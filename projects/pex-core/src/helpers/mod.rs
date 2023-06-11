@@ -14,7 +14,8 @@ pub use self::{
     comment::{CommentBlock, CommentLine},
     number::*,
     string::{
-        quotation_pair, quotation_pair_escaped, quotation_pair_nested, surround_pair_with_escaper, unescape_us, UnicodeUnescape,
+        paragraph_break, quotation_pair, quotation_pair_escaped, quotation_pair_nested, surround_pair_with_escaper,
+        unescape_us, UnicodeUnescape,
     },
     surround_pair::{SurroundPair, SurroundPattern},
     trie_set::CharactersTrie,

@@ -219,3 +219,35 @@ pub fn unescape_us(input: ParseState) -> ParseResult<char> {
         None => StopBecause::custom_error("Characters must not beyond U+10FFFF", start.start_offset, state.start_offset)?,
     }
 }
+
+/// A period of whitespace with more than two newlines, and terminated by a newline
+pub fn paragraph_break<'i>(input: ParseState<'i>) -> ParseResult<&'i str> {
+    let mut offset = 0;
+    // Capture all newlines and spaces
+    for c in input.residual.chars() {
+        if c.is_whitespace() {
+            offset += c.len_utf8();
+        }
+        else {
+            break;
+        }
+    }
+    let text = unsafe { input.residual.get_unchecked(..offset) };
+    // Fallback for spaces that don't have to be captured
+    for c in text.chars().rev() {
+        if c == ' ' {
+            offset -= c.len_utf8();
+        }
+        else {
+            break;
+        }
+    }
+    if offset == 0 {
+        StopBecause::missing_string("PARAGRAPH_LINE", input.start_offset)?;
+    }
+    let newlines = text.chars().filter(|c| *c == '\n').count();
+    if newlines <= 1 {
+        StopBecause::missing_string("PARAGRAPH_BREAK", input.start_offset)?;
+    }
+    input.advance_view(offset)
+}

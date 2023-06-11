@@ -51,6 +51,17 @@ impl<'i> FnOnce<(ParseState<'i>,)> for CommentLine {
     }
 }
 
+/// Parse the rest of the line, note this does not catch the newline,
+pub fn rest_of_line(input: ParseState) -> ParseResult<StringView> {
+    let offset = match input.residual.find(&['\r', '\n']) {
+        Some(s) => s,
+        None => input.residual.len(),
+    };
+    // SAFETY: find offset always valid
+    let body = unsafe { input.residual.get_unchecked(0..offset) };
+    input.advance(offset).finish(StringView::new(body, input.start_offset))
+}
+
 /// Parse the comment block
 ///
 /// # Patterns
