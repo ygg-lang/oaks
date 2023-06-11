@@ -8,10 +8,14 @@ time-travel.*
 .vs/
 .idea/
 *.iml
+*.txt
+*.log
 
 # Rust
 target/
 Cargo.lock
 
-# Data
-/projects/pex-trie/tests/ucd-15.0.0/
+
+# Windows
+*.pdb
+*.exe

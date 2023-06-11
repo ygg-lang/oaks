@@ -1,5 +1,4 @@
-version = "Two"
-edition = "2018"
+style_edition = "2024"
 max_width = 128
 
 imports_granularity = "Crate"

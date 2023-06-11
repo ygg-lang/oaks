@@ -1,0 +1,23 @@
+# 忽略 Rust 文件的语言统计
+*.rs linguist-detectable=false
+
+# 忽略文档格式的语言统计
+*.md linguist-detectable=false
+*.markdown linguist-detectable=false
+*.txt linguist-detectable=false
+*.rst linguist-detectable=false
+*.adoc linguist-detectable=false
+*.asciidoc linguist-detectable=false
+
+# 忽略配置文件的语言统计
+*.toml linguist-detectable=false
+*.yaml linguist-detectable=false
+*.yml linguist-detectable=false
+*.json linguist-detectable=false
+*.xml linguist-detectable=false
+
+# 忽略其他常见文档格式
+*.doc linguist-detectable=false
+*.docx linguist-detectable=false
+*.pdf linguist-detectable=false
+*.html linguist-detectable=false

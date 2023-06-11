@@ -1,4 +1,0 @@
-ucd-generate.exe property-bool tests/ucd-15.0.0 --include XID_Start,XID_Continue,ID_START,ID_Continue,Other_ID_START,Other_ID_Continue --chars > src/generate/xid.rs
-ucd-generate.exe property-bool tests/ucd-15.0.0 --include WHITE_SPACE,PATTERN_WHITE_SPACE --chars                                              > src/generate/space.rs
-ucd-generate.exe property-bool tests/ucd-15.0.0 --include MATH,OTHER_MATH --chars                                                              > src/generate/math.rs
-ucd-generate.exe general-category tests/ucd-15.0.0 --chars                                                                                     > src/generate/category.rs

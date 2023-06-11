@@ -1,9 +1,8 @@
 [*]
 charset = utf-8
-
-
-[*.pest]
 indent_style = space
+
+[*.{json,toml}]
 indent_size = 4
 
 [*.toml]
