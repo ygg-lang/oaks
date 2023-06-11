@@ -1,0 +1,27 @@
+[package]
+name = "oak-highlight"
+description = "A lightweight, no-std syntax highlighter for Rust with support for multiple programming languages and customizable themes."
+categories = ["text-processing"]
+keywords = ["syntax-highlighting", "code-highlighting", "no-std", "multi-language", "rust"]
+documentation = "https://docs.rs/oak-highlight"
+readme = "readme.md"
+version.workspace = true
+authors.workspace = true
+homepage.workspace = true
+repository.workspace = true
+license.workspace = true
+edition.workspace = true
+
+[dependencies]
+oak-core = { workspace = true }
+
+[dev-dependencies]
+oak-core = { workspace = true, features = ["testing"] }
+
+
+[features]
+default = []
+alloc = []
+
+[package.metadata.docs.rs]
+all-features = true
