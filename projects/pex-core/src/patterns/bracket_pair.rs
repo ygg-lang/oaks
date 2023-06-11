@@ -63,8 +63,8 @@ impl BracketPattern {
     {
         input
             .begin_choice()
-            .or_else(|s| self.consume_empty(s, ignore))
-            .or_else(|s| self.consume_many(s, ignore, parser))
+            .choose(|s| self.consume_empty(s, ignore))
+            .choose(|s| self.consume_many(s, ignore, parser))
             .end_choice()
     }
 

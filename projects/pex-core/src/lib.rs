@@ -20,7 +20,7 @@ pub use crate::{
     },
     results::{CustomError, ParseResult, StopBecause},
     states::{advance::ParseAdvance, choice::ChoiceHelper, ParseState, Parsed},
-    traits::PexNode,
+    traits::Parse,
 };
 
 pub mod helpers;

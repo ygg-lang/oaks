@@ -25,7 +25,7 @@ impl<'a, T> ChoiceHelper<'a, T> {
     }
     /// Try to parse a value
     #[inline]
-    pub fn or_else<F>(mut self, mut parse: F) -> Self
+    pub fn choose<F>(mut self, mut parse: F) -> Self
     where
         F: FnMut(ParseState<'a>) -> ParseResult<'a, T>,
     {
@@ -37,6 +37,15 @@ impl<'a, T> ChoiceHelper<'a, T> {
         }
         self
     }
+    /// Try to parse a value
+    pub fn choose_from<F, U>(self, mut parse: F) -> Self
+    where
+        F: FnMut(ParseState<'a>) -> ParseResult<'a, U>,
+        T: From<U>,
+    {
+        self.choose(|s| parse(s).map_inner(|s| T::from(s)))
+    }
+
     /// End choice
     #[inline]
     pub fn end_choice(self) -> ParseResult<'a, T> {

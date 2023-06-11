@@ -2,7 +2,7 @@ use crate::{ParseResult, ParseState};
 use core::ops::Range;
 
 /// A trait for parsing a node from a [`ParseState`].
-pub trait PexNode
+pub trait Parse
 where
     Self: Sized,
 {
