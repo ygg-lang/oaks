@@ -1,0 +1,27 @@
+[package]
+name = "oak-pretty-print"
+description = "Syntax highlighter supporting multiple programming languages."
+categories = ["text-processing"]
+keywords = ["syntax-highlighting", "code", "highlighting", "multi-language"]
+documentation = "https://docs.rs/oak-pretty-print"
+readme = "readme.md"
+version.workspace = true
+authors.workspace = true
+homepage.workspace = true
+repository.workspace = true
+license.workspace = true
+edition.workspace = true
+
+[dependencies]
+oak-core = { workspace = true }
+
+[dev-dependencies]
+oak-core = { workspace = true, features = ["testing"] }
+
+
+[features]
+default = []
+alloc = []
+
+[package.metadata.docs.rs]
+all-features = true
