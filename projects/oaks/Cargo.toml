@@ -1,0 +1,89 @@
+[package]
+name = "oaks"
+version.workspace = true
+authors.workspace = true
+description = "Unified parser combinator library collection for multiple languages and formats."
+homepage.workspace = true
+repository.workspace = true
+documentation = "https://docs.rs/oaks"
+keywords = ["parser", "combinator", "multi-language", "unified"]
+categories = ["parsing"]
+readme = "readme.md"
+license.workspace = true
+edition.workspace = true
+
+[dependencies]
+oak-core = { workspace = true }
+oak-ada = { workspace = true }
+oak-ascii-doc = { workspace = true }
+oak-bash = { workspace = true }
+oak-c = { workspace = true }
+oak-clojure = { workspace = true }
+oak-cpp = { workspace = true }
+oak-csharp = { workspace = true }
+oak-css = { workspace = true }
+oak-csv = { workspace = true }
+oak-d = { workspace = true }
+oak-dart = { workspace = true }
+oak-django = { workspace = true }
+oak-dockerfile = { workspace = true }
+oak-dot = { workspace = true }
+oak-erlang = { workspace = true }
+oak-fortran = { workspace = true }
+oak-fsharp = { workspace = true }
+oak-go = { workspace = true }
+oak-graphql = { workspace = true }
+oak-groovy = { workspace = true }
+oak-haskell = { workspace = true }
+oak-html = { workspace = true }
+oak-ini = { workspace = true }
+oak-jasm = { workspace = true }
+oak-jasmin = { workspace = true }
+oak-java = { workspace = true }
+oak-javadoc = { workspace = true }
+oak-javascript = { workspace = true }
+oak-json = { workspace = true }
+oak-julia = { workspace = true }
+oak-kotlin = { workspace = true }
+oak-lua = { workspace = true }
+oak-markdown = { workspace = true }
+oak-matlab = { workspace = true }
+oak-msil = { workspace = true }
+oak-nginx = { workspace = true }
+oak-objective-c = { workspace = true }
+oak-ocaml = { workspace = true }
+oak-org-mode = { workspace = true }
+oak-pascal = { workspace = true }
+oak-perl = { workspace = true }
+oak-php = { workspace = true }
+oak-powershell = { workspace = true }
+oak-protobuf = { workspace = true }
+oak-python = { workspace = true }
+oak-r = { workspace = true }
+oak-ruby = { workspace = true }
+oak-rust = { workspace = true }
+oak-scala = { workspace = true }
+oak-scheme = { workspace = true }
+oak-solidity = { workspace = true }
+oak-sql = { workspace = true }
+oak-swift = { workspace = true }
+oak-toml = { workspace = true }
+oak-typescript = { workspace = true }
+oak-valkyrie = { workspace = true }
+oak-wat = { workspace = true }
+oak-wolfram = { workspace = true }
+oak-xml = { workspace = true }
+oak-zig = { workspace = true }
+oak-yaml = { workspace = true }
+serde = { version = "1.0.228", features = ["derive"] }
+
+[dev-dependencies]
+oak-core = { workspace = true, features = ["testing"] }
+
+
+[features]
+default = []
+alloc = []
+
+[package.metadata.docs.rs]
+all-features = true

@@ -1,12 +1,99 @@
 [workspace]
 resolver = "2"
-members = ["projects/*"]
+members = [
+    "projects/*",
+    "examples/*"
+]
 default-members = [
-    "projects/pex-core",
+    "projects/*",
+    "examples/*"
 ]
 exclude = [
     "projects/.DS_Store",
 ]
+
+[workspace.package]
+version = "0.0.0"
+authors = ["Pex Team <192607617@qq.com>"]
+edition = "2024"
+license = "MPL-2.0"
+homepage = "https://github.com/oovm/pex"
+repository = "https://github.com/oovm/pex"
+
+[workspace.dependencies]
+walkdir = { version = "2.5.0" }
+serde = { version = "1.0.228", features = ["derive"] }
+serde_json = { version = "1.0.145" }
+schemars = { version = "1.0.4", features = ["derive"] }
+
+# utils
+oak-core = { version = "0.0.0", path = "projects/oak-core" }
+oak-highlight = { version = "0.0.0", path = "projects/oak-highlight" }
+oak-pretty-print = { version = "0.0.0", path = "projects/oak-pretty-print" }
+# langs
+oak-ada = { version = "0.0.0", path = "examples/oak-ada" }
+oak-ascii-doc = { version = "0.0.0", path = "examples/oak-ascii-doc" }
+oak-bash = { version = "0.0.0", path = "examples/oak-bash" }
+oak-c = { version = "0.0.0", path = "examples/oak-c" }
+oak-clojure = { version = "0.0.0", path = "examples/oak-clojure" }
+oak-cpp = { version = "0.0.0", path = "examples/oak-cpp" }
+oak-csharp = { version = "0.0.0", path = "examples/oak-csharp" }
+oak-css = { version = "0.0.0", path = "examples/oak-css" }
+oak-csv = { version = "0.0.0", path = "examples/oak-csv" }
+oak-d = { version = "0.0.0", path = "examples/oak-d" }
+oak-dart = { version = "0.0.0", path = "examples/oak-dart" }
+oak-django = { version = "0.0.0", path = "examples/oak-django" }
+oak-dockerfile = { version = "0.0.0", path = "examples/oak-dockerfile" }
+oak-dot = { version = "0.0.0", path = "examples/oak-dot" }
+oak-erlang = { version = "0.0.0", path = "examples/oak-erlang" }
+oak-fortran = { version = "0.0.0", path = "examples/oak-fortran" }
+oak-fsharp = { version = "0.0.0", path = "examples/oak-fsharp" }
+oak-go = { version = "0.0.0", path = "examples/oak-go" }
+oak-graphql = { version = "0.0.0", path = "examples/oak-graphql" }
+oak-groovy = { version = "0.0.0", path = "examples/oak-groovy" }
+oak-haskell = { version = "0.0.0", path = "examples/oak-haskell" }
+oak-html = { version = "0.0.0", path = "examples/oak-html" }
+oak-ini = { version = "0.0.0", path = "examples/oak-ini" }
+oak-jasm = { version = "0.0.0", path = "examples/oak-jasm" }
+oak-jasmin = { version = "0.0.0", path = "examples/oak-jasmin" }
+oak-java = { version = "0.0.0", path = "examples/oak-java" }
+oak-javadoc = { version = "0.0.0", path = "examples/oak-javadoc" }
+oak-javascript = { version = "0.0.0", path = "examples/oak-javascript" }
+oak-json = { version = "0.0.0", path = "examples/oak-json" }
+oak-julia = { version = "0.0.0", path = "examples/oak-julia" }
+oak-kotlin = { version = "0.0.0", path = "examples/oak-kotlin" }
+oak-lua = { version = "0.0.0", path = "examples/oak-lua" }
+oak-markdown = { version = "0.0.0", path = "examples/oak-markdown" }
+oak-matlab = { version = "0.0.0", path = "examples/oak-matlab" }
+oak-msil = { version = "0.0.0", path = "examples/oak-msil" }
+oak-nginx = { version = "0.0.0", path = "examples/oak-nginx" }
+oak-objective-c = { version = "0.0.0", path = "examples/oak-objective-c" }
+oak-ocaml = { version = "0.0.0", path = "examples/oak-ocaml" }
+oak-org-mode = { version = "0.0.0", path = "examples/oak-org-mode" }
+oak-pascal = { version = "0.0.0", path = "examples/oak-pascal" }
+oak-perl = { version = "0.0.0", path = "examples/oak-perl" }
+oak-php = { version = "0.0.0", path = "examples/oak-php" }
+oak-powershell = { version = "0.0.0", path = "examples/oak-powershell" }
+oak-protobuf = { version = "0.0.0", path = "examples/oak-protobuf" }
+oak-python = { version = "0.0.0", path = "examples/oak-python" }
+oak-r = { version = "0.0.0", path = "examples/oak-r" }
+oak-ruby = { version = "0.0.0", path = "examples/oak-ruby" }
+oak-rust = { version = "0.0.0", path = "examples/oak-rust" }
+oak-scala = { version = "0.0.0", path = "examples/oak-scala" }
+oak-scheme = { version = "0.0.0", path = "examples/oak-scheme" }
+oak-solidity = { version = "0.0.0", path = "examples/oak-solidity" }
+oak-sql = { version = "0.0.0", path = "examples/oak-sql" }
+oak-swift = { version = "0.0.0", path = "examples/oak-swift" }
+oak-toml = { version = "0.0.0", path = "examples/oak-toml" }
+oak-typescript = { version = "0.0.0", path = "examples/oak-typescript" }
+oak-valkyrie = { version = "0.0.0", path = "examples/oak-valkyrie" }
+oak-vhdl = { version = "0.0.0", path = "examples/oak-vhdl" }
+oak-wat = { version = "0.0.0", path = "examples/oak-wat" }
+oak-wolfram = { version = "0.0.0", path = "examples/oak-wolfram" }
+oak-xml = { version = "0.0.0", path = "examples/oak-xml" }
+oak-yaml = { version = "0.0.0", path = "examples/oak-yaml" }
+oak-zig = { version = "0.0.0", path = "examples/oak-zig" }
+
 
 [profile.release]
 lto = true
