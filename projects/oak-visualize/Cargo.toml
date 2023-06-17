@@ -1,0 +1,28 @@
+[package]
+name = "oak-visualize"
+description = "High-performance visualization and layout algorithms for the oak ecosystem with flexible configuration, emphasizing tree and graph visualization."
+categories = ["visualization", "algorithms"]
+keywords = ["visualization", "layout", "ast", "tree", "graph"]
+documentation = "https://docs.rs/oak-visualize"
+readme = "readme.md"
+version.workspace = true
+authors.workspace = true
+homepage.workspace = true
+repository.workspace = true
+license.workspace = true
+edition.workspace = true
+
+[dependencies]
+oak-core = { workspace = true }
+oak-highlight = { workspace = true, optional = true }
+oak-pretty-print = { workspace = true, optional = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
+
+[dev-dependencies]
+oak-core = { workspace = true, features = ["testing"] }
+
+
+[features]
+default = []
+alloc = []
