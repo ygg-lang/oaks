@@ -1,0 +1,28 @@
+[package]
+name = "oak-vampire"
+description = "Vampire language parser with support for modern Vampire syntax and features."
+categories = ["parsing"]
+keywords = ["parser", "vampire", "language"]
+documentation = "https://docs.rs/oak-vampire"
+readme = "readme.md"
+version.workspace = true
+authors.workspace = true
+homepage.workspace = true
+repository.workspace = true
+license.workspace = true
+edition.workspace = true
+
+
+[dependencies]
+oak-core = { workspace = true }
+
+[dev-dependencies]
+oak-core = { workspace = true, features = ["testing"] }
+
+
+[features]
+default = []
+alloc = []
+
+[package.metadata.docs.rs]
+all-features = true

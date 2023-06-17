@@ -1,0 +1,50 @@
+% Vampire/TPTP test file
+% This is a comment
+
+% Axioms
+fof(axiom1, axiom, 
+    ![X]: (human(X) => mortal(X))
+).
+
+fof(axiom2, axiom,
+    human(socrates)
+).
+
+% Conjecture
+fof(conjecture, conjecture,
+    mortal(socrates)
+).
+
+% More complex formulas
+fof(axiom3, axiom,
+    ![X, Y]: (parent(X, Y) => ancestor(X, Y))
+).
+
+fof(axiom4, axiom,
+    ![X, Y, Z]: ((ancestor(X, Y) & ancestor(Y, Z)) => ancestor(X, Z))
+).
+
+% Predicate definitions
+fof(definition1, axiom,
+    ![X]: (person(X) <=> (human(X) | robot(X)))
+).
+
+% Equality
+fof(equality_axiom, axiom,
+    ![X]: (X = X)
+).
+
+% Existential quantification
+fof(existence, axiom,
+    ?[X]: (wise(X) & human(X))
+).
+
+% Negation
+fof(negation_example, axiom,
+    ![X]: (~dead(X) => alive(X))
+).
+
+% Disjunction and conjunction
+fof(logical_ops, axiom,
+    ![X]: ((happy(X) | sad(X)) & ~(happy(X) & sad(X)))
+).

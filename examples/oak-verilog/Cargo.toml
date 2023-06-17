@@ -1,0 +1,19 @@
+[package]
+name = "oak-verilog"
+description = "Verilog language parser with support for modern Verilog syntax and features."
+categories = ["parsing"]
+keywords = ["parser", "verilog", "language"]
+documentation = "https://docs.rs/oak-verilog"
+readme = "readme.md"
+version.workspace = true
+authors.workspace = true
+homepage.workspace = true
+repository.workspace = true
+license.workspace = true
+edition.workspace = true
+
+[dependencies]
+oak-core = { workspace = true }
+
+[dev-dependencies]
+oak-core = { workspace = true, features = ["testing"] }

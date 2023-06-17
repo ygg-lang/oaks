@@ -1,0 +1,28 @@
+[package]
+name = "oak-org-mode"
+description = "Org-mode parser with support for Emacs org-mode syntax and features."
+categories = ["parsing"]
+keywords = ["parser", "org-mode", "emacs", "documentation"]
+documentation = "https://docs.rs/oak-org-mode"
+readme = "readme.md"
+version.workspace = true
+authors.workspace = true
+homepage.workspace = true
+repository.workspace = true
+license.workspace = true
+edition.workspace = true
+
+
+[dependencies]
+oak-core = { workspace = true }
+
+[dev-dependencies]
+oak-core = { workspace = true, features = ["testing"] }
+
+
+[features]
+default = []
+alloc = []
+
+[package.metadata.docs.rs]
+all-features = true

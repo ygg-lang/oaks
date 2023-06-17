@@ -1,0 +1,119 @@
+# CSV test file for lexer testing
+# Comma-Separated Values format
+
+# Basic CSV with header
+Name,Age,City,Country,Email
+John Doe,30,New York,USA,john.doe@example.com
+Jane Smith,25,London,UK,jane.smith@example.com
+Bob Johnson,35,Toronto,Canada,bob.johnson@example.com
+Alice Brown,28,Sydney,Australia,alice.brown@example.com
+
+# CSV with quoted fields containing commas
+Product,Category,Price,Description,Tags
+"iPhone 14","Electronics",999.99,"Latest Apple smartphone, 128GB storage","mobile,apple,smartphone"
+"Samsung Galaxy S23","Electronics",899.99,"Android flagship phone, excellent camera","mobile,samsung,android"
+"MacBook Pro 16","Computers",2499.99,"Professional laptop, M2 Pro chip","laptop,apple,professional"
+
+# CSV with quoted fields containing quotes
+Title,Author,Year,Description
+"The ""Great"" Gatsby","F. Scott Fitzgerald",1925,"A classic American novel about the Jazz Age"
+"To Kill a ""Mockingbird""","Harper Lee",1960,"Story of racial injustice and childhood innocence"
+"1984","George Orwell",1949,"Dystopian novel about surveillance and totalitarianism"
+
+# CSV with empty fields
+ID,Name,Department,Salary,Manager
+1,Alice Johnson,Engineering,120000,
+2,Bob Smith,Sales,95000,Alice Johnson
+3,Carol White,Marketing,85000,Bob Smith
+4,David Brown,,75000,Carol White
+5,Eve Davis,HR,80000,Bob Smith
+
+# CSV with different delimiters (tab-separated)
+# This would normally be a .tsv file but testing CSV parser flexibility
+Name	Age	Occupation	Salary
+John	30	Software Engineer	120000
+Jane	28	Data Scientist	115000
+Bob	35	Product Manager	130000
+
+# CSV with line breaks in quoted fields
+Company,Address,Phone,CEO
+"Tech Corp","123 Main Street
+Suite 456
+New York, NY 10001",555-1234,"John Smith"
+"Global Industries","456 Business Park
+Building B
+Los Angeles, CA 90001",555-5678,"Jane Doe"
+
+# CSV with special characters and international text
+Name,City,Country,Language,Description
+"José García","México City","México","Español","Habla español y inglés"
+"François Dubois","Paris","France","Français","Parle français et allemand"
+"田中太郎","Tokyo","日本","日本語","日本語と英語を話す"
+"Мария Иванова","Moscow","Россия","Русский","Говорит по-русски и по-английски"
+
+# CSV with numeric data and calculations
+Product,Quantity,UnitPrice,Discount,Total
+Widget A,100,25.50,0.1,2295.00
+Widget B,50,45.75,0.15,1944.38
+Widget C,200,15.25,0.05,2897.50
+Widget D,75,89.99,0.2,5399.40
+
+# CSV with dates and times
+Event,Date,Time,Location,Duration
+"Team Meeting","2024-01-15","14:00:00","Conference Room A",60
+"Project Review","2024-01-16","09:30:00","Main Hall",120
+"Client Presentation","2024-01-17","15:00:00","Board Room",90
+"Training Session","2024-01-18","10:00:00","Training Center",180
+
+# CSV with boolean values
+Feature,Enabled,Required,Deprecated,Experimental
+"Dark Mode",true,false,false,true
+"Auto-save",true,true,false,false
+"Beta Features",false,false,false,true
+"Legacy Support",true,false,true,false
+
+# CSV with URLs and file paths
+Website,URL,FilePath,Documentation
+"GitHub","https://github.com/example/project","/home/user/projects/example","https://docs.example.com"
+"Stack Overflow","https://stackoverflow.com/questions/tagged/example","C:\\Projects\\example","https://wiki.example.com"
+"NPM Registry","https://www.npmjs.com/package/example","./node_modules/example","https://github.com/example/example#readme"
+
+# CSV with scientific notation and large numbers
+Experiment,Value,Uncertainty,Unit,Description
+"Speed of Light",2.99792458e8,0.0,"m/s","Exact value by definition"
+"Planck Constant",6.62607015e-34,0.0,"J·s","Exact value since 2019"
+"Avogadro Number",6.02214076e23,0.0,"mol⁻¹","Exact value since 2019"
+"Electron Mass",9.10938356e-31,1.1e-38,"kg","CODATA 2018 value"
+
+# CSV with mixed data types in same column (challenging case)
+ID,Data,Type,Description
+1,42,"integer","Answer to everything"
+2,3.14159,"float","Pi constant"
+3,"Hello World","string","Classic greeting"
+4,true,"boolean","Truth value"
+5,"2024-01-15","date","Start date"
+
+# CSV with very long text fields
+Title,Content,Author,WordCount
+"Lorem Ipsum","Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.","John Writer",85
+"Technical Documentation","This documentation covers the API endpoints, authentication methods, error handling, rate limiting, and best practices for integrating with our service. It includes code examples in multiple programming languages, detailed parameter descriptions, response formats, and troubleshooting guides for common issues that developers might encounter.","Technical Team",52
+
+# Edge case: CSV with only one column
+Names
+Alice
+Bob
+Charlie
+David
+Eve
+
+# Edge case: CSV with only one row
+SingleRow,With,Multiple,Columns,But,Only,One,Data,Row
+
+# Edge case: Empty CSV (just headers)
+Column1,Column2,Column3,Column4,Column5
+
+# Edge case: CSV with trailing commas
+Name,Age,City,
+John,30,New York,
+Jane,25,London,
+Bob,35,Toronto,

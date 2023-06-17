@@ -1,0 +1,592 @@
+// Protocol Buffers Test File - Comprehensive Syntax Coverage
+// This file tests various protobuf syntax elements for lexer testing
+
+// Syntax version declaration
+syntax = "proto3";
+
+// Package declaration
+package com.example.comprehensive.test;
+
+// Import statements
+import "google/protobuf/any.proto";
+import "google/protobuf/timestamp.proto";
+import "google/protobuf/duration.proto";
+import "google/protobuf/empty.proto";
+import "google/protobuf/wrappers.proto";
+import "google/protobuf/struct.proto";
+import "google/protobuf/field_mask.proto";
+
+// Option declarations
+option java_package = "com.example.comprehensive.test";
+option java_outer_classname = "ComprehensiveTestProtos";
+option java_multiple_files = true;
+option go_package = "github.com/example/comprehensive-test";
+option csharp_namespace = "Example.Comprehensive.Test";
+option php_namespace = "Example\\Comprehensive\\Test";
+option ruby_package = "Example::Comprehensive::Test";
+option objc_class_prefix = "ECT";
+option cc_enable_arenas = true;
+option optimize_for = SPEED;
+
+// Enum definitions
+
+// Simple enum
+enum Status {
+  STATUS_UNSPECIFIED = 0;
+  STATUS_PENDING = 1;
+  STATUS_APPROVED = 2;
+  STATUS_REJECTED = 3;
+  STATUS_CANCELLED = 4;
+}
+
+// Enum with aliases
+enum Priority {
+  option allow_alias = true;
+  
+  PRIORITY_UNSPECIFIED = 0;
+  PRIORITY_LOW = 1;
+  PRIORITY_NORMAL = 2;
+  PRIORITY_HIGH = 3;
+  PRIORITY_URGENT = 3;  // Alias for HIGH
+  PRIORITY_CRITICAL = 4;
+}
+
+// Enum with reserved values
+enum Color {
+  COLOR_UNSPECIFIED = 0;
+  COLOR_RED = 1;
+  COLOR_GREEN = 2;
+  COLOR_BLUE = 3;
+  
+  reserved 4, 5, 6;
+  reserved "COLOR_YELLOW", "COLOR_ORANGE";
+}
+
+// Enum with negative values (proto2 style, but shown for syntax)
+enum Temperature {
+  TEMPERATURE_UNSPECIFIED = 0;
+  TEMPERATURE_FREEZING = -10;
+  TEMPERATURE_COLD = -5;
+  TEMPERATURE_COOL = 5;
+  TEMPERATURE_WARM = 15;
+  TEMPERATURE_HOT = 25;
+}
+
+// Message definitions
+
+// Simple message with basic field types
+message Person {
+  // Scalar types
+  string name = 1;
+  int32 age = 2;
+  string email = 3;
+  bool is_active = 4;
+  
+  // Repeated field
+  repeated string phone_numbers = 5;
+  
+  // Enum field
+  Status status = 6;
+  
+  // Optional fields (proto3 style)
+  optional string middle_name = 7;
+  optional int32 employee_id = 8;
+}
+
+// Message with all scalar types
+message ScalarTypes {
+  // Integer types
+  int32 int32_field = 1;
+  int64 int64_field = 2;
+  uint32 uint32_field = 3;
+  uint64 uint64_field = 4;
+  sint32 sint32_field = 5;
+  sint64 sint64_field = 6;
+  fixed32 fixed32_field = 7;
+  fixed64 fixed64_field = 8;
+  sfixed32 sfixed32_field = 9;
+  sfixed64 sfixed64_field = 10;
+  
+  // Floating point types
+  float float_field = 11;
+  double double_field = 12;
+  
+  // Boolean type
+  bool bool_field = 13;
+  
+  // String and bytes types
+  string string_field = 14;
+  bytes bytes_field = 15;
+}
+
+// Message with nested types
+message Address {
+  string street = 1;
+  string city = 2;
+  string state = 3;
+  string postal_code = 4;
+  string country = 5;
+  
+  // Nested enum
+  enum AddressType {
+    ADDRESS_TYPE_UNSPECIFIED = 0;
+    ADDRESS_TYPE_HOME = 1;
+    ADDRESS_TYPE_WORK = 2;
+    ADDRESS_TYPE_OTHER = 3;
+  }
+  
+  AddressType type = 6;
+  
+  // Nested message
+  message Coordinates {
+    double latitude = 1;
+    double longitude = 2;
+    optional double altitude = 3;
+  }
+  
+  optional Coordinates coordinates = 7;
+}
+
+// Message with complex nesting
+message Company {
+  string name = 1;
+  Address headquarters = 2;
+  repeated Address offices = 3;
+  
+  // Nested message with further nesting
+  message Department {
+    string name = 1;
+    Person manager = 2;
+    repeated Person employees = 3;
+    
+    message Budget {
+      double amount = 1;
+      string currency = 2;
+      int32 fiscal_year = 3;
+    }
+    
+    Budget budget = 4;
+  }
+  
+  repeated Department departments = 4;
+  
+  // Map fields
+  map<string, string> metadata = 5;
+  map<int32, Department> department_by_id = 6;
+  map<string, Person> employees_by_email = 7;
+}
+
+// Message with oneof fields
+message ContactInfo {
+  string name = 1;
+  
+  oneof contact_method {
+    string email = 2;
+    string phone = 3;
+    string slack_handle = 4;
+    Address mailing_address = 5;
+  }
+  
+  oneof notification_preference {
+    bool email_notifications = 6;
+    bool sms_notifications = 7;
+    bool push_notifications = 8;
+  }
+}
+
+// Message with reserved fields
+message ReservedFieldsExample {
+  string active_field = 1;
+  
+  reserved 2, 15, 9 to 11;
+  reserved "old_field", "deprecated_field";
+  
+  string another_active_field = 12;
+  repeated int32 numbers = 13;
+}
+
+// Message with field options
+message FieldOptionsExample {
+  // Deprecated field
+  string old_name = 1 [deprecated = true];
+  
+  // Field with custom options (would need to be defined)
+  string validated_email = 2;
+  
+  // Packed repeated field (default in proto3)
+  repeated int32 packed_numbers = 3 [packed = true];
+  
+  // JSON name override
+  string user_name = 4 [json_name = "userName"];
+}
+
+// Message using well-known types
+message WellKnownTypesExample {
+  google.protobuf.Timestamp created_at = 1;
+  google.protobuf.Timestamp updated_at = 2;
+  google.protobuf.Duration processing_time = 3;
+  google.protobuf.Any metadata = 4;
+  google.protobuf.Empty empty_field = 5;
+  
+  // Wrapper types for nullable primitives
+  google.protobuf.StringValue nullable_string = 6;
+  google.protobuf.Int32Value nullable_int = 7;
+  google.protobuf.BoolValue nullable_bool = 8;
+  google.protobuf.DoubleValue nullable_double = 9;
+  
+  // Struct and Value for dynamic content
+  google.protobuf.Struct dynamic_data = 10;
+  google.protobuf.Value dynamic_value = 11;
+  google.protobuf.ListValue dynamic_list = 12;
+  
+  // Field mask for partial updates
+  google.protobuf.FieldMask update_mask = 13;
+}
+
+// Message for API requests and responses
+message CreatePersonRequest {
+  Person person = 1;
+  bool validate_email = 2;
+  repeated string tags = 3;
+}
+
+message CreatePersonResponse {
+  Person person = 1;
+  string person_id = 2;
+  google.protobuf.Timestamp created_at = 3;
+}
+
+message GetPersonRequest {
+  string person_id = 1;
+  google.protobuf.FieldMask field_mask = 2;
+}
+
+message GetPersonResponse {
+  Person person = 1;
+  google.protobuf.Timestamp last_modified = 2;
+}
+
+message ListPersonsRequest {
+  int32 page_size = 1;
+  string page_token = 2;
+  string filter = 3;
+  string order_by = 4;
+}
+
+message ListPersonsResponse {
+  repeated Person persons = 1;
+  string next_page_token = 2;
+  int32 total_count = 3;
+}
+
+message UpdatePersonRequest {
+  Person person = 1;
+  google.protobuf.FieldMask update_mask = 2;
+}
+
+message UpdatePersonResponse {
+  Person person = 1;
+  google.protobuf.Timestamp updated_at = 2;
+}
+
+message DeletePersonRequest {
+  string person_id = 1;
+}
+
+message DeletePersonResponse {
+  google.protobuf.Empty empty = 1;
+}
+
+// Batch operations
+message BatchCreatePersonsRequest {
+  repeated CreatePersonRequest requests = 1;
+}
+
+message BatchCreatePersonsResponse {
+  repeated CreatePersonResponse responses = 1;
+}
+
+// Search and filtering
+message SearchPersonsRequest {
+  string query = 1;
+  repeated string fields = 2;
+  int32 limit = 3;
+  int32 offset = 4;
+  
+  message Filter {
+    oneof filter_type {
+      string name_contains = 1;
+      int32 age_greater_than = 2;
+      int32 age_less_than = 3;
+      Status status_equals = 4;
+      bool is_active = 5;
+    }
+  }
+  
+  repeated Filter filters = 5;
+}
+
+message SearchPersonsResponse {
+  repeated Person persons = 1;
+  int32 total_matches = 2;
+  repeated string highlighted_fields = 3;
+}
+
+// Analytics and reporting
+message PersonAnalytics {
+  int32 total_persons = 1;
+  int32 active_persons = 2;
+  
+  map<string, int32> persons_by_status = 3;
+  map<string, int32> persons_by_age_group = 4;
+  
+  message AgeDistribution {
+    int32 min_age = 1;
+    int32 max_age = 2;
+    double average_age = 3;
+    double median_age = 4;
+  }
+  
+  AgeDistribution age_distribution = 5;
+  
+  google.protobuf.Timestamp generated_at = 6;
+}
+
+// Configuration and settings
+message SystemConfiguration {
+  message DatabaseConfig {
+    string host = 1;
+    int32 port = 2;
+    string database_name = 3;
+    int32 max_connections = 4;
+    google.protobuf.Duration connection_timeout = 5;
+  }
+  
+  message CacheConfig {
+    string redis_url = 1;
+    google.protobuf.Duration ttl = 2;
+    int32 max_size = 3;
+  }
+  
+  message LoggingConfig {
+    enum LogLevel {
+      LOG_LEVEL_UNSPECIFIED = 0;
+      LOG_LEVEL_DEBUG = 1;
+      LOG_LEVEL_INFO = 2;
+      LOG_LEVEL_WARN = 3;
+      LOG_LEVEL_ERROR = 4;
+    }
+    
+    LogLevel level = 1;
+    string output_format = 2;
+    repeated string log_files = 3;
+  }
+  
+  DatabaseConfig database = 1;
+  CacheConfig cache = 2;
+  LoggingConfig logging = 3;
+  
+  map<string, string> feature_flags = 4;
+  map<string, google.protobuf.Value> custom_settings = 5;
+}
+
+// Event sourcing and streaming
+message PersonEvent {
+  string event_id = 1;
+  string person_id = 2;
+  google.protobuf.Timestamp timestamp = 3;
+  
+  oneof event_type {
+    PersonCreated person_created = 4;
+    PersonUpdated person_updated = 5;
+    PersonDeleted person_deleted = 6;
+    PersonStatusChanged person_status_changed = 7;
+  }
+  
+  message PersonCreated {
+    Person person = 1;
+    string created_by = 2;
+  }
+  
+  message PersonUpdated {
+    Person old_person = 1;
+    Person new_person = 2;
+    google.protobuf.FieldMask updated_fields = 3;
+    string updated_by = 4;
+  }
+  
+  message PersonDeleted {
+    string person_id = 1;
+    string deleted_by = 2;
+    string reason = 3;
+  }
+  
+  message PersonStatusChanged {
+    string person_id = 1;
+    Status old_status = 2;
+    Status new_status = 3;
+    string changed_by = 4;
+    string reason = 5;
+  }
+}
+
+// Streaming messages
+message StreamPersonEventsRequest {
+  repeated string person_ids = 1;
+  google.protobuf.Timestamp start_time = 2;
+  google.protobuf.Timestamp end_time = 3;
+  repeated string event_types = 4;
+}
+
+message StreamPersonEventsResponse {
+  PersonEvent event = 1;
+}
+
+// Error handling
+message ErrorDetails {
+  string code = 1;
+  string message = 2;
+  repeated string details = 3;
+  
+  map<string, google.protobuf.Value> metadata = 4;
+  
+  message FieldError {
+    string field_path = 1;
+    string error_code = 2;
+    string error_message = 3;
+  }
+  
+  repeated FieldError field_errors = 5;
+}
+
+// Health check and monitoring
+message HealthCheckRequest {
+  string service = 1;
+}
+
+message HealthCheckResponse {
+  enum ServingStatus {
+    SERVING_STATUS_UNSPECIFIED = 0;
+    SERVING_STATUS_SERVING = 1;
+    SERVING_STATUS_NOT_SERVING = 2;
+    SERVING_STATUS_SERVICE_UNKNOWN = 3;
+  }
+  
+  ServingStatus status = 1;
+  map<string, string> details = 2;
+  google.protobuf.Timestamp checked_at = 3;
+}
+
+// Service definitions
+service PersonService {
+  // CRUD operations
+  rpc CreatePerson(CreatePersonRequest) returns (CreatePersonResponse);
+  rpc GetPerson(GetPersonRequest) returns (GetPersonResponse);
+  rpc UpdatePerson(UpdatePersonRequest) returns (UpdatePersonResponse);
+  rpc DeletePerson(DeletePersonRequest) returns (DeletePersonResponse);
+  
+  // List and search
+  rpc ListPersons(ListPersonsRequest) returns (ListPersonsResponse);
+  rpc SearchPersons(SearchPersonsRequest) returns (SearchPersonsResponse);
+  
+  // Batch operations
+  rpc BatchCreatePersons(BatchCreatePersonsRequest) returns (BatchCreatePersonsResponse);
+  
+  // Streaming operations
+  rpc StreamPersonEvents(StreamPersonEventsRequest) returns (stream StreamPersonEventsResponse);
+  rpc StreamPersonUpdates(stream UpdatePersonRequest) returns (stream UpdatePersonResponse);
+  rpc BidirectionalPersonSync(stream PersonEvent) returns (stream PersonEvent);
+}
+
+// Analytics service
+service AnalyticsService {
+  rpc GetPersonAnalytics(google.protobuf.Empty) returns (PersonAnalytics);
+  rpc GenerateReport(GenerateReportRequest) returns (GenerateReportResponse);
+}
+
+message GenerateReportRequest {
+  enum ReportType {
+    REPORT_TYPE_UNSPECIFIED = 0;
+    REPORT_TYPE_SUMMARY = 1;
+    REPORT_TYPE_DETAILED = 2;
+    REPORT_TYPE_CUSTOM = 3;
+  }
+  
+  ReportType type = 1;
+  google.protobuf.Timestamp start_date = 2;
+  google.protobuf.Timestamp end_date = 3;
+  repeated string filters = 4;
+  string format = 5;
+}
+
+message GenerateReportResponse {
+  string report_id = 1;
+  bytes report_data = 2;
+  string download_url = 3;
+  google.protobuf.Timestamp generated_at = 4;
+}
+
+// Health service
+service HealthService {
+  rpc Check(HealthCheckRequest) returns (HealthCheckResponse);
+  rpc Watch(HealthCheckRequest) returns (stream HealthCheckResponse);
+}
+
+// Custom options (would need to be defined in a separate file)
+// extend google.protobuf.FieldOptions {
+//   string validation_regex = 50001;
+//   bool required_field = 50002;
+//   string description = 50003;
+// }
+
+// extend google.protobuf.MessageOptions {
+//   string table_name = 50004;
+//   bool cacheable = 50005;
+// }
+
+// extend google.protobuf.ServiceOptions {
+//   string api_version = 50006;
+//   bool deprecated_service = 50007;
+// }
+
+// Complex nested message for testing deep nesting
+message DeepNesting {
+  message Level1 {
+    message Level2 {
+      message Level3 {
+        message Level4 {
+          message Level5 {
+            string deep_value = 1;
+            repeated int32 deep_numbers = 2;
+            
+            enum DeepEnum {
+              DEEP_ENUM_UNSPECIFIED = 0;
+              DEEP_ENUM_VALUE1 = 1;
+              DEEP_ENUM_VALUE2 = 2;
+            }
+            
+            DeepEnum deep_enum = 3;
+          }
+          
+          Level5 level5 = 1;
+          repeated Level5 level5_list = 2;
+        }
+        
+        Level4 level4 = 1;
+        map<string, Level4> level4_map = 2;
+      }
+      
+      Level3 level3 = 1;
+      oneof level3_choice {
+        Level3 level3_option1 = 2;
+        string level3_option2 = 3;
+      }
+    }
+    
+    Level2 level2 = 1;
+    repeated Level2 level2_array = 2;
+  }
+  
+  Level1 level1 = 1;
+  map<int32, Level1> level1_by_id = 2;
+}

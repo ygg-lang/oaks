@@ -1,0 +1,30 @@
+[package]
+name = "oak-python"
+description = "High-performance incremental Python parser for the oak ecosystem with flexible configuration, supporting dynamic programming and rapid development workflows."
+categories = ["parsing"]
+keywords = ["parser", "python", "ast", "language"]
+documentation = "https://docs.rs/oak-python"
+readme = "readme.md"
+version.workspace = true
+authors.workspace = true
+homepage.workspace = true
+repository.workspace = true
+license.workspace = true
+edition.workspace = true
+
+[dependencies]
+oak-core = { path = "../../projects/oak-core" }
+oak-highlight = { path = "../../projects/oak-highlight" }
+oak-pretty-print = { path = "../../projects/oak-pretty-print" }
+serde = { version = "1.0", features = ["derive"] }
+
+[dev-dependencies]
+oak-core = { workspace = true, features = ["testing"] }
+
+
+[features]
+default = []
+alloc = []
+
+[package.metadata.docs.rs]
+all-features = true

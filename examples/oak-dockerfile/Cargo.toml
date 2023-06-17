@@ -1,0 +1,30 @@
+[package]
+name = "oak-dockerfile"
+description = "High-performance incremental Dockerfile parser for the oak ecosystem with flexible configuration, optimized for container image building and management."
+categories = ["parsing"]
+keywords = ["parser", "dockerfile", "docker", "container"]
+documentation = "https://docs.rs/oak-dockerfile"
+readme = "readme.md"
+version.workspace = true
+authors.workspace = true
+homepage.workspace = true
+repository.workspace = true
+license.workspace = true
+edition.workspace = true
+
+
+[dependencies]
+oak-core = { workspace = true }
+oak-highlight = { workspace = true, optional = true }
+oak-pretty-print = { workspace = true, optional = true }
+
+[dev-dependencies]
+oak-core = { workspace = true, features = ["testing"] }
+
+
+[features]
+default = []
+alloc = []
+
+[package.metadata.docs.rs]
+all-features = true

@@ -1,0 +1,30 @@
+[package]
+name = "oak-fortran"
+description = "High-performance incremental Julia parser for the oak ecosystem with flexible configuration, supporting scientific computing and high-performance numerical analysis."
+categories = ["parsing"]
+keywords = ["parser", "julia", "ast", "language"]
+documentation = "https://docs.rs/oak-julia"
+readme = "readme.md"
+version.workspace = true
+authors.workspace = true
+homepage.workspace = true
+repository.workspace = true
+license.workspace = true
+edition.workspace = true
+
+[dependencies]
+oak-core = { workspace = true }
+oak-highlight = { workspace = true, optional = true }
+oak-pretty-print = { workspace = true, optional = true }
+
+[dev-dependencies]
+oak-core = { workspace = true, features = ["testing"] }
+
+walkdir = "2.5"
+
+[features]
+default = []
+alloc = []
+
+[package.metadata.docs.rs]
+all-features = true

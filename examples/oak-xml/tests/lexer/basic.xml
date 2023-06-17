@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- XML test file -->
+<root xmlns:ns="http://example.com/namespace">
+    <header>
+        <title>Sample XML Document</title>
+        <author>Test Author</author>
+        <date>2024-01-01</date>
+    </header>
+    
+    <body>
+        <section id="intro">
+            <h1>Introduction</h1>
+            <p>This is a sample XML document for testing purposes.</p>
+            <p>It contains various XML elements and attributes.</p>
+        </section>
+        
+        <section id="data">
+            <h1>Data Section</h1>
+            <items>
+                <item id="1" type="book">
+                    <name>XML Guide</name>
+                    <price currency="USD">29.99</price>
+                    <available>true</available>
+                </item>
+                <item id="2" type="software">
+                    <name>XML Editor</name>
+                    <price currency="EUR">49.99</price>
+                    <available>false</available>
+                </item>
+            </items>
+        </section>
+        
+        <section id="metadata">
+            <ns:custom-element ns:attribute="value">
+                <![CDATA[
+                This is a CDATA section that can contain
+                special characters like <, >, &, etc.
+                ]]>
+            </ns:custom-element>
+            
+            <empty-element/>
+            <self-closing-element attr="value"/>
+        </section>
+    </body>
+    
+    <footer>
+        <copyright>&copy; 2024 Test Company</copyright>
+        <contact email="test@example.com"/>
+    </footer>
+</root>

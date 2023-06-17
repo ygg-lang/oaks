@@ -1,0 +1,85 @@
+# YAML test file
+---
+title: "Sample YAML Document"
+version: 1.0
+date: 2024-01-01
+
+# Configuration section
+config:
+  debug: true
+  timeout: 30
+  retries: 3
+  
+# Database settings
+database:
+  host: localhost
+  port: 5432
+  name: testdb
+  credentials:
+    username: admin
+    password: secret123
+
+# Application settings
+app:
+  name: "Test Application"
+  features:
+    - authentication
+    - logging
+    - monitoring
+    - caching
+  
+  environments:
+    development:
+      url: "http://localhost:3000"
+      debug: true
+    production:
+      url: "https://example.com"
+      debug: false
+
+# Users list
+users:
+  - id: 1
+    name: "John Doe"
+    email: "john@example.com"
+    roles: ["admin", "user"]
+    active: true
+    
+  - id: 2
+    name: "Jane Smith"
+    email: "jane@example.com"
+    roles: ["user"]
+    active: false
+
+# Multi-line strings
+description: |
+  This is a multi-line string
+  that preserves line breaks
+  and formatting.
+
+folded_description: >
+  This is a folded string
+  that will be converted to
+  a single line with spaces.
+
+# Special values
+null_value: null
+empty_string: ""
+boolean_true: true
+boolean_false: false
+integer: 42
+float: 3.14159
+scientific: 1.23e-4
+
+# Anchors and aliases
+default_settings: &defaults
+  timeout: 30
+  retries: 3
+
+service_a:
+  <<: *defaults
+  name: "Service A"
+  
+service_b:
+  <<: *defaults
+  name: "Service B"
+  timeout: 60  # Override default

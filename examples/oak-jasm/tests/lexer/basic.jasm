@@ -1,0 +1,154 @@
+// JASM (Java Assembly) basic syntax test file
+// This demonstrates Java bytecode assembly syntax
+
+.class public HelloWorld
+.super java/lang/Object
+
+// Field declarations
+.field private message Ljava/lang/String;
+.field public static final PI D = 3.14159
+.field protected count I = 0
+.field static instance LHelloWorld;
+
+// Method: main entry point
+.method public static main([Ljava/lang/String;)V
+    .limit stack 10
+    .limit locals 2
+    
+    // Create new instance
+    new HelloWorld
+    dup
+    invokespecial HelloWorld/<init>()V
+    astore_1
+    
+    // Call instance method
+    aload_1
+    invokevirtual HelloWorld/greet()V
+    
+    // Print message
+    getstatic java/lang/System/out Ljava/io/PrintStream;
+    ldc "Program completed successfully"
+    invokevirtual java/io/PrintStream/println(Ljava/lang/String;)V
+    
+    return
+.end method
+
+// Constructor
+.method public <init>()V
+    .limit stack 1
+    .limit locals 1
+    
+    aload_0
+    invokespecial java/lang/Object/<init>()V
+    
+    // Initialize field
+    aload_0
+    ldc "Hello from JASM!"
+    putfield HelloWorld/message Ljava/lang/String;
+    
+    return
+.end method
+
+// Instance method
+.method public greet()V
+    .limit stack 2
+    .limit locals 1
+    
+    getstatic java/lang/System/out Ljava/io/PrintStream;
+    aload_0
+    getfield HelloWorld/message Ljava/lang/String;
+    invokevirtual java/io/PrintStream/println(Ljava/lang/String;)V
+    
+    return
+.end method
+
+// Static method with parameters
+.method public static add(II)I
+    .limit stack 2
+    .limit locals 2
+    
+    iload_0
+    iload_1
+    iadd
+    ireturn
+.end method
+
+// Method with exception handling
+.method public riskyMethod()V
+    .limit stack 2
+    .limit locals 2
+    
+    .try {
+        // Code that might throw exception
+        new java/lang/Exception
+        dup
+        ldc "Something went wrong"
+        invokespecial java/lang/Exception/<init>(Ljava/lang/String;)V
+        athrow
+    } catch java/lang/Exception {
+        // Exception handler
+        astore_1
+        getstatic java/lang/System/out Ljava/io/PrintStream;
+        ldc "Exception caught: "
+        invokevirtual java/io/PrintStream/print(Ljava/lang/String;)V
+        
+        aload_1
+        invokevirtual java/lang/Exception/getMessage()Ljava/lang/String;
+        invokevirtual java/io/PrintStream/println(Ljava/lang/String;)V
+    }
+    
+    return
+.end method
+
+// Method with loops
+.method public static factorial(I)I
+    .limit stack 2
+    .limit locals 3
+    
+    iconst_1
+    istore_1
+    
+    iconst_0
+    istore_2
+    
+loop_start:
+    iload_2
+    iload_0
+    if_icmpge loop_end
+    
+    iload_1
+    iload_2
+    iconst_1
+    iadd
+    imul
+    istore_1
+    
+    iinc 2 1
+    goto loop_start
+    
+loop_end:
+    iload_1
+    ireturn
+.end method
+
+// Interface implementation
+.class public interface abstract Calculator
+.super java/lang/Object
+
+.method public abstract calculate(DD)D
+.end method
+
+// Class implementing interface
+.class public SimpleCalculator
+.super java/lang/Object
+.implements Calculator
+
+.method public calculate(DD)D
+    .limit stack 4
+    .limit locals 4
+    
+    dload_1
+    dload_3
+    dadd
+    dreturn
+.end method

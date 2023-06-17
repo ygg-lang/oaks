@@ -1,0 +1,30 @@
+[package]
+name = "oak-dot"
+description = "High-performance incremental DOT language parser for the oak ecosystem with flexible configuration, optimized for graph description and visualization."
+categories = ["parsing"]
+keywords = ["parser", "dot", "graph", "visualization"]
+documentation = "https://docs.rs/oak-dot"
+readme = "readme.md"
+version.workspace = true
+authors.workspace = true
+homepage.workspace = true
+repository.workspace = true
+license.workspace = true
+edition.workspace = true
+
+
+[dependencies]
+oak-core = { workspace = true }
+oak-highlight = { workspace = true, optional = true }
+oak-pretty-print = { workspace = true, optional = true }
+
+[dev-dependencies]
+oak-core = { workspace = true, features = ["testing"] }
+
+
+[features]
+default = []
+alloc = []
+
+[package.metadata.docs.rs]
+all-features = true

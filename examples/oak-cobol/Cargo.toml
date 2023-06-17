@@ -1,0 +1,29 @@
+[package]
+name = "oak-cobol"
+description = "High-performance incremental COBOL parser for the oak ecosystem with flexible configuration, supporting legacy and modern COBOL features."
+categories = ["parsing"]
+keywords = ["parser", "cobol", "mainframe", "syntax-analysis"]
+documentation = "https://docs.rs/oak-cobol"
+readme = "readme.md"
+version.workspace = true
+authors.workspace = true
+homepage.workspace = true
+repository.workspace = true
+license.workspace = true
+edition.workspace = true
+
+[dependencies]
+oak-core = { workspace = true }
+oak-highlight = { workspace = true, optional = true }
+oak-pretty-print = { workspace = true, optional = true }
+
+[dev-dependencies]
+oak-core = { workspace = true, features = ["testing"] }
+
+
+[features]
+default = []
+alloc = []
+
+[package.metadata.docs.rs]
+all-features = true

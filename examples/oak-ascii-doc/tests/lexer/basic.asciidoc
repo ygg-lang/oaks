@@ -1,0 +1,45 @@
+= Document Title
+:author: Test Author
+:email: test@example.com
+:toc:
+
+== Introduction
+
+This is a test document for AsciiDoc lexer testing.
+
+=== Features
+
+* Bullet point 1
+* Bullet point 2
+* Bullet point 3
+
+== Code Example
+
+[source,rust]
+----
+fn main() {
+    println!("Hello, World!");
+}
+----
+
+== Table Example
+
+|===
+| Column 1 | Column 2 | Column 3
+
+| Cell 1
+| Cell 2
+| Cell 3
+|===
+
+== Links and References
+
+* https://example.com[External Link]
+* <<introduction,Internal Reference>>
+
+// This is a comment
+
+[#custom-id]
+== Custom ID Section
+
+This section has a custom ID.

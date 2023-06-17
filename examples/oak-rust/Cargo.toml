@@ -1,0 +1,29 @@
+[package]
+name = "oak-rust"
+description = "High-performance incremental Rust parser for the oak ecosystem with flexible configuration, emphasizing memory safety and zero-cost abstractions."
+categories = ["parsing"]
+keywords = ["parser", "rust", "ast", "lexer"]
+documentation = "https://docs.rs/oak-rust"
+readme = "readme.md"
+version.workspace = true
+authors.workspace = true
+homepage.workspace = true
+repository.workspace = true
+license.workspace = true
+edition.workspace = true
+
+[dependencies]
+oak-core = { workspace = true }
+oak-highlight = { workspace = true, optional = true }
+oak-pretty-print = { workspace = true, optional = true }
+serde = { workspace = true }
+
+[dev-dependencies]
+oak-core = { workspace = true, features = ["testing"] }
+
+[features]
+default = []
+alloc = []
+
+[package.metadata.docs.rs]
+all-features = true

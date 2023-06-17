@@ -1,0 +1,27 @@
+[package]
+name = "oak-wat"
+description = "High-performance incremental WebAssembly Text (WAT) parser for the oak ecosystem with flexible configuration, supporting web platform development and portable code generation."
+categories = ["parsing"]
+keywords = ["parser", "wat", "webassembly", "wasm"]
+documentation = "https://docs.rs/oak-wat"
+readme = "readme.md"
+version.workspace = true
+authors.workspace = true
+homepage.workspace = true
+repository.workspace = true
+license.workspace = true
+edition.workspace = true
+
+[dependencies]
+oak-core = { workspace = true }
+
+[dev-dependencies]
+oak-core = { workspace = true, features = ["testing"] }
+
+
+[features]
+default = []
+alloc = []
+
+[package.metadata.docs.rs]
+all-features = true

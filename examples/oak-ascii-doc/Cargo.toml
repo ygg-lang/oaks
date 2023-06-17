@@ -1,0 +1,29 @@
+[package]
+name = "oak-ascii-doc"
+description = "AsciiDoc parser with support for AsciiDoc syntax and documentation features."
+categories = ["parsing"]
+keywords = ["parser", "asciidoc", "documentation", "markup"]
+documentation = "https://docs.rs/oak-ascii-doc"
+readme = "readme.md"
+version.workspace = true
+authors.workspace = true
+homepage.workspace = true
+repository.workspace = true
+license.workspace = true
+edition.workspace = true
+
+[dependencies]
+oak-core = { workspace = true }
+oak-highlight = { workspace = true, optional = true }
+oak-pretty-print = { workspace = true, optional = true }
+
+[dev-dependencies]
+oak-core = { workspace = true, features = ["testing"] }
+
+
+[features]
+default = []
+alloc = []
+
+[package.metadata.docs.rs]
+all-features = true

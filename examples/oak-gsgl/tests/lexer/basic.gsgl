@@ -1,0 +1,71 @@
+// GSGL (Graphics Shader Generator Language) basic syntax test file
+
+// Vertex shader
+vertex main {
+    input vec3 position;
+    input vec2 texCoord;
+    
+    output vec2 fragTexCoord;
+    
+    uniform mat4 modelMatrix;
+    uniform mat4 viewMatrix;
+    uniform mat4 projectionMatrix;
+    
+    void main() {
+        fragTexCoord = texCoord;
+        gl_Position = projectionMatrix * viewMatrix * modelMatrix * vec4(position, 1.0);
+    }
+}
+
+// Fragment shader
+fragment main {
+    input vec2 fragTexCoord;
+    
+    output vec4 fragColor;
+    
+    uniform sampler2D textureSampler;
+    uniform vec3 lightColor;
+    uniform float ambientStrength;
+    
+    void main() {
+        vec4 texColor = texture(textureSampler, fragTexCoord);
+        vec3 ambient = ambientStrength * lightColor;
+        fragColor = vec4(ambient, 1.0) * texColor;
+    }
+}
+
+// Geometry shader (optional)
+geometry main {
+    layout(triangles) in;
+    layout(triangle_strip, max_vertices = 3) out;
+    
+    uniform float time;
+    
+    void main() {
+        for(int i = 0; i < 3; i++) {
+            gl_Position = gl_in[i].gl_Position + vec4(sin(time), cos(time), 0.0, 0.0);
+            EmitVertex();
+        }
+        EndPrimitive();
+    }
+}
+
+// Compute shader
+compute main {
+    layout(local_size_x = 64, local_size_y = 1, local_size_z = 1) in;
+    
+    layout(std430, binding = 0) buffer InputBuffer {
+        float data[];
+    } inputBuffer;
+    
+    layout(std430, binding = 1) buffer OutputBuffer {
+        float result[];
+    } outputBuffer;
+    
+    void main() {
+        uint index = gl_GlobalInvocationID.x;
+        if (index < inputBuffer.data.length()) {
+            outputBuffer.result[index] = inputBuffer.data[index] * 2.0;
+        }
+    }
+}

@@ -1,0 +1,29 @@
+[package]
+name = "oak-ada"
+description = "High-performance incremental Ada parser for the oak ecosystem with flexible configuration, emphasizing safety and reliability."
+categories = ["parsing"]
+keywords = ["parser", "ada", "safety", "language"]
+documentation = "https://docs.rs/oak-ada"
+readme = "readme.md"
+version.workspace = true
+authors.workspace = true
+homepage.workspace = true
+repository.workspace = true
+license.workspace = true
+edition.workspace = true
+
+[dependencies]
+oak-core = { workspace = true }
+oak-highlight = { workspace = true, optional = true }
+oak-pretty-print = { workspace = true, optional = true }
+
+[dev-dependencies]
+oak-core = { workspace = true, features = ["testing"] }
+
+
+[features]
+default = []
+std = []
+
+[package.metadata.docs.rs]
+all-features = true

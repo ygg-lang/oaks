@@ -1,0 +1,144 @@
+// IDL (Interface Definition Language) basic syntax test file
+// This example shows CORBA IDL syntax
+
+module BankingSystem {
+    // Basic data types
+    typedef string AccountNumber;
+    typedef float Balance;
+    typedef sequence<Transaction> TransactionList;
+    
+    // Enumeration
+    enum AccountType {
+        SAVINGS,
+        CHECKING,
+        BUSINESS,
+        INVESTMENT
+    };
+    
+    // Structure definition
+    struct Transaction {
+        AccountNumber fromAccount;
+        AccountNumber toAccount;
+        Balance amount;
+        string description;
+        Time timestamp;
+    };
+    
+    // Exception definition
+    exception InsufficientFunds {
+        AccountNumber account;
+        Balance requested;
+        Balance available;
+    };
+    
+    exception InvalidAccount {
+        AccountNumber account;
+        string reason;
+    };
+    
+    // Interface definition
+    interface Account {
+        readonly attribute AccountNumber number;
+        readonly attribute Balance balance;
+        attribute AccountType type;
+        
+        // Basic operations
+        Balance getBalance();
+        
+        void deposit(in Balance amount, in string description)
+            raises (InvalidAccount);
+            
+        void withdraw(in Balance amount, in string description)
+            raises (InsufficientFunds, InvalidAccount);
+            
+        TransactionList getTransactions(in Time from, in Time to);
+        
+        // One-way operation (no response expected)
+        oneway void notify(in string message);
+    };
+    
+    // Interface inheritance
+    interface SavingsAccount : Account {
+        readonly attribute float interestRate;
+        
+        void applyInterest();
+        float calculateInterest(in int days);
+    };
+    
+    interface CheckingAccount : Account {
+        readonly attribute int checkNumber;
+        
+        void writeCheck(in int checkNumber, in Balance amount, in string payee)
+            raises (InsufficientFunds);
+    };
+    
+    // Abstract interface
+    abstract interface BankService {
+        Account createAccount(in AccountType type, in string owner)
+            raises (InvalidAccount);
+            
+        void closeAccount(in AccountNumber account)
+            raises (InvalidAccount);
+            
+        Account findAccount(in AccountNumber account)
+            raises (InvalidAccount);
+    };
+    
+    // Multiple interface inheritance
+    interface PremiumAccount : SavingsAccount, CheckingAccount {
+        readonly attribute string premiumLevel;
+        
+        void upgradeAccount(in string newLevel);
+    };
+    
+    // Valuetype (can have implementation)
+    valuetype Address {
+        public string street;
+        public string city;
+        public string state;
+        public string zipCode;
+        
+        public string getFullAddress();
+    };
+    
+    // Union type
+    union CustomerID switch (short) {
+        case 1:
+            long socialSecurityNumber;
+        case 2:
+            string passportNumber;
+        default:
+            sequence<octet> otherID;
+    };
+    
+    // Forward declaration
+    interface LoanAccount;
+    
+    // Using forward declaration
+    interface Customer {
+        attribute string name;
+        attribute Address address;
+        attribute CustomerID id;
+        
+        AccountList getAccounts();
+        LoanAccount getLoanAccount();
+    };
+    
+    typedef sequence<Account> AccountList;
+    typedef sequence<Customer> CustomerList;
+    
+    // Main bank interface
+    interface Bank : BankService {
+        readonly attribute string name;
+        readonly attribute Address headquarters;
+        
+        Customer createCustomer(in string name, in Address address, in CustomerID id);
+        
+        CustomerList getCustomers();
+        
+        float getExchangeRate(in string fromCurrency, in string toCurrency);
+        
+        // Attribute with constraints
+        attribute float primeRate;
+    };
+};

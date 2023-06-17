@@ -1,0 +1,81 @@
+{{!-- Handlebars template basic syntax test file --}}
+
+{{!-- Basic variable interpolation --}}
+<h1>Welcome {{userName}}!</h1>
+<p>Your age is {{userAge}} years old.</p>
+
+{{!-- Conditional blocks --}}
+{{#if isLoggedIn}}
+    <div class="user-dashboard">
+        <h2>Hello {{firstName}} {{lastName}}!</h2>
+        {{#if hasNotifications}}
+            <div class="notifications">
+                You have {{notificationCount}} new notifications.
+            </div>
+        {{else}}
+            <p>No new notifications.</p>
+        {{/if}}
+    </div>
+{{else}}
+    <div class="login-prompt">
+        Please <a href="/login">log in</a> to continue.
+    </div>
+{{/if}}
+
+{{!-- Each loop --}}
+<ul class="product-list">
+    {{#each products}}
+        <li class="product-item">
+            <h3>{{this.name}}</h3>
+            <p>Price: ${{this.price}}</p>
+            {{#if this.inStock}}
+                <span class="in-stock">In Stock ({{this.quantity}})</span>
+            {{else}}
+                <span class="out-of-stock">Out of Stock</span>
+            {{/if}}
+        </li>
+    {{/each}}
+</ul>
+
+{{!-- With block --}}
+{{#with company}}
+    <div class="company-info">
+        <h2>{{name}}</h2>
+        <p>Founded in {{foundedYear}}</p>
+        <address>
+            {{address.street}}<br>
+            {{address.city}}, {{address.state}} {{address.zip}}
+        </address>
+    </div>
+{{/with}}
+
+{{!-- Unless block --}}
+{{#unless isWeekend}}
+    <p>It's a weekday. Time to work!</p>
+{{else}}
+    <p>It's the weekend! Time to relax.</p>
+{{/unless}}
+
+{{!-- Helpers usage --}}
+<p>Total: {{formatCurrency totalAmount}}</p>
+<p>Date: {{formatDate currentDate "YYYY-MM-DD"}}</p>
+
+{{!-- Partial inclusion --}}
+{{> userCard user=currentUser}}
+
+{{!-- Comment syntax --}}
+{{!-- This is a Handlebars comment that won't be rendered --}}
+
+{{!-- Nested helpers --}}
+{{#each (filter products "inStock" true)}}
+    <div class="available-product">
+        {{this.name}} - {{this.price}}
+    </div>
+{{/each}}
+
+{{!-- Block parameters --}}
+{{#each users as |user userIndex|}}
+    <div class="user-{{userIndex}}">
+        {{user.name}} ({{user.email}})
+    </div>
+{{/each}}

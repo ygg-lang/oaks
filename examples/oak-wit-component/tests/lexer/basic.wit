@@ -1,0 +1,624 @@
+// WIT (WebAssembly Interface Types) Test File - Comprehensive Syntax Coverage
+// This file tests various WIT syntax elements for lexer testing
+
+// Package declaration
+package example:component@1.0.0;
+
+// World definition
+world example-world {
+    // Import interfaces
+    import wasi:filesystem/types@0.2.0;
+    import wasi:io/streams@0.2.0;
+    import wasi:http/types@0.2.0;
+    import wasi:clocks/wall-clock@0.2.0;
+    
+    // Import functions
+    import print: func(msg: string);
+    import log: func(level: log-level, message: string);
+    import get-time: func() -> u64;
+    
+    // Export interfaces
+    export calculator;
+    export file-processor;
+    export http-client;
+    
+    // Export functions
+    export run: func() -> result<_, error>;
+    export process-data: func(input: list<u8>) -> result<list<u8>, string>;
+}
+
+// Interface definitions
+interface calculator {
+    // Basic arithmetic operations
+    add: func(a: f64, b: f64) -> f64;
+    subtract: func(a: f64, b: f64) -> f64;
+    multiply: func(a: f64, b: f64) -> f64;
+    divide: func(a: f64, b: f64) -> result<f64, math-error>;
+    
+    // Advanced operations
+    power: func(base: f64, exponent: f64) -> f64;
+    sqrt: func(value: f64) -> result<f64, math-error>;
+    factorial: func(n: u32) -> result<u64, math-error>;
+    
+    // Vector operations
+    vector-add: func(a: vector3, b: vector3) -> vector3;
+    vector-dot: func(a: vector3, b: vector3) -> f64;
+    vector-cross: func(a: vector3, b: vector3) -> vector3;
+    vector-magnitude: func(v: vector3) -> f64;
+    vector-normalize: func(v: vector3) -> result<vector3, math-error>;
+    
+    // Matrix operations
+    matrix-multiply: func(a: matrix4x4, b: matrix4x4) -> matrix4x4;
+    matrix-inverse: func(m: matrix4x4) -> result<matrix4x4, math-error>;
+    matrix-determinant: func(m: matrix4x4) -> f64;
+}
+
+interface file-processor {
+    // File operations
+    read-file: func(path: string) -> result<list<u8>, file-error>;
+    write-file: func(path: string, data: list<u8>) -> result<_, file-error>;
+    append-file: func(path: string, data: list<u8>) -> result<_, file-error>;
+    delete-file: func(path: string) -> result<_, file-error>;
+    
+    // Directory operations
+    create-directory: func(path: string) -> result<_, file-error>;
+    list-directory: func(path: string) -> result<list<file-info>, file-error>;
+    
+    // File metadata
+    get-file-info: func(path: string) -> result<file-info, file-error>;
+    file-exists: func(path: string) -> bool;
+    
+    // Text processing
+    read-text-file: func(path: string, encoding: text-encoding) -> result<string, file-error>;
+    write-text-file: func(path: string, content: string, encoding: text-encoding) -> result<_, file-error>;
+    
+    // Binary processing
+    compress-data: func(data: list<u8>, algorithm: compression-algorithm) -> result<list<u8>, compression-error>;
+    decompress-data: func(data: list<u8>, algorithm: compression-algorithm) -> result<list<u8>, compression-error>;
+    
+    // Hash functions
+    calculate-hash: func(data: list<u8>, algorithm: hash-algorithm) -> list<u8>;
+    verify-hash: func(data: list<u8>, hash: list<u8>, algorithm: hash-algorithm) -> bool;
+}
+
+interface http-client {
+    // HTTP methods
+    get: func(url: string, headers: option<list<header>>) -> result<http-response, http-error>;
+    post: func(url: string, body: option<list<u8>>, headers: option<list<header>>) -> result<http-response, http-error>;
+    put: func(url: string, body: option<list<u8>>, headers: option<list<header>>) -> result<http-response, http-error>;
+    delete: func(url: string, headers: option<list<header>>) -> result<http-response, http-error>;
+    patch: func(url: string, body: option<list<u8>>, headers: option<list<header>>) -> result<http-response, http-error>;
+    head: func(url: string, headers: option<list<header>>) -> result<http-response, http-error>;
+    options: func(url: string, headers: option<list<header>>) -> result<http-response, http-error>;
+    
+    // Advanced HTTP operations
+    request: func(req: http-request) -> result<http-response, http-error>;
+    stream-request: func(req: http-request) -> result<http-stream, http-error>;
+    
+    // WebSocket operations
+    connect-websocket: func(url: string, protocols: option<list<string>>) -> result<websocket, websocket-error>;
+    send-websocket-message: func(ws: websocket, message: websocket-message) -> result<_, websocket-error>;
+    receive-websocket-message: func(ws: websocket) -> result<websocket-message, websocket-error>;
+    close-websocket: func(ws: websocket, code: option<u16>, reason: option<string>) -> result<_, websocket-error>;
+}
+
+// Type definitions
+
+// Basic types and aliases
+type user-id = u64;
+type timestamp = u64;
+type byte-array = list<u8>;
+type string-map = list<tuple<string, string>>;
+
+// Enums
+enum log-level {
+    trace,
+    debug,
+    info,
+    warn,
+    error,
+    fatal,
+}
+
+enum math-error {
+    division-by-zero,
+    invalid-input,
+    overflow,
+    underflow,
+    not-a-number,
+    infinite-result,
+}
+
+enum file-error {
+    not-found,
+    permission-denied,
+    already-exists,
+    invalid-path,
+    io-error,
+    disk-full,
+    read-only,
+}
+
+enum compression-algorithm {
+    gzip,
+    deflate,
+    brotli,
+    lz4,
+    zstd,
+}
+
+enum compression-error {
+    invalid-format,
+    corrupted-data,
+    unsupported-algorithm,
+    insufficient-memory,
+}
+
+enum hash-algorithm {
+    md5,
+    sha1,
+    sha256,
+    sha512,
+    blake2b,
+    blake3,
+}
+
+enum text-encoding {
+    utf8,
+    utf16,
+    ascii,
+    latin1,
+}
+
+enum http-method {
+    get,
+    post,
+    put,
+    delete,
+    patch,
+    head,
+    options,
+    trace,
+    connect,
+}
+
+enum http-error {
+    network-error,
+    timeout,
+    invalid-url,
+    invalid-response,
+    authentication-failed,
+    authorization-failed,
+    not-found,
+    server-error,
+    client-error,
+}
+
+enum websocket-error {
+    connection-failed,
+    protocol-error,
+    invalid-frame,
+    connection-closed,
+    timeout,
+}
+
+enum websocket-message-type {
+    text,
+    binary,
+    ping,
+    pong,
+    close,
+}
+
+// Records (structs)
+record vector3 {
+    x: f64,
+    y: f64,
+    z: f64,
+}
+
+record vector4 {
+    x: f64,
+    y: f64,
+    z: f64,
+    w: f64,
+}
+
+record matrix4x4 {
+    m00: f64, m01: f64, m02: f64, m03: f64,
+    m10: f64, m11: f64, m12: f64, m13: f64,
+    m20: f64, m21: f64, m22: f64, m23: f64,
+    m30: f64, m31: f64, m32: f64, m33: f64,
+}
+
+record file-info {
+    name: string,
+    path: string,
+    size: u64,
+    created: timestamp,
+    modified: timestamp,
+    is-directory: bool,
+    is-readonly: bool,
+    permissions: file-permissions,
+}
+
+record file-permissions {
+    owner-read: bool,
+    owner-write: bool,
+    owner-execute: bool,
+    group-read: bool,
+    group-write: bool,
+    group-execute: bool,
+    other-read: bool,
+    other-write: bool,
+    other-execute: bool,
+}
+
+record header {
+    name: string,
+    value: string,
+}
+
+record http-request {
+    method: http-method,
+    url: string,
+    headers: list<header>,
+    body: option<list<u8>>,
+    timeout: option<u32>,
+    follow-redirects: bool,
+    max-redirects: u32,
+}
+
+record http-response {
+    status: u16,
+    headers: list<header>,
+    body: list<u8>,
+}
+
+record websocket-message {
+    type: websocket-message-type,
+    data: list<u8>,
+}
+
+record user {
+    id: user-id,
+    username: string,
+    email: string,
+    full-name: string,
+    created-at: timestamp,
+    last-login: option<timestamp>,
+    is-active: bool,
+    roles: list<string>,
+    metadata: string-map,
+}
+
+record database-config {
+    host: string,
+    port: u16,
+    database: string,
+    username: string,
+    password: string,
+    ssl-enabled: bool,
+    connection-timeout: u32,
+    max-connections: u32,
+}
+
+record api-config {
+    base-url: string,
+    api-key: string,
+    timeout: u32,
+    retry-attempts: u32,
+    rate-limit: option<rate-limit>,
+}
+
+record rate-limit {
+    requests-per-second: u32,
+    burst-size: u32,
+}
+
+// Variants (unions)
+variant error {
+    math(math-error),
+    file(file-error),
+    http(http-error),
+    websocket(websocket-error),
+    compression(compression-error),
+    custom(string),
+}
+
+variant data-format {
+    json(string),
+    xml(string),
+    binary(list<u8>),
+    text(string),
+    csv(list<list<string>>),
+}
+
+variant storage-backend {
+    file-system(string),
+    database(database-config),
+    cloud-storage(cloud-config),
+    memory,
+}
+
+variant authentication {
+    none,
+    basic(basic-auth),
+    bearer(string),
+    api-key(string),
+    oauth2(oauth2-config),
+}
+
+variant notification {
+    email(email-notification),
+    sms(sms-notification),
+    push(push-notification),
+    webhook(webhook-notification),
+}
+
+// Additional records for variants
+record basic-auth {
+    username: string,
+    password: string,
+}
+
+record oauth2-config {
+    client-id: string,
+    client-secret: string,
+    token-url: string,
+    scope: option<string>,
+}
+
+record cloud-config {
+    provider: string,
+    region: string,
+    bucket: string,
+    access-key: string,
+    secret-key: string,
+}
+
+record email-notification {
+    to: list<string>,
+    subject: string,
+    body: string,
+    html: bool,
+}
+
+record sms-notification {
+    to: string,
+    message: string,
+}
+
+record push-notification {
+    device-token: string,
+    title: string,
+    body: string,
+    data: option<string-map>,
+}
+
+record webhook-notification {
+    url: string,
+    method: http-method,
+    headers: option<list<header>>,
+    payload: string,
+}
+
+// Resource types
+resource websocket {
+    send: func(message: websocket-message) -> result<_, websocket-error>;
+    receive: func() -> result<websocket-message, websocket-error>;
+    close: func(code: option<u16>, reason: option<string>) -> result<_, websocket-error>;
+    is-open: func() -> bool;
+}
+
+resource http-stream {
+    read-chunk: func() -> result<option<list<u8>>, http-error>;
+    write-chunk: func(data: list<u8>) -> result<_, http-error>;
+    close: func() -> result<_, http-error>;
+}
+
+resource file-handle {
+    read: func(size: u32) -> result<list<u8>, file-error>;
+    write: func(data: list<u8>) -> result<u32, file-error>;
+    seek: func(position: u64) -> result<u64, file-error>;
+    flush: func() -> result<_, file-error>;
+    close: func() -> result<_, file-error>;
+    size: func() -> result<u64, file-error>;
+}
+
+resource database-connection {
+    execute: func(query: string, params: option<list<database-value>>) -> result<database-result, database-error>;
+    prepare: func(query: string) -> result<prepared-statement, database-error>;
+    begin-transaction: func() -> result<transaction, database-error>;
+    close: func() -> result<_, database-error>;
+}
+
+resource prepared-statement {
+    execute: func(params: option<list<database-value>>) -> result<database-result, database-error>;
+    close: func() -> result<_, database-error>;
+}
+
+resource transaction {
+    commit: func() -> result<_, database-error>;
+    rollback: func() -> result<_, database-error>;
+}
+
+// Additional types for database operations
+variant database-value {
+    null,
+    integer(s64),
+    real(f64),
+    text(string),
+    blob(list<u8>),
+    boolean(bool),
+}
+
+record database-result {
+    rows: list<list<database-value>>,
+    columns: list<string>,
+    affected-rows: u64,
+}
+
+enum database-error {
+    connection-failed,
+    query-error,
+    constraint-violation,
+    transaction-failed,
+    timeout,
+    permission-denied,
+}
+
+// Complex nested types
+record application-config {
+    name: string,
+    version: string,
+    environment: string,
+    database: database-config,
+    api: api-config,
+    storage: storage-backend,
+    authentication: authentication,
+    notifications: list<notification>,
+    features: feature-flags,
+    logging: logging-config,
+}
+
+record feature-flags {
+    enable-caching: bool,
+    enable-metrics: bool,
+    enable-tracing: bool,
+    enable-rate-limiting: bool,
+    experimental-features: list<string>,
+}
+
+record logging-config {
+    level: log-level,
+    format: string,
+    output: logging-output,
+    rotation: option<log-rotation>,
+}
+
+variant logging-output {
+    console,
+    file(string),
+    syslog,
+    network(network-logging),
+}
+
+record network-logging {
+    host: string,
+    port: u16,
+    protocol: string,
+}
+
+record log-rotation {
+    max-size: u64,
+    max-files: u32,
+    compress: bool,
+}
+
+// Function types with complex signatures
+type event-handler = func(event: application-event) -> result<_, error>;
+type data-transformer = func(input: data-format) -> result<data-format, error>;
+type validator = func(data: list<u8>) -> result<validation-result, error>;
+
+record application-event {
+    id: string,
+    timestamp: timestamp,
+    source: string,
+    event-type: string,
+    data: data-format,
+    metadata: string-map,
+}
+
+record validation-result {
+    is-valid: bool,
+    errors: list<validation-error>,
+    warnings: list<string>,
+}
+
+record validation-error {
+    field: string,
+    message: string,
+    code: string,
+}
+
+// Interface with complex operations
+interface data-processing {
+    // Batch operations
+    process-batch: func(items: list<data-format>, config: processing-config) -> result<list<processing-result>, error>;
+    
+    // Stream processing
+    create-stream-processor: func(config: stream-config) -> result<stream-processor, error>;
+    
+    // Data validation
+    validate-data: func(data: data-format, schema: validation-schema) -> result<validation-result, error>;
+    
+    // Data transformation
+    transform-data: func(data: data-format, transformer: data-transformer) -> result<data-format, error>;
+    
+    // Analytics
+    analyze-data: func(data: list<data-format>, analysis-type: analysis-type) -> result<analysis-result, error>;
+}
+
+record processing-config {
+    parallel: bool,
+    batch-size: u32,
+    timeout: u32,
+    retry-policy: retry-policy,
+    error-handling: error-handling-strategy,
+}
+
+record stream-config {
+    buffer-size: u32,
+    checkpoint-interval: u32,
+    parallelism: u32,
+}
+
+resource stream-processor {
+    process: func(data: data-format) -> result<data-format, error>;
+    checkpoint: func() -> result<_, error>;
+    close: func() -> result<_, error>;
+}
+
+record validation-schema {
+    schema-type: string,
+    schema-content: string,
+    strict-mode: bool,
+}
+
+record processing-result {
+    input: data-format,
+    output: option<data-format>,
+    success: bool,
+    error: option<error>,
+    duration: u64,
+}
+
+record retry-policy {
+    max-attempts: u32,
+    initial-delay: u32,
+    max-delay: u32,
+    backoff-multiplier: f64,
+}
+
+enum error-handling-strategy {
+    fail-fast,
+    continue-on-error,
+    retry-with-backoff,
+    dead-letter-queue,
+}
+
+enum analysis-type {
+    statistical-summary,
+    pattern-detection,
+    anomaly-detection,
+    trend-analysis,
+    correlation-analysis,
+}
+
+record analysis-result {
+    analysis-type: analysis-type,
+    results: string-map,
+    confidence: f64,
+    metadata: string-map,
+}

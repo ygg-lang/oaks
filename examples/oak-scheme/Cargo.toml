@@ -1,0 +1,28 @@
+[package]
+name = "oak-scheme"
+description = "High-performance incremental Scheme parser for the oak ecosystem with flexible configuration, optimized for functional programming and symbolic computation."
+categories = ["parsing"]
+keywords = ["parser", "scheme", "streaming", "validation"]
+documentation = "https://docs.rs/oak-scheme"
+readme = "readme.md"
+version.workspace = true
+authors.workspace = true
+homepage.workspace = true
+repository.workspace = true
+license.workspace = true
+edition.workspace = true
+
+
+[dependencies]
+oak-core = { workspace = true }
+
+[dev-dependencies]
+oak-core = { workspace = true, features = ["testing"] }
+
+
+[features]
+default = []
+alloc = []
+
+[package.metadata.docs.rs]
+all-features = true

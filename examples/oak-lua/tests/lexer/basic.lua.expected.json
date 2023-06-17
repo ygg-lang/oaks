@@ -1,0 +1,607 @@
+{
+    "success": true,
+    "count": 100,
+    "tokens": [
+        {
+            "kind": "Comment",
+            "text": "-- Oak Lua Test Suit",
+            "start": 0,
+            "end": 20
+        },
+        {
+            "kind": "Whitespace",
+            "text": "e\r",
+            "start": 20,
+            "end": 22
+        },
+        {
+            "kind": "Comment",
+            "text": "\n-- Basic Lua syntax test file for Oak lexe",
+            "start": 22,
+            "end": 65
+        },
+        {
+            "kind": "Whitespace",
+            "text": "r\r",
+            "start": 65,
+            "end": 67
+        },
+        {
+            "kind": "Whitespace",
+            "text": "\n\r",
+            "start": 67,
+            "end": 69
+        },
+        {
+            "kind": "Comment",
+            "text": "\n-- Variables and basic data type",
+            "start": 69,
+            "end": 102
+        },
+        {
+            "kind": "Whitespace",
+            "text": "s\r",
+            "start": 102,
+            "end": 104
+        },
+        {
+            "kind": "Identifier",
+            "text": "\nloca",
+            "start": 104,
+            "end": 109
+        },
+        {
+            "kind": "Whitespace",
+            "text": "l",
+            "start": 109,
+            "end": 110
+        },
+        {
+            "kind": "Identifier",
+            "text": " nam",
+            "start": 110,
+            "end": 114
+        },
+        {
+            "kind": "Whitespace",
+            "text": "e",
+            "start": 114,
+            "end": 115
+        },
+        {
+            "kind": "Eq",
+            "text": " ",
+            "start": 115,
+            "end": 116
+        },
+        {
+            "kind": "Whitespace",
+            "text": "=",
+            "start": 116,
+            "end": 117
+        },
+        {
+            "kind": "String",
+            "text": " \"Oak Lua",
+            "start": 117,
+            "end": 126
+        },
+        {
+            "kind": "Whitespace",
+            "text": "\"\r",
+            "start": 126,
+            "end": 128
+        },
+        {
+            "kind": "Identifier",
+            "text": "\nloca",
+            "start": 128,
+            "end": 133
+        },
+        {
+            "kind": "Whitespace",
+            "text": "l",
+            "start": 133,
+            "end": 134
+        },
+        {
+            "kind": "Identifier",
+            "text": " versio",
+            "start": 134,
+            "end": 141
+        },
+        {
+            "kind": "Whitespace",
+            "text": "n",
+            "start": 141,
+            "end": 142
+        },
+        {
+            "kind": "Eq",
+            "text": " ",
+            "start": 142,
+            "end": 143
+        },
+        {
+            "kind": "Whitespace",
+            "text": "=",
+            "start": 143,
+            "end": 144
+        },
+        {
+            "kind": "Number",
+            "text": " 5.",
+            "start": 144,
+            "end": 147
+        },
+        {
+            "kind": "Whitespace",
+            "text": "4\r",
+            "start": 147,
+            "end": 149
+        },
+        {
+            "kind": "Identifier",
+            "text": "\nloca",
+            "start": 149,
+            "end": 154
+        },
+        {
+            "kind": "Whitespace",
+            "text": "l",
+            "start": 154,
+            "end": 155
+        },
+        {
+            "kind": "Identifier",
+            "text": " is_activ",
+            "start": 155,
+            "end": 164
+        },
+        {
+            "kind": "Whitespace",
+            "text": "e",
+            "start": 164,
+            "end": 165
+        },
+        {
+            "kind": "Eq",
+            "text": " ",
+            "start": 165,
+            "end": 166
+        },
+        {
+            "kind": "Whitespace",
+            "text": "=",
+            "start": 166,
+            "end": 167
+        },
+        {
+            "kind": "Identifier",
+            "text": " tru",
+            "start": 167,
+            "end": 171
+        },
+        {
+            "kind": "Whitespace",
+            "text": "e\r",
+            "start": 171,
+            "end": 173
+        },
+        {
+            "kind": "Identifier",
+            "text": "\nloca",
+            "start": 173,
+            "end": 178
+        },
+        {
+            "kind": "Whitespace",
+            "text": "l",
+            "start": 178,
+            "end": 179
+        },
+        {
+            "kind": "Identifier",
+            "text": " dat",
+            "start": 179,
+            "end": 183
+        },
+        {
+            "kind": "Whitespace",
+            "text": "a",
+            "start": 183,
+            "end": 184
+        },
+        {
+            "kind": "Eq",
+            "text": " ",
+            "start": 184,
+            "end": 185
+        },
+        {
+            "kind": "Whitespace",
+            "text": "=",
+            "start": 185,
+            "end": 186
+        },
+        {
+            "kind": "Identifier",
+            "text": " ni",
+            "start": 186,
+            "end": 189
+        },
+        {
+            "kind": "Whitespace",
+            "text": "l\r",
+            "start": 189,
+            "end": 191
+        },
+        {
+            "kind": "Identifier",
+            "text": "\nloca",
+            "start": 191,
+            "end": 196
+        },
+        {
+            "kind": "Whitespace",
+            "text": "l",
+            "start": 196,
+            "end": 197
+        },
+        {
+            "kind": "Identifier",
+            "text": " coun",
+            "start": 197,
+            "end": 202
+        },
+        {
+            "kind": "Whitespace",
+            "text": "t",
+            "start": 202,
+            "end": 203
+        },
+        {
+            "kind": "Eq",
+            "text": " ",
+            "start": 203,
+            "end": 204
+        },
+        {
+            "kind": "Whitespace",
+            "text": "=",
+            "start": 204,
+            "end": 205
+        },
+        {
+            "kind": "Number",
+            "text": " 4",
+            "start": 205,
+            "end": 207
+        },
+        {
+            "kind": "Whitespace",
+            "text": "2\r",
+            "start": 207,
+            "end": 209
+        },
+        {
+            "kind": "Identifier",
+            "text": "\nloca",
+            "start": 209,
+            "end": 214
+        },
+        {
+            "kind": "Whitespace",
+            "text": "l",
+            "start": 214,
+            "end": 215
+        },
+        {
+            "kind": "Identifier",
+            "text": " p",
+            "start": 215,
+            "end": 217
+        },
+        {
+            "kind": "Whitespace",
+            "text": "i",
+            "start": 217,
+            "end": 218
+        },
+        {
+            "kind": "Eq",
+            "text": " ",
+            "start": 218,
+            "end": 219
+        },
+        {
+            "kind": "Whitespace",
+            "text": "=",
+            "start": 219,
+            "end": 220
+        },
+        {
+            "kind": "Number",
+            "text": " 3.1415",
+            "start": 220,
+            "end": 227
+        },
+        {
+            "kind": "Whitespace",
+            "text": "9\r",
+            "start": 227,
+            "end": 229
+        },
+        {
+            "kind": "Identifier",
+            "text": "\nloca",
+            "start": 229,
+            "end": 234
+        },
+        {
+            "kind": "Whitespace",
+            "text": "l",
+            "start": 234,
+            "end": 235
+        },
+        {
+            "kind": "Identifier",
+            "text": " hex_valu",
+            "start": 235,
+            "end": 244
+        },
+        {
+            "kind": "Whitespace",
+            "text": "e",
+            "start": 244,
+            "end": 245
+        },
+        {
+            "kind": "Eq",
+            "text": " ",
+            "start": 245,
+            "end": 246
+        },
+        {
+            "kind": "Whitespace",
+            "text": "=",
+            "start": 246,
+            "end": 247
+        },
+        {
+            "kind": "Number",
+            "text": " ",
+            "start": 247,
+            "end": 248
+        },
+        {
+            "kind": "Identifier",
+            "text": "0xF",
+            "start": 248,
+            "end": 251
+        },
+        {
+            "kind": "Whitespace",
+            "text": "F\r",
+            "start": 251,
+            "end": 253
+        },
+        {
+            "kind": "Identifier",
+            "text": "\nloca",
+            "start": 253,
+            "end": 258
+        },
+        {
+            "kind": "Whitespace",
+            "text": "l",
+            "start": 258,
+            "end": 259
+        },
+        {
+            "kind": "Identifier",
+            "text": " scientifi",
+            "start": 259,
+            "end": 269
+        },
+        {
+            "kind": "Whitespace",
+            "text": "c",
+            "start": 269,
+            "end": 270
+        },
+        {
+            "kind": "Eq",
+            "text": " ",
+            "start": 270,
+            "end": 271
+        },
+        {
+            "kind": "Whitespace",
+            "text": "=",
+            "start": 271,
+            "end": 272
+        },
+        {
+            "kind": "Number",
+            "text": " 1.23e-",
+            "start": 272,
+            "end": 279
+        },
+        {
+            "kind": "Whitespace",
+            "text": "4\r",
+            "start": 279,
+            "end": 281
+        },
+        {
+            "kind": "Whitespace",
+            "text": "\n\r",
+            "start": 281,
+            "end": 283
+        },
+        {
+            "kind": "Comment",
+            "text": "\n-- Comment",
+            "start": 283,
+            "end": 294
+        },
+        {
+            "kind": "Whitespace",
+            "text": "s\r",
+            "start": 294,
+            "end": 296
+        },
+        {
+            "kind": "Comment",
+            "text": "\n-- This is a single line commen",
+            "start": 296,
+            "end": 328
+        },
+        {
+            "kind": "Whitespace",
+            "text": "t\r",
+            "start": 328,
+            "end": 330
+        },
+        {
+            "kind": "Identifier",
+            "text": "\nloca",
+            "start": 330,
+            "end": 335
+        },
+        {
+            "kind": "Whitespace",
+            "text": "l",
+            "start": 335,
+            "end": 336
+        },
+        {
+            "kind": "Identifier",
+            "text": " ",
+            "start": 336,
+            "end": 337
+        },
+        {
+            "kind": "Whitespace",
+            "text": "x",
+            "start": 337,
+            "end": 338
+        },
+        {
+            "kind": "Eq",
+            "text": " ",
+            "start": 338,
+            "end": 339
+        },
+        {
+            "kind": "Whitespace",
+            "text": "=",
+            "start": 339,
+            "end": 340
+        },
+        {
+            "kind": "Number",
+            "text": " 1",
+            "start": 340,
+            "end": 342
+        },
+        {
+            "kind": "Whitespace",
+            "text": "0",
+            "start": 342,
+            "end": 343
+        },
+        {
+            "kind": "Comment",
+            "text": " -- inline commen",
+            "start": 343,
+            "end": 360
+        },
+        {
+            "kind": "Whitespace",
+            "text": "t\r",
+            "start": 360,
+            "end": 362
+        },
+        {
+            "kind": "Whitespace",
+            "text": "\n\r",
+            "start": 362,
+            "end": 364
+        },
+        {
+            "kind": "Comment",
+            "text": "\n--[[\r\n    This is a multi-line comment\r\n    that spans multiple lines\r\n    and can contain various content\r\n]",
+            "start": 364,
+            "end": 474
+        },
+        {
+            "kind": "Whitespace",
+            "text": "]\r",
+            "start": 474,
+            "end": 476
+        },
+        {
+            "kind": "Whitespace",
+            "text": "\n\r",
+            "start": 476,
+            "end": 478
+        },
+        {
+            "kind": "Identifier",
+            "text": "\nloca",
+            "start": 478,
+            "end": 483
+        },
+        {
+            "kind": "Whitespace",
+            "text": "l",
+            "start": 483,
+            "end": 484
+        },
+        {
+            "kind": "Identifier",
+            "text": " ",
+            "start": 484,
+            "end": 485
+        },
+        {
+            "kind": "Whitespace",
+            "text": "y",
+            "start": 485,
+            "end": 486
+        },
+        {
+            "kind": "Eq",
+            "text": " ",
+            "start": 486,
+            "end": 487
+        },
+        {
+            "kind": "Whitespace",
+            "text": "=",
+            "start": 487,
+            "end": 488
+        },
+        {
+            "kind": "Number",
+            "text": " 2",
+            "start": 488,
+            "end": 490
+        },
+        {
+            "kind": "Whitespace",
+            "text": "0",
+            "start": 490,
+            "end": 491
+        },
+        {
+            "kind": "Comment",
+            "text": " --[[inline multi-line comment]",
+            "start": 491,
+            "end": 522
+        }
+    ],
+    "errors": []
+}

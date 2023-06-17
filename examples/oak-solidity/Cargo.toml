@@ -1,0 +1,22 @@
+[package]
+name = "oak-solidity"
+version.workspace = true
+authors.workspace = true
+edition.workspace = true
+license.workspace = true
+homepage.workspace = true
+repository.workspace = true
+
+[dependencies]
+oak-core = { workspace = true }
+oak-highlight = { workspace = true, optional = true }
+oak-pretty-print = { workspace = true, optional = true }
+
+[features]
+default = []
+highlight = ["dep:oak-highlight"]
+pretty-print = ["dep:oak-pretty-print"]
+
+[package.metadata.docs.rs]
+all-features = true
+rustdoc-args = ["--cfg", "docsrs"]

@@ -1,0 +1,281 @@
+# TOML Test File - Comprehensive Syntax Coverage
+# This file tests various TOML syntax elements for lexer testing
+
+# Basic key-value pairs
+title = "TOML Example"
+description = "A comprehensive TOML test file"
+version = "1.0.0"
+
+# Strings
+basic_string = "I'm a string"
+multiline_basic_string = """
+Roses are red
+Violets are blue"""
+
+literal_string = 'C:\Users\nodejs\templates'
+multiline_literal_string = '''
+The first newline is
+trimmed in raw strings.
+   All other whitespace
+   is preserved.
+'''
+
+# Integers
+int1 = +99
+int2 = 42
+int3 = 0
+int4 = -17
+int5 = 1_000
+int6 = 5_349_221
+int7 = 53_49_221  # Indian number system grouping
+int8 = 1_2_3_4_5  # VALID but discouraged
+
+# Hex, octal, binary
+hex1 = 0xDEADBEEF
+hex2 = 0xdeadbeef
+hex3 = 0xdead_beef
+oct1 = 0o01234567
+oct2 = 0o755 # useful for Unix file permissions
+bin1 = 0b11010110
+
+# Floats
+flt1 = +1.0
+flt2 = 3.1415926535897932384626433832795
+flt3 = -0.01
+flt4 = 5e+22
+flt5 = 1e06
+flt6 = -2E-2
+flt7 = 6.626e-34
+flt8 = 224_617.445_991_228
+
+# Infinity and NaN
+sf1 = inf  # positive infinity
+sf2 = +inf # positive infinity
+sf3 = -inf # negative infinity
+sf4 = nan  # actual sNaN/qNaN encoding is implementation-specific
+sf5 = +nan # same as `nan`
+sf6 = -nan # valid, actual encoding is implementation-specific
+
+# Booleans
+bool1 = true
+bool2 = false
+
+# Datetime
+odt1 = 1979-05-27T07:32:00Z
+odt2 = 1979-05-27T00:32:00-07:00
+odt3 = 1979-05-27T00:32:00.999999-07:00
+ldt1 = 1979-05-27T07:32:00
+ldt2 = 1979-05-27T00:32:00.999999
+ld1 = 1979-05-27
+lt1 = 07:32:00
+lt2 = 00:32:00.999999
+
+# Arrays
+integers = [ 1, 2, 3 ]
+colors = [ "red", "yellow", "green" ]
+nested_arrays_of_ints = [ [ 1, 2 ], [3, 4, 5] ]
+nested_mixed_array = [ [ 1, 2 ], ["a", "b", "c"] ]
+string_array = [ "all", 'strings', """are the same""", '''type''' ]
+
+# Mixed-type arrays are allowed
+numbers = [ 0.1, 0.2, 0.5, 1, 2, 5 ]
+contributors = [
+  "Foo Bar <foo@example.com>",
+  { name = "Baz Qux", email = "bazqux@example.com", url = "https://example.com/bazqux" }
+]
+
+# Tables
+[owner]
+name = "Tom Preston-Werner"
+dob = 1979-05-27T07:32:00-08:00
+
+[database]
+enabled = true
+ports = [ 8000, 8001, 8002 ]
+data = [ ["delta", "phi"], [3.14] ]
+temp_targets = { cpu = 79.5, case = 72.0 }
+
+# Nested tables
+[servers]
+
+[servers.alpha]
+ip = "10.0.0.1"
+role = "frontend"
+
+[servers.beta]
+ip = "10.0.0.2"
+role = "backend"
+
+# Array of tables
+[[products]]
+name = "Hammer"
+sku = 738594937
+
+[[products]]
+name = "Nail"
+sku = 284758393
+color = "gray"
+
+# Inline tables
+name = { first = "Tom", last = "Preston-Werner" }
+point = { x = 1, y = 2 }
+animal = { type.name = "pug" }
+
+# Dotted keys
+physical.color = "orange"
+physical.shape = "round"
+site."google.com" = true
+
+# Complex nested structure
+[fruit]
+apple.color = "red"
+apple.taste.sweet = true
+
+[fruit.apple.texture]
+smooth = true
+
+# More complex array of tables
+[[fruit]]
+name = "apple"
+
+[fruit.physical]  # subtable
+color = "red"
+shape = "round"
+
+[[fruit.variety]]  # nested array of tables
+name = "red delicious"
+
+[[fruit.variety]]
+name = "granny smith"
+
+[[fruit]]
+name = "banana"
+
+[[fruit.variety]]
+name = "plantain"
+
+# Unicode support
+unicode_key = "Unicode! 🔑"
+"ʎǝʞ" = "value"
+
+# Special characters in keys
+"127.0.0.1" = "localhost"
+"character encoding" = "UTF-8"
+"ʎǝʞ" = "value"
+'key2' = "value"
+'quoted "value"' = "value"
+
+# Comments
+# This is a full-line comment
+key = "value"  # This is a comment at the end of a line
+another = # This is also a comment
+"# This is not a comment"
+
+# Empty values
+empty_string = ""
+empty_array = []
+empty_table = {}
+
+# Escape sequences in strings
+escape_sequences = "\" \\ \b \f \n \r \t \u0041 \U00000041"
+
+# Large numbers
+large_int = 9_223_372_036_854_775_807
+large_float = 1.7976931348623157e+308
+
+# Configuration example
+[database.connection]
+server = "192.168.1.1"
+ports = [ 8001, 8001, 8002 ]
+connection_max = 5000
+enabled = true
+
+[database.credentials]
+username = "admin"
+password = "secret123"
+
+[logging]
+level = "info"
+file = "/var/log/app.log"
+max_size = "10MB"
+rotate = true
+
+[features]
+feature_a = true
+feature_b = false
+experimental = { enabled = true, version = "beta" }
+
+# Environment-specific configs
+[development]
+debug = true
+hot_reload = true
+
+[production]
+debug = false
+optimize = true
+cache_ttl = 3600
+
+# API configuration
+[api]
+base_url = "https://api.example.com"
+version = "v1"
+timeout = 30
+retry_attempts = 3
+
+[api.endpoints]
+users = "/users"
+posts = "/posts"
+comments = "/comments"
+
+# Security settings
+[security]
+encryption = "AES-256"
+hash_algorithm = "SHA-256"
+session_timeout = 1800
+
+[security.cors]
+allowed_origins = ["https://example.com", "https://app.example.com"]
+allowed_methods = ["GET", "POST", "PUT", "DELETE"]
+allowed_headers = ["Content-Type", "Authorization"]
+
+# Monitoring and metrics
+[monitoring]
+enabled = true
+interval = 60
+metrics = ["cpu", "memory", "disk", "network"]
+
+[monitoring.alerts]
+cpu_threshold = 80.0
+memory_threshold = 85.0
+disk_threshold = 90.0
+
+# Complex nested configuration
+[app]
+name = "MyApp"
+version = "2.1.0"
+
+[app.server]
+host = "0.0.0.0"
+port = 8080
+workers = 4
+
+[app.server.ssl]
+enabled = true
+cert_file = "/etc/ssl/certs/app.crt"
+key_file = "/etc/ssl/private/app.key"
+
+# Multiple environments
+[[environments]]
+name = "development"
+url = "http://localhost:3000"
+debug = true
+
+[[environments]]
+name = "staging"
+url = "https://staging.example.com"
+debug = false
+
+[[environments]]
+name = "production"
+url = "https://example.com"
+debug = false

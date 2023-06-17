@@ -1,0 +1,30 @@
+[package]
+name = "oak-zig"
+description = "Zig language parser with support for modern Zig syntax and features."
+categories = ["parsing"]
+keywords = ["parser", "zig", "systems", "language"]
+documentation = "https://docs.rs/oak-zig"
+readme = "readme.md"
+version.workspace = true
+authors.workspace = true
+edition.workspace = true
+license.workspace = true
+homepage.workspace = true
+repository.workspace = true
+
+[dependencies]
+oak-core = { workspace = true }
+oak-highlight = { workspace = true, optional = true }
+oak-pretty-print = { workspace = true, optional = true }
+serde = { workspace = true }
+
+[dev-dependencies]
+oak-core = { workspace = true, features = ["testing"] }
+
+
+[features]
+default = []
+alloc = []
+
+[package.metadata.docs.rs]
+all-features = true

@@ -1,0 +1,816 @@
+// Sass test file for lexer testing
+
+// Variables
+$primary-color: #3498db
+$secondary-color: #2ecc71
+$accent-color: #e74c3c
+$font-size-base: 16px
+$font-size-large: $font-size-base * 1.25
+$font-size-small: $font-size-base * 0.875
+$border-radius: 4px
+$spacing-unit: 1rem
+$max-width: 1200px
+
+// Color palette
+$colors: (
+  primary: $primary-color,
+  secondary: $secondary-color,
+  accent: $accent-color,
+  success: #27ae60,
+  warning: #f39c12,
+  danger: #e74c3c,
+  info: #3498db,
+  light: #ecf0f1,
+  dark: #2c3e50
+)
+
+// Font stacks
+$font-family-sans: 'Helvetica Neue', Helvetica, Arial, sans-serif
+$font-family-serif: Georgia, 'Times New Roman', Times, serif
+$font-family-mono: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace
+
+// Breakpoints
+$breakpoints: (
+  xs: 0,
+  sm: 576px,
+  md: 768px,
+  lg: 992px,
+  xl: 1200px,
+  xxl: 1400px
+)
+
+// Z-index scale
+$z-index: (
+  dropdown: 1000,
+  sticky: 1020,
+  fixed: 1030,
+  modal-backdrop: 1040,
+  modal: 1050,
+  popover: 1060,
+  tooltip: 1070
+)
+
+// Mixins
+@mixin border-radius($radius: $border-radius)
+  border-radius: $radius
+
+@mixin box-shadow($shadow...)
+  box-shadow: $shadow
+
+@mixin transition($property: all, $duration: 0.3s, $timing: ease)
+  transition: $property $duration $timing
+
+@mixin flex-center
+  display: flex
+  align-items: center
+  justify-content: center
+
+@mixin absolute-center
+  position: absolute
+  top: 50%
+  left: 50%
+  transform: translate(-50%, -50%)
+
+@mixin clearfix
+  &::after
+    content: ""
+    display: table
+    clear: both
+
+@mixin visually-hidden
+  position: absolute !important
+  width: 1px !important
+  height: 1px !important
+  padding: 0 !important
+  margin: -1px !important
+  overflow: hidden !important
+  clip: rect(0, 0, 0, 0) !important
+  white-space: nowrap !important
+  border: 0 !important
+
+@mixin media-breakpoint-up($name)
+  @if map-has-key($breakpoints, $name)
+    @media (min-width: map-get($breakpoints, $name))
+      @content
+  @else
+    @warn "Unknown breakpoint `#{$name}`."
+
+@mixin media-breakpoint-down($name)
+  @if map-has-key($breakpoints, $name)
+    $breakpoint: map-get($breakpoints, $name)
+    @if $breakpoint > 0
+      @media (max-width: $breakpoint - 1px)
+        @content
+    @else
+      @content
+  @else
+    @warn "Unknown breakpoint `#{$name}`."
+
+@mixin button-variant($bg-color, $text-color: white)
+  background-color: $bg-color
+  color: $text-color
+  border: 1px solid $bg-color
+  
+  &:hover
+    background-color: darken($bg-color, 10%)
+    border-color: darken($bg-color, 10%)
+  
+  &:active
+    background-color: darken($bg-color, 15%)
+    border-color: darken($bg-color, 15%)
+  
+  &:disabled
+    background-color: lighten($bg-color, 20%)
+    border-color: lighten($bg-color, 20%)
+    opacity: 0.6
+    cursor: not-allowed
+
+@mixin text-truncate
+  overflow: hidden
+  text-overflow: ellipsis
+  white-space: nowrap
+
+// Functions
+@function color($name)
+  @return map-get($colors, $name)
+
+@function breakpoint($name)
+  @return map-get($breakpoints, $name)
+
+@function z-index($name)
+  @return map-get($z-index, $name)
+
+@function rem($pixels)
+  @return #{$pixels / 16}rem
+
+@function em($pixels, $context: 16)
+  @return #{$pixels / $context}em
+
+@function strip-unit($number)
+  @if type-of($number) == 'number' and not unitless($number)
+    @return $number / ($number * 0 + 1)
+  @return $number
+
+// Placeholder selectors
+%btn-base
+  display: inline-block
+  padding: 0.375rem 0.75rem
+  margin-bottom: 0
+  font-size: $font-size-base
+  font-weight: 400
+  line-height: 1.5
+  text-align: center
+  text-decoration: none
+  vertical-align: middle
+  cursor: pointer
+  border: 1px solid transparent
+  @include border-radius($border-radius)
+  @include transition()
+  user-select: none
+
+%card-base
+  position: relative
+  display: flex
+  flex-direction: column
+  min-width: 0
+  word-wrap: break-word
+  background-color: #fff
+  background-clip: border-box
+  border: 1px solid rgba(0, 0, 0, 0.125)
+  @include border-radius($border-radius)
+
+%list-unstyled
+  padding-left: 0
+  list-style: none
+
+// Base styles
+*,
+*::before,
+*::after
+  box-sizing: border-box
+
+html
+  font-family: sans-serif
+  line-height: 1.15
+  -webkit-text-size-adjust: 100%
+  -webkit-tap-highlight-color: rgba(0, 0, 0, 0)
+
+body
+  margin: 0
+  font-family: $font-family-sans
+  font-size: $font-size-base
+  font-weight: 400
+  line-height: 1.5
+  color: #212529
+  text-align: left
+  background-color: #fff
+
+// Typography
+h1, h2, h3, h4, h5, h6
+  margin-top: 0
+  margin-bottom: 0.5rem
+  font-weight: 500
+  line-height: 1.2
+
+h1
+  font-size: 2.5rem
+
+h2
+  font-size: 2rem
+
+h3
+  font-size: 1.75rem
+
+h4
+  font-size: 1.5rem
+
+h5
+  font-size: 1.25rem
+
+h6
+  font-size: 1rem
+
+p
+  margin-top: 0
+  margin-bottom: 1rem
+
+a
+  color: color(primary)
+  text-decoration: none
+  
+  &:hover
+    color: darken(color(primary), 15%)
+    text-decoration: underline
+
+// Buttons
+.btn
+  @extend %btn-base
+
+.btn-primary
+  @include button-variant(color(primary))
+
+.btn-secondary
+  @include button-variant(color(secondary))
+
+.btn-success
+  @include button-variant(color(success))
+
+.btn-danger
+  @include button-variant(color(danger))
+
+.btn-warning
+  @include button-variant(color(warning))
+
+.btn-info
+  @include button-variant(color(info))
+
+.btn-light
+  @include button-variant(color(light), #212529)
+
+.btn-dark
+  @include button-variant(color(dark))
+
+.btn-lg
+  padding: 0.5rem 1rem
+  font-size: $font-size-large
+  @include border-radius($border-radius * 1.5)
+
+.btn-sm
+  padding: 0.25rem 0.5rem
+  font-size: $font-size-small
+  @include border-radius($border-radius * 0.75)
+
+// Cards
+.card
+  @extend %card-base
+
+.card-header
+  padding: 0.75rem 1.25rem
+  margin-bottom: 0
+  background-color: rgba(0, 0, 0, 0.03)
+  border-bottom: 1px solid rgba(0, 0, 0, 0.125)
+  
+  &:first-child
+    @include border-radius($border-radius $border-radius 0 0)
+
+.card-body
+  flex: 1 1 auto
+  padding: 1.25rem
+
+.card-footer
+  padding: 0.75rem 1.25rem
+  background-color: rgba(0, 0, 0, 0.03)
+  border-top: 1px solid rgba(0, 0, 0, 0.125)
+  
+  &:last-child
+    @include border-radius(0 0 $border-radius $border-radius)
+
+.card-title
+  margin-bottom: 0.75rem
+
+.card-text
+  &:last-child
+    margin-bottom: 0
+
+// Grid system
+.container
+  width: 100%
+  padding-right: 15px
+  padding-left: 15px
+  margin-right: auto
+  margin-left: auto
+
+@include media-breakpoint-up(sm)
+  .container
+    max-width: 540px
+
+@include media-breakpoint-up(md)
+  .container
+    max-width: 720px
+
+@include media-breakpoint-up(lg)
+  .container
+    max-width: 960px
+
+@include media-breakpoint-up(xl)
+  .container
+    max-width: 1140px
+
+@include media-breakpoint-up(xxl)
+  .container
+    max-width: 1320px
+
+.container-fluid
+  width: 100%
+  padding-right: 15px
+  padding-left: 15px
+  margin-right: auto
+  margin-left: auto
+
+.row
+  display: flex
+  flex-wrap: wrap
+  margin-right: -15px
+  margin-left: -15px
+
+.col
+  flex-basis: 0
+  flex-grow: 1
+  max-width: 100%
+  padding-right: 15px
+  padding-left: 15px
+
+// Generate column classes
+@for $i from 1 through 12
+  .col-#{$i}
+    flex: 0 0 percentage($i / 12)
+    max-width: percentage($i / 12)
+    padding-right: 15px
+    padding-left: 15px
+
+// Responsive columns
+@each $breakpoint, $value in $breakpoints
+  @if $value > 0
+    @include media-breakpoint-up($breakpoint)
+      @for $i from 1 through 12
+        .col-#{$breakpoint}-#{$i}
+          flex: 0 0 percentage($i / 12)
+          max-width: percentage($i / 12)
+
+// Utilities
+.text-left
+  text-align: left !important
+
+.text-right
+  text-align: right !important
+
+.text-center
+  text-align: center !important
+
+.text-justify
+  text-align: justify !important
+
+.text-nowrap
+  white-space: nowrap !important
+
+.text-truncate
+  @include text-truncate
+
+// Color utilities
+@each $color, $value in $colors
+  .text-#{$color}
+    color: $value !important
+  
+  .bg-#{$color}
+    background-color: $value !important
+
+// Display utilities
+$displays: none, inline, inline-block, block, table, table-row, table-cell, flex, inline-flex
+
+@each $display in $displays
+  .d-#{$display}
+    display: $display !important
+
+// Responsive display utilities
+@each $breakpoint, $value in $breakpoints
+  @if $value > 0
+    @include media-breakpoint-up($breakpoint)
+      @each $display in $displays
+        .d-#{$breakpoint}-#{$display}
+          display: $display !important
+
+// Flexbox utilities
+.flex-row
+  flex-direction: row !important
+
+.flex-column
+  flex-direction: column !important
+
+.flex-row-reverse
+  flex-direction: row-reverse !important
+
+.flex-column-reverse
+  flex-direction: column-reverse !important
+
+.flex-wrap
+  flex-wrap: wrap !important
+
+.flex-nowrap
+  flex-wrap: nowrap !important
+
+.flex-wrap-reverse
+  flex-wrap: wrap-reverse !important
+
+.justify-content-start
+  justify-content: flex-start !important
+
+.justify-content-end
+  justify-content: flex-end !important
+
+.justify-content-center
+  justify-content: center !important
+
+.justify-content-between
+  justify-content: space-between !important
+
+.justify-content-around
+  justify-content: space-around !important
+
+.align-items-start
+  align-items: flex-start !important
+
+.align-items-end
+  align-items: flex-end !important
+
+.align-items-center
+  align-items: center !important
+
+.align-items-baseline
+  align-items: baseline !important
+
+.align-items-stretch
+  align-items: stretch !important
+
+// Spacing utilities
+$spacers: (
+  0: 0,
+  1: 0.25rem,
+  2: 0.5rem,
+  3: 1rem,
+  4: 1.5rem,
+  5: 3rem
+)
+
+@each $prop, $abbrev in (margin: m, padding: p)
+  @each $size, $length in $spacers
+    .#{$abbrev}-#{$size}
+      #{$prop}: $length !important
+    
+    .#{$abbrev}t-#{$size}
+      #{$prop}-top: $length !important
+    
+    .#{$abbrev}r-#{$size}
+      #{$prop}-right: $length !important
+    
+    .#{$abbrev}b-#{$size}
+      #{$prop}-bottom: $length !important
+    
+    .#{$abbrev}l-#{$size}
+      #{$prop}-left: $length !important
+    
+    .#{$abbrev}x-#{$size}
+      #{$prop}-left: $length !important
+      #{$prop}-right: $length !important
+    
+    .#{$abbrev}y-#{$size}
+      #{$prop}-top: $length !important
+      #{$prop}-bottom: $length !important
+
+// Position utilities
+.position-static
+  position: static !important
+
+.position-relative
+  position: relative !important
+
+.position-absolute
+  position: absolute !important
+
+.position-fixed
+  position: fixed !important
+
+.position-sticky
+  position: sticky !important
+
+// Border utilities
+.border
+  border: 1px solid #dee2e6 !important
+
+.border-top
+  border-top: 1px solid #dee2e6 !important
+
+.border-right
+  border-right: 1px solid #dee2e6 !important
+
+.border-bottom
+  border-bottom: 1px solid #dee2e6 !important
+
+.border-left
+  border-left: 1px solid #dee2e6 !important
+
+.border-0
+  border: 0 !important
+
+.border-top-0
+  border-top: 0 !important
+
+.border-right-0
+  border-right: 0 !important
+
+.border-bottom-0
+  border-bottom: 0 !important
+
+.border-left-0
+  border-left: 0 !important
+
+// Border radius utilities
+.rounded
+  @include border-radius($border-radius)
+
+.rounded-top
+  border-top-left-radius: $border-radius !important
+  border-top-right-radius: $border-radius !important
+
+.rounded-right
+  border-top-right-radius: $border-radius !important
+  border-bottom-right-radius: $border-radius !important
+
+.rounded-bottom
+  border-bottom-right-radius: $border-radius !important
+  border-bottom-left-radius: $border-radius !important
+
+.rounded-left
+  border-top-left-radius: $border-radius !important
+  border-bottom-left-radius: $border-radius !important
+
+.rounded-circle
+  border-radius: 50% !important
+
+.rounded-pill
+  border-radius: 50rem !important
+
+.rounded-0
+  border-radius: 0 !important
+
+// Shadow utilities
+.shadow-sm
+  @include box-shadow(0 0.125rem 0.25rem rgba(0, 0, 0, 0.075))
+
+.shadow
+  @include box-shadow(0 0.5rem 1rem rgba(0, 0, 0, 0.15))
+
+.shadow-lg
+  @include box-shadow(0 1rem 3rem rgba(0, 0, 0, 0.175))
+
+.shadow-none
+  box-shadow: none !important
+
+// Width and height utilities
+.w-25
+  width: 25% !important
+
+.w-50
+  width: 50% !important
+
+.w-75
+  width: 75% !important
+
+.w-100
+  width: 100% !important
+
+.w-auto
+  width: auto !important
+
+.h-25
+  height: 25% !important
+
+.h-50
+  height: 50% !important
+
+.h-75
+  height: 75% !important
+
+.h-100
+  height: 100% !important
+
+.h-auto
+  height: auto !important
+
+// Component examples
+.navbar
+  position: relative
+  display: flex
+  flex-wrap: wrap
+  align-items: center
+  justify-content: space-between
+  padding: 0.5rem 1rem
+  
+  .navbar-brand
+    display: inline-block
+    padding-top: 0.3125rem
+    padding-bottom: 0.3125rem
+    margin-right: 1rem
+    font-size: 1.25rem
+    line-height: inherit
+    white-space: nowrap
+  
+  .navbar-nav
+    @extend %list-unstyled
+    display: flex
+    flex-direction: column
+    padding-left: 0
+    margin-bottom: 0
+    
+    .nav-link
+      display: block
+      padding: 0.5rem 1rem
+      color: rgba(0, 0, 0, 0.5)
+      text-decoration: none
+      @include transition()
+      
+      &:hover,
+      &:focus
+        color: rgba(0, 0, 0, 0.7)
+
+.modal
+  position: fixed
+  top: 0
+  left: 0
+  z-index: z-index(modal)
+  display: none
+  width: 100%
+  height: 100%
+  overflow: hidden
+  outline: 0
+  
+  &.show
+    display: block
+  
+  .modal-dialog
+    position: relative
+    width: auto
+    margin: 0.5rem
+    pointer-events: none
+    
+    @include media-breakpoint-up(sm)
+      max-width: 500px
+      margin: 1.75rem auto
+  
+  .modal-content
+    position: relative
+    display: flex
+    flex-direction: column
+    width: 100%
+    pointer-events: auto
+    background-color: #fff
+    background-clip: padding-box
+    border: 1px solid rgba(0, 0, 0, 0.2)
+    @include border-radius($border-radius * 1.5)
+    @include box-shadow(0 0.25rem 0.5rem rgba(0, 0, 0, 0.5))
+    outline: 0
+
+// Animation keyframes
+@keyframes fadeIn
+  from
+    opacity: 0
+  to
+    opacity: 1
+
+@keyframes slideInDown
+  from
+    transform: translate3d(0, -100%, 0)
+    visibility: visible
+  to
+    transform: translate3d(0, 0, 0)
+
+@keyframes bounce
+  0%, 20%, 53%, 80%, to
+    animation-timing-function: cubic-bezier(0.215, 0.61, 0.355, 1)
+    transform: translate3d(0, 0, 0)
+  40%, 43%
+    animation-timing-function: cubic-bezier(0.755, 0.05, 0.855, 0.06)
+    transform: translate3d(0, -30px, 0)
+  70%
+    animation-timing-function: cubic-bezier(0.755, 0.05, 0.855, 0.06)
+    transform: translate3d(0, -15px, 0)
+  90%
+    transform: translate3d(0, -4px, 0)
+
+// Animation classes
+.fade-in
+  animation: fadeIn 0.5s ease-in-out
+
+.slide-in-down
+  animation: slideInDown 0.5s ease-out
+
+.bounce
+  animation: bounce 1s infinite
+
+// Print styles
+@media print
+  *,
+  *::before,
+  *::after
+    text-shadow: none !important
+    box-shadow: none !important
+  
+  a:not(.btn)
+    text-decoration: underline
+  
+  abbr[title]::after
+    content: " (" attr(title) ")"
+  
+  pre
+    white-space: pre-wrap !important
+  
+  pre,
+  blockquote
+    border: 1px solid #adb5bd
+    page-break-inside: avoid
+  
+  thead
+    display: table-header-group
+  
+  tr,
+  img
+    page-break-inside: avoid
+  
+  p,
+  h2,
+  h3
+    orphans: 3
+    widows: 3
+  
+  h2,
+  h3
+    page-break-after: avoid
+  
+  @page
+    size: a3
+  
+  body
+    min-width: 992px !important
+  
+  .container
+    min-width: 992px !important
+  
+  .navbar
+    display: none
+  
+  .badge
+    border: 1px solid #000
+  
+  .table
+    border-collapse: collapse !important
+    
+    td,
+    th
+      background-color: #fff !important
+  
+  .table-bordered
+    th,
+    td
+      border: 1px solid #dee2e6 !important
+  
+  .table-dark
+    color: inherit
+    
+    th,
+    td,
+    thead th,
+    tbody + tbody
+      border-color: #dee2e6
+  
+  .table .thead-dark th
+    color: inherit
+    border-color: #dee2e6

@@ -1,0 +1,198 @@
+// DOT test file for lexer testing
+// Graph description language used by Graphviz
+
+// Simple directed graph
+digraph SimpleGraph {
+    rankdir=LR;
+    node [shape=circle, style=filled, fillcolor=lightblue];
+    edge [color=red, fontcolor=blue];
+    
+    A -> B [label="edge1"];
+    B -> C;
+    C -> A;
+    
+    A [label="Node A", shape=box];
+    B [label="Node B", fillcolor=yellow];
+    C [label="Node C", shape=diamond];
+}
+
+// Undirected graph
+graph UndirectedGraph {
+    A -- B;
+    B -- C;
+    C -- D;
+    D -- A;
+    
+    A [shape=circle];
+    B [shape=square];
+    C [shape=triangle];
+    D [shape=hexagon];
+}
+
+// Subgraph example
+digraph SubgraphExample {
+    subgraph cluster_0 {
+        style=filled;
+        color=lightgrey;
+        node [style=filled, color=white];
+        a0 -> a1 -> a2 -> a3;
+        label = "Process #1";
+    }
+    
+    subgraph cluster_1 {
+        node [style=filled];
+        b0 -> b1 -> b2 -> b3;
+        label = "Process #2";
+        color=blue;
+    }
+    
+    start -> a0;
+    start -> b0;
+    a1 -> b3;
+    b1 -> a3;
+    a3 -> end;
+    b3 -> end;
+    
+    start [shape=Mdiamond];
+    end [shape=Msquare];
+}
+
+// Node attributes and styles
+digraph NodeStyles {
+    // Basic shapes
+    circle [shape=circle];
+    box [shape=box];
+    diamond [shape=diamond];
+    triangle [shape=triangle];
+    ellipse [shape=ellipse];
+    
+    // Colors and fills
+    red_node [color=red, fillcolor=red, style=filled];
+    blue_node [color=blue, fillcolor=blue, style=filled];
+    green_node [color=green, fillcolor=green, style=filled];
+    
+    // Styles
+    solid [style=solid];
+    dashed [style=dashed];
+    dotted [style=dotted];
+    bold [style=bold];
+    
+    // Peripheries
+    double [peripheries=2];
+    triple [peripheries=3];
+    
+    // Labels with HTML-like formatting
+    html_label [label=< <B>Bold</B> and <I>Italic</I> >];
+    table_label [label=<<table>
+        <tr><td>Header</td></tr>
+        <tr><td>Content</td></tr>
+    </table>>];
+}
+
+// Edge attributes
+digraph EdgeAttributes {
+    // Edge styles
+    A -> B [style=solid];
+    A -> C [style=dashed];
+    A -> D [style=dotted];
+    A -> E [style=bold];
+    
+    // Edge colors
+    color1 [color=red];
+    color2 [color=blue];
+    color3 [color=green];
+    
+    color1 -> color2 [color=red];
+    color2 -> color3 [color=blue];
+    color3 -> color1 [color=green];
+    
+    // Edge labels and weights
+    weighted [label="Weighted Edge", weight=2];
+    labeled [label="Labeled Edge", fontsize=12, fontcolor=purple];
+    
+    weighted -> labeled [label="Connection", fontsize=10, fontname="Arial"];
+}
+
+// Graph attributes
+digraph GraphAttributes {
+    // Layout direction
+    rankdir=TB;  // Top to Bottom (default)
+    
+    // Graph size
+    size="8,6";  // Width, Height in inches
+    ratio=fill;  // Fill the given size
+    
+    // Margins
+    margin=0.5;
+    nodesep=0.25;
+    ranksep=0.5;
+    
+    // Background color
+    bgcolor=lightyellow;
+    
+    // Page settings
+    page="8.5,11";  // Letter size
+    orientation=portrait;
+    
+    node1 -> node2 -> node3;
+}
+
+// Record-based nodes
+digraph RecordNodes {
+    record1 [shape=record, label="{A | B | C}"];
+    record2 [shape=record, label="{<f0> Left | <f1> Middle | <f2> Right}"];
+    
+    record1:f0 -> record2:f1;
+    record1:f1 -> record2:f2;
+    record1:f2 -> record2:f0;
+}
+
+// HTML-like labels
+digraph HtmlLabels {
+    node1 [label=<<table border="0" cellborder="1" cellspacing="0">
+        <tr><td bgcolor="yellow">Header</td></tr>
+        <tr><td>Content 1</td></tr>
+        <tr><td>Content 2</td></tr>
+    </table>>];
+    
+    node2 [label=<<font color="red">Red Text</font><br/><font color="blue">Blue Text</font>>];
+    
+    node1 -> node2;
+}
+
+// Cluster subgraphs
+digraph Clusters {
+    subgraph cluster_0 {
+        label = "Main Cluster";
+        style = filled;
+        fillcolor = lightblue;
+        
+        n1 [label="Node 1"];
+        n2 [label="Node 2"];
+        n1 -> n2;
+    }
+    
+    subgraph cluster_1 {
+        label = "Secondary Cluster";
+        style = filled;
+        fillcolor = lightgreen;
+        
+        n3 [label="Node 3"];
+        n4 [label="Node 4"];
+        n3 -> n4;
+    }
+    
+    n2 -> n3 [style=invis];  // Invisible edge for ranking
+}
+
+// Comments and metadata
+/* This is a multi-line comment
+   that can span multiple lines
+   and describe the graph structure */
+
+// Single line comment
+digraph Comments {
+    A -> B;  // This edge connects A to B
+    B -> C;  # Hash-style comment also works
+    C -> A;  /* Another style of comment */
+}
