@@ -7,8 +7,8 @@ use oak_visualize::{
 #[test]
 fn test_svg_renderer_creation() {
     let renderer = SvgRenderer::new();
-    assert_eq!(renderer.config.canvas_width, 800.0);
-    assert_eq!(renderer.config.canvas_height, 600.0);
+    assert_eq!(renderer.config().canvas_width, 800.0);
+    assert_eq!(renderer.config().canvas_height, 600.0);
 }
 
 #[test]
@@ -103,9 +103,9 @@ fn test_svg_renderer_with_config() {
     };
 
     let renderer = SvgRenderer::new().with_config(config.clone());
-    assert_eq!(renderer.config.canvas_width, 1200.0);
-    assert_eq!(renderer.config.canvas_height, 800.0);
-    assert_eq!(renderer.config.background_color, "#f0f0f0");
+    assert_eq!(renderer.config().canvas_width, 1200.0);
+    assert_eq!(renderer.config().canvas_height, 800.0);
+    assert_eq!(renderer.config().background_color, "#f0f0f0");
 }
 
 #[test]

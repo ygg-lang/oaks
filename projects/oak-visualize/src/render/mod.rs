@@ -132,6 +132,10 @@ impl SvgRenderer {
         self
     }
 
+    pub fn config(&self) -> &RenderConfig {
+        &self.config
+    }
+
     pub fn set_node_style(&mut self, node_id: String, style: ElementStyle) {
         self.node_styles.insert(node_id, style);
     }

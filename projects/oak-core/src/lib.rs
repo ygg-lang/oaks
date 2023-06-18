@@ -1,33 +1,32 @@
+#![doc = include_str!("readme.md")]
+#![allow(incomplete_features)]
+#![feature(lazy_type_alias)]
 #![feature(new_range_api)]
-#![cfg_attr(not(feature = "std"), no_std)]
 #![warn(missing_docs)]
+#![doc(html_logo_url = "https://raw.githubusercontent.com/ygg-lang/oaks/refs/heads/dev/documents/logo.svg")]
+#![doc(html_favicon_url = "https://raw.githubusercontent.com/ygg-lang/oaks/refs/heads/dev/documents/logo.svg")]
 
-extern crate alloc;
-
+/// Tree building and construction utilities for the Oak parsing framework.
+///
+/// This module provides the [`Builder`] trait and related utilities for constructing
+/// kind trees from parsed tokens. It includes incremental building capabilities
+/// and tree manipulation utilities for efficient parsing operations.
+pub mod builder;
+/// Error handling and diagnostic reporting for the parsing system.
 pub mod errors;
+/// Utility functions and helper types for parsing operations.
 pub mod helpers;
+/// Syntax kind definitions for tokens and nodes in the parsing system.
 pub mod kinds;
-/// Language definition and coordination traits for different programming languages.
-///
-/// This module provides the [`Language`] trait which serves as the foundation for
-/// defining programming languages within the incremental parsing system. It coordinates
-/// all language-related types and behaviors.
+/// Language definition trait for coordinating language-specific components.
 pub mod language;
-
-/// Lexical analysis and tokenization for converting source text into tokens.
-///
-/// This module provides traits and utilities for converting source text into
-/// sequences of tokens that can be consumed by parsers. It includes support
-/// for common lexical patterns and incremental tokenization.
+/// Lexical analysis and tokenization functionality.
 pub mod lexer;
-
-/// Parsing algorithms and combinators for constructing kind trees.
-///
-/// This module provides the core parsing infrastructure including the [`Parser`]
-/// trait for building kind trees, operator precedence parsing utilities,
-/// and incremental parsing capabilities through the [`IncrementalParser`] trait.
+/// Parsing functionality for converting tokens to kind trees.
 pub mod parser;
+/// Source text management and location tracking.
 pub mod source;
+/// Tree structures for representing kind trees (green and red trees).
 pub mod tree;
 /// Tree traversal utilities for visiting and transforming kind trees.
 ///
@@ -37,11 +36,12 @@ pub mod tree;
 pub mod visitor;
 
 pub use crate::{
-    errors::{OakError, OakErrorKind, LexResult, ParseResult, OakDiagnostics},
+    builder::Builder,
+    errors::{LexResult, OakDiagnostics, OakError, OakErrorKind, ParseResult},
     kinds::SyntaxKind,
     language::Language,
     lexer::{Lexer, LexerState, Token},
-    parser::{Associativity, IncrementalParser, OperatorInfo, Parser, PrattParser, Precedence},
+    parser::{Associativity, OperatorInfo, Parser, PrattParser, Precedence},
     source::{SourceLocation, SourceText},
     tree::*,
 };

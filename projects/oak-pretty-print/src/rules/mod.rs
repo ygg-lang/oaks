@@ -1,11 +1,4 @@
 use crate::{FormatContext, FormatError, FormatResult};
-use alloc::{
-    boxed::Box,
-    string::{String, ToString},
-    vec::Vec,
-};
-// TODO: 这些类型在 oak-core 中不存在，需要实现
-// use oak_core::{AstNode, AstVisitor};
 
 /// 临时的 AST 节点 trait，用于编译
 pub trait AstNode {

@@ -1,5 +1,5 @@
-use alloc::string::String;
 use oak_core::errors::OakError;
+use std::string::String;
 
 /// 扩展 ParseError 以支持高亮相关的错误
 /// 通过为 ParseError 实现扩展方法来添加高亮特定的错误类型

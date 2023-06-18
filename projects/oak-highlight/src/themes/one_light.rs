@@ -1,5 +1,5 @@
 use crate::highlighter::{HighlightStyle, HighlightTheme};
-use alloc::string::{String, ToString};
+use std::string::ToString;
 
 impl HighlightTheme {
     /// One Light 主题 - 基于 Atom One Light 配色方案

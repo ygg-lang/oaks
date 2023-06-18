@@ -5,8 +5,9 @@
 //! green nodes and their offsets.
 
 use crate::tree::green_tree::{GreenNode, GreenTree};
-use alloc::{rc::Rc, vec::Vec};
-use core::range::Range;
+
+use std::range::Range;
+use triomphe::Arc;
 
 /// A red tree element with absolute position information.
 ///
@@ -44,7 +45,7 @@ impl<K: Copy> RedTree<K> {
 #[derive(Debug, Clone)]
 pub struct RedNode<K: Copy> {
     /// The underlying green node that contains the structural information
-    pub green: Rc<GreenNode<K>>,
+    pub green: Arc<GreenNode<K>>,
     /// The absolute byte offset of this node in the source text
     pub offset: usize,
 }
@@ -73,7 +74,7 @@ impl<K: Copy> RedNode<K> {
     ///
     /// A new [`RedNode`] with the given green node and offset
     #[inline]
-    pub fn new(green: Rc<GreenNode<K>>, offset: usize) -> Self {
+    pub fn new(green: Arc<GreenNode<K>>, offset: usize) -> Self {
         Self { green, offset }
     }
 
@@ -108,7 +109,7 @@ impl<K: Copy> RedNode<K> {
             cur += c.len();
         }
         Some(match ch {
-            GreenTree::Node(n) => RedTree::Node(RedNode::new(Rc::clone(n), cur)),
+            GreenTree::Node(n) => RedTree::Node(RedNode::new(Arc::clone(n), cur)),
             GreenTree::Leaf(t) => RedTree::Leaf(RedLeaf { kind: t.kind, span: Range { start: cur, end: cur + t.length } }),
         })
     }
@@ -236,7 +237,7 @@ impl<'a, K: Copy> Iterator for RedChildren<'a, K> {
         }
         let ch = &self.node.green.children[self.index];
         let elem = match ch {
-            GreenTree::Node(n) => RedTree::Node(RedNode::new(Rc::clone(n), self.offset)),
+            GreenTree::Node(n) => RedTree::Node(RedNode::new(Arc::clone(n), self.offset)),
             GreenTree::Leaf(t) => {
                 RedTree::Leaf(RedLeaf { kind: t.kind, span: Range { start: self.offset, end: self.offset + t.length } })
             }

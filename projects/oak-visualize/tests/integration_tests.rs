@@ -1,7 +1,7 @@
 use oak_visualize::{
     geometry::{Point, Rect, Size},
     graph::{Graph, GraphEdge, GraphLayout, GraphLayoutAlgorithm, GraphNode},
-    layout::{Layout, LayoutEdge, LayoutNode},
+    layout::Layout,
     render::{ExportFormat, LayoutExporter, RenderConfig, SvgRenderer},
     theme::VisualizationTheme,
     tree::{TreeLayout, TreeLayoutAlgorithm, TreeNode},
@@ -46,17 +46,19 @@ fn test_complete_graph_visualization_pipeline() {
 #[test]
 fn test_complete_tree_visualization_pipeline() {
     // 1. 创建树数据结构
-    let mut root = TreeNode::new("root".to_string(), "Root Package".to_string());
+    let root = TreeNode::new("root".to_string(), "Root Package".to_string(), "package".to_string());
 
-    let mut module1 = TreeNode::new("module1".to_string(), "Module 1".to_string());
-    module1.add_child(TreeNode::new("func1".to_string(), "Function 1".to_string()));
-    module1.add_child(TreeNode::new("func2".to_string(), "Function 2".to_string()));
+    let module1 = TreeNode::new("module1".to_string(), "Module 1".to_string(), "module".to_string())
+        .with_child(TreeNode::new("func1".to_string(), "Function 1".to_string(), "function".to_string()))
+        .with_child(TreeNode::new("func2".to_string(), "Function 2".to_string(), "function".to_string()));
 
-    let mut module2 = TreeNode::new("module2".to_string(), "Module 2".to_string());
-    module2.add_child(TreeNode::new("class1".to_string(), "Class 1".to_string()));
+    let module2 = TreeNode::new("module2".to_string(), "Module 2".to_string(), "module".to_string()).with_child(TreeNode::new(
+        "class1".to_string(),
+        "Class 1".to_string(),
+        "class".to_string(),
+    ));
 
-    root.add_child(module1);
-    root.add_child(module2);
+    let root = root.with_child(module1).with_child(module2);
 
     // 2. 使用树布局算法
     let layout_engine = TreeLayout::new(TreeLayoutAlgorithm::Layered);
@@ -170,7 +172,8 @@ fn test_geometry_layout_render_integration() {
 
         let edge_points = vec![from_rect.center(), to_rect.center()];
 
-        layout.add_edge(from.to_string(), to.to_string(), edge_points);
+        let edge = oak_visualize::layout::Edge::new(from.to_string(), to.to_string()).with_points(edge_points);
+        layout.add_edge(edge);
     }
 
     // 3. 渲染并验证

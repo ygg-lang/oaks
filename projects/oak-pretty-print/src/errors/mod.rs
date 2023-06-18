@@ -1,7 +1,6 @@
 // TODO: 这些类型在 oak-core 中不存在，需要实现
 // pub use oak_core::{Diagnostic, DiagnosticLevel, ParseError, PexError, PexErrorKind};
 
-use alloc::string::String;
 use core::fmt;
 
 /// 格式化特定的错误类型，扩展 oak-core 的错误系统

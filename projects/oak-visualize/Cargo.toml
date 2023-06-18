@@ -25,4 +25,3 @@ oak-core = { workspace = true, features = ["testing"] }
 
 [features]
 default = []
-alloc = []

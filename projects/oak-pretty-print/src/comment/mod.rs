@@ -1,7 +1,3 @@
-use alloc::{format, string::String, vec::Vec};
-// TODO: 这些类型在 oak-core 中不存在，需要实现
-// use oak_core::{Position, SourceSpan};
-
 /// 临时的位置类型
 #[derive(Debug, Clone, PartialEq)]
 pub struct Position {

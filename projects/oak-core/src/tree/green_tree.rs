@@ -4,7 +4,7 @@
 //! where green nodes are immutable and don't contain position information,
 //! making them cacheable and shareable across different parse trees.
 
-use alloc::{rc::Rc, vec::Vec};
+use triomphe::Arc;
 
 /// A green tree element - either a node or a leaf kind.
 ///
@@ -14,7 +14,7 @@ use alloc::{rc::Rc, vec::Vec};
 #[derive(Debug, Clone)]
 pub enum GreenTree<K: Copy> {
     /// A green node with child elements
-    Node(Rc<GreenNode<K>>),
+    Node(Arc<GreenNode<K>>),
     /// A green leaf kind
     Leaf(GreenLeaf<K>),
 }
@@ -91,9 +91,9 @@ impl<K: Copy> GreenNode<K> {
     /// # Returns
     ///
     /// A reference-counted [`GreenNode`] with computed total length
-    pub fn new(kind: K, children: Vec<GreenTree<K>>) -> Rc<Self> {
+    pub fn new(kind: K, children: Vec<GreenTree<K>>) -> Arc<Self> {
         let len = children.iter().map(|c| c.len()).sum();
-        Rc::new(Self { kind, children, length: len })
+        Arc::new(Self { kind, children, length: len })
     }
 }
 
@@ -111,12 +111,12 @@ impl<K: Copy> GreenNode<K> {
     ///
     /// # Returns
     ///
-    /// A new [`Rc<GreenNode<K>>`] with the specified children replaced
+    /// A new [`Arc<GreenNode<K>>`] with the specified children replaced
     ///
     /// # Panics
     ///
     /// Panics if the indices are out of bounds or if `replace_start > replace_end`
-    pub fn replace_range(&self, replace_start: usize, replace_end: usize, new_children: Vec<GreenTree<K>>) -> Rc<Self> {
+    pub fn replace_range(&self, replace_start: usize, replace_end: usize, new_children: Vec<GreenTree<K>>) -> Arc<Self> {
         assert!(replace_start <= replace_end && replace_end <= self.children.len());
         let mut children = Vec::with_capacity(self.children.len() - (replace_end - replace_start) + new_children.len());
         children.extend_from_slice(&self.children[..replace_start]);

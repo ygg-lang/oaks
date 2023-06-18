@@ -1,9 +1,5 @@
 use crate::{Comment, CommentProcessor, FormatConfig, FormatResult, FormatTraverser, RuleSet, create_builtin_rules};
-use alloc::{
-    boxed::Box,
-    string::{String, ToString},
-    vec::Vec,
-};
+
 // TODO: 这些类型在 oak-core 中不存在
 // use oak_core::{AstNode, AstVisitor, Language, SourceFile, SourceManager};
 use crate::rules::AstNode;

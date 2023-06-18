@@ -1,4 +1,4 @@
-use crate::Lexer;
+use crate::SyntaxKind;
 
 /// Language definition trait that coordinates all language-related types and behaviors.
 ///
@@ -23,5 +23,20 @@ pub trait Language {
     ///     // ... other kind kinds
     /// }
     /// ```
-    type SyntaxKind: crate::SyntaxKind;
+    type SyntaxKind: SyntaxKind;
+
+    /// The root type for the parsed tree that represents the top-level structure of the language.
+    ///
+    /// This associated type defines the structure of the root node in the parsed tree,
+    /// which typically contains the entire parsed source code organized according to the
+    /// language's grammar rules.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// struct RustRoot {
+    ///     items: Vec<RustItem>,
+    /// }
+    /// ```
+    type TypedRoot;
 }

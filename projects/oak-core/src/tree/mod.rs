@@ -27,6 +27,7 @@ mod red_tree;
 
 pub use self::{
     green_tree::{GreenLeaf, GreenNode, GreenTree},
-    incremental::GreenBuilder,
+    incremental::{GreenBuilder, IncrementalCache},
     red_tree::{RedChildren, RedLeaf, RedNode, RedTree},
 };
+pub use triomphe::Arc;

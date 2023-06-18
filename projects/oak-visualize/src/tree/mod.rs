@@ -411,64 +411,66 @@ impl TreeRenderer {
         self
     }
 
-    #[cfg(feature = "svg")]
-    pub fn render_svg(&self, layout: &Layout, tree: &TreeNode) -> crate::Result<String> {
-        use svg::{
-            Document,
-            node::element::{Group, Line, Rectangle, Text},
-        };
-
-        let mut document = Document::new().set("viewBox", format!("0 0 {} {}", layout.bounds.width(), layout.bounds.height()));
-
-        // Render nodes
-        for (node_id, rect) in &layout.nodes {
-            let node_group = Group::new().set("id", format!("node-{}", node_id));
-
-            // Node rectangle
-            let node_rect = Rectangle::new()
-                .set("x", rect.x())
-                .set("y", rect.y())
-                .set("width", rect.width())
-                .set("height", rect.height())
-                .set("fill", &self.config.node_fill_color)
-                .set("stroke", &self.config.node_stroke_color)
-                .set("stroke-width", self.config.node_stroke_width);
-
-            // Node label
-            let label = self.get_node_label(tree, node_id);
-            let text = Text::new()
-                .set("x", rect.center().x)
-                .set("y", rect.center().y)
-                .set("text-anchor", "middle")
-                .set("dominant-baseline", "middle")
-                .set("font-family", &self.config.font_family)
-                .set("font-size", self.config.font_size)
-                .set("fill", &self.config.text_color)
-                .add(svg::node::Text::new(label));
-
-            document = document.add(node_group.add(node_rect).add(text));
-        }
-
-        // Render edges
-        for edge in &layout.edges {
-            if let (Some(from_rect), Some(to_rect)) = (layout.nodes.get(&edge.from), layout.nodes.get(&edge.to)) {
-                let from_point = from_rect.center();
-                let to_point = to_rect.center();
-
-                let line = Line::new()
-                    .set("x1", from_point.x)
-                    .set("y1", from_point.y)
-                    .set("x2", to_point.x)
-                    .set("y2", to_point.y)
-                    .set("stroke", &self.config.edge_color)
-                    .set("stroke-width", self.config.edge_width);
-
-                document = document.add(line);
-            }
-        }
-
-        Ok(document.to_string())
-    }
+    // SVG rendering functionality would be implemented here
+    // Currently disabled due to missing svg dependency
+    // #[cfg(feature = "svg")]
+    // pub fn render_svg(&self, layout: &Layout, tree: &TreeNode) -> crate::Result<String> {
+    //     use svg::{
+    //         Document,
+    //         node::element::{Group, Line, Rectangle, Text},
+    //     };
+    //
+    //     let mut document = Document::new().set("viewBox", format!("0 0 {} {}", layout.bounds.width(), layout.bounds.height()));
+    //
+    //     // Render nodes
+    //     for (node_id, rect) in &layout.nodes {
+    //         let node_group = Group::new().set("id", format!("node-{}", node_id));
+    //
+    //         // Node rectangle
+    //         let node_rect = Rectangle::new()
+    //             .set("x", rect.x())
+    //             .set("y", rect.y())
+    //             .set("width", rect.width())
+    //             .set("height", rect.height())
+    //             .set("fill", &self.config.node_fill_color)
+    //             .set("stroke", &self.config.node_stroke_color)
+    //             .set("stroke-width", self.config.node_stroke_width);
+    //
+    //         // Node label
+    //         let label = self.get_node_label(tree, node_id);
+    //         let text = Text::new()
+    //             .set("x", rect.center().x)
+    //             .set("y", rect.center().y)
+    //             .set("text-anchor", "middle")
+    //             .set("dominant-baseline", "middle")
+    //             .set("font-family", &self.config.font_family)
+    //             .set("font-size", self.config.font_size)
+    //             .set("fill", &self.config.text_color)
+    //             .add(svg::node::Text::new(label));
+    //
+    //         document = document.add(node_group.add(node_rect).add(text));
+    //     }
+    //
+    //     // Render edges
+    //     for edge in &layout.edges {
+    //         if let (Some(from_rect), Some(to_rect)) = (layout.nodes.get(&edge.from), layout.nodes.get(&edge.to)) {
+    //             let from_point = from_rect.center();
+    //             let to_point = to_rect.center();
+    //
+    //             let line = Line::new()
+    //                 .set("x1", from_point.x)
+    //                 .set("y1", from_point.y)
+    //                 .set("x2", to_point.x)
+    //                 .set("y2", to_point.y)
+    //                 .set("stroke", &self.config.edge_color)
+    //                 .set("stroke-width", self.config.edge_width);
+    //
+    //             document = document.add(line);
+    //         }
+    //     }
+    //
+    //     Ok(document.to_string())
+    // }
 
     fn get_node_label(&self, tree: &TreeNode, node_id: &str) -> String {
         self.find_node_label(tree, node_id).unwrap_or_else(|| node_id.to_string())

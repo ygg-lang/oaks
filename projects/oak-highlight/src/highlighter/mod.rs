@@ -1,9 +1,8 @@
-use alloc::{
-    format,
+use std::{
+    range::Range,
     string::{String, ToString},
     vec::Vec,
 };
-use core::range::Range;
 
 /// Highlight style configuration for visual text formatting.
 ///
@@ -51,7 +50,7 @@ pub struct HighlightTheme {
     pub operator: HighlightStyle,
     /// Style for delimiters (parentheses, brackets, braces, etc.)
     pub delimiter: HighlightStyle,
-    /// Style for error tokens or invalid syntax
+    /// Style for error tokens or invalid kind
     pub error: HighlightStyle,
 }
 
@@ -88,7 +87,7 @@ pub struct HighlightSegment {
     pub text: String,
 }
 
-/// Result of syntax highlighting containing styled text segments.
+/// Result of kind highlighting containing styled text segments.
 ///
 /// This struct holds the complete highlighted representation of source code,
 /// broken down into segments with their associated styles.
@@ -100,9 +99,9 @@ pub struct HighlightResult {
     pub source: String,
 }
 
-/// Base trait for syntax highlighters.
+/// Base trait for kind highlighters.
 ///
-/// This trait defines the interface for syntax highlighting implementations
+/// This trait defines the interface for kind highlighting implementations
 /// that can analyze source code and produce styled text segments.
 pub trait Highlighter {}
 
@@ -172,7 +171,7 @@ impl HtmlExporter {
 
 /// HTML 转义
 fn html_escape(text: &str) -> String {
-    use crate::alloc::string::ToString;
+    use std::string::ToString;
     text.chars()
         .map(|c| match c {
             '<' => "&lt;".to_string(),

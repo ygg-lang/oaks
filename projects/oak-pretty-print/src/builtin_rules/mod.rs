@@ -1,7 +1,4 @@
-use crate::{BasicFormatRule, FormatContext, FormatResult, FormatRule};
-use alloc::{boxed::Box, string::ToString, vec::Vec};
-// TODO: 这些类型在 oak-core 中不存在，需要实现
-// use oak_core::{AstNode, Declaration, Expression, Statement};
+use crate::{BasicFormatRule, FormatRule};
 
 /// 创建内置的格式化规则集合
 pub fn create_builtin_rules() -> Vec<Box<dyn FormatRule>> {

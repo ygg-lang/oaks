@@ -1,10 +1,5 @@
-extern crate alloc;
-
 use crate::source::SourceLocation;
-use alloc::{boxed::Box, string::String, vec::Vec};
-use core::error::Error;
 
-#[cfg(feature = "std")]
 use url::Url;
 
 mod display;
@@ -34,7 +29,7 @@ pub type ParseResult<T> = Result<T, OakError>;
 /// This allows for error recovery where parsing can continue even
 /// after encountering language, collecting all issues for later analysis.
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct OakDiagnostics<T> {
     /// The primary result of the parsing operation.
     /// May contain either a successful value or a fatal error.
@@ -48,20 +43,11 @@ pub struct OakDiagnostics<T> {
 /// `OakError` represents all possible language that can occur during
 /// lexical analysis and parsing operations. It provides detailed
 /// error information including error kind and precise source location.
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct OakError {
     kind: Box<OakErrorKind>,
 }
 
-impl Error for OakErrorKind {
-    fn source(&self) -> Option<&(dyn Error + 'static)> {
-        match self {
-            #[cfg(feature = "std")]
-            OakErrorKind::IoError { error, .. } => Some(error),
-            _ => None,
-        }
-    }
-}
 /// Enumeration of all possible error kinds in the Oak Core framework.
 ///
 /// This enum categorizes different types of language that can occur
@@ -70,7 +56,6 @@ impl Error for OakErrorKind {
 #[derive(Debug)]
 pub enum OakErrorKind {
     /// I/O error that occurred while reading source files.
-    #[cfg(feature = "std")]
     IoError {
         /// The underlying I/O error.
         error: std::io::Error,
@@ -116,7 +101,7 @@ impl OakError {
     /// let io_err = io::Error::new(io::ErrorKind::NotFound, "File not found");
     /// let error = OakError::io_error(io_err, url::Url::parse("file:///main.rs").unwrap());
     /// ```
-    #[cfg(feature = "std")]
+
     pub fn io_error(error: std::io::Error, url: Url) -> Self {
         OakErrorKind::IoError { error, url: Some(url) }.into()
     }
@@ -183,5 +168,24 @@ impl OakError {
     /// A reference to the [`OakErrorKind`] enum that categorizes this error.
     pub fn kind(&self) -> &OakErrorKind {
         &self.kind
+    }
+}
+
+impl Clone for OakErrorKind {
+    fn clone(&self) -> Self {
+        match self {
+            OakErrorKind::IoError { error, url } => {
+                // 由于 std::io::Error 不支持 Clone，我们创建一个新的错误
+                let new_error = std::io::Error::new(error.kind(), error.to_string());
+                OakErrorKind::IoError { error: new_error, url: url.clone() }
+            }
+            OakErrorKind::SyntaxError { message, source } => {
+                OakErrorKind::SyntaxError { message: message.clone(), source: source.clone() }
+            }
+            OakErrorKind::UnexpectedCharacter { character, source } => {
+                OakErrorKind::UnexpectedCharacter { character: *character, source: source.clone() }
+            }
+            OakErrorKind::CustomError { message } => OakErrorKind::CustomError { message: message.clone() },
+        }
     }
 }

@@ -1,21 +1,38 @@
+//! Parser testing utilities for the Oak parsing framework.
+//!
+//! This module provides comprehensive testing infrastructure for parsers,
+//! including file-based testing, expected output comparison, timeout handling,
+//! and test result serialization.
+
 use crate::{
-    Language, Parser, SyntaxKind,
-    errors::{OakDiagnostics, OakError},
+    Language, Parser,
+    errors::OakError,
     helpers::{create_file, json_from_path, source_from_path},
-    tree::{GreenNode, GreenTree},
 };
-use alloc::rc::Rc;
 use serde::{Deserialize, Serialize};
 use serde_json::{Serializer, ser::PrettyFormatter};
-use std::path::{Path, PathBuf};
+use std::{
+    fmt::Debug,
+    path::{Path, PathBuf},
+    time::Duration,
+};
 use walkdir::WalkDir;
 
-#[derive(Debug)]
+/// A concurrent parser testing utility that can run tests against multiple files with timeout support.
+///
+/// The `ParserTester` provides functionality to test parsers against a directory
+/// of files with specific extensions, comparing actual output against expected
+/// results stored in JSON files, with configurable timeout protection.
 pub struct ParserTester {
     root: PathBuf,
     extensions: Vec<String>,
+    timeout: Duration,
 }
 
+/// Expected parser test results for comparison.
+///
+/// This struct represents the expected output of a parser test, including
+/// success status, node count, AST structure, and any expected errors.
 #[derive(Debug, Serialize, Deserialize, PartialEq)]
 pub struct ParserTestExpected {
     success: bool,
@@ -24,6 +41,10 @@ pub struct ParserTestExpected {
     errors: Vec<String>,
 }
 
+/// AST node data structure for parser testing.
+///
+/// Represents a node in the abstract kind tree with its kind, children,
+/// text length, and leaf status used for testing parser output.
 #[derive(Debug, Serialize, Deserialize, PartialEq)]
 pub struct AstNodeData {
     kind: String,
@@ -33,12 +54,28 @@ pub struct AstNodeData {
 }
 
 impl ParserTester {
+    /// Creates a new parser tester with the specified root directory and default 10-second timeout.
     pub fn new<P: AsRef<Path>>(root: P) -> Self {
-        Self { root: root.as_ref().to_path_buf(), extensions: vec![] }
+        Self { root: root.as_ref().to_path_buf(), extensions: vec![], timeout: Duration::from_secs(10) }
     }
 
+    /// Adds a file extension to test against.
     pub fn with_extension(mut self, extension: impl ToString) -> Self {
         self.extensions.push(extension.to_string());
+        self
+    }
+
+    /// Sets the timeout for parsing operations.
+    ///
+    /// # Arguments
+    ///
+    /// * `timeout` - The maximum duration to wait for parsing to complete
+    ///
+    /// # Returns
+    ///
+    /// A new `ParserTester` with the specified timeout
+    pub fn with_timeout(mut self, timeout: Duration) -> Self {
+        self.timeout = timeout;
         self
     }
 
@@ -56,17 +93,17 @@ impl ParserTester {
     /// let tester = ParserTester::new("tests/parser").with_extension("tex");
     /// tester.run_tests(my_parser)?;
     /// ```
-    pub fn run_tests<L, P>(self, parser: P) -> Result<(), OakError>
+    pub fn run_tests<L, P>(self, parser: &P) -> Result<(), OakError>
     where
-        L: Language,
-        L::SyntaxKind: Serialize + std::fmt::Debug,
-        P: Parser<L>,
+        P: Parser<L> + Send + Sync,
+        L: Language + Send + Sync,
+        L::SyntaxKind: Serialize + Debug + Sync + Send,
     {
         let test_files = self.find_test_files()?;
 
         for file_path in test_files {
             println!("Testing file: {}", file_path.display());
-            self.test_single_file(&file_path, &parser)?;
+            self.test_single_file::<L, P>(&file_path, parser)?;
         }
 
         Ok(())
@@ -93,114 +130,106 @@ impl ParserTester {
 
     fn test_single_file<L, P>(&self, file_path: &Path, parser: &P) -> Result<(), OakError>
     where
-        L: Language,
-        L::SyntaxKind: Serialize + std::fmt::Debug,
-        P: Parser<L>,
+        P: Parser<L> + Send + Sync,
+        L: Language + Send + Sync,
+        L::SyntaxKind: Serialize + Debug + Sync + Send,
     {
         let source = source_from_path(file_path)?;
-        let OakDiagnostics { result, diagnostics } = parser.parse(&source);
 
-        // 获取 AST 根节点
-        let (success, ast_structure, node_count) = match result {
-            Ok(green_node) => {
-                let ast_data = self.convert_green_node_to_data(&green_node);
-                let count = self.count_nodes(&green_node);
-                (true, ast_data, count)
+        // 在线程中执行解析并构造测试结果，主线程做真实超时控制
+        use std::sync::mpsc;
+        let (tx, rx) = mpsc::channel();
+        let timeout = self.timeout;
+        let file_path_string = file_path.display().to_string();
+
+        std::thread::scope(|s| {
+            s.spawn(move || {
+                let parse_out = parser.parse(&source);
+
+                // Build AST structure if parse succeeded, else create a minimal error node
+                let (success, ast_structure) = match &parse_out.result {
+                    Ok(root) => {
+                        let ast = Self::to_ast::<L::SyntaxKind>(root);
+                        (true, ast)
+                    }
+                    Err(_) => {
+                        let ast = AstNodeData { kind: "Error".to_string(), children: vec![], text_length: 0, is_leaf: true };
+                        (false, ast)
+                    }
+                };
+
+                // Collect error messages
+                let mut error_messages: Vec<String> = parse_out.diagnostics.iter().map(|e| e.to_string()).collect();
+                if let Err(e) = &parse_out.result {
+                    error_messages.push(e.to_string());
+                }
+
+                // Count nodes (including leaves)
+                let node_count = Self::count_nodes(&ast_structure);
+
+                let test_result = ParserTestExpected { success, node_count, ast_structure, errors: error_messages };
+
+                let _ = tx.send(Ok::<ParserTestExpected, OakError>(test_result));
+            });
+
+            match rx.recv_timeout(timeout) {
+                Ok(Ok(test_result)) => {
+                    let expected_file = file_path.with_extension(format!(
+                        "{}.expected.json",
+                        file_path.extension().unwrap_or_default().to_str().unwrap_or("")
+                    ));
+
+                    let force_regenerated = std::env::var("REGENERATE_TESTS").unwrap_or("0".to_string()) == "1";
+
+                    if expected_file.exists() && !force_regenerated {
+                        let expected: ParserTestExpected = json_from_path(&expected_file)?;
+
+                        if test_result != expected {
+                            println!("Test failed for file: {}", file_path.display());
+                            println!("Expected: {:#?}", expected);
+                            println!("Actual: {:#?}", test_result);
+                            return Err(OakError::custom_error("Test results do not match expected results"));
+                        }
+                    }
+                    else {
+                        let file = create_file(&expected_file)?;
+                        let mut writer = Serializer::with_formatter(file, PrettyFormatter::with_indent(b"    "));
+                        test_result.serialize(&mut writer)?;
+
+                        println!("Created expected result file: {}\nNeed rerun", expected_file.display());
+                    }
+
+                    Ok(())
+                }
+                Ok(Err(err)) => Err(err),
+                Err(mpsc::RecvTimeoutError::Timeout) => Err(OakError::custom_error(&format!(
+                    "Parser test timed out after {:?} for file: {}",
+                    timeout, file_path_string
+                ))),
+                Err(mpsc::RecvTimeoutError::Disconnected) => Err(OakError::custom_error(&format!(
+                    "Parser test thread panicked or disconnected for file: {}",
+                    file_path_string
+                ))),
             }
-            Err(_) => {
-                // 解析失败时创建一个空的 AST 结构
-                let empty_ast = AstNodeData { kind: "ERROR".to_string(), children: vec![], text_length: 0, is_leaf: true };
-                (false, empty_ast, 0)
-            }
-        };
-
-        let error_messages: Vec<String> = diagnostics.into_iter().map(|err| format!("{:?}", err)).collect();
-
-        let test_result = ParserTestExpected { success, node_count, ast_structure, errors: error_messages };
-
-        let expected_file = file_path
-            .with_extension(format!("{}.expected.json", file_path.extension().unwrap_or_default().to_str().unwrap_or("")));
-
-        let force_regenerated = std::env::var("REGENERATE_TESTS").unwrap_or("0".to_string()) == "1";
-
-        if expected_file.exists() && !force_regenerated {
-            let expected: ParserTestExpected = json_from_path(&expected_file)?;
-
-            if test_result != expected {
-                println!("Test failed for file: {}", file_path.display());
-                println!("Expected: {:#?}", expected);
-                println!("Actual: {:#?}", test_result);
-                return Err(OakError::custom_error("Test results do not match expected results"));
-            }
-        }
-        else {
-            let file = create_file(&expected_file)?;
-            let mut writer = Serializer::with_formatter(file, PrettyFormatter::with_indent(b"    "));
-            test_result.serialize(&mut writer)?;
-
-            println!("Created expected result file: {}\nNeed rerun", expected_file.display());
-        }
-
-        Ok(())
+        })
     }
 
-    fn convert_green_node_to_data<K: Copy + std::fmt::Debug>(&self, green_node: &Rc<GreenNode<K>>) -> AstNodeData {
-        let children: Vec<AstNodeData> =
-            green_node.children.iter().map(|child| self.convert_green_tree_to_data(child)).collect();
-
-        AstNodeData {
-            kind: format!("{:?}", green_node.kind),
-            children,
-            text_length: green_node.length,
-            is_leaf: green_node.children.is_empty(),
-        }
+    fn to_ast<K: Copy + Debug + Serialize>(root: &triomphe::Arc<crate::GreenNode<K>>) -> AstNodeData {
+        let kind_str = format!("{:?}", root.kind);
+        let children = root
+            .children
+            .iter()
+            .map(|c| match c {
+                crate::GreenTree::Node(n) => Self::to_ast(n),
+                crate::GreenTree::Leaf(l) => {
+                    AstNodeData { kind: format!("{:?}", l.kind), children: vec![], text_length: l.length, is_leaf: true }
+                }
+            })
+            .collect::<Vec<_>>();
+        AstNodeData { kind: kind_str, children, text_length: root.length, is_leaf: false }
     }
 
-    fn convert_green_tree_to_data<K: Copy + std::fmt::Debug>(&self, green_tree: &GreenTree<K>) -> AstNodeData {
-        match green_tree {
-            GreenTree::Node(node) => self.convert_green_node_to_data(node),
-            GreenTree::Leaf(leaf) => {
-                AstNodeData { kind: format!("{:?}", leaf.kind), children: vec![], text_length: leaf.length, is_leaf: true }
-            }
-        }
+    fn count_nodes(node: &AstNodeData) -> usize {
+        1 + node.children.iter().map(Self::count_nodes).sum::<usize>()
     }
-
-    fn count_nodes<K: Copy>(&self, green_node: &Rc<GreenNode<K>>) -> usize {
-        let mut count = 1; // 当前节点
-        for child in &green_node.children {
-            count += self.count_green_tree_nodes(child);
-        }
-        count
-    }
-
-    fn count_green_tree_nodes<K: Copy>(&self, green_tree: &GreenTree<K>) -> usize {
-        match green_tree {
-            GreenTree::Node(node) => self.count_nodes(node),
-            GreenTree::Leaf(_) => 1,
-        }
-    }
-}
-
-/// 便利函数：为指定的解析器和文件扩展名运行解析器测试
-///
-/// # Arguments
-///
-/// * `test_dir` - 测试文件目录
-/// * `extension` - 文件扩展名
-/// * `parser` - 要测试的解析器
-///
-/// # Examples
-///
-/// ```
-/// use oak_core::helpers::parsing::run_parser_tests;
-///
-/// run_parser_tests("tests/tex", "tex", my_tex_parser)?;
-/// ```
-pub fn run_parser_tests<L, P>(test_dir: impl AsRef<Path>, extension: &str, parser: P) -> Result<(), OakError>
-where
-    L: Language,
-    L::SyntaxKind: Serialize + std::fmt::Debug,
-    P: Parser<L>,
-{
-    ParserTester::new(test_dir).with_extension(extension).run_tests(parser)
 }

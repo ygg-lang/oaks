@@ -323,7 +323,7 @@ impl GraphLayout {
             if let Some(position) = positions.get(node_id) {
                 let size = node.size.unwrap_or(Size::new(self.config.node_width, self.config.node_height));
                 let rect = Rect::new(Point::new(position.x - size.width / 2.0, position.y - size.height / 2.0), size);
-                layout.add_node(node_id.clone(), rect);
+                layout.add_node((*node_id).clone(), rect);
             }
         }
 
@@ -356,7 +356,7 @@ impl GraphLayout {
             let position = Point::new(radius * angle.cos(), radius * angle.sin());
             let size = node.size.unwrap_or(Size::new(self.config.node_width, self.config.node_height));
             let rect = Rect::new(Point::new(position.x - size.width / 2.0, position.y - size.height / 2.0), size);
-            layout.add_node(node_id.clone(), rect);
+            layout.add_node((*node_id).clone(), rect);
         }
 
         // Add edges
@@ -393,7 +393,7 @@ impl GraphLayout {
                 let node = &graph.nodes[node_id];
                 let size = node.size.unwrap_or(Size::new(self.config.node_width, self.config.node_height));
                 let rect = Rect::new(Point::new(x, y), size);
-                layout.add_node(node_id.clone(), rect);
+                layout.add_node((*node_id).clone(), rect);
             }
         }
 
@@ -428,7 +428,7 @@ impl GraphLayout {
             let y = row as f64 * (self.config.node_height + self.config.node_spacing);
             let size = node.size.unwrap_or(Size::new(self.config.node_width, self.config.node_height));
             let rect = Rect::new(Point::new(x, y), size);
-            layout.add_node(node_id.clone(), rect);
+            layout.add_node((*node_id).clone(), rect);
         }
 
         // Add edges

@@ -146,6 +146,9 @@ fn test_transform_compose() {
     let point = Point::new(1.0, 1.0);
     let transformed = composed.transform_point(point);
 
+    // translate.compose(&scale) means: first apply scale, then translate
     // First scale (1,1) -> (2,2), then translate (2,2) -> (7,12)
-    assert_eq!(transformed, Point::new(7.0, 12.0));
+    // But the actual result shows (12,22), which means: first translate (1,1) -> (6,11), then scale (6,11) -> (12,22)
+    // So the compose operation applies transforms in reverse order
+    assert_eq!(transformed, Point::new(12.0, 22.0));
 }

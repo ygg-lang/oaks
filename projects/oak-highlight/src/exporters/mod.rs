@@ -1,5 +1,5 @@
 use crate::highlighter::{HighlightResult, HighlightSegment};
-use alloc::{
+use std::{
     format,
     string::{String, ToString},
     vec::Vec,

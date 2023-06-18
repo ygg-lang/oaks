@@ -10,6 +10,7 @@ default-members = [
 ]
 exclude = [
     "projects/.DS_Store",
+    "examples/oak-llvm",
 ]
 
 [workspace.package]
