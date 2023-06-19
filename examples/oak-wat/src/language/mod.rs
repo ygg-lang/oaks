@@ -5,4 +5,5 @@ pub struct WatLanguage;
 
 impl Language for WatLanguage {
     type SyntaxKind = WatSyntaxKind;
+    type TypedRoot = ();
 }

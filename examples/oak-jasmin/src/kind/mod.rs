@@ -1,7 +1,10 @@
-use oak_core::SyntaxKind;
+use oak_core::{SyntaxKind, Token};
+use serde::{Deserialize, Serialize};
 
-/// 统一JASMIN 语法种类（节点与词法
-#[derive(Copy, Clone, Debug, PartialEq, Eq)]
+pub type JasminToken = Token<JasminSyntaxKind>;
+
+/// 统一JASMIN 语法种类（节点与词法）
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
 #[repr(u16)]
 pub enum JasminSyntaxKind {
     // 语法节点
@@ -99,22 +102,110 @@ pub enum JasminSyntaxKind {
 
 impl SyntaxKind for JasminSyntaxKind {
     fn is_trivia(&self) -> bool {
-        todo!()
+        matches!(self, Self::Whitespace | Self::Comment)
     }
 
     fn is_comment(&self) -> bool {
-        todo!()
+        matches!(self, Self::Comment)
     }
 
     fn is_whitespace(&self) -> bool {
-        todo!()
+        matches!(self, Self::Whitespace)
     }
 
     fn is_token_type(&self) -> bool {
-        todo!()
+        matches!(
+            self,
+            Self::ClassKw
+                | Self::VersionKw
+                | Self::MethodKw
+                | Self::FieldKw
+                | Self::StringKw
+                | Self::SourceFileKw
+                | Self::StackKw
+                | Self::LocalsKw
+                | Self::EndKw
+                | Self::CompiledKw
+                | Self::FromKw
+                | Self::InnerClassKw
+                | Self::NestMembersKw
+                | Self::BootstrapMethodKw
+                | Self::Public
+                | Self::Private
+                | Self::Protected
+                | Self::Static
+                | Self::Super
+                | Self::Final
+                | Self::Abstract
+                | Self::Synchronized
+                | Self::Native
+                | Self::Synthetic
+                | Self::Deprecated
+                | Self::Varargs
+                | Self::ALoad0
+                | Self::ALoad1
+                | Self::ALoad2
+                | Self::ALoad3
+                | Self::ILoad0
+                | Self::ILoad1
+                | Self::ILoad2
+                | Self::ILoad3
+                | Self::Ldc
+                | Self::LdcW
+                | Self::Ldc2W
+                | Self::InvokeSpecial
+                | Self::InvokeVirtual
+                | Self::InvokeStatic
+                | Self::InvokeInterface
+                | Self::InvokeDynamic
+                | Self::GetStatic
+                | Self::PutStatic
+                | Self::GetField
+                | Self::PutField
+                | Self::Return
+                | Self::IReturn
+                | Self::AReturn
+                | Self::LReturn
+                | Self::FReturn
+                | Self::DReturn
+                | Self::Nop
+                | Self::Dup
+                | Self::Pop
+                | Self::New
+                | Self::LeftBrace
+                | Self::RightBrace
+                | Self::LeftParen
+                | Self::RightParen
+                | Self::LeftBracket
+                | Self::RightBracket
+                | Self::Colon
+                | Self::Semicolon
+                | Self::Dot
+                | Self::Comma
+                | Self::Slash
+                | Self::StringLiteral
+                | Self::Number
+                | Self::TypeDescriptor
+                | Self::IdentifierToken
+                | Self::Whitespace
+                | Self::Comment
+                | Self::Eof
+                | Self::Error
+        )
     }
 
     fn is_element_type(&self) -> bool {
-        todo!()
+        matches!(
+            self,
+            Self::Root
+                | Self::Class
+                | Self::Method
+                | Self::Field
+                | Self::Instruction
+                | Self::IdentifierNode
+                | Self::StringNode
+                | Self::NumberNode
+                | Self::ErrorNode
+        )
     }
 }

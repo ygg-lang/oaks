@@ -16,13 +16,14 @@ edition.workspace = true
 oak-core = { workspace = true }
 oak-highlight = { workspace = true, optional = true }
 oak-pretty-print = { workspace = true, optional = true }
+serde = { workspace = true }
 
 [dev-dependencies]
 oak-core = { workspace = true, features = ["testing"] }
 
 [features]
 default = []
-alloc = []
+
 
 [package.metadata.docs.rs]
 all-features = true

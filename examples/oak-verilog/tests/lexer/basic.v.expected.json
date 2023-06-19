@@ -1,0 +1,607 @@
+{
+    "success": true,
+    "count": 100,
+    "tokens": [
+        {
+            "kind": "Comment",
+            "text": "// Verilog Test File - Comprehensive Syntax Coverage",
+            "start": 0,
+            "end": 52
+        },
+        {
+            "kind": "Comment",
+            "text": "// This file tests various Verilog syntax elements for lexer testing",
+            "start": 54,
+            "end": 122
+        },
+        {
+            "kind": "Comment",
+            "text": "// Comments",
+            "start": 126,
+            "end": 137
+        },
+        {
+            "kind": "Comment",
+            "text": "// Single line comment",
+            "start": 139,
+            "end": 161
+        },
+        {
+            "kind": "Comment",
+            "text": "/* Multi-line comment\r\n   can span multiple lines\r\n   and contain any text */",
+            "start": 163,
+            "end": 240
+        },
+        {
+            "kind": "Comment",
+            "text": "// Compiler directives",
+            "start": 244,
+            "end": 266
+        },
+        {
+            "kind": "Identifier",
+            "text": "timescale",
+            "start": 269,
+            "end": 278
+        },
+        {
+            "kind": "Number",
+            "text": "1",
+            "start": 279,
+            "end": 280
+        },
+        {
+            "kind": "Identifier",
+            "text": "ns",
+            "start": 280,
+            "end": 282
+        },
+        {
+            "kind": "Slash",
+            "text": "/",
+            "start": 283,
+            "end": 284
+        },
+        {
+            "kind": "Number",
+            "text": "1",
+            "start": 285,
+            "end": 286
+        },
+        {
+            "kind": "Identifier",
+            "text": "ps",
+            "start": 286,
+            "end": 288
+        },
+        {
+            "kind": "Identifier",
+            "text": "define",
+            "start": 291,
+            "end": 297
+        },
+        {
+            "kind": "Identifier",
+            "text": "WORD_SIZE",
+            "start": 298,
+            "end": 307
+        },
+        {
+            "kind": "Number",
+            "text": "32",
+            "start": 308,
+            "end": 310
+        },
+        {
+            "kind": "Identifier",
+            "text": "define",
+            "start": 313,
+            "end": 319
+        },
+        {
+            "kind": "Identifier",
+            "text": "MAX_COUNT",
+            "start": 320,
+            "end": 329
+        },
+        {
+            "kind": "Number",
+            "text": "1024",
+            "start": 330,
+            "end": 334
+        },
+        {
+            "kind": "Identifier",
+            "text": "define",
+            "start": 337,
+            "end": 343
+        },
+        {
+            "kind": "Identifier",
+            "text": "CLOCK_PERIOD",
+            "start": 344,
+            "end": 356
+        },
+        {
+            "kind": "Number",
+            "text": "10",
+            "start": 357,
+            "end": 359
+        },
+        {
+            "kind": "Identifier",
+            "text": "ifdef",
+            "start": 362,
+            "end": 367
+        },
+        {
+            "kind": "Identifier",
+            "text": "SIMULATION",
+            "start": 368,
+            "end": 378
+        },
+        {
+            "kind": "Identifier",
+            "text": "define",
+            "start": 385,
+            "end": 391
+        },
+        {
+            "kind": "Identifier",
+            "text": "DEBUG",
+            "start": 392,
+            "end": 397
+        },
+        {
+            "kind": "Identifier",
+            "text": "endif",
+            "start": 400,
+            "end": 405
+        },
+        {
+            "kind": "Identifier",
+            "text": "include",
+            "start": 410,
+            "end": 417
+        },
+        {
+            "kind": "String",
+            "text": "\"memory.v\"",
+            "start": 418,
+            "end": 428
+        },
+        {
+            "kind": "Identifier",
+            "text": "include",
+            "start": 431,
+            "end": 438
+        },
+        {
+            "kind": "String",
+            "text": "\"alu.v\"",
+            "start": 439,
+            "end": 446
+        },
+        {
+            "kind": "Comment",
+            "text": "// Module declarations",
+            "start": 450,
+            "end": 472
+        },
+        {
+            "kind": "ModuleKw",
+            "text": "module",
+            "start": 474,
+            "end": 480
+        },
+        {
+            "kind": "Identifier",
+            "text": "basic_test",
+            "start": 481,
+            "end": 491
+        },
+        {
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 491,
+            "end": 492
+        },
+        {
+            "kind": "Comment",
+            "text": "// Parameter declarations",
+            "start": 500,
+            "end": 525
+        },
+        {
+            "kind": "Identifier",
+            "text": "parameter",
+            "start": 531,
+            "end": 540
+        },
+        {
+            "kind": "Identifier",
+            "text": "DATA_WIDTH",
+            "start": 541,
+            "end": 551
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 552,
+            "end": 553
+        },
+        {
+            "kind": "Number",
+            "text": "32",
+            "start": 554,
+            "end": 556
+        },
+        {
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 556,
+            "end": 557
+        },
+        {
+            "kind": "Identifier",
+            "text": "parameter",
+            "start": 563,
+            "end": 572
+        },
+        {
+            "kind": "Identifier",
+            "text": "ADDR_WIDTH",
+            "start": 573,
+            "end": 583
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 584,
+            "end": 585
+        },
+        {
+            "kind": "Number",
+            "text": "16",
+            "start": 586,
+            "end": 588
+        },
+        {
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 588,
+            "end": 589
+        },
+        {
+            "kind": "Identifier",
+            "text": "parameter",
+            "start": 595,
+            "end": 604
+        },
+        {
+            "kind": "Identifier",
+            "text": "MEMORY_SIZE",
+            "start": 605,
+            "end": 616
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 617,
+            "end": 618
+        },
+        {
+            "kind": "Number",
+            "text": "1024",
+            "start": 619,
+            "end": 623
+        },
+        {
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 623,
+            "end": 624
+        },
+        {
+            "kind": "Identifier",
+            "text": "parameter",
+            "start": 630,
+            "end": 639
+        },
+        {
+            "kind": "Identifier",
+            "text": "CLOCK_FREQ",
+            "start": 640,
+            "end": 650
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 651,
+            "end": 652
+        },
+        {
+            "kind": "Number",
+            "text": "100_000_000",
+            "start": 653,
+            "end": 664
+        },
+        {
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 664,
+            "end": 665
+        },
+        {
+            "kind": "Comment",
+            "text": "// 100 MHz",
+            "start": 666,
+            "end": 676
+        },
+        {
+            "kind": "Comment",
+            "text": "// Localparam declarations",
+            "start": 688,
+            "end": 714
+        },
+        {
+            "kind": "Identifier",
+            "text": "localparam",
+            "start": 720,
+            "end": 730
+        },
+        {
+            "kind": "Identifier",
+            "text": "STATE_IDLE",
+            "start": 731,
+            "end": 741
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 742,
+            "end": 743
+        },
+        {
+            "kind": "Number",
+            "text": "2'b00",
+            "start": 744,
+            "end": 749
+        },
+        {
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 749,
+            "end": 750
+        },
+        {
+            "kind": "Identifier",
+            "text": "localparam",
+            "start": 756,
+            "end": 766
+        },
+        {
+            "kind": "Identifier",
+            "text": "STATE_READ",
+            "start": 767,
+            "end": 777
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 778,
+            "end": 779
+        },
+        {
+            "kind": "Number",
+            "text": "2'b01",
+            "start": 780,
+            "end": 785
+        },
+        {
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 785,
+            "end": 786
+        },
+        {
+            "kind": "Identifier",
+            "text": "localparam",
+            "start": 792,
+            "end": 802
+        },
+        {
+            "kind": "Identifier",
+            "text": "STATE_WRITE",
+            "start": 803,
+            "end": 814
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 815,
+            "end": 816
+        },
+        {
+            "kind": "Number",
+            "text": "2'b10",
+            "start": 817,
+            "end": 822
+        },
+        {
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 822,
+            "end": 823
+        },
+        {
+            "kind": "Identifier",
+            "text": "localparam",
+            "start": 829,
+            "end": 839
+        },
+        {
+            "kind": "Identifier",
+            "text": "STATE_DONE",
+            "start": 840,
+            "end": 850
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 851,
+            "end": 852
+        },
+        {
+            "kind": "Number",
+            "text": "2'b11",
+            "start": 853,
+            "end": 858
+        },
+        {
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 858,
+            "end": 859
+        },
+        {
+            "kind": "Comment",
+            "text": "// Wire declarations",
+            "start": 867,
+            "end": 887
+        },
+        {
+            "kind": "WireKw",
+            "text": "wire",
+            "start": 893,
+            "end": 897
+        },
+        {
+            "kind": "Identifier",
+            "text": "clk",
+            "start": 898,
+            "end": 901
+        },
+        {
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 901,
+            "end": 902
+        },
+        {
+            "kind": "WireKw",
+            "text": "wire",
+            "start": 908,
+            "end": 912
+        },
+        {
+            "kind": "Identifier",
+            "text": "reset",
+            "start": 913,
+            "end": 918
+        },
+        {
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 918,
+            "end": 919
+        },
+        {
+            "kind": "WireKw",
+            "text": "wire",
+            "start": 925,
+            "end": 929
+        },
+        {
+            "kind": "Identifier",
+            "text": "enable",
+            "start": 930,
+            "end": 936
+        },
+        {
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 936,
+            "end": 937
+        },
+        {
+            "kind": "WireKw",
+            "text": "wire",
+            "start": 943,
+            "end": 947
+        },
+        {
+            "kind": "LeftBracket",
+            "text": "[",
+            "start": 948,
+            "end": 949
+        },
+        {
+            "kind": "Identifier",
+            "text": "DATA_WIDTH",
+            "start": 949,
+            "end": 959
+        },
+        {
+            "kind": "Minus",
+            "text": "-",
+            "start": 959,
+            "end": 960
+        },
+        {
+            "kind": "Number",
+            "text": "1",
+            "start": 960,
+            "end": 961
+        },
+        {
+            "kind": "Colon",
+            "text": ":",
+            "start": 961,
+            "end": 962
+        },
+        {
+            "kind": "Number",
+            "text": "0",
+            "start": 962,
+            "end": 963
+        },
+        {
+            "kind": "RightBracket",
+            "text": "]",
+            "start": 963,
+            "end": 964
+        },
+        {
+            "kind": "Identifier",
+            "text": "data_in",
+            "start": 965,
+            "end": 972
+        },
+        {
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 972,
+            "end": 973
+        },
+        {
+            "kind": "WireKw",
+            "text": "wire",
+            "start": 979,
+            "end": 983
+        },
+        {
+            "kind": "LeftBracket",
+            "text": "[",
+            "start": 984,
+            "end": 985
+        },
+        {
+            "kind": "Identifier",
+            "text": "DATA_WIDTH",
+            "start": 985,
+            "end": 995
+        }
+    ],
+    "errors": []
+}

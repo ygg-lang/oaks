@@ -1,7 +1,9 @@
-use oak_core::SyntaxKind;
+use oak_core::{SyntaxKind, Token};
+use serde::{Deserialize, Serialize};
 
-#[derive(Debug, Copy, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
-#[repr(u16)]
+pub type IdlToken = Token<IdlSyntaxKind>;
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub enum IdlSyntaxKind {
     // 空白和换行
     Whitespace = 0,
@@ -143,10 +145,116 @@ impl SyntaxKind for IdlSyntaxKind {
     }
 
     fn is_token_type(&self) -> bool {
-        true
+        matches!(
+            self,
+            Self::Whitespace
+                | Self::Newline
+                | Self::Comment
+                | Self::StringLiteral
+                | Self::NumberLiteral
+                | Self::BooleanLiteral
+                | Self::CharLiteral
+                | Self::Identifier
+                | Self::Void
+                | Self::Boolean
+                | Self::Byte
+                | Self::Octet
+                | Self::Short
+                | Self::UnsignedShort
+                | Self::Long
+                | Self::UnsignedLong
+                | Self::LongLong
+                | Self::UnsignedLongLong
+                | Self::Float
+                | Self::Double
+                | Self::LongDouble
+                | Self::Char
+                | Self::WChar
+                | Self::String
+                | Self::WString
+                | Self::Any
+                | Self::Object
+                | Self::ValueBase
+                | Self::Struct
+                | Self::Union
+                | Self::Enum
+                | Self::Interface
+                | Self::Module
+                | Self::Exception
+                | Self::Typedef
+                | Self::Sequence
+                | Self::Array
+                | Self::Fixed
+                | Self::Const
+                | Self::Readonly
+                | Self::Attribute
+                | Self::Oneway
+                | Self::In
+                | Self::Out
+                | Self::Inout
+                | Self::Raises
+                | Self::Context
+                | Self::Local
+                | Self::Abstract
+                | Self::Custom
+                | Self::Private
+                | Self::Public
+                | Self::Truncatable
+                | Self::Supports
+                | Self::ValueType
+                | Self::Native
+                | Self::Factory
+                | Self::Include
+                | Self::Pragma
+                | Self::Define
+                | Self::Ifdef
+                | Self::Ifndef
+                | Self::Endif
+                | Self::Else
+                | Self::Elif
+                | Self::Undef
+                | Self::Plus
+                | Self::Minus
+                | Self::Multiply
+                | Self::Divide
+                | Self::Modulo
+                | Self::BitwiseAnd
+                | Self::BitwiseOr
+                | Self::BitwiseXor
+                | Self::BitwiseNot
+                | Self::LeftShift
+                | Self::RightShift
+                | Self::LogicalAnd
+                | Self::LogicalOr
+                | Self::LogicalNot
+                | Self::Equal
+                | Self::NotEqual
+                | Self::Less
+                | Self::Greater
+                | Self::LessEqual
+                | Self::GreaterEqual
+                | Self::Assign
+                | Self::LeftParen
+                | Self::RightParen
+                | Self::LeftBracket
+                | Self::RightBracket
+                | Self::LeftBrace
+                | Self::RightBrace
+                | Self::LeftAngle
+                | Self::RightAngle
+                | Self::Semicolon
+                | Self::Comma
+                | Self::Colon
+                | Self::DoubleColon
+                | Self::Dot
+                | Self::Arrow
+                | Self::Hash
+                | Self::Eof
+                | Self::Error
+        )
     }
 
     fn is_element_type(&self) -> bool {
-        false
+        matches!(self, Self::SourceFile)
     }
 }

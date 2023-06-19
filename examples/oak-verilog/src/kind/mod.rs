@@ -1,35 +1,58 @@
-use oak_core::SyntaxKind;
+use oak_core::{SyntaxKind, Token};
+use serde::{Deserialize, Serialize};
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+pub type VerilogToken = Token<VerilogKind>;
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub enum VerilogKind {
     // Literals
     Number,
     String,
 
     // Keywords
-    Module,
-    Endmodule,
-    Wire,
-    Reg,
-    Input,
-    Output,
-    Always,
-    Begin,
-    End,
-    If,
-    Else,
+    ModuleKw,
+    EndmoduleKw,
+    WireKw,
+    RegKw,
+    InputKw,
+    OutputKw,
+    AlwaysKw,
+    BeginKw,
+    EndKw,
+    IfKw,
+    ElseKw,
+    AssignKw,
+    PosedgeKw,
+    NegedgeKw,
+    CaseKw,
+    EndcaseKw,
+    DefaultKw,
 
     // Identifiers
     Identifier,
 
     // Operators
-    Assign,
     Plus,
     Minus,
     Star,
     Slash,
+    Percent,
     Equal,
+    EqualEqual,
     NotEqual,
+    Bang,
+    Less,
+    LessEqual,
+    Greater,
+    GreaterEqual,
+    LeftShift,
+    RightShift,
+    Ampersand,
+    AndAnd,
+    Pipe,
+    OrOr,
+    Caret,
+    Tilde,
 
     // Delimiters
     LeftParen,
@@ -41,11 +64,16 @@ pub enum VerilogKind {
     Semicolon,
     Comma,
     Dot,
+    Colon,
+    Hash,
+    At,
 
     // Comments and whitespace
-    Comment,
+    LineComment,
+    BlockComment,
     Whitespace,
     Newline,
+    Comment,
 
     // Special
     Error,
@@ -54,11 +82,11 @@ pub enum VerilogKind {
 
 impl SyntaxKind for VerilogKind {
     fn is_trivia(&self) -> bool {
-        matches!(self, Self::Whitespace | Self::Newline | Self::Comment)
+        matches!(self, Self::Whitespace | Self::Newline | Self::LineComment | Self::BlockComment)
     }
 
     fn is_comment(&self) -> bool {
-        matches!(self, Self::Comment)
+        matches!(self, VerilogKind::Comment)
     }
 
     fn is_whitespace(&self) -> bool {

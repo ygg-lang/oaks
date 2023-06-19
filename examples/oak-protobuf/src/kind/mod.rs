@@ -1,6 +1,7 @@
 use oak_core::SyntaxKind;
+use serde::Serialize;
 
-#[derive(Copy, Clone, Debug, PartialEq, Eq)]
+#[derive(Copy, Clone, Debug, PartialEq, Eq, Serialize)]
 pub enum ProtobufSyntaxKind {
     // 空白符和换行
     Whitespace,

@@ -1,11 +1,31 @@
 use crate::{kind::DockerfileSyntaxKind, language::DockerfileLanguage};
-use core::range::Range;
-use oak_core::{Lexer, LexerState, SourceText, lexer::LexOutput};
+use oak_core::{
+    IncrementalCache, Lexer, LexerState, OakError,
+    lexer::{LexOutput, WhitespaceConfig},
+    source::Source,
+};
+use std::sync::LazyLock;
 
-type State<'input> = LexerState<'input, DockerfileLanguage>;
+type State<S: Source> = LexerState<S, DockerfileLanguage>;
 
+static DOCKERFILE_WHITESPACE: LazyLock<WhitespaceConfig> = LazyLock::new(|| WhitespaceConfig { unicode_whitespace: true });
+
+#[derive(Clone)]
 pub struct DockerfileLexer<'config> {
     config: &'config DockerfileLanguage,
+}
+
+impl<'config> Lexer<DockerfileLanguage> for DockerfileLexer<'config> {
+    fn lex_incremental(
+        &self,
+        source: impl Source,
+        changed: usize,
+        cache: IncrementalCache<DockerfileLanguage>,
+    ) -> LexOutput<DockerfileLanguage> {
+        let mut state = LexerState::new_with_cache(source, changed, cache);
+        let result = self.run(&mut state);
+        state.finish(result)
+    }
 }
 
 impl<'config> DockerfileLexer<'config> {
@@ -13,82 +33,113 @@ impl<'config> DockerfileLexer<'config> {
         Self { config }
     }
 
+    fn run<S: Source>(&self, state: &mut State<S>) -> Result<(), OakError> {
+        while state.not_at_end() {
+            let safe_point = state.get_position();
+
+            if self.skip_whitespace(state) {
+                continue;
+            }
+
+            if self.lex_newline(state) {
+                continue;
+            }
+
+            if self.lex_comment(state) {
+                continue;
+            }
+
+            if self.lex_identifier_or_instruction(state) {
+                continue;
+            }
+
+            if self.lex_number(state) {
+                continue;
+            }
+
+            if self.lex_string(state) {
+                continue;
+            }
+
+            if self.lex_path(state) {
+                continue;
+            }
+
+            if self.lex_operators_and_delimiters(state) {
+                continue;
+            }
+
+            if self.lex_other(state) {
+                continue;
+            }
+
+            state.safe_check(safe_point);
+        }
+
+        // 添加 EOF token
+        let eof_pos = state.get_position();
+        state.add_token(DockerfileSyntaxKind::Eof, eof_pos, eof_pos);
+        Ok(())
+    }
+
     /// 跳过空白字符
-    fn skip_whitespace(&self, state: &mut State) -> bool {
-        let start_pos = state.get_position();
-
-        while let Some(ch) = state.peek() {
-            if ch == ' ' || ch == '\t' {
-                state.advance(ch.len_utf8());
+    fn skip_whitespace<S: Source>(&self, state: &mut State<S>) -> bool {
+        match DOCKERFILE_WHITESPACE.scan(state.rest(), state.get_position(), DockerfileSyntaxKind::Whitespace) {
+            Some(token) => {
+                state.advance_with(token);
+                true
             }
-            else {
-                break;
-            }
-        }
-
-        if state.get_position() > start_pos {
-            state.add_token(DockerfileSyntaxKind::Whitespace, start_pos, state.get_position());
-            true
-        }
-        else {
-            false
+            None => false,
         }
     }
 
-    /// 处理换行
-    fn lex_newline(&self, state: &mut State) -> bool {
-        let start_pos = state.get_position();
-
-        if let Some('\n') = state.peek() {
-            state.advance(1);
-            state.add_token(DockerfileSyntaxKind::Newline, start_pos, state.get_position());
-            true
-        }
-        else if let Some('\r') = state.peek() {
-            state.advance(1);
-            if let Some('\n') = state.peek() {
+    /// 处理换行符
+    fn lex_newline<S: Source>(&self, state: &mut State<S>) -> bool {
+        let start = state.get_position();
+        if let Some(ch) = state.peek() {
+            if ch == '\n' {
                 state.advance(1);
+                state.add_token(DockerfileSyntaxKind::Newline, start, state.get_position());
+                return true;
             }
-            state.add_token(DockerfileSyntaxKind::Newline, start_pos, state.get_position());
-            true
+            else if ch == '\r' {
+                state.advance(1);
+                if state.peek() == Some('\n') {
+                    state.advance(1);
+                }
+                state.add_token(DockerfileSyntaxKind::Newline, start, state.get_position());
+                return true;
+            }
         }
-        else {
-            false
-        }
+        false
     }
 
     /// 处理注释
-    fn lex_comment(&self, state: &mut State) -> bool {
-        let start_pos = state.get_position();
-
-        if let Some('#') = state.peek() {
+    fn lex_comment<S: Source>(&self, state: &mut State<S>) -> bool {
+        let start = state.get_position();
+        if state.peek() == Some('#') {
             state.advance(1);
-
             while let Some(ch) = state.peek() {
                 if ch == '\n' || ch == '\r' {
                     break;
                 }
                 state.advance(ch.len_utf8());
             }
-
-            state.add_token(DockerfileSyntaxKind::Comment, start_pos, state.get_position());
-            true
+            state.add_token(DockerfileSyntaxKind::Comment, start, state.get_position());
+            return true;
         }
-        else {
-            false
-        }
+        false
     }
 
-    /// 处理标识符和指令
-    fn lex_identifier_or_instruction(&self, state: &mut State, source: &SourceText) -> bool {
-        let start_pos = state.get_position();
-
+    /// 处理标识符或指令
+    fn lex_identifier_or_instruction<S: Source>(&self, state: &mut State<S>) -> bool {
+        let start = state.get_position();
         if let Some(ch) = state.peek() {
-            if ch.is_alphabetic() || ch == '_' {
+            if ch.is_ascii_alphabetic() || ch == '_' {
                 state.advance(ch.len_utf8());
 
                 while let Some(ch) = state.peek() {
-                    if ch.is_alphanumeric() || ch == '_' || ch == '-' {
+                    if ch.is_ascii_alphanumeric() || ch == '_' {
                         state.advance(ch.len_utf8());
                     }
                     else {
@@ -97,14 +148,14 @@ impl<'config> DockerfileLexer<'config> {
                 }
 
                 let end_pos = state.get_position();
-                let text = source.get_text_in(core::range::Range { start: start_pos, end: end_pos }).unwrap_or("");
+                let text = state.get_text_in((start..end_pos).into());
 
-                let token_kind = match text.to_uppercase().as_str() {
+                // 检查是否是 Dockerfile 指令
+                let kind = match text.to_uppercase().as_str() {
                     "FROM" => DockerfileSyntaxKind::From,
                     "RUN" => DockerfileSyntaxKind::Run,
                     "CMD" => DockerfileSyntaxKind::Cmd,
                     "LABEL" => DockerfileSyntaxKind::Label,
-                    "MAINTAINER" => DockerfileSyntaxKind::Maintainer,
                     "EXPOSE" => DockerfileSyntaxKind::Expose,
                     "ENV" => DockerfileSyntaxKind::Env,
                     "ADD" => DockerfileSyntaxKind::Add,
@@ -118,88 +169,49 @@ impl<'config> DockerfileLexer<'config> {
                     "STOPSIGNAL" => DockerfileSyntaxKind::Stopsignal,
                     "HEALTHCHECK" => DockerfileSyntaxKind::Healthcheck,
                     "SHELL" => DockerfileSyntaxKind::Shell,
+                    "MAINTAINER" => DockerfileSyntaxKind::Maintainer,
                     "AS" => DockerfileSyntaxKind::As,
                     "NONE" => DockerfileSyntaxKind::None,
                     "INTERVAL" => DockerfileSyntaxKind::Interval,
                     "TIMEOUT" => DockerfileSyntaxKind::Timeout,
-                    "START-PERIOD" => DockerfileSyntaxKind::StartPeriod,
+                    "START_PERIOD" => DockerfileSyntaxKind::StartPeriod,
                     "RETRIES" => DockerfileSyntaxKind::Retries,
                     _ => DockerfileSyntaxKind::Identifier,
                 };
 
-                state.add_token(token_kind, start_pos, state.get_position());
-                true
-            }
-            else {
-                false
+                state.add_token(kind, start, end_pos);
+                return true;
             }
         }
-        else {
-            false
-        }
+        false
     }
 
     /// 处理数字
-    fn lex_number(&self, state: &mut State) -> bool {
-        let start_pos = state.get_position();
-
+    fn lex_number<S: Source>(&self, state: &mut State<S>) -> bool {
+        let start = state.get_position();
         if let Some(ch) = state.peek() {
             if ch.is_ascii_digit() {
-                state.advance(ch.len_utf8());
+                state.advance(1);
 
-                // 处理整数部分
                 while let Some(ch) = state.peek() {
-                    if ch.is_ascii_digit() {
-                        state.advance(ch.len_utf8());
+                    if ch.is_ascii_digit() || ch == '.' {
+                        state.advance(1);
                     }
                     else {
                         break;
                     }
                 }
 
-                // 处理小数部分
-                if let Some('.') = state.peek() {
-                    let dot_pos = state.get_position();
-                    state.advance(1);
-
-                    if let Some(ch) = state.peek() {
-                        if ch.is_ascii_digit() {
-                            while let Some(ch) = state.peek() {
-                                if ch.is_ascii_digit() {
-                                    state.advance(ch.len_utf8());
-                                }
-                                else {
-                                    break;
-                                }
-                            }
-                        }
-                        else {
-                            // 回退点号
-                            state.set_position(dot_pos);
-                        }
-                    }
-                    else {
-                        // 回退点号
-                        state.set_position(dot_pos);
-                    }
-                }
-
-                state.add_token(DockerfileSyntaxKind::Number, start_pos, state.get_position());
-                true
-            }
-            else {
-                false
+                state.add_token(DockerfileSyntaxKind::Number, start, state.get_position());
+                return true;
             }
         }
-        else {
-            false
-        }
+        false
     }
 
-    /// 处理字符
-    fn lex_string(&self, state: &mut State) -> bool {
-        let start_pos = state.get_position();
-
+    /// 处理字符串
+    fn lex_string<S: Source>(&self, state: &mut State<S>) -> bool {
+        let start = state.get_position();
         if let Some(quote) = state.peek() {
             if quote == '"' || quote == '\'' {
                 state.advance(1);
@@ -207,8 +219,7 @@ impl<'config> DockerfileLexer<'config> {
                 while let Some(ch) = state.peek() {
                     if ch == quote {
                         state.advance(1);
-                        state.add_token(DockerfileSyntaxKind::String, start_pos, state.get_position());
-                        return true;
+                        break;
                     }
                     else if ch == '\\' {
                         state.advance(1);
@@ -221,151 +232,70 @@ impl<'config> DockerfileLexer<'config> {
                     }
                 }
 
-                // 未闭合的字符                state.add_token(DockerfileSyntaxKind::Error, start_pos, state.get_position());
-                true
-            }
-            else {
-                false
+                state.add_token(DockerfileSyntaxKind::String, start, state.get_position());
+                return true;
             }
         }
-        else {
-            false
-        }
+        false
     }
 
-    /// 处理路径（不带引号的路径
-    fn lex_path(&self, state: &mut State) -> bool {
-        let start_pos = state.get_position();
-
+    /// 处理路径
+    fn lex_path<S: Source>(&self, state: &mut State<S>) -> bool {
+        let start = state.get_position();
         if let Some(ch) = state.peek() {
-            if ch == '/' || ch == '.' || ch == '~' {
-                state.advance(ch.len_utf8());
+            if ch == '/' || ch == '.' {
+                state.advance(1);
 
                 while let Some(ch) = state.peek() {
-                    if ch.is_alphanumeric() || matches!(ch, '/' | '.' | '-' | '_' | ':' | '~') {
-                        state.advance(ch.len_utf8());
+                    if ch.is_ascii_alphanumeric() || ch == '/' || ch == '.' || ch == '-' || ch == '_' {
+                        state.advance(1);
                     }
                     else {
                         break;
                     }
                 }
 
-                if state.get_position() > start_pos {
-                    state.add_token(DockerfileSyntaxKind::Path, start_pos, state.get_position());
-                    true
-                }
-                else {
-                    false
-                }
-            }
-            else {
-                false
+                state.add_token(DockerfileSyntaxKind::Path, start, state.get_position());
+                return true;
             }
         }
-        else {
-            false
-        }
+        false
     }
 
-    /// 处理操作符和分隔
-    fn lex_operator_or_delimiter(&self, state: &mut State) -> bool {
-        let start_pos = state.get_position();
-
+    /// 处理操作符和分隔符
+    fn lex_operators_and_delimiters<S: Source>(&self, state: &mut State<S>) -> bool {
+        let start = state.get_position();
         if let Some(ch) = state.peek() {
-            let token_kind = match ch {
+            let kind = match ch {
                 '=' => DockerfileSyntaxKind::Equal,
-                ',' => DockerfileSyntaxKind::Comma,
+                ':' => DockerfileSyntaxKind::Colon,
+                '{' => DockerfileSyntaxKind::LeftBrace,
+                '}' => DockerfileSyntaxKind::RightBrace,
                 '[' => DockerfileSyntaxKind::LeftBracket,
                 ']' => DockerfileSyntaxKind::RightBracket,
                 '(' => DockerfileSyntaxKind::LeftParen,
                 ')' => DockerfileSyntaxKind::RightParen,
+                ',' => DockerfileSyntaxKind::Comma,
+                ';' => DockerfileSyntaxKind::Semicolon,
+                '$' => DockerfileSyntaxKind::Dollar,
                 _ => return false,
             };
 
-            state.advance(ch.len_utf8());
-            state.add_token(token_kind, start_pos, state.get_position());
-            true
+            state.advance(1);
+            state.add_token(kind, start, state.get_position());
+            return true;
         }
-        else {
-            false
-        }
+        false
     }
 
-    /// 处理其他文本（作为标识符
-    fn lex_other_text(&self, state: &mut State) -> bool {
-        let start_pos = state.get_position();
-
-        while let Some(ch) = state.peek() {
-            if ch.is_whitespace() || matches!(ch, '=' | ',' | '[' | ']' | '(' | ')' | '#') {
-                break;
-            }
+    /// 处理其他字符
+    fn lex_other<S: Source>(&self, state: &mut State<S>) -> bool {
+        let start = state.get_position();
+        if let Some(ch) = state.peek() {
             state.advance(ch.len_utf8());
+            state.add_token(DockerfileSyntaxKind::Error, start, state.get_position());
+            return true;
         }
-
-        if state.get_position() > start_pos {
-            state.add_token(DockerfileSyntaxKind::Identifier, start_pos, state.get_position());
-            true
-        }
-        else {
-            false
-        }
-    }
-}
-
-impl<'config> Lexer<DockerfileLanguage> for DockerfileLexer<'config> {
-    fn lex(&self, source: &SourceText) -> LexOutput<DockerfileSyntaxKind> {
-        let mut state = LexerState::new(source);
-
-        while state.not_at_end() {
-            // 尝试各种词法规则
-            if self.skip_whitespace(&mut state) {
-                continue;
-            }
-
-            if self.lex_newline(&mut state) {
-                continue;
-            }
-
-            if self.lex_comment(&mut state) {
-                continue;
-            }
-
-            if self.lex_identifier_or_instruction(&mut state, source) {
-                continue;
-            }
-
-            if self.lex_number(&mut state) {
-                continue;
-            }
-
-            if self.lex_string(&mut state) {
-                continue;
-            }
-
-            if self.lex_path(&mut state) {
-                continue;
-            }
-
-            if self.lex_operator_or_delimiter(&mut state) {
-                continue;
-            }
-
-            if self.lex_other_text(&mut state) {
-                continue;
-            }
-
-            // 如果所有规则都不匹配，跳过当前字符并标记为错误
-            let start_pos = state.get_position();
-            if let Some(ch) = state.peek() {
-                state.advance(ch.len_utf8());
-                state.add_token(DockerfileSyntaxKind::Error, start_pos, state.get_position());
-            }
-        }
-
-        // 添加 EOF kind
-        let eof_pos = state.get_position();
-        state.add_token(DockerfileSyntaxKind::Eof, eof_pos, eof_pos);
-
-        state.finish()
+        false
     }
 }

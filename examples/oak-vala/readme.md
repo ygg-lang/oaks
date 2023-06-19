@@ -1,108 +1,173 @@
-# WebAssembly 文本格式 (WAT) 处理模块
+# Oak Vala Parser
 
-这个模块提供了完整的 WAT (WebAssembly Text) 格式处理功能，包括：
-- **词法分析**: 将 WAT 文本分解为词法单元 (tokens)
-- **语法分析**: 将词法单元解析为抽象语法树 (AST)
-- **编译**: 将 AST 编译为 WASM 二进制结构
-- **反编译**: 将 WASM 结构转换回 WAT 文本
+[![Crates.io](https://img.shields.io/crates/v/oak-vala.svg)](https://crates.io/crates/oak-vala)
+[![Documentation](https://docs.rs/oak-vala/badge.svg)](https://docs.rs/oak-vala)
 
-## 模块组件
+High-performance incremental Vala parser for the oak ecosystem with flexible configuration, optimized for GObject-based application development and GNOME ecosystem integration.
 
-### `ast` 模块
+## 🎯 Overview
 
-定义 WAT 抽象语法树的所有节点类型：
-- `Module`: 模块定义
-- `Func`: 函数定义
-- `Export`: 导出定义
-- `Import`: 导入定义
-- `Memory`: 内存定义
-- `Table`: 表定义
-- `Global`: 全局变量定义
-- `Instruction`: WebAssembly 指令
+Oak Vala is a robust parser for the Vala programming language, designed to handle complete Vala syntax including modern object-oriented features and GTK bindings. Built on the solid foundation of oak-core, it provides both high-level convenience and detailed AST generation for Vala analysis and tooling.
 
-### `lexer` 模块
+## ✨ Features
 
-词法分析器，将 WAT 文本转换为词法单元：
-- 关键字识别 (`module`, `func`, `export`, 等)
-- 标识符和名称解析
-- 数值字面量处理
-- 字符串字面量处理
-- 注释和空白字符处理
+- **Complete Vala Syntax**: Supports all Vala features including modern specifications
+- **GObject Integration**: Handles GObject type system and signals
+- **Full AST Generation**: Generates comprehensive Abstract Syntax Trees
+- **Lexer Support**: Built-in tokenization with proper span information
+- **Error Recovery**: Graceful handling of syntax errors with detailed diagnostics
 
-### `parser` 模块
+## 🚀 Quick Start
 
-语法分析器，将词法单元解析为 AST：
-- 递归下降解析
-- 错误恢复和报告
-- 语法验证
-- 位置信息跟踪
+Basic example:
 
-### `compiler` 模块
-
-编译器，将 AST 编译为 WASM 结构：
-- 类型检查
-- 符号解析
-- 指令编码
-- 模块生成
-
-### `writer` 模块
-
-写入器，将 AST 转换回 WAT 文本：
-- 格式化输出
-- 注释生成
-- 代码美化
-
-## 使用示例
-
-### 基本解析和编译
-
-```rust,no_run
-use wasi_assembler::formats::wat::{WatParser, WatCompiler};
+```rust
+use oak_vala::{Parser, ValaLanguage, SourceText};
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
-    let wat_source = r#"
-        (module
-            (func $add (param $a i32) (param $b i32) (result i32)
-                local.get $a
-                local.get $b
-                i32.add
-            )
-            (export "add" (func $add))
-        )
-    "#;
-    
-    // 解析 WAT 文本
-    let mut parser = WatParser::new();
-    let ast = parser.parse(wat_source)?;
-    
-    // 编译为 WASM 结构
-    let mut compiler = WatCompiler::new();
-    let wasm_module = compiler.compile(ast)?;
-    Ok(())
-}
-```
-
-### 错误处理
-
-```rust,no_run
-use wasi_assembler::formats::wat::{WatParser, WatError};
-
-fn main() -> Result<(), Box<dyn std::error::Error>> {
-    let mut parser = WatParser::new();
-    match parser.parse("(module (func $invalid") {
-        Ok(ast) => {
-            // 解析成功
-        }
-        Err(WatError::UnexpectedToken { expected, found, location }) => {
-            eprintln!("语法错误: 期望 {:?}, 找到 {:?} 在位置 {:?}", expected, found, location);
-        }
-        Err(WatError::UnexpectedEof) => {
-            eprintln!("意外结束: 输入不完整");
-        }
-        Err(e) => {
-            eprintln!("解析错误: {}", e);
-        }
+    let parser = Parser::new();
+    let source = SourceText::new(r#"
+public class HelloWorld : Object {
+    public static int main(string[] args) {
+        stdout.printf("Hello, World!\n");
+        return 0;
     }
+}
+    "#);
+    
+    let result = parser.parse(&source);
+    println!("Parsed Vala class successfully.");
     Ok(())
 }
 ```
+
+## 📋 Parsing Examples
+
+### Class Parsing
+```rust
+use oak_vala::{Parser, ValaLanguage, SourceText};
+
+let parser = Parser::new();
+let source = SourceText::new(r#"
+public class Calculator : Object {
+    private double _result;
+    
+    public double result {
+        get { return _result; }
+        set { _result = value; }
+    }
+    
+    public Calculator() {
+        _result = 0.0;
+    }
+    
+    public double add(double value) {
+        _result += value;
+        return _result;
+    }
+    
+    public signal void changed(double new_value);
+}
+"#);
+
+let result = parser.parse(&source);
+println!("Parsed Vala class successfully.");
+```
+
+### Interface Parsing
+```rust
+use oak_vala::{Parser, ValaLanguage, SourceText};
+
+let parser = Parser::new();
+let source = SourceText::new(r#"
+public interface Drawable {
+    public abstract void draw(Context ctx);
+    
+    public virtual void resize(int width, int height) {
+        // Default implementation
+    }
+}
+"#);
+
+let result = parser.parse(&source);
+println!("Parsed Vala interface successfully.");
+```
+
+## 🔧 Advanced Features
+
+### Token-Level Parsing
+```rust
+use oak_vala::{Parser, ValaLanguage, SourceText};
+
+let parser = Parser::new();
+let source = SourceText::new("public class Test { public int value; }");
+let result = parser.parse(&source);
+// Token information is available in the parse result
+```
+
+### Error Handling
+```rust
+use oak_vala::{Parser, ValaLanguage, SourceText};
+
+let parser = Parser::new();
+let source = SourceText::new(r#"
+public class Broken {
+    public int invalid_method() {
+        return "not a number"; // Type mismatch
+    }
+    
+    public int missing_semicolon // Missing semicolon
+    public property invalid_prop // Missing type
+}
+"#);
+
+let result = parser.parse(&source);
+if let Err(e) = result.result {
+    println!("Parse error: {:?}", e);
+}
+```
+
+## 🏗️ AST Structure
+
+The parser generates a comprehensive AST with the following main structures:
+
+- **Class**: Class definitions with inheritance
+- **Interface**: Interface definitions
+- **Method**: Method and function definitions
+- **Property**: Property definitions with getters/setters
+- **Signal**: Signal definitions for event handling
+- **Namespace**: Namespace declarations
+- **Statements**: Assignment, if, loop, try statements
+- **Expressions**: Binary, unary, method call expressions
+
+## 📊 Performance
+
+- **Streaming**: Parse large Vala files without loading entirely into memory
+- **Incremental**: Re-parse only changed sections
+- **Memory Efficient**: Smart AST node allocation
+- **Fast Recovery**: Quick error recovery for better IDE integration
+
+## 🔗 Integration
+
+Oak-vala integrates seamlessly with:
+
+- **Static Analysis**: Code quality and security analysis
+- **Code Generation**: Generating C code from Vala AST
+- **IDE Support**: Language server protocol compatibility
+- **Refactoring**: Automated code refactoring
+- **Documentation**: Generating documentation from Vala code
+
+## 📚 Examples
+
+Check out the [examples](examples/) directory for comprehensive examples:
+
+- Complete Vala class parsing
+- Interface and implementation analysis
+- Property and signal handling
+- Integration with GTK applications
+
+## 🤝 Contributing
+
+Contributions are welcome! 
+
+Please feel free to submit pull requests at the [project repository](https://github.com/ygg-lang/oaks/tree/dev/examples/oak-vala) or open [issues](https://github.com/ygg-lang/oaks/issues).

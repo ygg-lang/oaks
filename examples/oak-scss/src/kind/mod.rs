@@ -7,6 +7,7 @@ pub enum ScssSyntaxKind {
     // 基础词法种类
     Whitespace,
     Newline,
+    Comment,
     Error,
     Eof,
     ErrorNode,
@@ -93,6 +94,7 @@ pub enum ScssSyntaxKind {
     AndAnd,     // &&
     OrOr,       // ||
     Not,        // !
+    Bang,       // ! (alternative name)
     Tilde,      // ~
     LShift,     // <<
     RShift,     // >>

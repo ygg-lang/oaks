@@ -1,4 +1,4 @@
-use crate::syntax::SqlSyntaxKind;
+use crate::{ast::SqlRoot, kind::SqlSyntaxKind};
 use oak_core::Language;
 
 /// SQL 语言实现
@@ -44,4 +44,5 @@ impl Default for SqlLanguage {
 
 impl Language for SqlLanguage {
     type SyntaxKind = SqlSyntaxKind;
+    type TypedRoot = SqlRoot;
 }

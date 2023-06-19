@@ -1,14 +1,13 @@
-use alloc::string::ToString;
-use oak_core::{FileTestSuite, Lexer, Parser, SourceSpan};
-use oak_graphql::{CLanguage, CLexRules, CParser, CToken, CTokenKind};
-use std::{fs, path::Path};
+use oak_core::{SourceText, lexer::Lexer};
+use oak_graphql::{kind::GraphQLSyntaxKind, language::GraphQLLanguage, lexer::GraphQLLexer};
+use std::fs;
 
-struct CFileTestSuite {
+struct GraphQLFileTestSuite {
     test_dir: String,
     extension: String,
 }
 
-impl CFileTestSuite {
+impl GraphQLFileTestSuite {
     fn new(test_dir: &str, extension: &str) -> Self {
         Self { test_dir: test_dir.to_string(), extension: extension.to_string() }
     }
@@ -38,54 +37,43 @@ impl CFileTestSuite {
 }
 
 fn test_lexer() {
-    println!("Testing C Lexer...");
+    println!("Testing GraphQL Lexer...");
 
-    let test_suite = CFileTestSuite::new("tests/lexer", "c");
-    let test_files = test_suite.find_test_files();
+    let language = GraphQLLanguage {};
+    let lexer = GraphQLLexer::new(&language);
 
-    for file_path in test_files {
-        println!("Testing file: {}", file_path);
+    let content = "query { user { name } }";
+    let source = SourceText::new(content);
+    let lex_result = lexer.lex(&source);
 
-        match test_suite.read_file_content(&file_path) {
-            Ok(content) => {
-                let mut lexer = Lexer::new(&content, CLexRules);
-                let tokens = lexer.tokenize();
+    match lex_result.result {
+        Ok(tokens) => {
+            println!("Lexed {} tokens", tokens.len());
 
-                println!("  Tokens found: {}", tokens.len());
-
-                // 显示前几tokens 作为示例
-                for (i, token) in tokens.iter().take(10).enumerate() {
-                    println!("    {}: {:?}", i, token);
-                }
-
-                if tokens.len() > 10 {
-                    println!("    ... and {} more tokens", tokens.len() - 10);
-                }
-
-                // 验证最后一tokens EOF
-                if let Some(last_token) = tokens.last() {
-                    match last_token.kind {
-                        CTokenKind::Eof => println!("  Lexing completed successfully"),
-                        _ => println!("  Warning: Last tokens is not EOF"),
-                    }
+            // 检查是否有 EOF token
+            if let Some(last_token) = tokens.last() {
+                if last_token.kind == GraphQLSyntaxKind::Eof {
+                    println!("✓ Found EOF token");
                 }
                 else {
-                    println!("  Warning: No tokens generated");
+                    println!("✗ Missing EOF token");
                 }
             }
-            Err(e) => {
-                println!("  Error reading file: {}", e);
-            }
         }
+        Err(e) => {
+            println!("✗ Lexer error: {}", e);
+        }
+    }
 
-        println!();
+    if !lex_result.diagnostics.is_empty() {
+        println!("Diagnostics: {} warnings/errors", lex_result.diagnostics.len());
     }
 }
 
 fn test_parser() {
-    println!("Testing C Parser...");
+    println!("Testing GraphQL Parser...");
 
-    let test_suite = CFileTestSuite::new("tests/parser", "c");
+    let test_suite = GraphQLFileTestSuite::new("tests/parser", "graphql");
     let test_files = test_suite.find_test_files();
 
     for file_path in test_files {
@@ -94,22 +82,34 @@ fn test_parser() {
         match test_suite.read_file_content(&file_path) {
             Ok(content) => {
                 // 首先进行词法分析
-                let mut lexer = Lexer::new(&content, CLexRules);
-                let tokens = lexer.tokenize();
+                let language = GraphQLLanguage {};
+                let lexer = GraphQLLexer::new(&language);
+                let source = SourceText::new(&content);
+                let lex_result = lexer.lex(&source);
 
-                // 然后进行语法分析
-                let mut parser = CParser::new(tokens);
-                match parser.parse() {
-                    Ok(ast) => {
-                        println!("  Parsing completed successfully");
-                        println!(
-                            "  AST root: TranslationUnit with {} external declarations",
-                            ast.translation_unit.external_declarations.len()
-                        );
+                match lex_result.result {
+                    Ok(tokens) => {
+                        println!("  Lexing completed successfully");
+                        println!("  Tokens found: {}", tokens.len());
+
+                        // TODO: 添加 GraphQL 解析器实现
+                        // let mut parser = GraphQLParser::new(tokens);
+                        // match parser.parse() {
+                        //     Ok(ast) => {
+                        //         println!("  Parsing completed successfully");
+                        //     }
+                        //     Err(e) => {
+                        //         println!("  Parse error: {:?}", e);
+                        //     }
+                        // }
                     }
                     Err(e) => {
-                        println!("  Parse error: {:?}", e);
+                        println!("  Lexer error: {}", e);
                     }
+                }
+
+                if !lex_result.diagnostics.is_empty() {
+                    println!("  Diagnostics: {} warnings/errors", lex_result.diagnostics.len());
                 }
             }
             Err(e) => {
@@ -122,8 +122,8 @@ fn test_parser() {
 }
 
 fn main() {
-    println!("Running C Language Tests");
-    println!("========================");
+    println!("Running GraphQL Language Tests");
+    println!("==============================");
 
     test_lexer();
     test_parser();

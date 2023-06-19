@@ -32,30 +32,31 @@ WebAssembly 文本格式 (WAT) 的语法分析器，将词法单元解析为抽�
 
 ## 使用示例
 
-```rust
-use oak_wat::{WatLexer, WatParser};
+```rust,no_run
+use oak_wolfram::{WolframLexer, WolframParser, WolframLanguage};
+use oak_core::{source::SourceText, Lexer};
 
-let wat_source = r#"
-    (module
-        (func $add (param $a i32) (param $b i32) (result i32)
-            local.get $a
-            local.get $b
-            i32.add)
-        (export "add" (func $add))
-    )
+let wolfram_source = r#"
+    f[x_] := x^2 + 2*x + 1;
+    result = f[5];
+    Print[result];
 "#;
 
+// 创建语言配置
+let config = WolframLanguage::default();
+
 // 词法分析
-let mut lexer = WatLexer::new();
-let lexer_tokens = lexer.tokenize(wat_source);
+let lexer = WolframLexer::new(&config);
+let source = SourceText::new(wolfram_source);
+let lex_output = lexer.lex(&source);
 
-// 语法分析（直接复用 lexer 的 WatToken）
-let mut parser = WatParser::new();
-let out = parser.parse(lexer_tokens);
+// 语法分析
+let mut parser = WolframParser::new();
+let parse_output = parser.parse(lex_output.result.unwrap());
 
-match out.result {
-    Ok(module) => println!("解析成功，模块包含 {} 个项目", module.items.len()),
-    Err(e) => println!("解析失败: {}", e),
+match parse_output.result {
+    Ok(tree) => println!("解析成功"),
+    Err(e) => println!("解析失败: {:?}", e),
 }
 ```
 

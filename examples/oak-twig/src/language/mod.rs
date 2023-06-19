@@ -1,4 +1,4 @@
-use crate::{lexer::TwigLexer, syntax::TwigSyntaxKind};
+use crate::{ast::TwigRoot, kind::TwigSyntaxKind, lexer::TwigLexer, parser::TwigParser};
 use oak_core::Language;
 
 /// Twig 模板引擎配置
@@ -19,6 +19,13 @@ pub struct TwigLanguage {
 
 impl Language for TwigLanguage {
     type SyntaxKind = TwigSyntaxKind;
+    type TypedRoot = TwigRoot;
+}
+
+impl Default for TwigLanguage {
+    fn default() -> Self {
+        Self::standard()
+    }
 }
 
 impl TwigLanguage {
@@ -32,5 +39,9 @@ impl TwigLanguage {
 
     pub fn lexer(&self) -> TwigLexer<'_> {
         TwigLexer::new(self)
+    }
+
+    pub fn parser(&self) -> TwigParser<'_> {
+        TwigParser::new(self)
     }
 }

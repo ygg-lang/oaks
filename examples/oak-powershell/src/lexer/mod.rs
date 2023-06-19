@@ -1,8 +1,9 @@
 use crate::{kind::PowerShellSyntaxKind, language::PowerShellLanguage};
-use oak_core::{Lexer, LexerState, SourceText, lexer::LexOutput};
+use oak_core::{IncrementalCache, Lexer, LexerState, OakError, lexer::LexOutput, source::Source};
 
-type State<'input> = LexerState<'input, PowerShellLanguage>;
+type State<S: Source> = LexerState<S, PowerShellLanguage>;
 
+#[derive(Clone)]
 pub struct PowerShellLexer<'config> {
     config: &'config PowerShellLanguage,
 }
@@ -12,8 +13,60 @@ impl<'config> PowerShellLexer<'config> {
         Self { config }
     }
 
-    /// 跳过空白字符
-    fn skip_whitespace(&self, state: &mut State) -> bool {
+    fn run<S: Source>(&self, state: &mut State<S>) -> Result<(), OakError> {
+        while state.not_at_end() {
+            if self.skip_whitespace(state) {
+                continue;
+            }
+
+            if self.lex_newline(state) {
+                continue;
+            }
+
+            if self.lex_comment(state) {
+                continue;
+            }
+
+            if self.lex_string(state) {
+                continue;
+            }
+
+            if self.lex_number(state) {
+                continue;
+            }
+
+            if self.lex_variable(state) {
+                continue;
+            }
+
+            if self.lex_identifier_or_keyword(state) {
+                continue;
+            }
+
+            if self.lex_operators_and_punctuation(state) {
+                continue;
+            }
+
+            // 如果没有匹配任何规则，跳过当前字符
+            if let Some(ch) = state.peek() {
+                let start_pos = state.get_position();
+                state.advance(ch.len_utf8());
+                state.add_token(PowerShellSyntaxKind::Error, start_pos, state.get_position());
+            }
+            else {
+                // 如果已到达文件末尾，退出循环
+                break;
+            }
+        }
+
+        // Add EOF token
+        let pos = state.get_position();
+        state.add_token(PowerShellSyntaxKind::Eof, pos, pos);
+
+        Ok(())
+    }
+
+    fn skip_whitespace<S: Source>(&self, state: &mut State<S>) -> bool {
         let start_pos = state.get_position();
 
         while let Some(ch) = state.peek() {
@@ -34,8 +87,7 @@ impl<'config> PowerShellLexer<'config> {
         }
     }
 
-    /// 处理换行
-    fn lex_newline(&self, state: &mut State) -> bool {
+    fn lex_newline<S: Source>(&self, state: &mut State<S>) -> bool {
         let start_pos = state.get_position();
 
         if let Some('\n') = state.peek() {
@@ -56,13 +108,11 @@ impl<'config> PowerShellLexer<'config> {
         }
     }
 
-    /// 处理注释
-    fn lex_comment(&self, state: &mut State) -> bool {
+    fn lex_comment<S: Source>(&self, state: &mut State<S>) -> bool {
         let start_pos = state.get_position();
 
         if let Some('#') = state.peek() {
             state.advance(1);
-            
             // 单行注释
             while let Some(ch) = state.peek() {
                 if ch == '\n' || ch == '\r' {
@@ -70,56 +120,82 @@ impl<'config> PowerShellLexer<'config> {
                 }
                 state.advance(ch.len_utf8());
             }
-            
             state.add_token(PowerShellSyntaxKind::Comment, start_pos, state.get_position());
             true
         }
-        else if state.peek() == Some('<') && state.peek_next_n(1) == Some('#') {
-            // 多行注释 <# ... #>
-            state.advance(2);
-            
-            while let Some(ch) = state.peek() {
-                if ch == '#' && state.peek_next_n(1) == Some('>') {
-                    state.advance(2);
-                    break;
-                }
-                state.advance(ch.len_utf8());
-            }
-            
-            state.add_token(PowerShellSyntaxKind::Comment, start_pos, state.get_position());
-            true
-        }
-        else {
-            false
-        }
-    }
-
-    /// 处理字符串字面量
-    fn lex_string(&self, state: &mut State) -> bool {
-        let start_pos = state.get_position();
-
-        if let Some(quote) = state.peek() {
-            if quote == '"' || quote == '\'' {
+        else if let Some('<') = state.peek() {
+            state.advance(1);
+            if let Some('#') = state.peek() {
                 state.advance(1);
-                
-                while let Some(ch) = state.peek() {
-                    if ch == quote {
+                // 多行注释 <# ... #>
+                let mut depth = 1;
+                while let Some(ch) = state.peek()
+                    && depth > 0
+                {
+                    if ch == '<' {
                         state.advance(1);
-                        break;
-                    }
-                    else if ch == '`' && quote == '"' {
-                        // PowerShell 转义字符
-                        state.advance(1);
-                        if let Some(_) = state.peek() {
+                        if let Some('#') = state.peek() {
                             state.advance(1);
+                            depth += 1;
+                        }
+                    }
+                    else if ch == '#' {
+                        state.advance(1);
+                        if let Some('>') = state.peek() {
+                            state.advance(1);
+                            depth -= 1;
                         }
                     }
                     else {
                         state.advance(ch.len_utf8());
                     }
                 }
-                
-                state.add_token(PowerShellSyntaxKind::String, start_pos, state.get_position());
+                state.add_token(PowerShellSyntaxKind::Comment, start_pos, state.get_position());
+                true
+            }
+            else {
+                // 回退，这不是注释
+                state.set_position(start_pos);
+                false
+            }
+        }
+        else {
+            false
+        }
+    }
+
+    fn lex_string<S: Source>(&self, state: &mut State<S>) -> bool {
+        let start_pos = state.get_position();
+
+        if let Some(quote_char) = state.peek() {
+            if quote_char == '"' || quote_char == '\'' {
+                state.advance(1); // 跳过开始引号
+
+                let mut escaped = false;
+                while let Some(ch) = state.peek() {
+                    if escaped {
+                        escaped = false;
+                        state.advance(ch.len_utf8());
+                    }
+                    else if ch == '`' {
+                        // PowerShell 使用反引号作为转义字符
+                        escaped = true;
+                        state.advance(1);
+                    }
+                    else if ch == quote_char {
+                        state.advance(1); // 跳过结束引号
+                        break;
+                    }
+                    else if ch == '\n' || ch == '\r' {
+                        // 字符串可以跨行
+                        state.advance(ch.len_utf8());
+                    }
+                    else {
+                        state.advance(ch.len_utf8());
+                    }
+                }
+
+                state.add_token(PowerShellSyntaxKind::StringLiteral, start_pos, state.get_position());
                 true
             }
             else {
@@ -131,59 +207,12 @@ impl<'config> PowerShellLexer<'config> {
         }
     }
 
-    /// 处理 here-string
-    fn lex_here_string(&self, state: &mut State) -> bool {
-        let start_pos = state.get_position();
-
-        if state.peek() == Some('@') {
-            if state.peek_next_n(1) == Some('"') {
-                // @"....."@
-                state.advance(2);
-                
-                while let Some(ch) = state.peek() {
-                    if ch == '"' && state.peek_next_n(1) == Some('@') {
-                        state.advance(2);
-                        break;
-                    }
-                    state.advance(ch.len_utf8());
-                }
-                
-                state.add_token(PowerShellSyntaxKind::String, start_pos, state.get_position());
-                true
-            }
-            else if state.peek_next_n(1) == Some('\'') {
-                // @'.....'@
-                state.advance(2);
-                
-                while let Some(ch) = state.peek() {
-                    if ch == '\'' && state.peek_next_n(1) == Some('@') {
-                        state.advance(2);
-                        break;
-                    }
-                    state.advance(ch.len_utf8());
-                }
-                
-                state.add_token(PowerShellSyntaxKind::String, start_pos, state.get_position());
-                true
-            }
-            else {
-                false
-            }
-        }
-        else {
-            false
-        }
-    }
-
-    /// 处理数字
-    fn lex_number(&self, state: &mut State) -> bool {
-        let start_pos = state.get_position();
-
+    fn lex_number<S: Source>(&self, state: &mut State<S>) -> bool {
         if let Some(ch) = state.peek() {
             if ch.is_ascii_digit() {
-                state.advance(1);
-                
-                // 整数部分
+                let start_pos = state.get_position();
+
+                // 读取整数部分
                 while let Some(ch) = state.peek() {
                     if ch.is_ascii_digit() {
                         state.advance(1);
@@ -192,10 +221,11 @@ impl<'config> PowerShellLexer<'config> {
                         break;
                     }
                 }
-                
-                // 小数部分
-                if state.peek() == Some('.') && state.peek_next_n(1).map_or(false, |c| c.is_ascii_digit()) {
+
+                // 检查小数点
+                if let Some('.') = state.peek() {
                     state.advance(1);
+                    // 读取小数部分
                     while let Some(ch) = state.peek() {
                         if ch.is_ascii_digit() {
                             state.advance(1);
@@ -205,13 +235,13 @@ impl<'config> PowerShellLexer<'config> {
                         }
                     }
                 }
-                
-                // 科学计数法
+
+                // 检查科学记数法
                 if let Some(ch) = state.peek() {
                     if ch == 'e' || ch == 'E' {
                         state.advance(1);
-                        if let Some(sign) = state.peek() {
-                            if sign == '+' || sign == '-' {
+                        if let Some(ch) = state.peek() {
+                            if ch == '+' || ch == '-' {
                                 state.advance(1);
                             }
                         }
@@ -225,8 +255,8 @@ impl<'config> PowerShellLexer<'config> {
                         }
                     }
                 }
-                
-                state.add_token(PowerShellSyntaxKind::Number, start_pos, state.get_position());
+
+                state.add_token(PowerShellSyntaxKind::NumberLiteral, start_pos, state.get_position());
                 true
             }
             else {
@@ -238,27 +268,18 @@ impl<'config> PowerShellLexer<'config> {
         }
     }
 
-    /// 处理变量
-    fn lex_variable(&self, state: &mut State) -> bool {
+    fn lex_variable<S: Source>(&self, state: &mut State<S>) -> bool {
         let start_pos = state.get_position();
 
         if let Some('$') = state.peek() {
             state.advance(1);
-            
-            // 特殊变量如 $_, $?, $^, $$
-            if let Some(ch) = state.peek() {
-                if ch == '_' || ch == '?' || ch == '^' || ch == '$' {
-                    state.advance(1);
-                    state.add_token(PowerShellSyntaxKind::Variable, start_pos, state.get_position());
-                    return true;
-                }
-            }
-            
-            // 普通变量名
+
+            // 变量名必须以字母或下划线开头
             if let Some(ch) = state.peek() {
                 if ch.is_alphabetic() || ch == '_' {
                     state.advance(ch.len_utf8());
-                    
+
+                    // 后续字符可以是字母、数字或下划线
                     while let Some(ch) = state.peek() {
                         if ch.is_alphanumeric() || ch == '_' {
                             state.advance(ch.len_utf8());
@@ -267,18 +288,18 @@ impl<'config> PowerShellLexer<'config> {
                             break;
                         }
                     }
-                    
+
                     state.add_token(PowerShellSyntaxKind::Variable, start_pos, state.get_position());
                     true
                 }
                 else {
-                    // 只有 $ 符号
-                    state.add_token(PowerShellSyntaxKind::Variable, start_pos, state.get_position());
+                    // 只有 $ 符号，作为操作符处理
+                    state.add_token(PowerShellSyntaxKind::Dollar, start_pos, state.get_position());
                     true
                 }
             }
             else {
-                state.add_token(PowerShellSyntaxKind::Variable, start_pos, state.get_position());
+                state.add_token(PowerShellSyntaxKind::Dollar, start_pos, state.get_position());
                 true
             }
         }
@@ -287,41 +308,64 @@ impl<'config> PowerShellLexer<'config> {
         }
     }
 
-    /// 处理标识符和关键字
-    fn lex_identifier_or_keyword(&self, state: &mut State) -> bool {
-        let start_pos = state.get_position();
-
+    fn lex_identifier_or_keyword<S: Source>(&self, state: &mut State<S>) -> bool {
         if let Some(ch) = state.peek() {
             if ch.is_alphabetic() || ch == '_' {
-                state.advance(ch.len_utf8());
-                
+                let start_pos = state.get_position();
+                let mut text = String::new();
+
+                // 读取标识符
                 while let Some(ch) = state.peek() {
                     if ch.is_alphanumeric() || ch == '_' || ch == '-' {
+                        text.push(ch);
                         state.advance(ch.len_utf8());
                     }
                     else {
                         break;
                     }
                 }
-                
-                let text = state.get_text_range(start_pos, state.get_position());
-                let kind = match text.to_lowercase().as_str() {
-                    "if" | "else" | "elseif" | "switch" | "for" | "foreach" | "while" | "do" |
-                    "function" | "filter" | "workflow" | "class" | "enum" | "param" | "begin" |
-                    "process" | "end" | "try" | "catch" | "finally" | "throw" | "return" |
-                    "break" | "continue" | "exit" | "where" | "select" | "sort" | "group" |
-                    "measure" | "compare" | "tee" | "out" | "export" | "import" | "new" |
-                    "set" | "get" | "add" | "remove" | "clear" | "copy" | "move" | "rename" |
-                    "test" | "invoke" | "start" | "stop" | "restart" | "suspend" | "resume" |
-                    "wait" | "receive" | "send" | "read" | "write" | "format" | "convert" |
-                    "join" | "split" | "replace" | "match" | "like" | "contains" | "in" |
-                    "is" | "as" | "and" | "or" | "not" | "xor" | "band" | "bor" | "bnot" |
-                    "bxor" | "shl" | "shr" | "eq" | "ne" | "gt" | "ge" | "lt" | "le" |
-                    "ieq" | "ine" | "igt" | "ige" | "ilt" | "ile" | "ceq" | "cne" | "cgt" |
-                    "cge" | "clt" | "cle" | "true" | "false" | "null" => PowerShellSyntaxKind::Keyword,
+
+                // 检查是否是关键字
+                let kind = match text.as_str() {
+                    "begin" => PowerShellSyntaxKind::Begin,
+                    "break" => PowerShellSyntaxKind::Break,
+                    "catch" => PowerShellSyntaxKind::Catch,
+                    "class" => PowerShellSyntaxKind::Class,
+                    "continue" => PowerShellSyntaxKind::Continue,
+                    "data" => PowerShellSyntaxKind::Data,
+                    "define" => PowerShellSyntaxKind::Define,
+                    "do" => PowerShellSyntaxKind::Do,
+                    "dynamicparam" => PowerShellSyntaxKind::DynamicParam,
+                    "else" => PowerShellSyntaxKind::Else,
+                    "elseif" => PowerShellSyntaxKind::ElseIf,
+                    "end" => PowerShellSyntaxKind::End,
+                    "exit" => PowerShellSyntaxKind::Exit,
+                    "filter" => PowerShellSyntaxKind::Filter,
+                    "finally" => PowerShellSyntaxKind::Finally,
+                    "for" => PowerShellSyntaxKind::For,
+                    "foreach" => PowerShellSyntaxKind::ForEach,
+                    "from" => PowerShellSyntaxKind::From,
+                    "function" => PowerShellSyntaxKind::Function,
+                    "if" => PowerShellSyntaxKind::If,
+                    "in" => PowerShellSyntaxKind::In,
+                    "param" => PowerShellSyntaxKind::Param,
+                    "process" => PowerShellSyntaxKind::Process,
+                    "return" => PowerShellSyntaxKind::Return,
+                    "switch" => PowerShellSyntaxKind::Switch,
+                    "throw" => PowerShellSyntaxKind::Throw,
+                    "trap" => PowerShellSyntaxKind::Trap,
+                    "try" => PowerShellSyntaxKind::Try,
+                    "until" => PowerShellSyntaxKind::Until,
+                    "using" => PowerShellSyntaxKind::Using,
+                    "var" => PowerShellSyntaxKind::Var,
+                    "while" => PowerShellSyntaxKind::While,
+                    "workflow" => PowerShellSyntaxKind::Workflow,
+                    "true" => PowerShellSyntaxKind::BooleanLiteral,
+                    "false" => PowerShellSyntaxKind::BooleanLiteral,
+                    "null" => PowerShellSyntaxKind::NullLiteral,
                     _ => PowerShellSyntaxKind::Identifier,
                 };
-                
+
                 state.add_token(kind, start_pos, state.get_position());
                 true
             }
@@ -334,58 +378,206 @@ impl<'config> PowerShellLexer<'config> {
         }
     }
 
-    /// 处理操作符
-    fn lex_operator(&self, state: &mut State) -> bool {
-        let start_pos = state.get_position();
-
-        // 多字符操作符
-        let multi_char_ops = [
-            "++", "--", "+=", "-=", "*=", "/=", "%=", "==", "!=", "<=", ">=", 
-            "&&", "||", "..", "-eq", "-ne", "-gt", "-ge", "-lt", "-le",
-            "-like", "-notlike", "-match", "-notmatch", "-contains", "-notcontains",
-            "-in", "-notin", "-replace", "-split", "-join", "-is", "-isnot",
-            "-as", "-and", "-or", "-not", "-xor", "-band", "-bor", "-bnot",
-            "-bxor", "-shl", "-shr", "-ieq", "-ine", "-igt", "-ige", "-ilt",
-            "-ile", "-ceq", "-cne", "-cgt", "-cge", "-clt", "-cle"
-        ];
-
-        for op in &multi_char_ops {
-            if state.peek_string(op.len()) == Some(op.to_string()) {
-                state.advance(op.len());
-                state.add_token(PowerShellSyntaxKind::Operator, start_pos, state.get_position());
-                return true;
-            }
-        }
-
-        // 单字符操作符
+    fn lex_operators_and_punctuation<S: Source>(&self, state: &mut State<S>) -> bool {
         if let Some(ch) = state.peek() {
-            match ch {
-                '+' | '-' | '*' | '/' | '%' | '=' | '<' | '>' | '!' | '&' | '|' | '^' | '~' => {
-                    state.advance(1);
-                    state.add_token(PowerShellSyntaxKind::Operator, start_pos, state.get_position());
-                    true
-                }
-                _ => false
-            }
-        }
-        else {
-            false
-        }
-    }
+            let start_pos = state.get_position();
 
-    /// 处理分隔符
-    fn lex_delimiter(&self, state: &mut State) -> bool {
-        let start_pos = state.get_position();
-
-        if let Some(ch) = state.peek() {
-            match ch {
-                '(' | ')' | '[' | ']' | '{' | '}' | ',' | ';' | '.' | ':' => {
+            let kind = match ch {
+                '+' => {
                     state.advance(1);
-                    state.add_token(PowerShellSyntaxKind::Delimiter, start_pos, state.get_position());
-                    true
+                    if let Some('+') = state.peek() {
+                        state.advance(1);
+                        PowerShellSyntaxKind::Plus
+                    }
+                    else if let Some('=') = state.peek() {
+                        state.advance(1);
+                        PowerShellSyntaxKind::Equal
+                    }
+                    else {
+                        PowerShellSyntaxKind::Plus
+                    }
                 }
-                _ => false
-            }
+                '-' => {
+                    state.advance(1);
+                    if let Some('-') = state.peek() {
+                        state.advance(1);
+                        PowerShellSyntaxKind::Minus
+                    }
+                    else if let Some('=') = state.peek() {
+                        state.advance(1);
+                        PowerShellSyntaxKind::Equal
+                    }
+                    else {
+                        PowerShellSyntaxKind::Minus
+                    }
+                }
+                '*' => {
+                    state.advance(1);
+                    if let Some('=') = state.peek() {
+                        state.advance(1);
+                        PowerShellSyntaxKind::Equal
+                    }
+                    else {
+                        PowerShellSyntaxKind::Multiply
+                    }
+                }
+                '/' => {
+                    state.advance(1);
+                    if let Some('=') = state.peek() {
+                        state.advance(1);
+                        PowerShellSyntaxKind::Equal
+                    }
+                    else {
+                        PowerShellSyntaxKind::Divide
+                    }
+                }
+                '%' => {
+                    state.advance(1);
+                    if let Some('=') = state.peek() {
+                        state.advance(1);
+                        PowerShellSyntaxKind::Equal
+                    }
+                    else {
+                        PowerShellSyntaxKind::Modulo
+                    }
+                }
+                '=' => {
+                    state.advance(1);
+                    if let Some('=') = state.peek() {
+                        state.advance(1);
+                        PowerShellSyntaxKind::Equal
+                    }
+                    else {
+                        PowerShellSyntaxKind::Equal
+                    }
+                }
+                '!' => {
+                    state.advance(1);
+                    if let Some('=') = state.peek() {
+                        state.advance(1);
+                        PowerShellSyntaxKind::NotEqual
+                    }
+                    else {
+                        PowerShellSyntaxKind::Exclamation
+                    }
+                }
+                '<' => {
+                    state.advance(1);
+                    if let Some('=') = state.peek() {
+                        state.advance(1);
+                        PowerShellSyntaxKind::LessEqual
+                    }
+                    else {
+                        PowerShellSyntaxKind::LessThan
+                    }
+                }
+                '>' => {
+                    state.advance(1);
+                    if let Some('=') = state.peek() {
+                        state.advance(1);
+                        PowerShellSyntaxKind::GreaterEqual
+                    }
+                    else {
+                        PowerShellSyntaxKind::GreaterThan
+                    }
+                }
+                '&' => {
+                    state.advance(1);
+                    if let Some('&') = state.peek() {
+                        state.advance(1);
+                        PowerShellSyntaxKind::And
+                    }
+                    else {
+                        PowerShellSyntaxKind::Ampersand
+                    }
+                }
+                '|' => {
+                    state.advance(1);
+                    if let Some('|') = state.peek() {
+                        state.advance(1);
+                        PowerShellSyntaxKind::Or
+                    }
+                    else {
+                        PowerShellSyntaxKind::Pipe
+                    }
+                }
+                '^' => {
+                    state.advance(1);
+                    PowerShellSyntaxKind::Xor
+                }
+                '~' => {
+                    state.advance(1);
+                    PowerShellSyntaxKind::Not
+                }
+                '?' => {
+                    state.advance(1);
+                    PowerShellSyntaxKind::Question
+                }
+                ':' => {
+                    state.advance(1);
+                    if let Some(':') = state.peek() {
+                        state.advance(1);
+                        PowerShellSyntaxKind::DoubleColon
+                    }
+                    else {
+                        PowerShellSyntaxKind::Colon
+                    }
+                }
+                ';' => {
+                    state.advance(1);
+                    PowerShellSyntaxKind::Semicolon
+                }
+                ',' => {
+                    state.advance(1);
+                    PowerShellSyntaxKind::Comma
+                }
+                '.' => {
+                    state.advance(1);
+                    if let Some('.') = state.peek() {
+                        state.advance(1);
+                        PowerShellSyntaxKind::DotDot
+                    }
+                    else {
+                        PowerShellSyntaxKind::Dot
+                    }
+                }
+                '(' => {
+                    state.advance(1);
+                    PowerShellSyntaxKind::LeftParen
+                }
+                ')' => {
+                    state.advance(1);
+                    PowerShellSyntaxKind::RightParen
+                }
+                '[' => {
+                    state.advance(1);
+                    PowerShellSyntaxKind::LeftBracket
+                }
+                ']' => {
+                    state.advance(1);
+                    PowerShellSyntaxKind::RightBracket
+                }
+                '{' => {
+                    state.advance(1);
+                    PowerShellSyntaxKind::LeftBrace
+                }
+                '}' => {
+                    state.advance(1);
+                    PowerShellSyntaxKind::RightBrace
+                }
+                '@' => {
+                    state.advance(1);
+                    PowerShellSyntaxKind::At
+                }
+                '`' => {
+                    state.advance(1);
+                    PowerShellSyntaxKind::Backtick
+                }
+                _ => return false,
+            };
+
+            state.add_token(kind, start_pos, state.get_position());
+            true
         }
         else {
             false
@@ -394,60 +586,14 @@ impl<'config> PowerShellLexer<'config> {
 }
 
 impl<'config> Lexer<PowerShellLanguage> for PowerShellLexer<'config> {
-    fn lex(&self, source: &SourceText) -> LexOutput<PowerShellSyntaxKind> {
-        let mut state = State::new(source);
-        
-        while !state.is_at_end() {
-            if self.skip_whitespace(&mut state) {
-                continue;
-            }
-            
-            if self.lex_newline(&mut state) {
-                continue;
-            }
-            
-            if self.lex_comment(&mut state) {
-                continue;
-            }
-            
-            if self.lex_here_string(&mut state) {
-                continue;
-            }
-            
-            if self.lex_string(&mut state) {
-                continue;
-            }
-            
-            if self.lex_number(&mut state) {
-                continue;
-            }
-            
-            if self.lex_variable(&mut state) {
-                continue;
-            }
-            
-            if self.lex_identifier_or_keyword(&mut state) {
-                continue;
-            }
-            
-            if self.lex_operator(&mut state) {
-                continue;
-            }
-            
-            if self.lex_delimiter(&mut state) {
-                continue;
-            }
-            
-            // 如果没有匹配任何规则，跳过当前字符
-            if let Some(ch) = state.peek() {
-                state.advance(ch.len_utf8());
-            }
-        }
-        
-        // 添加 EOF kind
-        let pos = state.get_position();
-        state.add_token(PowerShellSyntaxKind::Eof, pos, pos);
-        
-        state.finish()
+    fn lex_incremental(
+        &self,
+        source: impl Source,
+        _changed: usize,
+        _cache: IncrementalCache<PowerShellLanguage>,
+    ) -> LexOutput<PowerShellLanguage> {
+        let mut state = LexerState::new_with_cache(source, _changed, _cache);
+        let result = self.run(&mut state);
+        state.finish(result)
     }
 }

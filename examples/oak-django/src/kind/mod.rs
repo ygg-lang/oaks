@@ -1,7 +1,8 @@
 use oak_core::SyntaxKind;
+use serde::Serialize;
 
 /// Django 模板语法种类
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize)]
 pub enum DjangoSyntaxKind {
     // 基本 kind
     Identifier,
@@ -88,6 +89,7 @@ pub enum DjangoSyntaxKind {
     Comment,
 
     // 特殊
+    Root,
     Error,
     Eof,
 }

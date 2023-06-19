@@ -1,3 +1,4 @@
+use crate::ast::SassRoot;
 use oak_core::language::Language;
 
 /// Sass 语言实现
@@ -21,4 +22,5 @@ impl Default for SassLanguage {
 
 impl Language for SassLanguage {
     type SyntaxKind = crate::kind::SassSyntaxKind;
+    type TypedRoot = SassRoot;
 }

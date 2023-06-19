@@ -1,12 +1,14 @@
+#![feature(new_range_api)]
+
+mod lexer;
+
 #[test]
 fn ready() {
-    println!("oak-wat tests ready!");
+    println!("oak-wolfram tests ready!");
 }
 
 #[cfg(test)]
 mod tests {
-    use super::*;
-
     #[test]
     fn test_basic_functionality() {
         // 基础功能测试

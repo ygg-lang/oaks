@@ -1,15 +1,13 @@
 use crate::{kind::DSyntaxKind, language::DLanguage};
-use oak_core::{Lexer, LexerState, SourceText, lexer::LexOutput};
+use oak_core::{Lexer, LexerState, SourceText, lexer::LexOutput, source::Source};
 
-type State<'input> = LexerState<'input, DLanguage>;
+type State<'input> = LexerState<&'input SourceText, DLanguage>;
 
-pub struct DLexer<'config> {
-    config: &'config DLanguage,
-}
+pub struct DLexer;
 
-impl<'config> DLexer<'config> {
-    pub fn new(config: &'config DLanguage) -> Self {
-        Self { config }
+impl DLexer {
+    pub fn new() -> Self {
+        Self
     }
 
     fn skip_whitespace(&self, state: &mut State) -> bool {
@@ -68,7 +66,7 @@ impl<'config> DLexer<'config> {
                 }
 
                 let end_pos = state.get_position();
-                let text = source.get_text_in((start_pos..end_pos).into()).unwrap_or("");
+                let text = source.get_text_in((start_pos..end_pos).into());
 
                 // 检查是否为关键
                 let kind = match text {
@@ -672,9 +670,10 @@ impl<'config> DLexer<'config> {
     }
 }
 
-impl<'config> Lexer<DLanguage> for DLexer<'config> {
-    fn lex(&self, source: &SourceText) -> oak_core::lexer::LexOutput<DSyntaxKind> {
-        let mut state = LexerState::new(source);
+impl Lexer<DLanguage> for DLexer {
+    fn lex(&self, source: impl Source) -> LexOutput<DLanguage> {
+        let source_text = SourceText::new(source.get_text_in((0..source.length()).into()));
+        let mut state = LexerState::new(&source_text);
 
         while state.not_at_end() {
             // 尝试各种词法规则
@@ -698,7 +697,7 @@ impl<'config> Lexer<DLanguage> for DLexer<'config> {
                 continue;
             }
 
-            if self.lex_identifier_or_keyword(&mut state, source) {
+            if self.lex_identifier_or_keyword(&mut state, &source_text) {
                 continue;
             }
 
@@ -737,6 +736,15 @@ impl<'config> Lexer<DLanguage> for DLexer<'config> {
         let eof_pos = state.get_position();
         state.add_token(DSyntaxKind::Eof, eof_pos, eof_pos);
 
-        state.finish()
+        state.finish(Ok(()))
+    }
+
+    fn lex_incremental(
+        &self,
+        source: impl Source,
+        _old_tree_len: usize,
+        _cache: oak_core::IncrementalCache<DLanguage>,
+    ) -> LexOutput<DLanguage> {
+        self.lex(source)
     }
 }

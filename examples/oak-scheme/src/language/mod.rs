@@ -6,4 +6,5 @@ pub struct SchemeLanguage;
 
 impl Language for SchemeLanguage {
     type SyntaxKind = SchemeSyntaxKind;
+    type TypedRoot = ();
 }

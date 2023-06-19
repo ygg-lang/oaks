@@ -1,4 +1,4 @@
-#[derive(Copy, Clone, Debug, PartialEq, Eq)]
+#[derive(Copy, Clone, Debug, PartialEq, Eq, serde::Serialize)]
 pub enum ActionScriptSyntaxKind {
     // Basic tokens
     Whitespace,
@@ -190,19 +190,81 @@ impl oak_core::SyntaxKind for ActionScriptSyntaxKind {
     }
 
     fn is_comment(&self) -> bool {
-        todo!()
+        matches!(self, Self::Comment)
     }
 
     fn is_whitespace(&self) -> bool {
-        todo!()
+        matches!(self, Self::Whitespace | Self::Newline)
     }
 
     fn is_token_type(&self) -> bool {
-        todo!()
+        !matches!(
+            self,
+            Self::Program
+                | Self::Statement
+                | Self::Expression
+                | Self::Block
+                | Self::ClassDeclaration
+                | Self::InterfaceDeclaration
+                | Self::FunctionDeclaration
+                | Self::VariableDeclaration
+                | Self::ImportStatement
+                | Self::PackageDeclaration
+                | Self::NamespaceDeclaration
+                | Self::Assignment
+                | Self::FunctionCall
+                | Self::MethodCall
+                | Self::PropertyAccess
+                | Self::ArrayAccess
+                | Self::ConditionalExpression
+                | Self::BinaryExpression
+                | Self::UnaryExpression
+                | Self::IfStatement
+                | Self::ForStatement
+                | Self::WhileStatement
+                | Self::DoWhileStatement
+                | Self::SwitchStatement
+                | Self::TryStatement
+                | Self::ThrowStatement
+                | Self::ReturnStatement
+                | Self::BreakStatement
+                | Self::ContinueStatement
+        )
     }
 
     fn is_element_type(&self) -> bool {
-        todo!()
+        matches!(
+            self,
+            Self::Program
+                | Self::Statement
+                | Self::Expression
+                | Self::Block
+                | Self::ClassDeclaration
+                | Self::InterfaceDeclaration
+                | Self::FunctionDeclaration
+                | Self::VariableDeclaration
+                | Self::ImportStatement
+                | Self::PackageDeclaration
+                | Self::NamespaceDeclaration
+                | Self::Assignment
+                | Self::FunctionCall
+                | Self::MethodCall
+                | Self::PropertyAccess
+                | Self::ArrayAccess
+                | Self::ConditionalExpression
+                | Self::BinaryExpression
+                | Self::UnaryExpression
+                | Self::IfStatement
+                | Self::ForStatement
+                | Self::WhileStatement
+                | Self::DoWhileStatement
+                | Self::SwitchStatement
+                | Self::TryStatement
+                | Self::ThrowStatement
+                | Self::ReturnStatement
+                | Self::BreakStatement
+                | Self::ContinueStatement
+        )
     }
 }
 

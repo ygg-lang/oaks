@@ -1,5 +1,7 @@
+use serde::{Deserialize, Serialize};
+
 /// 统一Scala 语法种类（包含节点与词法单元）
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub enum ScalaSyntaxKind {
     // 节点种类
     SourceFile,
@@ -61,49 +63,53 @@ pub enum ScalaSyntaxKind {
     Yield,
 
     // 操作符
-    Plus,       // +
-    Minus,      // -
-    Star,       // *
-    Slash,      // /
-    Percent,    // %
-    Eq,         // =
-    EqEq,       // ==
-    Ne,         // !=
-    Lt,         // <
-    Le,         // <=
-    Gt,         // >
-    Ge,         // >=
-    And,        // &
-    Or,         // |
-    Xor,        // ^
-    AndAnd,     // &&
-    OrOr,       // ||
-    Not,        // !
-    Tilde,      // ~
-    LShift,     // <<
-    RShift,     // >>
-    URShift,    // >>>
-    PlusEq,     // +=
-    MinusEq,    // -=
-    StarEq,     // *=
-    SlashEq,    // /=
-    PercentEq,  // %=
-    AndEq,      // &=
-    OrEq,       // |=
-    XorEq,      // ^=
-    LShiftEq,   // <<=
-    RShiftEq,   // >>=
-    URShiftEq,  // >>>=
-    Arrow,      // =>
-    LeftArrow,  // <-
-    Colon,      // :
-    ColonColon, // ::
-    Semicolon,  // ;
-    Dot,        // .
-    Comma,      // ,
-    Question,   // ?
-    At,         // @
-    Hash,       // #
+    Plus,         // +
+    Minus,        // -
+    Star,         // *
+    Slash,        // /
+    Percent,      // %
+    Eq,           // =
+    EqEq,         // ==
+    Ne,           // !=
+    Lt,           // <
+    Le,           // <=
+    Gt,           // >
+    Ge,           // >=
+    LessEqual,    // <=
+    GreaterEqual, // >=
+    EqualEqual,   // ==
+    NotEqual,     // !=
+    And,          // &
+    Or,           // |
+    Xor,          // ^
+    AndAnd,       // &&
+    OrOr,         // ||
+    Not,          // !
+    Tilde,        // ~
+    LShift,       // <<
+    RShift,       // >>
+    URShift,      // >>>
+    PlusEq,       // +=
+    MinusEq,      // -=
+    StarEq,       // *=
+    SlashEq,      // /=
+    PercentEq,    // %=
+    AndEq,        // &=
+    OrEq,         // |=
+    XorEq,        // ^=
+    LShiftEq,     // <<=
+    RShiftEq,     // >>=
+    URShiftEq,    // >>>=
+    Arrow,        // =>
+    LeftArrow,    // <-
+    Colon,        // :
+    ColonColon,   // ::
+    Semicolon,    // ;
+    Dot,          // .
+    Comma,        // ,
+    Question,     // ?
+    At,           // @
+    Hash,         // #
 
     // 分隔符
     LeftParen,    // (

@@ -1,7 +1,8 @@
+use crate::syntax::JasmSyntaxKind;
 use oak_core::language::Language;
 
-/// JASM 语言绑定与配
-#[derive(Clone, Debug)]
+/// JASM 语言绑定与配置
+#[derive(Clone, Debug, Default)]
 pub struct JasmLanguage {
     /// 是否启用扩展指令（如 invokedynamic 等）
     pub extended: bool,
@@ -20,5 +21,6 @@ impl JasmLanguage {
 }
 
 impl Language for JasmLanguage {
-    type SyntaxKind = crate::syntax::JasmSyntaxKind;
+    type SyntaxKind = JasmSyntaxKind;
+    type TypedRoot = (); // TODO: 添加 AST 根类型
 }

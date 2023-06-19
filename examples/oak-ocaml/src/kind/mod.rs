@@ -1,6 +1,9 @@
-use oak_core::SyntaxKind;
+use oak_core::{SyntaxKind, Token};
+use serde::{Deserialize, Serialize};
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+pub type OCamlToken = Token<OCamlSyntaxKind>;
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub enum OCamlSyntaxKind {
     // 空白和注释
     Whitespace,
@@ -59,10 +62,10 @@ pub enum OCamlSyntaxKind {
 
     // 标识符和字面量
     Identifier,
-    Integer,
-    Float,
-    String,
-    Char,
+    IntegerLiteral,
+    FloatLiteral,
+    StringLiteral,
+    CharLiteral,
 
     // 操作符
     Plus,
@@ -71,23 +74,31 @@ pub enum OCamlSyntaxKind {
     Slash,
     Percent,
     Equal,
+    EqualEqual,
     NotEqual,
     Less,
     Greater,
     LessEqual,
     GreaterEqual,
-    Assign,
-    Arrow,
-    DoubleArrow,
+    LeftArrow,
+    RightArrow,
+    OrOr,
+    AndAnd,
+    ColonColon,
     Pipe,
     Ampersand,
-    Exclamation,
+    Bang,
     Question,
     Colon,
     Semicolon,
     Comma,
     Dot,
-    DotDot,
+    Caret,
+    Tilde,
+    At,
+    Hash,
+    Dollar,
+    Backtick,
 
     // 分隔符
     LeftParen,
@@ -98,9 +109,6 @@ pub enum OCamlSyntaxKind {
     RightBrace,
 
     // 特殊
-    Underscore,
-    Quote,
-    Backquote,
 
     // 错误和结束
     Error,

@@ -7,7 +7,7 @@ High-performance incremental D parser for the oak ecosystem with flexible config
 
 ## 🎯 Overview
 
-Oak-d is a robust parser for D, designed to handle complete D syntax including modern features like templates, mixins, and functional programming constructs. Built on the solid foundation of oak-core, it provides both high-level convenience and detailed AST generation for code analysis and compilation.
+Oak D is a robust parser for D, designed to handle complete D syntax including modern features like templates, mixins, and functional programming constructs. Built on the solid foundation of oak-core, it provides both high-level convenience and detailed AST generation for code analysis and compilation.
 
 ## ✨ Features
 
@@ -21,20 +21,20 @@ Oak-d is a robust parser for D, designed to handle complete D syntax including m
 Basic example:
 
 ```rust
-use oak_d::DParser;
+use oak_d::{Parser, DLanguage, SourceText};
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
-    let parser = DParser::new();
-    let d_code = r#"
+    let parser = Parser::new();
+    let source = SourceText::new(r#"
 import std.stdio;
 
 void main() {
     writeln("Hello, World!");
 }
-"#;
+"#);
     
-    let program = parser.parse(d_code)?;
-    println!("Parsed D program with {} declarations", program.declarations.len());
+    let result = parser.parse(&source);
+    println!("Parsed D program successfully.");
     Ok(())
 }
 ```
@@ -43,23 +43,21 @@ void main() {
 
 ### Basic Program Parsing
 ```rust
-use oak_d::{DParser, ParseOptions};
+use oak_d::{Parser, DLanguage, SourceText};
 
-let parser = DParser::new(ParseOptions::default());
-let result = parser.parse_program("import std.stdio;\n\nvoid main() {\n    writeln(\"Hello, World!\");\n}");
+let parser = Parser::new();
+let source = SourceText::new("import std.stdio;\n\nvoid main() {\n    writeln(\"Hello, World!\");\n}");
 
-match result {
-    Ok(program) => println!("Parsed D program: {:?}", program),
-    Err(error) => eprintln!("Parse error: {}", error),
-}
+let result = parser.parse(&source);
+println!("Parsed D program successfully.");
 ```
 
 ### Class and Template Parsing
 ```rust
-use oak_d::{DParser, ParseOptions};
+use oak_d::{Parser, DLanguage, SourceText};
 
-let parser = DParser::new(ParseOptions::default());
-let d_code = r#"
+let parser = Parser::new();
+let source = SourceText::new(r#"
 class MyClass(T) {
     private T value;
     
@@ -73,24 +71,18 @@ class MyClass(T) {
 }
 
 auto obj = new MyClass!int(42);
-"#;
+"#);
 
-let result = parser.parse_program(d_code);
-match result {
-    Ok(program) => {
-        println!("Parsed D program with classes and templates");
-        // Process the AST for classes and templates
-    }
-    Err(error) => eprintln!("Parse error: {}", error),
-}
+let result = parser.parse(&source);
+println!("Parsed D program with classes and templates successfully.");
 ```
 
 ### Function Declaration Parsing
 ```rust
-use oak_d::{DParser, ast::{Declaration, Function}};
+use oak_d::{Parser, DLanguage, SourceText};
 
-let parser = DParser::new();
-let d_code = r#"
+let parser = Parser::new();
+let source = SourceText::new(r#"
 int calculate(int a, int b, string operation) {
     switch (operation) {
         case "add": return a + b;
@@ -103,37 +95,30 @@ int calculate(int a, int b, string operation) {
 void printResult(int result) {
     writefln("Result: %d", result);
 }
-"#;
+"#);
 
-let program = parser.parse(d_code)?;
-for decl in &program.declarations {
-    if let Declaration::Function(func) = decl {
-        println!("Function: {} with {} parameters", func.name, func.parameters.len());
-    }
-}
+let result = parser.parse(&source);
+println!("Parsed D functions successfully.");
 ```
 
 ## 🔧 Advanced Features
 
 ### Lexer Integration
 ```rust
-use oak_d::{DLexer, DSyntaxKind, DLanguage};
-use oak_core::lexer::Lexer;
+use oak_d::{Parser, DLanguage, SourceText};
 
-let lexer = DLexer::new("import std.stdio;\nvoid main() { writeln(\"Hello\"); }");
-let tokens: Vec<_> = lexer.tokenize().collect();
-
-for token in tokens {
-    println!("Token: {:?} at {:?}", token.kind, token.span);
-}
+let parser = Parser::new();
+let source = SourceText::new("import std.stdio;\nvoid main() { writeln(\"Hello\"); }");
+let result = parser.parse(&source);
+// Token information is available in the parse result
 ```
 
 ### Template and Mixin Analysis
 ```rust
-use oak_d::{DParser, ast::{Declaration, Template, Mixin}};
+use oak_d::{Parser, DLanguage, SourceText};
 
-let parser = DParser::new();
-let d_code = r#"
+let parser = Parser::new();
+let source = SourceText::new(r#"
 template Vector3(T) {
     struct Vector3 {
         T x, y, z;
@@ -150,28 +135,18 @@ mixin template Logger() {
         writefln("[%s] %s", __FUNCTION__, msg);
     }
 }
-"#;
+"#);
 
-let program = parser.parse(d_code)?;
-for decl in &program.declarations {
-    match decl {
-        Declaration::Template(temp) => {
-            println!("Template: {} with {} parameters", temp.name, temp.params.len());
-        }
-        Declaration::Mixin(mixin) => {
-            println!("Mixin: {} with {} members", mixin.name, mixin.members.len());
-        }
-        _ => {}
-    }
-}
+let result = parser.parse(&source);
+println!("Parsed D templates and mixins successfully.");
 ```
 
 ### Import and Module Analysis
 ```rust
-use oak_d::{DParser, ast::{Declaration, Import}};
+use oak_d::{Parser, DLanguage, SourceText};
 
-let parser = DParser::new();
-let d_code = r#"
+let parser = Parser::new();
+let source = SourceText::new(r#"
 module myapp.main;
 
 import std.stdio : writeln, writefln;
@@ -182,126 +157,51 @@ import core.thread : Thread;
 void main() {
     writeln("Application started");
 }
-"#;
+"#);
 
-let program = parser.parse(d_code)?;
-for decl in &program.declarations {
-    if let Declaration::Import(import) = decl {
-        println!("Import: {} (selective: {})", import.module_path, import.symbols.is_some());
-    }
-}
+let result = parser.parse(&source);
+println!("Parsed D imports and modules successfully.");
 ```
 
 ## 🏗️ AST Structure
 
-### Program Structure
+The parser generates a comprehensive AST with the following main structures:
 
-```rust
-pub struct Program {
-    pub declarations: Vec<Declaration>,
-    pub module_info: ModuleInfo,
-}
-
-pub enum Declaration {
-    Function(Function),
-    Class(Class),
-    Struct(Struct),
-    Import(Import),
-    Template(Template),
-}
-
-pub struct Function {
-    pub name: String,
-    pub parameters: Vec<Parameter>,
-    pub return_type: Type,
-    pub body: Block,
-}
-```
+- **Program**: Root container for D programs
+- **Module**: Module declarations
+- **Import**: Import statements
+- **Function**: Function definitions
+- **Class**: Class definitions
+- **Template**: Template declarations
+- **Mixin**: Mixin declarations
 
 ## 📊 Performance
 
-- **Parse large D source files without loading entirely into memory**
-- **Incremental parsing support for real-time code analysis**
-- **Memory Efficient: Smart AST node allocation**
-- **Optimized for compilation and static analysis workflows**
+- **Streaming**: Parse large D files without loading entirely into memory
+- **Incremental**: Re-parse only changed sections
+- **Memory Efficient**: Smart AST node allocation
+- **Fast Recovery**: Quick error recovery for better IDE integration
 
 ## 🔗 Integration
 
-Oak-d integrates seamlessly with:
+Oak D integrates seamlessly with:
 
-- **Static Analysis**: Code quality and security analysis
-- **Code Generation**: Generating code from D AST
+- **Compilers**: Front-end for D compilers
+- **Static Analysis Tools**: Code quality and security analysis
 - **IDE Support**: Language server protocol compatibility
-- **Refactoring**: Automated code refactoring
-- **Documentation**: Generating documentation from D code
+- **Code Generation**: Generating code from AST
 
 ## 📚 Examples
 
-### Complete D Program Parsing
+Check out the [examples](examples/) directory for comprehensive examples:
 
-```rust
-use oak_d::DParser;
-
-let parser = DParser::new();
-let d_code = r#"
-module hello;
-
-import std.stdio;
-
-void main()
-{
-    writeln("Hello, World!");
-}
-"#;
-
-let program = parser.parse(d_code)?;
-println!("Parsed D module with {} declarations", program.declarations.len());
-```
-
-### Function and Template Analysis
-
-```rust
-use oak_d::{DParser, ast::{Declaration, Function}};
-
-let parser = DParser::new();
-let d_code = r#"
-template MyTemplate(T) {
-    T process(T value) {
-        return value * 2;
-    }
-}
-
-int add(int a, int b) {
-    return a + b;
-}
-"#;
-
-let program = parser.parse(d_code)?;
-for decl in &program.declarations {
-    match decl {
-        Declaration::Function(func) => {
-            println!("Function: {} returns {}", func.name, func.return_type);
-        }
-        Declaration::Template(temp) => {
-            println!("Template: {}", temp.name);
-        }
-        _ => {}
-    }
-}
-```
-
-Check out the [examples](examples/) directory for more comprehensive examples:
-
-- Basic D parsing and AST generation
-- Custom analysis and transformation
-- Performance benchmarks
-- Integration with build tools
-- Language server implementation
+- Complete D program parsing
+- Class and template analysis
+- Code transformation
+- Integration with development workflows
 
 ## 🤝 Contributing
 
-Contributions are welcome! Please feel free to submit pull requests at the [project repository](https://github.com/ygg-lang/oaks/tree/dev/examples/oak-d) or open [issues](https://github.com/ygg-lang/oaks/issues).
+Contributions are welcome! 
 
----
-
-**Oak-d** - High-performance D parser for the oak ecosystem 🚀
+Please feel free to submit pull requests at the [project repository](https://github.com/ygg-lang/oaks/tree/dev/examples/oak-d) or open [issues](https://github.com/ygg-lang/oaks/issues).

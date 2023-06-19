@@ -37,4 +37,5 @@ impl Default for DLanguage {
 
 impl Language for DLanguage {
     type SyntaxKind = DSyntaxKind;
+    type TypedRoot = ();
 }

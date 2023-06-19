@@ -2,7 +2,7 @@
 //!
 //! 定义Lua 语言的核心结构体，实现了 oak-core Language trait
 
-use crate::syntax::LuaSyntaxKind;
+use crate::kind::LuaSyntaxKind;
 use oak_core::Language;
 
 /// Lua 语言定义
@@ -11,6 +11,7 @@ pub struct LuaLanguage;
 
 impl Language for LuaLanguage {
     type SyntaxKind = LuaSyntaxKind;
+    type TypedRoot = ();
 }
 
 impl LuaLanguage {

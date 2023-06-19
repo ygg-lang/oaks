@@ -1,5 +1,5 @@
-use alloc::{string::String, vec::Vec};
 use core::range::Range;
+use std::{string::String, vec::Vec};
 
 /// Ini 文档根节
 #[derive(Debug, Clone)]

@@ -1,10 +1,37 @@
 use crate::{kind::HtmlSyntaxKind, language::HtmlLanguage};
-use oak_core::{Lexer, LexerState, SourceText, lexer::LexOutput};
+use oak_core::{
+    IncrementalCache, Lexer, LexerState, OakError,
+    lexer::{CommentBlock, LexOutput, StringConfig, WhitespaceConfig},
+    source::Source,
+};
+use std::sync::LazyLock;
 
-type State<'input> = LexerState<'input, HtmlLanguage>;
+type State<S: Source> = LexerState<S, HtmlLanguage>;
 
+// HTML 静态配置
+static HTML_WHITESPACE: LazyLock<WhitespaceConfig> = LazyLock::new(|| WhitespaceConfig { unicode_whitespace: true });
+
+static HTML_COMMENT: LazyLock<CommentBlock> =
+    LazyLock::new(|| CommentBlock { block_markers: &[("<!--", "-->")], nested_blocks: false });
+
+static HTML_STRING: LazyLock<StringConfig> = LazyLock::new(|| StringConfig { quotes: &['"', '\''], escape: None });
+
+#[derive(Clone)]
 pub struct HtmlLexer<'config> {
     config: &'config HtmlLanguage,
+}
+
+impl<'config> Lexer<HtmlLanguage> for HtmlLexer<'config> {
+    fn lex_incremental(
+        &self,
+        source: impl Source,
+        changed: usize,
+        cache: IncrementalCache<HtmlLanguage>,
+    ) -> LexOutput<HtmlLanguage> {
+        let mut state = LexerState::new_with_cache(source, changed, cache);
+        let result = self.run(&mut state);
+        state.finish(result)
+    }
 }
 
 impl<'config> HtmlLexer<'config> {
@@ -12,131 +39,144 @@ impl<'config> HtmlLexer<'config> {
         Self { config }
     }
 
-    /// 跳过空白字符
-    fn skip_whitespace(&self, state: &mut State) -> bool {
-        let start_pos = state.get_position();
+    /// 主要的词法分析循环
+    fn run<S: Source>(&self, state: &mut State<S>) -> Result<(), OakError> {
+        while state.not_at_end() {
+            let safe_point = state.get_position();
 
-        while let Some(ch) = state.peek() {
-            if ch == ' ' || ch == '\t' || ch == '\r' {
-                state.advance(ch.len_utf8());
+            if self.skip_whitespace(state) {
+                continue;
             }
-            else {
-                break;
+
+            if self.lex_comment(state) {
+                continue;
             }
+
+            if self.lex_doctype(state) {
+                continue;
+            }
+
+            if self.lex_cdata(state) {
+                continue;
+            }
+
+            if self.lex_processing_instruction(state) {
+                continue;
+            }
+
+            if self.lex_tag_operators(state) {
+                continue;
+            }
+
+            if self.lex_entity_reference(state) {
+                continue;
+            }
+
+            if self.lex_string_literal(state) {
+                continue;
+            }
+
+            if self.lex_identifier(state) {
+                continue;
+            }
+
+            if self.lex_single_char_tokens(state) {
+                continue;
+            }
+
+            if self.lex_text(state) {
+                continue;
+            }
+
+            // 安全点检查，防止无限循环
+            state.safe_check(safe_point);
         }
 
-        if state.get_position() > start_pos {
-            state.add_token(HtmlSyntaxKind::Whitespace, start_pos, state.get_position());
-            true
-        }
-        else {
-            false
+        Ok(())
+    }
+
+    fn skip_whitespace<S: Source>(&self, state: &mut State<S>) -> bool {
+        match HTML_WHITESPACE.scan(state.rest(), state.get_position(), HtmlSyntaxKind::Whitespace) {
+            Some(token) => {
+                state.advance_with(token);
+                true
+            }
+            None => false,
         }
     }
 
-    /// 处理换行
-    fn lex_newline(&self, state: &mut State) -> bool {
-        let start_pos = state.get_position();
-
-        if let Some('\n') = state.peek() {
-            state.advance(1);
-            state.add_token(HtmlSyntaxKind::Newline, start_pos, state.get_position());
-            true
-        }
-        else {
-            false
+    fn lex_comment<S: Source>(&self, state: &mut State<S>) -> bool {
+        match HTML_COMMENT.scan(state.rest(), state.get_position(), HtmlSyntaxKind::Comment) {
+            Some(token) => {
+                state.advance_with(token);
+                true
+            }
+            None => false,
         }
     }
 
-    /// 处理注释 <!-- ... -->
-    fn lex_comment(&self, state: &mut State, source: &SourceText) -> bool {
+    fn lex_doctype<S: Source>(&self, state: &mut State<S>) -> bool {
         let start_pos = state.get_position();
 
         if let Some('<') = state.peek() {
-            if let Some('!') = source.get_char_at(start_pos + 1) {
-                if let Some('-') = source.get_char_at(start_pos + 2) {
-                    if let Some('-') = source.get_char_at(start_pos + 3) {
-                        // 找到注释开<!--
-                        state.advance(4);
+            if let Some('!') = state.peek_next_n(1) {
+                if let Some('D') = state.peek_next_n(2) {
+                    let doctype_start = "DOCTYPE";
+                    let mut matches = true;
 
-                        // 查找注释结束 -->
-                        while let Some(ch) = state.peek() {
-                            if ch == '-' {
-                                if let Some('-') = source.get_char_at(state.get_position() + 1) {
-                                    if let Some('>') = source.get_char_at(state.get_position() + 2) {
-                                        state.advance(3);
-                                        state.add_token(HtmlSyntaxKind::Comment, start_pos, state.get_position());
-                                        return true;
-                                    }
-                                }
+                    for (i, expected_ch) in doctype_start.chars().enumerate() {
+                        if let Some(actual_ch) = state.peek_next_n(2 + i) {
+                            if actual_ch.to_ascii_uppercase() != expected_ch {
+                                matches = false;
+                                break;
                             }
-                            state.advance(ch.len_utf8());
+                        }
+                        else {
+                            matches = false;
+                            break;
+                        }
+                    }
+
+                    if matches {
+                        state.advance(2 + doctype_start.len()); // Skip <!DOCTYPE
+
+                        // Find doctype end >
+                        while state.not_at_end() {
+                            if let Some('>') = state.peek() {
+                                state.advance(1); // Skip >
+                                state.add_token(HtmlSyntaxKind::Doctype, start_pos, state.get_position());
+                                return true;
+                            }
+                            if let Some(ch) = state.peek() {
+                                state.advance(ch.len_utf8());
+                            }
+                            else {
+                                break;
+                            }
                         }
 
-                        // 未闭合的注释
+                        // Unclosed doctype
                         state.add_token(HtmlSyntaxKind::Error, start_pos, state.get_position());
                         return true;
                     }
                 }
             }
         }
+
         false
     }
 
-    /// 处理 DOCTYPE 声明
-    fn lex_doctype(&self, state: &mut State, source: &SourceText) -> bool {
+    fn lex_cdata<S: Source>(&self, state: &mut State<S>) -> bool {
         let start_pos = state.get_position();
 
         if let Some('<') = state.peek() {
-            if let Some('!') = source.get_char_at(start_pos + 1) {
-                // 检查是否是 DOCTYPE
-                let doctype_str = "DOCTYPE";
-                let mut matches = true;
-                for (i, expected_ch) in doctype_str.chars().enumerate() {
-                    if let Some(actual_ch) = source.get_char_at(start_pos + 2 + i) {
-                        if actual_ch.to_ascii_uppercase() != expected_ch {
-                            matches = false;
-                            break;
-                        }
-                    }
-                    else {
-                        matches = false;
-                        break;
-                    }
-                }
-
-                if matches {
-                    state.advance(2 + doctype_str.len());
-
-                    // 跳过>
-                    while let Some(ch) = state.peek() {
-                        if ch == '>' {
-                            state.advance(1);
-                            break;
-                        }
-                        state.advance(ch.len_utf8());
-                    }
-
-                    state.add_token(HtmlSyntaxKind::Doctype, start_pos, state.get_position());
-                    return true;
-                }
-            }
-        }
-        false
-    }
-
-    /// 处理 CDATA
-    fn lex_cdata(&self, state: &mut State, source: &SourceText) -> bool {
-        let start_pos = state.get_position();
-
-        if let Some('<') = state.peek() {
-            if let Some('!') = source.get_char_at(start_pos + 1) {
-                if let Some('[') = source.get_char_at(start_pos + 2) {
-                    // 检查是否是 CDATA
-                    let cdata_str = "CDATA[";
+            if let Some('!') = state.peek_next_n(1) {
+                if let Some('[') = state.peek_next_n(2) {
+                    let cdata_start = "CDATA[";
                     let mut matches = true;
-                    for (i, expected_ch) in cdata_str.chars().enumerate() {
-                        if let Some(actual_ch) = source.get_char_at(start_pos + 3 + i) {
+
+                    for (i, expected_ch) in cdata_start.chars().enumerate() {
+                        if let Some(actual_ch) = state.peek_next_n(3 + i) {
                             if actual_ch != expected_ch {
                                 matches = false;
                                 break;
@@ -149,71 +189,207 @@ impl<'config> HtmlLexer<'config> {
                     }
 
                     if matches {
-                        state.advance(3 + cdata_str.len());
+                        state.advance(3 + cdata_start.len()); // Skip <![CDATA[
 
-                        // 查找 CDATA 结束 ]]>
-                        while let Some(ch) = state.peek() {
-                            if ch == ']' {
-                                if let Some(']') = source.get_char_at(state.get_position() + 1) {
-                                    if let Some('>') = source.get_char_at(state.get_position() + 2) {
-                                        state.advance(3);
+                        // Find CDATA end ]]>
+                        while state.not_at_end() {
+                            if let Some(']') = state.peek() {
+                                if let Some(']') = state.peek_next_n(1) {
+                                    if let Some('>') = state.peek_next_n(2) {
+                                        state.advance(3); // Skip ]]>
                                         state.add_token(HtmlSyntaxKind::CData, start_pos, state.get_position());
                                         return true;
                                     }
                                 }
                             }
-                            state.advance(ch.len_utf8());
+                            if let Some(ch) = state.peek() {
+                                state.advance(ch.len_utf8());
+                            }
+                            else {
+                                break;
+                            }
                         }
 
-                        // 未闭合的 CDATA
+                        // Unclosed CDATA
                         state.add_token(HtmlSyntaxKind::Error, start_pos, state.get_position());
                         return true;
                     }
                 }
             }
         }
+
         false
     }
 
-    /// 处理处理指令 <?xml ... ?>
-    fn lex_processing_instruction(&self, state: &mut State, source: &SourceText) -> bool {
+    fn lex_processing_instruction<S: Source>(&self, state: &mut State<S>) -> bool {
         let start_pos = state.get_position();
 
         if let Some('<') = state.peek() {
-            if let Some('?') = source.get_char_at(start_pos + 1) {
-                state.advance(2);
+            if let Some('?') = state.peek_next_n(1) {
+                state.advance(2); // Skip <?
 
-                // 查找处理指令结束 ?>
-                while let Some(ch) = state.peek() {
-                    if ch == '?' {
-                        if let Some('>') = source.get_char_at(state.get_position() + 1) {
-                            state.advance(2);
+                // Find processing instruction end ?>
+                while state.not_at_end() {
+                    if let Some('?') = state.peek() {
+                        if let Some('>') = state.peek_next_n(1) {
+                            state.advance(2); // Skip ?>
                             state.add_token(HtmlSyntaxKind::ProcessingInstruction, start_pos, state.get_position());
                             return true;
                         }
                     }
-                    state.advance(ch.len_utf8());
+                    if let Some(ch) = state.peek() {
+                        state.advance(ch.len_utf8());
+                    }
+                    else {
+                        break;
+                    }
                 }
 
-                // 未闭合的处理指令
+                // Unclosed processing instruction
                 state.add_token(HtmlSyntaxKind::Error, start_pos, state.get_position());
                 return true;
             }
         }
+
         false
     }
 
-    /// 处理标签
-    fn lex_tag_name(&self, state: &mut State) -> bool {
+    fn lex_tag_operators<S: Source>(&self, state: &mut State<S>) -> bool {
+        let start_pos = state.get_position();
+
+        match state.peek() {
+            Some('<') => {
+                if let Some('/') = state.peek_next_n(1) {
+                    state.advance(2);
+                    state.add_token(HtmlSyntaxKind::TagSlashOpen, start_pos, state.get_position());
+                    true
+                }
+                else {
+                    state.advance(1);
+                    state.add_token(HtmlSyntaxKind::TagOpen, start_pos, state.get_position());
+                    true
+                }
+            }
+            Some('/') => {
+                if let Some('>') = state.peek_next_n(1) {
+                    state.advance(2);
+                    state.add_token(HtmlSyntaxKind::TagSelfClose, start_pos, state.get_position());
+                    true
+                }
+                else {
+                    false
+                }
+            }
+            Some('>') => {
+                state.advance(1);
+                state.add_token(HtmlSyntaxKind::TagClose, start_pos, state.get_position());
+                true
+            }
+            _ => false,
+        }
+    }
+
+    fn lex_entity_reference<S: Source>(&self, state: &mut State<S>) -> bool {
+        let start_pos = state.get_position();
+
+        if let Some('&') = state.peek() {
+            state.advance(1);
+
+            if let Some('#') = state.peek() {
+                state.advance(1);
+
+                // Character reference &#123; or &#x1A;
+                if let Some('x') = state.peek() {
+                    state.advance(1);
+                    // Hexadecimal character reference
+                    let mut has_digits = false;
+                    while let Some(ch) = state.peek() {
+                        if ch.is_ascii_hexdigit() {
+                            state.advance(1);
+                            has_digits = true;
+                        }
+                        else {
+                            break;
+                        }
+                    }
+
+                    if has_digits && state.peek() == Some(';') {
+                        state.advance(1);
+                        state.add_token(HtmlSyntaxKind::CharRef, start_pos, state.get_position());
+                        return true;
+                    }
+                }
+                else {
+                    // Decimal character reference
+                    let mut has_digits = false;
+                    while let Some(ch) = state.peek() {
+                        if ch.is_ascii_digit() {
+                            state.advance(1);
+                            has_digits = true;
+                        }
+                        else {
+                            break;
+                        }
+                    }
+
+                    if has_digits && state.peek() == Some(';') {
+                        state.advance(1);
+                        state.add_token(HtmlSyntaxKind::CharRef, start_pos, state.get_position());
+                        return true;
+                    }
+                }
+            }
+            else {
+                // Named entity reference &name;
+                let mut has_name = false;
+                while let Some(ch) = state.peek() {
+                    if ch.is_ascii_alphanumeric() {
+                        state.advance(1);
+                        has_name = true;
+                    }
+                    else {
+                        break;
+                    }
+                }
+
+                if has_name && state.peek() == Some(';') {
+                    state.advance(1);
+                    state.add_token(HtmlSyntaxKind::EntityRef, start_pos, state.get_position());
+                    return true;
+                }
+            }
+
+            // Invalid entity reference
+            state.add_token(HtmlSyntaxKind::Error, start_pos, state.get_position());
+            return true;
+        }
+
+        false
+    }
+
+    fn lex_string_literal<S: Source>(&self, state: &mut State<S>) -> bool {
+        match HTML_STRING.scan(state.rest(), 0, HtmlSyntaxKind::AttributeValue) {
+            Some(mut token) => {
+                // Adjust token span to absolute position
+                token.span.start += state.get_position();
+                token.span.end += state.get_position();
+                state.advance_with(token);
+                true
+            }
+            None => false,
+        }
+    }
+
+    fn lex_identifier<S: Source>(&self, state: &mut State<S>) -> bool {
         let start_pos = state.get_position();
 
         if let Some(ch) = state.peek() {
-            if ch.is_ascii_alphabetic() || ch == '_' {
+            if ch.is_ascii_alphabetic() || ch == '_' || ch == ':' {
                 state.advance(ch.len_utf8());
 
-                while let Some(name_ch) = state.peek() {
-                    if name_ch.is_ascii_alphanumeric() || name_ch == '-' || name_ch == '_' || name_ch == ':' {
-                        state.advance(name_ch.len_utf8());
+                while let Some(ch) = state.peek() {
+                    if ch.is_ascii_alphanumeric() || ch == '_' || ch == '-' || ch == '.' || ch == ':' {
+                        state.advance(ch.len_utf8());
                     }
                     else {
                         break;
@@ -221,253 +397,58 @@ impl<'config> HtmlLexer<'config> {
                 }
 
                 state.add_token(HtmlSyntaxKind::TagName, start_pos, state.get_position());
-                true
+                return true;
             }
-            else {
-                false
-            }
+        }
+
+        false
+    }
+
+    fn lex_single_char_tokens<S: Source>(&self, state: &mut State<S>) -> bool {
+        let start_pos = state.get_position();
+
+        let kind = match state.peek() {
+            Some('=') => HtmlSyntaxKind::Equal,
+            Some('"') => HtmlSyntaxKind::Quote,
+            Some('\'') => HtmlSyntaxKind::Quote,
+            Some('!') => return false, // 已在其他地方处理
+            Some('?') => return false, // 已在其他地方处理
+            Some('&') => return false, // 已在其他地方处理
+            Some(';') => return false, // 已在其他地方处理
+            _ => return false,
+        };
+
+        if let Some(ch) = state.peek() {
+            state.advance(ch.len_utf8());
+            state.add_token(kind, start_pos, state.get_position());
+            true
         }
         else {
             false
         }
     }
 
-    /// 处理
-
-    fn lex_attribute_value(&self, state: &mut State) -> bool {
+    fn lex_text<S: Source>(&self, state: &mut State<S>) -> bool {
         let start_pos = state.get_position();
-
-        if let Some(quote) = state.peek() {
-            if quote == '"' || quote == '\'' {
-                state.advance(1);
-
-                while let Some(ch) = state.peek() {
-                    if ch == quote {
-                        state.advance(1);
-                        state.add_token(HtmlSyntaxKind::AttributeValue, start_pos, state.get_position());
-                        return true;
-                    }
-                    else if ch == '\n' {
-                        break; // 属性值不能跨
-                    }
-                    state.advance(ch.len_utf8());
-                }
-
-                // 未闭合的
-
-                state.add_token(HtmlSyntaxKind::Error, start_pos, state.get_position());
-                true
-            }
-            else {
-                false
-            }
-        }
-        else {
-            false
-        }
-    }
-
-    /// 处理实体引用
-    fn lex_entity_ref(&self, state: &mut State) -> bool {
-        let start_pos = state.get_position();
-
-        if let Some('&') = state.peek() {
-            state.advance(1);
-
-            if let Some('#') = state.peek() {
-                // 字符引用 &#123; &#x1A;
-                state.advance(1);
-
-                if let Some('x') = state.peek() {
-                    // 十六进制字符引用
-                    state.advance(1);
-                    while let Some(hex_ch) = state.peek() {
-                        if hex_ch.is_ascii_hexdigit() {
-                            state.advance(1);
-                        }
-                        else {
-                            break;
-                        }
-                    }
-                }
-                else {
-                    // 十进制字符引
-                    while let Some(digit_ch) = state.peek() {
-                        if digit_ch.is_ascii_digit() {
-                            state.advance(1);
-                        }
-                        else {
-                            break;
-                        }
-                    }
-                }
-
-                if let Some(';') = state.peek() {
-                    state.advance(1);
-                    state.add_token(HtmlSyntaxKind::CharRef, start_pos, state.get_position());
-                }
-                else {
-                    state.add_token(HtmlSyntaxKind::Error, start_pos, state.get_position());
-                }
-                true
-            }
-            else {
-                // 实体引用 &amp; &lt;
-                while let Some(entity_ch) = state.peek() {
-                    if entity_ch.is_ascii_alphanumeric() {
-                        state.advance(1);
-                    }
-                    else {
-                        break;
-                    }
-                }
-
-                if let Some(';') = state.peek() {
-                    state.advance(1);
-                    state.add_token(HtmlSyntaxKind::EntityRef, start_pos, state.get_position());
-                }
-                else {
-                    state.add_token(HtmlSyntaxKind::Error, start_pos, state.get_position());
-                }
-                true
-            }
-        }
-        else {
-            false
-        }
-    }
-
-    /// 处理文本内容
-    fn lex_text(&self, state: &mut State) -> bool {
-        let start_pos = state.get_position();
+        let mut has_text = false;
 
         while let Some(ch) = state.peek() {
-            if ch == '<' || ch == '&' || ch == ' ' || ch == '\t' || ch == '\r' || ch == '\n' {
-                break;
+            match ch {
+                '<' | '&' => break,
+                _ if ch.is_whitespace() => break,
+                _ => {
+                    state.advance(ch.len_utf8());
+                    has_text = true;
+                }
             }
-            state.advance(ch.len_utf8());
         }
 
-        if state.get_position() > start_pos {
+        if has_text {
             state.add_token(HtmlSyntaxKind::Text, start_pos, state.get_position());
             true
         }
         else {
             false
         }
-    }
-
-    /// 处理标签和操作符
-    fn lex_tag_operator(&self, state: &mut State, source: &SourceText) -> bool {
-        let start_pos = state.get_position();
-
-        if let Some(ch) = state.peek() {
-            let token_kind = match ch {
-                '<' => {
-                    if let Some('/') = source.get_char_at(start_pos + 1) {
-                        state.advance(2);
-                        HtmlSyntaxKind::TagSlashOpen
-                    }
-                    else {
-                        state.advance(1);
-                        HtmlSyntaxKind::TagOpen
-                    }
-                }
-                '>' => {
-                    state.advance(1);
-                    HtmlSyntaxKind::TagClose
-                }
-                '/' => {
-                    if let Some('>') = source.get_char_at(start_pos + 1) {
-                        state.advance(2);
-                        HtmlSyntaxKind::TagSelfClose
-                    }
-                    else {
-                        return false;
-                    }
-                }
-                '=' => {
-                    state.advance(1);
-                    HtmlSyntaxKind::Equal
-                }
-                '"' | '\'' => {
-                    state.advance(1);
-                    HtmlSyntaxKind::Quote
-                }
-                _ => return false,
-            };
-
-            state.add_token(token_kind, start_pos, state.get_position());
-            true
-        }
-        else {
-            false
-        }
-    }
-}
-
-impl<'config> Lexer<HtmlLanguage> for HtmlLexer<'config> {
-    fn lex(&self, source: &SourceText) -> LexOutput<HtmlSyntaxKind> {
-        let mut state = LexerState::new(source);
-
-        while state.not_at_end() {
-            // 尝试各种词法规则
-            if self.skip_whitespace(&mut state) {
-                continue;
-            }
-
-            if self.lex_newline(&mut state) {
-                continue;
-            }
-
-            if self.lex_comment(&mut state, source) {
-                continue;
-            }
-
-            if self.lex_doctype(&mut state, source) {
-                continue;
-            }
-
-            if self.lex_cdata(&mut state, source) {
-                continue;
-            }
-
-            if self.lex_processing_instruction(&mut state, source) {
-                continue;
-            }
-
-            if self.lex_entity_ref(&mut state) {
-                continue;
-            }
-
-            if self.lex_attribute_value(&mut state) {
-                continue;
-            }
-
-            if self.lex_tag_name(&mut state) {
-                continue;
-            }
-
-            if self.lex_tag_operator(&mut state, source) {
-                continue;
-            }
-
-            if self.lex_text(&mut state) {
-                continue;
-            }
-
-            // 如果所有规则都不匹配，跳过当前字符并标记为错误
-            let start_pos = state.get_position();
-            if let Some(ch) = state.peek() {
-                state.advance(ch.len_utf8());
-                state.add_token(HtmlSyntaxKind::Error, start_pos, state.get_position());
-            }
-        }
-
-        // 添加 EOF kind
-        let eof_pos = state.get_position();
-        state.add_token(HtmlSyntaxKind::Eof, eof_pos, eof_pos);
-
-        state.finish()
     }
 }

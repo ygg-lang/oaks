@@ -30,7 +30,7 @@ use oak_protobuf::ProtobufLanguage;
 
 fn main() {
     let source = r#"
-        syntax = "proto3";
+        kind = "proto3";
         
         package example;
         
@@ -61,7 +61,7 @@ use oak_protobuf::ProtobufLanguage;
 
 fn main() {
     let source = r#"
-        syntax = "proto3";
+        kind = "proto3";
         
         package bookstore;
         
@@ -109,7 +109,7 @@ Oak Protobuf supports parsing custom options:
 
 ```rust
 let source = r#"
-    syntax = "proto3";
+    kind = "proto3";
     
     message MyMessage {
         string value = 1 [(custom_option) = "test"];

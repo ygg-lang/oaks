@@ -1,7 +1,7 @@
 use crate::{kind::CppSyntaxKind, language::CppLanguage};
-use oak_core::{Lexer, LexerState, SourceText, lexer::LexOutput};
+use oak_core::{IncrementalCache, Lexer, LexerState, SourceText, lexer::LexOutput, source::Source};
 
-type State<'input> = LexerState<'input, CppLanguage>;
+type State<S> = LexerState<S, CppLanguage>;
 
 pub struct CppLexer<'config> {
     config: &'config CppLanguage,
@@ -16,7 +16,7 @@ impl<'config> CppLexer<'config> {
     }
 
     /// 跳过空白字符
-    fn skip_whitespace(&self, state: &mut State<'_>) -> bool {
+    fn skip_whitespace<S: Source>(&self, state: &mut State<S>) -> bool {
         let start_pos = state.get_position();
 
         while let Some(ch) = state.peek() {
@@ -38,7 +38,7 @@ impl<'config> CppLexer<'config> {
     }
 
     /// 处理换行
-    fn lex_newline(&self, state: &mut State<'_>) -> bool {
+    fn lex_newline<S: Source>(&self, state: &mut State<S>) -> bool {
         let start_pos = state.get_position();
 
         if let Some('\n') = state.peek() {
@@ -60,7 +60,7 @@ impl<'config> CppLexer<'config> {
     }
 
     /// 处理注释
-    fn lex_comment(&self, state: &mut State<'_>) -> bool {
+    fn lex_comment<S: Source>(&self, state: &mut State<S>) -> bool {
         let start_pos = state.get_position();
 
         if let Some('/') = state.peek() {
@@ -99,7 +99,7 @@ impl<'config> CppLexer<'config> {
     }
 
     /// 处理字符串字面量
-    fn lex_string(&self, state: &mut State<'_>) -> bool {
+    fn lex_string<S: Source>(&self, state: &mut State<S>) -> bool {
         let start_pos = state.get_position();
 
         if let Some('"') = state.peek() {
@@ -139,8 +139,8 @@ impl<'config> CppLexer<'config> {
         }
     }
 
-    /// 处理字符字面
-    fn lex_character(&self, state: &mut State<'_>) -> bool {
+    /// 处理字符字面量
+    fn lex_character<S: Source>(&self, state: &mut State<S>) -> bool {
         let start_pos = state.get_position();
 
         if let Some('\'') = state.peek() {
@@ -180,8 +180,8 @@ impl<'config> CppLexer<'config> {
         }
     }
 
-    /// 处理数字字面
-    fn lex_number(&self, state: &mut State<'_>) -> bool {
+    /// 处理数字字面量
+    fn lex_number<S: Source>(&self, state: &mut State<S>) -> bool {
         let start_pos = state.get_position();
 
         if let Some(ch) = state.peek() {
@@ -309,8 +309,8 @@ impl<'config> CppLexer<'config> {
         }
     }
 
-    /// 处理关键字或标识
-    fn lex_keyword_or_identifier(&self, state: &mut State<'_>, source: &SourceText) -> bool {
+    /// 处理关键字或标识符
+    fn lex_keyword_or_identifier<S: Source>(&self, state: &mut State<S>) -> bool {
         let start_pos = state.get_position();
 
         if let Some(ch) = state.peek() {
@@ -324,7 +324,7 @@ impl<'config> CppLexer<'config> {
                     }
                 }
 
-                let text = source.get_text_in((start_pos..state.get_position()).into()).unwrap_or("");
+                let text = state.get_text_in((start_pos..state.get_position()).into());
                 let token_kind = match text {
                     // C++ 关键
                     "alignas" | "alignof" | "and" | "and_eq" | "asm" | "atomic_cancel" | "atomic_commit"
@@ -355,8 +355,8 @@ impl<'config> CppLexer<'config> {
         }
     }
 
-    /// 处理操作
-    fn lex_operator(&self, state: &mut State<'_>) -> bool {
+    /// 处理操作符
+    fn lex_operator<S: Source>(&self, state: &mut State<S>) -> bool {
         let start_pos = state.get_position();
 
         if let Some(ch) = state.peek() {
@@ -511,8 +511,8 @@ impl<'config> CppLexer<'config> {
         }
     }
 
-    /// 处理分隔
-    fn lex_delimiter(&self, state: &mut State<'_>) -> bool {
+    /// 处理分隔符
+    fn lex_delimiter<S: Source>(&self, state: &mut State<S>) -> bool {
         let start_pos = state.get_position();
 
         if let Some(ch) = state.peek() {
@@ -537,8 +537,8 @@ impl<'config> CppLexer<'config> {
         }
     }
 
-    /// 处理预处理器指令
-    fn lex_preprocessor(&self, state: &mut State<'_>) -> bool {
+    /// 处理预处理指令
+    fn lex_preprocessor<S: Source>(&self, state: &mut State<S>) -> bool {
         let start_pos = state.get_position();
 
         if let Some('#') = state.peek() {
@@ -560,10 +560,20 @@ impl<'config> CppLexer<'config> {
 }
 
 impl<'config> Lexer<CppLanguage> for CppLexer<'config> {
-    fn lex(&self, source: &SourceText) -> LexOutput<CppSyntaxKind> {
-        let mut state = LexerState::new(source);
+    fn lex_incremental(
+        &self,
+        source: impl Source,
+        _changed: usize,
+        _cache: IncrementalCache<CppLanguage>,
+    ) -> LexOutput<CppLanguage> {
+        let mut state = LexerState::new_with_cache(source, _changed, _cache);
 
-        while state.not_at_end() {
+        loop {
+            // 检查是否到达文件末尾
+            if state.not_at_end() == false {
+                break;
+            }
+
             // 尝试各种词法规则
             if self.skip_whitespace(&mut state) {
                 continue;
@@ -589,7 +599,7 @@ impl<'config> Lexer<CppLanguage> for CppLexer<'config> {
                 continue;
             }
 
-            if self.lex_keyword_or_identifier(&mut state, source) {
+            if self.lex_keyword_or_identifier(&mut state) {
                 continue;
             }
 
@@ -611,12 +621,16 @@ impl<'config> Lexer<CppLanguage> for CppLexer<'config> {
                 state.advance(ch.len_utf8());
                 state.add_token(CppSyntaxKind::Error, start_pos, state.get_position());
             }
+            else {
+                // 如果没有字符可读，退出循环
+                break;
+            }
         }
 
         // 添加 EOF kind
         let eof_pos = state.get_position();
         state.add_token(CppSyntaxKind::Eof, eof_pos, eof_pos);
 
-        state.finish()
+        state.finish(Ok(()))
     }
 }

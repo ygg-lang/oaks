@@ -5,4 +5,5 @@ pub struct WitLanguage {}
 
 impl Language for WitLanguage {
     type SyntaxKind = WitSyntaxKind;
+    type TypedRoot = ();
 }

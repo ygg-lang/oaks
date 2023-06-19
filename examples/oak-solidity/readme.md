@@ -2,6 +2,7 @@
 
 [![Crates.io](https://img.shields.io/crates/v/oak-solidity.svg)](https://crates.io/crates/oak-solidity)
 [![Documentation](https://docs.rs/oak-solidity/badge.svg)](https://docs.rs/oak-solidity)
+[![License](https://img.shields.io/crates/l/oak-solidity.svg)](https://github.com/yourusername/oak-solidity#license)
 
 A Solidity parser for the Oak parsing framework, providing robust parsing capabilities for Ethereum smart contracts and Solidity language constructs.
 
@@ -17,11 +18,16 @@ A Solidity parser for the Oak parsing framework, providing robust parsing capabi
 - **AST Generation**: Rich Abstract Syntax Tree for semantic analysis and code generation
 - **Zero Dependencies**: Pure Rust implementation with no external dependencies
 
-## 🎯 Overview
+## Installation
 
-Oak Solidity is a robust parser for Solidity, designed to handle complete Solidity syntax including modern features. Built on the solid foundation of oak-core, it provides both high-level convenience and detailed AST generation for Solidity analysis and tooling.
+Add this to your `Cargo.toml`:
 
-## 🚀 Quick Start
+```toml
+[dependencies]
+oak-solidity = "0.1.0"
+```
+
+## Quick Start
 
 ```rust
 use oak::Parser;
@@ -59,7 +65,7 @@ fn main() {
 }
 ```
 
-## 📋 Parsing Examples
+## Advanced Usage
 
 ### Parsing Complex Contracts
 
@@ -122,7 +128,7 @@ fn main() {
 }
 ```
 
-### Error Handling
+### Error Handling with Context
 
 ```rust
 use oak::Parser;
@@ -152,7 +158,7 @@ fn parse_with_diagnostics(source: &str) {
 }
 ```
 
-## 🏗️ AST Structure
+## AST Structure
 
 The parser generates a rich AST with the following main node types:
 
@@ -171,14 +177,14 @@ The parser generates a rich AST with the following main node types:
   - Array and struct access
 - **Statement**: Control flow and other statements
 
-## 📊 Performance
+## Performance
 
 - **Zero-copy parsing**: Minimal string allocations during parsing
 - **Streaming support**: Parse large contracts incrementally
 - **Error recovery**: Continue parsing after encountering errors
 - **Memory efficient**: Compact AST representation
 
-## 🔗 Integration
+## Integration
 
 The parser integrates seamlessly with the broader Oak ecosystem:
 
@@ -197,8 +203,10 @@ fn analyze_solidity_contract(source: &str) -> Result<Analysis, ParseError> {
 }
 ```
 
-## 🤝 Contributing
+## Contributing
 
-Contributions are welcome! 
+Contributions are welcome! Please feel free to submit a Pull Request. For major changes, please open an issue first to discuss what you would like to change.
 
-Please feel free to submit pull requests at the [project repository](https://github.com/ygg-lang/oaks/tree/dev/examples/oak-solidity) or open [issues](https://github.com/ygg-lang/oaks/issues).
+## License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.

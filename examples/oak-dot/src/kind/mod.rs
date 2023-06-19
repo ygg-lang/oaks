@@ -1,7 +1,7 @@
 use oak_core::SyntaxKind;
 
 /// DOT 语法种类（Graphviz
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, serde::Serialize)]
 pub enum DotSyntaxKind {
     // 基本 kind
     Identifier,
@@ -43,22 +43,22 @@ pub enum DotSyntaxKind {
 
 impl SyntaxKind for DotSyntaxKind {
     fn is_trivia(&self) -> bool {
-        todo!()
+        matches!(self, Self::Whitespace | Self::Newline | Self::Comment)
     }
 
     fn is_comment(&self) -> bool {
-        todo!()
+        matches!(self, Self::Comment)
     }
 
     fn is_whitespace(&self) -> bool {
-        todo!()
+        matches!(self, Self::Whitespace | Self::Newline)
     }
 
     fn is_token_type(&self) -> bool {
-        todo!()
+        !matches!(self, Self::Error | Self::Eof)
     }
 
     fn is_element_type(&self) -> bool {
-        todo!()
+        matches!(self, Self::Error | Self::Eof)
     }
 }

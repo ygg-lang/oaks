@@ -1,0 +1,499 @@
+{
+    "success": true,
+    "count": 82,
+    "tokens": [
+        {
+            "kind": "Header1",
+            "text": "=",
+            "start": 0,
+            "end": 1
+        },
+        {
+            "kind": "Text",
+            "text": "Document Title",
+            "start": 2,
+            "end": 16
+        },
+        {
+            "kind": "Colon",
+            "text": ":",
+            "start": 18,
+            "end": 19
+        },
+        {
+            "kind": "Text",
+            "text": "author",
+            "start": 19,
+            "end": 25
+        },
+        {
+            "kind": "Colon",
+            "text": ":",
+            "start": 25,
+            "end": 26
+        },
+        {
+            "kind": "Text",
+            "text": "Test Author",
+            "start": 27,
+            "end": 38
+        },
+        {
+            "kind": "Colon",
+            "text": ":",
+            "start": 40,
+            "end": 41
+        },
+        {
+            "kind": "Text",
+            "text": "email",
+            "start": 41,
+            "end": 46
+        },
+        {
+            "kind": "Colon",
+            "text": ":",
+            "start": 46,
+            "end": 47
+        },
+        {
+            "kind": "Text",
+            "text": "test",
+            "start": 48,
+            "end": 52
+        },
+        {
+            "kind": "Text",
+            "text": "example",
+            "start": 53,
+            "end": 60
+        },
+        {
+            "kind": "Dot",
+            "text": ".",
+            "start": 60,
+            "end": 61
+        },
+        {
+            "kind": "Text",
+            "text": "com",
+            "start": 61,
+            "end": 64
+        },
+        {
+            "kind": "Colon",
+            "text": ":",
+            "start": 66,
+            "end": 67
+        },
+        {
+            "kind": "Text",
+            "text": "toc",
+            "start": 67,
+            "end": 70
+        },
+        {
+            "kind": "Colon",
+            "text": ":",
+            "start": 70,
+            "end": 71
+        },
+        {
+            "kind": "Header2",
+            "text": "==",
+            "start": 75,
+            "end": 77
+        },
+        {
+            "kind": "Text",
+            "text": "Introduction",
+            "start": 78,
+            "end": 90
+        },
+        {
+            "kind": "Text",
+            "text": "This is a test document for AsciiDoc lexer testing",
+            "start": 94,
+            "end": 144
+        },
+        {
+            "kind": "Dot",
+            "text": ".",
+            "start": 144,
+            "end": 145
+        },
+        {
+            "kind": "Header3",
+            "text": "===",
+            "start": 149,
+            "end": 152
+        },
+        {
+            "kind": "Text",
+            "text": "Features",
+            "start": 153,
+            "end": 161
+        },
+        {
+            "kind": "ItalicMarker",
+            "text": "*",
+            "start": 165,
+            "end": 166
+        },
+        {
+            "kind": "Text",
+            "text": "Bullet point 1",
+            "start": 167,
+            "end": 181
+        },
+        {
+            "kind": "ItalicMarker",
+            "text": "*",
+            "start": 183,
+            "end": 184
+        },
+        {
+            "kind": "Text",
+            "text": "Bullet point 2",
+            "start": 185,
+            "end": 199
+        },
+        {
+            "kind": "ItalicMarker",
+            "text": "*",
+            "start": 201,
+            "end": 202
+        },
+        {
+            "kind": "Text",
+            "text": "Bullet point 3",
+            "start": 203,
+            "end": 217
+        },
+        {
+            "kind": "Header2",
+            "text": "==",
+            "start": 221,
+            "end": 223
+        },
+        {
+            "kind": "Text",
+            "text": "Code Example",
+            "start": 224,
+            "end": 236
+        },
+        {
+            "kind": "LeftBracket",
+            "text": "[",
+            "start": 240,
+            "end": 241
+        },
+        {
+            "kind": "Text",
+            "text": "source",
+            "start": 241,
+            "end": 247
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 247,
+            "end": 248
+        },
+        {
+            "kind": "Text",
+            "text": "rust",
+            "start": 248,
+            "end": 252
+        },
+        {
+            "kind": "RightBracket",
+            "text": "]",
+            "start": 252,
+            "end": 253
+        },
+        {
+            "kind": "CodeBlockMarker",
+            "text": "----",
+            "start": 255,
+            "end": 259
+        },
+        {
+            "kind": "Text",
+            "text": "fn main",
+            "start": 261,
+            "end": 268
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 268,
+            "end": 269
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 269,
+            "end": 270
+        },
+        {
+            "kind": "Text",
+            "text": "println",
+            "start": 278,
+            "end": 285
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 286,
+            "end": 287
+        },
+        {
+            "kind": "Text",
+            "text": "Hello",
+            "start": 288,
+            "end": 293
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 293,
+            "end": 294
+        },
+        {
+            "kind": "Text",
+            "text": "World",
+            "start": 295,
+            "end": 300
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 302,
+            "end": 303
+        },
+        {
+            "kind": "CodeBlockMarker",
+            "text": "----",
+            "start": 309,
+            "end": 313
+        },
+        {
+            "kind": "Header2",
+            "text": "==",
+            "start": 317,
+            "end": 319
+        },
+        {
+            "kind": "Text",
+            "text": "Table Example",
+            "start": 320,
+            "end": 333
+        },
+        {
+            "kind": "Header3",
+            "text": "===",
+            "start": 338,
+            "end": 341
+        },
+        {
+            "kind": "Text",
+            "text": "Column 1 ",
+            "start": 345,
+            "end": 354
+        },
+        {
+            "kind": "Text",
+            "text": "Column 2 ",
+            "start": 356,
+            "end": 365
+        },
+        {
+            "kind": "Text",
+            "text": "Column 3",
+            "start": 367,
+            "end": 375
+        },
+        {
+            "kind": "Text",
+            "text": "Cell 1",
+            "start": 381,
+            "end": 387
+        },
+        {
+            "kind": "Text",
+            "text": "Cell 2",
+            "start": 391,
+            "end": 397
+        },
+        {
+            "kind": "Text",
+            "text": "Cell 3",
+            "start": 401,
+            "end": 407
+        },
+        {
+            "kind": "Header3",
+            "text": "===",
+            "start": 410,
+            "end": 413
+        },
+        {
+            "kind": "Header2",
+            "text": "==",
+            "start": 417,
+            "end": 419
+        },
+        {
+            "kind": "Text",
+            "text": "Links and References",
+            "start": 420,
+            "end": 440
+        },
+        {
+            "kind": "ItalicMarker",
+            "text": "*",
+            "start": 444,
+            "end": 445
+        },
+        {
+            "kind": "Text",
+            "text": "https",
+            "start": 446,
+            "end": 451
+        },
+        {
+            "kind": "Colon",
+            "text": ":",
+            "start": 451,
+            "end": 452
+        },
+        {
+            "kind": "Text",
+            "text": "example",
+            "start": 454,
+            "end": 461
+        },
+        {
+            "kind": "Dot",
+            "text": ".",
+            "start": 461,
+            "end": 462
+        },
+        {
+            "kind": "Text",
+            "text": "com",
+            "start": 462,
+            "end": 465
+        },
+        {
+            "kind": "LeftBracket",
+            "text": "[",
+            "start": 465,
+            "end": 466
+        },
+        {
+            "kind": "Text",
+            "text": "External Link",
+            "start": 466,
+            "end": 479
+        },
+        {
+            "kind": "RightBracket",
+            "text": "]",
+            "start": 479,
+            "end": 480
+        },
+        {
+            "kind": "ItalicMarker",
+            "text": "*",
+            "start": 482,
+            "end": 483
+        },
+        {
+            "kind": "Text",
+            "text": "introduction",
+            "start": 486,
+            "end": 498
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 498,
+            "end": 499
+        },
+        {
+            "kind": "Text",
+            "text": "Internal Reference",
+            "start": 499,
+            "end": 517
+        },
+        {
+            "kind": "Text",
+            "text": "This is a comment",
+            "start": 526,
+            "end": 543
+        },
+        {
+            "kind": "LeftBracket",
+            "text": "[",
+            "start": 547,
+            "end": 548
+        },
+        {
+            "kind": "Text",
+            "text": "custom",
+            "start": 549,
+            "end": 555
+        },
+        {
+            "kind": "ListMarker",
+            "text": "-",
+            "start": 555,
+            "end": 556
+        },
+        {
+            "kind": "Text",
+            "text": "id",
+            "start": 556,
+            "end": 558
+        },
+        {
+            "kind": "RightBracket",
+            "text": "]",
+            "start": 558,
+            "end": 559
+        },
+        {
+            "kind": "Header2",
+            "text": "==",
+            "start": 561,
+            "end": 563
+        },
+        {
+            "kind": "Text",
+            "text": "Custom ID Section",
+            "start": 564,
+            "end": 581
+        },
+        {
+            "kind": "Text",
+            "text": "This section has a custom ID",
+            "start": 585,
+            "end": 613
+        },
+        {
+            "kind": "Dot",
+            "text": ".",
+            "start": 613,
+            "end": 614
+        },
+        {
+            "kind": "Eof",
+            "text": "",
+            "start": 614,
+            "end": 614
+        }
+    ],
+    "errors": []
+}

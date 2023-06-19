@@ -1,4 +1,4 @@
-#[derive(Copy, Clone, Debug, PartialEq, Eq)]
+#[derive(Copy, Clone, Debug, PartialEq, Eq, serde::Serialize)]
 pub enum RSyntaxKind {
     // 空白符和换行
     Whitespace,
@@ -76,6 +76,9 @@ pub enum RSyntaxKind {
     Dot,
     Dollar,
     At,
+
+    // 根节点
+    Root,
 
     // 错误和结束
     Error,

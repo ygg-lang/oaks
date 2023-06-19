@@ -1,7 +1,6 @@
 #![doc = include_str!("readme.md")]
 
 use crate::{ast::*, kind::WolframSyntaxKind};
-use alloc::{boxed::Box, string::String, vec::Vec};
 use oak_core::{
     SourceLocation, SourceText, Token,
     errors::{OakDiagnostics, OakError},

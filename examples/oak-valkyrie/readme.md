@@ -1,108 +1,185 @@
-# WebAssembly 文本格式 (WAT) 处理模块
+# Oak Valkyrie Parser
 
-这个模块提供了完整的 WAT (WebAssembly Text) 格式处理功能，包括：
-- **词法分析**: 将 WAT 文本分解为词法单元 (tokens)
-- **语法分析**: 将词法单元解析为抽象语法树 (AST)
-- **编译**: 将 AST 编译为 WASM 二进制结构
-- **反编译**: 将 WASM 结构转换回 WAT 文本
+[![Crates.io](https://img.shields.io/crates/v/oak-valkyrie.svg)](https://crates.io/crates/oak-valkyrie)
+[![Documentation](https://docs.rs/oak-valkyrie/badge.svg)](https://docs.rs/oak-valkyrie)
 
-## 模块组件
+High-performance incremental Valkyrie parser for the oak ecosystem with flexible configuration, optimized for modern systems programming with advanced type safety and concurrency features.
 
-### `ast` 模块
+## 🎯 Overview
 
-定义 WAT 抽象语法树的所有节点类型：
-- `Module`: 模块定义
-- `Func`: 函数定义
-- `Export`: 导出定义
-- `Import`: 导入定义
-- `Memory`: 内存定义
-- `Table`: 表定义
-- `Global`: 全局变量定义
-- `Instruction`: WebAssembly 指令
+Oak Valkyrie is a robust parser for the Valkyrie programming language, designed to handle complete Valkyrie syntax including modern language features and advanced type system. Built on the solid foundation of oak-core, it provides both high-level convenience and detailed AST generation for Valkyrie analysis and tooling.
 
-### `lexer` 模块
+## ✨ Features
 
-词法分析器，将 WAT 文本转换为词法单元：
-- 关键字识别 (`module`, `func`, `export`, 等)
-- 标识符和名称解析
-- 数值字面量处理
-- 字符串字面量处理
-- 注释和空白字符处理
+- **Complete Valkyrie Syntax**: Supports all Valkyrie features including modern specifications
+- **Advanced Type System**: Handles generics, traits, and type inference
+- **Full AST Generation**: Generates comprehensive Abstract Syntax Trees
+- **Lexer Support**: Built-in tokenization with proper span information
+- **Error Recovery**: Graceful handling of syntax errors with detailed diagnostics
 
-### `parser` 模块
+## 🚀 Quick Start
 
-语法分析器，将词法单元解析为 AST：
-- 递归下降解析
-- 错误恢复和报告
-- 语法验证
-- 位置信息跟踪
+Basic example:
 
-### `compiler` 模块
-
-编译器，将 AST 编译为 WASM 结构：
-- 类型检查
-- 符号解析
-- 指令编码
-- 模块生成
-
-### `writer` 模块
-
-写入器，将 AST 转换回 WAT 文本：
-- 格式化输出
-- 注释生成
-- 代码美化
-
-## 使用示例
-
-### 基本解析和编译
-
-```rust,no_run
-use wasi_assembler::formats::wat::{WatParser, WatCompiler};
+```rust
+use oak_valkyrie::{Parser, ValkyrieLanguage, SourceText};
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
-    let wat_source = r#"
-        (module
-            (func $add (param $a i32) (param $b i32) (result i32)
-                local.get $a
-                local.get $b
-                i32.add
-            )
-            (export "add" (func $add))
-        )
-    "#;
+    let parser = Parser::new();
+    let source = SourceText::new(r#"
+mod main {
+    fn add(a: i32, b: i32) -> i32 {
+        a + b
+    }
+}
+    "#);
     
-    // 解析 WAT 文本
-    let mut parser = WatParser::new();
-    let ast = parser.parse(wat_source)?;
-    
-    // 编译为 WASM 结构
-    let mut compiler = WatCompiler::new();
-    let wasm_module = compiler.compile(ast)?;
+    let result = parser.parse(&source);
+    println!("Parsed Valkyrie module successfully.");
     Ok(())
 }
 ```
 
-### 错误处理
+## 📋 Parsing Examples
 
-```rust,no_run
-use wasi_assembler::formats::wat::{WatParser, WatError};
+### Module Parsing
+```rust
+use oak_valkyrie::{Parser, ValkyrieLanguage, SourceText};
 
-fn main() -> Result<(), Box<dyn std::error::Error>> {
-    let mut parser = WatParser::new();
-    match parser.parse("(module (func $invalid") {
-        Ok(ast) => {
-            // 解析成功
+let parser = Parser::new();
+let source = SourceText::new(r#"
+mod math {
+    pub struct Point {
+        x: f64,
+        y: f64,
+    }
+    
+    impl Point {
+        pub fn new(x: f64, y: f64) -> Self {
+            Self { x, y }
         }
-        Err(WatError::UnexpectedToken { expected, found, location }) => {
-            eprintln!("语法错误: 期望 {:?}, 找到 {:?} 在位置 {:?}", expected, found, location);
-        }
-        Err(WatError::UnexpectedEof) => {
-            eprintln!("意外结束: 输入不完整");
-        }
-        Err(e) => {
-            eprintln!("解析错误: {}", e);
+        
+        pub fn distance(&self, other: &Point) -> f64 {
+            ((self.x - other.x).powi(2) + (self.y - other.y).powi(2)).sqrt()
         }
     }
-    Ok(())
+}
+"#);
+
+let result = parser.parse(&source);
+println!("Parsed Valkyrie module successfully.");
+```
+
+### Trait Parsing
+```rust
+use oak_valkyrie::{Parser, ValkyrieLanguage, SourceText};
+
+let parser = Parser::new();
+let source = SourceText::new(r#"
+pub trait Drawable {
+    fn draw(&self);
+    fn area(&self) -> f64;
+    
+    fn describe(&self) -> String {
+        format!("Shape with area: {}", self.area())
+    }
+}
+
+pub struct Circle {
+    radius: f64,
+}
+
+impl Drawable for Circle {
+    fn draw(&self) {
+        println!("Drawing circle with radius: {}", self.radius);
+    }
+    
+    fn area(&self) -> f64 {
+        3.14159 * self.radius * self.radius
+    }
+}
+"#);
+
+let result = parser.parse(&source);
+println!("Parsed Valkyrie trait successfully.");
+```
+
+## 🔧 Advanced Features
+
+### Token-Level Parsing
+```rust
+use oak_valkyrie::{Parser, ValkyrieLanguage, SourceText};
+
+let parser = Parser::new();
+let source = SourceText::new("fn main() { let x = 42; println!(\"{}\", x); }");
+let result = parser.parse(&source);
+// Token information is available in the parse result
+```
+
+### Error Handling
+```rust
+use oak_valkyrie::{Parser, ValkyrieLanguage, SourceText};
+
+let parser = Parser::new();
+let source = SourceText::new(r#"
+fn broken_function() -> i32 {
+    let x: i32 = "not a number"; // Type mismatch
+    return x; // Type mismatch in return
+}
+
+fn invalid_syntax() { // Missing return type
+    let y = 1 // Missing semicolon
+}
+"#);
+
+let result = parser.parse(&source);
+if let Err(e) = result.result {
+    println!("Parse error: {:?}", e);
 }
 ```
+
+## 🏗️ AST Structure
+
+The parser generates a comprehensive AST with the following main structures:
+
+- **Module**: Module definitions with visibility
+- **Function**: Function definitions with parameters and return types
+- **Struct**: Struct definitions with fields
+- **Enum**: Enumeration definitions with variants
+- **Trait**: Trait definitions for shared behavior
+- **Impl**: Implementation blocks for types
+- **Statement**: Assignment, if, match, loop statements
+- **Expression**: Binary, unary, method call expressions
+- **Pattern**: Pattern matching constructs
+
+## 📊 Performance
+
+- **Streaming**: Parse large Valkyrie files without loading entirely into memory
+- **Incremental**: Re-parse only changed sections
+- **Memory Efficient**: Smart AST node allocation
+- **Fast Recovery**: Quick error recovery for better IDE integration
+
+## 🔗 Integration
+
+Oak-valkyrie integrates seamlessly with:
+
+- **Static Analysis**: Code quality and security analysis
+- **Code Generation**: Generating executable code from Valkyrie AST
+- **IDE Support**: Language server protocol compatibility
+- **Refactoring**: Automated code refactoring
+- **Documentation**: Generating documentation from Valkyrie code
+
+## 📚 Examples
+
+Check out the [examples](examples/) directory for comprehensive examples:
+
+- Complete Valkyrie module parsing
+- Trait and implementation analysis
+- Pattern matching processing
+- Integration with build systems
+
+## 🤝 Contributing
+
+Contributions are welcome! 
+
+Please feel free to submit pull requests at the [project repository](https://github.com/ygg-lang/oaks/tree/dev/examples/oak-valkyrie) or open [issues](https://github.com/ygg-lang/oaks/issues).

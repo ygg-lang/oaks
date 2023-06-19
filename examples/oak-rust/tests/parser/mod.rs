@@ -1,18 +1,14 @@
-use oak_core::{helpers::run_parser_tests, SourceText};
-use oak_rust::RustParser;
-use oak_rust::language::RustLanguage;
-use std::path::Path;
+use oak_core::helpers::ParserTester;
+use oak_rust::{RustParser, language::RustLanguage};
+use std::{path::Path, time::Duration};
 
 #[test]
 fn test_rust_parser() {
     let here = Path::new(env!("CARGO_MANIFEST_DIR"));
-    let tests = here.join("tests/parser");
-
-    // 构造一个解析器实例；其 parse 方法会基于传入的 SourceText 构造新的内部解析器
-    let dummy = SourceText::new("");
-    let parser = RustParser::new(&dummy, &[]);
-
-    match run_parser_tests::<RustLanguage, _>(tests, "txt", parser) {
+    let lang: &'static RustLanguage = Box::leak(Box::new(RustLanguage::default()));
+    let parser: &'static RustParser = Box::leak(Box::new(RustParser::new(lang)));
+    let test_runner = ParserTester::new(here.join("tests/parser")).with_extension("rust").with_timeout(Duration::from_secs(5));
+    match test_runner.run_tests::<RustLanguage, _>(parser) {
         Ok(()) => println!("Rust parser tests passed!"),
         Err(e) => panic!("Rust parser tests failed: {}", e),
     }

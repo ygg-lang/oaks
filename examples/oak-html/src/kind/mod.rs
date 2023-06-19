@@ -1,7 +1,8 @@
 use oak_core::SyntaxKind;
+use serde::{Deserialize, Serialize};
 
 /// HTML 语法节点类型
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub enum HtmlSyntaxKind {
     // 标签相关
     TagOpen,      // <

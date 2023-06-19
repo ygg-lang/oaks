@@ -1,8 +1,18 @@
 use crate::{kind::PascalSyntaxKind, language::PascalLanguage};
-use oak_core::{Lexer, LexerState, SourceText, lexer::LexOutput};
+use oak_core::{
+    IncrementalCache, Lexer, LexerState, OakError,
+    lexer::{CommentLine, LexOutput, StringConfig, WhitespaceConfig},
+    source::Source,
+};
+use std::sync::LazyLock;
 
-type State<'input> = LexerState<'input, PascalLanguage>;
+type State<S: Source> = LexerState<S, PascalLanguage>;
 
+static PASCAL_WHITESPACE: LazyLock<WhitespaceConfig> = LazyLock::new(|| WhitespaceConfig { unicode_whitespace: true });
+static PASCAL_COMMENT: LazyLock<CommentLine> = LazyLock::new(|| CommentLine { line_markers: &["//"] });
+static PASCAL_STRING: LazyLock<StringConfig> = LazyLock::new(|| StringConfig { quotes: &['\''], escape: None });
+
+#[derive(Clone)]
 pub struct PascalLexer<'config> {
     config: &'config PascalLanguage,
 }
@@ -12,252 +22,98 @@ impl<'config> PascalLexer<'config> {
         Self { config }
     }
 
-    /// 跳过空白字符
-    fn skip_whitespace(&self, state: &mut State) -> bool {
-        let start_pos = state.get_position();
-
-        while let Some(ch) = state.peek() {
-            if ch == ' ' || ch == '\t' {
-                state.advance(ch.len_utf8());
+    fn skip_whitespace<S: Source>(&self, state: &mut State<S>) -> bool {
+        match PASCAL_WHITESPACE.scan(state.rest(), state.get_position(), PascalSyntaxKind::Whitespace) {
+            Some(token) => {
+                state.advance_with(token);
+                true
             }
-            else {
-                break;
-            }
-        }
-
-        if state.get_position() > start_pos {
-            state.add_token(PascalSyntaxKind::Whitespace, start_pos, state.get_position());
-            true
-        }
-        else {
-            false
+            None => false,
         }
     }
 
-    /// 处理换行
-    fn lex_newline(&self, state: &mut State) -> bool {
-        let start_pos = state.get_position();
+    fn skip_comment<S: Source>(&self, state: &mut State<S>) -> bool {
+        let start = state.get_position();
+        let rest = state.rest();
 
-        if let Some('\n') = state.peek() {
-            state.advance(1);
-            state.add_token(PascalSyntaxKind::Newline, start_pos, state.get_position());
-            true
-        }
-        else if let Some('\r') = state.peek() {
-            state.advance(1);
-            if let Some('\n') = state.peek() {
-                state.advance(1);
+        // Line comment starting with //
+        if rest.starts_with("//") {
+            match PASCAL_COMMENT.scan(rest, start, PascalSyntaxKind::Comment) {
+                Some(token) => {
+                    state.advance_with(token);
+                    return true;
+                }
+                None => return false,
             }
-            state.add_token(PascalSyntaxKind::Newline, start_pos, state.get_position());
-            true
         }
-        else {
-            false
-        }
-    }
 
-    /// 处理注释
-    fn lex_comment(&self, state: &mut State, source: &SourceText) -> bool {
-        let start_pos = state.get_position();
-
-        // Pascal 风格注释 { ... }
-        if let Some('{') = state.peek() {
+        // Block comment: { ... }
+        if state.current() == Some('{') {
             state.advance(1);
             while let Some(ch) = state.peek() {
                 if ch == '}' {
                     state.advance(1);
                     break;
                 }
-                else {
-                    state.advance(ch.len_utf8());
-                }
+                state.advance(ch.len_utf8());
             }
-            state.add_token(PascalSyntaxKind::Comment, start_pos, state.get_position());
+            state.add_token(PascalSyntaxKind::Comment, start, state.get_position());
             return true;
         }
 
-        // (* ... *) 风格注释
-        if let Some('(') = state.peek() {
-            if let Some('*') = source.get_char_at(start_pos + 1) {
-                state.advance(2);
-                while let Some(ch) = state.peek() {
-                    if ch == '*' {
-                        if let Some(')') = source.get_char_at(state.get_position() + 1) {
-                            state.advance(2);
-                            break;
-                        }
-                        else {
-                            state.advance(1);
-                        }
-                    }
-                    else {
-                        state.advance(ch.len_utf8());
-                    }
+        // Block comment: (* ... *)
+        if rest.starts_with("(*") {
+            state.advance(2);
+            while let Some(ch) = state.peek() {
+                if ch == '*' && state.peek_next_n(1) == Some(')') {
+                    state.advance(2);
+                    break;
                 }
-                state.add_token(PascalSyntaxKind::Comment, start_pos, state.get_position());
-                return true;
+                state.advance(ch.len_utf8());
             }
-        }
-
-        // // 风格注释
-        if let Some('/') = state.peek() {
-            if let Some('/') = source.get_char_at(start_pos + 1) {
-                state.advance(2);
-                while let Some(ch) = state.peek() {
-                    if ch == '\n' || ch == '\r' {
-                        break;
-                    }
-                    else {
-                        state.advance(ch.len_utf8());
-                    }
-                }
-                state.add_token(PascalSyntaxKind::Comment, start_pos, state.get_position());
-                return true;
-            }
+            state.add_token(PascalSyntaxKind::Comment, start, state.get_position());
+            return true;
         }
 
         false
     }
 
-    /// 处理字符串字面量
-    fn lex_string_literal(&self, state: &mut State) -> bool {
-        let start_pos = state.get_position();
+    fn lex_string<S: Source>(&self, state: &mut State<S>) -> bool {
+        let start = state.get_position();
 
-        if let Some('\'') = state.peek() {
+        // Pascal 字符串字面量：'...'
+        if state.current() == Some('\'') {
             state.advance(1);
-            let mut found_end = false;
-
             while let Some(ch) = state.peek() {
                 if ch == '\'' {
-                    state.advance(1);
                     // 检查是否是转义的单引号 ''
-                    if let Some('\'') = state.peek() {
-                        state.advance(1);
+                    if state.peek_next_n(1) == Some('\'') {
+                        state.advance(2); // 跳过 ''
+                        continue;
                     }
                     else {
-                        found_end = true;
+                        state.advance(1); // 结束引号
                         break;
                     }
                 }
-                else if ch == '\n' || ch == '\r' {
-                    break; // 字符串不能跨
-                }
-                else {
-                    state.advance(ch.len_utf8());
-                }
-            }
-
-            if found_end {
-                state.add_token(PascalSyntaxKind::StringLiteral, start_pos, state.get_position());
-                true
-            }
-            else {
-                state.set_position(start_pos);
-                false
-            }
-        }
-        else {
-            false
-        }
-    }
-
-    /// 处理数字字面
-    fn lex_number_literal(&self, state: &mut State, source: &SourceText) -> bool {
-        let start_pos = state.get_position();
-
-        if let Some(ch) = state.peek() {
-            if ch.is_ascii_digit() {
-                // 整数部分
-                while let Some(digit) = state.peek() {
-                    if digit.is_ascii_digit() {
-                        state.advance(1);
-                    }
-                    else {
-                        break;
-                    }
-                }
-
-                let mut is_real = false;
-
-                // 检查小数点
-                if let Some('.') = state.peek() {
-                    // 确保不是范围操作..
-                    let next_pos = state.get_position() + 1;
-                    if let Some(next_ch) = source.get_char_at(next_pos) {
-                        if next_ch != '.' && next_ch.is_ascii_digit() {
-                            state.advance(1);
-                            is_real = true;
-
-                            // 小数部分
-                            while let Some(digit) = state.peek() {
-                                if digit.is_ascii_digit() {
-                                    state.advance(1);
-                                }
-                                else {
-                                    break;
-                                }
-                            }
-                        }
-                    }
-                }
-
-                // 检查科学计数法
-                if let Some(e_char) = state.peek() {
-                    if e_char == 'e' || e_char == 'E' {
-                        let saved_pos = state.get_position();
-                        state.advance(1);
-
-                        // 可选的符号
-                        if let Some(sign) = state.peek() {
-                            if sign == '+' || sign == '-' {
-                                state.advance(1);
-                            }
-                        }
-
-                        // 指数部分
-                        let exp_start = state.get_position();
-                        while let Some(digit) = state.peek() {
-                            if digit.is_ascii_digit() {
-                                state.advance(1);
-                            }
-                            else {
-                                break;
-                            }
-                        }
-
-                        if state.get_position() > exp_start {
-                            is_real = true;
-                        }
-                        else {
-                            // 没有有效的指数，回退
-                            state.set_position(saved_pos);
-                        }
-                    }
-                }
-
-                let token_kind = if is_real { PascalSyntaxKind::RealLiteral } else { PascalSyntaxKind::IntegerLiteral };
-                state.add_token(token_kind, start_pos, state.get_position());
-                true
-            }
-            else {
-                false
-            }
-        }
-        else {
-            false
-        }
-    }
-
-    /// 处理标识符和关键字
-    fn lex_identifier_or_keyword(&self, state: &mut State, source: &SourceText) -> bool {
-        let start_pos = state.get_position();
-
-        if let Some(ch) = state.peek() {
-            if ch.is_ascii_alphabetic() || ch == '_' {
                 state.advance(ch.len_utf8());
+            }
+            state.add_token(PascalSyntaxKind::StringLiteral, start, state.get_position());
+            return true;
+        }
+        false
+    }
 
+    fn lex_identifier_or_keyword<S: Source>(&self, state: &mut State<S>) -> bool {
+        if let Some(ch) = state.peek() {
+            if ch.is_alphabetic() || ch == '_' {
+                let start_pos = state.get_position();
+                let mut text = String::new();
+
+                // 读取标识符
                 while let Some(ch) = state.peek() {
-                    if ch.is_ascii_alphanumeric() || ch == '_' {
+                    if ch.is_alphanumeric() || ch == '_' {
+                        text.push(ch);
                         state.advance(ch.len_utf8());
                     }
                     else {
@@ -265,16 +121,16 @@ impl<'config> PascalLexer<'config> {
                     }
                 }
 
-                let text = source.get_text_in((start_pos..state.get_position()).into()).unwrap_or("");
-                let token_kind = match text.to_lowercase().as_str() {
+                // 检查是否是关键字
+                let kind = match text.to_lowercase().as_str() {
                     "program" => PascalSyntaxKind::Program,
-                    "begin" => PascalSyntaxKind::Begin,
-                    "end" => PascalSyntaxKind::End,
                     "var" => PascalSyntaxKind::Var,
                     "const" => PascalSyntaxKind::Const,
                     "type" => PascalSyntaxKind::Type,
-                    "function" => PascalSyntaxKind::Function,
                     "procedure" => PascalSyntaxKind::Procedure,
+                    "function" => PascalSyntaxKind::Function,
+                    "begin" => PascalSyntaxKind::Begin,
+                    "end" => PascalSyntaxKind::End,
                     "if" => PascalSyntaxKind::If,
                     "then" => PascalSyntaxKind::Then,
                     "else" => PascalSyntaxKind::Else,
@@ -302,10 +158,11 @@ impl<'config> PascalLexer<'config> {
                     "div" => PascalSyntaxKind::Div,
                     "mod" => PascalSyntaxKind::Mod,
                     "in" => PascalSyntaxKind::In,
+
                     _ => PascalSyntaxKind::Identifier,
                 };
 
-                state.add_token(token_kind, start_pos, state.get_position());
+                state.add_token(kind, start_pos, state.get_position());
                 true
             }
             else {
@@ -317,12 +174,45 @@ impl<'config> PascalLexer<'config> {
         }
     }
 
-    /// 处理运算
-    fn lex_operators(&self, state: &mut State, source: &SourceText) -> bool {
-        let start_pos = state.get_position();
-
+    fn lex_number<S: Source>(&self, state: &mut State<S>) -> bool {
         if let Some(ch) = state.peek() {
-            let token_kind = match ch {
+            if ch.is_ascii_digit() {
+                let start_pos = state.get_position();
+                let mut has_dot = false;
+
+                // 读取数字
+                while let Some(ch) = state.peek() {
+                    if ch.is_ascii_digit() {
+                        state.advance(1);
+                    }
+                    else if ch == '.' && !has_dot {
+                        has_dot = true;
+                        state.advance(1);
+                    }
+                    else {
+                        break;
+                    }
+                }
+
+                let kind = if has_dot { PascalSyntaxKind::RealLiteral } else { PascalSyntaxKind::IntegerLiteral };
+
+                state.add_token(kind, start_pos, state.get_position());
+                true
+            }
+            else {
+                false
+            }
+        }
+        else {
+            false
+        }
+    }
+
+    fn lex_operators_and_punctuation<S: Source>(&self, state: &mut State<S>) -> bool {
+        if let Some(ch) = state.peek() {
+            let start_pos = state.get_position();
+
+            let kind = match ch {
                 '+' => {
                     state.advance(1);
                     PascalSyntaxKind::Plus
@@ -377,6 +267,14 @@ impl<'config> PascalLexer<'config> {
                         PascalSyntaxKind::Colon
                     }
                 }
+                ';' => {
+                    state.advance(1);
+                    PascalSyntaxKind::Semicolon
+                }
+                ',' => {
+                    state.advance(1);
+                    PascalSyntaxKind::Comma
+                }
                 '.' => {
                     state.advance(1);
                     if let Some('.') = state.peek() {
@@ -387,38 +285,37 @@ impl<'config> PascalLexer<'config> {
                         PascalSyntaxKind::Dot
                     }
                 }
+                '(' => {
+                    state.advance(1);
+                    PascalSyntaxKind::LeftParen
+                }
+                ')' => {
+                    state.advance(1);
+                    PascalSyntaxKind::RightParen
+                }
+                '[' => {
+                    state.advance(1);
+                    PascalSyntaxKind::LeftBracket
+                }
+                ']' => {
+                    state.advance(1);
+                    PascalSyntaxKind::RightBracket
+                }
                 '^' => {
                     state.advance(1);
                     PascalSyntaxKind::Caret
                 }
-                _ => return false,
+                '\n' => {
+                    state.advance(1);
+                    PascalSyntaxKind::Newline
+                }
+                _ => {
+                    state.advance(ch.len_utf8());
+                    PascalSyntaxKind::Error
+                }
             };
 
-            state.add_token(token_kind, start_pos, state.get_position());
-            true
-        }
-        else {
-            false
-        }
-    }
-
-    /// 处理分隔
-    fn lex_delimiters(&self, state: &mut State) -> bool {
-        let start_pos = state.get_position();
-
-        if let Some(ch) = state.peek() {
-            let token_kind = match ch {
-                '(' => PascalSyntaxKind::LeftParen,
-                ')' => PascalSyntaxKind::RightParen,
-                '[' => PascalSyntaxKind::LeftBracket,
-                ']' => PascalSyntaxKind::RightBracket,
-                ';' => PascalSyntaxKind::Semicolon,
-                ',' => PascalSyntaxKind::Comma,
-                _ => return false,
-            };
-
-            state.advance(ch.len_utf8());
-            state.add_token(token_kind, start_pos, state.get_position());
+            state.add_token(kind, start_pos, state.get_position());
             true
         }
         else {
@@ -428,55 +325,65 @@ impl<'config> PascalLexer<'config> {
 }
 
 impl<'config> Lexer<PascalLanguage> for PascalLexer<'config> {
-    fn lex(&self, source: &SourceText) -> LexOutput<PascalSyntaxKind> {
-        let mut state = LexerState::new(source);
+    fn lex_incremental(
+        &self,
+        source: impl Source,
+        changed: usize,
+        cache: IncrementalCache<PascalLanguage>,
+    ) -> LexOutput<PascalLanguage> {
+        let mut state = LexerState::new_with_cache(source, changed, cache);
+        let result = self.run(&mut state);
+        state.finish(result)
+    }
+}
 
+impl<'config> PascalLexer<'config> {
+    fn run<S: Source>(&self, state: &mut State<S>) -> Result<(), OakError> {
         while state.not_at_end() {
-            // 尝试各种词法规则
-            if self.skip_whitespace(&mut state) {
+            // 跳过空白字符
+            if self.skip_whitespace(state) {
                 continue;
             }
 
-            if self.lex_newline(&mut state) {
+            // 处理注释
+            if self.skip_comment(state) {
                 continue;
             }
 
-            if self.lex_comment(&mut state, source) {
+            // 处理字符串
+            if self.lex_string(state) {
                 continue;
             }
 
-            if self.lex_string_literal(&mut state) {
+            // 处理标识符和关键字
+            if self.lex_identifier_or_keyword(state) {
                 continue;
             }
 
-            if self.lex_number_literal(&mut state, source) {
+            // 处理数字
+            if self.lex_number(state) {
                 continue;
             }
 
-            if self.lex_identifier_or_keyword(&mut state, source) {
+            // 处理操作符和标点符号
+            if self.lex_operators_and_punctuation(state) {
                 continue;
             }
 
-            if self.lex_operators(&mut state, source) {
-                continue;
-            }
-
-            if self.lex_delimiters(&mut state) {
-                continue;
-            }
-
-            // 如果所有规则都不匹配，跳过当前字符并标记为错误
+            // 如果没有匹配任何模式，创建错误 token
             let start_pos = state.get_position();
             if let Some(ch) = state.peek() {
                 state.advance(ch.len_utf8());
                 state.add_token(PascalSyntaxKind::Error, start_pos, state.get_position());
             }
+            else {
+                break;
+            }
         }
 
-        // 添加 EOF kind
+        // 添加 EOF token
         let eof_pos = state.get_position();
         state.add_token(PascalSyntaxKind::Eof, eof_pos, eof_pos);
-
-        state.finish()
+        Ok(())
     }
 }

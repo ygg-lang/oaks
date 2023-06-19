@@ -1,8 +1,11 @@
 #![doc = include_str!("../../readme.md")]
 
-use oak_core::SyntaxKind;
+use oak_core::{SyntaxKind, Token};
+use serde::{Deserialize, Serialize};
 
-#[derive(Copy, Clone, Debug, PartialEq, Eq)]
+pub type ValaToken = Token<ValaSyntaxKind>;
+
+#[derive(Copy, Clone, Debug, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub enum ValaSyntaxKind {
     // 基础文本
     Text,

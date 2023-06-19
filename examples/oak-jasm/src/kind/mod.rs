@@ -1,15 +1,15 @@
 use crate::syntax::JasmSyntaxKind;
-use core::ops::Range;
+use std::range::Range;
 
 #[derive(Clone, Debug)]
 pub struct JasmToken {
     pub kind: JasmSyntaxKind,
     pub span: Range<usize>,
-    pub text: alloc::string::String,
+    pub text: String,
 }
 
 impl JasmToken {
-    pub fn new(kind: JasmSyntaxKind, span: Range<usize>, text: alloc::string::String) -> Self {
+    pub fn new(kind: JasmSyntaxKind, span: Range<usize>, text: String) -> Self {
         Self { kind, span, text }
     }
 

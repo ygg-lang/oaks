@@ -1,10 +1,12 @@
-//! Oak Lean 语言支持
-//!
-//! Oak 解析器框架提Lean 语言的词法分析和语法支持
+#![feature(new_range_api)]
+#![doc = include_str!("readme.md")]
+#![doc(html_logo_url = "https://raw.githubusercontent.com/ygg-lang/oaks/refs/heads/dev/documents/logo.svg")]
+#![doc(html_favicon_url = "https://raw.githubusercontent.com/ygg-lang/oaks/refs/heads/dev/documents/logo.svg")]
+
+pub mod kind;
 pub mod language;
 pub mod lexer;
-pub mod syntax;
 
+pub use kind::{LeanSyntaxKind, LeanToken};
 pub use language::LeanLanguage;
 pub use lexer::LeanLexer;
-pub use syntax::LeanSyntaxKind;

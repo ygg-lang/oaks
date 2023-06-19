@@ -1,7 +1,7 @@
 use crate::{kind::WgslSyntaxKind, language::WgslLanguage};
-use oak_core::{Lexer, LexerState, SourceText, lexer::LexOutput};
+use oak_core::{IncrementalCache, Lexer, LexerState, OakError, SourceText, lexer::LexOutput, source::Source};
 
-type State<'input> = LexerState<'input, WgslLanguage>;
+type State<S> = LexerState<S, WgslLanguage>;
 
 pub struct WgslLexer<'config> {
     config: &'config WgslLanguage,
@@ -13,7 +13,7 @@ impl<'config> WgslLexer<'config> {
     }
 
     /// 跳过空白字符
-    fn skip_whitespace(&self, state: &mut State) -> bool {
+    fn skip_whitespace<S: Source>(&self, state: &mut State<S>) -> bool {
         let start_pos = state.get_position();
 
         while let Some(ch) = state.peek() {
@@ -36,7 +36,7 @@ impl<'config> WgslLexer<'config> {
 
     /// 处理换行
 
-    fn lex_newline(&self, state: &mut State) -> bool {
+    fn lex_newline<S: Source>(&self, state: &mut State<S>) -> bool {
         let start_pos = state.get_position();
 
         if let Some('\n') = state.peek() {
@@ -58,12 +58,12 @@ impl<'config> WgslLexer<'config> {
     }
 
     /// 处理注释
-    fn lex_comment(&self, state: &mut State, source: &SourceText) -> bool {
+    fn lex_comment<S: Source>(&self, state: &mut State<S>) -> bool {
         let start_pos = state.get_position();
 
         // 单行注释 //
         if let Some('/') = state.peek() {
-            if source.get_char_at(state.get_position() + 1) == Some('/') {
+            if state.get_char_at(state.get_position() + 1) == Some('/') {
                 state.advance(2);
 
                 // 读取到行
@@ -82,13 +82,13 @@ impl<'config> WgslLexer<'config> {
 
         // 多行注释 /* */
         if let Some('/') = state.peek() {
-            if source.get_char_at(state.get_position() + 1) == Some('*') {
+            if state.get_char_at(state.get_position() + 1) == Some('*') {
                 state.advance(2);
                 let mut depth = 1;
 
-                while depth > 0 && !state.is_at_end() {
+                while depth > 0 && state.not_at_end() {
                     if let Some('/') = state.peek() {
-                        if source.get_char_at(state.get_position() + 1) == Some('*') {
+                        if state.get_char_at(state.get_position() + 1) == Some('*') {
                             state.advance(2);
                             depth += 1;
                             continue;
@@ -119,7 +119,7 @@ impl<'config> WgslLexer<'config> {
     }
 
     /// 处理字符串字面量
-    fn lex_string(&self, state: &mut State, source: &SourceText) -> bool {
+    fn lex_string<S: Source>(&self, state: &mut State<S>) -> bool {
         let start_pos = state.get_position();
 
         if let Some('"') = state.peek() {
@@ -158,14 +158,14 @@ impl<'config> WgslLexer<'config> {
     }
 
     /// 处理数字字面量
-    fn lex_number(&self, state: &mut State, source: &SourceText) -> bool {
+    fn lex_number<S: Source>(&self, state: &mut State<S>) -> bool {
         let start_pos = state.get_position();
 
         if let Some(ch) = state.peek() {
             if ch.is_ascii_digit() {
                 // 十六进制
 
-                if ch == '0' && source.get_char_at(state.get_position() + 1) == Some('x') {
+                if ch == '0' && state.peek_next_n(1) == Some('x') {
                     state.advance(2); // 跳过 "0x"
 
                     let mut has_digits = false;
@@ -208,7 +208,7 @@ impl<'config> WgslLexer<'config> {
                 // 小数
 
                 if let Some('.') = state.peek() {
-                    if let Some(next_ch) = source.get_char_at(state.get_position() + 1) {
+                    if let Some(next_ch) = state.peek_next_n(1) {
                         if next_ch.is_ascii_digit() {
                             state.advance(1); // 跳过小数
 
@@ -281,7 +281,7 @@ impl<'config> WgslLexer<'config> {
     }
 
     /// 处理标识符或关键字
-    fn lex_ident_or_keyword(&self, state: &mut State, source: &SourceText) -> bool {
+    fn lex_ident_or_keyword<S: Source>(&self, state: &mut State<S>) -> bool {
         let start_pos = state.get_position();
 
         if let Some(ch) = state.peek() {
@@ -297,7 +297,7 @@ impl<'config> WgslLexer<'config> {
                     }
                 }
 
-                let text = source.get_text_in((start_pos..state.get_position()).into()).unwrap_or("");
+                let text = state.get_text_in((start_pos..state.get_position()).into());
                 let kind = match text {
                     // 基本类型关键字
                     "i32" => WgslSyntaxKind::I32Kw,
@@ -379,91 +379,87 @@ impl<'config> WgslLexer<'config> {
     }
 
     /// 处理标点符号和操作符
-    fn lex_punctuation(&self, state: &mut State, source: &SourceText) -> bool {
+    fn lex_punctuation<S: Source>(&self, state: &mut State<S>) -> bool {
         let start_pos = state.get_position();
 
         if let Some(ch) = state.peek() {
             let kind = match ch {
                 // 三字符运算符
-                '<' if source.get_char_at(state.get_position() + 1) == Some('<')
-                    && source.get_char_at(state.get_position() + 2) == Some('=') =>
-                {
+                '<' if state.peek_next_n(1) == Some('<') && state.peek_next_n(2) == Some('=') => {
                     state.advance(3);
                     WgslSyntaxKind::LeftShiftAssign
                 }
-                '>' if source.get_char_at(state.get_position() + 1) == Some('>')
-                    && source.get_char_at(state.get_position() + 2) == Some('=') =>
-                {
+                '>' if state.peek_next_n(1) == Some('>') && state.peek_next_n(2) == Some('=') => {
                     state.advance(3);
                     WgslSyntaxKind::RightShiftAssign
                 }
 
                 // 双字符运算符
-                '+' if source.get_char_at(state.get_position() + 1) == Some('=') => {
+                '+' if state.peek_next_n(1) == Some('=') => {
                     state.advance(2);
                     WgslSyntaxKind::PlusAssign
                 }
-                '-' if source.get_char_at(state.get_position() + 1) == Some('=') => {
+                '-' if state.peek_next_n(1) == Some('=') => {
                     state.advance(2);
                     WgslSyntaxKind::MinusAssign
                 }
-                '*' if source.get_char_at(state.get_position() + 1) == Some('=') => {
+                '*' if state.peek_next_n(1) == Some('=') => {
                     state.advance(2);
                     WgslSyntaxKind::StarAssign
                 }
-                '/' if source.get_char_at(state.get_position() + 1) == Some('=') => {
+                '/' if state.peek_next_n(1) == Some('=') => {
                     state.advance(2);
                     WgslSyntaxKind::SlashAssign
                 }
-                '%' if source.get_char_at(state.get_position() + 1) == Some('=') => {
+                '%' if state.peek_next_n(1) == Some('=') => {
                     state.advance(2);
                     WgslSyntaxKind::PercentAssign
                 }
-                '&' if source.get_char_at(state.get_position() + 1) == Some('=') => {
+                '&' if state.peek_next_n(1) == Some('=') => {
                     state.advance(2);
                     WgslSyntaxKind::AmpersandAssign
                 }
-                '|' if source.get_char_at(state.get_position() + 1) == Some('=') => {
+                '|' if state.peek_next_n(1) == Some('=') => {
                     state.advance(2);
                     WgslSyntaxKind::PipeAssign
                 }
-                '^' if source.get_char_at(state.get_position() + 1) == Some('=') => {
+                '^' if state.peek_next_n(1) == Some('=') => {
                     state.advance(2);
                     WgslSyntaxKind::CaretAssign
                 }
-                '=' if source.get_char_at(state.get_position() + 1) == Some('=') => {
+                '=' if state.peek_next_n(1) == Some('=') => {
                     state.advance(2);
                     WgslSyntaxKind::EqEq
                 }
-                '!' if source.get_char_at(state.get_position() + 1) == Some('=') => {
+                '!' if state.peek_next_n(1) == Some('=') => {
                     state.advance(2);
                     WgslSyntaxKind::BangEq
                 }
-                '<' if source.get_char_at(state.get_position() + 1) == Some('=') => {
+                '<' if state.peek_next_n(1) == Some('=') => {
                     state.advance(2);
                     WgslSyntaxKind::Le
                 }
-                '>' if source.get_char_at(state.get_position() + 1) == Some('=') => {
+                '>' if state.peek_next_n(1) == Some('=') => {
                     state.advance(2);
                     WgslSyntaxKind::Ge
                 }
-                '<' if source.get_char_at(state.get_position() + 1) == Some('<') => {
+                '<' if state.peek_next_n(1) == Some('<') => {
                     state.advance(2);
                     WgslSyntaxKind::LeftShift
                 }
-                '>' if source.get_char_at(state.get_position() + 1) == Some('>') => {
+                '>' if state.peek_next_n(1) == Some('>') => {
                     state.advance(2);
                     WgslSyntaxKind::RightShift
                 }
-                '&' if source.get_char_at(state.get_position() + 1) == Some('&') => {
+                '&' if state.peek_next_n(1) == Some('&') => {
                     state.advance(2);
                     WgslSyntaxKind::AmpersandAmpersand
                 }
-                '|' if source.get_char_at(state.get_position() + 1) == Some('|') => {
+                '|' if state.peek_next_n(1) == Some('|') => {
                     state.advance(2);
                     WgslSyntaxKind::PipePipe
                 }
-                '-' if source.get_char_at(state.get_position() + 1) == Some('>') => {
+                '-' if state.peek_next_n(1) == Some('>') => {
                     state.advance(2);
                     WgslSyntaxKind::Arrow
                 }
@@ -577,7 +573,7 @@ impl<'config> WgslLexer<'config> {
     }
 
     /// 处理普通文本
-    fn lex_text(&self, state: &mut State, source: &SourceText) -> bool {
+    fn lex_text<S: Source>(&self, state: &mut State<S>) -> bool {
         let start_pos = state.get_position();
 
         if let Some(ch) = state.peek() {
@@ -592,55 +588,68 @@ impl<'config> WgslLexer<'config> {
 }
 
 impl<'config> Lexer<WgslLanguage> for WgslLexer<'config> {
-    fn lex(&self, source: &SourceText) -> LexOutput<WgslSyntaxKind> {
-        let mut state = State::new(source);
+    fn lex_incremental(
+        &self,
+        source: impl Source,
+        start_offset: usize,
+        cache: IncrementalCache<'_, WgslLanguage>,
+    ) -> LexOutput<WgslLanguage> {
+        let mut state = State::new_with_cache(source, start_offset, cache);
+        let result = self.run(&mut state);
+        state.finish(result)
+    }
 
+    fn lex(&self, source: impl Source) -> LexOutput<WgslLanguage> {
+        let mut state = State::new(source);
+        let result = self.run(&mut state);
+        state.finish(result)
+    }
+}
+
+impl<'config> WgslLexer<'config> {
+    fn run<S: Source>(&self, state: &mut State<S>) -> Result<(), OakError> {
         while state.not_at_end() {
             // 跳过空白字符
-            if self.skip_whitespace(&mut state) {
+            if self.skip_whitespace(state) {
                 continue;
             }
 
             // 处理换行
-
-            if self.lex_newline(&mut state) {
+            if self.lex_newline(state) {
                 continue;
             }
 
             // 处理注释
-            if self.lex_comment(&mut state, source) {
+            if self.lex_comment(state) {
                 continue;
             }
 
             // 处理字符串
-
-            if self.lex_string(&mut state, source) {
+            if self.lex_string(state) {
                 continue;
             }
 
             // 处理数字
-            if self.lex_number(&mut state, source) {
+            if self.lex_number(state) {
                 continue;
             }
 
             // 处理标识符和关键字
-
-            if self.lex_ident_or_keyword(&mut state, source) {
+            if self.lex_ident_or_keyword(state) {
                 continue;
             }
 
             // 处理标点符号和运算符
-            if self.lex_punctuation(&mut state, source) {
+            if self.lex_punctuation(state) {
                 continue;
             }
 
             // 处理其他字符
-            if self.lex_text(&mut state, source) {
+            if self.lex_text(state) {
                 continue;
             }
 
-            // 如果没有匹配任何模式，添加错token 并前
-
+            // 如果没有匹配任何模式，添加错误 token 并前进
             let start_pos = state.get_position();
             if let Some(ch) = state.peek() {
                 state.advance(ch.len_utf8());
@@ -648,10 +657,10 @@ impl<'config> Lexer<WgslLanguage> for WgslLexer<'config> {
             }
         }
 
-        // 添加 EOF kind
+        // 添加 EOF token
         let eof_pos = state.get_position();
         state.add_token(WgslSyntaxKind::Eof, eof_pos, eof_pos);
 
-        state.finish()
+        Ok(())
     }
 }

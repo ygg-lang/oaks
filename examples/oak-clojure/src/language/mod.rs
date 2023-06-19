@@ -6,4 +6,5 @@ pub struct ClojureLanguage;
 
 impl Language for ClojureLanguage {
     type SyntaxKind = ClojureSyntaxKind;
+    type TypedRoot = crate::ast::ClojureRoot;
 }

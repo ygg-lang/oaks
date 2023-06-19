@@ -2,9 +2,10 @@
 
 use oak_core::Language;
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Default)]
 pub struct JavadocLanguage;
 
 impl Language for JavadocLanguage {
     type SyntaxKind = crate::kind::JavadocSyntaxKind;
+    type TypedRoot = ();
 }

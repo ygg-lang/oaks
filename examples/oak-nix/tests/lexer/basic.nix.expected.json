@@ -1,0 +1,607 @@
+{
+    "success": true,
+    "count": 100,
+    "tokens": [
+        {
+            "kind": "Let",
+            "text": "let",
+            "start": 165,
+            "end": 168
+        },
+        {
+            "kind": "Identifier",
+            "text": "intValue",
+            "start": 193,
+            "end": 201
+        },
+        {
+            "kind": "Assign",
+            "text": "=",
+            "start": 202,
+            "end": 203
+        },
+        {
+            "kind": "Number",
+            "text": "42",
+            "start": 204,
+            "end": 206
+        },
+        {
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 206,
+            "end": 207
+        },
+        {
+            "kind": "Identifier",
+            "text": "floatValue",
+            "start": 211,
+            "end": 221
+        },
+        {
+            "kind": "Assign",
+            "text": "=",
+            "start": 222,
+            "end": 223
+        },
+        {
+            "kind": "Number",
+            "text": "3.14159",
+            "start": 224,
+            "end": 231
+        },
+        {
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 231,
+            "end": 232
+        },
+        {
+            "kind": "Identifier",
+            "text": "stringValue",
+            "start": 236,
+            "end": 247
+        },
+        {
+            "kind": "Assign",
+            "text": "=",
+            "start": 248,
+            "end": 249
+        },
+        {
+            "kind": "String",
+            "text": "\"Hello, Nix!\"",
+            "start": 250,
+            "end": 263
+        },
+        {
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 263,
+            "end": 264
+        },
+        {
+            "kind": "Identifier",
+            "text": "boolTrue",
+            "start": 268,
+            "end": 276
+        },
+        {
+            "kind": "Assign",
+            "text": "=",
+            "start": 277,
+            "end": 278
+        },
+        {
+            "kind": "Boolean",
+            "text": "true",
+            "start": 279,
+            "end": 283
+        },
+        {
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 283,
+            "end": 284
+        },
+        {
+            "kind": "Identifier",
+            "text": "boolFalse",
+            "start": 288,
+            "end": 297
+        },
+        {
+            "kind": "Assign",
+            "text": "=",
+            "start": 298,
+            "end": 299
+        },
+        {
+            "kind": "Boolean",
+            "text": "false",
+            "start": 300,
+            "end": 305
+        },
+        {
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 305,
+            "end": 306
+        },
+        {
+            "kind": "Identifier",
+            "text": "nullValue",
+            "start": 310,
+            "end": 319
+        },
+        {
+            "kind": "Assign",
+            "text": "=",
+            "start": 320,
+            "end": 321
+        },
+        {
+            "kind": "Null",
+            "text": "null",
+            "start": 322,
+            "end": 326
+        },
+        {
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 326,
+            "end": 327
+        },
+        {
+            "kind": "Identifier",
+            "text": "name",
+            "start": 361,
+            "end": 365
+        },
+        {
+            "kind": "Assign",
+            "text": "=",
+            "start": 366,
+            "end": 367
+        },
+        {
+            "kind": "String",
+            "text": "\"World\"",
+            "start": 368,
+            "end": 375
+        },
+        {
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 375,
+            "end": 376
+        },
+        {
+            "kind": "Identifier",
+            "text": "greeting",
+            "start": 380,
+            "end": 388
+        },
+        {
+            "kind": "Assign",
+            "text": "=",
+            "start": 389,
+            "end": 390
+        },
+        {
+            "kind": "String",
+            "text": "\"Hello, ${name}!\"",
+            "start": 391,
+            "end": 408
+        },
+        {
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 408,
+            "end": 409
+        },
+        {
+            "kind": "Identifier",
+            "text": "multiLineString",
+            "start": 413,
+            "end": 428
+        },
+        {
+            "kind": "Assign",
+            "text": "=",
+            "start": 429,
+            "end": 430
+        },
+        {
+            "kind": "Error",
+            "text": "'",
+            "start": 431,
+            "end": 432
+        },
+        {
+            "kind": "Error",
+            "text": "'",
+            "start": 432,
+            "end": 433
+        },
+        {
+            "kind": "Identifier",
+            "text": "This",
+            "start": 439,
+            "end": 443
+        },
+        {
+            "kind": "Identifier",
+            "text": "is",
+            "start": 444,
+            "end": 446
+        },
+        {
+            "kind": "Identifier",
+            "text": "a",
+            "start": 447,
+            "end": 448
+        },
+        {
+            "kind": "Identifier",
+            "text": "multi-line",
+            "start": 449,
+            "end": 459
+        },
+        {
+            "kind": "Identifier",
+            "text": "string",
+            "start": 460,
+            "end": 466
+        },
+        {
+            "kind": "With",
+            "text": "with",
+            "start": 472,
+            "end": 476
+        },
+        {
+            "kind": "Dollar",
+            "text": "$",
+            "start": 477,
+            "end": 478
+        },
+        {
+            "kind": "LeftBrace",
+            "text": "{",
+            "start": 478,
+            "end": 479
+        },
+        {
+            "kind": "Identifier",
+            "text": "name",
+            "start": 479,
+            "end": 483
+        },
+        {
+            "kind": "RightBrace",
+            "text": "}",
+            "start": 483,
+            "end": 484
+        },
+        {
+            "kind": "Identifier",
+            "text": "interpolation",
+            "start": 485,
+            "end": 498
+        },
+        {
+            "kind": "Identifier",
+            "text": "and",
+            "start": 504,
+            "end": 507
+        },
+        {
+            "kind": "Identifier",
+            "text": "preserved",
+            "start": 508,
+            "end": 517
+        },
+        {
+            "kind": "Identifier",
+            "text": "whitespace",
+            "start": 518,
+            "end": 528
+        },
+        {
+            "kind": "Dot",
+            "text": ".",
+            "start": 528,
+            "end": 529
+        },
+        {
+            "kind": "Error",
+            "text": "'",
+            "start": 533,
+            "end": 534
+        },
+        {
+            "kind": "Error",
+            "text": "'",
+            "start": 534,
+            "end": 535
+        },
+        {
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 535,
+            "end": 536
+        },
+        {
+            "kind": "Identifier",
+            "text": "absolutePath",
+            "start": 555,
+            "end": 567
+        },
+        {
+            "kind": "Assign",
+            "text": "=",
+            "start": 568,
+            "end": 569
+        },
+        {
+            "kind": "Slash",
+            "text": "/",
+            "start": 570,
+            "end": 571
+        },
+        {
+            "kind": "Identifier",
+            "text": "etc",
+            "start": 571,
+            "end": 574
+        },
+        {
+            "kind": "Slash",
+            "text": "/",
+            "start": 574,
+            "end": 575
+        },
+        {
+            "kind": "Identifier",
+            "text": "nixos",
+            "start": 575,
+            "end": 580
+        },
+        {
+            "kind": "Slash",
+            "text": "/",
+            "start": 580,
+            "end": 581
+        },
+        {
+            "kind": "Identifier",
+            "text": "configuration",
+            "start": 581,
+            "end": 594
+        },
+        {
+            "kind": "Dot",
+            "text": ".",
+            "start": 594,
+            "end": 595
+        },
+        {
+            "kind": "Identifier",
+            "text": "nix",
+            "start": 595,
+            "end": 598
+        },
+        {
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 598,
+            "end": 599
+        },
+        {
+            "kind": "Identifier",
+            "text": "relativePath",
+            "start": 603,
+            "end": 615
+        },
+        {
+            "kind": "Assign",
+            "text": "=",
+            "start": 616,
+            "end": 617
+        },
+        {
+            "kind": "Dot",
+            "text": ".",
+            "start": 618,
+            "end": 619
+        },
+        {
+            "kind": "Slash",
+            "text": "/",
+            "start": 619,
+            "end": 620
+        },
+        {
+            "kind": "Identifier",
+            "text": "default",
+            "start": 620,
+            "end": 627
+        },
+        {
+            "kind": "Dot",
+            "text": ".",
+            "start": 627,
+            "end": 628
+        },
+        {
+            "kind": "Identifier",
+            "text": "nix",
+            "start": 628,
+            "end": 631
+        },
+        {
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 631,
+            "end": 632
+        },
+        {
+            "kind": "Identifier",
+            "text": "homePath",
+            "start": 636,
+            "end": 644
+        },
+        {
+            "kind": "Assign",
+            "text": "=",
+            "start": 645,
+            "end": 646
+        },
+        {
+            "kind": "Error",
+            "text": "~",
+            "start": 647,
+            "end": 648
+        },
+        {
+            "kind": "Slash",
+            "text": "/",
+            "start": 648,
+            "end": 649
+        },
+        {
+            "kind": "Dot",
+            "text": ".",
+            "start": 649,
+            "end": 650
+        },
+        {
+            "kind": "Identifier",
+            "text": "config",
+            "start": 650,
+            "end": 656
+        },
+        {
+            "kind": "Slash",
+            "text": "/",
+            "start": 656,
+            "end": 657
+        },
+        {
+            "kind": "Identifier",
+            "text": "nixpkgs",
+            "start": 657,
+            "end": 664
+        },
+        {
+            "kind": "Slash",
+            "text": "/",
+            "start": 664,
+            "end": 665
+        },
+        {
+            "kind": "Identifier",
+            "text": "config",
+            "start": 665,
+            "end": 671
+        },
+        {
+            "kind": "Dot",
+            "text": ".",
+            "start": 671,
+            "end": 672
+        },
+        {
+            "kind": "Identifier",
+            "text": "nix",
+            "start": 672,
+            "end": 675
+        },
+        {
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 675,
+            "end": 676
+        },
+        {
+            "kind": "Identifier",
+            "text": "httpUrl",
+            "start": 694,
+            "end": 701
+        },
+        {
+            "kind": "Assign",
+            "text": "=",
+            "start": 702,
+            "end": 703
+        },
+        {
+            "kind": "Identifier",
+            "text": "https",
+            "start": 704,
+            "end": 709
+        },
+        {
+            "kind": "Colon",
+            "text": ":",
+            "start": 709,
+            "end": 710
+        },
+        {
+            "kind": "Update",
+            "text": "//",
+            "start": 710,
+            "end": 712
+        },
+        {
+            "kind": "Identifier",
+            "text": "github",
+            "start": 712,
+            "end": 718
+        },
+        {
+            "kind": "Dot",
+            "text": ".",
+            "start": 718,
+            "end": 719
+        },
+        {
+            "kind": "Identifier",
+            "text": "com",
+            "start": 719,
+            "end": 722
+        },
+        {
+            "kind": "Slash",
+            "text": "/",
+            "start": 722,
+            "end": 723
+        },
+        {
+            "kind": "Identifier",
+            "text": "NixOS",
+            "start": 723,
+            "end": 728
+        },
+        {
+            "kind": "Slash",
+            "text": "/",
+            "start": 728,
+            "end": 729
+        },
+        {
+            "kind": "Identifier",
+            "text": "nixpkgs",
+            "start": 729,
+            "end": 736
+        },
+        {
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 736,
+            "end": 737
+        }
+    ],
+    "errors": []
+}

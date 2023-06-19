@@ -1,4 +1,7 @@
-#[derive(Copy, Clone, Debug, PartialEq, Eq)]
+use oak_core::SyntaxKind;
+use serde::Serialize;
+
+#[derive(Copy, Clone, Debug, PartialEq, Eq, Serialize)]
 pub enum HandlebarsSyntaxKind {
     // 空白和换行
     Whitespace,
@@ -44,6 +47,29 @@ pub enum HandlebarsSyntaxKind {
     Content, // HTML/text content outside of handlebars expressions
 
     // 特殊
+    Root,
     Error,
     Eof,
+}
+
+impl SyntaxKind for HandlebarsSyntaxKind {
+    fn is_trivia(&self) -> bool {
+        matches!(self, Self::Whitespace | Self::Newline | Self::Comment)
+    }
+
+    fn is_comment(&self) -> bool {
+        matches!(self, Self::Comment)
+    }
+
+    fn is_whitespace(&self) -> bool {
+        matches!(self, Self::Whitespace | Self::Newline)
+    }
+
+    fn is_token_type(&self) -> bool {
+        !matches!(self, Self::Root)
+    }
+
+    fn is_element_type(&self) -> bool {
+        matches!(self, Self::Root)
+    }
 }

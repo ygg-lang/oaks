@@ -1,0 +1,864 @@
+// Rust Test File - Comprehensive Syntax Coverage
+// This file tests various Rust syntax elements for lexer testing
+
+#![allow(unused_variables, dead_code, unused_imports)]
+#![warn(missing_docs)]
+
+//! This is a crate-level documentation comment
+//! It provides comprehensive examples of Rust syntax
+
+/// This is a documentation comment for the module
+/// It demonstrates various Rust language features
+
+// Standard library imports
+use std::collections::{HashMap, HashSet, BTreeMap, VecDeque};
+use std::sync::{Arc, Mutex, RwLock};
+use std::thread;
+use std::time::Duration;
+use std::fs::File;
+use std::io::{self, Read, Write, BufRead, BufReader};
+use std::fmt::{self, Display, Debug};
+use std::error::Error;
+use std::convert::{From, Into, TryFrom, TryInto};
+use std::ops::{Add, Sub, Mul, Div, Index, IndexMut};
+
+// External crate imports (would be in Cargo.toml)
+// use serde::{Serialize, Deserialize};
+// use tokio;
+
+// Module declarations
+mod inner_module {
+    pub fn public_function() -> i32 {
+        42
+    }
+    
+    fn private_function() -> String {
+        "private".to_string()
+    }
+    
+    pub mod nested {
+        pub const NESTED_CONSTANT: f64 = 3.14159;
+    }
+}
+
+// Re-exports
+pub use inner_module::public_function;
+pub use inner_module::nested::NESTED_CONSTANT;
+
+// Constants and static variables
+const MAX_SIZE: usize = 1000;
+const PI: f64 = 3.14159265359;
+const MESSAGE: &str = "Hello, Rust!";
+
+static GLOBAL_COUNTER: std::sync::atomic::AtomicUsize = 
+    std::sync::atomic::AtomicUsize::new(0);
+
+static mut UNSAFE_GLOBAL: i32 = 0;
+
+// Type aliases
+type Result<T> = std::result::Result<T, Box<dyn Error>>;
+type Point2D = (f64, f64);
+type Matrix = Vec<Vec<f64>>;
+
+// Basic data types and literals
+fn basic_types() {
+    // Integer types
+    let byte: u8 = 255;
+    let short: i16 = -32768;
+    let int: i32 = 42;
+    let long: i64 = 9223372036854775807;
+    let size: usize = 100;
+    let isize_val: isize = -100;
+    
+    // Floating point types
+    let float: f32 = 3.14f32;
+    let double: f64 = 2.718281828;
+    
+    // Boolean type
+    let boolean: bool = true;
+    let false_val = false;
+    
+    // Character type
+    let character: char = 'A';
+    let unicode_char = '🦀';
+    let escaped_char = '\n';
+    
+    // String types
+    let string_slice: &str = "Hello, World!";
+    let owned_string: String = String::from("Owned string");
+    let string_literal = "String literal";
+    
+    // Raw strings
+    let raw_string = r"This is a raw string with \n no escapes";
+    let raw_multiline = r#"
+        This is a raw string
+        with multiple lines
+        and "quotes"
+    "#;
+    
+    // Byte strings
+    let byte_string: &[u8] = b"Hello";
+    let raw_byte_string = br#"Raw byte string"#;
+}
+
+// Arrays and slices
+fn arrays_and_slices() {
+    // Arrays (fixed size)
+    let array: [i32; 5] = [1, 2, 3, 4, 5];
+    let zeros = [0; 10]; // Array of 10 zeros
+    let first_element = array[0];
+    
+    // Slices
+    let slice: &[i32] = &array[1..4];
+    let full_slice = &array[..];
+    
+    // Mutable arrays and slices
+    let mut mut_array = [1, 2, 3, 4, 5];
+    mut_array[0] = 10;
+    let mut_slice: &mut [i32] = &mut mut_array[..];
+    mut_slice[1] = 20;
+}
+
+// Vectors
+fn vectors() {
+    // Vector creation
+    let mut vec: Vec<i32> = Vec::new();
+    let vec_with_capacity = Vec::with_capacity(10);
+    let vec_macro = vec![1, 2, 3, 4, 5];
+    let vec_repeat = vec![0; 10];
+    
+    // Vector operations
+    vec.push(1);
+    vec.push(2);
+    vec.extend([3, 4, 5]);
+    
+    let popped = vec.pop();
+    let length = vec.len();
+    let is_empty = vec.is_empty();
+    
+    // Vector iteration
+    for item in &vec {
+        println!("{}", item);
+    }
+    
+    for (index, item) in vec.iter().enumerate() {
+        println!("{}: {}", index, item);
+    }
+}
+
+// Tuples
+fn tuples() {
+    let tuple: (i32, f64, char) = (42, 3.14, 'A');
+    let (x, y, z) = tuple; // Destructuring
+    let first = tuple.0;
+    let second = tuple.1;
+    
+    // Unit type
+    let unit: () = ();
+    
+    // Nested tuples
+    let nested: ((i32, i32), (f64, f64)) = ((1, 2), (3.14, 2.71));
+}
+
+// Structs
+#[derive(Debug, Clone, PartialEq)]
+struct Point {
+    x: f64,
+    y: f64,
+}
+
+impl Point {
+    // Associated function (constructor)
+    fn new(x: f64, y: f64) -> Self {
+        Point { x, y }
+    }
+    
+    // Method
+    fn distance_from_origin(&self) -> f64 {
+        (self.x * self.x + self.y * self.y).sqrt()
+    }
+    
+    // Mutable method
+    fn translate(&mut self, dx: f64, dy: f64) {
+        self.x += dx;
+        self.y += dy;
+    }
+    
+    // Consuming method
+    fn into_tuple(self) -> (f64, f64) {
+        (self.x, self.y)
+    }
+}
+
+// Tuple struct
+#[derive(Debug)]
+struct Color(u8, u8, u8);
+
+// Unit struct
+#[derive(Debug)]
+struct Unit;
+
+// Struct with lifetime parameters
+#[derive(Debug)]
+struct Reference<'a> {
+    data: &'a str,
+}
+
+// Generic struct
+#[derive(Debug)]
+struct Container<T> {
+    value: T,
+}
+
+impl<T> Container<T> {
+    fn new(value: T) -> Self {
+        Container { value }
+    }
+    
+    fn get(&self) -> &T {
+        &self.value
+    }
+    
+    fn into_inner(self) -> T {
+        self.value
+    }
+}
+
+// Enums
+#[derive(Debug, Clone, PartialEq)]
+enum Direction {
+    North,
+    South,
+    East,
+    West,
+}
+
+#[derive(Debug)]
+enum Message {
+    Quit,
+    Move { x: i32, y: i32 },
+    Write(String),
+    ChangeColor(u8, u8, u8),
+}
+
+impl Message {
+    fn process(&self) {
+        match self {
+            Message::Quit => println!("Quit message"),
+            Message::Move { x, y } => println!("Move to ({}, {})", x, y),
+            Message::Write(text) => println!("Write: {}", text),
+            Message::ChangeColor(r, g, b) => println!("Change color to ({}, {}, {})", r, g, b),
+        }
+    }
+}
+
+// Option and Result enums (built-in)
+fn option_and_result() {
+    let some_value: Option<i32> = Some(42);
+    let none_value: Option<i32> = None;
+    
+    match some_value {
+        Some(value) => println!("Value: {}", value),
+        None => println!("No value"),
+    }
+    
+    let ok_result: Result<i32, &str> = Ok(42);
+    let err_result: Result<i32, &str> = Err("Error message");
+    
+    match ok_result {
+        Ok(value) => println!("Success: {}", value),
+        Err(error) => println!("Error: {}", error),
+    }
+}
+
+// Pattern matching
+fn pattern_matching() {
+    let number = 42;
+    
+    match number {
+        0 => println!("Zero"),
+        1..=10 => println!("Between 1 and 10"),
+        11 | 12 | 13 => println!("Eleven, twelve, or thirteen"),
+        n if n > 100 => println!("Greater than 100"),
+        _ => println!("Something else"),
+    }
+    
+    let point = Point::new(3.0, 4.0);
+    match point {
+        Point { x: 0.0, y: 0.0 } => println!("Origin"),
+        Point { x, y: 0.0 } => println!("On x-axis at {}", x),
+        Point { x: 0.0, y } => println!("On y-axis at {}", y),
+        Point { x, y } => println!("Point at ({}, {})", x, y),
+    }
+    
+    // If let
+    let some_option = Some(42);
+    if let Some(value) = some_option {
+        println!("Value: {}", value);
+    }
+    
+    // While let
+    let mut stack = vec![1, 2, 3];
+    while let Some(value) = stack.pop() {
+        println!("Popped: {}", value);
+    }
+}
+
+// Functions
+fn simple_function() {
+    println!("Simple function");
+}
+
+fn function_with_params(x: i32, y: i32) -> i32 {
+    x + y
+}
+
+fn function_with_return_type() -> String {
+    "Hello".to_string()
+}
+
+fn function_with_early_return(x: i32) -> i32 {
+    if x < 0 {
+        return 0;
+    }
+    x * 2
+}
+
+// Generic functions
+fn generic_function<T: Display>(value: T) {
+    println!("Value: {}", value);
+}
+
+fn generic_with_multiple_params<T, U>(first: T, second: U) -> (T, U) {
+    (first, second)
+}
+
+// Function with lifetime parameters
+fn longest<'a>(x: &'a str, y: &'a str) -> &'a str {
+    if x.len() > y.len() {
+        x
+    } else {
+        y
+    }
+}
+
+// Higher-order functions
+fn apply_function<F>(f: F, x: i32) -> i32 
+where
+    F: Fn(i32) -> i32,
+{
+    f(x)
+}
+
+// Closures
+fn closures() {
+    let add_one = |x| x + 1;
+    let multiply = |x: i32, y: i32| -> i32 { x * y };
+    
+    let captured_var = 42;
+    let closure_with_capture = |x| x + captured_var;
+    
+    // Move closure
+    let move_closure = move |x| x + captured_var;
+    
+    // Using closures with iterators
+    let numbers = vec![1, 2, 3, 4, 5];
+    let doubled: Vec<i32> = numbers.iter().map(|x| x * 2).collect();
+    let filtered: Vec<&i32> = numbers.iter().filter(|&&x| x > 2).collect();
+    let sum: i32 = numbers.iter().sum();
+}
+
+// Traits
+trait Drawable {
+    fn draw(&self);
+    
+    // Default implementation
+    fn description(&self) -> String {
+        "A drawable object".to_string()
+    }
+}
+
+trait Resizable {
+    fn resize(&mut self, factor: f64);
+}
+
+// Implementing traits
+impl Drawable for Point {
+    fn draw(&self) {
+        println!("Drawing point at ({}, {})", self.x, self.y);
+    }
+}
+
+impl Resizable for Point {
+    fn resize(&mut self, factor: f64) {
+        self.x *= factor;
+        self.y *= factor;
+    }
+}
+
+// Trait bounds
+fn draw_something<T: Drawable>(item: &T) {
+    item.draw();
+}
+
+fn draw_and_resize<T: Drawable + Resizable>(item: &mut T) {
+    item.draw();
+    item.resize(2.0);
+}
+
+// Where clauses
+fn complex_function<T, U>(t: T, u: U) -> String
+where
+    T: Display + Clone,
+    U: Debug + Send,
+{
+    format!("T: {}, U: {:?}", t, u)
+}
+
+// Associated types
+trait Iterator {
+    type Item;
+    
+    fn next(&mut self) -> Option<Self::Item>;
+}
+
+// Trait objects
+fn use_trait_object(drawable: &dyn Drawable) {
+    drawable.draw();
+}
+
+// Lifetimes
+struct ImportantExcerpt<'a> {
+    part: &'a str,
+}
+
+impl<'a> ImportantExcerpt<'a> {
+    fn level(&self) -> i32 {
+        3
+    }
+    
+    fn announce_and_return_part(&self, announcement: &str) -> &str {
+        println!("Attention please: {}", announcement);
+        self.part
+    }
+}
+
+// Static lifetime
+fn static_lifetime() -> &'static str {
+    "This string has a static lifetime"
+}
+
+// Ownership and borrowing
+fn ownership_examples() {
+    // Move semantics
+    let s1 = String::from("hello");
+    let s2 = s1; // s1 is moved to s2
+    // println!("{}", s1); // This would cause a compile error
+    
+    // Clone
+    let s3 = s2.clone();
+    println!("{} and {}", s2, s3);
+    
+    // Borrowing
+    let s4 = String::from("world");
+    let len = calculate_length(&s4); // Immutable borrow
+    println!("Length of '{}' is {}", s4, len);
+    
+    // Mutable borrowing
+    let mut s5 = String::from("hello");
+    change_string(&mut s5);
+    println!("{}", s5);
+}
+
+fn calculate_length(s: &String) -> usize {
+    s.len()
+}
+
+fn change_string(s: &mut String) {
+    s.push_str(", world!");
+}
+
+// Error handling
+#[derive(Debug)]
+struct CustomError {
+    message: String,
+}
+
+impl Display for CustomError {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "Custom error: {}", self.message)
+    }
+}
+
+impl Error for CustomError {}
+
+fn might_fail(should_fail: bool) -> Result<i32, CustomError> {
+    if should_fail {
+        Err(CustomError {
+            message: "Something went wrong".to_string(),
+        })
+    } else {
+        Ok(42)
+    }
+}
+
+fn error_handling() {
+    // Using match
+    match might_fail(false) {
+        Ok(value) => println!("Success: {}", value),
+        Err(error) => println!("Error: {}", error),
+    }
+    
+    // Using unwrap (panics on error)
+    let value = might_fail(false).unwrap();
+    
+    // Using expect (panics with custom message)
+    let value = might_fail(false).expect("Expected success");
+    
+    // Using unwrap_or
+    let value = might_fail(true).unwrap_or(0);
+    
+    // Using unwrap_or_else
+    let value = might_fail(true).unwrap_or_else(|_| 0);
+    
+    // Using the ? operator
+    fn propagate_error() -> Result<i32, CustomError> {
+        let value = might_fail(false)?;
+        Ok(value * 2)
+    }
+}
+
+// Collections
+fn collections() {
+    // HashMap
+    let mut map: HashMap<String, i32> = HashMap::new();
+    map.insert("key1".to_string(), 10);
+    map.insert("key2".to_string(), 20);
+    
+    let value = map.get("key1");
+    let entry = map.entry("key3".to_string()).or_insert(30);
+    
+    // HashSet
+    let mut set: HashSet<i32> = HashSet::new();
+    set.insert(1);
+    set.insert(2);
+    set.insert(3);
+    
+    let contains = set.contains(&2);
+    
+    // BTreeMap (sorted)
+    let mut btree: BTreeMap<i32, String> = BTreeMap::new();
+    btree.insert(3, "three".to_string());
+    btree.insert(1, "one".to_string());
+    btree.insert(2, "two".to_string());
+    
+    // VecDeque (double-ended queue)
+    let mut deque: VecDeque<i32> = VecDeque::new();
+    deque.push_back(1);
+    deque.push_front(0);
+    deque.push_back(2);
+}
+
+// Iterators
+fn iterators() {
+    let vec = vec![1, 2, 3, 4, 5];
+    
+    // Iterator methods
+    let doubled: Vec<i32> = vec.iter().map(|x| x * 2).collect();
+    let filtered: Vec<&i32> = vec.iter().filter(|&&x| x > 2).collect();
+    let sum: i32 = vec.iter().sum();
+    let product: i32 = vec.iter().product();
+    
+    // Find and position
+    let found = vec.iter().find(|&&x| x > 3);
+    let position = vec.iter().position(|&x| x == 3);
+    
+    // Any and all
+    let any_greater_than_3 = vec.iter().any(|&x| x > 3);
+    let all_positive = vec.iter().all(|&x| x > 0);
+    
+    // Fold and reduce
+    let sum_fold = vec.iter().fold(0, |acc, &x| acc + x);
+    let max = vec.iter().reduce(|acc, x| if acc > x { acc } else { x });
+    
+    // Chain and zip
+    let vec2 = vec![6, 7, 8];
+    let chained: Vec<i32> = vec.iter().chain(vec2.iter()).cloned().collect();
+    let zipped: Vec<(i32, i32)> = vec.iter().zip(vec2.iter()).map(|(&a, &b)| (a, b)).collect();
+    
+    // Enumerate
+    for (index, value) in vec.iter().enumerate() {
+        println!("{}: {}", index, value);
+    }
+}
+
+// Concurrency
+fn concurrency() {
+    // Threads
+    let handle = thread::spawn(|| {
+        for i in 1..10 {
+            println!("Thread: {}", i);
+            thread::sleep(Duration::from_millis(1));
+        }
+    });
+    
+    handle.join().unwrap();
+    
+    // Shared state with Arc and Mutex
+    let counter = Arc::new(Mutex::new(0));
+    let mut handles = vec![];
+    
+    for _ in 0..10 {
+        let counter = Arc::clone(&counter);
+        let handle = thread::spawn(move || {
+            let mut num = counter.lock().unwrap();
+            *num += 1;
+        });
+        handles.push(handle);
+    }
+    
+    for handle in handles {
+        handle.join().unwrap();
+    }
+    
+    println!("Result: {}", *counter.lock().unwrap());
+    
+    // Channels
+    use std::sync::mpsc;
+    
+    let (tx, rx) = mpsc::channel();
+    
+    thread::spawn(move || {
+        let vals = vec![
+            String::from("hi"),
+            String::from("from"),
+            String::from("the"),
+            String::from("thread"),
+        ];
+        
+        for val in vals {
+            tx.send(val).unwrap();
+            thread::sleep(Duration::from_secs(1));
+        }
+    });
+    
+    for received in rx {
+        println!("Got: {}", received);
+    }
+}
+
+// Unsafe Rust
+unsafe fn unsafe_function() {
+    // Raw pointers
+    let mut num = 5;
+    let r1 = &num as *const i32;
+    let r2 = &mut num as *mut i32;
+    
+    // Dereferencing raw pointers (unsafe)
+    println!("r1 is: {}", *r1);
+    println!("r2 is: {}", *r2);
+    
+    // Calling unsafe functions
+    unsafe {
+        UNSAFE_GLOBAL += 1;
+    }
+}
+
+// FFI (Foreign Function Interface)
+extern "C" {
+    fn abs(input: i32) -> i32;
+}
+
+fn call_c_function() {
+    unsafe {
+        println!("Absolute value of -3 according to C: {}", abs(-3));
+    }
+}
+
+// Macros
+macro_rules! say_hello {
+    () => {
+        println!("Hello!");
+    };
+}
+
+macro_rules! create_function {
+    ($func_name:ident) => {
+        fn $func_name() {
+            println!("You called {:?}()", stringify!($func_name));
+        }
+    };
+}
+
+create_function!(foo);
+
+macro_rules! print_result {
+    ($expression:expr) => {
+        println!("{:?} = {:?}", stringify!($expression), $expression);
+    };
+}
+
+// Attributes
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+struct AttributeExample {
+    value: i32,
+}
+
+#[cfg(target_os = "windows")]
+fn windows_only() {
+    println!("This only runs on Windows");
+}
+
+#[cfg(target_os = "linux")]
+fn linux_only() {
+    println!("This only runs on Linux");
+}
+
+#[allow(dead_code)]
+fn unused_function() {
+    println!("This function is not used but won't generate a warning");
+}
+
+#[deprecated(since = "1.0.0", note = "Use new_function instead")]
+fn old_function() {
+    println!("This function is deprecated");
+}
+
+// Tests
+#[cfg(test)]
+mod tests {
+    use super::*;
+    
+    #[test]
+    fn test_addition() {
+        assert_eq!(2 + 2, 4);
+    }
+    
+    #[test]
+    fn test_point_creation() {
+        let point = Point::new(3.0, 4.0);
+        assert_eq!(point.x, 3.0);
+        assert_eq!(point.y, 4.0);
+    }
+    
+    #[test]
+    #[should_panic]
+    fn test_panic() {
+        panic!("This test should panic");
+    }
+    
+    #[test]
+    fn test_result() -> Result<(), Box<dyn Error>> {
+        let result = might_fail(false)?;
+        assert_eq!(result, 42);
+        Ok(())
+    }
+}
+
+// Async/await (requires async runtime like tokio)
+async fn async_function() -> Result<String, Box<dyn Error>> {
+    // Simulate async work
+    tokio::time::sleep(Duration::from_millis(100)).await;
+    Ok("Async result".to_string())
+}
+
+async fn call_async_function() {
+    match async_function().await {
+        Ok(result) => println!("Async result: {}", result),
+        Err(error) => println!("Async error: {}", error),
+    }
+}
+
+// Main function
+fn main() -> Result<(), Box<dyn Error>> {
+    println!("Rust syntax examples");
+    
+    // Call various functions to demonstrate syntax
+    basic_types();
+    arrays_and_slices();
+    vectors();
+    tuples();
+    option_and_result();
+    pattern_matching();
+    closures();
+    ownership_examples();
+    error_handling();
+    collections();
+    iterators();
+    
+    // Create and use structs
+    let mut point = Point::new(3.0, 4.0);
+    point.draw();
+    point.resize(2.0);
+    println!("Point: {:?}", point);
+    
+    // Use macros
+    say_hello!();
+    foo();
+    print_result!(2 + 2);
+    
+    // Demonstrate pattern matching
+    let message = Message::Move { x: 10, y: 20 };
+    message.process();
+    
+    // Use trait objects
+    let drawable: &dyn Drawable = &point;
+    use_trait_object(drawable);
+    
+    println!("Program completed successfully");
+    Ok(())
+}
+
+// Module with pub(crate) visibility
+pub(crate) mod internal {
+    pub(crate) fn internal_function() {
+        println!("This is visible within the crate");
+    }
+}
+
+// Constants with complex expressions
+const COMPLEX_CONST: usize = {
+    let base = 10;
+    let multiplier = 5;
+    base * multiplier
+};
+
+// Type parameters with bounds
+struct BoundedGeneric<T>
+where
+    T: Clone + Debug + Send + Sync,
+{
+    data: T,
+}
+
+// Associated constants
+trait MathConstants {
+    const PI: f64 = 3.14159265359;
+    const E: f64 = 2.718281828;
+}
+
+impl MathConstants for Point {}
+
+// Operator overloading
+impl Add for Point {
+    type Output = Point;
+    
+    fn add(self, other: Point) -> Point {
+        Point {
+            x: self.x + other.x,
+            y: self.y + other.y,
+        }
+    }
+}
+
+impl Index<usize> for Point {
+    type Output = f64;
+    
+    fn index(&self, index: usize) -> &Self::Output {
+        match index {
+            0 => &self.x,
+            1 => &self.y,
+            _ => panic!("Index out of bounds"),
+        }
+    }
+}

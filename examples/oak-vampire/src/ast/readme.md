@@ -32,34 +32,34 @@ AST 节点对应于 WAT 语言中的各种构造，如组件、模块、导入�
 ## 使用示例
 
 ```rust,no_run
-use oak_wat::ast::*;
+use oak_vampire::ast::*;
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     // 创建简单的模块 AST
-    let module = WatModule {
+    let module = ValkyrieModule {
         name: Some("my_module".to_string()),
         items: vec![
-            WatItem::Import(WatImport {
+            ValkyrieItem::Import(ValkyrieImport {
                 module: "env".to_string(),
                 name: "print".to_string(),
-                kind: WatImportKind::Function(WatFunctionType {
+                kind: ValkyrieImportKind::Function(ValkyrieFunctionType {
                     params: vec![],
-                    results: vec![WatType::I32],
+                    results: vec![ValkyrieType::I32],
                 }),
             }),
-            WatItem::Function(WatFunction {
+            ValkyrieItem::Function(ValkyrieFunction {
                 name: Some("main".to_string()),
                 params: vec![],
-                result: Some(WatType::I32),
+                result: Some(ValkyrieType::I32),
                 locals: vec![],
                 body: vec![
-                    WatInstruction::Simple("i32.const 42".to_string()),
-                    WatInstruction::Call { function: "print".to_string() },
+                    ValkyrieInstruction::Simple("i32.const 42".to_string()),
+                    ValkyrieInstruction::Call { function: "print".to_string() },
                 ],
             }),
-            WatItem::Export(WatExport {
+            ValkyrieItem::Export(ValkyrieExport {
                 name: "main".to_string(),
-                kind: WatExportKind::Function("main".to_string()),
+                kind: ValkyrieExportKind::Function("main".to_string()),
             }),
         ],
     };

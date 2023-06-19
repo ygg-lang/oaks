@@ -5,6 +5,7 @@ pub enum SchemeSyntaxKind {
     // 空白字符和换行
     Whitespace,
     Newline,
+    Comment,
 
     // 注释
     LineComment,
@@ -20,6 +21,7 @@ pub enum SchemeSyntaxKind {
     Symbol,
 
     // 关键字
+    Keyword,
     Define,
     Lambda,
     If,
@@ -44,9 +46,12 @@ pub enum SchemeSyntaxKind {
     RightParen,
     LeftBracket,
     RightBracket,
+    LeftBrace,
+    RightBrace,
     Dot,
 
     // 特殊符号
+    Hash,
     Quote_,
     Quasiquote_,
     Unquote_,

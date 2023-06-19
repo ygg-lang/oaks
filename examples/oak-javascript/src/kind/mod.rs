@@ -1,7 +1,8 @@
 use oak_core::SyntaxKind;
+use serde::{Deserialize, Serialize};
 
-/// JavaScript 语法种类（包含节点与词法
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+/// JavaScript 语法种类（包含节点与词法）
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub enum JavaScriptSyntaxKind {
     // 节点种类
     Root,
@@ -113,7 +114,8 @@ pub enum JavaScriptSyntaxKind {
     With,
     Yield,
 
-    // 词法种类 - 操作    Plus,           // +
+    // 词法种类 - 操作符
+    Plus,               // +
     Minus,              // -
     Star,               // *
     Slash,              // /

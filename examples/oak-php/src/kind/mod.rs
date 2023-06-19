@@ -1,6 +1,7 @@
 use oak_core::SyntaxKind;
+use serde::{Deserialize, Serialize};
 
-#[derive(Copy, Clone, Debug, PartialEq, Eq)]
+#[derive(Copy, Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
 pub enum PhpSyntaxKind {
     // 空白字符和换行
     Whitespace,
@@ -85,7 +86,8 @@ pub enum PhpSyntaxKind {
     Yield,
     YieldFrom,
 
-    // 运算    Plus,
+    // 运算符
+    Plus,
     Minus,
     Multiply,
     Divide,
@@ -132,7 +134,8 @@ pub enum PhpSyntaxKind {
     NullCoalesceAssign,
     Ellipsis,
 
-    // 分隔    LeftParen,
+    // 分隔符
+    LeftParen,
     RightParen,
     LeftBracket,
     RightBracket,
@@ -179,3 +182,5 @@ impl SyntaxKind for PhpSyntaxKind {
         false // PHP doesn't have element types in this simple implementation
     }
 }
+
+pub type PhpNode = oak_core::tree::RedNode<PhpSyntaxKind>;

@@ -1,4 +1,4 @@
-use crate::kind::DjangoSyntaxKind;
+use crate::{ast::DjangoRoot, kind::DjangoSyntaxKind};
 use oak_core::Language;
 
 /// Django 模板语言配置
@@ -18,4 +18,5 @@ impl Default for DjangoLanguage {
 
 impl Language for DjangoLanguage {
     type SyntaxKind = DjangoSyntaxKind;
+    type TypedRoot = DjangoRoot;
 }

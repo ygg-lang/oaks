@@ -1,8 +1,12 @@
 #![doc = include_str!("../../readme.md")]
 
-use oak_core::SyntaxKind;
+use oak_core::{SyntaxKind, Token};
+use serde::{Deserialize, Serialize};
 
-#[derive(Copy, Clone, Debug, PartialEq, Eq)]
+/// Type alias for Token with VampireSyntaxKind
+pub type VampireToken = Token<VampireSyntaxKind>;
+
+#[derive(Copy, Clone, Debug, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub enum VampireSyntaxKind {
     // 基础文本
     Text,

@@ -1,0 +1,607 @@
+{
+    "success": true,
+    "count": 100,
+    "tokens": [
+        {
+            "kind": "Identifier",
+            "text": "user",
+            "start": 175,
+            "end": 179
+        },
+        {
+            "kind": "Identifier",
+            "text": "nginx",
+            "start": 180,
+            "end": 185
+        },
+        {
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 185,
+            "end": 186
+        },
+        {
+            "kind": "Identifier",
+            "text": "worker_processes",
+            "start": 188,
+            "end": 204
+        },
+        {
+            "kind": "Identifier",
+            "text": "auto",
+            "start": 205,
+            "end": 209
+        },
+        {
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 209,
+            "end": 210
+        },
+        {
+            "kind": "Identifier",
+            "text": "worker_rlimit_nofile",
+            "start": 212,
+            "end": 232
+        },
+        {
+            "kind": "Number",
+            "text": "65535",
+            "start": 233,
+            "end": 238
+        },
+        {
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 238,
+            "end": 239
+        },
+        {
+            "kind": "Identifier",
+            "text": "worker_cpu_affinity",
+            "start": 241,
+            "end": 260
+        },
+        {
+            "kind": "Identifier",
+            "text": "auto",
+            "start": 261,
+            "end": 265
+        },
+        {
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 265,
+            "end": 266
+        },
+        {
+            "kind": "Identifier",
+            "text": "worker_priority",
+            "start": 268,
+            "end": 283
+        },
+        {
+            "kind": "Error",
+            "text": "-",
+            "start": 284,
+            "end": 285
+        },
+        {
+            "kind": "Number",
+            "text": "5",
+            "start": 285,
+            "end": 286
+        },
+        {
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 286,
+            "end": 287
+        },
+        {
+            "kind": "Identifier",
+            "text": "error_log",
+            "start": 318,
+            "end": 327
+        },
+        {
+            "kind": "Path",
+            "text": "/var/log/nginx/error.log",
+            "start": 328,
+            "end": 352
+        },
+        {
+            "kind": "Identifier",
+            "text": "warn",
+            "start": 353,
+            "end": 357
+        },
+        {
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 357,
+            "end": 358
+        },
+        {
+            "kind": "Identifier",
+            "text": "error_log",
+            "start": 360,
+            "end": 369
+        },
+        {
+            "kind": "Path",
+            "text": "/var/log/nginx/debug.log",
+            "start": 370,
+            "end": 394
+        },
+        {
+            "kind": "Identifier",
+            "text": "debug",
+            "start": 395,
+            "end": 400
+        },
+        {
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 400,
+            "end": 401
+        },
+        {
+            "kind": "Identifier",
+            "text": "pid",
+            "start": 417,
+            "end": 420
+        },
+        {
+            "kind": "Path",
+            "text": "/var/run/nginx.pid",
+            "start": 421,
+            "end": 439
+        },
+        {
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 439,
+            "end": 440
+        },
+        {
+            "kind": "Identifier",
+            "text": "load_module",
+            "start": 468,
+            "end": 479
+        },
+        {
+            "kind": "Identifier",
+            "text": "modules",
+            "start": 480,
+            "end": 487
+        },
+        {
+            "kind": "Path",
+            "text": "/ngx_http_geoip_module.so",
+            "start": 487,
+            "end": 512
+        },
+        {
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 512,
+            "end": 513
+        },
+        {
+            "kind": "Identifier",
+            "text": "load_module",
+            "start": 515,
+            "end": 526
+        },
+        {
+            "kind": "Identifier",
+            "text": "modules",
+            "start": 527,
+            "end": 534
+        },
+        {
+            "kind": "Path",
+            "text": "/ngx_stream_module.so",
+            "start": 534,
+            "end": 555
+        },
+        {
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 555,
+            "end": 556
+        },
+        {
+            "kind": "Identifier",
+            "text": "load_module",
+            "start": 558,
+            "end": 569
+        },
+        {
+            "kind": "Identifier",
+            "text": "modules",
+            "start": 570,
+            "end": 577
+        },
+        {
+            "kind": "Path",
+            "text": "/ngx_http_image_filter_module.so",
+            "start": 577,
+            "end": 609
+        },
+        {
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 609,
+            "end": 610
+        },
+        {
+            "kind": "Identifier",
+            "text": "include",
+            "start": 656,
+            "end": 663
+        },
+        {
+            "kind": "Path",
+            "text": "/etc/nginx/modules-enabled/*.conf",
+            "start": 664,
+            "end": 697
+        },
+        {
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 697,
+            "end": 698
+        },
+        {
+            "kind": "EventsKeyword",
+            "text": "events",
+            "start": 720,
+            "end": 726
+        },
+        {
+            "kind": "LeftBrace",
+            "text": "{",
+            "start": 727,
+            "end": 728
+        },
+        {
+            "kind": "Identifier",
+            "text": "use",
+            "start": 770,
+            "end": 773
+        },
+        {
+            "kind": "Identifier",
+            "text": "epoll",
+            "start": 774,
+            "end": 779
+        },
+        {
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 779,
+            "end": 780
+        },
+        {
+            "kind": "Identifier",
+            "text": "worker_connections",
+            "start": 842,
+            "end": 860
+        },
+        {
+            "kind": "Number",
+            "text": "4096",
+            "start": 861,
+            "end": 865
+        },
+        {
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 865,
+            "end": 866
+        },
+        {
+            "kind": "Identifier",
+            "text": "multi_accept",
+            "start": 913,
+            "end": 925
+        },
+        {
+            "kind": "Identifier",
+            "text": "on",
+            "start": 926,
+            "end": 928
+        },
+        {
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 928,
+            "end": 929
+        },
+        {
+            "kind": "Identifier",
+            "text": "accept_mutex",
+            "start": 961,
+            "end": 973
+        },
+        {
+            "kind": "Identifier",
+            "text": "off",
+            "start": 974,
+            "end": 977
+        },
+        {
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 977,
+            "end": 978
+        },
+        {
+            "kind": "Identifier",
+            "text": "accept_mutex_delay",
+            "start": 984,
+            "end": 1002
+        },
+        {
+            "kind": "Number",
+            "text": "500ms",
+            "start": 1003,
+            "end": 1008
+        },
+        {
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 1008,
+            "end": 1009
+        },
+        {
+            "kind": "RightBrace",
+            "text": "}",
+            "start": 1011,
+            "end": 1012
+        },
+        {
+            "kind": "HttpKeyword",
+            "text": "http",
+            "start": 1032,
+            "end": 1036
+        },
+        {
+            "kind": "LeftBrace",
+            "text": "{",
+            "start": 1037,
+            "end": 1038
+        },
+        {
+            "kind": "Identifier",
+            "text": "sendfile",
+            "start": 1066,
+            "end": 1074
+        },
+        {
+            "kind": "Identifier",
+            "text": "on",
+            "start": 1075,
+            "end": 1077
+        },
+        {
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 1077,
+            "end": 1078
+        },
+        {
+            "kind": "Identifier",
+            "text": "tcp_nopush",
+            "start": 1084,
+            "end": 1094
+        },
+        {
+            "kind": "Identifier",
+            "text": "on",
+            "start": 1095,
+            "end": 1097
+        },
+        {
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 1097,
+            "end": 1098
+        },
+        {
+            "kind": "Identifier",
+            "text": "tcp_nodelay",
+            "start": 1104,
+            "end": 1115
+        },
+        {
+            "kind": "Identifier",
+            "text": "on",
+            "start": 1116,
+            "end": 1118
+        },
+        {
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 1118,
+            "end": 1119
+        },
+        {
+            "kind": "Identifier",
+            "text": "keepalive_timeout",
+            "start": 1125,
+            "end": 1142
+        },
+        {
+            "kind": "Number",
+            "text": "65",
+            "start": 1143,
+            "end": 1145
+        },
+        {
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 1145,
+            "end": 1146
+        },
+        {
+            "kind": "Identifier",
+            "text": "keepalive_requests",
+            "start": 1152,
+            "end": 1170
+        },
+        {
+            "kind": "Number",
+            "text": "1000",
+            "start": 1171,
+            "end": 1175
+        },
+        {
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 1175,
+            "end": 1176
+        },
+        {
+            "kind": "Identifier",
+            "text": "types_hash_max_size",
+            "start": 1182,
+            "end": 1201
+        },
+        {
+            "kind": "Number",
+            "text": "2048",
+            "start": 1202,
+            "end": 1206
+        },
+        {
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 1206,
+            "end": 1207
+        },
+        {
+            "kind": "Identifier",
+            "text": "server_tokens",
+            "start": 1213,
+            "end": 1226
+        },
+        {
+            "kind": "Identifier",
+            "text": "off",
+            "start": 1227,
+            "end": 1230
+        },
+        {
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 1230,
+            "end": 1231
+        },
+        {
+            "kind": "Identifier",
+            "text": "server_names_hash_bucket_size",
+            "start": 1268,
+            "end": 1297
+        },
+        {
+            "kind": "Number",
+            "text": "128",
+            "start": 1298,
+            "end": 1301
+        },
+        {
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 1301,
+            "end": 1302
+        },
+        {
+            "kind": "Identifier",
+            "text": "server_names_hash_max_size",
+            "start": 1308,
+            "end": 1334
+        },
+        {
+            "kind": "Number",
+            "text": "1024",
+            "start": 1335,
+            "end": 1339
+        },
+        {
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 1339,
+            "end": 1340
+        },
+        {
+            "kind": "Identifier",
+            "text": "client_max_body_size",
+            "start": 1375,
+            "end": 1395
+        },
+        {
+            "kind": "Number",
+            "text": "100M",
+            "start": 1396,
+            "end": 1400
+        },
+        {
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 1400,
+            "end": 1401
+        },
+        {
+            "kind": "Identifier",
+            "text": "client_body_buffer_size",
+            "start": 1407,
+            "end": 1430
+        },
+        {
+            "kind": "Number",
+            "text": "128k",
+            "start": 1431,
+            "end": 1435
+        },
+        {
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 1435,
+            "end": 1436
+        },
+        {
+            "kind": "Identifier",
+            "text": "client_header_buffer_size",
+            "start": 1442,
+            "end": 1467
+        },
+        {
+            "kind": "Number",
+            "text": "1k",
+            "start": 1468,
+            "end": 1470
+        },
+        {
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 1470,
+            "end": 1471
+        },
+        {
+            "kind": "Identifier",
+            "text": "large_client_header_buffers",
+            "start": 1477,
+            "end": 1504
+        },
+        {
+            "kind": "Number",
+            "text": "4",
+            "start": 1505,
+            "end": 1506
+        }
+    ],
+    "errors": []
+}

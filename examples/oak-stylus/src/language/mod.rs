@@ -1,4 +1,4 @@
-use crate::{kind::StylusSyntaxKind, lexer::StylusLexer};
+use crate::{ast::StylusRoot, kind::StylusSyntaxKind, lexer::StylusLexer};
 use oak_core::Language;
 
 /// 日期时间格式
@@ -18,6 +18,7 @@ pub struct StylusLanguage {
 
 impl Language for StylusLanguage {
     type SyntaxKind = StylusSyntaxKind;
+    type TypedRoot = StylusRoot;
 }
 
 impl StylusLanguage {

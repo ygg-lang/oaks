@@ -1,0 +1,607 @@
+{
+    "success": true,
+    "count": 100,
+    "tokens": [
+        {
+            "kind": "Identifier",
+            "text": "e",
+            "start": 15,
+            "end": 16
+        },
+        {
+            "kind": "Identifier",
+            "text": "n",
+            "start": 44,
+            "end": 45
+        },
+        {
+            "kind": "Identifier",
+            "text": "e",
+            "start": 66,
+            "end": 67
+        },
+        {
+            "kind": "Create",
+            "text": "CREATE",
+            "start": 69,
+            "end": 75
+        },
+        {
+            "kind": "Database",
+            "text": "DATABASE",
+            "start": 76,
+            "end": 84
+        },
+        {
+            "kind": "If",
+            "text": "IF",
+            "start": 85,
+            "end": 87
+        },
+        {
+            "kind": "Not",
+            "text": "NOT",
+            "start": 88,
+            "end": 91
+        },
+        {
+            "kind": "Exists",
+            "text": "EXISTS",
+            "start": 92,
+            "end": 98
+        },
+        {
+            "kind": "Identifier",
+            "text": "test_db",
+            "start": 99,
+            "end": 106
+        },
+        {
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 106,
+            "end": 107
+        },
+        {
+            "kind": "Identifier",
+            "text": "USE",
+            "start": 109,
+            "end": 112
+        },
+        {
+            "kind": "Identifier",
+            "text": "test_db",
+            "start": 113,
+            "end": 120
+        },
+        {
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 120,
+            "end": 121
+        },
+        {
+            "kind": "Identifier",
+            "text": "s",
+            "start": 140,
+            "end": 141
+        },
+        {
+            "kind": "Create",
+            "text": "CREATE",
+            "start": 143,
+            "end": 149
+        },
+        {
+            "kind": "Table",
+            "text": "TABLE",
+            "start": 150,
+            "end": 155
+        },
+        {
+            "kind": "Identifier",
+            "text": "users",
+            "start": 156,
+            "end": 161
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 162,
+            "end": 163
+        },
+        {
+            "kind": "Identifier",
+            "text": "id",
+            "start": 169,
+            "end": 171
+        },
+        {
+            "kind": "Int",
+            "text": "INT",
+            "start": 172,
+            "end": 175
+        },
+        {
+            "kind": "Primary",
+            "text": "PRIMARY",
+            "start": 176,
+            "end": 183
+        },
+        {
+            "kind": "Key",
+            "text": "KEY",
+            "start": 184,
+            "end": 187
+        },
+        {
+            "kind": "AutoIncrement",
+            "text": "AUTO_INCREMENT",
+            "start": 188,
+            "end": 202
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 202,
+            "end": 203
+        },
+        {
+            "kind": "Identifier",
+            "text": "username",
+            "start": 209,
+            "end": 217
+        },
+        {
+            "kind": "Varchar",
+            "text": "VARCHAR",
+            "start": 218,
+            "end": 225
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 225,
+            "end": 226
+        },
+        {
+            "kind": "NumberLiteral",
+            "text": "5",
+            "start": 226,
+            "end": 227
+        },
+        {
+            "kind": "NumberLiteral",
+            "text": "0",
+            "start": 227,
+            "end": 228
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 228,
+            "end": 229
+        },
+        {
+            "kind": "Unique",
+            "text": "UNIQUE",
+            "start": 230,
+            "end": 236
+        },
+        {
+            "kind": "Not",
+            "text": "NOT",
+            "start": 237,
+            "end": 240
+        },
+        {
+            "kind": "Null",
+            "text": "NULL",
+            "start": 241,
+            "end": 245
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 245,
+            "end": 246
+        },
+        {
+            "kind": "Identifier",
+            "text": "email",
+            "start": 252,
+            "end": 257
+        },
+        {
+            "kind": "Varchar",
+            "text": "VARCHAR",
+            "start": 258,
+            "end": 265
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 265,
+            "end": 266
+        },
+        {
+            "kind": "NumberLiteral",
+            "text": "10",
+            "start": 266,
+            "end": 268
+        },
+        {
+            "kind": "NumberLiteral",
+            "text": "0",
+            "start": 268,
+            "end": 269
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 269,
+            "end": 270
+        },
+        {
+            "kind": "Unique",
+            "text": "UNIQUE",
+            "start": 271,
+            "end": 277
+        },
+        {
+            "kind": "Not",
+            "text": "NOT",
+            "start": 278,
+            "end": 281
+        },
+        {
+            "kind": "Null",
+            "text": "NULL",
+            "start": 282,
+            "end": 286
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 286,
+            "end": 287
+        },
+        {
+            "kind": "Identifier",
+            "text": "password_hash",
+            "start": 293,
+            "end": 306
+        },
+        {
+            "kind": "Varchar",
+            "text": "VARCHAR",
+            "start": 307,
+            "end": 314
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 314,
+            "end": 315
+        },
+        {
+            "kind": "NumberLiteral",
+            "text": "25",
+            "start": 315,
+            "end": 317
+        },
+        {
+            "kind": "NumberLiteral",
+            "text": "5",
+            "start": 317,
+            "end": 318
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 318,
+            "end": 319
+        },
+        {
+            "kind": "Not",
+            "text": "NOT",
+            "start": 320,
+            "end": 323
+        },
+        {
+            "kind": "Null",
+            "text": "NULL",
+            "start": 324,
+            "end": 328
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 328,
+            "end": 329
+        },
+        {
+            "kind": "Identifier",
+            "text": "first_name",
+            "start": 335,
+            "end": 345
+        },
+        {
+            "kind": "Varchar",
+            "text": "VARCHAR",
+            "start": 346,
+            "end": 353
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 353,
+            "end": 354
+        },
+        {
+            "kind": "NumberLiteral",
+            "text": "5",
+            "start": 354,
+            "end": 355
+        },
+        {
+            "kind": "NumberLiteral",
+            "text": "0",
+            "start": 355,
+            "end": 356
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 356,
+            "end": 357
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 357,
+            "end": 358
+        },
+        {
+            "kind": "Identifier",
+            "text": "last_name",
+            "start": 364,
+            "end": 373
+        },
+        {
+            "kind": "Varchar",
+            "text": "VARCHAR",
+            "start": 374,
+            "end": 381
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 381,
+            "end": 382
+        },
+        {
+            "kind": "NumberLiteral",
+            "text": "5",
+            "start": 382,
+            "end": 383
+        },
+        {
+            "kind": "NumberLiteral",
+            "text": "0",
+            "start": 383,
+            "end": 384
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 384,
+            "end": 385
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 385,
+            "end": 386
+        },
+        {
+            "kind": "Identifier",
+            "text": "date_of_birth",
+            "start": 392,
+            "end": 405
+        },
+        {
+            "kind": "Date",
+            "text": "DATE",
+            "start": 406,
+            "end": 410
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 410,
+            "end": 411
+        },
+        {
+            "kind": "Identifier",
+            "text": "is_active",
+            "start": 417,
+            "end": 426
+        },
+        {
+            "kind": "Boolean",
+            "text": "BOOLEAN",
+            "start": 427,
+            "end": 434
+        },
+        {
+            "kind": "Default",
+            "text": "DEFAULT",
+            "start": 435,
+            "end": 442
+        },
+        {
+            "kind": "True",
+            "text": "TRUE",
+            "start": 443,
+            "end": 447
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 447,
+            "end": 448
+        },
+        {
+            "kind": "Identifier",
+            "text": "created_at",
+            "start": 454,
+            "end": 464
+        },
+        {
+            "kind": "Timestamp",
+            "text": "TIMESTAMP",
+            "start": 465,
+            "end": 474
+        },
+        {
+            "kind": "Default",
+            "text": "DEFAULT",
+            "start": 475,
+            "end": 482
+        },
+        {
+            "kind": "Identifier",
+            "text": "CURRENT_TIMESTAMP",
+            "start": 483,
+            "end": 500
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 500,
+            "end": 501
+        },
+        {
+            "kind": "Identifier",
+            "text": "updated_at",
+            "start": 507,
+            "end": 517
+        },
+        {
+            "kind": "Timestamp",
+            "text": "TIMESTAMP",
+            "start": 518,
+            "end": 527
+        },
+        {
+            "kind": "Default",
+            "text": "DEFAULT",
+            "start": 528,
+            "end": 535
+        },
+        {
+            "kind": "Identifier",
+            "text": "CURRENT_TIMESTAMP",
+            "start": 536,
+            "end": 553
+        },
+        {
+            "kind": "On",
+            "text": "ON",
+            "start": 554,
+            "end": 556
+        },
+        {
+            "kind": "Update",
+            "text": "UPDATE",
+            "start": 557,
+            "end": 563
+        },
+        {
+            "kind": "Identifier",
+            "text": "CURRENT_TIMESTAMP",
+            "start": 564,
+            "end": 581
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 583,
+            "end": 584
+        },
+        {
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 584,
+            "end": 585
+        },
+        {
+            "kind": "Create",
+            "text": "CREATE",
+            "start": 589,
+            "end": 595
+        },
+        {
+            "kind": "Table",
+            "text": "TABLE",
+            "start": 596,
+            "end": 601
+        },
+        {
+            "kind": "Identifier",
+            "text": "categories",
+            "start": 602,
+            "end": 612
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 613,
+            "end": 614
+        },
+        {
+            "kind": "Identifier",
+            "text": "id",
+            "start": 620,
+            "end": 622
+        },
+        {
+            "kind": "Int",
+            "text": "INT",
+            "start": 623,
+            "end": 626
+        },
+        {
+            "kind": "Primary",
+            "text": "PRIMARY",
+            "start": 627,
+            "end": 634
+        },
+        {
+            "kind": "Key",
+            "text": "KEY",
+            "start": 635,
+            "end": 638
+        },
+        {
+            "kind": "AutoIncrement",
+            "text": "AUTO_INCREMENT",
+            "start": 639,
+            "end": 653
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 653,
+            "end": 654
+        },
+        {
+            "kind": "Identifier",
+            "text": "name",
+            "start": 660,
+            "end": 664
+        }
+    ],
+    "errors": []
+}

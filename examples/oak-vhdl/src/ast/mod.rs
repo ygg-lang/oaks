@@ -1,9 +1,8 @@
 #![doc = include_str!("readme.md")]
 
-use alloc::{string::String, vec::Vec};
-
-/// Valkyrie 根节#[derive(Clone, Debug)]
-pub struct ValkyrieRoot {
+/// Valkyrie 根节
+#[derive(Clone, Debug)]
+pub struct VhdlRoot {
     pub items: Vec<ValkyrieItem>,
 }
 

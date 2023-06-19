@@ -1,95 +1,176 @@
-# Oak Erlang Parser
+# Oak Elixir Parser
 
-## Overview
+[![Crates.io](https://img.shields.io/crates/v/oak-elixir.svg)](https://crates.io/crates/oak-elixir)
+[![Documentation](https://docs.rs/oak-elixir/badge.svg)](https://docs.rs/oak-elixir)
 
-`Oak of erlang` is a powerful and efficient parser for the Erlang programming language, built using the `oak` parser combinator library. It provides a robust solution for parsing Erlang syntax, enabling various applications such as static analysis of Erlang code, refactoring tools, and automated code generation.
+High-performance incremental Elixir parser for the oak ecosystem with flexible configuration, optimized for static analysis and code generation.
 
-## Features
+## 🎯 Overview
 
-- **Comprehensive Erlang Grammar**: Supports all standard Erlang constructs, including modules, functions, patterns, and expressions.
-- **High Performance**: Leverages `oak`'s optimized parsing techniques for speed.
-- **Abstract Syntax Tree (AST)**: Generates a detailed and easy-to-navigate AST representing the Erlang code structure.
-- **Error Handling**: Provides meaningful error messages for better debugging of malformed Erlang code.
-- **Extensible**: Easily extendable to support custom Erlang extensions or dialects.
+Oak Elixir is a robust parser for Elixir, designed to handle complete Elixir syntax including modern features. Built on the solid foundation of oak-core, it provides both high-level convenience and detailed AST generation for static analysis and code generation.
 
-## Quick Start
+## ✨ Features
 
-To use `Oak of erlang` in your Rust project, add it as a dependency in your `Cargo.toml`:
+- **Complete Elixir Syntax**: Supports all Elixir features including modern specifications
+- **Full AST Generation**: Generates comprehensive Abstract Syntax Trees
+- **Lexer Support**: Built-in tokenization with proper span information
+- **Error Recovery**: Graceful handling of syntax errors with detailed diagnostics
 
-```toml
-[dependencies]
-Oak of erlang = "0.1.0" # Replace with the latest version
-oak = "0.1.0" # Replace with the latest version
-```
+## 🚀 Quick Start
 
-## Parsing Examples
-
-Here's a simple example demonstrating how to parse Erlang code:
+Basic example:
 
 ```rust
-use pex_erlang::erlang_parser;
+use oak_elixir::{Parser, ElixirLanguage, SourceText};
 
-fn main() {
-    let input = r#"
--module(my_module).
--export([my_function/0]).
+fn main() -> Result<(), Box<dyn std::error::Error>> {
+    let parser = Parser::new();
+    let source = SourceText::new(r#"
+defmodule HelloWorld do
+  def greet(name) do
+    IO.puts("Hello, #{name}!")
+  end
+end
 
-my_function() ->
-    io:format("Hello, Erlang!~n").
-"#;
-    match erlang_parser::parse(input) {
-        Ok(ast) => {
-            println!("Successfully parsed Erlang code:\n{:#?}", ast);
-        }
-        Err(err) => {
-            eprintln!("Failed to parse Erlang code: {}", err);
-        }
-    }
+HelloWorld.greet("Elixir")
+    "#);
+    
+    let result = parser.parse(&source);
+    println!("Parsed Elixir successfully.");
+    Ok(())
 }
 ```
 
-## Advanced Features
+## 📋 Parsing Examples
 
-### Customizing the Parser
-
-The `oak` library allows for flexible customization of the parser. You can modify the grammar rules or add new ones to suit your specific needs, such as supporting experimental Erlang features. Refer to the `oak` documentation for more details on parser customization.
-
-### Error Recovery
-
-`Oak of erlang` can be extended with error recovery mechanisms to handle malformed Erlang code gracefully, allowing for partial parsing and better resilience in real-world scenarios.
-
-## AST Structure
-
-The generated AST for Erlang provides a hierarchical representation of the code elements. For instance, a function definition might result in an AST structure similar to this:
-
+### Function Parsing
 ```rust
-// Simplified AST representation for:
-// my_function() -> io:format("Hello, Erlang!~n").
-pex_erlang::ast::Node::FunctionDefinition {
-    name: "my_function".to_string(),
-    arity: 0,
-    clauses: vec![
-        // ... clause details ...
-    ],
+use oak_elixir::{Parser, ElixirLanguage, SourceText};
+
+let parser = Parser::new();
+let source = SourceText::new(r#"
+defmodule Math do
+  def add(a, b), do: a + b
+  
+  def factorial(0), do: 1
+  def factorial(n) when n > 0, do: n * factorial(n - 1)
+  
+  def main do
+    result = factorial(5)
+    IO.puts("Factorial of 5 is: #{result}")
+  end
+end
+
+Math.main()
+"#);
+
+let result = parser.parse(&source);
+println!("Function parsed successfully.");
+```
+
+### Struct Parsing
+```rust
+use oak_elixir::{Parser, ElixirLanguage, SourceText};
+
+let parser = Parser::new();
+let source = SourceText::new(r#"
+defmodule Person do
+  defstruct name: nil, age: nil
+  
+  def greet(%Person{name: name, age: age}) do
+    IO.puts("Hello, I'm #{name} and I'm #{age} years old")
+  end
+  
+  def have_birthday(person = %Person{age: age}) do
+    %{person | age: age + 1}
+  end
+end
+
+person = %Person{name: "Alice", age: 25}
+Person.greet(person)
+updated_person = Person.have_birthday(person)
+Person.greet(updated_person)
+"#);
+
+let result = parser.parse(&source);
+println!("Struct parsed successfully.");
+```
+
+## 🔧 Advanced Features
+
+### Token-Level Parsing
+```rust
+use oak_elixir::{Parser, ElixirLanguage, SourceText};
+
+let parser = Parser::new();
+let source = SourceText::new("x = 42");
+let result = parser.parse(&source);
+println!("Token parsing completed.");
+```
+
+### Error Handling
+```rust
+use oak_elixir::{Parser, ElixirLanguage, SourceText};
+
+let parser = Parser::new();
+let source = SourceText::new(r#"
+# Invalid Elixir code example
+defmodule BrokenModule do
+  def broken_function do
+    IO.puts("Hello"
+    # Missing closing parenthesis
+  end
+end
+"#);
+
+let result = parser.parse(&source);
+if let Some(errors) = result.result.err() {
+    println!("Parse errors found: {:?}", errors);
+} else {
+    println!("Parsed successfully.");
 }
 ```
 
-## Performance
+## 🏗️ AST Structure
 
-`Oak of erlang` is designed for performance. Benchmarks show efficient parsing of large Erlang codebases. Optimizations include memoization, efficient backtracking, and direct AST construction.
+The parser generates a comprehensive AST with the following main structures:
 
-## Integration
+- **ElixirProgram**: Root container for Elixir programs
+- **Module**: Elixir module definitions
+- **Function**: Elixir functions and methods
+- **Struct**: Elixir struct definitions
+- **Statement**: Various statement types including control flow
+- **Expression**: Various expression types including operators
+- **Pattern**: Pattern matching constructs
 
-`Oak of erlang` can be integrated into various tools and applications:
+## 📊 Performance
 
-- **Erlang IDEs**: Provide syntax highlighting, code completion, and refactoring capabilities.
-- **Static Analyzers**: Identify potential bugs, code smells, and security vulnerabilities.
-- **Code Transformers**: Automate code modifications and migrations.
+- **Streaming**: Parse large Elixir files without loading entirely into memory
+- **Incremental**: Re-parse only changed sections
+- **Memory Efficient**: Smart AST node allocation
+- **Fast Recovery**: Quick error recovery for better IDE integration
 
-## Examples
+## 🔗 Integration
 
-Explore the `examples` directory within the `oak-erlang` project for more usage examples and demonstrations of specific Erlang parsing features.
+Oak Elixir integrates seamlessly with:
 
-## Contributing
+- **Static Analysis**: Code quality and security analysis
+- **Code Generation**: Generating code from Elixir AST
+- **IDE Support**: Language server protocol compatibility
+- **Refactoring**: Automated code refactoring
+- **Documentation**: Generating documentation from Elixir code
 
-Contributions to `Oak of erlang` are welcome! If you find a bug or have a feature request, please open an issue on the GitHub repository. For major changes, please open a discussion first.
+## 📚 Examples
+
+Check out the [examples](examples/) directory for comprehensive examples:
+
+- Complete Elixir program parsing
+- Module and function analysis
+- Code transformation
+- Integration with development workflows
+
+## 🤝 Contributing
+
+Contributions are welcome! 
+
+Please feel free to submit pull requests at the [project repository](https://github.com/ygg-lang/oaks/tree/dev/examples/oak-elixir) or open [issues](https://github.com/ygg-lang/oaks/issues).

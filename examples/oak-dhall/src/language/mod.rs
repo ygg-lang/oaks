@@ -1,21 +1,19 @@
-use crate::kind::DHallSyntaxKind;
+use crate::{ast::DHallRoot, kind::DHallSyntaxKind};
 use oak_core::Language;
 
-/// Dhall 语言配置
-#[derive(Debug, Clone)]
+#[derive(Copy, Clone, Debug)]
 pub struct DHallLanguage {
-    /// 是否启用严格模式
-    pub strict_mode: bool,
-    /// 是否允许 Unicode 标识
-    pub allow_unicode: bool,
+    /// Allow unicode identifiers
+    pub unicode_identifiers: bool,
 }
 
 impl Default for DHallLanguage {
     fn default() -> Self {
-        Self { strict_mode: false, allow_unicode: true }
+        Self { unicode_identifiers: true }
     }
 }
 
 impl Language for DHallLanguage {
     type SyntaxKind = DHallSyntaxKind;
+    type TypedRoot = DHallRoot;
 }

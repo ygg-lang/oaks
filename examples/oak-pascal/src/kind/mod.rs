@@ -1,6 +1,9 @@
-use oak_core::SyntaxKind;
+use oak_core::{SyntaxKind, Token};
+use serde::{Deserialize, Serialize};
 
-#[derive(Copy, Clone, Debug, PartialEq, Eq)]
+pub type PascalToken = Token<PascalSyntaxKind>;
+
+#[derive(Copy, Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
 pub enum PascalSyntaxKind {
     // 空白和换行
     Whitespace,

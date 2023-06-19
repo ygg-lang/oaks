@@ -1,7 +1,7 @@
 use oak_core::SyntaxKind;
 
 /// 统一JSON 语法种类（包含节点与词法
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, serde::Serialize)]
 pub enum JsonSyntaxKind {
     // 节点种类
     Root,

@@ -1,8 +1,9 @@
 use crate::{kind::NginxSyntaxKind, language::NginxLanguage};
-use oak_core::{Lexer, LexerState, SourceText, lexer::LexOutput};
+use oak_core::{IncrementalCache, Lexer, LexerState, lexer::LexOutput, source::Source};
 
-type State<'input> = LexerState<'input, NginxLanguage>;
+type State<S> = LexerState<S, NginxLanguage>;
 
+#[derive(Clone)]
 pub struct NginxLexer<'config> {
     config: &'config NginxLanguage,
 }
@@ -13,7 +14,7 @@ impl<'config> NginxLexer<'config> {
     }
 
     /// 跳过空白字符
-    fn skip_whitespace(&self, state: &mut State) -> bool {
+    fn skip_whitespace<S: Source>(&self, state: &mut State<S>) -> bool {
         let start_pos = state.get_position();
 
         while let Some(ch) = state.peek() {
@@ -35,7 +36,7 @@ impl<'config> NginxLexer<'config> {
     }
 
     /// 处理换行
-    fn lex_newline(&self, state: &mut State) -> bool {
+    fn lex_newline<S: Source>(&self, state: &mut State<S>) -> bool {
         let start_pos = state.get_position();
 
         if let Some('\n') = state.peek() {
@@ -57,7 +58,7 @@ impl<'config> NginxLexer<'config> {
     }
 
     /// 处理注释
-    fn lex_comment(&self, state: &mut State) -> bool {
+    fn lex_comment<S: Source>(&self, state: &mut State<S>) -> bool {
         let start_pos = state.get_position();
 
         if let Some('#') = state.peek() {
@@ -80,7 +81,7 @@ impl<'config> NginxLexer<'config> {
     }
 
     /// 处理字符
-    fn lex_string(&self, state: &mut State) -> bool {
+    fn lex_string<S: Source>(&self, state: &mut State<S>) -> bool {
         let start_pos = state.get_position();
 
         if let Some(quote) = state.peek() {
@@ -114,7 +115,7 @@ impl<'config> NginxLexer<'config> {
     }
 
     /// 处理数字
-    fn lex_number(&self, state: &mut State) -> bool {
+    fn lex_number<S: Source>(&self, state: &mut State<S>) -> bool {
         let start_pos = state.get_position();
 
         if let Some(ch) = state.peek() {
@@ -172,7 +173,7 @@ impl<'config> NginxLexer<'config> {
     }
 
     /// 处理路径
-    fn lex_path(&self, state: &mut State) -> bool {
+    fn lex_path<S: Source>(&self, state: &mut State<S>) -> bool {
         let start_pos = state.get_position();
 
         if let Some('/') = state.peek() {
@@ -196,11 +197,11 @@ impl<'config> NginxLexer<'config> {
     }
 
     /// 处理 URL
-    fn lex_url(&self, state: &mut State, source: &SourceText) -> bool {
+    fn lex_url<S: Source>(&self, state: &mut State<S>) -> bool {
         let start_pos = state.get_position();
 
         // 检查是否以 http:// https:// 开
-        let text = source.get_text_at(state.get_position()).unwrap_or("");
+        let text = state.get_text_from(state.get_position());
         if text.starts_with("http://") || text.starts_with("https://") {
             let scheme_len = if text.starts_with("https://") { 8 } else { 7 };
             state.advance(scheme_len);
@@ -232,7 +233,7 @@ impl<'config> NginxLexer<'config> {
     }
 
     /// 处理标识符和关键
-    fn lex_identifier(&self, state: &mut State, source: &SourceText) -> bool {
+    fn lex_identifier<S: Source>(&self, state: &mut State<S>) -> bool {
         let start_pos = state.get_position();
 
         if let Some(ch) = state.peek() {
@@ -251,7 +252,7 @@ impl<'config> NginxLexer<'config> {
             }
 
             // 检查是否是关键
-            let text = source.get_text_in((start_pos..state.get_position()).into()).unwrap_or("");
+            let text = state.get_text_in((start_pos..state.get_position()).into());
             let token_kind = match text {
                 "server" => NginxSyntaxKind::ServerKeyword,
                 "location" => NginxSyntaxKind::LocationKeyword,
@@ -275,7 +276,7 @@ impl<'config> NginxLexer<'config> {
     }
 
     /// 处理分隔
-    fn lex_delimiter(&self, state: &mut State) -> bool {
+    fn lex_delimiter<S: Source>(&self, state: &mut State<S>) -> bool {
         let start_pos = state.get_position();
 
         if let Some(ch) = state.peek() {
@@ -297,8 +298,13 @@ impl<'config> NginxLexer<'config> {
 }
 
 impl<'config> Lexer<NginxLanguage> for NginxLexer<'config> {
-    fn lex(&self, source: &SourceText) -> LexOutput<NginxSyntaxKind> {
-        let mut state = LexerState::new(source);
+    fn lex_incremental(
+        &self,
+        source: impl Source,
+        changed: usize,
+        cache: IncrementalCache<NginxLanguage>,
+    ) -> LexOutput<NginxLanguage> {
+        let mut state = LexerState::new_with_cache(source, changed, cache);
 
         while state.not_at_end() {
             // 尝试各种词法规则
@@ -318,7 +324,7 @@ impl<'config> Lexer<NginxLanguage> for NginxLexer<'config> {
                 continue;
             }
 
-            if self.lex_url(&mut state, source) {
+            if self.lex_url(&mut state) {
                 continue;
             }
 
@@ -330,7 +336,7 @@ impl<'config> Lexer<NginxLanguage> for NginxLexer<'config> {
                 continue;
             }
 
-            if self.lex_identifier(&mut state, source) {
+            if self.lex_identifier(&mut state) {
                 continue;
             }
 
@@ -350,6 +356,6 @@ impl<'config> Lexer<NginxLanguage> for NginxLexer<'config> {
         let eof_pos = state.get_position();
         state.add_token(NginxSyntaxKind::Eof, eof_pos, eof_pos);
 
-        state.finish()
+        state.finish(Ok(()))
     }
 }

@@ -3,168 +3,158 @@
 [![Crates.io](https://img.shields.io/crates/v/oak-lean.svg)](https://crates.io/crates/oak-lean)
 [![Documentation](https://docs.rs/oak-lean/badge.svg)](https://docs.rs/oak-lean)
 
-A high-performance Lean theorem prover parser for Rust, built with the Oak parser combinator framework. Parse Lean code with comprehensive AST generation and error handling.
+High-performance incremental Lean parser for the oak ecosystem with flexible configuration, optimized for theorem proving and formal verification.
 
-## Overview
+## 🎯 Overview
 
-Oak Lean provides robust parsing capabilities for Lean theorem prover files, supporting tactics, definitions, theorems, proofs, and all major Lean constructs. Built on the Oak parser combinator framework, it delivers excellent performance and detailed error messages.
+Oak Lean is a robust parser for Lean theorem prover, designed to handle complete Lean syntax including modern features. Built on the solid foundation of oak-core, it provides both high-level convenience and detailed AST generation for theorem proving and formal verification.
 
-## Features
+## ✨ Features
 
-- ✅ **Complete Lean Support**: Parse tactics, definitions, theorems, proofs, and imports
-- ✅ **Modern Rust API**: Type-safe parsing with comprehensive error handling
-- ✅ **High Performance**: Built on the efficient Oak parser combinator framework
-- ✅ **Rich AST**: Detailed Abstract Syntax Tree with source location tracking
-- ✅ **Extensible**: Easy to extend for custom Lean dialects
-- ✅ **Well Tested**: Comprehensive test suite with real-world examples
+- **Complete Lean Syntax**: Supports all Lean features including modern specifications
+- **Full AST Generation**: Generates comprehensive Abstract Syntax Trees
+- **Lexer Support**: Built-in tokenization with proper span information
+- **Error Recovery**: Graceful handling of syntax errors with detailed diagnostics
 
-## Quick Start
+## 🚀 Quick Start
 
-## Parsing Examples
-
-### Basic Definition Parsing
+Basic example:
 
 ```rust
-use oak::{Parser, Language};
-use oak_lean::LeanLanguage;
+use oak_lean::{Parser, LeanLanguage, SourceText};
 
-fn main() {
-    let source = r#"
-        def factorial : ℕ → ℕ
-        | 0 := 1
-        | (n + 1) := (n + 1) * factorial n
-        
-        theorem factorial_pos (n : ℕ) : factorial n > 0 :=
-        begin
-            induction n with n ih,
-            { simp [factorial] },
-            { simp [factorial, ih, mul_pos] }
-        end
-    "#;
+fn main() -> Result<(), Box<dyn std::error::Error>> {
+    let parser = Parser::new();
+    let source = SourceText::new(r#"
+def factorial : ℕ → ℕ
+| 0 := 1
+| (n + 1) := (n + 1) * factorial n
+
+theorem factorial_pos (n : ℕ) : factorial n > 0 :=
+begin
+    induction n with n ih,
+    { simp [factorial] },
+    { simp [factorial, ih, mul_pos] }
+end
+    "#);
     
-    let mut parser = Parser::<LeanLanguage>::new();
-    match parser.parse(&source) {
-        Ok(ast) => {
-            println!("Parsed AST: {:#?}", ast);
-        }
-        Err(error) => {
-            eprintln!("Parse error: {}", error);
-        }
-    }
+    let result = parser.parse(&source);
+    println!("Parsed Lean successfully.");
+    Ok(())
 }
 ```
 
-### Complex Theorem with Tactics
+## 📋 Parsing Examples
 
+### Definition Parsing
 ```rust
-use oak::{Parser, Language};
-use oak_lean::LeanLanguage;
+use oak_lean::{Parser, LeanLanguage, SourceText};
 
-fn main() {
-    let source = r#"
-        import data.nat.basic
-        
-        namespace my_namespace
-        
-        def is_even (n : ℕ) := ∃ k, n = 2 * k
-        
-        theorem even_plus_even_is_even (m n : ℕ) 
-            (h₁ : is_even m) (h₂ : is_even n) : is_even (m + n) :=
-        begin
-            cases h₁ with k hk,
-            cases h₂ with l hl,
-            use k + l,
-            rw [hk, hl],
-            ring,
-        end
-        
-        end my_namespace
-    "#;
-    
-    let mut parser = Parser::<LeanLanguage>::new();
-    match parser.parse(&source) {
-        Ok(ast) => {
-            println!("Theorem parsed successfully!");
-        }
-        Err(error) => {
-            eprintln!("Parse error: {}", error);
-        }
-    }
+let parser = Parser::new();
+let source = SourceText::new(r#"
+def is_even (n : ℕ) := ∃ k, n = 2 * k
+
+theorem even_plus_even_is_even (m n : ℕ) 
+    (h₁ : is_even m) (h₂ : is_even n) : is_even (m + n) :=
+begin
+    cases h₁ with k hk,
+    cases h₂ with l hl,
+    use k + l,
+    rw [hk, hl],
+    ring,
+end
+"#);
+
+let result = parser.parse(&source);
+println!("Definition parsed successfully.");
+```
+
+### Inductive Type Parsing
+```rust
+use oak_lean::{Parser, LeanLanguage, SourceText};
+
+let parser = Parser::new();
+let source = SourceText::new(r#"
+inductive tree (α : Type)
+| leaf : tree
+| node : α → tree → tree → tree
+"#);
+
+let result = parser.parse(&source);
+println!("Inductive type parsed successfully.");
+```
+
+## 🔧 Advanced Features
+
+### Token-Level Parsing
+```rust
+use oak_lean::{Parser, LeanLanguage, SourceText};
+
+let parser = Parser::new();
+let source = SourceText::new("def hello := \"world\"");
+let result = parser.parse(&source);
+println!("Token parsing completed.");
+```
+
+### Error Handling
+```rust
+use oak_lean::{Parser, LeanLanguage, SourceText};
+
+let parser = Parser::new();
+let source = SourceText::new(r#"
+def broken_function
+    println("Hello")
+    // Missing function parameters and return type
+"#);
+
+let result = parser.parse(&source);
+if let Some(errors) = result.result.err() {
+    println!("Parse errors found: {:?}", errors);
+} else {
+    println!("Parsed successfully.");
 }
 ```
 
-## Advanced Features
+## 🏗️ AST Structure
 
-### Inductive Types
+The parser generates a comprehensive AST with the following main structures:
 
-Oak Lean supports parsing inductive type definitions:
+- **LeanProgram**: Root container for Lean programs
+- **Definition**: Lean function and constant definitions
+- **Theorem**: Lean theorem statements and proofs
+- **Inductive**: Lean inductive type definitions
+- **Structure**: Lean structure/record definitions
+- **Expression**: Lean expressions and terms
+- **TacticBlock**: Lean tactic proof blocks
 
-```rust
-let source = r#"
-    inductive tree (α : Type)
-    | leaf : tree
-    | node : α → tree → tree → tree
-"#;
-```
+## 📊 Performance
 
-### Type Classes
+- **Streaming**: Parse large Lean files without loading entirely into memory
+- **Incremental**: Re-parse only changed sections
+- **Memory Efficient**: Smart AST node allocation
+- **Fast Recovery**: Quick error recovery for better IDE integration
 
-Parse type class instances and definitions:
+## 🔗 Integration
 
-```rust
-let source = r#"
-    class monoid (α : Type) extends has_mul α, has_one α :=
-    (mul_assoc : ∀ a b c : α, (a * b) * c = a * (b * c))
-    (one_mul : ∀ a : α, 1 * a = a)
-    (mul_one : ∀ a : α, a * 1 = a)
-"#;
-```
+Oak Lean integrates seamlessly with:
 
-## AST Structure
+- **Theorem Proving**: Lean code analysis and verification
+- **Formal Verification**: Processing and transforming Lean proofs
+- **IDE Support**: Language server protocol compatibility
+- **Code Generation**: Generating code from Lean AST
+- **Documentation**: Generating documentation from Lean code
 
-The parser generates a rich AST with the following main node types:
+## 📚 Examples
 
-- `LeanFile` - Root node containing the entire file
-- `Import` - Import statements
-- `Definition` - Function and constant definitions
-- `Theorem` - Theorem statements and proofs
-- `Inductive` - Inductive type definitions
-- `Structure` - Structure/record definitions
-- `Instance` - Type class instances
-- `TacticBlock` - Tactic proof blocks
-- `Expression` - Lean expressions and terms
+Check out the [examples](examples/) directory for comprehensive examples:
 
-## Performance
+- Complete Lean program parsing
+- Definition and theorem analysis
+- Proof transformation
+- Integration with development workflows
 
-Oak Lean is designed for high performance:
+## 🤝 Contributing
 
-- **Zero-copy parsing** where possible
-- **Streaming support** for large files
-- **Efficient memory usage** with minimal allocations
-- **Fast error recovery** for better developer experience
+Contributions are welcome! 
 
-## Integration
-
-Oak Lean integrates seamlessly with the Oak ecosystem:
-
-```rust
-use oak::{Parser, Language};
-use oak_lean::LeanLanguage;
-
-// Use with other Oak parsers
-let mut parser = Parser::<LeanLanguage>::new();
-let result = parser.parse(lean_source);
-```
-
-## Examples
-
-More examples can be found in the [examples directory](https://github.com/axodotdev/oak/tree/main/examples/oak-lean/examples):
-
-- [Basic definitions](examples/definitions.rs)
-- [Theorem proving](examples/theorems.rs)
-- [Tactic parsing](examples/tactics.rs)
-- [Error handling](examples/error_handling.rs)
-
-## Contributing
-
-We welcome contributions! Please see our [Contributing Guide](https://github.com/axodotdev/oak/blob/main/CONTRIBUTING.md) for details.
+Please feel free to submit pull requests at the [project repository](https://github.com/ygg-lang/oaks/tree/dev/examples/oak-lean) or open [issues](https://github.com/ygg-lang/oaks/issues).

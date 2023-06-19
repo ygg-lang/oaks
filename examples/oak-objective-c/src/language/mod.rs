@@ -1,4 +1,4 @@
-use crate::kind::ObjectiveCLanguageSyntaxKind;
+use crate::{ast::ObjectiveCRoot, kind::ObjectiveCLanguageSyntaxKind};
 use oak_core::Language;
 
 pub struct ObjectiveCLanguage {
@@ -30,4 +30,5 @@ impl Default for ObjectiveCLanguage {
 
 impl Language for ObjectiveCLanguage {
     type SyntaxKind = ObjectiveCLanguageSyntaxKind;
+    type TypedRoot = ObjectiveCRoot;
 }

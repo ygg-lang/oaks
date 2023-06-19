@@ -6,4 +6,5 @@ pub struct CssLanguage;
 
 impl Language for CssLanguage {
     type SyntaxKind = CssSyntaxKind;
+    type TypedRoot = ();
 }

@@ -1,7 +1,10 @@
+use crate::kind::IdlSyntaxKind;
 use oak_core::Language;
 
-pub struct IdlLanguage;
+#[derive(Debug, Default)]
+pub struct IdlLanguage {}
 
 impl Language for IdlLanguage {
-    type Kind = crate::kind::IdlSyntaxKind;
+    type SyntaxKind = IdlSyntaxKind;
+    type TypedRoot = (); // TODO: 添加 AST 根类型
 }

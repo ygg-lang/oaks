@@ -130,6 +130,9 @@ impl FSharpLanguage {
     }
 }
 
+pub struct FSharpRoot;
+
 impl Language for FSharpLanguage {
     type SyntaxKind = FSharpSyntaxKind;
+    type TypedRoot = FSharpRoot;
 }

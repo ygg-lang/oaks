@@ -1,0 +1,289 @@
+{
+    "success": true,
+    "count": 47,
+    "tokens": [
+        {
+            "kind": "ProcessingInstruction",
+            "text": "<?xml version=\"1.0\" encoding=\"UTF-8\"?>",
+            "start": 0,
+            "end": 38
+        },
+        {
+            "kind": "LeftAngle",
+            "text": "<",
+            "start": 40,
+            "end": 41
+        },
+        {
+            "kind": "Exclamation",
+            "text": "!",
+            "start": 41,
+            "end": 42
+        },
+        {
+            "kind": "Text",
+            "text": "--",
+            "start": 42,
+            "end": 44
+        },
+        {
+            "kind": "Identifier",
+            "text": "XML",
+            "start": 45,
+            "end": 48
+        },
+        {
+            "kind": "Identifier",
+            "text": "test",
+            "start": 49,
+            "end": 53
+        },
+        {
+            "kind": "Identifier",
+            "text": "file",
+            "start": 54,
+            "end": 58
+        },
+        {
+            "kind": "Text",
+            "text": "--",
+            "start": 59,
+            "end": 61
+        },
+        {
+            "kind": "RightAngle",
+            "text": ">",
+            "start": 61,
+            "end": 62
+        },
+        {
+            "kind": "LeftAngle",
+            "text": "<",
+            "start": 64,
+            "end": 65
+        },
+        {
+            "kind": "Identifier",
+            "text": "root",
+            "start": 65,
+            "end": 69
+        },
+        {
+            "kind": "Identifier",
+            "text": "xmlns:ns",
+            "start": 70,
+            "end": 78
+        },
+        {
+            "kind": "Equals",
+            "text": "=",
+            "start": 78,
+            "end": 79
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "\"http://example.com/namespace",
+            "start": 79,
+            "end": 108
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "\">\r\n    <header>\r\n        <title>Sample XML Document</title>\r\n        <author>Test Author</author>\r\n        <date>2024-01-01</date>\r\n    </header>\r\n    \r\n    <body>\r\n        <section id=",
+            "start": 108,
+            "end": 294
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "\"intro",
+            "start": 294,
+            "end": 300
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "\">\r\n            <h1>Introduction</h1>\r\n            <p>This is a sample XML document for testing purposes.</p>\r\n            <p>It contains various XML elements and attributes.</p>\r\n        </section>\r\n        \r\n        <section id=",
+            "start": 300,
+            "end": 530
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "\"data",
+            "start": 530,
+            "end": 535
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "\">\r\n            <h1>Data Section</h1>\r\n            <items>\r\n                <item id=",
+            "start": 535,
+            "end": 620
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "\"1",
+            "start": 620,
+            "end": 622
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "\" type=",
+            "start": 622,
+            "end": 629
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "\"book",
+            "start": 629,
+            "end": 634
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "\">\r\n                    <name>XML Guide</name>\r\n                    <price currency=",
+            "start": 634,
+            "end": 718
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "\"USD",
+            "start": 718,
+            "end": 722
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "\">29.99</price>\r\n                    <available>true</available>\r\n                </item>\r\n                <item id=",
+            "start": 722,
+            "end": 838
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "\"2",
+            "start": 838,
+            "end": 840
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "\" type=",
+            "start": 840,
+            "end": 847
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "\"software",
+            "start": 847,
+            "end": 856
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "\">\r\n                    <name>XML Editor</name>\r\n                    <price currency=",
+            "start": 856,
+            "end": 941
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "\"EUR",
+            "start": 941,
+            "end": 945
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "\">49.99</price>\r\n                    <available>false</available>\r\n                </item>\r\n            </items>\r\n        </section>\r\n        \r\n        <section id=",
+            "start": 945,
+            "end": 1109
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "\"metadata",
+            "start": 1109,
+            "end": 1118
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "\">\r\n            <ns:custom-element ns:attribute=",
+            "start": 1118,
+            "end": 1166
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "\"value",
+            "start": 1166,
+            "end": 1172
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "\">\r\n                <![CDATA[\r\n                This is a CDATA section that can contain\r\n                special characters like <, >, &, etc.\r\n                ]]>\r\n            </ns:custom-element>\r\n            \r\n            <empty-element/>\r\n            <self-closing-element attr=",
+            "start": 1172,
+            "end": 1454
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "\"value",
+            "start": 1454,
+            "end": 1460
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "\"/>\r\n        </section>\r\n    </body>\r\n    \r\n    <footer>\r\n        <copyright>&copy; 2024 Test Company</copyright>\r\n        <contact email=",
+            "start": 1460,
+            "end": 1598
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "\"test@example.com",
+            "start": 1598,
+            "end": 1615
+        },
+        {
+            "kind": "Quote",
+            "text": "\"",
+            "start": 1615,
+            "end": 1616
+        },
+        {
+            "kind": "SlashRightAngle",
+            "text": "/>",
+            "start": 1616,
+            "end": 1618
+        },
+        {
+            "kind": "LeftAngleSlash",
+            "text": "</",
+            "start": 1624,
+            "end": 1626
+        },
+        {
+            "kind": "Identifier",
+            "text": "footer",
+            "start": 1626,
+            "end": 1632
+        },
+        {
+            "kind": "RightAngle",
+            "text": ">",
+            "start": 1632,
+            "end": 1633
+        },
+        {
+            "kind": "LeftAngleSlash",
+            "text": "</",
+            "start": 1635,
+            "end": 1637
+        },
+        {
+            "kind": "Identifier",
+            "text": "root",
+            "start": 1637,
+            "end": 1641
+        },
+        {
+            "kind": "RightAngle",
+            "text": ">",
+            "start": 1641,
+            "end": 1642
+        },
+        {
+            "kind": "Eof",
+            "text": "",
+            "start": 1642,
+            "end": 1642
+        }
+    ],
+    "errors": []
+}

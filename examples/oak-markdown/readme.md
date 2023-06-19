@@ -7,7 +7,7 @@ High-performance incremental Markdown parser for the oak ecosystem with flexible
 
 ## 🎯 Overview
 
-Oak of markdown is a robust parser for Markdown, designed to handle complete Markdown syntax including modern features. Built on the solid foundation of oak-core, it provides both high-level convenience and detailed AST generation for document processing and rendering.
+Oak Markdown is a robust parser for Markdown, designed to handle complete Markdown syntax including modern features. Built on the solid foundation of oak-core, it provides both high-level convenience and detailed AST generation for document processing and rendering.
 
 ## ✨ Features
 
@@ -21,11 +21,11 @@ Oak of markdown is a robust parser for Markdown, designed to handle complete Mar
 Basic example:
 
 ```rust
-use oak_markdown::MarkdownParser;
+use oak_markdown::{Parser, MarkdownLanguage, SourceText};
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
-    let parser = MarkdownParser::new();
-    let markdown_content = r#"
+    let parser = Parser::new();
+    let source = SourceText::new(r#"
 # Hello, Markdown!
 
 This is a **paragraph** with *emphasis*.
@@ -35,10 +35,10 @@ This is a **paragraph** with *emphasis*.
 - Lists
 - Code blocks
 - And more!
-    "#;
+    "#);
     
-    let document = parser.parse_document(markdown_content)?;
-    println!("Parsed Markdown document successfully.");
+    let result = parser.parse(&source);
+    println!("Parsed Markdown successfully.");
     Ok(())
 }
 ```
@@ -47,71 +47,64 @@ This is a **paragraph** with *emphasis*.
 
 ### Document Parsing
 ```rust
-use oak_markdown::{MarkdownParser, ast::Document};
+use oak_markdown::{Parser, MarkdownLanguage, SourceText};
 
-let parser = MarkdownParser::new();
-let markdown_content = r#"
+let parser = Parser::new();
+let source = SourceText::new(r#"
 # My Document
 
 This is a simple document.
-"#;
+"#);
 
-let document = parser.parse_document(markdown_content)?;
-println!("Document title: {}", document.title);
+let result = parser.parse(&source);
+println!("Document parsed successfully.");
 ```
 
 ### Heading Parsing
 ```rust
-use oak_markdown::{MarkdownParser, ast::Heading};
+use oak_markdown::{Parser, MarkdownLanguage, SourceText};
 
-let parser = MarkdownParser::new();
-let markdown_content = r#"
+let parser = Parser::new();
+let source = SourceText::new(r#"
 ## My Heading
 
 Some content here.
-"#;
+"#);
 
-let document = parser.parse_document(markdown_content)?;
-for heading in &document.headings {
-    println!("Heading level {}: {}", heading.level, heading.text);
-}
+let result = parser.parse(&source);
+println!("Heading parsed successfully.");
 ```
 
 ## 🔧 Advanced Features
 
 ### Token-Level Parsing
 ```rust
-use oak_markdown::{MarkdownParser, lexer::Token};
+use oak_markdown::{Parser, MarkdownLanguage, SourceText};
 
-let parser = MarkdownParser::new();
-let tokens = parser.tokenize("# Heading\n\nParagraph text")?;
-for token in tokens {
-    println!("{:?}", token.kind);
-}
+let parser = Parser::new();
+let source = SourceText::new("# Heading\n\nParagraph text");
+let result = parser.parse(&source);
+println!("Token parsing completed.");
 ```
 
 ### Error Handling
 ```rust
-use oak_markdown::MarkdownParser;
+use oak_markdown::{Parser, MarkdownLanguage, SourceText};
 
-let parser = MarkdownParser::new();
-let invalid_markdown = r#"
+let parser = Parser::new();
+let source = SourceText::new(r#"
 # Heading
 
 This is a paragraph
 ## Another heading
 # Unclosed heading
-"#;
+"#);
 
-match parser.parse_document(invalid_markdown) {
-    Ok(document) => println!("Parsed Markdown document successfully."),
-    Err(e) => {
-        println!("Parse error at line {} column {}: {}", 
-            e.line(), e.column(), e.message());
-        if let Some(context) = e.context() {
-            println!("Error context: {}", context);
-        }
-    }
+let result = parser.parse(&source);
+if let Some(errors) = result.result.err() {
+    println!("Parse errors found: {:?}", errors);
+} else {
+    println!("Parsed successfully.");
 }
 ```
 
@@ -119,7 +112,7 @@ match parser.parse_document(invalid_markdown) {
 
 The parser generates a comprehensive AST with the following main structures:
 
-- **Document**: Root container for Markdown documents
+- **MarkdownDocument**: Root container for Markdown documents
 - **Heading**: Heading elements with levels
 - **Paragraph**: Text paragraphs
 - **List**: Ordered and unordered lists
@@ -135,7 +128,7 @@ The parser generates a comprehensive AST with the following main structures:
 
 ## 🔗 Integration
 
-Oak of markdown integrates seamlessly with:
+Oak Markdown integrates seamlessly with:
 
 - **Static Site Generators**: Convert Markdown to HTML for websites
 - **Documentation Tools**: Process and render Markdown documentation

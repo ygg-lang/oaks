@@ -1,6 +1,7 @@
 use oak_core::SyntaxKind;
+use serde::{Deserialize, Serialize};
 
-#[derive(Copy, Clone, Debug, PartialEq, Eq)]
+#[derive(Copy, Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
 pub enum PerlSyntaxKind {
     // Basic tokens
     Whitespace,
@@ -61,9 +62,14 @@ pub enum PerlSyntaxKind {
     Defined,
     Undef,
     Ref,
+    Bless,
+    New,
+    Can,
+    Isa,
     Scalar,
     Array,
     Hash,
+    Code,
     Glob,
     Open,
     Close,
@@ -101,6 +107,8 @@ pub enum PerlSyntaxKind {
     // Operators
     Plus,
     Minus,
+    Increment,
+    Decrement,
     Star,
     Slash,
     Percent,
@@ -263,4 +271,4 @@ impl SyntaxKind for PerlSyntaxKind {
 }
 
 pub type PerlToken = oak_core::Token<PerlSyntaxKind>;
-pub type PerlNode = oak_core::Node<PerlSyntaxKind>;
+pub type PerlNode = oak_core::tree::RedNode<PerlSyntaxKind>;

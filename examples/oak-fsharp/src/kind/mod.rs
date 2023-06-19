@@ -1,6 +1,7 @@
 use oak_core::SyntaxKind;
+use serde::Serialize;
 
-#[derive(Copy, Clone, Debug, PartialEq, Eq)]
+#[derive(Copy, Clone, Debug, PartialEq, Eq, Serialize)]
 pub enum FSharpSyntaxKind {
     // 基础 tokens
     Whitespace,
@@ -37,7 +38,8 @@ pub enum FSharpSyntaxKind {
     Of,
     As,
 
-    // 关键- 模块和命名空    Module,
+    // 关键- 模块和命名空
+    Module,
     Namespace,
     Open,
 
@@ -79,6 +81,49 @@ pub enum FSharpSyntaxKind {
     Struct,
     Sig,
 
+    // 关键字 - 布尔和特殊值
+    True,
+    False,
+    Null,
+    Or,
+
+    // 关键字 - 访问修饰符
+    Public,
+    Private,
+    Internal,
+
+    // 关键字 - 其他
+    Inline,
+    Extern,
+    Upcast,
+    Downcast,
+    Assert,
+    Global,
+    Base,
+    This,
+    Void,
+
+    // 类型关键字
+    Obj,
+    Unit,
+    Int,
+    Float,
+    String,
+    Bool,
+    Char,
+    Byte,
+    SByte,
+    Int16,
+    UInt16,
+    Int32,
+    UInt32,
+    Int64,
+    UInt64,
+    NativeInt,
+    UNativeInt,
+    Decimal,
+    BigInt,
+
     // 运算- 算术
     Plus,     // +
     Minus,    // -
@@ -112,6 +157,7 @@ pub enum FSharpSyntaxKind {
     Arrow,       // ->
     DoubleArrow, // =>
     Pipe,        // |
+    PipeRight,   // |>
     DoublePipe,  // ||
     Cons,        // ::
     At,          // @
@@ -119,15 +165,26 @@ pub enum FSharpSyntaxKind {
     ComposeBack, // <<
     Dollar,      // $
 
+    // 运算符 - 其他
+    LogicalAnd, // &&
+    LogicalOr,  // ||
+    Ampersand,  // &
+    Caret,      // ^
+    Tilde,      // ~
+    Less,       // <
+    Greater,    // >
+
     // 分隔符
-    LeftParen,    // (
-    RightParen,   // )
-    LeftBracket,  // [
-    RightBracket, // ]
-    LeftBrace,    // {
-    RightBrace,   // }
-    LeftAngle,    // <
-    RightAngle,   // >
+    LeftParen,         // (
+    RightParen,        // )
+    LeftBracket,       // [
+    RightBracket,      // ]
+    LeftArrayBracket,  // [|
+    RightArrayBracket, // |]
+    LeftBrace,         // {
+    RightBrace,        // }
+    LeftAngle,         // <
+    RightAngle,        // >
 
     // 标点符号
     Comma,       // ,
@@ -152,22 +209,22 @@ pub enum FSharpSyntaxKind {
 
 impl SyntaxKind for FSharpSyntaxKind {
     fn is_trivia(&self) -> bool {
-        todo!()
+        matches!(self, Self::Whitespace | Self::Newline | Self::LineComment | Self::BlockComment)
     }
 
     fn is_comment(&self) -> bool {
-        todo!()
+        matches!(self, Self::LineComment | Self::BlockComment)
     }
 
     fn is_whitespace(&self) -> bool {
-        todo!()
+        matches!(self, Self::Whitespace | Self::Newline)
     }
 
     fn is_token_type(&self) -> bool {
-        todo!()
+        !matches!(self, Self::Error | Self::Eof)
     }
 
     fn is_element_type(&self) -> bool {
-        todo!()
+        false
     }
 }

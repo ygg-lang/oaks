@@ -7,7 +7,8 @@ pub enum ZigSyntaxKind {
     Error,
     Eof,
 
-    // 字面    Identifier,
+    // 字面量
+    Identifier,
     StringLiteral,
     CharLiteral,
     IntegerLiteral,
@@ -34,7 +35,8 @@ pub enum ZigSyntaxKind {
     CallConv,
     LinkSection,
 
-    // Zig 关键- 控制    If,
+    // Zig 关键字 - 控制流
+    If,
     Else,
     Switch,
     While,
@@ -47,13 +49,11 @@ pub enum ZigSyntaxKind {
     Unreachable,
     NoReturn,
 
-    // Zig 关键- 错误处理
-    Try,
-    Catch,
-    Orelse,
-    Error,
+    // Zig 关键字 - 错误处理
+    ErrorKeyword,
 
-    // Zig 关键- 测试和异    Test,
+    // Zig 关键字 - 测试和异步
+    Test,
     Async,
     Await,
     Suspend,
@@ -104,22 +104,21 @@ pub enum ZigSyntaxKind {
     C_LongDouble,
     C_Void,
     Void,
-    NoReturn,
     Comptime_Int,
     Comptime_Float,
 
-    // 操作    Plus,           // +
-    Minus,          // -
-    Star,           // *
-    Slash,          // /
-    Percent,        // %
-    StarStar,       // **
-    PlusPercent,    // +%
-    MinusPercent,   // -%
-    StarPercent,    // *%
-    PlusPlus,       // ++
-    StarStar,       // **
-    
+    // 操作符
+    Plus,         // +
+    Minus,        // -
+    Star,         // *
+    Slash,        // /
+    Percent,      // %
+    StarStar,     // **
+    PlusPercent,  // +%
+    MinusPercent, // -%
+    StarPercent,  // *%
+    PlusPlus,     // ++
+
     // 位操作符
     Ampersand,      // &
     Pipe,           // |
@@ -128,54 +127,56 @@ pub enum ZigSyntaxKind {
     LessLess,       // <<
     GreaterGreater, // >>
 
-    // 比较操作    Equal,          // ==
-    NotEqual,       // !=
-    Less,           // <
-    Greater,        // >
-    LessEqual,      // <=
-    GreaterEqual,   // >=
+    // 比较操作符
+    Equal,        // ==
+    NotEqual,     // !=
+    Less,         // <
+    Greater,      // >
+    LessEqual,    // <=
+    GreaterEqual, // >=
 
     // 逻辑操作    AndAnd,         // and
-    OrOr,           // or
+    OrOr, // or
 
     // 赋值操作符
-    Assign,         // =
-    PlusAssign,     // +=
-    MinusAssign,    // -=
-    StarAssign,     // *=
-    SlashAssign,    // /=
-    PercentAssign,  // %=
-    AmpersandAssign, // &=
-    PipeAssign,     // |=
-    CaretAssign,    // ^=
-    LessLessAssign, // <<=
+    Assign,               // =
+    PlusAssign,           // +=
+    MinusAssign,          // -=
+    StarAssign,           // *=
+    SlashAssign,          // /=
+    PercentAssign,        // %=
+    AmpersandAssign,      // &=
+    PipeAssign,           // |=
+    CaretAssign,          // ^=
+    LessLessAssign,       // <<=
     GreaterGreaterAssign, // >>=
 
     // 标点符号
-    LeftParen,      // (
-    RightParen,     // )
-    LeftBrace,      // {
-    RightBrace,     // }
-    LeftBracket,    // [
-    RightBracket,   // ]
-    Semicolon,      // ;
-    Comma,          // ,
-    Dot,            // .
-    DotDot,         // ..
-    DotDotDot,      // ...
-    Colon,          // :
-    Question,       // ?
-    Exclamation,    // !
-    Arrow,          // =>
-    FatArrow,       // =>
+    LeftParen,    // (
+    RightParen,   // )
+    LeftBrace,    // {
+    RightBrace,   // }
+    LeftBracket,  // [
+    RightBracket, // ]
+    Semicolon,    // ;
+    Comma,        // ,
+    Dot,          // .
+    DotDot,       // ..
+    DotDotDot,    // ...
+    Colon,        // :
+    Question,     // ?
+    Exclamation,  // !
+    Arrow,        // =>
+    FatArrow,     // =>
 
-    // 特殊操作    Orelse,         // orelse
-    Catch,          // catch
-    Try,            // try
-    Await,          // await
+    // 特殊操作符
+    OrElse,       // orelse
+    CatchKeyword, // catch
+    TryKeyword,   // try
+    AwaitKeyword, // await
 
     // 内置函数前缀
-    At,             // @
+    At, // @
 
     // 字符串插    StringStart,
     StringEnd,
@@ -201,11 +202,19 @@ impl oak_core::SyntaxKind for ZigSyntaxKind {
         matches!(self, Self::Whitespace | Self::Newline | Self::Comment | Self::DocComment)
     }
 
-    fn is_error(&self) -> bool {
-        matches!(self, Self::Error)
+    fn is_comment(&self) -> bool {
+        matches!(self, Self::Comment | Self::DocComment)
     }
 
-    fn is_eof(&self) -> bool {
-        matches!(self, Self::Eof)
+    fn is_whitespace(&self) -> bool {
+        matches!(self, Self::Whitespace | Self::Newline)
+    }
+
+    fn is_token_type(&self) -> bool {
+        !matches!(self, Self::Text)
+    }
+
+    fn is_element_type(&self) -> bool {
+        matches!(self, Self::Text)
     }
 }

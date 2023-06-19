@@ -1,4 +1,5 @@
-use oak_core::language::Language;
+use crate::{ast::ScalaRoot, kind::ScalaSyntaxKind};
+use oak_core::Language;
 
 /// Scala 语言实现
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -20,5 +21,6 @@ impl Default for ScalaLanguage {
 }
 
 impl Language for ScalaLanguage {
-    type SyntaxKind = crate::kind::ScalaSyntaxKind;
+    type SyntaxKind = ScalaSyntaxKind;
+    type TypedRoot = ScalaRoot;
 }

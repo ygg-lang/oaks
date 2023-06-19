@@ -1,4 +1,6 @@
-#[derive(Copy, Clone, Debug, PartialEq, Eq)]
+use serde::{Serialize, Deserialize};
+
+#[derive(Copy, Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
 pub enum HlslSyntaxKind {
     // 空白字符和换行
     Whitespace,
@@ -70,14 +72,14 @@ pub enum HlslSyntaxKind {
 
     // 纹理类型
     Texture1D,
-    Texture1DArray,
     Texture2D,
-    Texture2DArray,
-    Texture2DMS,
-    Texture2DMSArray,
     Texture3D,
     TextureCube,
+    Texture1DArray,
+    Texture2DArray,
     TextureCubeArray,
+    Texture2DMS,
+    Texture2DMSArray,
 
     // 采样器类型
     Sampler,
@@ -111,32 +113,45 @@ pub enum HlslSyntaxKind {
     // 函数和变量修饰符
     Static,
     Const,
-    Volatile,
-    Extern,
-    Shared,
-    Groupshared,
     Uniform,
+    Varying,
     In,
     Out,
     Inout,
     Inline,
+    Extern,
+    Shared,
+    Groupshared,
+    Volatile,
+    Precise,
+    Nointerpolation,
+    Linear,
+    Centroid,
+    Sample,
+    Noperspective,
     Target,
 
     // 语义修饰符
     Register,
     Packoffset,
 
-    // 着色器类型
+    // 特殊关键字
     Struct,
     Cbuffer,
     Tbuffer,
     Interface,
     Class,
+    Namespace,
+    Typedef,
+    Template,
+    Typename,
+    Using,
+    Sizeof,
+    Undef,
 
     // 预处理器指令
     Include,
     Define,
-    Undef,
     If_,
     Ifdef,
     Ifndef,
@@ -144,7 +159,6 @@ pub enum HlslSyntaxKind {
     Elif,
     Endif,
     Line,
-    Error,
     Pragma,
 
     // 运算符
@@ -181,9 +195,10 @@ pub enum HlslSyntaxKind {
     BitwiseXorAssign,
     Increment,
     Decrement,
-    Conditional,
+
     Dot,
     Arrow,
+    Conditional,
 
     // 分隔符
     LeftParen,
@@ -196,12 +211,36 @@ pub enum HlslSyntaxKind {
     Comma,
     Colon,
     DoubleColon,
-
-    // 特殊标记
+    Question,
     Hash,
+    At,
     Backslash,
 
-    // 特殊
+    // 特殊标记
     Eof,
     Error,
+}
+
+use oak_core::SyntaxKind;
+
+impl SyntaxKind for HlslSyntaxKind {
+    fn is_trivia(&self) -> bool {
+        matches!(self, Self::Whitespace | Self::Newline | Self::Comment)
+    }
+
+    fn is_comment(&self) -> bool {
+        matches!(self, Self::Comment)
+    }
+
+    fn is_whitespace(&self) -> bool {
+        matches!(self, Self::Whitespace | Self::Newline)
+    }
+
+    fn is_token_type(&self) -> bool {
+        !matches!(self, Self::Error)
+    }
+
+    fn is_element_type(&self) -> bool {
+        false
+    }
 }

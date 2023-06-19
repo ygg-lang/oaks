@@ -1,8 +1,3 @@
-use alloc::{
-    string::{String, ToString},
-    vec,
-    vec::Vec,
-};
 use oak_core::Language;
 use serde::{Deserialize, Serialize};
 
@@ -46,4 +41,5 @@ impl Default for ValkyrieLanguage {
 
 impl Language for ValkyrieLanguage {
     type SyntaxKind = crate::kind::ValkyrieSyntaxKind;
+    type TypedRoot = crate::ast::ValkyrieRoot;
 }

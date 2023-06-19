@@ -1,7 +1,7 @@
 use crate::{kind::SwiftSyntaxKind, language::SwiftLanguage};
-use oak_core::{Lexer, LexerState, SourceText, lexer::LexOutput};
+use oak_core::{IncrementalCache, Lexer, LexerState, OakError, lexer::LexOutput, source::Source};
 
-type State<'input> = LexerState<'input, SwiftLanguage>;
+type State<S: Source> = LexerState<S, SwiftLanguage>;
 
 pub struct SwiftLexer<'config> {
     config: &'config SwiftLanguage,
@@ -13,7 +13,7 @@ impl<'config> SwiftLexer<'config> {
     }
 
     /// 跳过空白字符
-    fn skip_whitespace(&self, state: &mut State) -> bool {
+    fn skip_whitespace<S: Source>(&self, state: &mut State<S>) -> bool {
         let start_pos = state.get_position();
 
         while let Some(ch) = state.peek() {
@@ -35,7 +35,7 @@ impl<'config> SwiftLexer<'config> {
     }
 
     /// 处理换行
-    fn lex_newline(&self, state: &mut State) -> bool {
+    fn lex_newline<S: Source>(&self, state: &mut State<S>) -> bool {
         let start_pos = state.get_position();
 
         if let Some('\n') = state.peek() {
@@ -57,11 +57,11 @@ impl<'config> SwiftLexer<'config> {
     }
 
     /// 处理注释
-    fn lex_comment(&self, state: &mut State, source: &SourceText) -> bool {
+    fn lex_comment<S: Source>(&self, state: &mut State<S>) -> bool {
         let start_pos = state.get_position();
 
         if let Some('/') = state.peek() {
-            if let Some('/') = source.get_char_at(start_pos + 1) {
+            if let Some('/') = state.peek_next_n(1) {
                 // 单行注释
                 state.advance(2);
                 while let Some(ch) = state.peek() {
@@ -73,19 +73,19 @@ impl<'config> SwiftLexer<'config> {
                 state.add_token(SwiftSyntaxKind::Comment, start_pos, state.get_position());
                 true
             }
-            else if let Some('*') = source.get_char_at(start_pos + 1) {
+            else if let Some('*') = state.peek_next_n(1) {
                 // 多行注释
                 state.advance(2);
                 let mut depth = 1;
                 while let Some(ch) = state.peek() {
                     if ch == '/'
-                        && let Some('*') = source.get_char_at(state.get_position() + 1)
+                        && let Some('*') = state.peek_next_n(1)
                     {
                         state.advance(2);
                         depth += 1;
                     }
                     else if ch == '*'
-                        && let Some('/') = source.get_char_at(state.get_position() + 1)
+                        && let Some('/') = state.peek_next_n(1)
                     {
                         state.advance(2);
                         depth -= 1;
@@ -110,7 +110,7 @@ impl<'config> SwiftLexer<'config> {
     }
 
     /// 处理标识符或关键
-    fn lex_identifier_or_keyword(&self, state: &mut State, source: &SourceText) -> bool {
+    fn lex_identifier_or_keyword<S: Source>(&self, state: &mut State<S>) -> bool {
         let start_pos = state.get_position();
 
         // 处理反引号标识符 `identifier`
@@ -145,10 +145,9 @@ impl<'config> SwiftLexer<'config> {
                 }
 
                 // 检查是否为关键
-                let text = source.get_text_at(start_pos).unwrap_or("");
-                let text_slice = &text[..(state.get_position() - start_pos)];
+                let text = state.get_text_in(std::range::Range { start: start_pos, end: state.get_position() });
 
-                let token_kind = match text_slice {
+                let token_kind = match text {
                     "class" => SwiftSyntaxKind::Class,
                     "struct" => SwiftSyntaxKind::Struct,
                     "enum" => SwiftSyntaxKind::Enum,
@@ -243,7 +242,7 @@ impl<'config> SwiftLexer<'config> {
     }
 
     /// 处理数字字面
-    fn lex_number_literal(&self, state: &mut State) -> bool {
+    fn lex_number_literal<S: Source>(&self, state: &mut State<S>) -> bool {
         let start_pos = state.get_position();
 
         if let Some(ch) = state.peek() {
@@ -351,19 +350,19 @@ impl<'config> SwiftLexer<'config> {
     }
 
     /// 处理字符串字面量
-    fn lex_string_literal(&self, state: &mut State, source: &SourceText) -> bool {
+    fn lex_string_literal<S: Source>(&self, state: &mut State<S>) -> bool {
         let start_pos = state.get_position();
 
         // 处理多行字符"""..."""
         if let Some('"') = state.peek() {
-            if let Some('"') = source.get_char_at(start_pos + 1) {
-                if let Some('"') = source.get_char_at(start_pos + 2) {
+            if let Some('"') = state.peek_next_n(1) {
+                if let Some('"') = state.peek_next_n(2) {
                     // 多行字符
                     state.advance(3);
                     while let Some(ch) = state.peek() {
                         if ch == '"' {
-                            if let Some('"') = source.get_char_at(state.get_position() + 1) {
-                                if let Some('"') = source.get_char_at(state.get_position() + 2) {
+                            if let Some('"') = state.peek_next_n(1) {
+                                if let Some('"') = state.peek_next_n(2) {
                                     state.advance(3);
                                     break;
                                 }
@@ -405,7 +404,7 @@ impl<'config> SwiftLexer<'config> {
     }
 
     /// 处理操作
-    fn lex_operator(&self, state: &mut State, source: &SourceText) -> bool {
+    fn lex_operator<S: Source>(&self, state: &mut State<S>) -> bool {
         let start_pos = state.get_position();
 
         if let Some(ch) = state.peek() {
@@ -604,7 +603,7 @@ impl<'config> SwiftLexer<'config> {
     }
 
     /// 处理分隔
-    fn lex_delimiter(&self, state: &mut State) -> bool {
+    fn lex_delimiter<S: Source>(&self, state: &mut State<S>) -> bool {
         let start_pos = state.get_position();
 
         if let Some(ch) = state.peek() {
@@ -637,40 +636,53 @@ impl<'config> SwiftLexer<'config> {
 }
 
 impl<'config> Lexer<SwiftLanguage> for SwiftLexer<'config> {
-    fn lex(&self, source: &SourceText) -> LexOutput<SwiftSyntaxKind> {
+    fn lex_incremental(
+        &self,
+        source: impl Source,
+        _changed: usize,
+        _cache: IncrementalCache<SwiftLanguage>,
+    ) -> LexOutput<SwiftLanguage> {
         let mut state = LexerState::new(source);
+        let result = self.run(&mut state);
+        state.finish(result)
+    }
+}
 
+impl<'config> SwiftLexer<'config> {
+    fn run<S: Source>(&self, state: &mut State<S>) -> Result<(), OakError> {
         while state.not_at_end() {
+            let _safe_point = state.get_position();
+
             // 尝试各种词法规则
-            if self.skip_whitespace(&mut state) {
+            if self.skip_whitespace(state) {
                 continue;
             }
 
-            if self.lex_newline(&mut state) {
+            if self.lex_newline(state) {
                 continue;
             }
 
-            if self.lex_comment(&mut state, source) {
+            if self.lex_comment(state) {
                 continue;
             }
 
-            if self.lex_string_literal(&mut state, source) {
+            if self.lex_string_literal(state) {
                 continue;
             }
 
-            if self.lex_number_literal(&mut state) {
+            if self.lex_number_literal(state) {
                 continue;
             }
 
-            if self.lex_identifier_or_keyword(&mut state, source) {
+            if self.lex_identifier_or_keyword(state) {
                 continue;
             }
 
-            if self.lex_operator(&mut state, source) {
+            if self.lex_operator(state) {
                 continue;
             }
 
-            if self.lex_delimiter(&mut state) {
+            if self.lex_delimiter(state) {
                 continue;
             }
 
@@ -682,10 +694,10 @@ impl<'config> Lexer<SwiftLanguage> for SwiftLexer<'config> {
             }
         }
 
-        // 添加 EOF kind
+        // 添加 Eof token
         let eof_pos = state.get_position();
         state.add_token(SwiftSyntaxKind::Eof, eof_pos, eof_pos);
 
-        state.finish()
+        Ok(())
     }
 }

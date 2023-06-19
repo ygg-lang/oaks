@@ -1,0 +1,19 @@
+{
+    "success": true,
+    "count": 2,
+    "tokens": [
+        {
+            "kind": "Identifier",
+            "text": "d",
+            "start": 614,
+            "end": 615
+        },
+        {
+            "kind": "Eof",
+            "text": "",
+            "start": 615,
+            "end": 615
+        }
+    ],
+    "errors": []
+}

@@ -1,4 +1,4 @@
-use crate::kind::TypstSyntaxKind;
+use crate::{ast::TypstRoot, kind::TypstSyntaxKind};
 use oak_core::Language;
 
 /// Typst 语言配置
@@ -61,4 +61,5 @@ impl TypstLanguage {
 
 impl Language for TypstLanguage {
     type SyntaxKind = TypstSyntaxKind;
+    type TypedRoot = TypstRoot;
 }

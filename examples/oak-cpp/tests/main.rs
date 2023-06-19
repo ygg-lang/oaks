@@ -1,132 +1,67 @@
-use alloc::string::ToString;
-use oak_c::{CLanguage, CLexRules, CParser, CToken, CTokenKind};
-use oak_core::{FileTestSuite, Lexer, Parser, SourceSpan};
-use std::{fs, path::Path};
+use oak_core::{GreenBuilder, IncrementalCache, Lexer, SourceText};
+use oak_cpp::{CppLanguage, CppLexer};
 
-struct CFileTestSuite {
-    test_dir: String,
-    extension: String,
+#[test]
+fn test_cpp_lexer_basic() {
+    let source = SourceText::new("int main() { return 0; }");
+    let language = CppLanguage::new();
+    let lexer = CppLexer::new(&language);
+    let mut builder = GreenBuilder::new(1024);
+    let cache = IncrementalCache::new(&mut builder);
+
+    let result = lexer.lex_incremental(&source, 0, cache);
+    assert!(result.diagnostics.is_empty());
+    println!("✓ C++ 基本词法分析测试通过");
 }
 
-impl CFileTestSuite {
-    fn new(test_dir: &str, extension: &str) -> Self {
-        Self { test_dir: test_dir.to_string(), extension: extension.to_string() }
-    }
+#[test]
+fn test_cpp_lexer_keywords() {
+    let source = SourceText::new("class MyClass { public: int value; };");
+    let language = CppLanguage::new();
+    let lexer = CppLexer::new(&language);
+    let mut builder = GreenBuilder::new(1024);
+    let cache = IncrementalCache::new(&mut builder);
 
-    fn find_test_files(&self) -> Vec<String> {
-        let mut files = Vec::new();
-        if let Ok(entries) = fs::read_dir(&self.test_dir) {
-            for entry in entries.flatten() {
-                if let Some(file_name) = entry.file_name().to_str() {
-                    if file_name.ends_with(&format!(".{}", self.extension)) {
-                        files.push(entry.path().to_string_lossy().to_string());
-                    }
-                }
-            }
-        }
-        files.sort();
-        files
-    }
-
-    fn get_json_path(&self, file_path: &str) -> String {
-        file_path.replace(&format!(".{}", self.extension), ".json")
-    }
-
-    fn read_file_content(&self, file_path: &str) -> Result<String, std::io::Error> {
-        fs::read_to_string(file_path)
-    }
+    let result = lexer.lex_incremental(&source, 0, cache);
+    assert!(result.diagnostics.is_empty());
+    println!("✓ C++ 关键字词法分析测试通过");
 }
 
-fn test_lexer() {
-    println!("Testing C Lexer...");
+#[test]
+fn test_cpp_lexer_operators() {
+    let source = SourceText::new("a += b * c / d - e;");
+    let language = CppLanguage::new();
+    let lexer = CppLexer::new(&language);
+    let mut builder = GreenBuilder::new(1024);
+    let cache = IncrementalCache::new(&mut builder);
 
-    let test_suite = CFileTestSuite::new("tests/lexer", "c");
-    let test_files = test_suite.find_test_files();
-
-    for file_path in test_files {
-        println!("Testing file: {}", file_path);
-
-        match test_suite.read_file_content(&file_path) {
-            Ok(content) => {
-                let mut lexer = Lexer::new(&content, CLexRules);
-                let tokens = lexer.tokenize();
-
-                println!("  Tokens found: {}", tokens.len());
-
-                // 显示前几tokens 作为示例
-                for (i, token) in tokens.iter().take(10).enumerate() {
-                    println!("    {}: {:?}", i, token);
-                }
-
-                if tokens.len() > 10 {
-                    println!("    ... and {} more tokens", tokens.len() - 10);
-                }
-
-                // 验证最后一tokens EOF
-                if let Some(last_token) = tokens.last() {
-                    match last_token.kind {
-                        CTokenKind::Eof => println!("  Lexing completed successfully"),
-                        _ => println!("  Warning: Last tokens is not EOF"),
-                    }
-                }
-                else {
-                    println!("  Warning: No tokens generated");
-                }
-            }
-            Err(e) => {
-                println!("  Error reading file: {}", e);
-            }
-        }
-
-        println!();
-    }
+    let result = lexer.lex_incremental(&source, 0, cache);
+    assert!(result.diagnostics.is_empty());
+    println!("✓ C++ 操作符词法分析测试通过");
 }
 
-fn test_parser() {
-    println!("Testing C Parser...");
+#[test]
+fn test_cpp_lexer_strings() {
+    let source = SourceText::new(r#"const char* str = "Hello, World!";"#);
+    let language = CppLanguage::new();
+    let lexer = CppLexer::new(&language);
+    let mut builder = GreenBuilder::new(1024);
+    let cache = IncrementalCache::new(&mut builder);
 
-    let test_suite = CFileTestSuite::new("tests/parser", "c");
-    let test_files = test_suite.find_test_files();
-
-    for file_path in test_files {
-        println!("Testing file: {}", file_path);
-
-        match test_suite.read_file_content(&file_path) {
-            Ok(content) => {
-                // 首先进行词法分析
-                let mut lexer = Lexer::new(&content, CLexRules);
-                let tokens = lexer.tokenize();
-
-                // 然后进行语法分析
-                let mut parser = CParser::new(tokens);
-                match parser.parse() {
-                    Ok(ast) => {
-                        println!("  Parsing completed successfully");
-                        println!(
-                            "  AST root: TranslationUnit with {} external declarations",
-                            ast.translation_unit.external_declarations.len()
-                        );
-                    }
-                    Err(e) => {
-                        println!("  Parse error: {:?}", e);
-                    }
-                }
-            }
-            Err(e) => {
-                println!("  Error reading file: {}", e);
-            }
-        }
-
-        println!();
-    }
+    let result = lexer.lex_incremental(&source, 0, cache);
+    assert!(result.diagnostics.is_empty());
+    println!("✓ C++ 字符串词法分析测试通过");
 }
 
-fn main() {
-    println!("Running C Language Tests");
-    println!("========================");
+#[test]
+fn test_cpp_lexer_comments() {
+    let source = SourceText::new("// Single line comment\n/* Multi line comment */\nint x;");
+    let language = CppLanguage::new();
+    let lexer = CppLexer::new(&language);
+    let mut builder = GreenBuilder::new(1024);
+    let cache = IncrementalCache::new(&mut builder);
 
-    test_lexer();
-    test_parser();
-
-    println!("All tests completed!");
+    let result = lexer.lex_incremental(&source, 0, cache);
+    assert!(result.diagnostics.is_empty());
+    println!("✓ C++ 注释词法分析测试通过");
 }

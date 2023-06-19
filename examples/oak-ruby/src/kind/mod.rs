@@ -5,7 +5,7 @@ use oak_core::{SyntaxKind, Token};
 pub type RubyToken = Token<RubySyntaxKind>;
 
 /// Ruby 令牌种类
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, serde::Serialize)]
 pub enum RubySyntaxKind {
     // 基础标识符和字面量
     Identifier,

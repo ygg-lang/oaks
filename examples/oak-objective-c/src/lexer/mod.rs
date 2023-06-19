@@ -1,10 +1,34 @@
 use crate::{kind::ObjectiveCLanguageSyntaxKind, language::ObjectiveCLanguage};
-use oak_core::{Lexer, LexerState, SourceText, lexer::LexOutput};
+use oak_core::{
+    IncrementalCache, Lexer, LexerState, OakError,
+    lexer::{CommentLine, LexOutput, StringConfig, WhitespaceConfig},
+    source::Source,
+};
+use std::sync::LazyLock;
 
-type State<'input> = LexerState<'input, ObjectiveCLanguage>;
+type State<S> = LexerState<S, ObjectiveCLanguage>;
 
+static OC_WHITESPACE: LazyLock<WhitespaceConfig> = LazyLock::new(|| WhitespaceConfig { unicode_whitespace: true });
+static OC_COMMENT: LazyLock<CommentLine> = LazyLock::new(|| CommentLine { line_markers: &["//"] });
+static OC_STRING: LazyLock<StringConfig> = LazyLock::new(|| StringConfig { quotes: &['"'], escape: Some('\\') });
+static OC_CHAR: LazyLock<StringConfig> = LazyLock::new(|| StringConfig { quotes: &['\''], escape: Some('\\') });
+
+#[derive(Clone)]
 pub struct ObjectiveCLexer<'config> {
     config: &'config ObjectiveCLanguage,
+}
+
+impl<'config> Lexer<ObjectiveCLanguage> for ObjectiveCLexer<'config> {
+    fn lex_incremental(
+        &self,
+        source: impl Source,
+        changed: usize,
+        cache: IncrementalCache<ObjectiveCLanguage>,
+    ) -> LexOutput<ObjectiveCLanguage> {
+        let mut state = LexerState::new_with_cache(source, changed, cache);
+        let result = self.run(&mut state);
+        state.finish(result)
+    }
 }
 
 impl<'config> ObjectiveCLexer<'config> {
@@ -12,200 +36,250 @@ impl<'config> ObjectiveCLexer<'config> {
         Self { config }
     }
 
-    /// 跳过空白字符
-    fn skip_whitespace(&self, state: &mut State) -> bool {
-        let start_pos = state.get_position();
+    /// 主词法分析循环
+    fn run<S: Source>(&self, state: &mut State<S>) -> Result<(), OakError> {
+        while state.not_at_end() {
+            let safe_point = state.get_position();
 
-        while let Some(ch) = state.peek() {
-            if ch == ' ' || ch == '\t' {
+            if self.skip_whitespace(state) {
+                continue;
+            }
+
+            if self.skip_comment(state) {
+                continue;
+            }
+
+            if self.lex_string_literal(state) {
+                continue;
+            }
+
+            if self.lex_char_literal(state) {
+                continue;
+            }
+
+            if self.lex_number_literal(state) {
+                continue;
+            }
+
+            if self.lex_identifier_or_keyword(state) {
+                continue;
+            }
+
+            if self.lex_operators(state) {
+                continue;
+            }
+
+            if self.lex_single_char_tokens(state) {
+                continue;
+            }
+
+            state.safe_check(safe_point);
+        }
+
+        // 添加 EOF token
+        let eof_pos = state.get_position();
+        state.add_token(ObjectiveCLanguageSyntaxKind::Eof, eof_pos, eof_pos);
+        Ok(())
+    }
+
+    /// 跳过空白字符
+    fn skip_whitespace<S: Source>(&self, state: &mut State<S>) -> bool {
+        match OC_WHITESPACE.scan(state.rest(), state.get_position(), ObjectiveCLanguageSyntaxKind::Whitespace) {
+            Some(token) => {
+                state.advance_with(token);
+                return true;
+            }
+            None => {}
+        }
+        false
+    }
+
+    fn skip_comment<S: Source>(&self, state: &mut State<S>) -> bool {
+        let start = state.get_position();
+        let rest = state.rest();
+        // line comment: // ... until newline
+        if rest.starts_with("//") {
+            state.advance(2);
+            while let Some(ch) = state.peek() {
+                if ch == '\n' || ch == '\r' {
+                    break;
+                }
                 state.advance(ch.len_utf8());
+            }
+            state.add_token(ObjectiveCLanguageSyntaxKind::CommentToken, start, state.get_position());
+            return true;
+        }
+        // block comment: /* ... */ with nesting support
+        if rest.starts_with("/*") {
+            state.advance(2);
+            let mut depth = 1usize;
+            while let Some(ch) = state.peek() {
+                if ch == '/' && state.peek_next_n(1) == Some('*') {
+                    state.advance(2);
+                    depth += 1;
+                    continue;
+                }
+                if ch == '*' && state.peek_next_n(1) == Some('/') {
+                    state.advance(2);
+                    depth -= 1;
+                    if depth == 0 {
+                        break;
+                    }
+                    continue;
+                }
+                state.advance(ch.len_utf8());
+            }
+            state.add_token(ObjectiveCLanguageSyntaxKind::CommentToken, start, state.get_position());
+            return true;
+        }
+        false
+    }
+
+    fn lex_string_literal<S: Source>(&self, state: &mut State<S>) -> bool {
+        let start = state.get_position();
+
+        // Objective-C string literal: @"..."
+        if state.current() == Some('@') && state.peek_next_n(1) == Some('"') {
+            state.advance(2); // consume @"
+            let mut escaped = false;
+            while let Some(ch) = state.peek() {
+                if ch == '"' && !escaped {
+                    state.advance(1); // consume closing quote
+                    break;
+                }
+                state.advance(ch.len_utf8());
+                if escaped {
+                    escaped = false;
+                    continue;
+                }
+                if ch == '\\' {
+                    escaped = true;
+                    continue;
+                }
+                if ch == '\n' || ch == '\r' {
+                    break;
+                }
+            }
+            state.add_token(ObjectiveCLanguageSyntaxKind::String, start, state.get_position());
+            return true;
+        }
+
+        // normal string: "..."
+        if state.current() == Some('"') {
+            state.advance(1);
+            let mut escaped = false;
+            while let Some(ch) = state.peek() {
+                if ch == '"' && !escaped {
+                    state.advance(1); // consume closing quote
+                    break;
+                }
+                state.advance(ch.len_utf8());
+                if escaped {
+                    escaped = false;
+                    continue;
+                }
+                if ch == '\\' {
+                    escaped = true;
+                    continue;
+                }
+                if ch == '\n' || ch == '\r' {
+                    break;
+                }
+            }
+            state.add_token(ObjectiveCLanguageSyntaxKind::String, start, state.get_position());
+            return true;
+        }
+
+        false
+    }
+
+    fn lex_char_literal<S: Source>(&self, state: &mut State<S>) -> bool {
+        let start = state.get_position();
+        if state.current() != Some('\'') {
+            return false;
+        }
+
+        state.advance(1); // opening '
+        if let Some('\\') = state.peek() {
+            state.advance(1);
+            if let Some(c) = state.peek() {
+                state.advance(c.len_utf8());
+            }
+        }
+        else if let Some(c) = state.peek() {
+            state.advance(c.len_utf8());
+        }
+        else {
+            state.set_position(start);
+            return false;
+        }
+
+        if state.peek() == Some('\'') {
+            state.advance(1);
+            state.add_token(ObjectiveCLanguageSyntaxKind::Character, start, state.get_position());
+            return true;
+        }
+
+        state.set_position(start);
+        false
+    }
+
+    fn lex_number_literal<S: Source>(&self, state: &mut State<S>) -> bool {
+        let start = state.get_position();
+        let first = match state.current() {
+            Some(c) => c,
+            None => return false,
+        };
+
+        if !first.is_ascii_digit() {
+            return false;
+        }
+
+        let mut is_float = false;
+
+        // consume digits
+        state.advance(1);
+        while let Some(c) = state.peek() {
+            if c.is_ascii_digit() {
+                state.advance(1);
             }
             else {
                 break;
             }
         }
 
-        if state.get_position() > start_pos {
-            state.add_token(ObjectiveCLanguageSyntaxKind::Whitespace, start_pos, state.get_position());
-            true
-        }
-        else {
-            false
-        }
-    }
-
-    /// 处理换行
-    fn lex_newline(&self, state: &mut State) -> bool {
-        let start_pos = state.get_position();
-
-        if let Some('\n') = state.peek() {
-            state.advance(1);
-            state.add_token(ObjectiveCLanguageSyntaxKind::Newline, start_pos, state.get_position());
-            true
-        }
-        else if let Some('\r') = state.peek() {
-            state.advance(1);
-            if let Some('\n') = state.peek() {
-                state.advance(1);
-            }
-            state.add_token(ObjectiveCLanguageSyntaxKind::Newline, start_pos, state.get_position());
-            true
-        }
-        else {
-            false
-        }
-    }
-
-    /// 处理注释
-    fn lex_comment(&self, state: &mut State) -> bool {
-        let start_pos = state.get_position();
-
-        // 单行注释 //
-        if let Some('/') = state.peek() {
-            if let Some('/') = state.peek_next_n(1) {
-                state.advance(2);
-
-                // 读取到行
-                while let Some(ch) = state.peek() {
-                    if ch == '\n' || ch == '\r' {
+        // fractional part
+        if state.peek() == Some('.') {
+            let n1 = state.peek_next_n(1);
+            if n1.map(|c| c.is_ascii_digit()).unwrap_or(false) {
+                is_float = true;
+                state.advance(1); // consume '.'
+                while let Some(c) = state.peek() {
+                    if c.is_ascii_digit() {
+                        state.advance(1);
+                    }
+                    else {
                         break;
                     }
-                    state.advance(ch.len_utf8());
                 }
-
-                state.add_token(ObjectiveCLanguageSyntaxKind::CommentToken, start_pos, state.get_position());
-                return true;
-            }
-            // 多行注释 /* */
-            else if let Some('*') = state.peek_next_n(1) {
-                state.advance(2);
-
-                while let Some(ch) = state.peek() {
-                    if ch == '*' {
-                        if let Some('/') = state.peek_next_n(1) {
-                            state.advance(2);
-                            break;
-                        }
-                    }
-                    state.advance(ch.len_utf8());
-                }
-
-                state.add_token(ObjectiveCLanguageSyntaxKind::CommentToken, start_pos, state.get_position());
-                return true;
             }
         }
 
-        false
-    }
-
-    /// 处理字符
-    fn lex_string(&self, state: &mut State) -> bool {
-        let start_pos = state.get_position();
-
-        if let Some('"') = state.peek() {
-            state.advance(1); // 跳过开始引
-            while let Some(ch) = state.peek() {
-                if ch == '"' {
-                    state.advance(1); // 跳过结束引号
-                    break;
-                }
-                else if ch == '\\' {
-                    state.advance(1); // 跳过转义字符
-                    if state.peek().is_some() {
-                        state.advance(state.peek().unwrap().len_utf8());
-                    }
-                }
-                else {
-                    state.advance(ch.len_utf8());
-                }
-            }
-
-            state.add_token(ObjectiveCLanguageSyntaxKind::String, start_pos, state.get_position());
-            true
-        }
-        else {
-            false
-        }
-    }
-
-    /// 处理字符字面
-    fn lex_character(&self, state: &mut State) -> bool {
-        let start_pos = state.get_position();
-
-        if let Some('\'') = state.peek() {
-            state.advance(1); // 跳过开始引
-            while let Some(ch) = state.peek() {
-                if ch == '\'' {
-                    state.advance(1); // 跳过结束引号
-                    break;
-                }
-                else if ch == '\\' {
-                    state.advance(1); // 跳过转义字符
-                    if state.peek().is_some() {
-                        state.advance(state.peek().unwrap().len_utf8());
-                    }
-                }
-                else {
-                    state.advance(ch.len_utf8());
-                }
-            }
-
-            state.add_token(ObjectiveCLanguageSyntaxKind::Character, start_pos, state.get_position());
-            true
-        }
-        else {
-            false
-        }
-    }
-
-    /// 处理数字
-    fn lex_number(&self, state: &mut State) -> bool {
-        let start_pos = state.get_position();
-
-        if let Some(ch) = state.peek() {
-            if !ch.is_ascii_digit() {
-                return false;
-            }
-
-            // 处理整数部分
-            while let Some(ch) = state.peek() {
-                if ch.is_ascii_digit() {
-                    state.advance(ch.len_utf8());
-                }
-                else {
-                    break;
-                }
-            }
-
-            // 处理小数
-            if let Some('.') = state.peek() {
-                if let Some(next_ch) = state.peek_next_n(1) {
-                    if next_ch.is_ascii_digit() {
-                        state.advance(1); // 跳过小数
-                        while let Some(ch) = state.peek() {
-                            if ch.is_ascii_digit() {
-                                state.advance(ch.len_utf8());
-                            }
-                            else {
-                                break;
-                            }
-                        }
-                    }
-                }
-            }
-
-            // 处理科学计数
-            if let Some(ch) = state.peek() {
-                if ch == 'e' || ch == 'E' {
+        // exponent
+        if let Some(c) = state.peek() {
+            if c == 'e' || c == 'E' {
+                let n1 = state.peek_next_n(1);
+                if n1 == Some('+') || n1 == Some('-') || n1.map(|d| d.is_ascii_digit()).unwrap_or(false) {
+                    is_float = true;
                     state.advance(1);
                     if let Some(sign) = state.peek() {
                         if sign == '+' || sign == '-' {
                             state.advance(1);
                         }
                     }
-                    while let Some(ch) = state.peek() {
-                        if ch.is_ascii_digit() {
-                            state.advance(ch.len_utf8());
+                    while let Some(d) = state.peek() {
+                        if d.is_ascii_digit() {
+                            state.advance(1);
                         }
                         else {
                             break;
@@ -213,244 +287,166 @@ impl<'config> ObjectiveCLexer<'config> {
                     }
                 }
             }
+        }
 
-            // 处理后缀 (f, l, etc.)
-            if let Some(ch) = state.peek() {
-                if ch == 'f' || ch == 'F' || ch == 'l' || ch == 'L' {
-                    state.advance(ch.len_utf8());
-                }
+        // suffix letters (e.g., f, l, u)
+        while let Some(c) = state.peek() {
+            if c.is_ascii_alphabetic() {
+                state.advance(1);
             }
+            else {
+                break;
+            }
+        }
 
-            state.add_token(ObjectiveCLanguageSyntaxKind::Number, start_pos, state.get_position());
-            true
-        }
-        else {
-            false
-        }
+        let end = state.get_position();
+        state.add_token(
+            if is_float { ObjectiveCLanguageSyntaxKind::FloatLiteral } else { ObjectiveCLanguageSyntaxKind::IntegerLiteral },
+            start,
+            end,
+        );
+        true
     }
 
-    /// 处理标识符和关键
-    fn lex_identifier(&self, state: &mut State, source: &SourceText) -> bool {
-        let start_pos = state.get_position();
+    fn lex_identifier_or_keyword<S: Source>(&self, state: &mut State<S>) -> bool {
+        let start = state.get_position();
+        let ch = match state.current() {
+            Some(c) => c,
+            None => return false,
+        };
 
-        if let Some(ch) = state.peek() {
-            if !ch.is_ascii_alphabetic() && ch != '_' {
-                return false;
+        if !(ch.is_ascii_alphabetic() || ch == '_') {
+            return false;
+        }
+
+        state.advance(1);
+        while let Some(c) = state.current() {
+            if c.is_ascii_alphanumeric() || c == '_' {
+                state.advance(1);
             }
-
-            // 收集标识符字
-            while let Some(ch) = state.peek() {
-                if ch.is_ascii_alphanumeric() || ch == '_' {
-                    state.advance(ch.len_utf8());
-                }
-                else {
-                    break;
-                }
+            else {
+                break;
             }
+        }
 
-            // 检查是否是关键
-            let text = source.get_text_in((start_pos..state.get_position()).into()).unwrap_or("");
-            let token_kind = match text {
-                "@interface" => ObjectiveCLanguageSyntaxKind::InterfaceKeyword,
-                "@implementation" => ObjectiveCLanguageSyntaxKind::ImplementationKeyword,
-                "@end" => ObjectiveCLanguageSyntaxKind::EndKeyword,
-                "@property" => ObjectiveCLanguageSyntaxKind::PropertyKeyword,
-                "@synthesize" => ObjectiveCLanguageSyntaxKind::SynthesizeKeyword,
-                "@dynamic" => ObjectiveCLanguageSyntaxKind::DynamicKeyword,
-                "@protocol" => ObjectiveCLanguageSyntaxKind::ProtocolKeyword,
-                "@category" => ObjectiveCLanguageSyntaxKind::CategoryKeyword,
-                "#import" => ObjectiveCLanguageSyntaxKind::ImportKeyword,
-                "#include" => ObjectiveCLanguageSyntaxKind::IncludeKeyword,
-                "if" => ObjectiveCLanguageSyntaxKind::IfKeyword,
-                "else" => ObjectiveCLanguageSyntaxKind::ElseKeyword,
-                "for" => ObjectiveCLanguageSyntaxKind::ForKeyword,
-                "while" => ObjectiveCLanguageSyntaxKind::WhileKeyword,
-                "do" => ObjectiveCLanguageSyntaxKind::DoKeyword,
-                "switch" => ObjectiveCLanguageSyntaxKind::SwitchKeyword,
-                "case" => ObjectiveCLanguageSyntaxKind::CaseKeyword,
-                "default" => ObjectiveCLanguageSyntaxKind::DefaultKeyword,
-                "break" => ObjectiveCLanguageSyntaxKind::BreakKeyword,
-                "continue" => ObjectiveCLanguageSyntaxKind::ContinueKeyword,
-                "return" => ObjectiveCLanguageSyntaxKind::ReturnKeyword,
-                "void" => ObjectiveCLanguageSyntaxKind::VoidKeyword,
-                "int" => ObjectiveCLanguageSyntaxKind::IntKeyword,
-                "float" => ObjectiveCLanguageSyntaxKind::FloatKeyword,
-                "double" => ObjectiveCLanguageSyntaxKind::DoubleKeyword,
-                "char" => ObjectiveCLanguageSyntaxKind::CharKeyword,
-                "BOOL" => ObjectiveCLanguageSyntaxKind::BoolKeyword,
-                "id" => ObjectiveCLanguageSyntaxKind::IdKeyword,
-                "self" => ObjectiveCLanguageSyntaxKind::SelfKeyword,
-                "super" => ObjectiveCLanguageSyntaxKind::SuperKeyword,
-                "nil" => ObjectiveCLanguageSyntaxKind::NilKeyword,
-                "YES" => ObjectiveCLanguageSyntaxKind::YesKeyword,
-                "NO" => ObjectiveCLanguageSyntaxKind::NoKeyword,
-                _ => ObjectiveCLanguageSyntaxKind::Identifier,
+        let end = state.get_position();
+        let text = state.get_text_in((start..end).into());
+        let kind = match text {
+            // Objective-C keywords
+            "@interface" => ObjectiveCLanguageSyntaxKind::InterfaceKeyword,
+            "@implementation" => ObjectiveCLanguageSyntaxKind::ImplementationKeyword,
+            "@end" => ObjectiveCLanguageSyntaxKind::EndKeyword,
+            "@property" => ObjectiveCLanguageSyntaxKind::PropertyKeyword,
+            "@synthesize" => ObjectiveCLanguageSyntaxKind::SynthesizeKeyword,
+            "@dynamic" => ObjectiveCLanguageSyntaxKind::DynamicKeyword,
+            "@protocol" => ObjectiveCLanguageSyntaxKind::ProtocolKeyword,
+            "@import" => ObjectiveCLanguageSyntaxKind::ImportKeyword,
+            "#import" => ObjectiveCLanguageSyntaxKind::ImportKeyword,
+            "#include" => ObjectiveCLanguageSyntaxKind::IncludeKeyword,
+
+            // C keywords
+            "if" => ObjectiveCLanguageSyntaxKind::IfKeyword,
+            "else" => ObjectiveCLanguageSyntaxKind::ElseKeyword,
+            "for" => ObjectiveCLanguageSyntaxKind::ForKeyword,
+            "while" => ObjectiveCLanguageSyntaxKind::WhileKeyword,
+            "do" => ObjectiveCLanguageSyntaxKind::DoKeyword,
+            "switch" => ObjectiveCLanguageSyntaxKind::SwitchKeyword,
+            "case" => ObjectiveCLanguageSyntaxKind::CaseKeyword,
+            "default" => ObjectiveCLanguageSyntaxKind::DefaultKeyword,
+            "break" => ObjectiveCLanguageSyntaxKind::BreakKeyword,
+            "continue" => ObjectiveCLanguageSyntaxKind::ContinueKeyword,
+            "return" => ObjectiveCLanguageSyntaxKind::ReturnKeyword,
+            "void" => ObjectiveCLanguageSyntaxKind::VoidKeyword,
+            "int" => ObjectiveCLanguageSyntaxKind::IntKeyword,
+            "float" => ObjectiveCLanguageSyntaxKind::FloatKeyword,
+            "double" => ObjectiveCLanguageSyntaxKind::DoubleKeyword,
+            "char" => ObjectiveCLanguageSyntaxKind::CharKeyword,
+            "BOOL" => ObjectiveCLanguageSyntaxKind::BoolKeyword,
+            "id" => ObjectiveCLanguageSyntaxKind::IdKeyword,
+            "self" => ObjectiveCLanguageSyntaxKind::SelfKeyword,
+            "super" => ObjectiveCLanguageSyntaxKind::SuperKeyword,
+            "nil" => ObjectiveCLanguageSyntaxKind::NilKeyword,
+            "YES" => ObjectiveCLanguageSyntaxKind::YesKeyword,
+            "NO" => ObjectiveCLanguageSyntaxKind::NoKeyword,
+
+            _ => ObjectiveCLanguageSyntaxKind::Identifier,
+        };
+
+        state.add_token(kind, start, state.get_position());
+        true
+    }
+
+    fn lex_operators<S: Source>(&self, state: &mut State<S>) -> bool {
+        let start = state.get_position();
+        let rest = state.rest();
+
+        // prefer longest matches first
+        let patterns: &[(&str, ObjectiveCLanguageSyntaxKind)] = &[
+            ("==", ObjectiveCLanguageSyntaxKind::EqualEqual),
+            ("!=", ObjectiveCLanguageSyntaxKind::NotEqual),
+            (">=", ObjectiveCLanguageSyntaxKind::GreaterEqual),
+            ("<=", ObjectiveCLanguageSyntaxKind::LessEqual),
+            ("&&", ObjectiveCLanguageSyntaxKind::And),
+            ("||", ObjectiveCLanguageSyntaxKind::Or),
+        ];
+
+        for (pat, kind) in patterns {
+            if rest.starts_with(pat) {
+                state.advance(pat.len());
+                state.add_token(*kind, start, state.get_position());
+                return true;
+            }
+        }
+
+        if let Some(ch) = state.current() {
+            let kind = match ch {
+                '+' => Some(ObjectiveCLanguageSyntaxKind::Plus),
+                '-' => Some(ObjectiveCLanguageSyntaxKind::Minus),
+                '*' => Some(ObjectiveCLanguageSyntaxKind::Star),
+                '/' => Some(ObjectiveCLanguageSyntaxKind::Slash),
+                '%' => Some(ObjectiveCLanguageSyntaxKind::Percent),
+                '=' => Some(ObjectiveCLanguageSyntaxKind::Equal),
+                '>' => Some(ObjectiveCLanguageSyntaxKind::Greater),
+                '<' => Some(ObjectiveCLanguageSyntaxKind::Less),
+                '!' => Some(ObjectiveCLanguageSyntaxKind::Not),
+                '?' => Some(ObjectiveCLanguageSyntaxKind::Question),
+                ':' => Some(ObjectiveCLanguageSyntaxKind::Colon),
+                '.' => Some(ObjectiveCLanguageSyntaxKind::Dot),
+                _ => None,
             };
 
-            state.add_token(token_kind, start_pos, state.get_position());
-            true
+            if let Some(k) = kind {
+                state.advance(ch.len_utf8());
+                state.add_token(k, start, state.get_position());
+                return true;
+            }
         }
-        else {
-            false
-        }
+
+        false
     }
 
-    /// 处理操作
-    fn lex_operator(&self, state: &mut State) -> bool {
-        let start_pos = state.get_position();
-
-        if let Some(ch) = state.peek() {
-            let token_kind = match ch {
-                '+' => ObjectiveCLanguageSyntaxKind::Plus,
-                '-' => ObjectiveCLanguageSyntaxKind::Minus,
-                '*' => ObjectiveCLanguageSyntaxKind::Star,
-                '/' => ObjectiveCLanguageSyntaxKind::Slash,
-                '%' => ObjectiveCLanguageSyntaxKind::Percent,
-                '=' => {
-                    if let Some('=') = state.peek_next_n(1) {
-                        state.advance(2);
-                        state.add_token(ObjectiveCLanguageSyntaxKind::EqualEqual, start_pos, state.get_position());
-                        return true;
-                    }
-                    ObjectiveCLanguageSyntaxKind::Equal
-                }
-                '!' => {
-                    if let Some('=') = state.peek_next_n(1) {
-                        state.advance(2);
-                        state.add_token(ObjectiveCLanguageSyntaxKind::NotEqual, start_pos, state.get_position());
-                        return true;
-                    }
-                    ObjectiveCLanguageSyntaxKind::Not
-                }
-                '<' => {
-                    if let Some('=') = state.peek_next_n(1) {
-                        state.advance(2);
-                        state.add_token(ObjectiveCLanguageSyntaxKind::LessEqual, start_pos, state.get_position());
-                        return true;
-                    }
-                    ObjectiveCLanguageSyntaxKind::Less
-                }
-                '>' => {
-                    if let Some('=') = state.peek_next_n(1) {
-                        state.advance(2);
-                        state.add_token(ObjectiveCLanguageSyntaxKind::GreaterEqual, start_pos, state.get_position());
-                        return true;
-                    }
-                    ObjectiveCLanguageSyntaxKind::Greater
-                }
-                '&' => {
-                    if let Some('&') = state.peek_next_n(1) {
-                        state.advance(2);
-                        state.add_token(ObjectiveCLanguageSyntaxKind::And, start_pos, state.get_position());
-                        return true;
-                    }
-                    return false;
-                }
-                '|' => {
-                    if let Some('|') = state.peek_next_n(1) {
-                        state.advance(2);
-                        state.add_token(ObjectiveCLanguageSyntaxKind::Or, start_pos, state.get_position());
-                        return true;
-                    }
-                    return false;
-                }
-                '?' => ObjectiveCLanguageSyntaxKind::Question,
+    fn lex_single_char_tokens<S: Source>(&self, state: &mut State<S>) -> bool {
+        let start = state.get_position();
+        if let Some(ch) = state.current() {
+            let kind = match ch {
+                '(' => ObjectiveCLanguageSyntaxKind::LeftParen,
+                ')' => ObjectiveCLanguageSyntaxKind::RightParen,
+                '[' => ObjectiveCLanguageSyntaxKind::LeftBracket,
+                ']' => ObjectiveCLanguageSyntaxKind::RightBracket,
+                '{' => ObjectiveCLanguageSyntaxKind::LeftBrace,
+                '}' => ObjectiveCLanguageSyntaxKind::RightBrace,
+                ',' => ObjectiveCLanguageSyntaxKind::Comma,
+                ';' => ObjectiveCLanguageSyntaxKind::Semicolon,
                 '@' => ObjectiveCLanguageSyntaxKind::At,
                 _ => return false,
             };
 
             state.advance(ch.len_utf8());
-            state.add_token(token_kind, start_pos, state.get_position());
+            state.add_token(kind, start, state.get_position());
             true
         }
         else {
             false
         }
-    }
-
-    /// 处理分隔
-    fn lex_delimiter(&self, state: &mut State) -> bool {
-        let start_pos = state.get_position();
-
-        if let Some(ch) = state.peek() {
-            let token_kind = match ch {
-                '(' => ObjectiveCLanguageSyntaxKind::LeftParen,
-                ')' => ObjectiveCLanguageSyntaxKind::RightParen,
-                '{' => ObjectiveCLanguageSyntaxKind::LeftBrace,
-                '}' => ObjectiveCLanguageSyntaxKind::RightBrace,
-                '[' => ObjectiveCLanguageSyntaxKind::LeftBracket,
-                ']' => ObjectiveCLanguageSyntaxKind::RightBracket,
-                ';' => ObjectiveCLanguageSyntaxKind::Semicolon,
-                ',' => ObjectiveCLanguageSyntaxKind::Comma,
-                '.' => ObjectiveCLanguageSyntaxKind::Dot,
-                ':' => ObjectiveCLanguageSyntaxKind::Colon,
-                _ => return false,
-            };
-
-            state.advance(ch.len_utf8());
-            state.add_token(token_kind, start_pos, state.get_position());
-            true
-        }
-        else {
-            false
-        }
-    }
-}
-
-impl<'config> Lexer<ObjectiveCLanguage> for ObjectiveCLexer<'config> {
-    fn lex(&self, source: &SourceText) -> LexOutput<ObjectiveCLanguageSyntaxKind> {
-        let mut state = LexerState::new(source);
-
-        while state.not_at_end() {
-            // 尝试各种词法规则
-            if self.skip_whitespace(&mut state) {
-                continue;
-            }
-
-            if self.lex_newline(&mut state) {
-                continue;
-            }
-
-            if self.lex_comment(&mut state) {
-                continue;
-            }
-
-            if self.lex_string(&mut state) {
-                continue;
-            }
-
-            if self.lex_character(&mut state) {
-                continue;
-            }
-
-            if self.lex_number(&mut state) {
-                continue;
-            }
-
-            if self.lex_identifier(&mut state, source) {
-                continue;
-            }
-
-            if self.lex_operator(&mut state) {
-                continue;
-            }
-
-            if self.lex_delimiter(&mut state) {
-                continue;
-            }
-
-            // 如果所有规则都不匹配，跳过当前字符并标记为错误
-            let start_pos = state.get_position();
-            if let Some(ch) = state.peek() {
-                state.advance(ch.len_utf8());
-                state.add_token(ObjectiveCLanguageSyntaxKind::Error, start_pos, state.get_position());
-            }
-        }
-
-        // 添加 EOF kind
-        let eof_pos = state.get_position();
-        state.add_token(ObjectiveCLanguageSyntaxKind::Eof, eof_pos, eof_pos);
-
-        state.finish()
     }
 }

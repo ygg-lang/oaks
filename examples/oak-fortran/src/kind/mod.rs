@@ -1,9 +1,10 @@
 use oak_core::{SyntaxKind, Token};
+use serde::Serialize;
 
 pub type FortranToken = Token<FortranSyntaxKind>;
 
 /// Fortran 令牌种类
-#[derive(Debug, Clone, PartialEq, Eq, Copy, Hash)]
+#[derive(Debug, Clone, PartialEq, Eq, Copy, Hash, Serialize)]
 pub enum FortranSyntaxKind {
     // 基本 kind
     Whitespace,
@@ -14,11 +15,14 @@ pub enum FortranSyntaxKind {
     Identifier,
     IntegerLiteral,
     Number,
+    NumberLiteral,
     RealLiteral,
     DoublePrecisionLiteral,
     ComplexLiteral,
     CharacterLiteral,
+    CharLiteral,
     String,
+    StringLiteral,
     LogicalLiteral,
     True,
     False,
@@ -144,6 +148,7 @@ pub enum FortranSyntaxKind {
     Equal,         // ==
     EqualEqual,    // == (alias for Equal)
     NotEqual,      // /=
+    SlashEqual,    // /= (alias for NotEqual)
     LessThan,      // <
     Less,          // < (alias for LessThan)
     GreaterThan,   // >
@@ -159,6 +164,12 @@ pub enum FortranSyntaxKind {
     Equivalent,    // .eqv. (alias for Eqv)
     Neqv,          // .neqv.
     NotEquivalent, // .neqv. (alias for Neqv)
+    Eq,            // .eq.
+    Ne,            // .ne.
+    Lt,            // .lt.
+    Le,            // .le.
+    Gt,            // .gt.
+    Ge,            // .ge.
 
     // 分隔符
     LeftParen,    // (
@@ -168,9 +179,11 @@ pub enum FortranSyntaxKind {
     Comma,        // ,
     Colon,        // :
     DoubleColon,  // ::
+    ColonColon,   // :: (alias for DoubleColon)
     Semicolon,    // ;
     Percent,      // %
     Ampersand,    // &
+    Dot,          // .
 
     // 特殊
     Error,

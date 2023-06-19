@@ -1,20 +1,25 @@
-use oak_core::SyntaxKind;
+use oak_core::{SyntaxKind, Token};
+use serde::{Deserialize, Serialize};
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+pub type ErlangToken = Token<ErlangSyntaxKind>;
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub enum ErlangSyntaxKind {
     // 基本 kind
     Whitespace,
     Newline,
     Comment,
 
-    // 标识符和字面    Identifier,
+    // 标识符和字面量
+    Identifier,
     Atom,
     Variable,
     Number,
     String,
     Character,
 
-    // Erlang 关键    After,
+    // Erlang 关键字
+    After,
     And,
     Andalso,
     Band,
@@ -43,7 +48,8 @@ pub enum ErlangSyntaxKind {
     When,
     Xor,
 
-    // 操作    Plus,           // +
+    // 操作符
+    Plus,            // +
     Minus,           // -
     Star,            // *
     Slash,           // /
@@ -61,7 +67,8 @@ pub enum ErlangSyntaxKind {
     Exclamation,     // !
     Question,        // ?
 
-    // 分隔    LeftParen,      // (
+    // 分隔符
+    LeftParen,    // (
     RightParen,   // )
     LeftBrace,    // {
     RightBrace,   // }
@@ -76,6 +83,31 @@ pub enum ErlangSyntaxKind {
     PipePipe,     // ||
     Hash,         // #
 
+    // 语法节点类型
+    Root,
+    Item,
+    Module,
+    Export,
+    Attribute,
+    Function,
+    FunctionClause,
+    Pattern,
+    RecordPattern,
+    Statement,
+    Expr,
+    BinaryExpr,
+    CallExpr,
+    FunExpr,
+    CaseExpr,
+    CaseClause,
+    IfExpr,
+    IfClause,
+    TryExpr,
+    CatchClause,
+    ReceiveExpr,
+    ReceiveClause,
+    RecordExpr,
+
     // 特殊
     Error,
     Eof,
@@ -87,18 +119,43 @@ impl SyntaxKind for ErlangSyntaxKind {
     }
 
     fn is_comment(&self) -> bool {
-        todo!()
+        matches!(self, Self::Comment)
     }
 
     fn is_whitespace(&self) -> bool {
-        todo!()
+        matches!(self, Self::Whitespace | Self::Newline)
     }
 
     fn is_token_type(&self) -> bool {
-        todo!()
+        !self.is_element_type()
     }
 
     fn is_element_type(&self) -> bool {
-        todo!()
+        matches!(
+            self,
+            Self::Root
+                | Self::Item
+                | Self::Module
+                | Self::Export
+                | Self::Attribute
+                | Self::Function
+                | Self::FunctionClause
+                | Self::Pattern
+                | Self::RecordPattern
+                | Self::Statement
+                | Self::Expr
+                | Self::BinaryExpr
+                | Self::CallExpr
+                | Self::FunExpr
+                | Self::CaseExpr
+                | Self::CaseClause
+                | Self::IfExpr
+                | Self::IfClause
+                | Self::TryExpr
+                | Self::CatchClause
+                | Self::ReceiveExpr
+                | Self::ReceiveClause
+                | Self::RecordExpr
+        )
     }
 }

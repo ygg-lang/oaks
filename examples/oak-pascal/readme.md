@@ -7,7 +7,7 @@ High-performance incremental Pascal parser for the oak ecosystem with flexible c
 
 ## 🎯 Overview
 
-Oak of pascal is a robust parser for Pascal, designed to handle complete Pascal syntax including legacy and modern features. Built on the solid foundation of oak-core, it provides both high-level convenience and detailed AST generation for code analysis and educational purposes.
+Oak Pascal is a robust parser for Pascal, designed to handle complete Pascal syntax including legacy and modern features. Built on the solid foundation of oak-core, it provides both high-level convenience and detailed AST generation for code analysis and educational purposes.
 
 ## ✨ Features
 
@@ -21,19 +21,19 @@ Oak of pascal is a robust parser for Pascal, designed to handle complete Pascal 
 Basic example:
 
 ```rust
-use oak_pascal::PascalParser;
+use oak_pascal::{Parser, PascalLanguage, SourceText};
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
-    let parser = PascalParser::new();
-    let pascal_code = r#"
+    let parser = Parser::new();
+    let source = SourceText::new(r#"
 program HelloWorld;
 begin
     writeln('Hello, World!');
 end.
-    "#;
+    "#);
     
-    let program = parser.parse_program(pascal_code)?;
-    println!("Parsed Pascal program successfully.");
+    let result = parser.parse(&source);
+    println!("Parsed Pascal successfully.");
     Ok(())
 }
 ```
@@ -42,10 +42,10 @@ end.
 
 ### Program Parsing
 ```rust
-use oak_pascal::{PascalParser, ast::Program};
+use oak_pascal::{Parser, PascalLanguage, SourceText};
 
-let parser = PascalParser::new();
-let pascal_code = r#"
+let parser = Parser::new();
+let source = SourceText::new(r#"
 program Calculator;
 uses
     SysUtils;
@@ -56,62 +56,57 @@ begin
     y := 20;
     writeln(x + y);
 end.
-"#;
+"#);
 
-let program = parser.parse_program(pascal_code)?;
-println!("Program name: {}", program.name);
+let result = parser.parse(&source);
+println!("Program parsed successfully.");
 ```
 
 ### Procedure Parsing
 ```rust
-use oak_pascal::{PascalParser, ast::Procedure};
+use oak_pascal::{Parser, PascalLanguage, SourceText};
 
-let parser = PascalParser::new();
-let procedure_code = r#"
+let parser = Parser::new();
+let source = SourceText::new(r#"
 procedure Greet(name: string);
 begin
     writeln('Hello, ', name);
 end;
-"#;
+"#);
 
-let procedure = parser.parse_procedure(procedure_code)?;
-println!("Procedure name: {}", procedure.name);
+let result = parser.parse(&source);
+println!("Procedure parsed successfully.");
 ```
 
 ## 🔧 Advanced Features
 
 ### Token-Level Parsing
 ```rust
-use oak_pascal::{PascalParser, lexer::Token};
+use oak_pascal::{Parser, PascalLanguage, SourceText};
 
-let parser = PascalParser::new();
-let tokens = parser.tokenize("program Test; begin end.")?;
-for token in tokens {
-    println!("{:?}", token.kind);
-}
+let parser = Parser::new();
+let source = SourceText::new("program Test; begin end.");
+let result = parser.parse(&source);
+println!("Token parsing completed.");
 ```
 
 ### Error Handling
 ```rust
-use oak_pascal::PascalParser;
+use oak_pascal::{Parser, PascalLanguage, SourceText};
 
-let parser = PascalParser::new();
-let invalid_pascal = r#"
+let parser = Parser::new();
+let source = SourceText::new(r#"
 program Test
 begin
     writeln('Missing semicolon')
 end.
-"#;
+"#);
 
-match parser.parse_program(invalid_pascal) {
-    Ok(program) => println!("Parsed Pascal program successfully."),
-    Err(e) => {
-        println!("Parse error at line {} column {}: {}", 
-            e.line(), e.column(), e.message());
-        if let Some(context) = e.context() {
-            println!("Error context: {}", context);
-        }
-    }
+let result = parser.parse(&source);
+if let Some(errors) = result.result.err() {
+    println!("Parse errors found: {:?}", errors);
+} else {
+    println!("Parsed successfully.");
 }
 ```
 
@@ -119,7 +114,7 @@ match parser.parse_program(invalid_pascal) {
 
 The parser generates a comprehensive AST with the following main structures:
 
-- **Program**: Root container for Pascal programs
+- **PascalProgram**: Root container for Pascal programs
 - **Procedure**: Procedure declarations
 - **Function**: Function declarations
 - **Variable**: Variable declarations with types
@@ -135,7 +130,7 @@ The parser generates a comprehensive AST with the following main structures:
 
 ## 🔗 Integration
 
-Oak of pascal integrates seamlessly with:
+Oak Pascal integrates seamlessly with:
 
 - **Legacy Code Analysis**: Analyze and understand legacy Pascal codebases
 - **Educational Tools**: Build programming language learning platforms

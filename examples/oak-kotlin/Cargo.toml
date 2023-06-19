@@ -24,8 +24,8 @@ oak-core = { workspace = true, features = ["testing"] }
 
 
 [features]
-default = ["alloc", "oak-highlight"]
-alloc = []
+default = ["oak-highlight"]
+
 
 [package.metadata.docs.rs]
 all-features = true

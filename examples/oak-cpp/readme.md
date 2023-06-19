@@ -7,7 +7,7 @@ High-performance incremental C++ parser for the oak ecosystem with flexible conf
 
 ## 🎯 Overview
 
-Oak-cpp is a robust parser for C++, designed to handle complete C++ syntax including modern features. Built on the solid foundation of oak-core, it provides both high-level convenience and detailed AST generation for static analysis and code generation.
+Oak C++ is a robust parser for C++, designed to handle complete C++ syntax including modern features. Built on the solid foundation of oak-core, it provides both high-level convenience and detailed AST generation for static analysis and code generation.
 
 ## ✨ Features
 
@@ -21,11 +21,11 @@ Oak-cpp is a robust parser for C++, designed to handle complete C++ syntax inclu
 Basic example:
 
 ```rust
-use oak_cpp::CppParser;
+use oak_cpp::{Parser, CppLanguage, SourceText};
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
-    let parser = CppParser::new();
-    let cpp_code = r#"
+    let parser = Parser::new();
+    let source = SourceText::new(r#"
         #include <iostream>
 
         class Greeter {
@@ -40,9 +40,9 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             greeter.greet();
             return 0;
         }
-    "#;
+    "#);
     
-    let program = parser.parse_program(cpp_code)?;
+    let result = parser.parse(&source);
     println!("Parsed C++ program successfully.");
     Ok(())
 }
@@ -52,74 +52,63 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
 ### Class Parsing
 ```rust
-use oak_cpp::{CppParser, ast::ClassDefinition};
+use oak_cpp::{Parser, CppLanguage, SourceText};
 
-let parser = CppParser::new();
-let cpp_code = r#"
+let parser = Parser::new();
+let source = SourceText::new(r#"
     class MyClass {
     public:
         int myMethod(int x) { return x * 2; }
     };
-"#;
+    "#);
 
-let program = parser.parse_program(cpp_code)?;
-if let Some(ClassDefinition { name, .. }) = program.classes.get(0) {
-    println!("Parsed class: {}", name);
-}
+let result = parser.parse(&source);
+println!("Parsed C++ class successfully.");
 ```
 
 ### Template Parsing
 ```rust
-use oak_cpp::{CppParser, ast::TemplateDeclaration};
+use oak_cpp::{Parser, CppLanguage, SourceText};
 
-let parser = CppParser::new();
-let cpp_code = r#"
+let parser = Parser::new();
+let source = SourceText::new(r#"
     template <typename T>
     T max(T a, T b) {
         return (a > b) ? a : b;
     }
-"#;
+    "#);
 
-let program = parser.parse_program(cpp_code)?;
-if let Some(TemplateDeclaration { name, .. }) = program.templates.get(0) {
-    println!("Parsed template: {}", name);
-}
+let result = parser.parse(&source);
+println!("Parsed C++ template successfully.");
 ```
 
 ## 🔧 Advanced Features
 
 ### Token-Level Parsing
 ```rust
-use oak_cpp::{CppParser, lexer::Token};
+use oak_cpp::{Parser, CppLanguage, SourceText};
 
-let parser = CppParser::new();
-let tokens = parser.tokenize("int main() { return 0; }")?;
-for token in tokens {
-    println!("{:?}", token.kind);
-}
+let parser = Parser::new();
+let source = SourceText::new("int main() { return 0; }");
+let result = parser.parse(&source);
+// Token information is available in the parse result
 ```
 
 ### Error Handling
 ```rust
-use oak_cpp::CppParser;
+use oak_cpp::{Parser, CppLanguage, SourceText};
 
-let parser = CppParser::new();
-let invalid_cpp = r#"
+let parser = Parser::new();
+let source = SourceText::new(r#"
     int main() {
         std::cout << "Hello, World!" << std::endl
         return 0;
     }
-"#;
+    "#);
 
-match parser.parse_program(invalid_cpp) {
-    Ok(program) => println!("Parsed C++ program successfully."),
-    Err(e) => {
-        println!("Parse error at line {} column {}: {}", 
-            e.line(), e.column(), e.message());
-        if let Some(context) = e.context() {
-            println!("Error context: {}", context);
-        }
-    }
+let result = parser.parse(&source);
+if let Err(e) = result.result {
+    println!("Parse error: {:?}", e);
 }
 ```
 
@@ -142,7 +131,7 @@ The parser generates a comprehensive AST with the following main structures:
 
 ## 🔗 Integration
 
-Oak-cpp integrates seamlessly with:
+Oak C++ integrates seamlessly with:
 
 - **Compilers**: Front-end for C++ compilers
 - **Static Analysis Tools**: Code quality and security analysis

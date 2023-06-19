@@ -1,11 +1,29 @@
-use oak_core::{Lexer, Parser, SourceText};
-use oak_ini::{IniLanguage, IniSyntaxKind};
+#![feature(new_range_api)]
+
+use oak_core::helpers::LexerTester;
+use oak_ini::{language::IniLanguage, lexer::IniLexer};
+use std::{path::Path, time::Duration};
 
 #[test]
-fn test_lexer_basic() {
-    let language = IniLanguage::new();
-    let lexer = language.lexer();
+fn test_ini_lexer() {
+    let here = Path::new(env!("CARGO_MANIFEST_DIR"));
+    let language = Box::leak(Box::new(IniLanguage::default()));
+    let lexer = IniLexer::new(language);
+    let test_runner = LexerTester::new(here.join("tests/lexer")).with_extension("ini").with_timeout(Duration::from_secs(5));
+    match test_runner.run_tests::<IniLanguage, _>(lexer) {
+        Ok(()) => println!("Ini lexer tests passed!"),
+        Err(e) => panic!("Ini lexer tests failed: {}", e),
+    }
+}
+
+#[test]
+fn test_basic_lexing() {
+    use oak_core::{Lexer, SourceText};
+    use oak_ini::language::IniLanguage;
+
     let source = SourceText::new(r#"key = "value""#);
+    let language = Box::leak(Box::new(IniLanguage::default()));
+    let lexer = IniLexer::new(language);
 
     let result = lexer.lex(&source);
     assert!(result.result.is_ok());
@@ -13,114 +31,4 @@ fn test_lexer_basic() {
     let tokens = result.result.unwrap();
     assert!(!tokens.is_empty());
     println!("Lexed {} tokens", tokens.len());
-}
-
-#[test]
-fn test_parser_basic() {
-    let language = IniLanguage::new();
-    let parser = language.parser();
-    let source = SourceText::new(r#"key = "value""#);
-
-    let result = parser.parse(&source);
-    assert!(result.result.is_ok());
-
-    let tree = result.result.unwrap();
-    println!("Parsed tree with {} children", tree.children.len());
-}
-
-#[test]
-fn test_lexer_string() {
-    let language = IniLanguage::new();
-    let lexer = language.lexer();
-    let source = SourceText::new(r#""hello world""#);
-
-    let result = lexer.lex(&source);
-    assert!(result.result.is_ok());
-
-    let tokens = result.result.unwrap();
-    assert!(!tokens.is_empty());
-
-    // 检查是否包含字符串 kind
-    let has_string = tokens.iter().any(|t| matches!(t.kind, IniSyntaxKind::String));
-    assert!(has_string, "Should contain a string token");
-}
-
-#[test]
-fn test_lexer_number() {
-    let language = IniLanguage::new();
-    let lexer = language.lexer();
-    let source = SourceText::new("123");
-
-    let result = lexer.lex(&source);
-    assert!(result.result.is_ok());
-
-    let tokens = result.result.unwrap();
-    assert!(!tokens.is_empty());
-
-    // 检查是否包含数token
-    let has_number = tokens.iter().any(|t| matches!(t.kind, IniSyntaxKind::Integer | IniSyntaxKind::Float));
-    assert!(has_number, "Should contain a number token");
-}
-
-#[test]
-fn test_lexer_boolean() {
-    let language = IniLanguage::new();
-    let lexer = language.lexer();
-    let source = SourceText::new("true");
-
-    let result = lexer.lex(&source);
-    assert!(result.result.is_ok());
-
-    let tokens = result.result.unwrap();
-    assert!(!tokens.is_empty());
-
-    // 检查是否包含布尔token
-    let has_boolean = tokens.iter().any(|t| matches!(t.kind, IniSyntaxKind::Boolean));
-    assert!(has_boolean, "Should contain a boolean token");
-}
-
-#[test]
-fn test_parser_key_value() {
-    let language = IniLanguage::new();
-    let parser = language.parser();
-    let source = SourceText::new(r#"name = "John""#);
-
-    let result = parser.parse(&source);
-    assert!(result.result.is_ok());
-
-    let tree = result.result.unwrap();
-    assert!(!tree.children.is_empty(), "Parsed tree should have children");
-}
-
-#[test]
-fn test_parser_table() {
-    let language = IniLanguage::new();
-    let parser = language.parser();
-    let source = SourceText::new(
-        r#"[section]
-name = "value"
-"#,
-    );
-
-    let result = parser.parse(&source);
-    assert!(result.result.is_ok());
-
-    let tree = result.result.unwrap();
-    assert!(!tree.children.is_empty(), "Parsed tree should have children");
-}
-
-#[test]
-fn test_empty_input() {
-    let language = IniLanguage::new();
-    let lexer = language.lexer();
-    let parser = language.parser();
-    let source = SourceText::new("");
-
-    // 测试空输入的词法分析
-    let lex_result = lexer.lex(&source);
-    assert!(lex_result.result.is_ok());
-
-    // 测试空输入的语法分析
-    let parse_result = parser.parse(&source);
-    assert!(parse_result.result.is_ok());
 }

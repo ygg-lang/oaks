@@ -1,6 +1,7 @@
 use oak_core::SyntaxKind;
+use serde::Serialize;
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize)]
 #[repr(u16)]
 pub enum AsciiDocSyntaxKind {
     // Trivia
@@ -23,6 +24,14 @@ pub enum AsciiDocSyntaxKind {
     Subscript,
     Highlight,
     Strikethrough,
+
+    // Formatting markers
+    BoldMarker,
+    ItalicMarker,
+    MonospaceMarker,
+    CodeBlockMarker,
+    LinkMarker,
+    ListMarker,
 
     // Lists
     UnorderedListItem,
@@ -63,6 +72,15 @@ pub enum AsciiDocSyntaxKind {
     PageBreak,
     Delimiter,
 
+    // Delimiters
+    LeftBracket,
+    RightBracket,
+    LeftParen,
+    RightParen,
+    Colon,
+    Comma,
+    Dot,
+
     // Composite nodes
     SourceFile,
 
@@ -92,3 +110,6 @@ impl SyntaxKind for AsciiDocSyntaxKind {
         matches!(self, Self::Error)
     }
 }
+
+use crate::language::AsciiDocLanguage;
+pub type AsciiDocToken = oak_core::Token<AsciiDocLanguage>;

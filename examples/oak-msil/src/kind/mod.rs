@@ -1,73 +1,105 @@
-use crate::syntax::MsilSyntaxKind;
-use alloc::string::String;
-use core::ops::Range;
+use std::range::Range;
 
-/// MSIL Token 结构
-#[derive(Debug, Clone, PartialEq)]
-pub struct MsilToken {
-    /// Token 的语法种
-    pub kind: MsilSyntaxKind,
-    /// Token 在源代码中的位置范围
-    pub span: Range<usize>,
-    /// Token 的文本内
-    pub text: String,
+use oak_core::{SyntaxKind, Token};
+use serde::{Deserialize, Serialize};
+
+pub type MsilToken = Token<MsilSyntaxKind>;
+
+/// 统一MSIL 语法种类（包含节点与词法
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
+pub enum MsilSyntaxKind {
+    // 节点种类
+    Root,
+    Assembly,
+    Module,
+    Class,
+    Method,
+    Instruction,
+    Label,
+    Directive,
+    Type,
+    Identifier,
+    Number,
+    String,
+    Comment,
+    ErrorNode,
+
+    // 词法种类 - 关键
+    AssemblyKeyword, // .assembly
+    ExternKeyword,   // extern
+    ModuleKeyword,   // .module
+    ClassKeyword,    // .class
+    MethodKeyword,   // .method
+    PublicKeyword,   // public
+    PrivateKeyword,  // private
+    StaticKeyword,   // static
+
+    // 词法种类 - 符号
+    LeftBrace,    // {
+    RightBrace,   // }
+    LeftParen,    // (
+    RightParen,   // )
+    LeftBracket,  // [
+    RightBracket, // ]
+    Dot,          // .
+    Colon,        // :
+    Semicolon,    // ;
+    Comma,        // ,
+
+    // 词法种类 - 字面
+    IdentifierToken,
+    NumberToken,
+    StringToken,
+
+    // 词法种类 - 其他
+    Whitespace,
+    CommentToken,
+    Eof,
+    Error,
 }
 
-impl MsilToken {
-    /// 创建新的 MSIL Token
-    pub fn new(kind: MsilSyntaxKind, span: Range<usize>, text: String) -> Self {
-        Self { kind, span, text }
+impl SyntaxKind for MsilSyntaxKind {
+    fn is_trivia(&self) -> bool {
+        matches!(self, Self::Whitespace | Self::CommentToken)
     }
 
-    /// 获取 Token 的长
-    pub fn len(&self) -> usize {
-        self.span.end - self.span.start
+    fn is_comment(&self) -> bool {
+        matches!(self, Self::CommentToken)
     }
 
-    /// 检Token 是否为空
-    pub fn is_empty(&self) -> bool {
-        self.len() == 0
+    fn is_whitespace(&self) -> bool {
+        matches!(self, Self::Whitespace)
     }
 
-    /// 检查是否为关键Token
-    pub fn is_keyword(&self) -> bool {
-        matches!(
-            self.kind,
-            MsilSyntaxKind::AssemblyKeyword
-                | MsilSyntaxKind::ExternKeyword
-                | MsilSyntaxKind::ModuleKeyword
-                | MsilSyntaxKind::ClassKeyword
-                | MsilSyntaxKind::MethodKeyword
-                | MsilSyntaxKind::PublicKeyword
-                | MsilSyntaxKind::PrivateKeyword
-                | MsilSyntaxKind::StaticKeyword
+    fn is_token_type(&self) -> bool {
+        !matches!(
+            self,
+            Self::Root
+                | Self::Assembly
+                | Self::Module
+                | Self::Class
+                | Self::Method
+                | Self::Instruction
+                | Self::Label
+                | Self::Directive
+                | Self::Type
+                | Self::ErrorNode
         )
     }
 
-    /// 检查是否为标识Token
-    pub fn is_identifier(&self) -> bool {
-        self.kind == MsilSyntaxKind::IdentifierToken
-    }
-
-    /// 检查是否为字面Token
-    pub fn is_literal(&self) -> bool {
-        matches!(self.kind, MsilSyntaxKind::NumberToken | MsilSyntaxKind::StringToken)
-    }
-
-    /// 检查是否为符号 Token
-    pub fn is_symbol(&self) -> bool {
+    fn is_element_type(&self) -> bool {
         matches!(
-            self.kind,
-            MsilSyntaxKind::LeftBrace
-                | MsilSyntaxKind::RightBrace
-                | MsilSyntaxKind::LeftParen
-                | MsilSyntaxKind::RightParen
-                | MsilSyntaxKind::LeftBracket
-                | MsilSyntaxKind::RightBracket
-                | MsilSyntaxKind::Dot
-                | MsilSyntaxKind::Colon
-                | MsilSyntaxKind::Semicolon
-                | MsilSyntaxKind::Comma
+            self,
+            Self::Root
+                | Self::Assembly
+                | Self::Module
+                | Self::Class
+                | Self::Method
+                | Self::Instruction
+                | Self::Label
+                | Self::Directive
+                | Self::Type
+                | Self::ErrorNode
         )
     }
 }

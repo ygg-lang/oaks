@@ -1,10 +1,24 @@
 use crate::{kind::SoliditySyntaxKind, language::SolidityLanguage};
-use oak_core::{Lexer, LexerState, SourceText, lexer::LexOutput};
+use oak_core::{IncrementalCache, Lexer, LexerState, OakError, lexer::LexOutput, source::Source};
 
-type State<'input> = LexerState<'input, SolidityLanguage>;
+type State<S> = LexerState<S, SolidityLanguage>;
 
+#[derive(Clone)]
 pub struct SolidityLexer<'config> {
     config: &'config SolidityLanguage,
+}
+
+impl<'config> Lexer<SolidityLanguage> for SolidityLexer<'config> {
+    fn lex_incremental(
+        &self,
+        source: impl Source,
+        changed: usize,
+        cache: IncrementalCache<SolidityLanguage>,
+    ) -> LexOutput<SolidityLanguage> {
+        let mut state = LexerState::new_with_cache(source, changed, cache);
+        let result = self.run(&mut state);
+        state.finish(result)
+    }
 }
 
 impl<'config> SolidityLexer<'config> {
@@ -12,8 +26,60 @@ impl<'config> SolidityLexer<'config> {
         Self { config }
     }
 
+    fn run<S: Source>(&self, state: &mut State<S>) -> Result<(), OakError> {
+        while state.not_at_end() {
+            let safe_point = state.get_position();
+
+            if self.skip_whitespace(state) {
+                continue;
+            }
+
+            if self.lex_newline(state) {
+                continue;
+            }
+
+            if self.lex_line_comment(state) {
+                continue;
+            }
+
+            if self.lex_block_comment(state) {
+                continue;
+            }
+
+            if self.lex_identifier_or_keyword(state) {
+                continue;
+            }
+
+            if self.lex_number(state) {
+                continue;
+            }
+
+            if self.lex_string(state) {
+                continue;
+            }
+
+            if self.lex_operator(state) {
+                continue;
+            }
+
+            if self.lex_delimiter(state) {
+                continue;
+            }
+
+            // 如果没有匹配任何模式，跳过当前字符并添加错误 token
+            if let Some(ch) = state.peek() {
+                state.advance(ch.len_utf8());
+                state.add_token(SoliditySyntaxKind::Error, safe_point, state.get_position());
+            }
+        }
+
+        // 添加 EOF token
+        state.add_token(SoliditySyntaxKind::Eof, state.get_position(), state.get_position());
+        Ok(())
+    }
+
     /// 跳过空白字符
-    fn skip_whitespace(&self, state: &mut State) -> bool {
+    fn skip_whitespace<S: Source>(&self, state: &mut State<S>) -> bool {
         let start_pos = state.get_position();
 
         while let Some(ch) = state.peek() {
@@ -35,7 +101,7 @@ impl<'config> SolidityLexer<'config> {
     }
 
     /// 处理换行
-    fn lex_newline(&self, state: &mut State) -> bool {
+    fn lex_newline<S: Source>(&self, state: &mut State<S>) -> bool {
         let start_pos = state.get_position();
 
         if let Some('\n') = state.peek() {
@@ -57,7 +123,7 @@ impl<'config> SolidityLexer<'config> {
     }
 
     /// 处理行注
-    fn lex_line_comment(&self, state: &mut State) -> bool {
+    fn lex_line_comment<S: Source>(&self, state: &mut State<S>) -> bool {
         let start_pos = state.get_position();
 
         if let Some('/') = state.peek() {
@@ -88,7 +154,7 @@ impl<'config> SolidityLexer<'config> {
     }
 
     /// 处理块注
-    fn lex_block_comment(&self, state: &mut State) -> bool {
+    fn lex_block_comment<S: Source>(&self, state: &mut State<S>) -> bool {
         let start_pos = state.get_position();
 
         if let Some('/') = state.peek() {
@@ -123,7 +189,7 @@ impl<'config> SolidityLexer<'config> {
     }
 
     /// 处理标识符或关键
-    fn lex_identifier_or_keyword(&self, state: &mut State, source: &SourceText) -> bool {
+    fn lex_identifier_or_keyword<S: Source>(&self, state: &mut State<S>) -> bool {
         let start_pos = state.get_position();
 
         if let Some(ch) = state.peek() {
@@ -139,7 +205,7 @@ impl<'config> SolidityLexer<'config> {
                     }
                 }
 
-                let text = source.get_text_in((start_pos..state.get_position()).into()).unwrap_or("");
+                let text = state.get_text_from(start_pos);
                 let token_kind = self.keyword_or_identifier(text);
                 state.add_token(token_kind, start_pos, state.get_position());
                 true
@@ -204,7 +270,7 @@ impl<'config> SolidityLexer<'config> {
     }
 
     /// 处理数字字面
-    fn lex_number(&self, state: &mut State) -> bool {
+    fn lex_number<S: Source>(&self, state: &mut State<S>) -> bool {
         let start_pos = state.get_position();
 
         if let Some(ch) = state.peek() {
@@ -280,16 +346,18 @@ impl<'config> SolidityLexer<'config> {
     }
 
     /// 处理字符串字面量
-    fn lex_string(&self, state: &mut State) -> bool {
+    fn lex_string<S: Source>(&self, state: &mut State<S>) -> bool {
         let start_pos = state.get_position();
 
         if let Some(quote) = state.peek() {
             if quote == '"' || quote == '\'' {
                 state.advance(1);
+                let mut found_end = false;
 
                 while let Some(ch) = state.peek() {
                     if ch == quote {
                         state.advance(1);
+                        found_end = true;
                         break;
                     }
                     else if ch == '\\' {
@@ -299,14 +367,19 @@ impl<'config> SolidityLexer<'config> {
                         }
                     }
                     else if ch == '\n' || ch == '\r' {
-                        break; // 字符串不能跨
+                        break; // 字符串不能跨行
                     }
                     else {
                         state.advance(ch.len_utf8());
                     }
                 }
 
-                state.add_token(SoliditySyntaxKind::StringLiteral, start_pos, state.get_position());
+                if found_end {
+                    state.add_token(SoliditySyntaxKind::StringLiteral, start_pos, state.get_position());
+                }
+                else {
+                    state.add_token(SoliditySyntaxKind::Error, start_pos, state.get_position());
+                }
                 true
             }
             else {
@@ -319,7 +392,7 @@ impl<'config> SolidityLexer<'config> {
     }
 
     /// 处理操作
-    fn lex_operator(&self, state: &mut State) -> bool {
+    fn lex_operator<S: Source>(&self, state: &mut State<S>) -> bool {
         let start_pos = state.get_position();
 
         if let Some(ch) = state.peek() {
@@ -471,7 +544,7 @@ impl<'config> SolidityLexer<'config> {
     }
 
     /// 处理分隔
-    fn lex_delimiter(&self, state: &mut State) -> bool {
+    fn lex_delimiter<S: Source>(&self, state: &mut State<S>) -> bool {
         let start_pos = state.get_position();
 
         if let Some(ch) = state.peek() {
@@ -496,62 +569,31 @@ impl<'config> SolidityLexer<'config> {
             false
         }
     }
-}
 
-impl<'config> Lexer<SolidityLanguage> for SolidityLexer<'config> {
-    fn lex(&self, source: &SourceText) -> LexOutput<SoliditySyntaxKind> {
-        let mut state = LexerState::new(source);
-
-        while state.not_at_end() {
-            // 尝试各种词法规则
-            if self.skip_whitespace(&mut state) {
-                continue;
-            }
-
-            if self.lex_newline(&mut state) {
-                continue;
-            }
-
-            if self.lex_line_comment(&mut state) {
-                continue;
-            }
-
-            if self.lex_block_comment(&mut state) {
-                continue;
-            }
-
-            if self.lex_string(&mut state) {
-                continue;
-            }
-
-            if self.lex_number(&mut state) {
-                continue;
-            }
-
-            if self.lex_identifier_or_keyword(&mut state, source) {
-                continue;
-            }
-
-            if self.lex_operator(&mut state) {
-                continue;
-            }
-
-            if self.lex_delimiter(&mut state) {
-                continue;
-            }
-
-            // 如果所有规则都不匹配，跳过当前字符并标记为错误
+    /// 处理单字符 token
+    fn lex_single_char_token<S: Source>(&self, state: &mut State<S>) -> bool {
+        if let Some(ch) = state.peek() {
             let start_pos = state.get_position();
-            if let Some(ch) = state.peek() {
-                state.advance(ch.len_utf8());
-                state.add_token(SoliditySyntaxKind::Error, start_pos, state.get_position());
-            }
+
+            let token_kind = match ch {
+                '(' => SoliditySyntaxKind::LeftParen,
+                ')' => SoliditySyntaxKind::RightParen,
+                '{' => SoliditySyntaxKind::LeftBrace,
+                '}' => SoliditySyntaxKind::RightBrace,
+                '[' => SoliditySyntaxKind::LeftBracket,
+                ']' => SoliditySyntaxKind::RightBracket,
+                ';' => SoliditySyntaxKind::Semicolon,
+                ',' => SoliditySyntaxKind::Comma,
+                '.' => SoliditySyntaxKind::Dot,
+                _ => return false,
+            };
+
+            state.advance(ch.len_utf8());
+            state.add_token(token_kind, start_pos, state.get_position());
+            true
         }
-
-        // 添加 EOF kind
-        let eof_pos = state.get_position();
-        state.add_token(SoliditySyntaxKind::Eof, eof_pos, eof_pos);
-
-        state.finish()
+        else {
+            false
+        }
     }
 }

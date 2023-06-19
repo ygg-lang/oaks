@@ -1,6 +1,6 @@
 use oak_core::SyntaxKind;
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, serde::Serialize)]
 #[repr(u16)]
 pub enum AdaSyntaxKind {
     // Trivia
@@ -95,7 +95,10 @@ pub enum AdaSyntaxKind {
     Minus,
     Multiply,
     Divide,
+    Star,
+    Slash,
     Power,
+    DoubleStar,
     Equal,
     NotEqual,
     Less,
@@ -103,6 +106,7 @@ pub enum AdaSyntaxKind {
     Greater,
     GreaterEqual,
     Assignment,
+    ColonEqual,
     Arrow,
     LeftShift,
     RightShift,
@@ -152,3 +156,5 @@ impl SyntaxKind for AdaSyntaxKind {
         matches!(self, Self::SourceFile)
     }
 }
+
+pub type AdaToken = oak_core::Token<AdaSyntaxKind>;

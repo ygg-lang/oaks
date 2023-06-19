@@ -7,7 +7,7 @@ High-performance incremental Clojure parser for the oak ecosystem with flexible 
 
 ## 🎯 Overview
 
-Oak-clojure is a robust parser for Clojure, designed to handle complete Clojure syntax including modern features like macros, data structures, and functional programming constructs. Built on the solid foundation of oak-core, it provides both high-level convenience and detailed AST generation for code analysis and compilation.
+Oak Clojure is a robust parser for Clojure, designed to handle complete Clojure syntax including modern features like macros, data structures, and functional programming constructs. Built on the solid foundation of oak-core, it provides both high-level convenience and detailed AST generation for code analysis and compilation.
 
 ## ✨ Features
 
@@ -21,18 +21,18 @@ Oak-clojure is a robust parser for Clojure, designed to handle complete Clojure 
 Basic example:
 
 ```rust
-use oak_clojure::ClojureParser;
+use oak_clojure::{Parser, ClojureLanguage, SourceText};
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
-    let parser = ClojureParser::new();
-    let clojure_code = r#"
+    let parser = Parser::new();
+    let source = SourceText::new(r#"
 (defn greet [name]
   (println (str "Hello, " name "!")))
 
 (greet "World")
-"#;
+    "#);
     
-    let program = parser.parse_program(clojure_code)?;
+    let result = parser.parse(&source);
     println!("Parsed Clojure program successfully.");
     Ok(())
 }
@@ -42,65 +42,58 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
 ### Function Parsing
 ```rust
-use oak_clojure::{ClojureParser, ast::Function};
+use oak_clojure::{Parser, ClojureLanguage, SourceText};
 
-let parser = ClojureParser::new();
-let clojure_code = r#"
+let parser = Parser::new();
+let source = SourceText::new(r#"
 (defn add [a b]
   (+ a b))
-"#;
+    "#);
 
-let function = parser.parse_function(clojure_code)?;
-println!("Function name: {}", function.name);
+let result = parser.parse(&source);
+println!("Parsed Clojure function successfully.");
 ```
 
 ### Data Structure Parsing
 ```rust
-use oak_clojure::{ClojureParser, ast::DataStructure};
+use oak_clojure::{Parser, ClojureLanguage, SourceText};
 
-let parser = ClojureParser::new();
-let clojure_code = r#"
+let parser = Parser::new();
+let source = SourceText::new(r#"
 {:name "Alice" :age 25 :city "New York"}
-"#;
+    "#);
 
-let data = parser.parse_data_structure(clojure_code)?;
-println!("Parsed data structure with {} elements", data.elements.len());
+let result = parser.parse(&source);
+println!("Parsed Clojure data structure successfully.");
 ```
 
 ## 🔧 Advanced Features
 
 ### Token-Level Parsing
 ```rust
-use oak_clojure::{ClojureParser, lexer::Token};
+use oak_clojure::{Parser, ClojureLanguage, SourceText};
 
-let parser = ClojureParser::new();
-let tokens = parser.tokenize("(defn add [x y] (+ x y))")?;
-for token in tokens {
-    println!("{:?}", token.kind);
-}
+let parser = Parser::new();
+let source = SourceText::new("(defn add [x y] (+ x y))");
+let result = parser.parse(&source);
+// Token information is available in the parse result
 ```
 
 ### Error Handling
 ```rust
-use oak_clojure::ClojureParser;
+use oak_clojure::{Parser, ClojureLanguage, SourceText};
 
-let parser = ClojureParser::new();
-let invalid_clojure = r#"
+let parser = Parser::new();
+let source = SourceText::new(r#"
 (defn broken-function
   "This function has unbalanced parentheses"
   [x y]
   (+ x y ; Missing closing parenthesis
-"#;
+    "#);
 
-match parser.parse_program(invalid_clojure) {
-    Ok(program) => println!("Parsed Clojure program successfully."),
-    Err(e) => {
-        println!("Parse error at line {} column {}: {}", 
-            e.line(), e.column(), e.message());
-        if let Some(context) = e.context() {
-            println!("Error context: {}", context);
-        }
-    }
+let result = parser.parse(&source);
+if let Err(e) = result.result {
+    println!("Parse error: {:?}", e);
 }
 ```
 
@@ -123,7 +116,7 @@ The parser generates a comprehensive AST with the following main structures:
 
 ## 🔗 Integration
 
-Oak-clojure integrates seamlessly with:
+Oak Clojure integrates seamlessly with:
 
 - **Clojure IDEs**: Provide syntax highlighting, code completion, and refactoring capabilities
 - **Static Analyzers**: Identify potential bugs and code smells in Clojure code

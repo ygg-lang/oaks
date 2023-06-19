@@ -1,10 +1,33 @@
 use crate::{kind::GraphQLSyntaxKind, language::GraphQLLanguage};
-use oak_core::{Lexer, LexerState, SourceText, lexer::LexOutput};
+use oak_core::{
+    IncrementalCache, Lexer, LexerState, OakError,
+    lexer::{CommentLine, LexOutput, StringConfig, WhitespaceConfig},
+    source::Source,
+};
+use std::sync::LazyLock;
 
-type State<'input> = LexerState<'input, GraphQLLanguage>;
+type State<S: Source> = LexerState<S, GraphQLLanguage>;
 
+static GRAPHQL_WHITESPACE: LazyLock<WhitespaceConfig> = LazyLock::new(|| WhitespaceConfig { unicode_whitespace: true });
+static GRAPHQL_COMMENT: LazyLock<CommentLine> = LazyLock::new(|| CommentLine { line_markers: &["#"] });
+static GRAPHQL_STRING: LazyLock<StringConfig> = LazyLock::new(|| StringConfig { quotes: &['"'], escape: Some('\\') });
+
+#[derive(Clone)]
 pub struct GraphQLLexer<'config> {
     config: &'config GraphQLLanguage,
+}
+
+impl<'config> Lexer<GraphQLLanguage> for GraphQLLexer<'config> {
+    fn lex_incremental(
+        &self,
+        source: impl Source,
+        changed: usize,
+        cache: IncrementalCache<GraphQLLanguage>,
+    ) -> LexOutput<GraphQLLanguage> {
+        let mut state = LexerState::new_with_cache(source, changed, cache);
+        let result = self.run(&mut state);
+        state.finish(result)
+    }
 }
 
 impl<'config> GraphQLLexer<'config> {
@@ -12,168 +35,293 @@ impl<'config> GraphQLLexer<'config> {
         Self { config }
     }
 
+    fn run<S: Source>(&self, state: &mut State<S>) -> Result<(), OakError> {
+        while state.not_at_end() {
+            let safe_point = state.get_position();
+
+            if self.skip_whitespace(state) {
+                continue;
+            }
+
+            if self.skip_comment(state) {
+                continue;
+            }
+
+            if self.lex_string_literal(state) {
+                continue;
+            }
+
+            if self.lex_number_literal(state) {
+                continue;
+            }
+
+            if self.lex_identifier_or_keyword(state) {
+                continue;
+            }
+
+            if self.lex_operators(state) {
+                continue;
+            }
+
+            if self.lex_single_char_tokens(state) {
+                continue;
+            }
+
+            state.safe_check(safe_point);
+        }
+
+        // 添加 EOF token
+        let eof_pos = state.get_position();
+        state.add_token(GraphQLSyntaxKind::Eof, eof_pos, eof_pos);
+        Ok(())
+    }
+
     /// 跳过空白字符
-    fn skip_whitespace(&self, state: &mut State) -> bool {
-        let start_pos = state.get_position();
-
-        while let Some(ch) = state.peek() {
-            if ch == ' ' || ch == '\t' {
-                state.advance(ch.len_utf8());
-            }
-            else {
-                break;
-            }
-        }
-
-        if state.get_position() > start_pos {
-            state.add_token(GraphQLSyntaxKind::Whitespace, start_pos, state.get_position());
-            true
-        }
-        else {
-            false
-        }
-    }
-
-    /// 处理换行
-    fn lex_newline(&self, state: &mut State) -> bool {
-        let start_pos = state.get_position();
-
-        if let Some('\n') = state.peek() {
-            state.advance(1);
-            state.add_token(GraphQLSyntaxKind::Newline, start_pos, state.get_position());
-            true
-        }
-        else if let Some('\r') = state.peek() {
-            state.advance(1);
-            if let Some('\n') = state.peek() {
-                state.advance(1);
-            }
-            state.add_token(GraphQLSyntaxKind::Newline, start_pos, state.get_position());
-            true
-        }
-        else {
-            false
-        }
-    }
-
-    /// 处理注释
-    fn lex_comment(&self, state: &mut State, source: &SourceText) -> bool {
-        let start_pos = state.get_position();
-
-        if let Some('#') = state.peek() {
-            // GraphQL 只有单行注释，以 # 开            state.advance(1); // 跳过 "#"
-            while let Some(ch) = state.peek() {
-                if ch == '\n' {
-                    break;
-                }
-                state.advance(ch.len_utf8());
-            }
-            state.add_token(GraphQLSyntaxKind::Comment, start_pos, state.get_position());
-            true
-        }
-        else {
-            false
-        }
-    }
-
-    /// 处理名称（标识符和关键字
-    fn lex_name(&self, state: &mut State, source: &SourceText) -> bool {
-        let start_pos = state.get_position();
-
-        if let Some(ch) = state.peek() {
-            if ch.is_ascii_alphabetic() || ch == '_' {
-                state.advance(ch.len_utf8());
-
-                while let Some(ch) = state.peek() {
-                    if ch.is_ascii_alphanumeric() || ch == '_' {
-                        state.advance(ch.len_utf8());
-                    }
-                    else {
-                        break;
-                    }
-                }
-
-                let text = source.get_text_in((start_pos..state.get_position()).into()).unwrap_or("");
-                let token_kind = match text {
-                    "query" => GraphQLSyntaxKind::QueryKeyword,
-                    "mutation" => GraphQLSyntaxKind::MutationKeyword,
-                    "subscription" => GraphQLSyntaxKind::SubscriptionKeyword,
-                    "fragment" => GraphQLSyntaxKind::FragmentKeyword,
-                    "on" => GraphQLSyntaxKind::OnKeyword,
-                    "type" => GraphQLSyntaxKind::TypeKeyword,
-                    "interface" => GraphQLSyntaxKind::InterfaceKeyword,
-                    "union" => GraphQLSyntaxKind::UnionKeyword,
-                    "scalar" => GraphQLSyntaxKind::ScalarKeyword,
-                    "enum" => GraphQLSyntaxKind::EnumKeyword,
-                    "input" => GraphQLSyntaxKind::InputKeyword,
-                    "extend" => GraphQLSyntaxKind::ExtendKeyword,
-                    "schema" => GraphQLSyntaxKind::SchemaKeyword,
-                    "directive" => GraphQLSyntaxKind::DirectiveKeyword,
-                    "implements" => GraphQLSyntaxKind::ImplementsKeyword,
-                    "repeats" => GraphQLSyntaxKind::RepeatsKeyword,
-                    "true" | "false" => GraphQLSyntaxKind::BooleanLiteral,
-                    "null" => GraphQLSyntaxKind::NullLiteral,
-                    _ => GraphQLSyntaxKind::Name,
-                };
-
-                state.add_token(token_kind, start_pos, state.get_position());
+    fn skip_whitespace<S: Source>(&self, state: &mut State<S>) -> bool {
+        match GRAPHQL_WHITESPACE.scan(state.rest(), state.get_position(), GraphQLSyntaxKind::Whitespace) {
+            Some(token) => {
+                state.advance_with(token);
                 true
             }
-            else {
-                false
-            }
-        }
-        else {
-            false
+            None => false,
         }
     }
 
-    /// 处理数字字面
-    fn lex_number(&self, state: &mut State, source: &SourceText) -> bool {
-        let start_pos = state.get_position();
+    /// 跳过注释
+    fn skip_comment<S: Source>(&self, state: &mut State<S>) -> bool {
+        match GRAPHQL_COMMENT.scan(state.rest(), state.get_position(), GraphQLSyntaxKind::Comment) {
+            Some(token) => {
+                state.advance_with(token);
+                true
+            }
+            None => false,
+        }
+    }
 
-        if let Some(ch) = state.peek() {
-            if ch.is_ascii_digit() || ch == '-' {
-                // 处理负号
-                if ch == '-' {
-                    state.advance(1);
+    /// 词法分析字符串字面量
+    fn lex_string_literal<S: Source>(&self, state: &mut State<S>) -> bool {
+        // 普通字符串 "..."
+        if let Some(token) = GRAPHQL_STRING.scan(state.rest(), state.get_position(), GraphQLSyntaxKind::StringLiteral) {
+            state.advance_with(token);
+            return true;
+        }
+
+        // 多行字符串 """..."""
+        if state.rest().starts_with("\"\"\"") {
+            let start = state.get_position();
+            state.advance(3); // 跳过开始的 """
+
+            while state.not_at_end() {
+                if state.rest().starts_with("\"\"\"") {
+                    state.advance(3); // 跳过结束的 """
+                    break;
                 }
-
-                // 处理整数部分
                 if let Some(ch) = state.peek() {
-                    if ch.is_ascii_digit() {
-                        self.scan_digits(state);
-                    }
-                    else {
-                        // 如果负号后面不是数字，回退
-                        if ch == '-' {
-                            return false;
+                    state.advance(ch.len_utf8());
+                }
+            }
+
+            let end = state.get_position();
+            state.add_token(GraphQLSyntaxKind::StringLiteral, start, end);
+            return true;
+        }
+
+        false
+    }
+
+    /// 词法分析数字字面量
+    fn lex_number_literal<S: Source>(&self, state: &mut State<S>) -> bool {
+        let start = state.get_position();
+        let mut has_digits = false;
+        let mut is_float = false;
+
+        // 处理负号
+        if state.rest().starts_with('-') {
+            state.advance(1);
+        }
+
+        // 处理整数部分
+        if state.rest().starts_with('0') {
+            // 单独的 0
+            state.advance(1);
+            has_digits = true;
+        }
+        else {
+            // 非零开头的数字
+            while let Some(ch) = state.peek() {
+                if ch.is_ascii_digit() {
+                    state.advance(ch.len_utf8());
+                    has_digits = true;
+                }
+                else {
+                    break;
+                }
+            }
+        }
+
+        // 处理小数部分
+        if state.rest().starts_with('.') && has_digits {
+            if let Some(next_ch) = state.rest().chars().nth(1) {
+                if next_ch.is_ascii_digit() {
+                    state.advance(1); // 跳过 .
+                    is_float = true;
+
+                    while let Some(ch) = state.peek() {
+                        if ch.is_ascii_digit() {
+                            state.advance(ch.len_utf8());
+                        }
+                        else {
+                            break;
                         }
                     }
                 }
+            }
+        }
 
-                let mut is_float = false;
+        // 处理指数部分
+        if (state.rest().starts_with('e') || state.rest().starts_with('E')) && has_digits {
+            state.advance(1);
+            is_float = true;
 
-                // 检查小数点
-                if let Some('.') = state.peek() {
-                    state.advance(1);
-                    self.scan_digits(state);
-                    is_float = true;
+            // 处理指数符号
+            if state.rest().starts_with('+') || state.rest().starts_with('-') {
+                state.advance(1);
+            }
+
+            // 处理指数数字
+            let mut exp_digits = false;
+            while let Some(ch) = state.peek() {
+                if ch.is_ascii_digit() {
+                    state.advance(ch.len_utf8());
+                    exp_digits = true;
                 }
-
-                // 检查科学记数法
-                if let Some('e') | Some('E') = state.peek() {
-                    state.advance(1);
-                    if let Some('+') | Some('-') = state.peek() {
-                        state.advance(1);
-                    }
-                    self.scan_digits(state);
-                    is_float = true;
+                else {
+                    break;
                 }
+            }
 
-                let token_kind = if is_float { GraphQLSyntaxKind::FloatLiteral } else { GraphQLSyntaxKind::IntLiteral };
+            if !exp_digits {
+                // 指数部分必须有数字
+                return false;
+            }
+        }
 
-                state.add_token(token_kind, start_pos, state.get_position());
+        if has_digits {
+            let end = state.get_position();
+            let kind = if is_float { GraphQLSyntaxKind::FloatLiteral } else { GraphQLSyntaxKind::IntLiteral };
+            state.add_token(kind, start, end);
+            true
+        }
+        else {
+            false
+        }
+    }
+
+    /// 词法分析标识符或关键字
+    fn lex_identifier_or_keyword<S: Source>(&self, state: &mut State<S>) -> bool {
+        let start = state.get_position();
+
+        // 标识符必须以字母或下划线开始
+        if let Some(first_ch) = state.peek() {
+            if !first_ch.is_alphabetic() && first_ch != '_' {
+                return false;
+            }
+
+            state.advance(first_ch.len_utf8());
+
+            // 后续字符可以是字母、数字或下划线
+            while let Some(ch) = state.peek() {
+                if ch.is_alphanumeric() || ch == '_' {
+                    state.advance(ch.len_utf8());
+                }
+                else {
+                    break;
+                }
+            }
+
+            let end = state.get_position();
+            let text = state.get_text_in((start..end).into());
+            let kind = self.keyword_or_identifier(&text);
+            state.add_token(kind, start, end);
+            true
+        }
+        else {
+            false
+        }
+    }
+
+    /// 判断是关键字还是标识符
+    fn keyword_or_identifier(&self, text: &str) -> GraphQLSyntaxKind {
+        match text {
+            // 关键字
+            "query" => GraphQLSyntaxKind::QueryKeyword,
+            "mutation" => GraphQLSyntaxKind::MutationKeyword,
+            "subscription" => GraphQLSyntaxKind::SubscriptionKeyword,
+            "fragment" => GraphQLSyntaxKind::FragmentKeyword,
+            "on" => GraphQLSyntaxKind::OnKeyword,
+            "type" => GraphQLSyntaxKind::TypeKeyword,
+            "interface" => GraphQLSyntaxKind::InterfaceKeyword,
+            "union" => GraphQLSyntaxKind::UnionKeyword,
+            "scalar" => GraphQLSyntaxKind::ScalarKeyword,
+            "enum" => GraphQLSyntaxKind::EnumKeyword,
+            "input" => GraphQLSyntaxKind::InputKeyword,
+            "extend" => GraphQLSyntaxKind::ExtendKeyword,
+            "schema" => GraphQLSyntaxKind::SchemaKeyword,
+            "directive" => GraphQLSyntaxKind::DirectiveKeyword,
+            "implements" => GraphQLSyntaxKind::ImplementsKeyword,
+            "repeats" => GraphQLSyntaxKind::RepeatsKeyword,
+
+            // 特殊字面量
+            "true" | "false" => GraphQLSyntaxKind::BooleanLiteral,
+            "null" => GraphQLSyntaxKind::NullLiteral,
+
+            // 默认为名称
+            _ => GraphQLSyntaxKind::Name,
+        }
+    }
+
+    /// 词法分析操作符
+    fn lex_operators<S: Source>(&self, state: &mut State<S>) -> bool {
+        let start = state.get_position();
+        let rest = state.rest();
+
+        // 三字符操作符
+        if rest.starts_with("...") {
+            state.advance(3);
+            state.add_token(GraphQLSyntaxKind::Spread, start, state.get_position());
+            return true;
+        }
+
+        false
+    }
+
+    /// 词法分析单字符 token
+    fn lex_single_char_tokens<S: Source>(&self, state: &mut State<S>) -> bool {
+        if let Some(ch) = state.peek() {
+            let start = state.get_position();
+            let kind = match ch {
+                '(' => Some(GraphQLSyntaxKind::LeftParen),
+                ')' => Some(GraphQLSyntaxKind::RightParen),
+                '[' => Some(GraphQLSyntaxKind::LeftBracket),
+                ']' => Some(GraphQLSyntaxKind::RightBracket),
+                '{' => Some(GraphQLSyntaxKind::LeftBrace),
+                '}' => Some(GraphQLSyntaxKind::RightBrace),
+                ',' => Some(GraphQLSyntaxKind::Comma),
+                ':' => Some(GraphQLSyntaxKind::Colon),
+                ';' => Some(GraphQLSyntaxKind::Semicolon),
+                '|' => Some(GraphQLSyntaxKind::Pipe),
+                '&' => Some(GraphQLSyntaxKind::Ampersand),
+                '=' => Some(GraphQLSyntaxKind::Equals),
+                '!' => Some(GraphQLSyntaxKind::Exclamation),
+                '@' => Some(GraphQLSyntaxKind::At),
+                '$' => Some(GraphQLSyntaxKind::Dollar),
+                _ => None,
+            };
+
+            if let Some(token_kind) = kind {
+                state.advance(ch.len_utf8());
+                let end = state.get_position();
+                state.add_token(token_kind, start, end);
                 true
             }
             else {
@@ -183,188 +331,5 @@ impl<'config> GraphQLLexer<'config> {
         else {
             false
         }
-    }
-
-    /// 扫描数字
-    fn scan_digits(&self, state: &mut State) {
-        while let Some(ch) = state.peek() {
-            if ch.is_ascii_digit() {
-                state.advance(ch.len_utf8());
-            }
-            else {
-                break;
-            }
-        }
-    }
-
-    /// 处理字符串字面量
-    fn lex_string(&self, state: &mut State, source: &SourceText) -> bool {
-        let start_pos = state.get_position();
-
-        if let Some('"') = state.peek() {
-            state.advance(1); // 跳过开始的引号
-
-            // 检查是否是块字符串（三个引号）
-            if let Some('"') = state.peek() {
-                if let Some('"') = source.get_char_at(state.get_position() + 1) {
-                    // 块字符串
-                    state.advance(2); // 跳过另外两个引号
-                    self.lex_block_string(state, source, start_pos);
-                    return true;
-                }
-            }
-
-            // 普通字符串
-            let mut escaped = false;
-            let mut found_end = false;
-
-            while let Some(ch) = state.peek() {
-                if escaped {
-                    escaped = false;
-                }
-                else if ch == '\\' {
-                    escaped = true;
-                }
-                else if ch == '"' {
-                    state.advance(1); // 跳过结束的引                    found_end = true;
-                    break;
-                }
-                else if ch == '\n' {
-                    break; // 普通字符串不能跨行
-                }
-                state.advance(ch.len_utf8());
-            }
-
-            if !found_end {
-                state.add_error(source.syntax_error("Unterminated string literal", start_pos));
-            }
-
-            state.add_token(GraphQLSyntaxKind::StringLiteral, start_pos, state.get_position());
-            true
-        }
-        else {
-            false
-        }
-    }
-
-    /// 处理块字符串
-    fn lex_block_string(&self, state: &mut State, source: &SourceText, start_pos: usize) {
-        let mut found_end = false;
-
-        while let Some(ch) = state.peek() {
-            if ch == '"' {
-                if let Some('"') = source.get_char_at(state.get_position() + 1) {
-                    if let Some('"') = source.get_char_at(state.get_position() + 2) {
-                        state.advance(3); // 跳过结束的三个引                        found_end = true;
-                        break;
-                    }
-                }
-            }
-            state.advance(ch.len_utf8());
-        }
-
-        if !found_end {
-            state.add_error(source.syntax_error("Unterminated block string literal", start_pos));
-        }
-
-        state.add_token(GraphQLSyntaxKind::StringLiteral, start_pos, state.get_position());
-    }
-
-    /// 处理操作符和分隔
-    fn lex_operator_or_delimiter(&self, state: &mut State, source: &SourceText) -> bool {
-        let start_pos = state.get_position();
-
-        if let Some(ch) = state.peek() {
-            let next_ch = source.get_char_at(state.get_position() + 1);
-            let third_ch = source.get_char_at(state.get_position() + 2);
-
-            let (token_kind, advance_count) = match (ch, next_ch, third_ch) {
-                // 三字符操作符
-                ('.', Some('.'), Some('.')) => (GraphQLSyntaxKind::Spread, 3),
-
-                // 单字符操作符和分隔符
-                ('(', _, _) => (GraphQLSyntaxKind::LeftParen, 1),
-                (')', _, _) => (GraphQLSyntaxKind::RightParen, 1),
-                ('[', _, _) => (GraphQLSyntaxKind::LeftBracket, 1),
-                (']', _, _) => (GraphQLSyntaxKind::RightBracket, 1),
-                ('{', _, _) => (GraphQLSyntaxKind::LeftBrace, 1),
-                ('}', _, _) => (GraphQLSyntaxKind::RightBrace, 1),
-                (',', _, _) => (GraphQLSyntaxKind::Comma, 1),
-                (':', _, _) => (GraphQLSyntaxKind::Colon, 1),
-                (';', _, _) => (GraphQLSyntaxKind::Semicolon, 1),
-                ('|', _, _) => (GraphQLSyntaxKind::Pipe, 1),
-                ('&', _, _) => (GraphQLSyntaxKind::Ampersand, 1),
-                ('=', _, _) => (GraphQLSyntaxKind::Equals, 1),
-                ('!', _, _) => (GraphQLSyntaxKind::Exclamation, 1),
-                ('@', _, _) => (GraphQLSyntaxKind::At, 1),
-                ('$', _, _) => (GraphQLSyntaxKind::Dollar, 1),
-
-                _ => return false,
-            };
-
-            state.advance(advance_count);
-            state.add_token(token_kind, start_pos, state.get_position());
-            true
-        }
-        else {
-            false
-        }
-    }
-}
-
-impl<'config> Lexer<GraphQLLanguage> for GraphQLLexer<'config> {
-    fn lex(&self, source: &SourceText) -> LexOutput<GraphQLSyntaxKind> {
-        let mut state = State::new(source);
-
-        while state.not_at_end() {
-            // 跳过空白字符
-            if self.skip_whitespace(&mut state) {
-                continue;
-            }
-
-            // 处理换行
-            if self.lex_newline(&mut state) {
-                continue;
-            }
-
-            // 处理注释
-            if self.lex_comment(&mut state, source) {
-                continue;
-            }
-
-            // 处理名称（标识符和关键字
-            if self.lex_name(&mut state, source) {
-                continue;
-            }
-
-            // 处理数字字面
-            if self.lex_number(&mut state, source) {
-                continue;
-            }
-
-            // 处理字符串字面量
-            if self.lex_string(&mut state, source) {
-                continue;
-            }
-
-            // 处理操作符和分隔
-            if self.lex_operator_or_delimiter(&mut state, source) {
-                continue;
-            }
-
-            // 未知字符
-            let start_pos = state.get_position();
-            if let Some(ch) = state.peek() {
-                state.add_error(source.unexpected_character(ch, state.get_position()));
-                state.advance(ch.len_utf8());
-                state.add_token(GraphQLSyntaxKind::Error, start_pos, state.get_position());
-            }
-        }
-
-        // 添加 EOF kind
-        let pos = state.get_position();
-        state.add_token(GraphQLSyntaxKind::Eof, pos, pos);
-
-        state.finish()
     }
 }

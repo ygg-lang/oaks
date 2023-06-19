@@ -2,7 +2,7 @@ use core::fmt;
 use oak_core::SyntaxKind;
 
 /// GSGL 语法节点类型
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, serde::Serialize)]
 pub enum GsglSyntaxKind {
     // 根节点
     Root,
@@ -160,8 +160,8 @@ pub enum GsglSyntaxKind {
 }
 
 impl GsglSyntaxKind {
-    /// 检查是否为关键    pub
-    fn is_keyword(self) -> bool {
+    /// 检查是否为关键字
+    pub fn is_keyword(self) -> bool {
         matches!(
             self,
             Self::Shader
@@ -210,8 +210,8 @@ impl GsglSyntaxKind {
         )
     }
 
-    /// 检查是否为操作    pub
-    fn is_operator(self) -> bool {
+    /// 检查是否为操作符
+    pub fn is_operator(self) -> bool {
         matches!(
             self,
             Self::Plus

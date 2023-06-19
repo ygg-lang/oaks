@@ -7,4 +7,5 @@ pub struct CSharpLanguage;
 
 impl Language for CSharpLanguage {
     type SyntaxKind = CSharpSyntaxKind;
+    type TypedRoot = ();
 }

@@ -1,4 +1,4 @@
-use crate::kind::TypeScriptSyntaxKind;
+use crate::{ast::TypeScriptRoot, kind::TypeScriptSyntaxKind};
 use oak_core::Language;
 
 /// TypeScript 语言配置
@@ -60,4 +60,5 @@ impl TypeScriptLanguage {
 
 impl Language for TypeScriptLanguage {
     type SyntaxKind = TypeScriptSyntaxKind;
+    type TypedRoot = TypeScriptRoot;
 }

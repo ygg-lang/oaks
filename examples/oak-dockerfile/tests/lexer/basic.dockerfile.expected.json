@@ -1,0 +1,607 @@
+{
+    "success": true,
+    "count": 100,
+    "tokens": [
+        {
+            "kind": "Error",
+            "text": "#",
+            "start": 0,
+            "end": 1
+        },
+        {
+            "kind": "Identifier",
+            "text": "Docke",
+            "start": 2,
+            "end": 7
+        },
+        {
+            "kind": "Error",
+            "text": "r",
+            "start": 7,
+            "end": 8
+        },
+        {
+            "kind": "Identifier",
+            "text": "fil",
+            "start": 9,
+            "end": 12
+        },
+        {
+            "kind": "Error",
+            "text": "e",
+            "start": 12,
+            "end": 13
+        },
+        {
+            "kind": "Identifier",
+            "text": "fo",
+            "start": 14,
+            "end": 16
+        },
+        {
+            "kind": "Error",
+            "text": "r",
+            "start": 16,
+            "end": 17
+        },
+        {
+            "kind": "Identifier",
+            "text": "testin",
+            "start": 18,
+            "end": 24
+        },
+        {
+            "kind": "Error",
+            "text": "g",
+            "start": 24,
+            "end": 25
+        },
+        {
+            "kind": "Identifier",
+            "text": "lexe",
+            "start": 26,
+            "end": 30
+        },
+        {
+            "kind": "Error",
+            "text": "r",
+            "start": 30,
+            "end": 31
+        },
+        {
+            "kind": "Identifier",
+            "text": "(alternativ",
+            "start": 32,
+            "end": 43
+        },
+        {
+            "kind": "Error",
+            "text": "e",
+            "start": 43,
+            "end": 44
+        },
+        {
+            "kind": "Identifier",
+            "text": "forma",
+            "start": 45,
+            "end": 50
+        },
+        {
+            "kind": "RightParen",
+            "text": "t",
+            "start": 50,
+            "end": 51
+        },
+        {
+            "kind": "Error",
+            "text": "#",
+            "start": 54,
+            "end": 55
+        },
+        {
+            "kind": "Identifier",
+            "text": "Thi",
+            "start": 56,
+            "end": 59
+        },
+        {
+            "kind": "Error",
+            "text": "s",
+            "start": 59,
+            "end": 60
+        },
+        {
+            "kind": "Identifier",
+            "text": "fil",
+            "start": 61,
+            "end": 64
+        },
+        {
+            "kind": "Error",
+            "text": "e",
+            "start": 64,
+            "end": 65
+        },
+        {
+            "kind": "Identifier",
+            "text": "contain",
+            "start": 66,
+            "end": 73
+        },
+        {
+            "kind": "Error",
+            "text": "s",
+            "start": 73,
+            "end": 74
+        },
+        {
+            "kind": "Identifier",
+            "text": "variou",
+            "start": 75,
+            "end": 81
+        },
+        {
+            "kind": "Error",
+            "text": "s",
+            "start": 81,
+            "end": 82
+        },
+        {
+            "kind": "Identifier",
+            "text": "Docke",
+            "start": 83,
+            "end": 88
+        },
+        {
+            "kind": "Error",
+            "text": "r",
+            "start": 88,
+            "end": 89
+        },
+        {
+            "kind": "Identifier",
+            "text": "kin",
+            "start": 90,
+            "end": 93
+        },
+        {
+            "kind": "Error",
+            "text": "d",
+            "start": 93,
+            "end": 94
+        },
+        {
+            "kind": "Identifier",
+            "text": "element",
+            "start": 95,
+            "end": 102
+        },
+        {
+            "kind": "Error",
+            "text": "s",
+            "start": 102,
+            "end": 103
+        },
+        {
+            "kind": "Identifier",
+            "text": "fo",
+            "start": 104,
+            "end": 106
+        },
+        {
+            "kind": "Error",
+            "text": "r",
+            "start": 106,
+            "end": 107
+        },
+        {
+            "kind": "Identifier",
+            "text": "oa",
+            "start": 108,
+            "end": 110
+        },
+        {
+            "kind": "Error",
+            "text": "k",
+            "start": 110,
+            "end": 111
+        },
+        {
+            "kind": "Identifier",
+            "text": "-dockerfil",
+            "start": 111,
+            "end": 121
+        },
+        {
+            "kind": "Error",
+            "text": "e",
+            "start": 121,
+            "end": 122
+        },
+        {
+            "kind": "Identifier",
+            "text": "projec",
+            "start": 123,
+            "end": 129
+        },
+        {
+            "kind": "Identifier",
+            "text": "FRO",
+            "start": 134,
+            "end": 137
+        },
+        {
+            "kind": "Error",
+            "text": "M",
+            "start": 137,
+            "end": 138
+        },
+        {
+            "kind": "Identifier",
+            "text": "ubunt",
+            "start": 139,
+            "end": 144
+        },
+        {
+            "kind": "Colon",
+            "text": "u",
+            "start": 144,
+            "end": 145
+        },
+        {
+            "kind": "Number",
+            "text": ":22.0",
+            "start": 145,
+            "end": 150
+        },
+        {
+            "kind": "Error",
+            "text": "#",
+            "start": 155,
+            "end": 156
+        },
+        {
+            "kind": "Identifier",
+            "text": "Se",
+            "start": 157,
+            "end": 159
+        },
+        {
+            "kind": "Error",
+            "text": "t",
+            "start": 159,
+            "end": 160
+        },
+        {
+            "kind": "Identifier",
+            "text": "environmen",
+            "start": 161,
+            "end": 171
+        },
+        {
+            "kind": "Error",
+            "text": "t",
+            "start": 171,
+            "end": 172
+        },
+        {
+            "kind": "Identifier",
+            "text": "variable",
+            "start": 173,
+            "end": 181
+        },
+        {
+            "kind": "Identifier",
+            "text": "EN",
+            "start": 184,
+            "end": 186
+        },
+        {
+            "kind": "Error",
+            "text": "V",
+            "start": 186,
+            "end": 187
+        },
+        {
+            "kind": "Identifier",
+            "text": "DEBIAN_FRONTEN",
+            "start": 188,
+            "end": 202
+        },
+        {
+            "kind": "Equal",
+            "text": "D",
+            "start": 202,
+            "end": 203
+        },
+        {
+            "kind": "Identifier",
+            "text": "=noninteractiv",
+            "start": 203,
+            "end": 217
+        },
+        {
+            "kind": "Identifier",
+            "text": "EN",
+            "start": 220,
+            "end": 222
+        },
+        {
+            "kind": "Error",
+            "text": "V",
+            "start": 222,
+            "end": 223
+        },
+        {
+            "kind": "Identifier",
+            "text": "APP_HOM",
+            "start": 224,
+            "end": 231
+        },
+        {
+            "kind": "Equal",
+            "text": "E",
+            "start": 231,
+            "end": 232
+        },
+        {
+            "kind": "Path",
+            "text": "=/ap",
+            "start": 232,
+            "end": 236
+        },
+        {
+            "kind": "Identifier",
+            "text": "EN",
+            "start": 239,
+            "end": 241
+        },
+        {
+            "kind": "Error",
+            "text": "V",
+            "start": 241,
+            "end": 242
+        },
+        {
+            "kind": "Identifier",
+            "text": "NODE_VERSIO",
+            "start": 243,
+            "end": 254
+        },
+        {
+            "kind": "Equal",
+            "text": "N",
+            "start": 254,
+            "end": 255
+        },
+        {
+            "kind": "Number",
+            "text": "=18.17.",
+            "start": 255,
+            "end": 262
+        },
+        {
+            "kind": "Error",
+            "text": "#",
+            "start": 267,
+            "end": 268
+        },
+        {
+            "kind": "Identifier",
+            "text": "Instal",
+            "start": 269,
+            "end": 275
+        },
+        {
+            "kind": "Error",
+            "text": "l",
+            "start": 275,
+            "end": 276
+        },
+        {
+            "kind": "Identifier",
+            "text": "syste",
+            "start": 277,
+            "end": 282
+        },
+        {
+            "kind": "Error",
+            "text": "m",
+            "start": 282,
+            "end": 283
+        },
+        {
+            "kind": "Identifier",
+            "text": "dependencie",
+            "start": 284,
+            "end": 295
+        },
+        {
+            "kind": "Identifier",
+            "text": "RU",
+            "start": 298,
+            "end": 300
+        },
+        {
+            "kind": "Error",
+            "text": "N",
+            "start": 300,
+            "end": 301
+        },
+        {
+            "kind": "Identifier",
+            "text": "ap",
+            "start": 302,
+            "end": 304
+        },
+        {
+            "kind": "Error",
+            "text": "t",
+            "start": 304,
+            "end": 305
+        },
+        {
+            "kind": "Identifier",
+            "text": "-ge",
+            "start": 305,
+            "end": 308
+        },
+        {
+            "kind": "Error",
+            "text": "t",
+            "start": 308,
+            "end": 309
+        },
+        {
+            "kind": "Identifier",
+            "text": "updat",
+            "start": 310,
+            "end": 315
+        },
+        {
+            "kind": "Error",
+            "text": "e",
+            "start": 315,
+            "end": 316
+        },
+        {
+            "kind": "Error",
+            "text": "&",
+            "start": 317,
+            "end": 318
+        },
+        {
+            "kind": "Error",
+            "text": "&",
+            "start": 318,
+            "end": 319
+        },
+        {
+            "kind": "Identifier",
+            "text": "ap",
+            "start": 320,
+            "end": 322
+        },
+        {
+            "kind": "Error",
+            "text": "t",
+            "start": 322,
+            "end": 323
+        },
+        {
+            "kind": "Identifier",
+            "text": "-ge",
+            "start": 323,
+            "end": 326
+        },
+        {
+            "kind": "Error",
+            "text": "t",
+            "start": 326,
+            "end": 327
+        },
+        {
+            "kind": "Identifier",
+            "text": "instal",
+            "start": 328,
+            "end": 334
+        },
+        {
+            "kind": "Error",
+            "text": "l",
+            "start": 334,
+            "end": 335
+        },
+        {
+            "kind": "Identifier",
+            "text": "-",
+            "start": 336,
+            "end": 337
+        },
+        {
+            "kind": "Error",
+            "text": "y",
+            "start": 337,
+            "end": 338
+        },
+        {
+            "kind": "Identifier",
+            "text": "cur",
+            "start": 346,
+            "end": 349
+        },
+        {
+            "kind": "Error",
+            "text": "l",
+            "start": 349,
+            "end": 350
+        },
+        {
+            "kind": "Identifier",
+            "text": "wge",
+            "start": 358,
+            "end": 361
+        },
+        {
+            "kind": "Error",
+            "text": "t",
+            "start": 361,
+            "end": 362
+        },
+        {
+            "kind": "Identifier",
+            "text": "gi",
+            "start": 370,
+            "end": 372
+        },
+        {
+            "kind": "Error",
+            "text": "t",
+            "start": 372,
+            "end": 373
+        },
+        {
+            "kind": "Identifier",
+            "text": "python",
+            "start": 381,
+            "end": 387
+        },
+        {
+            "kind": "Error",
+            "text": "3",
+            "start": 387,
+            "end": 388
+        },
+        {
+            "kind": "Identifier",
+            "text": "python",
+            "start": 396,
+            "end": 402
+        },
+        {
+            "kind": "Error",
+            "text": "3",
+            "start": 402,
+            "end": 403
+        },
+        {
+            "kind": "Identifier",
+            "text": "-pi",
+            "start": 403,
+            "end": 406
+        },
+        {
+            "kind": "Error",
+            "text": "p",
+            "start": 406,
+            "end": 407
+        },
+        {
+            "kind": "Identifier",
+            "text": "buil",
+            "start": 415,
+            "end": 419
+        }
+    ],
+    "errors": []
+}

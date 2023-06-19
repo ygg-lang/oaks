@@ -1,4 +1,4 @@
-use crate::kind::ActionScriptSyntaxKind;
+use crate::{ast::ActionScriptRoot, kind::ActionScriptSyntaxKind};
 use oak_core::Language;
 
 /// ActionScript 语言实现
@@ -7,4 +7,5 @@ pub struct ActionScriptLanguage;
 
 impl Language for ActionScriptLanguage {
     type SyntaxKind = ActionScriptSyntaxKind;
+    type TypedRoot = ActionScriptRoot;
 }

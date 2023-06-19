@@ -16,6 +16,7 @@ edition.workspace = true
 oak-core = { workspace = true }
 oak-highlight = { workspace = true, optional = true }
 oak-pretty-print = { workspace = true, optional = true }
+serde = { version = "1.0", features = ["derive"] }
 
 [dev-dependencies]
 oak-core = { workspace = true, features = ["testing"] }
@@ -24,7 +25,7 @@ walkdir = "2.5"
 
 [features]
 default = []
-alloc = []
+
 
 [package.metadata.docs.rs]
 all-features = true

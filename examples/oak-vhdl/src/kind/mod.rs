@@ -2,7 +2,7 @@
 
 use oak_core::SyntaxKind;
 
-#[derive(Copy, Clone, Debug, PartialEq, Eq, Hash)]
+#[derive(Copy, Clone, Debug, PartialEq, Eq, Hash, serde::Serialize)]
 pub enum VhdlSyntaxKind {
     // 基础文本
     Text,

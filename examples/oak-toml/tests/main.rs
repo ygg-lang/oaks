@@ -1,4 +1,4 @@
-use oak_core::{Lexer, Parser, SourceText};
+use oak_core::{Builder, Lexer, Parser, SourceText};
 use oak_toml::{TomlLanguage, TomlSyntaxKind};
 
 #[test]
@@ -41,7 +41,7 @@ fn test_lexer_string() {
     assert!(!tokens.is_empty());
 
     // 检查是否包含字符串 kind
-    let has_string = tokens.iter().any(|t| matches!(t.kind, TomlSyntaxKind::String));
+    let has_string = tokens.iter().any(|t| matches!(t.kind, TomlSyntaxKind::BasicString));
     assert!(has_string, "Should contain a string token");
 }
 

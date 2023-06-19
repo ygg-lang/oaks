@@ -34,4 +34,5 @@ impl Default for KotlinLanguage {
 
 impl Language for KotlinLanguage {
     type SyntaxKind = crate::kind::KotlinSyntaxKind;
+    type TypedRoot = (); // 暂时使用空类型，后续可以定义具体的AST根节点类型
 }

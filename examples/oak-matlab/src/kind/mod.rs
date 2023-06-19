@@ -8,12 +8,14 @@ pub enum MatlabSyntaxKind {
     Comment,
     BlockComment,
 
-    // 标识符和字面    Identifier,
+    // 标识符和字面量
+    Identifier,
     Number,
     String,
     Character,
 
-    // 关键    Function,
+    // 关键字
+    Function,
     End,
     If,
     Else,
@@ -35,7 +37,8 @@ pub enum MatlabSyntaxKind {
     Methods,
     Events,
 
-    // 运算    Plus,           // +
+    // 运算符
+    Plus,          // +
     Minus,         // -
     Times,         // *
     Divide,        // /
@@ -46,7 +49,8 @@ pub enum MatlabSyntaxKind {
     DotPower,      // .^
     DotLeftDivide, // .\
 
-    // 比较运算    Equal,          // ==
+    // 比较运算符
+    Equal,        // ==
     NotEqual,     // ~=
     Less,         // <
     Greater,      // >
@@ -77,7 +81,8 @@ pub enum MatlabSyntaxKind {
     Question,     // ?
     At,           // @
 
-    // 特殊运算    Transpose,      // '
+    // 特殊运算符
+    Transpose,    // '
     DotTranspose, // .'
 
     // 错误处理

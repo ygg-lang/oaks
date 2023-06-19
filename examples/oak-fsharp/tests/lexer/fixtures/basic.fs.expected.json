@@ -1,0 +1,94 @@
+[
+  {
+    "kind": "LineComment",
+    "text": "// Basic F# example"
+  },
+  {
+    "kind": "Newline",
+    "text": "\n"
+  },
+  {
+    "kind": "Module",
+    "text": "module"
+  },
+  {
+    "kind": "Whitespace",
+    "text": " "
+  },
+  {
+    "kind": "Identifier",
+    "text": "BasicExample"
+  },
+  {
+    "kind": "Newline",
+    "text": "\n"
+  },
+  {
+    "kind": "Newline",
+    "text": "\n"
+  },
+  {
+    "kind": "Let",
+    "text": "let"
+  },
+  {
+    "kind": "Whitespace",
+    "text": " "
+  },
+  {
+    "kind": "Identifier",
+    "text": "add"
+  },
+  {
+    "kind": "Whitespace",
+    "text": " "
+  },
+  {
+    "kind": "Identifier",
+    "text": "x"
+  },
+  {
+    "kind": "Whitespace",
+    "text": " "
+  },
+  {
+    "kind": "Identifier",
+    "text": "y"
+  },
+  {
+    "kind": "Whitespace",
+    "text": " "
+  },
+  {
+    "kind": "Equal",
+    "text": "="
+  },
+  {
+    "kind": "Whitespace",
+    "text": " "
+  },
+  {
+    "kind": "Identifier",
+    "text": "x"
+  },
+  {
+    "kind": "Whitespace",
+    "text": " "
+  },
+  {
+    "kind": "Plus",
+    "text": "+"
+  },
+  {
+    "kind": "Whitespace",
+    "text": " "
+  },
+  {
+    "kind": "Identifier",
+    "text": "y"
+  },
+  {
+    "kind": "Newline",
+    "text": "\n"
+  }
+]

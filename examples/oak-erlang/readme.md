@@ -1,95 +1,167 @@
 # Oak Erlang Parser
 
-## Overview
+[![Crates.io](https://img.shields.io/crates/v/oak-erlang.svg)](https://crates.io/crates/oak-erlang)
+[![Documentation](https://docs.rs/oak-erlang/badge.svg)](https://docs.rs/oak-erlang)
 
-`Oak of erlang` is a powerful and efficient parser for the Erlang programming language, built using the `oak` parser combinator library. It provides a robust solution for parsing Erlang syntax, enabling various applications such as static analysis of Erlang code, refactoring tools, and automated code generation.
+High-performance incremental Erlang parser for the oak ecosystem with flexible configuration, optimized for static analysis and code generation.
 
-## Features
+## 🎯 Overview
 
-- **Comprehensive Erlang Grammar**: Supports all standard Erlang constructs, including modules, functions, patterns, and expressions.
-- **High Performance**: Leverages `oak`'s optimized parsing techniques for speed.
-- **Abstract Syntax Tree (AST)**: Generates a detailed and easy-to-navigate AST representing the Erlang code structure.
-- **Error Handling**: Provides meaningful error messages for better debugging of malformed Erlang code.
-- **Extensible**: Easily extendable to support custom Erlang extensions or dialects.
+Oak Erlang is a robust parser for Erlang, designed to handle complete Erlang syntax including modern features. Built on the solid foundation of oak-core, it provides both high-level convenience and detailed AST generation for static analysis and code generation.
 
-## Quick Start
+## ✨ Features
 
-To use `Oak of erlang` in your Rust project, add it as a dependency in your `Cargo.toml`:
+- **Complete Erlang Syntax**: Supports all Erlang features including modern specifications
+- **Full AST Generation**: Generates comprehensive Abstract Syntax Trees
+- **Lexer Support**: Built-in tokenization with proper span information
+- **Error Recovery**: Graceful handling of syntax errors with detailed diagnostics
 
-```toml
-[dependencies]
-Oak of erlang = "0.1.0" # Replace with the latest version
-oak = "0.1.0" # Replace with the latest version
-```
+## 🚀 Quick Start
 
-## Parsing Examples
-
-Here's a simple example demonstrating how to parse Erlang code:
+Basic example:
 
 ```rust
-use pex_erlang::erlang_parser;
+use oak_erlang::{Parser, ErlangLanguage, SourceText};
 
-fn main() {
-    let input = r#"
--module(my_module).
--export([my_function/0]).
+fn main() -> Result<(), Box<dyn std::error::Error>> {
+    let parser = Parser::new();
+    let source = SourceText::new(r#"
+-module(hello).
+-export([greet/0]).
 
-my_function() ->
+greet() ->
     io:format("Hello, Erlang!~n").
-"#;
-    match erlang_parser::parse(input) {
-        Ok(ast) => {
-            println!("Successfully parsed Erlang code:\n{:#?}", ast);
-        }
-        Err(err) => {
-            eprintln!("Failed to parse Erlang code: {}", err);
-        }
-    }
+    "#);
+    
+    let result = parser.parse(&source);
+    println!("Parsed Erlang successfully.");
+    Ok(())
 }
 ```
 
-## Advanced Features
+## 📋 Parsing Examples
 
-### Customizing the Parser
-
-The `oak` library allows for flexible customization of the parser. You can modify the grammar rules or add new ones to suit your specific needs, such as supporting experimental Erlang features. Refer to the `oak` documentation for more details on parser customization.
-
-### Error Recovery
-
-`Oak of erlang` can be extended with error recovery mechanisms to handle malformed Erlang code gracefully, allowing for partial parsing and better resilience in real-world scenarios.
-
-## AST Structure
-
-The generated AST for Erlang provides a hierarchical representation of the code elements. For instance, a function definition might result in an AST structure similar to this:
-
+### Function Parsing
 ```rust
-// Simplified AST representation for:
-// my_function() -> io:format("Hello, Erlang!~n").
-pex_erlang::ast::Node::FunctionDefinition {
-    name: "my_function".to_string(),
-    arity: 0,
-    clauses: vec![
-        // ... clause details ...
-    ],
+use oak_erlang::{Parser, ErlangLanguage, SourceText};
+
+let parser = Parser::new();
+let source = SourceText::new(r#"
+-module(math).
+-export([add/2, factorial/1]).
+
+add(A, B) ->
+    A + B.
+
+factorial(0) ->
+    1;
+factorial(N) when N > 0 ->
+    N * factorial(N - 1).
+"#);
+
+let result = parser.parse(&source);
+println!("Function parsed successfully.");
+```
+
+### Module Parsing
+```rust
+use oak_erlang::{Parser, ErlangLanguage, SourceText};
+
+let parser = Parser::new();
+let source = SourceText::new(r#"
+-module(calculator).
+-export([new/0, add/2, subtract/2, get_result/1]).
+
+new() ->
+    0.
+
+add(Acc, Value) ->
+    Acc + Value.
+
+subtract(Acc, Value) ->
+    Acc - Value.
+
+get_result(Acc) ->
+    Acc.
+"#);
+
+let result = parser.parse(&source);
+println!("Module parsed successfully.");
+```
+
+## 🔧 Advanced Features
+
+### Token-Level Parsing
+```rust
+use oak_erlang::{Parser, ErlangLanguage, SourceText};
+
+let parser = Parser::new();
+let source = SourceText::new("X = 42.");
+let result = parser.parse(&source);
+println!("Token parsing completed.");
+```
+
+### Error Handling
+```rust
+use oak_erlang::{Parser, ErlangLanguage, SourceText};
+
+let parser = Parser::new();
+let source = SourceText::new(r#"
+-module(broken).
+-export([broken_function/0]).
+
+broken_function() ->
+    io:format("Hello"
+    % Missing closing parenthesis
+"#);
+
+let result = parser.parse(&source);
+if let Some(errors) = result.result.err() {
+    println!("Parse errors found: {:?}", errors);
+} else {
+    println!("Parsed successfully.");
 }
 ```
 
-## Performance
+## 🏗️ AST Structure
 
-`Oak of erlang` is designed for performance. Benchmarks show efficient parsing of large Erlang codebases. Optimizations include memoization, efficient backtracking, and direct AST construction.
+The parser generates a comprehensive AST with the following main structures:
 
-## Integration
+- **ErlangModule**: Root container for Erlang modules
+- **Function**: Erlang functions and clauses
+- **Pattern**: Pattern matching constructs
+- **Expression**: Various expression types including operators
+- **Statement**: Various statement types including control flow
+- **Type**: Erlang type system constructs
 
-`Oak of erlang` can be integrated into various tools and applications:
+## 📊 Performance
 
-- **Erlang IDEs**: Provide syntax highlighting, code completion, and refactoring capabilities.
-- **Static Analyzers**: Identify potential bugs, code smells, and security vulnerabilities.
-- **Code Transformers**: Automate code modifications and migrations.
+- **Streaming**: Parse large Erlang files without loading entirely into memory
+- **Incremental**: Re-parse only changed sections
+- **Memory Efficient**: Smart AST node allocation
+- **Fast Recovery**: Quick error recovery for better IDE integration
 
-## Examples
+## 🔗 Integration
 
-Explore the `examples` directory within the `oak-erlang` project for more usage examples and demonstrations of specific Erlang parsing features.
+Oak Erlang integrates seamlessly with:
 
-## Contributing
+- **Static Analysis**: Code quality and security analysis
+- **Code Generation**: Generating code from Erlang AST
+- **IDE Support**: Language server protocol compatibility
+- **Refactoring**: Automated code refactoring
+- **Documentation**: Generating documentation from Erlang code
 
-Contributions to `Oak of erlang` are welcome! If you find a bug or have a feature request, please open an issue on the GitHub repository. For major changes, please open a discussion first.
+## 📚 Examples
+
+Check out the [examples](examples/) directory for comprehensive examples:
+
+- Complete Erlang module parsing
+- Function and pattern analysis
+- Code transformation
+- Integration with development workflows
+
+## 🤝 Contributing
+
+Contributions are welcome! 
+
+Please feel free to submit pull requests at the [project repository](https://github.com/ygg-lang/oaks/tree/dev/examples/oak-erlang) or open [issues](https://github.com/ygg-lang/oaks/issues).

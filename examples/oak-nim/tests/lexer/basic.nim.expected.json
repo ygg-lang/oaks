@@ -1,0 +1,607 @@
+{
+    "success": true,
+    "count": 100,
+    "tokens": [
+        {
+            "kind": "ImportKeyword",
+            "text": "import",
+            "start": 116,
+            "end": 122
+        },
+        {
+            "kind": "Identifier",
+            "text": "std",
+            "start": 123,
+            "end": 126
+        },
+        {
+            "kind": "Slash",
+            "text": "/",
+            "start": 126,
+            "end": 127
+        },
+        {
+            "kind": "LeftBracket",
+            "text": "[",
+            "start": 127,
+            "end": 128
+        },
+        {
+            "kind": "Identifier",
+            "text": "strutils",
+            "start": 128,
+            "end": 136
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 136,
+            "end": 137
+        },
+        {
+            "kind": "Identifier",
+            "text": "sequtils",
+            "start": 138,
+            "end": 146
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 146,
+            "end": 147
+        },
+        {
+            "kind": "Identifier",
+            "text": "tables",
+            "start": 148,
+            "end": 154
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 154,
+            "end": 155
+        },
+        {
+            "kind": "Identifier",
+            "text": "sets",
+            "start": 156,
+            "end": 160
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 160,
+            "end": 161
+        },
+        {
+            "kind": "Identifier",
+            "text": "json",
+            "start": 162,
+            "end": 166
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 166,
+            "end": 167
+        },
+        {
+            "kind": "Identifier",
+            "text": "os",
+            "start": 168,
+            "end": 170
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 170,
+            "end": 171
+        },
+        {
+            "kind": "Identifier",
+            "text": "times",
+            "start": 172,
+            "end": 177
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 177,
+            "end": 178
+        },
+        {
+            "kind": "Identifier",
+            "text": "math",
+            "start": 179,
+            "end": 183
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 183,
+            "end": 184
+        },
+        {
+            "kind": "Identifier",
+            "text": "random",
+            "start": 185,
+            "end": 191
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 191,
+            "end": 192
+        },
+        {
+            "kind": "Identifier",
+            "text": "algorithm",
+            "start": 206,
+            "end": 215
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 215,
+            "end": 216
+        },
+        {
+            "kind": "Identifier",
+            "text": "sugar",
+            "start": 217,
+            "end": 222
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 222,
+            "end": 223
+        },
+        {
+            "kind": "Identifier",
+            "text": "options",
+            "start": 224,
+            "end": 231
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 231,
+            "end": 232
+        },
+        {
+            "kind": "Identifier",
+            "text": "asyncdispatch",
+            "start": 233,
+            "end": 246
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 246,
+            "end": 247
+        },
+        {
+            "kind": "Identifier",
+            "text": "httpclient",
+            "start": 248,
+            "end": 258
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 258,
+            "end": 259
+        },
+        {
+            "kind": "Identifier",
+            "text": "strformat",
+            "start": 260,
+            "end": 269
+        },
+        {
+            "kind": "RightBracket",
+            "text": "]",
+            "start": 269,
+            "end": 270
+        },
+        {
+            "kind": "ConstKeyword",
+            "text": "const",
+            "start": 315,
+            "end": 320
+        },
+        {
+            "kind": "Identifier",
+            "text": "PI",
+            "start": 324,
+            "end": 326
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 327,
+            "end": 328
+        },
+        {
+            "kind": "FloatLiteral",
+            "text": "3.14159265359",
+            "start": 329,
+            "end": 342
+        },
+        {
+            "kind": "Identifier",
+            "text": "MAX_SIZE",
+            "start": 346,
+            "end": 354
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 355,
+            "end": 356
+        },
+        {
+            "kind": "IntLiteral",
+            "text": "1000",
+            "start": 357,
+            "end": 361
+        },
+        {
+            "kind": "Identifier",
+            "text": "VERSION",
+            "start": 365,
+            "end": 372
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 373,
+            "end": 374
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "\"1.0.0\"",
+            "start": 375,
+            "end": 382
+        },
+        {
+            "kind": "Identifier",
+            "text": "DEBUG",
+            "start": 386,
+            "end": 391
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 392,
+            "end": 393
+        },
+        {
+            "kind": "Identifier",
+            "text": "true",
+            "start": 394,
+            "end": 398
+        },
+        {
+            "kind": "TypeKeyword",
+            "text": "type",
+            "start": 422,
+            "end": 426
+        },
+        {
+            "kind": "Identifier",
+            "text": "Color",
+            "start": 446,
+            "end": 451
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 452,
+            "end": 453
+        },
+        {
+            "kind": "Identifier",
+            "text": "enum",
+            "start": 454,
+            "end": 458
+        },
+        {
+            "kind": "Identifier",
+            "text": "Red",
+            "start": 464,
+            "end": 467
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 467,
+            "end": 468
+        },
+        {
+            "kind": "Identifier",
+            "text": "Green",
+            "start": 469,
+            "end": 474
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 474,
+            "end": 475
+        },
+        {
+            "kind": "Identifier",
+            "text": "Blue",
+            "start": 476,
+            "end": 480
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 480,
+            "end": 481
+        },
+        {
+            "kind": "Identifier",
+            "text": "Yellow",
+            "start": 482,
+            "end": 488
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 488,
+            "end": 489
+        },
+        {
+            "kind": "Identifier",
+            "text": "Purple",
+            "start": 490,
+            "end": 496
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 496,
+            "end": 497
+        },
+        {
+            "kind": "Identifier",
+            "text": "Orange",
+            "start": 498,
+            "end": 504
+        },
+        {
+            "kind": "Identifier",
+            "text": "Direction",
+            "start": 512,
+            "end": 521
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 522,
+            "end": 523
+        },
+        {
+            "kind": "Identifier",
+            "text": "enum",
+            "start": 524,
+            "end": 528
+        },
+        {
+            "kind": "Identifier",
+            "text": "North",
+            "start": 534,
+            "end": 539
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 540,
+            "end": 541
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "\"N\"",
+            "start": 542,
+            "end": 545
+        },
+        {
+            "kind": "Identifier",
+            "text": "South",
+            "start": 551,
+            "end": 556
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 557,
+            "end": 558
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "\"S\"",
+            "start": 559,
+            "end": 562
+        },
+        {
+            "kind": "Identifier",
+            "text": "East",
+            "start": 569,
+            "end": 573
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 574,
+            "end": 575
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "\"E\"",
+            "start": 576,
+            "end": 579
+        },
+        {
+            "kind": "Identifier",
+            "text": "West",
+            "start": 585,
+            "end": 589
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 590,
+            "end": 591
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "\"W\"",
+            "start": 592,
+            "end": 595
+        },
+        {
+            "kind": "Identifier",
+            "text": "LogLevel",
+            "start": 603,
+            "end": 611
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 612,
+            "end": 613
+        },
+        {
+            "kind": "Identifier",
+            "text": "enum",
+            "start": 614,
+            "end": 618
+        },
+        {
+            "kind": "Identifier",
+            "text": "Trace",
+            "start": 624,
+            "end": 629
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 630,
+            "end": 631
+        },
+        {
+            "kind": "IntLiteral",
+            "text": "0",
+            "start": 632,
+            "end": 633
+        },
+        {
+            "kind": "Identifier",
+            "text": "Debug",
+            "start": 639,
+            "end": 644
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 645,
+            "end": 646
+        },
+        {
+            "kind": "IntLiteral",
+            "text": "1",
+            "start": 647,
+            "end": 648
+        },
+        {
+            "kind": "Identifier",
+            "text": "Info",
+            "start": 654,
+            "end": 658
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 659,
+            "end": 660
+        },
+        {
+            "kind": "IntLiteral",
+            "text": "2",
+            "start": 661,
+            "end": 662
+        },
+        {
+            "kind": "Identifier",
+            "text": "Warn",
+            "start": 668,
+            "end": 672
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 673,
+            "end": 674
+        },
+        {
+            "kind": "IntLiteral",
+            "text": "3",
+            "start": 675,
+            "end": 676
+        },
+        {
+            "kind": "Identifier",
+            "text": "Error",
+            "start": 682,
+            "end": 687
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 688,
+            "end": 689
+        },
+        {
+            "kind": "IntLiteral",
+            "text": "4",
+            "start": 690,
+            "end": 691
+        },
+        {
+            "kind": "Identifier",
+            "text": "Fatal",
+            "start": 697,
+            "end": 702
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 703,
+            "end": 704
+        },
+        {
+            "kind": "IntLiteral",
+            "text": "5",
+            "start": 705,
+            "end": 706
+        },
+        {
+            "kind": "Identifier",
+            "text": "Point",
+            "start": 732,
+            "end": 737
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 738,
+            "end": 739
+        }
+    ],
+    "errors": []
+}

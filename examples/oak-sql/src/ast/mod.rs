@@ -1,7 +1,7 @@
 use core::range::Range;
 
-/// JSON 值节
+/// SQL 根节点
 #[derive(Debug, Clone)]
-pub struct JsonRoot {
+pub struct SqlRoot {
     span: Range<usize>,
 }

@@ -7,7 +7,7 @@ High-performance incremental JSON parser for the oak ecosystem with flexible con
 
 ## 🎯 Overview
 
-Oak-json is a robust parser for JSON, designed to handle complete JSON syntax including modern features. Built on the solid foundation of oak-core, it provides both high-level convenience and detailed AST generation for data processing and analysis.
+Oak JSON is a robust parser for JSON, designed to handle complete JSON syntax including modern features. Built on the solid foundation of oak-core, it provides both high-level convenience and detailed AST generation for data processing and analysis.
 
 ## ✨ Features
 
@@ -21,19 +21,19 @@ Oak-json is a robust parser for JSON, designed to handle complete JSON syntax in
 Basic example:
 
 ```rust
-use oak_json::JsonParser;
+use oak_json::{Parser, JsonLanguage, SourceText};
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
-    let parser = JsonParser::new();
-    let json_code = r#"
+    let parser = Parser::new();
+    let source = SourceText::new(r#"
         {
             "name": "Alice",
             "age": 30,
             "skills": ["Rust", "JavaScript", "Python"]
         }
-    "#;
+    "#);
     
-    let ast = parser.parse_json(json_code)?;
+    let result = parser.parse(&source);
     println!("Parsed JSON successfully.");
     Ok(())
 }
@@ -43,61 +43,56 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
 ### Object Parsing
 ```rust
-use oak_json::{JsonParser, ast::Object};
+use oak_json::{Parser, JsonLanguage, SourceText};
 
-let parser = JsonParser::new();
-let json_code = r#"{"name": "Alice", "age": 30}"#;
+let parser = Parser::new();
+let source = SourceText::new(r#"{"name": "Alice", "age": 30}"#);
 
-let object = parser.parse_object(json_code)?;
-println!("Object properties: {}", object.properties.len());
+let result = parser.parse(&source);
+println!("Object parsed successfully.");
 ```
 
 ### Array Parsing
 ```rust
-use oak_json::{JsonParser, ast::Array};
+use oak_json::{Parser, JsonLanguage, SourceText};
 
-let parser = JsonParser::new();
-let json_code = r#"[1, 2, 3, 4, 5]"#;
+let parser = Parser::new();
+let source = SourceText::new(r#"[1, 2, 3, 4, 5]"#);
 
-let array = parser.parse_array(json_code)?;
-println!("Array elements: {}", array.elements.len());
+let result = parser.parse(&source);
+println!("Array parsed successfully.");
 ```
 
 ## 🔧 Advanced Features
 
 ### Token-Level Parsing
 ```rust
-use oak_json::{JsonParser, lexer::Token};
+use oak_json::{Parser, JsonLanguage, SourceText};
 
-let parser = JsonParser::new();
-let tokens = parser.tokenize(r#"{"key": "value"}"#)?;
-for token in tokens {
-    println!("{:?}", token.kind);
-}
+let parser = Parser::new();
+let source = SourceText::new(r#"{"key": "value"}"#);
+let result = parser.parse(&source);
+println!("Token parsing completed.");
 ```
 
 ### Error Handling
 ```rust
-use oak_json::JsonParser;
+use oak_json::{Parser, JsonLanguage, SourceText};
 
-let parser = JsonParser::new();
-let invalid_json = r#"
+let parser = Parser::new();
+let source = SourceText::new(r#"
     {
         "name": "Alice",
         "age": 30,
         "skills": ["Rust", "JavaScript", "Python"
     // Missing closing brace
-"#;
+"#);
 
-match parser.parse_json(invalid_json) {
-    Ok(ast) => println!("Parsed JSON successfully."),
-    Err(e) => {
-        println!("Parse error at line {} column {}: {}", 
-            e.line(), e.column(), e.message());
-        if let Some(context) = e.context() {
-            println!("Error context: {}", context);
-        }
-    }
+let result = parser.parse(&source);
+if let Some(errors) = result.result.err() {
+    println!("Parse errors found: {:?}", errors);
+} else {
+    println!("Parsed successfully.");
 }
 ```
 
@@ -120,7 +115,7 @@ The parser generates a comprehensive AST with the following main structures:
 
 ## 🔗 Integration
 
-Oak-json integrates seamlessly with:
+Oak JSON integrates seamlessly with:
 
 - **Data Processing**: JSON data extraction and transformation
 - **Configuration Files**: Parsing application configurations

@@ -1,10 +1,7 @@
 use crate::{kind::KotlinSyntaxKind, language::KotlinLanguage};
-use oak_core::{
-    Lexer, SourceText,
-    lexer::{LexOutput, LexerState},
-};
+use oak_core::{IncrementalCache, Lexer, LexerState, OakError, lexer::LexOutput, source::Source};
 
-type State<'input> = LexerState<'input, KotlinLanguage>;
+type State<S> = LexerState<S, KotlinLanguage>;
 
 pub struct KotlinLexer<'config> {
     config: &'config KotlinLanguage,
@@ -16,7 +13,7 @@ impl<'config> KotlinLexer<'config> {
     }
 
     /// 跳过空白字符
-    fn skip_whitespace(&self, state: &mut State) -> bool {
+    fn skip_whitespace<S: Source>(&self, state: &mut State<S>) -> bool {
         let start_pos = state.get_position();
 
         while let Some(ch) = state.peek() {
@@ -38,7 +35,7 @@ impl<'config> KotlinLexer<'config> {
     }
 
     /// 处理换行
-    fn lex_newline(&self, state: &mut State) -> bool {
+    fn lex_newline<S: Source>(&self, state: &mut State<S>) -> bool {
         let start_pos = state.get_position();
 
         if let Some('\n') = state.peek() {
@@ -60,7 +57,7 @@ impl<'config> KotlinLexer<'config> {
     }
 
     /// 处理注释
-    fn lex_comment(&self, state: &mut State) -> bool {
+    fn lex_comment<S: Source>(&self, state: &mut State<S>) -> bool {
         let start_pos = state.get_position();
 
         if let Some('/') = state.peek() {
@@ -116,7 +113,7 @@ impl<'config> KotlinLexer<'config> {
     }
 
     /// 处理字符串字面量
-    fn lex_string(&self, state: &mut State) -> bool {
+    fn lex_string<S: Source>(&self, state: &mut State<S>) -> bool {
         let start_pos = state.get_position();
 
         if let Some('"') = state.peek() {
@@ -206,7 +203,7 @@ impl<'config> KotlinLexer<'config> {
     }
 
     /// 处理数字字面量
-    fn lex_number(&self, state: &mut State) -> bool {
+    fn lex_number<S: Source>(&self, state: &mut State<S>) -> bool {
         let start_pos = state.get_position();
 
         if let Some(ch) = state.peek() {
@@ -294,7 +291,7 @@ impl<'config> KotlinLexer<'config> {
     }
 
     /// 处理标识符和关键字
-    fn lex_identifier_or_keyword(&self, state: &mut State, source: &SourceText) -> bool {
+    fn lex_identifier_or_keyword<S: Source>(&self, state: &mut State<S>) -> bool {
         let start_pos = state.get_position();
 
         if let Some(ch) = state.peek() {
@@ -310,7 +307,7 @@ impl<'config> KotlinLexer<'config> {
                     }
                 }
 
-                let text = source.get_text_in(core::range::Range { start: start_pos, end: state.get_position() }).unwrap_or("");
+                let text = state.get_text_in((start_pos..state.get_position()).into());
                 let kind = match text {
                     "abstract" | "actual" | "annotation" | "as" | "break" | "by" | "catch" | "class" | "companion"
                     | "const" | "constructor" | "continue" | "crossinline" | "data" | "do" | "dynamic" | "else" | "enum"
@@ -336,7 +333,7 @@ impl<'config> KotlinLexer<'config> {
     }
 
     /// 处理特殊字符和操作符
-    fn lex_special_char(&self, state: &mut State) -> bool {
+    fn lex_special_char<S: Source>(&self, state: &mut State<S>) -> bool {
         let start_pos = state.get_position();
 
         if let Some(ch) = state.peek() {
@@ -380,35 +377,52 @@ impl<'config> KotlinLexer<'config> {
 }
 
 impl<'config> Lexer<KotlinLanguage> for KotlinLexer<'config> {
-    fn lex(&self, source: &SourceText) -> LexOutput<KotlinSyntaxKind> {
+    fn lex_incremental(
+        &self,
+        source: impl Source,
+        start_offset: usize,
+        cache: IncrementalCache<'_, KotlinLanguage>,
+    ) -> LexOutput<KotlinLanguage> {
+        let mut state = State::new_with_cache(source, start_offset, cache);
+        let result = self.run(&mut state);
+        state.finish(result)
+    }
+
+    fn lex(&self, source: impl Source) -> LexOutput<KotlinLanguage> {
         let mut state = State::new(source);
+        let result = self.run(&mut state);
+        state.finish(result)
+    }
+}
 
+impl<'config> KotlinLexer<'config> {
+    fn run<S: Source>(&self, state: &mut State<S>) -> Result<(), OakError> {
         while state.not_at_end() {
-            if self.skip_whitespace(&mut state) {
+            if self.skip_whitespace(state) {
                 continue;
             }
 
-            if self.lex_newline(&mut state) {
+            if self.lex_newline(state) {
                 continue;
             }
 
-            if self.lex_comment(&mut state) {
+            if self.lex_comment(state) {
                 continue;
             }
 
-            if self.lex_string(&mut state) {
+            if self.lex_string(state) {
                 continue;
             }
 
-            if self.lex_number(&mut state) {
+            if self.lex_number(state) {
                 continue;
             }
 
-            if self.lex_identifier_or_keyword(&mut state, source) {
+            if self.lex_identifier_or_keyword(state) {
                 continue;
             }
 
-            if self.lex_special_char(&mut state) {
+            if self.lex_special_char(state) {
                 continue;
             }
 
@@ -424,6 +438,6 @@ impl<'config> Lexer<KotlinLanguage> for KotlinLexer<'config> {
         let eof_pos = state.get_position();
         state.add_token(KotlinSyntaxKind::Eof, eof_pos, eof_pos);
 
-        state.finish()
+        Ok(())
     }
 }

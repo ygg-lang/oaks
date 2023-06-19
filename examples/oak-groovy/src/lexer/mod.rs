@@ -1,10 +1,34 @@
 use crate::{kind::GroovySyntaxKind, language::GroovyLanguage};
-use oak_core::{Lexer, LexerState, SourceText, lexer::LexOutput};
+use oak_core::{
+    IncrementalCache, Lexer, LexerState, OakError,
+    lexer::{CommentLine, LexOutput, StringConfig, WhitespaceConfig},
+    source::Source,
+};
+use std::sync::LazyLock;
 
-type State<'input> = LexerState<'input, GroovyLanguage>;
+type State<S: Source> = LexerState<S, GroovyLanguage>;
 
+static GROOVY_WHITESPACE: LazyLock<WhitespaceConfig> = LazyLock::new(|| WhitespaceConfig { unicode_whitespace: true });
+static GROOVY_COMMENT: LazyLock<CommentLine> = LazyLock::new(|| CommentLine { line_markers: &["//"] });
+static GROOVY_STRING: LazyLock<StringConfig> = LazyLock::new(|| StringConfig { quotes: &['"'], escape: Some('\\') });
+static GROOVY_CHAR: LazyLock<StringConfig> = LazyLock::new(|| StringConfig { quotes: &['\''], escape: Some('\\') });
+
+#[derive(Clone)]
 pub struct GroovyLexer<'config> {
     config: &'config GroovyLanguage,
+}
+
+impl<'config> Lexer<GroovyLanguage> for GroovyLexer<'config> {
+    fn lex_incremental(
+        &self,
+        source: impl Source,
+        changed: usize,
+        cache: IncrementalCache<GroovyLanguage>,
+    ) -> LexOutput<GroovyLanguage> {
+        let mut state = LexerState::new_with_cache(source, changed, cache);
+        let result = self.run(&mut state);
+        state.finish(result)
+    }
 }
 
 impl<'config> GroovyLexer<'config> {
@@ -12,594 +36,533 @@ impl<'config> GroovyLexer<'config> {
         Self { config }
     }
 
+    fn run<S: Source>(&self, state: &mut State<S>) -> Result<(), OakError> {
+        while state.not_at_end() {
+            let safe_point = state.get_position();
+
+            if self.skip_whitespace(state) {
+                continue;
+            }
+
+            if self.skip_comment(state) {
+                continue;
+            }
+
+            if self.lex_string_literal(state) {
+                continue;
+            }
+
+            if self.lex_char_literal(state) {
+                continue;
+            }
+
+            if self.lex_number_literal(state) {
+                continue;
+            }
+
+            if self.lex_identifier_or_keyword(state) {
+                continue;
+            }
+
+            if self.lex_operators(state) {
+                continue;
+            }
+
+            if self.lex_single_char_tokens(state) {
+                continue;
+            }
+
+            state.safe_check(safe_point);
+        }
+
+        // 添加 EOF token
+        let eof_pos = state.get_position();
+        state.add_token(GroovySyntaxKind::Eof, eof_pos, eof_pos);
+        Ok(())
+    }
+
     /// 跳过空白字符
-    fn skip_whitespace(&self, state: &mut State) -> bool {
-        let start_pos = state.get_position();
-
-        while let Some(ch) = state.peek() {
-            if ch == ' ' || ch == '\t' || ch == '\r' {
-                state.advance(ch.len_utf8());
-            }
-            else {
-                break;
-            }
-        }
-
-        if state.get_position() > start_pos {
-            state.add_token(GroovySyntaxKind::Whitespace, start_pos, state.get_position());
-            true
-        }
-        else {
-            false
-        }
-    }
-
-    /// 处理换行
-    fn lex_newline(&self, state: &mut State) -> bool {
-        let start_pos = state.get_position();
-
-        if let Some('\n') = state.peek() {
-            state.advance(1);
-            state.add_token(GroovySyntaxKind::Newline, start_pos, state.get_position());
-            true
-        }
-        else {
-            false
-        }
-    }
-
-    /// 处理注释
-    fn lex_comment(&self, state: &mut State, source: &SourceText) -> bool {
-        let start_pos = state.get_position();
-
-        if let Some('/') = state.peek() {
-            if let Some('/') = source.get_char_at(start_pos + 1) {
-                // 单行注释
-                state.advance(2);
-                while let Some(ch) = state.peek() {
-                    if ch == '\n' {
-                        break;
-                    }
-                    state.advance(ch.len_utf8());
-                }
-                state.add_token(GroovySyntaxKind::Comment, start_pos, state.get_position());
+    fn skip_whitespace<S: Source>(&self, state: &mut State<S>) -> bool {
+        match GROOVY_WHITESPACE.scan(state.rest(), state.get_position(), GroovySyntaxKind::Whitespace) {
+            Some(token) => {
+                state.advance_with(token);
                 true
             }
-            else if let Some('*') = source.get_char_at(start_pos + 1) {
-                // 多行注释
-                state.advance(2);
-                while let Some(ch) = state.peek() {
-                    if ch == '*' {
-                        if let Some('/') = source.get_char_at(state.get_position() + 1) {
-                            state.advance(2);
+            None => false,
+        }
+    }
+
+    /// 跳过注释
+    fn skip_comment<S: Source>(&self, state: &mut State<S>) -> bool {
+        // 行注释 //
+        if let Some(token) = GROOVY_COMMENT.scan(state.rest(), state.get_position(), GroovySyntaxKind::Comment) {
+            state.advance_with(token);
+            return true;
+        }
+
+        // 块注释 /* ... */
+        if state.rest().starts_with("/*") {
+            let start = state.get_position();
+            state.advance(2); // 跳过 /*
+
+            while state.not_at_end() {
+                if state.rest().starts_with("*/") {
+                    state.advance(2); // 跳过 */
+                    break;
+                }
+                if let Some(ch) = state.peek() {
+                    state.advance(ch.len_utf8());
+                }
+            }
+
+            let end = state.get_position();
+            state.add_token(GroovySyntaxKind::Comment, start, end);
+            return true;
+        }
+
+        false
+    }
+
+    /// 词法分析字符串字面量
+    fn lex_string_literal<S: Source>(&self, state: &mut State<S>) -> bool {
+        // 普通字符串 "..."
+        if let Some(token) = GROOVY_STRING.scan(state.rest(), state.get_position(), GroovySyntaxKind::StringLiteral) {
+            state.advance_with(token);
+            return true;
+        }
+
+        // 三重引号字符串 """..."""
+        if state.rest().starts_with("\"\"\"") {
+            let start = state.get_position();
+            state.advance(3); // 跳过开始的 """
+
+            while state.not_at_end() {
+                if state.rest().starts_with("\"\"\"") {
+                    state.advance(3); // 跳过结束的 """
+                    break;
+                }
+                if let Some(ch) = state.peek() {
+                    state.advance(ch.len_utf8());
+                }
+            }
+
+            let end = state.get_position();
+            state.add_token(GroovySyntaxKind::StringLiteral, start, end);
+            return true;
+        }
+
+        // GString $"..." 或 $/.../$
+        if state.rest().starts_with("$/") {
+            let start = state.get_position();
+            state.advance(2); // 跳过 $/
+
+            while state.not_at_end() {
+                if state.rest().starts_with("/$") {
+                    state.advance(2); // 跳过 /$
+                    break;
+                }
+                if let Some(ch) = state.peek() {
+                    state.advance(ch.len_utf8());
+                }
+            }
+
+            let end = state.get_position();
+            state.add_token(GroovySyntaxKind::StringLiteral, start, end);
+            return true;
+        }
+
+        false
+    }
+
+    /// 词法分析字符字面量
+    fn lex_char_literal<S: Source>(&self, state: &mut State<S>) -> bool {
+        match GROOVY_CHAR.scan(state.rest(), state.get_position(), GroovySyntaxKind::CharLiteral) {
+            Some(token) => {
+                state.advance_with(token);
+                true
+            }
+            None => false,
+        }
+    }
+
+    /// 词法分析数字字面量
+    fn lex_number_literal<S: Source>(&self, state: &mut State<S>) -> bool {
+        let start = state.get_position();
+        let mut has_digits = false;
+        let mut is_float = false;
+
+        // 处理负号
+        if state.rest().starts_with('-') {
+            state.advance(1);
+        }
+
+        // 处理十六进制 0x...
+        if state.rest().starts_with("0x") || state.rest().starts_with("0X") {
+            state.advance(2);
+            while let Some(ch) = state.peek() {
+                if ch.is_ascii_hexdigit() {
+                    state.advance(ch.len_utf8());
+                    has_digits = true;
+                }
+                else {
+                    break;
+                }
+            }
+        }
+        // 处理八进制 0...
+        else if state.rest().starts_with('0') && state.rest().len() > 1 {
+            if let Some(next_ch) = state.rest().chars().nth(1) {
+                if next_ch.is_ascii_digit() {
+                    state.advance(1); // 跳过 0
+                    while let Some(ch) = state.peek() {
+                        if ch >= '0' && ch <= '7' {
+                            state.advance(ch.len_utf8());
+                            has_digits = true;
+                        }
+                        else {
                             break;
                         }
                     }
-                    state.advance(ch.len_utf8());
                 }
-                state.add_token(GroovySyntaxKind::Comment, start_pos, state.get_position());
-                true
-            }
-            else {
-                false
             }
         }
+        // 处理十进制
         else {
-            false
-        }
-    }
+            // 处理整数部分
+            while let Some(ch) = state.peek() {
+                if ch.is_ascii_digit() {
+                    state.advance(ch.len_utf8());
+                    has_digits = true;
+                }
+                else {
+                    break;
+                }
+            }
 
-    /// 处理字符串字面量
-    fn lex_string(&self, state: &mut State) -> bool {
-        let start_pos = state.get_position();
+            // 处理小数部分
+            if state.rest().starts_with('.') && has_digits {
+                if let Some(next_ch) = state.rest().chars().nth(1) {
+                    if next_ch.is_ascii_digit() {
+                        state.advance(1); // 跳过 .
+                        is_float = true;
 
-        if let Some(quote) = state.peek() {
-            if quote == '"' || quote == '\'' {
+                        while let Some(ch) = state.peek() {
+                            if ch.is_ascii_digit() {
+                                state.advance(ch.len_utf8());
+                            }
+                            else {
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
+
+            // 处理指数部分
+            if (state.rest().starts_with('e') || state.rest().starts_with('E')) && has_digits {
                 state.advance(1);
-                let mut escaped = false;
+                is_float = true;
 
+                // 处理指数符号
+                if state.rest().starts_with('+') || state.rest().starts_with('-') {
+                    state.advance(1);
+                }
+
+                // 处理指数数字
+                let mut exp_digits = false;
                 while let Some(ch) = state.peek() {
-                    if escaped {
-                        escaped = false;
+                    if ch.is_ascii_digit() {
+                        state.advance(ch.len_utf8());
+                        exp_digits = true;
                     }
-                    else if ch == '\\' {
-                        escaped = true;
+                    else {
+                        break;
                     }
-                    else if ch == quote {
-                        state.advance(1);
-                        let token_kind =
-                            if quote == '"' { GroovySyntaxKind::StringLiteral } else { GroovySyntaxKind::CharLiteral };
-                        state.add_token(token_kind, start_pos, state.get_position());
-                        return true;
-                    }
-                    else if ch == '\n' && quote == '\'' {
-                        break; // 单引号字符串不能跨行
-                    }
+                }
+
+                if !exp_digits {
+                    // 指数部分必须有数字
+                    return false;
+                }
+            }
+        }
+
+        // 处理数字后缀 (G, L, F, D)
+        if has_digits {
+            if let Some(ch) = state.peek() {
+                if matches!(ch, 'G' | 'g' | 'L' | 'l' | 'F' | 'f' | 'D' | 'd') {
                     state.advance(ch.len_utf8());
+                    is_float = matches!(ch, 'F' | 'f' | 'D' | 'd' | 'G' | 'g');
                 }
-
-                // 未闭合的字符
-                state.add_token(GroovySyntaxKind::Error, start_pos, state.get_position());
-                true
-            }
-            else {
-                false
             }
         }
-        else {
-            false
-        }
-    }
 
-    /// 处理数字字面
-    fn lex_number(&self, state: &mut State) -> bool {
-        let start_pos = state.get_position();
-
-        if let Some(ch) = state.peek() {
-            if ch.is_ascii_digit() {
-                let mut has_dot = false;
-                let mut has_exp = false;
-
-                // 处理十六进制、八进制、二进制
-                if ch == '0' {
-                    state.advance(1);
-                    if let Some(next_ch) = state.peek() {
-                        match next_ch {
-                            'x' | 'X' => {
-                                // 十六进制
-                                state.advance(1);
-                                while let Some(hex_ch) = state.peek() {
-                                    if hex_ch.is_ascii_hexdigit() {
-                                        state.advance(1);
-                                    }
-                                    else {
-                                        break;
-                                    }
-                                }
-                                state.add_token(GroovySyntaxKind::IntLiteral, start_pos, state.get_position());
-                                return true;
-                            }
-                            'b' | 'B' => {
-                                // 二进
-                                state.advance(1);
-                                while let Some(bin_ch) = state.peek() {
-                                    if bin_ch == '0' || bin_ch == '1' {
-                                        state.advance(1);
-                                    }
-                                    else {
-                                        break;
-                                    }
-                                }
-                                state.add_token(GroovySyntaxKind::IntLiteral, start_pos, state.get_position());
-                                return true;
-                            }
-                            '0'..='7' => {
-                                // 八进
-                                while let Some(oct_ch) = state.peek() {
-                                    if oct_ch >= '0' && oct_ch <= '7' {
-                                        state.advance(1);
-                                    }
-                                    else {
-                                        break;
-                                    }
-                                }
-                                state.add_token(GroovySyntaxKind::IntLiteral, start_pos, state.get_position());
-                                return true;
-                            }
-                            _ => {}
-                        }
-                    }
-                }
-
-                // 处理十进制数
-                while let Some(digit_ch) = state.peek() {
-                    if digit_ch.is_ascii_digit() {
-                        state.advance(1);
-                    }
-                    else if digit_ch == '.' && !has_dot && !has_exp {
-                        has_dot = true;
-                        state.advance(1);
-                    }
-                    else if (digit_ch == 'e' || digit_ch == 'E') && !has_exp {
-                        has_exp = true;
-                        state.advance(1);
-                        if let Some(sign_ch) = state.peek() {
-                            if sign_ch == '+' || sign_ch == '-' {
-                                state.advance(1);
-                            }
-                        }
-                    }
-                    else if digit_ch == 'f' || digit_ch == 'F' || digit_ch == 'd' || digit_ch == 'D' {
-                        // Groovy 浮点数后缀
-                        state.advance(1);
-                        has_dot = true; // 标记为浮点数
-                        break;
-                    }
-                    else if digit_ch == 'l' || digit_ch == 'L' || digit_ch == 'g' || digit_ch == 'G' {
-                        // Groovy 整数后缀
-                        state.advance(1);
-                        break;
-                    }
-                    else {
-                        break;
-                    }
-                }
-
-                let token_kind = if has_dot || has_exp { GroovySyntaxKind::FloatLiteral } else { GroovySyntaxKind::IntLiteral };
-                state.add_token(token_kind, start_pos, state.get_position());
-                true
-            }
-            else {
-                false
-            }
-        }
-        else {
-            false
-        }
-    }
-
-    /// 处理标识符和关键
-    fn lex_identifier(&self, state: &mut State, source: &SourceText) -> bool {
-        let start_pos = state.get_position();
-
-        if let Some(ch) = state.peek() {
-            if ch.is_ascii_alphabetic() || ch == '_' || ch == '$' {
-                state.advance(ch.len_utf8());
-
-                while let Some(id_ch) = state.peek() {
-                    if id_ch.is_ascii_alphanumeric() || id_ch == '_' || id_ch == '$' {
-                        state.advance(id_ch.len_utf8());
-                    }
-                    else {
-                        break;
-                    }
-                }
-
-                // 检查是否是关键
-                let text = source.get_text_in((start_pos..state.get_position()).into()).unwrap_or("");
-                let token_kind = match text {
-                    "abstract" => GroovySyntaxKind::AbstractKeyword,
-                    "as" => GroovySyntaxKind::AsKeyword,
-                    "assert" => GroovySyntaxKind::AssertKeyword,
-                    "break" => GroovySyntaxKind::BreakKeyword,
-                    "case" => GroovySyntaxKind::CaseKeyword,
-                    "catch" => GroovySyntaxKind::CatchKeyword,
-                    "class" => GroovySyntaxKind::ClassKeyword,
-                    "const" => GroovySyntaxKind::ConstKeyword,
-                    "continue" => GroovySyntaxKind::ContinueKeyword,
-                    "def" => GroovySyntaxKind::DefKeyword,
-                    "default" => GroovySyntaxKind::DefaultKeyword,
-                    "do" => GroovySyntaxKind::DoKeyword,
-                    "else" => GroovySyntaxKind::ElseKeyword,
-                    "enum" => GroovySyntaxKind::EnumKeyword,
-                    "extends" => GroovySyntaxKind::ExtendsKeyword,
-                    "final" => GroovySyntaxKind::FinalKeyword,
-                    "finally" => GroovySyntaxKind::FinallyKeyword,
-                    "for" => GroovySyntaxKind::ForKeyword,
-                    "goto" => GroovySyntaxKind::GotoKeyword,
-                    "if" => GroovySyntaxKind::IfKeyword,
-                    "implements" => GroovySyntaxKind::ImplementsKeyword,
-                    "import" => GroovySyntaxKind::ImportKeyword,
-                    "in" => GroovySyntaxKind::InKeyword,
-                    "instanceof" => GroovySyntaxKind::InstanceofKeyword,
-                    "interface" => GroovySyntaxKind::InterfaceKeyword,
-                    "native" => GroovySyntaxKind::NativeKeyword,
-                    "new" => GroovySyntaxKind::NewKeyword,
-                    "package" => GroovySyntaxKind::PackageKeyword,
-                    "private" => GroovySyntaxKind::PrivateKeyword,
-                    "protected" => GroovySyntaxKind::ProtectedKeyword,
-                    "public" => GroovySyntaxKind::PublicKeyword,
-                    "return" => GroovySyntaxKind::ReturnKeyword,
-                    "static" => GroovySyntaxKind::StaticKeyword,
-                    "strictfp" => GroovySyntaxKind::StrictfpKeyword,
-                    "super" => GroovySyntaxKind::SuperKeyword,
-                    "switch" => GroovySyntaxKind::SwitchKeyword,
-                    "synchronized" => GroovySyntaxKind::SynchronizedKeyword,
-                    "this" => GroovySyntaxKind::ThisKeyword,
-                    "throw" => GroovySyntaxKind::ThrowKeyword,
-                    "throws" => GroovySyntaxKind::ThrowsKeyword,
-                    "trait" => GroovySyntaxKind::TraitKeyword,
-                    "transient" => GroovySyntaxKind::TransientKeyword,
-                    "try" => GroovySyntaxKind::TryKeyword,
-                    "void" => GroovySyntaxKind::VoidKeyword,
-                    "volatile" => GroovySyntaxKind::VolatileKeyword,
-                    "while" => GroovySyntaxKind::WhileKeyword,
-                    "true" | "false" => GroovySyntaxKind::BooleanLiteral,
-                    "null" => GroovySyntaxKind::NullLiteral,
-                    _ => GroovySyntaxKind::Identifier,
-                };
-
-                state.add_token(token_kind, start_pos, state.get_position());
-                true
-            }
-            else {
-                false
-            }
-        }
-        else {
-            false
-        }
-    }
-
-    /// 处理操作符和标点符号
-    fn lex_operator(&self, state: &mut State, source: &SourceText) -> bool {
-        let start_pos = state.get_position();
-
-        if let Some(ch) = state.peek() {
-            let token_kind = match ch {
-                '+' => {
-                    state.advance(1);
-                    if let Some('=') = state.peek() {
-                        state.advance(1);
-                        GroovySyntaxKind::PlusAssign
-                    }
-                    else if let Some('+') = state.peek() {
-                        state.advance(1);
-                        GroovySyntaxKind::Increment
-                    }
-                    else {
-                        GroovySyntaxKind::Plus
-                    }
-                }
-                '-' => {
-                    state.advance(1);
-                    if let Some('=') = state.peek() {
-                        state.advance(1);
-                        GroovySyntaxKind::MinusAssign
-                    }
-                    else if let Some('-') = state.peek() {
-                        state.advance(1);
-                        GroovySyntaxKind::Decrement
-                    }
-                    else {
-                        GroovySyntaxKind::Minus
-                    }
-                }
-                '*' => {
-                    state.advance(1);
-                    if let Some('*') = state.peek() {
-                        state.advance(1);
-                        if let Some('=') = state.peek() {
-                            state.advance(1);
-                            GroovySyntaxKind::PowerAssign
-                        }
-                        else {
-                            GroovySyntaxKind::Power
-                        }
-                    }
-                    else if let Some('=') = state.peek() {
-                        state.advance(1);
-                        GroovySyntaxKind::StarAssign
-                    }
-                    else {
-                        GroovySyntaxKind::Star
-                    }
-                }
-                '/' => {
-                    // 注释已经在前面处理了
-                    state.advance(1);
-                    if let Some('=') = state.peek() {
-                        state.advance(1);
-                        GroovySyntaxKind::SlashAssign
-                    }
-                    else {
-                        GroovySyntaxKind::Slash
-                    }
-                }
-                '%' => {
-                    state.advance(1);
-                    if let Some('=') = state.peek() {
-                        state.advance(1);
-                        GroovySyntaxKind::PercentAssign
-                    }
-                    else {
-                        GroovySyntaxKind::Percent
-                    }
-                }
-                '&' => {
-                    state.advance(1);
-                    if let Some('&') = state.peek() {
-                        state.advance(1);
-                        GroovySyntaxKind::LogicalAnd
-                    }
-                    else {
-                        GroovySyntaxKind::BitAnd
-                    }
-                }
-                '|' => {
-                    state.advance(1);
-                    if let Some('|') = state.peek() {
-                        state.advance(1);
-                        GroovySyntaxKind::LogicalOr
-                    }
-                    else {
-                        GroovySyntaxKind::BitOr
-                    }
-                }
-                '^' => {
-                    state.advance(1);
-                    GroovySyntaxKind::BitXor
-                }
-                '~' => {
-                    state.advance(1);
-                    GroovySyntaxKind::BitNot
-                }
-                '<' => {
-                    state.advance(1);
-                    if let Some('<') = state.peek() {
-                        state.advance(1);
-                        GroovySyntaxKind::LeftShift
-                    }
-                    else if let Some('=') = state.peek() {
-                        state.advance(1);
-                        if let Some('>') = state.peek() {
-                            state.advance(1);
-                            GroovySyntaxKind::Spaceship
-                        }
-                        else {
-                            GroovySyntaxKind::LessEqual
-                        }
-                    }
-                    else {
-                        GroovySyntaxKind::Less
-                    }
-                }
-                '>' => {
-                    state.advance(1);
-                    if let Some('>') = state.peek() {
-                        state.advance(1);
-                        if let Some('>') = state.peek() {
-                            state.advance(1);
-                            GroovySyntaxKind::UnsignedRightShift
-                        }
-                        else {
-                            GroovySyntaxKind::RightShift
-                        }
-                    }
-                    else if let Some('=') = state.peek() {
-                        state.advance(1);
-                        GroovySyntaxKind::GreaterEqual
-                    }
-                    else {
-                        GroovySyntaxKind::Greater
-                    }
-                }
-                '=' => {
-                    state.advance(1);
-                    if let Some('=') = state.peek() {
-                        state.advance(1);
-                        GroovySyntaxKind::Equal
-                    }
-                    else {
-                        GroovySyntaxKind::Assign
-                    }
-                }
-                '!' => {
-                    state.advance(1);
-                    if let Some('=') = state.peek() {
-                        state.advance(1);
-                        GroovySyntaxKind::NotEqual
-                    }
-                    else {
-                        GroovySyntaxKind::LogicalNot
-                    }
-                }
-                '?' => {
-                    state.advance(1);
-                    if let Some(':') = state.peek() {
-                        state.advance(1);
-                        GroovySyntaxKind::Elvis
-                    }
-                    else if let Some('.') = state.peek() {
-                        state.advance(1);
-                        GroovySyntaxKind::SafeNavigation
-                    }
-                    else {
-                        GroovySyntaxKind::Question
-                    }
-                }
-                ':' => {
-                    state.advance(1);
-                    GroovySyntaxKind::Colon
-                }
-                '.' => {
-                    state.advance(1);
-                    GroovySyntaxKind::Period
-                }
-                '(' => {
-                    state.advance(1);
-                    GroovySyntaxKind::LeftParen
-                }
-                ')' => {
-                    state.advance(1);
-                    GroovySyntaxKind::RightParen
-                }
-                '[' => {
-                    state.advance(1);
-                    GroovySyntaxKind::LeftBracket
-                }
-                ']' => {
-                    state.advance(1);
-                    GroovySyntaxKind::RightBracket
-                }
-                '{' => {
-                    state.advance(1);
-                    GroovySyntaxKind::LeftBrace
-                }
-                '}' => {
-                    state.advance(1);
-                    GroovySyntaxKind::RightBrace
-                }
-                ',' => {
-                    state.advance(1);
-                    GroovySyntaxKind::Comma
-                }
-                ';' => {
-                    state.advance(1);
-                    GroovySyntaxKind::Semicolon
-                }
-                '@' => {
-                    state.advance(1);
-                    GroovySyntaxKind::At
-                }
-                _ => return false,
-            };
-
-            state.add_token(token_kind, start_pos, state.get_position());
+        if has_digits {
+            let end = state.get_position();
+            let kind = if is_float { GroovySyntaxKind::FloatLiteral } else { GroovySyntaxKind::IntLiteral };
+            state.add_token(kind, start, end);
             true
         }
         else {
             false
         }
     }
-}
 
-impl<'config> Lexer<GroovyLanguage> for GroovyLexer<'config> {
-    fn lex(&self, source: &SourceText) -> LexOutput<GroovySyntaxKind> {
-        let mut state = State::new(source);
+    /// 词法分析标识符或关键字
+    fn lex_identifier_or_keyword<S: Source>(&self, state: &mut State<S>) -> bool {
+        let start = state.get_position();
 
-        while state.not_at_end() {
-            // 尝试各种词法规则
-            if self.skip_whitespace(&mut state) {
-                continue;
+        // 标识符必须以字母或下划线开始
+        if let Some(first_ch) = state.peek() {
+            if !first_ch.is_alphabetic() && first_ch != '_' {
+                return false;
             }
 
-            if self.lex_newline(&mut state) {
-                continue;
+            state.advance(first_ch.len_utf8());
+
+            // 后续字符可以是字母、数字或下划线
+            while let Some(ch) = state.peek() {
+                if ch.is_alphanumeric() || ch == '_' {
+                    state.advance(ch.len_utf8());
+                }
+                else {
+                    break;
+                }
             }
 
-            if self.lex_comment(&mut state, source) {
-                continue;
-            }
+            let end = state.get_position();
+            let text = state.get_text_in((start..end).into());
+            let kind = self.keyword_or_identifier(&text);
+            state.add_token(kind, start, end);
+            true
+        }
+        else {
+            false
+        }
+    }
 
-            if self.lex_string(&mut state) {
-                continue;
-            }
+    /// 判断是关键字还是标识符
+    fn keyword_or_identifier(&self, text: &str) -> GroovySyntaxKind {
+        match text {
+            // 关键字
+            "abstract" => GroovySyntaxKind::AbstractKeyword,
+            "as" => GroovySyntaxKind::AsKeyword,
+            "assert" => GroovySyntaxKind::AssertKeyword,
+            "break" => GroovySyntaxKind::BreakKeyword,
+            "case" => GroovySyntaxKind::CaseKeyword,
+            "catch" => GroovySyntaxKind::CatchKeyword,
+            "class" => GroovySyntaxKind::ClassKeyword,
+            "const" => GroovySyntaxKind::ConstKeyword,
+            "continue" => GroovySyntaxKind::ContinueKeyword,
+            "def" => GroovySyntaxKind::DefKeyword,
+            "default" => GroovySyntaxKind::DefaultKeyword,
+            "do" => GroovySyntaxKind::DoKeyword,
+            "else" => GroovySyntaxKind::ElseKeyword,
+            "enum" => GroovySyntaxKind::EnumKeyword,
+            "extends" => GroovySyntaxKind::ExtendsKeyword,
+            "final" => GroovySyntaxKind::FinalKeyword,
+            "finally" => GroovySyntaxKind::FinallyKeyword,
+            "for" => GroovySyntaxKind::ForKeyword,
+            "goto" => GroovySyntaxKind::GotoKeyword,
+            "if" => GroovySyntaxKind::IfKeyword,
+            "implements" => GroovySyntaxKind::ImplementsKeyword,
+            "import" => GroovySyntaxKind::ImportKeyword,
+            "in" => GroovySyntaxKind::InKeyword,
+            "instanceof" => GroovySyntaxKind::InstanceofKeyword,
+            "interface" => GroovySyntaxKind::InterfaceKeyword,
+            "native" => GroovySyntaxKind::NativeKeyword,
+            "new" => GroovySyntaxKind::NewKeyword,
+            "package" => GroovySyntaxKind::PackageKeyword,
+            "private" => GroovySyntaxKind::PrivateKeyword,
+            "protected" => GroovySyntaxKind::ProtectedKeyword,
+            "public" => GroovySyntaxKind::PublicKeyword,
+            "return" => GroovySyntaxKind::ReturnKeyword,
+            "static" => GroovySyntaxKind::StaticKeyword,
+            "strictfp" => GroovySyntaxKind::StrictfpKeyword,
+            "super" => GroovySyntaxKind::SuperKeyword,
+            "switch" => GroovySyntaxKind::SwitchKeyword,
+            "synchronized" => GroovySyntaxKind::SynchronizedKeyword,
+            "this" => GroovySyntaxKind::ThisKeyword,
+            "throw" => GroovySyntaxKind::ThrowKeyword,
+            "throws" => GroovySyntaxKind::ThrowsKeyword,
+            "trait" => GroovySyntaxKind::TraitKeyword,
+            "transient" => GroovySyntaxKind::TransientKeyword,
+            "try" => GroovySyntaxKind::TryKeyword,
+            "void" => GroovySyntaxKind::VoidKeyword,
+            "volatile" => GroovySyntaxKind::VolatileKeyword,
+            "while" => GroovySyntaxKind::WhileKeyword,
 
-            if self.lex_number(&mut state) {
-                continue;
-            }
+            // 特殊字面量
+            "true" | "false" => GroovySyntaxKind::BooleanLiteral,
+            "null" => GroovySyntaxKind::NullLiteral,
 
-            if self.lex_identifier(&mut state, source) {
-                continue;
-            }
+            // 默认为标识符
+            _ => GroovySyntaxKind::Identifier,
+        }
+    }
 
-            if self.lex_operator(&mut state, source) {
-                continue;
-            }
+    /// 词法分析操作符
+    fn lex_operators<S: Source>(&self, state: &mut State<S>) -> bool {
+        let start = state.get_position();
+        let rest = state.rest();
 
-            // 如果所有规则都不匹配，跳过当前字符并标记为错误
-            let start_pos = state.get_position();
-            if let Some(ch) = state.peek() {
-                state.advance(ch.len_utf8());
-                state.add_token(GroovySyntaxKind::Error, start_pos, state.get_position());
-            }
+        // 三字符操作符
+        if rest.starts_with(">>>") {
+            state.advance(3);
+            state.add_token(GroovySyntaxKind::UnsignedRightShift, start, state.get_position());
+            return true;
+        }
+        if rest.starts_with("<=>") {
+            state.advance(3);
+            state.add_token(GroovySyntaxKind::Spaceship, start, state.get_position());
+            return true;
         }
 
-        // 添加 EOF kind
-        let eof_pos = state.get_position();
-        state.add_token(GroovySyntaxKind::Eof, eof_pos, eof_pos);
+        // 两字符操作符
+        if rest.starts_with("**") {
+            state.advance(2);
+            state.add_token(GroovySyntaxKind::Power, start, state.get_position());
+            return true;
+        }
+        if rest.starts_with("+=") {
+            state.advance(2);
+            state.add_token(GroovySyntaxKind::PlusAssign, start, state.get_position());
+            return true;
+        }
+        if rest.starts_with("-=") {
+            state.advance(2);
+            state.add_token(GroovySyntaxKind::MinusAssign, start, state.get_position());
+            return true;
+        }
+        if rest.starts_with("*=") {
+            state.advance(2);
+            state.add_token(GroovySyntaxKind::StarAssign, start, state.get_position());
+            return true;
+        }
+        if rest.starts_with("/=") {
+            state.advance(2);
+            state.add_token(GroovySyntaxKind::SlashAssign, start, state.get_position());
+            return true;
+        }
+        if rest.starts_with("%=") {
+            state.advance(2);
+            state.add_token(GroovySyntaxKind::PercentAssign, start, state.get_position());
+            return true;
+        }
+        if rest.starts_with("**=") {
+            state.advance(3);
+            state.add_token(GroovySyntaxKind::PowerAssign, start, state.get_position());
+            return true;
+        }
+        if rest.starts_with("==") {
+            state.advance(2);
+            state.add_token(GroovySyntaxKind::Equal, start, state.get_position());
+            return true;
+        }
+        if rest.starts_with("!=") {
+            state.advance(2);
+            state.add_token(GroovySyntaxKind::NotEqual, start, state.get_position());
+            return true;
+        }
+        if rest.starts_with("<=") {
+            state.advance(2);
+            state.add_token(GroovySyntaxKind::LessEqual, start, state.get_position());
+            return true;
+        }
+        if rest.starts_with(">=") {
+            state.advance(2);
+            state.add_token(GroovySyntaxKind::GreaterEqual, start, state.get_position());
+            return true;
+        }
+        if rest.starts_with("&&") {
+            state.advance(2);
+            state.add_token(GroovySyntaxKind::LogicalAnd, start, state.get_position());
+            return true;
+        }
+        if rest.starts_with("||") {
+            state.advance(2);
+            state.add_token(GroovySyntaxKind::LogicalOr, start, state.get_position());
+            return true;
+        }
+        if rest.starts_with("<<") {
+            state.advance(2);
+            state.add_token(GroovySyntaxKind::LeftShift, start, state.get_position());
+            return true;
+        }
+        if rest.starts_with(">>") {
+            state.advance(2);
+            state.add_token(GroovySyntaxKind::RightShift, start, state.get_position());
+            return true;
+        }
+        if rest.starts_with("++") {
+            state.advance(2);
+            state.add_token(GroovySyntaxKind::Increment, start, state.get_position());
+            return true;
+        }
+        if rest.starts_with("--") {
+            state.advance(2);
+            state.add_token(GroovySyntaxKind::Decrement, start, state.get_position());
+            return true;
+        }
+        if rest.starts_with("?:") {
+            state.advance(2);
+            state.add_token(GroovySyntaxKind::Elvis, start, state.get_position());
+            return true;
+        }
+        if rest.starts_with("?.") {
+            state.advance(2);
+            state.add_token(GroovySyntaxKind::SafeNavigation, start, state.get_position());
+            return true;
+        }
 
-        state.finish()
+        false
+    }
+
+    /// 词法分析单字符 token
+    fn lex_single_char_tokens<S: Source>(&self, state: &mut State<S>) -> bool {
+        if let Some(ch) = state.peek() {
+            let start = state.get_position();
+            let kind = match ch {
+                '+' => Some(GroovySyntaxKind::Plus),
+                '-' => Some(GroovySyntaxKind::Minus),
+                '*' => Some(GroovySyntaxKind::Star),
+                '/' => Some(GroovySyntaxKind::Slash),
+                '%' => Some(GroovySyntaxKind::Percent),
+                '=' => Some(GroovySyntaxKind::Assign),
+                '<' => Some(GroovySyntaxKind::Less),
+                '>' => Some(GroovySyntaxKind::Greater),
+                '!' => Some(GroovySyntaxKind::LogicalNot),
+                '&' => Some(GroovySyntaxKind::BitAnd),
+                '|' => Some(GroovySyntaxKind::BitOr),
+                '^' => Some(GroovySyntaxKind::BitXor),
+                '~' => Some(GroovySyntaxKind::BitNot),
+                '?' => Some(GroovySyntaxKind::Question),
+                ':' => Some(GroovySyntaxKind::Colon),
+                '(' => Some(GroovySyntaxKind::LeftParen),
+                ')' => Some(GroovySyntaxKind::RightParen),
+                '[' => Some(GroovySyntaxKind::LeftBracket),
+                ']' => Some(GroovySyntaxKind::RightBracket),
+                '{' => Some(GroovySyntaxKind::LeftBrace),
+                '}' => Some(GroovySyntaxKind::RightBrace),
+                ',' => Some(GroovySyntaxKind::Comma),
+                '.' => Some(GroovySyntaxKind::Period),
+                ';' => Some(GroovySyntaxKind::Semicolon),
+                '@' => Some(GroovySyntaxKind::At),
+                _ => None,
+            };
+
+            if let Some(token_kind) = kind {
+                state.advance(ch.len_utf8());
+                let end = state.get_position();
+                state.add_token(token_kind, start, end);
+                true
+            }
+            else {
+                false
+            }
+        }
+        else {
+            false
+        }
     }
 }

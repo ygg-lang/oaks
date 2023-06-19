@@ -1,3 +1,4 @@
+use crate::ast::VhdlRoot;
 use oak_core::Language;
 
 /// VHDL 语言定义
@@ -18,4 +19,5 @@ impl Default for VhdlLanguage {
 
 impl Language for VhdlLanguage {
     type SyntaxKind = crate::kind::VhdlSyntaxKind;
+    type TypedRoot = VhdlRoot;
 }

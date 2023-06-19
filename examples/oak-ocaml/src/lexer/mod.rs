@@ -1,10 +1,34 @@
-use crate::{kind::OCamlSyntaxKind, language::OCamlLanguage};
-use oak_core::{Lexer, LexerState, SourceText, lexer::LexOutput};
+use crate::{OCamlToken, kind::OCamlSyntaxKind, language::OCamlLanguage};
+use oak_core::{
+    IncrementalCache, Lexer, LexerState, OakError,
+    lexer::{CommentLine, LexOutput, StringConfig, WhitespaceConfig},
+    source::Source,
+};
+use std::sync::LazyLock;
 
-type State<'input> = LexerState<'input, OCamlLanguage>;
+type State<S: Source> = LexerState<S, OCamlLanguage>;
 
+static OCAML_WHITESPACE: LazyLock<WhitespaceConfig> = LazyLock::new(|| WhitespaceConfig { unicode_whitespace: true });
+static OCAML_COMMENT: LazyLock<CommentLine> = LazyLock::new(|| CommentLine { line_markers: &["//"] });
+static OCAML_STRING: LazyLock<StringConfig> = LazyLock::new(|| StringConfig { quotes: &['"'], escape: Some('\\') });
+static OCAML_CHAR: LazyLock<StringConfig> = LazyLock::new(|| StringConfig { quotes: &['\''], escape: Some('\\') });
+
+#[derive(Clone)]
 pub struct OCamlLexer<'config> {
     config: &'config OCamlLanguage,
+}
+
+impl<'config> Lexer<OCamlLanguage> for OCamlLexer<'config> {
+    fn lex_incremental(
+        &self,
+        source: impl Source,
+        changed: usize,
+        cache: IncrementalCache<OCamlLanguage>,
+    ) -> LexOutput<OCamlLanguage> {
+        let mut state = LexerState::new_with_cache(source, changed, cache);
+        let result = self.run(&mut state);
+        state.finish(result)
+    }
 }
 
 impl<'config> OCamlLexer<'config> {
@@ -12,451 +36,372 @@ impl<'config> OCamlLexer<'config> {
         Self { config }
     }
 
-    /// 跳过空白字符
-    fn skip_whitespace(&self, state: &mut State) -> bool {
-        let start_pos = state.get_position();
+    /// 主词法分析循环
+    fn run<S: Source>(&self, state: &mut State<S>) -> Result<(), OakError> {
+        while state.not_at_end() {
+            let safe_point = state.get_position();
 
-        while let Some(ch) = state.peek() {
-            if ch == ' ' || ch == '\t' {
+            if self.skip_whitespace(state) {
+                continue;
+            }
+
+            if self.skip_comment(state) {
+                continue;
+            }
+
+            if self.lex_string_literal(state) {
+                continue;
+            }
+
+            if self.lex_char_literal(state) {
+                continue;
+            }
+
+            if self.lex_number_literal(state) {
+                continue;
+            }
+
+            if self.lex_identifier_or_keyword(state) {
+                continue;
+            }
+
+            if self.lex_operators(state) {
+                continue;
+            }
+
+            if self.lex_single_char_tokens(state) {
+                continue;
+            }
+
+            state.safe_check(safe_point);
+        }
+
+        // 添加 EOF token
+        let eof_pos = state.get_position();
+        state.add_token(OCamlSyntaxKind::Eof, eof_pos, eof_pos);
+        Ok(())
+    }
+
+    /// 跳过空白字符
+    fn skip_whitespace<S: Source>(&self, state: &mut State<S>) -> bool {
+        match OCAML_WHITESPACE.scan(state.rest(), state.get_position(), OCamlSyntaxKind::Whitespace) {
+            Some(token) => {
+                state.advance_with(token);
+                true
+            }
+            None => false,
+        }
+    }
+
+    fn skip_comment<S: Source>(&self, state: &mut State<S>) -> bool {
+        let start = state.get_position();
+        let rest = state.rest();
+
+        // OCaml block comment: (* ... *)
+        if rest.starts_with("(*") {
+            state.advance(2);
+            let mut depth = 1;
+            while let Some(ch) = state.peek() {
+                if ch == '(' && state.peek_next_n(1) == Some('*') {
+                    state.advance(2);
+                    depth += 1;
+                    continue;
+                }
+                if ch == '*' && state.peek_next_n(1) == Some(')') {
+                    state.advance(2);
+                    depth -= 1;
+                    if depth == 0 {
+                        break;
+                    }
+                    continue;
+                }
                 state.advance(ch.len_utf8());
+            }
+            state.add_token(OCamlSyntaxKind::Comment, start, state.get_position());
+            return true;
+        }
+
+        false
+    }
+
+    fn lex_string_literal<S: Source>(&self, state: &mut State<S>) -> bool {
+        let start = state.get_position();
+        if state.current() != Some('"') {
+            return false;
+        }
+
+        state.advance(1); // opening "
+        let mut escaped = false;
+        while let Some(ch) = state.peek() {
+            if ch == '"' && !escaped {
+                state.advance(1); // consume closing quote
+                break;
+            }
+            state.advance(ch.len_utf8());
+            if escaped {
+                escaped = false;
+                continue;
+            }
+            if ch == '\\' {
+                escaped = true;
+                continue;
+            }
+            if ch == '\n' || ch == '\r' {
+                break;
+            }
+        }
+        state.add_token(OCamlSyntaxKind::StringLiteral, start, state.get_position());
+        true
+    }
+
+    fn lex_char_literal<S: Source>(&self, state: &mut State<S>) -> bool {
+        let start = state.get_position();
+        if state.current() != Some('\'') {
+            return false;
+        }
+
+        state.advance(1); // opening '
+        if let Some('\\') = state.peek() {
+            state.advance(1);
+            if let Some(c) = state.peek() {
+                state.advance(c.len_utf8());
+            }
+        }
+        else if let Some(c) = state.peek() {
+            state.advance(c.len_utf8());
+        }
+        else {
+            state.set_position(start);
+            return false;
+        }
+
+        if state.peek() == Some('\'') {
+            state.advance(1);
+            state.add_token(OCamlSyntaxKind::CharLiteral, start, state.get_position());
+            return true;
+        }
+
+        state.set_position(start);
+        false
+    }
+
+    fn lex_number_literal<S: Source>(&self, state: &mut State<S>) -> bool {
+        let start = state.get_position();
+        let first = match state.current() {
+            Some(c) => c,
+            None => return false,
+        };
+
+        if !first.is_ascii_digit() {
+            return false;
+        }
+
+        let mut is_float = false;
+
+        // consume digits
+        state.advance(1);
+        while let Some(c) = state.peek() {
+            if c.is_ascii_digit() {
+                state.advance(1);
             }
             else {
                 break;
             }
         }
 
-        if state.get_position() > start_pos {
-            state.add_token(OCamlSyntaxKind::Whitespace, start_pos, state.get_position());
-            true
-        }
-        else {
-            false
-        }
-    }
-
-    /// 处理换行
-    fn lex_newline(&self, state: &mut State) -> bool {
-        let start_pos = state.get_position();
-
-        if let Some('\n') = state.peek() {
-            state.advance(1);
-            state.add_token(OCamlSyntaxKind::Newline, start_pos, state.get_position());
-            true
-        }
-        else if let Some('\r') = state.peek() {
-            state.advance(1);
-            if let Some('\n') = state.peek() {
-                state.advance(1);
-            }
-            state.add_token(OCamlSyntaxKind::Newline, start_pos, state.get_position());
-            true
-        }
-        else {
-            false
-        }
-    }
-
-    /// 处理注释
-    fn lex_comment(&self, state: &mut State) -> bool {
-        let start_pos = state.get_position();
-
-        if let Some('(') = state.peek() {
-            if let Some('*') = state.peek_next_n(1) {
-                state.advance(2);
-                let mut depth = 1;
-
-                while depth > 0 && state.not_at_end() {
-                    if let Some('(') = state.peek() {
-                        if let Some('*') = state.peek_next_n(1) {
-                            state.advance(2);
-                            depth += 1;
-                            continue;
-                        }
-                    }
-
-                    if let Some('*') = state.peek() {
-                        if let Some(')') = state.peek_next_n(1) {
-                            state.advance(2);
-                            depth -= 1;
-                            continue;
-                        }
-                    }
-
-                    if let Some(ch) = state.peek() {
-                        state.advance(ch.len_utf8());
-                    }
-                }
-
-                state.add_token(OCamlSyntaxKind::Comment, start_pos, state.get_position());
-                true
-            }
-            else {
-                false
-            }
-        }
-        else {
-            false
-        }
-    }
-
-    /// 处理标识符和关键
-    fn lex_identifier_or_keyword(&self, source: &SourceText, state: &mut State) -> bool {
-        let start_pos = state.get_position();
-
-        if let Some(ch) = state.peek() {
-            if ch.is_ascii_alphabetic() || ch == '_' {
-                state.advance(ch.len_utf8());
-
-                while let Some(ch) = state.peek() {
-                    if ch.is_ascii_alphanumeric() || ch == '_' || ch == '\'' {
-                        state.advance(ch.len_utf8());
-                    }
-                    else {
-                        break;
-                    }
-                }
-
-                let text = source.get_text_in((start_pos..state.get_position()).into()).unwrap_or("");
-
-                let token_kind = match text {
-                    "and" => OCamlSyntaxKind::And,
-                    "as" => OCamlSyntaxKind::As,
-                    "assert" => OCamlSyntaxKind::Assert,
-                    "begin" => OCamlSyntaxKind::Begin,
-                    "class" => OCamlSyntaxKind::Class,
-                    "constraint" => OCamlSyntaxKind::Constraint,
-                    "do" => OCamlSyntaxKind::Do,
-                    "done" => OCamlSyntaxKind::Done,
-                    "downto" => OCamlSyntaxKind::Downto,
-                    "else" => OCamlSyntaxKind::Else,
-                    "end" => OCamlSyntaxKind::End,
-                    "exception" => OCamlSyntaxKind::Exception,
-                    "external" => OCamlSyntaxKind::External,
-                    "false" => OCamlSyntaxKind::False,
-                    "for" => OCamlSyntaxKind::For,
-                    "fun" => OCamlSyntaxKind::Fun,
-                    "function" => OCamlSyntaxKind::Function,
-                    "functor" => OCamlSyntaxKind::Functor,
-                    "if" => OCamlSyntaxKind::If,
-                    "in" => OCamlSyntaxKind::In,
-                    "include" => OCamlSyntaxKind::Include,
-                    "inherit" => OCamlSyntaxKind::Inherit,
-                    "initializer" => OCamlSyntaxKind::Initializer,
-                    "lazy" => OCamlSyntaxKind::Lazy,
-                    "let" => OCamlSyntaxKind::Let,
-                    "match" => OCamlSyntaxKind::Match,
-                    "method" => OCamlSyntaxKind::Method,
-                    "module" => OCamlSyntaxKind::Module,
-                    "mutable" => OCamlSyntaxKind::Mutable,
-                    "new" => OCamlSyntaxKind::New,
-                    "object" => OCamlSyntaxKind::Object,
-                    "of" => OCamlSyntaxKind::Of,
-                    "open" => OCamlSyntaxKind::Open,
-                    "or" => OCamlSyntaxKind::Or,
-                    "private" => OCamlSyntaxKind::Private,
-                    "rec" => OCamlSyntaxKind::Rec,
-                    "sig" => OCamlSyntaxKind::Sig,
-                    "struct" => OCamlSyntaxKind::Struct,
-                    "then" => OCamlSyntaxKind::Then,
-                    "to" => OCamlSyntaxKind::To,
-                    "true" => OCamlSyntaxKind::True,
-                    "try" => OCamlSyntaxKind::Try,
-                    "type" => OCamlSyntaxKind::Type,
-                    "val" => OCamlSyntaxKind::Val,
-                    "virtual" => OCamlSyntaxKind::Virtual,
-                    "when" => OCamlSyntaxKind::When,
-                    "while" => OCamlSyntaxKind::While,
-                    "with" => OCamlSyntaxKind::With,
-                    _ => OCamlSyntaxKind::Identifier,
-                };
-
-                state.add_token(token_kind, start_pos, state.get_position());
-                true
-            }
-            else {
-                false
-            }
-        }
-        else {
-            false
-        }
-    }
-
-    /// 处理数字
-    fn lex_number(&self, state: &mut State) -> bool {
-        let start_pos = state.get_position();
-
-        if let Some(ch) = state.peek() {
-            if ch.is_ascii_digit() {
-                state.advance(1);
-
-                // 处理整数部分
-                while let Some(ch) = state.peek() {
-                    if ch.is_ascii_digit() || ch == '_' {
+        // fractional part
+        if state.peek() == Some('.') {
+            let n1 = state.peek_next_n(1);
+            if n1.map(|c| c.is_ascii_digit()).unwrap_or(false) {
+                is_float = true;
+                state.advance(1); // consume '.'
+                while let Some(c) = state.peek() {
+                    if c.is_ascii_digit() {
                         state.advance(1);
                     }
                     else {
                         break;
                     }
                 }
+            }
+        }
 
-                // 检查是否是浮点                let mut is_float = false;
-                if let Some('.') = state.peek() {
-                    if let Some(next_ch) = state.peek_next_n(1) {
-                        if next_ch.is_ascii_digit() {
-                            is_float = true;
-                            state.advance(1); // 跳过 '.'
-
-                            while let Some(ch) = state.peek() {
-                                if ch.is_ascii_digit() || ch == '_' {
-                                    state.advance(1);
-                                }
-                                else {
-                                    break;
-                                }
-                            }
+        // exponent
+        if let Some(c) = state.peek() {
+            if c == 'e' || c == 'E' {
+                let n1 = state.peek_next_n(1);
+                if n1 == Some('+') || n1 == Some('-') || n1.map(|d| d.is_ascii_digit()).unwrap_or(false) {
+                    is_float = true;
+                    state.advance(1);
+                    if let Some(sign) = state.peek() {
+                        if sign == '+' || sign == '-' {
+                            state.advance(1);
+                        }
+                    }
+                    while let Some(d) = state.peek() {
+                        if d.is_ascii_digit() {
+                            state.advance(1);
+                        }
+                        else {
+                            break;
                         }
                     }
                 }
+            }
+        }
 
-                // 处理指数部分
-                if let Some(ch) = state.peek() {
-                    if ch == 'e' || ch == 'E' {
-                        is_float = true;
-                        state.advance(1);
+        let end = state.get_position();
+        state.add_token(if is_float { OCamlSyntaxKind::FloatLiteral } else { OCamlSyntaxKind::IntegerLiteral }, start, end);
+        true
+    }
 
-                        if let Some(sign) = state.peek() {
-                            if sign == '+' || sign == '-' {
-                                state.advance(1);
-                            }
-                        }
+    fn lex_identifier_or_keyword<S: Source>(&self, state: &mut State<S>) -> bool {
+        let start = state.get_position();
+        let ch = match state.current() {
+            Some(c) => c,
+            None => return false,
+        };
 
-                        while let Some(ch) = state.peek() {
-                            if ch.is_ascii_digit() {
-                                state.advance(1);
-                            }
-                            else {
-                                break;
-                            }
-                        }
-                    }
-                }
+        if !(ch.is_ascii_alphabetic() || ch == '_') {
+            return false;
+        }
 
-                let token_kind = if is_float { OCamlSyntaxKind::Float } else { OCamlSyntaxKind::Integer };
-
-                state.add_token(token_kind, start_pos, state.get_position());
-                true
+        state.advance(1);
+        while let Some(c) = state.current() {
+            if c.is_ascii_alphanumeric() || c == '_' || c == '\'' {
+                state.advance(1);
             }
             else {
-                false
+                break;
             }
         }
-        else {
-            false
-        }
+
+        let end = state.get_position();
+        let text = state.get_text_in((start..end).into());
+        let kind = match text {
+            // OCaml keywords
+            "and" => OCamlSyntaxKind::And,
+            "as" => OCamlSyntaxKind::As,
+            "assert" => OCamlSyntaxKind::Assert,
+            "begin" => OCamlSyntaxKind::Begin,
+            "class" => OCamlSyntaxKind::Class,
+            "constraint" => OCamlSyntaxKind::Constraint,
+            "do" => OCamlSyntaxKind::Do,
+            "done" => OCamlSyntaxKind::Done,
+            "downto" => OCamlSyntaxKind::Downto,
+            "else" => OCamlSyntaxKind::Else,
+            "end" => OCamlSyntaxKind::End,
+            "exception" => OCamlSyntaxKind::Exception,
+            "external" => OCamlSyntaxKind::External,
+            "false" => OCamlSyntaxKind::False,
+            "for" => OCamlSyntaxKind::For,
+            "fun" => OCamlSyntaxKind::Fun,
+            "function" => OCamlSyntaxKind::Function,
+            "functor" => OCamlSyntaxKind::Functor,
+            "if" => OCamlSyntaxKind::If,
+            "in" => OCamlSyntaxKind::In,
+            "include" => OCamlSyntaxKind::Include,
+            "inherit" => OCamlSyntaxKind::Inherit,
+            "initializer" => OCamlSyntaxKind::Initializer,
+            "lazy" => OCamlSyntaxKind::Lazy,
+            "let" => OCamlSyntaxKind::Let,
+            "match" => OCamlSyntaxKind::Match,
+            "method" => OCamlSyntaxKind::Method,
+            "module" => OCamlSyntaxKind::Module,
+            "mutable" => OCamlSyntaxKind::Mutable,
+            "new" => OCamlSyntaxKind::New,
+            "object" => OCamlSyntaxKind::Object,
+            "of" => OCamlSyntaxKind::Of,
+            "open" => OCamlSyntaxKind::Open,
+            "or" => OCamlSyntaxKind::Or,
+            "private" => OCamlSyntaxKind::Private,
+            "rec" => OCamlSyntaxKind::Rec,
+            "sig" => OCamlSyntaxKind::Sig,
+            "struct" => OCamlSyntaxKind::Struct,
+            "then" => OCamlSyntaxKind::Then,
+            "to" => OCamlSyntaxKind::To,
+            "true" => OCamlSyntaxKind::True,
+            "try" => OCamlSyntaxKind::Try,
+            "type" => OCamlSyntaxKind::Type,
+            "val" => OCamlSyntaxKind::Val,
+            "virtual" => OCamlSyntaxKind::Virtual,
+            "when" => OCamlSyntaxKind::When,
+            "while" => OCamlSyntaxKind::While,
+            "with" => OCamlSyntaxKind::With,
+
+            _ => OCamlSyntaxKind::Identifier,
+        };
+
+        state.add_token(kind, start, state.get_position());
+        true
     }
 
-    /// 处理字符
-    fn lex_string(&self, state: &mut State) -> bool {
-        let start_pos = state.get_position();
+    fn lex_operators<S: Source>(&self, state: &mut State<S>) -> bool {
+        let start = state.get_position();
+        let rest = state.rest();
 
-        if let Some('"') = state.peek() {
-            state.advance(1);
+        // prefer longest matches first
+        let patterns: &[(&str, OCamlSyntaxKind)] = &[
+            ("==", OCamlSyntaxKind::EqualEqual),
+            ("!=", OCamlSyntaxKind::NotEqual),
+            (">=", OCamlSyntaxKind::GreaterEqual),
+            ("<=", OCamlSyntaxKind::LessEqual),
+            ("&&", OCamlSyntaxKind::AndAnd),
+            ("||", OCamlSyntaxKind::OrOr),
+            ("::", OCamlSyntaxKind::ColonColon),
+            ("->", OCamlSyntaxKind::RightArrow),
+            ("<-", OCamlSyntaxKind::LeftArrow),
+        ];
 
-            while let Some(ch) = state.peek() {
-                if ch == '"' {
-                    state.advance(1);
-                    state.add_token(OCamlSyntaxKind::String, start_pos, state.get_position());
-                    return true;
-                }
-                else if ch == '\\' {
-                    state.advance(1);
-                    if let Some(_) = state.peek() {
-                        state.advance(1);
-                    }
-                }
-                else {
-                    state.advance(ch.len_utf8());
-                }
+        for (pat, kind) in patterns {
+            if rest.starts_with(pat) {
+                state.advance(pat.len());
+                state.add_token(*kind, start, state.get_position());
+                return true;
             }
-
-            // 未闭合的字符            state.add_token(OCamlSyntaxKind::Error, start_pos, state.get_position());
-            true
         }
-        else {
-            false
-        }
-    }
 
-    /// 处理字符
-    fn lex_char(&self, state: &mut State) -> bool {
-        let start_pos = state.get_position();
-
-        if let Some('\'') = state.peek() {
-            state.advance(1);
-
-            if let Some(ch) = state.peek() {
-                if ch == '\\' {
-                    state.advance(1);
-                    if let Some(_) = state.peek() {
-                        state.advance(1);
-                    }
-                }
-                else {
-                    state.advance(ch.len_utf8());
-                }
-
-                if let Some('\'') = state.peek() {
-                    state.advance(1);
-                    state.add_token(OCamlSyntaxKind::Char, start_pos, state.get_position());
-                    return true;
-                }
-            }
-
-            // 未闭合的字符
-            state.add_token(OCamlSyntaxKind::Error, start_pos, state.get_position());
-            true
-        }
-        else {
-            false
-        }
-    }
-
-    /// 处理操作
-    fn lex_operators(&self, state: &mut State) -> bool {
-        let start_pos = state.get_position();
-
-        if let Some(ch) = state.peek() {
-            let token_kind = match ch {
-                '+' => {
-                    state.advance(1);
-                    OCamlSyntaxKind::Plus
-                }
-                '-' => {
-                    state.advance(1);
-                    if let Some('>') = state.peek() {
-                        state.advance(1);
-                        OCamlSyntaxKind::Arrow
-                    }
-                    else {
-                        OCamlSyntaxKind::Minus
-                    }
-                }
-                '*' => {
-                    state.advance(1);
-                    OCamlSyntaxKind::Star
-                }
-                '/' => {
-                    state.advance(1);
-                    OCamlSyntaxKind::Slash
-                }
-                '%' => {
-                    state.advance(1);
-                    OCamlSyntaxKind::Percent
-                }
-                '=' => {
-                    state.advance(1);
-                    if let Some('>') = state.peek() {
-                        state.advance(1);
-                        OCamlSyntaxKind::DoubleArrow
-                    }
-                    else {
-                        OCamlSyntaxKind::Equal
-                    }
-                }
-                '<' => {
-                    state.advance(1);
-                    if let Some('=') = state.peek() {
-                        state.advance(1);
-                        OCamlSyntaxKind::LessEqual
-                    }
-                    else if let Some('>') = state.peek() {
-                        state.advance(1);
-                        OCamlSyntaxKind::NotEqual
-                    }
-                    else {
-                        OCamlSyntaxKind::Less
-                    }
-                }
-                '>' => {
-                    state.advance(1);
-                    if let Some('=') = state.peek() {
-                        state.advance(1);
-                        OCamlSyntaxKind::GreaterEqual
-                    }
-                    else {
-                        OCamlSyntaxKind::Greater
-                    }
-                }
-                ':' => {
-                    state.advance(1);
-                    if let Some('=') = state.peek() {
-                        state.advance(1);
-                        OCamlSyntaxKind::Assign
-                    }
-                    else {
-                        OCamlSyntaxKind::Colon
-                    }
-                }
-                '|' => {
-                    state.advance(1);
-                    OCamlSyntaxKind::Pipe
-                }
-                '&' => {
-                    state.advance(1);
-                    OCamlSyntaxKind::Ampersand
-                }
-                '!' => {
-                    state.advance(1);
-                    OCamlSyntaxKind::Exclamation
-                }
-                '?' => {
-                    state.advance(1);
-                    OCamlSyntaxKind::Question
-                }
-                ';' => {
-                    state.advance(1);
-                    OCamlSyntaxKind::Semicolon
-                }
-                ',' => {
-                    state.advance(1);
-                    OCamlSyntaxKind::Comma
-                }
-                '.' => {
-                    state.advance(1);
-                    if let Some('.') = state.peek() {
-                        state.advance(1);
-                        OCamlSyntaxKind::DotDot
-                    }
-                    else {
-                        OCamlSyntaxKind::Dot
-                    }
-                }
-                '_' => {
-                    state.advance(1);
-                    OCamlSyntaxKind::Underscore
-                }
-                '`' => {
-                    state.advance(1);
-                    OCamlSyntaxKind::Backquote
-                }
-                _ => return false,
+        if let Some(ch) = state.current() {
+            let kind = match ch {
+                '+' => Some(OCamlSyntaxKind::Plus),
+                '-' => Some(OCamlSyntaxKind::Minus),
+                '*' => Some(OCamlSyntaxKind::Star),
+                '/' => Some(OCamlSyntaxKind::Slash),
+                '%' => Some(OCamlSyntaxKind::Percent),
+                '=' => Some(OCamlSyntaxKind::Equal),
+                '>' => Some(OCamlSyntaxKind::Greater),
+                '<' => Some(OCamlSyntaxKind::Less),
+                '!' => Some(OCamlSyntaxKind::Bang),
+                '?' => Some(OCamlSyntaxKind::Question),
+                ':' => Some(OCamlSyntaxKind::Colon),
+                ';' => Some(OCamlSyntaxKind::Semicolon),
+                ',' => Some(OCamlSyntaxKind::Comma),
+                '.' => Some(OCamlSyntaxKind::Dot),
+                '|' => Some(OCamlSyntaxKind::Pipe),
+                '&' => Some(OCamlSyntaxKind::Ampersand),
+                '^' => Some(OCamlSyntaxKind::Caret),
+                '~' => Some(OCamlSyntaxKind::Tilde),
+                '@' => Some(OCamlSyntaxKind::At),
+                '#' => Some(OCamlSyntaxKind::Hash),
+                '$' => Some(OCamlSyntaxKind::Dollar),
+                '`' => Some(OCamlSyntaxKind::Backtick),
+                _ => None,
             };
 
-            state.add_token(token_kind, start_pos, state.get_position());
-            true
+            if let Some(k) = kind {
+                state.advance(ch.len_utf8());
+                state.add_token(k, start, state.get_position());
+                return true;
+            }
         }
-        else {
-            false
-        }
+
+        false
     }
 
-    /// 处理分隔
-    fn lex_delimiters(&self, state: &mut State) -> bool {
-        let start_pos = state.get_position();
-
-        if let Some(ch) = state.peek() {
-            let token_kind = match ch {
+    fn lex_single_char_tokens<S: Source>(&self, state: &mut State<S>) -> bool {
+        let start = state.get_position();
+        if let Some(ch) = state.current() {
+            let kind = match ch {
                 '(' => OCamlSyntaxKind::LeftParen,
                 ')' => OCamlSyntaxKind::RightParen,
                 '[' => OCamlSyntaxKind::LeftBracket,
@@ -467,69 +412,11 @@ impl<'config> OCamlLexer<'config> {
             };
 
             state.advance(ch.len_utf8());
-            state.add_token(token_kind, start_pos, state.get_position());
+            state.add_token(kind, start, state.get_position());
             true
         }
         else {
             false
         }
-    }
-}
-
-impl<'config> Lexer<OCamlLanguage> for OCamlLexer<'config> {
-    fn lex(&self, source: &SourceText) -> LexOutput<OCamlSyntaxKind> {
-        let mut state = LexerState::new(source);
-
-        while state.not_at_end() {
-            // 尝试各种词法规则
-            if self.skip_whitespace(&mut state) {
-                continue;
-            }
-
-            if self.lex_newline(&mut state) {
-                continue;
-            }
-
-            if self.lex_comment(&mut state) {
-                continue;
-            }
-
-            if self.lex_string(&mut state) {
-                continue;
-            }
-
-            if self.lex_char(&mut state) {
-                continue;
-            }
-
-            if self.lex_number(&mut state) {
-                continue;
-            }
-
-            if self.lex_identifier_or_keyword(source, &mut state) {
-                continue;
-            }
-
-            if self.lex_operators(&mut state) {
-                continue;
-            }
-
-            if self.lex_delimiters(&mut state) {
-                continue;
-            }
-
-            // 如果所有规则都不匹配，跳过当前字符并标记为错误
-            let start_pos = state.get_position();
-            if let Some(ch) = state.peek() {
-                state.advance(ch.len_utf8());
-                state.add_token(OCamlSyntaxKind::Error, start_pos, state.get_position());
-            }
-        }
-
-        // 添加 EOF kind
-        let eof_pos = state.get_position();
-        state.add_token(OCamlSyntaxKind::Eof, eof_pos, eof_pos);
-
-        state.finish()
     }
 }

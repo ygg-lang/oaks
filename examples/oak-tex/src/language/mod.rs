@@ -71,4 +71,11 @@ impl TexLanguage {
 
 impl Language for TexLanguage {
     type SyntaxKind = TexSyntaxKind;
+    type TypedRoot = ();
+}
+
+impl Default for TexLanguage {
+    fn default() -> Self {
+        Self::standard()
+    }
 }

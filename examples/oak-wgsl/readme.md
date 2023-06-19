@@ -1,108 +1,157 @@
-# WebAssembly 文本格式 (WAT) 处理模块
+# Oak WGSL Parser
 
-这个模块提供了完整的 WAT (WebAssembly Text) 格式处理功能，包括：
-- **词法分析**: 将 WAT 文本分解为词法单元 (tokens)
-- **语法分析**: 将词法单元解析为抽象语法树 (AST)
-- **编译**: 将 AST 编译为 WASM 二进制结构
-- **反编译**: 将 WASM 结构转换回 WAT 文本
+[![Crates.io](https://img.shields.io/crates/v/oak-wgsl.svg)](https://crates.io/crates/oak-wgsl)
+[![Documentation](https://docs.rs/oak-wgsl/badge.svg)](https://docs.rs/oak-wgsl)
 
-## 模块组件
+High-performance incremental WGSL parser for the oak ecosystem with flexible configuration, optimized for WebGPU graphics programming and shader development.
 
-### `ast` 模块
+## 🎯 Overview
 
-定义 WAT 抽象语法树的所有节点类型：
-- `Module`: 模块定义
-- `Func`: 函数定义
-- `Export`: 导出定义
-- `Import`: 导入定义
-- `Memory`: 内存定义
-- `Table`: 表定义
-- `Global`: 全局变量定义
-- `Instruction`: WebAssembly 指令
+Oak WGSL is a robust parser for WebGPU Shading Language (WGSL), designed to handle complete WGSL syntax including modern shader features and compute capabilities. Built on the solid foundation of oak-core, it provides both high-level convenience and detailed AST generation for WGSL analysis and tooling.
 
-### `lexer` 模块
+## ✨ Features
 
-词法分析器，将 WAT 文本转换为词法单元：
-- 关键字识别 (`module`, `func`, `export`, 等)
-- 标识符和名称解析
-- 数值字面量处理
-- 字符串字面量处理
-- 注释和空白字符处理
+- **Complete WGSL Syntax**: Supports all WGSL features including modern specifications
+- **Shader Stage Support**: Handles vertex, fragment, and compute shader stages
+- **Full AST Generation**: Generates comprehensive Abstract Syntax Trees
+- **Lexer Support**: Built-in tokenization with proper span information
+- **Error Recovery**: Graceful handling of syntax errors with detailed diagnostics
 
-### `parser` 模块
+## 🚀 Quick Start
 
-语法分析器，将词法单元解析为 AST：
-- 递归下降解析
-- 错误恢复和报告
-- 语法验证
-- 位置信息跟踪
+Basic example:
 
-### `compiler` 模块
-
-编译器，将 AST 编译为 WASM 结构：
-- 类型检查
-- 符号解析
-- 指令编码
-- 模块生成
-
-### `writer` 模块
-
-写入器，将 AST 转换回 WAT 文本：
-- 格式化输出
-- 注释生成
-- 代码美化
-
-## 使用示例
-
-### 基本解析和编译
-
-```rust,no_run
-use wasi_assembler::formats::wat::{WatParser, WatCompiler};
+```rust
+use oak_wgsl::{Parser, WgslLanguage, SourceText};
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
-    let wat_source = r#"
-        (module
-            (func $add (param $a i32) (param $b i32) (result i32)
-                local.get $a
-                local.get $b
-                i32.add
-            )
-            (export "add" (func $add))
-        )
-    "#;
+    let parser = Parser::new();
+    let source = SourceText::new(r#"
+@vertex
+fn vs_main(@builtin(vertex_index) in_vertex_index: u32) -> @builtin(position) vec4<f32> {
+    let x = f32(i32(in_vertex_index) - 1);
+    let y = f32(i32(in_vertex_index & 1u) * 2 - 1);
+    return vec4<f32>(x, y, 0.0, 1.0);
+}
+    "#);
     
-    // 解析 WAT 文本
-    let mut parser = WatParser::new();
-    let ast = parser.parse(wat_source)?;
-    
-    // 编译为 WASM 结构
-    let mut compiler = WatCompiler::new();
-    let wasm_module = compiler.compile(ast)?;
+    let result = parser.parse(&source);
+    println!("Parsed WGSL shader successfully.");
     Ok(())
 }
 ```
 
-### 错误处理
+## 📋 Parsing Examples
 
-```rust,no_run
-use wasi_assembler::formats::wat::{WatParser, WatError};
+### Fragment Shader Parsing
+```rust
+use oak_wgsl::{Parser, WgslLanguage, SourceText};
 
-fn main() -> Result<(), Box<dyn std::error::Error>> {
-    let mut parser = WatParser::new();
-    match parser.parse("(module (func $invalid") {
-        Ok(ast) => {
-            // 解析成功
-        }
-        Err(WatError::UnexpectedToken { expected, found, location }) => {
-            eprintln!("语法错误: 期望 {:?}, 找到 {:?} 在位置 {:?}", expected, found, location);
-        }
-        Err(WatError::UnexpectedEof) => {
-            eprintln!("意外结束: 输入不完整");
-        }
-        Err(e) => {
-            eprintln!("解析错误: {}", e);
-        }
+let parser = Parser::new();
+let source = SourceText::new(r#"
+@fragment
+fn fs_main(@location(0) frag_color: vec4<f32>) -> @location(0) vec4<f32> {
+    return frag_color;
+}
+"#);
+
+let result = parser.parse(&source);
+println!("Parsed WGSL fragment shader successfully.");
+```
+
+### Compute Shader Parsing
+```rust
+use oak_wgsl::{Parser, WgslLanguage, SourceText};
+
+let parser = Parser::new();
+let source = SourceText::new(r#"
+@group(0) @binding(0)
+var<storage, read_write> data: array<f32>;
+
+@compute @workgroup_size(64)
+fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
+    let index = global_id.x;
+    if (index >= arrayLength(&data)) {
+        return;
     }
-    Ok(())
+    data[index] = data[index] * 2.0;
+}
+"#);
+
+let result = parser.parse(&source);
+println!("Parsed WGSL compute shader successfully.");
+```
+
+## 🔧 Advanced Features
+
+### Token-Level Parsing
+```rust
+use oak_wgsl::{Parser, WgslLanguage, SourceText};
+
+let parser = Parser::new();
+let source = SourceText::new("@vertex fn main() -> @builtin(position) vec4<f32> { return vec4<f32>(0.0); }");
+let result = parser.parse(&source);
+// Token information is available in the parse result
+```
+
+### Error Handling
+```rust
+use oak_wgsl::{Parser, WgslLanguage, SourceText};
+
+let parser = Parser::new();
+let source = SourceText::new(r#"
+@vertex
+fn broken_shader() -> vec4<f32> {
+    let x: f32 = "not a number"; // Type mismatch
+    return x; // Missing vector construction
+}
+"#);
+
+let result = parser.parse(&source);
+if let Err(e) = result.result {
+    println!("Parse error: {:?}", e);
 }
 ```
+
+## 🏗️ AST Structure
+
+The parser generates a comprehensive AST with the following main structures:
+
+- **Shader**: Root container for WGSL shaders
+- **Function**: Shader functions with attributes
+- **Variable**: Variable declarations with bindings
+- **Statements**: Assignment, if, loop, return statements
+- **Expressions**: Binary, unary, function call expressions
+- **Types**: Vector, matrix, array, and custom types
+
+## 📊 Performance
+
+- **Streaming**: Parse large WGSL files without loading entirely into memory
+- **Incremental**: Re-parse only changed sections
+- **Memory Efficient**: Smart AST node allocation
+- **Fast Recovery**: Quick error recovery for better IDE integration
+
+## 🔗 Integration
+
+Oak-wgsl integrates seamlessly with:
+
+- **Static Analysis**: Code quality and security analysis
+- **Shader Transpilation**: Converting between shading languages
+- **IDE Support**: Language server protocol compatibility
+- **Shader Validation**: Checking shader correctness before compilation
+- **Documentation**: Generating documentation from WGSL code
+
+## 📚 Examples
+
+Check out the [examples](examples/) directory for comprehensive examples:
+
+- Complete WGSL shader parsing
+- Vertex and fragment shader analysis
+- Compute shader processing
+- Integration with graphics pipelines
+
+## 🤝 Contributing
+
+Contributions are welcome! 
+
+Please feel free to submit pull requests at the [project repository](https://github.com/ygg-lang/oaks/tree/dev/examples/oak-wgsl) or open [issues](https://github.com/ygg-lang/oaks/issues).

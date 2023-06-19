@@ -1,14 +1,13 @@
 # Oak Dart Parser
 
-[![Crates.io](https://img.shields.io/crates/v/oak-markdown.svg)](https://crates.io/crates/oak-markdown)
-[![Documentation](https://docs.rs/oak-markdown/badge.svg)](https://docs.rs/oak-markdown)
+[![Crates.io](https://img.shields.io/crates/v/oak-dart.svg)](https://crates.io/crates/oak-dart)
+[![Documentation](https://docs.rs/oak-dart/badge.svg)](https://docs.rs/oak-dart)
 
-
-A comprehensive Markdown parser supporting CommonMark and GitHub Flavored Markdown, built on oak-core for accurate document parsing and AST generation.
+High-performance incremental Dart parser for the oak ecosystem with flexible configuration, optimized for code analysis and compilation.
 
 ## 🎯 Overview
 
-Oak-dart is a robust parser for Dart, designed to handle complete Dart syntax including modern features. Built on the solid foundation of oak-core, it provides both high-level convenience and detailed AST generation for static analysis and code generation.
+Oak Dart is a robust parser for Dart, designed to handle complete Dart syntax including modern features. Built on the solid foundation of oak-core, it provides both high-level convenience and detailed AST generation for static analysis and code generation.
 
 ## ✨ Features
 
@@ -22,248 +21,180 @@ Oak-dart is a robust parser for Dart, designed to handle complete Dart syntax in
 Basic example:
 
 ```rust
-use oak_markdown::MarkdownParser;
+use oak_dart::{Parser, DartLanguage, SourceText};
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
-    let parser = MarkdownParser::new();
-    let markdown = r#"# Hello World
+    let parser = Parser::new();
+    let source = SourceText::new(r#"
+import 'dart:io';
 
-This is a **bold** statement and this is *italic* text.
-
-## Features
-
-- First item
-- Second item
-- Third item
-
-[Link to documentation](https://docs.rs/oak-markdown)"#;
+void main() {
+  print('Hello, Dart!');
+  
+  var numbers = [1, 2, 3, 4, 5];
+  numbers.forEach((number) {
+    print(number * 2);
+  });
+}
+    "#);
     
-    let document = parser.parse(markdown)?;
-    println!("Parsed {} blocks", document.blocks.len());
+    let result = parser.parse(&source);
+    println!("Parsed Dart program successfully.");
     Ok(())
 }
 ```
 
 ## 📋 Parsing Examples
 
-### Document Structure
+### Class Parsing
 ```rust
-use oak_markdown::{MarkdownParser, ast::Block};
+use oak_dart::{Parser, DartLanguage, SourceText};
 
-let parser = MarkdownParser::new();
-let markdown = r#"# Main Title
-
-## Section 1
-
-This is the first paragraph with **bold** and *italic* text.
-
-### Subsection
-
-Here's a [link](https://example.com) and some `inline code`.
-
-## Section 2
-
-- List item 1
-- List item 2
-- List item 3"#;
-
-let document = parser.parse(markdown)?;
-for block in &document.blocks {
-    match block {
-        Block::Heading(heading) => {
-            println!("Heading level {}: {}", heading.level, heading.text);
-        }
-        Block::Paragraph(paragraph) => {
-            println!("Paragraph with {} inline elements", paragraph.inlines.len());
-        }
-        _ => {}
-    }
+let parser = Parser::new();
+let source = SourceText::new(r#"
+class Calculator {
+  double _result = 0.0;
+  
+  double add(double a, double b) {
+    _result = a + b;
+    return _result;
+  }
+  
+  double subtract(double a, double b) {
+    _result = a - b;
+    return _result;
+  }
+  
+  double get result => _result;
 }
+    "#);
+
+let result = parser.parse(&source);
+println!("Parsed Dart class successfully.");
 ```
 
-### Table Parsing
+### Function Parsing
 ```rust
-use oak_markdown::{MarkdownParser, ast::Block};
+use oak_dart::{Parser, DartLanguage, SourceText};
 
-let parser = MarkdownParser::new();
-let markdown = r#"| Name | Age | City |
-|------|-----|------|
-| Alice | 25 | New York |
-| Bob | 30 | London |
-| Carol | 28 | Tokyo |
-
-## Code Block
-
-```rust
-fn main() {
-    println!("Hello, World!");
+let parser = Parser::new();
+let source = SourceText::new(r#"
+String greet(String name, {String greeting = 'Hello'}) {
+  return '$greeting, $name!';
 }
-```"#;
 
-let document = parser.parse(markdown)?;
-for block in &document.blocks {
-    match block {
-        Block::Table(table) => {
-            println!("Table with {} rows and {} columns", 
-                table.rows.len(), table.headers.len());
-        }
-        Block::CodeBlock(code) => {
-            println!("Code block ({}): {}", code.language.as_deref().unwrap_or("text"), code.content);
-        }
-        _ => {}
-    }
+int fibonacci(int n) {
+  if (n <= 1) return n;
+  return fibonacci(n - 1) + fibonacci(n - 2);
 }
+    "#);
+
+let result = parser.parse(&source);
+println!("Parsed Dart functions successfully.");
 ```
 
-### Task Lists and Extensions
+### Async/Await Parsing
 ```rust
-use oak_markdown::{MarkdownParser, ast::Block, extensions::Extensions};
+use oak_dart::{Parser, DartLanguage, SourceText};
 
-let mut parser = MarkdownParser::new();
-parser.enable_extensions(Extensions::all());
+let parser = Parser::new();
+let source = SourceText::new(r#"
+import 'dart:convert';
+import 'package:http/http.dart' as http;
 
-let markdown = r#"## Todo List
-
-- [x] Complete the project
-- [ ] Write documentation
-- [ ] Add tests
-- [x] Review code
-
-### Strikethrough
-
-This is ~~deleted~~ text and this is ==highlighted== text.
-
-### Autolinks
-
-Visit https://github.com for more information."#;
-
-let document = parser.parse(markdown)?;
-for block in &document.blocks {
-    match block {
-        Block::List(list) => {
-            println!("List with {} items:", list.items.len());
-            for item in &list.items {
-                if let Some(checked) = item.checked {
-                    println!("  - [{}] {}", 
-                        if checked { "x" } else { " " }, 
-                        item.text);
-                }
-            }
-        }
-        _ => {}
-    }
+Future<Map<String, dynamic>> fetchData(String url) async {
+  final response = await http.get(Uri.parse(url));
+  
+  if (response.statusCode == 200) {
+    return jsonDecode(response.body) as Map<String, dynamic>;
+  } else {
+    throw Exception('Failed to load data');
+  }
 }
+
+void main() async {
+  try {
+    final data = await fetchData('https://api.example.com/data');
+    print('Data loaded: $data');
+  } catch (e) {
+    print('Error: $e');
+  }
+}
+    "#);
+
+let result = parser.parse(&source);
+println!("Parsed Dart async code successfully.");
 ```
 
 ## 🔧 Advanced Features
 
-### Custom Extensions
+### Token-Level Parsing
 ```rust
-use oak_markdown::{MarkdownParser, extensions::Extension};
+use oak_dart::{Parser, DartLanguage, SourceText};
 
-struct CustomEmojiExtension;
+let parser = Parser::new();
+let source = SourceText::new("void main() { print('Hello'); }");
+let result = parser.parse(&source);
+// Token information is available in the parse result
+```
 
-impl Extension for CustomEmojiExtension {
-    fn name(&self) -> &str { "custom_emoji" }
-    
-    fn process_inline(&self, text: &str) -> Option<Vec<ast::Inline>> {
-        // Convert :smile: to emoji
-        if text.contains(":smile:") {
-            Some(vec![ast::Inline::Text("😊".to_string())])
-        } else {
-            None
-        }
-    }
+### Error Handling
+```rust
+use oak_dart::{Parser, DartLanguage, SourceText};
+
+let parser = Parser::new();
+let source = SourceText::new(r#"
+void main() {
+  print('Hello, Dart!'
+  // Missing closing parenthesis
 }
+    "#);
 
-let mut parser = MarkdownParser::new();
-parser.add_extension(Box::new(CustomEmojiExtension));
-
-let markdown = "Hello :smile: World!";
-let document = parser.parse(markdown)?;
-```
-
-### AST Manipulation
-```rust
-use oak_markdown::{MarkdownParser, ast::{Block, Document}};
-
-let parser = MarkdownParser::new();
-let markdown = "# Original Title\n\nOriginal content.";
-let mut document = parser.parse(markdown)?;
-
-// Add a new heading
-document.blocks.push(Block::Heading(ast::Heading {
-    level: 2,
-    text: "Added Section".to_string(),
-    inlines: vec![ast::Inline::Text("Added Section".to_string())]
-}));
-
-// Serialize back to markdown
-let new_markdown = document.to_markdown();
-println!("Modified markdown:\n{}", new_markdown);
-```
-
-### HTML Generation
-```rust
-use oak_markdown::{MarkdownParser, html::HtmlRenderer};
-
-let parser = MarkdownParser::new();
-let markdown = r#"# Document Title
-
-This is a paragraph with **bold** text.
-
-- List item 1
-- List item 2
-
-[Link](https://example.com)"#;
-
-let document = parser.parse(markdown)?;
-let renderer = HtmlRenderer::new();
-let html = renderer.render(&document)?;
-
-println!("Generated HTML:\n{}", html);
+let result = parser.parse(&source);
+if let Err(e) = result.result {
+    println!("Parse error: {:?}", e);
+}
 ```
 
 ## 🏗️ AST Structure
 
 The parser generates a comprehensive AST with the following main structures:
 
-- **Document**: Root container with metadata and blocks
-- **Blocks**: Headings, paragraphs, lists, code blocks, tables, blockquotes
-- **Inlines**: Text, emphasis, strong, code, links, images
-- **Extensions**: Tables, task lists, strikethrough, autolinks
+- **CompilationUnit**: Root container for Dart programs
+- **ClassDeclaration**: Class definitions
+- **FunctionDeclaration**: Function declarations and definitions
+- **MethodDeclaration**: Method definitions within classes
+- **VariableDeclaration**: Variable declarations
+- **Expression**: Various expression types
+- **Statement**: Control flow and other statements
 
 ## 📊 Performance
 
-- **Streaming**: Parse large Markdown documents efficiently
+- **Streaming**: Parse large Dart files without loading entirely into memory
 - **Incremental**: Re-parse only changed sections
+- **Memory Efficient**: Smart AST node allocation
 - **Fast Recovery**: Quick error recovery for better IDE integration
-- **Memory Efficient**: Minimal memory footprint for large documents
 
 ## 🔗 Integration
 
-Oak of markdown integrates seamlessly with:
+Oak Dart integrates seamlessly with:
 
-- **Static Site Generators**: Convert Markdown to HTML for websites
-- **Documentation Tools**: Parse documentation in Markdown format
-- **Content Management**: Handle user-generated Markdown content
+- **Compilers**: Front-end for Dart compilers
+- **Static Analysis Tools**: Code quality and security analysis
 - **IDE Support**: Language server protocol compatibility
-- **Blog Platforms**: Process blog posts and articles
+- **Code Generation**: Generating code from AST
 
 ## 📚 Examples
 
 Check out the [examples](examples/) directory for comprehensive examples:
 
-- Basic Markdown parsing and HTML generation
-- Custom extensions and plugins
-- Document manipulation and transformation
-- Performance benchmarks
-- Integration with web frameworks
+- Complete Dart program parsing
+- Class and function analysis
+- Code transformation
+- Integration with development workflows
 
 ## 🤝 Contributing
 
-Contributions are welcome! Please feel free to submit issues or pull requests.
+Contributions are welcome! 
 
----
-
-**Pex Markdown Parser** - Comprehensive Markdown parsing for Rust applications 🚀
+Please feel free to submit pull requests at the [project repository](https://github.com/ygg-lang/oaks/tree/dev/examples/oak-dart) or open [issues](https://github.com/ygg-lang/oaks/issues).

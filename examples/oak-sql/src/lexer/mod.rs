@@ -1,10 +1,33 @@
-use crate::{language::SqlLanguage, syntax::SqlSyntaxKind};
-use oak_core::{Lexer, LexerState, SourceText, lexer::LexOutput};
+use crate::{kind::SqlSyntaxKind, language::SqlLanguage};
+use oak_core::{
+    IncrementalCache, Lexer, LexerState, OakError,
+    lexer::{CommentLine, LexOutput, StringConfig, WhitespaceConfig},
+    source::Source,
+};
+use std::sync::LazyLock;
 
-type State<'input> = LexerState<'input, SqlLanguage>;
+type State<S> = LexerState<S, SqlLanguage>;
 
+static SQL_WHITESPACE: LazyLock<WhitespaceConfig> = LazyLock::new(|| WhitespaceConfig { unicode_whitespace: true });
+static SQL_COMMENT: LazyLock<CommentLine> = LazyLock::new(|| CommentLine { line_markers: &["--"] });
+static SQL_STRING: LazyLock<StringConfig> = LazyLock::new(|| StringConfig { quotes: &['"', '\''], escape: Some('\\') });
+
+#[derive(Clone)]
 pub struct SqlLexer<'config> {
     config: &'config SqlLanguage,
+}
+
+impl<'config> Lexer<SqlLanguage> for SqlLexer<'config> {
+    fn lex_incremental(
+        &self,
+        source: impl Source,
+        changed: usize,
+        cache: IncrementalCache<SqlLanguage>,
+    ) -> LexOutput<SqlLanguage> {
+        let mut state = LexerState::new_with_cache(source, changed, cache);
+        let result = self.run(&mut state);
+        state.finish(result)
+    }
 }
 
 impl<'config> SqlLexer<'config> {
@@ -12,30 +35,57 @@ impl<'config> SqlLexer<'config> {
         Self { config }
     }
 
-    /// 跳过空白字符
-    fn skip_whitespace(&self, state: &mut State) -> bool {
-        let start_pos = state.get_position();
+    fn run<S: Source>(&self, state: &mut State<S>) -> Result<(), OakError> {
+        while state.not_at_end() {
+            let safe_point = state.get_position();
 
-        while let Some(ch) = state.peek() {
-            if ch == ' ' || ch == '\t' {
+            if self.skip_whitespace(state) {
+                continue;
+            }
+
+            if self.lex_newline(state) {
+                continue;
+            }
+
+            if self.skip_comment(state) {
+                continue;
+            }
+
+            if self.lex_string_literal(state) {
+                continue;
+            }
+
+            if self.lex_number_literal(state) {
+                continue;
+            }
+
+            if self.lex_identifier_or_keyword(state) {
+                continue;
+            }
+
+            if self.lex_operators(state) {
+                continue;
+            }
+
+            if self.lex_single_char_tokens(state) {
+                continue;
+            }
+
+            // 如果没有匹配任何模式，跳过当前字符并添加错误 token
+            if let Some(ch) = state.peek() {
                 state.advance(ch.len_utf8());
-            }
-            else {
-                break;
+                state.add_token(SqlSyntaxKind::Error, safe_point, state.get_position());
             }
         }
 
-        if state.get_position() > start_pos {
-            state.add_token(SqlSyntaxKind::Whitespace, start_pos, state.get_position());
-            true
-        }
-        else {
-            false
-        }
+        // 添加 EOF token
+        let eof_pos = state.get_position();
+        state.add_token(SqlSyntaxKind::Eof, eof_pos, eof_pos);
+        Ok(())
     }
 
     /// 处理换行
-    fn lex_newline(&self, state: &mut State) -> bool {
+    fn lex_newline<S: Source>(&self, state: &mut State<S>) -> bool {
         let start_pos = state.get_position();
 
         if let Some('\n') = state.peek() {
@@ -56,484 +106,337 @@ impl<'config> SqlLexer<'config> {
         }
     }
 
-    /// 处理行注
-    fn lex_line_comment(&self, state: &mut State) -> bool {
-        let start_pos = state.get_position();
-
-        if let Some('-') = state.peek() {
-            state.advance(1);
-            if let Some('-') = state.peek() {
-                state.advance(1);
-
-                while let Some(ch) = state.peek() {
-                    if ch == '\n' || ch == '\r' {
-                        break;
-                    }
-                    else {
-                        state.advance(ch.len_utf8());
-                    }
-                }
-
-                state.add_token(SqlSyntaxKind::LineComment, start_pos, state.get_position());
+    fn skip_whitespace<S: Source>(&self, state: &mut State<S>) -> bool {
+        match SQL_WHITESPACE.scan(state.rest(), state.get_position(), SqlSyntaxKind::Whitespace) {
+            Some(token) => {
+                state.advance_with(token);
                 true
             }
-            else {
-                state.set_position(start_pos);
-                false
-            }
-        }
-        else {
-            false
+            None => false,
         }
     }
 
-    /// 处理块注
-    fn lex_block_comment(&self, state: &mut State) -> bool {
-        let start_pos = state.get_position();
+    fn skip_comment<S: Source>(&self, state: &mut State<S>) -> bool {
+        let start = state.get_position();
+        let rest = state.rest();
 
-        if let Some('/') = state.peek() {
-            state.advance(1);
-            if let Some('*') = state.peek() {
-                state.advance(1);
-
-                while let Some(ch) = state.peek() {
-                    if ch == '*' {
-                        state.advance(1);
-                        if let Some('/') = state.peek() {
-                            state.advance(1);
-                            break;
-                        }
-                    }
-                    else {
-                        state.advance(ch.len_utf8());
-                    }
+        // 行注释: -- ... 直到换行
+        if rest.starts_with("--") {
+            state.advance(2);
+            while let Some(ch) = state.peek() {
+                if ch == '\n' || ch == '\r' {
+                    break;
                 }
-
-                state.add_token(SqlSyntaxKind::BlockComment, start_pos, state.get_position());
-                true
-            }
-            else {
-                state.set_position(start_pos);
-                false
-            }
-        }
-        else {
-            false
-        }
-    }
-
-    /// 处理数字字面
-    fn lex_number(&self, state: &mut State) -> bool {
-        let start_pos = state.get_position();
-
-        if let Some(ch) = state.peek() {
-            if ch.is_ascii_digit() {
-                state.advance(1);
-
-                // 处理十进制数
-                while let Some(ch) = state.peek() {
-                    if ch.is_ascii_digit() {
-                        state.advance(1);
-                    }
-                    else {
-                        break;
-                    }
-                }
-
-                // 处理小数
-                if let Some('.') = state.peek() {
-                    state.advance(1);
-                    while let Some(ch) = state.peek() {
-                        if ch.is_ascii_digit() {
-                            state.advance(1);
-                        }
-                        else {
-                            break;
-                        }
-                    }
-                }
-
-                // 处理科学计数
-                if let Some('e') | Some('E') = state.peek() {
-                    state.advance(1);
-                    if let Some('+') | Some('-') = state.peek() {
-                        state.advance(1);
-                    }
-                    while let Some(ch) = state.peek() {
-                        if ch.is_ascii_digit() {
-                            state.advance(1);
-                        }
-                        else {
-                            break;
-                        }
-                    }
-                }
-
-                state.add_token(SqlSyntaxKind::NumberLiteral, start_pos, state.get_position());
-                true
-            }
-            else {
-                false
-            }
-        }
-        else {
-            false
-        }
-    }
-
-    /// 处理字符串字面量
-    fn lex_string(&self, state: &mut State) -> bool {
-        let start_pos = state.get_position();
-
-        if let Some(quote) = state.peek() {
-            if quote == '\'' {
-                state.advance(1);
-
-                while let Some(ch) = state.peek() {
-                    if ch == '\'' {
-                        state.advance(1);
-                        // 处理双单引号转义
-                        if let Some('\'') = state.peek() {
-                            state.advance(1);
-                        }
-                        else {
-                            break;
-                        }
-                    }
-                    else if ch == '\n' || ch == '\r' {
-                        break; // 字符串不能跨
-                    }
-                    else {
-                        state.advance(ch.len_utf8());
-                    }
-                }
-
-                state.add_token(SqlSyntaxKind::StringLiteral, start_pos, state.get_position());
-                true
-            }
-            else {
-                false
-            }
-        }
-        else {
-            false
-        }
-    }
-
-    /// 处理标识符或关键
-    fn lex_identifier_or_keyword(&self, state: &mut State, source: &SourceText) -> bool {
-        let start_pos = state.get_position();
-
-        if let Some(ch) = state.peek() {
-            if ch.is_ascii_alphabetic() || ch == '_' {
                 state.advance(ch.len_utf8());
+            }
+            state.add_token(SqlSyntaxKind::Comment, start, state.get_position());
+            return true;
+        }
 
-                while let Some(ch) = state.peek() {
-                    if ch.is_ascii_alphanumeric() || ch == '_' {
-                        state.advance(ch.len_utf8());
-                    }
-                    else {
-                        break;
-                    }
+        // 块注释: /* ... */
+        if rest.starts_with("/*") {
+            state.advance(2);
+            while let Some(ch) = state.peek() {
+                if ch == '*' && state.peek_next_n(1) == Some('/') {
+                    state.advance(2);
+                    break;
                 }
+                state.advance(ch.len_utf8());
+            }
+            state.add_token(SqlSyntaxKind::Comment, start, state.get_position());
+            return true;
+        }
 
-                let text = source.get_text_in(core::range::Range { start: start_pos, end: state.get_position() }).unwrap_or("");
-                let token_kind = self.keyword_or_identifier(text);
-                state.add_token(token_kind, start_pos, state.get_position());
-                true
-            }
-            else {
-                false
-            }
-        }
-        else {
-            false
-        }
+        false
     }
 
-    /// 处理带引号的标识
-    fn lex_quoted_identifier(&self, state: &mut State) -> bool {
-        let start_pos = state.get_position();
-
-        if let Some(quote) = state.peek() {
-            let is_valid_quote = match quote {
-                '"' => self.config.quoted_identifiers,
-                '`' => self.config.backtick_identifiers,
-                '[' => self.config.bracket_identifiers,
-                _ => false,
-            };
-
-            if is_valid_quote {
-                let end_quote = if quote == '[' { ']' } else { quote };
-                state.advance(1);
-
-                while let Some(ch) = state.peek() {
-                    if ch == end_quote {
-                        state.advance(1);
-                        break;
-                    }
-                    else if ch == '\n' || ch == '\r' {
-                        break; // 标识符不能跨
-                    }
-                    else {
-                        state.advance(ch.len_utf8());
-                    }
-                }
-
-                state.add_token(SqlSyntaxKind::Identifier_, start_pos, state.get_position());
-                true
-            }
-            else {
-                false
-            }
-        }
-        else {
-            false
-        }
-    }
-
-    /// 判断是关键字还是标识
-    fn keyword_or_identifier(&self, text: &str) -> SqlSyntaxKind {
-        let text = if self.config.case_sensitive {
-            text
-        }
-        else {
-            // 对于不区分大小写的情况，转换为小写进行比
-            &text.to_lowercase()
+    fn lex_string_literal<S: Source>(&self, state: &mut State<S>) -> bool {
+        let start = state.get_position();
+        let ch = match state.current() {
+            Some(c) => c,
+            None => return false,
         };
 
-        match text {
-            "select" => SqlSyntaxKind::Select,
-            "from" => SqlSyntaxKind::From,
-            "where" => SqlSyntaxKind::Where,
-            "insert" => SqlSyntaxKind::Insert,
-            "into" => SqlSyntaxKind::Into,
-            "values" => SqlSyntaxKind::Values,
-            "update" => SqlSyntaxKind::Update,
-            "set" => SqlSyntaxKind::Set,
-            "delete" => SqlSyntaxKind::Delete,
-            "create" => SqlSyntaxKind::Create,
-            "table" => SqlSyntaxKind::Table,
-            "drop" => SqlSyntaxKind::Drop,
-            "alter" => SqlSyntaxKind::Alter,
-            "add" => SqlSyntaxKind::Add,
-            "column" => SqlSyntaxKind::Column,
-            "primary" => SqlSyntaxKind::Primary,
-            "key" => SqlSyntaxKind::Key,
-            "foreign" => SqlSyntaxKind::Foreign,
-            "references" => SqlSyntaxKind::References,
-            "index" => SqlSyntaxKind::Index,
-            "unique" => SqlSyntaxKind::Unique,
-            "not" => SqlSyntaxKind::Not,
-            "null" => SqlSyntaxKind::Null,
-            "default" => SqlSyntaxKind::Default,
-            "auto_increment" => SqlSyntaxKind::Auto_Increment,
-            "and" => SqlSyntaxKind::And,
-            "or" => SqlSyntaxKind::Or,
-            "in" => SqlSyntaxKind::In,
-            "like" => SqlSyntaxKind::Like,
-            "between" => SqlSyntaxKind::Between,
-            "is" => SqlSyntaxKind::Is,
-            "as" => SqlSyntaxKind::As,
-            "join" => SqlSyntaxKind::Join,
-            "inner" => SqlSyntaxKind::Inner,
-            "left" => SqlSyntaxKind::Left,
-            "right" => SqlSyntaxKind::Right,
-            "full" => SqlSyntaxKind::Full,
-            "outer" => SqlSyntaxKind::Outer,
-            "on" => SqlSyntaxKind::On,
-            "group" => SqlSyntaxKind::Group,
-            "by" => SqlSyntaxKind::By,
-            "having" => SqlSyntaxKind::Having,
-            "order" => SqlSyntaxKind::Order,
-            "asc" => SqlSyntaxKind::Asc,
-            "desc" => SqlSyntaxKind::Desc,
-            "limit" => SqlSyntaxKind::Limit,
-            "offset" => SqlSyntaxKind::Offset,
-            "union" => SqlSyntaxKind::Union,
-            "all" => SqlSyntaxKind::All,
-            "distinct" => SqlSyntaxKind::Distinct,
-            "count" => SqlSyntaxKind::Count,
-            "sum" => SqlSyntaxKind::Sum,
-            "avg" => SqlSyntaxKind::Avg,
-            "min" => SqlSyntaxKind::Min,
-            "max" => SqlSyntaxKind::Max,
-            "int" => SqlSyntaxKind::Int,
-            "integer" => SqlSyntaxKind::Integer,
-            "varchar" => SqlSyntaxKind::Varchar,
-            "char" => SqlSyntaxKind::Char,
-            "text" => SqlSyntaxKind::Text,
-            "date" => SqlSyntaxKind::Date,
-            "time" => SqlSyntaxKind::Time,
-            "timestamp" => SqlSyntaxKind::Timestamp,
-            "decimal" => SqlSyntaxKind::Decimal,
-            "float" => SqlSyntaxKind::Float,
-            "double" => SqlSyntaxKind::Double,
-            "boolean" => SqlSyntaxKind::Boolean,
-            "true" | "false" => SqlSyntaxKind::BooleanLiteral,
-            _ => SqlSyntaxKind::Identifier_,
+        if ch == '\'' || ch == '"' {
+            let quote = ch;
+            state.advance(1);
+            let mut escaped = false;
+
+            while let Some(ch) = state.peek() {
+                if ch == quote && !escaped {
+                    state.advance(1); // 消费结束引号
+                    break;
+                }
+                state.advance(ch.len_utf8());
+                if escaped {
+                    escaped = false;
+                    continue;
+                }
+                if ch == '\\' {
+                    escaped = true;
+                    continue;
+                }
+                if ch == '\n' || ch == '\r' {
+                    break;
+                }
+            }
+            state.add_token(SqlSyntaxKind::StringLiteral, start, state.get_position());
+            return true;
+        }
+        false
+    }
+
+    fn lex_number_literal<S: Source>(&self, state: &mut State<S>) -> bool {
+        let start = state.get_position();
+        let first = match state.current() {
+            Some(c) => c,
+            None => return false,
+        };
+
+        if !first.is_ascii_digit() {
+            return false;
+        }
+
+        let mut is_float = false;
+        state.advance(1);
+
+        // 整数部分
+        while let Some(c) = state.peek() {
+            if c.is_ascii_digit() || c == '_' {
+                state.advance(1);
+            }
+            else {
+                break;
+            }
+        }
+
+        // 小数部分
+        if state.peek() == Some('.') {
+            let next = state.peek_next_n(1);
+            if next.map(|c| c.is_ascii_digit()).unwrap_or(false) {
+                is_float = true;
+                state.advance(1); // 消费 '.'
+                while let Some(c) = state.peek() {
+                    if c.is_ascii_digit() || c == '_' {
+                        state.advance(1);
+                    }
+                    else {
+                        break;
+                    }
+                }
+            }
+        }
+
+        // 指数部分
+        if let Some(c) = state.peek() {
+            if c == 'e' || c == 'E' {
+                let next = state.peek_next_n(1);
+                if next == Some('+') || next == Some('-') || next.map(|d| d.is_ascii_digit()).unwrap_or(false) {
+                    is_float = true;
+                    state.advance(1);
+                    if let Some(sign) = state.peek() {
+                        if sign == '+' || sign == '-' {
+                            state.advance(1);
+                        }
+                    }
+                    while let Some(d) = state.peek() {
+                        if d.is_ascii_digit() || d == '_' {
+                            state.advance(1);
+                        }
+                        else {
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+
+        let end = state.get_position();
+        state.add_token(if is_float { SqlSyntaxKind::FloatLiteral } else { SqlSyntaxKind::NumberLiteral }, start, end);
+        true
+    }
+
+    fn lex_identifier_or_keyword<S: Source>(&self, state: &mut State<S>) -> bool {
+        let start = state.get_position();
+        let ch = match state.current() {
+            Some(c) => c,
+            None => return false,
+        };
+
+        if !(ch.is_ascii_alphabetic() || ch == '_') {
+            return false;
+        }
+
+        state.advance(1);
+        while let Some(c) = state.current() {
+            if c.is_ascii_alphanumeric() || c == '_' {
+                state.advance(1);
+            }
+            else {
+                break;
+            }
+        }
+
+        let end = state.get_position();
+        let text = state.get_text_in((start..end).into());
+        let kind = self.keyword_kind(&text).unwrap_or(SqlSyntaxKind::Identifier);
+        state.add_token(kind, start, end);
+        true
+    }
+
+    fn keyword_kind(&self, text: &str) -> Option<SqlSyntaxKind> {
+        match text.to_uppercase().as_str() {
+            "SELECT" => Some(SqlSyntaxKind::Select),
+            "FROM" => Some(SqlSyntaxKind::From),
+            "WHERE" => Some(SqlSyntaxKind::Where),
+            "INSERT" => Some(SqlSyntaxKind::Insert),
+            "INTO" => Some(SqlSyntaxKind::Into),
+            "VALUES" => Some(SqlSyntaxKind::Values),
+            "UPDATE" => Some(SqlSyntaxKind::Update),
+            "SET" => Some(SqlSyntaxKind::Set),
+            "DELETE" => Some(SqlSyntaxKind::Delete),
+            "CREATE" => Some(SqlSyntaxKind::Create),
+            "DROP" => Some(SqlSyntaxKind::Drop),
+            "ALTER" => Some(SqlSyntaxKind::Alter),
+            "ADD" => Some(SqlSyntaxKind::Add),
+            "COLUMN" => Some(SqlSyntaxKind::Column),
+            "TABLE" => Some(SqlSyntaxKind::Table),
+            "PRIMARY" => Some(SqlSyntaxKind::Primary),
+            "KEY" => Some(SqlSyntaxKind::Key),
+            "FOREIGN" => Some(SqlSyntaxKind::Foreign),
+            "REFERENCES" => Some(SqlSyntaxKind::References),
+            "INDEX" => Some(SqlSyntaxKind::Index),
+            "UNIQUE" => Some(SqlSyntaxKind::Unique),
+            "NOT" => Some(SqlSyntaxKind::Not),
+            "NULL" => Some(SqlSyntaxKind::Null),
+            "DEFAULT" => Some(SqlSyntaxKind::Default),
+            "AUTO_INCREMENT" => Some(SqlSyntaxKind::AutoIncrement),
+            "AND" => Some(SqlSyntaxKind::And),
+            "OR" => Some(SqlSyntaxKind::Or),
+            "IN" => Some(SqlSyntaxKind::In),
+            "LIKE" => Some(SqlSyntaxKind::Like),
+            "BETWEEN" => Some(SqlSyntaxKind::Between),
+            "IS" => Some(SqlSyntaxKind::Is),
+            "AS" => Some(SqlSyntaxKind::As),
+            "JOIN" => Some(SqlSyntaxKind::Join),
+            "INNER" => Some(SqlSyntaxKind::Inner),
+            "LEFT" => Some(SqlSyntaxKind::Left),
+            "RIGHT" => Some(SqlSyntaxKind::Right),
+            "FULL" => Some(SqlSyntaxKind::Full),
+            "OUTER" => Some(SqlSyntaxKind::Outer),
+            "ON" => Some(SqlSyntaxKind::On),
+            "GROUP" => Some(SqlSyntaxKind::Group),
+            "BY" => Some(SqlSyntaxKind::By),
+            "HAVING" => Some(SqlSyntaxKind::Having),
+            "ORDER" => Some(SqlSyntaxKind::Order),
+            "ASC" => Some(SqlSyntaxKind::Asc),
+            "DESC" => Some(SqlSyntaxKind::Desc),
+            "LIMIT" => Some(SqlSyntaxKind::Limit),
+            "OFFSET" => Some(SqlSyntaxKind::Offset),
+            "UNION" => Some(SqlSyntaxKind::Union),
+            "ALL" => Some(SqlSyntaxKind::All),
+            "DISTINCT" => Some(SqlSyntaxKind::Distinct),
+            "COUNT" => Some(SqlSyntaxKind::Count),
+            "SUM" => Some(SqlSyntaxKind::Sum),
+            "AVG" => Some(SqlSyntaxKind::Avg),
+            "MIN" => Some(SqlSyntaxKind::Min),
+            "MAX" => Some(SqlSyntaxKind::Max),
+            "VIEW" => Some(SqlSyntaxKind::View),
+            "DATABASE" => Some(SqlSyntaxKind::Database),
+            "SCHEMA" => Some(SqlSyntaxKind::Schema),
+            "TRUE" => Some(SqlSyntaxKind::True),
+            "FALSE" => Some(SqlSyntaxKind::False),
+            "EXISTS" => Some(SqlSyntaxKind::Exists),
+            "CASE" => Some(SqlSyntaxKind::Case),
+            "WHEN" => Some(SqlSyntaxKind::When),
+            "THEN" => Some(SqlSyntaxKind::Then),
+            "ELSE" => Some(SqlSyntaxKind::Else),
+            "END" => Some(SqlSyntaxKind::End),
+            "IF" => Some(SqlSyntaxKind::If),
+            "BEGIN" => Some(SqlSyntaxKind::Begin),
+            "COMMIT" => Some(SqlSyntaxKind::Commit),
+            "ROLLBACK" => Some(SqlSyntaxKind::Rollback),
+            "TRANSACTION" => Some(SqlSyntaxKind::Transaction),
+            // 数据类型
+            "INT" => Some(SqlSyntaxKind::Int),
+            "INTEGER" => Some(SqlSyntaxKind::Integer),
+            "VARCHAR" => Some(SqlSyntaxKind::Varchar),
+            "CHAR" => Some(SqlSyntaxKind::Char),
+            "TEXT" => Some(SqlSyntaxKind::Text),
+            "DATE" => Some(SqlSyntaxKind::Date),
+            "TIME" => Some(SqlSyntaxKind::Time),
+            "TIMESTAMP" => Some(SqlSyntaxKind::Timestamp),
+            "DECIMAL" => Some(SqlSyntaxKind::Decimal),
+            "FLOAT" => Some(SqlSyntaxKind::Float),
+            "DOUBLE" => Some(SqlSyntaxKind::Double),
+            "BOOLEAN" => Some(SqlSyntaxKind::Boolean),
+            _ => None,
         }
     }
 
-    /// 处理操作
-    fn lex_operator(&self, state: &mut State) -> bool {
-        let start_pos = state.get_position();
+    fn lex_operators<S: Source>(&self, state: &mut State<S>) -> bool {
+        let start = state.get_position();
+        let rest = state.rest();
 
-        if let Some(ch) = state.peek() {
-            let token_kind = match ch {
-                '+' => {
-                    state.advance(1);
-                    SqlSyntaxKind::Plus
-                }
-                '-' => {
-                    // 这里不处理注释，因为已经在其他地方处理了
-                    state.advance(1);
-                    SqlSyntaxKind::Minus
-                }
-                '*' => {
-                    state.advance(1);
-                    SqlSyntaxKind::Star
-                }
-                '/' => {
-                    // 这里不处理注释，因为已经在其他地方处理了
-                    state.advance(1);
-                    SqlSyntaxKind::Slash
-                }
-                '%' => {
-                    state.advance(1);
-                    SqlSyntaxKind::Percent
-                }
-                '=' => {
-                    state.advance(1);
-                    SqlSyntaxKind::Equal
-                }
-                '!' => {
-                    state.advance(1);
-                    if let Some('=') = state.peek() {
-                        state.advance(1);
-                        SqlSyntaxKind::NotEqual
-                    }
-                    else {
-                        return false; // 单独! 不是有效SQL 操作
-                    }
-                }
-                '<' => {
-                    state.advance(1);
-                    if let Some('=') = state.peek() {
-                        state.advance(1);
-                        SqlSyntaxKind::LessEqual
-                    }
-                    else if let Some('>') = state.peek() {
-                        state.advance(1);
-                        SqlSyntaxKind::NotEqual
-                    }
-                    else {
-                        SqlSyntaxKind::Less
-                    }
-                }
-                '>' => {
-                    state.advance(1);
-                    if let Some('=') = state.peek() {
-                        state.advance(1);
-                        SqlSyntaxKind::GreaterEqual
-                    }
-                    else {
-                        SqlSyntaxKind::Greater
-                    }
-                }
-                _ => return false,
+        // 优先匹配较长的操作符
+        let patterns: &[(&str, SqlSyntaxKind)] = &[
+            ("<=", SqlSyntaxKind::Le),
+            (">=", SqlSyntaxKind::Ge),
+            ("!=", SqlSyntaxKind::Ne),
+            ("<>", SqlSyntaxKind::Ne),
+            ("||", SqlSyntaxKind::Concat),
+        ];
+
+        for (pat, kind) in patterns {
+            if rest.starts_with(pat) {
+                state.advance(pat.len());
+                state.add_token(*kind, start, state.get_position());
+                return true;
+            }
+        }
+
+        if let Some(ch) = state.current() {
+            let kind = match ch {
+                '=' => Some(SqlSyntaxKind::Equal),
+                '<' => Some(SqlSyntaxKind::Lt),
+                '>' => Some(SqlSyntaxKind::Gt),
+                '+' => Some(SqlSyntaxKind::Plus),
+                '-' => Some(SqlSyntaxKind::Minus),
+                '*' => Some(SqlSyntaxKind::Star),
+                '/' => Some(SqlSyntaxKind::Slash),
+                '%' => Some(SqlSyntaxKind::Percent),
+                '.' => Some(SqlSyntaxKind::Dot),
+                _ => None,
             };
-
-            state.add_token(token_kind, start_pos, state.get_position());
-            true
+            if let Some(k) = kind {
+                state.advance(ch.len_utf8());
+                state.add_token(k, start, state.get_position());
+                return true;
+            }
         }
-        else {
-            false
-        }
+        false
     }
 
-    /// 处理分隔
-    fn lex_delimiter(&self, state: &mut State) -> bool {
-        let start_pos = state.get_position();
-
-        if let Some(ch) = state.peek() {
-            let token_kind = match ch {
+    fn lex_single_char_tokens<S: Source>(&self, state: &mut State<S>) -> bool {
+        let start = state.get_position();
+        if let Some(ch) = state.current() {
+            let kind = match ch {
                 '(' => SqlSyntaxKind::LeftParen,
                 ')' => SqlSyntaxKind::RightParen,
+                '{' => SqlSyntaxKind::LeftBrace,
+                '}' => SqlSyntaxKind::RightBrace,
+                '[' => SqlSyntaxKind::LeftBracket,
+                ']' => SqlSyntaxKind::RightBracket,
                 ',' => SqlSyntaxKind::Comma,
                 ';' => SqlSyntaxKind::Semicolon,
-                '.' => SqlSyntaxKind::Dot,
+                ':' => SqlSyntaxKind::Colon,
+                '?' => SqlSyntaxKind::Question,
                 _ => return false,
             };
-
             state.advance(ch.len_utf8());
-            state.add_token(token_kind, start_pos, state.get_position());
-            true
+            state.add_token(kind, start, state.get_position());
+            return true;
         }
-        else {
-            false
-        }
-    }
-}
-
-impl<'config> Lexer<SqlLanguage> for SqlLexer<'config> {
-    fn lex(&self, source: &SourceText) -> LexOutput<SqlSyntaxKind> {
-        let mut state = LexerState::new(source);
-
-        while state.not_at_end() {
-            // 尝试各种词法规则
-            if self.skip_whitespace(&mut state) {
-                continue;
-            }
-
-            if self.lex_newline(&mut state) {
-                continue;
-            }
-
-            if self.lex_line_comment(&mut state) {
-                continue;
-            }
-
-            if self.lex_block_comment(&mut state) {
-                continue;
-            }
-
-            if self.lex_string(&mut state) {
-                continue;
-            }
-
-            if self.lex_number(&mut state) {
-                continue;
-            }
-
-            if self.lex_quoted_identifier(&mut state) {
-                continue;
-            }
-
-            if self.lex_identifier_or_keyword(&mut state, source) {
-                continue;
-            }
-
-            if self.lex_operator(&mut state) {
-                continue;
-            }
-
-            if self.lex_delimiter(&mut state) {
-                continue;
-            }
-
-            // 如果所有规则都不匹配，跳过当前字符并标记为错误
-            let start_pos = state.get_position();
-            if let Some(ch) = state.peek() {
-                state.advance(ch.len_utf8());
-                state.add_token(SqlSyntaxKind::Error, start_pos, state.get_position());
-            }
-        }
-
-        // 添加 EOF kind
-        let eof_pos = state.get_position();
-        state.add_token(SqlSyntaxKind::Eof, eof_pos, eof_pos);
-
-        state.finish()
+        false
     }
 }

@@ -22,6 +22,9 @@ impl Default for FortranLanguage {
     }
 }
 
+pub struct FortranRoot;
+
 impl Language for FortranLanguage {
     type SyntaxKind = FortranSyntaxKind;
+    type TypedRoot = FortranRoot;
 }

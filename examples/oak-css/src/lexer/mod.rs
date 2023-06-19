@@ -1,15 +1,13 @@
 use crate::{kind::CssSyntaxKind, language::CssLanguage};
-use oak_core::{Lexer, LexerState, SourceText, lexer::LexOutput};
+use oak_core::{IncrementalCache, Lexer, LexerState, SourceText, lexer::LexOutput, source::Source};
 
-type State<'input> = LexerState<'input, CssLanguage>;
+type State<'input> = LexerState<&'input SourceText, CssLanguage>;
 
-pub struct CssLexer<'config> {
-    config: &'config CssLanguage,
-}
+pub struct CssLexer;
 
-impl<'config> CssLexer<'config> {
-    pub fn new(config: &'config CssLanguage) -> Self {
-        Self { config }
+impl CssLexer {
+    pub fn new(_config: CssLanguage) -> Self {
+        Self
     }
 
     /// 跳过空白字符
@@ -323,7 +321,7 @@ impl<'config> CssLexer<'config> {
                 }
             }
 
-            let rule_name = source.get_text_in((rule_start..state.get_position()).into()).unwrap_or("");
+            let rule_name = source.get_text_in((rule_start..state.get_position()).into());
             let token_kind = match rule_name {
                 "import" => CssSyntaxKind::AtImport,
                 "media" => CssSyntaxKind::AtMedia,
@@ -403,9 +401,10 @@ impl<'config> CssLexer<'config> {
     }
 }
 
-impl<'config> Lexer<CssLanguage> for CssLexer<'config> {
-    fn lex(&self, source: &SourceText) -> LexOutput<CssSyntaxKind> {
-        let mut state = LexerState::new(source);
+impl Lexer<CssLanguage> for CssLexer {
+    fn lex(&self, source: impl Source) -> LexOutput<CssLanguage> {
+        let source_text = SourceText::new(source.get_text_in((0..source.length()).into()));
+        let mut state = LexerState::new(&source_text);
 
         while state.not_at_end() {
             // 尝试各种词法规则
@@ -437,7 +436,7 @@ impl<'config> Lexer<CssLanguage> for CssLexer<'config> {
                 continue;
             }
 
-            if self.lex_at_rule(&mut state, source) {
+            if self.lex_at_rule(&mut state, &source_text) {
                 continue;
             }
 
@@ -465,6 +464,76 @@ impl<'config> Lexer<CssLanguage> for CssLexer<'config> {
         let eof_pos = state.get_position();
         state.add_token(CssSyntaxKind::Eof, eof_pos, eof_pos);
 
-        state.finish()
+        state.finish(Ok(()))
+    }
+
+    fn lex_incremental(
+        &self,
+        source: impl Source,
+        _changed: usize,
+        _cache: IncrementalCache<CssLanguage>,
+    ) -> LexOutput<CssLanguage> {
+        let source_text = SourceText::new(source.get_text_in((0..source.length()).into()));
+        let mut state = LexerState::new_with_cache(&source_text, _changed, _cache);
+
+        while state.not_at_end() {
+            // 尝试各种词法规则
+            if self.skip_whitespace(&mut state) {
+                continue;
+            }
+
+            if self.lex_newline(&mut state) {
+                continue;
+            }
+
+            if self.lex_comment(&mut state) {
+                continue;
+            }
+
+            if self.lex_string(&mut state) {
+                continue;
+            }
+
+            if self.lex_url(&mut state) {
+                continue;
+            }
+
+            if self.lex_color(&mut state) {
+                continue;
+            }
+
+            if self.lex_number(&mut state) {
+                continue;
+            }
+
+            if self.lex_at_rule(&mut state, &source_text) {
+                continue;
+            }
+
+            if self.lex_identifier(&mut state) {
+                continue;
+            }
+
+            if self.lex_delimiter(&mut state) {
+                continue;
+            }
+
+            if self.lex_operator(&mut state) {
+                continue;
+            }
+
+            // 如果所有规则都不匹配，跳过当前字符并标记为错误
+            let start_pos = state.get_position();
+            if let Some(ch) = state.peek() {
+                state.advance(ch.len_utf8());
+                state.add_token(CssSyntaxKind::Error, start_pos, state.get_position());
+            }
+        }
+
+        // 添加 EOF kind
+        let eof_pos = state.get_position();
+        state.add_token(CssSyntaxKind::Eof, eof_pos, eof_pos);
+
+        state.finish(Ok(()))
     }
 }

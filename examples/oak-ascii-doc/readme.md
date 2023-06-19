@@ -7,7 +7,7 @@ High-performance incremental AsciiDoc parser for the oak ecosystem with flexible
 
 ## 🎯 Overview
 
-Oak-ascii-doc is a robust parser for AsciiDoc, designed to handle complete AsciiDoc syntax including modern features. Built on the solid foundation of oak-core, it provides both high-level convenience and detailed AST generation for document processing and rendering.
+Oak AsciiDoc is a robust parser for AsciiDoc, designed to handle complete AsciiDoc syntax including modern features. Built on the solid foundation of oak-core, it provides both high-level convenience and detailed AST generation for document processing and rendering.
 
 ## ✨ Features
 
@@ -21,11 +21,11 @@ Oak-ascii-doc is a robust parser for AsciiDoc, designed to handle complete Ascii
 Basic example:
 
 ```rust
-use oak_ascii_doc::AsciiDocParser;
+use oak_ascii_doc::{Parser, AsciiDocLanguage, SourceText};
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
-    let parser = AsciiDocParser::new();
-    let adoc_code = r#"
+    let parser = Parser::new();
+    let source = SourceText::new(r#"
 = My Document
 :author: John Doe
 
@@ -35,9 +35,9 @@ This is a paragraph.
 
 . List item 1
 . List item 2
-"#;
+    "#);
     
-    let document = parser.parse_document(adoc_code)?;
+    let result = parser.parse(&source);
     println!("Parsed AsciiDoc document successfully.");
     Ok(())
 }
@@ -47,25 +47,25 @@ This is a paragraph.
 
 ### Document Parsing
 ```rust
-use oak_ascii_doc::{AsciiDocParser, ast::Document};
+use oak_ascii_doc::{Parser, AsciiDocLanguage, SourceText};
 
-let parser = AsciiDocParser::new();
-let adoc_code = r#"
+let parser = Parser::new();
+let source = SourceText::new(r#"
 = My Title
 
 A simple document.
-"#;
+    "#);
 
-let document = parser.parse_document(adoc_code)?;
-println!("Document title: {}", document.title);
+let result = parser.parse(&source);
+println!("Parsed AsciiDoc document successfully.");
 ```
 
 ### Block Parsing
 ```rust
-use oak_ascii_doc::{AsciiDocParser, ast::Block};
+use oak_ascii_doc::{Parser, AsciiDocLanguage, SourceText};
 
-let parser = AsciiDocParser::new();
-let adoc_code = r#"
+let parser = Parser::new();
+let source = SourceText::new(r#"
 == Section 1
 
 This is a paragraph.
@@ -74,52 +74,39 @@ This is a paragraph.
 ----
 fn main() {}
 ----
-"#;
+    "#);
 
-let document = parser.parse_document(adoc_code)?;
-for block in &document.blocks {
-    match block {
-        Block::Section(section) => println!("Section title: {}", section.title),
-        Block::Paragraph(paragraph) => println!("Paragraph content: {}", paragraph.content),
-        _ => {}
-    }
-}
+let result = parser.parse(&source);
+println!("Parsed AsciiDoc document with blocks successfully.");
 ```
 
 ## 🔧 Advanced Features
 
 ### Token-Level Parsing
 ```rust
-use oak_ascii_doc::{AsciiDocParser, lexer::Token};
+use oak_ascii_doc::{Parser, AsciiDocLanguage, SourceText};
 
-let parser = AsciiDocParser::new();
-let tokens = parser.tokenize("= Document Title")?;
-for token in tokens {
-    println!("{:?}", token.kind);
-}
+let parser = Parser::new();
+let source = SourceText::new("= Document Title");
+let result = parser.parse(&source);
+// Token information is available in the parse result
 ```
 
 ### Error Handling
 ```rust
-use oak_ascii_doc::AsciiDocParser;
+use oak_ascii_doc::{Parser, AsciiDocLanguage, SourceText};
 
-let parser = AsciiDocParser::new();
-let invalid_adoc = r#"
+let parser = Parser::new();
+let source = SourceText::new(r#"
 = My Document
 
 This is an invalid
 = Section
-"#;
+    "#);
 
-match parser.parse_document(invalid_adoc) {
-    Ok(document) => println!("Parsed AsciiDoc document successfully."),
-    Err(e) => {
-        println!("Parse error at line {} column {}: {}", 
-            e.line(), e.column(), e.message());
-        if let Some(context) = e.context() {
-            println!("Error context: {}", context);
-        }
-    }
+let result = parser.parse(&source);
+if let Err(e) = result.result {
+    println!("Parse error: {:?}", e);
 }
 ```
 
@@ -140,7 +127,7 @@ The parser generates a comprehensive AST with the following main structures:
 
 ## 🔗 Integration
 
-Oak-ascii-doc integrates seamlessly with:
+Oak AsciiDoc integrates seamlessly with:
 
 - **Document Processing**: AsciiDoc document conversion and transformation
 - **Static Analysis**: Document structure and content analysis
@@ -161,4 +148,4 @@ Check out the [examples](examples/) directory for comprehensive examples:
 
 Contributions are welcome! 
 
-Please feel free to submit pull requests at the [project repository](https://github.com/ygg-lang/oaks/tree/dev/projects/oak-ascii-doc) or open [issues](https://github.com/ygg-lang/oaks/issues).
+Please feel free to submit pull requests at the [project repository](https://github.com/ygg-lang/oaks/tree/dev/examples/oak-ascii-doc) or open [issues](https://github.com/ygg-lang/oaks/issues).

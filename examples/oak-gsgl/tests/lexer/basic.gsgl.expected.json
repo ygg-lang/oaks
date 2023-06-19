@@ -1,0 +1,607 @@
+{
+    "success": true,
+    "count": 100,
+    "tokens": [
+        {
+            "kind": "Error",
+            "text": "e",
+            "start": 66,
+            "end": 67
+        },
+        {
+            "kind": "Error",
+            "text": "\n",
+            "start": 68,
+            "end": 69
+        },
+        {
+            "kind": "Error",
+            "text": "r",
+            "start": 86,
+            "end": 87
+        },
+        {
+            "kind": "Identifier",
+            "text": "\nverte",
+            "start": 88,
+            "end": 94
+        },
+        {
+            "kind": "Identifier",
+            "text": " mai",
+            "start": 95,
+            "end": 99
+        },
+        {
+            "kind": "LeftBrace",
+            "text": " ",
+            "start": 100,
+            "end": 101
+        },
+        {
+            "kind": "Error",
+            "text": "{",
+            "start": 101,
+            "end": 102
+        },
+        {
+            "kind": "Identifier",
+            "text": " inpu",
+            "start": 107,
+            "end": 112
+        },
+        {
+            "kind": "Identifier",
+            "text": " vec",
+            "start": 113,
+            "end": 117
+        },
+        {
+            "kind": "Identifier",
+            "text": " positio",
+            "start": 118,
+            "end": 126
+        },
+        {
+            "kind": "Semicolon",
+            "text": "n",
+            "start": 126,
+            "end": 127
+        },
+        {
+            "kind": "Error",
+            "text": ";",
+            "start": 127,
+            "end": 128
+        },
+        {
+            "kind": "Identifier",
+            "text": " inpu",
+            "start": 133,
+            "end": 138
+        },
+        {
+            "kind": "Identifier",
+            "text": " vec",
+            "start": 139,
+            "end": 143
+        },
+        {
+            "kind": "Identifier",
+            "text": " texCoor",
+            "start": 144,
+            "end": 152
+        },
+        {
+            "kind": "Semicolon",
+            "text": "d",
+            "start": 152,
+            "end": 153
+        },
+        {
+            "kind": "Error",
+            "text": ";",
+            "start": 153,
+            "end": 154
+        },
+        {
+            "kind": "Error",
+            "text": " ",
+            "start": 159,
+            "end": 160
+        },
+        {
+            "kind": "Identifier",
+            "text": " outpu",
+            "start": 165,
+            "end": 171
+        },
+        {
+            "kind": "Identifier",
+            "text": " vec",
+            "start": 172,
+            "end": 176
+        },
+        {
+            "kind": "Identifier",
+            "text": " fragTexCoor",
+            "start": 177,
+            "end": 189
+        },
+        {
+            "kind": "Semicolon",
+            "text": "d",
+            "start": 189,
+            "end": 190
+        },
+        {
+            "kind": "Error",
+            "text": ";",
+            "start": 190,
+            "end": 191
+        },
+        {
+            "kind": "Error",
+            "text": " ",
+            "start": 196,
+            "end": 197
+        },
+        {
+            "kind": "Identifier",
+            "text": " unifor",
+            "start": 202,
+            "end": 209
+        },
+        {
+            "kind": "Identifier",
+            "text": " mat",
+            "start": 210,
+            "end": 214
+        },
+        {
+            "kind": "Identifier",
+            "text": " modelMatri",
+            "start": 215,
+            "end": 226
+        },
+        {
+            "kind": "Semicolon",
+            "text": "x",
+            "start": 226,
+            "end": 227
+        },
+        {
+            "kind": "Error",
+            "text": ";",
+            "start": 227,
+            "end": 228
+        },
+        {
+            "kind": "Identifier",
+            "text": " unifor",
+            "start": 233,
+            "end": 240
+        },
+        {
+            "kind": "Identifier",
+            "text": " mat",
+            "start": 241,
+            "end": 245
+        },
+        {
+            "kind": "Identifier",
+            "text": " viewMatri",
+            "start": 246,
+            "end": 256
+        },
+        {
+            "kind": "Semicolon",
+            "text": "x",
+            "start": 256,
+            "end": 257
+        },
+        {
+            "kind": "Error",
+            "text": ";",
+            "start": 257,
+            "end": 258
+        },
+        {
+            "kind": "Identifier",
+            "text": " unifor",
+            "start": 263,
+            "end": 270
+        },
+        {
+            "kind": "Identifier",
+            "text": " mat",
+            "start": 271,
+            "end": 275
+        },
+        {
+            "kind": "Identifier",
+            "text": " projectionMatri",
+            "start": 276,
+            "end": 292
+        },
+        {
+            "kind": "Semicolon",
+            "text": "x",
+            "start": 292,
+            "end": 293
+        },
+        {
+            "kind": "Error",
+            "text": ";",
+            "start": 293,
+            "end": 294
+        },
+        {
+            "kind": "Error",
+            "text": " ",
+            "start": 299,
+            "end": 300
+        },
+        {
+            "kind": "Identifier",
+            "text": " voi",
+            "start": 305,
+            "end": 309
+        },
+        {
+            "kind": "Identifier",
+            "text": " mai",
+            "start": 310,
+            "end": 314
+        },
+        {
+            "kind": "LeftParen",
+            "text": "n",
+            "start": 314,
+            "end": 315
+        },
+        {
+            "kind": "RightParen",
+            "text": "(",
+            "start": 315,
+            "end": 316
+        },
+        {
+            "kind": "LeftBrace",
+            "text": " ",
+            "start": 317,
+            "end": 318
+        },
+        {
+            "kind": "Error",
+            "text": "{",
+            "start": 318,
+            "end": 319
+        },
+        {
+            "kind": "Identifier",
+            "text": " fragTexCoor",
+            "start": 328,
+            "end": 340
+        },
+        {
+            "kind": "Eq",
+            "text": " =",
+            "start": 341,
+            "end": 343
+        },
+        {
+            "kind": "Identifier",
+            "text": " texCoor",
+            "start": 343,
+            "end": 351
+        },
+        {
+            "kind": "Semicolon",
+            "text": "d",
+            "start": 351,
+            "end": 352
+        },
+        {
+            "kind": "Error",
+            "text": ";",
+            "start": 352,
+            "end": 353
+        },
+        {
+            "kind": "Identifier",
+            "text": " gl_Positio",
+            "start": 362,
+            "end": 373
+        },
+        {
+            "kind": "Eq",
+            "text": " =",
+            "start": 374,
+            "end": 376
+        },
+        {
+            "kind": "Identifier",
+            "text": " projectionMatri",
+            "start": 376,
+            "end": 392
+        },
+        {
+            "kind": "Star",
+            "text": " ",
+            "start": 393,
+            "end": 394
+        },
+        {
+            "kind": "Identifier",
+            "text": " viewMatri",
+            "start": 395,
+            "end": 405
+        },
+        {
+            "kind": "Star",
+            "text": " ",
+            "start": 406,
+            "end": 407
+        },
+        {
+            "kind": "Identifier",
+            "text": " modelMatri",
+            "start": 408,
+            "end": 419
+        },
+        {
+            "kind": "Star",
+            "text": " ",
+            "start": 420,
+            "end": 421
+        },
+        {
+            "kind": "Identifier",
+            "text": " vec",
+            "start": 422,
+            "end": 426
+        },
+        {
+            "kind": "LeftParen",
+            "text": "4",
+            "start": 426,
+            "end": 427
+        },
+        {
+            "kind": "Identifier",
+            "text": "(positio",
+            "start": 427,
+            "end": 435
+        },
+        {
+            "kind": "Comma",
+            "text": "n",
+            "start": 435,
+            "end": 436
+        },
+        {
+            "kind": "Number",
+            "text": " ",
+            "start": 437,
+            "end": 438
+        },
+        {
+            "kind": "Dot",
+            "text": "1",
+            "start": 438,
+            "end": 439
+        },
+        {
+            "kind": "Number",
+            "text": ".",
+            "start": 439,
+            "end": 440
+        },
+        {
+            "kind": "RightParen",
+            "text": "0",
+            "start": 440,
+            "end": 441
+        },
+        {
+            "kind": "Semicolon",
+            "text": ")",
+            "start": 441,
+            "end": 442
+        },
+        {
+            "kind": "Error",
+            "text": ";",
+            "start": 442,
+            "end": 443
+        },
+        {
+            "kind": "RightBrace",
+            "text": " ",
+            "start": 448,
+            "end": 449
+        },
+        {
+            "kind": "Error",
+            "text": "}",
+            "start": 449,
+            "end": 450
+        },
+        {
+            "kind": "RightBrace",
+            "text": "\n",
+            "start": 451,
+            "end": 452
+        },
+        {
+            "kind": "Error",
+            "text": "}",
+            "start": 452,
+            "end": 453
+        },
+        {
+            "kind": "Error",
+            "text": "\n",
+            "start": 454,
+            "end": 455
+        },
+        {
+            "kind": "Error",
+            "text": "r",
+            "start": 474,
+            "end": 475
+        },
+        {
+            "kind": "Identifier",
+            "text": "\nfragmen",
+            "start": 476,
+            "end": 484
+        },
+        {
+            "kind": "Identifier",
+            "text": " mai",
+            "start": 485,
+            "end": 489
+        },
+        {
+            "kind": "LeftBrace",
+            "text": " ",
+            "start": 490,
+            "end": 491
+        },
+        {
+            "kind": "Error",
+            "text": "{",
+            "start": 491,
+            "end": 492
+        },
+        {
+            "kind": "Identifier",
+            "text": " inpu",
+            "start": 497,
+            "end": 502
+        },
+        {
+            "kind": "Identifier",
+            "text": " vec",
+            "start": 503,
+            "end": 507
+        },
+        {
+            "kind": "Identifier",
+            "text": " fragTexCoor",
+            "start": 508,
+            "end": 520
+        },
+        {
+            "kind": "Semicolon",
+            "text": "d",
+            "start": 520,
+            "end": 521
+        },
+        {
+            "kind": "Error",
+            "text": ";",
+            "start": 521,
+            "end": 522
+        },
+        {
+            "kind": "Error",
+            "text": " ",
+            "start": 527,
+            "end": 528
+        },
+        {
+            "kind": "Identifier",
+            "text": " outpu",
+            "start": 533,
+            "end": 539
+        },
+        {
+            "kind": "Identifier",
+            "text": " vec",
+            "start": 540,
+            "end": 544
+        },
+        {
+            "kind": "Identifier",
+            "text": " fragColo",
+            "start": 545,
+            "end": 554
+        },
+        {
+            "kind": "Semicolon",
+            "text": "r",
+            "start": 554,
+            "end": 555
+        },
+        {
+            "kind": "Error",
+            "text": ";",
+            "start": 555,
+            "end": 556
+        },
+        {
+            "kind": "Error",
+            "text": " ",
+            "start": 561,
+            "end": 562
+        },
+        {
+            "kind": "Identifier",
+            "text": " unifor",
+            "start": 567,
+            "end": 574
+        },
+        {
+            "kind": "Identifier",
+            "text": " sampler2",
+            "start": 575,
+            "end": 584
+        },
+        {
+            "kind": "Identifier",
+            "text": " textureSample",
+            "start": 585,
+            "end": 599
+        },
+        {
+            "kind": "Semicolon",
+            "text": "r",
+            "start": 599,
+            "end": 600
+        },
+        {
+            "kind": "Error",
+            "text": ";",
+            "start": 600,
+            "end": 601
+        },
+        {
+            "kind": "Identifier",
+            "text": " unifor",
+            "start": 606,
+            "end": 613
+        },
+        {
+            "kind": "Identifier",
+            "text": " vec",
+            "start": 614,
+            "end": 618
+        },
+        {
+            "kind": "Identifier",
+            "text": " lightColo",
+            "start": 619,
+            "end": 629
+        },
+        {
+            "kind": "Semicolon",
+            "text": "r",
+            "start": 629,
+            "end": 630
+        }
+    ],
+    "errors": []
+}

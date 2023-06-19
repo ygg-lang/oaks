@@ -1,0 +1,607 @@
+{
+    "success": true,
+    "count": 100,
+    "tokens": [
+        {
+            "kind": "Identifier",
+            "text": "INI",
+            "start": 2,
+            "end": 5
+        },
+        {
+            "kind": "Identifier",
+            "text": "file",
+            "start": 6,
+            "end": 10
+        },
+        {
+            "kind": "Identifier",
+            "text": "basic",
+            "start": 11,
+            "end": 16
+        },
+        {
+            "kind": "Identifier",
+            "text": "syntax",
+            "start": 17,
+            "end": 23
+        },
+        {
+            "kind": "Identifier",
+            "text": "test",
+            "start": 24,
+            "end": 28
+        },
+        {
+            "kind": "Identifier",
+            "text": "file",
+            "start": 29,
+            "end": 33
+        },
+        {
+            "kind": "Identifier",
+            "text": "This",
+            "start": 37,
+            "end": 41
+        },
+        {
+            "kind": "Identifier",
+            "text": "is",
+            "start": 42,
+            "end": 44
+        },
+        {
+            "kind": "Identifier",
+            "text": "comment",
+            "start": 47,
+            "end": 54
+        },
+        {
+            "kind": "Identifier",
+            "text": "line",
+            "start": 55,
+            "end": 59
+        },
+        {
+            "kind": "LeftBracket",
+            "text": "[",
+            "start": 63,
+            "end": 64
+        },
+        {
+            "kind": "Identifier",
+            "text": "Database",
+            "start": 64,
+            "end": 72
+        },
+        {
+            "kind": "Identifier",
+            "text": "Database",
+            "start": 77,
+            "end": 85
+        },
+        {
+            "kind": "Identifier",
+            "text": "configuration",
+            "start": 86,
+            "end": 99
+        },
+        {
+            "kind": "Identifier",
+            "text": "section",
+            "start": 100,
+            "end": 107
+        },
+        {
+            "kind": "Identifier",
+            "text": "host",
+            "start": 109,
+            "end": 113
+        },
+        {
+            "kind": "Identifier",
+            "text": "localhost",
+            "start": 116,
+            "end": 125
+        },
+        {
+            "kind": "Identifier",
+            "text": "port",
+            "start": 127,
+            "end": 131
+        },
+        {
+            "kind": "Integer",
+            "text": "543",
+            "start": 134,
+            "end": 137
+        },
+        {
+            "kind": "Identifier",
+            "text": "username",
+            "start": 140,
+            "end": 148
+        },
+        {
+            "kind": "Identifier",
+            "text": "dbuser",
+            "start": 151,
+            "end": 157
+        },
+        {
+            "kind": "Identifier",
+            "text": "password",
+            "start": 159,
+            "end": 167
+        },
+        {
+            "kind": "Identifier",
+            "text": "secret123",
+            "start": 170,
+            "end": 179
+        },
+        {
+            "kind": "Identifier",
+            "text": "Encrypted",
+            "start": 183,
+            "end": 192
+        },
+        {
+            "kind": "Identifier",
+            "text": "password",
+            "start": 193,
+            "end": 201
+        },
+        {
+            "kind": "Identifier",
+            "text": "base64",
+            "start": 203,
+            "end": 209
+        },
+        {
+            "kind": "Identifier",
+            "text": "encrypted_password",
+            "start": 212,
+            "end": 230
+        },
+        {
+            "kind": "Identifier",
+            "text": "U2VjdXJlUGFzc3dvcmQxMjM",
+            "start": 233,
+            "end": 256
+        },
+        {
+            "kind": "Identifier",
+            "text": "database_name",
+            "start": 259,
+            "end": 272
+        },
+        {
+            "kind": "Identifier",
+            "text": "myapp_production",
+            "start": 275,
+            "end": 291
+        },
+        {
+            "kind": "Identifier",
+            "text": "connection_timeout",
+            "start": 293,
+            "end": 311
+        },
+        {
+            "kind": "Integer",
+            "text": "3",
+            "start": 314,
+            "end": 315
+        },
+        {
+            "kind": "Identifier",
+            "text": "max_connections",
+            "start": 318,
+            "end": 333
+        },
+        {
+            "kind": "Integer",
+            "text": "10",
+            "start": 336,
+            "end": 338
+        },
+        {
+            "kind": "LeftBracket",
+            "text": "[",
+            "start": 343,
+            "end": 344
+        },
+        {
+            "kind": "Identifier",
+            "text": "Server",
+            "start": 344,
+            "end": 350
+        },
+        {
+            "kind": "Identifier",
+            "text": "Web",
+            "start": 355,
+            "end": 358
+        },
+        {
+            "kind": "Identifier",
+            "text": "server",
+            "start": 359,
+            "end": 365
+        },
+        {
+            "kind": "Identifier",
+            "text": "configuration",
+            "start": 366,
+            "end": 379
+        },
+        {
+            "kind": "Identifier",
+            "text": "host",
+            "start": 381,
+            "end": 385
+        },
+        {
+            "kind": "Float",
+            "text": "0.0.",
+            "start": 388,
+            "end": 392
+        },
+        {
+            "kind": "Integer",
+            "text": "0.",
+            "start": 392,
+            "end": 394
+        },
+        {
+            "kind": "Identifier",
+            "text": "port",
+            "start": 397,
+            "end": 401
+        },
+        {
+            "kind": "Integer",
+            "text": "808",
+            "start": 404,
+            "end": 407
+        },
+        {
+            "kind": "Identifier",
+            "text": "ssl_enabled",
+            "start": 410,
+            "end": 421
+        },
+        {
+            "kind": "Boolean",
+            "text": "true",
+            "start": 424,
+            "end": 428
+        },
+        {
+            "kind": "Identifier",
+            "text": "certificate_path",
+            "start": 430,
+            "end": 446
+        },
+        {
+            "kind": "Identifier",
+            "text": "etc",
+            "start": 450,
+            "end": 453
+        },
+        {
+            "kind": "Identifier",
+            "text": "ssl",
+            "start": 454,
+            "end": 457
+        },
+        {
+            "kind": "Identifier",
+            "text": "certs",
+            "start": 458,
+            "end": 463
+        },
+        {
+            "kind": "Identifier",
+            "text": "server",
+            "start": 464,
+            "end": 470
+        },
+        {
+            "kind": "Dot",
+            "text": ".",
+            "start": 470,
+            "end": 471
+        },
+        {
+            "kind": "Identifier",
+            "text": "crt",
+            "start": 471,
+            "end": 474
+        },
+        {
+            "kind": "Identifier",
+            "text": "private_key_path",
+            "start": 476,
+            "end": 492
+        },
+        {
+            "kind": "Identifier",
+            "text": "etc",
+            "start": 496,
+            "end": 499
+        },
+        {
+            "kind": "Identifier",
+            "text": "ssl",
+            "start": 500,
+            "end": 503
+        },
+        {
+            "kind": "Identifier",
+            "text": "private",
+            "start": 504,
+            "end": 511
+        },
+        {
+            "kind": "Identifier",
+            "text": "server",
+            "start": 512,
+            "end": 518
+        },
+        {
+            "kind": "Dot",
+            "text": ".",
+            "start": 518,
+            "end": 519
+        },
+        {
+            "kind": "Identifier",
+            "text": "key",
+            "start": 519,
+            "end": 522
+        },
+        {
+            "kind": "Identifier",
+            "text": "max_request_size",
+            "start": 524,
+            "end": 540
+        },
+        {
+            "kind": "Integer",
+            "text": "1",
+            "start": 543,
+            "end": 544
+        },
+        {
+            "kind": "Integer",
+            "text": "0",
+            "start": 544,
+            "end": 545
+        },
+        {
+            "kind": "Identifier",
+            "text": "MB",
+            "start": 545,
+            "end": 547
+        },
+        {
+            "kind": "Identifier",
+            "text": "keep_alive_timeout",
+            "start": 549,
+            "end": 567
+        },
+        {
+            "kind": "Integer",
+            "text": "6",
+            "start": 570,
+            "end": 571
+        },
+        {
+            "kind": "LeftBracket",
+            "text": "[",
+            "start": 576,
+            "end": 577
+        },
+        {
+            "kind": "Identifier",
+            "text": "Application",
+            "start": 577,
+            "end": 588
+        },
+        {
+            "kind": "Identifier",
+            "text": "Application",
+            "start": 593,
+            "end": 604
+        },
+        {
+            "kind": "Identifier",
+            "text": "settings",
+            "start": 605,
+            "end": 613
+        },
+        {
+            "kind": "Identifier",
+            "text": "debug_mode",
+            "start": 615,
+            "end": 625
+        },
+        {
+            "kind": "Boolean",
+            "text": "false",
+            "start": 628,
+            "end": 633
+        },
+        {
+            "kind": "Identifier",
+            "text": "log_level",
+            "start": 635,
+            "end": 644
+        },
+        {
+            "kind": "Identifier",
+            "text": "INFO",
+            "start": 647,
+            "end": 651
+        },
+        {
+            "kind": "Identifier",
+            "text": "environment",
+            "start": 653,
+            "end": 664
+        },
+        {
+            "kind": "Identifier",
+            "text": "production",
+            "start": 667,
+            "end": 677
+        },
+        {
+            "kind": "Identifier",
+            "text": "timezone",
+            "start": 679,
+            "end": 687
+        },
+        {
+            "kind": "Identifier",
+            "text": "UTC",
+            "start": 690,
+            "end": 693
+        },
+        {
+            "kind": "Identifier",
+            "text": "default_language",
+            "start": 695,
+            "end": 711
+        },
+        {
+            "kind": "Identifier",
+            "text": "en",
+            "start": 714,
+            "end": 716
+        },
+        {
+            "kind": "Identifier",
+            "text": "supported_languages",
+            "start": 718,
+            "end": 737
+        },
+        {
+            "kind": "Identifier",
+            "text": "en",
+            "start": 740,
+            "end": 742
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 742,
+            "end": 743
+        },
+        {
+            "kind": "Identifier",
+            "text": "es",
+            "start": 743,
+            "end": 745
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 745,
+            "end": 746
+        },
+        {
+            "kind": "Identifier",
+            "text": "fr",
+            "start": 746,
+            "end": 748
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 748,
+            "end": 749
+        },
+        {
+            "kind": "Identifier",
+            "text": "de",
+            "start": 749,
+            "end": 751
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 751,
+            "end": 752
+        },
+        {
+            "kind": "Identifier",
+            "text": "it",
+            "start": 752,
+            "end": 754
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 754,
+            "end": 755
+        },
+        {
+            "kind": "Identifier",
+            "text": "pt",
+            "start": 755,
+            "end": 757
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 757,
+            "end": 758
+        },
+        {
+            "kind": "Identifier",
+            "text": "zh",
+            "start": 758,
+            "end": 760
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 760,
+            "end": 761
+        },
+        {
+            "kind": "Identifier",
+            "text": "ja",
+            "start": 761,
+            "end": 763
+        },
+        {
+            "kind": "LeftBracket",
+            "text": "[",
+            "start": 767,
+            "end": 768
+        },
+        {
+            "kind": "Identifier",
+            "text": "Security",
+            "start": 768,
+            "end": 776
+        },
+        {
+            "kind": "Identifier",
+            "text": "Security-related",
+            "start": 781,
+            "end": 797
+        },
+        {
+            "kind": "Identifier",
+            "text": "settings",
+            "start": 798,
+            "end": 806
+        }
+    ],
+    "errors": []
+}

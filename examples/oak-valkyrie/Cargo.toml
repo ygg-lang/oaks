@@ -15,7 +15,7 @@ edition.workspace = true
 
 [dependencies]
 oak-core = { workspace = true }
-serde = { workspace = true, version = "1.0.0", features = ["derive"] }
+serde = { workspace = true }
 
 [dev-dependencies]
 oak-core = { workspace = true, features = ["testing"] }
@@ -23,7 +23,7 @@ oak-core = { workspace = true, features = ["testing"] }
 
 [features]
 default = []
-alloc = []
+
 
 [package.metadata.docs.rs]
 all-features = true

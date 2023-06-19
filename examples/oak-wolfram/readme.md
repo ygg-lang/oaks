@@ -7,7 +7,7 @@ High-performance incremental Wolfram Language parser for the oak ecosystem with 
 
 ## 🎯 Overview
 
-Oak of wolfram is a robust parser for the Wolfram Language, designed to handle complete Wolfram syntax including mathematical expressions, symbolic computations, and functional programming constructs. Built on the solid foundation of oak-core, it provides both high-level convenience and detailed AST generation for mathematical analysis and code generation.
+Oak Wolfram is a robust parser for the Wolfram Language, designed to handle complete Wolfram syntax including mathematical expressions, symbolic computations, and functional programming constructs. Built on the solid foundation of oak-core, it provides both high-level convenience and detailed AST generation for mathematical analysis and code generation.
 
 ## ✨ Features
 
@@ -21,17 +21,17 @@ Oak of wolfram is a robust parser for the Wolfram Language, designed to handle c
 Basic example:
 
 ```rust
-use oak_wolfram::WolframParser;
+use oak_wolfram::{Parser, WolframLanguage, SourceText};
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
-    let parser = WolframParser::new();
-    let wolfram_code = r#"
+    let parser = Parser::new();
+    let source = SourceText::new(r#"
         f[x_] := x^2 + 2*x + 1
         Plot[f[x], {x, -10, 10}]
-    "#;
+    "#);
     
-    let ast = parser.parse_expression(wolfram_code)?;
-    println!("Parsed Wolfram expression successfully.");
+    let result = parser.parse(&source);
+    println!("Parsed Wolfram successfully.");
     Ok(())
 }
 ```
@@ -40,62 +40,57 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
 ### Function Definition Parsing
 ```rust
-use oak_wolfram::{WolframParser, ast::FunctionDefinition};
+use oak_wolfram::{Parser, WolframLanguage, SourceText};
 
-let parser = WolframParser::new();
-let wolfram_code = r#"
+let parser = Parser::new();
+let source = SourceText::new(r#"
     factorial[n_] := If[n <= 1, 1, n * factorial[n - 1]]
-"#;
+"#);
 
-let function = parser.parse_function(wolfram_code)?;
-println!("Function name: {}", function.name);
+let result = parser.parse(&source);
+println!("Function parsed successfully.");
 ```
 
 ### Expression Parsing
 ```rust
-use oak_wolfram::{WolframParser, ast::Expression};
+use oak_wolfram::{Parser, WolframLanguage, SourceText};
 
-let parser = WolframParser::new();
-let wolfram_code = r#"
+let parser = Parser::new();
+let source = SourceText::new(r#"
     Integrate[Sin[x], {x, 0, Pi}]
-"#;
+"#);
 
-let expression = parser.parse_expression(wolfram_code)?;
-println!("Expression type: {:?}", expression.kind);
+let result = parser.parse(&source);
+println!("Expression parsed successfully.");
 ```
 
 ## 🔧 Advanced Features
 
 ### Token-Level Parsing
 ```rust
-use oak_wolfram::{WolframParser, lexer::Token};
+use oak_wolfram::{Parser, WolframLanguage, SourceText};
 
-let parser = WolframParser::new();
-let tokens = parser.tokenize("f[x_] := x^2")?;
-for token in tokens {
-    println!("{:?}", token.kind);
-}
+let parser = Parser::new();
+let source = SourceText::new("f[x_] := x^2");
+let result = parser.parse(&source);
+println!("Token parsing completed.");
 ```
 
 ### Error Handling
 ```rust
-use oak_wolfram::WolframParser;
+use oak_wolfram::{Parser, WolframLanguage, SourceText};
 
-let parser = WolframParser::new();
-let invalid_wolfram = r#"
+let parser = Parser::new();
+let source = SourceText::new(r#"
     f[x_ := x^2 + 1
     (* Missing closing bracket *)
-"#;
+"#);
 
-match parser.parse_expression(invalid_wolfram) {
-    Ok(ast) => println!("Parsed Wolfram expression successfully."),
-    Err(e) => {
-        println!("Parse error at line {} column {}: {}", 
-            e.line(), e.column(), e.message());
-        if let Some(context) = e.context() {
-            println!("Error context: {}", context);
-        }
-    }
+let result = parser.parse(&source);
+if let Some(errors) = result.result.err() {
+    println!("Parse errors found: {:?}", errors);
+} else {
+    println!("Parsed successfully.");
 }
 ```
 
@@ -118,7 +113,7 @@ The parser generates a comprehensive AST with the following main structures:
 
 ## 🔗 Integration
 
-Oak of wolfram integrates seamlessly with:
+Oak Wolfram integrates seamlessly with:
 
 - **Mathematical Computation**: Symbolic mathematics and calculus
 - **Code Generation**: Generating code from Wolfram expressions

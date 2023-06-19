@@ -1,7 +1,5 @@
 use crate::{kind::CoqSyntaxKind, language::CoqLanguage};
-use oak_core::{Lexer, LexerState, SourceText, lexer::LexOutput};
-
-type State<'input> = LexerState<'input, CoqLanguage>;
+use oak_core::{IncrementalCache, Lexer, LexerState, lexer::LexOutput, source::Source};
 
 pub struct CoqLexer<'config> {
     config: &'config CoqLanguage,
@@ -13,7 +11,7 @@ impl<'config> CoqLexer<'config> {
     }
 
     /// 跳过空白字符
-    fn skip_whitespace(&self, state: &mut State) -> bool {
+    fn skip_whitespace(&self, state: &mut LexerState<impl Source, CoqLanguage>) -> bool {
         let start_pos = state.get_position();
 
         while let Some(ch) = state.peek() {
@@ -35,7 +33,7 @@ impl<'config> CoqLexer<'config> {
     }
 
     /// 处理换行
-    fn lex_newline(&self, state: &mut State) -> bool {
+    fn lex_newline(&self, state: &mut LexerState<impl Source, CoqLanguage>) -> bool {
         let start_pos = state.get_position();
 
         if let Some('\n') = state.peek() {
@@ -57,7 +55,7 @@ impl<'config> CoqLexer<'config> {
     }
 
     /// 处理注释
-    fn lex_comment(&self, state: &mut State) -> bool {
+    fn lex_comment(&self, state: &mut LexerState<impl Source, CoqLanguage>) -> bool {
         let start_pos = state.get_position();
 
         if let Some('(') = state.peek() {
@@ -99,7 +97,7 @@ impl<'config> CoqLexer<'config> {
     }
 
     /// 处理字符串字面量
-    fn lex_string(&self, state: &mut State) -> bool {
+    fn lex_string(&self, state: &mut LexerState<impl Source, CoqLanguage>) -> bool {
         let start_pos = state.get_position();
 
         if let Some('"') = state.peek() {
@@ -131,7 +129,7 @@ impl<'config> CoqLexer<'config> {
     }
 
     /// 处理数字字面量
-    fn lex_number(&self, state: &mut State) -> bool {
+    fn lex_number(&self, state: &mut LexerState<impl Source, CoqLanguage>) -> bool {
         let start_pos = state.get_position();
 
         if let Some(ch) = state.peek() {
@@ -178,7 +176,7 @@ impl<'config> CoqLexer<'config> {
     }
 
     /// 处理标识符和关键字
-    fn lex_identifier_or_keyword(&self, state: &mut State, source: &SourceText) -> bool {
+    fn lex_identifier_or_keyword(&self, state: &mut LexerState<impl Source, CoqLanguage>) -> bool {
         let start_pos = state.get_position();
 
         if let Some(ch) = state.peek() {
@@ -196,7 +194,7 @@ impl<'config> CoqLexer<'config> {
                 }
 
                 // 检查是否为关键字
-                let text = source.get_text_in(core::range::Range { start: start_pos, end: state.get_position() }).unwrap_or("");
+                let text = state.get_text_in((start_pos..state.get_position()).into());
                 let kind = match text {
                     "Theorem" => CoqSyntaxKind::Theorem,
                     "Lemma" => CoqSyntaxKind::Lemma,
@@ -294,7 +292,7 @@ impl<'config> CoqLexer<'config> {
     }
 
     /// 处理操作符和分隔符
-    fn lex_operator_or_delimiter(&self, state: &mut State) -> bool {
+    fn lex_operator_or_delimiter(&self, state: &mut LexerState<impl Source, CoqLanguage>) -> bool {
         let start_pos = state.get_position();
 
         if let Some(ch) = state.peek() {
@@ -456,10 +454,13 @@ impl<'config> CoqLexer<'config> {
 }
 
 impl<'config> Lexer<CoqLanguage> for CoqLexer<'config> {
-    fn lex(&self, source: &SourceText) -> LexOutput<CoqSyntaxKind> {
-        let mut state = LexerState::new(source);
-
-        // 主词法分析循环
+    fn lex_incremental(
+        &self,
+        source: impl Source,
+        _changed: usize,
+        _cache: IncrementalCache<CoqLanguage>,
+    ) -> LexOutput<CoqLanguage> {
+        let mut state = LexerState::new_with_cache(source, _changed, _cache);
         while state.not_at_end() {
             // 跳过空白字符
             if self.skip_whitespace(&mut state) {
@@ -487,7 +488,7 @@ impl<'config> Lexer<CoqLanguage> for CoqLexer<'config> {
             }
 
             // 处理标识符或关键字
-            if self.lex_identifier_or_keyword(&mut state, source) {
+            if self.lex_identifier_or_keyword(&mut state) {
                 continue;
             }
 
@@ -496,18 +497,22 @@ impl<'config> Lexer<CoqLanguage> for CoqLexer<'config> {
                 continue;
             }
 
-            // 如果没有匹配到任何模式，跳过当前字符并标记为错误
+            // 如果所有规则都不匹配，检查是否到达文件末尾
             if let Some(ch) = state.peek() {
+                // 跳过当前字符并标记为错误
                 let start_pos = state.get_position();
                 state.advance(ch.len_utf8());
                 state.add_token(CoqSyntaxKind::Error, start_pos, state.get_position());
             }
+            else {
+                // 到达文件末尾，退出循环
+                break;
+            }
         }
 
         // 添加 EOF token
-        let eof_pos = state.get_position();
-        state.add_token(CoqSyntaxKind::Eof, eof_pos, eof_pos);
-
-        state.finish()
+        let pos = state.get_position();
+        state.add_token(CoqSyntaxKind::Eof, pos, pos);
+        state.finish(Ok(()))
     }
 }

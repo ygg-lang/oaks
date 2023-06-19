@@ -1,7 +1,10 @@
-use oak_core::SyntaxKind;
+use oak_core::{SyntaxKind, Token};
+use serde::{Deserialize, Serialize};
+
+pub type IniToken = Token<IniSyntaxKind>;
 
 /// 统一Ini 语法种类（包含节点与词法
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub enum IniSyntaxKind {
     // 节点种类
     Root,
@@ -130,25 +133,25 @@ impl SyntaxKind for IniSyntaxKind {
     }
 
     fn is_token_type(&self) -> bool {
-        !matches!(
+        matches!(
             self,
-            Self::Root
-                | Self::Document
-                | Self::Table
-                | Self::ArrayOfTables
-                | Self::KeyValue
-                | Self::Key
-                | Self::BareKey
-                | Self::QuotedKey
-                | Self::Value
-                | Self::Array
-                | Self::InlineTable
-                | Self::String
-                | Self::Integer
-                | Self::Float
-                | Self::Boolean
-                | Self::DateTime
-                | Self::ErrorNode
+            Self::LeftBrace
+                | Self::RightBrace
+                | Self::LeftBracket
+                | Self::RightBracket
+                | Self::DoubleLeftBracket
+                | Self::DoubleRightBracket
+                | Self::Comma
+                | Self::Dot
+                | Self::Equal
+                | Self::Equals
+                | Self::Number
+                | Self::Identifier
+                | Self::Whitespace
+                | Self::Newline
+                | Self::Comment
+                | Self::Eof
+                | Self::Error
         )
     }
 

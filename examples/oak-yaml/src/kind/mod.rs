@@ -1,77 +1,73 @@
 use oak_core::SyntaxKind;
+use serde::{Deserialize, Serialize};
 
-#[derive(Copy, Clone, Debug, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Deserialize)]
+#[repr(u16)]
 pub enum YamlSyntaxKind {
-    // 基本 kind
+    // Trivia
     Whitespace,
-    Newline,
     Comment,
-    Error,
-    Eof,
 
-    // YAML 特定语法
-    DocumentStart,      // ---
-    DocumentEnd,        // ...
-    BlockSequenceEntry, // -
-    FlowSequenceStart,  // [
-    FlowSequenceEnd,    // ]
-    FlowMappingStart,   // {
-    FlowMappingEnd,     // }
-    BlockEntry,         // -
-    KeyIndicator,       // ?
-    ValueIndicator,     // :
-    BlockScalar,        // |, >
-    FoldedScalar,       // >
-    LiteralScalar,      // |
-
-    // 字面    StringLiteral,
+    // Literals
+    StringLiteral,
     NumberLiteral,
     BooleanLiteral,
     NullLiteral,
 
-    // 标识符和    Identifier,
-    Key,
-    Value,
+    // Identifiers
+    Identifier,
 
-    // 标点符号
-    Comma,       // ,
+    // Operators and punctuation
+    Colon,       // :
+    Dash,        // -
     Pipe,        // |
     GreaterThan, // >
+    Question,    // ?
     Ampersand,   // &
     Asterisk,    // *
     Exclamation, // !
-    Percent,     // %
 
-    // 引号
-    SingleQuote, // '
-    DoubleQuote, // "
+    // Brackets
+    LeftBracket,  // [
+    RightBracket, // ]
+    LeftBrace,    // {
+    RightBrace,   // }
 
-    // 标签和锚    Tag,                // !tag
+    // Special
     Anchor, // &anchor
     Alias,  // *alias
+    Tag,    // !tag
 
-    // 指令
-    Directive, // %YAML, %TAG
+    // Document markers
+    DocumentStart, // ---
+    DocumentEnd,   // ...
+
+    // Newlines and indentation
+    Newline,
+
+    // Error and EOF
+    Error,
+    Eof,
 }
 
 impl SyntaxKind for YamlSyntaxKind {
     fn is_trivia(&self) -> bool {
-        matches!(self, Self::Whitespace | Self::Newline | Self::Comment)
+        matches!(self, Self::Whitespace | Self::Comment | Self::Newline)
     }
 
     fn is_comment(&self) -> bool {
-        todo!()
+        matches!(self, Self::Comment)
     }
 
     fn is_whitespace(&self) -> bool {
-        todo!()
+        matches!(self, Self::Whitespace | Self::Newline)
     }
 
     fn is_token_type(&self) -> bool {
-        todo!()
+        !matches!(self, Self::Error | Self::Eof)
     }
 
     fn is_element_type(&self) -> bool {
-        todo!()
+        false
     }
 }

@@ -7,7 +7,7 @@ High-performance incremental C# parser for the oak ecosystem with flexible confi
 
 ## 🎯 Overview
 
-Oak-csharp is a robust parser for C#, designed to handle complete C# syntax including modern features. Built on the solid foundation of oak-core, it provides both high-level convenience and detailed AST generation for static analysis and code generation.
+Oak C# is a robust parser for C#, designed to handle complete C# syntax including modern features. Built on the solid foundation of oak-core, it provides both high-level convenience and detailed AST generation for static analysis and code generation.
 
 ## ✨ Features
 
@@ -18,54 +18,14 @@ Oak-csharp is a robust parser for C#, designed to handle complete C# syntax incl
 
 ## 🚀 Quick Start
 
-
-## 📋 Parsing Examples
-
-### Class Parsing
-```rust
-use oak_csharp::{CsharpParser, ast::ClassDefinition};
-
-let parser = CsharpParser::new();
-let csharp_code = r#"
-public class Calculator {
-    public int Add(int a, int b) {
-        return a + b;
-    }
-}
-"#;
-
-let program = parser.parse_program(csharp_code)?;
-if let Some(ClassDefinition { name, .. }) = program.classes.get(0) {
-    println!("Parsed class: {}", name);
-}
-```
-
-### Method Parsing
-```rust
-use oak_csharp::{CsharpParser, ast::MethodDefinition};
-
-let parser = CsharpParser::new();
-let csharp_code = r#"
-public static string Greet(string name) {
-    return $"Hello, {name}!";
-}
-"#;
-
-let method = parser.parse_method(csharp_code)?;
-println!("Method name: {}", method.name);
-```toml
-[dependencies]
-oak-csharp = "0.1"
-```
-
 Basic example:
 
 ```rust
-use oak_csharp::CsharpParser;
+use oak_csharp::{Parser, CSharpLanguage, SourceText};
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
-    let parser = CsharpParser::new();
-    let csharp_code = r#"
+    let parser = Parser::new();
+    let source = SourceText::new(r#"
 using System;
 
 class Program {
@@ -73,49 +33,115 @@ class Program {
         Console.WriteLine("Hello, C#!");
     }
 }
-"#;
+    "#);
     
-    let program = parser.parse_program(csharp_code)?;
-    println!("Parsed C# program successfully.");
+    let result = parser.parse(&source);
+    println!("Parsed C# successfully.");
     Ok(())
 }
 ```
 
-## Advanced Features
+## 📋 Parsing Examples
 
-### Customizing the Parser
-
-The `oak` library allows for flexible customization of the parser. You can modify the grammar rules or add new ones to suit your specific needs. Refer to the `oak` documentation for more details on parser customization.
-
-### Error Recovery
-
-`Oak of csharp` can be extended with error recovery mechanisms to handle malformed C# code gracefully, allowing for partial parsing and better resilience in real-world scenarios.
-
-## AST Structure
-
-The generated AST for C# code provides a hierarchical representation of the source. For instance, a simple class definition might result in an AST structure similar to this:
-
+### Class Parsing
 ```rust
-// Simplified AST representation for:
-// public class MyClass { /* ... */ }
-pex_csharp::ast::Node::ClassDefinition {
-    modifiers: vec![
-        pex_csharp::ast::Modifier::Public,
-    ],
-    name: "MyClass".to_string(),
-    members: vec![
-        // ... method definitions, field definitions, etc.
-    ],
+use oak_csharp::{Parser, CSharpLanguage, SourceText};
+
+let parser = Parser::new();
+let source = SourceText::new(r#"
+public class Calculator {
+    public int Add(int a, int b) {
+        return a + b;
+    }
+    
+    public int Subtract(int a, int b) {
+        return a - b;
+    }
+}
+"#);
+
+let result = parser.parse(&source);
+println!("Class parsed successfully.");
+```
+
+### Interface Parsing
+```rust
+use oak_csharp::{Parser, CSharpLanguage, SourceText};
+
+let parser = Parser::new();
+let source = SourceText::new(r#"
+public interface IDrawable {
+    void Draw();
+    double Area { get; }
+}
+
+public class Circle : IDrawable {
+    public double Radius { get; set; }
+    
+    public void Draw() {
+        Console.WriteLine($"Drawing circle with radius {Radius}");
+    }
+    
+    public double Area => Math.PI * Radius * Radius;
+}
+"#);
+
+let result = parser.parse(&source);
+println!("Interface parsed successfully.");
+```
+
+## 🔧 Advanced Features
+
+### Token-Level Parsing
+```rust
+use oak_csharp::{Parser, CSharpLanguage, SourceText};
+
+let parser = Parser::new();
+let source = SourceText::new("int x = 42;");
+let result = parser.parse(&source);
+// Token information is available in the parse result
+```
+
+### Error Handling
+```rust
+use oak_csharp::{Parser, CSharpLanguage, SourceText};
+
+let parser = Parser::new();
+let source = SourceText::new(r#"
+public class BrokenClass {
+    public void Method() {
+        Console.WriteLine("Hello")
+    // Missing closing brace
+"#);
+
+let result = parser.parse(&source);
+if let Err(e) = result.result {
+    println!("Parse error: {:?}", e);
 }
 ```
 
-## Performance
+## 🏗️ AST Structure
 
-`Oak of csharp` is designed for performance. Benchmarks show efficient parsing of large C# codebases. Optimizations include memoization, efficient backtracking, and direct AST construction.
+The parser generates a comprehensive AST with the following main structures:
+
+- **CompilationUnit**: Root container for C# programs
+- **ClassDeclaration**: C# class definitions
+- **InterfaceDeclaration**: Interface definitions
+- **MethodDeclaration**: Method declarations
+- **PropertyDeclaration**: Property declarations
+- **Statement**: Various statement types
+- **Expression**: Various expression types
+
+## 📊 Performance
+
+- **Streaming**: Parse large C# files without loading entirely into memory
+- **Incremental**: Re-parse only changed sections
+- **Memory Efficient**: Smart AST node allocation
+- **Fast Recovery**: Quick error recovery for better IDE integration
 
 ## 🔗 Integration
 
-Oak-csharp integrates seamlessly with:
+Oak C# integrates seamlessly with:
 
 - **Static Analysis**: Code quality and security analysis
 - **Code Generation**: Generating code from C# AST
@@ -123,10 +149,17 @@ Oak-csharp integrates seamlessly with:
 - **Refactoring**: Automated code refactoring
 - **Documentation**: Generating documentation from C# code
 
-## Examples
+## 📚 Examples
 
-Explore the `examples` directory within the `oak-csharp` project for more usage examples and demonstrations of specific C# language features being parsed.
+Check out the [examples](examples/) directory for comprehensive examples:
 
-## Contributing
+- Complete C# program parsing
+- Class and interface analysis
+- Code transformation
+- Integration with development workflows
 
-Contributions to `Oak of csharp` are welcome! If you find a bug or have a feature request, please open an issue on the GitHub repository. For major changes, please open a discussion first.
+## 🤝 Contributing
+
+Contributions are welcome! 
+
+Please feel free to submit pull requests at the [project repository](https://github.com/ygg-lang/oaks/tree/dev/examples/oak-csharp) or open [issues](https://github.com/ygg-lang/oaks/issues).

@@ -63,4 +63,5 @@ impl Default for JsonLanguage {
 
 impl Language for JsonLanguage {
     type SyntaxKind = crate::kind::JsonSyntaxKind;
+    type TypedRoot = (); // 暂时使用空类型，后续可以定义具体的AST根节点类型
 }

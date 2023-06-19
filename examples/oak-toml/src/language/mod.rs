@@ -1,4 +1,4 @@
-use crate::{lexer::TomlLexer, syntax::TomlSyntaxKind};
+use crate::{TomlSyntaxKind, ast::TomlRoot, lexer::TomlLexer, parser::TomlParser};
 use oak_core::Language;
 
 /// 日期时间格式
@@ -9,7 +9,7 @@ pub enum DateTimeFormat {
 }
 
 /// TOML 语言定义
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Copy)]
 pub struct TomlLanguage {
     pub allow_multiline_strings: bool,
     pub allow_hex_numbers: bool,
@@ -18,6 +18,13 @@ pub struct TomlLanguage {
 
 impl Language for TomlLanguage {
     type SyntaxKind = TomlSyntaxKind;
+    type TypedRoot = TomlRoot;
+}
+
+impl Default for TomlLanguage {
+    fn default() -> Self {
+        Self::standard()
+    }
 }
 
 impl TomlLanguage {
@@ -31,5 +38,9 @@ impl TomlLanguage {
 
     pub fn lexer(&self) -> TomlLexer<'_> {
         TomlLexer::new(self)
+    }
+
+    pub fn parser(&self) -> TomlParser<'_> {
+        TomlParser::new(self)
     }
 }

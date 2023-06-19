@@ -1,7 +1,9 @@
 #![doc = include_str!("../../readme.md")]
 
-use oak_core::SyntaxKind;
+use oak_core::{SyntaxKind, Token};
 use serde::{Deserialize, Serialize};
+
+pub type ValkyrieToken = Token<ValkyrieSyntaxKind>;
 
 #[derive(Copy, Clone, Debug, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub enum ValkyrieSyntaxKind {

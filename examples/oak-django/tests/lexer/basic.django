@@ -1,0 +1,534 @@
+{# This is a comprehensive Django template test file for lexer testing #}
+{# It includes various Django template language features #}
+
+{# 1. Variables #}
+<p>Hello, {{ user.first_name }} {{ user.last_name }}!</p>
+<p>Your age is {{ user.age|default:"N/A" }}.</p>
+<p>The current date is {{ current_date|date:"Y-m-d" }}.</p>
+<p>The time is {{ current_time|time:"H:i:s" }}.</p>
+
+{# 2. Tags #}
+
+{# 2.1. for loop #}
+<h2>Fruits:</h2>
+<ul>
+  {% for fruit in fruits %}
+    <li>{{ forloop.counter }}. {{ fruit|capfirst }}</li>
+  {% empty %}
+    <li>No fruits available.</li>
+  {% endfor %}
+</ul>
+
+{# 2.2. if/elif/else #}
+{% if user.is_authenticated %}
+  <p>Welcome back, {{ user.username }}!</p>
+{% elif user.is_staff %}
+  <p>Hello, staff member!</p>
+{% else %}
+  <p>Please log in.</p>
+{% endif %}
+
+{# 2.3. extends and block #}
+{% comment %}
+  Assuming a base.html exists with a 'content' block
+{% endcomment %}
+{% extends "base.html" %}
+
+{% block title %}
+  My Awesome Page
+{% endblock %}
+
+{% block content %}
+  <h1>This is the content of the page.</h1>
+  <p>More content here.</p>
+{% endblock %}
+
+{# 2.4. include #}
+{% include "snippets/header.html" with greeting="Hello from include!" %}
+
+{# 2.5. load #}
+{% load static my_custom_tags %}
+
+{# 2.6. comment #}
+{% comment "This is a multi-line comment" %}
+  This entire section will be ignored by the template engine.
+  It can span multiple lines.
+{% endcomment %}
+
+{# 2.7. autoescape #}
+{% autoescape off %}
+  <p>This HTML will not be escaped: {{ unsafe_html }}</p>
+{% endautoescape %}
+
+{# 2.8. csrf_token #}
+<form method="post">
+  {% csrf_token %}
+  <input type="submit" value="Submit">
+</form>
+
+{# 2.9. url #}
+<a href="{% url 'myapp:detail' pk=object.pk %}">View Detail</a>
+<a href="{% url 'admin:index' %}">Admin Panel</a>
+
+{# 2.10. static #}
+<img src="{% static 'images/logo.png' %}" alt="Logo">
+<link rel="stylesheet" href="{% static 'css/style.css' %}">
+
+{# 2.11. with #}
+{% with total=item.price|add:item.tax %}
+  <p>Total price: {{ total }}</p>
+{% endwith %}
+
+{# 2.12. verbatim #}
+{% verbatim %}
+  This {{ will }} not be rendered as a template variable.
+  Instead, it will appear as raw text.
+{% endverbatim %}
+
+{# 2.13. ifequal/ifnotequal (deprecated but for testing) #}
+{% ifequal user.status "active" %}
+  <p>User is active.</p>
+{% else %}
+  <p>User is inactive.</p>
+{% endifequal %}
+
+{# 3. Filters #}
+<p>Lowercase: {{ "HELLO WORLD"|lower }}</p>
+<p>Uppercase: {{ "hello world"|upper }}</p>
+<p>Capitalize first: {{ "hello world"|capfirst }}</p>
+<p>Title case: {{ "hello world"|title }}</p>
+<p>Slugify: {{ "My Awesome Post Title"|slugify }}</p>
+<p>Truncate chars: {{ "This is a very long sentence."|truncatechars:10 }}</p>
+<p>Truncate words: {{ "This is a very long sentence."|truncatewords:3 }}</p>
+<p>Word count: {{ "One two three four"|wordcount }}</p>
+<p>Strip tags: {{ "<b>Hello</b> <i>World</i>"|striptags }}</p>
+<p>Add: {{ 5|add:3 }}</p>
+<p>Add slashes: {{ "It's a test"|addslashes }}</p>
+<p>Floatformat: {{ 3.1415926535|floatformat:2 }}</p>
+<p>Get digit: {{ 12345|get_digit:3 }}</p>
+<p>Line numbers:
+  <pre>{{ "Line 1\nLine 2"|linenumbers }}</pre>
+</p>
+<p>Make list: {{ "abc"|make_list }}</p>
+<p>Random choice: {{ my_list|random }}</p>
+<p>Remove tags: {{ "<p>Hello</p>"|removetags:"p" }}</p>
+<p>Pluralize: {{ 1|pluralize:"y,ies" }} {{ 2|pluralize:"y,ies" }}</p>
+<p>Dictsort: {{ list_of_dicts|dictsort:"name" }}</p>
+<p>Dictsort reversed: {{ list_of_dicts|dictsortreversed:"age" }}</p>
+<p>Escape: {{ "<script>alert('xss')</script>"|escape }}</p>
+<p>Escapejs: {{ "It's a string with 'quotes'"|escapejs }}</p>
+<p>Force escape: {{ "<b>Hello</b>"|force_escape }}</p>
+<p>IRI encode: {{ "http://example.com/path with spaces"|iriencode }}</p>
+<p>Linebreaks: {{ "First line\nSecond line"|linebreaks }}</p>
+<p>Linebreaksbr: {{ "First line\nSecond line"|linebreaksbr }}</p>
+<p>Ljust: {{ "hello"|ljust:10:"-" }}</p>
+<p>Rjust: {{ "hello"|rjust:10:"-" }}</p>
+<p>Center: {{ "hello"|center:10:"-" }}</p>
+<p>Safe: {{ "<b>safe html</b>"|safe }}</p>
+<p>Safeseq: {{ list_of_safe_html|safeseq }}</p>
+<p>Slice: {{ "abcdefg"|slice:"1:5" }}</p>
+<p>Stringformat: {{ "%.2f"|stringformat:3.14159 }}</p>
+<p>URL encode: {{ "param with spaces"|urlencode }}</p>
+<p>URLize: {{ "Visit example.com"|urlize }}</p>
+<p>Wordwrap: {{ "This is a long sentence that needs to be wrapped."|wordwrap:10 }}</p>
+<p>Yesno: {{ True|yesno:"yes,no,maybe" }}</p>
+
+{# 4. Custom Tags and Filters (assuming they are loaded) #}
+{% my_custom_tag "arg1" key="value" %}
+<p>{{ "custom filter input"|my_custom_filter:"arg" }}</p>
+
+{# 5. Comments #}
+{# Single line comment #}
+
+{#
+  Multi-line comment
+  Another line of comment
+#}
+
+{# 6. Raw tag #}
+{% raw %}
+  This content {{ will }} not be parsed by Django.
+  It will be outputted exactly as it is written.
+{% endraw %}
+
+{# 7. Ifchanged tag #}
+<ul>
+  {% for item in items %}
+    {% ifchanged item.category %}
+      <li>Category: {{ item.category }}</li>
+    {% endifchanged %}
+    <li>Item: {{ item.name }}</li>
+  {% endfor %}
+</ul>
+
+{# 8. Cycle tag #}
+{% for item in items %}
+  <p class="{% cycle 'row1' 'row2' %}">{{ item.name }}</p>
+{% endfor %}
+
+{# 9. Firstof, Lastof, Default #}
+<p>First available: {{ var1|firstof:var2:var3:"None" }}</p>
+<p>Last available: {{ var1|lastof:var2:var3:"None" }}</p>
+<p>Default value: {{ var_undefined|default:"Default Value" }}</p>
+
+{# 10. Length filter #}
+<p>List length: {{ my_list|length }}</p>
+<p>String length: {{ "hello"|length }}</p>
+
+{# 11. Date and Time filters #}
+<p>Date: {{ some_datetime|date:"D d M Y" }}</p>
+<p>Time: {{ some_datetime|time:"H:i" }}</p>
+<p>Timesince: {{ past_date|timesince }}</p>
+<p>Timeuntil: {{ future_date|timeuntil }}</p>
+
+{# 12. Join filter #}
+<p>Joined list: {{ list_of_strings|join:", " }}</p>
+
+{# 13. Cut filter #}
+<p>Cut characters: {{ "string with spaces"|cut:" " }}</p>
+
+{# 14. Widthratio filter #}
+<p>Width ratio: {% widthratio this_value max_value 100 %}%</p>
+
+{# 15. Debug tag #}
+{% debug %}
+
+{# 16. Regroup tag #}
+{% regroup data by category as grouped_data %}
+<ul>
+  {% for group in grouped_data %}
+    <li>{{ group.grouper }}
+      <ul>
+        {% for item in group.list %}
+          <li>{{ item.name }}</li>
+        {% endfor %}
+      </ul>
+    </li>
+  {% endfor %}
+</ul>
+
+{# 17. Url tag with current #}
+<a href="{% url 'current_app:view_name' %}">Current App View</a>
+
+{# 18. Block.super #}
+{% block extra_head %}
+  {{ block.super }}
+  <link rel="stylesheet" href="{% static 'css/extra.css' %}">
+{% endblock %}
+
+{# 19. Filter tag #}
+{% filter upper %}
+  This text will be uppercase.
+{% endfilter %}
+
+{# 20. Spaceless tag #}
+{% spaceless %}
+  <p>
+    Hello
+    World
+  </p>
+{% endspaceless %}
+
+{# 21. Autoescape tag #}
+{% autoescape on %}
+  <p>This will be escaped: {{ unsafe_html }}</p>
+{% endautoescape %}
+
+{# 22. If_has_changed tag (custom, for testing) #}
+{% if_has_changed user.email %}
+  <p>Email has changed!</p>
+{% endif_has_changed %}
+
+{# 23. For loop with reversed #}
+<ul>
+  {% for item in items reversed %}
+    <li>{{ item.name }}</li>
+  {% endfor %}
+</ul>
+
+{# 24. For loop with multiple iterators #}
+{% for key, value in my_dict.items %}
+  <p>{{ key }}: {{ value }}</p>
+{% endfor %}
+
+{# 25. With tag with multiple assignments #}
+{% with var_a=1 var_b=2 %}
+  <p>Sum: {{ var_a|add:var_b }}</p>
+{% endwith %}
+
+{# 26. Custom filter with arguments #}
+<p>{{ "my string"|custom_filter:"arg1":"arg2" }}</p>
+
+{# 27. Comments with different styles #}
+{# This is a standard Django comment #}
+<!-- This is an HTML comment, which Django ignores -->
+
+{# 28. Template inheritance with multiple levels #}
+{% extends "parent/base.html" %}
+
+{# 29. Include with only #}
+{% include "snippets/footer.html" only %}
+
+{# 30. If tag with 'and', 'or', 'not' #}
+{% if user.is_authenticated and user.is_active %}
+  <p>Authenticated and active user.</p>
+{% endif %}
+
+{% if user.is_staff or user.is_superuser %}
+  <p>Staff or superuser.</p>
+{% endif %}
+
+{% if not user.is_anonymous %}
+  <p>Not anonymous user.</p>
+{% endif %}
+
+{# 31. Set tag (from a custom tag library, for testing) #}
+{% set my_variable = "some value" %}
+<p>{{ my_variable }}</p>
+
+{# 32. Url tag with namespace #}
+<a href="{% url 'blog:post_detail' post.slug %}">Blog Post</a>
+
+{# 33. Static tag with variable #}
+{% with image_name="profile.jpg" %}
+  <img src="{% static 'images/'|add:image_name %}" alt="Profile">
+{% endwith %}
+
+{# 34. Block tag with default content #}
+{% block sidebar %}
+  <p>Default sidebar content.</p>
+{% endblock %}
+
+{# 35. If tag with 'in' operator #}
+{% if user.username in allowed_users %}
+  <p>User is in allowed list.</p>
+{% endif %}
+
+{# 36. If tag with 'not in' operator #}
+{% if user.username not in blocked_users %}
+  <p>User is not in blocked list.</p>
+{% endif %}
+
+{# 37. Comparison operators in if tag #}
+{% if item.price > 100 %}
+  <p>Expensive item.</p>
+{% endif %}
+
+{% if item.quantity <= 5 %}
+  <p>Low stock.</p>
+{% endif %}
+
+{# 38. Arithmetic operations in variables (limited) #}
+<p>Result: {{ value_a|add:value_b|mul:value_c }}</p>
+
+{# 39. Template literals (not directly supported, but for potential future parsing) #}
+{# `This is a template literal with ${variable}` #}
+
+{# 40. Filters chained #}
+<p>{{ "  hello world  "|strip|upper|truncatechars:5 }}</p>
+
+{# 41. Filters with multiple arguments #}
+<p>{{ my_string|replace:"old":"new" }}</p>
+
+{# 42. Custom tags with block content #}
+{% my_block_tag %}
+  <p>Content inside custom block tag.</p>
+{% endmy_block_tag %}
+
+{# 43. Comments within tags #}
+{% comment %} This is a comment inside a tag {% endcomment %}
+
+{# 44. Filters on numbers #}
+<p>Abs: {{ -5|abs }}</p>
+<p>Divisibleby: {{ 10|divisibleby:5 }}</p>
+<p>Length_is: {{ my_list|length_is:3 }}</p>
+
+{# 45. Filters on strings #}
+<p>Ljust: {{ "test"|ljust:10 }}</p>
+<p>Rjust: {{ "test"|rjust:10 }}</p>
+<p>Center: {{ "test"|center:10 }}</p>
+
+{# 46. Filters for HTML #}
+<p>Removetags: {{ "<b>Hello</b> <i>World</i>"|removetags:"b" }}</p>
+<p>Striptags: {{ "<b>Hello</b> <i>World</i>"|striptags }}</p>
+
+{# 47. Filters for lists #}
+<p>First: {{ my_list|first }}</p>
+<p>Last: {{ my_list|last }}</p>
+<p>Join: {{ my_list|join:", " }}</p>
+
+{# 48. Filters for dates #}
+<p>Date: {{ my_date|date:"SHORT_DATE_FORMAT" }}</p>
+<p>Time: {{ my_time|time:"H:i" }}</p>
+
+{# 49. Filters for numbers #}
+<p>Add: {{ 5|add:3 }}</p>
+<p>Cut: {{ "hello world"|cut:"o" }}</p>
+<p>Divisibleby: {{ 10|divisibleby:3 }}</p>
+<p>Floatformat: {{ 3.14159|floatformat:"-2" }}</p>
+<p>Get_digit: {{ 12345|get_digit:2 }}</p>
+
+{# 50. Filters for booleans #}
+<p>Yesno: {{ True|yesno }}</p>
+
+{# 51. Filters for paths #}
+<p>Filesizeformat: {{ 1234567|filesizeformat }}</p>
+
+{# 52. Filters for URLs #}
+<p>URLencode: {{ "param with spaces"|urlencode }}</p>
+<p>URLize: {{ "Check out example.com"|urlize }}</p>
+
+{# 53. Filters for text #}
+<p>Truncatechars_html: {{ "<p>This is a long text</p>"|truncatechars_html:10 }}</p>
+<p>Truncatewords_html: {{ "<p>This is a long text</p>"|truncatewords_html:3 }}</p>
+
+{# 54. Filters for sequences #}
+<p>Slice: {{ "abcdefg"|slice:"1:4" }}</p>
+
+{# 55. Filters for dictionaries #}
+<p>Dictsort: {{ list_of_dicts|dictsort:"name" }}</p>
+
+{# 56. Filters for custom #}
+<p>{{ "custom input"|my_custom_filter }}</p>
+
+{# 57. Filters with default arguments #}
+<p>{{ var_empty|default_if_none:"No Value" }}</p>
+
+{# 58. Filters with multiple arguments and pipes #}
+<p>{{ "  hello world  "|strip|upper|truncatechars:5|addslashes }}</p>
+
+{# 59. Filters with complex expressions #}
+<p>{{ user.name|lower|capfirst }}</p>
+
+{# 60. Filters with variable arguments #}
+<p>{{ my_list|join:separator_char }}</p>
+
+{# 61. Filters with nested data structures #}
+<p>{{ user.address.city|upper }}</p>
+
+{# 62. Filters with boolean logic #}
+<p>{{ True|and:False }}</p>
+<p>{{ True|or:False }}</p>
+<p>{{ True|not }}</p>
+
+{# 63. Filters with comparison #}
+<p>{{ 5|gt:3 }}</p>
+<p>{{ 5|lt:3 }}</p>
+<p>{{ 5|gte:5 }}</p>
+<p>{{ 5|lte:5 }}</p>
+<p>{{ 5|eq:5 }}</p>
+<p>{{ 5|ne:3 }}</p>
+
+{# 64. Filters with custom logic #}
+<p>{{ my_value|is_even }}</p>
+
+{# 65. Filters with date formatting #}
+<p>{{ my_date|date:"jS F Y" }}</p>
+
+{# 66. Filters with time formatting #}
+<p>{{ my_time|time:"P" }}</p>
+
+{# 67. Filters with number formatting #}
+<p>{{ 1234567.89|intcomma }}</p>
+<p>{{ 1234567.89|intword }}</p>
+
+{# 68. Filters with string manipulation #}
+<p>{{ "hello world"|cut:" "|join:"-" }}</p>
+
+{# 69. Filters with HTML escaping #}
+<p>{{ "<script>alert('xss')</script>"|escape }}</p>
+
+{# 70. Filters with URL manipulation #}
+<p>{{ "http://example.com?param=value with spaces"|urlencode }}</p>
+
+{# 71. Filters with list manipulation #}
+<p>{{ my_list|first }}</p>
+<p>{{ my_list|last }}</p>
+<p>{{ my_list|random }}</p>
+
+{# 72. Filters with dictionary manipulation #}
+<p>{{ my_dict|dictsort:"key" }}</p>
+
+{# 73. Filters with custom objects #}
+<p>{{ my_object|get_attribute:"name" }}</p>
+
+{# 74. Filters with multiple arguments and complex types #}
+<p>{{ my_list|join:" - "|upper }}</p>
+
+{# 75. Filters with default values #}
+<p>{{ var_none|default:"Default" }}</p>
+
+{# 76. Filters with boolean conditions #}
+<p>{{ True|yesno:"Yes,No" }}</p>
+
+{# 77. Filters with date calculations #}
+<p>{{ date_future|timeuntil:date_past }}</p>
+
+{# 78. Filters with string formatting #}
+<p>{{ "Hello %s"|stringformat:"World" }}</p>
+
+{# 79. Filters with HTML stripping #}
+<p>{{ "<p>Test</p>"|striptags }}</p>
+
+{# 80. Filters with URL parsing #}
+<p>{{ "http://example.com/path?query=value"|urlize }}</p>
+
+{# 81. Filters with list slicing #}
+<p>{{ my_list|slice:"1:3" }}</p>
+
+{# 82. Filters with dictionary sorting #}
+<p>{{ list_of_dicts|dictsortreversed:"value" }}</p>
+
+{# 83. Filters with custom logic and arguments #}
+<p>{{ my_value|custom_filter_with_arg:"arg_value" }}</p>
+
+{# 84. Filters with chained custom filters #}
+<p>{{ "input"|custom_filter_one|custom_filter_two }}</p>
+
+{# 85. Filters with complex variable paths #}
+<p>{{ user.profile.settings.theme|capfirst }}</p>
+
+{# 86. Filters with default values for missing keys #}
+<p>{{ my_dict.missing_key|default:"Key Not Found" }}</p>
+
+{# 87. Filters with boolean operations on variables #}
+<p>{{ var_bool_a|and:var_bool_b }}</p>
+
+{# 88. Filters with comparison of variables #}
+<p>{{ var_num_a|gt:var_num_b }}</p>
+
+{# 89. Filters with custom date formats #}
+<p>{{ my_date|date:"DATE_FORMAT" }}</p>
+
+{# 90. Filters with custom time formats #}
+<p>{{ my_time|time:"TIME_FORMAT" }}</p>
+
+{# 91. Filters with custom number formatting #}
+<p>{{ my_large_number|intcomma }}</p>
+
+{# 92. Filters with custom string manipulation #}
+<p>{{ my_string|replace:old_char:new_char }}</p>
+
+{# 93. Filters with custom HTML escaping #}
+<p>{{ unsafe_input|escape }}</p>
+
+{# 94. Filters with custom URL manipulation #}
+<p>{{ my_url|urlencode }}</p>
+
+{# 95. Filters with custom list manipulation #}
+<p>{{ my_list|first }}</p>
+
+{# 96. Filters with custom dictionary manipulation #}
+<p>{{ my_dict|dictsort:"custom_key" }}</p>
+
+{# 97. Filters with custom object attribute access #}
+<p>{{ my_object|get_attr:"custom_attr" }}</p>
+
+{# 98. Filters with multiple custom arguments and pipes #}
+<p>{{ "  custom input  "|custom_strip|custom_upper|custom_truncate:5 }}</p>
+
+{# 99. Filters with default values for complex types #}
+<p>{{ my_complex_var|default:default_complex_value }}</p>
+
+{# 100. Filters with boolean conditions on complex expressions #}
+<p>{{ (var_a and var_b)|yesno:"True,False" }}</p>

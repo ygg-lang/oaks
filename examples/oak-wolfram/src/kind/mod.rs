@@ -1,6 +1,7 @@
 use oak_core::SyntaxKind;
+use serde::{Deserialize, Serialize};
 
-#[derive(Copy, Clone, Debug, PartialEq, Eq)]
+#[derive(Copy, Clone, Debug, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub enum WolframSyntaxKind {
     // 基础 tokens
     Whitespace,

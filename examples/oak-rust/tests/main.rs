@@ -1,3 +1,6 @@
+#![feature(new_range_api)]
+
+mod builder;
 mod lexer;
 mod parser;
 

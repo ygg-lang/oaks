@@ -1,7 +1,8 @@
 use oak_core::SyntaxKind;
+use serde::Serialize;
 
 /// Python 语法节点类型
-#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize)]
 #[repr(u16)]
 pub enum PythonSyntaxKind {
     // 基础 kind

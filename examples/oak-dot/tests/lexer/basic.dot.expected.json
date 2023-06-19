@@ -1,0 +1,607 @@
+{
+    "success": true,
+    "count": 100,
+    "tokens": [
+        {
+            "kind": "Identifier",
+            "text": "\ndigrap",
+            "start": 111,
+            "end": 118
+        },
+        {
+            "kind": "Identifier",
+            "text": " SimpleGrap",
+            "start": 119,
+            "end": 130
+        },
+        {
+            "kind": "LeftBrace",
+            "text": " ",
+            "start": 131,
+            "end": 132
+        },
+        {
+            "kind": "Identifier",
+            "text": " rankdi",
+            "start": 138,
+            "end": 145
+        },
+        {
+            "kind": "Equal",
+            "text": "r",
+            "start": 145,
+            "end": 146
+        },
+        {
+            "kind": "Identifier",
+            "text": "=L",
+            "start": 146,
+            "end": 148
+        },
+        {
+            "kind": "Semicolon",
+            "text": "R",
+            "start": 148,
+            "end": 149
+        },
+        {
+            "kind": "Identifier",
+            "text": " nod",
+            "start": 155,
+            "end": 159
+        },
+        {
+            "kind": "LeftBracket",
+            "text": " ",
+            "start": 160,
+            "end": 161
+        },
+        {
+            "kind": "Identifier",
+            "text": "[shap",
+            "start": 161,
+            "end": 166
+        },
+        {
+            "kind": "Equal",
+            "text": "e",
+            "start": 166,
+            "end": 167
+        },
+        {
+            "kind": "Identifier",
+            "text": "=circl",
+            "start": 167,
+            "end": 173
+        },
+        {
+            "kind": "Comma",
+            "text": "e",
+            "start": 173,
+            "end": 174
+        },
+        {
+            "kind": "Identifier",
+            "text": " styl",
+            "start": 175,
+            "end": 180
+        },
+        {
+            "kind": "Equal",
+            "text": "e",
+            "start": 180,
+            "end": 181
+        },
+        {
+            "kind": "Identifier",
+            "text": "=fille",
+            "start": 181,
+            "end": 187
+        },
+        {
+            "kind": "Comma",
+            "text": "d",
+            "start": 187,
+            "end": 188
+        },
+        {
+            "kind": "Identifier",
+            "text": " fillcolo",
+            "start": 189,
+            "end": 198
+        },
+        {
+            "kind": "Equal",
+            "text": "r",
+            "start": 198,
+            "end": 199
+        },
+        {
+            "kind": "Identifier",
+            "text": "=lightblu",
+            "start": 199,
+            "end": 208
+        },
+        {
+            "kind": "RightBracket",
+            "text": "e",
+            "start": 208,
+            "end": 209
+        },
+        {
+            "kind": "Semicolon",
+            "text": "]",
+            "start": 209,
+            "end": 210
+        },
+        {
+            "kind": "Identifier",
+            "text": " edg",
+            "start": 216,
+            "end": 220
+        },
+        {
+            "kind": "LeftBracket",
+            "text": " ",
+            "start": 221,
+            "end": 222
+        },
+        {
+            "kind": "Identifier",
+            "text": "[colo",
+            "start": 222,
+            "end": 227
+        },
+        {
+            "kind": "Equal",
+            "text": "r",
+            "start": 227,
+            "end": 228
+        },
+        {
+            "kind": "Identifier",
+            "text": "=re",
+            "start": 228,
+            "end": 231
+        },
+        {
+            "kind": "Comma",
+            "text": "d",
+            "start": 231,
+            "end": 232
+        },
+        {
+            "kind": "Identifier",
+            "text": " fontcolo",
+            "start": 233,
+            "end": 242
+        },
+        {
+            "kind": "Equal",
+            "text": "r",
+            "start": 242,
+            "end": 243
+        },
+        {
+            "kind": "Identifier",
+            "text": "=blu",
+            "start": 243,
+            "end": 247
+        },
+        {
+            "kind": "RightBracket",
+            "text": "e",
+            "start": 247,
+            "end": 248
+        },
+        {
+            "kind": "Semicolon",
+            "text": "]",
+            "start": 248,
+            "end": 249
+        },
+        {
+            "kind": "Identifier",
+            "text": " ",
+            "start": 261,
+            "end": 262
+        },
+        {
+            "kind": "Line",
+            "text": " -",
+            "start": 263,
+            "end": 265
+        },
+        {
+            "kind": "Identifier",
+            "text": " ",
+            "start": 266,
+            "end": 267
+        },
+        {
+            "kind": "LeftBracket",
+            "text": " ",
+            "start": 268,
+            "end": 269
+        },
+        {
+            "kind": "Identifier",
+            "text": "[labe",
+            "start": 269,
+            "end": 274
+        },
+        {
+            "kind": "Equal",
+            "text": "l",
+            "start": 274,
+            "end": 275
+        },
+        {
+            "kind": "String",
+            "text": "=\"edge1",
+            "start": 275,
+            "end": 282
+        },
+        {
+            "kind": "RightBracket",
+            "text": "\"",
+            "start": 282,
+            "end": 283
+        },
+        {
+            "kind": "Semicolon",
+            "text": "]",
+            "start": 283,
+            "end": 284
+        },
+        {
+            "kind": "Identifier",
+            "text": " ",
+            "start": 290,
+            "end": 291
+        },
+        {
+            "kind": "Line",
+            "text": " -",
+            "start": 292,
+            "end": 294
+        },
+        {
+            "kind": "Identifier",
+            "text": " ",
+            "start": 295,
+            "end": 296
+        },
+        {
+            "kind": "Semicolon",
+            "text": "C",
+            "start": 296,
+            "end": 297
+        },
+        {
+            "kind": "Identifier",
+            "text": " ",
+            "start": 303,
+            "end": 304
+        },
+        {
+            "kind": "Line",
+            "text": " -",
+            "start": 305,
+            "end": 307
+        },
+        {
+            "kind": "Identifier",
+            "text": " ",
+            "start": 308,
+            "end": 309
+        },
+        {
+            "kind": "Semicolon",
+            "text": "A",
+            "start": 309,
+            "end": 310
+        },
+        {
+            "kind": "Identifier",
+            "text": " ",
+            "start": 322,
+            "end": 323
+        },
+        {
+            "kind": "LeftBracket",
+            "text": " ",
+            "start": 324,
+            "end": 325
+        },
+        {
+            "kind": "Identifier",
+            "text": "[labe",
+            "start": 325,
+            "end": 330
+        },
+        {
+            "kind": "Equal",
+            "text": "l",
+            "start": 330,
+            "end": 331
+        },
+        {
+            "kind": "String",
+            "text": "=\"Node A",
+            "start": 331,
+            "end": 339
+        },
+        {
+            "kind": "Comma",
+            "text": "\"",
+            "start": 339,
+            "end": 340
+        },
+        {
+            "kind": "Identifier",
+            "text": " shap",
+            "start": 341,
+            "end": 346
+        },
+        {
+            "kind": "Equal",
+            "text": "e",
+            "start": 346,
+            "end": 347
+        },
+        {
+            "kind": "Identifier",
+            "text": "=bo",
+            "start": 347,
+            "end": 350
+        },
+        {
+            "kind": "RightBracket",
+            "text": "x",
+            "start": 350,
+            "end": 351
+        },
+        {
+            "kind": "Semicolon",
+            "text": "]",
+            "start": 351,
+            "end": 352
+        },
+        {
+            "kind": "Identifier",
+            "text": " ",
+            "start": 358,
+            "end": 359
+        },
+        {
+            "kind": "LeftBracket",
+            "text": " ",
+            "start": 360,
+            "end": 361
+        },
+        {
+            "kind": "Identifier",
+            "text": "[labe",
+            "start": 361,
+            "end": 366
+        },
+        {
+            "kind": "Equal",
+            "text": "l",
+            "start": 366,
+            "end": 367
+        },
+        {
+            "kind": "String",
+            "text": "=\"Node B",
+            "start": 367,
+            "end": 375
+        },
+        {
+            "kind": "Comma",
+            "text": "\"",
+            "start": 375,
+            "end": 376
+        },
+        {
+            "kind": "Identifier",
+            "text": " fillcolo",
+            "start": 377,
+            "end": 386
+        },
+        {
+            "kind": "Equal",
+            "text": "r",
+            "start": 386,
+            "end": 387
+        },
+        {
+            "kind": "Identifier",
+            "text": "=yello",
+            "start": 387,
+            "end": 393
+        },
+        {
+            "kind": "RightBracket",
+            "text": "w",
+            "start": 393,
+            "end": 394
+        },
+        {
+            "kind": "Semicolon",
+            "text": "]",
+            "start": 394,
+            "end": 395
+        },
+        {
+            "kind": "Identifier",
+            "text": " ",
+            "start": 401,
+            "end": 402
+        },
+        {
+            "kind": "LeftBracket",
+            "text": " ",
+            "start": 403,
+            "end": 404
+        },
+        {
+            "kind": "Identifier",
+            "text": "[labe",
+            "start": 404,
+            "end": 409
+        },
+        {
+            "kind": "Equal",
+            "text": "l",
+            "start": 409,
+            "end": 410
+        },
+        {
+            "kind": "String",
+            "text": "=\"Node C",
+            "start": 410,
+            "end": 418
+        },
+        {
+            "kind": "Comma",
+            "text": "\"",
+            "start": 418,
+            "end": 419
+        },
+        {
+            "kind": "Identifier",
+            "text": " shap",
+            "start": 420,
+            "end": 425
+        },
+        {
+            "kind": "Equal",
+            "text": "e",
+            "start": 425,
+            "end": 426
+        },
+        {
+            "kind": "Identifier",
+            "text": "=diamon",
+            "start": 426,
+            "end": 433
+        },
+        {
+            "kind": "RightBracket",
+            "text": "d",
+            "start": 433,
+            "end": 434
+        },
+        {
+            "kind": "Semicolon",
+            "text": "]",
+            "start": 434,
+            "end": 435
+        },
+        {
+            "kind": "RightBrace",
+            "text": "\n",
+            "start": 437,
+            "end": 438
+        },
+        {
+            "kind": "Identifier",
+            "text": "\ngrap",
+            "start": 463,
+            "end": 468
+        },
+        {
+            "kind": "Identifier",
+            "text": " UndirectedGrap",
+            "start": 469,
+            "end": 484
+        },
+        {
+            "kind": "LeftBrace",
+            "text": " ",
+            "start": 485,
+            "end": 486
+        },
+        {
+            "kind": "Identifier",
+            "text": " ",
+            "start": 492,
+            "end": 493
+        },
+        {
+            "kind": "Line",
+            "text": " -",
+            "start": 494,
+            "end": 496
+        },
+        {
+            "kind": "Identifier",
+            "text": " ",
+            "start": 497,
+            "end": 498
+        },
+        {
+            "kind": "Semicolon",
+            "text": "B",
+            "start": 498,
+            "end": 499
+        },
+        {
+            "kind": "Identifier",
+            "text": " ",
+            "start": 505,
+            "end": 506
+        },
+        {
+            "kind": "Line",
+            "text": " -",
+            "start": 507,
+            "end": 509
+        },
+        {
+            "kind": "Identifier",
+            "text": " ",
+            "start": 510,
+            "end": 511
+        },
+        {
+            "kind": "Semicolon",
+            "text": "C",
+            "start": 511,
+            "end": 512
+        },
+        {
+            "kind": "Identifier",
+            "text": " ",
+            "start": 518,
+            "end": 519
+        },
+        {
+            "kind": "Line",
+            "text": " -",
+            "start": 520,
+            "end": 522
+        },
+        {
+            "kind": "Identifier",
+            "text": " ",
+            "start": 523,
+            "end": 524
+        },
+        {
+            "kind": "Semicolon",
+            "text": "D",
+            "start": 524,
+            "end": 525
+        },
+        {
+            "kind": "Identifier",
+            "text": " ",
+            "start": 531,
+            "end": 532
+        }
+    ],
+    "errors": []
+}

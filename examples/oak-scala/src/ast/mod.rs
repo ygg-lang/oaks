@@ -1,7 +1,7 @@
 use core::range::Range;
 
-/// JSON 值节
+/// Scala 根节点
 #[derive(Debug, Clone)]
-pub struct JsonRoot {
+pub struct ScalaRoot {
     span: Range<usize>,
 }

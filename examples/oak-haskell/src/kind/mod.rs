@@ -1,4 +1,6 @@
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+use serde::Serialize;
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize)]
 pub enum HaskellSyntaxKind {
     // 空白和注
     Whitespace,
@@ -38,10 +40,13 @@ pub enum HaskellSyntaxKind {
     // 标识符和字面
     Identifier,
     Constructor,
+    Number,
     Integer,
     Float,
     String,
+    StringLiteral,
     Char,
+    CharLiteral,
 
     // 操作
     Plus,
@@ -49,6 +54,7 @@ pub enum HaskellSyntaxKind {
     Star,
     Slash,
     Percent,
+    Assign,
     Equal,
     NotEqual,
     Less,
@@ -58,9 +64,11 @@ pub enum HaskellSyntaxKind {
     And,
     Or,
     Arrow,
+    LeftArrow,
     DoubleArrow,
     Pipe,
     Ampersand,
+    Bang,
     Exclamation,
     Question,
     Colon,
@@ -68,11 +76,13 @@ pub enum HaskellSyntaxKind {
     Semicolon,
     Comma,
     Dot,
+    DoubleDot,
     DotDot,
     Dollar,
     At,
     Tilde,
     Backslash,
+    Append,
 
     // 分隔
     LeftParen,
@@ -85,8 +95,10 @@ pub enum HaskellSyntaxKind {
     // 特殊符号
     Quote,
     Backquote,
+    Backtick,
 
     // 错误和结
+    Root,
     Error,
     Eof,
 }
@@ -105,10 +117,10 @@ impl oak_core::SyntaxKind for HaskellSyntaxKind {
     }
 
     fn is_token_type(&self) -> bool {
-        !matches!(self, Self::Error)
+        !matches!(self, Self::Root | Self::Error)
     }
 
     fn is_element_type(&self) -> bool {
-        matches!(self, Self::Error)
+        matches!(self, Self::Root | Self::Error)
     }
 }

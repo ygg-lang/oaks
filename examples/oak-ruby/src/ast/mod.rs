@@ -1,5 +1,3 @@
-use alloc::{boxed::Box, string::String, vec::Vec};
-
 /// Ruby AST 根节点
 pub type RubyAst = ProgramNode;
 

@@ -1,7 +1,8 @@
+use crate::kind::JasminSyntaxKind;
 use oak_core::Language;
 
-/// JASMIN 语言绑定与配
-#[derive(Clone, Debug)]
+/// JASMIN 语言绑定与配置
+#[derive(Debug, Default, Copy, Clone)]
 pub struct JasminLanguage {
     /// 是否启用扩展指令（如 invokedynamic 等）
     pub extended: bool,
@@ -20,5 +21,6 @@ impl JasminLanguage {
 }
 
 impl Language for JasminLanguage {
-    type SyntaxKind = crate::kind::JasminSyntaxKind;
+    type SyntaxKind = JasminSyntaxKind;
+    type TypedRoot = (); // TODO: 定义 TypedRoot
 }

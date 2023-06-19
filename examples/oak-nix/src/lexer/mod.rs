@@ -1,8 +1,9 @@
 use crate::{kind::NixSyntaxKind, language::NixLanguage};
-use oak_core::{Lexer, LexerState, SourceText, lexer::LexOutput};
+use oak_core::{IncrementalCache, Lexer, LexerState, lexer::LexOutput, source::Source};
 
-type State<'input> = LexerState<'input, NixLanguage>;
+type State<S> = LexerState<S, NixLanguage>;
 
+#[derive(Clone, Debug)]
 pub struct NixLexer<'config> {
     config: &'config NixLanguage,
 }
@@ -13,7 +14,7 @@ impl<'config> NixLexer<'config> {
     }
 
     /// 跳过空白字符
-    fn skip_whitespace(&self, state: &mut State) -> bool {
+    fn skip_whitespace<S: Source>(&self, state: &mut State<S>) -> bool {
         let start_pos = state.get_position();
 
         while let Some(ch) = state.peek() {
@@ -35,7 +36,7 @@ impl<'config> NixLexer<'config> {
     }
 
     /// 处理换行
-    fn lex_newline(&self, state: &mut State) -> bool {
+    fn lex_newline<S: Source>(&self, state: &mut State<S>) -> bool {
         let start_pos = state.get_position();
 
         if let Some('\n') = state.peek() {
@@ -57,7 +58,7 @@ impl<'config> NixLexer<'config> {
     }
 
     /// 处理注释
-    fn lex_comment(&self, state: &mut State) -> bool {
+    fn lex_comment<S: Source>(&self, state: &mut State<S>) -> bool {
         let start_pos = state.get_position();
 
         if let Some('#') = state.peek() {
@@ -80,7 +81,7 @@ impl<'config> NixLexer<'config> {
     }
 
     /// 处理字符串字面量
-    fn lex_string(&self, state: &mut State) -> bool {
+    fn lex_string<S: Source>(&self, state: &mut State<S>) -> bool {
         let start_pos = state.get_position();
 
         if let Some('"') = state.peek() {
@@ -111,7 +112,7 @@ impl<'config> NixLexer<'config> {
     }
 
     /// 处理数字字面
-    fn lex_number(&self, state: &mut State) -> bool {
+    fn lex_number<S: Source>(&self, state: &mut State<S>) -> bool {
         let start_pos = state.get_position();
 
         if let Some(ch) = state.peek() {
@@ -154,7 +155,7 @@ impl<'config> NixLexer<'config> {
     }
 
     /// 处理标识符和关键
-    fn lex_identifier(&self, state: &mut State, source: &SourceText) -> bool {
+    fn lex_identifier<S: Source>(&self, state: &mut State<S>) -> bool {
         let start_pos = state.get_position();
 
         if let Some(ch) = state.peek() {
@@ -172,7 +173,7 @@ impl<'config> NixLexer<'config> {
                 }
 
                 // 检查是否为关键
-                let text = source.get_text_in((start_pos..state.get_position()).into()).unwrap_or("");
+                let text = state.get_text_in((start_pos..state.get_position()).into());
                 let kind = match text {
                     "let" => NixSyntaxKind::Let,
                     "in" => NixSyntaxKind::In,
@@ -201,7 +202,7 @@ impl<'config> NixLexer<'config> {
     }
 
     /// 处理操作
-    fn lex_operator(&self, state: &mut State) -> bool {
+    fn lex_operator<S: Source>(&self, state: &mut State<S>) -> bool {
         let start_pos = state.get_position();
 
         if let Some(ch) = state.peek() {
@@ -373,8 +374,13 @@ impl<'config> NixLexer<'config> {
 }
 
 impl<'config> Lexer<NixLanguage> for NixLexer<'config> {
-    fn lex(&self, source: &SourceText) -> LexOutput<NixSyntaxKind> {
-        let mut state = LexerState::new(source);
+    fn lex_incremental(
+        &self,
+        source: impl Source,
+        changed: usize,
+        cache: IncrementalCache<NixLanguage>,
+    ) -> LexOutput<NixLanguage> {
+        let mut state = LexerState::new_with_cache(source, changed, cache);
 
         while state.not_at_end() {
             if self.skip_whitespace(&mut state) {
@@ -392,7 +398,7 @@ impl<'config> Lexer<NixLanguage> for NixLexer<'config> {
             if self.lex_number(&mut state) {
                 continue;
             }
-            if self.lex_identifier(&mut state, source) {
+            if self.lex_identifier(&mut state) {
                 continue;
             }
             if self.lex_operator(&mut state) {
@@ -409,6 +415,6 @@ impl<'config> Lexer<NixLanguage> for NixLexer<'config> {
 
         let eof_pos = state.get_position();
         state.add_token(NixSyntaxKind::Eof, eof_pos, eof_pos);
-        state.finish()
+        state.finish(Ok(()))
     }
 }

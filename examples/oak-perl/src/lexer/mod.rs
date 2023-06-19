@@ -1,8 +1,18 @@
 use crate::{kind::PerlSyntaxKind, language::PerlLanguage};
-use oak_core::{Lexer, LexerState, SourceText, lexer::LexOutput};
+use oak_core::{
+    IncrementalCache, Lexer, LexerState, OakError,
+    lexer::{CommentLine, LexOutput, StringConfig, WhitespaceConfig},
+    source::Source,
+};
+use std::sync::LazyLock;
 
-type State<'input> = LexerState<'input, PerlLanguage>;
+type State<S: Source> = LexerState<S, PerlLanguage>;
 
+static PERL_WHITESPACE: LazyLock<WhitespaceConfig> = LazyLock::new(|| WhitespaceConfig { unicode_whitespace: true });
+static PERL_COMMENT: LazyLock<CommentLine> = LazyLock::new(|| CommentLine { line_markers: &["#"] });
+static PERL_STRING: LazyLock<StringConfig> = LazyLock::new(|| StringConfig { quotes: &['"', '\''], escape: Some('\\') });
+
+#[derive(Clone)]
 pub struct PerlLexer<'config> {
     config: &'config PerlLanguage,
 }
@@ -12,187 +22,57 @@ impl<'config> PerlLexer<'config> {
         Self { config }
     }
 
-    /// 跳过空白字符
-    fn skip_whitespace(&self, state: &mut State) -> bool {
-        let start_pos = state.get_position();
-
-        while let Some(ch) = state.peek() {
-            if ch == ' ' || ch == '\t' {
-                state.advance(ch.len_utf8());
+    fn skip_whitespace<S: Source>(&self, state: &mut State<S>) -> bool {
+        match PERL_WHITESPACE.scan(state.rest(), state.get_position(), PerlSyntaxKind::Whitespace) {
+            Some(token) => {
+                state.advance_with(token);
+                true
             }
-            else {
-                break;
-            }
-        }
-
-        if state.get_position() > start_pos {
-            state.add_token(PerlSyntaxKind::Whitespace, start_pos, state.get_position());
-            true
-        }
-        else {
-            false
+            None => false,
         }
     }
 
-    /// 处理换行
-    fn lex_newline(&self, state: &mut State) -> bool {
-        let start_pos = state.get_position();
-
-        if let Some('\n') = state.peek() {
-            state.advance(1);
-            state.add_token(PerlSyntaxKind::Newline, start_pos, state.get_position());
-            true
-        }
-        else if let Some('\r') = state.peek() {
-            state.advance(1);
-            if let Some('\n') = state.peek() {
-                state.advance(1);
+    fn skip_comment<S: Source>(&self, state: &mut State<S>) -> bool {
+        match PERL_COMMENT.scan(state.rest(), state.get_position(), PerlSyntaxKind::Comment) {
+            Some(token) => {
+                state.advance_with(token);
+                true
             }
-            state.add_token(PerlSyntaxKind::Newline, start_pos, state.get_position());
-            true
-        }
-        else {
-            false
+            None => false,
         }
     }
 
-    /// 处理注释
-    fn lex_comment(&self, state: &mut State) -> bool {
+    fn lex_string<S: Source>(&self, state: &mut State<S>) -> bool {
         let start_pos = state.get_position();
 
-        if let Some('#') = state.peek() {
-            state.advance(1);
-            while let Some(ch) = state.peek() {
-                if ch == '\n' || ch == '\r' {
-                    break;
-                }
-                else {
-                    state.advance(ch.len_utf8());
-                }
-            }
-            state.add_token(PerlSyntaxKind::Comment, start_pos, state.get_position());
-            true
-        }
-        else {
-            false
-        }
-    }
+        if let Some(quote_char) = state.peek() {
+            if quote_char == '"' || quote_char == '\'' {
+                state.advance(1); // 跳过开始引号
 
-    /// 处理字符串字面量
-    fn lex_string_literal(&self, state: &mut State) -> bool {
-        let start_pos = state.get_position();
-
-        if let Some(quote) = state.peek() {
-            if quote == '"' || quote == '\'' {
-                state.advance(1);
-                let mut found_end = false;
-
+                let mut escaped = false;
                 while let Some(ch) = state.peek() {
-                    if ch == quote {
-                        state.advance(1);
-                        found_end = true;
-                        break;
+                    if escaped {
+                        escaped = false;
+                        state.advance(ch.len_utf8());
                     }
                     else if ch == '\\' {
+                        escaped = true;
                         state.advance(1);
-                        if let Some(_) = state.peek() {
-                            state.advance(1);
-                        }
+                    }
+                    else if ch == quote_char {
+                        state.advance(1); // 跳过结束引号
+                        break;
                     }
                     else if ch == '\n' || ch == '\r' {
-                        break; // 字符串不能跨行（除非转义
+                        // 字符串不能跨行（除非转义）
+                        break;
                     }
                     else {
                         state.advance(ch.len_utf8());
                     }
                 }
 
-                if found_end {
-                    state.add_token(PerlSyntaxKind::StringLiteral, start_pos, state.get_position());
-                    true
-                }
-                else {
-                    state.set_position(start_pos);
-                    false
-                }
-            }
-            else {
-                false
-            }
-        }
-        else {
-            false
-        }
-    }
-
-    /// 处理数字字面
-    fn lex_number_literal(&self, state: &mut State) -> bool {
-        let start_pos = state.get_position();
-
-        if let Some(ch) = state.peek() {
-            if ch.is_ascii_digit() {
-                // 整数部分
-                while let Some(digit) = state.peek() {
-                    if digit.is_ascii_digit() {
-                        state.advance(1);
-                    }
-                    else {
-                        break;
-                    }
-                }
-
-                // 检查小数点
-                if let Some('.') = state.peek() {
-                    let next_pos = state.get_position() + 1;
-                    if let Some(next_ch) = state.source.get_char_at(next_pos) {
-                        if next_ch.is_ascii_digit() {
-                            state.advance(1);
-
-                            // 小数部分
-                            while let Some(digit) = state.peek() {
-                                if digit.is_ascii_digit() {
-                                    state.advance(1);
-                                }
-                                else {
-                                    break;
-                                }
-                            }
-                        }
-                    }
-                }
-
-                // 检查科学计数法
-                if let Some(e_char) = state.peek() {
-                    if e_char == 'e' || e_char == 'E' {
-                        let saved_pos = state.get_position();
-                        state.advance(1);
-
-                        // 可选的符号
-                        if let Some(sign) = state.peek() {
-                            if sign == '+' || sign == '-' {
-                                state.advance(1);
-                            }
-                        }
-
-                        // 指数部分
-                        let exp_start = state.get_position();
-                        while let Some(digit) = state.peek() {
-                            if digit.is_ascii_digit() {
-                                state.advance(1);
-                            }
-                            else {
-                                break;
-                            }
-                        }
-
-                        if state.get_position() == exp_start {
-                            // 没有有效的指数，回退
-                            state.set_position(saved_pos);
-                        }
-                    }
-                }
-
-                state.add_token(PerlSyntaxKind::NumberLiteral, start_pos, state.get_position());
+                state.add_token(PerlSyntaxKind::StringLiteral, start_pos, state.get_position());
                 true
             }
             else {
@@ -204,39 +84,71 @@ impl<'config> PerlLexer<'config> {
         }
     }
 
-    /// 处理变量前缀
-    fn lex_variable_prefix(&self, state: &mut State) -> bool {
-        let start_pos = state.get_position();
-
+    fn lex_variable<S: Source>(&self, state: &mut State<S>) -> bool {
         if let Some(ch) = state.peek() {
-            let token_kind = match ch {
-                '$' => PerlSyntaxKind::Scalar,
-                '@' => PerlSyntaxKind::Array,
-                '%' => PerlSyntaxKind::Hash,
-                '&' => PerlSyntaxKind::Code,
-                '*' => PerlSyntaxKind::Glob,
-                _ => return false,
-            };
+            let start_pos = state.get_position();
 
-            state.advance(1);
-            state.add_token(token_kind, start_pos, state.get_position());
-            true
+            match ch {
+                '$' => {
+                    state.advance(1);
+                    // 读取变量名
+                    while let Some(ch) = state.peek() {
+                        if ch.is_alphanumeric() || ch == '_' {
+                            state.advance(ch.len_utf8());
+                        }
+                        else {
+                            break;
+                        }
+                    }
+                    state.add_token(PerlSyntaxKind::Dollar, start_pos, state.get_position());
+                    true
+                }
+                '@' => {
+                    state.advance(1);
+                    // 读取数组变量名
+                    while let Some(ch) = state.peek() {
+                        if ch.is_alphanumeric() || ch == '_' {
+                            state.advance(ch.len_utf8());
+                        }
+                        else {
+                            break;
+                        }
+                    }
+                    state.add_token(PerlSyntaxKind::At, start_pos, state.get_position());
+                    true
+                }
+                '%' => {
+                    state.advance(1);
+                    // 读取哈希变量名
+                    while let Some(ch) = state.peek() {
+                        if ch.is_alphanumeric() || ch == '_' {
+                            state.advance(ch.len_utf8());
+                        }
+                        else {
+                            break;
+                        }
+                    }
+                    state.add_token(PerlSyntaxKind::Percent_, start_pos, state.get_position());
+                    true
+                }
+                _ => false,
+            }
         }
         else {
             false
         }
     }
 
-    /// 处理标识符和关键
-    fn lex_identifier_or_keyword(&self, state: &mut State) -> bool {
-        let start_pos = state.get_position();
-
+    fn lex_identifier_or_keyword<S: Source>(&self, state: &mut State<S>) -> bool {
         if let Some(ch) = state.peek() {
-            if ch.is_ascii_alphabetic() || ch == '_' {
-                state.advance(ch.len_utf8());
+            if ch.is_alphabetic() || ch == '_' {
+                let start_pos = state.get_position();
+                let mut text = String::new();
 
+                // 读取标识符
                 while let Some(ch) = state.peek() {
-                    if ch.is_ascii_alphanumeric() || ch == '_' {
+                    if ch.is_alphanumeric() || ch == '_' {
+                        text.push(ch);
                         state.advance(ch.len_utf8());
                     }
                     else {
@@ -244,45 +156,41 @@ impl<'config> PerlLexer<'config> {
                     }
                 }
 
-                let text = state.source.get_text(start_pos, state.get_position());
-                let token_kind = match text {
-                    "package" => PerlSyntaxKind::Package,
-                    "use" => PerlSyntaxKind::Use,
-                    "sub" => PerlSyntaxKind::Sub,
-                    "my" => PerlSyntaxKind::My,
-                    "our" => PerlSyntaxKind::Our,
-                    "local" => PerlSyntaxKind::Local,
+                // 检查是否是关键字
+                let kind = match text.as_str() {
                     "if" => PerlSyntaxKind::If,
-                    "elsif" => PerlSyntaxKind::Elsif,
                     "else" => PerlSyntaxKind::Else,
+                    "elsif" => PerlSyntaxKind::Elsif,
                     "unless" => PerlSyntaxKind::Unless,
                     "while" => PerlSyntaxKind::While,
                     "until" => PerlSyntaxKind::Until,
                     "for" => PerlSyntaxKind::For,
                     "foreach" => PerlSyntaxKind::Foreach,
                     "do" => PerlSyntaxKind::Do,
+                    "sub" => PerlSyntaxKind::Sub,
+                    "package" => PerlSyntaxKind::Package,
+                    "use" => PerlSyntaxKind::Use,
+                    "require" => PerlSyntaxKind::Require,
+                    "my" => PerlSyntaxKind::My,
+                    "our" => PerlSyntaxKind::Our,
+                    "local" => PerlSyntaxKind::Local,
+                    "return" => PerlSyntaxKind::Return,
                     "last" => PerlSyntaxKind::Last,
                     "next" => PerlSyntaxKind::Next,
                     "redo" => PerlSyntaxKind::Redo,
-                    "return" => PerlSyntaxKind::Return,
                     "die" => PerlSyntaxKind::Die,
                     "warn" => PerlSyntaxKind::Warn,
+                    "eval" => PerlSyntaxKind::Eval,
                     "print" => PerlSyntaxKind::Print,
                     "printf" => PerlSyntaxKind::Printf,
                     "chomp" => PerlSyntaxKind::Chomp,
                     "chop" => PerlSyntaxKind::Chop,
-                    "length" => PerlSyntaxKind::Length,
-                    "substr" => PerlSyntaxKind::Substr,
-                    "index" => PerlSyntaxKind::Index,
-                    "rindex" => PerlSyntaxKind::Rindex,
                     "split" => PerlSyntaxKind::Split,
                     "join" => PerlSyntaxKind::Join,
                     "push" => PerlSyntaxKind::Push,
                     "pop" => PerlSyntaxKind::Pop,
                     "shift" => PerlSyntaxKind::Shift,
                     "unshift" => PerlSyntaxKind::Unshift,
-                    "sort" => PerlSyntaxKind::Sort,
-                    "reverse" => PerlSyntaxKind::Reverse,
                     "keys" => PerlSyntaxKind::Keys,
                     "values" => PerlSyntaxKind::Values,
                     "each" => PerlSyntaxKind::Each,
@@ -293,12 +201,13 @@ impl<'config> PerlLexer<'config> {
                     "ref" => PerlSyntaxKind::Ref,
                     "bless" => PerlSyntaxKind::Bless,
                     "new" => PerlSyntaxKind::New,
-                    "can" => PerlSyntaxKind::Can,
-                    "isa" => PerlSyntaxKind::Isa,
+                    "and" => PerlSyntaxKind::And,
+                    "or" => PerlSyntaxKind::Or,
+                    "not" => PerlSyntaxKind::Not,
                     _ => PerlSyntaxKind::Identifier,
                 };
 
-                state.add_token(token_kind, start_pos, state.get_position());
+                state.add_token(kind, start_pos, state.get_position());
                 true
             }
             else {
@@ -310,12 +219,45 @@ impl<'config> PerlLexer<'config> {
         }
     }
 
-    /// 处理运算
-    fn lex_operators(&self, state: &mut State, source: &SourceText) -> bool {
-        let start_pos = state.get_position();
-
+    fn lex_number<S: Source>(&self, state: &mut State<S>) -> bool {
         if let Some(ch) = state.peek() {
-            let token_kind = match ch {
+            if ch.is_ascii_digit() {
+                let start_pos = state.get_position();
+                let mut has_dot = false;
+
+                // 读取数字
+                while let Some(ch) = state.peek() {
+                    if ch.is_ascii_digit() {
+                        state.advance(1);
+                    }
+                    else if ch == '.' && !has_dot {
+                        has_dot = true;
+                        state.advance(1);
+                    }
+                    else {
+                        break;
+                    }
+                }
+
+                let kind = PerlSyntaxKind::NumberLiteral;
+
+                state.add_token(kind, start_pos, state.get_position());
+                true
+            }
+            else {
+                false
+            }
+        }
+        else {
+            false
+        }
+    }
+
+    fn lex_operators_and_punctuation<S: Source>(&self, state: &mut State<S>) -> bool {
+        if let Some(ch) = state.peek() {
+            let start_pos = state.get_position();
+
+            let kind = match ch {
                 '+' => {
                     state.advance(1);
                     if let Some('+') = state.peek() {
@@ -352,20 +294,14 @@ impl<'config> PerlLexer<'config> {
                     state.advance(1);
                     if let Some('*') = state.peek() {
                         state.advance(1);
-                        if let Some('=') = state.peek() {
-                            state.advance(1);
-                            PerlSyntaxKind::PowerAssign
-                        }
-                        else {
-                            PerlSyntaxKind::Power
-                        }
+                        PerlSyntaxKind::Power
                     }
                     else if let Some('=') = state.peek() {
                         state.advance(1);
                         PerlSyntaxKind::MultiplyAssign
                     }
                     else {
-                        PerlSyntaxKind::Multiply
+                        PerlSyntaxKind::Star
                     }
                 }
                 '/' => {
@@ -375,17 +311,7 @@ impl<'config> PerlLexer<'config> {
                         PerlSyntaxKind::DivideAssign
                     }
                     else {
-                        PerlSyntaxKind::Divide
-                    }
-                }
-                '%' => {
-                    state.advance(1);
-                    if let Some('=') = state.peek() {
-                        state.advance(1);
-                        PerlSyntaxKind::ModuloAssign
-                    }
-                    else {
-                        PerlSyntaxKind::Modulo
+                        PerlSyntaxKind::Slash
                     }
                 }
                 '=' => {
@@ -394,9 +320,9 @@ impl<'config> PerlLexer<'config> {
                         state.advance(1);
                         PerlSyntaxKind::Equal
                     }
-                    else if let Some('>') = state.peek() {
+                    else if let Some('~') = state.peek() {
                         state.advance(1);
-                        PerlSyntaxKind::FatComma
+                        PerlSyntaxKind::Match
                     }
                     else {
                         PerlSyntaxKind::Assign
@@ -408,8 +334,12 @@ impl<'config> PerlLexer<'config> {
                         state.advance(1);
                         PerlSyntaxKind::NotEqual
                     }
+                    else if let Some('~') = state.peek() {
+                        state.advance(1);
+                        PerlSyntaxKind::NotMatch
+                    }
                     else {
-                        PerlSyntaxKind::LogicalNot
+                        PerlSyntaxKind::Not
                     }
                 }
                 '<' => {
@@ -426,16 +356,10 @@ impl<'config> PerlLexer<'config> {
                     }
                     else if let Some('<') = state.peek() {
                         state.advance(1);
-                        if let Some('=') = state.peek() {
-                            state.advance(1);
-                            PerlSyntaxKind::LeftShiftAssign
-                        }
-                        else {
-                            PerlSyntaxKind::LeftShift
-                        }
+                        PerlSyntaxKind::LeftShift
                     }
                     else {
-                        PerlSyntaxKind::Less
+                        PerlSyntaxKind::LessThan
                     }
                 }
                 '>' => {
@@ -446,16 +370,10 @@ impl<'config> PerlLexer<'config> {
                     }
                     else if let Some('>') = state.peek() {
                         state.advance(1);
-                        if let Some('=') = state.peek() {
-                            state.advance(1);
-                            PerlSyntaxKind::RightShiftAssign
-                        }
-                        else {
-                            PerlSyntaxKind::RightShift
-                        }
+                        PerlSyntaxKind::RightShift
                     }
                     else {
-                        PerlSyntaxKind::Greater
+                        PerlSyntaxKind::GreaterThan
                     }
                 }
                 '&' => {
@@ -463,10 +381,6 @@ impl<'config> PerlLexer<'config> {
                     if let Some('&') = state.peek() {
                         state.advance(1);
                         PerlSyntaxKind::LogicalAnd
-                    }
-                    else if let Some('=') = state.peek() {
-                        state.advance(1);
-                        PerlSyntaxKind::BitwiseAndAssign
                     }
                     else {
                         PerlSyntaxKind::BitwiseAnd
@@ -478,23 +392,13 @@ impl<'config> PerlLexer<'config> {
                         state.advance(1);
                         PerlSyntaxKind::LogicalOr
                     }
-                    else if let Some('=') = state.peek() {
-                        state.advance(1);
-                        PerlSyntaxKind::BitwiseOrAssign
-                    }
                     else {
                         PerlSyntaxKind::BitwiseOr
                     }
                 }
                 '^' => {
                     state.advance(1);
-                    if let Some('=') = state.peek() {
-                        state.advance(1);
-                        PerlSyntaxKind::BitwiseXorAssign
-                    }
-                    else {
-                        PerlSyntaxKind::BitwiseXor
-                    }
+                    PerlSyntaxKind::BitwiseXor
                 }
                 '~' => {
                     state.advance(1);
@@ -506,47 +410,61 @@ impl<'config> PerlLexer<'config> {
                         state.advance(1);
                         PerlSyntaxKind::Range
                     }
-                    else if let Some('=') = state.peek() {
-                        state.advance(1);
-                        PerlSyntaxKind::ConcatAssign
-                    }
                     else {
                         PerlSyntaxKind::Concat
                     }
                 }
-                _ => return false,
+                '?' => {
+                    state.advance(1);
+                    PerlSyntaxKind::Question
+                }
+                ':' => {
+                    state.advance(1);
+                    PerlSyntaxKind::Colon
+                }
+                ';' => {
+                    state.advance(1);
+                    PerlSyntaxKind::Semicolon
+                }
+                ',' => {
+                    state.advance(1);
+                    PerlSyntaxKind::Comma
+                }
+                '(' => {
+                    state.advance(1);
+                    PerlSyntaxKind::LeftParen
+                }
+                ')' => {
+                    state.advance(1);
+                    PerlSyntaxKind::RightParen
+                }
+                '[' => {
+                    state.advance(1);
+                    PerlSyntaxKind::LeftBracket
+                }
+                ']' => {
+                    state.advance(1);
+                    PerlSyntaxKind::RightBracket
+                }
+                '{' => {
+                    state.advance(1);
+                    PerlSyntaxKind::LeftBrace
+                }
+                '}' => {
+                    state.advance(1);
+                    PerlSyntaxKind::RightBrace
+                }
+                '\n' => {
+                    state.advance(1);
+                    PerlSyntaxKind::Newline
+                }
+                _ => {
+                    state.advance(ch.len_utf8());
+                    PerlSyntaxKind::Error
+                }
             };
 
-            state.add_token(token_kind, start_pos, state.get_position());
-            true
-        }
-        else {
-            false
-        }
-    }
-
-    /// 处理分隔
-    fn lex_delimiters(&self, state: &mut State) -> bool {
-        let start_pos = state.get_position();
-
-        if let Some(ch) = state.peek() {
-            let token_kind = match ch {
-                '(' => PerlSyntaxKind::LeftParen,
-                ')' => PerlSyntaxKind::RightParen,
-                '[' => PerlSyntaxKind::LeftBracket,
-                ']' => PerlSyntaxKind::RightBracket,
-                '{' => PerlSyntaxKind::LeftBrace,
-                '}' => PerlSyntaxKind::RightBrace,
-                ';' => PerlSyntaxKind::Semicolon,
-                ',' => PerlSyntaxKind::Comma,
-                '?' => PerlSyntaxKind::Question,
-                ':' => PerlSyntaxKind::Colon,
-                '\\' => PerlSyntaxKind::Backslash,
-                _ => return false,
-            };
-
-            state.advance(ch.len_utf8());
-            state.add_token(token_kind, start_pos, state.get_position());
+            state.add_token(kind, start_pos, state.get_position());
             true
         }
         else {
@@ -556,59 +474,67 @@ impl<'config> PerlLexer<'config> {
 }
 
 impl<'config> Lexer<PerlLanguage> for PerlLexer<'config> {
-    fn lex(&self, source: &SourceText) -> LexOutput<PerlSyntaxKind> {
-        let mut state = LexerState::new(source);
+    fn lex_incremental(
+        &self,
+        source: impl Source,
+        changed: usize,
+        cache: IncrementalCache<PerlLanguage>,
+    ) -> LexOutput<PerlLanguage> {
+        let mut state = LexerState::new_with_cache(source, changed, cache);
+        let result = self.run(&mut state);
+        state.finish(result)
+    }
+}
 
+impl<'config> PerlLexer<'config> {
+    fn run<S: Source>(&self, state: &mut State<S>) -> Result<(), OakError> {
         while state.not_at_end() {
-            // 尝试各种词法规则
-            if self.skip_whitespace(&mut state) {
+            // 跳过空白字符
+            if self.skip_whitespace(state) {
                 continue;
             }
 
-            if self.lex_newline(&mut state) {
+            // 处理注释
+            if self.skip_comment(state) {
                 continue;
             }
 
-            if self.lex_comment(&mut state) {
+            // 处理字符串
+            if self.lex_string(state) {
                 continue;
             }
 
-            if self.lex_string_literal(&mut state) {
+            // 处理变量
+            if self.lex_variable(state) {
                 continue;
             }
 
-            if self.lex_number_literal(&mut state) {
+            // 处理标识符和关键字
+            if self.lex_identifier_or_keyword(state) {
                 continue;
             }
 
-            if self.lex_variable_prefix(&mut state) {
+            // 处理数字
+            if self.lex_number(state) {
                 continue;
             }
 
-            if self.lex_identifier_or_keyword(&mut state) {
+            // 处理操作符和标点符号
+            if self.lex_operators_and_punctuation(state) {
                 continue;
             }
 
-            if self.lex_operators(&mut state, source) {
-                continue;
-            }
-
-            if self.lex_delimiters(&mut state) {
-                continue;
-            }
-
-            // 如果所有规则都不匹配，跳过当前字符并标记为错误
+            // 如果没有匹配任何模式，创建错误 token
             let start_pos = state.get_position();
             if let Some(ch) = state.peek() {
                 state.advance(ch.len_utf8());
                 state.add_token(PerlSyntaxKind::Error, start_pos, state.get_position());
             }
+            else {
+                break;
+            }
         }
 
-        // 添加 EOF kind
-        let eof_pos = state.get_position();
-        state.add_token(PerlSyntaxKind::Eof, eof_pos, eof_pos);
-
-        state.finish()
+        Ok(())
     }
 }

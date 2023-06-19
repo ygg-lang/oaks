@@ -1,4 +1,4 @@
-use crate::kind::DelphiSyntaxKind;
+use crate::{ast::DelphiRoot, kind::DelphiSyntaxKind};
 use oak_core::Language;
 
 /// Delphi 语言配置
@@ -18,4 +18,5 @@ impl Default for DelphiLanguage {
 
 impl Language for DelphiLanguage {
     type SyntaxKind = DelphiSyntaxKind;
+    type TypedRoot = DelphiRoot;
 }

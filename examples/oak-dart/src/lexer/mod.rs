@@ -1,8 +1,33 @@
 use crate::{kind::DartSyntaxKind, language::DartLanguage};
-use oak_core::{Lexer, LexerState, SourceText, lexer::LexOutput};
+use oak_core::{
+    IncrementalCache, Lexer, LexerState, OakError,
+    lexer::{CommentLine, LexOutput, StringConfig, WhitespaceConfig},
+    source::Source,
+};
+use std::sync::LazyLock;
 
+type State<S: Source> = LexerState<S, DartLanguage>;
+
+static DART_WHITESPACE: LazyLock<WhitespaceConfig> = LazyLock::new(|| WhitespaceConfig { unicode_whitespace: true });
+static DART_COMMENT: LazyLock<CommentLine> = LazyLock::new(|| CommentLine { line_markers: &["//"] });
+static DART_STRING: LazyLock<StringConfig> = LazyLock::new(|| StringConfig { quotes: &['"', '\''], escape: Some('\\') });
+
+#[derive(Clone)]
 pub struct DartLexer<'config> {
     config: &'config DartLanguage,
+}
+
+impl<'config> Lexer<DartLanguage> for DartLexer<'config> {
+    fn lex_incremental(
+        &self,
+        source: impl Source,
+        changed: usize,
+        cache: IncrementalCache<DartLanguage>,
+    ) -> LexOutput<DartLanguage> {
+        let mut state = LexerState::new_with_cache(source, changed, cache);
+        let result = self.run(&mut state);
+        state.finish(result)
+    }
 }
 
 impl<'config> DartLexer<'config> {
@@ -10,53 +35,198 @@ impl<'config> DartLexer<'config> {
         Self { config }
     }
 
-    /// 跳过空白字符
-    fn skip_whitespace(&self, state: &mut LexerState<DartLanguage>) -> bool {
-        let start_pos = state.get_position();
+    fn run<S: Source>(&self, state: &mut State<S>) -> Result<(), OakError> {
+        while state.not_at_end() {
+            let safe_point = state.get_position();
 
-        while let Some(ch) = state.peek() {
-            if ch == ' ' || ch == '\t' {
+            if self.skip_whitespace(state) {
+                continue;
+            }
+
+            if self.skip_comment(state) {
+                continue;
+            }
+
+            if self.lex_string_literal(state) {
+                continue;
+            }
+
+            if self.lex_number_literal(state) {
+                continue;
+            }
+
+            if self.lex_identifier_or_keyword(state) {
+                continue;
+            }
+
+            if self.lex_operators(state) {
+                continue;
+            }
+
+            if self.lex_single_char_tokens(state) {
+                continue;
+            }
+
+            state.safe_check(safe_point);
+        }
+
+        // 添加 EOF token
+        let eof_pos = state.get_position();
+        state.add_token(DartSyntaxKind::Eof, eof_pos, eof_pos);
+        Ok(())
+    }
+
+    fn skip_whitespace<S: Source>(&self, state: &mut State<S>) -> bool {
+        match DART_WHITESPACE.scan(state.rest(), state.get_position(), DartSyntaxKind::Whitespace) {
+            Some(token) => {
+                state.advance_with(token);
+                true
+            }
+            None => false,
+        }
+    }
+
+    fn skip_comment<S: Source>(&self, state: &mut State<S>) -> bool {
+        let start = state.get_position();
+        let rest = state.rest();
+
+        // 行注释: // ... 直到换行
+        if rest.starts_with("//") {
+            state.advance(2);
+            while let Some(ch) = state.peek() {
+                if ch == '\n' || ch == '\r' {
+                    break;
+                }
                 state.advance(ch.len_utf8());
             }
-            else {
-                break;
-            }
+            state.add_token(DartSyntaxKind::LineComment, start, state.get_position());
+            return true;
         }
 
-        if state.get_position() > start_pos {
-            state.add_token(DartSyntaxKind::Whitespace, start_pos, state.get_position());
-            true
+        // 块注释: /* ... */
+        if rest.starts_with("/*") {
+            state.advance(2);
+            while let Some(ch) = state.peek() {
+                if ch == '*' && state.peek_next_n(1) == Some('/') {
+                    state.advance(2);
+                    state.add_token(DartSyntaxKind::BlockComment, start, state.get_position());
+                    return true;
+                }
+                state.advance(ch.len_utf8());
+            }
+            // 未闭合的块注释
+            state.add_token(DartSyntaxKind::Error, start, state.get_position());
+            return true;
         }
-        else {
-            false
-        }
+
+        false
     }
 
-    /// 处理换行
-    fn lex_newline(&self, state: &mut LexerState<DartLanguage>) -> bool {
-        let start_pos = state.get_position();
+    fn lex_string_literal<S: Source>(&self, state: &mut State<S>) -> bool {
+        let start = state.get_position();
 
-        if let Some('\n') = state.peek() {
-            state.advance(1);
-            state.add_token(DartSyntaxKind::Newline, start_pos, state.get_position());
-            true
-        }
-        else if let Some('\r') = state.peek() {
-            state.advance(1);
-            if let Some('\n') = state.peek() {
+        if let Some(quote) = state.peek() {
+            if quote == '"' || quote == '\'' {
                 state.advance(1);
+
+                while let Some(ch) = state.peek() {
+                    if ch == quote {
+                        state.advance(1);
+                        state.add_token(DartSyntaxKind::StringLiteral, start, state.get_position());
+                        return true;
+                    }
+                    else if ch == '\\' {
+                        state.advance(1);
+                        if let Some(_) = state.peek() {
+                            state.advance(1);
+                        }
+                    }
+                    else if ch == '\n' || ch == '\r' {
+                        break; // 字符串不能跨行
+                    }
+                    else {
+                        state.advance(ch.len_utf8());
+                    }
+                }
+
+                // 未闭合的字符串
+                state.add_token(DartSyntaxKind::Error, start, state.get_position());
+                return true;
             }
-            state.add_token(DartSyntaxKind::Newline, start_pos, state.get_position());
-            true
         }
-        else {
-            false
-        }
+
+        false
     }
 
-    /// 处理标识符和关键字
-    fn lex_identifier_or_keyword(&self, state: &mut LexerState<DartLanguage>, source: &SourceText) -> bool {
-        let start_pos = state.get_position();
+    fn lex_number_literal<S: Source>(&self, state: &mut State<S>) -> bool {
+        let start = state.get_position();
+
+        if let Some(ch) = state.peek() {
+            if ch.is_ascii_digit() {
+                state.advance(1);
+
+                // 消费数字
+                while let Some(ch) = state.peek() {
+                    if ch.is_ascii_digit() {
+                        state.advance(1);
+                    }
+                    else {
+                        break;
+                    }
+                }
+
+                let mut is_double = false;
+
+                // 检查小数点
+                if state.peek() == Some('.') && state.peek_next_n(1).map_or(false, |c| c.is_ascii_digit()) {
+                    state.advance(1); // 跳过 '.'
+                    is_double = true;
+
+                    while let Some(ch) = state.peek() {
+                        if ch.is_ascii_digit() {
+                            state.advance(1);
+                        }
+                        else {
+                            break;
+                        }
+                    }
+                }
+
+                // 检查科学计数法
+                if let Some(ch) = state.peek() {
+                    if ch == 'e' || ch == 'E' {
+                        state.advance(1);
+                        is_double = true;
+
+                        if let Some(ch) = state.peek() {
+                            if ch == '+' || ch == '-' {
+                                state.advance(1);
+                            }
+                        }
+
+                        while let Some(ch) = state.peek() {
+                            if ch.is_ascii_digit() {
+                                state.advance(1);
+                            }
+                            else {
+                                break;
+                            }
+                        }
+                    }
+                }
+
+                let kind = if is_double { DartSyntaxKind::DoubleLiteral } else { DartSyntaxKind::IntegerLiteral };
+
+                state.add_token(kind, start, state.get_position());
+                return true;
+            }
+        }
+
+        false
+    }
+
+    fn lex_identifier_or_keyword<S: Source>(&self, state: &mut State<S>) -> bool {
+        let start = state.get_position();
 
         if let Some(ch) = state.peek() {
             if ch.is_alphabetic() || ch == '_' || ch == '$' {
@@ -71,9 +241,9 @@ impl<'config> DartLexer<'config> {
                     }
                 }
 
-                let end_pos = state.get_position();
-                let text = source.get_text_in((start_pos..end_pos).into()).unwrap_or("");
-                let token_kind = match text {
+                let end = state.get_position();
+                let text = state.get_text_in((start..end).into());
+                let kind = match text {
                     "abstract" => DartSyntaxKind::Abstract,
                     "as" => DartSyntaxKind::As,
                     "assert" => DartSyntaxKind::Assert,
@@ -140,199 +310,19 @@ impl<'config> DartLexer<'config> {
                     _ => DartSyntaxKind::Identifier,
                 };
 
-                state.add_token(token_kind, start_pos, state.get_position());
-                true
-            }
-            else {
-                false
+                state.add_token(kind, start, state.get_position());
+                return true;
             }
         }
-        else {
-            false
-        }
+
+        false
     }
 
-    /// 处理数字字面
-    fn lex_number(&self, state: &mut LexerState<DartLanguage>) -> bool {
-        let start_pos = state.get_position();
+    fn lex_operators<S: Source>(&self, state: &mut State<S>) -> bool {
+        let start = state.get_position();
 
         if let Some(ch) = state.peek() {
-            if ch.is_ascii_digit() {
-                state.advance(1);
-
-                // 处理整数部分
-                while let Some(ch) = state.peek() {
-                    if ch.is_ascii_digit() {
-                        state.advance(1);
-                    }
-                    else {
-                        break;
-                    }
-                }
-
-                let mut is_double = false;
-
-                // 检查小数点
-                if let Some('.') = state.peek() {
-                    // 确保不是范围操作..
-                    if let Some(next_ch) = state.peek_next_n(1) {
-                        if next_ch.is_ascii_digit() {
-                            state.advance(1); // 跳过小数                            is_double = true;
-
-                            while let Some(ch) = state.peek() {
-                                if ch.is_ascii_digit() {
-                                    state.advance(1);
-                                }
-                                else {
-                                    break;
-                                }
-                            }
-                        }
-                    }
-                }
-
-                // 检查科学计数法
-                if let Some(ch) = state.peek() {
-                    if ch == 'e' || ch == 'E' {
-                        state.advance(1);
-                        is_double = true;
-
-                        if let Some(ch) = state.peek() {
-                            if ch == '+' || ch == '-' {
-                                state.advance(1);
-                            }
-                        }
-
-                        while let Some(ch) = state.peek() {
-                            if ch.is_ascii_digit() {
-                                state.advance(1);
-                            }
-                            else {
-                                break;
-                            }
-                        }
-                    }
-                }
-
-                let token_kind = if is_double { DartSyntaxKind::DoubleLiteral } else { DartSyntaxKind::IntegerLiteral };
-
-                state.add_token(token_kind, start_pos, state.get_position());
-                true
-            }
-            else {
-                false
-            }
-        }
-        else {
-            false
-        }
-    }
-
-    /// 处理字符串字面量
-    fn lex_string(&self, state: &mut LexerState<DartLanguage>) -> bool {
-        let start_pos = state.get_position();
-
-        if let Some(quote) = state.peek() {
-            if quote == '"' || quote == '\'' {
-                state.advance(1);
-
-                while let Some(ch) = state.peek() {
-                    if ch == quote {
-                        state.advance(1);
-                        state.add_token(DartSyntaxKind::StringLiteral, start_pos, state.get_position());
-                        return true;
-                    }
-                    else if ch == '\\' {
-                        state.advance(1);
-                        if let Some(_) = state.peek() {
-                            state.advance(1);
-                        }
-                    }
-                    else if ch == '\n' || ch == '\r' {
-                        break; // 字符串不能跨
-                    }
-                    else {
-                        state.advance(ch.len_utf8());
-                    }
-                }
-
-                // 未闭合的字符
-                state.add_token(DartSyntaxKind::Error, start_pos, state.get_position());
-                true
-            }
-            else {
-                false
-            }
-        }
-        else {
-            false
-        }
-    }
-
-    /// 处理行注
-    fn lex_line_comment(&self, state: &mut LexerState<DartLanguage>) -> bool {
-        let start_pos = state.get_position();
-
-        if let Some('/') = state.peek() {
-            if let Some('/') = state.peek_next_n(1) {
-                state.advance(2);
-
-                while let Some(ch) = state.peek() {
-                    if ch == '\n' || ch == '\r' {
-                        break;
-                    }
-                    state.advance(ch.len_utf8());
-                }
-
-                state.add_token(DartSyntaxKind::LineComment, start_pos, state.get_position());
-                true
-            }
-            else {
-                false
-            }
-        }
-        else {
-            false
-        }
-    }
-
-    /// 处理块注
-    fn lex_block_comment(&self, state: &mut LexerState<DartLanguage>) -> bool {
-        let start_pos = state.get_position();
-
-        if let Some('/') = state.peek() {
-            if let Some('*') = state.peek_next_n(1) {
-                state.advance(2);
-
-                while let Some(ch) = state.peek() {
-                    if ch == '*' {
-                        if let Some('/') = state.peek_next_n(1) {
-                            state.advance(2);
-                            state.add_token(DartSyntaxKind::BlockComment, start_pos, state.get_position());
-                            return true;
-                        }
-                    }
-                    state.advance(ch.len_utf8());
-                }
-
-                // 未闭合的块注                state.add_token(DartSyntaxKind::Error, start_pos, state.get_position());
-                true
-            }
-            else {
-                false
-            }
-        }
-        else {
-            false
-        }
-    }
-
-    /// 处理操作
-    fn lex_operator(&self, state: &mut LexerState<DartLanguage>) -> bool {
-        let start_pos = state.get_position();
-
-        if let Some(ch) = state.peek() {
-            let token_kind = match ch {
+            let kind = match ch {
                 '+' => {
                     state.advance(1);
                     match state.peek() {
@@ -363,7 +353,7 @@ impl<'config> DartLexer<'config> {
                 }
                 '*' => {
                     state.advance(1);
-                    if let Some('=') = state.peek() {
+                    if state.peek() == Some('=') {
                         state.advance(1);
                         DartSyntaxKind::StarEqual
                     }
@@ -372,9 +362,9 @@ impl<'config> DartLexer<'config> {
                     }
                 }
                 '/' => {
-                    // 已经在注释处理中处理// /*
+                    // 注释已经在前面处理了
                     state.advance(1);
-                    if let Some('=') = state.peek() {
+                    if state.peek() == Some('=') {
                         state.advance(1);
                         DartSyntaxKind::SlashEqual
                     }
@@ -384,7 +374,7 @@ impl<'config> DartLexer<'config> {
                 }
                 '%' => {
                     state.advance(1);
-                    if let Some('=') = state.peek() {
+                    if state.peek() == Some('=') {
                         state.advance(1);
                         DartSyntaxKind::PercentEqual
                     }
@@ -397,7 +387,7 @@ impl<'config> DartLexer<'config> {
                     match state.peek() {
                         Some('/') => {
                             state.advance(1);
-                            if let Some('=') = state.peek() {
+                            if state.peek() == Some('=') {
                                 state.advance(1);
                                 DartSyntaxKind::TildeSlashEqual
                             }
@@ -424,7 +414,7 @@ impl<'config> DartLexer<'config> {
                 }
                 '!' => {
                     state.advance(1);
-                    if let Some('=') = state.peek() {
+                    if state.peek() == Some('=') {
                         state.advance(1);
                         DartSyntaxKind::BangEqual
                     }
@@ -441,7 +431,7 @@ impl<'config> DartLexer<'config> {
                         }
                         Some('<') => {
                             state.advance(1);
-                            if let Some('=') = state.peek() {
+                            if state.peek() == Some('=') {
                                 state.advance(1);
                                 DartSyntaxKind::LeftShiftEqual
                             }
@@ -461,7 +451,7 @@ impl<'config> DartLexer<'config> {
                         }
                         Some('>') => {
                             state.advance(1);
-                            if let Some('=') = state.peek() {
+                            if state.peek() == Some('=') {
                                 state.advance(1);
                                 DartSyntaxKind::RightShiftEqual
                             }
@@ -502,7 +492,7 @@ impl<'config> DartLexer<'config> {
                 }
                 '^' => {
                     state.advance(1);
-                    if let Some('=') = state.peek() {
+                    if state.peek() == Some('=') {
                         state.advance(1);
                         DartSyntaxKind::CaretEqual
                     }
@@ -515,7 +505,7 @@ impl<'config> DartLexer<'config> {
                     match state.peek() {
                         Some('?') => {
                             state.advance(1);
-                            if let Some('=') = state.peek() {
+                            if state.peek() == Some('=') {
                                 state.advance(1);
                                 DartSyntaxKind::QuestionQuestionEqual
                             }
@@ -535,7 +525,7 @@ impl<'config> DartLexer<'config> {
                     match state.peek() {
                         Some('.') => {
                             state.advance(1);
-                            if let Some('.') = state.peek() {
+                            if state.peek() == Some('.') {
                                 state.advance(1);
                                 DartSyntaxKind::DotDotDot
                             }
@@ -549,20 +539,18 @@ impl<'config> DartLexer<'config> {
                 _ => return false,
             };
 
-            state.add_token(token_kind, start_pos, state.get_position());
-            true
+            state.add_token(kind, start, state.get_position());
+            return true;
         }
-        else {
-            false
-        }
+
+        false
     }
 
-    /// 处理分隔
-    fn lex_delimiter(&self, state: &mut LexerState<DartLanguage>) -> bool {
-        let start_pos = state.get_position();
+    fn lex_single_char_tokens<S: Source>(&self, state: &mut State<S>) -> bool {
+        let start = state.get_position();
 
         if let Some(ch) = state.peek() {
-            let token_kind = match ch {
+            let kind = match ch {
                 '(' => DartSyntaxKind::LeftParen,
                 ')' => DartSyntaxKind::RightParen,
                 '[' => DartSyntaxKind::LeftBracket,
@@ -578,69 +566,10 @@ impl<'config> DartLexer<'config> {
             };
 
             state.advance(ch.len_utf8());
-            state.add_token(token_kind, start_pos, state.get_position());
-            true
-        }
-        else {
-            false
-        }
-    }
-}
-
-impl<'config> Lexer<DartLanguage> for DartLexer<'config> {
-    fn lex(&self, source: &SourceText) -> LexOutput<DartSyntaxKind> {
-        let mut state = LexerState::new(source);
-
-        while state.not_at_end() {
-            // 尝试各种词法规则
-            if self.skip_whitespace(&mut state) {
-                continue;
-            }
-
-            if self.lex_newline(&mut state) {
-                continue;
-            }
-
-            if self.lex_line_comment(&mut state) {
-                continue;
-            }
-
-            if self.lex_block_comment(&mut state) {
-                continue;
-            }
-
-            if self.lex_identifier_or_keyword(&mut state, source) {
-                continue;
-            }
-
-            if self.lex_number(&mut state) {
-                continue;
-            }
-
-            if self.lex_string(&mut state) {
-                continue;
-            }
-
-            if self.lex_operator(&mut state) {
-                continue;
-            }
-
-            if self.lex_delimiter(&mut state) {
-                continue;
-            }
-
-            // 如果所有规则都不匹配，跳过当前字符并标记为错误
-            let start_pos = state.get_position();
-            if let Some(ch) = state.peek() {
-                state.advance(ch.len_utf8());
-                state.add_token(DartSyntaxKind::Error, start_pos, state.get_position());
-            }
+            state.add_token(kind, start, state.get_position());
+            return true;
         }
 
-        // 添加 EOF kind
-        let eof_pos = state.get_position();
-        state.add_token(DartSyntaxKind::Eof, eof_pos, eof_pos);
-
-        state.finish()
+        false
     }
 }

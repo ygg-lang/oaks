@@ -1,6 +1,7 @@
+use serde::{Deserialize, Serialize};
 use oak_core::SyntaxKind;
 
-#[derive(Copy, Clone, Debug, PartialEq, Eq)]
+#[derive(Copy, Clone, Debug, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub enum NginxSyntaxKind {
     // 节点种类
     Root,

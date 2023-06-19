@@ -1,7 +1,8 @@
 use oak_core::SyntaxKind;
+use serde::{Deserialize, Serialize};
 
 /// Java 语言Token 类型
-#[derive(Debug, PartialEq, Eq, Clone, Copy, Hash)]
+#[derive(Debug, PartialEq, Eq, Clone, Copy, Hash, Serialize, Deserialize)]
 pub enum JavaSyntaxKind {
     // 关键
     Abstract,

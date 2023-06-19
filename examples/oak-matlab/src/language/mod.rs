@@ -11,4 +11,5 @@ impl Default for MatlabLanguage {
 
 impl Language for MatlabLanguage {
     type SyntaxKind = MatlabSyntaxKind;
+    type TypedRoot = ();
 }

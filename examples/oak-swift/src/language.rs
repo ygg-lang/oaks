@@ -6,4 +6,5 @@ pub struct SwiftLanguage;
 
 impl Language for SwiftLanguage {
     type SyntaxKind = SwiftSyntaxKind;
+    type TypedRoot = ();
 }

@@ -1,3 +1,4 @@
+use crate::kind::MsilSyntaxKind;
 use oak_core::language::Language;
 
 /// MSIL 语言实现
@@ -35,5 +36,6 @@ impl Default for MsilLanguage {
 }
 
 impl Language for MsilLanguage {
-    type SyntaxKind = crate::syntax::MsilSyntaxKind;
+    type SyntaxKind = MsilSyntaxKind;
+    type TypedRoot = ();
 }

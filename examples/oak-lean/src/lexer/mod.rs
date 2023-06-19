@@ -1,14 +1,11 @@
-//! Lean 词法分析
+//! Lean 语言词法分析器
 //!
-//! 实现Lean 语言的词法分析，将源代码转换token 序列
+//! 提供 Lean 语言的词法分析功能，将源代码文本转换为标记流
 
-use crate::{language::LeanLanguage, syntax::LeanSyntaxKind};
-use oak_core::{
-    Lexer, SourceText,
-    lexer::{LexOutput, LexerState},
-};
+use crate::{kind::LeanSyntaxKind, language::LeanLanguage};
+use oak_core::{IncrementalCache, Lexer, LexerState, OakError, lexer::LexOutput, source::Source};
 
-type State<'input> = LexerState<'input, LeanLanguage>;
+type State<S> = LexerState<S, LeanLanguage>;
 
 /// Lean 词法分析器
 pub struct LeanLexer<'config> {
@@ -22,7 +19,7 @@ impl<'config> LeanLexer<'config> {
     }
 
     /// 跳过空白字符
-    fn skip_whitespace(&self, state: &mut State) -> bool {
+    fn skip_whitespace<S: Source>(&self, state: &mut State<S>) -> bool {
         let start_pos = state.get_position();
 
         while let Some(ch) = state.peek() {
@@ -44,12 +41,12 @@ impl<'config> LeanLexer<'config> {
     }
 
     /// 处理换行
-    fn lex_newline(&self, state: &mut State) -> bool {
+    fn lex_newline<S: Source>(&self, state: &mut State<S>) -> bool {
         let start_pos = state.get_position();
 
         if let Some('\n') = state.peek() {
             state.advance(1);
-            state.add_token(LeanSyntaxKind::Newline, start_pos, state.get_position());
+            state.add_token(LeanSyntaxKind::Whitespace, start_pos, state.get_position());
             true
         }
         else if let Some('\r') = state.peek() {
@@ -57,7 +54,7 @@ impl<'config> LeanLexer<'config> {
             if let Some('\n') = state.peek() {
                 state.advance(1);
             }
-            state.add_token(LeanSyntaxKind::Newline, start_pos, state.get_position());
+            state.add_token(LeanSyntaxKind::Whitespace, start_pos, state.get_position());
             true
         }
         else {
@@ -66,7 +63,7 @@ impl<'config> LeanLexer<'config> {
     }
 
     /// 处理注释
-    fn lex_comment(&self, state: &mut State, _source: &SourceText) -> bool {
+    fn lex_comment<S: Source>(&self, state: &mut State<S>) -> bool {
         let start_pos = state.get_position();
 
         if let Some('-') = state.peek() {
@@ -92,7 +89,8 @@ impl<'config> LeanLexer<'config> {
         else if let Some('/') = state.peek() {
             state.advance(1);
             if let Some('-') = state.peek() {
-                // 块注释开                state.advance(1);
+                // 块注释开始
+                state.advance(1);
                 let mut depth = 1;
                 while depth > 0 && state.not_at_end() {
                     if let Some('/') = state.peek() {
@@ -129,7 +127,7 @@ impl<'config> LeanLexer<'config> {
     }
 
     /// 处理字符串字面量
-    fn lex_string(&self, state: &mut State, _source: &SourceText) -> bool {
+    fn lex_string<S: Source>(&self, state: &mut State<S>) -> bool {
         let start_pos = state.get_position();
 
         if let Some('"') = state.peek() {
@@ -153,7 +151,7 @@ impl<'config> LeanLexer<'config> {
                     state.advance(ch.len_utf8());
                 }
             }
-            state.add_token(LeanSyntaxKind::String, start_pos, state.get_position());
+            state.add_token(LeanSyntaxKind::StringLiteral, start_pos, state.get_position());
             true
         }
         else {
@@ -161,8 +159,8 @@ impl<'config> LeanLexer<'config> {
         }
     }
 
-    /// 处理字符字面
-    fn lex_char(&self, state: &mut State, _source: &SourceText) -> bool {
+    /// 处理字符字面量
+    fn lex_char<S: Source>(&self, state: &mut State<S>) -> bool {
         let start_pos = state.get_position();
 
         if let Some('\'') = state.peek() {
@@ -186,7 +184,7 @@ impl<'config> LeanLexer<'config> {
                     state.advance(ch.len_utf8());
                 }
             }
-            state.add_token(LeanSyntaxKind::Char, start_pos, state.get_position());
+            state.add_token(LeanSyntaxKind::CharLiteral, start_pos, state.get_position());
             true
         }
         else {
@@ -194,8 +192,8 @@ impl<'config> LeanLexer<'config> {
         }
     }
 
-    /// 处理数字字面
-    fn lex_number(&self, state: &mut State, source: &SourceText) -> bool {
+    /// 处理数字字面量
+    fn lex_number<S: Source>(&self, state: &mut State<S>) -> bool {
         let start_pos = state.get_position();
 
         if let Some(ch) = state.peek() {
@@ -212,11 +210,9 @@ impl<'config> LeanLexer<'config> {
 
                 // 检查小数点
                 if let Some('.') = state.peek() {
-                    let next_pos = state.get_position() + 1;
-                    if next_pos < source.len() {
-                        let next_char = source.get_char_at(next_pos);
-                        if next_char.map_or(false, |c| c.is_ascii_digit()) {
-                            state.advance(1); // 跳过小数点
+                    state.advance(1); // 跳过小数点
+                    if let Some(next_char) = state.peek() {
+                        if next_char.is_ascii_digit() {
                             while let Some(ch) = state.peek() {
                                 if ch.is_ascii_digit() {
                                     state.advance(ch.len_utf8());
@@ -249,7 +245,7 @@ impl<'config> LeanLexer<'config> {
                     }
                 }
 
-                state.add_token(LeanSyntaxKind::Number, start_pos, state.get_position());
+                state.add_token(LeanSyntaxKind::IntegerLiteral, start_pos, state.get_position());
                 true
             }
             else {
@@ -261,8 +257,8 @@ impl<'config> LeanLexer<'config> {
         }
     }
 
-    /// 处理标识符和关键
-    fn lex_identifier_or_keyword(&self, state: &mut State, source: &SourceText) -> bool {
+    /// 处理标识符和关键字
+    fn lex_identifier_or_keyword<S: Source>(&self, state: &mut State<S>) -> bool {
         let start_pos = state.get_position();
 
         if let Some(ch) = state.peek() {
@@ -278,7 +274,7 @@ impl<'config> LeanLexer<'config> {
                     }
                 }
 
-                let text = source.get_text_in((start_pos..state.get_position()).into()).unwrap_or("");
+                let text = state.get_text_in((start_pos..state.get_position()).into());
                 let kind = match text {
                     "axiom" => LeanSyntaxKind::Axiom,
                     "constant" => LeanSyntaxKind::Constant,
@@ -341,8 +337,8 @@ impl<'config> LeanLexer<'config> {
         }
     }
 
-    /// 处理操作符和分隔
-    fn lex_operator_or_delimiter(&self, state: &mut State, _source: &SourceText) -> bool {
+    /// 处理操作符和分隔符
+    fn lex_operator_or_delimiter<S: Source>(&self, state: &mut State<S>) -> bool {
         let start_pos = state.get_position();
 
         if let Some(ch) = state.peek() {
@@ -431,39 +427,56 @@ impl<'config> LeanLexer<'config> {
 }
 
 impl<'config> Lexer<LeanLanguage> for LeanLexer<'config> {
-    fn lex(&self, source: &SourceText) -> LexOutput<LeanSyntaxKind> {
+    fn lex_incremental(
+        &self,
+        source: impl Source,
+        changed: usize,
+        cache: IncrementalCache<LeanLanguage>,
+    ) -> LexOutput<LeanLanguage> {
+        let mut state = LexerState::new_with_cache(source, changed, cache);
+        let result = self.run(&mut state);
+        state.finish(result)
+    }
+
+    fn lex(&self, source: impl Source) -> LexOutput<LeanLanguage> {
         let mut state = State::new(source);
+        let result = self.run(&mut state);
+        state.finish(result)
+    }
+}
 
+impl<'config> LeanLexer<'config> {
+    fn run<S: Source>(&self, state: &mut State<S>) -> Result<(), OakError> {
         while state.not_at_end() {
-            if self.skip_whitespace(&mut state) {
+            if self.skip_whitespace(state) {
                 continue;
             }
 
-            if self.lex_newline(&mut state) {
+            if self.lex_newline(state) {
                 continue;
             }
 
-            if self.lex_comment(&mut state, source) {
+            if self.lex_comment(state) {
                 continue;
             }
 
-            if self.lex_string(&mut state, source) {
+            if self.lex_string(state) {
                 continue;
             }
 
-            if self.lex_char(&mut state, source) {
+            if self.lex_char(state) {
                 continue;
             }
 
-            if self.lex_number(&mut state, source) {
+            if self.lex_number(state) {
                 continue;
             }
 
-            if self.lex_identifier_or_keyword(&mut state, source) {
+            if self.lex_identifier_or_keyword(state) {
                 continue;
             }
 
-            if self.lex_operator_or_delimiter(&mut state, source) {
+            if self.lex_operator_or_delimiter(state) {
                 continue;
             }
 
@@ -479,6 +492,6 @@ impl<'config> Lexer<LeanLanguage> for LeanLexer<'config> {
         let eof_pos = state.get_position();
         state.add_token(LeanSyntaxKind::Eof, eof_pos, eof_pos);
 
-        state.finish()
+        Ok(())
     }
 }

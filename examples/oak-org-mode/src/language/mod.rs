@@ -1,10 +1,10 @@
-use crate::kind::OrgModeSyntaxKind;
-use alloc::{
+use crate::{ast::OrgModeRoot, kind::OrgModeSyntaxKind};
+use oak_core::Language;
+use std::{
     string::{String, ToString},
     vec,
     vec::Vec,
 };
-use oak_core::Language;
 
 #[derive(Debug, Clone)]
 pub struct OrgModeLanguage {
@@ -46,4 +46,5 @@ impl Default for OrgModeLanguage {
 
 impl Language for OrgModeLanguage {
     type SyntaxKind = OrgModeSyntaxKind;
+    type TypedRoot = OrgModeRoot;
 }

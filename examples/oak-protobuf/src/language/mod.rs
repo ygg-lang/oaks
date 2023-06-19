@@ -1,8 +1,9 @@
-use crate::kind::ProtobufSyntaxKind;
 use oak_core::Language;
 
-pub struct ProtobufLanguage {}
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Default)]
+pub struct ProtobufLanguage;
 
 impl Language for ProtobufLanguage {
-    type SyntaxKind = ProtobufSyntaxKind;
+    type SyntaxKind = crate::kind::ProtobufSyntaxKind;
+    type TypedRoot = crate::ast::SourceFile;
 }

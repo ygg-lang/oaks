@@ -1,8 +1,8 @@
 use crate::{kind::MatlabSyntaxKind, language::MatlabLanguage};
-use alloc::string::String;
-use oak_core::{Lexer, LexerState, SourceText, lexer::LexOutput};
 
-type State<'input> = LexerState<'input, MatlabLanguage>;
+use oak_core::{IncrementalCache, Lexer, LexerState, lexer::LexOutput, source::Source};
+
+type State<S> = LexerState<S, MatlabLanguage>;
 
 pub struct MatlabLexer<'config> {
     config: &'config MatlabLanguage,
@@ -14,7 +14,7 @@ impl<'config> MatlabLexer<'config> {
     }
 
     /// 跳过空白字符
-    fn skip_whitespace(&self, state: &mut State) -> bool {
+    fn skip_whitespace<S: Source>(&self, state: &mut State<S>) -> bool {
         let start_pos = state.get_position();
 
         while let Some(ch) = state.peek() {
@@ -36,7 +36,7 @@ impl<'config> MatlabLexer<'config> {
     }
 
     /// 处理换行
-    fn lex_newline(&self, state: &mut State) -> bool {
+    fn lex_newline<S: Source>(&self, state: &mut State<S>) -> bool {
         let start_pos = state.get_position();
 
         if let Some('\n') = state.peek() {
@@ -58,7 +58,7 @@ impl<'config> MatlabLexer<'config> {
     }
 
     /// 处理标识符和关键
-    fn lex_identifier(&self, state: &mut State, _source: &SourceText) -> bool {
+    fn lex_identifier<S: Source>(&self, state: &mut State<S>) -> bool {
         let start_pos = state.get_position();
 
         if let Some(ch) = state.peek() {
@@ -113,7 +113,7 @@ impl<'config> MatlabLexer<'config> {
     }
 
     /// 处理数字
-    fn lex_number(&self, state: &mut State) -> bool {
+    fn lex_number<S: Source>(&self, state: &mut State<S>) -> bool {
         let start_pos = state.get_position();
 
         if let Some(ch) = state.peek() {
@@ -177,7 +177,7 @@ impl<'config> MatlabLexer<'config> {
     }
 
     /// 处理字符
-    fn lex_string(&self, state: &mut State) -> bool {
+    fn lex_string<S: Source>(&self, state: &mut State<S>) -> bool {
         let start_pos = state.get_position();
 
         if let Some(quote) = state.peek() {
@@ -213,7 +213,7 @@ impl<'config> MatlabLexer<'config> {
     }
 
     /// 处理注释
-    fn lex_comment(&self, state: &mut State, _source: &SourceText) -> bool {
+    fn lex_comment<S: Source>(&self, state: &mut State<S>) -> bool {
         let start_pos = state.get_position();
 
         if let Some('%') = state.peek() {
@@ -255,7 +255,7 @@ impl<'config> MatlabLexer<'config> {
     }
 
     /// 处理运算
-    fn lex_operator(&self, state: &mut State) -> bool {
+    fn lex_operator<S: Source>(&self, state: &mut State<S>) -> bool {
         let start_pos = state.get_position();
 
         if let Some(ch) = state.peek() {
@@ -391,7 +391,7 @@ impl<'config> MatlabLexer<'config> {
     }
 
     /// 处理分隔
-    fn lex_delimiter(&self, state: &mut State) -> bool {
+    fn lex_delimiter<S: Source>(&self, state: &mut State<S>) -> bool {
         let start_pos = state.get_position();
 
         if let Some(ch) = state.peek() {
@@ -421,7 +421,22 @@ impl<'config> MatlabLexer<'config> {
 }
 
 impl<'config> Lexer<MatlabLanguage> for MatlabLexer<'config> {
-    fn lex(&self, source: &SourceText) -> LexOutput<MatlabSyntaxKind> {
+    fn lex_incremental(
+        &self,
+        source: impl Source,
+        _start_offset: usize,
+        _cache: IncrementalCache<'_, MatlabLanguage>,
+    ) -> LexOutput<MatlabLanguage> {
+        self.lex_internal(source)
+    }
+
+    fn lex(&self, source: impl Source) -> LexOutput<MatlabLanguage> {
+        self.lex_internal(source)
+    }
+}
+
+impl<'config> MatlabLexer<'config> {
+    fn lex_internal<S: Source>(&self, source: S) -> LexOutput<MatlabLanguage> {
         let mut state = LexerState::new(source);
 
         while state.not_at_end() {
@@ -436,7 +451,7 @@ impl<'config> Lexer<MatlabLanguage> for MatlabLexer<'config> {
             }
 
             // 处理注释
-            if self.lex_comment(&mut state, source) {
+            if self.lex_comment(&mut state) {
                 continue;
             }
 
@@ -451,7 +466,7 @@ impl<'config> Lexer<MatlabLanguage> for MatlabLexer<'config> {
             }
 
             // 处理标识符和关键
-            if self.lex_identifier(&mut state, source) {
+            if self.lex_identifier(&mut state) {
                 continue;
             }
 
@@ -473,10 +488,6 @@ impl<'config> Lexer<MatlabLanguage> for MatlabLexer<'config> {
             }
         }
 
-        // 添加 EOF 标记
-        let eof_pos = state.get_position();
-        state.add_token(MatlabSyntaxKind::Eof, eof_pos, eof_pos);
-
-        state.finish()
+        state.finish(Ok(()))
     }
 }

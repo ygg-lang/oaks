@@ -7,7 +7,7 @@ High-performance incremental SQL parser for the oak ecosystem with flexible conf
 
 ## 🎯 Overview
 
-Oak of sql is a robust parser for SQL, designed to handle complete SQL syntax including modern features. Built on the solid foundation of oak-core, it provides both high-level convenience and detailed AST generation for database query analysis and SQL processing.
+Oak SQL is a robust parser for SQL, designed to handle complete SQL syntax including modern features. Built on the solid foundation of oak-core, it provides both high-level convenience and detailed AST generation for database query analysis and SQL processing.
 
 ## ✨ Features
 
@@ -21,21 +21,21 @@ Oak of sql is a robust parser for SQL, designed to handle complete SQL syntax in
 Basic example:
 
 ```rust
-use oak_sql::SqlParser;
+use oak_sql::{Parser, SqlLanguage, SourceText};
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
-    let parser = SqlParser::new();
-    let sql_query = r#"
+    let parser = Parser::new();
+    let source = SourceText::new(r#"
         SELECT u.id, u.name, p.title
         FROM users u
         JOIN posts p ON u.id = p.user_id
         WHERE u.active = true
         ORDER BY u.created_at DESC
         LIMIT 10;
-    "#;
+    "#);
     
-    let statement = parser.parse_statement(sql_query)?;
-    println!("Parsed SQL statement successfully.");
+    let result = parser.parse(&source);
+    println!("Parsed SQL successfully.");
     Ok(())
 }
 ```
@@ -44,70 +44,63 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
 ### Select Statement Parsing
 ```rust
-use oak_sql::{SqlParser, ast::SelectStatement};
+use oak_sql::{Parser, SqlLanguage, SourceText};
 
-let parser = SqlParser::new();
-let sql_query = r#"
+let parser = Parser::new();
+let source = SourceText::new(r#"
     SELECT id, name, email
     FROM customers
     WHERE country = 'USA' AND age > 21
     ORDER BY name ASC
     LIMIT 100;
-"#;
+"#);
 
-let select = parser.parse_select(sql_query)?;
-println!("Selected columns: {}", select.columns.len());
-println!("From table: {}", select.from_table);
+let result = parser.parse(&source);
+println!("Select statement parsed successfully.");
 ```
 
 ### Insert Statement Parsing
 ```rust
-use oak_sql::{SqlParser, ast::InsertStatement};
+use oak_sql::{Parser, SqlLanguage, SourceText};
 
-let parser = SqlParser::new();
-let insert_query = r#"
+let parser = Parser::new();
+let source = SourceText::new(r#"
     INSERT INTO products (name, price, category)
     VALUES ('Laptop', 999.99, 'Electronics');
-"#;
+"#);
 
-let insert = parser.parse_insert(insert_query)?;
-println!("Target table: {}", insert.table);
-println!("Values: {}", insert.values.len());
+let result = parser.parse(&source);
+println!("Insert statement parsed successfully.");
 ```
 
 ## 🔧 Advanced Features
 
 ### Token-Level Parsing
 ```rust
-use oak_sql::{SqlParser, lexer::Token};
+use oak_sql::{Parser, SqlLanguage, SourceText};
 
-let parser = SqlParser::new();
-let tokens = parser.tokenize("SELECT * FROM users WHERE id = 1;")?;
-for token in tokens {
-    println!("{:?}", token.kind);
-}
+let parser = Parser::new();
+let source = SourceText::new("SELECT * FROM users WHERE id = 1;");
+let result = parser.parse(&source);
+println!("Token parsing completed.");
 ```
 
 ### Error Handling
 ```rust
-use oak_sql::SqlParser;
+use oak_sql::{Parser, SqlLanguage, SourceText};
 
-let parser = SqlParser::new();
-let invalid_sql = r#"
+let parser = Parser::new();
+let source = SourceText::new(r#"
     SELECT name, 
     FROM users
     WHERE id = 1;
-"#;
+"#);
 
-match parser.parse_statement(invalid_sql) {
-    Ok(statement) => println!("Parsed SQL statement successfully."),
-    Err(e) => {
-        println!("Parse error at line {} column {}: {}", 
-            e.line(), e.column(), e.message());
-        if let Some(context) = e.context() {
-            println!("Error context: {}", context);
-        }
-    }
+let result = parser.parse(&source);
+if let Some(errors) = result.result.err() {
+    println!("Parse errors found: {:?}", errors);
+} else {
+    println!("Parsed successfully.");
 }
 ```
 
@@ -131,7 +124,7 @@ The parser generates a comprehensive AST with the following main structures:
 
 ## 🔗 Integration
 
-Oak of sql integrates seamlessly with:
+Oak SQL integrates seamlessly with:
 
 - **Database Tools**: Build SQL query analyzers and optimizers
 - **IDE Support**: Language server protocol compatibility for SQL

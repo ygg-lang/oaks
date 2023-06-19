@@ -1,0 +1,185 @@
+/**
+ * This is a comprehensive Javadoc test file for lexer testing.
+ * It covers various Javadoc tags, inline tags, HTML elements, and general text.
+ *
+ * <p>This is a paragraph tag within Javadoc. It demonstrates basic HTML support.</p>
+ * <pre>
+ * {@code
+ * public class MyClass {
+ *     public static void main(String[] args) {
+ *         System.out.println("Hello, Javadoc!");
+ *     }
+ * }
+ * }
+ * </pre>
+ *
+ * <h2>Section Header</h2>
+ * <p>Another paragraph with some <b>bold</b> and <i>italic</i> text.</p>
+ *
+ * <h3>List Examples:</h3>
+ * <ul>
+ *     <li>Item 1</li>
+ *     <li>Item 2</li>
+ * </ul>
+ * <ol>
+ *     <li>Ordered Item 1</li>
+ *     <li>Ordered Item 2</li>
+ * </ol>
+ *
+ * @author Your Name <a href="mailto:your.email@example.com">your.email@example.com</a>
+ * @version 1.0.0
+ * @since 2023-10-26
+ * @see java.lang.String#length()
+ * @see <a href="https://docs.oracle.com/en/java/javase/20/docs/api/index.html">Java SE API Documentation</a>
+ * @param <T> the type of the first parameter
+ * @param value the input value to process
+ * @return the processed result
+ * @throws IllegalArgumentException if the value is invalid
+ * @deprecated As of version 1.0.1, replaced by {@link #newValueMethod(Object)}
+ */
+public class JavadocTestClass {
+
+    /**
+     * This is a field documentation.
+     * It can contain {@code inline code} and {@link JavadocTestClass another link}.
+     */
+    private int testField;
+
+    /**
+     * Constructs a new {@code JavadocTestClass} instance.
+     * @param testField The initial value for {@link #testField}.
+     */
+    public JavadocTestClass(int testField) {
+        this.testField = testField;
+    }
+
+    /**
+     * Processes a given value.
+     * <p>This method takes an object and returns a string representation.</p>
+     * <ul>
+     *     <li>If the value is {@code null}, it returns "null".</li>
+     *     <li>Otherwise, it returns the {@code toString()} representation.</li>
+     * </ul>
+     * @param <T> The type of the value.
+     * @param value The value to process.
+     * @return A string representation of the value.
+     * @exception NullPointerException if value is null (though handled internally).
+     * @serialData The value is serialized directly.
+     * @hidden This method is for internal use only.
+     */
+    public <T> String processValue(T value) {
+        if (value == null) {
+            return "null";
+        }
+        return value.toString();
+    }
+
+    /**
+     * A new method that replaces the deprecated one.
+     * @param <T> The type of the new value.
+     * @param newValue The new value to handle.
+     * @return A message indicating success.
+     */
+    public <T> String newValueMethod(T newValue) {
+        return "Successfully processed new value: " + newValue;
+    }
+
+    /**
+     * Example of a method with a simple return.
+     * @return Always returns 42.
+     */
+    public int getAnswer() {
+        return 42;
+    }
+
+    /**
+     * Example of a method with multiple parameters.
+     * @param a The first integer.
+     * @param b The second integer.
+     * @return The sum of a and b.
+     */
+    public int add(int a, int b) {
+        return a + b;
+    }
+
+    /**
+     * Example of a method with a generic parameter and return type.
+     * @param <U> The type of the input and output.
+     * @param input The input of type U.
+     * @return The same input.
+     */
+    public <U> U identity(U input) {
+        return input;
+    }
+
+    /**
+     * Demonstrates a method with a {@literal <} and {@literal >} in its description.
+     * This is useful for avoiding HTML parsing issues.
+     * <p>For example, {@literal List<String>} is rendered correctly.</p>
+     * @return A sample string.
+     */
+    public String literalExample() {
+        return "Literal example";
+    }
+
+    /**
+     * Demonstrates the use of {@value #MAX_VALUE} in Javadoc.
+     * This tag is used to display the value of a static field.
+     */
+    public void displayMaxValue() {
+        System.out.println("Max value: " + JavadocTestClass.MAX_VALUE);
+    }
+
+    /**
+     * A method that might throw an exception.
+     * @throws java.io.IOException if an I/O error occurs.
+     */
+    public void mightThrowException() throws java.io.IOException {
+        throw new java.io.IOException("Simulated I/O error");
+    }
+
+    /**
+     * Main method for demonstration.
+     * @param args Command line arguments.
+     */
+    public static void main(String[] args) {
+        JavadocTestClass test = new JavadocTestClass(10);
+        System.out.println("Processed value: " + test.processValue("Hello"));
+        System.out.println("New value method: " + test.newValueMethod(123));
+        System.out.println("Answer: " + test.getAnswer());
+        System.out.println("Sum: " + test.add(5, 7));
+        System.out.println("Identity: " + test.identity("test"));
+        test.displayMaxValue();
+        try {
+            test.mightThrowException();
+        } catch (java.io.IOException e) {
+            System.err.println("Caught expected exception: " + e.getMessage());
+        }
+    }
+
+    /**
+     * An example of a nested class with its own Javadoc.
+     */
+    public static class NestedClass {
+        /**
+         * Nested field documentation.
+         */
+        private String nestedField;
+
+        /**
+         * Nested constructor.
+         * @param nestedField Initial value for {@link #nestedField}.
+         */
+        public NestedClass(String nestedField) {
+            this.nestedField = nestedField;
+        }
+
+        /**
+         * Nested method.
+         * @return The nested field value.
+         */
+        public String getNestedField() {
+            return nestedField;
+        }
+    }
+}

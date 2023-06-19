@@ -1,5 +1,5 @@
 /// Dockerfile 语法种类
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, serde::Serialize)]
 pub enum DockerfileSyntaxKind {
     // 基本 kind
     Identifier,
@@ -36,11 +36,17 @@ pub enum DockerfileSyntaxKind {
     StartPeriod,
     Retries,
 
-    // 操作符和分隔
-    Equal,        // =
+    // 操作符和分隔符
+    Equal,        // = (保持向后兼容)
+    Equals,       // = (新名称)
+    Colon,        // :
     Comma,        // ,
+    Semicolon,    // ;
+    Dollar,       // $
     LeftBracket,  // [
     RightBracket, // ]
+    LeftBrace,    // {
+    RightBrace,   // }
     LeftParen,    // (
     RightParen,   // )
 

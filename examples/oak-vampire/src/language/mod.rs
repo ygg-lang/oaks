@@ -1,8 +1,3 @@
-use alloc::{
-    string::{String, ToString},
-    vec,
-    vec::Vec,
-};
 use oak_core::Language;
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -44,4 +39,5 @@ impl Default for VampireLanguage {
 
 impl Language for VampireLanguage {
     type SyntaxKind = crate::kind::VampireSyntaxKind;
+    type TypedRoot = ();
 }

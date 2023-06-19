@@ -1,0 +1,607 @@
+{
+    "success": true,
+    "count": 100,
+    "tokens": [
+        {
+            "kind": "Interface",
+            "text": "interface",
+            "start": 48,
+            "end": 57
+        },
+        {
+            "kind": "IdentifierName",
+            "text": "User",
+            "start": 58,
+            "end": 62
+        },
+        {
+            "kind": "LeftBrace",
+            "text": "{",
+            "start": 63,
+            "end": 64
+        },
+        {
+            "kind": "IdentifierName",
+            "text": "id",
+            "start": 70,
+            "end": 72
+        },
+        {
+            "kind": "Colon",
+            "text": ":",
+            "start": 72,
+            "end": 73
+        },
+        {
+            "kind": "Number",
+            "text": "number",
+            "start": 74,
+            "end": 80
+        },
+        {
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 80,
+            "end": 81
+        },
+        {
+            "kind": "IdentifierName",
+            "text": "name",
+            "start": 87,
+            "end": 91
+        },
+        {
+            "kind": "Colon",
+            "text": ":",
+            "start": 91,
+            "end": 92
+        },
+        {
+            "kind": "String",
+            "text": "string",
+            "start": 93,
+            "end": 99
+        },
+        {
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 99,
+            "end": 100
+        },
+        {
+            "kind": "IdentifierName",
+            "text": "email",
+            "start": 106,
+            "end": 111
+        },
+        {
+            "kind": "Colon",
+            "text": ":",
+            "start": 111,
+            "end": 112
+        },
+        {
+            "kind": "String",
+            "text": "string",
+            "start": 113,
+            "end": 119
+        },
+        {
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 119,
+            "end": 120
+        },
+        {
+            "kind": "IdentifierName",
+            "text": "isActive",
+            "start": 126,
+            "end": 134
+        },
+        {
+            "kind": "Colon",
+            "text": ":",
+            "start": 134,
+            "end": 135
+        },
+        {
+            "kind": "Boolean",
+            "text": "boolean",
+            "start": 136,
+            "end": 143
+        },
+        {
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 143,
+            "end": 144
+        },
+        {
+            "kind": "IdentifierName",
+            "text": "roles",
+            "start": 150,
+            "end": 155
+        },
+        {
+            "kind": "Question",
+            "text": "?",
+            "start": 155,
+            "end": 156
+        },
+        {
+            "kind": "Colon",
+            "text": ":",
+            "start": 156,
+            "end": 157
+        },
+        {
+            "kind": "String",
+            "text": "string",
+            "start": 158,
+            "end": 164
+        },
+        {
+            "kind": "LeftBracket",
+            "text": "[",
+            "start": 164,
+            "end": 165
+        },
+        {
+            "kind": "RightBracket",
+            "text": "]",
+            "start": 165,
+            "end": 166
+        },
+        {
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 166,
+            "end": 167
+        },
+        {
+            "kind": "RightBrace",
+            "text": "}",
+            "start": 169,
+            "end": 170
+        },
+        {
+            "kind": "Type",
+            "text": "type",
+            "start": 174,
+            "end": 178
+        },
+        {
+            "kind": "IdentifierName",
+            "text": "Status",
+            "start": 179,
+            "end": 185
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 186,
+            "end": 187
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "'pending'",
+            "start": 188,
+            "end": 197
+        },
+        {
+            "kind": "Pipe",
+            "text": "|",
+            "start": 198,
+            "end": 199
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "'approved'",
+            "start": 200,
+            "end": 210
+        },
+        {
+            "kind": "Pipe",
+            "text": "|",
+            "start": 211,
+            "end": 212
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "'rejected'",
+            "start": 213,
+            "end": 223
+        },
+        {
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 223,
+            "end": 224
+        },
+        {
+            "kind": "Interface",
+            "text": "interface",
+            "start": 250,
+            "end": 259
+        },
+        {
+            "kind": "IdentifierName",
+            "text": "Repository",
+            "start": 260,
+            "end": 270
+        },
+        {
+            "kind": "Less",
+            "text": "<",
+            "start": 270,
+            "end": 271
+        },
+        {
+            "kind": "IdentifierName",
+            "text": "T",
+            "start": 271,
+            "end": 272
+        },
+        {
+            "kind": "Greater",
+            "text": ">",
+            "start": 272,
+            "end": 273
+        },
+        {
+            "kind": "LeftBrace",
+            "text": "{",
+            "start": 274,
+            "end": 275
+        },
+        {
+            "kind": "IdentifierName",
+            "text": "findById",
+            "start": 281,
+            "end": 289
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 289,
+            "end": 290
+        },
+        {
+            "kind": "IdentifierName",
+            "text": "id",
+            "start": 290,
+            "end": 292
+        },
+        {
+            "kind": "Colon",
+            "text": ":",
+            "start": 292,
+            "end": 293
+        },
+        {
+            "kind": "Number",
+            "text": "number",
+            "start": 294,
+            "end": 300
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 300,
+            "end": 301
+        },
+        {
+            "kind": "Colon",
+            "text": ":",
+            "start": 301,
+            "end": 302
+        },
+        {
+            "kind": "IdentifierName",
+            "text": "Promise",
+            "start": 303,
+            "end": 310
+        },
+        {
+            "kind": "Less",
+            "text": "<",
+            "start": 310,
+            "end": 311
+        },
+        {
+            "kind": "IdentifierName",
+            "text": "T",
+            "start": 311,
+            "end": 312
+        },
+        {
+            "kind": "Pipe",
+            "text": "|",
+            "start": 313,
+            "end": 314
+        },
+        {
+            "kind": "Null",
+            "text": "null",
+            "start": 315,
+            "end": 319
+        },
+        {
+            "kind": "Greater",
+            "text": ">",
+            "start": 319,
+            "end": 320
+        },
+        {
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 320,
+            "end": 321
+        },
+        {
+            "kind": "IdentifierName",
+            "text": "save",
+            "start": 327,
+            "end": 331
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 331,
+            "end": 332
+        },
+        {
+            "kind": "IdentifierName",
+            "text": "entity",
+            "start": 332,
+            "end": 338
+        },
+        {
+            "kind": "Colon",
+            "text": ":",
+            "start": 338,
+            "end": 339
+        },
+        {
+            "kind": "IdentifierName",
+            "text": "T",
+            "start": 340,
+            "end": 341
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 341,
+            "end": 342
+        },
+        {
+            "kind": "Colon",
+            "text": ":",
+            "start": 342,
+            "end": 343
+        },
+        {
+            "kind": "IdentifierName",
+            "text": "Promise",
+            "start": 344,
+            "end": 351
+        },
+        {
+            "kind": "Less",
+            "text": "<",
+            "start": 351,
+            "end": 352
+        },
+        {
+            "kind": "IdentifierName",
+            "text": "T",
+            "start": 352,
+            "end": 353
+        },
+        {
+            "kind": "Greater",
+            "text": ">",
+            "start": 353,
+            "end": 354
+        },
+        {
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 354,
+            "end": 355
+        },
+        {
+            "kind": "Delete",
+            "text": "delete",
+            "start": 361,
+            "end": 367
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 367,
+            "end": 368
+        },
+        {
+            "kind": "IdentifierName",
+            "text": "id",
+            "start": 368,
+            "end": 370
+        },
+        {
+            "kind": "Colon",
+            "text": ":",
+            "start": 370,
+            "end": 371
+        },
+        {
+            "kind": "Number",
+            "text": "number",
+            "start": 372,
+            "end": 378
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 378,
+            "end": 379
+        },
+        {
+            "kind": "Colon",
+            "text": ":",
+            "start": 379,
+            "end": 380
+        },
+        {
+            "kind": "IdentifierName",
+            "text": "Promise",
+            "start": 381,
+            "end": 388
+        },
+        {
+            "kind": "Less",
+            "text": "<",
+            "start": 388,
+            "end": 389
+        },
+        {
+            "kind": "Void",
+            "text": "void",
+            "start": 389,
+            "end": 393
+        },
+        {
+            "kind": "Greater",
+            "text": ">",
+            "start": 393,
+            "end": 394
+        },
+        {
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 394,
+            "end": 395
+        },
+        {
+            "kind": "RightBrace",
+            "text": "}",
+            "start": 397,
+            "end": 398
+        },
+        {
+            "kind": "Class",
+            "text": "class",
+            "start": 423,
+            "end": 428
+        },
+        {
+            "kind": "IdentifierName",
+            "text": "UserService",
+            "start": 429,
+            "end": 440
+        },
+        {
+            "kind": "Implements",
+            "text": "implements",
+            "start": 441,
+            "end": 451
+        },
+        {
+            "kind": "IdentifierName",
+            "text": "Repository",
+            "start": 452,
+            "end": 462
+        },
+        {
+            "kind": "Less",
+            "text": "<",
+            "start": 462,
+            "end": 463
+        },
+        {
+            "kind": "IdentifierName",
+            "text": "User",
+            "start": 463,
+            "end": 467
+        },
+        {
+            "kind": "Greater",
+            "text": ">",
+            "start": 467,
+            "end": 468
+        },
+        {
+            "kind": "LeftBrace",
+            "text": "{",
+            "start": 469,
+            "end": 470
+        },
+        {
+            "kind": "Private",
+            "text": "private",
+            "start": 476,
+            "end": 483
+        },
+        {
+            "kind": "IdentifierName",
+            "text": "users",
+            "start": 484,
+            "end": 489
+        },
+        {
+            "kind": "Colon",
+            "text": ":",
+            "start": 489,
+            "end": 490
+        },
+        {
+            "kind": "IdentifierName",
+            "text": "User",
+            "start": 491,
+            "end": 495
+        },
+        {
+            "kind": "LeftBracket",
+            "text": "[",
+            "start": 495,
+            "end": 496
+        },
+        {
+            "kind": "RightBracket",
+            "text": "]",
+            "start": 496,
+            "end": 497
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 498,
+            "end": 499
+        },
+        {
+            "kind": "LeftBracket",
+            "text": "[",
+            "start": 500,
+            "end": 501
+        },
+        {
+            "kind": "RightBracket",
+            "text": "]",
+            "start": 501,
+            "end": 502
+        },
+        {
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 502,
+            "end": 503
+        },
+        {
+            "kind": "Constructor",
+            "text": "constructor",
+            "start": 515,
+            "end": 526
+        }
+    ],
+    "errors": []
+}

@@ -1,8 +1,9 @@
 use crate::{kind::DotSyntaxKind, language::DotLanguage};
-use oak_core::{Lexer, LexerState, SourceText, lexer::LexOutput};
+use oak_core::{IncrementalCache, Lexer, LexerState, OakError, lexer::LexOutput, source::Source};
 
-type State<'input> = LexerState<'input, DotLanguage>;
+// State type alias removed - using generic methods instead
 
+#[derive(Clone)]
 pub struct DotLexer<'config> {
     config: &'config DotLanguage,
 }
@@ -13,7 +14,7 @@ impl<'config> DotLexer<'config> {
     }
 
     /// 跳过空白字符
-    fn skip_whitespace(&self, state: &mut State) -> bool {
+    fn skip_whitespace<S: Source>(&self, state: &mut LexerState<S, DotLanguage>) -> bool {
         let start_pos = state.get_position();
 
         while let Some(ch) = state.peek() {
@@ -35,7 +36,7 @@ impl<'config> DotLexer<'config> {
     }
 
     /// 处理换行
-    fn lex_newline(&self, state: &mut State) -> bool {
+    fn lex_newline<S: Source>(&self, state: &mut LexerState<S, DotLanguage>) -> bool {
         let start_pos = state.get_position();
 
         if let Some('\n') = state.peek() {
@@ -57,7 +58,7 @@ impl<'config> DotLexer<'config> {
     }
 
     /// 处理注释
-    fn lex_comment(&self, state: &mut State) -> bool {
+    fn lex_comment<S: Source>(&self, state: &mut LexerState<S, DotLanguage>) -> bool {
         let start_pos = state.get_position();
 
         if let Some('/') = state.peek() {
@@ -118,8 +119,8 @@ impl<'config> DotLexer<'config> {
         }
     }
 
-    /// 处理标识符和关键
-    fn lex_identifier_or_keyword(&self, state: &mut State, source: &SourceText) -> bool {
+    /// 处理标识符和关键字
+    fn lex_identifier_or_keyword<S: Source>(&self, state: &mut LexerState<S, DotLanguage>) -> bool {
         let start_pos = state.get_position();
 
         if let Some(ch) = state.peek() {
@@ -136,7 +137,7 @@ impl<'config> DotLexer<'config> {
                 }
 
                 let end_pos = state.get_position();
-                let text = source.get_text_in(core::range::Range { start: start_pos, end: end_pos }).unwrap_or("");
+                let text = state.get_text_in(core::range::Range { start: start_pos, end: end_pos });
 
                 let token_kind = match text.to_lowercase().as_str() {
                     "graph" => DotSyntaxKind::Graph,
@@ -161,7 +162,7 @@ impl<'config> DotLexer<'config> {
     }
 
     /// 处理数字
-    fn lex_number(&self, state: &mut State, source: &SourceText) -> bool {
+    fn lex_number<S: Source>(&self, state: &mut LexerState<S, DotLanguage>) -> bool {
         let start_pos = state.get_position();
 
         if let Some(ch) = state.peek() {
@@ -171,8 +172,8 @@ impl<'config> DotLexer<'config> {
             if is_negative {
                 // 检查负号后面是否有数字
                 let next_pos = state.get_position() + 1;
-                if next_pos < source.len() {
-                    let next_ch = source.get_char_at(next_pos);
+                if next_pos < state.length() {
+                    let next_ch = state.get_char_at(next_pos);
                     if next_ch.map_or(false, |c| c.is_ascii_digit()) {
                         state.advance(1); // 跳过负号
                     }
@@ -244,7 +245,7 @@ impl<'config> DotLexer<'config> {
     }
 
     /// 处理字符
-    fn lex_string(&self, state: &mut State) -> bool {
+    fn lex_string<S: Source>(&self, state: &mut LexerState<S, DotLanguage>) -> bool {
         let start_pos = state.get_position();
 
         if let Some('"') = state.peek() {
@@ -276,15 +277,15 @@ impl<'config> DotLexer<'config> {
     }
 
     /// 处理操作
-    fn lex_operator(&self, state: &mut State, source: &SourceText) -> bool {
+    fn lex_operator<S: Source>(&self, state: &mut LexerState<S, DotLanguage>) -> bool {
         let start_pos = state.get_position();
 
         if let Some(ch) = state.peek() {
             match ch {
                 '-' => {
                     let next_pos = state.get_position() + 1;
-                    if next_pos < source.len() {
-                        let next_ch = source.get_char_at(next_pos);
+                    if next_pos < state.length() {
+                        let next_ch = state.get_char_at(next_pos);
                         match next_ch {
                             Some('>') => {
                                 state.advance(1);
@@ -329,7 +330,7 @@ impl<'config> DotLexer<'config> {
     }
 
     /// 处理分隔
-    fn lex_delimiter(&self, state: &mut State) -> bool {
+    fn lex_delimiter<S: Source>(&self, state: &mut LexerState<S, DotLanguage>) -> bool {
         let start_pos = state.get_position();
 
         if let Some(ch) = state.peek() {
@@ -354,40 +355,60 @@ impl<'config> DotLexer<'config> {
 }
 
 impl<'config> Lexer<DotLanguage> for DotLexer<'config> {
-    fn lex(&self, source: &SourceText) -> LexOutput<DotSyntaxKind> {
+    fn lex(&self, source: impl Source) -> LexOutput<DotLanguage> {
         let mut state = LexerState::new(source);
+        let result = self.run(&mut state);
+        state.finish(result)
+    }
 
+    fn lex_incremental(
+        &self,
+        source: impl Source,
+        changed: usize,
+        cache: IncrementalCache<DotLanguage>,
+    ) -> LexOutput<DotLanguage> {
+        let mut state = LexerState::new_with_cache(source, changed, cache);
+        let result = self.run(&mut state);
+        state.finish(result)
+    }
+}
+
+impl<'config> DotLexer<'config> {
+    /// 主要的词法分析逻辑
+    fn run<S: Source>(&self, state: &mut LexerState<S, DotLanguage>) -> Result<(), OakError> {
         while state.not_at_end() {
+            let safe_point = state.get_position();
+
             // 尝试各种词法规则
-            if self.skip_whitespace(&mut state) {
+            if self.skip_whitespace(state) {
                 continue;
             }
 
-            if self.lex_newline(&mut state) {
+            if self.lex_newline(state) {
                 continue;
             }
 
-            if self.lex_comment(&mut state) {
+            if self.lex_comment(state) {
                 continue;
             }
 
-            if self.lex_identifier_or_keyword(&mut state, source) {
+            if self.lex_identifier_or_keyword(state) {
                 continue;
             }
 
-            if self.lex_number(&mut state, source) {
+            if self.lex_number(state) {
                 continue;
             }
 
-            if self.lex_string(&mut state) {
+            if self.lex_string(state) {
                 continue;
             }
 
-            if self.lex_operator(&mut state, source) {
+            if self.lex_operator(state) {
                 continue;
             }
 
-            if self.lex_delimiter(&mut state) {
+            if self.lex_delimiter(state) {
                 continue;
             }
 
@@ -397,12 +418,14 @@ impl<'config> Lexer<DotLanguage> for DotLexer<'config> {
                 state.advance(ch.len_utf8());
                 state.add_token(DotSyntaxKind::Error, start_pos, state.get_position());
             }
+
+            state.safe_check(safe_point);
         }
 
-        // 添加 EOF kind
+        // 添加 EOF token
         let eof_pos = state.get_position();
         state.add_token(DotSyntaxKind::Eof, eof_pos, eof_pos);
 
-        state.finish()
+        Ok(())
     }
 }

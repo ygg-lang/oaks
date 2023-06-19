@@ -1,0 +1,607 @@
+{
+    "success": true,
+    "count": 100,
+    "tokens": [
+        {
+            "kind": "StringLiteral",
+            "text": "'use strict'",
+            "start": 25,
+            "end": 37
+        },
+        {
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 37,
+            "end": 38
+        },
+        {
+            "kind": "Const",
+            "text": "const",
+            "start": 70,
+            "end": 75
+        },
+        {
+            "kind": "IdentifierName",
+            "text": "PI",
+            "start": 76,
+            "end": 78
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 79,
+            "end": 80
+        },
+        {
+            "kind": "NumericLiteral",
+            "text": "3.14159",
+            "start": 81,
+            "end": 88
+        },
+        {
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 88,
+            "end": 89
+        },
+        {
+            "kind": "Let",
+            "text": "let",
+            "start": 91,
+            "end": 94
+        },
+        {
+            "kind": "IdentifierName",
+            "text": "count",
+            "start": 95,
+            "end": 100
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 101,
+            "end": 102
+        },
+        {
+            "kind": "NumericLiteral",
+            "text": "0",
+            "start": 103,
+            "end": 104
+        },
+        {
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 104,
+            "end": 105
+        },
+        {
+            "kind": "Var",
+            "text": "var",
+            "start": 107,
+            "end": 110
+        },
+        {
+            "kind": "IdentifierName",
+            "text": "name",
+            "start": 111,
+            "end": 115
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 116,
+            "end": 117
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "\"JavaScript\"",
+            "start": 118,
+            "end": 130
+        },
+        {
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 130,
+            "end": 131
+        },
+        {
+            "kind": "Function",
+            "text": "function",
+            "start": 149,
+            "end": 157
+        },
+        {
+            "kind": "IdentifierName",
+            "text": "greet",
+            "start": 158,
+            "end": 163
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 163,
+            "end": 164
+        },
+        {
+            "kind": "IdentifierName",
+            "text": "person",
+            "start": 164,
+            "end": 170
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 170,
+            "end": 171
+        },
+        {
+            "kind": "LeftBrace",
+            "text": "{",
+            "start": 172,
+            "end": 173
+        },
+        {
+            "kind": "Return",
+            "text": "return",
+            "start": 179,
+            "end": 185
+        },
+        {
+            "kind": "TemplateString",
+            "text": "`Hello, ${person}!`",
+            "start": 186,
+            "end": 205
+        },
+        {
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 205,
+            "end": 206
+        },
+        {
+            "kind": "RightBrace",
+            "text": "}",
+            "start": 208,
+            "end": 209
+        },
+        {
+            "kind": "Const",
+            "text": "const",
+            "start": 213,
+            "end": 218
+        },
+        {
+            "kind": "IdentifierName",
+            "text": "add",
+            "start": 219,
+            "end": 222
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 223,
+            "end": 224
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 225,
+            "end": 226
+        },
+        {
+            "kind": "IdentifierName",
+            "text": "a",
+            "start": 226,
+            "end": 227
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 227,
+            "end": 228
+        },
+        {
+            "kind": "IdentifierName",
+            "text": "b",
+            "start": 229,
+            "end": 230
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 230,
+            "end": 231
+        },
+        {
+            "kind": "Arrow",
+            "text": "=>",
+            "start": 232,
+            "end": 234
+        },
+        {
+            "kind": "IdentifierName",
+            "text": "a",
+            "start": 235,
+            "end": 236
+        },
+        {
+            "kind": "Plus",
+            "text": "+",
+            "start": 237,
+            "end": 238
+        },
+        {
+            "kind": "IdentifierName",
+            "text": "b",
+            "start": 239,
+            "end": 240
+        },
+        {
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 240,
+            "end": 241
+        },
+        {
+            "kind": "Const",
+            "text": "const",
+            "start": 275,
+            "end": 280
+        },
+        {
+            "kind": "IdentifierName",
+            "text": "multiply",
+            "start": 281,
+            "end": 289
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 290,
+            "end": 291
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 292,
+            "end": 293
+        },
+        {
+            "kind": "IdentifierName",
+            "text": "a",
+            "start": 293,
+            "end": 294
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 294,
+            "end": 295
+        },
+        {
+            "kind": "IdentifierName",
+            "text": "b",
+            "start": 296,
+            "end": 297
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 297,
+            "end": 298
+        },
+        {
+            "kind": "Arrow",
+            "text": "=>",
+            "start": 299,
+            "end": 301
+        },
+        {
+            "kind": "LeftBrace",
+            "text": "{",
+            "start": 302,
+            "end": 303
+        },
+        {
+            "kind": "Const",
+            "text": "const",
+            "start": 309,
+            "end": 314
+        },
+        {
+            "kind": "IdentifierName",
+            "text": "result",
+            "start": 315,
+            "end": 321
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 322,
+            "end": 323
+        },
+        {
+            "kind": "IdentifierName",
+            "text": "a",
+            "start": 324,
+            "end": 325
+        },
+        {
+            "kind": "Star",
+            "text": "*",
+            "start": 326,
+            "end": 327
+        },
+        {
+            "kind": "IdentifierName",
+            "text": "b",
+            "start": 328,
+            "end": 329
+        },
+        {
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 329,
+            "end": 330
+        },
+        {
+            "kind": "Return",
+            "text": "return",
+            "start": 336,
+            "end": 342
+        },
+        {
+            "kind": "IdentifierName",
+            "text": "result",
+            "start": 343,
+            "end": 349
+        },
+        {
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 349,
+            "end": 350
+        },
+        {
+            "kind": "RightBrace",
+            "text": "}",
+            "start": 352,
+            "end": 353
+        },
+        {
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 353,
+            "end": 354
+        },
+        {
+            "kind": "Class",
+            "text": "class",
+            "start": 370,
+            "end": 375
+        },
+        {
+            "kind": "IdentifierName",
+            "text": "Person",
+            "start": 376,
+            "end": 382
+        },
+        {
+            "kind": "LeftBrace",
+            "text": "{",
+            "start": 383,
+            "end": 384
+        },
+        {
+            "kind": "IdentifierName",
+            "text": "constructor",
+            "start": 390,
+            "end": 401
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 401,
+            "end": 402
+        },
+        {
+            "kind": "IdentifierName",
+            "text": "name",
+            "start": 402,
+            "end": 406
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 406,
+            "end": 407
+        },
+        {
+            "kind": "IdentifierName",
+            "text": "age",
+            "start": 408,
+            "end": 411
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 411,
+            "end": 412
+        },
+        {
+            "kind": "LeftBrace",
+            "text": "{",
+            "start": 413,
+            "end": 414
+        },
+        {
+            "kind": "This",
+            "text": "this",
+            "start": 424,
+            "end": 428
+        },
+        {
+            "kind": "Dot",
+            "text": ".",
+            "start": 428,
+            "end": 429
+        },
+        {
+            "kind": "IdentifierName",
+            "text": "name",
+            "start": 429,
+            "end": 433
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 434,
+            "end": 435
+        },
+        {
+            "kind": "IdentifierName",
+            "text": "name",
+            "start": 436,
+            "end": 440
+        },
+        {
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 440,
+            "end": 441
+        },
+        {
+            "kind": "This",
+            "text": "this",
+            "start": 451,
+            "end": 455
+        },
+        {
+            "kind": "Dot",
+            "text": ".",
+            "start": 455,
+            "end": 456
+        },
+        {
+            "kind": "IdentifierName",
+            "text": "age",
+            "start": 456,
+            "end": 459
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 460,
+            "end": 461
+        },
+        {
+            "kind": "IdentifierName",
+            "text": "age",
+            "start": 462,
+            "end": 465
+        },
+        {
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 465,
+            "end": 466
+        },
+        {
+            "kind": "RightBrace",
+            "text": "}",
+            "start": 472,
+            "end": 473
+        },
+        {
+            "kind": "IdentifierName",
+            "text": "introduce",
+            "start": 485,
+            "end": 494
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 494,
+            "end": 495
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 495,
+            "end": 496
+        },
+        {
+            "kind": "LeftBrace",
+            "text": "{",
+            "start": 497,
+            "end": 498
+        },
+        {
+            "kind": "IdentifierName",
+            "text": "console",
+            "start": 508,
+            "end": 515
+        },
+        {
+            "kind": "Dot",
+            "text": ".",
+            "start": 515,
+            "end": 516
+        },
+        {
+            "kind": "IdentifierName",
+            "text": "log",
+            "start": 516,
+            "end": 519
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 519,
+            "end": 520
+        },
+        {
+            "kind": "TemplateString",
+            "text": "`Hi, I'm ${this.name} and I'm ${this.age} years old.`",
+            "start": 520,
+            "end": 573
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 573,
+            "end": 574
+        },
+        {
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 574,
+            "end": 575
+        },
+        {
+            "kind": "RightBrace",
+            "text": "}",
+            "start": 581,
+            "end": 582
+        },
+        {
+            "kind": "Static",
+            "text": "static",
+            "start": 594,
+            "end": 600
+        },
+        {
+            "kind": "IdentifierName",
+            "text": "createAdult",
+            "start": 601,
+            "end": 612
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 612,
+            "end": 613
+        }
+    ],
+    "errors": []
+}

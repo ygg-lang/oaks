@@ -1,27 +1,82 @@
-use alloc::{boxed::Box, string::String, vec::Vec};
-use core::ops::Range;
+use std::range::Range;
 
 type SourceSpan = Range<usize>;
 
-/// C 语言抽象语法
+/// GraphQL 根节点
+#[derive(Debug, Clone, PartialEq)]
+pub struct GraphQLRoot {
+    pub document: Document,
+}
+
+/// GraphQL 文档
+#[derive(Debug, Clone, PartialEq)]
+pub struct Document {
+    pub definitions: Vec<Definition>,
+    pub span: SourceSpan,
+}
+
+/// GraphQL 定义
+#[derive(Debug, Clone, PartialEq)]
+pub enum Definition {
+    Operation(OperationDefinition),
+    Fragment(FragmentDefinition),
+    Schema(SchemaDefinition),
+    Type(TypeDefinition),
+}
+
+/// GraphQL 操作定义
+#[derive(Debug, Clone, PartialEq)]
+pub struct OperationDefinition {
+    pub operation_type: OperationType,
+    pub name: Option<String>,
+    pub span: SourceSpan,
+}
+
+/// GraphQL 操作类型
+#[derive(Debug, Clone, PartialEq)]
+pub enum OperationType {
+    Query,
+    Mutation,
+    Subscription,
+}
+
+/// GraphQL 片段定义
+#[derive(Debug, Clone, PartialEq)]
+pub struct FragmentDefinition {
+    pub name: String,
+    pub span: SourceSpan,
+}
+
+/// GraphQL 模式定义
+#[derive(Debug, Clone, PartialEq)]
+pub struct SchemaDefinition {
+    pub span: SourceSpan,
+}
+
+/// GraphQL 类型定义
+#[derive(Debug, Clone, PartialEq)]
+pub struct TypeDefinition {
+    pub name: String,
+    pub span: SourceSpan,
+}
+
+/// C AST 根节点
 #[derive(Debug, Clone, PartialEq)]
 pub struct CAst {
     pub translation_unit: TranslationUnit,
 }
 
-/// 翻译单元（C 程序的顶层结构）
+/// 翻译单元
 #[derive(Debug, Clone, PartialEq)]
 pub struct TranslationUnit {
     pub external_declarations: Vec<ExternalDeclaration>,
-    pub span: Range<usize>,
+    pub span: SourceSpan,
 }
 
 /// 外部声明
 #[derive(Debug, Clone, PartialEq)]
 pub enum ExternalDeclaration {
-    /// 函数定义
     FunctionDefinition(FunctionDefinition),
-    /// 声明
     Declaration(Declaration),
 }
 
@@ -31,7 +86,7 @@ pub struct FunctionDefinition {
     pub declaration_specifiers: Vec<DeclarationSpecifier>,
     pub declarator: Declarator,
     pub compound_statement: CompoundStatement,
-    pub span: Range<usize>,
+    pub span: SourceSpan,
 }
 
 /// 声明
@@ -39,19 +94,15 @@ pub struct FunctionDefinition {
 pub struct Declaration {
     pub declaration_specifiers: Vec<DeclarationSpecifier>,
     pub init_declarators: Vec<InitDeclarator>,
-    pub span: Range<usize>,
+    pub span: SourceSpan,
 }
 
-/// 声明说明
+/// 声明说明符
 #[derive(Debug, Clone, PartialEq)]
 pub enum DeclarationSpecifier {
-    /// 存储类说明符
     StorageClassSpecifier(StorageClassSpecifier),
-    /// 类型说明
     TypeSpecifier(TypeSpecifier),
-    /// 类型限定
     TypeQualifier(TypeQualifier),
-    /// 函数说明
     FunctionSpecifier(FunctionSpecifier),
 }
 
@@ -65,7 +116,7 @@ pub enum StorageClassSpecifier {
     Register,
 }
 
-/// 类型说明
+/// 类型说明符
 #[derive(Debug, Clone, PartialEq)]
 pub enum TypeSpecifier {
     Void,
@@ -85,7 +136,7 @@ pub enum TypeSpecifier {
     TypedefName(String),
 }
 
-/// 类型限定
+/// 类型限定符
 #[derive(Debug, Clone, PartialEq)]
 pub enum TypeQualifier {
     Const,
@@ -93,7 +144,7 @@ pub enum TypeQualifier {
     Volatile,
 }
 
-/// 函数说明
+/// 函数说明符
 #[derive(Debug, Clone, PartialEq)]
 pub enum FunctionSpecifier {
     Inline,
@@ -106,22 +157,22 @@ pub struct StructOrUnionSpecifier {
     pub struct_or_union: StructOrUnion,
     pub identifier: Option<String>,
     pub struct_declarations: Option<Vec<StructDeclaration>>,
-    pub span: Range<usize>,
+    pub span: SourceSpan,
 }
 
-/// 结构体或联合
+/// 结构体或联合体
 #[derive(Debug, Clone, PartialEq)]
 pub enum StructOrUnion {
     Struct,
     Union,
 }
 
-/// 结构体声
+/// 结构体声明
 #[derive(Debug, Clone, PartialEq)]
 pub struct StructDeclaration {
     pub specifier_qualifiers: Vec<SpecifierQualifier>,
     pub struct_declarators: Vec<StructDeclarator>,
-    pub span: Range<usize>,
+    pub span: SourceSpan,
 }
 
 /// 说明符限定符
@@ -136,23 +187,23 @@ pub enum SpecifierQualifier {
 pub struct StructDeclarator {
     pub declarator: Option<Declarator>,
     pub constant_expression: Option<Expression>,
-    pub span: Range<usize>,
+    pub span: SourceSpan,
 }
 
-/// 枚举说明
+/// 枚举说明符
 #[derive(Debug, Clone, PartialEq)]
 pub struct EnumSpecifier {
     pub identifier: Option<String>,
     pub enumerators: Option<Vec<Enumerator>>,
-    pub span: Range<usize>,
+    pub span: SourceSpan,
 }
 
-/// 枚举
+/// 枚举器
 #[derive(Debug, Clone, PartialEq)]
 pub struct Enumerator {
     pub identifier: String,
     pub constant_expression: Option<Expression>,
-    pub span: Range<usize>,
+    pub span: SourceSpan,
 }
 
 /// 初始化声明符
@@ -163,7 +214,7 @@ pub struct InitDeclarator {
     pub span: SourceSpan,
 }
 
-/// 声明
+/// 声明符
 #[derive(Debug, Clone, PartialEq)]
 pub struct Declarator {
     pub pointer: Option<Pointer>,
@@ -179,7 +230,7 @@ pub struct Pointer {
     pub span: SourceSpan,
 }
 
-/// 直接声明
+/// 直接声明符
 #[derive(Debug, Clone, PartialEq)]
 pub enum DirectDeclarator {
     Identifier(String),
@@ -212,15 +263,15 @@ pub struct ParameterDeclaration {
     pub span: SourceSpan,
 }
 
-/// 抽象声明
+/// 抽象声明符
 #[derive(Debug, Clone, PartialEq)]
 pub struct AbstractDeclarator {
     pub pointer: Option<Pointer>,
     pub direct_abstract_declarator: Option<Box<DirectAbstractDeclarator>>,
-    pub span: Range<usize>,
+    pub span: SourceSpan,
 }
 
-/// 直接抽象声明
+/// 直接抽象声明符
 #[derive(Debug, Clone, PartialEq)]
 pub enum DirectAbstractDeclarator {
     AbstractDeclarator(Box<AbstractDeclarator>),
@@ -238,21 +289,15 @@ pub enum Initializer {
 /// 语句
 #[derive(Debug, Clone, PartialEq)]
 pub enum Statement {
-    /// 标号语句
     Labeled(LabeledStatement),
-    /// 复合语句
     Compound(CompoundStatement),
-    /// 表达式语
     Expression(ExpressionStatement),
-    /// 选择语句
     Selection(SelectionStatement),
-    /// 迭代语句
     Iteration(IterationStatement),
-    /// 跳转语句
     Jump(JumpStatement),
 }
 
-/// 标号语句
+/// 标签语句
 #[derive(Debug, Clone, PartialEq)]
 pub enum LabeledStatement {
     Label { identifier: String, statement: Box<Statement> },
@@ -274,7 +319,7 @@ pub enum BlockItem {
     Statement(Statement),
 }
 
-/// 表达式语
+/// 表达式语句
 #[derive(Debug, Clone, PartialEq)]
 pub struct ExpressionStatement {
     pub expression: Option<Expression>,
@@ -305,48 +350,66 @@ pub enum JumpStatement {
     Return(Option<Expression>),
 }
 
-/// 表达
+/// 表达式
 #[derive(Debug, Clone, PartialEq)]
 pub struct Expression {
     pub kind: Box<ExpressionKind>,
-    pub span: Range<usize>,
+    pub span: SourceSpan,
 }
 
-/// 表达式种
+/// 表达式类型
 #[derive(Debug, Clone, PartialEq)]
 pub enum ExpressionKind {
-    /// 标识
     Identifier(String),
-    /// 常量
     Constant(Constant),
-    /// 字符串字面量
     StringLiteral(String),
-    /// 数组下标
-    ArraySubscript { array: Box<Expression>, index: Box<Expression> },
-    /// 函数调用
-    FunctionCall { function: Box<Expression>, arguments: Vec<Expression> },
-    /// 成员访问
+    ArraySubscript {
+        array: Box<Expression>,
+        index: Box<Expression>,
+    },
+    FunctionCall {
+        function: Box<Expression>,
+        arguments: Vec<Expression>,
+    },
     MemberAccess {
         object: Box<Expression>,
         member: String,
         is_pointer: bool, // true for ->, false for .
     },
-    /// 后缀递增/递减
-    PostfixIncDec { operand: Box<Expression>, is_increment: bool },
-    /// 前缀递增/递减
-    PrefixIncDec { operand: Box<Expression>, is_increment: bool },
-    /// 一元操作符
-    Unary { operator: UnaryOperator, operand: Box<Expression> },
-    /// 类型转换
-    Cast { type_name: Box<TypeName>, expression: Box<Expression> },
-    /// 二元操作
-    Binary { left: Box<Expression>, operator: BinaryOperator, right: Box<Expression> },
-    /// 条件表达
-    Conditional { condition: Box<Expression>, then_expr: Box<Expression>, else_expr: Box<Expression> },
-    /// 赋值表达式
-    Assignment { left: Box<Expression>, operator: AssignmentOperator, right: Box<Expression> },
-    /// 逗号表达
-    Comma { expressions: Vec<Expression> },
+    PostfixIncDec {
+        operand: Box<Expression>,
+        is_increment: bool,
+    },
+    PrefixIncDec {
+        operand: Box<Expression>,
+        is_increment: bool,
+    },
+    Unary {
+        operator: UnaryOperator,
+        operand: Box<Expression>,
+    },
+    Cast {
+        type_name: Box<TypeName>,
+        expression: Box<Expression>,
+    },
+    Binary {
+        left: Box<Expression>,
+        operator: BinaryOperator,
+        right: Box<Expression>,
+    },
+    Conditional {
+        condition: Box<Expression>,
+        then_expr: Box<Expression>,
+        else_expr: Box<Expression>,
+    },
+    Assignment {
+        left: Box<Expression>,
+        operator: AssignmentOperator,
+        right: Box<Expression>,
+    },
+    Comma {
+        expressions: Vec<Expression>,
+    },
 }
 
 /// 常量
@@ -357,7 +420,7 @@ pub enum Constant {
     Character(char),
 }
 
-/// 一元操作符
+/// 一元运算符
 #[derive(Debug, Clone, PartialEq)]
 pub enum UnaryOperator {
     AddressOf,   // &
@@ -369,24 +432,24 @@ pub enum UnaryOperator {
     Sizeof,      // sizeof
 }
 
-/// 二元操作
+/// 二元运算符
 #[derive(Debug, Clone, PartialEq)]
 pub enum BinaryOperator {
-    // 算术操作
+    // 算术运算符
     Add,      // +
     Subtract, // -
     Multiply, // *
     Divide,   // /
     Modulo,   // %
 
-    // 位操作符
+    // 位运算符
     BitwiseAnd, // &
     BitwiseOr,  // |
     BitwiseXor, // ^
     LeftShift,  // <<
     RightShift, // >>
 
-    // 比较操作
+    // 比较运算符
     Equal,        // ==
     NotEqual,     // !=
     Less,         // <
@@ -394,12 +457,12 @@ pub enum BinaryOperator {
     LessEqual,    // <=
     GreaterEqual, // >=
 
-    // 逻辑操作
+    // 逻辑运算符
     LogicalAnd, // &&
     LogicalOr,  // ||
 }
 
-/// 赋值操作符
+/// 赋值运算符
 #[derive(Debug, Clone, PartialEq)]
 pub enum AssignmentOperator {
     Assign,           // =
@@ -415,24 +478,22 @@ pub enum AssignmentOperator {
     RightShiftAssign, // >>=
 }
 
-/// 类型
+/// 类型名
 #[derive(Debug, Clone, PartialEq)]
 pub struct TypeName {
     pub specifier_qualifiers: Vec<SpecifierQualifier>,
     pub abstract_declarator: Option<Box<AbstractDeclarator>>,
-    pub span: Range<usize>,
+    pub span: SourceSpan,
 }
 
 impl CAst {
-    /// 创建新的 AST
     pub fn new(translation_unit: TranslationUnit) -> Self {
         Self { translation_unit }
     }
 }
 
 impl TranslationUnit {
-    /// 创建新的翻译单元
-    pub fn new(external_declarations: Vec<ExternalDeclaration>, span: Range<usize>) -> Self {
+    pub fn new(external_declarations: Vec<ExternalDeclaration>, span: SourceSpan) -> Self {
         Self { external_declarations, span }
     }
 }

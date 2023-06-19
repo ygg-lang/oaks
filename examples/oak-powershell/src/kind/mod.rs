@@ -1,6 +1,9 @@
-use oak_core::SyntaxKind;
+use oak_core::{SyntaxKind, Token};
+use serde::{Deserialize, Serialize};
 
-#[derive(Copy, Clone, Debug, PartialEq, Eq)]
+pub type PowerShellToken = Token<PowerShellSyntaxKind>;
+
+#[derive(Copy, Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
 pub enum PowerShellSyntaxKind {
     // Whitespace and comments
     Whitespace,
@@ -60,7 +63,6 @@ pub enum PowerShellSyntaxKind {
     NotMatch,
     Contains,
     NotContains,
-    In,
     NotIn,
     Replace,
     Split,

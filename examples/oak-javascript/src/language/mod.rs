@@ -62,4 +62,5 @@ impl Default for JavaScriptLanguage {
 
 impl Language for JavaScriptLanguage {
     type SyntaxKind = crate::kind::JavaScriptSyntaxKind;
+    type TypedRoot = ();
 }

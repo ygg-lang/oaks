@@ -1,8 +1,9 @@
-use crate::kind::XmlSyntaxKind;
 use oak_core::Language;
 
-pub struct XmlLanguage {}
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Default)]
+pub struct PrologLanguage;
 
-impl Language for XmlLanguage {
-    type SyntaxKind = XmlSyntaxKind;
+impl Language for PrologLanguage {
+    type SyntaxKind = crate::kind::PrologSyntaxKind;
+    type TypedRoot = crate::ast::SourceFile;
 }

@@ -1,8 +1,9 @@
 use crate::{kind::SmalltalkKind, language::SmalltalkLanguage};
-use oak_core::{Lexer, LexerState, SourceText, lexer::LexOutput};
+use oak_core::{IncrementalCache, Lexer, LexerState, OakError, lexer::LexOutput, source::Source};
 
-type State<'input> = LexerState<'input, SmalltalkLanguage>;
+type State<S> = LexerState<S, SmalltalkLanguage>;
 
+#[derive(Clone)]
 pub struct SmalltalkLexer<'config> {
     config: &'config SmalltalkLanguage,
 }
@@ -12,8 +13,52 @@ impl<'config> SmalltalkLexer<'config> {
         Self { config }
     }
 
+    fn run<S: Source>(&self, state: &mut State<S>) -> Result<(), OakError> {
+        while state.not_at_end() {
+            let safe_point = state.get_position();
+
+            if self.skip_whitespace(state) {
+                continue;
+            }
+
+            if self.lex_newline(state) {
+                continue;
+            }
+
+            if self.lex_comment(state) {
+                continue;
+            }
+
+            if self.lex_number(state) {
+                continue;
+            }
+
+            if self.lex_identifier(state) {
+                continue;
+            }
+
+            if self.lex_punctuation(state) {
+                continue;
+            }
+
+            // 错误处理：如果没有匹配任何规则，跳过当前字符并标记为错误
+            let start_pos = state.get_position();
+            if let Some(ch) = state.peek() {
+                state.advance(ch.len_utf8());
+                state.add_token(SmalltalkKind::Error, start_pos, state.get_position());
+            }
+
+            state.safe_check(safe_point);
+        }
+
+        // 添加 EOF token
+        let eof_pos = state.get_position();
+        state.add_token(SmalltalkKind::Eof, eof_pos, eof_pos);
+        Ok(())
+    }
+
     /// 跳过空白字符
-    fn skip_whitespace(&self, state: &mut State) -> bool {
+    fn skip_whitespace<S: Source>(&self, state: &mut State<S>) -> bool {
         let start_pos = state.get_position();
 
         while let Some(ch) = state.peek() {
@@ -34,8 +79,8 @@ impl<'config> SmalltalkLexer<'config> {
         }
     }
 
-    /// 处理换行
-    fn lex_newline(&self, state: &mut State) -> bool {
+    /// 处理换行符
+    fn lex_newline<S: Source>(&self, state: &mut State<S>) -> bool {
         let start_pos = state.get_position();
 
         if let Some('\n') = state.peek() {
@@ -57,7 +102,7 @@ impl<'config> SmalltalkLexer<'config> {
     }
 
     /// 处理注释
-    fn lex_comment(&self, state: &mut State) -> bool {
+    fn lex_comment<S: Source>(&self, state: &mut State<S>) -> bool {
         let start_pos = state.get_position();
 
         if let Some('"') = state.peek() {
@@ -79,8 +124,8 @@ impl<'config> SmalltalkLexer<'config> {
         }
     }
 
-    /// 处理标识符和关键字
-    fn lex_identifier(&self, state: &mut State) -> bool {
+    /// 处理标识符
+    fn lex_identifier<S: Source>(&self, state: &mut State<S>) -> bool {
         let start_pos = state.get_position();
 
         if let Some(ch) = state.peek() {
@@ -109,7 +154,7 @@ impl<'config> SmalltalkLexer<'config> {
     }
 
     /// 处理数字
-    fn lex_number(&self, state: &mut State) -> bool {
+    fn lex_number<S: Source>(&self, state: &mut State<S>) -> bool {
         let start_pos = state.get_position();
 
         if let Some(ch) = state.peek() {
@@ -138,7 +183,7 @@ impl<'config> SmalltalkLexer<'config> {
     }
 
     /// 处理标点符号
-    fn lex_punctuation(&self, state: &mut State) -> bool {
+    fn lex_punctuation<S: Source>(&self, state: &mut State<S>) -> bool {
         let start_pos = state.get_position();
 
         if let Some(ch) = state.peek() {
@@ -173,47 +218,14 @@ impl<'config> SmalltalkLexer<'config> {
 }
 
 impl<'config> Lexer<SmalltalkLanguage> for SmalltalkLexer<'config> {
-    fn lex(&self, source: &SourceText) -> LexOutput<SmalltalkKind> {
-        let mut state = LexerState::new(source);
-
-        while state.not_at_end() {
-            // 尝试各种词法规则
-            if self.skip_whitespace(&mut state) {
-                continue;
-            }
-
-            if self.lex_newline(&mut state) {
-                continue;
-            }
-
-            if self.lex_comment(&mut state) {
-                continue;
-            }
-
-            if self.lex_number(&mut state) {
-                continue;
-            }
-
-            if self.lex_identifier(&mut state) {
-                continue;
-            }
-
-            if self.lex_punctuation(&mut state) {
-                continue;
-            }
-
-            // 如果所有规则都不匹配，跳过当前字符并标记为错误
-            let start_pos = state.get_position();
-            if let Some(ch) = state.peek() {
-                state.advance(ch.len_utf8());
-                state.add_token(SmalltalkKind::Error, start_pos, state.get_position());
-            }
-        }
-
-        // 添加 EOF token
-        let eof_pos = state.get_position();
-        state.add_token(SmalltalkKind::Eof, eof_pos, eof_pos);
-
-        state.finish()
+    fn lex_incremental(
+        &self,
+        source: impl Source,
+        changed: usize,
+        cache: IncrementalCache<SmalltalkLanguage>,
+    ) -> LexOutput<SmalltalkLanguage> {
+        let mut state = LexerState::new_with_cache(source, changed, cache);
+        let result = self.run(&mut state);
+        state.finish(result)
     }
 }

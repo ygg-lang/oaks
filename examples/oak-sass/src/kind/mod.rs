@@ -1,7 +1,8 @@
 use oak_core::SyntaxKind;
+use serde::{Deserialize, Serialize};
 
 /// Sass 语法种类
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub enum SassSyntaxKind {
     // 节点种类
     SourceFile,
@@ -16,6 +17,7 @@ pub enum SassSyntaxKind {
     // 标识符和字面量
     Identifier,
     NumberLiteral,
+    FloatLiteral,
     StringLiteral,
     ColorLiteral,
 

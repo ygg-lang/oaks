@@ -2,6 +2,7 @@
 
 [![Crates.io](https://img.shields.io/crates/v/oak-nginx.svg)](https://crates.io/crates/oak-nginx)
 [![Documentation](https://docs.rs/oak-nginx/badge.svg)](https://docs.rs/oak-nginx)
+[![License](https://img.shields.io/crates/l/oak-nginx.svg)](https://github.com/yourusername/oak-nginx#license)
 
 A comprehensive Nginx configuration parser for the Oak parsing framework, providing robust parsing capabilities for Nginx server blocks, directives, and configuration syntax.
 
@@ -17,11 +18,16 @@ A comprehensive Nginx configuration parser for the Oak parsing framework, provid
 - **AST Generation**: Rich Abstract Syntax Tree for configuration analysis and manipulation
 - **Zero Dependencies**: Pure Rust implementation with no external dependencies
 
-## 🎯 Overview
+## Installation
 
-Oak Nginx is a robust parser for Nginx configuration files, designed to handle complete Nginx syntax including server blocks, location blocks, upstream blocks, and all standard directives.
+Add this to your `Cargo.toml`:
 
-## 🚀 Quick Start
+```toml
+[dependencies]
+oak-nginx = "0.1.0"
+```
+
+## Quick Start
 
 ```rust
 use oak::Parser;
@@ -64,7 +70,7 @@ fn main() {
 }
 ```
 
-## 📋 Parsing Examples
+## Advanced Usage
 
 ### Parsing Complex Configurations
 
@@ -151,7 +157,7 @@ fn main() {
 }
 ```
 
-### Error Handling
+### Error Handling with Context
 
 ```rust
 use oak::Parser;
@@ -195,7 +201,7 @@ fn validate_nginx_config(config_path: &str) -> Result<(), Box<dyn std::error::Er
     
     match parser.parse(&config, &language) {
         Ok(ast) => {
-            println!("Configuration syntax is valid!");
+            println!("Configuration kind is valid!");
             
             // You can now analyze the AST for semantic issues
             check_semantic_errors(&ast)?;
@@ -209,7 +215,7 @@ fn validate_nginx_config(config_path: &str) -> Result<(), Box<dyn std::error::Er
 }
 ```
 
-## 🏗️ AST Structure
+## AST Structure
 
 The parser generates a comprehensive AST with the following main node types:
 
@@ -232,7 +238,7 @@ The parser generates a comprehensive AST with the following main node types:
 - **Upstream Block**: Load balancing configuration
 - **Mail Block**: Mail proxy configuration
 
-## 📊 Performance
+## Performance
 
 - **Zero-copy parsing**: Minimal string allocations during parsing
 - **Streaming support**: Parse large configuration files incrementally
@@ -240,7 +246,7 @@ The parser generates a comprehensive AST with the following main node types:
 - **Memory efficient**: Compact AST representation
 - **Fast validation**: Quick syntax validation for large configs
 
-## 🔗 Integration
+## Integration
 
 The parser integrates seamlessly with the broader Oak ecosystem:
 
@@ -277,8 +283,10 @@ fn convert_to_json(source: &str) -> Result<String, ParseError> {
 - **Automation**: Generate or modify configurations programmatically
 - **Monitoring**: Parse and analyze configuration changes
 
-## 🤝 Contributing
+## Contributing
 
-Contributions are welcome! 
+Contributions are welcome! Please feel free to submit a Pull Request. For major changes, please open an issue first to discuss what you would like to change.
 
-Please feel free to submit pull requests at the [project repository](https://github.com/ygg-lang/oaks/tree/dev/examples/oak-nginx) or open [issues](https://github.com/ygg-lang/oaks/issues).
+## License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.

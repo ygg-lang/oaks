@@ -62,4 +62,5 @@ impl TclLanguage {
 
 impl Language for TclLanguage {
     type SyntaxKind = TclSyntaxKind;
+    type TypedRoot = ();
 }

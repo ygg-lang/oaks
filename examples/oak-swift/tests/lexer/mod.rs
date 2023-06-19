@@ -1,15 +1,12 @@
-use oak_swift::{SwiftLanguage, SwiftLexer};
-use oak_core::helpers::LexerTester;
-use std::path::Path;
+#![feature(new_range_api)]
+
+use oak_core::LexerTester;
+use oak_swift::{lexer::SwiftLexer, language::SwiftLanguage};
 
 #[test]
 fn test_swift_lexer() {
-    let here = Path::new(env!("CARGO_MANIFEST_DIR"));
-    let tests = here.join("tests/lexer");
-    let lexer = SwiftLexer::new(&SwiftLanguage::default());
-    let test_runner = LexerTester::new(tests).with_extension("swift");
-    match test_runner.run_tests::<SwiftLanguage, _>(lexer) {
-        Ok(()) => println!("Swift lexer tests passed!"),
-        Err(e) => panic!("Swift lexer tests failed: {}", e),
-    }
+    let config = SwiftLanguage::default();
+    let lexer = SwiftLexer::new(&config);
+    let tester = LexerTester::new(lexer);
+    tester.run("swift");
 }

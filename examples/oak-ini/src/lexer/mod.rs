@@ -1,26 +1,85 @@
 use crate::{language::IniLanguage, syntax::IniSyntaxKind};
-use alloc::string::String;
 use oak_core::{
-    Lexer, SourceText,
-    lexer::{LexOutput, LexerState},
+    IncrementalCache, Lexer, LexerState, OakError,
+    lexer::{CommentLine, LexOutput, StringConfig, WhitespaceConfig},
+    source::Source,
 };
+use std::sync::LazyLock;
 
-type State<'input> = LexerState<'input, IniLanguage>;
+type State<S: Source> = LexerState<S, IniLanguage>;
 
-/// INI lexer implementation
+static INI_WHITESPACE: LazyLock<WhitespaceConfig> = LazyLock::new(|| WhitespaceConfig { unicode_whitespace: true });
+static INI_COMMENT: LazyLock<CommentLine> = LazyLock::new(|| CommentLine { line_markers: &[";", "#"] });
+static INI_STRING: LazyLock<StringConfig> = LazyLock::new(|| StringConfig { quotes: &['"', '\''], escape: Some('\\') });
+
+#[derive(Clone)]
 pub struct IniLexer<'config> {
     config: &'config IniLanguage,
 }
 
+impl<'config> Lexer<IniLanguage> for IniLexer<'config> {
+    fn lex_incremental(
+        &self,
+        source: impl Source,
+        changed: usize,
+        cache: IncrementalCache<IniLanguage>,
+    ) -> LexOutput<IniLanguage> {
+        let mut state = LexerState::new_with_cache(source, changed, cache);
+        let result = self.run(&mut state);
+        state.finish(result)
+    }
+}
+
 impl<'config> IniLexer<'config> {
-    /// Create a new INI lexer
     pub fn new(config: &'config IniLanguage) -> Self {
         Self { config }
     }
 
+    /// 主要的词法分析循环
+    fn run<S: Source>(&self, state: &mut State<S>) -> Result<(), OakError> {
+        while state.not_at_end() {
+            let safe_point = state.get_position();
+
+            if self.skip_whitespace(state) {
+                continue;
+            }
+
+            if self.lex_newline(state) {
+                continue;
+            }
+
+            if self.skip_comment(state) {
+                continue;
+            }
+
+            if self.lex_string_literal(state) {
+                continue;
+            }
+
+            if self.lex_number_literal(state) {
+                continue;
+            }
+
+            if self.lex_identifier(state) {
+                continue;
+            }
+
+            if self.lex_punctuation(state) {
+                continue;
+            }
+
+            state.safe_check(safe_point);
+        }
+
+        // 添加 EOF token
+        let eof_pos = state.get_position();
+        state.add_token(IniSyntaxKind::Eof, eof_pos, eof_pos);
+        Ok(())
+    }
+
     /// 跳过空白字符（不包括换行符）
-    fn skip_whitespace(&self, state: &mut State) -> bool {
-        let start_pos = state.get_position();
+    fn skip_whitespace<S: Source>(&self, state: &mut State<S>) -> bool {
+        let start = state.get_position();
 
         while let Some(ch) = state.peek() {
             if ch == ' ' || ch == '\t' || ch == '\r' {
@@ -31,39 +90,35 @@ impl<'config> IniLexer<'config> {
             }
         }
 
-        if state.get_position() > start_pos {
-            state.add_token(IniSyntaxKind::Whitespace, start_pos, state.get_position());
-            true
+        if state.get_position() > start {
+            state.add_token(IniSyntaxKind::Whitespace, start, state.get_position());
+            return true;
         }
-        else {
-            false
-        }
+        false
     }
 
     /// 处理换行
-    fn lex_newline(&self, state: &mut State) -> bool {
-        let start_pos = state.get_position();
+    fn lex_newline<S: Source>(&self, state: &mut State<S>) -> bool {
+        let start = state.get_position();
 
-        if let Some('\n') = state.peek() {
+        if state.current() == Some('\n') {
             state.advance(1);
-            state.add_token(IniSyntaxKind::Newline, start_pos, state.get_position());
-            true
+            state.add_token(IniSyntaxKind::Newline, start, state.get_position());
+            return true;
         }
-        else {
-            false
-        }
+        false
     }
 
-    /// Lex comment
-    fn lex_comment(&self, state: &mut State) -> bool {
-        let start_pos = state.get_position();
+    /// 跳过注释
+    fn skip_comment<S: Source>(&self, state: &mut State<S>) -> bool {
+        let start = state.get_position();
 
-        if let Some(ch) = state.peek() {
+        if let Some(ch) = state.current() {
             if ch == ';' || ch == '#' {
-                // Skip comment character
+                // 跳过注释字符
                 state.advance(1);
 
-                // Read until end of line
+                // 读取到行尾
                 while let Some(ch) = state.peek() {
                     if ch != '\n' {
                         state.advance(ch.len_utf8());
@@ -73,33 +128,28 @@ impl<'config> IniLexer<'config> {
                     }
                 }
 
-                state.add_token(IniSyntaxKind::Comment, start_pos, state.get_position());
-                true
-            }
-            else {
-                false
+                state.add_token(IniSyntaxKind::Comment, start, state.get_position());
+                return true;
             }
         }
-        else {
-            false
-        }
+        false
     }
 
-    /// Lex string literal
-    fn lex_string(&self, state: &mut State) -> bool {
-        let start_pos = state.get_position();
+    /// 处理字符串字面量
+    fn lex_string_literal<S: Source>(&self, state: &mut State<S>) -> bool {
+        let start = state.get_position();
 
-        if let Some(quote_char) = state.peek() {
+        if let Some(quote_char) = state.current() {
             if quote_char == '"' || quote_char == '\'' {
-                // Skip opening quote
+                // 跳过开始引号
                 state.advance(1);
 
                 while let Some(ch) = state.peek() {
                     if ch != quote_char {
                         if ch == '\\' {
-                            state.advance(1); // escape character
-                            if state.peek().is_some() {
-                                state.advance(1); // escaped character
+                            state.advance(1); // 转义字符
+                            if let Some(_) = state.peek() {
+                                state.advance(1); // 被转义的字符
                             }
                         }
                         else {
@@ -107,170 +157,154 @@ impl<'config> IniLexer<'config> {
                         }
                     }
                     else {
+                        // 找到结束引号
+                        state.advance(1);
                         break;
                     }
                 }
 
-                if let Some(ch) = state.peek() {
-                    if ch == quote_char {
-                        state.advance(1); // closing quote
-                    }
-                }
-
-                state.add_token(IniSyntaxKind::String, start_pos, state.get_position());
-                true
-            }
-            else {
-                false
+                state.add_token(IniSyntaxKind::String, start, state.get_position());
+                return true;
             }
         }
-        else {
-            false
-        }
+        false
     }
 
-    /// Lex number (integer or float)
-    fn lex_number(&self, state: &mut State) -> bool {
-        let start_pos = state.get_position();
-        let mut is_float = false;
+    /// 处理数字字面量
+    fn lex_number_literal<S: Source>(&self, state: &mut State<S>) -> bool {
+        let start = state.get_position();
+        let first = match state.current() {
+            Some(c) => c,
+            None => return false,
+        };
 
-        // Handle optional sign
-        if let Some(ch) = state.peek() {
-            if ch == '+' || ch == '-' {
-                state.advance(1);
+        // 检查是否以数字或负号开始
+        if !first.is_ascii_digit() && first != '-' && first != '+' {
+            return false;
+        }
+
+        // 如果是符号，检查后面是否跟数字
+        if (first == '-' || first == '+') {
+            if let Some(next) = state.peek_next_n(1) {
+                if !next.is_ascii_digit() {
+                    return false;
+                }
+            }
+            else {
+                return false;
             }
         }
 
-        // Read digits
-        let mut has_digits = false;
+        state.advance(1);
+        let mut has_dot = false;
+        let mut has_exp = false;
+
         while let Some(ch) = state.peek() {
             if ch.is_ascii_digit() {
                 state.advance(1);
-                has_digits = true;
+            }
+            else if ch == '.' && !has_dot && !has_exp {
+                has_dot = true;
+                state.advance(1);
+            }
+            else if (ch == 'e' || ch == 'E') && !has_exp {
+                has_exp = true;
+                state.advance(1);
+                // 处理指数符号
+                if let Some(sign) = state.peek() {
+                    if sign == '+' || sign == '-' {
+                        state.advance(1);
+                    }
+                }
             }
             else {
                 break;
             }
         }
 
-        if !has_digits {
+        // 检查是否为有效数字
+        let end = state.get_position();
+        let text = state.get_text_in((start..end).into());
+
+        // 简单验证：不能只是符号或只是点
+        if text == "-" || text == "+" || text == "." {
+            // 回退
+            state.set_position(start);
             return false;
         }
 
-        // Check for decimal point
-        if let Some('.') = state.peek() {
-            // Look ahead to see if there's a digit after the decimal point
-            let current_pos = state.get_position();
-            state.advance(1);
-            if let Some(ch) = state.peek() {
-                if ch.is_ascii_digit() {
-                    is_float = true;
+        // 判断是整数还是浮点数
+        let kind = if has_dot || has_exp { IniSyntaxKind::Float } else { IniSyntaxKind::Integer };
 
-                    // Read fractional part
-                    while let Some(ch) = state.peek() {
-                        if ch.is_ascii_digit() {
-                            state.advance(1);
-                        }
-                        else {
-                            break;
-                        }
-                    }
-                }
-                else {
-                    // Not a decimal number, backtrack
-                    state.set_position(current_pos);
-                }
-            }
-            else {
-                // Not a decimal number, backtrack
-                state.set_position(current_pos);
-            }
-        }
-
-        // Check for exponent
-        if let Some(ch) = state.peek() {
-            if ch == 'e' || ch == 'E' {
-                let current_pos = state.get_position();
-                state.advance(1);
-
-                // Optional sign in exponent
-                if let Some(ch) = state.peek() {
-                    if ch == '+' || ch == '-' {
-                        state.advance(1);
-                    }
-                }
-
-                // Read exponent digits
-                let mut has_exp_digits = false;
-                while let Some(ch) = state.peek() {
-                    if ch.is_ascii_digit() {
-                        state.advance(1);
-                        has_exp_digits = true;
-                    }
-                    else {
-                        break;
-                    }
-                }
-
-                if has_exp_digits {
-                    is_float = true;
-                }
-                else {
-                    // Invalid exponent, backtrack
-                    state.set_position(current_pos);
-                }
-            }
-        }
-
-        let kind = if is_float { IniSyntaxKind::Float } else { IniSyntaxKind::Integer };
-
-        state.add_token(kind, start_pos, state.get_position());
+        state.add_token(kind, start, state.get_position());
         true
     }
 
-    /// Lex identifier or keyword
-    fn lex_identifier(&self, state: &mut State) -> bool {
-        let start_pos = state.get_position();
+    /// 处理标识符
+    fn lex_identifier<S: Source>(&self, state: &mut State<S>) -> bool {
+        let start = state.get_position();
+        let ch = match state.current() {
+            Some(c) => c,
+            None => return false,
+        };
 
-        if let Some(ch) = state.peek() {
-            if ch.is_ascii_alphabetic() || ch == '_' {
-                let mut text = String::new();
+        // 标识符必须以字母或下划线开始
+        if !(ch.is_ascii_alphabetic() || ch == '_') {
+            return false;
+        }
 
-                // Read identifier characters
-                while let Some(ch) = state.peek() {
-                    if ch.is_ascii_alphanumeric() || ch == '_' || ch == '-' {
-                        text.push(ch);
-                        state.advance(ch.len_utf8());
-                    }
-                    else {
-                        break;
-                    }
-                }
-
-                let kind = match text.as_str() {
-                    "true" | "false" => IniSyntaxKind::Boolean,
-                    _ if self.is_datetime_like(&text) => IniSyntaxKind::DateTime,
-                    _ => IniSyntaxKind::Identifier,
-                };
-
-                state.add_token(kind, start_pos, state.get_position());
-                true
+        state.advance(1);
+        while let Some(c) = state.current() {
+            if c.is_ascii_alphanumeric() || c == '_' || c == '-' {
+                state.advance(1);
             }
             else {
-                false
+                break;
             }
         }
-        else {
-            false
-        }
+
+        let end = state.get_position();
+        let text = state.get_text_in((start..end).into());
+
+        // 检查是否为布尔值或日期时间
+        let kind = match text.to_lowercase().as_str() {
+            "true" | "false" => IniSyntaxKind::Boolean,
+            _ => {
+                if self.is_datetime_like::<S>(text) {
+                    IniSyntaxKind::DateTime
+                }
+                else {
+                    IniSyntaxKind::Identifier
+                }
+            }
+        };
+
+        state.add_token(kind, start, state.get_position());
+        true
     }
 
     /// 处理标点符号
-    fn lex_punctuation(&self, state: &mut State) -> bool {
-        let start_pos = state.get_position();
+    fn lex_punctuation<S: Source>(&self, state: &mut State<S>) -> bool {
+        let start = state.get_position();
+        let rest = state.rest();
 
-        if let Some(ch) = state.peek() {
-            let token_kind = match ch {
+        // 优先匹配较长的符号
+        if rest.starts_with("[[") {
+            state.advance(2);
+            state.add_token(IniSyntaxKind::DoubleLeftBracket, start, state.get_position());
+            return true;
+        }
+
+        if rest.starts_with("]]") {
+            state.advance(2);
+            state.add_token(IniSyntaxKind::DoubleRightBracket, start, state.get_position());
+            return true;
+        }
+
+        if let Some(ch) = state.current() {
+            let kind = match ch {
+                '{' => IniSyntaxKind::LeftBrace,
+                '}' => IniSyntaxKind::RightBrace,
                 '[' => IniSyntaxKind::LeftBracket,
                 ']' => IniSyntaxKind::RightBracket,
                 ',' => IniSyntaxKind::Comma,
@@ -279,75 +313,43 @@ impl<'config> IniLexer<'config> {
                 _ => return false,
             };
 
-            state.advance(1);
-            state.add_token(token_kind, start_pos, state.get_position());
-            true
+            state.advance(ch.len_utf8());
+            state.add_token(kind, start, state.get_position());
+            return true;
+        }
+
+        false
+    }
+
+    /// 判断是否类似日期时间格式
+    fn is_datetime_like<S: Source>(&self, text: &str) -> bool {
+        // 简单的日期时间格式检查
+        // 支持 ISO 8601 格式：YYYY-MM-DD, YYYY-MM-DDTHH:MM:SS 等
+        if text.len() < 8 {
+            return false;
+        }
+
+        // 检查是否包含日期分隔符
+        if text.contains('-') || text.contains(':') || text.contains('T') {
+            // 更详细的检查可以在这里添加
+            let chars: Vec<char> = text.chars().collect();
+            let mut digit_count = 0;
+            let mut separator_count = 0;
+
+            for ch in chars {
+                if ch.is_ascii_digit() {
+                    digit_count += 1;
+                }
+                else if ch == '-' || ch == ':' || ch == 'T' || ch == 'Z' || ch == '+' {
+                    separator_count += 1;
+                }
+            }
+
+            // 简单启发式：如果数字多于分隔符，可能是日期时间
+            digit_count > separator_count && digit_count >= 6
         }
         else {
             false
         }
-    }
-
-    /// Check if text looks like a datetime
-    fn is_datetime_like(&self, text: &str) -> bool {
-        // Simple heuristic for datetime detection
-        text.len() >= 10
-            && text.chars().nth(4) == Some('-')
-            && text.chars().nth(7) == Some('-')
-            && text.chars().take(4).all(|c| c.is_ascii_digit())
-            && text.chars().skip(5).take(2).all(|c| c.is_ascii_digit())
-            && text.chars().skip(8).take(2).all(|c| c.is_ascii_digit())
-    }
-}
-
-impl<'config> Lexer<IniLanguage> for IniLexer<'config> {
-    fn lex(&self, source: &SourceText) -> LexOutput<IniSyntaxKind> {
-        let mut state = State::new(source);
-
-        loop {
-            if self.skip_whitespace(&mut state) {
-                continue;
-            }
-
-            if self.lex_newline(&mut state) {
-                continue;
-            }
-
-            if self.lex_comment(&mut state) {
-                continue;
-            }
-
-            if self.lex_string(&mut state) {
-                continue;
-            }
-
-            if self.lex_number(&mut state) {
-                continue;
-            }
-
-            if self.lex_identifier(&mut state) {
-                continue;
-            }
-
-            if self.lex_punctuation(&mut state) {
-                continue;
-            }
-
-            // 如果没有匹配任何规则，标记为错误并前进一个字符
-            if let Some(ch) = state.peek() {
-                let start_pos = state.get_position();
-                state.advance(ch.len_utf8());
-                state.add_token(IniSyntaxKind::Error, start_pos, state.get_position());
-            }
-            else {
-                break;
-            }
-        }
-
-        // 添加 EOF token
-        let eof_pos = state.get_position();
-        state.add_token(IniSyntaxKind::Eof, eof_pos, eof_pos);
-
-        state.finish()
     }
 }

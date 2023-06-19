@@ -1,14 +1,14 @@
-#![no_std]
 #![feature(new_range_api)]
-
-extern crate alloc;
+#![doc = include_str!("readme.md")]
+#![doc(html_logo_url = "https://raw.githubusercontent.com/ygg-lang/oaks/refs/heads/dev/documents/logo.svg")]
+#![doc(html_favicon_url = "https://raw.githubusercontent.com/ygg-lang/oaks/refs/heads/dev/documents/logo.svg")]
 
 pub mod ast;
 pub mod highlighter;
+pub mod kind;
 pub mod language;
 pub mod lexer;
-// pub mod parser;  // 暂时注释掉，需要重新实现
-pub mod syntax;
+pub mod parser;
 
 // 重新导出主要类型
-pub use crate::{language::SqlLanguage, syntax::SqlSyntaxKind};
+pub use crate::{kind::SqlSyntaxKind, language::SqlLanguage, lexer::SqlLexer};

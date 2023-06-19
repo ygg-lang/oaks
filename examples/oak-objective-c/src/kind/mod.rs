@@ -1,6 +1,9 @@
-use oak_core::SyntaxKind;
+use oak_core::{SyntaxKind, Token};
+use serde::Serialize;
 
-#[derive(Copy, Clone, Debug, PartialEq, Eq)]
+pub type ObjectiveCToken = Token<ObjectiveCLanguageSyntaxKind>;
+
+#[derive(Copy, Clone, Debug, PartialEq, Eq, Serialize)]
 pub enum ObjectiveCLanguageSyntaxKind {
     // 节点类型
     Root,
@@ -78,7 +81,8 @@ pub enum ObjectiveCLanguageSyntaxKind {
 
     // 字面量
     Identifier,
-    Number,
+    IntegerLiteral,
+    FloatLiteral,
     String,
     Character,
 

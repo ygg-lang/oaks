@@ -1,259 +1,266 @@
-use crate::{language::TwigLanguage, syntax::TwigSyntaxKind};
-use oak_core::{Lexer, LexerState, SourceText, lexer::LexOutput};
+use crate::{kind::TwigSyntaxKind, language::TwigLanguage};
+use oak_core::{IncrementalCache, Lexer, LexerState, OakError, lexer::LexOutput, source::Source};
 
-type State<'input> = LexerState<'input, TwigLanguage>;
-
+#[derive(Clone)]
 pub struct TwigLexer<'config> {
     config: &'config TwigLanguage,
 }
+
+type State<S: Source> = LexerState<S, TwigLanguage>;
 
 impl<'config> TwigLexer<'config> {
     pub fn new(config: &'config TwigLanguage) -> Self {
         Self { config }
     }
-
-    /// 跳过空白字符（不包括换行符）
-    fn skip_whitespace(&self, state: &mut State) -> bool {
-        let start_pos = state.get_position();
-
-        while let Some(ch) = state.peek() {
-            if ch == ' ' || ch == '\t' {
-                state.advance(ch.len_utf8());
-            }
-            else {
-                break;
-            }
-        }
-
-        if state.get_position() > start_pos {
-            state.add_token(TwigSyntaxKind::Whitespace, start_pos, state.get_position());
-            true
-        }
-        else {
-            false
-        }
-    }
-
-    /// 跳过换行符
-    fn skip_newline(&self, state: &mut State) -> bool {
-        if state.peek() == Some('\n') {
-            let start_pos = state.get_position();
-            state.advance(1);
-            state.add_token(TwigSyntaxKind::Whitespace, start_pos, state.get_position());
-            true
-        }
-        else {
-            false
-        }
-    }
-
-    /// 解析注释
-    fn parse_comment(&self, state: &mut State) -> bool {
-        if state.peek() == Some('#') {
-            let start_pos = state.get_position();
-
-            // 跳过 #
-            state.advance(1);
-
-            // 读取到行尾
-            while let Some(ch) = state.peek() {
-                if ch == '\n' {
-                    break;
-                }
-                state.advance(ch.len_utf8());
-            }
-
-            state.add_token(TwigSyntaxKind::Comment, start_pos, state.get_position());
-            true
-        }
-        else {
-            false
-        }
-    }
-
-    /// 解析字符串
-    fn parse_string(&self, state: &mut State) -> bool {
-        let quote_char = match state.peek() {
-            Some('"') | Some('\'') => state.peek().unwrap(),
-            _ => return false,
-        };
-
-        let start_pos = state.get_position();
-        state.advance(1); // 跳过开始引号
-
-        while let Some(ch) = state.peek() {
-            if ch == quote_char {
-                state.advance(1); // 跳过结束引号
-                break;
-            }
-            else if ch == '\\' {
-                state.advance(1); // 跳过转义字符
-                if state.peek().is_some() {
-                    state.advance(state.peek().unwrap().len_utf8());
-                }
-            }
-            else {
-                state.advance(ch.len_utf8());
-            }
-        }
-
-        state.add_token(TwigSyntaxKind::String, start_pos, state.get_position());
-        true
-    }
-
-    /// 解析数字
-    fn parse_number(&self, state: &mut State) -> bool {
-        if !state.peek().map_or(false, |ch| ch.is_ascii_digit()) {
-            return false;
-        }
-
-        let start_pos = state.get_position();
-
-        // 解析整数部分
-        while let Some(ch) = state.peek() {
-            if ch.is_ascii_digit() {
-                state.advance(1);
-            }
-            else {
-                break;
-            }
-        }
-
-        // 检查小数点
-        if state.peek() == Some('.') {
-            state.advance(1);
-
-            // 解析小数部分
-            while let Some(ch) = state.peek() {
-                if ch.is_ascii_digit() {
-                    state.advance(1);
-                }
-                else {
-                    break;
-                }
-            }
-        }
-
-        state.add_token(TwigSyntaxKind::Number, start_pos, state.get_position());
-        true
-    }
-
-    /// 解析标识符
-    fn parse_identifier(&self, state: &mut State) -> bool {
-        if !state.peek().map_or(false, |ch| ch.is_alphabetic() || ch == '_') {
-            return false;
-        }
-
-        let start_pos = state.get_position();
-
-        while let Some(ch) = state.peek() {
-            if ch.is_alphanumeric() || ch == '_' {
-                state.advance(ch.len_utf8());
-            }
-            else {
-                break;
-            }
-        }
-
-        let kind = TwigSyntaxKind::Identifier;
-        state.add_token(kind, start_pos, state.get_position());
-        true
-    }
-
-    /// 判断是否为关键字或标识符
-    fn keyword_or_identifier(&self, text: &str) -> TwigSyntaxKind {
-        match text {
-            "true" | "false" => TwigSyntaxKind::Boolean,
-            "null" => TwigSyntaxKind::Null,
-            _ => TwigSyntaxKind::Identifier,
-        }
-    }
-
-    /// 解析单字符标记
-    fn parse_single_char(&self, state: &mut State) -> bool {
-        if let Some(ch) = state.peek() {
-            let start_pos = state.get_position();
-
-            let kind = match ch {
-                '{' => TwigSyntaxKind::LeftBrace,
-                '}' => TwigSyntaxKind::RightBrace,
-                '[' => TwigSyntaxKind::LeftBracket,
-                ']' => TwigSyntaxKind::RightBracket,
-                '(' => TwigSyntaxKind::LeftParen,
-                ')' => TwigSyntaxKind::RightParen,
-                '|' => TwigSyntaxKind::Pipe,
-                ',' => TwigSyntaxKind::Comma,
-                '.' => TwigSyntaxKind::Dot,
-                '=' => TwigSyntaxKind::Equal,
-                _ => return false,
-            };
-
-            state.advance(ch.len_utf8());
-            state.add_token(kind, start_pos, state.get_position());
-            true
-        }
-        else {
-            false
-        }
-    }
 }
 
 impl<'config> Lexer<TwigLanguage> for TwigLexer<'config> {
-    fn lex(&self, source: &SourceText) -> LexOutput<TwigSyntaxKind> {
-        let mut state = State::new(source);
+    fn lex_incremental(
+        &self,
+        source: impl Source,
+        changed: usize,
+        cache: IncrementalCache<TwigLanguage>,
+    ) -> LexOutput<TwigLanguage> {
+        let mut state = LexerState::new_with_cache(source, changed, cache);
+        let result = self.run(&mut state);
+        state.finish(result)
+    }
+}
 
-        while !state.is_at_end() {
-            // 跳过空白字符
-            if self.skip_whitespace(&mut state) {
+impl<'config> TwigLexer<'config> {
+    fn run<S: Source>(&self, state: &mut State<S>) -> Result<(), OakError> {
+        while state.not_at_end() {
+            let safe_point = state.get_position();
+
+            if self.skip_whitespace(state) {
                 continue;
             }
 
-            // 跳过换行
-
-            if self.skip_newline(&mut state) {
+            if self.skip_comment(state) {
                 continue;
             }
 
-            // 解析注释
-            if self.parse_comment(&mut state) {
+            if self.lex_string(state) {
                 continue;
             }
 
-            // 解析字符
-
-            if self.parse_string(&mut state) {
+            if self.lex_number(state) {
                 continue;
             }
 
-            // 解析数字
-            if self.parse_number(&mut state) {
+            if self.lex_punctuation(state) {
                 continue;
             }
 
-            // 解析标识
-
-            if self.parse_identifier(&mut state) {
+            if self.lex_identifier(state) {
                 continue;
             }
 
-            // 解析单字符标
+            state.safe_check(safe_point);
+        }
 
-            if self.parse_single_char(&mut state) {
-                continue;
-            }
+        // 添加 EOF token
+        let eof_pos = state.get_position();
+        state.add_token(TwigSyntaxKind::Eof, eof_pos, eof_pos);
+        Ok(())
+    }
 
-            // 如果都不匹配，则跳过当前字符并标记为错误
-            let start_pos = state.get_position();
-            if let Some(ch) = state.peek() {
+    fn skip_whitespace<S: Source>(&self, state: &mut State<S>) -> bool {
+        let start = state.get_position();
+        let mut found = false;
+
+        while let Some(ch) = state.peek() {
+            if ch.is_whitespace() {
                 state.advance(ch.len_utf8());
-                state.add_token(TwigSyntaxKind::Error, start_pos, state.get_position());
+                found = true;
+            }
+            else {
+                break;
             }
         }
 
-        // 添加 EOF 标记
-        let eof_pos = state.get_position();
-        state.add_token(TwigSyntaxKind::Eof, eof_pos, eof_pos);
+        if found {
+            state.add_token(TwigSyntaxKind::Whitespace, start, state.get_position());
+        }
 
-        state.finish()
+        found
+    }
+
+    fn skip_comment<S: Source>(&self, state: &mut State<S>) -> bool {
+        let start = state.get_position();
+        let rest = state.rest();
+
+        // Twig comment: {# ... #}
+        if rest.starts_with("{#") {
+            state.advance(2);
+            while let Some(ch) = state.peek() {
+                if ch == '#' && state.peek_next_n(1) == Some('}') {
+                    state.advance(2);
+                    break;
+                }
+                state.advance(ch.len_utf8());
+            }
+            state.add_token(TwigSyntaxKind::Comment, start, state.get_position());
+            return true;
+        }
+
+        false
+    }
+
+    fn lex_string<S: Source>(&self, state: &mut State<S>) -> bool {
+        let start = state.get_position();
+
+        if let Some(quote) = state.peek() {
+            if quote == '"' || quote == '\'' {
+                state.advance(1);
+
+                while let Some(ch) = state.peek() {
+                    if ch == quote {
+                        state.advance(1);
+                        break;
+                    }
+                    else if ch == '\\' {
+                        state.advance(1);
+                        if let Some(_) = state.peek() {
+                            state.advance(1);
+                        }
+                    }
+                    else {
+                        state.advance(ch.len_utf8());
+                    }
+                }
+
+                state.add_token(TwigSyntaxKind::String, start, state.get_position());
+                return true;
+            }
+        }
+
+        false
+    }
+
+    fn lex_number<S: Source>(&self, state: &mut State<S>) -> bool {
+        let start = state.get_position();
+
+        if let Some(ch) = state.peek() {
+            if ch.is_ascii_digit() {
+                state.advance(1);
+
+                while let Some(ch) = state.peek() {
+                    if ch.is_ascii_digit() || ch == '.' {
+                        state.advance(1);
+                    }
+                    else {
+                        break;
+                    }
+                }
+
+                state.add_token(TwigSyntaxKind::Number, start, state.get_position());
+                return true;
+            }
+        }
+
+        false
+    }
+
+    fn lex_punctuation<S: Source>(&self, state: &mut State<S>) -> bool {
+        let start = state.get_position();
+        let rest = state.rest();
+
+        // 双字符操作符
+        if rest.starts_with("{{") {
+            state.advance(2);
+            state.add_token(TwigSyntaxKind::DoubleLeftBrace, start, state.get_position());
+            return true;
+        }
+        if rest.starts_with("}}") {
+            state.advance(2);
+            state.add_token(TwigSyntaxKind::DoubleRightBrace, start, state.get_position());
+            return true;
+        }
+        if rest.starts_with("{%") {
+            state.advance(2);
+            state.add_token(TwigSyntaxKind::LeftBracePercent, start, state.get_position());
+            return true;
+        }
+        if rest.starts_with("%}") {
+            state.advance(2);
+            state.add_token(TwigSyntaxKind::PercentRightBrace, start, state.get_position());
+            return true;
+        }
+
+        // 单字符操作符
+        if let Some(ch) = state.peek() {
+            let kind = match ch {
+                '{' => TwigSyntaxKind::LeftBrace,
+                '}' => TwigSyntaxKind::RightBrace,
+                '(' => TwigSyntaxKind::LeftParen,
+                ')' => TwigSyntaxKind::RightParen,
+                '[' => TwigSyntaxKind::LeftBracket,
+                ']' => TwigSyntaxKind::RightBracket,
+                ',' => TwigSyntaxKind::Comma,
+                '.' => TwigSyntaxKind::Dot,
+                ':' => TwigSyntaxKind::Colon,
+                ';' => TwigSyntaxKind::Semicolon,
+                '|' => TwigSyntaxKind::Pipe,
+                '=' => TwigSyntaxKind::Eq,
+                '+' => TwigSyntaxKind::Plus,
+                '-' => TwigSyntaxKind::Minus,
+                '*' => TwigSyntaxKind::Star,
+                '/' => TwigSyntaxKind::Slash,
+                '%' => TwigSyntaxKind::Percent,
+                '!' => TwigSyntaxKind::Bang,
+                '?' => TwigSyntaxKind::Question,
+                '<' => TwigSyntaxKind::Lt,
+                '>' => TwigSyntaxKind::Gt,
+                '&' => TwigSyntaxKind::Amp,
+                '^' => TwigSyntaxKind::Caret,
+                '~' => TwigSyntaxKind::Tilde,
+                _ => return false,
+            };
+
+            state.advance(1);
+            state.add_token(kind, start, state.get_position());
+            return true;
+        }
+
+        false
+    }
+
+    fn lex_identifier<S: Source>(&self, state: &mut State<S>) -> bool {
+        let start = state.get_position();
+
+        if let Some(ch) = state.peek() {
+            if ch.is_alphabetic() || ch == '_' {
+                let mut text = String::new();
+
+                // 添加第一个字符
+                text.push(ch);
+                state.advance(ch.len_utf8());
+
+                // 继续添加字母数字字符
+                while let Some(ch) = state.peek() {
+                    if ch.is_alphanumeric() || ch == '_' {
+                        text.push(ch);
+                        state.advance(ch.len_utf8());
+                    }
+                    else {
+                        break;
+                    }
+                }
+
+                let end = state.get_position();
+
+                // 检查是否为布尔关键字
+                let kind = match text.as_str() {
+                    "true" | "false" => TwigSyntaxKind::Boolean,
+                    _ => TwigSyntaxKind::Identifier,
+                };
+
+                state.add_token(kind, start, end);
+                return true;
+            }
+        }
+
+        false
     }
 }

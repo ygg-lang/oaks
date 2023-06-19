@@ -1,9 +1,10 @@
 use crate::{kind::JsonSyntaxKind, language::JsonLanguage};
-use oak_core::{Lexer, LexerState, SourceText, lexer::LexOutput};
+use oak_core::{IncrementalCache, Lexer, LexerState, OakError, SourceText, lexer::LexOutput, source::Source};
 
-type State<'input> = LexerState<'input, JsonLanguage>;
+type State<S> = LexerState<S, JsonLanguage>;
 
 /// JSON 词法分析
+#[derive(Clone)]
 pub struct JsonLexer<'config> {
     config: &'config JsonLanguage,
 }
@@ -13,13 +14,13 @@ impl<'config> JsonLexer<'config> {
         Self { config }
     }
 
-    /// 为了向后兼容，提tokenize_source 方法
-    pub fn tokenize_source(&self, source: &SourceText) -> LexOutput<JsonSyntaxKind> {
+    /// 为了向后兼容，提供tokenize_source 方法
+    pub fn tokenize_source(&self, source: &SourceText) -> LexOutput<JsonLanguage> {
         self.lex(source)
     }
 
     /// 跳过空白字符
-    fn skip_whitespace(&self, state: &mut State) -> bool {
+    fn skip_whitespace<S: Source>(&self, state: &mut State<S>) -> bool {
         let start_pos = state.get_position();
 
         while let Some(ch) = state.peek() {
@@ -41,7 +42,7 @@ impl<'config> JsonLexer<'config> {
     }
 
     /// 处理换行
-    fn lex_newline(&self, state: &mut State) -> bool {
+    fn lex_newline<S: Source>(&self, state: &mut State<S>) -> bool {
         let start_pos = state.get_position();
 
         if let Some('\n') = state.peek() {
@@ -63,7 +64,7 @@ impl<'config> JsonLexer<'config> {
     }
 
     /// 处理注释
-    fn lex_comment(&self, state: &mut State, source: &SourceText) -> bool {
+    fn lex_comment<S: Source>(&self, state: &mut State<S>) -> bool {
         if !self.config.comments {
             return false;
         }
@@ -71,8 +72,10 @@ impl<'config> JsonLexer<'config> {
         let start_pos = state.get_position();
 
         if let Some('/') = state.peek() {
-            // 检查下一个字
-            if let Some(next_ch) = source.get_char_at(state.get_position() + 1) {
+            // 检查下一个字符
+            let remaining_text = state.get_text_in((start_pos..state.length()).into());
+            if remaining_text.len() > 1 {
+                let next_ch = remaining_text.chars().nth(1).unwrap();
                 match next_ch {
                     '/' => {
                         // 单行注释
@@ -87,7 +90,7 @@ impl<'config> JsonLexer<'config> {
                         }
 
                         state.add_token(JsonSyntaxKind::Comment, start_pos, state.get_position());
-                        true
+                        return true;
                     }
                     '*' => {
                         // 多行注释
@@ -96,7 +99,9 @@ impl<'config> JsonLexer<'config> {
 
                         while let Some(ch) = state.peek() {
                             if ch == '*' {
-                                if let Some('/') = source.get_char_at(state.get_position() + 1) {
+                                let current_pos = state.get_position();
+                                let remaining = state.get_text_in((current_pos..state.length()).into());
+                                if remaining.len() > 1 && remaining.chars().nth(1) == Some('/') {
                                     state.advance(2); // 跳过 '*/'
                                     closed = true;
                                     break;
@@ -110,22 +115,17 @@ impl<'config> JsonLexer<'config> {
                         }
 
                         state.add_token(JsonSyntaxKind::Comment, start_pos, state.get_position());
-                        true
+                        return true;
                     }
-                    _ => false,
+                    _ => {}
                 }
             }
-            else {
-                false
-            }
         }
-        else {
-            false
-        }
+        false
     }
 
     /// 处理字符串字面量
-    fn lex_string_literal(&self, state: &mut State) -> bool {
+    fn lex_string_literal<S: Source>(&self, state: &mut State<S>) -> bool {
         let start_pos = state.get_position();
 
         let quote_char = if let Some('"') = state.peek() {
@@ -168,7 +168,7 @@ impl<'config> JsonLexer<'config> {
     }
 
     /// 处理数字字面
-    fn lex_number(&self, state: &mut State) -> bool {
+    fn lex_number<S: Source>(&self, state: &mut State<S>) -> bool {
         let start_pos = state.get_position();
 
         // 处理负号
@@ -265,75 +265,44 @@ impl<'config> JsonLexer<'config> {
     }
 
     /// 处理布尔值和 null
-    fn lex_keyword(&self, state: &mut State, source: &SourceText) -> bool {
+    fn lex_keyword<S: Source>(&self, state: &mut State<S>) -> bool {
         let start_pos = state.get_position();
-        let remaining_text = source.get_text_at(start_pos).unwrap_or("");
 
-        if remaining_text.starts_with("true") {
-            // 确保后面不是标识符字
-            if let Some(next_ch) = remaining_text.chars().nth(4) {
-                if next_ch.is_alphanumeric() || next_ch == '_' {
-                    return false;
-                }
-            }
-            state.advance(4);
-            state.add_token(JsonSyntaxKind::BooleanLiteral, start_pos, state.get_position());
-            true
-        }
-        else if remaining_text.starts_with("false") {
-            // 确保后面不是标识符字
-            if let Some(next_ch) = remaining_text.chars().nth(5) {
-                if next_ch.is_alphanumeric() || next_ch == '_' {
-                    return false;
-                }
-            }
-            state.advance(5);
-            state.add_token(JsonSyntaxKind::BooleanLiteral, start_pos, state.get_position());
-            true
-        }
-        else if remaining_text.starts_with("null") {
-            // 确保后面不是标识符字
-            if let Some(next_ch) = remaining_text.chars().nth(4) {
-                if next_ch.is_alphanumeric() || next_ch == '_' {
-                    return false;
-                }
-            }
-            state.advance(4);
-            state.add_token(JsonSyntaxKind::NullLiteral, start_pos, state.get_position());
-            true
-        }
-        else if self.config.infinity_and_nan {
-            if remaining_text.starts_with("Infinity") {
-                if let Some(next_ch) = remaining_text.chars().nth(8) {
-                    if next_ch.is_alphanumeric() || next_ch == '_' {
-                        return false;
-                    }
-                }
-                state.advance(8);
-                state.add_token(JsonSyntaxKind::NumberLiteral, start_pos, state.get_position());
-                true
-            }
-            else if remaining_text.starts_with("NaN") {
-                if let Some(next_ch) = remaining_text.chars().nth(3) {
-                    if next_ch.is_alphanumeric() || next_ch == '_' {
-                        return false;
-                    }
-                }
-                state.advance(3);
-                state.add_token(JsonSyntaxKind::NumberLiteral, start_pos, state.get_position());
-                true
-            }
-            else {
-                false
+        // Check for "true"
+        if start_pos + 4 <= state.length() {
+            let text = state.get_text_in((start_pos..start_pos + 4).into());
+            if text == "true" {
+                state.advance(4);
+                state.add_token(JsonSyntaxKind::BooleanLiteral, start_pos, state.get_position());
+                return true;
             }
         }
-        else {
-            false
+
+        // Check for "false"
+        if start_pos + 5 <= state.length() {
+            let text = state.get_text_in((start_pos..start_pos + 5).into());
+            if text == "false" {
+                state.advance(5);
+                state.add_token(JsonSyntaxKind::BooleanLiteral, start_pos, state.get_position());
+                return true;
+            }
         }
+
+        // Check for "null"
+        if start_pos + 4 <= state.length() {
+            let text = state.get_text_in((start_pos..start_pos + 4).into());
+            if text == "null" {
+                state.advance(4);
+                state.add_token(JsonSyntaxKind::NullLiteral, start_pos, state.get_position());
+                return true;
+            }
+        }
+
+        false
     }
 
     /// 处理裸键（JSON5 特性）
-    fn lex_bare_key(&self, state: &mut State) -> bool {
+    fn lex_bare_key<S: Source>(&self, state: &mut State<S>) -> bool {
         if !self.config.bare_keys {
             return false;
         }
@@ -367,7 +336,7 @@ impl<'config> JsonLexer<'config> {
     }
 
     /// 处理操作符和分隔
-    fn lex_operator_or_delimiter(&self, state: &mut State) -> bool {
+    fn lex_operator_or_delimiter<S: Source>(&self, state: &mut State<S>) -> bool {
         let start_pos = state.get_position();
 
         if let Some(ch) = state.peek() {
@@ -392,40 +361,57 @@ impl<'config> JsonLexer<'config> {
 }
 
 impl<'config> Lexer<JsonLanguage> for JsonLexer<'config> {
-    fn lex(&self, source: &SourceText) -> LexOutput<JsonSyntaxKind> {
-        let mut state = LexerState::new(source);
+    fn lex_incremental(
+        &self,
+        source: impl Source,
+        _start_offset: usize,
+        _cache: IncrementalCache<'_, JsonLanguage>,
+    ) -> LexOutput<JsonLanguage> {
+        let mut state = LexerState::new_with_cache(source, _start_offset, _cache);
+        let result = self.run(&mut state);
+        state.finish(result)
+    }
 
+    fn lex(&self, source: impl Source) -> LexOutput<JsonLanguage> {
+        let mut state = LexerState::new(source);
+        let result = self.run(&mut state);
+        state.finish(result)
+    }
+}
+
+impl<'config> JsonLexer<'config> {
+    fn run<S: Source>(&self, state: &mut State<S>) -> Result<(), OakError> {
         while state.not_at_end() {
             // 尝试各种词法规则
-            if self.skip_whitespace(&mut state) {
+            if self.skip_whitespace(state) {
                 continue;
             }
 
-            if self.lex_newline(&mut state) {
+            if self.lex_newline(state) {
                 continue;
             }
 
-            if self.lex_comment(&mut state, source) {
+            if self.lex_comment(state) {
                 continue;
             }
 
-            if self.lex_string_literal(&mut state) {
+            if self.lex_string_literal(state) {
                 continue;
             }
 
-            if self.lex_number(&mut state) {
+            if self.lex_number(state) {
                 continue;
             }
 
-            if self.lex_keyword(&mut state, source) {
+            if self.lex_keyword(state) {
                 continue;
             }
 
-            if self.lex_bare_key(&mut state) {
+            if self.lex_bare_key(state) {
                 continue;
             }
 
-            if self.lex_operator_or_delimiter(&mut state) {
+            if self.lex_operator_or_delimiter(state) {
                 continue;
             }
 
@@ -435,12 +421,15 @@ impl<'config> Lexer<JsonLanguage> for JsonLexer<'config> {
                 state.advance(ch.len_utf8());
                 state.add_token(JsonSyntaxKind::Error, start_pos, state.get_position());
             }
+            else {
+                break;
+            }
         }
 
         // 添加 EOF kind
         let eof_pos = state.get_position();
         state.add_token(JsonSyntaxKind::Eof, eof_pos, eof_pos);
 
-        state.finish()
+        Ok(())
     }
 }

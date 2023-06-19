@@ -1,10 +1,34 @@
 use crate::{kind::ActionScriptSyntaxKind, language::ActionScriptLanguage};
-use oak_core::{Lexer, LexerState, SourceText, lexer::LexOutput};
+use oak_core::{
+    IncrementalCache, Lexer, LexerState, OakError,
+    lexer::{CommentLine, LexOutput, StringConfig, WhitespaceConfig},
+    source::Source,
+};
+use std::sync::LazyLock;
 
-type State<'input> = LexerState<'input, ActionScriptLanguage>;
+type State<S: Source> = LexerState<S, ActionScriptLanguage>;
 
+static AS_WHITESPACE: LazyLock<WhitespaceConfig> = LazyLock::new(|| WhitespaceConfig { unicode_whitespace: true });
+static AS_COMMENT: LazyLock<CommentLine> = LazyLock::new(|| CommentLine { line_markers: &["//"] });
+static AS_STRING: LazyLock<StringConfig> = LazyLock::new(|| StringConfig { quotes: &['"'], escape: Some('\\') });
+static AS_CHAR: LazyLock<StringConfig> = LazyLock::new(|| StringConfig { quotes: &['\''], escape: Some('\\') });
+
+#[derive(Clone)]
 pub struct ActionScriptLexer<'config> {
     config: &'config ActionScriptLanguage,
+}
+
+impl<'config> Lexer<ActionScriptLanguage> for ActionScriptLexer<'config> {
+    fn lex_incremental(
+        &self,
+        source: impl Source,
+        changed: usize,
+        cache: IncrementalCache<ActionScriptLanguage>,
+    ) -> LexOutput<ActionScriptLanguage> {
+        let mut state = LexerState::new_with_cache(source, changed, cache);
+        let result = self.run(&mut state);
+        state.finish(result)
+    }
 }
 
 impl<'config> ActionScriptLexer<'config> {
@@ -12,415 +36,336 @@ impl<'config> ActionScriptLexer<'config> {
         Self { config }
     }
 
-    /// Skip whitespace characters
-    fn skip_whitespace(&self, state: &mut State) -> bool {
-        let start_pos = state.get_position();
+    /// 主要词法分析逻辑
+    fn run<S: Source>(&self, state: &mut State<S>) -> Result<(), OakError> {
+        while state.not_at_end() {
+            let safe_point = state.get_position();
+            if self.skip_whitespace(state) {
+                continue;
+            }
 
-        while let Some(ch) = state.peek() {
-            if ch == ' ' || ch == '\t' {
+            if self.skip_comment(state) {
+                continue;
+            }
+
+            if self.lex_string_literal(state) {
+                continue;
+            }
+
+            if self.lex_char_literal(state) {
+                continue;
+            }
+
+            if self.lex_number_literal(state) {
+                continue;
+            }
+
+            if self.lex_identifier_or_keyword(state) {
+                continue;
+            }
+
+            if self.lex_operator_or_delimiter(state) {
+                continue;
+            }
+
+            state.safe_check(safe_point);
+        }
+
+        // 添加 EOF kind
+        let eof_pos = state.get_position();
+        state.add_token(ActionScriptSyntaxKind::Eof, eof_pos, eof_pos);
+        Ok(())
+    }
+
+    /// 跳过空白字符
+    fn skip_whitespace<S: Source>(&self, state: &mut State<S>) -> bool {
+        match AS_WHITESPACE.scan(state.rest(), state.get_position(), ActionScriptSyntaxKind::Whitespace) {
+            Some(token) => {
+                state.advance_with(token);
+                return true;
+            }
+            None => {}
+        }
+        false
+    }
+
+    fn skip_comment<S: Source>(&self, state: &mut State<S>) -> bool {
+        let start = state.get_position();
+        let rest = state.rest();
+        // line comment: // ... until newline
+        if rest.starts_with("//") {
+            state.advance(2);
+            while let Some(ch) = state.peek() {
+                if ch == '\n' || ch == '\r' {
+                    break;
+                }
                 state.advance(ch.len_utf8());
+            }
+            state.add_token(ActionScriptSyntaxKind::Comment, start, state.get_position());
+            return true;
+        }
+        // block comment: /* ... */ with nesting support
+        if rest.starts_with("/*") {
+            state.advance(2);
+            let mut depth = 1usize;
+            while let Some(ch) = state.peek() {
+                if ch == '/' && state.peek_next_n(1) == Some('*') {
+                    state.advance(2);
+                    depth += 1;
+                    continue;
+                }
+                if ch == '*' && state.peek_next_n(1) == Some('/') {
+                    state.advance(2);
+                    depth -= 1;
+                    if depth == 0 {
+                        break;
+                    }
+                    continue;
+                }
+                state.advance(ch.len_utf8());
+            }
+            state.add_token(ActionScriptSyntaxKind::Comment, start, state.get_position());
+            return true;
+        }
+        false
+    }
+
+    fn lex_number_literal<S: Source>(&self, state: &mut State<S>) -> bool {
+        let start = state.get_position();
+        let first = match state.peek() {
+            Some(c) => c,
+            None => return false,
+        };
+        if !first.is_ascii_digit() {
+            return false;
+        }
+
+        state.advance(first.len_utf8());
+        while let Some(c) = state.peek() {
+            if c.is_ascii_digit() || c == '_' {
+                state.advance(c.len_utf8());
             }
             else {
                 break;
             }
         }
 
-        if state.get_position() > start_pos {
-            state.add_token(ActionScriptSyntaxKind::Whitespace, start_pos, state.get_position());
-            true
-        }
-        else {
-            false
-        }
-    }
-
-    /// 处理换行
-    fn lex_newline(&self, state: &mut State) -> bool {
-        let start_pos = state.get_position();
-
-        if let Some('\n') = state.peek() {
-            state.advance(1);
-            state.add_token(ActionScriptSyntaxKind::Newline, start_pos, state.get_position());
-            true
-        }
-        else if let Some('\r') = state.peek() {
-            state.advance(1);
-            if let Some('\n') = state.peek() {
-                state.advance(1);
-            }
-            state.add_token(ActionScriptSyntaxKind::Newline, start_pos, state.get_position());
-            true
-        }
-        else {
-            false
-        }
-    }
-
-    /// 处理注释
-    fn lex_comment(&self, state: &mut State) -> bool {
-        let start_pos = state.get_position();
-
-        if let Some('/') = state.peek() {
-            state.advance(1);
-            if let Some('/') = state.peek() {
-                // 单行注释
-                state.advance(1);
-                while let Some(ch) = state.peek() {
-                    if ch == '\n' || ch == '\r' {
+        // fractional part
+        if state.peek() == Some('.') {
+            let n1 = state.peek_next_n(1);
+            if n1.map(|c| c.is_ascii_digit()).unwrap_or(false) {
+                state.advance(1); // consume '.'
+                while let Some(c) = state.peek() {
+                    if c.is_ascii_digit() || c == '_' {
+                        state.advance(c.len_utf8());
+                    }
+                    else {
                         break;
                     }
-                    state.advance(ch.len_utf8());
                 }
-                state.add_token(ActionScriptSyntaxKind::Comment, start_pos, state.get_position());
-                true
             }
-            else if let Some('*') = state.peek() {
-                // 多行注释
-                state.advance(1);
-                let mut found_end = false;
-                while let Some(ch) = state.peek() {
-                    state.advance(ch.len_utf8());
-                    if ch == '*' {
-                        if let Some('/') = state.peek() {
+        }
+        // exponent
+        if let Some(c) = state.peek() {
+            if c == 'e' || c == 'E' {
+                let n1 = state.peek_next_n(1);
+                if n1 == Some('+') || n1 == Some('-') || n1.map(|d| d.is_ascii_digit()).unwrap_or(false) {
+                    state.advance(1);
+                    if let Some(sign) = state.peek() {
+                        if sign == '+' || sign == '-' {
                             state.advance(1);
-                            found_end = true;
+                        }
+                    }
+                    while let Some(d) = state.peek() {
+                        if d.is_ascii_digit() || d == '_' {
+                            state.advance(d.len_utf8());
+                        }
+                        else {
                             break;
                         }
                     }
                 }
-                state.add_token(ActionScriptSyntaxKind::Comment, start_pos, state.get_position());
-                true
-            }
-            else {
-                // 不是注释，回退
-                state.set_position(start_pos);
-                false
             }
         }
-        else {
-            false
-        }
+        let end = state.get_position();
+        state.add_token(ActionScriptSyntaxKind::NumberLiteral, start, end);
+        true
     }
 
-    /// 处理字符串字面量
-    fn lex_string(&self, state: &mut State) -> bool {
-        let start_pos = state.get_position();
+    fn lex_identifier_or_keyword<S: Source>(&self, state: &mut State<S>) -> bool {
+        let start = state.get_position();
+        let first = match state.peek() {
+            Some(c) => c,
+            None => return false,
+        };
+        if !first.is_ascii_alphabetic() && first != '_' && first != '$' {
+            return false;
+        }
 
-        if let Some(quote) = state.peek() {
-            if quote == '"' || quote == '\'' {
+        let mut buf = String::new();
+        buf.push(first);
+        state.advance(first.len_utf8());
+        while let Some(c) = state.peek() {
+            if c.is_ascii_alphanumeric() || c == '_' || c == '$' {
+                buf.push(c);
+                state.advance(c.len_utf8());
+            }
+            else {
+                break;
+            }
+        }
+
+        let end = state.get_position();
+        let kind = match buf.as_str() {
+            "as" => ActionScriptSyntaxKind::As,
+            "break" => ActionScriptSyntaxKind::Break,
+            "case" => ActionScriptSyntaxKind::Case,
+            "catch" => ActionScriptSyntaxKind::Catch,
+            "class" => ActionScriptSyntaxKind::Class,
+            "const" => ActionScriptSyntaxKind::Const,
+            "continue" => ActionScriptSyntaxKind::Continue,
+            "default" => ActionScriptSyntaxKind::Default,
+            "delete" => ActionScriptSyntaxKind::Delete,
+            "do" => ActionScriptSyntaxKind::Do,
+            "else" => ActionScriptSyntaxKind::Else,
+            "extends" => ActionScriptSyntaxKind::Extends,
+            "false" => ActionScriptSyntaxKind::False,
+            "finally" => ActionScriptSyntaxKind::Finally,
+            "for" => ActionScriptSyntaxKind::For,
+            "function" => ActionScriptSyntaxKind::Function,
+            "if" => ActionScriptSyntaxKind::If,
+            "implements" => ActionScriptSyntaxKind::Implements,
+            "import" => ActionScriptSyntaxKind::Import,
+            "in" => ActionScriptSyntaxKind::In,
+            "instanceof" => ActionScriptSyntaxKind::Instanceof,
+            "interface" => ActionScriptSyntaxKind::Interface,
+            "internal" => ActionScriptSyntaxKind::Internal,
+            "is" => ActionScriptSyntaxKind::Is,
+            "native" => ActionScriptSyntaxKind::Native,
+            "new" => ActionScriptSyntaxKind::New,
+            "null" => ActionScriptSyntaxKind::Null,
+            "package" => ActionScriptSyntaxKind::Package,
+            "private" => ActionScriptSyntaxKind::Private,
+            "protected" => ActionScriptSyntaxKind::Protected,
+            "public" => ActionScriptSyntaxKind::Public,
+            "return" => ActionScriptSyntaxKind::Return,
+            "static" => ActionScriptSyntaxKind::Static,
+            "super" => ActionScriptSyntaxKind::Super,
+            "switch" => ActionScriptSyntaxKind::Switch,
+            "this" => ActionScriptSyntaxKind::This,
+            "throw" => ActionScriptSyntaxKind::Throw,
+            "true" => ActionScriptSyntaxKind::True,
+            "try" => ActionScriptSyntaxKind::Try,
+            "typeof" => ActionScriptSyntaxKind::Typeof,
+            "use" => ActionScriptSyntaxKind::Use,
+            "var" => ActionScriptSyntaxKind::Var,
+            "void" => ActionScriptSyntaxKind::Void,
+            "while" => ActionScriptSyntaxKind::While,
+            "with" => ActionScriptSyntaxKind::With,
+            "each" => ActionScriptSyntaxKind::Each,
+            "get" => ActionScriptSyntaxKind::Get,
+            "set" => ActionScriptSyntaxKind::Set,
+            "namespace" => ActionScriptSyntaxKind::Namespace,
+            "include" => ActionScriptSyntaxKind::Include,
+            "dynamic" => ActionScriptSyntaxKind::Dynamic,
+            "final" => ActionScriptSyntaxKind::Final,
+            "override" => ActionScriptSyntaxKind::Override,
+            "Array" => ActionScriptSyntaxKind::Array,
+            "Boolean" => ActionScriptSyntaxKind::Boolean,
+            "Date" => ActionScriptSyntaxKind::Date,
+            "Error" => ActionScriptSyntaxKind::Error,
+            "Function" => ActionScriptSyntaxKind::Function_,
+            "Number" => ActionScriptSyntaxKind::Number,
+            "Object" => ActionScriptSyntaxKind::Object,
+            "RegExp" => ActionScriptSyntaxKind::RegExp,
+            "String" => ActionScriptSyntaxKind::String_,
+            "uint" => ActionScriptSyntaxKind::Uint,
+            "Vector" => ActionScriptSyntaxKind::Vector,
+            "XML" => ActionScriptSyntaxKind::Xml,
+            "XMLList" => ActionScriptSyntaxKind::XmlList,
+            _ => ActionScriptSyntaxKind::Identifier,
+        };
+
+        state.add_token(kind, start, end);
+        true
+    }
+
+    fn lex_operator_or_delimiter<S: Source>(&self, state: &mut State<S>) -> bool {
+        let start = state.get_position();
+        let first = match state.peek() {
+            Some(c) => c,
+            None => return false,
+        };
+
+        let kind = match first {
+            '+' => {
                 state.advance(1);
-                let mut found_end = false;
-
-                while let Some(ch) = state.peek() {
-                    if ch == quote {
-                        state.advance(1);
-                        found_end = true;
-                        break;
-                    }
-                    else if ch == '\\' {
-                        state.advance(1);
-                        if let Some(_) = state.peek() {
-                            state.advance(1);
-                        }
-                    }
-                    else if ch == '\n' || ch == '\r' {
-                        // 未闭合的字符串
-                        break;
-                    }
-                    else {
-                        state.advance(ch.len_utf8());
-                    }
-                }
-
-                // 即使未闭合也当作字符串处理
-                state.add_token(ActionScriptSyntaxKind::StringLiteral, start_pos, state.get_position());
-                true
-            }
-            else if quote == '/' {
-                // 简单的正则表达式检测（需要更复杂的上下文分析）
-                state.advance(1);
-                while let Some(ch) = state.peek() {
-                    if ch == '/' {
-                        state.advance(1);
-                        // 检查正则表达式标志
-                        while let Some(ch) = state.peek() {
-                            if ch.is_ascii_alphabetic() {
-                                state.advance(1);
-                            }
-                            else {
-                                break;
-                            }
-                        }
-                        break;
-                    }
-                    else if ch == '\\' {
-                        state.advance(1);
-                        if let Some(_) = state.peek() {
-                            state.advance(1);
-                        }
-                    }
-                    else if ch == '\n' || ch == '\r' {
-                        break;
-                    }
-                    else {
-                        state.advance(ch.len_utf8());
-                    }
-                }
-                state.add_token(ActionScriptSyntaxKind::StringLiteral, start_pos, state.get_position());
-                true
-            }
-            else {
-                false
-            }
-        }
-        else {
-            false
-        }
-    }
-
-    /// 处理数字字面量
-    fn lex_number(&self, state: &mut State) -> bool {
-        let start_pos = state.get_position();
-
-        if let Some(ch) = state.peek() {
-            if ch.is_ascii_digit() || ch == '.' {
-                let mut has_dot = ch == '.';
-
-                if has_dot {
-                    state.advance(1);
-                    // 确保点后面有数字
-                    if let Some(next_ch) = state.peek() {
-                        if !next_ch.is_ascii_digit() {
-                            state.set_position(start_pos);
-                            return false;
-                        }
-                    }
-                    else {
-                        state.set_position(start_pos);
-                        return false;
-                    }
-                }
-
-                while let Some(ch) = state.peek() {
-                    if ch.is_ascii_digit() {
-                        state.advance(1);
-                    }
-                    else if ch == '.' && !has_dot {
-                        has_dot = true;
-                        state.advance(1);
-                    }
-                    else if ch == 'e' || ch == 'E' {
-                        state.advance(1);
-                        if let Some(sign) = state.peek() {
-                            if sign == '+' || sign == '-' {
-                                state.advance(1);
-                            }
-                        }
-                        while let Some(ch) = state.peek() {
-                            if ch.is_ascii_digit() {
-                                state.advance(1);
-                            }
-                            else {
-                                break;
-                            }
-                        }
-                        break;
-                    }
-                    else {
-                        break;
-                    }
-                }
-
-                state.add_token(ActionScriptSyntaxKind::NumberLiteral, start_pos, state.get_position());
-                true
-            }
-            else {
-                false
-            }
-        }
-        else {
-            false
-        }
-    }
-
-    /// 处理标识符和关键字
-    fn lex_identifier_or_keyword(&self, state: &mut State, source: &SourceText) -> bool {
-        let start_pos = state.get_position();
-
-        if let Some(ch) = state.peek() {
-            if ch.is_ascii_alphabetic() || ch == '_' || ch == '$' {
-                state.advance(ch.len_utf8());
-
-                while let Some(ch) = state.peek() {
-                    if ch.is_ascii_alphanumeric() || ch == '_' || ch == '$' {
-                        state.advance(ch.len_utf8());
-                    }
-                    else {
-                        break;
-                    }
-                }
-
-                let text = source.get_text_in(core::range::Range { start: start_pos, end: state.get_position() }).unwrap_or("");
-                let kind = match text {
-                    "as" => ActionScriptSyntaxKind::As,
-                    "break" => ActionScriptSyntaxKind::Break,
-                    "case" => ActionScriptSyntaxKind::Case,
-                    "catch" => ActionScriptSyntaxKind::Catch,
-                    "class" => ActionScriptSyntaxKind::Class,
-                    "const" => ActionScriptSyntaxKind::Const,
-                    "continue" => ActionScriptSyntaxKind::Continue,
-                    "default" => ActionScriptSyntaxKind::Default,
-                    "delete" => ActionScriptSyntaxKind::Delete,
-                    "do" => ActionScriptSyntaxKind::Do,
-                    "else" => ActionScriptSyntaxKind::Else,
-                    "extends" => ActionScriptSyntaxKind::Extends,
-                    "false" => ActionScriptSyntaxKind::False,
-                    "finally" => ActionScriptSyntaxKind::Finally,
-                    "for" => ActionScriptSyntaxKind::For,
-                    "function" => ActionScriptSyntaxKind::Function,
-                    "if" => ActionScriptSyntaxKind::If,
-                    "implements" => ActionScriptSyntaxKind::Implements,
-                    "import" => ActionScriptSyntaxKind::Import,
-                    "in" => ActionScriptSyntaxKind::In,
-                    "instanceof" => ActionScriptSyntaxKind::Instanceof,
-                    "interface" => ActionScriptSyntaxKind::Interface,
-                    "internal" => ActionScriptSyntaxKind::Internal,
-                    "is" => ActionScriptSyntaxKind::Is,
-                    "native" => ActionScriptSyntaxKind::Native,
-                    "new" => ActionScriptSyntaxKind::New,
-                    "null" => ActionScriptSyntaxKind::Null,
-                    "package" => ActionScriptSyntaxKind::Package,
-                    "private" => ActionScriptSyntaxKind::Private,
-                    "protected" => ActionScriptSyntaxKind::Protected,
-                    "public" => ActionScriptSyntaxKind::Public,
-                    "return" => ActionScriptSyntaxKind::Return,
-                    "static" => ActionScriptSyntaxKind::Static,
-                    "super" => ActionScriptSyntaxKind::Super,
-                    "switch" => ActionScriptSyntaxKind::Switch,
-                    "this" => ActionScriptSyntaxKind::This,
-                    "throw" => ActionScriptSyntaxKind::Throw,
-                    "true" => ActionScriptSyntaxKind::True,
-                    "try" => ActionScriptSyntaxKind::Try,
-                    "typeof" => ActionScriptSyntaxKind::Typeof,
-                    "use" => ActionScriptSyntaxKind::Use,
-                    "var" => ActionScriptSyntaxKind::Var,
-                    "void" => ActionScriptSyntaxKind::Void,
-                    "while" => ActionScriptSyntaxKind::While,
-                    "with" => ActionScriptSyntaxKind::With,
-
-                    // Contextual keywords
-                    "each" => ActionScriptSyntaxKind::Each,
-                    "get" => ActionScriptSyntaxKind::Get,
-                    "set" => ActionScriptSyntaxKind::Set,
-                    "namespace" => ActionScriptSyntaxKind::Namespace,
-                    "include" => ActionScriptSyntaxKind::Include,
-                    "dynamic" => ActionScriptSyntaxKind::Dynamic,
-                    "final" => ActionScriptSyntaxKind::Final,
-                    "override" => ActionScriptSyntaxKind::Override,
-
-                    // Type keywords
-                    "Array" => ActionScriptSyntaxKind::Array,
-                    "Boolean" => ActionScriptSyntaxKind::Boolean,
-                    "Date" => ActionScriptSyntaxKind::Date,
-                    "Error" => ActionScriptSyntaxKind::Error,
-                    "Function" => ActionScriptSyntaxKind::Function_,
-                    "Number" => ActionScriptSyntaxKind::Number,
-                    "Object" => ActionScriptSyntaxKind::Object,
-                    "RegExp" => ActionScriptSyntaxKind::RegExp,
-                    "String" => ActionScriptSyntaxKind::String_,
-                    "uint" => ActionScriptSyntaxKind::Uint,
-                    "Vector" => ActionScriptSyntaxKind::Vector,
-                    "XML" => ActionScriptSyntaxKind::Xml,
-                    "XMLList" => ActionScriptSyntaxKind::XmlList,
-
-                    _ => ActionScriptSyntaxKind::Identifier,
-                };
-
-                state.add_token(kind, start_pos, state.get_position());
-                true
-            }
-            else {
-                false
-            }
-        }
-        else {
-            false
-        }
-    }
-
-    /// 处理操作符和分隔符
-    fn lex_operator_or_delimiter(&self, state: &mut State) -> bool {
-        let start_pos = state.get_position();
-
-        if let Some(ch) = state.peek() {
-            let kind = match ch {
-                '+' => {
-                    state.advance(1);
-                    if let Some('=') = state.peek() {
+                match state.peek() {
+                    Some('=') => {
                         state.advance(1);
                         ActionScriptSyntaxKind::PlusAssign
                     }
-                    else if let Some('+') = state.peek() {
+                    Some('+') => {
                         state.advance(1);
                         ActionScriptSyntaxKind::Increment
                     }
-                    else {
-                        ActionScriptSyntaxKind::Plus
-                    }
+                    _ => ActionScriptSyntaxKind::Plus,
                 }
-                '-' => {
-                    state.advance(1);
-                    if let Some('=') = state.peek() {
+            }
+            '-' => {
+                state.advance(1);
+                match state.peek() {
+                    Some('=') => {
                         state.advance(1);
                         ActionScriptSyntaxKind::MinusAssign
                     }
-                    else if let Some('-') = state.peek() {
+                    Some('-') => {
                         state.advance(1);
                         ActionScriptSyntaxKind::Decrement
                     }
-                    else if let Some('>') = state.peek() {
+                    Some('>') => {
                         state.advance(1);
                         ActionScriptSyntaxKind::Arrow
                     }
-                    else {
-                        ActionScriptSyntaxKind::Minus
-                    }
+                    _ => ActionScriptSyntaxKind::Minus,
                 }
-                '*' => {
+            }
+            '*' => {
+                state.advance(1);
+                if state.peek() == Some('=') {
                     state.advance(1);
-                    if let Some('=') = state.peek() {
-                        state.advance(1);
-                        ActionScriptSyntaxKind::StarAssign
-                    }
-                    else {
-                        ActionScriptSyntaxKind::Star
-                    }
+                    ActionScriptSyntaxKind::StarAssign
                 }
-                '/' => {
-                    state.advance(1);
-                    if let Some('=') = state.peek() {
-                        state.advance(1);
-                        ActionScriptSyntaxKind::SlashAssign
-                    }
-                    else {
-                        ActionScriptSyntaxKind::Slash
-                    }
+                else {
+                    ActionScriptSyntaxKind::Star
                 }
-                '%' => {
+            }
+            '/' => {
+                state.advance(1);
+                if state.peek() == Some('=') {
                     state.advance(1);
-                    if let Some('=') = state.peek() {
-                        state.advance(1);
-                        ActionScriptSyntaxKind::PercentAssign
-                    }
-                    else {
-                        ActionScriptSyntaxKind::Percent
-                    }
+                    ActionScriptSyntaxKind::SlashAssign
                 }
-                '=' => {
+                else {
+                    ActionScriptSyntaxKind::Slash
+                }
+            }
+            '%' => {
+                state.advance(1);
+                if state.peek() == Some('=') {
                     state.advance(1);
-                    if let Some('=') = state.peek() {
+                    ActionScriptSyntaxKind::PercentAssign
+                }
+                else {
+                    ActionScriptSyntaxKind::Percent
+                }
+            }
+            '=' => {
+                state.advance(1);
+                match state.peek() {
+                    Some('=') => {
                         state.advance(1);
-                        if let Some('=') = state.peek() {
+                        if state.peek() == Some('=') {
                             state.advance(1);
                             ActionScriptSyntaxKind::EqualEqualEqual
                         }
@@ -428,15 +373,15 @@ impl<'config> ActionScriptLexer<'config> {
                             ActionScriptSyntaxKind::EqualEqual
                         }
                     }
-                    else {
-                        ActionScriptSyntaxKind::Equal
-                    }
+                    _ => ActionScriptSyntaxKind::Equal,
                 }
-                '!' => {
-                    state.advance(1);
-                    if let Some('=') = state.peek() {
+            }
+            '!' => {
+                state.advance(1);
+                match state.peek() {
+                    Some('=') => {
                         state.advance(1);
-                        if let Some('=') = state.peek() {
+                        if state.peek() == Some('=') {
                             state.advance(1);
                             ActionScriptSyntaxKind::NotEqualEqual
                         }
@@ -444,19 +389,19 @@ impl<'config> ActionScriptLexer<'config> {
                             ActionScriptSyntaxKind::NotEqual
                         }
                     }
-                    else {
-                        ActionScriptSyntaxKind::LogicalNot
-                    }
+                    _ => ActionScriptSyntaxKind::LogicalNot,
                 }
-                '<' => {
-                    state.advance(1);
-                    if let Some('=') = state.peek() {
+            }
+            '<' => {
+                state.advance(1);
+                match state.peek() {
+                    Some('=') => {
                         state.advance(1);
                         ActionScriptSyntaxKind::LessEqual
                     }
-                    else if let Some('<') = state.peek() {
+                    Some('<') => {
                         state.advance(1);
-                        if let Some('=') = state.peek() {
+                        if state.peek() == Some('=') {
                             state.advance(1);
                             ActionScriptSyntaxKind::LeftShiftAssign
                         }
@@ -464,211 +409,218 @@ impl<'config> ActionScriptLexer<'config> {
                             ActionScriptSyntaxKind::LeftShift
                         }
                     }
-                    else {
-                        ActionScriptSyntaxKind::LessThan
-                    }
+                    _ => ActionScriptSyntaxKind::LessThan,
                 }
-                '>' => {
-                    state.advance(1);
-                    if let Some('=') = state.peek() {
+            }
+            '>' => {
+                state.advance(1);
+                match state.peek() {
+                    Some('=') => {
                         state.advance(1);
                         ActionScriptSyntaxKind::GreaterEqual
                     }
-                    else if let Some('>') = state.peek() {
+                    Some('>') => {
                         state.advance(1);
-                        if let Some('>') = state.peek() {
-                            state.advance(1);
-                            if let Some('=') = state.peek() {
+                        match state.peek() {
+                            Some('>') => {
                                 state.advance(1);
-                                ActionScriptSyntaxKind::UnsignedRightShiftAssign
+                                if state.peek() == Some('=') {
+                                    state.advance(1);
+                                    ActionScriptSyntaxKind::UnsignedRightShiftAssign
+                                }
+                                else {
+                                    ActionScriptSyntaxKind::UnsignedRightShift
+                                }
                             }
-                            else {
-                                ActionScriptSyntaxKind::UnsignedRightShift
+                            Some('=') => {
+                                state.advance(1);
+                                ActionScriptSyntaxKind::RightShiftAssign
                             }
-                        }
-                        else if let Some('=') = state.peek() {
-                            state.advance(1);
-                            ActionScriptSyntaxKind::RightShiftAssign
-                        }
-                        else {
-                            ActionScriptSyntaxKind::RightShift
+                            _ => ActionScriptSyntaxKind::RightShift,
                         }
                     }
-                    else {
-                        ActionScriptSyntaxKind::GreaterThan
-                    }
+                    _ => ActionScriptSyntaxKind::GreaterThan,
                 }
-                '&' => {
-                    state.advance(1);
-                    if let Some('&') = state.peek() {
+            }
+            '&' => {
+                state.advance(1);
+                match state.peek() {
+                    Some('&') => {
                         state.advance(1);
                         ActionScriptSyntaxKind::LogicalAnd
                     }
-                    else if let Some('=') = state.peek() {
+                    Some('=') => {
                         state.advance(1);
                         ActionScriptSyntaxKind::BitwiseAndAssign
                     }
-                    else {
-                        ActionScriptSyntaxKind::BitwiseAnd
-                    }
+                    _ => ActionScriptSyntaxKind::BitwiseAnd,
                 }
-                '|' => {
-                    state.advance(1);
-                    if let Some('|') = state.peek() {
+            }
+            '|' => {
+                state.advance(1);
+                match state.peek() {
+                    Some('|') => {
                         state.advance(1);
                         ActionScriptSyntaxKind::LogicalOr
                     }
-                    else if let Some('=') = state.peek() {
+                    Some('=') => {
                         state.advance(1);
                         ActionScriptSyntaxKind::BitwiseOrAssign
                     }
-                    else {
-                        ActionScriptSyntaxKind::BitwiseOr
-                    }
+                    _ => ActionScriptSyntaxKind::BitwiseOr,
                 }
-                '^' => {
+            }
+            '^' => {
+                state.advance(1);
+                if state.peek() == Some('=') {
                     state.advance(1);
-                    if let Some('=') = state.peek() {
-                        state.advance(1);
-                        ActionScriptSyntaxKind::BitwiseXorAssign
-                    }
-                    else {
-                        ActionScriptSyntaxKind::BitwiseXor
-                    }
+                    ActionScriptSyntaxKind::BitwiseXorAssign
                 }
-                '~' => {
-                    state.advance(1);
-                    ActionScriptSyntaxKind::BitwiseNot
+                else {
+                    ActionScriptSyntaxKind::BitwiseXor
                 }
-                '?' => {
-                    state.advance(1);
-                    ActionScriptSyntaxKind::Question
-                }
-                ':' => {
-                    state.advance(1);
-                    ActionScriptSyntaxKind::Colon
-                }
-                '(' => {
-                    state.advance(1);
-                    ActionScriptSyntaxKind::LeftParen
-                }
-                ')' => {
-                    state.advance(1);
-                    ActionScriptSyntaxKind::RightParen
-                }
-                '{' => {
-                    state.advance(1);
-                    ActionScriptSyntaxKind::LeftBrace
-                }
-                '}' => {
-                    state.advance(1);
-                    ActionScriptSyntaxKind::RightBrace
-                }
-                '[' => {
-                    state.advance(1);
-                    ActionScriptSyntaxKind::LeftBracket
-                }
-                ']' => {
-                    state.advance(1);
-                    ActionScriptSyntaxKind::RightBracket
-                }
-                ';' => {
-                    state.advance(1);
-                    ActionScriptSyntaxKind::Semicolon
-                }
-                ',' => {
-                    state.advance(1);
-                    ActionScriptSyntaxKind::Comma
-                }
-                '.' => {
-                    state.advance(1);
-                    ActionScriptSyntaxKind::Dot
-                }
-                '@' => {
-                    state.advance(1);
-                    ActionScriptSyntaxKind::At
-                }
-                '#' => {
-                    state.advance(1);
-                    ActionScriptSyntaxKind::Hash
-                }
-                '$' => {
-                    state.advance(1);
-                    ActionScriptSyntaxKind::Dollar
-                }
-                '\\' => {
-                    state.advance(1);
-                    ActionScriptSyntaxKind::Backslash
-                }
-                '\'' => {
-                    state.advance(1);
-                    ActionScriptSyntaxKind::Quote
-                }
-                '"' => {
-                    state.advance(1);
-                    ActionScriptSyntaxKind::DoubleQuote
-                }
-                '`' => {
-                    state.advance(1);
-                    ActionScriptSyntaxKind::Backtick
-                }
-                _ => return false,
-            };
+            }
+            '~' => {
+                state.advance(1);
+                ActionScriptSyntaxKind::BitwiseNot
+            }
+            '?' => {
+                state.advance(1);
+                ActionScriptSyntaxKind::Question
+            }
+            ':' => {
+                state.advance(1);
+                ActionScriptSyntaxKind::Colon
+            }
+            '(' => {
+                state.advance(1);
+                ActionScriptSyntaxKind::LeftParen
+            }
+            ')' => {
+                state.advance(1);
+                ActionScriptSyntaxKind::RightParen
+            }
+            '{' => {
+                state.advance(1);
+                ActionScriptSyntaxKind::LeftBrace
+            }
+            '}' => {
+                state.advance(1);
+                ActionScriptSyntaxKind::RightBrace
+            }
+            '[' => {
+                state.advance(1);
+                ActionScriptSyntaxKind::LeftBracket
+            }
+            ']' => {
+                state.advance(1);
+                ActionScriptSyntaxKind::RightBracket
+            }
+            ';' => {
+                state.advance(1);
+                ActionScriptSyntaxKind::Semicolon
+            }
+            ',' => {
+                state.advance(1);
+                ActionScriptSyntaxKind::Comma
+            }
+            '.' => {
+                state.advance(1);
+                ActionScriptSyntaxKind::Dot
+            }
+            '@' => {
+                state.advance(1);
+                ActionScriptSyntaxKind::At
+            }
+            '#' => {
+                state.advance(1);
+                ActionScriptSyntaxKind::Hash
+            }
+            '$' => {
+                state.advance(1);
+                ActionScriptSyntaxKind::Dollar
+            }
+            '\\' => {
+                state.advance(1);
+                ActionScriptSyntaxKind::Backslash
+            }
+            '\'' => {
+                state.advance(1);
+                ActionScriptSyntaxKind::Quote
+            }
+            '"' => {
+                state.advance(1);
+                ActionScriptSyntaxKind::DoubleQuote
+            }
+            '`' => {
+                state.advance(1);
+                ActionScriptSyntaxKind::Backtick
+            }
+            _ => return false,
+        };
 
-            state.add_token(kind, start_pos, state.get_position());
-            true
-        }
-        else {
-            false
-        }
+        let end = state.get_position();
+        state.add_token(kind, start, end);
+        true
     }
-}
 
-impl<'config> Lexer<ActionScriptLanguage> for ActionScriptLexer<'config> {
-    fn lex(&self, source: &SourceText) -> LexOutput<ActionScriptSyntaxKind> {
-        let mut state = LexerState::new(source);
+    fn lex_string_literal<S: Source>(&self, state: &mut State<S>) -> bool {
+        let start = state.get_position();
 
-        while state.not_at_end() {
-            if self.skip_whitespace(&mut state) {
-                continue;
-            }
-
-            if self.lex_newline(&mut state) {
-                continue;
-            }
-
-            if self.lex_comment(&mut state) {
-                continue;
-            }
-
-            if self.lex_string(&mut state) {
-                continue;
-            }
-
-            if self.lex_number(&mut state) {
-                continue;
-            }
-
-            if self.lex_identifier_or_keyword(&mut state, source) {
-                continue;
-            }
-
-            if self.lex_operator_or_delimiter(&mut state) {
-                continue;
-            }
-
-            // 如果没有匹配到任何模式，跳过当前字符并标记为错误
-            let start_pos = state.get_position();
-            if let Some(ch) = state.peek() {
+        // normal string: "..." or '...'
+        if state.current() == Some('"') || state.current() == Some('\'') {
+            let quote_char = state.current().unwrap();
+            state.advance(1);
+            let mut escaped = false;
+            while let Some(ch) = state.peek() {
+                if ch == quote_char && !escaped {
+                    state.advance(1); // consume closing quote
+                    break;
+                }
                 state.advance(ch.len_utf8());
-                state.add_token(ActionScriptSyntaxKind::Error, start_pos, state.get_position());
+                if escaped {
+                    escaped = false;
+                    continue;
+                }
+                if ch == '\\' {
+                    escaped = true;
+                    continue;
+                }
+                if ch == '\n' || ch == '\r' {
+                    break;
+                }
             }
+            state.add_token(ActionScriptSyntaxKind::StringLiteral, start, state.get_position());
+            return true;
+        }
+        false
+    }
+
+    fn lex_char_literal<S: Source>(&self, state: &mut State<S>) -> bool {
+        let start = state.get_position();
+        if state.peek() != Some('\'') {
+            return false;
         }
 
-        // 添加 EOF token
-        let eof_pos = state.get_position();
-        state.add_token(ActionScriptSyntaxKind::Eof, eof_pos, eof_pos);
+        state.advance(1); // consume opening quote
+        if let Some('\\') = state.peek() {
+            state.advance(1); // consume backslash
+            if let Some(escaped) = state.peek() {
+                state.advance(escaped.len_utf8()); // consume escaped character
+            }
+        }
+        else if let Some(ch) = state.peek() {
+            state.advance(ch.len_utf8()); // consume character
+        }
 
-        state.finish()
+        if state.peek() == Some('\'') {
+            state.advance(1); // consume closing quote
+            state.add_token(ActionScriptSyntaxKind::CharLiteral, start, state.get_position());
+            return true;
+        }
+
+        // Reset position if not a valid char literal
+        state.set_position(start);
+        false
     }
 }

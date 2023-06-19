@@ -1,5 +1,6 @@
 use core::{fmt, range::Range};
 use oak_core::SyntaxKind;
+use serde::{Deserialize, Serialize};
 
 /// Julia 令牌
 #[derive(Debug, Clone, PartialEq)]
@@ -11,7 +12,7 @@ pub struct JuliaToken {
 use core::str::FromStr;
 
 /// Julia 令牌种类
-#[derive(Debug, Clone, PartialEq, Eq, Copy)]
+#[derive(Debug, Clone, PartialEq, Eq, Copy, Serialize, Deserialize)]
 pub enum JuliaSyntaxKind {
     // 关键字
     If,

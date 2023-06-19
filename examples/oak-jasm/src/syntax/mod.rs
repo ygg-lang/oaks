@@ -1,5 +1,10 @@
-/// 统一JASM 语法种类（节点与词法
-#[derive(Copy, Clone, Debug, PartialEq, Eq)]
+use oak_core::Token;
+use serde::{Deserialize, Serialize};
+
+pub type JasmToken = Token<JasmSyntaxKind>;
+
+/// 统一JASM 语法种类（节点与词法）
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub enum JasmSyntaxKind {
     // 语法节点
     Root,

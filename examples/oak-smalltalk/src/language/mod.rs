@@ -18,4 +18,5 @@ impl Default for SmalltalkLanguage {
 
 impl Language for SmalltalkLanguage {
     type SyntaxKind = crate::kind::SmalltalkKind;
+    type TypedRoot = ();
 }

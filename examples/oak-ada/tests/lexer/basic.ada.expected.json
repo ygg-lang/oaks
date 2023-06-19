@@ -1,0 +1,607 @@
+{
+    "success": true,
+    "count": 100,
+    "tokens": [
+        {
+            "kind": "WithKeyword",
+            "text": "with",
+            "start": 234,
+            "end": 238
+        },
+        {
+            "kind": "Identifier",
+            "text": "Ada",
+            "start": 239,
+            "end": 242
+        },
+        {
+            "kind": "Dot",
+            "text": ".",
+            "start": 242,
+            "end": 243
+        },
+        {
+            "kind": "Identifier",
+            "text": "Text_IO",
+            "start": 243,
+            "end": 250
+        },
+        {
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 250,
+            "end": 251
+        },
+        {
+            "kind": "WithKeyword",
+            "text": "with",
+            "start": 252,
+            "end": 256
+        },
+        {
+            "kind": "Identifier",
+            "text": "Ada",
+            "start": 257,
+            "end": 260
+        },
+        {
+            "kind": "Dot",
+            "text": ".",
+            "start": 260,
+            "end": 261
+        },
+        {
+            "kind": "Identifier",
+            "text": "Integer_Text_IO",
+            "start": 261,
+            "end": 276
+        },
+        {
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 276,
+            "end": 277
+        },
+        {
+            "kind": "WithKeyword",
+            "text": "with",
+            "start": 278,
+            "end": 282
+        },
+        {
+            "kind": "Identifier",
+            "text": "Ada",
+            "start": 283,
+            "end": 286
+        },
+        {
+            "kind": "Dot",
+            "text": ".",
+            "start": 286,
+            "end": 287
+        },
+        {
+            "kind": "Identifier",
+            "text": "Float_Text_IO",
+            "start": 287,
+            "end": 300
+        },
+        {
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 300,
+            "end": 301
+        },
+        {
+            "kind": "UseKeyword",
+            "text": "use",
+            "start": 302,
+            "end": 305
+        },
+        {
+            "kind": "Identifier",
+            "text": "Ada",
+            "start": 306,
+            "end": 309
+        },
+        {
+            "kind": "Dot",
+            "text": ".",
+            "start": 309,
+            "end": 310
+        },
+        {
+            "kind": "Identifier",
+            "text": "Text_IO",
+            "start": 310,
+            "end": 317
+        },
+        {
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 317,
+            "end": 318
+        },
+        {
+            "kind": "ProcedureKeyword",
+            "text": "procedure",
+            "start": 320,
+            "end": 329
+        },
+        {
+            "kind": "Identifier",
+            "text": "Ada_Features_Test",
+            "start": 330,
+            "end": 347
+        },
+        {
+            "kind": "IsKeyword",
+            "text": "is",
+            "start": 348,
+            "end": 350
+        },
+        {
+            "kind": "TypeKeyword",
+            "text": "type",
+            "start": 378,
+            "end": 382
+        },
+        {
+            "kind": "Identifier",
+            "text": "My_Integer",
+            "start": 383,
+            "end": 393
+        },
+        {
+            "kind": "IsKeyword",
+            "text": "is",
+            "start": 394,
+            "end": 396
+        },
+        {
+            "kind": "RangeKeyword",
+            "text": "range",
+            "start": 397,
+            "end": 402
+        },
+        {
+            "kind": "Minus",
+            "text": "-",
+            "start": 403,
+            "end": 404
+        },
+        {
+            "kind": "NumberLiteral",
+            "text": "1_000_000",
+            "start": 404,
+            "end": 413
+        },
+        {
+            "kind": "DotDot",
+            "text": "..",
+            "start": 414,
+            "end": 416
+        },
+        {
+            "kind": "NumberLiteral",
+            "text": "1_000_000",
+            "start": 417,
+            "end": 426
+        },
+        {
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 426,
+            "end": 427
+        },
+        {
+            "kind": "TypeKeyword",
+            "text": "type",
+            "start": 431,
+            "end": 435
+        },
+        {
+            "kind": "Identifier",
+            "text": "My_Float",
+            "start": 436,
+            "end": 444
+        },
+        {
+            "kind": "IsKeyword",
+            "text": "is",
+            "start": 445,
+            "end": 447
+        },
+        {
+            "kind": "DigitsKeyword",
+            "text": "digits",
+            "start": 448,
+            "end": 454
+        },
+        {
+            "kind": "NumberLiteral",
+            "text": "7",
+            "start": 455,
+            "end": 456
+        },
+        {
+            "kind": "RangeKeyword",
+            "text": "range",
+            "start": 457,
+            "end": 462
+        },
+        {
+            "kind": "Minus",
+            "text": "-",
+            "start": 463,
+            "end": 464
+        },
+        {
+            "kind": "NumberLiteral",
+            "text": "1.0E9",
+            "start": 464,
+            "end": 469
+        },
+        {
+            "kind": "DotDot",
+            "text": "..",
+            "start": 470,
+            "end": 472
+        },
+        {
+            "kind": "NumberLiteral",
+            "text": "1.0E9",
+            "start": 473,
+            "end": 478
+        },
+        {
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 478,
+            "end": 479
+        },
+        {
+            "kind": "TypeKeyword",
+            "text": "type",
+            "start": 483,
+            "end": 487
+        },
+        {
+            "kind": "Identifier",
+            "text": "My_Boolean",
+            "start": 488,
+            "end": 498
+        },
+        {
+            "kind": "IsKeyword",
+            "text": "is",
+            "start": 499,
+            "end": 501
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 502,
+            "end": 503
+        },
+        {
+            "kind": "Identifier",
+            "text": "False",
+            "start": 503,
+            "end": 508
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 508,
+            "end": 509
+        },
+        {
+            "kind": "Identifier",
+            "text": "True",
+            "start": 510,
+            "end": 514
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 514,
+            "end": 515
+        },
+        {
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 515,
+            "end": 516
+        },
+        {
+            "kind": "TypeKeyword",
+            "text": "type",
+            "start": 520,
+            "end": 524
+        },
+        {
+            "kind": "Identifier",
+            "text": "My_Character",
+            "start": 525,
+            "end": 537
+        },
+        {
+            "kind": "IsKeyword",
+            "text": "is",
+            "start": 538,
+            "end": 540
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 541,
+            "end": 542
+        },
+        {
+            "kind": "CharacterLiteral",
+            "text": "'A'",
+            "start": 542,
+            "end": 545
+        },
+        {
+            "kind": "DotDot",
+            "text": "..",
+            "start": 546,
+            "end": 548
+        },
+        {
+            "kind": "CharacterLiteral",
+            "text": "'Z'",
+            "start": 549,
+            "end": 552
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 552,
+            "end": 553
+        },
+        {
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 553,
+            "end": 554
+        },
+        {
+            "kind": "TypeKeyword",
+            "text": "type",
+            "start": 558,
+            "end": 562
+        },
+        {
+            "kind": "Identifier",
+            "text": "My_String",
+            "start": 563,
+            "end": 572
+        },
+        {
+            "kind": "IsKeyword",
+            "text": "is",
+            "start": 573,
+            "end": 575
+        },
+        {
+            "kind": "ArrayKeyword",
+            "text": "array",
+            "start": 576,
+            "end": 581
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 582,
+            "end": 583
+        },
+        {
+            "kind": "Identifier",
+            "text": "Positive",
+            "start": 583,
+            "end": 591
+        },
+        {
+            "kind": "RangeKeyword",
+            "text": "range",
+            "start": 592,
+            "end": 597
+        },
+        {
+            "kind": "Less",
+            "text": "<",
+            "start": 598,
+            "end": 599
+        },
+        {
+            "kind": "Greater",
+            "text": ">",
+            "start": 599,
+            "end": 600
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 600,
+            "end": 601
+        },
+        {
+            "kind": "OfKeyword",
+            "text": "of",
+            "start": 602,
+            "end": 604
+        },
+        {
+            "kind": "Identifier",
+            "text": "Character",
+            "start": 605,
+            "end": 614
+        },
+        {
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 614,
+            "end": 615
+        },
+        {
+            "kind": "Identifier",
+            "text": "Decimal_Int",
+            "start": 643,
+            "end": 654
+        },
+        {
+            "kind": "Colon",
+            "text": ":",
+            "start": 658,
+            "end": 659
+        },
+        {
+            "kind": "ConstantKeyword",
+            "text": "constant",
+            "start": 660,
+            "end": 668
+        },
+        {
+            "kind": "Identifier",
+            "text": "Integer",
+            "start": 669,
+            "end": 676
+        },
+        {
+            "kind": "ColonEqual",
+            "text": ":=",
+            "start": 677,
+            "end": 679
+        },
+        {
+            "kind": "NumberLiteral",
+            "text": "123_456",
+            "start": 680,
+            "end": 687
+        },
+        {
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 687,
+            "end": 688
+        },
+        {
+            "kind": "Identifier",
+            "text": "Based_Int",
+            "start": 692,
+            "end": 701
+        },
+        {
+            "kind": "Colon",
+            "text": ":",
+            "start": 707,
+            "end": 708
+        },
+        {
+            "kind": "ConstantKeyword",
+            "text": "constant",
+            "start": 709,
+            "end": 717
+        },
+        {
+            "kind": "Identifier",
+            "text": "Integer",
+            "start": 718,
+            "end": 725
+        },
+        {
+            "kind": "ColonEqual",
+            "text": ":=",
+            "start": 726,
+            "end": 728
+        },
+        {
+            "kind": "NumberLiteral",
+            "text": "16",
+            "start": 729,
+            "end": 731
+        },
+        {
+            "kind": "Error",
+            "text": "#",
+            "start": 731,
+            "end": 732
+        },
+        {
+            "kind": "Identifier",
+            "text": "FF",
+            "start": 732,
+            "end": 734
+        },
+        {
+            "kind": "Error",
+            "text": "#",
+            "start": 734,
+            "end": 735
+        },
+        {
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 735,
+            "end": 736
+        },
+        {
+            "kind": "Identifier",
+            "text": "Real_Literal",
+            "start": 740,
+            "end": 752
+        },
+        {
+            "kind": "Colon",
+            "text": ":",
+            "start": 755,
+            "end": 756
+        },
+        {
+            "kind": "ConstantKeyword",
+            "text": "constant",
+            "start": 757,
+            "end": 765
+        },
+        {
+            "kind": "Identifier",
+            "text": "Float",
+            "start": 766,
+            "end": 771
+        },
+        {
+            "kind": "ColonEqual",
+            "text": ":=",
+            "start": 774,
+            "end": 776
+        },
+        {
+            "kind": "NumberLiteral",
+            "text": "3.141_59",
+            "start": 777,
+            "end": 785
+        },
+        {
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 785,
+            "end": 786
+        },
+        {
+            "kind": "Identifier",
+            "text": "Exp_Real",
+            "start": 790,
+            "end": 798
+        },
+        {
+            "kind": "Colon",
+            "text": ":",
+            "start": 805,
+            "end": 806
+        }
+    ],
+    "errors": []
+}

@@ -1,0 +1,131 @@
+// Scala 3 (Dotty) test file for lexer testing
+
+package com.example.scala3
+
+// New in Scala 3: Enums
+enum Color:
+  case Red, Green, Blue
+  case Custom(r: Int, g: Int, b: Int)
+
+// New in Scala 3: Opaque Type Aliases
+object Meter:
+  opaque type Meter = Double
+  def apply(d: Double): Meter = d
+  extension (m: Meter)
+    def toCentimeter: Double = m * 100
+    def toKilometer: Double = m / 1000
+
+// New in Scala 3: Union Types
+def handleId(id: Int | String): String = id match
+  case i: Int => s"Integer ID: $i"
+  case s: String => s"String ID: $s"
+
+// New in Scala 3: Intersection Types
+trait Resettable:
+  def reset(): Unit
+
+trait Loggable:
+  def log(msg: String): Unit
+
+class Widget extends Resettable, Loggable:
+  def reset(): Unit = println("Widget reset")
+  def log(msg: String): Unit = println(s"Widget log: $msg")
+
+def process(obj: Resettable & Loggable): Unit = {
+  obj.reset()
+  obj.log("Processed")
+}
+
+// New in Scala 3: Extension Methods
+extension (s: String)
+  def exclamation: String = s + "!"
+  def isQuestion: Boolean = s.endsWith("?")
+
+// New in Scala 3: Contextual Abstractions (using clauses)
+case class Config(timeout: Int, retries: Int)
+
+def operation(data: String)(using config: Config): String = {
+  s"Processing '$data' with timeout ${config.timeout} and ${config.retries} retries."
+}
+
+// New in Scala 3: Given Instances (formerly implicits)
+given defaultTimeout: Int = 5000
+given defaultRetries: Int = 3
+given Config = Config(defaultTimeout, defaultRetries)
+
+// New in Scala 3: Implicit Function Types (using functions)
+def executeWithConfig(f: Config ?=> String): String = {
+  given Config = Config(1000, 1)
+  f
+}
+
+// New in Scala 3: Trait Parameters
+trait Greeter(val name: String):
+  def greet(): String = s"Hello, $name"
+
+class EnglishGreeter(name: String) extends Greeter(name)
+
+// New in Scala 3: Universal Apply Methods
+case class Box[T](value: T)
+
+// New in Scala 3: Export Clauses
+object Utils:
+  def add(a: Int, b: Int): Int = a + b
+  def subtract(a: Int, b: Int): Int = a - b
+
+object MathExports:
+  export Utils.{add, subtract as minus}
+
+// New in Scala 3: Soft Keywords (e.g., `enum`, `extension`, `given`, `using`, `export`)
+// These are handled contextually by the lexer/parser
+
+// New in Scala 3: Top-level definitions
+val topLevelVal = 123
+def topLevelMethod(x: Int) = x * 2
+
+object Scala3FeaturesApp extends App:
+  println("=== Scala 3 Features Test ===")
+
+  // Enums
+  println(Color.Red)
+  println(Color.Custom(255, 0, 0))
+
+  // Opaque Type Aliases
+  val distance = Meter(1.5)
+  println(s"1.5 meters is ${distance.toCentimeter} cm and ${distance.toKilometer} km")
+
+  // Union Types
+  println(handleId(123))
+  println(handleId("abc-456"))
+
+  // Intersection Types
+  val myWidget = new Widget()
+  process(myWidget)
+
+  // Extension Methods
+  println("Hello".exclamation)
+  println("Is this a question?".isQuestion)
+
+  // Contextual Abstractions & Given Instances
+  println(operation("data")) // Uses given Config
+  println(executeWithConfig(operation("another data")))
+
+  // Trait Parameters
+  val greeter = new EnglishGreeter("Scala 3")
+  println(greeter.greet())
+
+  // Universal Apply Methods
+  val intBox = Box(10)
+  val stringBox = Box("hello")
+  println(intBox)
+  println(stringBox)
+
+  // Export Clauses
+  println(MathExports.add(5, 3))
+  println(MathExports.minus(10, 4))
+
+  // Top-level definitions
+  println(s"Top-level val: $topLevelVal")
+  println(s"Top-level method: ${topLevelMethod(7)}")
+
+  println("=== End of Scala 3 Features Test ===")

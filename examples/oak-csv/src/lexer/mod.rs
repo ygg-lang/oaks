@@ -1,17 +1,16 @@
 use crate::{kind::CsvSyntaxKind, language::CsvLanguage};
-use oak_core::{Lexer, LexerState, SourceText, lexer::LexOutput};
+use oak_core::{IncrementalCache, Lexer, LexerState, SourceText, lexer::LexOutput, source::Source};
 
-type State<'input> = LexerState<'input, CsvLanguage>;
+type State<'input> = LexerState<&'input SourceText, CsvLanguage>;
 
-pub struct CsvLexer<'config> {
-    config: &'config CsvLanguage,
+pub struct CsvLexer {
     field_separator: char,
     quote_char: char,
 }
 
-impl<'config> CsvLexer<'config> {
-    pub fn new(config: &'config CsvLanguage) -> Self {
-        Self { config, field_separator: ',', quote_char: '"' }
+impl CsvLexer {
+    pub fn new(_config: CsvLanguage) -> Self {
+        Self { field_separator: ',', quote_char: '"' }
     }
 
     pub fn with_separator(mut self, separator: char) -> Self {
@@ -154,9 +153,10 @@ impl<'config> CsvLexer<'config> {
     }
 }
 
-impl<'config> Lexer<CsvLanguage> for CsvLexer<'config> {
-    fn lex(&self, source: &SourceText) -> LexOutput<CsvSyntaxKind> {
-        let mut state = LexerState::new(source);
+impl Lexer<CsvLanguage> for CsvLexer {
+    fn lex(&self, source: impl Source) -> LexOutput<CsvLanguage> {
+        let source_text = SourceText::new(source.get_text_in((0..source.length()).into()));
+        let mut state = LexerState::new(&source_text);
 
         while state.not_at_end() {
             // 尝试各种词法规则
@@ -192,6 +192,15 @@ impl<'config> Lexer<CsvLanguage> for CsvLexer<'config> {
         let eof_pos = state.get_position();
         state.add_token(CsvSyntaxKind::Eof, eof_pos, eof_pos);
 
-        state.finish()
+        state.finish(Ok(()))
+    }
+
+    fn lex_incremental(
+        &self,
+        source: impl Source,
+        _changed: usize,
+        _cache: IncrementalCache<CsvLanguage>,
+    ) -> LexOutput<CsvLanguage> {
+        self.lex(source)
     }
 }

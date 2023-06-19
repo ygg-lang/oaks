@@ -1,13 +1,7 @@
 #[test]
 fn ready() {
-    println!("oak-jasm tests ready!");
+    println!("oak-java tests ready!");
 }
 
 #[cfg(test)]
-mod tests {
-    #[test]
-    fn test_basic_functionality() {
-        // 基础功能测试
-        assert!(true);
-    }
-}
+mod lexer;

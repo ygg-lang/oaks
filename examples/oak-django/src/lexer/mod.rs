@@ -1,8 +1,18 @@
 use crate::{kind::DjangoSyntaxKind, language::DjangoLanguage};
-use oak_core::{Lexer, LexerState, SourceText, lexer::LexOutput};
+use oak_core::{
+    IncrementalCache, Lexer, LexerState, OakError,
+    lexer::{CommentLine, LexOutput, StringConfig, WhitespaceConfig},
+    source::Source,
+};
+use std::sync::LazyLock;
 
-type State<'input> = LexerState<'input, DjangoLanguage>;
+type State<S: Source> = LexerState<S, DjangoLanguage>;
 
+static DJANGO_WHITESPACE: LazyLock<WhitespaceConfig> = LazyLock::new(|| WhitespaceConfig { unicode_whitespace: true });
+static DJANGO_COMMENT: LazyLock<CommentLine> = LazyLock::new(|| CommentLine { line_markers: &["{#"] });
+static DJANGO_STRING: LazyLock<StringConfig> = LazyLock::new(|| StringConfig { quotes: &['"', '\''], escape: Some('\\') });
+
+#[derive(Clone)]
 pub struct DjangoLexer<'config> {
     config: &'config DjangoLanguage,
 }
@@ -12,21 +22,83 @@ impl<'config> DjangoLexer<'config> {
         Self { config }
     }
 
-    /// 跳过空白字符
-    fn skip_whitespace(&self, state: &mut State) -> bool {
-        let start_pos = state.get_position();
+    fn run<S: Source>(&self, state: &mut State<S>) -> Result<(), OakError> {
+        while state.not_at_end() {
+            let safe_point = state.get_position();
+            if self.skip_whitespace(state) {
+                continue;
+            }
 
-        while let Some(ch) = state.peek() {
-            if ch == ' ' || ch == '\t' {
-                state.advance(ch.len_utf8());
+            if self.skip_comment(state) {
+                continue;
             }
-            else {
-                break;
+
+            if self.lex_string(state) {
+                continue;
             }
+
+            if self.lex_number(state) {
+                continue;
+            }
+
+            if self.lex_identifier_or_keyword(state) {
+                continue;
+            }
+
+            if self.lex_django_tags(state) {
+                continue;
+            }
+
+            if self.lex_operator(state) {
+                continue;
+            }
+
+            if self.lex_delimiter(state) {
+                continue;
+            }
+
+            if self.lex_html_text(state) {
+                continue;
+            }
+
+            state.safe_check(safe_point);
         }
 
-        if state.get_position() > start_pos {
-            state.add_token(DjangoSyntaxKind::Whitespace, start_pos, state.get_position());
+        // 添加 EOF kind
+        let eof_pos = state.get_position();
+        state.add_token(DjangoSyntaxKind::Eof, eof_pos, eof_pos);
+        Ok(())
+    }
+
+    /// 跳过空白字符
+    fn skip_whitespace<S: Source>(&self, state: &mut State<S>) -> bool {
+        match DJANGO_WHITESPACE.scan(state.rest(), state.get_position(), DjangoSyntaxKind::Whitespace) {
+            Some(token) => {
+                let start = state.get_position();
+                state.advance(token.length());
+                state.add_token(DjangoSyntaxKind::Whitespace, start, state.get_position());
+                true
+            }
+            None => false,
+        }
+    }
+
+    /// 跳过注释
+    fn skip_comment<S: Source>(&self, state: &mut State<S>) -> bool {
+        if state.rest().starts_with("{#") {
+            let start = state.get_position();
+            state.advance(2); // 跳过 "{#"
+
+            // 查找注释结束标记 "#}"
+            while state.not_at_end() {
+                if state.rest().starts_with("#}") {
+                    state.advance(2); // 跳过 "#}"
+                    break;
+                }
+                state.advance(1);
+            }
+
+            state.add_token(DjangoSyntaxKind::Comment, start, state.get_position());
             true
         }
         else {
@@ -34,8 +106,21 @@ impl<'config> DjangoLexer<'config> {
         }
     }
 
+    /// 处理字符串字面量
+    fn lex_string_literal<S: Source>(&self, state: &mut State<S>) -> bool {
+        match DJANGO_STRING.scan(state.rest(), state.get_position(), DjangoSyntaxKind::String) {
+            Some(token) => {
+                let start = state.get_position();
+                state.advance(token.length());
+                state.add_token(DjangoSyntaxKind::String, start, state.get_position());
+                true
+            }
+            None => false,
+        }
+    }
+
     /// 处理换行
-    fn lex_newline(&self, state: &mut State) -> bool {
+    fn lex_newline<S: Source>(&self, state: &mut State<S>) -> bool {
         let start_pos = state.get_position();
 
         if let Some('\n') = state.peek() {
@@ -56,9 +141,8 @@ impl<'config> DjangoLexer<'config> {
         }
     }
 
-    /// 处理标识符和关键
-
-    fn lex_identifier_or_keyword(&self, state: &mut State, source: &SourceText) -> bool {
+    /// 处理标识符和关键字
+    fn lex_identifier_or_keyword<S: Source>(&self, state: &mut State<S>) -> bool {
         let start_pos = state.get_position();
 
         if let Some(ch) = state.peek() {
@@ -75,7 +159,7 @@ impl<'config> DjangoLexer<'config> {
                 }
 
                 let end_pos = state.get_position();
-                let text = source.get_text_in((start_pos..end_pos).into()).unwrap_or("");
+                let text = state.get_text_in((start_pos..end_pos).into());
 
                 let token_kind = match text {
                     "if" => DjangoSyntaxKind::If,
@@ -125,7 +209,7 @@ impl<'config> DjangoLexer<'config> {
     }
 
     /// 处理数字
-    fn lex_number(&self, state: &mut State) -> bool {
+    fn lex_number<S: Source>(&self, state: &mut State<S>) -> bool {
         let start_pos = state.get_position();
 
         if let Some(ch) = state.peek() {
@@ -183,7 +267,7 @@ impl<'config> DjangoLexer<'config> {
 
     /// 处理字符
 
-    fn lex_string(&self, state: &mut State) -> bool {
+    fn lex_string<S: Source>(&self, state: &mut State<S>) -> bool {
         let start_pos = state.get_position();
 
         if let Some(quote) = state.peek() {
@@ -222,7 +306,7 @@ impl<'config> DjangoLexer<'config> {
     }
 
     /// 处理 Django 标签
-    fn lex_django_tags(&self, state: &mut State) -> bool {
+    fn lex_django_tags<S: Source>(&self, state: &mut State<S>) -> bool {
         let start_pos = state.get_position();
 
         if let Some('{') = state.peek() {
@@ -291,7 +375,7 @@ impl<'config> DjangoLexer<'config> {
     }
 
     /// 处理操作
-    fn lex_operator(&self, state: &mut State) -> bool {
+    fn lex_operator<S: Source>(&self, state: &mut State<S>) -> bool {
         let start_pos = state.get_position();
 
         if let Some(ch) = state.peek() {
@@ -373,7 +457,7 @@ impl<'config> DjangoLexer<'config> {
 
     /// 处理分隔
 
-    fn lex_delimiter(&self, state: &mut State) -> bool {
+    fn lex_delimiter<S: Source>(&self, state: &mut State<S>) -> bool {
         let start_pos = state.get_position();
 
         if let Some(ch) = state.peek() {
@@ -399,7 +483,7 @@ impl<'config> DjangoLexer<'config> {
     }
 
     /// 处理 HTML 文本
-    fn lex_html_text(&self, state: &mut State) -> bool {
+    fn lex_html_text<S: Source>(&self, state: &mut State<S>) -> bool {
         let start_pos = state.get_position();
 
         while let Some(ch) = state.peek() {
@@ -425,59 +509,14 @@ impl<'config> DjangoLexer<'config> {
 }
 
 impl<'config> Lexer<DjangoLanguage> for DjangoLexer<'config> {
-    fn lex(&self, source: &SourceText) -> LexOutput<DjangoSyntaxKind> {
-        let mut state = LexerState::new(source);
-
-        while state.not_at_end() {
-            // 尝试各种词法规则
-            if self.skip_whitespace(&mut state) {
-                continue;
-            }
-
-            if self.lex_newline(&mut state) {
-                continue;
-            }
-
-            if self.lex_django_tags(&mut state) {
-                continue;
-            }
-
-            if self.lex_identifier_or_keyword(&mut state, source) {
-                continue;
-            }
-
-            if self.lex_number(&mut state) {
-                continue;
-            }
-
-            if self.lex_string(&mut state) {
-                continue;
-            }
-
-            if self.lex_operator(&mut state) {
-                continue;
-            }
-
-            if self.lex_delimiter(&mut state) {
-                continue;
-            }
-
-            if self.lex_html_text(&mut state) {
-                continue;
-            }
-
-            // 如果所有规则都不匹配，跳过当前字符并标记为错误
-            let start_pos = state.get_position();
-            if let Some(ch) = state.peek() {
-                state.advance(ch.len_utf8());
-                state.add_token(DjangoSyntaxKind::Error, start_pos, state.get_position());
-            }
-        }
-
-        // 添加 EOF kind
-        let eof_pos = state.get_position();
-        state.add_token(DjangoSyntaxKind::Eof, eof_pos, eof_pos);
-
-        state.finish()
+    fn lex_incremental(
+        &self,
+        source: impl Source,
+        _changed: usize,
+        _cache: IncrementalCache<DjangoLanguage>,
+    ) -> LexOutput<DjangoLanguage> {
+        let mut state = LexerState::new_with_cache(source, _changed, _cache);
+        let result = self.run(&mut state);
+        state.finish(result)
     }
 }

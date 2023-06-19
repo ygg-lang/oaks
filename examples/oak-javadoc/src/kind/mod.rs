@@ -96,7 +96,9 @@ pub enum JavadocSyntaxKind {
 
     // 错误
     Error,
-    // 根节    Root,
+
+    // 根节点
+    Root,
 }
 
 impl SyntaxKind for JavadocSyntaxKind {

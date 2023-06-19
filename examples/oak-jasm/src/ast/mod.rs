@@ -1,6 +1,6 @@
 #![doc = include_str!("readme.md")]
 
-use alloc::{string::String, vec::Vec};
+use std::{string::String, vec::Vec};
 
 /// JASM 根节
 #[derive(Clone, Debug)]

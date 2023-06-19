@@ -1,7 +1,5 @@
 #![doc = include_str!("readme.md")]
 
-use alloc::{string::String, vec::Vec};
-
 /// Wolfram 根节
 #[derive(Clone, Debug)]
 pub struct WolframRoot {

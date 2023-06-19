@@ -10,6 +10,7 @@ pub struct GsglLanguage;
 
 impl Language for GsglLanguage {
     type SyntaxKind = GsglSyntaxKind;
+    type TypedRoot = ();
 }
 
 impl GsglLanguage {

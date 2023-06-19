@@ -1,20 +1,19 @@
 use crate::kind::GroovySyntaxKind;
-use oak_core::{Language, lexer::common::CommentConfig};
+use oak_core::Language;
 
 /// Groovy 语言配置
 #[derive(Debug, Clone)]
-pub struct GroovyLanguage {
-    pub comments: CommentConfig,
-}
+pub struct GroovyLanguage;
 
 impl Default for GroovyLanguage {
     fn default() -> Self {
-        Self { comments: CommentConfig { line_markers: &[], block_markers: &[], nested_blocks: false } }
+        Self
     }
 }
 
 impl Language for GroovyLanguage {
     type SyntaxKind = GroovySyntaxKind;
+    type TypedRoot = ();
 }
 
 impl GroovyLanguage {

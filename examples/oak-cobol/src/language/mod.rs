@@ -1,4 +1,4 @@
-use crate::kind::CobolSyntaxKind;
+use crate::{ast::CobolRoot, kind::CobolSyntaxKind};
 use oak_core::Language;
 
 /// COBOL 语言实现
@@ -7,4 +7,5 @@ pub struct CobolLanguage;
 
 impl Language for CobolLanguage {
     type SyntaxKind = CobolSyntaxKind;
+    type TypedRoot = CobolRoot;
 }

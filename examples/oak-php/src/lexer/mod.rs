@@ -1,8 +1,9 @@
 use crate::{kind::PhpSyntaxKind, language::PhpLanguage};
-use oak_core::{Lexer, LexerState, SourceText, lexer::LexOutput};
+use oak_core::{IncrementalCache, Lexer, LexerState, OakError, lexer::LexOutput, source::Source};
 
-type State<'input> = LexerState<'input, PhpLanguage>;
+type State<S: Source> = LexerState<S, PhpLanguage>;
 
+#[derive(Clone)]
 pub struct PhpLexer<'config> {
     config: &'config PhpLanguage,
 }
@@ -12,8 +13,56 @@ impl<'config> PhpLexer<'config> {
         Self { config }
     }
 
-    /// 跳过空白字符
-    fn skip_whitespace(&self, state: &mut State) -> bool {
+    fn run<S: Source>(&self, state: &mut State<S>) -> Result<(), OakError> {
+        while state.not_at_end() {
+            if self.skip_whitespace(state) {
+                continue;
+            }
+
+            if self.lex_newline(state) {
+                continue;
+            }
+
+            if self.lex_comment(state) {
+                continue;
+            }
+
+            if self.lex_string(state) {
+                continue;
+            }
+
+            if self.lex_number(state) {
+                continue;
+            }
+
+            if self.lex_identifier_or_keyword(state) {
+                continue;
+            }
+
+            if self.lex_operators_and_punctuation(state) {
+                continue;
+            }
+
+            // 如果没有匹配任何规则，跳过当前字符
+            if let Some(ch) = state.peek() {
+                let start_pos = state.get_position();
+                state.advance(ch.len_utf8());
+                state.add_token(PhpSyntaxKind::Error, start_pos, state.get_position());
+            }
+            else {
+                // 如果已到达文件末尾，退出循环
+                break;
+            }
+        }
+
+        // Add EOF token
+        let pos = state.get_position();
+        state.add_token(PhpSyntaxKind::Eof, pos, pos);
+
+        Ok(())
+    }
+
+    fn skip_whitespace<S: Source>(&self, state: &mut State<S>) -> bool {
         let start_pos = state.get_position();
 
         while let Some(ch) = state.peek() {
@@ -34,8 +83,7 @@ impl<'config> PhpLexer<'config> {
         }
     }
 
-    /// 处理换行
-    fn lex_newline(&self, state: &mut State) -> bool {
+    fn lex_newline<S: Source>(&self, state: &mut State<S>) -> bool {
         let start_pos = state.get_position();
 
         if let Some('\n') = state.peek() {
@@ -56,59 +104,34 @@ impl<'config> PhpLexer<'config> {
         }
     }
 
-    /// 处理 PHP 标签
-    fn lex_php_tags(&self, state: &mut State, source: &SourceText) -> bool {
+    fn lex_comment<S: Source>(&self, state: &mut State<S>) -> bool {
         let start_pos = state.get_position();
 
-        // <?php 开始标
-        if let Some('<') = state.peek() {
-            if let Some('?') = source.get_char_at(start_pos + 1) {
-                if let Some('p') = source.get_char_at(start_pos + 2) {
-                    if let Some('h') = source.get_char_at(start_pos + 3) {
-                        if let Some('p') = source.get_char_at(start_pos + 4) {
-                            state.advance(5);
-                            state.add_token(PhpSyntaxKind::OpenTag, start_pos, state.get_position());
-                            return true;
-                        }
-                    }
-                }
-                // <? 短标
-                state.advance(2);
-                state.add_token(PhpSyntaxKind::OpenTag, start_pos, state.get_position());
-                return true;
-            }
-            // <?= echo 标签
-            else if let Some('=') = source.get_char_at(start_pos + 1) {
-                state.advance(3);
-                state.add_token(PhpSyntaxKind::EchoTag, start_pos, state.get_position());
-                return true;
-            }
-        }
-
-        // ?> 结束标签
-        if let Some('?') = state.peek() {
-            if let Some('>') = source.get_char_at(start_pos + 1) {
-                state.advance(2);
-                state.add_token(PhpSyntaxKind::CloseTag, start_pos, state.get_position());
-                return true;
-            }
-        }
-
-        false
-    }
-
-    /// 处理注释
-    fn lex_comment(&self, state: &mut State, source: &SourceText) -> bool {
-        let start_pos = state.get_position();
-
-        // // 单行注释
         if let Some('/') = state.peek() {
-            if let Some('/') = source.get_char_at(start_pos + 1) {
-                state.advance(2);
+            state.advance(1);
+            if let Some('/') = state.peek() {
+                state.advance(1);
+                // 单行注释
                 while let Some(ch) = state.peek() {
                     if ch == '\n' || ch == '\r' {
                         break;
                     }
+                    state.advance(ch.len_utf8());
+                }
+                state.add_token(PhpSyntaxKind::Comment, start_pos, state.get_position());
+                return true;
+            }
+            else if let Some('*') = state.peek() {
+                state.advance(1);
+                // 多行注释
+                while let Some(ch) = state.peek() {
+                    if ch == '*' {
+                        state.advance(1);
+                        if let Some('/') = state.peek() {
+                            state.advance(1);
+                            break;
+                        }
+                    }
                     else {
                         state.advance(ch.len_utf8());
                     }
@@ -116,86 +139,61 @@ impl<'config> PhpLexer<'config> {
                 state.add_token(PhpSyntaxKind::Comment, start_pos, state.get_position());
                 return true;
             }
+            else {
+                // 回退，这不是注释
+                state.set_position(start_pos);
+                return false;
+            }
         }
-
-        // # 单行注释
-        if let Some('#') = state.peek() {
+        else if let Some('#') = state.peek() {
             state.advance(1);
+            // PHP 风格的单行注释
             while let Some(ch) = state.peek() {
                 if ch == '\n' || ch == '\r' {
                     break;
                 }
-                else {
-                    state.advance(ch.len_utf8());
-                }
+                state.advance(ch.len_utf8());
             }
             state.add_token(PhpSyntaxKind::Comment, start_pos, state.get_position());
-            return true;
+            true
         }
-
-        // /* */ 多行注释
-        if let Some('/') = state.peek() {
-            if let Some('*') = source.get_char_at(start_pos + 1) {
-                state.advance(2);
-                while let Some(ch) = state.peek() {
-                    if ch == '*' {
-                        if let Some('/') = source.get_char_at(state.get_position() + 1) {
-                            state.advance(2);
-                            break;
-                        }
-                        else {
-                            state.advance(1);
-                        }
-                    }
-                    else {
-                        state.advance(ch.len_utf8());
-                    }
-                }
-                state.add_token(PhpSyntaxKind::Comment, start_pos, state.get_position());
-                return true;
-            }
+        else {
+            false
         }
-
-        false
     }
 
-    /// 处理字符串字面量
-    fn lex_string_literal(&self, state: &mut State) -> bool {
+    fn lex_string<S: Source>(&self, state: &mut State<S>) -> bool {
         let start_pos = state.get_position();
 
-        if let Some(quote) = state.peek() {
-            if quote == '"' || quote == '\'' {
-                state.advance(1);
-                let mut found_end = false;
+        if let Some(quote_char) = state.peek() {
+            if quote_char == '"' || quote_char == '\'' {
+                state.advance(1); // 跳过开始引号
 
+                let mut escaped = false;
                 while let Some(ch) = state.peek() {
-                    if ch == quote {
-                        state.advance(1);
-                        found_end = true;
-                        break;
+                    if escaped {
+                        escaped = false;
+                        state.advance(ch.len_utf8());
                     }
                     else if ch == '\\' {
+                        escaped = true;
                         state.advance(1);
-                        if let Some(_) = state.peek() {
-                            state.advance(1);
-                        }
+                    }
+                    else if ch == quote_char {
+                        state.advance(1); // 跳过结束引号
+                        break;
                     }
                     else if ch == '\n' || ch == '\r' {
-                        break; // 字符串不能跨行（除非转义
+                        // 字符串不能跨行（除非转义）
+                        break;
                     }
                     else {
                         state.advance(ch.len_utf8());
                     }
                 }
 
-                if found_end {
-                    state.add_token(PhpSyntaxKind::StringLiteral, start_pos, state.get_position());
-                    true
-                }
-                else {
-                    state.set_position(start_pos);
-                    false
-                }
+                state.add_token(PhpSyntaxKind::StringLiteral, start_pos, state.get_position());
+                true
             }
             else {
                 false
@@ -206,15 +204,14 @@ impl<'config> PhpLexer<'config> {
         }
     }
 
-    /// 处理数字字面
-    fn lex_number_literal(&self, state: &mut State) -> bool {
-        let start_pos = state.get_position();
-
+    fn lex_number<S: Source>(&self, state: &mut State<S>) -> bool {
         if let Some(ch) = state.peek() {
             if ch.is_ascii_digit() {
-                // 整数部分
-                while let Some(digit) = state.peek() {
-                    if digit.is_ascii_digit() {
+                let start_pos = state.get_position();
+
+                // 读取整数部分
+                while let Some(ch) = state.peek() {
+                    if ch.is_ascii_digit() {
                         state.advance(1);
                     }
                     else {
@@ -224,51 +221,34 @@ impl<'config> PhpLexer<'config> {
 
                 // 检查小数点
                 if let Some('.') = state.peek() {
-                    let next_pos = state.get_position() + 1;
-                    if let Some(next_ch) = state.source.get_char_at(next_pos) {
-                        if next_ch.is_ascii_digit() {
+                    state.advance(1);
+                    // 读取小数部分
+                    while let Some(ch) = state.peek() {
+                        if ch.is_ascii_digit() {
                             state.advance(1);
-
-                            // 小数部分
-                            while let Some(digit) = state.peek() {
-                                if digit.is_ascii_digit() {
-                                    state.advance(1);
-                                }
-                                else {
-                                    break;
-                                }
-                            }
+                        }
+                        else {
+                            break;
                         }
                     }
                 }
 
-                // 检查科学计数法
-                if let Some(e_char) = state.peek() {
-                    if e_char == 'e' || e_char == 'E' {
-                        let saved_pos = state.get_position();
+                // 检查科学记数法
+                if let Some(ch) = state.peek() {
+                    if ch == 'e' || ch == 'E' {
                         state.advance(1);
-
-                        // 可选的符号
-                        if let Some(sign) = state.peek() {
-                            if sign == '+' || sign == '-' {
+                        if let Some(ch) = state.peek() {
+                            if ch == '+' || ch == '-' {
                                 state.advance(1);
                             }
                         }
-
-                        // 指数部分
-                        let exp_start = state.get_position();
-                        while let Some(digit) = state.peek() {
-                            if digit.is_ascii_digit() {
+                        while let Some(ch) = state.peek() {
+                            if ch.is_ascii_digit() {
                                 state.advance(1);
                             }
                             else {
                                 break;
                             }
-                        }
-
-                        if state.get_position() == exp_start {
-                            // 没有有效的指数，回退
-                            state.set_position(saved_pos);
                         }
                     }
                 }
@@ -285,57 +265,16 @@ impl<'config> PhpLexer<'config> {
         }
     }
 
-    /// 处理变量
-    fn lex_variable(&self, state: &mut State) -> bool {
-        let start_pos = state.get_position();
-
-        if let Some('$') = state.peek() {
-            state.advance(1);
-
-            // 变量名必须以字母或下划线开
-            if let Some(ch) = state.peek() {
-                if ch.is_ascii_alphabetic() || ch == '_' {
-                    state.advance(ch.len_utf8());
-
-                    while let Some(ch) = state.peek() {
-                        if ch.is_ascii_alphanumeric() || ch == '_' {
-                            state.advance(ch.len_utf8());
-                        }
-                        else {
-                            break;
-                        }
-                    }
-
-                    state.add_token(PhpSyntaxKind::Variable, start_pos, state.get_position());
-                    true
-                }
-                else {
-                    // 只有 $ 符号，回退
-                    state.set_position(start_pos);
-                    false
-                }
-            }
-            else {
-                // 只有 $ 符号，回退
-                state.set_position(start_pos);
-                false
-            }
-        }
-        else {
-            false
-        }
-    }
-
-    /// 处理标识符和关键
-    fn lex_identifier_or_keyword(&self, state: &mut State, source: &SourceText) -> bool {
-        let start_pos = state.get_position();
-
+    fn lex_identifier_or_keyword<S: Source>(&self, state: &mut State<S>) -> bool {
         if let Some(ch) = state.peek() {
-            if ch.is_ascii_alphabetic() || ch == '_' {
-                state.advance(ch.len_utf8());
+            if ch.is_alphabetic() || ch == '_' || ch == '$' {
+                let start_pos = state.get_position();
+                let mut text = String::new();
 
+                // 读取标识符
                 while let Some(ch) = state.peek() {
-                    if ch.is_ascii_alphanumeric() || ch == '_' {
+                    if ch.is_alphanumeric() || ch == '_' || ch == '$' {
+                        text.push(ch);
                         state.advance(ch.len_utf8());
                     }
                     else {
@@ -343,8 +282,8 @@ impl<'config> PhpLexer<'config> {
                     }
                 }
 
-                let text = state.source.get_text(start_pos, state.get_position());
-                let token_kind = match text.to_lowercase().as_str() {
+                // 检查是否是关键字
+                let kind = match text.as_str() {
                     "abstract" => PhpSyntaxKind::Abstract,
                     "and" => PhpSyntaxKind::And,
                     "array" => PhpSyntaxKind::Array,
@@ -359,6 +298,7 @@ impl<'config> PhpLexer<'config> {
                     "continue" => PhpSyntaxKind::Continue,
                     "declare" => PhpSyntaxKind::Declare,
                     "default" => PhpSyntaxKind::Default,
+                    "die" => PhpSyntaxKind::Exit,
                     "do" => PhpSyntaxKind::Do,
                     "echo" => PhpSyntaxKind::Echo,
                     "else" => PhpSyntaxKind::Else,
@@ -410,12 +350,13 @@ impl<'config> PhpLexer<'config> {
                     "while" => PhpSyntaxKind::While,
                     "xor" => PhpSyntaxKind::Xor,
                     "yield" => PhpSyntaxKind::Yield,
-                    "true" | "false" => PhpSyntaxKind::BooleanLiteral,
+                    "true" => PhpSyntaxKind::BooleanLiteral,
+                    "false" => PhpSyntaxKind::BooleanLiteral,
                     "null" => PhpSyntaxKind::NullLiteral,
                     _ => PhpSyntaxKind::Identifier,
                 };
 
-                state.add_token(token_kind, start_pos, state.get_position());
+                state.add_token(kind, start_pos, state.get_position());
                 true
             }
             else {
@@ -427,12 +368,11 @@ impl<'config> PhpLexer<'config> {
         }
     }
 
-    /// 处理运算
-    fn lex_operators(&self, state: &mut State, source: &SourceText) -> bool {
-        let start_pos = state.get_position();
-
+    fn lex_operators_and_punctuation<S: Source>(&self, state: &mut State<S>) -> bool {
         if let Some(ch) = state.peek() {
-            let token_kind = match ch {
+            let start_pos = state.get_position();
+
+            let kind = match ch {
                 '+' => {
                     state.advance(1);
                     if let Some('+') = state.peek() {
@@ -469,13 +409,7 @@ impl<'config> PhpLexer<'config> {
                     state.advance(1);
                     if let Some('*') = state.peek() {
                         state.advance(1);
-                        if let Some('=') = state.peek() {
-                            state.advance(1);
-                            PhpSyntaxKind::PowerAssign
-                        }
-                        else {
-                            PhpSyntaxKind::Power
-                        }
+                        PhpSyntaxKind::Power
                     }
                     else if let Some('=') = state.peek() {
                         state.advance(1);
@@ -545,13 +479,7 @@ impl<'config> PhpLexer<'config> {
                     state.advance(1);
                     if let Some('=') = state.peek() {
                         state.advance(1);
-                        if let Some('>') = state.peek() {
-                            state.advance(1);
-                            PhpSyntaxKind::Spaceship
-                        }
-                        else {
-                            PhpSyntaxKind::LessEqual
-                        }
+                        PhpSyntaxKind::LessEqual
                     }
                     else if let Some('<') = state.peek() {
                         state.advance(1);
@@ -562,6 +490,10 @@ impl<'config> PhpLexer<'config> {
                         else {
                             PhpSyntaxKind::LeftShift
                         }
+                    }
+                    else if let Some('>') = state.peek() {
+                        state.advance(1);
+                        PhpSyntaxKind::Spaceship
                     }
                     else {
                         PhpSyntaxKind::Less
@@ -629,39 +561,11 @@ impl<'config> PhpLexer<'config> {
                     state.advance(1);
                     PhpSyntaxKind::BitwiseNot
                 }
-                '.' => {
-                    state.advance(1);
-                    if let Some('.') = state.peek() {
-                        state.advance(1);
-                        if let Some('.') = state.peek() {
-                            state.advance(1);
-                            PhpSyntaxKind::Ellipsis
-                        }
-                        else {
-                            // 回退一个字符，这不是省略号
-                            state.set_position(state.get_position() - 1);
-                            PhpSyntaxKind::Concat
-                        }
-                    }
-                    else if let Some('=') = state.peek() {
-                        state.advance(1);
-                        PhpSyntaxKind::ConcatAssign
-                    }
-                    else {
-                        PhpSyntaxKind::Concat
-                    }
-                }
                 '?' => {
                     state.advance(1);
                     if let Some('?') = state.peek() {
                         state.advance(1);
-                        if let Some('=') = state.peek() {
-                            state.advance(1);
-                            PhpSyntaxKind::NullCoalesceAssign
-                        }
-                        else {
-                            PhpSyntaxKind::NullCoalesce
-                        }
+                        PhpSyntaxKind::NullCoalesce
                     }
                     else {
                         PhpSyntaxKind::Question
@@ -677,39 +581,60 @@ impl<'config> PhpLexer<'config> {
                         PhpSyntaxKind::Colon
                     }
                 }
+                ';' => {
+                    state.advance(1);
+                    PhpSyntaxKind::Semicolon
+                }
+                ',' => {
+                    state.advance(1);
+                    PhpSyntaxKind::Comma
+                }
+                '.' => {
+                    state.advance(1);
+                    if let Some('=') = state.peek() {
+                        state.advance(1);
+                        PhpSyntaxKind::ConcatAssign
+                    }
+                    else {
+                        PhpSyntaxKind::Dot
+                    }
+                }
+                '(' => {
+                    state.advance(1);
+                    PhpSyntaxKind::LeftParen
+                }
+                ')' => {
+                    state.advance(1);
+                    PhpSyntaxKind::RightParen
+                }
+                '[' => {
+                    state.advance(1);
+                    PhpSyntaxKind::LeftBracket
+                }
+                ']' => {
+                    state.advance(1);
+                    PhpSyntaxKind::RightBracket
+                }
+                '{' => {
+                    state.advance(1);
+                    PhpSyntaxKind::LeftBrace
+                }
+                '}' => {
+                    state.advance(1);
+                    PhpSyntaxKind::RightBrace
+                }
+                '$' => {
+                    state.advance(1);
+                    PhpSyntaxKind::Dollar
+                }
+                '@' => {
+                    state.advance(1);
+                    PhpSyntaxKind::At
+                }
                 _ => return false,
             };
 
-            state.add_token(token_kind, start_pos, state.get_position());
-            true
-        }
-        else {
-            false
-        }
-    }
-
-    /// 处理分隔
-    fn lex_delimiters(&self, state: &mut State) -> bool {
-        let start_pos = state.get_position();
-
-        if let Some(ch) = state.peek() {
-            let token_kind = match ch {
-                '(' => PhpSyntaxKind::LeftParen,
-                ')' => PhpSyntaxKind::RightParen,
-                '[' => PhpSyntaxKind::LeftBracket,
-                ']' => PhpSyntaxKind::RightBracket,
-                '{' => PhpSyntaxKind::LeftBrace,
-                '}' => PhpSyntaxKind::RightBrace,
-                ';' => PhpSyntaxKind::Semicolon,
-                ',' => PhpSyntaxKind::Comma,
-                '\\' => PhpSyntaxKind::Backslash,
-                '@' => PhpSyntaxKind::At,
-                '$' => PhpSyntaxKind::Dollar,
-                _ => return false,
-            };
-
-            state.advance(ch.len_utf8());
-            state.add_token(token_kind, start_pos, state.get_position());
+            state.add_token(kind, start_pos, state.get_position());
             true
         }
         else {
@@ -719,63 +644,14 @@ impl<'config> PhpLexer<'config> {
 }
 
 impl<'config> Lexer<PhpLanguage> for PhpLexer<'config> {
-    fn lex(&self, source: &SourceText) -> LexOutput<PhpSyntaxKind> {
+    fn lex_incremental(
+        &self,
+        source: impl Source,
+        _changed: usize,
+        _cache: IncrementalCache<PhpLanguage>,
+    ) -> LexOutput<PhpLanguage> {
         let mut state = LexerState::new(source);
-
-        while state.not_at_end() {
-            // 尝试各种词法规则
-            if self.skip_whitespace(&mut state) {
-                continue;
-            }
-
-            if self.lex_newline(&mut state) {
-                continue;
-            }
-
-            if self.lex_php_tags(&mut state, source) {
-                continue;
-            }
-
-            if self.lex_comment(&mut state, source) {
-                continue;
-            }
-
-            if self.lex_string_literal(&mut state) {
-                continue;
-            }
-
-            if self.lex_number_literal(&mut state) {
-                continue;
-            }
-
-            if self.lex_variable(&mut state) {
-                continue;
-            }
-
-            if self.lex_identifier_or_keyword(&mut state, source) {
-                continue;
-            }
-
-            if self.lex_operators(&mut state, source) {
-                continue;
-            }
-
-            if self.lex_delimiters(&mut state) {
-                continue;
-            }
-
-            // 如果所有规则都不匹配，跳过当前字符并标记为错误
-            let start_pos = state.get_position();
-            if let Some(ch) = state.peek() {
-                state.advance(ch.len_utf8());
-                state.add_token(PhpSyntaxKind::Error, start_pos, state.get_position());
-            }
-        }
-
-        // 添加 EOF kind
-        let eof_pos = state.get_position();
-        state.add_token(PhpSyntaxKind::Eof, eof_pos, eof_pos);
-
-        state.finish()
+        let result = self.run(&mut state);
+        state.finish(result)
     }
 }

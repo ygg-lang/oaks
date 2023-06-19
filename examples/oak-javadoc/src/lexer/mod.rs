@@ -1,11 +1,8 @@
 use crate::{kind::JavadocSyntaxKind, language::JavadocLanguage};
-use alloc::string::String;
-use oak_core::{
-    Lexer, SourceText,
-    lexer::{LexOutput, LexerState},
-};
 
-type State<'input> = LexerState<'input, JavadocLanguage>;
+use oak_core::{IncrementalCache, Lexer, LexerState, lexer::LexOutput, source::Source};
+
+type State<S> = LexerState<S, JavadocLanguage>;
 
 /// Javadoc 词法分析
 pub struct JavadocLexer<'config> {
@@ -19,7 +16,7 @@ impl<'config> JavadocLexer<'config> {
     }
 
     /// 跳过空白字符
-    fn skip_whitespace(&self, state: &mut State) -> bool {
+    fn skip_whitespace<S: Source>(&self, state: &mut State<S>) -> bool {
         let start_pos = state.get_position();
 
         while let Some(ch) = state.peek() {
@@ -41,7 +38,7 @@ impl<'config> JavadocLexer<'config> {
     }
 
     /// 处理换行
-    fn lex_newline(&self, state: &mut State) -> bool {
+    fn lex_newline<S: Source>(&self, state: &mut State<S>) -> bool {
         let start_pos = state.get_position();
 
         if let Some('\n') = state.peek() {
@@ -63,21 +60,27 @@ impl<'config> JavadocLexer<'config> {
     }
 
     /// 处理 Javadoc 注释开
-    fn lex_comment_start(&self, state: &mut State, source: &SourceText) -> bool {
+    fn lex_comment_start<S: Source>(&self, state: &mut State<S>) -> bool {
         let start_pos = state.get_position();
 
         if let Some('/') = state.peek() {
-            if let Some('*') = source.get_char_at(start_pos + 1) {
-                if let Some('*') = source.get_char_at(start_pos + 2) {
-                    state.advance(3);
+            state.advance(1);
+            if let Some('*') = state.peek() {
+                state.advance(1);
+                if let Some('*') = state.peek() {
+                    state.advance(1);
                     state.add_token(JavadocSyntaxKind::CommentStart, start_pos, state.get_position());
                     true
                 }
                 else {
+                    // 回退到开始位置
+                    state.set_position(start_pos);
                     false
                 }
             }
             else {
+                // 回退到开始位置
+                state.set_position(start_pos);
                 false
             }
         }
@@ -87,16 +90,19 @@ impl<'config> JavadocLexer<'config> {
     }
 
     /// 处理 Javadoc 注释结束
-    fn lex_comment_end(&self, state: &mut State, source: &SourceText) -> bool {
+    fn lex_comment_end<S: Source>(&self, state: &mut State<S>) -> bool {
         let start_pos = state.get_position();
 
         if let Some('*') = state.peek() {
-            if let Some('/') = source.get_char_at(start_pos + 1) {
-                state.advance(2);
+            state.advance(1);
+            if let Some('/') = state.peek() {
+                state.advance(1);
                 state.add_token(JavadocSyntaxKind::CommentEnd, start_pos, state.get_position());
                 true
             }
             else {
+                // 回退到开始位置
+                state.set_position(start_pos);
                 false
             }
         }
@@ -106,7 +112,7 @@ impl<'config> JavadocLexer<'config> {
     }
 
     /// 处理 Javadoc 标签
-    fn lex_tag(&self, state: &mut State) -> bool {
+    fn lex_tag<S: Source>(&self, state: &mut State<S>) -> bool {
         let start_pos = state.get_position();
 
         if let Some('@') = state.peek() {
@@ -152,7 +158,7 @@ impl<'config> JavadocLexer<'config> {
     }
 
     /// 处理 HTML 标签
-    fn lex_html_tag(&self, state: &mut State) -> bool {
+    fn lex_html_tag<S: Source>(&self, state: &mut State<S>) -> bool {
         let start_pos = state.get_position();
 
         if let Some('<') = state.peek() {
@@ -222,7 +228,7 @@ impl<'config> JavadocLexer<'config> {
     }
 
     /// 处理文本内容
-    fn lex_text(&self, state: &mut State) -> bool {
+    fn lex_text<S: Source>(&self, state: &mut State<S>) -> bool {
         let start_pos = state.get_position();
 
         while let Some(ch) = state.peek() {
@@ -242,7 +248,7 @@ impl<'config> JavadocLexer<'config> {
     }
 
     /// 处理星号（注释行开始）
-    fn lex_asterisk(&self, state: &mut State) -> bool {
+    fn lex_asterisk<S: Source>(&self, state: &mut State<S>) -> bool {
         let start_pos = state.get_position();
 
         if let Some('*') = state.peek() {
@@ -257,40 +263,52 @@ impl<'config> JavadocLexer<'config> {
 }
 
 impl<'config> Lexer<JavadocLanguage> for JavadocLexer<'config> {
-    fn lex(&self, source: &SourceText) -> LexOutput<JavadocSyntaxKind> {
-        let mut state = State::new(source);
+    fn lex_incremental(
+        &self,
+        source: impl Source,
+        changed: usize,
+        cache: IncrementalCache<JavadocLanguage>,
+    ) -> LexOutput<JavadocLanguage> {
+        let mut state = State::new_with_cache(source, changed, cache);
+        let result = self.run(&mut state);
+        state.finish(result)
+    }
+}
 
+impl<'config> JavadocLexer<'config> {
+    /// 主要的词法分析循环
+    fn run<S: Source>(&self, state: &mut State<S>) -> Result<(), oak_core::OakError> {
         loop {
             // 尝试各种词法规则
-            if self.skip_whitespace(&mut state) {
+            if self.skip_whitespace(state) {
                 continue;
             }
 
-            if self.lex_newline(&mut state) {
+            if self.lex_newline(state) {
                 continue;
             }
 
-            if self.lex_comment_start(&mut state, source) {
+            if self.lex_comment_start(state) {
                 continue;
             }
 
-            if self.lex_comment_end(&mut state, source) {
+            if self.lex_comment_end(state) {
                 continue;
             }
 
-            if self.lex_tag(&mut state) {
+            if self.lex_tag(state) {
                 continue;
             }
 
-            if self.lex_html_tag(&mut state) {
+            if self.lex_html_tag(state) {
                 continue;
             }
 
-            if self.lex_asterisk(&mut state) {
+            if self.lex_asterisk(state) {
                 continue;
             }
 
-            if self.lex_text(&mut state) {
+            if self.lex_text(state) {
                 continue;
             }
 
@@ -311,6 +329,6 @@ impl<'config> Lexer<JavadocLanguage> for JavadocLexer<'config> {
         let eof_pos = state.get_position();
         state.add_token(JavadocSyntaxKind::Eof, eof_pos, eof_pos);
 
-        state.finish()
+        Ok(())
     }
 }

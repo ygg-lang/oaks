@@ -1,27 +1,88 @@
 use crate::{language::JasmLanguage, syntax::JasmSyntaxKind};
-use alloc::string::String;
-use oak_core::{Lexer, LexerState, SourceText, lexer::LexOutput};
+use oak_core::{
+    IncrementalCache, Lexer, LexerState, OakError,
+    lexer::{CommentLine, LexOutput, StringConfig, WhitespaceConfig},
+    source::Source,
+};
+use std::sync::LazyLock;
 
-type State<'input> = LexerState<'input, JasmLanguage>;
+type State<S: Source> = LexerState<S, JasmLanguage>;
 
-/// JASM 词法分析
+static JASM_WHITESPACE: LazyLock<WhitespaceConfig> = LazyLock::new(|| WhitespaceConfig { unicode_whitespace: true });
+static JASM_COMMENT: LazyLock<CommentLine> = LazyLock::new(|| CommentLine { line_markers: &["//"] });
+static JASM_STRING: LazyLock<StringConfig> = LazyLock::new(|| StringConfig { quotes: &['"'], escape: Some('\\') });
 
+#[derive(Clone)]
 pub struct JasmLexer<'config> {
-    _config: &'config JasmLanguage,
+    config: &'config JasmLanguage,
+}
+
+impl<'config> Lexer<JasmLanguage> for JasmLexer<'config> {
+    fn lex_incremental(
+        &self,
+        source: impl Source,
+        changed: usize,
+        cache: IncrementalCache<JasmLanguage>,
+    ) -> LexOutput<JasmLanguage> {
+        let mut state = LexerState::new_with_cache(source, changed, cache);
+        let result = self.run(&mut state);
+        state.finish(result)
+    }
 }
 
 impl<'config> JasmLexer<'config> {
-    /// 创建新的 JASM lexer
     pub fn new(config: &'config JasmLanguage) -> Self {
-        Self { _config: config }
+        Self { config }
     }
 
-    /// 跳过空白字符
-    fn skip_whitespace(&self, state: &mut State) -> bool {
-        let start_pos = state.get_position();
+    /// 主要的词法分析循环
+    fn run<S: Source>(&self, state: &mut State<S>) -> Result<(), OakError> {
+        while state.not_at_end() {
+            let safe_point = state.get_position();
+
+            if self.skip_whitespace(state) {
+                continue;
+            }
+
+            if self.lex_newline(state) {
+                continue;
+            }
+
+            if self.skip_comment(state) {
+                continue;
+            }
+
+            if self.lex_string_literal(state) {
+                continue;
+            }
+
+            if self.lex_number_literal(state) {
+                continue;
+            }
+
+            if self.lex_identifier_or_keyword(state) {
+                continue;
+            }
+
+            if self.lex_punctuation(state) {
+                continue;
+            }
+
+            state.safe_check(safe_point);
+        }
+
+        // 添加 EOF token
+        let eof_pos = state.get_position();
+        state.add_token(JasmSyntaxKind::Eof, eof_pos, eof_pos);
+        Ok(())
+    }
+
+    /// 跳过空白字符（不包括换行符）
+    fn skip_whitespace<S: Source>(&self, state: &mut State<S>) -> bool {
+        let start = state.get_position();
 
         while let Some(ch) = state.peek() {
-            if ch == ' ' || ch == '\t' {
+            if ch == ' ' || ch == '\t' || ch == '\r' {
                 state.advance(ch.len_utf8());
             }
             else {
@@ -29,237 +90,258 @@ impl<'config> JasmLexer<'config> {
             }
         }
 
-        if state.get_position() > start_pos {
-            state.add_token(JasmSyntaxKind::Whitespace, start_pos, state.get_position());
-            true
+        if state.get_position() > start {
+            state.add_token(JasmSyntaxKind::Whitespace, start, state.get_position());
+            return true;
         }
-        else {
-            false
-        }
+        false
     }
 
     /// 处理换行
-    fn lex_newline(&self, state: &mut State) -> bool {
-        let start_pos = state.get_position();
+    fn lex_newline<S: Source>(&self, state: &mut State<S>) -> bool {
+        let start = state.get_position();
 
-        if let Some('\n') = state.peek() {
+        if state.current() == Some('\n') {
             state.advance(1);
-            state.add_token(JasmSyntaxKind::Newline, start_pos, state.get_position());
-            true
+            state.add_token(JasmSyntaxKind::Newline, start, state.get_position());
+            return true;
         }
-        else if let Some('\r') = state.peek() {
-            state.advance(1);
-            if let Some('\n') = state.peek() {
-                state.advance(1);
-            }
-            state.add_token(JasmSyntaxKind::Newline, start_pos, state.get_position());
-            true
-        }
-        else {
-            false
-        }
+        false
     }
 
-    /// 处理注释
-    fn lex_comment(&self, state: &mut State, source: &SourceText) -> bool {
-        let start_pos = state.get_position();
+    /// 跳过注释
+    fn skip_comment<S: Source>(&self, state: &mut State<S>) -> bool {
+        let start = state.get_position();
+        let rest = state.rest();
 
-        if let Some('/') = state.peek() {
-            if let Some('/') = source.get_char_at(start_pos + 1) {
-                state.advance(2);
+        if rest.starts_with("//") {
+            // 跳过注释标记
+            state.advance(2);
 
-                // 读取到行末
-                while let Some(ch) = state.peek() {
-                    if ch == '\n' || ch == '\r' {
-                        break;
-                    }
+            // 读取到行尾
+            while let Some(ch) = state.peek() {
+                if ch != '\n' {
                     state.advance(ch.len_utf8());
                 }
+                else {
+                    break;
+                }
+            }
 
-                state.add_token(JasmSyntaxKind::Comment, start_pos, state.get_position());
-                true
-            }
-            else {
-                false
-            }
+            state.add_token(JasmSyntaxKind::Comment, start, state.get_position());
+            return true;
         }
-        else {
-            false
-        }
+        false
     }
 
     /// 处理字符串字面量
-    fn lex_string(&self, state: &mut State) -> bool {
-        let start_pos = state.get_position();
+    fn lex_string_literal<S: Source>(&self, state: &mut State<S>) -> bool {
+        let start = state.get_position();
 
-        if let Some('"') = state.peek() {
+        if state.current() == Some('"') {
+            // 跳过开始引号
             state.advance(1);
-            let mut escaped = false;
 
             while let Some(ch) = state.peek() {
-                if escaped {
-                    escaped = false;
-                    state.advance(ch.len_utf8());
-                }
-                else if ch == '\\' {
-                    escaped = true;
-                    state.advance(1);
-                }
-                else if ch == '"' {
-                    state.advance(1);
-                    state.add_token(JasmSyntaxKind::StringLiteral, start_pos, state.get_position());
-                    return true;
-                }
-                else if ch == '\n' || ch == '\r' {
-                    // 字符串不能跨行
-                    break;
+                if ch != '"' {
+                    if ch == '\\' {
+                        state.advance(1); // 转义字符
+                        if let Some(_) = state.peek() {
+                            state.advance(1); // 被转义的字符
+                        }
+                    }
+                    else {
+                        state.advance(ch.len_utf8());
+                    }
                 }
                 else {
-                    state.advance(ch.len_utf8());
-                }
-            }
-
-            // 未闭合的字符            state.set_position(start_pos);
-            false
-        }
-        else {
-            false
-        }
-    }
-
-    /// 处理数字
-    fn lex_number(&self, state: &mut State, source: &SourceText) -> bool {
-        let start_pos = state.get_position();
-
-        if let Some(ch) = state.peek() {
-            if ch.is_ascii_digit() || (ch == '-' && source.get_char_at(start_pos + 1).map_or(false, |c| c.is_ascii_digit())) {
-                if ch == '-' {
+                    // 找到结束引号
                     state.advance(1);
+                    break;
                 }
+            }
 
-                while let Some(ch) = state.peek() {
-                    if ch.is_ascii_digit() || ch == '.' {
-                        state.advance(ch.len_utf8());
-                    }
-                    else {
-                        break;
-                    }
+            state.add_token(JasmSyntaxKind::StringLiteral, start, state.get_position());
+            return true;
+        }
+        false
+    }
+
+    /// 处理数字字面量
+    fn lex_number_literal<S: Source>(&self, state: &mut State<S>) -> bool {
+        let start = state.get_position();
+        let first = match state.current() {
+            Some(c) => c,
+            None => return false,
+        };
+
+        // 检查是否以数字或负号开始
+        if !first.is_ascii_digit() && first != '-' && first != '+' {
+            return false;
+        }
+
+        // 如果是符号，检查后面是否跟数字
+        if first == '-' || first == '+' {
+            if let Some(next) = state.peek_next_n(1) {
+                if !next.is_ascii_digit() {
+                    return false;
                 }
-
-                state.add_token(JasmSyntaxKind::Number, start_pos, state.get_position());
-                true
             }
             else {
-                false
+                return false;
             }
         }
-        else {
-            false
+
+        state.advance(1);
+        let mut has_dot = false;
+        let mut has_exp = false;
+
+        while let Some(ch) = state.peek() {
+            if ch.is_ascii_digit() {
+                state.advance(1);
+            }
+            else if ch == '.' && !has_dot && !has_exp {
+                has_dot = true;
+                state.advance(1);
+            }
+            else if (ch == 'e' || ch == 'E') && !has_exp {
+                has_exp = true;
+                state.advance(1);
+                // 处理指数符号
+                if let Some(sign) = state.peek() {
+                    if sign == '+' || sign == '-' {
+                        state.advance(1);
+                    }
+                }
+            }
+            else {
+                break;
+            }
+        }
+
+        // 检查是否为有效数字
+        let end = state.get_position();
+        let text = state.get_text_in((start..end).into());
+
+        // 简单验证：不能只是符号或只是点
+        if text == "-" || text == "+" || text == "." {
+            // 回退
+            state.set_position(start);
+            return false;
+        }
+
+        state.add_token(JasmSyntaxKind::Number, start, state.get_position());
+        true
+    }
+
+    /// 处理标识符或关键字
+    fn lex_identifier_or_keyword<S: Source>(&self, state: &mut State<S>) -> bool {
+        let start = state.get_position();
+        let ch = match state.current() {
+            Some(c) => c,
+            None => return false,
+        };
+
+        // 标识符必须以字母或下划线开始
+        if !(ch.is_ascii_alphabetic() || ch == '_') {
+            return false;
+        }
+
+        state.advance(1);
+        while let Some(c) = state.current() {
+            if c.is_ascii_alphanumeric() || c == '_' {
+                state.advance(1);
+            }
+            else {
+                break;
+            }
+        }
+
+        let end = state.get_position();
+        let text = state.get_text_in((start..end).into());
+
+        // 检查是否为关键字或指令
+        let kind = self.classify_identifier(text);
+        state.add_token(kind, start, state.get_position());
+        true
+    }
+
+    /// 分类标识符为关键字、指令或普通标识符
+    fn classify_identifier(&self, text: &str) -> JasmSyntaxKind {
+        match text {
+            // 关键字
+            "class" => JasmSyntaxKind::ClassKw,
+            "version" => JasmSyntaxKind::VersionKw,
+            "method" => JasmSyntaxKind::MethodKw,
+            "field" => JasmSyntaxKind::FieldKw,
+            "string" => JasmSyntaxKind::StringKw,
+            "sourcefile" => JasmSyntaxKind::SourceFileKw,
+            "stack" => JasmSyntaxKind::StackKw,
+            "locals" => JasmSyntaxKind::LocalsKw,
+            "end" => JasmSyntaxKind::EndKw,
+            "compiled" => JasmSyntaxKind::CompiledKw,
+            "from" => JasmSyntaxKind::FromKw,
+            "innerclass" => JasmSyntaxKind::InnerClassKw,
+            "nestmembers" => JasmSyntaxKind::NestMembersKw,
+            "bootstrapmethod" => JasmSyntaxKind::BootstrapMethodKw,
+
+            // 访问修饰符
+            "public" => JasmSyntaxKind::Public,
+            "private" => JasmSyntaxKind::Private,
+            "protected" => JasmSyntaxKind::Protected,
+            "static" => JasmSyntaxKind::Static,
+            "super" => JasmSyntaxKind::Super,
+            "final" => JasmSyntaxKind::Final,
+            "abstract" => JasmSyntaxKind::Abstract,
+            "synchronized" => JasmSyntaxKind::Synchronized,
+            "native" => JasmSyntaxKind::Native,
+            "synthetic" => JasmSyntaxKind::Synthetic,
+            "deprecated" => JasmSyntaxKind::Deprecated,
+            "varargs" => JasmSyntaxKind::Varargs,
+
+            // 字节码指令
+            "aload_0" => JasmSyntaxKind::ALoad0,
+            "aload_1" => JasmSyntaxKind::ALoad1,
+            "aload_2" => JasmSyntaxKind::ALoad2,
+            "aload_3" => JasmSyntaxKind::ALoad3,
+            "iload_0" => JasmSyntaxKind::ILoad0,
+            "iload_1" => JasmSyntaxKind::ILoad1,
+            "iload_2" => JasmSyntaxKind::ILoad2,
+            "iload_3" => JasmSyntaxKind::ILoad3,
+            "ldc" => JasmSyntaxKind::Ldc,
+            "ldc_w" => JasmSyntaxKind::LdcW,
+            "ldc2_w" => JasmSyntaxKind::Ldc2W,
+            "invokespecial" => JasmSyntaxKind::InvokeSpecial,
+            "invokevirtual" => JasmSyntaxKind::InvokeVirtual,
+            "invokestatic" => JasmSyntaxKind::InvokeStatic,
+            "invokeinterface" => JasmSyntaxKind::InvokeInterface,
+            "invokedynamic" => JasmSyntaxKind::InvokeDynamic,
+            "getstatic" => JasmSyntaxKind::GetStatic,
+            "putstatic" => JasmSyntaxKind::PutStatic,
+            "getfield" => JasmSyntaxKind::GetField,
+            "putfield" => JasmSyntaxKind::PutField,
+            "return" => JasmSyntaxKind::Return,
+            "ireturn" => JasmSyntaxKind::IReturn,
+            "areturn" => JasmSyntaxKind::AReturn,
+            "lreturn" => JasmSyntaxKind::LReturn,
+            "freturn" => JasmSyntaxKind::FReturn,
+            "dreturn" => JasmSyntaxKind::DReturn,
+            "nop" => JasmSyntaxKind::Nop,
+            "dup" => JasmSyntaxKind::Dup,
+            "pop" => JasmSyntaxKind::Pop,
+            "new" => JasmSyntaxKind::New,
+
+            // 默认为标识符
+            _ => JasmSyntaxKind::IdentifierToken,
         }
     }
 
-    /// 处理标识符和关键字
-    fn lex_identifier(&self, state: &mut State) -> bool {
-        let start_pos = state.get_position();
+    /// 处理标点符号
+    fn lex_punctuation<S: Source>(&self, state: &mut State<S>) -> bool {
+        let start = state.get_position();
 
-        if let Some(ch) = state.peek() {
-            if ch.is_alphabetic() || ch == '_' {
-                let mut text = String::new();
-
-                while let Some(ch) = state.peek() {
-                    if ch.is_alphanumeric() || ch == '_' {
-                        text.push(ch);
-                        state.advance(ch.len_utf8());
-                    }
-                    else {
-                        break;
-                    }
-                }
-
-                // 检查是否为关键字或指令
-                let kind = match text.as_str() {
-                    // 关键                    "class" => JasmSyntaxKind::ClassKw,
-                    "version" => JasmSyntaxKind::VersionKw,
-                    "method" => JasmSyntaxKind::MethodKw,
-                    "field" => JasmSyntaxKind::FieldKw,
-                    "string" => JasmSyntaxKind::StringKw,
-                    "sourcefile" => JasmSyntaxKind::SourceFileKw,
-                    "stack" => JasmSyntaxKind::StackKw,
-                    "locals" => JasmSyntaxKind::LocalsKw,
-                    "end" => JasmSyntaxKind::EndKw,
-                    "compiled" => JasmSyntaxKind::CompiledKw,
-                    "from" => JasmSyntaxKind::FromKw,
-                    "innerclass" => JasmSyntaxKind::InnerClassKw,
-                    "nestmembers" => JasmSyntaxKind::NestMembersKw,
-                    "bootstrapmethod" => JasmSyntaxKind::BootstrapMethodKw,
-
-                    // 访问修饰                    "public" => JasmSyntaxKind::Public,
-                    "private" => JasmSyntaxKind::Private,
-                    "protected" => JasmSyntaxKind::Protected,
-                    "static" => JasmSyntaxKind::Static,
-                    "super" => JasmSyntaxKind::Super,
-                    "final" => JasmSyntaxKind::Final,
-                    "abstract" => JasmSyntaxKind::Abstract,
-                    "synchronized" => JasmSyntaxKind::Synchronized,
-                    "native" => JasmSyntaxKind::Native,
-                    "synthetic" => JasmSyntaxKind::Synthetic,
-                    "deprecated" => JasmSyntaxKind::Deprecated,
-                    "varargs" => JasmSyntaxKind::Varargs,
-
-                    // JVM 指令
-                    "aload_0" => JasmSyntaxKind::ALoad0,
-                    "aload_1" => JasmSyntaxKind::ALoad1,
-                    "aload_2" => JasmSyntaxKind::ALoad2,
-                    "aload_3" => JasmSyntaxKind::ALoad3,
-                    "iload_0" => JasmSyntaxKind::ILoad0,
-                    "iload_1" => JasmSyntaxKind::ILoad1,
-                    "iload_2" => JasmSyntaxKind::ILoad2,
-                    "iload_3" => JasmSyntaxKind::ILoad3,
-                    "ldc" => JasmSyntaxKind::Ldc,
-                    "ldc_w" => JasmSyntaxKind::LdcW,
-                    "ldc2_w" => JasmSyntaxKind::Ldc2W,
-                    "invokespecial" => JasmSyntaxKind::InvokeSpecial,
-                    "invokevirtual" => JasmSyntaxKind::InvokeVirtual,
-                    "invokestatic" => JasmSyntaxKind::InvokeStatic,
-                    "invokeinterface" => JasmSyntaxKind::InvokeInterface,
-                    "invokedynamic" => JasmSyntaxKind::InvokeDynamic,
-                    "getstatic" => JasmSyntaxKind::GetStatic,
-                    "putstatic" => JasmSyntaxKind::PutStatic,
-                    "getfield" => JasmSyntaxKind::GetField,
-                    "putfield" => JasmSyntaxKind::PutField,
-                    "return" => JasmSyntaxKind::Return,
-                    "ireturn" => JasmSyntaxKind::IReturn,
-                    "areturn" => JasmSyntaxKind::AReturn,
-                    "lreturn" => JasmSyntaxKind::LReturn,
-                    "freturn" => JasmSyntaxKind::FReturn,
-                    "dreturn" => JasmSyntaxKind::DReturn,
-                    "nop" => JasmSyntaxKind::Nop,
-                    "dup" => JasmSyntaxKind::Dup,
-                    "pop" => JasmSyntaxKind::Pop,
-                    "new" => JasmSyntaxKind::New,
-
-                    // 默认为标识符
-                    _ => JasmSyntaxKind::IdentifierToken,
-                };
-
-                state.add_token(kind, start_pos, state.get_position());
-                true
-            }
-            else {
-                false
-            }
-        }
-        else {
-            false
-        }
-    }
-
-    /// 处理特殊字符
-    fn lex_special_char(&self, state: &mut State) -> bool {
-        let start_pos = state.get_position();
-
-        if let Some(ch) = state.peek() {
-            let token_kind = match ch {
+        if let Some(ch) = state.current() {
+            let kind = match ch {
                 '{' => JasmSyntaxKind::LeftBrace,
                 '}' => JasmSyntaxKind::RightBrace,
                 '(' => JasmSyntaxKind::LeftParen,
@@ -275,63 +357,10 @@ impl<'config> JasmLexer<'config> {
             };
 
             state.advance(ch.len_utf8());
-            state.add_token(token_kind, start_pos, state.get_position());
-            true
-        }
-        else {
-            false
-        }
-    }
-}
-
-impl<'config> Lexer<JasmLanguage> for JasmLexer<'config> {
-    fn lex(&self, source: &SourceText) -> LexOutput<JasmSyntaxKind> {
-        let mut state = State::new(source);
-
-        loop {
-            if self.skip_whitespace(&mut state) {
-                continue;
-            }
-
-            if self.lex_newline(&mut state) {
-                continue;
-            }
-
-            if self.lex_comment(&mut state, source) {
-                continue;
-            }
-
-            if self.lex_string(&mut state) {
-                continue;
-            }
-
-            if self.lex_number(&mut state, source) {
-                continue;
-            }
-
-            if self.lex_identifier(&mut state) {
-                continue;
-            }
-
-            if self.lex_special_char(&mut state) {
-                continue;
-            }
-
-            // 如果没有匹配任何规则，标记为错误并前进一个字符
-            if let Some(ch) = state.peek() {
-                let start_pos = state.get_position();
-                state.advance(ch.len_utf8());
-                state.add_token(JasmSyntaxKind::Error, start_pos, state.get_position());
-            }
-            else {
-                break;
-            }
+            state.add_token(kind, start, state.get_position());
+            return true;
         }
 
-        // 添加 EOF token
-        let eof_pos = state.get_position();
-        state.add_token(JasmSyntaxKind::Eof, eof_pos, eof_pos);
-
-        state.finish()
+        false
     }
 }

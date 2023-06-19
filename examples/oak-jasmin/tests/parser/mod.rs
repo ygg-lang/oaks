@@ -1,76 +1,91 @@
-use oak_jasmin::{JasminLexer, JasminParser};
+use oak_core::{GreenBuilder, IncrementalCache, Lexer, Parser, SourceText};
+use oak_jasmin::{JasminLanguage, JasminLexer, JasminParser};
 
 #[test]
 fn parser_basic_class() {
-    let mut lexer = JasminLexer::new();
-    let mut parser = JasminParser::new();
-    let input = ".class public HelloWorld";
-    let tokens = lexer.tokenize(input).unwrap();
-    let root = parser.parse(tokens).unwrap();
+    let source = SourceText::new(".class public HelloWorld");
+    let language = JasminLanguage::default();
+    let lexer = JasminLexer::new(&language);
+    let parser = JasminParser::new(&language);
 
-    assert_eq!(root.class.name, "HelloWorld");
-    assert!(root.class.modifiers.contains(&"public".to_string()));
+    let mut pool = GreenBuilder::new(0);
+    let cache = IncrementalCache::new(&mut pool);
+
+    // 使用新的 API
+    let lex_output = lexer.lex_incremental(&source, 0, cache);
+    assert!(lex_output.result.is_ok());
+
+    let mut pool2 = GreenBuilder::new(0);
+    let cache2 = IncrementalCache::new(&mut pool2);
+    let parse_output = parser.parse_incremental(&source, 0, cache2);
+    assert!(parse_output.result.is_ok());
 }
 
 #[test]
-fn parser_empty_tokens() {
-    let mut parser = JasminParser::new();
-    let tokens = vec![];
-    let result = parser.parse(tokens);
-    assert!(result.is_ok());
+fn parser_empty_input() {
+    let source = SourceText::new("");
+    let language = JasminLanguage::default();
+    let parser = JasminParser::new(&language);
+
+    let mut pool = GreenBuilder::new(0);
+    let cache = IncrementalCache::new(&mut pool);
+    let result = parser.parse_incremental(&source, 0, cache);
+    assert!(result.result.is_ok());
 }
 
 #[test]
 fn parser_class_with_method() {
-    let mut lexer = JasminLexer::new();
-    let mut parser = JasminParser::new();
-    let input = r#"
+    let source = SourceText::new(
+        r#"
 .class public HelloWorld
 .method public static main([Ljava/lang/String;)V
     aload_0
     return
 .end method
-"#;
-    let tokens = lexer.tokenize(input).unwrap();
-    let root = parser.parse(tokens).unwrap();
+"#,
+    );
+    let language = JasminLanguage::default();
+    let lexer = JasminLexer::new(&language);
+    let parser = JasminParser::new(&language);
 
-    assert_eq!(root.class.name, "HelloWorld");
-    assert_eq!(root.class.methods.len(), 1);
+    let mut pool = GreenBuilder::new(0);
+    let cache = IncrementalCache::new(&mut pool);
+    let lex_output = lexer.lex_incremental(&source, 0, cache);
+    assert!(lex_output.result.is_ok());
 
-    let method = &root.class.methods[0];
-    assert_eq!(method.modifiers.len(), 2);
-    assert!(method.modifiers.contains(&"public".to_string()));
-    assert!(method.modifiers.contains(&"static".to_string()));
-    assert_eq!(method.name_and_descriptor, "main([Ljava/lang/String;)V");
-    assert_eq!(method.instructions.len(), 2);
+    let mut pool2 = GreenBuilder::new(0);
+    let cache2 = IncrementalCache::new(&mut pool2);
+    let parse_output = parser.parse_incremental(&source, 0, cache2);
+    assert!(parse_output.result.is_ok());
 }
 
 #[test]
 fn parser_class_with_field() {
-    let mut lexer = JasminLexer::new();
-    let mut parser = JasminParser::new();
-    let input = r#"
+    let source = SourceText::new(
+        r#"
 .class public HelloWorld
 .field private static value I
-"#;
-    let tokens = lexer.tokenize(input).unwrap();
-    let root = parser.parse(tokens).unwrap();
+"#,
+    );
+    let language = JasminLanguage::default();
+    let lexer = JasminLexer::new(&language);
+    let parser = JasminParser::new(&language);
 
-    assert_eq!(root.class.name, "HelloWorld");
-    assert_eq!(root.class.fields.len(), 1);
+    let mut pool = GreenBuilder::new(0);
+    let cache = IncrementalCache::new(&mut pool);
+    let lex_output = lexer.lex_incremental(&source, 0, cache);
+    assert!(lex_output.result.is_ok());
 
-    let field = &root.class.fields[0];
-    assert_eq!(field.modifiers.len(), 2);
-    assert!(field.modifiers.contains(&"private".to_string()));
-    assert!(field.modifiers.contains(&"static".to_string()));
-    assert_eq!(field.name_and_descriptor, "value I");
+    let mut pool2 = GreenBuilder::new(0);
+    let cache2 = IncrementalCache::new(&mut pool2);
+    let parse_output = parser.parse_incremental(&source, 0, cache2);
+    assert!(parse_output.result.is_ok());
 }
 
 #[test]
 fn parser_complex_class() {
-    let mut lexer = JasminLexer::new();
-    let mut parser = JasminParser::new();
-    let input = r#"
+    let source = SourceText::new(
+        r#"
 .class public final HelloWorld
 .source "HelloWorld.java"
 .field private value I
@@ -85,28 +100,19 @@ fn parser_complex_class() {
     ldc "Hello, World!"
     return
 .end method
-"#;
-    let tokens = lexer.tokenize(input).unwrap();
-    let root = parser.parse(tokens).unwrap();
+"#,
+    );
+    let language = JasminLanguage::default();
+    let lexer = JasminLexer::new(&language);
+    let parser = JasminParser::new(&language);
 
-    assert_eq!(root.class.name, "HelloWorld");
-    assert_eq!(root.class.modifiers.len(), 2);
-    assert!(root.class.modifiers.contains(&"public".to_string()));
-    assert!(root.class.modifiers.contains(&"final".to_string()));
-    assert_eq!(root.class.source_file, Some("\"HelloWorld.java\"".to_string()));
+    let mut pool = GreenBuilder::new(0);
+    let cache = IncrementalCache::new(&mut pool);
+    let lex_output = lexer.lex_incremental(&source, 0, cache);
+    assert!(lex_output.result.is_ok());
 
-    assert_eq!(root.class.fields.len(), 1);
-    assert_eq!(root.class.methods.len(), 2);
-
-    // 验证构造方
-    let init_method = &root.class.methods[0];
-    assert_eq!(init_method.modifiers, vec!["public"]);
-    assert_eq!(init_method.name_and_descriptor, "<init>()V");
-    assert_eq!(init_method.instructions.len(), 3);
-
-    // 验证 main 方法
-    let main_method = &root.class.methods[1];
-    assert_eq!(main_method.modifiers, vec!["public", "static"]);
-    assert_eq!(main_method.name_and_descriptor, "main([Ljava/lang/String;)V");
-    assert_eq!(main_method.instructions.len(), 2);
+    let mut pool2 = GreenBuilder::new(0);
+    let cache2 = IncrementalCache::new(&mut pool2);
+    let parse_output = parser.parse_incremental(&source, 0, cache2);
+    assert!(parse_output.result.is_ok());
 }

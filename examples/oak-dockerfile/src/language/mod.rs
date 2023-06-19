@@ -1,8 +1,8 @@
-use crate::kind::DockerfileSyntaxKind;
+use crate::{ast::DockerfileRoot, kind::DockerfileSyntaxKind};
 use oak_core::Language;
 
 /// Dockerfile 语言配置
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Copy)]
 pub struct DockerfileLanguage {
     /// 是否启用严格模式
     pub strict_mode: bool,
@@ -18,4 +18,5 @@ impl Default for DockerfileLanguage {
 
 impl Language for DockerfileLanguage {
     type SyntaxKind = DockerfileSyntaxKind;
+    type TypedRoot = DockerfileRoot;
 }

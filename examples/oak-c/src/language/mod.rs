@@ -7,4 +7,5 @@ pub struct CLanguage;
 
 impl Language for CLanguage {
     type SyntaxKind = CSyntaxKind;
+    type TypedRoot = crate::ast::CRoot;
 }

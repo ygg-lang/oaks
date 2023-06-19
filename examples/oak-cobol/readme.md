@@ -7,7 +7,7 @@ High-performance incremental COBOL parser for the oak ecosystem with flexible co
 
 ## 🎯 Overview
 
-Oak of cobol is a robust parser for COBOL, designed to handle complete COBOL syntax including legacy and modern features. Built on the solid foundation of oak-core, it provides both high-level convenience and detailed AST generation for legacy system analysis and mainframe development.
+Oak COBOL is a robust parser for COBOL, designed to handle complete COBOL syntax including legacy and modern features. Built on the solid foundation of oak-core, it provides both high-level convenience and detailed AST generation for legacy system analysis and mainframe development.
 
 ## ✨ Features
 
@@ -21,11 +21,11 @@ Oak of cobol is a robust parser for COBOL, designed to handle complete COBOL syn
 Basic example:
 
 ```rust
-use oak_cobol::CobolParser;
+use oak_cobol::{Parser, CobolLanguage, SourceText};
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
-    let parser = CobolParser::new();
-    let cobol_code = r#"
+    let parser = Parser::new();
+    let source = SourceText::new(r#"
        IDENTIFICATION DIVISION.
        PROGRAM-ID. HELLO-WORLD.
        
@@ -40,9 +40,9 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
        MAIN-PROCEDURE.
            DISPLAY WS-MESSAGE
            STOP RUN.
-    "#;
+    "#);
     
-    let program = parser.parse_program(cobol_code)?;
+    let result = parser.parse(&source);
     println!("Parsed COBOL program successfully.");
     Ok(())
 }
@@ -52,10 +52,10 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
 ### Program Parsing
 ```rust
-use oak_cobol::{CobolParser, ast::Program};
+use oak_cobol::{Parser, CobolLanguage, SourceText};
 
-let parser = CobolParser::new();
-let cobol_code = r#"
+let parser = Parser::new();
+let source = SourceText::new(r#"
 IDENTIFICATION DIVISION.
 PROGRAM-ID. CALCULATOR.
 
@@ -70,66 +70,59 @@ MAIN-PROCEDURE.
     COMPUTE RESULT = NUM1 + NUM2
     DISPLAY 'Result: ' RESULT
     STOP RUN.
-"#;
+    "#);
 
-let program = parser.parse_program(cobol_code)?;
-println!("Program ID: {}", program.identification.program_id);
+let result = parser.parse(&source);
+println!("Parsed COBOL program successfully.");
 ```
 
 ### Data Division Parsing
 ```rust
-use oak_cobol::{CobolParser, ast::DataDivision};
+use oak_cobol::{Parser, CobolLanguage, SourceText};
 
-let parser = CobolParser::new();
-let data_division = r#"
+let parser = Parser::new();
+let source = SourceText::new(r#"
 DATA DIVISION.
 WORKING-STORAGE SECTION.
 01 CUSTOMER-RECORD.
     05 CUSTOMER-ID PIC 9(5).
     05 CUSTOMER-NAME PIC X(30).
     05 CUSTOMER-BALANCE PIC 9(7)V99.
-"#;
+    "#);
 
-let data_div = parser.parse_data_division(data_division)?;
-println!("Working storage sections: {}", data_div.working_storage.len());
+let result = parser.parse(&source);
+println!("Parsed COBOL data division successfully.");
 ```
 
 ## 🔧 Advanced Features
 
 ### Token-Level Parsing
 ```rust
-use oak_cobol::{CobolParser, lexer::Token};
+use oak_cobol::{Parser, CobolLanguage, SourceText};
 
-let parser = CobolParser::new();
-let tokens = parser.tokenize("IDENTIFICATION DIVISION.")?;
-for token in tokens {
-    println!("{:?}", token.kind);
-}
+let parser = Parser::new();
+let source = SourceText::new("IDENTIFICATION DIVISION.");
+let result = parser.parse(&source);
+// Token information is available in the parse result
 ```
 
 ### Error Handling
 ```rust
-use oak_cobol::CobolParser;
+use oak_cobol::{Parser, CobolLanguage, SourceText};
 
-let parser = CobolParser::new();
-let invalid_cobol = r#"
+let parser = Parser::new();
+let source = SourceText::new(r#"
 IDENTIFICATION DIVISION
 PROGRAM-ID. INVALID
 DATA DIVISION
 PROCEDURE DIVISION
     DISPLAY 'Missing periods'
     STOP RUN
-"#;
+    "#);
 
-match parser.parse_program(invalid_cobol) {
-    Ok(program) => println!("Parsed COBOL program successfully."),
-    Err(e) => {
-        println!("Parse error at line {} column {}: {}", 
-            e.line(), e.column(), e.message());
-        if let Some(context) = e.context() {
-            println!("Error context: {}", context);
-        }
-    }
+let result = parser.parse(&source);
+if let Err(e) = result.result {
+    println!("Parse error: {:?}", e);
 }
 ```
 
@@ -154,7 +147,7 @@ The parser generates a comprehensive AST with the following main structures:
 
 ## 🔗 Integration
 
-Oak of cobol integrates seamlessly with:
+Oak COBOL integrates seamlessly with:
 
 - **Legacy System Analysis**: Analyze and understand legacy COBOL codebases
 - **Mainframe Development**: Build tools for mainframe development environments

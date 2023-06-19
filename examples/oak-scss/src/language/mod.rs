@@ -21,4 +21,5 @@ impl Default for ScssLanguage {
 
 impl Language for ScssLanguage {
     type SyntaxKind = crate::kind::ScssSyntaxKind;
+    type TypedRoot = ();
 }

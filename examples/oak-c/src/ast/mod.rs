@@ -1,5 +1,3 @@
-use alloc::{boxed::Box, string::String, vec::Vec};
-
 /// C 语言抽象语法
 #[derive(Debug, Clone, PartialEq)]
 pub struct CRoot {

@@ -1,8 +1,9 @@
 use crate::{kind::PrologSyntaxKind, language::PrologLanguage};
-use oak_core::{Lexer, LexerState, SourceText, lexer::LexOutput};
+use oak_core::{IncrementalCache, Lexer, LexerState, OakError, lexer::LexOutput, source::Source};
 
-type State<'input> = LexerState<'input, PrologLanguage>;
+type State<S: Source> = LexerState<S, PrologLanguage>;
 
+#[derive(Clone)]
 pub struct PrologLexer<'config> {
     config: &'config PrologLanguage,
 }
@@ -12,8 +13,60 @@ impl<'config> PrologLexer<'config> {
         Self { config }
     }
 
-    /// 跳过空白字符
-    fn skip_whitespace(&self, state: &mut State) -> bool {
+    fn run<S: Source>(&self, state: &mut State<S>) -> Result<(), OakError> {
+        while state.not_at_end() {
+            if self.skip_whitespace(state) {
+                continue;
+            }
+
+            if self.lex_newline(state) {
+                continue;
+            }
+
+            if self.lex_comment(state) {
+                continue;
+            }
+
+            if self.lex_string(state) {
+                continue;
+            }
+
+            if self.lex_number(state) {
+                continue;
+            }
+
+            if self.lex_atom_or_keyword(state) {
+                continue;
+            }
+
+            if self.lex_variable(state) {
+                continue;
+            }
+
+            if self.lex_operators_and_punctuation(state) {
+                continue;
+            }
+
+            // 如果没有匹配任何规则，跳过当前字符
+            if let Some(ch) = state.peek() {
+                let start_pos = state.get_position();
+                state.advance(ch.len_utf8());
+                state.add_token(PrologSyntaxKind::Error, start_pos, state.get_position());
+            }
+            else {
+                // 如果已到达文件末尾，退出循环
+                break;
+            }
+        }
+
+        // Add EOF token
+        let pos = state.get_position();
+        state.add_token(PrologSyntaxKind::Eof, pos, pos);
+
+        Ok(())
+    }
+
+    fn skip_whitespace<S: Source>(&self, state: &mut State<S>) -> bool {
         let start_pos = state.get_position();
 
         while let Some(ch) = state.peek() {
@@ -34,8 +87,7 @@ impl<'config> PrologLexer<'config> {
         }
     }
 
-    /// 处理换行
-    fn lex_newline(&self, state: &mut State) -> bool {
+    fn lex_newline<S: Source>(&self, state: &mut State<S>) -> bool {
         let start_pos = state.get_position();
 
         if let Some('\n') = state.peek() {
@@ -56,13 +108,11 @@ impl<'config> PrologLexer<'config> {
         }
     }
 
-    /// 处理注释
-    fn lex_comment(&self, state: &mut State) -> bool {
+    fn lex_comment<S: Source>(&self, state: &mut State<S>) -> bool {
         let start_pos = state.get_position();
 
         if let Some('%') = state.peek() {
             state.advance(1);
-
             // 单行注释
             while let Some(ch) = state.peek() {
                 if ch == '\n' || ch == '\r' {
@@ -70,49 +120,64 @@ impl<'config> PrologLexer<'config> {
                 }
                 state.advance(ch.len_utf8());
             }
-
             state.add_token(PrologSyntaxKind::Comment, start_pos, state.get_position());
             true
         }
-        else if state.peek() == Some('/') && state.peek_next_n(1) == Some('*') {
-            // 多行注释 /* ... */
-            state.advance(2);
-
-            while let Some(ch) = state.peek() {
-                if ch == '*' && state.peek_next_n(1) == Some('/') {
-                    state.advance(2);
-                    break;
+        else if let Some('/') = state.peek() {
+            state.advance(1);
+            if let Some('*') = state.peek() {
+                state.advance(1);
+                // 多行注释 /* ... */
+                while let Some(ch) = state.peek() {
+                    if ch == '*' {
+                        state.advance(1);
+                        if let Some('/') = state.peek() {
+                            state.advance(1);
+                            break;
+                        }
+                    }
+                    else {
+                        state.advance(ch.len_utf8());
+                    }
                 }
-                state.advance(ch.len_utf8());
+                state.add_token(PrologSyntaxKind::Comment, start_pos, state.get_position());
+                true
             }
-
-            state.add_token(PrologSyntaxKind::Comment, start_pos, state.get_position());
-            true
+            else {
+                // 回退，这不是注释
+                state.set_position(start_pos);
+                false
+            }
         }
         else {
             false
         }
     }
 
-    /// 处理字符串字面量
-    fn lex_string(&self, state: &mut State) -> bool {
+    fn lex_string<S: Source>(&self, state: &mut State<S>) -> bool {
         let start_pos = state.get_position();
 
-        if let Some(quote) = state.peek() {
-            if quote == '"' || quote == '\'' {
-                state.advance(1);
+        if let Some(quote_char) = state.peek() {
+            if quote_char == '"' || quote_char == '\'' {
+                state.advance(1); // 跳过开始引号
 
+                let mut escaped = false;
                 while let Some(ch) = state.peek() {
-                    if ch == quote {
-                        state.advance(1);
-                        break;
+                    if escaped {
+                        escaped = false;
+                        state.advance(ch.len_utf8());
                     }
                     else if ch == '\\' {
-                        // 转义字符
+                        escaped = true;
                         state.advance(1);
-                        if let Some(_) = state.peek() {
-                            state.advance(1);
-                        }
+                    }
+                    else if ch == quote_char {
+                        state.advance(1); // 跳过结束引号
+                        break;
+                    }
+                    else if ch == '\n' || ch == '\r' {
+                        // 字符串不能跨行
+                        break;
                     }
                     else {
                         state.advance(ch.len_utf8());
@@ -131,15 +196,12 @@ impl<'config> PrologLexer<'config> {
         }
     }
 
-    /// 处理数字
-    fn lex_number(&self, state: &mut State) -> bool {
-        let start_pos = state.get_position();
-
+    fn lex_number<S: Source>(&self, state: &mut State<S>) -> bool {
         if let Some(ch) = state.peek() {
             if ch.is_ascii_digit() {
-                state.advance(1);
+                let start_pos = state.get_position();
 
-                // 整数部分
+                // 读取整数部分
                 while let Some(ch) = state.peek() {
                     if ch.is_ascii_digit() {
                         state.advance(1);
@@ -149,9 +211,10 @@ impl<'config> PrologLexer<'config> {
                     }
                 }
 
-                // 小数部分
-                if state.peek() == Some('.') && state.peek_next_n(1).map_or(false, |c| c.is_ascii_digit()) {
+                // 检查小数点
+                if let Some('.') = state.peek() {
                     state.advance(1);
+                    // 读取小数部分
                     while let Some(ch) = state.peek() {
                         if ch.is_ascii_digit() {
                             state.advance(1);
@@ -162,12 +225,12 @@ impl<'config> PrologLexer<'config> {
                     }
                 }
 
-                // 科学计数法
+                // 检查科学记数法
                 if let Some(ch) = state.peek() {
                     if ch == 'e' || ch == 'E' {
                         state.advance(1);
-                        if let Some(sign) = state.peek() {
-                            if sign == '+' || sign == '-' {
+                        if let Some(ch) = state.peek() {
+                            if ch == '+' || ch == '-' {
                                 state.advance(1);
                             }
                         }
@@ -194,14 +257,48 @@ impl<'config> PrologLexer<'config> {
         }
     }
 
-    /// 处理变量（以大写字母或下划线开头）
-    fn lex_variable(&self, state: &mut State) -> bool {
-        let start_pos = state.get_position();
+    fn lex_atom_or_keyword<S: Source>(&self, state: &mut State<S>) -> bool {
+        if let Some(ch) = state.peek() {
+            if ch.is_ascii_lowercase() || ch == '_' {
+                let start_pos = state.get_position();
+                let mut text = String::new();
 
+                // 读取原子
+                while let Some(ch) = state.peek() {
+                    if ch.is_alphanumeric() || ch == '_' {
+                        text.push(ch);
+                        state.advance(ch.len_utf8());
+                    }
+                    else {
+                        break;
+                    }
+                }
+
+                // 检查是否是关键字
+                let kind = match text.as_str() {
+                    "is" => PrologSyntaxKind::Is,
+                    "mod" => PrologSyntaxKind::Modulo,
+                    _ => PrologSyntaxKind::Atom,
+                };
+
+                state.add_token(kind, start_pos, state.get_position());
+                true
+            }
+            else {
+                false
+            }
+        }
+        else {
+            false
+        }
+    }
+
+    fn lex_variable<S: Source>(&self, state: &mut State<S>) -> bool {
         if let Some(ch) = state.peek() {
             if ch.is_ascii_uppercase() || ch == '_' {
-                state.advance(ch.len_utf8());
+                let start_pos = state.get_position();
 
+                // 读取变量名
                 while let Some(ch) = state.peek() {
                     if ch.is_alphanumeric() || ch == '_' {
                         state.advance(ch.len_utf8());
@@ -223,136 +320,179 @@ impl<'config> PrologLexer<'config> {
         }
     }
 
-    /// 处理原子（以小写字母开头的标识符）
-    fn lex_atom(&self, state: &mut State) -> bool {
-        let start_pos = state.get_position();
-
+    fn lex_operators_and_punctuation<S: Source>(&self, state: &mut State<S>) -> bool {
         if let Some(ch) = state.peek() {
-            if ch.is_ascii_lowercase() {
-                state.advance(ch.len_utf8());
+            let start_pos = state.get_position();
 
-                while let Some(ch) = state.peek() {
-                    if ch.is_alphanumeric() || ch == '_' {
-                        state.advance(ch.len_utf8());
+            let kind = match ch {
+                '+' => {
+                    state.advance(1);
+                    PrologSyntaxKind::Plus
+                }
+                '-' => {
+                    state.advance(1);
+                    PrologSyntaxKind::Minus
+                }
+                '*' => {
+                    state.advance(1);
+                    if let Some('*') = state.peek() {
+                        state.advance(1);
+                        PrologSyntaxKind::Power
                     }
                     else {
-                        break;
+                        PrologSyntaxKind::Multiply
                     }
                 }
-
-                let text = state.get_text_range(start_pos, state.get_position());
-                let kind = match text {
-                    "is" | "mod" | "rem" | "div" | "abs" | "sign" | "float" | "floor" | "ceiling" | "round" | "truncate"
-                    | "max" | "min" | "succ" | "plus" | "true" | "false" | "fail" | "cut" | "not" | "once" | "repeat"
-                    | "halt" | "abort" | "trace" | "notrace" | "spy" | "nospy" | "debug" | "nodebug" | "write" | "read"
-                    | "get" | "put" | "nl" | "tab" | "see" | "tell" | "seen" | "told" | "close" | "open" | "current_input"
-                    | "current_output" | "set_input" | "set_output" | "flush_output" | "at_end_of_stream"
-                    | "stream_property" | "assert" | "asserta" | "assertz" | "retract" | "retractall" | "abolish"
-                    | "clause" | "current_predicate" | "predicate_property" | "functor" | "arg" | "univ" | "copy_term"
-                    | "numbervars" | "term_variables" | "subsumes_term" | "compare" | "sort" | "keysort" | "length"
-                    | "member" | "append" | "reverse" | "last" | "nth0" | "nth1" | "select" | "permutation" | "sublist"
-                    | "prefix" | "suffix" | "findall" | "bagof" | "setof" | "forall" | "aggregate" | "aggregate_all" => {
-                        PrologSyntaxKind::Keyword
-                    }
-                    _ => PrologSyntaxKind::Atom,
-                };
-
-                state.add_token(kind, start_pos, state.get_position());
-                true
-            }
-            else {
-                false
-            }
-        }
-        else {
-            false
-        }
-    }
-
-    /// 处理操作符
-    fn lex_operator(&self, state: &mut State) -> bool {
-        let start_pos = state.get_position();
-
-        // 多字符操作符
-        let multi_char_ops = [
-            ":-", "?-", "-->", "=..", "\\=", "\\==", "=:=", "=\\=", "==", "\\=@=", "@<", "@=<", "@>", "@>=", "=<", ">=", "<<",
-            ">>", "**", "//", "mod", "rem", "xor", "\\/", "/\\", "is", "=", "\\+", "->", ";", "|",
-        ];
-
-        for op in &multi_char_ops {
-            if state.peek_string(op.len()) == Some(op.to_string()) {
-                state.advance(op.len());
-                state.add_token(PrologSyntaxKind::Operator, start_pos, state.get_position());
-                return true;
-            }
-        }
-
-        // 单字符操作符
-        if let Some(ch) = state.peek() {
-            match ch {
-                '+' | '-' | '*' | '/' | '^' | '<' | '>' | '=' | '\\' | '~' | '@' => {
+                '/' => {
                     state.advance(1);
-                    state.add_token(PrologSyntaxKind::Operator, start_pos, state.get_position());
-                    true
-                }
-                _ => false,
-            }
-        }
-        else {
-            false
-        }
-    }
-
-    /// 处理分隔符
-    fn lex_delimiter(&self, state: &mut State) -> bool {
-        let start_pos = state.get_position();
-
-        if let Some(ch) = state.peek() {
-            match ch {
-                '(' | ')' | '[' | ']' | '{' | '}' | ',' | '.' | ';' | '|' | '!' => {
-                    state.advance(1);
-                    state.add_token(PrologSyntaxKind::Delimiter, start_pos, state.get_position());
-                    true
-                }
-                _ => false,
-            }
-        }
-        else {
-            false
-        }
-    }
-
-    /// 处理引用原子（用单引号包围的原子）
-    fn lex_quoted_atom(&self, state: &mut State) -> bool {
-        let start_pos = state.get_position();
-
-        if let Some('\'') = state.peek() {
-            state.advance(1);
-
-            while let Some(ch) = state.peek() {
-                if ch == '\'' {
-                    // 检查是否是转义的单引号
-                    if state.peek_next_n(1) == Some('\'') {
-                        state.advance(2); // 跳过 ''
+                    if let Some('/') = state.peek() {
+                        state.advance(1);
+                        PrologSyntaxKind::IntDivide
                     }
                     else {
-                        state.advance(1);
-                        break;
+                        PrologSyntaxKind::Divide
                     }
                 }
-                else if ch == '\\' {
-                    // 转义字符
+                '=' => {
                     state.advance(1);
-                    if let Some(_) = state.peek() {
+                    if let Some('=') = state.peek() {
                         state.advance(1);
+                        PrologSyntaxKind::Equal
+                    }
+                    else if let Some(':') = state.peek() {
+                        state.advance(1);
+                        if let Some('=') = state.peek() {
+                            state.advance(1);
+                            PrologSyntaxKind::ArithEqual
+                        }
+                        else {
+                            // 回退
+                            state.set_position(start_pos + 1);
+                            PrologSyntaxKind::Unify
+                        }
+                    }
+                    else if let Some('\\') = state.peek() {
+                        state.advance(1);
+                        if let Some('=') = state.peek() {
+                            state.advance(1);
+                            PrologSyntaxKind::NotUnify
+                        }
+                        else {
+                            // 回退
+                            state.set_position(start_pos + 1);
+                            PrologSyntaxKind::Unify
+                        }
+                    }
+                    else if let Some('<') = state.peek() {
+                        state.advance(1);
+                        PrologSyntaxKind::ArithNotEqual
+                    }
+                    else {
+                        PrologSyntaxKind::Unify
                     }
                 }
-                else {
-                    state.advance(ch.len_utf8());
+                '<' => {
+                    state.advance(1);
+                    if let Some('=') = state.peek() {
+                        state.advance(1);
+                        PrologSyntaxKind::LessEqual
+                    }
+                    else {
+                        PrologSyntaxKind::Less
+                    }
                 }
-            }
+                '>' => {
+                    state.advance(1);
+                    if let Some('=') = state.peek() {
+                        state.advance(1);
+                        PrologSyntaxKind::GreaterEqual
+                    }
+                    else {
+                        PrologSyntaxKind::Greater
+                    }
+                }
+                '\\' => {
+                    state.advance(1);
+                    if let Some('=') = state.peek() {
+                        state.advance(1);
+                        if let Some('=') = state.peek() {
+                            state.advance(1);
+                            PrologSyntaxKind::NotEqual
+                        }
+                        else {
+                            PrologSyntaxKind::NotUnify
+                        }
+                    }
+                    else {
+                        PrologSyntaxKind::BitwiseNot
+                    }
+                }
+                '!' => {
+                    state.advance(1);
+                    PrologSyntaxKind::Cut
+                }
+                '?' => {
+                    state.advance(1);
+                    PrologSyntaxKind::Question
+                }
+                ':' => {
+                    state.advance(1);
+                    if let Some('-') = state.peek() {
+                        state.advance(1);
+                        PrologSyntaxKind::ColonMinus
+                    }
+                    else {
+                        PrologSyntaxKind::Colon
+                    }
+                }
+                ';' => {
+                    state.advance(1);
+                    PrologSyntaxKind::Semicolon
+                }
+                ',' => {
+                    state.advance(1);
+                    PrologSyntaxKind::Comma
+                }
+                '.' => {
+                    state.advance(1);
+                    PrologSyntaxKind::Dot
+                }
+                '(' => {
+                    state.advance(1);
+                    PrologSyntaxKind::LeftParen
+                }
+                ')' => {
+                    state.advance(1);
+                    PrologSyntaxKind::RightParen
+                }
+                '[' => {
+                    state.advance(1);
+                    PrologSyntaxKind::LeftBracket
+                }
+                ']' => {
+                    state.advance(1);
+                    PrologSyntaxKind::RightBracket
+                }
+                '{' => {
+                    state.advance(1);
+                    PrologSyntaxKind::LeftBrace
+                }
+                '}' => {
+                    state.advance(1);
+                    PrologSyntaxKind::RightBrace
+                }
+                '|' => {
+                    state.advance(1);
+                    PrologSyntaxKind::Pipe
+                }
+                '^' => {
+                    state.advance(1);
+                    PrologSyntaxKind::BitwiseXor
+                }
+                _ => return false,
+            };
 
-            state.add_token(PrologSyntaxKind::Atom, start_pos, state.get_position());
+            state.add_token(kind, start_pos, state.get_position());
             true
         }
         else {
@@ -362,60 +502,14 @@ impl<'config> PrologLexer<'config> {
 }
 
 impl<'config> Lexer<PrologLanguage> for PrologLexer<'config> {
-    fn lex(&self, source: &SourceText) -> LexOutput<PrologSyntaxKind> {
-        let mut state = State::new(source);
-
-        while !state.is_at_end() {
-            if self.skip_whitespace(&mut state) {
-                continue;
-            }
-
-            if self.lex_newline(&mut state) {
-                continue;
-            }
-
-            if self.lex_comment(&mut state) {
-                continue;
-            }
-
-            if self.lex_quoted_atom(&mut state) {
-                continue;
-            }
-
-            if self.lex_string(&mut state) {
-                continue;
-            }
-
-            if self.lex_number(&mut state) {
-                continue;
-            }
-
-            if self.lex_variable(&mut state) {
-                continue;
-            }
-
-            if self.lex_atom(&mut state) {
-                continue;
-            }
-
-            if self.lex_operator(&mut state) {
-                continue;
-            }
-
-            if self.lex_delimiter(&mut state) {
-                continue;
-            }
-
-            // 如果没有匹配任何规则，跳过当前字符
-            if let Some(ch) = state.peek() {
-                state.advance(ch.len_utf8());
-            }
-        }
-
-        // 添加 EOF kind
-        let pos = state.get_position();
-        state.add_token(PrologSyntaxKind::Eof, pos, pos);
-
-        state.finish()
+    fn lex_incremental(
+        &self,
+        source: impl Source,
+        _changed: usize,
+        _cache: IncrementalCache<PrologLanguage>,
+    ) -> LexOutput<PrologLanguage> {
+        let mut state = LexerState::new(source);
+        let result = self.run(&mut state);
+        state.finish(result)
     }
 }

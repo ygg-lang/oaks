@@ -1,5 +1,5 @@
 # TOML Test File - Comprehensive Syntax Coverage
-# This file tests various TOML syntax elements for lexer testing
+# This file tests various TOML kind elements for lexer testing
 
 # Basic key-value pairs
 title = "TOML Example"

@@ -1,4 +1,4 @@
-use oak_core::{Parser, SourceText, errors::OakErrorKind};
+use oak_core::{Builder, SourceText, errors::OakErrorKind};
 use oak_json::{language::JsonLanguage, parser::JsonParser};
 
 #[test]

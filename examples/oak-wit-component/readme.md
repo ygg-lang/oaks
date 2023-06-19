@@ -1,108 +1,152 @@
-# WebAssembly 文本格式 (WAT) 处理模块
+# Oak WIT Component Parser
 
-这个模块提供了完整的 WAT (WebAssembly Text) 格式处理功能，包括：
-- **词法分析**: 将 WAT 文本分解为词法单元 (tokens)
-- **语法分析**: 将词法单元解析为抽象语法树 (AST)
-- **编译**: 将 AST 编译为 WASM 二进制结构
-- **反编译**: 将 WASM 结构转换回 WAT 文本
+[![Crates.io](https://img.shields.io/crates/v/oak-wit-component.svg)](https://crates.io/crates/oak-wit-component)
+[![Documentation](https://docs.rs/oak-wit-component/badge.svg)](https://docs.rs/oak-wit-component)
 
-## 模块组件
+High-performance incremental WIT Component parser for the oak ecosystem with flexible configuration, optimized for WebAssembly Interface Types processing.
 
-### `ast` 模块
+## 🎯 Overview
 
-定义 WAT 抽象语法树的所有节点类型：
-- `Module`: 模块定义
-- `Func`: 函数定义
-- `Export`: 导出定义
-- `Import`: 导入定义
-- `Memory`: 内存定义
-- `Table`: 表定义
-- `Global`: 全局变量定义
-- `Instruction`: WebAssembly 指令
+Oak WIT Component is a robust parser for WIT (WebAssembly Interface Types) components, designed to handle complete WIT syntax including modern specifications. Built on the solid foundation of oak-core, it provides both high-level convenience and detailed AST generation for WebAssembly component analysis and code generation.
 
-### `lexer` 模块
+## ✨ Features
 
-词法分析器，将 WAT 文本转换为词法单元：
-- 关键字识别 (`module`, `func`, `export`, 等)
-- 标识符和名称解析
-- 数值字面量处理
-- 字符串字面量处理
-- 注释和空白字符处理
+- **Complete WIT Syntax**: Supports all WIT features including interface definitions
+- **Full AST Generation**: Generates comprehensive Abstract Syntax Trees
+- **Lexer Support**: Built-in tokenization with proper span information
+- **Error Recovery**: Graceful handling of syntax errors with detailed diagnostics
 
-### `parser` 模块
+## 🚀 Quick Start
 
-语法分析器，将词法单元解析为 AST：
-- 递归下降解析
-- 错误恢复和报告
-- 语法验证
-- 位置信息跟踪
+Basic example:
 
-### `compiler` 模块
-
-编译器，将 AST 编译为 WASM 结构：
-- 类型检查
-- 符号解析
-- 指令编码
-- 模块生成
-
-### `writer` 模块
-
-写入器，将 AST 转换回 WAT 文本：
-- 格式化输出
-- 注释生成
-- 代码美化
-
-## 使用示例
-
-### 基本解析和编译
-
-```rust,no_run
-use wasi_assembler::formats::wat::{WatParser, WatCompiler};
+```rust
+use oak_wit_component::{Parser, WitComponentLanguage, SourceText};
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
-    let wat_source = r#"
-        (module
-            (func $add (param $a i32) (param $b i32) (result i32)
-                local.get $a
-                local.get $b
-                i32.add
-            )
-            (export "add" (func $add))
-        )
-    "#;
+    let parser = Parser::new();
+    let source = SourceText::new(r#"
+        package example:calculator;
+
+        interface calculator {
+            add: func(a: f32, b: f32) -> f32;
+            subtract: func(a: f32, b: f32) -> f32;
+        }
+
+        world calculator-world {
+            import calculator;
+        }
+    "#);
     
-    // 解析 WAT 文本
-    let mut parser = WatParser::new();
-    let ast = parser.parse(wat_source)?;
-    
-    // 编译为 WASM 结构
-    let mut compiler = WatCompiler::new();
-    let wasm_module = compiler.compile(ast)?;
+    let result = parser.parse(&source);
+    println!("Parsed WIT Component successfully.");
     Ok(())
 }
 ```
 
-### 错误处理
+## 📋 Parsing Examples
 
-```rust,no_run
-use wasi_assembler::formats::wat::{WatParser, WatError};
+### Interface Parsing
+```rust
+use oak_wit_component::{Parser, WitComponentLanguage, SourceText};
 
-fn main() -> Result<(), Box<dyn std::error::Error>> {
-    let mut parser = WatParser::new();
-    match parser.parse("(module (func $invalid") {
-        Ok(ast) => {
-            // 解析成功
-        }
-        Err(WatError::UnexpectedToken { expected, found, location }) => {
-            eprintln!("语法错误: 期望 {:?}, 找到 {:?} 在位置 {:?}", expected, found, location);
-        }
-        Err(WatError::UnexpectedEof) => {
-            eprintln!("意外结束: 输入不完整");
-        }
-        Err(e) => {
-            eprintln!("解析错误: {}", e);
-        }
+let parser = Parser::new();
+let source = SourceText::new(r#"
+    interface math {
+        add: func(a: f64, b: f64) -> f64;
+        multiply: func(a: f64, b: f64) -> f64;
     }
-    Ok(())
+"#);
+
+let result = parser.parse(&source);
+println!("Interface parsed successfully.");
+```
+
+### World Parsing
+```rust
+use oak_wit_component::{Parser, WitComponentLanguage, SourceText};
+
+let parser = Parser::new();
+let source = SourceText::new(r#"
+    world example {
+        import wasi:clocks/monotonic-clock@0.2.0;
+        export example:interface;
+    }
+"#);
+
+let result = parser.parse(&source);
+println!("World parsed successfully.");
+```
+
+## 🔧 Advanced Features
+
+### Token-Level Parsing
+```rust
+use oak_wit_component::{Parser, WitComponentLanguage, SourceText};
+
+let parser = Parser::new();
+let source = SourceText::new("interface test { func: func(); }");
+let result = parser.parse(&source);
+println!("Token parsing completed.");
+```
+
+### Error Handling
+```rust
+use oak_wit_component::{Parser, WitComponentLanguage, SourceText};
+
+let parser = Parser::new();
+let source = SourceText::new(r#"
+    interface invalid {
+        func: func(a: f32
+    // Missing closing parenthesis
+"#);
+
+let result = parser.parse(&source);
+if let Some(errors) = result.result.err() {
+    println!("Parse errors found: {:?}", errors);
+} else {
+    println!("Parsed successfully.");
 }
 ```
+
+## 🏗️ AST Structure
+
+The parser generates a comprehensive AST with the following main structures:
+
+- **Package**: WIT package definitions
+- **Interface**: Interface definitions with functions and types
+- **World**: World definitions with imports and exports
+- **Function**: Function definitions with parameters and results
+- **Type**: Type definitions including records, variants, and primitives
+
+## 📊 Performance
+
+- **Streaming**: Parse large WIT files without loading entirely into memory
+- **Incremental**: Re-parse only changed sections
+- **Memory Efficient**: Smart AST node allocation
+- **Fast Recovery**: Quick error recovery for better IDE integration
+
+## 🔗 Integration
+
+Oak WIT Component integrates seamlessly with:
+
+- **WebAssembly Tools**: Component analysis and generation
+- **IDE Support**: Language server protocol compatibility for WIT
+- **Code Generation**: Generating bindings from WIT interfaces
+- **Component Validation**: Validating WIT component specifications
+- **Documentation**: Generating documentation from WIT interfaces
+
+## 📚 Examples
+
+Check out the [examples](examples/) directory for comprehensive examples:
+
+- Complete WIT component parsing
+- Interface and world analysis
+- Component validation
+- Integration with development workflows
+
+## 🤝 Contributing
+
+Contributions are welcome! 
+
+Please feel free to submit pull requests at the [project repository](https://github.com/ygg-lang/oaks/tree/dev/examples/oak-wit-component) or open [issues](https://github.com/ygg-lang/oaks/issues).

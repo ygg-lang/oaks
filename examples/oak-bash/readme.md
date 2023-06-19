@@ -7,7 +7,7 @@ High-performance incremental Bash parser for the oak ecosystem with flexible con
 
 ## 🎯 Overview
 
-Oak-bash is a robust parser for Bash, designed to handle complete Bash syntax including modern features like conditionals, loops, and functions. Built on the solid foundation of oak-core, it provides both high-level convenience and detailed AST generation for script analysis and automation.
+Oak Bash is a robust parser for Bash, designed to handle complete Bash syntax including modern features like conditionals, loops, and functions. Built on the solid foundation of oak-core, it provides both high-level convenience and detailed AST generation for script analysis and automation.
 
 ## ✨ Features
 
@@ -21,20 +21,20 @@ Oak-bash is a robust parser for Bash, designed to handle complete Bash syntax in
 Basic example:
 
 ```rust
-use oak_bash::BashParser;
+use oak_bash::{Parser, BashLanguage, SourceText};
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
-    let parser = BashParser::new();
-    let bash_code = r#"
+    let parser = Parser::new();
+    let source = SourceText::new(r#"
         #!/bin/bash
         NAME="World"
         echo "Hello, $NAME!"
         if [ "$NAME" == "World" ]; then
             echo "It's a small world."
         fi
-    "#;
+    "#);
     
-    let script = parser.parse_script(bash_code)?;
+    let result = parser.parse(&source);
     println!("Parsed Bash script successfully.");
     Ok(())
 }
@@ -44,71 +44,60 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
 ### Script Parsing
 ```rust
-use oak_bash::{BashParser, ast::Script};
+use oak_bash::{Parser, BashLanguage, SourceText};
 
-let parser = BashParser::new();
-let bash_code = r#"
+let parser = Parser::new();
+let source = SourceText::new(r#"
     #!/bin/bash
     echo "Hello"
-"#;
+    "#);
 
-let script = parser.parse_script(bash_code)?;
-println!("Script contains {} commands.", script.commands.len());
+let result = parser.parse(&source);
+println!("Parsed Bash script successfully.");
 ```
 
 ### Command Parsing
 ```rust
-use oak_bash::{BashParser, ast::Command};
+use oak_bash::{Parser, BashLanguage, SourceText};
 
-let parser = BashParser::new();
-let bash_code = r#"
+let parser = Parser::new();
+let source = SourceText::new(r#"
     ls -la /tmp
     grep "error" /var/log/syslog
-"#;
+    "#);
 
-let script = parser.parse_script(bash_code)?;
-for command in &script.commands {
-    if let Command::Simple(simple_cmd) = command {
-        println!("Command: {}", simple_cmd.name);
-    }
-}
+let result = parser.parse(&source);
+println!("Parsed Bash commands successfully.");
 ```
 
 ## 🔧 Advanced Features
 
 ### Token-Level Parsing
 ```rust
-use oak_bash::{BashParser, lexer::Token};
+use oak_bash::{Parser, BashLanguage, SourceText};
 
-let parser = BashParser::new();
-let tokens = parser.tokenize("echo \"Hello World\"")?;
-for token in tokens {
-    println!("{:?}", token.kind);
-}
+let parser = Parser::new();
+let source = SourceText::new("echo \"Hello World\"");
+let result = parser.parse(&source);
+// Token information is available in the parse result
 ```
 
 ### Error Handling
 ```rust
-use oak_bash::BashParser;
+use oak_bash::{Parser, BashLanguage, SourceText};
 
-let parser = BashParser::new();
-let invalid_bash = r#"
+let parser = Parser::new();
+let source = SourceText::new(r#"
     if [ -f /tmp/file ]; then
         echo "File exists"
     else
         echo "File does not exist"
     fi_invalid
-"#;
+    "#);
 
-match parser.parse_script(invalid_bash) {
-    Ok(script) => println!("Parsed Bash script successfully."),
-    Err(e) => {
-        println!("Parse error at line {} column {}: {}", 
-            e.line(), e.column(), e.message());
-        if let Some(context) = e.context() {
-            println!("Error context: {}", context);
-        }
-    }
+let result = parser.parse(&source);
+if let Err(e) = result.result {
+    println!("Parse error: {:?}", e);
 }
 ```
 
@@ -130,7 +119,7 @@ The parser generates a comprehensive AST with the following main structures:
 
 ## 🔗 Integration
 
-Oak-bash integrates seamlessly with:
+Oak Bash integrates seamlessly with:
 
 - **Shell Scripting Tools**: Integration with linters, formatters
 - **Automation**: Parsing scripts for automated tasks

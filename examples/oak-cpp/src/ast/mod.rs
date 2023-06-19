@@ -1,5 +1,4 @@
-use alloc::{boxed::Box, string::String, vec::Vec};
-use core::ops::Range;
+use core::range::Range;
 
 /// Type alias for source span
 type SourceSpan = Range<usize>;
@@ -14,7 +13,7 @@ pub struct CppRoot {
 #[derive(Debug, Clone, PartialEq)]
 pub struct TranslationUnit {
     pub external_declarations: Vec<ExternalDeclaration>,
-    pub span: core::ops::Range<usize>,
+    pub span: Range<usize>,
 }
 
 /// 外部声明
@@ -218,7 +217,7 @@ pub struct ParameterDeclaration {
 pub struct AbstractDeclarator {
     pub pointer: Option<Pointer>,
     pub direct_abstract_declarator: Option<Box<DirectAbstractDeclarator>>,
-    pub span: core::ops::Range<usize>,
+    pub span: Range<usize>,
 }
 
 /// 直接抽象声明
@@ -306,11 +305,11 @@ pub enum JumpStatement {
     Return(Option<Expression>),
 }
 
-/// 表达
+/// 表达式
 #[derive(Debug, Clone, PartialEq)]
 pub struct Expression {
     pub kind: Box<ExpressionKind>,
-    pub span: core::ops::Range<usize>,
+    pub span: Range<usize>,
 }
 
 /// 表达式种
@@ -421,7 +420,7 @@ pub enum AssignmentOperator {
 pub struct TypeName {
     pub specifier_qualifiers: Vec<SpecifierQualifier>,
     pub abstract_declarator: Option<Box<AbstractDeclarator>>,
-    pub span: core::ops::Range<usize>,
+    pub span: Range<usize>,
 }
 
 impl TypeName {
@@ -429,7 +428,7 @@ impl TypeName {
     pub fn new(
         specifier_qualifiers: Vec<SpecifierQualifier>,
         abstract_declarator: Option<Box<AbstractDeclarator>>,
-        span: core::ops::Range<usize>,
+        span: Range<usize>,
     ) -> Self {
         Self { specifier_qualifiers, abstract_declarator, span }
     }
@@ -444,7 +443,7 @@ impl CppRoot {
 
 impl TranslationUnit {
     /// 创建新的翻译单元
-    pub fn new(external_declarations: Vec<ExternalDeclaration>, span: core::ops::Range<usize>) -> Self {
+    pub fn new(external_declarations: Vec<ExternalDeclaration>, span: Range<usize>) -> Self {
         Self { external_declarations, span }
     }
 }

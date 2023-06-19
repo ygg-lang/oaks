@@ -1,6 +1,7 @@
 use oak_core::SyntaxKind;
+use serde::Serialize;
 
-#[derive(Debug, Copy, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Debug, Copy, Clone, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize)]
 #[repr(u16)]
 pub enum BashSyntaxKind {
     // Tokens

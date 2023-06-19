@@ -6,4 +6,5 @@ pub struct CsvLanguage;
 
 impl Language for CsvLanguage {
     type SyntaxKind = CsvSyntaxKind;
+    type TypedRoot = ();
 }

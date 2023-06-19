@@ -20,12 +20,13 @@ Oak of vampire is a robust parser for Vampire, designed to handle complete Vampi
 
 Basic example:
 
-```rust
-use oak_vampire::VampireParser;
+```rust,no_run
+use oak_vampire::{VampireLexer, VampireLanguage};
+use oak_core::{Lexer, SourceText};
 
-fn main() -> Result<(), Box<dyn std::error::Error>> {
-    let parser = VampireParser::new();
-    let vampire_code = r#"
+let language = VampireLanguage::default();
+let lexer = VampireLexer::new(&language);
+let vampire_code = r#"
 fof(ax1, axiom, (
     ! [A] : ( human(A) => mortal(A) )).
 
@@ -36,19 +37,20 @@ fof(conj, conjecture, (
     mortal(socrates) )).
     "#;
     
-    let problem = parser.parse_problem(vampire_code)?;
-    println!("Parsed Vampire problem successfully.");
-    Ok(())
-}
+let source = SourceText::new(vampire_code);
+let output = lexer.lex(&source);
+println!("Parsed Vampire problem successfully.");
 ```
 
 ## 📋 Parsing Examples
 
 ### Problem Parsing
-```rust
-use oak_vampire::{VampireParser, ast::Problem};
+```rust,no_run
+use oak_vampire::{VampireLexer, VampireLanguage, ast::ValkyrieModule};
+use oak_core::{Lexer, SourceText};
 
-let parser = VampireParser::new();
+let language = VampireLanguage::default();
+let lexer = VampireLexer::new(&language);
 let vampire_code = r#"
 fof(commutativity, axiom, (
     ! [X, Y] : ( X + Y = Y + X ) )).
@@ -60,56 +62,55 @@ fof(goal, conjecture, (
     ! [A, B, C] : ( A + (B + C) = (C + A) + B ) )).
 "#;
 
-let problem = parser.parse_problem(vampire_code)?;
-println!("Axioms: {}", problem.axioms.len());
-println!("Conjectures: {}", problem.conjectures.len());
+let source = SourceText::new(vampire_code);
+let output = lexer.lex(&source);
+println!("Tokens: {}", output.result.map_or(0, |tokens| tokens.len()));
 ```
 
 ### Formula Parsing
-```rust
-use oak_vampire::{VampireParser, ast::Formula};
+```rust,no_run
+use oak_vampire::{VampireLexer, VampireLanguage, ast::ValkyrieInstruction};
+use oak_core::{Lexer, SourceText};
 
-let parser = VampireParser::new();
+let language = VampireLanguage::default();
+let lexer = VampireLexer::new(&language);
 let formula_code = r#"
 ! [X, Y] : ( parent(X, Y) => ( ancestor(X, Y) & ~ sibling(X, Y) ) )
 "#;
 
-let formula = parser.parse_formula(formula_code)?;
-println!("Formula type: {:?}", formula.kind);
+let source = SourceText::new(formula_code);
+let output = lexer.lex(source);
+println!("Formula tokens: {}", output.result.map_or(0, |tokens| tokens.len()));
 ```
 
 ## 🔧 Advanced Features
 
 ### Token-Level Parsing
-```rust
-use oak_vampire::{VampireParser, lexer::Token};
+```rust,no_run
+use oak_vampire::{VampireLexer, VampireLanguage};
+use oak_core::{Lexer, SourceText};
 
-let parser = VampireParser::new();
-let tokens = parser.tokenize("fof(ax1, axiom, ( human(socrates) )).")?;
-for token in tokens {
-    println!("{:?}", token.kind);
-}
+let language = VampireLanguage::default();
+let lexer = VampireLexer::new(&language);
+let source = SourceText::new("fof(ax1, axiom, ( human(socrates) )).");
+let output = lexer.lex(source);
+println!("Tokens: {}", output.result.map_or(0, |tokens| tokens.len()));
 ```
 
 ### Error Handling
-```rust
-use oak_vampire::VampireParser;
+```rust,no_run
+use oak_vampire::{VampireLexer, VampireLanguage};
+use oak_core::{Lexer, SourceText};
 
-let parser = VampireParser::new();
-let invalid_vampire = r#"
-fof(ax1 axiom (
-    human(socrates) & mortal(socrates)
-)).
-"#;
+let language = VampireLanguage::default();
+let lexer = VampireLexer::new(&language);
+let invalid_code = "fof(invalid syntax here";
+let source = SourceText::new(invalid_code);
+let output = lexer.lex(source);
 
-match parser.parse_problem(invalid_vampire) {
-    Ok(problem) => println!("Parsed Vampire problem successfully."),
-    Err(e) => {
-        println!("Parse error at line {} column {}: {}", 
-            e.line(), e.column(), e.message());
-        if let Some(context) = e.context() {
-            println!("Error context: {}", context);
-        }
+if let Some(errors) = output.errors {
+    for error in errors {
+        println!("Error: {:?}", error);
     }
 }
 ```

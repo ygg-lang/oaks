@@ -1,10 +1,33 @@
-use crate::{kind::VerilogKind, language::VerilogLanguage};
-use oak_core::{Lexer, LexerState, SourceText, lexer::LexOutput};
+use crate::{VerilogKind, language::VerilogLanguage};
+use oak_core::{
+    IncrementalCache, Lexer, LexerState, OakError,
+    lexer::{CommentLine, LexOutput, StringConfig, WhitespaceConfig},
+    source::Source,
+};
+use std::sync::LazyLock;
 
-type State<'input> = LexerState<'input, VerilogLanguage>;
+type State<S: Source> = LexerState<S, VerilogLanguage>;
 
+static VL_WHITESPACE: LazyLock<WhitespaceConfig> = LazyLock::new(|| WhitespaceConfig { unicode_whitespace: true });
+static VL_COMMENT: LazyLock<CommentLine> = LazyLock::new(|| CommentLine { line_markers: &["//"] });
+static VL_STRING: LazyLock<StringConfig> = LazyLock::new(|| StringConfig { quotes: &['"'], escape: Some('\\') });
+
+#[derive(Clone)]
 pub struct VerilogLexer<'config> {
     config: &'config VerilogLanguage,
+}
+
+impl<'config> Lexer<VerilogLanguage> for VerilogLexer<'config> {
+    fn lex_incremental(
+        &self,
+        source: impl Source,
+        changed: usize,
+        cache: IncrementalCache<VerilogLanguage>,
+    ) -> LexOutput<VerilogLanguage> {
+        let mut state = LexerState::new_with_cache(source, changed, cache);
+        let result = self.run(&mut state);
+        state.finish(result)
+    }
 }
 
 impl<'config> VerilogLexer<'config> {
@@ -12,234 +35,297 @@ impl<'config> VerilogLexer<'config> {
         Self { config }
     }
 
-    /// 跳过空白字符
-    fn skip_whitespace(&self, state: &mut State) -> bool {
-        let start_pos = state.get_position();
+    /// 主要词法分析循环
+    fn run<S: Source>(&self, state: &mut State<S>) -> Result<(), OakError> {
+        while state.not_at_end() {
+            let safe_point = state.get_position();
 
-        while let Some(ch) = state.peek() {
-            if ch == ' ' || ch == '\t' {
+            if self.skip_whitespace(state) {
+                continue;
+            }
+
+            if self.skip_comment(state) {
+                continue;
+            }
+
+            if self.lex_string_literal(state) {
+                continue;
+            }
+
+            if self.lex_number_literal(state) {
+                continue;
+            }
+
+            if self.lex_identifier_or_keyword(state) {
+                continue;
+            }
+
+            if self.lex_operators(state) {
+                continue;
+            }
+
+            if self.lex_single_char_tokens(state) {
+                continue;
+            }
+
+            state.safe_check(safe_point);
+        }
+
+        // 添加 EOF token
+        let eof_pos = state.get_position();
+        state.add_token(VerilogKind::Eof, eof_pos, eof_pos);
+        Ok(())
+    }
+
+    /// 跳过空白字符
+    fn skip_whitespace<S: Source>(&self, state: &mut State<S>) -> bool {
+        match VL_WHITESPACE.scan(state.rest(), state.get_position(), VerilogKind::Whitespace) {
+            Some(token) => {
+                state.advance_with(token);
+                return true;
+            }
+            None => {}
+        }
+        false
+    }
+
+    /// 跳过注释
+    fn skip_comment<S: Source>(&self, state: &mut State<S>) -> bool {
+        let start = state.get_position();
+        let rest = state.rest();
+
+        // 行注释: // ... until newline
+        if rest.starts_with("//") {
+            state.advance(2);
+            while let Some(ch) = state.peek() {
+                if ch == '\n' || ch == '\r' {
+                    break;
+                }
                 state.advance(ch.len_utf8());
+            }
+            state.add_token(VerilogKind::Comment, start, state.get_position());
+            return true;
+        }
+
+        // 块注释: /* ... */
+        if rest.starts_with("/*") {
+            state.advance(2);
+            while let Some(ch) = state.peek() {
+                if ch == '*' && state.peek_next_n(1) == Some('/') {
+                    state.advance(2);
+                    break;
+                }
+                state.advance(ch.len_utf8());
+            }
+            state.add_token(VerilogKind::Comment, start, state.get_position());
+            return true;
+        }
+
+        false
+    }
+
+    /// 处理字符串字面量
+    fn lex_string_literal<S: Source>(&self, state: &mut State<S>) -> bool {
+        let start = state.get_position();
+
+        if state.current() == Some('"') {
+            state.advance(1);
+            let mut escaped = false;
+            while let Some(ch) = state.peek() {
+                if ch == '"' && !escaped {
+                    state.advance(1); // consume closing quote
+                    break;
+                }
+                state.advance(ch.len_utf8());
+                if escaped {
+                    escaped = false;
+                    continue;
+                }
+                if ch == '\\' {
+                    escaped = true;
+                    continue;
+                }
+                if ch == '\n' || ch == '\r' {
+                    break;
+                }
+            }
+            state.add_token(VerilogKind::String, start, state.get_position());
+            return true;
+        }
+        false
+    }
+
+    /// 处理数字字面量
+    fn lex_number_literal<S: Source>(&self, state: &mut State<S>) -> bool {
+        let start = state.get_position();
+        let first = match state.current() {
+            Some(c) => c,
+            None => return false,
+        };
+
+        if !first.is_ascii_digit() {
+            return false;
+        }
+
+        // 基本数字解析
+        state.advance(1);
+        while let Some(c) = state.peek() {
+            if c.is_ascii_digit() || c == '_' {
+                state.advance(1);
             }
             else {
                 break;
             }
         }
 
-        if state.get_position() > start_pos {
-            state.add_token(VerilogKind::Whitespace, start_pos, state.get_position());
-            true
-        }
-        else {
-            false
-        }
-    }
-
-    /// 处理换行
-    fn lex_newline(&self, state: &mut State) -> bool {
-        let start_pos = state.get_position();
-
-        if let Some('\n') = state.peek() {
+        // 检查是否有进制前缀 (如 'b, 'h, 'o, 'd)
+        if state.peek() == Some('\'') {
             state.advance(1);
-            state.add_token(VerilogKind::Newline, start_pos, state.get_position());
-            true
-        }
-        else if let Some('\r') = state.peek() {
-            state.advance(1);
-            if let Some('\n') = state.peek() {
-                state.advance(1);
-            }
-            state.add_token(VerilogKind::Newline, start_pos, state.get_position());
-            true
-        }
-        else {
-            false
-        }
-    }
-
-    /// 处理注释
-    fn lex_comment(&self, state: &mut State) -> bool {
-        let start_pos = state.get_position();
-
-        if let Some('/') = state.peek() {
-            state.advance(1);
-            if let Some('/') = state.peek() {
-                state.advance(1);
-
-                while let Some(ch) = state.peek() {
-                    if ch == '\n' {
-                        break;
+            if let Some(base_char) = state.peek() {
+                if matches!(base_char, 'b' | 'B' | 'h' | 'H' | 'o' | 'O' | 'd' | 'D') {
+                    state.advance(1);
+                    while let Some(c) = state.peek() {
+                        if c.is_ascii_alphanumeric() || c == '_' {
+                            state.advance(1);
+                        }
+                        else {
+                            break;
+                        }
                     }
-                    state.advance(ch.len_utf8());
                 }
+            }
+        }
 
-                state.add_token(VerilogKind::Comment, start_pos, state.get_position());
-                true
-            }
-            else {
-                // 回退，这不是注释
-                state.set_position(start_pos);
-                false
-            }
-        }
-        else {
-            false
-        }
+        state.add_token(VerilogKind::Number, start, state.get_position());
+        true
     }
 
     /// 处理标识符和关键字
-    fn lex_identifier(&self, state: &mut State, source: &SourceText) -> bool {
-        let start_pos = state.get_position();
+    fn lex_identifier_or_keyword<S: Source>(&self, state: &mut State<S>) -> bool {
+        let start = state.get_position();
+        let ch = match state.current() {
+            Some(c) => c,
+            None => return false,
+        };
 
-        if let Some(ch) = state.peek() {
-            if ch.is_alphabetic() || ch == '_' {
-                state.advance(ch.len_utf8());
-
-                while let Some(ch) = state.peek() {
-                    if ch.is_alphanumeric() || ch == '_' {
-                        state.advance(ch.len_utf8());
-                    }
-                    else {
-                        break;
-                    }
-                }
-
-                // 检查是否是关键字
-                let kind = if let Some(text) = source.get_text_in((start_pos..state.get_position()).into()) {
-                    match text {
-                        "module" => VerilogKind::Module,
-                        "endmodule" => VerilogKind::Endmodule,
-                        "wire" => VerilogKind::Wire,
-                        "reg" => VerilogKind::Reg,
-                        "input" => VerilogKind::Input,
-                        "output" => VerilogKind::Output,
-                        "always" => VerilogKind::Always,
-                        "begin" => VerilogKind::Begin,
-                        "end" => VerilogKind::End,
-                        "if" => VerilogKind::If,
-                        "else" => VerilogKind::Else,
-                        "assign" => VerilogKind::Assign,
-                        _ => VerilogKind::Identifier,
-                    }
-                } else {
-                    VerilogKind::Identifier
-                };
-
-                state.add_token(kind, start_pos, state.get_position());
-                true
-            }
-            else {
-                false
-            }
+        if !(ch.is_ascii_alphabetic() || ch == '_') {
+            return false;
         }
-        else {
-            false
-        }
-    }
 
-    /// 处理数字
-    fn lex_number(&self, state: &mut State) -> bool {
-        let start_pos = state.get_position();
-
-        if let Some(ch) = state.peek() {
-            if ch.is_ascii_digit() {
+        state.advance(1);
+        while let Some(c) = state.current() {
+            if c.is_ascii_alphanumeric() || c == '_' {
                 state.advance(1);
-
-                while let Some(ch) = state.peek() {
-                    if ch.is_ascii_digit() {
-                        state.advance(1);
-                    }
-                    else {
-                        break;
-                    }
-                }
-
-                state.add_token(VerilogKind::Number, start_pos, state.get_position());
-                true
             }
             else {
-                false
+                break;
             }
         }
-        else {
-            false
-        }
+
+        let end = state.get_position();
+        let text = state.get_text_in((start..end).into());
+        let kind = match text {
+            "module" => VerilogKind::ModuleKw,
+            "endmodule" => VerilogKind::EndmoduleKw,
+            "wire" => VerilogKind::WireKw,
+            "reg" => VerilogKind::RegKw,
+            "input" => VerilogKind::InputKw,
+            "output" => VerilogKind::OutputKw,
+            "always" => VerilogKind::AlwaysKw,
+            "begin" => VerilogKind::BeginKw,
+            "end" => VerilogKind::EndKw,
+            "if" => VerilogKind::IfKw,
+            "else" => VerilogKind::ElseKw,
+            "assign" => VerilogKind::AssignKw,
+            "posedge" => VerilogKind::PosedgeKw,
+            "negedge" => VerilogKind::NegedgeKw,
+            "case" => VerilogKind::CaseKw,
+            "endcase" => VerilogKind::EndcaseKw,
+            "default" => VerilogKind::DefaultKw,
+            _ => VerilogKind::Identifier,
+        };
+
+        state.add_token(kind, start, state.get_position());
+        true
     }
 
-    /// 处理标点符号
-    fn lex_punctuation(&self, state: &mut State) -> bool {
-        let start_pos = state.get_position();
+    /// 处理操作符
+    fn lex_operators<S: Source>(&self, state: &mut State<S>) -> bool {
+        let start = state.get_position();
+        let rest = state.rest();
 
-        if let Some(ch) = state.peek() {
+        // 优先匹配长操作符
+        let patterns: &[(&str, VerilogKind)] = &[
+            ("==", VerilogKind::EqualEqual),
+            ("!=", VerilogKind::NotEqual),
+            ("<=", VerilogKind::LessEqual),
+            (">=", VerilogKind::GreaterEqual),
+            ("<<", VerilogKind::LeftShift),
+            (">>", VerilogKind::RightShift),
+            ("&&", VerilogKind::AndAnd),
+            ("||", VerilogKind::OrOr),
+        ];
+
+        for (pat, kind) in patterns {
+            if rest.starts_with(pat) {
+                state.advance(pat.len());
+                state.add_token(*kind, start, state.get_position());
+                return true;
+            }
+        }
+
+        if let Some(ch) = state.current() {
+            let kind = match ch {
+                '+' => Some(VerilogKind::Plus),
+                '-' => Some(VerilogKind::Minus),
+                '*' => Some(VerilogKind::Star),
+                '/' => Some(VerilogKind::Slash),
+                '%' => Some(VerilogKind::Percent),
+                '=' => Some(VerilogKind::Equal),
+                '!' => Some(VerilogKind::Bang),
+                '<' => Some(VerilogKind::Less),
+                '>' => Some(VerilogKind::Greater),
+                '&' => Some(VerilogKind::Ampersand),
+                '|' => Some(VerilogKind::Pipe),
+                '^' => Some(VerilogKind::Caret),
+                '~' => Some(VerilogKind::Tilde),
+                _ => None,
+            };
+
+            if let Some(k) = kind {
+                state.advance(ch.len_utf8());
+                state.add_token(k, start, state.get_position());
+                return true;
+            }
+        }
+        false
+    }
+
+    /// 处理单字符标记
+    fn lex_single_char_tokens<S: Source>(&self, state: &mut State<S>) -> bool {
+        let start = state.get_position();
+
+        if let Some(ch) = state.current() {
             let kind = match ch {
                 '(' => VerilogKind::LeftParen,
                 ')' => VerilogKind::RightParen,
-                '[' => VerilogKind::LeftBracket,
-                ']' => VerilogKind::RightBracket,
                 '{' => VerilogKind::LeftBrace,
                 '}' => VerilogKind::RightBrace,
-                '.' => VerilogKind::Dot,
-                ';' => VerilogKind::Semicolon,
+                '[' => VerilogKind::LeftBracket,
+                ']' => VerilogKind::RightBracket,
                 ',' => VerilogKind::Comma,
-                '+' => VerilogKind::Plus,
-                '-' => VerilogKind::Minus,
-                '*' => VerilogKind::Star,
-                '/' => VerilogKind::Slash,
-                '=' => VerilogKind::Equal,
+                ';' => VerilogKind::Semicolon,
+                '.' => VerilogKind::Dot,
+                ':' => VerilogKind::Colon,
+                '#' => VerilogKind::Hash,
+                '@' => VerilogKind::At,
                 _ => return false,
             };
 
-            state.advance(1);
-            state.add_token(kind, start_pos, state.get_position());
-            true
+            state.advance(ch.len_utf8());
+            state.add_token(kind, start, state.get_position());
+            return true;
         }
-        else {
-            false
-        }
-    }
-}
-
-impl<'config> Lexer<VerilogLanguage> for VerilogLexer<'config> {
-    fn lex(&self, source: &SourceText) -> LexOutput<VerilogKind> {
-        let mut state = LexerState::new(source);
-
-        while state.not_at_end() {
-            // 尝试各种词法规则
-            if self.skip_whitespace(&mut state) {
-                continue;
-            }
-
-            if self.lex_newline(&mut state) {
-                continue;
-            }
-
-            if self.lex_comment(&mut state) {
-                continue;
-            }
-
-            if self.lex_number(&mut state) {
-                continue;
-            }
-
-            if self.lex_identifier(&mut state, source) {
-                continue;
-            }
-
-            if self.lex_punctuation(&mut state) {
-                continue;
-            }
-
-            // 如果所有规则都不匹配，跳过当前字符并标记为错误
-            let start_pos = state.get_position();
-            if let Some(ch) = state.peek() {
-                state.advance(ch.len_utf8());
-                state.add_token(VerilogKind::Error, start_pos, state.get_position());
-            }
-        }
-
-        // 添加 EOF token
-        let eof_pos = state.get_position();
-        state.add_token(VerilogKind::Eof, eof_pos, eof_pos);
-
-        state.finish()
+        false
     }
 }

@@ -1,6 +1,7 @@
 use oak_core::SyntaxKind;
+use serde::{Deserialize, Serialize};
 
-#[derive(Copy, Clone, Debug, PartialEq, Eq)]
+#[derive(Copy, Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
 pub enum XmlSyntaxKind {
     // 基本 kind
     Whitespace,

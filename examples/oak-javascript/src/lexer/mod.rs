@@ -1,8 +1,24 @@
 use crate::{kind::JavaScriptSyntaxKind, language::JavaScriptLanguage};
-use oak_core::{Lexer, LexerState, SourceText, lexer::LexOutput};
+use oak_core::{
+    IncrementalCache, Lexer, LexerState, OakError,
+    lexer::{LexOutput, StringConfig, WhitespaceConfig},
+    source::Source,
+};
+use std::sync::LazyLock;
 
-type State<'input> = LexerState<'input, JavaScriptLanguage>;
+type State<S> = LexerState<S, JavaScriptLanguage>;
 
+static JS_WHITESPACE: LazyLock<WhitespaceConfig> = LazyLock::new(|| WhitespaceConfig { unicode_whitespace: true });
+static JS_STRING: LazyLock<StringConfig> = LazyLock::new(|| StringConfig { quotes: &['"', '\''], escape: Some('\\') });
+
+#[cfg(feature = "lexer_debug")]
+macro_rules! lex_debug { ($($arg:tt)*) => { println!($($arg)*); } }
+#[cfg(not(feature = "lexer_debug"))]
+macro_rules! lex_debug {
+    ($($arg:tt)*) => {};
+}
+
+#[derive(Clone)]
 pub struct JavaScriptLexer<'config> {
     config: &'config JavaScriptLanguage,
 }
@@ -12,30 +28,96 @@ impl<'config> JavaScriptLexer<'config> {
         Self { config }
     }
 
-    /// 跳过空白字符
-    fn skip_whitespace(&self, state: &mut State) -> bool {
-        let start_pos = state.get_position();
+    fn safe_check<S: Source>(&self, state: &State<S>) -> Result<(), OakError> {
+        if state.get_position() <= state.length() {
+            Ok(())
+        }
+        else {
+            Err(OakError::custom_error(format!("Lexer out-of-bounds: pos={}, len={}", state.get_position(), state.length())))
+        }
+    }
 
-        while let Some(ch) = state.peek() {
-            if ch == ' ' || ch == '\t' {
+    /// 主要的词法分析运行方法
+    fn run<S: Source>(&self, state: &mut State<S>) -> Result<(), OakError> {
+        lex_debug!("Starting lexer run, source length: {}", state.length());
+        while state.not_at_end() {
+            let current_pos = state.get_position();
+            let current_char = state.peek();
+            lex_debug!("At position {}, char: {:?}", current_pos, current_char);
+
+            self.safe_check(state)?;
+
+            if self.skip_whitespace(state) {
+                lex_debug!("Skipped whitespace");
+                continue;
+            }
+
+            if self.lex_newline(state) {
+                lex_debug!("Lexed newline");
+                continue;
+            }
+
+            if self.lex_comment(state) {
+                lex_debug!("Lexed comment");
+                continue;
+            }
+
+            if self.lex_string_literal(state) {
+                lex_debug!("Lexed string literal");
+                continue;
+            }
+
+            if self.lex_template_literal(state) {
+                lex_debug!("Lexed template literal");
+                continue;
+            }
+
+            if self.lex_numeric_literal(state) {
+                lex_debug!("Lexed numeric literal");
+                continue;
+            }
+
+            if self.lex_identifier_or_keyword(state) {
+                lex_debug!("Lexed identifier or keyword");
+                continue;
+            }
+
+            if self.lex_operator_or_punctuation(state) {
+                lex_debug!("Lexed operator or punctuation");
+                continue;
+            }
+
+            let start = state.get_position();
+            if let Some(ch) = state.peek() {
+                lex_debug!("No pattern matched for char {:?}, adding error token", ch);
                 state.advance(ch.len_utf8());
+                state.add_token(JavaScriptSyntaxKind::Error, start, state.get_position());
             }
             else {
+                lex_debug!("Reached end of file");
                 break;
             }
         }
+        lex_debug!("Finished lexer run");
 
-        if state.get_position() > start_pos {
-            state.add_token(JavaScriptSyntaxKind::Whitespace, start_pos, state.get_position());
-            true
-        }
-        else {
-            false
+        let eof_pos = state.get_position();
+        state.add_token(JavaScriptSyntaxKind::Eof, eof_pos, eof_pos);
+        Ok(())
+    }
+
+    /// 跳过空白字符
+    fn skip_whitespace<S: Source>(&self, state: &mut State<S>) -> bool {
+        match JS_WHITESPACE.scan(state.rest(), state.get_position(), JavaScriptSyntaxKind::Whitespace) {
+            Some(token) => {
+                state.advance_with(token);
+                true
+            }
+            None => false,
         }
     }
 
     /// 处理换行
-    fn lex_newline(&self, state: &mut State) -> bool {
+    fn lex_newline<S: Source>(&self, state: &mut State<S>) -> bool {
         let start_pos = state.get_position();
 
         if let Some('\n') = state.peek() {
@@ -56,80 +138,59 @@ impl<'config> JavaScriptLexer<'config> {
         }
     }
 
-    /// 处理行注
-    fn lex_line_comment(&self, state: &mut State, source: &SourceText) -> bool {
-        let start_pos = state.get_position();
+    /// 处理注释（行注释和块注释）
+    fn lex_comment<S: Source>(&self, state: &mut State<S>) -> bool {
+        let start = state.get_position();
+        let rest = state.rest();
 
-        if let Some('/') = state.peek() {
-            if let Some('/') = source.get_char_at(start_pos + 1) {
-                state.advance(2); // 跳过 //
-
-                // 读取到行结束符之前的所有字符
-                while let Some(ch) = state.peek() {
-                    if ch == '\n' || ch == '\r' {
-                        break;
-                    }
-                    state.advance(ch.len_utf8());
+        // 行注释: // ... 直到换行
+        if rest.starts_with("//") {
+            state.advance(2);
+            while let Some(ch) = state.peek() {
+                if ch == '\n' || ch == '\r' {
+                    break;
                 }
-
-                state.add_token(JavaScriptSyntaxKind::LineComment, start_pos, state.get_position());
-                true
+                state.advance(ch.len_utf8());
             }
-            else {
-                false
-            }
+            state.add_token(JavaScriptSyntaxKind::LineComment, start, state.get_position());
+            return true;
         }
-        else {
-            false
-        }
-    }
 
-    /// 处理块注
-    fn lex_block_comment(&self, state: &mut State, source: &SourceText) -> bool {
-        let start_pos = state.get_position();
-
-        if let Some('/') = state.peek() {
-            if let Some('*') = source.get_char_at(start_pos + 1) {
-                state.advance(2); // 跳过 /*
-
-                let mut found_end = false;
-                while let Some(ch) = state.peek() {
-                    if ch == '*' {
-                        if let Some('/') = source.get_char_at(state.get_position() + 1) {
-                            state.advance(2); // 跳过 */
-                            found_end = true;
-                            break;
-                        }
-                    }
-                    state.advance(ch.len_utf8());
+        // 块注释: /* ... */
+        if rest.starts_with("/*") {
+            state.advance(2);
+            let mut found_end = false;
+            while let Some(ch) = state.peek() {
+                if ch == '*' && state.peek_next_n(1) == Some('/') {
+                    state.advance(2);
+                    found_end = true;
+                    break;
                 }
-
-                if !found_end {
-                    // 未终止的注释，添加错误
-                    state.add_error(source.syntax_error("Unterminated comment", start_pos));
-                }
-
-                state.add_token(JavaScriptSyntaxKind::BlockComment, start_pos, state.get_position());
-                true
+                state.advance(ch.len_utf8());
             }
-            else {
-                false
+
+            if !found_end {
+                let error = state.syntax_error("Unterminated comment", start);
+                state.add_error(error);
             }
+
+            state.add_token(JavaScriptSyntaxKind::BlockComment, start, state.get_position());
+            return true;
         }
-        else {
-            false
-        }
+
+        false
     }
 
     /// 处理字符串字面量
-    fn lex_string_literal(&self, state: &mut State, source: &SourceText) -> bool {
+    fn lex_string_literal<S: Source>(&self, state: &mut State<S>) -> bool {
         let start_pos = state.get_position();
 
-        if let Some(quote) = state.peek() {
-            if quote == '"' || quote == '\'' {
+        if let Some(first_char) = state.peek() {
+            if first_char == '"' || first_char == '\'' {
+                let quote = first_char;
                 state.advance(1);
-
                 let mut found_end = false;
+
                 while let Some(ch) = state.peek() {
                     if ch == quote {
                         state.advance(1);
@@ -137,14 +198,15 @@ impl<'config> JavaScriptLexer<'config> {
                         break;
                     }
                     else if ch == '\\' {
-                        // 处理转义字符
+                        // Skip escaped character
                         state.advance(1);
-                        if let Some(escaped) = state.peek() {
-                            state.advance(escaped.len_utf8());
+                        if let Some(_escaped) = state.peek() {
+                            state.advance(1);
                         }
                     }
                     else if ch == '\n' || ch == '\r' {
-                        break; // 字符串不能跨多行
+                        // Strings cannot span multiple lines in JavaScript
+                        break;
                     }
                     else {
                         state.advance(ch.len_utf8());
@@ -152,7 +214,8 @@ impl<'config> JavaScriptLexer<'config> {
                 }
 
                 if !found_end {
-                    state.add_error(source.syntax_error("Unterminated string literal", start_pos));
+                    let error = state.syntax_error("Unterminated string literal", start_pos);
+                    state.add_error(error);
                 }
 
                 state.add_token(JavaScriptSyntaxKind::StringLiteral, start_pos, state.get_position());
@@ -168,7 +231,7 @@ impl<'config> JavaScriptLexer<'config> {
     }
 
     /// 处理模板字符
-    fn lex_template_literal(&self, state: &mut State, source: &SourceText) -> bool {
+    fn lex_template_literal<S: Source>(&self, state: &mut State<S>) -> bool {
         let start_pos = state.get_position();
 
         if let Some('`') = state.peek() {
@@ -189,7 +252,7 @@ impl<'config> JavaScriptLexer<'config> {
                     }
                 }
                 else if ch == '$' {
-                    if let Some('{') = source.get_char_at(state.get_position() + 1) {
+                    if let Some('{') = state.peek_next_n(1) {
                         // 模板表达式，暂时跳过
                         state.advance(2);
                         let mut brace_count = 1;
@@ -217,7 +280,8 @@ impl<'config> JavaScriptLexer<'config> {
             }
 
             if !found_end {
-                state.add_error(source.syntax_error("Unterminated template literal", start_pos));
+                let error = state.syntax_error("Unterminated template literal", start_pos);
+                state.add_error(error);
             }
 
             state.add_token(JavaScriptSyntaxKind::TemplateString, start_pos, state.get_position());
@@ -228,11 +292,46 @@ impl<'config> JavaScriptLexer<'config> {
         }
     }
 
-    /// 处理数字字面
-    fn lex_numeric_literal(&self, state: &mut State) -> bool {
+    /// 处理数字字面量
+    fn lex_numeric_literal<S: Source>(&self, state: &mut State<S>) -> bool {
         let start_pos = state.get_position();
 
         if let Some(ch) = state.peek() {
+            // 十六进制数字 (0x 或 0X)
+            if ch == '0' {
+                if let Some(next) = state.peek_next_n(1) {
+                    if next == 'x' || next == 'X' {
+                        state.advance(2); // 跳过 '0x'
+                        let mut has_digits = false;
+                        while let Some(hex_ch) = state.peek() {
+                            if hex_ch.is_ascii_hexdigit() {
+                                state.advance(1);
+                                has_digits = true;
+                            }
+                            else {
+                                break;
+                            }
+                        }
+
+                        if !has_digits {
+                            let error = state.syntax_error("Invalid hexadecimal number", start_pos);
+                            state.add_error(error);
+                        }
+
+                        // 检查 BigInt 后缀
+                        if let Some('n') = state.peek() {
+                            state.advance(1);
+                            state.add_token(JavaScriptSyntaxKind::BigIntLiteral, start_pos, state.get_position());
+                        }
+                        else {
+                            state.add_token(JavaScriptSyntaxKind::NumericLiteral, start_pos, state.get_position());
+                        }
+                        return true;
+                    }
+                }
+            }
+
+            // 普通数字或小数
             if ch.is_ascii_digit() || (ch == '.' && self.is_next_digit(state)) {
                 // 处理整数部分
                 if ch != '.' {
@@ -263,23 +362,34 @@ impl<'config> JavaScriptLexer<'config> {
                 if let Some(exp) = state.peek() {
                     if exp == 'e' || exp == 'E' {
                         state.advance(1);
+
+                        // 可选的符号
                         if let Some(sign) = state.peek() {
                             if sign == '+' || sign == '-' {
                                 state.advance(1);
                             }
                         }
+
+                        // 必须有数字
+                        let mut has_exp_digits = false;
                         while let Some(digit) = state.peek() {
                             if digit.is_ascii_digit() {
                                 state.advance(1);
+                                has_exp_digits = true;
                             }
                             else {
                                 break;
                             }
                         }
+
+                        if !has_exp_digits {
+                            let error = state.syntax_error("Invalid number exponent", start_pos);
+                            state.add_error(error);
+                        }
                     }
                 }
 
-                // 检BigInt 后缀
+                // 检查 BigInt 后缀
                 if let Some('n') = state.peek() {
                     state.advance(1);
                     state.add_token(JavaScriptSyntaxKind::BigIntLiteral, start_pos, state.get_position());
@@ -299,12 +409,12 @@ impl<'config> JavaScriptLexer<'config> {
     }
 
     /// 检查下一个字符是否是数字
-    fn is_next_digit(&self, state: &State) -> bool {
+    fn is_next_digit<S: Source>(&self, state: &State<S>) -> bool {
         if let Some(next_ch) = state.peek_next_n(1) { next_ch.is_ascii_digit() } else { false }
     }
 
     /// 处理标识符和关键
-    fn lex_identifier_or_keyword(&self, state: &mut State, source: &SourceText) -> bool {
+    fn lex_identifier_or_keyword<S: Source>(&self, state: &mut State<S>) -> bool {
         let start_pos = state.get_position();
 
         if let Some(ch) = state.peek() {
@@ -320,7 +430,7 @@ impl<'config> JavaScriptLexer<'config> {
                     }
                 }
 
-                let text = source.get_text_in((start_pos..state.get_position()).into()).unwrap_or("");
+                let text = state.get_text_in((start_pos..state.get_position()).into());
                 let token_kind = self.keyword_or_identifier(&text);
                 state.add_token(token_kind, start_pos, state.get_position());
                 true
@@ -392,7 +502,7 @@ impl<'config> JavaScriptLexer<'config> {
     }
 
     /// 处理操作符和标点符号
-    fn lex_operator_or_punctuation(&self, state: &mut State, source: &SourceText) -> bool {
+    fn lex_operator_or_punctuation<S: Source>(&self, state: &mut State<S>) -> bool {
         let start_pos = state.get_position();
 
         if let Some(ch) = state.peek() {
@@ -447,9 +557,9 @@ impl<'config> JavaScriptLexer<'config> {
                 }
                 '/' => {
                     // 检查是否是注释
-                    if let Some(next) = source.get_char_at(start_pos + 1) {
+                    if let Some(next) = state.peek_next_n(1) {
                         if next == '/' || next == '*' {
-                            return false; // 让注释处理函数处                        
+                            return false; // 让注释处理函数处理                        
                         }
                     }
                     state.advance(1);
@@ -666,7 +776,7 @@ impl<'config> JavaScriptLexer<'config> {
                 '.' => {
                     state.advance(1);
                     if let Some('.') = state.peek() {
-                        if let Some('.') = source.get_char_at(state.get_position() + 1) {
+                        if let Some('.') = state.peek_next_n(1) {
                             state.advance(2);
                             JavaScriptSyntaxKind::DotDotDot
                         }
@@ -695,59 +805,14 @@ impl<'config> JavaScriptLexer<'config> {
 }
 
 impl<'config> Lexer<JavaScriptLanguage> for JavaScriptLexer<'config> {
-    fn lex(&self, source: &SourceText) -> LexOutput<JavaScriptSyntaxKind> {
-        let mut state = LexerState::new(source);
-
-        while state.not_at_end() {
-            // 尝试各种词法规则
-            if self.skip_whitespace(&mut state) {
-                continue;
-            }
-
-            if self.lex_newline(&mut state) {
-                continue;
-            }
-
-            if self.lex_line_comment(&mut state, source) {
-                continue;
-            }
-
-            if self.lex_block_comment(&mut state, source) {
-                continue;
-            }
-
-            if self.lex_string_literal(&mut state, source) {
-                continue;
-            }
-
-            if self.lex_template_literal(&mut state, source) {
-                continue;
-            }
-
-            if self.lex_numeric_literal(&mut state) {
-                continue;
-            }
-
-            if self.lex_identifier_or_keyword(&mut state, source) {
-                continue;
-            }
-
-            if self.lex_operator_or_punctuation(&mut state, source) {
-                continue;
-            }
-
-            // 如果所有规则都不匹配，跳过当前字符并标记为错误
-            let start_pos = state.get_position();
-            if let Some(ch) = state.peek() {
-                state.advance(ch.len_utf8());
-                state.add_token(JavaScriptSyntaxKind::Error, start_pos, state.get_position());
-            }
-        }
-
-        // 添加 EOF kind
-        let eof_pos = state.get_position();
-        state.add_token(JavaScriptSyntaxKind::Eof, eof_pos, eof_pos);
-
-        state.finish()
+    fn lex_incremental(
+        &self,
+        source: impl Source,
+        changed: usize,
+        cache: IncrementalCache<JavaScriptLanguage>,
+    ) -> LexOutput<JavaScriptLanguage> {
+        let mut state = LexerState::new_with_cache(source, changed, cache);
+        let result = self.run(&mut state);
+        state.finish(result)
     }
 }

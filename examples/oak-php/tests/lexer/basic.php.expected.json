@@ -1,0 +1,607 @@
+{
+    "success": true,
+    "count": 100,
+    "tokens": [
+        {
+            "kind": "Question",
+            "text": "<?",
+            "start": 0,
+            "end": 1
+        },
+        {
+            "kind": "Identifier",
+            "text": "php",
+            "start": 1,
+            "end": 4
+        },
+        {
+            "kind": "Declare",
+            "text": "\ndeclare",
+            "start": 26,
+            "end": 33
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 33,
+            "end": 34
+        },
+        {
+            "kind": "Identifier",
+            "text": "(strict_type",
+            "start": 34,
+            "end": 46
+        },
+        {
+            "kind": "Assign",
+            "text": "s",
+            "start": 46,
+            "end": 47
+        },
+        {
+            "kind": "NumberLiteral",
+            "text": "=",
+            "start": 47,
+            "end": 48
+        },
+        {
+            "kind": "RightParen",
+            "text": "1",
+            "start": 48,
+            "end": 49
+        },
+        {
+            "kind": "Semicolon",
+            "text": ")",
+            "start": 49,
+            "end": 50
+        },
+        {
+            "kind": "Namespace",
+            "text": "\nnamespac",
+            "start": 54,
+            "end": 63
+        },
+        {
+            "kind": "Identifier",
+            "text": " Ap",
+            "start": 64,
+            "end": 67
+        },
+        {
+            "kind": "Error",
+            "text": "p",
+            "start": 67,
+            "end": 68
+        },
+        {
+            "kind": "Identifier",
+            "text": "\\Model",
+            "start": 68,
+            "end": 74
+        },
+        {
+            "kind": "Semicolon",
+            "text": "s",
+            "start": 74,
+            "end": 75
+        },
+        {
+            "kind": "Use",
+            "text": "\nus",
+            "start": 79,
+            "end": 82
+        },
+        {
+            "kind": "Identifier",
+            "text": " DateTim",
+            "start": 83,
+            "end": 91
+        },
+        {
+            "kind": "Semicolon",
+            "text": "e",
+            "start": 91,
+            "end": 92
+        },
+        {
+            "kind": "Use",
+            "text": "\nus",
+            "start": 94,
+            "end": 97
+        },
+        {
+            "kind": "Identifier",
+            "text": " Exceptio",
+            "start": 98,
+            "end": 107
+        },
+        {
+            "kind": "Semicolon",
+            "text": "n",
+            "start": 107,
+            "end": 108
+        },
+        {
+            "kind": "Use",
+            "text": "\nus",
+            "start": 110,
+            "end": 113
+        },
+        {
+            "kind": "Identifier",
+            "text": " PD",
+            "start": 114,
+            "end": 117
+        },
+        {
+            "kind": "Semicolon",
+            "text": "O",
+            "start": 117,
+            "end": 118
+        },
+        {
+            "kind": "Use",
+            "text": "\nus",
+            "start": 120,
+            "end": 123
+        },
+        {
+            "kind": "Identifier",
+            "text": " PDOExceptio",
+            "start": 124,
+            "end": 136
+        },
+        {
+            "kind": "Semicolon",
+            "text": "n",
+            "start": 136,
+            "end": 137
+        },
+        {
+            "kind": "Class",
+            "text": "\nclas",
+            "start": 172,
+            "end": 177
+        },
+        {
+            "kind": "Identifier",
+            "text": " Use",
+            "start": 178,
+            "end": 182
+        },
+        {
+            "kind": "LeftBrace",
+            "text": "\n",
+            "start": 184,
+            "end": 185
+        },
+        {
+            "kind": "Private",
+            "text": " privat",
+            "start": 191,
+            "end": 198
+        },
+        {
+            "kind": "Identifier",
+            "text": " in",
+            "start": 199,
+            "end": 202
+        },
+        {
+            "kind": "Identifier",
+            "text": " $i",
+            "start": 203,
+            "end": 206
+        },
+        {
+            "kind": "Semicolon",
+            "text": "d",
+            "start": 206,
+            "end": 207
+        },
+        {
+            "kind": "Private",
+            "text": " privat",
+            "start": 213,
+            "end": 220
+        },
+        {
+            "kind": "Identifier",
+            "text": " strin",
+            "start": 221,
+            "end": 227
+        },
+        {
+            "kind": "Identifier",
+            "text": " $usernam",
+            "start": 228,
+            "end": 237
+        },
+        {
+            "kind": "Semicolon",
+            "text": "e",
+            "start": 237,
+            "end": 238
+        },
+        {
+            "kind": "Private",
+            "text": " privat",
+            "start": 244,
+            "end": 251
+        },
+        {
+            "kind": "Identifier",
+            "text": " strin",
+            "start": 252,
+            "end": 258
+        },
+        {
+            "kind": "Identifier",
+            "text": " $emai",
+            "start": 259,
+            "end": 265
+        },
+        {
+            "kind": "Semicolon",
+            "text": "l",
+            "start": 265,
+            "end": 266
+        },
+        {
+            "kind": "Private",
+            "text": " privat",
+            "start": 272,
+            "end": 279
+        },
+        {
+            "kind": "Question",
+            "text": " ",
+            "start": 280,
+            "end": 281
+        },
+        {
+            "kind": "Identifier",
+            "text": "?strin",
+            "start": 281,
+            "end": 287
+        },
+        {
+            "kind": "Identifier",
+            "text": " $firstNam",
+            "start": 288,
+            "end": 298
+        },
+        {
+            "kind": "Semicolon",
+            "text": "e",
+            "start": 298,
+            "end": 299
+        },
+        {
+            "kind": "Private",
+            "text": " privat",
+            "start": 305,
+            "end": 312
+        },
+        {
+            "kind": "Question",
+            "text": " ",
+            "start": 313,
+            "end": 314
+        },
+        {
+            "kind": "Identifier",
+            "text": "?strin",
+            "start": 314,
+            "end": 320
+        },
+        {
+            "kind": "Identifier",
+            "text": " $lastNam",
+            "start": 321,
+            "end": 330
+        },
+        {
+            "kind": "Semicolon",
+            "text": "e",
+            "start": 330,
+            "end": 331
+        },
+        {
+            "kind": "Private",
+            "text": " privat",
+            "start": 337,
+            "end": 344
+        },
+        {
+            "kind": "Identifier",
+            "text": " DateTim",
+            "start": 345,
+            "end": 353
+        },
+        {
+            "kind": "Identifier",
+            "text": " $createdA",
+            "start": 354,
+            "end": 364
+        },
+        {
+            "kind": "Semicolon",
+            "text": "t",
+            "start": 364,
+            "end": 365
+        },
+        {
+            "kind": "Private",
+            "text": " privat",
+            "start": 371,
+            "end": 378
+        },
+        {
+            "kind": "Identifier",
+            "text": " boo",
+            "start": 379,
+            "end": 383
+        },
+        {
+            "kind": "Identifier",
+            "text": " $isActiv",
+            "start": 384,
+            "end": 393
+        },
+        {
+            "kind": "Semicolon",
+            "text": "e",
+            "start": 393,
+            "end": 394
+        },
+        {
+            "kind": "Public",
+            "text": " publi",
+            "start": 402,
+            "end": 408
+        },
+        {
+            "kind": "Function",
+            "text": " functio",
+            "start": 409,
+            "end": 417
+        },
+        {
+            "kind": "Identifier",
+            "text": " __construc",
+            "start": 418,
+            "end": 429
+        },
+        {
+            "kind": "LeftParen",
+            "text": "t",
+            "start": 429,
+            "end": 430
+        },
+        {
+            "kind": "Identifier",
+            "text": " in",
+            "start": 440,
+            "end": 443
+        },
+        {
+            "kind": "Identifier",
+            "text": " $i",
+            "start": 444,
+            "end": 447
+        },
+        {
+            "kind": "Comma",
+            "text": "d",
+            "start": 447,
+            "end": 448
+        },
+        {
+            "kind": "Identifier",
+            "text": " strin",
+            "start": 458,
+            "end": 464
+        },
+        {
+            "kind": "Identifier",
+            "text": " $usernam",
+            "start": 465,
+            "end": 474
+        },
+        {
+            "kind": "Comma",
+            "text": "e",
+            "start": 474,
+            "end": 475
+        },
+        {
+            "kind": "Identifier",
+            "text": " strin",
+            "start": 485,
+            "end": 491
+        },
+        {
+            "kind": "Identifier",
+            "text": " $emai",
+            "start": 492,
+            "end": 498
+        },
+        {
+            "kind": "Comma",
+            "text": "l",
+            "start": 498,
+            "end": 499
+        },
+        {
+            "kind": "Question",
+            "text": " ",
+            "start": 509,
+            "end": 510
+        },
+        {
+            "kind": "Identifier",
+            "text": "?strin",
+            "start": 510,
+            "end": 516
+        },
+        {
+            "kind": "Identifier",
+            "text": " $firstNam",
+            "start": 517,
+            "end": 527
+        },
+        {
+            "kind": "Assign",
+            "text": " ",
+            "start": 528,
+            "end": 529
+        },
+        {
+            "kind": "NullLiteral",
+            "text": " nul",
+            "start": 530,
+            "end": 534
+        },
+        {
+            "kind": "Comma",
+            "text": "l",
+            "start": 534,
+            "end": 535
+        },
+        {
+            "kind": "Question",
+            "text": " ",
+            "start": 545,
+            "end": 546
+        },
+        {
+            "kind": "Identifier",
+            "text": "?strin",
+            "start": 546,
+            "end": 552
+        },
+        {
+            "kind": "Identifier",
+            "text": " $lastNam",
+            "start": 553,
+            "end": 562
+        },
+        {
+            "kind": "Assign",
+            "text": " ",
+            "start": 563,
+            "end": 564
+        },
+        {
+            "kind": "NullLiteral",
+            "text": " nul",
+            "start": 565,
+            "end": 569
+        },
+        {
+            "kind": "Comma",
+            "text": "l",
+            "start": 569,
+            "end": 570
+        },
+        {
+            "kind": "Question",
+            "text": " ",
+            "start": 580,
+            "end": 581
+        },
+        {
+            "kind": "Identifier",
+            "text": "?DateTim",
+            "start": 581,
+            "end": 589
+        },
+        {
+            "kind": "Identifier",
+            "text": " $createdA",
+            "start": 590,
+            "end": 600
+        },
+        {
+            "kind": "Assign",
+            "text": " ",
+            "start": 601,
+            "end": 602
+        },
+        {
+            "kind": "NullLiteral",
+            "text": " nul",
+            "start": 603,
+            "end": 607
+        },
+        {
+            "kind": "Comma",
+            "text": "l",
+            "start": 607,
+            "end": 608
+        },
+        {
+            "kind": "Identifier",
+            "text": " boo",
+            "start": 618,
+            "end": 622
+        },
+        {
+            "kind": "Identifier",
+            "text": " $isActiv",
+            "start": 623,
+            "end": 632
+        },
+        {
+            "kind": "Assign",
+            "text": " ",
+            "start": 633,
+            "end": 634
+        },
+        {
+            "kind": "BooleanLiteral",
+            "text": " tru",
+            "start": 635,
+            "end": 639
+        },
+        {
+            "kind": "RightParen",
+            "text": " ",
+            "start": 645,
+            "end": 646
+        },
+        {
+            "kind": "LeftBrace",
+            "text": " ",
+            "start": 647,
+            "end": 648
+        },
+        {
+            "kind": "Identifier",
+            "text": " $thi",
+            "start": 658,
+            "end": 663
+        },
+        {
+            "kind": "Arrow",
+            "text": "s-",
+            "start": 663,
+            "end": 665
+        },
+        {
+            "kind": "Identifier",
+            "text": ">i",
+            "start": 665,
+            "end": 667
+        },
+        {
+            "kind": "Assign",
+            "text": " ",
+            "start": 668,
+            "end": 669
+        }
+    ],
+    "errors": []
+}

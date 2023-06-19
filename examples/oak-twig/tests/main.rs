@@ -1,11 +1,11 @@
-use oak_core::{Lexer, Parser, SourceText};
-use oak_toml::{TomlLanguage, TomlSyntaxKind};
+use oak_core::{Builder, Lexer, Parser, SourceText};
+use oak_twig::{TwigLanguage, TwigSyntaxKind};
 
 #[test]
 fn test_lexer_basic() {
-    let language = TomlLanguage::new();
+    let language = TwigLanguage::new();
     let lexer = language.lexer();
-    let source = SourceText::new(r#"key = "value""#);
+    let source = SourceText::new("{{ variable }}");
 
     let result = lexer.lex(&source);
     assert!(result.result.is_ok());
@@ -17,9 +17,9 @@ fn test_lexer_basic() {
 
 #[test]
 fn test_parser_basic() {
-    let language = TomlLanguage::new();
+    let language = TwigLanguage::new();
     let parser = language.parser();
-    let source = SourceText::new(r#"key = "value""#);
+    let source = SourceText::new("{{ variable }}");
 
     let result = parser.parse(&source);
     assert!(result.result.is_ok());
@@ -30,9 +30,9 @@ fn test_parser_basic() {
 
 #[test]
 fn test_lexer_string() {
-    let language = TomlLanguage::new();
+    let language = TwigLanguage::new();
     let lexer = language.lexer();
-    let source = SourceText::new(r#""hello world""#);
+    let source = SourceText::new(r#"{{ "hello world" }}"#);
 
     let result = lexer.lex(&source);
     assert!(result.result.is_ok());
@@ -41,15 +41,15 @@ fn test_lexer_string() {
     assert!(!tokens.is_empty());
 
     // 检查是否包含字符串 kind
-    let has_string = tokens.iter().any(|t| matches!(t.kind, TomlSyntaxKind::String));
+    let has_string = tokens.iter().any(|t| matches!(t.kind, TwigSyntaxKind::String));
     assert!(has_string, "Should contain a string token");
 }
 
 #[test]
 fn test_lexer_number() {
-    let language = TomlLanguage::new();
+    let language = TwigLanguage::new();
     let lexer = language.lexer();
-    let source = SourceText::new("123");
+    let source = SourceText::new("{{ 123 }}");
 
     let result = lexer.lex(&source);
     assert!(result.result.is_ok());
@@ -57,16 +57,16 @@ fn test_lexer_number() {
     let tokens = result.result.unwrap();
     assert!(!tokens.is_empty());
 
-    // 检查是否包含数token
-    let has_number = tokens.iter().any(|t| matches!(t.kind, TomlSyntaxKind::Integer | TomlSyntaxKind::Float));
+    // 检查是否包含数字token
+    let has_number = tokens.iter().any(|t| matches!(t.kind, TwigSyntaxKind::Number));
     assert!(has_number, "Should contain a number token");
 }
 
 #[test]
 fn test_lexer_boolean() {
-    let language = TomlLanguage::new();
+    let language = TwigLanguage::new();
     let lexer = language.lexer();
-    let source = SourceText::new("true");
+    let source = SourceText::new("{{ true }}");
 
     let result = lexer.lex(&source);
     assert!(result.result.is_ok());
@@ -75,15 +75,15 @@ fn test_lexer_boolean() {
     assert!(!tokens.is_empty());
 
     // 检查是否包含布尔token
-    let has_boolean = tokens.iter().any(|t| matches!(t.kind, TomlSyntaxKind::Boolean));
+    let has_boolean = tokens.iter().any(|t| matches!(t.kind, TwigSyntaxKind::Boolean));
     assert!(has_boolean, "Should contain a boolean token");
 }
 
 #[test]
-fn test_parser_key_value() {
-    let language = TomlLanguage::new();
+fn test_parser_variable() {
+    let language = TwigLanguage::new();
     let parser = language.parser();
-    let source = SourceText::new(r#"name = "John""#);
+    let source = SourceText::new("{{ name }}");
 
     let result = parser.parse(&source);
     assert!(result.result.is_ok());
@@ -93,13 +93,13 @@ fn test_parser_key_value() {
 }
 
 #[test]
-fn test_parser_table() {
-    let language = TomlLanguage::new();
+fn test_parser_block() {
+    let language = TwigLanguage::new();
     let parser = language.parser();
     let source = SourceText::new(
-        r#"[section]
-name = "value"
-"#,
+        r#"{% if condition %}
+    Hello World
+{% endif %}"#,
     );
 
     let result = parser.parse(&source);
@@ -111,7 +111,7 @@ name = "value"
 
 #[test]
 fn test_empty_input() {
-    let language = TomlLanguage::new();
+    let language = TwigLanguage::new();
     let lexer = language.lexer();
     let parser = language.parser();
     let source = SourceText::new("");

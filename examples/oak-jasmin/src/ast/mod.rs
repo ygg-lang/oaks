@@ -1,7 +1,5 @@
 #![doc = include_str!("readme.md")]
 
-use alloc::{string::String, vec::Vec};
-
 /// JASM 根节
 #[derive(Clone, Debug)]
 pub struct JasmRoot {

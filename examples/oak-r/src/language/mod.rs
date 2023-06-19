@@ -1,4 +1,4 @@
-use crate::kind::RSyntaxKind;
+use crate::{ast::RRoot, kind::RSyntaxKind};
 use oak_core::{Language, SyntaxKind};
 
 /// R 语言定义
@@ -29,4 +29,11 @@ impl SyntaxKind for RSyntaxKind {
 
 impl Language for RLanguage {
     type SyntaxKind = RSyntaxKind;
+    type TypedRoot = RRoot;
+}
+
+impl Default for RLanguage {
+    fn default() -> Self {
+        Self
+    }
 }
