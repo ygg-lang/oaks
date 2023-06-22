@@ -22,9 +22,9 @@ impl Highlighter for HtmlHighlighter {
 
         if self.use_parser {
             let config = HtmlLanguage::new();
-            let parser = crate::parser::HtmlParser::new(&config);
+            let parser = crate::parser::HtmlParser::new(config);
             let lexer = crate::lexer::HtmlLexer::new(&config);
-            highlighter.highlight_with_language::<HtmlLanguage, crate::parser::HtmlParser<'_>, crate::lexer::HtmlLexer<'_>>(source, theme, &parser, &lexer)
+            highlighter.highlight_with_language::<HtmlLanguage, crate::parser::HtmlParser, crate::lexer::HtmlLexer<'_>>(source, theme, &parser, &lexer)
         }
         else {
             highlighter.highlight(source, HtmlLanguage::NAME, theme)

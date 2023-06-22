@@ -1,6 +1,7 @@
 use oak_core::{Language, LanguageCategory};
+use serde::{Deserialize, Serialize};
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub struct NginxLanguage {
     /// 是否允许扩展指令
     pub allow_extensions: bool,

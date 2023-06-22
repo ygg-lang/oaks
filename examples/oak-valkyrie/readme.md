@@ -27,10 +27,10 @@ use oak_core::{Parser, source::SourceText, parser::ParseSession};
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     let language = ValkyrieLanguage::default();
-    let parser = ValkyrieParser::new(&language);
+    let parser = ValkyrieParser::new(language);
     let source = SourceText::new(r#"
 namespace main {
-    fn add(a: i32, b: i32) -> i32 {
+    micro add(a: i32, b: i32) -> i32 {
         a + b
     }
 }
@@ -51,7 +51,7 @@ use oak_valkyrie::{ValkyrieParser, ValkyrieLanguage};
 use oak_core::{Parser, source::SourceText, parser::ParseSession};
 
 let language = ValkyrieLanguage::default();
-let parser = ValkyrieParser::new(&language);
+let parser = ValkyrieParser::new(language);
 let source = SourceText::new(r#"
 namespace math {
     pub struct Point {
@@ -60,11 +60,11 @@ namespace math {
     }
     
     impl Point {
-        pub fn new(x: f64, y: f64) -> Self {
+        pub micro new(x: f64, y: f64) -> Self {
             Self { x, y }
         }
         
-        pub fn distance(&self, other: &Point) -> f64 {
+        pub micro distance(&self, other: &Point) -> f64 {
             ((self.x - other.x).powi(2) + (self.y - other.y).powi(2)).sqrt()
         }
     }
@@ -82,13 +82,13 @@ use oak_valkyrie::{ValkyrieParser, ValkyrieLanguage};
 use oak_core::{Parser, source::SourceText, parser::ParseSession};
 
 let language = ValkyrieLanguage::default();
-let parser = ValkyrieParser::new(&language);
+let parser = ValkyrieParser::new(language);
 let source = SourceText::new(r#"
 pub trait Drawable {
-    fn draw(&self);
-    fn area(&self) -> f64;
+    micro draw(&self);
+    micro area(&self) -> f64;
     
-    fn describe(&self) -> String {
+    micro describe(&self) -> String {
         format!("Shape with area: {}", self.area())
     }
 }
@@ -98,11 +98,11 @@ pub struct Circle {
 }
 
 impl Drawable for Circle {
-    fn draw(&self) {
+    micro draw(&self) {
         println!("Drawing circle with radius: {}", self.radius);
     }
     
-    fn area(&self) -> f64 {
+    micro area(&self) -> f64 {
         3.14159 * self.radius * self.radius
     }
 }
@@ -121,8 +121,8 @@ use oak_valkyrie::{ValkyrieParser, ValkyrieLanguage};
 use oak_core::{Parser, source::SourceText, parser::ParseSession};
 
 let language = ValkyrieLanguage::default();
-let parser = ValkyrieParser::new(&language);
-let source = SourceText::new("fn main() { let x = 42; println!(\"{}\", x); }");
+let parser = ValkyrieParser::new(language);
+let source = SourceText::new("micro main() { let x = 42; println!(\"{}\", x); }");
 let mut cache = ParseSession::default();
 let result = parser.parse(&source, &[], &mut cache);
 // Token information is available in the parse result
@@ -134,14 +134,14 @@ use oak_valkyrie::{ValkyrieParser, ValkyrieLanguage};
 use oak_core::{Parser, source::SourceText, parser::ParseSession};
 
 let language = ValkyrieLanguage::default();
-let parser = ValkyrieParser::new(&language);
+let parser = ValkyrieParser::new(language);
 let source = SourceText::new(r#"
-fn broken_function() -> i32 {
+micro broken_function() -> i32 {
     let x: i32 = "not a number"; // Type mismatch
     return x; // Type mismatch in return
 }
 
-fn invalid_syntax() { // Missing return type
+micro invalid_syntax() { // Missing return type
     let y = 1 // Missing semicolon
 }
 "#);

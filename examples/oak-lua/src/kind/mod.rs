@@ -1,7 +1,7 @@
 use oak_core::{ElementType, Token, TokenType, UniversalElementRole, UniversalTokenRole};
 use serde::{Deserialize, Serialize};
 
-pub type LuaToken = Token<LuaLanguage>;
+pub type LuaToken = Token<LuaSyntaxKind>;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub enum LuaSyntaxKind {

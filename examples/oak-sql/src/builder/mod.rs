@@ -15,7 +15,7 @@ impl<'config> SqlBuilder<'config> {
 impl<'config> Builder<SqlLanguage> for SqlBuilder<'config> {
     fn build<'a, S: Source + ?Sized>(&self, source: &S, edits: &[TextEdit], _cache: &'a mut impl BuilderCache<SqlLanguage>) -> oak_core::builder::BuildOutput<SqlLanguage> {
         let parser = crate::parser::SqlParser::new(self.config);
-        let lexer = crate::lexer::SqlLexer::new(self.config);
+        let lexer = crate::lexer::SqlLexer::new(&self.config);
         let mut parse_cache = oak_core::parser::session::ParseSession::<SqlLanguage>::default();
         lexer.lex(source, edits, &mut parse_cache);
         let parse_result = parser.parse(source, edits, &mut parse_cache);

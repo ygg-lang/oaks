@@ -15,14 +15,14 @@ impl<'config> ValaBuilder<'config> {
 impl<'config> Builder<ValaLanguage> for ValaBuilder<'config> {
     fn build<'a, S: Source + ?Sized>(&self, text: &S, edits: &[TextEdit], cache: &'a mut impl BuilderCache<ValaLanguage>) -> oak_core::builder::BuildOutput<ValaLanguage> {
         let parser = ValaParser::new(self.config);
-        let lexer = ValaLexer::new(self.config);
+        let lexer = ValaLexer::new(&self.config);
 
         lexer.lex(text, edits, cache);
         let parse_result = parser.parse(text, edits, cache);
 
         match parse_result.result {
             Ok(green_tree) => {
-                let source_text = SourceText::new(text.get_text_in((0..text.length()).into()));
+                let source_text = SourceText::new(text.get_text_in((0..text.length()).into()).into_owned());
                 match self.build_root(green_tree.clone(), &source_text) {
                     Ok(ast_root) => OakDiagnostics { result: Ok(ast_root), diagnostics: parse_result.diagnostics },
                     Err(build_error) => {

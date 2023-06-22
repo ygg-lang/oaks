@@ -20,7 +20,8 @@ serde = { workspace = true }
 serde_json = { workspace = true }
 
 [dev-dependencies]
-oak-core = { workspace = true, features = ["testing"] }
+oak-testing = { workspace = true }
+oak-json = { workspace = true }
 
 
 [features]

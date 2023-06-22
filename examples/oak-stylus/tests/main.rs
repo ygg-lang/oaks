@@ -1,5 +1,7 @@
+mod lexer;
+
 use oak_core::{Lexer, SourceText};
-use oak_stylus::{StylusLanguage, StylusLexer, StylusSyntaxKind};
+use oak_stylus::{kind::StylusSyntaxKind, language::StylusLanguage, lexer::StylusLexer};
 
 #[test]
 fn test_lexer_basic() {

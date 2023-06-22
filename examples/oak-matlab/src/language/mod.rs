@@ -1,5 +1,7 @@
 use oak_core::{Language, LanguageCategory};
+use serde::{Deserialize, Serialize};
 
+#[derive(Debug, Clone, Copy, Serialize, Deserialize)]
 pub struct MatlabLanguage {}
 
 impl MatlabLanguage {

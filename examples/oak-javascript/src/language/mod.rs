@@ -1,7 +1,8 @@
 use oak_core::language::{Language, LanguageCategory};
+use serde::{Deserialize, Serialize};
 
 /// JavaScript 语言实现
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub struct JavaScriptLanguage {
     /// 是否允许 JSX 语法
     pub jsx: bool,
@@ -16,7 +17,7 @@ pub struct JavaScriptLanguage {
 }
 
 /// ECMAScript 版本
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub enum EcmaVersion {
     ES3,
     ES5,
@@ -33,6 +34,11 @@ pub enum EcmaVersion {
 }
 
 impl JavaScriptLanguage {
+    /// 创建新的 JavaScript 语言配置
+    pub fn new() -> Self {
+        Self::default()
+    }
+
     /// 创建标准 JavaScript 语言实例
     pub fn standard() -> Self {
         Self::default()

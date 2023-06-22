@@ -2,17 +2,17 @@ use crate::{ast::PrologRoot, language::PrologLanguage, parser::PrologParser};
 use oak_core::{Builder, BuilderCache, OakDiagnostics, TextEdit, parser::Parser, source::Source};
 
 #[derive(Clone)]
-pub struct PrologBuilder<'config> {
-    config: &'config PrologLanguage,
+pub struct PrologBuilder {
+    config: PrologLanguage,
 }
 
-impl<'config> PrologBuilder<'config> {
-    pub fn new(config: &'config PrologLanguage) -> Self {
+impl PrologBuilder {
+    pub fn new(config: PrologLanguage) -> Self {
         Self { config }
     }
 }
 
-impl<'config> Builder<PrologLanguage> for PrologBuilder<'config> {
+impl Builder<PrologLanguage> for PrologBuilder {
     fn build<'a, S: Source + ?Sized>(&self, source: &S, edits: &[TextEdit], _cache: &'a mut impl BuilderCache<PrologLanguage>) -> oak_core::builder::BuildOutput<PrologLanguage> {
         let parser = PrologParser::new(self.config);
         let mut cache = oak_core::parser::session::ParseSession::<PrologLanguage>::default();

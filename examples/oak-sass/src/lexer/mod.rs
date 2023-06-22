@@ -13,10 +13,12 @@ static SASS_COMMENT: LazyLock<CommentConfig> = LazyLock::new(|| CommentConfig { 
 static SASS_STRING: LazyLock<StringConfig> = LazyLock::new(|| StringConfig { quotes: &['"'], escape: Some('\\') });
 static SASS_CHAR: LazyLock<StringConfig> = LazyLock::new(|| StringConfig { quotes: &['\''], escape: Some('\\') });
 
-#[derive(Clone, Default)]
-pub struct SassLexer {}
+#[derive(Clone, Debug)]
+pub struct SassLexer<'config> {
+    _config: &'config SassLanguage,
+}
 
-impl Lexer<SassLanguage> for SassLexer {
+impl<'config> Lexer<SassLanguage> for SassLexer<'config> {
     fn lex<'a, S: Source + ?Sized>(&self, source: &S, _edits: &[TextEdit], cache: &'a mut impl LexerCache<SassLanguage>) -> LexOutput<SassLanguage> {
         let mut state = LexerState::new(source);
         let result = self.run(&mut state);
@@ -27,9 +29,9 @@ impl Lexer<SassLanguage> for SassLexer {
     }
 }
 
-impl SassLexer {
-    pub fn new(_config: &SassLanguage) -> Self {
-        Self {}
+impl<'config> SassLexer<'config> {
+    pub fn new(config: &'config SassLanguage) -> Self {
+        Self { _config: config }
     }
 
     /// 主要的词法分析循环

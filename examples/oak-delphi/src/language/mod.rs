@@ -3,12 +3,18 @@ use oak_core::{Language, LanguageCategory};
 use serde::{Deserialize, Serialize};
 
 /// Language definition for Delphi programming language
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub struct DelphiLanguage {
     /// Whether to enable strict syntax checking
     pub strict_syntax: bool,
     /// Whether to support Unicode strings
     pub unicode_strings: bool,
+}
+
+impl DelphiLanguage {
+    pub fn new() -> Self {
+        Self::default()
+    }
 }
 
 impl Default for DelphiLanguage {

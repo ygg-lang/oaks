@@ -1,0 +1,91 @@
+{
+  "success": true,
+  "count": 14,
+  "tokens": [
+    {
+      "kind": "Keyword(Namespace)",
+      "text": "namespace",
+      "start": 0,
+      "end": 9
+    },
+    {
+      "kind": "Keyword(Micro)",
+      "text": "micro",
+      "start": 10,
+      "end": 15
+    },
+    {
+      "kind": "Keyword(Let)",
+      "text": "let",
+      "start": 16,
+      "end": 19
+    },
+    {
+      "kind": "Keyword(If)",
+      "text": "if",
+      "start": 20,
+      "end": 22
+    },
+    {
+      "kind": "Keyword(Else)",
+      "text": "else",
+      "start": 23,
+      "end": 27
+    },
+    {
+      "kind": "Keyword(While)",
+      "text": "while",
+      "start": 28,
+      "end": 33
+    },
+    {
+      "kind": "Keyword(For)",
+      "text": "for",
+      "start": 34,
+      "end": 37
+    },
+    {
+      "kind": "Keyword(Return)",
+      "text": "return",
+      "start": 38,
+      "end": 44
+    },
+    {
+      "kind": "Keyword(Break)",
+      "text": "break",
+      "start": 45,
+      "end": 50
+    },
+    {
+      "kind": "Keyword(Continue)",
+      "text": "continue",
+      "start": 51,
+      "end": 59
+    },
+    {
+      "kind": "Keyword(True)",
+      "text": "true",
+      "start": 60,
+      "end": 64
+    },
+    {
+      "kind": "Keyword(False)",
+      "text": "false",
+      "start": 65,
+      "end": 70
+    },
+    {
+      "kind": "Keyword(Null)",
+      "text": "null",
+      "start": 71,
+      "end": 75
+    },
+    {
+      "kind": "Eof",
+      "text": "",
+      "start": 76,
+      "end": 76
+    }
+  ],
+  "errors": []
+}

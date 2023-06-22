@@ -1,8 +1,9 @@
 use crate::ast::SassRoot;
 use oak_core::language::{Language, LanguageCategory};
+use serde::{Deserialize, Serialize};
 
 /// Sass 语言实现
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub struct SassLanguage {
     // Sass 语言特有的配置，目前为空
 }
@@ -16,7 +17,7 @@ impl SassLanguage {
 
 impl Default for SassLanguage {
     fn default() -> Self {
-        Self::new()
+        Self {}
     }
 }
 

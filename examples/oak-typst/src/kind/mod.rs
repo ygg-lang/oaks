@@ -13,6 +13,7 @@ pub enum TypstSyntaxKind {
     Paragraph,
     List,
     ListItem,
+    EnumItem,
     Table,
     TableRow,
     TableCell,
@@ -94,6 +95,7 @@ pub enum TypstSyntaxKind {
     At,
     Dollar,
     Underscore,
+    Backtick,
 
     // 字面量
     StringLiteral,

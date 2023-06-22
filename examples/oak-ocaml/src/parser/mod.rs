@@ -5,12 +5,12 @@ use oak_core::{
     source::{Source, TextEdit},
 };
 
-pub struct OCamlParser<'a> {
-    pub language: &'a OCamlLanguage,
+pub struct OCamlParser<'config> {
+    pub language: &'config OCamlLanguage,
 }
 
-impl<'a> OCamlParser<'a> {
-    pub fn new(language: &'a OCamlLanguage) -> Self {
+impl<'config> OCamlParser<'config> {
+    pub fn new(language: &'config OCamlLanguage) -> Self {
         Self { language }
     }
 
@@ -90,7 +90,7 @@ impl<'a> OCamlParser<'a> {
     }
 }
 
-impl<'a> Parser<OCamlLanguage> for OCamlParser<'a> {
+impl<'config> Parser<OCamlLanguage> for OCamlParser<'config> {
     fn parse<'s, S: Source + ?Sized>(&self, text: &'s S, edits: &[TextEdit], cache: &'s mut impl ParseCache<OCamlLanguage>) -> ParseOutput<'s, OCamlLanguage> {
         let lexer = OCamlLexer::new(self.language);
         oak_core::parser::parse_with_lexer(&lexer, text, edits, cache, |state| self.parse_root_internal(state))

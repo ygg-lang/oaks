@@ -16,7 +16,56 @@ impl<'config> NixLexer<'config> {
     pub fn new(config: &'config NixLanguage) -> Self {
         Self { _config: config }
     }
+}
 
+impl NixLexer<'_> {
+    pub fn run<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> Result<(), oak_core::OakError> {
+        while state.not_at_end() {
+            if self.skip_whitespace(state) {
+                continue;
+            }
+            if self.lex_newline(state) {
+                continue;
+            }
+            if self.lex_comment(state) {
+                continue;
+            }
+            if self.lex_string(state) {
+                continue;
+            }
+            if self.lex_number(state) {
+                continue;
+            }
+            if self.lex_identifier(state) {
+                continue;
+            }
+            if self.lex_operator(state) {
+                continue;
+            }
+
+            // 如果没有匹配到任何模式，添加错误 kind
+            let start_pos = state.get_position();
+            if let Some(ch) = state.peek() {
+                state.advance(ch.len_utf8());
+                state.add_token(NixSyntaxKind::Error, start_pos, state.get_position());
+            }
+        }
+        Ok(())
+    }
+}
+
+impl<'config> Lexer<NixLanguage> for NixLexer<'config> {
+    fn lex<'a, S: Source + ?Sized>(&self, source: &'a S, _edits: &[TextEdit], cache: &'a mut impl LexerCache<NixLanguage>) -> LexOutput<NixLanguage> {
+        let mut state = LexerState::new(source);
+        let result = self.run(&mut state);
+        if result.is_ok() {
+            state.add_eof();
+        }
+        state.finish_with_cache(result, cache)
+    }
+}
+
+impl NixLexer<'_> {
     /// 跳过空白字符
     fn skip_whitespace<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start_pos = state.get_position();
@@ -350,46 +399,5 @@ impl<'config> NixLexer<'config> {
         else {
             false
         }
-    }
-}
-
-impl<'config> Lexer<NixLanguage> for NixLexer<'config> {
-    fn lex<'a, S: Source + ?Sized>(&self, text: &'a S, _edits: &[TextEdit], cache: &'a mut impl LexerCache<NixLanguage>) -> LexOutput<NixLanguage> {
-        let mut state = State::new(text);
-
-        while state.not_at_end() {
-            if self.skip_whitespace(&mut state) {
-                continue;
-            }
-            if self.lex_newline(&mut state) {
-                continue;
-            }
-            if self.lex_comment(&mut state) {
-                continue;
-            }
-            if self.lex_string(&mut state) {
-                continue;
-            }
-            if self.lex_number(&mut state) {
-                continue;
-            }
-            if self.lex_identifier(&mut state) {
-                continue;
-            }
-            if self.lex_operator(&mut state) {
-                continue;
-            }
-
-            // 如果没有匹配到任何模式，添加错误 kind
-            let start_pos = state.get_position();
-            if let Some(ch) = state.peek() {
-                state.advance(ch.len_utf8());
-                state.add_token(NixSyntaxKind::Error, start_pos, state.get_position());
-            }
-        }
-
-        let eof_pos = state.get_position();
-        state.add_token(NixSyntaxKind::Eof, eof_pos, eof_pos);
-        state.finish_with_cache(Ok(()), cache)
     }
 }

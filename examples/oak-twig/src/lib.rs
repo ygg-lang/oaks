@@ -14,13 +14,8 @@ pub mod parser;
 mod formatter;
 pub mod highlighter;
 pub mod lsp;
-#[cfg(feature = "mcp")]
 pub mod mcp;
 
 pub use crate::{ast::TwigRoot, builder::TwigBuilder, formatter::TwigFormatter, highlighter::TwigHighlighter, language::TwigLanguage, lexer::TwigLexer, lsp::TwigLanguageService, parser::TwigParser};
 
-#[cfg(feature = "mcp")]
 pub use crate::mcp::serve_twig_mcp;
-
-#[cfg(all(feature = "mcp", feature = "axum"))]
-pub use crate::mcp::serve_twig_mcp_axum;

@@ -11,12 +11,14 @@ type State<'a, S> = LexerState<'a, S, TexLanguage>;
 static TEX_WHITESPACE: LazyLock<WhitespaceConfig> = LazyLock::new(|| WhitespaceConfig { unicode_whitespace: true });
 static TEX_COMMENT: LazyLock<CommentConfig> = LazyLock::new(|| CommentConfig { line_marker: "%", block_start: "", block_end: "", nested_blocks: false });
 
-#[derive(Clone, Default)]
-pub struct TexLexer {}
+#[derive(Clone, Debug)]
+pub struct TexLexer<'config> {
+    _config: &'config TexLanguage,
+}
 
-impl Lexer<TexLanguage> for TexLexer {
-    fn lex<'a, S: Source + ?Sized>(&self, source: &S, _edits: &[oak_core::TextEdit], cache: &'a mut impl LexerCache<TexLanguage>) -> LexOutput<TexLanguage> {
-        let mut state = State::new(source);
+impl<'config> Lexer<TexLanguage> for TexLexer<'config> {
+    fn lex<'a, S: Source + ?Sized>(&self, source: &S, _edits: &[oak_core::source::TextEdit], cache: &'a mut impl LexerCache<TexLanguage>) -> LexOutput<TexLanguage> {
+        let mut state = State::new_with_cache(source, 0, cache);
         let result = self.run(&mut state);
         if result.is_ok() {
             state.add_eof();
@@ -25,9 +27,9 @@ impl Lexer<TexLanguage> for TexLexer {
     }
 }
 
-impl TexLexer {
-    pub fn new(_config: &TexLanguage) -> Self {
-        Self {}
+impl<'config> TexLexer<'config> {
+    pub fn new(config: &'config TexLanguage) -> Self {
+        Self { _config: config }
     }
 
     fn run<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> Result<(), OakError> {
@@ -69,9 +71,6 @@ impl TexLexer {
             state.advance_if_dead_lock(safe_point);
         }
 
-        // 添加 EOF token
-        let eof_pos = state.get_position();
-        state.add_token(TexSyntaxKind::Eof, eof_pos, eof_pos);
         Ok(())
     }
 
@@ -94,13 +93,22 @@ impl TexLexer {
 
         // 读取命令名
         let mut has_name = false;
-        while let Some(ch) = state.peek() {
+        if let Some(ch) = state.peek() {
             if ch.is_ascii_alphabetic() {
-                state.advance(ch.len_utf8());
-                has_name = true;
+                while let Some(ch) = state.peek() {
+                    if ch.is_ascii_alphabetic() {
+                        state.advance(ch.len_utf8());
+                        has_name = true;
+                    }
+                    else {
+                        break;
+                    }
+                }
             }
             else {
-                break;
+                // Single non-alphabetic character command (e.g., \\, \&, \$, \ )
+                state.advance(ch.len_utf8());
+                has_name = true;
             }
         }
 
@@ -141,6 +149,43 @@ impl TexLexer {
                 "gamma" => TexSyntaxKind::Gamma,
                 "delta" => TexSyntaxKind::Delta,
                 "epsilon" => TexSyntaxKind::Epsilon,
+                "zeta" => TexSyntaxKind::Zeta,
+                "eta" => TexSyntaxKind::Eta,
+                "theta" => TexSyntaxKind::Theta,
+                "iota" => TexSyntaxKind::Iota,
+                "kappa" => TexSyntaxKind::Kappa,
+                "lambda" => TexSyntaxKind::Lambda,
+                "mu" => TexSyntaxKind::Mu,
+                "nu" => TexSyntaxKind::Nu,
+                "xi" => TexSyntaxKind::Xi,
+                "omicron" => TexSyntaxKind::Omicron,
+                "pi" => TexSyntaxKind::Pi,
+                "rho" => TexSyntaxKind::Rho,
+                "sigma" => TexSyntaxKind::Sigma,
+                "tau" => TexSyntaxKind::Tau,
+                "upsilon" => TexSyntaxKind::Upsilon,
+                "phi" => TexSyntaxKind::Phi,
+                "chi" => TexSyntaxKind::Chi,
+                "psi" => TexSyntaxKind::Psi,
+                "omega" => TexSyntaxKind::Omega,
+                "varepsilon" => TexSyntaxKind::VarEpsilon,
+                "vartheta" => TexSyntaxKind::VarTheta,
+                "varkappa" => TexSyntaxKind::VarKappa,
+                "varpi" => TexSyntaxKind::VarPi,
+                "varrho" => TexSyntaxKind::VarRho,
+                "varsigma" => TexSyntaxKind::VarSigma,
+                "varphi" => TexSyntaxKind::VarPhi,
+                "Gamma" => TexSyntaxKind::UpperGamma,
+                "Delta" => TexSyntaxKind::UpperDelta,
+                "Theta" => TexSyntaxKind::UpperTheta,
+                "Lambda" => TexSyntaxKind::UpperLambda,
+                "Xi" => TexSyntaxKind::UpperXi,
+                "Pi" => TexSyntaxKind::UpperPi,
+                "Sigma" => TexSyntaxKind::UpperSigma,
+                "Upsilon" => TexSyntaxKind::UpperUpsilon,
+                "Phi" => TexSyntaxKind::UpperPhi,
+                "Psi" => TexSyntaxKind::UpperPsi,
+                "Omega" => TexSyntaxKind::UpperOmega,
                 _ => TexSyntaxKind::Command,
             };
 
@@ -256,10 +301,10 @@ impl TexLexer {
         let start = state.get_position();
 
         if let Some(ch) = state.peek() {
-            if ch.is_ascii_alphabetic() {
+            if ch.is_alphabetic() {
                 state.advance(ch.len_utf8());
                 while let Some(c) = state.peek() {
-                    if c.is_ascii_alphanumeric() {
+                    if c.is_alphanumeric() {
                         state.advance(c.len_utf8());
                     }
                     else {

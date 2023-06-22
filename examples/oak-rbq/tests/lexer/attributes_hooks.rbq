@@ -1,0 +1,49 @@
+# Attributes and Hooks Test
+# This file tests various built-in attributes and lifecycle hooks
+
+@database("test_db.logic")
+@table(name = "business_users")
+@audit
+@soft_delete
+@before_save("on_user_save")
+@after_save("notify_system")
+class BusinessUser {
+    @key
+    id: u64;
+    
+    @unique
+    username: utf8;
+    
+    @index(name = "idx_email", type = "btree")
+    email: utf8;
+    
+    @layout("json")
+    profile: ProfileData;
+    
+    status: UserStatus = UserStatus.Active;
+}
+
+@layout("i32")
+union UserStatus {
+    Active = 1,
+    Inactive = 0,
+    Suspended = -1,
+}
+
+class ProfileData {
+    avatar: utf8?;
+    bio: utf8;
+}
+
+@database("test_db.logs")
+@table(name = "system_logs")
+class SystemLog {
+    @key
+    log_id: uuid;
+    
+    @foreign_key(table = "business_user", column = "id")
+    user_id: u64;
+    
+    action: utf8;
+    timestamp: date_time;
+}

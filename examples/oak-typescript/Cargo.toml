@@ -1,38 +1,24 @@
 [package]
 name = "oak-typescript"
-description = "High-performance incremental TypeScript parser for the oak ecosystem with flexible configuration, supporting modern web development and type-safe programming."
-categories = ["parsing"]
-keywords = ["parser", "typescript", "javascript", "language"]
-documentation = "https://docs.rs/oak-typescript"
-readme = "readme.md"
 version.workspace = true
-authors.workspace = true
-homepage.workspace = true
-repository.workspace = true
-license.workspace = true
 edition.workspace = true
+authors.workspace = true
+license.workspace = true
+categories = ["compilers", "development-tools"]
+keywords = ["frontend", "language", "typescript"]
+description = "TypeScript frontend for Oak"
 
 [dependencies]
 oak-core = { workspace = true }
-oak-highlight = { workspace = true }
-oak-pretty-print = { workspace = true }
 oak-lsp = { workspace = true }
-oak-mcp = { workspace = true, optional = true }
-oak-hover = { workspace = true }
 oak-vfs = { workspace = true }
-futures = { workspace = true }
-serde = { workspace = true, features = ["derive"] }
-axum = { workspace = true, optional = true }
+oak-mcp = { workspace = true, optional = true }
+serde = { workspace = true }
+# serde_json = { workspace = true } # replaced by oak-json
+oak-json = { workspace = true }
 tokio = { workspace = true, optional = true }
 
-[dev-dependencies]
-oak-core = { workspace = true, features = ["testing"] }
-
 [features]
-default = []
-mcp = ["dep:oak-mcp"]
-axum = ["mcp", "dep:axum", "dep:tokio", "oak-mcp/axum", "oak-lsp/axum"]
-std = []
-
-[package.metadata.docs.rs]
-all-features = true
+default = ["mcp"]
+mcp = ["dep:oak-mcp", "oak-mcp/io-std"]
+semantic-search = []

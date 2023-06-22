@@ -14,13 +14,13 @@ static YAML_STRING: StringConfig = StringConfig { quotes: &['"'], escape: Some('
 type State<'s, S> = LexerState<'s, S, YamlLanguage>;
 
 #[derive(Clone)]
-pub struct YamlLexer {
-    _config: YamlLanguage,
+pub struct YamlLexer<'config> {
+    _config: &'config YamlLanguage,
 }
 
-impl YamlLexer {
-    pub fn new(config: &YamlLanguage) -> Self {
-        Self { _config: config.clone() }
+impl<'config> YamlLexer<'config> {
+    pub fn new(config: &'config YamlLanguage) -> Self {
+        Self { _config: config }
     }
 
     fn run<'s, S: Source + ?Sized>(&self, state: &mut State<'s, S>) -> Result<(), OakError> {
@@ -97,15 +97,15 @@ impl YamlLexer {
     }
 }
 
-impl Lexer<YamlLanguage> for YamlLexer {
+impl<'config> Lexer<YamlLanguage> for YamlLexer<'config> {
     fn lex<'a, S: Source + ?Sized>(&self, source: &'a S, _edits: &[oak_core::TextEdit], cache: &'a mut impl LexerCache<YamlLanguage>) -> LexOutput<YamlLanguage> {
-        let mut state = State::new(source);
+        let mut state = State::new_with_cache(source, 0, cache);
         let result = self.run(&mut state);
         state.finish_with_cache(result, cache)
     }
 }
 
-impl YamlLexer {
+impl YamlLexer<'_> {
     fn lex_whitespace<'s, S: Source + ?Sized>(&self, state: &mut State<'s, S>) -> bool {
         YAML_WHITESPACE.scan(state, YamlSyntaxKind::Whitespace)
     }

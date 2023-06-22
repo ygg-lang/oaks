@@ -5,13 +5,16 @@ use oak_core::{
     source::Source,
 };
 
-pub struct VueLexer;
+#[derive(Clone, Debug)]
+pub struct VueLexer<'config> {
+    _config: &'config VueLanguage,
+}
 
 type State<'a, S> = LexerState<'a, S, VueLanguage>;
 
-impl VueLexer {
-    pub fn new() -> Self {
-        Self
+impl<'config> VueLexer<'config> {
+    pub fn new(config: &'config VueLanguage) -> Self {
+        Self { _config: config }
     }
 
     fn lex_token<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) {
@@ -394,16 +397,15 @@ fn is_ident_continue(ch: char) -> bool {
     ch.is_ascii_alphanumeric() || ch == '_' || ch == '$' || ch == '-'
 }
 
-impl Lexer<VueLanguage> for VueLexer {
-    fn lex<'a, S: Source + ?Sized>(&self, source: &'a S, _edits: &[oak_core::source::TextEdit], cache: &'a mut impl LexerCache<VueLanguage>) -> LexOutput<VueLanguage> {
-        let mut state = State::new(source);
+impl<'config> Lexer<VueLanguage> for VueLexer<'config> {
+    fn lex<'a, S: Source + ?Sized>(&self, source: &S, _edits: &[oak_core::source::TextEdit], cache: &'a mut impl LexerCache<VueLanguage>) -> LexOutput<VueLanguage> {
+        let mut state = State::new_with_cache(source, 0, cache);
 
         while state.not_at_end() {
             self.lex_token(&mut state);
         }
 
-        let pos = state.get_position();
-        state.add_token(VueSyntaxKind::Eof, pos, pos);
+        state.add_eof();
 
         state.finish_with_cache(Ok(()), cache)
     }

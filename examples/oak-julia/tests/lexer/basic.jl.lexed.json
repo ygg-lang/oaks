@@ -1,0 +1,97 @@
+{
+    "success": true,
+    "count": 15,
+    "tokens": [
+        {
+            "kind": "Function",
+            "text": "function",
+            "start": 0,
+            "end": 8
+        },
+        {
+            "kind": "Identifier",
+            "text": "hello",
+            "start": 9,
+            "end": 14
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 14,
+            "end": 15
+        },
+        {
+            "kind": "Identifier",
+            "text": "name",
+            "start": 15,
+            "end": 19
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 19,
+            "end": 20
+        },
+        {
+            "kind": "Identifier",
+            "text": "println",
+            "start": 25,
+            "end": 32
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 32,
+            "end": 33
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "\"Hello, $name!\"",
+            "start": 33,
+            "end": 48
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 48,
+            "end": 49
+        },
+        {
+            "kind": "End",
+            "text": "end",
+            "start": 50,
+            "end": 53
+        },
+        {
+            "kind": "Identifier",
+            "text": "hello",
+            "start": 55,
+            "end": 60
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 60,
+            "end": 61
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "\"Julia\"",
+            "start": 61,
+            "end": 68
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 68,
+            "end": 69
+        },
+        {
+            "kind": "Eof",
+            "text": "",
+            "start": 70,
+            "end": 70
+        }
+    ],
+    "errors": []
+}

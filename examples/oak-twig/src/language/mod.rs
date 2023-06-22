@@ -2,15 +2,16 @@ use crate::{ast::TwigRoot, lexer::TwigLexer, parser::TwigParser};
 use oak_core::{Language, LanguageCategory};
 
 /// Twig 模板引擎配置
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Default, serde::Serialize, serde::Deserialize)]
 pub enum TwigMode {
+    #[default]
     Template,
     Expression,
     // 其他可能的模式
 }
 
 /// Twig 语言定义
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Default, serde::Serialize, serde::Deserialize)]
 pub struct TwigLanguage {
     pub allow_raw_blocks: bool,
     pub allow_custom_tags: bool,
@@ -24,12 +25,6 @@ impl Language for TwigLanguage {
     type TokenType = crate::kind::TwigSyntaxKind;
     type ElementType = crate::kind::TwigSyntaxKind;
     type TypedRoot = TwigRoot;
-}
-
-impl Default for TwigLanguage {
-    fn default() -> Self {
-        Self::standard()
-    }
 }
 
 impl TwigLanguage {

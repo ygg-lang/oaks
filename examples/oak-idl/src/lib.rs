@@ -9,10 +9,8 @@ mod kind;
 mod language;
 mod lexer;
 pub mod lsp;
-mod parser;
-
-#[cfg(feature = "mcp")]
 pub mod mcp;
+mod parser;
 
 pub use crate::{
     ast::IdlRoot,

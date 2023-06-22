@@ -4,12 +4,14 @@ use std::simd::prelude::*;
 
 type State<'a, S> = LexerState<'a, S, JavaScriptLanguage>;
 
-#[derive(Clone, Default)]
-pub struct JavaScriptLexer {}
+#[derive(Clone, Debug)]
+pub struct JavaScriptLexer<'config> {
+    _config: &'config JavaScriptLanguage,
+}
 
-impl JavaScriptLexer {
-    pub fn new(_config: &JavaScriptLanguage) -> Self {
-        Self {}
+impl<'config> JavaScriptLexer<'config> {
+    pub fn new(config: &'config JavaScriptLanguage) -> Self {
+        Self { _config: config }
     }
 
     fn safe_check<'a, S: Source + ?Sized>(&self, state: &State<'a, S>) -> Result<(), OakError> {
@@ -447,59 +449,7 @@ impl JavaScriptLexer {
 
     /// 判断是关键字还是标识
     fn keyword_or_identifier(&self, text: &str) -> JavaScriptSyntaxKind {
-        match text {
-            "abstract" => JavaScriptSyntaxKind::Abstract,
-            "as" => JavaScriptSyntaxKind::As,
-            "async" => JavaScriptSyntaxKind::Async,
-            "await" => JavaScriptSyntaxKind::Await,
-            "break" => JavaScriptSyntaxKind::Break,
-            "case" => JavaScriptSyntaxKind::Case,
-            "catch" => JavaScriptSyntaxKind::Catch,
-            "class" => JavaScriptSyntaxKind::Class,
-            "const" => JavaScriptSyntaxKind::Const,
-            "continue" => JavaScriptSyntaxKind::Continue,
-            "debugger" => JavaScriptSyntaxKind::Debugger,
-            "default" => JavaScriptSyntaxKind::Default,
-            "delete" => JavaScriptSyntaxKind::Delete,
-            "do" => JavaScriptSyntaxKind::Do,
-            "else" => JavaScriptSyntaxKind::Else,
-            "enum" => JavaScriptSyntaxKind::Enum,
-            "export" => JavaScriptSyntaxKind::Export,
-            "extends" => JavaScriptSyntaxKind::Extends,
-            "false" => JavaScriptSyntaxKind::False,
-            "finally" => JavaScriptSyntaxKind::Finally,
-            "for" => JavaScriptSyntaxKind::For,
-            "function" => JavaScriptSyntaxKind::Function,
-            "if" => JavaScriptSyntaxKind::If,
-            "implements" => JavaScriptSyntaxKind::Implements,
-            "import" => JavaScriptSyntaxKind::Import,
-            "in" => JavaScriptSyntaxKind::In,
-            "instanceof" => JavaScriptSyntaxKind::Instanceof,
-            "interface" => JavaScriptSyntaxKind::Interface,
-            "let" => JavaScriptSyntaxKind::Let,
-            "new" => JavaScriptSyntaxKind::New,
-            "null" => JavaScriptSyntaxKind::Null,
-            "package" => JavaScriptSyntaxKind::Package,
-            "private" => JavaScriptSyntaxKind::Private,
-            "protected" => JavaScriptSyntaxKind::Protected,
-            "public" => JavaScriptSyntaxKind::Public,
-            "return" => JavaScriptSyntaxKind::Return,
-            "static" => JavaScriptSyntaxKind::Static,
-            "super" => JavaScriptSyntaxKind::Super,
-            "switch" => JavaScriptSyntaxKind::Switch,
-            "this" => JavaScriptSyntaxKind::This,
-            "throw" => JavaScriptSyntaxKind::Throw,
-            "true" => JavaScriptSyntaxKind::True,
-            "try" => JavaScriptSyntaxKind::Try,
-            "typeof" => JavaScriptSyntaxKind::Typeof,
-            "undefined" => JavaScriptSyntaxKind::Undefined,
-            "var" => JavaScriptSyntaxKind::Var,
-            "void" => JavaScriptSyntaxKind::Void,
-            "while" => JavaScriptSyntaxKind::While,
-            "with" => JavaScriptSyntaxKind::With,
-            "yield" => JavaScriptSyntaxKind::Yield,
-            _ => JavaScriptSyntaxKind::IdentifierName,
-        }
+        JavaScriptSyntaxKind::from_keyword(text).unwrap_or(JavaScriptSyntaxKind::IdentifierName)
     }
 
     /// 处理操作符和标点符号
@@ -805,7 +755,7 @@ impl JavaScriptLexer {
     }
 }
 
-impl Lexer<JavaScriptLanguage> for JavaScriptLexer {
+impl<'config> Lexer<JavaScriptLanguage> for JavaScriptLexer<'config> {
     fn lex<'a, S: Source + ?Sized>(&self, text: &S, _edits: &[TextEdit], cache: &'a mut impl LexerCache<JavaScriptLanguage>) -> LexOutput<JavaScriptLanguage> {
         let mut state = LexerState::new(text);
         let result = self.run(&mut state);

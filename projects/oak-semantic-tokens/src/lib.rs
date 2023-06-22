@@ -1,4 +1,5 @@
-use oak_core::{language::Language, tree::RedNode};
+use oak_core::{language::Language, source::Source, tree::RedNode};
+use oak_vfs::LineMap;
 use serde::{Deserialize, Serialize};
 
 /// Represents a semantic token for syntax highlighting.
@@ -10,11 +11,11 @@ pub struct SemanticToken {
     pub delta_start: u32,
     pub length: u32,
     pub token_type: u32,
-    pub token_modifiers_bitmask: u32,
+    pub token_modifiers_bitset: u32,
 }
 
 /// Trait for languages that support semantic highlighting.
 pub trait SemanticTokensProvider<L: Language> {
     /// Returns the semantic tokens for the given document.
-    fn semantic_tokens(&self, root: &RedNode<L>) -> Vec<SemanticToken>;
+    fn semantic_tokens<S: Source + ?Sized>(&self, root: &RedNode<L>, source: &S, line_map: &LineMap) -> Vec<SemanticToken>;
 }

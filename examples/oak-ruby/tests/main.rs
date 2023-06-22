@@ -1,4 +1,5 @@
 mod lexer;
+mod parser;
 
 #[test]
 fn ready() {

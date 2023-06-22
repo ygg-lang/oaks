@@ -1,5 +1,5 @@
 #[test]
-fn test_rust_formatter() {
+fn test_rust_formatter() -> Result<(), oak_core::OakError> {
     use oak_rust::RustFormatter;
 
     let formatter = RustFormatter::new();
@@ -9,10 +9,11 @@ fn test_rust_formatter() {
     assert!(!formatted.is_empty(), "Formatter should produce output");
 
     println!("Rust formatter test passed");
+    Ok(())
 }
 
 #[test]
-fn test_rust_formatter_with_config() {
+fn test_rust_formatter_with_config() -> Result<(), oak_core::OakError> {
     use oak_rust::RustFormatter;
 
     let formatter = RustFormatter::with_config("    ".to_string(), 80);
@@ -23,4 +24,5 @@ fn test_rust_formatter_with_config() {
     assert!(!formatted.is_empty(), "Formatter with config should produce output");
 
     println!("Rust formatter with config test passed");
+    Ok(())
 }

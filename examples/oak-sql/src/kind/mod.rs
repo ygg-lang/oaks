@@ -1,7 +1,8 @@
 use oak_core::{UniversalElementRole, UniversalTokenRole};
+use serde::{Deserialize, Serialize};
 
 /// 统一SQL 语法种类（包含节点与词法
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, serde::Serialize)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub enum SqlSyntaxKind {
     // 节点种类
     Root,
@@ -17,6 +18,11 @@ pub enum SqlSyntaxKind {
     Identifier,
     TableName,
     ColumnName,
+    JoinClause,
+    GroupByClause,
+    HavingClause,
+    OrderByClause,
+    LimitClause,
     ErrorNode,
 
     // 空白字符和换

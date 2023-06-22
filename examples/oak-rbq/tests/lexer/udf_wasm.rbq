@@ -1,0 +1,41 @@
+# RBQ WASI UDF Test Case (WASM Component Model)
+#
+# Testing UDF definition and usage in DSL using @wasi
+
+@database("pgsql.public")
+@table(name = "transactions")
+class Transaction {
+    @key
+    id: uuid;
+    amount: d128;
+    currency: utf8;
+    metadata: dict<object>;
+}
+
+# 1. Define WASI UDFs
+# From an external analytics component
+@wasi(component = "risk-engine.wasm", export = "eval-transaction")
+micro evaluate_risk(amount: d128, meta: dict<object>) -> f64;
+
+# A standardized text utility component
+@wasi(component = "text-utils.wasm")
+micro format_currency(amount: d128, code: utf8) -> utf8;
+
+# 2. Use UDFs in Query DSL
+# Find high-risk transactions and format their display
+transactions.filter { evaluate_risk($amount, $metadata) > 0.7 }
+            .map {
+              id = $id
+              display_amount = format_currency($amount, $currency)
+              risk = evaluate_risk($amount, $metadata)
+            }
+            .list();
+
+# 3. Use UDF in Aggregation
+# Calculate average risk score per currency
+transactions.group_by { $currency }
+            .map {
+              currency = $key
+              avg_risk = $group.avg { evaluate_risk($amount, $metadata) }
+            }
+            .list();

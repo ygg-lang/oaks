@@ -13,11 +13,12 @@ license.workspace = true
 edition.workspace = true
 
 [dependencies]
-oak-core = { workspace = true }
+oak-core = { workspace = true, features = ["serde"] }
 oak-macros = { workspace = true }
+serde = { workspace = true, features = ["derive"] }
 
 [dev-dependencies]
-oak-core = { workspace = true, features = ["testing"] }
+oak-testing = { workspace = true }
 
 
 [features]

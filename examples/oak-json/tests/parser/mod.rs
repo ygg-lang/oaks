@@ -1,21 +1,21 @@
-use oak_core::{GreenNode, GreenTree, OakErrorKind, SourceText, TextEdit, helpers::ParserTester, parser::ParseSession};
+use oak_core::{GreenNode, GreenTree, OakErrorKind, SourceText, TextEdit, parser::ParseSession};
 use oak_json::{kind::JsonSyntaxKind, language::JsonLanguage, lexer::JsonLexer, parser::JsonParser};
+use oak_testing::parsing::ParserTester;
 use std::path::PathBuf;
 
 #[test]
-fn run_compliance_tests() {
+fn run_compliance_tests() -> Result<(), oak_core::OakError> {
     let mut root = PathBuf::from(env!("CARGO_MANIFEST_DIR"));
     root.push("tests/compliance");
 
     let binding = JsonLanguage::standard();
     let parser = JsonParser::new(&binding);
-    let _lexer = JsonLexer::new(&binding);
 
     let tester = ParserTester::new(root).with_extension("json").with_timeout(std::time::Duration::from_secs(5));
 
     // 运行所有测试
     // 注意：如果是 invalid 目录下的文件，ParserTester 会预期解析失败或生成 Error 节点
-    tester.run_tests(&parser).expect("Compliance tests failed");
+    tester.run_tests(&parser)
 }
 
 fn fingerprint(node: &GreenNode<JsonLanguage>, out: &mut Vec<(JsonSyntaxKind, usize, usize)>) {
@@ -105,9 +105,9 @@ fn incremental_multi_edits_matches_full_parse_shape() {
     edited.replace_range(b_pos + "\"b\": ".len()..b_pos + "\"b\": 2".len(), "20");
     edited.replace_range(a_pos + "\"a\": ".len()..a_pos + "\"a\": 1".len(), "10");
 
-    let source2 = SourceText::new(&edited);
-    let edit1 = TextEdit { span: (a_pos + "\"a\": ".len()..a_pos + "\"a\": 1".len()).into(), text: "10".to_string() };
-    let edit2 = TextEdit { span: (b_pos + "\"b\": ".len()..b_pos + "\"b\": 2".len()).into(), text: "20".to_string() };
+    let source2 = SourceText::new(edited.as_str());
+    let edit1 = TextEdit { span: (a_pos + "\"a\": ".len()..a_pos + "\"a\": 1".len()).into(), text: "10".to_string().into() };
+    let edit2 = TextEdit { span: (b_pos + "\"b\": ".len()..b_pos + "\"b\": 2".len()).into(), text: "20".to_string().into() };
     let edits = vec![edit1, edit2];
 
     let out2 = oak_core::parser::parse(&parser, &lexer, &source2, &edits, &mut cache);

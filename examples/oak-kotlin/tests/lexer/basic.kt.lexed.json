@@ -1,0 +1,607 @@
+{
+    "success": true,
+    "count": 100,
+    "tokens": [
+        {
+            "kind": "Keyword",
+            "text": "package",
+            "start": 0,
+            "end": 7
+        },
+        {
+            "kind": "Identifier",
+            "text": "com",
+            "start": 8,
+            "end": 11
+        },
+        {
+            "kind": "Dot",
+            "text": ".",
+            "start": 11,
+            "end": 12
+        },
+        {
+            "kind": "Identifier",
+            "text": "example",
+            "start": 12,
+            "end": 19
+        },
+        {
+            "kind": "Keyword",
+            "text": "import",
+            "start": 23,
+            "end": 29
+        },
+        {
+            "kind": "Identifier",
+            "text": "kotlin",
+            "start": 30,
+            "end": 36
+        },
+        {
+            "kind": "Dot",
+            "text": ".",
+            "start": 36,
+            "end": 37
+        },
+        {
+            "kind": "Identifier",
+            "text": "math",
+            "start": 37,
+            "end": 41
+        },
+        {
+            "kind": "Dot",
+            "text": ".",
+            "start": 41,
+            "end": 42
+        },
+        {
+            "kind": "Star",
+            "text": "*",
+            "start": 42,
+            "end": 43
+        },
+        {
+            "kind": "Keyword",
+            "text": "class",
+            "start": 67,
+            "end": 72
+        },
+        {
+            "kind": "Identifier",
+            "text": "Person",
+            "start": 73,
+            "end": 79
+        },
+        {
+            "kind": "LParen",
+            "text": "(",
+            "start": 79,
+            "end": 80
+        },
+        {
+            "kind": "Keyword",
+            "text": "val",
+            "start": 80,
+            "end": 83
+        },
+        {
+            "kind": "Identifier",
+            "text": "name",
+            "start": 84,
+            "end": 88
+        },
+        {
+            "kind": "Colon",
+            "text": ":",
+            "start": 88,
+            "end": 89
+        },
+        {
+            "kind": "Identifier",
+            "text": "String",
+            "start": 90,
+            "end": 96
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 96,
+            "end": 97
+        },
+        {
+            "kind": "Keyword",
+            "text": "var",
+            "start": 98,
+            "end": 101
+        },
+        {
+            "kind": "Identifier",
+            "text": "age",
+            "start": 102,
+            "end": 105
+        },
+        {
+            "kind": "Colon",
+            "text": ":",
+            "start": 105,
+            "end": 106
+        },
+        {
+            "kind": "Identifier",
+            "text": "Int",
+            "start": 107,
+            "end": 110
+        },
+        {
+            "kind": "RParen",
+            "text": ")",
+            "start": 110,
+            "end": 111
+        },
+        {
+            "kind": "LBrace",
+            "text": "{",
+            "start": 112,
+            "end": 113
+        },
+        {
+            "kind": "Keyword",
+            "text": "fun",
+            "start": 140,
+            "end": 143
+        },
+        {
+            "kind": "Identifier",
+            "text": "greet",
+            "start": 144,
+            "end": 149
+        },
+        {
+            "kind": "LParen",
+            "text": "(",
+            "start": 149,
+            "end": 150
+        },
+        {
+            "kind": "RParen",
+            "text": ")",
+            "start": 150,
+            "end": 151
+        },
+        {
+            "kind": "Colon",
+            "text": ":",
+            "start": 151,
+            "end": 152
+        },
+        {
+            "kind": "Identifier",
+            "text": "String",
+            "start": 153,
+            "end": 159
+        },
+        {
+            "kind": "LBrace",
+            "text": "{",
+            "start": 160,
+            "end": 161
+        },
+        {
+            "kind": "Keyword",
+            "text": "return",
+            "start": 171,
+            "end": 177
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "\"Hello, my name is $name and I'm $age years old\"",
+            "start": 178,
+            "end": 226
+        },
+        {
+            "kind": "RBrace",
+            "text": "}",
+            "start": 232,
+            "end": 233
+        },
+        {
+            "kind": "Keyword",
+            "text": "val",
+            "start": 260,
+            "end": 263
+        },
+        {
+            "kind": "Identifier",
+            "text": "isAdult",
+            "start": 264,
+            "end": 271
+        },
+        {
+            "kind": "Colon",
+            "text": ":",
+            "start": 271,
+            "end": 272
+        },
+        {
+            "kind": "Identifier",
+            "text": "Boolean",
+            "start": 273,
+            "end": 280
+        },
+        {
+            "kind": "Keyword",
+            "text": "get",
+            "start": 290,
+            "end": 293
+        },
+        {
+            "kind": "LParen",
+            "text": "(",
+            "start": 293,
+            "end": 294
+        },
+        {
+            "kind": "RParen",
+            "text": ")",
+            "start": 294,
+            "end": 295
+        },
+        {
+            "kind": "Equals",
+            "text": "=",
+            "start": 296,
+            "end": 297
+        },
+        {
+            "kind": "Identifier",
+            "text": "age",
+            "start": 298,
+            "end": 301
+        },
+        {
+            "kind": "Greater",
+            "text": ">",
+            "start": 302,
+            "end": 303
+        },
+        {
+            "kind": "Equals",
+            "text": "=",
+            "start": 303,
+            "end": 304
+        },
+        {
+            "kind": "NumberLiteral",
+            "text": "18",
+            "start": 305,
+            "end": 307
+        },
+        {
+            "kind": "RBrace",
+            "text": "}",
+            "start": 309,
+            "end": 310
+        },
+        {
+            "kind": "Keyword",
+            "text": "fun",
+            "start": 331,
+            "end": 334
+        },
+        {
+            "kind": "Identifier",
+            "text": "add",
+            "start": 335,
+            "end": 338
+        },
+        {
+            "kind": "LParen",
+            "text": "(",
+            "start": 338,
+            "end": 339
+        },
+        {
+            "kind": "Identifier",
+            "text": "x",
+            "start": 339,
+            "end": 340
+        },
+        {
+            "kind": "Colon",
+            "text": ":",
+            "start": 340,
+            "end": 341
+        },
+        {
+            "kind": "Identifier",
+            "text": "Int",
+            "start": 342,
+            "end": 345
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 345,
+            "end": 346
+        },
+        {
+            "kind": "Identifier",
+            "text": "y",
+            "start": 347,
+            "end": 348
+        },
+        {
+            "kind": "Colon",
+            "text": ":",
+            "start": 348,
+            "end": 349
+        },
+        {
+            "kind": "Identifier",
+            "text": "Int",
+            "start": 350,
+            "end": 353
+        },
+        {
+            "kind": "RParen",
+            "text": ")",
+            "start": 353,
+            "end": 354
+        },
+        {
+            "kind": "Colon",
+            "text": ":",
+            "start": 354,
+            "end": 355
+        },
+        {
+            "kind": "Identifier",
+            "text": "Int",
+            "start": 356,
+            "end": 359
+        },
+        {
+            "kind": "Equals",
+            "text": "=",
+            "start": 360,
+            "end": 361
+        },
+        {
+            "kind": "Identifier",
+            "text": "x",
+            "start": 362,
+            "end": 363
+        },
+        {
+            "kind": "Plus",
+            "text": "+",
+            "start": 364,
+            "end": 365
+        },
+        {
+            "kind": "Identifier",
+            "text": "y",
+            "start": 366,
+            "end": 367
+        },
+        {
+            "kind": "Keyword",
+            "text": "val",
+            "start": 388,
+            "end": 391
+        },
+        {
+            "kind": "Identifier",
+            "text": "pi",
+            "start": 392,
+            "end": 394
+        },
+        {
+            "kind": "Equals",
+            "text": "=",
+            "start": 395,
+            "end": 396
+        },
+        {
+            "kind": "NumberLiteral",
+            "text": "3.14159",
+            "start": 397,
+            "end": 404
+        },
+        {
+            "kind": "Keyword",
+            "text": "var",
+            "start": 406,
+            "end": 409
+        },
+        {
+            "kind": "Identifier",
+            "text": "counter",
+            "start": 410,
+            "end": 417
+        },
+        {
+            "kind": "Equals",
+            "text": "=",
+            "start": 418,
+            "end": 419
+        },
+        {
+            "kind": "NumberLiteral",
+            "text": "0",
+            "start": 420,
+            "end": 421
+        },
+        {
+            "kind": "Keyword",
+            "text": "val",
+            "start": 448,
+            "end": 451
+        },
+        {
+            "kind": "Identifier",
+            "text": "greeting",
+            "start": 452,
+            "end": 460
+        },
+        {
+            "kind": "Equals",
+            "text": "=",
+            "start": 461,
+            "end": 462
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "\"Hello, Kotlin!\"",
+            "start": 463,
+            "end": 479
+        },
+        {
+            "kind": "Keyword",
+            "text": "val",
+            "start": 481,
+            "end": 484
+        },
+        {
+            "kind": "Identifier",
+            "text": "multiline",
+            "start": 485,
+            "end": 494
+        },
+        {
+            "kind": "Equals",
+            "text": "=",
+            "start": 495,
+            "end": 496
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "\"\"\"\r\n    This is a\r\n    multiline string\r\n\"\"\"",
+            "start": 497,
+            "end": 542
+        },
+        {
+            "kind": "Dot",
+            "text": ".",
+            "start": 542,
+            "end": 543
+        },
+        {
+            "kind": "Identifier",
+            "text": "trimIndent",
+            "start": 543,
+            "end": 553
+        },
+        {
+            "kind": "LParen",
+            "text": "(",
+            "start": 553,
+            "end": 554
+        },
+        {
+            "kind": "RParen",
+            "text": ")",
+            "start": 554,
+            "end": 555
+        },
+        {
+            "kind": "Keyword",
+            "text": "val",
+            "start": 579,
+            "end": 582
+        },
+        {
+            "kind": "Identifier",
+            "text": "char",
+            "start": 583,
+            "end": 587
+        },
+        {
+            "kind": "Equals",
+            "text": "=",
+            "start": 588,
+            "end": 589
+        },
+        {
+            "kind": "CharLiteral",
+            "text": "'K'",
+            "start": 590,
+            "end": 593
+        },
+        {
+            "kind": "Keyword",
+            "text": "val",
+            "start": 617,
+            "end": 620
+        },
+        {
+            "kind": "Identifier",
+            "text": "integer",
+            "start": 621,
+            "end": 628
+        },
+        {
+            "kind": "Equals",
+            "text": "=",
+            "start": 629,
+            "end": 630
+        },
+        {
+            "kind": "NumberLiteral",
+            "text": "42",
+            "start": 631,
+            "end": 633
+        },
+        {
+            "kind": "Keyword",
+            "text": "val",
+            "start": 635,
+            "end": 638
+        },
+        {
+            "kind": "Identifier",
+            "text": "long",
+            "start": 639,
+            "end": 643
+        },
+        {
+            "kind": "Equals",
+            "text": "=",
+            "start": 644,
+            "end": 645
+        },
+        {
+            "kind": "NumberLiteral",
+            "text": "42",
+            "start": 646,
+            "end": 648
+        },
+        {
+            "kind": "Identifier",
+            "text": "L",
+            "start": 648,
+            "end": 649
+        },
+        {
+            "kind": "Keyword",
+            "text": "val",
+            "start": 651,
+            "end": 654
+        },
+        {
+            "kind": "Identifier",
+            "text": "float",
+            "start": 655,
+            "end": 660
+        },
+        {
+            "kind": "Equals",
+            "text": "=",
+            "start": 661,
+            "end": 662
+        }
+    ],
+    "errors": []
+}

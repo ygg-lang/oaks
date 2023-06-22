@@ -1,0 +1,607 @@
+{
+    "success": true,
+    "count": 100,
+    "tokens": [
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 28,
+            "end": 29
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 30,
+            "end": 31
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 58,
+            "end": 59
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 60,
+            "end": 61
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 61,
+            "end": 62
+        },
+        {
+            "kind": "At",
+            "text": "@",
+            "start": 62,
+            "end": 63
+        },
+        {
+            "kind": "Identifier_",
+            "text": "database",
+            "start": 63,
+            "end": 71
+        },
+        {
+            "kind": "LParen",
+            "text": "(",
+            "start": 71,
+            "end": 72
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "\"pgsql.public.user\"",
+            "start": 72,
+            "end": 91
+        },
+        {
+            "kind": "RParen",
+            "text": ")",
+            "start": 91,
+            "end": 92
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 92,
+            "end": 93
+        },
+        {
+            "kind": "Namespace",
+            "text": "namespace",
+            "start": 93,
+            "end": 102
+        },
+        {
+            "kind": "Whitespace",
+            "text": " ",
+            "start": 102,
+            "end": 103
+        },
+        {
+            "kind": "Identifier_",
+            "text": "project",
+            "start": 103,
+            "end": 110
+        },
+        {
+            "kind": "Dot",
+            "text": ".",
+            "start": 110,
+            "end": 111
+        },
+        {
+            "kind": "Identifier_",
+            "text": "user",
+            "start": 111,
+            "end": 115
+        },
+        {
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 115,
+            "end": 116
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 116,
+            "end": 117
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 117,
+            "end": 118
+        },
+        {
+            "kind": "At",
+            "text": "@",
+            "start": 118,
+            "end": 119
+        },
+        {
+            "kind": "Identifier_",
+            "text": "table",
+            "start": 119,
+            "end": 124
+        },
+        {
+            "kind": "LParen",
+            "text": "(",
+            "start": 124,
+            "end": 125
+        },
+        {
+            "kind": "Identifier_",
+            "text": "name",
+            "start": 125,
+            "end": 129
+        },
+        {
+            "kind": "Whitespace",
+            "text": " ",
+            "start": 129,
+            "end": 130
+        },
+        {
+            "kind": "Eq",
+            "text": "=",
+            "start": 130,
+            "end": 131
+        },
+        {
+            "kind": "Whitespace",
+            "text": " ",
+            "start": 131,
+            "end": 132
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "\"users\"",
+            "start": 132,
+            "end": 139
+        },
+        {
+            "kind": "RParen",
+            "text": ")",
+            "start": 139,
+            "end": 140
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 140,
+            "end": 141
+        },
+        {
+            "kind": "Struct",
+            "text": "struct",
+            "start": 141,
+            "end": 147
+        },
+        {
+            "kind": "Whitespace",
+            "text": " ",
+            "start": 147,
+            "end": 148
+        },
+        {
+            "kind": "Identifier_",
+            "text": "User",
+            "start": 148,
+            "end": 152
+        },
+        {
+            "kind": "Whitespace",
+            "text": " ",
+            "start": 152,
+            "end": 153
+        },
+        {
+            "kind": "LBrace",
+            "text": "{",
+            "start": 153,
+            "end": 154
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 154,
+            "end": 155
+        },
+        {
+            "kind": "Whitespace",
+            "text": "    ",
+            "start": 155,
+            "end": 159
+        },
+        {
+            "kind": "At",
+            "text": "@",
+            "start": 159,
+            "end": 160
+        },
+        {
+            "kind": "Key",
+            "text": "key",
+            "start": 160,
+            "end": 163
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 163,
+            "end": 164
+        },
+        {
+            "kind": "Whitespace",
+            "text": "    ",
+            "start": 164,
+            "end": 168
+        },
+        {
+            "kind": "Identifier_",
+            "text": "id",
+            "start": 168,
+            "end": 170
+        },
+        {
+            "kind": "Colon",
+            "text": ":",
+            "start": 170,
+            "end": 171
+        },
+        {
+            "kind": "Whitespace",
+            "text": " ",
+            "start": 171,
+            "end": 172
+        },
+        {
+            "kind": "Identifier_",
+            "text": "u128",
+            "start": 172,
+            "end": 176
+        },
+        {
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 176,
+            "end": 177
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 177,
+            "end": 178
+        },
+        {
+            "kind": "Whitespace",
+            "text": "    ",
+            "start": 178,
+            "end": 182
+        },
+        {
+            "kind": "At",
+            "text": "@",
+            "start": 182,
+            "end": 183
+        },
+        {
+            "kind": "Identifier_",
+            "text": "unique",
+            "start": 183,
+            "end": 189
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 189,
+            "end": 190
+        },
+        {
+            "kind": "Whitespace",
+            "text": "    ",
+            "start": 190,
+            "end": 194
+        },
+        {
+            "kind": "Identifier_",
+            "text": "user_name",
+            "start": 194,
+            "end": 203
+        },
+        {
+            "kind": "Colon",
+            "text": ":",
+            "start": 203,
+            "end": 204
+        },
+        {
+            "kind": "Whitespace",
+            "text": " ",
+            "start": 204,
+            "end": 205
+        },
+        {
+            "kind": "String",
+            "text": "string",
+            "start": 205,
+            "end": 211
+        },
+        {
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 211,
+            "end": 212
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 212,
+            "end": 213
+        },
+        {
+            "kind": "Whitespace",
+            "text": "    ",
+            "start": 213,
+            "end": 217
+        },
+        {
+            "kind": "Identifier_",
+            "text": "nick_name",
+            "start": 217,
+            "end": 226
+        },
+        {
+            "kind": "Colon",
+            "text": ":",
+            "start": 226,
+            "end": 227
+        },
+        {
+            "kind": "Whitespace",
+            "text": " ",
+            "start": 227,
+            "end": 228
+        },
+        {
+            "kind": "String",
+            "text": "string",
+            "start": 228,
+            "end": 234
+        },
+        {
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 234,
+            "end": 235
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 235,
+            "end": 236
+        },
+        {
+            "kind": "Whitespace",
+            "text": "    ",
+            "start": 236,
+            "end": 240
+        },
+        {
+            "kind": "At",
+            "text": "@",
+            "start": 240,
+            "end": 241
+        },
+        {
+            "kind": "Identifier_",
+            "text": "unique",
+            "start": 241,
+            "end": 247
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 247,
+            "end": 248
+        },
+        {
+            "kind": "Whitespace",
+            "text": "    ",
+            "start": 248,
+            "end": 252
+        },
+        {
+            "kind": "Identifier_",
+            "text": "email",
+            "start": 252,
+            "end": 257
+        },
+        {
+            "kind": "Colon",
+            "text": ":",
+            "start": 257,
+            "end": 258
+        },
+        {
+            "kind": "Whitespace",
+            "text": " ",
+            "start": 258,
+            "end": 259
+        },
+        {
+            "kind": "String",
+            "text": "string",
+            "start": 259,
+            "end": 265
+        },
+        {
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 265,
+            "end": 266
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 266,
+            "end": 267
+        },
+        {
+            "kind": "Whitespace",
+            "text": "    ",
+            "start": 267,
+            "end": 271
+        },
+        {
+            "kind": "Identifier_",
+            "text": "password_hash",
+            "start": 271,
+            "end": 284
+        },
+        {
+            "kind": "Colon",
+            "text": ":",
+            "start": 284,
+            "end": 285
+        },
+        {
+            "kind": "Whitespace",
+            "text": " ",
+            "start": 285,
+            "end": 286
+        },
+        {
+            "kind": "String",
+            "text": "string",
+            "start": 286,
+            "end": 292
+        },
+        {
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 292,
+            "end": 293
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 293,
+            "end": 294
+        },
+        {
+            "kind": "Whitespace",
+            "text": "    ",
+            "start": 294,
+            "end": 298
+        },
+        {
+            "kind": "Identifier_",
+            "text": "is_active",
+            "start": 298,
+            "end": 307
+        },
+        {
+            "kind": "Colon",
+            "text": ":",
+            "start": 307,
+            "end": 308
+        },
+        {
+            "kind": "Whitespace",
+            "text": " ",
+            "start": 308,
+            "end": 309
+        },
+        {
+            "kind": "Bool",
+            "text": "bool",
+            "start": 309,
+            "end": 313
+        },
+        {
+            "kind": "Whitespace",
+            "text": " ",
+            "start": 313,
+            "end": 314
+        },
+        {
+            "kind": "Eq",
+            "text": "=",
+            "start": 314,
+            "end": 315
+        },
+        {
+            "kind": "Whitespace",
+            "text": " ",
+            "start": 315,
+            "end": 316
+        },
+        {
+            "kind": "BooleanLiteral",
+            "text": "true",
+            "start": 316,
+            "end": 320
+        },
+        {
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 320,
+            "end": 321
+        },
+        {
+            "kind": "Newline",
+            "text": "\n",
+            "start": 321,
+            "end": 322
+        },
+        {
+            "kind": "Whitespace",
+            "text": "    ",
+            "start": 322,
+            "end": 326
+        },
+        {
+            "kind": "Identifier_",
+            "text": "age",
+            "start": 326,
+            "end": 329
+        },
+        {
+            "kind": "Colon",
+            "text": ":",
+            "start": 329,
+            "end": 330
+        },
+        {
+            "kind": "Whitespace",
+            "text": " ",
+            "start": 330,
+            "end": 331
+        },
+        {
+            "kind": "U32",
+            "text": "u32",
+            "start": 331,
+            "end": 334
+        },
+        {
+            "kind": "Question",
+            "text": "?",
+            "start": 334,
+            "end": 335
+        },
+        {
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 335,
+            "end": 336
+        }
+    ],
+    "errors": []
+}

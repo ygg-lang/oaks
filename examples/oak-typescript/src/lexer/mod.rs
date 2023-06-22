@@ -1,7 +1,7 @@
 use crate::{kind::TypeScriptSyntaxKind, language::TypeScriptLanguage};
 use oak_core::{Lexer, LexerCache, LexerState, OakError, TextEdit, lexer::LexOutput, source::Source};
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct TypeScriptLexer<'config> {
     _config: &'config TypeScriptLanguage,
 }
@@ -15,8 +15,10 @@ impl<'config> TypeScriptLexer<'config> {
 }
 
 impl<'config> Lexer<TypeScriptLanguage> for TypeScriptLexer<'config> {
-    fn lex<'a, S: Source + ?Sized>(&self, text: &S, _edits: &[TextEdit], cache: &'a mut impl LexerCache<TypeScriptLanguage>) -> LexOutput<TypeScriptLanguage> {
-        let mut state: State<'_, S> = LexerState::new(text);
+    fn lex<'a, S: Source + ?Sized>(&self, text: &S, edits: &[TextEdit], cache: &'a mut impl LexerCache<TypeScriptLanguage>) -> LexOutput<TypeScriptLanguage> {
+        let relex_from = edits.iter().map(|e| e.span.start).min().unwrap_or(0);
+        let mut state: State<'_, S> = LexerState::new_with_cache(text, relex_from, cache);
+
         let result = self.run(&mut state);
         if result.is_ok() {
             state.add_eof();
@@ -301,184 +303,56 @@ impl<'config> TypeScriptLexer<'config> {
     }
 
     fn keyword_or_identifier(&self, text: &str) -> TypeScriptSyntaxKind {
-        match text {
-            "abstract" => TypeScriptSyntaxKind::Abstract,
-            "any" => TypeScriptSyntaxKind::Any,
-            "as" => TypeScriptSyntaxKind::As,
-            "asserts" => TypeScriptSyntaxKind::Asserts,
-            "async" => TypeScriptSyntaxKind::Async,
-            "await" => TypeScriptSyntaxKind::Await,
-            "boolean" => TypeScriptSyntaxKind::Boolean,
-            "break" => TypeScriptSyntaxKind::Break,
-            "case" => TypeScriptSyntaxKind::Case,
-            "catch" => TypeScriptSyntaxKind::Catch,
-            "class" => TypeScriptSyntaxKind::Class,
-            "const" => TypeScriptSyntaxKind::Const,
-            "constructor" => TypeScriptSyntaxKind::Constructor,
-            "continue" => TypeScriptSyntaxKind::Continue,
-            "debugger" => TypeScriptSyntaxKind::Debugger,
-            "declare" => TypeScriptSyntaxKind::Declare,
-            "default" => TypeScriptSyntaxKind::Default,
-            "delete" => TypeScriptSyntaxKind::Delete,
-            "do" => TypeScriptSyntaxKind::Do,
-            "else" => TypeScriptSyntaxKind::Else,
-            "enum" => TypeScriptSyntaxKind::Enum,
-            "export" => TypeScriptSyntaxKind::Export,
-            "extends" => TypeScriptSyntaxKind::Extends,
-            "false" => TypeScriptSyntaxKind::False,
-            "finally" => TypeScriptSyntaxKind::Finally,
-            "for" => TypeScriptSyntaxKind::For,
-            "from" => TypeScriptSyntaxKind::From,
-            "function" => TypeScriptSyntaxKind::Function,
-            "get" => TypeScriptSyntaxKind::Get,
-            "global" => TypeScriptSyntaxKind::Global,
-            "if" => TypeScriptSyntaxKind::If,
-            "implements" => TypeScriptSyntaxKind::Implements,
-            "import" => TypeScriptSyntaxKind::Import,
-            "in" => TypeScriptSyntaxKind::In,
-            "infer" => TypeScriptSyntaxKind::Infer,
-            "instanceof" => TypeScriptSyntaxKind::Instanceof,
-            "interface" => TypeScriptSyntaxKind::Interface,
-            "is" => TypeScriptSyntaxKind::Is,
-            "keyof" => TypeScriptSyntaxKind::Keyof,
-            "let" => TypeScriptSyntaxKind::Let,
-            "namespace" => TypeScriptSyntaxKind::Namespace,
-            "never" => TypeScriptSyntaxKind::Never,
-            "new" => TypeScriptSyntaxKind::New,
-            "null" => TypeScriptSyntaxKind::Null,
-            "number" => TypeScriptSyntaxKind::Number,
-            "object" => TypeScriptSyntaxKind::Object,
-            "of" => TypeScriptSyntaxKind::Of,
-            "package" => TypeScriptSyntaxKind::Package,
-            "private" => TypeScriptSyntaxKind::Private,
-            "protected" => TypeScriptSyntaxKind::Protected,
-            "public" => TypeScriptSyntaxKind::Public,
-            "readonly" => TypeScriptSyntaxKind::Readonly,
-            "require" => TypeScriptSyntaxKind::Require,
-            "return" => TypeScriptSyntaxKind::Return,
-            "set" => TypeScriptSyntaxKind::Set,
-            "static" => TypeScriptSyntaxKind::Static,
-            "string" => TypeScriptSyntaxKind::String,
-            "super" => TypeScriptSyntaxKind::Super,
-            "switch" => TypeScriptSyntaxKind::Switch,
-            "symbol" => TypeScriptSyntaxKind::Symbol,
-            "this" => TypeScriptSyntaxKind::This,
-            "throw" => TypeScriptSyntaxKind::Throw,
-            "true" => TypeScriptSyntaxKind::True,
-            "try" => TypeScriptSyntaxKind::Try,
-            "type" => TypeScriptSyntaxKind::Type,
-            "typeof" => TypeScriptSyntaxKind::Typeof,
-            "undefined" => TypeScriptSyntaxKind::Undefined,
-            "unique" => TypeScriptSyntaxKind::Unique,
-            "unknown" => TypeScriptSyntaxKind::Unknown,
-            "var" => TypeScriptSyntaxKind::Var,
-            "void" => TypeScriptSyntaxKind::Void,
-            "while" => TypeScriptSyntaxKind::While,
-            "with" => TypeScriptSyntaxKind::With,
-            "yield" => TypeScriptSyntaxKind::Yield,
-            _ => TypeScriptSyntaxKind::IdentifierName,
-        }
+        TypeScriptSyntaxKind::from_keyword(text).unwrap_or(TypeScriptSyntaxKind::IdentifierName)
     }
 
     fn lex_operator_or_punctuation<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start = state.get_position();
         let rest = state.rest();
 
-        // 三字符操作符
-        if rest.starts_with("===") {
-            state.advance(3);
-            state.add_token(TypeScriptSyntaxKind::EqualEqualEqual, start, state.get_position());
-            return true;
-        }
-        if rest.starts_with("!==") {
-            state.advance(3);
-            state.add_token(TypeScriptSyntaxKind::NotEqualEqual, start, state.get_position());
-            return true;
-        }
-        if rest.starts_with(">>>") {
-            state.advance(3);
-            state.add_token(TypeScriptSyntaxKind::UnsignedRightShift, start, state.get_position());
-            return true;
-        }
-        if rest.starts_with("...") {
-            state.advance(3);
-            state.add_token(TypeScriptSyntaxKind::DotDotDot, start, state.get_position());
-            return true;
+        let ops = [
+            ("===", TypeScriptSyntaxKind::EqualEqualEqual),
+            ("!==", TypeScriptSyntaxKind::NotEqualEqual),
+            (">>>", TypeScriptSyntaxKind::UnsignedRightShift),
+            ("...", TypeScriptSyntaxKind::DotDotDot),
+            ("**=", TypeScriptSyntaxKind::StarStarEqual),
+            ("<<=", TypeScriptSyntaxKind::LeftShiftEqual),
+            (">>=", TypeScriptSyntaxKind::RightShiftEqual),
+            ("&&=", TypeScriptSyntaxKind::AmpersandAmpersandEqual),
+            ("||=", TypeScriptSyntaxKind::PipePipeEqual),
+            ("??=", TypeScriptSyntaxKind::QuestionQuestionEqual),
+            ("**", TypeScriptSyntaxKind::StarStar),
+            ("<=", TypeScriptSyntaxKind::LessEqual),
+            (">=", TypeScriptSyntaxKind::GreaterEqual),
+            ("==", TypeScriptSyntaxKind::EqualEqual),
+            ("!=", TypeScriptSyntaxKind::NotEqual),
+            ("&&", TypeScriptSyntaxKind::AmpersandAmpersand),
+            ("||", TypeScriptSyntaxKind::PipePipe),
+            ("<<", TypeScriptSyntaxKind::LeftShift),
+            (">>", TypeScriptSyntaxKind::RightShift),
+            ("++", TypeScriptSyntaxKind::PlusPlus),
+            ("--", TypeScriptSyntaxKind::MinusMinus),
+            ("=>", TypeScriptSyntaxKind::Arrow),
+            ("?.", TypeScriptSyntaxKind::QuestionDot),
+            ("??", TypeScriptSyntaxKind::QuestionQuestion),
+            ("+=", TypeScriptSyntaxKind::PlusEqual),
+            ("-=", TypeScriptSyntaxKind::MinusEqual),
+            ("*=", TypeScriptSyntaxKind::StarEqual),
+            ("/=", TypeScriptSyntaxKind::SlashEqual),
+            ("%=", TypeScriptSyntaxKind::PercentEqual),
+            ("&=", TypeScriptSyntaxKind::AmpersandEqual),
+            ("|=", TypeScriptSyntaxKind::PipeEqual),
+            ("^=", TypeScriptSyntaxKind::CaretEqual),
+        ];
+
+        for (op, kind) in ops {
+            if rest.starts_with(op) {
+                state.advance(op.len());
+                state.add_token(kind, start, state.get_position());
+                return true;
+            }
         }
 
-        // 双字符操作符
-        if rest.starts_with("**") {
-            state.advance(2);
-            state.add_token(TypeScriptSyntaxKind::StarStar, start, state.get_position());
-            return true;
-        }
-        if rest.starts_with("<=") {
-            state.advance(2);
-            state.add_token(TypeScriptSyntaxKind::LessEqual, start, state.get_position());
-            return true;
-        }
-        if rest.starts_with(">=") {
-            state.advance(2);
-            state.add_token(TypeScriptSyntaxKind::GreaterEqual, start, state.get_position());
-            return true;
-        }
-        if rest.starts_with("==") {
-            state.advance(2);
-            state.add_token(TypeScriptSyntaxKind::EqualEqual, start, state.get_position());
-            return true;
-        }
-        if rest.starts_with("!=") {
-            state.advance(2);
-            state.add_token(TypeScriptSyntaxKind::NotEqual, start, state.get_position());
-            return true;
-        }
-        if rest.starts_with("&&") {
-            state.advance(2);
-            state.add_token(TypeScriptSyntaxKind::AmpersandAmpersand, start, state.get_position());
-            return true;
-        }
-        if rest.starts_with("||") {
-            state.advance(2);
-            state.add_token(TypeScriptSyntaxKind::PipePipe, start, state.get_position());
-            return true;
-        }
-        if rest.starts_with("<<") {
-            state.advance(2);
-            state.add_token(TypeScriptSyntaxKind::LeftShift, start, state.get_position());
-            return true;
-        }
-        if rest.starts_with(">>") {
-            state.advance(2);
-            state.add_token(TypeScriptSyntaxKind::RightShift, start, state.get_position());
-            return true;
-        }
-        if rest.starts_with("++") {
-            state.advance(2);
-            state.add_token(TypeScriptSyntaxKind::PlusPlus, start, state.get_position());
-            return true;
-        }
-        if rest.starts_with("--") {
-            state.advance(2);
-            state.add_token(TypeScriptSyntaxKind::MinusMinus, start, state.get_position());
-            return true;
-        }
-        if rest.starts_with("=>") {
-            state.advance(2);
-            state.add_token(TypeScriptSyntaxKind::Arrow, start, state.get_position());
-            return true;
-        }
-        if rest.starts_with("?.") {
-            state.advance(2);
-            state.add_token(TypeScriptSyntaxKind::QuestionDot, start, state.get_position());
-            return true;
-        }
-        if rest.starts_with("??") {
-            state.advance(2);
-            state.add_token(TypeScriptSyntaxKind::QuestionQuestion, start, state.get_position());
-            return true;
-        }
-
-        // 单字符操作符
         if let Some(ch) = state.peek() {
             let kind = match ch {
                 '+' => TypeScriptSyntaxKind::Plus,

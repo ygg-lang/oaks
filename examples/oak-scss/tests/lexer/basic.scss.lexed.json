@@ -1,0 +1,607 @@
+{
+    "success": true,
+    "count": 100,
+    "tokens": [
+        {
+            "kind": "Identifier",
+            "text": "$primary-color",
+            "start": 53,
+            "end": 67
+        },
+        {
+            "kind": "Colon",
+            "text": ":",
+            "start": 67,
+            "end": 68
+        },
+        {
+            "kind": "Hash",
+            "text": "#",
+            "start": 69,
+            "end": 70
+        },
+        {
+            "kind": "IntegerLiteral",
+            "text": "3498",
+            "start": 70,
+            "end": 74
+        },
+        {
+            "kind": "Identifier",
+            "text": "db",
+            "start": 74,
+            "end": 76
+        },
+        {
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 76,
+            "end": 77
+        },
+        {
+            "kind": "Identifier",
+            "text": "$secondary-color",
+            "start": 79,
+            "end": 95
+        },
+        {
+            "kind": "Colon",
+            "text": ":",
+            "start": 95,
+            "end": 96
+        },
+        {
+            "kind": "Hash",
+            "text": "#",
+            "start": 97,
+            "end": 98
+        },
+        {
+            "kind": "IntegerLiteral",
+            "text": "2",
+            "start": 98,
+            "end": 99
+        },
+        {
+            "kind": "Identifier",
+            "text": "ecc71",
+            "start": 99,
+            "end": 104
+        },
+        {
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 104,
+            "end": 105
+        },
+        {
+            "kind": "Identifier",
+            "text": "$accent-color",
+            "start": 107,
+            "end": 120
+        },
+        {
+            "kind": "Colon",
+            "text": ":",
+            "start": 120,
+            "end": 121
+        },
+        {
+            "kind": "Hash",
+            "text": "#",
+            "start": 122,
+            "end": 123
+        },
+        {
+            "kind": "Identifier",
+            "text": "e74c3c",
+            "start": 123,
+            "end": 129
+        },
+        {
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 129,
+            "end": 130
+        },
+        {
+            "kind": "Identifier",
+            "text": "$font-size-base",
+            "start": 132,
+            "end": 147
+        },
+        {
+            "kind": "Colon",
+            "text": ":",
+            "start": 147,
+            "end": 148
+        },
+        {
+            "kind": "IntegerLiteral",
+            "text": "16",
+            "start": 149,
+            "end": 151
+        },
+        {
+            "kind": "Identifier",
+            "text": "px",
+            "start": 151,
+            "end": 153
+        },
+        {
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 153,
+            "end": 154
+        },
+        {
+            "kind": "Identifier",
+            "text": "$font-size-large",
+            "start": 156,
+            "end": 172
+        },
+        {
+            "kind": "Colon",
+            "text": ":",
+            "start": 172,
+            "end": 173
+        },
+        {
+            "kind": "Identifier",
+            "text": "$font-size-base",
+            "start": 174,
+            "end": 189
+        },
+        {
+            "kind": "Star",
+            "text": "*",
+            "start": 190,
+            "end": 191
+        },
+        {
+            "kind": "IntegerLiteral",
+            "text": "1.25",
+            "start": 192,
+            "end": 196
+        },
+        {
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 196,
+            "end": 197
+        },
+        {
+            "kind": "Identifier",
+            "text": "$font-size-small",
+            "start": 199,
+            "end": 215
+        },
+        {
+            "kind": "Colon",
+            "text": ":",
+            "start": 215,
+            "end": 216
+        },
+        {
+            "kind": "Identifier",
+            "text": "$font-size-base",
+            "start": 217,
+            "end": 232
+        },
+        {
+            "kind": "Star",
+            "text": "*",
+            "start": 233,
+            "end": 234
+        },
+        {
+            "kind": "IntegerLiteral",
+            "text": "0.875",
+            "start": 235,
+            "end": 240
+        },
+        {
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 240,
+            "end": 241
+        },
+        {
+            "kind": "Identifier",
+            "text": "$border-radius",
+            "start": 243,
+            "end": 257
+        },
+        {
+            "kind": "Colon",
+            "text": ":",
+            "start": 257,
+            "end": 258
+        },
+        {
+            "kind": "IntegerLiteral",
+            "text": "4",
+            "start": 259,
+            "end": 260
+        },
+        {
+            "kind": "Identifier",
+            "text": "px",
+            "start": 260,
+            "end": 262
+        },
+        {
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 262,
+            "end": 263
+        },
+        {
+            "kind": "Identifier",
+            "text": "$spacing-unit",
+            "start": 265,
+            "end": 278
+        },
+        {
+            "kind": "Colon",
+            "text": ":",
+            "start": 278,
+            "end": 279
+        },
+        {
+            "kind": "IntegerLiteral",
+            "text": "1",
+            "start": 280,
+            "end": 281
+        },
+        {
+            "kind": "Identifier",
+            "text": "rem",
+            "start": 281,
+            "end": 284
+        },
+        {
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 284,
+            "end": 285
+        },
+        {
+            "kind": "Identifier",
+            "text": "$max-width",
+            "start": 287,
+            "end": 297
+        },
+        {
+            "kind": "Colon",
+            "text": ":",
+            "start": 297,
+            "end": 298
+        },
+        {
+            "kind": "IntegerLiteral",
+            "text": "1200",
+            "start": 299,
+            "end": 303
+        },
+        {
+            "kind": "Identifier",
+            "text": "px",
+            "start": 303,
+            "end": 305
+        },
+        {
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 305,
+            "end": 306
+        },
+        {
+            "kind": "Identifier",
+            "text": "$colors",
+            "start": 332,
+            "end": 339
+        },
+        {
+            "kind": "Colon",
+            "text": ":",
+            "start": 339,
+            "end": 340
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 341,
+            "end": 342
+        },
+        {
+            "kind": "Identifier",
+            "text": "primary",
+            "start": 346,
+            "end": 353
+        },
+        {
+            "kind": "Colon",
+            "text": ":",
+            "start": 353,
+            "end": 354
+        },
+        {
+            "kind": "Identifier",
+            "text": "$primary-color",
+            "start": 355,
+            "end": 369
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 369,
+            "end": 370
+        },
+        {
+            "kind": "Identifier",
+            "text": "secondary",
+            "start": 374,
+            "end": 383
+        },
+        {
+            "kind": "Colon",
+            "text": ":",
+            "start": 383,
+            "end": 384
+        },
+        {
+            "kind": "Identifier",
+            "text": "$secondary-color",
+            "start": 385,
+            "end": 401
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 401,
+            "end": 402
+        },
+        {
+            "kind": "Identifier",
+            "text": "accent",
+            "start": 406,
+            "end": 412
+        },
+        {
+            "kind": "Colon",
+            "text": ":",
+            "start": 412,
+            "end": 413
+        },
+        {
+            "kind": "Identifier",
+            "text": "$accent-color",
+            "start": 414,
+            "end": 427
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 427,
+            "end": 428
+        },
+        {
+            "kind": "Identifier",
+            "text": "success",
+            "start": 432,
+            "end": 439
+        },
+        {
+            "kind": "Colon",
+            "text": ":",
+            "start": 439,
+            "end": 440
+        },
+        {
+            "kind": "Hash",
+            "text": "#",
+            "start": 441,
+            "end": 442
+        },
+        {
+            "kind": "IntegerLiteral",
+            "text": "27",
+            "start": 442,
+            "end": 444
+        },
+        {
+            "kind": "Identifier",
+            "text": "ae60",
+            "start": 444,
+            "end": 448
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 448,
+            "end": 449
+        },
+        {
+            "kind": "Identifier",
+            "text": "warning",
+            "start": 453,
+            "end": 460
+        },
+        {
+            "kind": "Colon",
+            "text": ":",
+            "start": 460,
+            "end": 461
+        },
+        {
+            "kind": "Hash",
+            "text": "#",
+            "start": 462,
+            "end": 463
+        },
+        {
+            "kind": "Identifier",
+            "text": "f39c12",
+            "start": 463,
+            "end": 469
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 469,
+            "end": 470
+        },
+        {
+            "kind": "Identifier",
+            "text": "danger",
+            "start": 474,
+            "end": 480
+        },
+        {
+            "kind": "Colon",
+            "text": ":",
+            "start": 480,
+            "end": 481
+        },
+        {
+            "kind": "Hash",
+            "text": "#",
+            "start": 482,
+            "end": 483
+        },
+        {
+            "kind": "Identifier",
+            "text": "e74c3c",
+            "start": 483,
+            "end": 489
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 489,
+            "end": 490
+        },
+        {
+            "kind": "Identifier",
+            "text": "info",
+            "start": 494,
+            "end": 498
+        },
+        {
+            "kind": "Colon",
+            "text": ":",
+            "start": 498,
+            "end": 499
+        },
+        {
+            "kind": "Hash",
+            "text": "#",
+            "start": 500,
+            "end": 501
+        },
+        {
+            "kind": "IntegerLiteral",
+            "text": "3498",
+            "start": 501,
+            "end": 505
+        },
+        {
+            "kind": "Identifier",
+            "text": "db",
+            "start": 505,
+            "end": 507
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 507,
+            "end": 508
+        },
+        {
+            "kind": "Identifier",
+            "text": "light",
+            "start": 512,
+            "end": 517
+        },
+        {
+            "kind": "Colon",
+            "text": ":",
+            "start": 517,
+            "end": 518
+        },
+        {
+            "kind": "Hash",
+            "text": "#",
+            "start": 519,
+            "end": 520
+        },
+        {
+            "kind": "Identifier",
+            "text": "ecf0f1",
+            "start": 520,
+            "end": 526
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 526,
+            "end": 527
+        },
+        {
+            "kind": "Identifier",
+            "text": "dark",
+            "start": 531,
+            "end": 535
+        },
+        {
+            "kind": "Colon",
+            "text": ":",
+            "start": 535,
+            "end": 536
+        },
+        {
+            "kind": "Hash",
+            "text": "#",
+            "start": 537,
+            "end": 538
+        },
+        {
+            "kind": "IntegerLiteral",
+            "text": "2",
+            "start": 538,
+            "end": 539
+        },
+        {
+            "kind": "Identifier",
+            "text": "c3e50",
+            "start": 539,
+            "end": 544
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 546,
+            "end": 547
+        },
+        {
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 547,
+            "end": 548
+        },
+        {
+            "kind": "Identifier",
+            "text": "$font-family-sans",
+            "start": 568,
+            "end": 585
+        },
+        {
+            "kind": "Colon",
+            "text": ":",
+            "start": 585,
+            "end": 586
+        }
+    ],
+    "errors": []
+}

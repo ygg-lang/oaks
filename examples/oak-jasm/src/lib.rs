@@ -13,7 +13,6 @@ pub mod lsp;
 pub mod parser;
 pub mod syntax;
 
-#[cfg(feature = "mcp")]
 pub mod mcp;
 
 pub use crate::{ast::JasmRoot, builder::JasmBuilder, highlighter::JasmHighlighter, language::JasmLanguage, lexer::JasmLexer, lsp::JasmLanguageService, parser::JasmParser};

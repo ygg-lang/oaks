@@ -1,7 +1,8 @@
 // use crate::kind::WitSyntaxKind;
 use oak_core::{Language, LanguageCategory};
+use serde::{Deserialize, Serialize};
 
-#[derive(Default)]
+#[derive(Default, Debug, Clone, Copy, Serialize, Deserialize)]
 pub struct WitLanguage {}
 
 impl Language for WitLanguage {

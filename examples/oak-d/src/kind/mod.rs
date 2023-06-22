@@ -4,7 +4,7 @@ use oak_core::{ElementType, Token, TokenType, UniversalElementRole, UniversalTok
 pub type DToken = Token<DSyntaxKind>;
 
 /// D language syntax kinds
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, serde::Serialize)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, serde::Serialize, serde::Deserialize)]
 pub enum DSyntaxKind {
     /// Root node of the syntax tree
     Root,

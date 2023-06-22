@@ -1,0 +1,6 @@
+mod1 micro x1() { }
+mod1 mod2 micro x2() { }
+mod1 mod2 mod3 macro x3() { }
+
+↯attribute # modifier 必须在 attribute 后面
+mod1 micro x4()

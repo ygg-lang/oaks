@@ -39,6 +39,6 @@ impl<'config> Builder<LuaLanguage> for LuaBuilder<'config> {
 impl<'config> LuaBuilder<'config> {
     fn build_root<S: Source + ?Sized>(&self, _green_tree: oak_core::GreenNode<LuaLanguage>, _source: &S) -> Result<LuaRoot, oak_core::OakError> {
         // TODO: 从 GreenNode 构建 AST
-        Ok(LuaRoot { span: (0..0).into() })
+        Ok(LuaRoot { statements: vec![], span: (0..0).into() })
     }
 }

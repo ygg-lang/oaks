@@ -3,7 +3,7 @@ use oak_core::{ElementType, Token, TokenType, UniversalElementRole, UniversalTok
 pub type DotToken = Token<DotSyntaxKind>;
 
 /// DOT 语法种类（Graphviz
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, serde::Serialize)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, serde::Serialize, serde::Deserialize)]
 pub enum DotSyntaxKind {
     // 基本 kind
     Identifier,

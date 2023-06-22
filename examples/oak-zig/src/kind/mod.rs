@@ -1,6 +1,6 @@
 use oak_core::{ElementType, TokenType, UniversalElementRole, UniversalTokenRole};
 
-#[derive(Copy, Clone, Debug, PartialEq, Eq, Hash)]
+#[derive(Copy, Clone, Debug, PartialEq, Eq, Hash, serde::Serialize, serde::Deserialize)]
 pub enum ZigSyntaxKind {
     Root,
     // 基础 kind

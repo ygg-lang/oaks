@@ -442,8 +442,8 @@ impl<'config> NimLexer<'config> {
 }
 
 impl<'config> Lexer<NimLanguage> for NimLexer<'config> {
-    fn lex<'a, S: Source + ?Sized>(&self, source: &'a S, _edits: &[oak_core::source::TextEdit], cache: &'a mut impl LexerCache<NimLanguage>) -> LexOutput<NimLanguage> {
-        let mut state = State::new(source);
+    fn lex<'s, S: Source + ?Sized>(&self, source: &'s S, _edits: &[oak_core::source::TextEdit], cache: &'s mut impl LexerCache<NimLanguage>) -> LexOutput<NimLanguage> {
+        let mut state = LexerState::new(source);
         let result = self.run(&mut state);
         if result.is_ok() {
             state.add_eof();

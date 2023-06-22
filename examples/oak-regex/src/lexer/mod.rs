@@ -50,11 +50,13 @@ type State<'a, S> = LexerState<'a, S, RegexLanguage>;
 /// // Verify tokens were generated
 /// assert!(output.result.unwrap().len() > 5);
 /// ```
-#[derive(Clone)]
-pub struct RegexLexer;
+#[derive(Clone, Debug)]
+pub struct RegexLexer<'config> {
+    _config: &'config RegexLanguage,
+}
 
-impl Lexer<RegexLanguage> for RegexLexer {
-    fn lex<'a, S: Source + ?Sized>(&self, source: &'a S, _edits: &[oak_core::TextEdit], cache: &'a mut impl LexerCache<RegexLanguage>) -> LexOutput<RegexLanguage> {
+impl<'config> Lexer<RegexLanguage> for RegexLexer<'config> {
+    fn lex<'a, S: Source + ?Sized>(&self, source: &'a S, _edits: &[oak_core::source::TextEdit], cache: &'a mut impl LexerCache<RegexLanguage>) -> LexOutput<RegexLanguage> {
         let mut state = State::new(source);
         let result = self.run(&mut state);
         if result.is_ok() {
@@ -64,12 +66,12 @@ impl Lexer<RegexLanguage> for RegexLexer {
     }
 }
 
-impl RegexLexer {
+impl<'config> RegexLexer<'config> {
     /// Creates a new `RegexLexer` with the given language configuration.
     ///
     /// # Arguments
     ///
-    /// * `_config` - A reference to the `RegexLanguage` configuration that controls
+    /// * `config` - A `RegexLanguage` configuration that controls
     ///   language-specific parsing behavior.
     ///
     /// # Examples
@@ -80,8 +82,8 @@ impl RegexLexer {
     /// let language = RegexLanguage::default();
     /// let lexer = RegexLexer::new(&language);
     /// ```
-    pub fn new(_config: &RegexLanguage) -> Self {
-        Self
+    pub fn new(config: &'config RegexLanguage) -> Self {
+        Self { _config: config }
     }
 
     /// Returns the whitespace configuration for the lexer.

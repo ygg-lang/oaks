@@ -11,8 +11,9 @@ pub mod highlighter;
 pub mod kind;
 pub mod language;
 pub mod lexer;
+#[cfg(feature = "lsp")]
 pub mod lsp;
-#[cfg(feature = "mcp")]
+#[cfg(feature = "mcp-stdio")]
 pub mod mcp;
 pub mod parser;
 
@@ -24,9 +25,21 @@ pub use crate::{
     kind::{TomlSyntaxKind, TomlTokenKind},
     language::TomlLanguage,
     lexer::TomlLexer,
-    lsp::TomlLanguageService,
     parser::TomlParser,
 };
 
-#[cfg(feature = "mcp")]
+pub fn parse(toml: &str) -> Result<crate::ast::TomlRoot, String> {
+    use oak_core::{Builder, SourceText, parser::session::ParseSession};
+    let language = TomlLanguage::default();
+    let builder = TomlBuilder::new(&language);
+    let source = SourceText::new(toml.to_string());
+    let mut cache = ParseSession::default();
+    let result = builder.build(&source, &[], &mut cache);
+    result.result.map_err(|e| format!("{:?}", e))
+}
+
+#[cfg(feature = "lsp")]
+pub use crate::lsp::TomlLanguageService;
+
+#[cfg(feature = "mcp-stdio")]
 pub use crate::mcp::serve_toml_mcp;

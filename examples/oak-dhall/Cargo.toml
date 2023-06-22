@@ -19,7 +19,7 @@ oak-pretty-print = { workspace = true, optional = true }
 serde = { workspace = true }
 
 [dev-dependencies]
-oak-core = { workspace = true, features = ["testing"] }
+oak-testing = { workspace = true }
 
 
 [features]

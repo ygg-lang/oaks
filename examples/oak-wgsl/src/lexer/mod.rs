@@ -3,6 +3,7 @@ use oak_core::{Lexer, LexerCache, LexerState, OakError, TextEdit, lexer::LexOutp
 
 type State<'a, S> = LexerState<'a, S, WgslLanguage>;
 
+#[derive(Clone)]
 pub struct WgslLexer<'config> {
     #[allow(dead_code)]
     config: &'config WgslLanguage,

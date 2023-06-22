@@ -1,8 +1,8 @@
 use oak_core::{ElementType, TokenType, UniversalElementRole, UniversalTokenRole};
-use serde::Serialize;
+use serde::{Deserialize, Serialize};
 
 /// Python 语法节点类型
-#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Deserialize)]
 #[repr(u16)]
 pub enum PythonSyntaxKind {
     // 基础 kind
@@ -249,7 +249,6 @@ pub enum PythonSyntaxKind {
 
 impl From<u16> for PythonSyntaxKind {
     fn from(d: u16) -> PythonSyntaxKind {
-        assert!(d <= (PythonSyntaxKind::Del as u16));
         unsafe { core::mem::transmute::<u16, PythonSyntaxKind>(d) }
     }
 }
@@ -359,7 +358,11 @@ impl TokenType for PythonSyntaxKind {
     }
 
     fn is_whitespace(&self) -> bool {
-        matches!(self, Self::Whitespace | Self::Newline | Self::Indent | Self::Dedent)
+        matches!(self, Self::Whitespace)
+    }
+
+    fn is_ignored(&self) -> bool {
+        matches!(self, Self::Whitespace | Self::Comment)
     }
 }
 

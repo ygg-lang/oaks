@@ -28,13 +28,16 @@ impl<'config> ValkyrieParser<'config> {
 
 impl<'config> Pratt<ValkyrieLanguage> for ValkyrieParser<'config> {
     fn primary<'a, S: Source + ?Sized>(&self, state: &mut ParserState<'a, ValkyrieLanguage, S>) -> &'a GreenNode<'a, ValkyrieLanguage> {
+        let cp = state.checkpoint();
         self.parse_primary(state).unwrap_or_else(|_| {
-            state.bump(); // Consume the error token if possible
-            state.finish_at(state.checkpoint(), ValkyrieSyntaxKind::Error)
+            state.restore(cp);
+            state.bump();
+            state.finish_at(cp, ValkyrieSyntaxKind::Error)
         })
     }
 
     fn infix<'a, S: Source + ?Sized>(&self, state: &mut ParserState<'a, ValkyrieLanguage, S>, left: &'a GreenNode<'a, ValkyrieLanguage>, min_precedence: u8) -> Option<&'a GreenNode<'a, ValkyrieLanguage>> {
+        self.skip_trivia(state);
         let t = state.current()?;
         let kind = t.kind;
 
@@ -78,6 +81,7 @@ impl<'config> Pratt<ValkyrieLanguage> for ValkyrieParser<'config> {
             ValkyrieSyntaxKind::LeftParen => (70, Associativity::Left, ValkyrieSyntaxKind::CallExpression),
             ValkyrieSyntaxKind::Dot => (70, Associativity::Left, ValkyrieSyntaxKind::FieldExpression),
             ValkyrieSyntaxKind::LeftBracket => (70, Associativity::Left, ValkyrieSyntaxKind::IndexExpression),
+            ValkyrieSyntaxKind::LeftBrace => (70, Associativity::Left, ValkyrieSyntaxKind::ApplyBlock),
 
             _ => return None,
         };
@@ -86,13 +90,12 @@ impl<'config> Pratt<ValkyrieLanguage> for ValkyrieParser<'config> {
             return None;
         }
 
-        Some(match kind {
+        let cp = state.checkpoint();
+        let node = match kind {
             ValkyrieSyntaxKind::LeftParen => {
-                // Call expression
-                let cp = state.checkpoint();
+                let cp_inner = state.checkpoint();
                 state.push_child(left);
                 state.expect(ValkyrieSyntaxKind::LeftParen).ok();
-                // Parse args...
                 while let Some(t) = state.current() {
                     if t.kind == ValkyrieSyntaxKind::RightParen {
                         break;
@@ -104,23 +107,30 @@ impl<'config> Pratt<ValkyrieLanguage> for ValkyrieParser<'config> {
                     }
                 }
                 state.expect(ValkyrieSyntaxKind::RightParen).ok();
-                state.finish_at(cp, ValkyrieSyntaxKind::CallExpression)
+                state.finish_at(cp_inner, ValkyrieSyntaxKind::CallExpression)
             }
             ValkyrieSyntaxKind::LeftBracket => {
-                // Index expression
-                let cp = state.checkpoint();
+                let cp_inner = state.checkpoint();
                 state.push_child(left);
                 state.expect(ValkyrieSyntaxKind::LeftBracket).ok();
                 let index = self.parse_expression_internal(state, 0);
                 state.push_child(index);
                 state.expect(ValkyrieSyntaxKind::RightBracket).ok();
-                state.finish_at(cp, ValkyrieSyntaxKind::IndexExpression)
+                state.finish_at(cp_inner, ValkyrieSyntaxKind::IndexExpression)
+            }
+            ValkyrieSyntaxKind::LeftBrace => {
+                let cp_inner = state.checkpoint();
+                state.push_child(left);
+                self.parse_block_expr_node(state).ok();
+                state.finish_at(cp_inner, ValkyrieSyntaxKind::ApplyBlock)
             }
             _ => binary(state, left, kind, prec, assoc, result_kind, |s, p| self.parse_expression_internal(s, p)),
-        })
+        };
+        Some(node)
     }
 
     fn prefix<'a, S: Source + ?Sized>(&self, state: &mut ParserState<'a, ValkyrieLanguage, S>) -> &'a GreenNode<'a, ValkyrieLanguage> {
+        self.skip_trivia(state);
         let t = match state.current() {
             Some(t) => t,
             None => return self.primary(state),
@@ -132,6 +142,7 @@ impl<'config> Pratt<ValkyrieLanguage> for ValkyrieParser<'config> {
             _ => return self.primary(state),
         };
 
+        let cp = state.checkpoint();
         unary(state, kind, prec, result_kind, |s, p| self.parse_expression_internal(s, p))
     }
 }
@@ -139,6 +150,6 @@ impl<'config> Pratt<ValkyrieLanguage> for ValkyrieParser<'config> {
 impl<'config> oak_core::parser::Parser<ValkyrieLanguage> for ValkyrieParser<'config> {
     fn parse<'a, S: Source + ?Sized>(&self, source: &'a S, edits: &[oak_core::TextEdit], cache: &'a mut impl oak_core::parser::ParseCache<ValkyrieLanguage>) -> oak_core::ParseOutput<'a, ValkyrieLanguage> {
         let lexer = crate::lexer::ValkyrieLexer::new(self.config);
-        oak_core::parser::parse_with_lexer(&lexer, source, edits, cache, |state| self.parse_root_internal(state))
+        oak_core::parser::parse_with_lexer(&lexer, source, edits, cache, |state| Ok(self.parse_root_internal(state)))
     }
 }

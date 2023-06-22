@@ -1,53 +1,69 @@
-# WAT 词法分析器模块
+# Wolfram Lexer Module
 
-WebAssembly 文本格式 (WAT) 的词法分析器，将源代码转换为词法单元 (tokens)。
+The Wolfram Lexer module provides comprehensive lexical analysis for the Wolfram Language (Mathematica). It is responsible for converting complex Wolfram source code into a stream of tokens, handling its unique and extensive symbolic syntax.
 
-## 功能特性
+## Purpose
 
-- **关键字识别**: 识别 WAT 关键字 (`module`, `func`, `export` 等)
-- **标识符解析**: 处理标识符和名称
-- **数值字面量**: 解析各种数值类型
-- **字符串字面量**: 处理字符串常量
-- **注释处理**: 支持行注释和块注释
+The primary goal of this module is to accurately tokenize Wolfram Language expressions, which can range from simple arithmetic to highly complex symbolic representations. It handles specialized characters, long-name symbols, and various numeric forms unique to Wolfram.
 
-## 词法单元类型
+## Features
 
-### 关键字
-- 模块关键字: `module`, `func`, `export`, `import`
-- 类型关键字: `param`, `result`, `local`
-- 指令关键字: `i32.add`, `local.get`, `call`
+- **Extensive Symbol Support**: Correctly identifies Wolfram symbols, including those with special characters and long names (e.g., `\[Alpha]`).
+- **Complex Numeric Literals**: Parses standard integers, reals, and specialized forms like base-n numbers (e.g., `16^^FF`) and precision-specified numbers.
+- **String Handling**: Supports Wolfram-style strings with various escape sequences and special characters.
+- **Operator Recognition**: Tokenizes a vast array of Wolfram operators, including prefix, infix, and postfix forms.
+- **Comment Processing**: Handles Wolfram comments enclosed in `(* ... *)`, including nested comments.
+- **Whitespace Management**: Correctly handles whitespace, which can be significant in certain Wolfram constructs.
+- **Precise Span Tracking**: Each token is associated with its exact location in the source code for accurate error reporting and IDE integration.
 
-### 字面量
-- 数值: `123`, `0xFF`, `1.5`
-- 字符串: `"hello"`, `$name`
-- 标识符: `$func_name`
+## Token Types
 
-## 使用示例
+### Symbols & Identifiers
+- **System Symbols**: `Plot`, `List`, `Table`, `Integrate`.
+- **User Symbols**: `myVar`, `data123`.
+- **Special Characters**: `\[Infinity]`, `\[DifferentialD]`.
+
+### Literals
+- **Numeric**: `123`, `3.14`, `16^^ABCD`, `123.456``20` (precision).
+- **Strings**: `"Wolfram Language"`, `"String with \"escapes\""`.
+
+### Operators & Delimiters
+- **Arithmetic**: `+`, `-`, `*`, `/`, `^`.
+- **Structural**: `{`, `}`, `[`, `]`, `(`, `)`, `[[`, `]]`.
+- **Logical & Relational**: `&&`, `||`, `!`, `==`, `!=`, `<`, `>`, `<=`, `>=`.
+- **Wolfram Specific**: `:=`, `->`, `:>`, `/.`, `//`, `&`, `#`, `##`.
+
+## Usage Example
 
 ```rust
-use oak_wat::lexer::WatLexer;
+use oak_wolfram::lexer::WolframLexer;
 
-let wat_source = r#"
-    (module
-        (func $add (param $a i32) (param $b i32) (result i32)
-            local.get $a
-            local.get $b
-            i32.add)
-    )
-"#;
+fn main() {
+    let wolfram_source = r#"
+        Plot[Sin[x], {x, 0, 2 Pi}]
+        data = {1, 2, 3, 4, 5}
+        Total[data] (* Calculate sum *)
+    "#;
 
-let mut lexer = WatLexer::new();
-let tokens = lexer.tokenize(wat_source);
+    let mut lexer = WolframLexer::new();
+    let tokens = lexer.tokenize(wolfram_source);
 
-for token in tokens {
-    println!("{:?}: {:?}", token.token_type, token.lexeme);
+    for token in tokens {
+        println!("{:?}: '{}' at {:?}", token.token_type, token.lexeme, token.span);
+    }
 }
 ```
 
-## 错误处理
+## Error Handling
 
-词法分析器提供详细的错误信息：
-- 非法字符
-- 未结束的字符串
-- 无效的数值格式
-- 位置信息跟踪
+The lexer detects and reports:
+- **Invalid Characters**: Characters not recognized in the Wolfram Language.
+- **Unterminated Comments**: Comments that are not properly closed with `*)`.
+- **Unterminated Strings**: Strings missing their closing quote.
+- **Malformed Numbers**: Incorrectly formatted base-n or precision numbers.
+
+## Design Principles
+
+1. **Symbolic Accuracy**: Prioritizes correct identification of the vast symbolic set in Wolfram.
+2. **Performance**: Optimized to handle large and complex symbolic expressions efficiently.
+3. **Robustness**: Designed to be resilient to malformed input while providing clear diagnostics.

@@ -1,7 +1,8 @@
 use oak_core::language::{Language, LanguageCategory};
+use serde::{Deserialize, Serialize};
 
 /// Kotlin 语言实现
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 pub struct KotlinLanguage {
     /// 是否启用严格模式
     pub strict_mode: bool,
@@ -10,6 +11,11 @@ pub struct KotlinLanguage {
 }
 
 impl KotlinLanguage {
+    /// 创建新的 Kotlin 语言实例
+    pub fn new() -> Self {
+        Self::default()
+    }
+
     /// 创建标准 Kotlin 语言实例
     pub fn standard() -> Self {
         Self::default()

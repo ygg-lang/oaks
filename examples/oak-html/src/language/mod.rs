@@ -1,17 +1,12 @@
 use crate::kind::HtmlSyntaxKind;
 use oak_core::{Language, LanguageCategory};
+use serde::{Deserialize, Serialize};
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Default, Serialize, Deserialize)]
 pub struct HtmlLanguage {}
 
 impl HtmlLanguage {
     pub fn new() -> Self {
-        Self::default()
-    }
-}
-
-impl Default for HtmlLanguage {
-    fn default() -> Self {
         Self {}
     }
 }

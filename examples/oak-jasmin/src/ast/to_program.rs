@@ -1,7 +1,8 @@
 //! JASM AST JVM 程序的转换器
 
 use crate::{formats::jasm::ast::*, program::*};
-use gaia_types::{GaiaDiagnostics, GaiaError, Result};
+use oak_core::{OakDiagnostics, OakError};
+type Result<T> = std::result::Result<T, OakError>;
 
 /// JASM JVM 转换
 pub struct JasmToJvmConverter {
@@ -16,10 +17,10 @@ impl JasmToJvmConverter {
     }
 
     /// 转换 JASM AST JVM 程序
-    pub fn convert(&mut self, ast: JasmRoot) -> GaiaDiagnostics<JvmProgram> {
+    pub fn convert(&mut self, ast: JasmRoot) -> OakDiagnostics<JvmProgram> {
         match self.convert_class(ast.class) {
-            Ok(program) => GaiaDiagnostics::success(program),
-            Err(error) => GaiaDiagnostics::failure(error),
+            Ok(program) => OakDiagnostics::success(program),
+            Err(error) => OakDiagnostics::failure(error),
         }
     }
 
@@ -156,7 +157,7 @@ impl JasmToJvmConverter {
                     "athrow" => Ok(JvmInstruction::Athrow),
                     "monitorenter" => Ok(JvmInstruction::Monitorenter),
                     "monitorexit" => Ok(JvmInstruction::Monitorexit),
-                    _ => Err(GaiaError::custom_error(format!("Unknown simple instruction: {}", name))),
+                    _ => Err(OakError::custom_error(format!("Unknown simple instruction: {}", name))),
                 }
             }
             JasmInstruction::WithArgument { instruction, argument } => {
@@ -165,37 +166,37 @@ impl JasmToJvmConverter {
                     "bipush" => {
                         let value = argument
                             .parse::<i8>()
-                            .map_err(|_| GaiaError::custom_error(format!("Invalid bipush value: {}", argument)))?;
+                            .map_err(|_| OakError::custom_error(format!("Invalid bipush value: {}", argument)))?;
                         Ok(JvmInstruction::Bipush { value })
                     }
                     "sipush" => {
                         let value = argument
                             .parse::<i16>()
-                            .map_err(|_| GaiaError::custom_error(format!("Invalid sipush value: {}", argument)))?;
+                            .map_err(|_| OakError::custom_error(format!("Invalid sipush value: {}", argument)))?;
                         Ok(JvmInstruction::Sipush { value })
                     }
                     "iload" => {
                         let index = argument
                             .parse::<u16>()
-                            .map_err(|_| GaiaError::custom_error(format!("Invalid iload index: {}", argument)))?;
+                            .map_err(|_| OakError::custom_error(format!("Invalid iload index: {}", argument)))?;
                         Ok(JvmInstruction::Iload { index })
                     }
                     "aload" => {
                         let index = argument
                             .parse::<u16>()
-                            .map_err(|_| GaiaError::custom_error(format!("Invalid aload index: {}", argument)))?;
+                            .map_err(|_| OakError::custom_error(format!("Invalid aload index: {}", argument)))?;
                         Ok(JvmInstruction::Aload { index })
                     }
                     "istore" => {
                         let index = argument
                             .parse::<u16>()
-                            .map_err(|_| GaiaError::custom_error(format!("Invalid istore index: {}", argument)))?;
+                            .map_err(|_| OakError::custom_error(format!("Invalid istore index: {}", argument)))?;
                         Ok(JvmInstruction::Istore { index })
                     }
                     "astore" => {
                         let index = argument
                             .parse::<u16>()
-                            .map_err(|_| GaiaError::custom_error(format!("Invalid astore index: {}", argument)))?;
+                            .map_err(|_| OakError::custom_error(format!("Invalid astore index: {}", argument)))?;
                         Ok(JvmInstruction::Astore { index })
                     }
                     "ldc" => {
@@ -219,10 +220,10 @@ impl JasmToJvmConverter {
                     "newarray" => {
                         let atype = argument
                             .parse::<u8>()
-                            .map_err(|_| GaiaError::custom_error(format!("Invalid newarray type: {}", argument)))?;
+                            .map_err(|_| OakError::custom_error(format!("Invalid newarray type: {}", argument)))?;
                         Ok(JvmInstruction::Newarray { atype })
                     }
-                    _ => Err(GaiaError::custom_error(format!("Unknown instruction with argument: {}", instruction))),
+                    _ => Err(OakError::custom_error(format!("Unknown instruction with argument: {}", instruction))),
                 }
             }
             JasmInstruction::MethodCall { instruction, method_ref } => {
@@ -237,7 +238,7 @@ impl JasmToJvmConverter {
                     "invokestatic" => Ok(JvmInstruction::Invokestatic { class_name, method_name, descriptor }),
                     "invokeinterface" => Ok(JvmInstruction::Invokeinterface { class_name, method_name, descriptor }),
                     "invokedynamic" => Ok(JvmInstruction::Invokedynamic { class_name, method_name, descriptor }),
-                    _ => Err(GaiaError::custom_error(format!("Unknown method call instruction: {}", instruction))),
+                    _ => Err(OakError::custom_error(format!("Unknown method call instruction: {}", instruction))),
                 }
             }
             JasmInstruction::FieldAccess { instruction, field_ref } => {
@@ -251,7 +252,7 @@ impl JasmToJvmConverter {
                     "putstatic" => Ok(JvmInstruction::Putstatic { class_name, field_name, descriptor }),
                     "getfield" => Ok(JvmInstruction::Getfield { class_name, field_name, descriptor }),
                     "putfield" => Ok(JvmInstruction::Putfield { class_name, field_name, descriptor }),
-                    _ => Err(GaiaError::custom_error(format!("Unknown field access instruction: {}", instruction))),
+                    _ => Err(OakError::custom_error(format!("Unknown field access instruction: {}", instruction))),
                 }
             }
         }
@@ -265,7 +266,7 @@ impl JasmToJvmConverter {
             Ok((name, descriptor))
         }
         else {
-            Err(GaiaError::custom_error(format!("Invalid method signature: {}", signature)))
+            Err(OakError::custom_error(format!("Invalid method signature: {}", signature)))
         }
     }
 
@@ -277,7 +278,7 @@ impl JasmToJvmConverter {
             Ok((name, descriptor))
         }
         else {
-            Err(GaiaError::custom_error(format!("Invalid field signature: {}", signature)))
+            Err(OakError::custom_error(format!("Invalid field signature: {}", signature)))
         }
     }
 
@@ -294,11 +295,11 @@ impl JasmToJvmConverter {
                 Ok((class_name, method_name, descriptor))
             }
             else {
-                Err(GaiaError::custom_error(format!("Invalid method reference: {}", method_ref)))
+                Err(OakError::custom_error(format!("Invalid method reference: {}", method_ref)))
             }
         }
         else {
-            Err(GaiaError::custom_error(format!("Invalid method reference: {}", method_ref)))
+            Err(OakError::custom_error(format!("Invalid method reference: {}", method_ref)))
         }
     }
 
@@ -315,11 +316,11 @@ impl JasmToJvmConverter {
                 Ok((class_name, field_name, descriptor))
             }
             else {
-                Err(GaiaError::custom_error(format!("Invalid field reference: {}", field_ref)))
+                Err(OakError::custom_error(format!("Invalid field reference: {}", field_ref)))
             }
         }
         else {
-            Err(GaiaError::custom_error(format!("Invalid field reference: {}", field_ref)))
+            Err(OakError::custom_error(format!("Invalid field reference: {}", field_ref)))
         }
     }
 
@@ -386,7 +387,7 @@ impl Default for JasmToJvmConverter {
 }
 
 /// 便利函数：直接转JASM AST JVM 程序
-pub fn convert_jasm_to_jvm(ast: JasmRoot) -> GaiaDiagnostics<JvmProgram> {
+pub fn convert_jasm_to_jvm(ast: JasmRoot) -> OakDiagnostics<JvmProgram> {
     let mut converter = JasmToJvmConverter::new();
     converter.convert(ast)
 }

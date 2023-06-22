@@ -5,6 +5,7 @@
 
 use core::range::Range;
 use std::borrow::Cow;
+mod buffer;
 mod cursor;
 mod rope;
 mod simd;
@@ -12,6 +13,7 @@ mod streaming;
 mod text;
 
 pub use self::{
+    buffer::{SourceBuffer, ToSource},
     cursor::SourceCursor,
     rope::{RopeBuffer, RopeSource},
     simd::SimdScanner,
@@ -19,7 +21,9 @@ pub use self::{
     text::SourceText,
 };
 use crate::OakError;
-pub use url::Url;
+
+/// A unique identifier for a source file.
+pub type SourceId = u32;
 
 /// A chunk of text from a source, including its start offset.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
@@ -70,7 +74,7 @@ pub struct TextEdit {
     /// The byte range in the original text to be replaced (start..end)
     pub span: Range<usize>,
     /// The new text to insert in place of the specified range
-    pub text: String,
+    pub text: Cow<'static, str>,
 }
 
 /// Trait for abstract text sources.
@@ -87,8 +91,8 @@ pub trait Source: Send + Sync {
     /// This represents the total size of this source in bytes.
     fn length(&self) -> usize;
 
-    /// Returns the URL of this source, if available.
-    fn url(&self) -> Option<Url> {
+    /// Returns the ID of this source, if available.
+    fn source_id(&self) -> Option<SourceId> {
         None
     }
 
@@ -147,18 +151,6 @@ pub trait Source: Send + Sync {
         self.get_text_in(core::range::Range { start: offset, end: self.length() })
     }
 
-    /// Get the URL of this source, if available.
-    ///
-    /// This method returns a reference to the URL associated with this source,
-    /// typically used for file-based sources or remote resources.
-    ///
-    /// # Returns
-    ///
-    /// An optional reference to the source URL, or `None` if no URL is available
-    fn get_url(&self) -> Option<&Url> {
-        None
-    }
-
     /// Find the next occurrence of a character starting from an offset.
     ///
     /// # Arguments
@@ -212,7 +204,25 @@ pub trait Source: Send + Sync {
     ///
     /// An [`OakError`] with precise location information.
     fn syntax_error(&self, message: String, offset: usize) -> OakError {
-        OakError::syntax_error(message, offset, self.get_url().cloned())
+        OakError::syntax_error(message, offset, self.source_id())
+    }
+}
+
+impl Source for str {
+    fn length(&self) -> usize {
+        self.len()
+    }
+
+    fn chunk_at(&self, offset: usize) -> TextChunk<'_> {
+        let len = self.len();
+        if offset >= len {
+            return TextChunk { start: len, text: "" };
+        }
+        TextChunk { start: offset, text: &self[offset..] }
+    }
+
+    fn get_text_in(&self, range: Range<usize>) -> Cow<'_, str> {
+        self.get(range.start..range.end).map(Cow::Borrowed).unwrap_or(Cow::Borrowed(""))
     }
 }
 
@@ -229,25 +239,27 @@ impl<S: Source + ?Sized> Source for &S {
         (**self).get_text_in(range)
     }
 
-    fn get_url(&self) -> Option<&Url> {
-        (**self).get_url()
-    }
-}
-
-impl Source for Box<dyn Source + Send + Sync> {
-    fn length(&self) -> usize {
-        (**self).length()
+    fn source_id(&self) -> Option<SourceId> {
+        (**self).source_id()
     }
 
-    fn chunk_at(&self, offset: usize) -> TextChunk<'_> {
-        (**self).chunk_at(offset)
+    fn get_char_at(&self, offset: usize) -> Option<char> {
+        (**self).get_char_at(offset)
     }
 
-    fn get_text_in(&self, range: Range<usize>) -> Cow<'_, str> {
-        (**self).get_text_in(range)
+    fn get_text_from(&self, offset: usize) -> Cow<'_, str> {
+        (**self).get_text_from(offset)
     }
 
-    fn get_url(&self) -> Option<&Url> {
-        (**self).get_url()
+    fn find_char_from(&self, offset: usize, ch: char) -> Option<usize> {
+        (**self).find_char_from(offset, ch)
+    }
+
+    fn find_str_from(&self, offset: usize, pattern: &str) -> Option<usize> {
+        (**self).find_str_from(offset, pattern)
+    }
+
+    fn syntax_error(&self, message: String, offset: usize) -> OakError {
+        (**self).syntax_error(message, offset)
     }
 }

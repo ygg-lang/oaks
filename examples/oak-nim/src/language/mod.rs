@@ -1,6 +1,8 @@
 use oak_core::{Language, LanguageCategory};
 
-#[derive(Debug)]
+use serde::{Deserialize, Serialize};
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub struct NimLanguage {
     pub allow_comment: bool,
 }

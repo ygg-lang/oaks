@@ -3,7 +3,13 @@ use oak_core::{Language, LanguageCategory};
 
 /// Crystal 语言实现
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Default)]
-pub struct CrystalLanguage;
+pub struct CrystalLanguage {}
+
+impl CrystalLanguage {
+    pub fn new() -> Self {
+        Self {}
+    }
+}
 
 impl Language for CrystalLanguage {
     const NAME: &'static str = "Crystal";

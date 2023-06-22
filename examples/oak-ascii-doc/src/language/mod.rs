@@ -2,8 +2,14 @@ use crate::{lexer::AsciiDocTokenType, parser::AsciiDocElementType};
 use oak_core::{Language, LanguageCategory};
 use serde::{Deserialize, Serialize};
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Deserialize)]
-pub struct AsciiDocLanguage;
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Deserialize, Default)]
+pub struct AsciiDocLanguage {}
+
+impl AsciiDocLanguage {
+    pub fn new() -> Self {
+        Self {}
+    }
+}
 
 impl Language for AsciiDocLanguage {
     const NAME: &'static str = "ascii-doc";
@@ -12,10 +18,4 @@ impl Language for AsciiDocLanguage {
     type TokenType = AsciiDocTokenType;
     type ElementType = AsciiDocElementType;
     type TypedRoot = ();
-}
-
-impl Default for AsciiDocLanguage {
-    fn default() -> Self {
-        Self {}
-    }
 }

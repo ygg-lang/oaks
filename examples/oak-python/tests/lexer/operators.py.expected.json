@@ -1,6 +1,6 @@
 {
     "success": true,
-    "count": 96,
+    "count": 87,
     "tokens": [
         {
             "kind": "Identifier",
@@ -87,15 +87,9 @@
             "end": 53
         },
         {
-            "kind": "Slash",
-            "text": "/",
+            "kind": "DoubleSlash",
+            "text": "//",
             "start": 54,
-            "end": 55
-        },
-        {
-            "kind": "Slash",
-            "text": "/",
-            "start": 55,
             "end": 56
         },
         {
@@ -123,15 +117,9 @@
             "end": 65
         },
         {
-            "kind": "Star",
-            "text": "*",
+            "kind": "DoubleStar",
+            "text": "**",
             "start": 66,
-            "end": 67
-        },
-        {
-            "kind": "Star",
-            "text": "*",
-            "start": 67,
             "end": 68
         },
         {
@@ -189,15 +177,9 @@
             "end": 121
         },
         {
-            "kind": "Assign",
-            "text": "=",
+            "kind": "Eq",
+            "text": "==",
             "start": 122,
-            "end": 123
-        },
-        {
-            "kind": "Assign",
-            "text": "=",
-            "start": 123,
             "end": 124
         },
         {
@@ -321,15 +303,9 @@
             "end": 191
         },
         {
-            "kind": "Less",
-            "text": "<",
+            "kind": "LessEqual",
+            "text": "<=",
             "start": 192,
-            "end": 193
-        },
-        {
-            "kind": "Assign",
-            "text": "=",
-            "start": 193,
             "end": 194
         },
         {
@@ -357,15 +333,9 @@
             "end": 209
         },
         {
-            "kind": "Greater",
-            "text": ">",
+            "kind": "GreaterEqual",
+            "text": ">=",
             "start": 210,
-            "end": 211
-        },
-        {
-            "kind": "Assign",
-            "text": "=",
-            "start": 211,
             "end": 212
         },
         {
@@ -387,19 +357,19 @@
             "end": 246
         },
         {
-            "kind": "Identifier",
+            "kind": "TrueKeyword",
             "text": "True",
             "start": 247,
             "end": 251
         },
         {
-            "kind": "Identifier",
+            "kind": "AndKeyword",
             "text": "and",
             "start": 252,
             "end": 255
         },
         {
-            "kind": "Identifier",
+            "kind": "FalseKeyword",
             "text": "False",
             "start": 256,
             "end": 261
@@ -417,19 +387,19 @@
             "end": 270
         },
         {
-            "kind": "Identifier",
+            "kind": "TrueKeyword",
             "text": "True",
             "start": 271,
             "end": 275
         },
         {
-            "kind": "Identifier",
+            "kind": "OrKeyword",
             "text": "or",
             "start": 276,
             "end": 278
         },
         {
-            "kind": "Identifier",
+            "kind": "FalseKeyword",
             "text": "False",
             "start": 279,
             "end": 284
@@ -447,13 +417,13 @@
             "end": 293
         },
         {
-            "kind": "Identifier",
+            "kind": "NotKeyword",
             "text": "not",
             "start": 294,
             "end": 297
         },
         {
-            "kind": "Identifier",
+            "kind": "TrueKeyword",
             "text": "True",
             "start": 298,
             "end": 302
@@ -483,15 +453,9 @@
             "end": 339
         },
         {
-            "kind": "Plus",
-            "text": "+",
+            "kind": "PlusAssign",
+            "text": "+=",
             "start": 340,
-            "end": 341
-        },
-        {
-            "kind": "Assign",
-            "text": "=",
-            "start": 341,
             "end": 342
         },
         {
@@ -507,15 +471,9 @@
             "end": 347
         },
         {
-            "kind": "Minus",
-            "text": "-",
+            "kind": "MinusAssign",
+            "text": "-=",
             "start": 348,
-            "end": 349
-        },
-        {
-            "kind": "Assign",
-            "text": "=",
-            "start": 349,
             "end": 350
         },
         {
@@ -531,15 +489,9 @@
             "end": 355
         },
         {
-            "kind": "Star",
-            "text": "*",
+            "kind": "StarAssign",
+            "text": "*=",
             "start": 356,
-            "end": 357
-        },
-        {
-            "kind": "Assign",
-            "text": "=",
-            "start": 357,
             "end": 358
         },
         {
@@ -555,15 +507,9 @@
             "end": 363
         },
         {
-            "kind": "Slash",
-            "text": "/",
+            "kind": "SlashAssign",
+            "text": "/=",
             "start": 364,
-            "end": 365
-        },
-        {
-            "kind": "Assign",
-            "text": "=",
-            "start": 365,
             "end": 366
         },
         {

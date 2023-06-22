@@ -1,13 +1,12 @@
-#[cfg(test)]
-mod tests {
-    use std::fs;
+use oak_smalltalk::{SmalltalkLanguage, SmalltalkLexer};
+use oak_testing::lexing::LexerTester;
+use std::{path::Path, time::Duration};
 
-    #[test]
-    fn test_basic_smalltalk() {
-        let content = fs::read_to_string("tests/lexer/basic.st").expect("Failed to read basic.st");
-
-        // Basic test to ensure file can be read
-        assert!(!content.is_empty());
-        assert!(content.contains("Smalltalk"));
-    }
+#[test]
+fn test_smalltalk_lexer() -> Result<(), oak_core::OakError> {
+    let here = Path::new(env!("CARGO_MANIFEST_DIR"));
+    let language = SmalltalkLanguage::default();
+    let lexer = SmalltalkLexer::new(&language);
+    let test_runner = LexerTester::new(here.join("tests/lexer")).with_extension("st").with_timeout(Duration::from_secs(5));
+    test_runner.run_tests(&lexer)
 }

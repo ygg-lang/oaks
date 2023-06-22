@@ -17,7 +17,6 @@ mod formatter;
 mod highlighter;
 
 pub mod lsp;
-#[cfg(feature = "mcp")]
 pub mod mcp;
 
 #[cfg(feature = "oak-pretty-print")]
@@ -33,8 +32,4 @@ pub use crate::{
     parser::RegexParser,
 };
 
-#[cfg(feature = "mcp")]
 pub use crate::mcp::serve_regex_mcp;
-
-#[cfg(all(feature = "mcp", feature = "axum"))]
-pub use crate::mcp::serve_regex_mcp_axum;

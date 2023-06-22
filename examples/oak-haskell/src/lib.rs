@@ -12,7 +12,6 @@ mod lexer;
 pub mod lsp;
 mod parser;
 
-#[cfg(feature = "mcp")]
 pub mod mcp;
 
 pub use crate::{ast::HaskellRoot, builder::HaskellBuilder, highlighter::HaskellHighlighter, language::HaskellLanguage, lexer::HaskellLexer, lsp::HaskellLanguageService, parser::HaskellParser};

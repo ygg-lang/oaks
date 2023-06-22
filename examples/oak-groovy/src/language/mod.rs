@@ -1,12 +1,13 @@
 use oak_core::{Language, LanguageCategory};
+use serde::{Deserialize, Serialize};
 
 /// Groovy 语言配置
-#[derive(Debug, Clone)]
-pub struct GroovyLanguage;
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
+pub struct GroovyLanguage {}
 
 impl Default for GroovyLanguage {
     fn default() -> Self {
-        Self
+        Self {}
     }
 }
 

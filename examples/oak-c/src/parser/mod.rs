@@ -21,6 +21,7 @@ impl<'config> CParser<'config> {
 
     pub(crate) fn parse_statement<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> Result<(), OakError> {
         use crate::lexer::CTokenType::*;
+        self.skip_trivia(state);
         match state.peek_kind() {
             Some(If) => self.parse_if_statement(state)?,
             Some(While) => self.parse_while_statement(state)?,
@@ -29,22 +30,73 @@ impl<'config> CParser<'config> {
             Some(LeftBrace) => self.parse_compound_statement(state)?,
             Some(Struct) | Some(Union) | Some(Enum) | Some(Typedef) | Some(Extern) | Some(Static) | Some(Int) | Some(Char) | Some(Void) | Some(Float) | Some(Double) => self.parse_declaration(state)?,
             _ => {
-                PrattParser::parse(state, 0, self);
+                let expr = PrattParser::parse(state, 0, self);
+                state.push_child(expr);
+                self.skip_trivia(state);
                 state.eat(Semicolon);
             }
         }
         Ok(())
     }
 
+    fn skip_trivia<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) {
+        while let Some(kind) = state.peek_kind() {
+            if matches!(kind, CTokenType::Whitespace | CTokenType::Comment) {
+                state.bump();
+            }
+            else {
+                break;
+            }
+        }
+    }
+
     fn parse_declaration<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> Result<(), OakError> {
         use crate::lexer::CTokenType::*;
         let cp = state.checkpoint();
-        while state.not_at_end() && !state.at(CTokenType::Semicolon) && !state.at(CTokenType::LeftBrace) {
-            state.advance();
+
+        self.skip_trivia(state);
+        while state.not_at_end() && !state.at(Semicolon) && !state.at(LeftBrace) && !state.at(Assign) && !state.at(LeftParen) {
+            state.bump();
+            self.skip_trivia(state);
         }
-        if state.eat(LeftBrace) {
+
+        if state.at(LeftParen) {
+            let pcp = state.checkpoint();
+            state.bump(); // (
+            self.skip_trivia(state);
+            while state.not_at_end() && !state.at(RightParen) {
+                if state.at(Identifier) || state.at(Int) || state.at(Char) || state.at(Float) || state.at(Double) || state.at(Void) {
+                    state.bump();
+                }
+                else if state.at(Comma) {
+                    state.bump();
+                }
+                else {
+                    state.bump();
+                }
+                self.skip_trivia(state);
+            }
+            state.expect(RightParen).ok();
+            state.finish_at(pcp, CElementType::ParameterList);
+        }
+
+        self.skip_trivia(state);
+
+        if state.at(Assign) {
+            state.bump(); // =
+            self.skip_trivia(state);
+            let expr = PrattParser::parse(state, 0, self);
+            state.push_child(expr);
+        }
+
+        self.skip_trivia(state);
+
+        if state.at(LeftBrace) {
+            state.bump(); // {
+            self.skip_trivia(state);
             while state.not_at_end() && !state.at(RightBrace) {
                 self.parse_statement(state)?;
+                self.skip_trivia(state);
             }
             state.expect(RightBrace).ok();
             state.finish_at(cp, CElementType::FunctionDefinition);
@@ -60,7 +112,8 @@ impl<'config> CParser<'config> {
         let cp = state.checkpoint();
         state.bump(); // if
         state.expect(CTokenType::LeftParen).ok();
-        PrattParser::parse(state, 0, self);
+        let expr = PrattParser::parse(state, 0, self);
+        state.push_child(expr);
         state.expect(CTokenType::RightParen).ok();
         self.parse_statement(state)?;
         if state.eat(CTokenType::Else) {
@@ -74,7 +127,8 @@ impl<'config> CParser<'config> {
         let cp = state.checkpoint();
         state.bump(); // while
         state.expect(CTokenType::LeftParen).ok();
-        PrattParser::parse(state, 0, self);
+        let expr = PrattParser::parse(state, 0, self);
+        state.push_child(expr);
         state.expect(CTokenType::RightParen).ok();
         self.parse_statement(state)?;
         state.finish_at(cp, CElementType::WhileStatement);
@@ -85,10 +139,28 @@ impl<'config> CParser<'config> {
         let cp = state.checkpoint();
         state.bump(); // for
         state.expect(CTokenType::LeftParen).ok();
-        while state.not_at_end() && !state.at(CTokenType::RightParen) {
-            state.advance();
+
+        // Init
+        if !state.at(CTokenType::Semicolon) {
+            let expr = PrattParser::parse(state, 0, self);
+            state.push_child(expr);
         }
-        state.eat(CTokenType::RightParen);
+        state.expect(CTokenType::Semicolon).ok();
+
+        // Condition
+        if !state.at(CTokenType::Semicolon) {
+            let expr = PrattParser::parse(state, 0, self);
+            state.push_child(expr);
+        }
+        state.expect(CTokenType::Semicolon).ok();
+
+        // Increment
+        if !state.at(CTokenType::RightParen) {
+            let expr = PrattParser::parse(state, 0, self);
+            state.push_child(expr);
+        }
+        state.expect(CTokenType::RightParen).ok();
+
         self.parse_statement(state)?;
         state.finish_at(cp, CElementType::ForStatement);
         Ok(())
@@ -98,7 +170,8 @@ impl<'config> CParser<'config> {
         let cp = state.checkpoint();
         state.bump(); // return
         if !state.at(CTokenType::Semicolon) {
-            PrattParser::parse(state, 0, self);
+            let expr = PrattParser::parse(state, 0, self);
+            state.push_child(expr);
         }
         state.eat(CTokenType::Semicolon);
         state.finish_at(cp, CElementType::ReturnStatement);
@@ -120,6 +193,7 @@ impl<'config> CParser<'config> {
 impl<'config> Pratt<CLanguage> for CParser<'config> {
     fn primary<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> &'a GreenNode<'a, CLanguage> {
         use crate::lexer::CTokenType::*;
+        self.skip_trivia(state);
         let cp = state.checkpoint();
         match state.peek_kind() {
             Some(Identifier) => {
@@ -133,7 +207,9 @@ impl<'config> Pratt<CLanguage> for CParser<'config> {
             }
             Some(LeftParen) => {
                 state.bump();
-                PrattParser::parse(state, 0, self);
+                let expr = PrattParser::parse(state, 0, self);
+                state.push_child(expr);
+                self.skip_trivia(state);
                 state.expect(RightParen).ok();
                 state.finish_at(cp, CElementType::ExpressionStatement)
             }
@@ -146,6 +222,7 @@ impl<'config> Pratt<CLanguage> for CParser<'config> {
 
     fn infix<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>, left: &'a GreenNode<'a, CLanguage>, min_precedence: u8) -> Option<&'a GreenNode<'a, CLanguage>> {
         use crate::lexer::CTokenType::*;
+        self.skip_trivia(state);
         let kind = state.peek_kind()?;
 
         let (prec, assoc) = match kind {
@@ -169,7 +246,12 @@ impl<'config> Pratt<CLanguage> for CParser<'config> {
                 state.push_child(left);
                 state.expect(LeftParen).ok();
                 while state.not_at_end() && !state.at(RightParen) {
-                    state.advance();
+                    let expr = PrattParser::parse(state, 0, self);
+                    state.push_child(expr);
+                    self.skip_trivia(state);
+                    if !state.eat(Comma) {
+                        break;
+                    }
                 }
                 state.expect(RightParen).ok();
                 Some(state.finish_at(cp, CElementType::ExpressionStatement))
@@ -178,9 +260,8 @@ impl<'config> Pratt<CLanguage> for CParser<'config> {
                 let cp = state.checkpoint();
                 state.push_child(left);
                 state.expect(LeftBracket).ok();
-                while state.not_at_end() && !state.at(RightBracket) {
-                    state.advance();
-                }
+                let expr = PrattParser::parse(state, 0, self);
+                state.push_child(expr);
                 state.expect(RightBracket).ok();
                 Some(state.finish_at(cp, CElementType::ExpressionStatement))
             }

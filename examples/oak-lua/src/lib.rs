@@ -12,7 +12,6 @@ pub mod lexer;
 pub mod lsp;
 pub mod parser;
 
-#[cfg(feature = "mcp")]
-pub mod mcp;
+// pub mod mcp;
 
 pub use crate::{ast::LuaRoot, builder::LuaBuilder, highlighter::LuaHighlighter, kind::LuaSyntaxKind, language::LuaLanguage, lexer::LuaLexer, lsp::LuaLanguageService, parser::LuaParser};

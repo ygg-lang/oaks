@@ -12,10 +12,12 @@ static GRAPHQL_WHITESPACE: LazyLock<WhitespaceConfig> = LazyLock::new(|| Whitesp
 static GRAPHQL_COMMENT: LazyLock<CommentConfig> = LazyLock::new(|| CommentConfig { line_marker: "#", block_start: "", block_end: "", nested_blocks: false });
 static GRAPHQL_STRING: LazyLock<StringConfig> = LazyLock::new(|| StringConfig { quotes: &['"'], escape: Some('\\') });
 
-#[derive(Clone)]
-pub struct GraphQLLexer;
+#[derive(Clone, Debug)]
+pub struct GraphQLLexer<'config> {
+    _config: &'config GraphQLLanguage,
+}
 
-impl Lexer<GraphQLLanguage> for GraphQLLexer {
+impl<'config> Lexer<GraphQLLanguage> for GraphQLLexer<'config> {
     fn lex<'a, S: Source + ?Sized>(&self, text: &S, _edits: &[TextEdit], cache: &'a mut impl LexerCache<GraphQLLanguage>) -> LexOutput<GraphQLLanguage> {
         let mut state = LexerState::new(text);
         let result = self.run(&mut state);
@@ -26,9 +28,9 @@ impl Lexer<GraphQLLanguage> for GraphQLLexer {
     }
 }
 
-impl GraphQLLexer {
-    pub fn new(_config: &GraphQLLanguage) -> Self {
-        Self
+impl<'config> GraphQLLexer<'config> {
+    pub fn new(config: &'config GraphQLLanguage) -> Self {
+        Self { _config: config }
     }
 
     fn run<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> Result<(), OakError> {

@@ -3,7 +3,7 @@
     "count": 30,
     "tokens": [
         {
-            "kind": "Identifier",
+            "kind": "DefKeyword",
             "text": "def",
             "start": 0,
             "end": 3
@@ -75,13 +75,13 @@
             "end": 100
         },
         {
-            "kind": "Identifier",
+            "kind": "ReturnKeyword",
             "text": "return",
             "start": 106,
             "end": 112
         },
         {
-            "kind": "Identifier",
+            "kind": "TrueKeyword",
             "text": "True",
             "start": 113,
             "end": 117

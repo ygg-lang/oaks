@@ -6,6 +6,8 @@ use crate::{
     source::{Source, SourceCursor},
 };
 pub use core::range::Range;
+#[cfg(feature = "serde")]
+use serde::{Deserialize, Serialize};
 use std::borrow::Cow;
 use triomphe::Arc;
 
@@ -176,10 +178,12 @@ impl<'a, L: Language, C: LexerCache<L> + ?Sized> LexerCache<L> for &'a mut C {
 /// Tokens are the fundamental units of lexical analysis, representing
 /// categorized pieces of source text with their position information.
 #[derive(Debug, Clone, PartialEq, Eq, Copy)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct Token<K> {
     /// The kind/category of this kind (e.g., keyword, identifier, number)
     pub kind: K,
     /// The byte range in the source text that this kind occupies
+    #[cfg_attr(feature = "serde", serde(with = "crate::serde_range"))]
     pub span: Range<usize>,
 }
 
@@ -202,6 +206,41 @@ impl<K> Token<K> {
     #[inline]
     pub fn length(&self) -> usize {
         self.span.end - self.span.start
+    }
+}
+
+/// A stream of tokens with associated source text.
+#[derive(Debug, Clone)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", serde(bound(serialize = "K: Serialize", deserialize = "K: Deserialize<'de>")))]
+pub struct TokenStream<K: Copy> {
+    /// The raw source text.
+    pub raw: String,
+    /// The tokens extracted from the source text.
+    #[cfg_attr(feature = "serde", serde(with = "arc_slice_serde"))]
+    pub tokens: Arc<[Token<K>]>,
+}
+
+#[cfg(feature = "serde")]
+mod arc_slice_serde {
+    use super::*;
+    use serde::{Deserialize, Deserializer, Serialize, Serializer};
+
+    pub fn serialize<K, S>(arc: &Arc<[Token<K>]>, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        K: Serialize,
+        S: Serializer,
+    {
+        arc.as_ref().serialize(serializer)
+    }
+
+    pub fn deserialize<'de, K, D>(deserializer: D) -> Result<Arc<[Token<K>]>, D::Error>
+    where
+        K: Deserialize<'de>,
+        D: Deserializer<'de>,
+    {
+        let vec = Vec::<Token<K>>::deserialize(deserializer)?;
+        Ok(Arc::from_iter(vec))
     }
 }
 
@@ -335,6 +374,30 @@ impl<'s, S: Source + ?Sized, L: Language> LexerState<'s, S, L> {
     #[inline]
     pub fn get_position(&self) -> usize {
         self.cursor.position()
+    }
+
+    /// Checks if the lexer has NOT consumed all input from the source.
+    #[inline]
+    pub fn not_at_end(&self) -> bool {
+        self.cursor.position() < self.cursor.source().length()
+    }
+
+    /// Peeks at the next character without advancing.
+    #[inline]
+    pub fn peek(&mut self) -> Option<char> {
+        self.cursor.peek_char()
+    }
+
+    /// Peeks at the character at the specified byte offset relative to the current position.
+    #[inline]
+    pub fn peek_next_n(&mut self, n: usize) -> Option<char> {
+        self.cursor.peek_next_n(n)
+    }
+
+    /// Advances the cursor by the specified number of bytes.
+    #[inline]
+    pub fn advance(&mut self, len: usize) {
+        self.cursor.advance_bytes(len);
     }
 
     /// Gets the total length of the source text in bytes.
@@ -587,74 +650,6 @@ impl<'s, S: Source + ?Sized, L: Language> LexerState<'s, S, L> {
         self.cursor.peek_char()
     }
 
-    /// Peeks at the next character without advancing the position.
-    ///
-    /// # Returns
-    ///
-    /// The next character, or `None` if at the end of the source
-    #[inline]
-    pub fn peek(&mut self) -> Option<char> {
-        self.cursor.peek_char()
-    }
-
-    /// Peeks at the character n positions ahead without advancing the position.
-    ///
-    /// # Arguments
-    ///
-    /// * `n` - The number of characters to peek ahead
-    ///
-    /// # Returns
-    ///
-    /// The character n positions ahead, or `None` if beyond the end of the source
-    pub fn peek_next_n(&mut self, n: usize) -> Option<char> {
-        if n == 0 {
-            return self.peek();
-        }
-
-        // Fast path: check current chunk
-        let rest = self.cursor.rest();
-        if let Some(ch) = rest.chars().nth(n) {
-            return Some(ch);
-        }
-
-        // Slow path: cross chunk
-        let mut count = 0;
-        let mut offset = self.cursor.position();
-        let end = self.get_length();
-
-        while offset < end {
-            let chunk = self.source().chunk_at(offset);
-            let text = chunk.slice_from(offset);
-            for ch in text.chars() {
-                if count == n {
-                    return Some(ch);
-                }
-                count += 1;
-            }
-            offset = chunk.end();
-        }
-
-        None
-    }
-
-    /// Advances the position by the specified number of bytes.
-    ///
-    /// This method moves the lexer's current position forward by the specified
-    /// number of bytes. It's commonly used after recognizing a token to move
-    /// past the token's characters.
-    ///
-    /// # Arguments
-    ///
-    /// * `length` - The number of bytes to advance
-    ///
-    /// # Returns
-    ///
-    /// The new byte offset position after advancing
-    #[inline]
-    pub fn advance(&mut self, length: usize) -> usize {
-        self.cursor.advance_bytes(length)
-    }
-
     /// Advances the position by the current character's length.
     ///
     /// # Returns
@@ -832,16 +827,6 @@ impl<'s, S: Source + ?Sized, L: Language> LexerState<'s, S, L> {
             }
         }
         Range { start, end: self.cursor.position() }
-    }
-
-    /// Checks if the lexer has not reached the end of the source text.
-    ///
-    /// # Returns
-    ///
-    /// `true` if not at the end of the source, `false` otherwise
-    #[inline]
-    pub fn not_at_end(&self) -> bool {
-        self.cursor.position() < self.cursor.source().length()
     }
 
     /// Performs a safety check to prevent infinite loops during lexing.

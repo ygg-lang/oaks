@@ -11,6 +11,13 @@ pub struct DjangoLanguage {
     pub allow_custom_tags: bool,
 }
 
+impl DjangoLanguage {
+    /// 创建新的 Django 语言实例
+    pub fn new() -> Self {
+        Self::default()
+    }
+}
+
 impl Default for DjangoLanguage {
     fn default() -> Self {
         Self { strict_mode: false, allow_custom_tags: true }

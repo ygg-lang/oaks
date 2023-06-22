@@ -1,7 +1,7 @@
 use oak_core::{ElementType, TokenType, UniversalElementRole, UniversalTokenRole};
-use serde::Serialize;
+use serde::{Deserialize, Serialize};
 
-#[derive(Copy, Clone, Debug, PartialEq, Eq, Serialize, Hash)]
+#[derive(Copy, Clone, Debug, PartialEq, Eq, Serialize, Deserialize, Hash)]
 pub enum PrologSyntaxKind {
     // Whitespace and comments
     Whitespace,

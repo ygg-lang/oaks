@@ -18,7 +18,7 @@ use oak_core::{Builder, BuilderCache, GreenNode, OakDiagnostics, OakError, Parse
 /// use oak_rust::{RustBuilder, RustLanguage, SourceText};
 ///
 /// let language = RustLanguage::default();
-/// let builder = RustBuilder::new(&language);
+/// let builder = RustBuilder::new(language);
 /// let source = SourceText::new("fn main() { let x = 42; }");
 /// let result = builder.build(source, 0);
 ///
@@ -33,7 +33,7 @@ use oak_core::{Builder, BuilderCache, GreenNode, OakDiagnostics, OakError, Parse
 /// use oak_rust::{RustBuilder, RustLanguage, SourceText};
 ///
 /// let language = RustLanguage::default();
-/// let builder = RustBuilder::new(&language);
+/// let builder = RustBuilder::new(language);
 ///
 /// let source = SourceText::new(
 ///     r#"
@@ -54,7 +54,7 @@ use oak_core::{Builder, BuilderCache, GreenNode, OakDiagnostics, OakError, Parse
 /// // 验证解析成功
 /// assert!(result.result.is_ok());
 /// ```
-#[derive(Clone)]
+#[derive(Clone, Copy)]
 pub struct RustBuilder<'config> {
     /// 语言配置
     config: &'config RustLanguage,
@@ -80,7 +80,7 @@ impl<'config> Builder<RustLanguage> for RustBuilder<'config> {
         match parse_result.result {
             Ok(green_tree) => {
                 // 构建 AST
-                let source_text = SourceText::new(source.get_text_in((0..source.length()).into()));
+                let source_text = SourceText::new(source.get_text_in((0..source.length()).into()).into_owned());
                 match self.build_root(green_tree.clone(), &source_text) {
                     Ok(ast_root) => OakDiagnostics { result: Ok(ast_root), diagnostics: parse_result.diagnostics },
                     Err(build_error) => {
@@ -298,7 +298,7 @@ impl<'config> RustBuilder<'config> {
                         match pattern {
                             Pattern::Ident(ident) => name = ident,
                             _ => {
-                                return Err(OakError::syntax_error("Expected identifier in let statement".to_string(), span.start, source.get_url().cloned()));
+                                return Err(OakError::syntax_error("Expected identifier in let statement".to_string(), span.start, None));
                             }
                         }
                     }
@@ -360,7 +360,7 @@ impl<'config> RustBuilder<'config> {
                         }
                     }
                 }
-                Err(OakError::syntax_error("Invalid identifier expression".to_string(), span.start, source.get_url().cloned()))
+                Err(OakError::syntax_error("Invalid identifier expression".to_string(), span.start, None))
             }
             RustElementType::LiteralExpression => {
                 for child in node.children() {
@@ -379,7 +379,7 @@ impl<'config> RustBuilder<'config> {
                         }
                     }
                 }
-                Err(OakError::syntax_error("Invalid literal expression".to_string(), span.start, source.get_url().cloned()))
+                Err(OakError::syntax_error("Invalid literal expression".to_string(), span.start, None))
             }
             RustElementType::BinaryExpression => {
                 let mut left = None;
@@ -422,7 +422,7 @@ impl<'config> RustBuilder<'config> {
                     }
                 }
 
-                if let (Some(left), Some(op), Some(right)) = (left, op, right) { Ok(Expr::Binary { left, op, right, span: span.into() }) } else { Err(OakError::syntax_error("Invalid binary expression".to_string(), span.start, source.get_url().cloned())) }
+                if let (Some(left), Some(op), Some(right)) = (left, op, right) { Ok(Expr::Binary { left, op, right, span: span.into() }) } else { Err(OakError::syntax_error("Invalid binary expression".to_string(), span.start, None)) }
             }
             RustElementType::UnaryExpression => {
                 let mut op = None;
@@ -448,7 +448,7 @@ impl<'config> RustBuilder<'config> {
                     }
                 }
 
-                if let (Some(op), Some(operand)) = (op, operand) { Ok(Expr::Unary { op, expr: operand, span: span.into() }) } else { Err(OakError::syntax_error("Invalid unary expression".to_string(), span.start, source.get_url().cloned())) }
+                if let (Some(op), Some(operand)) = (op, operand) { Ok(Expr::Unary { op, expr: operand, span: span.into() }) } else { Err(OakError::syntax_error("Invalid unary expression".to_string(), span.start, None)) }
             }
             RustElementType::CallExpression => {
                 let mut func = None;
@@ -468,7 +468,7 @@ impl<'config> RustBuilder<'config> {
                     }
                 }
 
-                if let Some(func) = func { Ok(Expr::Call { callee: func, args, span: span.into() }) } else { Err(OakError::syntax_error("Invalid call expression".to_string(), span.start, source.get_url().cloned())) }
+                if let Some(func) = func { Ok(Expr::Call { callee: func, args, span: span.into() }) } else { Err(OakError::syntax_error("Invalid call expression".to_string(), span.start, None)) }
             }
             RustElementType::FieldExpression => {
                 let mut base = None;
@@ -488,7 +488,7 @@ impl<'config> RustBuilder<'config> {
                     }
                 }
 
-                if let Some(receiver) = base { Ok(Expr::Field { receiver, field, span: span.into() }) } else { Err(OakError::syntax_error("Invalid field expression".to_string(), span.start, source.get_url().cloned())) }
+                if let Some(receiver) = base { Ok(Expr::Field { receiver, field, span: span.into() }) } else { Err(OakError::syntax_error("Invalid field expression".to_string(), span.start, None)) }
             }
             RustElementType::IndexExpression => {
                 let mut base = None;
@@ -505,7 +505,7 @@ impl<'config> RustBuilder<'config> {
                     }
                 }
 
-                if let (Some(receiver), Some(index)) = (base, index) { Ok(Expr::Index { receiver, index, span: span.into() }) } else { Err(OakError::syntax_error("Invalid index expression".to_string(), span.start, source.get_url().cloned())) }
+                if let (Some(receiver), Some(index)) = (base, index) { Ok(Expr::Index { receiver, index, span: span.into() }) } else { Err(OakError::syntax_error("Invalid index expression".to_string(), span.start, None)) }
             }
             RustElementType::ParenthesizedExpression => {
                 for child in node.children() {
@@ -514,13 +514,13 @@ impl<'config> RustBuilder<'config> {
                         return Ok(Expr::Paren { expr: Box::new(inner_expr), span: span.into() });
                     }
                 }
-                Err(OakError::syntax_error("Invalid parenthesized expression".to_string(), span.start, source.get_url().cloned()))
+                Err(OakError::syntax_error("Invalid parenthesized expression".to_string(), span.start, None))
             }
             RustElementType::BlockExpression => {
                 let block = self.build_block(node, source)?;
                 Ok(Expr::Block(block))
             }
-            _ => Err(OakError::syntax_error(format!("Unsupported expression type: {:?}", node.green.kind), span.start, source.get_url().cloned())),
+            _ => Err(OakError::syntax_error(format!("Unsupported expression type: {:?}", node.green.kind), span.start, None)),
         }
     }
 
@@ -665,7 +665,7 @@ impl<'config> RustBuilder<'config> {
                 }
             }
         }
-        Err(OakError::syntax_error("Invalid item statement".to_string(), node.offset, source.get_url().cloned()))
+        Err(OakError::syntax_error("Invalid item statement".to_string(), node.offset, None))
     }
 
     fn build_type(&self, node: RedNode<RustLanguage>, source: &SourceText) -> Result<Type, OakError> {

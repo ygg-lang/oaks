@@ -1,0 +1,607 @@
+{
+    "success": true,
+    "count": 100,
+    "tokens": [
+        {
+            "kind": "Identifier",
+            "text": "clear",
+            "start": 330,
+            "end": 335
+        },
+        {
+            "kind": "Identifier",
+            "text": "all",
+            "start": 336,
+            "end": 339
+        },
+        {
+            "kind": "Delimiter",
+            "text": ";",
+            "start": 339,
+            "end": 340
+        },
+        {
+            "kind": "Identifier",
+            "text": "close",
+            "start": 354,
+            "end": 359
+        },
+        {
+            "kind": "Identifier",
+            "text": "all",
+            "start": 360,
+            "end": 363
+        },
+        {
+            "kind": "Delimiter",
+            "text": ";",
+            "start": 363,
+            "end": 364
+        },
+        {
+            "kind": "Identifier",
+            "text": "clc",
+            "start": 366,
+            "end": 369
+        },
+        {
+            "kind": "Delimiter",
+            "text": ";",
+            "start": 369,
+            "end": 370
+        },
+        {
+            "kind": "Identifier",
+            "text": "a",
+            "start": 428,
+            "end": 429
+        },
+        {
+            "kind": "Operator",
+            "text": "=",
+            "start": 430,
+            "end": 431
+        },
+        {
+            "kind": "Number",
+            "text": "5",
+            "start": 432,
+            "end": 433
+        },
+        {
+            "kind": "Delimiter",
+            "text": ";",
+            "start": 433,
+            "end": 434
+        },
+        {
+            "kind": "Identifier",
+            "text": "b",
+            "start": 436,
+            "end": 437
+        },
+        {
+            "kind": "Operator",
+            "text": "=",
+            "start": 438,
+            "end": 439
+        },
+        {
+            "kind": "Number",
+            "text": "3.14159",
+            "start": 440,
+            "end": 447
+        },
+        {
+            "kind": "Delimiter",
+            "text": ";",
+            "start": 447,
+            "end": 448
+        },
+        {
+            "kind": "Identifier",
+            "text": "c",
+            "start": 450,
+            "end": 451
+        },
+        {
+            "kind": "Operator",
+            "text": "=",
+            "start": 452,
+            "end": 453
+        },
+        {
+            "kind": "Number",
+            "text": "2.5e-3",
+            "start": 454,
+            "end": 460
+        },
+        {
+            "kind": "Delimiter",
+            "text": ";",
+            "start": 460,
+            "end": 461
+        },
+        {
+            "kind": "Identifier",
+            "text": "d",
+            "start": 463,
+            "end": 464
+        },
+        {
+            "kind": "Operator",
+            "text": "=",
+            "start": 465,
+            "end": 466
+        },
+        {
+            "kind": "Number",
+            "text": "1.23e+10",
+            "start": 467,
+            "end": 475
+        },
+        {
+            "kind": "Delimiter",
+            "text": ";",
+            "start": 475,
+            "end": 476
+        },
+        {
+            "kind": "Identifier",
+            "text": "e",
+            "start": 478,
+            "end": 479
+        },
+        {
+            "kind": "Operator",
+            "text": "=",
+            "start": 480,
+            "end": 481
+        },
+        {
+            "kind": "Operator",
+            "text": "-",
+            "start": 482,
+            "end": 483
+        },
+        {
+            "kind": "Number",
+            "text": "42",
+            "start": 483,
+            "end": 485
+        },
+        {
+            "kind": "Delimiter",
+            "text": ";",
+            "start": 485,
+            "end": 486
+        },
+        {
+            "kind": "Identifier",
+            "text": "f",
+            "start": 488,
+            "end": 489
+        },
+        {
+            "kind": "Operator",
+            "text": "=",
+            "start": 490,
+            "end": 491
+        },
+        {
+            "kind": "Identifier",
+            "text": "inf",
+            "start": 492,
+            "end": 495
+        },
+        {
+            "kind": "Delimiter",
+            "text": ";",
+            "start": 495,
+            "end": 496
+        },
+        {
+            "kind": "Identifier",
+            "text": "g",
+            "start": 498,
+            "end": 499
+        },
+        {
+            "kind": "Operator",
+            "text": "=",
+            "start": 500,
+            "end": 501
+        },
+        {
+            "kind": "Operator",
+            "text": "-",
+            "start": 502,
+            "end": 503
+        },
+        {
+            "kind": "Identifier",
+            "text": "inf",
+            "start": 503,
+            "end": 506
+        },
+        {
+            "kind": "Delimiter",
+            "text": ";",
+            "start": 506,
+            "end": 507
+        },
+        {
+            "kind": "Identifier",
+            "text": "h",
+            "start": 509,
+            "end": 510
+        },
+        {
+            "kind": "Operator",
+            "text": "=",
+            "start": 511,
+            "end": 512
+        },
+        {
+            "kind": "Identifier",
+            "text": "NaN",
+            "start": 513,
+            "end": 516
+        },
+        {
+            "kind": "Delimiter",
+            "text": ";",
+            "start": 516,
+            "end": 517
+        },
+        {
+            "kind": "Identifier",
+            "text": "z1",
+            "start": 540,
+            "end": 542
+        },
+        {
+            "kind": "Operator",
+            "text": "=",
+            "start": 543,
+            "end": 544
+        },
+        {
+            "kind": "Number",
+            "text": "3",
+            "start": 545,
+            "end": 546
+        },
+        {
+            "kind": "Operator",
+            "text": "+",
+            "start": 547,
+            "end": 548
+        },
+        {
+            "kind": "Number",
+            "text": "4i",
+            "start": 549,
+            "end": 551
+        },
+        {
+            "kind": "Delimiter",
+            "text": ";",
+            "start": 551,
+            "end": 552
+        },
+        {
+            "kind": "Identifier",
+            "text": "z2",
+            "start": 554,
+            "end": 556
+        },
+        {
+            "kind": "Operator",
+            "text": "=",
+            "start": 557,
+            "end": 558
+        },
+        {
+            "kind": "Number",
+            "text": "2",
+            "start": 559,
+            "end": 560
+        },
+        {
+            "kind": "Operator",
+            "text": "+",
+            "start": 561,
+            "end": 562
+        },
+        {
+            "kind": "Number",
+            "text": "3j",
+            "start": 563,
+            "end": 565
+        },
+        {
+            "kind": "Delimiter",
+            "text": ";",
+            "start": 565,
+            "end": 566
+        },
+        {
+            "kind": "Identifier",
+            "text": "z3",
+            "start": 568,
+            "end": 570
+        },
+        {
+            "kind": "Operator",
+            "text": "=",
+            "start": 571,
+            "end": 572
+        },
+        {
+            "kind": "Identifier",
+            "text": "complex",
+            "start": 573,
+            "end": 580
+        },
+        {
+            "kind": "Delimiter",
+            "text": "(",
+            "start": 580,
+            "end": 581
+        },
+        {
+            "kind": "Number",
+            "text": "1",
+            "start": 581,
+            "end": 582
+        },
+        {
+            "kind": "Delimiter",
+            "text": ",",
+            "start": 582,
+            "end": 583
+        },
+        {
+            "kind": "Number",
+            "text": "2",
+            "start": 584,
+            "end": 585
+        },
+        {
+            "kind": "Delimiter",
+            "text": ")",
+            "start": 585,
+            "end": 586
+        },
+        {
+            "kind": "Delimiter",
+            "text": ";",
+            "start": 586,
+            "end": 587
+        },
+        {
+            "kind": "Identifier",
+            "text": "flag1",
+            "start": 612,
+            "end": 617
+        },
+        {
+            "kind": "Operator",
+            "text": "=",
+            "start": 618,
+            "end": 619
+        },
+        {
+            "kind": "Identifier",
+            "text": "true",
+            "start": 620,
+            "end": 624
+        },
+        {
+            "kind": "Delimiter",
+            "text": ";",
+            "start": 624,
+            "end": 625
+        },
+        {
+            "kind": "Identifier",
+            "text": "flag2",
+            "start": 627,
+            "end": 632
+        },
+        {
+            "kind": "Operator",
+            "text": "=",
+            "start": 633,
+            "end": 634
+        },
+        {
+            "kind": "Identifier",
+            "text": "false",
+            "start": 635,
+            "end": 640
+        },
+        {
+            "kind": "Delimiter",
+            "text": ";",
+            "start": 640,
+            "end": 641
+        },
+        {
+            "kind": "Identifier",
+            "text": "flag3",
+            "start": 643,
+            "end": 648
+        },
+        {
+            "kind": "Operator",
+            "text": "=",
+            "start": 649,
+            "end": 650
+        },
+        {
+            "kind": "Identifier",
+            "text": "logical",
+            "start": 651,
+            "end": 658
+        },
+        {
+            "kind": "Delimiter",
+            "text": "(",
+            "start": 658,
+            "end": 659
+        },
+        {
+            "kind": "Number",
+            "text": "1",
+            "start": 659,
+            "end": 660
+        },
+        {
+            "kind": "Delimiter",
+            "text": ")",
+            "start": 660,
+            "end": 661
+        },
+        {
+            "kind": "Delimiter",
+            "text": ";",
+            "start": 661,
+            "end": 662
+        },
+        {
+            "kind": "Identifier",
+            "text": "str1",
+            "start": 697,
+            "end": 701
+        },
+        {
+            "kind": "Operator",
+            "text": "=",
+            "start": 702,
+            "end": 703
+        },
+        {
+            "kind": "Character",
+            "text": "'Hello World'",
+            "start": 704,
+            "end": 717
+        },
+        {
+            "kind": "Delimiter",
+            "text": ";",
+            "start": 717,
+            "end": 718
+        },
+        {
+            "kind": "Identifier",
+            "text": "str2",
+            "start": 720,
+            "end": 724
+        },
+        {
+            "kind": "Operator",
+            "text": "=",
+            "start": 725,
+            "end": 726
+        },
+        {
+            "kind": "String",
+            "text": "\"Modern string\"",
+            "start": 727,
+            "end": 742
+        },
+        {
+            "kind": "Delimiter",
+            "text": ";",
+            "start": 742,
+            "end": 743
+        },
+        {
+            "kind": "Identifier",
+            "text": "char_array",
+            "start": 745,
+            "end": 755
+        },
+        {
+            "kind": "Operator",
+            "text": "=",
+            "start": 756,
+            "end": 757
+        },
+        {
+            "kind": "Delimiter",
+            "text": "[",
+            "start": 758,
+            "end": 759
+        },
+        {
+            "kind": "Character",
+            "text": "'a'",
+            "start": 759,
+            "end": 762
+        },
+        {
+            "kind": "Delimiter",
+            "text": ",",
+            "start": 762,
+            "end": 763
+        },
+        {
+            "kind": "Character",
+            "text": "'b'",
+            "start": 764,
+            "end": 767
+        },
+        {
+            "kind": "Delimiter",
+            "text": ",",
+            "start": 767,
+            "end": 768
+        },
+        {
+            "kind": "Character",
+            "text": "'c'",
+            "start": 769,
+            "end": 772
+        },
+        {
+            "kind": "Delimiter",
+            "text": "]",
+            "start": 772,
+            "end": 773
+        },
+        {
+            "kind": "Delimiter",
+            "text": ";",
+            "start": 773,
+            "end": 774
+        },
+        {
+            "kind": "Identifier",
+            "text": "row_vec",
+            "start": 817,
+            "end": 824
+        },
+        {
+            "kind": "Operator",
+            "text": "=",
+            "start": 825,
+            "end": 826
+        },
+        {
+            "kind": "Delimiter",
+            "text": "[",
+            "start": 827,
+            "end": 828
+        },
+        {
+            "kind": "Number",
+            "text": "1",
+            "start": 828,
+            "end": 829
+        }
+    ],
+    "errors": []
+}

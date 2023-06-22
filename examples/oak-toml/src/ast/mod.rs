@@ -171,13 +171,69 @@ pub struct TomlInlineTable {
     pub items: Vec<TomlKeyValue>,
 }
 
-impl TomlRoot {
-    pub fn new(span: Range<usize>) -> Self {
-        Self { span, items: Vec::new() }
+impl TomlTable {
+    pub fn new(span: Range<usize>, header: TomlTableHeader) -> Self {
+        Self { span, header, items: Vec::new() }
+    }
+
+    pub fn get(&self, key: &str) -> Option<&TomlValue> {
+        for kv in &self.items {
+            if kv.key.to_string() == key {
+                return Some(&kv.value);
+            }
+        }
+        None
+    }
+}
+
+impl TomlKey {
+    pub fn to_string(&self) -> String {
+        self.segments
+            .iter()
+            .map(|s| match s {
+                TomlKeySegment::Bare(b) => b.name.clone(),
+                TomlKeySegment::Quoted(q) => q.value.clone(),
+            })
+            .collect::<Vec<_>>()
+            .join(".")
     }
 }
 
 impl TomlValue {
+    pub fn as_str(&self) -> Option<&str> {
+        match self {
+            TomlValue::String(s) => Some(&s.value),
+            _ => None,
+        }
+    }
+
+    pub fn as_integer(&self) -> Option<i64> {
+        match self {
+            TomlValue::Integer(i) => Some(i.value),
+            _ => None,
+        }
+    }
+
+    pub fn as_bool(&self) -> Option<bool> {
+        match self {
+            TomlValue::Boolean(b) => Some(b.value),
+            _ => None,
+        }
+    }
+
+    pub fn as_inline_table(&self) -> Option<&TomlInlineTable> {
+        match self {
+            TomlValue::InlineTable(t) => Some(t),
+            _ => None,
+        }
+    }
+
+    pub fn as_array(&self) -> Option<&TomlArray> {
+        match self {
+            TomlValue::Array(a) => Some(a),
+            _ => None,
+        }
+    }
     /// 获取值的跨度
     pub fn span(&self) -> Range<usize> {
         match self {

@@ -4,12 +4,14 @@ use oak_core::{Lexer, LexerCache, LexerState, OakError, TextEdit, lexer::LexOutp
 type State<'a, S> = LexerState<'a, S, GsglLanguage>;
 
 /// GSGL 词法分析器
-#[derive(Clone)]
-pub struct GsglLexer;
+#[derive(Clone, Debug)]
+pub struct GsglLexer<'config> {
+    _config: &'config GsglLanguage,
+}
 
-impl GsglLexer {
-    pub fn new() -> Self {
-        Self
+impl<'config> GsglLexer<'config> {
+    pub fn new(config: &'config GsglLanguage) -> Self {
+        Self { _config: config }
     }
 
     fn run<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> Result<(), OakError> {
@@ -385,7 +387,7 @@ impl GsglLexer {
     }
 }
 
-impl Lexer<GsglLanguage> for GsglLexer {
+impl<'config> Lexer<GsglLanguage> for GsglLexer<'config> {
     fn lex<'a, S: Source + ?Sized>(&self, source: &'a S, _edits: &[TextEdit], cache: &'a mut impl LexerCache<GsglLanguage>) -> LexOutput<GsglLanguage> {
         let mut state = State::new(source);
         let result = self.run(&mut state);

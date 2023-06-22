@@ -14,12 +14,14 @@ type State<'a, S> = LexerState<'a, S, AdaLanguage>;
 
 static ADA_WHITESPACE: LazyLock<WhitespaceConfig> = LazyLock::new(|| WhitespaceConfig { unicode_whitespace: true });
 
-#[derive(Clone)]
-pub struct AdaLexer;
+#[derive(Clone, Debug)]
+pub struct AdaLexer<'config> {
+    config: &'config AdaLanguage,
+}
 
-impl Lexer<AdaLanguage> for AdaLexer {
-    fn lex<'a, S: Source + ?Sized>(&self, source: &S, _edits: &[oak_core::source::TextEdit], cache: &'a mut impl LexerCache<AdaLanguage>) -> LexOutput<AdaLanguage> {
-        let mut state: State<'_, S> = LexerState::new(source);
+impl<'config> Lexer<AdaLanguage> for AdaLexer<'config> {
+    fn lex<'a, S: Source + ?Sized>(&self, source: &'a S, _edits: &[oak_core::source::TextEdit], cache: &'a mut impl LexerCache<AdaLanguage>) -> LexOutput<AdaLanguage> {
+        let mut state: State<'_, S> = LexerState::new_with_cache(source, 0, cache);
         let result = self.run(&mut state);
         if result.is_ok() {
             state.add_eof();
@@ -28,9 +30,9 @@ impl Lexer<AdaLanguage> for AdaLexer {
     }
 }
 
-impl AdaLexer {
-    pub fn new(_config: &AdaLanguage) -> Self {
-        Self
+impl<'config> AdaLexer<'config> {
+    pub fn new(config: &'config AdaLanguage) -> Self {
+        Self { config }
     }
 
     /// 主要词法分析逻辑

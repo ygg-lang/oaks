@@ -15,7 +15,6 @@ pub mod lexer;
 pub mod lsp;
 pub mod parser;
 
-#[cfg(feature = "mcp")]
 pub mod mcp;
 
 // 重新导出主要类型
@@ -30,8 +29,4 @@ pub use crate::{
     parser::{ActionScriptElementType, ActionScriptParser},
 };
 
-#[cfg(feature = "mcp")]
 pub use crate::mcp::serve_actionscript_mcp;
-
-#[cfg(all(feature = "mcp", feature = "axum"))]
-pub use crate::mcp::serve_actionscript_mcp_axum;

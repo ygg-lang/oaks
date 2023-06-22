@@ -1,4 +1,4 @@
-fn main() {
+micro main() {
     if true {
         1;
     }

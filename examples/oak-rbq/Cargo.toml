@@ -1,0 +1,42 @@
+[package]
+name = "oak-rbq"
+description = "High-performance incremental RBQ parser for the oak ecosystem."
+categories = ["parsing"]
+keywords = ["parser", "rbq", "streaming", "validation"]
+version.workspace = true
+authors.workspace = true
+homepage.workspace = true
+repository.workspace = true
+license.workspace = true
+edition.workspace = true
+
+[dependencies]
+oak-core = { workspace = true, features = ["serde", "testing"] }
+triomphe = { workspace = true }
+oak-highlight = { workspace = true, optional = true }
+oak-pretty-print = { workspace = true, optional = true }
+oak-lsp = { workspace = true, optional = true }
+oak-hover = { workspace = true, optional = true }
+oak-folding = { workspace = true, optional = true }
+oak-semantic-tokens = { workspace = true, optional = true }
+oak-vfs = { workspace = true, optional = true }
+oak-navigation = { workspace = true, optional = true }
+oak-mcp = { workspace = true, optional = true, features = ["io-std"] }
+dashmap = { workspace = true, optional = true }
+serde = { workspace = true, features = ["derive"], optional = true }
+futures = { workspace = true, optional = true }
+tokio = { workspace = true, optional = true }
+
+[dev-dependencies]
+oak-testing = { workspace = true }
+oak-macros = { workspace = true }
+
+[features]
+default = ["oak-pretty-print", "serde"]
+serde = ["dep:serde", "oak-core/serde"]
+lsp = ["dep:oak-lsp", "dep:oak-hover", "dep:oak-vfs", "dep:oak-navigation", "dep:oak-mcp", "dep:dashmap", "dep:futures", "dep:oak-folding", "dep:oak-semantic-tokens"]
+mcp-stdio = ["lsp", "oak-mcp/io-std"]
+semantic-search = []
+
+[package.metadata.docs.rs]
+all-features = true

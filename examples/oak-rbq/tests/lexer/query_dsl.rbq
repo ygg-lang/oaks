@@ -1,0 +1,74 @@
+# RBQ Query DSL Test Case
+#
+# Testing various DSL features: Filter, Map, Sort, With, Aggregation, Mutation
+
+@database("pgsql.public")
+@table(name = "users")
+class User {
+    @key
+    id: uuid;
+    username: utf8;
+    age: i32;
+    @relation(back_ref = "author")
+    posts: list<&Post>;
+}
+
+@table(name = "posts")
+class Post {
+    @key
+    id: i64;
+    title: utf8;
+    content: utf8;
+    author_id: &User;
+    view_count: i32 = 0;
+    status: utf8;
+}
+
+# 1. Basic Query
+# Find active adult users, sorted by age descending, return top 10
+users.filter { $age >= 18 }
+     .sort { $age.desc() }
+     .limit(10)
+     .list();
+
+# 2. Projection & Relations
+# Get users with their post titles
+users.with { $posts }
+     .map { 
+       name = $username
+       post_titles = $posts.map { $title }
+     }
+     .list();
+
+# 3. Complex Filtering
+# Posts with specific tags or high views, by non-null authors
+posts.filter { 
+          ($title.contains("RBQ") || $view_count > 1000) && 
+          $author_id.is_not_null()
+     }
+     .list();
+
+# 4. Aggregation
+# Group posts by author and count them
+posts.group_by { $author_id }
+     .map {
+       author = $key
+       post_count = $group.count()
+       total_views = $group.sum { $view_count }
+     }
+     .list();
+
+# 5. Mutations
+# Soft delete old draft posts
+posts.filter { $status == "Draft" && $view_count == 0 }
+     .delete();
+
+# Update usernames
+users.filter { $id == "550e8400-e29b-41d4-a716-446655440000" }
+     .update { username = "new_alice" };
+
+# Batch insert
+users.insert([
+     { username = "bob", age = 25 },
+     { username = "charlie", age = 30 }
+]);

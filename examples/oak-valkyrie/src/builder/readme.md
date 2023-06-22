@@ -33,8 +33,7 @@ The builder provides specialized methods for constructing different types of AST
 
 - `build_root()` - Constructs the root AST node containing all top-level items
 - `build_namespace()` - Builds namespace definitions
-- `build_micro()` - Builds micro definitions (Valkyrie-specific constructs)
-- `build_function()` - Constructs function definitions
+- `build_micro()` - Builds micro function definitions
 - `build_expr()` - Builds various expression types
 - `build_stmt()` - Constructs statement nodes
 
@@ -56,7 +55,7 @@ use oak_core::{Builder, parser::ParseSession, source::SourceText};
 
 let language = ValkyrieLanguage::default();
 let builder = ValkyrieBuilder::new(&language);
-let source = SourceText::new("namespace MyNamespace { fn main() { let x = 42; } }");
+let source = SourceText::new("namespace MyNamespace { micro main() { let x = 42; } }");
 let mut cache = ParseSession::default();
 let result = builder.build(&source, &[], &mut cache);
 
@@ -76,8 +75,7 @@ match result.result {
 The builder supports all major Valkyrie language constructs:
 
 - **Namespaces**: Organizational units for code
-- **Micro Definitions**: Valkyrie-specific specialized constructs
-- **Functions**: With parameters and block bodies
+- **Micro Functions**: Functions with parameters and block bodies
 - **Expressions**: Identifiers, literals, binary/unary operations, calls, field access, indexing
 - **Statements**: Variable bindings (`let`) and expression statements
 

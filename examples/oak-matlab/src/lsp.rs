@@ -62,7 +62,7 @@ impl<V: Vfs + Send + Sync + 'static + oak_vfs::WritableVfs> LanguageService for 
             let mut cache = Box::new(oak_core::parser::ParseSession::<MatlabLanguage>::default());
             let cache_ptr: *mut oak_core::parser::ParseSession<MatlabLanguage> = &mut *cache;
 
-            let output = oak_core::parser::parse(&parser, &lexer, source.as_ref(), &[], unsafe { &mut *cache_ptr }).result.ok()?;
+            let output = oak_core::parser::parse(&parser, &lexer, &source, &[], unsafe { &mut *cache_ptr }).result.ok()?;
 
             let _leaked_cache = Box::leak(cache);
             let green_static: &'static oak_core::GreenNode<MatlabLanguage> = unsafe { std::mem::transmute(output) };

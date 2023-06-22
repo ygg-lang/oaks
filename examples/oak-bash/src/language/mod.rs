@@ -3,7 +3,13 @@ use oak_core::{Language, LanguageCategory};
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Deserialize, Default)]
-pub struct BashLanguage;
+pub struct BashLanguage {}
+
+impl BashLanguage {
+    pub fn new() -> Self {
+        Self {}
+    }
+}
 
 impl Language for BashLanguage {
     const NAME: &'static str = "bash";

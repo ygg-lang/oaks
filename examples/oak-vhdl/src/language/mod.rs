@@ -1,18 +1,13 @@
 use oak_core::{Language, LanguageCategory};
+use serde::{Deserialize, Serialize};
 
 /// VHDL 语言定义
-#[derive(Debug, Clone)]
-pub struct VhdlLanguage;
+#[derive(Debug, Default, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
+pub struct VhdlLanguage {}
 
 impl VhdlLanguage {
     pub fn new() -> Self {
-        Self
-    }
-}
-
-impl Default for VhdlLanguage {
-    fn default() -> Self {
-        Self::new()
+        Self {}
     }
 }
 

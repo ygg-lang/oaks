@@ -26,7 +26,7 @@ The main highlighter struct that implements the `Highlighter` trait:
 
 ### Keywords
 - **Control Flow**: `if`, `else`, `while`, `for`, `return`, `break`, `continue`
-- **Declarations**: `namespace`, `micro`, `fn`, `let`
+- **Declarations**: `namespace`, `micro`, `let`
 - **Literals**: `true`, `false`, `null`
 
 ### Literals
@@ -39,7 +39,7 @@ The main highlighter struct that implements the `Highlighter` trait:
 - **Documentation Comments**: Special comment formats for documentation
 
 ### Identifiers
-- **Function Names**: Function identifiers in declarations and calls
+- **Function Names**: Function identifiers (in `micro` declarations and calls)
 - **Variable Names**: Variable identifiers in declarations and usage
 - **Namespace Names**: Namespace identifiers
 
@@ -51,7 +51,7 @@ use oak_valkyrie::highlighter::ValkyrieHighlighter;
 use oak_highlight::{highlighter::Highlighter, themes::Theme};
 
 let highlighter = ValkyrieHighlighter::new();
-let highlights = highlighter.highlight("fn main() { let x = 42; }", "valkyrie", Theme::Default);
+let highlights = highlighter.highlight("micro main() { let x = 42; }", "valkyrie", Theme::Default);
 ```
 
 ### Parser-based Highlighting (Enhanced)

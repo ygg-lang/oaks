@@ -23,7 +23,7 @@ impl Highlighter for StylusHighlighter {
             let config = StylusLanguage::new();
             let parser = crate::parser::StylusParser::new(&config);
             let lexer = crate::lexer::StylusLexer::new(&config);
-            highlighter.highlight_with_language::<StylusLanguage, crate::parser::StylusParser<'_>, crate::lexer::StylusLexer<'_>>(source, theme, &parser, &lexer)
+            highlighter.highlight_with_language::<StylusLanguage, crate::parser::StylusParser<'_>, crate::lexer::StylusLexer>(source, theme, &parser, &lexer)
         }
         else {
             highlighter.highlight(source, StylusLanguage::NAME, theme)

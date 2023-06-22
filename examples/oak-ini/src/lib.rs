@@ -10,9 +10,7 @@ mod kind;
 mod language;
 mod lexer;
 pub mod lsp;
-mod parser;
-
-#[cfg(feature = "mcp")]
 pub mod mcp;
+mod parser;
 
 pub use crate::{ast::IniRoot, builder::IniBuilder, highlighter::IniHighlighter, kind::IniSyntaxKind, language::IniLanguage, lexer::IniLexer, lsp::IniLanguageService, parser::IniParser};

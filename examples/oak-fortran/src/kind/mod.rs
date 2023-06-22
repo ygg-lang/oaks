@@ -1,10 +1,10 @@
 use oak_core::{ElementType, Token, TokenType, UniversalElementRole, UniversalTokenRole};
-use serde::Serialize;
+use serde::{Deserialize, Serialize};
 
 pub type FortranToken = Token<FortranSyntaxKind>;
 
 /// Fortran 令牌种类
-#[derive(Debug, Clone, PartialEq, Eq, Copy, Hash, Serialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Copy, Hash, Serialize, Deserialize)]
 pub enum FortranSyntaxKind {
     // 基本 kind
     Whitespace,

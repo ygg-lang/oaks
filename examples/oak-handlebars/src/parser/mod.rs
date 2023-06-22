@@ -19,7 +19,7 @@ impl<'config> HandlebarsParser<'config> {
 
 impl<'config> Parser<HandlebarsLanguage> for HandlebarsParser<'config> {
     fn parse<'a, S: Source + ?Sized>(&self, text: &'a S, edits: &[TextEdit], cache: &'a mut impl ParseCache<HandlebarsLanguage>) -> ParseOutput<'a, HandlebarsLanguage> {
-        let lexer = HandlebarsLexer::new(self.config);
+        let lexer = HandlebarsLexer::new(&self.config);
         parse_with_lexer(&lexer, text, edits, cache, |state| self.parse_root_internal(state))
     }
 }

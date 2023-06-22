@@ -1,7 +1,8 @@
 use oak_core::language::{Language, LanguageCategory};
+use serde::{Deserialize, Serialize};
 
 /// Scss 语言实现
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 pub struct ScssLanguage {
     // Scss 语言特有的配置，目前为空
 }
@@ -15,7 +16,7 @@ impl ScssLanguage {
 
 impl Default for ScssLanguage {
     fn default() -> Self {
-        Self::new()
+        Self {}
     }
 }
 

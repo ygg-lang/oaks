@@ -2,7 +2,7 @@ use crate::{ast::ValkyrieRoot, kind::ValkyrieSyntaxKind};
 use oak_core::{Language, LanguageCategory};
 use serde::{Deserialize, Serialize};
 
-#[derive(Clone, Debug, PartialEq, Eq, Hash, Serialize, Deserialize)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash, Serialize, Deserialize)]
 /// The Valkyrie programming language definition.
 pub struct ValkyrieLanguage {
     /// Allow using `<xml/>` syntax in source code

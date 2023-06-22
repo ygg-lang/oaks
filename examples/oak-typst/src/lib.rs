@@ -11,13 +11,9 @@ pub mod parser;
 mod formatter;
 pub mod highlighter;
 pub mod lsp;
-#[cfg(feature = "mcp")]
 pub mod mcp;
 
 pub use crate::{ast::TypstRoot, builder::TypstBuilder, formatter::TypstFormatter, highlighter::TypstHighlighter, language::TypstLanguage, lexer::TypstLexer, lsp::TypstLanguageService, parser::TypstParser};
 
-#[cfg(feature = "mcp")]
+#[cfg(feature = "io-std")]
 pub use crate::mcp::serve_typst_mcp;
-
-#[cfg(all(feature = "mcp", feature = "axum"))]
-pub use crate::mcp::serve_typst_mcp_axum;

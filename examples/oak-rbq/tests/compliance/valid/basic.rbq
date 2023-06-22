@@ -1,0 +1,6 @@
+@schema(name="test")
+namespace App {
+    class User {
+        id: i32
+    }
+}

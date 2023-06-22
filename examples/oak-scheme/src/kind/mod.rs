@@ -1,6 +1,7 @@
 use oak_core::{ElementType, TokenType, UniversalElementRole, UniversalTokenRole};
+use serde::{Deserialize, Serialize};
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub enum SchemeSyntaxKind {
     // 空白字符和换行
     Whitespace,

@@ -1,24 +1,29 @@
 use crate::types::InitializeParams;
 use dashmap::DashMap;
+use oak_resolver::{GlobalSymbolTable, StandardResolver};
 use std::path::PathBuf;
 use url::Url;
 
 /// A manager for workspace folders and path resolution.
 pub struct WorkspaceManager {
     folders: DashMap<String, PathBuf>,
+    pub symbols: GlobalSymbolTable,
+    pub resolver: StandardResolver,
 }
 
 impl WorkspaceManager {
     pub fn new() -> Self {
-        Self { folders: DashMap::new() }
+        Self { folders: DashMap::new(), symbols: GlobalSymbolTable::new(), resolver: StandardResolver::new(Vec::new()) }
     }
 
     /// Initialize the workspace manager with parameters from the client.
     pub fn initialize(&self, params: &InitializeParams) {
+        let mut root_dirs = Vec::new();
         if let Some(uri_str) = &params.root_uri {
             if let Ok(uri) = Url::parse(uri_str) {
                 if let Ok(path) = uri.to_file_path() {
-                    self.folders.insert(uri_str.clone(), path);
+                    self.folders.insert(uri_str.clone(), path.clone());
+                    root_dirs.push(path);
                 }
             }
         }
@@ -26,10 +31,13 @@ impl WorkspaceManager {
         for folder in &params.workspace_folders {
             if let Ok(uri) = Url::parse(&folder.uri) {
                 if let Ok(path) = uri.to_file_path() {
-                    self.folders.insert(folder.uri.clone(), path);
+                    self.folders.insert(folder.uri.clone(), path.clone());
+                    root_dirs.push(path);
                 }
             }
         }
+
+        self.resolver.set_root_dirs(root_dirs);
     }
 
     /// Add a workspace folder.

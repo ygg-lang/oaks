@@ -2,14 +2,15 @@ use crate::lexer::StylusLexer;
 use oak_core::{Language, LanguageCategory};
 
 /// 日期时间格式
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Default)]
 pub enum DateTimeFormat {
+    #[default]
     Rfc3339,
     // 其他可能的日期时间格
 }
 
 /// Stylus 语言定义
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Default)]
 pub struct StylusLanguage {
     pub allow_multiline_strings: bool,
     pub allow_hex_numbers: bool,

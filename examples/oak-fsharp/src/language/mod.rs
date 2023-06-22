@@ -1,7 +1,8 @@
 use oak_core::{Language, LanguageCategory};
+use serde::{Deserialize, Serialize};
 
 /// F# 语言实现
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub struct FSharpLanguage {
     /// 是否启用 F# 4.0
     pub fsharp_4_0: bool,

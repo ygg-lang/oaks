@@ -1,0 +1,461 @@
+{# Twig Test Template - Comprehensive Syntax Coverage #}
+{# This template tests various Twig syntax elements for lexer testing #}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ title|default('Twig Test Template') }}</title>
+    <style>
+        .highlight { background-color: yellow; }
+        .error { color: red; }
+        .success { color: green; }
+    </style>
+</head>
+<body>
+    {# Variables and basic output #}
+    <h1>{{ page_title }}</h1>
+    <p>Welcome, {{ user.name|default('Guest') }}!</p>
+    <p>Today is {{ "now"|date("Y-m-d H:i:s") }}</p>
+
+    {# String concatenation #}
+    <p>{{ "Hello " ~ user.name ~ "!" }}</p>
+
+    {# Mathematical operations #}
+    <p>2 + 3 = {{ 2 + 3 }}</p>
+    <p>10 - 4 = {{ 10 - 4 }}</p>
+    <p>5 * 6 = {{ 5 * 6 }}</p>
+    <p>15 / 3 = {{ 15 / 3 }}</p>
+    <p>17 % 5 = {{ 17 % 5 }}</p>
+    <p>2 ** 3 = {{ 2 ** 3 }}</p>
+
+    {# Comparison operators #}
+    <p>5 > 3: {{ 5 > 3 ? 'true' : 'false' }}</p>
+    <p>2 < 1: {{ 2 < 1 ? 'true' : 'false' }}</p>
+    <p>5 >= 5: {{ 5 >= 5 ? 'true' : 'false' }}</p>
+    <p>3 <= 2: {{ 3 <= 2 ? 'true' : 'false' }}</p>
+    <p>5 == 5: {{ 5 == 5 ? 'true' : 'false' }}</p>
+    <p>5 != 3: {{ 5 != 3 ? 'true' : 'false' }}</p>
+
+    {# Logical operators #}
+    <p>true and false: {{ true and false ? 'true' : 'false' }}</p>
+    <p>true or false: {{ true or false ? 'true' : 'false' }}</p>
+    <p>not true: {{ not true ? 'true' : 'false' }}</p>
+
+    {# Ternary operator #}
+    <p>{{ user.is_admin ? 'Admin User' : 'Regular User' }}</p>
+
+    {# Null coalescing #}
+    <p>{{ user.nickname ?? user.name ?? 'Anonymous' }}</p>
+
+    {# Array access #}
+    <p>First item: {{ items[0] }}</p>
+    <p>Last item: {{ items[-1] }}</p>
+    <p>Dynamic access: {{ items[index] }}</p>
+
+    {# Object property access #}
+    <p>User ID: {{ user.id }}</p>
+    <p>User email: {{ user['email'] }}</p>
+    <p>Dynamic property: {{ user[property_name] }}</p>
+
+    {# Filters #}
+    <h2>Filters</h2>
+    <p>Uppercase: {{ "hello world"|upper }}</p>
+    <p>Lowercase: {{ "HELLO WORLD"|lower }}</p>
+    <p>Capitalize: {{ "hello world"|capitalize }}</p>
+    <p>Title case: {{ "hello world"|title }}</p>
+    <p>Length: {{ "hello"|length }}</p>
+    <p>Reverse: {{ "hello"|reverse }}</p>
+    <p>Trim: "{{ "  hello world  "|trim }}"</p>
+    <p>Replace: {{ "hello world"|replace({'world': 'universe'}) }}</p>
+    <p>Slice: {{ "hello world"|slice(0, 5) }}</p>
+    <p>Split: {{ "a,b,c"|split(',')|join(' - ') }}</p>
+    <p>Format: {{ "Hello %s!"|format(user.name) }}</p>
+    <p>Number format: {{ 1234.5678|number_format(2, '.', ',') }}</p>
+    <p>Date format: {{ user.created_at|date('Y-m-d') }}</p>
+    <p>JSON encode: {{ user|json_encode }}</p>
+    <p>URL encode: {{ "hello world"|url_encode }}</p>
+    <p>Raw output: {{ "<script>alert('xss')</script>"|raw }}</p>
+    <p>Escape: {{ "<script>alert('xss')</script>"|escape }}</p>
+    <p>Striptags: {{ "<p>Hello <strong>world</strong></p>"|striptags }}</p>
+    <p>Nl2br: {{ "Line 1\nLine 2"|nl2br }}</p>
+
+    {# Custom filters with arguments #}
+    <p>Truncate: {{ long_text|truncate(50, '...') }}</p>
+    <p>Default: {{ empty_var|default('Default value') }}</p>
+    <p>First: {{ items|first }}</p>
+    <p>Last: {{ items|last }}</p>
+    <p>Random: {{ items|random }}</p>
+    <p>Sort: {{ items|sort|join(', ') }}</p>
+    <p>Unique: {{ items|unique|join(', ') }}</p>
+    <p>Merge: {{ array1|merge(array2)|join(', ') }}</p>
+
+    {# Conditional statements #}
+    {% if user.is_logged_in %}
+        <p>Welcome back, {{ user.name }}!</p>
+    {% elseif user.is_guest %}
+        <p>Hello, guest user!</p>
+    {% else %}
+        <p>Please log in.</p>
+    {% endif %}
+
+    {# Multiple conditions #}
+    {% if user.is_admin and user.is_active %}
+        <p>Admin panel access granted.</p>
+    {% endif %}
+
+    {% if user.role == 'admin' or user.role == 'moderator' %}
+        <p>You have elevated privileges.</p>
+    {% endif %}
+
+    {# Unless (negative if) #}
+    {% unless user.is_banned %}
+        <p>You can post comments.</p>
+    {% endunless %}
+
+    {# For loops #}
+    <h2>For Loops</h2>
+    <ul>
+    {% for item in items %}
+        <li>{{ loop.index }}: {{ item }}</li>
+    {% endfor %}
+    </ul>
+
+    {# For loop with key #}
+    <ul>
+    {% for key, value in user_data %}
+        <li>{{ key }}: {{ value }}</li>
+    {% endfor %}
+    </ul>
+
+    {# For loop with conditions #}
+    <ul>
+    {% for user in users if user.is_active %}
+        <li>{{ user.name }} (Active)</li>
+    {% endfor %}
+    </ul>
+
+    {# For loop with else #}
+    <ul>
+    {% for item in empty_list %}
+        <li>{{ item }}</li>
+    {% else %}
+        <li>No items found</li>
+    {% endfor %}
+    </ul>
+
+    {# Loop variables #}
+    <table>
+    {% for user in users %}
+        <tr class="{{ loop.cycle('odd', 'even') }}">
+            <td>{{ loop.index }}</td>
+            <td>{{ loop.index0 }}</td>
+            <td>{{ user.name }}</td>
+            <td>{{ loop.first ? 'First' : '' }}</td>
+            <td>{{ loop.last ? 'Last' : '' }}</td>
+            <td>{{ loop.length }}</td>
+            <td>{{ loop.revindex }}</td>
+            <td>{{ loop.revindex0 }}</td>
+        </tr>
+    {% endfor %}
+    </table>
+
+    {# Nested loops #}
+    {% for category in categories %}
+        <h3>{{ category.name }}</h3>
+        <ul>
+        {% for product in category.products %}
+            <li>{{ product.name }} - ${{ product.price }}</li>
+        {% endfor %}
+        </ul>
+    {% endfor %}
+
+    {# Set variables #}
+    {% set greeting = 'Hello' %}
+    {% set full_greeting = greeting ~ ', ' ~ user.name ~ '!' %}
+    <p>{{ full_greeting }}</p>
+
+    {# Set with capture #}
+    {% set content %}
+        <p>This is captured content.</p>
+        <p>It can span multiple lines.</p>
+    {% endset %}
+    {{ content }}
+
+    {# Include templates #}
+    {% include 'header.twig' %}
+    {% include 'sidebar.twig' with {'title': 'Custom Title'} %}
+    {% include 'footer.twig' only %}
+
+    {# Include with conditional #}
+    {% include user.is_admin ? 'admin_panel.twig' : 'user_panel.twig' %}
+
+    {# Extends and blocks #}
+    {% extends "base.twig" %}
+
+    {% block title %}Custom Page Title{% endblock %}
+
+    {% block content %}
+        <h1>Page Content</h1>
+        {{ parent() }}
+    {% endblock %}
+
+    {% block sidebar %}
+        {% if show_sidebar %}
+            {{ parent() }}
+        {% endif %}
+    {% endblock %}
+
+    {# Embed templates #}
+    {% embed "card.twig" %}
+        {% block card_title %}Custom Card Title{% endblock %}
+        {% block card_content %}
+            <p>Custom card content goes here.</p>
+        {% endblock %}
+    {% endembed %}
+
+    {# Macros #}
+    {% macro input(name, value, type = 'text') %}
+        <input type="{{ type }}" name="{{ name }}" value="{{ value|e }}" />
+    {% endmacro %}
+
+    {% macro render_field(field) %}
+        <div class="field">
+            <label>{{ field.label }}</label>
+            {{ _self.input(field.name, field.value, field.type) }}
+        </div>
+    {% endmacro %}
+
+    {# Using macros #}
+    {{ _self.input('username', user.username) }}
+    {{ _self.input('password', '', 'password') }}
+    {{ _self.render_field(form.email_field) }}
+
+    {# Import macros #}
+    {% import "forms.twig" as forms %}
+    {{ forms.input('email', user.email, 'email') }}
+
+    {# From import #}
+    {% from "forms.twig" import input, textarea %}
+    {{ input('name', user.name) }}
+    {{ textarea('bio', user.bio) }}
+
+    {# Tests #}
+    <h2>Tests</h2>
+    {% if user is defined %}
+        <p>User is defined</p>
+    {% endif %}
+
+    {% if user.email is empty %}
+        <p>Email is empty</p>
+    {% endif %}
+
+    {% if user.age is even %}
+        <p>Age is even</p>
+    {% endif %}
+
+    {% if user.age is odd %}
+        <p>Age is odd</p>
+    {% endif %}
+
+    {% if user.name is same as('John') %}
+        <p>Name is John</p>
+    {% endif %}
+
+    {% if user.roles is iterable %}
+        <p>Roles is iterable</p>
+    {% endif %}
+
+    {% if user.id is divisible by(2) %}
+        <p>ID is divisible by 2</p>
+    {% endif %}
+
+    {% if user.email is null %}
+        <p>Email is null</p>
+    {% endif %}
+
+    {# Custom tests #}
+    {% if user is admin %}
+        <p>User is admin</p>
+    {% endif %}
+
+    {# Whitespace control #}
+    <ul>
+        {%- for item in items -%}
+            <li>{{- item -}}</li>
+        {%- endfor -%}
+    </ul>
+
+    {# Raw blocks #}
+    {% raw %}
+        <p>This {{ will not }} be parsed as Twig.</p>
+        {% if true %}This is literal text{% endif %}
+    {% endraw %}
+
+    {# Verbatim (alias for raw) #}
+    {% verbatim %}
+        <script>
+            var data = {{ json_data }};
+        </script>
+    {% endverbatim %}
+
+    {# Apply filter to block #}
+    {% apply upper %}
+        This text will be uppercase
+    {% endapply %}
+
+    {% apply spaceless %}
+        <div>
+            <strong>No whitespace</strong>
+        </div>
+    {% endapply %}
+
+    {# Deprecated spaceless tag #}
+    {% spaceless %}
+        <div>
+            <strong>No whitespace</strong>
+        </div>
+    {% endspaceless %}
+
+    {# Autoescape #}
+    {% autoescape %}
+        {{ user.bio }}
+    {% endautoescape %}
+
+    {% autoescape 'html' %}
+        {{ user.bio }}
+    {% endautoescape %}
+
+    {% autoescape false %}
+        {{ user.bio }}
+    {% endautoescape %}
+
+    {# Flush output buffer #}
+    {% flush %}
+
+    {# Do (execute without output) #}
+    {% do user.updateLastSeen() %}
+
+    {# With context #}
+    {% with %}
+        {% set temp_var = 'temporary' %}
+        <p>{{ temp_var }}</p>
+    {% endwith %}
+
+    {% with {'new_var': 'value'} %}
+        <p>{{ new_var }}</p>
+    {% endwith %}
+
+    {# Sandbox #}
+    {% sandbox %}
+        {{ include('untrusted_template.twig') }}
+    {% endsandbox %}
+
+    {# Use (traits) #}
+    {% use "pagination.twig" %}
+    {% use "sorting.twig" with sort as table_sort %}
+
+    {# Deprecated tags #}
+    {% filter upper %}
+        this text becomes uppercase
+    {% endfilter %}
+
+    {# Functions #}
+    <h2>Functions</h2>
+    <p>Range: {{ range(1, 5)|join(', ') }}</p>
+    <p>Cycle: {{ cycle(['odd', 'even'], loop.index0) }}</p>
+    <p>Random: {{ random(100) }}</p>
+    <p>Random string: {{ random(['apple', 'banana', 'cherry']) }}</p>
+    <p>Attribute: {{ attribute(user, 'name') }}</p>
+    <p>Block: {{ block('content') }}</p>
+    <p>Parent: {{ parent() }}</p>
+    <p>Constant: {{ constant('PHP_VERSION') }}</p>
+    <p>Dump: {{ dump(user) }}</p>
+    <p>Include: {{ include('partial.twig', {'var': 'value'}) }}</p>
+    <p>Source: {{ source('template.twig') }}</p>
+    <p>Template from string: {{ template_from_string('Hello {{ name }}').render({'name': 'World'}) }}</p>
+
+    {# Date functions #}
+    <p>Date: {{ date() }}</p>
+    <p>Date with format: {{ date('Y-m-d') }}</p>
+    <p>Date with timezone: {{ date('now', 'Europe/Paris') }}</p>
+
+    {# Path and URL functions #}
+    <p>Path: {{ path('user_profile', {'id': user.id}) }}</p>
+    <p>URL: {{ url('user_profile', {'id': user.id}) }}</p>
+    <p>Absolute URL: {{ absolute_url(path('homepage')) }}</p>
+    <p>Relative path: {{ relative_path('/path/to/file') }}</p>
+
+    {# Asset functions #}
+    <p>Asset: {{ asset('css/style.css') }}</p>
+    <p>Asset version: {{ asset('js/app.js', 'v2') }}</p>
+
+    {# Translation functions #}
+    <p>Trans: {{ 'Hello %name%'|trans({'%name%': user.name}) }}</p>
+    <p>Transchoice: {{ '{0} No items|{1} One item|]1,Inf[ %count% items'|transchoice(items|length, {'%count%': items|length}) }}</p>
+
+    {# Form functions #}
+    {{ form_start(form) }}
+    {{ form_widget(form.name) }}
+    {{ form_label(form.email) }}
+    {{ form_errors(form.password) }}
+    {{ form_row(form.submit) }}
+    {{ form_end(form) }}
+
+    {# CSRF functions #}
+    <input type="hidden" name="_token" value="{{ csrf_token('form_id') }}" />
+
+    {# Complex expressions #}
+    <h2>Complex Expressions</h2>
+    <p>{{ (user.age > 18 and user.is_verified) ? 'Adult verified user' : 'Minor or unverified' }}</p>
+    <p>{{ items|filter(item => item.active)|map(item => item.name)|join(', ') }}</p>
+    <p>{{ users|reduce((carry, user) => carry + user.score, 0) }}</p>
+
+    {# String interpolation #}
+    <p>{{ "Hello #{user.name}, you have #{user.messages|length} messages" }}</p>
+
+    {# Hash/Map literals #}
+    {% set config = {
+        'database': {
+            'host': 'localhost',
+            'port': 3306,
+            'name': 'myapp'
+        },
+        'cache': {
+            'enabled': true,
+            'ttl': 3600
+        }
+    } %}
+
+    {# Array literals #}
+    {% set fruits = ['apple', 'banana', 'cherry'] %}
+    {% set numbers = [1, 2, 3, 4, 5] %}
+    {% set mixed = ['string', 42, true, null] %}
+
+    {# Spread operator #}
+    {% set all_items = [1, 2, ...middle_items, 9, 10] %}
+    {% set merged_config = {base: 'value', ...user_config, override: 'final'} %}
+
+    {# Named arguments #}
+    {{ include('template.twig', with_context = false, ignore_missing = true) }}
+    {{ path('route', parameters = {'id': 1}, relative = true) }}
+
+    {# Arrow functions #}
+    {% set filtered = items|filter(v => v.active) %}
+    {% set mapped = items|map(v => v.name|upper) %}
+    {% set sorted = items|sort((a, b) => a.priority <=> b.priority) %}
+
+    {# Comments #}
+    {# Single line comment #}
+    {#
+        Multi-line comment
+        Can span multiple lines
+        Useful for documentation
+    #}
+
+    {# Nested comments #}
+    {# Outer comment {# Inner comment #} back to outer #}
+
+</body>
+</html>

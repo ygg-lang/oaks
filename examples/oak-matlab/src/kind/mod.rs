@@ -1,6 +1,7 @@
 use oak_core::{ElementType, TokenType, UniversalElementRole, UniversalTokenRole};
+use serde::{Deserialize, Serialize};
 
-#[derive(Copy, Clone, Debug, PartialEq, Eq, Hash)]
+#[derive(Copy, Clone, Debug, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub enum MatlabSyntaxKind {
     // 基础标记
     Whitespace,

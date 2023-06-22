@@ -1,12 +1,30 @@
 use oak_core::{ElementType, TokenType, UniversalElementRole, UniversalTokenRole};
+use serde::{Deserialize, Serialize};
 
 /// Kotlin 语法种类
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, serde::Serialize)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub enum KotlinSyntaxKind {
     // 节点种类
     Root,
     SourceFile,
     EndOfStream,
+
+    FunctionDeclaration,
+    ClassDeclaration,
+    VariableDeclaration,
+    IfStatement,
+    WhileStatement,
+    ReturnStatement,
+    Block,
+    BinaryExpression,
+    UnaryExpression,
+    AssignmentExpression,
+    CallExpression,
+    MemberAccessExpression,
+    LiteralExpression,
+    IdentifierExpression,
+    Parameter,
+    TypeReference,
 
     // 关键字
     Class,

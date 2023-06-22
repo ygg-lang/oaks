@@ -1,5 +1,5 @@
 /// 统一 Twig 语法种类（包含节点与词法）
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, serde::Serialize, serde::Deserialize)]
 pub enum TwigSyntaxKind {
     // 节点种类
     Root,

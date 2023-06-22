@@ -1,7 +1,14 @@
 use oak_core::{Language, LanguageCategory};
+use serde::{Deserialize, Serialize};
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
-pub struct SchemeLanguage;
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Default, Serialize, Deserialize)]
+pub struct SchemeLanguage {}
+
+impl SchemeLanguage {
+    pub fn new() -> Self {
+        Self {}
+    }
+}
 
 impl Language for SchemeLanguage {
     const NAME: &'static str = "scheme";

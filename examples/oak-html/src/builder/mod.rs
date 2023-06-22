@@ -3,17 +3,17 @@ use oak_core::{Builder, BuilderCache, GreenNode, OakDiagnostics, Parser, RedNode
 
 /// HTML Builder
 #[derive(Clone)]
-pub struct HtmlBuilder<'config> {
-    config: &'config HtmlLanguage,
+pub struct HtmlBuilder {
+    config: HtmlLanguage,
 }
 
-impl<'config> HtmlBuilder<'config> {
-    pub fn new(config: &'config HtmlLanguage) -> Self {
+impl HtmlBuilder {
+    pub fn new(config: HtmlLanguage) -> Self {
         Self { config }
     }
 }
 
-impl<'config> Builder<HtmlLanguage> for HtmlBuilder<'config> {
+impl Builder<HtmlLanguage> for HtmlBuilder {
     fn build<'a, S: Source + ?Sized>(&self, source: &S, edits: &[TextEdit], _cache: &'a mut impl BuilderCache<HtmlLanguage>) -> BuildOutput<HtmlLanguage> {
         let parser = HtmlParser::new(self.config);
 
@@ -22,7 +22,7 @@ impl<'config> Builder<HtmlLanguage> for HtmlBuilder<'config> {
 
         match parse_result.result {
             Ok(green_tree) => {
-                let source_text = SourceText::new(source.get_text_in((0..source.length()).into()));
+                let source_text = SourceText::new(source.get_text_in((0..source.length()).into()).into_owned());
                 let ast_root = self.build_root(green_tree, &source_text);
                 OakDiagnostics { result: Ok(ast_root), diagnostics: parse_result.diagnostics }
             }
@@ -31,7 +31,7 @@ impl<'config> Builder<HtmlLanguage> for HtmlBuilder<'config> {
     }
 }
 
-impl<'config> HtmlBuilder<'config> {
+impl HtmlBuilder {
     pub(crate) fn build_root<'a>(&self, green_tree: &'a GreenNode<'a, HtmlLanguage>, _source: &SourceText) -> HtmlDocument {
         let _red_root = RedNode::new(green_tree, 0);
         // Simplified AST building for now

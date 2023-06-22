@@ -4,7 +4,7 @@ use oak_gsgl::{GsglLanguage, GsglParser};
 #[test]
 fn test_parser_basic() {
     let language = GsglLanguage::default();
-    let parser = GsglParser::new(&language);
+    let parser = GsglParser::new(language);
     let source = SourceText::new(r#"local x = 42"#);
     let mut cache = ParseSession::<GsglLanguage>::default();
 
@@ -16,7 +16,7 @@ fn test_parser_basic() {
 #[test]
 fn test_parser_function_declaration() {
     let language = GsglLanguage::default();
-    let parser = GsglParser::new(&language);
+    let parser = GsglParser::new(language);
     let source = SourceText::new(
         r#"
         function add(a, b)
@@ -34,7 +34,7 @@ fn test_parser_function_declaration() {
 #[test]
 fn test_parser_local_function() {
     let language = GsglLanguage::default();
-    let parser = GsglParser::new(&language);
+    let parser = GsglParser::new(language);
     let source = SourceText::new(
         r#"
         local function factorial(n)
@@ -59,7 +59,7 @@ fn test_parser_local_function() {
 #[test]
 fn test_parser_table_constructor() {
     let language = GsglLanguage::default();
-    let parser = GsglParser::new(&language);
+    let parser = GsglParser::new(language);
     let source = SourceText::new(r#"local t = {a = 1, b = 2, [3] = "three"}"#);
 
     let mut cache = ParseSession::<GsglLanguage>::default();
@@ -71,7 +71,7 @@ fn test_parser_table_constructor() {
 #[test]
 fn test_parser_control_structures() {
     let language = GsglLanguage::default();
-    let parser = GsglParser::new(&language);
+    let parser = GsglParser::new(language);
     let source = SourceText::new(
         r#"
         local x = 10
@@ -99,8 +99,8 @@ fn test_parser_control_structures() {
         until true
         "#,
     );
-
     let mut cache = ParseSession::<GsglLanguage>::default();
+
     let result = parser.parse(&source, &[], &mut cache);
     assert!(result.result.is_ok());
     println!("Control structures parsed: {:?}", result.result);

@@ -1,8 +1,9 @@
 use crate::ast::TclRoot;
 use oak_core::{Language, LanguageCategory};
+use serde::{Deserialize, Serialize};
 
 /// Tcl 语言配置
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub struct TclLanguage {
     /// Tcl 版本
     pub version: TclVersion,
@@ -10,8 +11,21 @@ pub struct TclLanguage {
     pub extensions: bool,
 }
 
+impl Default for TclLanguage {
+    fn default() -> Self {
+        Self::standard()
+    }
+}
+
+impl TclLanguage {
+    /// 创建新的 Tcl 语言实例
+    pub fn new() -> Self {
+        Self::default()
+    }
+}
+
 /// Tcl 版本
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub enum TclVersion {
     /// Tcl 8.0
     Tcl80,

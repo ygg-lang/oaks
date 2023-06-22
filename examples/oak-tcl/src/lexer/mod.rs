@@ -12,13 +12,13 @@ static TCL_COMMENT: CommentConfig = CommentConfig { line_marker: "#", block_star
 static TCL_STRING: StringConfig = StringConfig { quotes: &['"'], escape: Some('\\') };
 
 #[derive(Clone)]
-pub struct TclLexer {
-    _config: TclLanguage,
+pub struct TclLexer<'config> {
+    _config: &'config TclLanguage,
 }
 
-impl TclLexer {
-    pub fn new(config: &TclLanguage) -> Self {
-        Self { _config: config.clone() }
+impl<'config> TclLexer<'config> {
+    pub fn new(config: &'config TclLanguage) -> Self {
+        Self { _config: config }
     }
 
     fn run<'s, S: Source + ?Sized>(&self, state: &mut State<'s, S>) -> Result<(), OakError> {
@@ -74,7 +74,7 @@ impl TclLexer {
     }
 }
 
-impl Lexer<TclLanguage> for TclLexer {
+impl<'config> Lexer<TclLanguage> for TclLexer<'config> {
     fn lex<'a, S: Source + ?Sized>(&self, source: &'a S, _edits: &[oak_core::TextEdit], cache: &'a mut impl LexerCache<TclLanguage>) -> LexOutput<TclLanguage> {
         let mut state = State::new(source);
         let result = self.run(&mut state);
@@ -82,7 +82,7 @@ impl Lexer<TclLanguage> for TclLexer {
     }
 }
 
-impl TclLexer {
+impl<'config> TclLexer<'config> {
     fn skip_whitespace<'s, S: Source + ?Sized>(&self, state: &mut State<'s, S>) -> bool {
         TCL_WHITESPACE.scan(state, TclSyntaxKind::Whitespace)
     }

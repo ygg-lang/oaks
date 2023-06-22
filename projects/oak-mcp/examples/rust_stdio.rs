@@ -1,4 +1,3 @@
-use oak_mcp::OakMcpService;
 use oak_rust::RustLanguageService;
 use oak_vfs::MemoryVfs;
 
@@ -16,7 +15,7 @@ async fn main() -> tokio::io::Result<()> {
     let service = RustLanguageService::new(vfs);
 
     // Convert the service into an MCP server
-    let server = service.into_mcp_server();
+    let server = oak_mcp::McpServer::new(service);
 
     println!("Starting Rust MCP server on Stdio...");
     server.run().await

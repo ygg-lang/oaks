@@ -13,9 +13,8 @@ impl HoverProvider<ValkyrieLanguage> for ValkyrieHoverProvider {
         let kind = node.green.kind;
 
         let contents = match kind {
-            ValkyrieSyntaxKind::Function => "### Valkyrie Function\nDefines a callable function.",
             ValkyrieSyntaxKind::Namespace => "### Valkyrie Namespace\nDefines a scope for items.",
-            ValkyrieSyntaxKind::Micro => "### Valkyrie Micro\nDefines a micro-service or component.",
+            ValkyrieSyntaxKind::Micro => "### Valkyrie Function\nDefines a callable function.",
             ValkyrieSyntaxKind::LetStatement => "### Let Statement\nDeclares a local variable.",
             ValkyrieSyntaxKind::Identifier => "### Identifier\nA name referring to a value or item.",
             _ => return None,
@@ -30,12 +29,13 @@ pub struct ValkyrieLanguageService<V: Vfs> {
     vfs: V,
     workspace: oak_lsp::workspace::WorkspaceManager,
     hover_provider: ValkyrieHoverProvider,
+    language: ValkyrieLanguage,
 }
 
 impl<V: Vfs> ValkyrieLanguageService<V> {
     /// Creates a new Valkyrie language service.
     pub fn new(vfs: V) -> Self {
-        Self { vfs, workspace: oak_lsp::workspace::WorkspaceManager::default(), hover_provider: ValkyrieHoverProvider }
+        Self { vfs, workspace: oak_lsp::workspace::WorkspaceManager::default(), hover_provider: ValkyrieHoverProvider, language: ValkyrieLanguage::default() }
     }
 }
 
@@ -53,9 +53,10 @@ impl<V: Vfs + Send + Sync + 'static + oak_vfs::WritableVfs> LanguageService for 
 
     fn get_root(&self, uri: &str) -> impl futures::Future<Output = Option<RedNode<'_, ValkyrieLanguage>>> + Send + '_ {
         let source = self.get_source(uri);
+        let uri = uri.to_string();
         async move {
             let source = source?;
-            let language = ValkyrieLanguage::default();
+            let language = self.language;
             let parser = crate::parser::ValkyrieParser::new(&language);
             let lexer = crate::lexer::ValkyrieLexer::new(&language);
 
@@ -67,8 +68,8 @@ impl<V: Vfs + Send + Sync + 'static + oak_vfs::WritableVfs> LanguageService for 
             let mut cache = Box::new(oak_core::parser::session::ParseSession::<ValkyrieLanguage>::default());
             let cache_ptr: *mut oak_core::parser::session::ParseSession<ValkyrieLanguage> = &mut *cache;
 
-            lexer.lex(source.as_ref(), &[], unsafe { &mut *cache_ptr });
-            let output = parser.parse(source.as_ref(), &[], unsafe { &mut *cache_ptr });
+            lexer.lex(&source, &[], unsafe { &mut *cache_ptr });
+            let output = parser.parse(&source, &[], unsafe { &mut *cache_ptr });
             let green = output.result.ok()?;
 
             // 这里的 green 实际上是从 cache.arena 分配的。
@@ -78,7 +79,15 @@ impl<V: Vfs + Send + Sync + 'static + oak_vfs::WritableVfs> LanguageService for 
             // 安全地获取 'static 生命周期的 green 节点，因为它现在属于 leaked_cache
             let green_static: &'static oak_core::GreenNode<ValkyrieLanguage> = unsafe { std::mem::transmute(green) };
 
-            Some(RedNode::new(green_static, 0))
+            let root = RedNode::new(green_static, 0);
+
+            // Index symbols
+            use oak_symbols::{SymbolProvider, UniversalSymbolProvider};
+            let provider = UniversalSymbolProvider::new();
+            let symbols = provider.document_symbols(&uri, &root, &source);
+            self.workspace().symbols.update_file_symbols(uri, symbols);
+
+            Some(root)
         }
     }
 

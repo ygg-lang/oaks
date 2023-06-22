@@ -1,4 +1,4 @@
-use oak_core::{TokenType, UniversalElementRole, UniversalTokenRole};
+use oak_core::{ElementType, TokenType, UniversalElementRole, UniversalTokenRole};
 use serde::{Deserialize, Serialize};
 
 #[derive(Copy, Clone, Debug, PartialEq, Eq, Serialize, Deserialize, Hash)]
@@ -139,9 +139,17 @@ impl TokenType for MarkdownSyntaxKind {
             _ => None,
         }
     }
+
+    fn is_ignored(&self) -> bool {
+        matches!(self, Self::Whitespace | Self::Newline)
+    }
+
+    fn is_whitespace(&self) -> bool {
+        matches!(self, Self::Whitespace | Self::Newline)
+    }
 }
 
-impl oak_core::ElementType for MarkdownSyntaxKind {
+impl ElementType for MarkdownSyntaxKind {
     type Role = UniversalElementRole;
 
     fn role(&self) -> Self::Role {

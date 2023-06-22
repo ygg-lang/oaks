@@ -3,7 +3,6 @@
 use criterion::{Criterion, black_box, criterion_group, criterion_main};
 use oak_core::{Lexer, ParseSession, Parser, source::SourceText};
 use oak_sql::{language::SqlLanguage, lexer::SqlLexer, parser::SqlParser};
-use sqlparser::{dialect::GenericDialect, parser::Parser as SqlParserLib};
 
 fn generate_sql(n: usize) -> String {
     let mut s = String::with_capacity(n * 150);
@@ -41,13 +40,6 @@ fn bench_sql_comparison(c: &mut Criterion) {
             })
         });
 
-        group.bench_function("sqlparser_parse", |b| {
-            let dialect = GenericDialect {};
-            b.iter(|| {
-                let ast = SqlParserLib::parse_sql(&dialect, black_box(&s)).unwrap();
-                black_box(ast);
-            })
-        });
         group.finish();
     }
 
@@ -73,13 +65,6 @@ fn bench_sql_comparison(c: &mut Criterion) {
             })
         });
 
-        group.bench_function("sqlparser_parse", |b| {
-            let dialect = GenericDialect {};
-            b.iter(|| {
-                let ast = SqlParserLib::parse_sql(&dialect, black_box(&s)).unwrap();
-                black_box(ast);
-            })
-        });
         group.finish();
     }
 
@@ -105,13 +90,6 @@ fn bench_sql_comparison(c: &mut Criterion) {
             })
         });
 
-        group.bench_function("sqlparser_parse", |b| {
-            let dialect = GenericDialect {};
-            b.iter(|| {
-                let ast = SqlParserLib::parse_sql(&dialect, black_box(&s)).unwrap();
-                black_box(ast);
-            })
-        });
         group.finish();
     }
 }

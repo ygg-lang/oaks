@@ -1,38 +1,16 @@
 [package]
 name = "oak-kotlin"
-description = "High-performance incremental Kotlin parser for the oak ecosystem with flexible configuration, supporting modern JVM development and functional programming."
-categories = ["parsing"]
-keywords = ["parser", "kotlin", "jvm", "language"]
-documentation = "https://docs.rs/oak-kotlin"
-readme = "readme.md"
 version.workspace = true
 authors.workspace = true
-homepage.workspace = true
-repository.workspace = true
-license.workspace = true
 edition.workspace = true
+license.workspace = true
+categories = ["compilers", "development-tools"]
+keywords = ["frontend", "language", "kotlin"]
+description = "Kotlin frontend for Oak"
 
 [dependencies]
 oak-core = { workspace = true }
-oak-highlight = { workspace = true }
-oak-pretty-print = { workspace = true }
-oak-lsp = { workspace = true }
-oak-mcp = { workspace = true, optional = true }
-oak-hover = { workspace = true }
-oak-vfs = { workspace = true }
-serde = { workspace = true }
-futures = { workspace = true }
-axum = { workspace = true, optional = true }
-tokio = { workspace = true, optional = true }
+serde = { workspace = true, features = ["derive"] }
 
 [dev-dependencies]
-oak-core = { workspace = true, features = ["testing"] }
-
-[features]
-default = []
-mcp = ["dep:oak-mcp"]
-axum = ["mcp", "dep:tokio", "dep:axum", "oak-mcp/axum", "oak-lsp/axum"]
-
-
-[package.metadata.docs.rs]
-all-features = true
+oak-testing = { workspace = true }

@@ -1,69 +1,56 @@
-# WAT 语法分析器模块
+# Wolfram Parser Module
 
-WebAssembly 文本格式 (WAT) 的语法分析器，将词法单元解析为抽象语法树 (AST)。
+The Wolfram Parser module provides comprehensive syntax analysis for the Wolfram Language. It transforms the stream of tokens produced by the `WolframLexer` into a structured Abstract Syntax Tree (AST), enabling deep analysis and transformation of Wolfram expressions.
 
-## 功能特性
+## Purpose
 
-- **递归下降解析**: 高效的语法分析算法
-- **错误恢复**: 从语法错误中恢复
-- **错误报告**: 详细的错误信息
-- **语法验证**: 完整的语法检查
-- **位置跟踪**: 保留源代码位置信息
+The parser is responsible for understanding the hierarchical and operator-heavy structure of the Wolfram Language. It handles operator precedence, complex function call syntax, and various structural forms (lists, associations, etc.) while ensuring the resulting AST accurately reflects the intended symbolic structure.
 
-## 支持的语法
+## Features
 
-### 模块语法
-```wat
-(module
-    (func $name (param $p i32) (result i32) ...)
-    (export "name" (func $name))
-    (import "module" "name" (func $name (param i32)))
-)
-```
+- **Recursive Descent Parsing**: Uses an efficient recursive descent strategy to handle the highly recursive nature of Wolfram expressions.
+- **Operator Precedence Handling**: Correctly implements the extensive and sometimes complex operator precedence rules of the Wolfram Language.
+- **Flexible Function Call Parsing**: Supports standard `f[x]`, prefix `f@x`, and postfix `x//f` function call syntaxes.
+- **Pattern and Rule Recognition**: Specialized parsing logic for Wolfram's powerful pattern matching and rule-based programming constructs.
+- **Error Recovery**: Implements sophisticated error recovery mechanisms to continue parsing and provide multiple diagnostics even in the presence of syntax errors.
+- **Incremental Support**: Designed to work with the Oak incremental parsing framework, re-parsing only changed sections of the source.
 
-### 函数语法
-```wat
-(func $add (param $a i32) (param $b i32) (result i32)
-    local.get $a
-    local.get $b
-    i32.add
-)
-```
+## Parsing Process
 
-## 使用示例
+1. **Token Stream Acquisition**: Receives tokens from the `WolframLexer`.
+2. **Expression Analysis**: Identifies the head and arguments of expressions.
+3. **Operator Resolution**: Determines the structure of binary and unary operations based on precedence and associativity.
+4. **AST Construction**: Builds the `WolframRoot` and constituent `Expression` nodes.
+5. **Diagnostic Generation**: Produces warnings or errors for invalid syntax.
 
-```rust,no_run
-use oak_wolfram::{WolframLexer, WolframParser, WolframLanguage};
-use oak_core::{source::SourceText, Lexer};
+## Usage Example
 
-let wolfram_source = r#"
-    f[x_] := x^2 + 2*x + 1;
-    result = f[5];
-    Print[result];
-"#;
+```rust
+use oak_wolfram::parser::WolframParser;
+use oak_wolfram::lexer::WolframLexer;
 
-// 创建语言配置
-let config = WolframLanguage::default();
-
-// 词法分析
-let lexer = WolframLexer::new(&config);
-let source = SourceText::new(wolfram_source);
-let lex_output = lexer.lex(&source);
-
-// 语法分析
-let mut parser = WolframParser::new();
-let parse_output = parser.parse(lex_output.result.unwrap());
-
-match parse_output.result {
-    Ok(tree) => println!("解析成功"),
-    Err(e) => println!("解析失败: {:?}", e),
+fn main() {
+    let source = "f[x] + g[y] * z";
+    let lexer = WolframLexer::new();
+    let tokens = lexer.tokenize(source);
+    
+    let parser = WolframParser::new();
+    let result = parser.parse(tokens);
+    
+    match result {
+        Ok(ast) => println!("Parsed AST with {} top-level expressions", ast.expressions.len()),
+        Err(diagnostics) => {
+            for diag in diagnostics {
+                println!("Error: {}", diag.message);
+            }
+        }
+    }
 }
 ```
 
-## 错误处理
+## Design Principles
 
-语法分析器提供详细的错误信息：
-- 意外的词法单元
-- 缺少必需的元素
-- 语法结构错误
-- 位置信息
+1. **Accuracy**: Aims to match the parsing behavior of the official Wolfram engine.
+2. **Performance**: Optimized for fast parsing of large symbolic data sets.
+3. **Diagnostics**: Provides clear and actionable error messages for syntax violations.
+4. **Flexibility**: Supports various input forms and can be configured for different parsing contexts.

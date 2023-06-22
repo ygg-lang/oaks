@@ -1,4 +1,5 @@
 use oak_core::{ElementType, Token, TokenType, UniversalElementRole, UniversalTokenRole};
+use serde::Serialize;
 
 /// TOML tokens
 pub type TomlToken = Token<TomlTokenKind>;
@@ -7,7 +8,7 @@ pub type TomlToken = Token<TomlTokenKind>;
 pub type TomlSyntaxKind = TomlTokenKind;
 
 /// TOML tokens 种类（亦作为语法节点种类）
-#[derive(Debug, Clone, PartialEq, Eq, Hash, Copy)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash, Copy, Serialize)]
 pub enum TomlTokenKind {
     // 语法节点（red/green 根）
     Document,

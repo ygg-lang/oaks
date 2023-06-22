@@ -1,12 +1,12 @@
 //! Go 语言格式化器
 
-use oak_pretty_print::Doc;
+use oak_pretty_print::Document;
 
 /// 格式化器 trait
 #[allow(dead_code)]
 pub trait Formatter {
     /// 格式化给定的 AST
-    fn format(&self, text: &str) -> Doc;
+    fn format(&self, text: &str) -> Document<'_>;
 }
 
 /// Go 语言格式化器
@@ -19,7 +19,7 @@ impl GoFormatter {
 }
 
 impl Formatter for GoFormatter {
-    fn format(&self, _text: &str) -> Doc {
-        Doc::Nil
+    fn format(&self, _text: &str) -> Document<'_> {
+        Document::Nil
     }
 }

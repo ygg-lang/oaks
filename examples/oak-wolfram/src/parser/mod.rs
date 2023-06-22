@@ -18,7 +18,7 @@ impl<'config> WolframParser<'config> {
 
 impl<'config> Parser<WolframLanguage> for WolframParser<'config> {
     fn parse<'a, S: Source + ?Sized>(&self, text: &'a S, edits: &[TextEdit], cache: &'a mut impl ParseCache<WolframLanguage>) -> ParseOutput<'a, WolframLanguage> {
-        let lexer = WolframLexer::new(self.config);
+        let lexer = WolframLexer::new(&self.config);
         parse_with_lexer(&lexer, text, edits, cache, |state| {
             let checkpoint = state.checkpoint();
 

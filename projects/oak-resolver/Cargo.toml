@@ -1,0 +1,17 @@
+[package]
+name = "oak-resolver"
+version.workspace = true
+authors.workspace = true
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+description = "Module resolution and global symbol management for the Oaks framework."
+
+[dependencies]
+oak-core = { workspace = true }
+oak-vfs = { workspace = true }
+oak-symbols = { workspace = true }
+serde = { workspace = true }
+dashmap = { workspace = true }
+url = { workspace = true }
+tracing = { workspace = true }

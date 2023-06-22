@@ -8,19 +8,19 @@ mod parse;
 
 pub(crate) type State<'a, S> = ParserState<'a, GsglLanguage, S>;
 
-pub struct GsglParser<'config> {
-    pub(crate) _config: &'config GsglLanguage,
+pub struct GsglParser {
+    pub(crate) _config: GsglLanguage,
 }
 
-impl<'config> GsglParser<'config> {
-    pub fn new(config: &'config GsglLanguage) -> Self {
+impl GsglParser {
+    pub fn new(config: GsglLanguage) -> Self {
         Self { _config: config }
     }
 }
 
-impl<'config> Parser<GsglLanguage> for GsglParser<'config> {
+impl Parser<GsglLanguage> for GsglParser {
     fn parse<'a, S: Source + ?Sized>(&self, text: &'a S, edits: &[TextEdit], cache: &'a mut impl ParseCache<GsglLanguage>) -> ParseOutput<'a, GsglLanguage> {
-        let lexer = crate::lexer::GsglLexer::new();
+        let lexer = crate::lexer::GsglLexer::new(&self._config);
         parse_with_lexer(&lexer, text, edits, cache, |state| self.parse_root_internal(state))
     }
 }

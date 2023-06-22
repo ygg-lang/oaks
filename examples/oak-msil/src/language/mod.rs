@@ -1,7 +1,8 @@
 use oak_core::{Language, LanguageCategory};
+use serde::{Deserialize, Serialize};
 
 /// MSIL 语言实现
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub struct MsilLanguage {
     /// 是否允许扩展指令
     pub extended_instructions: bool,

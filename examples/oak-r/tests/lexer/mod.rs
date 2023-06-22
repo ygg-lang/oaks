@@ -1,4 +1,4 @@
-use oak_core::helpers::LexerTester;
+use oak_diagnostic::testing::lexing::LexerTester;
 use oak_r::{language::RLanguage, lexer::RLexer};
 use std::{path::Path, time::Duration};
 

@@ -1,20 +1,12 @@
-use oak_core::{Lexer, ParseSession, SourceText};
 use oak_sql::{SqlLanguage, SqlLexer};
+use oak_testing::lexing::LexerTester;
+use std::{path::Path, time::Duration};
 
 #[test]
-fn test_sql_lexer_basic() {
-    let source = SourceText::new("SELECT * FROM table");
+fn test_sql_lexer() -> Result<(), oak_core::OakError> {
+    let here = Path::new(env!("CARGO_MANIFEST_DIR"));
     let language = SqlLanguage::default();
     let lexer = SqlLexer::new(&language);
-
-    let mut session = ParseSession::<SqlLanguage>::new(16);
-    let result = lexer.lex(&source, &[], &mut session);
-
-    assert!(result.result.is_ok(), "词法分析应该成功");
-    let tokens = result.result.unwrap();
-    assert!(!tokens.is_empty(), "应该生成至少一个 token");
-
-    // 检查最后一个 token 是否为 Eof
-    let last_token = tokens.last().unwrap();
-    assert_eq!(last_token.kind, oak_sql::SqlSyntaxKind::Eof);
+    let test_runner = LexerTester::new(here.join("tests/lexer")).with_extension("sql").with_timeout(Duration::from_secs(5));
+    test_runner.run_tests(&lexer)
 }

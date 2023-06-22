@@ -1,7 +1,9 @@
 use crate::ast::TypeScriptRoot;
 use oak_core::{Language, LanguageCategory};
+use serde::{Deserialize, Serialize};
 
 /// TypeScript 语言配置
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub struct TypeScriptLanguage {
     /// 是否支持 JSX 语法
     pub jsx: bool,
@@ -15,8 +17,14 @@ pub struct TypeScriptLanguage {
     pub experimental: bool,
 }
 
+impl Default for TypeScriptLanguage {
+    fn default() -> Self {
+        Self::standard()
+    }
+}
+
 /// ECMAScript 版本
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub enum EcmaVersion {
     ES3,
     ES5,
@@ -32,6 +40,11 @@ pub enum EcmaVersion {
 }
 
 impl TypeScriptLanguage {
+    /// 创建新的 TypeScript 语言配置
+    pub fn new() -> Self {
+        Self::default()
+    }
+
     /// 创建标准 TypeScript 配置
     pub fn standard() -> Self {
         Self { jsx: false, decorators: false, strict: false, target: EcmaVersion::ES2020, experimental: false }

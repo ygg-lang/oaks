@@ -9,14 +9,9 @@ pub mod kind;
 pub mod language;
 pub mod lexer;
 pub mod lsp;
-#[cfg(feature = "mcp")]
 pub mod mcp;
 pub mod parser;
 
 pub use crate::{builder::SmalltalkBuilder, formatter::SmalltalkFormatter, highlighter::SmalltalkHighlighter, kind::SmalltalkSyntaxKind, language::SmalltalkLanguage, lexer::SmalltalkLexer, lsp::SmalltalkLanguageService, parser::SmalltalkParser};
 
-#[cfg(feature = "mcp")]
 pub use crate::mcp::serve_smalltalk_mcp;
-
-#[cfg(all(feature = "mcp", feature = "axum"))]
-pub use crate::mcp::serve_smalltalk_mcp_axum;

@@ -20,7 +20,7 @@ oak-highlight = { workspace = true, optional = true }
 oak-pretty-print = { workspace = true, optional = true }
 
 [dev-dependencies]
-oak-core = { workspace = true, features = ["testing"] }
+oak-testing = { workspace = true }
 
 
 [features]

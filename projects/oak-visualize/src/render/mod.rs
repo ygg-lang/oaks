@@ -423,46 +423,42 @@ impl LayoutExporter {
     }
 
     fn export_json(&self, layout: &Layout) -> crate::Result<String> {
-        #[derive(Serialize)]
-        struct JsonLayout {
-            nodes: HashMap<String, JsonRect>,
-            edges: Vec<JsonEdge>,
+        let mut nodes = std::collections::HashMap::new();
+        for (id, node) in &layout.nodes {
+            let rect = &node.rect;
+            nodes.insert(
+                id.clone(),
+                serde_json::json!({
+                    "x": rect.origin.x,
+                    "y": rect.origin.y,
+                    "width": rect.size.width,
+                    "height": rect.size.height
+                }),
+            );
         }
 
-        #[derive(Serialize)]
-        struct JsonRect {
-            x: f64,
-            y: f64,
-            width: f64,
-            height: f64,
+        let mut edges = Vec::new();
+        for edge in &layout.edges {
+            let mut points = Vec::new();
+            for p in &edge.points {
+                points.push(serde_json::json!({
+                    "x": p.x,
+                    "y": p.y
+                }));
+            }
+            edges.push(serde_json::json!({
+                "from": edge.from.clone(),
+                "to": edge.to.clone(),
+                "points": points,
+                "label": edge.label.clone()
+            }));
         }
 
-        #[derive(Serialize)]
-        struct JsonEdge {
-            from: String,
-            to: String,
-            points: Vec<JsonPoint>,
-            label: Option<String>,
-        }
+        let json_layout = serde_json::json!({
+            "nodes": nodes,
+            "edges": edges
+        });
 
-        #[derive(Serialize)]
-        struct JsonPoint {
-            x: f64,
-            y: f64,
-        }
-
-        let json_layout = JsonLayout {
-            nodes: layout
-                .nodes
-                .iter()
-                .map(|(id, node)| {
-                    let rect = &node.rect;
-                    (id.clone(), JsonRect { x: rect.origin.x, y: rect.origin.y, width: rect.size.width, height: rect.size.height })
-                })
-                .collect(),
-            edges: layout.edges.iter().map(|edge| JsonEdge { from: edge.from.clone(), to: edge.to.clone(), points: edge.points.iter().map(|p| JsonPoint { x: p.x, y: p.y }).collect(), label: edge.label.clone() }).collect(),
-        };
-
-        serde_json::to_string_pretty(&json_layout).map_err(|e| crate::Error::Serialization(format!("Failed to serialize layout to JSON: {}", e)))
+        Ok(json_layout.to_string())
     }
 }

@@ -9,14 +9,14 @@ type State<'a, S> = LexerState<'a, S, LuaLanguage>;
 
 /// Lua 词法分析
 #[derive(Clone)]
-pub struct LuaLexer {
-    _config: LuaLanguage,
+pub struct LuaLexer<'config> {
+    _config: &'config LuaLanguage,
 }
 
-impl LuaLexer {
+impl<'config> LuaLexer<'config> {
     /// 创建新的 Lua 词法分析
-    pub fn new(config: &LuaLanguage) -> Self {
-        Self { _config: config.clone() }
+    pub fn new(config: &'config LuaLanguage) -> Self {
+        Self { _config: config }
     }
 
     fn run<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> Result<(), OakError> {
@@ -520,7 +520,7 @@ impl LuaLexer {
     }
 }
 
-impl Lexer<LuaLanguage> for LuaLexer {
+impl<'config> Lexer<LuaLanguage> for LuaLexer<'config> {
     fn lex<'a, S: Source + ?Sized>(&self, source: &'a S, _edits: &[oak_core::TextEdit], cache: &'a mut impl LexerCache<LuaLanguage>) -> LexOutput<LuaLanguage> {
         let mut state = State::new_with_cache(source, 0, cache);
         let result = self.run(&mut state);

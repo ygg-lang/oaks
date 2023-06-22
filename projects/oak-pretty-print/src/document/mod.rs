@@ -1,22 +1,23 @@
 use crate::{config::FormatConfig, document::printer::Printer};
-use alloc::{boxed::Box, string::String, vec::Vec};
+use alloc::{borrow::Cow, boxed::Box, string::String, vec::Vec};
 use core::fmt;
 
 pub mod printer;
 
 /// Document 抽象，用于描述布局逻辑
-#[derive(Clone)]
-pub enum Doc {
+#[derive(Clone, serde::Serialize)]
+#[serde(tag = "kind", content = "value", rename_all = "camelCase")]
+pub enum Document<'a> {
     /// 空文档
     Nil,
     /// 纯文本
-    Text(String),
+    Text(Cow<'a, str>),
     /// 连接多个文档
-    Concat(Vec<Doc>),
+    Concat(Vec<Document<'a>>),
     /// 组合文档，作为换行计算的最小单位
-    Group(Box<Doc>),
+    Group(Box<Document<'a>>),
     /// 增加缩进
-    Indent(Box<Doc>),
+    Indent(Box<Document<'a>>),
     /// 强制换行
     Line,
     /// 软换行：如果 Group 展开则为换行，否则为空
@@ -27,124 +28,70 @@ pub enum Doc {
     HardLine,
 }
 
-/// 用于快速构建 Document 的宏
-#[macro_export]
-macro_rules! doc {
-    // 缩进
-    (indent $doc:expr) => {
-        $crate::Doc::Indent(Box::new($doc))
-    };
-    // 组合
-    (group $doc:expr) => {
-        $crate::Doc::Group(Box::new($doc))
-    };
-    // 换行符
-    (line) => {
-        $crate::Doc::Line
-    };
-    (@line) => {
-        $crate::Doc::Line
-    };
-    // 空
-    (nil) => {
-        $crate::Doc::Nil
-    };
-    // 软换行
-    (soft_line) => {
-        $crate::Doc::SoftLine
-    };
-    (@soft_line) => {
-        $crate::Doc::SoftLine
-    };
-    // 软换行（带空格）
-    (soft_line_space) => {
-        $crate::Doc::SoftLineSpace
-    };
-    (@soft_line_space) => {
-        $crate::Doc::SoftLineSpace
-    };
-    // 强制换行
-    (hard_line) => {
-        $crate::Doc::HardLine
-    };
-    (@hard_line) => {
-        $crate::Doc::HardLine
-    };
-    // 列表连接
-    ([ $($doc:tt),* $(,)? ]) => {
-        $crate::Doc::Concat(vec![ $( $crate::doc!($doc) ),* ])
-    };
-    // 字符串字面量
-    ($text:literal) => {
-        $crate::Doc::Text($text.into())
-    };
-    // 嵌套 doc 调用或变量
-    ($doc:expr) => {
-        $doc
-    };
-}
-
-impl fmt::Debug for Doc {
+impl<'a> fmt::Debug for Document<'a> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         #[cfg(debug_assertions)]
         {
             match self {
-                Doc::Nil => write!(f, "Nil"),
-                Doc::Text(s) => write!(f, "Text({:?})", s),
-                Doc::Concat(docs) => f.debug_list().entries(docs).finish(),
-                Doc::Group(d) => f.debug_tuple("Group").field(d).finish(),
-                Doc::Indent(d) => f.debug_tuple("Indent").field(d).finish(),
-                Doc::Line => write!(f, "Line"),
-                Doc::SoftLine => write!(f, "SoftLine"),
-                Doc::SoftLineSpace => write!(f, "SoftLineSpace"),
-                Doc::HardLine => write!(f, "HardLine"),
+                Document::Nil => write!(f, "Nil"),
+                Document::Text(s) => write!(f, "Text({:?})", s),
+                Document::Concat(docs) => f.debug_list().entries(docs).finish(),
+                Document::Group(d) => f.debug_tuple("Group").field(d).finish(),
+                Document::Indent(d) => f.debug_tuple("Indent").field(d).finish(),
+                Document::Line => write!(f, "Line"),
+                Document::SoftLine => write!(f, "SoftLine"),
+                Document::SoftLineSpace => write!(f, "SoftLineSpace"),
+                Document::HardLine => write!(f, "HardLine"),
             }
         }
         #[cfg(not(debug_assertions))]
         {
             match self {
-                Doc::Nil => write!(f, "Doc::Nil"),
-                Doc::Text(_) => write!(f, "Doc::Text"),
-                Doc::Concat(_) => write!(f, "Doc::Concat"),
-                Doc::Group(_) => write!(f, "Doc::Group"),
-                Doc::Indent(_) => write!(f, "Doc::Indent"),
-                Doc::Line => write!(f, "Doc::Line"),
-                Doc::SoftLine => write!(f, "Doc::SoftLine"),
-                Doc::SoftLineSpace => write!(f, "Doc::SoftLineSpace"),
-                Doc::HardLine => write!(f, "Doc::HardLine"),
+                Document::Nil => write!(f, "Doc::Nil"),
+                Document::Text(_) => write!(f, "Doc::Text"),
+                Document::Concat(_) => write!(f, "Doc::Concat"),
+                Document::Group(_) => write!(f, "Doc::Group"),
+                Document::Indent(_) => write!(f, "Doc::Indent"),
+                Document::Line => write!(f, "Doc::Line"),
+                Document::SoftLine => write!(f, "Doc::SoftLine"),
+                Document::SoftLineSpace => write!(f, "Doc::SoftLineSpace"),
+                Document::HardLine => write!(f, "Doc::HardLine"),
             }
         }
     }
 }
 
-impl Doc {
+impl<'a> Document<'a> {
     /// 渲染 Document 为字符串
     pub fn render(&self, config: FormatConfig) -> String {
         Printer::new(config).print(self)
     }
 
     /// 创建文本文档
-    pub fn text<S: Into<String>>(text: S) -> Self {
-        Doc::Text(text.into())
+    pub fn text<S: Into<Cow<'a, str>>>(text: S) -> Self {
+        Document::Text(text.into())
     }
 
     /// 连接多个文档
-    pub fn concat(docs: Vec<Doc>) -> Self {
-        Doc::Concat(docs)
+    pub fn concat(docs: Vec<Document<'a>>) -> Self {
+        Document::Concat(docs)
     }
 
     /// 创建组合文档
-    pub fn group(doc: Doc) -> Self {
-        Doc::Group(Box::new(doc))
+    pub fn group(doc: Document<'a>) -> Self {
+        Document::Group(Box::new(doc))
     }
 
     /// 创建缩进文档
-    pub fn indent(doc: Doc) -> Self {
-        Doc::Indent(Box::new(doc))
+    pub fn indent(doc: Document<'a>) -> Self {
+        Document::Indent(Box::new(doc))
     }
 
     /// 辅助方法：将多个文档用指定分隔符连接
-    pub fn join(docs: Vec<Doc>, separator: Doc) -> Self {
+    pub fn join<I>(docs: I, separator: Document<'a>) -> Self
+    where
+        I: IntoIterator<Item = Document<'a>>,
+    {
         let mut result = Vec::new();
         for (i, doc) in docs.into_iter().enumerate() {
             if i > 0 {
@@ -152,18 +99,44 @@ impl Doc {
             }
             result.push(doc);
         }
-        Doc::Concat(result)
+        Document::Concat(result)
     }
 }
 
-impl From<String> for Doc {
+impl<'a> From<Cow<'a, str>> for Document<'a> {
+    fn from(s: Cow<'a, str>) -> Self {
+        Document::Text(s)
+    }
+}
+
+impl From<String> for Document<'_> {
     fn from(s: String) -> Self {
-        Doc::Text(s)
+        Document::Text(s.into())
     }
 }
 
-impl From<&str> for Doc {
-    fn from(s: &str) -> Self {
-        Doc::Text(s.to_string())
+impl<'a> From<&'a str> for Document<'a> {
+    fn from(s: &'a str) -> Self {
+        Document::Text(s.into())
+    }
+}
+
+pub trait JoinDoc<'a> {
+    fn join_doc(self, separator: Document<'a>) -> Vec<Document<'a>>;
+}
+
+impl<'a, I> JoinDoc<'a> for I
+where
+    I: IntoIterator<Item = Document<'a>>,
+{
+    fn join_doc(self, separator: Document<'a>) -> Vec<Document<'a>> {
+        let mut result = Vec::new();
+        for (i, doc) in self.into_iter().enumerate() {
+            if i > 0 {
+                result.push(separator.clone());
+            }
+            result.push(doc);
+        }
+        result
     }
 }

@@ -1,9 +1,9 @@
 use crate::lexer::BashTokenType;
 use oak_core::{ElementType, UniversalElementRole};
-use serde::Serialize;
+use serde::{Deserialize, Serialize};
 
 /// Represents all possible element kinds in the Bash shell scripting language.
-#[derive(Debug, Copy, Clone, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize)]
+#[derive(Debug, Copy, Clone, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Deserialize)]
 pub enum BashElementType {
     /// A wrapper for tokens
     Token(BashTokenType),

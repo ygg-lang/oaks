@@ -105,41 +105,154 @@ impl<'config> SqlParser<'config> {
         use crate::kind::SqlSyntaxKind::*;
         let cp = state.checkpoint();
         state.expect(Select).ok();
-        state.advance_until(From);
-        state.expect(From).ok();
-        state.expect(Identifier_).ok(); // TableName
+
+        // Parse Select Items
+        while state.not_at_end() && state.peek_kind() != Some(From) {
+            PrattParser::parse(state, 0, self);
+            state.eat(Comma);
+        }
+
+        if state.eat(From) {
+            state.expect(Identifier_).ok(); // TableName
+
+            // Parse JOIN clauses
+            while let Some(kind) = state.peek_kind() {
+                if matches!(kind, Join | Inner | Left | Right | Full) {
+                    let join_cp = state.checkpoint();
+                    if kind != Join {
+                        state.bump(); // Inner, Left, etc.
+                        state.eat(Outer);
+                    }
+                    state.expect(Join).ok();
+                    state.expect(Identifier_).ok(); // Joined TableName
+                    if state.eat(On) {
+                        PrattParser::parse(state, 0, self); // Join condition
+                    }
+                    state.finish_at(join_cp, JoinClause.into());
+                }
+                else {
+                    break;
+                }
+            }
+        }
+
         if state.eat(Where) {
             PrattParser::parse(state, 0, self);
         }
+
+        if state.eat(Group) {
+            let group_cp = state.checkpoint();
+            state.expect(By).ok();
+            while state.not_at_end() {
+                PrattParser::parse(state, 0, self);
+                if !state.eat(Comma) {
+                    break;
+                }
+            }
+            state.finish_at(group_cp, GroupByClause.into());
+        }
+
+        if state.eat(Having) {
+            let having_cp = state.checkpoint();
+            PrattParser::parse(state, 0, self);
+            state.finish_at(having_cp, HavingClause.into());
+        }
+
+        if state.eat(Order) {
+            let order_cp = state.checkpoint();
+            state.expect(By).ok();
+            while state.not_at_end() {
+                PrattParser::parse(state, 0, self);
+                if state.eat(Asc) || state.eat(Desc) {
+                    // Handled
+                }
+                if !state.eat(Comma) {
+                    break;
+                }
+            }
+            state.finish_at(order_cp, OrderByClause.into());
+        }
+
+        if state.eat(Limit) {
+            let limit_cp = state.checkpoint();
+            state.expect(NumberLiteral).ok();
+            if state.eat(Offset) {
+                state.expect(NumberLiteral).ok();
+            }
+            state.finish_at(limit_cp, LimitClause.into());
+        }
+        else if state.eat(Offset) {
+            let offset_cp = state.checkpoint();
+            state.expect(NumberLiteral).ok();
+            state.finish_at(offset_cp, LimitClause.into());
+        }
+
         state.eat(Semicolon);
         state.finish_at(cp, SelectStatement.into());
         Ok(())
     }
 
     fn parse_insert<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> Result<(), OakError> {
+        use crate::kind::SqlSyntaxKind::*;
         let cp = state.checkpoint();
-        state.bump(); // insert
-        state.advance_until(crate::kind::SqlSyntaxKind::Semicolon);
-        state.eat(crate::kind::SqlSyntaxKind::Semicolon);
-        state.finish_at(cp, crate::kind::SqlSyntaxKind::InsertStatement.into());
+        state.expect(Insert).ok();
+        state.eat(Into);
+        state.expect(Identifier_).ok(); // TableName
+
+        if state.eat(Values) {
+            if state.eat(LeftParen) {
+                while state.not_at_end() && state.peek_kind() != Some(RightParen) {
+                    PrattParser::parse(state, 0, self);
+                    state.eat(Comma);
+                }
+                state.expect(RightParen).ok();
+            }
+        }
+
+        state.eat(Semicolon);
+        state.finish_at(cp, InsertStatement.into());
         Ok(())
     }
 
     fn parse_update<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> Result<(), OakError> {
+        use crate::kind::SqlSyntaxKind::*;
         let cp = state.checkpoint();
-        state.bump(); // update
-        state.advance_until(crate::kind::SqlSyntaxKind::Semicolon);
-        state.eat(crate::kind::SqlSyntaxKind::Semicolon);
-        state.finish_at(cp, crate::kind::SqlSyntaxKind::UpdateStatement.into());
+        state.expect(Update).ok();
+        state.expect(Identifier_).ok(); // TableName
+
+        if state.eat(Set) {
+            while state.not_at_end() && state.peek_kind() != Some(Where) && state.peek_kind() != Some(Semicolon) {
+                state.expect(Identifier_).ok(); // Column
+                state.expect(Equal).ok();
+                PrattParser::parse(state, 0, self);
+                if !state.eat(Comma) {
+                    break;
+                }
+            }
+        }
+
+        if state.eat(Where) {
+            PrattParser::parse(state, 0, self);
+        }
+
+        state.eat(Semicolon);
+        state.finish_at(cp, UpdateStatement.into());
         Ok(())
     }
 
     fn parse_delete<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> Result<(), OakError> {
+        use crate::kind::SqlSyntaxKind::*;
         let cp = state.checkpoint();
-        state.bump(); // delete
-        state.advance_until(crate::kind::SqlSyntaxKind::Semicolon);
-        state.eat(crate::kind::SqlSyntaxKind::Semicolon);
-        state.finish_at(cp, crate::kind::SqlSyntaxKind::DeleteStatement.into());
+        state.expect(Delete).ok();
+        state.eat(From);
+        state.expect(Identifier_).ok(); // TableName
+
+        if state.eat(Where) {
+            PrattParser::parse(state, 0, self);
+        }
+
+        state.eat(Semicolon);
+        state.finish_at(cp, DeleteStatement.into());
         Ok(())
     }
 
@@ -173,7 +286,7 @@ impl<'config> SqlParser<'config> {
 
 impl<'config> Parser<SqlLanguage> for SqlParser<'config> {
     fn parse<'a, S: Source + ?Sized>(&self, text: &'a S, edits: &[TextEdit], cache: &'a mut impl ParseCache<SqlLanguage>) -> ParseOutput<'a, SqlLanguage> {
-        let lexer = crate::lexer::SqlLexer::new(self.config);
+        let lexer = crate::lexer::SqlLexer::new(&self.config);
         parse_with_lexer(&lexer, text, edits, cache, |state| self.parse_root_internal(state))
     }
 }

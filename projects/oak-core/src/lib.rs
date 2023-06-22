@@ -25,6 +25,7 @@ pub mod lexer;
 pub mod memory;
 /// Parsing functionality for converting tokens to kind trees.
 pub mod parser;
+pub mod serde_arc_str;
 pub mod serde_range;
 /// Source text management and location tracking.
 pub mod source;
@@ -42,11 +43,11 @@ pub use crate::{
     builder::{Builder, BuilderCache},
     errors::{OakDiagnostics, OakError, OakErrorKind},
     language::{ElementRole, ElementType, Language, LanguageCategory, TokenRole, TokenType, UniversalElementRole, UniversalTokenRole},
-    lexer::{LexOutput, Lexer, LexerCache, LexerState, Token, Tokens},
+    lexer::{LexOutput, Lexer, LexerCache, LexerState, Token, TokenStream, Tokens},
     memory::arena::SyntaxArena,
-    parser::{Associativity, OperatorInfo, ParseCache, ParseOutput, ParseSession, Parser, ParserState, Pratt, PrattParser, binary, postfix, state::TreeSink, unary},
+    parser::{Associativity, OperatorInfo, ParseCache, ParseOutput, ParseSession, Parser, ParserState, Pratt, PrattParser, binary, parse, parse_one_pass, postfix, state::TreeSink, unary},
     source::{Source, SourceText, TextEdit},
-    tree::{GreenNode, GreenTree, RedNode, RedTree},
+    tree::{GreenNode, GreenTree, RedLeaf, RedNode, RedTree},
 };
 
 pub use triomphe::Arc;

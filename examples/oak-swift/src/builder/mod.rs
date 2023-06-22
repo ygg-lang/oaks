@@ -15,7 +15,7 @@ impl<'config> SwiftBuilder<'config> {
 impl<'config> Builder<SwiftLanguage> for SwiftBuilder<'config> {
     fn build<'a, S: Source + ?Sized>(&self, source: &S, edits: &[TextEdit], _cache: &'a mut impl BuilderCache<SwiftLanguage>) -> oak_core::builder::BuildOutput<SwiftLanguage> {
         let parser = SwiftParser::new(self.config);
-        let _lexer = crate::lexer::SwiftLexer::new(self.config);
+        let _lexer = crate::lexer::SwiftLexer::new(&self.config);
         let mut cache = oak_core::parser::ParseSession::<SwiftLanguage>::default();
         let parse_result = parser.parse(source, edits, &mut cache);
         match parse_result.result {

@@ -1,0 +1,51 @@
+# RBQ Closures and Micro Expansion Test Case
+#
+# Testing trailing closures, $ variables, and nested closure clarity
+
+@table(name = "users")
+class User {
+    @key id: uuid;
+    name: utf8;
+    @relation(back_ref = "author")
+    posts: list<&Post>;
+}
+
+@table(name = "posts")
+class Post {
+    @key id: i64;
+    title: utf8;
+    view_count: i32;
+    author_id: &User;
+    tags: list<utf8>;
+}
+
+# 1. Simple Trailing Closure
+# f { $ } expands to f(micro(x) { x })
+users.filter { $name.starts_with("A") };
+
+# 2. Positional Arguments
+# f { $1 + $2 } expands to f(micro(x1, x2) { x1 + x2 })
+# Note: aggregate functions might use this for custom logic
+# (Hypothetical usage for custom reduction)
+# users.map { $age }.reduce { $1 + $2 };
+
+# 3. Nested Closures
+# Demonstrating how $ always refers to the immediate closure scope
+users.map {
+    username = $name
+    # Nested filter on posts
+    active_posts = $posts.filter { $view_count > 100 }
+                         .map { 
+                             post_title = $title
+                             # Deeply nested check on tags
+                             is_tech = $tags.any { $ == "tech" || $ == "rust" }
+                         }
+};
+
+# 4. Explicit micro usage (the expanded form)
+# This is what the compiler sees after desugaring
+users.filter(micro(u) { u.name == "Alice" });
+
+# 5. Multi-argument micro
+# (Conceptual example for potential future complex DSL operations)
+# pair_operation(micro(a, b) { a.score + b.score });

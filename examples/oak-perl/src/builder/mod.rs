@@ -20,7 +20,7 @@ impl<'config> Builder<PerlLanguage> for PerlBuilder<'config> {
 
         match parse_result.result {
             Ok(_green_tree) => {
-                let _source_text = SourceText::new(source.get_text_in((0..source.length()).into()));
+                let _source_text = SourceText::new(source.get_text_in((0..source.length()).into()).into_owned());
                 // Placeholder implementation
                 let ast_root = PerlRoot { items: Vec::new() };
                 OakDiagnostics { result: Ok(ast_root), diagnostics: parse_result.diagnostics }

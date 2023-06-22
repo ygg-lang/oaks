@@ -1,7 +1,14 @@
 use oak_core::{Language, LanguageCategory};
+use serde::{Deserialize, Serialize};
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
-pub struct SwiftLanguage;
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Default, Serialize, Deserialize)]
+pub struct SwiftLanguage {}
+
+impl SwiftLanguage {
+    pub fn new() -> Self {
+        Self {}
+    }
+}
 
 impl Language for SwiftLanguage {
     const NAME: &'static str = "swift";

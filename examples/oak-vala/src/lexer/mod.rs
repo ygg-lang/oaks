@@ -13,7 +13,7 @@ static VALA_COMMENT: LazyLock<CommentConfig> = LazyLock::new(|| CommentConfig { 
 static VALA_STRING: LazyLock<StringConfig> = LazyLock::new(|| StringConfig { quotes: &['"'], escape: Some('\\') });
 static VALA_CHAR: LazyLock<StringConfig> = LazyLock::new(|| StringConfig { quotes: &['\''], escape: Some('\\') });
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct ValaLexer<'config> {
     _config: &'config ValaLanguage,
 }

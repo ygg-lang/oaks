@@ -115,7 +115,7 @@ impl<'config> Pratt<ZigLanguage> for ZigParser<'config> {
 
 impl<'config> Parser<ZigLanguage> for ZigParser<'config> {
     fn parse<'a, S: Source + ?Sized>(&self, source: &'a S, edits: &[TextEdit], cache: &'a mut impl ParseCache<ZigLanguage>) -> ParseOutput<'a, ZigLanguage> {
-        let lexer = ZigLexer::new(self.config);
+        let lexer = ZigLexer::new(&self.config);
         parse_with_lexer(&lexer, source, edits, cache, |state| self.parse_root_internal(state))
     }
 }

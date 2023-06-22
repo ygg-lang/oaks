@@ -17,6 +17,12 @@ pub struct RustParser<'config> {
     config: &'config RustLanguage,
 }
 
+impl<'config> RustParser<'config> {
+    pub fn new(config: &'config RustLanguage) -> Self {
+        Self { config }
+    }
+}
+
 impl<'config> Pratt<RustLanguage> for RustParser<'config> {
     fn primary<'a, S: oak_core::source::Source + ?Sized>(&self, state: &mut ParserState<'a, RustLanguage, S>) -> &'a GreenNode<'a, RustLanguage> {
         let cp = state.checkpoint();
@@ -124,11 +130,6 @@ impl<'config> Parser<RustLanguage> for RustParser<'config> {
 }
 
 impl<'config> RustParser<'config> {
-    /// Creates a new Rust parser with the given language configuration.
-    pub fn new(config: &'config RustLanguage) -> Self {
-        Self { config }
-    }
-
     pub(crate) fn parse_source_file<'a, S: oak_core::source::Source + ?Sized>(&self, state: &mut ParserState<'a, RustLanguage, S>) -> Result<&'a GreenNode<'a, RustLanguage>, OakError> {
         let cp = state.checkpoint();
         while state.not_at_end() {

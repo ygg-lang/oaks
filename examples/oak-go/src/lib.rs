@@ -16,14 +16,9 @@ mod builder;
 mod formatter;
 pub mod highlighter;
 pub mod lsp;
-#[cfg(feature = "mcp")]
 pub mod mcp;
 
 // 重新导出主要类型
 pub use crate::{ast::GoRoot, builder::GoBuilder, formatter::GoFormatter, highlighter::GoHighlighter, kind::GoSyntaxKind, language::GoLanguage, lexer::GoLexer, lsp::GoLanguageService, parser::GoParser};
 
-#[cfg(feature = "mcp")]
 pub use crate::mcp::serve_go_mcp;
-
-#[cfg(all(feature = "mcp", feature = "axum"))]
-pub use crate::mcp::serve_go_mcp_axum;

@@ -10,9 +10,7 @@ mod kind;
 mod language;
 mod lexer;
 pub mod lsp;
-mod parser;
-
-#[cfg(feature = "mcp")]
 pub mod mcp;
+mod parser;
 
 pub use crate::{ast::HandlebarsRoot, builder::HandlebarsBuilder, highlighter::HandlebarsHighlighter, language::HandlebarsLanguage, lexer::HandlebarsLexer, lsp::HandlebarsLanguageService, parser::HandlebarsParser};

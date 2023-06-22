@@ -1,3 +1,5 @@
+mod lexer;
+
 use oak_core::{Lexer, ParseSession, Parser, SourceText};
 use oak_twig::{TwigLanguage, kind::TwigSyntaxKind};
 

@@ -11,7 +11,13 @@ homepage.workspace = true
 repository.workspace = true
 
 [dependencies]
-serde = { workspace = true }
+serde = { workspace = true, optional = true }
 url = { workspace = true }
-walkdir = { workspace = true }
+walkdir = { workspace = true, optional = true }
 oak-core = { workspace = true }
+notify = { workspace = true, optional = true }
+
+[features]
+default = ["disk"]
+disk = ["dep:walkdir", "dep:notify"]
+serde = ["dep:serde", "oak-core/serde"]

@@ -20,7 +20,7 @@ impl<'config> JasminParser<'config> {
 
 impl<'config> Parser<JasminLanguage> for JasminParser<'config> {
     fn parse<'a, S: Source + ?Sized>(&self, text: &'a S, edits: &[TextEdit], cache: &'a mut impl ParseCache<JasminLanguage>) -> ParseOutput<'a, JasminLanguage> {
-        let lexer = JasminLexer::new(self.config);
+        let lexer = JasminLexer::new(&self.config);
         parse_with_lexer(&lexer, text, edits, cache, |state| self.parse_root_internal(state))
     }
 }

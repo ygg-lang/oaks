@@ -1,8 +1,10 @@
+#![feature(new_range_api)]
 use oak_core::{
+    Arc, Range,
     language::{ElementRole, ElementType, Language, TokenType, UniversalElementRole, UniversalTokenRole},
+    source::Source,
     tree::{RedNode, RedTree},
 };
-use oak_lsp::LocationRange;
 use serde::{Deserialize, Serialize};
 
 /// Represents information about a symbol (e.g., function, variable, class).
@@ -12,8 +14,12 @@ pub struct SymbolInformation {
     pub name: String,
     /// The universal role of the symbol.
     pub role: UniversalElementRole,
-    /// The location of the symbol.
-    pub location: LocationRange,
+    /// The URI of the resource.
+    #[serde(with = "oak_core::serde_arc_str")]
+    pub uri: Arc<str>,
+    /// The byte range within the resource.
+    #[serde(with = "oak_core::serde_range")]
+    pub range: Range<usize>,
     /// The name of the container this symbol is in.
     pub container_name: Option<String>,
 }
@@ -21,10 +27,7 @@ pub struct SymbolInformation {
 /// Trait for languages that support symbol search and navigation.
 pub trait SymbolProvider<L: Language> {
     /// Returns symbols defined in the document.
-    ///
-    /// This is typically used for `textDocument/documentSymbol` when a flat list is preferred,
-    /// or as a basis for `workspace/symbol`.
-    fn document_symbols(&self, root: &RedNode<L>) -> Vec<SymbolInformation>;
+    fn document_symbols<S: Source + ?Sized>(&self, uri: &str, root: &RedNode<L>, source: &S) -> Vec<SymbolInformation>;
 }
 
 /// A universal symbol provider that works for any language whose ElementType implements role().
@@ -35,8 +38,7 @@ impl UniversalSymbolProvider {
         Self
     }
 
-    #[allow(dead_code)]
-    fn collect_symbols<L: Language>(&self, node: &RedNode<L>, symbols: &mut Vec<SymbolInformation>, container_name: Option<String>, source: &str) {
+    fn collect_symbols<L: Language, S: Source + ?Sized>(&self, uri: &str, node: &RedNode<L>, symbols: &mut Vec<SymbolInformation>, container_name: Option<String>, source: &S) {
         let role = node.green.kind.role();
 
         if role.universal() == UniversalElementRole::Definition {
@@ -46,8 +48,8 @@ impl UniversalSymbolProvider {
                 match child {
                     RedTree::Leaf(leaf) => {
                         // In many languages, the first name identifier in a definition is its name
-                        if leaf.kind.is_universal(UniversalTokenRole::None) || leaf.kind.is_universal(UniversalTokenRole::Name) {
-                            name = Some(source[leaf.span.clone()].to_string());
+                        if leaf.kind.is_universal(UniversalTokenRole::Name) || leaf.kind.is_universal(UniversalTokenRole::None) {
+                            name = Some(source.get_text_in(leaf.span).to_string());
                             break;
                         }
                     }
@@ -57,20 +59,12 @@ impl UniversalSymbolProvider {
 
             let name = name.unwrap_or_else(|| format!("<{:?}>", node.green.kind));
 
-            symbols.push(SymbolInformation {
-                name: name.clone(),
-                role: role.universal(),
-                location: LocationRange {
-                    uri: "file:///dummy".to_string(), // This should be provided by the caller
-                    range: node.span(),
-                },
-                container_name: container_name.clone(),
-            });
+            symbols.push(SymbolInformation { name: name.clone(), role: role.universal(), uri: uri.to_string().into(), range: node.span(), container_name: container_name.clone() });
 
             // Recurse with this definition as the container
             for child in node.children() {
                 if let RedTree::Node(child_node) = child {
-                    self.collect_symbols::<L>(&child_node, symbols, Some(name.clone()), source);
+                    self.collect_symbols(uri, &child_node, symbols, Some(name.clone()), source);
                 }
             }
         }
@@ -78,7 +72,7 @@ impl UniversalSymbolProvider {
             // Just recurse
             for child in node.children() {
                 if let RedTree::Node(child_node) = child {
-                    self.collect_symbols::<L>(&child_node, symbols, container_name.clone(), source);
+                    self.collect_symbols(uri, &child_node, symbols, container_name.clone(), source);
                 }
             }
         }
@@ -86,11 +80,9 @@ impl UniversalSymbolProvider {
 }
 
 impl<L: Language> SymbolProvider<L> for UniversalSymbolProvider {
-    fn document_symbols(&self, _root: &RedNode<L>) -> Vec<SymbolInformation> {
-        // We need the source code to get the names, but the trait doesn't provide it.
-        // This is a limitation of the current trait design.
-        // For now, we'll return an empty list or change the trait.
-        // Actually, let's keep the trait as is and assume the provider has access to source if needed.
-        Vec::new()
+    fn document_symbols<S: Source + ?Sized>(&self, uri: &str, root: &RedNode<L>, source: &S) -> Vec<SymbolInformation> {
+        let mut symbols = Vec::new();
+        self.collect_symbols(uri, root, &mut symbols, None, source);
+        symbols
     }
 }

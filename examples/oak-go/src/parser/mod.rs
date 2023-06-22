@@ -247,15 +247,11 @@ impl<'config> Parser<GoLanguage> for GoParser<'config> {
     fn parse<'a, S: Source + ?Sized>(&self, text: &'a S, edits: &[TextEdit], cache: &'a mut impl ParseCache<GoLanguage>) -> ParseOutput<'a, GoLanguage> {
         let lexer = GoLexer::new(self.config);
         parse_with_lexer(&lexer, text, edits, cache, |state| {
-            let checkpoint = state.checkpoint();
+            let cp = state.checkpoint();
             while state.not_at_end() {
-                if state.peek_kind().map(|k| k.is_ignored()).unwrap_or(false) {
-                    state.bump();
-                    continue;
-                }
                 self.parse_statement(state)?;
             }
-            Ok(state.finish_at(checkpoint, GoSyntaxKind::SourceFile.into()))
+            Ok(state.finish_at(cp, GoSyntaxKind::SourceFile.into()))
         })
     }
 }

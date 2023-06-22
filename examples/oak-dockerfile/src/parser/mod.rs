@@ -20,7 +20,7 @@ impl<'config> DockerfileParser<'config> {
 
 impl<'config> Parser<DockerfileLanguage> for DockerfileParser<'config> {
     fn parse<'a, S: Source + ?Sized>(&self, text: &'a S, edits: &[TextEdit], cache: &'a mut impl ParseCache<DockerfileLanguage>) -> ParseOutput<'a, DockerfileLanguage> {
-        let lexer = DockerfileLexer::new(self.config);
+        let lexer = DockerfileLexer::new(&self.config);
         parse_with_lexer(&lexer, text, edits, cache, |state| self.parse_root_internal(state))
     }
 }

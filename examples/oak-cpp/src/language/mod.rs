@@ -3,10 +3,11 @@ use crate::{
     parser::CppElementType,
 };
 use oak_core::{Language, LanguageCategory};
+use serde::{Deserialize, Serialize};
 
 /// C++ 语言实现
-#[derive(Debug, Clone)]
-pub struct CppLanguage;
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
+pub struct CppLanguage {}
 
 impl Language for CppLanguage {
     const NAME: &'static str = "cpp";
@@ -20,7 +21,7 @@ impl Language for CppLanguage {
 impl CppLanguage {
     /// 创建新的 C++ 语言实例
     pub fn new() -> Self {
-        Self
+        Self {}
     }
 
     /// 创建 C++ 词法分析器
@@ -31,6 +32,6 @@ impl CppLanguage {
 
 impl Default for CppLanguage {
     fn default() -> Self {
-        Self::new()
+        Self {}
     }
 }

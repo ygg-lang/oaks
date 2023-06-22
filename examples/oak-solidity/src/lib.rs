@@ -14,13 +14,8 @@ pub mod parser;
 
 mod formatter;
 pub mod lsp;
-#[cfg(feature = "mcp")]
 pub mod mcp;
 
 pub use crate::{builder::SolidityBuilder, formatter::SolidityFormatter, highlighter::SolidityHighlighter, language::SolidityLanguage, lexer::SolidityLexer, lsp::SolidityLanguageService, parser::SolidityParser};
 
-#[cfg(feature = "mcp")]
 pub use crate::mcp::serve_solidity_mcp;
-
-#[cfg(all(feature = "mcp", feature = "axum"))]
-pub use crate::mcp::serve_solidity_mcp_axum;

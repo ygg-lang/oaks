@@ -185,7 +185,7 @@ impl<'config> Pratt<RubyLanguage> for RubyParser<'config> {
 
 impl<'config> Parser<RubyLanguage> for RubyParser<'config> {
     fn parse<'a, S: Source + ?Sized>(&self, text: &'a S, edits: &[TextEdit], cache: &'a mut impl ParseCache<RubyLanguage>) -> ParseOutput<'a, RubyLanguage> {
-        let lexer = RubyLexer::new(self.config);
+        let lexer = RubyLexer::new(&self.config);
         parse_with_lexer(&lexer, text, edits, cache, |state| self.parse_root_internal(state))
     }
 }

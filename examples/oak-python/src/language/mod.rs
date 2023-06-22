@@ -1,8 +1,16 @@
 use oak_core::{Language, LanguageCategory};
+use serde::{Deserialize, Serialize};
 
 /// Python 语言定义
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
-pub struct PythonLanguage;
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Default, Serialize, Deserialize)]
+pub struct PythonLanguage {}
+
+impl PythonLanguage {
+    /// 创建新的 Python 语言配置
+    pub fn new() -> Self {
+        Self {}
+    }
+}
 
 impl Language for PythonLanguage {
     const NAME: &'static str = "python";

@@ -4,12 +4,14 @@
 #![doc(html_favicon_url = "https://raw.githubusercontent.com/ygg-lang/oaks/refs/heads/dev/documents/logo.svg")]
 
 pub mod ast;
+mod builder;
 pub mod language;
 pub mod lexer;
 pub mod parser;
 
 pub use crate::{
     ast::BashRoot,
+    builder::BashBuilder,
     language::BashLanguage,
     lexer::{BashLexer, BashTokenType},
     parser::{BashElementType, BashParser},

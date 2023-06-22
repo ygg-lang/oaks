@@ -1,40 +1,14 @@
 [package]
 name = "oak-javascript"
-description = "JavaScript dynamic programming language parser with support for modern ECMAScript features and web development."
-categories = ["parsing"]
-keywords = ["parser", "javascript", "ecmascript", "language"]
-documentation = "https://docs.rs/oak-javascript"
-readme = "readme.md"
 version.workspace = true
 authors.workspace = true
-homepage.workspace = true
-repository.workspace = true
-license.workspace = true
 edition.workspace = true
+license.workspace = true
+categories = ["compilers", "development-tools"]
+keywords = ["frontend", "language", "javascript"]
+description = "JavaScript frontend for Oak (reuses TypeScript implementation)"
 
 [dependencies]
 oak-core = { workspace = true }
-oak-highlight = { workspace = true }
-oak-pretty-print = { workspace = true }
-oak-lsp = { workspace = true }
-oak-hover = { workspace = true }
-oak-vfs = { workspace = true }
-oak-mcp = { workspace = true, optional = true }
+oak-typescript = { workspace = true }
 serde = { workspace = true }
-futures = { workspace = true }
-tracing = { workspace = true }
-tokio = { workspace = true, optional = true }
-axum = { workspace = true, optional = true }
-
-[dev-dependencies]
-oak-core = { workspace = true, features = ["testing"] }
-
-[features]
-default = []
-mcp = ["dep:oak-mcp"]
-axum = ["mcp", "dep:tokio", "dep:axum", "oak-mcp/axum", "oak-lsp/axum"]
-semantic-search = ["mcp"]
-
-
-[package.metadata.docs.rs]
-all-features = true

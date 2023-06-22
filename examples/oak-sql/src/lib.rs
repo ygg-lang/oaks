@@ -14,7 +14,6 @@ pub mod parser;
 
 mod formatter;
 pub mod lsp;
-#[cfg(feature = "mcp")]
 pub mod mcp;
 
 // 重新导出主要类型

@@ -1,17 +1,38 @@
 use crate::{FileMetadata, FileType, Vfs, WritableVfs};
-use oak_core::source::SourceText;
-use std::{fs, path::PathBuf};
+use oak_core::{
+    Arc,
+    source::{SourceId, SourceText},
+};
+use std::{
+    collections::HashMap,
+    fs,
+    path::PathBuf,
+    sync::{
+        RwLock,
+        atomic::{AtomicU32, Ordering},
+    },
+};
 use url::Url;
 
 /// A disk-based Virtual File System implementation.
 /// Handles file URIs and interacts with the physical file system.
-#[derive(Default, Clone)]
-pub struct DiskVfs;
+#[derive(Default)]
+pub struct DiskVfs {
+    ids: std::sync::Arc<RwLock<HashMap<SourceId, Arc<str>>>>,
+    uri_to_id: std::sync::Arc<RwLock<HashMap<Arc<str>, SourceId>>>,
+    next_id: std::sync::Arc<AtomicU32>,
+}
+
+impl Clone for DiskVfs {
+    fn clone(&self) -> Self {
+        Self { ids: self.ids.clone(), uri_to_id: self.uri_to_id.clone(), next_id: self.next_id.clone() }
+    }
+}
 
 impl DiskVfs {
     /// Create a new DiskVfs.
     pub fn new() -> Self {
-        Self
+        Self::default()
     }
 
     /// Convert a URI string to a PathBuf.
@@ -26,8 +47,22 @@ impl DiskVfs {
     }
 
     /// Convert a PathBuf to a URI string.
-    fn path_to_uri(&self, path: PathBuf) -> String {
-        if let Ok(url) = Url::from_file_path(path) { url.to_string() } else { "".to_string() }
+    fn path_to_uri(&self, path: PathBuf) -> Arc<str> {
+        if let Ok(url) = Url::from_file_path(path) { Arc::from(url.to_string()) } else { Arc::from("") }
+    }
+
+    fn get_or_assign_id(&self, uri: &str) -> SourceId {
+        let mut uri_to_id = self.uri_to_id.write().unwrap();
+        if let Some(id) = uri_to_id.get(uri) {
+            return *id;
+        }
+
+        let mut ids = self.ids.write().unwrap();
+        let id = self.next_id.fetch_add(1, Ordering::SeqCst);
+        let uri_arc: Arc<str> = Arc::from(uri);
+        uri_to_id.insert(uri_arc.clone(), id);
+        ids.insert(id, uri_arc);
+        id
     }
 }
 
@@ -36,7 +71,18 @@ impl Vfs for DiskVfs {
 
     fn get_source(&self, uri: &str) -> Option<SourceText> {
         let path = self.uri_to_path(uri)?;
-        fs::read_to_string(path).ok().map(SourceText::new)
+        let id = self.get_or_assign_id(uri);
+        fs::read_to_string(path).ok().map(|s| SourceText::new_with_id(s, id))
+    }
+
+    fn get_uri(&self, id: SourceId) -> Option<Arc<str>> {
+        let ids = self.ids.read().unwrap();
+        ids.get(&id).cloned()
+    }
+
+    fn get_id(&self, uri: &str) -> Option<SourceId> {
+        let uri_to_id = self.uri_to_id.read().unwrap();
+        uri_to_id.get(uri).cloned()
     }
 
     fn exists(&self, uri: &str) -> bool {
@@ -62,7 +108,7 @@ impl Vfs for DiskVfs {
         Some(FileMetadata { file_type, len: meta.len(), modified })
     }
 
-    fn read_dir(&self, uri: &str) -> Option<Vec<String>> {
+    fn read_dir(&self, uri: &str) -> Option<Vec<Arc<str>>> {
         let path = self.uri_to_path(uri)?;
         if !path.is_dir() {
             return None;
@@ -79,12 +125,12 @@ impl Vfs for DiskVfs {
 }
 
 impl WritableVfs for DiskVfs {
-    fn write_file(&self, uri: &str, content: String) {
+    fn write_file(&self, uri: &str, content: Arc<str>) {
         if let Some(path) = self.uri_to_path(uri) {
             if let Some(parent) = path.parent() {
                 let _ = fs::create_dir_all(parent);
             }
-            let _ = fs::write(path, content);
+            let _ = fs::write(path, content.as_ref());
         }
     }
 

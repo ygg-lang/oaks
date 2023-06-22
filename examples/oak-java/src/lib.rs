@@ -10,8 +10,7 @@ pub mod kind;
 pub mod language;
 pub mod lexer;
 pub mod lsp;
-#[cfg(feature = "mcp")]
-pub mod mcp;
+// pub mod mcp;
 pub mod parser;
 
 pub use crate::{ast::JavaRoot, builder::JavaBuilder, highlighter::JavaHighlighter, kind::JavaSyntaxKind, language::JavaLanguage, lexer::JavaLexer, lsp::JavaLanguageService, parser::JavaParser};

@@ -3,6 +3,12 @@ use oak_core::{Language, LanguageCategory};
 #[derive(Debug, Clone)]
 pub struct XmlLanguage {}
 
+impl XmlLanguage {
+    pub fn new() -> Self {
+        Self {}
+    }
+}
+
 impl Default for XmlLanguage {
     fn default() -> Self {
         Self {}
@@ -15,5 +21,5 @@ impl Language for XmlLanguage {
 
     type TokenType = crate::kind::XmlSyntaxKind;
     type ElementType = crate::kind::XmlSyntaxKind;
-    type TypedRoot = ();
+    type TypedRoot = crate::ast::XmlRoot;
 }

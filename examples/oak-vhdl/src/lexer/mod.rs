@@ -5,15 +5,18 @@ use oak_core::{
     source::{Source, TextEdit},
 };
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct VhdlLexer<'config> {
     _config: &'config VhdlLanguage,
 }
 
 impl<'config> Lexer<VhdlLanguage> for VhdlLexer<'config> {
-    fn lex<'a, S: Source + ?Sized>(&self, source: &'a S, _edits: &[TextEdit], cache: &'a mut impl LexerCache<VhdlLanguage>) -> LexOutput<VhdlLanguage> {
-        let mut state = LexerState::new(source);
+    fn lex<'a, S: Source + ?Sized>(&self, source: &S, _edits: &[TextEdit], cache: &'a mut impl LexerCache<VhdlLanguage>) -> LexOutput<VhdlLanguage> {
+        let mut state = LexerState::new_with_cache(source, 0, cache);
         let result = self.run(&mut state);
+        if result.is_ok() {
+            state.add_eof();
+        }
         state.finish_with_cache(result, cache)
     }
 }
@@ -25,7 +28,7 @@ impl<'config> VhdlLexer<'config> {
 
     /// 主要的词法分析循环
     fn run<'a, S: Source + ?Sized>(&self, state: &mut LexerState<'a, S, VhdlLanguage>) -> Result<(), OakError> {
-        while !state.not_at_end() {
+        while state.not_at_end() {
             let safe_point = state.get_position();
 
             // 尝试各种词法规则
@@ -66,9 +69,6 @@ impl<'config> VhdlLexer<'config> {
 
             state.advance_if_dead_lock(safe_point);
         }
-
-        // 添加 EOF token
-        state.add_eof();
 
         Ok(())
     }

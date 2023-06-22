@@ -52,7 +52,7 @@ use std::sync::Arc;
 
 async fn start_server<S: LanguageService>(service: Arc<S>) {
     // Oak LSP provides handlers that can be plugged into web frameworks or stdio
-    // e.g., using axum or actix-web
+    // e.g., using axum
 }
 ```
 

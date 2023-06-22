@@ -13,7 +13,7 @@ use triomphe::Arc;
 ///
 /// This is used to "promote" nodes from a previous generation's arena to the current one,
 /// ensuring that the new tree is self-contained and has good memory locality.
-pub fn deep_clone_node<'a, L: Language>(node: &'a GreenNode<'a, L>, arena: &'a SyntaxArena) -> &'a GreenNode<'a, L> {
+pub fn deep_clone_node<'a, L: Language>(node: &GreenNode<'_, L>, arena: &'a SyntaxArena) -> &'a GreenNode<'a, L> {
     let children_iter = node.children.iter().map(|child| match child {
         GreenTree::Node(n) => GreenTree::Node(deep_clone_node(n, arena)),
         GreenTree::Leaf(l) => GreenTree::Leaf(*l),
@@ -106,6 +106,16 @@ impl<'a, L: Language> TreeSink<'a, L> {
         self.children.len()
     }
 
+    /// Returns the syntax arena used by this sink.
+    pub fn arena(&self) -> &'a SyntaxArena {
+        self.arena
+    }
+
+    /// Restores the sink to a previous checkpoint by truncating the children list.
+    pub fn restore(&mut self, checkpoint: usize) {
+        self.children.truncate(checkpoint);
+    }
+
     /// Finishes a node starting from the given checkpoint and adds it as a child.
     pub fn finish_node(&mut self, checkpoint: usize, kind: L::ElementType) -> &'a GreenNode<'a, L> {
         let children_slice = self.arena.alloc_slice_copy(&self.children[checkpoint..]);
@@ -195,9 +205,14 @@ pub struct ParserState<'a, L: Language, S: Source + ?Sized = crate::source::Sour
 }
 
 impl<'a, L: Language, S: Source + ?Sized> ParserState<'a, L, S> {
-    /// Returns the source file's URL, if available.
-    pub fn source_url(&self) -> Option<crate::source::Url> {
-        self.source.url()
+    /// Returns the source file's ID, if available.
+    pub fn source_id(&self) -> Option<crate::source::SourceId> {
+        self.source.source_id()
+    }
+
+    /// Returns the syntax arena used by this parser.
+    pub fn arena(&self) -> &'a SyntaxArena {
+        self.sink.arena()
     }
 
     /// Creates a new parser state.
@@ -252,49 +267,49 @@ impl<'a, L: Language, S: Source + ?Sized> ParserState<'a, L, S> {
 
     /// Records a syntax error with the given message.
     pub fn syntax_error(&mut self, message: impl Into<String>) -> OakError {
-        let err = OakError::syntax_error(message, self.current_offset(), self.source.url());
+        let err = OakError::syntax_error(message, self.current_offset(), self.source.source_id());
         self.errors.push(err.clone());
         err
     }
 
     /// Records an unexpected token error.
     pub fn record_unexpected_token(&mut self, token: impl Into<String>) {
-        let err = OakError::unexpected_token(token, self.current_offset(), self.source.url());
+        let err = OakError::unexpected_token(token, self.current_offset(), self.source.source_id());
         self.errors.push(err);
     }
 
     /// Records an expected token error.
     pub fn record_expected(&mut self, expected: impl Into<String>) {
         let offset = self.tokens.current().map(|t| t.span.start).unwrap_or(self.source.length());
-        let err = OakError::expected_token(expected, offset, self.source.url());
+        let err = OakError::expected_token(expected, offset, self.source.source_id());
         self.errors.push(err);
     }
 
     /// Records an expected name error.
     pub fn record_expected_name(&mut self, name_kind: impl Into<String>) {
         let offset = self.tokens.current().map(|t| t.span.start).unwrap_or(self.source.length());
-        let err = OakError::expected_name(name_kind, offset, self.source.url());
+        let err = OakError::expected_name(name_kind, offset, self.source.source_id());
         self.errors.push(err);
     }
 
     /// Records a trailing comma not allowed error.
     pub fn record_trailing_comma_not_allowed(&mut self) {
         let offset = self.tokens.current().map(|t| t.span.start).unwrap_or(self.source.length());
-        let err = OakError::trailing_comma_not_allowed(offset, self.source.url());
+        let err = OakError::trailing_comma_not_allowed(offset, self.source.source_id());
         self.errors.push(err);
     }
 
     /// Records an unexpected end of file error.
     pub fn record_unexpected_eof(&mut self) {
         let offset = self.source.length();
-        let err = OakError::unexpected_eof(offset, self.source.url());
+        let err = OakError::unexpected_eof(offset, self.source.source_id());
         self.errors.push(err);
     }
 
     /// Records an unexpected end of file error and returns it.
     pub fn unexpected_eof(&mut self) -> OakError {
         let offset = self.source.length();
-        let err = OakError::unexpected_eof(offset, self.source.url());
+        let err = OakError::unexpected_eof(offset, self.source.source_id());
         self.errors.push(err.clone());
         err
     }
@@ -335,6 +350,12 @@ impl<'a, L: Language, S: Source + ?Sized> ParserState<'a, L, S> {
     #[inline]
     pub fn at(&self, kind: L::TokenType) -> bool {
         self.peek_kind() == Some(kind)
+    }
+
+    /// Checks if the current token is NOT of the specified kind.
+    #[inline]
+    pub fn not_at(&self, kind: L::TokenType) -> bool {
+        !self.at(kind)
     }
 
     /// Advances the current position to the next token.
@@ -392,22 +413,62 @@ impl<'a, L: Language, S: Source + ?Sized> ParserState<'a, L, S> {
             Ok(())
         }
         else {
-            let err = OakError::expected_token(format!("{:?}", kind), self.current_offset(), self.source.url());
+            let err = OakError::expected_token(format!("{:?}", kind), self.current_offset(), self.source.source_id());
             self.errors.push(err.clone());
             Err(err)
+        }
+    }
+
+    /// Tries to parse a construct with a backtracking point.
+    pub fn try_parse<T, F>(&mut self, parser: F) -> Result<T, OakError>
+    where
+        F: FnOnce(&mut Self) -> Result<T, OakError>,
+    {
+        let checkpoint = self.checkpoint();
+        match parser(self) {
+            Ok(value) => Ok(value),
+            Err(err) => {
+                self.restore(checkpoint);
+                Err(err)
+            }
+        }
+    }
+
+    /// Tries to parse a construct with a backtracking point, preserving the error if it fails.
+    ///
+    /// This is similar to `try_parse`, but it keeps the error generated by the parser
+    /// instead of potentially discarding it or generating a generic one.
+    pub fn try_parse_with_error<T, F>(&mut self, parser: F) -> Result<T, OakError>
+    where
+        F: FnOnce(&mut Self) -> Result<T, OakError>,
+    {
+        let checkpoint = self.checkpoint();
+        match parser(self) {
+            Ok(value) => Ok(value),
+            Err(err) => {
+                self.restore(checkpoint);
+                Err(err)
+            }
         }
     }
 
     // --- Tree Construction ---
 
     /// Creates a checkpoint in the tree construction process, which can be used to finish a node later.
-    pub fn checkpoint(&self) -> usize {
-        self.sink.checkpoint()
+    /// This checkpoint includes both the token index and the tree sink's current position for backtracking.
+    pub fn checkpoint(&self) -> (usize, usize) {
+        (self.tokens.index(), self.sink.checkpoint())
+    }
+
+    /// Restores the parser state to a previous checkpoint.
+    pub fn restore(&mut self, (token_index, tree_checkpoint): (usize, usize)) {
+        self.tokens.set_index(token_index);
+        self.sink.restore(tree_checkpoint);
     }
 
     /// Finishes a node starting from the given checkpoint and adds it as a child.
-    pub fn finish_at(&mut self, checkpoint: usize, kind: L::ElementType) -> &'a GreenNode<'a, L> {
-        self.sink.finish_node(checkpoint, kind)
+    pub fn finish_at(&mut self, checkpoint: (usize, usize), kind: L::ElementType) -> &'a GreenNode<'a, L> {
+        self.sink.finish_node(checkpoint.1, kind)
     }
 
     /// Adds an existing node as a child to the current node.

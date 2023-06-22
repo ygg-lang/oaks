@@ -1,4 +1,5 @@
 mod lexer;
+mod parser;
 
 #[test]
 fn test_basic_compilation() {
@@ -6,7 +7,7 @@ fn test_basic_compilation() {
     use oak_go::{GoLanguage, GoLexer, GoSyntaxKind};
 
     // 创建语言实例
-    let language = GoLanguage {};
+    let language = GoLanguage::default();
 
     // 创建词法分析器
     let _lexer = GoLexer::new(&language);

@@ -4,7 +4,7 @@ use std::fmt::Display;
 pub type RegexToken = Token<RegexSyntaxKind>;
 
 #[allow(missing_docs)]
-#[derive(Debug, PartialEq, Eq, PartialOrd, Ord, Clone, Copy, Hash, serde::Serialize)]
+#[derive(Debug, PartialEq, Eq, PartialOrd, Ord, Clone, Copy, Hash, serde::Serialize, serde::Deserialize)]
 #[repr(u16)]
 pub enum RegexSyntaxKind {
     // Special Kinds

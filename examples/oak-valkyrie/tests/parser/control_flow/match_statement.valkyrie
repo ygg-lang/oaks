@@ -1,4 +1,4 @@
-fn main() {
+micro main() {
     match x {
         1 => 2,
         _ => 0,

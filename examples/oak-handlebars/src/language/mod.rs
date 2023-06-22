@@ -1,7 +1,14 @@
 use oak_core::{Language, LanguageCategory};
+use serde::{Deserialize, Serialize};
 
-#[derive(Debug, Default, Clone, Copy, PartialEq, Eq, Hash)]
+#[derive(Debug, Default, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub struct HandlebarsLanguage {}
+
+impl HandlebarsLanguage {
+    pub fn new() -> Self {
+        Self {}
+    }
+}
 
 unsafe impl Send for HandlebarsLanguage {}
 unsafe impl Sync for HandlebarsLanguage {}

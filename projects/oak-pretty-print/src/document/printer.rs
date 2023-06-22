@@ -1,4 +1,4 @@
-use crate::{config::FormatConfig, document::Doc};
+use crate::{config::FormatConfig, document::Document};
 use alloc::string::String;
 
 /// 负责将 Document 渲染为字符串
@@ -14,7 +14,7 @@ impl Printer {
         Self { config, output: String::new(), indent_level: 0, column: 0 }
     }
 
-    pub fn print(mut self, doc: &Doc) -> String {
+    pub fn print(mut self, doc: &Document<'_>) -> String {
         self.render(doc, false);
         self.finalize();
         self.output
@@ -29,30 +29,30 @@ impl Printer {
         }
     }
 
-    fn render(&mut self, doc: &Doc, is_broken: bool) {
+    fn render(&mut self, doc: &Document<'_>, is_broken: bool) {
         match doc {
-            Doc::Nil => {}
-            Doc::Text(s) => {
+            Document::Nil => {}
+            Document::Text(s) => {
                 self.output.push_str(s);
                 self.column += s.len();
             }
-            Doc::Concat(docs) => {
+            Document::Concat(docs) => {
                 for d in docs {
                     self.render(d, is_broken);
                 }
             }
-            Doc::Group(d) => {
+            Document::Group(d) => {
                 // 不再强制继承父级的 broken 状态，而是根据当前内容是否溢出来决定
                 // 这样可以实现更精细的布局：父级展开时，子级如果能放下则仍可保持单行
                 let should_break = self.will_break(d);
                 self.render(d, should_break);
             }
-            Doc::Indent(d) => {
+            Document::Indent(d) => {
                 self.indent_level += 1;
                 self.render(d, is_broken);
                 self.indent_level -= 1;
             }
-            Doc::Line => {
+            Document::Line => {
                 if is_broken {
                     self.newline();
                 }
@@ -61,12 +61,12 @@ impl Printer {
                     self.column += 1;
                 }
             }
-            Doc::SoftLine => {
+            Document::SoftLine => {
                 if is_broken {
                     self.newline();
                 }
             }
-            Doc::SoftLineSpace => {
+            Document::SoftLineSpace => {
                 if is_broken {
                     self.newline();
                 }
@@ -75,7 +75,7 @@ impl Printer {
                     self.column += 1;
                 }
             }
-            Doc::HardLine => {
+            Document::HardLine => {
                 self.newline();
             }
         }
@@ -99,23 +99,23 @@ impl Printer {
     }
 
     /// 简单的宽度预测逻辑
-    fn will_break(&self, doc: &Doc) -> bool {
+    fn will_break(&self, doc: &Document<'_>) -> bool {
         let mut width = self.column;
         self.check_width(doc, &mut width)
     }
 
-    fn check_width(&self, doc: &Doc, width: &mut usize) -> bool {
+    fn check_width(&self, doc: &Document<'_>, width: &mut usize) -> bool {
         if *width > self.config.max_width {
             return true;
         }
 
         match doc {
-            Doc::Nil => false,
-            Doc::Text(s) => {
+            Document::Nil => false,
+            Document::Text(s) => {
                 *width += s.len();
                 *width > self.config.max_width
             }
-            Doc::Concat(docs) => {
+            Document::Concat(docs) => {
                 for d in docs {
                     if self.check_width(d, width) {
                         return true;
@@ -123,23 +123,23 @@ impl Printer {
                 }
                 false
             }
-            Doc::Group(d) => self.check_width(d, width),
-            Doc::Indent(d) => self.check_width(d, width),
-            Doc::Line => {
+            Document::Group(d) => self.check_width(d, width),
+            Document::Indent(d) => self.check_width(d, width),
+            Document::Line => {
                 // 在未展开模式下，Line 表现为空格
                 *width += 1;
                 *width > self.config.max_width
             }
-            Doc::SoftLine => {
+            Document::SoftLine => {
                 // 在未展开模式下，SoftLine 不占空间
                 false
             }
-            Doc::SoftLineSpace => {
+            Document::SoftLineSpace => {
                 // 在未展开模式下，SoftLineSpace 表现为空格
                 *width += 1;
                 *width > self.config.max_width
             }
-            Doc::HardLine => true, // 强制换行意味着必须展开
+            Document::HardLine => true, // 强制换行意味着必须展开
         }
     }
 }

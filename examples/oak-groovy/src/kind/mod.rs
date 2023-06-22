@@ -1,7 +1,8 @@
 use oak_core::{ElementType, TokenType, UniversalElementRole, UniversalTokenRole};
+use serde::{Deserialize, Serialize};
 
 /// Groovy 语法节点类型
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, serde::Serialize)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub enum GroovySyntaxKind {
     Root,
     SourceFile,

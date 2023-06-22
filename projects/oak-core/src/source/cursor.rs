@@ -87,6 +87,20 @@ impl<'s, S: Source + ?Sized> SourceCursor<'s, S> {
         self.rest().chars().next()
     }
 
+    /// Peeks at the character at the specified byte offset relative to the current position.
+    pub fn peek_next_n(&mut self, n: usize) -> Option<char> {
+        let target_offset = self.offset + n;
+        if target_offset >= self.source.length() {
+            return None;
+        }
+        if target_offset >= self.chunk.start && target_offset < self.chunk.end() {
+            let rel = target_offset - self.chunk.start;
+            let text = unsafe { self.chunk.text.get_unchecked(rel..) };
+            return text.chars().next();
+        }
+        self.source.get_char_at(target_offset)
+    }
+
     /// Skips common ASCII whitespace using SIMD if possible.
     pub fn skip_ascii_whitespace(&mut self) -> Range<usize> {
         let start = self.offset;

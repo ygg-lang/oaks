@@ -560,43 +560,43 @@ class SwitchPatternMatching {
 }
 
 // --- Foreign Function & Memory API (Preview in Java 19+) ---
-// import java.lang.foreign.*;
-// import java.lang.invoke.*;
-// class FFMAPIExample {
-//     public void callCFunction() throws Throwable {
-//         Linker linker = Linker.nativeLinker();
-//         MethodHandle strlen = linker.downcallHandle(
-//             linker.defaultLookup().find("strlen").get(),
-//             FunctionDescriptor.of(ValueLayout.JAVA_LONG, ValueLayout.ADDRESS)
-//         );
-//         try (MemorySegment str = MemorySegment.ofArray("Hello".getBytes())) {
-//             long len = (long) strlen.invokeExact(str);
-//             System.out.println("Length: " + len);
-//         }
-//     }
-// }
+import java.lang.foreign.*;
+import java.lang.invoke.*;
+class FFMAPIExample {
+    public void callCFunction() throws Throwable {
+        Linker linker = Linker.nativeLinker();
+        MethodHandle strlen = linker.downcallHandle(
+            linker.defaultLookup().find("strlen").get(),
+            FunctionDescriptor.of(ValueLayout.JAVA_LONG, ValueLayout.ADDRESS)
+        );
+        try (MemorySegment str = MemorySegment.ofArray("Hello".getBytes())) {
+            long len = (long) strlen.invokeExact(str);
+            System.out.println("Length: " + len);
+        }
+    }
+}
 
 // --- Virtual Threads (Preview in Java 19+) ---
-// import java.util.concurrent.Executors;
-// class VirtualThreadsExample {
-//     public void runVirtualThread() {
-//         try (var executor = Executors.newVirtualThreadPerTaskExecutor()) {
-//             executor.submit(() -> {
-//                 System.out.println("Running in virtual thread: " + Thread.currentThread());
-//             });
-//         }
-//     }
-// }
+import java.util.concurrent.Executors;
+class VirtualThreadsExample {
+    public void runVirtualThread() {
+        try (var executor = Executors.newVirtualThreadPerTaskExecutor()) {
+            executor.submit(() -> {
+                System.out.println("Running in virtual thread: " + Thread.currentThread());
+            });
+        }
+    }
+}
 
 // --- Unnamed Classes and Instance Main Methods (Preview in Java 21+) ---
-// void main() {
-//     System.out.println("Hello from unnamed class!");
-// }
+void main() {
+    System.out.println("Hello from unnamed class!");
+}
 
 // --- Unnamed Patterns and Variables (Preview in Java 21+) ---
-// record Pair(int x, int y) {}
-// void processPair(Object o) {
-//     if (o instanceof Pair(int x, _)) {
-//         System.out.println("X value: " + x);
-//     }
-// }
+record Pair(int x, int y) {}
+void processPair(Object o) {
+    if (o instanceof Pair(int x, _)) {
+        System.out.println("X value: " + x);
+    }
+}

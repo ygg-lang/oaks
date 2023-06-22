@@ -1,4 +1,4 @@
-fn main() {
+micro main() {
     3.14;
     2.0;
     1e10;

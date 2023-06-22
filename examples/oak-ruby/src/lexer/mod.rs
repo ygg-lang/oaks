@@ -3,10 +3,12 @@ use oak_core::{LexOutput, Lexer, LexerCache, LexerState, OakError, Source, TextE
 
 type State<'a, S> = LexerState<'a, S, RubyLanguage>;
 
-#[derive(Clone, Default)]
-pub struct RubyLexer {}
+#[derive(Clone, Debug)]
+pub struct RubyLexer<'config> {
+    _config: &'config RubyLanguage,
+}
 
-impl Lexer<RubyLanguage> for RubyLexer {
+impl<'config> Lexer<RubyLanguage> for RubyLexer<'config> {
     fn lex<'a, S: Source + ?Sized>(&self, source: &S, _edits: &[TextEdit], cache: &'a mut impl LexerCache<RubyLanguage>) -> LexOutput<RubyLanguage> {
         let mut state: State<'_, S> = LexerState::new(source);
         let result = self.run(&mut state);
@@ -17,9 +19,9 @@ impl Lexer<RubyLanguage> for RubyLexer {
     }
 }
 
-impl RubyLexer {
-    pub fn new(_config: &RubyLanguage) -> Self {
-        Self {}
+impl<'config> RubyLexer<'config> {
+    pub fn new(config: &'config RubyLanguage) -> Self {
+        Self { _config: config }
     }
 
     fn run<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> Result<(), OakError> {

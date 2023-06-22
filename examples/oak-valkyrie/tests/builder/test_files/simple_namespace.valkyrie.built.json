@@ -1,0 +1,8 @@
+{
+  "success": false,
+  "typed_root": null,
+  "errors": [
+    "Syntax error at 33: Unexpected token or expression in let statement",
+    "Failed to build AST"
+  ]
+}

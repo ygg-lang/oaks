@@ -1,3 +1,5 @@
+mod lexer;
+
 use oak_core::{Lexer, SourceText};
 use oak_toml::{TomlLanguage, TomlSyntaxKind};
 

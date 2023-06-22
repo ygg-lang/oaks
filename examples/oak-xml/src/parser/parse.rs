@@ -7,15 +7,17 @@ impl<'config> XmlParser<'config> {
     pub(crate) fn parse_root_internal<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> Result<&'a GreenNode<'a, XmlLanguage>, OakError> {
         let checkpoint = state.checkpoint();
 
+        self.skip_trivia(state);
         if state.at(XmlSyntaxKind::LeftAngle) && state.peek_kind_at(1) == Some(XmlSyntaxKind::Question) {
             self.parse_prolog(state)?;
         }
 
         while state.not_at_end() {
+            self.skip_trivia(state);
             if state.at(XmlSyntaxKind::LeftAngle) {
                 self.parse_element(state)?;
             }
-            else {
+            else if state.not_at_end() {
                 state.advance();
             }
         }
@@ -30,9 +32,16 @@ impl<'config> XmlParser<'config> {
         state.expect(XmlSyntaxKind::Identifier)?; // xml
 
         while state.not_at_end() && !state.at(XmlSyntaxKind::Question) {
-            self.parse_attribute(state)?;
+            self.skip_trivia(state);
+            if state.at(XmlSyntaxKind::Identifier) {
+                self.parse_attribute(state)?;
+            }
+            else {
+                break;
+            }
         }
 
+        self.skip_trivia(state);
         state.expect(XmlSyntaxKind::Question)?;
         state.expect(XmlSyntaxKind::RightAngle)?;
         state.finish_at(checkpoint, XmlSyntaxKind::Prolog);
@@ -45,12 +54,20 @@ impl<'config> XmlParser<'config> {
         // Start Tag
         let start_tag_checkpoint = state.checkpoint();
         state.expect(XmlSyntaxKind::LeftAngle)?;
+        self.skip_trivia(state);
         state.expect(XmlSyntaxKind::Identifier)?;
 
         while state.not_at_end() && !state.at(XmlSyntaxKind::RightAngle) && !state.at(XmlSyntaxKind::SlashRightAngle) {
-            self.parse_attribute(state)?;
+            self.skip_trivia(state);
+            if state.at(XmlSyntaxKind::Identifier) {
+                self.parse_attribute(state)?;
+            }
+            else {
+                break;
+            }
         }
 
+        self.skip_trivia(state);
         let is_self_closing = state.at(XmlSyntaxKind::SlashRightAngle);
         if is_self_closing {
             let self_closing_checkpoint = state.checkpoint();
@@ -65,10 +82,10 @@ impl<'config> XmlParser<'config> {
 
         // Content
         while state.not_at_end() {
+            if state.at(XmlSyntaxKind::LeftAngleSlash) {
+                break;
+            }
             if state.at(XmlSyntaxKind::LeftAngle) {
-                if state.peek_kind_at(1) == Some(XmlSyntaxKind::SlashRightAngle) || state.peek_kind_at(1) == Some(XmlSyntaxKind::LeftAngleSlash) {
-                    break;
-                }
                 self.parse_element(state)?;
             }
             else {
@@ -79,7 +96,9 @@ impl<'config> XmlParser<'config> {
         // End Tag
         let end_tag_checkpoint = state.checkpoint();
         state.expect(XmlSyntaxKind::LeftAngleSlash)?;
+        self.skip_trivia(state);
         state.expect(XmlSyntaxKind::Identifier)?;
+        self.skip_trivia(state);
         state.expect(XmlSyntaxKind::RightAngle)?;
         state.finish_at(end_tag_checkpoint, XmlSyntaxKind::EndTag);
 
@@ -90,9 +109,23 @@ impl<'config> XmlParser<'config> {
     fn parse_attribute<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> Result<(), OakError> {
         let checkpoint = state.checkpoint();
         state.expect(XmlSyntaxKind::Identifier)?;
+        self.skip_trivia(state);
         state.expect(XmlSyntaxKind::Equals)?;
+        self.skip_trivia(state);
         state.expect(XmlSyntaxKind::StringLiteral)?;
         state.finish_at(checkpoint, XmlSyntaxKind::Attribute);
         Ok(())
+    }
+
+    fn skip_trivia<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) {
+        use oak_core::TokenType;
+        while let Some(token) = state.current() {
+            if token.kind.is_ignored() {
+                state.bump();
+            }
+            else {
+                break;
+            }
+        }
     }
 }

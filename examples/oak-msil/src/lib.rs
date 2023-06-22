@@ -15,5 +15,4 @@ pub mod parser;
 
 pub use crate::{ast::MsilRoot, builder::MsilBuilder, highlighter::MsilHighlighter, kind::MsilSyntaxKind, language::MsilLanguage, lexer::MsilLexer, lsp::MsilLanguageService, parser::MsilParser};
 
-#[cfg(feature = "mcp")]
 pub use crate::mcp::serve_msil_mcp;

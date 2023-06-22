@@ -1,57 +1,12 @@
-use oak_core::{Lexer, ParseSession, source::SourceText};
 use oak_groovy::{language::GroovyLanguage, lexer::GroovyLexer};
+use oak_testing::lexing::LexerTester;
+use std::{path::Path, time::Duration};
 
 #[test]
-fn test_groovy_lexer() {
-    let source = "class HelloWorld";
-
+fn test_groovy_lexer() -> Result<(), oak_core::OakError> {
+    let here = Path::new(env!("CARGO_MANIFEST_DIR"));
     let language = GroovyLanguage::default();
     let lexer = GroovyLexer::new(&language);
-    let source_text = SourceText::new(source);
-    let mut session = ParseSession::<GroovyLanguage>::new(1024);
-    let result = lexer.lex(&source_text, &[], &mut session);
-
-    match result.result {
-        Ok(tokens) => {
-            assert!(!tokens.is_empty(), "Tokens should not be empty");
-            println!("Groovy lexer test passed with {} tokens", tokens.len());
-        }
-        Err(e) => panic!("Groovy lexer test failed: {}", e),
-    }
-}
-
-#[test]
-fn test_peek_behavior() {
-    let source = "class Test";
-    let language = GroovyLanguage::default();
-    let lexer = GroovyLexer::new(&language);
-    let source_text = SourceText::new(source);
-    let mut session = ParseSession::<GroovyLanguage>::new(1024);
-    let result = lexer.lex(&source_text, &[], &mut session);
-
-    match result.result {
-        Ok(tokens) => {
-            assert!(!tokens.is_empty(), "Should have tokens for 'class Test'");
-            println!("Peek behavior test passed");
-        }
-        Err(e) => panic!("Peek behavior test failed: {}", e),
-    }
-}
-
-#[test]
-fn test_groovy_class_parsing() {
-    let source = "class Person";
-    let language = GroovyLanguage::default();
-    let lexer = GroovyLexer::new(&language);
-    let source_text = SourceText::new(source);
-    let mut session = ParseSession::<GroovyLanguage>::new(1024);
-    let result = lexer.lex(&source_text, &[], &mut session);
-
-    match result.result {
-        Ok(tokens) => {
-            assert!(!tokens.is_empty(), "Should have tokens for class definition");
-            println!("Groovy class parsing test passed");
-        }
-        Err(e) => panic!("Groovy class parsing test failed: {}", e),
-    }
+    let test_runner = LexerTester::new(here.join("tests/lexer")).with_extension("groovy").with_timeout(Duration::from_secs(5));
+    test_runner.run_tests(&lexer)
 }

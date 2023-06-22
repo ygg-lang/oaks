@@ -1,20 +1,12 @@
+#[cfg(feature = "io-std")]
 use crate::lsp::TypstLanguageService;
-use oak_mcp::OakMcpService;
+#[cfg(feature = "io-std")]
 use oak_vfs::MemoryVfs;
 
 /// 启动 Typst MCP 服务
+#[cfg(feature = "io-std")]
 pub async fn serve_typst_mcp(vfs: MemoryVfs) {
     let service = TypstLanguageService::new(vfs);
-    let server = service.into_mcp_server();
+    let server = oak_mcp::McpServer::new(service);
     server.run().await.unwrap();
-}
-
-/// 启动 Typst MCP 服务 (Axum)
-#[cfg(feature = "axum")]
-pub async fn serve_typst_mcp_axum(vfs: MemoryVfs) {
-    let service = TypstLanguageService::new(vfs);
-    let app = service.into_mcp_axum_router();
-
-    let listener = tokio::net::TcpListener::bind("127.0.0.1:3103").await.unwrap();
-    axum::serve(listener, app).await.unwrap();
 }

@@ -1,0 +1,43 @@
+{
+  "success": true,
+  "count": 6,
+  "tokens": [
+    {
+      "kind": "IntegerLiteral",
+      "text": "42",
+      "start": 0,
+      "end": 2
+    },
+    {
+      "kind": "IntegerLiteral",
+      "text": "3.14",
+      "start": 3,
+      "end": 7
+    },
+    {
+      "kind": "StringLiteral",
+      "text": "\"hello world\"",
+      "start": 8,
+      "end": 21
+    },
+    {
+      "kind": "Keyword(True)",
+      "text": "true",
+      "start": 22,
+      "end": 26
+    },
+    {
+      "kind": "Keyword(False)",
+      "text": "false",
+      "start": 27,
+      "end": 32
+    },
+    {
+      "kind": "Eof",
+      "text": "",
+      "start": 33,
+      "end": 33
+    }
+  ],
+  "errors": []
+}

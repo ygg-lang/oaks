@@ -2,7 +2,7 @@ use core::fmt;
 use oak_core::{ElementType, TokenType, UniversalElementRole, UniversalTokenRole};
 
 /// GSGL 语法节点类型
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, serde::Serialize)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, serde::Serialize, serde::Deserialize)]
 pub enum GsglSyntaxKind {
     // 根节点
     Root,

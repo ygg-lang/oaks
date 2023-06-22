@@ -8,11 +8,14 @@ use oak_core::{
     source::{Source, TextEdit},
 };
 
-pub struct ClojureLexer;
+#[derive(Clone, Debug)]
+pub struct ClojureLexer<'config> {
+    _config: &'config ClojureLanguage,
+}
 
 type State<'a, S> = LexerState<'a, S, ClojureLanguage>;
 
-impl Lexer<ClojureLanguage> for ClojureLexer {
+impl<'config> Lexer<ClojureLanguage> for ClojureLexer<'config> {
     fn lex<'a, S: Source + ?Sized>(&self, text: &S, _edits: &[TextEdit], cache: &'a mut impl LexerCache<ClojureLanguage>) -> LexOutput<ClojureLanguage> {
         let mut state = State::new(text);
         let result = self.run(&mut state);
@@ -23,7 +26,10 @@ impl Lexer<ClojureLanguage> for ClojureLexer {
     }
 }
 
-impl ClojureLexer {
+impl<'config> ClojureLexer<'config> {
+    pub fn new(config: &'config ClojureLanguage) -> Self {
+        Self { _config: config }
+    }
     fn run<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> Result<(), OakError> {
         while state.not_at_end() {
             let start = state.get_position();
@@ -105,7 +111,7 @@ impl ClojureLexer {
     }
 }
 
-impl ClojureLexer {
+impl<'config> ClojureLexer<'config> {
     fn lex_whitespace<'a, S: Source + ?Sized>(&self, state: &mut LexerState<'a, S, ClojureLanguage>) {
         let start = state.get_position();
         while let Some(c) = state.peek() {

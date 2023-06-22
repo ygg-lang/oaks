@@ -9,7 +9,6 @@ use serde::{Deserialize, Serialize};
 
 /// Severity of a diagnostic.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
-#[serde(rename_all = "lowercase")]
 pub enum Severity {
     Error,
     Warning,
@@ -20,35 +19,9 @@ pub enum Severity {
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Label {
     pub message: Option<String>,
-    #[serde(with = "range_serde")]
+    #[serde(with = "oak_core::serde_range")]
     pub span: core::range::Range<usize>,
     pub color: Option<String>,
-}
-
-mod range_serde {
-    use core::range::Range;
-    use serde::{Deserialize, Deserializer, Serialize, Serializer};
-
-    #[derive(Serialize, Deserialize)]
-    struct RangeProxy {
-        start: usize,
-        end: usize,
-    }
-
-    pub fn serialize<S>(range: &Range<usize>, serializer: S) -> Result<S::Ok, S::Error>
-    where
-        S: Serializer,
-    {
-        RangeProxy { start: range.start, end: range.end }.serialize(serializer)
-    }
-
-    pub fn deserialize<'de, D>(deserializer: D) -> Result<Range<usize>, D::Error>
-    where
-        D: Deserializer<'de>,
-    {
-        let proxy = RangeProxy::deserialize(deserializer)?;
-        Ok(Range { start: proxy.start, end: proxy.end })
-    }
 }
 
 /// A diagnostic message.
@@ -82,7 +55,7 @@ impl Diagnostic {
         self
     }
 
-    pub fn from_provider<P: DiagnosticProvider>(provider: &P, source: &dyn Source) -> Self {
+    pub fn from_provider<P: DiagnosticProvider, S: Source + ?Sized>(provider: &P, source: &S) -> Self {
         provider.to_diagnostic(source)
     }
 
@@ -112,11 +85,11 @@ impl From<&OakError> for Diagnostic {
 /// A trait for objects that can be converted into a diagnostic.
 pub trait DiagnosticProvider {
     /// Convert this object into a diagnostic.
-    fn to_diagnostic(&self, source: &dyn Source) -> Diagnostic;
+    fn to_diagnostic<S: Source + ?Sized>(&self, source: &S) -> Diagnostic;
 }
 
 impl DiagnosticProvider for OakError {
-    fn to_diagnostic(&self, source: &dyn Source) -> Diagnostic {
+    fn to_diagnostic<S: Source + ?Sized>(&self, source: &S) -> Diagnostic {
         let kind = self.kind();
         let message = kind.to_string();
         let code = Some(kind.key().to_string());
@@ -163,15 +136,21 @@ pub trait Localizer {
     fn localize(&self, key: &str, args: &std::collections::HashMap<String, String>) -> String;
 }
 
+impl Localizer for () {
+    fn localize(&self, _key: &str, _args: &std::collections::HashMap<String, String>) -> String {
+        String::new()
+    }
+}
+
 /// A trait for emitting diagnostics.
 pub trait Emitter {
     /// Render a diagnostic to a string.
-    fn render(&self, source: &dyn Source, diagnostic: &Diagnostic) -> String {
-        self.render_localized(source, diagnostic, None)
+    fn render<S: Source + ?Sized>(&self, source: &S, diagnostic: &Diagnostic) -> String {
+        self.render_localized::<S, ()>(source, diagnostic, None, None)
     }
 
-    /// Render a diagnostic to a string with an optional localizer.
-    fn render_localized(&self, source: &dyn Source, diagnostic: &Diagnostic, localizer: Option<&dyn Localizer>) -> String;
+    /// Render a diagnostic to a string with an optional localizer and URI lookup.
+    fn render_localized<S: Source + ?Sized, L: Localizer + ?Sized>(&self, source: &S, diagnostic: &Diagnostic, localizer: Option<&L>, uri: Option<&str>) -> String;
 }
 
 /// Emitter for ANSI-colored console output.
@@ -186,7 +165,7 @@ impl Default for ConsoleEmitter {
 }
 
 impl Emitter for ConsoleEmitter {
-    fn render_localized(&self, source: &dyn Source, diagnostic: &Diagnostic, localizer: Option<&dyn Localizer>) -> String {
+    fn render_localized<S: Source + ?Sized, L: Localizer + ?Sized>(&self, source: &S, diagnostic: &Diagnostic, localizer: Option<&L>, uri: Option<&str>) -> String {
         let mut out = String::new();
         let line_map = LineMap::from_source(source);
         let full_text = source.get_text_in(core::range::Range { start: 0, end: source.length() }).into_owned();
@@ -215,7 +194,7 @@ impl Emitter for ConsoleEmitter {
 
         // 2. Snippets
         for label in &diagnostic.labels {
-            self.render_snippet(&mut out, source, &line_map, &full_text, &lines, label);
+            self.render_snippet(&mut out, source, &line_map, &full_text, &lines, label, uri);
         }
 
         // 3. Help
@@ -245,7 +224,7 @@ impl Characters {
 }
 
 impl ConsoleEmitter {
-    fn render_snippet(&self, out: &mut String, source: &dyn Source, line_map: &LineMap, full_text: &str, lines: &[&str], label: &Label) {
+    fn render_snippet<S: Source + ?Sized>(&self, out: &mut String, source: &S, line_map: &LineMap, full_text: &str, lines: &[&str], label: &Label, uri: Option<&str>) {
         let chars = if self.unicode { Characters::unicode() } else { Characters::ascii() };
         let (start_line, _) = line_map.offset_to_line_col_utf16(source, label.span.start);
         let (end_line, _) = line_map.offset_to_line_col_utf16(source, label.span.end);
@@ -260,7 +239,7 @@ impl ConsoleEmitter {
         let padding = " ".repeat(line_num_width);
 
         // Location info: ┌ at url:line:col
-        let url_str = source.get_url().map(|u| u.to_string()).unwrap_or_else(|| "<anonymous>".to_string());
+        let url_str = uri.unwrap_or("<anonymous>");
         let pos_str = format!("{}:{}", start_line + 1, start_col + 1);
         out.push_str(&format!("  \x1b[34m{}\x1b[0m at {}:{}\n", chars.ltop, url_str, pos_str));
         out.push_str(&format!("{} \x1b[34m{}\x1b[0m\n", padding, chars.vbar));
@@ -330,7 +309,7 @@ impl Default for PlainTextEmitter {
 }
 
 impl Emitter for PlainTextEmitter {
-    fn render_localized(&self, source: &dyn Source, diagnostic: &Diagnostic, localizer: Option<&dyn Localizer>) -> String {
+    fn render_localized<S: Source + ?Sized, L: Localizer + ?Sized>(&self, source: &S, diagnostic: &Diagnostic, localizer: Option<&L>, uri: Option<&str>) -> String {
         let mut out = String::new();
         let line_map = LineMap::from_source(source);
         let full_text = source.get_text_in(core::range::Range { start: 0, end: source.length() }).into_owned();
@@ -354,7 +333,7 @@ impl Emitter for PlainTextEmitter {
 
         // 2. Snippets
         for label in &diagnostic.labels {
-            self.render_snippet(&mut out, source, &line_map, &full_text, &lines, label);
+            self.render_snippet(&mut out, source, &line_map, &full_text, &lines, label, uri);
         }
 
         // 3. Help
@@ -367,7 +346,7 @@ impl Emitter for PlainTextEmitter {
 }
 
 impl PlainTextEmitter {
-    fn render_snippet(&self, out: &mut String, source: &dyn Source, line_map: &LineMap, full_text: &str, lines: &[&str], label: &Label) {
+    fn render_snippet<S: Source + ?Sized>(&self, out: &mut String, source: &S, line_map: &LineMap, full_text: &str, lines: &[&str], label: &Label, uri: Option<&str>) {
         let chars = if self.unicode { Characters::unicode() } else { Characters::ascii() };
         let (start_line, _) = line_map.offset_to_line_col_utf16(source, label.span.start);
         let (end_line, _) = line_map.offset_to_line_col_utf16(source, label.span.end);
@@ -382,7 +361,7 @@ impl PlainTextEmitter {
         let padding = " ".repeat(line_num_width);
 
         // Location info: ┌ at url:line:col
-        let url_str = source.get_url().map(|u| u.to_string()).unwrap_or_else(|| "<anonymous>".to_string());
+        let url_str = uri.unwrap_or("<anonymous>");
         let pos_str = format!("{}:{}", start_line + 1, start_col + 1);
         out.push_str(&format!("  {} at {}:{}\n", chars.ltop, url_str, pos_str));
         out.push_str(&format!("{} {}\n", padding, chars.vbar));
@@ -437,7 +416,7 @@ impl PlainTextEmitter {
 pub struct HtmlEmitter;
 
 impl Emitter for HtmlEmitter {
-    fn render_localized(&self, source: &dyn Source, diagnostic: &Diagnostic, localizer: Option<&dyn Localizer>) -> String {
+    fn render_localized<S: Source + ?Sized, L: Localizer + ?Sized>(&self, source: &S, diagnostic: &Diagnostic, localizer: Option<&L>, uri: Option<&str>) -> String {
         let mut out = String::new();
         let line_map = LineMap::from_source(source);
         let full_text = source.get_text_in(core::range::Range { start: 0, end: source.length() }).into_owned();
@@ -461,7 +440,7 @@ impl Emitter for HtmlEmitter {
         out.push_str("  </div>\n");
 
         for label in &diagnostic.labels {
-            self.render_snippet(&mut out, source, &line_map, &full_text, &lines, label);
+            self.render_snippet(&mut out, source, &line_map, &full_text, &lines, label, uri);
         }
 
         if let Some(help) = &diagnostic.help {
@@ -474,7 +453,7 @@ impl Emitter for HtmlEmitter {
 }
 
 impl HtmlEmitter {
-    fn render_snippet(&self, out: &mut String, source: &dyn Source, line_map: &LineMap, full_text: &str, lines: &[&str], label: &Label) {
+    fn render_snippet<S: Source + ?Sized>(&self, out: &mut String, source: &S, line_map: &LineMap, full_text: &str, lines: &[&str], label: &Label, uri: Option<&str>) {
         let (start_line, _) = line_map.offset_to_line_col_utf16(source, label.span.start);
         let (end_line, _) = line_map.offset_to_line_col_utf16(source, label.span.end);
         let start_line = start_line as usize;
@@ -486,9 +465,9 @@ impl HtmlEmitter {
 
         out.push_str("  <div class=\"snippet\">\n");
         let location_prefix = "┌"; // Use the same connector
-        let url_str = source.get_url().map(|u| u.to_string()).unwrap_or_else(|| "<anonymous>".to_string());
+        let url_str = uri.unwrap_or("<anonymous>");
         let pos_str = format!("{}:{}", start_line + 1, start_col + 1);
-        out.push_str(&format!("    <div class=\"location\">  {} at {}:{}</div>\n", location_prefix, html_escape(&url_str), pos_str));
+        out.push_str(&format!("    <div class=\"location\">  {} at {}:{}</div>\n", location_prefix, html_escape(url_str), pos_str));
 
         out.push_str("    <pre><code>");
         let line_num_width = (end_line + 1).to_string().len();
@@ -549,7 +528,7 @@ fn html_escape(s: &str) -> String {
 pub struct LspEmitter;
 
 impl Emitter for LspEmitter {
-    fn render_localized(&self, source: &dyn Source, diagnostic: &Diagnostic, localizer: Option<&dyn Localizer>) -> String {
+    fn render_localized<S: Source + ?Sized, L: Localizer + ?Sized>(&self, source: &S, diagnostic: &Diagnostic, localizer: Option<&L>, uri: Option<&str>) -> String {
         let line_map = LineMap::from_source(source);
         let (start_line, start_character, end_line, end_character) = if let Some(label) = diagnostic.labels.first() {
             let (sl, sc) = line_map.offset_to_line_col_utf16(source, label.span.start);
@@ -574,7 +553,7 @@ impl Emitter for LspEmitter {
                 "end": { "line": end_line, "character": end_character }
             },
             "severity": severity,
-            "code": diagnostic.code,
+            "code": diagnostic.code.clone().unwrap_or_default(),
             "source": "oak",
             "message": message,
             "relatedInformation": diagnostic.labels.iter().filter_map(|l| {
@@ -583,18 +562,18 @@ impl Emitter for LspEmitter {
                     let (el, ec) = line_map.offset_to_line_col_utf16(source, l.span.end);
                     serde_json::json!({
                         "location": {
-                            "uri": source.get_url().map(|u| u.to_string()).unwrap_or_default(),
+                            "uri": uri.unwrap_or(""),
                             "range": {
                                 "start": { "line": sl, "character": sc },
                                 "end": { "line": el, "character": ec }
                             }
                         },
-                        "message": msg
+                        "message": msg.clone()
                     })
                 })
-            }).collect::<Vec<_>>()
+            }).collect::<Vec<serde_json::Value>>()
         });
 
-        serde_json::to_string_pretty(&lsp_diag).unwrap_or_default()
+        lsp_diag.to_string()
     }
 }

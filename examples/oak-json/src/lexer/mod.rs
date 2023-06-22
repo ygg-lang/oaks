@@ -14,7 +14,7 @@ static JSON_SINGLE_QUOTE_STRING: LazyLock<StringConfig> = LazyLock::new(|| Strin
 /// JSON 词法分析
 #[derive(Clone)]
 pub struct JsonLexer<'config> {
-    _config: &'config JsonLanguage,
+    config: &'config JsonLanguage,
 }
 
 impl<'config> Lexer<JsonLanguage> for JsonLexer<'config> {
@@ -30,7 +30,7 @@ impl<'config> Lexer<JsonLanguage> for JsonLexer<'config> {
 
 impl<'config> JsonLexer<'config> {
     pub fn new(config: &'config JsonLanguage) -> Self {
-        Self { _config: config }
+        Self { config }
     }
 
     fn run<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> Result<(), OakError> {
@@ -48,7 +48,7 @@ impl<'config> JsonLexer<'config> {
                 '"' => {
                     self.lex_string_fast(state);
                 }
-                '/' if self._config.comments => {
+                '/' if self.config.comments => {
                     JSON_COMMENT.scan(state, JsonSyntaxKind::Comment, JsonSyntaxKind::Comment);
                 }
                 '-' | '0'..='9' => {
@@ -59,17 +59,17 @@ impl<'config> JsonLexer<'config> {
                 }
                 't' | 'f' | 'n' => {
                     if !self.lex_keyword(state) {
-                        if self._config.bare_keys {
+                        if self.config.bare_keys {
                             self.lex_bare_key(state);
                         }
                     }
                 }
-                '\'' if self._config.single_quotes => {
+                '\'' if self.config.single_quotes => {
                     JSON_SINGLE_QUOTE_STRING.scan(state, JsonSyntaxKind::StringLiteral);
                 }
                 _ => {
                     let mut handled = false;
-                    if self._config.bare_keys && (ch.is_alphabetic() || ch == '_' || ch == '$') {
+                    if self.config.bare_keys && (ch.is_alphabetic() || ch == '_' || ch == '$') {
                         handled = self.lex_bare_key(state);
                     }
 
@@ -97,7 +97,7 @@ impl<'config> JsonLexer<'config> {
         let mut has_digits = false;
 
         // 处理十六进制数字（如果配置允许）
-        if self._config.hex_numbers && state.starts_with("0") {
+        if self.config.hex_numbers && state.starts_with("0") {
             let n1 = state.peek_next_n(1);
             if n1 == Some('x') || n1 == Some('X') {
                 state.advance(2); // 跳过 '0x'

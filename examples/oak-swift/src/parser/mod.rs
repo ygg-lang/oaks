@@ -228,7 +228,7 @@ impl<'config> Pratt<SwiftLanguage> for SwiftParser<'config> {
 
 impl<'config> Parser<SwiftLanguage> for SwiftParser<'config> {
     fn parse<'a, S: Source + ?Sized>(&self, text: &'a S, edits: &[TextEdit], cache: &'a mut impl oak_core::ParseCache<SwiftLanguage>) -> oak_core::ParseOutput<'a, SwiftLanguage> {
-        let lexer = crate::lexer::SwiftLexer::new(self.config);
+        let lexer = crate::lexer::SwiftLexer::new(&self.config);
         oak_core::parser::parse_with_lexer(&lexer, text, edits, cache, |state| self.parse_root_internal(state))
     }
 }

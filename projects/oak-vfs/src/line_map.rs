@@ -7,7 +7,7 @@ pub struct LineMap {
 }
 
 impl LineMap {
-    pub fn from_source(source: &dyn Source) -> Self {
+    pub fn from_source<S: Source + ?Sized>(source: &S) -> Self {
         let len = source.length();
         let mut line_starts = Vec::new();
         line_starts.push(0);
@@ -45,7 +45,7 @@ impl LineMap {
         Some(next.max(start))
     }
 
-    pub fn offset_to_line_col_utf16(&self, source: &dyn Source, offset: usize) -> (u32, u32) {
+    pub fn offset_to_line_col_utf16<S: Source + ?Sized>(&self, source: &S, offset: usize) -> (u32, u32) {
         let offset = offset.min(self.len);
         let line_idx = match self.line_starts.binary_search(&offset) {
             Ok(i) => i,
@@ -58,7 +58,7 @@ impl LineMap {
         (line_idx as u32, col)
     }
 
-    pub fn line_col_utf16_to_offset(&self, source: &dyn Source, line: u32, col_utf16: u32) -> usize {
+    pub fn line_col_utf16_to_offset<S: Source + ?Sized>(&self, source: &S, line: u32, col_utf16: u32) -> usize {
         let Some(line_start) = self.line_start(line)
         else {
             return self.len;

@@ -12,6 +12,17 @@ pub struct PythonLexer<'config> {
     _config: &'config PythonLanguage,
 }
 
+impl<'config> Lexer<PythonLanguage> for PythonLexer<'config> {
+    fn lex<'a, S: Source + ?Sized>(&self, source: &S, _edits: &[TextEdit], cache: &'a mut impl LexerCache<PythonLanguage>) -> LexOutput<PythonLanguage> {
+        let mut state = State::new_with_cache(source, 0, cache);
+        let result = self.run(&mut state);
+        if result.is_ok() {
+            state.add_eof();
+        }
+        state.finish_with_cache(result, cache)
+    }
+}
+
 impl<'config> PythonLexer<'config> {
     pub fn new(config: &'config PythonLanguage) -> Self {
         Self { _config: config }
@@ -219,52 +230,171 @@ impl<'config> PythonLexer<'config> {
     fn lex_operator<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start_pos = state.get_position();
 
-        // 简化实现：只处理单字符操作符
         if let Some(ch) = state.current() {
             let kind = match ch {
                 '+' => {
                     state.advance(1);
-                    PythonSyntaxKind::Plus
+                    if let Some('=') = state.current() {
+                        state.advance(1);
+                        PythonSyntaxKind::PlusAssign
+                    }
+                    else {
+                        PythonSyntaxKind::Plus
+                    }
                 }
                 '-' => {
                     state.advance(1);
-                    PythonSyntaxKind::Minus
+                    if let Some('=') = state.current() {
+                        state.advance(1);
+                        PythonSyntaxKind::MinusAssign
+                    }
+                    else if let Some('>') = state.current() {
+                        state.advance(1);
+                        PythonSyntaxKind::Arrow
+                    }
+                    else {
+                        PythonSyntaxKind::Minus
+                    }
                 }
                 '*' => {
                     state.advance(1);
-                    PythonSyntaxKind::Star
+                    if let Some('=') = state.current() {
+                        state.advance(1);
+                        PythonSyntaxKind::StarAssign
+                    }
+                    else if let Some('*') = state.current() {
+                        state.advance(1);
+                        if let Some('=') = state.current() {
+                            state.advance(1);
+                            PythonSyntaxKind::DoubleStarAssign
+                        }
+                        else {
+                            PythonSyntaxKind::DoubleStar
+                        }
+                    }
+                    else {
+                        PythonSyntaxKind::Star
+                    }
                 }
                 '/' => {
                     state.advance(1);
-                    PythonSyntaxKind::Slash
+                    if let Some('=') = state.current() {
+                        state.advance(1);
+                        PythonSyntaxKind::SlashAssign
+                    }
+                    else if let Some('/') = state.current() {
+                        state.advance(1);
+                        if let Some('=') = state.current() {
+                            state.advance(1);
+                            PythonSyntaxKind::DoubleSlashAssign
+                        }
+                        else {
+                            PythonSyntaxKind::DoubleSlash
+                        }
+                    }
+                    else {
+                        PythonSyntaxKind::Slash
+                    }
                 }
                 '%' => {
                     state.advance(1);
-                    PythonSyntaxKind::Percent
+                    if let Some('=') = state.current() {
+                        state.advance(1);
+                        PythonSyntaxKind::PercentAssign
+                    }
+                    else {
+                        PythonSyntaxKind::Percent
+                    }
                 }
                 '=' => {
                     state.advance(1);
-                    PythonSyntaxKind::Assign
+                    if let Some('=') = state.current() {
+                        state.advance(1);
+                        PythonSyntaxKind::Eq
+                    }
+                    else {
+                        PythonSyntaxKind::Assign
+                    }
                 }
                 '<' => {
                     state.advance(1);
-                    PythonSyntaxKind::Less
+                    if let Some('=') = state.current() {
+                        state.advance(1);
+                        PythonSyntaxKind::LessEqual
+                    }
+                    else if let Some('<') = state.current() {
+                        state.advance(1);
+                        if let Some('=') = state.current() {
+                            state.advance(1);
+                            PythonSyntaxKind::LeftShiftAssign
+                        }
+                        else {
+                            PythonSyntaxKind::LeftShift
+                        }
+                    }
+                    else {
+                        PythonSyntaxKind::Less
+                    }
                 }
                 '>' => {
                     state.advance(1);
-                    PythonSyntaxKind::Greater
+                    if let Some('=') = state.current() {
+                        state.advance(1);
+                        PythonSyntaxKind::GreaterEqual
+                    }
+                    else if let Some('>') = state.current() {
+                        state.advance(1);
+                        if let Some('=') = state.current() {
+                            state.advance(1);
+                            PythonSyntaxKind::RightShiftAssign
+                        }
+                        else {
+                            PythonSyntaxKind::RightShift
+                        }
+                    }
+                    else {
+                        PythonSyntaxKind::Greater
+                    }
+                }
+                '!' => {
+                    state.advance(1);
+                    if let Some('=') = state.current() {
+                        state.advance(1);
+                        PythonSyntaxKind::NotEqual
+                    }
+                    else {
+                        return false;
+                    }
                 }
                 '&' => {
                     state.advance(1);
-                    PythonSyntaxKind::Ampersand
+                    if let Some('=') = state.current() {
+                        state.advance(1);
+                        PythonSyntaxKind::AmpersandAssign
+                    }
+                    else {
+                        PythonSyntaxKind::Ampersand
+                    }
                 }
                 '|' => {
                     state.advance(1);
-                    PythonSyntaxKind::Pipe
+                    if let Some('=') = state.current() {
+                        state.advance(1);
+                        PythonSyntaxKind::PipeAssign
+                    }
+                    else {
+                        PythonSyntaxKind::Pipe
+                    }
                 }
                 '^' => {
                     state.advance(1);
-                    PythonSyntaxKind::Caret
+                    if let Some('=') = state.current() {
+                        state.advance(1);
+                        PythonSyntaxKind::CaretAssign
+                    }
+                    else {
+                        PythonSyntaxKind::Caret
+                    }
                 }
                 '~' => {
                     state.advance(1);
@@ -272,7 +402,13 @@ impl<'config> PythonLexer<'config> {
                 }
                 '@' => {
                     state.advance(1);
-                    PythonSyntaxKind::At
+                    if let Some('=') = state.current() {
+                        state.advance(1);
+                        PythonSyntaxKind::AtAssign
+                    }
+                    else {
+                        PythonSyntaxKind::At
+                    }
                 }
                 _ => return false,
             };
@@ -309,17 +445,6 @@ impl<'config> PythonLexer<'config> {
         }
 
         false
-    }
-}
-
-impl<'config> Lexer<PythonLanguage> for PythonLexer<'config> {
-    fn lex<'a, S: Source + ?Sized>(&self, source: &S, _edits: &[TextEdit], cache: &'a mut impl LexerCache<PythonLanguage>) -> LexOutput<PythonLanguage> {
-        let mut state: State<'_, S> = LexerState::new(source);
-        let result = self.run(&mut state);
-        if result.is_ok() {
-            state.add_eof();
-        }
-        state.finish_with_cache(result, cache)
     }
 }
 

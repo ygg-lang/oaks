@@ -1,0 +1,73 @@
+# Complex RBQ Schema Example
+#
+# Covering various features
+#
+
+@database("pgsql.public.user")
+@table(name = "users")
+class User {
+    @key
+    id: u128;
+    # 唯一用户名
+    @unique
+    user_name: utf8;
+    # 昵称
+    nick_name: utf8; 
+    @unique
+    email: utf8;
+    password_hash: utf8;
+    is_active: bool = true;
+    age: u32?;
+    tags: list<utf8>;
+    
+    # 使用 @inline 将 profile 字段平铺到 users 表中
+    @inline
+    profile: UserProfile;
+    
+    role: UserRole;
+    metadata: dict<object>;
+    created_at: date_time;
+    updated_at: date_time;
+}
+
+@repr("i32")
+union UserRole {
+    Admin = 1,
+    Moderator = 2,
+    User = 3,
+    Guest = 4,
+}
+
+# 自由对象 (Free Object)，语义等价于 JSON 存储在 User 表中
+class UserProfile {
+    bio: utf8?;
+    avatar_url: utf8?;
+    website: utf8?;
+}
+
+@database("pgsql.public.billing")
+namespace project.billing;
+
+@table(name = "orders")
+class Order {
+    id: u64;
+    user_id: uuid;
+    amount: d128;
+    status: OrderStatus;
+    
+    items: list<OrderItem>;
+}
+
+@repr("utf8")
+union OrderStatus {
+    Pending,
+    Processing,
+    Completed,
+    Cancelled,
+}
+
+class OrderItem {
+    product_id: utf8;
+    quantity: i32;
+    price: d128;
+}

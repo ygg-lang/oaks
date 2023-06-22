@@ -16,7 +16,7 @@ impl<'config> ScalaBuilder<'config> {
 impl<'config> Builder<ScalaLanguage> for ScalaBuilder<'config> {
     fn build<'a, S: Source + ?Sized>(&self, source: &'a S, edits: &[TextEdit], cache: &'a mut impl BuilderCache<ScalaLanguage>) -> OakDiagnostics<ScalaRoot> {
         let parser = ScalaParser::new(self.config);
-        let lexer = crate::lexer::ScalaLexer::new(self.config);
+        let lexer = crate::lexer::ScalaLexer::new(&self.config);
 
         lexer.lex(source, edits, cache);
         let parse_result = parser.parse(source, edits, cache);

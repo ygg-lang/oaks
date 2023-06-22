@@ -7,12 +7,12 @@ use oak_core::{
 
 pub(crate) type State<'a, S> = ParserState<'a, JavaScriptLanguage, S>;
 
-pub struct JavaScriptParser {
-    pub(crate) config: JavaScriptLanguage,
+pub struct JavaScriptParser<'config> {
+    pub(crate) config: &'config JavaScriptLanguage,
 }
 
-impl JavaScriptParser {
-    pub fn new(config: JavaScriptLanguage) -> Self {
+impl<'config> JavaScriptParser<'config> {
+    pub fn new(config: &'config JavaScriptLanguage) -> Self {
         Self { config }
     }
 
@@ -129,7 +129,7 @@ impl JavaScriptParser {
     }
 }
 
-impl Pratt<JavaScriptLanguage> for JavaScriptParser {
+impl<'config> Pratt<JavaScriptLanguage> for JavaScriptParser<'config> {
     fn primary<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> &'a GreenNode<'a, JavaScriptLanguage> {
         use crate::kind::JavaScriptSyntaxKind::*;
         let cp = state.checkpoint();
@@ -234,7 +234,7 @@ impl Pratt<JavaScriptLanguage> for JavaScriptParser {
     }
 }
 
-impl JavaScriptParser {
+impl<'config> JavaScriptParser<'config> {
     fn parse_root_internal<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> Result<&'a GreenNode<'a, JavaScriptLanguage>, OakError> {
         let cp = state.checkpoint();
         while state.not_at_end() {
@@ -244,7 +244,7 @@ impl JavaScriptParser {
     }
 }
 
-impl Parser<JavaScriptLanguage> for JavaScriptParser {
+impl<'config> Parser<JavaScriptLanguage> for JavaScriptParser<'config> {
     fn parse<'a, S: Source + ?Sized>(&self, text: &'a S, edits: &[TextEdit], cache: &'a mut impl ParseCache<JavaScriptLanguage>) -> oak_core::parser::ParseOutput<'a, JavaScriptLanguage> {
         let lexer = crate::lexer::JavaScriptLexer::new(&self.config);
         oak_core::parser::parse_with_lexer(&lexer, text, edits, cache, |state| self.parse_root_internal(state))

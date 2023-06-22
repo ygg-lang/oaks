@@ -1,0 +1,37 @@
+# Free Objects Test
+# This file tests classes that are NOT marked with @table
+
+namespace test.free;
+
+# A nested object for address
+class Address {
+    street: utf8;
+    city: utf8;
+    zip_code: utf8?;
+}
+
+# A nested object for social links
+class SocialLinks {
+    twitter: utf8?;
+    github: utf8?;
+    linkedin: utf8?;
+}
+
+# The main entity table
+@table(name = "member_profiles")
+class MemberProfile {
+    @key
+    id: uuid;
+    
+    display_name: utf8;
+    
+    # Nested free objects
+    @layout("json")
+    home_address: Address;
+    
+    @layout("json")
+    work_address: Address?;
+    
+    @layout("json")
+    social: SocialLinks;
+}

@@ -1,5 +1,8 @@
+use alloc::borrow::Cow;
+
 /// 缩进样式
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, serde::Serialize)]
+#[serde(rename_all = "snake_case")]
 pub enum IndentStyle {
     /// 使用空格
     Spaces(u8),
@@ -14,7 +17,8 @@ impl Default for IndentStyle {
 }
 
 /// 行结束符
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, serde::Serialize)]
+#[serde(rename_all = "snake_case")]
 pub enum LineEnding {
     /// Unix 风格 (\n)
     Unix,
@@ -31,12 +35,13 @@ impl Default for LineEnding {
 }
 
 /// 格式化配置
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, serde::Serialize)]
+#[serde(rename_all = "camelCase")]
 pub struct FormatConfig {
     /// 缩进样式
     pub indent_style: IndentStyle,
     /// 缩进文本（缓存的单级缩进字符串）
-    pub indent_text: String,
+    pub indent_text: Cow<'static, str>,
     /// 行结束符
     pub line_ending: LineEnding,
     /// 最大行长度
@@ -61,8 +66,8 @@ impl Default for FormatConfig {
     fn default() -> Self {
         let indent_style = IndentStyle::default();
         let (indent_text, indent_size) = match indent_style {
-            IndentStyle::Spaces(count) => (" ".repeat(count as usize), count as usize),
-            IndentStyle::Tabs => ("\t".to_string(), 4), // Default tab size for column calculation
+            IndentStyle::Spaces(count) => (" ".repeat(count as usize).into(), count as usize),
+            IndentStyle::Tabs => ("\t".into(), 4), // Default tab size for column calculation
         };
 
         Self {
@@ -91,8 +96,8 @@ impl FormatConfig {
     pub fn with_indent_style(mut self, style: IndentStyle) -> Self {
         self.indent_style = style;
         let (indent_text, indent_size) = match style {
-            IndentStyle::Spaces(count) => (" ".repeat(count as usize), count as usize),
-            IndentStyle::Tabs => ("\t".to_string(), 4),
+            IndentStyle::Spaces(count) => (" ".repeat(count as usize).into(), count as usize),
+            IndentStyle::Tabs => ("\t".into(), 4),
         };
         self.indent_text = indent_text;
         self.indent_size = indent_size;

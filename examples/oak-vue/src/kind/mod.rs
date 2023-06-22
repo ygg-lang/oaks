@@ -289,11 +289,24 @@ impl oak_core::ElementType for VueSyntaxKind {
     }
 }
 
-#[derive(Debug, Clone, Default)]
-pub struct VueLanguage;
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
+pub struct VueLanguage {}
+
+impl Default for VueLanguage {
+    fn default() -> Self {
+        Self {}
+    }
+}
+
+impl VueLanguage {
+    pub fn new() -> Self {
+        Self::default()
+    }
+}
 
 impl Language for VueLanguage {
     const NAME: &'static str = "vue";
+    const CATEGORY: oak_core::LanguageCategory = oak_core::LanguageCategory::Markup;
     type TokenType = VueSyntaxKind;
     type ElementType = VueSyntaxKind;
     type TypedRoot = ();

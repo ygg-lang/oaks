@@ -9,7 +9,6 @@ pub mod kind;
 pub mod language;
 pub mod lexer;
 pub mod lsp;
-#[cfg(feature = "mcp")]
 pub mod mcp;
 pub mod parser;
 
@@ -23,5 +22,4 @@ pub use crate::{
     parser::PhpParser,
 };
 
-#[cfg(feature = "mcp")]
 pub use crate::mcp::serve_php_mcp;

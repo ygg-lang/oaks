@@ -21,19 +21,14 @@ use std::{
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct HighlightStyle {
     /// Foreground text color in hex format (e.g., "#FF0000" for red)
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub color: Option<String>,
     /// Background color in hex format (e.g., "#FFFF00" for yellow)
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub background_color: Option<String>,
     /// Whether text should be displayed in bold
-    #[serde(default)]
     pub bold: bool,
     /// Whether text should be displayed in italic
-    #[serde(default)]
     pub italic: bool,
     /// Whether text should be underlined
-    #[serde(default)]
     pub underline: bool,
 }
 
@@ -44,7 +39,7 @@ impl Default for HighlightStyle {
 }
 
 /// Highlight theme configuration containing style definitions for different roles.
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct HighlightTheme {
     /// Theme name identifier
     pub name: String,

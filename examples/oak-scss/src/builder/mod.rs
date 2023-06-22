@@ -17,7 +17,7 @@ impl<'config> ScssBuilder<'config> {
 impl<'config> Builder<ScssLanguage> for ScssBuilder<'config> {
     fn build<'a, S: Source + ?Sized>(&self, source: &S, edits: &[TextEdit], _cache: &'a mut impl BuilderCache<ScssLanguage>) -> BuildOutput<ScssLanguage> {
         let parser = crate::parser::ScssParser::new(self.config);
-        let lexer = crate::lexer::ScssLexer::new(self.config);
+        let lexer = crate::lexer::ScssLexer::new(&self.config);
 
         let mut cache = oak_core::parser::session::ParseSession::<ScssLanguage>::default();
         lexer.lex(source, edits, &mut cache);

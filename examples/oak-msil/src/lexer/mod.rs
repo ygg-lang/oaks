@@ -3,7 +3,7 @@ use oak_core::{Lexer, LexerCache, LexerState, lexer::LexOutput, source::Source};
 
 type State<'a, S> = LexerState<'a, S, MsilLanguage>;
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct MsilLexer<'config> {
     _config: &'config MsilLanguage,
 }
@@ -12,7 +12,9 @@ impl<'config> MsilLexer<'config> {
     pub fn new(config: &'config MsilLanguage) -> Self {
         Self { _config: config }
     }
+}
 
+impl MsilLexer<'_> {
     pub fn run<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> Result<(), oak_core::OakError> {
         let safe_point = state.get_position();
         while state.not_at_end() {
@@ -54,6 +56,7 @@ impl<'config> MsilLexer<'config> {
             state.advance_if_dead_lock(safe_point);
         }
 
+        state.add_eof();
         Ok(())
     }
 
@@ -268,24 +271,20 @@ impl<'config> MsilLexer<'config> {
     }
 }
 
-impl<'config> Lexer<MsilLanguage> for MsilLexer<'config> {
-    fn lex<'a, S: Source + ?Sized>(&self, source: &'a S, _edits: &[oak_core::TextEdit], _cache: &'a mut impl LexerCache<MsilLanguage>) -> LexOutput<MsilLanguage> {
-        let mut state = State::new(source);
+impl Lexer<MsilLanguage> for MsilLexer<'_> {
+    fn lex<'a, S: Source + ?Sized>(&self, source: &'a S, _edits: &[oak_core::TextEdit], cache: &'a mut impl LexerCache<MsilLanguage>) -> LexOutput<MsilLanguage> {
+        let mut state = State::new_with_cache(source, 0, cache);
         let result = self.run(&mut state);
-        if result.is_ok() {
-            state.add_eof();
-        }
-        state.finish(result)
+        state.finish_with_cache(result, cache)
     }
 }
 
-impl<'config> MsilLexer<'config> {
+impl MsilLexer<'_> {
     pub fn tokenize<'a>(&self, text: &'a str) -> Vec<oak_core::Token<<MsilLanguage as oak_core::Language>::TokenType>> {
         let source = oak_core::SourceText::new(text);
         let mut cache = oak_core::parser::session::ParseSession::<MsilLanguage>::default();
         let mut state = State::new_with_cache(&source, 0, &mut cache);
         let result = self.run(&mut state);
-        state.add_eof();
         state.finish_with_cache(result, &mut cache).result.unwrap().to_vec()
     }
 }

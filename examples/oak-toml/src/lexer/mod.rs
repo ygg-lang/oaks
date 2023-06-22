@@ -7,10 +7,12 @@ use oak_core::{
 
 type State<'a, S> = LexerState<'a, S, TomlLanguage>;
 
-#[derive(Clone)]
-pub struct TomlLexer;
+#[derive(Clone, Debug)]
+pub struct TomlLexer<'config> {
+    _config: &'config TomlLanguage,
+}
 
-impl Lexer<TomlLanguage> for TomlLexer {
+impl<'config> Lexer<TomlLanguage> for TomlLexer<'config> {
     fn lex<'a, S: Source + ?Sized>(&self, source: &'a S, _edits: &[TextEdit], cache: &'a mut impl LexerCache<TomlLanguage>) -> LexOutput<TomlLanguage> {
         let mut state = State::new(source);
         let result = self.run(&mut state);
@@ -21,9 +23,9 @@ impl Lexer<TomlLanguage> for TomlLexer {
     }
 }
 
-impl TomlLexer {
-    pub fn new(_config: &TomlLanguage) -> Self {
-        Self
+impl<'config> TomlLexer<'config> {
+    pub fn new(config: &'config TomlLanguage) -> Self {
+        Self { _config: config }
     }
 
     /// 主要的词法分析循环

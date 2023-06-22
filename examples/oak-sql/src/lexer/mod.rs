@@ -10,7 +10,7 @@ type State<'a, S> = LexerState<'a, S, SqlLanguage>;
 
 static SQL_WHITESPACE: LazyLock<WhitespaceConfig> = LazyLock::new(|| WhitespaceConfig { unicode_whitespace: true });
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct SqlLexer<'config> {
     _config: &'config SqlLanguage,
 }
@@ -289,6 +289,11 @@ impl<'config> SqlLexer<'config> {
             "VALUES" => SqlSyntaxKind::Values,
             "SET" => SqlSyntaxKind::Set,
             "JOIN" => SqlSyntaxKind::Join,
+            "INNER" => SqlSyntaxKind::Inner,
+            "LEFT" => SqlSyntaxKind::Left,
+            "RIGHT" => SqlSyntaxKind::Right,
+            "FULL" => SqlSyntaxKind::Full,
+            "OUTER" => SqlSyntaxKind::Outer,
             "ON" => SqlSyntaxKind::On,
             "AND" => SqlSyntaxKind::And,
             "OR" => SqlSyntaxKind::Or,
@@ -299,6 +304,8 @@ impl<'config> SqlLexer<'config> {
             "AS" => SqlSyntaxKind::As,
             "BY" => SqlSyntaxKind::By,
             "ORDER" => SqlSyntaxKind::Order,
+            "ASC" => SqlSyntaxKind::Asc,
+            "DESC" => SqlSyntaxKind::Desc,
             "GROUP" => SqlSyntaxKind::Group,
             "HAVING" => SqlSyntaxKind::Having,
             "LIMIT" => SqlSyntaxKind::Limit,

@@ -10,9 +10,7 @@ mod kind;
 mod language;
 mod lexer;
 pub mod lsp;
-mod parser;
-
-#[cfg(feature = "mcp")]
 pub mod mcp;
+mod parser;
 
 pub use crate::{ast::JasminRoot, builder::JasminBuilder, highlighter::JasminHighlighter, language::JasminLanguage, lexer::JasminLexer, lsp::JasminLanguageService, parser::JasminParser};

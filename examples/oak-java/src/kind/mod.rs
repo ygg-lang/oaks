@@ -126,6 +126,22 @@ pub enum JavaSyntaxKind {
     Error,
     // 非终端节点
     CompilationUnit,
+    ClassDeclaration,
+    InterfaceDeclaration,
+    MethodDeclaration,
+    FieldDeclaration,
+    Parameter,
+    BlockStatement,
+    IfStatement,
+    WhileStatement,
+    ForStatement,
+    ReturnStatement,
+    ExpressionStatement,
+    BinaryExpression,
+    MethodCall,
+    MemberSelect,
+    LiteralExpression,
+    VariableDeclaration,
 }
 
 impl JavaSyntaxKind {

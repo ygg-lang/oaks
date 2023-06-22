@@ -13,13 +13,13 @@ homepage.workspace = true
 repository.workspace = true
 
 [dependencies]
-oak-core = { workspace = true }
+oak-core = { workspace = true, features = ["serde", "testing"] }
 oak-highlight = { workspace = true, optional = true }
 oak-pretty-print = { workspace = true, optional = true }
-serde = { workspace = true }
+serde = { workspace = true, features = ["derive"] }
 
 [dev-dependencies]
-oak-core = { workspace = true, features = ["testing"] }
+oak-testing = { workspace = true }
 
 
 [features]

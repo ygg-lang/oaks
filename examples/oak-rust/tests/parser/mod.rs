@@ -1,17 +1,17 @@
 use oak_core::{LexerCache, source::Source};
 
 #[test]
-fn test_simple_function_parsing() {
+fn test_simple_function_parsing() -> Result<(), oak_core::OakError> {
     use oak_core::{Lexer, Parser, SourceText};
     use oak_rust::{RustLanguage, RustLexer, RustParser};
 
     let source = SourceText::new("fn main() { println!(\"Hello, world!\"); }");
-    let language = Box::leak(Box::new(RustLanguage::default()));
+    let language = RustLanguage::default();
     let parser = RustParser::new(language);
 
     // 先测试词法分析器
     println!("测试词法分析器:");
-    let lexer = RustLexer::new(language);
+    let lexer = RustLexer::new(&language);
     let mut cache = oak_core::parser::session::ParseSession::<RustLanguage>::default();
     let lex_output = lexer.lex(&source, &[], &mut cache);
     match &lex_output.result {
@@ -33,13 +33,14 @@ fn test_simple_function_parsing() {
                 }
                 Err(e) => {
                     println!("❌ 解析失败: {:?}", e);
-                    panic!("解析失败");
+                    return Err(e.clone());
                 }
             }
         }
         Err(e) => {
             println!("❌ 词法分析失败: {:?}", e);
-            panic!("词法分析失败");
+            return Err(e.clone());
         }
     }
+    Ok(())
 }

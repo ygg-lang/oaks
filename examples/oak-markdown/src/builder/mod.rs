@@ -46,14 +46,46 @@ impl<'config> MarkdownBuilder<'config> {
                     Heading6 => 6,
                     _ => unreachable!(),
                 };
-                Some(Block::Heading(crate::ast::Heading { level, content: source.get_text_in(node.span()).to_string(), span: node.span() }))
+                let text = source.get_text_in(node.span());
+                let content = text.trim_start_matches('#').trim_start().to_string();
+                Some(Block::Heading(crate::ast::Heading { level, content, span: node.span() }))
             }
             Paragraph => Some(Block::Paragraph(crate::ast::Paragraph { content: source.get_text_in(node.span()).to_string(), span: node.span() })),
-            CodeBlock => Some(Block::CodeBlock(crate::ast::CodeBlock {
-                language: None, // TODO: 提取语言标识符
-                content: source.get_text_in(node.span()).to_string(),
-                span: node.span(),
-            })),
+            CodeBlock => {
+                let mut language = None;
+                let mut content = String::new();
+
+                for child in node.children() {
+                    match child {
+                        RedTree::Leaf(leaf) => {
+                            if leaf.kind == CodeLanguage {
+                                language = Some(source.get_text_in(leaf.span).trim().to_string());
+                            }
+                            else if leaf.kind != CodeFence {
+                                content.push_str(&source.get_text_in(leaf.span));
+                            }
+                        }
+                        RedTree::Node(child_node) => {
+                            // 检查子节点是否包含语言标识
+                            for sub_child in child_node.children() {
+                                if let RedTree::Leaf(sub_leaf) = sub_child {
+                                    if sub_leaf.kind == CodeLanguage {
+                                        language = Some(source.get_text_in(sub_leaf.span).trim().to_string());
+                                    }
+                                    else if sub_leaf.kind != CodeFence {
+                                        content.push_str(&source.get_text_in(sub_leaf.span));
+                                    }
+                                }
+                                else if let RedTree::Node(sub_node) = sub_child {
+                                    content.push_str(&source.get_text_in(sub_node.span()));
+                                }
+                            }
+                        }
+                    }
+                }
+
+                Some(Block::CodeBlock(crate::ast::CodeBlock { language, content: content.trim().to_string(), span: node.span() }))
+            }
             UnorderedList | OrderedList => {
                 let mut items = Vec::new();
                 for child in node.children() {
@@ -65,11 +97,57 @@ impl<'config> MarkdownBuilder<'config> {
                 }
                 Some(Block::List(crate::ast::List { is_ordered: kind == OrderedList, items, span: node.span() }))
             }
-            Blockquote => Some(Block::Blockquote(crate::ast::Blockquote { content: node.children().filter_map(|child| if let RedTree::Node(child_node) = child { self.build_block(child_node, source) } else { None }).collect(), span: node.span() })),
+            Blockquote => {
+                let mut content_text = String::new();
+                for child in node.children() {
+                    match child {
+                        RedTree::Leaf(leaf) => {
+                            if leaf.kind != BlockquoteMarker {
+                                content_text.push_str(&source.get_text_in(leaf.span));
+                            }
+                        }
+                        RedTree::Node(child_node) => {
+                            content_text.push_str(&source.get_text_in(child_node.span()));
+                        }
+                    }
+                }
+
+                // 简单的引用处理：将其内容作为段落
+                Some(Block::Blockquote(crate::ast::Blockquote { content: vec![Block::Paragraph(crate::ast::Paragraph { content: content_text.trim().to_string(), span: node.span() })], span: node.span() }))
+            }
             HorizontalRule => Some(Block::HorizontalRule(crate::ast::HorizontalRule { span: node.span() })),
             Table => {
-                // TODO: 实现表格构建
-                None
+                let text = source.get_text_in(node.span());
+                let lines: Vec<&str> = text.lines().collect();
+                if lines.is_empty() {
+                    return None;
+                }
+
+                let parse_row = |line: &str| -> crate::ast::TableRow {
+                    let cells = line
+                        .split('|')
+                        .filter(|s| !s.trim().is_empty())
+                        .map(|s| crate::ast::TableCell {
+                            content: s.trim().to_string(),
+                            span: node.span(), // 简化处理
+                        })
+                        .collect();
+                    crate::ast::TableRow { cells, span: node.span() }
+                };
+
+                let header = parse_row(lines[0]);
+                let mut rows = Vec::new();
+                for line in lines.iter().skip(1) {
+                    if line.contains("---") {
+                        continue;
+                    }
+                    if line.trim().is_empty() {
+                        continue;
+                    }
+                    rows.push(parse_row(line));
+                }
+
+                Some(Block::Table(crate::ast::Table { header, rows, span: node.span() }))
             }
             HtmlTag => {
                 // TODO: 实现 HTML 构建
@@ -89,12 +167,27 @@ impl<'config> MarkdownBuilder<'config> {
             }
         }
 
-        crate::ast::ListItem {
-            content,
-            is_task: false,   // TODO: 检测任务列表
-            is_checked: None, // TODO: 检测勾选状态
-            span: node.span(),
+        // 如果没有嵌套块，但有文本内容，将其包装为段落
+        if content.is_empty() {
+            let text = source.get_text_in(node.span()).to_string();
+            if !text.trim().is_empty() {
+                // 简单的清理：移除可能的列表标记前缀
+                let display_text = if text.starts_with("- ") || text.starts_with("* ") {
+                    text[2..].to_string()
+                }
+                else if text.len() > 3 && text.chars().next().unwrap().is_ascii_digit() && text.contains(". ") {
+                    // 处理有序列表标记，如 "1. "
+                    if let Some(pos) = text.find(". ") { text[pos + 2..].to_string() } else { text }
+                }
+                else {
+                    text
+                };
+
+                content.push(crate::ast::Block::Paragraph(crate::ast::Paragraph { content: display_text.trim().to_string(), span: node.span() }));
+            }
         }
+
+        crate::ast::ListItem { content, is_task: false, is_checked: None, span: node.span() }
     }
 }
 
@@ -106,7 +199,7 @@ impl<'config> Builder<MarkdownLanguage> for MarkdownBuilder<'config> {
 
         match parse_result.result {
             Ok(green_tree) => {
-                let source_text = SourceText::new(source.get_text_in((0..source.length()).into()));
+                let source_text = SourceText::new(source.get_text_in((0..source.length()).into()).into_owned());
                 match self.build_root(green_tree, &source_text) {
                     Ok(ast_root) => oak_core::OakDiagnostics { result: Ok(ast_root), diagnostics: parse_result.diagnostics },
                     Err(build_error) => {

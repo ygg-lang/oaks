@@ -19,7 +19,8 @@ impl PascalParser {
 
 impl Parser<PascalLanguage> for PascalParser {
     fn parse<'a, S: Source + ?Sized>(&self, text: &'a S, edits: &[TextEdit], cache: &'a mut impl ParseCache<PascalLanguage>) -> oak_core::ParseOutput<'a, PascalLanguage> {
-        let lexer = PascalLexer::new(&PascalLanguage::default());
+        let language = PascalLanguage::default();
+        let lexer = PascalLexer::new(&language);
         oak_core::parser::parse_with_lexer(&lexer, text, edits, cache, |state| self.parse_root_internal(state))
     }
 }

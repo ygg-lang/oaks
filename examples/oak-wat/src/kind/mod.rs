@@ -1,6 +1,7 @@
 use oak_core::{ElementType, TokenType, UniversalElementRole, UniversalTokenRole};
+use serde::Serialize;
 
-#[derive(Copy, Clone, Debug, PartialEq, Eq, Hash)]
+#[derive(Copy, Clone, Debug, PartialEq, Eq, Hash, Serialize)]
 pub enum WatSyntaxKind {
     // 基础 kind
     Whitespace,

@@ -10,10 +10,14 @@ pub mod highlighter;
 mod kind;
 mod language;
 mod lexer;
+#[cfg(feature = "lsp")]
 pub mod lsp;
 mod parser;
 
-#[cfg(feature = "mcp")]
+#[cfg(feature = "lsp")]
 pub mod mcp;
 
-pub use crate::{ast::HtmlDocument, builder::HtmlBuilder, highlighter::HtmlHighlighter, language::HtmlLanguage, lexer::HtmlLexer, lsp::HtmlLanguageService, parser::HtmlParser};
+pub use crate::{ast::HtmlDocument, builder::HtmlBuilder, highlighter::HtmlHighlighter, language::HtmlLanguage, lexer::HtmlLexer, parser::HtmlParser};
+
+#[cfg(feature = "lsp")]
+pub use crate::lsp::HtmlLanguageService;

@@ -11,22 +11,20 @@ homepage.workspace = true
 repository.workspace = true
 
 [dependencies]
-anyhow = "1.0"
-serde = { workspace = true }
-futures = "0.3"
-dashmap = "5.5"
-url = { workspace = true }
-oak-core = { workspace = true }
-oak-vfs = { workspace = true }
-oak-folding = { workspace = true }
 axum = { workspace = true, optional = true }
-actix-web = { workspace = true, optional = true }
+anyhow = { workspace = true }
+serde = { workspace = true }
 serde_json = { workspace = true }
-tokio = { workspace = true, features = ["io-util", "io-std", "macros", "sync"] }
-tower-lsp = { workspace = true, optional = true }
+futures = { workspace = true }
+dashmap = { workspace = true }
+url = { workspace = true }
+oak-core = { workspace = true, features = ["serde"] }
+oak-vfs = { workspace = true, features = ["serde"] }
+oak-symbols = { workspace = true }
+oak-navigation = { workspace = true }
+oak-resolver = { workspace = true }
+oak-folding = { workspace = true }
+tokio = { workspace = true, features = ["io-util", "macros", "sync"] }
 
 [features]
 default = []
-axum = ["dep:axum"]
-actix-web = ["dep:actix-web"]
-tower-lsp = ["dep:tower-lsp"]

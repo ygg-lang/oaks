@@ -11,10 +11,12 @@ type State<'a, S> = LexerState<'a, S, JasmLanguage>;
 static JASM_COMMENT: LazyLock<CommentConfig> = LazyLock::new(|| CommentConfig { line_marker: "//", block_start: "", block_end: "", nested_blocks: false });
 static JASM_STRING: LazyLock<StringConfig> = LazyLock::new(|| StringConfig { quotes: &['"'], escape: Some('\\') });
 
-#[derive(Clone, Default)]
-pub struct JasmLexer {}
+#[derive(Clone, Debug)]
+pub struct JasmLexer<'config> {
+    _config: &'config JasmLanguage,
+}
 
-impl Lexer<JasmLanguage> for JasmLexer {
+impl<'config> Lexer<JasmLanguage> for JasmLexer<'config> {
     fn lex<'a, S: Source + ?Sized>(&self, source: &'a S, _edits: &[oak_core::TextEdit], _cache: &'a mut impl LexerCache<JasmLanguage>) -> LexOutput<JasmLanguage> {
         let mut state = State::new(source);
         let result = self.run(&mut state);
@@ -22,9 +24,9 @@ impl Lexer<JasmLanguage> for JasmLexer {
     }
 }
 
-impl JasmLexer {
-    pub fn new(_config: &JasmLanguage) -> Self {
-        Self {}
+impl<'config> JasmLexer<'config> {
+    pub fn new(config: &'config JasmLanguage) -> Self {
+        Self { _config: config }
     }
 
     /// 主要的词法分析循环

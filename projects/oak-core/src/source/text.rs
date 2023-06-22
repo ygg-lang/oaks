@@ -1,20 +1,26 @@
 use crate::{
     OakError,
-    source::{Source, TextEdit},
+    source::{Source, SourceId, TextEdit},
 };
 use core::range::Range;
 use std::borrow::Cow;
-use url::Url;
+use triomphe::Arc;
 
-/// Represents source code text with optional URL reference.
+/// Represents source code text with optional source ID reference.
 ///
 /// This struct manages the raw source text and provides utilities for:
 /// - Text extraction at specific offsets or ranges
 /// - Error reporting with precise location information
-#[derive(Clone, Debug, Default, PartialEq, Eq, Hash)]
+#[derive(Clone, Debug, PartialEq, Eq, Hash)]
 pub struct SourceText {
-    pub(crate) url: Option<Url>,
-    pub(crate) raw: String,
+    pub(crate) source_id: Option<SourceId>,
+    pub(crate) raw: Arc<str>,
+}
+
+impl Default for SourceText {
+    fn default() -> Self {
+        Self { source_id: None, raw: Arc::from("") }
+    }
 }
 
 impl Source for SourceText {
@@ -34,12 +40,22 @@ impl Source for SourceText {
         self.raw.get(range.start..range.end).map(Cow::Borrowed).unwrap_or(Cow::Borrowed(""))
     }
 
-    fn get_url(&self) -> Option<&Url> {
-        self.url.as_ref()
+    fn source_id(&self) -> Option<SourceId> {
+        self.source_id
     }
 }
 
 impl SourceText {
+    /// Creates a new source text from the given input.
+    pub fn new(input: impl Into<Arc<str>>) -> Self {
+        Self { source_id: None, raw: input.into() }
+    }
+
+    /// Creates a new source text from the given input and source ID.
+    pub fn new_with_id(input: impl Into<Arc<str>>, source_id: SourceId) -> Self {
+        Self { source_id: Some(source_id), raw: input.into() }
+    }
+
     /// Returns the raw source text as a string slice.
     pub fn text(&self) -> &str {
         &self.raw
@@ -68,10 +84,12 @@ impl SourceText {
             delta += text.len() as isize - (span.end - span.start) as isize;
         }
 
+        let mut raw = self.raw.to_string();
         for &i in order.iter().rev() {
             let TextEdit { span, text } = &edits[i];
-            self.raw.replace_range(span.start..span.end, text);
+            raw.replace_range(span.start..span.end, text);
         }
+        self.raw = Arc::from(raw);
 
         Range { start: reparse_from, end: reparse_to }
     }
@@ -106,23 +124,22 @@ impl SourceText {
         self.apply_edits_range(edits).start
     }
 
-    /// Gets the URL associated with this source text, if any.
+    /// Gets the source ID associated with this source text, if any.
     ///
     /// # Returns
     ///
-    /// An [`Option<&Url>`] containing the URL reference if one was set,
-    /// or `None` if no URL is associated with this source text.
+    /// An [`Option<SourceId>`] containing the source ID if one was set,
+    /// or `None` if no ID is associated with this source text.
     ///
     /// # Examples
     ///
     /// ```
     /// # use oak_core::SourceText;
-    /// # use url::Url;
-    /// let source = SourceText::new_with_url("code", Url::parse("file:///main.rs").unwrap());
-    /// assert!(source.get_url().is_some());
+    /// let source = SourceText::new_with_id("code", 1);
+    /// assert!(source.source_id().is_some());
     /// ```
-    pub fn get_url(&self) -> Option<&Url> {
-        self.url.as_ref()
+    pub fn source_id(&self) -> Option<SourceId> {
+        self.source_id
     }
 
     /// Gets the length of the source text in bytes.
@@ -158,43 +175,6 @@ impl SourceText {
     pub fn is_empty(&self) -> bool {
         self.raw.is_empty()
     }
-}
-
-impl SourceText {
-    /// Creates a new SourceText from a string.
-    ///
-    /// # Arguments
-    ///
-    /// * `input` - The source code text
-    ///
-    /// # Examples
-    ///
-    /// ```
-    /// # use oak_core::SourceText;
-    /// let source = SourceText::new("fn main() {}");
-    /// ```
-    pub fn new(input: impl ToString) -> Self {
-        let text = input.to_string();
-        Self { url: None, raw: text }
-    }
-    /// Creates a new SourceText from a string with an optional URL.
-    ///
-    /// # Arguments
-    ///
-    /// * `input` - The source code text
-    /// * `url` - URL reference for the source file
-    ///
-    /// # Examples
-    ///
-    /// ```
-    /// # use oak_core::SourceText;
-    /// # use url::Url;
-    /// let source = SourceText::new_with_url("fn main() {}", Url::parse("file:///main.rs").unwrap());
-    /// ```
-    pub fn new_with_url(input: impl ToString, url: Url) -> Self {
-        let text = input.to_string();
-        Self { url: Some(url), raw: text }
-    }
 
     /// Creates a syntax error with location information.
     ///
@@ -215,26 +195,26 @@ impl SourceText {
     /// let error = source.syntax_error("Unexpected end of input", 7);
     /// ```
     pub fn syntax_error(&self, message: impl Into<String>, offset: usize) -> OakError {
-        OakError::syntax_error(message, offset, self.url.clone())
+        OakError::syntax_error(message, offset, self.source_id)
     }
 
     /// Creates an error for an unexpected character at the specified offset.
     pub fn unexpected_character(&self, character: char, offset: usize) -> OakError {
-        OakError::unexpected_character(character, offset, self.url.clone())
+        OakError::unexpected_character(character, offset, self.source_id)
     }
 
     /// Creates an error for an expected token that was missing at the specified offset.
     pub fn expected_token(&self, expected: impl Into<String>, offset: usize) -> OakError {
-        OakError::expected_token(expected, offset, self.url.clone())
+        OakError::expected_token(expected, offset, self.source_id)
     }
 
     /// Creates an error for an expected name that was missing at the specified offset.
     pub fn expected_name(&self, name_kind: impl Into<String>, offset: usize) -> OakError {
-        OakError::expected_name(name_kind, offset, self.url.clone())
+        OakError::expected_name(name_kind, offset, self.source_id)
     }
 
     /// Creates an error for a trailing comma that is not allowed at the specified offset.
     pub fn trailing_comma_not_allowed(&self, offset: usize) -> OakError {
-        OakError::trailing_comma_not_allowed(offset, self.url.clone())
+        OakError::trailing_comma_not_allowed(offset, self.source_id)
     }
 }

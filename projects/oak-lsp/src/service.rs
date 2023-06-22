@@ -1,6 +1,11 @@
-use crate::types::{CompletionItem, Diagnostic, FoldingRange, Hover, InitializeParams, LocationRange, StructureItem, WorkspaceEdit, WorkspaceSymbol};
+use crate::types::{CodeAction, CompletionItem, Diagnostic, DocumentHighlight, FoldingRange, Hover, InitializeParams, InlayHint, LocationRange, SelectionRange, SemanticTokens, SignatureHelp, StructureItem, TextEdit, WorkspaceEdit, WorkspaceSymbol};
 use core::range::Range;
-use oak_core::{language::Language, source::Source, tree::RedNode};
+use oak_core::{
+    language::{ElementRole, ElementType, Language},
+    source::Source,
+    tree::RedNode,
+};
+use oak_resolver::ModuleResolver;
 use oak_vfs::{Vfs, WritableVfs};
 use std::future::Future;
 
@@ -15,8 +20,8 @@ pub trait LanguageService: Send + Sync {
     fn workspace(&self) -> &crate::workspace::WorkspaceManager;
 
     /// Helper to get source from VFS.
-    fn get_source(&self, uri: &str) -> Option<Box<dyn Source + Send + Sync>> {
-        self.vfs().get_source(uri).map(|s| Box::new(s) as Box<dyn Source + Send + Sync>)
+    fn get_source(&self, uri: &str) -> Option<<Self::Vfs as Vfs>::Source> {
+        self.vfs().get_source(uri)
     }
 
     /// Helper to get the root red node of a file.
@@ -65,13 +70,28 @@ pub trait LanguageService: Send + Sync {
     }
 
     /// Provide document symbols. Defaults to empty.
-    fn document_symbols(&self, _uri: &str) -> impl Future<Output = Vec<StructureItem>> + Send + '_ {
-        async { vec![] }
+    fn document_symbols<'a>(&'a self, uri: &'a str) -> impl Future<Output = Vec<StructureItem>> + Send + 'a {
+        let uri = uri.to_string();
+        async move {
+            let _source = match self.get_source(&uri) {
+                Some(s) => s,
+                None => return vec![],
+            };
+            let _root = match self.get_root(&uri).await {
+                Some(r) => r,
+                None => return vec![],
+            };
+            let symbols = self.workspace().symbols.query_file(&uri);
+            if !symbols.is_empty() {
+                return symbols.into_iter().map(StructureItem::from).collect();
+            }
+            vec![]
+        }
     }
 
-    /// Search for symbols in the entire workspace.
-    fn workspace_symbols(&self, _query: &str) -> impl Future<Output = Vec<WorkspaceSymbol>> + Send + '_ {
-        async { vec![] }
+    /// Provide workspace symbols.
+    fn workspace_symbols<'a>(&'a self, query: String) -> impl Future<Output = Vec<WorkspaceSymbol>> + Send + 'a {
+        async move { self.workspace().symbols.query(&query).into_iter().map(|s| WorkspaceSymbol::from(s)).collect() }
     }
 
     /// Helper to list all files recursively.
@@ -88,7 +108,7 @@ pub trait LanguageService: Send + Sync {
                 else if self.vfs().is_dir(&uri) {
                     if let Some(entries) = self.vfs().read_dir(&uri) {
                         for entry in entries {
-                            stack.push(entry);
+                            stack.push(entry.to_string());
                         }
                     }
                 }
@@ -98,12 +118,65 @@ pub trait LanguageService: Send + Sync {
     }
 
     /// Find definition. Defaults to empty.
-    fn definition<'a>(&'a self, _uri: &'a str, _range: Range<usize>) -> impl Future<Output = Vec<LocationRange>> + Send + 'a {
-        async { vec![] }
+    fn definition<'a>(&'a self, uri: &'a str, range: Range<usize>) -> impl Future<Output = Vec<LocationRange>> + Send + 'a {
+        let uri = uri.to_string();
+        async move {
+            let root = match self.get_root(&uri).await {
+                Some(r) => r,
+                None => return vec![],
+            };
+            let source = match self.get_source(&uri) {
+                Some(s) => s,
+                None => return vec![],
+            };
+
+            // 1. Identify token at range
+            use oak_core::tree::RedTree;
+            let node = match root.child_at_offset(range.start) {
+                Some(RedTree::Node(n)) => n,
+                Some(RedTree::Leaf(l)) => return vec![LocationRange { uri: uri.clone().into(), range: l.span }],
+                None => root,
+            };
+
+            // 2. If it's a reference, try to resolve it
+            let role = node.green.kind.role();
+            if role.universal() == oak_core::language::UniversalElementRole::Reference {
+                let name = &source.get_text_in(node.span());
+
+                // Try local symbols first (not implemented here, should be done by lang-specific logic)
+
+                // Try global symbols
+                if let Some(sym) = self.workspace().symbols.lookup(name) {
+                    return vec![LocationRange { uri: sym.uri, range: sym.range }];
+                }
+
+                // Try as a module import
+                if let Some(resolved_uri) = self.workspace().resolver.resolve(&uri, name) {
+                    return vec![LocationRange { uri: resolved_uri.into(), range: (0..0).into() }];
+                }
+            }
+
+            vec![]
+        }
     }
 
     /// Find references. Defaults to empty.
     fn references<'a>(&'a self, _uri: &'a str, _range: Range<usize>) -> impl Future<Output = Vec<LocationRange>> + Send + 'a {
+        async { vec![] }
+    }
+
+    /// Find type definition. Defaults to empty.
+    fn type_definition<'a>(&'a self, _uri: &'a str, _range: Range<usize>) -> impl Future<Output = Vec<LocationRange>> + Send + 'a {
+        async { vec![] }
+    }
+
+    /// Find implementation. Defaults to empty.
+    fn implementation<'a>(&'a self, _uri: &'a str, _range: Range<usize>) -> impl Future<Output = Vec<LocationRange>> + Send + 'a {
+        async { vec![] }
+    }
+
+    /// Provide document highlights. Defaults to empty.
+    fn document_highlights<'a>(&'a self, _uri: &'a str, _range: Range<usize>) -> impl Future<Output = Vec<DocumentHighlight>> + Send + 'a {
         async { vec![] }
     }
 
@@ -119,6 +192,41 @@ pub trait LanguageService: Send + Sync {
 
     /// Provide diagnostics for a file. Defaults to empty.
     fn diagnostics<'a>(&'a self, _uri: &'a str) -> impl Future<Output = Vec<Diagnostic>> + Send + 'a {
+        async { vec![] }
+    }
+
+    /// Provide semantic tokens for a file. Defaults to None.
+    fn semantic_tokens<'a>(&'a self, _uri: &'a str) -> impl Future<Output = Option<SemanticTokens>> + Send + 'a {
+        async { None }
+    }
+
+    /// Provide semantic tokens for a range. Defaults to None.
+    fn semantic_tokens_range<'a>(&'a self, _uri: &'a str, _range: Range<usize>) -> impl Future<Output = Option<SemanticTokens>> + Send + 'a {
+        async { None }
+    }
+
+    /// Provide selection ranges for a file. Defaults to empty.
+    fn selection_ranges<'a>(&'a self, _uri: &'a str, _ranges: Vec<usize>) -> impl Future<Output = Vec<SelectionRange>> + Send + 'a {
+        async { vec![] }
+    }
+
+    /// Provide signature help at a position. Defaults to None.
+    fn signature_help<'a>(&'a self, _uri: &'a str, _position: usize) -> impl Future<Output = Option<SignatureHelp>> + Send + 'a {
+        async { None }
+    }
+
+    /// Provide inlay hints for a file. Defaults to empty.
+    fn inlay_hints<'a>(&'a self, _uri: &'a str) -> impl Future<Output = Vec<InlayHint>> + Send + 'a {
+        async { vec![] }
+    }
+
+    /// Provide document formatting. Defaults to empty.
+    fn formatting<'a>(&'a self, _uri: &'a str) -> impl Future<Output = Vec<TextEdit>> + Send + 'a {
+        async { vec![] }
+    }
+
+    /// Provide code actions for a file. Defaults to empty.
+    fn code_actions<'a>(&'a self, _uri: &'a str, _range: Range<usize>) -> impl Future<Output = Vec<CodeAction>> + Send + 'a {
         async { vec![] }
     }
 
@@ -147,17 +255,3 @@ pub trait LanguageService: Send + Sync {
         async {}
     }
 }
-
-/// Extension trait for `LanguageService` providing additional functionality like Axum integration.
-pub trait LanguageServiceExt: LanguageService {
-    /// Converts the language service into an Axum router.
-    #[cfg(feature = "axum")]
-    fn into_axum_router(self) -> axum::Router
-    where
-        Self: Sized + 'static,
-    {
-        crate::server::axum_router(std::sync::Arc::new(self))
-    }
-}
-
-impl<T: LanguageService> LanguageServiceExt for T {}

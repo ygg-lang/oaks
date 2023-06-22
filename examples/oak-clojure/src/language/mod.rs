@@ -1,8 +1,14 @@
 use crate::{lexer::ClojureTokenType, parser::ClojureElementType};
 use oak_core::{Language, LanguageCategory};
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
-pub struct ClojureLanguage;
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Default)]
+pub struct ClojureLanguage {}
+
+impl ClojureLanguage {
+    pub fn new() -> Self {
+        Self {}
+    }
+}
 
 impl Language for ClojureLanguage {
     const NAME: &'static str = "clojure";

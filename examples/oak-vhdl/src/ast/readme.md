@@ -1,33 +1,33 @@
-# VHDL 抽象语法树 (AST) 模块
+# VHDL Abstract Syntax Tree (AST) Module
 
-这个模块定义了 VHDL 的抽象语法树结构，用于表示解析后的 VHDL 代码。
+This module defines the abstract syntax tree structure for the VHDL language, used to represent parsed VHDL code.
 
-## AST 节点类型
+## AST Node Types
 
-### 根节点
+### Root Node
 
-- **`VhdlRoot`**: VHDL 文件的根节点，包含多个设计单元
+- **`VhdlRoot`**: The root node of a VHDL file, containing multiple design units.
 
-### 设计单元
+### Design Units
 
-- **`DesignUnit`**: VHDL 设计单元，可以是实体、架构体或包
-- **`EntityDeclaration`**: 实体声明，定义端口
-- **`ArchitectureBody`**: 架构体，定义实体的具体实现
-- **`PackageDeclaration`**: 包声明，定义可重用的类型和函数
+- **`DesignUnit`**: A VHDL design unit, which can be an entity, architecture body, or package.
+- **`EntityDeclaration`**: An entity declaration defining ports.
+- **`ArchitectureBody`**: An architecture body defining the specific implementation of an entity.
+- **`PackageDeclaration`**: A package declaration defining reusable types and functions.
 
-### 端口与信号
+### Ports and Signals
 
-- **`PortDeclaration`**: 端口声明（in, out, inout 等）
-- **`SignalDeclaration`**: 信号声明
-- **`PortDirection`**: 端口方向枚举
+- **`PortDeclaration`**: Port declarations (in, out, inout, etc.).
+- **`SignalDeclaration`**: Signal declarations.
+- **`PortDirection`**: Port direction enumeration.
 
-## 使用示例
+## Usage Example
 
 ```rust
 use oak_vhdl::ast::*;
 
 fn main() {
-    // 创建简单的 VHDL 实体 AST
+    // Create a simple VHDL entity AST
     let entity = EntityDeclaration {
         name: "counter".to_string(),
         ports: vec![
@@ -50,9 +50,9 @@ fn main() {
 }
 ```
 
-## 设计原则
+## Design Principles
 
-1. **完整性**: 支持完整的 VHDL 语法
-2. **可扩展性**: 易于添加新的 AST 节点类型
-3. **类型安全**: 使用 Rust 的类型系统确保 AST 的有效性
-4. **性能**: 高效的内存使用和访问模式
+1. **Completeness**: Supports full VHDL syntax.
+2. **Extensibility**: Easy to add new AST node types.
+3. **Type Safety**: Uses Rust's type system to ensure AST validity.
+4. **Performance**: Efficient memory usage and access patterns.

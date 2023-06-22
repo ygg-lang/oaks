@@ -20,7 +20,7 @@ impl<'config> NimParser<'config> {
 
 impl<'config> Parser<NimLanguage> for NimParser<'config> {
     fn parse<'a, S: Source + ?Sized>(&self, text: &'a S, edits: &[TextEdit], cache: &'a mut impl ParseCache<NimLanguage>) -> ParseOutput<'a, NimLanguage> {
-        let lexer = NimLexer::new(self.config);
+        let lexer = NimLexer::new(&self.config);
         parse_with_lexer(&lexer, text, edits, cache, |state| self.parse_root_internal(state))
     }
 }

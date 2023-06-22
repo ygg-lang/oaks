@@ -10,7 +10,6 @@ pub mod kind;
 pub mod language;
 pub mod lexer;
 pub mod lsp;
-#[cfg(feature = "mcp")]
 pub mod mcp;
 pub mod parser;
 
@@ -25,5 +24,4 @@ pub use crate::{
     parser::NoteParser,
 };
 
-#[cfg(feature = "mcp")]
 pub use crate::mcp::serve_note_mcp;

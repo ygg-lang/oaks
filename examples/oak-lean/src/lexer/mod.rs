@@ -8,10 +8,12 @@ use oak_core::{Lexer, LexerCache, LexerState, OakError, TextEdit, lexer::LexOutp
 type State<'a, S> = LexerState<'a, S, LeanLanguage>;
 
 /// Lean 词法分析器
-#[derive(Debug, Clone, Copy)]
-pub struct LeanLexer;
+#[derive(Debug, Clone)]
+pub struct LeanLexer<'config> {
+    _config: &'config LeanLanguage,
+}
 
-impl Lexer<LeanLanguage> for LeanLexer {
+impl<'config> Lexer<LeanLanguage> for LeanLexer<'config> {
     fn lex<'a, S: Source + ?Sized>(&self, text: &'a S, _edits: &[TextEdit], cache: &'a mut impl LexerCache<LeanLanguage>) -> LexOutput<LeanLanguage> {
         let mut state = State::new(text);
         let result = self.run(&mut state);
@@ -22,10 +24,10 @@ impl Lexer<LeanLanguage> for LeanLexer {
     }
 }
 
-impl LeanLexer {
+impl<'config> LeanLexer<'config> {
     /// 创建新的 Lean 词法分析器
-    pub fn new(_config: &LeanLanguage) -> Self {
-        Self
+    pub fn new(config: &'config LeanLanguage) -> Self {
+        Self { _config: config }
     }
 
     /// 跳过空白字符

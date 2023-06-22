@@ -1,5 +1,6 @@
 use crate::{formats::jasm::ast::*, program::*};
-use gaia_types::{GaiaDiagnostics, GaiaError, Result};
+use oak_core::{OakDiagnostics, OakError};
+type Result<T> = std::result::Result<T, OakError>;
 
 pub struct JvmToJasmConverter {
     constant_pool: JvmConstantPool,
@@ -10,12 +11,12 @@ impl JvmToJasmConverter {
         Self { constant_pool: JvmConstantPool::new() }
     }
 
-    pub fn convert(&mut self, program: JvmProgram) -> GaiaDiagnostics<JasmRoot> {
+    pub fn convert(&mut self, program: JvmProgram) -> OakDiagnostics<JasmRoot> {
         let constant_pool = program.constant_pool.clone();
         self.constant_pool = constant_pool;
         match self.convert_class(program) {
-            Ok(jasm_class) => GaiaDiagnostics::success(JasmRoot { class: jasm_class }),
-            Err(error) => GaiaDiagnostics::failure(error),
+            Ok(jasm_class) => OakDiagnostics::success(JasmRoot { class: jasm_class }),
+            Err(error) => OakDiagnostics::failure(error),
         }
     }
 
@@ -205,7 +206,7 @@ impl JvmToJasmConverter {
                 Ok(JasmInstruction::MethodCall { instruction: "invokedynamic".to_string(), method_ref })
             }
 
-            _ => Err(GaiaError::custom_error(format!("Unsupported JVM instruction for JASM conversion: {:?}", instruction))),
+            _ => Err(OakError::custom_error(format!("Unsupported JVM instruction for JASM conversion: {:?}", instruction))),
         }
     }
 
@@ -229,18 +230,18 @@ impl JvmToJasmConverter {
                     JvmConstantPoolEntry::InterfaceMethodref { class_name, name, descriptor } => {
                         Ok(format!("{}.\"{}\":\"{}\"", class_name, name, descriptor))
                     }
-                    _ => Err(GaiaError::custom_error(format!(
+                    _ => Err(OakError::custom_error(format!(
                         "Unsupported constant pool entry type for JASM conversion: {:?}",
                         entry
                     ))),
                 }
             }
             else {
-                Err(GaiaError::custom_error(format!("Constant pool entry not found for index: {}", index)))
+                Err(OakError::custom_error(format!("Constant pool entry not found for index: {}", index)))
             }
         }
         else {
-            Err(GaiaError::custom_error(format!("Symbol not found in constant pool: {}", symbol)))
+            Err(OakError::custom_error(format!("Symbol not found in constant pool: {}", symbol)))
         }
     }
 }
@@ -251,7 +252,7 @@ impl Default for JvmToJasmConverter {
     }
 }
 
-pub fn convert_jvm_to_jasm(program: JvmProgram) -> GaiaDiagnostics<JasmRoot> {
+pub fn convert_jvm_to_jasm(program: JvmProgram) -> OakDiagnostics<JasmRoot> {
     let mut converter = JvmToJasmConverter::new();
     converter.convert(program)
 }

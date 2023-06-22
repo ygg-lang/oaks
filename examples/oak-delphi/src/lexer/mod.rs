@@ -4,7 +4,7 @@ use oak_core::{Lexer, LexerCache, LexerState, OakError, TextEdit, lexer::LexOutp
 type State<'a, S> = LexerState<'a, S, DelphiLanguage>;
 
 /// Lexer implementation for Delphi programming language
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct DelphiLexer<'config> {
     _config: &'config DelphiLanguage,
 }
@@ -375,8 +375,8 @@ impl<'config> DelphiLexer<'config> {
 }
 
 impl<'config> Lexer<DelphiLanguage> for DelphiLexer<'config> {
-    fn lex<'a, S: Source + ?Sized>(&self, source: &'a S, _edits: &[TextEdit], cache: &'a mut impl LexerCache<DelphiLanguage>) -> LexOutput<DelphiLanguage> {
-        let mut state = LexerState::new(source);
+    fn lex<'a, S: Source + ?Sized>(&self, source: &S, _edits: &[TextEdit], cache: &'a mut impl LexerCache<DelphiLanguage>) -> LexOutput<DelphiLanguage> {
+        let mut state = State::new_with_cache(source, 0, cache);
         let result = self.run(&mut state);
         if result.is_ok() {
             state.add_eof();

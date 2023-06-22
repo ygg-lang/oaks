@@ -11,12 +11,12 @@ type State<'a, S> = LexerState<'a, S, CLanguage>;
 
 #[derive(Clone, Copy, Debug, Serialize)]
 pub struct CLexer<'config> {
-    _config: &'config CLanguage,
+    config: &'config CLanguage,
 }
 
 impl<'config> Lexer<CLanguage> for CLexer<'config> {
     fn lex<'a, S: Source + ?Sized>(&self, source: &S, _edits: &[oak_core::source::TextEdit], cache: &'a mut impl LexerCache<CLanguage>) -> LexOutput<CLanguage> {
-        let mut state = State::new(source);
+        let mut state = State::new_with_cache(source, 0, cache);
         let result = self.run(&mut state);
         if result.is_ok() {
             state.add_eof();
@@ -27,7 +27,7 @@ impl<'config> Lexer<CLanguage> for CLexer<'config> {
 
 impl<'config> CLexer<'config> {
     pub fn new(config: &'config CLanguage) -> Self {
-        Self { _config: config }
+        Self { config }
     }
 
     fn run<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> Result<(), OakError> {

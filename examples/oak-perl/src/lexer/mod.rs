@@ -11,7 +11,7 @@ type State<'s, S> = LexerState<'s, S, PerlLanguage>;
 static PERL_WHITESPACE: LazyLock<WhitespaceConfig> = LazyLock::new(|| WhitespaceConfig { unicode_whitespace: true });
 static PERL_COMMENT: LazyLock<CommentConfig> = LazyLock::new(|| CommentConfig { line_marker: "#", block_start: "", block_end: "", nested_blocks: false });
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct PerlLexer<'config> {
     _config: &'config PerlLanguage,
 }
@@ -462,7 +462,7 @@ impl<'config> PerlLexer<'config> {
 
 impl<'config> Lexer<PerlLanguage> for PerlLexer<'config> {
     fn lex<'a, S: Source + ?Sized>(&self, source: &'a S, _edits: &[oak_core::source::TextEdit], cache: &'a mut impl LexerCache<PerlLanguage>) -> LexOutput<PerlLanguage> {
-        let mut state = State::new_with_cache(source, 0, cache);
+        let mut state = LexerState::new(source);
         let result = self.run(&mut state);
         if result.is_ok() {
             state.add_eof();

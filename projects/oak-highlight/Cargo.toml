@@ -15,10 +15,9 @@ edition.workspace = true
 [dependencies]
 oak-core = { workspace = true }
 serde = { workspace = true }
-serde_json = { workspace = true }
 
 [dev-dependencies]
-oak-core = { workspace = true, features = ["testing"] }
+oak-testing = { workspace = true }
 oak-rust = { workspace = true }
 
 

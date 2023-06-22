@@ -21,7 +21,7 @@ impl<'config> IniParser<'config> {
 
 impl<'config> Parser<IniLanguage> for IniParser<'config> {
     fn parse<'a, S: Source + ?Sized>(&self, text: &'a S, edits: &[TextEdit], cache: &'a mut impl ParseCache<IniLanguage>) -> ParseOutput<'a, IniLanguage> {
-        let lexer = IniLexer::new(self.config);
+        let lexer = IniLexer::new(&self.config);
         parse_with_lexer(&lexer, text, edits, cache, |state| self.parse_root_internal(state))
     }
 }

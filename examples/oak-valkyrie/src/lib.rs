@@ -20,7 +20,6 @@ pub mod language;
 pub mod lexer;
 /// Language Server Protocol support for Valkyrie.
 pub mod lsp;
-#[cfg(feature = "mcp")]
 /// MCP support for Valkyrie.
 pub mod mcp;
 /// Parser implementation for Valkyrie.
@@ -31,5 +30,4 @@ pub use crate::{
     ast::ValkyrieRoot, builder::ValkyrieBuilder, formatter::ValkyrieFormatter, highlighter::ValkyrieHighlighter, kind::ValkyrieSyntaxKind, language::ValkyrieLanguage, lexer::ValkyrieLexer, lsp::ValkyrieLanguageService, parser::ValkyrieParser,
 };
 
-#[cfg(feature = "mcp")]
 pub use crate::mcp::serve_valkyrie_mcp;

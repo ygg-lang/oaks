@@ -11,11 +11,13 @@ type State<'a, S> = LexerState<'a, S, ZigLanguage>;
 static ZIG_WHITESPACE: LazyLock<WhitespaceConfig> = LazyLock::new(|| WhitespaceConfig { unicode_whitespace: true });
 
 #[derive(Clone)]
-pub struct ZigLexer;
+pub struct ZigLexer<'config> {
+    _config: &'config ZigLanguage,
+}
 
-impl Lexer<ZigLanguage> for ZigLexer {
-    fn lex<'a, S: Source + ?Sized>(&self, source: &S, _edits: &[oak_core::TextEdit], cache: &'a mut impl LexerCache<ZigLanguage>) -> LexOutput<ZigLanguage> {
-        let mut state = LexerState::new(source);
+impl<'config> Lexer<ZigLanguage> for ZigLexer<'config> {
+    fn lex<'a, S: Source + ?Sized>(&self, source: &S, _edits: &[oak_core::source::TextEdit], cache: &'a mut impl LexerCache<ZigLanguage>) -> LexOutput<ZigLanguage> {
+        let mut state = State::new_with_cache(source, 0, cache);
         let result = self.run(&mut state);
         if result.is_ok() {
             state.add_eof();
@@ -24,13 +26,13 @@ impl Lexer<ZigLanguage> for ZigLexer {
     }
 }
 
-impl ZigLexer {
-    pub fn new(_config: &ZigLanguage) -> Self {
-        Self
+impl<'config> ZigLexer<'config> {
+    pub fn new(config: &'config ZigLanguage) -> Self {
+        Self { _config: config }
     }
 
     /// 主要的词法分析循环
-    fn run<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> Result<(), OakError> {
+    fn run<S: Source + ?Sized>(&self, state: &mut State<'_, S>) -> Result<(), OakError> {
         while state.not_at_end() {
             let safe_point = state.get_position();
 
@@ -84,12 +86,12 @@ impl ZigLexer {
     }
 
     /// 跳过空白字符
-    fn skip_whitespace<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
+    fn skip_whitespace<S: Source + ?Sized>(&self, state: &mut State<'_, S>) -> bool {
         ZIG_WHITESPACE.scan(state, ZigSyntaxKind::Whitespace)
     }
 
     /// 跳过注释
-    fn skip_comment<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
+    fn skip_comment<S: Source + ?Sized>(&self, state: &mut State<'_, S>) -> bool {
         let start = state.get_position();
         let rest = state.rest();
 

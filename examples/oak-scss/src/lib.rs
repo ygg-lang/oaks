@@ -14,14 +14,9 @@ pub mod syntax;
 
 mod formatter;
 pub mod lsp;
-#[cfg(feature = "mcp")]
 pub mod mcp;
 
 // 重新导出主要类型
 pub use crate::{builder::ScssBuilder, formatter::ScssFormatter, highlighter::ScssHighlighter, kind::ScssSyntaxKind, language::ScssLanguage, lexer::ScssLexer, lsp::ScssLanguageService, parser::ScssParser};
 
-#[cfg(feature = "mcp")]
 pub use crate::mcp::serve_scss_mcp;
-
-#[cfg(all(feature = "mcp", feature = "axum"))]
-pub use crate::mcp::serve_scss_mcp_axum;

@@ -10,7 +10,7 @@ pub mod state;
 pub use self::{
     pratt::{Associativity, OperatorInfo, Pratt, PrattParser, binary, postfix, unary},
     session::{ParseCache, ParseSession},
-    state::ParserState,
+    state::{ParserState, deep_clone_node},
 };
 
 pub use triomphe::Arc;

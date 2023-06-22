@@ -1,0 +1,207 @@
+# Advanced RBQ Concepts Test
+# Covering Traits, Relations, Validation, and Custom Scalars
+
+# 1. Custom Scalars (Rust-style)
+@regex("^[a-zA-Z0-9+_.-]+@[a-zA-Z0-9.-]+$")
+type Email = utf8;
+
+@range(min = 0)
+type Money = d128;
+
+# 2. Reusable Traits
+trait Timestamps {
+    created_at: date_time;
+    updated_at: date_time;
+}
+
+trait SoftDelete {
+    @index
+    deleted_at: date_time?;
+}
+
+# 3. Entities with Relations and Traits
+@database("social.main")
+@table(name = "users")
+class User using Timestamps, SoftDelete {
+    @key
+    id: u64;
+    
+    @unique
+    @length(min = 3, max = 20)
+    username: utf8;
+    
+    email: Email;
+    
+    # 1:N Navigation Property
+    @relation(back_ref = "author")
+    posts: list<&Post>;
+    
+    # Virtual field
+    @virtual
+    display_name: utf8;
+}
+
+@table(name = "posts")
+class Post using Timestamps {
+    @key
+    id: u64;
+    
+    @length(max = 200)
+    title: utf8;
+    
+    content: utf8;
+    
+    # Physical Foreign Key
+    author: &User;
+    
+    # 1:N Relation to comments
+    @relation(back_ref = "post")
+    comments: list<&Comment>;
+}
+
+@table(name = "comments")
+class Comment using Timestamps {
+    @key
+    id: u128;
+    
+    content: utf8;
+    
+    # Physical links
+    post: &Post;
+    author: &User;
+}
+
+# 4. ADT Enums (Free Objects by default)
+@tag("type")
+union Attachment {
+    Image { url: utf8, width: i32, height: i32 },
+    Video { url: utf8, duration: i32 },
+    @tag("doc")
+    File { path: utf8, size: u64 }
+}
+
+@tag("t")
+@content("c")
+union NotificationType {
+    Email { to: utf8 },
+    Push { device_id: utf8 }
+}
+
+# 5. Advanced Modeling Simulation
+
+# Vector Search Simulation (SQL + pgvector)
+@table(name = "knowledge_base")
+class Document {
+    @key id: uuid;
+    content: utf8;
+    
+    @vector(index = "hnsw", metric = "l2")
+    embedding: vector<f32, 768>;
+}
+
+# Graph Simulation (SQL + Recursive CTE/JOIN)
+@table(name = "users")
+struct GUser {
+    @key id: utf8;
+    name: utf8;
+    
+    @relation(label = "FOLLOWS")
+    following: list<&GUser>;
+}
+
+# Document Simulation (SQL + JSONB/Lifting)
+struct GeoPoint {
+    lat: f64;
+    lng: f64;
+}
+
+@table(name = "configs")
+struct SystemConfig {
+    @key id: utf8;
+    
+    # 显式平铺到父表
+    @inline
+    location: GeoPoint;
+    
+    # 默认存储为 JSONB
+    extra: dict<object>;
+}
+
+# 6. Enterprise Features Simulation
+
+# State Machine
+enum TaskStatus {
+    @initial
+    Todo,
+    @transition(from = [Todo])
+    InProgress,
+    @transition(from = [InProgress])
+    Done,
+    @transition(from = [Todo, InProgress])
+    Archived
+}
+
+# Multi-tenancy & Policy
+@table(name = "projects")
+@tenant
+@policy(
+    read = "auth.user.role == 'Admin' || $owner_id == auth.user_id",
+    write = "$owner_id == auth.user_id"
+)
+struct Project {
+    @key id: uuid;
+    name: utf8;
+    owner_id: &GUser;
+    status: TaskStatus;
+    
+    @version
+    version: i32;
+    
+    @audit
+    trace: {
+        created_at: date_time;
+        updated_at: date_time;
+    }
+}
+
+# 7. AI & Big Data Simulation
+
+# Time-series & Big Data
+@table(name = "sensor_readings")
+@partition(by = "range", field = "ts", interval = "1 day")
+@ttl(expire = "30d")
+@columnar
+struct SensorReading {
+    @key id: u64;
+    sensor_id: utf8;
+    value: f64;
+    @audit(created_at)
+    ts: date_time;
+}
+
+# AI Integrated Schema
+@table(name = "documents")
+struct AIDoc {
+    @key id: uuid;
+    content: utf8;
+    
+    # AI derived field
+    @embedding(source = "content", model = "openai/text-embedding-ada-002")
+    content_vec: vector<f32, 1536>;
+    
+    # Feature for downstream ML
+    @feature
+    importance_score: f32;
+}
+
+# 8. Composite Constraints
+@table(name = "likes")
+@unique(["user_id", "post_id"])
+struct Like {
+    user_id: &User;
+    post_id: &Post;
+    created_at: date_time;
+    
+    # Nested Free Object
+    attachment: Attachment?;
+}

@@ -13,9 +13,11 @@ static SCSS_COMMENT: LazyLock<CommentConfig> = LazyLock::new(|| CommentConfig { 
 static SCSS_STRING: LazyLock<StringConfig> = LazyLock::new(|| StringConfig { quotes: &['"'], escape: Some('\\') });
 
 #[derive(Debug, Clone)]
-pub struct ScssLexer;
+pub struct ScssLexer<'config> {
+    _config: &'config ScssLanguage,
+}
 
-impl Lexer<ScssLanguage> for ScssLexer {
+impl<'config> Lexer<ScssLanguage> for ScssLexer<'config> {
     fn lex<'a, S: Source + ?Sized>(&self, text: &S, _edits: &[TextEdit], cache: &'a mut impl LexerCache<ScssLanguage>) -> LexOutput<ScssLanguage> {
         let mut state = LexerState::new(text);
         let result = self.run(&mut state);
@@ -26,9 +28,9 @@ impl Lexer<ScssLanguage> for ScssLexer {
     }
 }
 
-impl ScssLexer {
-    pub fn new(_config: &ScssLanguage) -> Self {
-        Self
+impl<'config> ScssLexer<'config> {
+    pub fn new(config: &'config ScssLanguage) -> Self {
+        Self { _config: config }
     }
 
     fn run<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> Result<(), OakError> {

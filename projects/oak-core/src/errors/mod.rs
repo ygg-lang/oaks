@@ -1,8 +1,6 @@
-use url::Url;
+use crate::source::SourceId;
 
 mod display;
-#[cfg(feature = "serde_json")]
-mod from_serde_json;
 mod from_std;
 mod source;
 
@@ -36,6 +34,23 @@ pub struct OakDiagnostics<T> {
     pub diagnostics: Vec<OakError>,
 }
 
+impl<T> OakDiagnostics<T> {
+    /// Creates a new OakDiagnostics with the given result and no diagnostics.
+    pub fn new(result: Result<T, OakError>) -> Self {
+        Self { result, diagnostics: Vec::new() }
+    }
+
+    /// Creates a new OakDiagnostics with a successful result.
+    pub fn success(value: T) -> Self {
+        Self { result: Ok(value), diagnostics: Vec::new() }
+    }
+
+    /// Creates a new OakDiagnostics with a fatal error.
+    pub fn error(error: OakError) -> Self {
+        Self { result: Err(error), diagnostics: Vec::new() }
+    }
+}
+
 /// The main error type for the Oak Core parsing framework.
 ///
 /// `OakError` represents all possible language that can occur during
@@ -46,9 +61,30 @@ pub struct OakError {
     kind: Box<OakErrorKind>,
 }
 
+impl OakError {
+    /// Creates a new OakError with the given kind.
+    pub fn new(kind: OakErrorKind) -> Self {
+        Self { kind: Box::new(kind) }
+    }
+}
+
 impl std::fmt::Debug for OakError {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self, f)
+    }
+}
+
+#[cfg(feature = "serde")]
+impl serde::ser::Error for OakError {
+    fn custom<T: std::fmt::Display>(msg: T) -> Self {
+        OakError::serde_error(msg.to_string())
+    }
+}
+
+#[cfg(feature = "serde")]
+impl serde::de::Error for OakError {
+    fn custom<T: std::fmt::Display>(msg: T) -> Self {
+        OakError::deserialize_error(msg.to_string())
     }
 }
 
@@ -63,8 +99,8 @@ pub enum OakErrorKind {
     IoError {
         /// The underlying I/O error.
         error: std::io::Error,
-        /// Optional URL of the file that caused the error.
-        url: Option<Url>,
+        /// Optional source ID of the file that caused the error.
+        source_id: Option<SourceId>,
     },
     /// Syntax error encountered during parsing.
     SyntaxError {
@@ -72,8 +108,8 @@ pub enum OakErrorKind {
         message: String,
         /// The byte offset where the error occurred.
         offset: usize,
-        /// Optional URL of the file that caused the error.
-        url: Option<Url>,
+        /// Optional source ID of the file that caused the error.
+        source_id: Option<SourceId>,
     },
     /// Unexpected character encountered during lexical analysis.
     UnexpectedCharacter {
@@ -81,8 +117,8 @@ pub enum OakErrorKind {
         character: char,
         /// The byte offset where the unexpected character was found.
         offset: usize,
-        /// Optional URL of the file that caused the error.
-        url: Option<Url>,
+        /// Optional source ID of the file that caused the error.
+        source_id: Option<SourceId>,
     },
 
     /// Unexpected token encountered during parsing.
@@ -91,16 +127,16 @@ pub enum OakErrorKind {
         token: String,
         /// The byte offset where the unexpected token was found.
         offset: usize,
-        /// Optional URL of the file that caused the error.
-        url: Option<Url>,
+        /// Optional source ID of the file that caused the error.
+        source_id: Option<SourceId>,
     },
 
     /// Unexpected end of file encountered during parsing.
     UnexpectedEof {
         /// The byte offset where the EOF was encountered.
         offset: usize,
-        /// Optional URL of the file that caused the error.
-        url: Option<Url>,
+        /// Optional source ID of the file that caused the error.
+        source_id: Option<SourceId>,
     },
 
     /// Custom error for user-defined error conditions.
@@ -151,8 +187,8 @@ pub enum OakErrorKind {
         expected: String,
         /// The byte offset where the error occurred.
         offset: usize,
-        /// Optional URL of the file that caused the error.
-        url: Option<Url>,
+        /// Optional source ID of the file that caused the error.
+        source_id: Option<SourceId>,
     },
 
     /// Expected a name (identifier).
@@ -161,16 +197,16 @@ pub enum OakErrorKind {
         name_kind: String,
         /// The byte offset where the error occurred.
         offset: usize,
-        /// Optional URL of the file that caused the error.
-        url: Option<Url>,
+        /// Optional source ID of the file that caused the error.
+        source_id: Option<SourceId>,
     },
 
     /// Trailing comma is not allowed.
     TrailingCommaNotAllowed {
         /// The byte offset where the error occurred.
         offset: usize,
-        /// Optional URL of the file that caused the error.
-        url: Option<Url>,
+        /// Optional source ID of the file that caused the error.
+        source_id: Option<SourceId>,
     },
 
     /// Test failure error.
@@ -187,6 +223,42 @@ pub enum OakErrorKind {
     TestRegenerated {
         /// The file that was regenerated.
         path: std::path::PathBuf,
+    },
+
+    /// Serde serialization error.
+    SerdeError {
+        /// The error message.
+        message: String,
+    },
+
+    /// Serde deserialization error.
+    DeserializeError {
+        /// The error message.
+        message: String,
+    },
+
+    /// XML writing error.
+    XmlError {
+        /// The error message.
+        message: String,
+    },
+
+    /// Zip archive error.
+    ZipError {
+        /// The error message.
+        message: String,
+    },
+
+    /// Parsing error (generic).
+    ParseError {
+        /// The error message.
+        message: String,
+    },
+
+    /// Internal error.
+    InternalError {
+        /// The error message.
+        message: String,
     },
 }
 
@@ -211,11 +283,22 @@ impl OakErrorKind {
             OakErrorKind::TrailingCommaNotAllowed { .. } => "error.trailing_comma_not_allowed",
             OakErrorKind::TestFailure { .. } => "error.test_failure",
             OakErrorKind::TestRegenerated { .. } => "error.test_regenerated",
+            OakErrorKind::SerdeError { .. } => "error.serde",
+            OakErrorKind::DeserializeError { .. } => "error.deserialize",
+            OakErrorKind::XmlError { .. } => "error.xml",
+            OakErrorKind::ZipError { .. } => "error.zip",
+            OakErrorKind::ParseError { .. } => "error.parse",
+            OakErrorKind::InternalError { .. } => "error.internal",
         }
     }
 }
 
 impl OakError {
+    /// Gets the kind of this error.
+    pub fn kind(&self) -> &OakErrorKind {
+        &self.kind
+    }
+
     /// Creates a test failure error.
     pub fn test_failure(path: std::path::PathBuf, expected: String, actual: String) -> Self {
         OakErrorKind::TestFailure { path, expected, actual }.into()
@@ -226,12 +309,12 @@ impl OakError {
         OakErrorKind::TestRegenerated { path }.into()
     }
 
-    /// Creates an I/O error with optional file URL.
+    /// Creates an I/O error with optional Source ID.
     ///
     /// # Arguments
     ///
     /// * `error` - The underlying I/O error
-    /// * `url` - URL of the file that caused the error
+    /// * `source_id` - Source ID of the file that caused the error
     ///
     /// # Examples
     ///
@@ -240,11 +323,11 @@ impl OakError {
     /// # use std::io;
     ///
     /// let io_err = io::Error::new(io::ErrorKind::NotFound, "File not found");
-    /// let error = OakError::io_error(io_err, url::Url::parse("file:///main.rs").unwrap());
+    /// let error = OakError::io_error(io_err, 1);
     /// ```
 
-    pub fn io_error(error: std::io::Error, url: Url) -> Self {
-        OakErrorKind::IoError { error, url: Some(url) }.into()
+    pub fn io_error(error: std::io::Error, source_id: SourceId) -> Self {
+        OakErrorKind::IoError { error, source_id: Some(source_id) }.into()
     }
 
     /// Creates a kind error with a message and location.
@@ -253,7 +336,7 @@ impl OakError {
     ///
     /// * `message` - Description of the kind error
     /// * `offset` - The byte offset where the error occurred
-    /// * `url` - Optional URL of the file that caused the error
+    /// * `source_id` - Optional source ID of the file that caused the error
     ///
     /// # Examples
     ///
@@ -262,8 +345,8 @@ impl OakError {
     ///
     /// let error = OakError::syntax_error("Unexpected token", 5, None);
     /// ```
-    pub fn syntax_error(message: impl Into<String>, offset: usize, url: Option<Url>) -> Self {
-        OakErrorKind::SyntaxError { message: message.into(), offset, url }.into()
+    pub fn syntax_error(message: impl Into<String>, offset: usize, source_id: Option<SourceId>) -> Self {
+        OakErrorKind::SyntaxError { message: message.into(), offset, source_id }.into()
     }
 
     /// Creates an unexpected character error.
@@ -272,7 +355,7 @@ impl OakError {
     ///
     /// * `character` - The unexpected character
     /// * `offset` - The byte offset where the character was found
-    /// * `url` - Optional URL of the file that caused the error
+    /// * `source_id` - Optional source ID of the file that caused the error
     ///
     /// # Examples
     ///
@@ -281,33 +364,33 @@ impl OakError {
     ///
     /// let error = OakError::unexpected_character('$', 0, None);
     /// ```
-    pub fn unexpected_character(character: char, offset: usize, url: Option<Url>) -> Self {
-        OakErrorKind::UnexpectedCharacter { character, offset, url }.into()
+    pub fn unexpected_character(character: char, offset: usize, source_id: Option<SourceId>) -> Self {
+        OakErrorKind::UnexpectedCharacter { character, offset, source_id }.into()
     }
 
     /// Creates an unexpected token error.
-    pub fn unexpected_token(token: impl Into<String>, offset: usize, url: Option<Url>) -> Self {
-        OakErrorKind::UnexpectedToken { token: token.into(), offset, url }.into()
+    pub fn unexpected_token(token: impl Into<String>, offset: usize, source_id: Option<SourceId>) -> Self {
+        OakErrorKind::UnexpectedToken { token: token.into(), offset, source_id }.into()
     }
 
     /// Creates an unexpected end of file error.
-    pub fn unexpected_eof(offset: usize, url: Option<Url>) -> Self {
-        OakErrorKind::UnexpectedEof { offset, url }.into()
+    pub fn unexpected_eof(offset: usize, source_id: Option<SourceId>) -> Self {
+        OakErrorKind::UnexpectedEof { offset, source_id }.into()
     }
 
     /// Creates an expected token error.
-    pub fn expected_token(expected: impl Into<String>, offset: usize, url: Option<Url>) -> Self {
-        OakErrorKind::ExpectedToken { expected: expected.into(), offset, url }.into()
+    pub fn expected_token(expected: impl Into<String>, offset: usize, source_id: Option<SourceId>) -> Self {
+        OakErrorKind::ExpectedToken { expected: expected.into(), offset, source_id }.into()
     }
 
     /// Creates an expected name error.
-    pub fn expected_name(name_kind: impl Into<String>, offset: usize, url: Option<Url>) -> Self {
-        OakErrorKind::ExpectedName { name_kind: name_kind.into(), offset, url }.into()
+    pub fn expected_name(name_kind: impl Into<String>, offset: usize, source_id: Option<SourceId>) -> Self {
+        OakErrorKind::ExpectedName { name_kind: name_kind.into(), offset, source_id }.into()
     }
 
     /// Creates a trailing comma not allowed error.
-    pub fn trailing_comma_not_allowed(offset: usize, url: Option<Url>) -> Self {
-        OakErrorKind::TrailingCommaNotAllowed { offset, url }.into()
+    pub fn trailing_comma_not_allowed(offset: usize, source_id: Option<SourceId>) -> Self {
+        OakErrorKind::TrailingCommaNotAllowed { offset, source_id }.into()
     }
 
     /// Creates a custom error for user-defined error conditions.with a message.
@@ -357,25 +440,46 @@ impl OakError {
         OakErrorKind::ProtocolError { message: message.into() }.into()
     }
 
-    /// Returns a reference to the error kind.
-    ///
-    /// # Returns
-    ///
-    /// A reference to the [`OakErrorKind`] enum that categorizes this error.
-    pub fn kind(&self) -> &OakErrorKind {
-        &self.kind
+    /// Creates a serde serialization error.
+    pub fn serde_error(message: impl Into<String>) -> Self {
+        OakErrorKind::SerdeError { message: message.into() }.into()
     }
 
-    /// Attach a URL to the error context.
-    pub fn with_url(mut self, url: Url) -> Self {
+    /// Creates a serde deserialization error.
+    pub fn deserialize_error(message: impl Into<String>) -> Self {
+        OakErrorKind::DeserializeError { message: message.into() }.into()
+    }
+
+    /// Creates an XML error.
+    pub fn xml_error(message: impl Into<String>) -> Self {
+        OakErrorKind::XmlError { message: message.into() }.into()
+    }
+
+    /// Creates a zip error.
+    pub fn zip_error(message: impl Into<String>) -> Self {
+        OakErrorKind::ZipError { message: message.into() }.into()
+    }
+
+    /// Creates a parse error.
+    pub fn parse_error(message: impl Into<String>) -> Self {
+        OakErrorKind::ParseError { message: message.into() }.into()
+    }
+
+    /// Creates an internal error.
+    pub fn internal_error(message: impl Into<String>) -> Self {
+        OakErrorKind::InternalError { message: message.into() }.into()
+    }
+
+    /// Attach a source ID to the error context.
+    pub fn with_source_id(mut self, source_id: SourceId) -> Self {
         match self.kind.as_mut() {
-            OakErrorKind::IoError { url: u, .. } => *u = Some(url),
-            OakErrorKind::SyntaxError { url: u, .. } => *u = Some(url),
-            OakErrorKind::UnexpectedCharacter { url: u, .. } => *u = Some(url),
-            OakErrorKind::UnexpectedToken { url: u, .. } => *u = Some(url),
-            OakErrorKind::ExpectedToken { url: u, .. } => *u = Some(url),
-            OakErrorKind::ExpectedName { url: u, .. } => *u = Some(url),
-            OakErrorKind::TrailingCommaNotAllowed { url: u, .. } => *u = Some(url),
+            OakErrorKind::IoError { source_id: u, .. } => *u = Some(source_id),
+            OakErrorKind::SyntaxError { source_id: u, .. } => *u = Some(source_id),
+            OakErrorKind::UnexpectedCharacter { source_id: u, .. } => *u = Some(source_id),
+            OakErrorKind::UnexpectedToken { source_id: u, .. } => *u = Some(source_id),
+            OakErrorKind::ExpectedToken { source_id: u, .. } => *u = Some(source_id),
+            OakErrorKind::ExpectedName { source_id: u, .. } => *u = Some(source_id),
+            OakErrorKind::TrailingCommaNotAllowed { source_id: u, .. } => *u = Some(source_id),
             _ => {}
         }
         self
@@ -385,18 +489,18 @@ impl OakError {
 impl Clone for OakErrorKind {
     fn clone(&self) -> Self {
         match self {
-            OakErrorKind::IoError { error, url } => {
+            OakErrorKind::IoError { error, source_id } => {
                 // Since std::io::Error doesn't support Clone, we create a new error
                 let new_error = std::io::Error::new(error.kind(), error.to_string());
-                OakErrorKind::IoError { error: new_error, url: url.clone() }
+                OakErrorKind::IoError { error: new_error, source_id: *source_id }
             }
-            OakErrorKind::SyntaxError { message, offset, url } => OakErrorKind::SyntaxError { message: message.clone(), offset: *offset, url: url.clone() },
-            OakErrorKind::UnexpectedCharacter { character, offset, url } => OakErrorKind::UnexpectedCharacter { character: *character, offset: *offset, url: url.clone() },
-            OakErrorKind::UnexpectedToken { token, offset, url } => OakErrorKind::UnexpectedToken { token: token.clone(), offset: *offset, url: url.clone() },
-            OakErrorKind::UnexpectedEof { offset, url } => OakErrorKind::UnexpectedEof { offset: *offset, url: url.clone() },
-            OakErrorKind::ExpectedToken { expected, offset, url } => OakErrorKind::ExpectedToken { expected: expected.clone(), offset: *offset, url: url.clone() },
-            OakErrorKind::ExpectedName { name_kind, offset, url } => OakErrorKind::ExpectedName { name_kind: name_kind.clone(), offset: *offset, url: url.clone() },
-            OakErrorKind::TrailingCommaNotAllowed { offset, url } => OakErrorKind::TrailingCommaNotAllowed { offset: *offset, url: url.clone() },
+            OakErrorKind::SyntaxError { message, offset, source_id } => OakErrorKind::SyntaxError { message: message.clone(), offset: *offset, source_id: *source_id },
+            OakErrorKind::UnexpectedCharacter { character, offset, source_id } => OakErrorKind::UnexpectedCharacter { character: *character, offset: *offset, source_id: *source_id },
+            OakErrorKind::UnexpectedToken { token, offset, source_id } => OakErrorKind::UnexpectedToken { token: token.clone(), offset: *offset, source_id: *source_id },
+            OakErrorKind::UnexpectedEof { offset, source_id } => OakErrorKind::UnexpectedEof { offset: *offset, source_id: *source_id },
+            OakErrorKind::ExpectedToken { expected, offset, source_id } => OakErrorKind::ExpectedToken { expected: expected.clone(), offset: *offset, source_id: *source_id },
+            OakErrorKind::ExpectedName { name_kind, offset, source_id } => OakErrorKind::ExpectedName { name_kind: name_kind.clone(), offset: *offset, source_id: *source_id },
+            OakErrorKind::TrailingCommaNotAllowed { offset, source_id } => OakErrorKind::TrailingCommaNotAllowed { offset: *offset, source_id: *source_id },
             OakErrorKind::CustomError { message } => OakErrorKind::CustomError { message: message.clone() },
             OakErrorKind::InvalidTheme { message } => OakErrorKind::InvalidTheme { message: message.clone() },
             OakErrorKind::UnsupportedFormat { format } => OakErrorKind::UnsupportedFormat { format: format.clone() },
@@ -406,6 +510,12 @@ impl Clone for OakErrorKind {
             OakErrorKind::ProtocolError { message } => OakErrorKind::ProtocolError { message: message.clone() },
             OakErrorKind::TestFailure { path, expected, actual } => OakErrorKind::TestFailure { path: path.clone(), expected: expected.clone(), actual: actual.clone() },
             OakErrorKind::TestRegenerated { path } => OakErrorKind::TestRegenerated { path: path.clone() },
+            OakErrorKind::SerdeError { message } => OakErrorKind::SerdeError { message: message.clone() },
+            OakErrorKind::DeserializeError { message } => OakErrorKind::DeserializeError { message: message.clone() },
+            OakErrorKind::XmlError { message } => OakErrorKind::XmlError { message: message.clone() },
+            OakErrorKind::ZipError { message } => OakErrorKind::ZipError { message: message.clone() },
+            OakErrorKind::ParseError { message } => OakErrorKind::ParseError { message: message.clone() },
+            OakErrorKind::InternalError { message } => OakErrorKind::InternalError { message: message.clone() },
         }
     }
 }

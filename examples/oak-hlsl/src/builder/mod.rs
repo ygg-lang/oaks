@@ -15,7 +15,7 @@ impl<'config> HlslBuilder<'config> {
 impl<'config> Builder<HlslLanguage> for HlslBuilder<'config> {
     fn build<'a, S: Source + ?Sized>(&self, text: &S, edits: &[TextEdit], _cache: &'a mut impl BuilderCache<HlslLanguage>) -> oak_core::builder::BuildOutput<HlslLanguage> {
         let parser = HlslParser::new(self.config);
-        let lexer = crate::lexer::HlslLexer::new(self.config);
+        let lexer = crate::lexer::HlslLexer::new(&self.config);
 
         // For now, we don't have a proper incremental builder implementation here
         // We just run the lexer and parser
@@ -29,7 +29,7 @@ impl<'config> Builder<HlslLanguage> for HlslBuilder<'config> {
 
         match result {
             Ok(green_tree) => {
-                let source_text = SourceText::new(text.get_text_in((0..text.length()).into()));
+                let source_text = SourceText::new(text.get_text_in((0..text.length()).into()).into_owned());
                 match self.build_root(green_tree, &source_text) {
                     Ok(ast_root) => OakDiagnostics { result: Ok(ast_root), diagnostics },
                     Err(build_error) => {

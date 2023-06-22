@@ -1,4 +1,4 @@
-use oak_core::helpers::LexerTester;
+use oak_diagnostic::testing::lexing::LexerTester;
 use oak_xml::{XmlLanguage, XmlLexer};
 use std::{path::Path, time::Duration};
 
@@ -6,7 +6,7 @@ use std::{path::Path, time::Duration};
 fn test_xml_lexer() {
     let here = Path::new(env!("CARGO_MANIFEST_DIR"));
     let language = Box::leak(Box::new(XmlLanguage::default()));
-    let lexer = XmlLexer::new(language);
+    let lexer = XmlLexer::new(&language);
     // don't use `xml` here to avoid confusion with XML source files
     let test_runner = LexerTester::new(here.join("tests/lexer")).with_extension("xml").with_timeout(Duration::from_secs(5));
     match test_runner.run_tests::<XmlLanguage, _>(&lexer) {
@@ -47,7 +47,7 @@ fn test_xml_comment_parsing() {
     use oak_xml::{XmlLanguage, XmlLexer};
 
     let language = Box::leak(Box::new(XmlLanguage::default()));
-    let lexer = XmlLexer::new(language);
+    let lexer = XmlLexer::new(&language);
     let source = SourceText::new("<!-- This is a comment -->");
     let mut session = oak_core::parser::session::ParseSession::<XmlLanguage>::default();
     let result = lexer.lex(&source, &[], &mut session);
@@ -63,7 +63,7 @@ fn test_xml_tag_parsing() {
     use oak_xml::{XmlLanguage, XmlLexer};
 
     let language = Box::leak(Box::new(XmlLanguage::default()));
-    let lexer = XmlLexer::new(language);
+    let lexer = XmlLexer::new(&language);
     let source = SourceText::new("<tag attr=\"value\">content</tag>");
     let mut session = oak_core::parser::session::ParseSession::<XmlLanguage>::default();
     let result = lexer.lex(&source, &[], &mut session);
@@ -79,7 +79,7 @@ fn test_xml_cdata_parsing() {
     use oak_xml::{XmlLanguage, XmlLexer};
 
     let language = Box::leak(Box::new(XmlLanguage::default()));
-    let lexer = XmlLexer::new(language);
+    let lexer = XmlLexer::new(&language);
     let source = SourceText::new("<![CDATA[Some data]]>");
     let mut session = oak_core::parser::session::ParseSession::<XmlLanguage>::default();
     let result = lexer.lex(&source, &[], &mut session);
@@ -95,7 +95,7 @@ fn test_xml_processing_instruction_parsing() {
     use oak_xml::{XmlLanguage, XmlLexer};
 
     let language = Box::leak(Box::new(XmlLanguage::default()));
-    let lexer = XmlLexer::new(language);
+    let lexer = XmlLexer::new(&language);
     let source = SourceText::new("<?xml version=\"1.0\"?>");
     let mut session = oak_core::parser::session::ParseSession::<XmlLanguage>::default();
     let result = lexer.lex(&source, &[], &mut session);

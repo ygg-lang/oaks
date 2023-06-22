@@ -3,7 +3,7 @@ use oak_core::{Language, LanguageCategory};
 use serde::{Deserialize, Serialize};
 
 /// Language definition for D programming language
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub struct DLanguage {
     /// Whether to enable D2 features
     pub d2_features: bool,
@@ -14,6 +14,11 @@ pub struct DLanguage {
 }
 
 impl DLanguage {
+    /// Create a new D language instance
+    pub fn new() -> Self {
+        Self::default()
+    }
+
     /// Create a standard D language instance
     pub fn standard() -> Self {
         Self { d2_features: true, inline_asm: true, contracts: true }

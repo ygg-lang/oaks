@@ -12,15 +12,18 @@ type State<'a, S> = LexerState<'a, S, HtmlLanguage>;
 
 static HTML_STRING: LazyLock<StringConfig> = LazyLock::new(|| StringConfig { quotes: &['"', '\''], escape: None });
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct HtmlLexer<'config> {
     _config: &'config HtmlLanguage,
 }
 
 impl<'config> Lexer<HtmlLanguage> for HtmlLexer<'config> {
     fn lex<'a, S: Source + ?Sized>(&self, source: &'a S, _edits: &[TextEdit], cache: &'a mut impl LexerCache<HtmlLanguage>) -> LexOutput<HtmlLanguage> {
-        let mut state = LexerState::new(source);
+        let mut state = State::new_with_cache(source, 0, cache);
         let result = self.run(&mut state);
+        if result.is_ok() {
+            state.add_eof();
+        }
         state.finish_with_cache(result, cache)
     }
 }

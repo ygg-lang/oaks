@@ -24,14 +24,14 @@ impl<'config> CoqBuilder<'config> {
 impl<'config> Builder<CoqLanguage> for CoqBuilder<'config> {
     fn build<'a, S: Source + ?Sized>(&self, source: &S, edits: &[TextEdit], _cache: &'a mut impl BuilderCache<CoqLanguage>) -> oak_core::builder::BuildOutput<CoqLanguage> {
         let parser = CoqParser::new(self.config);
-        let lexer = crate::lexer::CoqLexer::new(self.config);
+        let lexer = crate::lexer::CoqLexer::new(&self.config);
 
         let mut cache = oak_core::parser::session::ParseSession::<CoqLanguage>::default();
         let parse_result = oak_core::parser::parse(&parser, &lexer, source, edits, &mut cache);
 
         match parse_result.result {
             Ok(green_tree) => {
-                let source_text = SourceText::new(source.get_text_in((0..source.length()).into()));
+                let source_text = SourceText::new(source.get_text_in((0..source.length()).into()).into_owned());
                 match self.build_root(green_tree, &source_text) {
                     Ok(ast_root) => OakDiagnostics { result: Ok(ast_root), diagnostics: parse_result.diagnostics },
                     Err(build_error) => {

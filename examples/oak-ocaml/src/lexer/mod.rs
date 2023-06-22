@@ -11,23 +11,25 @@ type State<'a, S> = LexerState<'a, S, OCamlLanguage>;
 static OCAML_WHITESPACE: LazyLock<WhitespaceConfig> = LazyLock::new(|| WhitespaceConfig { unicode_whitespace: true });
 static OCAML_COMMENT: LazyLock<CommentConfig> = LazyLock::new(|| CommentConfig { line_marker: "//", block_start: "(*", block_end: "*)", nested_blocks: true });
 
-#[derive(Clone, Default)]
-pub struct OCamlLexer {}
+#[derive(Clone, Debug)]
+pub struct OCamlLexer<'config> {
+    _config: &'config OCamlLanguage,
+}
 
-impl Lexer<OCamlLanguage> for OCamlLexer {
-    fn lex<'a, S: Source + ?Sized>(&self, source: &'a S, _edits: &[oak_core::TextEdit], cache: &'a mut impl LexerCache<OCamlLanguage>) -> LexOutput<OCamlLanguage> {
-        let mut state = LexerState::new(source);
+impl<'config> Lexer<OCamlLanguage> for OCamlLexer<'config> {
+    fn lex<'a, S: Source + ?Sized>(&self, source: &'a S, _edits: &[oak_core::source::TextEdit], cache: &'a mut impl LexerCache<OCamlLanguage>) -> LexOutput<OCamlLanguage> {
+        let mut state = State::new_with_cache(source, 0, cache);
         let result = self.run(&mut state);
         if result.is_ok() {
-            // run adds EOF
+            state.add_eof();
         }
         state.finish_with_cache(result, cache)
     }
 }
 
-impl OCamlLexer {
-    pub fn new(_config: &OCamlLanguage) -> Self {
-        Self {}
+impl<'config> OCamlLexer<'config> {
+    pub fn new(config: &'config OCamlLanguage) -> Self {
+        Self { _config: config }
     }
 
     /// 主词法分析循环
@@ -70,9 +72,6 @@ impl OCamlLexer {
             state.advance_if_dead_lock(safe_point);
         }
 
-        // 添加 EOF token
-        let eof_pos = state.get_position();
-        state.add_token(OCamlSyntaxKind::Eof, eof_pos, eof_pos);
         Ok(())
     }
 

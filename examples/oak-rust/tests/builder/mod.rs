@@ -2,13 +2,13 @@ use oak_core::LexerCache;
 use oak_rust::highlighter::Highlighter;
 
 #[test]
-fn test_rust_integration() {
+fn test_rust_integration() -> Result<(), oak_core::OakError> {
     use oak_core::{Lexer, Parser, SourceText};
     use oak_rust::{RustLanguage, RustLexer, RustParser};
 
     let language = RustLanguage::default();
     let lexer = RustLexer::new(&language);
-    let parser = RustParser::new(&language);
+    let parser = RustParser::new(language);
 
     // Test basic integration
     let source = SourceText::new("fn main() { let x = 42; println!(\"Hello, world!\"); }");
@@ -24,15 +24,16 @@ fn test_rust_integration() {
     assert!(parse_output.result.is_ok(), "Parser should produce AST");
 
     println!("Rust integration test passed - {} tokens generated", lex_output.result.unwrap().len());
+    Ok(())
 }
 
 #[test]
-fn test_rust_builder_single_file() {
+fn test_rust_builder_single_file() -> Result<(), oak_core::OakError> {
     use oak_core::{Builder, SourceText, parser::session::ParseSession};
     use oak_rust::{RustBuilder, RustLanguage};
 
     let language = RustLanguage::default();
-    let builder = RustBuilder::new(&language);
+    let builder = RustBuilder::new(language);
 
     // 测试简单的函数
     let source = SourceText::new("fn add(x: i32, y: i32) -> i32 { x + y }");
@@ -42,15 +43,16 @@ fn test_rust_builder_single_file() {
 
     let diagnostics = builder.build(&source, &[], &mut cache);
     assert!(diagnostics.result.is_ok());
+    Ok(())
 }
 
 #[test]
-fn test_rust_builder_complex() {
+fn test_rust_builder_complex() -> Result<(), oak_core::OakError> {
     use oak_core::{Builder, SourceText, parser::session::ParseSession};
     use oak_rust::{RustBuilder, RustLanguage};
 
     let language = RustLanguage::default();
-    let builder = RustBuilder::new(&language);
+    let builder = RustBuilder::new(language);
 
     // 测试更复杂的 Rust 代码
     let source = SourceText::new(
@@ -94,10 +96,11 @@ fn main() {
     if !diagnostics.diagnostics.is_empty() {
         println!("Complex build diagnostics: {:?}", diagnostics.diagnostics);
     }
+    Ok(())
 }
 
 #[test]
-fn test_complete_rust_program() {
+fn test_complete_rust_program() -> Result<(), oak_core::OakError> {
     use oak_core::{Lexer, SourceText};
     use oak_rust::{RustFormatter, RustHighlighter, RustLanguage, RustLexer};
 
@@ -156,4 +159,5 @@ fn main() {
     println!("  - {} tokens generated", tokens.len());
     println!("  - {} highlights generated", highlights.len());
     println!("  - Formatted code length: {} chars", formatted.len());
+    Ok(())
 }

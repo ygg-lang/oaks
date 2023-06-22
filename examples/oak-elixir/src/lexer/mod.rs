@@ -14,14 +14,14 @@ static ELIXIR_COMMENT: LazyLock<CommentConfig> = LazyLock::new(|| CommentConfig 
 static ELIXIR_STRING: LazyLock<StringConfig> = LazyLock::new(|| StringConfig { quotes: &['"'], escape: Some('\\') });
 static ELIXIR_CHAR: LazyLock<StringConfig> = LazyLock::new(|| StringConfig { quotes: &['\''], escape: None });
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct ElixirLexer<'config> {
     _config: &'config ElixirLanguage,
 }
 
 impl<'config> Lexer<ElixirLanguage> for ElixirLexer<'config> {
     fn lex<'a, S: Source + ?Sized>(&self, source: &S, _edits: &[oak_core::source::TextEdit], cache: &'a mut impl LexerCache<ElixirLanguage>) -> LexOutput<ElixirLanguage> {
-        let mut state = State::new(source);
+        let mut state = State::new_with_cache(source, 0, cache);
         let result = self.run(&mut state);
         if result.is_ok() {
             state.add_eof();

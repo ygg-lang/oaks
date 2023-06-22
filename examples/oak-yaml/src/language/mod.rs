@@ -1,7 +1,14 @@
 use oak_core::{Language, LanguageCategory};
+use serde::{Deserialize, Serialize};
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Default)]
-pub struct YamlLanguage;
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Default, Serialize, Deserialize)]
+pub struct YamlLanguage {}
+
+impl YamlLanguage {
+    pub fn new() -> Self {
+        Self {}
+    }
+}
 
 impl Language for YamlLanguage {
     const NAME: &'static str = "yaml";

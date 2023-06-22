@@ -1,17 +1,16 @@
-use oak_core::{helpers::LexerTester, source::Source};
+use oak_core::{errors::OakError, source::Source};
 use oak_elixir::{ElixirLanguage, ElixirLexer};
+use oak_testing::lexing::LexerTester;
 use std::{path::Path, time::Duration};
 
 #[test]
-fn test_elixir_lexer() {
+fn test_elixir_lexer() -> Result<(), OakError> {
     let here = Path::new(env!("CARGO_MANIFEST_DIR"));
-    let language = Box::leak(Box::new(ElixirLanguage::default()));
-    let lexer = ElixirLexer::new(language);
+    let language = ElixirLanguage::default();
+    let lexer = ElixirLexer::new(&language);
     let test_runner = LexerTester::new(here.join("tests/lexer")).with_extension("ex").with_timeout(Duration::from_secs(5));
-    match test_runner.run_tests::<ElixirLanguage, _>(&lexer) {
-        Ok(()) => println!("Elixir lexer tests passed!"),
-        Err(e) => panic!("Elixir lexer tests failed: {}", e),
-    }
+    test_runner.run_tests::<ElixirLanguage, _>(&lexer)?;
+    Ok(())
 }
 
 #[test]
@@ -42,12 +41,12 @@ fn test_peek_behavior() {
 }
 
 #[test]
-fn test_elixir_module_parsing() {
+fn test_elixir_module_parsing() -> Result<(), OakError> {
     use oak_core::{Lexer, SourceText};
 
     let source = SourceText::new("defmodule MyModule do\n  def hello do\n    :world\n  end\nend");
-    let language = Box::leak(Box::new(ElixirLanguage::default()));
-    let lexer = ElixirLexer::new(language);
+    let language = ElixirLanguage::default();
+    let lexer = ElixirLexer::new(&language);
 
     let mut cache = oak_core::parser::session::ParseSession::<ElixirLanguage>::default();
     let result = lexer.lex(&source, &[], &mut cache);
@@ -55,7 +54,7 @@ fn test_elixir_module_parsing() {
     println!("测试 Elixir 模块解析:");
     println!("源代码: '{}'", (&source).get_text_from(0));
 
-    let tokens = result.result.expect("词法分析应该成功");
+    let tokens = result.result?;
     assert!(!tokens.is_empty(), "应该解析出至少一个标记");
 
     let first_token = &tokens[0];
@@ -65,4 +64,5 @@ fn test_elixir_module_parsing() {
     println!("第一个标记: 类型={:?}, 文本='{}'", first_token.kind, token_text);
 
     println!("✅ Elixir 模块解析测试通过！");
+    Ok(())
 }

@@ -54,7 +54,7 @@ impl ValkyrieFormatter {
     /// use oak_valkyrie::formatter::ValkyrieFormatter;
     ///
     /// let formatter = ValkyrieFormatter::new();
-    /// let formatted = formatter.format("namespace Test { fn main() { let x = 42; } }");
+    /// let formatted = formatter.format("namespace Test { micro main() { let x = 42; } }");
     /// ```
     pub fn format(&self, source: &str) -> String {
         // TODO: Implement proper Valkyrie code formatting
@@ -76,19 +76,19 @@ impl ValkyrieFormatter {
         format!("namespace {} {{\n{}\n}}", name, self.indent_lines(body))
     }
 
-    /// Formats a Valkyrie function declaration.
+    /// Formats a Valkyrie micro function declaration.
     ///
     /// # Arguments
     ///
-    /// * `name` - The function name
+    /// * `name` - The micro function name
     /// * `params` - The function parameters
     /// * `body` - The function body content
     ///
     /// # Returns
     ///
-    /// A formatted function declaration string.
-    pub fn format_function(&self, name: &str, params: &str, body: &str) -> String {
-        format!("fn {}({}) {{\n{}\n}}", name, params, self.indent_lines(body))
+    /// A formatted micro function declaration string.
+    pub fn format_micro_fn(&self, name: &str, params: &str, body: &str) -> String {
+        format!("micro {}({}) {{\n{}\n}}", name, params, self.indent_lines(body))
     }
 
     /// Formats a Valkyrie micro definition.
@@ -101,7 +101,7 @@ impl ValkyrieFormatter {
     /// # Returns
     ///
     /// A formatted micro definition string.
-    pub fn format_micro(&self, name: &str, value: &str) -> String {
+    pub fn format_micro_val(&self, name: &str, value: &str) -> String {
         format!("micro {} = {};", name, value)
     }
 

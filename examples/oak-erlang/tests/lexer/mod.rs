@@ -1,4 +1,5 @@
-use oak_core::{Lexer, helpers::LexerTester};
+use oak_core::Lexer;
+use oak_diagnostic::testing::lexing::LexerTester;
 use oak_erlang::{ErlangLanguage, ErlangLexer};
 use std::{path::Path, time::Duration};
 
@@ -6,7 +7,7 @@ use std::{path::Path, time::Duration};
 fn test_erlang_lexer() {
     let here = Path::new(env!("CARGO_MANIFEST_DIR"));
     let language = Box::leak(Box::new(ErlangLanguage::default()));
-    let lexer = ErlangLexer::new(language);
+    let lexer = ErlangLexer::new(&language);
     let test_runner = LexerTester::new(here.join("tests/lexer")).with_extension("erl").with_timeout(Duration::from_secs(5));
     match test_runner.run_tests::<ErlangLanguage, _>(&lexer) {
         Ok(()) => println!("Erlang lexer tests passed!"),
@@ -49,7 +50,7 @@ hello() ->
     );
 
     let language = Box::leak(Box::new(ErlangLanguage::default()));
-    let lexer = ErlangLexer::new(language);
+    let lexer = ErlangLexer::new(&language);
     let mut cache = oak_core::parser::session::ParseSession::<ErlangLanguage>::default();
     let result = lexer.lex(&source, &[], &mut cache);
 

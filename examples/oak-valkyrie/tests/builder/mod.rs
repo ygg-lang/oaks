@@ -1,24 +1,17 @@
-use oak_core::helpers::BuilderTester;
+use oak_testing::building::BuilderTester;
 use oak_valkyrie::{ValkyrieBuilder, ValkyrieLanguage};
 use std::time::Duration;
 
 #[test]
-fn test_valkyrie_builder() {
+fn test_valkyrie_builder() -> Result<(), oak_core::OakError> {
     let language = ValkyrieLanguage::default();
     let builder = ValkyrieBuilder::new(&language);
 
     // 创建 BuilderTester，指向测试文件目录
-    let tester = BuilderTester::new("tests/builder/test_files").with_extension("valkyrie").with_timeout(Duration::from_secs(5));
+    let test_runner = BuilderTester::new("tests/builder/test_files").with_extension("valkyrie").with_timeout(Duration::from_secs(5));
 
     // 运行测试
-    match tester.run_tests::<ValkyrieLanguage, _>(&builder) {
-        Ok(()) => println!("All builder tests passed!"),
-        Err(e) => {
-            println!("Builder test failed: {}", e);
-            // 在开发阶段，我们可能期望某些测试失败
-            // 所以这里不使用 panic!，而是打印错误信息
-        }
-    }
+    test_runner.run_tests::<ValkyrieLanguage, _>(&builder)
 }
 
 #[test]
@@ -59,7 +52,7 @@ fn test_valkyrie_builder_namespace() {
     let builder = ValkyrieBuilder::new(&language);
 
     // 测试 namespace 声明
-    let source = SourceText::new("namespace Test { fn main() { let x = 42; } }");
+    let source = SourceText::new("namespace Test { micro main() { let x = 42; } }");
 
     println!("Testing builder with namespace");
 

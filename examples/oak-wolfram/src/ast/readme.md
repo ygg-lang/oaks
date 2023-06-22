@@ -1,47 +1,72 @@
-# WASI WAT (WebAssembly Text Format) 抽象语法树 (AST) 模块
+# Wolfram Abstract Syntax Tree (AST) Module
 
-这个模块定义了 WASI WAT Component Model 的抽象语法树结构，用于表示解析后的 WAT 代码。
-AST 节点对应于 WAT 语言中的各种构造，如组件、模块、导入、导出、类型定义等。
+This module defines the Abstract Syntax Tree (AST) structure for the Wolfram Language. It provides a strongly-typed representation of Wolfram expressions, which is essential for symbolic manipulation, evaluation, and analysis.
 
-## AST 节点类型
+## Purpose
 
-### 模块级别
+The Wolfram AST is designed to capture the rich and recursive nature of Wolfram Language expressions. It provides a structured way to represent everything from simple atoms to complex function applications and structural patterns.
 
-- **`Module`**: 核心模块定义
-- **`Component`**: 组件定义（WASM Component Model）
-- **`Import`**: 导入定义
-- **`Export`**: 导出定义
-- **`Type`**: 类型定义
+## AST Node Types
 
-### 函数级别
+### Core Nodes
+- **`WolframRoot`**: The top-level node representing a complete Wolfram source file or a sequence of expressions.
+- **`Expression`**: The fundamental unit of the Wolfram Language, which can be an atom or a composite expression.
 
-- **`Func`**: 函数定义
-- **`FuncType`**: 函数类型定义
-- **`Param`**: 函数参数
-- **`Result`**: 函数返回值
-- **`Local`**: 局部变量
+### Atoms
+- **`Symbol`**: Represents a named entity (e.g., `x`, `List`, `Plot`).
+- **`Integer`**: A whole number.
+- **`Real`**: A floating-point number.
+- **`String`**: A sequence of characters.
 
-### 表达式级别
+### Composite Expressions
+- **`FunctionCall`**: Represents an expression of the form `f[x, y, ...]` (e.g., `Sin[x]`).
+- **`List`**: A collection of expressions enclosed in `{...}`.
+- **`Association`**: A collection of key-value pairs `<| k -> v, ... |>`.
+- **`BinaryExpression`**: An expression involving an infix operator (e.g., `a + b`, `x := 42`).
+- **`UnaryExpression`**: An expression involving a prefix or postfix operator (e.g., `-x`, `n!`).
 
-- **`Instruction`**: WebAssembly 指令
-- **`Block`**: 块结构
-- **`Loop`**: 循环结构
-- **`If`**: 条件结构
-- **`Call`**: 函数调用
+### Specialized Constructs
+- **`Pattern`**: Represents Wolfram patterns (e.g., `x_`, `x__`, `x_Integer`).
+- **`Rule`**: Represents rules (e.g., `x -> y`, `x :> y`).
+- **`Part`**: Represents part access (e.g., `list[[1]]`).
 
-## 使用示例
+## Usage Example
 
-```rust,no_run
-// 创建简单的 Wolfram 表达式示例
-fn main() -> Result<(), Box<dyn std::error::Error>> {
-    println!("Wolfram AST 示例");
-    Ok(())
+```rust
+use oak_wolfram::ast::*;
+
+fn main() {
+    // Manually constructing a simple AST for: Plot[Sin[x], {x, 0, 2 Pi}]
+    let root = WolframRoot {
+        expressions: vec![
+            Expression::FunctionCall(FunctionCall {
+                head: Box::new(Expression::Symbol(Symbol { name: "Plot".to_string() })),
+                arguments: vec![
+                    Expression::FunctionCall(FunctionCall {
+                        head: Box::new(Expression::Symbol(Symbol { name: "Sin".to_string() })),
+                        arguments: vec![Expression::Symbol(Symbol { name: "x".to_string() })],
+                    }),
+                    Expression::List(List {
+                        elements: vec![
+                            Expression::Symbol(Symbol { name: "x".to_string() }),
+                            Expression::Integer(0),
+                            Expression::BinaryExpression(BinaryExpression {
+                                operator: "*".to_string(),
+                                left: Box::new(Expression::Integer(2)),
+                                right: Box::new(Expression::Symbol(Symbol { name: "Pi".to_string() })),
+                            }),
+                        ],
+                    }),
+                ],
+            })
+        ],
+    };
 }
 ```
 
-## 设计原则
+## Design Principles
 
-1. **完整性**: 支持完整的 WebAssembly 和 Component Model 语法
-2. **可扩展性**: 易于添加新的 AST 节点类型
-3. **类型安全**: 使用 Rust 的类型系统确保 AST 的有效性
-4. **性能**: 高效的内存使用和访问模式
+1. **Symbolic Fidelity**: Accurately represents the symbolic nature of the Wolfram Language.
+2. **Recursion Support**: Designed to handle deeply nested expression structures.
+3. **Extensibility**: Easy to add support for new or specialized Wolfram constructs.
+4. **Type Safety**: Leverages Rust's type system to ensure the structural integrity of the AST.

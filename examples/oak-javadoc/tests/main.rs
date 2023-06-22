@@ -1,3 +1,6 @@
+#[cfg(test)]
+mod lexer;
+
 #[test]
 fn ready() {
     println!("oak-jasm tests ready!");

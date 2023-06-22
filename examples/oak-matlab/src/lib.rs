@@ -10,11 +10,9 @@ pub mod kind;
 pub mod language;
 pub mod lexer;
 pub mod lsp;
-#[cfg(feature = "mcp")]
 pub mod mcp;
 pub mod parser;
 
 pub use crate::{ast::MatlabRoot, builder::MatlabBuilder, highlighter::MatlabHighlighter, kind::MatlabSyntaxKind, language::MatlabLanguage, lexer::MatlabLexer, lsp::MatlabLanguageService, parser::MatlabParser};
 
-#[cfg(feature = "mcp")]
 pub use crate::mcp::serve_matlab_mcp;

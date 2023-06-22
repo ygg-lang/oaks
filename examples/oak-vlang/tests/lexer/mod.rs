@@ -1,15 +1,12 @@
+use oak_testing::lexing::LexerTester;
 use oak_vlang::{VLangLanguage, VLangLexer};
-use oak_core::helpers::LexerTester;
-use std::path::Path;
+use std::{path::Path, time::Duration};
 
 #[test]
-fn test_vlang_lexer() {
+fn test_vlang_lexer() -> Result<(), oak_core::OakError> {
     let here = Path::new(env!("CARGO_MANIFEST_DIR"));
-    let tests = here.join("tests/lexer");
-    let lexer = VLangLexer::new(&VLangLanguage::default());
-    let test_runner = LexerTester::new(tests).with_extension("v");
-    match test_runner.run_tests::<VLangLanguage, _>(&lexer) {
-        Ok(()) => println!("V language lexer tests passed!"),
-        Err(e) => panic!("V language lexer tests failed: {}", e),
-    }
+    let language = VLangLanguage::default();
+    let lexer = VLangLexer::new(&language);
+    let test_runner = LexerTester::new(here.join("tests/lexer")).with_extension("v").with_timeout(Duration::from_secs(5));
+    test_runner.run_tests(&lexer)
 }

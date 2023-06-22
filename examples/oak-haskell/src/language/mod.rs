@@ -1,7 +1,13 @@
 use oak_core::{Language, LanguageCategory};
 
 #[derive(Debug, Clone, Default)]
-pub struct HaskellLanguage;
+pub struct HaskellLanguage {}
+
+impl HaskellLanguage {
+    pub fn new() -> Self {
+        Self {}
+    }
+}
 
 impl Language for HaskellLanguage {
     const NAME: &'static str = "haskell";

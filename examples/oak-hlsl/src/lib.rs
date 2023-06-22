@@ -10,7 +10,6 @@ mod kind;
 mod language;
 mod lexer;
 pub mod lsp;
-#[cfg(feature = "mcp")]
 pub mod mcp;
 mod parser;
 

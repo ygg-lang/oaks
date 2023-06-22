@@ -64,14 +64,14 @@ impl<'config> MsilBuilder<'config> {
 impl<'config> Builder<MsilLanguage> for MsilBuilder<'config> {
     fn build<'a, S: Source + ?Sized>(&self, source: &S, edits: &[TextEdit], _cache: &'a mut impl BuilderCache<MsilLanguage>) -> OakDiagnostics<MsilRoot> {
         let parser = MsilParser::new(self.config);
-        let lexer = crate::lexer::MsilLexer::new(self.config);
+        let lexer = crate::lexer::MsilLexer::new(&self.config);
 
         let mut cache = oak_core::parser::session::ParseSession::<MsilLanguage>::default();
         let parse_result = oak_core::parser::parse(&parser, &lexer, source, edits, &mut cache);
 
         match parse_result.result {
             Ok(green_tree) => {
-                let source_text = SourceText::new(source.get_text_in((0..source.length()).into()));
+                let source_text = SourceText::new(source.get_text_in((0..source.length()).into()).into_owned());
                 OakDiagnostics { result: self.build_root(green_tree, &source_text), diagnostics: parse_result.diagnostics }
             }
             Err(parse_error) => OakDiagnostics { result: Err(parse_error), diagnostics: parse_result.diagnostics },

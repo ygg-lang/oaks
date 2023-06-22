@@ -3,7 +3,7 @@ use oak_core::{LexerState, OakError, source::Source};
 
 type State<'s, S> = LexerState<'s, S, RegexLanguage>;
 
-impl RegexLexer {
+impl<'config> RegexLexer<'config> {
     /// Runs the lexer on the given source state and produces tokens.
     pub(crate) fn run<'s, S: Source + ?Sized>(&self, state: &mut State<'s, S>) -> Result<(), OakError> {
         while state.not_at_end() {

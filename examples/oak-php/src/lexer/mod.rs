@@ -3,9 +3,20 @@ use oak_core::{Lexer, LexerCache, LexerState, OakError, lexer::LexOutput, source
 
 type State<'s, S> = LexerState<'s, S, PhpLanguage>;
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct PhpLexer<'config> {
     _config: &'config PhpLanguage,
+}
+
+impl<'config> Lexer<PhpLanguage> for PhpLexer<'config> {
+    fn lex<'a, S: Source + ?Sized>(&self, source: &'a S, _edits: &[oak_core::source::TextEdit], cache: &'a mut impl LexerCache<PhpLanguage>) -> LexOutput<PhpLanguage> {
+        let mut state = State::new_with_cache(source, 0, cache);
+        let result = self.run(&mut state);
+        if result.is_ok() {
+            state.add_eof();
+        }
+        state.finish_with_cache(result, cache)
+    }
 }
 
 impl<'config> PhpLexer<'config> {
@@ -54,9 +65,6 @@ impl<'config> PhpLexer<'config> {
                 break;
             }
         }
-
-        // Add EOF token
-        state.add_eof();
 
         Ok(())
     }
@@ -640,13 +648,5 @@ impl<'config> PhpLexer<'config> {
         else {
             false
         }
-    }
-}
-
-impl<'config> Lexer<PhpLanguage> for PhpLexer<'config> {
-    fn lex<'a, S: Source + ?Sized>(&self, source: &S, _edits: &[oak_core::TextEdit], cache: &'a mut impl LexerCache<PhpLanguage>) -> LexOutput<PhpLanguage> {
-        let mut state: State<'_, S> = LexerState::new(source);
-        let result = self.run(&mut state);
-        state.finish_with_cache(result, cache)
     }
 }

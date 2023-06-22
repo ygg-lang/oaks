@@ -1,5 +1,5 @@
 use crate::{ast::KotlinRoot, language::KotlinLanguage, lexer::KotlinLexer, parser::KotlinParser};
-use oak_core::{Builder, BuilderCache, GreenNode, Lexer, OakDiagnostics, OakError, Parser, RedNode, SourceText, TextEdit, source::Source};
+use oak_core::{Builder, BuilderCache, GreenNode, Lexer, OakDiagnostics, OakError, Parser, SourceText, TextEdit, source::Source};
 
 pub struct KotlinBuilder<'config> {
     config: &'config KotlinLanguage,
@@ -14,7 +14,7 @@ impl<'config> KotlinBuilder<'config> {
 impl<'config> Builder<KotlinLanguage> for KotlinBuilder<'config> {
     fn build<'a, S: Source + ?Sized>(&self, source: &'a S, edits: &[TextEdit], _cache: &'a mut impl BuilderCache<KotlinLanguage>) -> OakDiagnostics<KotlinRoot> {
         let parser = KotlinParser::new(self.config);
-        let lexer = KotlinLexer::new(self.config);
+        let lexer = KotlinLexer::new(&self.config);
 
         let mut session = oak_core::parser::session::ParseSession::<KotlinLanguage>::default();
         lexer.lex(source, edits, &mut session);
@@ -22,7 +22,7 @@ impl<'config> Builder<KotlinLanguage> for KotlinBuilder<'config> {
 
         match parse_result.result {
             Ok(green_tree) => {
-                let source_text = SourceText::new(source.get_text_in((0..source.length()).into()));
+                let source_text = SourceText::new(source.get_text_in((0..source.length()).into()).into_owned());
                 match self.build_root(green_tree.clone(), &source_text) {
                     Ok(ast_root) => OakDiagnostics { result: Ok(ast_root), diagnostics: parse_result.diagnostics },
                     Err(build_error) => {
@@ -39,8 +39,216 @@ impl<'config> Builder<KotlinLanguage> for KotlinBuilder<'config> {
 
 impl<'config> KotlinBuilder<'config> {
     pub(crate) fn build_root(&self, green_tree: GreenNode<KotlinLanguage>, _source: &SourceText) -> Result<KotlinRoot, OakError> {
-        let _red_root = RedNode::new(&green_tree, 0);
-        // TODO: Map RedNode to KotlinRoot
-        Ok(KotlinRoot { span: (0.._source.length()).into() })
+        let mut declarations = Vec::new();
+        let mut offset = 0;
+
+        for child in green_tree.children() {
+            if let oak_core::GreenTree::Node(node) = child {
+                if let Some(decl) = self.build_declaration(node, _source, offset) {
+                    declarations.push(decl);
+                }
+            }
+            offset += child.len() as usize;
+        }
+
+        Ok(KotlinRoot { span: (0.._source.length()).into(), declarations })
+    }
+
+    fn build_declaration(&self, node: &oak_core::GreenNode<KotlinLanguage>, source: &SourceText, offset: usize) -> Option<crate::ast::Declaration> {
+        use crate::kind::KotlinSyntaxKind;
+        let kind: KotlinSyntaxKind = node.kind.into();
+        let start = offset;
+
+        match kind {
+            KotlinSyntaxKind::ClassDeclaration => {
+                let mut name = "MyClass".to_string();
+                let mut members = vec![];
+                let mut inner_offset = offset;
+                let mut found_name = false;
+
+                for child in node.children() {
+                    match child {
+                        oak_core::GreenTree::Node(child_node) => {
+                            let child_kind: KotlinSyntaxKind = child_node.kind.into();
+                            if child_kind == KotlinSyntaxKind::Block {
+                                let mut block_offset = inner_offset;
+                                for member in child_node.children() {
+                                    if let oak_core::GreenTree::Node(m_node) = member {
+                                        if let Some(m_decl) = self.build_declaration(m_node, source, block_offset) {
+                                            members.push(m_decl);
+                                        }
+                                    }
+                                    block_offset += member.len() as usize;
+                                }
+                            }
+                        }
+                        oak_core::GreenTree::Leaf(leaf) => {
+                            let leaf_kind: KotlinSyntaxKind = leaf.kind.into();
+                            if leaf_kind == KotlinSyntaxKind::Identifier && !found_name {
+                                name = source.get_text_in((inner_offset..inner_offset + leaf.length as usize).into()).to_string();
+                                found_name = true;
+                            }
+                        }
+                    }
+                    inner_offset += child.len() as usize;
+                }
+                Some(crate::ast::Declaration::Class { name, members, span: (start..start + node.text_len as usize).into() })
+            }
+            KotlinSyntaxKind::FunctionDeclaration => {
+                let mut name = "main".to_string();
+                let mut params = vec![];
+                let mut body = vec![];
+                let mut inner_offset = offset;
+                let mut found_name = false;
+
+                for child in node.children() {
+                    match child {
+                        oak_core::GreenTree::Node(child_node) => {
+                            let child_kind: KotlinSyntaxKind = child_node.kind.into();
+                            match child_kind {
+                                KotlinSyntaxKind::Parameter => {
+                                    if let Some(p) = self.build_parameter(child_node, source, inner_offset) {
+                                        params.push(p);
+                                    }
+                                }
+                                KotlinSyntaxKind::Block => {
+                                    let mut block_offset = inner_offset;
+                                    for stmt in child_node.children() {
+                                        if let oak_core::GreenTree::Node(s_node) = stmt {
+                                            if let Some(s) = self.build_statement(s_node, source, block_offset) {
+                                                body.push(s);
+                                            }
+                                        }
+                                        block_offset += stmt.len() as usize;
+                                    }
+                                }
+                                _ => {}
+                            }
+                        }
+                        oak_core::GreenTree::Leaf(leaf) => {
+                            let leaf_kind: KotlinSyntaxKind = leaf.kind.into();
+                            if leaf_kind == KotlinSyntaxKind::Identifier && !found_name {
+                                name = source.get_text_in((inner_offset..inner_offset + leaf.length as usize).into()).to_string();
+                                found_name = true;
+                            }
+                        }
+                    }
+                    inner_offset += child.len() as usize;
+                }
+                Some(crate::ast::Declaration::Function { name, params, body, span: (start..start + node.text_len as usize).into() })
+            }
+            KotlinSyntaxKind::VariableDeclaration => {
+                let mut name = "v".to_string();
+                let mut is_val = true;
+                let mut inner_offset = offset;
+                for child in node.children() {
+                    match child {
+                        oak_core::GreenTree::Leaf(leaf) => {
+                            let leaf_kind: KotlinSyntaxKind = leaf.kind.into();
+                            if leaf_kind == KotlinSyntaxKind::Identifier {
+                                name = source.get_text_in((inner_offset..inner_offset + leaf.length as usize).into()).to_string();
+                            }
+                            else if leaf_kind == KotlinSyntaxKind::Var {
+                                is_val = false;
+                            }
+                        }
+                        _ => {}
+                    }
+                    inner_offset += child.len() as usize;
+                }
+                Some(crate::ast::Declaration::Variable { name, is_val, span: (start..start + node.text_len as usize).into() })
+            }
+            _ => None,
+        }
+    }
+
+    fn build_parameter(&self, node: &oak_core::GreenNode<KotlinLanguage>, source: &SourceText, offset: usize) -> Option<crate::ast::Parameter> {
+        use crate::kind::KotlinSyntaxKind;
+        let mut name = "p".to_string();
+        let mut inner_offset = offset;
+        for child in node.children() {
+            if let oak_core::GreenTree::Leaf(leaf) = child {
+                let leaf_kind: KotlinSyntaxKind = leaf.kind.into();
+                if leaf_kind == KotlinSyntaxKind::Identifier {
+                    name = source.get_text_in((inner_offset..inner_offset + leaf.length as usize).into()).to_string();
+                }
+            }
+            inner_offset += child.len() as usize;
+        }
+        Some(crate::ast::Parameter { name, type_name: None, span: (offset..offset + node.text_len as usize).into() })
+    }
+
+    fn build_statement(&self, node: &oak_core::GreenNode<KotlinLanguage>, source: &SourceText, offset: usize) -> Option<crate::ast::Statement> {
+        use crate::kind::KotlinSyntaxKind;
+        let kind: KotlinSyntaxKind = node.kind.into();
+
+        match kind {
+            KotlinSyntaxKind::ReturnStatement => {
+                let mut inner_offset = offset;
+                let mut expr = None;
+                for child in node.children() {
+                    if let oak_core::GreenTree::Node(child_node) = child {
+                        // Assuming the first node after 'return' is the expression
+                        expr = Some(source.get_text_in((inner_offset..inner_offset + child_node.text_len as usize).into()).to_string());
+                        break;
+                    }
+                    inner_offset += child.len() as usize;
+                }
+                Some(crate::ast::Statement::Return(expr))
+            }
+            KotlinSyntaxKind::VariableDeclaration => {
+                let mut name = "v".to_string();
+                let mut is_val = true;
+                let mut inner_offset = offset;
+                for child in node.children() {
+                    match child {
+                        oak_core::GreenTree::Leaf(leaf) => {
+                            let leaf_kind: KotlinSyntaxKind = leaf.kind.into();
+                            if leaf_kind == KotlinSyntaxKind::Identifier {
+                                name = source.get_text_in((inner_offset..inner_offset + leaf.length as usize).into()).to_string();
+                            }
+                            else if leaf_kind == KotlinSyntaxKind::Var {
+                                is_val = false;
+                            }
+                        }
+                        _ => {}
+                    }
+                    inner_offset += child.len() as usize;
+                }
+                Some(crate::ast::Statement::Variable { name, is_val })
+            }
+            KotlinSyntaxKind::AssignmentExpression => {
+                let mut target = String::new();
+                let mut value = String::new();
+                let mut inner_offset = offset;
+                let mut found_assign = false;
+
+                for child in node.children() {
+                    match child {
+                        oak_core::GreenTree::Node(child_node) => {
+                            let text = source.get_text_in((inner_offset..inner_offset + child_node.text_len as usize).into()).to_string();
+                            if !found_assign {
+                                target = text;
+                            }
+                            else {
+                                value = text;
+                            }
+                        }
+                        oak_core::GreenTree::Leaf(leaf) => {
+                            let leaf_kind: KotlinSyntaxKind = leaf.kind.into();
+                            if leaf_kind == KotlinSyntaxKind::Assign {
+                                found_assign = true;
+                            }
+                        }
+                    }
+                    inner_offset += child.len() as usize;
+                }
+                Some(crate::ast::Statement::Assignment { target, value })
+            }
+            _ => {
+                // Default to expression statement
+                Some(crate::ast::Statement::Expression(source.get_text_in((offset..offset + node.text_len as usize).into()).to_string()))
+            }
+        }
     }
 }

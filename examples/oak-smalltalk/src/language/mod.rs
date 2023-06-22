@@ -1,18 +1,19 @@
 use oak_core::{Language, LanguageCategory};
+use serde::{Deserialize, Serialize};
 
 /// Smalltalk 语言定义
-#[derive(Debug, Clone)]
-pub struct SmalltalkLanguage;
+#[derive(Debug, Clone, Copy, Serialize, Deserialize)]
+pub struct SmalltalkLanguage {}
 
 impl SmalltalkLanguage {
     pub fn new() -> Self {
-        Self
+        Self {}
     }
 }
 
 impl Default for SmalltalkLanguage {
     fn default() -> Self {
-        Self::new()
+        Self {}
     }
 }
 

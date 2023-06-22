@@ -5,6 +5,7 @@ use oak_core::{Lexer, LexerCache, LexerState, lexer::LexOutput, source::Source};
 type State<'a, S> = LexerState<'a, S, JavadocLanguage>;
 
 /// Javadoc 词法分析
+#[derive(Clone)]
 pub struct JavadocLexer<'config> {
     _config: &'config JavadocLanguage,
 }

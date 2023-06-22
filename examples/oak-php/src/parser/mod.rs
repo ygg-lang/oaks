@@ -1,6 +1,6 @@
 use crate::{kind::PhpSyntaxKind, language::PhpLanguage, lexer::PhpLexer};
 use oak_core::{
-    GreenNode, OakError, TokenType,
+    GreenNode, OakError,
     parser::{
         ParseCache, ParseOutput, Parser, ParserState, parse_with_lexer,
         pratt::{Associativity, Pratt, PrattParser, binary},
@@ -12,6 +12,12 @@ pub(crate) type State<'a, S> = ParserState<'a, PhpLanguage, S>;
 
 pub struct PhpParser<'config> {
     pub(crate) config: &'config PhpLanguage,
+}
+
+impl<'config> PhpParser<'config> {
+    pub fn new(config: &'config PhpLanguage) -> Self {
+        Self { config }
+    }
 }
 
 impl<'config> Pratt<PhpLanguage> for PhpParser<'config> {
@@ -99,10 +105,6 @@ impl<'config> Pratt<PhpLanguage> for PhpParser<'config> {
 }
 
 impl<'config> PhpParser<'config> {
-    pub fn new(config: &'config PhpLanguage) -> Self {
-        Self { config }
-    }
-
     fn parse_statement<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> Result<(), OakError> {
         use crate::kind::PhpSyntaxKind::*;
         match state.peek_kind() {
@@ -290,25 +292,14 @@ impl<'config> PhpParser<'config> {
 }
 
 impl<'config> Parser<PhpLanguage> for PhpParser<'config> {
-    fn parse<'a, S: Source + ?Sized>(&self, text: &'a S, edits: &[TextEdit], cache: &'a mut impl ParseCache<PhpLanguage>) -> ParseOutput<'a, PhpLanguage> {
+    fn parse<'s, S: Source + ?Sized>(&self, text: &'s S, edits: &[TextEdit], cache: &'s mut impl ParseCache<PhpLanguage>) -> ParseOutput<'s, PhpLanguage> {
         let lexer = PhpLexer::new(self.config);
         parse_with_lexer(&lexer, text, edits, cache, |state| {
-            let checkpoint = state.checkpoint();
-            // 简单跳过开头的 <?php
-            state.eat(PhpSyntaxKind::OpenTag);
-
+            let cp = state.checkpoint();
             while state.not_at_end() {
-                if state.current().map(|t| t.kind.is_ignored()).unwrap_or(false) {
-                    state.advance();
-                    continue;
-                }
-                if state.at(PhpSyntaxKind::CloseTag) {
-                    state.bump();
-                    continue;
-                }
-                self.parse_statement(state).ok();
+                PrattParser::parse(state, 0, self);
             }
-            Ok(state.finish_at(checkpoint, PhpSyntaxKind::Root.into()))
+            Ok(state.finish_at(cp, PhpSyntaxKind::Root.into()))
         })
     }
 }

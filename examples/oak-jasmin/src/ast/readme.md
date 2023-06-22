@@ -1,3 +1,3 @@
-# JASM 抽象语法树 (AST) 模块
+# Jasmin Abstract Syntax Tree (AST) Module
 
-此模块定义了 JASM 语言的抽象语法树 (AST) 结构。AST 是 JASM 源代码的内存表示，用于在解析后进行语义分析和代码生成。
+This module defines the abstract syntax tree structure for the Jasmin assembly language, used to represent parsed Jasmin code.

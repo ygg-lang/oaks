@@ -21,7 +21,7 @@ impl<'config> IdlParser<'config> {
 
 impl<'config> Parser<IdlLanguage> for IdlParser<'config> {
     fn parse<'a, S: Source + ?Sized>(&self, text: &'a S, edits: &[TextEdit], cache: &'a mut impl ParseCache<IdlLanguage>) -> ParseOutput<'a, IdlLanguage> {
-        let lexer = IdlLexer::new(self.config);
+        let lexer = IdlLexer::new(&self.config);
         parse_with_lexer(&lexer, text, edits, cache, |state| self.parse_root_internal(state))
     }
 }

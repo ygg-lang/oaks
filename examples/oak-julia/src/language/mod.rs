@@ -1,9 +1,16 @@
 use oak_core::{Language, LanguageCategory};
+use serde::{Deserialize, Serialize};
 
 /// Julia 语言实现
-#[derive(Debug)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub struct JuliaLanguage {
     pub allow_comment: bool,
+}
+
+impl JuliaLanguage {
+    pub fn new() -> Self {
+        Self::default()
+    }
 }
 
 impl Language for JuliaLanguage {

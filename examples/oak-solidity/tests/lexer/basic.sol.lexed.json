@@ -1,0 +1,607 @@
+{
+    "success": true,
+    "count": 100,
+    "tokens": [
+        {
+            "kind": "Identifier",
+            "text": "pragma",
+            "start": 33,
+            "end": 39
+        },
+        {
+            "kind": "Identifier",
+            "text": "solidity",
+            "start": 40,
+            "end": 48
+        },
+        {
+            "kind": "BitXor",
+            "text": "^",
+            "start": 49,
+            "end": 50
+        },
+        {
+            "kind": "NumberLiteral",
+            "text": "0.8",
+            "start": 50,
+            "end": 53
+        },
+        {
+            "kind": "Dot",
+            "text": ".",
+            "start": 53,
+            "end": 54
+        },
+        {
+            "kind": "NumberLiteral",
+            "text": "19",
+            "start": 54,
+            "end": 56
+        },
+        {
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 56,
+            "end": 57
+        },
+        {
+            "kind": "Identifier",
+            "text": "import",
+            "start": 61,
+            "end": 67
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "\"@openzeppelin/contracts/token/ERC20/ERC20.sol\"",
+            "start": 68,
+            "end": 115
+        },
+        {
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 115,
+            "end": 116
+        },
+        {
+            "kind": "Identifier",
+            "text": "import",
+            "start": 118,
+            "end": 124
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "\"@openzeppelin/contracts/token/ERC20/extensions/ERC20Burnable.sol\"",
+            "start": 125,
+            "end": 191
+        },
+        {
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 191,
+            "end": 192
+        },
+        {
+            "kind": "Identifier",
+            "text": "import",
+            "start": 194,
+            "end": 200
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "\"@openzeppelin/contracts/access/Ownable.sol\"",
+            "start": 201,
+            "end": 245
+        },
+        {
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 245,
+            "end": 246
+        },
+        {
+            "kind": "Identifier",
+            "text": "import",
+            "start": 248,
+            "end": 254
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "\"@openzeppelin/contracts/security/Pausable.sol\"",
+            "start": 255,
+            "end": 302
+        },
+        {
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 302,
+            "end": 303
+        },
+        {
+            "kind": "Identifier",
+            "text": "import",
+            "start": 305,
+            "end": 311
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "\"@openzeppelin/contracts/security/ReentrancyGuard.sol\"",
+            "start": 312,
+            "end": 366
+        },
+        {
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 366,
+            "end": 367
+        },
+        {
+            "kind": "Identifier",
+            "text": "import",
+            "start": 369,
+            "end": 375
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "\"@openzeppelin/contracts/utils/math/SafeMath.sol\"",
+            "start": 376,
+            "end": 425
+        },
+        {
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 425,
+            "end": 426
+        },
+        {
+            "kind": "Identifier",
+            "text": "contract",
+            "start": 531,
+            "end": 539
+        },
+        {
+            "kind": "Identifier",
+            "text": "MyToken",
+            "start": 540,
+            "end": 547
+        },
+        {
+            "kind": "Identifier",
+            "text": "is",
+            "start": 548,
+            "end": 550
+        },
+        {
+            "kind": "Identifier",
+            "text": "ERC20",
+            "start": 551,
+            "end": 556
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 556,
+            "end": 557
+        },
+        {
+            "kind": "Identifier",
+            "text": "ERC20Burnable",
+            "start": 558,
+            "end": 571
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 571,
+            "end": 572
+        },
+        {
+            "kind": "Identifier",
+            "text": "Ownable",
+            "start": 573,
+            "end": 580
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 580,
+            "end": 581
+        },
+        {
+            "kind": "Identifier",
+            "text": "Pausable",
+            "start": 582,
+            "end": 590
+        },
+        {
+            "kind": "LeftBrace",
+            "text": "{",
+            "start": 591,
+            "end": 592
+        },
+        {
+            "kind": "Identifier",
+            "text": "using",
+            "start": 598,
+            "end": 603
+        },
+        {
+            "kind": "Identifier",
+            "text": "SafeMath",
+            "start": 604,
+            "end": 612
+        },
+        {
+            "kind": "Identifier",
+            "text": "for",
+            "start": 613,
+            "end": 616
+        },
+        {
+            "kind": "Identifier",
+            "text": "uint256",
+            "start": 617,
+            "end": 624
+        },
+        {
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 624,
+            "end": 625
+        },
+        {
+            "kind": "Identifier",
+            "text": "uint256",
+            "start": 637,
+            "end": 644
+        },
+        {
+            "kind": "Identifier",
+            "text": "private",
+            "start": 645,
+            "end": 652
+        },
+        {
+            "kind": "Identifier",
+            "text": "constant",
+            "start": 653,
+            "end": 661
+        },
+        {
+            "kind": "Identifier",
+            "text": "MAX_SUPPLY",
+            "start": 662,
+            "end": 672
+        },
+        {
+            "kind": "Assign",
+            "text": "=",
+            "start": 673,
+            "end": 674
+        },
+        {
+            "kind": "NumberLiteral",
+            "text": "1000000",
+            "start": 675,
+            "end": 682
+        },
+        {
+            "kind": "Star",
+            "text": "*",
+            "start": 683,
+            "end": 684
+        },
+        {
+            "kind": "NumberLiteral",
+            "text": "10",
+            "start": 685,
+            "end": 687
+        },
+        {
+            "kind": "Power",
+            "text": "**",
+            "start": 687,
+            "end": 689
+        },
+        {
+            "kind": "NumberLiteral",
+            "text": "18",
+            "start": 689,
+            "end": 691
+        },
+        {
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 691,
+            "end": 692
+        },
+        {
+            "kind": "Identifier",
+            "text": "uint256",
+            "start": 718,
+            "end": 725
+        },
+        {
+            "kind": "Identifier",
+            "text": "public",
+            "start": 726,
+            "end": 732
+        },
+        {
+            "kind": "Identifier",
+            "text": "constant",
+            "start": 733,
+            "end": 741
+        },
+        {
+            "kind": "Identifier",
+            "text": "INITIAL_SUPPLY",
+            "start": 742,
+            "end": 756
+        },
+        {
+            "kind": "Assign",
+            "text": "=",
+            "start": 757,
+            "end": 758
+        },
+        {
+            "kind": "NumberLiteral",
+            "text": "100000",
+            "start": 759,
+            "end": 765
+        },
+        {
+            "kind": "Star",
+            "text": "*",
+            "start": 766,
+            "end": 767
+        },
+        {
+            "kind": "NumberLiteral",
+            "text": "10",
+            "start": 768,
+            "end": 770
+        },
+        {
+            "kind": "Power",
+            "text": "**",
+            "start": 770,
+            "end": 772
+        },
+        {
+            "kind": "NumberLiteral",
+            "text": "18",
+            "start": 772,
+            "end": 774
+        },
+        {
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 774,
+            "end": 775
+        },
+        {
+            "kind": "Identifier",
+            "text": "mapping",
+            "start": 802,
+            "end": 809
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 809,
+            "end": 810
+        },
+        {
+            "kind": "Identifier",
+            "text": "address",
+            "start": 810,
+            "end": 817
+        },
+        {
+            "kind": "Assign",
+            "text": "=",
+            "start": 818,
+            "end": 819
+        },
+        {
+            "kind": "Greater",
+            "text": ">",
+            "start": 819,
+            "end": 820
+        },
+        {
+            "kind": "Identifier",
+            "text": "bool",
+            "start": 821,
+            "end": 825
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 825,
+            "end": 826
+        },
+        {
+            "kind": "Identifier",
+            "text": "public",
+            "start": 827,
+            "end": 833
+        },
+        {
+            "kind": "Identifier",
+            "text": "blacklisted",
+            "start": 834,
+            "end": 845
+        },
+        {
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 845,
+            "end": 846
+        },
+        {
+            "kind": "Identifier",
+            "text": "mapping",
+            "start": 852,
+            "end": 859
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 859,
+            "end": 860
+        },
+        {
+            "kind": "Identifier",
+            "text": "address",
+            "start": 860,
+            "end": 867
+        },
+        {
+            "kind": "Assign",
+            "text": "=",
+            "start": 868,
+            "end": 869
+        },
+        {
+            "kind": "Greater",
+            "text": ">",
+            "start": 869,
+            "end": 870
+        },
+        {
+            "kind": "Identifier",
+            "text": "uint256",
+            "start": 871,
+            "end": 878
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 878,
+            "end": 879
+        },
+        {
+            "kind": "Identifier",
+            "text": "public",
+            "start": 880,
+            "end": 886
+        },
+        {
+            "kind": "Identifier",
+            "text": "lastTransferTime",
+            "start": 887,
+            "end": 903
+        },
+        {
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 903,
+            "end": 904
+        },
+        {
+            "kind": "Identifier",
+            "text": "uint256",
+            "start": 916,
+            "end": 923
+        },
+        {
+            "kind": "Identifier",
+            "text": "public",
+            "start": 924,
+            "end": 930
+        },
+        {
+            "kind": "Identifier",
+            "text": "transferCooldown",
+            "start": 931,
+            "end": 947
+        },
+        {
+            "kind": "Assign",
+            "text": "=",
+            "start": 948,
+            "end": 949
+        },
+        {
+            "kind": "NumberLiteral",
+            "text": "1",
+            "start": 950,
+            "end": 951
+        },
+        {
+            "kind": "Identifier",
+            "text": "minutes",
+            "start": 952,
+            "end": 959
+        },
+        {
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 959,
+            "end": 960
+        },
+        {
+            "kind": "Identifier",
+            "text": "uint256",
+            "start": 966,
+            "end": 973
+        },
+        {
+            "kind": "Identifier",
+            "text": "public",
+            "start": 974,
+            "end": 980
+        },
+        {
+            "kind": "Identifier",
+            "text": "maxTransferAmount",
+            "start": 981,
+            "end": 998
+        },
+        {
+            "kind": "Assign",
+            "text": "=",
+            "start": 999,
+            "end": 1000
+        },
+        {
+            "kind": "NumberLiteral",
+            "text": "10000",
+            "start": 1001,
+            "end": 1006
+        },
+        {
+            "kind": "Star",
+            "text": "*",
+            "start": 1007,
+            "end": 1008
+        },
+        {
+            "kind": "NumberLiteral",
+            "text": "10",
+            "start": 1009,
+            "end": 1011
+        },
+        {
+            "kind": "Power",
+            "text": "**",
+            "start": 1011,
+            "end": 1013
+        },
+        {
+            "kind": "NumberLiteral",
+            "text": "18",
+            "start": 1013,
+            "end": 1015
+        },
+        {
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 1015,
+            "end": 1016
+        }
+    ],
+    "errors": []
+}

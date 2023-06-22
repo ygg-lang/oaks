@@ -20,7 +20,7 @@ impl<'config> PerlParser<'config> {
 
 impl<'config> Parser<PerlLanguage> for PerlParser<'config> {
     fn parse<'a, S: Source + ?Sized>(&self, text: &'a S, edits: &[TextEdit], cache: &'a mut impl ParseCache<PerlLanguage>) -> ParseOutput<'a, PerlLanguage> {
-        let lexer = crate::lexer::PerlLexer::new(self.config);
+        let lexer = crate::lexer::PerlLexer::new(&self.config);
         parse_with_lexer(&lexer, text, edits, cache, |state| self.parse_root_internal(state))
     }
 }

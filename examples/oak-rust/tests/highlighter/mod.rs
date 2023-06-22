@@ -1,7 +1,7 @@
 use oak_rust::highlighter::Highlighter;
 
 #[test]
-fn test_rust_highlighter() {
+fn test_rust_highlighter() -> Result<(), oak_core::OakError> {
     use oak_rust::RustHighlighter;
 
     let highlighter = RustHighlighter::new();
@@ -16,10 +16,11 @@ fn main() {
     assert!(!highlights.is_empty(), "Highlighter should produce highlights");
 
     println!("Rust highlighter test passed - {} highlights generated", highlights.len());
+    Ok(())
 }
 
 #[test]
-fn test_rust_highlighter_with_parser() {
+fn test_rust_highlighter_with_parser() -> Result<(), oak_core::OakError> {
     use oak_rust::RustHighlighter;
 
     let highlighter = RustHighlighter::new();
@@ -40,4 +41,5 @@ impl Point {
     assert!(!highlights.is_empty(), "Should highlight complex code");
 
     println!("Rust highlighter with files test passed - {} highlights generated", highlights.len());
+    Ok(())
 }

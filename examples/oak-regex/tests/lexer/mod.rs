@@ -1,18 +1,16 @@
-use oak_core::{Lexer, SourceText, helpers::LexerTester, source::Source};
+use oak_core::{Lexer, SourceText, source::Source};
 use oak_regex::{RegexLanguage, RegexLexer};
+use oak_testing::lexing::LexerTester;
 use std::{path::Path, time::Duration};
 
 #[test]
-fn test_regex_lexer() {
+fn test_regex_lexer() -> Result<(), oak_core::OakError> {
     let here = Path::new(env!("CARGO_MANIFEST_DIR"));
-    let language = Box::leak(Box::new(RegexLanguage::default()));
-    let lexer = RegexLexer::new(language);
+    let language = RegexLanguage::default();
+    let lexer = RegexLexer::new(&language);
     // don't use `rs` here to avoid confusion with Rust source files
     let test_runner = LexerTester::new(here.join("tests/lexer")).with_extension("regex").with_timeout(Duration::from_secs(5));
-    match test_runner.run_tests::<RegexLanguage, _>(&lexer) {
-        Ok(()) => println!("Regex lexer tests passed!"),
-        Err(e) => panic!("Regex lexer tests failed: {}", e),
-    }
+    test_runner.run_tests(&lexer)
 }
 
 #[test]
@@ -20,7 +18,7 @@ fn test_peek_behavior() {
     use oak_core::{LexerState, SourceText};
 
     let source = SourceText::new(r"[a-z]+");
-    let mut state = LexerState::<SourceText, RegexLanguage>::new(&source);
+    let mut state = LexerState::<&SourceText, RegexLanguage>::new(&source);
 
     println!("初始状态:");
     println!("位置: {}", state.get_position());
@@ -43,8 +41,8 @@ fn test_peek_behavior() {
 #[test]
 fn test_character_class_parsing() {
     let source = SourceText::new(r"[a-z]+");
-    let language = Box::leak(Box::new(RegexLanguage::default()));
-    let lexer = RegexLexer::new(language);
+    let language = RegexLanguage::default();
+    let lexer = RegexLexer::new(&language);
 
     let mut cache = oak_core::ParseSession::<RegexLanguage>::default();
     let result = lexer.lex(&source, &[], &mut cache);

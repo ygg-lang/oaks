@@ -1,0 +1,607 @@
+{
+    "success": true,
+    "count": 100,
+    "tokens": [
+        {
+            "kind": "BareKey",
+            "text": "title",
+            "start": 141,
+            "end": 146
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 147,
+            "end": 148
+        },
+        {
+            "kind": "BasicString",
+            "text": "\"TOML Example\"",
+            "start": 149,
+            "end": 163
+        },
+        {
+            "kind": "BareKey",
+            "text": "description",
+            "start": 165,
+            "end": 176
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 177,
+            "end": 178
+        },
+        {
+            "kind": "BasicString",
+            "text": "\"A comprehensive TOML test file\"",
+            "start": 179,
+            "end": 211
+        },
+        {
+            "kind": "BareKey",
+            "text": "version",
+            "start": 213,
+            "end": 220
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 221,
+            "end": 222
+        },
+        {
+            "kind": "BasicString",
+            "text": "\"1.0.0\"",
+            "start": 223,
+            "end": 230
+        },
+        {
+            "kind": "BareKey",
+            "text": "basic_string",
+            "start": 245,
+            "end": 257
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 258,
+            "end": 259
+        },
+        {
+            "kind": "BasicString",
+            "text": "\"I'm a string\"",
+            "start": 260,
+            "end": 274
+        },
+        {
+            "kind": "BareKey",
+            "text": "multiline_basic_string",
+            "start": 276,
+            "end": 298
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 299,
+            "end": 300
+        },
+        {
+            "kind": "BasicString",
+            "text": "\"\"",
+            "start": 301,
+            "end": 303
+        },
+        {
+            "kind": "BasicString",
+            "text": "\"\r\nRoses are red\r\nViolets are blue\"",
+            "start": 303,
+            "end": 338
+        },
+        {
+            "kind": "BasicString",
+            "text": "\"\"",
+            "start": 338,
+            "end": 340
+        },
+        {
+            "kind": "BareKey",
+            "text": "literal_string",
+            "start": 344,
+            "end": 358
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 359,
+            "end": 360
+        },
+        {
+            "kind": "LiteralString",
+            "text": "'C:\\Users\\nodejs\\templates'",
+            "start": 361,
+            "end": 388
+        },
+        {
+            "kind": "BareKey",
+            "text": "multiline_literal_string",
+            "start": 390,
+            "end": 414
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 415,
+            "end": 416
+        },
+        {
+            "kind": "LiteralString",
+            "text": "''",
+            "start": 417,
+            "end": 419
+        },
+        {
+            "kind": "LiteralString",
+            "text": "'\r\nThe first newline is\r\ntrimmed in raw strings.\r\n   All other whitespace\r\n   is preserved.\r\n'",
+            "start": 419,
+            "end": 513
+        },
+        {
+            "kind": "LiteralString",
+            "text": "''",
+            "start": 513,
+            "end": 515
+        },
+        {
+            "kind": "BareKey",
+            "text": "int1",
+            "start": 531,
+            "end": 535
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 536,
+            "end": 537
+        },
+        {
+            "kind": "Integer",
+            "text": "+99",
+            "start": 538,
+            "end": 541
+        },
+        {
+            "kind": "BareKey",
+            "text": "int2",
+            "start": 543,
+            "end": 547
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 548,
+            "end": 549
+        },
+        {
+            "kind": "Integer",
+            "text": "42",
+            "start": 550,
+            "end": 552
+        },
+        {
+            "kind": "BareKey",
+            "text": "int3",
+            "start": 554,
+            "end": 558
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 559,
+            "end": 560
+        },
+        {
+            "kind": "Integer",
+            "text": "0",
+            "start": 561,
+            "end": 562
+        },
+        {
+            "kind": "BareKey",
+            "text": "int4",
+            "start": 564,
+            "end": 568
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 569,
+            "end": 570
+        },
+        {
+            "kind": "Integer",
+            "text": "-17",
+            "start": 571,
+            "end": 574
+        },
+        {
+            "kind": "BareKey",
+            "text": "int5",
+            "start": 576,
+            "end": 580
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 581,
+            "end": 582
+        },
+        {
+            "kind": "Integer",
+            "text": "1",
+            "start": 583,
+            "end": 584
+        },
+        {
+            "kind": "BareKey",
+            "text": "_000",
+            "start": 584,
+            "end": 588
+        },
+        {
+            "kind": "BareKey",
+            "text": "int6",
+            "start": 590,
+            "end": 594
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 595,
+            "end": 596
+        },
+        {
+            "kind": "Integer",
+            "text": "5",
+            "start": 597,
+            "end": 598
+        },
+        {
+            "kind": "BareKey",
+            "text": "_349_221",
+            "start": 598,
+            "end": 606
+        },
+        {
+            "kind": "BareKey",
+            "text": "int7",
+            "start": 608,
+            "end": 612
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 613,
+            "end": 614
+        },
+        {
+            "kind": "Integer",
+            "text": "53",
+            "start": 615,
+            "end": 617
+        },
+        {
+            "kind": "BareKey",
+            "text": "_49_221",
+            "start": 617,
+            "end": 624
+        },
+        {
+            "kind": "BareKey",
+            "text": "int8",
+            "start": 659,
+            "end": 663
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 664,
+            "end": 665
+        },
+        {
+            "kind": "Integer",
+            "text": "1",
+            "start": 666,
+            "end": 667
+        },
+        {
+            "kind": "BareKey",
+            "text": "_2_3_4_5",
+            "start": 667,
+            "end": 675
+        },
+        {
+            "kind": "BareKey",
+            "text": "hex1",
+            "start": 726,
+            "end": 730
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 731,
+            "end": 732
+        },
+        {
+            "kind": "Integer",
+            "text": "0",
+            "start": 733,
+            "end": 734
+        },
+        {
+            "kind": "BareKey",
+            "text": "xDEADBEEF",
+            "start": 734,
+            "end": 743
+        },
+        {
+            "kind": "BareKey",
+            "text": "hex2",
+            "start": 745,
+            "end": 749
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 750,
+            "end": 751
+        },
+        {
+            "kind": "Integer",
+            "text": "0",
+            "start": 752,
+            "end": 753
+        },
+        {
+            "kind": "BareKey",
+            "text": "xdeadbeef",
+            "start": 753,
+            "end": 762
+        },
+        {
+            "kind": "BareKey",
+            "text": "hex3",
+            "start": 764,
+            "end": 768
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 769,
+            "end": 770
+        },
+        {
+            "kind": "Integer",
+            "text": "0",
+            "start": 771,
+            "end": 772
+        },
+        {
+            "kind": "BareKey",
+            "text": "xdead_beef",
+            "start": 772,
+            "end": 782
+        },
+        {
+            "kind": "BareKey",
+            "text": "oct1",
+            "start": 784,
+            "end": 788
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 789,
+            "end": 790
+        },
+        {
+            "kind": "Integer",
+            "text": "0",
+            "start": 791,
+            "end": 792
+        },
+        {
+            "kind": "BareKey",
+            "text": "o01234567",
+            "start": 792,
+            "end": 801
+        },
+        {
+            "kind": "BareKey",
+            "text": "oct2",
+            "start": 803,
+            "end": 807
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 808,
+            "end": 809
+        },
+        {
+            "kind": "Integer",
+            "text": "0",
+            "start": 810,
+            "end": 811
+        },
+        {
+            "kind": "BareKey",
+            "text": "o755",
+            "start": 811,
+            "end": 815
+        },
+        {
+            "kind": "BareKey",
+            "text": "bin1",
+            "start": 852,
+            "end": 856
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 857,
+            "end": 858
+        },
+        {
+            "kind": "Integer",
+            "text": "0",
+            "start": 859,
+            "end": 860
+        },
+        {
+            "kind": "BareKey",
+            "text": "b11010110",
+            "start": 860,
+            "end": 869
+        },
+        {
+            "kind": "BareKey",
+            "text": "flt1",
+            "start": 883,
+            "end": 887
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 888,
+            "end": 889
+        },
+        {
+            "kind": "Float",
+            "text": "+1.0",
+            "start": 890,
+            "end": 894
+        },
+        {
+            "kind": "BareKey",
+            "text": "flt2",
+            "start": 896,
+            "end": 900
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 901,
+            "end": 902
+        },
+        {
+            "kind": "Float",
+            "text": "3.1415926535897932384626433832795",
+            "start": 903,
+            "end": 936
+        },
+        {
+            "kind": "BareKey",
+            "text": "flt3",
+            "start": 938,
+            "end": 942
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 943,
+            "end": 944
+        },
+        {
+            "kind": "Float",
+            "text": "-0.01",
+            "start": 945,
+            "end": 950
+        },
+        {
+            "kind": "BareKey",
+            "text": "flt4",
+            "start": 952,
+            "end": 956
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 957,
+            "end": 958
+        },
+        {
+            "kind": "Integer",
+            "text": "5",
+            "start": 959,
+            "end": 960
+        },
+        {
+            "kind": "BareKey",
+            "text": "e",
+            "start": 960,
+            "end": 961
+        },
+        {
+            "kind": "Integer",
+            "text": "+22",
+            "start": 961,
+            "end": 964
+        },
+        {
+            "kind": "BareKey",
+            "text": "flt5",
+            "start": 966,
+            "end": 970
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 971,
+            "end": 972
+        },
+        {
+            "kind": "Integer",
+            "text": "1",
+            "start": 973,
+            "end": 974
+        },
+        {
+            "kind": "BareKey",
+            "text": "e06",
+            "start": 974,
+            "end": 977
+        },
+        {
+            "kind": "BareKey",
+            "text": "flt6",
+            "start": 979,
+            "end": 983
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 984,
+            "end": 985
+        },
+        {
+            "kind": "Integer",
+            "text": "-2",
+            "start": 986,
+            "end": 988
+        },
+        {
+            "kind": "BareKey",
+            "text": "E-2",
+            "start": 988,
+            "end": 991
+        },
+        {
+            "kind": "BareKey",
+            "text": "flt7",
+            "start": 993,
+            "end": 997
+        }
+    ],
+    "errors": []
+}

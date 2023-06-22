@@ -3,7 +3,7 @@ use oak_core::{Lexer, LexerCache, LexerState, lexer::LexOutput, source::Source};
 
 type State<'a, S> = LexerState<'a, S, NginxLanguage>;
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct NginxLexer<'config> {
     _config: &'config NginxLanguage,
 }
@@ -339,7 +339,7 @@ impl<'config> NginxLexer<'config> {
 }
 
 impl<'config> Lexer<NginxLanguage> for NginxLexer<'config> {
-    fn lex<'a, S: Source + ?Sized>(&self, source: &S, _edits: &[oak_core::TextEdit], cache: &'a mut impl LexerCache<NginxLanguage>) -> LexOutput<NginxLanguage> {
+    fn lex<'a, S: Source + ?Sized>(&self, source: &'a S, _edits: &[oak_core::source::TextEdit], cache: &'a mut impl LexerCache<NginxLanguage>) -> LexOutput<NginxLanguage> {
         let mut state = LexerState::new(source);
         let result = self.run(&mut state);
         if result.is_ok() {

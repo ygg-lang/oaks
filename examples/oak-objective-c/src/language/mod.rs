@@ -23,7 +23,7 @@ impl ObjectiveCLanguage {
 
 impl Default for ObjectiveCLanguage {
     fn default() -> Self {
-        Self::new()
+        Self { arc_enabled: true, strict_mode: false }
     }
 }
 

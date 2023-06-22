@@ -1,8 +1,15 @@
 use oak_core::{Language, LanguageCategory};
+use serde::{Deserialize, Serialize};
 
-#[derive(Debug)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub struct HlslLanguage {
     pub allow_comment: bool,
+}
+
+impl HlslLanguage {
+    pub fn new() -> Self {
+        Self::default()
+    }
 }
 
 impl Language for HlslLanguage {

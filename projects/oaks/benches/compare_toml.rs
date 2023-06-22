@@ -39,19 +39,19 @@ fn bench_toml_comparison(c: &mut Criterion) {
             })
         });
 
-        group.bench_function("toml_rs_parse", |b| {
-            b.iter(|| {
-                let val: toml::Value = toml::from_str(black_box(&s)).unwrap();
-                black_box(val);
-            })
-        });
-
-        group.bench_function("toml_edit_parse", |b| {
-            b.iter(|| {
-                let doc = s.parse::<toml_edit::DocumentMut>().unwrap();
-                black_box(doc);
-            })
-        });
+        // group.bench_function("toml_rs_parse", |b| {
+        // b.iter(|| {
+        // let val: toml::Value = toml::from_str(black_box(&s)).unwrap();
+        // black_box(val);
+        // })
+        // });
+        //
+        // group.bench_function("toml_edit_parse", |b| {
+        // b.iter(|| {
+        // let doc = s.parse::<toml_edit::DocumentMut>().unwrap();
+        // black_box(doc);
+        // })
+        // });
         group.finish();
     }
 
@@ -77,19 +77,19 @@ fn bench_toml_comparison(c: &mut Criterion) {
             })
         });
 
-        group.bench_function("toml_rs_parse", |b| {
-            b.iter(|| {
-                let val: toml::Value = toml::from_str(black_box(&s)).unwrap();
-                black_box(val);
-            })
-        });
-
-        group.bench_function("toml_edit_parse", |b| {
-            b.iter(|| {
-                let doc = s.parse::<toml_edit::DocumentMut>().unwrap();
-                black_box(doc);
-            })
-        });
+        // group.bench_function("toml_rs_parse", |b| {
+        // b.iter(|| {
+        // let val: toml::Value = toml::from_str(black_box(&s)).unwrap();
+        // black_box(val);
+        // })
+        // });
+        //
+        // group.bench_function("toml_edit_parse", |b| {
+        // b.iter(|| {
+        // let doc = s.parse::<toml_edit::DocumentMut>().unwrap();
+        // black_box(doc);
+        // })
+        // });
         group.finish();
     }
 
@@ -115,19 +115,19 @@ fn bench_toml_comparison(c: &mut Criterion) {
             })
         });
 
-        group.bench_function("toml_rs_parse", |b| {
-            b.iter(|| {
-                let val: toml::Value = toml::from_str(black_box(&s)).unwrap();
-                black_box(val);
-            })
-        });
-
-        group.bench_function("toml_edit_parse", |b| {
-            b.iter(|| {
-                let doc = s.parse::<toml_edit::DocumentMut>().unwrap();
-                black_box(doc);
-            })
-        });
+        // group.bench_function("toml_rs_parse", |b| {
+        // b.iter(|| {
+        // let val: toml::Value = toml::from_str(black_box(&s)).unwrap();
+        // black_box(val);
+        // })
+        // });
+        //
+        // group.bench_function("toml_edit_parse", |b| {
+        // b.iter(|| {
+        // let doc = s.parse::<toml_edit::DocumentMut>().unwrap();
+        // black_box(doc);
+        // })
+        // });
         group.finish();
     }
 }

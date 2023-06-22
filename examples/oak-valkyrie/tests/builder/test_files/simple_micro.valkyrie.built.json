@@ -1,0 +1,8 @@
+{
+  "success": false,
+  "typed_root": null,
+  "errors": [
+    "Syntax error at 28: Unexpected token or expression after semicolon",
+    "Failed to build AST"
+  ]
+}

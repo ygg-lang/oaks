@@ -15,7 +15,6 @@ pub mod parser;
 
 mod formatter;
 pub mod lsp;
-#[cfg(feature = "mcp")]
 pub mod mcp;
 
 pub use crate::{builder::StylusBuilder, formatter::StylusFormatter, highlighter::StylusHighlighter, kind::StylusSyntaxKind, language::StylusLanguage, lexer::StylusLexer, lsp::StylusLanguageService, parser::StylusParser};

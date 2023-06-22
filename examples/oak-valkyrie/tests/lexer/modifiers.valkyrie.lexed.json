@@ -1,0 +1,229 @@
+{
+  "success": true,
+  "count": 37,
+  "tokens": [
+    {
+      "kind": "Identifier",
+      "text": "mod1",
+      "start": 0,
+      "end": 4
+    },
+    {
+      "kind": "Keyword(Micro)",
+      "text": "micro",
+      "start": 5,
+      "end": 10
+    },
+    {
+      "kind": "Identifier",
+      "text": "x1",
+      "start": 11,
+      "end": 13
+    },
+    {
+      "kind": "LeftParen",
+      "text": "(",
+      "start": 13,
+      "end": 14
+    },
+    {
+      "kind": "RightParen",
+      "text": ")",
+      "start": 14,
+      "end": 15
+    },
+    {
+      "kind": "LeftBrace",
+      "text": "{",
+      "start": 16,
+      "end": 17
+    },
+    {
+      "kind": "RightBrace",
+      "text": "}",
+      "start": 18,
+      "end": 19
+    },
+    {
+      "kind": "Identifier",
+      "text": "mod1",
+      "start": 20,
+      "end": 24
+    },
+    {
+      "kind": "Identifier",
+      "text": "mod2",
+      "start": 25,
+      "end": 29
+    },
+    {
+      "kind": "Keyword(Micro)",
+      "text": "micro",
+      "start": 30,
+      "end": 35
+    },
+    {
+      "kind": "Identifier",
+      "text": "x2",
+      "start": 36,
+      "end": 38
+    },
+    {
+      "kind": "LeftParen",
+      "text": "(",
+      "start": 38,
+      "end": 39
+    },
+    {
+      "kind": "RightParen",
+      "text": ")",
+      "start": 39,
+      "end": 40
+    },
+    {
+      "kind": "LeftBrace",
+      "text": "{",
+      "start": 41,
+      "end": 42
+    },
+    {
+      "kind": "RightBrace",
+      "text": "}",
+      "start": 43,
+      "end": 44
+    },
+    {
+      "kind": "Identifier",
+      "text": "mod1",
+      "start": 45,
+      "end": 49
+    },
+    {
+      "kind": "Identifier",
+      "text": "mod2",
+      "start": 50,
+      "end": 54
+    },
+    {
+      "kind": "Identifier",
+      "text": "mod3",
+      "start": 55,
+      "end": 59
+    },
+    {
+      "kind": "Keyword(Macro)",
+      "text": "macro",
+      "start": 60,
+      "end": 65
+    },
+    {
+      "kind": "Identifier",
+      "text": "x3",
+      "start": 66,
+      "end": 68
+    },
+    {
+      "kind": "LeftParen",
+      "text": "(",
+      "start": 68,
+      "end": 69
+    },
+    {
+      "kind": "RightParen",
+      "text": ")",
+      "start": 69,
+      "end": 70
+    },
+    {
+      "kind": "LeftBrace",
+      "text": "{",
+      "start": 71,
+      "end": 72
+    },
+    {
+      "kind": "RightBrace",
+      "text": "}",
+      "start": 73,
+      "end": 74
+    },
+    {
+      "kind": "Error",
+      "text": "↯",
+      "start": 76,
+      "end": 79
+    },
+    {
+      "kind": "Identifier",
+      "text": "attribute",
+      "start": 79,
+      "end": 88
+    },
+    {
+      "kind": "Hash",
+      "text": "#",
+      "start": 89,
+      "end": 90
+    },
+    {
+      "kind": "Identifier",
+      "text": "modifier",
+      "start": 91,
+      "end": 99
+    },
+    {
+      "kind": "Identifier",
+      "text": "必须在",
+      "start": 100,
+      "end": 109
+    },
+    {
+      "kind": "Identifier",
+      "text": "attribute",
+      "start": 110,
+      "end": 119
+    },
+    {
+      "kind": "Identifier",
+      "text": "后面",
+      "start": 120,
+      "end": 126
+    },
+    {
+      "kind": "Identifier",
+      "text": "mod1",
+      "start": 127,
+      "end": 131
+    },
+    {
+      "kind": "Keyword(Micro)",
+      "text": "micro",
+      "start": 132,
+      "end": 137
+    },
+    {
+      "kind": "Identifier",
+      "text": "x4",
+      "start": 138,
+      "end": 140
+    },
+    {
+      "kind": "LeftParen",
+      "text": "(",
+      "start": 140,
+      "end": 141
+    },
+    {
+      "kind": "RightParen",
+      "text": ")",
+      "start": 141,
+      "end": 142
+    },
+    {
+      "kind": "Eof",
+      "text": "",
+      "start": 142,
+      "end": 142
+    }
+  ],
+  "errors": []
+}

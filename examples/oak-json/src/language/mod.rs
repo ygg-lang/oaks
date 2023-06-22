@@ -1,7 +1,8 @@
 use oak_core::language::{Language, LanguageCategory};
+use serde::{Deserialize, Serialize};
 
 /// JSON 语言实现
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub struct JsonLanguage {
     /// 是否允许尾随逗号
     pub trailing_comma: bool,
@@ -18,6 +19,11 @@ pub struct JsonLanguage {
 }
 
 impl JsonLanguage {
+    /// 创建新的 JSON 语言实例
+    pub fn new() -> Self {
+        Self::default()
+    }
+
     /// 创建标准 JSON 语言实例
     pub fn standard() -> Self {
         Self::default()

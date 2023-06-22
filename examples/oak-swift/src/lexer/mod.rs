@@ -1,10 +1,22 @@
 use crate::{kind::SwiftSyntaxKind, language::SwiftLanguage};
-use oak_core::{Lexer, LexerState, OakError, lexer::LexOutput, source::Source};
+use oak_core::{Lexer, LexerCache, LexerState, OakError, TextEdit, lexer::LexOutput, source::Source};
 
 type State<'a, S> = LexerState<'a, S, SwiftLanguage>;
 
+#[derive(Clone, Debug)]
 pub struct SwiftLexer<'config> {
     _config: &'config SwiftLanguage,
+}
+
+impl<'config> Lexer<SwiftLanguage> for SwiftLexer<'config> {
+    fn lex<'a, S: Source + ?Sized>(&self, source: &'a S, _edits: &[TextEdit], cache: &'a mut impl LexerCache<SwiftLanguage>) -> LexOutput<SwiftLanguage> {
+        let mut state = State::new(source);
+        let result = self.run(&mut state);
+        if result.is_ok() {
+            state.add_eof();
+        }
+        state.finish_with_cache(result, cache)
+    }
 }
 
 impl<'config> SwiftLexer<'config> {
@@ -632,17 +644,6 @@ impl<'config> SwiftLexer<'config> {
         else {
             false
         }
-    }
-}
-
-impl<'config> Lexer<SwiftLanguage> for SwiftLexer<'config> {
-    fn lex<'a, S: Source + ?Sized>(&self, text: &'a S, _edits: &[oak_core::TextEdit], cache: &'a mut impl oak_core::lexer::LexerCache<SwiftLanguage>) -> LexOutput<SwiftLanguage> {
-        let mut state = State::new(text);
-        let result = self.run(&mut state);
-        if result.is_ok() {
-            state.add_eof();
-        }
-        state.finish_with_cache(result, cache)
     }
 }
 

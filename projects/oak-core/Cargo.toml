@@ -13,21 +13,17 @@ license.workspace = true
 edition.workspace = true
 
 [dependencies]
-serde = { workspace = true }
-serde_json = { workspace = true, optional = true }
-walkdir = { workspace = true, optional = true }
-url = { workspace = true }
+serde = { workspace = true, optional = true }
 triomphe = { workspace = true }
 smallvec = { workspace = true }
 tracing = { workspace = true }
 
 [dev-dependencies]
-serde_json = { workspace = true }
-walkdir = { workspace = true }
 
 [features]
 default = []
-testing = ["walkdir", "serde_json"]
+serde = ["dep:serde"]
+testing = []
 
 [package.metadata.docs.rs]
 all-features = true

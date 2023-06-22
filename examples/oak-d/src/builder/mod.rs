@@ -14,8 +14,8 @@ impl<'config> DBuilder<'config> {
         Self { config }
     }
 
-    fn build_root(&self, green_tree: GreenNode<DLanguage>, _source: &SourceText) -> Result<crate::ast::DRoot, OakError> {
-        let _red_root = RedNode::new(&green_tree, 0);
+    fn build_root(&self, green_tree: &GreenNode<DLanguage>, _source: &SourceText) -> Result<crate::ast::DRoot, OakError> {
+        let _red_root = RedNode::new(green_tree, 0);
         // Basic implementation, can be expanded later
         Ok(crate::ast::DRoot { items: Vec::new() })
     }
@@ -29,8 +29,8 @@ impl<'config> Builder<DLanguage> for DBuilder<'config> {
 
         match parse_result.result {
             Ok(green_tree) => {
-                let source_text = SourceText::new(source.get_text_in((0..source.length()).into()));
-                match self.build_root(green_tree.clone(), &source_text) {
+                let source_text = SourceText::new(source.get_text_in((0..source.length()).into()).into_owned());
+                match self.build_root(green_tree, &source_text) {
                     Ok(ast_root) => oak_core::builder::BuildOutput::<DLanguage> { result: Ok(ast_root), diagnostics: parse_result.diagnostics },
                     Err(build_error) => {
                         let mut diagnostics = parse_result.diagnostics;

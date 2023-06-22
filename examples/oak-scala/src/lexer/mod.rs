@@ -13,19 +13,19 @@ static SCALA_COMMENT: LazyLock<CommentConfig> = LazyLock::new(|| CommentConfig {
 static SCALA_STRING: LazyLock<StringConfig> = LazyLock::new(|| StringConfig { quotes: &['"'], escape: Some('\\') });
 static SCALA_CHAR: LazyLock<StringConfig> = LazyLock::new(|| StringConfig { quotes: &['\''], escape: None });
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct ScalaLexer<'config> {
     _config: &'config ScalaLanguage,
 }
 
 impl<'config> Lexer<ScalaLanguage> for ScalaLexer<'config> {
-    fn lex<'a, S: Source + ?Sized>(&self, source: &'a S, _edits: &[TextEdit], _cache: &'a mut impl LexerCache<ScalaLanguage>) -> LexOutput<ScalaLanguage> {
+    fn lex<'a, S: Source + ?Sized>(&self, source: &'a S, _edits: &[TextEdit], cache: &'a mut impl LexerCache<ScalaLanguage>) -> LexOutput<ScalaLanguage> {
         let mut state: State<'_, S> = LexerState::new(source);
         let result = self.run(&mut state);
         if result.is_ok() {
             state.add_eof();
         }
-        state.finish(result)
+        state.finish_with_cache(result, cache)
     }
 }
 

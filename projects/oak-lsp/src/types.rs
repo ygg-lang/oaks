@@ -1,18 +1,24 @@
-use oak_core::language::UniversalElementRole;
+use oak_core::{Arc, language::UniversalElementRole};
 use serde::{Deserialize, Serialize};
 
 pub use core::range::Range;
 pub use oak_folding::{FoldingRange, FoldingRangeKind};
 
+/// Represents a position in a source file (line and character).
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub struct Position {
+    /// Line number (0-indexed).
     pub line: u32,
+    /// Character offset in the line (0-indexed).
     pub character: u32,
 }
 
+/// Represents a range in a source file using line/character positions.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub struct LspRange {
+    /// The start position of the range.
     pub start: Position,
+    /// The end position of the range.
     pub end: Position,
 }
 
@@ -21,14 +27,20 @@ pub struct LspRange {
 #[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
 #[serde(bound(serialize = "R: Serialize", deserialize = "R: Deserialize<'de>"))]
 pub struct Location<R = Range<usize>> {
-    pub uri: String,
+    /// The URI of the resource.
+    #[serde(with = "oak_core::serde_arc_str")]
+    pub uri: Arc<str>,
+    /// The range within the resource.
     pub range: R,
 }
 
 /// A specialized location type for byte-based ranges.
 #[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub struct LocationRange {
-    pub uri: String,
+    /// The URI of the resource.
+    #[serde(with = "oak_core::serde_arc_str")]
+    pub uri: Arc<str>,
+    /// The byte range within the resource.
     #[serde(with = "oak_core::serde_range")]
     pub range: Range<usize>,
 }
@@ -42,6 +54,48 @@ impl From<LocationRange> for Location<Range<usize>> {
 impl From<Location<Range<usize>>> for LocationRange {
     fn from(loc: Location<Range<usize>>) -> Self {
         Self { uri: loc.uri, range: loc.range }
+    }
+}
+
+impl From<oak_navigation::Location> for Location<Range<usize>> {
+    fn from(loc: oak_navigation::Location) -> Self {
+        Self { uri: loc.uri, range: loc.range }
+    }
+}
+
+impl From<oak_navigation::Location> for LocationRange {
+    fn from(loc: oak_navigation::Location) -> Self {
+        Self { uri: loc.uri, range: loc.range }
+    }
+}
+
+/// A source position with line, column, and offset.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
+pub struct SourcePosition {
+    /// Line number (1-indexed).
+    pub line: u32,
+    /// Column number (1-indexed).
+    pub column: u32,
+    /// Byte offset (0-indexed).
+    pub offset: usize,
+    /// Length of the token/element.
+    pub length: usize,
+}
+
+/// A source location with an optional URL.
+#[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
+pub struct SourceLocation {
+    /// Line number (1-indexed).
+    pub line: u32,
+    /// Column number (1-indexed).
+    pub column: u32,
+    /// Optional URL of the source file.
+    pub url: Option<url::Url>,
+}
+
+impl Default for SourceLocation {
+    fn default() -> Self {
+        Self { line: 1, column: 1, url: None }
     }
 }
 
@@ -112,7 +166,7 @@ pub struct StructureItem {
 }
 
 /// Parameters for the `initialize` request.
-#[derive(Debug, Clone, Serialize, Deserialize, Default)]
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct InitializeParams {
     pub root_uri: Option<String>,
     pub workspace_folders: Vec<WorkspaceFolder>,
@@ -267,4 +321,129 @@ pub enum DiagnosticSeverity {
     Warning = 2,
     Information = 3,
     Hint = 4,
+}
+
+/// Represents a semantic token.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct SemanticToken {
+    pub delta_line: u32,
+    pub delta_start: u32,
+    pub length: u32,
+    pub token_type: u32,
+    pub token_modifiers_bitset: u32,
+}
+
+/// Represents semantic tokens.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct SemanticTokens {
+    pub result_id: Option<String>,
+    pub data: Vec<SemanticToken>,
+}
+
+/// Represents a selection range.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct SelectionRange {
+    #[serde(with = "oak_core::serde_range")]
+    pub range: Range<usize>,
+    pub parent: Option<Box<SelectionRange>>,
+}
+
+/// Represents parameter information.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct ParameterInformation {
+    pub label: String,
+    pub documentation: Option<String>,
+}
+
+/// Represents signature information.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct SignatureInformation {
+    pub label: String,
+    pub documentation: Option<String>,
+    pub parameters: Option<Vec<ParameterInformation>>,
+    pub active_parameter: Option<u32>,
+}
+
+/// Represents signature help.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct SignatureHelp {
+    pub signatures: Vec<SignatureInformation>,
+    pub active_signature: Option<u32>,
+    pub active_parameter: Option<u32>,
+}
+
+/// Represents an inlay hint.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct InlayHint {
+    pub position: Position,
+    pub label: String,
+    pub kind: Option<InlayHintKind>,
+    pub tooltip: Option<String>,
+    pub padding_left: Option<bool>,
+    pub padding_right: Option<bool>,
+}
+
+/// Represents an inlay hint kind.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
+pub enum InlayHintKind {
+    Type = 1,
+    Parameter = 2,
+}
+
+/// Represents a code action.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct CodeAction {
+    pub title: String,
+    pub kind: Option<String>,
+    pub diagnostics: Option<Vec<Diagnostic>>,
+    pub edit: Option<WorkspaceEdit>,
+    pub command: Option<Command>,
+    pub is_preferred: Option<bool>,
+    pub disabled: Option<CodeActionDisabled>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct CodeActionDisabled {
+    pub reason: String,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct Command {
+    pub title: String,
+    pub command: String,
+    pub arguments: Option<Vec<serde_json::Value>>,
+}
+
+impl From<UniversalElementRole> for SymbolKind {
+    fn from(role: UniversalElementRole) -> Self {
+        match role {
+            UniversalElementRole::Root => SymbolKind::File,
+            UniversalElementRole::Container => SymbolKind::Module,
+            UniversalElementRole::Definition => SymbolKind::Function,
+            UniversalElementRole::Binding => SymbolKind::Variable,
+            UniversalElementRole::Reference => SymbolKind::Variable,
+            UniversalElementRole::Typing => SymbolKind::Class,
+            UniversalElementRole::Statement => SymbolKind::Function,
+            UniversalElementRole::Expression => SymbolKind::Variable,
+            UniversalElementRole::Call => SymbolKind::Function,
+            UniversalElementRole::Metadata => SymbolKind::Property,
+            UniversalElementRole::Attribute => SymbolKind::Property,
+            UniversalElementRole::Documentation => SymbolKind::String,
+            UniversalElementRole::Value => SymbolKind::Constant,
+            UniversalElementRole::Error => SymbolKind::Null,
+            _ => SymbolKind::Function,
+        }
+    }
+}
+
+impl From<oak_symbols::SymbolInformation> for WorkspaceSymbol {
+    fn from(s: oak_symbols::SymbolInformation) -> Self {
+        Self { name: s.name, kind: SymbolKind::from(s.role), location: LocationRange { uri: s.uri, range: s.range }, container_name: s.container_name }
+    }
+}
+
+impl From<oak_symbols::SymbolInformation> for StructureItem {
+    fn from(s: oak_symbols::SymbolInformation) -> Self {
+        Self { name: s.name, detail: None, role: s.role, kind: SymbolKind::from(s.role), range: s.range.clone(), selection_range: s.range.clone(), deprecated: false, children: vec![] }
+    }
 }

@@ -36,12 +36,12 @@ fn bench_full_parse(c: &mut Criterion) {
         })
     });
 
-    c.bench_function("serde_json_parse_500", |b| {
-        b.iter(|| {
-            let v: serde_json::Value = serde_json::from_str(black_box(&s)).unwrap();
-            black_box(v);
-        })
-    });
+    // c.bench_function("serde_json_parse_500", |b| {
+    // b.iter(|| {
+    // let v: serde_json::Value = serde_json::from_str(black_box(&s)).unwrap();
+    // black_box(v);
+    // })
+    // });
 }
 
 fn bench_incremental_parse(c: &mut Criterion) {

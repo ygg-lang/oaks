@@ -3,10 +3,11 @@
 //! 定义Lua 语言的核心结构体，实现了 oak-core Language trait
 
 use oak_core::{Language, LanguageCategory};
+use serde::{Deserialize, Serialize};
 
 /// Lua 语言定义
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
-pub struct LuaLanguage;
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
+pub struct LuaLanguage {}
 
 impl Language for LuaLanguage {
     const NAME: &'static str = "lua";
@@ -20,12 +21,12 @@ impl Language for LuaLanguage {
 impl LuaLanguage {
     /// 创建新的 Lua 语言实例
     pub fn new() -> Self {
-        Self
+        Self {}
     }
 }
 
 impl Default for LuaLanguage {
     fn default() -> Self {
-        Self::new()
+        Self {}
     }
 }

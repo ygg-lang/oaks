@@ -3,16 +3,20 @@ use oak_core::{Lexer, LexerCache, LexerState, OakError, lexer::LexOutput, source
 
 type State<'s, S> = LexerState<'s, S, PrologLanguage>;
 
-#[derive(Clone, Default)]
-pub struct PrologLexer {}
+#[derive(Clone, Debug)]
+pub struct PrologLexer<'config> {
+    _config: &'config PrologLanguage,
+}
 
-impl PrologLexer {
-    pub fn new(_config: &PrologLanguage) -> Self {
-        Self {}
+impl<'config> PrologLexer<'config> {
+    pub fn new(config: &'config PrologLanguage) -> Self {
+        Self { _config: config }
     }
 
     fn run<'s, S: Source + ?Sized>(&self, state: &mut State<'s, S>) -> Result<(), OakError> {
         while state.not_at_end() {
+            let safe_point = state.get_position();
+
             if self.skip_whitespace(state) {
                 continue;
             }
@@ -51,15 +55,9 @@ impl PrologLexer {
                 state.advance(ch.len_utf8());
                 state.add_token(PrologSyntaxKind::Error, start_pos, state.get_position());
             }
-            else {
-                // 如果已到达文件末尾，退出循环
-                break;
-            }
-        }
 
-        // Add EOF token
-        let pos = state.get_position();
-        state.add_token(PrologSyntaxKind::Eof, pos, pos);
+            state.advance_if_dead_lock(safe_point);
+        }
 
         Ok(())
     }
@@ -499,13 +497,12 @@ impl PrologLexer {
     }
 }
 
-impl Lexer<PrologLanguage> for PrologLexer {
+impl<'config> Lexer<PrologLanguage> for PrologLexer<'config> {
     fn lex<'a, S: Source + ?Sized>(&self, source: &'a S, _edits: &[oak_core::source::TextEdit], cache: &'a mut impl LexerCache<PrologLanguage>) -> LexOutput<PrologLanguage> {
-        let mut state = LexerState::new(source);
+        let mut state = State::new_with_cache(source, 0, cache);
         let result = self.run(&mut state);
         if result.is_ok() {
-            // state.run already adds EOF, but LexerState::new doesn't include it by default
-            // PrologLexer::run adds EOF manually, so we don't need to add it again here
+            state.add_eof();
         }
         state.finish_with_cache(result, cache)
     }

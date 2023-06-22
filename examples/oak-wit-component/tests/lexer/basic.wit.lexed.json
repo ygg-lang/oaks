@@ -1,0 +1,607 @@
+{
+    "success": true,
+    "count": 100,
+    "tokens": [
+        {
+            "kind": "Identifier",
+            "text": "package",
+            "start": 172,
+            "end": 179
+        },
+        {
+            "kind": "Identifier",
+            "text": "example",
+            "start": 180,
+            "end": 187
+        },
+        {
+            "kind": "Colon",
+            "text": ":",
+            "start": 187,
+            "end": 188
+        },
+        {
+            "kind": "Identifier",
+            "text": "component",
+            "start": 188,
+            "end": 197
+        },
+        {
+            "kind": "At",
+            "text": "@",
+            "start": 197,
+            "end": 198
+        },
+        {
+            "kind": "IntegerLiteral",
+            "text": "1",
+            "start": 198,
+            "end": 199
+        },
+        {
+            "kind": "Dot",
+            "text": ".",
+            "start": 199,
+            "end": 200
+        },
+        {
+            "kind": "IntegerLiteral",
+            "text": "0",
+            "start": 200,
+            "end": 201
+        },
+        {
+            "kind": "Dot",
+            "text": ".",
+            "start": 201,
+            "end": 202
+        },
+        {
+            "kind": "IntegerLiteral",
+            "text": "0",
+            "start": 202,
+            "end": 203
+        },
+        {
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 203,
+            "end": 204
+        },
+        {
+            "kind": "Identifier",
+            "text": "world",
+            "start": 229,
+            "end": 234
+        },
+        {
+            "kind": "Identifier",
+            "text": "example-world",
+            "start": 235,
+            "end": 248
+        },
+        {
+            "kind": "LeftBrace",
+            "text": "{",
+            "start": 249,
+            "end": 250
+        },
+        {
+            "kind": "Identifier",
+            "text": "import",
+            "start": 282,
+            "end": 288
+        },
+        {
+            "kind": "Identifier",
+            "text": "wasi",
+            "start": 289,
+            "end": 293
+        },
+        {
+            "kind": "Colon",
+            "text": ":",
+            "start": 293,
+            "end": 294
+        },
+        {
+            "kind": "Identifier",
+            "text": "filesystem",
+            "start": 294,
+            "end": 304
+        },
+        {
+            "kind": "Slash",
+            "text": "/",
+            "start": 304,
+            "end": 305
+        },
+        {
+            "kind": "Identifier",
+            "text": "types",
+            "start": 305,
+            "end": 310
+        },
+        {
+            "kind": "At",
+            "text": "@",
+            "start": 310,
+            "end": 311
+        },
+        {
+            "kind": "IntegerLiteral",
+            "text": "0",
+            "start": 311,
+            "end": 312
+        },
+        {
+            "kind": "Dot",
+            "text": ".",
+            "start": 312,
+            "end": 313
+        },
+        {
+            "kind": "IntegerLiteral",
+            "text": "2",
+            "start": 313,
+            "end": 314
+        },
+        {
+            "kind": "Dot",
+            "text": ".",
+            "start": 314,
+            "end": 315
+        },
+        {
+            "kind": "IntegerLiteral",
+            "text": "0",
+            "start": 315,
+            "end": 316
+        },
+        {
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 316,
+            "end": 317
+        },
+        {
+            "kind": "Identifier",
+            "text": "import",
+            "start": 323,
+            "end": 329
+        },
+        {
+            "kind": "Identifier",
+            "text": "wasi",
+            "start": 330,
+            "end": 334
+        },
+        {
+            "kind": "Colon",
+            "text": ":",
+            "start": 334,
+            "end": 335
+        },
+        {
+            "kind": "Identifier",
+            "text": "io",
+            "start": 335,
+            "end": 337
+        },
+        {
+            "kind": "Slash",
+            "text": "/",
+            "start": 337,
+            "end": 338
+        },
+        {
+            "kind": "Identifier",
+            "text": "streams",
+            "start": 338,
+            "end": 345
+        },
+        {
+            "kind": "At",
+            "text": "@",
+            "start": 345,
+            "end": 346
+        },
+        {
+            "kind": "IntegerLiteral",
+            "text": "0",
+            "start": 346,
+            "end": 347
+        },
+        {
+            "kind": "Dot",
+            "text": ".",
+            "start": 347,
+            "end": 348
+        },
+        {
+            "kind": "IntegerLiteral",
+            "text": "2",
+            "start": 348,
+            "end": 349
+        },
+        {
+            "kind": "Dot",
+            "text": ".",
+            "start": 349,
+            "end": 350
+        },
+        {
+            "kind": "IntegerLiteral",
+            "text": "0",
+            "start": 350,
+            "end": 351
+        },
+        {
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 351,
+            "end": 352
+        },
+        {
+            "kind": "Identifier",
+            "text": "import",
+            "start": 358,
+            "end": 364
+        },
+        {
+            "kind": "Identifier",
+            "text": "wasi",
+            "start": 365,
+            "end": 369
+        },
+        {
+            "kind": "Colon",
+            "text": ":",
+            "start": 369,
+            "end": 370
+        },
+        {
+            "kind": "Identifier",
+            "text": "http",
+            "start": 370,
+            "end": 374
+        },
+        {
+            "kind": "Slash",
+            "text": "/",
+            "start": 374,
+            "end": 375
+        },
+        {
+            "kind": "Identifier",
+            "text": "types",
+            "start": 375,
+            "end": 380
+        },
+        {
+            "kind": "At",
+            "text": "@",
+            "start": 380,
+            "end": 381
+        },
+        {
+            "kind": "IntegerLiteral",
+            "text": "0",
+            "start": 381,
+            "end": 382
+        },
+        {
+            "kind": "Dot",
+            "text": ".",
+            "start": 382,
+            "end": 383
+        },
+        {
+            "kind": "IntegerLiteral",
+            "text": "2",
+            "start": 383,
+            "end": 384
+        },
+        {
+            "kind": "Dot",
+            "text": ".",
+            "start": 384,
+            "end": 385
+        },
+        {
+            "kind": "IntegerLiteral",
+            "text": "0",
+            "start": 385,
+            "end": 386
+        },
+        {
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 386,
+            "end": 387
+        },
+        {
+            "kind": "Identifier",
+            "text": "import",
+            "start": 393,
+            "end": 399
+        },
+        {
+            "kind": "Identifier",
+            "text": "wasi",
+            "start": 400,
+            "end": 404
+        },
+        {
+            "kind": "Colon",
+            "text": ":",
+            "start": 404,
+            "end": 405
+        },
+        {
+            "kind": "Identifier",
+            "text": "clocks",
+            "start": 405,
+            "end": 411
+        },
+        {
+            "kind": "Slash",
+            "text": "/",
+            "start": 411,
+            "end": 412
+        },
+        {
+            "kind": "Identifier",
+            "text": "wall-clock",
+            "start": 412,
+            "end": 422
+        },
+        {
+            "kind": "At",
+            "text": "@",
+            "start": 422,
+            "end": 423
+        },
+        {
+            "kind": "IntegerLiteral",
+            "text": "0",
+            "start": 423,
+            "end": 424
+        },
+        {
+            "kind": "Dot",
+            "text": ".",
+            "start": 424,
+            "end": 425
+        },
+        {
+            "kind": "IntegerLiteral",
+            "text": "2",
+            "start": 425,
+            "end": 426
+        },
+        {
+            "kind": "Dot",
+            "text": ".",
+            "start": 426,
+            "end": 427
+        },
+        {
+            "kind": "IntegerLiteral",
+            "text": "0",
+            "start": 427,
+            "end": 428
+        },
+        {
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 428,
+            "end": 429
+        },
+        {
+            "kind": "Identifier",
+            "text": "import",
+            "start": 466,
+            "end": 472
+        },
+        {
+            "kind": "Identifier",
+            "text": "print",
+            "start": 473,
+            "end": 478
+        },
+        {
+            "kind": "Colon",
+            "text": ":",
+            "start": 478,
+            "end": 479
+        },
+        {
+            "kind": "Identifier",
+            "text": "func",
+            "start": 480,
+            "end": 484
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 484,
+            "end": 485
+        },
+        {
+            "kind": "Identifier",
+            "text": "msg",
+            "start": 485,
+            "end": 488
+        },
+        {
+            "kind": "Colon",
+            "text": ":",
+            "start": 488,
+            "end": 489
+        },
+        {
+            "kind": "Identifier",
+            "text": "string",
+            "start": 490,
+            "end": 496
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 496,
+            "end": 497
+        },
+        {
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 497,
+            "end": 498
+        },
+        {
+            "kind": "Identifier",
+            "text": "import",
+            "start": 504,
+            "end": 510
+        },
+        {
+            "kind": "Identifier",
+            "text": "log",
+            "start": 511,
+            "end": 514
+        },
+        {
+            "kind": "Colon",
+            "text": ":",
+            "start": 514,
+            "end": 515
+        },
+        {
+            "kind": "Identifier",
+            "text": "func",
+            "start": 516,
+            "end": 520
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 520,
+            "end": 521
+        },
+        {
+            "kind": "Identifier",
+            "text": "level",
+            "start": 521,
+            "end": 526
+        },
+        {
+            "kind": "Colon",
+            "text": ":",
+            "start": 526,
+            "end": 527
+        },
+        {
+            "kind": "Identifier",
+            "text": "log-level",
+            "start": 528,
+            "end": 537
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 537,
+            "end": 538
+        },
+        {
+            "kind": "Identifier",
+            "text": "message",
+            "start": 539,
+            "end": 546
+        },
+        {
+            "kind": "Colon",
+            "text": ":",
+            "start": 546,
+            "end": 547
+        },
+        {
+            "kind": "Identifier",
+            "text": "string",
+            "start": 548,
+            "end": 554
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 554,
+            "end": 555
+        },
+        {
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 555,
+            "end": 556
+        },
+        {
+            "kind": "Identifier",
+            "text": "import",
+            "start": 562,
+            "end": 568
+        },
+        {
+            "kind": "Identifier",
+            "text": "get-time",
+            "start": 569,
+            "end": 577
+        },
+        {
+            "kind": "Colon",
+            "text": ":",
+            "start": 577,
+            "end": 578
+        },
+        {
+            "kind": "Identifier",
+            "text": "func",
+            "start": 579,
+            "end": 583
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 583,
+            "end": 584
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 584,
+            "end": 585
+        },
+        {
+            "kind": "Arrow",
+            "text": "->",
+            "start": 586,
+            "end": 588
+        },
+        {
+            "kind": "Identifier",
+            "text": "u64",
+            "start": 589,
+            "end": 592
+        },
+        {
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 592,
+            "end": 593
+        },
+        {
+            "kind": "Identifier",
+            "text": "export",
+            "start": 631,
+            "end": 637
+        }
+    ],
+    "errors": []
+}

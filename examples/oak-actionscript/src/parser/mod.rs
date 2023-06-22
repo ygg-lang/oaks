@@ -123,7 +123,7 @@ impl<'config> ActionScriptParser<'config> {
 
 impl<'config> Parser<ActionScriptLanguage> for ActionScriptParser<'config> {
     fn parse<'a, S: Source + ?Sized>(&self, text: &'a S, edits: &[TextEdit], cache: &'a mut impl ParseCache<ActionScriptLanguage>) -> ParseOutput<'a, ActionScriptLanguage> {
-        let lexer = ActionScriptLexer::new(self.config);
+        let lexer = ActionScriptLexer::new(&self.config);
         parse_with_lexer(&lexer, text, edits, cache, |state| self.parse_source_file(state))
     }
 }

@@ -49,7 +49,7 @@ fn test_demo_diagnostic() {
     let i18n_diag = Diagnostic::error("default message").with_code("E0001").with_i18n("error.missing_semicolon").with_arg("expected", ";").with_label(Range { start: 26, end: 28 }, "expected ';' here");
 
     println!("--- Localized Console Output ---");
-    println!("{}", ConsoleEmitter { unicode: true }.render_localized(&source, &i18n_diag, Some(&MyLocalizer)));
+    println!("{}", ConsoleEmitter { unicode: true }.render_localized(&source, &i18n_diag, Some(&MyLocalizer), None));
 
     println!("\n=== OakError Diagnostic ===");
     use oak_core::errors::OakError;

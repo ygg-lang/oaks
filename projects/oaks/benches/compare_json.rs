@@ -63,31 +63,31 @@ fn bench_json_comparison(c: &mut Criterion) {
             })
         });
 
-        group.bench_function("serde_json_parse", |b| {
-            b.iter(|| {
-                let v: serde_json::Value = serde_json::from_str(black_box(&s)).unwrap();
-                black_box(v);
-            })
-        });
-
-        group.bench_function("simd_json_parse", |b| {
-            let bytes = s.clone().into_bytes();
-            b.iter_batched(
-                || bytes.clone(),
-                |mut b| {
-                    let v = simd_json::to_borrowed_value(&mut b).unwrap();
-                    black_box(v);
-                },
-                criterion::BatchSize::SmallInput,
-            )
-        });
-
-        group.bench_function("json_rust_parse", |b| {
-            b.iter(|| {
-                let v = json::parse(black_box(&s)).unwrap();
-                black_box(v);
-            })
-        });
+        // group.bench_function("serde_json_parse", |b| {
+        // b.iter(|| {
+        // let v: serde_json::Value = serde_json::from_str(black_box(&s)).unwrap();
+        // black_box(v);
+        // })
+        // });
+        //
+        // group.bench_function("simd_json_parse", |b| {
+        // let bytes = s.clone().into_bytes();
+        // b.iter_batched(
+        // || bytes.clone(),
+        // |mut b| {
+        // let v = simd_json::to_borrowed_value(&mut b).unwrap();
+        // black_box(v);
+        // },
+        // criterion::BatchSize::SmallInput,
+        // )
+        // });
+        //
+        // group.bench_function("json_rust_parse", |b| {
+        // b.iter(|| {
+        // let v = json::parse(black_box(&s)).unwrap();
+        // black_box(v);
+        // })
+        // });
         group.finish();
     }
 
@@ -113,31 +113,31 @@ fn bench_json_comparison(c: &mut Criterion) {
             })
         });
 
-        group.bench_function("serde_json_parse", |b| {
-            b.iter(|| {
-                let v: serde_json::Value = serde_json::from_str(black_box(&m)).unwrap();
-                black_box(v);
-            })
-        });
-
-        group.bench_function("simd_json_parse", |b| {
-            let bytes = m.clone().into_bytes();
-            b.iter_batched(
-                || bytes.clone(),
-                |mut b| {
-                    let v = simd_json::to_borrowed_value(&mut b).unwrap();
-                    black_box(v);
-                },
-                criterion::BatchSize::SmallInput,
-            )
-        });
-
-        group.bench_function("json_rust_parse", |b| {
-            b.iter(|| {
-                let v = json::parse(black_box(&m)).unwrap();
-                black_box(v);
-            })
-        });
+        // group.bench_function("serde_json_parse", |b| {
+        // b.iter(|| {
+        // let v: serde_json::Value = serde_json::from_str(black_box(&m)).unwrap();
+        // black_box(v);
+        // })
+        // });
+        //
+        // group.bench_function("simd_json_parse", |b| {
+        // let bytes = m.clone().into_bytes();
+        // b.iter_batched(
+        // || bytes.clone(),
+        // |mut b| {
+        // let v = simd_json::to_borrowed_value(&mut b).unwrap();
+        // black_box(v);
+        // },
+        // criterion::BatchSize::SmallInput,
+        // )
+        // });
+        //
+        // group.bench_function("json_rust_parse", |b| {
+        // b.iter(|| {
+        // let v = json::parse(black_box(&m)).unwrap();
+        // black_box(v);
+        // })
+        // });
         group.finish();
     }
 
@@ -163,31 +163,31 @@ fn bench_json_comparison(c: &mut Criterion) {
             })
         });
 
-        group.bench_function("serde_json_parse", |b| {
-            b.iter(|| {
-                let v: serde_json::Value = serde_json::from_str(black_box(&l)).unwrap();
-                black_box(v);
-            })
-        });
-
-        group.bench_function("simd_json_parse", |b| {
-            let bytes = l.clone().into_bytes();
-            b.iter_batched(
-                || bytes.clone(),
-                |mut b| {
-                    let v = simd_json::to_borrowed_value(&mut b).unwrap();
-                    black_box(v);
-                },
-                criterion::BatchSize::LargeInput,
-            )
-        });
-
-        group.bench_function("json_rust_parse", |b| {
-            b.iter(|| {
-                let v = json::parse(black_box(&l)).unwrap();
-                black_box(v);
-            })
-        });
+        // group.bench_function("serde_json_parse", |b| {
+        // b.iter(|| {
+        // let v: serde_json::Value = serde_json::from_str(black_box(&l)).unwrap();
+        // black_box(v);
+        // })
+        // });
+        //
+        // group.bench_function("simd_json_parse", |b| {
+        // let bytes = l.clone().into_bytes();
+        // b.iter_batched(
+        // || bytes.clone(),
+        // |mut b| {
+        // let v = simd_json::to_borrowed_value(&mut b).unwrap();
+        // black_box(v);
+        // },
+        // criterion::BatchSize::LargeInput,
+        // )
+        // });
+        //
+        // group.bench_function("json_rust_parse", |b| {
+        // b.iter(|| {
+        // let v = json::parse(black_box(&l)).unwrap();
+        // black_box(v);
+        // })
+        // });
         group.finish();
     }
 }

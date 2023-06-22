@@ -1,0 +1,13 @@
+[package]
+name = "oak-mojo"
+version.workspace = true
+authors.workspace = true
+edition.workspace = true
+license.workspace = true
+categories = ["compilers", "development-tools"]
+keywords = ["frontend", "language", "mojo"]
+description = "Mojo frontend for Oak"
+
+[dependencies]
+oak-core = { workspace = true }
+serde = { workspace = true }

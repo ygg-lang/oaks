@@ -20,7 +20,7 @@ impl<'config> LeanParser<'config> {
 
 impl<'config> Parser<LeanLanguage> for LeanParser<'config> {
     fn parse<'a, S: Source + ?Sized>(&self, text: &'a S, edits: &[TextEdit], cache: &'a mut impl ParseCache<LeanLanguage>) -> ParseOutput<'a, LeanLanguage> {
-        let lexer = LeanLexer::new(self.config);
+        let lexer = LeanLexer::new(&self.config);
         parse_with_lexer(&lexer, text, edits, cache, |state| self.parse_root_internal(state))
     }
 }

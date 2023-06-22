@@ -1,7 +1,7 @@
 use crate::{kind::TwigSyntaxKind, language::TwigLanguage};
 use oak_core::{Lexer, LexerCache, LexerState, OakError, lexer::LexOutput, source::Source};
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct TwigLexer<'config> {
     /// 语言配置
     _config: &'config TwigLanguage,
@@ -9,15 +9,8 @@ pub struct TwigLexer<'config> {
 
 type State<'a, S> = LexerState<'a, S, TwigLanguage>;
 
-impl<'config> TwigLexer<'config> {
-    /// 创建新的 Twig 词法分析器
-    pub fn new(config: &'config TwigLanguage) -> Self {
-        Self { _config: config }
-    }
-}
-
 impl<'config> Lexer<TwigLanguage> for TwigLexer<'config> {
-    fn lex<'a, S: Source + ?Sized>(&self, source: &'a S, _edits: &[oak_core::TextEdit], cache: &'a mut impl LexerCache<TwigLanguage>) -> LexOutput<TwigLanguage> {
+    fn lex<'a, S: Source + ?Sized>(&self, source: &S, _edits: &[oak_core::TextEdit], cache: &'a mut impl LexerCache<TwigLanguage>) -> LexOutput<TwigLanguage> {
         let mut state = LexerState::new(source);
         let result = self.run(&mut state);
         if result.is_ok() {
@@ -28,7 +21,11 @@ impl<'config> Lexer<TwigLanguage> for TwigLexer<'config> {
 }
 
 impl<'config> TwigLexer<'config> {
-    fn run<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> Result<(), OakError> {
+    /// 创建新的 Twig 词法分析器
+    pub fn new(config: &'config TwigLanguage) -> Self {
+        Self { _config: config }
+    }
+    fn run<S: Source + ?Sized>(&self, state: &mut State<'_, S>) -> Result<(), OakError> {
         while state.not_at_end() {
             let safe_point = state.get_position();
 
@@ -62,7 +59,7 @@ impl<'config> TwigLexer<'config> {
         Ok(())
     }
 
-    fn skip_whitespace<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
+    fn skip_whitespace<S: Source + ?Sized>(&self, state: &mut State<'_, S>) -> bool {
         let start = state.get_position();
         let mut found = false;
 
@@ -83,7 +80,7 @@ impl<'config> TwigLexer<'config> {
         found
     }
 
-    fn skip_comment<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
+    fn skip_comment<S: Source + ?Sized>(&self, state: &mut State<'_, S>) -> bool {
         let start = state.get_position();
         if state.consume_if_starts_with("{#") {
             while state.not_at_end() {

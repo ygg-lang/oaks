@@ -1,15 +1,14 @@
-use crate::source::{Source, TextChunk};
+use crate::source::{Source, SourceId, TextChunk};
 use core::range::Range;
 use std::borrow::Cow;
 use triomphe::Arc;
-use url::Url;
 
 const CHUNK_SIZE: usize = 4096;
 
 /// A read-only, chunked source implementation for efficient handling of streamed or large files.
 #[derive(Clone, Debug)]
 pub struct ChunkedSource {
-    url: Option<Url>,
+    source_id: Option<SourceId>,
     chunks: Arc<[Arc<str>]>,
     starts: Arc<[usize]>,
     len: usize,
@@ -18,7 +17,7 @@ pub struct ChunkedSource {
 /// A mutable buffer for chunked source code, supporting efficient appending of text.
 #[derive(Clone, Debug, Default)]
 pub struct ChunkedBuffer {
-    url: Option<Url>,
+    source_id: Option<SourceId>,
     chunks: Vec<Arc<str>>,
     starts: Vec<usize>,
     len: usize,
@@ -30,9 +29,9 @@ impl ChunkedBuffer {
         Self::default()
     }
 
-    /// Creates a new `ChunkedBuffer` with the specified URL.
-    pub fn new_with_url(url: impl Into<Option<Url>>) -> Self {
-        Self { url: url.into(), ..Self::default() }
+    /// Creates a new `ChunkedBuffer` with the specified source ID.
+    pub fn new_with_id(source_id: impl Into<Option<SourceId>>) -> Self {
+        Self { source_id: source_id.into(), ..Self::default() }
     }
 
     /// Appends the specified string to the end of the buffer.
@@ -49,7 +48,7 @@ impl ChunkedBuffer {
 
     /// Returns a read-only snapshot of the current buffer.
     pub fn snapshot(&self) -> ChunkedSource {
-        ChunkedSource { url: self.url.clone(), chunks: Arc::<[Arc<str>]>::from(self.chunks.clone()), starts: Arc::<[usize]>::from(self.starts.clone()), len: self.len }
+        ChunkedSource { source_id: self.source_id, chunks: Arc::<[Arc<str>]>::from(self.chunks.clone()), starts: Arc::<[usize]>::from(self.starts.clone()), len: self.len }
     }
 }
 
@@ -75,8 +74,8 @@ impl Source for ChunkedBuffer {
         text_in_chunks(&self.chunks, &self.starts, self.len, range)
     }
 
-    fn get_url(&self) -> Option<&Url> {
-        self.url.as_ref()
+    fn source_id(&self) -> Option<SourceId> {
+        self.source_id
     }
 }
 
@@ -102,8 +101,8 @@ impl Source for ChunkedSource {
         text_in_chunks(&self.chunks, &self.starts, self.len, range)
     }
 
-    fn get_url(&self) -> Option<&Url> {
-        self.url.as_ref()
+    fn source_id(&self) -> Option<SourceId> {
+        self.source_id
     }
 }
 

@@ -1,21 +1,19 @@
-use crate::lsp::OrgModeLanguageService;
-use oak_mcp::OakMcpService;
 use oak_vfs::MemoryVfs;
 
+#[cfg(feature = "io-std")]
+// use crate::lsp::OrgModeLanguageService;
+
 /// Start an MCP server for Org-mode semantics (Stdio).
+#[cfg(feature = "io-std")]
 pub async fn serve_org_mode_mcp(vfs: MemoryVfs) {
     let service = OrgModeLanguageService::new(vfs);
-    let server = service.into_mcp_server();
+    let server = oak_mcp::McpServer::new(service);
 
     server.run().await.unwrap();
 }
 
-/// One-click Axum integration for Org-mode MCP.
-#[cfg(feature = "axum")]
-pub async fn serve_org_mode_mcp_axum(vfs: MemoryVfs) {
-    let service = OrgModeLanguageService::new(vfs);
-    let app = service.into_mcp_axum_router();
-
-    let listener = tokio::net::TcpListener::bind("127.0.0.1:3046").await.unwrap();
-    axum::serve(listener, app).await.unwrap();
+/// Start an MCP server for Org-mode semantics (Stdio).
+#[cfg(not(feature = "io-std"))]
+pub async fn serve_org_mode_mcp(_vfs: MemoryVfs) {
+    panic!("MCP server requires io-std feature");
 }

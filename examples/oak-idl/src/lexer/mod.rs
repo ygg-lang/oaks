@@ -10,7 +10,7 @@ type State<'s, S> = LexerState<'s, S, IdlLanguage>;
 
 static IDL_WHITESPACE: LazyLock<WhitespaceConfig> = LazyLock::new(|| WhitespaceConfig { unicode_whitespace: true });
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct IdlLexer<'config> {
     _config: &'config IdlLanguage,
 }

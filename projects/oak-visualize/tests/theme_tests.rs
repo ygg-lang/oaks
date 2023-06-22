@@ -116,12 +116,12 @@ fn test_theme_serialization() {
     let theme = VisualizationTheme::one_light();
 
     // Test that theme can be serialized to JSON
-    let json = serde_json::to_string(&theme);
+    let json = oak_json::to_string(&theme);
     assert!(json.is_ok());
 
     // Test that theme can be deserialized from JSON
     let json_str = json.unwrap();
-    let deserialized: Result<VisualizationTheme, _> = serde_json::from_str(&json_str);
+    let deserialized: Result<VisualizationTheme, _> = oak_json::from_str(&json_str);
     assert!(deserialized.is_ok());
 
     let deserialized_theme = deserialized.unwrap();

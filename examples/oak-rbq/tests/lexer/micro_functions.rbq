@@ -1,0 +1,46 @@
+# RBQ Micro Functions Test Case
+#
+# Testing definition and inlining of micro functions
+
+@table(name = "products")
+class Product {
+    @key id: uuid;
+    name: utf8;
+    price: d128;
+    stock: i32;
+}
+
+# 1. Define micro functions
+# Basic arithmetic
+micro calculate_tax(amount: d128, rate: f64) -> d128 {
+    amount * rate
+}
+
+# Boolean logic
+micro is_low_stock(quantity: i32, threshold: i32) -> bool {
+    quantity < threshold
+}
+
+# Nested micro function calls
+micro get_final_price(base: d128, tax_rate: f64) -> d128 {
+    base + calculate_tax(base, tax_rate)
+}
+
+# 2. Use in DSL
+products.filter { is_low_stock($stock, 10) }
+        .map {
+            name = $name
+            current_stock = $stock
+            price_with_tax = get_final_price($price, 0.08)
+        };
+
+# 3. Micro function with multiple parameters and expressions
+micro format_label(name: utf8, category: utf8) -> utf8 {
+    category + ": " + name
+}
+
+# 4. Complex usage in projections
+products.map {
+    display = format_label($name, "Electronics")
+    is_urgent = is_low_stock($stock, 5) && $price > 1000.0
+};

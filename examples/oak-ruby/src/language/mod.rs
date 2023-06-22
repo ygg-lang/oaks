@@ -1,8 +1,15 @@
 use oak_core::{Language, LanguageCategory};
+use serde::{Deserialize, Serialize};
 
 /// Ruby 语言实现
-#[derive(Default)]
-pub struct RubyLanguage;
+#[derive(Default, Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
+pub struct RubyLanguage {}
+
+impl RubyLanguage {
+    pub fn new() -> Self {
+        Self {}
+    }
+}
 
 impl Language for RubyLanguage {
     const NAME: &'static str = "ruby";

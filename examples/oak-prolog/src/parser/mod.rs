@@ -5,12 +5,12 @@ use oak_core::{
     source::{Source, TextEdit},
 };
 
-pub struct PrologParser<'a> {
-    language: &'a PrologLanguage,
+pub struct PrologParser {
+    language: PrologLanguage,
 }
 
-impl<'a> PrologParser<'a> {
-    pub fn new(language: &'a PrologLanguage) -> Self {
+impl PrologParser {
+    pub fn new(language: PrologLanguage) -> Self {
         Self { language }
     }
 
@@ -60,9 +60,9 @@ impl<'a> PrologParser<'a> {
     }
 }
 
-impl<'a> Parser<PrologLanguage> for PrologParser<'a> {
+impl Parser<PrologLanguage> for PrologParser {
     fn parse<'s, S: Source + ?Sized>(&self, text: &'s S, edits: &[TextEdit], cache: &'s mut impl ParseCache<PrologLanguage>) -> ParseOutput<'s, PrologLanguage> {
-        let lexer = PrologLexer::new(self.language);
+        let lexer = PrologLexer::new(&self.language);
         oak_core::parser::parse_with_lexer(&lexer, text, edits, cache, |state| self.parse_root_internal(state))
     }
 }

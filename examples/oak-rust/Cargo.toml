@@ -13,28 +13,27 @@ license.workspace = true
 edition.workspace = true
 
 [dependencies]
-oak-core = { workspace = true }
+oak-core = { workspace = true, features = ["serde", "testing"] }
 oak-highlight = { workspace = true }
 oak-pretty-print = { workspace = true }
 oak-lsp = { workspace = true }
 oak-hover = { workspace = true }
 oak-vfs = { workspace = true }
-oak-mcp = { workspace = true, optional = true }
+oak-navigation = { workspace = true }
+oak-mcp = { workspace = true, features = ["io-std"] }
+dashmap = { workspace = true }
 serde = { workspace = true }
 futures = { workspace = true }
 tracing = { workspace = true }
 unicode-ident = { workspace = true }
 tokio = { workspace = true, optional = true }
-axum = { workspace = true, optional = true }
 
 [dev-dependencies]
-oak-core = { workspace = true, features = ["testing"] }
+oak-testing = { workspace = true }
 
 [features]
 default = []
-mcp = ["dep:oak-mcp"]
-semantic-search = ["mcp"]
-axum = ["mcp", "dep:tokio", "dep:axum", "oak-mcp/axum", "oak-lsp/axum"]
+semantic-search = []
 
 [package.metadata.docs.rs]
 all-features = true

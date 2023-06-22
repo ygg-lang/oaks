@@ -7,13 +7,13 @@ use oak_core::{
 
 pub(crate) type State<'a, S> = ParserState<'a, HtmlLanguage, S>;
 
-pub struct HtmlParser<'config> {
-    pub(crate) _config: Option<&'config HtmlLanguage>,
+pub struct HtmlParser {
+    pub(crate) _config: HtmlLanguage,
 }
 
-impl<'config> HtmlParser<'config> {
-    pub fn new(config: &'config HtmlLanguage) -> Self {
-        Self { _config: Some(config) }
+impl HtmlParser {
+    pub fn new(config: HtmlLanguage) -> Self {
+        Self { _config: config }
     }
 
     pub(crate) fn parse_root_internal<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> Result<&'a GreenNode<'a, HtmlLanguage>, OakError> {
@@ -84,11 +84,9 @@ impl<'config> HtmlParser<'config> {
     }
 }
 
-impl<'config> Parser<HtmlLanguage> for HtmlParser<'config> {
+impl Parser<HtmlLanguage> for HtmlParser {
     fn parse<'a, S: Source + ?Sized>(&self, text: &'a S, edits: &[TextEdit], cache: &'a mut impl ParseCache<HtmlLanguage>) -> ParseOutput<'a, HtmlLanguage> {
-        let default_config = HtmlLanguage::default();
-        let config = self._config.unwrap_or(&default_config);
-        let lexer = HtmlLexer::new(config);
+        let lexer = HtmlLexer::new(&self._config);
         parse_with_lexer(&lexer, text, edits, cache, |state| self.parse_root_internal(state))
     }
 }

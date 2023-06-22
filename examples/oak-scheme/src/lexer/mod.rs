@@ -12,14 +12,14 @@ static SCHEME_WHITESPACE: LazyLock<WhitespaceConfig> = LazyLock::new(|| Whitespa
 static SCHEME_COMMENT: LazyLock<CommentConfig> = LazyLock::new(|| CommentConfig { line_marker: ";", block_start: "#|", block_end: "|#", nested_blocks: true });
 static SCHEME_STRING: LazyLock<StringConfig> = LazyLock::new(|| StringConfig { quotes: &['"'], escape: Some('\\') });
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct SchemeLexer<'config> {
     _config: &'config SchemeLanguage,
 }
 
 impl<'config> Lexer<SchemeLanguage> for SchemeLexer<'config> {
     fn lex<'a, S: Source + ?Sized>(&self, source: &S, _edits: &[oak_core::TextEdit], cache: &'a mut impl LexerCache<SchemeLanguage>) -> LexOutput<SchemeLanguage> {
-        let mut state: State<'_, S> = LexerState::new(source);
+        let mut state: State<'_, S> = LexerState::new_with_cache(source, 0, cache);
         let result = self.run(&mut state);
         state.finish_with_cache(result, cache)
     }
@@ -73,8 +73,7 @@ impl<'config> SchemeLexer<'config> {
         }
 
         // 添加 EOF token
-        let eof_pos = state.get_position();
-        state.add_token(SchemeSyntaxKind::Eof, eof_pos, eof_pos);
+        state.add_eof();
         Ok(())
     }
 

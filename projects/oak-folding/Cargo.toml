@@ -10,5 +10,5 @@ license.workspace = true
 repository.workspace = true
 
 [dependencies]
-oak-core = { workspace = true }
+oak-core = { workspace = true, features = ["serde"] }
 serde = { workspace = true }

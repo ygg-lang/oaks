@@ -14,13 +14,6 @@ pub mod parser;
 mod formatter;
 pub mod highlighter;
 pub mod lsp;
-#[cfg(feature = "mcp")]
 pub mod mcp;
 
-pub use crate::{ast::TexRoot, builder::TexBuilder, formatter::TexFormatter, highlighter::TexHighlighter, language::TexLanguage, lexer::TexLexer, lsp::TexLanguageService, parser::TexParser};
-
-#[cfg(feature = "mcp")]
-pub use crate::mcp::serve_tex_mcp;
-
-#[cfg(all(feature = "mcp", feature = "axum"))]
-pub use crate::mcp::serve_tex_mcp_axum;
+pub use crate::{ast::TexRoot, builder::TexBuilder, formatter::TexFormatter, highlighter::TexHighlighter, language::TexLanguage, lexer::TexLexer, lsp::TexLanguageService, mcp::serve_tex_mcp, parser::TexParser};

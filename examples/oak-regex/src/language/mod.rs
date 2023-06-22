@@ -1,14 +1,22 @@
 use crate::ast::RegexRoot;
 use oak_core::{Language, LanguageCategory};
+use serde::{Deserialize, Serialize};
 
 /// Configuration for the regular expression language.
 ///
 /// This structure defines the language configuration for the regex parser,
 /// including options such as whether to ignore whitespace characters.
-#[derive(Copy, Clone, Debug)]
+#[derive(Copy, Clone, Debug, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub struct RegexLanguage {
     /// Whether to ignore whitespace characters
     pub ignore_whitespace: bool,
+}
+
+impl RegexLanguage {
+    /// Creates a new RegexLanguage instance.
+    pub fn new() -> Self {
+        Self::default()
+    }
 }
 
 /// Default implementation for RegexLanguage.

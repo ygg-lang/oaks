@@ -1,49 +1,47 @@
-# WASI WAT (WebAssembly Text Format) 抽象语法树 (AST) 模块
+# Valkyrie Abstract Syntax Tree (AST) Module
 
-这个模块定义了 WASI WAT Component Model 的抽象语法树结构，用于表示解析后的 WAT 代码。
-AST 节点对应于 WAT 语言中的各种构造，如组件、模块、导入、导出、类型定义等。
+This module defines the Abstract Syntax Tree (AST) structure for the Valkyrie language. It provides a strongly-typed and comprehensive representation of Valkyrie source code, facilitating compilation, analysis, and transformation.
 
-## AST 节点类型
+## Purpose
 
-### 模块级别
+The Valkyrie AST is the central data structure used by the compiler and associated tools to represent the semantic structure of a Valkyrie program. It is designed to be both expressive and efficient, supporting the language's modern features like algebraic data types, pattern matching, and functional programming constructs.
 
-- **`Module`**: 核心模块定义
-- **`Component`**: 组件定义（WASM Component Model）
-- **`Import`**: 导入定义
-- **`Export`**: 导出定义
-- **`Type`**: 类型定义
+## AST Node Types
 
-### 函数级别
+### Core Structure
+- **`ValkyrieRoot`**: The root node representing a complete Valkyrie source file or module.
+- **`Module`**: A module definition containing declarations and imports.
+- **`Import`**: Represents an import statement.
 
-- **`Func`**: 函数定义
-- **`FuncType`**: 函数类型定义
-- **`Param`**: 函数参数
-- **`Result`**: 函数返回值
-- **`Local`**: 局部变量
+### Declarations
+- **`MicroDefinition`**: Micro function definition with parameters, return type, and body.
+- **`Class`**: Class definition with fields and methods.
+- **`Namespace`**: Namespace definition for organizing code.
+- **`Widget`**: UI widget definition.
 
-### 表达式级别
+### Expressions and Statements
+- **`Expression`**: The base type for all expressions (literals, identifiers, function calls, etc.).
+- **`Let`**: Local variable declaration.
+- **`Match`**: Pattern matching construct.
+- **`Block`**: A sequence of expressions/statements enclosed in braces.
 
-- **`Instruction`**: WebAssembly 指令
-- **`Block`**: 块结构
-- **`Loop`**: 循环结构
-- **`If`**: 条件结构
-- **`Call`**: 函数调用
+### Patterns and Types
+- **`Pattern`**: Patterns used in `match` and `let` bindings (e.g., `_`, `42`, variable names).
 
-## 使用示例
+## Usage Example
 
-```rust,no_run
+```rust
 use oak_valkyrie::ast::*;
 
-fn main() -> Result<(), Box<dyn std::error::Error>> {
-    // 创建简单的 Valkyrie 程序 AST
-    println!("Valkyrie AST example");
-    Ok(())
+fn main() {
+    // Constructing a simple AST for a Valkyrie micro function
+    // (Actual fields may vary based on current implementation)
 }
 ```
 
-## 设计原则
+## Design Principles
 
-1. **完整性**: 支持完整的 WebAssembly 和 Component Model 语法
-2. **可扩展性**: 易于添加新的 AST 节点类型
-3. **类型安全**: 使用 Rust 的类型系统确保 AST 的有效性
-4. **性能**: 高效的内存使用和访问模式
+1. **Type Safety**: Uses Rust's enum and struct system to ensure only valid AST structures can be represented.
+2. **Completeness**: Supports the full range of Valkyrie language features.
+3. **Rich Metadata**: Each node includes span information and can be extended with semantic information (like types) during analysis.
+4. **Performance**: Optimized for memory efficiency and fast traversal.

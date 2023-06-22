@@ -2,7 +2,13 @@ use oak_core::{Language, LanguageCategory};
 
 /// Erlang 语言配置
 #[derive(Debug, Clone, Default)]
-pub struct ErlangLanguage;
+pub struct ErlangLanguage {}
+
+impl ErlangLanguage {
+    pub fn new() -> Self {
+        Self {}
+    }
+}
 
 impl Language for ErlangLanguage {
     const NAME: &'static str = "erlang";

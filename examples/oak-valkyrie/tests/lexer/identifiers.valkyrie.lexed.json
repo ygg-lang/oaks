@@ -1,0 +1,37 @@
+{
+  "success": true,
+  "count": 5,
+  "tokens": [
+    {
+      "kind": "Identifier",
+      "text": "myVariable",
+      "start": 0,
+      "end": 10
+    },
+    {
+      "kind": "Identifier",
+      "text": "myFunction",
+      "start": 11,
+      "end": 21
+    },
+    {
+      "kind": "Identifier",
+      "text": "MyClass",
+      "start": 22,
+      "end": 29
+    },
+    {
+      "kind": "Identifier",
+      "text": "_private",
+      "start": 30,
+      "end": 38
+    },
+    {
+      "kind": "Eof",
+      "text": "",
+      "start": 39,
+      "end": 39
+    }
+  ],
+  "errors": []
+}

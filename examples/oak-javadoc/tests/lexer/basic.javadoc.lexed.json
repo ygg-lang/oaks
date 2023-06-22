@@ -1,0 +1,607 @@
+{
+    "success": true,
+    "count": 100,
+    "tokens": [
+        {
+            "kind": "Asterisk",
+            "text": "*",
+            "start": 6,
+            "end": 7
+        },
+        {
+            "kind": "Text",
+            "text": "This",
+            "start": 8,
+            "end": 12
+        },
+        {
+            "kind": "Text",
+            "text": "is",
+            "start": 13,
+            "end": 15
+        },
+        {
+            "kind": "Text",
+            "text": "a",
+            "start": 16,
+            "end": 17
+        },
+        {
+            "kind": "Text",
+            "text": "comprehensive",
+            "start": 18,
+            "end": 31
+        },
+        {
+            "kind": "Text",
+            "text": "Javadoc",
+            "start": 32,
+            "end": 39
+        },
+        {
+            "kind": "Text",
+            "text": "test",
+            "start": 40,
+            "end": 44
+        },
+        {
+            "kind": "Text",
+            "text": "file",
+            "start": 45,
+            "end": 49
+        },
+        {
+            "kind": "Text",
+            "text": "for",
+            "start": 50,
+            "end": 53
+        },
+        {
+            "kind": "Text",
+            "text": "lexer",
+            "start": 54,
+            "end": 59
+        },
+        {
+            "kind": "Text",
+            "text": "testing.",
+            "start": 60,
+            "end": 68
+        },
+        {
+            "kind": "Asterisk",
+            "text": "*",
+            "start": 71,
+            "end": 72
+        },
+        {
+            "kind": "Text",
+            "text": "It",
+            "start": 73,
+            "end": 75
+        },
+        {
+            "kind": "Text",
+            "text": "covers",
+            "start": 76,
+            "end": 82
+        },
+        {
+            "kind": "Text",
+            "text": "various",
+            "start": 83,
+            "end": 90
+        },
+        {
+            "kind": "Text",
+            "text": "Javadoc",
+            "start": 91,
+            "end": 98
+        },
+        {
+            "kind": "Text",
+            "text": "tags,",
+            "start": 99,
+            "end": 104
+        },
+        {
+            "kind": "Text",
+            "text": "inline",
+            "start": 105,
+            "end": 111
+        },
+        {
+            "kind": "Text",
+            "text": "tags,",
+            "start": 112,
+            "end": 117
+        },
+        {
+            "kind": "Text",
+            "text": "HTML",
+            "start": 118,
+            "end": 122
+        },
+        {
+            "kind": "Text",
+            "text": "elements,",
+            "start": 123,
+            "end": 132
+        },
+        {
+            "kind": "Text",
+            "text": "and",
+            "start": 133,
+            "end": 136
+        },
+        {
+            "kind": "Text",
+            "text": "general",
+            "start": 137,
+            "end": 144
+        },
+        {
+            "kind": "Text",
+            "text": "text.",
+            "start": 145,
+            "end": 150
+        },
+        {
+            "kind": "Asterisk",
+            "text": "*",
+            "start": 153,
+            "end": 154
+        },
+        {
+            "kind": "Asterisk",
+            "text": "*",
+            "start": 157,
+            "end": 158
+        },
+        {
+            "kind": "HtmlPTag",
+            "text": "<p>",
+            "start": 159,
+            "end": 162
+        },
+        {
+            "kind": "Text",
+            "text": "This",
+            "start": 162,
+            "end": 166
+        },
+        {
+            "kind": "Text",
+            "text": "is",
+            "start": 167,
+            "end": 169
+        },
+        {
+            "kind": "Text",
+            "text": "a",
+            "start": 170,
+            "end": 171
+        },
+        {
+            "kind": "Text",
+            "text": "paragraph",
+            "start": 172,
+            "end": 181
+        },
+        {
+            "kind": "Text",
+            "text": "tag",
+            "start": 182,
+            "end": 185
+        },
+        {
+            "kind": "Text",
+            "text": "within",
+            "start": 186,
+            "end": 192
+        },
+        {
+            "kind": "Text",
+            "text": "Javadoc.",
+            "start": 193,
+            "end": 201
+        },
+        {
+            "kind": "Text",
+            "text": "It",
+            "start": 202,
+            "end": 204
+        },
+        {
+            "kind": "Text",
+            "text": "demonstrates",
+            "start": 205,
+            "end": 217
+        },
+        {
+            "kind": "Text",
+            "text": "basic",
+            "start": 218,
+            "end": 223
+        },
+        {
+            "kind": "Text",
+            "text": "HTML",
+            "start": 224,
+            "end": 228
+        },
+        {
+            "kind": "Text",
+            "text": "support.",
+            "start": 229,
+            "end": 237
+        },
+        {
+            "kind": "HtmlEndTag",
+            "text": "</p>",
+            "start": 237,
+            "end": 241
+        },
+        {
+            "kind": "Asterisk",
+            "text": "*",
+            "start": 244,
+            "end": 245
+        },
+        {
+            "kind": "HtmlPreTag",
+            "text": "<pre>",
+            "start": 246,
+            "end": 251
+        },
+        {
+            "kind": "Asterisk",
+            "text": "*",
+            "start": 254,
+            "end": 255
+        },
+        {
+            "kind": "Text",
+            "text": "{",
+            "start": 256,
+            "end": 257
+        },
+        {
+            "kind": "CodeTag",
+            "text": "@code",
+            "start": 257,
+            "end": 262
+        },
+        {
+            "kind": "Asterisk",
+            "text": "*",
+            "start": 265,
+            "end": 266
+        },
+        {
+            "kind": "Text",
+            "text": "public",
+            "start": 267,
+            "end": 273
+        },
+        {
+            "kind": "Text",
+            "text": "class",
+            "start": 274,
+            "end": 279
+        },
+        {
+            "kind": "Text",
+            "text": "MyClass",
+            "start": 280,
+            "end": 287
+        },
+        {
+            "kind": "Text",
+            "text": "{",
+            "start": 288,
+            "end": 289
+        },
+        {
+            "kind": "Asterisk",
+            "text": "*",
+            "start": 292,
+            "end": 293
+        },
+        {
+            "kind": "Text",
+            "text": "public",
+            "start": 298,
+            "end": 304
+        },
+        {
+            "kind": "Text",
+            "text": "static",
+            "start": 305,
+            "end": 311
+        },
+        {
+            "kind": "Text",
+            "text": "void",
+            "start": 312,
+            "end": 316
+        },
+        {
+            "kind": "Text",
+            "text": "main(String[]",
+            "start": 317,
+            "end": 330
+        },
+        {
+            "kind": "Text",
+            "text": "args)",
+            "start": 331,
+            "end": 336
+        },
+        {
+            "kind": "Text",
+            "text": "{",
+            "start": 337,
+            "end": 338
+        },
+        {
+            "kind": "Asterisk",
+            "text": "*",
+            "start": 341,
+            "end": 342
+        },
+        {
+            "kind": "Text",
+            "text": "System.out.println(\"Hello,",
+            "start": 351,
+            "end": 377
+        },
+        {
+            "kind": "Text",
+            "text": "Javadoc!\");",
+            "start": 378,
+            "end": 389
+        },
+        {
+            "kind": "Asterisk",
+            "text": "*",
+            "start": 392,
+            "end": 393
+        },
+        {
+            "kind": "Text",
+            "text": "}",
+            "start": 398,
+            "end": 399
+        },
+        {
+            "kind": "Asterisk",
+            "text": "*",
+            "start": 402,
+            "end": 403
+        },
+        {
+            "kind": "Text",
+            "text": "}",
+            "start": 404,
+            "end": 405
+        },
+        {
+            "kind": "Asterisk",
+            "text": "*",
+            "start": 408,
+            "end": 409
+        },
+        {
+            "kind": "Text",
+            "text": "}",
+            "start": 410,
+            "end": 411
+        },
+        {
+            "kind": "Asterisk",
+            "text": "*",
+            "start": 414,
+            "end": 415
+        },
+        {
+            "kind": "HtmlEndTag",
+            "text": "</pre>",
+            "start": 416,
+            "end": 422
+        },
+        {
+            "kind": "Asterisk",
+            "text": "*",
+            "start": 425,
+            "end": 426
+        },
+        {
+            "kind": "Asterisk",
+            "text": "*",
+            "start": 429,
+            "end": 430
+        },
+        {
+            "kind": "HtmlTag",
+            "text": "<h2>",
+            "start": 431,
+            "end": 435
+        },
+        {
+            "kind": "Text",
+            "text": "Section",
+            "start": 435,
+            "end": 442
+        },
+        {
+            "kind": "Text",
+            "text": "Header",
+            "start": 443,
+            "end": 449
+        },
+        {
+            "kind": "HtmlEndTag",
+            "text": "</h2>",
+            "start": 449,
+            "end": 454
+        },
+        {
+            "kind": "Asterisk",
+            "text": "*",
+            "start": 457,
+            "end": 458
+        },
+        {
+            "kind": "HtmlPTag",
+            "text": "<p>",
+            "start": 459,
+            "end": 462
+        },
+        {
+            "kind": "Text",
+            "text": "Another",
+            "start": 462,
+            "end": 469
+        },
+        {
+            "kind": "Text",
+            "text": "paragraph",
+            "start": 470,
+            "end": 479
+        },
+        {
+            "kind": "Text",
+            "text": "with",
+            "start": 480,
+            "end": 484
+        },
+        {
+            "kind": "Text",
+            "text": "some",
+            "start": 485,
+            "end": 489
+        },
+        {
+            "kind": "HtmlBTag",
+            "text": "<b>",
+            "start": 490,
+            "end": 493
+        },
+        {
+            "kind": "Text",
+            "text": "bold",
+            "start": 493,
+            "end": 497
+        },
+        {
+            "kind": "HtmlEndTag",
+            "text": "</b>",
+            "start": 497,
+            "end": 501
+        },
+        {
+            "kind": "Text",
+            "text": "and",
+            "start": 502,
+            "end": 505
+        },
+        {
+            "kind": "HtmlITag",
+            "text": "<i>",
+            "start": 506,
+            "end": 509
+        },
+        {
+            "kind": "Text",
+            "text": "italic",
+            "start": 509,
+            "end": 515
+        },
+        {
+            "kind": "HtmlEndTag",
+            "text": "</i>",
+            "start": 515,
+            "end": 519
+        },
+        {
+            "kind": "Text",
+            "text": "text.",
+            "start": 520,
+            "end": 525
+        },
+        {
+            "kind": "HtmlEndTag",
+            "text": "</p>",
+            "start": 525,
+            "end": 529
+        },
+        {
+            "kind": "Asterisk",
+            "text": "*",
+            "start": 532,
+            "end": 533
+        },
+        {
+            "kind": "Asterisk",
+            "text": "*",
+            "start": 536,
+            "end": 537
+        },
+        {
+            "kind": "HtmlTag",
+            "text": "<h3>",
+            "start": 538,
+            "end": 542
+        },
+        {
+            "kind": "Text",
+            "text": "List",
+            "start": 542,
+            "end": 546
+        },
+        {
+            "kind": "Text",
+            "text": "Examples:",
+            "start": 547,
+            "end": 556
+        },
+        {
+            "kind": "HtmlEndTag",
+            "text": "</h3>",
+            "start": 556,
+            "end": 561
+        },
+        {
+            "kind": "Asterisk",
+            "text": "*",
+            "start": 564,
+            "end": 565
+        },
+        {
+            "kind": "HtmlUlTag",
+            "text": "<ul>",
+            "start": 566,
+            "end": 570
+        },
+        {
+            "kind": "Asterisk",
+            "text": "*",
+            "start": 573,
+            "end": 574
+        },
+        {
+            "kind": "HtmlLiTag",
+            "text": "<li>",
+            "start": 579,
+            "end": 583
+        },
+        {
+            "kind": "Text",
+            "text": "Item",
+            "start": 583,
+            "end": 587
+        }
+    ],
+    "errors": []
+}

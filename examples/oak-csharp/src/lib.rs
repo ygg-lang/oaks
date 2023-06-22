@@ -1,13 +1,8 @@
-#![feature(new_range_api)]
-#![doc = include_str!("readme.md")]
-#![doc(html_logo_url = "https://raw.githubusercontent.com/ygg-lang/oaks/refs/heads/dev/documents/logo.svg")]
-#![doc(html_favicon_url = "https://raw.githubusercontent.com/ygg-lang/oaks/refs/heads/dev/documents/logo.svg")]
-pub mod language;
-pub mod lexer;
-pub mod parser;
+//! Oak C# Frontend
+//!
+//! This crate is currently a placeholder for the upstream Oak C# frontend.
+//! The original implementation has been removed to reduce maintenance burden.
 
-pub use crate::{
-    language::CSharpLanguage,
-    lexer::{CSharpLexer, CSharpTokenType},
-    parser::{CSharpElementType, CSharpParser},
-};
+pub fn parse() {
+    println!("Oak C# frontend not yet implemented");
+}

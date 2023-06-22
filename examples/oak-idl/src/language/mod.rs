@@ -1,7 +1,14 @@
 use oak_core::{Language, LanguageCategory};
+use serde::{Deserialize, Serialize};
 
-#[derive(Debug, Default)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Default, Serialize, Deserialize)]
 pub struct IdlLanguage {}
+
+impl IdlLanguage {
+    pub fn new() -> Self {
+        Self {}
+    }
+}
 
 impl Language for IdlLanguage {
     const NAME: &'static str = "idl";

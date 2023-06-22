@@ -25,7 +25,7 @@ impl<'config> Lexer<JuliaLanguage> for JuliaLexer<'config> {
     }
 }
 
-impl<'config> JuliaLexer<'config> {
+impl JuliaLexer<'_> {
     /// 跳过空白字符
     fn skip_whitespace<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start_pos = state.get_position();

@@ -1,14 +1,18 @@
 //! Serde support for `core::range::Range`.
 
+#[cfg(feature = "serde")]
 use core::range::Range;
+#[cfg(feature = "serde")]
 use serde::{Deserialize, Deserializer, Serialize, Serializer};
 
+#[cfg(feature = "serde")]
 #[derive(Serialize, Deserialize)]
 struct RangeDef<T> {
     start: T,
     end: T,
 }
 
+#[cfg(feature = "serde")]
 #[derive(Serialize)]
 struct RangeDefRef<'a, T> {
     start: &'a T,
@@ -16,6 +20,7 @@ struct RangeDefRef<'a, T> {
 }
 
 /// Serializes a `Range<T>`.
+#[cfg(feature = "serde")]
 pub fn serialize<S, T>(value: &Range<T>, serializer: S) -> Result<S::Ok, S::Error>
 where
     S: Serializer,
@@ -25,6 +30,7 @@ where
 }
 
 /// Deserializes a `Range<T>`.
+#[cfg(feature = "serde")]
 pub fn deserialize<'de, D, T>(deserializer: D) -> Result<Range<T>, D::Error>
 where
     D: Deserializer<'de>,
@@ -35,6 +41,7 @@ where
 }
 
 /// Serde support for `Option<Range<T>>`.
+#[cfg(feature = "serde")]
 pub mod option {
     use super::{RangeDef, RangeDefRef};
     use core::range::Range;

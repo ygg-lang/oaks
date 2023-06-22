@@ -1,5 +1,5 @@
-use oak_core::helpers::LexerTester;
 use oak_pascal::{language::PascalLanguage, lexer::PascalLexer};
+use oak_testing::lexing::LexerTester;
 use std::{path::Path, time::Duration};
 
 static PASCAL_LANGUAGE: PascalLanguage = PascalLanguage {};

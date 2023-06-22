@@ -8,10 +8,10 @@ homepage.workspace = true
 repository.workspace = true
 description = "Oak MCP server with support for compact code structures and fuzzy semantic search."
 categories = ["development-tools"]
-keywords = ["mcp", "model-context-protocol", "ai"]
+keywords = ["mcp", "context-protocol", "ai"]
 
 [dependencies]
-tokio = { workspace = true }
+tokio = { workspace = true, features = ["rt", "macros", "sync", "io-util", "time"] }
 serde = { workspace = true }
 serde_json = { workspace = true }
 oak-core = { workspace = true }
@@ -27,16 +27,7 @@ tracing = { workspace = true }
 tracing-subscriber = { workspace = true }
 futures = { workspace = true }
 
-axum = { workspace = true, optional = true }
-actix-web = { workspace = true, optional = true }
-
-[dev-dependencies]
-oak-rust = { workspace = true }
-
 [features]
-default = []
-axum = ["dep:axum"]
-actix-web = ["dep:actix-web"]
-# semantic-search feature removed as it's now trait-based and doesn't need oak-semantic-search crate dependency here
-# semantic-search = ["dep:oak-semantic-search"] 
-
+default = ["io-std"]
+io-std = ["tokio/io-std"]
+axum = ["tokio/full"]

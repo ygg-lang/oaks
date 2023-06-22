@@ -1,8 +1,10 @@
+#[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
 use std::{fmt::Debug, hash::Hash};
 
 /// Represents the broad category a language belongs to.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub enum LanguageCategory {
     /// General-purpose programming languages (e.g., Rust, C, Java).
     Programming,
@@ -10,6 +12,8 @@ pub enum LanguageCategory {
     Markup,
     /// Configuration and data serialization languages (e.g., YAML, JSON, TOML).
     Config,
+    /// Styling languages (e.g., CSS, Sass, Less).
+    StyleSheet,
     /// Domain-specific languages or specialized notation (e.g., SQL, Regex, Math).
     Dsl,
     /// Other or unclassified.
@@ -338,7 +342,9 @@ pub trait TokenRole: Copy + Eq + Send {
 ///
 /// By mapping to these roles, generic tools can identify names, literals, or operators
 /// across 100+ languages without needing to learn the specifics of each grammar.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", serde(rename_all = "snake_case"))]
 pub enum UniversalTokenRole {
     /// Language reserved words or built-in commands (e.g., 'SELECT', 'let', 'MOV').
     Keyword,
@@ -548,7 +554,9 @@ pub trait ElementRole: Copy + Eq + Send {
 /// - **Semantic Relationships**: Roles like "Inheritance", "Implementation", or "Dependency"
 ///   are excluded. These are better handled by semantic graph analysis rather than
 ///   syntactic tree roles.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", serde(rename_all = "snake_case"))]
 #[non_exhaustive]
 pub enum UniversalElementRole {
     /// The top-level root of the syntax tree, representing the entire document or source file.

@@ -12,6 +12,6 @@ repository.workspace = true
 
 [dependencies]
 oak-core = { workspace = true }
-tokio = { workspace = true }
+tokio = { workspace = true, features = ["rt", "macros", "sync"] }
 serde = { workspace = true }
-serde_json = { workspace = true }
+# oak-json = { workspace = true }

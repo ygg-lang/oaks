@@ -1,31 +1,31 @@
-# VLang 抽象语法树 (AST) 模块
+# VLang Abstract Syntax Tree (AST) Module
 
-这个模块定义了 V 语言的抽象语法树结构，用于表示解析后的 V 代码。
+This module defines the abstract syntax tree structure for the V language, used to represent parsed V code.
 
-## AST 节点类型
+## AST Node Types
 
-### 顶级节点
+### Top-level Nodes
 
-- **`VRoot`**: V 源代码的根节点，包含模块名、导入和项目列表。
-- **`VItem`**: 顶级项目，可以是结构体、函数、枚举或常量。
+- **`VRoot`**: The root node of V source code, containing module name, imports, and item list.
+- **`VItem`**: Top-level items, which can be structs, functions, enums, or constants.
 
-### 类型定义
+### Type Definitions
 
-- **`VStruct`**: 结构体定义。
-- **`VEnum`**: 枚举定义。
-- **`VField`**: 结构体字段。
+- **`VStruct`**: Struct definition.
+- **`VEnum`**: Enum definition.
+- **`VField`**: Struct field.
 
-### 函数
+### Functions
 
-- **`VFunction`**: 函数或方法定义。
-- **`VReceiver`**: 方法的接收者。
-- **`VParam`**: 函数参数。
+- **`VFunction`**: Function or method definition.
+- **`VReceiver`**: Receiver for a method.
+- **`VParam`**: Function parameter.
 
-### 其他
+### Others
 
-- **`VConst`**: 常量定义。
+- **`VConst`**: Constant definition.
 
-## 使用示例
+## Usage Example
 
 ```rust,ignore
 use oak_vlang::ast::*;

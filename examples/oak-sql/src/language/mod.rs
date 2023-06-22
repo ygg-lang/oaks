@@ -1,7 +1,8 @@
 use oak_core::{Language, LanguageCategory};
+use serde::{Deserialize, Serialize};
 
 /// SQL 语言实现
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub struct SqlLanguage {
     /// 是否区分大小
     pub case_sensitive: bool,
@@ -14,6 +15,11 @@ pub struct SqlLanguage {
 }
 
 impl SqlLanguage {
+    /// 创建新的 SQL 语言实例
+    pub fn new() -> Self {
+        Self::default()
+    }
+
     /// 创建标准 SQL 语言实例
     pub fn standard() -> Self {
         Self::default()

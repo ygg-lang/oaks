@@ -18,7 +18,6 @@ mod language;
 pub mod lexer;
 /// LSP 模块
 pub mod lsp;
-#[cfg(feature = "mcp")]
 pub mod mcp;
 /// 语法分析器模块
 pub mod parser;
@@ -26,5 +25,4 @@ pub mod parser;
 // 重新导出主要类型
 pub use crate::{ast::AdaRoot, builder::AdaBuilder, formatter::AdaFormatter, highlighter::AdaHighlighter, language::AdaLanguage, lexer::AdaLexer, lsp::AdaLanguageService, parser::AdaParser};
 
-#[cfg(feature = "mcp")]
 pub use crate::mcp::serve_ada_mcp;

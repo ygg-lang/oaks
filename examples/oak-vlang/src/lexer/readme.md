@@ -1,53 +1,78 @@
-# WAT 词法分析器模块
+# VLang Lexer Module
 
-WebAssembly 文本格式 (WAT) 的词法分析器，将源代码转换为词法单元 (tokens)。
+The VLang Lexer module provides lexical analysis for the [V programming language](https://vlang.io/). It converts V source code into a stream of tokens, which is the first step in the compilation or analysis process.
 
-## 功能特性
+## Purpose
 
-- **关键字识别**: 识别 WAT 关键字 (`module`, `func`, `export` 等)
-- **标识符解析**: 处理标识符和名称
-- **数值字面量**: 解析各种数值类型
-- **字符串字面量**: 处理字符串常量
-- **注释处理**: 支持行注释和块注释
+This module is designed to be a fast and reliable lexer for V, supporting its modern syntax and features. It serves as the foundation for the V parser and other V-related tools in the Oak ecosystem.
 
-## 词法单元类型
+## Features
 
-### 关键字
-- 模块关键字: `module`, `func`, `export`, `import`
-- 类型关键字: `param`, `result`, `local`
-- 指令关键字: `i32.add`, `local.get`, `call`
+- **Keyword Recognition**: Supports all V keywords, including `module`, `import`, `pub`, `mut`, `fn`, `struct`, `interface`, etc.
+- **Modern Syntax Support**: Handles V's specific features like string interpolation (future), multiple return types, and more.
+- **String Literals**: Supports both single-quote (`'`) and double-quote (`"`) strings, as well as raw strings.
+- **Numeric Literals**: Correctly parses decimal, hexadecimal (`0x`), binary (`0b`), and octal (`0o`) numbers, including underscores for readability (e.g., `1_000_000`).
+- **Comment Handling**: Supports line comments (`//`) and multi-line comments (`/* ... */`).
+- **Fast and Lightweight**: Optimized for performance and low memory overhead.
+- **Source Mapping**: Every token contains span information (start and end positions) for precise error reporting and IDE support.
 
-### 字面量
-- 数值: `123`, `0xFF`, `1.5`
-- 字符串: `"hello"`, `$name`
-- 标识符: `$func_name`
+## Token Types
 
-## 使用示例
+### Keywords
+- **Module & Imports**: `module`, `import`.
+- **Visibility & Mutability**: `pub`, `mut`, `const`, `__global`.
+- **Declarations**: `fn`, `struct`, `interface`, `enum`, `type`, `union`.
+- **Control Flow**: `if`, `else`, `for`, `in`, `match`, `return`, `defer`, `go`, `select`.
+- **Types**: `int`, `string`, `bool`, `f32`, `f64`, etc.
+
+### Literals
+- **Numeric**: `123`, `0x7B`, `0b1111011`, `3.14`.
+- **String**: `'Hello V'`, `"Hello V"`, `r'raw string'`.
+- **Boolean**: `true`, `false`.
+- **Identifiers**: `main`, `my_var`, `UserStruct`.
+
+### Operators and Symbols
+- **Arithmetic**: `+`, `-`, `*`, `/`, `%`.
+- **Assignment**: `=`, `:=`, `+=`, `-=`, `*=`, `/=`.
+- **Comparison**: `==`, `!=`, `<`, `>`, `<=`, `>=`.
+- **Logical**: `&&`, `||`, `!`.
+- **Others**: `(`, `)`, `[`, `]`, `{`, `}`, `.`, `,`, `:`, `;`, `?`, `!`, `<-`.
+
+## Usage Example
 
 ```rust
-use oak_wat::lexer::WatLexer;
+use oak_vlang::lexer::VLexer;
 
-let wat_source = r#"
-    (module
-        (func $add (param $a i32) (param $b i32) (result i32)
-            local.get $a
-            local.get $b
-            i32.add)
-    )
-"#;
+fn main() {
+    let v_source = r#"
+        module main
+        import os
 
-let mut lexer = WatLexer::new();
-let tokens = lexer.tokenize(wat_source);
+        pub fn main() {
+            name := 'Oak'
+            println('Hello, $name!')
+        }
+    "#;
 
-for token in tokens {
-    println!("{:?}: {:?}", token.token_type, token.lexeme);
+    let mut lexer = VLexer::new();
+    let tokens = lexer.tokenize(v_source);
+
+    for token in tokens {
+        println!("{:?}: '{}' at {:?}", token.token_type, token.lexeme, token.span);
+    }
 }
 ```
 
-## 错误处理
+## Error Handling
 
-词法分析器提供详细的错误信息：
-- 非法字符
-- 未结束的字符串
-- 无效的数值格式
-- 位置信息跟踪
+The lexer detects and reports:
+- **Illegal Characters**: Characters that are not valid in V source code.
+- **Unterminated Strings**: Strings that don't have a matching closing quote.
+- **Invalid Number Formats**: Malformed numeric literals (e.g., `0xG1`).
+- **Unterminated Comments**: Multi-line comments that are never closed.
+
+## Design Principles
+
+1. **Simplicity**: Matches V's philosophy of being simple and easy to understand.
+2. **Speed**: Built to handle large V codebases quickly.
+3. **Accuracy**: Aims for 100% compatibility with the official V compiler's lexical rules.

@@ -20,7 +20,7 @@ impl<'config> SchemeParser<'config> {
 
 impl<'config> Parser<SchemeLanguage> for SchemeParser<'config> {
     fn parse<'a, S: Source + ?Sized>(&self, text: &'a S, edits: &[TextEdit], cache: &'a mut impl ParseCache<SchemeLanguage>) -> ParseOutput<'a, SchemeLanguage> {
-        let lexer = SchemeLexer::new(self.config);
+        let lexer = SchemeLexer::new(&self.config);
         parse_with_lexer(&lexer, text, edits, cache, |state| self.parse_root_internal(state))
     }
 }

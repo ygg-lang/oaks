@@ -16,7 +16,7 @@ impl<'config> SchemeBuilder<'config> {
 impl<'config> Builder<SchemeLanguage> for SchemeBuilder<'config> {
     fn build<'a, S: Source + ?Sized>(&self, source: &S, edits: &[TextEdit], cache: &'a mut impl BuilderCache<SchemeLanguage>) -> OakDiagnostics<()> {
         let parser = SchemeParser::new(self.config);
-        let lexer = crate::lexer::SchemeLexer::new(self.config);
+        let lexer = crate::lexer::SchemeLexer::new(&self.config);
 
         lexer.lex(source, edits, cache);
         let parse_result = parser.parse(source, edits, cache);

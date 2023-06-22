@@ -1,7 +1,7 @@
 use oak_core::{TokenType, UniversalElementRole, UniversalTokenRole};
 
 /// 统一JSON 语法种类（包含节点与词法
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, serde::Serialize)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, serde::Serialize, serde::Deserialize)]
 pub enum JsonSyntaxKind {
     // 节点种类
     Root,

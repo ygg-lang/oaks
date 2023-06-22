@@ -14,7 +14,7 @@ impl<'config> NginxBuilder<'config> {
 impl<'config> Builder<NginxLanguage> for NginxBuilder<'config> {
     fn build<'a, S: Source + ?Sized>(&self, source: &S, edits: &[TextEdit], _cache: &'a mut impl BuilderCache<NginxLanguage>) -> OakDiagnostics<NginxRoot> {
         let parser = crate::parser::NginxParser::new(self.config);
-        let lexer = crate::lexer::NginxLexer::new(self.config);
+        let lexer = crate::lexer::NginxLexer::new(&self.config);
 
         let mut session = oak_core::parser::session::ParseSession::<NginxLanguage>::default();
         lexer.lex(source, edits, &mut session);

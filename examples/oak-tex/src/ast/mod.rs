@@ -13,9 +13,58 @@ pub struct TexRoot {
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub enum TexItem {
     Command(TexCommand),
+    Environment(TexEnvironment),
     Group(TexGroup),
-    Text(String),
-    Comment(String),
+    Math(TexMath),
+    Superscript(TexSuperscript),
+    Subscript(TexSubscript),
+    Text {
+        #[serde(with = "oak_core::serde_range")]
+        span: Range<usize>,
+        content: String,
+    },
+    Comment {
+        #[serde(with = "oak_core::serde_range")]
+        span: Range<usize>,
+        content: String,
+    },
+}
+
+/// TeX 环境 (e.g., \begin{matrix} ... \end{matrix})
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct TexEnvironment {
+    #[serde(with = "oak_core::serde_range")]
+    pub span: Range<usize>,
+    pub name: String,
+    pub arguments: Vec<TexArgument>,
+    pub content: TexRoot,
+}
+
+/// TeX 上标
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct TexSuperscript {
+    #[serde(with = "oak_core::serde_range")]
+    pub span: Range<usize>,
+    pub target: Option<Box<TexItem>>,
+    pub content: Box<TexRoot>,
+}
+
+/// TeX 下标
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct TexSubscript {
+    #[serde(with = "oak_core::serde_range")]
+    pub span: Range<usize>,
+    pub target: Option<Box<TexItem>>,
+    pub content: Box<TexRoot>,
+}
+
+/// TeX 数学环境 ($...$ 或 $$...$$)
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct TexMath {
+    #[serde(with = "oak_core::serde_range")]
+    pub span: Range<usize>,
+    pub content: TexRoot,
+    pub is_display: bool,
 }
 
 /// TeX 命令 (e.g., \section, \textbf)

@@ -46,7 +46,7 @@ oak-html = { workspace = true }
 # oak-jasmin = { workspace = true }
 # oak-java = { workspace = true }
 # oak-javadoc = { workspace = true }
-oak-javascript = { workspace = true }
+# oak-javascript = { workspace = true }
 oak-json = { workspace = true }
 # oak-julia = { workspace = true }
 # oak-kotlin = { workspace = true }
@@ -84,13 +84,12 @@ oak-rust = { workspace = true }
 oak-sql = { workspace = true }
 oak-python = { workspace = true }
 serde = { workspace = true }
-serde_json = { workspace = true }
 
 [dev-dependencies]
-oak-core = { workspace = true, features = ["testing"] }
+oak-testing = { workspace = true }
 chrono = { workspace = true }
 criterion = { workspace = true }
-toml = { workspace = true }
+# toml = { workspace = true } # replaced by oak-toml
 toml_edit = { workspace = true }
 markdown = { workspace = true }
 pulldown-cmark = { workspace = true }
@@ -100,12 +99,11 @@ html5ever = { workspace = true }
 cssparser = { workspace = true }
 serde_yaml = { workspace = true }
 syn = { workspace = true }
-sqlparser = { workspace = true }
 rustpython-parser = { workspace = true }
 # swc_ecma_parser = { workspace = true }
 # swc_common = { workspace = true }
 oxc_parser = { workspace = true }
-oxc_allocator = { version = "0.13" }
+oxc_allocator = { workspace = true }
 oxc_span = { workspace = true }
 
 [[bench]]

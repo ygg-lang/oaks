@@ -1,7 +1,13 @@
 use oak_core::{Language, LanguageCategory};
 
 #[derive(Default)]
-pub struct WatLanguage;
+pub struct WatLanguage {}
+
+impl WatLanguage {
+    pub fn new() -> Self {
+        Self {}
+    }
+}
 
 impl Language for WatLanguage {
     const NAME: &'static str = "wat";

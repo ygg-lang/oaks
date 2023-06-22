@@ -12,7 +12,7 @@ static TYPST_WHITESPACE: LazyLock<WhitespaceConfig> = LazyLock::new(|| Whitespac
 static TYPST_COMMENT: LazyLock<CommentConfig> = LazyLock::new(|| CommentConfig { line_marker: "//", block_start: "/*", block_end: "*/", nested_blocks: true });
 static TYPST_STRING: LazyLock<StringConfig> = LazyLock::new(|| StringConfig { quotes: &['"'], escape: Some('\\') });
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct TypstLexer<'config> {
     _config: &'config TypstLanguage,
 }
@@ -37,7 +37,7 @@ impl<'config> TypstLexer<'config> {
         while state.not_at_end() {
             let safe_point = state.get_position();
 
-            if TYPST_WHITESPACE.scan(state, TypstSyntaxKind::Whitespace) {
+            if self.lex_whitespace(state) {
                 continue;
             }
 
@@ -69,6 +69,21 @@ impl<'config> TypstLexer<'config> {
         }
 
         Ok(())
+    }
+
+    fn lex_whitespace<'s, S: Source + ?Sized>(&self, state: &mut State<'s, S>) -> bool {
+        if let Some(ch) = state.peek() {
+            if ch == '\n' || ch == '\r' {
+                let start = state.get_position();
+                state.advance(1);
+                if ch == '\r' && state.peek() == Some('\n') {
+                    state.advance(1);
+                }
+                state.add_token(TypstSyntaxKind::Newline, start, state.get_position());
+                return true;
+            }
+        }
+        TYPST_WHITESPACE.scan(state, TypstSyntaxKind::Whitespace)
     }
 
     fn lex_number_literal<'s, S: Source + ?Sized>(&self, state: &mut State<'s, S>) -> bool {
@@ -122,7 +137,7 @@ impl<'config> TypstLexer<'config> {
         }
 
         let first_char = text.chars().next().unwrap();
-        if !first_char.is_ascii_alphabetic() && first_char != '_' {
+        if !first_char.is_ascii_alphabetic() {
             return false;
         }
 
@@ -133,7 +148,7 @@ impl<'config> TypstLexer<'config> {
         pos += 1;
 
         // 后续字符
-        while pos < chars.len() && (chars[pos].is_ascii_alphanumeric() || chars[pos] == '_') {
+        while pos < chars.len() && (chars[pos].is_ascii_alphanumeric()) {
             pos += 1;
         }
 
@@ -179,12 +194,11 @@ impl<'config> TypstLexer<'config> {
 
         let (kind, len) = match chars[0] {
             '=' => {
-                if chars.len() > 1 && chars[1] == '=' {
-                    (TypstSyntaxKind::EqualEqual, 2)
+                let mut count = 1;
+                while count < chars.len() && chars[count] == '=' {
+                    count += 1;
                 }
-                else {
-                    (TypstSyntaxKind::Equal, 1)
-                }
+                (TypstSyntaxKind::Equal, count)
             }
             '!' => {
                 if chars.len() > 1 && chars[1] == '=' {
@@ -263,6 +277,7 @@ impl<'config> TypstLexer<'config> {
             '@' => TypstSyntaxKind::At,
             '$' => TypstSyntaxKind::Dollar,
             '_' => TypstSyntaxKind::Underscore,
+            '`' => TypstSyntaxKind::Backtick,
             _ => TypstSyntaxKind::Error,
         };
 

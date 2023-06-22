@@ -1,19 +1,20 @@
 [package]
 name = "oak-diagnostic"
-version = "0.0.1"
-edition = "2024"
+version.workspace = true
+edition.workspace = true
 description = "Beautiful diagnostic reporting for the Oak ecosystem, inspired by miette."
 categories = ["development-tools"]
 keywords = ["diagnostic", "error", "reporting", "miette"]
 authors.workspace = true
 license.workspace = true
+homepage = "https://github.com/ygg-lang/oaks"
+repository = "https://github.com/ygg-lang/oaks"
 
 [lib]
 path = "src/lib.rs"
 
 [dependencies]
-oak-core = { path = "../oak-core" }
-oak-vfs = { path = "../oak-vfs" }
+oak-core = { workspace = true, features = ["serde"] }
+oak-vfs = { workspace = true, features = ["serde"] }
 serde = { workspace = true }
 serde_json = { workspace = true }
-url = { workspace = true }

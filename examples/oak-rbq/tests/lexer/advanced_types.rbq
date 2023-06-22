@@ -1,0 +1,40 @@
+# Advanced Types and Collections Test
+# This file tests nested generics and various built-in types
+
+@database("test_db.collections")
+@table(name = "collection_testers")
+class CollectionTester {
+    @key
+    id: uuid;
+    
+    # Nested Generics
+    tags: list<list<utf8>>;
+    scores: list<i32>;
+    metadata: dict<object>;
+    settings: dict<utf8>;
+    
+    # Optional and Required fields
+    required_name: utf8;
+    optional_note: utf8?;
+    
+    # Numerical variety
+    count_8: i8;
+    count_16: i16;
+    count_32: i32;
+    count_64: i64;
+    u_count_128: u128;
+    price: d128;
+    ratio: f64;
+    
+    # Time and Binary
+    created_at: date_time;
+    last_login: date_time?;
+    raw_data: object;
+}
+
+union ComplexEnum {
+    Alpha = "A",
+    Beta = "B",
+    Gamma = 100,
+    Delta,
+}

@@ -3,7 +3,7 @@ use oak_core::{Lexer, LexerCache, LexerState, OakError, TextEdit, lexer::LexOutp
 
 type State<'a, S> = LexerState<'a, S, StylusLanguage>;
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct StylusLexer<'config> {
     config: &'config StylusLanguage,
 }
@@ -340,7 +340,9 @@ impl<'config> StylusLexer<'config> {
             false
         }
     }
+}
 
+impl<'config> StylusLexer<'config> {
     fn run<S: Source + ?Sized>(&self, state: &mut State<'_, S>) -> Result<(), OakError> {
         while state.not_at_end() {
             let safe_point = state.get_position();
@@ -388,13 +390,14 @@ impl<'config> StylusLexer<'config> {
             state.advance_if_dead_lock(safe_point);
         }
 
+        state.add_eof();
         Ok(())
     }
 }
 
 impl<'config> Lexer<StylusLanguage> for StylusLexer<'config> {
     fn lex<'a, S: Source + ?Sized>(&self, source: &S, _edits: &[TextEdit], cache: &'a mut impl LexerCache<StylusLanguage>) -> LexOutput<StylusLanguage> {
-        let mut state: State<'_, S> = LexerState::new(source);
+        let mut state = LexerState::new(source);
         let result = self.run(&mut state);
         if result.is_ok() {
             state.add_eof();

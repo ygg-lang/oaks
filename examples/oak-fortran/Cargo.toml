@@ -2,7 +2,7 @@
 name = "oak-fortran"
 description = "Fortran scientific computing language parser with support for modern Fortran standards and numerical computing."
 categories = ["parsing"]
-keywords = ["parser", "fortran", "scientific-computing", "hpc"]
+keywords = ["parser", "fortran", "scientific", "hpc"]
 documentation = "https://docs.rs/oak-fortran"
 readme = "readme.md"
 version.workspace = true
@@ -19,7 +19,7 @@ oak-pretty-print = { workspace = true, optional = true }
 serde = { workspace = true }
 
 [dev-dependencies]
-oak-core = { workspace = true, features = ["testing"] }
+oak-testing = { workspace = true }
 walkdir = { workspace = true }
 
 [features]

@@ -22,7 +22,7 @@ impl<'config> CsvParser<'config> {
 
 impl<'config> Parser<CsvLanguage> for CsvParser<'config> {
     fn parse<'a, S: Source + ?Sized>(&self, text: &'a S, edits: &[TextEdit], cache: &'a mut impl ParseCache<CsvLanguage>) -> ParseOutput<'a, CsvLanguage> {
-        let lexer = CsvLexer::new(self.config);
+        let lexer = CsvLexer::new(&self.config);
         oak_core::parser::parse_with_lexer(&lexer, text, edits, cache, |state| self.parse_root_internal(state))
     }
 }

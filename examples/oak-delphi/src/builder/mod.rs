@@ -2,26 +2,27 @@ use crate::{ast::*, language::DelphiLanguage, parser::DelphiParser};
 use oak_core::{Builder, BuilderCache, GreenNode, OakDiagnostics, OakError, Parser, RedNode, SourceText, TextEdit, source::Source};
 
 /// Delphi 语言的 AST 构建器
-#[derive(Clone, Default)]
-pub struct DelphiBuilder;
+#[derive(Clone)]
+pub struct DelphiBuilder {
+    config: DelphiLanguage,
+}
 
 impl DelphiBuilder {
-    pub fn new() -> Self {
-        Self
+    pub fn new(config: DelphiLanguage) -> Self {
+        Self { config }
     }
 }
 
 impl Builder<DelphiLanguage> for DelphiBuilder {
-    fn build<'a, S: Source + ?Sized>(&self, source: &S, edits: &[TextEdit], _cache: &'a mut impl BuilderCache<DelphiLanguage>) -> OakDiagnostics<DelphiRoot> {
-        let config = DelphiLanguage::default();
-        let parser = DelphiParser::new(&config);
+    fn build<'a, S: Source + ?Sized>(&self, source: &'a S, edits: &[TextEdit], _cache: &'a mut impl BuilderCache<DelphiLanguage>) -> oak_core::builder::BuildOutput<DelphiLanguage> {
+        let parser = DelphiParser::new(&self.config);
 
         let mut parse_cache = oak_core::parser::session::ParseSession::<DelphiLanguage>::default();
         let parse_result = parser.parse(source, edits, &mut parse_cache);
 
         match parse_result.result {
             Ok(green_tree) => {
-                let source_text = SourceText::new(source.get_text_in((0..source.length()).into()));
+                let source_text = SourceText::new(source.get_text_in((0..source.length()).into()).into_owned());
                 match self.build_root(green_tree, &source_text) {
                     Ok(ast_root) => OakDiagnostics { result: Ok(ast_root), diagnostics: parse_result.diagnostics },
                     Err(build_error) => {

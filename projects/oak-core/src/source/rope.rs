@@ -1,15 +1,14 @@
-use crate::source::{Source, TextChunk, TextEdit};
+use crate::source::{Source, SourceId, TextChunk, TextEdit};
 use core::range::Range;
 use std::borrow::Cow;
 use triomphe::Arc;
-use url::Url;
 
 const CHUNK_SIZE: usize = 4096;
 
 /// A read-only, rope-based source implementation for efficient handling of large files.
 #[derive(Clone, Debug)]
 pub struct RopeSource {
-    url: Option<Url>,
+    source_id: Option<SourceId>,
     chunks: Arc<[Arc<str>]>,
     starts: Arc<[usize]>,
     len: usize,
@@ -18,7 +17,7 @@ pub struct RopeSource {
 /// A mutable buffer for rope-based source code, supporting efficient edits.
 #[derive(Clone, Debug)]
 pub struct RopeBuffer {
-    url: Option<Url>,
+    source_id: Option<SourceId>,
     chunks: Vec<Arc<str>>,
     starts: Vec<usize>,
     len: usize,
@@ -27,21 +26,21 @@ pub struct RopeBuffer {
 impl RopeBuffer {
     /// Creates a new empty `RopeBuffer`.
     pub fn new(input: impl ToString) -> Self {
-        Self::new_with_url(input, None)
+        Self::new_with_id(input, None)
     }
 
-    /// Creates a new `RopeBuffer` with the specified input and URL.
-    pub fn new_with_url(input: impl ToString, url: impl Into<Option<Url>>) -> Self {
-        let url = url.into();
+    /// Creates a new `RopeBuffer` with the specified input and source ID.
+    pub fn new_with_id(input: impl ToString, source_id: impl Into<Option<SourceId>>) -> Self {
+        let source_id = source_id.into();
         let text = input.to_string();
         let chunks = chunkify(&text);
         let (starts, len) = rebuild_starts(&chunks);
-        Self { url, chunks, starts, len }
+        Self { source_id, chunks, starts, len }
     }
 
     /// Returns a read-only snapshot of the current buffer.
     pub fn snapshot(&self) -> RopeSource {
-        RopeSource { url: self.url.clone(), chunks: Arc::<[Arc<str>]>::from(self.chunks.clone()), starts: Arc::<[usize]>::from(self.starts.clone()), len: self.len }
+        RopeSource { source_id: self.source_id, chunks: Arc::<[Arc<str>]>::from(self.chunks.clone()), starts: Arc::<[usize]>::from(self.starts.clone()), len: self.len }
     }
 
     /// Applies multiple text edits to the buffer and returns the affected range.
@@ -169,8 +168,8 @@ impl Source for RopeBuffer {
         text_in_chunks(&self.chunks, &self.starts, self.len, range)
     }
 
-    fn get_url(&self) -> Option<&Url> {
-        self.url.as_ref()
+    fn source_id(&self) -> Option<SourceId> {
+        self.source_id
     }
 }
 
@@ -196,8 +195,8 @@ impl Source for RopeSource {
         text_in_chunks(&self.chunks, &self.starts, self.len, range)
     }
 
-    fn get_url(&self) -> Option<&Url> {
-        self.url.as_ref()
+    fn source_id(&self) -> Option<SourceId> {
+        self.source_id
     }
 }
 

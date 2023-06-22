@@ -10,10 +10,12 @@ type State<'a, S> = LexerState<'a, S, VerilogLanguage>;
 
 static VL_WHITESPACE: LazyLock<WhitespaceConfig> = LazyLock::new(|| WhitespaceConfig { unicode_whitespace: true });
 
-#[derive(Clone)]
-pub struct VerilogLexer;
+#[derive(Clone, Debug)]
+pub struct VerilogLexer<'config> {
+    _config: &'config VerilogLanguage,
+}
 
-impl Lexer<VerilogLanguage> for VerilogLexer {
+impl<'config> Lexer<VerilogLanguage> for VerilogLexer<'config> {
     fn lex<'a, S: Source + ?Sized>(&self, source: &'a S, _edits: &[oak_core::TextEdit], cache: &'a mut impl LexerCache<VerilogLanguage>) -> LexOutput<VerilogLanguage> {
         let mut state = LexerState::new(source);
         let result = self.run(&mut state);
@@ -21,9 +23,9 @@ impl Lexer<VerilogLanguage> for VerilogLexer {
     }
 }
 
-impl VerilogLexer {
-    pub fn new(_config: &VerilogLanguage) -> Self {
-        Self
+impl<'config> VerilogLexer<'config> {
+    pub fn new(config: &'config VerilogLanguage) -> Self {
+        Self { _config: config }
     }
 
     /// 主要词法分析循环

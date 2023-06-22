@@ -14,7 +14,7 @@ impl<'config> JuliaBuilder<'config> {
 impl<'config> Builder<JuliaLanguage> for JuliaBuilder<'config> {
     fn build<'a, S: Source + ?Sized>(&self, source: &S, edits: &[TextEdit], _cache: &'a mut impl BuilderCache<JuliaLanguage>) -> OakDiagnostics<JuliaRoot> {
         let parser = JuliaParser::new(self.config);
-        let lexer = JuliaLexer::new(self.config);
+        let lexer = JuliaLexer::new(&self.config);
 
         let mut cache = oak_core::parser::session::ParseSession::<JuliaLanguage>::default();
         let parse_result = oak_core::parser::parse(&parser, &lexer, source, edits, &mut cache);

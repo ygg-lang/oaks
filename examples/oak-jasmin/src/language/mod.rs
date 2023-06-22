@@ -10,6 +10,10 @@ pub struct JasminLanguage {
 }
 
 impl JasminLanguage {
+    pub fn new() -> Self {
+        Self::default()
+    }
+
     pub fn standard() -> Self {
         Self { extended: true, comments: true }
     }

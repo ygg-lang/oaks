@@ -1,9 +1,9 @@
 use core::fmt;
 use oak_core::{ElementType, TokenType, UniversalElementRole, UniversalTokenRole};
-use serde::Serialize;
+use serde::{Deserialize, Serialize};
 
 /// Ruby 令牌种类
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Hash)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, Hash)]
 pub enum RubySyntaxKind {
     // 基础标识符和字面量
     Identifier,

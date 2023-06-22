@@ -1,4 +1,5 @@
 #![feature(new_range_api)]
+#![recursion_limit = "512"]
 pub mod handlers;
 pub mod server;
 pub mod service;

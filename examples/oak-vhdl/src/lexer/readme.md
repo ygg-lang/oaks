@@ -1,53 +1,70 @@
-# WAT 词法分析器模块
+# VHDL Lexer Module
 
-WebAssembly 文本格式 (WAT) 的词法分析器，将源代码转换为词法单元 (tokens)。
+The VHDL Lexer module provides high-performance lexical analysis for the VHDL (VHSIC Hardware Description Language) programming language. It is responsible for converting raw VHDL source text into a stream of meaningful tokens for further processing by the parser.
 
-## 功能特性
+## Purpose
 
-- **关键字识别**: 识别 WAT 关键字 (`module`, `func`, `export` 等)
-- **标识符解析**: 处理标识符和名称
-- **数值字面量**: 解析各种数值类型
-- **字符串字面量**: 处理字符串常量
-- **注释处理**: 支持行注释和块注释
+The primary goal of this module is to provide a robust and efficient way to tokenize VHDL source code, handling the complexities of hardware description language syntax, including case-insensitivity, specialized numeric literals, and various design unit structures.
 
-## 词法单元类型
+## Features
 
-### 关键字
-- 模块关键字: `module`, `func`, `export`, `import`
-- 类型关键字: `param`, `result`, `local`
-- 指令关键字: `i32.add`, `local.get`, `call`
+- **Full Keyword Support**: Recognizes all standard VHDL keywords across different versions (87, 93, 2002, 2008, 2019).
+- **Case Insensitivity**: Correctly handles VHDL's case-insensitive nature for keywords and identifiers.
+- **Advanced Numeric Literals**: Supports decimal literals, based literals (e.g., `16#FF#`), and physical literals.
+- **Identifier Handling**: Correctly parses basic identifiers and extended identifiers.
+- **Comment Processing**: Supports standard line comments (`--`) and block comments (in newer versions).
+- **Position Tracking**: Each token includes precise source code coordinates (line, column, offset) for accurate error reporting.
 
-### 字面量
-- 数值: `123`, `0xFF`, `1.5`
-- 字符串: `"hello"`, `$name`
-- 标识符: `$func_name`
+## Token Types
 
-## 使用示例
+### Keywords
+- **Design Units**: `entity`, `architecture`, `package`, `configuration`, `context`.
+- **Declarations**: `port`, `generic`, `signal`, `variable`, `constant`, `type`, `subtype`, `component`.
+- **Directional**: `in`, `out`, `inout`, `buffer`, `linkage`.
+- **Control Flow**: `if`, `else`, `elsif`, `case`, `when`, `loop`, `for`, `while`, `generate`.
+
+### Literals
+- **Numeric**: Decimal (`123`, `1.5`, `1.0E-9`) and Based (`2#1010_1010#`, `16#DEAD_BEEF#`).
+- **Character/String**: Character literals (`'A'`), String literals (`"hello"`), and Bit String literals (`x"FF"`, `b"1010"`).
+- **Identifiers**: `clk`, `reset_n`, `\my extended identifier\`.
+
+### Operators and Delimiters
+- **Operators**: `+`, `-`, `*`, `/`, `**`, `abs`, `not`, `and`, `or`, `nand`, `nor`, `xor`, `xnor`.
+- **Delimiters**: `(`, `)`, `,`, `;`, `:`, `:=`, `=>`, `<=`.
+
+## Usage Example
 
 ```rust
-use oak_wat::lexer::WatLexer;
+use oak_vhdl::lexer::VhdlLexer;
 
-let wat_source = r#"
-    (module
-        (func $add (param $a i32) (param $b i32) (result i32)
-            local.get $a
-            local.get $b
-            i32.add)
-    )
-"#;
+fn main() {
+    let vhdl_source = r#"
+        entity counter is
+            port (
+                clk : in std_logic;
+                count : out std_logic_vector(3 downto 0)
+            );
+        end entity;
+    "#;
 
-let mut lexer = WatLexer::new();
-let tokens = lexer.tokenize(wat_source);
+    let mut lexer = VhdlLexer::new();
+    let tokens = lexer.tokenize(vhdl_source);
 
-for token in tokens {
-    println!("{:?}: {:?}", token.token_type, token.lexeme);
+    for token in tokens {
+        println!("{:?}: '{}' at {:?}", token.token_type, token.lexeme, token.span);
+    }
 }
 ```
 
-## 错误处理
+## Error Handling
 
-词法分析器提供详细的错误信息：
-- 非法字符
-- 未结束的字符串
-- 无效的数值格式
-- 位置信息跟踪
+The lexer provides detailed error reporting for:
+- **Invalid Characters**: Detects characters not allowed in VHDL source.
+- **Malformed Literals**: Identifies incorrectly formatted numeric or bit-string literals.
+- **Unterminated Strings**: Detects strings or extended identifiers that are not closed.
+
+## Design Principles
+
+1. **Efficiency**: Optimized for fast tokenization of large VHDL files.
+2. **Standard Compliance**: Aims to strictly follow VHDL language specifications.
+3. **Tool Friendly**: Designed to be used in IDEs, linters, and synthesis tool frontends.

@@ -99,7 +99,7 @@ impl<'config> Pratt<RegexLanguage> for RegexParser<'config> {
 
 impl<'config> Parser<RegexLanguage> for RegexParser<'config> {
     fn parse<'a, S: Source + ?Sized>(&self, text: &'a S, edits: &[TextEdit], cache: &'a mut impl ParseCache<RegexLanguage>) -> ParseOutput<'a, RegexLanguage> {
-        let lexer = RegexLexer::new(self.config);
+        let lexer = RegexLexer::new(&self.config);
         oak_core::parser::parse_with_lexer(&lexer, text, edits, cache, |state| {
             let checkpoint = state.checkpoint();
             while state.not_at_end() {

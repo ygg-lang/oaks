@@ -11,12 +11,14 @@ type State<'s, S> = LexerState<'s, S, PascalLanguage>;
 static PASCAL_WHITESPACE: LazyLock<WhitespaceConfig> = LazyLock::new(|| WhitespaceConfig { unicode_whitespace: true });
 static PASCAL_COMMENT: LazyLock<CommentConfig> = LazyLock::new(|| CommentConfig { line_marker: "//", block_start: "{", block_end: "}", nested_blocks: false });
 
-#[derive(Clone, Default)]
-pub struct PascalLexer;
+#[derive(Clone, Debug)]
+pub struct PascalLexer<'config> {
+    _config: &'config PascalLanguage,
+}
 
-impl PascalLexer {
-    pub fn new(_config: &PascalLanguage) -> Self {
-        Self
+impl<'config> PascalLexer<'config> {
+    pub fn new(config: &'config PascalLanguage) -> Self {
+        Self { _config: config }
     }
 
     fn skip_whitespace<'s, S: Source + ?Sized>(&self, state: &mut State<'s, S>) -> bool {
@@ -308,7 +310,7 @@ impl PascalLexer {
     }
 }
 
-impl Lexer<PascalLanguage> for PascalLexer {
+impl Lexer<PascalLanguage> for PascalLexer<'_> {
     fn lex<'a, S: Source + ?Sized>(&self, source: &'a S, _edits: &[oak_core::source::TextEdit], cache: &'a mut impl LexerCache<PascalLanguage>) -> LexOutput<PascalLanguage> {
         let mut state = State::new(source);
         let result = self.run(&mut state);
@@ -319,7 +321,7 @@ impl Lexer<PascalLanguage> for PascalLexer {
     }
 }
 
-impl PascalLexer {
+impl PascalLexer<'_> {
     fn run<'s, S: Source + ?Sized>(&self, state: &mut State<'s, S>) -> Result<(), OakError> {
         let safe_point = state.get_position();
         while state.not_at_end() {

@@ -14,13 +14,8 @@ pub mod parser;
 
 mod formatter;
 pub mod lsp;
-#[cfg(feature = "mcp")]
 pub mod mcp;
 
 pub use crate::{builder::SwiftBuilder, formatter::SwiftFormatter, highlighter::SwiftHighlighter, kind::SwiftSyntaxKind, language::SwiftLanguage, lexer::SwiftLexer, lsp::SwiftLanguageService, parser::SwiftParser};
 
-#[cfg(feature = "mcp")]
 pub use crate::mcp::serve_swift_mcp;
-
-#[cfg(all(feature = "mcp", feature = "axum"))]
-pub use crate::mcp::serve_swift_mcp_axum;

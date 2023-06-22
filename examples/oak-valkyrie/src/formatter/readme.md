@@ -18,8 +18,7 @@ The main formatter struct that handles the formatting operations:
 
 - **format()** - Formats complete Valkyrie source code
 - **format_namespace()** - Formats namespace declarations
-- **format_function()** - Formats function declarations
-- **format_micro()** - Formats micro definitions
+- **format_micro()** - Formats micro function declarations
 - **indent_lines()** - Utility for proper indentation
 
 ## Supported Valkyrie Features
@@ -30,16 +29,12 @@ The formatter supports formatting for:
    - Proper indentation of namespace bodies
    - Consistent brace placement
 
-2. **Function Declarations**
+2. **Micro Function Declarations**
    - Parameter list formatting
    - Function body indentation
    - Return type formatting
 
-3. **Micro Definitions**
-   - Expression formatting
-   - Proper spacing around operators
-
-4. **Statements and Expressions**
+3. **Statements and Expressions**
    - Let statements
    - Expression statements
    - Block expressions
@@ -50,7 +45,7 @@ The formatter supports formatting for:
 use oak_valkyrie::formatter::ValkyrieFormatter;
 
 let formatter = ValkyrieFormatter::new();
-let source = "namespace Test{fn main(){let x=42;}}";
+let source = "namespace Test{micro main(){let x=42;}}";
 let formatted = formatter.format(source);
 ```
 

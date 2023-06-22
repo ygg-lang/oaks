@@ -57,7 +57,7 @@ impl<'config> IniParser<'config> {
                 state.bump();
             }
             else {
-                let err = oak_core::errors::OakError::expected_token("identifier or string", state.tokens.index(), state.source_url());
+                let err = oak_core::errors::OakError::expected_token("identifier or string", state.tokens.index(), state.source_id());
                 state.errors.push(err);
                 return Err(state.errors.last().unwrap().clone());
             }
@@ -78,7 +78,7 @@ impl<'config> IniParser<'config> {
     fn parse_value<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> Result<(), OakError> {
         let checkpoint = state.checkpoint();
         let kind = state.peek_kind().ok_or_else(|| {
-            let err = oak_core::errors::OakError::expected_token("value", state.tokens.index(), state.source_url());
+            let err = oak_core::errors::OakError::expected_token("value", state.tokens.index(), state.source_id());
             state.errors.push(err);
             state.errors.last().unwrap().clone()
         })?;
@@ -94,7 +94,7 @@ impl<'config> IniParser<'config> {
                 self.parse_inline_table(state)?;
             }
             _ => {
-                let err = oak_core::errors::OakError::expected_token("value", state.tokens.index(), state.source_url());
+                let err = oak_core::errors::OakError::expected_token("value", state.tokens.index(), state.source_id());
                 state.errors.push(err);
                 return Err(state.errors.last().unwrap().clone());
             }

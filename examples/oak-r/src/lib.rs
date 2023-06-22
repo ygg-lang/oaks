@@ -14,13 +14,8 @@ pub mod parser;
 mod formatter;
 pub mod highlighter;
 pub mod lsp;
-#[cfg(feature = "mcp")]
 pub mod mcp;
 
 pub use crate::{builder::RBuilder, formatter::RFormatter, highlighter::RHighlighter, kind::RSyntaxKind, language::RLanguage, lexer::RLexer, lsp::RLanguageService, parser::RParser};
 
-#[cfg(feature = "mcp")]
 pub use crate::mcp::serve_r_mcp;
-
-#[cfg(all(feature = "mcp", feature = "axum"))]
-pub use crate::mcp::serve_r_mcp_axum;

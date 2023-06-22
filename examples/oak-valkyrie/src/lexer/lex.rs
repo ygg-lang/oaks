@@ -14,14 +14,9 @@ static VK_COMMENT: LazyLock<CommentConfig> = LazyLock::new(|| CommentConfig { li
 static VK_STRING: LazyLock<StringConfig> = LazyLock::new(|| StringConfig { quotes: &['"'], escape: Some('\\') });
 static VK_CHAR: LazyLock<StringConfig> = LazyLock::new(|| StringConfig { quotes: &['\''], escape: Some('\\') });
 
-impl<'config> crate::lexer::ValkyrieLexer<'config> {
-    /// Creates a new Valkyrie lexer.
-    pub fn new(config: &'config ValkyrieLanguage) -> Self {
-        Self { _config: config }
-    }
-
+impl crate::lexer::ValkyrieLexer<'_> {
     /// Runs the lexer on the given state.
-    pub(crate) fn run<'s, S: Source + ?Sized>(&self, state: &mut State<'s, S>) -> Result<(), OakError> {
+    pub(crate) fn run<S: Source + ?Sized>(&self, state: &mut State<'_, S>) -> Result<(), OakError> {
         while state.not_at_end() {
             let safe_point = state.get_position();
 
@@ -67,23 +62,22 @@ impl<'config> crate::lexer::ValkyrieLexer<'config> {
             state.advance_if_dead_lock(safe_point);
         }
 
-        state.add_eof();
         Ok(())
     }
 
-    fn skip_whitespace<'s, S: Source + ?Sized>(&self, state: &mut State<'s, S>) -> bool {
+    fn skip_whitespace<S: Source + ?Sized>(&self, state: &mut State<'_, S>) -> bool {
         VK_WHITESPACE.scan(state, ValkyrieSyntaxKind::Whitespace)
     }
 
-    fn skip_comment<'s, S: Source + ?Sized>(&self, state: &mut State<'s, S>) -> bool {
+    fn skip_comment<S: Source + ?Sized>(&self, state: &mut State<'_, S>) -> bool {
         VK_COMMENT.scan(state, ValkyrieSyntaxKind::LineComment, ValkyrieSyntaxKind::BlockComment)
     }
 
-    fn lex_string_literal<'s, S: Source + ?Sized>(&self, state: &mut State<'s, S>) -> bool {
+    fn lex_string_literal<S: Source + ?Sized>(&self, state: &mut State<'_, S>) -> bool {
         VK_STRING.scan(state, ValkyrieSyntaxKind::StringLiteral)
     }
 
-    fn lex_char_literal<'s, S: Source + ?Sized>(&self, state: &mut State<'s, S>) -> bool {
+    fn lex_char_literal<S: Source + ?Sized>(&self, state: &mut State<'_, S>) -> bool {
         VK_CHAR.scan(state, ValkyrieSyntaxKind::CharLiteral)
     }
 
@@ -137,7 +131,7 @@ impl<'config> crate::lexer::ValkyrieLexer<'config> {
                     "micro" => ValkyrieSyntaxKind::Keyword(ValkyrieKeywords::Micro),
                     "mezzo" => ValkyrieSyntaxKind::Keyword(ValkyrieKeywords::Mezzo),
                     "macro" => ValkyrieSyntaxKind::Keyword(ValkyrieKeywords::Macro),
-                    "fn" => ValkyrieSyntaxKind::Keyword(ValkyrieKeywords::Fn),
+                    "widget" => ValkyrieSyntaxKind::Keyword(ValkyrieKeywords::Widget),
                     "let" => ValkyrieSyntaxKind::Keyword(ValkyrieKeywords::Let),
                     "if" => ValkyrieSyntaxKind::Keyword(ValkyrieKeywords::If),
                     "else" => ValkyrieSyntaxKind::Keyword(ValkyrieKeywords::Else),
@@ -154,6 +148,7 @@ impl<'config> crate::lexer::ValkyrieLexer<'config> {
                     "true" => ValkyrieSyntaxKind::Keyword(ValkyrieKeywords::True),
                     "false" => ValkyrieSyntaxKind::Keyword(ValkyrieKeywords::False),
                     "null" => ValkyrieSyntaxKind::Keyword(ValkyrieKeywords::Null),
+                    "mut" => ValkyrieSyntaxKind::Keyword(ValkyrieKeywords::Mut),
                     _ => ValkyrieSyntaxKind::Identifier,
                 };
 
@@ -235,6 +230,10 @@ impl<'config> crate::lexer::ValkyrieLexer<'config> {
                     if let Some('=') = state.current() {
                         state.advance(1);
                         ValkyrieSyntaxKind::EqEq
+                    }
+                    else if let Some('>') = state.current() {
+                        state.advance(1);
+                        ValkyrieSyntaxKind::Arrow
                     }
                     else {
                         ValkyrieSyntaxKind::Eq

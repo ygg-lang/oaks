@@ -1,0 +1,607 @@
+{
+    "success": true,
+    "count": 100,
+    "tokens": [
+        {
+            "kind": "Identifier",
+            "text": "Object",
+            "start": 320,
+            "end": 326
+        },
+        {
+            "kind": "Identifier",
+            "text": "subclass",
+            "start": 327,
+            "end": 335
+        },
+        {
+            "kind": "Error",
+            "text": ":",
+            "start": 335,
+            "end": 336
+        },
+        {
+            "kind": "Error",
+            "text": "#",
+            "start": 337,
+            "end": 338
+        },
+        {
+            "kind": "Identifier",
+            "text": "BasicLiterals",
+            "start": 338,
+            "end": 351
+        },
+        {
+            "kind": "Identifier",
+            "text": "instanceVariableNames",
+            "start": 357,
+            "end": 378
+        },
+        {
+            "kind": "Error",
+            "text": ":",
+            "start": 378,
+            "end": 379
+        },
+        {
+            "kind": "Error",
+            "text": "'",
+            "start": 380,
+            "end": 381
+        },
+        {
+            "kind": "Error",
+            "text": "'",
+            "start": 381,
+            "end": 382
+        },
+        {
+            "kind": "Identifier",
+            "text": "classVariableNames",
+            "start": 388,
+            "end": 406
+        },
+        {
+            "kind": "Error",
+            "text": ":",
+            "start": 406,
+            "end": 407
+        },
+        {
+            "kind": "Error",
+            "text": "'",
+            "start": 408,
+            "end": 409
+        },
+        {
+            "kind": "Error",
+            "text": "'",
+            "start": 409,
+            "end": 410
+        },
+        {
+            "kind": "Identifier",
+            "text": "poolDictionaries",
+            "start": 416,
+            "end": 432
+        },
+        {
+            "kind": "Error",
+            "text": ":",
+            "start": 432,
+            "end": 433
+        },
+        {
+            "kind": "Error",
+            "text": "'",
+            "start": 434,
+            "end": 435
+        },
+        {
+            "kind": "Error",
+            "text": "'",
+            "start": 435,
+            "end": 436
+        },
+        {
+            "kind": "Identifier",
+            "text": "category",
+            "start": 442,
+            "end": 450
+        },
+        {
+            "kind": "Error",
+            "text": ":",
+            "start": 450,
+            "end": 451
+        },
+        {
+            "kind": "Error",
+            "text": "'",
+            "start": 452,
+            "end": 453
+        },
+        {
+            "kind": "Identifier",
+            "text": "Examples",
+            "start": 453,
+            "end": 461
+        },
+        {
+            "kind": "Minus",
+            "text": "-",
+            "start": 461,
+            "end": 462
+        },
+        {
+            "kind": "Identifier",
+            "text": "Basic",
+            "start": 462,
+            "end": 467
+        },
+        {
+            "kind": "Error",
+            "text": "'",
+            "start": 467,
+            "end": 468
+        },
+        {
+            "kind": "Error",
+            "text": "!",
+            "start": 468,
+            "end": 469
+        },
+        {
+            "kind": "Error",
+            "text": "!",
+            "start": 473,
+            "end": 474
+        },
+        {
+            "kind": "Identifier",
+            "text": "BasicLiterals",
+            "start": 474,
+            "end": 487
+        },
+        {
+            "kind": "Identifier",
+            "text": "methodsFor",
+            "start": 488,
+            "end": 498
+        },
+        {
+            "kind": "Error",
+            "text": ":",
+            "start": 498,
+            "end": 499
+        },
+        {
+            "kind": "Error",
+            "text": "'",
+            "start": 500,
+            "end": 501
+        },
+        {
+            "kind": "Identifier",
+            "text": "literals",
+            "start": 501,
+            "end": 509
+        },
+        {
+            "kind": "Error",
+            "text": "'",
+            "start": 509,
+            "end": 510
+        },
+        {
+            "kind": "Error",
+            "text": "!",
+            "start": 510,
+            "end": 511
+        },
+        {
+            "kind": "Identifier",
+            "text": "numbers",
+            "start": 515,
+            "end": 522
+        },
+        {
+            "kind": "Error",
+            "text": "|",
+            "start": 552,
+            "end": 553
+        },
+        {
+            "kind": "Identifier",
+            "text": "integers",
+            "start": 554,
+            "end": 562
+        },
+        {
+            "kind": "Error",
+            "text": "|",
+            "start": 563,
+            "end": 564
+        },
+        {
+            "kind": "Identifier",
+            "text": "integers",
+            "start": 570,
+            "end": 578
+        },
+        {
+            "kind": "Error",
+            "text": ":",
+            "start": 579,
+            "end": 580
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 580,
+            "end": 581
+        },
+        {
+            "kind": "Identifier",
+            "text": "Array",
+            "start": 582,
+            "end": 587
+        },
+        {
+            "kind": "Identifier",
+            "text": "with",
+            "start": 588,
+            "end": 592
+        },
+        {
+            "kind": "Error",
+            "text": ":",
+            "start": 592,
+            "end": 593
+        },
+        {
+            "kind": "Number",
+            "text": "0",
+            "start": 594,
+            "end": 595
+        },
+        {
+            "kind": "Identifier",
+            "text": "with",
+            "start": 596,
+            "end": 600
+        },
+        {
+            "kind": "Error",
+            "text": ":",
+            "start": 600,
+            "end": 601
+        },
+        {
+            "kind": "Number",
+            "text": "42",
+            "start": 602,
+            "end": 604
+        },
+        {
+            "kind": "Identifier",
+            "text": "with",
+            "start": 605,
+            "end": 609
+        },
+        {
+            "kind": "Error",
+            "text": ":",
+            "start": 609,
+            "end": 610
+        },
+        {
+            "kind": "Minus",
+            "text": "-",
+            "start": 611,
+            "end": 612
+        },
+        {
+            "kind": "Number",
+            "text": "17",
+            "start": 612,
+            "end": 614
+        },
+        {
+            "kind": "Identifier",
+            "text": "with",
+            "start": 615,
+            "end": 619
+        },
+        {
+            "kind": "Error",
+            "text": ":",
+            "start": 619,
+            "end": 620
+        },
+        {
+            "kind": "Number",
+            "text": "1000000",
+            "start": 621,
+            "end": 628
+        },
+        {
+            "kind": "Dot",
+            "text": ".",
+            "start": 628,
+            "end": 629
+        },
+        {
+            "kind": "Error",
+            "text": "|",
+            "start": 663,
+            "end": 664
+        },
+        {
+            "kind": "Identifier",
+            "text": "radixNumbers",
+            "start": 665,
+            "end": 677
+        },
+        {
+            "kind": "Error",
+            "text": "|",
+            "start": 678,
+            "end": 679
+        },
+        {
+            "kind": "Identifier",
+            "text": "radixNumbers",
+            "start": 685,
+            "end": 697
+        },
+        {
+            "kind": "Error",
+            "text": ":",
+            "start": 698,
+            "end": 699
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 699,
+            "end": 700
+        },
+        {
+            "kind": "Identifier",
+            "text": "Array",
+            "start": 701,
+            "end": 706
+        },
+        {
+            "kind": "Identifier",
+            "text": "with",
+            "start": 717,
+            "end": 721
+        },
+        {
+            "kind": "Error",
+            "text": ":",
+            "start": 721,
+            "end": 722
+        },
+        {
+            "kind": "Number",
+            "text": "16",
+            "start": 723,
+            "end": 725
+        },
+        {
+            "kind": "Identifier",
+            "text": "r1A",
+            "start": 725,
+            "end": 728
+        },
+        {
+            "kind": "Identifier",
+            "text": "with",
+            "start": 755,
+            "end": 759
+        },
+        {
+            "kind": "Error",
+            "text": ":",
+            "start": 759,
+            "end": 760
+        },
+        {
+            "kind": "Number",
+            "text": "8",
+            "start": 761,
+            "end": 762
+        },
+        {
+            "kind": "Identifier",
+            "text": "r755",
+            "start": 762,
+            "end": 766
+        },
+        {
+            "kind": "Identifier",
+            "text": "with",
+            "start": 787,
+            "end": 791
+        },
+        {
+            "kind": "Error",
+            "text": ":",
+            "start": 791,
+            "end": 792
+        },
+        {
+            "kind": "Number",
+            "text": "2",
+            "start": 793,
+            "end": 794
+        },
+        {
+            "kind": "Identifier",
+            "text": "r1010",
+            "start": 794,
+            "end": 799
+        },
+        {
+            "kind": "Identifier",
+            "text": "with",
+            "start": 820,
+            "end": 824
+        },
+        {
+            "kind": "Error",
+            "text": ":",
+            "start": 824,
+            "end": 825
+        },
+        {
+            "kind": "Number",
+            "text": "36",
+            "start": 826,
+            "end": 828
+        },
+        {
+            "kind": "Identifier",
+            "text": "rZZ",
+            "start": 828,
+            "end": 831
+        },
+        {
+            "kind": "Dot",
+            "text": ".",
+            "start": 831,
+            "end": 832
+        },
+        {
+            "kind": "Error",
+            "text": "|",
+            "start": 878,
+            "end": 879
+        },
+        {
+            "kind": "Identifier",
+            "text": "floats",
+            "start": 880,
+            "end": 886
+        },
+        {
+            "kind": "Error",
+            "text": "|",
+            "start": 887,
+            "end": 888
+        },
+        {
+            "kind": "Identifier",
+            "text": "floats",
+            "start": 894,
+            "end": 900
+        },
+        {
+            "kind": "Error",
+            "text": ":",
+            "start": 901,
+            "end": 902
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 902,
+            "end": 903
+        },
+        {
+            "kind": "Identifier",
+            "text": "Array",
+            "start": 904,
+            "end": 909
+        },
+        {
+            "kind": "Identifier",
+            "text": "with",
+            "start": 920,
+            "end": 924
+        },
+        {
+            "kind": "Error",
+            "text": ":",
+            "start": 924,
+            "end": 925
+        },
+        {
+            "kind": "Number",
+            "text": "3",
+            "start": 926,
+            "end": 927
+        },
+        {
+            "kind": "Dot",
+            "text": ".",
+            "start": 927,
+            "end": 928
+        },
+        {
+            "kind": "Number",
+            "text": "14159",
+            "start": 928,
+            "end": 933
+        },
+        {
+            "kind": "Identifier",
+            "text": "with",
+            "start": 943,
+            "end": 947
+        },
+        {
+            "kind": "Error",
+            "text": ":",
+            "start": 947,
+            "end": 948
+        },
+        {
+            "kind": "Minus",
+            "text": "-",
+            "start": 949,
+            "end": 950
+        },
+        {
+            "kind": "Number",
+            "text": "2",
+            "start": 950,
+            "end": 951
+        },
+        {
+            "kind": "Dot",
+            "text": ".",
+            "start": 951,
+            "end": 952
+        },
+        {
+            "kind": "Number",
+            "text": "718",
+            "start": 952,
+            "end": 955
+        },
+        {
+            "kind": "Identifier",
+            "text": "with",
+            "start": 965,
+            "end": 969
+        },
+        {
+            "kind": "Error",
+            "text": ":",
+            "start": 969,
+            "end": 970
+        },
+        {
+            "kind": "Number",
+            "text": "1",
+            "start": 971,
+            "end": 972
+        }
+    ],
+    "errors": []
+}

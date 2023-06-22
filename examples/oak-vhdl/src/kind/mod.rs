@@ -1,8 +1,9 @@
 #![doc = include_str!("../../readme.md")]
 
 use oak_core::{ElementType, TokenType, UniversalElementRole, UniversalTokenRole};
+use serde::{Deserialize, Serialize};
 
-#[derive(Copy, Clone, Debug, PartialEq, Eq, Hash, serde::Serialize)]
+#[derive(Copy, Clone, Debug, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub enum VhdlSyntaxKind {
     // 特殊
     Root,

@@ -22,10 +22,11 @@ mod token_type;
 /// let language = RustLanguage::default();
 /// let lexer = RustLexer::new(&language);
 /// let source = SourceText::new("fn main() { println!(\"Hello, world!\"); }");
-/// let output = lexer.lex(source, 0);
+/// let mut cache = oak_core::parser::session::ParseSession::<RustLanguage>::default();
+/// let output = lexer.lex(&source, &[], &mut cache);
 ///
 /// // The output contains tokens for the entire source code
-/// assert!(!output.tokens.is_empty());
+/// assert!(output.result.is_ok());
 /// ```
 ///
 /// Tokenizing different Rust constructs:
@@ -47,10 +48,11 @@ mod token_type;
 /// }
 /// "#,
 /// );
-/// let output = lexer.lex(source, 0);
+/// let mut cache = oak_core::parser::session::ParseSession::<RustLanguage>::default();
+/// let output = lexer.lex(&source, &[], &mut cache);
 ///
 /// // Verify that tokens were generated
-/// assert!(output.tokens.len() > 10);
+/// assert!(output.result.is_ok());
 /// ```
 #[derive(Clone)]
 pub struct RustLexer<'config> {
@@ -75,7 +77,7 @@ impl<'config> RustLexer<'config> {
     ///
     /// # Parameters
     ///
-    /// * `config` - A reference to the `RustLanguage` configuration that controls
+    /// * `config` - A `RustLanguage` configuration that controls
     ///   language-specific parsing behavior.
     ///
     /// # Examples

@@ -5,14 +5,14 @@ mod keywords;
 mod lex;
 
 /// The lexer for the Valkyrie programming language.
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct ValkyrieLexer<'config> {
     _config: &'config ValkyrieLanguage,
 }
 
 impl<'config> Lexer<ValkyrieLanguage> for ValkyrieLexer<'config> {
     fn lex<'a, S: Source + ?Sized>(&self, source: &S, _edits: &[oak_core::TextEdit], cache: &'a mut impl LexerCache<ValkyrieLanguage>) -> LexOutput<ValkyrieLanguage> {
-        let mut state = LexerState::new(source);
+        let mut state = LexerState::new_with_cache(source, 0, cache);
         let result = self.run(&mut state);
         if result.is_ok() {
             state.add_eof();
@@ -22,6 +22,11 @@ impl<'config> Lexer<ValkyrieLanguage> for ValkyrieLexer<'config> {
 }
 
 impl<'config> ValkyrieLexer<'config> {
+    /// Create a new lexer with the given configuration.
+    pub fn new(config: &'config ValkyrieLanguage) -> Self {
+        Self { _config: config }
+    }
+
     /// Tokenize the given source code.
     pub fn tokenize<S: Source + ?Sized>(&self, source: &S) -> impl Iterator<Item = oak_core::lexer::Token<crate::kind::ValkyrieSyntaxKind>> {
         let mut cache = oak_core::parser::session::ParseSession::<ValkyrieLanguage>::default();

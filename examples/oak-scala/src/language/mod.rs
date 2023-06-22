@@ -1,8 +1,9 @@
 use crate::ast::ScalaRoot;
 use oak_core::{Language, LanguageCategory};
+use serde::{Deserialize, Serialize};
 
 /// Scala 语言实现
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub struct ScalaLanguage {
     // Scala 语言特有的配置，目前为空
 }
@@ -16,7 +17,7 @@ impl ScalaLanguage {
 
 impl Default for ScalaLanguage {
     fn default() -> Self {
-        Self::new()
+        Self {}
     }
 }
 

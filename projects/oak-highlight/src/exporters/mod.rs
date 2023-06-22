@@ -5,6 +5,24 @@ use std::{
     vec::Vec,
 };
 
+fn json_escape(s: &str) -> String {
+    let mut escaped = String::with_capacity(s.len());
+    for c in s.chars() {
+        match c {
+            '"' => escaped.push_str("\\\""),
+            '\\' => escaped.push_str("\\\\"),
+            '\x08' => escaped.push_str("\\b"),
+            '\x0c' => escaped.push_str("\\f"),
+            '\n' => escaped.push_str("\\n"),
+            '\r' => escaped.push_str("\\r"),
+            '\t' => escaped.push_str("\\t"),
+            c if c.is_control() => escaped.push_str(&format!("\\u{:04x}", c as u32)),
+            c => escaped.push(c),
+        }
+    }
+    escaped
+}
+
 /// Supported export formats for highlighted code.
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub enum ExportFormat {
@@ -149,7 +167,42 @@ pub struct JsonExporter {
 
 impl Exporter for JsonExporter {
     fn export(&self, result: &HighlightResult<'_>) -> String {
-        if self.pretty { serde_json::to_string_pretty(result).unwrap_or_default() } else { serde_json::to_string(result).unwrap_or_default() }
+        let mut json = String::new();
+        json.push_str("{\"segments\":[");
+
+        for (i, segment) in result.segments.iter().enumerate() {
+            if i > 0 {
+                json.push(',');
+            }
+            json.push_str("{\"span\":{\"start\":");
+            json.push_str(&segment.span.start.to_string());
+            json.push_str(",\"end\":");
+            json.push_str(&segment.span.end.to_string());
+            json.push_str("},\"style\":{");
+
+            let mut style_parts = Vec::new();
+            style_parts.push(format!("\"bold\":{}", segment.style.bold));
+            style_parts.push(format!("\"italic\":{}", segment.style.italic));
+            style_parts.push(format!("\"underline\":{}", segment.style.underline));
+
+            if let Some(color) = &segment.style.color {
+                style_parts.push(format!("\"color\":\"{}\"", json_escape(color)));
+            }
+            if let Some(bg) = &segment.style.background_color {
+                style_parts.push(format!("\"background_color\":\"{}\"", json_escape(bg)));
+            }
+
+            json.push_str(&style_parts.join(","));
+            json.push_str("},\"text\":\"");
+            json.push_str(&json_escape(&segment.text));
+            json.push_str("\"}");
+        }
+
+        json.push_str("],\"source\":\"");
+        json.push_str(&json_escape(&result.source));
+        json.push_str("\"}");
+
+        json
     }
 }
 

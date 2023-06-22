@@ -18,7 +18,7 @@ impl<'config> HandlebarsParser<'config> {
         let token = match state.current() {
             Some(t) => t,
             None => {
-                let err = oak_core::errors::OakError::unexpected_eof(state.tokens.index(), state.source_url());
+                let err = oak_core::errors::OakError::unexpected_eof(state.tokens.index(), state.source_id());
                 state.errors.push(err.clone());
                 return Err(err);
             }
@@ -283,7 +283,7 @@ impl<'config> HandlebarsParser<'config> {
         }
         else {
             let token = state.current();
-            let err = oak_core::errors::OakError::unexpected_token(format!("{:?}", token.map(|t| t.kind)), state.tokens.index(), state.source_url());
+            let err = oak_core::errors::OakError::unexpected_token(format!("{:?}", token.map(|t| t.kind)), state.tokens.index(), state.source_id());
             state.errors.push(err.clone());
             return Err(err);
         }

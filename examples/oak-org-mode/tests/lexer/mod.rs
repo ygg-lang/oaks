@@ -1,5 +1,5 @@
-use oak_core::helpers::LexerTester;
 use oak_org_mode::{language::OrgModeLanguage, lexer::OrgModeLexer};
+use oak_testing::lexing::LexerTester;
 use std::{path::Path, time::Duration};
 
 #[test]

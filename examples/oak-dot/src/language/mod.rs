@@ -1,12 +1,19 @@
 use oak_core::{Language, LanguageCategory};
+use serde::{Deserialize, Serialize};
 
 /// DOT 语言配置（Graphviz）
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub struct DotLanguage {
     /// 是否启用严格模式
     pub strict_mode: bool,
     /// 是否允许有向图
     pub allow_digraph: bool,
+}
+
+impl DotLanguage {
+    pub fn new() -> Self {
+        Self::default()
+    }
 }
 
 impl Default for DotLanguage {

@@ -14,13 +14,8 @@ pub mod parser;
 mod formatter;
 pub mod highlighter;
 pub mod lsp;
-#[cfg(feature = "mcp")]
 pub mod mcp;
 
 pub use crate::{ast::ValaRoot, builder::ValaBuilder, formatter::ValaFormatter, highlighter::ValaHighlighter, language::ValaLanguage, lexer::ValaLexer, lsp::ValaLanguageService, parser::ValaParser};
 
-#[cfg(feature = "mcp")]
 pub use crate::mcp::serve_vala_mcp;
-
-#[cfg(all(feature = "mcp", feature = "axum"))]
-pub use crate::mcp::serve_vala_mcp_axum;

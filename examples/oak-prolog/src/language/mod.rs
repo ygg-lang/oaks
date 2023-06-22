@@ -1,7 +1,14 @@
 use oak_core::{Language, LanguageCategory};
+use serde::{Deserialize, Serialize};
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Default)]
-pub struct PrologLanguage;
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Default, Serialize, Deserialize)]
+pub struct PrologLanguage {}
+
+impl PrologLanguage {
+    pub fn new() -> Self {
+        Self {}
+    }
+}
 
 impl Language for PrologLanguage {
     const NAME: &'static str = "prolog";

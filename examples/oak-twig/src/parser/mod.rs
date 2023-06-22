@@ -20,7 +20,7 @@ impl<'config> TwigParser<'config> {
 
 impl<'config> Parser<TwigLanguage> for TwigParser<'config> {
     fn parse<'a, S: Source + ?Sized>(&self, text: &'a S, edits: &[TextEdit], cache: &'a mut impl ParseCache<TwigLanguage>) -> ParseOutput<'a, TwigLanguage> {
-        let lexer = TwigLexer::new(self.config);
+        let lexer = TwigLexer::new(&self.config);
         parse_with_lexer(&lexer, text, edits, cache, |state| self.parse_root_internal(state))
     }
 }

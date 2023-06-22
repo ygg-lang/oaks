@@ -19,7 +19,7 @@ fn test_valkyrie_integration() {
     let _parser = ValkyrieParser::new(&language);
 
     // Test basic integration
-    let source = SourceText::new("namespace Test { fn main() { let x = 42; } }");
+    let source = SourceText::new("namespace Test { micro main() { let x = 42; } }");
 
     // Test lexer
     let tokens: Vec<_> = lexer.tokenize(&source).collect();

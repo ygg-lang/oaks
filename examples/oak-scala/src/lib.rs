@@ -14,14 +14,9 @@ pub mod syntax;
 
 mod formatter;
 pub mod lsp;
-#[cfg(feature = "mcp")]
 pub mod mcp;
 
 // 重新导出主要类型
 pub use crate::{builder::ScalaBuilder, formatter::ScalaFormatter, highlighter::ScalaHighlighter, kind::ScalaSyntaxKind, language::ScalaLanguage, lexer::ScalaLexer, lsp::ScalaLanguageService, parser::ScalaParser};
 
-#[cfg(feature = "mcp")]
 pub use crate::mcp::serve_scala_mcp;
-
-#[cfg(all(feature = "mcp", feature = "axum"))]
-pub use crate::mcp::serve_scala_mcp_axum;

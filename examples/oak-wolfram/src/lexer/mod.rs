@@ -12,10 +12,12 @@ static WL_WHITESPACE: LazyLock<WhitespaceConfig> = LazyLock::new(|| WhitespaceCo
 static WL_COMMENT: LazyLock<CommentConfig> = LazyLock::new(|| CommentConfig { line_marker: "", block_start: "(*", block_end: "*)", nested_blocks: true });
 static WL_STRING: LazyLock<StringConfig> = LazyLock::new(|| StringConfig { quotes: &['"'], escape: Some('\\') });
 
-#[derive(Clone, Debug, Default)]
-pub struct WolframLexer;
+#[derive(Clone, Debug)]
+pub struct WolframLexer<'config> {
+    _config: &'config WolframLanguage,
+}
 
-impl Lexer<WolframLanguage> for WolframLexer {
+impl<'config> Lexer<WolframLanguage> for WolframLexer<'config> {
     fn lex<'a, S: Source + ?Sized>(&self, source: &S, _edits: &[TextEdit], cache: &'a mut impl LexerCache<WolframLanguage>) -> LexOutput<WolframLanguage> {
         let mut state = LexerState::new(source);
         let result = self.run(&mut state);
@@ -26,9 +28,9 @@ impl Lexer<WolframLanguage> for WolframLexer {
     }
 }
 
-impl WolframLexer {
-    pub fn new(_config: &WolframLanguage) -> Self {
-        Self
+impl<'config> WolframLexer<'config> {
+    pub fn new(config: &'config WolframLanguage) -> Self {
+        Self { _config: config }
     }
 
     fn run<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> Result<(), OakError> {

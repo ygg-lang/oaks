@@ -43,14 +43,56 @@ pub struct ValkyrieRoot {
 /// such as function definitions and statements.
 #[derive(Debug, PartialEq, Clone, Serialize, Deserialize)]
 pub enum Item {
-    /// A function definition
-    Function(Function),
     /// A standalone statement
     Statement(Statement),
     /// A namespace definition
     Namespace(Namespace),
+    /// A class definition
+    Class(Class),
+    /// A widget definition
+    Widget(Widget),
+    /// A type function definition
+    TypeFunction(TypeFunction),
     /// A micro definition
     Micro(MicroDefinition),
+}
+
+/// Represents a type function definition (mezzo) in Valkyrie source code.
+#[derive(Debug, PartialEq, Clone, Serialize, Deserialize)]
+pub struct TypeFunction {
+    /// The name identifier of the type function
+    pub name: Identifier,
+    /// Parameters of the type function
+    pub params: Vec<Param>,
+    /// The body of the type function
+    pub body: Block,
+    /// Source code span where this type function appears
+    #[serde(with = "oak_core::serde_range")]
+    pub span: Range<usize>,
+}
+
+/// Represents a class definition in Valkyrie source code.
+#[derive(Debug, PartialEq, Clone, Serialize, Deserialize)]
+pub struct Class {
+    /// The name identifier of the class
+    pub name: Identifier,
+    /// List of items within the class
+    pub items: Vec<Item>,
+    /// Source code span where this class appears
+    #[serde(with = "oak_core::serde_range")]
+    pub span: Range<usize>,
+}
+
+/// Represents a widget definition in Valkyrie source code.
+#[derive(Debug, PartialEq, Clone, Serialize, Deserialize)]
+pub struct Widget {
+    /// The name identifier of the widget
+    pub name: Identifier,
+    /// List of items within the widget
+    pub items: Vec<Item>,
+    /// Source code span where this widget appears
+    #[serde(with = "oak_core::serde_range")]
+    pub span: Range<usize>,
 }
 
 /// Represents a namespace definition in Valkyrie source code.
@@ -74,28 +116,13 @@ pub struct Namespace {
 pub struct MicroDefinition {
     /// The name identifier of the micro definition
     pub name: Identifier,
-    /// List of items within the micro definition
-    pub items: Vec<Item>,
-    /// Source code span where this micro definition appears
-    #[serde(with = "oak_core::serde_range")]
-    pub span: Range<usize>,
-}
-
-/// Represents a function definition in Valkyrie source code.
-///
-/// Functions are fundamental building blocks in Valkyrie that encapsulate reusable logic.
-/// They can have parameters, return types, and contain executable code blocks.
-#[derive(Debug, PartialEq, Clone, Serialize, Deserialize)]
-pub struct Function {
-    /// The name identifier of the function
-    pub name: Identifier,
     /// List of function parameters
     pub params: Vec<Param>,
     /// The optional return type of the function
     pub return_type: Option<String>,
     /// The function body containing executable statements
     pub body: Block,
-    /// Source code span where this function appears
+    /// Source code span where this micro definition appears
     #[serde(with = "oak_core::serde_range")]
     pub span: Range<usize>,
 }
@@ -137,6 +164,8 @@ pub enum Statement {
     ///
     /// Contains the variable name, initialization expression, and source location
     Let {
+        /// Whether the variable is mutable
+        is_mutable: bool,
         /// The variable name identifier
         name: Identifier,
         /// The initialization expression
@@ -261,4 +290,146 @@ pub enum Expr {
     },
     /// A block expression that can be used as a value
     Block(Block),
+    /// An anonymous class definition
+    AnonymousClass {
+        /// List of parent types/traits
+        parents: Vec<String>,
+        /// List of fields and methods
+        items: Vec<Item>,
+        /// Source code span where this anonymous class appears
+        #[serde(with = "oak_core::serde_range")]
+        span: Range<usize>,
+    },
+    /// An if-else expression
+    If {
+        /// The condition expression
+        condition: Box<Expr>,
+        /// The then-branch block
+        then_branch: Block,
+        /// The optional else-branch block
+        else_branch: Option<Block>,
+        /// Source code span where this if expression appears
+        #[serde(with = "oak_core::serde_range")]
+        span: Range<usize>,
+    },
+    /// A match expression
+    Match {
+        /// The expression being matched
+        scrutinee: Box<Expr>,
+        /// List of match arms
+        arms: Vec<MatchArm>,
+        /// Source code span where this match expression appears
+        #[serde(with = "oak_core::serde_range")]
+        span: Range<usize>,
+    },
+    /// A loop expression
+    Loop {
+        /// Optional loop label
+        label: Option<String>,
+        /// The loop body block
+        body: Block,
+        /// Source code span where this loop expression appears
+        #[serde(with = "oak_core::serde_range")]
+        span: Range<usize>,
+    },
+    /// A return expression
+    Return {
+        /// The optional return value
+        expr: Option<Box<Expr>>,
+        /// Source code span where this return expression appears
+        #[serde(with = "oak_core::serde_range")]
+        span: Range<usize>,
+    },
+    /// A break expression
+    Break {
+        /// Optional break label
+        label: Option<String>,
+        /// Optional break value
+        expr: Option<Box<Expr>>,
+        /// Source code span where this break expression appears
+        #[serde(with = "oak_core::serde_range")]
+        span: Range<usize>,
+    },
+    /// A continue expression
+    Continue {
+        /// Optional continue label
+        label: Option<String>,
+        /// Source code span where this continue expression appears
+        #[serde(with = "oak_core::serde_range")]
+        span: Range<usize>,
+    },
+    /// A yield expression
+    Yield {
+        /// Optional yield value
+        expr: Option<Box<Expr>>,
+        /// Whether this is a yield-from expression
+        yield_from: bool,
+        /// Source code span where this yield expression appears
+        #[serde(with = "oak_core::serde_range")]
+        span: Range<usize>,
+    },
+    /// A raise/throw expression
+    Raise {
+        /// The exception expression to raise
+        expr: Box<Expr>,
+        /// Source code span where this raise expression appears
+        #[serde(with = "oak_core::serde_range")]
+        span: Range<usize>,
+    },
+    /// A catch expression
+    Catch {
+        /// The expression to try
+        expr: Box<Expr>,
+        /// List of catch arms
+        arms: Vec<MatchArm>,
+        /// Source code span where this catch expression appears
+        #[serde(with = "oak_core::serde_range")]
+        span: Range<usize>,
+    },
+    /// An object creation or trailing closure call (e.g., Point { x: 1 })
+    Object {
+        /// The name or expression being "called" with a block
+        callee: Box<Expr>,
+        /// The block contents
+        block: Block,
+        /// Source code span
+        #[serde(with = "oak_core::serde_range")]
+        span: Range<usize>,
+    },
+}
+
+/// Represents an arm in a match or catch expression.
+#[derive(Debug, PartialEq, Clone, Serialize, Deserialize)]
+pub struct MatchArm {
+    /// The pattern to match
+    pub pattern: Pattern,
+    /// Optional guard expression
+    pub guard: Option<Expr>,
+    /// The body expression
+    pub body: Expr,
+    /// Source code span where this match arm appears
+    #[serde(with = "oak_core::serde_range")]
+    pub span: Range<usize>,
+}
+
+/// Represents different types of patterns in Valkyrie.
+#[derive(Debug, PartialEq, Clone, Serialize, Deserialize)]
+pub enum Pattern {
+    /// A wildcard pattern (_)
+    Wildcard {
+        #[serde(with = "oak_core::serde_range")]
+        span: Range<usize>,
+    },
+    /// A variable pattern
+    Variable {
+        name: Identifier,
+        #[serde(with = "oak_core::serde_range")]
+        span: Range<usize>,
+    },
+    /// A literal pattern
+    Literal {
+        value: String,
+        #[serde(with = "oak_core::serde_range")]
+        span: Range<usize>,
+    },
 }

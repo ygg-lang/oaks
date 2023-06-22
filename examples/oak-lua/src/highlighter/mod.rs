@@ -62,7 +62,8 @@ impl Highlighter for LuaHighlighter {
             }
         }
 
-        let lexer = LuaLexer::new(&crate::language::LuaLanguage::default());
+        let config = crate::language::LuaLanguage::default();
+        let lexer = LuaLexer::new(&config);
         let mut cache = SimpleCache { tokens: Vec::new() };
         let source = SourceText::new(text);
         let output = lexer.lex(&source, &[], &mut cache);

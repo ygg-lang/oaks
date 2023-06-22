@@ -14,13 +14,13 @@ pub struct BashLexer<'config> {
 }
 
 impl<'config> Lexer<BashLanguage> for BashLexer<'config> {
-    fn lex<'a, S: Source + ?Sized>(&self, source: &S, _edits: &[oak_core::source::TextEdit], mut cache: &'a mut impl LexerCache<BashLanguage>) -> LexOutput<BashLanguage> {
-        let mut state = LexerState::new(source);
+    fn lex<'a, S: Source + ?Sized>(&self, source: &S, _edits: &[oak_core::source::TextEdit], cache: &'a mut impl LexerCache<BashLanguage>) -> LexOutput<BashLanguage> {
+        let mut state = LexerState::new_with_cache(source, 0, cache);
         let result = self.run(&mut state);
         if result.is_ok() {
             state.add_eof();
         }
-        state.finish_with_cache(result, &mut cache)
+        state.finish_with_cache(result, cache)
     }
 }
 

@@ -1,18 +1,14 @@
-use oak_core::helpers::ParserTester;
-use oak_valkyrie::{ValkyrieLanguage, ValkyrieLexer, ValkyrieParser};
+use oak_testing::parsing::ParserTester;
+use oak_valkyrie::{ValkyrieLanguage, ValkyrieParser};
 use std::{path::Path, time::Duration};
 
 #[test]
-fn test_valkyrie_parser() {
+fn test_valkyrie_parser() -> Result<(), oak_core::OakError> {
     let here = Path::new(env!("CARGO_MANIFEST_DIR"));
-    let lang: &'static ValkyrieLanguage = Box::leak(Box::new(ValkyrieLanguage::default()));
-    let parser: &'static ValkyrieParser = Box::leak(Box::new(ValkyrieParser::new(lang)));
-    let _lexer: &'static ValkyrieLexer = Box::leak(Box::new(ValkyrieLexer::new(lang)));
-    let test_runner = ParserTester::new(here.join("tests/parser")).with_extension("valkyrie").with_timeout(Duration::from_secs(5));
-    match test_runner.run_tests::<ValkyrieLanguage, _>(parser) {
-        Ok(()) => println!("Valkyrie files tests passed!"),
-        Err(e) => panic!("Valkyrie files tests failed: {}", e),
-    }
+    let lang = Box::leak(Box::new(ValkyrieLanguage::default()));
+    let parser = ValkyrieParser::new(lang);
+    let test_runner = ParserTester::new(here.join("tests").join("parser")).with_extension("valkyrie").with_timeout(Duration::from_secs(5));
+    test_runner.run_tests::<ValkyrieLanguage, _>(&parser)
 }
 
 #[test]
@@ -35,20 +31,20 @@ fn test_valkyrie_namespace_parsing() {
 }
 
 #[test]
-fn test_valkyrie_function_parsing() {
+fn test_valkyrie_micro_function_parsing() {
     use oak_core::SourceText;
     use oak_valkyrie::{ValkyrieLanguage, ValkyrieParser};
 
     let language = ValkyrieLanguage::default();
     let _parser = ValkyrieParser::new(&language);
 
-    // Test function declaration
-    let source = SourceText::new("fn main() { let x = 42; }");
+    // Test micro function declaration
+    let source = SourceText::new("micro main() { let x = 42; }");
 
-    println!("Testing Valkyrie function parsing with: {}", source.text());
+    println!("Testing Valkyrie micro function parsing with: {}", source.text());
 
     // 暂时跳过实际的解析测试，直到实现完成
-    assert!(true, "Function parsing test placeholder - parser implementation needed");
+    assert!(true, "Micro function parsing test placeholder - parser implementation needed");
 }
 
 #[test]
@@ -60,7 +56,7 @@ fn test_valkyrie_micro_parsing() {
     let _parser = ValkyrieParser::new(&language);
 
     // Test micro definition
-    let source = SourceText::new("micro PI = 3.14;");
+    let source = SourceText::new("micro PI() { return 3.14; }");
 
     println!("Testing Valkyrie micro parsing with: {}", source.text());
 
@@ -80,9 +76,9 @@ fn test_valkyrie_complex_parsing() {
     let source = SourceText::new(
         r#"
         namespace Math {
-            micro PI = 3.14159;
+            micro PI() { return 3.14159; }
             
-            fn calculate(x: i32, y: i32) {
+            micro calculate(x: i32, y: i32) {
                 let result = x + y;
                 return result;
             }

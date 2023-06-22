@@ -1,0 +1,11 @@
+{
+    "name": "Oak JSON",
+    "version": 1.0,
+    "active": true,
+    "features": ["incremental", "high-performance", null],
+    "nested": {
+        "key": "value",
+        "number": -123.456e+7
+    },
+    "empty": {}
+}

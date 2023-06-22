@@ -7,6 +7,7 @@ use oak_core::{
 
 type State<'s, S> = LexerState<'s, S, MatlabLanguage>;
 
+#[derive(Clone)]
 pub struct MatlabLexer<'config> {
     _config: &'config MatlabLanguage,
 }

@@ -1,7 +1,7 @@
 [package]
 name = "oak-macros"
 description = "Procedural macros for the Oak framework to simplify parser and AST definition."
-categories = ["development-tools::procedural-macros"]
+categories = ["development-tools", "rust-patterns"]
 keywords = ["macros", "proc-macro", "codegen"]
 version.workspace = true
 authors.workspace = true

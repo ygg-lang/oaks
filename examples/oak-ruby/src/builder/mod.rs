@@ -14,7 +14,7 @@ impl<'config> RubyBuilder<'config> {
 impl<'config> Builder<RubyLanguage> for RubyBuilder<'config> {
     fn build<'a, S: Source + ?Sized>(&self, source: &'a S, edits: &[TextEdit], _cache: &'a mut impl BuilderCache<RubyLanguage>) -> oak_core::builder::BuildOutput<RubyLanguage> {
         let parser = RubyParser::new(self.config);
-        let lexer = crate::lexer::RubyLexer::new(self.config);
+        let lexer = crate::lexer::RubyLexer::new(&self.config);
 
         let mut cache = oak_core::parser::session::ParseSession::<RubyLanguage>::default();
         lexer.lex(source, edits, &mut cache);

@@ -1,7 +1,13 @@
 use oak_core::language::{Language, LanguageCategory};
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
-pub struct VerilogLanguage;
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Default)]
+pub struct VerilogLanguage {}
+
+impl VerilogLanguage {
+    pub fn new() -> Self {
+        Self {}
+    }
+}
 
 // 定义 Verilog 的根节点类型
 #[derive(Debug, Clone, PartialEq, Eq)]

@@ -2,10 +2,17 @@
 //!
 //! 定义GSGL 语言的核心结构体，实现了 oak-core Language trait
 use oak_core::{Language, LanguageCategory};
+use serde::{Deserialize, Serialize};
 
-/// GSGL 语言定义
-#[derive(Debug, Clone)]
-pub struct GsglLanguage;
+/// GSGL 语言 definition
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Default, Serialize, Deserialize)]
+pub struct GsglLanguage {}
+
+impl GsglLanguage {
+    pub fn new() -> Self {
+        Self {}
+    }
+}
 
 impl Language for GsglLanguage {
     const NAME: &'static str = "gsgl";
@@ -14,17 +21,4 @@ impl Language for GsglLanguage {
     type TokenType = crate::syntax::GsglSyntaxKind;
     type ElementType = crate::syntax::GsglSyntaxKind;
     type TypedRoot = ();
-}
-
-impl GsglLanguage {
-    /// 创建新的 GSGL 语言实例
-    pub fn new() -> Self {
-        Self
-    }
-}
-
-impl Default for GsglLanguage {
-    fn default() -> Self {
-        Self::new()
-    }
 }

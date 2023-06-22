@@ -1,7 +1,8 @@
 use oak_core::{Language, LanguageCategory};
+use serde::{Deserialize, Serialize};
 
 /// Fortran 语言配置
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub struct FortranLanguage {
     /// 是否启用 Fortran 2008
     pub fortran_2008: bool,
@@ -13,6 +14,13 @@ pub struct FortranLanguage {
     pub openmp: bool,
     /// 是否启用 Coarray 支持
     pub coarray: bool,
+}
+
+impl FortranLanguage {
+    /// 创建新的 Fortran 语言实例
+    pub fn new() -> Self {
+        Self::default()
+    }
 }
 
 impl Default for FortranLanguage {

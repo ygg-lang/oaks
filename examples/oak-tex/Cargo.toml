@@ -17,21 +17,18 @@ oak-core = { workspace = true }
 oak-highlight = { workspace = true }
 oak-pretty-print = { workspace = true }
 oak-lsp = { workspace = true }
-oak-mcp = { workspace = true, optional = true }
+oak-mcp = { workspace = true, features = ["io-std"] }
 oak-hover = { workspace = true }
 oak-vfs = { workspace = true }
 futures = { workspace = true }
 serde = { workspace = true, features = ["derive"] }
-axum = { workspace = true, optional = true }
 tokio = { workspace = true, optional = true }
 
 [dev-dependencies]
-oak-core = { workspace = true, features = ["testing"] }
+oak-testing = { workspace = true }
 
 [features]
 default = []
-mcp = ["dep:oak-mcp"]
-axum = ["mcp", "dep:axum", "dep:tokio", "oak-mcp/axum", "oak-lsp/axum"]
 std = []
 
 [package.metadata.docs.rs]

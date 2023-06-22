@@ -1,69 +1,74 @@
-# Vala 抽象语法树 (AST) 模块
+# Vala Abstract Syntax Tree (AST) Module
 
-这个模块定义了 Vala 语言的抽象语法树结构，用于表示解析后的 Vala 代码。
-AST 节点对应于 Vala 语言中的各种构造，如类、方法、属性、命名空间等。
+This module defines the Abstract Syntax Tree (AST) structure for the [Vala programming language](https://vala.dev/). It provides a strongly-typed and comprehensive representation of Vala source code, optimized for the GObject system and C code generation.
 
-## AST 节点类型
+## Purpose
 
-### 顶级声明
+The Vala AST is the central data structure used by the compiler and associated tools to represent the semantic structure of a Vala program. It captures Vala's object-oriented features, its unique integration with GLib/GObject, and its support for modern programming constructs like async/await and signals.
 
-- **`Class`**: 类定义
-- **`Interface`**: 接口定义
-- **`Namespace`**: 命名空间定义
-- **`Enum`**: 枚举定义
-- **`Struct`**: 结构体定义
+## AST Node Types
 
-### 类成员
+### Core Structure
+- **`ValaRoot`**: The root node representing a complete Vala source file or translation unit.
+- **`Namespace`**: Represents a Vala namespace containing other declarations.
+- **`UsingDirective`**: Represents a `using` statement.
 
-- **`Method`**: 方法定义
-- **`Property`**: 属性定义
-- **`Field`**: 字段定义
-- **`Constructor`**: 构造函数
-- **`Destructor`**: 析构函数
+### Declarations
+- **`Class`**: Class definition with its base types, fields, methods, properties, and signals.
+- **`Interface`**: Interface definition.
+- **`Struct`**: Struct definition.
+- **`Enum`**: Enum definition with its members.
+- **`Delegate`**: Delegate type definition.
+- **`Method`**: Method definition with parameters, return type, and body.
+- **`Property`**: GObject property definition with `get` and `set` accessors.
+- **`Signal`**: GObject signal definition.
 
-### 表达式和语句
+### Expressions and Statements
+- **`Expression`**: The base type for all expressions (literals, identifiers, calls, assignments, etc.).
+- **`Statement`**: Represents various statements (local variables, control flow, blocks, etc.).
+- **`Block`**: A sequence of statements enclosed in braces.
+- **`TryStatement`**: Try-catch-finally construct.
 
-- **`Expression`**: 表达式
-- **`Statement`**: 语句
-- **`Block`**: 代码块
-- **`IfStatement`**: 条件语句
-- **`ForStatement`**: 循环语句
+### GObject Specifics
+- **`Constructor`**: Represents `construct` blocks and class constructors.
+- **`SignalConnection`**: Represents signal connection expressions (e.g., `obj.sig.connect(...)`).
 
-## 使用示例
+## Usage Example
 
-```rust,ignore
+```rust
 use oak_vala::ast::*;
 
-fn main() -> Result<(), Box<dyn std::error::Error>> {
-    // 创建简单的类 AST
-    let class = ValaClass {
-        name: "MyClass".to_string(),
-        visibility: ValaVisibility::Public,
+fn main() {
+    // Manually constructing a simple AST for a Vala class
+    let class_def = Class {
+        name: "HelloWorld".to_string(),
+        base_types: vec!["Object".to_string()],
         members: vec![
-            ValaMember::Method(ValaMethod {
-                name: "hello".to_string(),
-                visibility: ValaVisibility::Public,
-                return_type: ValaType::Void,
-                parameters: vec![],
-                body: ValaBlock {
+            ClassMember::Method(Method {
+                name: "main".to_string(),
+                is_public: true,
+                is_static: true,
+                return_type: Type::Void,
+                params: vec![
+                    Param { name: "args".to_string(), ty: Type::Array(Box::new(Type::String)) }
+                ],
+                body: Some(Block {
                     statements: vec![
-                        ValaStatement::Expression(ValaExpression::MethodCall {
-                            object: None,
-                            method: "print".to_string(),
-                            arguments: vec![
-                                ValaExpression::StringLiteral("Hello, World!".to_string())
-                            ],
-                        }),
+                        Statement::Expression(Expression::Call(CallExpr {
+                            target: Box::new(Expression::Identifier("stdout.printf".to_string())),
+                            arguments: vec![Expression::StringLiteral("Hello, World!\n".to_string())],
+                        }))
                     ],
-                },
-            }),
+                }),
+            })
         ],
     };
-    
-    Ok(())
 }
 ```
 
-## 实现状态
+## Design Principles
 
-目前 AST 模块还在开发中，上述示例代码仅用于说明预期的 API 设计。
+1. **GObject Fidelity**: Accurately represents Vala's specialized GObject features.
+2. **Type Safety**: Leverages Rust's type system to ensure AST structural integrity.
+3. **Rich Metadata**: Each node includes span information for precise source mapping.
+4. **Efficiency**: Designed for fast traversal and transformation, suitable for large projects.

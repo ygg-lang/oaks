@@ -1,0 +1,607 @@
+{
+    "success": true,
+    "count": 100,
+    "tokens": [
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 167,
+            "end": 168
+        },
+        {
+            "kind": "ModuleKw",
+            "text": "module",
+            "start": 168,
+            "end": 174
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 199,
+            "end": 200
+        },
+        {
+            "kind": "ImportKw",
+            "text": "import",
+            "start": 200,
+            "end": 206
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "\"env\"",
+            "start": 207,
+            "end": 212
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "\"memory\"",
+            "start": 213,
+            "end": 221
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 222,
+            "end": 223
+        },
+        {
+            "kind": "MemoryKw",
+            "text": "memory",
+            "start": 223,
+            "end": 229
+        },
+        {
+            "kind": "IntegerLiteral",
+            "text": "1",
+            "start": 230,
+            "end": 231
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 231,
+            "end": 232
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 232,
+            "end": 233
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 237,
+            "end": 238
+        },
+        {
+            "kind": "ImportKw",
+            "text": "import",
+            "start": 238,
+            "end": 244
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "\"env\"",
+            "start": 245,
+            "end": 250
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "\"print\"",
+            "start": 251,
+            "end": 258
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 259,
+            "end": 260
+        },
+        {
+            "kind": "FuncKw",
+            "text": "func",
+            "start": 260,
+            "end": 264
+        },
+        {
+            "kind": "Identifier",
+            "text": "$print",
+            "start": 265,
+            "end": 271
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 272,
+            "end": 273
+        },
+        {
+            "kind": "ParamKw",
+            "text": "param",
+            "start": 273,
+            "end": 278
+        },
+        {
+            "kind": "I32Kw",
+            "text": "i32",
+            "start": 279,
+            "end": 282
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 282,
+            "end": 283
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 283,
+            "end": 284
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 284,
+            "end": 285
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 289,
+            "end": 290
+        },
+        {
+            "kind": "ImportKw",
+            "text": "import",
+            "start": 290,
+            "end": 296
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "\"env\"",
+            "start": 297,
+            "end": 302
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "\"abort\"",
+            "start": 303,
+            "end": 310
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 311,
+            "end": 312
+        },
+        {
+            "kind": "FuncKw",
+            "text": "func",
+            "start": 312,
+            "end": 316
+        },
+        {
+            "kind": "Identifier",
+            "text": "$abort",
+            "start": 317,
+            "end": 323
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 324,
+            "end": 325
+        },
+        {
+            "kind": "ParamKw",
+            "text": "param",
+            "start": 325,
+            "end": 330
+        },
+        {
+            "kind": "I32Kw",
+            "text": "i32",
+            "start": 331,
+            "end": 334
+        },
+        {
+            "kind": "I32Kw",
+            "text": "i32",
+            "start": 335,
+            "end": 338
+        },
+        {
+            "kind": "I32Kw",
+            "text": "i32",
+            "start": 339,
+            "end": 342
+        },
+        {
+            "kind": "I32Kw",
+            "text": "i32",
+            "start": 343,
+            "end": 346
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 346,
+            "end": 347
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 347,
+            "end": 348
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 348,
+            "end": 349
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 353,
+            "end": 354
+        },
+        {
+            "kind": "ImportKw",
+            "text": "import",
+            "start": 354,
+            "end": 360
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "\"console\"",
+            "start": 361,
+            "end": 370
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "\"log\"",
+            "start": 371,
+            "end": 376
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 377,
+            "end": 378
+        },
+        {
+            "kind": "FuncKw",
+            "text": "func",
+            "start": 378,
+            "end": 382
+        },
+        {
+            "kind": "Identifier",
+            "text": "$log",
+            "start": 383,
+            "end": 387
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 388,
+            "end": 389
+        },
+        {
+            "kind": "ParamKw",
+            "text": "param",
+            "start": 389,
+            "end": 394
+        },
+        {
+            "kind": "I32Kw",
+            "text": "i32",
+            "start": 395,
+            "end": 398
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 398,
+            "end": 399
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 399,
+            "end": 400
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 400,
+            "end": 401
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 432,
+            "end": 433
+        },
+        {
+            "kind": "TypeKw",
+            "text": "type",
+            "start": 433,
+            "end": 437
+        },
+        {
+            "kind": "Identifier",
+            "text": "$binary_op",
+            "start": 438,
+            "end": 448
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 449,
+            "end": 450
+        },
+        {
+            "kind": "FuncKw",
+            "text": "func",
+            "start": 450,
+            "end": 454
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 455,
+            "end": 456
+        },
+        {
+            "kind": "ParamKw",
+            "text": "param",
+            "start": 456,
+            "end": 461
+        },
+        {
+            "kind": "I32Kw",
+            "text": "i32",
+            "start": 462,
+            "end": 465
+        },
+        {
+            "kind": "I32Kw",
+            "text": "i32",
+            "start": 466,
+            "end": 469
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 469,
+            "end": 470
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 471,
+            "end": 472
+        },
+        {
+            "kind": "ResultKw",
+            "text": "result",
+            "start": 472,
+            "end": 478
+        },
+        {
+            "kind": "I32Kw",
+            "text": "i32",
+            "start": 479,
+            "end": 482
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 482,
+            "end": 483
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 483,
+            "end": 484
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 484,
+            "end": 485
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 489,
+            "end": 490
+        },
+        {
+            "kind": "TypeKw",
+            "text": "type",
+            "start": 490,
+            "end": 494
+        },
+        {
+            "kind": "Identifier",
+            "text": "$unary_op",
+            "start": 495,
+            "end": 504
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 505,
+            "end": 506
+        },
+        {
+            "kind": "FuncKw",
+            "text": "func",
+            "start": 506,
+            "end": 510
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 511,
+            "end": 512
+        },
+        {
+            "kind": "ParamKw",
+            "text": "param",
+            "start": 512,
+            "end": 517
+        },
+        {
+            "kind": "I32Kw",
+            "text": "i32",
+            "start": 518,
+            "end": 521
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 521,
+            "end": 522
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 523,
+            "end": 524
+        },
+        {
+            "kind": "ResultKw",
+            "text": "result",
+            "start": 524,
+            "end": 530
+        },
+        {
+            "kind": "I32Kw",
+            "text": "i32",
+            "start": 531,
+            "end": 534
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 534,
+            "end": 535
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 535,
+            "end": 536
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 536,
+            "end": 537
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 541,
+            "end": 542
+        },
+        {
+            "kind": "TypeKw",
+            "text": "type",
+            "start": 542,
+            "end": 546
+        },
+        {
+            "kind": "Identifier",
+            "text": "$void_func",
+            "start": 547,
+            "end": 557
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 558,
+            "end": 559
+        },
+        {
+            "kind": "FuncKw",
+            "text": "func",
+            "start": 559,
+            "end": 563
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 563,
+            "end": 564
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 564,
+            "end": 565
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 569,
+            "end": 570
+        },
+        {
+            "kind": "TypeKw",
+            "text": "type",
+            "start": 570,
+            "end": 574
+        },
+        {
+            "kind": "Identifier",
+            "text": "$callback",
+            "start": 575,
+            "end": 584
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 585,
+            "end": 586
+        },
+        {
+            "kind": "FuncKw",
+            "text": "func",
+            "start": 586,
+            "end": 590
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 591,
+            "end": 592
+        },
+        {
+            "kind": "ParamKw",
+            "text": "param",
+            "start": 592,
+            "end": 597
+        },
+        {
+            "kind": "I32Kw",
+            "text": "i32",
+            "start": 598,
+            "end": 601
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 601,
+            "end": 602
+        }
+    ],
+    "errors": []
+}

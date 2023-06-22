@@ -3,13 +3,13 @@ use oak_core::{Lexer, LexerCache, LexerState, OakError, lexer::LexOutput, source
 
 type State<'a, S> = LexerState<'a, S, JavaLanguage>;
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct JavaLexer<'config> {
     _config: &'config JavaLanguage,
 }
 
 impl<'config> Lexer<JavaLanguage> for JavaLexer<'config> {
-    fn lex<'a, S: Source + ?Sized>(&self, source: &'a S, _edits: &[oak_core::TextEdit], cache: &'a mut impl LexerCache<JavaLanguage>) -> LexOutput<JavaLanguage> {
+    fn lex<'a, S: Source + ?Sized>(&self, source: &'a S, _edits: &[oak_core::source::TextEdit], cache: &'a mut impl LexerCache<JavaLanguage>) -> LexOutput<JavaLanguage> {
         let mut state = State::new(source);
         let result = self.run(&mut state);
         if result.is_ok() {
@@ -304,7 +304,7 @@ impl<'config> JavaLexer<'config> {
 
     /// 分类标识符为关键字或普通标识符
     fn classify_identifier(&self, text: &str) -> JavaSyntaxKind {
-        match text {
+        let kind = match text {
             "abstract" => JavaSyntaxKind::Abstract,
             "assert" => JavaSyntaxKind::Assert,
             "boolean" => JavaSyntaxKind::Boolean,
@@ -358,7 +358,9 @@ impl<'config> JavaLexer<'config> {
             "true" | "false" => JavaSyntaxKind::BooleanLiteral,
             "null" => JavaSyntaxKind::NullLiteral,
             _ => JavaSyntaxKind::Identifier,
-        }
+        };
+        eprintln!("DEBUG: Lexer classified '{}' as {:?}", text, kind);
+        kind
     }
 
     /// 处理操作符和分隔�?

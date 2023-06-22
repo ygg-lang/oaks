@@ -11,12 +11,12 @@ static _INI_WHITESPACE: WhitespaceConfig = WhitespaceConfig { unicode_whitespace
 static _INI_COMMENT: CommentConfig = CommentConfig { line_marker: ";", block_start: "", block_end: "", nested_blocks: false };
 static _INI_STRING: StringConfig = StringConfig { quotes: &['"', '\''], escape: Some('\\') };
 
-#[derive(Clone)]
-pub struct IniLexer {
-    _config: IniLanguage,
+#[derive(Clone, Debug)]
+pub struct IniLexer<'config> {
+    _config: &'config IniLanguage,
 }
 
-impl Lexer<IniLanguage> for IniLexer {
+impl<'config> Lexer<IniLanguage> for IniLexer<'config> {
     fn lex<'a, S: Source + ?Sized>(&self, source: &S, _edits: &[oak_core::TextEdit], cache: &'a mut impl LexerCache<IniLanguage>) -> LexOutput<IniLanguage> {
         let mut state: State<'_, S> = State::new(source);
         let result = self.run(&mut state);
@@ -27,9 +27,9 @@ impl Lexer<IniLanguage> for IniLexer {
     }
 }
 
-impl IniLexer {
-    pub fn new(config: &IniLanguage) -> Self {
-        Self { _config: config.clone() }
+impl<'config> IniLexer<'config> {
+    pub fn new(config: &'config IniLanguage) -> Self {
+        Self { _config: config }
     }
 
     /// 主要的词法分析循环

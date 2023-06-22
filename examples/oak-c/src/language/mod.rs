@@ -1,4 +1,4 @@
-use crate::{lexer::CTokenType, parser::CElementType};
+use crate::{ast::CRoot, lexer::CTokenType, parser::CElementType};
 use oak_core::{Language, LanguageCategory};
 use serde::{Deserialize, Serialize};
 
@@ -6,13 +6,19 @@ use serde::{Deserialize, Serialize};
 #[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Deserialize)]
 pub struct CLanguage {}
 
+impl CLanguage {
+    pub fn new() -> Self {
+        Self {}
+    }
+}
+
 impl Language for CLanguage {
     const NAME: &'static str = "c";
     const CATEGORY: LanguageCategory = LanguageCategory::Programming;
 
     type TokenType = CTokenType;
     type ElementType = CElementType;
-    type TypedRoot = ();
+    type TypedRoot = CRoot;
 }
 
 impl Default for CLanguage {

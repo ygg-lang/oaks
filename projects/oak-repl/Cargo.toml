@@ -1,0 +1,15 @@
+[package]
+name = "oak-repl"
+version.workspace = true
+authors.workspace = true
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+description = "Custom-built REPL infrastructure for Oak languages"
+
+[dependencies]
+crossterm = { workspace = true }
+unicode-width = { workspace = true }
+clap = { workspace = true }
+oak-highlight = { workspace = true }
+oak-core = { workspace = true }

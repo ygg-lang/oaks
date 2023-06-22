@@ -1,14 +1,14 @@
-# Vampire 抽象语法树 (AST) 模块
+# Vampire Abstract Syntax Tree (AST) Module
 
-这个模块定义了 Vampire 定理证明器的抽象语法树结构。
+This module defines the abstract syntax tree structure for the Vampire theorem prover.
 
-## AST 节点类型
+## AST Node Types
 
-- **`VampireRoot`**: 根节点，包含多个公式
-- **`VampireFormula`**: 公式，包含名称、角色和公式文本
-- **`VampireInclude`**: 包含指令，用于引入其他文件
+- **`VampireRoot`**: The root node, containing multiple formulas.
+- **`VampireFormula`**: A formula, including name, role, and formula text.
+- **`VampireInclude`**: An include directive used to import other files.
 
-## 使用示例
+## Usage Example
 
 ```rust,no_run
 #![feature(new_range_api)]
@@ -32,9 +32,9 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 }
 ```
 
-## 设计原则
+## Design Principles
 
-1. **完整性**: 支持完整的 Vampire 语法
-2. **可扩展性**: 易于添加新的 AST 节点类型
-3. **类型安全**: 使用 Rust 的类型系统确保 AST 的有效性
-4. **性能**: 高效的内存使用和访问模式
+1. **Completeness**: Supports full Vampire syntax.
+2. **Extensibility**: Easy to add new AST node types.
+3. **Type Safety**: Uses Rust's type system to ensure AST validity.
+4. **Performance**: Efficient memory usage and access patterns.

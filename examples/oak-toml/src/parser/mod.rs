@@ -15,7 +15,7 @@ impl<'config> TomlParser<'config> {
 
 impl<'config> Parser<TomlLanguage> for TomlParser<'config> {
     fn parse<'a, S: Source + ?Sized>(&self, text: &'a S, edits: &[oak_core::TextEdit], cache: &'a mut impl oak_core::ParseCache<TomlLanguage>) -> oak_core::ParseOutput<'a, TomlLanguage> {
-        let lexer = crate::lexer::TomlLexer::new(self.config);
+        let lexer = crate::lexer::TomlLexer::new(&self.config);
         oak_core::parser::parse_with_lexer(&lexer, text, edits, cache, |state| {
             let checkpoint = state.checkpoint();
 

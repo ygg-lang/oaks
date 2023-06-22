@@ -22,15 +22,10 @@ mod formatter;
 pub mod highlighter;
 /// LSP 模块
 pub mod lsp;
-#[cfg(feature = "mcp")]
 /// MCP integration for Rust.
 pub mod mcp;
 
 // 重新导出主要类型
 pub use crate::{ast::RustRoot, builder::RustBuilder, formatter::RustFormatter, highlighter::RustHighlighter, language::RustLanguage, lexer::RustLexer, lsp::RustLanguageService, parser::RustParser};
 
-#[cfg(feature = "mcp")]
 pub use crate::mcp::serve_rust_mcp;
-
-#[cfg(all(feature = "mcp", feature = "axum"))]
-pub use crate::mcp::serve_rust_mcp_axum;

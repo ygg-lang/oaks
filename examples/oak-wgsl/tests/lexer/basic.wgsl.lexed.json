@@ -1,0 +1,607 @@
+{
+    "success": true,
+    "count": 100,
+    "tokens": [
+        {
+            "kind": "StructKw",
+            "text": "struct",
+            "start": 169,
+            "end": 175
+        },
+        {
+            "kind": "Identifier",
+            "text": "VertexInput",
+            "start": 176,
+            "end": 187
+        },
+        {
+            "kind": "LeftBrace",
+            "text": "{",
+            "start": 188,
+            "end": 189
+        },
+        {
+            "kind": "At",
+            "text": "@",
+            "start": 195,
+            "end": 196
+        },
+        {
+            "kind": "Identifier",
+            "text": "location",
+            "start": 196,
+            "end": 204
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 204,
+            "end": 205
+        },
+        {
+            "kind": "IntegerLiteral",
+            "text": "0",
+            "start": 205,
+            "end": 206
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 206,
+            "end": 207
+        },
+        {
+            "kind": "Identifier",
+            "text": "position",
+            "start": 208,
+            "end": 216
+        },
+        {
+            "kind": "Colon",
+            "text": ":",
+            "start": 216,
+            "end": 217
+        },
+        {
+            "kind": "Vec3Kw",
+            "text": "vec3",
+            "start": 218,
+            "end": 222
+        },
+        {
+            "kind": "Lt",
+            "text": "<",
+            "start": 222,
+            "end": 223
+        },
+        {
+            "kind": "F32Kw",
+            "text": "f32",
+            "start": 223,
+            "end": 226
+        },
+        {
+            "kind": "Gt",
+            "text": ">",
+            "start": 226,
+            "end": 227
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 227,
+            "end": 228
+        },
+        {
+            "kind": "At",
+            "text": "@",
+            "start": 234,
+            "end": 235
+        },
+        {
+            "kind": "Identifier",
+            "text": "location",
+            "start": 235,
+            "end": 243
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 243,
+            "end": 244
+        },
+        {
+            "kind": "IntegerLiteral",
+            "text": "1",
+            "start": 244,
+            "end": 245
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 245,
+            "end": 246
+        },
+        {
+            "kind": "Identifier",
+            "text": "normal",
+            "start": 247,
+            "end": 253
+        },
+        {
+            "kind": "Colon",
+            "text": ":",
+            "start": 253,
+            "end": 254
+        },
+        {
+            "kind": "Vec3Kw",
+            "text": "vec3",
+            "start": 255,
+            "end": 259
+        },
+        {
+            "kind": "Lt",
+            "text": "<",
+            "start": 259,
+            "end": 260
+        },
+        {
+            "kind": "F32Kw",
+            "text": "f32",
+            "start": 260,
+            "end": 263
+        },
+        {
+            "kind": "Gt",
+            "text": ">",
+            "start": 263,
+            "end": 264
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 264,
+            "end": 265
+        },
+        {
+            "kind": "At",
+            "text": "@",
+            "start": 271,
+            "end": 272
+        },
+        {
+            "kind": "Identifier",
+            "text": "location",
+            "start": 272,
+            "end": 280
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 280,
+            "end": 281
+        },
+        {
+            "kind": "IntegerLiteral",
+            "text": "2",
+            "start": 281,
+            "end": 282
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 282,
+            "end": 283
+        },
+        {
+            "kind": "Identifier",
+            "text": "uv",
+            "start": 284,
+            "end": 286
+        },
+        {
+            "kind": "Colon",
+            "text": ":",
+            "start": 286,
+            "end": 287
+        },
+        {
+            "kind": "Vec2Kw",
+            "text": "vec2",
+            "start": 288,
+            "end": 292
+        },
+        {
+            "kind": "Lt",
+            "text": "<",
+            "start": 292,
+            "end": 293
+        },
+        {
+            "kind": "F32Kw",
+            "text": "f32",
+            "start": 293,
+            "end": 296
+        },
+        {
+            "kind": "Gt",
+            "text": ">",
+            "start": 296,
+            "end": 297
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 297,
+            "end": 298
+        },
+        {
+            "kind": "At",
+            "text": "@",
+            "start": 304,
+            "end": 305
+        },
+        {
+            "kind": "Identifier",
+            "text": "location",
+            "start": 305,
+            "end": 313
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 313,
+            "end": 314
+        },
+        {
+            "kind": "IntegerLiteral",
+            "text": "3",
+            "start": 314,
+            "end": 315
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 315,
+            "end": 316
+        },
+        {
+            "kind": "Identifier",
+            "text": "color",
+            "start": 317,
+            "end": 322
+        },
+        {
+            "kind": "Colon",
+            "text": ":",
+            "start": 322,
+            "end": 323
+        },
+        {
+            "kind": "Vec4Kw",
+            "text": "vec4",
+            "start": 324,
+            "end": 328
+        },
+        {
+            "kind": "Lt",
+            "text": "<",
+            "start": 328,
+            "end": 329
+        },
+        {
+            "kind": "F32Kw",
+            "text": "f32",
+            "start": 329,
+            "end": 332
+        },
+        {
+            "kind": "Gt",
+            "text": ">",
+            "start": 332,
+            "end": 333
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 333,
+            "end": 334
+        },
+        {
+            "kind": "RightBrace",
+            "text": "}",
+            "start": 336,
+            "end": 337
+        },
+        {
+            "kind": "StructKw",
+            "text": "struct",
+            "start": 341,
+            "end": 347
+        },
+        {
+            "kind": "Identifier",
+            "text": "VertexOutput",
+            "start": 348,
+            "end": 360
+        },
+        {
+            "kind": "LeftBrace",
+            "text": "{",
+            "start": 361,
+            "end": 362
+        },
+        {
+            "kind": "At",
+            "text": "@",
+            "start": 368,
+            "end": 369
+        },
+        {
+            "kind": "Identifier",
+            "text": "builtin",
+            "start": 369,
+            "end": 376
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 376,
+            "end": 377
+        },
+        {
+            "kind": "Identifier",
+            "text": "position",
+            "start": 377,
+            "end": 385
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 385,
+            "end": 386
+        },
+        {
+            "kind": "Identifier",
+            "text": "clip_position",
+            "start": 387,
+            "end": 400
+        },
+        {
+            "kind": "Colon",
+            "text": ":",
+            "start": 400,
+            "end": 401
+        },
+        {
+            "kind": "Vec4Kw",
+            "text": "vec4",
+            "start": 402,
+            "end": 406
+        },
+        {
+            "kind": "Lt",
+            "text": "<",
+            "start": 406,
+            "end": 407
+        },
+        {
+            "kind": "F32Kw",
+            "text": "f32",
+            "start": 407,
+            "end": 410
+        },
+        {
+            "kind": "Gt",
+            "text": ">",
+            "start": 410,
+            "end": 411
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 411,
+            "end": 412
+        },
+        {
+            "kind": "At",
+            "text": "@",
+            "start": 418,
+            "end": 419
+        },
+        {
+            "kind": "Identifier",
+            "text": "location",
+            "start": 419,
+            "end": 427
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 427,
+            "end": 428
+        },
+        {
+            "kind": "IntegerLiteral",
+            "text": "0",
+            "start": 428,
+            "end": 429
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 429,
+            "end": 430
+        },
+        {
+            "kind": "Identifier",
+            "text": "world_position",
+            "start": 431,
+            "end": 445
+        },
+        {
+            "kind": "Colon",
+            "text": ":",
+            "start": 445,
+            "end": 446
+        },
+        {
+            "kind": "Vec3Kw",
+            "text": "vec3",
+            "start": 447,
+            "end": 451
+        },
+        {
+            "kind": "Lt",
+            "text": "<",
+            "start": 451,
+            "end": 452
+        },
+        {
+            "kind": "F32Kw",
+            "text": "f32",
+            "start": 452,
+            "end": 455
+        },
+        {
+            "kind": "Gt",
+            "text": ">",
+            "start": 455,
+            "end": 456
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 456,
+            "end": 457
+        },
+        {
+            "kind": "At",
+            "text": "@",
+            "start": 463,
+            "end": 464
+        },
+        {
+            "kind": "Identifier",
+            "text": "location",
+            "start": 464,
+            "end": 472
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 472,
+            "end": 473
+        },
+        {
+            "kind": "IntegerLiteral",
+            "text": "1",
+            "start": 473,
+            "end": 474
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 474,
+            "end": 475
+        },
+        {
+            "kind": "Identifier",
+            "text": "world_normal",
+            "start": 476,
+            "end": 488
+        },
+        {
+            "kind": "Colon",
+            "text": ":",
+            "start": 488,
+            "end": 489
+        },
+        {
+            "kind": "Vec3Kw",
+            "text": "vec3",
+            "start": 490,
+            "end": 494
+        },
+        {
+            "kind": "Lt",
+            "text": "<",
+            "start": 494,
+            "end": 495
+        },
+        {
+            "kind": "F32Kw",
+            "text": "f32",
+            "start": 495,
+            "end": 498
+        },
+        {
+            "kind": "Gt",
+            "text": ">",
+            "start": 498,
+            "end": 499
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 499,
+            "end": 500
+        },
+        {
+            "kind": "At",
+            "text": "@",
+            "start": 506,
+            "end": 507
+        },
+        {
+            "kind": "Identifier",
+            "text": "location",
+            "start": 507,
+            "end": 515
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 515,
+            "end": 516
+        },
+        {
+            "kind": "IntegerLiteral",
+            "text": "2",
+            "start": 516,
+            "end": 517
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 517,
+            "end": 518
+        },
+        {
+            "kind": "Identifier",
+            "text": "uv",
+            "start": 519,
+            "end": 521
+        },
+        {
+            "kind": "Colon",
+            "text": ":",
+            "start": 521,
+            "end": 522
+        },
+        {
+            "kind": "Vec2Kw",
+            "text": "vec2",
+            "start": 523,
+            "end": 527
+        },
+        {
+            "kind": "Lt",
+            "text": "<",
+            "start": 527,
+            "end": 528
+        }
+    ],
+    "errors": []
+}
