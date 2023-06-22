@@ -58,15 +58,7 @@ pub struct GraphEdge {
 
 impl GraphEdge {
     pub fn new(from: String, to: String) -> Self {
-        Self {
-            from,
-            to,
-            label: None,
-            edge_type: "default".to_string(),
-            weight: 1.0,
-            directed: true,
-            attributes: HashMap::new(),
-        }
+        Self { from, to, label: None, edge_type: "default".to_string(), weight: 1.0, directed: true, attributes: HashMap::new() }
     }
 
     pub fn with_label(mut self, label: String) -> Self {
@@ -176,14 +168,7 @@ impl Graph {
         cycles
     }
 
-    fn dfs_cycles(
-        &self,
-        node: &str,
-        visited: &mut HashSet<String>,
-        rec_stack: &mut HashSet<String>,
-        path: &mut Vec<String>,
-        cycles: &mut Vec<Vec<String>>,
-    ) {
+    fn dfs_cycles(&self, node: &str, visited: &mut HashSet<String>, rec_stack: &mut HashSet<String>, path: &mut Vec<String>, cycles: &mut Vec<Vec<String>>) {
         visited.insert(node.to_string());
         rec_stack.insert(node.to_string());
         path.push(node.to_string());
@@ -205,20 +190,65 @@ impl Graph {
     }
 }
 
+impl crate::Visualize for Graph {
+    fn visualize(&self) -> crate::Result<String> {
+        GraphLayout::new().visualize(self)
+    }
+}
+
 /// Graph layout engine
 pub struct GraphLayout {
     algorithm: GraphLayoutAlgorithm,
     config: GraphLayoutConfig,
 }
 
+impl Default for GraphLayout {
+    fn default() -> Self {
+        Self { algorithm: GraphLayoutAlgorithm::ForceDirected, config: GraphLayoutConfig::default() }
+    }
+}
+
 impl GraphLayout {
-    pub fn new(algorithm: GraphLayoutAlgorithm) -> Self {
-        Self { algorithm, config: GraphLayoutConfig::default() }
+    pub fn new() -> Self {
+        Self::default()
+    }
+
+    pub fn force_directed() -> Self {
+        Self::new().with_algorithm(GraphLayoutAlgorithm::ForceDirected)
+    }
+
+    pub fn circular() -> Self {
+        Self::new().with_algorithm(GraphLayoutAlgorithm::Circular)
+    }
+
+    pub fn with_algorithm(mut self, algorithm: GraphLayoutAlgorithm) -> Self {
+        self.algorithm = algorithm;
+        self
     }
 
     pub fn with_config(mut self, config: GraphLayoutConfig) -> Self {
         self.config = config;
         self
+    }
+
+    pub fn with_repulsion(mut self, repulsion: f64) -> Self {
+        self.config.repulsion_strength = repulsion;
+        self
+    }
+
+    pub fn with_attraction(mut self, attraction: f64) -> Self {
+        self.config.spring_strength = attraction;
+        self
+    }
+
+    pub fn with_iterations(mut self, iterations: usize) -> Self {
+        self.config.iterations = iterations;
+        self
+    }
+
+    pub fn visualize(&self, graph: &Graph) -> crate::Result<String> {
+        let layout = self.layout_graph(graph)?;
+        crate::render::SvgRenderer::new().render_layout(&layout)
     }
 
     pub fn layout_graph(&self, graph: &Graph) -> crate::Result<Layout> {
@@ -299,11 +329,8 @@ impl GraphLayout {
 
             // Update positions
             for node_id in graph.nodes.keys() {
-                if let (Some(force), Some(velocity), Some(position)) =
-                    (forces.get(node_id), velocities.get_mut(node_id), positions.get_mut(node_id))
-                {
-                    *velocity =
-                        Point::new(velocity.x * self.config.damping + force.x, velocity.y * self.config.damping + force.y);
+                if let (Some(force), Some(velocity), Some(position)) = (forces.get(node_id), velocities.get_mut(node_id), positions.get_mut(node_id)) {
+                    *velocity = Point::new(velocity.x * self.config.damping + force.x, velocity.y * self.config.damping + force.y);
 
                     // Limit velocity
                     let speed = (velocity.x * velocity.x + velocity.y * velocity.y).sqrt();
@@ -323,15 +350,20 @@ impl GraphLayout {
             if let Some(position) = positions.get(node_id) {
                 let size = node.size.unwrap_or(Size::new(self.config.node_width, self.config.node_height));
                 let rect = Rect::new(Point::new(position.x - size.width / 2.0, position.y - size.height / 2.0), size);
-                layout.add_node((*node_id).clone(), rect);
+                let nt = match node.node_type.as_str() {
+                    "function" => crate::layout::NodeType::Function,
+                    "struct" => crate::layout::NodeType::Struct,
+                    "module" => crate::layout::NodeType::Module,
+                    _ => crate::layout::NodeType::Default,
+                };
+                layout.add_node_with_metadata(node_id.clone(), node.label.clone(), rect, nt);
             }
         }
 
         // Add edges
         for edge in &graph.edges {
-            if let (Some(from_rect), Some(to_rect)) = (layout.nodes.get(&edge.from), layout.nodes.get(&edge.to)) {
-                let layout_edge =
-                    Edge::new(edge.from.clone(), edge.to.clone()).with_points(vec![from_rect.center(), to_rect.center()]);
+            if let (Some(from_node), Some(to_node)) = (layout.nodes.get(&edge.from), layout.nodes.get(&edge.to)) {
+                let layout_edge = Edge::new(edge.from.clone(), edge.to.clone()).with_points(vec![from_node.rect.center(), to_node.rect.center()]);
                 layout.add_edge(layout_edge);
             }
         }
@@ -356,14 +388,19 @@ impl GraphLayout {
             let position = Point::new(radius * angle.cos(), radius * angle.sin());
             let size = node.size.unwrap_or(Size::new(self.config.node_width, self.config.node_height));
             let rect = Rect::new(Point::new(position.x - size.width / 2.0, position.y - size.height / 2.0), size);
-            layout.add_node((*node_id).clone(), rect);
+            let nt = match node.node_type.as_str() {
+                "function" => crate::layout::NodeType::Function,
+                "struct" => crate::layout::NodeType::Struct,
+                "module" => crate::layout::NodeType::Module,
+                _ => crate::layout::NodeType::Default,
+            };
+            layout.add_node_with_metadata(node_id.clone(), node.label.clone(), rect, nt);
         }
 
         // Add edges
         for edge in &graph.edges {
-            if let (Some(from_rect), Some(to_rect)) = (layout.nodes.get(&edge.from), layout.nodes.get(&edge.to)) {
-                let layout_edge =
-                    Edge::new(edge.from.clone(), edge.to.clone()).with_points(vec![from_rect.center(), to_rect.center()]);
+            if let (Some(from_node), Some(to_node)) = (layout.nodes.get(&edge.from), layout.nodes.get(&edge.to)) {
+                let layout_edge = Edge::new(edge.from.clone(), edge.to.clone()).with_points(vec![from_node.rect.center(), to_node.rect.center()]);
                 layout.add_edge(layout_edge);
             }
         }
@@ -393,15 +430,20 @@ impl GraphLayout {
                 let node = &graph.nodes[node_id];
                 let size = node.size.unwrap_or(Size::new(self.config.node_width, self.config.node_height));
                 let rect = Rect::new(Point::new(x, y), size);
-                layout.add_node((*node_id).clone(), rect);
+                let nt = match node.node_type.as_str() {
+                    "function" => crate::layout::NodeType::Function,
+                    "struct" => crate::layout::NodeType::Struct,
+                    "module" => crate::layout::NodeType::Module,
+                    _ => crate::layout::NodeType::Default,
+                };
+                layout.add_node_with_metadata(node_id.clone(), node.label.clone(), rect, nt);
             }
         }
 
         // Add edges
         for edge in &graph.edges {
-            if let (Some(from_rect), Some(to_rect)) = (layout.nodes.get(&edge.from), layout.nodes.get(&edge.to)) {
-                let layout_edge =
-                    Edge::new(edge.from.clone(), edge.to.clone()).with_points(vec![from_rect.center(), to_rect.center()]);
+            if let (Some(from_node), Some(to_node)) = (layout.nodes.get(&edge.from), layout.nodes.get(&edge.to)) {
+                let layout_edge = Edge::new(edge.from.clone(), edge.to.clone()).with_points(vec![from_node.rect.center(), to_node.rect.center()]);
                 layout.add_edge(layout_edge);
             }
         }
@@ -428,14 +470,19 @@ impl GraphLayout {
             let y = row as f64 * (self.config.node_height + self.config.node_spacing);
             let size = node.size.unwrap_or(Size::new(self.config.node_width, self.config.node_height));
             let rect = Rect::new(Point::new(x, y), size);
-            layout.add_node((*node_id).clone(), rect);
+            let nt = match node.node_type.as_str() {
+                "function" => crate::layout::NodeType::Function,
+                "struct" => crate::layout::NodeType::Struct,
+                "module" => crate::layout::NodeType::Module,
+                _ => crate::layout::NodeType::Default,
+            };
+            layout.add_node_with_metadata(node_id.clone(), node.label.clone(), rect, nt);
         }
 
         // Add edges
         for edge in &graph.edges {
-            if let (Some(from_rect), Some(to_rect)) = (layout.nodes.get(&edge.from), layout.nodes.get(&edge.to)) {
-                let layout_edge =
-                    Edge::new(edge.from.clone(), edge.to.clone()).with_points(vec![from_rect.center(), to_rect.center()]);
+            if let (Some(from_node), Some(to_node)) = (layout.nodes.get(&edge.from), layout.nodes.get(&edge.to)) {
+                let layout_edge = Edge::new(edge.from.clone(), edge.to.clone()).with_points(vec![from_node.rect.center(), to_node.rect.center()]);
                 layout.add_edge(layout_edge);
             }
         }
@@ -451,7 +498,7 @@ impl GraphLayout {
         organic_config.repulsion_strength *= 1.5;
         organic_config.damping = 0.95;
 
-        let organic_layout = GraphLayout::new(GraphLayoutAlgorithm::ForceDirected).with_config(organic_config);
+        let organic_layout = GraphLayout::new().with_algorithm(GraphLayoutAlgorithm::ForceDirected).with_config(organic_config);
 
         organic_layout.force_directed_layout(graph)
     }
@@ -476,8 +523,7 @@ impl GraphLayout {
             let mut current_layer = Vec::new();
 
             // Find nodes with in-degree 0
-            let zero_in_degree: Vec<_> =
-                in_degree.iter().filter(|&(_, &degree)| degree == 0).map(|(id, _)| id.clone()).collect();
+            let zero_in_degree: Vec<_> = in_degree.iter().filter(|&(_, &degree)| degree == 0).map(|(id, _)| id.clone()).collect();
 
             if zero_in_degree.is_empty() {
                 // Cycle detected - break it by selecting node with minimum in-degree
@@ -528,19 +574,7 @@ pub struct GraphLayoutConfig {
 
 impl Default for GraphLayoutConfig {
     fn default() -> Self {
-        Self {
-            node_width: 80.0,
-            node_height: 40.0,
-            node_spacing: 20.0,
-            layer_distance: 100.0,
-            circle_radius: 200.0,
-            iterations: 100,
-            spring_strength: 0.1,
-            repulsion_strength: 1000.0,
-            damping: 0.9,
-            max_velocity: 10.0,
-            ideal_edge_length: 100.0,
-        }
+        Self { node_width: 80.0, node_height: 40.0, node_spacing: 20.0, layer_distance: 100.0, circle_radius: 200.0, iterations: 100, spring_strength: 0.1, repulsion_strength: 1000.0, damping: 0.9, max_velocity: 10.0, ideal_edge_length: 100.0 }
     }
 }
 

@@ -1,27 +1,37 @@
-# Oaks - Parser Combinator Library Collection
+# Oaks - Parser Framework for Rust
 
 [![Rust Version](https://img.shields.io/badge/rust-nightly-blue.svg)](https://www.rust-lang.org)
 
-Oaks is a comprehensive collection of parser combinator libraries for Rust, providing robust parsing solutions for
-multiple programming languages and data formats. Built on a solid foundation of parser combinators, Oaks offers both
-high-level convenience and low-level control.
+Oaks is a modular parser framework for Rust that provides a unified approach to building language parsers. Built on the oak-core foundation, Oaks offers a comprehensive set of tools for lexical analysis, parsing, and syntax tree manipulation.
 
 ## 🚀 Features
 
-- **Multi-Language Support**: 50+ programming languages and data formats
-- **High Performance**: Zero-copy parsing with minimal allocations
-- **Extensible**: Modular design allowing custom parsers and extensions
-- **No-std Compatible**: Core library works without the standard library
-- **Comprehensive Error Handling**: Detailed error messages with source locations
-- **Incremental Parsing**: Support for partial and streaming parsing
-- **Syntax Highlighting**: Built-in multi-language syntax highlighting
-- **Pretty Printing**: Code formatting and pretty printing utilities
+- **Modular Architecture**: Decouples the core parsing engine from language-specific logic. Implement new languages by defining `TokenType` and `ElementType` without touching the core infrastructure.
+- **Lossless Green/Red Tree**: Implements a Rowan-style architecture. **Green Trees** are immutable and interned for memory efficiency, while **Red Trees** provide a parent-aware, position-aware view for effortless traversal.
+- **Structural Sharing**: Modifications to the tree use `Arc`-based sharing. Only the modified nodes and their direct ancestors are recreated, making transformations and refactorings extremely memory-efficient.
+- **Error Recovery**: The parser can recover from syntax errors to produce a partial but valid tree, ensuring that features like highlighting and autocompletion remain functional during active editing.
+- **Incremental Parsing**: By utilizing an `IncrementalCache`, the framework only re-parses the changed portions of the source code, enabling lightning-fast updates for large files in IDE environments.
+- **Source Mapping**: Absolute position information is dynamically computed from Red Nodes, providing a stable and accurate foundation for Source Maps and diagnostic reporting.
 
-## 📦 Core Crates
+## 🛠️ Core Capabilities
 
-| Crate              | Description                           | Status         |
+### Formatter
+Implemented by manipulating `Trivia` (whitespace, line breaks, comments) within the `GreenNode` structure. It ensures 100% lossless code formatting by reconstructing the source text while preserving or adjusting non-functional tokens.
+
+### Linter
+Utilizes the `Visitor` pattern to traverse the `RedTree`. By leveraging absolute `span` information computed from red nodes, it performs efficient static analysis and provides precise diagnostic locations for coding standard violations.
+
+### Highlighter
+Supports dual-mode highlighting: fast Lexer-based highlighting using the raw token stream, and precise Parser-based highlighting that utilizes the full syntax tree to distinguish between semantic categories like function calls, types, and variables.
+
+### Transformer
+Powered by the `Transformer` trait, it enables high-performance code refactoring. It leverages the **Structural Sharing** property of the Red-Green tree architecture; only modified nodes and their parent paths are recreated as new `GreenNodes`, while unchanged subtrees are efficiently reused via `Arc`.
+
+## 📦 Core Components
+
+| Component          | Description                           | Status         |
 |--------------------|---------------------------------------|----------------|
-| `oak-core`         | Core parser combinator primitives     | ✅ Active       |
+| `oak-core`         | Core parsing infrastructure and traits| ✅ Active       |
 | `oak-highlight`    | Multi-language syntax highlighter     | ✅ Active       |
 | `oak-pretty-print` | Code formatting and pretty printing   | ✅ Active       |
 | `oak-visualize`    | AST visualization and graph rendering | 🔄 Development |
@@ -32,19 +42,16 @@ high-level convenience and low-level control.
 ### System Programming
 
 - `oak-c` - C language parser with preprocessor
-- `oak-cpp` - C++ language parser
 - `oak-rust` - Rust language parser
 - `oak-zig` - Zig language parser
 - `oak-go` - Go language parser
-- `oak-d` - D language parser
 
 ### Web & Scripting
 
 - `oak-javascript` - JavaScript/ECMAScript parser
-- `oak-typescript` - TypeScript parser
 - `oak-html` - HTML parser
 - `oak-css` - CSS parser
-- `oak-json` - JSON parser with streaming
+- `oak-json` - JSON parser with JSON5 support
 - `oak-markdown` - Markdown parser with CommonMark
 
 ### Functional & JVM
@@ -53,8 +60,6 @@ high-level convenience and low-level control.
 - `oak-java` - Java language parser
 - `oak-kotlin` - Kotlin language parser
 - `oak-scala` - Scala language parser
-- `oak-clojure` - Clojure parser
-- `oak-fsharp` - F# parser
 
 ### Data & Config
 
@@ -64,65 +69,102 @@ high-level convenience and low-level control.
 - `oak-csv` - CSV parser
 - `oak-xml` - XML parser
 
-### And many more... (50+ languages supported)
+### And many more...
 
 ## 🛠️ Quick Start
 
-Basic usage example:
+Basic usage example with oak-c:
 
 ```rust
-use oak_core::{Language, Lexer};
-use oak_rust::{RustLanguage, RustLexer};
+use oak_core::{SourceText, Parser};
+use oak_c::{CLanguage, CParser};
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
-    // Tokenize Rust code
-    let input = "fn main() { println!(\"Hello, World!\"); }";
-    let lexer = RustLexer::new(input);
-    let tokens: Vec<_> = lexer.collect();
-
-    println!("Tokens: {:?}", tokens);
+    // Create source text from input
+    let source = SourceText::new("int main() { return 0; }");
+    
+    // Parse the source code
+    let parser = CParser::new(CLanguage::default());
+    let result = parser.parse(&source);
+    
+    // Handle the result
+    match result {
+        Ok(tree) => println!("Parsed successfully: {:?}", tree),
+        Err(errors) => println!("Parse errors: {:?}", errors),
+    }
+    
     Ok(())
 }
 ```
 
 ## 🏗️ Architecture
 
-Oaks follows a modular workspace architecture:
+Oaks is designed from the ground up to be a **High-Performance LSP Foundation**. Its architecture solves the most challenging problems in building modern IDE support:
 
-- **Core Libraries**: Fundamental parser combinator primitives in `projects/`
-    - `oak-core`: Core parsing infrastructure and traits
-    - `oak-highlight`: Multi-language syntax highlighting
-    - `oak-pretty-print`: Code formatting utilities
-    - `oak-visualize`: AST visualization (in development)
-    - `oaks`: Unified API facade
+### The LSP Powerhouse
+- **Native LSP Type Support**: `SourceText` provides built-in, zero-cost conversion between UTF-8 byte offsets and LSP-standard `Line/Character` positions.
+- **Resilient Analysis**: The framework's **Error Recovery** ensures that your Language Server remains responsive even when the user's code is in an invalid state.
+- **HMR-Ready**: Sub-millisecond **Incremental Parsing** means your LSP can provide instant feedback on every keystroke, even in multi-megabyte files.
+- **Refactoring Engine**: The `Transformer` trait combined with **Structural Sharing** allows for complex code actions (like "Rename" or "Extract Method") to be implemented with high performance and 100% comment preservation.
 
-- **Language Parsers**: Individual parser implementations in `examples/`
-    - 50+ language-specific parsers
-    - Each parser built on top of `oak-core`
-    - Consistent API design across all languages
+### Semantic Integration Ready
+While Oaks focuses on high-performance syntax analysis, it is designed to be the perfect foundation for semantic analysis:
+- **Semantic Hints**: The `TokenType` and `ElementType` traits provide built-in hooks like `is_definition`, `is_reference`, and `is_scope_boundary`, allowing external semantic engines to instantly understand the tree's logical structure.
+- **Stable Identifiers**: Red nodes provide stable pointers that semantic analyzers can use for symbol indexing and cross-referencing.
+- **Parent-Aware Navigation**: The `RedTree` allows semantic checkers to easily bubble up from a usage to its scope or declaration.
+- **Typed IR**: The high-level **Typed AST** layer serves as a clean, serializable Intermediate Representation (IR) that external type-checkers and symbol solvers can consume without knowing the details of the red-green tree.
+- **Framework Agnostic**: Oaks is unopinionated about how you handle semantics, making it trivial to integrate with databases (like Salsa) or graph-based analysis engines.
 
-- **Development Tools**: Build and development utilities
-    - Workspace-based development with Cargo
-    - Comprehensive test suites for each parser
-    - Documentation and examples
+### Core Framework Concepts
+- **Language Trait**: A unified interface to plug in any grammar.
+- **Green Tree**: The "What" — immutable, shared, and extremely compact.
+- **Red Tree**: The "Where" — a lightweight, parent-aware view for easy tree walking.
+- **Visitor & Transformer**: Standardized patterns for both read-only analysis (Linter) and read-write mutations (Refactoring).
 
-## 📁 Project Structure
+### Language Implementations
+
+Each language parser (e.g., `oak-c`, `oak-json`) follows a consistent pattern:
+
+1. **SyntaxKind Enum**: Defines all possible syntax elements
+2. **Language Struct**: Implements the Language trait
+3. **Lexer Struct**: Implements tokenization for the language
+4. **AST Definitions**: Optional typed AST structures
+
+### Project Structure
 
 ```
 oaks/
 ├── projects/              # Core libraries
 │   ├── oak-core/         # Core parsing infrastructure
+│   │   ├── src/
+│   │   │   ├── lib.rs    # Main API exports
+│   │   │   ├── language/ # Language trait
+│   │   │   ├── lexer/    # Lexer trait and utilities
+│   │   │   ├── parser/   # Parser trait and Pratt parser
+│   │   │   ├── source/   # SourceText implementation
+│   │   │   ├── tree/     # Green/Red tree implementation
+│   │   │   └── visitor/  # Tree visitor pattern
+│   │   └── Cargo.toml
 │   ├── oak-highlight/    # Syntax highlighting
 │   ├── oak-pretty-print/ # Code formatting
 │   ├── oak-visualize/    # AST visualization
 │   └── oaks/             # Main unified library
-├── examples/             # Language parsers (50+ languages)
-│   ├── oak-rust/         # Rust parser
-│   ├── oak-c/           # C parser
-│   ├── oak-javascript/  # JavaScript parser
-│   └── ...              # Many more languages
-├── documents/            # Additional documentation
-├── target/              # Build artifacts
+├── examples/             # Language parsers
+│   ├── oak-c/           # C parser example
+│   │   ├── src/
+│   │   │   ├── lib.rs   # Public API
+│   │   │   ├── language/ # Language implementation
+│   │   │   ├── lexer/   # Lexer implementation
+│   │   │   └── kind/    # SyntaxKind definitions
+│   │   └── Cargo.toml
+│   ├── oak-json/        # JSON parser example
+│   │   ├── src/
+│   │   │   ├── lib.rs   # Public API
+│   │   │   ├── language/ # Language implementation
+│   │   │   ├── lexer/   # Lexer implementation
+│   │   │   └── kind/    # SyntaxKind definitions
+│   │   └── Cargo.toml
+│   └── ...              # Other language parsers
 └── Cargo.toml           # Workspace configuration
 ```
 
@@ -133,64 +175,110 @@ oaks/
 - Rust nightly toolchain (required for `new_range_api` feature)
 - Cargo workspace support
 
-### Building
-
-```bash
-# Build all crates
-cargo build --release
-
-# Build specific language parser
-cargo build -p oak-rust
-
-# Run tests
-cargo test --release
-```
-
-### Development Scripts
-
-```bash
-# Format code
-npm run fmt
-
-# Generate documentation
-npm run doc
-
-# Run all tests
-npm run test
-```
-
 ## 📋 Examples
 
-### Tokenizing Rust Code
+### Parsing C Code
 
 ```rust
-use oak_rust::{RustLexer, RustLanguage};
-use oak_core::{Lexer, Language};
+use oak_core::{SourceText, Parser};
+use oak_c::{CLanguage, CParser};
 
-let input = "fn main() { println!(\"Hello, World!\"); }";
-let lexer = RustLexer::new(input);
-let tokens: Vec<_ > = lexer.collect();
-println!("Found {} tokens", tokens.len());
+fn parse_c_function() -> Result<(), Box<dyn std::error::Error>> {
+    let source = SourceText::new("
+        int factorial(int n) {
+            if (n <= 1) return 1;
+            return n * factorial(n - 1);
+        }
+    ");
+    
+    let parser = CParser::new(CLanguage::default());
+    let result = parser.parse(&source)?;
+    
+    println!("Parsed C function successfully");
+    Ok(())
+}
+```
+
+### Parsing JSON with Configuration
+
+```rust
+use oak_core::{SourceText, Parser};
+use oak_json::{JsonLanguage, JsonParser};
+
+fn parse_json5() -> Result<(), Box<dyn std::error::Error>> {
+    // JSON5 allows comments, trailing commas, and more
+    let source = SourceText::new(r#"
+    {
+        // This is a comment
+        "name": "Oaks Parser",
+        "version": "1.0.0",  // trailing comma
+    }
+    "#);
+    
+    // Use JSON5 configuration
+    let language = JsonLanguage::json5();
+    let parser = JsonParser::new(language);
+    let result = parser.parse(&source)?;
+    
+    println!("Parsed JSON5 successfully");
+    Ok(())
+}
+```
+
+### Incremental Parsing
+
+```rust
+use oak_core::{SourceText, Parser, TextEdit};
+use oak_json::{JsonLanguage, JsonParser};
+
+fn incremental_parsing() -> Result<(), Box<dyn std::error::Error>> {
+    let mut source = SourceText::new(r#"{"name": "Oaks"}"#);
+    
+    let language = JsonLanguage::standard();
+    let parser = JsonParser::new(language);
+    
+    // Initial parse
+    let result = parser.parse(&source)?;
+    
+    // Apply edits
+    let edits = vec![TextEdit {
+        span: 7..7,  // After "name":
+        text: ", \"version\": \"1.0\"".to_string(),
+    }];
+    
+    let min_offset = source.apply_edits(&edits);
+    
+    // Incremental reparse (only affected part)
+    let incremental_result = parser.parse_incremental(&source, min_offset)?;
+    
+    println!("Incremental parsing successful");
+    Ok(())
+}
 ```
 
 ### Syntax Highlighting
 
 ```rust
 use oak_highlight::{Highlighter, Theme};
-use oak_rust::RustLanguage;
+use oak_c::CLanguage;
 
-let highlighter = Highlighter::new(RustLanguage::new());
-let highlighted = highlighter.highlight_to_html(code, Theme::Github);
-```
-
-### Pretty Printing
-
-```rust
-use oak_rust::RustLanguage;
-use oak_pretty_print::Formatter;
-
-let formatter = Formatter::new(RustLanguage::new());
-let formatted = formatter.format(code) ?;
+fn syntax_highlighting() -> Result<(), Box<dyn std::error::Error>> {
+    let code = r#"
+    #include <stdio.h>
+    
+    int main() {
+        printf("Hello, World!\n");
+        return 0;
+    }
+    "#;
+    
+    let language = CLanguage::default();
+    let highlighter = Highlighter::new(language);
+    let highlighted = highlighter.highlight_to_html(code, Theme::Github);
+    
+    println!("Highlighted HTML: {}", highlighted);
+    Ok(())
+}
 ```
 
 ## 🚦 Development Status
@@ -199,45 +287,54 @@ Oaks is actively developed and maintained. Current status:
 
 ### ✅ Completed
 
-- Core parser combinator framework (`oak-core`)
-- Basic lexer infrastructure for all languages
+- Core parser framework (`oak-core`)
+  - Language trait and infrastructure
+  - Lexer and Parser traits
+  - Green/Red tree system
+  - SourceText with line/column tracking
+  - Error recovery mechanisms
+- Basic language implementations
+  - C parser with full syntax support
+  - JSON parser with JSON5 support
+  - Other language parsers in various stages
 - Syntax highlighting system (`oak-highlight`)
 - Pretty printing framework (`oak-pretty-print`)
-- Project structure for 50+ languages
+- Incremental parsing support
+- Native `async trait` support (removed `async-trait` dependency)
 
 ### 🔄 In Development
 
-- Full AST parsing for major languages (Rust, C, JavaScript, Python)
+- Complete AST implementations for major languages
 - Advanced error recovery mechanisms
-- Incremental parsing capabilities
 - Performance optimizations
+- Comprehensive test coverage
 - Documentation and examples
 
 ### 📋 Planned
 
-- Complete AST implementations for all languages
 - Language server protocol support
 - Advanced code analysis features
 - IDE integrations
-- Streaming parser support
+- Additional language parsers
 
 ## 🤝 Contributing
 
-Contributions are welcome! Please feel free to submit a Pull Request. For major changes, please open an issue first to
-discuss what you would like to change.
+Contributions are welcome! Please feel free to submit a Pull Request. For major changes, please open an issue first to discuss what you would like to change.
 
-1. Fork the repository
-2. Create your feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add some amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
+### Adding a New Language Parser
 
-## 🙏 Acknowledgments
+To add a new language parser to Oaks:
 
-- Built with love for the Rust community
-- Inspired by parser combinator libraries like [nom](https://github.com/Geal/nom)
-  and [combine](https://github.com/Marwes/combine)
-- Thanks to all contributors who have helped shape this project
+1. Create a new directory in `examples/` following the pattern `oak-{language}`
+2. Implement the required components:
+   - `SyntaxKind` enum in `src/kind/`
+   - `Language` implementation in `src/language/`
+   - `Lexer` implementation in `src/lexer/`
+   - Optional: AST definitions in `src/ast/`
+3. Add your parser to the workspace in the root `Cargo.toml`
+4. Add documentation and examples
+
+For reference implementations, see `oak-c` and `oak-json`.
 
 ## 📚 Resources
 

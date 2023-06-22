@@ -1,110 +1,98 @@
-use crate::{SyntaxKind, Token};
-use std::range::Range;
+use super::LexerState;
+use crate::{
+    Language,
+    source::{SimdScanner, Source},
+};
 
-/// Configuration for string scanning
-#[derive(Debug, Clone)]
+/// Configuration for string literal scanning.
 pub struct StringConfig {
-    /// Quote characters that can start/end strings
+    /// Characters that can start and end a string (e.g., '"', '\'').
     pub quotes: &'static [char],
-    /// Custom escape characters (default is backslash)
+    /// Character used for escaping (e.g., '\\').
     pub escape: Option<char>,
-}
-
-/// Configuration for multiline string scanning
-pub struct StringMultilineConfig {
-    /// Opening delimiters for multiline strings (e.g., ["\"\"\"", "'''"])
-    pub open_delimiters: &'static [&'static str],
-    /// Closing delimiters for multiline strings (e.g., ["\"\"\"", "'''"])
-    pub close_delimiters: &'static [&'static str],
-    /// Whether to allow escape sequences in multiline strings
-    pub escape: Option<char>,
-}
-
-impl Default for StringConfig {
-    fn default() -> Self {
-        Self { quotes: &['"'], escape: Some('\\') }
-    }
-}
-
-impl Default for StringMultilineConfig {
-    fn default() -> Self {
-        Self { open_delimiters: &["\"\"\"", "'''"], close_delimiters: &["\"\"\"", "'''"], escape: Some('\\') }
-    }
 }
 
 impl StringConfig {
-    /// Scan for a string at the given position
-    ///
-    /// # Arguments
-    ///
-    /// * `view` - The text view to scan
-    /// * `start` - The starting byte position
-    /// * `kind` - The token kind to assign to the string
-    ///
-    /// # Returns
-    ///
-    /// A token if a string is found, `None` otherwise
-    pub fn scan<K: SyntaxKind>(&self, view: &str, start: usize, kind: K) -> Option<Token<K>> {
-        for quote in self.quotes {
-            if view.starts_with(*quote) {
-                let end_index = view[start + 1..].find(*quote);
-                if let Some(end_index) = end_index {
-                    return Some(Token { kind, span: Range { start, end: start + 1 + end_index } });
-                }
-            }
-        }
-        None
-    }
-}
-impl StringMultilineConfig {
-    /// Scan for a multiline string at the given position
-    ///
-    /// # Arguments
-    ///
-    /// * `view` - The text view to scan
-    /// * `start` - The starting byte position
-    /// * `kind` - The token kind to assign to the string
-    ///
-    /// # Returns
-    ///
-    /// A token if a multiline string is found, `None` otherwise
-    pub fn scan<K: SyntaxKind>(&self, view: &str, start: usize, kind: K) -> Option<Token<K>> {
-        let remaining = &view[start..];
+    /// Scans for a string literal at the current position in the lexer state.
+    pub fn scan<S: Source + ?Sized, L: Language>(&self, state: &mut LexerState<S, L>, kind: L::TokenType) -> bool {
+        let start = state.get_position();
+        let quote = match state.current() {
+            Some(c) if self.quotes.contains(&c) => c,
+            _ => return false,
+        };
 
-        // Try each opening delimiter
-        for (i, open_delim) in self.open_delimiters.iter().enumerate() {
-            if remaining.starts_with(open_delim) {
-                let close_delim = self.close_delimiters[i];
-                let mut pos = open_delim.len();
+        state.advance(quote.len_utf8());
 
-                // Scan until we find the closing delimiter
-                while pos < remaining.len() {
-                    // Check for closing delimiter
-                    if remaining[pos..].starts_with(close_delim) {
-                        pos += close_delim.len();
-                        return Some(Token { kind, span: Range { start, end: start + pos } });
+        // Fast path for ASCII strings
+        if quote.is_ascii() && self.escape.map_or(true, |c| c.is_ascii()) {
+            let q_byte = quote as u8;
+            let e_byte = self.escape.map(|c| c as u8).unwrap_or(q_byte);
+
+            loop {
+                let (rest_len, found_info) = {
+                    let rest = state.rest();
+                    if rest.is_empty() {
+                        (0, None)
                     }
+                    else {
+                        let bytes = rest.as_bytes();
+                        if let Some(pos) = find_first_of_4(bytes, q_byte, e_byte, q_byte, e_byte) { (rest.len(), Some((pos, bytes[pos]))) } else { (rest.len(), None) }
+                    }
+                };
 
-                    // Handle escape sequences if enabled
-                    if let Some(escape_char) = self.escape {
-                        if remaining[pos..].starts_with(escape_char) && pos + 1 < remaining.len() {
-                            // Skip the escape character and the next character
-                            pos += 2;
-                            continue;
+                if rest_len == 0 {
+                    break;
+                }
+
+                if let Some((pos, found)) = found_info {
+                    state.advance(pos);
+                    if found == q_byte {
+                        state.advance(1);
+                        state.add_token(kind, start, state.get_position());
+                        return true;
+                    }
+                    else {
+                        state.advance(1);
+                        if let Some(next) = state.current() {
+                            state.advance(next.len_utf8());
                         }
                     }
-
-                    // Move to next character
-                    let ch = remaining[pos..].chars().next().unwrap_or('\0');
-                    pos += ch.len_utf8();
                 }
+                else {
+                    state.advance(rest_len);
+                }
+            }
 
-                // If we reach here, we didn't find a closing delimiter
-                // Return the token anyway, but it will be incomplete
-                return Some(Token { kind, span: Range { start, end: start + remaining.len() } });
+            // Unterminated string
+            state.add_token(kind, start, state.get_position());
+            return true;
+        }
+
+        while let Some(ch) = state.current() {
+            if Some(ch) == self.escape {
+                state.advance(ch.len_utf8());
+                if let Some(next) = state.current() {
+                    state.advance(next.len_utf8());
+                }
+            }
+            else if ch == quote {
+                state.advance(ch.len_utf8());
+                state.add_token(kind, start, state.get_position());
+                return true;
+            }
+            else {
+                state.advance(ch.len_utf8());
             }
         }
 
-        None
+        // Unterminated string
+        state.add_token(kind, start, state.get_position());
+        true
     }
+}
+
+/// Finds the first occurrence of any of the four given bytes.
+#[inline]
+pub fn find_first_of_4(bytes: &[u8], a: u8, b: u8, c: u8, d: u8) -> Option<usize> {
+    SimdScanner::find_first_of_4(bytes, a, b, c, d)
 }

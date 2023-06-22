@@ -5,40 +5,52 @@ use std::{
     vec::Vec,
 };
 
-/// 导出格式
+/// Supported export formats for highlighted code.
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub enum ExportFormat {
+    /// HTML with optional CSS classes or inline styles.
     Html,
+    /// CSS style definitions for highlighting.
     Css,
+    /// JSON representation of highlighted segments.
     Json,
+    /// XML representation of highlighted segments.
     Xml,
+    /// ANSI escape codes for terminal color output.
     Ansi,
 }
 
-/// 导出器特征
+/// A trait for exporting [HighlightResult] into various string formats.
 pub trait Exporter {
-    fn export(&self, result: &HighlightResult) -> String;
+    /// Exports the highlighting result into a string representation.
+    fn export(&self, result: &HighlightResult<'_>) -> String;
 }
 
-/// HTML 导出器
+/// An exporter that generates HTML markup for highlighted code.
 pub struct HtmlExporter {
+    /// Whether to include a `<style>` block with default CSS classes.
     pub include_css: bool,
+    /// Whether to use inline `style="..."` attributes instead of CSS classes.
     pub inline_styles: bool,
 }
 
 impl HtmlExporter {
+    /// Creates a new [HtmlExporter] with the specified configuration.
     pub fn new(include_css: bool, inline_styles: bool) -> Self {
         Self { include_css, inline_styles }
     }
 }
 
 impl Exporter for HtmlExporter {
-    fn export(&self, result: &HighlightResult) -> String {
+    fn export(&self, result: &HighlightResult<'_>) -> String {
         let mut html = String::new();
 
         if self.include_css {
             html.push_str("<style>\n");
             html.push_str(".highlight { font-family: 'Courier New', monospace; white-space: pre; }\n");
+            html.push_str(".highlight .bold { font-weight: bold; }\n");
+            html.push_str(".highlight .italic { font-style: italic; }\n");
+            html.push_str(".highlight .underline { text-decoration: underline; }\n");
             html.push_str("</style>\n");
         }
 
@@ -59,7 +71,7 @@ impl Exporter for HtmlExporter {
 }
 
 impl HtmlExporter {
-    fn segment_to_html_inline(&self, segment: &HighlightSegment) -> String {
+    fn segment_to_html_inline(&self, segment: &HighlightSegment<'_>) -> String {
         let mut style_attrs = Vec::new();
 
         if let Some(color) = &segment.style.color {
@@ -84,18 +96,13 @@ impl HtmlExporter {
 
         let escaped_text = html_escape(&segment.text);
 
-        if style_attrs.is_empty() {
-            escaped_text
-        }
-        else {
-            format!("<span style=\"{}\">{}</span>", style_attrs.join("; "), escaped_text)
-        }
+        if style_attrs.is_empty() { escaped_text } else { format!("<span style=\"{}\">{}</span>", style_attrs.join("; "), escaped_text) }
     }
 
-    fn segment_to_html_class(&self, segment: &HighlightSegment) -> String {
+    fn segment_to_html_class(&self, segment: &HighlightSegment<'_>) -> String {
         let escaped_text = html_escape(&segment.text);
 
-        // 根据样式生成 CSS 类名
+        // Generate CSS class names based on style
         let mut classes = Vec::new();
 
         if segment.style.bold {
@@ -114,11 +121,11 @@ impl HtmlExporter {
     }
 }
 
-/// CSS 导出器
+/// An exporter that generates CSS style definitions for highlighting classes.
 pub struct CssExporter;
 
 impl Exporter for CssExporter {
-    fn export(&self, _result: &HighlightResult) -> String {
+    fn export(&self, _result: &HighlightResult<'_>) -> String {
         let mut css = String::new();
 
         css.push_str(".highlight {\n");
@@ -134,61 +141,23 @@ impl Exporter for CssExporter {
     }
 }
 
-/// JSON 导出器
-pub struct JsonExporter;
+/// An exporter that generates a JSON representation of the highlighting result.
+pub struct JsonExporter {
+    /// Whether to format the JSON output with indentation.
+    pub pretty: bool,
+}
 
 impl Exporter for JsonExporter {
-    fn export(&self, result: &HighlightResult) -> String {
-        let mut json = String::new();
-
-        json.push_str("{\n");
-        json.push_str("  \"source\": ");
-        json.push_str(&json_escape(&result.source));
-        json.push_str(",\n");
-        json.push_str("  \"segments\": [\n");
-
-        for (i, segment) in result.segments.iter().enumerate() {
-            if i > 0 {
-                json.push_str(",\n");
-            }
-            json.push_str("    {\n");
-            json.push_str(&format!("      \"start\": {},\n", segment.span.start));
-            json.push_str(&format!("      \"end\": {},\n", segment.span.end));
-            json.push_str("      \"text\": ");
-            json.push_str(&json_escape(&segment.text));
-            json.push_str(",\n");
-            json.push_str("      \"style\": {\n");
-
-            if let Some(color) = &segment.style.color {
-                json.push_str("        \"color\": ");
-                json.push_str(&json_escape(color));
-                json.push_str(",\n");
-            }
-
-            if let Some(bg_color) = &segment.style.background_color {
-                json.push_str("        \"backgroundColor\": ");
-                json.push_str(&json_escape(bg_color));
-                json.push_str(",\n");
-            }
-
-            json.push_str(&format!("        \"bold\": {},\n", segment.style.bold));
-            json.push_str(&format!("        \"italic\": {},\n", segment.style.italic));
-            json.push_str(&format!("        \"underline\": {}\n", segment.style.underline));
-            json.push_str("      }\n");
-            json.push_str("    }");
-        }
-
-        json.push_str("\n  ]\n");
-        json.push_str("}\n");
-        json
+    fn export(&self, result: &HighlightResult<'_>) -> String {
+        if self.pretty { serde_json::to_string_pretty(result).unwrap_or_default() } else { serde_json::to_string(result).unwrap_or_default() }
     }
 }
 
-/// ANSI 导出器（终端颜色）
+/// An exporter that generates ANSI escape codes for terminal color output.
 pub struct AnsiExporter;
 
 impl Exporter for AnsiExporter {
-    fn export(&self, result: &HighlightResult) -> String {
+    fn export(&self, result: &HighlightResult<'_>) -> String {
         let mut output = String::new();
 
         for segment in &result.segments {
@@ -200,10 +169,10 @@ impl Exporter for AnsiExporter {
 }
 
 impl AnsiExporter {
-    fn segment_to_ansi(&self, segment: &HighlightSegment) -> String {
+    fn segment_to_ansi(&self, segment: &HighlightSegment<'_>) -> String {
         let mut codes = Vec::new();
 
-        // 重置
+        // Reset
         codes.push("0");
 
         if segment.style.bold {
@@ -218,20 +187,20 @@ impl AnsiExporter {
             codes.push("4");
         }
 
-        // 简单的颜色映射
+        // Basic color mapping
         if let Some(color) = &segment.style.color {
             match color.as_str() {
-                "#FF0000" | "#F44747" | "#DC322F" | "#FF5555" => codes.push("31"), // 红色
-                "#00FF00" | "#6A9955" | "#859900" => codes.push("32"),             // 绿色
-                "#FFFF00" | "#F1FA8C" | "#E6DB74" => codes.push("33"),             // 黄色
-                "#0000FF" | "#569CD6" | "#005CC5" => codes.push("34"),             // 蓝色
-                "#FF00FF" | "#FF79C6" | "#D73A49" => codes.push("35"),             // 洋红
-                "#00FFFF" | "#9CDCFE" | "#2AA198" => codes.push("36"),             // 青色
-                _ => codes.push("37"),                                             // 白色
+                "#FF0000" | "#F44747" | "#DC322F" | "#FF5555" => codes.push("31"), // Red
+                "#00FF00" | "#6A9955" | "#859900" => codes.push("32"),             // Green
+                "#FFFF00" | "#F1FA8C" | "#E6DB74" => codes.push("33"),             // Yellow
+                "#0000FF" | "#569CD6" | "#005CC5" => codes.push("34"),             // Blue
+                "#FF00FF" | "#FF79C6" | "#D73A49" => codes.push("35"),             // Magenta
+                "#00FFFF" | "#9CDCFE" | "#2AA198" => codes.push("36"),             // Cyan
+                _ => codes.push("37"),                                             // White
             }
         }
 
-        if codes.len() > 1 { format!("\x1b[{}m{}\x1b[0m", codes.join(";"), segment.text) } else { segment.text.clone() }
+        if codes.len() > 1 { format!("\x1b[{}m{}\x1b[0m", codes.join(";"), segment.text) } else { segment.text.to_string() }
     }
 }
 
@@ -247,27 +216,4 @@ fn html_escape(text: &str) -> String {
             _ => c.to_string(),
         })
         .collect()
-}
-
-/// JSON 转义
-fn json_escape(text: &str) -> String {
-    let mut result = String::new();
-    result.push('"');
-
-    for c in text.chars() {
-        match c {
-            '"' => result.push_str("\\\""),
-            '\\' => result.push_str("\\\\"),
-            '\n' => result.push_str("\\n"),
-            '\r' => result.push_str("\\r"),
-            '\t' => result.push_str("\\t"),
-            c if c.is_control() => {
-                result.push_str(&format!("\\u{:04x}", c as u32));
-            }
-            c => result.push(c),
-        }
-    }
-
-    result.push('"');
-    result
 }

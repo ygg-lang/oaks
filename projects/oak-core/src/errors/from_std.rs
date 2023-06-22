@@ -5,3 +5,9 @@ impl From<OakErrorKind> for OakError {
         Self { kind: Box::new(kind) }
     }
 }
+
+impl From<std::io::Error> for OakError {
+    fn from(error: std::io::Error) -> Self {
+        OakErrorKind::IoError { error, url: None }.into()
+    }
+}

@@ -5,7 +5,7 @@
 //! test result serialization.
 
 use crate::{
-    Language, Lexer, SyntaxKind,
+    Language, Lexer, TokenType,
     errors::{OakDiagnostics, OakError},
     helpers::{create_file, json_from_path, source_from_path},
     source::Source,
@@ -82,20 +82,22 @@ impl LexerTester {
     ///
     /// ```
     /// ```
-    pub fn run_tests<L, Lex>(self, lexer: Lex) -> Result<(), OakError>
+    pub fn run_tests<L, Lex>(self, lexer: &Lex) -> Result<(), OakError>
     where
         L: Language + Send + Sync + 'static,
-        L::SyntaxKind: Serialize + std::fmt::Debug + Send + Sync,
+        L::TokenType: Serialize + std::fmt::Debug + Send + Sync,
         Lex: Lexer<L> + Send + Sync + 'static + Clone,
     {
         let test_files = self.find_test_files()?;
+        let force_regenerated = std::env::var("REGENERATE_TESTS").unwrap_or("0".to_string()) == "1";
+        let mut regenerated_any = false;
 
         for file_path in test_files {
             println!("Testing file: {}", file_path.display());
-            self.test_single_file::<L, Lex>(&file_path, &lexer)?;
+            regenerated_any |= self.test_single_file::<L, Lex>(&file_path, lexer, force_regenerated)?;
         }
 
-        Ok(())
+        if regenerated_any && force_regenerated { Err(OakError::test_regenerated(self.root)) } else { Ok(()) }
     }
 
     fn find_test_files(&self) -> Result<Vec<PathBuf>, OakError> {
@@ -107,8 +109,15 @@ impl LexerTester {
 
             if path.is_file() {
                 if let Some(ext) = path.extension() {
-                    if self.extensions.iter().any(|e| e == ext.to_str().unwrap_or("")) {
-                        files.push(path.to_path_buf());
+                    let ext_str = ext.to_str().unwrap_or("");
+                    if self.extensions.iter().any(|e| e == ext_str) {
+                        // 忽略由 Tester 自身生成的输出文件，防止递归包含
+                        let file_name = path.file_name().and_then(|n| n.to_str()).unwrap_or("");
+                        let is_output_file = file_name.ends_with(".parsed.json") || file_name.ends_with(".lexed.json") || file_name.ends_with(".built.json");
+
+                        if !is_output_file {
+                            files.push(path.to_path_buf());
+                        }
                     }
                 }
             }
@@ -117,60 +126,55 @@ impl LexerTester {
         Ok(files)
     }
 
-    fn test_single_file<L, Lex>(&self, file_path: &Path, lexer: &Lex) -> Result<(), OakError>
+    fn test_single_file<L, Lex>(&self, file_path: &Path, lexer: &Lex, force_regenerated: bool) -> Result<bool, OakError>
     where
         L: Language + Send + Sync + 'static,
-        L::SyntaxKind: Serialize + std::fmt::Debug + Send + Sync,
+        L::TokenType: Serialize + std::fmt::Debug + Send + Sync,
         Lex: Lexer<L> + Send + Sync + 'static + Clone,
     {
         let source = source_from_path(file_path)?;
 
-        // 使用Arc和Mutex来在线程间共享结果
+        // Use Arc and Mutex to share results between threads
         let result = Arc::new(Mutex::new(None));
         let result_clone = Arc::clone(&result);
 
-        // 克隆lexer以便在线程中使用
+        // Clone lexer for use in thread
         let lexer_clone = lexer.clone();
-        // 将source包装在Arc中以便在线程间共享
+        // Wrap source in Arc for sharing between threads
         let source_arc = Arc::new(source);
         let source_clone = Arc::clone(&source_arc);
 
-        // 创建一个新线程来执行词法分析
+        // Create a new thread to perform lexical analysis
         let handle = thread::spawn(move || {
-            let mut builder = crate::GreenBuilder::new(0);
-            let cache = crate::IncrementalCache::new(&mut builder);
-            let output = lexer_clone.lex_incremental(&*source_clone, 0, cache);
+            let mut cache = crate::parser::ParseSession::<L>::default();
+            let output = lexer_clone.lex(&*source_clone, &[], &mut cache);
             let mut result = result_clone.lock().unwrap();
             *result = Some(output);
         });
 
-        // 等待线程完成或超时
+        // Wait for thread completion or timeout
         let start_time = Instant::now();
         let timeout_occurred = loop {
-            // 检查线程是否已完成
+            // Check if thread has finished
             if handle.is_finished() {
                 break false;
             }
 
-            // 检查是否超时
+            // Check for timeout
             if start_time.elapsed() > self.timeout {
                 break true;
             }
 
-            // 短暂休眠以避免忙等待
+            // Sleep briefly to avoid busy waiting
             thread::sleep(Duration::from_millis(10));
         };
 
-        // 如果超时，返回错误
+        // Return error if timed out
         if timeout_occurred {
-            return Err(OakError::custom_error(&format!(
-                "Lexer test timed out after {:?} for file: {}",
-                self.timeout,
-                file_path.display()
-            )));
+            return Err(OakError::custom_error(&format!("Lexer test timed out after {:?} for file: {}", self.timeout, file_path.display())));
         }
 
-        // 获取词法分析结果
+        // Get lexical analysis result
         let OakDiagnostics { result: tokens_result, mut diagnostics } = {
             let result_guard = result.lock().unwrap();
             match result_guard.as_ref() {
@@ -179,14 +183,14 @@ impl LexerTester {
             }
         };
 
-        // 构造测试结果
+        // Construct test result
         let mut success = true;
         let tokens = match tokens_result {
             Ok(tokens) => tokens,
             Err(e) => {
                 success = false;
                 diagnostics.push(e);
-                Vec::new()
+                triomphe::Arc::from_iter(Vec::new())
             }
         };
 
@@ -195,10 +199,13 @@ impl LexerTester {
         }
 
         let tokens: Vec<TokenData> = tokens
-            .into_iter()
-            .filter(|token| !token.kind.is_trivia())
+            .iter()
+            .filter(|token| !token.kind.is_ignored())
             .map(|token| {
-                let text = source_arc.as_ref().get_text_in(token.span.clone().into()).to_string();
+                let len = source_arc.as_ref().length();
+                let start = token.span.start.min(len);
+                let end = token.span.end.min(len).max(start);
+                let text = source_arc.as_ref().get_text_in((start..end).into()).to_string();
                 TokenData { kind: format!("{:?}", token.kind), text, start: token.span.start, end: token.span.end }
             })
             .take(100)
@@ -207,20 +214,15 @@ impl LexerTester {
         let errors: Vec<String> = diagnostics.iter().map(|e| e.to_string()).collect();
         let test_result = LexerTestExpected { success, count: tokens.len(), tokens, errors };
 
-        // 处理预期结果文件
-        let expected_file = file_path
-            .with_extension(format!("{}.expected.json", file_path.extension().unwrap_or_default().to_str().unwrap_or("")));
+        // Process expected result file
+        let expected_file = file_path.with_extension(format!("{}.lexed.json", file_path.extension().unwrap_or_default().to_str().unwrap_or("")));
 
-        let force_regenerated = std::env::var("REGENERATE_TESTS").unwrap_or("0".to_string()) == "1";
-
+        let mut regenerated = false;
         if expected_file.exists() && !force_regenerated {
             let expected: LexerTestExpected = json_from_path(&expected_file)?;
 
             if test_result != expected {
-                println!("Test failed for file: {}", file_path.display());
-                println!("Expected: {:#?}", expected);
-                println!("Actual: {:#?}", test_result);
-                return Err(OakError::custom_error("Test results do not match expected results"));
+                return Err(OakError::test_failure(file_path.to_path_buf(), format!("{:#?}", expected), format!("{:#?}", test_result)));
             }
         }
         else {
@@ -228,9 +230,14 @@ impl LexerTester {
             let mut writer = Serializer::with_formatter(file, PrettyFormatter::with_indent(b"    "));
             test_result.serialize(&mut writer)?;
 
-            println!("Created expected result file: {}\nNeed rerun", expected_file.display());
+            if force_regenerated {
+                regenerated = true;
+            }
+            else {
+                return Err(OakError::test_regenerated(expected_file));
+            }
         }
 
-        Ok(())
+        Ok(regenerated)
     }
 }

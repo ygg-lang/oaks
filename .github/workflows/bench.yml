@@ -1,0 +1,35 @@
+name: Benchmark
+
+on:
+  push:
+    branches: [ master, dev ]
+  workflow_dispatch:
+
+jobs:
+  bench:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Rust Nightly
+        uses: dtolnay/rust-toolchain@nightly
+
+      - name: Cache Benchmark Results
+        uses: actions/cache@v4
+        with:
+          path: target/criterion
+          key: ${{ runner.os }}-benchmark-${{ github.ref_name }}-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-benchmark-${{ github.ref_name }}-
+            ${{ runner.os }}-benchmark-master-
+            ${{ runner.os }}-benchmark-
+
+      - name: Run Benchmarks
+        run: cargo bench -p oaks --all-features
+
+      # - name: Deploy to Cloudflare Pages
+      #   uses: cloudflare/wrangler-action@v3
+      #   with:
+      #     apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      #     accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+      #     command: pages deploy target/criterion/report --project-name=oaks-benchmarks --branch=${{ github.ref_name }}

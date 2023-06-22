@@ -4,8 +4,9 @@
         "regenerate": "$env:REGENERATE_TESTS=1; cargo test --release --all-features",
         "test": "cargo test --release",
         "fmt": "cargo fmt --all",
-        "p": "git push && git push --tags --prune",
+        "p": "cargo workspaces publish --no-git-commit --publish-interval 10 --yes",
         "reset": "git reset Head~ --soft",
         "u": "cargo upgrade --offline --incompatible"
-    }
+    },
+    "packageManager": "pnpm@10.18.3"
 }

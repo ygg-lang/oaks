@@ -1,0 +1,17 @@
+[package]
+name = "oak-semantic-search"
+description = "Fuzzy semantic search and code indexing for the Oak framework."
+categories = ["development-tools"]
+keywords = ["search", "semantic", "fuzzy", "indexing"]
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+license.workspace = true
+homepage.workspace = true
+repository.workspace = true
+
+[dependencies]
+oak-core = { workspace = true }
+tokio = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }

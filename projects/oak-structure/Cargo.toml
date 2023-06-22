@@ -1,0 +1,14 @@
+[package]
+name = "oak-structure"
+description = "AST-based document structure and symbol tree generation for the Oak framework."
+categories = ["development-tools"]
+keywords = ["structure", "outline", "ast", "symbols"]
+version.workspace = true
+authors.workspace = true
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+
+[dependencies]
+oak-core = { workspace = true }
+serde = { workspace = true }

@@ -1,35 +1,38 @@
-//! Lexical analysis and tokenization for the Oak Core parsing framework.
-//!
-//! This module provides traits and utilities for converting source text into
-//! sequences of tokens that can be consumed by parsers. It includes support
-//! for common lexical patterns and incremental tokenization.
+#![doc = include_str!("readme.md")]
 
-pub use self::{scan_comment::*, scan_string::*, scan_white_space::*};
 use crate::{
-    GreenBuilder, IncrementalCache, Language,
+    Language, TextEdit, TokenType,
     errors::{OakDiagnostics, OakError},
-    source::Source,
+    source::{Source, SourceCursor},
 };
-use std::{ops::Deref, range::Range};
+pub use core::range::Range;
+use std::borrow::Cow;
+use triomphe::Arc;
 
-/// Common lexical patterns and utilities shared across different languages.
-///
-/// This module provides reusable components for common lexical constructs such as
-/// whitespace handling, number literals, string literals, and identifier recognition.
-/// These utilities can be used by language-specific lexers to avoid reimplementing
-/// basic tokenization patterns.
-mod scan_white_space;
-
-mod scan_comment;
-
+/// Utilities for scanning comments.
+pub mod scan_comment;
+/// Utilities for scanning identifiers.
+pub mod scan_identifier;
+/// Utilities for scanning numbers.
+pub mod scan_number;
+/// Utilities for scanning string literals.
 pub mod scan_string;
+/// Utilities for scanning whitespace.
+pub mod scan_white_space;
+
+pub use scan_comment::CommentConfig;
+pub use scan_string::StringConfig;
+pub use scan_white_space::WhitespaceConfig;
 
 /// Output type for lexical analysis operations.
 ///
 /// This type alias represents the result of tokenization, containing
 /// a vector of tokens and any diagnostic language that occurred during
 /// the lexing process.
-pub type LexOutput<L: Language> = OakDiagnostics<Vec<Token<L::SyntaxKind>>>;
+pub type Tokens<L: Language> = Arc<[Token<L::TokenType>]>;
+
+/// Output type for lexical analysis operations, including diagnostics.
+pub type LexOutput<L: Language> = OakDiagnostics<Tokens<L>>;
 
 /// Trait for tokenizing source code into sequences of tokens.
 ///
@@ -39,21 +42,41 @@ pub type LexOutput<L: Language> = OakDiagnostics<Vec<Token<L::SyntaxKind>>>;
 ///
 /// # Examples
 ///
-/// ```rust
-/// # use oak_core::{Lexer, Language, SourceText, LexOutput};
-///
+/// ```ignore
 /// struct MyLexer;
+///
+/// #[derive(Debug, Clone, PartialEq, Eq, Copy)]
 /// enum MyToken {
 ///     Number,
 ///     Identifier,
+///     End,
 /// }
 ///
-/// impl Language for MyToken {
-///     type SyntaxKind = MyToken;
+/// impl TokenType for MyToken {
+///     const END_OF_STREAM: Self = MyToken::End;
+///     type Role = UniversalTokenRole;
+///     fn role(&self) -> Self::Role { UniversalTokenRole::None }
 /// }
 ///
-/// impl Lexer<MyToken> for MyLexer {
-///     fn lex(&self, source: &SourceText) -> LexOutput<MyToken> {
+/// #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+/// enum MyElement {}
+///
+/// impl ElementType for MyElement {
+///     type Role = UniversalElementRole;
+///     fn role(&self) -> Self::Role { UniversalElementRole::None }
+/// }
+///
+/// struct MyLanguage;
+///
+/// impl Language for MyLanguage {
+///     const NAME: &'static str = "my-language";
+///     type TokenType = MyToken;
+///     type ElementType = MyElement;
+///     type TypedRoot = ();
+/// }
+///
+/// impl Lexer<MyLanguage> for MyLexer {
+///     fn lex<'a, S: Source + ?Sized>(&self, text: &S, edits: &[TextEdit], cache: &'a mut impl LexerCache<MyLanguage>) -> LexOutput<MyLanguage> {
 ///         // Tokenization logic here
 ///         todo!()
 ///     }
@@ -61,8 +84,6 @@ pub type LexOutput<L: Language> = OakDiagnostics<Vec<Token<L::SyntaxKind>>>;
 /// ```
 pub trait Lexer<L: Language + Send + Sync + 'static> {
     /// Tokenizes the given source text into a sequence of tokens.
-    ///
-    /// Tokenizes source text into a sequence of tokens.
     ///
     /// This method performs a full lexical analysis of the source text,
     /// creating a new sequence of tokens from scratch. It uses a default
@@ -75,34 +96,86 @@ pub trait Lexer<L: Language + Send + Sync + 'static> {
     /// # Returns
     ///
     /// A [`LexOutput`] containing the tokens and any diagnostic messages
-    fn lex(&self, source: impl Source) -> LexOutput<L> {
-        let mut pool = GreenBuilder::new(0);
-        let cache = IncrementalCache::new(&mut pool);
-        self.lex_incremental(source, 0, cache)
-    }
+    fn lex<'a, S: Source + ?Sized>(&self, text: &S, edits: &[TextEdit], cache: &'a mut impl LexerCache<L>) -> LexOutput<L>;
+}
 
-    /// Tokenizes source text using an existing cache for incremental parsing.
-    ///
-    /// This method enables efficient re-lexing by reusing information from previous
-    /// parsing operations, only processing the changed portions of the source.
+/// Cache trait for lexical results.
+///
+/// This trait defines the interface for caching and accessing lexical analysis results.
+/// It provides methods for storing and retrieving token information from previous
+/// lexical analysis operations.
+#[allow(unused_variables)]
+pub trait LexerCache<L: Language> {
+    /// Sets the lexed output in the cache.
     ///
     /// # Arguments
     ///
-    /// * `source` - The source text to tokenize
-    /// * `changed` - The number of bytes that have changed since the last parse
-    /// * `cache` - The incremental cache containing previous parsing results
+    /// * `output` - The output from lexical analysis, including tokens and diagnostics
+    fn set_lex_output(&mut self, output: LexOutput<L>);
+
+    /// Gets a token from the cache by index.
+    ///
+    /// # Arguments
+    ///
+    /// * `index` - The index of the token to retrieve
     ///
     /// # Returns
     ///
-    /// A [`LexOutput`] containing the tokens and any diagnostic messages
-    fn lex_incremental(&self, source: impl Source, changed: usize, cache: IncrementalCache<L>) -> LexOutput<L>;
+    /// An `Option<Token<L::TokenType>>` containing the token if it exists,
+    /// or `None` if the index is out of bounds or no tokens are cached
+    fn get_token(&self, index: usize) -> Option<Token<L::TokenType>>;
+
+    /// Gets the total number of tokens in the cache.
+    ///
+    /// # Returns
+    ///
+    /// The number of cached tokens, or 0 if no tokens are cached
+    fn count_tokens(&self) -> usize;
+
+    /// Checks if the cache contains any tokens.
+    ///
+    /// # Returns
+    ///
+    /// `true` if the cache contains tokens, `false` otherwise
+    fn has_tokens(&self) -> bool;
+
+    /// Gets all cached tokens as a slice.
+    ///
+    /// # Returns
+    ///
+    /// An optional slice of tokens if available.
+    fn get_tokens(&self) -> Option<&[Token<L::TokenType>]> {
+        None
+    }
+}
+
+impl<'a, L: Language, C: LexerCache<L> + ?Sized> LexerCache<L> for &'a mut C {
+    fn set_lex_output(&mut self, output: LexOutput<L>) {
+        (**self).set_lex_output(output);
+    }
+
+    fn get_token(&self, index: usize) -> Option<Token<L::TokenType>> {
+        (**self).get_token(index)
+    }
+
+    fn count_tokens(&self) -> usize {
+        (**self).count_tokens()
+    }
+
+    fn has_tokens(&self) -> bool {
+        (**self).has_tokens()
+    }
+
+    fn get_tokens(&self) -> Option<&[Token<L::TokenType>]> {
+        (**self).get_tokens()
+    }
 }
 
 /// Represents a single kind in the source code.
 ///
 /// Tokens are the fundamental units of lexical analysis, representing
 /// categorized pieces of source text with their position information.
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, Copy)]
 pub struct Token<K> {
     /// The kind/category of this kind (e.g., keyword, identifier, number)
     pub kind: K,
@@ -119,10 +192,10 @@ impl<K> Token<K> {
     ///
     /// # Examples
     ///
-    /// ```rust
-    /// # use oak_core::Token;
+    /// ```ignore
+    /// #![feature(new_range_api)]
+    /// # use oak_core::lexer::Token;
     /// # use core::range::Range;
-    ///
     /// let kind = Token { kind: "ident", span: Range { start: 0, end: 5 } };
     /// assert_eq!(kind.length(), 5);
     /// ```
@@ -137,24 +210,13 @@ impl<K> Token<K> {
 /// This struct maintains the current position and context during
 /// tokenization, enabling incremental and resumable lexing operations.
 #[derive(Debug)]
-pub struct LexerState<S, L: Language> {
-    /// The source text being tokenized
-    pub(crate) source: S,
-    /// Current byte offset position in the source text
-    pub(crate) offset: usize,
-    pub(crate) tokens: Vec<Token<L::SyntaxKind>>,
+pub struct LexerState<'s, S: Source + ?Sized, L: Language> {
+    pub(crate) cursor: SourceCursor<'s, S>,
+    pub(crate) tokens: Vec<Token<L::TokenType>>,
     pub(crate) errors: Vec<OakError>,
 }
 
-impl<S: Source, L: Language> Deref for LexerState<S, L> {
-    type Target = S;
-
-    fn deref(&self) -> &Self::Target {
-        &self.source
-    }
-}
-
-impl<S: Source, L: Language> LexerState<S, L> {
+impl<'s, S: Source + ?Sized, L: Language> LexerState<'s, S, L> {
     /// Creates a new lexer state with the given source text.
     ///
     /// # Arguments
@@ -164,8 +226,8 @@ impl<S: Source, L: Language> LexerState<S, L> {
     /// # Returns
     ///
     /// A new `LexerState` initialized at the beginning of the source
-    pub fn new(source: S) -> Self {
-        Self { source, offset: 0, tokens: vec![], errors: vec![] }
+    pub fn new(source: &'s S) -> Self {
+        Self { cursor: SourceCursor::new(source), tokens: vec![], errors: vec![] }
     }
 
     /// Creates a new lexer state with the given source text and incremental cache.
@@ -173,14 +235,76 @@ impl<S: Source, L: Language> LexerState<S, L> {
     /// # Arguments
     ///
     /// * `source` - The source text to lex
-    /// * `changed` - The number of bytes that have changed since the last lex
+    /// * `relex_from` - The minimum byte offset that may have been affected by edits
+    ///   (use `source.length()` to indicate no edits)
     /// * `cache` - The incremental cache containing previous lexing results
     ///
     /// # Returns
     ///
     /// A new `LexerState` initialized at the beginning of the source with cache support
-    pub fn new_with_cache(source: S, changed: usize, cache: IncrementalCache<L>) -> Self {
-        Self { source, offset: 0, tokens: vec![], errors: vec![] }
+    pub fn new_with_cache(source: &'s S, relex_from: usize, cache: &impl LexerCache<L>) -> Self {
+        if !cache.has_tokens() {
+            return Self { cursor: SourceCursor::new(source), tokens: vec![], errors: vec![] };
+        }
+
+        let len = source.length();
+        let relex_from = relex_from.min(len);
+
+        // Fast path: fully re-used
+        if relex_from >= len {
+            let mut tokens = Vec::new();
+            if let Some(cached) = cache.get_tokens() {
+                tokens.extend_from_slice(cached);
+            }
+            else {
+                let count = cache.count_tokens();
+                tokens.reserve(count);
+                for i in 0..count {
+                    if let Some(t) = cache.get_token(i) {
+                        tokens.push(t);
+                    }
+                }
+            }
+            let offset = tokens.last().map(|t| t.span.end).unwrap_or(0).min(len);
+            return Self { cursor: SourceCursor::new_at(source, offset), tokens, errors: vec![] };
+        }
+
+        if relex_from == 0 {
+            return Self { cursor: SourceCursor::new(source), tokens: vec![], errors: vec![] };
+        }
+
+        let mut reused_tokens = Vec::new();
+        const BACKTRACK_TOKENS: usize = 1;
+
+        if let Some(cached) = cache.get_tokens() {
+            // Binary search for the cut-off point since tokens are sorted by position
+            let idx = cached.partition_point(|t| t.span.end <= relex_from);
+            let keep = idx.saturating_sub(BACKTRACK_TOKENS);
+            if keep > 0 {
+                reused_tokens.extend_from_slice(&cached[..keep]);
+            }
+        }
+        else {
+            // Fallback for caches that don't support slice access
+            let count = cache.count_tokens();
+            for i in 0..count {
+                let Some(token) = cache.get_token(i)
+                else {
+                    break;
+                };
+                if token.span.end <= relex_from {
+                    reused_tokens.push(token);
+                }
+                else {
+                    break;
+                }
+            }
+            let keep = reused_tokens.len().saturating_sub(BACKTRACK_TOKENS);
+            reused_tokens.truncate(keep);
+        }
+
+        let stable_offset = reused_tokens.last().map(|t| t.span.end).unwrap_or(0);
+        Self { cursor: SourceCursor::new_at(source, stable_offset), tokens: reused_tokens, errors: vec![] }
     }
 
     /// Gets the remaining text from the current position to the end of the source.
@@ -188,8 +312,19 @@ impl<S: Source, L: Language> LexerState<S, L> {
     /// # Returns
     ///
     /// A string slice containing the remaining text
-    pub fn rest(&self) -> &str {
-        self.source.get_text_from(self.offset)
+    pub fn rest(&mut self) -> &str {
+        self.cursor.rest()
+    }
+
+    /// Gets the remaining text as a byte slice.
+    #[inline]
+    pub fn rest_bytes(&mut self) -> &[u8] {
+        self.cursor.rest().as_bytes()
+    }
+
+    /// Checks if the lexer has consumed all input from the source.
+    pub fn fully_reused(&self) -> bool {
+        self.cursor.position() >= self.cursor.source().length()
     }
 
     /// Gets the current byte offset position in the source text.
@@ -199,7 +334,119 @@ impl<S: Source, L: Language> LexerState<S, L> {
     /// The current byte offset from the start of the source text
     #[inline]
     pub fn get_position(&self) -> usize {
-        self.offset
+        self.cursor.position()
+    }
+
+    /// Gets the total length of the source text in bytes.
+    #[inline]
+    pub fn get_length(&self) -> usize {
+        self.cursor.source().length()
+    }
+
+    /// Gets a single character at the specified byte offset.
+    #[inline]
+    pub fn get_char_at(&self, offset: usize) -> Option<char> {
+        self.cursor.source().get_char_at(offset)
+    }
+
+    /// Peeks at the next byte without advancing.
+    #[inline]
+    pub fn peek_byte(&mut self) -> Option<u8> {
+        self.cursor.peek_byte()
+    }
+
+    /// Advances the cursor by one byte and returns it.
+    #[inline]
+    pub fn advance_byte(&mut self) -> Option<u8> {
+        self.cursor.advance_byte()
+    }
+
+    /// Advances the cursor while the byte predicate is true.
+    #[inline]
+    pub fn take_while_byte(&mut self, pred: impl FnMut(u8) -> bool) -> Range<usize> {
+        self.cursor.take_while_byte(pred)
+    }
+
+    /// Skips common ASCII whitespace using SIMD if possible.
+    #[inline]
+    pub fn skip_ascii_whitespace(&mut self) -> Range<usize> {
+        self.cursor.skip_ascii_whitespace()
+    }
+
+    /// Skips all ASCII digits at the current position.
+    #[inline]
+    pub fn skip_ascii_digits(&mut self) -> Range<usize> {
+        self.cursor.skip_ascii_digits()
+    }
+
+    /// Skips all characters that can continue an ASCII identifier.
+    #[inline]
+    pub fn skip_ascii_ident_continue(&mut self) -> Range<usize> {
+        self.cursor.skip_ascii_ident_continue()
+    }
+
+    /// Skips all characters until the target byte is encountered.
+    #[inline]
+    pub fn skip_until(&mut self, target: u8) -> Range<usize> {
+        self.cursor.skip_until(target)
+    }
+
+    /// Scans an ASCII identifier (starts with alpha/_, continues with alphanumeric/_).
+    #[inline]
+    pub fn scan_ascii_identifier(&mut self, kind: L::TokenType) -> bool {
+        let start = self.get_position();
+        if let Some(b) = self.peek_byte() {
+            if b == b'_' || b.is_ascii_alphabetic() {
+                self.advance_byte();
+                self.skip_ascii_ident_continue();
+                self.add_token(kind, start, self.get_position());
+                return true;
+            }
+        }
+        false
+    }
+
+    /// Scans a line comment starting with the given prefix.
+    #[inline]
+    pub fn scan_line_comment(&mut self, kind: L::TokenType, prefix: &str) -> bool {
+        let start = self.get_position();
+        if self.consume_if_starts_with(prefix) {
+            self.skip_until(b'\n');
+            self.add_token(kind, start, self.get_position());
+            return true;
+        }
+        false
+    }
+
+    /// Scans a block comment with given start and end sequences.
+    #[inline]
+    pub fn scan_block_comment(&mut self, kind: L::TokenType, start_seq: &str, end_seq: &str) -> bool {
+        let start = self.get_position();
+        if self.consume_if_starts_with(start_seq) {
+            while let Some(_b) = self.peek_byte() {
+                self.skip_until(end_seq.as_bytes()[0]);
+                if self.consume_if_starts_with(end_seq) {
+                    self.add_token(kind, start, self.get_position());
+                    return true;
+                }
+                self.advance_byte();
+            }
+            // Unclosed block comment is still a comment in many languages,
+            // but we might want to add an error here in the future.
+            self.add_token(kind, start, self.get_position());
+            return true;
+        }
+        false
+    }
+
+    /// Gets a reference to the tokens collected so far.
+    ///
+    /// # Returns
+    ///
+    /// A slice of tokens collected during the lexing process
+    #[inline]
+    pub fn tokens(&self) -> &[Token<L::TokenType>] {
+        &self.tokens
     }
 
     /// Sets the current position to the specified byte offset.
@@ -213,18 +460,42 @@ impl<S: Source, L: Language> LexerState<S, L> {
     /// The previous byte offset position
     #[inline]
     pub fn set_position(&mut self, offset: usize) -> usize {
-        let last = self.offset;
-        self.offset = offset;
-        last
+        self.cursor.set_position(offset)
     }
 
-    /// Gets the total length of the source text in bytes.
+    /// Returns a reference to the underlying source.
+    pub fn source(&self) -> &'s S {
+        self.cursor.source()
+    }
+
+    /// Returns the text in the specified range.
+    pub fn get_text_in(&self, range: Range<usize>) -> Cow<'_, str> {
+        self.cursor.source().get_text_in(range)
+    }
+
+    /// Returns the text from the specified offset to the end.
+    pub fn get_text_from(&self, offset: usize) -> Cow<'_, str> {
+        self.cursor.source().get_text_from(offset)
+    }
+
+    /// Checks if the source starts with the given pattern at the current position.
+    pub fn starts_with(&mut self, pattern: &str) -> bool {
+        self.cursor.starts_with(pattern)
+    }
+
+    /// Consumes the pattern if it exists at the current position.
+    pub fn consume_if_starts_with(&mut self, pattern: &str) -> bool {
+        self.cursor.consume_if_starts_with(pattern)
+    }
+
+    /// Gets the tokens collected so far in the lexer state.
     ///
     /// # Returns
     ///
-    /// The total number of bytes in the source text
-    pub fn get_length(&self) -> usize {
-        self.source.length()
+    /// A slice of tokens collected during lexing
+    #[inline]
+    pub fn get_tokens(&self) -> &[Token<L::TokenType>] {
+        &self.tokens
     }
 
     /// Adds an error to the lexer state.
@@ -245,8 +516,65 @@ impl<S: Source, L: Language> LexerState<S, L> {
     /// * `start` - The starting byte offset of the token
     /// * `end` - The ending byte offset of the token
     #[inline]
-    pub fn add_token(&mut self, kind: L::SyntaxKind, start: usize, end: usize) {
+    pub fn add_token(&mut self, kind: L::TokenType, start: usize, end: usize) {
         self.tokens.push(Token { kind, span: Range { start, end } });
+    }
+
+    /// Adds an end-of-file token to the lexer state.
+    ///
+    /// This method creates and adds an END_OF_STREAM token at the current position.
+    /// It's typically called when the lexer reaches the end of the source text
+    /// to mark the termination of the token stream.
+    ///
+    /// # Examples
+    ///
+    /// ```ignore
+    /// #![feature(new_range_api)]
+    /// # use core::range::Range;
+    /// # use oak_core::lexer::{LexerState, Token};
+    /// # use oak_core::{Language, TokenType, SourceText, UniversalTokenRole, TokenRole, UniversalElementRole, ElementRole, ElementType};
+    /// #
+    /// # #[derive(Debug, PartialEq, Clone, Copy, Eq, Hash)]
+    /// # enum SimpleToken {
+    /// #     End,
+    /// # }
+    /// #
+    /// # impl TokenType for SimpleToken {
+    /// #     const END_OF_STREAM: Self = SimpleToken::End;
+    /// #     type Role = UniversalTokenRole;
+    /// #     fn role(&self) -> Self::Role { UniversalTokenRole::None }
+    /// # }
+    /// #
+    /// # #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+    /// # enum SimpleElement {}
+    /// #
+    /// # impl ElementType for SimpleElement {
+    /// #     type Role = UniversalElementRole;
+    /// #     fn role(&self) -> Self::Role { UniversalElementRole::None }
+    /// # }
+    /// #
+    /// # #[derive(Clone)]
+    /// # struct SimpleLanguage;
+    /// #
+    /// # impl Language for SimpleLanguage {
+    /// #     const NAME: &'static str = "simple";
+    /// #     type TokenType = SimpleToken;
+    /// #     type ElementType = SimpleElement;
+    /// #     type TypedRoot = ();
+    /// # }
+    /// #
+    /// let source = SourceText::new("test");
+    /// let mut state = LexerState::<_, SimpleLanguage>::new(&source);
+    /// state.take_while(|_| true); // Advance to end
+    /// state.add_eof();
+    ///
+    /// assert_eq!(state.tokens().len(), 1);
+    /// assert_eq!(state.tokens()[0].span, Range { start: 4, end: 4 });
+    /// ```
+    #[inline]
+    pub fn add_eof(&mut self) {
+        let end = self.get_position();
+        self.add_token(L::TokenType::END_OF_STREAM, end, end);
     }
 
     /// Gets the current character at the current position.
@@ -255,8 +583,8 @@ impl<S: Source, L: Language> LexerState<S, L> {
     ///
     /// The current character, or `None` if at the end of the source
     #[inline]
-    pub fn current(&self) -> Option<char> {
-        self.peek_next_n(0)
+    pub fn current(&mut self) -> Option<char> {
+        self.cursor.peek_char()
     }
 
     /// Peeks at the next character without advancing the position.
@@ -265,8 +593,8 @@ impl<S: Source, L: Language> LexerState<S, L> {
     ///
     /// The next character, or `None` if at the end of the source
     #[inline]
-    pub fn peek(&self) -> Option<char> {
-        self.peek_next_n(0)
+    pub fn peek(&mut self) -> Option<char> {
+        self.cursor.peek_char()
     }
 
     /// Peeks at the character n positions ahead without advancing the position.
@@ -278,59 +606,223 @@ impl<S: Source, L: Language> LexerState<S, L> {
     /// # Returns
     ///
     /// The character n positions ahead, or `None` if beyond the end of the source
-    pub fn peek_next_n(&self, n: usize) -> Option<char> {
-        let rest = self.source.get_text_from(self.offset);
-        rest.chars().nth(n)
+    pub fn peek_next_n(&mut self, n: usize) -> Option<char> {
+        if n == 0 {
+            return self.peek();
+        }
+
+        // Fast path: check current chunk
+        let rest = self.cursor.rest();
+        if let Some(ch) = rest.chars().nth(n) {
+            return Some(ch);
+        }
+
+        // Slow path: cross chunk
+        let mut count = 0;
+        let mut offset = self.cursor.position();
+        let end = self.get_length();
+
+        while offset < end {
+            let chunk = self.source().chunk_at(offset);
+            let text = chunk.slice_from(offset);
+            for ch in text.chars() {
+                if count == n {
+                    return Some(ch);
+                }
+                count += 1;
+            }
+            offset = chunk.end();
+        }
+
+        None
     }
 
     /// Advances the position by the specified number of bytes.
     ///
+    /// This method moves the lexer's current position forward by the specified
+    /// number of bytes. It's commonly used after recognizing a token to move
+    /// past the token's characters.
+    ///
     /// # Arguments
     ///
     /// * `length` - The number of bytes to advance
     ///
     /// # Returns
     ///
-    /// The new byte offset position
+    /// The new byte offset position after advancing
     #[inline]
     pub fn advance(&mut self, length: usize) -> usize {
-        let end = self.offset + length;
-        self.offset = end;
-        end
+        self.cursor.advance_bytes(length)
     }
 
-    /// Advances the position by the specified number of bytes and adds a token.
-    ///
-    /// # Arguments
-    ///
-    /// * `length` - The number of bytes to advance
-    /// * `token` - The kind of token to add
+    /// Advances the position by the current character's length.
     ///
     /// # Returns
     ///
-    /// The new byte offset position
+    /// The character that was skipped, or `None` if at the end of the source
+    #[inline]
+    pub fn bump(&mut self) -> Option<char> {
+        let ch = self.peek()?;
+        self.advance(ch.len_utf8());
+        Some(ch)
+    }
+
+    /// Advances the position by the token's length and adds the token to the lexer state.
+    ///
+    /// This method combines two common operations: advancing the lexer position
+    /// and adding a token to the token list. It calculates the advance distance
+    /// from the token's span, ensuring consistent positioning.
+    ///
+    /// # Arguments
+    ///
+    /// * `token` - The token to add to the lexer state
+    ///
+    /// # Returns
+    ///
+    /// The new byte offset position after advancing
+    ///
+    /// # Examples
+    ///
+    /// ```ignore
+    /// #![feature(new_range_api)]
+    /// # use core::range::Range;
+    /// # use oak_core::lexer::{LexerState, Token};
+    /// # use oak_core::{Language, TokenType, SourceText, UniversalTokenRole, TokenRole, UniversalElementRole, ElementRole, ElementType};
+    /// #     /// #
+    /// # #[derive(Debug, PartialEq, Clone, Copy, Eq, Hash)]
+    /// # enum SimpleToken { Identifier, End }
+    /// #
+    /// # impl TokenType for SimpleToken {
+    /// #     const END_OF_STREAM: Self = SimpleToken::End;
+    /// #     type Role = UniversalTokenRole;
+    /// #     fn role(&self) -> Self::Role { UniversalTokenRole::None }
+    /// # }
+    /// #
+    /// # #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+    /// # enum SimpleElement {}
+    /// #
+    /// # impl ElementType for SimpleElement {
+    /// #     type Role = UniversalElementRole;
+    /// #     fn role(&self) -> Self::Role { UniversalElementRole::None }
+    /// # }
+    /// #
+    /// # #[derive(Clone)]
+    /// # struct SimpleLanguage;
+    /// #
+    /// # impl Language for SimpleLanguage {
+    /// #     const NAME: &'static str = "simple";
+    /// #     type TokenType = SimpleToken;
+    /// #     type ElementType = SimpleElement;
+    /// #     type TypedRoot = ();
+    /// # }
+    /// #
+    /// let source = SourceText::new("hello world");
+    /// let mut state = LexerState::<_, SimpleLanguage>::new(&source);
+    ///
+    /// // Create a token for "hello"
+    /// let token = Token { kind: SimpleToken::Identifier, span: Range { start: 0, end: 5 } };
+    ///
+    /// // Initially at position 0
+    /// assert_eq!(state.get_position(), 0);
+    ///
+    /// // Advance and add the token
+    /// let new_pos = state.advance_with(token);
+    ///
+    /// // Now at position 5 and token is added
+    /// assert_eq!(new_pos, 5);
+    /// assert_eq!(state.get_position(), 5);
+    /// assert_eq!(state.get_tokens().len(), 1);
+    /// assert_eq!(state.get_tokens()[0].kind, SimpleToken::Identifier);
+    /// ```
     ///
     /// # Note
     ///
-    /// The caller must ensure that the advance is at character boundaries.
+    /// The caller must ensure that the token's span is valid and that the advance
+    /// does not split multi-byte UTF-8 characters. The token should be created
+    /// with proper character boundaries.
     #[inline]
-    pub fn advance_with(&mut self, token: Token<L::SyntaxKind>) -> usize {
-        self.offset += token.length();
+    pub fn advance_with(&mut self, token: Token<L::TokenType>) -> usize {
+        self.cursor.advance_bytes(token.length());
         self.tokens.push(token);
-        self.offset
+        self.cursor.position()
     }
 
     /// Consumes characters while the predicate returns true, returning the consumed range.
     ///
+    /// This method iterates through the source text from the current position,
+    /// consuming characters as long as the predicate function returns true.
+    /// It's commonly used for recognizing patterns like identifiers, numbers,
+    /// or whitespace sequences.
+    ///
     /// # Arguments
     ///
-    /// * `pred` - The predicate function that determines whether to consume a character
+    /// * `pred` - A closure that takes a character and returns true if the character
+    ///            should be consumed, false otherwise
     ///
     /// # Returns
     ///
-    /// The byte range of consumed characters
+    /// A byte range representing the span of consumed characters
+    ///
+    /// # Examples
+    ///
+    /// ```ignore
+    /// #![feature(new_range_api)]
+    /// # use core::range::Range;
+    /// # use oak_core::lexer::{LexerState, Token};
+    /// # use oak_core::{Language, TokenType, SourceText, UniversalTokenRole, TokenRole, UniversalElementRole, ElementRole, ElementType};
+    /// #     /// #
+    /// # #[derive(Debug, PartialEq, Clone, Copy, Eq, Hash)]
+    /// # enum SimpleToken { End }
+    /// #
+    /// # impl TokenType for SimpleToken {
+    /// #     const END_OF_STREAM: Self = SimpleToken::End;
+    /// #     type Role = UniversalTokenRole;
+    /// #     fn role(&self) -> Self::Role { UniversalTokenRole::None }
+    /// # }
+    /// #
+    /// # #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+    /// # enum SimpleElement {}
+    /// #
+    /// # impl ElementType for SimpleElement {
+    /// #     type Role = UniversalElementRole;
+    /// #     fn role(&self) -> Self::Role { UniversalElementRole::None }
+    /// # }
+    /// #
+    /// # #[derive(Clone)]
+    /// # struct SimpleLanguage;
+    /// #
+    /// # impl Language for SimpleLanguage {
+    /// #     const NAME: &'static str = "simple";
+    /// #     type TokenType = SimpleToken;
+    /// #     type ElementType = SimpleElement;
+    /// #     type TypedRoot = ();
+    /// # }
+    /// #
+    /// let source = SourceText::new("hello123world");
+    /// let mut state = LexerState::<_, SimpleLanguage>::new(&source);
+    ///
+    /// // Consume alphabetic characters
+    /// let range = state.take_while(|c| c.is_alphabetic());
+    ///
+    /// // Should have consumed "hello"
+    /// assert_eq!(range, Range { start: 0, end: 5 });
+    /// assert_eq!(state.get_position(), 5);
+    ///
+    /// // Consume numeric characters
+    /// let range = state.take_while(|c| c.is_numeric());
+    ///
+    /// // Should have consumed "123"
+    /// assert_eq!(range, Range { start: 5, end: 8 });
+    /// assert_eq!(state.get_position(), 8);
+    /// ```
+    ///
+    /// # Performance Note
+    ///
+    /// This method operates on a character-by-character basis, which means it
+    /// correctly handles multi-byte UTF-8 characters. For performance-critical
+    /// code, consider using byte-based methods when working with ASCII-only text.
     pub fn take_while(&mut self, mut pred: impl FnMut(char) -> bool) -> Range<usize> {
-        let start = self.offset;
+        let start = self.cursor.position();
         while let Some(ch) = self.peek() {
             if pred(ch) {
                 self.advance(ch.len_utf8());
@@ -339,7 +831,7 @@ impl<S: Source, L: Language> LexerState<S, L> {
                 break;
             }
         }
-        Range { start, end: self.offset }
+        Range { start, end: self.cursor.position() }
     }
 
     /// Checks if the lexer has not reached the end of the source text.
@@ -349,7 +841,7 @@ impl<S: Source, L: Language> LexerState<S, L> {
     /// `true` if not at the end of the source, `false` otherwise
     #[inline]
     pub fn not_at_end(&self) -> bool {
-        self.offset < self.source.length()
+        self.cursor.position() < self.cursor.source().length()
     }
 
     /// Performs a safety check to prevent infinite loops during lexing.
@@ -358,17 +850,99 @@ impl<S: Source, L: Language> LexerState<S, L> {
     /// advancement when stuck at the same position. It's used as a safeguard
     /// against infinite loops in lexer implementations.
     ///
+    /// The method compares the current position with a previously saved "safe point"
+    /// position. If they're the same, it means the lexer hasn't made progress since
+    /// that safe point, potentially indicating an infinite loop. In this case, the
+    /// method forces advancement by at least one character.
+    ///
     /// # Arguments
     ///
     /// * `safe_point` - The position to check against for potential deadlock
-    pub fn safe_check(&mut self, safe_point: usize) {
-        // 如果没有前进过，强制前进
-        if self.offset == safe_point {
-            match self.peek_next_n(0) {
-                // 跳过当前字符
-                Some(c) => self.offset += c.len_utf8(),
-                // 无论如何都要前进，防止死循环
-                None => self.offset += 1,
+    ///
+    /// # Examples
+    ///
+    /// ```ignore
+    /// #![feature(new_range_api)]
+    /// # use oak_core::lexer::{LexerState, Token};
+    /// # use oak_core::{Language, TokenType, SourceText, UniversalTokenRole, TokenRole, UniversalElementRole, ElementRole, ElementType};
+    /// #     /// #
+    /// # #[derive(Debug, PartialEq, Clone, Copy, Eq, Hash)]
+    /// # enum SimpleToken { End }
+    /// #
+    /// # impl TokenType for SimpleToken {
+    /// #     const END_OF_STREAM: Self = SimpleToken::End;
+    /// #     type Role = UniversalTokenRole;
+    /// #     fn role(&self) -> Self::Role { UniversalTokenRole::None }
+    /// # }
+    /// #
+    /// # #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+    /// # enum SimpleElement {}
+    /// #
+    /// # impl ElementType for SimpleElement {
+    /// #     type Role = UniversalElementRole;
+    /// #     fn role(&self) -> Self::Role { UniversalElementRole::None }
+    /// # }
+    /// #
+    /// # struct SimpleLanguage;
+    /// #
+    /// # impl Language for SimpleLanguage {
+    /// #     const NAME: &'static str = "simple";
+    /// #     type TokenType = SimpleToken;
+    /// #     type ElementType = SimpleElement;
+    /// #     type TypedRoot = ();
+    /// # }
+    /// #
+    /// let source = SourceText::new("test");
+    /// let mut state = LexerState::<_, SimpleLanguage>::new(&source);
+    ///
+    /// // Save the current position as a safe point
+    /// let safe_point = state.get_position();
+    ///
+    /// // In a real lexer, you would do some processing here
+    /// // If something went wrong and we didn't advance, this would prevent infinite loop
+    /// state.advance_if_dead_lock(safe_point);
+    ///
+    /// // If we were stuck, we would have advanced by at least 1
+    /// assert!(state.get_position() >= safe_point);
+    /// ```
+    ///
+    /// # Usage in Lexer Implementations
+    ///
+    /// This method is typically used at the beginning or end of lexing loops:
+    ///
+    /// ```ignore
+    /// loop {
+    ///     let safe_point = state.get_position();
+    ///     
+    ///     // Try to recognize a token
+    ///     if let Some(token) = try_recognize_token(&mut state) {
+    ///         // Success, continue loop
+    ///         continue;
+    ///     }
+    ///     
+    ///     // If we get here, we didn't recognize anything
+    ///     // This prevents infinite loops if recognition fails
+    ///     state.advance_if_dead_lock(safe_point);
+    ///     
+    ///     if state.not_at_end() {
+    ///         // Continue trying to recognize tokens
+    ///         continue;
+    ///     } else {
+    ///         // Reached end of source
+    ///         break;
+    ///     }
+    /// }
+    /// ```
+    pub fn advance_if_dead_lock(&mut self, safe_point: usize) {
+        // Force advance if no progress was made
+        if self.cursor.position() == safe_point {
+            if let Some(ch) = self.current() {
+                // Skip current character
+                self.advance(ch.len_utf8());
+            }
+            else {
+                // Advance anyway to prevent infinite loop
+                self.advance(1);
             }
             // tracing::warn!("deadlock");
         }
@@ -376,13 +950,180 @@ impl<S: Source, L: Language> LexerState<S, L> {
 
     /// Finishes lexing and returns the final output with tokens and diagnostics.
     ///
+    /// This method concludes the lexing process by converting the collected tokens
+    /// and errors into a `LexOutput` result. It takes a `Result` parameter that
+    /// represents the overall success or failure of the lexing operation.
+    ///
+    /// If the result is `Ok`, the tokens are returned as the successful result.
+    /// If the result is `Err`, the error is returned as the failure result.
+    /// In both cases, any collected diagnostic errors are included in the output.
+    ///
+    /// # Arguments
+    ///
+    /// * `result` - The result of the lexing operation (Ok for success, Err for failure)
+    ///
     /// # Returns
     ///
-    /// A `LexOutput` containing the collected tokens and any errors encountered
+    /// A `LexOutput` containing the tokens (if successful) and any diagnostic errors
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// #![feature(new_range_api)]
+    /// # use oak_core::lexer::{LexerState, Token};
+    /// # use oak_core::{Language, TokenType, SourceText, OakError, OakDiagnostics, UniversalTokenRole, UniversalElementRole, ElementType};
+    /// #     /// #
+    /// # #[derive(Debug, PartialEq, Clone, Copy, Eq, Hash)]
+    /// # enum SimpleToken { Identifier, End }
+    /// #
+    /// # impl TokenType for SimpleToken {
+    /// #     const END_OF_STREAM: Self = SimpleToken::End;
+    /// #     type Role = UniversalTokenRole;
+    /// #     fn role(&self) -> Self::Role { UniversalTokenRole::None }
+    /// # }
+    /// #
+    /// # #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+    /// # enum SimpleElement {}
+    /// #
+    /// # impl ElementType for SimpleElement {
+    /// #     type Role = UniversalElementRole;
+    /// #     fn role(&self) -> Self::Role { UniversalElementRole::None }
+    /// # }
+    /// #
+    /// # struct SimpleLanguage;
+    /// #
+    /// # impl Language for SimpleLanguage {
+    /// #     const NAME: &'static str = "simple";
+    /// #     type TokenType = SimpleToken;
+    /// #     type ElementType = SimpleElement;
+    /// #     type TypedRoot = ();
+    /// # }
+    /// #
+    /// let source = SourceText::new("test");
+    /// let mut state = LexerState::<_, SimpleLanguage>::new(&source);
+    ///
+    /// // Add some tokens during lexing
+    /// state.add_token(SimpleToken::Identifier, 0, 4);
+    ///
+    /// // Finish with successful result
+    /// let output = state.finish(Ok(()));
+    ///
+    /// // Check the results
+    /// assert!(output.result.is_ok());
+    /// assert_eq!(output.result.unwrap().len(), 1);
+    /// assert_eq!(output.diagnostics.len(), 0);
+    ///
+    /// // Example with error
+    /// let source2 = SourceText::new("test");
+    /// let mut state2 = LexerState::<_, SimpleLanguage>::new(&source2);
+    /// state2.add_error(OakError::custom_error("Test error"));
+    ///
+    /// let output2 = state2.finish(Err(OakError::custom_error("Fatal error")));
+    ///
+    /// // Check the results
+    /// assert!(output2.result.is_err());
+    /// assert_eq!(output2.diagnostics.len(), 1); // The added error
+    /// ```
     pub fn finish(self, result: Result<(), OakError>) -> LexOutput<L> {
         match result {
-            Ok(_) => OakDiagnostics { result: Ok(self.tokens), diagnostics: self.errors },
+            Ok(_) => {
+                let tokens: Tokens<L> = self.tokens.into();
+                OakDiagnostics { result: Ok(tokens), diagnostics: self.errors }
+            }
             Err(e) => OakDiagnostics { result: Err(e), diagnostics: self.errors },
         }
+    }
+
+    /// Finishes lexing and returns the final output with tokens, diagnostics, and updated cache.
+    ///
+    /// This method is similar to `finish` but additionally updates the incremental cache
+    /// with the new tokens. It's used for incremental lexing where the results need to
+    /// be cached for future reuse when the source text changes.
+    ///
+    /// The method first creates the output in the same way as `finish`, then updates
+    /// the cache's `last_lex` field with the new tokens. This enables the next call
+    /// to `new_with_cache` to reuse these tokens if the source text hasn't changed.
+    ///
+    /// # Arguments
+    ///
+    /// * `result` - The result of the lexing operation (Ok for success, Err for failure)
+    /// * `cache` - The incremental cache to update with the new tokens
+    ///
+    /// # Returns
+    ///
+    /// A `LexOutput` containing the tokens (if successful) and any diagnostic errors
+    ///
+    /// # Examples
+    ///
+    /// ```ignore
+    /// #![feature(new_range_api)]
+    /// # use core::range::Range;
+    /// # use oak_core::lexer::{LexerState, Token};
+    /// # use oak_core::{Language, TokenType, SourceText, OakError, LexOutput, UniversalTokenRole, UniversalElementRole, ElementType};
+    /// # use oak_core::parser::session::ParseSession;
+    /// #
+    /// # #[derive(Debug, PartialEq, Clone, Copy, Eq, Hash)]
+    /// # enum SimpleToken { Identifier, End }
+    /// #
+    /// # impl TokenType for SimpleToken {
+    /// #     const END_OF_STREAM: Self = SimpleToken::End;
+    /// #     type Role = UniversalTokenRole;
+    /// #     fn role(&self) -> Self::Role { UniversalTokenRole::None }
+    /// # }
+    /// #
+    /// # #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+    /// # enum SimpleElement {}
+    /// #
+    /// # impl ElementType for SimpleElement {
+    /// #     type Role = UniversalElementRole;
+    /// #     fn role(&self) -> Self::Role { UniversalElementRole::None }
+    /// # }
+    /// #
+    /// # struct SimpleLanguage;
+    /// #
+    /// # impl Language for SimpleLanguage {
+    /// #     const NAME: &'static str = "simple";
+    /// #     type TokenType = SimpleToken;
+    /// #     type ElementType = SimpleElement;
+    /// #     type TypedRoot = ();
+    /// # }
+    /// #
+    /// let source = SourceText::new("test");
+    /// let mut state = LexerState::<_, SimpleLanguage>::new(&source);
+    ///
+    /// // Create a cache for incremental lexing
+    /// let mut cache = ParseSession::<SimpleLanguage>::new(16);
+    ///
+    /// // Add some tokens during lexing
+    /// state.add_token(SimpleToken::Identifier, 0, 4);
+    ///
+    /// // Finish with cache update
+    /// let output = state.finish_with_cache(Ok(()), &mut cache);
+    ///
+    /// // Check the results
+    /// assert!(output.result.is_ok());
+    /// assert_eq!(output.result.unwrap().len(), 1);
+    /// ```
+    ///
+    /// # Incremental Lexing Workflow
+    ///
+    /// This method is typically used as part of an incremental lexing workflow:
+    ///
+    /// ```ignore
+    /// // First lexing
+    /// let mut state = LexerState::new_with_cache(source, source.length(), cache);
+    /// // ... lexing logic ...
+    /// let output = state.finish_with_cache(Ok(()), cache);
+    ///
+    /// // Later, when source changes
+    /// let relex_from = calculate_min_affected_offset(old_source, new_source);
+    /// let mut state = LexerState::new_with_cache(new_source, relex_from, cache);
+    /// // ... lexing logic (reusing unchanged tokens) ...
+    /// let output = state.finish_with_cache(Ok(()), cache);
+    /// ```
+    pub fn finish_with_cache(self, result: Result<(), OakError>, cache: &mut impl LexerCache<L>) -> LexOutput<L> {
+        let out = self.finish(result);
+        cache.set_lex_output(out.clone());
+        out
     }
 }

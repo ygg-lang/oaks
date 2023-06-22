@@ -1,6 +1,7 @@
 #![doc = include_str!("readme.md")]
 #![doc(html_logo_url = "https://raw.githubusercontent.com/ygg-lang/oaks/refs/heads/dev/documents/logo.svg")]
 #![doc(html_favicon_url = "https://raw.githubusercontent.com/ygg-lang/oaks/refs/heads/dev/documents/logo.svg")]
+#![feature(new_range_api)]
 
 use std::fmt;
 
@@ -48,6 +49,17 @@ impl From<std::io::Error> for Error {
 
 /// Result type alias for oak-visualize operations
 pub type Result<T> = std::result::Result<T, Error>;
+
+/// Trait for types that can be visualized
+pub trait Visualize {
+    /// Visualize the object as an SVG string
+    fn visualize(&self) -> Result<String>;
+}
+
+/// Helper function to visualize a tree node as an SVG string
+pub fn to_svg<T: Visualize>(item: &T) -> Result<String> {
+    item.visualize()
+}
 
 // Re-export commonly used types
 pub use crate::{

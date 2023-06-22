@@ -1,0 +1,17 @@
+[package]
+name = "oak-vfs"
+description = "Virtual file system abstraction for the Oak framework, supporting disk and memory-based storage."
+categories = ["filesystem"]
+keywords = ["vfs", "filesystem", "virtual"]
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+license.workspace = true
+homepage.workspace = true
+repository.workspace = true
+
+[dependencies]
+serde = { workspace = true }
+url = { workspace = true }
+walkdir = { workspace = true }
+oak-core = { workspace = true }

@@ -1,47 +1,52 @@
 #![doc = include_str!("readme.md")]
 #![allow(incomplete_features)]
-#![feature(lazy_type_alias)]
-#![feature(new_range_api)]
+#![allow(internal_features)] // Allow using internal features like `core_intrinsics`
+#![feature(allocator_api)] // Required for custom arena allocation and manual memory management
+#![feature(core_intrinsics)] // Used for `likely`/`unlikely` hints in performance-critical paths
+#![feature(lazy_type_alias)] // Allows more flexible type aliases for complex generic AST structures
+#![feature(new_range_api)] // Uses the modernized `core::range` API for precise source tracking
+// #![feature(nonnull_slice_from_raw_parts)] // Essential for creating raw slices in `SyntaxArena` without null checks
+#![feature(portable_simd)] // Enables SIMD acceleration for high-performance lexing and parsing
+#![feature(slice_ptr_get)] // Provides ergonomic access to raw pointers within slices
+#![feature(trusted_len)] // Optimizes iterator performance by trusting length hints in core structures
 #![warn(missing_docs)]
 #![doc(html_logo_url = "https://raw.githubusercontent.com/ygg-lang/oaks/refs/heads/dev/documents/logo.svg")]
 #![doc(html_favicon_url = "https://raw.githubusercontent.com/ygg-lang/oaks/refs/heads/dev/documents/logo.svg")]
 
-/// Tree building and construction utilities for the Oak parsing framework.
-///
-/// This module provides the [`Builder`] trait and related utilities for constructing
-/// kind trees from parsed tokens. It includes incremental building capabilities
-/// and tree manipulation utilities for efficient parsing operations.
+/// Incremental tree builder and cache management.
 pub mod builder;
 /// Error handling and diagnostic reporting for the parsing system.
 pub mod errors;
-/// Utility functions and helper types for parsing operations.
-pub mod helpers;
-/// Syntax kind definitions for tokens and nodes in the parsing system.
-pub mod kinds;
 /// Language definition trait for coordinating language-specific components.
 pub mod language;
 /// Lexical analysis and tokenization functionality.
 pub mod lexer;
+/// Memory management utilities (Arena, Bump).
+pub mod memory;
 /// Parsing functionality for converting tokens to kind trees.
 pub mod parser;
+pub mod serde_range;
 /// Source text management and location tracking.
 pub mod source;
 /// Tree structures for representing kind trees (green and red trees).
 pub mod tree;
-/// Tree traversal utilities for visiting and transforming kind trees.
-///
-/// This module provides visitor patterns and traversal utilities for walking
-/// through kind trees, enabling operations like kind highlighting,
-/// code analysis, and tree transformations.
+/// Tree traversal and transformation utilities.
 pub mod visitor;
 
+/// Helper utilities for common operations.
+pub mod helpers;
+
+pub use core::range::Range;
+
 pub use crate::{
-    builder::Builder,
-    errors::{LexResult, OakDiagnostics, OakError, OakErrorKind, ParseResult},
-    kinds::SyntaxKind,
-    language::Language,
-    lexer::{Lexer, LexerState, Token},
-    parser::{Associativity, OperatorInfo, Parser, PrattParser, Precedence},
-    source::{SourceLocation, SourceText},
-    tree::*,
+    builder::{Builder, BuilderCache},
+    errors::{OakDiagnostics, OakError, OakErrorKind},
+    language::{ElementRole, ElementType, Language, LanguageCategory, TokenRole, TokenType, UniversalElementRole, UniversalTokenRole},
+    lexer::{LexOutput, Lexer, LexerCache, LexerState, Token, Tokens},
+    memory::arena::SyntaxArena,
+    parser::{Associativity, OperatorInfo, ParseCache, ParseOutput, ParseSession, Parser, ParserState, Pratt, PrattParser, binary, postfix, state::TreeSink, unary},
+    source::{Source, SourceText, TextEdit},
+    tree::{GreenNode, GreenTree, RedNode, RedTree},
 };
+
+pub use triomphe::Arc;

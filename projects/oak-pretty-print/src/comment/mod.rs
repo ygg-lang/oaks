@@ -114,7 +114,7 @@ impl Comment {
 }
 
 /// 注释收集器，用于从源码中提取注释
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct CommentCollector {
     comments: Vec<Comment>,
 }
@@ -138,10 +138,7 @@ impl CommentCollector {
 
     /// 获取指定位置范围内的注释
     pub fn comments_in_range(&self, start: Position, end: Position) -> Vec<&Comment> {
-        self.comments
-            .iter()
-            .filter(|comment| comment.span.start.offset >= start.offset && comment.span.end.offset <= end.offset)
-            .collect()
+        self.comments.iter().filter(|comment| comment.span.start.offset >= start.offset && comment.span.end.offset <= end.offset).collect()
     }
 
     /// 获取指定位置之前的注释
@@ -177,7 +174,7 @@ impl Default for CommentCollector {
 }
 
 /// 注释处理器，负责在格式化过程中处理注释
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct CommentProcessor {
     collector: CommentCollector,
     preserve_comments: bool,

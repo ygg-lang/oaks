@@ -1,17 +1,52 @@
 //! Source text management and location tracking for incremental parsing.
 //!
 //! This module provides structures for managing source code text and tracking
-//! locations within it, including support for LSP (Language Server Protocol) integration.
+//! locations within it.
 
+use core::range::Range;
+use std::borrow::Cow;
+mod cursor;
+mod rope;
+mod simd;
+mod streaming;
 mod text;
-mod view;
 
-pub use self::{text::SourceText, view::SourceView};
+pub use self::{
+    cursor::SourceCursor,
+    rope::{RopeBuffer, RopeSource},
+    simd::SimdScanner,
+    streaming::{ChunkedBuffer, ChunkedSource},
+    text::SourceText,
+};
 use crate::OakError;
-use lsp_types::Position;
-use serde::{Deserialize, Serialize};
-use std::range::Range;
 pub use url::Url;
+
+/// A chunk of text from a source, including its start offset.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub struct TextChunk<'a> {
+    /// The start byte offset of this chunk in the source.
+    pub start: usize,
+    /// The text content of this chunk.
+    pub text: &'a str,
+}
+
+impl<'a> TextChunk<'a> {
+    /// Returns the end byte offset of this chunk.
+    #[inline]
+    pub fn end(&self) -> usize {
+        self.start + self.text.len()
+    }
+
+    /// Returns a slice of the chunk text starting from the specified absolute offset.
+    #[inline]
+    pub fn slice_from(&self, offset: usize) -> &'a str {
+        if offset <= self.start {
+            return self.text;
+        }
+        let rel = offset.saturating_sub(self.start);
+        self.text.get(rel..).unwrap_or("")
+    }
+}
 
 /// Represents a text edit operation for incremental updates.
 ///
@@ -23,9 +58,12 @@ pub use url::Url;
 /// # Examples
 ///
 /// ```
+/// # #![feature(new_range_api)]
+/// # use oak_core::source::TextEdit;
+/// use core::range::Range;
 /// let edit = TextEdit {
-///     span: 4..9,           // Replace characters at positions 4-8
-///     text: "world".into(), // With the text "world"
+///     span: Range { start: 4, end: 9 }, // Replace characters at positions 4-8
+///     text: "world".into(),             // With the text "world"
 /// };
 /// ```
 pub struct TextEdit {
@@ -35,21 +73,7 @@ pub struct TextEdit {
     pub text: String,
 }
 
-/// Represents a specific location within source code.
-///
-/// This struct provides line and column information for error reporting
-/// and debugging, optionally including a URL reference to the source file.
-#[derive(Clone, Debug, Default, PartialEq, Eq, Hash, Serialize, Deserialize)]
-pub struct SourceLocation {
-    /// The 1-based line number in the source text
-    pub line: u32,
-    /// The 0-based column number within the line
-    pub column: u32,
-    /// Optional URL reference to the source file
-    pub url: Option<Url>,
-}
-
-/// Trait for abstract text sources with error position management.
+/// Trait for abstract text sources.
 ///
 /// This trait provides a unified interface for different text sources that may have:
 /// - Different character representations (Unicode escapes, HTML entities)
@@ -57,13 +81,19 @@ pub struct SourceLocation {
 /// - Different error handling requirements
 ///
 /// All offsets exposed by this trait are simple text ranges from the start of this source.
-/// Internal complexity like global offset mapping, character encoding transformations,
-/// and position tracking are handled internally.
-pub trait Source {
+pub trait Source: Send + Sync {
     /// Get the length of this source.
     ///
     /// This represents the total size of this source in bytes.
     fn length(&self) -> usize;
+
+    /// Returns the URL of this source, if available.
+    fn url(&self) -> Option<Url> {
+        None
+    }
+
+    /// Returns a text chunk containing the specified offset.
+    fn chunk_at(&self, offset: usize) -> TextChunk<'_>;
 
     /// Check if the source is empty.
     fn is_empty(&self) -> bool {
@@ -83,7 +113,7 @@ pub trait Source {
     ///
     /// The character at the specified offset, or `None` if the offset is invalid
     fn get_char_at(&self, offset: usize) -> Option<char> {
-        self.get_text_from(offset).chars().next()
+        self.chunk_at(offset).slice_from(offset).chars().next()
     }
 
     /// Get the text content at the specified range.
@@ -98,8 +128,8 @@ pub trait Source {
     ///
     /// # Returns
     ///
-    /// The text content in the specified range, or `None` if the range is invalid
-    fn get_text_in(&self, range: Range<usize>) -> &str;
+    /// The text content in the specified range.
+    fn get_text_in(&self, range: Range<usize>) -> Cow<'_, str>;
 
     /// Get the text from the current position to the end of the source.
     ///
@@ -109,12 +139,12 @@ pub trait Source {
     ///
     /// # Returns
     ///
-    /// The remaining text from the offset to the end, or `None` if the offset is invalid
-    fn get_text_from(&self, offset: usize) -> &str {
+    /// The remaining text from the offset to the end.
+    fn get_text_from(&self, offset: usize) -> Cow<'_, str> {
         if offset >= self.length() {
-            return "";
+            return Cow::Borrowed("");
         }
-        self.get_text_in((offset..self.length()).into())
+        self.get_text_in(core::range::Range { start: offset, end: self.length() })
     }
 
     /// Get the URL of this source, if available.
@@ -129,68 +159,6 @@ pub trait Source {
         None
     }
 
-    /// Convert an offset to position information for error reporting.
-    ///
-    /// This method handles the mapping from offsets to human-readable
-    /// line/column positions for error reporting.
-    ///
-    /// # Arguments
-    ///
-    /// * `offset` - The byte offset from the start of this source
-    ///
-    /// # Returns
-    ///
-    /// A [`SourcePosition`] with line and column information,
-    /// or `None` if the offset is invalid
-    fn offset_to_position(&self, offset: usize) -> Position;
-
-    /// Convert a position to an offset.
-    ///
-    /// # Arguments
-    ///
-    /// * `position` - The position to convert
-    ///
-    /// # Returns
-    ///
-    /// The offset corresponding to the position
-    fn position_to_offset(&self, position: Position) -> usize;
-
-    /// Converts a byte range to an LSP Range.
-    ///
-    /// # Arguments
-    ///
-    /// * `span` - The byte range to convert
-    ///
-    /// # Returns
-    ///
-    /// An `lsp_types::Range` with line/column positions.
-    ///
-    /// # Availability
-    ///
-    /// This method is only available when the `lsp-types` feature is enabled.
-    fn span_to_lsp_range(&self, span: Range<usize>) -> lsp_types::Range {
-        let start = self.offset_to_position(span.start);
-        let end = self.offset_to_position(span.end);
-        lsp_types::Range { start, end }
-    }
-
-    /// Converts an LSP Range to a byte-based source span.
-    ///
-    /// # Arguments
-    ///
-    /// * `range` - The LSP Range to convert
-    ///
-    /// # Returns
-    ///
-    /// A `Range<usize>` representing the byte offset range.
-    ///
-    /// # Availability
-    ///
-    /// This method is only available when the `lsp-types` feature is enabled.
-    fn lsp_range_to_span(&self, range: lsp_types::Range) -> Range<usize> {
-        Range { start: self.position_to_offset(range.start), end: self.position_to_offset(range.end) }
-    }
-
     /// Find the next occurrence of a character starting from an offset.
     ///
     /// # Arguments
@@ -202,8 +170,20 @@ pub trait Source {
     ///
     /// The offset of the next occurrence, or `None` if not found
     fn find_char_from(&self, offset: usize, ch: char) -> Option<usize> {
-        let text = self.get_text_from(offset);
-        text.find(ch).map(|pos| offset + pos)
+        let mut cursor = SourceCursor::new_at(self, offset);
+        let mut base = offset;
+        loop {
+            let rest = cursor.rest();
+            if let Some(pos) = rest.find(ch) {
+                return Some(base + pos);
+            }
+            let next = cursor.chunk_end();
+            if next >= self.length() {
+                return None;
+            }
+            base = next;
+            cursor.set_position(next);
+        }
     }
 
     /// Find the next occurrence of a substring starting from an offset.
@@ -217,25 +197,57 @@ pub trait Source {
     ///
     /// The offset of the next occurrence, or `None` if not found
     fn find_str_from(&self, offset: usize, pattern: &str) -> Option<usize> {
-        let text = self.get_text_from(offset);
-        text.find(pattern).map(|pos| offset + pos)
+        let mut cursor = SourceCursor::new_at(self, offset);
+        cursor.find_str(pattern)
     }
 
-    /// Create an error for an invalid range.
+    /// Create a syntax error with location information.
     ///
     /// # Arguments
     ///
-    /// * `range` - The invalid range
     /// * `message` - The error message
+    /// * `offset` - The byte offset where the error occurred
     ///
     /// # Returns
     ///
-    /// An [`OakError`] with position information at the start of the range
-    fn syntax_error(&self, message: impl Into<String>, position: usize) -> OakError {
-        let position = self.offset_to_position(position);
-        OakError::syntax_error(
-            message.into(),
-            SourceLocation { line: position.line, column: position.character, url: self.get_url().cloned() },
-        )
+    /// An [`OakError`] with precise location information.
+    fn syntax_error(&self, message: String, offset: usize) -> OakError {
+        OakError::syntax_error(message, offset, self.get_url().cloned())
+    }
+}
+
+impl<S: Source + ?Sized> Source for &S {
+    fn length(&self) -> usize {
+        (**self).length()
+    }
+
+    fn chunk_at(&self, offset: usize) -> TextChunk<'_> {
+        (**self).chunk_at(offset)
+    }
+
+    fn get_text_in(&self, range: Range<usize>) -> Cow<'_, str> {
+        (**self).get_text_in(range)
+    }
+
+    fn get_url(&self) -> Option<&Url> {
+        (**self).get_url()
+    }
+}
+
+impl Source for Box<dyn Source + Send + Sync> {
+    fn length(&self) -> usize {
+        (**self).length()
+    }
+
+    fn chunk_at(&self, offset: usize) -> TextChunk<'_> {
+        (**self).chunk_at(offset)
+    }
+
+    fn get_text_in(&self, range: Range<usize>) -> Cow<'_, str> {
+        (**self).get_text_in(range)
+    }
+
+    fn get_url(&self) -> Option<&Url> {
+        (**self).get_url()
     }
 }

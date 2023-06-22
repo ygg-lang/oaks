@@ -1,127 +1,193 @@
 //! Green tree implementation for immutable kind tree representation.
 //!
-//! This module provides the "green" side of the red-green tree architecture,
-//! where green nodes are immutable and don't contain position information,
-//! making them cacheable and shareable across different parse trees.
+//! This module provides the "green" side of the red-green tree architecture.
+//! In this high-performance implementation, green nodes are allocated in a
+//! `SyntaxArena` and do not use reference counting.
 
-use triomphe::Arc;
+use crate::Language;
+use std::{
+    fmt,
+    hash::{Hash, Hasher},
+};
 
 /// A green tree element - either a node or a leaf kind.
 ///
 /// Green trees represent the immutable structure of kind trees without
-/// position information. They are designed to be cacheable and shareable
-/// across different parse trees and incremental updates.
-#[derive(Debug, Clone)]
-pub enum GreenTree<K: Copy> {
+/// position information.
+pub enum GreenTree<'a, L: Language> {
     /// A green node with child elements
-    Node(Arc<GreenNode<K>>),
+    Node(&'a GreenNode<'a, L>),
     /// A green leaf kind
-    Leaf(GreenLeaf<K>),
+    Leaf(GreenLeaf<L>),
 }
 
-impl<K: Copy> GreenTree<K> {
-    /// Returns the total byte length of this green tree element.
-    ///
-    /// # Returns
-    ///
-    /// The byte length of the element, either from the node's total length
-    /// or the leaf's text length
-    #[inline]
-    pub fn len(&self) -> usize {
+// Manually implement Clone/Copy to avoid L: Copy bound
+impl<'a, L: Language> Clone for GreenTree<'a, L> {
+    fn clone(&self) -> Self {
+        *self
+    }
+}
+
+impl<'a, L: Language> Copy for GreenTree<'a, L> {}
+
+impl<'a, L: Language> fmt::Debug for GreenTree<'a, L> {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
-            GreenTree::Node(n) => n.length,
+            Self::Node(node) => fmt::Debug::fmt(node, f),
+            Self::Leaf(leaf) => fmt::Debug::fmt(leaf, f),
+        }
+    }
+}
+
+impl<'a, L: Language> PartialEq for GreenTree<'a, L> {
+    fn eq(&self, other: &Self) -> bool {
+        match (self, other) {
+            (Self::Node(l0), Self::Node(r0)) => l0 == r0,
+            (Self::Leaf(l0), Self::Leaf(r0)) => l0 == r0,
+            _ => false,
+        }
+    }
+}
+
+impl<'a, L: Language> Eq for GreenTree<'a, L> {}
+
+impl<'a, L: Language> Hash for GreenTree<'a, L> {
+    fn hash<H: Hasher>(&self, state: &mut H) {
+        match self {
+            Self::Node(node) => node.hash(state),
+            Self::Leaf(leaf) => leaf.hash(state),
+        }
+    }
+}
+
+impl<'a, L: Language> GreenTree<'a, L> {
+    /// Returns the total byte length of this green tree element.
+    #[inline]
+    pub fn len(&self) -> u32 {
+        match self {
+            GreenTree::Node(n) => n.text_len,
             GreenTree::Leaf(t) => t.length,
         }
     }
 }
 
 /// A green leaf kind that stores only kind and length.
-///
-/// Green leaves represent individual tokens (keywords, identifiers, literals, etc.)
-/// without storing the actual text content. They only store the kind kind and
-/// length, avoiding text duplication and enabling efficient sharing.
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct GreenLeaf<K: Copy> {
-    /// The kind kind/category (e.g., keyword, identifier, literal)
-    pub kind: K,
+pub struct GreenLeaf<L: Language> {
+    /// The kind kind/category
+    pub kind: L::TokenType,
     /// The byte length of the kind text
-    pub length: usize,
+    pub length: u32,
 }
 
-impl<K: Copy> GreenLeaf<K> {
+// Manually implement Clone/Copy to avoid L: Copy bound
+impl<L: Language> Clone for GreenLeaf<L> {
+    fn clone(&self) -> Self {
+        *self
+    }
+}
+
+impl<L: Language> Copy for GreenLeaf<L> {}
+
+impl<L: Language> PartialEq for GreenLeaf<L> {
+    fn eq(&self, other: &Self) -> bool {
+        self.kind == other.kind && self.length == other.length
+    }
+}
+
+impl<L: Language> Eq for GreenLeaf<L> {}
+
+impl<L: Language> Hash for GreenLeaf<L> {
+    fn hash<H: Hasher>(&self, state: &mut H) {
+        self.kind.hash(state);
+        self.length.hash(state);
+    }
+}
+
+impl<L: Language> fmt::Debug for GreenLeaf<L> {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.debug_struct("GreenLeaf").field("kind", &self.kind).field("length", &self.length).finish()
+    }
+}
+
+impl<L: Language> GreenLeaf<L> {
     /// Creates a new green leaf kind.
-    ///
-    /// # Arguments
-    ///
-    /// * `kind` - The kind kind/category
-    /// * `len` - The byte length of the kind text
-    ///
-    /// # Returns
-    ///
-    /// A new [`GreenLeaf`] with the given kind and length
     #[inline]
-    pub fn new(kind: K, len: usize) -> Self {
+    pub fn new(kind: L::TokenType, len: u32) -> Self {
         Self { kind, length: len }
     }
 }
 
-/// A green node that contains child elements without parent pointers.
+/// A green node that contains child elements.
 ///
-/// Green nodes represent kind tree nodes with their structural information
-/// but without position data or parent references. This design makes them
-/// immutable and shareable across different parse trees.
-#[derive(Debug, Clone)]
-pub struct GreenNode<K: Copy> {
-    /// The node kind/category (e.g., expression, statement, declaration)
-    pub kind: K,
-    /// The child elements of this node
-    pub children: Vec<GreenTree<K>>,
-    /// The total byte length of this node and all its children
-    pub length: usize,
+/// Green nodes are allocated in a `SyntaxArena` and hold a slice reference
+/// to their children. They are POD (Plain Old Data) and strictly immutable.
+pub struct GreenNode<'a, L: Language> {
+    /// The element type (kind) of this node.
+    pub kind: L::ElementType,
+    /// The total text length of this node (sum of children's lengths).
+    pub text_len: u32,
+    /// The children of this node.
+    pub children: &'a [GreenTree<'a, L>],
 }
 
-impl<K: Copy> GreenNode<K> {
-    /// Creates a new green node from kind and children.
-    ///
-    /// # Arguments
-    ///
-    /// * `kind` - The node kind/category
-    /// * `children` - The child elements of this node
-    ///
-    /// # Returns
-    ///
-    /// A reference-counted [`GreenNode`] with computed total length
-    pub fn new(kind: K, children: Vec<GreenTree<K>>) -> Arc<Self> {
-        let len = children.iter().map(|c| c.len()).sum();
-        Arc::new(Self { kind, children, length: len })
+// Manually implement Clone to avoid L: Clone bound (though L usually is Clone)
+impl<'a, L: Language> Clone for GreenNode<'a, L> {
+    fn clone(&self) -> Self {
+        Self { kind: self.kind, text_len: self.text_len, children: self.children }
     }
 }
 
-impl<K: Copy> GreenNode<K> {
-    /// Replaces a range of child elements with new children.
+impl<'a, L: Language> PartialEq for GreenNode<'a, L> {
+    fn eq(&self, other: &Self) -> bool {
+        self.kind == other.kind && self.text_len == other.text_len && self.children == other.children
+    }
+}
+
+impl<'a, L: Language> Eq for GreenNode<'a, L> {}
+
+impl<'a, L: Language> fmt::Debug for GreenNode<'a, L> {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.debug_struct("GreenNode").field("kind", &self.kind).field("children", &self.children).field("length", &self.text_len).finish()
+    }
+}
+
+impl<'a, L: Language> Hash for GreenNode<'a, L> {
+    fn hash<H: Hasher>(&self, state: &mut H) {
+        self.kind.hash(state);
+        self.children.hash(state);
+    }
+}
+
+impl<'a, L: Language> GreenNode<'a, L> {
+    /// Creates a new green node from child elements.
     ///
-    /// This method is essential for incremental parsing, allowing efficient
-    /// updates to kind trees by replacing only the changed portions.
-    ///
-    /// # Arguments
-    ///
-    /// * `replace_start` - The starting index of the range to replace (inclusive)
-    /// * `replace_end` - The ending index of the range to replace (exclusive)
-    /// * `new_children` - The new child elements to insert
-    ///
-    /// # Returns
-    ///
-    /// A new [`Arc<GreenNode<K>>`] with the specified children replaced
-    ///
-    /// # Panics
-    ///
-    /// Panics if the indices are out of bounds or if `replace_start > replace_end`
-    pub fn replace_range(&self, replace_start: usize, replace_end: usize, new_children: Vec<GreenTree<K>>) -> Arc<Self> {
-        assert!(replace_start <= replace_end && replace_end <= self.children.len());
-        let mut children = Vec::with_capacity(self.children.len() - (replace_end - replace_start) + new_children.len());
-        children.extend_from_slice(&self.children[..replace_start]);
-        children.extend(new_children.into_iter());
-        children.extend_from_slice(&self.children[replace_end..]);
-        GreenNode::new(self.kind, children)
+    /// This function assumes the children slice is already allocated in the arena.
+    pub fn new(kind: L::ElementType, children: &'a [GreenTree<'a, L>]) -> Self {
+        let len: u32 = children.iter().map(|c| c.len()).sum();
+        Self { kind, text_len: len, children }
+    }
+
+    /// Returns the kind of this node.
+    #[inline]
+    pub fn kind(&self) -> L::ElementType {
+        self.kind
+    }
+
+    /// Returns the total text length of this node.
+    #[inline]
+    pub fn text_len(&self) -> u32 {
+        self.text_len
+    }
+
+    /// Returns the children of this node.
+    #[inline]
+    pub fn children(&self) -> &'a [GreenTree<'a, L>] {
+        self.children
+    }
+
+    /// Returns a specific child at index.
+    #[inline]
+    pub fn child_at(&self, index: usize) -> Option<&'a GreenTree<'a, L>> {
+        self.children.get(index)
     }
 }

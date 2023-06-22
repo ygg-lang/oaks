@@ -1,0 +1,557 @@
+use crate::{
+    Language,
+    errors::OakError,
+    lexer::{LexOutput, Token, Tokens},
+    memory::arena::SyntaxArena,
+    source::Source,
+    tree::{Cursor, GreenLeaf, GreenNode, GreenTree},
+};
+use core::range::Range;
+use triomphe::Arc;
+
+/// Helper function to perform deep clone of a node into an arena.
+///
+/// This is used to "promote" nodes from a previous generation's arena to the current one,
+/// ensuring that the new tree is self-contained and has good memory locality.
+pub fn deep_clone_node<'a, L: Language>(node: &'a GreenNode<'a, L>, arena: &'a SyntaxArena) -> &'a GreenNode<'a, L> {
+    let children_iter = node.children.iter().map(|child| match child {
+        GreenTree::Node(n) => GreenTree::Node(deep_clone_node(n, arena)),
+        GreenTree::Leaf(l) => GreenTree::Leaf(*l),
+    });
+
+    let slice = arena.alloc_slice_fill_iter(node.children.len(), children_iter);
+    let new_node = GreenNode::new(node.kind, slice);
+    arena.alloc(new_node)
+}
+
+/// Provides tokens to the parser.
+pub struct TokenSource<L: Language> {
+    tokens: Tokens<L>,
+    index: usize,
+}
+
+impl<L: Language> Clone for TokenSource<L> {
+    fn clone(&self) -> Self {
+        Self { tokens: self.tokens.clone(), index: self.index }
+    }
+}
+
+impl<L: Language> TokenSource<L> {
+    /// Creates a new token source.
+    pub fn new(tokens: Tokens<L>) -> Self {
+        Self { tokens, index: 0 }
+    }
+
+    /// Gets the current token.
+    #[inline]
+    pub fn current(&self) -> Option<&Token<L::TokenType>> {
+        self.tokens.get(self.index)
+    }
+
+    /// Peeks at a token at the specified offset from the current position.
+    #[inline]
+    pub fn peek_at(&self, offset: usize) -> Option<&Token<L::TokenType>> {
+        self.tokens.get(self.index + offset)
+    }
+
+    /// Advances the current position to the next token.
+    #[inline]
+    pub fn advance(&mut self) {
+        self.index += 1;
+    }
+
+    /// Checks if the token source has reached the end.
+    #[inline]
+    pub fn is_end(&self) -> bool {
+        self.index >= self.tokens.len()
+    }
+
+    /// Gets the current index.
+    #[inline]
+    pub fn index(&self) -> usize {
+        self.index
+    }
+
+    /// Sets the current index.
+    #[inline]
+    pub fn set_index(&mut self, index: usize) {
+        self.index = index;
+    }
+}
+
+/// Collects the results of the parsing process.
+pub struct TreeSink<'a, L: Language> {
+    arena: &'a SyntaxArena,
+    children: Vec<GreenTree<'a, L>>,
+}
+
+impl<'a, L: Language> TreeSink<'a, L> {
+    /// Creates a new tree sink.
+    pub fn new(arena: &'a SyntaxArena, capacity_hint: usize) -> Self {
+        Self { arena, children: Vec::with_capacity(capacity_hint) }
+    }
+
+    /// Pushes a leaf node (token) to the current list of children.
+    pub fn push_leaf(&mut self, kind: L::TokenType, len: usize) {
+        self.children.push(GreenTree::Leaf(GreenLeaf::new(kind, len as u32)));
+    }
+
+    /// Pushes an existing node to the current list of children.
+    pub fn push_node(&mut self, node: &'a GreenNode<'a, L>) {
+        self.children.push(GreenTree::Node(node));
+    }
+
+    /// Returns the current number of children, serving as a checkpoint for finishing a node later.
+    pub fn checkpoint(&self) -> usize {
+        self.children.len()
+    }
+
+    /// Finishes a node starting from the given checkpoint and adds it as a child.
+    pub fn finish_node(&mut self, checkpoint: usize, kind: L::ElementType) -> &'a GreenNode<'a, L> {
+        let children_slice = self.arena.alloc_slice_copy(&self.children[checkpoint..]);
+        self.children.truncate(checkpoint);
+        let node = GreenNode::new(kind, children_slice);
+        let node_ref = self.arena.alloc(node);
+        self.children.push(GreenTree::Node(node_ref));
+        node_ref
+    }
+}
+
+/// Encapsulates incremental parsing logic.
+pub struct IncrementalContext<'a, L: Language> {
+    cursor: Cursor<'a, L>,
+    /// Sorted list of edits with their accumulated deltas.
+    /// Each entry contains the old range and the cumulative delta *after* this edit.
+    edits: Vec<(Range<usize>, isize)>,
+}
+
+impl<'a, L: Language> IncrementalContext<'a, L> {
+    /// Creates a new incremental parsing context.
+    pub fn new(old_root: &'a GreenNode<'a, L>, edits: &[crate::source::TextEdit]) -> Self {
+        let mut sorted_edits: Vec<_> = edits.iter().collect();
+        sorted_edits.sort_by_key(|e| e.span.start);
+
+        let mut cumulative_delta = 0isize;
+        let mut processed_edits = Vec::with_capacity(edits.len());
+
+        for edit in sorted_edits {
+            let old_len = edit.span.end - edit.span.start;
+            let new_len = edit.text.len();
+            cumulative_delta += new_len as isize - old_len as isize;
+            processed_edits.push((edit.span, cumulative_delta));
+        }
+
+        Self { cursor: Cursor::new(old_root), edits: processed_edits }
+    }
+
+    fn map_new_to_old(&self, new_pos: usize) -> Option<usize> {
+        let mut current_delta = 0isize;
+
+        for (old_range, cumulative_delta) in &self.edits {
+            let new_start = (old_range.start as isize + current_delta) as usize;
+            let edit_delta = *cumulative_delta - current_delta;
+            let new_end = (old_range.end as isize + current_delta + edit_delta) as usize;
+
+            if new_pos < new_start {
+                return Some((new_pos as isize - current_delta) as usize);
+            }
+            else if new_pos < new_end {
+                // Inside a dirty range
+                return None;
+            }
+
+            current_delta = *cumulative_delta;
+        }
+
+        Some((new_pos as isize - current_delta) as usize)
+    }
+
+    fn is_dirty(&self, old_start: usize, old_end: usize) -> bool {
+        for (old_range, _) in &self.edits {
+            // Check for overlap between [old_start, old_end) and [old_range.start, old_range.end)
+            if old_start < old_range.end && old_end > old_range.start {
+                return true;
+            }
+        }
+        false
+    }
+}
+
+/// High-level API for parsers, coordinating token supply and tree construction.
+pub struct ParserState<'a, L: Language, S: Source + ?Sized = crate::source::SourceText> {
+    /// The token stream being parsed.
+    pub tokens: TokenSource<L>,
+
+    /// The sink where the syntax tree is constructed.
+    pub sink: TreeSink<'a, L>,
+
+    /// Optional context for incremental parsing.
+    pub incremental: Option<IncrementalContext<'a, L>>,
+
+    /// Collection of errors encountered during parsing.
+    pub errors: Vec<OakError>,
+    /// We keep a reference to help with error reporting and offset calculation.
+    pub source: &'a S,
+}
+
+impl<'a, L: Language, S: Source + ?Sized> ParserState<'a, L, S> {
+    /// Returns the source file's URL, if available.
+    pub fn source_url(&self) -> Option<crate::source::Url> {
+        self.source.url()
+    }
+
+    /// Creates a new parser state.
+    ///
+    /// # Arguments
+    /// * `arena` - The syntax arena to allocate nodes in.
+    /// * `lex_output` - The output from the lexer, including tokens and any lexical errors.
+    /// * `source` - The source text being parsed.
+    /// * `capacity_hint` - Initial capacity hint for the tree sink's child vector.
+    pub fn new(arena: &'a SyntaxArena, lex_output: LexOutput<L>, source: &'a S, capacity_hint: usize) -> Self {
+        let (tokens, mut errors) = match lex_output.result {
+            Ok(tokens) => (tokens, Vec::new()),
+            Err(e) => (Arc::from(Vec::new()), vec![e]),
+        };
+        errors.extend(lex_output.diagnostics);
+
+        Self { tokens: TokenSource::new(tokens), sink: TreeSink::new(arena, capacity_hint), incremental: None, errors, source }
+    }
+
+    /// Creates a nested parser state that shares the same arena and source.
+    /// This is useful for parsing sub-structures that should be independent but part of the same overall tree.
+    pub fn nested(&self) -> ParserState<'a, L, S> {
+        ParserState { tokens: self.tokens.clone(), sink: TreeSink::new(self.sink.arena, 1024), incremental: None, errors: Vec::new(), source: self.source }
+    }
+
+    /// Returns the text content of the current token.
+    pub fn peek_text(&self) -> Option<std::borrow::Cow<'_, str>> {
+        self.current().map(|t| self.source.get_text_in(t.span))
+    }
+
+    /// Manually promotes a node from a previous generation to the current one.
+    /// This is useful for improving memory locality.
+    pub fn promote(&mut self, node: &'a GreenNode<'a, L>) -> &'a GreenNode<'a, L> {
+        deep_clone_node(node, self.sink.arena)
+    }
+
+    /// Sets the incremental parsing context.
+    ///
+    /// # Arguments
+    /// * `old` - The root of the previous version of the syntax tree.
+    /// * `edits` - The edits that were applied to the source text.
+    pub fn set_incremental(&mut self, old: &'a GreenNode<'a, L>, edits: &[crate::source::TextEdit]) {
+        self.incremental = Some(IncrementalContext::new(old, edits));
+    }
+
+    // --- Error Reporting ---
+
+    /// Returns the current byte offset.
+    pub fn current_offset(&self) -> usize {
+        self.tokens.current().map(|t| t.span.start).unwrap_or_else(|| self.source.length())
+    }
+
+    /// Records a syntax error with the given message.
+    pub fn syntax_error(&mut self, message: impl Into<String>) -> OakError {
+        let err = OakError::syntax_error(message, self.current_offset(), self.source.url());
+        self.errors.push(err.clone());
+        err
+    }
+
+    /// Records an unexpected token error.
+    pub fn record_unexpected_token(&mut self, token: impl Into<String>) {
+        let err = OakError::unexpected_token(token, self.current_offset(), self.source.url());
+        self.errors.push(err);
+    }
+
+    /// Records an expected token error.
+    pub fn record_expected(&mut self, expected: impl Into<String>) {
+        let offset = self.tokens.current().map(|t| t.span.start).unwrap_or(self.source.length());
+        let err = OakError::expected_token(expected, offset, self.source.url());
+        self.errors.push(err);
+    }
+
+    /// Records an expected name error.
+    pub fn record_expected_name(&mut self, name_kind: impl Into<String>) {
+        let offset = self.tokens.current().map(|t| t.span.start).unwrap_or(self.source.length());
+        let err = OakError::expected_name(name_kind, offset, self.source.url());
+        self.errors.push(err);
+    }
+
+    /// Records a trailing comma not allowed error.
+    pub fn record_trailing_comma_not_allowed(&mut self) {
+        let offset = self.tokens.current().map(|t| t.span.start).unwrap_or(self.source.length());
+        let err = OakError::trailing_comma_not_allowed(offset, self.source.url());
+        self.errors.push(err);
+    }
+
+    /// Records an unexpected end of file error.
+    pub fn record_unexpected_eof(&mut self) {
+        let offset = self.source.length();
+        let err = OakError::unexpected_eof(offset, self.source.url());
+        self.errors.push(err);
+    }
+
+    /// Records an unexpected end of file error and returns it.
+    pub fn unexpected_eof(&mut self) -> OakError {
+        let offset = self.source.length();
+        let err = OakError::unexpected_eof(offset, self.source.url());
+        self.errors.push(err.clone());
+        err
+    }
+
+    // --- Token Navigation ---
+
+    /// Returns the current token.
+    #[inline]
+    pub fn current(&self) -> Option<&Token<L::TokenType>> {
+        self.tokens.current()
+    }
+
+    /// Returns the kind of the current token.
+    #[inline]
+    pub fn peek_kind(&self) -> Option<L::TokenType> {
+        self.current().map(|t| t.kind)
+    }
+
+    /// Peeks at a token at the specified offset from the current position.
+    #[inline]
+    pub fn peek_at(&self, offset: usize) -> Option<&Token<L::TokenType>> {
+        self.tokens.peek_at(offset)
+    }
+
+    /// Returns the kind of the token at the specified offset from the current position.
+    #[inline]
+    pub fn peek_kind_at(&self, offset: usize) -> Option<L::TokenType> {
+        self.tokens.peek_at(offset).map(|t| t.kind)
+    }
+
+    /// Checks if the parser has not yet reached the end of the token stream.
+    #[inline]
+    pub fn not_at_end(&self) -> bool {
+        !self.tokens.is_end()
+    }
+
+    /// Checks if the current token is of the specified kind.
+    #[inline]
+    pub fn at(&self, kind: L::TokenType) -> bool {
+        self.peek_kind() == Some(kind)
+    }
+
+    /// Advances the current position to the next token.
+    pub fn advance(&mut self) {
+        self.tokens.advance();
+    }
+
+    /// Advances until a token of the specified kind is found, or the end of the token stream is reached.
+    pub fn advance_until(&mut self, kind: L::TokenType) {
+        while self.not_at_end() && !self.at(kind) {
+            self.advance();
+        }
+    }
+
+    /// Advances until any token of the specified kinds is found, or the end of the token stream is reached.
+    pub fn advance_until_any(&mut self, kinds: &[L::TokenType]) {
+        while self.not_at_end() && !kinds.iter().any(|&k| self.at(k)) {
+            self.advance();
+        }
+    }
+
+    /// Consumes the current token and adds it to the syntax tree as a leaf node.
+    pub fn bump(&mut self)
+    where
+        L::ElementType: From<L::TokenType>,
+    {
+        if let Some(token) = self.current() {
+            self.sink.push_leaf(token.kind, token.length());
+            self.tokens.advance();
+        }
+    }
+
+    /// Consumes the current token if it matches the specified kind.
+    /// Returns `true` if the token was consumed, `false` otherwise.
+    pub fn eat(&mut self, kind: L::TokenType) -> bool
+    where
+        L::ElementType: From<L::TokenType>,
+    {
+        if self.at(kind) {
+            self.bump();
+            true
+        }
+        else {
+            false
+        }
+    }
+
+    /// Expects the current token to be of the specified kind, consuming it if it matches.
+    /// If the token does not match, an error is recorded and returned.
+    pub fn expect(&mut self, kind: L::TokenType) -> Result<(), OakError>
+    where
+        L::ElementType: From<L::TokenType>,
+    {
+        if self.eat(kind) {
+            Ok(())
+        }
+        else {
+            let err = OakError::expected_token(format!("{:?}", kind), self.current_offset(), self.source.url());
+            self.errors.push(err.clone());
+            Err(err)
+        }
+    }
+
+    // --- Tree Construction ---
+
+    /// Creates a checkpoint in the tree construction process, which can be used to finish a node later.
+    pub fn checkpoint(&self) -> usize {
+        self.sink.checkpoint()
+    }
+
+    /// Finishes a node starting from the given checkpoint and adds it as a child.
+    pub fn finish_at(&mut self, checkpoint: usize, kind: L::ElementType) -> &'a GreenNode<'a, L> {
+        self.sink.finish_node(checkpoint, kind)
+    }
+
+    /// Adds an existing node as a child to the current node.
+    pub fn push_child(&mut self, node: &'a GreenNode<'a, L>) {
+        self.sink.push_node(node);
+    }
+
+    /// Attempts to reuse a previous syntax node at the current position.
+    /// This is the core of incremental parsing.
+    pub fn try_reuse(&mut self, kind: L::ElementType) -> bool {
+        let Some(inc) = &mut self.incremental
+        else {
+            return false;
+        };
+        let current_index = self.tokens.index();
+        let new_pos = self.tokens.current().map(|t| t.span.start).unwrap_or(self.source.length());
+
+        #[cfg(test)]
+        println!("try_reuse: kind={:?}, new_pos={}", kind, new_pos);
+
+        let Some(target_old_pos) = inc.map_new_to_old(new_pos)
+        else {
+            return false;
+        };
+
+        #[cfg(test)]
+        println!("Trying to reuse node at pos {}: {:?}", new_pos, kind);
+
+        let mut steps = 0;
+        const MAX_STEPS: usize = 100;
+
+        loop {
+            let start = inc.cursor.offset();
+            let end = inc.cursor.end_offset();
+
+            if start == target_old_pos {
+                if let Some(node) = inc.cursor.as_node() {
+                    if node.kind == kind {
+                        if !inc.is_dirty(start, end) {
+                            // Verify tokens
+                            let node_len = node.text_len() as usize;
+
+                            // Check token stream
+                            let mut lookahead = 0;
+                            let mut current_pos = new_pos;
+                            let target_new_end = new_pos + node_len;
+
+                            while let Some(t) = self.tokens.peek_at(lookahead) {
+                                if t.span.start != current_pos {
+                                    // Token stream doesn't match expected positions
+                                    break;
+                                }
+                                current_pos = t.span.end;
+
+                                if t.span.end == target_new_end {
+                                    // Found the end!
+                                    let tokens_consumed = lookahead + 1;
+                                    let new_node = deep_clone_node(node, self.sink.arena);
+                                    self.sink.push_node(new_node);
+                                    self.tokens.set_index(current_index + tokens_consumed);
+                                    inc.cursor.step_over();
+                                    return true;
+                                }
+                                else if t.span.end > target_new_end {
+                                    break;
+                                }
+                                lookahead += 1;
+                            }
+                        }
+                    }
+                }
+                if !inc.cursor.step_into() && !inc.cursor.step_next() {
+                    return false;
+                }
+            }
+            else if start < target_old_pos && end > target_old_pos {
+                if !inc.cursor.step_into() && !inc.cursor.step_next() {
+                    return false;
+                }
+            }
+            else if end <= target_old_pos {
+                if !inc.cursor.step_next() {
+                    return false;
+                }
+            }
+            else {
+                return false;
+            }
+
+            steps += 1;
+            if steps > MAX_STEPS {
+                return false;
+            }
+        }
+    }
+
+    /// Finishes the parsing process and returns the final output.
+    pub fn finish(self, result: Result<&'a GreenNode<'a, L>, OakError>) -> crate::parser::ParseOutput<'a, L> {
+        crate::errors::OakDiagnostics { result, diagnostics: self.errors }
+    }
+
+    /// Wraps the parsing of a node with incremental reuse support.
+    ///
+    /// This method first attempts to reuse an existing node of the given kind from the previous tree.
+    /// If successful, it skips the provided closure and returns `Ok(())`.
+    /// Otherwise, it creates a checkpoint, runs the closure to parse the node's content,
+    /// and then finishes the node with the specified kind.
+    pub fn incremental_node<F>(&mut self, kind: L::ElementType, f: F) -> Result<(), OakError>
+    where
+        F: FnOnce(&mut Self) -> Result<(), OakError>,
+    {
+        if self.try_reuse(kind) {
+            return Ok(());
+        }
+
+        let checkpoint = self.checkpoint();
+        let res = f(self);
+        self.finish_at(checkpoint, kind);
+        res
+    }
+
+    /// Wraps the parsing of an optional node with incremental reuse support.
+    ///
+    /// Similar to `incremental_node`, but the closure returns a boolean indicating
+    /// if the node was actually present.
+    pub fn incremental_opt<F>(&mut self, kind: L::ElementType, f: F) -> Result<bool, OakError>
+    where
+        F: FnOnce(&mut Self) -> Result<bool, OakError>,
+    {
+        if self.try_reuse(kind) {
+            return Ok(true);
+        }
+
+        let checkpoint = self.checkpoint();
+        match f(self) {
+            Ok(true) => {
+                self.finish_at(checkpoint, kind);
+                Ok(true)
+            }
+            Ok(false) => Ok(false),
+            Err(e) => {
+                self.finish_at(checkpoint, kind);
+                Err(e)
+            }
+        }
+    }
+}

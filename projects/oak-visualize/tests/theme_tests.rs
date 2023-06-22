@@ -1,4 +1,4 @@
-use oak_visualize::theme::{ArrowConfig, EdgeTheme, HighlightTheme, NodeTheme, ShadowConfig, TextTheme, VisualizationTheme};
+use oak_visualize::theme::VisualizationTheme;
 
 #[test]
 fn test_default_theme() {
@@ -36,8 +36,8 @@ fn test_light_theme() {
     let theme = VisualizationTheme::light();
     assert_eq!(theme.name, "Light");
     assert_eq!(theme.background_color, "#FFFFFF");
-    assert_eq!(theme.node.fill_color, "#F5F5F5");
-    assert_eq!(theme.edge.color, "#666666");
+    assert_eq!(theme.node.fill_color, "#F8F9FA");
+    assert_eq!(theme.edge.color, "#6C757D");
 }
 
 #[test]
@@ -131,13 +131,7 @@ fn test_theme_serialization() {
 
 #[test]
 fn test_theme_color_formats() {
-    let themes = vec![
-        VisualizationTheme::light(),
-        VisualizationTheme::dark(),
-        VisualizationTheme::one_light(),
-        VisualizationTheme::one_dark_pro(),
-        VisualizationTheme::github(),
-    ];
+    let themes = vec![VisualizationTheme::light(), VisualizationTheme::dark(), VisualizationTheme::one_light(), VisualizationTheme::one_dark_pro(), VisualizationTheme::github()];
 
     for theme in themes {
         // All colors should start with # (hex format)

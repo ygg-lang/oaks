@@ -2,7 +2,6 @@
 
 mod lexer;
 mod parser;
-mod source;
 
 #[test]
 fn ready() {

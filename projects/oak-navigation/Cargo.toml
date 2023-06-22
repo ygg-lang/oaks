@@ -1,0 +1,15 @@
+[package]
+name = "oak-navigation"
+description = "Symbol navigation, definition lookup, and reference tracking for the Oak framework."
+categories = ["development-tools"]
+keywords = ["navigation", "goto-definition", "references"]
+version.workspace = true
+authors.workspace = true
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+
+[dependencies]
+oak-core = { workspace = true }
+oak-lsp = { workspace = true }
+serde = { workspace = true }

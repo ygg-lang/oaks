@@ -5,7 +5,16 @@ use crate::{
     layout::{Edge, Layout},
 };
 use serde::{Deserialize, Serialize};
-use std::collections::HashMap;
+use std::{
+    collections::HashMap,
+    sync::atomic::{AtomicUsize, Ordering},
+};
+
+static NODE_ID_COUNTER: AtomicUsize = AtomicUsize::new(0);
+
+fn next_node_id() -> String {
+    format!("node_{}", NODE_ID_COUNTER.fetch_add(1, Ordering::SeqCst))
+}
 
 /// Tree node for visualization
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -60,20 +69,97 @@ impl TreeNode {
     }
 }
 
+impl crate::Visualize for TreeNode {
+    fn visualize(&self) -> crate::Result<String> {
+        TreeLayout::new().visualize(self)
+    }
+}
+
+// Bridge for oak-core types
+impl<'a, L: oak_core::Language> From<&oak_core::GreenTree<'a, L>> for TreeNode {
+    fn from(green: &oak_core::GreenTree<'a, L>) -> Self {
+        match green {
+            oak_core::GreenTree::Node(node) => {
+                let mut tree_node = TreeNode::new(next_node_id(), format!("{:?}", node.kind), "node".to_string());
+                for child in node.children() {
+                    tree_node.children.push(TreeNode::from(child));
+                }
+                tree_node
+            }
+            oak_core::GreenTree::Leaf(leaf) => TreeNode::new(next_node_id(), format!("{:?}", leaf.kind), "leaf".to_string()),
+        }
+    }
+}
+
+impl<'a, L: oak_core::Language> From<&oak_core::RedTree<'a, L>> for TreeNode {
+    fn from(red: &oak_core::RedTree<'a, L>) -> Self {
+        match red {
+            oak_core::RedTree::Node(node) => {
+                let mut tree_node = TreeNode::new(next_node_id(), format!("{:?}", node.green.kind), "node".to_string());
+                for child in node.children() {
+                    tree_node.children.push(TreeNode::from(child));
+                }
+                tree_node
+            }
+            oak_core::RedTree::Leaf(leaf) => TreeNode::new(next_node_id(), format!("{:?}", leaf.kind), "leaf".to_string()),
+        }
+    }
+}
+
+impl<'a, L: oak_core::Language> From<oak_core::GreenTree<'a, L>> for TreeNode {
+    fn from(green: oak_core::GreenTree<'a, L>) -> Self {
+        TreeNode::from(&green)
+    }
+}
+
+impl<'a, L: oak_core::Language> From<oak_core::RedTree<'a, L>> for TreeNode {
+    fn from(red: oak_core::RedTree<'a, L>) -> Self {
+        TreeNode::from(&red)
+    }
+}
+
+impl<'a, L: oak_core::Language> crate::Visualize for oak_core::GreenTree<'a, L> {
+    fn visualize(&self) -> crate::Result<String> {
+        TreeNode::from(self).visualize()
+    }
+}
+
+impl<'a, L: oak_core::Language> crate::Visualize for oak_core::RedTree<'a, L> {
+    fn visualize(&self) -> crate::Result<String> {
+        TreeNode::from(self).visualize()
+    }
+}
+
 /// Tree layout engine
 pub struct TreeLayout {
     algorithm: TreeLayoutAlgorithm,
     config: TreeLayoutConfig,
 }
 
+impl Default for TreeLayout {
+    fn default() -> Self {
+        Self { algorithm: TreeLayoutAlgorithm::Layered, config: TreeLayoutConfig::default() }
+    }
+}
+
 impl TreeLayout {
-    pub fn new(algorithm: TreeLayoutAlgorithm) -> Self {
-        Self { algorithm, config: TreeLayoutConfig::default() }
+    pub fn new() -> Self {
+        Self::default()
+    }
+
+    pub fn with_algorithm(mut self, algorithm: TreeLayoutAlgorithm) -> Self {
+        self.algorithm = algorithm;
+        self
     }
 
     pub fn with_config(mut self, config: TreeLayoutConfig) -> Self {
         self.config = config;
         self
+    }
+
+    pub fn visualize(&self, tree: &TreeNode) -> crate::Result<String> {
+        let layout = self.layout_tree(tree)?;
+        crate::render::SvgRenderer::new().render_layout(&layout)
     }
 
     pub fn layout_tree(&self, tree: &TreeNode) -> crate::Result<Layout> {
@@ -99,9 +185,15 @@ impl TreeLayout {
         self.position_layered_node(tree, 0, 0.0, &level_widths, &mut current_positions, &mut node_positions);
 
         // Add nodes to layout
-        for (id, (position, size)) in node_positions {
+        for (id, (position, size, label, node_type)) in node_positions {
             let rect = Rect::new(position, size);
-            layout.add_node(id, rect);
+            let nt = match node_type.as_str() {
+                "function" => crate::layout::NodeType::Function,
+                "struct" => crate::layout::NodeType::Struct,
+                "module" => crate::layout::NodeType::Module,
+                _ => crate::layout::NodeType::Default,
+            };
+            layout.add_node_with_metadata(id, label, rect, nt);
         }
 
         // Add edges
@@ -118,26 +210,24 @@ impl TreeLayout {
         // Position root at center
         let root_size = self.get_node_size(tree);
         let root_pos = Point::new(0.0, 0.0);
-        node_positions.insert(tree.id.clone(), (root_pos, root_size));
+        node_positions.insert(tree.id.clone(), (root_pos, root_size, tree.label.clone(), tree.node_type.clone()));
 
         // Position children in concentric circles
         if !tree.children.is_empty() {
             let radius = self.config.level_distance;
-            self.position_radial_children(
-                &tree.children,
-                root_pos,
-                radius,
-                0.0,
-                2.0 * std::f64::consts::PI,
-                1,
-                &mut node_positions,
-            );
+            self.position_radial_children(&tree.children, root_pos, radius, 0.0, 2.0 * std::f64::consts::PI, 1, &mut node_positions);
         }
 
         // Add nodes to layout
-        for (id, (position, size)) in node_positions {
+        for (id, (position, size, label, node_type)) in node_positions {
             let rect = Rect::new(Point::new(position.x - size.width / 2.0, position.y - size.height / 2.0), size);
-            layout.add_node(id, rect);
+            let nt = match node_type.as_str() {
+                "function" => crate::layout::NodeType::Function,
+                "struct" => crate::layout::NodeType::Struct,
+                "module" => crate::layout::NodeType::Module,
+                _ => crate::layout::NodeType::Default,
+            };
+            layout.add_node_with_metadata(id, label, rect, nt);
         }
 
         // Add edges
@@ -156,9 +246,15 @@ impl TreeLayout {
         self.extract_positions(&positioned_tree, &mut node_positions);
 
         // Add nodes to layout
-        for (id, (position, size)) in node_positions {
+        for (id, (position, size, label, node_type)) in node_positions {
             let rect = Rect::new(position, size);
-            layout.add_node(id, rect);
+            let nt = match node_type.as_str() {
+                "function" => crate::layout::NodeType::Function,
+                "struct" => crate::layout::NodeType::Struct,
+                "module" => crate::layout::NodeType::Module,
+                _ => crate::layout::NodeType::Default,
+            };
+            layout.add_node_with_metadata(id, label, rect, nt);
         }
 
         // Add edges
@@ -175,7 +271,7 @@ impl TreeLayout {
         // Similar to radial but with balloon-like clustering
         let root_size = self.get_node_size(tree);
         let root_pos = Point::new(0.0, 0.0);
-        node_positions.insert(tree.id.clone(), (root_pos, root_size));
+        node_positions.insert(tree.id.clone(), (root_pos, root_size, tree.label.clone(), tree.node_type.clone()));
 
         // Position children in balloon clusters
         if !tree.children.is_empty() {
@@ -184,9 +280,15 @@ impl TreeLayout {
         }
 
         // Add nodes to layout
-        for (id, (position, size)) in node_positions {
+        for (id, (position, size, label, node_type)) in node_positions {
             let rect = Rect::new(Point::new(position.x - size.width / 2.0, position.y - size.height / 2.0), size);
-            layout.add_node(id, rect);
+            let nt = match node_type.as_str() {
+                "function" => crate::layout::NodeType::Function,
+                "struct" => crate::layout::NodeType::Struct,
+                "module" => crate::layout::NodeType::Module,
+                _ => crate::layout::NodeType::Default,
+            };
+            layout.add_node_with_metadata(id, label, rect, nt);
         }
 
         // Add edges
@@ -210,15 +312,7 @@ impl TreeLayout {
         }
     }
 
-    fn position_layered_node(
-        &self,
-        node: &TreeNode,
-        level: usize,
-        _parent_x: f64,
-        level_widths: &HashMap<usize, f64>,
-        current_positions: &mut HashMap<usize, f64>,
-        node_positions: &mut HashMap<String, (Point, Size)>,
-    ) {
+    fn position_layered_node(&self, node: &TreeNode, level: usize, _parent_x: f64, level_widths: &HashMap<usize, f64>, current_positions: &mut HashMap<usize, f64>, node_positions: &mut HashMap<String, (Point, Size, String, String)>) {
         let node_size = self.get_node_size(node);
         let level_width = level_widths.get(&level).unwrap_or(&0.0);
         let default_x = -level_width / 2.0;
@@ -233,7 +327,7 @@ impl TreeLayout {
 
         let y = level as f64 * self.config.level_distance;
 
-        node_positions.insert(node.id.clone(), (Point::new(x, y), node_size));
+        node_positions.insert(node.id.clone(), (Point::new(x, y), node_size, node.label.clone(), node.node_type.clone()));
         current_positions.insert(level, current_x + node_size.width + self.config.sibling_distance);
 
         // Position children
@@ -242,16 +336,7 @@ impl TreeLayout {
         }
     }
 
-    fn position_radial_children(
-        &self,
-        children: &[TreeNode],
-        center: Point,
-        radius: f64,
-        start_angle: f64,
-        angle_span: f64,
-        level: usize,
-        node_positions: &mut HashMap<String, (Point, Size)>,
-    ) {
+    fn position_radial_children(&self, children: &[TreeNode], center: Point, radius: f64, start_angle: f64, angle_span: f64, level: usize, node_positions: &mut HashMap<String, (Point, Size, String, String)>) {
         if children.is_empty() {
             return;
         }
@@ -263,21 +348,13 @@ impl TreeLayout {
             let child_pos = Point::new(center.x + radius * angle.cos(), center.y + radius * angle.sin());
 
             let child_size = self.get_node_size(child);
-            node_positions.insert(child.id.clone(), (child_pos, child_size));
+            node_positions.insert(child.id.clone(), (child_pos, child_size, child.label.clone(), child.node_type.clone()));
 
             // Recursively position grandchildren
             if !child.children.is_empty() {
                 let child_radius = radius + self.config.level_distance;
                 let child_angle_span = angle_step * 0.8; // Reduce angle span for children
-                self.position_radial_children(
-                    &child.children,
-                    child_pos,
-                    child_radius,
-                    angle - child_angle_span / 2.0,
-                    child_angle_span,
-                    level + 1,
-                    node_positions,
-                );
+                self.position_radial_children(&child.children, child_pos, child_radius, angle - child_angle_span / 2.0, child_angle_span, level + 1, node_positions);
             }
         }
     }
@@ -293,33 +370,15 @@ impl TreeLayout {
             positioned_children.push(positioned_child);
         }
 
-        let subtree_width = if positioned_children.is_empty() {
-            size.width
-        }
-        else {
-            positioned_children.iter().map(|c| c.subtree_width).sum::<f64>()
-                + (positioned_children.len() - 1) as f64 * self.config.sibling_distance
-        };
+        let subtree_width = if positioned_children.is_empty() { size.width } else { positioned_children.iter().map(|c| c.subtree_width).sum::<f64>() + (positioned_children.len() - 1) as f64 * self.config.sibling_distance };
 
         // Center the node over its children
         let node_x = if positioned_children.is_empty() { x } else { x + subtree_width / 2.0 - size.width / 2.0 };
 
-        PositionedTreeNode {
-            id: node.id.clone(),
-            position: Point::new(node_x, y),
-            size,
-            subtree_width,
-            children: positioned_children,
-        }
+        PositionedTreeNode { id: node.id.clone(), label: node.label.clone(), node_type: node.node_type.clone(), position: Point::new(node_x, y), size, subtree_width, children: positioned_children }
     }
 
-    fn position_balloon_children(
-        &self,
-        children: &[TreeNode],
-        center: Point,
-        radius: f64,
-        node_positions: &mut HashMap<String, (Point, Size)>,
-    ) {
+    fn position_balloon_children(&self, children: &[TreeNode], center: Point, radius: f64, node_positions: &mut HashMap<String, (Point, Size, String, String)>) {
         if children.is_empty() {
             return;
         }
@@ -332,7 +391,7 @@ impl TreeLayout {
             let child_pos = Point::new(center.x + radius * angle.cos(), center.y + radius * angle.sin());
 
             let child_size = self.get_node_size(child);
-            node_positions.insert(child.id.clone(), (child_pos, child_size));
+            node_positions.insert(child.id.clone(), (child_pos, child_size, child.label.clone(), child.node_type.clone()));
 
             // Recursively position grandchildren in smaller balloons
             if !child.children.is_empty() {
@@ -342,8 +401,8 @@ impl TreeLayout {
         }
     }
 
-    fn extract_positions(&self, positioned_node: &PositionedTreeNode, positions: &mut HashMap<String, (Point, Size)>) {
-        positions.insert(positioned_node.id.clone(), (positioned_node.position, positioned_node.size));
+    fn extract_positions(&self, positioned_node: &PositionedTreeNode, positions: &mut HashMap<String, (Point, Size, String, String)>) {
+        positions.insert(positioned_node.id.clone(), (positioned_node.position, positioned_node.size, positioned_node.label.clone(), positioned_node.node_type.clone()));
 
         for child in &positioned_node.children {
             self.extract_positions(child, positions);
@@ -390,6 +449,8 @@ pub enum TreeLayoutAlgorithm {
 #[derive(Debug, Clone)]
 struct PositionedTreeNode {
     id: String,
+    label: String,
+    node_type: String,
     position: Point,
     size: Size,
     subtree_width: f64,
@@ -472,10 +533,12 @@ impl TreeRenderer {
     //     Ok(document.to_string())
     // }
 
+    #[allow(dead_code)]
     fn get_node_label(&self, tree: &TreeNode, node_id: &str) -> String {
         self.find_node_label(tree, node_id).unwrap_or_else(|| node_id.to_string())
     }
 
+    #[allow(dead_code)]
     fn find_node_label(&self, node: &TreeNode, target_id: &str) -> Option<String> {
         if node.id == target_id {
             return Some(node.label.clone());

@@ -5,7 +5,7 @@
 
 use crate::errors::OakError;
 
-use crate::{SourceLocation, SourceText};
+use crate::source::SourceText;
 
 use std::fs::File;
 
@@ -19,6 +19,11 @@ pub use self::lexing::LexerTester;
 mod parsing;
 #[cfg(feature = "testing")]
 pub use self::parsing::ParserTester;
+
+#[cfg(feature = "testing")]
+mod building;
+#[cfg(feature = "testing")]
+pub use self::building::BuilderTester;
 
 /// Converts a file system path to a URL.
 ///
@@ -39,7 +44,7 @@ pub use self::parsing::ParserTester;
 pub fn url_from_path(path: &std::path::Path) -> Result<Url, OakError> {
     match Url::from_file_path(path) {
         Ok(o) => Ok(o),
-        Err(_) => Err(OakError::syntax_error(format!("invalid url {}", path.display()), SourceLocation::default())),
+        Err(_) => Err(OakError::custom_error(format!("invalid url {}", path.display()))),
     }
 }
 

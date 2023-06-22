@@ -1,179 +1,126 @@
-# oak-pretty-print
+# Oak Pretty Print
 
-一个基于 `oak-core` 的通用代码格式化库，支持多种编程语言的代码格式化。
+[![Crates.io](https://img.shields.io/crates/v/oak-pretty-print.svg)](https://crates.io/crates/oak-pretty-print)
+[![Documentation](https://docs.rs/oak-pretty-print/badge.svg)](https://docs.rs/oak-pretty-print)
 
-## 特性
+A high-performance, language-agnostic code formatting library built on the Oak ecosystem.
 
-- 🎯 **语言无关**: 基于 `oak-core` 的抽象语法树，不绑定任何具体语言
-- 🔧 **可配置**: 丰富的格式化配置选项
-- 📏 **规则系统**: 灵活的格式化规则系统，支持自定义规则
-- 🚀 **高性能**: 基于 Rust 实现，无 std 环境支持
-- 🔄 **可扩展**: 易于扩展和定制的架构
+## 🎯 Overview
 
-## 核心组件
+`oak-pretty-print` provides a flexible and powerful engine for formatting source code. By leveraging `oak-core`'s red-green trees and universal roles, it can format code for any language that implements the Oak traits. It features a rule-based system that allows for fine-grained control over indentation, spacing, line breaks, and more.
 
-### FormatConfig
-格式化配置，包含缩进样式、行结束符、最大行长度等选项。
+## ✨ Features
 
-```rust
-use oak_pretty_print::{FormatConfig, IndentStyle, LineEnding};
+- **Language Agnostic**: Works with any language that implements `oak-core::Language`.
+- **Rule-Based System**: Highly customizable through a priority-based rule engine.
+- **Universal Roles**: Can apply formatting based on universal semantic roles (e.g., Container, Definition).
+- **Advanced Layout**: Supports complex line-breaking logic using groups and indentation levels.
+- **Configurable**: Easily adjust indentation styles, line endings, and maximum line lengths.
+- **no_std Support**: Designed to work in restricted environments with only `alloc` required.
 
-let config = FormatConfig::new()
-    .with_indent_style(IndentStyle::Spaces(4))
-    .with_line_ending(LineEnding::Unix)
-    .with_max_line_length(100);
-```
+## 🚀 Quick Start
 
-### Formatter
-核心格式化器，负责将 AST 转换为格式化后的代码。
+Basic usage of the formatter:
 
 ```rust
-use oak_pretty_print::{Formatter, FormatConfig};
+use oak_pretty_print::{Formatter, FormatConfig, RuleSet, create_builtin_rules};
+use my_language::MyLanguage;
 
-let config = FormatConfig::default();
-let formatter = Formatter::new(config);
+fn main() -> Result<(), Box<dyn std::error::Error>> {
+    // 1. Configure the formatter
+    let config = FormatConfig::default()
+        .with_indent_style(IndentStyle::Spaces(4))
+        .with_max_line_length(80);
+
+    // 2. Set up rules
+    let mut rules = RuleSet::new();
+    rules.add_rules(create_builtin_rules::<MyLanguage>());
+
+    // 3. Create the formatter
+    let mut formatter = Formatter::<MyLanguage>::new(config, rules);
+
+    // 4. Format a node
+    let result = formatter.format(&red_node, &source_code)?;
+    println!("Formatted code:\n{}", result.content);
+    Ok(())
+}
 ```
 
-### FormatRule
-格式化规则系统，支持自定义格式化逻辑。
+## 📋 Configuration
 
-```rust
-use oak_pretty_print::{BasicFormatRule, FormatRule};
-
-let rule = BasicFormatRule::new(
-    "my_rule".to_string(),
-    |node, context| {
-        // 自定义格式化逻辑
-        Ok(())
-    },
-    |node| true, // 适用条件
-).with_priority(10);
-```
-
-## 使用示例
-
-### 基础使用
-
-```rust
-use oak_pretty_print::{Formatter, FormatConfig};
-use oak_core::AstNode;
-
-// 创建格式化器
-let config = FormatConfig::default();
-let formatter = Formatter::new(config);
-
-// 格式化 AST 节点
-let result = formatter.format_ast(&ast_node)?;
-println!("格式化后的代码: {}", result.content);
-```
-
-### 自定义配置
+The `FormatConfig` allows you to customize the global behavior of the formatter:
 
 ```rust
 use oak_pretty_print::{FormatConfig, IndentStyle, LineEnding};
 
 let config = FormatConfig::new()
     .with_indent_style(IndentStyle::Tabs)
-    .with_line_ending(LineEnding::Windows)
-    .with_max_line_length(80);
+    .with_line_ending(LineEnding::Unix)
+    .with_max_line_length(100)
+    .with_trim_trailing_whitespace(true);
 ```
 
-### 添加自定义规则
+## 🔧 Advanced Usage
+
+### Custom Formatting Rules
+
+You can create custom rules to handle specific language constructs:
 
 ```rust
-use oak_pretty_print::{Formatter, BasicFormatRule};
+use oak_pretty_print::{BasicFormatRule, FormatRule, FormatContext};
+use oak_core::language::UniversalElementRole;
 
-let mut formatter = Formatter::new(FormatConfig::default());
-
-let custom_rule = BasicFormatRule::new(
-    "custom_spacing".to_string(),
-    |node, context| {
-        // 在特定节点后添加空格
-        context.write(" ");
-        Ok(())
-    },
-    |node| {
-        // 检查节点类型
-        true
-    },
-);
-
-formatter.add_rule(Box::new(custom_rule))?;
+let rule = BasicFormatRule::new("custom_indent")
+    .with_priority(10)
+    .with_node_rule(
+        |node| node.green.kind.is_universal(UniversalElementRole::Container),
+        |_node, context| {
+            context.increase_indent();
+            Ok(())
+        },
+    );
 ```
 
-## 内置规则
+### Using the `doc!` Macro
 
-库提供了一系列内置的格式化规则：
-
-- **缩进规则**: 自动处理代码缩进
-- **空行规则**: 在声明之间添加适当的空行
-- **括号规则**: 处理括号的格式化
-- **逗号规则**: 在逗号后添加空格
-- **分号规则**: 处理语句结束符
-- **行长度规则**: 限制行长度并自动换行
-- **空白字符规则**: 处理尾随空白
-
-## 架构设计
-
-```
-┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
-│   oak-core      │    │ oak-pretty-print│    │   具体语言      │
-│                 │    │                 │    │                 │
-│ ┌─────────────┐ │    │ ┌─────────────┐ │    │ ┌─────────────┐ │
-│ │ AstNode     │ │◄───┤ │ Formatter   │ │◄───┤ │ Language    │ │
-│ │ AstVisitor  │ │    │ │ FormatRule  │ │    │ │ Parser      │ │
-│ │ Language    │ │    │ │ Config      │ │    │ │ Lexer       │ │
-│ └─────────────┘ │    │ └─────────────┘ │    │ └─────────────┘ │
-└─────────────────┘    └─────────────────┘    └─────────────────┘
-```
-
-## 扩展指南
-
-### 实现自定义规则
+For more manual control over document structure, you can use the `doc!` macro from `oak-macros`:
 
 ```rust
-use oak_pretty_print::{FormatRule, FormatContext, FormatResult};
-use oak_core::AstNode;
+use oak_macros::doc;
 
-struct MyCustomRule;
-
-impl FormatRule for MyCustomRule {
-    fn name(&self) -> &str {
-        "my_custom_rule"
-    }
-
-    fn priority(&self) -> u8 {
-        5
-    }
-
-    fn applies_to(&self, node: &dyn AstNode) -> bool {
-        // 检查规则是否适用于该节点
-        true
-    }
-
-    fn apply(&self, node: &dyn AstNode, context: &mut FormatContext) -> FormatResult<()> {
-        // 实现格式化逻辑
-        Ok(())
-    }
-}
+let my_doc = doc! {
+    [
+        "fn", " ", "main", "()", " ",
+        group {
+            [
+                "{",
+                indent {
+                    [hard_line, "println!(\"Hello World\");"]
+                },
+                hard_line,
+                "}"
+            ]
+        }
+    ]
+};
 ```
 
-### 集成到具体语言
+## 🏗️ Architecture
 
-要将 `oak-pretty-print` 集成到具体的编程语言中，需要：
+Oak Pretty Print uses a two-stage process:
+1. **Rule Application**: AST nodes are visited and rules generate a `Doc` tree.
+2. **Printing**: The `Doc` tree is rendered into a string based on the current configuration and layout constraints.
 
-1. 实现 `oak-core::Language` trait
-2. 为语言的 AST 节点实现 `oak-core::AstNode` trait
-3. 创建语言特定的格式化规则
-4. 配置格式化器
+## 📊 Performance
 
-## 依赖
+- **Fast Rendering**: The `Doc` tree printer is optimized for linear time complexity relative to the document size.
+- **Efficient Memory**: Uses internal pooling for document fragments to minimize allocations.
+- **Streaming Support**: Capable of generating output in chunks for large files.
 
-- `oak-core`: 核心 AST 和语言抽象
-- `alloc`: 用于动态内存分配（no_std 环境）
+## 🤝 Contributing
 
-## 许可证
+Contributions are welcome! Please feel free to submit issues or pull requests.
 
-本项目采用与工作空间相同的许可证。
+---
 
-
+**Oak Pretty Print** - Beautiful code for every language 🚀

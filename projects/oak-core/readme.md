@@ -3,140 +3,113 @@
 [![Crates.io](https://img.shields.io/crates/v/oak-core.svg)](https://crates.io/crates/oak-core)
 [![Documentation](https://docs.rs/oak-core/badge.svg)](https://docs.rs/oak-core)
 
-The foundational parser combinator library providing core primitives for building robust parsers in Rust.
+The foundational parser framework providing core primitives for building robust, incremental parsers in Rust.
 
 ## 🎯 Overview
 
-oak-core is the heart of the Pex ecosystem, offering a comprehensive set of parser combinator primitives that form the building blocks for all language parsers in the collection. It provides both high-level convenience functions and low-level control for custom parsing needs.
+`oak-core` is the heart of the Oak ecosystem, offering a comprehensive set of primitives that form the building blocks for language parsers. It provides a language-agnostic architecture for building high-performance lexers and parsers with built-in support for IDE features.
 
 ## ✨ Features
 
-- **Zero-copy Parsing**: Return slices of input without unnecessary allocations
-- **No-std Support**: Works in embedded and kernel environments
-- **Composable**: Combine simple parsers into complex ones
-- **Error Recovery**: Graceful handling of malformed input
-- **Streaming**: Support for incremental parsing of large inputs
-- **Type Safe**: Leverage Rust's type system for parser correctness
+- **Language-Agnostic Design**: Define your language's tokens and elements using traits.
+- **Zero-copy Lexing**: Efficiently tokenize source text without unnecessary allocations.
+- **Incremental Parsing**: Built-in support for incremental re-parsing using specialized caching.
+- **Green/Red Trees**: Persistent syntax tree structures inspired by Roslyn, enabling efficient immutability and easy traversal.
+- **Error Recovery**: Graceful handling of malformed input with integrated diagnostics and "panic mode" recovery.
+- **Pratt Parsing**: Built-in support for operator precedence parsing.
+- **Source Mapping**: Accurate mapping between byte offsets and line/column positions.
 
 ## 🚀 Quick Start
 
-Basic example:
+To use Oak Core, you first define your language by implementing the `Language` trait.
 
 ```rust
-use oak_core::{Parser, combinator::*};
+#![feature(new_range_api)]
+use oak_core::{Language, TokenType, ElementType, UniversalTokenRole, UniversalElementRole};
 
-fn main() -> Result<(), Box<dyn std::error::Error>> {
-    // Parse a simple identifier
-    let mut parser = letter().and(many(alphanumeric()));
-    let result = parser.parse("hello123")?;
-    println!("Parsed: {:?}", result);
-    Ok(())
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+enum MyToken { Identifier, Whitespace, End }
+
+impl TokenType for MyToken {
+    const END_OF_STREAM: Self = MyToken::End;
+    type Role = UniversalTokenRole;
+    fn role(&self) -> Self::Role {
+        match self {
+            Self::Whitespace => UniversalTokenRole::Whitespace,
+            _ => UniversalTokenRole::None,
+        }
+    }
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+enum MyElement { Root, Identifier }
+
+impl ElementType for MyElement {
+    type Role = UniversalElementRole;
+    fn role(&self) -> Self::Role { UniversalElementRole::None }
+}
+
+struct MyLanguage;
+
+impl Language for MyLanguage {
+    const NAME: &'static str = "my-language";
+    type TokenType = MyToken;
+    type ElementType = MyElement;
+    type TypedRoot = ();
 }
 ```
 
-## 📋 Parser Combinators
+## 📋 Core Components
 
-### Basic Parsers
-
-- `any()` - Parse any single character
-- `letter()` - Parse alphabetic characters
-- `digit()` - Parse numeric digits
-- `whitespace()` - Parse whitespace
-- `string("text")` - Parse literal strings
-- `char('c')` - Parse specific characters
-
-### Combinators
-
-- `parser1.and(parser2)` - Sequential parsing
-- `parser1.or(parser2)` - Alternative parsing
-- `many(parser)` - Zero or more repetitions
-- `some(parser)` - One or more repetitions
-- `optional(parser)` - Optional parsing
-- `between(open, close)` - Parse between delimiters
-
-### Advanced Features
-
-```rust
-use oak_core::{Parser, combinator::*, error::ParseError};
-
-// Custom parser with error handling
-fn identifier() -> impl Parser<Output = String> {
-    letter()
-        .and(many(alphanumeric().or(char('_'))))
-        .map(|(first, rest)| format!("{}{}", first, rest.into_iter().collect::<String>()))
-}
-
-// Recursive parser for nested structures
-fn nested_parser() -> impl Parser<Output = Vec<char>> {
-    between(char('['), char(']'))
-        .and(many(any()))
-        .map(|(_, chars)| chars)
-}
-```
+- **`GreenNode`**: An immutable, pointer-free, and position-independent representation of the AST. Perfect for caching and sharing.
+- **`RedNode`**: A thin wrapper around `GreenNode` that adds parent pointers and absolute position information for easy traversal.
+- **`Lexer`**: A high-performance lexing engine that supports custom scanners for identifiers, numbers, and strings.
+- **`Parser`**: A flexible parsing framework that supports both recursive descent and Pratt parsing.
+- **`Visitor`**: A trait-based utility for walking the syntax tree and performing analysis.
 
 ## 🔧 Advanced Usage
 
-### Custom Error Types
+### Incremental Parsing
+
+Oak Core supports incremental parsing out of the box. When the source text changes, you can re-parse only the affected parts by providing an `IncrementalCache`.
 
 ```rust
-use oak_core::error::{ParseError, ParseResult};
+use oak_core::tree::IncrementalCache;
+use oak_core::builder::GreenBuilder;
 
-#[derive(Debug, Clone)]
-enum MyError {
-    InvalidToken(String),
-    UnexpectedEof,
-}
-
-impl ParseError for MyError {
-    fn from_unexpected(input: &str, expected: &str) -> Self {
-        MyError::InvalidToken(format!("Expected {}, got {}", expected, input.chars().next().unwrap_or('EOF')))
-    }
-}
+let mut pool = GreenBuilder::new();
+let cache = IncrementalCache::new();
+let result = parser.parse_incremental(new_source, &cache);
 ```
 
-### Zero-allocation Parsing
+### Pratt Parsing for Expressions
+
+Handle complex operator precedence with ease using the `PrattParser`.
 
 ```rust
-use oak_core::combinator::*;
+use oak_core::parser::PrattParser;
 
-// Return slices of input for zero-copy parsing
-fn parse_word(input: &str) -> ParseResult<&str, MyError> {
-    let (rest, word) = many1(letter()).parse(input)?;
-    Ok((rest, word))
-}
+let mut pratt = PrattParser::new();
+pratt.add_postfix(TokenKind::Inc, 10);
+pratt.add_prefix(TokenKind::Minus, 9);
+pratt.add_infix(TokenKind::Plus, 5, Associativity::Left);
+
+let expr = pratt.parse(&mut parser_context)?;
 ```
-
-## 🏗️ Integration
-
-oak-core is designed to integrate seamlessly with the broader Pex ecosystem:
-
-- Language parsers built on oak-core
-- Consistent error handling across all parsers
-- Shared utilities and helpers
-- Common parsing patterns
 
 ## 📊 Performance
 
-- **Zero-copy**: Minimize allocations by returning slices
-- **Streaming**: Handle large files without loading entirely into memory
-- **Lazy**: Evaluate parsers only when needed
-- **Optimized**: Fast path for common parsing scenarios
+- **Optimized Memory Layout**: Green nodes use a compact, cache-friendly memory representation.
+- **Minimal Allocations**: Lexers and parsers use internal pooling to minimize heap allocations.
+- **Fast Traversal**: Red trees provide O(1) access to parent nodes and absolute offsets.
 
-## 🔗 Related Crates
+## 🔗 Integration
 
-- [pex](../oaks) - Main unified library
-- [oak-rust](../../examples/oak-rust) - Rust language parser
-- [oak-json](../oak-json) - JSON parser
-- [oak-highlight](../oak-highlight) - Syntax highlighter
+Oak Core is the foundational dependency for all other Oak projects, including:
 
-## 📚 Examples
-
-Check out the [examples](examples/) directory for more comprehensive usage examples:
-
-- Basic parser combinators
-- Custom error handling
-- Streaming parsers
-- Performance optimizations
+- **Oak Highlight**: Uses core lexers for syntax highlighting.
+- **Oak LSP**: Builds on core trees to provide language server features.
+- **Oak Visualize**: Visualizes the green and red trees.
 
 ## 🤝 Contributing
 
@@ -144,4 +117,4 @@ Contributions are welcome! Please feel free to submit issues or pull requests.
 
 ---
 
-**Pex Core** - Building the foundation for robust parsing in Rust 🦀
+**Oak Core** - Building blocks for modern language tools 🚀

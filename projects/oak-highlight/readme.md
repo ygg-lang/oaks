@@ -23,10 +23,10 @@ Oak of highlight is a comprehensive syntax highlighter designed to provide beaut
 Basic example:
 
 ```rust
-use oak_highlight::{Highlighter, Theme};
+use oak_highlight::{OakHighlighter, Theme, Highlighter};
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
-    let highlighter = Highlighter::new();
+    let highlighter = OakHighlighter::new();
     let code = r#"fn main() {
     println!("Hello, World!");
     let numbers = vec![1, 2, 3, 4, 5];
@@ -36,7 +36,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 }"#;
     
     let highlighted = highlighter.highlight(code, "rust", Theme::GitHub)?;
-    println!("Highlighted code:\n{}", highlighted);
+    println!("Highlighted code:\n{:?}", highlighted);
     Ok(())
 }
 ```
@@ -45,9 +45,9 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
 ### Rust Code
 ```rust
-use oak_highlight::{Highlighter, Theme};
+use oak_highlight::{OakHighlighter, Theme, Highlighter};
 
-let highlighter = Highlighter::new();
+let highlighter = OakHighlighter::new();
 let rust_code = r#"use std::collections::HashMap;
 
 fn process_data(items: Vec<&str>) -> Result<HashMap<String, usize>, Error> {
@@ -67,14 +67,14 @@ struct Config {
 }"#;
 
 let highlighted = highlighter.highlight(rust_code, "rust", Theme::Monokai)?;
-println!("Highlighted Rust code:\n{}", highlighted);
+println!("Highlighted Rust code:\n{:?}", highlighted);
 ```
 
 ### Python Code
 ```rust
-use oak_highlight::{Highlighter, Theme, OutputFormat};
+use oak_highlight::{OakHighlighter, Theme, ExportFormat, Highlighter};
 
-let highlighter = Highlighter::new();
+let highlighter = OakHighlighter::new();
 let python_code = r#"import asyncio
 import aiohttp
 from typing import List, Optional
@@ -98,16 +98,16 @@ let highlighted = highlighter.highlight_format(
     python_code, 
     "python", 
     Theme::VSCode, 
-    OutputFormat::Html
+    ExportFormat::Html
 )?;
 println!("HTML highlighted Python code:\n{}", highlighted);
 ```
 
 ### JavaScript Code
 ```rust
-use oak_highlight::{Highlighter, Theme};
+use oak_highlight::{OakHighlighter, Theme};
 
-let highlighter = Highlighter::new();
+let highlighter = OakHighlighter::new();
 let js_code = r#"class ApiClient {
     constructor(baseURL) {
         this.baseURL = baseURL;
@@ -139,7 +139,7 @@ let js_code = r#"class ApiClient {
     }
 }"#;
 
-let highlighted = highlighter.highlight(js_code, "javascript", Theme::Dracula)?;
+let highlighted = highlighter.highlight(js_code, "javascript", Theme::OneDarkPro)?;
 println!("Highlighted JavaScript code:\n{}", highlighted);
 ```
 

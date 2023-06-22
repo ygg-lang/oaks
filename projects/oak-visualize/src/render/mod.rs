@@ -64,16 +64,7 @@ pub struct ElementStyle {
 
 impl Default for ElementStyle {
     fn default() -> Self {
-        Self {
-            fill_color: None,
-            stroke_color: None,
-            stroke_width: None,
-            text_color: None,
-            text_size: None,
-            opacity: None,
-            class_name: None,
-            attributes: HashMap::new(),
-        }
+        Self { fill_color: None, stroke_color: None, stroke_width: None, text_color: None, text_size: None, opacity: None, class_name: None, attributes: HashMap::new() }
     }
 }
 
@@ -153,10 +144,7 @@ impl SvgRenderer {
         let canvas_height = bounds.size.height + 2.0 * self.config.padding;
 
         // SVG header
-        svg.push_str(&format!(
-            r#"<svg width="{}" height="{}" xmlns="http://www.w3.org/2000/svg">"#,
-            canvas_width, canvas_height
-        ));
+        svg.push_str(&format!(r#"<svg width="{}" height="{}" xmlns="http://www.w3.org/2000/svg">"#, canvas_width, canvas_height));
         svg.push('\n');
 
         // Background
@@ -193,11 +181,7 @@ impl SvgRenderer {
         svg.push_str("  </defs>\n");
 
         // Transform group to apply padding offset
-        svg.push_str(&format!(
-            r#"  <g transform="translate({}, {})">"#,
-            self.config.padding - bounds.origin.x,
-            self.config.padding - bounds.origin.y
-        ));
+        svg.push_str(&format!(r#"  <g transform="translate({}, {})">"#, self.config.padding - bounds.origin.x, self.config.padding - bounds.origin.y));
         svg.push('\n');
 
         // Render edges first (so they appear behind nodes)
@@ -206,8 +190,8 @@ impl SvgRenderer {
         }
 
         // Render nodes
-        for (node_id, rect) in &layout.nodes {
-            self.render_node(&mut svg, node_id, rect)?;
+        for node in layout.nodes.values() {
+            self.render_node(&mut svg, node)?;
         }
 
         svg.push_str("  </g>\n");
@@ -216,18 +200,16 @@ impl SvgRenderer {
         Ok(svg)
     }
 
-    fn render_node(&self, svg: &mut String, node_id: &str, rect: &Rect) -> crate::Result<()> {
-        let style = self.node_styles.get(node_id);
+    fn render_node(&self, svg: &mut String, node: &crate::layout::PositionedNode) -> crate::Result<()> {
+        let style = self.node_styles.get(&node.id);
+        let rect = &node.rect;
 
         let fill_color = style.and_then(|s| s.fill_color.as_ref()).unwrap_or(&self.config.node_fill_color);
         let stroke_color = style.and_then(|s| s.stroke_color.as_ref()).unwrap_or(&self.config.node_stroke_color);
         let stroke_width = style.and_then(|s| s.stroke_width).unwrap_or(self.config.node_stroke_width);
 
         // Node rectangle
-        svg.push_str(&format!(
-            r#"    <rect x="{}" y="{}" width="{}" height="{}" fill="{}" stroke="{}" stroke-width="{}" class="node""#,
-            rect.origin.x, rect.origin.y, rect.size.width, rect.size.height, fill_color, stroke_color, stroke_width
-        ));
+        svg.push_str(&format!(r#"    <rect x="{}" y="{}" width="{}" height="{}" fill="{}" stroke="{}" stroke-width="{}" class="node""#, rect.origin.x, rect.origin.y, rect.size.width, rect.size.height, fill_color, stroke_color, stroke_width));
 
         // Add custom attributes
         if let Some(style) = style {
@@ -252,12 +234,7 @@ impl SvgRenderer {
             let center = rect.center();
             svg.push_str(&format!(
                 r#"    <text x="{}" y="{}" text-anchor="middle" dominant-baseline="central" fill="{}" font-size="{}" font-family="{}" class="label">{}</text>"#,
-                center.x,
-                center.y,
-                text_color,
-                text_size,
-                self.config.font_family,
-                node_id
+                center.x, center.y, text_color, text_size, self.config.font_family, node.label
             ));
             svg.push('\n');
         }
@@ -284,10 +261,7 @@ impl SvgRenderer {
             path_data.push_str(&format!(" L {} {}", point.x, point.y));
         }
 
-        svg.push_str(&format!(
-            r#"    <path d="{}" stroke="{}" stroke-width="{}" fill="none" class="edge""#,
-            path_data, stroke_color, stroke_width
-        ));
+        svg.push_str(&format!(r#"    <path d="{}" stroke="{}" stroke-width="{}" fill="none" class="edge""#, path_data, stroke_color, stroke_width));
 
         // Add arrow marker for directed edges
         if self.config.show_arrows {
@@ -348,7 +322,8 @@ impl SvgRenderer {
         let mut max_x = f64::NEG_INFINITY;
         let mut max_y = f64::NEG_INFINITY;
 
-        for rect in layout.nodes.values() {
+        for node in layout.nodes.values() {
+            let rect = &node.rect;
             min_x = min_x.min(rect.origin.x);
             min_y = min_y.min(rect.origin.y);
             max_x = max_x.max(rect.origin.x + rect.size.width);
@@ -480,26 +455,14 @@ impl LayoutExporter {
             nodes: layout
                 .nodes
                 .iter()
-                .map(|(id, rect)| {
-                    (
-                        id.clone(),
-                        JsonRect { x: rect.origin.x, y: rect.origin.y, width: rect.size.width, height: rect.size.height },
-                    )
+                .map(|(id, node)| {
+                    let rect = &node.rect;
+                    (id.clone(), JsonRect { x: rect.origin.x, y: rect.origin.y, width: rect.size.width, height: rect.size.height })
                 })
                 .collect(),
-            edges: layout
-                .edges
-                .iter()
-                .map(|edge| JsonEdge {
-                    from: edge.from.clone(),
-                    to: edge.to.clone(),
-                    points: edge.points.iter().map(|p| JsonPoint { x: p.x, y: p.y }).collect(),
-                    label: edge.label.clone(),
-                })
-                .collect(),
+            edges: layout.edges.iter().map(|edge| JsonEdge { from: edge.from.clone(), to: edge.to.clone(), points: edge.points.iter().map(|p| JsonPoint { x: p.x, y: p.y }).collect(), label: edge.label.clone() }).collect(),
         };
 
-        serde_json::to_string_pretty(&json_layout)
-            .map_err(|e| crate::Error::Serialization(format!("Failed to serialize layout to JSON: {}", e)))
+        serde_json::to_string_pretty(&json_layout).map_err(|e| crate::Error::Serialization(format!("Failed to serialize layout to JSON: {}", e)))
     }
 }

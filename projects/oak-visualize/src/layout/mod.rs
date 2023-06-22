@@ -17,22 +17,24 @@ pub struct LayoutConfig {
 
 impl Default for LayoutConfig {
     fn default() -> Self {
-        Self {
-            node_width: 120.0,
-            node_height: 60.0,
-            horizontal_spacing: 40.0,
-            vertical_spacing: 30.0,
-            margin: 20.0,
-            padding: 10.0,
-        }
+        Self { node_width: 120.0, node_height: 60.0, horizontal_spacing: 40.0, vertical_spacing: 30.0, margin: 20.0, padding: 10.0 }
     }
+}
+
+/// Positioned node in a layout
+#[derive(Debug, Clone)]
+pub struct PositionedNode {
+    pub id: String,
+    pub label: String,
+    pub rect: Rect,
+    pub node_type: NodeType,
 }
 
 /// Layout result containing positioned elements
 #[derive(Debug, Clone)]
 pub struct Layout {
     pub bounds: Rect,
-    pub nodes: HashMap<String, Rect>,
+    pub nodes: HashMap<String, PositionedNode>,
     pub edges: Vec<Edge>,
 }
 
@@ -42,7 +44,13 @@ impl Layout {
     }
 
     pub fn add_node(&mut self, id: String, rect: Rect) {
-        self.nodes.insert(id, rect);
+        let label = id.clone();
+        self.nodes.insert(id.clone(), PositionedNode { id, label, rect, node_type: NodeType::Default });
+        self.update_bounds();
+    }
+
+    pub fn add_node_with_metadata(&mut self, id: String, label: String, rect: Rect, node_type: NodeType) {
+        self.nodes.insert(id.clone(), PositionedNode { id, label, rect, node_type });
         self.update_bounds();
     }
 
@@ -61,7 +69,8 @@ impl Layout {
         let mut max_x = f64::NEG_INFINITY;
         let mut max_y = f64::NEG_INFINITY;
 
-        for rect in self.nodes.values() {
+        for node in self.nodes.values() {
+            let rect = &node.rect;
             min_x = min_x.min(rect.min_x());
             min_y = min_y.min(rect.min_y());
             max_x = max_x.max(rect.max_x());
@@ -218,8 +227,8 @@ impl LayoutEngine for HierarchicalLayout {
 
         // Add edges with routing
         for edge in edges {
-            if let (Some(from_rect), Some(to_rect)) = (layout.nodes.get(&edge.from), layout.nodes.get(&edge.to)) {
-                let routed_edge = route_edge(from_rect, to_rect, &edge.from, &edge.to, edge.label.clone());
+            if let (Some(from_node), Some(to_node)) = (layout.nodes.get(&edge.from), layout.nodes.get(&edge.to)) {
+                let routed_edge = route_edge(&from_node.rect, &to_node.rect, &edge.from, &edge.to, edge.label.clone());
                 layout.add_edge(routed_edge);
             }
         }
@@ -327,9 +336,7 @@ impl LayoutEngine for ForceDirectedLayout {
 
             // Update positions
             for node in nodes {
-                if let (Some(force), Some(velocity), Some(position)) =
-                    (forces.get(&node.id), velocities.get_mut(&node.id), positions.get_mut(&node.id))
-                {
+                if let (Some(force), Some(velocity), Some(position)) = (forces.get(&node.id), velocities.get_mut(&node.id), positions.get_mut(&node.id)) {
                     *velocity = Point::new(velocity.x * self.damping + force.x, velocity.y * self.damping + force.y);
                     *position = *position + *velocity;
                 }
@@ -339,16 +346,15 @@ impl LayoutEngine for ForceDirectedLayout {
         // Convert positions to rectangles
         for node in nodes {
             if let Some(position) = positions.get(&node.id) {
-                let rect =
-                    Rect::new(Point::new(position.x - node.size.width / 2.0, position.y - node.size.height / 2.0), node.size);
+                let rect = Rect::new(Point::new(position.x - node.size.width / 2.0, position.y - node.size.height / 2.0), node.size);
                 layout.add_node(node.id.clone(), rect);
             }
         }
 
         // Add edges
         for edge in edges {
-            if let (Some(from_rect), Some(to_rect)) = (layout.nodes.get(&edge.from), layout.nodes.get(&edge.to)) {
-                let routed_edge = route_edge(from_rect, to_rect, &edge.from, &edge.to, edge.label.clone());
+            if let (Some(from_node), Some(to_node)) = (layout.nodes.get(&edge.from), layout.nodes.get(&edge.to)) {
+                let routed_edge = route_edge(&from_node.rect, &to_node.rect, &edge.from, &edge.to, edge.label.clone());
                 layout.add_edge(routed_edge);
             }
         }
@@ -397,10 +403,7 @@ fn build_hierarchy(nodes: &[LayoutNode], edges: &[LayoutEdge]) -> crate::Result<
 
 fn build_hierarchy_node(id: &str, nodes: &[LayoutNode], children_map: &HashMap<String, Vec<String>>) -> HierarchyNode {
     let node = nodes.iter().find(|n| n.id == id).unwrap();
-    let children = children_map
-        .get(id)
-        .map(|child_ids| child_ids.iter().map(|child_id| build_hierarchy_node(child_id, nodes, children_map)).collect())
-        .unwrap_or_default();
+    let children = children_map.get(id).map(|child_ids| child_ids.iter().map(|child_id| build_hierarchy_node(child_id, nodes, children_map)).collect()).unwrap_or_default();
 
     HierarchyNode { id: id.to_string(), children, size: node.size }
 }
@@ -417,13 +420,7 @@ fn layout_top_down(hierarchy: &[HierarchyNode], config: &LayoutConfig) -> HashMa
     positions
 }
 
-fn layout_node_top_down(
-    node: &HierarchyNode,
-    x: f64,
-    y: &mut f64,
-    config: &LayoutConfig,
-    positions: &mut HashMap<String, Rect>,
-) {
+fn layout_node_top_down(node: &HierarchyNode, x: f64, y: &mut f64, config: &LayoutConfig, positions: &mut HashMap<String, Rect>) {
     let rect = Rect::new(Point::new(x, *y), node.size);
     positions.insert(node.id.clone(), rect);
 
@@ -448,13 +445,7 @@ fn layout_left_right(hierarchy: &[HierarchyNode], config: &LayoutConfig) -> Hash
     positions
 }
 
-fn layout_node_left_right(
-    node: &HierarchyNode,
-    x: &mut f64,
-    y: f64,
-    config: &LayoutConfig,
-    positions: &mut HashMap<String, Rect>,
-) {
+fn layout_node_left_right(node: &HierarchyNode, x: &mut f64, y: f64, config: &LayoutConfig, positions: &mut HashMap<String, Rect>) {
     let rect = Rect::new(Point::new(*x, y), node.size);
     positions.insert(node.id.clone(), rect);
 

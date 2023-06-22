@@ -1,0 +1,14 @@
+[package]
+name = "oak-hover"
+description = "Hover information and documentation lookup support for the Oak framework."
+categories = ["development-tools"]
+keywords = ["hover", "documentation", "lsp"]
+version.workspace = true
+authors.workspace = true
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+
+[dependencies]
+oak-core = { workspace = true }
+serde = { workspace = true }

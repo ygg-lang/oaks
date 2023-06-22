@@ -176,10 +176,7 @@ impl Rect {
     }
 
     pub fn intersects(&self, other: &Rect) -> bool {
-        !(self.max_x() < other.min_x()
-            || other.max_x() < self.min_x()
-            || self.max_y() < other.min_y()
-            || other.max_y() < self.min_y())
+        !(self.max_x() < other.min_x() || other.max_x() < self.min_x() || self.max_y() < other.min_y() || other.max_y() < self.min_y())
     }
 
     pub fn union(&self, other: &Rect) -> Rect {

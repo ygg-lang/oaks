@@ -2,7 +2,7 @@ use oak_visualize::{
     geometry::{Point, Rect, Size},
     graph::{Graph, GraphEdge, GraphLayout, GraphLayoutAlgorithm, GraphNode},
     layout::Layout,
-    render::{ExportFormat, LayoutExporter, RenderConfig, SvgRenderer},
+    render::{ExportFormat, LayoutExporter, SvgRenderer},
     theme::VisualizationTheme,
     tree::{TreeLayout, TreeLayoutAlgorithm, TreeNode},
 };
@@ -23,7 +23,7 @@ fn test_complete_graph_visualization_pipeline() {
     graph.add_edge(GraphEdge::new("helper2".to_string(), "util".to_string()));
 
     // 2. 使用图布局算法
-    let layout_engine = GraphLayout::new(GraphLayoutAlgorithm::ForceDirected);
+    let layout_engine = GraphLayout::new().with_algorithm(GraphLayoutAlgorithm::ForceDirected);
     let layout_result = layout_engine.layout_graph(&graph);
     assert!(layout_result.is_ok());
 
@@ -38,9 +38,9 @@ fn test_complete_graph_visualization_pipeline() {
 
     let svg = svg_result.unwrap();
     assert!(svg.contains("<svg"));
-    assert!(svg.contains("main"));
-    assert!(svg.contains("helper1"));
-    assert!(svg.contains("util"));
+    assert!(svg.contains("Main Function"));
+    assert!(svg.contains("Helper 1"));
+    assert!(svg.contains("Utility"));
 }
 
 #[test]
@@ -48,20 +48,18 @@ fn test_complete_tree_visualization_pipeline() {
     // 1. 创建树数据结构
     let root = TreeNode::new("root".to_string(), "Root Package".to_string(), "package".to_string());
 
-    let module1 = TreeNode::new("module1".to_string(), "Module 1".to_string(), "module".to_string())
-        .with_child(TreeNode::new("func1".to_string(), "Function 1".to_string(), "function".to_string()))
-        .with_child(TreeNode::new("func2".to_string(), "Function 2".to_string(), "function".to_string()));
-
-    let module2 = TreeNode::new("module2".to_string(), "Module 2".to_string(), "module".to_string()).with_child(TreeNode::new(
-        "class1".to_string(),
-        "Class 1".to_string(),
-        "class".to_string(),
+    let module1 = TreeNode::new("module1".to_string(), "Module 1".to_string(), "module".to_string()).with_child(TreeNode::new("func1".to_string(), "Function 1".to_string(), "function".to_string())).with_child(TreeNode::new(
+        "func2".to_string(),
+        "Function 2".to_string(),
+        "function".to_string(),
     ));
+
+    let module2 = TreeNode::new("module2".to_string(), "Module 2".to_string(), "module".to_string()).with_child(TreeNode::new("class1".to_string(), "Class 1".to_string(), "class".to_string()));
 
     let root = root.with_child(module1).with_child(module2);
 
     // 2. 使用树布局算法
-    let layout_engine = TreeLayout::new(TreeLayoutAlgorithm::Layered);
+    let layout_engine = TreeLayout::new().with_algorithm(TreeLayoutAlgorithm::Layered);
     let layout_result = layout_engine.layout_tree(&root);
     assert!(layout_result.is_ok());
 
@@ -86,22 +84,10 @@ fn test_theme_integration_with_rendering() {
     layout.add_node("test_node".to_string(), Rect::new(Point::new(50.0, 50.0), Size::new(100.0, 60.0)));
 
     // 2. 测试不同主题的渲染配置
-    let themes = vec![
-        VisualizationTheme::light(),
-        VisualizationTheme::dark(),
-        VisualizationTheme::one_light(),
-        VisualizationTheme::one_dark_pro(),
-        VisualizationTheme::github(),
-    ];
+    let themes = vec![VisualizationTheme::light(), VisualizationTheme::dark(), VisualizationTheme::one_light(), VisualizationTheme::one_dark_pro(), VisualizationTheme::github()];
 
     for theme in themes {
-        let config = RenderConfig {
-            background_color: theme.background_color.clone(),
-            node_fill_color: theme.node.fill_color.clone(),
-            node_stroke_color: theme.node.stroke_color.clone(),
-            text_color: theme.text.color.clone(),
-            ..Default::default()
-        };
+        let config = theme.to_render_config();
 
         let renderer = SvgRenderer::new().with_config(config);
         let svg_result = renderer.render_layout(&layout);
@@ -170,7 +156,7 @@ fn test_geometry_layout_render_integration() {
         let from_rect = layout.nodes.get(from).unwrap();
         let to_rect = layout.nodes.get(to).unwrap();
 
-        let edge_points = vec![from_rect.center(), to_rect.center()];
+        let edge_points = vec![from_rect.rect.center(), to_rect.rect.center()];
 
         let edge = oak_visualize::layout::Edge::new(from.to_string(), to.to_string()).with_points(edge_points);
         layout.add_edge(edge);
@@ -198,7 +184,7 @@ fn test_geometry_layout_render_integration() {
 fn test_error_handling_integration() {
     // 测试空图的处理
     let empty_graph = Graph::new(true);
-    let layout_engine = GraphLayout::new(GraphLayoutAlgorithm::Circular);
+    let layout_engine = GraphLayout::new().with_algorithm(GraphLayoutAlgorithm::Circular);
     let layout_result = layout_engine.layout_graph(&empty_graph);
     assert!(layout_result.is_ok());
 
@@ -242,7 +228,7 @@ fn test_large_graph_performance() {
     }
 
     // 使用力导向布局（计算密集型）
-    let layout_engine = GraphLayout::new(GraphLayoutAlgorithm::ForceDirected);
+    let layout_engine = GraphLayout::new().with_algorithm(GraphLayoutAlgorithm::ForceDirected);
     let layout_result = layout_engine.layout_graph(&graph);
     assert!(layout_result.is_ok());
 
@@ -255,6 +241,6 @@ fn test_large_graph_performance() {
     assert!(svg_result.is_ok());
 
     let svg = svg_result.unwrap();
-    assert!(svg.contains("node_0"));
-    assert!(svg.contains("node_99"));
+    assert!(svg.contains("Node 0"));
+    assert!(svg.contains("Node 99"));
 }

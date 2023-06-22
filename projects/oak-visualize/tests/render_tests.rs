@@ -80,11 +80,7 @@ fn test_render_config_defaults() {
 
 #[test]
 fn test_element_style_builder() {
-    let style = ElementStyle::new()
-        .with_fill("#blue".to_string())
-        .with_text("#white".to_string(), 14.0)
-        .with_class("node-style".to_string())
-        .with_attribute("data-id".to_string(), "test".to_string());
+    let style = ElementStyle::new().with_fill("#blue".to_string()).with_text("#white".to_string(), 14.0).with_class("node-style".to_string()).with_attribute("data-id".to_string(), "test".to_string());
 
     assert_eq!(style.fill_color, Some("#blue".to_string()));
     assert_eq!(style.text_color, Some("#white".to_string()));
@@ -95,12 +91,7 @@ fn test_element_style_builder() {
 
 #[test]
 fn test_svg_renderer_with_config() {
-    let config = RenderConfig {
-        canvas_width: 1200.0,
-        canvas_height: 800.0,
-        background_color: "#f0f0f0".to_string(),
-        ..Default::default()
-    };
+    let config = RenderConfig { canvas_width: 1200.0, canvas_height: 800.0, background_color: "#f0f0f0".to_string(), ..Default::default() };
 
     let renderer = SvgRenderer::new().with_config(config.clone());
     assert_eq!(renderer.config().canvas_width, 1200.0);

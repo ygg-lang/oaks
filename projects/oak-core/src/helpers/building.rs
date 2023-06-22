@@ -1,0 +1,226 @@
+//! Builder testing utilities for the Oak parsing framework.
+//!
+//! This module provides comprehensive testing infrastructure for builders,
+//! including file-based testing, expected output comparison, timeout handling,
+//! and test result serialization for typed root structures.
+
+use crate::{
+    Builder, Language,
+    errors::OakError,
+    helpers::{create_file, json_from_path, source_from_path},
+};
+use serde::{Deserialize, Serialize};
+use serde_json::{Serializer, ser::PrettyFormatter};
+use std::{
+    fmt::Debug,
+    path::{Path, PathBuf},
+    time::Duration,
+};
+use walkdir::WalkDir;
+
+/// A concurrent builder testing utility that can run tests against multiple files with timeout support.
+///
+/// The `BuilderTester` provides functionality to test builders against a directory
+/// of files with specific extensions, comparing actual output against expected
+/// results stored in JSON files, with configurable timeout protection.
+pub struct BuilderTester {
+    root: PathBuf,
+    extensions: Vec<String>,
+    timeout: Duration,
+}
+
+/// Expected builder test results for comparison.
+///
+/// This struct represents the expected output of a builder test, including
+/// success status, typed root structure, and any expected errors.
+#[derive(Debug, Serialize, Deserialize, PartialEq)]
+pub struct BuilderTestExpected {
+    success: bool,
+    typed_root: Option<TypedRootData>,
+    errors: Vec<String>,
+}
+
+/// Typed root data structure for builder testing.
+///
+/// Represents the typed root structure with its type name and serialized content
+/// used for testing builder output. Since TypedRoot can be any type, we serialize
+/// it as a generic structure for comparison.
+#[derive(Debug, Serialize, Deserialize, PartialEq)]
+pub struct TypedRootData {
+    type_name: String,
+    content: serde_json::Value,
+}
+
+impl BuilderTester {
+    /// Creates a new builder tester with the specified root directory and default 10-second timeout.
+    pub fn new<P: AsRef<Path>>(root: P) -> Self {
+        Self { root: root.as_ref().to_path_buf(), extensions: vec![], timeout: Duration::from_secs(10) }
+    }
+
+    /// Adds a file extension to test against.
+    pub fn with_extension(mut self, extension: impl ToString) -> Self {
+        self.extensions.push(extension.to_string());
+        self
+    }
+
+    /// Sets the timeout for building operations.
+    ///
+    /// # Arguments
+    ///
+    /// * `timeout` - The maximum duration to wait for building to complete
+    ///
+    /// # Returns
+    ///
+    /// A new `BuilderTester` with the specified timeout
+    pub fn with_timeout(mut self, timeout: Duration) -> Self {
+        self.timeout = timeout;
+        self
+    }
+
+    /// Run tests for the given builder against all files in the root directory with the specified extensions.
+    ///
+    /// # Arguments
+    ///
+    /// * `builder`: The builder to test.
+    ///
+    /// # Examples
+    ///
+    /// ```ignore
+    /// use oak_core::helpers::building::BuilderTester;
+    ///
+    /// let tester = BuilderTester::new("tests/builder").with_extension("valkyrie");
+    /// tester.run_tests(&my_builder)?;
+    /// ```
+    pub fn run_tests<L, B>(self, builder: &B) -> Result<(), OakError>
+    where
+        B: Builder<L> + Send + Sync,
+        L: Language + Send + Sync + 'static,
+        L::TypedRoot: Serialize + Debug + Sync + Send,
+    {
+        let test_files = self.find_test_files()?;
+        let force_regenerated = std::env::var("REGENERATE_TESTS").unwrap_or("0".to_string()) == "1";
+        let mut regenerated_any = false;
+
+        for file_path in test_files {
+            println!("Testing file: {}", file_path.display());
+            regenerated_any |= self.test_single_file::<L, B>(&file_path, builder, force_regenerated)?;
+        }
+
+        if regenerated_any && force_regenerated { Err(OakError::test_regenerated(self.root)) } else { Ok(()) }
+    }
+
+    fn find_test_files(&self) -> Result<Vec<PathBuf>, OakError> {
+        let mut files = Vec::new();
+
+        for entry in WalkDir::new(&self.root) {
+            let entry = entry.unwrap();
+            let path = entry.path();
+
+            if path.is_file() {
+                if let Some(ext) = path.extension() {
+                    let ext_str = ext.to_str().unwrap_or("");
+                    if self.extensions.iter().any(|e| e == ext_str) {
+                        // 忽略由 Tester 自身生成的输出文件，防止递归包含
+                        let file_name = path.file_name().and_then(|n| n.to_str()).unwrap_or("");
+                        let is_output_file = file_name.ends_with(".parsed.json") || file_name.ends_with(".lexed.json") || file_name.ends_with(".built.json");
+
+                        if !is_output_file {
+                            files.push(path.to_path_buf());
+                        }
+                    }
+                }
+            }
+        }
+
+        Ok(files)
+    }
+
+    fn test_single_file<L, B>(&self, file_path: &Path, builder: &B, force_regenerated: bool) -> Result<bool, OakError>
+    where
+        B: Builder<L> + Send + Sync,
+        L: Language + Send + Sync + 'static,
+        L::TypedRoot: Serialize + Debug + Sync + Send,
+    {
+        let source = source_from_path(file_path)?;
+
+        // Perform build in a thread and construct test results, with main thread handling timeout control
+        use std::sync::mpsc;
+        let (tx, rx) = mpsc::channel();
+        let timeout = self.timeout;
+        let file_path_string = file_path.display().to_string();
+
+        std::thread::scope(|s| {
+            s.spawn(move || {
+                let mut cache = crate::parser::session::ParseSession::<L>::new(1024);
+                let build_out = builder.build(&source, &[], &mut cache);
+
+                // Build typed root structure if build succeeded
+                let (success, typed_root) = match &build_out.result {
+                    Ok(root) => {
+                        // Serialize the typed root to JSON for comparison
+                        match serde_json::to_value(root) {
+                            Ok(content) => {
+                                let typed_root_data = TypedRootData { type_name: std::any::type_name::<L::TypedRoot>().to_string(), content };
+                                (true, Some(typed_root_data))
+                            }
+                            Err(_) => {
+                                // If serialization fails, still mark as success but with no typed root data
+                                (true, None)
+                            }
+                        }
+                    }
+                    Err(_) => (false, None),
+                };
+
+                // Collect error messages
+                let mut error_messages: Vec<String> = build_out.diagnostics.iter().map(|e| e.to_string()).collect();
+                if let Err(e) = &build_out.result {
+                    error_messages.push(e.to_string());
+                }
+
+                let test_result = BuilderTestExpected { success, typed_root, errors: error_messages };
+
+                let _ = tx.send(Ok::<BuilderTestExpected, OakError>(test_result));
+            });
+
+            let mut regenerated = false;
+            match rx.recv_timeout(timeout) {
+                Ok(Ok(test_result)) => {
+                    let expected_file = file_path.with_extension(format!("{}.built.json", file_path.extension().unwrap_or_default().to_str().unwrap_or("")));
+
+                    if expected_file.exists() && !force_regenerated {
+                        let expected: BuilderTestExpected = json_from_path(&expected_file)?;
+
+                        if test_result != expected {
+                            println!("Test failed for file: {}", file_path.display());
+                            println!("Expected: {:#?}", expected);
+                            println!("Actual: {:#?}", test_result);
+                            return Err(OakError::custom_error("Test results do not match expected results"));
+                        }
+                    }
+                    else {
+                        let file = create_file(&expected_file)?;
+                        let mut writer = Serializer::with_formatter(file, PrettyFormatter::with_indent(b"    "));
+                        test_result.serialize(&mut writer)?;
+
+                        println!("Created expected result file: {}\nNeed rerun", expected_file.display());
+                        if force_regenerated {
+                            regenerated = true;
+                        }
+                        else {
+                            return Err(OakError::custom_error("Test expected result file was missing or regenerated"));
+                        }
+                    }
+                }
+                Ok(Err(e)) => return Err(e),
+                Err(mpsc::RecvTimeoutError::Timeout) => {
+                    return Err(OakError::custom_error(format!("Builder test timed out after {:?} for file: {}", timeout, file_path_string)));
+                }
+                Err(mpsc::RecvTimeoutError::Disconnected) => {
+                    return Err(OakError::custom_error("Builder thread disconnected unexpectedly"));
+                }
+            }
+            Ok(regenerated)
+        })
+    }
+}

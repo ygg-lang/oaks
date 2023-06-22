@@ -14,6 +14,7 @@ edition.workspace = true
 
 [dependencies]
 oak-core = { workspace = true }
+oak-macros = { workspace = true }
 
 [dev-dependencies]
 oak-core = { workspace = true, features = ["testing"] }

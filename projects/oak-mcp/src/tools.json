@@ -1,0 +1,160 @@
+[
+  {
+    "name": "hover",
+    "description": "Get hover information (type, documentation) at a specific position",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "uri": {
+          "type": "string",
+          "description": "The URI of the file"
+        },
+        "offset": {
+          "type": "integer",
+          "description": "Byte offset in the file"
+        }
+      },
+      "required": [
+        "uri",
+        "offset"
+      ]
+    }
+  },
+  {
+    "name": "symbols",
+    "description": "Get all symbols (functions, structs, etc.) in a file",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "uri": {
+          "type": "string",
+          "description": "The URI of the file"
+        }
+      },
+      "required": [
+        "uri"
+      ]
+    }
+  },
+  {
+    "name": "definition",
+    "description": "Find definition of the symbol at a specific position",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "uri": {
+          "type": "string",
+          "description": "The URI of the file"
+        },
+        "offset": {
+          "type": "integer",
+          "description": "Byte offset in the file"
+        }
+      },
+      "required": [
+        "uri",
+        "offset"
+      ]
+    }
+  },
+  {
+    "name": "references",
+    "description": "Find references of the symbol at a specific position",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "uri": {
+          "type": "string",
+          "description": "The URI of the file"
+        },
+        "offset": {
+          "type": "integer",
+          "description": "Byte offset in the file"
+        }
+      },
+      "required": [
+        "uri",
+        "offset"
+      ]
+    }
+  },
+  {
+    "name": "diagnostics",
+    "description": "Get diagnostics (errors, warnings) for a file",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "uri": {
+          "type": "string",
+          "description": "The URI of the file"
+        }
+      },
+      "required": [
+        "uri"
+      ]
+    }
+  },
+  {
+    "name": "completion",
+    "description": "Get code completions at a specific position",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "uri": {
+          "type": "string",
+          "description": "The URI of the file"
+        },
+        "offset": {
+          "type": "integer",
+          "description": "Byte offset in the file"
+        }
+      },
+      "required": [
+        "uri",
+        "offset"
+      ]
+    }
+  },
+  {
+    "name": "set_file_content",
+    "description": "Update or create a file with the given content",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "uri": {
+          "type": "string",
+          "description": "The URI of the file"
+        },
+        "content": {
+          "type": "string",
+          "description": "The new content of the file"
+        }
+      },
+      "required": [
+        "uri",
+        "content"
+      ]
+    }
+  },
+  {
+    "name": "search",
+    "description": "Perform semantic search across indexed files",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "query": {
+          "type": "string",
+          "description": "The search query"
+        },
+        "limit": {
+          "type": "integer",
+          "description": "Maximum number of results to return",
+          "default": 5
+        }
+      },
+      "required": [
+        "query"
+      ]
+    }
+  }
+]

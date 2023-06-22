@@ -97,6 +97,26 @@ pub struct ArrowConfig {
     pub arrow_type: String,
 }
 
+impl VisualizationTheme {
+    /// 转换为渲染配置
+    pub fn to_render_config(&self) -> crate::render::RenderConfig {
+        crate::render::RenderConfig {
+            background_color: self.background_color.clone(),
+            node_fill_color: self.node.fill_color.clone(),
+            node_stroke_color: self.node.stroke_color.clone(),
+            node_stroke_width: self.node.stroke_width as f64,
+            edge_color: self.edge.color.clone(),
+            edge_width: self.edge.width as f64,
+            text_color: self.text.color.clone(),
+            text_size: self.text.font_size as f64,
+            font_family: self.text.font_family.clone(),
+            show_arrows: self.edge.arrow.enabled,
+            arrow_size: self.edge.arrow.size as f64,
+            ..Default::default()
+        }
+    }
+}
+
 impl Default for VisualizationTheme {
     fn default() -> Self {
         Self::light()
@@ -114,32 +134,11 @@ impl VisualizationTheme {
                 stroke_color: "#DEE2E6".to_string(),
                 stroke_width: 1.0,
                 border_radius: 4.0,
-                shadow: ShadowConfig {
-                    enabled: true,
-                    color: "rgba(0, 0, 0, 0.1)".to_string(),
-                    offset_x: 0.0,
-                    offset_y: 2.0,
-                    blur_radius: 4.0,
-                },
+                shadow: ShadowConfig { enabled: true, color: "rgba(0, 0, 0, 0.1)".to_string(), offset_x: 0.0, offset_y: 2.0, blur_radius: 4.0 },
             },
-            edge: EdgeTheme {
-                color: "#6C757D".to_string(),
-                width: 1.5,
-                style: "solid".to_string(),
-                arrow: ArrowConfig { enabled: true, size: 8.0, arrow_type: "triangle".to_string() },
-            },
-            text: TextTheme {
-                font_family: "Arial, sans-serif".to_string(),
-                font_size: 12.0,
-                color: "#212529".to_string(),
-                font_weight: "normal".to_string(),
-            },
-            highlight: HighlightTheme {
-                selected_color: "#007BFF".to_string(),
-                hover_color: "#0056B3".to_string(),
-                error_color: "#DC3545".to_string(),
-                warning_color: "#FFC107".to_string(),
-            },
+            edge: EdgeTheme { color: "#6C757D".to_string(), width: 1.5, style: "solid".to_string(), arrow: ArrowConfig { enabled: true, size: 8.0, arrow_type: "triangle".to_string() } },
+            text: TextTheme { font_family: "Arial, sans-serif".to_string(), font_size: 12.0, color: "#212529".to_string(), font_weight: "normal".to_string() },
+            highlight: HighlightTheme { selected_color: "#007BFF".to_string(), hover_color: "#0056B3".to_string(), error_color: "#DC3545".to_string(), warning_color: "#FFC107".to_string() },
         }
     }
 
@@ -153,32 +152,11 @@ impl VisualizationTheme {
                 stroke_color: "#3E3E42".to_string(),
                 stroke_width: 1.0,
                 border_radius: 4.0,
-                shadow: ShadowConfig {
-                    enabled: true,
-                    color: "rgba(0, 0, 0, 0.3)".to_string(),
-                    offset_x: 0.0,
-                    offset_y: 2.0,
-                    blur_radius: 4.0,
-                },
+                shadow: ShadowConfig { enabled: true, color: "rgba(0, 0, 0, 0.3)".to_string(), offset_x: 0.0, offset_y: 2.0, blur_radius: 4.0 },
             },
-            edge: EdgeTheme {
-                color: "#CCCCCC".to_string(),
-                width: 1.5,
-                style: "solid".to_string(),
-                arrow: ArrowConfig { enabled: true, size: 8.0, arrow_type: "triangle".to_string() },
-            },
-            text: TextTheme {
-                font_family: "Arial, sans-serif".to_string(),
-                font_size: 12.0,
-                color: "#CCCCCC".to_string(),
-                font_weight: "normal".to_string(),
-            },
-            highlight: HighlightTheme {
-                selected_color: "#0E639C".to_string(),
-                hover_color: "#1177BB".to_string(),
-                error_color: "#F14C4C".to_string(),
-                warning_color: "#FFCC02".to_string(),
-            },
+            edge: EdgeTheme { color: "#CCCCCC".to_string(), width: 1.5, style: "solid".to_string(), arrow: ArrowConfig { enabled: true, size: 8.0, arrow_type: "triangle".to_string() } },
+            text: TextTheme { font_family: "Arial, sans-serif".to_string(), font_size: 12.0, color: "#CCCCCC".to_string(), font_weight: "normal".to_string() },
+            highlight: HighlightTheme { selected_color: "#0E639C".to_string(), hover_color: "#1177BB".to_string(), error_color: "#F14C4C".to_string(), warning_color: "#FFCC02".to_string() },
         }
     }
 
@@ -192,32 +170,11 @@ impl VisualizationTheme {
                 stroke_color: "#E1E4E8".to_string(),
                 stroke_width: 1.0,
                 border_radius: 6.0,
-                shadow: ShadowConfig {
-                    enabled: true,
-                    color: "rgba(149, 157, 165, 0.2)".to_string(),
-                    offset_x: 0.0,
-                    offset_y: 8.0,
-                    blur_radius: 24.0,
-                },
+                shadow: ShadowConfig { enabled: true, color: "rgba(149, 157, 165, 0.2)".to_string(), offset_x: 0.0, offset_y: 8.0, blur_radius: 24.0 },
             },
-            edge: EdgeTheme {
-                color: "#586069".to_string(),
-                width: 1.5,
-                style: "solid".to_string(),
-                arrow: ArrowConfig { enabled: true, size: 8.0, arrow_type: "triangle".to_string() },
-            },
-            text: TextTheme {
-                font_family: "SF Pro Display, -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, sans-serif".to_string(),
-                font_size: 12.0,
-                color: "#24292E".to_string(),
-                font_weight: "400".to_string(),
-            },
-            highlight: HighlightTheme {
-                selected_color: "#0366D6".to_string(),
-                hover_color: "#0256CC".to_string(),
-                error_color: "#D73A49".to_string(),
-                warning_color: "#F66A0A".to_string(),
-            },
+            edge: EdgeTheme { color: "#586069".to_string(), width: 1.5, style: "solid".to_string(), arrow: ArrowConfig { enabled: true, size: 8.0, arrow_type: "triangle".to_string() } },
+            text: TextTheme { font_family: "SF Pro Display, -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, sans-serif".to_string(), font_size: 12.0, color: "#24292E".to_string(), font_weight: "400".to_string() },
+            highlight: HighlightTheme { selected_color: "#0366D6".to_string(), hover_color: "#0256CC".to_string(), error_color: "#D73A49".to_string(), warning_color: "#F66A0A".to_string() },
         }
     }
 
@@ -231,32 +188,11 @@ impl VisualizationTheme {
                 stroke_color: "#3E4451".to_string(),
                 stroke_width: 1.0,
                 border_radius: 6.0,
-                shadow: ShadowConfig {
-                    enabled: true,
-                    color: "rgba(0, 0, 0, 0.4)".to_string(),
-                    offset_x: 0.0,
-                    offset_y: 8.0,
-                    blur_radius: 24.0,
-                },
+                shadow: ShadowConfig { enabled: true, color: "rgba(0, 0, 0, 0.4)".to_string(), offset_x: 0.0, offset_y: 8.0, blur_radius: 24.0 },
             },
-            edge: EdgeTheme {
-                color: "#ABB2BF".to_string(),
-                width: 1.5,
-                style: "solid".to_string(),
-                arrow: ArrowConfig { enabled: true, size: 8.0, arrow_type: "triangle".to_string() },
-            },
-            text: TextTheme {
-                font_family: "SF Mono, Monaco, Inconsolata, Roboto Mono, monospace".to_string(),
-                font_size: 12.0,
-                color: "#ABB2BF".to_string(),
-                font_weight: "400".to_string(),
-            },
-            highlight: HighlightTheme {
-                selected_color: "#61AFEF".to_string(),
-                hover_color: "#528BFF".to_string(),
-                error_color: "#E06C75".to_string(),
-                warning_color: "#E5C07B".to_string(),
-            },
+            edge: EdgeTheme { color: "#ABB2BF".to_string(), width: 1.5, style: "solid".to_string(), arrow: ArrowConfig { enabled: true, size: 8.0, arrow_type: "triangle".to_string() } },
+            text: TextTheme { font_family: "SF Mono, Monaco, Inconsolata, Roboto Mono, monospace".to_string(), font_size: 12.0, color: "#ABB2BF".to_string(), font_weight: "400".to_string() },
+            highlight: HighlightTheme { selected_color: "#61AFEF".to_string(), hover_color: "#528BFF".to_string(), error_color: "#E06C75".to_string(), warning_color: "#E5C07B".to_string() },
         }
     }
 
@@ -270,32 +206,11 @@ impl VisualizationTheme {
                 stroke_color: "#D0D7DE".to_string(),
                 stroke_width: 1.0,
                 border_radius: 6.0,
-                shadow: ShadowConfig {
-                    enabled: true,
-                    color: "rgba(31, 35, 40, 0.04)".to_string(),
-                    offset_x: 0.0,
-                    offset_y: 1.0,
-                    blur_radius: 0.0,
-                },
+                shadow: ShadowConfig { enabled: true, color: "rgba(31, 35, 40, 0.04)".to_string(), offset_x: 0.0, offset_y: 1.0, blur_radius: 0.0 },
             },
-            edge: EdgeTheme {
-                color: "#656D76".to_string(),
-                width: 1.0,
-                style: "solid".to_string(),
-                arrow: ArrowConfig { enabled: true, size: 6.0, arrow_type: "triangle".to_string() },
-            },
-            text: TextTheme {
-                font_family: "-apple-system, BlinkMacSystemFont, Segoe UI, Helvetica, Arial, sans-serif".to_string(),
-                font_size: 12.0,
-                color: "#24292F".to_string(),
-                font_weight: "400".to_string(),
-            },
-            highlight: HighlightTheme {
-                selected_color: "#0969DA".to_string(),
-                hover_color: "#0860CA".to_string(),
-                error_color: "#CF222E".to_string(),
-                warning_color: "#9A6700".to_string(),
-            },
+            edge: EdgeTheme { color: "#656D76".to_string(), width: 1.0, style: "solid".to_string(), arrow: ArrowConfig { enabled: true, size: 6.0, arrow_type: "triangle".to_string() } },
+            text: TextTheme { font_family: "-apple-system, BlinkMacSystemFont, Segoe UI, Helvetica, Arial, sans-serif".to_string(), font_size: 12.0, color: "#24292F".to_string(), font_weight: "400".to_string() },
+            highlight: HighlightTheme { selected_color: "#0969DA".to_string(), hover_color: "#0860CA".to_string(), error_color: "#CF222E".to_string(), warning_color: "#9A6700".to_string() },
         }
     }
 }
