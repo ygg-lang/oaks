@@ -1,9 +1,13 @@
-use crate::kind::WatSyntaxKind;
-use oak_core::Language;
+use oak_core::{Language, LanguageCategory};
 
+#[derive(Default)]
 pub struct WatLanguage;
 
 impl Language for WatLanguage {
-    type SyntaxKind = WatSyntaxKind;
+    const NAME: &'static str = "wat";
+    const CATEGORY: LanguageCategory = LanguageCategory::Dsl;
+
+    type TokenType = crate::kind::WatSyntaxKind;
+    type ElementType = crate::kind::WatSyntaxKind;
     type TypedRoot = ();
 }

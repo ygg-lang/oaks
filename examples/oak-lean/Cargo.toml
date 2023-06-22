@@ -1,9 +1,9 @@
 [package]
 name = "oak-lean"
-description = "High-performance incremental Lua parser for the oak ecosystem with flexible configuration, supporting lightweight scripting and embedded development."
+description = "Lean theorem prover language parser with support for dependent types and formal verification."
 categories = ["parsing"]
-keywords = ["parser", "lua", "scripting", "language"]
-documentation = "https://docs.rs/oak-lua"
+keywords = ["parser", "lean", "theorem-prover", "dependent-types"]
+documentation = "https://docs.rs/oak-lean"
 readme = "readme.md"
 version.workspace = true
 authors.workspace = true
@@ -14,16 +14,24 @@ edition.workspace = true
 
 [dependencies]
 oak-core = { workspace = true }
-oak-highlight = { workspace = true, optional = true }
-oak-pretty-print = { workspace = true, optional = true }
+oak-highlight = { workspace = true }
+oak-pretty-print = { workspace = true }
+oak-lsp = { workspace = true }
+oak-mcp = { workspace = true, optional = true }
+oak-hover = { workspace = true }
+oak-vfs = { workspace = true }
 serde = { workspace = true }
+futures = { workspace = true }
+axum = { workspace = true, optional = true }
+tokio = { workspace = true, optional = true }
 
 [dev-dependencies]
 oak-core = { workspace = true, features = ["testing"] }
 
-
 [features]
 default = []
+mcp = ["dep:oak-mcp"]
+axum = ["mcp", "dep:tokio", "dep:axum", "oak-mcp/axum", "oak-lsp/axum"]
 
 
 [package.metadata.docs.rs]

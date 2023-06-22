@@ -1,0 +1,385 @@
+{
+    "success": true,
+    "count": 63,
+    "tokens": [
+        {
+            "kind": "Program",
+            "text": "program",
+            "start": 0,
+            "end": 7
+        },
+        {
+            "kind": "Identifier",
+            "text": "hello",
+            "start": 8,
+            "end": 13
+        },
+        {
+            "kind": "Implicit",
+            "text": "implicit",
+            "start": 19,
+            "end": 27
+        },
+        {
+            "kind": "None",
+            "text": "none",
+            "start": 28,
+            "end": 32
+        },
+        {
+            "kind": "Integer",
+            "text": "integer",
+            "start": 38,
+            "end": 45
+        },
+        {
+            "kind": "ColonColon",
+            "text": "::",
+            "start": 46,
+            "end": 48
+        },
+        {
+            "kind": "Identifier",
+            "text": "i",
+            "start": 49,
+            "end": 50
+        },
+        {
+            "kind": "Real",
+            "text": "real",
+            "start": 56,
+            "end": 60
+        },
+        {
+            "kind": "ColonColon",
+            "text": "::",
+            "start": 61,
+            "end": 63
+        },
+        {
+            "kind": "Identifier",
+            "text": "x",
+            "start": 64,
+            "end": 65
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 66,
+            "end": 67
+        },
+        {
+            "kind": "NumberLiteral",
+            "text": "3.14",
+            "start": 68,
+            "end": 72
+        },
+        {
+            "kind": "Character",
+            "text": "character",
+            "start": 78,
+            "end": 87
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 87,
+            "end": 88
+        },
+        {
+            "kind": "Identifier",
+            "text": "len",
+            "start": 88,
+            "end": 91
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 91,
+            "end": 92
+        },
+        {
+            "kind": "NumberLiteral",
+            "text": "20",
+            "start": 92,
+            "end": 94
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 94,
+            "end": 95
+        },
+        {
+            "kind": "ColonColon",
+            "text": "::",
+            "start": 96,
+            "end": 98
+        },
+        {
+            "kind": "Identifier",
+            "text": "name",
+            "start": 99,
+            "end": 103
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 104,
+            "end": 105
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "\"World\"",
+            "start": 106,
+            "end": 113
+        },
+        {
+            "kind": "Print",
+            "text": "print",
+            "start": 150,
+            "end": 155
+        },
+        {
+            "kind": "Star",
+            "text": "*",
+            "start": 156,
+            "end": 157
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 157,
+            "end": 158
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "\"Hello, \"",
+            "start": 159,
+            "end": 168
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 168,
+            "end": 169
+        },
+        {
+            "kind": "Identifier",
+            "text": "name",
+            "start": 170,
+            "end": 174
+        },
+        {
+            "kind": "Do",
+            "text": "do",
+            "start": 186,
+            "end": 188
+        },
+        {
+            "kind": "Identifier",
+            "text": "i",
+            "start": 189,
+            "end": 190
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 191,
+            "end": 192
+        },
+        {
+            "kind": "NumberLiteral",
+            "text": "1",
+            "start": 193,
+            "end": 194
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 194,
+            "end": 195
+        },
+        {
+            "kind": "NumberLiteral",
+            "text": "10",
+            "start": 196,
+            "end": 198
+        },
+        {
+            "kind": "Identifier",
+            "text": "x",
+            "start": 208,
+            "end": 209
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 210,
+            "end": 211
+        },
+        {
+            "kind": "Identifier",
+            "text": "x",
+            "start": 212,
+            "end": 213
+        },
+        {
+            "kind": "Plus",
+            "text": "+",
+            "start": 214,
+            "end": 215
+        },
+        {
+            "kind": "NumberLiteral",
+            "text": "1.0",
+            "start": 216,
+            "end": 219
+        },
+        {
+            "kind": "End",
+            "text": "end",
+            "start": 225,
+            "end": 228
+        },
+        {
+            "kind": "Do",
+            "text": "do",
+            "start": 229,
+            "end": 231
+        },
+        {
+            "kind": "If",
+            "text": "if",
+            "start": 243,
+            "end": 245
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 246,
+            "end": 247
+        },
+        {
+            "kind": "Identifier",
+            "text": "x",
+            "start": 247,
+            "end": 248
+        },
+        {
+            "kind": "Greater",
+            "text": ">",
+            "start": 249,
+            "end": 250
+        },
+        {
+            "kind": "NumberLiteral",
+            "text": "10.0",
+            "start": 251,
+            "end": 255
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 255,
+            "end": 256
+        },
+        {
+            "kind": "Then",
+            "text": "then",
+            "start": 257,
+            "end": 261
+        },
+        {
+            "kind": "Print",
+            "text": "print",
+            "start": 271,
+            "end": 276
+        },
+        {
+            "kind": "Star",
+            "text": "*",
+            "start": 277,
+            "end": 278
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 278,
+            "end": 279
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "\"x is greater than 10\"",
+            "start": 280,
+            "end": 302
+        },
+        {
+            "kind": "Else",
+            "text": "else",
+            "start": 308,
+            "end": 312
+        },
+        {
+            "kind": "Print",
+            "text": "print",
+            "start": 322,
+            "end": 327
+        },
+        {
+            "kind": "Star",
+            "text": "*",
+            "start": 328,
+            "end": 329
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 329,
+            "end": 330
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "\"x is not greater than 10\"",
+            "start": 331,
+            "end": 357
+        },
+        {
+            "kind": "End",
+            "text": "end",
+            "start": 363,
+            "end": 366
+        },
+        {
+            "kind": "If",
+            "text": "if",
+            "start": 367,
+            "end": 369
+        },
+        {
+            "kind": "End",
+            "text": "end",
+            "start": 371,
+            "end": 374
+        },
+        {
+            "kind": "Program",
+            "text": "program",
+            "start": 375,
+            "end": 382
+        },
+        {
+            "kind": "Identifier",
+            "text": "hello",
+            "start": 383,
+            "end": 388
+        },
+        {
+            "kind": "Eof",
+            "text": "",
+            "start": 388,
+            "end": 388
+        }
+    ],
+    "errors": []
+}

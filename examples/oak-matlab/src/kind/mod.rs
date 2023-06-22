@@ -1,6 +1,6 @@
-use oak_core::SyntaxKind;
+use oak_core::{ElementType, TokenType, UniversalElementRole, UniversalTokenRole};
 
-#[derive(Copy, Clone, Debug, PartialEq, Eq)]
+#[derive(Copy, Clone, Debug, PartialEq, Eq, Hash)]
 pub enum MatlabSyntaxKind {
     // 基础标记
     Whitespace,
@@ -85,6 +85,10 @@ pub enum MatlabSyntaxKind {
     Transpose,    // '
     DotTranspose, // .'
 
+    // 泛化类型
+    Operator,
+    Delimiter,
+
     // 错误处理
     Error,
 
@@ -100,24 +104,47 @@ pub enum MatlabSyntaxKind {
     Eof,
 }
 
-impl SyntaxKind for MatlabSyntaxKind {
-    fn is_trivia(&self) -> bool {
-        todo!()
+impl MatlabSyntaxKind {
+    pub fn is_token(&self) -> bool {
+        !self.is_element()
+    }
+
+    pub fn is_element(&self) -> bool {
+        matches!(self, Self::Script | Self::FunctionDef | Self::ClassDef | Self::Block | Self::Expression | Self::Statement)
+    }
+}
+
+impl TokenType for MatlabSyntaxKind {
+    const END_OF_STREAM: Self = Self::Eof;
+    type Role = UniversalTokenRole;
+
+    fn role(&self) -> Self::Role {
+        match self {
+            Self::Whitespace | Self::Newline => UniversalTokenRole::Whitespace,
+            Self::Comment | Self::BlockComment => UniversalTokenRole::Comment,
+            Self::Eof => UniversalTokenRole::Eof,
+            _ => UniversalTokenRole::None,
+        }
     }
 
     fn is_comment(&self) -> bool {
-        todo!()
+        matches!(self, Self::Comment | Self::BlockComment)
     }
 
     fn is_whitespace(&self) -> bool {
-        todo!()
+        matches!(self, Self::Whitespace | Self::Newline)
     }
+}
 
-    fn is_token_type(&self) -> bool {
-        todo!()
-    }
+impl ElementType for MatlabSyntaxKind {
+    type Role = UniversalElementRole;
 
-    fn is_element_type(&self) -> bool {
-        todo!()
+    fn role(&self) -> Self::Role {
+        match self {
+            Self::Error => UniversalElementRole::Error,
+            Self::Script => UniversalElementRole::Root,
+            Self::FunctionDef | Self::ClassDef => UniversalElementRole::Detail,
+            _ => UniversalElementRole::None,
+        }
     }
 }

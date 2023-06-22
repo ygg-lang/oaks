@@ -1,5 +1,4 @@
-use crate::kind::HlslSyntaxKind;
-use oak_core::Language;
+use oak_core::{Language, LanguageCategory};
 
 #[derive(Debug)]
 pub struct HlslLanguage {
@@ -7,15 +6,16 @@ pub struct HlslLanguage {
 }
 
 impl Language for HlslLanguage {
-    type SyntaxKind = HlslSyntaxKind;
-    type TypedRoot = ();
-}
+    const NAME: &'static str = "hlsl";
+    const CATEGORY: LanguageCategory = LanguageCategory::Programming;
 
+    type TokenType = crate::kind::HlslSyntaxKind;
+    type ElementType = crate::kind::HlslSyntaxKind;
+    type TypedRoot = crate::ast::HlslRoot;
+}
 
 impl Default for HlslLanguage {
     fn default() -> Self {
-        Self {
-            allow_comment: true,
-        }
+        Self { allow_comment: true }
     }
 }

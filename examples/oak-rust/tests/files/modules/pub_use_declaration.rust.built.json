@@ -1,0 +1,20 @@
+{
+    "success": true,
+    "typed_root": {
+        "type_name": "oak_rust::ast::RustRoot",
+        "content": {
+            "items": [
+                {
+                    "Use": {
+                        "path": " use my_module::MyType",
+                        "span": {
+                            "end": 25,
+                            "start": 3
+                        }
+                    }
+                }
+            ]
+        }
+    },
+    "errors": []
+}

@@ -1,11 +1,14 @@
-use crate::{ast::GoRoot, kind::GoLangSyntaxKind};
-use oak_core::Language;
+use oak_core::{Language, LanguageCategory};
 
-/// Go 语言实现
-#[derive(Debug, Clone, Default)]
-pub struct GoLangLanguage {}
+/// Go 语言定义
+#[derive(Debug, Clone, Copy, Default)]
+pub struct GoLanguage {}
 
-impl Language for GoLangLanguage {
-    type SyntaxKind = GoLangSyntaxKind;
-    type TypedRoot = GoRoot;
+impl Language for GoLanguage {
+    const NAME: &'static str = "go";
+    const CATEGORY: LanguageCategory = LanguageCategory::Programming;
+
+    type TokenType = crate::kind::GoSyntaxKind;
+    type ElementType = crate::kind::GoSyntaxKind;
+    type TypedRoot = crate::ast::GoRoot;
 }

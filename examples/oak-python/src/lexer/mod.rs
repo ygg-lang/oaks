@@ -1,20 +1,24 @@
 use crate::{kind::PythonSyntaxKind, language::PythonLanguage};
-use oak_core::{IncrementalCache, Lexer, LexerState, lexer::LexOutput, source::Source};
+use oak_core::{
+    Lexer, LexerCache, LexerState, OakError,
+    lexer::LexOutput,
+    source::{Source, TextEdit},
+};
 
-type State<S: Source> = LexerState<S, PythonLanguage>;
+type State<'a, S> = LexerState<'a, S, PythonLanguage>;
 
 #[derive(Clone)]
 pub struct PythonLexer<'config> {
-    config: &'config PythonLanguage,
+    _config: &'config PythonLanguage,
 }
 
 impl<'config> PythonLexer<'config> {
     pub fn new(config: &'config PythonLanguage) -> Self {
-        Self { config }
+        Self { _config: config }
     }
 
     /// 跳过空白字符
-    fn skip_whitespace<S: Source>(&self, state: &mut State<S>) -> bool {
+    fn skip_whitespace<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start_pos = state.get_position();
 
         while let Some(ch) = state.current() {
@@ -36,7 +40,7 @@ impl<'config> PythonLexer<'config> {
     }
 
     /// 处理换行
-    fn lex_newline<S: Source>(&self, state: &mut State<S>) -> bool {
+    fn lex_newline<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start_pos = state.get_position();
 
         if let Some('\n') = state.current() {
@@ -58,7 +62,7 @@ impl<'config> PythonLexer<'config> {
     }
 
     /// 处理注释
-    fn lex_comment<S: Source>(&self, state: &mut State<S>) -> bool {
+    fn lex_comment<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         if let Some('#') = state.current() {
             let start_pos = state.get_position();
             state.advance(1); // 跳过 '#'
@@ -80,7 +84,7 @@ impl<'config> PythonLexer<'config> {
     }
 
     /// 处理字符串字面量
-    fn lex_string<S: Source>(&self, state: &mut State<S>) -> bool {
+    fn lex_string<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start_pos = state.get_position();
 
         // 检查是否是字符串开始
@@ -125,7 +129,7 @@ impl<'config> PythonLexer<'config> {
     }
 
     /// 处理数字字面量
-    fn lex_number<S: Source>(&self, state: &mut State<S>) -> bool {
+    fn lex_number<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start_pos = state.get_position();
 
         if !state.current().map_or(false, |c| c.is_ascii_digit()) {
@@ -147,7 +151,7 @@ impl<'config> PythonLexer<'config> {
     }
 
     /// 处理标识符或关键字
-    fn lex_identifier_or_keyword<S: Source>(&self, state: &mut State<S>) -> bool {
+    fn lex_identifier_or_keyword<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start_pos = state.get_position();
 
         // 检查第一个字符
@@ -156,8 +160,10 @@ impl<'config> PythonLexer<'config> {
         }
 
         // 读取标识符
+        let mut text = String::new();
         while let Some(ch) = state.current() {
             if ch.is_ascii_alphanumeric() || ch == '_' {
+                text.push(ch);
                 state.advance(ch.len_utf8());
             }
             else {
@@ -166,14 +172,51 @@ impl<'config> PythonLexer<'config> {
         }
 
         // 检查是否是关键字
-        let kind = PythonSyntaxKind::Identifier; // 简化处理，都标记为标识符
+        let kind = match text.as_str() {
+            "and" => PythonSyntaxKind::AndKeyword,
+            "as" => PythonSyntaxKind::AsKeyword,
+            "assert" => PythonSyntaxKind::AssertKeyword,
+            "async" => PythonSyntaxKind::AsyncKeyword,
+            "await" => PythonSyntaxKind::AwaitKeyword,
+            "break" => PythonSyntaxKind::BreakKeyword,
+            "class" => PythonSyntaxKind::ClassKeyword,
+            "continue" => PythonSyntaxKind::ContinueKeyword,
+            "def" => PythonSyntaxKind::DefKeyword,
+            "del" => PythonSyntaxKind::DelKeyword,
+            "elif" => PythonSyntaxKind::ElifKeyword,
+            "else" => PythonSyntaxKind::ElseKeyword,
+            "except" => PythonSyntaxKind::ExceptKeyword,
+            "False" => PythonSyntaxKind::FalseKeyword,
+            "finally" => PythonSyntaxKind::FinallyKeyword,
+            "for" => PythonSyntaxKind::ForKeyword,
+            "from" => PythonSyntaxKind::FromKeyword,
+            "global" => PythonSyntaxKind::GlobalKeyword,
+            "if" => PythonSyntaxKind::IfKeyword,
+            "import" => PythonSyntaxKind::ImportKeyword,
+            "in" => PythonSyntaxKind::InKeyword,
+            "is" => PythonSyntaxKind::IsKeyword,
+            "lambda" => PythonSyntaxKind::LambdaKeyword,
+            "None" => PythonSyntaxKind::NoneKeyword,
+            "nonlocal" => PythonSyntaxKind::NonlocalKeyword,
+            "not" => PythonSyntaxKind::NotKeyword,
+            "or" => PythonSyntaxKind::OrKeyword,
+            "pass" => PythonSyntaxKind::PassKeyword,
+            "raise" => PythonSyntaxKind::RaiseKeyword,
+            "return" => PythonSyntaxKind::ReturnKeyword,
+            "True" => PythonSyntaxKind::TrueKeyword,
+            "try" => PythonSyntaxKind::TryKeyword,
+            "while" => PythonSyntaxKind::WhileKeyword,
+            "with" => PythonSyntaxKind::WithKeyword,
+            "yield" => PythonSyntaxKind::YieldKeyword,
+            _ => PythonSyntaxKind::Identifier,
+        };
 
         state.add_token(kind, start_pos, state.get_position());
         true
     }
 
     /// 处理操作符
-    fn lex_operator<S: Source>(&self, state: &mut State<S>) -> bool {
+    fn lex_operator<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start_pos = state.get_position();
 
         // 简化实现：只处理单字符操作符
@@ -242,7 +285,7 @@ impl<'config> PythonLexer<'config> {
     }
 
     /// 处理分隔符
-    fn lex_delimiter<S: Source>(&self, state: &mut State<S>) -> bool {
+    fn lex_delimiter<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start_pos = state.get_position();
 
         if let Some(ch) = state.current() {
@@ -267,97 +310,144 @@ impl<'config> PythonLexer<'config> {
 
         false
     }
-
-    /// 处理缩进
-    fn lex_indent<S: Source>(&self, state: &mut State<S>) -> bool {
-        // 简化的缩进处理
-        false
-    }
-
-    /// 处理其他字符
-    fn lex_other<S: Source>(&self, state: &mut State<S>) -> bool {
-        if let Some(ch) = state.current() {
-            let start_pos = state.get_position();
-            state.advance(ch.len_utf8());
-            state.add_token(PythonSyntaxKind::Error, start_pos, state.get_position());
-            true
-        }
-        else {
-            false
-        }
-    }
 }
 
 impl<'config> Lexer<PythonLanguage> for PythonLexer<'config> {
-    fn lex(&self, source: impl Source) -> LexOutput<PythonLanguage> {
-        let mut state = LexerState::new(source);
+    fn lex<'a, S: Source + ?Sized>(&self, source: &S, _edits: &[TextEdit], cache: &'a mut impl LexerCache<PythonLanguage>) -> LexOutput<PythonLanguage> {
+        let mut state: State<'_, S> = LexerState::new(source);
+        let result = self.run(&mut state);
+        if result.is_ok() {
+            state.add_eof();
+        }
+        state.finish_with_cache(result, cache)
+    }
+}
+
+impl<'config> PythonLexer<'config> {
+    pub(crate) fn run<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> Result<(), OakError> {
+        let mut indent_stack = vec![0];
+        let mut bracket_level: usize = 0;
+        let mut at_line_start = true;
 
         while state.not_at_end() {
-            if self.skip_whitespace(&mut state) {
+            let safe_point = state.get_position();
+
+            if at_line_start && bracket_level == 0 {
+                self.handle_indentation(state, &mut indent_stack);
+                at_line_start = false;
                 continue;
             }
 
-            if self.lex_newline(&mut state) {
-                continue;
+            if let Some(ch) = state.peek() {
+                match ch {
+                    ' ' | '\t' => {
+                        self.skip_whitespace(state);
+                    }
+                    '\n' | '\r' => {
+                        self.lex_newline(state);
+                        at_line_start = true;
+                    }
+                    '#' => {
+                        self.lex_comment(state);
+                    }
+                    '"' | '\'' => {
+                        self.lex_string(state);
+                    }
+                    '0'..='9' => {
+                        self.lex_number(state);
+                    }
+                    'a'..='z' | 'A'..='Z' | '_' => {
+                        self.lex_identifier_or_keyword(state);
+                    }
+                    '(' | '[' | '{' => {
+                        bracket_level += 1;
+                        self.lex_delimiter(state);
+                    }
+                    ')' | ']' | '}' => {
+                        bracket_level = bracket_level.saturating_sub(1);
+                        self.lex_delimiter(state);
+                    }
+                    '+' | '-' | '*' | '/' | '%' | '=' | '<' | '>' | '&' | '|' | '^' | '~' | '@' => {
+                        self.lex_operator(state);
+                    }
+                    ',' | ':' | ';' | '.' => {
+                        self.lex_delimiter(state);
+                    }
+                    _ => {
+                        // Fallback to error
+                        state.advance(ch.len_utf8());
+                        state.add_token(PythonSyntaxKind::Error, safe_point, state.get_position());
+                    }
+                }
             }
 
-            if self.lex_comment(&mut state) {
-                continue;
+            state.advance_if_dead_lock(safe_point);
+        }
+
+        // Emit remaining dedents
+        while indent_stack.len() > 1 {
+            indent_stack.pop();
+            let pos = state.get_position();
+            state.add_token(PythonSyntaxKind::Dedent, pos, pos);
+        }
+
+        Ok(())
+    }
+
+    fn handle_indentation<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>, stack: &mut Vec<usize>) {
+        let start_pos = state.get_position();
+        let current_indent;
+
+        // Skip comments and empty lines at start of line
+        let mut temp_state = state.get_position();
+        loop {
+            let mut indent = 0;
+            while let Some(ch) = state.get_char_at(temp_state) {
+                if ch == ' ' {
+                    indent += 1;
+                }
+                else if ch == '\t' {
+                    indent += 8;
+                }
+                // Standard Python tab width
+                else {
+                    break;
+                }
+                temp_state += 1;
             }
 
-            if self.lex_string(&mut state) {
-                continue;
-            }
-
-            if self.lex_number(&mut state) {
-                continue;
-            }
-
-            if self.lex_identifier_or_keyword(&mut state) {
-                continue;
-            }
-
-            if self.lex_operator(&mut state) {
-                continue;
-            }
-
-            if self.lex_delimiter(&mut state) {
-                continue;
-            }
-
-            if self.lex_indent(&mut state) {
-                continue;
-            }
-
-            if self.lex_other(&mut state) {
-                continue;
-            }
-
-            // 如果没有匹配任何规则，前进一个字符避免无限循环
-            if let Some(ch) = state.current() {
-                let start_pos = state.get_position();
-                state.advance(ch.len_utf8());
-                state.add_token(PythonSyntaxKind::Error, start_pos, state.get_position());
-            }
-            else {
-                break;
+            match state.get_char_at(temp_state) {
+                Some('\n') | Some('\r') | Some('#') => {
+                    // This is an empty line or comment-only line, ignore indentation change
+                    return;
+                }
+                None => return, // EOF
+                _ => {
+                    current_indent = indent;
+                    break;
+                }
             }
         }
 
-        // 添加 EOF kind
-        let eof_pos = state.get_position();
-        state.add_token(PythonSyntaxKind::Eof, eof_pos, eof_pos);
+        // Advance state to skip the indentation we just measured
+        if current_indent > 0 {
+            let end_pos = state.get_position() + (temp_state - state.get_position());
+            state.add_token(PythonSyntaxKind::Whitespace, start_pos, end_pos);
+            state.set_position(end_pos);
+        }
 
-        state.finish(Ok(()))
-    }
-
-    fn lex_incremental(
-        &self,
-        source: impl Source,
-        _offset: usize,
-        _cache: IncrementalCache<'_, PythonLanguage>,
-    ) -> LexOutput<PythonLanguage> {
-        // 简化实现，直接调用完整的 lex 方法
-        self.lex(source)
+        let last_indent = *stack.last().unwrap();
+        if current_indent > last_indent {
+            stack.push(current_indent);
+            state.add_token(PythonSyntaxKind::Indent, state.get_position(), state.get_position());
+        }
+        else {
+            while current_indent < *stack.last().unwrap() {
+                stack.pop();
+                state.add_token(PythonSyntaxKind::Dedent, state.get_position(), state.get_position());
+            }
+            // If current_indent doesn't match any previous level, it's an indentation error,
+            // but for now we just stop at the closest level.
+        }
     }
 }

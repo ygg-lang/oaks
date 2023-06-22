@@ -1,5 +1,4 @@
-use crate::{ast::SqlRoot, kind::SqlSyntaxKind};
-use oak_core::Language;
+use oak_core::{Language, LanguageCategory};
 
 /// SQL 语言实现
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -43,6 +42,10 @@ impl Default for SqlLanguage {
 }
 
 impl Language for SqlLanguage {
-    type SyntaxKind = SqlSyntaxKind;
-    type TypedRoot = SqlRoot;
+    const NAME: &'static str = "sql";
+    const CATEGORY: LanguageCategory = LanguageCategory::Dsl;
+
+    type TokenType = crate::kind::SqlSyntaxKind;
+    type ElementType = crate::kind::SqlSyntaxKind;
+    type TypedRoot = ();
 }

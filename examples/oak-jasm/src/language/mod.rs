@@ -1,5 +1,4 @@
-use crate::syntax::JasmSyntaxKind;
-use oak_core::language::Language;
+use oak_core::language::{Language, LanguageCategory};
 
 /// JASM 语言绑定与配置
 #[derive(Clone, Debug, Default)]
@@ -21,6 +20,10 @@ impl JasmLanguage {
 }
 
 impl Language for JasmLanguage {
-    type SyntaxKind = JasmSyntaxKind;
-    type TypedRoot = (); // TODO: 添加 AST 根类型
+    const NAME: &'static str = "jasm";
+    const CATEGORY: LanguageCategory = LanguageCategory::Programming;
+
+    type TokenType = crate::syntax::JasmSyntaxKind;
+    type ElementType = crate::syntax::JasmSyntaxKind;
+    type TypedRoot = crate::ast::JasmRoot;
 }

@@ -1,10 +1,12 @@
-use crate::kind::CssSyntaxKind;
+use crate::{lexer::CssTokenType, parser::CssElementType};
 use oak_core::Language;
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Default)]
 pub struct CssLanguage;
 
 impl Language for CssLanguage {
-    type SyntaxKind = CssSyntaxKind;
+    const NAME: &'static str = "css";
+    type TokenType = CssTokenType;
+    type ElementType = CssElementType;
     type TypedRoot = ();
 }

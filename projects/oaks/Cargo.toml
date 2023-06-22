@@ -2,83 +2,155 @@
 name = "oaks"
 version.workspace = true
 authors.workspace = true
-description = "Unified parser combinator library collection for multiple languages and formats."
-homepage.workspace = true
-repository.workspace = true
-documentation = "https://docs.rs/oaks"
-keywords = ["parser", "combinator", "multi-language", "unified"]
-categories = ["parsing"]
+description = "Unified parser combinator library and IDE feature facade."
+keywords = ["parser", "combinator", "lsp", "ide", "multi-language"]
+categories = ["parsing", "development-tools"]
 readme = "readme.md"
 license.workspace = true
 edition.workspace = true
 
 [dependencies]
 oak-core = { workspace = true }
-oak-ada = { workspace = true }
-oak-ascii-doc = { workspace = true }
-oak-bash = { workspace = true }
-oak-c = { workspace = true }
-oak-clojure = { workspace = true }
-oak-cpp = { workspace = true }
-oak-csharp = { workspace = true }
+oak-lsp = { workspace = true }
+oak-folding = { workspace = true }
+oak-hover = { workspace = true }
+oak-navigation = { workspace = true }
+oak-semantic-tokens = { workspace = true }
+oak-structure = { workspace = true }
+oak-vfs = { workspace = true }
+oak-symbols = { workspace = true }
+# oak-ada = { workspace = true }
+# oak-ascii-doc = { workspace = true }
+# oak-bash = { workspace = true }
+# oak-c = { workspace = true }
+# oak-clojure = { workspace = true }
+# oak-cpp = { workspace = true }
+# oak-csharp = { workspace = true }
 oak-css = { workspace = true }
-oak-csv = { workspace = true }
-oak-d = { workspace = true }
-oak-dart = { workspace = true }
-oak-django = { workspace = true }
-oak-dockerfile = { workspace = true }
-oak-dot = { workspace = true }
-oak-erlang = { workspace = true }
-oak-fortran = { workspace = true }
-oak-fsharp = { workspace = true }
-oak-go = { workspace = true }
-oak-graphql = { workspace = true }
-oak-groovy = { workspace = true }
-oak-haskell = { workspace = true }
+# oak-csv = { workspace = true }
+# oak-d = { workspace = true }
+# oak-dart = { workspace = true }
+# oak-django = { workspace = true }
+# oak-dockerfile = { workspace = true }
+# oak-dot = { workspace = true }
+# oak-erlang = { workspace = true }
+# oak-fortran = { workspace = true }
+# oak-fsharp = { workspace = true }
+# oak-go = { workspace = true }
+# oak-graphql = { workspace = true }
+# oak-groovy = { workspace = true }
+# oak-haskell = { workspace = true }
 oak-html = { workspace = true }
-oak-ini = { workspace = true }
-oak-jasm = { workspace = true }
-oak-jasmin = { workspace = true }
-oak-java = { workspace = true }
-oak-javadoc = { workspace = true }
+# oak-ini = { workspace = true }
+# oak-jasm = { workspace = true }
+# oak-jasmin = { workspace = true }
+# oak-java = { workspace = true }
+# oak-javadoc = { workspace = true }
 oak-javascript = { workspace = true }
 oak-json = { workspace = true }
-oak-julia = { workspace = true }
-oak-kotlin = { workspace = true }
-oak-lua = { workspace = true }
+# oak-julia = { workspace = true }
+# oak-kotlin = { workspace = true }
+# oak-lua = { workspace = true }
 oak-markdown = { workspace = true }
-oak-matlab = { workspace = true }
-oak-msil = { workspace = true }
-oak-nginx = { workspace = true }
-oak-objective-c = { workspace = true }
-oak-ocaml = { workspace = true }
-oak-org-mode = { workspace = true }
-oak-pascal = { workspace = true }
-oak-perl = { workspace = true }
-oak-php = { workspace = true }
-oak-powershell = { workspace = true }
-oak-protobuf = { workspace = true }
-oak-python = { workspace = true }
-oak-r = { workspace = true }
-oak-ruby = { workspace = true }
-oak-rust = { workspace = true }
-oak-scala = { workspace = true }
-oak-scheme = { workspace = true }
-oak-solidity = { workspace = true }
-oak-sql = { workspace = true }
-oak-swift = { workspace = true }
+# oak-matlab = { workspace = true }
+# oak-msil = { workspace = true }
+# oak-nginx = { workspace = true }
+# oak-objective-c = { workspace = true }
+# oak-ocaml = { workspace = true }
+# oak-org-mode = { workspace = true }
+# oak-pascal = { workspace = true }
+# oak-perl = { workspace = true }
+# oak-php = { workspace = true }
+# oak-powershell = { workspace = true }
+# oak-protobuf = { workspace = true }
+# oak-python = { workspace = true }
+# oak-r = { workspace = true }
+# oak-ruby = { workspace = true }
+# oak-rust = { workspace = true }
+# oak-scala = { workspace = true }
+# oak-scheme = { workspace = true }
+# oak-solidity = { workspace = true }
+# oak-sql = { workspace = true }
+# oak-swift = { workspace = true }
 oak-toml = { workspace = true }
-oak-typescript = { workspace = true }
-oak-valkyrie = { workspace = true }
-oak-wat = { workspace = true }
-oak-wolfram = { workspace = true }
-oak-xml = { workspace = true }
-oak-zig = { workspace = true }
+# oak-typescript = { workspace = true }
+# oak-valkyrie = { workspace = true }
+# oak-wat = { workspace = true }
+# oak-wolfram = { workspace = true }
+# oak-xml = { workspace = true }
+# oak-zig = { workspace = true }
 oak-yaml = { workspace = true }
-serde = { version = "1.0.228", features = ["derive"] }
+oak-rust = { workspace = true }
+oak-sql = { workspace = true }
+oak-python = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
 
 [dev-dependencies]
 oak-core = { workspace = true, features = ["testing"] }
+chrono = { workspace = true }
+criterion = { workspace = true }
+toml = { workspace = true }
+toml_edit = { workspace = true }
+markdown = { workspace = true }
+pulldown-cmark = { workspace = true }
+simd-json = { workspace = true }
+json = { workspace = true }
+html5ever = { workspace = true }
+cssparser = { workspace = true }
+serde_yaml = { workspace = true }
+syn = { workspace = true }
+sqlparser = { workspace = true }
+rustpython-parser = { workspace = true }
+# swc_ecma_parser = { workspace = true }
+# swc_common = { workspace = true }
+oxc_parser = { workspace = true }
+oxc_allocator = { version = "0.13" }
+oxc_span = { workspace = true }
+
+[[bench]]
+name = "compare_json"
+harness = false
+
+[[bench]]
+name = "parse_bench"
+harness = false
+
+[[bench]]
+name = "compare_toml"
+harness = false
+
+[[bench]]
+name = "compare_markdown"
+harness = false
+
+[[bench]]
+name = "compare_html"
+harness = false
+
+[[bench]]
+name = "compare_css"
+harness = false
+
+[[bench]]
+name = "compare_js"
+harness = false
+
+[[bench]]
+name = "compare_yaml"
+harness = false
+
+[[bench]]
+name = "compare_rust"
+harness = false
+
+[[bench]]
+name = "compare_sql"
+harness = false
+
+[[bench]]
+name = "compare_python"
+harness = false
 
 
 [features]

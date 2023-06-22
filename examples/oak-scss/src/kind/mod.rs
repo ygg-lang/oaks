@@ -1,8 +1,17 @@
+use oak_core::{ElementType, TokenType, UniversalElementRole, UniversalTokenRole};
+use serde::{Deserialize, Serialize};
+
 /// 统一 SCSS 语法种类（包含节点与词法）
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub enum ScssSyntaxKind {
     // 节点种类
     SourceFile,
+    ErrorNode,
+    Selector,
+    Property,
+    Variable,
+    Ruleset,
+    Declaration,
 
     // 基础词法种类
     Whitespace,
@@ -10,7 +19,6 @@ pub enum ScssSyntaxKind {
     Comment,
     Error,
     Eof,
-    ErrorNode,
 
     // 标识符和字面量
     Identifier,
@@ -136,24 +144,87 @@ pub enum ScssSyntaxKind {
     DocComment,
 }
 
-impl oak_core::SyntaxKind for ScssSyntaxKind {
-    fn is_comment(&self) -> bool {
-        matches!(self, Self::LineComment | Self::BlockComment | Self::DocComment)
-    }
+impl TokenType for ScssSyntaxKind {
+    type Role = UniversalTokenRole;
 
-    fn is_whitespace(&self) -> bool {
-        matches!(self, Self::Whitespace | Self::Newline)
-    }
+    const END_OF_STREAM: Self = Self::Eof;
 
-    fn is_trivia(&self) -> bool {
-        self.is_comment() || self.is_whitespace()
+    fn role(&self) -> Self::Role {
+        match self {
+            Self::Whitespace | Self::Newline => UniversalTokenRole::Whitespace,
+            Self::Comment | Self::LineComment | Self::BlockComment | Self::DocComment => UniversalTokenRole::Comment,
+            Self::Error => UniversalTokenRole::Error,
+            Self::Eof => UniversalTokenRole::None,
+            Self::Identifier => UniversalTokenRole::Name,
+            Self::IntegerLiteral | Self::FloatLiteral | Self::StringLiteral | Self::CharLiteral | Self::BooleanLiteral | Self::True | Self::False | Self::Null => UniversalTokenRole::Literal,
+            Self::Import
+            | Self::Include
+            | Self::Mixin
+            | Self::Function
+            | Self::Return
+            | Self::If
+            | Self::Else
+            | Self::For
+            | Self::While
+            | Self::Each
+            | Self::In
+            | Self::From
+            | Self::To
+            | Self::Through
+            | Self::Default
+            | Self::Important
+            | Self::Optional
+            | Self::Global => UniversalTokenRole::Keyword,
+            Self::Plus
+            | Self::Minus
+            | Self::Star
+            | Self::Slash
+            | Self::Percent
+            | Self::Eq
+            | Self::EqEq
+            | Self::Ne
+            | Self::Lt
+            | Self::Le
+            | Self::Gt
+            | Self::Ge
+            | Self::And
+            | Self::Or
+            | Self::Xor
+            | Self::AndAnd
+            | Self::OrOr
+            | Self::Not
+            | Self::Bang
+            | Self::Tilde
+            | Self::LShift
+            | Self::RShift
+            | Self::URShift
+            | Self::PlusEq
+            | Self::MinusEq
+            | Self::StarEq
+            | Self::SlashEq
+            | Self::PercentEq
+            | Self::AndEq
+            | Self::OrEq
+            | Self::XorEq
+            | Self::LShiftEq
+            | Self::RShiftEq
+            | Self::URShiftEq
+            | Self::Arrow
+            | Self::LeftArrow => UniversalTokenRole::Operator,
+            Self::LeftParen | Self::RightParen | Self::LeftBracket | Self::RightBracket | Self::LeftBrace | Self::RightBrace => UniversalTokenRole::Punctuation,
+            _ => UniversalTokenRole::None,
+        }
     }
+}
 
-    fn is_token_type(&self) -> bool {
-        !matches!(self, Self::SourceFile | Self::ErrorNode)
-    }
+impl ElementType for ScssSyntaxKind {
+    type Role = UniversalElementRole;
 
-    fn is_element_type(&self) -> bool {
-        matches!(self, Self::SourceFile | Self::ErrorNode)
+    fn role(&self) -> Self::Role {
+        match self {
+            Self::SourceFile => UniversalElementRole::Root,
+            Self::ErrorNode => UniversalElementRole::Error,
+            _ => UniversalElementRole::None,
+        }
     }
 }

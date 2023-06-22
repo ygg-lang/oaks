@@ -4,9 +4,14 @@
 #![doc(html_favicon_url = "https://raw.githubusercontent.com/ygg-lang/oaks/refs/heads/dev/documents/logo.svg")]
 
 pub mod ast;
-pub mod kind;
-pub mod language;
-pub mod lexer;
+mod language;
+mod lexer;
+mod parser;
 
 // Re-exports
-pub use crate::{ast::CRoot, kind::CSyntaxKind, language::CLanguage, lexer::CLexer};
+pub use crate::{
+    ast::CRoot,
+    language::CLanguage,
+    lexer::{CLexer, CTokenType},
+    parser::{CElementType, CParser},
+};

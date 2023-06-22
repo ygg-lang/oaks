@@ -1,4 +1,4 @@
-use oak_core::SyntaxKind;
+use oak_core::{ElementType, TokenType, UniversalElementRole, UniversalTokenRole};
 use serde::{Deserialize, Serialize};
 
 /// Sass 语法种类
@@ -6,13 +6,13 @@ use serde::{Deserialize, Serialize};
 pub enum SassSyntaxKind {
     // 节点种类
     SourceFile,
+    ErrorNode,
 
     // 基础词法种类
     Whitespace,
     Newline,
     Error,
     Eof,
-    ErrorNode,
 
     // 标识符和字面量
     Identifier,
@@ -103,24 +103,37 @@ pub enum SassSyntaxKind {
     Unit,          // px, em, rem 等单位
 }
 
-impl SyntaxKind for SassSyntaxKind {
-    fn is_trivia(&self) -> bool {
-        matches!(self, Self::Whitespace | Self::Newline | Self::LineComment | Self::BlockComment)
-    }
+impl TokenType for SassSyntaxKind {
+    type Role = UniversalTokenRole;
 
-    fn is_comment(&self) -> bool {
-        matches!(self, Self::LineComment | Self::BlockComment)
-    }
+    const END_OF_STREAM: Self = Self::Eof;
 
-    fn is_whitespace(&self) -> bool {
-        matches!(self, Self::Whitespace | Self::Newline)
+    fn role(&self) -> Self::Role {
+        match self {
+            Self::Whitespace | Self::Newline => UniversalTokenRole::Whitespace,
+            Self::LineComment | Self::BlockComment => UniversalTokenRole::Comment,
+            Self::Error => UniversalTokenRole::Error,
+            Self::Eof => UniversalTokenRole::None,
+            Self::Identifier | Self::Variable => UniversalTokenRole::Name,
+            Self::NumberLiteral | Self::FloatLiteral | Self::StringLiteral | Self::ColorLiteral => UniversalTokenRole::Literal,
+            Self::Import | Self::Include | Self::Extend | Self::Mixin | Self::Function | Self::Return | Self::If | Self::Else | Self::ElseIf | Self::For | Self::Each | Self::While | Self::Default | Self::Important | Self::Optional | Self::Global => {
+                UniversalTokenRole::Keyword
+            }
+            Self::Plus | Self::Minus | Self::Star | Self::Slash | Self::Percent | Self::Eq | Self::EqEq | Self::Ne | Self::Lt | Self::Le | Self::Gt | Self::Ge | Self::And | Self::Or | Self::Not => UniversalTokenRole::Operator,
+            Self::LeftParen | Self::RightParen | Self::LeftBracket | Self::RightBracket | Self::LeftBrace | Self::RightBrace => UniversalTokenRole::Punctuation,
+            _ => UniversalTokenRole::None,
+        }
     }
+}
 
-    fn is_token_type(&self) -> bool {
-        !matches!(self, Self::SourceFile | Self::ErrorNode)
-    }
+impl ElementType for SassSyntaxKind {
+    type Role = UniversalElementRole;
 
-    fn is_element_type(&self) -> bool {
-        matches!(self, Self::SourceFile | Self::ErrorNode)
+    fn role(&self) -> Self::Role {
+        match self {
+            Self::SourceFile => UniversalElementRole::Root,
+            Self::ErrorNode => UniversalElementRole::Error,
+            _ => UniversalElementRole::None,
+        }
     }
 }

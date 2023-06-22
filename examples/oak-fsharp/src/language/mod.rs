@@ -1,5 +1,4 @@
-use crate::kind::FSharpSyntaxKind;
-use oak_core::Language;
+use oak_core::{Language, LanguageCategory};
 
 /// F# 语言实现
 #[derive(Debug, Clone)]
@@ -28,18 +27,7 @@ pub struct FSharpLanguage {
 
 impl Default for FSharpLanguage {
     fn default() -> Self {
-        Self {
-            fsharp_4_0: true,
-            fsharp_4_1: true,
-            fsharp_4_5: true,
-            fsharp_5_0: true,
-            fsharp_6_0: true,
-            fsharp_7_0: true,
-            computation_expressions: true,
-            type_providers: true,
-            async_workflows: true,
-            query_expressions: true,
-        }
+        Self { fsharp_4_0: true, fsharp_4_1: true, fsharp_4_5: true, fsharp_5_0: true, fsharp_6_0: true, fsharp_7_0: true, computation_expressions: true, type_providers: true, async_workflows: true, query_expressions: true }
     }
 }
 
@@ -49,8 +37,8 @@ impl FSharpLanguage {
         Self::default()
     }
 
-    /// 启用所F#    pub
-    fn with_all_features(mut self) -> Self {
+    /// 启用所F#
+    pub fn with_all_features(mut self) -> Self {
         self.fsharp_4_0 = true;
         self.fsharp_4_1 = true;
         self.fsharp_4_5 = true;
@@ -64,8 +52,8 @@ impl FSharpLanguage {
         self
     }
 
-    /// 设置 F# 版本   pub
-    fn with_version(mut self, major: u8, minor: u8) -> Self {
+    /// 设置 F# 版本
+    pub fn with_version(mut self, major: u8, minor: u8) -> Self {
         match (major, minor) {
             (4, 0) => {
                 self.fsharp_4_0 = true;
@@ -105,26 +93,26 @@ impl FSharpLanguage {
         self
     }
 
-    /// 启用计算表达    pub
-    fn with_computation_expressions(mut self, enabled: bool) -> Self {
+    /// 启用计算表达
+    pub fn with_computation_expressions(mut self, enabled: bool) -> Self {
         self.computation_expressions = enabled;
         self
     }
 
-    /// 启用类型提供    pub
-    fn with_type_providers(mut self, enabled: bool) -> Self {
+    /// 启用类型提供
+    pub fn with_type_providers(mut self, enabled: bool) -> Self {
         self.type_providers = enabled;
         self
     }
 
-    /// 启用异步工作    pub
-    fn with_async_workflows(mut self, enabled: bool) -> Self {
+    /// 启用异步工作
+    pub fn with_async_workflows(mut self, enabled: bool) -> Self {
         self.async_workflows = enabled;
         self
     }
 
-    /// 启用查询表达    pub
-    fn with_query_expressions(mut self, enabled: bool) -> Self {
+    /// 启用查询表达
+    pub fn with_query_expressions(mut self, enabled: bool) -> Self {
         self.query_expressions = enabled;
         self
     }
@@ -133,6 +121,10 @@ impl FSharpLanguage {
 pub struct FSharpRoot;
 
 impl Language for FSharpLanguage {
-    type SyntaxKind = FSharpSyntaxKind;
+    const NAME: &'static str = "fsharp";
+    const CATEGORY: LanguageCategory = LanguageCategory::Programming;
+
+    type TokenType = crate::kind::FSharpSyntaxKind;
+    type ElementType = crate::kind::FSharpSyntaxKind;
     type TypedRoot = FSharpRoot;
 }

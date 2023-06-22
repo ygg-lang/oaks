@@ -1,0 +1,607 @@
+{
+    "success": true,
+    "count": 100,
+    "tokens": [
+        {
+            "kind": "ProcessingInstruction",
+            "text": "<?xml version=\"1.0\" encoding=\"UTF-8\"?>",
+            "start": 0,
+            "end": 38
+        },
+        {
+            "kind": "LeftAngle",
+            "text": "<",
+            "start": 64,
+            "end": 65
+        },
+        {
+            "kind": "Identifier",
+            "text": "root",
+            "start": 65,
+            "end": 69
+        },
+        {
+            "kind": "Identifier",
+            "text": "xmlns:ns",
+            "start": 70,
+            "end": 78
+        },
+        {
+            "kind": "Equals",
+            "text": "=",
+            "start": 78,
+            "end": 79
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "\"http://example.com/namespace\"",
+            "start": 79,
+            "end": 109
+        },
+        {
+            "kind": "RightAngle",
+            "text": ">",
+            "start": 109,
+            "end": 110
+        },
+        {
+            "kind": "LeftAngle",
+            "text": "<",
+            "start": 116,
+            "end": 117
+        },
+        {
+            "kind": "Identifier",
+            "text": "header",
+            "start": 117,
+            "end": 123
+        },
+        {
+            "kind": "RightAngle",
+            "text": ">",
+            "start": 123,
+            "end": 124
+        },
+        {
+            "kind": "LeftAngle",
+            "text": "<",
+            "start": 134,
+            "end": 135
+        },
+        {
+            "kind": "Identifier",
+            "text": "title",
+            "start": 135,
+            "end": 140
+        },
+        {
+            "kind": "RightAngle",
+            "text": ">",
+            "start": 140,
+            "end": 141
+        },
+        {
+            "kind": "Identifier",
+            "text": "Sample",
+            "start": 141,
+            "end": 147
+        },
+        {
+            "kind": "Identifier",
+            "text": "XML",
+            "start": 148,
+            "end": 151
+        },
+        {
+            "kind": "Identifier",
+            "text": "Document",
+            "start": 152,
+            "end": 160
+        },
+        {
+            "kind": "LeftAngleSlash",
+            "text": "</",
+            "start": 160,
+            "end": 162
+        },
+        {
+            "kind": "Identifier",
+            "text": "title",
+            "start": 162,
+            "end": 167
+        },
+        {
+            "kind": "RightAngle",
+            "text": ">",
+            "start": 167,
+            "end": 168
+        },
+        {
+            "kind": "LeftAngle",
+            "text": "<",
+            "start": 178,
+            "end": 179
+        },
+        {
+            "kind": "Identifier",
+            "text": "author",
+            "start": 179,
+            "end": 185
+        },
+        {
+            "kind": "RightAngle",
+            "text": ">",
+            "start": 185,
+            "end": 186
+        },
+        {
+            "kind": "Identifier",
+            "text": "Test",
+            "start": 186,
+            "end": 190
+        },
+        {
+            "kind": "Identifier",
+            "text": "Author",
+            "start": 191,
+            "end": 197
+        },
+        {
+            "kind": "LeftAngleSlash",
+            "text": "</",
+            "start": 197,
+            "end": 199
+        },
+        {
+            "kind": "Identifier",
+            "text": "author",
+            "start": 199,
+            "end": 205
+        },
+        {
+            "kind": "RightAngle",
+            "text": ">",
+            "start": 205,
+            "end": 206
+        },
+        {
+            "kind": "LeftAngle",
+            "text": "<",
+            "start": 216,
+            "end": 217
+        },
+        {
+            "kind": "Identifier",
+            "text": "date",
+            "start": 217,
+            "end": 221
+        },
+        {
+            "kind": "RightAngle",
+            "text": ">",
+            "start": 221,
+            "end": 222
+        },
+        {
+            "kind": "Text",
+            "text": "2024-01-01",
+            "start": 222,
+            "end": 232
+        },
+        {
+            "kind": "LeftAngleSlash",
+            "text": "</",
+            "start": 232,
+            "end": 234
+        },
+        {
+            "kind": "Identifier",
+            "text": "date",
+            "start": 234,
+            "end": 238
+        },
+        {
+            "kind": "RightAngle",
+            "text": ">",
+            "start": 238,
+            "end": 239
+        },
+        {
+            "kind": "LeftAngleSlash",
+            "text": "</",
+            "start": 245,
+            "end": 247
+        },
+        {
+            "kind": "Identifier",
+            "text": "header",
+            "start": 247,
+            "end": 253
+        },
+        {
+            "kind": "RightAngle",
+            "text": ">",
+            "start": 253,
+            "end": 254
+        },
+        {
+            "kind": "LeftAngle",
+            "text": "<",
+            "start": 266,
+            "end": 267
+        },
+        {
+            "kind": "Identifier",
+            "text": "body",
+            "start": 267,
+            "end": 271
+        },
+        {
+            "kind": "RightAngle",
+            "text": ">",
+            "start": 271,
+            "end": 272
+        },
+        {
+            "kind": "LeftAngle",
+            "text": "<",
+            "start": 282,
+            "end": 283
+        },
+        {
+            "kind": "Identifier",
+            "text": "section",
+            "start": 283,
+            "end": 290
+        },
+        {
+            "kind": "Identifier",
+            "text": "id",
+            "start": 291,
+            "end": 293
+        },
+        {
+            "kind": "Equals",
+            "text": "=",
+            "start": 293,
+            "end": 294
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "\"intro\"",
+            "start": 294,
+            "end": 301
+        },
+        {
+            "kind": "RightAngle",
+            "text": ">",
+            "start": 301,
+            "end": 302
+        },
+        {
+            "kind": "LeftAngle",
+            "text": "<",
+            "start": 316,
+            "end": 317
+        },
+        {
+            "kind": "Identifier",
+            "text": "h1",
+            "start": 317,
+            "end": 319
+        },
+        {
+            "kind": "RightAngle",
+            "text": ">",
+            "start": 319,
+            "end": 320
+        },
+        {
+            "kind": "Identifier",
+            "text": "Introduction",
+            "start": 320,
+            "end": 332
+        },
+        {
+            "kind": "LeftAngleSlash",
+            "text": "</",
+            "start": 332,
+            "end": 334
+        },
+        {
+            "kind": "Identifier",
+            "text": "h1",
+            "start": 334,
+            "end": 336
+        },
+        {
+            "kind": "RightAngle",
+            "text": ">",
+            "start": 336,
+            "end": 337
+        },
+        {
+            "kind": "LeftAngle",
+            "text": "<",
+            "start": 351,
+            "end": 352
+        },
+        {
+            "kind": "Identifier",
+            "text": "p",
+            "start": 352,
+            "end": 353
+        },
+        {
+            "kind": "RightAngle",
+            "text": ">",
+            "start": 353,
+            "end": 354
+        },
+        {
+            "kind": "Identifier",
+            "text": "This",
+            "start": 354,
+            "end": 358
+        },
+        {
+            "kind": "Identifier",
+            "text": "is",
+            "start": 359,
+            "end": 361
+        },
+        {
+            "kind": "Identifier",
+            "text": "a",
+            "start": 362,
+            "end": 363
+        },
+        {
+            "kind": "Identifier",
+            "text": "sample",
+            "start": 364,
+            "end": 370
+        },
+        {
+            "kind": "Identifier",
+            "text": "XML",
+            "start": 371,
+            "end": 374
+        },
+        {
+            "kind": "Identifier",
+            "text": "document",
+            "start": 375,
+            "end": 383
+        },
+        {
+            "kind": "Identifier",
+            "text": "for",
+            "start": 384,
+            "end": 387
+        },
+        {
+            "kind": "Identifier",
+            "text": "testing",
+            "start": 388,
+            "end": 395
+        },
+        {
+            "kind": "Identifier",
+            "text": "purposes.",
+            "start": 396,
+            "end": 405
+        },
+        {
+            "kind": "LeftAngleSlash",
+            "text": "</",
+            "start": 405,
+            "end": 407
+        },
+        {
+            "kind": "Identifier",
+            "text": "p",
+            "start": 407,
+            "end": 408
+        },
+        {
+            "kind": "RightAngle",
+            "text": ">",
+            "start": 408,
+            "end": 409
+        },
+        {
+            "kind": "LeftAngle",
+            "text": "<",
+            "start": 423,
+            "end": 424
+        },
+        {
+            "kind": "Identifier",
+            "text": "p",
+            "start": 424,
+            "end": 425
+        },
+        {
+            "kind": "RightAngle",
+            "text": ">",
+            "start": 425,
+            "end": 426
+        },
+        {
+            "kind": "Identifier",
+            "text": "It",
+            "start": 426,
+            "end": 428
+        },
+        {
+            "kind": "Identifier",
+            "text": "contains",
+            "start": 429,
+            "end": 437
+        },
+        {
+            "kind": "Identifier",
+            "text": "various",
+            "start": 438,
+            "end": 445
+        },
+        {
+            "kind": "Identifier",
+            "text": "XML",
+            "start": 446,
+            "end": 449
+        },
+        {
+            "kind": "Identifier",
+            "text": "elements",
+            "start": 450,
+            "end": 458
+        },
+        {
+            "kind": "Identifier",
+            "text": "and",
+            "start": 459,
+            "end": 462
+        },
+        {
+            "kind": "Identifier",
+            "text": "attributes.",
+            "start": 463,
+            "end": 474
+        },
+        {
+            "kind": "LeftAngleSlash",
+            "text": "</",
+            "start": 474,
+            "end": 476
+        },
+        {
+            "kind": "Identifier",
+            "text": "p",
+            "start": 476,
+            "end": 477
+        },
+        {
+            "kind": "RightAngle",
+            "text": ">",
+            "start": 477,
+            "end": 478
+        },
+        {
+            "kind": "LeftAngleSlash",
+            "text": "</",
+            "start": 488,
+            "end": 490
+        },
+        {
+            "kind": "Identifier",
+            "text": "section",
+            "start": 490,
+            "end": 497
+        },
+        {
+            "kind": "RightAngle",
+            "text": ">",
+            "start": 497,
+            "end": 498
+        },
+        {
+            "kind": "LeftAngle",
+            "text": "<",
+            "start": 518,
+            "end": 519
+        },
+        {
+            "kind": "Identifier",
+            "text": "section",
+            "start": 519,
+            "end": 526
+        },
+        {
+            "kind": "Identifier",
+            "text": "id",
+            "start": 527,
+            "end": 529
+        },
+        {
+            "kind": "Equals",
+            "text": "=",
+            "start": 529,
+            "end": 530
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "\"data\"",
+            "start": 530,
+            "end": 536
+        },
+        {
+            "kind": "RightAngle",
+            "text": ">",
+            "start": 536,
+            "end": 537
+        },
+        {
+            "kind": "LeftAngle",
+            "text": "<",
+            "start": 551,
+            "end": 552
+        },
+        {
+            "kind": "Identifier",
+            "text": "h1",
+            "start": 552,
+            "end": 554
+        },
+        {
+            "kind": "RightAngle",
+            "text": ">",
+            "start": 554,
+            "end": 555
+        },
+        {
+            "kind": "Identifier",
+            "text": "Data",
+            "start": 555,
+            "end": 559
+        },
+        {
+            "kind": "Identifier",
+            "text": "Section",
+            "start": 560,
+            "end": 567
+        },
+        {
+            "kind": "LeftAngleSlash",
+            "text": "</",
+            "start": 567,
+            "end": 569
+        },
+        {
+            "kind": "Identifier",
+            "text": "h1",
+            "start": 569,
+            "end": 571
+        },
+        {
+            "kind": "RightAngle",
+            "text": ">",
+            "start": 571,
+            "end": 572
+        },
+        {
+            "kind": "LeftAngle",
+            "text": "<",
+            "start": 586,
+            "end": 587
+        },
+        {
+            "kind": "Identifier",
+            "text": "items",
+            "start": 587,
+            "end": 592
+        }
+    ],
+    "errors": []
+}

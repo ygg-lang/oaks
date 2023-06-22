@@ -1,0 +1,607 @@
+{
+    "success": true,
+    "count": 100,
+    "tokens": [
+        {
+            "kind": "Doctype",
+            "text": "<!DOCTYPE html>",
+            "start": 0,
+            "end": 15
+        },
+        {
+            "kind": "TagOpen",
+            "text": "<",
+            "start": 17,
+            "end": 18
+        },
+        {
+            "kind": "TagName",
+            "text": "html",
+            "start": 18,
+            "end": 22
+        },
+        {
+            "kind": "TagName",
+            "text": "lang",
+            "start": 23,
+            "end": 27
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 27,
+            "end": 28
+        },
+        {
+            "kind": "AttributeValue",
+            "text": "\"en\"",
+            "start": 28,
+            "end": 32
+        },
+        {
+            "kind": "TagClose",
+            "text": ">",
+            "start": 32,
+            "end": 33
+        },
+        {
+            "kind": "TagOpen",
+            "text": "<",
+            "start": 35,
+            "end": 36
+        },
+        {
+            "kind": "TagName",
+            "text": "head",
+            "start": 36,
+            "end": 40
+        },
+        {
+            "kind": "TagClose",
+            "text": ">",
+            "start": 40,
+            "end": 41
+        },
+        {
+            "kind": "TagOpen",
+            "text": "<",
+            "start": 47,
+            "end": 48
+        },
+        {
+            "kind": "TagName",
+            "text": "meta",
+            "start": 48,
+            "end": 52
+        },
+        {
+            "kind": "TagName",
+            "text": "charset",
+            "start": 53,
+            "end": 60
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 60,
+            "end": 61
+        },
+        {
+            "kind": "AttributeValue",
+            "text": "\"UTF-8\"",
+            "start": 61,
+            "end": 68
+        },
+        {
+            "kind": "TagClose",
+            "text": ">",
+            "start": 68,
+            "end": 69
+        },
+        {
+            "kind": "TagOpen",
+            "text": "<",
+            "start": 75,
+            "end": 76
+        },
+        {
+            "kind": "TagName",
+            "text": "meta",
+            "start": 76,
+            "end": 80
+        },
+        {
+            "kind": "TagName",
+            "text": "name",
+            "start": 81,
+            "end": 85
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 85,
+            "end": 86
+        },
+        {
+            "kind": "AttributeValue",
+            "text": "\"viewport\"",
+            "start": 86,
+            "end": 96
+        },
+        {
+            "kind": "TagName",
+            "text": "content",
+            "start": 97,
+            "end": 104
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 104,
+            "end": 105
+        },
+        {
+            "kind": "AttributeValue",
+            "text": "\"width=device-width, initial-scale=1.0\"",
+            "start": 105,
+            "end": 144
+        },
+        {
+            "kind": "TagClose",
+            "text": ">",
+            "start": 144,
+            "end": 145
+        },
+        {
+            "kind": "TagOpen",
+            "text": "<",
+            "start": 151,
+            "end": 152
+        },
+        {
+            "kind": "TagName",
+            "text": "title",
+            "start": 152,
+            "end": 157
+        },
+        {
+            "kind": "TagClose",
+            "text": ">",
+            "start": 157,
+            "end": 158
+        },
+        {
+            "kind": "TagName",
+            "text": "HTML",
+            "start": 158,
+            "end": 162
+        },
+        {
+            "kind": "TagName",
+            "text": "Lexer",
+            "start": 163,
+            "end": 168
+        },
+        {
+            "kind": "TagName",
+            "text": "Test",
+            "start": 169,
+            "end": 173
+        },
+        {
+            "kind": "TagName",
+            "text": "Page",
+            "start": 174,
+            "end": 178
+        },
+        {
+            "kind": "TagSlashOpen",
+            "text": "</",
+            "start": 178,
+            "end": 180
+        },
+        {
+            "kind": "TagName",
+            "text": "title",
+            "start": 180,
+            "end": 185
+        },
+        {
+            "kind": "TagClose",
+            "text": ">",
+            "start": 185,
+            "end": 186
+        },
+        {
+            "kind": "TagOpen",
+            "text": "<",
+            "start": 192,
+            "end": 193
+        },
+        {
+            "kind": "TagName",
+            "text": "style",
+            "start": 193,
+            "end": 198
+        },
+        {
+            "kind": "TagClose",
+            "text": ">",
+            "start": 198,
+            "end": 199
+        },
+        {
+            "kind": "TagName",
+            "text": "body",
+            "start": 209,
+            "end": 213
+        },
+        {
+            "kind": "Text",
+            "text": "{",
+            "start": 214,
+            "end": 215
+        },
+        {
+            "kind": "TagName",
+            "text": "font-family:",
+            "start": 229,
+            "end": 241
+        },
+        {
+            "kind": "TagName",
+            "text": "Arial",
+            "start": 242,
+            "end": 247
+        },
+        {
+            "kind": "Text",
+            "text": ",",
+            "start": 247,
+            "end": 248
+        },
+        {
+            "kind": "TagName",
+            "text": "sans-serif",
+            "start": 249,
+            "end": 259
+        },
+        {
+            "kind": "Text",
+            "text": ";",
+            "start": 259,
+            "end": 260
+        },
+        {
+            "kind": "TagName",
+            "text": "margin:",
+            "start": 274,
+            "end": 281
+        },
+        {
+            "kind": "Text",
+            "text": "0;",
+            "start": 282,
+            "end": 284
+        },
+        {
+            "kind": "TagName",
+            "text": "padding:",
+            "start": 298,
+            "end": 306
+        },
+        {
+            "kind": "Text",
+            "text": "20px;",
+            "start": 307,
+            "end": 312
+        },
+        {
+            "kind": "TagName",
+            "text": "background-color:",
+            "start": 326,
+            "end": 343
+        },
+        {
+            "kind": "Text",
+            "text": "#f5f5f5;",
+            "start": 344,
+            "end": 352
+        },
+        {
+            "kind": "Text",
+            "text": "}",
+            "start": 362,
+            "end": 363
+        },
+        {
+            "kind": "Text",
+            "text": ".container",
+            "start": 373,
+            "end": 383
+        },
+        {
+            "kind": "Text",
+            "text": "{",
+            "start": 384,
+            "end": 385
+        },
+        {
+            "kind": "TagName",
+            "text": "max-width:",
+            "start": 399,
+            "end": 409
+        },
+        {
+            "kind": "Text",
+            "text": "800px;",
+            "start": 410,
+            "end": 416
+        },
+        {
+            "kind": "TagName",
+            "text": "margin:",
+            "start": 430,
+            "end": 437
+        },
+        {
+            "kind": "Text",
+            "text": "0",
+            "start": 438,
+            "end": 439
+        },
+        {
+            "kind": "TagName",
+            "text": "auto",
+            "start": 440,
+            "end": 444
+        },
+        {
+            "kind": "Text",
+            "text": ";",
+            "start": 444,
+            "end": 445
+        },
+        {
+            "kind": "TagName",
+            "text": "background:",
+            "start": 459,
+            "end": 470
+        },
+        {
+            "kind": "TagName",
+            "text": "white",
+            "start": 471,
+            "end": 476
+        },
+        {
+            "kind": "Text",
+            "text": ";",
+            "start": 476,
+            "end": 477
+        },
+        {
+            "kind": "TagName",
+            "text": "padding:",
+            "start": 491,
+            "end": 499
+        },
+        {
+            "kind": "Text",
+            "text": "20px;",
+            "start": 500,
+            "end": 505
+        },
+        {
+            "kind": "TagName",
+            "text": "border-radius:",
+            "start": 519,
+            "end": 533
+        },
+        {
+            "kind": "Text",
+            "text": "8px;",
+            "start": 534,
+            "end": 538
+        },
+        {
+            "kind": "TagName",
+            "text": "box-shadow:",
+            "start": 552,
+            "end": 563
+        },
+        {
+            "kind": "Text",
+            "text": "0",
+            "start": 564,
+            "end": 565
+        },
+        {
+            "kind": "Text",
+            "text": "2px",
+            "start": 566,
+            "end": 569
+        },
+        {
+            "kind": "Text",
+            "text": "10px",
+            "start": 570,
+            "end": 574
+        },
+        {
+            "kind": "TagName",
+            "text": "rgba",
+            "start": 575,
+            "end": 579
+        },
+        {
+            "kind": "Text",
+            "text": "(0,0,0,0.1);",
+            "start": 579,
+            "end": 591
+        },
+        {
+            "kind": "Text",
+            "text": "}",
+            "start": 601,
+            "end": 602
+        },
+        {
+            "kind": "TagName",
+            "text": "h1",
+            "start": 612,
+            "end": 614
+        },
+        {
+            "kind": "Text",
+            "text": "{",
+            "start": 615,
+            "end": 616
+        },
+        {
+            "kind": "TagName",
+            "text": "color:",
+            "start": 630,
+            "end": 636
+        },
+        {
+            "kind": "Text",
+            "text": "#333;",
+            "start": 637,
+            "end": 642
+        },
+        {
+            "kind": "TagName",
+            "text": "text-align:",
+            "start": 656,
+            "end": 667
+        },
+        {
+            "kind": "TagName",
+            "text": "center",
+            "start": 668,
+            "end": 674
+        },
+        {
+            "kind": "Text",
+            "text": ";",
+            "start": 674,
+            "end": 675
+        },
+        {
+            "kind": "Text",
+            "text": "}",
+            "start": 685,
+            "end": 686
+        },
+        {
+            "kind": "Text",
+            "text": ".form-group",
+            "start": 696,
+            "end": 707
+        },
+        {
+            "kind": "Text",
+            "text": "{",
+            "start": 708,
+            "end": 709
+        },
+        {
+            "kind": "TagName",
+            "text": "margin-bottom:",
+            "start": 723,
+            "end": 737
+        },
+        {
+            "kind": "Text",
+            "text": "15px;",
+            "start": 738,
+            "end": 743
+        },
+        {
+            "kind": "Text",
+            "text": "}",
+            "start": 753,
+            "end": 754
+        },
+        {
+            "kind": "TagName",
+            "text": "label",
+            "start": 764,
+            "end": 769
+        },
+        {
+            "kind": "Text",
+            "text": "{",
+            "start": 770,
+            "end": 771
+        },
+        {
+            "kind": "TagName",
+            "text": "display:",
+            "start": 785,
+            "end": 793
+        },
+        {
+            "kind": "TagName",
+            "text": "block",
+            "start": 794,
+            "end": 799
+        },
+        {
+            "kind": "Text",
+            "text": ";",
+            "start": 799,
+            "end": 800
+        },
+        {
+            "kind": "TagName",
+            "text": "margin-bottom:",
+            "start": 814,
+            "end": 828
+        },
+        {
+            "kind": "Text",
+            "text": "5px;",
+            "start": 829,
+            "end": 833
+        },
+        {
+            "kind": "TagName",
+            "text": "font-weight:",
+            "start": 847,
+            "end": 859
+        },
+        {
+            "kind": "TagName",
+            "text": "bold",
+            "start": 860,
+            "end": 864
+        },
+        {
+            "kind": "Text",
+            "text": ";",
+            "start": 864,
+            "end": 865
+        },
+        {
+            "kind": "Text",
+            "text": "}",
+            "start": 875,
+            "end": 876
+        },
+        {
+            "kind": "TagName",
+            "text": "input",
+            "start": 886,
+            "end": 891
+        },
+        {
+            "kind": "Text",
+            "text": ",",
+            "start": 891,
+            "end": 892
+        }
+    ],
+    "errors": []
+}

@@ -5,8 +5,8 @@ fn ready() {
 
 #[cfg(test)]
 mod tests {
-    use oak_core::{SourceText, lexer::Lexer, tree::GreenBuilder};
-    use oak_vampire::{VampireLanguage, VampireLexer, VampireSyntaxKind};
+    use oak_core::{ParseSession, SourceText, lexer::Lexer};
+    use oak_vampire::{VampireLanguage, VampireLexer, kind::VampireSyntaxKind};
 
     #[test]
     fn test_vampire_lexer_basic_tokens() {
@@ -14,8 +14,8 @@ mod tests {
         let lexer = VampireLexer::new(&config);
         let source = SourceText::new("cnf(test, axiom, p(X) | ~q(Y)).");
 
-        let mut builder = GreenBuilder::new(1024);
-        let result = lexer.lex_incremental(&source, 0, oak_core::tree::IncrementalCache::new(&mut builder));
+        let mut session = ParseSession::<VampireLanguage>::new(1024);
+        let result = lexer.lex(&source, &[], &mut session);
         assert!(result.result.is_ok());
 
         let tokens = result.result.unwrap();
@@ -37,8 +37,8 @@ mod tests {
         let lexer = VampireLexer::new(&config);
         let source = SourceText::new("p(X, Y) :- q(X), r(Y).");
 
-        let mut builder = GreenBuilder::new(1024);
-        let result = lexer.lex_incremental(&source, 0, oak_core::tree::IncrementalCache::new(&mut builder));
+        let mut session = ParseSession::<VampireLanguage>::new(1024);
+        let result = lexer.lex(&source, &[], &mut session);
         assert!(result.result.is_ok());
 
         let tokens = result.result.unwrap();
@@ -53,8 +53,8 @@ mod tests {
         let lexer = VampireLexer::new(&config);
         let source = SourceText::new("p(X) | ~q(Y) & r(Z).");
 
-        let mut builder = GreenBuilder::new(1024);
-        let result = lexer.lex_incremental(&source, 0, oak_core::tree::IncrementalCache::new(&mut builder));
+        let mut session = ParseSession::<VampireLanguage>::new(1024);
+        let result = lexer.lex(&source, &[], &mut session);
         assert!(result.result.is_ok());
 
         let tokens = result.result.unwrap();
@@ -71,8 +71,8 @@ mod tests {
         let lexer = VampireLexer::new(&config);
         let source = SourceText::new("% This is a comment\ncnf(test, axiom, p(X)).");
 
-        let mut builder = GreenBuilder::new(1024);
-        let result = lexer.lex_incremental(&source, 0, oak_core::tree::IncrementalCache::new(&mut builder));
+        let mut session = ParseSession::<VampireLanguage>::new(1024);
+        let result = lexer.lex(&source, &[], &mut session);
         assert!(result.result.is_ok());
 
         let tokens = result.result.unwrap();
@@ -88,8 +88,8 @@ mod tests {
         let lexer = VampireLexer::new(&config);
         let source = SourceText::new("  cnf  (  test  ,  axiom  ,  p  (  X  )  )  .  ");
 
-        let mut builder = GreenBuilder::new(1024);
-        let result = lexer.lex_incremental(&source, 0, oak_core::tree::IncrementalCache::new(&mut builder));
+        let mut session = ParseSession::<VampireLanguage>::new(1024);
+        let result = lexer.lex(&source, &[], &mut session);
         assert!(result.result.is_ok());
 
         let tokens = result.result.unwrap();

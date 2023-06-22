@@ -1,6 +1,4 @@
-#![feature(new_range_api)]
-
-use oak_core::{helpers::LexerTester, source::Source};
+use oak_core::{LexerState, helpers::LexerTester, source::Source};
 use oak_zig::{ZigLanguage, ZigLexer};
 use std::{path::Path, time::Duration};
 
@@ -12,7 +10,7 @@ fn test_zig_lexer() {
     let test_runner = LexerTester::new(here.join("tests/lexer"))
         .with_extension("zig")
         .with_timeout(Duration::from_secs(5));
-    match test_runner.run_tests::<ZigLanguage, _>(lexer) {
+    match test_runner.run_tests::<ZigLanguage, _>(&lexer) {
         Ok(()) => println!("Zig lexer tests passed!"),
         Err(e) => panic!("Zig lexer tests failed: {}", e),
     }
@@ -20,7 +18,7 @@ fn test_zig_lexer() {
 
 #[test]
 fn test_peek_behavior() {
-    use oak_core::{SourceText, lexer::LexerState};
+    use oak_core::{LexerState, SourceText, lexer::LexerState};
     use oak_zig::ZigLanguage;
 
     let source = SourceText::new("const x = 42;");
@@ -46,44 +44,44 @@ fn test_peek_behavior() {
 
 #[test]
 fn test_zig_identifier_parsing() {
-    use oak_core::{Lexer, SourceText};
+    use oak_core::{Lexer, ParseSession, SourceText};
     use oak_zig::{ZigLanguage, ZigLexer, ZigSyntaxKind};
 
     let source = SourceText::new("const identifier = 42;");
     let language = ZigLanguage::default();
     let lexer = ZigLexer::new(&language);
-    let output = lexer.lex_incremental(&source, 0, Default::default());
+    let mut session = ParseSession::<ZigLanguage>::new(16);
+    let output = lexer.lex(&source, &[], &mut session);
 
-    println!("Tokens:");
-    for token in output.tokens {
-        println!("  {:?}: {:?}", token.kind, token.text(&source));
-    }
+    let tokens = output.result.unwrap();
 
     // 验证第一个token是const关键字
-    assert_eq!(output.tokens[0].kind, ZigSyntaxKind::Const);
+    assert_eq!(tokens[0].kind, ZigSyntaxKind::Const);
     // 验证第二个token是标识符
-    assert_eq!(output.tokens[2].kind, ZigSyntaxKind::Identifier);
+    assert_eq!(tokens[2].kind, ZigSyntaxKind::Identifier);
 }
 
 #[test]
 fn test_zig_number_parsing() {
-    use oak_core::{Lexer, SourceText};
+    use oak_core::{Lexer, ParseSession, SourceText};
     use oak_zig::{ZigLanguage, ZigLexer, ZigSyntaxKind};
 
     let source = SourceText::new("42 3.14 0x1A 0b1010 0o777");
     let language = ZigLanguage::default();
     let lexer = ZigLexer::new(&language);
-    let output = lexer.lex_incremental(&source, 0, Default::default());
+    let mut session = ParseSession::<ZigLanguage>::new(16);
+    let output = lexer.lex(&source, &[], &mut session);
+    let tokens = output.result.unwrap();
 
     println!("Number tokens:");
-    for token in &output.tokens {
+    for token in &tokens {
         if matches!(token.kind, ZigSyntaxKind::IntegerLiteral | ZigSyntaxKind::FloatLiteral) {
             println!("  {:?}: {:?}", token.kind, token.text(&source));
         }
     }
 
     // 验证数字类型
-    let number_tokens: Vec<_> = output.tokens.iter()
+    let number_tokens: Vec<_> = tokens.iter()
         .filter(|t| matches!(t.kind, ZigSyntaxKind::IntegerLiteral | ZigSyntaxKind::FloatLiteral))
         .collect();
     

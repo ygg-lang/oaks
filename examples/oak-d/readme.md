@@ -21,10 +21,13 @@ Oak D is a robust parser for D, designed to handle complete D syntax including m
 Basic example:
 
 ```rust
-use oak_d::{Parser, DLanguage, SourceText};
+use oak_d::{DLanguage, DParser};
+use oak_core::{Parser, source::SourceText, parser::session::ParseSession};
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
-    let parser = Parser::new();
+    let language = DLanguage::default();
+    let parser = DParser::new(&language);
+    let mut session = ParseSession::<DLanguage>::default();
     let source = SourceText::new(r#"
 import std.stdio;
 
@@ -33,7 +36,7 @@ void main() {
 }
 "#);
     
-    let result = parser.parse(&source);
+    let result = parser.parse(&source, &[], &mut session);
     println!("Parsed D program successfully.");
     Ok(())
 }
@@ -43,20 +46,26 @@ void main() {
 
 ### Basic Program Parsing
 ```rust
-use oak_d::{Parser, DLanguage, SourceText};
+use oak_d::{DLanguage, DParser};
+use oak_core::{Parser, source::SourceText, parser::session::ParseSession};
 
-let parser = Parser::new();
+let language = DLanguage::default();
+let parser = DParser::new(&language);
+let mut session = ParseSession::<DLanguage>::default();
 let source = SourceText::new("import std.stdio;\n\nvoid main() {\n    writeln(\"Hello, World!\");\n}");
 
-let result = parser.parse(&source);
+let result = parser.parse(&source, &[], &mut session);
 println!("Parsed D program successfully.");
 ```
 
 ### Class and Template Parsing
 ```rust
-use oak_d::{Parser, DLanguage, SourceText};
+use oak_d::{DLanguage, DParser};
+use oak_core::{Parser, source::SourceText, parser::session::ParseSession};
 
-let parser = Parser::new();
+let language = DLanguage::default();
+let parser = DParser::new(&language);
+let mut session = ParseSession::<DLanguage>::default();
 let source = SourceText::new(r#"
 class MyClass(T) {
     private T value;
@@ -73,15 +82,18 @@ class MyClass(T) {
 auto obj = new MyClass!int(42);
 "#);
 
-let result = parser.parse(&source);
+let result = parser.parse(&source, &[], &mut session);
 println!("Parsed D program with classes and templates successfully.");
 ```
 
 ### Function Declaration Parsing
 ```rust
-use oak_d::{Parser, DLanguage, SourceText};
+use oak_d::{DLanguage, DParser};
+use oak_core::{Parser, source::SourceText, parser::session::ParseSession};
 
-let parser = Parser::new();
+let language = DLanguage::default();
+let parser = DParser::new(&language);
+let mut session = ParseSession::<DLanguage>::default();
 let source = SourceText::new(r#"
 int calculate(int a, int b, string operation) {
     switch (operation) {
@@ -91,76 +103,45 @@ int calculate(int a, int b, string operation) {
         default: return 0;
     }
 }
-
-void printResult(int result) {
-    writefln("Result: %d", result);
-}
 "#);
 
-let result = parser.parse(&source);
-println!("Parsed D functions successfully.");
+let result = parser.parse(&source, &[], &mut session);
+println!("Parsed D program with function declarations successfully.");
 ```
 
 ## 🔧 Advanced Features
 
-### Lexer Integration
+### Token-Level Parsing
 ```rust
-use oak_d::{Parser, DLanguage, SourceText};
+use oak_d::{DLanguage, DParser};
+use oak_core::{Parser, source::SourceText, parser::session::ParseSession};
 
-let parser = Parser::new();
-let source = SourceText::new("import std.stdio;\nvoid main() { writeln(\"Hello\"); }");
-let result = parser.parse(&source);
+let language = DLanguage::default();
+let parser = DParser::new(&language);
+let mut session = ParseSession::<DLanguage>::default();
+let source = SourceText::new("void main() {}");
+let result = parser.parse(&source, &[], &mut session);
 // Token information is available in the parse result
 ```
 
-### Template and Mixin Analysis
+### Error Handling
 ```rust
-use oak_d::{Parser, DLanguage, SourceText};
+use oak_d::{DLanguage, DParser};
+use oak_core::{Parser, source::SourceText, parser::session::ParseSession};
 
-let parser = Parser::new();
+let language = DLanguage::default();
+let parser = DParser::new(&language);
+let mut session = ParseSession::<DLanguage>::default();
 let source = SourceText::new(r#"
-template Vector3(T) {
-    struct Vector3 {
-        T x, y, z;
-        
-        T length() const {
-            import std.math : sqrt;
-            return sqrt(x*x + y*y + z*z);
-        }
-    }
-}
-
-mixin template Logger() {
-    void log(string msg) {
-        writefln("[%s] %s", __FUNCTION__, msg);
-    }
-}
-"#);
-
-let result = parser.parse(&source);
-println!("Parsed D templates and mixins successfully.");
-```
-
-### Import and Module Analysis
-```rust
-use oak_d::{Parser, DLanguage, SourceText};
-
-let parser = Parser::new();
-let source = SourceText::new(r#"
-module myapp.main;
-
-import std.stdio : writeln, writefln;
-import std.algorithm : map, filter;
-import std.array : array;
-import core.thread : Thread;
-
 void main() {
-    writeln("Application started");
+    writeln("Hello, World!") // Missing semicolon
 }
 "#);
 
-let result = parser.parse(&source);
-println!("Parsed D imports and modules successfully.");
+let result = parser.parse(&source, &[], &mut session);
+if let Err(e) = result.result {
+    println!("Parse error: {:?}", e);
+}
 ```
 
 ## 🏗️ AST Structure

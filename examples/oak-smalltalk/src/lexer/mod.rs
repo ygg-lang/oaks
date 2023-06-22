@@ -1,19 +1,36 @@
-use crate::{kind::SmalltalkKind, language::SmalltalkLanguage};
-use oak_core::{IncrementalCache, Lexer, LexerState, OakError, lexer::LexOutput, source::Source};
+use crate::{kind::SmalltalkSyntaxKind, language::SmalltalkLanguage};
+use oak_core::{
+    OakError,
+    lexer::{LexOutput, Lexer, LexerCache, LexerState},
+    source::{Source, TextEdit},
+};
 
-type State<S> = LexerState<S, SmalltalkLanguage>;
+type State<'a, S> = LexerState<'a, S, SmalltalkLanguage>;
 
 #[derive(Clone)]
 pub struct SmalltalkLexer<'config> {
-    config: &'config SmalltalkLanguage,
+    _config: &'config SmalltalkLanguage,
+}
+
+impl<'config> Lexer<SmalltalkLanguage> for SmalltalkLexer<'config> {
+    fn lex<'a, S: Source + ?Sized>(&self, source: &S, edits: &[TextEdit], cache: &'a mut impl LexerCache<SmalltalkLanguage>) -> LexOutput<SmalltalkLanguage> {
+        let relex_from = edits.iter().map(|e| e.span.start).min().unwrap_or(source.length());
+        let mut state = LexerState::new_with_cache(source, relex_from, cache);
+        if state.fully_reused() {
+            let result = Ok(());
+            return state.finish_with_cache(result, cache);
+        }
+        let result = self.run(&mut state);
+        state.finish_with_cache(result, cache)
+    }
 }
 
 impl<'config> SmalltalkLexer<'config> {
     pub fn new(config: &'config SmalltalkLanguage) -> Self {
-        Self { config }
+        Self { _config: config }
     }
 
-    fn run<S: Source>(&self, state: &mut State<S>) -> Result<(), OakError> {
+    fn run<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> Result<(), OakError> {
         while state.not_at_end() {
             let safe_point = state.get_position();
 
@@ -45,20 +62,19 @@ impl<'config> SmalltalkLexer<'config> {
             let start_pos = state.get_position();
             if let Some(ch) = state.peek() {
                 state.advance(ch.len_utf8());
-                state.add_token(SmalltalkKind::Error, start_pos, state.get_position());
+                state.add_token(SmalltalkSyntaxKind::Error, start_pos, state.get_position());
             }
 
-            state.safe_check(safe_point);
+            state.advance_if_dead_lock(safe_point);
         }
 
         // 添加 EOF token
-        let eof_pos = state.get_position();
-        state.add_token(SmalltalkKind::Eof, eof_pos, eof_pos);
+        state.add_eof();
         Ok(())
     }
 
     /// 跳过空白字符
-    fn skip_whitespace<S: Source>(&self, state: &mut State<S>) -> bool {
+    fn skip_whitespace<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start_pos = state.get_position();
 
         while let Some(ch) = state.peek() {
@@ -71,7 +87,7 @@ impl<'config> SmalltalkLexer<'config> {
         }
 
         if state.get_position() > start_pos {
-            state.add_token(SmalltalkKind::Whitespace, start_pos, state.get_position());
+            state.add_token(SmalltalkSyntaxKind::Whitespace, start_pos, state.get_position());
             true
         }
         else {
@@ -80,12 +96,12 @@ impl<'config> SmalltalkLexer<'config> {
     }
 
     /// 处理换行符
-    fn lex_newline<S: Source>(&self, state: &mut State<S>) -> bool {
+    fn lex_newline<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start_pos = state.get_position();
 
         if let Some('\n') = state.peek() {
             state.advance(1);
-            state.add_token(SmalltalkKind::Newline, start_pos, state.get_position());
+            state.add_token(SmalltalkSyntaxKind::Newline, start_pos, state.get_position());
             true
         }
         else if let Some('\r') = state.peek() {
@@ -93,7 +109,7 @@ impl<'config> SmalltalkLexer<'config> {
             if let Some('\n') = state.peek() {
                 state.advance(1);
             }
-            state.add_token(SmalltalkKind::Newline, start_pos, state.get_position());
+            state.add_token(SmalltalkSyntaxKind::Newline, start_pos, state.get_position());
             true
         }
         else {
@@ -102,7 +118,7 @@ impl<'config> SmalltalkLexer<'config> {
     }
 
     /// 处理注释
-    fn lex_comment<S: Source>(&self, state: &mut State<S>) -> bool {
+    fn lex_comment<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start_pos = state.get_position();
 
         if let Some('"') = state.peek() {
@@ -116,7 +132,7 @@ impl<'config> SmalltalkLexer<'config> {
                 state.advance(ch.len_utf8());
             }
 
-            state.add_token(SmalltalkKind::Comment, start_pos, state.get_position());
+            state.add_token(SmalltalkSyntaxKind::Comment, start_pos, state.get_position());
             true
         }
         else {
@@ -125,7 +141,7 @@ impl<'config> SmalltalkLexer<'config> {
     }
 
     /// 处理标识符
-    fn lex_identifier<S: Source>(&self, state: &mut State<S>) -> bool {
+    fn lex_identifier<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start_pos = state.get_position();
 
         if let Some(ch) = state.peek() {
@@ -141,7 +157,7 @@ impl<'config> SmalltalkLexer<'config> {
                     }
                 }
 
-                state.add_token(SmalltalkKind::Identifier, start_pos, state.get_position());
+                state.add_token(SmalltalkSyntaxKind::Identifier, start_pos, state.get_position());
                 true
             }
             else {
@@ -154,7 +170,7 @@ impl<'config> SmalltalkLexer<'config> {
     }
 
     /// 处理数字
-    fn lex_number<S: Source>(&self, state: &mut State<S>) -> bool {
+    fn lex_number<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start_pos = state.get_position();
 
         if let Some(ch) = state.peek() {
@@ -170,7 +186,7 @@ impl<'config> SmalltalkLexer<'config> {
                     }
                 }
 
-                state.add_token(SmalltalkKind::Number, start_pos, state.get_position());
+                state.add_token(SmalltalkSyntaxKind::Number, start_pos, state.get_position());
                 true
             }
             else {
@@ -183,27 +199,27 @@ impl<'config> SmalltalkLexer<'config> {
     }
 
     /// 处理标点符号
-    fn lex_punctuation<S: Source>(&self, state: &mut State<S>) -> bool {
+    fn lex_punctuation<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start_pos = state.get_position();
 
         if let Some(ch) = state.peek() {
             let kind = match ch {
-                '(' => SmalltalkKind::LeftParen,
-                ')' => SmalltalkKind::RightParen,
-                '[' => SmalltalkKind::LeftBracket,
-                ']' => SmalltalkKind::RightBracket,
-                '{' => SmalltalkKind::LeftBrace,
-                '}' => SmalltalkKind::RightBrace,
-                '.' => SmalltalkKind::Dot,
-                ';' => SmalltalkKind::Semicolon,
-                ',' => SmalltalkKind::Comma,
-                '+' => SmalltalkKind::Plus,
-                '-' => SmalltalkKind::Minus,
-                '*' => SmalltalkKind::Star,
-                '/' => SmalltalkKind::Slash,
-                '=' => SmalltalkKind::Equal,
-                '<' => SmalltalkKind::Less,
-                '>' => SmalltalkKind::Greater,
+                '(' => SmalltalkSyntaxKind::LeftParen,
+                ')' => SmalltalkSyntaxKind::RightParen,
+                '[' => SmalltalkSyntaxKind::LeftBracket,
+                ']' => SmalltalkSyntaxKind::RightBracket,
+                '{' => SmalltalkSyntaxKind::LeftBrace,
+                '}' => SmalltalkSyntaxKind::RightBrace,
+                '.' => SmalltalkSyntaxKind::Dot,
+                ';' => SmalltalkSyntaxKind::Semicolon,
+                ',' => SmalltalkSyntaxKind::Comma,
+                '+' => SmalltalkSyntaxKind::Plus,
+                '-' => SmalltalkSyntaxKind::Minus,
+                '*' => SmalltalkSyntaxKind::Star,
+                '/' => SmalltalkSyntaxKind::Slash,
+                '=' => SmalltalkSyntaxKind::Equal,
+                '<' => SmalltalkSyntaxKind::Less,
+                '>' => SmalltalkSyntaxKind::Greater,
                 _ => return false,
             };
 
@@ -214,18 +230,5 @@ impl<'config> SmalltalkLexer<'config> {
         else {
             false
         }
-    }
-}
-
-impl<'config> Lexer<SmalltalkLanguage> for SmalltalkLexer<'config> {
-    fn lex_incremental(
-        &self,
-        source: impl Source,
-        changed: usize,
-        cache: IncrementalCache<SmalltalkLanguage>,
-    ) -> LexOutput<SmalltalkLanguage> {
-        let mut state = LexerState::new_with_cache(source, changed, cache);
-        let result = self.run(&mut state);
-        state.finish(result)
     }
 }

@@ -1,4 +1,4 @@
-use oak_core::SyntaxKind;
+use oak_core::{ElementType, TokenType, UniversalElementRole, UniversalTokenRole};
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
@@ -251,164 +251,27 @@ pub enum TypeScriptSyntaxKind {
     Eof,
 }
 
-impl SyntaxKind for TypeScriptSyntaxKind {
-    fn is_trivia(&self) -> bool {
-        matches!(
-            self,
-            TypeScriptSyntaxKind::LineComment
-                | TypeScriptSyntaxKind::BlockComment
-                | TypeScriptSyntaxKind::Whitespace
-                | TypeScriptSyntaxKind::Newline
-        )
-    }
+impl TokenType for TypeScriptSyntaxKind {
+    const END_OF_STREAM: Self = Self::Eof;
+    type Role = UniversalTokenRole;
 
-    fn is_comment(&self) -> bool {
-        matches!(self, TypeScriptSyntaxKind::LineComment | TypeScriptSyntaxKind::BlockComment)
+    fn role(&self) -> Self::Role {
+        match self {
+            TypeScriptSyntaxKind::Whitespace | TypeScriptSyntaxKind::Newline => UniversalTokenRole::Whitespace,
+            TypeScriptSyntaxKind::LineComment | TypeScriptSyntaxKind::BlockComment => UniversalTokenRole::Comment,
+            Self::Eof => UniversalTokenRole::Eof,
+            _ => UniversalTokenRole::None,
+        }
     }
+}
 
-    fn is_whitespace(&self) -> bool {
-        matches!(self, TypeScriptSyntaxKind::Whitespace | TypeScriptSyntaxKind::Newline)
-    }
+impl ElementType for TypeScriptSyntaxKind {
+    type Role = UniversalElementRole;
 
-    fn is_token_type(&self) -> bool {
-        !matches!(
-            self,
-            TypeScriptSyntaxKind::Root
-                | TypeScriptSyntaxKind::SourceFile
-                | TypeScriptSyntaxKind::Module
-                | TypeScriptSyntaxKind::VariableDeclaration
-                | TypeScriptSyntaxKind::FunctionDeclaration
-                | TypeScriptSyntaxKind::ClassDeclaration
-                | TypeScriptSyntaxKind::InterfaceDeclaration
-                | TypeScriptSyntaxKind::TypeAliasDeclaration
-                | TypeScriptSyntaxKind::EnumDeclaration
-                | TypeScriptSyntaxKind::NamespaceDeclaration
-                | TypeScriptSyntaxKind::ImportDeclaration
-                | TypeScriptSyntaxKind::ExportDeclaration
-                | TypeScriptSyntaxKind::BinaryExpression
-                | TypeScriptSyntaxKind::UnaryExpression
-                | TypeScriptSyntaxKind::ConditionalExpression
-                | TypeScriptSyntaxKind::CallExpression
-                | TypeScriptSyntaxKind::NewExpression
-                | TypeScriptSyntaxKind::MemberExpression
-                | TypeScriptSyntaxKind::ArrayExpression
-                | TypeScriptSyntaxKind::ObjectExpression
-                | TypeScriptSyntaxKind::FunctionExpression
-                | TypeScriptSyntaxKind::ArrowFunction
-                | TypeScriptSyntaxKind::TemplateExpression
-                | TypeScriptSyntaxKind::TaggedTemplateExpression
-                | TypeScriptSyntaxKind::AsExpression
-                | TypeScriptSyntaxKind::TypeAssertionExpression
-                | TypeScriptSyntaxKind::NonNullExpression
-                | TypeScriptSyntaxKind::ExpressionStatement
-                | TypeScriptSyntaxKind::BlockStatement
-                | TypeScriptSyntaxKind::IfStatement
-                | TypeScriptSyntaxKind::WhileStatement
-                | TypeScriptSyntaxKind::ForStatement
-                | TypeScriptSyntaxKind::ForInStatement
-                | TypeScriptSyntaxKind::ForOfStatement
-                | TypeScriptSyntaxKind::DoWhileStatement
-                | TypeScriptSyntaxKind::SwitchStatement
-                | TypeScriptSyntaxKind::CaseClause
-                | TypeScriptSyntaxKind::DefaultClause
-                | TypeScriptSyntaxKind::TryStatement
-                | TypeScriptSyntaxKind::CatchClause
-                | TypeScriptSyntaxKind::FinallyClause
-                | TypeScriptSyntaxKind::ThrowStatement
-                | TypeScriptSyntaxKind::ReturnStatement
-                | TypeScriptSyntaxKind::BreakStatement
-                | TypeScriptSyntaxKind::ContinueStatement
-                | TypeScriptSyntaxKind::DebuggerStatement
-                | TypeScriptSyntaxKind::WithStatement
-                | TypeScriptSyntaxKind::BindingPattern
-                | TypeScriptSyntaxKind::ArrayBindingPattern
-                | TypeScriptSyntaxKind::ObjectBindingPattern
-                | TypeScriptSyntaxKind::BindingElement
-                | TypeScriptSyntaxKind::TypeReference
-                | TypeScriptSyntaxKind::TypeLiteral
-                | TypeScriptSyntaxKind::FunctionType
-                | TypeScriptSyntaxKind::ConstructorType
-                | TypeScriptSyntaxKind::ArrayType
-                | TypeScriptSyntaxKind::TupleType
-                | TypeScriptSyntaxKind::UnionType
-                | TypeScriptSyntaxKind::IntersectionType
-                | TypeScriptSyntaxKind::ConditionalType
-                | TypeScriptSyntaxKind::MappedType
-                | TypeScriptSyntaxKind::IndexedAccessType
-                | TypeScriptSyntaxKind::TypeQuery
-                | TypeScriptSyntaxKind::TypePredicate
-                | TypeScriptSyntaxKind::Error
-        )
-    }
-
-    fn is_element_type(&self) -> bool {
-        matches!(
-            self,
-            TypeScriptSyntaxKind::Root
-                | TypeScriptSyntaxKind::SourceFile
-                | TypeScriptSyntaxKind::Module
-                | TypeScriptSyntaxKind::VariableDeclaration
-                | TypeScriptSyntaxKind::FunctionDeclaration
-                | TypeScriptSyntaxKind::ClassDeclaration
-                | TypeScriptSyntaxKind::InterfaceDeclaration
-                | TypeScriptSyntaxKind::TypeAliasDeclaration
-                | TypeScriptSyntaxKind::EnumDeclaration
-                | TypeScriptSyntaxKind::NamespaceDeclaration
-                | TypeScriptSyntaxKind::ImportDeclaration
-                | TypeScriptSyntaxKind::ExportDeclaration
-                | TypeScriptSyntaxKind::BinaryExpression
-                | TypeScriptSyntaxKind::UnaryExpression
-                | TypeScriptSyntaxKind::ConditionalExpression
-                | TypeScriptSyntaxKind::CallExpression
-                | TypeScriptSyntaxKind::NewExpression
-                | TypeScriptSyntaxKind::MemberExpression
-                | TypeScriptSyntaxKind::ArrayExpression
-                | TypeScriptSyntaxKind::ObjectExpression
-                | TypeScriptSyntaxKind::FunctionExpression
-                | TypeScriptSyntaxKind::ArrowFunction
-                | TypeScriptSyntaxKind::TemplateExpression
-                | TypeScriptSyntaxKind::TaggedTemplateExpression
-                | TypeScriptSyntaxKind::AsExpression
-                | TypeScriptSyntaxKind::TypeAssertionExpression
-                | TypeScriptSyntaxKind::NonNullExpression
-                | TypeScriptSyntaxKind::ExpressionStatement
-                | TypeScriptSyntaxKind::BlockStatement
-                | TypeScriptSyntaxKind::IfStatement
-                | TypeScriptSyntaxKind::WhileStatement
-                | TypeScriptSyntaxKind::ForStatement
-                | TypeScriptSyntaxKind::ForInStatement
-                | TypeScriptSyntaxKind::ForOfStatement
-                | TypeScriptSyntaxKind::DoWhileStatement
-                | TypeScriptSyntaxKind::SwitchStatement
-                | TypeScriptSyntaxKind::CaseClause
-                | TypeScriptSyntaxKind::DefaultClause
-                | TypeScriptSyntaxKind::TryStatement
-                | TypeScriptSyntaxKind::CatchClause
-                | TypeScriptSyntaxKind::FinallyClause
-                | TypeScriptSyntaxKind::ThrowStatement
-                | TypeScriptSyntaxKind::ReturnStatement
-                | TypeScriptSyntaxKind::BreakStatement
-                | TypeScriptSyntaxKind::ContinueStatement
-                | TypeScriptSyntaxKind::DebuggerStatement
-                | TypeScriptSyntaxKind::WithStatement
-                | TypeScriptSyntaxKind::BindingPattern
-                | TypeScriptSyntaxKind::ArrayBindingPattern
-                | TypeScriptSyntaxKind::ObjectBindingPattern
-                | TypeScriptSyntaxKind::BindingElement
-                | TypeScriptSyntaxKind::TypeReference
-                | TypeScriptSyntaxKind::TypeLiteral
-                | TypeScriptSyntaxKind::FunctionType
-                | TypeScriptSyntaxKind::ConstructorType
-                | TypeScriptSyntaxKind::ArrayType
-                | TypeScriptSyntaxKind::TupleType
-                | TypeScriptSyntaxKind::UnionType
-                | TypeScriptSyntaxKind::IntersectionType
-                | TypeScriptSyntaxKind::ConditionalType
-                | TypeScriptSyntaxKind::MappedType
-                | TypeScriptSyntaxKind::IndexedAccessType
-                | TypeScriptSyntaxKind::TypeQuery
-                | TypeScriptSyntaxKind::TypePredicate
-                | TypeScriptSyntaxKind::Error
-        )
+    fn role(&self) -> Self::Role {
+        match self {
+            Self::Error => UniversalElementRole::Error,
+            _ => UniversalElementRole::None,
+        }
     }
 }

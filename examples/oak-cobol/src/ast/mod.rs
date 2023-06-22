@@ -1,21 +1,17 @@
-use crate::{kind::CobolSyntaxKind, language::CobolLanguage};
+use crate::language::CobolLanguage;
 use oak_core::tree::{RedLeaf, RedNode};
 
-pub type CobolNode = RedNode<CobolSyntaxKind>;
-pub type CobolToken = RedLeaf<CobolSyntaxKind>;
+pub type CobolNode<'a> = RedNode<'a, CobolLanguage>;
+pub type CobolToken = RedLeaf<CobolLanguage>;
 
-#[derive(Debug, Clone)]
-pub struct CobolRoot {
-    pub syntax: CobolNode,
+#[derive(Debug, Clone, Copy)]
+pub struct CobolRoot<'a> {
+    pub syntax: CobolNode<'a>,
 }
 
-impl CobolRoot {
-    pub fn new(syntax: CobolNode) -> Self {
+impl<'a> CobolRoot<'a> {
+    pub fn new(syntax: CobolNode<'a>) -> Self {
         Self { syntax }
-    }
-
-    pub fn kind(&self) -> CobolSyntaxKind {
-        self.syntax.green.kind
     }
 }
 

@@ -1,4 +1,4 @@
-use oak_core::SyntaxKind;
+use oak_core::{ElementType, TokenType, UniversalElementRole, UniversalTokenRole};
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub enum SchemeSyntaxKind {
@@ -60,26 +60,32 @@ pub enum SchemeSyntaxKind {
     // 错误和结束
     Error,
     Eof,
+
+    // 根节点
+    SourceFile,
 }
 
-impl SyntaxKind for SchemeSyntaxKind {
-    fn is_trivia(&self) -> bool {
-        matches!(self, Self::Whitespace | Self::Newline | Self::LineComment)
-    }
+impl TokenType for SchemeSyntaxKind {
+    const END_OF_STREAM: Self = Self::Eof;
+    type Role = UniversalTokenRole;
 
-    fn is_comment(&self) -> bool {
-        matches!(self, Self::LineComment)
+    fn role(&self) -> Self::Role {
+        match self {
+            Self::Whitespace | Self::Newline => UniversalTokenRole::Whitespace,
+            Self::LineComment => UniversalTokenRole::Comment,
+            Self::Eof => UniversalTokenRole::Eof,
+            _ => UniversalTokenRole::None,
+        }
     }
+}
 
-    fn is_whitespace(&self) -> bool {
-        matches!(self, Self::Whitespace | Self::Newline)
-    }
+impl ElementType for SchemeSyntaxKind {
+    type Role = UniversalElementRole;
 
-    fn is_token_type(&self) -> bool {
-        !matches!(self, Self::Error | Self::Eof)
-    }
-
-    fn is_element_type(&self) -> bool {
-        false
+    fn role(&self) -> Self::Role {
+        match self {
+            Self::Error => UniversalElementRole::Error,
+            _ => UniversalElementRole::None,
+        }
     }
 }

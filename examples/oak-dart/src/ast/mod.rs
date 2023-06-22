@@ -1,39 +1,48 @@
 use core::range::Range;
+use serde::{Deserialize, Serialize};
 
-#[derive(Debug, PartialEq, Eq, Clone)]
+/// Identifier in the Dart language
+#[derive(Debug, PartialEq, Eq, Clone, Serialize, Deserialize)]
 pub struct Identifier {
     pub name: String,
+    #[serde(with = "oak_core::serde_range")]
     pub span: Range<usize>,
 }
 
-/// 强类型 AST 根
-#[derive(Debug, PartialEq, Clone)]
+/// Strongly-typed AST root for Dart language
+#[derive(Debug, PartialEq, Clone, Serialize, Deserialize)]
 pub struct DartRoot {
     pub items: Vec<Item>,
 }
 
-/// 顶层项：类、函数、变量声明等
-#[derive(Debug, PartialEq, Clone)]
+/// Top-level items: classes, functions, variable declarations, etc.
+#[derive(Debug, PartialEq, Clone, Serialize, Deserialize)]
 pub enum Item {
     Class(ClassDeclaration),
     Function(FunctionDeclaration),
     Variable(VariableDeclaration),
 }
 
-#[derive(Debug, PartialEq, Clone)]
+/// Class declaration in Dart
+#[derive(Debug, PartialEq, Clone, Serialize, Deserialize)]
 pub struct ClassDeclaration {
     pub name: Identifier,
+    #[serde(with = "oak_core::serde_range")]
     pub span: Range<usize>,
 }
 
-#[derive(Debug, PartialEq, Clone)]
+/// Function declaration in Dart
+#[derive(Debug, PartialEq, Clone, Serialize, Deserialize)]
 pub struct FunctionDeclaration {
     pub name: Identifier,
+    #[serde(with = "oak_core::serde_range")]
     pub span: Range<usize>,
 }
 
-#[derive(Debug, PartialEq, Clone)]
+/// Variable declaration in Dart
+#[derive(Debug, PartialEq, Clone, Serialize, Deserialize)]
 pub struct VariableDeclaration {
     pub name: Identifier,
+    #[serde(with = "oak_core::serde_range")]
     pub span: Range<usize>,
 }

@@ -1,42 +1,31 @@
 use crate::{kind::JavaSyntaxKind, language::JavaLanguage};
-use oak_core::{
-    IncrementalCache, Lexer, LexerState, OakError,
-    lexer::{CommentLine, LexOutput, StringConfig, WhitespaceConfig},
-    source::Source,
-};
-use std::sync::LazyLock;
+use oak_core::{Lexer, LexerCache, LexerState, OakError, lexer::LexOutput, source::Source};
 
-type State<S: Source> = LexerState<S, JavaLanguage>;
-
-static JAVA_WHITESPACE: LazyLock<WhitespaceConfig> = LazyLock::new(|| WhitespaceConfig { unicode_whitespace: true });
-static JAVA_COMMENT: LazyLock<CommentLine> = LazyLock::new(|| CommentLine { line_markers: &["//"] });
-static JAVA_STRING: LazyLock<StringConfig> = LazyLock::new(|| StringConfig { quotes: &['"'], escape: Some('\\') });
+type State<'a, S> = LexerState<'a, S, JavaLanguage>;
 
 #[derive(Clone)]
 pub struct JavaLexer<'config> {
-    config: &'config JavaLanguage,
+    _config: &'config JavaLanguage,
 }
 
 impl<'config> Lexer<JavaLanguage> for JavaLexer<'config> {
-    fn lex_incremental(
-        &self,
-        source: impl Source,
-        changed: usize,
-        cache: IncrementalCache<JavaLanguage>,
-    ) -> LexOutput<JavaLanguage> {
-        let mut state = LexerState::new_with_cache(source, changed, cache);
+    fn lex<'a, S: Source + ?Sized>(&self, source: &'a S, _edits: &[oak_core::TextEdit], cache: &'a mut impl LexerCache<JavaLanguage>) -> LexOutput<JavaLanguage> {
+        let mut state = State::new(source);
         let result = self.run(&mut state);
-        state.finish(result)
+        if result.is_ok() {
+            state.add_eof();
+        }
+        state.finish_with_cache(result, cache)
     }
 }
 
 impl<'config> JavaLexer<'config> {
     pub fn new(config: &'config JavaLanguage) -> Self {
-        Self { config }
+        Self { _config: config }
     }
 
     /// 主要的词法分析循环
-    fn run<S: Source>(&self, state: &mut State<S>) -> Result<(), OakError> {
+    fn run<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> Result<(), OakError> {
         while state.not_at_end() {
             let safe_point = state.get_position();
 
@@ -72,17 +61,21 @@ impl<'config> JavaLexer<'config> {
                 continue;
             }
 
-            state.safe_check(safe_point);
+            // 如果没有匹配到任何规则，前进一个字符并标记为错误
+            let start_pos = state.get_position();
+            if let Some(ch) = state.peek() {
+                state.advance(ch.len_utf8());
+                state.add_token(JavaSyntaxKind::Error, start_pos, state.get_position());
+            }
+
+            state.advance_if_dead_lock(safe_point);
         }
 
-        // 添加 EOF token
-        let eof_pos = state.get_position();
-        state.add_token(JavaSyntaxKind::Eof, eof_pos, eof_pos);
         Ok(())
     }
 
     /// 跳过空白字符（不包括换行符）
-    fn skip_whitespace<S: Source>(&self, state: &mut State<S>) -> bool {
+    fn skip_whitespace<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start = state.get_position();
 
         while let Some(ch) = state.peek() {
@@ -102,7 +95,7 @@ impl<'config> JavaLexer<'config> {
     }
 
     /// 处理换行
-    fn lex_newline<S: Source>(&self, state: &mut State<S>) -> bool {
+    fn lex_newline<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start = state.get_position();
 
         if let Some('\n') = state.peek() {
@@ -116,7 +109,7 @@ impl<'config> JavaLexer<'config> {
     }
 
     /// 跳过注释
-    fn skip_comment<S: Source>(&self, state: &mut State<S>) -> bool {
+    fn skip_comment<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start = state.get_position();
 
         // 单行注释 //
@@ -150,7 +143,7 @@ impl<'config> JavaLexer<'config> {
     }
 
     /// 处理字符串字面量
-    fn lex_string_literal<S: Source>(&self, state: &mut State<S>) -> bool {
+    fn lex_string_literal<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start = state.get_position();
 
         if let Some('"') = state.peek() {
@@ -184,7 +177,7 @@ impl<'config> JavaLexer<'config> {
     }
 
     /// 处理字符字面�?
-    fn lex_char_literal<S: Source>(&self, state: &mut State<S>) -> bool {
+    fn lex_char_literal<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start = state.get_position();
 
         if let Some('\'') = state.peek() {
@@ -214,7 +207,7 @@ impl<'config> JavaLexer<'config> {
     }
 
     /// 处理数字字面�?
-    fn lex_number_literal<S: Source>(&self, state: &mut State<S>) -> bool {
+    fn lex_number_literal<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start = state.get_position();
 
         if let Some(ch) = state.peek() {
@@ -278,7 +271,7 @@ impl<'config> JavaLexer<'config> {
     }
 
     /// 处理标识符或关键�?
-    fn lex_identifier_or_keyword<S: Source>(&self, state: &mut State<S>) -> bool {
+    fn lex_identifier_or_keyword<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start = state.get_position();
 
         if let Some(ch) = state.peek() {
@@ -295,7 +288,7 @@ impl<'config> JavaLexer<'config> {
                 }
 
                 let text = state.get_text_in((start..state.get_position()).into());
-                let token_kind = self.classify_identifier(&text);
+                let token_kind = self.classify_identifier(text.as_ref());
 
                 state.add_token(token_kind, start, state.get_position());
                 true
@@ -369,7 +362,7 @@ impl<'config> JavaLexer<'config> {
     }
 
     /// 处理操作符和分隔�?
-    fn lex_operator_or_delimiter<S: Source>(&self, state: &mut State<S>) -> bool {
+    fn lex_operator_or_delimiter<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start = state.get_position();
 
         if let Some(ch) = state.peek() {

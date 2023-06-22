@@ -1,6 +1,6 @@
 #![doc = include_str!("../../readme.md")]
 
-use oak_core::{SyntaxKind, Token};
+use oak_core::{ElementType, Token, TokenType, UniversalElementRole, UniversalTokenRole};
 use serde::{Deserialize, Serialize};
 
 /// Type alias for Token with VampireSyntaxKind
@@ -8,6 +8,9 @@ pub type VampireToken = Token<VampireSyntaxKind>;
 
 #[derive(Copy, Clone, Debug, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub enum VampireSyntaxKind {
+    // 根节点
+    Root,
+
     // 基础文本
     Text,
     Whitespace,
@@ -123,24 +126,27 @@ pub enum VampireSyntaxKind {
     BlockComment,
 }
 
-impl SyntaxKind for VampireSyntaxKind {
-    fn is_trivia(&self) -> bool {
-        matches!(self, Self::Whitespace | Self::Newline | Self::LineComment | Self::BlockComment)
-    }
+impl TokenType for VampireSyntaxKind {
+    const END_OF_STREAM: Self = Self::Eof;
+    type Role = UniversalTokenRole;
 
-    fn is_comment(&self) -> bool {
-        matches!(self, Self::LineComment | Self::BlockComment)
+    fn role(&self) -> Self::Role {
+        match self {
+            Self::Whitespace | Self::Newline => UniversalTokenRole::Whitespace,
+            Self::LineComment | Self::BlockComment => UniversalTokenRole::Comment,
+            Self::Eof => UniversalTokenRole::Eof,
+            _ => UniversalTokenRole::None,
+        }
     }
+}
 
-    fn is_whitespace(&self) -> bool {
-        matches!(self, Self::Whitespace | Self::Newline)
-    }
+impl ElementType for VampireSyntaxKind {
+    type Role = UniversalElementRole;
 
-    fn is_token_type(&self) -> bool {
-        !matches!(self, Self::Error | Self::Eof)
-    }
-
-    fn is_element_type(&self) -> bool {
-        false
+    fn role(&self) -> Self::Role {
+        match self {
+            Self::Error => UniversalElementRole::Error,
+            _ => UniversalElementRole::None,
+        }
     }
 }

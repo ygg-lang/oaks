@@ -1,5 +1,4 @@
-use crate::kind::VerilogKind;
-use oak_core::language::Language;
+use oak_core::language::{Language, LanguageCategory};
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub struct VerilogLanguage;
@@ -12,6 +11,10 @@ pub struct VerilogRoot {
 }
 
 impl Language for VerilogLanguage {
-    type SyntaxKind = VerilogKind;
-    type TypedRoot = VerilogRoot;
+    const NAME: &'static str = "verilog";
+    const CATEGORY: LanguageCategory = LanguageCategory::Programming;
+
+    type TokenType = crate::kind::VerilogKind;
+    type ElementType = crate::kind::VerilogKind;
+    type TypedRoot = ();
 }

@@ -9,7 +9,7 @@ fn test_ruby_lexer() {
     let lexer = RubyLexer::new(language);
     // use `rb` extension for Ruby source files
     let test_runner = LexerTester::new(here.join("tests/lexer")).with_extension("rb").with_timeout(Duration::from_secs(30));
-    match test_runner.run_tests::<RubyLanguage, _>(lexer) {
+    match test_runner.run_tests::<RubyLanguage, _>(&lexer) {
         Ok(()) => println!("Ruby lexer tests passed!"),
         Err(e) => panic!("Ruby lexer tests failed: {}", e),
     }

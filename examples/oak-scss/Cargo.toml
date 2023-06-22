@@ -1,6 +1,6 @@
 [package]
 name = "oak-scss"
-description = "High-performance incremental SCSS parser for the oak ecosystem with flexible configuration, supporting CSS preprocessing and styling."
+description = "SCSS CSS preprocessor language parser with support for modern CSS features and dynamic styling."
 categories = ["parsing"]
 keywords = ["parser", "scss", "css", "stylesheet"]
 documentation = "https://docs.rs/oak-scss"
@@ -14,16 +14,26 @@ edition.workspace = true
 
 [dependencies]
 oak-core = { workspace = true }
-oak-highlight = { workspace = true, optional = true }
-oak-pretty-print = { workspace = true, optional = true }
-
+oak-highlight = { workspace = true }
+oak-pretty-print = { workspace = true }
+oak-lsp = { workspace = true }
+oak-hover = { workspace = true }
+oak-vfs = { workspace = true }
+oak-mcp = { workspace = true, optional = true }
+serde = { workspace = true }
+futures = { workspace = true }
+tracing = { workspace = true }
+tokio = { workspace = true, optional = true }
+axum = { workspace = true, optional = true }
 
 [dev-dependencies]
 oak-core = { workspace = true, features = ["testing"] }
 
-
 [features]
-default = [ "oak-highlight"]
+default = []
+mcp = ["dep:oak-mcp"]
+axum = ["mcp", "dep:tokio", "dep:axum", "oak-mcp/axum", "oak-lsp/axum"]
+semantic-search = ["mcp"]
 
 
 [package.metadata.docs.rs]

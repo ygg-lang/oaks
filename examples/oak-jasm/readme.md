@@ -1,118 +1,207 @@
-# JASM 格式
+# Oak JASM Parser
 
-JASM (Java ASseMbler) 是一种人类可读的 JVM 字节码汇编语言格式，用于表示 Java 类文件的结构和字节码指令。
+[![Crates.io](https://img.shields.io/crates/v/oak-jasm.svg)](https://crates.io/crates/oak-jasm)
+[![Documentation](https://docs.rs/oak-jasm/badge.svg)](https://docs.rs/oak-jasm)
 
-## 概述
+High-performance incremental JASM parser for the oak ecosystem with flexible configuration, optimized for assembly language analysis and JVM bytecode generation.
 
-JASM 格式提供了一种直观的方式来编写和阅读 JVM 字节码，它是 Java 类文件的文本表示形式。该格式支持：
+## 🎯 Overview
 
-- **类定义**: 类名、访问修饰符、超类、接口
-- **字段定义**: 字段名、类型、访问修饰符
-- **方法定义**: 方法名、签名、字节码指令
-- **常量池**: 自动管理字符串、数字、类引用等常量
-- **属性**: 源文件、行号表、局部变量表等标准属性
+Oak JASM is a robust parser for Java ASseMbler (JASM), designed to handle complete JASM syntax including modern assembly features and JVM bytecode instructions. Built on the solid foundation of oak-core, it provides both high-level convenience and detailed AST generation for JASM analysis and tooling.
 
-## 语法结构
+## ✨ Features
 
-### 基本类结构
+- **Complete JASM Syntax**: Supports all JASM features including class definitions, methods, and bytecode instructions
+- **JVM Bytecode Support**: Handles all JVM bytecode instructions and type descriptors
+- **Full AST Generation**: Generates comprehensive Abstract Syntax Trees
+- **Lexer Support**: Built-in tokenization with proper span information
+- **Error Recovery**: Graceful handling of syntax errors with detailed diagnostics
 
+## 🚀 Quick Start
 
+Basic example:
 
-### 字段定义
+```rust
+use oak_core::{Parser, SourceText, parser::session::ParseSession};
+use oak_jasm::{JasmParser, JasmLanguage};
 
+fn main() -> Result<(), Box<dyn std::error::Error>> {
+    let mut session = ParseSession::<JasmLanguage>::default();
+    let parser = JasmParser::new();
+    let source = SourceText::new(r#"
+.class public Hello
+.super java/lang/Object
 
+.method public <init>()V
+    aload_0
+    invokespecial java/lang/Object/<init>()V
+    return
+.end method
 
-### 方法定义
+.method public static main([Ljava/lang/String;)V
+    .limit stack 2
+    getstatic java/lang/System/out Ljava/io/PrintStream;
+    ldc "Hello, JASM!"
+    invokevirtual java/io/PrintStream/println(Ljava/lang/String;)V
+    return
+.end method
+.end class
+    "#);
+    
+    let result = parser.parse(&source, &[], &mut session);
+    println!("Parsed JASM class successfully.");
+    Ok(())
+}
+```
 
+## 📋 Parsing Examples
 
+### Class Definition Parsing
+```rust
+use oak_core::{Parser, SourceText, parser::session::ParseSession};
+use oak_jasm::{JasmParser, JasmLanguage};
 
-## 指令系统
+let mut session = ParseSession::<JasmLanguage>::default();
+let parser = JasmParser::new();
+let source = SourceText::new(r#"
+.class public Calculator
+.super java/lang/Object
 
-### 常量加载指令
+.field private result I
 
-- `aconst_null` - 加载 null 引用
-- `iconst_0` 到 `iconst_5` - 加载整数常量 0-5
-- `ldc "string"` - 加载字符串常量
-- `ldc 123` - 加载数字常量
+.method public <init>()V
+    aload_0
+    invokespecial java/lang/Object/<init>()V
+    aload_0
+    iconst_0
+    putfield Calculator/result I
+    return
+.end method
 
-### 局部变量操作
+.method public add(I)V
+    aload_0
+    dup
+    getfield Calculator/result I
+    iload_1
+    iadd
+    putfield Calculator/result I
+    return
+.end method
+.end class
+"#);
 
-- `iload_0` 到 `iload_3` - 加载局部变量到操作数栈
-- `istore_0` 到 `istore_3` - 从操作数栈存储到局部变量
-- `iinc 1 1` - 递增局部变量
+let result = parser.parse(&source, &[], &mut session);
+println!("Parsed JASM class with fields and methods successfully.");
+```
 
-### 栈操作指令
+### Method with Control Flow
+```rust
+use oak_core::{Parser, SourceText, parser::session::ParseSession};
+use oak_jasm::{JasmParser, JasmLanguage};
 
-- `pop` - 弹出栈顶元素
-- `dup` - 复制栈顶元素
-- `swap` - 交换栈顶两个元素
+let mut session = ParseSession::<JasmLanguage>::default();
+let parser = JasmParser::new();
+let source = SourceText::new(r#"
+.class public LoopExample
+.super java/lang/Object
 
-### 算术运算
+.method public static count(I)V
+    .limit locals 2
+    iconst_0
+    istore_1
+Loop:
+    iload_1
+    iload_0
+    if_icmpge End
+    
+    getstatic java/lang/System/out Ljava/io/PrintStream;
+    iload_1
+    invokevirtual java/io/PrintStream/println(I)V
+    
+    iinc 1 1
+    goto Loop
+End:
+    return
+.end method
+.end class
+"#);
 
-- `iadd` - 整数加法
-- `isub` - 整数减法
-- `imul` - 整数乘法
-- `idiv` - 整数除法
+let result = parser.parse(&source, &[], &mut session);
+println!("Parsed JASM with control flow successfully.");
+```
 
-### 方法调用
+## 🔧 Advanced Features
 
+### Token-Level Parsing
+```rust
+use oak_core::{Parser, SourceText, parser::session::ParseSession};
+use oak_jasm::{JasmParser, JasmLanguage};
 
+let mut session = ParseSession::<JasmLanguage>::default();
+let parser = JasmParser::new();
+let source = SourceText::new(".class public MyClass");
+let result = parser.parse(&source, &[], &mut session);
+println!("Token parsing completed.");
+```
 
-### 控制流
+### Error Handling
+```rust
+use oak_core::{Parser, SourceText, parser::session::ParseSession};
+use oak_jasm::{JasmParser, JasmLanguage};
 
+let mut session = ParseSession::<JasmLanguage>::default();
+let parser = JasmParser::new();
+let source = SourceText::new(r#"
+.class public Broken
+# Missing super class or methods
+"#);
 
+let result = parser.parse(&source, &[], &mut session);
+if let Some(errors) = result.result.err() {
+    println!("Parse errors found: {:?}", errors);
+} else {
+    println!("Parsed successfully.");
+}
+```
 
-## 示例程序
+## 🏗️ AST Structure
 
-### Hello World
+The parser generates a comprehensive AST with the following main structures:
 
+- **Class**: JASM class definitions with access modifiers and inheritance
+- **Field**: Field definitions with types and access modifiers
+- **Method**: Method definitions with signatures and bytecode instructions
+- **Instruction**: JVM bytecode instructions with operands
+- **Constant**: Constant pool entries for strings, numbers, and references
 
+## 📊 Performance
 
-### 简单计算器
+- **Streaming**: Parse large JASM files without loading entirely into memory
+- **Incremental**: Re-parse only changed sections
+- **Memory Efficient**: Smart AST node allocation
+- **Fast Recovery**: Quick error recovery for better IDE integration
 
+## 🔗 Integration
 
+Oak-jasm integrates seamlessly with:
 
-## 高级特性
+- **Bytecode Analysis**: Security analysis and optimization of JVM bytecode
+- **Code Generation**: Generating bytecode from high-level languages
+- **IDE Support**: Language server protocol compatibility for assembly languages
+- **Debugging Tools**: Debuggers and profilers for JVM applications
+- **Documentation**: Generating documentation from assembly code
 
-### 异常处理
+## 📚 Examples
 
+Check out the [examples](examples/) directory for comprehensive examples:
 
+- Complete JASM class parsing
+- Method and instruction analysis
+- Control flow and exception handling
+- Integration with development workflows
 
-### 泛型支持
+## 🤝 Contributing
 
-JASM 支持 Java 泛型的类型描述符：
+Contributions are welcome! 
 
-
-
-### 注解支持
-
-
-
-## 转换过程
-
-JASM 格式通过以下步骤转换为 JVM 类文件：
-
-1. **词法分析**: 将文本分解为标记（tokens）
-2. **语法分析**: 构建抽象语法树（AST）
-3. **语义分析**: 验证语法和类型正确性
-4. **代码生成**: 生成 JVM 字节码和常量池
-5. **类文件写入**: 写入标准 Java 类文件格式
-
-## 相关模块
-
-- [`lexer`](lexer/index.html) - JASM 词法分析器
-- [`parser`](parser/index.html) - JASM 语法分析器
-- [`ast`](ast/index.html) - JASM 抽象语法树定义
-- [`converter`](converter/index.html) - AST 到 JVM 程序的转换器
-- [`writer`](writer/index.html) - JVM 程序到类文件的写入器
-
-## 错误处理
-
-JASM 解析和转换过程中可能遇到的错误：
-
-- **语法错误**: 无效的语法结构
-- **类型错误**: 类型不匹配或无效类型
-- **引用错误**: 未定义的类、方法或字段
-- **验证错误**: 字节码验证失败
-
-所有错误都通过 [`GaiaError`](../../gaia_types/struct.GaiaError.html) 类型返回，提供详细的错误信息和位置。
+Please feel free to submit pull requests at the [project repository](https://github.com/ygg-lang/oaks/tree/dev/examples/oak-jasm) or open [issues](https://github.com/ygg-lang/oaks/issues).

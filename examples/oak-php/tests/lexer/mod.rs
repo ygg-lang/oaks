@@ -8,7 +8,7 @@ fn test_php_lexer() {
     let language = Box::leak(Box::new(PhpLanguage::default()));
     let lexer = PhpLexer::new(language);
     let test_runner = LexerTester::new(here.join("tests/lexer")).with_extension("php").with_timeout(Duration::from_secs(5));
-    match test_runner.run_tests::<PhpLanguage, _>(lexer) {
+    match test_runner.run_tests::<PhpLanguage, _>(&lexer) {
         Ok(()) => println!("PHP lexer tests passed!"),
         Err(e) => panic!("PHP lexer tests failed: {}", e),
     }

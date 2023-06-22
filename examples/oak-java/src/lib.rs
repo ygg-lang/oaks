@@ -4,8 +4,14 @@
 #![doc(html_favicon_url = "https://raw.githubusercontent.com/ygg-lang/oaks/refs/heads/dev/documents/logo.svg")]
 
 pub mod ast;
+mod builder;
+pub mod highlighter;
 pub mod kind;
 pub mod language;
 pub mod lexer;
+pub mod lsp;
+#[cfg(feature = "mcp")]
+pub mod mcp;
+pub mod parser;
 
-pub use crate::{ast::JavaRoot, kind::JavaSyntaxKind, language::JavaLanguage, lexer::JavaLexer};
+pub use crate::{ast::JavaRoot, builder::JavaBuilder, highlighter::JavaHighlighter, kind::JavaSyntaxKind, language::JavaLanguage, lexer::JavaLexer, lsp::JavaLanguageService, parser::JavaParser};

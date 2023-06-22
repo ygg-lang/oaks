@@ -1,0 +1,85 @@
+{
+    "success": true,
+    "count": 13,
+    "tokens": [
+        {
+            "kind": "Keyword(Fn)",
+            "text": "fn",
+            "start": 0,
+            "end": 2
+        },
+        {
+            "kind": "Identifier",
+            "text": "main",
+            "start": 3,
+            "end": 7
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 7,
+            "end": 8
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 8,
+            "end": 9
+        },
+        {
+            "kind": "LeftBrace",
+            "text": "{",
+            "start": 10,
+            "end": 11
+        },
+        {
+            "kind": "Minus",
+            "text": "-",
+            "start": 17,
+            "end": 18
+        },
+        {
+            "kind": "IntegerLiteral",
+            "text": "42",
+            "start": 18,
+            "end": 20
+        },
+        {
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 20,
+            "end": 21
+        },
+        {
+            "kind": "Bang",
+            "text": "!",
+            "start": 27,
+            "end": 28
+        },
+        {
+            "kind": "Keyword(True)",
+            "text": "true",
+            "start": 28,
+            "end": 32
+        },
+        {
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 32,
+            "end": 33
+        },
+        {
+            "kind": "RightBrace",
+            "text": "}",
+            "start": 35,
+            "end": 36
+        },
+        {
+            "kind": "Eof",
+            "text": "",
+            "start": 36,
+            "end": 36
+        }
+    ],
+    "errors": []
+}

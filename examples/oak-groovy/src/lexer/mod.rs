@@ -1,42 +1,40 @@
 use crate::{kind::GroovySyntaxKind, language::GroovyLanguage};
 use oak_core::{
-    IncrementalCache, Lexer, LexerState, OakError,
-    lexer::{CommentLine, LexOutput, StringConfig, WhitespaceConfig},
+    Lexer, LexerCache, LexerState, OakError,
+    lexer::{CommentConfig, LexOutput, StringConfig, WhitespaceConfig},
     source::Source,
 };
 use std::sync::LazyLock;
 
-type State<S: Source> = LexerState<S, GroovyLanguage>;
+type State<'a, S> = LexerState<'a, S, GroovyLanguage>;
 
 static GROOVY_WHITESPACE: LazyLock<WhitespaceConfig> = LazyLock::new(|| WhitespaceConfig { unicode_whitespace: true });
-static GROOVY_COMMENT: LazyLock<CommentLine> = LazyLock::new(|| CommentLine { line_markers: &["//"] });
+static GROOVY_COMMENT: LazyLock<CommentConfig> = LazyLock::new(|| CommentConfig { line_marker: "//", block_start: "/*", block_end: "*/", nested_blocks: false });
 static GROOVY_STRING: LazyLock<StringConfig> = LazyLock::new(|| StringConfig { quotes: &['"'], escape: Some('\\') });
 static GROOVY_CHAR: LazyLock<StringConfig> = LazyLock::new(|| StringConfig { quotes: &['\''], escape: Some('\\') });
 
 #[derive(Clone)]
 pub struct GroovyLexer<'config> {
-    config: &'config GroovyLanguage,
+    _config: &'config GroovyLanguage,
 }
 
 impl<'config> Lexer<GroovyLanguage> for GroovyLexer<'config> {
-    fn lex_incremental(
-        &self,
-        source: impl Source,
-        changed: usize,
-        cache: IncrementalCache<GroovyLanguage>,
-    ) -> LexOutput<GroovyLanguage> {
-        let mut state = LexerState::new_with_cache(source, changed, cache);
+    fn lex<'a, S: Source + ?Sized>(&self, source: &'a S, _edits: &[oak_core::TextEdit], cache: &'a mut impl LexerCache<GroovyLanguage>) -> LexOutput<GroovyLanguage> {
+        let mut state = LexerState::new(source);
         let result = self.run(&mut state);
-        state.finish(result)
+        if result.is_ok() {
+            state.add_eof();
+        }
+        state.finish_with_cache(result, cache)
     }
 }
 
 impl<'config> GroovyLexer<'config> {
     pub fn new(config: &'config GroovyLanguage) -> Self {
-        Self { config }
+        Self { _config: config }
     }
 
-    fn run<S: Source>(&self, state: &mut State<S>) -> Result<(), OakError> {
+    fn run<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> Result<(), OakError> {
         while state.not_at_end() {
             let safe_point = state.get_position();
 
@@ -72,51 +70,21 @@ impl<'config> GroovyLexer<'config> {
                 continue;
             }
 
-            state.safe_check(safe_point);
+            state.advance_if_dead_lock(safe_point);
         }
 
-        // 添加 EOF token
-        let eof_pos = state.get_position();
-        state.add_token(GroovySyntaxKind::Eof, eof_pos, eof_pos);
         Ok(())
     }
 
     /// 跳过空白字符
-    fn skip_whitespace<S: Source>(&self, state: &mut State<S>) -> bool {
-        match GROOVY_WHITESPACE.scan(state.rest(), state.get_position(), GroovySyntaxKind::Whitespace) {
-            Some(token) => {
-                state.advance_with(token);
-                true
-            }
-            None => false,
-        }
+    fn skip_whitespace<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
+        GROOVY_WHITESPACE.scan(state, GroovySyntaxKind::Whitespace)
     }
 
     /// 跳过注释
-    fn skip_comment<S: Source>(&self, state: &mut State<S>) -> bool {
-        // 行注释 //
-        if let Some(token) = GROOVY_COMMENT.scan(state.rest(), state.get_position(), GroovySyntaxKind::Comment) {
-            state.advance_with(token);
-            return true;
-        }
-
-        // 块注释 /* ... */
-        if state.rest().starts_with("/*") {
-            let start = state.get_position();
-            state.advance(2); // 跳过 /*
-
-            while state.not_at_end() {
-                if state.rest().starts_with("*/") {
-                    state.advance(2); // 跳过 */
-                    break;
-                }
-                if let Some(ch) = state.peek() {
-                    state.advance(ch.len_utf8());
-                }
-            }
-
-            let end = state.get_position();
-            state.add_token(GroovySyntaxKind::Comment, start, end);
+    fn skip_comment<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
+        // 行注释 // 和 块注释 /* ... */
+        if GROOVY_COMMENT.scan(state, GroovySyntaxKind::Comment, GroovySyntaxKind::Comment) {
             return true;
         }
 
@@ -124,21 +92,18 @@ impl<'config> GroovyLexer<'config> {
     }
 
     /// 词法分析字符串字面量
-    fn lex_string_literal<S: Source>(&self, state: &mut State<S>) -> bool {
+    fn lex_string_literal<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         // 普通字符串 "..."
-        if let Some(token) = GROOVY_STRING.scan(state.rest(), state.get_position(), GroovySyntaxKind::StringLiteral) {
-            state.advance_with(token);
+        if GROOVY_STRING.scan(state, GroovySyntaxKind::StringLiteral) {
             return true;
         }
 
         // 三重引号字符串 """..."""
-        if state.rest().starts_with("\"\"\"") {
-            let start = state.get_position();
-            state.advance(3); // 跳过开始的 """
+        if state.consume_if_starts_with("\"\"\"") {
+            let start = state.get_position() - 3;
 
             while state.not_at_end() {
-                if state.rest().starts_with("\"\"\"") {
-                    state.advance(3); // 跳过结束的 """
+                if state.consume_if_starts_with("\"\"\"") {
                     break;
                 }
                 if let Some(ch) = state.peek() {
@@ -151,14 +116,12 @@ impl<'config> GroovyLexer<'config> {
             return true;
         }
 
-        // GString $"..." 或 $/.../$
-        if state.rest().starts_with("$/") {
-            let start = state.get_position();
-            state.advance(2); // 跳过 $/
+        // GString $/.../$
+        if state.consume_if_starts_with("$/") {
+            let start = state.get_position() - 2;
 
             while state.not_at_end() {
-                if state.rest().starts_with("/$") {
-                    state.advance(2); // 跳过 /$
+                if state.consume_if_starts_with("/$") {
                     break;
                 }
                 if let Some(ch) = state.peek() {
@@ -175,30 +138,23 @@ impl<'config> GroovyLexer<'config> {
     }
 
     /// 词法分析字符字面量
-    fn lex_char_literal<S: Source>(&self, state: &mut State<S>) -> bool {
-        match GROOVY_CHAR.scan(state.rest(), state.get_position(), GroovySyntaxKind::CharLiteral) {
-            Some(token) => {
-                state.advance_with(token);
-                true
-            }
-            None => false,
-        }
+    fn lex_char_literal<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
+        GROOVY_CHAR.scan(state, GroovySyntaxKind::CharLiteral)
     }
 
     /// 词法分析数字字面量
-    fn lex_number_literal<S: Source>(&self, state: &mut State<S>) -> bool {
+    fn lex_number_literal<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start = state.get_position();
         let mut has_digits = false;
         let mut is_float = false;
 
         // 处理负号
-        if state.rest().starts_with('-') {
-            state.advance(1);
+        if state.consume_if_starts_with("-") {
+            // Negative sign
         }
 
         // 处理十六进制 0x...
-        if state.rest().starts_with("0x") || state.rest().starts_with("0X") {
-            state.advance(2);
+        if state.consume_if_starts_with("0x") || state.consume_if_starts_with("0X") {
             while let Some(ch) = state.peek() {
                 if ch.is_ascii_hexdigit() {
                     state.advance(ch.len_utf8());
@@ -210,19 +166,15 @@ impl<'config> GroovyLexer<'config> {
             }
         }
         // 处理八进制 0...
-        else if state.rest().starts_with('0') && state.rest().len() > 1 {
-            if let Some(next_ch) = state.rest().chars().nth(1) {
-                if next_ch.is_ascii_digit() {
-                    state.advance(1); // 跳过 0
-                    while let Some(ch) = state.peek() {
-                        if ch >= '0' && ch <= '7' {
-                            state.advance(ch.len_utf8());
-                            has_digits = true;
-                        }
-                        else {
-                            break;
-                        }
-                    }
+        else if state.peek() == Some('0') {
+            state.advance(1);
+            has_digits = true;
+            while let Some(ch) = state.peek() {
+                if ch >= '0' && ch <= '7' {
+                    state.advance(ch.len_utf8());
+                }
+                else {
+                    break;
                 }
             }
         }
@@ -240,8 +192,8 @@ impl<'config> GroovyLexer<'config> {
             }
 
             // 处理小数部分
-            if state.rest().starts_with('.') && has_digits {
-                if let Some(next_ch) = state.rest().chars().nth(1) {
+            if state.peek() == Some('.') && has_digits {
+                if let Some(next_ch) = state.peek_next_n(1) {
                     if next_ch.is_ascii_digit() {
                         state.advance(1); // 跳过 .
                         is_float = true;
@@ -259,30 +211,34 @@ impl<'config> GroovyLexer<'config> {
             }
 
             // 处理指数部分
-            if (state.rest().starts_with('e') || state.rest().starts_with('E')) && has_digits {
-                state.advance(1);
-                is_float = true;
-
-                // 处理指数符号
-                if state.rest().starts_with('+') || state.rest().starts_with('-') {
+            if let Some(ch) = state.peek() {
+                if (ch == 'e' || ch == 'E') && has_digits {
                     state.advance(1);
-                }
+                    is_float = true;
 
-                // 处理指数数字
-                let mut exp_digits = false;
-                while let Some(ch) = state.peek() {
-                    if ch.is_ascii_digit() {
-                        state.advance(ch.len_utf8());
-                        exp_digits = true;
+                    // 处理指数符号
+                    if let Some(next) = state.peek() {
+                        if next == '+' || next == '-' {
+                            state.advance(1);
+                        }
                     }
-                    else {
-                        break;
-                    }
-                }
 
-                if !exp_digits {
-                    // 指数部分必须有数字
-                    return false;
+                    // 处理指数数字
+                    let mut exp_digits = false;
+                    while let Some(ch) = state.peek() {
+                        if ch.is_ascii_digit() {
+                            state.advance(ch.len_utf8());
+                            exp_digits = true;
+                        }
+                        else {
+                            break;
+                        }
+                    }
+
+                    if !exp_digits {
+                        // 指数部分必须有数字
+                        return false;
+                    }
                 }
             }
         }
@@ -309,12 +265,12 @@ impl<'config> GroovyLexer<'config> {
     }
 
     /// 词法分析标识符或关键字
-    fn lex_identifier_or_keyword<S: Source>(&self, state: &mut State<S>) -> bool {
+    fn lex_identifier_or_keyword<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start = state.get_position();
 
         // 标识符必须以字母或下划线开始
         if let Some(first_ch) = state.peek() {
-            if !first_ch.is_alphabetic() && first_ch != '_' {
+            if !first_ch.is_alphabetic() && first_ch != '_' && first_ch != '$' {
                 return false;
             }
 
@@ -322,7 +278,7 @@ impl<'config> GroovyLexer<'config> {
 
             // 后续字符可以是字母、数字或下划线
             while let Some(ch) = state.peek() {
-                if ch.is_alphanumeric() || ch == '_' {
+                if ch.is_alphanumeric() || ch == '_' || ch == '$' {
                     state.advance(ch.len_utf8());
                 }
                 else {
@@ -332,7 +288,7 @@ impl<'config> GroovyLexer<'config> {
 
             let end = state.get_position();
             let text = state.get_text_in((start..end).into());
-            let kind = self.keyword_or_identifier(&text);
+            let kind = self.keyword_or_identifier(text.as_ref());
             state.add_token(kind, start, end);
             true
         }
@@ -402,115 +358,93 @@ impl<'config> GroovyLexer<'config> {
     }
 
     /// 词法分析操作符
-    fn lex_operators<S: Source>(&self, state: &mut State<S>) -> bool {
+    fn lex_operators<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start = state.get_position();
-        let rest = state.rest();
 
         // 三字符操作符
-        if rest.starts_with(">>>") {
-            state.advance(3);
+        if state.consume_if_starts_with(">>>") {
             state.add_token(GroovySyntaxKind::UnsignedRightShift, start, state.get_position());
             return true;
         }
-        if rest.starts_with("<=>") {
-            state.advance(3);
+        if state.consume_if_starts_with("<=>") {
             state.add_token(GroovySyntaxKind::Spaceship, start, state.get_position());
             return true;
         }
 
         // 两字符操作符
-        if rest.starts_with("**") {
-            state.advance(2);
+        if state.consume_if_starts_with("**") {
             state.add_token(GroovySyntaxKind::Power, start, state.get_position());
             return true;
         }
-        if rest.starts_with("+=") {
-            state.advance(2);
+        if state.consume_if_starts_with("+=") {
             state.add_token(GroovySyntaxKind::PlusAssign, start, state.get_position());
             return true;
         }
-        if rest.starts_with("-=") {
-            state.advance(2);
+        if state.consume_if_starts_with("-=") {
             state.add_token(GroovySyntaxKind::MinusAssign, start, state.get_position());
             return true;
         }
-        if rest.starts_with("*=") {
-            state.advance(2);
+        if state.consume_if_starts_with("*=") {
             state.add_token(GroovySyntaxKind::StarAssign, start, state.get_position());
             return true;
         }
-        if rest.starts_with("/=") {
-            state.advance(2);
+        if state.consume_if_starts_with("/=") {
             state.add_token(GroovySyntaxKind::SlashAssign, start, state.get_position());
             return true;
         }
-        if rest.starts_with("%=") {
-            state.advance(2);
+        if state.consume_if_starts_with("%=") {
             state.add_token(GroovySyntaxKind::PercentAssign, start, state.get_position());
             return true;
         }
-        if rest.starts_with("**=") {
-            state.advance(3);
+        if state.consume_if_starts_with("**=") {
             state.add_token(GroovySyntaxKind::PowerAssign, start, state.get_position());
             return true;
         }
-        if rest.starts_with("==") {
-            state.advance(2);
+        if state.consume_if_starts_with("==") {
             state.add_token(GroovySyntaxKind::Equal, start, state.get_position());
             return true;
         }
-        if rest.starts_with("!=") {
-            state.advance(2);
+        if state.consume_if_starts_with("!=") {
             state.add_token(GroovySyntaxKind::NotEqual, start, state.get_position());
             return true;
         }
-        if rest.starts_with("<=") {
-            state.advance(2);
+        if state.consume_if_starts_with("<=") {
             state.add_token(GroovySyntaxKind::LessEqual, start, state.get_position());
             return true;
         }
-        if rest.starts_with(">=") {
-            state.advance(2);
+        if state.consume_if_starts_with(">=") {
             state.add_token(GroovySyntaxKind::GreaterEqual, start, state.get_position());
             return true;
         }
-        if rest.starts_with("&&") {
-            state.advance(2);
+        if state.consume_if_starts_with("&&") {
             state.add_token(GroovySyntaxKind::LogicalAnd, start, state.get_position());
             return true;
         }
-        if rest.starts_with("||") {
-            state.advance(2);
+        if state.consume_if_starts_with("||") {
             state.add_token(GroovySyntaxKind::LogicalOr, start, state.get_position());
             return true;
         }
-        if rest.starts_with("<<") {
-            state.advance(2);
+        if state.consume_if_starts_with("<<") {
             state.add_token(GroovySyntaxKind::LeftShift, start, state.get_position());
             return true;
         }
-        if rest.starts_with(">>") {
-            state.advance(2);
+        if state.consume_if_starts_with(">>") {
             state.add_token(GroovySyntaxKind::RightShift, start, state.get_position());
             return true;
         }
-        if rest.starts_with("++") {
-            state.advance(2);
+        if state.consume_if_starts_with("++") {
             state.add_token(GroovySyntaxKind::Increment, start, state.get_position());
             return true;
         }
-        if rest.starts_with("--") {
-            state.advance(2);
+        if state.consume_if_starts_with("--") {
             state.add_token(GroovySyntaxKind::Decrement, start, state.get_position());
             return true;
         }
-        if rest.starts_with("?:") {
-            state.advance(2);
+        if state.consume_if_starts_with("?:") {
             state.add_token(GroovySyntaxKind::Elvis, start, state.get_position());
             return true;
         }
-        if rest.starts_with("?.") {
-            state.advance(2);
+        if state.consume_if_starts_with("?.") {
             state.add_token(GroovySyntaxKind::SafeNavigation, start, state.get_position());
             return true;
         }
@@ -519,7 +453,7 @@ impl<'config> GroovyLexer<'config> {
     }
 
     /// 词法分析单字符 token
-    fn lex_single_char_tokens<S: Source>(&self, state: &mut State<S>) -> bool {
+    fn lex_single_char_tokens<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         if let Some(ch) = state.peek() {
             let start = state.get_position();
             let kind = match ch {

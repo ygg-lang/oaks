@@ -1,8 +1,9 @@
-use std::{range::Range, string::String, vec::Vec};
+use core::range::Range;
+use std::{string::String, vec::Vec};
 
 /// AsciiDoc 文档的根节点
 #[derive(Debug, PartialEq, Clone)]
-pub struct SourceFile {
+pub struct AsciiDocRoot {
     pub elements: Vec<Element>,
 }
 

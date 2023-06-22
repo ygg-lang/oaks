@@ -1,6 +1,6 @@
-use crate::kind::WolframSyntaxKind;
-use oak_core::Language;
+use oak_core::{Language, LanguageCategory};
 
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, Hash)]
 pub struct WolframLanguage {}
 
 impl WolframLanguage {
@@ -9,13 +9,11 @@ impl WolframLanguage {
     }
 }
 
-impl Default for WolframLanguage {
-    fn default() -> Self {
-        Self::new()
-    }
-}
-
 impl Language for WolframLanguage {
-    type SyntaxKind = WolframSyntaxKind;
+    const NAME: &'static str = "wolfram";
+    const CATEGORY: LanguageCategory = LanguageCategory::Programming;
+
+    type TokenType = crate::kind::WolframSyntaxKind;
+    type ElementType = crate::kind::WolframSyntaxKind;
     type TypedRoot = ();
 }

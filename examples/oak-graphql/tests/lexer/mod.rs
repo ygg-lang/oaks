@@ -1,4 +1,4 @@
-use oak_core::{helpers::LexerTester, source::Source};
+use oak_core::{LexerState, helpers::LexerTester, source::Source};
 use oak_graphql::{GraphQLLanguage, GraphQLLexer};
 use std::{path::Path, time::Duration};
 
@@ -8,7 +8,7 @@ fn test_graphql_lexer() {
     let language = Box::leak(Box::new(GraphQLLanguage::default()));
     let lexer = GraphQLLexer::new(language);
     let test_runner = LexerTester::new(here.join("tests/lexer/fixtures")).with_extension("graphql").with_timeout(Duration::from_secs(5));
-    match test_runner.run_tests::<GraphQLLanguage, _>(lexer) {
+    match test_runner.run_tests::<GraphQLLanguage, _>(&lexer) {
         Ok(()) => println!("GraphQL lexer tests passed!"),
         Err(e) => panic!("GraphQL lexer tests failed: {}", e),
     }
@@ -16,7 +16,7 @@ fn test_graphql_lexer() {
 
 #[test]
 fn test_peek_behavior() {
-    use oak_core::{SourceText, lexer::LexerState};
+    use oak_core::{LexerState, SourceText, lexer::LexerState};
     use oak_graphql::GraphQLLanguage;
 
     let source = SourceText::new("NESTED_CONSTANT");
@@ -42,7 +42,7 @@ fn test_peek_behavior() {
 
 #[test]
 fn test_graphql_query_parsing() {
-    use oak_core::{Lexer, SourceText};
+    use oak_core::{Lexer, LexerState, SourceText};
     use oak_graphql::{GraphQLLanguage, GraphQLLexer};
 
     let source = SourceText::new("query { user { name } }");

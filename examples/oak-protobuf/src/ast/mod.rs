@@ -3,9 +3,7 @@ use crate::kind::ProtobufSyntaxKind;
 pub type ProtobufToken = ProtobufSyntaxKind;
 
 #[derive(Debug, Clone, PartialEq)]
-pub struct SourceFile {
-    pub definitions: Vec<Definition>,
-}
+pub struct ProtobufRoot {}
 
 #[derive(Debug, Clone, PartialEq)]
 pub enum Definition {

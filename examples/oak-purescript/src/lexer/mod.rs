@@ -1,20 +1,32 @@
 use crate::{kind::PurescriptSyntaxKind, language::PurescriptLanguage};
-use oak_core::{IncrementalCache, Lexer, LexerState, OakError, lexer::LexOutput, source::Source};
+use oak_core::{Lexer, LexerCache, LexerState, OakError, lexer::LexOutput, source::Source};
 
-type State<S: Source> = LexerState<S, PurescriptLanguage>;
+type State<'a, S> = LexerState<'a, S, PurescriptLanguage>;
 
 #[derive(Clone)]
 pub struct PurescriptLexer<'config> {
-    config: &'config PurescriptLanguage,
+    _config: &'config PurescriptLanguage,
+}
+
+impl<'config> Lexer<PurescriptLanguage> for PurescriptLexer<'config> {
+    fn lex<'a, S: Source + ?Sized>(&self, source: &'a S, _edits: &[oak_core::TextEdit], cache: &'a mut impl LexerCache<PurescriptLanguage>) -> LexOutput<PurescriptLanguage> {
+        let mut state = State::new_with_cache(source, 0, cache);
+        let result = self.run(&mut state);
+        if result.is_ok() {
+            state.add_eof();
+        }
+        state.finish_with_cache(result, cache)
+    }
 }
 
 impl<'config> PurescriptLexer<'config> {
     pub fn new(config: &'config PurescriptLanguage) -> Self {
-        Self { config }
+        Self { _config: config }
     }
 
-    fn run<S: Source>(&self, state: &mut State<S>) -> Result<(), OakError> {
+    fn run<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> Result<(), OakError> {
         while state.not_at_end() {
+            let safe_point = state.get_position();
             if self.skip_whitespace(state) {
                 continue;
             }
@@ -57,17 +69,15 @@ impl<'config> PurescriptLexer<'config> {
                 state.advance(ch.len_utf8());
                 state.add_token(PurescriptSyntaxKind::Error, start_pos, state.get_position());
             }
-        }
 
-        // 添加 EOF token
-        let eof_pos = state.get_position();
-        state.add_token(PurescriptSyntaxKind::Eof, eof_pos, eof_pos);
+            state.advance_if_dead_lock(safe_point);
+        }
 
         Ok(())
     }
 
     /// 跳过空白字符
-    fn skip_whitespace<S: Source>(&self, state: &mut State<S>) -> bool {
+    fn skip_whitespace<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start_pos = state.get_position();
 
         while let Some(ch) = state.peek() {
@@ -89,7 +99,7 @@ impl<'config> PurescriptLexer<'config> {
     }
 
     /// 处理换行
-    fn lex_newline<S: Source>(&self, state: &mut State<S>) -> bool {
+    fn lex_newline<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start_pos = state.get_position();
 
         if let Some('\n') = state.peek() {
@@ -111,7 +121,7 @@ impl<'config> PurescriptLexer<'config> {
     }
 
     /// 处理注释
-    fn lex_comment<S: Source>(&self, state: &mut State<S>) -> bool {
+    fn lex_comment<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start_pos = state.get_position();
 
         if let Some('-') = state.peek() {
@@ -175,7 +185,7 @@ impl<'config> PurescriptLexer<'config> {
     }
 
     /// 处理标识符或关键
-    fn lex_identifier_or_keyword<S: Source>(&self, state: &mut State<S>) -> bool {
+    fn lex_identifier_or_keyword<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start_pos = state.get_position();
 
         if let Some(ch) = state.peek() {
@@ -235,7 +245,7 @@ impl<'config> PurescriptLexer<'config> {
     }
 
     /// 处理数字字面
-    fn lex_number_literal<S: Source>(&self, state: &mut State<S>) -> bool {
+    fn lex_number_literal<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start_pos = state.get_position();
 
         if let Some(ch) = state.peek() {
@@ -321,7 +331,7 @@ impl<'config> PurescriptLexer<'config> {
     }
 
     /// 处理字符串字面量
-    fn lex_string_literal<S: Source>(&self, state: &mut State<S>) -> bool {
+    fn lex_string_literal<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start_pos = state.get_position();
 
         if let Some('"') = state.peek() {
@@ -355,7 +365,7 @@ impl<'config> PurescriptLexer<'config> {
     }
 
     /// 处理字符字面
-    fn lex_char_literal<S: Source>(&self, state: &mut State<S>) -> bool {
+    fn lex_char_literal<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start_pos = state.get_position();
 
         if let Some('\'') = state.peek() {
@@ -389,7 +399,7 @@ impl<'config> PurescriptLexer<'config> {
     }
 
     /// 处理操作
-    fn lex_operator<S: Source>(&self, state: &mut State<S>) -> bool {
+    fn lex_operator<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start_pos = state.get_position();
 
         if let Some(ch) = state.peek() {
@@ -506,7 +516,7 @@ impl<'config> PurescriptLexer<'config> {
     }
 
     /// 处理分隔
-    fn lex_delimiter<S: Source>(&self, state: &mut State<S>) -> bool {
+    fn lex_delimiter<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start_pos = state.get_position();
 
         if let Some(ch) = state.peek() {
@@ -545,18 +555,5 @@ impl<'config> PurescriptLexer<'config> {
         else {
             false
         }
-    }
-}
-
-impl<'config> Lexer<PurescriptLanguage> for PurescriptLexer<'config> {
-    fn lex_incremental(
-        &self,
-        source: impl Source,
-        changed: usize,
-        cache: IncrementalCache<PurescriptLanguage>,
-    ) -> LexOutput<PurescriptLanguage> {
-        let mut state = LexerState::new_with_cache(source, changed, cache);
-        let result = self.run(&mut state);
-        state.finish(result)
     }
 }

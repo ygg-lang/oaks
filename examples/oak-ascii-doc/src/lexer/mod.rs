@@ -1,41 +1,43 @@
-use crate::{kind::AsciiDocSyntaxKind, language::AsciiDocLanguage};
+pub mod token_type;
+
+pub use token_type::AsciiDocTokenType;
+
+use crate::language::AsciiDocLanguage;
 use oak_core::{
-    IncrementalCache, Lexer, LexerState, OakError,
-    lexer::{CommentLine, LexOutput, WhitespaceConfig},
+    OakError,
+    lexer::{CommentConfig, LexOutput, Lexer, LexerCache, LexerState, WhitespaceConfig},
     source::Source,
 };
 use std::sync::LazyLock;
 
-type State<S: Source> = LexerState<S, AsciiDocLanguage>;
+type State<'a, S> = LexerState<'a, S, AsciiDocLanguage>;
 
 static ASCIIDOC_WHITESPACE: LazyLock<WhitespaceConfig> = LazyLock::new(|| WhitespaceConfig { unicode_whitespace: true });
-static ASCIIDOC_COMMENT: LazyLock<CommentLine> = LazyLock::new(|| CommentLine { line_markers: &["//"] });
+static ASCIIDOC_COMMENT: LazyLock<CommentConfig> = LazyLock::new(|| CommentConfig { line_marker: "//", block_start: "", block_end: "", nested_blocks: false });
 
 #[derive(Clone)]
 pub struct AsciiDocLexer<'config> {
-    config: &'config AsciiDocLanguage,
+    _config: &'config AsciiDocLanguage,
 }
 
 impl<'config> Lexer<AsciiDocLanguage> for AsciiDocLexer<'config> {
-    fn lex_incremental(
-        &self,
-        source: impl Source,
-        changed: usize,
-        cache: IncrementalCache<AsciiDocLanguage>,
-    ) -> LexOutput<AsciiDocLanguage> {
-        let mut state = LexerState::new_with_cache(source, changed, cache);
+    fn lex<'a, S: Source + ?Sized>(&self, text: &'a S, _edits: &[oak_core::TextEdit], cache: &'a mut impl LexerCache<AsciiDocLanguage>) -> LexOutput<AsciiDocLanguage> {
+        let mut state = State::new(text);
         let result = self.run(&mut state);
-        state.finish(result)
+        if result.is_ok() {
+            state.add_eof();
+        }
+        state.finish_with_cache(result, cache)
     }
 }
 
 impl<'config> AsciiDocLexer<'config> {
     pub fn new(config: &'config AsciiDocLanguage) -> Self {
-        Self { config }
+        Self { _config: config }
     }
 
     /// 主要词法分析逻辑
-    fn run<S: Source>(&self, state: &mut State<S>) -> Result<(), OakError> {
+    fn run<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> Result<(), OakError> {
         while state.not_at_end() {
             let safe_point = state.get_position();
 
@@ -83,97 +85,78 @@ impl<'config> AsciiDocLexer<'config> {
                 continue;
             }
 
-            state.safe_check(safe_point);
+            state.advance_if_dead_lock(safe_point);
         }
 
-        // 添加 EOF token
-        let eof_pos = state.get_position();
-        state.add_token(AsciiDocSyntaxKind::Eof, eof_pos, eof_pos);
         Ok(())
     }
 
     /// 跳过空白字符
-    fn skip_whitespace<S: Source>(&self, state: &mut State<S>) -> bool {
-        match ASCIIDOC_WHITESPACE.scan(state.rest(), state.get_position(), AsciiDocSyntaxKind::Whitespace) {
-            Some(token) => {
-                state.advance_with(token);
-                return true;
-            }
-            None => {}
-        }
-        false
+    fn skip_whitespace<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
+        ASCIIDOC_WHITESPACE.scan(state, AsciiDocTokenType::Whitespace)
     }
 
-    fn skip_comment<S: Source>(&self, state: &mut State<S>) -> bool {
-        match ASCIIDOC_COMMENT.scan(state.rest(), state.get_position(), AsciiDocSyntaxKind::Comment) {
-            Some(token) => {
-                state.advance_with(token);
-                return true;
-            }
-            None => {}
-        }
-        false
+    fn skip_comment<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
+        ASCIIDOC_COMMENT.scan(state, AsciiDocTokenType::Comment, AsciiDocTokenType::Comment)
     }
 
     /// 处理标题 (= Title, == Subtitle, etc.)
-    fn lex_header<S: Source>(&self, state: &mut State<S>) -> bool {
+    fn lex_header<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start = state.get_position();
-        let rest = state.rest();
 
-        if rest.starts_with("======") {
+        if state.starts_with("======") {
             state.advance(6);
-            state.add_token(AsciiDocSyntaxKind::Header6, start, state.get_position());
+            state.add_token(AsciiDocTokenType::Header6, start, state.get_position());
             return true;
         }
-        if rest.starts_with("=====") {
+        if state.starts_with("=====") {
             state.advance(5);
-            state.add_token(AsciiDocSyntaxKind::Header5, start, state.get_position());
+            state.add_token(AsciiDocTokenType::Header5, start, state.get_position());
             return true;
         }
-        if rest.starts_with("====") {
+        if state.starts_with("====") {
             state.advance(4);
-            state.add_token(AsciiDocSyntaxKind::Header4, start, state.get_position());
+            state.add_token(AsciiDocTokenType::Header4, start, state.get_position());
             return true;
         }
-        if rest.starts_with("===") {
+        if state.starts_with("===") {
             state.advance(3);
-            state.add_token(AsciiDocSyntaxKind::Header3, start, state.get_position());
+            state.add_token(AsciiDocTokenType::Header3, start, state.get_position());
             return true;
         }
-        if rest.starts_with("==") {
+        if state.starts_with("==") {
             state.advance(2);
-            state.add_token(AsciiDocSyntaxKind::Header2, start, state.get_position());
+            state.add_token(AsciiDocTokenType::Header2, start, state.get_position());
             return true;
         }
-        if rest.starts_with("=") {
+        if state.starts_with("=") {
             state.advance(1);
-            state.add_token(AsciiDocSyntaxKind::Header1, start, state.get_position());
+            state.add_token(AsciiDocTokenType::Header1, start, state.get_position());
             return true;
         }
         false
     }
 
     /// 处理粗体 **text**
-    fn lex_bold<S: Source>(&self, state: &mut State<S>) -> bool {
+    fn lex_bold<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start = state.get_position();
-        let rest = state.rest();
 
-        if rest.starts_with("**") {
+        if state.starts_with("**") {
             state.advance(2);
-            state.add_token(AsciiDocSyntaxKind::BoldMarker, start, state.get_position());
+            state.add_token(AsciiDocTokenType::BoldMarker, start, state.get_position());
             return true;
         }
         false
     }
 
     /// 处理斜体 *text*
-    fn lex_italic<S: Source>(&self, state: &mut State<S>) -> bool {
+    fn lex_italic<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start = state.get_position();
 
-        if let Some(ch) = state.current() {
+        if let Some(ch) = state.peek() {
             if ch == '*' {
                 state.advance(1);
-                state.add_token(AsciiDocSyntaxKind::ItalicMarker, start, state.get_position());
+                state.add_token(AsciiDocTokenType::ItalicMarker, start, state.get_position());
                 return true;
             }
         }
@@ -181,13 +164,13 @@ impl<'config> AsciiDocLexer<'config> {
     }
 
     /// 处理等宽字体 `text`
-    fn lex_monospace<S: Source>(&self, state: &mut State<S>) -> bool {
+    fn lex_monospace<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start = state.get_position();
 
-        if let Some(ch) = state.current() {
+        if let Some(ch) = state.peek() {
             if ch == '`' {
                 state.advance(1);
-                state.add_token(AsciiDocSyntaxKind::MonospaceMarker, start, state.get_position());
+                state.add_token(AsciiDocTokenType::MonospaceMarker, start, state.get_position());
                 return true;
             }
         }
@@ -195,40 +178,40 @@ impl<'config> AsciiDocLexer<'config> {
     }
 
     /// 处理代码块 ----
-    fn lex_code_block<S: Source>(&self, state: &mut State<S>) -> bool {
+    fn lex_code_block<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start = state.get_position();
         let rest = state.rest();
 
         if rest.starts_with("----") {
             state.advance(4);
-            state.add_token(AsciiDocSyntaxKind::CodeBlockMarker, start, state.get_position());
+            state.add_token(AsciiDocTokenType::CodeBlockMarker, start, state.get_position());
             return true;
         }
         false
     }
 
     /// 处理链接 link:url[text]
-    fn lex_link<S: Source>(&self, state: &mut State<S>) -> bool {
+    fn lex_link<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start = state.get_position();
         let rest = state.rest();
 
         if rest.starts_with("link:") {
             state.advance(5);
-            state.add_token(AsciiDocSyntaxKind::LinkMarker, start, state.get_position());
+            state.add_token(AsciiDocTokenType::LinkMarker, start, state.get_position());
             return true;
         }
         false
     }
 
     /// 处理列表项 *, -, +
-    fn lex_list_item<S: Source>(&self, state: &mut State<S>) -> bool {
+    fn lex_list_item<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start = state.get_position();
 
         if let Some(ch) = state.current() {
             match ch {
                 '*' | '-' | '+' => {
                     state.advance(1);
-                    state.add_token(AsciiDocSyntaxKind::ListMarker, start, state.get_position());
+                    state.add_token(AsciiDocTokenType::ListMarker, start, state.get_position());
                     return true;
                 }
                 _ => {}
@@ -238,19 +221,19 @@ impl<'config> AsciiDocLexer<'config> {
     }
 
     /// 处理分隔符
-    fn lex_delimiter<S: Source>(&self, state: &mut State<S>) -> bool {
+    fn lex_delimiter<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start = state.get_position();
 
         if let Some(ch) = state.current() {
             let kind = match ch {
-                '[' => AsciiDocSyntaxKind::LeftBracket,
-                ']' => AsciiDocSyntaxKind::RightBracket,
-                '(' => AsciiDocSyntaxKind::LeftParen,
-                ')' => AsciiDocSyntaxKind::RightParen,
-                ':' => AsciiDocSyntaxKind::Colon,
-                ',' => AsciiDocSyntaxKind::Comma,
-                '.' => AsciiDocSyntaxKind::Dot,
-                '\n' => AsciiDocSyntaxKind::Newline,
+                '[' => AsciiDocTokenType::LeftBracket,
+                ']' => AsciiDocTokenType::RightBracket,
+                '(' => AsciiDocTokenType::LeftParen,
+                ')' => AsciiDocTokenType::RightParen,
+                ':' => AsciiDocTokenType::Colon,
+                ',' => AsciiDocTokenType::Comma,
+                '.' => AsciiDocTokenType::Dot,
+                '\n' => AsciiDocTokenType::Newline,
                 _ => return false,
             };
             state.advance(ch.len_utf8());
@@ -261,7 +244,7 @@ impl<'config> AsciiDocLexer<'config> {
     }
 
     /// 处理普通文本
-    fn lex_text<S: Source>(&self, state: &mut State<S>) -> bool {
+    fn lex_text<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start = state.get_position();
 
         if let Some(ch) = state.current() {
@@ -277,7 +260,7 @@ impl<'config> AsciiDocLexer<'config> {
                     }
                 }
 
-                state.add_token(AsciiDocSyntaxKind::Text, start, state.get_position());
+                state.add_token(AsciiDocTokenType::Text, start, state.get_position());
                 return true;
             }
         }

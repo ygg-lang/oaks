@@ -1,6 +1,4 @@
-#![feature(new_range_api)]
-
-use oak_core::{helpers::LexerTester, source::Source};
+use oak_core::{LexerState, helpers::LexerTester, source::Source};
 use oak_wolfram::{WolframLanguage, WolframLexer};
 use std::{path::Path, time::Duration};
 
@@ -10,7 +8,7 @@ fn test_wolfram_lexer() {
     let language = Box::leak(Box::new(WolframLanguage::default()));
     let lexer = WolframLexer::new(language);
     let test_runner = LexerTester::new(here.join("tests/lexer")).with_extension("wl").with_timeout(Duration::from_secs(5));
-    match test_runner.run_tests::<WolframLanguage, _>(lexer) {
+    match test_runner.run_tests::<WolframLanguage, _>(&lexer) {
         Ok(()) => println!("Wolfram lexer tests passed!"),
         Err(e) => panic!("Wolfram lexer tests failed: {}", e),
     }
@@ -18,11 +16,11 @@ fn test_wolfram_lexer() {
 
 #[test]
 fn test_peek_behavior() {
-    use oak_core::{SourceText, lexer::LexerState};
+    use oak_core::SourceText;
     use oak_wolfram::WolframLanguage;
 
     let source = SourceText::new("Module[{x}, x + 1]");
-    let mut state = LexerState::<&SourceText, WolframLanguage>::new(&source);
+    let mut state = LexerState::<SourceText, WolframLanguage>::new(&source);
 
     println!("初始状态:");
     println!("位置: {}", state.get_position());
@@ -51,7 +49,8 @@ fn test_wolfram_function_parsing() {
     let language = Box::leak(Box::new(WolframLanguage::default()));
     let lexer = WolframLexer::new(language);
 
-    let result = lexer.lex(&source);
+    let mut cache = oak_core::ParseSession::<WolframLanguage>::default();
+    let result = lexer.lex(&source, &[], &mut cache);
 
     println!("测试 Module[{{x}}, x + 1] 解析:");
     println!("源代码: '{}'", (&source).get_text_from(0));
@@ -63,10 +62,7 @@ fn test_wolfram_function_parsing() {
     let source_ref = &source;
     let token_text = source_ref.get_text_in(first_token.span.clone());
 
-    println!(
-        "第一个标记: 类型={:?}, 文本='{}', 位置={}..{}",
-        first_token.kind, token_text, first_token.span.start, first_token.span.end
-    );
+    println!("第一个标记: 类型={:?}, 文本='{}', 位置={}..{}", first_token.kind, token_text, first_token.span.start, first_token.span.end);
 
     assert_eq!(token_text, "Module", "标识符应该被完整解析为 Module");
     assert_eq!(first_token.span.start, 0, "标记应该从位置 0 开始");

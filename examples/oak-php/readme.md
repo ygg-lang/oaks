@@ -21,10 +21,12 @@ Oak PHP is a robust parser for PHP, designed to handle complete PHP syntax inclu
 Basic example:
 
 ```rust
-use oak_php::{Parser, PhpLanguage, SourceText};
+use oak_core::{Parser, SourceText, parser::session::ParseSession};
+use oak_php::{PhpParser, PhpLanguage};
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
-    let parser = Parser::new();
+    let mut session = ParseSession::<PhpLanguage>::default();
+    let parser = PhpParser::new();
     let source = SourceText::new(r#"
 <?php
 echo "Hello, World!";
@@ -34,7 +36,7 @@ echo "Welcome to $name!";
 ?>
     "#);
     
-    let result = parser.parse(&source);
+    let result = parser.parse(&[], &mut session);
     println!("Parsed PHP successfully.");
     Ok(())
 }
@@ -44,9 +46,11 @@ echo "Welcome to $name!";
 
 ### Function Parsing
 ```rust
-use oak_php::{Parser, PhpLanguage, SourceText};
+use oak_core::{Parser, SourceText, parser::session::ParseSession};
+use oak_php::{PhpParser, PhpLanguage};
 
-let parser = Parser::new();
+let mut session = ParseSession::<PhpLanguage>::default();
+let parser = PhpParser::new();
 let source = SourceText::new(r#"
 <?php
 function add($a, $b) {
@@ -58,15 +62,17 @@ echo "Result: $result";
 ?>
 "#);
 
-let result = parser.parse(&source);
+let result = parser.parse(&[], &mut session);
 println!("Function parsed successfully.");
 ```
 
 ### Class Parsing
 ```rust
-use oak_php::{Parser, PhpLanguage, SourceText};
+use oak_core::{Parser, SourceText, parser::session::ParseSession};
+use oak_php::{PhpParser, PhpLanguage};
 
-let parser = Parser::new();
+let mut session = ParseSession::<PhpLanguage>::default();
+let parser = PhpParser::new();
 let source = SourceText::new(r#"
 <?php
 class Calculator {
@@ -88,7 +94,7 @@ class Calculator {
 ?>
 "#);
 
-let result = parser.parse(&source);
+let result = parser.parse(&[], &mut session);
 println!("Class parsed successfully.");
 ```
 
@@ -96,11 +102,13 @@ println!("Class parsed successfully.");
 
 ### Token-Level Parsing
 ```rust
-use oak_php::{Parser, PhpLanguage, SourceText};
+use oak_core::{Parser, SourceText, parser::session::ParseSession};
+use oak_php::{PhpParser, PhpLanguage};
 
-let parser = Parser::new();
+let mut session = ParseSession::<PhpLanguage>::default();
+let parser = PhpParser::new();
 let source = SourceText::new("<?php $x = 42; ?>");
-let result = parser.parse(&source);
+let result = parser.parse(&[], &mut session);
 println!("Token parsing completed.");
 ```
 

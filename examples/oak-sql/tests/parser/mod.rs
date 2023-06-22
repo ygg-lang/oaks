@@ -1,5 +1,5 @@
-// SQL parser tests are not implemented yet
-// This file is kept for future parser implementation
+// SQL files tests are not implemented yet
+// This file is kept for future files implementation
 
 #[test]
 fn placeholder_test() {

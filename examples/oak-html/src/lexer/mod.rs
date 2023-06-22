@@ -1,121 +1,169 @@
 use crate::{kind::HtmlSyntaxKind, language::HtmlLanguage};
 use oak_core::{
-    IncrementalCache, Lexer, LexerState, OakError,
-    lexer::{CommentBlock, LexOutput, StringConfig, WhitespaceConfig},
-    source::Source,
+    Lexer, LexerCache, LexerState, OakError,
+    lexer::{LexOutput, StringConfig},
+    source::{Source, TextEdit},
 };
-use std::sync::LazyLock;
+use std::{simd::prelude::*, sync::LazyLock};
 
-type State<S: Source> = LexerState<S, HtmlLanguage>;
+type State<'a, S> = LexerState<'a, S, HtmlLanguage>;
 
 // HTML 静态配置
-static HTML_WHITESPACE: LazyLock<WhitespaceConfig> = LazyLock::new(|| WhitespaceConfig { unicode_whitespace: true });
-
-static HTML_COMMENT: LazyLock<CommentBlock> =
-    LazyLock::new(|| CommentBlock { block_markers: &[("<!--", "-->")], nested_blocks: false });
 
 static HTML_STRING: LazyLock<StringConfig> = LazyLock::new(|| StringConfig { quotes: &['"', '\''], escape: None });
 
 #[derive(Clone)]
 pub struct HtmlLexer<'config> {
-    config: &'config HtmlLanguage,
+    _config: &'config HtmlLanguage,
 }
 
 impl<'config> Lexer<HtmlLanguage> for HtmlLexer<'config> {
-    fn lex_incremental(
-        &self,
-        source: impl Source,
-        changed: usize,
-        cache: IncrementalCache<HtmlLanguage>,
-    ) -> LexOutput<HtmlLanguage> {
-        let mut state = LexerState::new_with_cache(source, changed, cache);
+    fn lex<'a, S: Source + ?Sized>(&self, source: &'a S, _edits: &[TextEdit], cache: &'a mut impl LexerCache<HtmlLanguage>) -> LexOutput<HtmlLanguage> {
+        let mut state = LexerState::new(source);
         let result = self.run(&mut state);
-        state.finish(result)
+        state.finish_with_cache(result, cache)
     }
 }
 
 impl<'config> HtmlLexer<'config> {
     pub fn new(config: &'config HtmlLanguage) -> Self {
-        Self { config }
+        Self { _config: config }
     }
 
     /// 主要的词法分析循环
-    fn run<S: Source>(&self, state: &mut State<S>) -> Result<(), OakError> {
+    fn run<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> Result<(), OakError> {
         while state.not_at_end() {
             let safe_point = state.get_position();
 
-            if self.skip_whitespace(state) {
-                continue;
+            if let Some(ch) = state.peek() {
+                match ch {
+                    ' ' | '\t' | '\n' | '\r' => {
+                        self.skip_whitespace(state);
+                    }
+                    '<' => {
+                        if let Some(next) = state.peek_next_n(1) {
+                            if next == '!' {
+                                if state.starts_with("<!--") {
+                                    self.lex_comment(state);
+                                }
+                                else if state.starts_with("<![CDATA[") {
+                                    self.lex_cdata(state);
+                                }
+                                else {
+                                    // Try Doctype
+                                    if !self.lex_doctype(state) {
+                                        // Fallback to tag operator (TagOpen) or Text?
+                                        // Original loop: tries doctype, cdata, then tag_operators.
+                                        // If doctype fails (e.g. <!FOO>), tag_operators will see < and consume it as TagOpen.
+                                        self.lex_tag_operators(state);
+                                    }
+                                }
+                            }
+                            else if next == '?' {
+                                self.lex_processing_instruction(state);
+                            }
+                            else {
+                                self.lex_tag_operators(state);
+                            }
+                        }
+                        else {
+                            self.lex_tag_operators(state);
+                        }
+                    }
+                    '/' | '>' => {
+                        if self.lex_tag_operators(state) {
+                            continue;
+                        }
+                        self.lex_text(state);
+                    }
+                    '&' => {
+                        self.lex_entity_reference(state);
+                    }
+                    '"' | '\'' => {
+                        self.lex_string_literal(state);
+                    }
+                    'a'..='z' | 'A'..='Z' | '_' | ':' => {
+                        self.lex_identifier(state);
+                    }
+                    '=' => {
+                        self.lex_single_char_tokens(state);
+                    }
+                    _ => {
+                        if self.lex_text(state) {
+                            continue;
+                        }
+
+                        // 安全点检查，防止无限循环
+                        state.advance(ch.len_utf8());
+                        state.add_token(HtmlSyntaxKind::Error, safe_point, state.get_position());
+                    }
+                }
             }
 
-            if self.lex_comment(state) {
-                continue;
-            }
-
-            if self.lex_doctype(state) {
-                continue;
-            }
-
-            if self.lex_cdata(state) {
-                continue;
-            }
-
-            if self.lex_processing_instruction(state) {
-                continue;
-            }
-
-            if self.lex_tag_operators(state) {
-                continue;
-            }
-
-            if self.lex_entity_reference(state) {
-                continue;
-            }
-
-            if self.lex_string_literal(state) {
-                continue;
-            }
-
-            if self.lex_identifier(state) {
-                continue;
-            }
-
-            if self.lex_single_char_tokens(state) {
-                continue;
-            }
-
-            if self.lex_text(state) {
-                continue;
-            }
-
-            // 安全点检查，防止无限循环
-            state.safe_check(safe_point);
+            state.advance_if_dead_lock(safe_point);
         }
 
         Ok(())
     }
 
-    fn skip_whitespace<S: Source>(&self, state: &mut State<S>) -> bool {
-        match HTML_WHITESPACE.scan(state.rest(), state.get_position(), HtmlSyntaxKind::Whitespace) {
-            Some(token) => {
-                state.advance_with(token);
-                true
+    fn skip_whitespace<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
+        let start = state.get_position();
+        let bytes = state.rest_bytes();
+        let mut i = 0;
+        let len = bytes.len();
+        const LANES: usize = 32;
+
+        while i + LANES <= len {
+            let chunk = Simd::<u8, LANES>::from_slice(unsafe { bytes.get_unchecked(i..i + LANES) });
+            let is_le_space = chunk.simd_le(Simd::splat(32));
+
+            if !is_le_space.all() {
+                let not_space = !is_le_space;
+                let idx = not_space.first_set().unwrap();
+                i += idx;
+                state.advance(i);
+                state.add_token(HtmlSyntaxKind::Whitespace, start, state.get_position());
+                return true;
             }
-            None => false,
+            i += LANES;
+        }
+
+        while i < len {
+            if !unsafe { *bytes.get_unchecked(i) }.is_ascii_whitespace() {
+                break;
+            }
+            i += 1;
+        }
+
+        if i > 0 {
+            state.advance(i);
+            state.add_token(HtmlSyntaxKind::Whitespace, start, state.get_position());
+            true
+        }
+        else {
+            false
         }
     }
 
-    fn lex_comment<S: Source>(&self, state: &mut State<S>) -> bool {
-        match HTML_COMMENT.scan(state.rest(), state.get_position(), HtmlSyntaxKind::Comment) {
-            Some(token) => {
-                state.advance_with(token);
-                true
-            }
-            None => false,
+    fn lex_comment<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
+        if !state.starts_with("<!--") {
+            return false;
         }
+
+        let start = state.get_position();
+        let len = {
+            let rest = state.rest();
+            match rest.find("-->") {
+                Some(end_at) => end_at + "-->".len(),
+                None => rest.len(),
+            }
+        };
+        state.advance(len);
+        state.add_token(HtmlSyntaxKind::Comment, start, state.get_position());
+        true
     }
 
-    fn lex_doctype<S: Source>(&self, state: &mut State<S>) -> bool {
+    fn lex_doctype<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start_pos = state.get_position();
 
         if let Some('<') = state.peek() {
@@ -166,7 +214,7 @@ impl<'config> HtmlLexer<'config> {
         false
     }
 
-    fn lex_cdata<S: Source>(&self, state: &mut State<S>) -> bool {
+    fn lex_cdata<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start_pos = state.get_position();
 
         if let Some('<') = state.peek() {
@@ -221,7 +269,7 @@ impl<'config> HtmlLexer<'config> {
         false
     }
 
-    fn lex_processing_instruction<S: Source>(&self, state: &mut State<S>) -> bool {
+    fn lex_processing_instruction<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start_pos = state.get_position();
 
         if let Some('<') = state.peek() {
@@ -254,7 +302,7 @@ impl<'config> HtmlLexer<'config> {
         false
     }
 
-    fn lex_tag_operators<S: Source>(&self, state: &mut State<S>) -> bool {
+    fn lex_tag_operators<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start_pos = state.get_position();
 
         match state.peek() {
@@ -289,7 +337,7 @@ impl<'config> HtmlLexer<'config> {
         }
     }
 
-    fn lex_entity_reference<S: Source>(&self, state: &mut State<S>) -> bool {
+    fn lex_entity_reference<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start_pos = state.get_position();
 
         if let Some('&') = state.peek() {
@@ -367,20 +415,11 @@ impl<'config> HtmlLexer<'config> {
         false
     }
 
-    fn lex_string_literal<S: Source>(&self, state: &mut State<S>) -> bool {
-        match HTML_STRING.scan(state.rest(), 0, HtmlSyntaxKind::AttributeValue) {
-            Some(mut token) => {
-                // Adjust token span to absolute position
-                token.span.start += state.get_position();
-                token.span.end += state.get_position();
-                state.advance_with(token);
-                true
-            }
-            None => false,
-        }
+    fn lex_string_literal<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
+        HTML_STRING.scan(state, HtmlSyntaxKind::AttributeValue)
     }
 
-    fn lex_identifier<S: Source>(&self, state: &mut State<S>) -> bool {
+    fn lex_identifier<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start_pos = state.get_position();
 
         if let Some(ch) = state.peek() {
@@ -404,7 +443,7 @@ impl<'config> HtmlLexer<'config> {
         false
     }
 
-    fn lex_single_char_tokens<S: Source>(&self, state: &mut State<S>) -> bool {
+    fn lex_single_char_tokens<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start_pos = state.get_position();
 
         let kind = match state.peek() {
@@ -428,22 +467,42 @@ impl<'config> HtmlLexer<'config> {
         }
     }
 
-    fn lex_text<S: Source>(&self, state: &mut State<S>) -> bool {
+    fn lex_text<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start_pos = state.get_position();
-        let mut has_text = false;
+        let bytes = state.rest_bytes();
+        let mut i = 0;
+        let len = bytes.len();
+        const LANES: usize = 32;
 
-        while let Some(ch) = state.peek() {
-            match ch {
-                '<' | '&' => break,
-                _ if ch.is_whitespace() => break,
-                _ => {
-                    state.advance(ch.len_utf8());
-                    has_text = true;
-                }
+        while i + LANES <= len {
+            let chunk = Simd::<u8, LANES>::from_slice(unsafe { bytes.get_unchecked(i..i + LANES) });
+
+            let is_lt = chunk.simd_eq(Simd::splat(b'<'));
+            let is_amp = chunk.simd_eq(Simd::splat(b'&'));
+            let is_le_space = chunk.simd_le(Simd::splat(32));
+
+            let stop = is_lt | is_amp | is_le_space;
+
+            if stop.any() {
+                let idx = stop.first_set().unwrap();
+                i += idx;
+                state.advance(i);
+                state.add_token(HtmlSyntaxKind::Text, start_pos, state.get_position());
+                return true;
             }
+            i += LANES;
         }
 
-        if has_text {
+        while i < len {
+            let ch = unsafe { *bytes.get_unchecked(i) };
+            if ch == b'<' || ch == b'&' || ch.is_ascii_whitespace() {
+                break;
+            }
+            i += 1;
+        }
+
+        if i > 0 {
+            state.advance(i);
             state.add_token(HtmlSyntaxKind::Text, start_pos, state.get_position());
             true
         }

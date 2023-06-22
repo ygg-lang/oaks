@@ -1,41 +1,36 @@
 use crate::{kind::SchemeSyntaxKind, language::SchemeLanguage};
 use oak_core::{
-    IncrementalCache, Lexer, LexerState, OakError,
-    lexer::{CommentLine, LexOutput, StringConfig, WhitespaceConfig},
+    Lexer, LexerCache, LexerState, OakError,
+    lexer::{CommentConfig, LexOutput, StringConfig, WhitespaceConfig},
     source::Source,
 };
 use std::sync::LazyLock;
 
-type State<S: Source> = LexerState<S, SchemeLanguage>;
+type State<'a, S> = LexerState<'a, S, SchemeLanguage>;
 
 static SCHEME_WHITESPACE: LazyLock<WhitespaceConfig> = LazyLock::new(|| WhitespaceConfig { unicode_whitespace: true });
-static SCHEME_COMMENT: LazyLock<CommentLine> = LazyLock::new(|| CommentLine { line_markers: &[";"] });
+static SCHEME_COMMENT: LazyLock<CommentConfig> = LazyLock::new(|| CommentConfig { line_marker: ";", block_start: "#|", block_end: "|#", nested_blocks: true });
 static SCHEME_STRING: LazyLock<StringConfig> = LazyLock::new(|| StringConfig { quotes: &['"'], escape: Some('\\') });
 
 #[derive(Clone)]
 pub struct SchemeLexer<'config> {
-    config: &'config SchemeLanguage,
+    _config: &'config SchemeLanguage,
 }
 
 impl<'config> Lexer<SchemeLanguage> for SchemeLexer<'config> {
-    fn lex_incremental(
-        &self,
-        source: impl Source,
-        changed: usize,
-        cache: IncrementalCache<SchemeLanguage>,
-    ) -> LexOutput<SchemeLanguage> {
-        let mut state = LexerState::new_with_cache(source, changed, cache);
+    fn lex<'a, S: Source + ?Sized>(&self, source: &S, _edits: &[oak_core::TextEdit], cache: &'a mut impl LexerCache<SchemeLanguage>) -> LexOutput<SchemeLanguage> {
+        let mut state: State<'_, S> = LexerState::new(source);
         let result = self.run(&mut state);
-        state.finish(result)
+        state.finish_with_cache(result, cache)
     }
 }
 
 impl<'config> SchemeLexer<'config> {
     pub fn new(config: &'config SchemeLanguage) -> Self {
-        Self { config }
+        Self { _config: config }
     }
 
-    fn run<S: Source>(&self, state: &mut State<S>) -> Result<(), OakError> {
+    fn run<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> Result<(), OakError> {
         while state.not_at_end() {
             let safe_point = state.get_position();
 
@@ -74,7 +69,7 @@ impl<'config> SchemeLexer<'config> {
                 state.add_token(SchemeSyntaxKind::Error, start_pos, state.get_position());
             }
 
-            state.safe_check(safe_point);
+            state.advance_if_dead_lock(safe_point);
         }
 
         // 添加 EOF token
@@ -83,19 +78,12 @@ impl<'config> SchemeLexer<'config> {
         Ok(())
     }
 
-    fn skip_whitespace<S: Source>(&self, state: &mut State<S>) -> bool {
-        match SCHEME_WHITESPACE.scan(state.rest(), state.get_position(), SchemeSyntaxKind::Whitespace) {
-            Some(token) => {
-                state.advance_with(token);
-                return true;
-            }
-            None => {}
-        }
-        false
+    fn skip_whitespace<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
+        SCHEME_WHITESPACE.scan(state, SchemeSyntaxKind::Whitespace)
     }
 
     /// 处理换行
-    fn lex_newline<S: Source>(&self, state: &mut State<S>) -> bool {
+    fn lex_newline<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start_pos = state.get_position();
 
         if let Some('\n') = state.peek() {
@@ -116,123 +104,109 @@ impl<'config> SchemeLexer<'config> {
         }
     }
 
-    fn skip_comment<S: Source>(&self, state: &mut State<S>) -> bool {
-        match SCHEME_COMMENT.scan(state.rest(), state.get_position(), SchemeSyntaxKind::Comment) {
-            Some(token) => {
-                state.advance_with(token);
-                return true;
-            }
-            None => {}
-        }
-        false
+    fn skip_comment<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
+        SCHEME_COMMENT.scan(state, SchemeSyntaxKind::LineComment, SchemeSyntaxKind::Comment)
     }
 
-    fn lex_string_literal<S: Source>(&self, state: &mut State<S>) -> bool {
-        match SCHEME_STRING.scan(state.rest(), state.get_position(), SchemeSyntaxKind::StringLiteral) {
-            Some(token) => {
-                state.advance_with(token);
-                return true;
-            }
-            None => {}
-        }
-        false
+    fn lex_string_literal<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
+        SCHEME_STRING.scan(state, SchemeSyntaxKind::StringLiteral)
     }
 
-    fn lex_number_literal<S: Source>(&self, state: &mut State<S>) -> bool {
-        let rest = state.rest();
-        if rest.is_empty() {
-            return false;
-        }
-
-        let first_char = rest.chars().next().unwrap();
-        if !first_char.is_ascii_digit() && first_char != '-' && first_char != '+' {
-            return false;
-        }
-
+    fn lex_number_literal<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start = state.get_position();
         let mut len = 0;
-
-        // 处理符号
-        if first_char == '-' || first_char == '+' {
-            len += first_char.len_utf8();
-        }
-
-        // 跳过数字
         let mut has_digits = false;
-        let mut chars = rest.chars().skip(if first_char == '-' || first_char == '+' { 1 } else { 0 });
 
-        while let Some(ch) = chars.next() {
-            if ch.is_ascii_digit() {
-                len += ch.len_utf8();
-                has_digits = true;
+        {
+            let rest = state.rest();
+            if rest.is_empty() {
+                return false;
             }
-            else if ch == '.' {
-                // 浮点数
-                len += ch.len_utf8();
-                while let Some(ch) = chars.next() {
-                    if ch.is_ascii_digit() {
-                        len += ch.len_utf8();
-                        has_digits = true;
-                    }
-                    else {
-                        break;
-                    }
+
+            let first_char = rest.chars().next().unwrap();
+            if !first_char.is_ascii_digit() && first_char != '-' && first_char != '+' {
+                return false;
+            }
+
+            // 处理符号
+            if first_char == '-' || first_char == '+' {
+                len += first_char.len_utf8();
+            }
+
+            // 跳过数字
+            let mut chars = rest.chars().skip(if first_char == '-' || first_char == '+' { 1 } else { 0 });
+
+            while let Some(ch) = chars.next() {
+                if ch.is_ascii_digit() {
+                    len += ch.len_utf8();
+                    has_digits = true;
                 }
-                break;
-            }
-            else {
-                break;
+                else if ch == '.' {
+                    // 浮点数
+                    len += ch.len_utf8();
+                    while let Some(ch) = chars.next() {
+                        if ch.is_ascii_digit() {
+                            len += ch.len_utf8();
+                            has_digits = true;
+                        }
+                        else {
+                            break;
+                        }
+                    }
+                    break;
+                }
+                else {
+                    break;
+                }
             }
         }
 
         if has_digits {
             state.advance(len);
+            let end = state.get_position();
+            state.add_token(SchemeSyntaxKind::NumberLiteral, start, end);
+            true
         }
-
-        if !has_digits {
-            // 重置位置，这不是一个数字
-            return false;
+        else {
+            false
         }
-
-        let end = state.get_position();
-        state.add_token(SchemeSyntaxKind::NumberLiteral, start, end);
-        true
     }
 
-    fn lex_identifier_or_keyword<S: Source>(&self, state: &mut State<S>) -> bool {
-        let rest = state.rest();
-        if rest.is_empty() {
-            return false;
-        }
-
-        let first_char = rest.chars().next().unwrap();
-        if !self.is_identifier_start(first_char) {
-            return false;
-        }
-
+    fn lex_identifier_or_keyword<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start = state.get_position();
-        let mut len = first_char.len_utf8();
-        let mut chars = rest.chars().skip(1);
+        let mut len;
 
-        while let Some(ch) = chars.next() {
-            if self.is_identifier_continue(ch) {
-                len += ch.len_utf8();
+        {
+            let rest = state.rest();
+            if rest.is_empty() {
+                return false;
             }
-            else {
-                break;
+
+            let first_char = rest.chars().next().unwrap();
+            if !self.is_identifier_start(first_char) {
+                return false;
+            }
+
+            len = first_char.len_utf8();
+            let mut chars = rest.chars().skip(1);
+
+            while let Some(ch) = chars.next() {
+                if self.is_identifier_continue(ch) {
+                    len += ch.len_utf8();
+                }
+                else {
+                    break;
+                }
             }
         }
 
-        let text = rest[..len].to_string();
+        let text = state.get_text_in(oak_core::Range { start, end: start + len }).to_string();
         state.advance(len);
         let end = state.get_position();
 
         let kind = match text.as_str() {
-            "define" | "lambda" | "if" | "cond" | "case" | "and" | "or" | "not" | "let" | "let*" | "letrec" | "begin"
-            | "do" | "quote" | "quasiquote" | "unquote" | "unquote-splicing" | "set!" | "delay" | "force" | "#t" | "#f"
-            | "null" | "car" | "cdr" | "cons" | "list" | "append" | "length" | "reverse" | "map" | "for-each" | "apply" => {
-                SchemeSyntaxKind::Keyword
-            }
+            "define" | "lambda" | "if" | "cond" | "case" | "and" | "or" | "not" | "let" | "let*" | "letrec" | "begin" | "do" | "quote" | "quasiquote" | "unquote" | "unquote-splicing" | "set!" | "delay" | "force" | "#t" | "#f" | "null" | "car" | "cdr"
+            | "cons" | "list" | "append" | "length" | "reverse" | "map" | "for-each" | "apply" => SchemeSyntaxKind::Keyword,
             _ => SchemeSyntaxKind::Identifier,
         };
 
@@ -248,35 +222,35 @@ impl<'config> SchemeLexer<'config> {
         self.is_identifier_start(ch) || ch.is_ascii_digit()
     }
 
-    fn lex_single_char_tokens<S: Source>(&self, state: &mut State<S>) -> bool {
-        let rest = state.rest();
-        if rest.is_empty() {
-            return false;
-        }
-
-        let ch = rest.chars().next().unwrap();
+    fn lex_single_char_tokens<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start = state.get_position();
-        state.advance(ch.len_utf8());
-        let end = state.get_position();
-
-        let kind = match ch {
-            '(' => SchemeSyntaxKind::LeftParen,
-            ')' => SchemeSyntaxKind::RightParen,
-            '[' => SchemeSyntaxKind::LeftBracket,
-            ']' => SchemeSyntaxKind::RightBracket,
-            '{' => SchemeSyntaxKind::LeftBrace,
-            '}' => SchemeSyntaxKind::RightBrace,
-            '\'' => SchemeSyntaxKind::Quote,
-            '`' => SchemeSyntaxKind::Quasiquote,
-            ',' => SchemeSyntaxKind::Unquote,
-            '.' => SchemeSyntaxKind::Dot,
-            '#' => SchemeSyntaxKind::Hash,
-            _ => {
-                return false;
-            }
+        let ch = match state.peek() {
+            Some(ch) => ch,
+            None => return false,
         };
 
-        state.add_token(kind, start, end);
-        true
+        let kind = match ch {
+            '(' => Some(SchemeSyntaxKind::LeftParen),
+            ')' => Some(SchemeSyntaxKind::RightParen),
+            '[' => Some(SchemeSyntaxKind::LeftBracket),
+            ']' => Some(SchemeSyntaxKind::RightBracket),
+            '{' => Some(SchemeSyntaxKind::LeftBrace),
+            '}' => Some(SchemeSyntaxKind::RightBrace),
+            '\'' => Some(SchemeSyntaxKind::Quote),
+            '`' => Some(SchemeSyntaxKind::Quasiquote),
+            ',' => Some(SchemeSyntaxKind::Unquote),
+            '.' => Some(SchemeSyntaxKind::Dot),
+            '#' => Some(SchemeSyntaxKind::Hash),
+            _ => None,
+        };
+
+        if let Some(kind) = kind {
+            state.advance(ch.len_utf8());
+            state.add_token(kind, start, state.get_position());
+            true
+        }
+        else {
+            false
+        }
     }
 }

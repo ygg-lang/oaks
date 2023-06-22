@@ -1,18 +1,82 @@
-use crate::{kind::CobolSyntaxKind, language::CobolLanguage};
+pub mod token_type;
+pub use token_type::CobolTokenType;
+
+use crate::language::CobolLanguage;
 use oak_core::{
-    IncrementalCache,
-    lexer::{LexOutput, Lexer, LexerState},
-    source::Source,
+    Lexer, LexerCache, LexerState, OakError,
+    lexer::LexOutput,
+    source::{Source, TextEdit},
 };
 
-pub struct CobolLexer;
+type State<'a, S> = LexerState<'a, S, CobolLanguage>;
 
-impl CobolLexer {
-    pub fn new() -> Self {
-        Self
+pub struct CobolLexer<'config> {
+    _config: &'config CobolLanguage,
+}
+
+impl<'config> Lexer<CobolLanguage> for CobolLexer<'config> {
+    fn lex<'a, S: Source + ?Sized>(&self, source: &S, _edits: &[TextEdit], mut cache: &'a mut impl LexerCache<CobolLanguage>) -> LexOutput<CobolLanguage> {
+        let mut state: State<'_, S> = LexerState::new(source);
+        let result = self.run(&mut state);
+        if result.is_ok() {
+            state.add_eof();
+        }
+        state.finish_with_cache(result, &mut cache)
+    }
+}
+
+impl<'config> CobolLexer<'config> {
+    pub fn new(config: &'config CobolLanguage) -> Self {
+        Self { _config: config }
     }
 
-    fn skip_whitespace(&self, state: &mut LexerState<impl Source, CobolLanguage>) -> bool {
+    fn run<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> Result<(), OakError> {
+        while state.not_at_end() {
+            let safe_point = state.get_position();
+
+            // 尝试各种词法规则
+            if self.skip_whitespace(state) {
+                continue;
+            }
+
+            if self.lex_newline(state) {
+                continue;
+            }
+
+            if self.lex_comment(state) {
+                continue;
+            }
+
+            if self.lex_string(state) {
+                continue;
+            }
+
+            if self.lex_number(state) {
+                continue;
+            }
+
+            if self.lex_identifier_or_keyword(state) {
+                continue;
+            }
+
+            if self.lex_operator_or_delimiter(state) {
+                continue;
+            }
+
+            // 如果所有规则都不匹配，跳过当前字符并标记为错误
+            let start_pos = state.get_position();
+            if let Some(ch) = state.peek() {
+                state.advance(ch.len_utf8());
+                state.add_token(CobolTokenType::Error, start_pos, state.get_position());
+            }
+
+            state.advance_if_dead_lock(safe_point);
+        }
+
+        Ok(())
+    }
+
+    fn skip_whitespace<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         if let Some(ch) = state.peek() {
             if ch.is_whitespace() && ch != '\n' && ch != '\r' {
                 let start_pos = state.get_position();
@@ -24,14 +88,14 @@ impl CobolLexer {
                         break;
                     }
                 }
-                state.add_token(CobolSyntaxKind::Whitespace, start_pos, state.get_position());
+                state.add_token(CobolTokenType::Whitespace, start_pos, state.get_position());
                 return true;
             }
         }
         false
     }
 
-    fn lex_newline(&self, state: &mut LexerState<impl Source, CobolLanguage>) -> bool {
+    fn lex_newline<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         if let Some(ch) = state.peek() {
             if ch == '\n' || ch == '\r' {
                 let start_pos = state.get_position();
@@ -39,255 +103,257 @@ impl CobolLexer {
                 if ch == '\r' && state.peek() == Some('\n') {
                     state.advance(1);
                 }
-                state.add_token(CobolSyntaxKind::Newline, start_pos, state.get_position());
+                state.add_token(CobolTokenType::Newline, start_pos, state.get_position());
                 return true;
             }
         }
         false
     }
 
-    fn lex_comment(&self, state: &mut LexerState<impl Source, CobolLanguage>) -> bool {
-        if let Some('*') = state.peek() {
+    fn lex_comment<'a, S: Source + ?Sized>(&self, state: &mut LexerState<'a, S, CobolLanguage>) -> bool {
+        // COBOL 注释通常在第7列（索引6），但我们这里简化处理
+        if state.peek() == Some('*') || state.peek() == Some('/') {
             let start_pos = state.get_position();
-            state.advance(1);
-
-            // COBOL 注释以 * 开头，读取到行尾
             while let Some(ch) = state.peek() {
                 if ch == '\n' || ch == '\r' {
                     break;
                 }
                 state.advance(ch.len_utf8());
             }
-
-            state.add_token(CobolSyntaxKind::Comment, start_pos, state.get_position());
+            state.add_token(CobolTokenType::Comment, start_pos, state.get_position());
             return true;
         }
         false
     }
 
-    fn lex_string(&self, state: &mut LexerState<impl Source, CobolLanguage>) -> bool {
+    fn lex_string<'a, S: Source + ?Sized>(&self, state: &mut LexerState<'a, S, CobolLanguage>) -> bool {
         if let Some(quote) = state.peek() {
             if quote == '"' || quote == '\'' {
                 let start_pos = state.get_position();
                 state.advance(1);
-
                 while let Some(ch) = state.peek() {
                     if ch == quote {
                         state.advance(1);
-                        break;
-                    }
-                    else if ch == '\\' {
-                        state.advance(1);
-                        if let Some(_) = state.peek() {
+                        // 处理双引号转义
+                        if state.peek() == Some(quote) {
                             state.advance(1);
+                        }
+                        else {
+                            break;
                         }
                     }
                     else if ch == '\n' || ch == '\r' {
-                        break; // 字符串不能跨行
+                        break;
                     }
                     else {
                         state.advance(ch.len_utf8());
                     }
                 }
-
-                state.add_token(CobolSyntaxKind::StringLiteral, start_pos, state.get_position());
+                state.add_token(CobolTokenType::StringLiteral, start_pos, state.get_position());
                 return true;
             }
         }
         false
     }
 
-    fn lex_number(&self, state: &mut LexerState<impl Source, CobolLanguage>) -> bool {
+    fn lex_number<'a, S: Source + ?Sized>(&self, state: &mut LexerState<'a, S, CobolLanguage>) -> bool {
         if let Some(ch) = state.peek() {
-            if ch.is_ascii_digit() {
+            if ch.is_ascii_digit() || ch == '.' {
                 let start_pos = state.get_position();
+                let mut has_dot = false;
+                if ch == '.' {
+                    has_dot = true;
+                    state.advance(1);
+                    if !state.peek().map_or(false, |c| c.is_ascii_digit()) {
+                        state.set_position(start_pos);
+                        return false;
+                    }
+                }
 
                 while let Some(ch) = state.peek() {
-                    if ch.is_ascii_digit() || ch == '.' {
+                    if ch.is_ascii_digit() {
+                        state.advance(1);
+                    }
+                    else if ch == '.' && !has_dot {
+                        has_dot = true;
                         state.advance(1);
                     }
                     else {
                         break;
                     }
                 }
-
-                state.add_token(CobolSyntaxKind::NumberLiteral, start_pos, state.get_position());
+                state.add_token(CobolTokenType::NumberLiteral, start_pos, state.get_position());
                 return true;
             }
         }
         false
     }
 
-    fn lex_identifier_or_keyword(&self, state: &mut LexerState<impl Source, CobolLanguage>) -> bool {
+    fn lex_identifier_or_keyword<'a, S: Source + ?Sized>(&self, state: &mut LexerState<'a, S, CobolLanguage>) -> bool {
         if let Some(ch) = state.peek() {
-            if ch.is_alphabetic() || ch == '_' {
+            if ch.is_alphabetic() {
                 let start_pos = state.get_position();
-
                 while let Some(ch) = state.peek() {
-                    if ch.is_alphanumeric() || ch == '_' || ch == '-' {
-                        state.advance(ch.len_utf8());
+                    if ch.is_alphanumeric() || ch == '-' {
+                        state.advance(1);
                     }
                     else {
                         break;
                     }
                 }
+                let end_pos = state.get_position();
+                let text = state.get_text_in((start_pos..end_pos).into()).to_uppercase();
 
-                let text = state.get_text_in(std::range::Range { start: start_pos, end: state.get_position() }).to_uppercase();
                 let kind = match text.as_str() {
-                    "ACCEPT" => CobolSyntaxKind::Accept,
-                    "ADD" => CobolSyntaxKind::Add,
-                    "CALL" => CobolSyntaxKind::Call,
-                    "CANCEL" => CobolSyntaxKind::Cancel,
-                    "CLOSE" => CobolSyntaxKind::Close,
-                    "COMPUTE" => CobolSyntaxKind::Compute,
-                    "CONTINUE" => CobolSyntaxKind::Continue,
-                    "DELETE" => CobolSyntaxKind::Delete,
-                    "DISPLAY" => CobolSyntaxKind::Display,
-                    "DIVIDE" => CobolSyntaxKind::Divide,
-                    "EVALUATE" => CobolSyntaxKind::Evaluate,
-                    "EXIT" => CobolSyntaxKind::Exit,
-                    "GO" | "GOTO" => CobolSyntaxKind::GoTo,
-                    "IF" => CobolSyntaxKind::If,
-                    "INITIALIZE" => CobolSyntaxKind::Initialize,
-                    "INSPECT" => CobolSyntaxKind::Inspect,
-                    "MOVE" => CobolSyntaxKind::Move,
-                    "MULTIPLY" => CobolSyntaxKind::Multiply,
-                    "OPEN" => CobolSyntaxKind::Open,
-                    "PERFORM" => CobolSyntaxKind::Perform,
-                    "READ" => CobolSyntaxKind::Read,
-                    "RETURN" => CobolSyntaxKind::Return,
-                    "REWRITE" => CobolSyntaxKind::Rewrite,
-                    "SEARCH" => CobolSyntaxKind::Search,
-                    "SET" => CobolSyntaxKind::Set,
-                    "SORT" => CobolSyntaxKind::Sort,
-                    "START" => CobolSyntaxKind::Start,
-                    "STOP" => CobolSyntaxKind::Stop,
-                    "STRING" => CobolSyntaxKind::String,
-                    "SUBTRACT" => CobolSyntaxKind::Subtract,
-                    "UNSTRING" => CobolSyntaxKind::Unstring,
-                    "WRITE" => CobolSyntaxKind::Write,
-                    "IDENTIFICATION" => CobolSyntaxKind::Identification,
-                    "DIVISION" => CobolSyntaxKind::Division,
-                    "SECTION" => CobolSyntaxKind::Section,
-                    "WORKING-STORAGE" => CobolSyntaxKind::WorkingStorage,
-                    "DATA" => CobolSyntaxKind::Data,
-                    "PROCEDURE" => CobolSyntaxKind::Procedure,
-                    "PIC" | "PICTURE" => CobolSyntaxKind::Picture,
-                    "VALUE" => CobolSyntaxKind::Value,
-                    "OCCURS" => CobolSyntaxKind::Occurs,
-                    "REDEFINES" => CobolSyntaxKind::Redefines,
-                    "COMP" | "COMPUTATIONAL" => CobolSyntaxKind::Comp,
-                    "BINARY" => CobolSyntaxKind::Binary,
-                    "PACKED-DECIMAL" => CobolSyntaxKind::Packed,
-                    "USAGE" => CobolSyntaxKind::Usage,
-
-                    "OR" => CobolSyntaxKind::Or,
-                    "NOT" => CobolSyntaxKind::Not,
-                    "EQUAL" | "=" => CobolSyntaxKind::Equal,
-                    "GREATER" | ">" => CobolSyntaxKind::Greater,
-                    "LESS" | "<" => CobolSyntaxKind::Less,
-                    "THROUGH" | "THRU" => CobolSyntaxKind::Through,
-                    "VARYING" => CobolSyntaxKind::Varying,
-                    "FROM" => CobolSyntaxKind::From,
-                    "BY" => CobolSyntaxKind::By,
-                    "UNTIL" => CobolSyntaxKind::Until,
-                    "WHEN" => CobolSyntaxKind::When,
-                    "OTHER" => CobolSyntaxKind::Other,
-                    "ALSO" => CobolSyntaxKind::Also,
-                    _ => CobolSyntaxKind::Identifier,
+                    "ACCEPT" => CobolTokenType::Accept,
+                    "ADD" => CobolTokenType::Add,
+                    "CALL" => CobolTokenType::Call,
+                    "CANCEL" => CobolTokenType::Cancel,
+                    "CLOSE" => CobolTokenType::Close,
+                    "COMPUTE" => CobolTokenType::Compute,
+                    "CONTINUE" => CobolTokenType::Continue,
+                    "DELETE" => CobolTokenType::Delete,
+                    "DISPLAY" => CobolTokenType::Display,
+                    "DIVIDE" => CobolTokenType::Divide,
+                    "EVALUATE" => CobolTokenType::Evaluate,
+                    "EXIT" => CobolTokenType::Exit,
+                    "GO" => {
+                        if state.peek() == Some(' ') {
+                            // 检查是否是 GO TO
+                            let save = state.get_position();
+                            state.advance(1);
+                            while state.peek() == Some(' ') {
+                                state.advance(1);
+                            }
+                            let next_start = state.get_position();
+                            while let Some(c) = state.peek() {
+                                if c.is_alphanumeric() {
+                                    state.advance(1);
+                                }
+                                else {
+                                    break;
+                                }
+                            }
+                            if state.get_text_in((next_start..state.get_position()).into()).to_uppercase() == "TO" {
+                                CobolTokenType::GoTo
+                            }
+                            else {
+                                state.set_position(save);
+                                CobolTokenType::Identifier
+                            }
+                        }
+                        else {
+                            CobolTokenType::Identifier
+                        }
+                    }
+                    "IF" => CobolTokenType::If,
+                    "INITIALIZE" => CobolTokenType::Initialize,
+                    "INSPECT" => CobolTokenType::Inspect,
+                    "MOVE" => CobolTokenType::Move,
+                    "MULTIPLY" => CobolTokenType::Multiply,
+                    "OPEN" => CobolTokenType::Open,
+                    "PERFORM" => CobolTokenType::Perform,
+                    "READ" => CobolTokenType::Read,
+                    "RETURN" => CobolTokenType::Return,
+                    "REWRITE" => CobolTokenType::Rewrite,
+                    "SEARCH" => CobolTokenType::Search,
+                    "SET" => CobolTokenType::Set,
+                    "SORT" => CobolTokenType::Sort,
+                    "START" => CobolTokenType::Start,
+                    "STOP" => CobolTokenType::Stop,
+                    "STRING" => CobolTokenType::String,
+                    "SUBTRACT" => CobolTokenType::Subtract,
+                    "UNSTRING" => CobolTokenType::Unstring,
+                    "WRITE" => CobolTokenType::Write,
+                    "DATA" => CobolTokenType::Data,
+                    "DIVISION" => CobolTokenType::Division,
+                    "SECTION" => CobolTokenType::Section,
+                    "WORKING-STORAGE" => CobolTokenType::WorkingStorage,
+                    "FILE-CONTROL" => CobolTokenType::File, // 简化
+                    "PROCEDURE" => CobolTokenType::Procedure,
+                    "PROGRAM-ID" => CobolTokenType::Program,
+                    "IDENTIFICATION" => CobolTokenType::Identification,
+                    "ENVIRONMENT" => CobolTokenType::Environment,
+                    "CONFIGURATION" => CobolTokenType::Configuration,
+                    "INPUT-OUTPUT" => CobolTokenType::InputOutput,
+                    "PIC" => CobolTokenType::Pic,
+                    "PICTURE" => CobolTokenType::Picture,
+                    "VALUE" => CobolTokenType::Value,
+                    "OCCURS" => CobolTokenType::Occurs,
+                    "REDEFINES" => CobolTokenType::Redefines,
+                    "USAGE" => CobolTokenType::Usage,
+                    "COMP" => CobolTokenType::Comp,
+                    "BINARY" => CobolTokenType::Binary,
+                    "PACKED-DECIMAL" => CobolTokenType::Packed,
+                    "AND" => CobolTokenType::And,
+                    "OR" => CobolTokenType::Or,
+                    "NOT" => CobolTokenType::Not,
+                    "EQUAL" => CobolTokenType::Equal,
+                    "GREATER" => CobolTokenType::Greater,
+                    "LESS" => CobolTokenType::Less,
+                    _ => CobolTokenType::Identifier,
                 };
 
-                state.add_token(kind, start_pos, state.get_position());
+                state.add_token(kind, start_pos, end_pos);
                 return true;
             }
         }
         false
     }
 
-    fn lex_operator_or_delimiter(&self, state: &mut LexerState<impl Source, CobolLanguage>) -> bool {
+    fn lex_operator_or_delimiter<'a, S: Source + ?Sized>(&self, state: &mut LexerState<'a, S, CobolLanguage>) -> bool {
         if let Some(ch) = state.peek() {
             let start_pos = state.get_position();
-
             let kind = match ch {
-                '+' => CobolSyntaxKind::Plus,
-                '-' => CobolSyntaxKind::Minus,
-                '*' => CobolSyntaxKind::Star,
-                '/' => CobolSyntaxKind::Slash,
-                '=' => CobolSyntaxKind::EqualSign,
-                '>' => CobolSyntaxKind::GreaterThan,
-                '<' => CobolSyntaxKind::LessThan,
-                '(' => CobolSyntaxKind::LeftParen,
-                ')' => CobolSyntaxKind::RightParen,
-                ',' => CobolSyntaxKind::Comma,
-                '.' => CobolSyntaxKind::Period,
-                '"' => CobolSyntaxKind::Quote,
-                '\'' => CobolSyntaxKind::Apostrophe,
-                '@' => CobolSyntaxKind::At,
-                '#' => CobolSyntaxKind::Hash,
-                '$' => CobolSyntaxKind::Dollar,
-                '&' => CobolSyntaxKind::Ampersand,
+                '+' => CobolTokenType::Plus,
+                '-' => CobolTokenType::Minus,
+                '*' => {
+                    state.advance(1);
+                    if state.peek() == Some('*') {
+                        state.advance(1);
+                        state.add_token(CobolTokenType::Power, start_pos, state.get_position());
+                        return true;
+                    }
+                    CobolTokenType::Star
+                }
+                '/' => CobolTokenType::Slash,
+                '=' => CobolTokenType::EqualSign,
+                '>' => {
+                    state.advance(1);
+                    if state.peek() == Some('=') {
+                        state.advance(1);
+                        state.add_token(CobolTokenType::GreaterEqual, start_pos, state.get_position());
+                        return true;
+                    }
+                    CobolTokenType::GreaterThan
+                }
+                '<' => {
+                    state.advance(1);
+                    if state.peek() == Some('=') {
+                        state.advance(1);
+                        state.add_token(CobolTokenType::LessEqual, start_pos, state.get_position());
+                        return true;
+                    }
+                    if state.peek() == Some('>') {
+                        state.advance(1);
+                        state.add_token(CobolTokenType::NotEqual, start_pos, state.get_position());
+                        return true;
+                    }
+                    CobolTokenType::LessThan
+                }
+                '(' => CobolTokenType::LeftParen,
+                ')' => CobolTokenType::RightParen,
+                ',' => CobolTokenType::Comma,
+                '.' => CobolTokenType::Period,
+                ';' => CobolTokenType::Semicolon,
+                ':' => CobolTokenType::Colon,
                 _ => return false,
             };
 
-            state.advance(ch.len_utf8());
+            state.advance(1);
             state.add_token(kind, start_pos, state.get_position());
             return true;
         }
         false
-    }
-}
-
-impl Lexer<CobolLanguage> for CobolLexer {
-    fn lex_incremental(
-        &self,
-        source: impl Source,
-        _changed: usize,
-        _cache: IncrementalCache<CobolLanguage>,
-    ) -> LexOutput<CobolLanguage> {
-        let mut state = LexerState::new_with_cache(source, _changed, _cache);
-
-        while state.not_at_end() {
-            // 尝试各种词法规则
-            if self.skip_whitespace(&mut state) {
-                continue;
-            }
-
-            if self.lex_newline(&mut state) {
-                continue;
-            }
-
-            if self.lex_comment(&mut state) {
-                continue;
-            }
-
-            if self.lex_string(&mut state) {
-                continue;
-            }
-
-            if self.lex_number(&mut state) {
-                continue;
-            }
-
-            if self.lex_identifier_or_keyword(&mut state) {
-                continue;
-            }
-
-            if self.lex_operator_or_delimiter(&mut state) {
-                continue;
-            }
-
-            // 如果所有规则都不匹配，跳过当前字符并标记为错误
-            let start_pos = state.get_position();
-            if let Some(ch) = state.peek() {
-                state.advance(ch.len_utf8());
-                state.add_token(CobolSyntaxKind::Error, start_pos, state.get_position());
-            }
-        }
-
-        // 添加 EOF token
-        let eof_pos = state.get_position();
-        state.add_token(CobolSyntaxKind::Eof, eof_pos, eof_pos);
-
-        state.finish(Ok(()))
     }
 }

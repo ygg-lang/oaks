@@ -1,9 +1,12 @@
-use crate::kind::ZigSyntaxKind;
-use oak_core::Language;
+use oak_core::{Language, LanguageCategory};
 
 pub struct ZigLanguage {}
 
 impl Language for ZigLanguage {
-    type SyntaxKind = ZigSyntaxKind;
+    const NAME: &'static str = "zig";
+    const CATEGORY: LanguageCategory = LanguageCategory::Programming;
+
+    type TokenType = crate::kind::ZigSyntaxKind;
+    type ElementType = crate::kind::ZigSyntaxKind;
     type TypedRoot = ();
 }

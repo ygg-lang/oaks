@@ -1,29 +1,15 @@
-use crate::{ast::CoqRoot, kind::CoqSyntaxKind, lexer::CoqLexer};
-use oak_core::Language;
+use crate::kind::CoqSyntaxKind;
+use oak_core::{Language, LanguageCategory};
 
-/// Coq 语言实现
-#[derive(Debug, Clone)]
+/// Implementation of the Coq language for the OAK parsing framework.
+#[derive(Debug, Clone, Default)]
 pub struct CoqLanguage;
 
 impl Language for CoqLanguage {
-    type SyntaxKind = CoqSyntaxKind;
-    type TypedRoot = CoqRoot;
-}
+    const NAME: &'static str = "coq";
+    const CATEGORY: LanguageCategory = LanguageCategory::Programming;
 
-impl CoqLanguage {
-    /// 创建新的 Coq 语言实例
-    pub fn new() -> Self {
-        Self
-    }
-
-    /// 创建 Coq 词法分析器
-    pub fn lexer(&self) -> CoqLexer<'_> {
-        CoqLexer::new(self)
-    }
-}
-
-impl Default for CoqLanguage {
-    fn default() -> Self {
-        Self::new()
-    }
+    type TokenType = CoqSyntaxKind;
+    type ElementType = CoqSyntaxKind;
+    type TypedRoot = crate::ast::CoqRoot;
 }

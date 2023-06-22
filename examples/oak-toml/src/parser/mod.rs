@@ -1,16 +1,11 @@
-use crate::{TomlSyntaxKind, ast::*, language::TomlLanguage};
-use oak_core::{
-    Builder, GreenBuilder, GreenNode, GreenTree, IncrementalCache, Lexer, OakError, Parser, SyntaxKind, errors::OakDiagnostics,
-    parser::ParserState, source::Source, tree::Arc,
-};
+use crate::{kind::TomlSyntaxKind, language::TomlLanguage};
+use oak_core::{Parser, source::Source};
 
-/// TOML 语言解析器（不可变），通过 &mut ParserState 推进
+/// TOML 语言解析器
 pub struct TomlParser<'config> {
     /// 语言配置
-    config: &'config TomlLanguage,
+    pub(crate) config: &'config TomlLanguage,
 }
-
-type State<'a, S: Source> = ParserState<'a, S, TomlLanguage>;
 
 impl<'config> TomlParser<'config> {
     pub fn new(config: &'config TomlLanguage) -> Self {
@@ -18,43 +13,18 @@ impl<'config> TomlParser<'config> {
     }
 }
 
-impl<'config> Clone for TomlParser<'config> {
-    fn clone(&self) -> Self {
-        TomlParser::new(self.config)
-    }
-}
-
 impl<'config> Parser<TomlLanguage> for TomlParser<'config> {
-    fn parse_incremental(
-        &self,
-        text: impl Source,
-        changed: usize,
-        cache: IncrementalCache<TomlLanguage>,
-    ) -> OakDiagnostics<Arc<GreenNode<TomlSyntaxKind>>> {
-        let mut state = ParserState::new_with_cache(text, changed, cache);
-        let result = self.run(&mut state);
-        state.finish(result)
-    }
-}
+    fn parse<'a, S: Source + ?Sized>(&self, text: &'a S, edits: &[oak_core::TextEdit], cache: &'a mut impl oak_core::ParseCache<TomlLanguage>) -> oak_core::ParseOutput<'a, TomlLanguage> {
+        let lexer = crate::lexer::TomlLexer::new(self.config);
+        oak_core::parser::parse_with_lexer(&lexer, text, edits, cache, |state| {
+            let checkpoint = state.checkpoint();
 
-impl<'config> Builder<TomlLanguage> for TomlParser<'config> {
-    fn build_incremental(
-        &self,
-        _text: impl Source,
-        _changed: usize,
-        _cache: IncrementalCache<TomlLanguage>,
-    ) -> OakDiagnostics<crate::ast::TomlRoot> {
-        todo!()
-    }
-}
+            // 简单的解析逻辑：消耗所有 token 并放入 Root 节点
+            while state.current().is_some() {
+                state.bump();
+            }
 
-impl<'config> TomlParser<'config> {
-    /// 主要的解析循环
-    fn run<S: Source>(&self, state: &mut State<S>) -> Result<(), OakError> {
-        // 创建根节点
-        let root = GreenBuilder::<TomlLanguage>::new(1).token(TomlSyntaxKind::Eof, 0).finish(TomlSyntaxKind::Root);
-
-        state.cache.last_parse = Some(root);
-        Ok(())
+            Ok(state.finish_at(checkpoint, TomlSyntaxKind::Root.into()))
+        })
     }
 }

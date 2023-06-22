@@ -7,7 +7,8 @@ fn test_fsharp_lexer_integration() {
     let language = Box::leak(Box::new(FSharpLanguage::default()));
     let lexer = FSharpLexer::new(language);
 
-    let result = lexer.lex(&source);
+    let mut cache = oak_core::parser::session::ParseSession::<FSharpLanguage>::default();
+    let result = lexer.lex(&source, &[], &mut cache);
 
     match result.result {
         Ok(tokens) => {

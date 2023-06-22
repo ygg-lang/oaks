@@ -1,0 +1,85 @@
+{
+    "success": true,
+    "count": 13,
+    "tokens": [
+        {
+            "kind": "Keyword(Fn)",
+            "text": "fn",
+            "start": 0,
+            "end": 2
+        },
+        {
+            "kind": "Identifier",
+            "text": "main",
+            "start": 3,
+            "end": 7
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 7,
+            "end": 8
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 8,
+            "end": 9
+        },
+        {
+            "kind": "LeftBrace",
+            "text": "{",
+            "start": 10,
+            "end": 11
+        },
+        {
+            "kind": "Keyword(While)",
+            "text": "while",
+            "start": 17,
+            "end": 22
+        },
+        {
+            "kind": "Keyword(True)",
+            "text": "true",
+            "start": 23,
+            "end": 27
+        },
+        {
+            "kind": "LeftBrace",
+            "text": "{",
+            "start": 28,
+            "end": 29
+        },
+        {
+            "kind": "Keyword(Break)",
+            "text": "break",
+            "start": 39,
+            "end": 44
+        },
+        {
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 44,
+            "end": 45
+        },
+        {
+            "kind": "RightBrace",
+            "text": "}",
+            "start": 51,
+            "end": 52
+        },
+        {
+            "kind": "RightBrace",
+            "text": "}",
+            "start": 54,
+            "end": 55
+        },
+        {
+            "kind": "Eof",
+            "text": "",
+            "start": 55,
+            "end": 55
+        }
+    ],
+    "errors": []
+}

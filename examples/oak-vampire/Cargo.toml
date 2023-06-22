@@ -1,8 +1,8 @@
 [package]
 name = "oak-vampire"
-description = "Vampire language parser with support for modern Vampire syntax and features."
+description = "Vampire theorem prover language parser with support for automated theorem proving and first-order logic."
 categories = ["parsing"]
-keywords = ["parser", "vampire", "language"]
+keywords = ["parser", "vampire", "theorem-prover", "first-order-logic"]
 documentation = "https://docs.rs/oak-vampire"
 readme = "readme.md"
 version.workspace = true
@@ -15,7 +15,16 @@ edition.workspace = true
 
 [dependencies]
 oak-core = { workspace = true }
-serde = { version = "1.0", features = ["derive"] }
+oak-highlight = { workspace = true }
+oak-pretty-print = { workspace = true }
+oak-lsp = { workspace = true }
+oak-mcp = { workspace = true, optional = true }
+oak-hover = { workspace = true }
+oak-vfs = { workspace = true }
+futures = { workspace = true }
+serde = { workspace = true, features = ["derive"] }
+axum = { workspace = true, optional = true }
+tokio = { workspace = true, optional = true }
 
 [dev-dependencies]
 oak-core = { workspace = true, features = ["testing"] }
@@ -23,6 +32,9 @@ oak-core = { workspace = true, features = ["testing"] }
 
 [features]
 default = []
+mcp = ["dep:oak-mcp"]
+axum = ["mcp", "dep:axum", "dep:tokio", "oak-mcp/axum", "oak-lsp/axum"]
+std = []
 
 
 [package.metadata.docs.rs]

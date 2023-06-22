@@ -1,0 +1,6 @@
+union Option<T> {
+    Some {
+        value: T
+    },
+    None,
+}

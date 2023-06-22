@@ -1,4 +1,4 @@
-use oak_core::SyntaxKind;
+use oak_core::{ElementType, TokenType, UniversalElementRole, UniversalTokenRole};
 use serde::Serialize;
 
 /// Python 语法节点类型
@@ -117,6 +117,7 @@ pub enum PythonSyntaxKind {
     Module,
     InteractiveModule,
     ExpressionModule,
+    Suite,
     FunctionDef,
     AsyncFunctionDef,
     ClassDef,
@@ -259,9 +260,98 @@ impl From<PythonSyntaxKind> for u16 {
     }
 }
 
-impl SyntaxKind for PythonSyntaxKind {
-    fn is_trivia(&self) -> bool {
-        matches!(self, Self::Whitespace | Self::Comment | Self::Newline)
+impl PythonSyntaxKind {
+    pub fn is_keyword(&self) -> bool {
+        matches!(
+            self,
+            Self::AndKeyword
+                | Self::AsKeyword
+                | Self::AssertKeyword
+                | Self::AsyncKeyword
+                | Self::AwaitKeyword
+                | Self::BreakKeyword
+                | Self::ClassKeyword
+                | Self::ContinueKeyword
+                | Self::DefKeyword
+                | Self::DelKeyword
+                | Self::ElifKeyword
+                | Self::ElseKeyword
+                | Self::ExceptKeyword
+                | Self::FalseKeyword
+                | Self::FinallyKeyword
+                | Self::ForKeyword
+                | Self::FromKeyword
+                | Self::GlobalKeyword
+                | Self::IfKeyword
+                | Self::ImportKeyword
+                | Self::InKeyword
+                | Self::IsKeyword
+                | Self::LambdaKeyword
+                | Self::NoneKeyword
+                | Self::NonlocalKeyword
+                | Self::NotKeyword
+                | Self::OrKeyword
+                | Self::PassKeyword
+                | Self::RaiseKeyword
+                | Self::ReturnKeyword
+                | Self::TrueKeyword
+                | Self::TryKeyword
+                | Self::WhileKeyword
+                | Self::WithKeyword
+                | Self::YieldKeyword
+        )
+    }
+}
+
+impl TokenType for PythonSyntaxKind {
+    const END_OF_STREAM: Self = Self::Eof;
+    type Role = UniversalTokenRole;
+
+    fn role(&self) -> Self::Role {
+        match self {
+            Self::Whitespace | Self::Newline | Self::Indent | Self::Dedent => UniversalTokenRole::Whitespace,
+            Self::Comment => UniversalTokenRole::Comment,
+            Self::Identifier => UniversalTokenRole::Name,
+            Self::Number | Self::String | Self::Bytes | Self::FString => UniversalTokenRole::Literal,
+            _ if self.is_keyword() => UniversalTokenRole::Keyword,
+            Self::Plus
+            | Self::Minus
+            | Self::Star
+            | Self::DoubleStar
+            | Self::Slash
+            | Self::DoubleSlash
+            | Self::Percent
+            | Self::At
+            | Self::LeftShift
+            | Self::RightShift
+            | Self::Ampersand
+            | Self::Pipe
+            | Self::Caret
+            | Self::Tilde
+            | Self::Less
+            | Self::Greater
+            | Self::LessEqual
+            | Self::GreaterEqual
+            | Self::Equal
+            | Self::NotEqual
+            | Self::Assign
+            | Self::PlusAssign
+            | Self::MinusAssign
+            | Self::StarAssign
+            | Self::DoubleStarAssign
+            | Self::SlashAssign
+            | Self::DoubleSlashAssign
+            | Self::PercentAssign
+            | Self::AtAssign
+            | Self::AmpersandAssign
+            | Self::PipeAssign
+            | Self::CaretAssign
+            | Self::LeftShiftAssign
+            | Self::RightShiftAssign => UniversalTokenRole::Operator,
+            Self::LeftParen | Self::RightParen | Self::LeftBracket | Self::RightBracket | Self::LeftBrace | Self::RightBrace | Self::Comma | Self::Colon | Self::Semicolon | Self::Dot | Self::Arrow | Self::Ellipsis => UniversalTokenRole::Punctuation,
+            Self::Eof => UniversalTokenRole::Eof,
+            _ => UniversalTokenRole::None,
+        }
     }
 
     fn is_comment(&self) -> bool {
@@ -269,32 +359,47 @@ impl SyntaxKind for PythonSyntaxKind {
     }
 
     fn is_whitespace(&self) -> bool {
-        matches!(self, Self::Whitespace | Self::Newline)
+        matches!(self, Self::Whitespace | Self::Newline | Self::Indent | Self::Dedent)
+    }
+}
+
+impl ElementType for PythonSyntaxKind {
+    type Role = UniversalElementRole;
+
+    fn role(&self) -> Self::Role {
+        match self {
+            Self::Root | Self::Module => UniversalElementRole::Root,
+            Self::FunctionDef
+            | Self::AsyncFunctionDef
+            | Self::ClassDef
+            | Self::Return
+            | Self::Delete
+            | Self::AssignStmt
+            | Self::AugAssign
+            | Self::AnnAssign
+            | Self::For
+            | Self::AsyncFor
+            | Self::While
+            | Self::If
+            | Self::With
+            | Self::AsyncWith
+            | Self::Raise
+            | Self::Try
+            | Self::Assert
+            | Self::Import
+            | Self::ImportFrom
+            | Self::Global
+            | Self::Nonlocal
+            | Self::Expr
+            | Self::Pass
+            | Self::Break
+            | Self::Continue => UniversalElementRole::Statement,
+            Self::Error => UniversalElementRole::Error,
+            _ => UniversalElementRole::None,
+        }
     }
 
-    fn is_token_type(&self) -> bool {
-        !matches!(
-            self,
-            Self::Root
-                | Self::Module
-                | Self::InteractiveModule
-                | Self::ExpressionModule
-                | Self::FunctionDef
-                | Self::AsyncFunctionDef
-                | Self::ClassDef
-        )
-    }
-
-    fn is_element_type(&self) -> bool {
-        matches!(
-            self,
-            Self::Root
-                | Self::Module
-                | Self::InteractiveModule
-                | Self::ExpressionModule
-                | Self::FunctionDef
-                | Self::AsyncFunctionDef
-                | Self::ClassDef
-        )
+    fn is_error(&self) -> bool {
+        matches!(self, Self::Error)
     }
 }

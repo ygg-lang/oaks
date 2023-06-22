@@ -1,6 +1,6 @@
-use oak_core::SyntaxKind;
+use oak_core::{ElementType, TokenType, UniversalElementRole, UniversalTokenRole};
 
-#[derive(Copy, Clone, Debug, PartialEq, Eq)]
+#[derive(Copy, Clone, Debug, PartialEq, Eq, Hash)]
 pub enum WatSyntaxKind {
     // 基础 kind
     Whitespace,
@@ -234,26 +234,35 @@ pub enum WatSyntaxKind {
     Backslash,
     Pipe,
     Tilde,
+    // Special
+    Root,
+    SourceFile,
+    Module,
+    Item,
 }
 
-impl SyntaxKind for WatSyntaxKind {
-    fn is_trivia(&self) -> bool {
-        matches!(self, Self::Whitespace | Self::Newline | Self::Comment)
-    }
+impl TokenType for WatSyntaxKind {
+    const END_OF_STREAM: Self = Self::Eof;
+    type Role = UniversalTokenRole;
 
-    fn is_comment(&self) -> bool {
-        matches!(self, Self::Comment)
+    fn role(&self) -> Self::Role {
+        match self {
+            Self::Whitespace | Self::Newline => UniversalTokenRole::Whitespace,
+            Self::Comment => UniversalTokenRole::Comment,
+            Self::Eof => UniversalTokenRole::Eof,
+            _ => UniversalTokenRole::None,
+        }
     }
+}
 
-    fn is_whitespace(&self) -> bool {
-        matches!(self, Self::Whitespace | Self::Newline)
-    }
+impl ElementType for WatSyntaxKind {
+    type Role = UniversalElementRole;
 
-    fn is_token_type(&self) -> bool {
-        !matches!(self, Self::Error)
-    }
-
-    fn is_element_type(&self) -> bool {
-        matches!(self, Self::Error)
+    fn role(&self) -> Self::Role {
+        match self {
+            Self::Root | Self::SourceFile => UniversalElementRole::Root,
+            Self::Error => UniversalElementRole::Error,
+            _ => UniversalElementRole::None,
+        }
     }
 }

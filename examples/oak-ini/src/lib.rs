@@ -4,7 +4,15 @@
 #![doc(html_favicon_url = "https://raw.githubusercontent.com/ygg-lang/oaks/refs/heads/dev/documents/logo.svg")]
 
 pub mod ast;
-pub mod kind;
-pub mod language;
-pub mod lexer;
-pub mod syntax;
+pub mod builder;
+pub mod highlighter;
+mod kind;
+mod language;
+mod lexer;
+pub mod lsp;
+mod parser;
+
+#[cfg(feature = "mcp")]
+pub mod mcp;
+
+pub use crate::{ast::IniRoot, builder::IniBuilder, highlighter::IniHighlighter, kind::IniSyntaxKind, language::IniLanguage, lexer::IniLexer, lsp::IniLanguageService, parser::IniParser};

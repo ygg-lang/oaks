@@ -1,0 +1,607 @@
+{
+    "success": true,
+    "count": 100,
+    "tokens": [
+        {
+            "kind": "Set",
+            "text": "set",
+            "start": 93,
+            "end": 96
+        },
+        {
+            "kind": "Identifier",
+            "text": "name",
+            "start": 97,
+            "end": 101
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "\"John Doe\"",
+            "start": 102,
+            "end": 112
+        },
+        {
+            "kind": "Set",
+            "text": "set",
+            "start": 114,
+            "end": 117
+        },
+        {
+            "kind": "Identifier",
+            "text": "age",
+            "start": 118,
+            "end": 121
+        },
+        {
+            "kind": "Number",
+            "text": "30",
+            "start": 122,
+            "end": 124
+        },
+        {
+            "kind": "Set",
+            "text": "set",
+            "start": 126,
+            "end": 129
+        },
+        {
+            "kind": "Identifier",
+            "text": "height",
+            "start": 130,
+            "end": 136
+        },
+        {
+            "kind": "Number",
+            "text": "5",
+            "start": 137,
+            "end": 138
+        },
+        {
+            "kind": "Number",
+            "text": "9",
+            "start": 139,
+            "end": 140
+        },
+        {
+            "kind": "Set",
+            "text": "set",
+            "start": 142,
+            "end": 145
+        },
+        {
+            "kind": "Identifier",
+            "text": "is_student",
+            "start": 146,
+            "end": 156
+        },
+        {
+            "kind": "Identifier",
+            "text": "true",
+            "start": 157,
+            "end": 161
+        },
+        {
+            "kind": "Set",
+            "text": "set",
+            "start": 163,
+            "end": 166
+        },
+        {
+            "kind": "Identifier",
+            "text": "empty_var",
+            "start": 167,
+            "end": 176
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "\"\"",
+            "start": 177,
+            "end": 179
+        },
+        {
+            "kind": "Set",
+            "text": "set",
+            "start": 192,
+            "end": 195
+        },
+        {
+            "kind": "Identifier",
+            "text": "fruits",
+            "start": 196,
+            "end": 202
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "{apple banana cherry date elderberry}",
+            "start": 203,
+            "end": 240
+        },
+        {
+            "kind": "Set",
+            "text": "set",
+            "start": 242,
+            "end": 245
+        },
+        {
+            "kind": "Identifier",
+            "text": "numbers",
+            "start": 246,
+            "end": 253
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "{1 2 3 4 5}",
+            "start": 254,
+            "end": 265
+        },
+        {
+            "kind": "Set",
+            "text": "set",
+            "start": 267,
+            "end": 270
+        },
+        {
+            "kind": "Identifier",
+            "text": "mixed_list",
+            "start": 271,
+            "end": 281
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "{hello 42 3.14 world}",
+            "start": 282,
+            "end": 303
+        },
+        {
+            "kind": "Set",
+            "text": "set",
+            "start": 305,
+            "end": 308
+        },
+        {
+            "kind": "Identifier",
+            "text": "nested_list",
+            "start": 309,
+            "end": 320
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "{{a b c} {1 2 3} {x y z}}",
+            "start": 321,
+            "end": 346
+        },
+        {
+            "kind": "Identifier",
+            "text": "array",
+            "start": 381,
+            "end": 386
+        },
+        {
+            "kind": "Set",
+            "text": "set",
+            "start": 387,
+            "end": 390
+        },
+        {
+            "kind": "Identifier",
+            "text": "person",
+            "start": 391,
+            "end": 397
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "{\r\n    name \"Alice Smith\"\r\n    age 25\r\n    city \"New York\"\r\n    occupation \"Engineer\"\r\n}",
+            "start": 398,
+            "end": 486
+        },
+        {
+            "kind": "Identifier",
+            "text": "array",
+            "start": 490,
+            "end": 495
+        },
+        {
+            "kind": "Set",
+            "text": "set",
+            "start": 496,
+            "end": 499
+        },
+        {
+            "kind": "Identifier",
+            "text": "colors",
+            "start": 500,
+            "end": 506
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "{\r\n    red \"#FF0000\"\r\n    green \"#00FF00\"\r\n    blue \"#0000FF\"\r\n    yellow \"#FFFF00\"\r\n}",
+            "start": 507,
+            "end": 593
+        },
+        {
+            "kind": "Set",
+            "text": "set",
+            "start": 622,
+            "end": 625
+        },
+        {
+            "kind": "Identifier",
+            "text": "config",
+            "start": 626,
+            "end": 632
+        },
+        {
+            "kind": "LeftBracket",
+            "text": "[",
+            "start": 633,
+            "end": 634
+        },
+        {
+            "kind": "Identifier",
+            "text": "dict",
+            "start": 634,
+            "end": 638
+        },
+        {
+            "kind": "Identifier",
+            "text": "create",
+            "start": 639,
+            "end": 645
+        },
+        {
+            "kind": "Identifier",
+            "text": "host",
+            "start": 653,
+            "end": 657
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "\"localhost\"",
+            "start": 658,
+            "end": 669
+        },
+        {
+            "kind": "Identifier",
+            "text": "port",
+            "start": 677,
+            "end": 681
+        },
+        {
+            "kind": "Number",
+            "text": "8080",
+            "start": 682,
+            "end": 686
+        },
+        {
+            "kind": "Identifier",
+            "text": "timeout",
+            "start": 694,
+            "end": 701
+        },
+        {
+            "kind": "Number",
+            "text": "30",
+            "start": 702,
+            "end": 704
+        },
+        {
+            "kind": "Identifier",
+            "text": "ssl_enabled",
+            "start": 712,
+            "end": 723
+        },
+        {
+            "kind": "Identifier",
+            "text": "true",
+            "start": 724,
+            "end": 728
+        },
+        {
+            "kind": "Identifier",
+            "text": "max_connections",
+            "start": 736,
+            "end": 751
+        },
+        {
+            "kind": "Number",
+            "text": "100",
+            "start": 752,
+            "end": 755
+        },
+        {
+            "kind": "RightBracket",
+            "text": "]",
+            "start": 755,
+            "end": 756
+        },
+        {
+            "kind": "Proc",
+            "text": "proc",
+            "start": 786,
+            "end": 790
+        },
+        {
+            "kind": "Identifier",
+            "text": "greet",
+            "start": 791,
+            "end": 796
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "{name}",
+            "start": 797,
+            "end": 803
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "{\r\n    return \"Hello, $name!\"\r\n}",
+            "start": 804,
+            "end": 836
+        },
+        {
+            "kind": "Proc",
+            "text": "proc",
+            "start": 840,
+            "end": 844
+        },
+        {
+            "kind": "Identifier",
+            "text": "add",
+            "start": 845,
+            "end": 848
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "{a b}",
+            "start": 849,
+            "end": 854
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "{\r\n    return [expr {$a + $b}]\r\n}",
+            "start": 855,
+            "end": 888
+        },
+        {
+            "kind": "Proc",
+            "text": "proc",
+            "start": 892,
+            "end": 896
+        },
+        {
+            "kind": "Identifier",
+            "text": "multiply",
+            "start": 897,
+            "end": 905
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "{a b}",
+            "start": 906,
+            "end": 911
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "{\r\n    return [expr {$a * $b}]\r\n}",
+            "start": 912,
+            "end": 945
+        },
+        {
+            "kind": "Proc",
+            "text": "proc",
+            "start": 949,
+            "end": 953
+        },
+        {
+            "kind": "Identifier",
+            "text": "factorial",
+            "start": 954,
+            "end": 963
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "{n}",
+            "start": 964,
+            "end": 967
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "{\r\n    if {$n <= 1} {\r\n        return 1\r\n    } else {\r\n        return [expr {$n * [factorial [expr {$n - 1}]]}]\r\n    }\r\n}",
+            "start": 968,
+            "end": 1089
+        },
+        {
+            "kind": "Proc",
+            "text": "proc",
+            "start": 1093,
+            "end": 1097
+        },
+        {
+            "kind": "Identifier",
+            "text": "fibonacci",
+            "start": 1098,
+            "end": 1107
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "{n}",
+            "start": 1108,
+            "end": 1111
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "{\r\n    if {$n <= 1} {\r\n        return $n\r\n    } else {\r\n        return [expr {[fibonacci [expr {$n - 1}]] + [fibonacci [expr {$n - 2}]]}]\r\n    }\r\n}",
+            "start": 1112,
+            "end": 1259
+        },
+        {
+            "kind": "Proc",
+            "text": "proc",
+            "start": 1263,
+            "end": 1267
+        },
+        {
+            "kind": "Identifier",
+            "text": "sum_list",
+            "start": 1268,
+            "end": 1276
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "{lst}",
+            "start": 1277,
+            "end": 1282
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "{\r\n    set total 0\r\n    foreach item $lst {\r\n        set total [expr {$total + $item}]\r\n    }\r\n    return $total\r\n}",
+            "start": 1283,
+            "end": 1398
+        },
+        {
+            "kind": "Proc",
+            "text": "proc",
+            "start": 1402,
+            "end": 1406
+        },
+        {
+            "kind": "Identifier",
+            "text": "find_max",
+            "start": 1407,
+            "end": 1415
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "{lst}",
+            "start": 1416,
+            "end": 1421
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "{\r\n    set max [lindex $lst 0]\r\n    foreach item $lst {\r\n        if {$item > $max} {\r\n            set max $item\r\n        }\r\n    }\r\n    return $max\r\n}",
+            "start": 1422,
+            "end": 1571
+        },
+        {
+            "kind": "Proc",
+            "text": "proc",
+            "start": 1575,
+            "end": 1579
+        },
+        {
+            "kind": "Identifier",
+            "text": "is_prime",
+            "start": 1580,
+            "end": 1588
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "{n}",
+            "start": 1589,
+            "end": 1592
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "{\r\n    if {$n < 2} {\r\n        return 0\r\n    }\r\n    if {$n == 2} {\r\n        return 1\r\n    }\r\n    if {$n % 2 == 0} {\r\n        return 0\r\n    }\r\n    for {set i 3} {$i * $i <= $n} {incr i 2} {\r\n        if {$n % $i == 0} {\r\n            return 0\r\n        }\r\n    }\r\n    return 1\r\n}",
+            "start": 1593,
+            "end": 1866
+        },
+        {
+            "kind": "Proc",
+            "text": "proc",
+            "start": 1870,
+            "end": 1874
+        },
+        {
+            "kind": "Identifier",
+            "text": "reverse_string",
+            "start": 1875,
+            "end": 1889
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "{str}",
+            "start": 1890,
+            "end": 1895
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "{\r\n    set result \"\"\r\n    for {set i [expr {[string length $str] - 1}]} {$i >= 0} {incr i -1} {\r\n        append result [string index $str $i]\r\n    }\r\n    return $result\r\n}",
+            "start": 1896,
+            "end": 2067
+        },
+        {
+            "kind": "Proc",
+            "text": "proc",
+            "start": 2071,
+            "end": 2075
+        },
+        {
+            "kind": "Identifier",
+            "text": "count_words",
+            "start": 2076,
+            "end": 2087
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "{text}",
+            "start": 2088,
+            "end": 2094
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "{\r\n    return [llength [split $text]]\r\n}",
+            "start": 2095,
+            "end": 2135
+        },
+        {
+            "kind": "Proc",
+            "text": "proc",
+            "start": 2176,
+            "end": 2180
+        },
+        {
+            "kind": "Identifier",
+            "text": "print_all",
+            "start": 2181,
+            "end": 2190
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "{args}",
+            "start": 2191,
+            "end": 2197
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "{\r\n    foreach arg $args {\r\n        puts $arg\r\n    }\r\n}",
+            "start": 2198,
+            "end": 2253
+        },
+        {
+            "kind": "Proc",
+            "text": "proc",
+            "start": 2294,
+            "end": 2298
+        },
+        {
+            "kind": "Identifier",
+            "text": "connect_db",
+            "start": 2299,
+            "end": 2309
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "{host {port 5432} {database \"mydb\"}}",
+            "start": 2310,
+            "end": 2346
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "{\r\n    puts \"Connecting to $host:$port/$database\"\r\n}",
+            "start": 2347,
+            "end": 2399
+        }
+    ],
+    "errors": []
+}

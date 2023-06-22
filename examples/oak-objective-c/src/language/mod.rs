@@ -1,5 +1,4 @@
-use crate::{ast::ObjectiveCRoot, kind::ObjectiveCLanguageSyntaxKind};
-use oak_core::Language;
+use oak_core::{Language, LanguageCategory};
 
 pub struct ObjectiveCLanguage {
     pub arc_enabled: bool,
@@ -29,6 +28,10 @@ impl Default for ObjectiveCLanguage {
 }
 
 impl Language for ObjectiveCLanguage {
-    type SyntaxKind = ObjectiveCLanguageSyntaxKind;
-    type TypedRoot = ObjectiveCRoot;
+    const NAME: &'static str = "objective-c";
+    const CATEGORY: LanguageCategory = LanguageCategory::Programming;
+
+    type TokenType = crate::kind::ObjectiveCSyntaxKind;
+    type ElementType = crate::kind::ObjectiveCSyntaxKind;
+    type TypedRoot = crate::ast::ObjectiveCRoot;
 }

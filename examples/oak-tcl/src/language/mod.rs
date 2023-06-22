@@ -1,5 +1,5 @@
-use crate::kind::TclSyntaxKind;
-use oak_core::Language;
+use crate::ast::TclRoot;
+use oak_core::{Language, LanguageCategory};
 
 /// Tcl 语言配置
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -61,6 +61,10 @@ impl TclLanguage {
 }
 
 impl Language for TclLanguage {
-    type SyntaxKind = TclSyntaxKind;
-    type TypedRoot = ();
+    const NAME: &'static str = "tcl";
+    const CATEGORY: LanguageCategory = LanguageCategory::Programming;
+
+    type TokenType = crate::kind::TclSyntaxKind;
+    type ElementType = crate::kind::TclSyntaxKind;
+    type TypedRoot = TclRoot;
 }

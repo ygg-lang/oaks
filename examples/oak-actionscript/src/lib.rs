@@ -3,12 +3,35 @@
 #![doc(html_logo_url = "https://raw.githubusercontent.com/ygg-lang/oaks/refs/heads/dev/documents/logo.svg")]
 #![doc(html_favicon_url = "https://raw.githubusercontent.com/ygg-lang/oaks/refs/heads/dev/documents/logo.svg")]
 
-pub mod ast;
-pub mod kind;
-pub mod language;
-pub mod lexer;
+extern crate oak_core;
+extern crate serde;
 
-pub use ast::*;
-pub use kind::*;
-pub use language::*;
-pub use lexer::*;
+pub mod ast;
+mod builder;
+mod formatter;
+pub mod highlighter;
+mod language;
+pub mod lexer;
+pub mod lsp;
+pub mod parser;
+
+#[cfg(feature = "mcp")]
+pub mod mcp;
+
+// 重新导出主要类型
+pub use crate::{
+    ast::ActionScriptRoot,
+    builder::ActionScriptBuilder,
+    formatter::ActionScriptFormatter,
+    highlighter::ActionScriptHighlighter,
+    language::ActionScriptLanguage,
+    lexer::{ActionScriptLexer, ActionScriptTokenType},
+    lsp::ActionScriptLanguageService,
+    parser::{ActionScriptElementType, ActionScriptParser},
+};
+
+#[cfg(feature = "mcp")]
+pub use crate::mcp::serve_actionscript_mcp;
+
+#[cfg(all(feature = "mcp", feature = "axum"))]
+pub use crate::mcp::serve_actionscript_mcp_axum;

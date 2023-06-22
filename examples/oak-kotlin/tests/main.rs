@@ -1,5 +1,4 @@
 use oak_kotlin::{KotlinLanguage, KotlinLexer};
-use std::path::Path;
 
 #[test]
 fn ready() {
@@ -10,7 +9,7 @@ fn ready() {
 fn test_kotlin_lexer_basic() {
     // 简单测试：创建词法分析器并验证它可以正常工作
     let language = KotlinLanguage::default();
-    let lexer = KotlinLexer::new(&language);
+    let _lexer = KotlinLexer::new(&language);
 
     // 测试一个简单的 Kotlin 代码片段
     let test_code = "fun main() {\n    println(\"Hello, World!\")\n}";

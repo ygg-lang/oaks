@@ -1,118 +1,196 @@
-# JASM 格式
+# Oak Javadoc Parser
 
-JASM (Java ASseMbler) 是一种人类可读的 JVM 字节码汇编语言格式，用于表示 Java 类文件的结构和字节码指令。
+[![Crates.io](https://img.shields.io/crates/v/oak-javadoc.svg)](https://crates.io/crates/oak-javadoc)
+[![Documentation](https://docs.rs/oak-javadoc/badge.svg)](https://docs.rs/oak-javadoc)
 
-## 概述
+High-performance incremental Javadoc parser for the oak ecosystem with flexible configuration, optimized for API documentation generation and code analysis.
 
-JASM 格式提供了一种直观的方式来编写和阅读 JVM 字节码，它是 Java 类文件的文本表示形式。该格式支持：
+## 🎯 Overview
 
-- **类定义**: 类名、访问修饰符、超类、接口
-- **字段定义**: 字段名、类型、访问修饰符
-- **方法定义**: 方法名、签名、字节码指令
-- **常量池**: 自动管理字符串、数字、类引用等常量
-- **属性**: 源文件、行号表、局部变量表等标准属性
+Oak Javadoc is a robust parser for Java documentation comments (Javadoc), designed to handle complete Javadoc syntax including standard tags and custom extensions. Built on the solid foundation of oak-core, it provides both high-level convenience and detailed AST generation for documentation analysis and generation.
 
-## 语法结构
+## ✨ Features
 
-### 基本类结构
+- **Complete Javadoc Syntax**: Supports all standard Javadoc tags and HTML elements
+- **Custom Tag Support**: Handles custom Javadoc tags and extensions
+- **Full AST Generation**: Generates comprehensive Abstract Syntax Trees
+- **Lexer Support**: Built-in tokenization with proper span information
+- **Error Recovery**: Graceful handling of syntax errors with detailed diagnostics
 
+## 🚀 Quick Start
 
+Basic example:
 
-### 字段定义
+```rust
+use oak_javadoc::{Parser, JavadocLanguage, SourceText};
 
+fn main() -> Result<(), Box<dyn std::error::Error>> {
+    let parser = Parser::new();
+    let source = SourceText::new(r#"
+/**
+ * Calculates the sum of two integers.
+ * 
+ * @param a The first integer
+ * @param b The second integer
+ * @return The sum of a and b
+ * @throws IllegalArgumentException If either parameter is null
+ * @since 1.0
+ * @author John Doe
+ */
+public int add(int a, int b) {
+    return a + b;
+}
+    "#);
+    
+    let result = parser.parse(&source);
+    println!("Parsed Javadoc comment successfully.");
+    Ok(())
+}
+```
 
+## 📋 Parsing Examples
 
-### 方法定义
+### Class Documentation
+```rust
+use oak_javadoc::{Parser, JavadocLanguage, SourceText};
 
+let parser = Parser::new();
+let source = SourceText::new(r#"
+/**
+ * Represents a person with a name and age.
+ * <p>
+ * This class provides basic functionality for storing and retrieving
+ * person information. It includes validation for age constraints.
+ * 
+ * @author Jane Smith
+ * @version 1.2
+ * @since 1.0
+ */
+public class Person {
+    private String name;
+    private int age;
+    
+    /**
+     * Constructs a new Person with the specified name and age.
+     * 
+     * @param name The person's name, cannot be null
+     * @param age The person's age, must be between 0 and 150
+     * @throws IllegalArgumentException If name is null or age is out of range
+     */
+    public Person(String name, int age) {
+        // Implementation...
+    }
+}
+"#);
 
+let result = parser.parse(&source);
+println!("Parsed class documentation successfully.");
+```
 
-## 指令系统
+### Method Documentation with Examples
+```rust
+use oak_javadoc::{Parser, JavadocLanguage, SourceText};
 
-### 常量加载指令
+let parser = Parser::new();
+let source = SourceText::new(r#"
+/**
+ * Formats a string using the specified template and arguments.
+ * <p>
+ * This method replaces placeholders in the template with the provided arguments.
+ * Placeholders are specified in the format {0}, {1}, etc.
+ * 
+ * <pre>
+ * String result = StringFormatter.format("Hello {0}, today is {1}", "Alice", "Monday");
+ * // Returns: "Hello Alice, today is Monday"
+ * </pre>
+ * 
+ * @param template The template string with placeholders
+ * @param args The arguments to replace the placeholders
+ * @return The formatted string
+ * @throws IllegalArgumentException If template is null or number of arguments doesn't match placeholders
+ * @see java.text.MessageFormat
+ * @since 1.5
+ */
+public String format(String template, Object... args) {
+    // Implementation...
+}
+"#);
 
-- `aconst_null` - 加载 null 引用
-- `iconst_0` 到 `iconst_5` - 加载整数常量 0-5
-- `ldc "string"` - 加载字符串常量
-- `ldc 123` - 加载数字常量
+let result = parser.parse(&source);
+println!("Parsed method documentation with examples successfully.");
+```
 
-### 局部变量操作
+## 🔧 Advanced Features
 
-- `iload_0` 到 `iload_3` - 加载局部变量到操作数栈
-- `istore_0` 到 `istore_3` - 从操作数栈存储到局部变量
-- `iinc 1 1` - 递增局部变量
+### Token-Level Parsing
+```rust
+use oak_javadoc::{Parser, JavadocLanguage, SourceText};
 
-### 栈操作指令
+let parser = Parser::new();
+let source = SourceText::new("/** Simple comment */");
+let result = parser.parse(&source);
+// Token information is available in the parse result
+```
 
-- `pop` - 弹出栈顶元素
-- `dup` - 复制栈顶元素
-- `swap` - 交换栈顶两个元素
+### Error Handling
+```rust
+use oak_javadoc::{Parser, JavadocLanguage, SourceText};
 
-### 算术运算
+let parser = Parser::new();
+let source = SourceText::new(r#"
+/**
+ * This comment has an unclosed tag
+ * @param x This parameter is described
+ * @return This return is not properly closed
+public int broken() {
+    return 0;
+}
+"#);
 
-- `iadd` - 整数加法
-- `isub` - 整数减法
-- `imul` - 整数乘法
-- `idiv` - 整数除法
+let result = parser.parse(&source);
+if let Err(e) = result.result {
+    println!("Parse error: {:?}", e);
+}
+```
 
-### 方法调用
+## 🏗️ AST Structure
 
+The parser generates a comprehensive AST with the following main structures:
 
+- **Javadoc**: Root container for Javadoc comments
+- **Description**: Main description text with HTML elements
+- **BlockTag**: Block-level tags like @param, @return, @throws
+- **InlineTag**: Inline tags like {@link}, {@code}, {@literal}
+- **HtmlElement**: HTML elements within the documentation
 
-### 控制流
+## 📊 Performance
 
+- **Streaming**: Parse large Javadoc files without loading entirely into memory
+- **Incremental**: Re-parse only changed sections
+- **Memory Efficient**: Smart AST node allocation
+- **Fast Recovery**: Quick error recovery for better IDE integration
 
+## 🔗 Integration
 
-## 示例程序
+Oak-javadoc integrates seamlessly with:
 
-### Hello World
+- **Documentation Generation**: Generating HTML docs from Javadoc comments
+- **Static Analysis**: Analyzing code quality and documentation coverage
+- **IDE Support**: Language server protocol compatibility for Java
+- **API Extraction**: Extracting API specifications from source code
+- **Code Completion**: Providing context-aware code completion
 
+## 📚 Examples
 
+Check out the [examples](examples/) directory for comprehensive examples:
 
-### 简单计算器
+- Complete class documentation parsing
+- Method and field documentation analysis
+- Custom tag handling
+- Integration with documentation generation tools
 
+## 🤝 Contributing
 
+Contributions are welcome! 
 
-## 高级特性
-
-### 异常处理
-
-
-
-### 泛型支持
-
-JASM 支持 Java 泛型的类型描述符：
-
-
-
-### 注解支持
-
-
-
-## 转换过程
-
-JASM 格式通过以下步骤转换为 JVM 类文件：
-
-1. **词法分析**: 将文本分解为标记（tokens）
-2. **语法分析**: 构建抽象语法树（AST）
-3. **语义分析**: 验证语法和类型正确性
-4. **代码生成**: 生成 JVM 字节码和常量池
-5. **类文件写入**: 写入标准 Java 类文件格式
-
-## 相关模块
-
-- [`lexer`](lexer/index.html) - JASM 词法分析器
-- [`parser`](parser/index.html) - JASM 语法分析器
-- [`ast`](ast/index.html) - JASM 抽象语法树定义
-- [`converter`](converter/index.html) - AST 到 JVM 程序的转换器
-- [`writer`](writer/index.html) - JVM 程序到类文件的写入器
-
-## 错误处理
-
-JASM 解析和转换过程中可能遇到的错误：
-
-- **语法错误**: 无效的语法结构
-- **类型错误**: 类型不匹配或无效类型
-- **引用错误**: 未定义的类、方法或字段
-- **验证错误**: 字节码验证失败
-
-所有错误都通过 [`GaiaError`](../../gaia_types/struct.GaiaError.html) 类型返回，提供详细的错误信息和位置。
+Please feel free to submit pull requests at the [project repository](https://github.com/ygg-lang/oaks/tree/dev/examples/oak-javadoc) or open [issues](https://github.com/ygg-lang/oaks/issues).

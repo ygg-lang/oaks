@@ -12,7 +12,7 @@ fn test_vampire_lexer() {
     let test_runner = LexerTester::new(tests)
         .with_extension("tptp")
         .with_timeout(Duration::from_secs(30));
-    match test_runner.run_tests::<VampireLanguage, _>(lexer) {
+    match test_runner.run_tests::<VampireLanguage, _>(&lexer) {
         Ok(()) => println!("Vampire lexer tests passed!"),
         Err(e) => panic!("Vampire lexer tests failed: {}", e),
     }

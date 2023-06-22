@@ -1,9 +1,9 @@
 [package]
 name = "oak-wgsl"
-description = "High-performance incremental WebAssembly Text (WAT) parser for the oak ecosystem with flexible configuration, supporting web platform development and portable code generation."
+description = "WGSL language parser with support for modern shader programming and WebGPU features."
 categories = ["parsing"]
-keywords = ["parser", "wat", "webassembly", "wasm"]
-documentation = "https://docs.rs/oak-wat"
+keywords = ["parser", "wgsl", "shader", "webgpu"]
+documentation = "https://docs.rs/oak-wgsl"
 readme = "readme.md"
 version.workspace = true
 authors.workspace = true

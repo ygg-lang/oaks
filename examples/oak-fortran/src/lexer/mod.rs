@@ -1,42 +1,30 @@
 use crate::{kind::FortranSyntaxKind, language::FortranLanguage};
-use oak_core::{
-    IncrementalCache, Lexer, LexerState, OakError,
-    lexer::{CommentLine, LexOutput, StringConfig, WhitespaceConfig},
-    source::Source,
-};
-use std::sync::LazyLock;
+use oak_core::{Lexer, LexerCache, LexerState, OakError, lexer::LexOutput, source::Source};
 
-type State<S> = LexerState<S, FortranLanguage>;
-
-static FORTRAN_WHITESPACE: LazyLock<WhitespaceConfig> = LazyLock::new(|| WhitespaceConfig { unicode_whitespace: true });
-static FORTRAN_COMMENT: LazyLock<CommentLine> = LazyLock::new(|| CommentLine { line_markers: &["!", "C", "c"] });
-static FORTRAN_STRING: LazyLock<StringConfig> = LazyLock::new(|| StringConfig { quotes: &['"'], escape: None });
-static FORTRAN_CHAR: LazyLock<StringConfig> = LazyLock::new(|| StringConfig { quotes: &['\''], escape: None });
+type State<'a, S> = LexerState<'a, S, FortranLanguage>;
 
 #[derive(Clone)]
 pub struct FortranLexer<'config> {
-    config: &'config FortranLanguage,
+    _config: &'config FortranLanguage,
 }
 
 impl<'config> Lexer<FortranLanguage> for FortranLexer<'config> {
-    fn lex_incremental(
-        &self,
-        source: impl Source,
-        changed: usize,
-        cache: IncrementalCache<FortranLanguage>,
-    ) -> LexOutput<FortranLanguage> {
-        let mut state = LexerState::new_with_cache(source, changed, cache);
+    fn lex<'a, S: Source + ?Sized>(&self, source: &S, _edits: &[oak_core::TextEdit], cache: &'a mut impl LexerCache<FortranLanguage>) -> LexOutput<FortranLanguage> {
+        let mut state = LexerState::new(source);
         let result = self.run(&mut state);
-        state.finish(result)
+        if result.is_ok() {
+            state.add_eof();
+        }
+        state.finish_with_cache(result, cache)
     }
 }
 
 impl<'config> FortranLexer<'config> {
     pub fn new(config: &'config FortranLanguage) -> Self {
-        Self { config }
+        Self { _config: config }
     }
 
-    fn run<S: Source>(&self, state: &mut State<S>) -> Result<(), OakError> {
+    fn run<'s, S: Source + ?Sized>(&self, state: &mut State<'s, S>) -> Result<(), OakError> {
         while state.not_at_end() {
             let safe_point = state.get_position();
 
@@ -77,16 +65,13 @@ impl<'config> FortranLexer<'config> {
                 state.advance(c.len_utf8());
             }
 
-            state.safe_check(safe_point);
+            state.advance_if_dead_lock(safe_point);
         }
 
-        // Add EOF token
-        let eof_pos = state.get_position();
-        state.add_token(FortranSyntaxKind::Eof, eof_pos, eof_pos);
         Ok(())
     }
 
-    fn lex_newline<S: Source>(&self, state: &mut State<S>) -> bool {
+    fn lex_newline<'s, S: Source + ?Sized>(&self, state: &mut State<'s, S>) -> bool {
         let start = state.get_position();
         if let Some(ch) = state.current() {
             if ch == '\n' {
@@ -106,8 +91,7 @@ impl<'config> FortranLexer<'config> {
         false
     }
 
-    fn skip_whitespace<S: Source>(&self, state: &mut State<S>) -> bool {
-        let start = state.get_position();
+    fn skip_whitespace<'s, S: Source + ?Sized>(&self, state: &mut State<'s, S>) -> bool {
         let mut advanced = false;
 
         while let Some(ch) = state.current() {
@@ -123,7 +107,7 @@ impl<'config> FortranLexer<'config> {
         advanced
     }
 
-    fn skip_comment<S: Source>(&self, state: &mut State<S>) -> bool {
+    fn skip_comment<'s, S: Source + ?Sized>(&self, state: &mut State<'s, S>) -> bool {
         // Check for Fortran comment indicators
         if let Some(ch) = state.current() {
             if ch == '!' {
@@ -140,7 +124,7 @@ impl<'config> FortranLexer<'config> {
         false
     }
 
-    fn lex_string_literal<S: Source>(&self, state: &mut State<S>) -> bool {
+    fn lex_string_literal<'s, S: Source + ?Sized>(&self, state: &mut State<'s, S>) -> bool {
         let start = state.get_position();
 
         if state.current() != Some('"') {
@@ -164,7 +148,7 @@ impl<'config> FortranLexer<'config> {
         true
     }
 
-    fn lex_char_literal<S: Source>(&self, state: &mut State<S>) -> bool {
+    fn lex_char_literal<'s, S: Source + ?Sized>(&self, state: &mut State<'s, S>) -> bool {
         let start = state.get_position();
 
         if state.current() != Some('\'') {
@@ -189,7 +173,7 @@ impl<'config> FortranLexer<'config> {
         true
     }
 
-    fn lex_number_literal<S: Source>(&self, state: &mut State<S>) -> bool {
+    fn lex_number_literal<'s, S: Source + ?Sized>(&self, state: &mut State<'s, S>) -> bool {
         let start = state.get_position();
         let first = match state.current() {
             Some(c) => c,
@@ -199,8 +183,6 @@ impl<'config> FortranLexer<'config> {
         if !first.is_ascii_digit() {
             return false;
         }
-
-        let mut is_float = false;
 
         // Read integer part
         state.advance(1);
@@ -217,7 +199,6 @@ impl<'config> FortranLexer<'config> {
         if state.current() == Some('.') {
             let n1 = state.peek_next_n(1);
             if n1.map(|c| c.is_ascii_digit()).unwrap_or(false) {
-                is_float = true;
                 state.advance(1); // consume '.'
                 while let Some(c) = state.current() {
                     if c.is_ascii_digit() || c == '_' {
@@ -235,7 +216,6 @@ impl<'config> FortranLexer<'config> {
             if c == 'e' || c == 'E' || c == 'd' || c == 'D' {
                 let n1 = state.peek_next_n(1);
                 if n1 == Some('+') || n1 == Some('-') || n1.map(|d| d.is_ascii_digit()).unwrap_or(false) {
-                    is_float = true;
                     state.advance(1);
                     if let Some(sign) = state.current() {
                         if sign == '+' || sign == '-' {
@@ -259,7 +239,7 @@ impl<'config> FortranLexer<'config> {
         true
     }
 
-    fn lex_identifier_or_keyword<S: Source>(&self, state: &mut State<S>) -> bool {
+    fn lex_identifier_or_keyword<'s, S: Source + ?Sized>(&self, state: &mut State<'s, S>) -> bool {
         let start = state.get_position();
         let first = match state.current() {
             Some(c) => c,
@@ -346,7 +326,7 @@ impl<'config> FortranLexer<'config> {
         true
     }
 
-    fn lex_operator_or_single_char<S: Source>(&self, state: &mut State<S>) -> bool {
+    fn lex_operator_or_single_char<'s, S: Source + ?Sized>(&self, state: &mut State<'s, S>) -> bool {
         let start = state.get_position();
         let c = match state.current() {
             Some(c) => c,

@@ -1,8 +1,8 @@
 [package]
 name = "oak-objective-c"
-description = "High-performance incremental Objective-C parser for the oak ecosystem with flexible configuration."
+description = "Objective-C object-oriented programming language parser with support for Apple platform development and runtime features."
 categories = ["parsing"]
-keywords = ["parser", "objective-c", "objc", "apple"]
+keywords = ["parser", "objective-c", "apple-platforms", "object-oriented"]
 documentation = "https://docs.rs/oak-objective-c"
 readme = "readme.md"
 version.workspace = true
@@ -14,9 +14,16 @@ edition.workspace = true
 
 [dependencies]
 oak-core = { workspace = true }
-oak-highlight = { workspace = true, optional = true }
-oak-pretty-print = { workspace = true, optional = true }
+oak-highlight = { workspace = true }
+oak-pretty-print = { workspace = true }
+oak-lsp = { workspace = true }
+oak-hover = { workspace = true }
+oak-vfs = { workspace = true }
+oak-mcp = { workspace = true, optional = true }
 serde = { workspace = true }
+tracing = { workspace = true }
+tokio = { workspace = true, optional = true }
+axum = { workspace = true, optional = true }
 
 [dev-dependencies]
 oak-core = { workspace = true, features = ["testing"] }
@@ -24,7 +31,8 @@ serde_json = { workspace = true }
 
 [features]
 default = []
-
+mcp = ["dep:oak-mcp"]
+axum = ["mcp", "dep:tokio", "dep:axum", "oak-mcp/axum", "oak-lsp/axum"]
 
 [package.metadata.docs.rs]
 all-features = true

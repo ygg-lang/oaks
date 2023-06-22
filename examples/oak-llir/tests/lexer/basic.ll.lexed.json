@@ -1,0 +1,607 @@
+{
+    "success": true,
+    "count": 100,
+    "tokens": [
+        {
+            "kind": "Keyword",
+            "text": "source_filename",
+            "start": 25,
+            "end": 40
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 41,
+            "end": 42
+        },
+        {
+            "kind": "String",
+            "text": "\"basic.c\"",
+            "start": 43,
+            "end": 52
+        },
+        {
+            "kind": "Keyword",
+            "text": "target",
+            "start": 54,
+            "end": 60
+        },
+        {
+            "kind": "Keyword",
+            "text": "datalayout",
+            "start": 61,
+            "end": 71
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 72,
+            "end": 73
+        },
+        {
+            "kind": "String",
+            "text": "\"e-m:w-p270:32:32-p271:32:32-p272:64:64-i64:64-f80:128-n8:16:32:64-S128\"",
+            "start": 74,
+            "end": 146
+        },
+        {
+            "kind": "Keyword",
+            "text": "target",
+            "start": 148,
+            "end": 154
+        },
+        {
+            "kind": "Keyword",
+            "text": "triple",
+            "start": 155,
+            "end": 161
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 162,
+            "end": 163
+        },
+        {
+            "kind": "String",
+            "text": "\"x86_64-pc-windows-msvc19.29.30146\"",
+            "start": 164,
+            "end": 199
+        },
+        {
+            "kind": "Keyword",
+            "text": "define",
+            "start": 256,
+            "end": 262
+        },
+        {
+            "kind": "Keyword",
+            "text": "dso_local",
+            "start": 263,
+            "end": 272
+        },
+        {
+            "kind": "Keyword",
+            "text": "i32",
+            "start": 273,
+            "end": 276
+        },
+        {
+            "kind": "GlobalVar",
+            "text": "@main",
+            "start": 277,
+            "end": 282
+        },
+        {
+            "kind": "LParen",
+            "text": "(",
+            "start": 282,
+            "end": 283
+        },
+        {
+            "kind": "RParen",
+            "text": ")",
+            "start": 283,
+            "end": 284
+        },
+        {
+            "kind": "Error",
+            "text": "#",
+            "start": 285,
+            "end": 286
+        },
+        {
+            "kind": "Number",
+            "text": "0",
+            "start": 286,
+            "end": 287
+        },
+        {
+            "kind": "LBrace",
+            "text": "{",
+            "start": 288,
+            "end": 289
+        },
+        {
+            "kind": "LocalVar",
+            "text": "%1",
+            "start": 293,
+            "end": 295
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 296,
+            "end": 297
+        },
+        {
+            "kind": "Keyword",
+            "text": "alloca",
+            "start": 298,
+            "end": 304
+        },
+        {
+            "kind": "Keyword",
+            "text": "i32",
+            "start": 305,
+            "end": 308
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 308,
+            "end": 309
+        },
+        {
+            "kind": "Keyword",
+            "text": "align",
+            "start": 310,
+            "end": 315
+        },
+        {
+            "kind": "Number",
+            "text": "4",
+            "start": 316,
+            "end": 317
+        },
+        {
+            "kind": "LocalVar",
+            "text": "%2",
+            "start": 321,
+            "end": 323
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 324,
+            "end": 325
+        },
+        {
+            "kind": "Keyword",
+            "text": "alloca",
+            "start": 326,
+            "end": 332
+        },
+        {
+            "kind": "Keyword",
+            "text": "i32",
+            "start": 333,
+            "end": 336
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 336,
+            "end": 337
+        },
+        {
+            "kind": "Keyword",
+            "text": "align",
+            "start": 338,
+            "end": 343
+        },
+        {
+            "kind": "Number",
+            "text": "4",
+            "start": 344,
+            "end": 345
+        },
+        {
+            "kind": "Keyword",
+            "text": "store",
+            "start": 349,
+            "end": 354
+        },
+        {
+            "kind": "Keyword",
+            "text": "i32",
+            "start": 355,
+            "end": 358
+        },
+        {
+            "kind": "Number",
+            "text": "0",
+            "start": 359,
+            "end": 360
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 360,
+            "end": 361
+        },
+        {
+            "kind": "Keyword",
+            "text": "i32",
+            "start": 362,
+            "end": 365
+        },
+        {
+            "kind": "Star",
+            "text": "*",
+            "start": 365,
+            "end": 366
+        },
+        {
+            "kind": "LocalVar",
+            "text": "%1",
+            "start": 367,
+            "end": 369
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 369,
+            "end": 370
+        },
+        {
+            "kind": "Keyword",
+            "text": "align",
+            "start": 371,
+            "end": 376
+        },
+        {
+            "kind": "Number",
+            "text": "4",
+            "start": 377,
+            "end": 378
+        },
+        {
+            "kind": "Keyword",
+            "text": "store",
+            "start": 382,
+            "end": 387
+        },
+        {
+            "kind": "Keyword",
+            "text": "i32",
+            "start": 388,
+            "end": 391
+        },
+        {
+            "kind": "Number",
+            "text": "5",
+            "start": 392,
+            "end": 393
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 393,
+            "end": 394
+        },
+        {
+            "kind": "Keyword",
+            "text": "i32",
+            "start": 395,
+            "end": 398
+        },
+        {
+            "kind": "Star",
+            "text": "*",
+            "start": 398,
+            "end": 399
+        },
+        {
+            "kind": "LocalVar",
+            "text": "%2",
+            "start": 400,
+            "end": 402
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 402,
+            "end": 403
+        },
+        {
+            "kind": "Keyword",
+            "text": "align",
+            "start": 404,
+            "end": 409
+        },
+        {
+            "kind": "Number",
+            "text": "4",
+            "start": 410,
+            "end": 411
+        },
+        {
+            "kind": "LocalVar",
+            "text": "%3",
+            "start": 415,
+            "end": 417
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 418,
+            "end": 419
+        },
+        {
+            "kind": "Keyword",
+            "text": "load",
+            "start": 420,
+            "end": 424
+        },
+        {
+            "kind": "Keyword",
+            "text": "i32",
+            "start": 425,
+            "end": 428
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 428,
+            "end": 429
+        },
+        {
+            "kind": "Keyword",
+            "text": "i32",
+            "start": 430,
+            "end": 433
+        },
+        {
+            "kind": "Star",
+            "text": "*",
+            "start": 433,
+            "end": 434
+        },
+        {
+            "kind": "LocalVar",
+            "text": "%2",
+            "start": 435,
+            "end": 437
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 437,
+            "end": 438
+        },
+        {
+            "kind": "Keyword",
+            "text": "align",
+            "start": 439,
+            "end": 444
+        },
+        {
+            "kind": "Number",
+            "text": "4",
+            "start": 445,
+            "end": 446
+        },
+        {
+            "kind": "LocalVar",
+            "text": "%4",
+            "start": 450,
+            "end": 452
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 453,
+            "end": 454
+        },
+        {
+            "kind": "Keyword",
+            "text": "add",
+            "start": 455,
+            "end": 458
+        },
+        {
+            "kind": "Keyword",
+            "text": "nsw",
+            "start": 459,
+            "end": 462
+        },
+        {
+            "kind": "Keyword",
+            "text": "i32",
+            "start": 463,
+            "end": 466
+        },
+        {
+            "kind": "LocalVar",
+            "text": "%3",
+            "start": 467,
+            "end": 469
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 469,
+            "end": 470
+        },
+        {
+            "kind": "Number",
+            "text": "10",
+            "start": 471,
+            "end": 473
+        },
+        {
+            "kind": "Keyword",
+            "text": "store",
+            "start": 477,
+            "end": 482
+        },
+        {
+            "kind": "Keyword",
+            "text": "i32",
+            "start": 483,
+            "end": 486
+        },
+        {
+            "kind": "LocalVar",
+            "text": "%4",
+            "start": 487,
+            "end": 489
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 489,
+            "end": 490
+        },
+        {
+            "kind": "Keyword",
+            "text": "i32",
+            "start": 491,
+            "end": 494
+        },
+        {
+            "kind": "Star",
+            "text": "*",
+            "start": 494,
+            "end": 495
+        },
+        {
+            "kind": "LocalVar",
+            "text": "%2",
+            "start": 496,
+            "end": 498
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 498,
+            "end": 499
+        },
+        {
+            "kind": "Keyword",
+            "text": "align",
+            "start": 500,
+            "end": 505
+        },
+        {
+            "kind": "Number",
+            "text": "4",
+            "start": 506,
+            "end": 507
+        },
+        {
+            "kind": "LocalVar",
+            "text": "%5",
+            "start": 511,
+            "end": 513
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 514,
+            "end": 515
+        },
+        {
+            "kind": "Keyword",
+            "text": "load",
+            "start": 516,
+            "end": 520
+        },
+        {
+            "kind": "Keyword",
+            "text": "i32",
+            "start": 521,
+            "end": 524
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 524,
+            "end": 525
+        },
+        {
+            "kind": "Keyword",
+            "text": "i32",
+            "start": 526,
+            "end": 529
+        },
+        {
+            "kind": "Star",
+            "text": "*",
+            "start": 529,
+            "end": 530
+        },
+        {
+            "kind": "LocalVar",
+            "text": "%2",
+            "start": 531,
+            "end": 533
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 533,
+            "end": 534
+        },
+        {
+            "kind": "Keyword",
+            "text": "align",
+            "start": 535,
+            "end": 540
+        },
+        {
+            "kind": "Number",
+            "text": "4",
+            "start": 541,
+            "end": 542
+        },
+        {
+            "kind": "Keyword",
+            "text": "ret",
+            "start": 546,
+            "end": 549
+        },
+        {
+            "kind": "Keyword",
+            "text": "i32",
+            "start": 550,
+            "end": 553
+        },
+        {
+            "kind": "LocalVar",
+            "text": "%5",
+            "start": 554,
+            "end": 556
+        },
+        {
+            "kind": "RBrace",
+            "text": "}",
+            "start": 558,
+            "end": 559
+        },
+        {
+            "kind": "Keyword",
+            "text": "define",
+            "start": 616,
+            "end": 622
+        },
+        {
+            "kind": "Keyword",
+            "text": "dso_local",
+            "start": 623,
+            "end": 632
+        }
+    ],
+    "errors": []
+}

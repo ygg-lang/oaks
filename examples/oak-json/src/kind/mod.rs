@@ -1,4 +1,4 @@
-use oak_core::SyntaxKind;
+use oak_core::{TokenType, UniversalElementRole, UniversalTokenRole};
 
 /// 统一JSON 语法种类（包含节点与词法
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, serde::Serialize)]
@@ -34,10 +34,9 @@ pub enum JsonSyntaxKind {
     Error,
 }
 
-impl SyntaxKind for JsonSyntaxKind {
-    fn is_trivia(&self) -> bool {
-        matches!(self, JsonSyntaxKind::Whitespace | JsonSyntaxKind::Comment)
-    }
+impl TokenType for JsonSyntaxKind {
+    type Role = UniversalTokenRole;
+    const END_OF_STREAM: Self = Self::Eof;
 
     fn is_comment(&self) -> bool {
         matches!(self, JsonSyntaxKind::Comment)
@@ -47,41 +46,49 @@ impl SyntaxKind for JsonSyntaxKind {
         matches!(self, JsonSyntaxKind::Whitespace)
     }
 
-    fn is_token_type(&self) -> bool {
-        matches!(
-            self,
-            JsonSyntaxKind::LeftBrace
-                | JsonSyntaxKind::RightBrace
-                | JsonSyntaxKind::LeftBracket
-                | JsonSyntaxKind::RightBracket
-                | JsonSyntaxKind::Comma
-                | JsonSyntaxKind::Colon
-                | JsonSyntaxKind::StringLiteral
-                | JsonSyntaxKind::NumberLiteral
-                | JsonSyntaxKind::BooleanLiteral
-                | JsonSyntaxKind::NullLiteral
-                | JsonSyntaxKind::BareKey
-                | JsonSyntaxKind::Whitespace
-                | JsonSyntaxKind::Comment
-                | JsonSyntaxKind::Eof
-                | JsonSyntaxKind::Error
-        )
+    fn role(&self) -> Self::Role {
+        use UniversalTokenRole::*;
+        match self {
+            Self::LeftBrace | Self::RightBrace | Self::LeftBracket | Self::RightBracket | Self::Comma | Self::Colon => Punctuation,
+
+            Self::StringLiteral | Self::NumberLiteral | Self::BooleanLiteral | Self::NullLiteral => Literal,
+
+            Self::BareKey => Name,
+            Self::Whitespace => Whitespace,
+            Self::Comment => Comment,
+            Self::Error => Error,
+            _ => None,
+        }
+    }
+}
+
+impl oak_core::ElementType for JsonSyntaxKind {
+    type Role = UniversalElementRole;
+
+    fn is_root(&self) -> bool {
+        matches!(self, Self::Root)
     }
 
-    fn is_element_type(&self) -> bool {
-        matches!(
-            self,
-            JsonSyntaxKind::Root
-                | JsonSyntaxKind::Value
-                | JsonSyntaxKind::Object
-                | JsonSyntaxKind::Array
-                | JsonSyntaxKind::String
-                | JsonSyntaxKind::Number
-                | JsonSyntaxKind::Boolean
-                | JsonSyntaxKind::Null
-                | JsonSyntaxKind::ObjectEntry
-                | JsonSyntaxKind::ArrayElement
-                | JsonSyntaxKind::ErrorNode
-        )
+    fn is_error(&self) -> bool {
+        matches!(self, Self::ErrorNode)
+    }
+
+    fn role(&self) -> Self::Role {
+        use UniversalElementRole::*;
+        match self {
+            Self::Root => Root,
+
+            // Hierarchy & Scoping
+            Self::Object | Self::Array => Container,
+
+            // Flow Control & Logic (Data logic)
+            Self::ObjectEntry | Self::ArrayElement => Statement,
+
+            // Atomic Values
+            Self::Value | Self::String | Self::Number | Self::Boolean | Self::Null => Value,
+
+            Self::ErrorNode => Error,
+            _ => None,
+        }
     }
 }

@@ -1,41 +1,40 @@
 use crate::{kind::HandlebarsSyntaxKind, language::HandlebarsLanguage};
 use oak_core::{
-    IncrementalCache, Lexer, LexerState, OakError, Token,
+    Lexer, LexerCache, LexerState, OakError, Range,
     lexer::{LexOutput, StringConfig, WhitespaceConfig},
     source::Source,
 };
 use std::sync::LazyLock;
 
-type State<S: Source> = LexerState<S, HandlebarsLanguage>;
+type State<'a, S> = LexerState<'a, S, HandlebarsLanguage>;
 
 // Scanner configurations
 static HB_WHITESPACE: LazyLock<WhitespaceConfig> = LazyLock::new(|| WhitespaceConfig { unicode_whitespace: true });
-static HB_STRING: LazyLock<StringConfig> = LazyLock::new(|| StringConfig { quotes: &['"', '\''], escape: Some('\\') });
+static HB_STRING_DOUBLE: LazyLock<StringConfig> = LazyLock::new(|| StringConfig { quotes: &['"'], escape: Some('\\') });
+static HB_STRING_SINGLE: LazyLock<StringConfig> = LazyLock::new(|| StringConfig { quotes: &['\''], escape: Some('\\') });
 
 #[derive(Clone)]
 pub struct HandlebarsLexer<'config> {
-    config: &'config HandlebarsLanguage,
+    _config: &'config HandlebarsLanguage,
 }
 
 impl<'config> Lexer<HandlebarsLanguage> for HandlebarsLexer<'config> {
-    fn lex_incremental(
-        &self,
-        source: impl Source,
-        changed: usize,
-        cache: IncrementalCache<HandlebarsLanguage>,
-    ) -> LexOutput<HandlebarsLanguage> {
-        let mut state = LexerState::new_with_cache(source, changed, cache);
+    fn lex<'a, S: Source + ?Sized>(&self, source: &S, _edits: &[oak_core::TextEdit], cache: &'a mut impl LexerCache<HandlebarsLanguage>) -> LexOutput<HandlebarsLanguage> {
+        let mut state: State<'_, S> = LexerState::new(source);
         let result = self.run(&mut state);
-        state.finish(result)
+        if result.is_ok() {
+            state.add_eof();
+        }
+        state.finish_with_cache(result, cache)
     }
 }
 
 impl<'config> HandlebarsLexer<'config> {
     pub fn new(config: &'config HandlebarsLanguage) -> Self {
-        Self { config }
+        Self { _config: config }
     }
 
-    fn run<S: Source>(&self, state: &mut State<S>) -> Result<(), OakError> {
+    fn run<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> Result<(), OakError> {
         while state.not_at_end() {
             let safe_point = state.get_position();
 
@@ -75,26 +74,17 @@ impl<'config> HandlebarsLexer<'config> {
                 continue;
             }
 
-            state.safe_check(safe_point);
+            state.advance_if_dead_lock(safe_point);
         }
 
-        // Add EOF token
-        let eof_pos = state.get_position();
-        state.add_token(HandlebarsSyntaxKind::Eof, eof_pos, eof_pos);
         Ok(())
     }
 
-    fn skip_whitespace<S: Source>(&self, state: &mut State<S>) -> bool {
-        match HB_WHITESPACE.scan(state.rest(), state.get_position(), HandlebarsSyntaxKind::Whitespace) {
-            Some(token) => {
-                state.advance_with(token);
-                true
-            }
-            None => false,
-        }
+    fn skip_whitespace<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
+        HB_WHITESPACE.scan(state, HandlebarsSyntaxKind::Whitespace)
     }
 
-    fn skip_newline<S: Source>(&self, state: &mut State<S>) -> bool {
+    fn skip_newline<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         if state.current() == Some('\n') || state.current() == Some('\r') {
             let start = state.get_position();
             state.advance(1);
@@ -110,15 +100,12 @@ impl<'config> HandlebarsLexer<'config> {
         }
     }
 
-    fn lex_comment<S: Source>(&self, state: &mut State<S>) -> bool {
-        let rest = state.rest();
-        if rest.starts_with("{{!--") {
-            let start = state.get_position();
-            state.advance(5); // Skip "{{!--"
-
+    fn lex_comment<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
+        let start = state.get_position();
+        if state.consume_if_starts_with("{{!--") {
             // Find the end of the comment
             while state.not_at_end() {
-                if state.rest().starts_with("--}}") {
+                if state.starts_with("--}}") {
                     state.advance(4); // Skip "--}}"
                     break;
                 }
@@ -129,13 +116,10 @@ impl<'config> HandlebarsLexer<'config> {
             state.add_token(HandlebarsSyntaxKind::Comment, start, end);
             true
         }
-        else if rest.starts_with("{{!") {
-            let start = state.get_position();
-            state.advance(3); // Skip "{{!"
-
+        else if state.consume_if_starts_with("{{!") {
             // Find the end of the comment
             while state.not_at_end() {
-                if state.rest().starts_with("}}") {
+                if state.starts_with("}}") {
                     state.advance(2); // Skip "}}"
                     break;
                 }
@@ -151,48 +135,60 @@ impl<'config> HandlebarsLexer<'config> {
         }
     }
 
-    fn lex_handlebars_expression<S: Source>(&self, state: &mut State<S>) -> bool {
-        let rest = state.rest();
+    fn lex_handlebars_expression<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start = state.get_position();
 
-        if rest.starts_with("{{{") {
-            state.advance(3);
+        if state.consume_if_starts_with("{{{{/") {
+            let end = state.get_position();
+            state.add_token(HandlebarsSyntaxKind::OpenEndRawBlock, start, end);
+            true
+        }
+        else if state.consume_if_starts_with("{{{{") {
+            let end = state.get_position();
+            state.add_token(HandlebarsSyntaxKind::OpenRawBlock, start, end);
+            true
+        }
+        else if state.consume_if_starts_with("}}}}") {
+            let end = state.get_position();
+            state.add_token(HandlebarsSyntaxKind::CloseRawBlock, start, end);
+            true
+        }
+        else if state.consume_if_starts_with("{{{") {
             let end = state.get_position();
             state.add_token(HandlebarsSyntaxKind::OpenUnescaped, start, end);
             true
         }
-        else if rest.starts_with("{{#") {
-            state.advance(3);
+        else if state.consume_if_starts_with("{{#") {
             let end = state.get_position();
             state.add_token(HandlebarsSyntaxKind::OpenBlock, start, end);
             true
         }
-        else if rest.starts_with("{{/") {
-            state.advance(3);
+        else if state.consume_if_starts_with("{{^") {
+            let end = state.get_position();
+            state.add_token(HandlebarsSyntaxKind::OpenInverseBlock, start, end);
+            true
+        }
+        else if state.consume_if_starts_with("{{/") {
             let end = state.get_position();
             state.add_token(HandlebarsSyntaxKind::CloseBlock, start, end);
             true
         }
-        else if rest.starts_with("{{>") {
-            state.advance(3);
+        else if state.consume_if_starts_with("{{>") {
             let end = state.get_position();
             state.add_token(HandlebarsSyntaxKind::OpenPartial, start, end);
             true
         }
-        else if rest.starts_with("{{") {
-            state.advance(2);
+        else if state.consume_if_starts_with("{{") {
             let end = state.get_position();
             state.add_token(HandlebarsSyntaxKind::Open, start, end);
             true
         }
-        else if rest.starts_with("}}}") {
-            state.advance(3);
+        else if state.consume_if_starts_with("}}}") {
             let end = state.get_position();
             state.add_token(HandlebarsSyntaxKind::CloseUnescaped, start, end);
             true
         }
-        else if rest.starts_with("}}") {
-            state.advance(2);
+        else if state.consume_if_starts_with("}}") {
             let end = state.get_position();
             state.add_token(HandlebarsSyntaxKind::Close, start, end);
             true
@@ -202,23 +198,21 @@ impl<'config> HandlebarsLexer<'config> {
         }
     }
 
-    fn lex_string_literal<S: Source>(&self, state: &mut State<S>) -> bool {
-        match HB_STRING.scan(state.rest(), 0, HandlebarsSyntaxKind::StringLiteral) {
-            Some(token) => {
-                // 创建新的 token 并调整位置为绝对位置
-                use std::range::Range;
-                let adjusted_token = Token {
-                    kind: token.kind,
-                    span: Range { start: token.span.start + state.get_position(), end: token.span.end + state.get_position() },
-                };
-                state.advance_with(adjusted_token);
-                true
-            }
-            None => false,
+    fn lex_string_literal<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
+        let config = if state.current() == Some('"') {
+            &*HB_STRING_DOUBLE
         }
+        else if state.current() == Some('\'') {
+            &*HB_STRING_SINGLE
+        }
+        else {
+            return false;
+        };
+
+        config.scan(state, HandlebarsSyntaxKind::StringLiteral)
     }
 
-    fn lex_number_literal<S: Source>(&self, state: &mut State<S>) -> bool {
+    fn lex_number_literal<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         if let Some(c) = state.current() {
             if c.is_ascii_digit() {
                 let start = state.get_position();
@@ -243,9 +237,9 @@ impl<'config> HandlebarsLexer<'config> {
         }
     }
 
-    fn lex_identifier<S: Source>(&self, state: &mut State<S>) -> bool {
+    fn lex_identifier<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         if let Some(c) = state.current() {
-            if c.is_alphabetic() || c == '_' {
+            if c.is_alphabetic() || c == '_' || c == '@' {
                 let start = state.get_position();
                 while let Some(c) = state.current() {
                     if c.is_alphanumeric() || c == '_' || c == '-' || c == '.' {
@@ -256,7 +250,13 @@ impl<'config> HandlebarsLexer<'config> {
                     }
                 }
                 let end = state.get_position();
-                state.add_token(HandlebarsSyntaxKind::Identifier, start, end);
+                let text = state.get_text_in(Range { start, end });
+                let kind = match text.as_ref() {
+                    "else" => HandlebarsSyntaxKind::Else,
+                    "true" | "false" => HandlebarsSyntaxKind::BooleanLiteral,
+                    _ => HandlebarsSyntaxKind::Identifier,
+                };
+                state.add_token(kind, start, end);
                 true
             }
             else {
@@ -268,7 +268,7 @@ impl<'config> HandlebarsLexer<'config> {
         }
     }
 
-    fn lex_single_char_tokens<S: Source>(&self, state: &mut State<S>) -> bool {
+    fn lex_single_char_tokens<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         if let Some(c) = state.current() {
             let start = state.get_position();
             let kind = match c {
@@ -281,6 +281,8 @@ impl<'config> HandlebarsLexer<'config> {
                 '#' => HandlebarsSyntaxKind::Hash,
                 '.' => HandlebarsSyntaxKind::Dot,
                 '/' => HandlebarsSyntaxKind::Slash,
+                '@' => HandlebarsSyntaxKind::At,
+                '^' => HandlebarsSyntaxKind::Caret,
                 _ => return false,
             };
             state.advance(1);
@@ -293,21 +295,19 @@ impl<'config> HandlebarsLexer<'config> {
         }
     }
 
-    fn lex_content<S: Source>(&self, state: &mut State<S>) -> bool {
+    fn lex_content<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start = state.get_position();
-        let mut has_content = false;
+        let mut count = 0;
 
-        while state.not_at_end() {
-            let rest = state.rest();
-            // Stop if we encounter Handlebars kind
-            if rest.starts_with("{{") {
+        while let Some(c) = state.current() {
+            if c == '{' && state.peek() == Some('{') {
                 break;
             }
             state.advance(1);
-            has_content = true;
+            count += 1;
         }
 
-        if has_content {
+        if count > 0 {
             let end = state.get_position();
             state.add_token(HandlebarsSyntaxKind::Content, start, end);
             true

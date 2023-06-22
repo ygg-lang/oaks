@@ -1,9 +1,9 @@
 [package]
 name = "oak-delphi"
-description = "High-performance incremental DOT language parser for the oak ecosystem with flexible configuration, optimized for graph description and visualization."
+description = "Delphi language parser with support for modern Delphi syntax and object-oriented programming features."
 categories = ["parsing"]
-keywords = ["parser", "dot", "graph", "visualization"]
-documentation = "https://docs.rs/oak-dot"
+keywords = ["parser", "delphi", "object-oriented", "pascal"]
+documentation = "https://docs.rs/oak-delphi"
 readme = "readme.md"
 version.workspace = true
 authors.workspace = true

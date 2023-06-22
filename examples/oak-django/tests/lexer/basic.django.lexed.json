@@ -1,0 +1,607 @@
+{
+    "success": true,
+    "count": 100,
+    "tokens": [
+        {
+            "kind": "Less",
+            "text": "<",
+            "start": 158,
+            "end": 159
+        },
+        {
+            "kind": "Identifier",
+            "text": "p",
+            "start": 159,
+            "end": 160
+        },
+        {
+            "kind": "Greater",
+            "text": ">",
+            "start": 160,
+            "end": 161
+        },
+        {
+            "kind": "Identifier",
+            "text": "Hello",
+            "start": 161,
+            "end": 166
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 166,
+            "end": 167
+        },
+        {
+            "kind": "VariableStart",
+            "text": "{{",
+            "start": 168,
+            "end": 170
+        },
+        {
+            "kind": "Identifier",
+            "text": "user",
+            "start": 171,
+            "end": 175
+        },
+        {
+            "kind": "Dot",
+            "text": ".",
+            "start": 175,
+            "end": 176
+        },
+        {
+            "kind": "Identifier",
+            "text": "first_name",
+            "start": 176,
+            "end": 186
+        },
+        {
+            "kind": "VariableEnd",
+            "text": "}}",
+            "start": 187,
+            "end": 189
+        },
+        {
+            "kind": "VariableStart",
+            "text": "{{",
+            "start": 190,
+            "end": 192
+        },
+        {
+            "kind": "Identifier",
+            "text": "user",
+            "start": 193,
+            "end": 197
+        },
+        {
+            "kind": "Dot",
+            "text": ".",
+            "start": 197,
+            "end": 198
+        },
+        {
+            "kind": "Identifier",
+            "text": "last_name",
+            "start": 198,
+            "end": 207
+        },
+        {
+            "kind": "VariableEnd",
+            "text": "}}",
+            "start": 208,
+            "end": 210
+        },
+        {
+            "kind": "HtmlText",
+            "text": "!</p>\r\n<p>Your age is ",
+            "start": 210,
+            "end": 232
+        },
+        {
+            "kind": "VariableStart",
+            "text": "{{",
+            "start": 232,
+            "end": 234
+        },
+        {
+            "kind": "Identifier",
+            "text": "user",
+            "start": 235,
+            "end": 239
+        },
+        {
+            "kind": "Dot",
+            "text": ".",
+            "start": 239,
+            "end": 240
+        },
+        {
+            "kind": "Identifier",
+            "text": "age",
+            "start": 240,
+            "end": 243
+        },
+        {
+            "kind": "Pipe",
+            "text": "|",
+            "start": 243,
+            "end": 244
+        },
+        {
+            "kind": "Identifier",
+            "text": "default",
+            "start": 244,
+            "end": 251
+        },
+        {
+            "kind": "Colon",
+            "text": ":",
+            "start": 251,
+            "end": 252
+        },
+        {
+            "kind": "String",
+            "text": "\"N/A\"",
+            "start": 252,
+            "end": 257
+        },
+        {
+            "kind": "VariableEnd",
+            "text": "}}",
+            "start": 258,
+            "end": 260
+        },
+        {
+            "kind": "Dot",
+            "text": ".",
+            "start": 260,
+            "end": 261
+        },
+        {
+            "kind": "Less",
+            "text": "<",
+            "start": 261,
+            "end": 262
+        },
+        {
+            "kind": "Slash",
+            "text": "/",
+            "start": 262,
+            "end": 263
+        },
+        {
+            "kind": "Identifier",
+            "text": "p",
+            "start": 263,
+            "end": 264
+        },
+        {
+            "kind": "Greater",
+            "text": ">",
+            "start": 264,
+            "end": 265
+        },
+        {
+            "kind": "Less",
+            "text": "<",
+            "start": 267,
+            "end": 268
+        },
+        {
+            "kind": "Identifier",
+            "text": "p",
+            "start": 268,
+            "end": 269
+        },
+        {
+            "kind": "Greater",
+            "text": ">",
+            "start": 269,
+            "end": 270
+        },
+        {
+            "kind": "Identifier",
+            "text": "The",
+            "start": 270,
+            "end": 273
+        },
+        {
+            "kind": "Identifier",
+            "text": "current",
+            "start": 274,
+            "end": 281
+        },
+        {
+            "kind": "Identifier",
+            "text": "date",
+            "start": 282,
+            "end": 286
+        },
+        {
+            "kind": "Identifier",
+            "text": "is",
+            "start": 287,
+            "end": 289
+        },
+        {
+            "kind": "VariableStart",
+            "text": "{{",
+            "start": 290,
+            "end": 292
+        },
+        {
+            "kind": "Identifier",
+            "text": "current_date",
+            "start": 293,
+            "end": 305
+        },
+        {
+            "kind": "Pipe",
+            "text": "|",
+            "start": 305,
+            "end": 306
+        },
+        {
+            "kind": "Identifier",
+            "text": "date",
+            "start": 306,
+            "end": 310
+        },
+        {
+            "kind": "Colon",
+            "text": ":",
+            "start": 310,
+            "end": 311
+        },
+        {
+            "kind": "String",
+            "text": "\"Y-m-d\"",
+            "start": 311,
+            "end": 318
+        },
+        {
+            "kind": "VariableEnd",
+            "text": "}}",
+            "start": 319,
+            "end": 321
+        },
+        {
+            "kind": "Dot",
+            "text": ".",
+            "start": 321,
+            "end": 322
+        },
+        {
+            "kind": "Less",
+            "text": "<",
+            "start": 322,
+            "end": 323
+        },
+        {
+            "kind": "Slash",
+            "text": "/",
+            "start": 323,
+            "end": 324
+        },
+        {
+            "kind": "Identifier",
+            "text": "p",
+            "start": 324,
+            "end": 325
+        },
+        {
+            "kind": "Greater",
+            "text": ">",
+            "start": 325,
+            "end": 326
+        },
+        {
+            "kind": "Less",
+            "text": "<",
+            "start": 328,
+            "end": 329
+        },
+        {
+            "kind": "Identifier",
+            "text": "p",
+            "start": 329,
+            "end": 330
+        },
+        {
+            "kind": "Greater",
+            "text": ">",
+            "start": 330,
+            "end": 331
+        },
+        {
+            "kind": "Identifier",
+            "text": "The",
+            "start": 331,
+            "end": 334
+        },
+        {
+            "kind": "Identifier",
+            "text": "time",
+            "start": 335,
+            "end": 339
+        },
+        {
+            "kind": "Identifier",
+            "text": "is",
+            "start": 340,
+            "end": 342
+        },
+        {
+            "kind": "VariableStart",
+            "text": "{{",
+            "start": 343,
+            "end": 345
+        },
+        {
+            "kind": "Identifier",
+            "text": "current_time",
+            "start": 346,
+            "end": 358
+        },
+        {
+            "kind": "Pipe",
+            "text": "|",
+            "start": 358,
+            "end": 359
+        },
+        {
+            "kind": "Identifier",
+            "text": "time",
+            "start": 359,
+            "end": 363
+        },
+        {
+            "kind": "Colon",
+            "text": ":",
+            "start": 363,
+            "end": 364
+        },
+        {
+            "kind": "String",
+            "text": "\"H:i:s\"",
+            "start": 364,
+            "end": 371
+        },
+        {
+            "kind": "VariableEnd",
+            "text": "}}",
+            "start": 372,
+            "end": 374
+        },
+        {
+            "kind": "Dot",
+            "text": ".",
+            "start": 374,
+            "end": 375
+        },
+        {
+            "kind": "Less",
+            "text": "<",
+            "start": 375,
+            "end": 376
+        },
+        {
+            "kind": "Slash",
+            "text": "/",
+            "start": 376,
+            "end": 377
+        },
+        {
+            "kind": "Identifier",
+            "text": "p",
+            "start": 377,
+            "end": 378
+        },
+        {
+            "kind": "Greater",
+            "text": ">",
+            "start": 378,
+            "end": 379
+        },
+        {
+            "kind": "Less",
+            "text": "<",
+            "start": 421,
+            "end": 422
+        },
+        {
+            "kind": "Identifier",
+            "text": "h2",
+            "start": 422,
+            "end": 424
+        },
+        {
+            "kind": "Greater",
+            "text": ">",
+            "start": 424,
+            "end": 425
+        },
+        {
+            "kind": "Identifier",
+            "text": "Fruits",
+            "start": 425,
+            "end": 431
+        },
+        {
+            "kind": "Colon",
+            "text": ":",
+            "start": 431,
+            "end": 432
+        },
+        {
+            "kind": "Less",
+            "text": "<",
+            "start": 432,
+            "end": 433
+        },
+        {
+            "kind": "Slash",
+            "text": "/",
+            "start": 433,
+            "end": 434
+        },
+        {
+            "kind": "Identifier",
+            "text": "h2",
+            "start": 434,
+            "end": 436
+        },
+        {
+            "kind": "Greater",
+            "text": ">",
+            "start": 436,
+            "end": 437
+        },
+        {
+            "kind": "Less",
+            "text": "<",
+            "start": 439,
+            "end": 440
+        },
+        {
+            "kind": "Identifier",
+            "text": "ul",
+            "start": 440,
+            "end": 442
+        },
+        {
+            "kind": "Greater",
+            "text": ">",
+            "start": 442,
+            "end": 443
+        },
+        {
+            "kind": "TagStart",
+            "text": "{%",
+            "start": 447,
+            "end": 449
+        },
+        {
+            "kind": "For",
+            "text": "for",
+            "start": 450,
+            "end": 453
+        },
+        {
+            "kind": "Identifier",
+            "text": "fruit",
+            "start": 454,
+            "end": 459
+        },
+        {
+            "kind": "In",
+            "text": "in",
+            "start": 460,
+            "end": 462
+        },
+        {
+            "kind": "Identifier",
+            "text": "fruits",
+            "start": 463,
+            "end": 469
+        },
+        {
+            "kind": "TagEnd",
+            "text": "%}",
+            "start": 470,
+            "end": 472
+        },
+        {
+            "kind": "Less",
+            "text": "<",
+            "start": 478,
+            "end": 479
+        },
+        {
+            "kind": "Identifier",
+            "text": "li",
+            "start": 479,
+            "end": 481
+        },
+        {
+            "kind": "Greater",
+            "text": ">",
+            "start": 481,
+            "end": 482
+        },
+        {
+            "kind": "VariableStart",
+            "text": "{{",
+            "start": 482,
+            "end": 484
+        },
+        {
+            "kind": "Identifier",
+            "text": "forloop",
+            "start": 485,
+            "end": 492
+        },
+        {
+            "kind": "Dot",
+            "text": ".",
+            "start": 492,
+            "end": 493
+        },
+        {
+            "kind": "Identifier",
+            "text": "counter",
+            "start": 493,
+            "end": 500
+        },
+        {
+            "kind": "VariableEnd",
+            "text": "}}",
+            "start": 501,
+            "end": 503
+        },
+        {
+            "kind": "Dot",
+            "text": ".",
+            "start": 503,
+            "end": 504
+        },
+        {
+            "kind": "VariableStart",
+            "text": "{{",
+            "start": 505,
+            "end": 507
+        },
+        {
+            "kind": "Identifier",
+            "text": "fruit",
+            "start": 508,
+            "end": 513
+        },
+        {
+            "kind": "Pipe",
+            "text": "|",
+            "start": 513,
+            "end": 514
+        },
+        {
+            "kind": "Identifier",
+            "text": "capfirst",
+            "start": 514,
+            "end": 522
+        },
+        {
+            "kind": "VariableEnd",
+            "text": "}}",
+            "start": 523,
+            "end": 525
+        },
+        {
+            "kind": "Less",
+            "text": "<",
+            "start": 525,
+            "end": 526
+        }
+    ],
+    "errors": []
+}

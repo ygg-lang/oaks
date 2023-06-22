@@ -1,4 +1,4 @@
-use oak_core::language::Language;
+use oak_core::language::{Language, LanguageCategory};
 
 /// JavaScript 语言实现
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -61,6 +61,10 @@ impl Default for JavaScriptLanguage {
 }
 
 impl Language for JavaScriptLanguage {
-    type SyntaxKind = crate::kind::JavaScriptSyntaxKind;
-    type TypedRoot = ();
+    const NAME: &'static str = "javascript";
+    const CATEGORY: LanguageCategory = LanguageCategory::Programming;
+
+    type TokenType = crate::kind::JavaScriptSyntaxKind;
+    type ElementType = crate::kind::JavaScriptSyntaxKind;
+    type TypedRoot = crate::ast::JavaScriptRoot;
 }

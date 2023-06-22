@@ -1,20 +1,33 @@
 use crate::{kind::JuliaSyntaxKind, language::JuliaLanguage};
-use oak_core::{IncrementalCache, Lexer, LexerState, lexer::LexOutput, source::Source};
+use oak_core::{Lexer, LexerCache, LexerState, lexer::LexOutput, source::Source};
 
-type State<S> = LexerState<S, JuliaLanguage>;
+type State<'a, S> = LexerState<'a, S, JuliaLanguage>;
 
 #[derive(Clone, Debug)]
 pub struct JuliaLexer<'config> {
-    config: &'config JuliaLanguage,
+    _config: &'config JuliaLanguage,
 }
 
 impl<'config> JuliaLexer<'config> {
     pub fn new(config: &'config JuliaLanguage) -> Self {
-        Self { config }
+        Self { _config: config }
     }
+}
 
+impl<'config> Lexer<JuliaLanguage> for JuliaLexer<'config> {
+    fn lex<'a, S: Source + ?Sized>(&self, source: &'a S, _edits: &[oak_core::source::TextEdit], cache: &'a mut impl LexerCache<JuliaLanguage>) -> LexOutput<JuliaLanguage> {
+        let mut state = LexerState::new(source);
+        let result = self.run(&mut state);
+        if result.is_ok() {
+            state.add_eof();
+        }
+        state.finish_with_cache(result, cache)
+    }
+}
+
+impl<'config> JuliaLexer<'config> {
     /// 跳过空白字符
-    fn skip_whitespace<S: Source>(&self, state: &mut State<S>) -> bool {
+    fn skip_whitespace<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start_pos = state.get_position();
 
         while let Some(ch) = state.peek() {
@@ -36,7 +49,7 @@ impl<'config> JuliaLexer<'config> {
     }
 
     /// 处理换行
-    fn lex_newline<S: Source>(&self, state: &mut State<S>) -> bool {
+    fn lex_newline<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start_pos = state.get_position();
 
         if let Some('\n') = state.peek() {
@@ -57,8 +70,8 @@ impl<'config> JuliaLexer<'config> {
         }
     }
 
-    /// 处理标识符和关键
-    fn lex_identifier_or_keyword<S: Source>(&self, state: &mut State<S>) -> bool {
+    /// 处理标识符和关键字
+    fn lex_identifier_or_keyword<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start_pos = state.get_position();
 
         if let Some(ch) = state.peek() {
@@ -77,8 +90,8 @@ impl<'config> JuliaLexer<'config> {
                 let end_pos = state.get_position();
                 let identifier_str = state.get_text_in((start_pos..end_pos).into());
 
-                // 检查是否是关键
-                if let Some(keyword_kind) = JuliaSyntaxKind::from_str(identifier_str) {
+                // 检查是否是关键字
+                if let Some(keyword_kind) = JuliaSyntaxKind::from_str(identifier_str.as_ref()) {
                     state.add_token(keyword_kind, start_pos, end_pos);
                 }
                 else {
@@ -95,8 +108,8 @@ impl<'config> JuliaLexer<'config> {
         }
     }
 
-    /// 处理数字字面
-    fn lex_number<S: Source>(&self, state: &mut State<S>) -> bool {
+    /// 处理数字字面量
+    fn lex_number<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start_pos = state.get_position();
 
         if let Some(ch) = state.peek() {
@@ -160,7 +173,7 @@ impl<'config> JuliaLexer<'config> {
                     }
                 }
 
-                // 检查类型后缀 (f32, f64, i32, i64
+                // 检查类型后缀 (f32, f64, i32, i64)
                 if let Some(ch) = state.peek() {
                     if ch.is_ascii_alphabetic() {
                         while let Some(ch) = state.peek() {
@@ -189,7 +202,7 @@ impl<'config> JuliaLexer<'config> {
     }
 
     /// 处理字符串字面量
-    fn lex_string<S: Source>(&self, state: &mut State<S>) -> bool {
+    fn lex_string<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start_pos = state.get_position();
 
         if let Some(quote) = state.peek() {
@@ -221,7 +234,8 @@ impl<'config> JuliaLexer<'config> {
                     true
                 }
                 else {
-                    // 未找到结束引号，回退到开始位                    state.set_position(start_pos);
+                    // 未找到结束引号，回退到开始位
+                    state.set_position(start_pos);
                     false
                 }
             }
@@ -235,7 +249,7 @@ impl<'config> JuliaLexer<'config> {
     }
 
     /// 处理三重引号字符
-    fn lex_triple_string<S: Source>(&self, state: &mut State<S>) -> bool {
+    fn lex_triple_string<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start_pos = state.get_position();
 
         // 检查是否是三重引号
@@ -267,7 +281,7 @@ impl<'config> JuliaLexer<'config> {
     }
 
     /// 处理注释
-    fn lex_comment<S: Source>(&self, state: &mut State<S>) -> bool {
+    fn lex_comment<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start_pos = state.get_position();
 
         if let Some('#') = state.peek() {
@@ -276,9 +290,10 @@ impl<'config> JuliaLexer<'config> {
                 state.advance(2);
                 let mut depth = 1;
 
-                while let Some(ch) = state.peek()
-                    && depth > 0
-                {
+                while let Some(ch) = state.peek() {
+                    if depth == 0 {
+                        break;
+                    }
                     if ch == '#' && state.peek_next_n(1) == Some('=') {
                         depth += 1;
                         state.advance(2);
@@ -315,8 +330,8 @@ impl<'config> JuliaLexer<'config> {
         }
     }
 
-    /// 处理操作
-    fn lex_operator<S: Source>(&self, state: &mut State<S>) -> bool {
+    /// 处理操作符
+    fn lex_operator<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start_pos = state.get_position();
 
         if let Some(ch) = state.peek() {
@@ -486,8 +501,8 @@ impl<'config> JuliaLexer<'config> {
         }
     }
 
-    /// 处理分隔
-    fn lex_delimiter<S: Source>(&self, state: &mut State<S>) -> bool {
+    /// 处理分隔符
+    fn lex_delimiter<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start_pos = state.get_position();
 
         if let Some(ch) = state.peek() {
@@ -513,23 +528,12 @@ impl<'config> JuliaLexer<'config> {
     }
 }
 
-impl<'config> Lexer<JuliaLanguage> for JuliaLexer<'config> {
-    fn lex_incremental(
-        &self,
-        source: impl Source,
-        changed: usize,
-        cache: IncrementalCache<JuliaLanguage>,
-    ) -> LexOutput<JuliaLanguage> {
-        let mut state = LexerState::new_with_cache(source, changed, cache);
-        let result = self.run(&mut state);
-        state.finish(result)
-    }
-}
-
 impl<'config> JuliaLexer<'config> {
     /// 主要的词法分析循环
-    fn run<S: Source>(&self, state: &mut State<S>) -> Result<(), oak_core::OakError> {
+    fn run<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> Result<(), oak_core::OakError> {
         while state.not_at_end() {
+            let safe_point = state.get_position();
+
             // 尝试各种词法规则
             if self.skip_whitespace(state) {
                 continue;
@@ -573,11 +577,9 @@ impl<'config> JuliaLexer<'config> {
                 state.advance(ch.len_utf8());
                 state.add_token(JuliaSyntaxKind::Error, start_pos, state.get_position());
             }
-        }
 
-        // 添加 EOF kind
-        let eof_pos = state.get_position();
-        state.add_token(JuliaSyntaxKind::Eof, eof_pos, eof_pos);
+            state.advance_if_dead_lock(safe_point);
+        }
 
         Ok(())
     }

@@ -1,29 +1,25 @@
-use crate::kind::DSyntaxKind;
-use oak_core::Language;
+use crate::ast::DRoot;
+use oak_core::{Language, LanguageCategory};
+use serde::{Deserialize, Serialize};
 
-/// D 语言定义
-#[derive(Debug, Clone)]
+/// Language definition for D programming language
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct DLanguage {
-    /// 是否启用 D2 特性
+    /// Whether to enable D2 features
     pub d2_features: bool,
-    /// 是否允许内联汇编
+    /// Whether to allow inline assembly
     pub inline_asm: bool,
-    /// 是否启用契约编程
+    /// Whether to enable contract programming
     pub contracts: bool,
 }
 
 impl DLanguage {
-    /// 创建新的 D 语言实例
-    pub fn new() -> Self {
-        Self::default()
-    }
-
-    /// 创建标准 D 语言实例
+    /// Create a standard D language instance
     pub fn standard() -> Self {
         Self { d2_features: true, inline_asm: true, contracts: true }
     }
 
-    /// 创建简化的 D 语言实例
+    /// Create a minimal D language instance
     pub fn minimal() -> Self {
         Self { d2_features: false, inline_asm: false, contracts: false }
     }
@@ -36,6 +32,10 @@ impl Default for DLanguage {
 }
 
 impl Language for DLanguage {
-    type SyntaxKind = DSyntaxKind;
-    type TypedRoot = ();
+    const NAME: &'static str = "d";
+    const CATEGORY: LanguageCategory = LanguageCategory::Programming;
+
+    type TokenType = crate::kind::DSyntaxKind;
+    type ElementType = crate::kind::DSyntaxKind;
+    type TypedRoot = DRoot;
 }

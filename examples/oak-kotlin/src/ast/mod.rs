@@ -1,7 +1,9 @@
 use core::range::Range;
+use serde::{Deserialize, Serialize};
 
-/// JSON 值节
-#[derive(Debug, Clone)]
-pub struct JsonRoot {
-    span: Range<usize>,
+/// Kotlin root
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct KotlinRoot {
+    #[serde(with = "oak_core::serde_range")]
+    pub span: Range<usize>,
 }

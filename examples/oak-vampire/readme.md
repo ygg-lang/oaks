@@ -22,7 +22,7 @@ Basic example:
 
 ```rust,no_run
 use oak_vampire::{VampireLexer, VampireLanguage};
-use oak_core::{Lexer, SourceText};
+use oak_core::{Lexer, source::SourceText, ParseSession};
 
 let language = VampireLanguage::default();
 let lexer = VampireLexer::new(&language);
@@ -38,7 +38,8 @@ fof(conj, conjecture, (
     "#;
     
 let source = SourceText::new(vampire_code);
-let output = lexer.lex(&source);
+let mut session = ParseSession::<VampireLanguage>::default();
+let output = lexer.lex(&source, &[], &mut session);
 println!("Parsed Vampire problem successfully.");
 ```
 
@@ -46,8 +47,8 @@ println!("Parsed Vampire problem successfully.");
 
 ### Problem Parsing
 ```rust,no_run
-use oak_vampire::{VampireLexer, VampireLanguage, ast::ValkyrieModule};
-use oak_core::{Lexer, SourceText};
+use oak_vampire::{VampireLexer, VampireLanguage};
+use oak_core::{Lexer, source::SourceText, ParseSession};
 
 let language = VampireLanguage::default();
 let lexer = VampireLexer::new(&language);
@@ -63,14 +64,15 @@ fof(goal, conjecture, (
 "#;
 
 let source = SourceText::new(vampire_code);
-let output = lexer.lex(&source);
+let mut session = ParseSession::<VampireLanguage>::default();
+let output = lexer.lex(&source, &[], &mut session);
 println!("Tokens: {}", output.result.map_or(0, |tokens| tokens.len()));
 ```
 
 ### Formula Parsing
 ```rust,no_run
-use oak_vampire::{VampireLexer, VampireLanguage, ast::ValkyrieInstruction};
-use oak_core::{Lexer, SourceText};
+use oak_vampire::{VampireLexer, VampireLanguage};
+use oak_core::{Lexer, source::SourceText, ParseSession};
 
 let language = VampireLanguage::default();
 let lexer = VampireLexer::new(&language);
@@ -79,7 +81,8 @@ let formula_code = r#"
 "#;
 
 let source = SourceText::new(formula_code);
-let output = lexer.lex(source);
+let mut session = ParseSession::<VampireLanguage>::default();
+let output = lexer.lex(&source, &[], &mut session);
 println!("Formula tokens: {}", output.result.map_or(0, |tokens| tokens.len()));
 ```
 
@@ -88,28 +91,30 @@ println!("Formula tokens: {}", output.result.map_or(0, |tokens| tokens.len()));
 ### Token-Level Parsing
 ```rust,no_run
 use oak_vampire::{VampireLexer, VampireLanguage};
-use oak_core::{Lexer, SourceText};
+use oak_core::{Lexer, source::SourceText, ParseSession};
 
 let language = VampireLanguage::default();
 let lexer = VampireLexer::new(&language);
 let source = SourceText::new("fof(ax1, axiom, ( human(socrates) )).");
-let output = lexer.lex(source);
+let mut session = ParseSession::<VampireLanguage>::default();
+let output = lexer.lex(&source, &[], &mut session);
 println!("Tokens: {}", output.result.map_or(0, |tokens| tokens.len()));
 ```
 
 ### Error Handling
 ```rust,no_run
 use oak_vampire::{VampireLexer, VampireLanguage};
-use oak_core::{Lexer, SourceText};
+use oak_core::{Lexer, SourceText, ParseSession};
 
 let language = VampireLanguage::default();
 let lexer = VampireLexer::new(&language);
 let invalid_code = "fof(invalid syntax here";
 let source = SourceText::new(invalid_code);
-let output = lexer.lex(source);
+let mut session = ParseSession::<VampireLanguage>::default();
+let output = lexer.lex(&source, &[], &mut session);
 
-if let Some(errors) = output.errors {
-    for error in errors {
+if !output.diagnostics.is_empty() {
+    for error in output.diagnostics {
         println!("Error: {:?}", error);
     }
 }

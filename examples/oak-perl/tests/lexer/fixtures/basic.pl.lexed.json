@@ -1,0 +1,607 @@
+{
+    "success": true,
+    "count": 100,
+    "tokens": [
+        {
+            "kind": "Use",
+            "text": "use",
+            "start": 17,
+            "end": 20
+        },
+        {
+            "kind": "Identifier",
+            "text": "strict",
+            "start": 21,
+            "end": 27
+        },
+        {
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 27,
+            "end": 28
+        },
+        {
+            "kind": "Use",
+            "text": "use",
+            "start": 30,
+            "end": 33
+        },
+        {
+            "kind": "Identifier",
+            "text": "warnings",
+            "start": 34,
+            "end": 42
+        },
+        {
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 42,
+            "end": 43
+        },
+        {
+            "kind": "Use",
+            "text": "use",
+            "start": 45,
+            "end": 48
+        },
+        {
+            "kind": "Identifier",
+            "text": "feature",
+            "start": 49,
+            "end": 56
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "'say'",
+            "start": 57,
+            "end": 62
+        },
+        {
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 62,
+            "end": 63
+        },
+        {
+            "kind": "Use",
+            "text": "use",
+            "start": 65,
+            "end": 68
+        },
+        {
+            "kind": "Identifier",
+            "text": "Data",
+            "start": 69,
+            "end": 73
+        },
+        {
+            "kind": "Colon",
+            "text": ":",
+            "start": 73,
+            "end": 74
+        },
+        {
+            "kind": "Colon",
+            "text": ":",
+            "start": 74,
+            "end": 75
+        },
+        {
+            "kind": "Identifier",
+            "text": "Dumper",
+            "start": 75,
+            "end": 81
+        },
+        {
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 81,
+            "end": 82
+        },
+        {
+            "kind": "Use",
+            "text": "use",
+            "start": 84,
+            "end": 87
+        },
+        {
+            "kind": "Identifier",
+            "text": "List",
+            "start": 88,
+            "end": 92
+        },
+        {
+            "kind": "Colon",
+            "text": ":",
+            "start": 92,
+            "end": 93
+        },
+        {
+            "kind": "Colon",
+            "text": ":",
+            "start": 93,
+            "end": 94
+        },
+        {
+            "kind": "Identifier",
+            "text": "Util",
+            "start": 94,
+            "end": 98
+        },
+        {
+            "kind": "Identifier",
+            "text": "qw",
+            "start": 99,
+            "end": 101
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 101,
+            "end": 102
+        },
+        {
+            "kind": "Identifier",
+            "text": "sum",
+            "start": 102,
+            "end": 105
+        },
+        {
+            "kind": "Identifier",
+            "text": "max",
+            "start": 106,
+            "end": 109
+        },
+        {
+            "kind": "Identifier",
+            "text": "min",
+            "start": 110,
+            "end": 113
+        },
+        {
+            "kind": "Identifier",
+            "text": "first",
+            "start": 114,
+            "end": 119
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 119,
+            "end": 120
+        },
+        {
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 120,
+            "end": 121
+        },
+        {
+            "kind": "Use",
+            "text": "use",
+            "start": 123,
+            "end": 126
+        },
+        {
+            "kind": "Identifier",
+            "text": "Scalar",
+            "start": 127,
+            "end": 133
+        },
+        {
+            "kind": "Colon",
+            "text": ":",
+            "start": 133,
+            "end": 134
+        },
+        {
+            "kind": "Colon",
+            "text": ":",
+            "start": 134,
+            "end": 135
+        },
+        {
+            "kind": "Identifier",
+            "text": "Util",
+            "start": 135,
+            "end": 139
+        },
+        {
+            "kind": "Identifier",
+            "text": "qw",
+            "start": 140,
+            "end": 142
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 142,
+            "end": 143
+        },
+        {
+            "kind": "Identifier",
+            "text": "looks_like_number",
+            "start": 143,
+            "end": 160
+        },
+        {
+            "kind": "Identifier",
+            "text": "blessed",
+            "start": 161,
+            "end": 168
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 168,
+            "end": 169
+        },
+        {
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 169,
+            "end": 170
+        },
+        {
+            "kind": "Package",
+            "text": "package",
+            "start": 196,
+            "end": 203
+        },
+        {
+            "kind": "Identifier",
+            "text": "Person",
+            "start": 204,
+            "end": 210
+        },
+        {
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 210,
+            "end": 211
+        },
+        {
+            "kind": "Sub",
+            "text": "sub",
+            "start": 215,
+            "end": 218
+        },
+        {
+            "kind": "New",
+            "text": "new",
+            "start": 219,
+            "end": 222
+        },
+        {
+            "kind": "LeftBrace",
+            "text": "{",
+            "start": 223,
+            "end": 224
+        },
+        {
+            "kind": "My",
+            "text": "my",
+            "start": 230,
+            "end": 232
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 233,
+            "end": 234
+        },
+        {
+            "kind": "Dollar",
+            "text": "$class",
+            "start": 234,
+            "end": 240
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 240,
+            "end": 241
+        },
+        {
+            "kind": "Percent_",
+            "text": "%args",
+            "start": 242,
+            "end": 247
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 247,
+            "end": 248
+        },
+        {
+            "kind": "Assign",
+            "text": "=",
+            "start": 249,
+            "end": 250
+        },
+        {
+            "kind": "At",
+            "text": "@_",
+            "start": 251,
+            "end": 253
+        },
+        {
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 253,
+            "end": 254
+        },
+        {
+            "kind": "My",
+            "text": "my",
+            "start": 260,
+            "end": 262
+        },
+        {
+            "kind": "Dollar",
+            "text": "$self",
+            "start": 263,
+            "end": 268
+        },
+        {
+            "kind": "Assign",
+            "text": "=",
+            "start": 269,
+            "end": 270
+        },
+        {
+            "kind": "LeftBrace",
+            "text": "{",
+            "start": 271,
+            "end": 272
+        },
+        {
+            "kind": "Identifier",
+            "text": "name",
+            "start": 282,
+            "end": 286
+        },
+        {
+            "kind": "Assign",
+            "text": "=",
+            "start": 287,
+            "end": 288
+        },
+        {
+            "kind": "GreaterThan",
+            "text": ">",
+            "start": 288,
+            "end": 289
+        },
+        {
+            "kind": "Dollar",
+            "text": "$args",
+            "start": 290,
+            "end": 295
+        },
+        {
+            "kind": "LeftBrace",
+            "text": "{",
+            "start": 295,
+            "end": 296
+        },
+        {
+            "kind": "Identifier",
+            "text": "name",
+            "start": 296,
+            "end": 300
+        },
+        {
+            "kind": "RightBrace",
+            "text": "}",
+            "start": 300,
+            "end": 301
+        },
+        {
+            "kind": "LogicalOr",
+            "text": "||",
+            "start": 302,
+            "end": 304
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "'Unknown'",
+            "start": 305,
+            "end": 314
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 314,
+            "end": 315
+        },
+        {
+            "kind": "Identifier",
+            "text": "age",
+            "start": 325,
+            "end": 328
+        },
+        {
+            "kind": "Assign",
+            "text": "=",
+            "start": 330,
+            "end": 331
+        },
+        {
+            "kind": "GreaterThan",
+            "text": ">",
+            "start": 331,
+            "end": 332
+        },
+        {
+            "kind": "Dollar",
+            "text": "$args",
+            "start": 333,
+            "end": 338
+        },
+        {
+            "kind": "LeftBrace",
+            "text": "{",
+            "start": 338,
+            "end": 339
+        },
+        {
+            "kind": "Identifier",
+            "text": "age",
+            "start": 339,
+            "end": 342
+        },
+        {
+            "kind": "RightBrace",
+            "text": "}",
+            "start": 342,
+            "end": 343
+        },
+        {
+            "kind": "LogicalOr",
+            "text": "||",
+            "start": 345,
+            "end": 347
+        },
+        {
+            "kind": "NumberLiteral",
+            "text": "0",
+            "start": 348,
+            "end": 349
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 349,
+            "end": 350
+        },
+        {
+            "kind": "Identifier",
+            "text": "email",
+            "start": 360,
+            "end": 365
+        },
+        {
+            "kind": "Assign",
+            "text": "=",
+            "start": 366,
+            "end": 367
+        },
+        {
+            "kind": "GreaterThan",
+            "text": ">",
+            "start": 367,
+            "end": 368
+        },
+        {
+            "kind": "Dollar",
+            "text": "$args",
+            "start": 369,
+            "end": 374
+        },
+        {
+            "kind": "LeftBrace",
+            "text": "{",
+            "start": 374,
+            "end": 375
+        },
+        {
+            "kind": "Identifier",
+            "text": "email",
+            "start": 375,
+            "end": 380
+        },
+        {
+            "kind": "RightBrace",
+            "text": "}",
+            "start": 380,
+            "end": 381
+        },
+        {
+            "kind": "LogicalOr",
+            "text": "||",
+            "start": 382,
+            "end": 384
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "''",
+            "start": 385,
+            "end": 387
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 387,
+            "end": 388
+        },
+        {
+            "kind": "RightBrace",
+            "text": "}",
+            "start": 394,
+            "end": 395
+        },
+        {
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 395,
+            "end": 396
+        },
+        {
+            "kind": "Bless",
+            "text": "bless",
+            "start": 402,
+            "end": 407
+        },
+        {
+            "kind": "Dollar",
+            "text": "$self",
+            "start": 408,
+            "end": 413
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 413,
+            "end": 414
+        },
+        {
+            "kind": "Dollar",
+            "text": "$class",
+            "start": 415,
+            "end": 421
+        },
+        {
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 421,
+            "end": 422
+        },
+        {
+            "kind": "Return",
+            "text": "return",
+            "start": 428,
+            "end": 434
+        },
+        {
+            "kind": "Dollar",
+            "text": "$self",
+            "start": 435,
+            "end": 440
+        },
+        {
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 440,
+            "end": 441
+        },
+        {
+            "kind": "RightBrace",
+            "text": "}",
+            "start": 443,
+            "end": 444
+        }
+    ],
+    "errors": []
+}

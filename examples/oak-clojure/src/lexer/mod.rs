@@ -1,169 +1,176 @@
-use crate::{ClojureLanguage, ClojureSyntaxKind};
+pub mod token_type;
+pub use token_type::ClojureTokenType;
+
+use crate::ClojureLanguage;
 use oak_core::{
-    errors::OakError,
-    lexer::{LexOutput, Lexer, LexerState},
-    source::Source,
-    tree::IncrementalCache,
+    Lexer, LexerCache, LexerState, OakError,
+    lexer::LexOutput,
+    source::{Source, TextEdit},
 };
 
 pub struct ClojureLexer;
 
+type State<'a, S> = LexerState<'a, S, ClojureLanguage>;
+
 impl Lexer<ClojureLanguage> for ClojureLexer {
-    fn lex_incremental(
-        &self,
-        source: impl Source,
-        _changed: usize,
-        _cache: IncrementalCache<ClojureLanguage>,
-    ) -> LexOutput<ClojureLanguage> {
-        let mut state = LexerState::new_with_cache(source, _changed, _cache);
-        while state.not_at_end() {
-            let start = state.get_position();
-
-            match state.current() {
-                Some(c) if c.is_whitespace() => {
-                    self.lex_whitespace(&mut state);
-                }
-                Some(';') => {
-                    self.lex_comment(&mut state);
-                }
-                Some('"') => {
-                    self.lex_string(&mut state);
-                }
-                Some('\\') => {
-                    self.lex_character(&mut state);
-                }
-                Some(c) if c.is_ascii_digit() => {
-                    self.lex_number(&mut state);
-                }
-                Some(':') => {
-                    self.lex_keyword(&mut state);
-                }
-                Some('#') => {
-                    self.lex_dispatch(&mut state);
-                }
-                Some('(') => {
-                    state.advance(1);
-                    state.add_token(ClojureSyntaxKind::ListStart, start, state.get_position());
-                }
-                Some(')') => {
-                    state.advance(1);
-                    state.add_token(ClojureSyntaxKind::ListEnd, start, state.get_position());
-                }
-                Some('[') => {
-                    state.advance(1);
-                    state.add_token(ClojureSyntaxKind::VectorStart, start, state.get_position());
-                }
-                Some(']') => {
-                    state.advance(1);
-                    state.add_token(ClojureSyntaxKind::VectorEnd, start, state.get_position());
-                }
-                Some('{') => {
-                    state.advance(1);
-                    state.add_token(ClojureSyntaxKind::MapStart, start, state.get_position());
-                }
-                Some('}') => {
-                    state.advance(1);
-                    state.add_token(ClojureSyntaxKind::MapEnd, start, state.get_position());
-                }
-                Some('\'') => {
-                    state.advance(1);
-                    state.add_token(ClojureSyntaxKind::Quote, start, state.get_position());
-                }
-                Some('`') => {
-                    state.advance(1);
-                    state.add_token(ClojureSyntaxKind::Quote, start, state.get_position());
-                }
-                Some('~') => {
-                    if state.peek() == Some('@') {
-                        state.advance(2);
-                        state.add_token(ClojureSyntaxKind::UnquoteSplice, start, state.get_position());
-                    }
-                    else {
-                        state.advance(1);
-                        state.add_token(ClojureSyntaxKind::Unquote, start, state.get_position());
-                    }
-                }
-                Some('^') => {
-                    state.advance(1);
-                    state.add_token(ClojureSyntaxKind::Meta, start, state.get_position());
-                }
-                Some(_) => {
-                    self.lex_symbol(&mut state);
-                }
-                None => break,
-            }
+    fn lex<'a, S: Source + ?Sized>(&self, text: &S, _edits: &[TextEdit], cache: &'a mut impl LexerCache<ClojureLanguage>) -> LexOutput<ClojureLanguage> {
+        let mut state = State::new(text);
+        let result = self.run(&mut state);
+        if result.is_ok() {
+            state.add_eof();
         }
-
-        state.finish(Ok(()))
+        state.finish_with_cache(result, cache)
     }
 }
 
 impl ClojureLexer {
-    fn lex_whitespace<S: Source>(&self, state: &mut LexerState<S, ClojureLanguage>) {
+    fn run<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> Result<(), OakError> {
+        while state.not_at_end() {
+            let start = state.get_position();
+            let safe_point = start;
+
+            match state.peek() {
+                Some(c) if c.is_whitespace() => {
+                    self.lex_whitespace(state);
+                }
+                Some(';') => {
+                    self.lex_comment(state);
+                }
+                Some('"') => {
+                    self.lex_string(state);
+                }
+                Some('\\') => {
+                    self.lex_character(state);
+                }
+                Some(c) if c.is_ascii_digit() => {
+                    self.lex_number(state);
+                }
+                Some(':') => {
+                    self.lex_keyword(state);
+                }
+                Some('#') => {
+                    self.lex_dispatch(state);
+                }
+                Some('(') => {
+                    state.advance(1);
+                    state.add_token(ClojureTokenType::ListStart, start, state.get_position());
+                }
+                Some(')') => {
+                    state.advance(1);
+                    state.add_token(ClojureTokenType::ListEnd, start, state.get_position());
+                }
+                Some('[') => {
+                    state.advance(1);
+                    state.add_token(ClojureTokenType::VectorStart, start, state.get_position());
+                }
+                Some(']') => {
+                    state.advance(1);
+                    state.add_token(ClojureTokenType::VectorEnd, start, state.get_position());
+                }
+                Some('{') => {
+                    state.advance(1);
+                    state.add_token(ClojureTokenType::MapStart, start, state.get_position());
+                }
+                Some('}') => {
+                    state.advance(1);
+                    state.add_token(ClojureTokenType::MapEnd, start, state.get_position());
+                }
+                Some('\'') | Some('`') => {
+                    state.advance(1);
+                    state.add_token(ClojureTokenType::Quote, start, state.get_position());
+                }
+                Some('~') => {
+                    state.advance(1);
+                    if state.peek() == Some('@') {
+                        state.advance(1);
+                        state.add_token(ClojureTokenType::UnquoteSplice, start, state.get_position());
+                    }
+                    else {
+                        state.add_token(ClojureTokenType::Unquote, start, state.get_position());
+                    }
+                }
+                Some('^') => {
+                    state.advance(1);
+                    state.add_token(ClojureTokenType::Meta, start, state.get_position());
+                }
+                Some(_) => {
+                    self.lex_symbol(state);
+                }
+                None => break,
+            }
+
+            state.advance_if_dead_lock(safe_point);
+        }
+        Ok(())
+    }
+}
+
+impl ClojureLexer {
+    fn lex_whitespace<'a, S: Source + ?Sized>(&self, state: &mut LexerState<'a, S, ClojureLanguage>) {
         let start = state.get_position();
-        while let Some(c) = state.current() {
+        while let Some(c) = state.peek() {
             if c.is_whitespace() {
-                state.advance(1);
+                state.advance(c.len_utf8());
             }
             else {
                 break;
             }
         }
-        state.add_token(ClojureSyntaxKind::Whitespace, start, state.get_position());
+        state.add_token(ClojureTokenType::Whitespace, start, state.get_position());
     }
 
-    fn lex_comment<S: Source>(&self, state: &mut LexerState<S, ClojureLanguage>) {
+    fn lex_comment<'a, S: Source + ?Sized>(&self, state: &mut LexerState<'a, S, ClojureLanguage>) {
         let start = state.get_position();
         state.advance(1); // Skip ';'
 
-        while let Some(c) = state.current() {
+        while let Some(c) = state.peek() {
             if c == '\n' {
                 break;
             }
-            state.advance(1);
+            state.advance(c.len_utf8());
         }
 
-        state.add_token(ClojureSyntaxKind::Comment, start, state.get_position());
+        state.add_token(ClojureTokenType::Comment, start, state.get_position());
     }
 
-    fn lex_string<S: Source>(&self, state: &mut LexerState<S, ClojureLanguage>) {
+    fn lex_string<'a, S: Source + ?Sized>(&self, state: &mut LexerState<'a, S, ClojureLanguage>) {
         let start = state.get_position();
         state.advance(1); // Skip opening quote
 
-        while let Some(c) = state.current() {
+        while let Some(c) = state.peek() {
             if c == '"' {
                 state.advance(1);
                 break;
             }
             else if c == '\\' {
                 state.advance(1); // Skip escape character
-                if state.current().is_some() {
-                    state.advance(1); // Skip escaped character
+                if let Some(escaped) = state.peek() {
+                    state.advance(escaped.len_utf8()); // Skip escaped character
                 }
             }
             else {
-                state.advance(1);
+                state.advance(c.len_utf8());
             }
         }
 
-        state.add_token(ClojureSyntaxKind::StringLiteral, start, state.get_position());
+        state.add_token(ClojureTokenType::StringLiteral, start, state.get_position());
     }
 
-    fn lex_character<S: Source>(&self, state: &mut LexerState<S, ClojureLanguage>) {
+    fn lex_character<'a, S: Source + ?Sized>(&self, state: &mut LexerState<'a, S, ClojureLanguage>) {
         let start = state.get_position();
         state.advance(1); // Skip '\'
 
-        if let Some(_) = state.current() {
-            state.advance(1);
+        if let Some(c) = state.peek() {
+            state.advance(c.len_utf8());
         }
 
-        state.add_token(ClojureSyntaxKind::CharacterLiteral, start, state.get_position());
+        state.add_token(ClojureTokenType::CharacterLiteral, start, state.get_position());
     }
 
-    fn lex_number<S: Source>(&self, state: &mut LexerState<S, ClojureLanguage>) {
+    fn lex_number<'a, S: Source + ?Sized>(&self, state: &mut LexerState<'a, S, ClojureLanguage>) {
         let start = state.get_position();
 
-        while let Some(c) = state.current() {
+        while let Some(c) = state.peek() {
             if c.is_ascii_digit() || c == '.' {
                 state.advance(1);
             }
@@ -172,81 +179,81 @@ impl ClojureLexer {
             }
         }
 
-        state.add_token(ClojureSyntaxKind::NumberLiteral, start, state.get_position());
+        state.add_token(ClojureTokenType::NumberLiteral, start, state.get_position());
     }
 
-    fn lex_keyword<S: Source>(&self, state: &mut LexerState<S, ClojureLanguage>) {
+    fn lex_keyword<'a, S: Source + ?Sized>(&self, state: &mut LexerState<'a, S, ClojureLanguage>) {
         let start = state.get_position();
         state.advance(1); // Skip ':'
 
-        while let Some(c) = state.current() {
+        while let Some(c) = state.peek() {
             if c.is_alphanumeric() || c == '-' || c == '_' || c == '?' || c == '!' {
-                state.advance(1);
+                state.advance(c.len_utf8());
             }
             else {
                 break;
             }
         }
 
-        state.add_token(ClojureSyntaxKind::KeywordLiteral, start, state.get_position());
+        state.add_token(ClojureTokenType::KeywordLiteral, start, state.get_position());
     }
 
-    fn lex_dispatch<S: Source>(&self, state: &mut LexerState<S, ClojureLanguage>) {
+    fn lex_dispatch<'a, S: Source + ?Sized>(&self, state: &mut LexerState<'a, S, ClojureLanguage>) {
         let start = state.get_position();
         state.advance(1); // Skip '#'
 
-        match state.current() {
+        match state.peek() {
             Some('{') => {
                 state.advance(1);
-                state.add_token(ClojureSyntaxKind::SetStart, start, state.get_position());
+                state.add_token(ClojureTokenType::SetStart, start, state.get_position());
             }
             Some('(') => {
                 state.advance(1);
-                state.add_token(ClojureSyntaxKind::AnonFnStart, start, state.get_position());
+                state.add_token(ClojureTokenType::AnonFnStart, start, state.get_position());
             }
             Some('"') => {
                 self.lex_regex(state, start);
             }
             _ => {
-                state.add_token(ClojureSyntaxKind::Dispatch, start, state.get_position());
+                state.add_token(ClojureTokenType::Dispatch, start, state.get_position());
             }
         }
     }
 
-    fn lex_regex<S: Source>(&self, state: &mut LexerState<S, ClojureLanguage>, start: usize) {
+    fn lex_regex<'a, S: Source + ?Sized>(&self, state: &mut LexerState<'a, S, ClojureLanguage>, start: usize) {
         state.advance(1); // Skip '"'
 
-        while let Some(c) = state.current() {
+        while let Some(c) = state.peek() {
             if c == '"' {
                 state.advance(1);
                 break;
             }
             else if c == '\\' {
                 state.advance(1); // Skip escape character
-                if state.current().is_some() {
-                    state.advance(1); // Skip escaped character
+                if let Some(escaped) = state.peek() {
+                    state.advance(escaped.len_utf8()); // Skip escaped character
                 }
             }
             else {
-                state.advance(1);
+                state.advance(c.len_utf8());
             }
         }
 
-        state.add_token(ClojureSyntaxKind::RegexLiteral, start, state.get_position());
+        state.add_token(ClojureTokenType::RegexLiteral, start, state.get_position());
     }
 
-    fn lex_symbol<S: Source>(&self, state: &mut LexerState<S, ClojureLanguage>) {
+    fn lex_symbol<'a, S: Source + ?Sized>(&self, state: &mut LexerState<'a, S, ClojureLanguage>) {
         let start = state.get_position();
 
-        while let Some(c) = state.current() {
+        while let Some(c) = state.peek() {
             if c.is_alphanumeric() || c == '-' || c == '_' || c == '?' || c == '!' || c == '*' || c == '+' || c == '/' {
-                state.advance(1);
+                state.advance(c.len_utf8());
             }
             else {
                 break;
             }
         }
 
-        state.add_token(ClojureSyntaxKind::Symbol, start, state.get_position());
+        state.add_token(ClojureTokenType::Symbol, start, state.get_position());
     }
 }

@@ -1,8 +1,8 @@
 [package]
 name = "oak-msil"
-description = "High-performance incremental MSIL (Microsoft Intermediate Language) parser for the oak ecosystem with flexible configuration."
+description = "Microsoft Intermediate Language (MSIL) parser with support for .NET Common Language Infrastructure and bytecode analysis."
 categories = ["parsing"]
-keywords = ["parser", "msil", "cil", "dotnet", "assembly"]
+keywords = ["parser", "msil", "cil", "dotnet", "bytecode"]
 documentation = "https://docs.rs/oak-msil"
 readme = "readme.md"
 version.workspace = true
@@ -15,16 +15,25 @@ edition.workspace = true
 
 [dependencies]
 oak-core = { workspace = true }
-oak-highlight = { workspace = true, optional = true }
-oak-pretty-print = { workspace = true, optional = true }
-serde = { version = "1.0", features = ["derive"] }
+oak-highlight = { workspace = true }
+oak-pretty-print = { workspace = true }
+oak-lsp = { workspace = true }
+oak-hover = { workspace = true }
+oak-vfs = { workspace = true }
+oak-mcp = { workspace = true, optional = true }
+serde = { workspace = true }
+tracing = { workspace = true }
+tokio = { workspace = true, optional = true }
+axum = { workspace = true, optional = true }
 
 [dev-dependencies]
 oak-core = { workspace = true, features = ["testing"] }
 
-
 [features]
-default = []
+default = ["lsp", "mcp"]
+lsp = []
+mcp = ["dep:oak-mcp"]
+axum = ["mcp", "dep:tokio", "dep:axum", "oak-mcp/axum", "oak-lsp/axum"]
 
 
 [package.metadata.docs.rs]

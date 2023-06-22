@@ -1,0 +1,607 @@
+{
+    "success": true,
+    "count": 100,
+    "tokens": [
+        {
+            "kind": "Field",
+            "text": "# CSV test file for lexer testing",
+            "start": 0,
+            "end": 33
+        },
+        {
+            "kind": "Newline",
+            "text": "\r\n",
+            "start": 33,
+            "end": 35
+        },
+        {
+            "kind": "Field",
+            "text": "# Comma-Separated Values format",
+            "start": 35,
+            "end": 66
+        },
+        {
+            "kind": "Newline",
+            "text": "\r\n",
+            "start": 66,
+            "end": 68
+        },
+        {
+            "kind": "Newline",
+            "text": "\r\n",
+            "start": 68,
+            "end": 70
+        },
+        {
+            "kind": "Field",
+            "text": "# Basic CSV with header",
+            "start": 70,
+            "end": 93
+        },
+        {
+            "kind": "Newline",
+            "text": "\r\n",
+            "start": 93,
+            "end": 95
+        },
+        {
+            "kind": "Field",
+            "text": "Name",
+            "start": 95,
+            "end": 99
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 99,
+            "end": 100
+        },
+        {
+            "kind": "Field",
+            "text": "Age",
+            "start": 100,
+            "end": 103
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 103,
+            "end": 104
+        },
+        {
+            "kind": "Field",
+            "text": "City",
+            "start": 104,
+            "end": 108
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 108,
+            "end": 109
+        },
+        {
+            "kind": "Field",
+            "text": "Country",
+            "start": 109,
+            "end": 116
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 116,
+            "end": 117
+        },
+        {
+            "kind": "Field",
+            "text": "Email",
+            "start": 117,
+            "end": 122
+        },
+        {
+            "kind": "Newline",
+            "text": "\r\n",
+            "start": 122,
+            "end": 124
+        },
+        {
+            "kind": "Field",
+            "text": "John Doe",
+            "start": 124,
+            "end": 132
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 132,
+            "end": 133
+        },
+        {
+            "kind": "Field",
+            "text": "30",
+            "start": 133,
+            "end": 135
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 135,
+            "end": 136
+        },
+        {
+            "kind": "Field",
+            "text": "New York",
+            "start": 136,
+            "end": 144
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 144,
+            "end": 145
+        },
+        {
+            "kind": "Field",
+            "text": "USA",
+            "start": 145,
+            "end": 148
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 148,
+            "end": 149
+        },
+        {
+            "kind": "Field",
+            "text": "john.doe@example.com",
+            "start": 149,
+            "end": 169
+        },
+        {
+            "kind": "Newline",
+            "text": "\r\n",
+            "start": 169,
+            "end": 171
+        },
+        {
+            "kind": "Field",
+            "text": "Jane Smith",
+            "start": 171,
+            "end": 181
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 181,
+            "end": 182
+        },
+        {
+            "kind": "Field",
+            "text": "25",
+            "start": 182,
+            "end": 184
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 184,
+            "end": 185
+        },
+        {
+            "kind": "Field",
+            "text": "London",
+            "start": 185,
+            "end": 191
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 191,
+            "end": 192
+        },
+        {
+            "kind": "Field",
+            "text": "UK",
+            "start": 192,
+            "end": 194
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 194,
+            "end": 195
+        },
+        {
+            "kind": "Field",
+            "text": "jane.smith@example.com",
+            "start": 195,
+            "end": 217
+        },
+        {
+            "kind": "Newline",
+            "text": "\r\n",
+            "start": 217,
+            "end": 219
+        },
+        {
+            "kind": "Field",
+            "text": "Bob Johnson",
+            "start": 219,
+            "end": 230
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 230,
+            "end": 231
+        },
+        {
+            "kind": "Field",
+            "text": "35",
+            "start": 231,
+            "end": 233
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 233,
+            "end": 234
+        },
+        {
+            "kind": "Field",
+            "text": "Toronto",
+            "start": 234,
+            "end": 241
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 241,
+            "end": 242
+        },
+        {
+            "kind": "Field",
+            "text": "Canada",
+            "start": 242,
+            "end": 248
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 248,
+            "end": 249
+        },
+        {
+            "kind": "Field",
+            "text": "bob.johnson@example.com",
+            "start": 249,
+            "end": 272
+        },
+        {
+            "kind": "Newline",
+            "text": "\r\n",
+            "start": 272,
+            "end": 274
+        },
+        {
+            "kind": "Field",
+            "text": "Alice Brown",
+            "start": 274,
+            "end": 285
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 285,
+            "end": 286
+        },
+        {
+            "kind": "Field",
+            "text": "28",
+            "start": 286,
+            "end": 288
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 288,
+            "end": 289
+        },
+        {
+            "kind": "Field",
+            "text": "Sydney",
+            "start": 289,
+            "end": 295
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 295,
+            "end": 296
+        },
+        {
+            "kind": "Field",
+            "text": "Australia",
+            "start": 296,
+            "end": 305
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 305,
+            "end": 306
+        },
+        {
+            "kind": "Field",
+            "text": "alice.brown@example.com",
+            "start": 306,
+            "end": 329
+        },
+        {
+            "kind": "Newline",
+            "text": "\r\n",
+            "start": 329,
+            "end": 331
+        },
+        {
+            "kind": "Newline",
+            "text": "\r\n",
+            "start": 331,
+            "end": 333
+        },
+        {
+            "kind": "Field",
+            "text": "# CSV with quoted fields containing commas",
+            "start": 333,
+            "end": 375
+        },
+        {
+            "kind": "Newline",
+            "text": "\r\n",
+            "start": 375,
+            "end": 377
+        },
+        {
+            "kind": "Field",
+            "text": "Product",
+            "start": 377,
+            "end": 384
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 384,
+            "end": 385
+        },
+        {
+            "kind": "Field",
+            "text": "Category",
+            "start": 385,
+            "end": 393
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 393,
+            "end": 394
+        },
+        {
+            "kind": "Field",
+            "text": "Price",
+            "start": 394,
+            "end": 399
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 399,
+            "end": 400
+        },
+        {
+            "kind": "Field",
+            "text": "Description",
+            "start": 400,
+            "end": 411
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 411,
+            "end": 412
+        },
+        {
+            "kind": "Field",
+            "text": "Tags",
+            "start": 412,
+            "end": 416
+        },
+        {
+            "kind": "Newline",
+            "text": "\r\n",
+            "start": 416,
+            "end": 418
+        },
+        {
+            "kind": "Field",
+            "text": "\"iPhone 14\"",
+            "start": 418,
+            "end": 429
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 429,
+            "end": 430
+        },
+        {
+            "kind": "Field",
+            "text": "\"Electronics\"",
+            "start": 430,
+            "end": 443
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 443,
+            "end": 444
+        },
+        {
+            "kind": "Field",
+            "text": "999.99",
+            "start": 444,
+            "end": 450
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 450,
+            "end": 451
+        },
+        {
+            "kind": "Field",
+            "text": "\"Latest Apple smartphone, 128GB storage\"",
+            "start": 451,
+            "end": 491
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 491,
+            "end": 492
+        },
+        {
+            "kind": "Field",
+            "text": "\"mobile,apple,smartphone\"",
+            "start": 492,
+            "end": 517
+        },
+        {
+            "kind": "Newline",
+            "text": "\r\n",
+            "start": 517,
+            "end": 519
+        },
+        {
+            "kind": "Field",
+            "text": "\"Samsung Galaxy S23\"",
+            "start": 519,
+            "end": 539
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 539,
+            "end": 540
+        },
+        {
+            "kind": "Field",
+            "text": "\"Electronics\"",
+            "start": 540,
+            "end": 553
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 553,
+            "end": 554
+        },
+        {
+            "kind": "Field",
+            "text": "899.99",
+            "start": 554,
+            "end": 560
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 560,
+            "end": 561
+        },
+        {
+            "kind": "Field",
+            "text": "\"Android flagship phone, excellent camera\"",
+            "start": 561,
+            "end": 603
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 603,
+            "end": 604
+        },
+        {
+            "kind": "Field",
+            "text": "\"mobile,samsung,android\"",
+            "start": 604,
+            "end": 628
+        },
+        {
+            "kind": "Newline",
+            "text": "\r\n",
+            "start": 628,
+            "end": 630
+        },
+        {
+            "kind": "Field",
+            "text": "\"MacBook Pro 16\"",
+            "start": 630,
+            "end": 646
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 646,
+            "end": 647
+        },
+        {
+            "kind": "Field",
+            "text": "\"Computers\"",
+            "start": 647,
+            "end": 658
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 658,
+            "end": 659
+        },
+        {
+            "kind": "Field",
+            "text": "2499.99",
+            "start": 659,
+            "end": 666
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 666,
+            "end": 667
+        },
+        {
+            "kind": "Field",
+            "text": "\"Professional laptop, M2 Pro chip\"",
+            "start": 667,
+            "end": 701
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 701,
+            "end": 702
+        },
+        {
+            "kind": "Field",
+            "text": "\"laptop,apple,professional\"",
+            "start": 702,
+            "end": 729
+        },
+        {
+            "kind": "Newline",
+            "text": "\r\n",
+            "start": 729,
+            "end": 731
+        }
+    ],
+    "errors": []
+}

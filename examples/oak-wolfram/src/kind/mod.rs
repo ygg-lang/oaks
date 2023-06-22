@@ -1,8 +1,11 @@
-use oak_core::SyntaxKind;
+use oak_core::{ElementType, TokenType, UniversalElementRole, UniversalTokenRole};
 use serde::{Deserialize, Serialize};
+use std::fmt;
 
 #[derive(Copy, Clone, Debug, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub enum WolframSyntaxKind {
+    Root,
+
     // 基础 tokens
     Whitespace,
     Newline,
@@ -103,8 +106,21 @@ pub enum WolframSyntaxKind {
     Eof,
 }
 
-impl SyntaxKind for WolframSyntaxKind {
-    fn is_trivia(&self) -> bool {
+impl fmt::Display for WolframSyntaxKind {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "{:?}", self)
+    }
+}
+
+impl TokenType for WolframSyntaxKind {
+    const END_OF_STREAM: Self = WolframSyntaxKind::Eof;
+    type Role = UniversalTokenRole;
+
+    fn role(&self) -> Self::Role {
+        UniversalTokenRole::None
+    }
+
+    fn is_ignored(&self) -> bool {
         matches!(self, WolframSyntaxKind::Whitespace | WolframSyntaxKind::Newline | WolframSyntaxKind::Comment)
     }
 
@@ -115,12 +131,15 @@ impl SyntaxKind for WolframSyntaxKind {
     fn is_whitespace(&self) -> bool {
         matches!(self, WolframSyntaxKind::Whitespace | WolframSyntaxKind::Newline)
     }
+}
 
-    fn is_token_type(&self) -> bool {
-        !matches!(self, WolframSyntaxKind::Error | WolframSyntaxKind::Eof)
-    }
+impl ElementType for WolframSyntaxKind {
+    type Role = UniversalElementRole;
 
-    fn is_element_type(&self) -> bool {
-        matches!(self, WolframSyntaxKind::Error | WolframSyntaxKind::Eof)
+    fn role(&self) -> Self::Role {
+        match self {
+            WolframSyntaxKind::Error => UniversalElementRole::Error,
+            _ => UniversalElementRole::None,
+        }
     }
 }

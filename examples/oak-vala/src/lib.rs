@@ -4,8 +4,23 @@
 #![doc(html_favicon_url = "https://raw.githubusercontent.com/ygg-lang/oaks/refs/heads/dev/documents/logo.svg")]
 
 pub mod ast;
+
+mod builder;
 pub mod kind;
 pub mod language;
 pub mod lexer;
+pub mod parser;
 
-pub use crate::{kind::ValaSyntaxKind, language::ValaLanguage, lexer::ValaLexer};
+mod formatter;
+pub mod highlighter;
+pub mod lsp;
+#[cfg(feature = "mcp")]
+pub mod mcp;
+
+pub use crate::{ast::ValaRoot, builder::ValaBuilder, formatter::ValaFormatter, highlighter::ValaHighlighter, language::ValaLanguage, lexer::ValaLexer, lsp::ValaLanguageService, parser::ValaParser};
+
+#[cfg(feature = "mcp")]
+pub use crate::mcp::serve_vala_mcp;
+
+#[cfg(all(feature = "mcp", feature = "axum"))]
+pub use crate::mcp::serve_vala_mcp_axum;

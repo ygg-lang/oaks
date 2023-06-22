@@ -7,8 +7,12 @@ pub mod ast;
 mod kind;
 mod language;
 mod lexer;
+mod parser;
 
-pub use ast::DockerfileRoot;
-pub use kind::DockerfileSyntaxKind;
-pub use language::DockerfileLanguage;
-pub use lexer::DockerfileLexer;
+pub use crate::{
+    ast::DockerfileRoot,
+    kind::{DockerfileSyntaxKind, DockerfileToken},
+    language::DockerfileLanguage,
+    lexer::DockerfileLexer,
+    parser::DockerfileParser,
+};

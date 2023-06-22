@@ -1,41 +1,28 @@
 use crate::{kind::RubySyntaxKind, language::RubyLanguage};
-use oak_core::{
-    IncrementalCache, Lexer, LexerState, OakError,
-    lexer::{CommentLine, LexOutput, StringConfig, WhitespaceConfig},
-    source::Source,
-};
-use std::sync::LazyLock;
+use oak_core::{LexOutput, Lexer, LexerCache, LexerState, OakError, Source, TextEdit};
 
-type State<S: Source> = LexerState<S, RubyLanguage>;
+type State<'a, S> = LexerState<'a, S, RubyLanguage>;
 
-static RUBY_WHITESPACE: LazyLock<WhitespaceConfig> = LazyLock::new(|| WhitespaceConfig { unicode_whitespace: true });
-static RUBY_COMMENT: LazyLock<CommentLine> = LazyLock::new(|| CommentLine { line_markers: &["#"] });
-static RUBY_STRING: LazyLock<StringConfig> = LazyLock::new(|| StringConfig { quotes: &['"', '\'', '`'], escape: Some('\\') });
+#[derive(Clone, Default)]
+pub struct RubyLexer {}
 
-#[derive(Clone)]
-pub struct RubyLexer<'config> {
-    config: &'config RubyLanguage,
-}
-
-impl<'config> Lexer<RubyLanguage> for RubyLexer<'config> {
-    fn lex_incremental(
-        &self,
-        source: impl Source,
-        changed: usize,
-        cache: IncrementalCache<RubyLanguage>,
-    ) -> LexOutput<RubyLanguage> {
-        let mut state = LexerState::new_with_cache(source, changed, cache);
+impl Lexer<RubyLanguage> for RubyLexer {
+    fn lex<'a, S: Source + ?Sized>(&self, source: &S, _edits: &[TextEdit], cache: &'a mut impl LexerCache<RubyLanguage>) -> LexOutput<RubyLanguage> {
+        let mut state: State<'_, S> = LexerState::new(source);
         let result = self.run(&mut state);
-        state.finish(result)
+        if result.is_ok() {
+            state.add_eof();
+        }
+        state.finish_with_cache(result, cache)
     }
 }
 
-impl<'config> RubyLexer<'config> {
-    pub fn new(config: &'config RubyLanguage) -> Self {
-        Self { config }
+impl RubyLexer {
+    pub fn new(_config: &RubyLanguage) -> Self {
+        Self {}
     }
 
-    fn run<S: Source>(&self, state: &mut State<S>) -> Result<(), OakError> {
+    fn run<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> Result<(), OakError> {
         while state.not_at_end() {
             let safe_point = state.get_position();
 
@@ -75,17 +62,14 @@ impl<'config> RubyLexer<'config> {
                 continue;
             }
 
-            state.safe_check(safe_point);
+            state.advance_if_dead_lock(safe_point);
         }
 
-        // 添加 EOF token
-        let eof_pos = state.get_position();
-        state.add_token(RubySyntaxKind::Eof, eof_pos, eof_pos);
         Ok(())
     }
 
     /// 跳过空白字符
-    fn skip_whitespace<S: Source>(&self, state: &mut State<S>) -> bool {
+    fn skip_whitespace<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start_pos = state.get_position();
 
         while let Some(ch) = state.peek() {
@@ -107,7 +91,7 @@ impl<'config> RubyLexer<'config> {
     }
 
     /// 处理换行
-    fn lex_newline<S: Source>(&self, state: &mut State<S>) -> bool {
+    fn lex_newline<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start_pos = state.get_position();
 
         if let Some('\n') = state.peek() {
@@ -129,7 +113,7 @@ impl<'config> RubyLexer<'config> {
     }
 
     /// 处理注释
-    fn skip_comment<S: Source>(&self, state: &mut State<S>) -> bool {
+    fn skip_comment<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         if let Some('#') = state.peek() {
             let start_pos = state.get_position();
             state.advance(1); // 跳过 '#'
@@ -151,7 +135,7 @@ impl<'config> RubyLexer<'config> {
     }
 
     /// 处理字符串字面量
-    fn lex_string_literal<S: Source>(&self, state: &mut State<S>) -> bool {
+    fn lex_string_literal<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start_pos = state.get_position();
 
         // 检查是否是字符串开
@@ -195,7 +179,7 @@ impl<'config> RubyLexer<'config> {
     }
 
     /// 处理符号
-    fn lex_symbol<S: Source>(&self, state: &mut State<S>) -> bool {
+    fn lex_symbol<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         if let Some(':') = state.peek() {
             let start_pos = state.get_position();
             state.advance(1); // 跳过 ':'
@@ -250,59 +234,8 @@ impl<'config> RubyLexer<'config> {
         false
     }
 
-    /// 处理正则表达
-    fn lex_regex<S: Source>(&self, state: &mut State<S>) -> bool {
-        if let Some('/') = state.peek() {
-            let start_pos = state.get_position();
-            state.advance(1); // 跳过开始的 '/'
-
-            let mut escaped = false;
-            while let Some(ch) = state.peek() {
-                if escaped {
-                    escaped = false;
-                    state.advance(ch.len_utf8());
-                    continue;
-                }
-
-                if ch == '\\' {
-                    escaped = true;
-                    state.advance(1);
-                    continue;
-                }
-
-                if ch == '/' {
-                    state.advance(1); // 跳过结束'/'
-
-                    // 读取修饰
-                    while let Some(ch) = state.peek() {
-                        if ch.is_ascii_alphabetic() {
-                            state.advance(1);
-                        }
-                        else {
-                            break;
-                        }
-                    }
-                    break;
-                }
-                else if ch == '\n' || ch == '\r' {
-                    // 正则表达式不能跨
-                    break;
-                }
-                else {
-                    state.advance(ch.len_utf8());
-                }
-            }
-
-            state.add_token(RubySyntaxKind::RegexLiteral, start_pos, state.get_position());
-            true
-        }
-        else {
-            false
-        }
-    }
-
     /// 处理数字字面
-    fn lex_number_literal<S: Source>(&self, state: &mut State<S>) -> bool {
+    fn lex_number_literal<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start_pos = state.get_position();
 
         if !state.peek().map_or(false, |c| c.is_ascii_digit()) {
@@ -378,7 +311,7 @@ impl<'config> RubyLexer<'config> {
     }
 
     /// 处理十进制数
-    fn lex_decimal_number<S: Source>(&self, state: &mut State<S>, is_float: &mut bool) {
+    fn lex_decimal_number<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>, is_float: &mut bool) {
         // 读取整数部分
         while let Some(ch) = state.peek() {
             if ch.is_ascii_digit() {
@@ -432,7 +365,7 @@ impl<'config> RubyLexer<'config> {
     }
 
     /// 处理标识符或关键
-    fn lex_identifier_or_keyword<S: Source>(&self, state: &mut State<S>) -> bool {
+    fn lex_identifier_or_keyword<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start_pos = state.get_position();
 
         // 检查第一个字
@@ -508,16 +441,13 @@ impl<'config> RubyLexer<'config> {
     }
 
     /// 处理操作
-    fn lex_operators<S: Source>(&self, state: &mut State<S>) -> bool {
+    fn lex_operators<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start_pos = state.get_position();
 
         // 尝试匹配多字符操作符
         let three_char_ops = ["<=>", "===", "**=", "<<=", ">>=", "||=", "&&=", "..."];
         for op in &three_char_ops {
-            if state.peek() == op.chars().nth(0)
-                && state.peek_next_n(1) == op.chars().nth(1)
-                && state.peek_next_n(2) == op.chars().nth(2)
-            {
+            if state.peek() == op.chars().nth(0) && state.peek_next_n(1) == op.chars().nth(1) && state.peek_next_n(2) == op.chars().nth(2) {
                 state.advance(3);
                 let kind = match *op {
                     "<=>" => RubySyntaxKind::Spaceship,
@@ -535,10 +465,7 @@ impl<'config> RubyLexer<'config> {
             }
         }
 
-        let two_char_ops = [
-            "**", "<<", ">>", "<=", ">=", "==", "!=", "=~", "!~", "&&", "||", "+=", "-=", "*=", "/=", "%=", "&=", "|=", "^=",
-            "..",
-        ];
+        let two_char_ops = ["**", "<<", ">>", "<=", ">=", "==", "!=", "=~", "!~", "&&", "||", "+=", "-=", "*=", "/=", "%=", "&=", "|=", "^=", ".."];
         for op in &two_char_ops {
             if state.peek() == op.chars().nth(0) && state.peek_next_n(1) == op.chars().nth(1) {
                 state.advance(2);
@@ -602,7 +529,7 @@ impl<'config> RubyLexer<'config> {
     }
 
     /// 处理分隔
-    fn lex_single_char_tokens<S: Source>(&self, state: &mut State<S>) -> bool {
+    fn lex_single_char_tokens<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start_pos = state.get_position();
 
         // 检查双冒号

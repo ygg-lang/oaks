@@ -1,94 +1,164 @@
 # Oak Dockerfile Parser
 
-## Overview
+[![Crates.io](https://img.shields.io/crates/v/oak-dockerfile.svg)](https://crates.io/crates/oak-dockerfile)
+[![Documentation](https://docs.rs/oak-dockerfile/badge.svg)](https://docs.rs/oak-dockerfile)
 
-`Oak of docker` is a powerful and efficient parser for Dockerfiles, built using the `oak` parser combinator library. It provides a robust solution for parsing Dockerfile syntax, enabling various applications such as static analysis of Docker images, security auditing, and automated Dockerfile generation.
+High-performance incremental Dockerfile parser for the oak ecosystem with flexible configuration, optimized for container configuration and image building.
 
-## Features
+## 🎯 Overview
 
-- **Comprehensive Dockerfile Grammar**: Supports all standard Dockerfile instructions and syntax.
-- **High Performance**: Leverages `oak`'s optimized parsing techniques for speed.
-- **Abstract Syntax Tree (AST)**: Generates a detailed and easy-to-navigate AST representing the Dockerfile structure.
-- **Error Handling**: Provides meaningful error messages for better debugging of malformed Dockerfiles.
-- **Extensible**: Easily extendable to support custom Dockerfile directives or extensions.
+Oak Dockerfile is a robust parser for Dockerfile, designed to handle complete Dockerfile syntax including modern features. Built on the solid foundation of oak-core, it provides both high-level convenience and detailed AST generation for container configuration and image building.
 
-## Quick Start
+## ✨ Features
 
-To use `Oak of docker` in your Rust project, add it as a dependency in your `Cargo.toml`:
+- **Complete Dockerfile Syntax**: Supports all Dockerfile features including modern specifications
+- **Full AST Generation**: Generates comprehensive Abstract Syntax Trees
+- **Lexer Support**: Built-in tokenization with proper span information
+- **Error Recovery**: Graceful handling of syntax errors with detailed diagnostics
 
-```toml
-[dependencies]
-Oak of docker = "0.1.0" # Replace with the latest version
-oak = "0.1.0" # Replace with the latest version
-```
+## 🚀 Quick Start
 
-## Parsing Examples
-
-Here's a simple example demonstrating how to parse a Dockerfile content:
+Basic example:
 
 ```rust
-use pex_docker::dockerfile_parser;
+use oak_dockerfile::{Parser, DockerfileLanguage, SourceText};
 
-fn main() {
-    let input = r#"
+fn main() -> Result<(), Box<dyn std::error::Error>> {
+    let parser = Parser::new();
+    let source = SourceText::new(r#"
 FROM alpine:latest
 RUN apk add --no-cache bash
 COPY . /app
 WORKDIR /app
 CMD ["bash"]
-"#;
-    match dockerfile_parser::parse(input) {
-        Ok(ast) => {
-            println!("Successfully parsed Dockerfile:\n{:#?}", ast);
-        }
-        Err(err) => {
-            eprintln!("Failed to parse Dockerfile: {}", err);
-        }
-    }
+    "#);
+    
+    let result = parser.parse(&source);
+    println!("Parsed Dockerfile successfully.");
+    Ok(())
 }
 ```
 
-## Advanced Features
+## 📋 Parsing Examples
 
-### Customizing the Parser
-
-The `oak` library allows for flexible customization of the parser. You can modify the grammar rules or add new ones to suit your specific needs, such as supporting experimental Dockerfile features. Refer to the `oak` documentation for more details on parser customization.
-
-### Error Recovery
-
-`Oak of docker` can be extended with error recovery mechanisms to handle malformed Dockerfiles gracefully, allowing for partial parsing and better resilience in real-world scenarios.
-
-## AST Structure
-
-The generated AST for Dockerfiles provides a hierarchical representation of the instructions. For instance, a `FROM` instruction might result in an AST structure similar to this:
-
+### Basic Dockerfile Parsing
 ```rust
-// Simplified AST representation for:
-// FROM alpine:latest
-pex_docker::ast::Node::Instruction {
-    command: "FROM".to_string(),
-    arguments: vec![
-        "alpine:latest".to_string(),
-    ],
+use oak_dockerfile::{Parser, DockerfileLanguage, SourceText};
+
+let parser = Parser::new();
+let source = SourceText::new(r#"
+FROM node:14-alpine
+WORKDIR /app
+COPY package*.json ./
+RUN npm ci --only=production
+COPY . .
+EXPOSE 3000
+CMD ["npm", "start"]
+"#);
+
+let result = parser.parse(&source);
+println!("Dockerfile parsed successfully.");
+```
+
+### Multi-stage Build Parsing
+```rust
+use oak_dockerfile::{Parser, DockerfileLanguage, SourceText};
+
+let parser = Parser::new();
+let source = SourceText::new(r#"
+# Build stage
+FROM golang:1.19-alpine AS builder
+WORKDIR /src
+COPY go.mod go.sum ./
+RUN go mod download
+COPY . .
+RUN CGO_ENABLED=0 go build -o /app
+
+# Runtime stage
+FROM alpine:latest
+RUN apk --no-cache add ca-certificates
+WORKDIR /root/
+COPY --from=builder /app .
+EXPOSE 8080
+CMD ["./app"]
+"#);
+
+let result = parser.parse(&source);
+println!("Multi-stage Dockerfile parsed successfully.");
+```
+
+## 🔧 Advanced Features
+
+### Token-Level Parsing
+```rust
+use oak_dockerfile::{Parser, DockerfileLanguage, SourceText};
+
+let parser = Parser::new();
+let source = SourceText::new("FROM alpine:latest");
+let result = parser.parse(&source);
+println!("Token parsing completed.");
+```
+
+### Error Handling
+```rust
+use oak_dockerfile::{Parser, DockerfileLanguage, SourceText};
+
+let parser = Parser::new();
+let source = SourceText::new(r#"
+FROM alpine:latest
+RUN apk add --no-cache bash
+COPY . /app
+WORKDIR /app
+CMD ["bash"
+# Missing closing bracket
+"#);
+
+let result = parser.parse(&source);
+if let Some(errors) = result.result.err() {
+    println!("Parse errors found: {:?}", errors);
+} else {
+    println!("Parsed successfully.");
 }
 ```
 
-## Performance
+## 🏗️ AST Structure
 
-`Oak of docker` is designed for performance. Benchmarks show efficient parsing of large Dockerfiles. Optimizations include memoization, efficient backtracking, and direct AST construction.
+The parser generates a comprehensive AST with the following main structures:
 
-## Integration
+- **Dockerfile**: Root container for Dockerfile documents
+- **Instruction**: Dockerfile instructions (FROM, RUN, COPY, etc.)
+- **Argument**: Instruction arguments and parameters
+- **Stage**: Build stages in multi-stage builds
+- **Comment**: Dockerfile comments
 
-`Oak of docker` can be integrated into various tools and applications:
+## 📊 Performance
 
-- **Dockerfile Linters**: Analyze Dockerfiles for best practices and potential issues.
-- **Security Scanners**: Identify vulnerabilities in Docker image builds.
-- **CI/CD Pipelines**: Automate Dockerfile validation and generation.
+- **Streaming**: Parse large Dockerfiles without loading entirely into memory
+- **Incremental**: Re-parse only changed sections
+- **Memory Efficient**: Smart AST node allocation
+- **Fast Recovery**: Quick error recovery for better IDE integration
 
-## Examples
+## 🔗 Integration
 
-Explore the `examples` directory within the `oak-docker` project for more usage examples and demonstrations of specific Dockerfile parsing features.
+Oak Dockerfile integrates seamlessly with:
 
-## Contributing
+- **Container Analysis**: Analyze Dockerfiles for security and best practices
+- **CI/CD Pipelines**: Integrate with build and deployment workflows
+- **IDE Support**: Language server protocol compatibility
+- **Security Scanning**: Identify potential security issues in Dockerfiles
+- **Optimization**: Suggest optimizations for Dockerfile structure
 
-Contributions to `Oak of docker` are welcome! If you find a bug or have a feature request, please open an issue on the GitHub repository. For major changes, please open a discussion first.
+## 📚 Examples
+
+Check out the [examples](examples/) directory for comprehensive examples:
+
+- Complete Dockerfile parsing
+- Multi-stage build analysis
+- Security vulnerability detection
+- Integration with development workflows
+
+## 🤝 Contributing
+
+Contributions are welcome! 
+
+Please feel free to submit pull requests at the [project repository](https://github.com/ygg-lang/oaks/tree/dev/examples/oak-dockerfile) or open [issues](https://github.com/ygg-lang/oaks/issues).

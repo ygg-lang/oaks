@@ -10,7 +10,7 @@ fn test_pascal_lexer() {
     let lexer = PascalLexer::new(&PASCAL_LANGUAGE);
 
     let test_runner = LexerTester::new(here.join("tests/lexer")).with_extension("pas").with_timeout(Duration::from_secs(5));
-    match test_runner.run_tests::<PascalLanguage, _>(lexer) {
+    match test_runner.run_tests::<PascalLanguage, _>(&lexer) {
         Ok(_) => println!("Pascal lexer tests passed"),
         Err(e) => panic!("Pascal lexer tests failed: {}", e),
     }

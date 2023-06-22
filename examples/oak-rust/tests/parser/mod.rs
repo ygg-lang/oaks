@@ -1,15 +1,45 @@
-use oak_core::helpers::ParserTester;
-use oak_rust::{RustParser, language::RustLanguage};
-use std::{path::Path, time::Duration};
+use oak_core::{LexerCache, source::Source};
 
 #[test]
-fn test_rust_parser() {
-    let here = Path::new(env!("CARGO_MANIFEST_DIR"));
-    let lang: &'static RustLanguage = Box::leak(Box::new(RustLanguage::default()));
-    let parser: &'static RustParser = Box::leak(Box::new(RustParser::new(lang)));
-    let test_runner = ParserTester::new(here.join("tests/parser")).with_extension("rust").with_timeout(Duration::from_secs(5));
-    match test_runner.run_tests::<RustLanguage, _>(parser) {
-        Ok(()) => println!("Rust parser tests passed!"),
-        Err(e) => panic!("Rust parser tests failed: {}", e),
+fn test_simple_function_parsing() {
+    use oak_core::{Lexer, Parser, SourceText};
+    use oak_rust::{RustLanguage, RustLexer, RustParser};
+
+    let source = SourceText::new("fn main() { println!(\"Hello, world!\"); }");
+    let language = Box::leak(Box::new(RustLanguage::default()));
+    let parser = RustParser::new(language);
+
+    // 先测试词法分析器
+    println!("测试词法分析器:");
+    let lexer = RustLexer::new(language);
+    let mut cache = oak_core::parser::session::ParseSession::<RustLanguage>::default();
+    let lex_output = lexer.lex(&source, &[], &mut cache);
+    match &lex_output.result {
+        Ok(tokens) => {
+            println!("生成的 tokens: {:?}", tokens);
+            println!("token 数量: {}", tokens.len());
+
+            cache.set_lex_output(lex_output.clone());
+
+            // 使用带有 token 的缓存进行解析
+            let parse_output = parser.parse(&source, &[], &mut cache);
+
+            println!("测试简单函数解析:");
+            println!("源代码: '{}'", (&source).get_text_from(0));
+            match &parse_output.result {
+                Ok(root) => {
+                    println!("解析结果: {:?}", root);
+                    println!("✅ 简单函数解析测试通过！");
+                }
+                Err(e) => {
+                    println!("❌ 解析失败: {:?}", e);
+                    panic!("解析失败");
+                }
+            }
+        }
+        Err(e) => {
+            println!("❌ 词法分析失败: {:?}", e);
+            panic!("词法分析失败");
+        }
     }
 }

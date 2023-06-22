@@ -1,20 +1,20 @@
-use crate::{ClojureLanguage, ClojureSyntaxKind};
+use crate::{language::ClojureLanguage, parser::ClojureElementType};
 use oak_core::tree::{RedLeaf, RedNode};
 
-pub type ClojureNode = RedNode<ClojureSyntaxKind>;
-pub type ClojureToken = RedLeaf<ClojureSyntaxKind>;
+pub type ClojureNode<'a> = RedNode<'a, ClojureLanguage>;
+pub type ClojureToken = RedLeaf<ClojureLanguage>;
 
-#[derive(Debug, Clone)]
-pub struct ClojureRoot {
-    syntax: ClojureNode,
+#[derive(Debug, Clone, Copy)]
+pub struct ClojureRoot<'a> {
+    syntax: ClojureNode<'a>,
 }
 
-impl ClojureRoot {
-    pub fn cast(node: ClojureNode) -> Option<Self> {
-        if node.green.kind == ClojureSyntaxKind::SourceFile { Some(ClojureRoot { syntax: node }) } else { None }
+impl<'a> ClojureRoot<'a> {
+    pub fn cast(node: ClojureNode<'a>) -> Option<Self> {
+        if node.green.kind == ClojureElementType::SourceFile { Some(ClojureRoot { syntax: node }) } else { None }
     }
 
-    pub fn syntax(&self) -> &ClojureNode {
+    pub fn syntax(&self) -> &ClojureNode<'a> {
         &self.syntax
     }
 }

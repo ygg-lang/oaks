@@ -1,13 +1,14 @@
-use oak_core::{Builder, Lexer, Parser, SourceText};
-use oak_twig::{TwigLanguage, TwigSyntaxKind};
+use oak_core::{Lexer, ParseSession, Parser, SourceText};
+use oak_twig::{TwigLanguage, kind::TwigSyntaxKind};
 
 #[test]
 fn test_lexer_basic() {
     let language = TwigLanguage::new();
     let lexer = language.lexer();
     let source = SourceText::new("{{ variable }}");
+    let mut session = ParseSession::<TwigLanguage>::default();
 
-    let result = lexer.lex(&source);
+    let result = lexer.lex(&source, &[], &mut session);
     assert!(result.result.is_ok());
 
     let tokens = result.result.unwrap();
@@ -20,8 +21,9 @@ fn test_parser_basic() {
     let language = TwigLanguage::new();
     let parser = language.parser();
     let source = SourceText::new("{{ variable }}");
+    let mut session = ParseSession::<TwigLanguage>::default();
 
-    let result = parser.parse(&source);
+    let result = parser.parse(&source, &[], &mut session);
     assert!(result.result.is_ok());
 
     let tree = result.result.unwrap();
@@ -33,8 +35,9 @@ fn test_lexer_string() {
     let language = TwigLanguage::new();
     let lexer = language.lexer();
     let source = SourceText::new(r#"{{ "hello world" }}"#);
+    let mut session = ParseSession::<TwigLanguage>::default();
 
-    let result = lexer.lex(&source);
+    let result = lexer.lex(&source, &[], &mut session);
     assert!(result.result.is_ok());
 
     let tokens = result.result.unwrap();
@@ -50,8 +53,9 @@ fn test_lexer_number() {
     let language = TwigLanguage::new();
     let lexer = language.lexer();
     let source = SourceText::new("{{ 123 }}");
+    let mut session = ParseSession::<TwigLanguage>::default();
 
-    let result = lexer.lex(&source);
+    let result = lexer.lex(&source, &[], &mut session);
     assert!(result.result.is_ok());
 
     let tokens = result.result.unwrap();
@@ -67,8 +71,9 @@ fn test_lexer_boolean() {
     let language = TwigLanguage::new();
     let lexer = language.lexer();
     let source = SourceText::new("{{ true }}");
+    let mut session = ParseSession::<TwigLanguage>::default();
 
-    let result = lexer.lex(&source);
+    let result = lexer.lex(&source, &[], &mut session);
     assert!(result.result.is_ok());
 
     let tokens = result.result.unwrap();
@@ -84,8 +89,9 @@ fn test_parser_variable() {
     let language = TwigLanguage::new();
     let parser = language.parser();
     let source = SourceText::new("{{ name }}");
+    let mut session = ParseSession::<TwigLanguage>::default();
 
-    let result = parser.parse(&source);
+    let result = parser.parse(&source, &[], &mut session);
     assert!(result.result.is_ok());
 
     let tree = result.result.unwrap();
@@ -101,8 +107,9 @@ fn test_parser_block() {
     Hello World
 {% endif %}"#,
     );
+    let mut session = ParseSession::<TwigLanguage>::default();
 
-    let result = parser.parse(&source);
+    let result = parser.parse(&source, &[], &mut session);
     assert!(result.result.is_ok());
 
     let tree = result.result.unwrap();
@@ -115,12 +122,13 @@ fn test_empty_input() {
     let lexer = language.lexer();
     let parser = language.parser();
     let source = SourceText::new("");
+    let mut session = ParseSession::<TwigLanguage>::default();
 
     // 测试空输入的词法分析
-    let lex_result = lexer.lex(&source);
+    let lex_result = lexer.lex(&source, &[], &mut session);
     assert!(lex_result.result.is_ok());
 
     // 测试空输入的语法分析
-    let parse_result = parser.parse(&source);
+    let parse_result = parser.parse(&source, &[], &mut session);
     assert!(parse_result.result.is_ok());
 }

@@ -1,0 +1,40 @@
+[package]
+name = "oak-notedown"
+description = "High-performance incremental Markdown parser for the oak ecosystem with flexible configuration, optimized for documentation and content creation."
+categories = ["parsing"]
+keywords = ["parser", "markdown", "commonmark", "extension"]
+documentation = "https://docs.rs/oak-notedown"
+readme = "readme.md"
+version.workspace = true
+authors.workspace = true
+homepage.workspace = true
+repository.workspace = true
+license.workspace = true
+edition.workspace = true
+
+[dependencies]
+oak-core = { workspace = true }
+oak-highlight = { workspace = true }
+oak-pretty-print = { workspace = true }
+oak-lsp = { workspace = true }
+oak-hover = { workspace = true }
+oak-vfs = { workspace = true }
+oak-mcp = { workspace = true, optional = true }
+serde = { workspace = true }
+tracing = { workspace = true }
+futures = "0.3"
+
+tokio = { workspace = true, optional = true }
+axum = { workspace = true, optional = true }
+
+[dev-dependencies]
+oak-core = { workspace = true, features = ["testing"] }
+
+[features]
+default = []
+mcp = ["dep:oak-mcp"]
+axum = ["mcp", "dep:tokio", "dep:axum", "oak-mcp/axum", "oak-lsp/axum"]
+
+
+[package.metadata.docs.rs]
+all-features = true

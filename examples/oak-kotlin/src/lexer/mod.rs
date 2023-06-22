@@ -1,19 +1,23 @@
 use crate::{kind::KotlinSyntaxKind, language::KotlinLanguage};
-use oak_core::{IncrementalCache, Lexer, LexerState, OakError, lexer::LexOutput, source::Source};
+use oak_core::{
+    Lexer, LexerState, OakError, TextEdit,
+    lexer::{LexOutput, LexerCache},
+    source::Source,
+};
 
-type State<S> = LexerState<S, KotlinLanguage>;
+type State<'a, S> = LexerState<'a, S, KotlinLanguage>;
 
 pub struct KotlinLexer<'config> {
-    config: &'config KotlinLanguage,
+    _config: &'config KotlinLanguage,
 }
 
 impl<'config> KotlinLexer<'config> {
     pub fn new(config: &'config KotlinLanguage) -> Self {
-        Self { config }
+        Self { _config: config }
     }
 
     /// 跳过空白字符
-    fn skip_whitespace<S: Source>(&self, state: &mut State<S>) -> bool {
+    fn skip_whitespace<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start_pos = state.get_position();
 
         while let Some(ch) = state.peek() {
@@ -35,7 +39,7 @@ impl<'config> KotlinLexer<'config> {
     }
 
     /// 处理换行
-    fn lex_newline<S: Source>(&self, state: &mut State<S>) -> bool {
+    fn lex_newline<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start_pos = state.get_position();
 
         if let Some('\n') = state.peek() {
@@ -57,7 +61,7 @@ impl<'config> KotlinLexer<'config> {
     }
 
     /// 处理注释
-    fn lex_comment<S: Source>(&self, state: &mut State<S>) -> bool {
+    fn lex_comment<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start_pos = state.get_position();
 
         if let Some('/') = state.peek() {
@@ -93,9 +97,11 @@ impl<'config> KotlinLexer<'config> {
                             depth -= 1;
                         }
                     }
-                    else {
-                        let ch = state.peek().unwrap();
+                    else if let Some(ch) = state.peek() {
                         state.advance(ch.len_utf8());
+                    }
+                    else {
+                        break;
                     }
                 }
                 state.add_token(KotlinSyntaxKind::Comment, start_pos, state.get_position());
@@ -113,7 +119,7 @@ impl<'config> KotlinLexer<'config> {
     }
 
     /// 处理字符串字面量
-    fn lex_string<S: Source>(&self, state: &mut State<S>) -> bool {
+    fn lex_string<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start_pos = state.get_position();
 
         if let Some('"') = state.peek() {
@@ -136,9 +142,11 @@ impl<'config> KotlinLexer<'config> {
                                 }
                             }
                         }
-                        else {
-                            let ch = state.peek().unwrap();
+                        else if let Some(ch) = state.peek() {
                             state.advance(ch.len_utf8());
+                        }
+                        else {
+                            break;
                         }
                     }
                     state.add_token(KotlinSyntaxKind::StringLiteral, start_pos, state.get_position());
@@ -164,7 +172,7 @@ impl<'config> KotlinLexer<'config> {
                     }
                 }
                 else if ch == '\n' || ch == '\r' {
-                    break; // 字符串不能跨
+                    break; // 字符串不能跨行
                 }
                 else {
                     state.advance(ch.len_utf8());
@@ -174,7 +182,7 @@ impl<'config> KotlinLexer<'config> {
             true
         }
         else if let Some('\'') = state.peek() {
-            // 字符字面
+            // 字符字面量
             state.advance(1);
             while let Some(ch) = state.peek() {
                 if ch == '\'' {
@@ -203,45 +211,30 @@ impl<'config> KotlinLexer<'config> {
     }
 
     /// 处理数字字面量
-    fn lex_number<S: Source>(&self, state: &mut State<S>) -> bool {
+    fn lex_number<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start_pos = state.get_position();
 
         if let Some(ch) = state.peek() {
             if ch.is_ascii_digit() {
-                // 扫描数字
+                state.advance(1);
                 while let Some(ch) = state.peek() {
                     if ch.is_ascii_digit() || ch == '_' {
-                        state.advance(ch.len_utf8());
+                        state.advance(1);
                     }
                     else {
                         break;
                     }
                 }
 
-                // 检查小数点
+                // 处理小数点
                 if let Some('.') = state.peek() {
-                    let current_pos = state.get_position();
-                    state.advance(1); // 临时前进查看下一个字符
-                    if let Some(next_ch) = state.peek() {
-                        if next_ch.is_ascii_digit() {
-                            // 这是小数点，继续处理
-                        }
-                        else {
-                            // 不是小数点，回退
-                            state.set_position(current_pos);
-                        }
-                    }
-                    else {
-                        // 没有下一个字符，回退
-                        state.set_position(current_pos);
-                    }
-
-                    if let Some(next_ch) = state.peek() {
-                        if next_ch.is_ascii_digit() {
-                            // 小数点已经被处理了
+                    // 预判下一个字符，如果是数字则是浮点数，如果是其他（如调用方法）则不是
+                    if let Some(next) = state.peek_next_n(1) {
+                        if next.is_ascii_digit() {
+                            state.advance(1);
                             while let Some(ch) = state.peek() {
                                 if ch.is_ascii_digit() || ch == '_' {
-                                    state.advance(ch.len_utf8());
+                                    state.advance(1);
                                 }
                                 else {
                                     break;
@@ -251,53 +244,36 @@ impl<'config> KotlinLexer<'config> {
                     }
                 }
 
-                // 检查指
-                if let Some(ch) = state.peek() {
-                    if ch == 'e' || ch == 'E' {
+                // 处理指数部分
+                if let Some('e') | Some('E') = state.peek() {
+                    state.advance(1);
+                    if let Some('+') | Some('-') = state.peek() {
                         state.advance(1);
-                        if let Some(sign) = state.peek() {
-                            if sign == '+' || sign == '-' {
-                                state.advance(1);
-                            }
-                        }
-                        while let Some(ch) = state.peek() {
-                            if ch.is_ascii_digit() || ch == '_' {
-                                state.advance(ch.len_utf8());
-                            }
-                            else {
-                                break;
-                            }
-                        }
                     }
-                }
-
-                // 检查后缀
-                if let Some(ch) = state.peek() {
-                    if ch == 'L' || ch == 'l' || ch == 'F' || ch == 'f' {
-                        state.advance(1);
+                    while let Some(ch) = state.peek() {
+                        if ch.is_ascii_digit() || ch == '_' {
+                            state.advance(1);
+                        }
+                        else {
+                            break;
+                        }
                     }
                 }
 
                 state.add_token(KotlinSyntaxKind::NumberLiteral, start_pos, state.get_position());
-                true
-            }
-            else {
-                false
+                return true;
             }
         }
-        else {
-            false
-        }
+        false
     }
 
     /// 处理标识符和关键字
-    fn lex_identifier_or_keyword<S: Source>(&self, state: &mut State<S>) -> bool {
+    fn lex_identifier_or_keyword<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start_pos = state.get_position();
 
         if let Some(ch) = state.peek() {
             if ch.is_alphabetic() || ch == '_' || ch == '$' {
                 state.advance(ch.len_utf8());
-
                 while let Some(ch) = state.peek() {
                     if ch.is_alphanumeric() || ch == '_' || ch == '$' {
                         state.advance(ch.len_utf8());
@@ -308,15 +284,11 @@ impl<'config> KotlinLexer<'config> {
                 }
 
                 let text = state.get_text_in((start_pos..state.get_position()).into());
-                let kind = match text {
-                    "abstract" | "actual" | "annotation" | "as" | "break" | "by" | "catch" | "class" | "companion"
-                    | "const" | "constructor" | "continue" | "crossinline" | "data" | "do" | "dynamic" | "else" | "enum"
-                    | "expect" | "external" | "false" | "final" | "finally" | "for" | "fun" | "get" | "if" | "import"
-                    | "in" | "infix" | "init" | "inline" | "inner" | "interface" | "internal" | "is" | "lateinit"
-                    | "noinline" | "null" | "object" | "open" | "operator" | "out" | "override" | "package" | "private"
-                    | "protected" | "public" | "reified" | "return" | "sealed" | "set" | "super" | "suspend" | "tailrec"
-                    | "this" | "throw" | "true" | "try" | "typealias" | "typeof" | "val" | "var" | "vararg" | "when"
-                    | "where" | "while" => KotlinSyntaxKind::Keyword,
+                let kind = match text.as_ref() {
+                    "abstract" | "actual" | "annotation" | "as" | "break" | "by" | "catch" | "class" | "companion" | "const" | "constructor" | "continue" | "crossinline" | "data" | "do" | "dynamic" | "else" | "enum" | "expect" | "external" | "false"
+                    | "final" | "finally" | "for" | "fun" | "get" | "if" | "import" | "in" | "infix" | "init" | "inline" | "inner" | "interface" | "internal" | "is" | "lateinit" | "noinline" | "null" | "object" | "open" | "operator" | "out"
+                    | "override" | "package" | "private" | "protected" | "public" | "reified" | "return" | "sealed" | "set" | "super" | "suspend" | "tailrec" | "this" | "throw" | "true" | "try" | "typealias" | "typeof" | "val" | "var" | "vararg"
+                    | "when" | "where" | "while" => KotlinSyntaxKind::Keyword,
                     _ => KotlinSyntaxKind::Identifier,
                 };
 
@@ -333,19 +305,19 @@ impl<'config> KotlinLexer<'config> {
     }
 
     /// 处理特殊字符和操作符
-    fn lex_special_char<S: Source>(&self, state: &mut State<S>) -> bool {
+    fn lex_special_char<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start_pos = state.get_position();
 
         if let Some(ch) = state.peek() {
             let kind = match ch {
-                '(' => KotlinSyntaxKind::LeftParen,
-                ')' => KotlinSyntaxKind::RightParen,
-                '{' => KotlinSyntaxKind::LeftBrace,
-                '}' => KotlinSyntaxKind::RightBrace,
-                '[' => KotlinSyntaxKind::LeftBracket,
-                ']' => KotlinSyntaxKind::RightBracket,
+                '(' => KotlinSyntaxKind::LParen,
+                ')' => KotlinSyntaxKind::RParen,
+                '{' => KotlinSyntaxKind::LBrace,
+                '}' => KotlinSyntaxKind::RBrace,
+                '[' => KotlinSyntaxKind::LBracket,
+                ']' => KotlinSyntaxKind::RBracket,
                 ',' => KotlinSyntaxKind::Comma,
-                ';' => KotlinSyntaxKind::Semicolon,
+                ';' => KotlinSyntaxKind::Semi,
                 ':' => KotlinSyntaxKind::Colon,
                 '.' => KotlinSyntaxKind::Dot,
                 '?' => KotlinSyntaxKind::Question,
@@ -377,27 +349,21 @@ impl<'config> KotlinLexer<'config> {
 }
 
 impl<'config> Lexer<KotlinLanguage> for KotlinLexer<'config> {
-    fn lex_incremental(
-        &self,
-        source: impl Source,
-        start_offset: usize,
-        cache: IncrementalCache<'_, KotlinLanguage>,
-    ) -> LexOutput<KotlinLanguage> {
-        let mut state = State::new_with_cache(source, start_offset, cache);
+    fn lex<'a, S: Source + ?Sized>(&self, text: &'a S, _edits: &[TextEdit], cache: &'a mut impl LexerCache<KotlinLanguage>) -> LexOutput<KotlinLanguage> {
+        let mut state = State::new(text);
         let result = self.run(&mut state);
-        state.finish(result)
-    }
-
-    fn lex(&self, source: impl Source) -> LexOutput<KotlinLanguage> {
-        let mut state = State::new(source);
-        let result = self.run(&mut state);
-        state.finish(result)
+        if result.is_ok() {
+            state.add_eof();
+        }
+        state.finish_with_cache(result, cache)
     }
 }
 
 impl<'config> KotlinLexer<'config> {
-    fn run<S: Source>(&self, state: &mut State<S>) -> Result<(), OakError> {
+    fn run<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> Result<(), OakError> {
         while state.not_at_end() {
+            let safe_point = state.get_position();
+
             if self.skip_whitespace(state) {
                 continue;
             }
@@ -432,11 +398,9 @@ impl<'config> KotlinLexer<'config> {
                 state.advance(ch.len_utf8());
                 state.add_token(KotlinSyntaxKind::Error, start_pos, state.get_position());
             }
-        }
 
-        // 添加 EOF kind
-        let eof_pos = state.get_position();
-        state.add_token(KotlinSyntaxKind::Eof, eof_pos, eof_pos);
+            state.advance_if_dead_lock(safe_point);
+        }
 
         Ok(())
     }

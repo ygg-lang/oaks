@@ -1,108 +1,167 @@
-# WebAssembly 文本格式 (WAT) 处理模块
+# Oak Groovy Parser
 
-这个模块提供了完整的 WAT (WebAssembly Text) 格式处理功能，包括：
-- **词法分析**: 将 WAT 文本分解为词法单元 (tokens)
-- **语法分析**: 将词法单元解析为抽象语法树 (AST)
-- **编译**: 将 AST 编译为 WASM 二进制结构
-- **反编译**: 将 WASM 结构转换回 WAT 文本
+[![Crates.io](https://img.shields.io/crates/v/oak-groovy.svg)](https://crates.io/crates/oak-groovy)
+[![Documentation](https://docs.rs/oak-groovy/badge.svg)](https://docs.rs/oak-groovy)
 
-## 模块组件
+High-performance incremental Groovy parser for the oak ecosystem with flexible configuration, optimized for build systems and dynamic language applications.
 
-### `ast` 模块
+## 🎯 Overview
 
-定义 WAT 抽象语法树的所有节点类型：
-- `Module`: 模块定义
-- `Func`: 函数定义
-- `Export`: 导出定义
-- `Import`: 导入定义
-- `Memory`: 内存定义
-- `Table`: 表定义
-- `Global`: 全局变量定义
-- `Instruction`: WebAssembly 指令
+Oak Groovy is a robust parser for Apache Groovy, designed to handle complete Groovy syntax including modern language features and DSL capabilities. Built on the solid foundation of oak-core, it provides both high-level convenience and detailed AST generation for Groovy analysis and tooling.
 
-### `lexer` 模块
+## ✨ Features
 
-词法分析器，将 WAT 文本转换为词法单元：
-- 关键字识别 (`module`, `func`, `export`, 等)
-- 标识符和名称解析
-- 数值字面量处理
-- 字符串字面量处理
-- 注释和空白字符处理
+- **Complete Groovy Syntax**: Supports all Groovy features including closures, builders, and dynamic typing
+- **DSL Support**: Handles domain-specific languages and Groovy-specific constructs
+- **Full AST Generation**: Generates comprehensive Abstract Syntax Trees
+- **Lexer Support**: Built-in tokenization with proper span information
+- **Error Recovery**: Graceful handling of syntax errors with detailed diagnostics
 
-### `parser` 模块
+## 🚀 Quick Start
 
-语法分析器，将词法单元解析为 AST：
-- 递归下降解析
-- 错误恢复和报告
-- 语法验证
-- 位置信息跟踪
+Basic example:
 
-### `compiler` 模块
-
-编译器，将 AST 编译为 WASM 结构：
-- 类型检查
-- 符号解析
-- 指令编码
-- 模块生成
-
-### `writer` 模块
-
-写入器，将 AST 转换回 WAT 文本：
-- 格式化输出
-- 注释生成
-- 代码美化
-
-## 使用示例
-
-### 基本解析和编译
-
-```rust,no_run
-use wasi_assembler::formats::wat::{WatParser, WatCompiler};
+```rust
+use oak_groovy::{Parser, GroovyLanguage, SourceText};
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
-    let wat_source = r#"
-        (module
-            (func $add (param $a i32) (param $b i32) (result i32)
-                local.get $a
-                local.get $b
-                i32.add
-            )
-            (export "add" (func $add))
-        )
-    "#;
+    let parser = Parser::new();
+    let source = SourceText::new(r#"
+def hello() {
+    println "Hello, Groovy!"
+}
+hello()
+    "#);
     
-    // 解析 WAT 文本
-    let mut parser = WatParser::new();
-    let ast = parser.parse(wat_source)?;
-    
-    // 编译为 WASM 结构
-    let mut compiler = WatCompiler::new();
-    let wasm_module = compiler.compile(ast)?;
+    let result = parser.parse(&source);
+    println!("Parsed Groovy script successfully.");
     Ok(())
 }
 ```
 
-### 错误处理
+## 📋 Parsing Examples
 
-```rust,no_run
-use wasi_assembler::formats::wat::{WatParser, WatError};
+### Class Parsing
+```rust
+use oak_groovy::{Parser, GroovyLanguage, SourceText};
 
-fn main() -> Result<(), Box<dyn std::error::Error>> {
-    let mut parser = WatParser::new();
-    match parser.parse("(module (func $invalid") {
-        Ok(ast) => {
-            // 解析成功
-        }
-        Err(WatError::UnexpectedToken { expected, found, location }) => {
-            eprintln!("语法错误: 期望 {:?}, 找到 {:?} 在位置 {:?}", expected, found, location);
-        }
-        Err(WatError::UnexpectedEof) => {
-            eprintln!("意外结束: 输入不完整");
-        }
-        Err(e) => {
-            eprintln!("解析错误: {}", e);
-        }
+let parser = Parser::new();
+let source = SourceText::new(r#"
+class Person {
+    String name
+    int age
+    
+    Person(String name, int age) {
+        this.name = name
+        this.age = age
     }
-    Ok(())
+    
+    def greet() {
+        println "Hello, I'm ${name} and I'm ${age} years old."
+    }
+}
+
+def person = new Person("Alice", 30)
+person.greet()
+"#);
+
+let result = parser.parse(&source);
+println!("Parsed Groovy class successfully.");
+```
+
+### Closure Parsing
+```rust
+use oak_groovy::{Parser, GroovyLanguage, SourceText};
+
+let parser = Parser::new();
+let source = SourceText::new(r#"
+def numbers = [1, 2, 3, 4, 5]
+def doubled = numbers.collect { it * 2 }
+println "Original: ${numbers}"
+println "Doubled: ${doubled}"
+
+// Method reference
+def strings = ["apple", "banana", "cherry"]
+def lengths = strings.collect(String::length)
+println "Lengths: ${lengths}"
+"#);
+
+let result = parser.parse(&source);
+println!("Parsed Groovy closures successfully.");
+```
+
+## 🔧 Advanced Features
+
+### Token-Level Parsing
+```rust
+use oak_groovy::{Parser, GroovyLanguage, SourceText};
+
+let parser = Parser::new();
+let source = SourceText::new("def hello() { println 'Hello' }");
+let result = parser.parse(&source);
+// Token information is available in the parse result
+```
+
+### Error Handling
+```rust
+use oak_groovy::{Parser, GroovyLanguage, SourceText};
+
+let parser = Parser::new();
+let source = SourceText::new(r#"
+def brokenMethod() {
+    def x = "string"
+    x++  // Type mismatch error
+    if (x == 5 {  // Missing closing parenthesis
+        println "This won't compile"
+    }
+}
+"#);
+
+let result = parser.parse(&source);
+if let Err(e) = result.result {
+    println!("Parse error: {:?}", e);
 }
 ```
+
+## 🏗️ AST Structure
+
+The parser generates a comprehensive AST with the following main structures:
+
+- **Class**: Groovy class definitions
+- **Method**: Method and function definitions
+- **Closure**: Groovy closure expressions
+- **Statement**: Assignment, control flow, and expression statements
+- **Expression**: Method calls, literals, and operators
+
+## 📊 Performance
+
+- **Streaming**: Parse large Groovy files without loading entirely into memory
+- **Incremental**: Re-parse only changed sections
+- **Memory Efficient**: Smart AST node allocation
+- **Fast Recovery**: Quick error recovery for better IDE integration
+
+## 🔗 Integration
+
+Oak-groovy integrates seamlessly with:
+
+- **Build Systems**: Gradle and other build tool analysis
+- **Static Analysis**: Code quality and security analysis
+- **Code Generation**: Generating code from Groovy AST
+- **IDE Support**: Language server protocol compatibility
+- **Refactoring**: Automated code refactoring
+- **Documentation**: Generating documentation from Groovy code
+
+## 📚 Examples
+
+Check out the [examples](examples/) directory for comprehensive examples:
+
+- Complete Groovy class parsing
+- Closure and DSL analysis
+- Build script processing
+- Integration with development workflows
+
+## 🤝 Contributing
+
+Contributions are welcome! 
+
+Please feel free to submit pull requests at the [project repository](https://github.com/ygg-lang/oaks/tree/dev/examples/oak-groovy) or open [issues](https://github.com/ygg-lang/oaks/issues).

@@ -59,76 +59,28 @@ pub enum TwigSyntaxKind {
     Error,
 }
 
-impl oak_core::SyntaxKind for TwigSyntaxKind {
-    fn is_trivia(&self) -> bool {
-        matches!(self, TwigSyntaxKind::Whitespace | TwigSyntaxKind::Comment)
-    }
+impl oak_core::TokenType for TwigSyntaxKind {
+    type Role = oak_core::UniversalTokenRole;
+    const END_OF_STREAM: Self = TwigSyntaxKind::Eof;
 
-    fn is_comment(&self) -> bool {
-        matches!(self, TwigSyntaxKind::Comment)
-    }
-
-    fn is_whitespace(&self) -> bool {
-        matches!(self, TwigSyntaxKind::Whitespace)
-    }
-
-    fn is_token_type(&self) -> bool {
-        !matches!(
-            self,
-            TwigSyntaxKind::Root
-                | TwigSyntaxKind::Variable
-                | TwigSyntaxKind::Block
-                | TwigSyntaxKind::Expression
-                | TwigSyntaxKind::Array
-                | TwigSyntaxKind::Object
-                | TwigSyntaxKind::ErrorNode
-        )
-    }
-
-    fn is_element_type(&self) -> bool {
-        matches!(
-            self,
-            TwigSyntaxKind::Root
-                | TwigSyntaxKind::Variable
-                | TwigSyntaxKind::Block
-                | TwigSyntaxKind::Expression
-                | TwigSyntaxKind::Array
-                | TwigSyntaxKind::Object
-                | TwigSyntaxKind::ErrorNode
-        )
+    fn role(&self) -> Self::Role {
+        match self {
+            Self::Whitespace => oak_core::UniversalTokenRole::Whitespace,
+            Self::Comment => oak_core::UniversalTokenRole::Comment,
+            _ => oak_core::UniversalTokenRole::None,
+        }
     }
 }
 
-impl TwigSyntaxKind {
-    /// 判断是否为值类型
-    pub fn is_value(self) -> bool {
-        matches!(
-            self,
-            TwigSyntaxKind::String
-                | TwigSyntaxKind::Number
-                | TwigSyntaxKind::Boolean
-                | TwigSyntaxKind::Null
-                | TwigSyntaxKind::Array
-                | TwigSyntaxKind::Object
-        )
-    }
+impl oak_core::ElementType for TwigSyntaxKind {
+    type Role = oak_core::UniversalElementRole;
 
-    /// 判断是否为字面量
-    pub fn is_literal(self) -> bool {
-        matches!(self, TwigSyntaxKind::String | TwigSyntaxKind::Number | TwigSyntaxKind::Boolean | TwigSyntaxKind::Null)
-    }
-
-    /// 判断是否为表达式
-    pub fn is_expression(self) -> bool {
-        matches!(
-            self,
-            TwigSyntaxKind::Expression | TwigSyntaxKind::Variable | TwigSyntaxKind::Filter | TwigSyntaxKind::Function
-        )
-    }
-
-    /// 判断是否为块级元素
-    pub fn is_block(self) -> bool {
-        matches!(self, TwigSyntaxKind::Block | TwigSyntaxKind::Tag)
+    fn role(&self) -> Self::Role {
+        match self {
+            Self::Root | Self::Document | Self::Template => oak_core::UniversalElementRole::Root,
+            Self::Error | Self::ErrorNode => oak_core::UniversalElementRole::Error,
+            _ => oak_core::UniversalElementRole::None,
+        }
     }
 }
 

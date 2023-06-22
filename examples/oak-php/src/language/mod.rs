@@ -1,5 +1,4 @@
-use crate::kind::PhpSyntaxKind;
-use oak_core::{Language, SyntaxKind};
+use oak_core::{Language, LanguageCategory};
 
 pub type TypedRoot = crate::ast::PhpRoot;
 
@@ -7,6 +6,10 @@ pub type TypedRoot = crate::ast::PhpRoot;
 pub struct PhpLanguage;
 
 impl Language for PhpLanguage {
-    type SyntaxKind = PhpSyntaxKind;
-    type TypedRoot = TypedRoot;
+    const NAME: &'static str = "php";
+    const CATEGORY: LanguageCategory = LanguageCategory::Programming;
+
+    type TokenType = crate::kind::PhpSyntaxKind;
+    type ElementType = crate::kind::PhpSyntaxKind;
+    type TypedRoot = crate::ast::PhpRoot;
 }

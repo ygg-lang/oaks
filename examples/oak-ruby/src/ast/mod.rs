@@ -1,65 +1,154 @@
+use core::range::Range;
+use serde::{Deserialize, Serialize};
+
 /// Ruby AST 根节点
 pub type RubyAst = ProgramNode;
 
 /// 程序节点
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct ProgramNode {
     pub statements: Vec<StatementNode>,
+    #[serde(with = "oak_core::serde_range")]
+    pub span: Range<usize>,
 }
 
 /// Ruby 语句节点
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub enum StatementNode {
     /// 表达式语句
     Expression(ExpressionNode),
     /// 方法定义
-    MethodDef { name: String, params: Vec<String>, body: Vec<StatementNode> },
+    MethodDef {
+        name: String,
+        params: Vec<String>,
+        body: Vec<StatementNode>,
+        #[serde(with = "oak_core::serde_range")]
+        span: Range<usize>,
+    },
     /// 类定义
-    ClassDef { name: String, superclass: Option<String>, body: Vec<StatementNode> },
+    ClassDef {
+        name: String,
+        superclass: Option<String>,
+        body: Vec<StatementNode>,
+        #[serde(with = "oak_core::serde_range")]
+        span: Range<usize>,
+    },
     /// 赋值语句
-    Assignment { target: String, value: ExpressionNode },
+    Assignment {
+        target: String,
+        value: ExpressionNode,
+        #[serde(with = "oak_core::serde_range")]
+        span: Range<usize>,
+    },
     /// 条件语句
-    If { condition: ExpressionNode, then_body: Vec<StatementNode>, else_body: Option<Vec<StatementNode>> },
+    If {
+        condition: ExpressionNode,
+        then_body: Vec<StatementNode>,
+        else_body: Option<Vec<StatementNode>>,
+        #[serde(with = "oak_core::serde_range")]
+        span: Range<usize>,
+    },
     /// 循环语句
-    While { condition: ExpressionNode, body: Vec<StatementNode> },
+    While {
+        condition: ExpressionNode,
+        body: Vec<StatementNode>,
+        #[serde(with = "oak_core::serde_range")]
+        span: Range<usize>,
+    },
     /// 返回语句
-    Return(Option<ExpressionNode>),
+    Return {
+        value: Option<ExpressionNode>,
+        #[serde(with = "oak_core::serde_range")]
+        span: Range<usize>,
+    },
 }
 
 /// Ruby 表达式节点
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub enum ExpressionNode {
     /// 标识符
-    Identifier(String),
+    Identifier {
+        name: String,
+        #[serde(with = "oak_core::serde_range")]
+        span: Range<usize>,
+    },
     /// 字面量
     Literal(LiteralNode),
     /// 方法调用
-    MethodCall { receiver: Option<Box<ExpressionNode>>, method: String, args: Vec<ExpressionNode> },
+    MethodCall {
+        receiver: Option<Box<ExpressionNode>>,
+        method: String,
+        args: Vec<ExpressionNode>,
+        #[serde(with = "oak_core::serde_range")]
+        span: Range<usize>,
+    },
     /// 二元操作
-    BinaryOp { left: Box<ExpressionNode>, operator: String, right: Box<ExpressionNode> },
+    BinaryOp {
+        left: Box<ExpressionNode>,
+        operator: String,
+        right: Box<ExpressionNode>,
+        #[serde(with = "oak_core::serde_range")]
+        span: Range<usize>,
+    },
     /// 一元操作
-    UnaryOp { operator: String, operand: Box<ExpressionNode> },
+    UnaryOp {
+        operator: String,
+        operand: Box<ExpressionNode>,
+        #[serde(with = "oak_core::serde_range")]
+        span: Range<usize>,
+    },
     /// 数组
-    Array(Vec<ExpressionNode>),
+    Array {
+        elements: Vec<ExpressionNode>,
+        #[serde(with = "oak_core::serde_range")]
+        span: Range<usize>,
+    },
     /// 哈希
-    Hash(Vec<(ExpressionNode, ExpressionNode)>),
+    Hash {
+        pairs: Vec<(ExpressionNode, ExpressionNode)>,
+        #[serde(with = "oak_core::serde_range")]
+        span: Range<usize>,
+    },
 }
 
 /// 字面量节点
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub enum LiteralNode {
     /// 整数
-    Integer(i64),
+    Integer {
+        value: i64,
+        #[serde(with = "oak_core::serde_range")]
+        span: Range<usize>,
+    },
     /// 浮点数
-    Float(f64),
+    Float {
+        value: f64,
+        #[serde(with = "oak_core::serde_range")]
+        span: Range<usize>,
+    },
     /// 字符串
-    String(String),
+    String {
+        value: String,
+        #[serde(with = "oak_core::serde_range")]
+        span: Range<usize>,
+    },
     /// 符号
-    Symbol(String),
+    Symbol {
+        value: String,
+        #[serde(with = "oak_core::serde_range")]
+        span: Range<usize>,
+    },
     /// 布尔值
-    Boolean(bool),
+    Boolean {
+        value: bool,
+        #[serde(with = "oak_core::serde_range")]
+        span: Range<usize>,
+    },
     /// nil
-    Nil,
+    Nil {
+        #[serde(with = "oak_core::serde_range")]
+        span: Range<usize>,
+    },
 }
 
 /// Ruby AST 访问者 trait

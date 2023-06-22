@@ -1,0 +1,607 @@
+{
+    "success": true,
+    "count": 100,
+    "tokens": [
+        {
+            "kind": "ImportKeyword",
+            "text": "#import",
+            "start": 134,
+            "end": 141
+        },
+        {
+            "kind": "Less",
+            "text": "<",
+            "start": 142,
+            "end": 143
+        },
+        {
+            "kind": "Identifier",
+            "text": "Foundation",
+            "start": 143,
+            "end": 153
+        },
+        {
+            "kind": "Slash",
+            "text": "/",
+            "start": 153,
+            "end": 154
+        },
+        {
+            "kind": "Identifier",
+            "text": "Foundation",
+            "start": 154,
+            "end": 164
+        },
+        {
+            "kind": "Dot",
+            "text": ".",
+            "start": 164,
+            "end": 165
+        },
+        {
+            "kind": "Identifier",
+            "text": "h",
+            "start": 165,
+            "end": 166
+        },
+        {
+            "kind": "Greater",
+            "text": ">",
+            "start": 166,
+            "end": 167
+        },
+        {
+            "kind": "ImportKeyword",
+            "text": "#import",
+            "start": 169,
+            "end": 176
+        },
+        {
+            "kind": "Less",
+            "text": "<",
+            "start": 177,
+            "end": 178
+        },
+        {
+            "kind": "Identifier",
+            "text": "UIKit",
+            "start": 178,
+            "end": 183
+        },
+        {
+            "kind": "Slash",
+            "text": "/",
+            "start": 183,
+            "end": 184
+        },
+        {
+            "kind": "Identifier",
+            "text": "UIKit",
+            "start": 184,
+            "end": 189
+        },
+        {
+            "kind": "Dot",
+            "text": ".",
+            "start": 189,
+            "end": 190
+        },
+        {
+            "kind": "Identifier",
+            "text": "h",
+            "start": 190,
+            "end": 191
+        },
+        {
+            "kind": "Greater",
+            "text": ">",
+            "start": 191,
+            "end": 192
+        },
+        {
+            "kind": "ImportKeyword",
+            "text": "#import",
+            "start": 194,
+            "end": 201
+        },
+        {
+            "kind": "Less",
+            "text": "<",
+            "start": 202,
+            "end": 203
+        },
+        {
+            "kind": "Identifier",
+            "text": "CoreData",
+            "start": 203,
+            "end": 211
+        },
+        {
+            "kind": "Slash",
+            "text": "/",
+            "start": 211,
+            "end": 212
+        },
+        {
+            "kind": "Identifier",
+            "text": "CoreData",
+            "start": 212,
+            "end": 220
+        },
+        {
+            "kind": "Dot",
+            "text": ".",
+            "start": 220,
+            "end": 221
+        },
+        {
+            "kind": "Identifier",
+            "text": "h",
+            "start": 221,
+            "end": 222
+        },
+        {
+            "kind": "Greater",
+            "text": ">",
+            "start": 222,
+            "end": 223
+        },
+        {
+            "kind": "ImportKeyword",
+            "text": "#import",
+            "start": 225,
+            "end": 232
+        },
+        {
+            "kind": "Less",
+            "text": "<",
+            "start": 233,
+            "end": 234
+        },
+        {
+            "kind": "Identifier",
+            "text": "QuartzCore",
+            "start": 234,
+            "end": 244
+        },
+        {
+            "kind": "Slash",
+            "text": "/",
+            "start": 244,
+            "end": 245
+        },
+        {
+            "kind": "Identifier",
+            "text": "QuartzCore",
+            "start": 245,
+            "end": 255
+        },
+        {
+            "kind": "Dot",
+            "text": ".",
+            "start": 255,
+            "end": 256
+        },
+        {
+            "kind": "Identifier",
+            "text": "h",
+            "start": 256,
+            "end": 257
+        },
+        {
+            "kind": "Greater",
+            "text": ">",
+            "start": 257,
+            "end": 258
+        },
+        {
+            "kind": "Identifier",
+            "text": "@class",
+            "start": 287,
+            "end": 293
+        },
+        {
+            "kind": "Identifier",
+            "text": "Person",
+            "start": 294,
+            "end": 300
+        },
+        {
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 300,
+            "end": 301
+        },
+        {
+            "kind": "Identifier",
+            "text": "@class",
+            "start": 303,
+            "end": 309
+        },
+        {
+            "kind": "Identifier",
+            "text": "Vehicle",
+            "start": 310,
+            "end": 317
+        },
+        {
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 317,
+            "end": 318
+        },
+        {
+            "kind": "ProtocolKeyword",
+            "text": "@protocol",
+            "start": 320,
+            "end": 329
+        },
+        {
+            "kind": "Identifier",
+            "text": "Drawable",
+            "start": 330,
+            "end": 338
+        },
+        {
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 338,
+            "end": 339
+        },
+        {
+            "kind": "ProtocolKeyword",
+            "text": "@protocol",
+            "start": 341,
+            "end": 350
+        },
+        {
+            "kind": "Identifier",
+            "text": "Serializable",
+            "start": 351,
+            "end": 363
+        },
+        {
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 363,
+            "end": 364
+        },
+        {
+            "kind": "ProtocolKeyword",
+            "text": "@protocol",
+            "start": 393,
+            "end": 402
+        },
+        {
+            "kind": "Identifier",
+            "text": "Drawable",
+            "start": 403,
+            "end": 411
+        },
+        {
+            "kind": "Less",
+            "text": "<",
+            "start": 412,
+            "end": 413
+        },
+        {
+            "kind": "Identifier",
+            "text": "NSObject",
+            "start": 413,
+            "end": 421
+        },
+        {
+            "kind": "Greater",
+            "text": ">",
+            "start": 421,
+            "end": 422
+        },
+        {
+            "kind": "Identifier",
+            "text": "@required",
+            "start": 424,
+            "end": 433
+        },
+        {
+            "kind": "Minus",
+            "text": "-",
+            "start": 435,
+            "end": 436
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 437,
+            "end": 438
+        },
+        {
+            "kind": "VoidKeyword",
+            "text": "void",
+            "start": 438,
+            "end": 442
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 442,
+            "end": 443
+        },
+        {
+            "kind": "Identifier",
+            "text": "draw",
+            "start": 443,
+            "end": 447
+        },
+        {
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 447,
+            "end": 448
+        },
+        {
+            "kind": "Minus",
+            "text": "-",
+            "start": 450,
+            "end": 451
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 452,
+            "end": 453
+        },
+        {
+            "kind": "VoidKeyword",
+            "text": "void",
+            "start": 453,
+            "end": 457
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 457,
+            "end": 458
+        },
+        {
+            "kind": "Identifier",
+            "text": "drawAtPoint",
+            "start": 458,
+            "end": 469
+        },
+        {
+            "kind": "Colon",
+            "text": ":",
+            "start": 469,
+            "end": 470
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 470,
+            "end": 471
+        },
+        {
+            "kind": "Identifier",
+            "text": "CGPoint",
+            "start": 471,
+            "end": 478
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 478,
+            "end": 479
+        },
+        {
+            "kind": "Identifier",
+            "text": "point",
+            "start": 479,
+            "end": 484
+        },
+        {
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 484,
+            "end": 485
+        },
+        {
+            "kind": "Identifier",
+            "text": "@optional",
+            "start": 489,
+            "end": 498
+        },
+        {
+            "kind": "Minus",
+            "text": "-",
+            "start": 500,
+            "end": 501
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 502,
+            "end": 503
+        },
+        {
+            "kind": "VoidKeyword",
+            "text": "void",
+            "start": 503,
+            "end": 507
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 507,
+            "end": 508
+        },
+        {
+            "kind": "Identifier",
+            "text": "drawWithColor",
+            "start": 508,
+            "end": 521
+        },
+        {
+            "kind": "Colon",
+            "text": ":",
+            "start": 521,
+            "end": 522
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 522,
+            "end": 523
+        },
+        {
+            "kind": "Identifier",
+            "text": "UIColor",
+            "start": 523,
+            "end": 530
+        },
+        {
+            "kind": "Star",
+            "text": "*",
+            "start": 531,
+            "end": 532
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 532,
+            "end": 533
+        },
+        {
+            "kind": "Identifier",
+            "text": "color",
+            "start": 533,
+            "end": 538
+        },
+        {
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 538,
+            "end": 539
+        },
+        {
+            "kind": "Minus",
+            "text": "-",
+            "start": 541,
+            "end": 542
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 543,
+            "end": 544
+        },
+        {
+            "kind": "Identifier",
+            "text": "CGSize",
+            "start": 544,
+            "end": 550
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 550,
+            "end": 551
+        },
+        {
+            "kind": "Identifier",
+            "text": "size",
+            "start": 551,
+            "end": 555
+        },
+        {
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 555,
+            "end": 556
+        },
+        {
+            "kind": "EndKeyword",
+            "text": "@end",
+            "start": 558,
+            "end": 562
+        },
+        {
+            "kind": "ProtocolKeyword",
+            "text": "@protocol",
+            "start": 566,
+            "end": 575
+        },
+        {
+            "kind": "Identifier",
+            "text": "Serializable",
+            "start": 576,
+            "end": 588
+        },
+        {
+            "kind": "Less",
+            "text": "<",
+            "start": 589,
+            "end": 590
+        },
+        {
+            "kind": "Identifier",
+            "text": "NSObject",
+            "start": 590,
+            "end": 598
+        },
+        {
+            "kind": "Greater",
+            "text": ">",
+            "start": 598,
+            "end": 599
+        },
+        {
+            "kind": "Minus",
+            "text": "-",
+            "start": 601,
+            "end": 602
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 603,
+            "end": 604
+        },
+        {
+            "kind": "Identifier",
+            "text": "NSData",
+            "start": 604,
+            "end": 610
+        },
+        {
+            "kind": "Star",
+            "text": "*",
+            "start": 611,
+            "end": 612
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 612,
+            "end": 613
+        },
+        {
+            "kind": "Identifier",
+            "text": "serialize",
+            "start": 613,
+            "end": 622
+        },
+        {
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 622,
+            "end": 623
+        },
+        {
+            "kind": "Minus",
+            "text": "-",
+            "start": 625,
+            "end": 626
+        }
+    ],
+    "errors": []
+}

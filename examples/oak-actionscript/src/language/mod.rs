@@ -1,11 +1,27 @@
-use crate::{ast::ActionScriptRoot, kind::ActionScriptSyntaxKind};
-use oak_core::Language;
+use crate::{ast::ActionScriptRoot, lexer::ActionScriptTokenType, parser::ActionScriptElementType};
+use oak_core::{Language, LanguageCategory};
+use serde::{Deserialize, Serialize};
 
-/// ActionScript 语言实现
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Default)]
-pub struct ActionScriptLanguage;
+/// ActionScript 语言配置和元数据。
+#[derive(Clone, Debug, PartialEq, Eq, Hash, Serialize, Deserialize)]
+pub struct ActionScriptLanguage {
+    /// Enable strict mode
+    pub strict_mode: bool,
+    /// Enable AS3 specific features
+    pub as3_features: bool,
+}
+
+impl Default for ActionScriptLanguage {
+    fn default() -> Self {
+        Self { strict_mode: true, as3_features: true }
+    }
+}
 
 impl Language for ActionScriptLanguage {
-    type SyntaxKind = ActionScriptSyntaxKind;
+    const NAME: &'static str = "actionscript";
+    const CATEGORY: LanguageCategory = LanguageCategory::Programming;
+
+    type TokenType = ActionScriptTokenType;
+    type ElementType = ActionScriptElementType;
     type TypedRoot = ActionScriptRoot;
 }

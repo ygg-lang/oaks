@@ -4,11 +4,14 @@
 #![doc(html_favicon_url = "https://raw.githubusercontent.com/ygg-lang/oaks/refs/heads/dev/documents/logo.svg")]
 
 pub mod ast;
-pub mod kind;
-pub mod language;
-pub mod lexer;
+mod kind;
+mod language;
+mod lexer;
+pub mod parser;
 
-pub use ast::DotRoot;
-pub use kind::DotSyntaxKind;
-pub use language::DotLanguage;
-pub use lexer::DotLexer;
+pub use crate::{
+    ast::DotRoot,
+    kind::{DotSyntaxKind, DotToken},
+    language::DotLanguage,
+    lexer::DotLexer,
+};

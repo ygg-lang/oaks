@@ -1,5 +1,4 @@
-use crate::{ast::NginxRoot, kind::NginxSyntaxKind};
-use oak_core::Language;
+use oak_core::{Language, LanguageCategory};
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct NginxLanguage {
@@ -16,8 +15,12 @@ impl Default for NginxLanguage {
 }
 
 impl Language for NginxLanguage {
-    type SyntaxKind = NginxSyntaxKind;
-    type TypedRoot = NginxRoot;
+    const NAME: &'static str = "nginx";
+    const CATEGORY: LanguageCategory = LanguageCategory::Programming;
+
+    type TokenType = crate::kind::NginxSyntaxKind;
+    type ElementType = crate::kind::NginxSyntaxKind;
+    type TypedRoot = crate::ast::NginxRoot;
 }
 
 impl NginxLanguage {

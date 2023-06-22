@@ -4,8 +4,13 @@
 #![doc(html_favicon_url = "https://raw.githubusercontent.com/ygg-lang/oaks/refs/heads/dev/documents/logo.svg")]
 
 pub mod ast;
-pub mod kind;
-pub mod language;
-pub mod lexer;
+mod language;
+mod lexer;
+pub mod parser;
 
-pub use crate::{kind::ClojureSyntaxKind, language::ClojureLanguage, lexer::ClojureLexer};
+pub use crate::{
+    ast::ClojureRoot,
+    language::ClojureLanguage,
+    lexer::{ClojureLexer, ClojureTokenType},
+    parser::{ClojureElementType, ClojureParser},
+};

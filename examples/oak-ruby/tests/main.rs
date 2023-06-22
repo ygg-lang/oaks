@@ -2,5 +2,5 @@ mod lexer;
 
 #[test]
 fn ready() {
-    println!("Ruby parser is ready!")
+    println!("Ruby files is ready!")
 }

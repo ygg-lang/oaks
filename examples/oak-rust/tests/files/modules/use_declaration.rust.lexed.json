@@ -1,0 +1,55 @@
+{
+    "success": true,
+    "count": 8,
+    "tokens": [
+        {
+            "kind": "Keyword(Use)",
+            "text": "use",
+            "start": 0,
+            "end": 3
+        },
+        {
+            "kind": "Identifier",
+            "text": "std",
+            "start": 4,
+            "end": 7
+        },
+        {
+            "kind": "PathSep",
+            "text": "::",
+            "start": 7,
+            "end": 9
+        },
+        {
+            "kind": "Identifier",
+            "text": "collections",
+            "start": 9,
+            "end": 20
+        },
+        {
+            "kind": "PathSep",
+            "text": "::",
+            "start": 20,
+            "end": 22
+        },
+        {
+            "kind": "Identifier",
+            "text": "HashMap",
+            "start": 22,
+            "end": 29
+        },
+        {
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 29,
+            "end": 30
+        },
+        {
+            "kind": "Eof",
+            "text": "",
+            "start": 30,
+            "end": 30
+        }
+    ],
+    "errors": []
+}

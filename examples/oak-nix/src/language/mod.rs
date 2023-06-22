@@ -1,5 +1,4 @@
-use crate::kind::NixSyntaxKind;
-use oak_core::Language;
+use oak_core::{Language, LanguageCategory};
 
 #[derive(Debug)]
 pub struct NixLanguage {
@@ -7,7 +6,11 @@ pub struct NixLanguage {
 }
 
 impl Language for NixLanguage {
-    type SyntaxKind = NixSyntaxKind;
+    const NAME: &'static str = "nix";
+    const CATEGORY: LanguageCategory = LanguageCategory::Programming;
+
+    type TokenType = crate::kind::NixSyntaxKind;
+    type ElementType = crate::kind::NixSyntaxKind;
     type TypedRoot = ();
 }
 

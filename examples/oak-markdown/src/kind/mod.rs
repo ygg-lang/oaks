@@ -1,7 +1,7 @@
-use oak_core::SyntaxKind;
+use oak_core::{TokenType, UniversalElementRole, UniversalTokenRole};
 use serde::{Deserialize, Serialize};
 
-#[derive(Copy, Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Copy, Clone, Debug, PartialEq, Eq, Serialize, Deserialize, Hash)]
 pub enum MarkdownSyntaxKind {
     // 基础文本
     Text,
@@ -91,31 +91,86 @@ pub enum MarkdownSyntaxKind {
     Error,
 
     // 文档结构
+    Root,
     Document,
     Paragraph,
 
     // EOF
-    Eof,
+    EndOfStream,
 }
 
-impl SyntaxKind for MarkdownSyntaxKind {
-    fn is_trivia(&self) -> bool {
-        matches!(self, Self::Whitespace | Self::Newline)
-    }
+impl TokenType for MarkdownSyntaxKind {
+    type Role = UniversalTokenRole;
+    const END_OF_STREAM: Self = Self::EndOfStream;
 
-    fn is_comment(&self) -> bool {
-        matches!(self, Self::HtmlComment)
-    }
+    fn role(&self) -> Self::Role {
+        use UniversalTokenRole::*;
+        match self {
+            Self::LeftBracket
+            | Self::RightBracket
+            | Self::LeftParen
+            | Self::RightParen
+            | Self::LeftAngle
+            | Self::RightAngle
+            | Self::Asterisk
+            | Self::Underscore
+            | Self::Backtick
+            | Self::Tilde
+            | Self::Hash
+            | Self::Pipe
+            | Self::Dash
+            | Self::Plus
+            | Self::Dot
+            | Self::Colon
+            | Self::Exclamation
+            | Self::CodeFence
+            | Self::BlockquoteMarker
+            | Self::ListMarker
+            | Self::TableSeparator => Punctuation,
 
-    fn is_whitespace(&self) -> bool {
-        matches!(self, Self::Whitespace | Self::Newline)
-    }
+            Self::Text | Self::HeadingText | Self::LinkText | Self::ImageAlt | Self::CodeLanguage => Name,
 
-    fn is_token_type(&self) -> bool {
-        !matches!(self, Self::Document | Self::Paragraph)
-    }
+            Self::LinkUrl | Self::LinkTitle | Self::ImageUrl | Self::ImageTitle => Literal,
 
-    fn is_element_type(&self) -> bool {
-        matches!(self, Self::Document | Self::Paragraph)
+            Self::Escape => Escape,
+            Self::Whitespace | Self::Newline => Whitespace,
+            Self::HtmlComment => Comment,
+            Self::Error => Error,
+            _ => None,
+        }
+    }
+}
+
+impl oak_core::ElementType for MarkdownSyntaxKind {
+    type Role = UniversalElementRole;
+
+    fn role(&self) -> Self::Role {
+        use UniversalElementRole::*;
+        match self {
+            Self::Root | Self::Document => Root,
+
+            // Hierarchy & Scoping
+            Self::UnorderedList | Self::OrderedList | Self::TaskList | Self::Blockquote | Self::Table | Self::TableRow => Container,
+
+            // Flow Control & Logic (Markup units)
+            Self::Paragraph | Self::ListItem | Self::TableCell | Self::HorizontalRule => Statement,
+
+            // Symbol Management
+            Self::Heading1 | Self::Heading2 | Self::Heading3 | Self::Heading4 | Self::Heading5 | Self::Heading6 => Definition,
+
+            Self::Link | Self::Image => Reference,
+
+            // Atomic Values
+            Self::Emphasis | Self::Strong | Self::Strikethrough | Self::InlineCode => Value,
+
+            // Metadata
+            Self::HtmlTag => Metadata,
+
+            // Embedded
+            Self::CodeBlock => Embedded,
+
+            Self::Error => Error,
+            _ => None,
+        }
     }
 }

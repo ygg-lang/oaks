@@ -8,7 +8,7 @@ fn test_elixir_lexer() {
     let language = Box::leak(Box::new(ElixirLanguage::default()));
     let lexer = ElixirLexer::new(language);
     let test_runner = LexerTester::new(here.join("tests/lexer")).with_extension("ex").with_timeout(Duration::from_secs(5));
-    match test_runner.run_tests::<ElixirLanguage, _>(lexer) {
+    match test_runner.run_tests::<ElixirLanguage, _>(&lexer) {
         Ok(()) => println!("Elixir lexer tests passed!"),
         Err(e) => panic!("Elixir lexer tests failed: {}", e),
     }
@@ -16,11 +16,12 @@ fn test_elixir_lexer() {
 
 #[test]
 fn test_peek_behavior() {
-    use oak_core::{SourceText, lexer::LexerState};
+    use oak_core::{LexerState, SourceText};
     use oak_elixir::ElixirLanguage;
 
     let source = SourceText::new("NESTED_CONSTANT");
-    let mut state = LexerState::<&SourceText, ElixirLanguage>::new(&source);
+    let mut cache = oak_core::parser::session::ParseSession::<ElixirLanguage>::default();
+    let mut state = LexerState::<SourceText, ElixirLanguage>::new_with_cache(&source, 0, &mut cache);
 
     println!("初始状态:");
     println!("位置: {}", state.get_position());
@@ -43,13 +44,13 @@ fn test_peek_behavior() {
 #[test]
 fn test_elixir_module_parsing() {
     use oak_core::{Lexer, SourceText};
-    use oak_elixir::{ElixirLanguage, ElixirLexer};
 
     let source = SourceText::new("defmodule MyModule do\n  def hello do\n    :world\n  end\nend");
     let language = Box::leak(Box::new(ElixirLanguage::default()));
     let lexer = ElixirLexer::new(language);
 
-    let result = lexer.lex(&source);
+    let mut cache = oak_core::parser::session::ParseSession::<ElixirLanguage>::default();
+    let result = lexer.lex(&source, &[], &mut cache);
 
     println!("测试 Elixir 模块解析:");
     println!("源代码: '{}'", (&source).get_text_from(0));

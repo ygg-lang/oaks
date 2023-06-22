@@ -8,7 +8,7 @@ fn test_vhdl_lexer() {
     let tests = here.join("tests/lexer");
     let lexer = VhdlLexer::new(&VhdlLanguage::default());
     let test_runner = LexerTester::new(tests).with_extension("vhd");
-    match test_runner.run_tests::<VhdlLanguage, _>(lexer) {
+    match test_runner.run_tests::<VhdlLanguage, _>(&lexer) {
         Ok(()) => println!("VHDL lexer tests passed!"),
         Err(e) => panic!("VHDL lexer tests failed: {}", e),
     }

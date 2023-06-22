@@ -1,7 +1,7 @@
-use oak_core::SyntaxKind;
+use oak_core::{ElementType, TokenType, UniversalElementRole, UniversalTokenRole};
 use serde::{Deserialize, Serialize};
 
-#[derive(Copy, Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Copy, Clone, Debug, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub enum NimSyntaxKind {
     // Whitespace and comments
     Whitespace,
@@ -126,28 +126,66 @@ pub enum NimSyntaxKind {
 
     // Special
     Root,
+    ProcDecl,
+    VarDecl,
+    LetDecl,
+    ConstDecl,
+    TypeDecl,
+    IfStmt,
+    WhileStmt,
+    ForStmt,
+    CaseStmt,
+    BlockStmt,
+    Expression,
+    Literal,
+    Comment,
+    ImportDecl,
+    ErrorNode,
     Error,
     Eof,
 }
 
-impl SyntaxKind for NimSyntaxKind {
-    fn is_trivia(&self) -> bool {
-        matches!(self, Self::Whitespace | Self::Newline | Self::CommentToken)
+impl NimSyntaxKind {
+    pub fn is_token(&self) -> bool {
+        !self.is_element()
+    }
+
+    pub fn is_element(&self) -> bool {
+        matches!(self, Self::Root | Self::ProcDecl | Self::TypeDecl | Self::VarDecl | Self::ConstDecl | Self::LetDecl | Self::ImportDecl | Self::Comment | Self::ErrorNode)
+    }
+}
+
+impl TokenType for NimSyntaxKind {
+    const END_OF_STREAM: Self = Self::Eof;
+    type Role = UniversalTokenRole;
+
+    fn role(&self) -> Self::Role {
+        match self {
+            Self::Whitespace | Self::Newline => UniversalTokenRole::Whitespace,
+            Self::CommentToken | Self::Comment => UniversalTokenRole::Comment,
+            Self::Eof => UniversalTokenRole::Eof,
+            _ => UniversalTokenRole::None,
+        }
     }
 
     fn is_comment(&self) -> bool {
-        matches!(self, Self::CommentToken)
+        matches!(self, Self::CommentToken | Self::Comment)
     }
 
     fn is_whitespace(&self) -> bool {
         matches!(self, Self::Whitespace | Self::Newline)
     }
+}
 
-    fn is_token_type(&self) -> bool {
-        !matches!(self, Self::Root)
-    }
+impl ElementType for NimSyntaxKind {
+    type Role = UniversalElementRole;
 
-    fn is_element_type(&self) -> bool {
-        matches!(self, Self::Root)
+    fn role(&self) -> Self::Role {
+        match self {
+            Self::ErrorNode | Self::Error => UniversalElementRole::Error,
+            Self::Root => UniversalElementRole::Root,
+            Self::ProcDecl | Self::TypeDecl | Self::VarDecl => UniversalElementRole::Detail,
+            _ => UniversalElementRole::None,
+        }
     }
 }

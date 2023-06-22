@@ -14,16 +14,25 @@ edition.workspace = true
 
 [dependencies]
 oak-core = { workspace = true }
+oak-lsp = { workspace = true }
+oak-hover = { workspace = true }
+oak-vfs = { workspace = true }
+futures = { workspace = true }
 oak-highlight = { workspace = true, optional = true }
 oak-pretty-print = { workspace = true, optional = true }
-serde = { version = "1.0", features = ["derive"] }
+serde = { workspace = true }
+oak-mcp = { workspace = true, optional = true }
+
+tokio = { workspace = true, optional = true }
+axum = { workspace = true, optional = true }
 
 [dev-dependencies]
 oak-core = { workspace = true, features = ["testing"] }
 
-
 [features]
 default = []
+mcp = ["dep:oak-mcp"]
+axum = ["mcp", "dep:tokio", "dep:axum", "oak-mcp/axum", "oak-lsp/axum"]
 
 
 [package.metadata.docs.rs]

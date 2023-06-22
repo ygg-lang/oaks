@@ -8,7 +8,7 @@ fn test_erlang_lexer() {
     let language = Box::leak(Box::new(ErlangLanguage::default()));
     let lexer = ErlangLexer::new(language);
     let test_runner = LexerTester::new(here.join("tests/lexer")).with_extension("erl").with_timeout(Duration::from_secs(5));
-    match test_runner.run_tests::<ErlangLanguage, _>(lexer) {
+    match test_runner.run_tests::<ErlangLanguage, _>(&lexer) {
         Ok(()) => println!("Erlang lexer tests passed!"),
         Err(e) => panic!("Erlang lexer tests failed: {}", e),
     }
@@ -16,10 +16,10 @@ fn test_erlang_lexer() {
 
 #[test]
 fn test_peek_behavior() {
-    use oak_core::{SourceText, lexer::LexerState};
+    use oak_core::{LexerState, SourceText};
 
     let source = SourceText::new("hello world");
-    let mut state = LexerState::<_, ErlangLanguage>::new(&source);
+    let mut state = LexerState::<SourceText, ErlangLanguage>::new(&source);
 
     println!("初始状态:");
     println!("位置: {}", state.get_position());
@@ -35,7 +35,7 @@ fn test_peek_behavior() {
 
 #[test]
 fn test_erlang_module_parsing() {
-    use oak_core::{SourceText, lexer::LexerState};
+    use oak_core::SourceText;
     use oak_erlang::{ErlangLanguage, ErlangLexer, ErlangSyntaxKind};
 
     let source = SourceText::new(
@@ -50,7 +50,8 @@ hello() ->
 
     let language = Box::leak(Box::new(ErlangLanguage::default()));
     let lexer = ErlangLexer::new(language);
-    let result = lexer.lex(&source);
+    let mut cache = oak_core::parser::session::ParseSession::<ErlangLanguage>::default();
+    let result = lexer.lex(&source, &[], &mut cache);
 
     // 验证包含模块声明的 token
     let tokens = result.result.expect("词法分析应该成功");
@@ -67,5 +68,5 @@ hello() ->
     // 验证包含预期的 token 类型
     let token_kinds: Vec<_> = tokens.iter().map(|t| t.kind).collect();
     assert!(token_kinds.contains(&ErlangSyntaxKind::Minus));
-    assert!(token_kinds.contains(&ErlangSyntaxKind::Identifier));
+    assert!(token_kinds.contains(&ErlangSyntaxKind::Atom));
 }

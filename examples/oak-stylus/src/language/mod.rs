@@ -1,5 +1,5 @@
-use crate::{ast::StylusRoot, kind::StylusSyntaxKind, lexer::StylusLexer};
-use oak_core::Language;
+use crate::lexer::StylusLexer;
+use oak_core::{Language, LanguageCategory};
 
 /// 日期时间格式
 #[derive(Debug, Clone, Copy)]
@@ -17,8 +17,12 @@ pub struct StylusLanguage {
 }
 
 impl Language for StylusLanguage {
-    type SyntaxKind = StylusSyntaxKind;
-    type TypedRoot = StylusRoot;
+    const NAME: &'static str = "stylus";
+    const CATEGORY: LanguageCategory = LanguageCategory::Programming;
+
+    type TokenType = crate::kind::StylusSyntaxKind;
+    type ElementType = crate::kind::StylusSyntaxKind;
+    type TypedRoot = ();
 }
 
 impl StylusLanguage {

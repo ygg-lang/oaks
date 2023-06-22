@@ -7,3 +7,19 @@ pub mod ast;
 pub mod kind;
 pub mod language;
 pub mod lexer;
+pub mod parser;
+
+mod builder;
+mod formatter;
+pub mod highlighter;
+pub mod lsp;
+#[cfg(feature = "mcp")]
+pub mod mcp;
+
+pub use crate::{builder::RubyBuilder, formatter::RubyFormatter, highlighter::RubyHighlighter, kind::RubySyntaxKind, language::RubyLanguage, lexer::RubyLexer, lsp::RubyLanguageService, parser::RubyParser};
+
+#[cfg(feature = "mcp")]
+pub use crate::mcp::serve_ruby_mcp;
+
+#[cfg(all(feature = "mcp", feature = "axum"))]
+pub use crate::mcp::serve_ruby_mcp_axum;

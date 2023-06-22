@@ -1,53 +1,51 @@
 use crate::{kind::TypstSyntaxKind, language::TypstLanguage};
 use oak_core::{
-    IncrementalCache, Lexer, LexerState, OakError,
-    lexer::{CommentLine, LexOutput, StringConfig, WhitespaceConfig},
-    source::Source,
+    Lexer, LexerCache, LexerState, OakError,
+    lexer::{CommentConfig, LexOutput, StringConfig, WhitespaceConfig},
+    source::{Source, TextEdit},
 };
 use std::sync::LazyLock;
 
-type State<S: Source> = LexerState<S, TypstLanguage>;
+type State<'s, S> = LexerState<'s, S, TypstLanguage>;
 
 static TYPST_WHITESPACE: LazyLock<WhitespaceConfig> = LazyLock::new(|| WhitespaceConfig { unicode_whitespace: true });
-static TYPST_COMMENT: LazyLock<CommentLine> = LazyLock::new(|| CommentLine { line_markers: &["//"] });
+static TYPST_COMMENT: LazyLock<CommentConfig> = LazyLock::new(|| CommentConfig { line_marker: "//", block_start: "/*", block_end: "*/", nested_blocks: true });
 static TYPST_STRING: LazyLock<StringConfig> = LazyLock::new(|| StringConfig { quotes: &['"'], escape: Some('\\') });
 
 #[derive(Clone)]
 pub struct TypstLexer<'config> {
-    config: &'config TypstLanguage,
+    _config: &'config TypstLanguage,
 }
 
 impl<'config> Lexer<TypstLanguage> for TypstLexer<'config> {
-    fn lex_incremental(
-        &self,
-        source: impl Source,
-        changed: usize,
-        cache: IncrementalCache<TypstLanguage>,
-    ) -> LexOutput<TypstLanguage> {
-        let mut state = LexerState::new_with_cache(source, changed, cache);
+    fn lex<'a, S: Source + ?Sized>(&self, source: &'a S, _edits: &[TextEdit], _cache: &'a mut impl LexerCache<TypstLanguage>) -> LexOutput<TypstLanguage> {
+        let mut state = State::new(source);
         let result = self.run(&mut state);
+        if result.is_ok() {
+            state.add_eof();
+        }
         state.finish(result)
     }
 }
 
 impl<'config> TypstLexer<'config> {
     pub fn new(config: &'config TypstLanguage) -> Self {
-        Self { config }
+        Self { _config: config }
     }
 
-    fn run<S: Source>(&self, state: &mut State<S>) -> Result<(), OakError> {
+    fn run<'s, S: Source + ?Sized>(&self, state: &mut State<'s, S>) -> Result<(), OakError> {
         while state.not_at_end() {
             let safe_point = state.get_position();
 
-            if self.skip_whitespace(state) {
+            if TYPST_WHITESPACE.scan(state, TypstSyntaxKind::Whitespace) {
                 continue;
             }
 
-            if self.skip_comment(state) {
+            if TYPST_COMMENT.scan(state, TypstSyntaxKind::LineComment, TypstSyntaxKind::BlockComment) {
                 continue;
             }
 
-            if self.lex_string_literal(state) {
+            if TYPST_STRING.scan(state, TypstSyntaxKind::StringLiteral) {
                 continue;
             }
 
@@ -67,73 +65,19 @@ impl<'config> TypstLexer<'config> {
                 continue;
             }
 
-            state.safe_check(safe_point);
+            state.advance_if_dead_lock(safe_point);
         }
 
-        // 添加 EOF token
-        let eof_pos = state.get_position();
-        state.add_token(TypstSyntaxKind::Eof, eof_pos, eof_pos);
         Ok(())
     }
 
-    fn skip_whitespace<S: Source>(&self, state: &mut State<S>) -> bool {
-        match TYPST_WHITESPACE.scan(state.rest(), state.get_position(), TypstSyntaxKind::Whitespace) {
-            Some(token) => {
-                state.advance_with(token);
-                return true;
-            }
-            None => {}
-        }
-        false
-    }
-
-    fn skip_comment<S: Source>(&self, state: &mut State<S>) -> bool {
-        // 行注释
-        if let Some(token) = TYPST_COMMENT.scan(state.rest(), state.get_position(), TypstSyntaxKind::LineComment) {
-            state.advance_with(token);
-            return true;
-        }
-
-        // 块注释
-        if state.rest().starts_with("/*") {
-            let start = state.get_position();
-            let mut pos = 2;
-            let text = state.rest();
-
-            while pos < text.len() {
-                if text[pos..].starts_with("*/") {
-                    pos += 2;
-                    break;
-                }
-                pos += 1;
-            }
-
-            state.advance(pos);
-            state.add_token(TypstSyntaxKind::BlockComment, start, state.get_position());
-            return true;
-        }
-
-        false
-    }
-
-    fn lex_string_literal<S: Source>(&self, state: &mut State<S>) -> bool {
-        match TYPST_STRING.scan(state.rest(), state.get_position(), TypstSyntaxKind::StringLiteral) {
-            Some(token) => {
-                state.advance_with(token);
-                return true;
-            }
-            None => {}
-        }
-        false
-    }
-
-    fn lex_number_literal<S: Source>(&self, state: &mut State<S>) -> bool {
+    fn lex_number_literal<'s, S: Source + ?Sized>(&self, state: &mut State<'s, S>) -> bool {
+        let start = state.get_position();
         let text = state.rest();
         if text.is_empty() || !text.chars().next().unwrap().is_ascii_digit() {
             return false;
         }
 
-        let start = state.get_position();
         let mut pos = 0;
         let chars: Vec<char> = text.chars().collect();
 
@@ -170,7 +114,8 @@ impl<'config> TypstLexer<'config> {
         false
     }
 
-    fn lex_identifier_or_keyword<S: Source>(&self, state: &mut State<S>) -> bool {
+    fn lex_identifier_or_keyword<'s, S: Source + ?Sized>(&self, state: &mut State<'s, S>) -> bool {
+        let start = state.get_position();
         let text = state.rest();
         if text.is_empty() {
             return false;
@@ -181,7 +126,6 @@ impl<'config> TypstLexer<'config> {
             return false;
         }
 
-        let start = state.get_position();
         let mut pos = 0;
         let chars: Vec<char> = text.chars().collect();
 
@@ -224,13 +168,13 @@ impl<'config> TypstLexer<'config> {
         }
     }
 
-    fn lex_operators<S: Source>(&self, state: &mut State<S>) -> bool {
+    fn lex_operators<'s, S: Source + ?Sized>(&self, state: &mut State<'s, S>) -> bool {
+        let start = state.get_position();
         let text = state.rest();
         if text.is_empty() {
             return false;
         }
 
-        let start = state.get_position();
         let chars: Vec<char> = text.chars().collect();
 
         let (kind, len) = match chars[0] {
@@ -295,13 +239,13 @@ impl<'config> TypstLexer<'config> {
         true
     }
 
-    fn lex_single_char_tokens<S: Source>(&self, state: &mut State<S>) -> bool {
+    fn lex_single_char_tokens<'s, S: Source + ?Sized>(&self, state: &mut State<'s, S>) -> bool {
+        let start = state.get_position();
         let text = state.rest();
         if text.is_empty() {
             return false;
         }
 
-        let start = state.get_position();
         let ch = text.chars().next().unwrap();
 
         let kind = match ch {

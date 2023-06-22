@@ -1,17 +1,17 @@
-# Oak Valkyrie Parser
+# Oak VHDL Parser
 
-[![Crates.io](https://img.shields.io/crates/v/oak-valkyrie.svg)](https://crates.io/crates/oak-valkyrie)
-[![Documentation](https://docs.rs/oak-valkyrie/badge.svg)](https://docs.rs/oak-valkyrie)
+[![Crates.io](https://img.shields.io/crates/v/oak-vhdl.svg)](https://crates.io/crates/oak-vhdl)
+[![Documentation](https://docs.rs/oak-vhdl/badge.svg)](https://docs.rs/oak-vhdl)
 
-High-performance incremental Valkyrie parser for the oak ecosystem with flexible configuration, optimized for modern Valkyrie syntax and features.
+High-performance incremental VHDL parser for the oak ecosystem with flexible configuration, optimized for hardware description and digital circuit design.
 
 ## 🎯 Overview
 
-Oak of valkyrie is a robust parser for Valkyrie, designed to handle complete Valkyrie syntax including modern features. Built on the solid foundation of oak-core, it provides both high-level convenience and detailed AST generation for Valkyrie language processing.
+Oak VHDL is a robust parser for VHDL, designed to handle complete VHDL syntax including modern features. Built on the solid foundation of oak-core, it provides both high-level convenience and detailed AST generation for hardware description and digital circuit design.
 
 ## ✨ Features
 
-- **Complete Valkyrie Syntax**: Supports all Valkyrie features including modern specifications
+- **Complete VHDL Syntax**: Supports all VHDL features including modern specifications
 - **Full AST Generation**: Generates comprehensive Abstract Syntax Trees
 - **Lexer Support**: Built-in tokenization with proper span information
 - **Error Recovery**: Graceful handling of syntax errors with detailed diagnostics
@@ -21,106 +21,144 @@ Oak of valkyrie is a robust parser for Valkyrie, designed to handle complete Val
 Basic example:
 
 ```rust
-use oak_valkyrie::ValkyrieParser;
+use oak_core::{Parser, source::SourceText, ParseSession};
+use oak_vhdl::{VhdlParser, VhdlLanguage};
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
-    let parser = ValkyrieParser::new();
-    let valkyrie_code = r#"
-module Main {
-    data List a = Nil | Cons a (List a)
+    let language = VhdlLanguage::default();
+    let parser = VhdlParser::new(&language);
+    let mut session = ParseSession::<VhdlLanguage>::default();
+    let source = SourceText::new(r#"
+library IEEE;
+use IEEE.STD_LOGIC_1164.ALL;
+use IEEE.NUMERIC_STD.ALL;
+
+entity counter is
+    Port ( clk : in STD_LOGIC;
+           reset : in STD_LOGIC;
+           count : out STD_LOGIC_VECTOR (3 downto 0));
+end counter;
+
+architecture Behavioral of counter is
+    signal internal_count : unsigned(3 downto 0) := (others => '0');
+begin
+    process(clk, reset)
+    begin
+        if reset = '1' then
+            internal_count <= (others => '0');
+        elsif rising_edge(clk) then
+            internal_count <= internal_count + 1;
+        end if;
+    end process;
     
-    length : List a -> Int
-    length Nil = 0
-    length (Cons _ xs) = 1 + length xs
+    count <= std_logic_vector(internal_count);
+end Behavioral;
+    "#);
     
-    main : IO ()
-    main = print (length (Cons 1 (Cons 2 (Cons 3 Nil))))
-}
-    "#;
-    
-    let module = parser.parse_module(valkyrie_code)?;
-    println!("Parsed Valkyrie module successfully.");
+    let result = parser.parse(&source, &[], &mut session);
+    println!("Parsed VHDL successfully.");
     Ok(())
 }
 ```
 
 ## 📋 Parsing Examples
 
-### Module Parsing
+### Entity Parsing
 ```rust
-use oak_valkyrie::{ValkyrieParser, ast::Module};
+use oak_core::{Parser, source::SourceText, ParseSession};
+use oak_vhdl::{VhdlParser, VhdlLanguage};
 
-let parser = ValkyrieParser::new();
-let valkyrie_code = r#"
-module Math {
-    data Nat = Zero | Succ Nat
-    
-    add : Nat -> Nat -> Nat
-    add Zero n = n
-    add (Succ m) n = Succ (add m n)
-    
-    multiply : Nat -> Nat -> Nat
-    multiply Zero _ = Zero
-    multiply (Succ m) n = add (multiply m n) n
-}
-"#;
+let language = VhdlLanguage::default();
+let parser = VhdlParser::new(&language);
+let mut session = ParseSession::<VhdlLanguage>::default();
+let source = SourceText::new(r#"
+library IEEE;
+use IEEE.STD_LOGIC_1164.ALL;
 
-let module = parser.parse_module(valkyrie_code)?;
-println!("Declarations: {}", module.declarations.len());
-println!("Functions: {}", module.functions.len());
+entity full_adder is
+    Port ( a : in STD_LOGIC;
+           b : in STD_LOGIC;
+           cin : in STD_LOGIC;
+           sum : out STD_LOGIC;
+           cout : out STD_LOGIC);
+end full_adder;
+"#);
+
+let result = parser.parse(&source, &[], &mut session);
+println!("Entity parsed successfully.");
 ```
 
-### Expression Parsing
+### Architecture Parsing
 ```rust
-use oak_valkyrie::{ValkyrieParser, ast::Expression};
+use oak_core::{Parser, source::SourceText, ParseSession};
+use oak_vhdl::{VhdlParser, VhdlLanguage};
 
-let parser = ValkyrieParser::new();
-let expression_code = r#"
-let x = 42 in
-let y = x * 2 in
-if y > 80 then "large" else "small"
-"#;
+let language = VhdlLanguage::default();
+let parser = VhdlParser::new(&language);
+let mut session = ParseSession::<VhdlLanguage>::default();
+let source = SourceText::new(r#"
+architecture Structural of full_adder is
+begin
+    sum <= a xor b xor cin;
+    cout <= (a and b) or (cin and (a xor b));
+end Structural;
+"#);
 
-let expression = parser.parse_expression(expression_code)?;
-println!("Expression type: {:?}", expression.kind);
+let result = parser.parse(&source, &[], &mut session);
+println!("Architecture parsed successfully.");
+```
+
+### Package Parsing
+```rust
+use oak_core::{Parser, source::SourceText, parser::session::ParseSession};
+use oak_vhdl::{VhdlParser, VhdlLanguage};
+
+let language = VhdlLanguage::default();
+let parser = VhdlParser::new(&language);
+let mut session = ParseSession::<VhdlLanguage>::default();
+let source = SourceText::new(r#"
+package my_types is
+    type state_type is (IDLE, READ, WRITE, DONE);
+    constant MAX_COUNT : integer := 255;
+end my_types;
+"#);
+
+let result = parser.parse(&source, &[], &mut session);
+println!("Package parsed successfully.");
 ```
 
 ## 🔧 Advanced Features
 
 ### Token-Level Parsing
 ```rust
-use oak_valkyrie::{ValkyrieParser, lexer::Token};
+use oak_core::{Parser, source::SourceText, parser::session::ParseSession};
+use oak_vhdl::{VhdlParser, VhdlLanguage};
 
-let parser = ValkyrieParser::new();
-let tokens = parser.tokenize("data List a = Nil | Cons a (List a)")?;
-for token in tokens {
-    println!("{:?}", token.kind);
-}
+let language = VhdlLanguage::default();
+let parser = VhdlParser::new(&language);
+let mut session = ParseSession::<VhdlLanguage>::default();
+let source = SourceText::new("entity Test is end Test;");
+let result = parser.parse(&source, &[], &mut session);
+// Token information is available in the parse result
 ```
 
 ### Error Handling
 ```rust
-use oak_valkyrie::ValkyrieParser;
+use oak_core::{Parser, source::SourceText, parser::session::ParseSession};
+use oak_vhdl::{VhdlParser, VhdlLanguage};
 
-let parser = ValkyrieParser::new();
-let invalid_valkyrie = r#"
-module Broken {
-    data List a = Nil | Cons a List a  -- Missing parentheses
-    
-    bad_function : Int -> String
-    bad_function x = x ++ "hello"  -- Type mismatch
-}
-"#;
+let language = VhdlLanguage::default();
+let parser = VhdlParser::new(&language);
+let mut session = ParseSession::<VhdlLanguage>::default();
+let source = SourceText::new(r#"
+entity Broken is
+    Port ( clk : in STD_LOGIC -- Missing semicolon
+end Broken;
+"#);
 
-match parser.parse_module(invalid_valkyrie) {
-    Ok(module) => println!("Parsed Valkyrie module successfully."),
-    Err(e) => {
-        println!("Parse error at line {} column {}: {}", 
-            e.line(), e.column(), e.message());
-        if let Some(context) = e.context() {
-            println!("Error context: {}", context);
-        }
-    }
+let result = parser.parse(&source, &[], &mut session);
+if let Err(e) = result.result {
+    println!("Parse error: {:?}", e);
 }
 ```
 
@@ -128,41 +166,42 @@ match parser.parse_module(invalid_valkyrie) {
 
 The parser generates a comprehensive AST with the following main structures:
 
-- **Module**: Root container for Valkyrie modules
-- **DataType**: Algebraic data type definitions
-- **Function**: Function definitions with type signatures
-- **Expression**: Expressions including let-bindings, conditionals, and function calls
-- **Pattern**: Pattern matching constructs
-- **Type**: Type annotations and type constructors
+- **VhdlSource**: Root container for VHDL source files
+- **DesignUnit**: VHDL design units (entity, architecture, package, etc.)
+- **Entity**: Entity declarations with ports and generics
+- **Architecture**: Architecture implementations with statements
+- **Process**: Process statements with sensitivity lists
+- **SignalDeclaration**: Signal and variable declarations
+- **ConcurrentStatement**: Concurrent statements (assignments, instances, etc.)
+- **SequentialStatement**: Sequential statements within processes
 
 ## 📊 Performance
 
-- **Streaming**: Parse large Valkyrie files without loading entirely into memory
+- **Streaming**: Parse large VHDL files without loading entirely into memory
 - **Incremental**: Re-parse only changed sections
 - **Memory Efficient**: Smart AST node allocation
 - **Fast Recovery**: Quick error recovery for better IDE integration
 
 ## 🔗 Integration
 
-Oak of valkyrie integrates seamlessly with:
+Oak VHDL integrates seamlessly with:
 
-- **Functional Programming**: Build functional programming languages and tools
-- **Type Systems**: Implement advanced type checking and inference
-- **IDE Support**: Language server protocol compatibility for Valkyrie
-- **Educational Tools**: Build programming language learning environments
-- **Research Tools**: Support academic research in programming languages
+- **Hardware Design**: Building hardware design tools
+- **Simulation**: Creating simulation and verification tools
+- **Synthesis**: Front-end for synthesis tools
+- **IDE Support**: Language server protocol compatibility for VHDL
+- **Educational Tools**: Building VHDL learning environments
 
 ## 📚 Examples
 
 Check out the [examples](examples/) directory for comprehensive examples:
 
-- Complete Valkyrie module parsing
-- Type inference and checking
-- Pattern matching and algebraic data types
+- Complete VHDL design unit parsing
+- Hardware description analysis
 - Integration with development workflows
 
 ## 🤝 Contributing
 
 Contributions are welcome! 
 
-Please feel free to submit pull requests at the [project repository](https://github.com/ygg-lang/oaks/tree/dev/examples/oak-valkyrie) or open [issues](https://github.com/ygg-lang/oaks/issues).
+Please feel free to submit pull requests at the [project repository](https://github.com/ygg-lang/oaks/tree/dev/examples/oak-vhdl) or open [issues](https://github.com/ygg-lang/oaks/issues).

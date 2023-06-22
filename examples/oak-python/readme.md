@@ -21,10 +21,12 @@ Oak Python is a robust parser for Python, designed to handle complete Python syn
 Basic example:
 
 ```rust
-use oak_python::{Parser, PythonLanguage, SourceText};
+use oak_core::{Parser, SourceText, parser::session::ParseSession};
+use oak_python::{PythonParser, PythonLanguage};
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
-    let parser = Parser::new();
+    let mut session = ParseSession::<PythonLanguage>::default();
+    let parser = PythonParser::new();
     let source = SourceText::new(r#"
 def greet(name):
     print(f"Hello, {name}!")
@@ -32,7 +34,7 @@ def greet(name):
 greet("World")
     "#);
     
-    let result = parser.parse(&source);
+    let result = parser.parse(&[], &mut session);
     println!("Parsed Python successfully.");
     Ok(())
 }
@@ -42,30 +44,34 @@ greet("World")
 
 ### Function Parsing
 ```rust
-use oak_python::{Parser, PythonLanguage, SourceText};
+use oak_core::{Parser, SourceText, parser::session::ParseSession};
+use oak_python::{PythonParser, PythonLanguage};
 
-let parser = Parser::new();
+let mut session = ParseSession::<PythonLanguage>::default();
+let parser = PythonParser::new();
 let source = SourceText::new(r#"
 def add(a, b):
     return a + b
 "#);
 
-let result = parser.parse(&source);
+let result = parser.parse(&[], &mut session);
 println!("Function parsed successfully.");
 ```
 
 ### Class Parsing
 ```rust
-use oak_python::{Parser, PythonLanguage, SourceText};
+use oak_core::{Parser, SourceText, parser::session::ParseSession};
+use oak_python::{PythonParser, PythonLanguage};
 
-let parser = Parser::new();
+let mut session = ParseSession::<PythonLanguage>::default();
+let parser = PythonParser::new();
 let source = SourceText::new(r#"
 class Person:
     def __init__(self, name):
         self.name = name
 "#);
 
-let result = parser.parse(&source);
+let result = parser.parse(&[], &mut session);
 println!("Class parsed successfully.");
 ```
 
@@ -73,26 +79,30 @@ println!("Class parsed successfully.");
 
 ### Token-Level Parsing
 ```rust
-use oak_python::{Parser, PythonLanguage, SourceText};
+use oak_core::{Parser, SourceText, parser::session::ParseSession};
+use oak_python::{PythonParser, PythonLanguage};
 
-let parser = Parser::new();
+let mut session = ParseSession::<PythonLanguage>::default();
+let parser = PythonParser::new();
 let source = SourceText::new("x = 42");
-let result = parser.parse(&source);
+let result = parser.parse(&[], &mut session);
 println!("Token parsing completed.");
 ```
 
 ### Error Handling
 ```rust
-use oak_python::{Parser, PythonLanguage, SourceText};
+use oak_core::{Parser, SourceText, parser::session::ParseSession};
+use oak_python::{PythonParser, PythonLanguage};
 
-let parser = Parser::new();
+let mut session = ParseSession::<PythonLanguage>::default();
+let parser = PythonParser::new();
 let source = SourceText::new(r#"
 def greet(name)
     print(f"Hello, {name}!")
 # Missing colon
 "#);
 
-let result = parser.parse(&source);
+let result = parser.parse(&[], &mut session);
 if let Some(errors) = result.result.err() {
     println!("Parse errors found: {:?}", errors);
 } else {

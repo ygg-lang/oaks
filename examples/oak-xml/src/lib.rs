@@ -3,9 +3,9 @@
 #![doc(html_logo_url = "https://raw.githubusercontent.com/ygg-lang/oaks/refs/heads/dev/documents/logo.svg")]
 #![doc(html_favicon_url = "https://raw.githubusercontent.com/ygg-lang/oaks/refs/heads/dev/documents/logo.svg")]
 
-mod language;
-
 mod kind;
+mod language;
 mod lexer;
+pub mod parser;
 
-pub use crate::{kind::XmlSyntaxKind, language::XmlLanguage, lexer::XmlLexer};
+pub use crate::{kind::XmlSyntaxKind, language::XmlLanguage, lexer::XmlLexer, parser::XmlParser};

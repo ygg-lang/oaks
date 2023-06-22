@@ -1,32 +1,53 @@
-/// 强类型 AST 根
-#[derive(Debug, PartialEq, Clone)]
+use core::range::Range;
+use serde::{Deserialize, Serialize};
+
+/// Identifier in Delphi
+#[derive(Debug, PartialEq, Eq, Clone, Serialize, Deserialize)]
+pub struct Identifier {
+    pub name: String,
+    #[serde(with = "oak_core::serde_range")]
+    pub span: Range<usize>,
+}
+
+/// Strongly-typed AST root for Delphi language
+#[derive(Debug, PartialEq, Clone, Serialize, Deserialize)]
 pub struct DelphiRoot {
     pub items: Vec<DelphiItem>,
 }
 
-/// Delphi 顶层项
-#[derive(Debug, PartialEq, Clone)]
+/// Top-level items in Delphi language
+#[derive(Debug, PartialEq, Clone, Serialize, Deserialize)]
 pub enum DelphiItem {
     Program(DelphiProgram),
     Unit(DelphiUnit),
     Statement(DelphiStatement),
 }
 
-#[derive(Debug, PartialEq, Clone)]
+/// Represents a Delphi program
+#[derive(Debug, PartialEq, Clone, Serialize, Deserialize)]
 pub struct DelphiProgram {
-    pub name: String,
+    pub name: Identifier,
     pub statements: Vec<DelphiStatement>,
+    #[serde(with = "oak_core::serde_range")]
+    pub span: Range<usize>,
 }
 
-#[derive(Debug, PartialEq, Clone)]
+/// Represents a Delphi unit
+#[derive(Debug, PartialEq, Clone, Serialize, Deserialize)]
 pub struct DelphiUnit {
-    pub name: String,
+    pub name: Identifier,
     pub interface_section: Vec<DelphiStatement>,
     pub implementation_section: Vec<DelphiStatement>,
+    #[serde(with = "oak_core::serde_range")]
+    pub span: Range<usize>,
 }
 
-#[derive(Debug, PartialEq, Clone)]
+/// Represents various statements in Delphi language
+#[derive(Debug, PartialEq, Clone, Serialize, Deserialize)]
 pub enum DelphiStatement {
-    // 简化的语句类型
-    Empty,
+    /// Empty statement
+    Empty {
+        #[serde(with = "oak_core::serde_range")]
+        span: Range<usize>,
+    },
 }

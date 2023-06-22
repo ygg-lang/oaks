@@ -1,43 +1,40 @@
-use crate::{kind::AdaSyntaxKind, language::AdaLanguage};
+pub mod token_type;
+
+pub use token_type::AdaTokenType;
+
+use crate::language::AdaLanguage;
 use oak_core::{
-    IncrementalCache, Lexer, LexerState, OakError,
-    lexer::{CommentLine, LexOutput, StringConfig, WhitespaceConfig},
+    Lexer, LexerCache, LexerState, OakError,
+    lexer::{LexOutput, WhitespaceConfig},
     source::Source,
 };
 use std::sync::LazyLock;
 
-type State<S> = LexerState<S, AdaLanguage>;
+type State<'a, S> = LexerState<'a, S, AdaLanguage>;
 
 static ADA_WHITESPACE: LazyLock<WhitespaceConfig> = LazyLock::new(|| WhitespaceConfig { unicode_whitespace: true });
-static ADA_COMMENT: LazyLock<CommentLine> = LazyLock::new(|| CommentLine { line_markers: &["--"] });
-static ADA_STRING: LazyLock<StringConfig> = LazyLock::new(|| StringConfig { quotes: &['"'], escape: None });
-static ADA_CHAR: LazyLock<StringConfig> = LazyLock::new(|| StringConfig { quotes: &['\''], escape: None });
 
 #[derive(Clone)]
-pub struct AdaLexer<'config> {
-    config: &'config AdaLanguage,
-}
+pub struct AdaLexer;
 
-impl<'config> Lexer<AdaLanguage> for AdaLexer<'config> {
-    fn lex_incremental(
-        &self,
-        source: impl Source,
-        changed: usize,
-        cache: IncrementalCache<AdaLanguage>,
-    ) -> LexOutput<AdaLanguage> {
-        let mut state = LexerState::new_with_cache(source, changed, cache);
+impl Lexer<AdaLanguage> for AdaLexer {
+    fn lex<'a, S: Source + ?Sized>(&self, source: &S, _edits: &[oak_core::source::TextEdit], cache: &'a mut impl LexerCache<AdaLanguage>) -> LexOutput<AdaLanguage> {
+        let mut state: State<'_, S> = LexerState::new(source);
         let result = self.run(&mut state);
-        state.finish(result)
+        if result.is_ok() {
+            state.add_eof();
+        }
+        state.finish_with_cache(result, cache)
     }
 }
 
-impl<'config> AdaLexer<'config> {
-    pub fn new(config: &'config AdaLanguage) -> Self {
-        Self { config }
+impl AdaLexer {
+    pub fn new(_config: &AdaLanguage) -> Self {
+        Self
     }
 
     /// 主要词法分析逻辑
-    fn run<S: Source>(&self, state: &mut State<S>) -> Result<(), OakError> {
+    fn run<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> Result<(), OakError> {
         while state.not_at_end() {
             let safe_point = state.get_position();
 
@@ -76,56 +73,49 @@ impl<'config> AdaLexer<'config> {
             // 如果没有匹配任何模式，跳过当前字符并生成 Error token
             if let Some(ch) = state.peek() {
                 state.advance(ch.len_utf8());
-                state.add_token(AdaSyntaxKind::Error, safe_point, state.get_position());
+                state.add_token(AdaTokenType::Error, safe_point, state.get_position());
             }
         }
 
-        // 添加 EOF kind
-        let eof_pos = state.get_position();
-        state.add_token(AdaSyntaxKind::Eof, eof_pos, eof_pos);
         Ok(())
     }
 
     /// 跳过空白字符
-    fn skip_whitespace<S: Source>(&self, state: &mut State<S>) -> bool {
-        match ADA_WHITESPACE.scan(state.rest(), state.get_position(), AdaSyntaxKind::Whitespace) {
-            Some(token) => {
-                state.advance_with(token);
-                return true;
-            }
-            None => {}
-        }
-        false
+    fn skip_whitespace<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
+        ADA_WHITESPACE.scan(state, AdaTokenType::Whitespace)
     }
 
-    fn skip_comment<S: Source>(&self, state: &mut State<S>) -> bool {
+    fn skip_comment<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start = state.get_position();
-        let rest = state.rest();
 
         // Ada line comment: -- ... until newline
-        if rest.starts_with("--") {
-            state.advance(2);
+        if state.consume_if_starts_with("--") {
             while let Some(ch) = state.peek() {
                 if ch == '\n' || ch == '\r' {
                     break;
                 }
                 state.advance(ch.len_utf8());
             }
-            state.add_token(AdaSyntaxKind::Comment, start, state.get_position());
+            state.add_token(AdaTokenType::Comment, start, state.get_position());
             return true;
         }
         false
     }
 
-    fn lex_string_literal<S: Source>(&self, state: &mut State<S>) -> bool {
+    fn lex_string_literal<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start = state.get_position();
 
         // Ada string: "..."
-        if state.current() == Some('"') {
+        if state.peek() == Some('"') {
             state.advance(1);
             while let Some(ch) = state.peek() {
                 if ch == '"' {
                     state.advance(1); // consume closing quote
+                    if state.peek() == Some('"') {
+                        // Double quotes in Ada strings are escaped quotes
+                        state.advance(1);
+                        continue;
+                    }
                     break;
                 }
                 state.advance(ch.len_utf8());
@@ -133,15 +123,15 @@ impl<'config> AdaLexer<'config> {
                     break;
                 }
             }
-            state.add_token(AdaSyntaxKind::StringLiteral, start, state.get_position());
+            state.add_token(AdaTokenType::StringLiteral, start, state.get_position());
             return true;
         }
         false
     }
 
-    fn lex_char_literal<S: Source>(&self, state: &mut State<S>) -> bool {
+    fn lex_char_literal<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start = state.get_position();
-        if state.current() != Some('\'') {
+        if state.peek() != Some('\'') {
             return false;
         }
 
@@ -157,21 +147,21 @@ impl<'config> AdaLexer<'config> {
 
         if state.peek() == Some('\'') {
             state.advance(1);
-            state.add_token(AdaSyntaxKind::CharacterLiteral, start, state.get_position());
+            state.add_token(AdaTokenType::CharacterLiteral, start, state.get_position());
             return true;
         }
         state.set_position(start);
         false
     }
 
-    fn lex_number_literal<S: Source>(&self, state: &mut State<S>) -> bool {
+    fn lex_number_literal<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start = state.get_position();
 
-        if let Some(ch) = state.current() {
+        if let Some(ch) = state.peek() {
             if ch.is_ascii_digit() {
                 // consume digits
                 state.advance(ch.len_utf8());
-                while let Some(ch) = state.current() {
+                while let Some(ch) = state.peek() {
                     if ch.is_ascii_digit() || ch == '_' {
                         state.advance(ch.len_utf8());
                     }
@@ -181,9 +171,9 @@ impl<'config> AdaLexer<'config> {
                 }
 
                 // check for decimal point
-                if state.current() == Some('.') {
+                if state.peek() == Some('.') {
                     state.advance(1);
-                    while let Some(ch) = state.current() {
+                    while let Some(ch) = state.peek() {
                         if ch.is_ascii_digit() || ch == '_' {
                             state.advance(ch.len_utf8());
                         }
@@ -194,15 +184,15 @@ impl<'config> AdaLexer<'config> {
                 }
 
                 // check for exponent
-                if let Some(ch) = state.current() {
+                if let Some(ch) = state.peek() {
                     if ch == 'e' || ch == 'E' {
                         state.advance(1);
-                        if let Some(sign) = state.current() {
+                        if let Some(sign) = state.peek() {
                             if sign == '+' || sign == '-' {
                                 state.advance(1);
                             }
                         }
-                        while let Some(ch) = state.current() {
+                        while let Some(ch) = state.peek() {
                             if ch.is_ascii_digit() {
                                 state.advance(ch.len_utf8());
                             }
@@ -213,21 +203,21 @@ impl<'config> AdaLexer<'config> {
                     }
                 }
 
-                state.add_token(AdaSyntaxKind::NumberLiteral, start, state.get_position());
+                state.add_token(AdaTokenType::NumberLiteral, start, state.get_position());
                 return true;
             }
         }
         false
     }
 
-    fn lex_identifier_or_keyword<S: Source>(&self, state: &mut State<S>) -> bool {
+    fn lex_identifier_or_keyword<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start = state.get_position();
 
-        if let Some(ch) = state.current() {
+        if let Some(ch) = state.peek() {
             if ch.is_ascii_alphabetic() || ch == '_' {
                 state.advance(ch.len_utf8());
 
-                while let Some(ch) = state.current() {
+                while let Some(ch) = state.peek() {
                     if ch.is_ascii_alphanumeric() || ch == '_' {
                         state.advance(ch.len_utf8());
                     }
@@ -236,143 +226,149 @@ impl<'config> AdaLexer<'config> {
                     }
                 }
 
-                let text = state.get_text_in((start..state.get_position()).into());
+                let end = state.get_position();
+                let text = state.get_text_in((start..end).into());
                 let kind = match text.to_lowercase().as_str() {
-                    "abort" => AdaSyntaxKind::AbortKeyword,
-                    "abs" => AdaSyntaxKind::AbsKeyword,
-                    "abstract" => AdaSyntaxKind::AbstractKeyword,
-                    "accept" => AdaSyntaxKind::AcceptKeyword,
-                    "access" => AdaSyntaxKind::AccessKeyword,
-                    "aliased" => AdaSyntaxKind::AliasedKeyword,
-                    "all" => AdaSyntaxKind::AllKeyword,
-                    "and" => AdaSyntaxKind::AndKeyword,
-                    "array" => AdaSyntaxKind::ArrayKeyword,
-                    "at" => AdaSyntaxKind::AtKeyword,
-                    "begin" => AdaSyntaxKind::BeginKeyword,
-                    "body" => AdaSyntaxKind::BodyKeyword,
-                    "case" => AdaSyntaxKind::CaseKeyword,
-                    "constant" => AdaSyntaxKind::ConstantKeyword,
-                    "declare" => AdaSyntaxKind::DeclareKeyword,
-                    "delay" => AdaSyntaxKind::DelayKeyword,
-                    "delta" => AdaSyntaxKind::DeltaKeyword,
-                    "digits" => AdaSyntaxKind::DigitsKeyword,
-                    "do" => AdaSyntaxKind::DoKeyword,
-                    "else" => AdaSyntaxKind::ElseKeyword,
-                    "elsif" => AdaSyntaxKind::ElsifKeyword,
-                    "end" => AdaSyntaxKind::EndKeyword,
-                    "entry" => AdaSyntaxKind::EntryKeyword,
-                    "exception" => AdaSyntaxKind::ExceptionKeyword,
-                    "exit" => AdaSyntaxKind::ExitKeyword,
-                    "for" => AdaSyntaxKind::ForKeyword,
-                    "function" => AdaSyntaxKind::FunctionKeyword,
-                    "generic" => AdaSyntaxKind::GenericKeyword,
-                    "goto" => AdaSyntaxKind::GotoKeyword,
-                    "if" => AdaSyntaxKind::IfKeyword,
-                    "in" => AdaSyntaxKind::InKeyword,
-                    "interface" => AdaSyntaxKind::InterfaceKeyword,
-                    "is" => AdaSyntaxKind::IsKeyword,
-                    "limited" => AdaSyntaxKind::LimitedKeyword,
-                    "loop" => AdaSyntaxKind::LoopKeyword,
-                    "mod" => AdaSyntaxKind::ModKeyword,
-                    "new" => AdaSyntaxKind::NewKeyword,
-                    "not" => AdaSyntaxKind::NotKeyword,
-                    "null" => AdaSyntaxKind::NullKeyword,
-                    "of" => AdaSyntaxKind::OfKeyword,
-                    "or" => AdaSyntaxKind::OrKeyword,
-                    "others" => AdaSyntaxKind::OthersKeyword,
-                    "out" => AdaSyntaxKind::OutKeyword,
-                    "overriding" => AdaSyntaxKind::OverridingKeyword,
-                    "package" => AdaSyntaxKind::PackageKeyword,
-                    "pragma" => AdaSyntaxKind::PragmaKeyword,
-                    "private" => AdaSyntaxKind::PrivateKeyword,
-                    "procedure" => AdaSyntaxKind::ProcedureKeyword,
-                    "protected" => AdaSyntaxKind::ProtectedKeyword,
-                    "raise" => AdaSyntaxKind::RaiseKeyword,
-                    "range" => AdaSyntaxKind::RangeKeyword,
-                    "record" => AdaSyntaxKind::RecordKeyword,
-                    "rem" => AdaSyntaxKind::RemKeyword,
-                    "renames" => AdaSyntaxKind::RenamesKeyword,
-                    "requeue" => AdaSyntaxKind::RequeueKeyword,
-                    "return" => AdaSyntaxKind::ReturnKeyword,
-                    "reverse" => AdaSyntaxKind::ReverseKeyword,
-                    "select" => AdaSyntaxKind::SelectKeyword,
-                    "separate" => AdaSyntaxKind::SeparateKeyword,
-                    "subtype" => AdaSyntaxKind::SubtypeKeyword,
-                    "synchronized" => AdaSyntaxKind::SynchronizedKeyword,
-                    "tagged" => AdaSyntaxKind::TaggedKeyword,
-                    "task" => AdaSyntaxKind::TaskKeyword,
-                    "terminate" => AdaSyntaxKind::TerminateKeyword,
-                    "then" => AdaSyntaxKind::ThenKeyword,
-                    "type" => AdaSyntaxKind::TypeKeyword,
-                    "until" => AdaSyntaxKind::UntilKeyword,
-                    "use" => AdaSyntaxKind::UseKeyword,
-                    "when" => AdaSyntaxKind::WhenKeyword,
-                    "while" => AdaSyntaxKind::WhileKeyword,
-                    "with" => AdaSyntaxKind::WithKeyword,
-                    "xor" => AdaSyntaxKind::XorKeyword,
-                    _ => AdaSyntaxKind::Identifier,
+                    "abort" => AdaTokenType::Abort,
+                    "abs" => AdaTokenType::Abs,
+                    "abstract" => AdaTokenType::Abstract,
+                    "accept" => AdaTokenType::Accept,
+                    "access" => AdaTokenType::Access,
+                    "aliased" => AdaTokenType::Aliased,
+                    "all" => AdaTokenType::All,
+                    "and" => AdaTokenType::And,
+                    "array" => AdaTokenType::Array,
+                    "at" => AdaTokenType::At,
+                    "begin" => AdaTokenType::Begin,
+                    "body" => AdaTokenType::Body,
+                    "case" => AdaTokenType::Case,
+                    "constant" => AdaTokenType::Constant,
+                    "declare" => AdaTokenType::Declare,
+                    "delay" => AdaTokenType::Delay,
+                    "delta" => AdaTokenType::Delta,
+                    "digits" => AdaTokenType::Digits,
+                    "do" => AdaTokenType::Do,
+                    "else" => AdaTokenType::Else,
+                    "elsif" => AdaTokenType::Elsif,
+                    "end" => AdaTokenType::End,
+                    "entry" => AdaTokenType::Entry,
+                    "exception" => AdaTokenType::Exception,
+                    "exit" => AdaTokenType::Exit,
+                    "for" => AdaTokenType::For,
+                    "function" => AdaTokenType::Function,
+                    "generic" => AdaTokenType::Generic,
+                    "goto" => AdaTokenType::Goto,
+                    "if" => AdaTokenType::If,
+                    "in" => AdaTokenType::In,
+                    "interface" => AdaTokenType::Interface,
+                    "is" => AdaTokenType::Is,
+                    "limited" => AdaTokenType::Limited,
+                    "loop" => AdaTokenType::Loop,
+                    "mod" => AdaTokenType::Mod,
+                    "new" => AdaTokenType::New,
+                    "not" => AdaTokenType::Not,
+                    "null" => AdaTokenType::Null,
+                    "of" => AdaTokenType::Of,
+                    "or" => AdaTokenType::Or,
+                    "others" => AdaTokenType::Others,
+                    "out" => AdaTokenType::Out,
+                    "overriding" => AdaTokenType::Overriding,
+                    "package" => AdaTokenType::Package,
+                    "pragma" => AdaTokenType::Pragma,
+                    "private" => AdaTokenType::Private,
+                    "procedure" => AdaTokenType::Procedure,
+                    "protected" => AdaTokenType::Protected,
+                    "raise" => AdaTokenType::Raise,
+                    "range" => AdaTokenType::Range,
+                    "record" => AdaTokenType::Record,
+                    "rem" => AdaTokenType::Rem,
+                    "renames" => AdaTokenType::Renames,
+                    "requeue" => AdaTokenType::Requeue,
+                    "return" => AdaTokenType::Return,
+                    "reverse" => AdaTokenType::Reverse,
+                    "select" => AdaTokenType::Select,
+                    "separate" => AdaTokenType::Separate,
+                    "some" => AdaTokenType::Some,
+                    "subtype" => AdaTokenType::Subtype,
+                    "synchronized" => AdaTokenType::Synchronized,
+                    "tagged" => AdaTokenType::Tagged,
+                    "task" => AdaTokenType::Task,
+                    "terminate" => AdaTokenType::Terminate,
+                    "then" => AdaTokenType::Then,
+                    "type" => AdaTokenType::Type,
+                    "until" => AdaTokenType::Until,
+                    "use" => AdaTokenType::Use,
+                    "when" => AdaTokenType::When,
+                    "while" => AdaTokenType::While,
+                    "with" => AdaTokenType::With,
+                    "xor" => AdaTokenType::Xor,
+                    _ => AdaTokenType::Identifier,
                 };
 
-                state.add_token(kind, start, state.get_position());
+                state.add_token(kind, start, end);
                 return true;
             }
         }
         false
     }
 
-    fn lex_operators<S: Source>(&self, state: &mut State<S>) -> bool {
+    fn lex_operators<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start = state.get_position();
-        let rest = state.rest();
 
         // Multi-character operators first
-        if rest.starts_with("**") {
-            state.advance(2);
-            state.add_token(AdaSyntaxKind::DoubleStar, start, state.get_position());
+        if state.consume_if_starts_with("**") {
+            state.add_token(AdaTokenType::StarStar, start, state.get_position());
             return true;
         }
-        if rest.starts_with("=>") {
-            state.advance(2);
-            state.add_token(AdaSyntaxKind::Arrow, start, state.get_position());
+        if state.consume_if_starts_with("=>") {
+            state.add_token(AdaTokenType::Arrow, start, state.get_position());
             return true;
         }
-        if rest.starts_with("<=") {
-            state.advance(2);
-            state.add_token(AdaSyntaxKind::LessEqual, start, state.get_position());
+        if state.consume_if_starts_with("<=") {
+            state.add_token(AdaTokenType::Le, start, state.get_position());
             return true;
         }
-        if rest.starts_with(">=") {
-            state.advance(2);
-            state.add_token(AdaSyntaxKind::GreaterEqual, start, state.get_position());
+        if state.consume_if_starts_with(">=") {
+            state.add_token(AdaTokenType::Ge, start, state.get_position());
             return true;
         }
-        if rest.starts_with(":=") {
-            state.advance(2);
-            state.add_token(AdaSyntaxKind::ColonEqual, start, state.get_position());
+        if state.consume_if_starts_with(":=") {
+            state.add_token(AdaTokenType::ColonEq, start, state.get_position());
             return true;
         }
-        if rest.starts_with("..") {
-            state.advance(2);
-            state.add_token(AdaSyntaxKind::DotDot, start, state.get_position());
+        if state.consume_if_starts_with("..") {
+            state.add_token(AdaTokenType::DotDot, start, state.get_position());
             return true;
         }
-        if rest.starts_with("/=") {
-            state.advance(2);
-            state.add_token(AdaSyntaxKind::NotEqual, start, state.get_position());
+        if state.consume_if_starts_with("/=") {
+            state.add_token(AdaTokenType::Ne, start, state.get_position());
+            return true;
+        }
+        if state.consume_if_starts_with("<<") {
+            state.add_token(AdaTokenType::LtLt, start, state.get_position());
+            return true;
+        }
+        if state.consume_if_starts_with(">>") {
+            state.add_token(AdaTokenType::GtGt, start, state.get_position());
+            return true;
+        }
+        if state.consume_if_starts_with("<>") {
+            state.add_token(AdaTokenType::Box, start, state.get_position());
             return true;
         }
 
         // Single-character operators
-        if let Some(ch) = state.current() {
+        if let Some(ch) = state.peek() {
             let kind = match ch {
-                '+' => AdaSyntaxKind::Plus,
-                '-' => AdaSyntaxKind::Minus,
-                '*' => AdaSyntaxKind::Star,
-                '/' => AdaSyntaxKind::Slash,
-                '=' => AdaSyntaxKind::Equal,
-                '<' => AdaSyntaxKind::Less,
-                '>' => AdaSyntaxKind::Greater,
-                '&' => AdaSyntaxKind::Ampersand,
-                '|' => AdaSyntaxKind::Pipe,
+                '+' => AdaTokenType::Plus,
+                '-' => AdaTokenType::Minus,
+                '*' => AdaTokenType::Star,
+                '/' => AdaTokenType::Slash,
+                '=' => AdaTokenType::Eq,
+                '<' => AdaTokenType::Lt,
+                '>' => AdaTokenType::Gt,
+                '&' => AdaTokenType::Ampersand,
+                '|' => AdaTokenType::Pipe,
                 _ => return false,
             };
             state.advance(1);
@@ -382,21 +378,22 @@ impl<'config> AdaLexer<'config> {
         false
     }
 
-    fn lex_single_char_tokens<S: Source>(&self, state: &mut State<S>) -> bool {
+    fn lex_single_char_tokens<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start = state.get_position();
 
-        if let Some(ch) = state.current() {
+        if let Some(ch) = state.peek() {
             let kind = match ch {
-                '(' => AdaSyntaxKind::LeftParen,
-                ')' => AdaSyntaxKind::RightParen,
-                '[' => AdaSyntaxKind::LeftBracket,
-                ']' => AdaSyntaxKind::RightBracket,
-                '{' => AdaSyntaxKind::LeftBrace,
-                '}' => AdaSyntaxKind::RightBrace,
-                ',' => AdaSyntaxKind::Comma,
-                ';' => AdaSyntaxKind::Semicolon,
-                ':' => AdaSyntaxKind::Colon,
-                '.' => AdaSyntaxKind::Dot,
+                '(' => AdaTokenType::LeftParen,
+                ')' => AdaTokenType::RightParen,
+                '[' => AdaTokenType::LeftBracket,
+                ']' => AdaTokenType::RightBracket,
+                '{' => AdaTokenType::LeftBrace,
+                '}' => AdaTokenType::RightBrace,
+                ',' => AdaTokenType::Comma,
+                ';' => AdaTokenType::Semicolon,
+                ':' => AdaTokenType::Colon,
+                '.' => AdaTokenType::Dot,
+                '\'' => AdaTokenType::Apostrophe,
                 _ => return false,
             };
             state.advance(1);

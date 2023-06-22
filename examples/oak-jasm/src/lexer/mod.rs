@@ -1,42 +1,34 @@
 use crate::{language::JasmLanguage, syntax::JasmSyntaxKind};
 use oak_core::{
-    IncrementalCache, Lexer, LexerState, OakError,
-    lexer::{CommentLine, LexOutput, StringConfig, WhitespaceConfig},
+    Lexer, LexerCache, LexerState, OakError,
+    lexer::{CommentConfig, LexOutput, StringConfig},
     source::Source,
 };
 use std::sync::LazyLock;
 
-type State<S: Source> = LexerState<S, JasmLanguage>;
+type State<'a, S> = LexerState<'a, S, JasmLanguage>;
 
-static JASM_WHITESPACE: LazyLock<WhitespaceConfig> = LazyLock::new(|| WhitespaceConfig { unicode_whitespace: true });
-static JASM_COMMENT: LazyLock<CommentLine> = LazyLock::new(|| CommentLine { line_markers: &["//"] });
+static JASM_COMMENT: LazyLock<CommentConfig> = LazyLock::new(|| CommentConfig { line_marker: "//", block_start: "", block_end: "", nested_blocks: false });
 static JASM_STRING: LazyLock<StringConfig> = LazyLock::new(|| StringConfig { quotes: &['"'], escape: Some('\\') });
 
-#[derive(Clone)]
-pub struct JasmLexer<'config> {
-    config: &'config JasmLanguage,
-}
+#[derive(Clone, Default)]
+pub struct JasmLexer {}
 
-impl<'config> Lexer<JasmLanguage> for JasmLexer<'config> {
-    fn lex_incremental(
-        &self,
-        source: impl Source,
-        changed: usize,
-        cache: IncrementalCache<JasmLanguage>,
-    ) -> LexOutput<JasmLanguage> {
-        let mut state = LexerState::new_with_cache(source, changed, cache);
+impl Lexer<JasmLanguage> for JasmLexer {
+    fn lex<'a, S: Source + ?Sized>(&self, source: &'a S, _edits: &[oak_core::TextEdit], _cache: &'a mut impl LexerCache<JasmLanguage>) -> LexOutput<JasmLanguage> {
+        let mut state = State::new(source);
         let result = self.run(&mut state);
         state.finish(result)
     }
 }
 
-impl<'config> JasmLexer<'config> {
-    pub fn new(config: &'config JasmLanguage) -> Self {
-        Self { config }
+impl JasmLexer {
+    pub fn new(_config: &JasmLanguage) -> Self {
+        Self {}
     }
 
     /// 主要的词法分析循环
-    fn run<S: Source>(&self, state: &mut State<S>) -> Result<(), OakError> {
+    fn run<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> Result<(), OakError> {
         while state.not_at_end() {
             let safe_point = state.get_position();
 
@@ -68,17 +60,16 @@ impl<'config> JasmLexer<'config> {
                 continue;
             }
 
-            state.safe_check(safe_point);
+            state.advance_if_dead_lock(safe_point);
         }
 
         // 添加 EOF token
-        let eof_pos = state.get_position();
-        state.add_token(JasmSyntaxKind::Eof, eof_pos, eof_pos);
+        state.add_eof();
         Ok(())
     }
 
     /// 跳过空白字符（不包括换行符）
-    fn skip_whitespace<S: Source>(&self, state: &mut State<S>) -> bool {
+    fn skip_whitespace<S: Source + ?Sized>(&self, state: &mut State<'_, S>) -> bool {
         let start = state.get_position();
 
         while let Some(ch) = state.peek() {
@@ -94,11 +85,12 @@ impl<'config> JasmLexer<'config> {
             state.add_token(JasmSyntaxKind::Whitespace, start, state.get_position());
             return true;
         }
+
         false
     }
 
     /// 处理换行
-    fn lex_newline<S: Source>(&self, state: &mut State<S>) -> bool {
+    fn lex_newline<S: Source + ?Sized>(&self, state: &mut State<'_, S>) -> bool {
         let start = state.get_position();
 
         if state.current() == Some('\n') {
@@ -110,67 +102,19 @@ impl<'config> JasmLexer<'config> {
     }
 
     /// 跳过注释
-    fn skip_comment<S: Source>(&self, state: &mut State<S>) -> bool {
-        let start = state.get_position();
-        let rest = state.rest();
-
-        if rest.starts_with("//") {
-            // 跳过注释标记
-            state.advance(2);
-
-            // 读取到行尾
-            while let Some(ch) = state.peek() {
-                if ch != '\n' {
-                    state.advance(ch.len_utf8());
-                }
-                else {
-                    break;
-                }
-            }
-
-            state.add_token(JasmSyntaxKind::Comment, start, state.get_position());
-            return true;
-        }
-        false
+    fn skip_comment<S: Source + ?Sized>(&self, state: &mut State<'_, S>) -> bool {
+        JASM_COMMENT.scan(state, JasmSyntaxKind::Comment, JasmSyntaxKind::Comment)
     }
 
     /// 处理字符串字面量
-    fn lex_string_literal<S: Source>(&self, state: &mut State<S>) -> bool {
-        let start = state.get_position();
-
-        if state.current() == Some('"') {
-            // 跳过开始引号
-            state.advance(1);
-
-            while let Some(ch) = state.peek() {
-                if ch != '"' {
-                    if ch == '\\' {
-                        state.advance(1); // 转义字符
-                        if let Some(_) = state.peek() {
-                            state.advance(1); // 被转义的字符
-                        }
-                    }
-                    else {
-                        state.advance(ch.len_utf8());
-                    }
-                }
-                else {
-                    // 找到结束引号
-                    state.advance(1);
-                    break;
-                }
-            }
-
-            state.add_token(JasmSyntaxKind::StringLiteral, start, state.get_position());
-            return true;
-        }
-        false
+    fn lex_string_literal<S: Source + ?Sized>(&self, state: &mut State<'_, S>) -> bool {
+        JASM_STRING.scan(state, JasmSyntaxKind::StringLiteral)
     }
 
     /// 处理数字字面量
-    fn lex_number_literal<S: Source>(&self, state: &mut State<S>) -> bool {
+    fn lex_number_literal<S: Source + ?Sized>(&self, state: &mut State<'_, S>) -> bool {
         let start = state.get_position();
-        let first = match state.current() {
+        let first = match state.peek() {
             Some(c) => c,
             None => return false,
         };
@@ -192,13 +136,13 @@ impl<'config> JasmLexer<'config> {
             }
         }
 
-        state.advance(1);
+        state.advance(first.len_utf8());
         let mut has_dot = false;
         let mut has_exp = false;
 
         while let Some(ch) = state.peek() {
             if ch.is_ascii_digit() {
-                state.advance(1);
+                state.advance(ch.len_utf8());
             }
             else if ch == '.' && !has_dot && !has_exp {
                 has_dot = true;
@@ -219,25 +163,14 @@ impl<'config> JasmLexer<'config> {
             }
         }
 
-        // 检查是否为有效数字
-        let end = state.get_position();
-        let text = state.get_text_in((start..end).into());
-
-        // 简单验证：不能只是符号或只是点
-        if text == "-" || text == "+" || text == "." {
-            // 回退
-            state.set_position(start);
-            return false;
-        }
-
         state.add_token(JasmSyntaxKind::Number, start, state.get_position());
         true
     }
 
     /// 处理标识符或关键字
-    fn lex_identifier_or_keyword<S: Source>(&self, state: &mut State<S>) -> bool {
+    fn lex_identifier_or_keyword<S: Source + ?Sized>(&self, state: &mut State<'_, S>) -> bool {
         let start = state.get_position();
-        let ch = match state.current() {
+        let ch = match state.peek() {
             Some(c) => c,
             None => return false,
         };
@@ -247,10 +180,10 @@ impl<'config> JasmLexer<'config> {
             return false;
         }
 
-        state.advance(1);
-        while let Some(c) = state.current() {
+        state.advance(ch.len_utf8());
+        while let Some(c) = state.peek() {
             if c.is_ascii_alphanumeric() || c == '_' {
-                state.advance(1);
+                state.advance(c.len_utf8());
             }
             else {
                 break;
@@ -261,7 +194,7 @@ impl<'config> JasmLexer<'config> {
         let text = state.get_text_in((start..end).into());
 
         // 检查是否为关键字或指令
-        let kind = self.classify_identifier(text);
+        let kind = self.classify_identifier(&text);
         state.add_token(kind, start, state.get_position());
         true
     }
@@ -337,7 +270,7 @@ impl<'config> JasmLexer<'config> {
     }
 
     /// 处理标点符号
-    fn lex_punctuation<S: Source>(&self, state: &mut State<S>) -> bool {
+    fn lex_punctuation<S: Source + ?Sized>(&self, state: &mut State<'_, S>) -> bool {
         let start = state.get_position();
 
         if let Some(ch) = state.current() {

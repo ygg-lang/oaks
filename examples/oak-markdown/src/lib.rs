@@ -5,7 +5,17 @@
 
 pub mod language;
 
+pub mod ast;
+pub mod builder;
+pub mod highlighter;
 pub mod kind;
 pub mod lexer;
+pub mod lsp;
+#[cfg(feature = "mcp")]
+pub mod mcp;
+pub mod parser;
 
-pub use crate::{kind::MarkdownSyntaxKind, language::MarkdownLanguage, lexer::MarkdownLexer};
+pub use crate::{ast::MarkdownRoot, builder::MarkdownBuilder, highlighter::MarkdownHighlighter, kind::MarkdownSyntaxKind, language::MarkdownLanguage, lexer::MarkdownLexer, parser::MarkdownParser};
+
+#[cfg(feature = "mcp")]
+pub use crate::mcp::serve_markdown_mcp;

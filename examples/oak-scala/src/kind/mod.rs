@@ -1,3 +1,4 @@
+use oak_core::{ElementType, TokenType, UniversalElementRole, UniversalTokenRole};
 use serde::{Deserialize, Serialize};
 
 /// 统一Scala 语法种类（包含节点与词法单元）
@@ -123,4 +124,30 @@ pub enum ScalaSyntaxKind {
     LineComment,
     BlockComment,
     DocComment,
+}
+
+impl TokenType for ScalaSyntaxKind {
+    const END_OF_STREAM: Self = Self::Eof;
+    type Role = UniversalTokenRole;
+
+    fn role(&self) -> Self::Role {
+        match self {
+            Self::Whitespace | Self::Newline => UniversalTokenRole::Whitespace,
+            Self::LineComment | Self::BlockComment | Self::DocComment => UniversalTokenRole::Comment,
+            Self::Eof => UniversalTokenRole::Eof,
+            _ => UniversalTokenRole::None,
+        }
+    }
+}
+
+impl ElementType for ScalaSyntaxKind {
+    type Role = UniversalElementRole;
+
+    fn role(&self) -> Self::Role {
+        match self {
+            Self::SourceFile => UniversalElementRole::Root,
+            Self::Error | Self::ErrorNode => UniversalElementRole::Error,
+            _ => UniversalElementRole::None,
+        }
+    }
 }

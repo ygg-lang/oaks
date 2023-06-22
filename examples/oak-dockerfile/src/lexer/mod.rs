@@ -1,39 +1,37 @@
 use crate::{kind::DockerfileSyntaxKind, language::DockerfileLanguage};
 use oak_core::{
-    IncrementalCache, Lexer, LexerState, OakError,
+    Lexer, LexerCache, LexerState, OakError, TextEdit,
     lexer::{LexOutput, WhitespaceConfig},
     source::Source,
 };
 use std::sync::LazyLock;
 
-type State<S: Source> = LexerState<S, DockerfileLanguage>;
+type State<'a, S> = LexerState<'a, S, DockerfileLanguage>;
 
 static DOCKERFILE_WHITESPACE: LazyLock<WhitespaceConfig> = LazyLock::new(|| WhitespaceConfig { unicode_whitespace: true });
 
 #[derive(Clone)]
 pub struct DockerfileLexer<'config> {
-    config: &'config DockerfileLanguage,
+    _config: &'config DockerfileLanguage,
 }
 
 impl<'config> Lexer<DockerfileLanguage> for DockerfileLexer<'config> {
-    fn lex_incremental(
-        &self,
-        source: impl Source,
-        changed: usize,
-        cache: IncrementalCache<DockerfileLanguage>,
-    ) -> LexOutput<DockerfileLanguage> {
-        let mut state = LexerState::new_with_cache(source, changed, cache);
+    fn lex<'a, S: Source + ?Sized>(&self, text: &'a S, _edits: &[TextEdit], cache: &'a mut impl LexerCache<DockerfileLanguage>) -> LexOutput<DockerfileLanguage> {
+        let mut state = State::new(text);
         let result = self.run(&mut state);
-        state.finish(result)
+        if result.is_ok() {
+            state.add_eof();
+        }
+        state.finish_with_cache(result, cache)
     }
 }
 
 impl<'config> DockerfileLexer<'config> {
     pub fn new(config: &'config DockerfileLanguage) -> Self {
-        Self { config }
+        Self { _config: config }
     }
 
-    fn run<S: Source>(&self, state: &mut State<S>) -> Result<(), OakError> {
+    fn run<'s, S: Source + ?Sized>(&self, state: &mut State<'s, S>) -> Result<(), OakError> {
         while state.not_at_end() {
             let safe_point = state.get_position();
 
@@ -73,28 +71,19 @@ impl<'config> DockerfileLexer<'config> {
                 continue;
             }
 
-            state.safe_check(safe_point);
+            state.advance_if_dead_lock(safe_point);
         }
 
-        // 添加 EOF token
-        let eof_pos = state.get_position();
-        state.add_token(DockerfileSyntaxKind::Eof, eof_pos, eof_pos);
         Ok(())
     }
 
     /// 跳过空白字符
-    fn skip_whitespace<S: Source>(&self, state: &mut State<S>) -> bool {
-        match DOCKERFILE_WHITESPACE.scan(state.rest(), state.get_position(), DockerfileSyntaxKind::Whitespace) {
-            Some(token) => {
-                state.advance_with(token);
-                true
-            }
-            None => false,
-        }
+    fn skip_whitespace<'s, S: Source + ?Sized>(&self, state: &mut State<'s, S>) -> bool {
+        DOCKERFILE_WHITESPACE.scan(state, DockerfileSyntaxKind::Whitespace)
     }
 
     /// 处理换行符
-    fn lex_newline<S: Source>(&self, state: &mut State<S>) -> bool {
+    fn lex_newline<'s, S: Source + ?Sized>(&self, state: &mut State<'s, S>) -> bool {
         let start = state.get_position();
         if let Some(ch) = state.peek() {
             if ch == '\n' {
@@ -115,7 +104,7 @@ impl<'config> DockerfileLexer<'config> {
     }
 
     /// 处理注释
-    fn lex_comment<S: Source>(&self, state: &mut State<S>) -> bool {
+    fn lex_comment<'s, S: Source + ?Sized>(&self, state: &mut State<'s, S>) -> bool {
         let start = state.get_position();
         if state.peek() == Some('#') {
             state.advance(1);
@@ -132,7 +121,7 @@ impl<'config> DockerfileLexer<'config> {
     }
 
     /// 处理标识符或指令
-    fn lex_identifier_or_instruction<S: Source>(&self, state: &mut State<S>) -> bool {
+    fn lex_identifier_or_instruction<'s, S: Source + ?Sized>(&self, state: &mut State<'s, S>) -> bool {
         let start = state.get_position();
         if let Some(ch) = state.peek() {
             if ch.is_ascii_alphabetic() || ch == '_' {
@@ -187,7 +176,7 @@ impl<'config> DockerfileLexer<'config> {
     }
 
     /// 处理数字
-    fn lex_number<S: Source>(&self, state: &mut State<S>) -> bool {
+    fn lex_number<'s, S: Source + ?Sized>(&self, state: &mut State<'s, S>) -> bool {
         let start = state.get_position();
         if let Some(ch) = state.peek() {
             if ch.is_ascii_digit() {
@@ -210,7 +199,7 @@ impl<'config> DockerfileLexer<'config> {
     }
 
     /// 处理字符串
-    fn lex_string<S: Source>(&self, state: &mut State<S>) -> bool {
+    fn lex_string<'s, S: Source + ?Sized>(&self, state: &mut State<'s, S>) -> bool {
         let start = state.get_position();
         if let Some(quote) = state.peek() {
             if quote == '"' || quote == '\'' {
@@ -240,7 +229,7 @@ impl<'config> DockerfileLexer<'config> {
     }
 
     /// 处理路径
-    fn lex_path<S: Source>(&self, state: &mut State<S>) -> bool {
+    fn lex_path<'s, S: Source + ?Sized>(&self, state: &mut State<'s, S>) -> bool {
         let start = state.get_position();
         if let Some(ch) = state.peek() {
             if ch == '/' || ch == '.' {
@@ -262,8 +251,8 @@ impl<'config> DockerfileLexer<'config> {
         false
     }
 
-    /// 处理操作符和分隔符
-    fn lex_operators_and_delimiters<S: Source>(&self, state: &mut State<S>) -> bool {
+    /// 处理运算符和分隔符
+    fn lex_operators_and_delimiters<'s, S: Source + ?Sized>(&self, state: &mut State<'s, S>) -> bool {
         let start = state.get_position();
         if let Some(ch) = state.peek() {
             let kind = match ch {
@@ -289,7 +278,7 @@ impl<'config> DockerfileLexer<'config> {
     }
 
     /// 处理其他字符
-    fn lex_other<S: Source>(&self, state: &mut State<S>) -> bool {
+    fn lex_other<'s, S: Source + ?Sized>(&self, state: &mut State<'s, S>) -> bool {
         let start = state.get_position();
         if let Some(ch) = state.peek() {
             state.advance(ch.len_utf8());

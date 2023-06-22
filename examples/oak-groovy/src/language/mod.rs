@@ -1,5 +1,4 @@
-use crate::kind::GroovySyntaxKind;
-use oak_core::Language;
+use oak_core::{Language, LanguageCategory};
 
 /// Groovy 语言配置
 #[derive(Debug, Clone)]
@@ -12,7 +11,11 @@ impl Default for GroovyLanguage {
 }
 
 impl Language for GroovyLanguage {
-    type SyntaxKind = GroovySyntaxKind;
+    const NAME: &'static str = "groovy";
+    const CATEGORY: LanguageCategory = LanguageCategory::Programming;
+
+    type TokenType = crate::kind::GroovySyntaxKind;
+    type ElementType = crate::kind::GroovySyntaxKind;
     type TypedRoot = ();
 }
 

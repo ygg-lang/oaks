@@ -4,13 +4,16 @@
 #![doc(html_favicon_url = "https://raw.githubusercontent.com/ygg-lang/oaks/refs/heads/dev/documents/logo.svg")]
 
 pub mod ast;
+mod builder;
+pub mod highlighter;
 pub mod kind;
-pub mod language;
+mod language;
 pub mod lexer;
+pub mod lsp;
+pub mod parser;
 pub mod syntax;
 
-pub use crate::{
-    language::JasmLanguage,
-    lexer::JasmLexer,
-    syntax::{JasmSyntaxKind, JasmToken},
-};
+#[cfg(feature = "mcp")]
+pub mod mcp;
+
+pub use crate::{ast::JasmRoot, builder::JasmBuilder, highlighter::JasmHighlighter, language::JasmLanguage, lexer::JasmLexer, lsp::JasmLanguageService, parser::JasmParser};

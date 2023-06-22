@@ -8,7 +8,7 @@ fn test_handlebars_lexer() {
     let language = Box::leak(Box::new(HandlebarsLanguage::default()));
     let lexer = HandlebarsLexer::new(language);
     let test_runner = LexerTester::new(here.join("tests/lexer")).with_extension("hbs").with_timeout(Duration::from_secs(5));
-    match test_runner.run_tests::<HandlebarsLanguage, _>(lexer) {
+    match test_runner.run_tests::<HandlebarsLanguage, _>(&lexer) {
         Ok(()) => println!("Handlebars lexer tests passed!"),
         Err(e) => panic!("Handlebars lexer tests failed: {}", e),
     }

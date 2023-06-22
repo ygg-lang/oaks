@@ -4,11 +4,14 @@
 #![doc(html_favicon_url = "https://raw.githubusercontent.com/ygg-lang/oaks/refs/heads/dev/documents/logo.svg")]
 
 pub mod ast;
-pub mod kind;
-pub mod language;
-pub mod lexer;
+mod kind;
+mod language;
+mod lexer;
+pub mod parser;
 
-pub use ast::ErlangRoot;
-pub use kind::ErlangSyntaxKind;
-pub use language::ErlangLanguage;
-pub use lexer::ErlangLexer;
+pub use crate::{
+    ast::ErlangRoot,
+    kind::{ErlangSyntaxKind, ErlangToken},
+    language::ErlangLanguage,
+    lexer::ErlangLexer,
+};

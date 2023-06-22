@@ -1,0 +1,40 @@
+#![feature(new_range_api)]
+#![doc = include_str!("readme.md")]
+#![doc(html_logo_url = "https://raw.githubusercontent.com/ygg-lang/oaks/refs/heads/dev/documents/logo.svg")]
+#![doc(html_favicon_url = "https://raw.githubusercontent.com/ygg-lang/oaks/refs/heads/dev/documents/logo.svg")]
+#![allow(missing_docs)]
+
+pub mod ast;
+mod builder;
+mod kind;
+mod language;
+mod lexer;
+mod parser;
+
+#[cfg(feature = "oak-pretty-print")]
+mod formatter;
+#[cfg(feature = "oak-highlight")]
+mod highlighter;
+
+pub mod lsp;
+#[cfg(feature = "mcp")]
+pub mod mcp;
+
+#[cfg(feature = "oak-pretty-print")]
+pub use crate::formatter::RegexFormatter;
+#[cfg(feature = "oak-highlight")]
+pub use crate::highlighter::RegexHighlighter;
+pub use crate::{
+    ast::RegexRoot,
+    kind::{RegexSyntaxKind, RegexToken},
+    language::RegexLanguage,
+    lexer::RegexLexer,
+    lsp::RegexLanguageService,
+    parser::RegexParser,
+};
+
+#[cfg(feature = "mcp")]
+pub use crate::mcp::serve_regex_mcp;
+
+#[cfg(all(feature = "mcp", feature = "axum"))]
+pub use crate::mcp::serve_regex_mcp_axum;

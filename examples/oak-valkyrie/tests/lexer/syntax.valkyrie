@@ -1,3 +1,4 @@
+# comment
 class A {
 
 }
@@ -11,5 +12,8 @@ trait B {
 
 union C {
 
+}
+
+micro F { 
 
 }

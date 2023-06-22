@@ -1,10 +1,16 @@
-use crate::kind::HandlebarsSyntaxKind;
-use oak_core::{Arc, GreenNode, Language};
+use oak_core::{Language, LanguageCategory};
 
-#[derive(Default)]
+#[derive(Debug, Default, Clone, Copy, PartialEq, Eq, Hash)]
 pub struct HandlebarsLanguage {}
 
+unsafe impl Send for HandlebarsLanguage {}
+unsafe impl Sync for HandlebarsLanguage {}
+
 impl Language for HandlebarsLanguage {
-    type SyntaxKind = HandlebarsSyntaxKind;
-    type TypedRoot = Arc<GreenNode<HandlebarsSyntaxKind>>;
+    const NAME: &'static str = "handlebars";
+    const CATEGORY: LanguageCategory = LanguageCategory::Markup;
+
+    type TokenType = crate::kind::HandlebarsSyntaxKind;
+    type ElementType = crate::kind::HandlebarsSyntaxKind;
+    type TypedRoot = crate::ast::HandlebarsRoot;
 }

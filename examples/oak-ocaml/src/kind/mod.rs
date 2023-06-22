@@ -1,4 +1,4 @@
-use oak_core::{SyntaxKind, Token};
+use oak_core::{ElementType, Token, TokenType, UniversalElementRole, UniversalTokenRole};
 use serde::{Deserialize, Serialize};
 
 pub type OCamlToken = Token<OCamlSyntaxKind>;
@@ -110,14 +110,31 @@ pub enum OCamlSyntaxKind {
 
     // 特殊
 
+    // Element kinds
+    Root,
+    ModuleDef,
+    LetBinding,
+    MatchExpr,
+    FunctionDef,
+    TypeDefinition,
+    Expression,
+
     // 错误和结束
     Error,
     Eof,
 }
 
-impl SyntaxKind for OCamlSyntaxKind {
-    fn is_trivia(&self) -> bool {
-        matches!(self, Self::Whitespace | Self::Newline | Self::Comment)
+impl TokenType for OCamlSyntaxKind {
+    const END_OF_STREAM: Self = Self::Eof;
+    type Role = UniversalTokenRole;
+
+    fn role(&self) -> Self::Role {
+        match self {
+            Self::Whitespace | Self::Newline => UniversalTokenRole::Whitespace,
+            Self::Comment => UniversalTokenRole::Comment,
+            Self::Eof => UniversalTokenRole::Eof,
+            _ => UniversalTokenRole::None,
+        }
     }
 
     fn is_comment(&self) -> bool {
@@ -127,12 +144,17 @@ impl SyntaxKind for OCamlSyntaxKind {
     fn is_whitespace(&self) -> bool {
         matches!(self, Self::Whitespace | Self::Newline)
     }
+}
 
-    fn is_token_type(&self) -> bool {
-        !matches!(self, Self::Error | Self::Eof)
-    }
+impl ElementType for OCamlSyntaxKind {
+    type Role = UniversalElementRole;
 
-    fn is_element_type(&self) -> bool {
-        matches!(self, Self::Error | Self::Eof)
+    fn role(&self) -> Self::Role {
+        match self {
+            Self::Error => UniversalElementRole::Error,
+            Self::Root => UniversalElementRole::Root,
+            Self::ModuleDef | Self::LetBinding | Self::TypeDefinition => UniversalElementRole::Detail,
+            _ => UniversalElementRole::None,
+        }
     }
 }

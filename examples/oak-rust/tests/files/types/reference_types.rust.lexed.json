@@ -1,0 +1,169 @@
+{
+    "success": true,
+    "count": 27,
+    "tokens": [
+        {
+            "kind": "Keyword(Fn)",
+            "text": "fn",
+            "start": 0,
+            "end": 2
+        },
+        {
+            "kind": "Identifier",
+            "text": "main",
+            "start": 3,
+            "end": 7
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 7,
+            "end": 8
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 8,
+            "end": 9
+        },
+        {
+            "kind": "LeftBrace",
+            "text": "{",
+            "start": 10,
+            "end": 11
+        },
+        {
+            "kind": "Keyword(Let)",
+            "text": "let",
+            "start": 17,
+            "end": 20
+        },
+        {
+            "kind": "Identifier",
+            "text": "a",
+            "start": 21,
+            "end": 22
+        },
+        {
+            "kind": "Colon",
+            "text": ":",
+            "start": 22,
+            "end": 23
+        },
+        {
+            "kind": "Ampersand",
+            "text": "&",
+            "start": 24,
+            "end": 25
+        },
+        {
+            "kind": "Identifier",
+            "text": "i32",
+            "start": 25,
+            "end": 28
+        },
+        {
+            "kind": "Eq",
+            "text": "=",
+            "start": 29,
+            "end": 30
+        },
+        {
+            "kind": "Ampersand",
+            "text": "&",
+            "start": 31,
+            "end": 32
+        },
+        {
+            "kind": "IntegerLiteral",
+            "text": "42",
+            "start": 32,
+            "end": 34
+        },
+        {
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 34,
+            "end": 35
+        },
+        {
+            "kind": "Keyword(Let)",
+            "text": "let",
+            "start": 41,
+            "end": 44
+        },
+        {
+            "kind": "Identifier",
+            "text": "b",
+            "start": 45,
+            "end": 46
+        },
+        {
+            "kind": "Colon",
+            "text": ":",
+            "start": 46,
+            "end": 47
+        },
+        {
+            "kind": "Ampersand",
+            "text": "&",
+            "start": 48,
+            "end": 49
+        },
+        {
+            "kind": "Keyword(Mut)",
+            "text": "mut",
+            "start": 49,
+            "end": 52
+        },
+        {
+            "kind": "Identifier",
+            "text": "i32",
+            "start": 53,
+            "end": 56
+        },
+        {
+            "kind": "Eq",
+            "text": "=",
+            "start": 57,
+            "end": 58
+        },
+        {
+            "kind": "Ampersand",
+            "text": "&",
+            "start": 59,
+            "end": 60
+        },
+        {
+            "kind": "Keyword(Mut)",
+            "text": "mut",
+            "start": 60,
+            "end": 63
+        },
+        {
+            "kind": "IntegerLiteral",
+            "text": "42",
+            "start": 64,
+            "end": 66
+        },
+        {
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 66,
+            "end": 67
+        },
+        {
+            "kind": "RightBrace",
+            "text": "}",
+            "start": 69,
+            "end": 70
+        },
+        {
+            "kind": "Eof",
+            "text": "",
+            "start": 70,
+            "end": 70
+        }
+    ],
+    "errors": []
+}

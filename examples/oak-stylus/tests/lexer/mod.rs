@@ -1,6 +1,4 @@
-#![feature(new_range_api)]
-
-use oak_core::LexerTester;
+use oak_core::helpers::LexerTester;
 use oak_stylus::{lexer::StylusLexer, language::StylusLanguage};
 
 #[test]

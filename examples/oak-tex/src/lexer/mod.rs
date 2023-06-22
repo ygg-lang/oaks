@@ -1,40 +1,36 @@
 use crate::{kind::TexSyntaxKind, language::TexLanguage};
 use oak_core::{
-    IncrementalCache, Lexer, LexerState, OakError,
-    lexer::{CommentLine, LexOutput, WhitespaceConfig},
+    Lexer, LexerCache, LexerState, OakError,
+    lexer::{CommentConfig, LexOutput, WhitespaceConfig},
     source::Source,
 };
 use std::sync::LazyLock;
 
-type State<S: Source> = LexerState<S, TexLanguage>;
+type State<'a, S> = LexerState<'a, S, TexLanguage>;
 
 static TEX_WHITESPACE: LazyLock<WhitespaceConfig> = LazyLock::new(|| WhitespaceConfig { unicode_whitespace: true });
-static TEX_COMMENT: LazyLock<CommentLine> = LazyLock::new(|| CommentLine { line_markers: &["%"] });
+static TEX_COMMENT: LazyLock<CommentConfig> = LazyLock::new(|| CommentConfig { line_marker: "%", block_start: "", block_end: "", nested_blocks: false });
 
-#[derive(Clone)]
-pub struct TexLexer<'config> {
-    config: &'config TexLanguage,
-}
+#[derive(Clone, Default)]
+pub struct TexLexer {}
 
-impl<'config> Lexer<TexLanguage> for TexLexer<'config> {
-    fn lex_incremental(
-        &self,
-        source: impl Source,
-        changed: usize,
-        cache: IncrementalCache<TexLanguage>,
-    ) -> LexOutput<TexLanguage> {
-        let mut state = LexerState::new_with_cache(source, changed, cache);
+impl Lexer<TexLanguage> for TexLexer {
+    fn lex<'a, S: Source + ?Sized>(&self, source: &S, _edits: &[oak_core::TextEdit], cache: &'a mut impl LexerCache<TexLanguage>) -> LexOutput<TexLanguage> {
+        let mut state = State::new(source);
         let result = self.run(&mut state);
-        state.finish(result)
+        if result.is_ok() {
+            state.add_eof();
+        }
+        state.finish_with_cache(result, cache)
     }
 }
 
-impl<'config> TexLexer<'config> {
-    pub fn new(config: &'config TexLanguage) -> Self {
-        Self { config }
+impl TexLexer {
+    pub fn new(_config: &TexLanguage) -> Self {
+        Self {}
     }
 
-    fn run<S: Source>(&self, state: &mut State<S>) -> Result<(), OakError> {
+    fn run<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> Result<(), OakError> {
         while state.not_at_end() {
             let safe_point = state.get_position();
 
@@ -70,7 +66,7 @@ impl<'config> TexLexer<'config> {
                 continue;
             }
 
-            state.safe_check(safe_point);
+            state.advance_if_dead_lock(safe_point);
         }
 
         // 添加 EOF token
@@ -79,39 +75,18 @@ impl<'config> TexLexer<'config> {
         Ok(())
     }
 
-    fn skip_whitespace<S: Source>(&self, state: &mut State<S>) -> bool {
-        match TEX_WHITESPACE.scan(state.rest(), state.get_position(), TexSyntaxKind::Whitespace) {
-            Some(token) => {
-                state.advance_with(token);
-                true
-            }
-            None => false,
-        }
+    fn skip_whitespace<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
+        TEX_WHITESPACE.scan(state, TexSyntaxKind::Whitespace)
     }
 
-    fn skip_comment<S: Source>(&self, state: &mut State<S>) -> bool {
-        let start = state.get_position();
-        let rest = state.rest();
-
-        // TeX 行注释: % ... 直到换行
-        if rest.starts_with("%") {
-            state.advance(1);
-            while let Some(ch) = state.peek() {
-                if ch == '\n' || ch == '\r' {
-                    break;
-                }
-                state.advance(ch.len_utf8());
-            }
-            state.add_token(TexSyntaxKind::Comment, start, state.get_position());
-            return true;
-        }
-        false
+    fn skip_comment<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
+        TEX_COMMENT.scan(state, TexSyntaxKind::Comment, TexSyntaxKind::Comment)
     }
 
-    fn lex_command<S: Source>(&self, state: &mut State<S>) -> bool {
+    fn lex_command<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start = state.get_position();
 
-        if state.current() != Some('\\') {
+        if state.peek() != Some('\\') {
             return false;
         }
 
@@ -119,9 +94,9 @@ impl<'config> TexLexer<'config> {
 
         // 读取命令名
         let mut has_name = false;
-        while let Some(ch) = state.current() {
+        while let Some(ch) = state.peek() {
             if ch.is_ascii_alphabetic() {
-                state.advance(1);
+                state.advance(ch.len_utf8());
                 has_name = true;
             }
             else {
@@ -133,7 +108,7 @@ impl<'config> TexLexer<'config> {
             let end = state.get_position();
             let text = state.get_text_in((start + 1..end).into()); // 跳过反斜杠
 
-            let kind = match text {
+            let kind = match text.as_ref() {
                 "begin" => TexSyntaxKind::BeginKeyword,
                 "end" => TexSyntaxKind::EndKeyword,
                 "documentclass" => TexSyntaxKind::DocumentclassKeyword,
@@ -178,18 +153,15 @@ impl<'config> TexLexer<'config> {
         true
     }
 
-    fn lex_math_delimiters<S: Source>(&self, state: &mut State<S>) -> bool {
+    fn lex_math_delimiters<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start = state.get_position();
-        let rest = state.rest();
 
-        if rest.starts_with("$$") {
-            state.advance(2);
+        if state.consume_if_starts_with("$$") {
             state.add_token(TexSyntaxKind::DoubleDollar, start, state.get_position());
             return true;
         }
 
-        if rest.starts_with("$") {
-            state.advance(1);
+        if state.consume_if_starts_with("$") {
             state.add_token(TexSyntaxKind::Dollar, start, state.get_position());
             return true;
         }
@@ -197,10 +169,10 @@ impl<'config> TexLexer<'config> {
         false
     }
 
-    fn lex_braces_and_brackets<S: Source>(&self, state: &mut State<S>) -> bool {
+    fn lex_braces_and_brackets<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start = state.get_position();
 
-        if let Some(ch) = state.current() {
+        if let Some(ch) = state.peek() {
             let kind = match ch {
                 '{' => TexSyntaxKind::LeftBrace,
                 '}' => TexSyntaxKind::RightBrace,
@@ -219,17 +191,17 @@ impl<'config> TexLexer<'config> {
         false
     }
 
-    fn lex_special_chars<S: Source>(&self, state: &mut State<S>) -> bool {
+    fn lex_special_chars<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start = state.get_position();
 
-        if let Some(ch) = state.current() {
+        if let Some(ch) = state.peek() {
             let kind = match ch {
                 '&' => TexSyntaxKind::Ampersand,
                 '#' => TexSyntaxKind::Hash,
                 '^' => TexSyntaxKind::Caret,
                 '_' => TexSyntaxKind::Underscore,
                 '~' => TexSyntaxKind::Tilde,
-                '=' => TexSyntaxKind::Equal,
+                '=' => TexSyntaxKind::Equals,
                 '+' => TexSyntaxKind::Plus,
                 '-' => TexSyntaxKind::Minus,
                 '*' => TexSyntaxKind::Star,
@@ -255,9 +227,9 @@ impl<'config> TexLexer<'config> {
         false
     }
 
-    fn lex_number<S: Source>(&self, state: &mut State<S>) -> bool {
+    fn lex_number<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start = state.get_position();
-        let first = match state.current() {
+        let first = match state.peek() {
             Some(c) => c,
             None => return false,
         };
@@ -267,7 +239,7 @@ impl<'config> TexLexer<'config> {
         }
 
         state.advance(1);
-        while let Some(c) = state.current() {
+        while let Some(c) = state.peek() {
             if c.is_ascii_digit() || c == '.' {
                 state.advance(1);
             }
@@ -280,15 +252,15 @@ impl<'config> TexLexer<'config> {
         true
     }
 
-    fn lex_text<S: Source>(&self, state: &mut State<S>) -> bool {
+    fn lex_text<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start = state.get_position();
 
-        if let Some(ch) = state.current() {
+        if let Some(ch) = state.peek() {
             if ch.is_ascii_alphabetic() {
-                state.advance(1);
-                while let Some(c) = state.current() {
+                state.advance(ch.len_utf8());
+                while let Some(c) = state.peek() {
                     if c.is_ascii_alphanumeric() {
-                        state.advance(1);
+                        state.advance(c.len_utf8());
                     }
                     else {
                         break;

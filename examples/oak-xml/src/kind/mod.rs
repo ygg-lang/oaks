@@ -1,9 +1,10 @@
-use oak_core::SyntaxKind;
+use oak_core::{ElementType, TokenType, UniversalElementRole, UniversalTokenRole};
 use serde::{Deserialize, Serialize};
 
-#[derive(Copy, Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Copy, Clone, Debug, PartialEq, Eq, Serialize, Deserialize, Hash)]
 pub enum XmlSyntaxKind {
     // 基本 kind
+    Root,
     Whitespace,
     Newline,
     Comment,
@@ -48,26 +49,49 @@ pub enum XmlSyntaxKind {
 
     // 标识符
     Identifier,
+
+    // 非终结符
+    SourceFile,
+    Element,
+    Attribute,
+    Prolog,
 }
 
-impl SyntaxKind for XmlSyntaxKind {
-    fn is_trivia(&self) -> bool {
-        matches!(self, Self::Whitespace | Self::Newline | Self::Comment)
+impl TokenType for XmlSyntaxKind {
+    const END_OF_STREAM: Self = Self::Eof;
+    type Role = UniversalTokenRole;
+
+    fn role(&self) -> Self::Role {
+        match self {
+            Self::Whitespace | Self::Newline => UniversalTokenRole::Whitespace,
+            Self::Comment => UniversalTokenRole::Comment,
+            Self::Eof => UniversalTokenRole::Eof,
+            _ => UniversalTokenRole::None,
+        }
+    }
+}
+
+impl ElementType for XmlSyntaxKind {
+    type Role = UniversalElementRole;
+
+    fn role(&self) -> Self::Role {
+        match self {
+            Self::SourceFile => UniversalElementRole::Root,
+            Self::Element => UniversalElementRole::Container,
+            Self::Attribute => UniversalElementRole::Detail,
+            Self::Prolog => UniversalElementRole::Detail,
+            Self::StartTag | Self::EndTag | Self::SelfClosingTag => UniversalElementRole::Detail,
+            Self::Comment => UniversalElementRole::None,
+            Self::Error => UniversalElementRole::Error,
+            _ => UniversalElementRole::None,
+        }
     }
 
-    fn is_comment(&self) -> bool {
-        matches!(self, Self::Comment)
+    fn is_root(&self) -> bool {
+        matches!(self, Self::SourceFile)
     }
 
-    fn is_whitespace(&self) -> bool {
-        matches!(self, Self::Whitespace | Self::Newline)
-    }
-
-    fn is_token_type(&self) -> bool {
-        !matches!(self, Self::XmlDeclaration | Self::DoctypeDeclaration | Self::StartTag | Self::EndTag | Self::SelfClosingTag)
-    }
-
-    fn is_element_type(&self) -> bool {
-        matches!(self, Self::XmlDeclaration | Self::DoctypeDeclaration | Self::StartTag | Self::EndTag | Self::SelfClosingTag)
+    fn is_error(&self) -> bool {
+        matches!(self, Self::Error)
     }
 }

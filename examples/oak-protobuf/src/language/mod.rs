@@ -1,9 +1,13 @@
-use oak_core::Language;
+use oak_core::{Language, LanguageCategory};
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Default)]
 pub struct ProtobufLanguage;
 
 impl Language for ProtobufLanguage {
-    type SyntaxKind = crate::kind::ProtobufSyntaxKind;
-    type TypedRoot = crate::ast::SourceFile;
+    const NAME: &'static str = "protobuf";
+    const CATEGORY: LanguageCategory = LanguageCategory::Programming;
+
+    type TokenType = crate::kind::ProtobufSyntaxKind;
+    type ElementType = crate::kind::ProtobufSyntaxKind;
+    type TypedRoot = crate::ast::ProtobufRoot;
 }

@@ -1,19 +1,33 @@
 use crate::{kind::VhdlSyntaxKind, language::VhdlLanguage};
-use oak_core::{GreenBuilder, IncrementalCache, Lexer, LexerState, lexer::LexOutput, source::Source};
+use oak_core::{
+    Lexer, LexerCache, LexerState, OakError,
+    lexer::LexOutput,
+    source::{Source, TextEdit},
+};
 
 #[derive(Clone)]
 pub struct VhdlLexer<'config> {
-    config: &'config VhdlLanguage,
+    _config: &'config VhdlLanguage,
+}
+
+impl<'config> Lexer<VhdlLanguage> for VhdlLexer<'config> {
+    fn lex<'a, S: Source + ?Sized>(&self, source: &'a S, _edits: &[TextEdit], cache: &'a mut impl LexerCache<VhdlLanguage>) -> LexOutput<VhdlLanguage> {
+        let mut state = LexerState::new(source);
+        let result = self.run(&mut state);
+        state.finish_with_cache(result, cache)
+    }
 }
 
 impl<'config> VhdlLexer<'config> {
     pub fn new(config: &'config VhdlLanguage) -> Self {
-        Self { config }
+        Self { _config: config }
     }
 
     /// 主要的词法分析循环
-    fn run<S: Source>(&self, state: &mut LexerState<S, VhdlLanguage>) -> Result<(), oak_core::errors::OakError> {
+    fn run<'a, S: Source + ?Sized>(&self, state: &mut LexerState<'a, S, VhdlLanguage>) -> Result<(), OakError> {
         while !state.not_at_end() {
+            let safe_point = state.get_position();
+
             // 尝试各种词法规则
             if self.skip_whitespace(state) {
                 continue;
@@ -45,24 +59,25 @@ impl<'config> VhdlLexer<'config> {
 
             // 如果所有规则都不匹配，跳过当前字符并标记为错误
             let start_pos = state.get_position();
-            if let Some(ch) = state.current() {
+            if let Some(ch) = state.peek() {
                 state.advance(ch.len_utf8());
                 state.add_token(VhdlSyntaxKind::Error, start_pos, state.get_position());
             }
+
+            state.advance_if_dead_lock(safe_point);
         }
 
         // 添加 EOF token
-        let eof_pos = state.get_position();
-        state.add_token(VhdlSyntaxKind::Eof, eof_pos, eof_pos);
+        state.add_eof();
 
         Ok(())
     }
 
     /// 跳过空白字符
-    fn skip_whitespace<S: Source>(&self, state: &mut LexerState<S, VhdlLanguage>) -> bool {
+    fn skip_whitespace<'a, S: Source + ?Sized>(&self, state: &mut LexerState<'a, S, VhdlLanguage>) -> bool {
         let start_pos = state.get_position();
 
-        while let Some(ch) = state.current() {
+        while let Some(ch) = state.peek() {
             match ch {
                 ' ' | '\t' | '\n' | '\r' => {
                     state.advance(ch.len_utf8());
@@ -81,40 +96,37 @@ impl<'config> VhdlLexer<'config> {
     }
 
     /// 跳过注释
-    fn skip_comment<S: Source>(&self, state: &mut LexerState<S, VhdlLanguage>) -> bool {
+    fn skip_comment<'a, S: Source + ?Sized>(&self, state: &mut LexerState<'a, S, VhdlLanguage>) -> bool {
         let start_pos = state.get_position();
 
         // VHDL 行注释 --
-        if let Some('-') = state.current() {
-            if let Some('-') = state.peek() {
-                state.advance(2);
-                while let Some(ch) = state.current() {
-                    if ch == '\n' || ch == '\r' {
-                        break;
-                    }
-                    state.advance(ch.len_utf8());
+        if state.consume_if_starts_with("--") {
+            while let Some(ch) = state.peek() {
+                if ch == '\n' || ch == '\r' {
+                    break;
                 }
-                state.add_token(VhdlSyntaxKind::Comment, start_pos, state.get_position());
-                return true;
+                state.advance(ch.len_utf8());
             }
+            state.add_token(VhdlSyntaxKind::Comment, start_pos, state.get_position());
+            return true;
         }
 
         false
     }
 
     /// 处理字符串字面量
-    fn lex_string_literal<S: Source>(&self, state: &mut LexerState<S, VhdlLanguage>) -> bool {
+    fn lex_string_literal<'a, S: Source + ?Sized>(&self, state: &mut LexerState<'a, S, VhdlLanguage>) -> bool {
         let start_pos = state.get_position();
 
         // VHDL 字符串字面量 "..."
-        if let Some('"') = state.current() {
+        if let Some('"') = state.peek() {
             state.advance(1);
 
-            while let Some(ch) = state.current() {
+            while let Some(ch) = state.peek() {
                 if ch == '"' {
                     state.advance(1);
                     // 检查是否是双引号转义
-                    if let Some('"') = state.current() {
+                    if let Some('"') = state.peek() {
                         state.advance(1);
                         continue;
                     }
@@ -135,12 +147,12 @@ impl<'config> VhdlLexer<'config> {
         }
 
         // VHDL 字符字面量 '.'
-        if let Some('\'') = state.current() {
+        if let Some('\'') = state.peek() {
             state.advance(1);
 
-            if let Some(ch) = state.current() {
+            if let Some(ch) = state.peek() {
                 state.advance(ch.len_utf8());
-                if let Some('\'') = state.current() {
+                if let Some('\'') = state.peek() {
                     state.advance(1);
                     state.add_token(VhdlSyntaxKind::CharLiteral, start_pos, state.get_position());
                     return true;
@@ -153,12 +165,12 @@ impl<'config> VhdlLexer<'config> {
         }
 
         // 位字符串字面量 B"...", O"...", X"..."
-        if let Some(prefix) = state.current() {
+        if let Some(prefix) = state.peek() {
             if matches!(prefix, 'B' | 'O' | 'X' | 'b' | 'o' | 'x') {
-                if let Some('"') = state.peek() {
+                if let Some('"') = state.peek_next_n(1) {
                     state.advance(2); // 跳过前缀和引号
 
-                    while let Some(ch) = state.current() {
+                    while let Some(ch) = state.peek() {
                         if ch == '"' {
                             state.advance(1);
                             state.add_token(VhdlSyntaxKind::BitStringLiteral, start_pos, state.get_position());
@@ -186,13 +198,13 @@ impl<'config> VhdlLexer<'config> {
     }
 
     /// 处理数字字面量
-    fn lex_number_literal<S: Source>(&self, state: &mut LexerState<S, VhdlLanguage>) -> bool {
+    fn lex_number_literal<'a, S: Source + ?Sized>(&self, state: &mut LexerState<'a, S, VhdlLanguage>) -> bool {
         let start_pos = state.get_position();
 
-        if let Some(ch) = state.current() {
+        if let Some(ch) = state.peek() {
             if ch.is_ascii_digit() {
                 // 整数部分
-                while let Some(digit) = state.current() {
+                while let Some(digit) = state.peek() {
                     if digit.is_ascii_digit() || digit == '_' {
                         state.advance(1);
                     }
@@ -202,9 +214,9 @@ impl<'config> VhdlLexer<'config> {
                 }
 
                 // 检查是否是基数字面量 (16#FF#)
-                if let Some('#') = state.current() {
+                if let Some('#') = state.peek() {
                     state.advance(1);
-                    while let Some(ch) = state.current() {
+                    while let Some(ch) = state.peek() {
                         if ch.is_ascii_alphanumeric() || ch == '_' {
                             state.advance(1);
                         }
@@ -223,11 +235,11 @@ impl<'config> VhdlLexer<'config> {
                 }
 
                 // 检查是否是实数
-                if let Some('.') = state.current() {
-                    if let Some(next_ch) = state.peek() {
+                if let Some('.') = state.peek() {
+                    if let Some(next_ch) = state.peek_next_n(1) {
                         if next_ch.is_ascii_digit() {
                             state.advance(1); // 跳过 '.'
-                            while let Some(digit) = state.current() {
+                            while let Some(digit) = state.peek() {
                                 if digit.is_ascii_digit() || digit == '_' {
                                     state.advance(1);
                                 }
@@ -237,15 +249,15 @@ impl<'config> VhdlLexer<'config> {
                             }
 
                             // 检查科学计数法
-                            if let Some(e) = state.current() {
+                            if let Some(e) = state.peek() {
                                 if e == 'e' || e == 'E' {
                                     state.advance(1);
-                                    if let Some(sign) = state.current() {
+                                    if let Some(sign) = state.peek() {
                                         if sign == '+' || sign == '-' {
                                             state.advance(1);
                                         }
                                     }
-                                    while let Some(digit) = state.current() {
+                                    while let Some(digit) = state.peek() {
                                         if digit.is_ascii_digit() || digit == '_' {
                                             state.advance(1);
                                         }
@@ -271,14 +283,14 @@ impl<'config> VhdlLexer<'config> {
     }
 
     /// 处理标识符和关键字
-    fn lex_identifier_or_keyword<S: Source>(&self, state: &mut LexerState<S, VhdlLanguage>) -> bool {
+    fn lex_identifier_or_keyword<'a, S: Source + ?Sized>(&self, state: &mut LexerState<'a, S, VhdlLanguage>) -> bool {
         let start_pos = state.get_position();
 
-        if let Some(ch) = state.current() {
+        if let Some(ch) = state.peek() {
             if ch.is_ascii_alphabetic() || ch == '_' {
                 state.advance(ch.len_utf8());
 
-                while let Some(ch) = state.current() {
+                while let Some(ch) = state.peek() {
                     if ch.is_ascii_alphanumeric() || ch == '_' {
                         state.advance(ch.len_utf8());
                     }
@@ -396,13 +408,13 @@ impl<'config> VhdlLexer<'config> {
     }
 
     /// 处理操作符
-    fn lex_operators<S: Source>(&self, state: &mut LexerState<S, VhdlLanguage>) -> bool {
+    fn lex_operators<'a, S: Source + ?Sized>(&self, state: &mut LexerState<'a, S, VhdlLanguage>) -> bool {
         let start_pos = state.get_position();
 
-        if let Some(ch) = state.current() {
+        if let Some(ch) = state.peek() {
             let token_kind = match ch {
                 ':' => {
-                    if let Some('=') = state.peek() {
+                    if let Some('=') = state.peek_next_n(1) {
                         state.advance(2);
                         VhdlSyntaxKind::Assign
                     }
@@ -412,7 +424,7 @@ impl<'config> VhdlLexer<'config> {
                     }
                 }
                 '-' => {
-                    if let Some('>') = state.peek() {
+                    if let Some('>') = state.peek_next_n(1) {
                         state.advance(2);
                         VhdlSyntaxKind::Arrow
                     }
@@ -422,7 +434,7 @@ impl<'config> VhdlLexer<'config> {
                     }
                 }
                 '*' => {
-                    if let Some('*') = state.peek() {
+                    if let Some('*') = state.peek_next_n(1) {
                         state.advance(2);
                         VhdlSyntaxKind::Pow
                     }
@@ -432,7 +444,7 @@ impl<'config> VhdlLexer<'config> {
                     }
                 }
                 '/' => {
-                    if let Some('=') = state.peek() {
+                    if let Some('=') = state.peek_next_n(1) {
                         state.advance(2);
                         VhdlSyntaxKind::Ne
                     }
@@ -442,7 +454,7 @@ impl<'config> VhdlLexer<'config> {
                     }
                 }
                 '=' => {
-                    if let Some('>') = state.peek() {
+                    if let Some('>') = state.peek_next_n(1) {
                         state.advance(2);
                         VhdlSyntaxKind::DoubleArrow
                     }
@@ -452,7 +464,7 @@ impl<'config> VhdlLexer<'config> {
                     }
                 }
                 '<' => {
-                    if let Some('=') = state.peek() {
+                    if let Some('=') = state.peek_next_n(1) {
                         state.advance(2);
                         VhdlSyntaxKind::Le
                     }
@@ -462,7 +474,7 @@ impl<'config> VhdlLexer<'config> {
                     }
                 }
                 '>' => {
-                    if let Some('=') = state.peek() {
+                    if let Some('=') = state.peek_next_n(1) {
                         state.advance(2);
                         VhdlSyntaxKind::Ge
                     }
@@ -491,10 +503,10 @@ impl<'config> VhdlLexer<'config> {
     }
 
     /// 处理单字符标记
-    fn lex_single_char_tokens<S: Source>(&self, state: &mut LexerState<S, VhdlLanguage>) -> bool {
+    fn lex_single_char_tokens<'a, S: Source + ?Sized>(&self, state: &mut LexerState<'a, S, VhdlLanguage>) -> bool {
         let start_pos = state.get_position();
 
-        if let Some(ch) = state.current() {
+        if let Some(ch) = state.peek() {
             let token_kind = match ch {
                 '(' => VhdlSyntaxKind::LeftParen,
                 ')' => VhdlSyntaxKind::RightParen,
@@ -522,18 +534,5 @@ impl<'config> VhdlLexer<'config> {
         else {
             false
         }
-    }
-}
-
-impl<'config> Lexer<VhdlLanguage> for VhdlLexer<'config> {
-    fn lex_incremental(
-        &self,
-        source: impl Source,
-        _changed: usize,
-        _cache: IncrementalCache<VhdlLanguage>,
-    ) -> LexOutput<VhdlLanguage> {
-        let mut state = LexerState::new(source);
-        let result = self.run(&mut state);
-        state.finish(result)
     }
 }

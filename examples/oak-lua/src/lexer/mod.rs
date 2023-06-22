@@ -3,24 +3,70 @@
 //! 实现Lua 语言的词法分析，将源代码转换token 序列
 
 use crate::{kind::LuaSyntaxKind, language::LuaLanguage};
-use oak_core::{IncrementalCache, Lexer, LexerState, OakError, lexer::LexOutput, source::Source};
+use oak_core::{Lexer, LexerCache, LexerState, OakError, lexer::LexOutput, source::Source};
 
-type State<S> = LexerState<S, LuaLanguage>;
+type State<'a, S> = LexerState<'a, S, LuaLanguage>;
 
 /// Lua 词法分析
 #[derive(Clone)]
-pub struct LuaLexer<'config> {
-    config: &'config LuaLanguage,
+pub struct LuaLexer {
+    _config: LuaLanguage,
 }
 
-impl<'config> LuaLexer<'config> {
+impl LuaLexer {
     /// 创建新的 Lua 词法分析
-    pub fn new(config: &'config LuaLanguage) -> Self {
-        Self { config }
+    pub fn new(config: &LuaLanguage) -> Self {
+        Self { _config: config.clone() }
+    }
+
+    fn run<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> Result<(), OakError> {
+        while state.not_at_end() {
+            let safe_point = state.get_position();
+
+            // 尝试各种词法规则
+            if self.skip_whitespace(state) {
+                continue;
+            }
+
+            if self.lex_newline(state) {
+                continue;
+            }
+
+            if self.lex_comment(state) {
+                continue;
+            }
+
+            if self.lex_string(state) {
+                continue;
+            }
+
+            if self.lex_number(state) {
+                continue;
+            }
+
+            if self.lex_identifier_or_keyword(state) {
+                continue;
+            }
+
+            if self.lex_operator_or_delimiter(state) {
+                continue;
+            }
+
+            // 如果所有规则都不匹配，跳过当前字符并标记为错误
+            let start_pos = state.get_position();
+            if let Some(ch) = state.peek() {
+                state.advance(ch.len_utf8());
+                state.add_token(LuaSyntaxKind::Error, start_pos, state.get_position());
+            }
+
+            state.advance_if_dead_lock(safe_point);
+        }
+
+        Ok(())
     }
 
     /// 跳过空白字符
-    fn skip_whitespace<S: Source>(&self, state: &mut State<S>) -> bool {
+    fn skip_whitespace<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start_pos = state.get_position();
 
         while let Some(ch) = state.peek() {
@@ -42,12 +88,12 @@ impl<'config> LuaLexer<'config> {
     }
 
     /// 处理换行
-    fn lex_newline<S: Source>(&self, state: &mut State<S>) -> bool {
+    fn lex_newline<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start_pos = state.get_position();
 
         if let Some('\n') = state.peek() {
             state.advance(1);
-            state.add_token(LuaSyntaxKind::Whitespace, start_pos, state.get_position());
+            state.add_token(LuaSyntaxKind::Newline, start_pos, state.get_position());
             true
         }
         else if let Some('\r') = state.peek() {
@@ -55,7 +101,7 @@ impl<'config> LuaLexer<'config> {
             if let Some('\n') = state.peek() {
                 state.advance(1);
             }
-            state.add_token(LuaSyntaxKind::Whitespace, start_pos, state.get_position());
+            state.add_token(LuaSyntaxKind::Newline, start_pos, state.get_position());
             true
         }
         else {
@@ -64,7 +110,7 @@ impl<'config> LuaLexer<'config> {
     }
 
     /// 处理注释
-    fn lex_comment<S: Source>(&self, state: &mut State<S>) -> bool {
+    fn lex_comment<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start_pos = state.get_position();
 
         if let Some('-') = state.current() {
@@ -123,7 +169,7 @@ impl<'config> LuaLexer<'config> {
     }
 
     /// 处理字符串字面量
-    fn lex_string<S: Source>(&self, state: &mut State<S>) -> bool {
+    fn lex_string<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start_pos = state.get_position();
 
         if let Some(quote_char) = state.current() {
@@ -191,7 +237,7 @@ impl<'config> LuaLexer<'config> {
     }
 
     /// 处理数字
-    fn lex_number<S: Source>(&self, state: &mut State<S>) -> bool {
+    fn lex_number<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start_pos = state.get_position();
 
         if let Some(ch) = state.current() {
@@ -260,13 +306,13 @@ impl<'config> LuaLexer<'config> {
     }
 
     /// 处理标识符或关键
-    fn lex_identifier_or_keyword<S: Source>(&self, state: &mut State<S>) -> bool {
+    fn lex_identifier_or_keyword<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         if let Some(ch) = state.current() {
             if ch.is_ascii_alphabetic() || ch == '_' {
                 let range = state.take_while(|c| c.is_ascii_alphanumeric() || c == '_');
                 // 使用 Source trait 的 get_text_in 方法
-                let text = state.get_text_in(range);
-                let token_kind = self.keyword_or_identifier(text);
+                let text = state.get_text_in(range.clone().into());
+                let token_kind = self.keyword_or_identifier(&text);
                 state.add_token(token_kind, range.start, range.end);
                 true
             }
@@ -309,7 +355,7 @@ impl<'config> LuaLexer<'config> {
     }
 
     /// 处理操作符和分隔
-    fn lex_operator_or_delimiter<S: Source>(&self, state: &mut State<S>) -> bool {
+    fn lex_operator_or_delimiter<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start_pos = state.get_position();
 
         if let Some(ch) = state.peek() {
@@ -474,68 +520,13 @@ impl<'config> LuaLexer<'config> {
     }
 }
 
-impl<'config> Lexer<LuaLanguage> for LuaLexer<'config> {
-    fn lex_incremental(
-        &self,
-        source: impl Source,
-        _offset: usize,
-        _cache: IncrementalCache<LuaLanguage>,
-    ) -> LexOutput<LuaLanguage> {
-        let mut state = LexerState::new_with_cache(source, _offset, _cache);
+impl Lexer<LuaLanguage> for LuaLexer {
+    fn lex<'a, S: Source + ?Sized>(&self, source: &'a S, _edits: &[oak_core::TextEdit], cache: &'a mut impl LexerCache<LuaLanguage>) -> LexOutput<LuaLanguage> {
+        let mut state = State::new_with_cache(source, 0, cache);
         let result = self.run(&mut state);
-        state.finish(result)
-    }
-}
-
-impl<'config> LuaLexer<'config> {
-    fn run<S: Source>(&self, state: &mut State<S>) -> Result<(), OakError> {
-        loop {
-            // 尝试各种词法规则
-            if self.skip_whitespace(state) {
-                continue;
-            }
-
-            if self.lex_newline(state) {
-                continue;
-            }
-
-            if self.lex_comment(state) {
-                continue;
-            }
-
-            if self.lex_string(state) {
-                continue;
-            }
-
-            if self.lex_number(state) {
-                continue;
-            }
-
-            if self.lex_identifier_or_keyword(state) {
-                continue;
-            }
-
-            if self.lex_operator_or_delimiter(state) {
-                continue;
-            }
-
-            // 如果所有规则都不匹配，检查是否到达文件末尾
-            if let Some(ch) = state.current() {
-                // 跳过当前字符并标记为错误
-                let start_pos = state.get_position();
-                state.advance(ch.len_utf8());
-                state.add_token(LuaSyntaxKind::Error, start_pos, state.get_position());
-            }
-            else {
-                // 到达文件末尾，退出循环
-                break;
-            }
+        if result.is_ok() {
+            state.add_eof();
         }
-
-        // 添加 EOF token
-        let eof_pos = state.get_position();
-        state.add_token(LuaSyntaxKind::Eof, eof_pos, eof_pos);
-
-        Ok(())
+        state.finish_with_cache(result, cache)
     }
 }

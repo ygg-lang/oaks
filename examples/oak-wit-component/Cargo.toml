@@ -1,9 +1,9 @@
 [package]
 name = "oak-wit"
-description = "High-performance incremental WebAssembly Text (WAT) parser for the oak ecosystem with flexible configuration, supporting web platform development and portable code generation."
+description = "WebAssembly Interface Types (WIT) component parser with support for interface definitions and component model."
 categories = ["parsing"]
-keywords = ["parser", "wat", "webassembly", "wasm"]
-documentation = "https://docs.rs/oak-wat"
+keywords = ["parser", "wit", "webassembly", "component-model"]
+documentation = "https://docs.rs/oak-wit"
 readme = "readme.md"
 version.workspace = true
 authors.workspace = true

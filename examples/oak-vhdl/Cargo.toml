@@ -1,9 +1,9 @@
 [package]
 name = "oak-vhdl"
-description = "Valkyrie language parser with support for modern Valkyrie syntax and features."
-categories = ["parsing"]
-keywords = ["parser", "valkyrie", "language"]
-documentation = "https://docs.rs/oak-valkyrie"
+description = "VHDL language parser with support for hardware description and digital circuit design."
+categories = ["parsing", "hardware-support"]
+keywords = ["parser", "vhdl", "hardware", "hdl", "digital-circuit"]
+documentation = "https://docs.rs/oak-vhdl"
 readme = "readme.md"
 version.workspace = true
 authors.workspace = true
@@ -15,7 +15,7 @@ edition.workspace = true
 
 [dependencies]
 oak-core = { workspace = true }
-serde = { version = "1.0", features = ["derive"] }
+serde = { workspace = true }
 
 [dev-dependencies]
 oak-core = { workspace = true, features = ["testing"] }

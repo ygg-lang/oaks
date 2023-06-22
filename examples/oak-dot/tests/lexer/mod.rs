@@ -9,7 +9,7 @@ fn test_dot_lexer() {
     let language = Box::leak(Box::new(DotLanguage::default()));
     let lexer = DotLexer::new(language);
     let test_runner = LexerTester::new(tests).with_extension("dot").with_timeout(Duration::from_secs(5));
-    match test_runner.run_tests::<DotLanguage, _>(lexer) {
+    match test_runner.run_tests::<DotLanguage, _>(&lexer) {
         Ok(()) => println!("DOT lexer tests passed!"),
         Err(e) => panic!("DOT lexer tests failed: {}", e),
     }

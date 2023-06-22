@@ -1,5 +1,5 @@
-use crate::{ast::TwigRoot, kind::TwigSyntaxKind, lexer::TwigLexer, parser::TwigParser};
-use oak_core::Language;
+use crate::{ast::TwigRoot, lexer::TwigLexer, parser::TwigParser};
+use oak_core::{Language, LanguageCategory};
 
 /// Twig 模板引擎配置
 #[derive(Debug, Clone, Copy)]
@@ -18,7 +18,11 @@ pub struct TwigLanguage {
 }
 
 impl Language for TwigLanguage {
-    type SyntaxKind = TwigSyntaxKind;
+    const NAME: &'static str = "twig";
+    const CATEGORY: LanguageCategory = LanguageCategory::Markup;
+
+    type TokenType = crate::kind::TwigSyntaxKind;
+    type ElementType = crate::kind::TwigSyntaxKind;
     type TypedRoot = TwigRoot;
 }
 

@@ -1,7 +1,7 @@
-use oak_core::SyntaxKind;
+use oak_core::{ElementType, TokenType, UniversalElementRole, UniversalTokenRole};
 use serde::Serialize;
 
-#[derive(Copy, Clone, Debug, PartialEq, Eq, Serialize)]
+#[derive(Copy, Clone, Debug, PartialEq, Eq, Hash, Serialize, serde::Deserialize)]
 pub enum ProtobufSyntaxKind {
     // 空白符和换行
     Whitespace,
@@ -77,11 +77,36 @@ pub enum ProtobufSyntaxKind {
     // 特殊
     Error,
     Eof,
+
+    // Element types
+    Root,
+    SyntaxDef,
+    PackageDef,
+    ImportDef,
+    OptionDef,
+    MessageDef,
+    EnumDef,
+    ServiceDef,
+    RpcDef,
+    FieldDef,
+    EnumFieldDef,
+    OneofDef,
+    MapFieldDef,
+    ReservedDef,
+    ExtensionsDef,
 }
 
-impl SyntaxKind for ProtobufSyntaxKind {
-    fn is_trivia(&self) -> bool {
-        matches!(self, Self::Whitespace | Self::Newline | Self::Comment)
+impl TokenType for ProtobufSyntaxKind {
+    const END_OF_STREAM: Self = Self::Eof;
+    type Role = UniversalTokenRole;
+
+    fn role(&self) -> Self::Role {
+        match self {
+            Self::Whitespace | Self::Newline => UniversalTokenRole::Whitespace,
+            Self::Comment => UniversalTokenRole::Comment,
+            Self::Eof => UniversalTokenRole::Eof,
+            _ => UniversalTokenRole::None,
+        }
     }
 
     fn is_comment(&self) -> bool {
@@ -91,12 +116,17 @@ impl SyntaxKind for ProtobufSyntaxKind {
     fn is_whitespace(&self) -> bool {
         matches!(self, Self::Whitespace | Self::Newline)
     }
+}
 
-    fn is_token_type(&self) -> bool {
-        true // Protobuf doesn't have element types in this simple implementation
-    }
+impl ElementType for ProtobufSyntaxKind {
+    type Role = UniversalElementRole;
 
-    fn is_element_type(&self) -> bool {
-        false // Protobuf doesn't have element types in this simple implementation
+    fn role(&self) -> Self::Role {
+        match self {
+            Self::Error => UniversalElementRole::Error,
+            Self::Root => UniversalElementRole::Root,
+            Self::MessageDef | Self::EnumDef | Self::ServiceDef | Self::PackageDef => UniversalElementRole::Detail,
+            _ => UniversalElementRole::None,
+        }
     }
 }

@@ -1,6 +1,6 @@
 #![allow(unused)]
 
-use oak_core::SyntaxKind;
+use oak_core::{ElementType, TokenType, UniversalElementRole, UniversalTokenRole};
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[repr(u16)]
@@ -101,24 +101,27 @@ pub enum JavadocSyntaxKind {
     Root,
 }
 
-impl SyntaxKind for JavadocSyntaxKind {
-    fn is_trivia(&self) -> bool {
-        matches!(self, Self::Whitespace | Self::Newline)
-    }
+impl TokenType for JavadocSyntaxKind {
+    const END_OF_STREAM: Self = Self::Eof;
+    type Role = UniversalTokenRole;
 
-    fn is_comment(&self) -> bool {
-        matches!(self, Self::CommentStart | Self::CommentEnd)
+    fn role(&self) -> Self::Role {
+        match self {
+            Self::Whitespace | Self::Newline => UniversalTokenRole::Whitespace,
+            Self::CommentStart | Self::CommentEnd => UniversalTokenRole::Comment,
+            Self::Eof => UniversalTokenRole::Eof,
+            _ => UniversalTokenRole::None,
+        }
     }
+}
 
-    fn is_whitespace(&self) -> bool {
-        matches!(self, Self::Whitespace | Self::Newline)
-    }
+impl ElementType for JavadocSyntaxKind {
+    type Role = UniversalElementRole;
 
-    fn is_token_type(&self) -> bool {
-        !matches!(self, Self::Root)
-    }
-
-    fn is_element_type(&self) -> bool {
-        matches!(self, Self::Root)
+    fn role(&self) -> Self::Role {
+        match self {
+            Self::Error => UniversalElementRole::Error,
+            _ => UniversalElementRole::None,
+        }
     }
 }

@@ -1,254 +1,393 @@
-use oak_core::SyntaxKind;
+use oak_core::{ElementType, Token, TokenType, UniversalElementRole, UniversalTokenRole};
+use std::fmt::{Display, Formatter};
 
-/// Crystal 语法节点类型
+pub type CrystalToken = Token<CrystalSyntaxKind>;
+
+/// Crystal syntax node types
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[repr(u16)]
 pub enum CrystalSyntaxKind {
-    // 基础 kind
+    /// Whitespace characters
     Whitespace,
+    /// Comment
     Comment,
+    /// Identifier
     Identifier,
-
-    // 字面量
+    /// Number literal
     Number,
+    /// String literal
     String,
+    /// Character literal
     Character,
+    /// Symbol
     Symbol,
-
-    // 关键字
+    /// class keyword
     ClassKeyword,
+    /// module keyword
     ModuleKeyword,
+    /// def keyword
     DefKeyword,
+    /// end keyword
     EndKeyword,
+    /// if keyword
     IfKeyword,
+    /// else keyword
     ElseKeyword,
+    /// elsif keyword
     ElsifKeyword,
+    /// unless keyword
     UnlessKeyword,
+    /// case keyword
     CaseKeyword,
+    /// when keyword
     WhenKeyword,
+    /// then keyword
     ThenKeyword,
+    /// while keyword
     WhileKeyword,
+    /// until keyword
     UntilKeyword,
+    /// for keyword
     ForKeyword,
+    /// in keyword
     InKeyword,
+    /// do keyword
     DoKeyword,
+    /// begin keyword
     BeginKeyword,
+    /// rescue keyword
     RescueKeyword,
+    /// ensure keyword
     EnsureKeyword,
+    /// break keyword
     BreakKeyword,
+    /// next keyword
     NextKeyword,
+    /// return keyword
     ReturnKeyword,
+    /// yield keyword
     YieldKeyword,
+    /// super keyword
     SuperKeyword,
+    /// self keyword
     SelfKeyword,
+    /// true keyword
     TrueKeyword,
+    /// false keyword
     FalseKeyword,
+    /// nil keyword
     NilKeyword,
+    /// and keyword
     AndKeyword,
+    /// or keyword
     OrKeyword,
+    /// not keyword
     NotKeyword,
-
-    // 运算符
+    /// plus operator
     Plus,
+    /// minus operator
     Minus,
+    /// multiplication operator
     Star,
+    /// division operator
     Slash,
+    /// modulo operator
     Percent,
+    /// exponentiation operator
     StarStar,
+    /// assignment operator
     Equal,
+    /// equality operator
     EqualEqual,
+    /// inequality operator
     NotEqual,
+    /// less than operator
     Less,
+    /// less than or equal operator
     LessEqual,
+    /// greater than operator
     Greater,
+    /// greater than or equal operator
     GreaterEqual,
+    /// spaceship operator
     Spaceship,
+    /// match operator
     Match,
+    /// not match operator
     NotMatch,
+    /// and operator
     And,
+    /// or operator
     Or,
+    /// not operator
     Not,
+    /// bitwise and operator
     BitwiseAnd,
+    /// bitwise or operator
     BitwiseOr,
+    /// bitwise xor operator
     BitwiseXor,
+    /// bitwise not operator
     BitwiseNot,
+    /// left shift operator
     LeftShift,
+    /// right shift operator
     RightShift,
+    /// logical and operator
     LogicalAnd,
+    /// logical or operator
     LogicalOr,
-
-    // 赋值运算符
+    /// plus assignment operator
     PlusEqual,
+    /// minus assignment operator
     MinusEqual,
+    /// multiplication assignment operator
     StarEqual,
+    /// division assignment operator
     SlashEqual,
+    /// modulo assignment operator
     PercentEqual,
+    /// exponentiation assignment operator
     StarStarEqual,
+    /// and assignment operator
     AndEqual,
+    /// or assignment operator
     OrEqual,
+    /// xor assignment operator
     XorEqual,
+    /// left shift assignment operator
     LeftShiftEqual,
+    /// right shift assignment operator
     RightShiftEqual,
+    /// logical and assignment operator
     LogicalAndEqual,
+    /// logical or assignment operator
     LogicalOrEqual,
-
-    // 分隔符
+    /// left parenthesis
     LeftParen,
+    /// right parenthesis
     RightParen,
+    /// left brace
     LeftBrace,
+    /// right brace
     RightBrace,
+    /// left bracket
     LeftBracket,
+    /// right bracket
     RightBracket,
+    /// comma
     Comma,
+    /// semicolon
     Semicolon,
+    /// dot
     Dot,
+    /// dot dot
     DotDot,
+    /// dot dot dot
     DotDotDot,
+    /// colon
     Colon,
+    /// double colon
     DoubleColon,
+    /// arrow
     Arrow,
+    /// fat arrow
     FatArrow,
+    /// question mark
     Question,
+    /// at sign
     At,
+    /// double at sign
     DoubleAt,
+    /// dollar sign
     Dollar,
-
-    // 特殊
+    /// newline
     Newline,
+    /// end of file
     Eof,
+    /// error
     Error,
-
-    // 语法节点
+    /// root node
     Root,
+    /// program node
     Program,
+    /// source file node
+    SourceFile,
+    /// class definition
     ClassDef,
+    /// module definition
     ModuleDef,
+    /// method definition
     MethodDef,
+    /// block
     Block,
+    /// if expression
     IfExpr,
+    /// unless expression
     UnlessExpr,
+    /// case expression
     CaseExpr,
+    /// when clause
     WhenClause,
+    /// while expression
     WhileExpr,
+    /// until expression
     UntilExpr,
+    /// for expression
     ForExpr,
+    /// begin expression
     BeginExpr,
+    /// rescue clause
     RescueClause,
+    /// ensure clause
     EnsureClause,
+    /// call expression
     CallExpr,
+    /// index expression
     IndexExpr,
+    /// member expression
     MemberExpr,
+    /// binary expression
     BinaryExpr,
+    /// unary expression
     UnaryExpr,
+    /// assignment expression
     AssignExpr,
+    /// literal expression
     LiteralExpr,
+    /// identifier expression
     IdentifierExpr,
+    /// array expression
     ArrayExpr,
+    /// hash expression
     HashExpr,
+    /// hash pair
     HashPair,
+    /// block expression
     BlockExpr,
+    /// lambda expression
     LambdaExpr,
+    /// yield expression
     YieldExpr,
+    /// return expression
     ReturnExpr,
+    /// break expression
     BreakExpr,
+    /// next expression
     NextExpr,
+    /// super expression
     SuperExpr,
+    /// self expression
     SelfExpr,
+    /// parenthesized expression
     ParenExpr,
-
-    // 类型相关
+    /// type expression
     TypeExpr,
+    /// generic type
     GenericType,
+    /// union type
     UnionType,
+    /// tuple type
     TupleType,
+    /// named tuple type
     NamedTupleType,
+    /// procedure type
     ProcType,
-
-    // 模式匹配
+    /// pattern
     Pattern,
+    /// identifier pattern
     IdentifierPattern,
+    /// literal pattern
     LiteralPattern,
+    /// array pattern
     ArrayPattern,
+    /// hash pattern
     HashPattern,
+    /// tuple pattern
     TuplePattern,
-
-    // 参数
+    /// parameter list
     ParamList,
+    /// parameter
     Param,
+    /// splat parameter
     SplatParam,
+    /// double splat parameter
     DoubleSplatParam,
+    /// block parameter
     BlockParam,
-
-    // 注解
+    /// annotation
     Annotation,
-
-    // 宏
+    /// macro definition
     MacroDef,
+    /// macro call
     MacroCall,
+    /// macro expression
     MacroExpr,
-
-    // 其他
+    /// alias
     Alias,
+    /// include
     Include,
+    /// extend
     Extend,
+    /// require
     Require,
-
-    // 可见性修饰符
+    /// private
     Private,
+    /// protected
     Protected,
+    /// public
     Public,
-
-    // 抽象和虚拟
+    /// abstract
     Abstract,
+    /// virtual
     Virtual,
+    /// override
     Override,
-
-    // 结构体和枚举
+    /// struct definition
     StructDef,
+    /// enum definition
     EnumDef,
+    /// union definition
     UnionDef,
+    /// lib definition
     LibDef,
-
-    // 异常处理
+    /// raise expression
     RaiseExpr,
-
-    // 范围
+    /// range expression
     RangeExpr,
+    /// exclusive range expression
     ExclusiveRangeExpr,
-
-    // 正则表达式
+    /// regex literal
     RegexLiteral,
-
-    // 字符串插值
+    /// string interpolation
     StringInterpolation,
+    /// interpolation expression
     InterpolationExpr,
-
-    // 符号
+    /// symbol literal
     SymbolLiteral,
-
-    // 常量
+    /// constant reference
     ConstantRef,
-
-    // 实例变量和类变量
+    /// instance variable
     InstanceVar,
+    /// class variable
     ClassVar,
-
-    // 全局变量
+    /// global variable
     GlobalVar,
-
-    // 特殊方法
+    /// getter method
     Getter,
+    /// setter method
     Setter,
-
-    // 操作符重载
+    /// operator definition
     OperatorDef,
 }
 
 impl CrystalSyntaxKind {
+    /// Check if the syntax kind is trivia (whitespace, comment, or newline)
     pub fn is_trivia(&self) -> bool {
         matches!(self, Self::Whitespace | Self::Comment | Self::Newline)
     }
 
+    /// Check if the syntax kind is a keyword
     pub fn is_keyword(self) -> bool {
         matches!(
             self,
@@ -286,10 +425,12 @@ impl CrystalSyntaxKind {
         )
     }
 
+    /// Check if the syntax kind is a literal
     pub fn is_literal(self) -> bool {
         matches!(self, Self::Number | Self::String | Self::Character | Self::Symbol | Self::RegexLiteral | Self::SymbolLiteral)
     }
 
+    /// Check if the syntax kind is an operator
     pub fn is_operator(self) -> bool {
         matches!(
             self,
@@ -323,6 +464,7 @@ impl CrystalSyntaxKind {
         )
     }
 
+    /// Check if the syntax kind is an assignment operator
     pub fn is_assignment_operator(self) -> bool {
         matches!(
             self,
@@ -342,39 +484,46 @@ impl CrystalSyntaxKind {
         )
     }
 
+    /// Check if the syntax kind is a delimiter
     pub fn is_delimiter(self) -> bool {
-        matches!(
-            self,
-            Self::LeftParen
-                | Self::RightParen
-                | Self::LeftBrace
-                | Self::RightBrace
-                | Self::LeftBracket
-                | Self::RightBracket
-                | Self::Comma
-                | Self::Semicolon
-        )
+        matches!(self, Self::LeftParen | Self::RightParen | Self::LeftBrace | Self::RightBrace | Self::LeftBracket | Self::RightBracket | Self::Comma | Self::Semicolon)
     }
 }
 
-impl SyntaxKind for CrystalSyntaxKind {
-    fn is_trivia(&self) -> bool {
-        matches!(self, Self::Whitespace | Self::Comment)
-    }
+impl TokenType for CrystalSyntaxKind {
+    const END_OF_STREAM: Self = Self::Eof;
+    type Role = UniversalTokenRole;
 
-    fn is_comment(&self) -> bool {
-        matches!(self, Self::Comment)
+    fn role(&self) -> Self::Role {
+        match self {
+            Self::Whitespace | Self::Newline => UniversalTokenRole::Whitespace,
+            Self::Comment => UniversalTokenRole::Comment,
+            Self::Identifier => UniversalTokenRole::Name,
+            Self::Number | Self::String | Self::Character | Self::Symbol | Self::RegexLiteral | Self::SymbolLiteral => UniversalTokenRole::Literal,
+            Self::Error => UniversalTokenRole::Error,
+            Self::Eof => UniversalTokenRole::Eof,
+            k if k.is_keyword() => UniversalTokenRole::Keyword,
+            k if k.is_operator() || k.is_assignment_operator() => UniversalTokenRole::Operator,
+            k if k.is_delimiter() => UniversalTokenRole::Punctuation,
+            _ => UniversalTokenRole::None,
+        }
     }
+}
 
-    fn is_whitespace(&self) -> bool {
-        matches!(self, Self::Whitespace)
+impl ElementType for CrystalSyntaxKind {
+    type Role = UniversalElementRole;
+
+    fn role(&self) -> Self::Role {
+        match self {
+            Self::Root => UniversalElementRole::Root,
+            Self::Error => UniversalElementRole::Error,
+            _ => UniversalElementRole::None,
+        }
     }
+}
 
-    fn is_token_type(&self) -> bool {
-        !matches!(self, Self::Eof | Self::Error)
-    }
-
-    fn is_element_type(&self) -> bool {
-        matches!(self, Self::Eof | Self::Error)
+impl Display for CrystalSyntaxKind {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{:?}", self)
     }
 }

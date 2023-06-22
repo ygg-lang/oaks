@@ -9,7 +9,7 @@ fn test_perl_lexer() {
     let lexer = PerlLexer::new(language);
 
     let test_runner = LexerTester::new(here.join("tests/lexer")).with_extension("pl").with_timeout(Duration::from_secs(5));
-    match test_runner.run_tests::<PerlLanguage, _>(lexer) {
+    match test_runner.run_tests::<PerlLanguage, _>(&lexer) {
         Ok(()) => println!("Perl lexer tests passed!"),
         Err(e) => panic!("Perl lexer tests failed: {}", e),
     }

@@ -21,10 +21,12 @@ Oak F# is a robust parser for F#, designed to handle complete F# syntax includin
 Basic example:
 
 ```rust
-use oak_fsharp::{Parser, FSharpLanguage, SourceText};
+use oak_core::{Parser, SourceText, parser::session::ParseSession};
+use oak_fsharp::{FSharpParser, FSharpLanguage};
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
-    let parser = Parser::new();
+    let mut session = ParseSession::<FSharpLanguage>::default();
+    let parser = FSharpParser::new();
     let source = SourceText::new(r#"
 let helloWorld = 
     printfn "Hello, F#!"
@@ -32,7 +34,7 @@ let helloWorld =
 helloWorld
     "#);
     
-    let result = parser.parse(&source);
+    let result = parser.parse(&source, &[], &mut session);
     println!("Parsed F# successfully.");
     Ok(())
 }
@@ -42,72 +44,66 @@ helloWorld
 
 ### Function Parsing
 ```rust
-use oak_fsharp::{Parser, FSharpLanguage, SourceText};
+use oak_core::{Parser, SourceText, parser::session::ParseSession};
+use oak_fsharp::{FSharpParser, FSharpLanguage};
 
-let parser = Parser::new();
+let mut session = ParseSession::<FSharpLanguage>::default();
+let parser = FSharpParser::new();
 let source = SourceText::new(r#"
-let rec factorial n =
-    if n <= 1 then 1
-    else n * factorial (n - 1)
-
-let main() =
-    let result = factorial 5
-    printfn "Factorial of 5 is %d" result
-
-main()
+let add x y = x + y
+let result = add 5 10
 "#);
 
-let result = parser.parse(&source);
+let result = parser.parse(&source, &[], &mut session);
 println!("Function parsed successfully.");
 ```
 
-### Module Parsing
+### Type Parsing
 ```rust
-use oak_fsharp::{Parser, FSharpLanguage, SourceText};
+use oak_core::{Parser, SourceText, parser::session::ParseSession};
+use oak_fsharp::{FSharpParser, FSharpLanguage};
 
-let parser = Parser::new();
+let mut session = ParseSession::<FSharpLanguage>::default();
+let parser = FSharpParser::new();
 let source = SourceText::new(r#"
-module Calculator =
-    let add x y = x + y
-    let subtract x y = x - y
-    let multiply x y = x * y
-    let divide x y = x / y
-
-open Calculator
-
-let result = add 10 5
-printfn "10 + 5 = %d" result
+type Person = {
+    Name: string
+    Age: int
+}
 "#);
 
-let result = parser.parse(&source);
-println!("Module parsed successfully.");
+let result = parser.parse(&source, &[], &mut session);
+println!("Type parsed successfully.");
 ```
 
 ## 🔧 Advanced Features
 
 ### Token-Level Parsing
 ```rust
-use oak_fsharp::{Parser, FSharpLanguage, SourceText};
+use oak_core::{Parser, SourceText, parser::session::ParseSession};
+use oak_fsharp::{FSharpParser, FSharpLanguage};
 
-let parser = Parser::new();
+let mut session = ParseSession::<FSharpLanguage>::default();
+let parser = FSharpParser::new();
 let source = SourceText::new("let x = 42");
-let result = parser.parse(&source);
+let result = parser.parse(&source, &[], &mut session);
 println!("Token parsing completed.");
 ```
 
 ### Error Handling
 ```rust
-use oak_fsharp::{Parser, FSharpLanguage, SourceText};
+use oak_core::{Parser, SourceText, parser::session::ParseSession};
+use oak_fsharp::{FSharpParser, FSharpLanguage};
 
-let parser = Parser::new();
+let mut session = ParseSession::<FSharpLanguage>::default();
+let parser = FSharpParser::new();
 let source = SourceText::new(r#"
-// Invalid F# code example
-let brokenFunction =
-    printfn "Hello"
-    // Missing proper function definition
+let broken = 
+    if x > 0 then
+# Missing else
 "#);
 
-let result = parser.parse(&source);
+let result = parser.parse(&source, &[], &mut session);
 if let Some(errors) = result.result.err() {
     println!("Parse errors found: {:?}", errors);
 } else {

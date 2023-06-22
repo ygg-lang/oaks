@@ -3,11 +3,22 @@
 #![doc(html_logo_url = "https://raw.githubusercontent.com/ygg-lang/oaks/refs/heads/dev/documents/logo.svg")]
 #![doc(html_favicon_url = "https://raw.githubusercontent.com/ygg-lang/oaks/refs/heads/dev/documents/logo.svg")]
 
-pub mod kind;
-pub mod language;
-pub mod lexer;
+pub mod ast;
+mod builder;
+mod formatter;
+pub mod highlighter;
+mod kind;
+mod language;
+mod lexer;
+pub mod parser;
 
-// 重新导出主要类型
-pub use kind::DSyntaxKind;
-pub use language::DLanguage;
-pub use lexer::DLexer;
+pub use crate::{
+    ast::DRoot,
+    builder::DBuilder,
+    formatter::DFormatter,
+    highlighter::DHighlighter,
+    kind::{DSyntaxKind, DToken},
+    language::DLanguage,
+    lexer::DLexer,
+    parser::DParser,
+};

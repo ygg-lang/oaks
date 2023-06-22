@@ -1,9 +1,13 @@
-#[derive(Copy, Clone, Debug, PartialEq, Eq)]
+use oak_core::{ElementType, TokenType, UniversalElementRole, UniversalTokenRole};
+
+#[derive(Copy, Clone, Debug, PartialEq, Eq, Hash)]
 pub enum ZigSyntaxKind {
+    Root,
     // 基础 kind
     Whitespace,
     Newline,
     Comment,
+    DocComment,
     Error,
     Eof,
 
@@ -15,7 +19,7 @@ pub enum ZigSyntaxKind {
     FloatLiteral,
     BooleanLiteral,
 
-    // Zig 关键- 基本结构
+    // Zig 关键字 - 基本结构
     Const,
     Var,
     Fn,
@@ -60,14 +64,14 @@ pub enum ZigSyntaxKind {
     Resume,
     Cancel,
 
-    // Zig 关键- 内存管理
+    // Zig 关键字 - 内存管理
     Undefined,
     Null,
     Volatile,
     AllowZero,
     NoAlias,
 
-    // Zig 关键- 其他
+    // Zig 关键字 - 其他
     And,
     Or,
     AnyFrame,
@@ -93,19 +97,19 @@ pub enum ZigSyntaxKind {
     F64,
     F80,
     F128,
-    C_Short,
-    C_UShort,
-    C_Int,
-    C_UInt,
-    C_Long,
-    C_ULong,
-    C_LongLong,
-    C_ULongLong,
-    C_LongDouble,
-    C_Void,
+    CShort,
+    CUshort,
+    CInt,
+    CUint,
+    CLong,
+    CUlong,
+    CLongLong,
+    CUlongLong,
+    CLongDouble,
+    CVoid,
     Void,
-    Comptime_Int,
-    Comptime_Float,
+    ComptimeInt,
+    ComptimeFloat,
 
     // 操作符
     Plus,         // +
@@ -118,6 +122,7 @@ pub enum ZigSyntaxKind {
     MinusPercent, // -%
     StarPercent,  // *%
     PlusPlus,     // ++
+    MinusMinus,   // --
 
     // 位操作符
     Ampersand,      // &
@@ -135,8 +140,9 @@ pub enum ZigSyntaxKind {
     LessEqual,    // <=
     GreaterEqual, // >=
 
-    // 逻辑操作    AndAnd,         // and
-    OrOr, // or
+    // 逻辑操作符
+    AndAnd, // and
+    OrOr,   // or
 
     // 赋值操作符
     Assign,               // =
@@ -163,10 +169,12 @@ pub enum ZigSyntaxKind {
     Dot,          // .
     DotDot,       // ..
     DotDotDot,    // ...
+    DotQuestion,  // .?
+    DotStar,      // .*
     Colon,        // :
     Question,     // ?
     Exclamation,  // !
-    Arrow,        // =>
+    Arrow,        // ->
     FatArrow,     // =>
 
     // 特殊操作符
@@ -177,28 +185,195 @@ pub enum ZigSyntaxKind {
 
     // 内置函数前缀
     At, // @
+    BuiltinIdentifier,
 
-    // 字符串插    StringStart,
+    // 字符串插值
+    StringStart,
     StringEnd,
     StringContent,
     InterpolationStart,
     InterpolationEnd,
 
-    // 多行字符    MultilineStringStart,
+    // 多行字符串
+    MultilineStringStart,
     MultilineStringEnd,
     MultilineStringContent,
 
-    // 文档注释
-    DocComment,
-
-    // 编译时指    CompileDirective,
+    // 编译时指令
+    CompileDirective,
 
     // 其他
     Text,
+
+    // 非终结符
+    VarDeclaration,
+    FnDeclaration,
+    StructDeclaration,
+    EnumDeclaration,
+    UnionDeclaration,
+    Block,
+    IfStatement,
+    WhileStatement,
+    ForStatement,
+    ReturnStatement,
 }
 
-impl oak_core::SyntaxKind for ZigSyntaxKind {
-    fn is_trivia(&self) -> bool {
+impl TokenType for ZigSyntaxKind {
+    type Role = UniversalTokenRole;
+    const END_OF_STREAM: Self = Self::Eof;
+
+    fn role(&self) -> Self::Role {
+        match self {
+            Self::Const
+            | Self::Var
+            | Self::Fn
+            | Self::Struct
+            | Self::Union
+            | Self::Enum
+            | Self::Opaque
+            | Self::Type
+            | Self::Comptime
+            | Self::Inline
+            | Self::NoInline
+            | Self::Pub
+            | Self::Export
+            | Self::Extern
+            | Self::Packed
+            | Self::Align
+            | Self::CallConv
+            | Self::LinkSection
+            | Self::If
+            | Self::Else
+            | Self::Switch
+            | Self::While
+            | Self::For
+            | Self::Break
+            | Self::Continue
+            | Self::Return
+            | Self::Defer
+            | Self::ErrDefer
+            | Self::Unreachable
+            | Self::NoReturn
+            | Self::ErrorKeyword
+            | Self::Test
+            | Self::Async
+            | Self::Await
+            | Self::Suspend
+            | Self::Resume
+            | Self::Cancel
+            | Self::Undefined
+            | Self::Null
+            | Self::Volatile
+            | Self::AllowZero
+            | Self::NoAlias
+            | Self::And
+            | Self::Or
+            | Self::AnyFrame
+            | Self::AnyType
+            | Self::ThreadLocal
+            | Self::OrElse
+            | Self::CatchKeyword
+            | Self::TryKeyword
+            | Self::AwaitKeyword => UniversalTokenRole::Keyword,
+
+            Self::Bool
+            | Self::I8
+            | Self::I16
+            | Self::I32
+            | Self::I64
+            | Self::I128
+            | Self::Isize
+            | Self::U8
+            | Self::U16
+            | Self::U32
+            | Self::U64
+            | Self::U128
+            | Self::Usize
+            | Self::F16
+            | Self::F32
+            | Self::F64
+            | Self::F80
+            | Self::F128
+            | Self::CShort
+            | Self::CUshort
+            | Self::CInt
+            | Self::CUint
+            | Self::CLong
+            | Self::CUlong
+            | Self::CLongLong
+            | Self::CUlongLong
+            | Self::CLongDouble
+            | Self::CVoid
+            | Self::Void
+            | Self::ComptimeInt
+            | Self::ComptimeFloat => UniversalTokenRole::Keyword,
+
+            Self::Identifier => UniversalTokenRole::Name,
+
+            Self::StringLiteral | Self::CharLiteral | Self::IntegerLiteral | Self::FloatLiteral | Self::BooleanLiteral => UniversalTokenRole::Literal,
+
+            Self::Plus
+            | Self::Minus
+            | Self::Star
+            | Self::Slash
+            | Self::Percent
+            | Self::StarStar
+            | Self::PlusPercent
+            | Self::MinusPercent
+            | Self::StarPercent
+            | Self::PlusPlus
+            | Self::Ampersand
+            | Self::Pipe
+            | Self::Caret
+            | Self::Tilde
+            | Self::LessLess
+            | Self::GreaterGreater
+            | Self::Equal
+            | Self::NotEqual
+            | Self::Less
+            | Self::Greater
+            | Self::LessEqual
+            | Self::GreaterEqual
+            | Self::AndAnd
+            | Self::OrOr
+            | Self::Assign
+            | Self::PlusAssign
+            | Self::MinusAssign
+            | Self::StarAssign
+            | Self::SlashAssign
+            | Self::PercentAssign
+            | Self::AmpersandAssign
+            | Self::PipeAssign
+            | Self::CaretAssign
+            | Self::LessLessAssign
+            | Self::GreaterGreaterAssign
+            | Self::At => UniversalTokenRole::Operator,
+
+            Self::LeftParen
+            | Self::RightParen
+            | Self::LeftBrace
+            | Self::RightBrace
+            | Self::LeftBracket
+            | Self::RightBracket
+            | Self::Semicolon
+            | Self::Comma
+            | Self::Dot
+            | Self::DotDot
+            | Self::DotDotDot
+            | Self::Colon
+            | Self::Question
+            | Self::Exclamation
+            | Self::Arrow
+            | Self::FatArrow => UniversalTokenRole::Punctuation,
+
+            Self::Whitespace | Self::Newline => UniversalTokenRole::Whitespace,
+            Self::Comment | Self::DocComment => UniversalTokenRole::Comment,
+            Self::Error => UniversalTokenRole::Error,
+            _ => UniversalTokenRole::None,
+        }
+    }
+
+    fn is_ignored(&self) -> bool {
         matches!(self, Self::Whitespace | Self::Newline | Self::Comment | Self::DocComment)
     }
 
@@ -209,12 +384,19 @@ impl oak_core::SyntaxKind for ZigSyntaxKind {
     fn is_whitespace(&self) -> bool {
         matches!(self, Self::Whitespace | Self::Newline)
     }
+}
 
-    fn is_token_type(&self) -> bool {
-        !matches!(self, Self::Text)
-    }
+impl ElementType for ZigSyntaxKind {
+    type Role = UniversalElementRole;
 
-    fn is_element_type(&self) -> bool {
-        matches!(self, Self::Text)
+    fn role(&self) -> Self::Role {
+        match self {
+            Self::Root => UniversalElementRole::Root,
+            Self::FnDeclaration | Self::StructDeclaration | Self::EnumDeclaration | Self::UnionDeclaration => UniversalElementRole::Definition,
+            Self::VarDeclaration | Self::IfStatement | Self::WhileStatement | Self::ForStatement | Self::ReturnStatement => UniversalElementRole::Statement,
+            Self::Block => UniversalElementRole::Container,
+            Self::Error => UniversalElementRole::Error,
+            _ => UniversalElementRole::None,
+        }
     }
 }

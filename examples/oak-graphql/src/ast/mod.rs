@@ -1,4 +1,4 @@
-use std::range::Range;
+use core::range::Range;
 
 type SourceSpan = Range<usize>;
 
@@ -235,15 +235,8 @@ pub struct Pointer {
 pub enum DirectDeclarator {
     Identifier(String),
     Declarator(Box<Declarator>),
-    Array {
-        declarator: Box<DirectDeclarator>,
-        assignment_expression: Option<Expression>,
-    },
-    Function {
-        declarator: Box<DirectDeclarator>,
-        parameter_type_list: Option<ParameterTypeList>,
-        identifier_list: Option<Vec<String>>,
-    },
+    Array { declarator: Box<DirectDeclarator>, assignment_expression: Option<Expression> },
+    Function { declarator: Box<DirectDeclarator>, parameter_type_list: Option<ParameterTypeList>, identifier_list: Option<Vec<String>> },
 }
 
 /// 参数类型列表

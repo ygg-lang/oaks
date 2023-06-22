@@ -1,69 +1,90 @@
-use oak_core::Token;
+use oak_core::{ElementType, TokenType, UniversalElementRole, UniversalTokenRole};
+use serde::{Deserialize, Serialize};
 
-/// Ini tokens
-pub type IniToken = Token<IniTokenKind>;
+#[derive(Copy, Clone, Debug, PartialEq, Eq, Hash, Serialize, Deserialize)]
+pub enum IniSyntaxKind {
+    // Basic kinds
+    Whitespace,
+    Newline,
+    Comment,
+    Error,
+    Eof,
 
-/// Ini tokens 种类（亦作为语法节点种类
-#[derive(Debug, Clone, PartialEq, Copy)]
-pub enum IniTokenKind {
-    // 语法节点（red/green 根）
+    // Structures
+    Root,
     Document,
+    Table,
+    ArrayOfTables,
+    Array,
+    InlineTable,
+    KeyValue,
+    Key,
+    Value,
 
-    // Ini 值类
+    // Tokens
+    LeftBrace,          // {
+    RightBrace,         // }
+    LeftBracket,        // [
+    RightBracket,       // ]
+    DoubleLeftBracket,  // [[
+    DoubleRightBracket, // ]]
+    Comma,              // ,
+    Dot,                // .
+    Equal,              // =
+
+    // Values
+    Identifier,
     String,
     Integer,
     Float,
     Boolean,
     DateTime,
-
-    // Ini 结构符号
-    LeftBrace,    // {
-    RightBrace,   // }
-    LeftBracket,  // [
-    RightBracket, // ]
-    Comma,        // ,
-    Dot,          // .
-    Equal,        // =
-
-    // Ini 特殊符号
-    DoubleLeftBracket,  // [[
-    DoubleRightBracket, // ]]
-
-    // 标识符和
-    Identifier,
-
-    // 空白和注
-    Whitespace,
-    Comment,
-
-    // 特殊
-    Eof,
-    Invalid,
 }
 
-impl core::fmt::Display for IniTokenKind {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+impl IniSyntaxKind {
+    pub fn is_trivia(&self) -> bool {
+        matches!(self, Self::Whitespace | Self::Newline | Self::Comment)
+    }
+}
+
+impl TokenType for IniSyntaxKind {
+    const END_OF_STREAM: Self = Self::Eof;
+    type Role = UniversalTokenRole;
+
+    fn role(&self) -> Self::Role {
         match self {
-            IniTokenKind::Document => write!(f, "Document"),
-            IniTokenKind::String => write!(f, "String"),
-            IniTokenKind::Integer => write!(f, "Integer"),
-            IniTokenKind::Float => write!(f, "Float"),
-            IniTokenKind::Boolean => write!(f, "Boolean"),
-            IniTokenKind::DateTime => write!(f, "DateTime"),
-            IniTokenKind::LeftBrace => write!(f, "{{"),
-            IniTokenKind::RightBrace => write!(f, "}}"),
-            IniTokenKind::LeftBracket => write!(f, "["),
-            IniTokenKind::RightBracket => write!(f, "]"),
-            IniTokenKind::Comma => write!(f, ","),
-            IniTokenKind::Dot => write!(f, "."),
-            IniTokenKind::Equal => write!(f, "="),
-            IniTokenKind::DoubleLeftBracket => write!(f, "[["),
-            IniTokenKind::DoubleRightBracket => write!(f, "]]"),
-            IniTokenKind::Identifier => write!(f, "Identifier"),
-            IniTokenKind::Whitespace => write!(f, "Whitespace"),
-            IniTokenKind::Comment => write!(f, "Comment"),
-            IniTokenKind::Eof => write!(f, "EOF"),
-            IniTokenKind::Invalid => write!(f, "Invalid"),
+            Self::Whitespace | Self::Newline => UniversalTokenRole::Whitespace,
+            Self::Comment => UniversalTokenRole::Comment,
+            Self::Eof => UniversalTokenRole::Eof,
+            Self::LeftBrace | Self::RightBrace | Self::LeftBracket | Self::RightBracket | Self::DoubleLeftBracket | Self::DoubleRightBracket | Self::Comma | Self::Dot | Self::Equal => UniversalTokenRole::Punctuation,
+            Self::Identifier => UniversalTokenRole::Name,
+            Self::String | Self::Integer | Self::Float | Self::Boolean | Self::DateTime => UniversalTokenRole::Literal,
+            _ => UniversalTokenRole::None,
         }
+    }
+}
+
+impl ElementType for IniSyntaxKind {
+    type Role = UniversalElementRole;
+
+    fn role(&self) -> Self::Role {
+        match self {
+            Self::Root | Self::Document => UniversalElementRole::Root,
+            Self::Table | Self::ArrayOfTables | Self::Array | Self::InlineTable => UniversalElementRole::Container,
+            Self::KeyValue => UniversalElementRole::Statement,
+            Self::Key => UniversalElementRole::Name,
+            Self::Value => UniversalElementRole::Value,
+            Self::String | Self::Integer | Self::Float | Self::Boolean | Self::DateTime => UniversalElementRole::Value,
+            Self::Error => UniversalElementRole::Error,
+            _ => UniversalElementRole::None,
+        }
+    }
+
+    fn is_root(&self) -> bool {
+        matches!(self, Self::Root | Self::Document)
+    }
+
+    fn is_error(&self) -> bool {
+        matches!(self, Self::Error)
     }
 }

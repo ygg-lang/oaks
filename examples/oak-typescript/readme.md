@@ -21,10 +21,13 @@ Oak TypeScript is a robust parser for TypeScript, designed to handle complete Ty
 Basic example:
 
 ```rust
-use oak_typescript::{Parser, TypeScriptLanguage, SourceText};
+use oak_core::{Parser, SourceText, parser::session::ParseSession};
+use oak_typescript::{TypeScriptParser, TypeScriptLanguage};
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
-    let parser = Parser::new();
+    let config = TypeScriptLanguage::standard();
+    let mut session = ParseSession::<TypeScriptLanguage>::default();
+    let parser = TypeScriptParser::new(&config);
     let source = SourceText::new(r#"
 interface User {
     id: number;
@@ -37,7 +40,7 @@ function greet(user: User): string {
 }
     "#);
     
-    let result = parser.parse(&source);
+    let result = parser.parse(&source, &[], &mut session);
     println!("Parsed TypeScript code successfully.");
     Ok(())
 }
@@ -47,9 +50,12 @@ function greet(user: User): string {
 
 ### Interface Parsing
 ```rust
-use oak_typescript::{Parser, TypeScriptLanguage, SourceText};
+use oak_core::{Parser, SourceText, parser::session::ParseSession};
+use oak_typescript::{TypeScriptParser, TypeScriptLanguage};
 
-let parser = Parser::new();
+let config = TypeScriptLanguage::standard();
+let mut session = ParseSession::<TypeScriptLanguage>::default();
+let parser = TypeScriptParser::new(&config);
 let source = SourceText::new(r#"
 interface User {
     id: number;
@@ -59,30 +65,36 @@ interface User {
 }
 "#);
 
-let result = parser.parse(&source);
+let result = parser.parse(&source, &[], &mut session);
 println!("Parsed TypeScript interface successfully.");
 ```
 
 ### Function Parsing
 ```rust
-use oak_typescript::{Parser, TypeScriptLanguage, SourceText};
+use oak_core::{Parser, SourceText, parser::session::ParseSession};
+use oak_typescript::{TypeScriptParser, TypeScriptLanguage};
 
-let parser = Parser::new();
+let config = TypeScriptLanguage::standard();
+let mut session = ParseSession::<TypeScriptLanguage>::default();
+let parser = TypeScriptParser::new(&config);
 let source = SourceText::new(r#"
 function calculateTotal(items: Item[]): number {
     return items.reduce((sum, item) => sum + item.price, 0);
 }
 "#);
 
-let result = parser.parse(&source);
+let result = parser.parse(&source, &[], &mut session);
 println!("Parsed TypeScript function successfully.");
 ```
 
 ### Class Parsing
 ```rust
-use oak_typescript::{Parser, TypeScriptLanguage, SourceText};
+use oak_core::{Parser, SourceText, parser::session::ParseSession};
+use oak_typescript::{TypeScriptParser, TypeScriptLanguage};
 
-let parser = Parser::new();
+let config = TypeScriptLanguage::standard();
+let mut session = ParseSession::<TypeScriptLanguage>::default();
+let parser = TypeScriptParser::new(&config);
 let source = SourceText::new(r#"
 class UserService {
     private users: User[] = [];
@@ -95,7 +107,7 @@ class UserService {
 }
 "#);
 
-let result = parser.parse(&source);
+let result = parser.parse(&source, &[], &mut session);
 println!("Parsed TypeScript class successfully.");
 ```
 
@@ -103,19 +115,25 @@ println!("Parsed TypeScript class successfully.");
 
 ### Token-Level Parsing
 ```rust
-use oak_typescript::{Parser, TypeScriptLanguage, SourceText};
+use oak_core::{Parser, SourceText, parser::session::ParseSession};
+use oak_typescript::{TypeScriptParser, TypeScriptLanguage};
 
-let parser = Parser::new();
+let config = TypeScriptLanguage::standard();
+let mut session = ParseSession::<TypeScriptLanguage>::default();
+let parser = TypeScriptParser::new(&config);
 let source = SourceText::new("const x: number = 42;");
-let result = parser.parse(&source);
+let result = parser.parse(&source, &[], &mut session);
 // Token information is available in the parse result
 ```
 
 ### Error Handling
 ```rust
-use oak_typescript::{Parser, TypeScriptLanguage, SourceText};
+use oak_core::{Parser, SourceText, parser::session::ParseSession};
+use oak_typescript::{TypeScriptParser, TypeScriptLanguage};
 
-let parser = Parser::new();
+let config = TypeScriptLanguage::standard();
+let mut session = ParseSession::<TypeScriptLanguage>::default();
+let parser = TypeScriptParser::new(&config);
 let source = SourceText::new(r#"
 interface User {
     name: string
@@ -123,9 +141,9 @@ interface User {
 }
 "#);
 
-let result = parser.parse(&source);
-if let Err(e) = result.result {
-    println!("Parse error: {:?}", e);
+let result = parser.parse(&source, &[], &mut session);
+if let Some(errors) = result.result.err() {
+    println!("Parse error: {:?}", errors);
 }
 ```
 

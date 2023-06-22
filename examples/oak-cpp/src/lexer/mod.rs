@@ -1,10 +1,13 @@
-use crate::{kind::CppSyntaxKind, language::CppLanguage};
-use oak_core::{IncrementalCache, Lexer, LexerState, SourceText, lexer::LexOutput, source::Source};
+mod token_type;
+pub use token_type::CppTokenType;
 
-type State<S> = LexerState<S, CppLanguage>;
+use crate::language::CppLanguage;
+use oak_core::{Lexer, LexerCache, LexerState, TextEdit, lexer::LexOutput, source::Source};
+
+type State<'a, S> = LexerState<'a, S, CppLanguage>;
 
 pub struct CppLexer<'config> {
-    config: &'config CppLanguage,
+    _config: &'config CppLanguage,
 }
 
 /// C 词法分析器类型别名
@@ -12,11 +15,11 @@ pub type CLexer<'config> = CppLexer<'config>;
 
 impl<'config> CppLexer<'config> {
     pub fn new(config: &'config CppLanguage) -> Self {
-        Self { config }
+        Self { _config: config }
     }
 
     /// 跳过空白字符
-    fn skip_whitespace<S: Source>(&self, state: &mut State<S>) -> bool {
+    fn skip_whitespace<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start_pos = state.get_position();
 
         while let Some(ch) = state.peek() {
@@ -29,7 +32,7 @@ impl<'config> CppLexer<'config> {
         }
 
         if state.get_position() > start_pos {
-            state.add_token(CppSyntaxKind::Whitespace, start_pos, state.get_position());
+            state.add_token(CppTokenType::Whitespace, start_pos, state.get_position());
             true
         }
         else {
@@ -38,12 +41,12 @@ impl<'config> CppLexer<'config> {
     }
 
     /// 处理换行
-    fn lex_newline<S: Source>(&self, state: &mut State<S>) -> bool {
+    fn lex_newline<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start_pos = state.get_position();
 
         if let Some('\n') = state.peek() {
             state.advance(1);
-            state.add_token(CppSyntaxKind::Newline, start_pos, state.get_position());
+            state.add_token(CppTokenType::Newline, start_pos, state.get_position());
             true
         }
         else if let Some('\r') = state.peek() {
@@ -51,7 +54,7 @@ impl<'config> CppLexer<'config> {
             if let Some('\n') = state.peek() {
                 state.advance(1);
             }
-            state.add_token(CppSyntaxKind::Newline, start_pos, state.get_position());
+            state.add_token(CppTokenType::Newline, start_pos, state.get_position());
             true
         }
         else {
@@ -60,7 +63,7 @@ impl<'config> CppLexer<'config> {
     }
 
     /// 处理注释
-    fn lex_comment<S: Source>(&self, state: &mut State<S>) -> bool {
+    fn lex_comment<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start_pos = state.get_position();
 
         if let Some('/') = state.peek() {
@@ -73,7 +76,7 @@ impl<'config> CppLexer<'config> {
                     }
                     state.advance(ch.len_utf8());
                 }
-                state.add_token(CppSyntaxKind::Comment, start_pos, state.get_position());
+                state.add_token(CppTokenType::Comment, start_pos, state.get_position());
                 true
             }
             else if let Some('*') = state.peek_next_n(1) {
@@ -86,7 +89,7 @@ impl<'config> CppLexer<'config> {
                     }
                     state.advance(ch.len_utf8());
                 }
-                state.add_token(CppSyntaxKind::Comment, start_pos, state.get_position());
+                state.add_token(CppTokenType::Comment, start_pos, state.get_position());
                 true
             }
             else {
@@ -99,7 +102,7 @@ impl<'config> CppLexer<'config> {
     }
 
     /// 处理字符串字面量
-    fn lex_string<S: Source>(&self, state: &mut State<S>) -> bool {
+    fn lex_string<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start_pos = state.get_position();
 
         if let Some('"') = state.peek() {
@@ -131,7 +134,7 @@ impl<'config> CppLexer<'config> {
                 state.advance(ch.len_utf8());
             }
 
-            state.add_token(CppSyntaxKind::StringLiteral, start_pos, state.get_position());
+            state.add_token(CppTokenType::StringLiteral, start_pos, state.get_position());
             true
         }
         else {
@@ -140,7 +143,7 @@ impl<'config> CppLexer<'config> {
     }
 
     /// 处理字符字面量
-    fn lex_character<S: Source>(&self, state: &mut State<S>) -> bool {
+    fn lex_character<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start_pos = state.get_position();
 
         if let Some('\'') = state.peek() {
@@ -172,7 +175,7 @@ impl<'config> CppLexer<'config> {
                 state.advance(ch.len_utf8());
             }
 
-            state.add_token(CppSyntaxKind::CharacterLiteral, start_pos, state.get_position());
+            state.add_token(CppTokenType::CharacterLiteral, start_pos, state.get_position());
             true
         }
         else {
@@ -181,7 +184,7 @@ impl<'config> CppLexer<'config> {
     }
 
     /// 处理数字字面量
-    fn lex_number<S: Source>(&self, state: &mut State<S>) -> bool {
+    fn lex_number<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start_pos = state.get_position();
 
         if let Some(ch) = state.peek() {
@@ -295,8 +298,7 @@ impl<'config> CppLexer<'config> {
                     }
                 }
 
-                let token_kind = if is_float { CppSyntaxKind::FloatLiteral } else { CppSyntaxKind::IntegerLiteral };
-
+                let token_kind = if is_float { CppTokenType::FloatLiteral } else { CppTokenType::IntegerLiteral };
                 state.add_token(token_kind, start_pos, state.get_position());
                 true
             }
@@ -310,7 +312,7 @@ impl<'config> CppLexer<'config> {
     }
 
     /// 处理关键字或标识符
-    fn lex_keyword_or_identifier<S: Source>(&self, state: &mut State<S>) -> bool {
+    fn lex_keyword_or_identifier<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start_pos = state.get_position();
 
         if let Some(ch) = state.peek() {
@@ -325,22 +327,15 @@ impl<'config> CppLexer<'config> {
                 }
 
                 let text = state.get_text_in((start_pos..state.get_position()).into());
-                let token_kind = match text {
+                let token_kind = match text.as_ref() {
                     // C++ 关键
-                    "alignas" | "alignof" | "and" | "and_eq" | "asm" | "atomic_cancel" | "atomic_commit"
-                    | "atomic_noexcept" | "auto" | "bitand" | "bitor" | "bool" | "break" | "case" | "catch" | "char"
-                    | "char8_t" | "char16_t" | "char32_t" | "class" | "compl" | "concept" | "const" | "consteval"
-                    | "constexpr" | "constinit" | "const_cast" | "continue" | "co_await" | "co_return" | "co_yield"
-                    | "decltype" | "default" | "delete" | "do" | "double" | "dynamic_cast" | "else" | "enum" | "explicit"
-                    | "export" | "extern" | "false" | "float" | "for" | "friend" | "goto" | "if" | "inline" | "int"
-                    | "long" | "mutable" | "namespace" | "new" | "noexcept" | "not" | "not_eq" | "nullptr" | "operator"
-                    | "or" | "or_eq" | "private" | "protected" | "public" | "reflexpr" | "register" | "reinterpret_cast"
-                    | "requires" | "return" | "short" | "signed" | "sizeof" | "static" | "static_assert" | "static_cast"
-                    | "struct" | "switch" | "synchronized" | "template" | "this" | "thread_local" | "throw" | "true"
-                    | "try" | "typedef" | "typeid" | "typename" | "union" | "unsigned" | "using" | "virtual" | "void"
-                    | "volatile" | "wchar_t" | "while" | "xor" | "xor_eq" => CppSyntaxKind::Keyword,
-                    "true" | "false" => CppSyntaxKind::BooleanLiteral,
-                    _ => CppSyntaxKind::Identifier,
+                    "alignas" | "alignof" | "and" | "and_eq" | "asm" | "atomic_cancel" | "atomic_commit" | "atomic_noexcept" | "auto" | "bitand" | "bitor" | "bool" | "break" | "case" | "catch" | "char" | "char8_t" | "char16_t" | "char32_t" | "class"
+                    | "compl" | "concept" | "const" | "consteval" | "constexpr" | "constinit" | "const_cast" | "continue" | "co_await" | "co_return" | "co_yield" | "decltype" | "default" | "delete" | "do" | "double" | "dynamic_cast" | "else" | "enum"
+                    | "explicit" | "export" | "extern" | "float" | "for" | "friend" | "goto" | "if" | "inline" | "int" | "long" | "mutable" | "namespace" | "new" | "noexcept" | "not" | "not_eq" | "nullptr" | "operator" | "or" | "or_eq" | "private"
+                    | "protected" | "public" | "reflexpr" | "register" | "reinterpret_cast" | "requires" | "return" | "short" | "signed" | "sizeof" | "static" | "static_assert" | "static_cast" | "struct" | "switch" | "synchronized" | "template"
+                    | "this" | "thread_local" | "throw" | "try" | "typedef" | "typeid" | "typename" | "union" | "unsigned" | "using" | "virtual" | "void" | "volatile" | "wchar_t" | "while" | "xor" | "xor_eq" => CppTokenType::Keyword,
+                    "true" | "false" => CppTokenType::BooleanLiteral,
+                    _ => CppTokenType::Identifier,
                 };
 
                 state.add_token(token_kind, start_pos, state.get_position());
@@ -356,149 +351,139 @@ impl<'config> CppLexer<'config> {
     }
 
     /// 处理操作符
-    fn lex_operator<S: Source>(&self, state: &mut State<S>) -> bool {
+    fn lex_operator<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start_pos = state.get_position();
 
         if let Some(ch) = state.peek() {
             let (token_kind, advance_count) = match ch {
                 '+' => {
                     if let Some('+') = state.peek_next_n(1) {
-                        (CppSyntaxKind::Increment, 2)
+                        (CppTokenType::Increment, 2)
                     }
                     else if let Some('=') = state.peek_next_n(1) {
-                        (CppSyntaxKind::PlusAssign, 2)
+                        (CppTokenType::PlusAssign, 2)
                     }
                     else {
-                        (CppSyntaxKind::Plus, 1)
+                        (CppTokenType::Plus, 1)
                     }
                 }
                 '-' => {
                     if let Some('-') = state.peek_next_n(1) {
-                        (CppSyntaxKind::Decrement, 2)
+                        (CppTokenType::Decrement, 2)
                     }
                     else if let Some('=') = state.peek_next_n(1) {
-                        (CppSyntaxKind::MinusAssign, 2)
+                        (CppTokenType::MinusAssign, 2)
                     }
                     else if let Some('>') = state.peek_next_n(1) {
-                        (CppSyntaxKind::Arrow, 2)
+                        (CppTokenType::Arrow, 2)
                     }
                     else {
-                        (CppSyntaxKind::Minus, 1)
+                        (CppTokenType::Minus, 1)
                     }
                 }
                 '*' => {
                     if let Some('=') = state.peek_next_n(1) {
-                        (CppSyntaxKind::StarAssign, 2)
+                        (CppTokenType::StarAssign, 2)
                     }
                     else {
-                        (CppSyntaxKind::Star, 1)
+                        (CppTokenType::Star, 1)
                     }
                 }
                 '/' => {
                     if let Some('=') = state.peek_next_n(1) {
-                        (CppSyntaxKind::SlashAssign, 2)
+                        (CppTokenType::SlashAssign, 2)
                     }
                     else {
-                        (CppSyntaxKind::Slash, 1)
+                        (CppTokenType::Slash, 1)
                     }
                 }
                 '%' => {
                     if let Some('=') = state.peek_next_n(1) {
-                        (CppSyntaxKind::PercentAssign, 2)
+                        (CppTokenType::PercentAssign, 2)
                     }
                     else {
-                        (CppSyntaxKind::Percent, 1)
+                        (CppTokenType::Percent, 1)
                     }
                 }
                 '=' => {
                     if let Some('=') = state.peek_next_n(1) {
-                        (CppSyntaxKind::Equal, 2)
+                        (CppTokenType::Equal, 2)
                     }
                     else {
-                        (CppSyntaxKind::Assign, 1)
+                        (CppTokenType::Assign, 1)
                     }
                 }
                 '!' => {
                     if let Some('=') = state.peek_next_n(1) {
-                        (CppSyntaxKind::NotEqual, 2)
+                        (CppTokenType::NotEqual, 2)
                     }
                     else {
-                        (CppSyntaxKind::LogicalNot, 1)
+                        (CppTokenType::LogicalNot, 1)
                     }
                 }
                 '<' => {
                     if let Some('<') = state.peek_next_n(1) {
-                        if let Some('=') = state.peek_next_n(2) {
-                            (CppSyntaxKind::LeftShiftAssign, 3)
-                        }
-                        else {
-                            (CppSyntaxKind::LeftShift, 2)
-                        }
+                        if let Some('=') = state.peek_next_n(2) { (CppTokenType::LeftShiftAssign, 3) } else { (CppTokenType::LeftShift, 2) }
                     }
                     else if let Some('=') = state.peek_next_n(1) {
-                        (CppSyntaxKind::LessEqual, 2)
+                        (CppTokenType::LessEqual, 2)
                     }
                     else {
-                        (CppSyntaxKind::Less, 1)
+                        (CppTokenType::Less, 1)
                     }
                 }
                 '>' => {
                     if let Some('>') = state.peek_next_n(1) {
-                        if let Some('=') = state.peek_next_n(2) {
-                            (CppSyntaxKind::RightShiftAssign, 3)
-                        }
-                        else {
-                            (CppSyntaxKind::RightShift, 2)
-                        }
+                        if let Some('=') = state.peek_next_n(2) { (CppTokenType::RightShiftAssign, 3) } else { (CppTokenType::RightShift, 2) }
                     }
                     else if let Some('=') = state.peek_next_n(1) {
-                        (CppSyntaxKind::GreaterEqual, 2)
+                        (CppTokenType::GreaterEqual, 2)
                     }
                     else {
-                        (CppSyntaxKind::Greater, 1)
+                        (CppTokenType::Greater, 1)
                     }
                 }
                 '&' => {
                     if let Some('&') = state.peek_next_n(1) {
-                        (CppSyntaxKind::LogicalAnd, 2)
+                        (CppTokenType::LogicalAnd, 2)
                     }
                     else if let Some('=') = state.peek_next_n(1) {
-                        (CppSyntaxKind::AndAssign, 2)
+                        (CppTokenType::AndAssign, 2)
                     }
                     else {
-                        (CppSyntaxKind::BitAnd, 1)
+                        (CppTokenType::BitAnd, 1)
                     }
                 }
                 '|' => {
                     if let Some('|') = state.peek_next_n(1) {
-                        (CppSyntaxKind::LogicalOr, 2)
+                        (CppTokenType::LogicalOr, 2)
                     }
                     else if let Some('=') = state.peek_next_n(1) {
-                        (CppSyntaxKind::OrAssign, 2)
+                        (CppTokenType::OrAssign, 2)
                     }
                     else {
-                        (CppSyntaxKind::BitOr, 1)
+                        (CppTokenType::BitOr, 1)
                     }
                 }
                 '^' => {
                     if let Some('=') = state.peek_next_n(1) {
-                        (CppSyntaxKind::XorAssign, 2)
+                        (CppTokenType::XorAssign, 2)
                     }
                     else {
-                        (CppSyntaxKind::BitXor, 1)
+                        (CppTokenType::BitXor, 1)
                     }
                 }
-                '~' => (CppSyntaxKind::BitNot, 1),
-                '?' => (CppSyntaxKind::Question, 1),
+                '~' => (CppTokenType::BitNot, 1),
+                '?' => (CppTokenType::Question, 1),
                 ':' => {
                     if let Some(':') = state.peek_next_n(1) {
-                        (CppSyntaxKind::Scope, 2)
+                        (CppTokenType::Scope, 2)
                     }
                     else {
-                        (CppSyntaxKind::Colon, 1)
+                        (CppTokenType::Colon, 1)
                     }
                 }
-                '.' => (CppSyntaxKind::Dot, 1),
+                '.' => (CppTokenType::Dot, 1),
                 _ => return false,
             };
 
@@ -512,19 +497,19 @@ impl<'config> CppLexer<'config> {
     }
 
     /// 处理分隔符
-    fn lex_delimiter<S: Source>(&self, state: &mut State<S>) -> bool {
+    fn lex_delimiter<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start_pos = state.get_position();
 
         if let Some(ch) = state.peek() {
             let token_kind = match ch {
-                '(' => CppSyntaxKind::LeftParen,
-                ')' => CppSyntaxKind::RightParen,
-                '[' => CppSyntaxKind::LeftBracket,
-                ']' => CppSyntaxKind::RightBracket,
-                '{' => CppSyntaxKind::LeftBrace,
-                '}' => CppSyntaxKind::RightBrace,
-                ',' => CppSyntaxKind::Comma,
-                ';' => CppSyntaxKind::Semicolon,
+                '(' => CppTokenType::LeftParen,
+                ')' => CppTokenType::RightParen,
+                '[' => CppTokenType::LeftBracket,
+                ']' => CppTokenType::RightBracket,
+                '{' => CppTokenType::LeftBrace,
+                '}' => CppTokenType::RightBrace,
+                ',' => CppTokenType::Comma,
+                ';' => CppTokenType::Semicolon,
                 _ => return false,
             };
 
@@ -538,7 +523,7 @@ impl<'config> CppLexer<'config> {
     }
 
     /// 处理预处理指令
-    fn lex_preprocessor<S: Source>(&self, state: &mut State<S>) -> bool {
+    fn lex_preprocessor<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start_pos = state.get_position();
 
         if let Some('#') = state.peek() {
@@ -550,7 +535,7 @@ impl<'config> CppLexer<'config> {
                 state.advance(ch.len_utf8());
             }
 
-            state.add_token(CppSyntaxKind::Preprocessor, start_pos, state.get_position());
+            state.add_token(CppTokenType::Preprocessor, start_pos, state.get_position());
             true
         }
         else {
@@ -560,77 +545,64 @@ impl<'config> CppLexer<'config> {
 }
 
 impl<'config> Lexer<CppLanguage> for CppLexer<'config> {
-    fn lex_incremental(
-        &self,
-        source: impl Source,
-        _changed: usize,
-        _cache: IncrementalCache<CppLanguage>,
-    ) -> LexOutput<CppLanguage> {
-        let mut state = LexerState::new_with_cache(source, _changed, _cache);
+    fn lex<'a, S: Source + ?Sized>(&self, source: &'a S, _edits: &[TextEdit], cache: &'a mut impl LexerCache<CppLanguage>) -> LexOutput<CppLanguage> {
+        let mut state = LexerState::new(source);
+        let result = self.run(&mut state);
+        state.finish_with_cache(result, cache)
+    }
+}
 
-        loop {
-            // 检查是否到达文件末尾
-            if state.not_at_end() == false {
-                break;
-            }
-
+impl<'config> CppLexer<'config> {
+    fn run<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> Result<(), oak_core::OakError> {
+        while state.not_at_end() {
             // 尝试各种词法规则
-            if self.skip_whitespace(&mut state) {
+            if self.skip_whitespace(state) {
                 continue;
             }
 
-            if self.lex_newline(&mut state) {
+            if self.lex_newline(state) {
                 continue;
             }
 
-            if self.lex_comment(&mut state) {
+            if self.lex_comment(state) {
                 continue;
             }
 
-            if self.lex_string(&mut state) {
+            if self.lex_string(state) {
                 continue;
             }
 
-            if self.lex_character(&mut state) {
+            if self.lex_character(state) {
                 continue;
             }
 
-            if self.lex_number(&mut state) {
+            if self.lex_number(state) {
                 continue;
             }
 
-            if self.lex_keyword_or_identifier(&mut state) {
+            if self.lex_keyword_or_identifier(state) {
                 continue;
             }
 
-            if self.lex_preprocessor(&mut state) {
+            if self.lex_preprocessor(state) {
                 continue;
             }
 
-            if self.lex_operator(&mut state) {
+            if self.lex_operator(state) {
                 continue;
             }
 
-            if self.lex_delimiter(&mut state) {
+            if self.lex_delimiter(state) {
                 continue;
             }
 
-            // 如果所有规则都不匹配，跳过当前字符并标记为错误
-            let start_pos = state.get_position();
+            // 如果都不匹配，跳过当前字符并记录错误
+            let start = state.get_position();
             if let Some(ch) = state.peek() {
                 state.advance(ch.len_utf8());
-                state.add_token(CppSyntaxKind::Error, start_pos, state.get_position());
-            }
-            else {
-                // 如果没有字符可读，退出循环
-                break;
+                state.add_token(CppTokenType::Error, start, state.get_position());
             }
         }
-
-        // 添加 EOF kind
-        let eof_pos = state.get_position();
-        state.add_token(CppSyntaxKind::Eof, eof_pos, eof_pos);
-
-        state.finish(Ok(()))
+        Ok(())
     }
 }

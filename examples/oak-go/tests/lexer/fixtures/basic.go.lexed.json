@@ -1,0 +1,355 @@
+{
+    "success": true,
+    "count": 58,
+    "tokens": [
+        {
+            "kind": "Package",
+            "text": "package",
+            "start": 0,
+            "end": 7
+        },
+        {
+            "kind": "Identifier",
+            "text": "main",
+            "start": 8,
+            "end": 12
+        },
+        {
+            "kind": "Import",
+            "text": "import",
+            "start": 16,
+            "end": 22
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "\"fmt\"",
+            "start": 23,
+            "end": 28
+        },
+        {
+            "kind": "Func",
+            "text": "func",
+            "start": 32,
+            "end": 36
+        },
+        {
+            "kind": "Identifier",
+            "text": "main",
+            "start": 37,
+            "end": 41
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 41,
+            "end": 42
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 42,
+            "end": 43
+        },
+        {
+            "kind": "LeftBrace",
+            "text": "{",
+            "start": 44,
+            "end": 45
+        },
+        {
+            "kind": "Identifier",
+            "text": "fmt",
+            "start": 51,
+            "end": 54
+        },
+        {
+            "kind": "Period",
+            "text": ".",
+            "start": 54,
+            "end": 55
+        },
+        {
+            "kind": "Identifier",
+            "text": "Println",
+            "start": 55,
+            "end": 62
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 62,
+            "end": 63
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "\"Hello, World!\"",
+            "start": 63,
+            "end": 78
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 78,
+            "end": 79
+        },
+        {
+            "kind": "RightBrace",
+            "text": "}",
+            "start": 81,
+            "end": 82
+        },
+        {
+            "kind": "Func",
+            "text": "func",
+            "start": 86,
+            "end": 90
+        },
+        {
+            "kind": "Identifier",
+            "text": "add",
+            "start": 91,
+            "end": 94
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 94,
+            "end": 95
+        },
+        {
+            "kind": "Identifier",
+            "text": "x",
+            "start": 95,
+            "end": 96
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 96,
+            "end": 97
+        },
+        {
+            "kind": "Identifier",
+            "text": "y",
+            "start": 98,
+            "end": 99
+        },
+        {
+            "kind": "Int",
+            "text": "int",
+            "start": 100,
+            "end": 103
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 103,
+            "end": 104
+        },
+        {
+            "kind": "Int",
+            "text": "int",
+            "start": 105,
+            "end": 108
+        },
+        {
+            "kind": "LeftBrace",
+            "text": "{",
+            "start": 109,
+            "end": 110
+        },
+        {
+            "kind": "Return",
+            "text": "return",
+            "start": 116,
+            "end": 122
+        },
+        {
+            "kind": "Identifier",
+            "text": "x",
+            "start": 123,
+            "end": 124
+        },
+        {
+            "kind": "Plus",
+            "text": "+",
+            "start": 125,
+            "end": 126
+        },
+        {
+            "kind": "Identifier",
+            "text": "y",
+            "start": 127,
+            "end": 128
+        },
+        {
+            "kind": "RightBrace",
+            "text": "}",
+            "start": 130,
+            "end": 131
+        },
+        {
+            "kind": "Type",
+            "text": "type",
+            "start": 135,
+            "end": 139
+        },
+        {
+            "kind": "Identifier",
+            "text": "Person",
+            "start": 140,
+            "end": 146
+        },
+        {
+            "kind": "Struct",
+            "text": "struct",
+            "start": 147,
+            "end": 153
+        },
+        {
+            "kind": "LeftBrace",
+            "text": "{",
+            "start": 154,
+            "end": 155
+        },
+        {
+            "kind": "Identifier",
+            "text": "Name",
+            "start": 161,
+            "end": 165
+        },
+        {
+            "kind": "String",
+            "text": "string",
+            "start": 166,
+            "end": 172
+        },
+        {
+            "kind": "Identifier",
+            "text": "Age",
+            "start": 178,
+            "end": 181
+        },
+        {
+            "kind": "Int",
+            "text": "int",
+            "start": 183,
+            "end": 186
+        },
+        {
+            "kind": "RightBrace",
+            "text": "}",
+            "start": 188,
+            "end": 189
+        },
+        {
+            "kind": "Var",
+            "text": "var",
+            "start": 193,
+            "end": 196
+        },
+        {
+            "kind": "Identifier",
+            "text": "numbers",
+            "start": 197,
+            "end": 204
+        },
+        {
+            "kind": "Assign",
+            "text": "=",
+            "start": 205,
+            "end": 206
+        },
+        {
+            "kind": "LeftBracket",
+            "text": "[",
+            "start": 207,
+            "end": 208
+        },
+        {
+            "kind": "RightBracket",
+            "text": "]",
+            "start": 208,
+            "end": 209
+        },
+        {
+            "kind": "Int",
+            "text": "int",
+            "start": 209,
+            "end": 212
+        },
+        {
+            "kind": "LeftBrace",
+            "text": "{",
+            "start": 212,
+            "end": 213
+        },
+        {
+            "kind": "IntLiteral",
+            "text": "1",
+            "start": 213,
+            "end": 214
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 214,
+            "end": 215
+        },
+        {
+            "kind": "IntLiteral",
+            "text": "2",
+            "start": 216,
+            "end": 217
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 217,
+            "end": 218
+        },
+        {
+            "kind": "IntLiteral",
+            "text": "3",
+            "start": 219,
+            "end": 220
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 220,
+            "end": 221
+        },
+        {
+            "kind": "IntLiteral",
+            "text": "4",
+            "start": 222,
+            "end": 223
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 223,
+            "end": 224
+        },
+        {
+            "kind": "IntLiteral",
+            "text": "5",
+            "start": 225,
+            "end": 226
+        },
+        {
+            "kind": "RightBrace",
+            "text": "}",
+            "start": 226,
+            "end": 227
+        },
+        {
+            "kind": "Eof",
+            "text": "",
+            "start": 227,
+            "end": 227
+        }
+    ],
+    "errors": []
+}

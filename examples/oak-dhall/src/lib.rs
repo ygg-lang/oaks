@@ -4,13 +4,21 @@
 #![doc(html_favicon_url = "https://raw.githubusercontent.com/ygg-lang/oaks/refs/heads/dev/documents/logo.svg")]
 
 pub mod ast;
-pub mod kind;
-pub mod language;
-pub mod lexer;
+mod kind;
+mod language;
+mod lexer;
+pub mod parser;
 
-pub use ast::DHallRoot;
-pub use kind::DHallSyntaxKind;
-pub use language::DHallLanguage;
-pub use lexer::DHallLexer;
+mod builder;
+mod formatter;
+pub mod highlighter;
 
-pub type DHallToken = oak_core::Token<DHallSyntaxKind>;
+pub use crate::{
+    ast::DHallRoot,
+    builder::DHallBuilder,
+    formatter::DHallFormatter,
+    highlighter::DHallHighlighter,
+    kind::{DHallSyntaxKind, DHallToken},
+    language::DHallLanguage,
+    lexer::DHallLexer,
+};

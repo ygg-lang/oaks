@@ -8,7 +8,7 @@ fn test_gsgl_lexer() {
     let tests = here.join("tests/lexer");
     let lexer = GsglLexer::new();
     let test_runner = LexerTester::new(tests).with_extension("gsgl").with_timeout(Duration::from_secs(5));
-    match test_runner.run_tests::<GsglLanguage, _>(lexer) {
+    match test_runner.run_tests::<GsglLanguage, _>(&lexer) {
         Ok(()) => println!("GSGL lexer tests passed!"),
         Err(e) => panic!("GSGL lexer tests failed: {}", e),
     }

@@ -1,6 +1,4 @@
-#![feature(new_range_api)]
-
-use oak_core::{helpers::LexerTester, source::Source};
+use oak_core::helpers::LexerTester;
 use oak_csv::{CsvLanguage, CsvLexer};
 use std::{path::Path, time::Duration};
 
@@ -10,7 +8,7 @@ fn test_csv_lexer() {
     let language = Box::leak(Box::new(CsvLanguage::default()));
     let lexer = CsvLexer::new(language);
     let test_runner = LexerTester::new(here.join("tests/lexer")).with_extension("csv").with_timeout(Duration::from_secs(5));
-    match test_runner.run_tests::<CsvLanguage, _>(lexer) {
+    match test_runner.run_tests::<CsvLanguage, _>(&lexer) {
         Ok(()) => println!("CSV lexer tests passed!"),
         Err(e) => panic!("CSV lexer tests failed: {}", e),
     }

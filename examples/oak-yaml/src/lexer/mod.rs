@@ -1,134 +1,121 @@
 use crate::{kind::YamlSyntaxKind, language::YamlLanguage};
 use oak_core::{
-    IncrementalCache, Lexer, OakError,
-    lexer::{CommentLine, LexOutput, LexerState, StringConfig, WhitespaceConfig},
+    Lexer, LexerState, OakError,
+    lexer::{CommentConfig, LexOutput, LexerCache, StringConfig, WhitespaceConfig},
     source::Source,
 };
 
 static YAML_WHITESPACE: WhitespaceConfig = WhitespaceConfig { unicode_whitespace: false };
 
-static YAML_COMMENT: CommentLine = CommentLine { line_markers: &["#"] };
+static YAML_COMMENT: CommentConfig = CommentConfig { line_marker: "#", block_start: "", block_end: "", nested_blocks: false };
 
-static YAML_STRING: StringConfig = StringConfig { quotes: &['"', '\''], escape: Some('\\') };
+static YAML_STRING: StringConfig = StringConfig { quotes: &['"'], escape: Some('\\') };
+
+type State<'s, S> = LexerState<'s, S, YamlLanguage>;
 
 #[derive(Clone)]
 pub struct YamlLexer {
-    config: YamlLanguage,
+    _config: YamlLanguage,
 }
 
 impl YamlLexer {
     pub fn new(config: &YamlLanguage) -> Self {
-        Self { config: config.clone() }
+        Self { _config: config.clone() }
+    }
+
+    fn run<'s, S: Source + ?Sized>(&self, state: &mut State<'s, S>) -> Result<(), OakError> {
+        while state.not_at_end() {
+            let safe_point = state.get_position();
+
+            if let Some(ch) = state.peek() {
+                match ch {
+                    ' ' | '\t' => {
+                        self.lex_whitespace(state);
+                    }
+                    '#' => {
+                        self.lex_comment(state);
+                    }
+                    '\n' | '\r' => {
+                        self.lex_newline(state);
+                    }
+                    '"' => {
+                        self.lex_string_literal(state)?;
+                    }
+                    '0'..='9' | '+' => {
+                        if self.lex_number_literal(state)? {
+                            continue;
+                        }
+                        if self.lex_single_char_tokens(state) {
+                            continue;
+                        }
+                    }
+                    '-' => {
+                        // Could be number, document start (---), or dash
+                        if self.lex_number_literal(state)? {
+                            continue;
+                        }
+                        if self.lex_multi_char_operators(state) {
+                            continue;
+                        }
+                        if self.lex_single_char_tokens(state) {
+                            continue;
+                        }
+                    }
+                    '.' => {
+                        // Could be document end (...)
+                        if self.lex_multi_char_operators(state) {
+                            continue;
+                        }
+                        // Fallback to error/unknown if not handled
+                        if self.lex_single_char_tokens(state) {
+                            continue;
+                        }
+                        // If we reach here, we have an unexpected character (handled below)
+                        state.advance(ch.len_utf8());
+                        state.add_token(YamlSyntaxKind::Error, safe_point, state.get_position());
+                    }
+                    'a'..='z' | 'A'..='Z' | '_' => {
+                        self.lex_identifier_or_keyword(state)?;
+                    }
+                    _ => {
+                        if self.lex_single_char_tokens(state) {
+                            continue;
+                        }
+
+                        // If we reach here, we have an unexpected character
+                        state.advance(ch.len_utf8());
+                        state.add_token(YamlSyntaxKind::Error, safe_point, state.get_position());
+                    }
+                }
+            }
+
+            state.advance_if_dead_lock(safe_point);
+        }
+
+        state.add_eof();
+        Ok(())
     }
 }
 
 impl Lexer<YamlLanguage> for YamlLexer {
-    fn lex_incremental(
-        &self,
-        source: impl Source,
-        _changed: usize,
-        _cache: IncrementalCache<YamlLanguage>,
-    ) -> LexOutput<YamlLanguage> {
-        let mut state = LexerState::new(source);
+    fn lex<'a, S: Source + ?Sized>(&self, source: &'a S, _edits: &[oak_core::TextEdit], cache: &'a mut impl LexerCache<YamlLanguage>) -> LexOutput<YamlLanguage> {
+        let mut state = State::new(source);
         let result = self.run(&mut state);
-        state.finish(result)
+        state.finish_with_cache(result, cache)
     }
 }
 
 impl YamlLexer {
-    fn run(&self, state: &mut LexerState<impl Source, YamlLanguage>) -> Result<(), OakError> {
-        while !state.not_at_end() {
-            // Skip whitespace
-            if self.lex_whitespace(state) {
-                continue;
-            }
-
-            // Skip comments
-            if self.lex_comment(state) {
-                continue;
-            }
-
-            // Lex newlines
-            if self.lex_newline(state) {
-                continue;
-            }
-
-            // Lex string literals
-            if self.lex_string_literal(state)? {
-                continue;
-            }
-
-            // Lex number literals
-            if self.lex_number_literal(state)? {
-                continue;
-            }
-
-            // Lex identifiers or keywords
-            if self.lex_identifier_or_keyword(state)? {
-                continue;
-            }
-
-            // Lex multi-character operators
-            if self.lex_multi_char_operators(state) {
-                continue;
-            }
-
-            // Lex single character tokens
-            if self.lex_single_char_tokens(state) {
-                continue;
-            }
-
-            // If we reach here, we have an unexpected character
-            let ch = state.peek().unwrap_or('\0');
-            state.advance(ch.len_utf8());
-            state.add_token(YamlSyntaxKind::Error, state.get_position() - ch.len_utf8(), state.get_position());
-        }
-
-        // Add EOF token
-        state.add_token(YamlSyntaxKind::Eof, state.get_position(), state.get_position());
-        Ok(())
+    fn lex_whitespace<'s, S: Source + ?Sized>(&self, state: &mut State<'s, S>) -> bool {
+        YAML_WHITESPACE.scan(state, YamlSyntaxKind::Whitespace)
     }
 
-    fn lex_whitespace(&self, state: &mut LexerState<impl Source, YamlLanguage>) -> bool {
-        let start = state.get_position();
-
-        if let Some(token) = YAML_WHITESPACE.scan(state.rest(), 0, YamlSyntaxKind::Whitespace) {
-            state.advance(token.span.end - token.span.start);
-            state.add_token(YamlSyntaxKind::Whitespace, start, state.get_position());
-            true
-        }
-        else {
-            false
-        }
+    fn lex_comment<'s, S: Source + ?Sized>(&self, state: &mut State<'s, S>) -> bool {
+        YAML_COMMENT.scan(state, YamlSyntaxKind::Comment, YamlSyntaxKind::Comment)
     }
 
-    fn lex_comment(&self, state: &mut LexerState<impl Source, YamlLanguage>) -> bool {
-        let start = state.get_position();
-
-        if let Some(token) = YAML_COMMENT.scan(state.rest(), 0, YamlSyntaxKind::Comment) {
-            // For line comments, we need to read until end of line
-            let mut length = token.span.end - token.span.start;
-            let remaining = &state.rest()[length..];
-
-            // Continue reading until newline
-            for ch in remaining.chars() {
-                if ch == '\n' || ch == '\r' {
-                    break;
-                }
-                length += ch.len_utf8();
-            }
-
-            state.advance(length);
-            state.add_token(YamlSyntaxKind::Comment, start, state.get_position());
-            true
-        }
-        else {
-            false
-        }
-    }
-
-    fn lex_newline(&self, state: &mut LexerState<impl Source, YamlLanguage>) -> bool {
-        if let Some(ch) = state.peek() {
+    fn lex_newline<'s, S: Source + ?Sized>(&self, state: &mut State<'s, S>) -> bool {
+        if let Some(ch) = state.current() {
             if ch == '\n' {
                 let start = state.get_position();
                 state.advance(1);
@@ -138,7 +125,7 @@ impl YamlLexer {
             else if ch == '\r' {
                 let start = state.get_position();
                 state.advance(1);
-                if state.peek() == Some('\n') {
+                if state.current() == Some('\n') {
                     state.advance(1);
                 }
                 state.add_token(YamlSyntaxKind::Newline, start, state.get_position());
@@ -148,20 +135,11 @@ impl YamlLexer {
         false
     }
 
-    fn lex_string_literal(&self, state: &mut LexerState<impl Source, YamlLanguage>) -> Result<bool, OakError> {
-        let start = state.get_position();
-
-        if let Some(token) = YAML_STRING.scan(state.rest(), 0, YamlSyntaxKind::StringLiteral) {
-            state.advance(token.span.end - token.span.start);
-            state.add_token(YamlSyntaxKind::StringLiteral, start, state.get_position());
-            Ok(true)
-        }
-        else {
-            Ok(false)
-        }
+    fn lex_string_literal<'s, S: Source + ?Sized>(&self, state: &mut State<'s, S>) -> Result<bool, OakError> {
+        Ok(YAML_STRING.scan(state, YamlSyntaxKind::StringLiteral))
     }
 
-    fn lex_number_literal(&self, state: &mut LexerState<impl Source, YamlLanguage>) -> Result<bool, OakError> {
+    fn lex_number_literal<'s, S: Source + ?Sized>(&self, state: &mut State<'s, S>) -> Result<bool, OakError> {
         let start = state.get_position();
 
         if let Some(ch) = state.peek() {
@@ -226,7 +204,7 @@ impl YamlLexer {
         }
     }
 
-    fn lex_identifier_or_keyword(&self, state: &mut LexerState<impl Source, YamlLanguage>) -> Result<bool, OakError> {
+    fn lex_identifier_or_keyword<'s, S: Source + ?Sized>(&self, state: &mut State<'s, S>) -> Result<bool, OakError> {
         let start = state.get_position();
 
         if let Some(ch) = state.peek() {
@@ -242,9 +220,10 @@ impl YamlLexer {
                     }
                 }
 
-                let text = state.get_text_from(start)[..(state.get_position() - start)].to_string();
-                let kind = self.keyword_kind(&text).unwrap_or(YamlSyntaxKind::Identifier);
-                state.add_token(kind, start, state.get_position());
+                let end = state.get_position();
+                let text = state.source().get_text_in((start..end).into());
+                let kind = self.keyword_kind(text.as_ref()).unwrap_or(YamlSyntaxKind::Identifier);
+                state.add_token(kind, start, end);
                 Ok(true)
             }
             else {
@@ -256,7 +235,7 @@ impl YamlLexer {
         }
     }
 
-    fn lex_multi_char_operators(&self, state: &mut LexerState<impl Source, YamlLanguage>) -> bool {
+    fn lex_multi_char_operators<'s, S: Source + ?Sized>(&self, state: &mut State<'s, S>) -> bool {
         let start = state.get_position();
 
         // Document start: ---
@@ -276,7 +255,7 @@ impl YamlLexer {
         false
     }
 
-    fn lex_single_char_tokens(&self, state: &mut LexerState<impl Source, YamlLanguage>) -> bool {
+    fn lex_single_char_tokens<'s, S: Source + ?Sized>(&self, state: &mut State<'s, S>) -> bool {
         if let Some(ch) = state.peek() {
             let start = state.get_position();
 

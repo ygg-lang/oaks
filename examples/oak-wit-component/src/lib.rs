@@ -1,10 +1,7 @@
-#![feature(new_range_api)]
-#![doc = include_str!("readme.md")]
-#![doc(html_logo_url = "https://raw.githubusercontent.com/ygg-lang/oaks/refs/heads/dev/documents/logo.svg")]
-#![doc(html_favicon_url = "https://raw.githubusercontent.com/ygg-lang/oaks/refs/heads/dev/documents/logo.svg")]
-mod language;
+pub mod ast;
+pub mod kind;
+pub mod language;
+pub mod lexer;
+pub mod parser;
 
-mod kind;
-mod lexer;
-
-pub use crate::{kind::WitSyntaxKind, language::WitLanguage, lexer::WitLexer};
+pub use crate::{ast::WitRoot, kind::WitSyntaxKind, language::WitLanguage, lexer::WitLexer, parser::WitParser};

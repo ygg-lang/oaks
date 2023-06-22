@@ -1,9 +1,9 @@
 [package]
 name = "oak-nix"
-description = "High-performance incremental Markdown parser for the oak ecosystem with flexible configuration, optimized for documentation and content creation."
+description = "Nix package manager language parser with support for declarative package configuration and reproducible builds."
 categories = ["parsing"]
-keywords = ["parser", "markdown", "commonmark", "extension"]
-documentation = "https://docs.rs/oak-markdown"
+keywords = ["parser", "nix", "package-manager", "declarative"]
+documentation = "https://docs.rs/oak-nix"
 readme = "readme.md"
 version.workspace = true
 authors.workspace = true
@@ -14,16 +14,25 @@ edition.workspace = true
 
 [dependencies]
 oak-core = { workspace = true }
-oak-highlight = { workspace = true, optional = true }
-oak-pretty-print = { workspace = true, optional = true }
-serde = { version = "1.0", features = ["derive"] }
+oak-highlight = { workspace = true }
+oak-pretty-print = { workspace = true }
+oak-lsp = { workspace = true }
+oak-hover = { workspace = true }
+oak-vfs = { workspace = true }
+oak-mcp = { workspace = true, optional = true }
+serde = { workspace = true }
+tracing = { workspace = true }
+
+tokio = { workspace = true, optional = true }
+axum = { workspace = true, optional = true }
 
 [dev-dependencies]
 oak-core = { workspace = true, features = ["testing"] }
 
-
 [features]
 default = []
+mcp = ["dep:oak-mcp"]
+axum = ["mcp", "dep:tokio", "dep:axum", "oak-mcp/axum", "oak-lsp/axum"]
 
 
 [package.metadata.docs.rs]

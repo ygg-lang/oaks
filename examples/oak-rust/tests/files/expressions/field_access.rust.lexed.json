@@ -1,0 +1,73 @@
+{
+    "success": true,
+    "count": 11,
+    "tokens": [
+        {
+            "kind": "Keyword(Fn)",
+            "text": "fn",
+            "start": 0,
+            "end": 2
+        },
+        {
+            "kind": "Identifier",
+            "text": "main",
+            "start": 3,
+            "end": 7
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 7,
+            "end": 8
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 8,
+            "end": 9
+        },
+        {
+            "kind": "LeftBrace",
+            "text": "{",
+            "start": 10,
+            "end": 11
+        },
+        {
+            "kind": "Identifier",
+            "text": "point",
+            "start": 17,
+            "end": 22
+        },
+        {
+            "kind": "Dot",
+            "text": ".",
+            "start": 22,
+            "end": 23
+        },
+        {
+            "kind": "Identifier",
+            "text": "x",
+            "start": 23,
+            "end": 24
+        },
+        {
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 24,
+            "end": 25
+        },
+        {
+            "kind": "RightBrace",
+            "text": "}",
+            "start": 27,
+            "end": 28
+        },
+        {
+            "kind": "Eof",
+            "text": "",
+            "start": 28,
+            "end": 28
+        }
+    ],
+    "errors": []
+}

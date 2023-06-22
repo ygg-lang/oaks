@@ -1,43 +1,36 @@
 use crate::{kind::ZigSyntaxKind, language::ZigLanguage};
 use oak_core::{
-    IncrementalCache, Lexer, LexerState, OakError,
-    lexer::{CommentLine, LexOutput, StringConfig, WhitespaceConfig},
+    Lexer, LexerCache, LexerState, OakError,
+    lexer::{LexOutput, WhitespaceConfig},
     source::Source,
 };
 use std::sync::LazyLock;
 
-type State<S: Source> = LexerState<S, ZigLanguage>;
+type State<'a, S> = LexerState<'a, S, ZigLanguage>;
 
 static ZIG_WHITESPACE: LazyLock<WhitespaceConfig> = LazyLock::new(|| WhitespaceConfig { unicode_whitespace: true });
-static ZIG_COMMENT: LazyLock<CommentLine> = LazyLock::new(|| CommentLine { line_markers: &["//"] });
-static ZIG_STRING: LazyLock<StringConfig> = LazyLock::new(|| StringConfig { quotes: &['"'], escape: Some('\\') });
-static ZIG_CHAR: LazyLock<StringConfig> = LazyLock::new(|| StringConfig { quotes: &['\''], escape: Some('\\') });
 
 #[derive(Clone)]
-pub struct ZigLexer<'config> {
-    config: &'config ZigLanguage,
-}
+pub struct ZigLexer;
 
-impl<'config> Lexer<ZigLanguage> for ZigLexer<'config> {
-    fn lex_incremental(
-        &self,
-        source: impl Source,
-        changed: usize,
-        cache: IncrementalCache<ZigLanguage>,
-    ) -> LexOutput<ZigLanguage> {
-        let mut state = LexerState::new_with_cache(source, changed, cache);
+impl Lexer<ZigLanguage> for ZigLexer {
+    fn lex<'a, S: Source + ?Sized>(&self, source: &S, _edits: &[oak_core::TextEdit], cache: &'a mut impl LexerCache<ZigLanguage>) -> LexOutput<ZigLanguage> {
+        let mut state = LexerState::new(source);
         let result = self.run(&mut state);
-        state.finish(result)
+        if result.is_ok() {
+            state.add_eof();
+        }
+        state.finish_with_cache(result, cache)
     }
 }
 
-impl<'config> ZigLexer<'config> {
-    pub fn new(config: &'config ZigLanguage) -> Self {
-        Self { config }
+impl ZigLexer {
+    pub fn new(_config: &ZigLanguage) -> Self {
+        Self
     }
 
     /// 主要的词法分析循环
-    fn run<S: Source>(&self, state: &mut State<S>) -> Result<(), OakError> {
+    fn run<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> Result<(), OakError> {
         while state.not_at_end() {
             let safe_point = state.get_position();
 
@@ -77,29 +70,26 @@ impl<'config> ZigLexer<'config> {
                 continue;
             }
 
-            state.safe_check(safe_point);
+            // 如果没有匹配到任何规则，前进一个字符并标记为错误
+            let start_pos = state.get_position();
+            if let Some(ch) = state.peek() {
+                state.advance(ch.len_utf8());
+                state.add_token(ZigSyntaxKind::Error, start_pos, state.get_position());
+            }
+
+            state.advance_if_dead_lock(safe_point);
         }
 
-        // 添加 EOF token
-        let eof_pos = state.get_position();
-        state.add_token(ZigSyntaxKind::Eof, eof_pos, eof_pos);
         Ok(())
     }
 
     /// 跳过空白字符
-    fn skip_whitespace<S: Source>(&self, state: &mut State<S>) -> bool {
-        match ZIG_WHITESPACE.scan(state.rest(), state.get_position(), ZigSyntaxKind::Whitespace) {
-            Some(token) => {
-                state.advance_with(token);
-                return true;
-            }
-            None => {}
-        }
-        false
+    fn skip_whitespace<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
+        ZIG_WHITESPACE.scan(state, ZigSyntaxKind::Whitespace)
     }
 
     /// 跳过注释
-    fn skip_comment<S: Source>(&self, state: &mut State<S>) -> bool {
+    fn skip_comment<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start = state.get_position();
         let rest = state.rest();
 
@@ -132,7 +122,7 @@ impl<'config> ZigLexer<'config> {
     }
 
     /// 解析字符串字面量
-    fn lex_string_literal<S: Source>(&self, state: &mut State<S>) -> bool {
+    fn lex_string_literal<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start = state.get_position();
 
         // 多行字符串: \\...
@@ -176,31 +166,20 @@ impl<'config> ZigLexer<'config> {
         // 普通字符串: "..."
         if state.current() == Some('"') {
             state.advance(1);
-            let mut escaped = false;
-
             while let Some(ch) = state.peek() {
-                if ch == '"' && !escaped {
-                    state.advance(1); // consume closing quote
+                if ch == '"' {
+                    state.advance(1);
                     break;
                 }
-
-                state.advance(ch.len_utf8());
-
-                if escaped {
-                    escaped = false;
-                    continue;
-                }
-
                 if ch == '\\' {
-                    escaped = true;
+                    state.advance(1);
+                    if let Some(next) = state.peek() {
+                        state.advance(next.len_utf8());
+                    }
                     continue;
                 }
-
-                if ch == '\n' || ch == '\r' {
-                    break;
-                }
+                state.advance(ch.len_utf8());
             }
-
             state.add_token(ZigSyntaxKind::StringLiteral, start, state.get_position());
             return true;
         }
@@ -209,187 +188,114 @@ impl<'config> ZigLexer<'config> {
     }
 
     /// 解析字符字面量
-    fn lex_char_literal<S: Source>(&self, state: &mut State<S>) -> bool {
+    fn lex_char_literal<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start = state.get_position();
-
-        if state.current() != Some('\'') {
-            return false;
-        }
-
-        state.advance(1); // opening '
-
-        if let Some('\\') = state.peek() {
+        if state.current() == Some('\'') {
             state.advance(1);
-            if let Some(c) = state.peek() {
-                state.advance(c.len_utf8());
+            while let Some(ch) = state.peek() {
+                if ch == '\'' {
+                    state.advance(1);
+                    break;
+                }
+                if ch == '\\' {
+                    state.advance(1);
+                    if let Some(next) = state.peek() {
+                        state.advance(next.len_utf8());
+                    }
+                    continue;
+                }
+                state.advance(ch.len_utf8());
             }
-        }
-        else if let Some(c) = state.peek() {
-            state.advance(c.len_utf8());
-        }
-        else {
-            state.set_position(start);
-            return false;
-        }
-
-        if state.peek() == Some('\'') {
-            state.advance(1);
             state.add_token(ZigSyntaxKind::CharLiteral, start, state.get_position());
             return true;
         }
-
-        state.set_position(start);
         false
     }
 
     /// 解析数字字面量
-    fn lex_number_literal<S: Source>(&self, state: &mut State<S>) -> bool {
+    fn lex_number_literal<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start = state.get_position();
-        let first = match state.current() {
-            Some(c) => c,
-            None => return false,
-        };
-
-        if !first.is_ascii_digit() {
-            return false;
-        }
-
+        let ch = state.current();
         let mut is_float = false;
 
-        // 处理不同进制
-        if first == '0' {
-            match state.peek_next_n(1) {
-                Some('x') | Some('X') => {
-                    state.advance(2);
-                    while let Some(c) = state.peek() {
-                        if c.is_ascii_hexdigit() || c == '_' {
-                            state.advance(1);
-                        }
-                        else {
-                            break;
-                        }
-                    }
-                }
-                Some('b') | Some('B') => {
-                    state.advance(2);
-                    while let Some(c) = state.peek() {
-                        if c == '0' || c == '1' || c == '_' {
-                            state.advance(1);
-                        }
-                        else {
-                            break;
-                        }
-                    }
-                }
-                Some('o') | Some('O') => {
-                    state.advance(2);
-                    while let Some(c) = state.peek() {
-                        if ('0'..='7').contains(&c) || c == '_' {
-                            state.advance(1);
-                        }
-                        else {
-                            break;
+        if let Some(ch) = ch {
+            if ch.is_ascii_digit() {
+                state.advance(1);
+                // 处理十六进制、二进制、八进制
+                if ch == '0' {
+                    if let Some(next) = state.peek() {
+                        match next {
+                            'x' | 'X' => {
+                                state.advance(1);
+                                state.take_while(|c| c.is_ascii_hexdigit() || c == '_');
+                            }
+                            'b' | 'B' => {
+                                state.advance(1);
+                                state.take_while(|c| c == '0' || c == '1' || c == '_');
+                            }
+                            'o' | 'O' => {
+                                state.advance(1);
+                                state.take_while(|c| ('0'..='7').contains(&c) || c == '_');
+                            }
+                            _ => {
+                                state.take_while(|c| c.is_ascii_digit() || c == '_');
+                            }
                         }
                     }
-                }
-                _ => {
-                    state.advance(1);
-                    while let Some(c) = state.peek() {
-                        if c.is_ascii_digit() || c == '_' {
-                            state.advance(1);
-                        }
-                        else {
-                            break;
-                        }
-                    }
-                }
-            }
-        }
-        else {
-            state.advance(1);
-            while let Some(c) = state.peek() {
-                if c.is_ascii_digit() || c == '_' {
-                    state.advance(1);
                 }
                 else {
-                    break;
+                    state.take_while(|c| c.is_ascii_digit() || c == '_');
                 }
-            }
-        }
 
-        // 小数部分
-        if state.peek() == Some('.') {
-            let n1 = state.peek_next_n(1);
-            if n1.map(|c| c.is_ascii_digit()).unwrap_or(false) {
-                is_float = true;
-                state.advance(1); // consume '.'
-                while let Some(c) = state.peek() {
-                    if c.is_ascii_digit() || c == '_' {
+                // 处理小数点
+                if state.current() == Some('.') {
+                    if let Some(next) = state.peek() {
+                        if next.is_ascii_digit() {
+                            is_float = true;
+                            state.advance(1);
+                            state.take_while(|c| c.is_ascii_digit() || c == '_');
+                        }
+                    }
+                }
+
+                // 处理指数
+                if let Some(c) = state.current() {
+                    if c == 'e' || c == 'E' || c == 'p' || c == 'P' {
+                        is_float = true;
                         state.advance(1);
-                    }
-                    else {
-                        break;
+                        if let Some(next) = state.peek() {
+                            if next == '+' || next == '-' {
+                                state.advance(1);
+                            }
+                        }
+                        state.take_while(|c| c.is_ascii_digit() || c == '_');
                     }
                 }
+
+                let kind = if is_float { ZigSyntaxKind::FloatLiteral } else { ZigSyntaxKind::IntegerLiteral };
+                state.add_token(kind, start, state.get_position());
+                return true;
             }
         }
-
-        // 指数部分
-        if let Some(c) = state.peek() {
-            if c == 'e' || c == 'E' {
-                let n1 = state.peek_next_n(1);
-                if n1 == Some('+') || n1 == Some('-') || n1.map(|d| d.is_ascii_digit()).unwrap_or(false) {
-                    is_float = true;
-                    state.advance(1);
-                    if let Some(sign) = state.peek() {
-                        if sign == '+' || sign == '-' {
-                            state.advance(1);
-                        }
-                    }
-                    while let Some(d) = state.peek() {
-                        if d.is_ascii_digit() || d == '_' {
-                            state.advance(1);
-                        }
-                        else {
-                            break;
-                        }
-                    }
-                }
-            }
-        }
-
-        let end = state.get_position();
-        state.add_token(if is_float { ZigSyntaxKind::FloatLiteral } else { ZigSyntaxKind::IntegerLiteral }, start, end);
-        true
+        false
     }
 
     /// 解析标识符或关键字
-    fn lex_identifier_or_keyword<S: Source>(&self, state: &mut State<S>) -> bool {
+    fn lex_identifier_or_keyword<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start = state.get_position();
-        let ch = match state.current() {
-            Some(c) => c,
-            None => return false,
-        };
+        if let Some(ch) = state.current() {
+            if ch.is_ascii_alphabetic() || ch == '_' {
+                state.advance(ch.len_utf8());
+                state.take_while(|c| c.is_ascii_alphanumeric() || c == '_');
 
-        if !(ch.is_ascii_alphabetic() || ch == '_') {
-            return false;
-        }
-
-        state.advance(1);
-        while let Some(c) = state.current() {
-            if c.is_ascii_alphanumeric() || c == '_' {
-                state.advance(1);
-            }
-            else {
-                break;
+                let end = state.get_position();
+                let text = state.get_text_in((start..end).into());
+                let kind = self.get_keyword_or_identifier(&text);
+                state.add_token(kind, start, state.get_position());
+                return true;
             }
         }
-
-        let end = state.get_position();
-        let text = state.get_text_in((start..end).into());
-        let kind = self.get_keyword_or_identifier(text);
-        state.add_token(kind, start, state.get_position());
-        true
+        false
     }
 
     /// 获取关键字或标识符类型
@@ -478,19 +384,19 @@ impl<'config> ZigLexer<'config> {
             "f64" => ZigSyntaxKind::F64,
             "f80" => ZigSyntaxKind::F80,
             "f128" => ZigSyntaxKind::F128,
-            "c_short" => ZigSyntaxKind::C_Short,
-            "c_ushort" => ZigSyntaxKind::C_UShort,
-            "c_int" => ZigSyntaxKind::C_Int,
-            "c_uint" => ZigSyntaxKind::C_UInt,
-            "c_long" => ZigSyntaxKind::C_Long,
-            "c_ulong" => ZigSyntaxKind::C_ULong,
-            "c_longlong" => ZigSyntaxKind::C_LongLong,
-            "c_ulonglong" => ZigSyntaxKind::C_ULongLong,
-            "c_longdouble" => ZigSyntaxKind::C_LongDouble,
-            "c_void" => ZigSyntaxKind::C_Void,
+            "c_short" => ZigSyntaxKind::CShort,
+            "c_ushort" => ZigSyntaxKind::CUshort,
+            "c_int" => ZigSyntaxKind::CInt,
+            "c_uint" => ZigSyntaxKind::CUint,
+            "c_long" => ZigSyntaxKind::CLong,
+            "c_ulong" => ZigSyntaxKind::CUlong,
+            "c_longlong" => ZigSyntaxKind::CLongLong,
+            "c_ulonglong" => ZigSyntaxKind::CUlongLong,
+            "c_longdouble" => ZigSyntaxKind::CLongDouble,
+            "c_void" => ZigSyntaxKind::CVoid,
             "void" => ZigSyntaxKind::Void,
-            "comptime_int" => ZigSyntaxKind::Comptime_Int,
-            "comptime_float" => ZigSyntaxKind::Comptime_Float,
+            "comptime_int" => ZigSyntaxKind::ComptimeInt,
+            "comptime_float" => ZigSyntaxKind::ComptimeFloat,
 
             // 布尔字面量
             "true" | "false" => ZigSyntaxKind::BooleanLiteral,
@@ -499,48 +405,39 @@ impl<'config> ZigLexer<'config> {
         }
     }
 
-    /// 解析内置函数 @...
-    fn lex_builtin<S: Source>(&self, state: &mut State<S>) -> bool {
+    /// 解析内置标识符 (@import 等)
+    fn lex_builtin<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start = state.get_position();
-
-        if state.current() != Some('@') {
-            return false;
-        }
-
-        state.advance(1); // consume '@'
-
-        // 读取内置函数名
-        while let Some(c) = state.peek() {
-            if c.is_ascii_alphanumeric() || c == '_' {
-                state.advance(1);
-            }
-            else {
-                break;
+        if state.current() == Some('@') {
+            state.advance(1);
+            if let Some(ch) = state.current() {
+                if ch.is_ascii_alphabetic() || ch == '_' {
+                    state.advance(ch.len_utf8());
+                    state.take_while(|c| c.is_ascii_alphanumeric() || c == '_');
+                    state.add_token(ZigSyntaxKind::BuiltinIdentifier, start, state.get_position());
+                    return true;
+                }
             }
         }
-
-        state.add_token(ZigSyntaxKind::At, start, state.get_position());
-        true
+        false
     }
 
     /// 解析操作符
-    fn lex_operators<S: Source>(&self, state: &mut State<S>) -> bool {
+    fn lex_operators<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start = state.get_position();
         let rest = state.rest();
 
-        // 优先匹配较长的操作符
-        let patterns: &[(&str, ZigSyntaxKind)] = &[
-            ("**", ZigSyntaxKind::StarStar),
-            ("+%", ZigSyntaxKind::PlusPercent),
-            ("-%", ZigSyntaxKind::MinusPercent),
-            ("*%", ZigSyntaxKind::StarPercent),
-            ("++", ZigSyntaxKind::PlusPlus),
-            ("<<", ZigSyntaxKind::LessLess),
-            (">>", ZigSyntaxKind::GreaterGreater),
+        // 尝试匹配最长的操作符
+        let ops = [
+            ("<<=", ZigSyntaxKind::LessLessAssign),
+            (">>=", ZigSyntaxKind::GreaterGreaterAssign),
+            ("...", ZigSyntaxKind::DotDotDot),
             ("==", ZigSyntaxKind::Equal),
             ("!=", ZigSyntaxKind::NotEqual),
             ("<=", ZigSyntaxKind::LessEqual),
             (">=", ZigSyntaxKind::GreaterEqual),
+            ("&&", ZigSyntaxKind::AndAnd),
+            ("||", ZigSyntaxKind::OrOr),
             ("+=", ZigSyntaxKind::PlusAssign),
             ("-=", ZigSyntaxKind::MinusAssign),
             ("*=", ZigSyntaxKind::StarAssign),
@@ -549,45 +446,21 @@ impl<'config> ZigLexer<'config> {
             ("&=", ZigSyntaxKind::AmpersandAssign),
             ("|=", ZigSyntaxKind::PipeAssign),
             ("^=", ZigSyntaxKind::CaretAssign),
-            ("<<=", ZigSyntaxKind::LessLessAssign),
-            (">>=", ZigSyntaxKind::GreaterGreaterAssign),
-            ("...", ZigSyntaxKind::DotDotDot),
-            ("..", ZigSyntaxKind::DotDot),
+            ("++", ZigSyntaxKind::PlusPlus),
+            ("--", ZigSyntaxKind::MinusMinus),
+            ("**", ZigSyntaxKind::StarStar),
+            ("->", ZigSyntaxKind::Arrow),
             ("=>", ZigSyntaxKind::FatArrow),
+            ("<<", ZigSyntaxKind::LessLess),
+            (">>", ZigSyntaxKind::GreaterGreater),
+            (".?", ZigSyntaxKind::DotQuestion),
+            (".*", ZigSyntaxKind::DotStar),
         ];
 
-        for (pat, kind) in patterns {
-            if rest.starts_with(pat) {
-                state.advance(pat.len());
-                state.add_token(*kind, start, state.get_position());
-                return true;
-            }
-        }
-
-        // 单字符操作符
-        if let Some(ch) = state.current() {
-            let kind = match ch {
-                '+' => Some(ZigSyntaxKind::Plus),
-                '-' => Some(ZigSyntaxKind::Minus),
-                '*' => Some(ZigSyntaxKind::Star),
-                '/' => Some(ZigSyntaxKind::Slash),
-                '%' => Some(ZigSyntaxKind::Percent),
-                '&' => Some(ZigSyntaxKind::Ampersand),
-                '|' => Some(ZigSyntaxKind::Pipe),
-                '^' => Some(ZigSyntaxKind::Caret),
-                '~' => Some(ZigSyntaxKind::Tilde),
-                '=' => Some(ZigSyntaxKind::Assign),
-                '<' => Some(ZigSyntaxKind::Less),
-                '>' => Some(ZigSyntaxKind::Greater),
-                '.' => Some(ZigSyntaxKind::Dot),
-                '!' => Some(ZigSyntaxKind::Exclamation),
-                '?' => Some(ZigSyntaxKind::Question),
-                _ => None,
-            };
-
-            if let Some(k) = kind {
-                state.advance(ch.len_utf8());
-                state.add_token(k, start, state.get_position());
+        for (op, kind) in ops {
+            if rest.starts_with(op) {
+                state.advance(op.len());
+                state.add_token(kind, start, state.get_position());
                 return true;
             }
         }
@@ -595,10 +468,9 @@ impl<'config> ZigLexer<'config> {
         false
     }
 
-    /// 解析单字符token
-    fn lex_single_char_tokens<S: Source>(&self, state: &mut State<S>) -> bool {
+    /// 解析单字符标记
+    fn lex_single_char_tokens<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start = state.get_position();
-
         if let Some(ch) = state.current() {
             let kind = match ch {
                 '(' => ZigSyntaxKind::LeftParen,
@@ -608,16 +480,29 @@ impl<'config> ZigLexer<'config> {
                 '[' => ZigSyntaxKind::LeftBracket,
                 ']' => ZigSyntaxKind::RightBracket,
                 ',' => ZigSyntaxKind::Comma,
-                ';' => ZigSyntaxKind::Semicolon,
+                '.' => ZigSyntaxKind::Dot,
                 ':' => ZigSyntaxKind::Colon,
+                ';' => ZigSyntaxKind::Semicolon,
+                '+' => ZigSyntaxKind::Plus,
+                '-' => ZigSyntaxKind::Minus,
+                '*' => ZigSyntaxKind::Star,
+                '/' => ZigSyntaxKind::Slash,
+                '%' => ZigSyntaxKind::Percent,
+                '&' => ZigSyntaxKind::Ampersand,
+                '|' => ZigSyntaxKind::Pipe,
+                '^' => ZigSyntaxKind::Caret,
+                '~' => ZigSyntaxKind::Tilde,
+                '!' => ZigSyntaxKind::Exclamation,
+                '?' => ZigSyntaxKind::Question,
+                '<' => ZigSyntaxKind::Less,
+                '>' => ZigSyntaxKind::Greater,
+                '=' => ZigSyntaxKind::Assign,
                 _ => return false,
             };
-
-            state.advance(ch.len_utf8());
+            state.advance(1);
             state.add_token(kind, start, state.get_position());
             return true;
         }
-
         false
     }
 }

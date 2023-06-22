@@ -1,7 +1,7 @@
 use core::range::Range;
 
-/// JSON 值节
+/// SCSS root node
 #[derive(Debug, Clone)]
-pub struct JsonRoot {
-    span: Range<usize>,
+pub struct ScssRoot {
+    _span: Range<usize>,
 }

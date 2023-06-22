@@ -100,8 +100,79 @@ pub enum JasmSyntaxKind {
     Error,
 }
 
-impl oak_core::SyntaxKind for JasmSyntaxKind {
-    fn is_trivia(&self) -> bool {
+impl oak_core::TokenType for JasmSyntaxKind {
+    const END_OF_STREAM: Self = Self::Eof;
+    type Role = oak_core::UniversalTokenRole;
+
+    fn role(&self) -> Self::Role {
+        use oak_core::UniversalTokenRole::*;
+        match self {
+            Self::ClassKw
+            | Self::VersionKw
+            | Self::MethodKw
+            | Self::FieldKw
+            | Self::StringKw
+            | Self::SourceFileKw
+            | Self::StackKw
+            | Self::LocalsKw
+            | Self::EndKw
+            | Self::CompiledKw
+            | Self::FromKw
+            | Self::InnerClassKw
+            | Self::NestMembersKw
+            | Self::BootstrapMethodKw
+            | Self::Public
+            | Self::Private
+            | Self::Protected
+            | Self::Static
+            | Self::Super
+            | Self::Final
+            | Self::Abstract
+            | Self::Synchronized
+            | Self::Native
+            | Self::Synthetic
+            | Self::Deprecated
+            | Self::Varargs
+            | Self::ALoad0
+            | Self::ALoad1
+            | Self::ALoad2
+            | Self::ALoad3
+            | Self::ILoad0
+            | Self::ILoad1
+            | Self::ILoad2
+            | Self::ILoad3
+            | Self::Ldc
+            | Self::LdcW
+            | Self::Ldc2W
+            | Self::InvokeSpecial
+            | Self::InvokeVirtual
+            | Self::InvokeStatic
+            | Self::InvokeInterface
+            | Self::InvokeDynamic
+            | Self::GetStatic
+            | Self::PutStatic
+            | Self::GetField
+            | Self::PutField
+            | Self::Return
+            | Self::IReturn
+            | Self::AReturn
+            | Self::LReturn
+            | Self::FReturn
+            | Self::DReturn
+            | Self::Nop
+            | Self::Dup
+            | Self::Pop
+            | Self::New => Keyword,
+            Self::StringLiteral | Self::Number => Literal,
+            Self::IdentifierToken | Self::TypeDescriptor => Name,
+            Self::LeftBrace | Self::RightBrace | Self::LeftParen | Self::RightParen | Self::LeftBracket | Self::RightBracket | Self::Colon | Self::Semicolon | Self::Dot | Self::Comma | Self::Slash => Punctuation,
+            Self::Whitespace | Self::Newline => Whitespace,
+            Self::Comment => Comment,
+            _ => None,
+        }
+    }
+
+    fn is_ignored(&self) -> bool {
         matches!(self, Self::Whitespace | Self::Newline | Self::Comment)
     }
 
@@ -112,34 +183,17 @@ impl oak_core::SyntaxKind for JasmSyntaxKind {
     fn is_whitespace(&self) -> bool {
         matches!(self, Self::Whitespace | Self::Newline)
     }
+}
 
-    fn is_token_type(&self) -> bool {
-        !matches!(
-            self,
-            Self::Root
-                | Self::Class
-                | Self::Method
-                | Self::Field
-                | Self::Instruction
-                | Self::IdentifierNode
-                | Self::StringNode
-                | Self::NumberNode
-                | Self::ErrorNode
-        )
-    }
+impl oak_core::ElementType for JasmSyntaxKind {
+    type Role = oak_core::UniversalElementRole;
 
-    fn is_element_type(&self) -> bool {
-        matches!(
-            self,
-            Self::Root
-                | Self::Class
-                | Self::Method
-                | Self::Field
-                | Self::Instruction
-                | Self::IdentifierNode
-                | Self::StringNode
-                | Self::NumberNode
-                | Self::ErrorNode
-        )
+    fn role(&self) -> Self::Role {
+        use oak_core::UniversalElementRole::*;
+        match self {
+            Self::Root => Root,
+            Self::Class | Self::Method | Self::Field => Definition,
+            _ => None,
+        }
     }
 }

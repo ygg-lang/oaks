@@ -1,6 +1,4 @@
-#![feature(new_range_api)]
-
-use oak_core::LexerTester;
+use oak_core::helpers::LexerTester;
 use oak_scheme::{lexer::SchemeLexer, language::SchemeLanguage};
 
 #[test]

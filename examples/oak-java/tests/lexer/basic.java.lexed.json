@@ -1,0 +1,607 @@
+{
+    "success": true,
+    "count": 100,
+    "tokens": [
+        {
+            "kind": "Package",
+            "text": "package",
+            "start": 157,
+            "end": 164
+        },
+        {
+            "kind": "Identifier",
+            "text": "com",
+            "start": 165,
+            "end": 168
+        },
+        {
+            "kind": "Dot",
+            "text": ".",
+            "start": 168,
+            "end": 169
+        },
+        {
+            "kind": "Identifier",
+            "text": "example",
+            "start": 169,
+            "end": 176
+        },
+        {
+            "kind": "Dot",
+            "text": ".",
+            "start": 176,
+            "end": 177
+        },
+        {
+            "kind": "Identifier",
+            "text": "lexer",
+            "start": 177,
+            "end": 182
+        },
+        {
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 182,
+            "end": 183
+        },
+        {
+            "kind": "Import",
+            "text": "import",
+            "start": 187,
+            "end": 193
+        },
+        {
+            "kind": "Identifier",
+            "text": "java",
+            "start": 194,
+            "end": 198
+        },
+        {
+            "kind": "Dot",
+            "text": ".",
+            "start": 198,
+            "end": 199
+        },
+        {
+            "kind": "Identifier",
+            "text": "io",
+            "start": 199,
+            "end": 201
+        },
+        {
+            "kind": "Dot",
+            "text": ".",
+            "start": 201,
+            "end": 202
+        },
+        {
+            "kind": "Identifier",
+            "text": "Serializable",
+            "start": 202,
+            "end": 214
+        },
+        {
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 214,
+            "end": 215
+        },
+        {
+            "kind": "Import",
+            "text": "import",
+            "start": 217,
+            "end": 223
+        },
+        {
+            "kind": "Identifier",
+            "text": "java",
+            "start": 224,
+            "end": 228
+        },
+        {
+            "kind": "Dot",
+            "text": ".",
+            "start": 228,
+            "end": 229
+        },
+        {
+            "kind": "Identifier",
+            "text": "math",
+            "start": 229,
+            "end": 233
+        },
+        {
+            "kind": "Dot",
+            "text": ".",
+            "start": 233,
+            "end": 234
+        },
+        {
+            "kind": "Identifier",
+            "text": "BigDecimal",
+            "start": 234,
+            "end": 244
+        },
+        {
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 244,
+            "end": 245
+        },
+        {
+            "kind": "Import",
+            "text": "import",
+            "start": 247,
+            "end": 253
+        },
+        {
+            "kind": "Identifier",
+            "text": "java",
+            "start": 254,
+            "end": 258
+        },
+        {
+            "kind": "Dot",
+            "text": ".",
+            "start": 258,
+            "end": 259
+        },
+        {
+            "kind": "Identifier",
+            "text": "util",
+            "start": 259,
+            "end": 263
+        },
+        {
+            "kind": "Dot",
+            "text": ".",
+            "start": 263,
+            "end": 264
+        },
+        {
+            "kind": "Identifier",
+            "text": "ArrayList",
+            "start": 264,
+            "end": 273
+        },
+        {
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 273,
+            "end": 274
+        },
+        {
+            "kind": "Import",
+            "text": "import",
+            "start": 276,
+            "end": 282
+        },
+        {
+            "kind": "Identifier",
+            "text": "java",
+            "start": 283,
+            "end": 287
+        },
+        {
+            "kind": "Dot",
+            "text": ".",
+            "start": 287,
+            "end": 288
+        },
+        {
+            "kind": "Identifier",
+            "text": "util",
+            "start": 288,
+            "end": 292
+        },
+        {
+            "kind": "Dot",
+            "text": ".",
+            "start": 292,
+            "end": 293
+        },
+        {
+            "kind": "Identifier",
+            "text": "HashMap",
+            "start": 293,
+            "end": 300
+        },
+        {
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 300,
+            "end": 301
+        },
+        {
+            "kind": "Import",
+            "text": "import",
+            "start": 303,
+            "end": 309
+        },
+        {
+            "kind": "Identifier",
+            "text": "java",
+            "start": 310,
+            "end": 314
+        },
+        {
+            "kind": "Dot",
+            "text": ".",
+            "start": 314,
+            "end": 315
+        },
+        {
+            "kind": "Identifier",
+            "text": "util",
+            "start": 315,
+            "end": 319
+        },
+        {
+            "kind": "Dot",
+            "text": ".",
+            "start": 319,
+            "end": 320
+        },
+        {
+            "kind": "Identifier",
+            "text": "List",
+            "start": 320,
+            "end": 324
+        },
+        {
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 324,
+            "end": 325
+        },
+        {
+            "kind": "Import",
+            "text": "import",
+            "start": 327,
+            "end": 333
+        },
+        {
+            "kind": "Identifier",
+            "text": "java",
+            "start": 334,
+            "end": 338
+        },
+        {
+            "kind": "Dot",
+            "text": ".",
+            "start": 338,
+            "end": 339
+        },
+        {
+            "kind": "Identifier",
+            "text": "util",
+            "start": 339,
+            "end": 343
+        },
+        {
+            "kind": "Dot",
+            "text": ".",
+            "start": 343,
+            "end": 344
+        },
+        {
+            "kind": "Identifier",
+            "text": "Map",
+            "start": 344,
+            "end": 347
+        },
+        {
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 347,
+            "end": 348
+        },
+        {
+            "kind": "Import",
+            "text": "import",
+            "start": 350,
+            "end": 356
+        },
+        {
+            "kind": "Identifier",
+            "text": "java",
+            "start": 357,
+            "end": 361
+        },
+        {
+            "kind": "Dot",
+            "text": ".",
+            "start": 361,
+            "end": 362
+        },
+        {
+            "kind": "Identifier",
+            "text": "util",
+            "start": 362,
+            "end": 366
+        },
+        {
+            "kind": "Dot",
+            "text": ".",
+            "start": 366,
+            "end": 367
+        },
+        {
+            "kind": "Identifier",
+            "text": "Objects",
+            "start": 367,
+            "end": 374
+        },
+        {
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 374,
+            "end": 375
+        },
+        {
+            "kind": "Import",
+            "text": "import",
+            "start": 377,
+            "end": 383
+        },
+        {
+            "kind": "Identifier",
+            "text": "java",
+            "start": 384,
+            "end": 388
+        },
+        {
+            "kind": "Dot",
+            "text": ".",
+            "start": 388,
+            "end": 389
+        },
+        {
+            "kind": "Identifier",
+            "text": "util",
+            "start": 389,
+            "end": 393
+        },
+        {
+            "kind": "Dot",
+            "text": ".",
+            "start": 393,
+            "end": 394
+        },
+        {
+            "kind": "Identifier",
+            "text": "Optional",
+            "start": 394,
+            "end": 402
+        },
+        {
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 402,
+            "end": 403
+        },
+        {
+            "kind": "Import",
+            "text": "import",
+            "start": 405,
+            "end": 411
+        },
+        {
+            "kind": "Identifier",
+            "text": "java",
+            "start": 412,
+            "end": 416
+        },
+        {
+            "kind": "Dot",
+            "text": ".",
+            "start": 416,
+            "end": 417
+        },
+        {
+            "kind": "Identifier",
+            "text": "util",
+            "start": 417,
+            "end": 421
+        },
+        {
+            "kind": "Dot",
+            "text": ".",
+            "start": 421,
+            "end": 422
+        },
+        {
+            "kind": "Identifier",
+            "text": "Set",
+            "start": 422,
+            "end": 425
+        },
+        {
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 425,
+            "end": 426
+        },
+        {
+            "kind": "Import",
+            "text": "import",
+            "start": 428,
+            "end": 434
+        },
+        {
+            "kind": "Identifier",
+            "text": "java",
+            "start": 435,
+            "end": 439
+        },
+        {
+            "kind": "Dot",
+            "text": ".",
+            "start": 439,
+            "end": 440
+        },
+        {
+            "kind": "Identifier",
+            "text": "util",
+            "start": 440,
+            "end": 444
+        },
+        {
+            "kind": "Dot",
+            "text": ".",
+            "start": 444,
+            "end": 445
+        },
+        {
+            "kind": "Identifier",
+            "text": "concurrent",
+            "start": 445,
+            "end": 455
+        },
+        {
+            "kind": "Dot",
+            "text": ".",
+            "start": 455,
+            "end": 456
+        },
+        {
+            "kind": "Identifier",
+            "text": "Callable",
+            "start": 456,
+            "end": 464
+        },
+        {
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 464,
+            "end": 465
+        },
+        {
+            "kind": "Import",
+            "text": "import",
+            "start": 467,
+            "end": 473
+        },
+        {
+            "kind": "Identifier",
+            "text": "java",
+            "start": 474,
+            "end": 478
+        },
+        {
+            "kind": "Dot",
+            "text": ".",
+            "start": 478,
+            "end": 479
+        },
+        {
+            "kind": "Identifier",
+            "text": "util",
+            "start": 479,
+            "end": 483
+        },
+        {
+            "kind": "Dot",
+            "text": ".",
+            "start": 483,
+            "end": 484
+        },
+        {
+            "kind": "Identifier",
+            "text": "function",
+            "start": 484,
+            "end": 492
+        },
+        {
+            "kind": "Dot",
+            "text": ".",
+            "start": 492,
+            "end": 493
+        },
+        {
+            "kind": "Identifier",
+            "text": "Consumer",
+            "start": 493,
+            "end": 501
+        },
+        {
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 501,
+            "end": 502
+        },
+        {
+            "kind": "Import",
+            "text": "import",
+            "start": 504,
+            "end": 510
+        },
+        {
+            "kind": "Identifier",
+            "text": "java",
+            "start": 511,
+            "end": 515
+        },
+        {
+            "kind": "Dot",
+            "text": ".",
+            "start": 515,
+            "end": 516
+        },
+        {
+            "kind": "Identifier",
+            "text": "util",
+            "start": 516,
+            "end": 520
+        },
+        {
+            "kind": "Dot",
+            "text": ".",
+            "start": 520,
+            "end": 521
+        },
+        {
+            "kind": "Identifier",
+            "text": "function",
+            "start": 521,
+            "end": 529
+        },
+        {
+            "kind": "Dot",
+            "text": ".",
+            "start": 529,
+            "end": 530
+        },
+        {
+            "kind": "Identifier",
+            "text": "Function",
+            "start": 530,
+            "end": 538
+        },
+        {
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 538,
+            "end": 539
+        },
+        {
+            "kind": "Import",
+            "text": "import",
+            "start": 541,
+            "end": 547
+        },
+        {
+            "kind": "Identifier",
+            "text": "java",
+            "start": 548,
+            "end": 552
+        },
+        {
+            "kind": "Dot",
+            "text": ".",
+            "start": 552,
+            "end": 553
+        }
+    ],
+    "errors": []
+}

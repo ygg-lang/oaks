@@ -9,7 +9,7 @@ fn test_lua_lexer() {
     let language = Box::leak(Box::new(LuaLanguage::default()));
     let lexer = LuaLexer::new(language);
     let test_runner = LexerTester::new(tests).with_extension("lua");
-    match test_runner.run_tests::<LuaLanguage, _>(lexer) {
+    match test_runner.run_tests::<LuaLanguage, _>(&lexer) {
         Ok(()) => println!("Lua lexer tests passed!"),
         Err(e) => panic!("Lua lexer tests failed: {}", e),
     }

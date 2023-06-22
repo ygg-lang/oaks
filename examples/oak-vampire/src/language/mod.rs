@@ -1,4 +1,4 @@
-use oak_core::Language;
+use oak_core::{Language, LanguageCategory};
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct CommentConfig {
@@ -27,10 +27,7 @@ pub struct VampireLanguage {
 impl Default for VampireLanguage {
     fn default() -> Self {
         Self {
-            comment_config: CommentConfig {
-                line_comment: Some("%".to_string()),
-                block_comment: Some(("/*".to_string(), "*/".to_string())),
-            },
+            comment_config: CommentConfig { line_comment: Some("%".to_string()), block_comment: Some(("/*".to_string(), "*/".to_string())) },
             string_config: StringConfig { quotes: vec!['"', '\''], escape_char: Some('\\') },
             whitespace_config: WhitespaceConfig { characters: vec![' ', '\t'], new_line_characters: vec!['\n', '\r'] },
         }
@@ -38,6 +35,10 @@ impl Default for VampireLanguage {
 }
 
 impl Language for VampireLanguage {
-    type SyntaxKind = crate::kind::VampireSyntaxKind;
-    type TypedRoot = ();
+    const NAME: &'static str = "vampire";
+    const CATEGORY: LanguageCategory = LanguageCategory::Programming;
+
+    type TokenType = crate::kind::VampireSyntaxKind;
+    type ElementType = crate::kind::VampireSyntaxKind;
+    type TypedRoot = crate::ast::VampireRoot;
 }

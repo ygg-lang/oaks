@@ -1,17 +1,25 @@
-use crate::{CSharpSyntaxKind, language::CSharpLanguage};
-use oak_core::{IncrementalCache, Lexer, LexerState, lexer::LexOutput, source::Source};
+use crate::language::CSharpLanguage;
+pub mod token_type;
+use oak_core::{
+    Lexer, LexerCache, LexerState,
+    lexer::LexOutput,
+    source::{Source, TextEdit},
+};
+pub use token_type::CSharpTokenType;
 
-type State<S> = LexerState<S, CSharpLanguage>;
+type State<'a, S> = LexerState<'a, S, CSharpLanguage>;
 
-pub struct CSharpLexer;
+pub struct CSharpLexer<'config> {
+    _config: &'config CSharpLanguage,
+}
 
-impl CSharpLexer {
-    pub fn new(_config: &CSharpLanguage) -> Self {
-        Self
+impl<'config> CSharpLexer<'config> {
+    pub fn new(config: &'config CSharpLanguage) -> Self {
+        Self { _config: config }
     }
 
     /// 跳过空白字符
-    fn skip_whitespace<S: Source>(&self, state: &mut State<S>) -> bool {
+    fn skip_whitespace<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start_pos = state.get_position();
 
         while let Some(ch) = state.peek() {
@@ -24,7 +32,7 @@ impl CSharpLexer {
         }
 
         if state.get_position() > start_pos {
-            state.add_token(CSharpSyntaxKind::Whitespace, start_pos, state.get_position());
+            state.add_token(CSharpTokenType::Whitespace, start_pos, state.get_position());
             true
         }
         else {
@@ -33,12 +41,12 @@ impl CSharpLexer {
     }
 
     /// 处理换行
-    fn lex_newline<S: Source>(&self, state: &mut State<S>) -> bool {
+    fn lex_newline<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start_pos = state.get_position();
 
         if let Some('\n') = state.peek() {
             state.advance(1);
-            state.add_token(CSharpSyntaxKind::Newline, start_pos, state.get_position());
+            state.add_token(CSharpTokenType::Newline, start_pos, state.get_position());
             true
         }
         else if let Some('\r') = state.peek() {
@@ -46,7 +54,7 @@ impl CSharpLexer {
             if let Some('\n') = state.peek() {
                 state.advance(1);
             }
-            state.add_token(CSharpSyntaxKind::Newline, start_pos, state.get_position());
+            state.add_token(CSharpTokenType::Newline, start_pos, state.get_position());
             true
         }
         else {
@@ -55,7 +63,7 @@ impl CSharpLexer {
     }
 
     /// 处理注释
-    fn lex_comment<S: Source>(&self, state: &mut State<S>) -> bool {
+    fn lex_comment<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start_pos = state.get_position();
 
         if let Some('/') = state.peek() {
@@ -69,7 +77,7 @@ impl CSharpLexer {
                     }
                     state.advance(ch.len_utf8());
                 }
-                state.add_token(CSharpSyntaxKind::Comment, start_pos, state.get_position());
+                state.add_token(CSharpTokenType::Comment, start_pos, state.get_position());
                 return true;
             }
             else if let Some('*') = state.peek() {
@@ -87,7 +95,7 @@ impl CSharpLexer {
                         state.advance(ch.len_utf8());
                     }
                 }
-                state.add_token(CSharpSyntaxKind::Comment, start_pos, state.get_position());
+                state.add_token(CSharpTokenType::Comment, start_pos, state.get_position());
                 return true;
             }
             else {
@@ -100,7 +108,7 @@ impl CSharpLexer {
     }
 
     /// 处理字符串字面量
-    fn lex_string<S: Source>(&self, state: &mut State<S>) -> bool {
+    fn lex_string<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start_pos = state.get_position();
 
         if let Some('"') = state.peek() {
@@ -120,7 +128,7 @@ impl CSharpLexer {
                     state.advance(ch.len_utf8());
                 }
             }
-            state.add_token(CSharpSyntaxKind::StringLiteral, start_pos, state.get_position());
+            state.add_token(CSharpTokenType::StringLiteral, start_pos, state.get_position());
             true
         }
         else if let Some('\'') = state.peek() {
@@ -141,7 +149,7 @@ impl CSharpLexer {
                     state.advance(ch.len_utf8());
                 }
             }
-            state.add_token(CSharpSyntaxKind::CharLiteral, start_pos, state.get_position());
+            state.add_token(CSharpTokenType::CharLiteral, start_pos, state.get_position());
             true
         }
         else {
@@ -150,7 +158,7 @@ impl CSharpLexer {
     }
 
     /// 处理数字字面量
-    fn lex_number<S: Source>(&self, state: &mut State<S>) -> bool {
+    fn lex_number<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start_pos = state.get_position();
 
         if let Some(ch) = state.peek() {
@@ -178,7 +186,7 @@ impl CSharpLexer {
                     }
                 }
 
-                state.add_token(CSharpSyntaxKind::NumberLiteral, start_pos, state.get_position());
+                state.add_token(CSharpTokenType::NumberLiteral, start_pos, state.get_position());
                 true
             }
             else {
@@ -191,7 +199,7 @@ impl CSharpLexer {
     }
 
     /// 处理关键字或标识符
-    fn lex_keyword_or_identifier<S: Source>(&self, state: &mut State<S>) -> bool {
+    fn lex_keyword_or_identifier<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start_pos = state.get_position();
 
         if let Some(ch) = state.peek() {
@@ -208,86 +216,86 @@ impl CSharpLexer {
                 }
 
                 let text = state.get_text_in((start_pos..state.get_position()).into());
-                let token_kind = match text {
+                let token_kind = match text.as_ref() {
                     // C# 关键字
-                    "abstract" => CSharpSyntaxKind::Abstract,
-                    "as" => CSharpSyntaxKind::As,
-                    "base" => CSharpSyntaxKind::Base,
-                    "bool" => CSharpSyntaxKind::Bool,
-                    "break" => CSharpSyntaxKind::Break,
-                    "byte" => CSharpSyntaxKind::Byte,
-                    "case" => CSharpSyntaxKind::Case,
-                    "catch" => CSharpSyntaxKind::Catch,
-                    "char" => CSharpSyntaxKind::Char,
-                    "checked" => CSharpSyntaxKind::Checked,
-                    "class" => CSharpSyntaxKind::Class,
-                    "const" => CSharpSyntaxKind::Const,
-                    "continue" => CSharpSyntaxKind::Continue,
-                    "decimal" => CSharpSyntaxKind::Decimal,
-                    "default" => CSharpSyntaxKind::Default,
-                    "delegate" => CSharpSyntaxKind::Delegate,
-                    "do" => CSharpSyntaxKind::Do,
-                    "double" => CSharpSyntaxKind::Double,
-                    "else" => CSharpSyntaxKind::Else,
-                    "enum" => CSharpSyntaxKind::Enum,
-                    "event" => CSharpSyntaxKind::Event,
-                    "explicit" => CSharpSyntaxKind::Explicit,
-                    "extern" => CSharpSyntaxKind::Extern,
-                    "false" => CSharpSyntaxKind::False,
-                    "finally" => CSharpSyntaxKind::Finally,
-                    "fixed" => CSharpSyntaxKind::Fixed,
-                    "float" => CSharpSyntaxKind::Float,
-                    "for" => CSharpSyntaxKind::For,
-                    "foreach" => CSharpSyntaxKind::Foreach,
-                    "goto" => CSharpSyntaxKind::Goto,
-                    "if" => CSharpSyntaxKind::If,
-                    "implicit" => CSharpSyntaxKind::Implicit,
-                    "in" => CSharpSyntaxKind::In,
-                    "int" => CSharpSyntaxKind::Int,
-                    "interface" => CSharpSyntaxKind::Interface,
-                    "internal" => CSharpSyntaxKind::Internal,
-                    "is" => CSharpSyntaxKind::Is,
-                    "lock" => CSharpSyntaxKind::Lock,
-                    "long" => CSharpSyntaxKind::Long,
-                    "namespace" => CSharpSyntaxKind::Namespace,
-                    "new" => CSharpSyntaxKind::New,
-                    "null" => CSharpSyntaxKind::Null,
-                    "object" => CSharpSyntaxKind::Object,
-                    "operator" => CSharpSyntaxKind::Operator,
-                    "out" => CSharpSyntaxKind::Out,
-                    "override" => CSharpSyntaxKind::Override,
-                    "params" => CSharpSyntaxKind::Params,
-                    "private" => CSharpSyntaxKind::Private,
-                    "protected" => CSharpSyntaxKind::Protected,
-                    "public" => CSharpSyntaxKind::Public,
-                    "readonly" => CSharpSyntaxKind::Readonly,
-                    "ref" => CSharpSyntaxKind::Ref,
-                    "return" => CSharpSyntaxKind::Return,
-                    "sbyte" => CSharpSyntaxKind::Sbyte,
-                    "sealed" => CSharpSyntaxKind::Sealed,
-                    "short" => CSharpSyntaxKind::Short,
-                    "sizeof" => CSharpSyntaxKind::Sizeof,
-                    "stackalloc" => CSharpSyntaxKind::Stackalloc,
-                    "static" => CSharpSyntaxKind::Static,
-                    "string" => CSharpSyntaxKind::String,
-                    "struct" => CSharpSyntaxKind::Struct,
-                    "switch" => CSharpSyntaxKind::Switch,
-                    "this" => CSharpSyntaxKind::This,
-                    "throw" => CSharpSyntaxKind::Throw,
-                    "true" => CSharpSyntaxKind::True,
-                    "try" => CSharpSyntaxKind::Try,
-                    "typeof" => CSharpSyntaxKind::Typeof,
-                    "uint" => CSharpSyntaxKind::Uint,
-                    "ulong" => CSharpSyntaxKind::Ulong,
-                    "unchecked" => CSharpSyntaxKind::Unchecked,
-                    "unsafe" => CSharpSyntaxKind::Unsafe,
-                    "ushort" => CSharpSyntaxKind::Ushort,
-                    "using" => CSharpSyntaxKind::Using,
-                    "virtual" => CSharpSyntaxKind::Virtual,
-                    "void" => CSharpSyntaxKind::Void,
-                    "volatile" => CSharpSyntaxKind::Volatile,
-                    "while" => CSharpSyntaxKind::While,
-                    _ => CSharpSyntaxKind::Identifier,
+                    "abstract" => CSharpTokenType::Abstract,
+                    "as" => CSharpTokenType::As,
+                    "base" => CSharpTokenType::Base,
+                    "bool" => CSharpTokenType::Bool,
+                    "break" => CSharpTokenType::Break,
+                    "byte" => CSharpTokenType::Byte,
+                    "case" => CSharpTokenType::Case,
+                    "catch" => CSharpTokenType::Catch,
+                    "char" => CSharpTokenType::Char,
+                    "checked" => CSharpTokenType::Checked,
+                    "class" => CSharpTokenType::Class,
+                    "const" => CSharpTokenType::Const,
+                    "continue" => CSharpTokenType::Continue,
+                    "decimal" => CSharpTokenType::Decimal,
+                    "default" => CSharpTokenType::Default,
+                    "delegate" => CSharpTokenType::Delegate,
+                    "do" => CSharpTokenType::Do,
+                    "double" => CSharpTokenType::Double,
+                    "else" => CSharpTokenType::Else,
+                    "enum" => CSharpTokenType::Enum,
+                    "event" => CSharpTokenType::Event,
+                    "explicit" => CSharpTokenType::Explicit,
+                    "extern" => CSharpTokenType::Extern,
+                    "false" => CSharpTokenType::False,
+                    "finally" => CSharpTokenType::Finally,
+                    "fixed" => CSharpTokenType::Fixed,
+                    "float" => CSharpTokenType::Float,
+                    "for" => CSharpTokenType::For,
+                    "foreach" => CSharpTokenType::Foreach,
+                    "goto" => CSharpTokenType::Goto,
+                    "if" => CSharpTokenType::If,
+                    "implicit" => CSharpTokenType::Implicit,
+                    "in" => CSharpTokenType::In,
+                    "int" => CSharpTokenType::Int,
+                    "interface" => CSharpTokenType::Interface,
+                    "internal" => CSharpTokenType::Internal,
+                    "is" => CSharpTokenType::Is,
+                    "lock" => CSharpTokenType::Lock,
+                    "long" => CSharpTokenType::Long,
+                    "namespace" => CSharpTokenType::Namespace,
+                    "new" => CSharpTokenType::New,
+                    "null" => CSharpTokenType::Null,
+                    "object" => CSharpTokenType::Object,
+                    "operator" => CSharpTokenType::Operator,
+                    "out" => CSharpTokenType::Out,
+                    "override" => CSharpTokenType::Override,
+                    "params" => CSharpTokenType::Params,
+                    "private" => CSharpTokenType::Private,
+                    "protected" => CSharpTokenType::Protected,
+                    "public" => CSharpTokenType::Public,
+                    "readonly" => CSharpTokenType::Readonly,
+                    "ref" => CSharpTokenType::Ref,
+                    "return" => CSharpTokenType::Return,
+                    "sbyte" => CSharpTokenType::Sbyte,
+                    "sealed" => CSharpTokenType::Sealed,
+                    "short" => CSharpTokenType::Short,
+                    "sizeof" => CSharpTokenType::Sizeof,
+                    "stackalloc" => CSharpTokenType::Stackalloc,
+                    "static" => CSharpTokenType::Static,
+                    "string" => CSharpTokenType::String,
+                    "struct" => CSharpTokenType::Struct,
+                    "switch" => CSharpTokenType::Switch,
+                    "this" => CSharpTokenType::This,
+                    "throw" => CSharpTokenType::Throw,
+                    "true" => CSharpTokenType::True,
+                    "try" => CSharpTokenType::Try,
+                    "typeof" => CSharpTokenType::Typeof,
+                    "uint" => CSharpTokenType::Uint,
+                    "ulong" => CSharpTokenType::Ulong,
+                    "unchecked" => CSharpTokenType::Unchecked,
+                    "unsafe" => CSharpTokenType::Unsafe,
+                    "ushort" => CSharpTokenType::Ushort,
+                    "using" => CSharpTokenType::Using,
+                    "virtual" => CSharpTokenType::Virtual,
+                    "void" => CSharpTokenType::Void,
+                    "volatile" => CSharpTokenType::Volatile,
+                    "while" => CSharpTokenType::While,
+                    _ => CSharpTokenType::Identifier,
                 };
 
                 state.add_token(token_kind, start_pos, state.get_position());
@@ -303,7 +311,7 @@ impl CSharpLexer {
     }
 
     /// 处理操作符
-    fn lex_operator<S: Source>(&self, state: &mut State<S>) -> bool {
+    fn lex_operator<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start_pos = state.get_position();
 
         if let Some(ch) = state.peek() {
@@ -312,38 +320,38 @@ impl CSharpLexer {
                     state.advance(1);
                     if let Some('=') = state.peek() {
                         state.advance(1);
-                        CSharpSyntaxKind::PlusAssign
+                        CSharpTokenType::PlusAssign
                     }
                     else if let Some('+') = state.peek() {
                         state.advance(1);
-                        CSharpSyntaxKind::Increment
+                        CSharpTokenType::Increment
                     }
                     else {
-                        CSharpSyntaxKind::Plus
+                        CSharpTokenType::Plus
                     }
                 }
                 '-' => {
                     state.advance(1);
                     if let Some('=') = state.peek() {
                         state.advance(1);
-                        CSharpSyntaxKind::MinusAssign
+                        CSharpTokenType::MinusAssign
                     }
                     else if let Some('-') = state.peek() {
                         state.advance(1);
-                        CSharpSyntaxKind::Decrement
+                        CSharpTokenType::Decrement
                     }
                     else {
-                        CSharpSyntaxKind::Minus
+                        CSharpTokenType::Minus
                     }
                 }
                 '*' => {
                     state.advance(1);
                     if let Some('=') = state.peek() {
                         state.advance(1);
-                        CSharpSyntaxKind::StarAssign
+                        CSharpTokenType::StarAssign
                     }
                     else {
-                        CSharpSyntaxKind::Star
+                        CSharpTokenType::Star
                     }
                 }
                 '/' => {
@@ -351,97 +359,97 @@ impl CSharpLexer {
                     state.advance(1);
                     if let Some('=') = state.peek() {
                         state.advance(1);
-                        CSharpSyntaxKind::SlashAssign
+                        CSharpTokenType::SlashAssign
                     }
                     else {
-                        CSharpSyntaxKind::Slash
+                        CSharpTokenType::Slash
                     }
                 }
                 '%' => {
                     state.advance(1);
                     if let Some('=') = state.peek() {
                         state.advance(1);
-                        CSharpSyntaxKind::PercentAssign
+                        CSharpTokenType::PercentAssign
                     }
                     else {
-                        CSharpSyntaxKind::Percent
+                        CSharpTokenType::Percent
                     }
                 }
                 '=' => {
                     state.advance(1);
                     if let Some('=') = state.peek() {
                         state.advance(1);
-                        CSharpSyntaxKind::Equal
+                        CSharpTokenType::Equal
                     }
                     else {
-                        CSharpSyntaxKind::Assign
+                        CSharpTokenType::Assign
                     }
                 }
                 '!' => {
                     state.advance(1);
                     if let Some('=') = state.peek() {
                         state.advance(1);
-                        CSharpSyntaxKind::NotEqual
+                        CSharpTokenType::NotEqual
                     }
                     else {
-                        CSharpSyntaxKind::LogicalNot
+                        CSharpTokenType::LogicalNot
                     }
                 }
                 '<' => {
                     state.advance(1);
                     if let Some('=') = state.peek() {
                         state.advance(1);
-                        CSharpSyntaxKind::LessEqual
+                        CSharpTokenType::LessEqual
                     }
                     else if let Some('<') = state.peek() {
                         state.advance(1);
-                        CSharpSyntaxKind::LeftShift
+                        CSharpTokenType::LeftShift
                     }
                     else {
-                        CSharpSyntaxKind::Less
+                        CSharpTokenType::Less
                     }
                 }
                 '>' => {
                     state.advance(1);
                     if let Some('=') = state.peek() {
                         state.advance(1);
-                        CSharpSyntaxKind::GreaterEqual
+                        CSharpTokenType::GreaterEqual
                     }
                     else if let Some('>') = state.peek() {
                         state.advance(1);
-                        CSharpSyntaxKind::RightShift
+                        CSharpTokenType::RightShift
                     }
                     else {
-                        CSharpSyntaxKind::Greater
+                        CSharpTokenType::Greater
                     }
                 }
                 '&' => {
                     state.advance(1);
                     if let Some('&') = state.peek() {
                         state.advance(1);
-                        CSharpSyntaxKind::LogicalAnd
+                        CSharpTokenType::LogicalAnd
                     }
                     else {
-                        CSharpSyntaxKind::Ampersand
+                        CSharpTokenType::Ampersand
                     }
                 }
                 '|' => {
                     state.advance(1);
                     if let Some('|') = state.peek() {
                         state.advance(1);
-                        CSharpSyntaxKind::LogicalOr
+                        CSharpTokenType::LogicalOr
                     }
                     else {
-                        CSharpSyntaxKind::Pipe
+                        CSharpTokenType::Pipe
                     }
                 }
                 '^' => {
                     state.advance(1);
-                    CSharpSyntaxKind::Caret
+                    CSharpTokenType::Caret
                 }
                 '~' => {
                     state.advance(1);
-                    CSharpSyntaxKind::Tilde
+                    CSharpTokenType::Tilde
                 }
                 _ => return false,
             };
@@ -455,22 +463,22 @@ impl CSharpLexer {
     }
 
     /// 处理分隔符
-    fn lex_delimiter<S: Source>(&self, state: &mut State<S>) -> bool {
+    fn lex_delimiter<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start_pos = state.get_position();
 
         if let Some(ch) = state.peek() {
             let token_kind = match ch {
-                '(' => CSharpSyntaxKind::LeftParen,
-                ')' => CSharpSyntaxKind::RightParen,
-                '[' => CSharpSyntaxKind::LeftBracket,
-                ']' => CSharpSyntaxKind::RightBracket,
-                '{' => CSharpSyntaxKind::LeftBrace,
-                '}' => CSharpSyntaxKind::RightBrace,
-                ';' => CSharpSyntaxKind::Semicolon,
-                ',' => CSharpSyntaxKind::Comma,
-                '.' => CSharpSyntaxKind::Dot,
-                ':' => CSharpSyntaxKind::Colon,
-                '?' => CSharpSyntaxKind::Question,
+                '(' => CSharpTokenType::LeftParen,
+                ')' => CSharpTokenType::RightParen,
+                '[' => CSharpTokenType::LeftBracket,
+                ']' => CSharpTokenType::RightBracket,
+                '{' => CSharpTokenType::LeftBrace,
+                '}' => CSharpTokenType::RightBrace,
+                ';' => CSharpTokenType::Semicolon,
+                ',' => CSharpTokenType::Comma,
+                '.' => CSharpTokenType::Dot,
+                ':' => CSharpTokenType::Colon,
+                '?' => CSharpTokenType::Question,
                 _ => return false,
             };
 
@@ -482,47 +490,40 @@ impl CSharpLexer {
             false
         }
     }
-}
 
-impl Lexer<CSharpLanguage> for CSharpLexer {
-    fn lex_incremental(
-        &self,
-        source: impl Source,
-        _changed: usize,
-        _cache: IncrementalCache<CSharpLanguage>,
-    ) -> LexOutput<CSharpLanguage> {
-        let mut state = LexerState::new_with_cache(source, _changed, _cache);
-
+    fn run<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> Result<(), oak_core::OakError> {
         while state.not_at_end() {
-            if self.skip_whitespace(&mut state) {
+            let safe_point = state.get_position();
+
+            if self.skip_whitespace(state) {
                 continue;
             }
 
-            if self.lex_newline(&mut state) {
+            if self.lex_newline(state) {
                 continue;
             }
 
-            if self.lex_comment(&mut state) {
+            if self.lex_comment(state) {
                 continue;
             }
 
-            if self.lex_string(&mut state) {
+            if self.lex_string(state) {
                 continue;
             }
 
-            if self.lex_number(&mut state) {
+            if self.lex_number(state) {
                 continue;
             }
 
-            if self.lex_keyword_or_identifier(&mut state) {
+            if self.lex_keyword_or_identifier(state) {
                 continue;
             }
 
-            if self.lex_operator(&mut state) {
+            if self.lex_operator(state) {
                 continue;
             }
 
-            if self.lex_delimiter(&mut state) {
+            if self.lex_delimiter(state) {
                 continue;
             }
 
@@ -530,13 +531,22 @@ impl Lexer<CSharpLanguage> for CSharpLexer {
             let start_pos = state.get_position();
             if let Some(ch) = state.peek() {
                 state.advance(ch.len_utf8());
-                state.add_token(CSharpSyntaxKind::Error, start_pos, state.get_position());
+                state.add_token(CSharpTokenType::Error, start_pos, state.get_position());
             }
-            else {
-                break;
-            }
-        }
 
-        state.finish(Ok(()))
+            state.advance_if_dead_lock(safe_point);
+        }
+        Ok(())
+    }
+}
+
+impl<'config> Lexer<CSharpLanguage> for CSharpLexer<'config> {
+    fn lex<'a, S: Source + ?Sized>(&self, text: &S, _edits: &[TextEdit], mut cache: &'a mut impl LexerCache<CSharpLanguage>) -> LexOutput<CSharpLanguage> {
+        let mut state = LexerState::new(text);
+        let result = self.run(&mut state);
+        if result.is_ok() {
+            state.add_eof();
+        }
+        state.finish_with_cache(result, &mut cache)
     }
 }

@@ -7,5 +7,6 @@ pub mod ast;
 pub mod kind;
 pub mod language;
 pub mod lexer;
+pub mod parser;
 
-pub use crate::{kind::VhdlSyntaxKind, language::VhdlLanguage, lexer::VhdlLexer};
+pub use crate::{kind::VhdlSyntaxKind, language::VhdlLanguage, lexer::VhdlLexer, parser::VhdlParser};

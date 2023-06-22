@@ -1,5 +1,4 @@
 use oak_purescript::{PurescriptLanguage, PurescriptLexer};
-use std::path::Path;
 
 mod lexer;
 mod parser;
@@ -13,7 +12,7 @@ fn ready() {
 fn test_purescript_lexer_basic() {
     // 简单测试：创建词法分析器并验证它可以正常工作
     let language = PurescriptLanguage::default();
-    let lexer = PurescriptLexer::new(&language);
+    let _lexer = PurescriptLexer::new(&language);
 
     // 测试一个简单的 PureScript 代码片段
     let test_code = "module Main where\n\nmain :: IO ()\nmain = log \"Hello, World!\"";

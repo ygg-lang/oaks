@@ -1,42 +1,39 @@
-use crate::{language::IniLanguage, syntax::IniSyntaxKind};
+use crate::{kind::IniSyntaxKind, language::IniLanguage};
 use oak_core::{
-    IncrementalCache, Lexer, LexerState, OakError,
-    lexer::{CommentLine, LexOutput, StringConfig, WhitespaceConfig},
+    Lexer, LexerCache, LexerState, OakError,
+    lexer::{CommentConfig, LexOutput, StringConfig, WhitespaceConfig},
     source::Source,
 };
-use std::sync::LazyLock;
 
-type State<S: Source> = LexerState<S, IniLanguage>;
+type State<'a, S> = LexerState<'a, S, IniLanguage>;
 
-static INI_WHITESPACE: LazyLock<WhitespaceConfig> = LazyLock::new(|| WhitespaceConfig { unicode_whitespace: true });
-static INI_COMMENT: LazyLock<CommentLine> = LazyLock::new(|| CommentLine { line_markers: &[";", "#"] });
-static INI_STRING: LazyLock<StringConfig> = LazyLock::new(|| StringConfig { quotes: &['"', '\''], escape: Some('\\') });
+static _INI_WHITESPACE: WhitespaceConfig = WhitespaceConfig { unicode_whitespace: true };
+static _INI_COMMENT: CommentConfig = CommentConfig { line_marker: ";", block_start: "", block_end: "", nested_blocks: false };
+static _INI_STRING: StringConfig = StringConfig { quotes: &['"', '\''], escape: Some('\\') };
 
 #[derive(Clone)]
-pub struct IniLexer<'config> {
-    config: &'config IniLanguage,
+pub struct IniLexer {
+    _config: IniLanguage,
 }
 
-impl<'config> Lexer<IniLanguage> for IniLexer<'config> {
-    fn lex_incremental(
-        &self,
-        source: impl Source,
-        changed: usize,
-        cache: IncrementalCache<IniLanguage>,
-    ) -> LexOutput<IniLanguage> {
-        let mut state = LexerState::new_with_cache(source, changed, cache);
+impl Lexer<IniLanguage> for IniLexer {
+    fn lex<'a, S: Source + ?Sized>(&self, source: &S, _edits: &[oak_core::TextEdit], cache: &'a mut impl LexerCache<IniLanguage>) -> LexOutput<IniLanguage> {
+        let mut state: State<'_, S> = State::new(source);
         let result = self.run(&mut state);
-        state.finish(result)
+        if result.is_ok() {
+            state.add_eof();
+        }
+        state.finish_with_cache(result, cache)
     }
 }
 
-impl<'config> IniLexer<'config> {
-    pub fn new(config: &'config IniLanguage) -> Self {
-        Self { config }
+impl IniLexer {
+    pub fn new(config: &IniLanguage) -> Self {
+        Self { _config: config.clone() }
     }
 
     /// 主要的词法分析循环
-    fn run<S: Source>(&self, state: &mut State<S>) -> Result<(), OakError> {
+    fn run<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> Result<(), OakError> {
         while state.not_at_end() {
             let safe_point = state.get_position();
 
@@ -68,17 +65,14 @@ impl<'config> IniLexer<'config> {
                 continue;
             }
 
-            state.safe_check(safe_point);
+            state.advance_if_dead_lock(safe_point);
         }
 
-        // 添加 EOF token
-        let eof_pos = state.get_position();
-        state.add_token(IniSyntaxKind::Eof, eof_pos, eof_pos);
         Ok(())
     }
 
     /// 跳过空白字符（不包括换行符）
-    fn skip_whitespace<S: Source>(&self, state: &mut State<S>) -> bool {
+    fn skip_whitespace<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start = state.get_position();
 
         while let Some(ch) = state.peek() {
@@ -98,7 +92,7 @@ impl<'config> IniLexer<'config> {
     }
 
     /// 处理换行
-    fn lex_newline<S: Source>(&self, state: &mut State<S>) -> bool {
+    fn lex_newline<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start = state.get_position();
 
         if state.current() == Some('\n') {
@@ -110,7 +104,7 @@ impl<'config> IniLexer<'config> {
     }
 
     /// 跳过注释
-    fn skip_comment<S: Source>(&self, state: &mut State<S>) -> bool {
+    fn skip_comment<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start = state.get_position();
 
         if let Some(ch) = state.current() {
@@ -136,7 +130,7 @@ impl<'config> IniLexer<'config> {
     }
 
     /// 处理字符串字面量
-    fn lex_string_literal<S: Source>(&self, state: &mut State<S>) -> bool {
+    fn lex_string_literal<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start = state.get_position();
 
         if let Some(quote_char) = state.current() {
@@ -171,7 +165,7 @@ impl<'config> IniLexer<'config> {
     }
 
     /// 处理数字字面量
-    fn lex_number_literal<S: Source>(&self, state: &mut State<S>) -> bool {
+    fn lex_number_literal<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start = state.get_position();
         let first = match state.current() {
             Some(c) => c,
@@ -184,7 +178,7 @@ impl<'config> IniLexer<'config> {
         }
 
         // 如果是符号，检查后面是否跟数字
-        if (first == '-' || first == '+') {
+        if first == '-' || first == '+' {
             if let Some(next) = state.peek_next_n(1) {
                 if !next.is_ascii_digit() {
                     return false;
@@ -227,7 +221,7 @@ impl<'config> IniLexer<'config> {
         let text = state.get_text_in((start..end).into());
 
         // 简单验证：不能只是符号或只是点
-        if text == "-" || text == "+" || text == "." {
+        if text.as_ref() == "-" || text.as_ref() == "+" || text.as_ref() == "." {
             // 回退
             state.set_position(start);
             return false;
@@ -241,7 +235,7 @@ impl<'config> IniLexer<'config> {
     }
 
     /// 处理标识符
-    fn lex_identifier<S: Source>(&self, state: &mut State<S>) -> bool {
+    fn lex_identifier<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start = state.get_position();
         let ch = match state.current() {
             Some(c) => c,
@@ -270,7 +264,7 @@ impl<'config> IniLexer<'config> {
         let kind = match text.to_lowercase().as_str() {
             "true" | "false" => IniSyntaxKind::Boolean,
             _ => {
-                if self.is_datetime_like::<S>(text) {
+                if self.is_datetime_like(text.as_ref()) {
                     IniSyntaxKind::DateTime
                 }
                 else {
@@ -284,18 +278,17 @@ impl<'config> IniLexer<'config> {
     }
 
     /// 处理标点符号
-    fn lex_punctuation<S: Source>(&self, state: &mut State<S>) -> bool {
+    fn lex_punctuation<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start = state.get_position();
-        let rest = state.rest();
 
         // 优先匹配较长的符号
-        if rest.starts_with("[[") {
+        if state.starts_with("[[") {
             state.advance(2);
             state.add_token(IniSyntaxKind::DoubleLeftBracket, start, state.get_position());
             return true;
         }
 
-        if rest.starts_with("]]") {
+        if state.starts_with("]]") {
             state.advance(2);
             state.add_token(IniSyntaxKind::DoubleRightBracket, start, state.get_position());
             return true;
@@ -322,7 +315,7 @@ impl<'config> IniLexer<'config> {
     }
 
     /// 判断是否类似日期时间格式
-    fn is_datetime_like<S: Source>(&self, text: &str) -> bool {
+    fn is_datetime_like(&self, text: &str) -> bool {
         // 简单的日期时间格式检查
         // 支持 ISO 8601 格式：YYYY-MM-DD, YYYY-MM-DDTHH:MM:SS 等
         if text.len() < 8 {

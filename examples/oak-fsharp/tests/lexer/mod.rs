@@ -1,4 +1,4 @@
-use oak_core::{helpers::LexerTester, source::Source};
+use oak_core::{LexerState, helpers::LexerTester, source::Source};
 use oak_fsharp::{FSharpLanguage, FSharpLexer};
 use std::{path::Path, time::Duration};
 
@@ -8,7 +8,7 @@ fn test_fsharp_lexer() {
     let language = Box::leak(Box::new(FSharpLanguage::default()));
     let lexer = FSharpLexer::new(language);
     let test_runner = LexerTester::new(here.join("tests/lexer/fixtures")).with_extension("fs").with_timeout(Duration::from_secs(5));
-    match test_runner.run_tests::<FSharpLanguage, _>(lexer) {
+    match test_runner.run_tests::<FSharpLanguage, _>(&lexer) {
         Ok(()) => println!("F# lexer tests passed!"),
         Err(e) => panic!("F# lexer tests failed: {}", e),
     }
@@ -16,7 +16,7 @@ fn test_fsharp_lexer() {
 
 #[test]
 fn test_peek_behavior() {
-    use oak_core::{SourceText, lexer::LexerState};
+    use oak_core::{LexerState, SourceText, lexer::LexerState};
     use oak_fsharp::FSharpLanguage;
 
     let source = SourceText::new("NESTED_CONSTANT");
@@ -42,7 +42,7 @@ fn test_peek_behavior() {
 
 #[test]
 fn test_fsharp_function_parsing() {
-    use oak_core::{Lexer, SourceText};
+    use oak_core::{Lexer, LexerState, SourceText};
     use oak_fsharp::{FSharpLanguage, FSharpLexer};
 
     let source = SourceText::new("let add x y = x + y\nlet result = add 1 2");

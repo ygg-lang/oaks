@@ -1,8 +1,10 @@
-use oak_core::SyntaxKind;
-use serde::Serialize;
+use oak_core::{Token, TokenType, UniversalTokenRole};
+use serde::{Deserialize, Serialize};
+
+pub type DjangoToken = Token<DjangoSyntaxKind>;
 
 /// Django 模板语法种类
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub enum DjangoSyntaxKind {
     // 基本 kind
     Identifier,
@@ -88,6 +90,10 @@ pub enum DjangoSyntaxKind {
     // 注释
     Comment,
 
+    // 节点类型
+    Variable,
+    Tag,
+
     // 特殊
     Root,
     Error,
@@ -137,8 +143,32 @@ impl DjangoSyntaxKind {
     }
 }
 
-impl SyntaxKind for DjangoSyntaxKind {
-    fn is_trivia(&self) -> bool {
+impl TokenType for DjangoSyntaxKind {
+    type Role = UniversalTokenRole;
+    const END_OF_STREAM: Self = Self::Eof;
+
+    fn role(&self) -> Self::Role {
+        if self.is_keyword() {
+            return UniversalTokenRole::Keyword;
+        }
+
+        match self {
+            Self::Identifier => UniversalTokenRole::Name,
+            Self::Number | Self::String => UniversalTokenRole::Literal,
+            Self::Whitespace | Self::Newline => UniversalTokenRole::Whitespace,
+            Self::Comment => UniversalTokenRole::Comment,
+            Self::VariableStart | Self::VariableEnd | Self::TagStart | Self::TagEnd | Self::CommentStart | Self::CommentEnd => UniversalTokenRole::Punctuation,
+            Self::Pipe | Self::Colon | Self::Dot | Self::Comma | Self::Equal | Self::Plus | Self::Minus | Self::Star | Self::Slash | Self::Percent | Self::EqualEqual | Self::NotEqual | Self::Less | Self::LessEqual | Self::Greater | Self::GreaterEqual => {
+                UniversalTokenRole::Operator
+            }
+            Self::LeftParen | Self::RightParen | Self::LeftBracket | Self::RightBracket | Self::Semicolon => UniversalTokenRole::Punctuation,
+            Self::HtmlText | Self::HtmlTag => UniversalTokenRole::None,
+            Self::Error => UniversalTokenRole::Error,
+            _ => UniversalTokenRole::None,
+        }
+    }
+
+    fn is_ignored(&self) -> bool {
         matches!(self, Self::Whitespace | Self::Newline | Self::Comment)
     }
 
@@ -149,12 +179,21 @@ impl SyntaxKind for DjangoSyntaxKind {
     fn is_whitespace(&self) -> bool {
         matches!(self, Self::Whitespace | Self::Newline)
     }
+}
 
-    fn is_token_type(&self) -> bool {
-        !matches!(self, Self::Error | Self::Eof)
+impl oak_core::ElementType for DjangoSyntaxKind {
+    type Role = oak_core::UniversalElementRole;
+
+    fn role(&self) -> Self::Role {
+        match self {
+            Self::Root => oak_core::UniversalElementRole::Root,
+            Self::Variable | Self::Tag => oak_core::UniversalElementRole::Statement,
+            Self::Error => oak_core::UniversalElementRole::Error,
+            _ => oak_core::UniversalElementRole::None,
+        }
     }
 
-    fn is_element_type(&self) -> bool {
-        false
+    fn is_error(&self) -> bool {
+        matches!(self, Self::Error)
     }
 }

@@ -3,5 +3,5 @@ mod parser;
 
 #[test]
 fn ready() {
-    println!("MATLAB parser is ready!")
+    println!("MATLAB files is ready!")
 }

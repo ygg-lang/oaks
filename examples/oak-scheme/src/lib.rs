@@ -5,7 +5,19 @@
 pub mod kind;
 pub mod language;
 pub mod lexer;
+pub mod parser;
 
-pub use kind::SchemeSyntaxKind;
-pub use language::SchemeLanguage;
-pub use lexer::SchemeLexer;
+mod builder;
+mod formatter;
+pub mod highlighter;
+pub mod lsp;
+#[cfg(feature = "mcp")]
+pub mod mcp;
+
+pub use crate::{builder::SchemeBuilder, formatter::SchemeFormatter, highlighter::SchemeHighlighter, kind::SchemeSyntaxKind, language::SchemeLanguage, lexer::SchemeLexer, lsp::SchemeLanguageService};
+
+#[cfg(feature = "mcp")]
+pub use crate::mcp::serve_scheme_mcp;
+
+#[cfg(all(feature = "mcp", feature = "axum"))]
+pub use crate::mcp::serve_scheme_mcp_axum;

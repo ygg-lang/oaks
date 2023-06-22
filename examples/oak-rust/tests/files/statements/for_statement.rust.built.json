@@ -1,0 +1,51 @@
+{
+    "success": true,
+    "typed_root": {
+        "type_name": "oak_rust::ast::RustRoot",
+        "content": {
+            "items": [
+                {
+                    "Function": {
+                        "body": {
+                            "block_end": 0,
+                            "block_start": 0,
+                            "nested": 0,
+                            "span": {
+                                "end": 0,
+                                "start": 0
+                            },
+                            "statements": []
+                        },
+                        "generics": [],
+                        "is_async": false,
+                        "is_extern": false,
+                        "is_unsafe": false,
+                        "name": {
+                            "name": "",
+                            "span": {
+                                "end": 0,
+                                "start": 0
+                            }
+                        },
+                        "params": [],
+                        "return_type": null,
+                        "span": {
+                            "end": 49,
+                            "start": 0
+                        }
+                    }
+                }
+            ]
+        }
+    },
+    "errors": [
+        "Expected 'Identifier' at 2",
+        "Expected 'LeftParen' at 2",
+        "Expected 'LeftBrace' at 9",
+        "Expected 'Identifier' at 20",
+        "Expected 'Keyword(In)' at 20",
+        "Expected 'LeftBrace' at 21",
+        "Expected 'RightBrace' at 55",
+        "Expected 'RightBrace' at 55"
+    ]
+}

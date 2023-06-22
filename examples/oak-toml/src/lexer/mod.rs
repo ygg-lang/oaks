@@ -1,69 +1,73 @@
 use crate::{TomlSyntaxKind, language::TomlLanguage};
 use oak_core::{
-    IncrementalCache, Lexer, LexerState, OakError,
-    lexer::{CommentLine, LexOutput, StringConfig, WhitespaceConfig},
+    Lexer, LexerState, OakError, TextEdit,
+    lexer::{LexOutput, LexerCache},
     source::Source,
 };
-use std::sync::LazyLock;
 
-type State<S: Source> = LexerState<S, TomlLanguage>;
-
-static TOML_WHITESPACE: LazyLock<WhitespaceConfig> = LazyLock::new(|| WhitespaceConfig { unicode_whitespace: true });
-static TOML_COMMENT: LazyLock<CommentLine> = LazyLock::new(|| CommentLine { line_markers: &["#"] });
+type State<'a, S> = LexerState<'a, S, TomlLanguage>;
 
 #[derive(Clone)]
-pub struct TomlLexer<'config> {
-    config: &'config TomlLanguage,
-}
+pub struct TomlLexer;
 
-impl<'config> Lexer<TomlLanguage> for TomlLexer<'config> {
-    fn lex_incremental(
-        &self,
-        source: impl Source,
-        changed: usize,
-        cache: IncrementalCache<TomlLanguage>,
-    ) -> LexOutput<TomlLanguage> {
-        let mut state = LexerState::new_with_cache(source, changed, cache);
+impl Lexer<TomlLanguage> for TomlLexer {
+    fn lex<'a, S: Source + ?Sized>(&self, source: &'a S, _edits: &[TextEdit], cache: &'a mut impl LexerCache<TomlLanguage>) -> LexOutput<TomlLanguage> {
+        let mut state = State::new(source);
         let result = self.run(&mut state);
-        state.finish(result)
+        if result.is_ok() {
+            state.add_eof();
+        }
+        state.finish_with_cache(result, cache)
     }
 }
 
-impl<'config> TomlLexer<'config> {
-    pub fn new(config: &'config TomlLanguage) -> Self {
-        Self { config }
+impl TomlLexer {
+    pub fn new(_config: &TomlLanguage) -> Self {
+        Self
     }
 
     /// 主要的词法分析循环
-    fn run<S: Source>(&self, state: &mut State<S>) -> Result<(), OakError> {
+    fn run<S: Source + ?Sized>(&self, state: &mut State<S>) -> Result<(), OakError> {
         while state.not_at_end() {
-            if self.skip_whitespace(state) {
-                continue;
+            if let Some(ch) = state.peek() {
+                match ch {
+                    ' ' | '\t' | '\n' | '\r' => {
+                        self.skip_whitespace(state);
+                    }
+                    '#' => {
+                        self.skip_comment(state);
+                    }
+                    '"' | '\'' => {
+                        self.lex_string(state);
+                    }
+                    '0'..='9' | '+' | '-' => {
+                        self.lex_number(state);
+                    }
+                    '[' | ']' | '{' | '}' | ',' | '.' | '=' => {
+                        self.lex_punctuation(state);
+                    }
+                    'a'..='z' | 'A'..='Z' | '_' => {
+                        self.lex_identifier(state);
+                    }
+                    _ => {
+                        // Fallback for any other punctuation or unknown characters
+                        if self.lex_punctuation(state) {
+                            continue;
+                        }
+                        // 如果没有匹配任何模式，跳过当前字符
+                        state.advance(1);
+                    }
+                }
             }
-            if self.skip_comment(state) {
-                continue;
+            else {
+                break;
             }
-            if self.lex_string(state) {
-                continue;
-            }
-            if self.lex_number(state) {
-                continue;
-            }
-            if self.lex_punctuation(state) {
-                continue;
-            }
-            if self.lex_identifier(state) {
-                continue;
-            }
-
-            // 如果没有匹配任何模式，跳过当前字符
-            state.advance(1);
         }
         Ok(())
     }
 
     /// 跳过空白字符
-    fn skip_whitespace<S: Source>(&self, state: &mut State<S>) -> bool {
+    fn skip_whitespace<S: Source + ?Sized>(&self, state: &mut State<S>) -> bool {
         let start_pos = state.get_position();
 
         while let Some(ch) = state.current() {
@@ -85,7 +89,7 @@ impl<'config> TomlLexer<'config> {
     }
 
     /// 跳过注释
-    fn skip_comment<S: Source>(&self, state: &mut State<S>) -> bool {
+    fn skip_comment<S: Source + ?Sized>(&self, state: &mut State<S>) -> bool {
         if state.current() == Some('#') {
             let start_pos = state.get_position();
             state.advance(1);
@@ -95,7 +99,7 @@ impl<'config> TomlLexer<'config> {
                 if ch == '\n' || ch == '\r' {
                     break;
                 }
-                state.advance(1);
+                state.advance(ch.len_utf8());
             }
 
             state.add_token(TomlSyntaxKind::Comment, start_pos, state.get_position());
@@ -107,7 +111,7 @@ impl<'config> TomlLexer<'config> {
     }
 
     /// 解析字符串
-    fn lex_string<S: Source>(&self, state: &mut State<S>) -> bool {
+    fn lex_string<S: Source + ?Sized>(&self, state: &mut State<S>) -> bool {
         match state.current() {
             Some('"') => {
                 let start = state.get_position();
@@ -156,7 +160,7 @@ impl<'config> TomlLexer<'config> {
     }
 
     /// 解析数字
-    fn lex_number<S: Source>(&self, state: &mut State<S>) -> bool {
+    fn lex_number<S: Source + ?Sized>(&self, state: &mut State<S>) -> bool {
         if !state.current().map_or(false, |c| c.is_ascii_digit() || c == '-' || c == '+') {
             return false;
         }
@@ -190,7 +194,7 @@ impl<'config> TomlLexer<'config> {
     }
 
     /// 解析标点符号
-    fn lex_punctuation<S: Source>(&self, state: &mut State<S>) -> bool {
+    fn lex_punctuation<S: Source + ?Sized>(&self, state: &mut State<S>) -> bool {
         let start = state.get_position();
 
         match state.current() {
@@ -255,7 +259,7 @@ impl<'config> TomlLexer<'config> {
     }
 
     /// 解析标识符和键
-    fn lex_identifier<S: Source>(&self, state: &mut State<S>) -> bool {
+    fn lex_identifier<S: Source + ?Sized>(&self, state: &mut State<S>) -> bool {
         if !state.current().map_or(false, |c| c.is_ascii_alphabetic() || c == '_') {
             return false;
         }
@@ -270,7 +274,7 @@ impl<'config> TomlLexer<'config> {
 
         // 检查是否为关键字
         let text = state.get_text_in((start..end).into());
-        let kind = match text {
+        let kind = match text.as_ref() {
             "true" | "false" => TomlSyntaxKind::Boolean,
             _ => TomlSyntaxKind::BareKey,
         };

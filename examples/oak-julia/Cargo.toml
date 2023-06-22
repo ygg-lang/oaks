@@ -1,6 +1,6 @@
 [package]
 name = "oak-julia"
-description = "High-performance incremental Julia parser for the oak ecosystem with flexible configuration, supporting scientific computing and high-performance numerical analysis."
+description = "Julia scientific computing language parser with support for high-performance numerical analysis and scientific computing."
 categories = ["parsing"]
 keywords = ["parser", "julia", "ast", "language"]
 documentation = "https://docs.rs/oak-julia"
@@ -14,17 +14,24 @@ edition.workspace = true
 
 [dependencies]
 oak-core = { workspace = true }
-oak-highlight = { workspace = true, optional = true }
-oak-pretty-print = { workspace = true, optional = true }
-serde = { version = "1.0", features = ["derive"] }
+oak-highlight = { workspace = true }
+oak-pretty-print = { workspace = true }
+oak-lsp = { workspace = true }
+oak-mcp = { workspace = true, optional = true }
+oak-hover = { workspace = true }
+oak-vfs = { workspace = true }
+serde = { workspace = true }
+futures = { workspace = true }
+axum = { workspace = true, optional = true }
+tokio = { workspace = true, optional = true }
 
 [dev-dependencies]
 oak-core = { workspace = true, features = ["testing"] }
 
-walkdir = "2.5"
-
 [features]
 default = []
+mcp = ["dep:oak-mcp"]
+axum = ["mcp", "dep:tokio", "dep:axum", "oak-mcp/axum", "oak-lsp/axum"]
 
 
 [package.metadata.docs.rs]

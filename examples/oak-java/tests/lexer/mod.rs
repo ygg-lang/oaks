@@ -8,7 +8,7 @@ fn test_java_lexer() {
     let language = Box::leak(Box::new(JavaLanguage::default()));
     let lexer = JavaLexer::new(language);
     let test_runner = LexerTester::new(here.join("tests/lexer")).with_extension("java").with_timeout(Duration::from_secs(5));
-    match test_runner.run_tests::<JavaLanguage, _>(lexer) {
+    match test_runner.run_tests::<JavaLanguage, _>(&lexer) {
         Ok(()) => println!("Java lexer tests passed!"),
         Err(e) => panic!("Java lexer tests failed: {}", e),
     }

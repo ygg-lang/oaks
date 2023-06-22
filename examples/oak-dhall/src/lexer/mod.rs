@@ -1,40 +1,34 @@
 use crate::{kind::DHallSyntaxKind, language::DHallLanguage};
 use oak_core::{
-    IncrementalCache, Lexer, LexerState, OakError,
-    lexer::{CommentLine, LexOutput, StringConfig, WhitespaceConfig},
-    source::Source,
+    LexOutput, Lexer, LexerCache, LexerState, OakError,
+    lexer::{CommentConfig, StringConfig, WhitespaceConfig},
+    source::{Source, TextEdit},
 };
 use std::sync::LazyLock;
 
-type State<S: Source> = LexerState<S, DHallLanguage>;
-
 static DHALL_WHITESPACE: LazyLock<WhitespaceConfig> = LazyLock::new(|| WhitespaceConfig { unicode_whitespace: true });
-static DHALL_COMMENT: LazyLock<CommentLine> = LazyLock::new(|| CommentLine { line_markers: &["--"] });
+static DHALL_COMMENT: LazyLock<CommentConfig> = LazyLock::new(|| CommentConfig { line_marker: "--", block_start: "{-", block_end: "-}", nested_blocks: true });
 static DHALL_STRING: LazyLock<StringConfig> = LazyLock::new(|| StringConfig { quotes: &['"'], escape: Some('\\') });
 
+#[derive(Clone)]
 pub struct DHallLexer<'config> {
-    config: &'config DHallLanguage,
+    _config: &'config DHallLanguage,
 }
 
 impl<'config> Lexer<DHallLanguage> for DHallLexer<'config> {
-    fn lex_incremental(
-        &self,
-        source: impl Source,
-        _changed: usize,
-        _cache: IncrementalCache<DHallLanguage>,
-    ) -> LexOutput<DHallLanguage> {
-        let mut state = LexerState::new_with_cache(source, _changed, _cache);
+    fn lex<'a, S: Source + ?Sized>(&self, source: &'a S, _edits: &[TextEdit], cache: &'a mut impl LexerCache<DHallLanguage>) -> LexOutput<DHallLanguage> {
+        let mut state = LexerState::new(source);
         let result = self.run(&mut state);
-        state.finish(result)
+        state.finish_with_cache(result, cache)
     }
 }
 
 impl<'config> DHallLexer<'config> {
     pub fn new(config: &'config DHallLanguage) -> Self {
-        Self { config }
+        Self { _config: config }
     }
 
-    fn run<S: Source>(&self, state: &mut State<S>) -> Result<(), OakError> {
+    fn run<'a, S: Source + ?Sized>(&self, state: &mut LexerState<'a, S, DHallLanguage>) -> Result<(), OakError> {
         while state.not_at_end() {
             let safe_point = state.get_position();
             if self.skip_whitespace(state) {
@@ -65,50 +59,27 @@ impl<'config> DHallLexer<'config> {
                 continue;
             }
 
-            state.safe_check(safe_point);
+            state.advance_if_dead_lock(safe_point);
         }
 
-        // 添加 EOF kind
-        let eof_pos = state.get_position();
-        state.add_token(DHallSyntaxKind::Eof, eof_pos, eof_pos);
         Ok(())
     }
 
-    fn skip_whitespace<S: Source>(&self, state: &mut State<S>) -> bool {
-        match DHALL_WHITESPACE.scan(state.rest(), state.get_position(), DHallSyntaxKind::Whitespace) {
-            Some(token) => {
-                state.advance(token.length());
-                true
-            }
-            None => false,
-        }
+    fn skip_whitespace<'a, S: Source + ?Sized>(&self, state: &mut LexerState<'a, S, DHallLanguage>) -> bool {
+        DHALL_WHITESPACE.scan(state, DHallSyntaxKind::Whitespace)
     }
 
-    fn skip_comment<S: Source>(&self, state: &mut State<S>) -> bool {
-        match DHALL_COMMENT.scan(state.rest(), state.get_position(), DHallSyntaxKind::Comment) {
-            Some(token) => {
-                state.advance(token.length());
-                true
-            }
-            None => false,
-        }
+    fn skip_comment<'a, S: Source + ?Sized>(&self, state: &mut LexerState<'a, S, DHallLanguage>) -> bool {
+        DHALL_COMMENT.scan(state, DHallSyntaxKind::Comment, DHallSyntaxKind::Comment)
     }
 
-    fn lex_string_literal<S: Source>(&self, state: &mut State<S>) -> bool {
+    fn lex_string_literal<'a, S: Source + ?Sized>(&self, state: &mut LexerState<'a, S, DHallLanguage>) -> bool {
+        DHALL_STRING.scan(state, DHallSyntaxKind::String)
+    }
+
+    fn lex_number_literal<'a, S: Source + ?Sized>(&self, state: &mut LexerState<'a, S, DHallLanguage>) -> bool {
         let start = state.get_position();
-        match DHALL_STRING.scan(state.rest(), start, DHallSyntaxKind::String) {
-            Some(token) => {
-                state.advance(token.length());
-                state.add_token(token.kind, start, state.get_position());
-                true
-            }
-            None => false,
-        }
-    }
-
-    fn lex_number_literal<S: Source>(&self, state: &mut State<S>) -> bool {
-        let start = state.get_position();
-        let first = match state.current() {
+        let first = match state.peek() {
             Some(c) => c,
             None => return false,
         };
@@ -127,64 +98,25 @@ impl<'config> DHallLexer<'config> {
             }
         }
 
-        // Fractional part
-        if state.peek() == Some('.') {
-            let next = state.peek_next_n(1);
-            if next.map(|c| c.is_ascii_digit()).unwrap_or(false) {
-                state.advance(1); // consume '.'
-                while let Some(c) = state.peek() {
-                    if c.is_ascii_digit() {
-                        state.advance(1);
-                    }
-                    else {
-                        break;
-                    }
-                }
-            }
-        }
-
-        // Exponent part
-        if let Some(c) = state.peek() {
-            if c == 'e' || c == 'E' {
-                let next = state.peek_next_n(1);
-                if next == Some('+') || next == Some('-') || next.map(|d| d.is_ascii_digit()).unwrap_or(false) {
-                    state.advance(1);
-                    if let Some(sign) = state.peek() {
-                        if sign == '+' || sign == '-' {
-                            state.advance(1);
-                        }
-                    }
-                    while let Some(d) = state.peek() {
-                        if d.is_ascii_digit() {
-                            state.advance(1);
-                        }
-                        else {
-                            break;
-                        }
-                    }
-                }
-            }
-        }
-
         state.add_token(DHallSyntaxKind::Number, start, state.get_position());
         true
     }
 
-    fn lex_identifier_or_keyword<S: Source>(&self, state: &mut State<S>) -> bool {
+    fn lex_identifier_or_keyword<'a, S: Source + ?Sized>(&self, state: &mut LexerState<'a, S, DHallLanguage>) -> bool {
         let start = state.get_position();
-        let ch = match state.current() {
+        let first = match state.peek() {
             Some(c) => c,
             None => return false,
         };
 
-        if !ch.is_alphabetic() && ch != '_' {
+        if !first.is_alphabetic() && first != '_' {
             return false;
         }
 
-        state.advance(ch.len_utf8());
+        state.advance(1);
         while let Some(c) = state.peek() {
-            if c.is_alphanumeric() || c == '_' {
-                state.advance(c.len_utf8());
+            if c.is_alphanumeric() || c == '_' || c == '-' || c == '/' {
+                state.advance(1);
             }
             else {
                 break;
@@ -193,64 +125,67 @@ impl<'config> DHallLexer<'config> {
 
         let end = state.get_position();
         let text = state.get_text_in((start..end).into());
-        let kind = match text.to_lowercase().as_str() {
-            "after" => DHallSyntaxKind::After,
-            "and" => DHallSyntaxKind::And,
-            "andalso" => DHallSyntaxKind::Andalso,
-            "band" => DHallSyntaxKind::Band,
-            "begin" => DHallSyntaxKind::Begin,
-            "bnot" => DHallSyntaxKind::Bnot,
-            "bor" => DHallSyntaxKind::Bor,
-            "bsl" => DHallSyntaxKind::Bsl,
-            "bsr" => DHallSyntaxKind::Bsr,
-            "bxor" => DHallSyntaxKind::Bxor,
-            "case" => DHallSyntaxKind::Case,
-            "catch" => DHallSyntaxKind::Catch,
-            "cond" => DHallSyntaxKind::Cond,
-            "div" => DHallSyntaxKind::Div,
-            "end" => DHallSyntaxKind::End,
-            "fun" => DHallSyntaxKind::Fun,
+
+        let kind = match text.as_ref() {
             "if" => DHallSyntaxKind::If,
+            "then" => DHallSyntaxKind::Then,
+            "else" => DHallSyntaxKind::Else,
             "let" => DHallSyntaxKind::Let,
-            "not" => DHallSyntaxKind::Not,
-            "of" => DHallSyntaxKind::Of,
-            "or" => DHallSyntaxKind::Or,
-            "orelse" => DHallSyntaxKind::Orelse,
-            "query" => DHallSyntaxKind::Query,
-            "receive" => DHallSyntaxKind::Receive,
-            "rem" => DHallSyntaxKind::Rem,
-            "try" => DHallSyntaxKind::Try,
-            "when" => DHallSyntaxKind::When,
-            "xor" => DHallSyntaxKind::Xor,
+            "in" => DHallSyntaxKind::In,
+            "using" => DHallSyntaxKind::Using,
+            "as" => DHallSyntaxKind::As,
+            "merge" => DHallSyntaxKind::Merge,
+            "Some" => DHallSyntaxKind::Some,
+            "None" => DHallSyntaxKind::None,
+            "with" => DHallSyntaxKind::With,
+            "forall" => DHallSyntaxKind::Forall,
+            "assert" => DHallSyntaxKind::Assert,
+            "Bool" => DHallSyntaxKind::Bool,
+            "Natural" => DHallSyntaxKind::Natural,
+            "Integer" => DHallSyntaxKind::Integer,
+            "Double" => DHallSyntaxKind::Double,
+            "Text" => DHallSyntaxKind::Text,
+            "List" => DHallSyntaxKind::List,
+            "Optional" => DHallSyntaxKind::Optional,
+            "True" => DHallSyntaxKind::True,
+            "False" => DHallSyntaxKind::False,
+            "λ" => DHallSyntaxKind::Lambda,
             _ => DHallSyntaxKind::Identifier,
         };
 
-        state.add_token(kind, start, state.get_position());
+        state.add_token(kind, start, end);
         true
     }
 
-    fn lex_operators<S: Source>(&self, state: &mut State<S>) -> bool {
+    fn lex_operators<'a, S: Source + ?Sized>(&self, state: &mut LexerState<'a, S, DHallLanguage>) -> bool {
         let start = state.get_position();
-        let rest = state.rest();
+        let text = state.rest();
 
-        // Multi-character operators (longest first)
-        let patterns: &[(&str, DHallSyntaxKind)] = &[
-            ("==", DHallSyntaxKind::EqualEqual),
-            ("/=", DHallSyntaxKind::SlashEqual),
-            ("=:=", DHallSyntaxKind::EqualColonEqual),
-            ("=/=", DHallSyntaxKind::EqualSlashEqual),
-            ("=<", DHallSyntaxKind::LessEqual),
-            (">=", DHallSyntaxKind::GreaterEqual),
-            ("++", DHallSyntaxKind::PlusPlus),
-            ("--", DHallSyntaxKind::MinusMinus),
+        let ops = [
             ("->", DHallSyntaxKind::Arrow),
-            ("||", DHallSyntaxKind::PipePipe),
+            ("→", DHallSyntaxKind::Arrow),
+            ("=>", DHallSyntaxKind::FatArrow),
+            ("==", DHallSyntaxKind::EqualEqual),
+            ("≡", DHallSyntaxKind::EqualEqual),
+            ("!=", DHallSyntaxKind::NotEqual),
+            ("&&", DHallSyntaxKind::And),
+            ("∧", DHallSyntaxKind::And),
+            ("||", DHallSyntaxKind::Or),
+            ("∨", DHallSyntaxKind::Or),
+            ("++", DHallSyntaxKind::Append),
+            ("//", DHallSyntaxKind::Combine),
+            ("⫽", DHallSyntaxKind::Combine),
+            ("/\\", DHallSyntaxKind::CombineTypes),
+            ("⩓", DHallSyntaxKind::CombineTypes),
+            ("//\\", DHallSyntaxKind::Prefer),
+            ("∀", DHallSyntaxKind::Forall),
+            ("λ", DHallSyntaxKind::Lambda),
         ];
 
-        for (pat, kind) in patterns {
-            if rest.starts_with(pat) {
-                state.advance(pat.len());
-                state.add_token(*kind, start, state.get_position());
+        for (op, kind) in ops {
+            if text.starts_with(op) {
+                state.advance(op.len());
+                state.add_token(kind, start, state.get_position());
                 return true;
             }
         }
@@ -258,45 +193,40 @@ impl<'config> DHallLexer<'config> {
         false
     }
 
-    fn lex_single_char_tokens<S: Source>(&self, state: &mut State<S>) -> bool {
+    fn lex_single_char_tokens<'a, S: Source + ?Sized>(&self, state: &mut LexerState<'a, S, DHallLanguage>) -> bool {
         let start = state.get_position();
-        if let Some(ch) = state.current() {
-            let kind = match ch {
-                '+' => Some(DHallSyntaxKind::Plus),
-                '-' => Some(DHallSyntaxKind::Minus),
-                '*' => Some(DHallSyntaxKind::Star),
-                '/' => Some(DHallSyntaxKind::Slash),
-                '=' => Some(DHallSyntaxKind::Equal),
-                '<' => Some(DHallSyntaxKind::Less),
-                '>' => Some(DHallSyntaxKind::Greater),
-                '!' => Some(DHallSyntaxKind::Exclamation),
-                '?' => Some(DHallSyntaxKind::Question),
-                '(' => Some(DHallSyntaxKind::LeftParen),
-                ')' => Some(DHallSyntaxKind::RightParen),
-                '{' => Some(DHallSyntaxKind::LeftBrace),
-                '}' => Some(DHallSyntaxKind::RightBrace),
-                '[' => Some(DHallSyntaxKind::LeftBracket),
-                ']' => Some(DHallSyntaxKind::RightBracket),
-                ',' => Some(DHallSyntaxKind::Comma),
-                ';' => Some(DHallSyntaxKind::Semicolon),
-                '.' => Some(DHallSyntaxKind::Dot),
-                ':' => Some(DHallSyntaxKind::Colon),
-                '|' => Some(DHallSyntaxKind::Pipe),
-                '#' => Some(DHallSyntaxKind::Hash),
-                _ => None,
-            };
+        let c = match state.peek() {
+            Some(c) => c,
+            None => return false,
+        };
 
-            if let Some(token_kind) = kind {
-                state.advance(ch.len_utf8());
-                state.add_token(token_kind, start, state.get_position());
-                true
-            }
-            else {
-                false
-            }
-        }
-        else {
-            false
-        }
+        let kind = match c {
+            '(' => DHallSyntaxKind::LeftParen,
+            ')' => DHallSyntaxKind::RightParen,
+            '[' => DHallSyntaxKind::LeftBracket,
+            ']' => DHallSyntaxKind::RightBracket,
+            '{' => DHallSyntaxKind::LeftBrace,
+            '}' => DHallSyntaxKind::RightBrace,
+            '<' => DHallSyntaxKind::Less,
+            '>' => DHallSyntaxKind::Greater,
+            ',' => DHallSyntaxKind::Comma,
+            '.' => DHallSyntaxKind::Dot,
+            ':' => DHallSyntaxKind::Colon,
+            ';' => DHallSyntaxKind::Semicolon,
+            '=' => DHallSyntaxKind::Equal,
+            '@' => DHallSyntaxKind::At,
+            '#' => DHallSyntaxKind::Hash,
+            '?' => DHallSyntaxKind::Question,
+            '+' => DHallSyntaxKind::Plus,
+            '*' => DHallSyntaxKind::Star,
+            '/' => DHallSyntaxKind::Slash,
+            '|' => DHallSyntaxKind::Pipe,
+            '\\' => DHallSyntaxKind::Lambda,
+            _ => return false,
+        };
+
+        state.advance(1);
+        state.add_token(kind, start, state.get_position());
+        true
     }
 }

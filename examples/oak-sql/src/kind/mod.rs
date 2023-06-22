@@ -1,3 +1,5 @@
+use oak_core::{UniversalElementRole, UniversalTokenRole};
+
 /// 统一SQL 语法种类（包含节点与词法
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, serde::Serialize)]
 pub enum SqlSyntaxKind {
@@ -162,16 +164,12 @@ pub enum SqlSyntaxKind {
     Eof,
 }
 
-impl oak_core::SyntaxKind for SqlSyntaxKind {
-    fn is_trivia(&self) -> bool {
-        matches!(
-            self,
-            SqlSyntaxKind::Whitespace
-                | SqlSyntaxKind::Newline
-                | SqlSyntaxKind::Comment
-                | SqlSyntaxKind::LineComment
-                | SqlSyntaxKind::BlockComment
-        )
+impl oak_core::TokenType for SqlSyntaxKind {
+    type Role = UniversalTokenRole;
+    const END_OF_STREAM: Self = Self::Eof;
+
+    fn is_ignored(&self) -> bool {
+        matches!(self, SqlSyntaxKind::Whitespace | SqlSyntaxKind::Newline | SqlSyntaxKind::Comment | SqlSyntaxKind::LineComment | SqlSyntaxKind::BlockComment)
     }
 
     fn is_comment(&self) -> bool {
@@ -182,27 +180,131 @@ impl oak_core::SyntaxKind for SqlSyntaxKind {
         matches!(self, SqlSyntaxKind::Whitespace | SqlSyntaxKind::Newline)
     }
 
-    fn is_token_type(&self) -> bool {
-        !self.is_element_type()
+    fn role(&self) -> Self::Role {
+        use UniversalTokenRole::*;
+        match self {
+            Self::Whitespace | Self::Newline => Whitespace,
+            Self::Comment | Self::LineComment | Self::BlockComment => Comment,
+            Self::NumberLiteral | Self::FloatLiteral | Self::StringLiteral | Self::BooleanLiteral | Self::NullLiteral => Literal,
+            Self::Identifier_ => Name,
+            Self::Select
+            | Self::From
+            | Self::Where
+            | Self::Insert
+            | Self::Into
+            | Self::Values
+            | Self::Update
+            | Self::Set
+            | Self::Delete
+            | Self::Create
+            | Self::Table
+            | Self::Drop
+            | Self::Alter
+            | Self::Add
+            | Self::Column
+            | Self::Primary
+            | Self::Key
+            | Self::Foreign
+            | Self::References
+            | Self::Index
+            | Self::Unique
+            | Self::Not
+            | Self::Null
+            | Self::Default
+            | Self::AutoIncrement
+            | Self::And
+            | Self::Or
+            | Self::In
+            | Self::Like
+            | Self::Between
+            | Self::Is
+            | Self::As
+            | Self::Join
+            | Self::Inner
+            | Self::Left
+            | Self::Right
+            | Self::Full
+            | Self::Outer
+            | Self::On
+            | Self::Group
+            | Self::By
+            | Self::Having
+            | Self::Order
+            | Self::Asc
+            | Self::Desc
+            | Self::Limit
+            | Self::Offset
+            | Self::Union
+            | Self::All
+            | Self::Distinct
+            | Self::Count
+            | Self::Sum
+            | Self::Avg
+            | Self::Min
+            | Self::Max
+            | Self::View
+            | Self::Database
+            | Self::Schema
+            | Self::True
+            | Self::False
+            | Self::Exists
+            | Self::Case
+            | Self::When
+            | Self::Then
+            | Self::Else
+            | Self::End
+            | Self::If
+            | Self::Begin
+            | Self::Commit
+            | Self::Rollback
+            | Self::Transaction => Keyword,
+            Self::Int | Self::Integer | Self::Varchar | Self::Char | Self::Text | Self::Date | Self::Time | Self::Timestamp | Self::Decimal | Self::Float | Self::Double | Self::Boolean => Keyword, // Types are often keywords
+            Self::Plus
+            | Self::Minus
+            | Self::Star
+            | Self::Slash
+            | Self::Percent
+            | Self::Equal
+            | Self::NotEqual
+            | Self::Less
+            | Self::Greater
+            | Self::LessEqual
+            | Self::GreaterEqual
+            | Self::Assign
+            | Self::Eq
+            | Self::Ne
+            | Self::Lt
+            | Self::Le
+            | Self::Gt
+            | Self::Ge
+            | Self::Concat => Operator,
+            Self::LeftParen | Self::RightParen | Self::LeftBracket | Self::RightBracket | Self::LeftBrace | Self::RightBrace | Self::Comma | Self::Semicolon | Self::Dot | Self::Colon | Self::Question => Punctuation,
+            Self::Error => Error,
+            _ => None,
+        }
+    }
+}
+
+impl oak_core::ElementType for SqlSyntaxKind {
+    type Role = UniversalElementRole;
+
+    fn is_root(&self) -> bool {
+        matches!(self, Self::Root)
     }
 
-    fn is_element_type(&self) -> bool {
-        matches!(
-            self,
-            SqlSyntaxKind::Root
-                | SqlSyntaxKind::Statement
-                | SqlSyntaxKind::SelectStatement
-                | SqlSyntaxKind::InsertStatement
-                | SqlSyntaxKind::UpdateStatement
-                | SqlSyntaxKind::DeleteStatement
-                | SqlSyntaxKind::CreateStatement
-                | SqlSyntaxKind::DropStatement
-                | SqlSyntaxKind::AlterStatement
-                | SqlSyntaxKind::Expression
-                | SqlSyntaxKind::Identifier
-                | SqlSyntaxKind::TableName
-                | SqlSyntaxKind::ColumnName
-                | SqlSyntaxKind::ErrorNode
-        )
+    fn is_error(&self) -> bool {
+        matches!(self, Self::ErrorNode)
+    }
+
+    fn role(&self) -> Self::Role {
+        use UniversalElementRole::*;
+        match self {
+            Self::Root => Root,
+            Self::Statement | Self::SelectStatement | Self::InsertStatement | Self::UpdateStatement | Self::DeleteStatement | Self::CreateStatement | Self::DropStatement | Self::AlterStatement => Statement,
+            Self::Expression => Value,
+            Self::Identifier | Self::TableName | Self::ColumnName => Name,
+            Self::ErrorNode => Error,
+            _ => None,
+        }
     }
 }

@@ -1,16 +1,89 @@
 use crate::{kind::DSyntaxKind, language::DLanguage};
-use oak_core::{Lexer, LexerState, SourceText, lexer::LexOutput, source::Source};
+use oak_core::{Lexer, LexerCache, LexerState, TextEdit, lexer::LexOutput, source::Source};
 
-type State<'input> = LexerState<&'input SourceText, DLanguage>;
+type State<'a, S> = LexerState<'a, S, DLanguage>;
 
-pub struct DLexer;
+/// Lexer implementation for D programming language
+#[derive(Clone)]
+pub struct DLexer<'config> {
+    _config: &'config DLanguage,
+}
 
-impl DLexer {
-    pub fn new() -> Self {
-        Self
+impl<'config> Lexer<DLanguage> for DLexer<'config> {
+    fn lex<'a, S: Source + ?Sized>(&self, source: &S, _edits: &[TextEdit], cache: &'a mut impl LexerCache<DLanguage>) -> LexOutput<DLanguage> {
+        let mut state = LexerState::new(source);
+        let result = self.run(&mut state);
+        if result.is_ok() {
+            state.add_eof();
+        }
+        state.finish_with_cache(result, cache)
+    }
+}
+
+impl<'config> DLexer<'config> {
+    pub fn new(config: &'config DLanguage) -> Self {
+        Self { _config: config }
     }
 
-    fn skip_whitespace(&self, state: &mut State) -> bool {
+    fn run<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> Result<(), oak_core::OakError> {
+        while state.not_at_end() {
+            let start_pos = state.get_position();
+
+            // 尝试各种词法规则
+            if self.skip_whitespace(state) {
+                continue;
+            }
+
+            if self.lex_newline(state) {
+                continue;
+            }
+
+            if self.lex_line_comment(state) {
+                continue;
+            }
+
+            if self.lex_block_comment(state) {
+                continue;
+            }
+
+            if self.lex_nested_comment(state) {
+                continue;
+            }
+
+            if self.lex_identifier_or_keyword(state) {
+                continue;
+            }
+
+            if self.lex_number(state) {
+                continue;
+            }
+
+            if self.lex_string(state) {
+                continue;
+            }
+
+            if self.lex_character(state) {
+                continue;
+            }
+
+            if self.lex_operator(state) {
+                continue;
+            }
+
+            if self.lex_delimiter(state) {
+                continue;
+            }
+
+            // 如果没有匹配任何规则，添加错误token并强行推进，防止死循环
+            state.advance_if_dead_lock(start_pos);
+            if state.get_position() > start_pos {
+                state.add_token(DSyntaxKind::Error, start_pos, state.get_position());
+            }
+        }
+        Ok(())
+    }
+
+    fn skip_whitespace<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         if let Some(ch) = state.peek() {
             if ch.is_whitespace() && ch != '\n' && ch != '\r' {
                 let start_pos = state.get_position();
@@ -27,13 +100,13 @@ impl DLexer {
         false
     }
 
-    fn lex_newline(&self, state: &mut State) -> bool {
+    fn lex_newline<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         if let Some(ch) = state.peek() {
             if ch == '\n' || ch == '\r' {
                 let start_pos = state.get_position();
                 if ch == '\r' {
                     state.advance(1);
-                    if let Some('\n') = state.peek() {
+                    if state.peek() == Some('\n') {
                         state.advance(1);
                     }
                 }
@@ -47,15 +120,10 @@ impl DLexer {
         false
     }
 
-    fn lex_identifier_or_keyword(&self, state: &mut State, source: &SourceText) -> bool {
+    fn lex_identifier_or_keyword<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         if let Some(ch) = state.peek() {
             if ch.is_alphabetic() || ch == '_' {
                 let start_pos = state.get_position();
-
-                // 第一个字
-                state.advance(ch.len_utf8());
-
-                // 后续字符
                 while let Some(ch) = state.peek() {
                     if ch.is_alphanumeric() || ch == '_' {
                         state.advance(ch.len_utf8());
@@ -64,12 +132,10 @@ impl DLexer {
                         break;
                     }
                 }
-
                 let end_pos = state.get_position();
-                let text = source.get_text_in((start_pos..end_pos).into());
+                let text = state.get_text_in((start_pos..end_pos).into());
 
-                // 检查是否为关键
-                let kind = match text {
+                let kind = match text.as_ref() {
                     "module" => DSyntaxKind::ModuleKeyword,
                     "import" => DSyntaxKind::ImportKeyword,
                     "public" => DSyntaxKind::PublicKeyword,
@@ -187,7 +253,7 @@ impl DLexer {
         false
     }
 
-    fn lex_number(&self, state: &mut State) -> bool {
+    fn lex_number<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         if let Some(ch) = state.peek() {
             if ch.is_ascii_digit() {
                 let start_pos = state.get_position();
@@ -215,7 +281,7 @@ impl DLexer {
                     }
                 }
 
-                // 检查指
+                // 检查指数
                 if let Some(ch) = state.peek() {
                     if ch == 'e' || ch == 'E' {
                         state.advance(1);
@@ -249,7 +315,7 @@ impl DLexer {
         false
     }
 
-    fn lex_string(&self, state: &mut State) -> bool {
+    fn lex_string<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         if let Some(ch) = state.peek() {
             if ch == '"' || ch == '\'' {
                 let start_pos = state.get_position();
@@ -279,7 +345,7 @@ impl DLexer {
         false
     }
 
-    fn lex_character(&self, state: &mut State) -> bool {
+    fn lex_character<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         if let Some('\'') = state.peek() {
             let start_pos = state.get_position();
             state.advance(1); // consume opening quote
@@ -306,51 +372,34 @@ impl DLexer {
         false
     }
 
-    fn lex_line_comment(&self, state: &mut State) -> bool {
+    fn lex_line_comment<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         if let Some('/') = state.peek() {
-            // 保存当前位置
-            let current_pos = state.get_position();
-            state.advance(1);
-            if let Some('/') = state.peek() {
-                // 恢复位置并开始处
-                state.set_position(current_pos);
+            if let Some('/') = state.peek_next_n(1) {
                 let start_pos = state.get_position();
-                state.advance(2); // skip //
-
+                state.advance(2);
                 while let Some(ch) = state.peek() {
-                    if ch == '\n' {
+                    if ch == '\n' || ch == '\r' {
                         break;
                     }
                     state.advance(ch.len_utf8());
                 }
-
                 state.add_token(DSyntaxKind::LineComment, start_pos, state.get_position());
                 return true;
-            }
-            else {
-                // 恢复位置
-                state.set_position(current_pos);
             }
         }
         false
     }
 
-    fn lex_block_comment(&self, state: &mut State) -> bool {
+    fn lex_block_comment<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         if let Some('/') = state.peek() {
-            // 保存当前位置
-            let current_pos = state.get_position();
-            state.advance(1);
-            if let Some('*') = state.peek() {
-                // 恢复位置并开始处
-                state.set_position(current_pos);
+            if let Some('*') = state.peek_next_n(1) {
                 let start_pos = state.get_position();
-                state.advance(2); // skip /*
-
+                state.advance(2);
                 while let Some(ch) = state.peek() {
                     if ch == '*' {
                         state.advance(1);
-                        if let Some('/') = state.peek() {
-                            state.advance(1); // consume closing */
+                        if state.peek() == Some('/') {
+                            state.advance(1);
                             break;
                         }
                     }
@@ -358,65 +407,49 @@ impl DLexer {
                         state.advance(ch.len_utf8());
                     }
                 }
-
                 state.add_token(DSyntaxKind::BlockComment, start_pos, state.get_position());
                 return true;
-            }
-            else {
-                // 恢复位置
-                state.set_position(current_pos);
             }
         }
         false
     }
 
-    fn lex_nested_comment(&self, state: &mut State) -> bool {
+    fn lex_nested_comment<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         if let Some('/') = state.peek() {
-            // 保存当前位置
-            let current_pos = state.get_position();
-            state.advance(1);
-            if let Some('+') = state.peek() {
-                // 恢复位置并开始处                state.set_position(current_pos);
+            if let Some('+') = state.peek_next_n(1) {
                 let start_pos = state.get_position();
-                state.advance(2); // skip /+
-
+                state.advance(2);
                 let mut depth = 1;
-                while depth > 0 {
-                    let Some(ch) = state.peek()
-                    else {
-                        break;
-                    };
+                while let Some(ch) = state.peek() {
                     if ch == '/' {
                         state.advance(1);
-                        if let Some('+') = state.peek() {
+                        if state.peek() == Some('+') {
                             state.advance(1);
                             depth += 1;
                         }
                     }
                     else if ch == '+' {
                         state.advance(1);
-                        if let Some('/') = state.peek() {
+                        if state.peek() == Some('/') {
                             state.advance(1);
                             depth -= 1;
+                            if depth == 0 {
+                                break;
+                            }
                         }
                     }
                     else {
                         state.advance(ch.len_utf8());
                     }
                 }
-
                 state.add_token(DSyntaxKind::NestedComment, start_pos, state.get_position());
                 return true;
-            }
-            else {
-                // 恢复位置
-                state.set_position(current_pos);
             }
         }
         false
     }
 
-    fn lex_operator(&self, state: &mut State) -> bool {
+    fn lex_operator<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         if let Some(ch) = state.peek() {
             let start_pos = state.get_position();
 
@@ -463,7 +496,7 @@ impl DLexer {
                     return true;
                 }
                 '/' => {
-                    // 已在注释处理中处
+                    // 已在注释处理中处理
                     return false;
                 }
                 '%' => {
@@ -601,7 +634,7 @@ impl DLexer {
         }
     }
 
-    fn lex_delimiter(&self, state: &mut State) -> bool {
+    fn lex_delimiter<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         if let Some(ch) = state.peek() {
             let start_pos = state.get_position();
 
@@ -667,84 +700,5 @@ impl DLexer {
         else {
             false
         }
-    }
-}
-
-impl Lexer<DLanguage> for DLexer {
-    fn lex(&self, source: impl Source) -> LexOutput<DLanguage> {
-        let source_text = SourceText::new(source.get_text_in((0..source.length()).into()));
-        let mut state = LexerState::new(&source_text);
-
-        while state.not_at_end() {
-            // 尝试各种词法规则
-            if self.skip_whitespace(&mut state) {
-                continue;
-            }
-
-            if self.lex_newline(&mut state) {
-                continue;
-            }
-
-            if self.lex_line_comment(&mut state) {
-                continue;
-            }
-
-            if self.lex_block_comment(&mut state) {
-                continue;
-            }
-
-            if self.lex_nested_comment(&mut state) {
-                continue;
-            }
-
-            if self.lex_identifier_or_keyword(&mut state, &source_text) {
-                continue;
-            }
-
-            if self.lex_number(&mut state) {
-                continue;
-            }
-
-            if self.lex_string(&mut state) {
-                continue;
-            }
-
-            if self.lex_character(&mut state) {
-                continue;
-            }
-
-            if self.lex_operator(&mut state) {
-                continue;
-            }
-
-            if self.lex_delimiter(&mut state) {
-                continue;
-            }
-
-            // 如果没有匹配任何规则，添加错token
-            let start_pos = state.get_position();
-            if let Some(ch) = state.peek() {
-                state.advance(ch.len_utf8());
-                state.add_token(DSyntaxKind::Error, start_pos, state.get_position());
-            }
-            else {
-                break;
-            }
-        }
-
-        // 添加 EOF kind
-        let eof_pos = state.get_position();
-        state.add_token(DSyntaxKind::Eof, eof_pos, eof_pos);
-
-        state.finish(Ok(()))
-    }
-
-    fn lex_incremental(
-        &self,
-        source: impl Source,
-        _old_tree_len: usize,
-        _cache: oak_core::IncrementalCache<DLanguage>,
-    ) -> LexOutput<DLanguage> {
-        self.lex(source)
     }
 }

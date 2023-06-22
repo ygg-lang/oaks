@@ -1,0 +1,10 @@
+{
+    "success": true,
+    "typed_root": {
+        "type_name": "oak_rust::ast::RustRoot",
+        "content": {
+            "items": []
+        }
+    },
+    "errors": []
+}

@@ -1,41 +1,37 @@
 use crate::{kind::WolframSyntaxKind, language::WolframLanguage};
 use oak_core::{
-    IncrementalCache, Lexer, LexerState, OakError,
-    lexer::{CommentLine, LexOutput, StringConfig, WhitespaceConfig},
-    source::Source,
+    Lexer, LexerCache, LexerState, OakError,
+    lexer::{CommentConfig, LexOutput, StringConfig, WhitespaceConfig},
+    source::{Source, TextEdit},
 };
 use std::sync::LazyLock;
 
-type State<S: Source> = LexerState<S, WolframLanguage>;
+type State<'a, S> = LexerState<'a, S, WolframLanguage>;
 
 static WL_WHITESPACE: LazyLock<WhitespaceConfig> = LazyLock::new(|| WhitespaceConfig { unicode_whitespace: true });
-static WL_COMMENT: LazyLock<CommentLine> = LazyLock::new(|| CommentLine { line_markers: &[] }); // Wolfram uses block comments
+static WL_COMMENT: LazyLock<CommentConfig> = LazyLock::new(|| CommentConfig { line_marker: "", block_start: "(*", block_end: "*)", nested_blocks: true });
 static WL_STRING: LazyLock<StringConfig> = LazyLock::new(|| StringConfig { quotes: &['"'], escape: Some('\\') });
 
-#[derive(Clone)]
-pub struct WolframLexer<'config> {
-    config: &'config WolframLanguage,
-}
+#[derive(Clone, Debug, Default)]
+pub struct WolframLexer;
 
-impl<'config> Lexer<WolframLanguage> for WolframLexer<'config> {
-    fn lex_incremental(
-        &self,
-        source: impl Source,
-        changed: usize,
-        cache: IncrementalCache<WolframLanguage>,
-    ) -> LexOutput<WolframLanguage> {
-        let mut state = LexerState::new_with_cache(source, changed, cache);
+impl Lexer<WolframLanguage> for WolframLexer {
+    fn lex<'a, S: Source + ?Sized>(&self, source: &S, _edits: &[TextEdit], cache: &'a mut impl LexerCache<WolframLanguage>) -> LexOutput<WolframLanguage> {
+        let mut state = LexerState::new(source);
         let result = self.run(&mut state);
-        state.finish(result)
+        if result.is_ok() {
+            state.add_eof();
+        }
+        state.finish_with_cache(result, cache)
     }
 }
 
-impl<'config> WolframLexer<'config> {
-    pub fn new(config: &'config WolframLanguage) -> Self {
-        Self { config }
+impl WolframLexer {
+    pub fn new(_config: &WolframLanguage) -> Self {
+        Self
     }
 
-    fn run<S: Source>(&self, state: &mut State<S>) -> Result<(), OakError> {
+    fn run<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> Result<(), OakError> {
         while state.not_at_end() {
             let safe_point = state.get_position();
 
@@ -67,30 +63,23 @@ impl<'config> WolframLexer<'config> {
                 continue;
             }
 
-            state.safe_check(safe_point);
+            state.advance_if_dead_lock(safe_point);
         }
 
-        // 添加 EOF token
-        let eof_pos = state.get_position();
-        state.add_token(WolframSyntaxKind::Eof, eof_pos, eof_pos);
         Ok(())
     }
 
-    fn skip_whitespace<S: Source>(&self, state: &mut State<S>) -> bool {
-        match WL_WHITESPACE.scan(state.rest(), state.get_position(), WolframSyntaxKind::Whitespace) {
-            Some(token) => {
-                state.advance_with(token);
-                return true;
-            }
-            None => {}
+    fn skip_whitespace<S: Source + ?Sized>(&self, state: &mut State<S>) -> bool {
+        if WL_WHITESPACE.scan(state, WolframSyntaxKind::Whitespace) {
+            return true;
         }
 
         // Handle newlines separately
-        if let Some(ch) = state.current() {
+        if let Some(ch) = state.peek() {
             if ch == '\n' || ch == '\r' {
                 let start = state.get_position();
-                state.advance(1);
-                if ch == '\r' && state.current() == Some('\n') {
+                state.advance(ch.len_utf8());
+                if ch == '\r' && state.peek() == Some('\n') {
                     state.advance(1);
                 }
                 state.add_token(WolframSyntaxKind::Newline, start, state.get_position());
@@ -100,70 +89,17 @@ impl<'config> WolframLexer<'config> {
         false
     }
 
-    fn skip_comment<S: Source>(&self, state: &mut State<S>) -> bool {
-        let start = state.get_position();
-        let rest = state.rest();
-
-        // Wolfram block comment: (* ... *) with nesting support
-        if rest.starts_with("(*") {
-            state.advance(2);
-            let mut depth = 1usize;
-            while let Some(ch) = state.peek() {
-                if ch == '(' && state.peek_next_n(1) == Some('*') {
-                    state.advance(2);
-                    depth += 1;
-                    continue;
-                }
-                if ch == '*' && state.peek_next_n(1) == Some(')') {
-                    state.advance(2);
-                    depth -= 1;
-                    if depth == 0 {
-                        break;
-                    }
-                    continue;
-                }
-                state.advance(ch.len_utf8());
-            }
-            state.add_token(WolframSyntaxKind::Comment, start, state.get_position());
-            return true;
-        }
-        false
+    fn skip_comment<S: Source + ?Sized>(&self, state: &mut State<S>) -> bool {
+        WL_COMMENT.scan(state, WolframSyntaxKind::Comment, WolframSyntaxKind::Comment)
     }
 
-    fn lex_string_literal<S: Source>(&self, state: &mut State<S>) -> bool {
-        let start = state.get_position();
-
-        // Normal string: "..."
-        if state.current() == Some('"') {
-            state.advance(1);
-            let mut escaped = false;
-            while let Some(ch) = state.peek() {
-                if ch == '"' && !escaped {
-                    state.advance(1); // consume closing quote
-                    break;
-                }
-                state.advance(ch.len_utf8());
-                if escaped {
-                    escaped = false;
-                    continue;
-                }
-                if ch == '\\' {
-                    escaped = true;
-                    continue;
-                }
-                if ch == '\n' || ch == '\r' {
-                    break;
-                }
-            }
-            state.add_token(WolframSyntaxKind::String, start, state.get_position());
-            return true;
-        }
-        false
+    fn lex_string_literal<S: Source + ?Sized>(&self, state: &mut State<S>) -> bool {
+        WL_STRING.scan(state, WolframSyntaxKind::String)
     }
 
-    fn lex_number_literal<S: Source>(&self, state: &mut State<S>) -> bool {
+    fn lex_number_literal<S: Source + ?Sized>(&self, state: &mut State<S>) -> bool {
         let start = state.get_position();
-        let first = match state.current() {
+        let first = match state.peek() {
             Some(c) => c,
             None => return false,
         };
@@ -175,7 +111,7 @@ impl<'config> WolframLexer<'config> {
         let mut is_real = false;
 
         // Integer part
-        state.advance(1);
+        state.advance(first.len_utf8());
         while let Some(c) = state.peek() {
             if c.is_ascii_digit() {
                 state.advance(1);
@@ -231,9 +167,9 @@ impl<'config> WolframLexer<'config> {
         true
     }
 
-    fn lex_identifier_or_keyword<S: Source>(&self, state: &mut State<S>) -> bool {
+    fn lex_identifier_or_keyword<S: Source + ?Sized>(&self, state: &mut State<S>) -> bool {
         let start = state.get_position();
-        let ch = match state.current() {
+        let ch = match state.peek() {
             Some(c) => c,
             None => return false,
         };
@@ -242,10 +178,10 @@ impl<'config> WolframLexer<'config> {
             return false;
         }
 
-        state.advance(1);
-        while let Some(c) = state.current() {
+        state.advance(ch.len_utf8());
+        while let Some(c) = state.peek() {
             if c.is_ascii_alphanumeric() || c == '$' {
-                state.advance(1);
+                state.advance(c.len_utf8());
             }
             else {
                 break;
@@ -253,8 +189,8 @@ impl<'config> WolframLexer<'config> {
         }
 
         let end = state.get_position();
-        let text = state.get_text_in((start..end).into());
-        let kind = match text {
+        let text = state.source().get_text_in((start..end).into());
+        let kind = match text.as_ref() {
             "If" => WolframSyntaxKind::If,
             "Then" => WolframSyntaxKind::Then,
             "Else" => WolframSyntaxKind::Else,
@@ -291,9 +227,8 @@ impl<'config> WolframLexer<'config> {
         true
     }
 
-    fn lex_operators<S: Source>(&self, state: &mut State<S>) -> bool {
+    fn lex_operators<S: Source + ?Sized>(&self, state: &mut State<S>) -> bool {
         let start = state.get_position();
-        let rest = state.rest();
 
         // Multi-character operators (prefer longest matches first)
         let patterns: &[(&str, WolframSyntaxKind)] = &[
@@ -317,7 +252,7 @@ impl<'config> WolframLexer<'config> {
         ];
 
         for (pat, kind) in patterns {
-            if rest.starts_with(pat) {
+            if state.starts_with(pat) {
                 state.advance(pat.len());
                 state.add_token(*kind, start, state.get_position());
                 return true;
@@ -325,7 +260,7 @@ impl<'config> WolframLexer<'config> {
         }
 
         // Single-character operators
-        if let Some(ch) = state.current() {
+        if let Some(ch) = state.peek() {
             let kind = match ch {
                 '+' => Some(WolframSyntaxKind::Plus),
                 '-' => Some(WolframSyntaxKind::Minus),
@@ -352,9 +287,9 @@ impl<'config> WolframLexer<'config> {
         false
     }
 
-    fn lex_single_char_tokens<S: Source>(&self, state: &mut State<S>) -> bool {
+    fn lex_single_char_tokens<S: Source + ?Sized>(&self, state: &mut State<S>) -> bool {
         let start = state.get_position();
-        if let Some(ch) = state.current() {
+        if let Some(ch) = state.peek() {
             let kind = match ch {
                 '(' => WolframSyntaxKind::LeftParen,
                 ')' => WolframSyntaxKind::RightParen,

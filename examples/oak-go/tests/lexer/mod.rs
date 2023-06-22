@@ -1,15 +1,14 @@
 use oak_core::{helpers::LexerTester, source::Source};
-use oak_go::{GoLangLanguage, GoLexer};
+use oak_go::{GoLanguage, GoLexer};
 use std::{path::Path, time::Duration};
 
 #[test]
 fn test_go_lexer() {
     let here = Path::new(env!("CARGO_MANIFEST_DIR"));
-    let language = Box::leak(Box::new(GoLangLanguage::default()));
+    let language = Box::leak(Box::new(GoLanguage::default()));
     let lexer = GoLexer::new(language);
-    let test_runner =
-        LexerTester::new(here.join("tests/lexer/fixtures")).with_extension("go").with_timeout(Duration::from_secs(5));
-    match test_runner.run_tests::<GoLangLanguage, _>(lexer) {
+    let test_runner = LexerTester::new(here.join("tests/lexer/fixtures")).with_extension("go").with_timeout(Duration::from_secs(5));
+    match test_runner.run_tests::<GoLanguage, _>(&lexer) {
         Ok(()) => println!("Go lexer tests passed!"),
         Err(e) => panic!("Go lexer tests failed: {}", e),
     }
@@ -17,11 +16,11 @@ fn test_go_lexer() {
 
 #[test]
 fn test_peek_behavior() {
-    use oak_core::{SourceText, lexer::LexerState};
-    use oak_go::GoLangLanguage;
+    use oak_core::{LexerState, SourceText};
+    use oak_go::GoLanguage;
 
     let source = SourceText::new("NESTED_CONSTANT");
-    let mut state = LexerState::<&SourceText, GoLangLanguage>::new(&source);
+    let mut state = LexerState::<SourceText, GoLanguage>::new(&source);
 
     println!("初始状态:");
     println!("位置: {}", state.get_position());
@@ -43,14 +42,15 @@ fn test_peek_behavior() {
 
 #[test]
 fn test_go_function_parsing() {
-    use oak_core::{Lexer, SourceText};
-    use oak_go::{GoLangLanguage, GoLexer};
+    use oak_core::{Lexer, SourceText, parser::ParseSession};
+    use oak_go::{GoLanguage, GoLexer};
 
     let source = SourceText::new("package main");
-    let language = Box::leak(Box::new(GoLangLanguage::default()));
+    let language = Box::leak(Box::new(GoLanguage::default()));
     let lexer = GoLexer::new(language);
 
-    let result = lexer.lex(&source);
+    let mut cache = ParseSession::<GoLanguage>::default();
+    let result = lexer.lex(&source, &[], &mut cache);
 
     println!("测试 Go 函数解析:");
     println!("源代码: '{}'", (&source).get_text_from(0));

@@ -1,45 +1,40 @@
-use crate::{
-    kind::{VampireSyntaxKind, VampireToken},
-    language::VampireLanguage,
-};
+use crate::{kind::VampireSyntaxKind, language::VampireLanguage};
 use oak_core::{
-    IncrementalCache, Lexer, LexerState, OakError,
-    lexer::{CommentLine, LexOutput, StringConfig, WhitespaceConfig},
+    Lexer, LexerCache, LexerState, OakError, TextEdit,
+    lexer::{CommentConfig, LexOutput, StringConfig, WhitespaceConfig},
     source::Source,
 };
 use std::sync::LazyLock;
 
-type State<S: Source> = LexerState<S, VampireLanguage>;
+type State<'s, S> = LexerState<'s, S, VampireLanguage>;
 
 static VAMPIRE_WHITESPACE: LazyLock<WhitespaceConfig> = LazyLock::new(|| WhitespaceConfig { unicode_whitespace: true });
-static VAMPIRE_COMMENT: LazyLock<CommentLine> = LazyLock::new(|| CommentLine { line_markers: &["%"] });
+static VAMPIRE_COMMENT: LazyLock<CommentConfig> = LazyLock::new(|| CommentConfig { line_marker: "%", block_start: "/*", block_end: "*/", nested_blocks: false });
 static VAMPIRE_STRING: LazyLock<StringConfig> = LazyLock::new(|| StringConfig { quotes: &['"'], escape: Some('\\') });
 
 #[derive(Clone)]
 pub struct VampireLexer<'config> {
-    config: &'config VampireLanguage,
+    _config: &'config VampireLanguage,
 }
 
 impl<'config> Lexer<VampireLanguage> for VampireLexer<'config> {
-    fn lex_incremental(
-        &self,
-        source: impl Source,
-        changed: usize,
-        cache: IncrementalCache<VampireLanguage>,
-    ) -> LexOutput<VampireLanguage> {
-        let mut state = LexerState::new_with_cache(source, changed, cache);
+    fn lex<'a, S: Source + ?Sized>(&self, text: &'a S, _edits: &[TextEdit], _cache: &'a mut impl LexerCache<VampireLanguage>) -> LexOutput<VampireLanguage> {
+        let mut state: State<'_, S> = LexerState::new(text);
         let result = self.run(&mut state);
+        if result.is_ok() {
+            state.add_eof();
+        }
         state.finish(result)
     }
 }
 
 impl<'config> VampireLexer<'config> {
     pub fn new(config: &'config VampireLanguage) -> Self {
-        Self { config }
+        Self { _config: config }
     }
 
     /// Main lexing loop
-    fn run<S: Source>(&self, state: &mut State<S>) -> Result<(), OakError> {
+    fn run<'s, S: Source + ?Sized>(&self, state: &mut State<'s, S>) -> Result<(), OakError> {
         while state.not_at_end() {
             let safe_point = state.get_position();
 
@@ -71,157 +66,61 @@ impl<'config> VampireLexer<'config> {
                 continue;
             }
 
-            state.safe_check(safe_point);
+            state.advance_if_dead_lock(safe_point);
         }
 
-        // Add EOF token
-        let eof_pos = state.get_position();
-        state.add_token(VampireSyntaxKind::Eof, eof_pos, eof_pos);
         Ok(())
     }
 
     /// Skip whitespace characters
-    fn skip_whitespace<S: Source>(&self, state: &mut State<S>) -> bool {
-        match VAMPIRE_WHITESPACE.scan(state.rest(), state.get_position(), VampireSyntaxKind::Whitespace) {
-            Some(token) => {
-                state.advance_with(token);
-                true
-            }
-            None => false,
-        }
+    fn skip_whitespace<'s, S: Source + ?Sized>(&self, state: &mut State<'s, S>) -> bool {
+        VAMPIRE_WHITESPACE.scan(state, VampireSyntaxKind::Whitespace)
     }
 
     /// Skip comment lines
-    fn skip_comment<S: Source>(&self, state: &mut State<S>) -> bool {
-        let start = state.get_position();
-        let rest = state.rest();
-
-        // Line comment: % ... until newline
-        if rest.starts_with("%") {
-            state.advance(1);
-            while let Some(ch) = state.peek() {
-                if ch == '\n' || ch == '\r' {
-                    break;
-                }
-                state.advance(ch.len_utf8());
-            }
-            state.add_token(VampireSyntaxKind::LineComment, start, state.get_position());
-            return true;
-        }
-
-        // Block comment: /* ... */
-        if rest.starts_with("/*") {
-            state.advance(2);
-            while let Some(ch) = state.peek() {
-                if ch == '*' && state.peek_next_n(1) == Some('/') {
-                    state.advance(2);
-                    break;
-                }
-                state.advance(ch.len_utf8());
-            }
-            state.add_token(VampireSyntaxKind::BlockComment, start, state.get_position());
-            return true;
-        }
-
-        false
+    fn skip_comment<'s, S: Source + ?Sized>(&self, state: &mut State<'s, S>) -> bool {
+        VAMPIRE_COMMENT.scan(state, VampireSyntaxKind::LineComment, VampireSyntaxKind::BlockComment)
     }
 
     /// Lex string literals
-    fn lex_string_literal<S: Source>(&self, state: &mut State<S>) -> bool {
-        let start = state.get_position();
-
-        if state.current() == Some('"') {
-            state.advance(1);
-            let mut escaped = false;
-            while let Some(ch) = state.peek() {
-                if ch == '"' && !escaped {
-                    state.advance(1); // consume closing quote
-                    break;
-                }
-                state.advance(ch.len_utf8());
-                if escaped {
-                    escaped = false;
-                    continue;
-                }
-                if ch == '\\' {
-                    escaped = true;
-                    continue;
-                }
-                if ch == '\n' || ch == '\r' {
-                    break;
-                }
-            }
-            state.add_token(VampireSyntaxKind::StringLiteral, start, state.get_position());
-            return true;
-        }
-        false
+    fn lex_string_literal<'s, S: Source + ?Sized>(&self, state: &mut State<'s, S>) -> bool {
+        VAMPIRE_STRING.scan(state, VampireSyntaxKind::StringLiteral)
     }
 
     /// Lex number literals
-    fn lex_number_literal<S: Source>(&self, state: &mut State<S>) -> bool {
+    fn lex_number_literal<'s, S: Source + ?Sized>(&self, state: &mut State<'s, S>) -> bool {
         let start = state.get_position();
-        let first = match state.current() {
-            Some(c) => c,
-            None => return false,
-        };
+        let mut has_digit = false;
 
-        if !first.is_ascii_digit() && first != '-' && first != '+' {
-            return false;
-        }
-
-        let mut is_real = false;
-
-        // Handle sign
-        if first == '-' || first == '+' {
+        // Optional minus
+        if state.peek() == Some('-') {
             state.advance(1);
-            if !state.peek().map(|c| c.is_ascii_digit()).unwrap_or(false) {
-                state.set_position(start);
-                return false;
-            }
         }
 
-        // Integer part
-        while let Some(c) = state.peek() {
-            if c.is_ascii_digit() {
-                state.advance(1);
+        while let Some(ch) = state.peek() {
+            if ch.is_ascii_digit() {
+                state.advance(ch.len_utf8());
+                has_digit = true;
             }
             else {
                 break;
             }
         }
 
-        // Fractional part
-        if state.peek() == Some('.') {
-            let n1 = state.peek_next_n(1);
-            if n1.map(|c| c.is_ascii_digit()).unwrap_or(false) {
-                is_real = true;
-                state.advance(1); // consume '.'
-                while let Some(c) = state.peek() {
-                    if c.is_ascii_digit() {
-                        state.advance(1);
-                    }
-                    else {
-                        break;
-                    }
-                }
-            }
+        if !has_digit {
+            return false;
         }
 
-        // Exponent
-        if let Some(c) = state.peek() {
-            if c == 'e' || c == 'E' {
-                let n1 = state.peek_next_n(1);
-                if n1 == Some('+') || n1 == Some('-') || n1.map(|d| d.is_ascii_digit()).unwrap_or(false) {
-                    is_real = true;
-                    state.advance(1);
-                    if let Some(sign) = state.peek() {
-                        if sign == '+' || sign == '-' {
-                            state.advance(1);
-                        }
-                    }
-                    while let Some(d) = state.peek() {
-                        if d.is_ascii_digit() {
-                            state.advance(1);
+        // Check for float (dot or exponent)
+        let mut is_float = false;
+        if state.peek() == Some('.') {
+            if let Some(next) = state.peek_next_n(1) {
+                if next.is_ascii_digit() {
+                    state.advance(1); // skip dot
+                    is_float = true;
+                    while let Some(ch) = state.peek() {
+                        if ch.is_ascii_digit() {
+                            state.advance(ch.len_utf8());
                         }
                         else {
                             break;
@@ -231,36 +130,64 @@ impl<'config> VampireLexer<'config> {
             }
         }
 
-        let end = state.get_position();
-        state.add_token(if is_real { VampireSyntaxKind::RealLiteral } else { VampireSyntaxKind::IntegerLiteral }, start, end);
+        if let Some(ch) = state.peek() {
+            if ch == 'e' || ch == 'E' {
+                state.advance(1);
+                is_float = true;
+                if let Some(ch) = state.peek() {
+                    if ch == '+' || ch == '-' {
+                        state.advance(1);
+                    }
+                }
+                while let Some(ch) = state.peek() {
+                    if ch.is_ascii_digit() {
+                        state.advance(ch.len_utf8());
+                    }
+                    else {
+                        break;
+                    }
+                }
+            }
+        }
+
+        let kind = if is_float { VampireSyntaxKind::RealLiteral } else { VampireSyntaxKind::IntegerLiteral };
+        state.add_token(kind, start, state.get_position());
         true
     }
 
-    /// Lex identifiers and keywords
-    fn lex_identifier_or_keyword<S: Source>(&self, state: &mut State<S>) -> bool {
+    /// Lex identifier or keyword
+    fn lex_identifier_or_keyword<'s, S: Source + ?Sized>(&self, state: &mut State<'s, S>) -> bool {
         let start = state.get_position();
-        let ch = match state.current() {
-            Some(c) => c,
-            None => return false,
-        };
+        if let Some(ch) = state.peek() {
+            if ch.is_ascii_alphabetic() || ch == '_' || ch == '$' {
+                state.advance(ch.len_utf8());
+                while let Some(ch) = state.peek() {
+                    if ch.is_ascii_alphanumeric() || ch == '_' || ch == '$' {
+                        state.advance(ch.len_utf8());
+                    }
+                    else {
+                        break;
+                    }
+                }
 
-        if !(ch.is_ascii_alphabetic() || ch == '_' || ch == '$') {
-            return false;
-        }
-
-        state.advance(1);
-        while let Some(c) = state.current() {
-            if c.is_ascii_alphanumeric() || c == '_' || c == '$' {
-                state.advance(1);
+                let end = state.get_position();
+                let text = state.get_text_in((start..end).into());
+                let kind = self.keyword_or_identifier(text.as_ref());
+                state.add_token(kind, start, end);
+                true
             }
             else {
-                break;
+                false
             }
         }
+        else {
+            false
+        }
+    }
 
-        let end = state.get_position();
-        let text = state.get_text_in((start..end).into());
-        let kind = match text {
+    /// Determine if text is a keyword or identifier
+    fn keyword_or_identifier(&self, text: &str) -> VampireSyntaxKind {
+        match text {
             // TPTP formula types
             "fof" => VampireSyntaxKind::FofKw,
             "cnf" => VampireSyntaxKind::CnfKw,
@@ -312,110 +239,130 @@ impl<'config> VampireLexer<'config> {
             "$false" => VampireSyntaxKind::BoolLiteral,
 
             _ => VampireSyntaxKind::Identifier,
+        }
+    }
+
+    /// Lex operators
+    fn lex_operators<'s, S: Source + ?Sized>(&self, state: &mut State<'s, S>) -> bool {
+        let start = state.get_position();
+        let rest = state.rest();
+
+        let (kind, len) = if rest.starts_with("==>") {
+            (VampireSyntaxKind::ImpliesKw, 3)
+        }
+        else if rest.starts_with("<=>") {
+            (VampireSyntaxKind::IffKw, 3)
+        }
+        else if rest.starts_with("<~>") {
+            (VampireSyntaxKind::XorKw, 3)
+        }
+        else if rest.starts_with("~|") {
+            (VampireSyntaxKind::NorKw, 2)
+        }
+        else if rest.starts_with("~&") {
+            (VampireSyntaxKind::NandKw, 2)
+        }
+        else if rest.starts_with("==") {
+            (VampireSyntaxKind::EqEq, 2)
+        }
+        else if rest.starts_with("!=") {
+            (VampireSyntaxKind::NotEq, 2)
+        }
+        else if rest.starts_with("<=") {
+            (VampireSyntaxKind::LessEq, 2)
+        }
+        else if rest.starts_with(">=") {
+            (VampireSyntaxKind::GreaterEq, 2)
+        }
+        else if rest.starts_with("&&") {
+            (VampireSyntaxKind::AndAnd, 2)
+        }
+        else if rest.starts_with("||") {
+            (VampireSyntaxKind::OrOr, 2)
+        }
+        else if rest.starts_with("++") {
+            (VampireSyntaxKind::PlusPlus, 2)
+        }
+        else if rest.starts_with("--") {
+            (VampireSyntaxKind::MinusMinus, 2)
+        }
+        else if rest.starts_with("+=") {
+            (VampireSyntaxKind::PlusEq, 2)
+        }
+        else if rest.starts_with("-=") {
+            (VampireSyntaxKind::MinusEq, 2)
+        }
+        else if rest.starts_with("*=") {
+            (VampireSyntaxKind::StarEq, 2)
+        }
+        else if rest.starts_with("/=") {
+            (VampireSyntaxKind::SlashEq, 2)
+        }
+        else if rest.starts_with("%=") {
+            (VampireSyntaxKind::PercentEq, 2)
+        }
+        else if rest.starts_with("<<") {
+            (VampireSyntaxKind::LeftShift, 2)
+        }
+        else if rest.starts_with(">>") {
+            (VampireSyntaxKind::RightShift, 2)
+        }
+        else if rest.starts_with("->") {
+            (VampireSyntaxKind::Arrow, 2)
+        }
+        else {
+            return false;
         };
 
+        state.advance(len);
         state.add_token(kind, start, state.get_position());
         true
     }
 
-    /// Lex operators
-    fn lex_operators<S: Source>(&self, state: &mut State<S>) -> bool {
-        let start = state.get_position();
-        let rest = state.rest();
-
-        // Multi-character operators (longest first)
-        let patterns: &[(&str, VampireSyntaxKind)] = &[
-            ("<==>", VampireSyntaxKind::IffKw),
-            ("<~>", VampireSyntaxKind::XorKw),
-            ("==>", VampireSyntaxKind::ImpliesKw),
-            ("~|", VampireSyntaxKind::NorKw),
-            ("~&", VampireSyntaxKind::NandKw),
-            ("==", VampireSyntaxKind::EqEq),
-            ("!=", VampireSyntaxKind::NotEq),
-            ("<=", VampireSyntaxKind::LessEq),
-            (">=", VampireSyntaxKind::GreaterEq),
-            ("&&", VampireSyntaxKind::AndAnd),
-            ("||", VampireSyntaxKind::OrOr),
-            ("++", VampireSyntaxKind::PlusPlus),
-            ("--", VampireSyntaxKind::MinusMinus),
-            ("+=", VampireSyntaxKind::PlusEq),
-            ("-=", VampireSyntaxKind::MinusEq),
-            ("*=", VampireSyntaxKind::StarEq),
-            ("/=", VampireSyntaxKind::SlashEq),
-            ("%=", VampireSyntaxKind::PercentEq),
-            ("<<", VampireSyntaxKind::LeftShift),
-            (">>", VampireSyntaxKind::RightShift),
-            ("->", VampireSyntaxKind::Arrow),
-        ];
-
-        for (pat, kind) in patterns {
-            if rest.starts_with(pat) {
-                state.advance(pat.len());
-                state.add_token(*kind, start, state.get_position());
-                return true;
-            }
-        }
-
-        // Single character operators
-        if let Some(ch) = state.current() {
+    /// Lex single character tokens
+    fn lex_single_char_tokens<'s, S: Source + ?Sized>(&self, state: &mut State<'s, S>) -> bool {
+        if let Some(ch) = state.peek() {
+            let start = state.get_position();
             let kind = match ch {
-                '=' => Some(VampireSyntaxKind::Eq),
-                '<' => Some(VampireSyntaxKind::LessThan),
-                '>' => Some(VampireSyntaxKind::GreaterThan),
-                '+' => Some(VampireSyntaxKind::Plus),
-                '-' => Some(VampireSyntaxKind::Minus),
-                '*' => Some(VampireSyntaxKind::Star),
-                '/' => Some(VampireSyntaxKind::Slash),
-                '\\' => Some(VampireSyntaxKind::Backslash),
+                '(' => Some(VampireSyntaxKind::LeftParen),
+                ')' => Some(VampireSyntaxKind::RightParen),
+                '[' => Some(VampireSyntaxKind::LeftBracket),
+                ']' => Some(VampireSyntaxKind::RightBracket),
+                '{' => Some(VampireSyntaxKind::LeftBrace),
+                '}' => Some(VampireSyntaxKind::RightBrace),
+                ':' => Some(VampireSyntaxKind::Colon),
+                ';' => Some(VampireSyntaxKind::Semicolon),
+                '.' => Some(VampireSyntaxKind::Dot),
+                ',' => Some(VampireSyntaxKind::Comma),
+                '?' => Some(VampireSyntaxKind::Question),
+                '!' => Some(VampireSyntaxKind::Bang),
+                '@' => Some(VampireSyntaxKind::At),
+                '#' => Some(VampireSyntaxKind::Hash),
+                '$' => Some(VampireSyntaxKind::Dollar),
                 '%' => Some(VampireSyntaxKind::Percent),
                 '^' => Some(VampireSyntaxKind::Caret),
                 '&' => Some(VampireSyntaxKind::Ampersand),
+                '*' => Some(VampireSyntaxKind::Star),
+                '+' => Some(VampireSyntaxKind::Plus),
+                '-' => Some(VampireSyntaxKind::Minus),
+                '=' => Some(VampireSyntaxKind::Eq),
+                '<' => Some(VampireSyntaxKind::LessThan),
+                '>' => Some(VampireSyntaxKind::GreaterThan),
+                '/' => Some(VampireSyntaxKind::Slash),
+                '\\' => Some(VampireSyntaxKind::Backslash),
                 '|' => Some(VampireSyntaxKind::Pipe),
                 '~' => Some(VampireSyntaxKind::Tilde),
-                '!' => Some(VampireSyntaxKind::Bang),
-                '?' => Some(VampireSyntaxKind::Question),
-                '.' => Some(VampireSyntaxKind::Dot),
-                ':' => Some(VampireSyntaxKind::Colon),
                 _ => None,
             };
 
-            if let Some(k) = kind {
+            if let Some(token_kind) = kind {
                 state.advance(ch.len_utf8());
-                state.add_token(k, start, state.get_position());
-                return true;
+                state.add_token(token_kind, start, state.get_position());
+                true
             }
-        }
-
-        false
-    }
-
-    /// Lex single character tokens
-    fn lex_single_char_tokens<S: Source>(&self, state: &mut State<S>) -> bool {
-        let start = state.get_position();
-        if let Some(ch) = state.current() {
-            let kind = match ch {
-                '(' => VampireSyntaxKind::LeftParen,
-                ')' => VampireSyntaxKind::RightParen,
-                '[' => VampireSyntaxKind::LeftBracket,
-                ']' => VampireSyntaxKind::RightBracket,
-                '{' => VampireSyntaxKind::LeftBrace,
-                '}' => VampireSyntaxKind::RightBrace,
-                ',' => VampireSyntaxKind::Comma,
-                ';' => VampireSyntaxKind::Semicolon,
-                '@' => VampireSyntaxKind::At,
-                '#' => VampireSyntaxKind::Hash,
-                '$' => VampireSyntaxKind::Dollar,
-                _ => {
-                    // Unknown character, create error token
-                    state.advance(ch.len_utf8());
-                    state.add_token(VampireSyntaxKind::Error, start, state.get_position());
-                    return true;
-                }
-            };
-
-            state.advance(ch.len_utf8());
-            state.add_token(kind, start, state.get_position());
-            true
+            else {
+                false
+            }
         }
         else {
             false

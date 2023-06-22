@@ -1,4 +1,4 @@
-use oak_core::SyntaxKind;
+use oak_core::{ElementType, TokenType, UniversalElementRole, UniversalTokenRole};
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Deserialize)]
@@ -41,6 +41,8 @@ pub enum YamlSyntaxKind {
     // Document markers
     DocumentStart, // ---
     DocumentEnd,   // ...
+    Document,
+    Root,
 
     // Newlines and indentation
     Newline,
@@ -50,10 +52,9 @@ pub enum YamlSyntaxKind {
     Eof,
 }
 
-impl SyntaxKind for YamlSyntaxKind {
-    fn is_trivia(&self) -> bool {
-        matches!(self, Self::Whitespace | Self::Comment | Self::Newline)
-    }
+impl TokenType for YamlSyntaxKind {
+    type Role = UniversalTokenRole;
+    const END_OF_STREAM: Self = Self::Eof;
 
     fn is_comment(&self) -> bool {
         matches!(self, Self::Comment)
@@ -63,11 +64,47 @@ impl SyntaxKind for YamlSyntaxKind {
         matches!(self, Self::Whitespace | Self::Newline)
     }
 
-    fn is_token_type(&self) -> bool {
-        !matches!(self, Self::Error | Self::Eof)
+    fn role(&self) -> Self::Role {
+        use oak_core::UniversalTokenRole::*;
+        match self {
+            Self::Colon
+            | Self::Dash
+            | Self::Pipe
+            | Self::GreaterThan
+            | Self::Question
+            | Self::Ampersand
+            | Self::Asterisk
+            | Self::Exclamation
+            | Self::LeftBracket
+            | Self::RightBracket
+            | Self::LeftBrace
+            | Self::RightBrace
+            | Self::DocumentStart
+            | Self::DocumentEnd => Punctuation,
+
+            Self::Identifier | Self::Anchor | Self::Alias | Self::Tag => Name,
+
+            Self::StringLiteral | Self::NumberLiteral | Self::BooleanLiteral | Self::NullLiteral => Literal,
+
+            Self::Whitespace | Self::Newline => Whitespace,
+            Self::Comment => Comment,
+            Self::Error => Error,
+            _ => None,
+        }
+    }
+}
+
+impl ElementType for YamlSyntaxKind {
+    type Role = UniversalElementRole;
+
+    fn is_error(&self) -> bool {
+        matches!(self, Self::Error)
     }
 
-    fn is_element_type(&self) -> bool {
-        false
+    fn role(&self) -> Self::Role {
+        match self {
+            Self::Error => UniversalElementRole::Error,
+            _ => UniversalElementRole::None,
+        }
     }
 }

@@ -1,0 +1,607 @@
+{
+    "success": true,
+    "count": 100,
+    "tokens": [
+        {
+            "kind": "Universe",
+            "text": "universe",
+            "start": 150,
+            "end": 158
+        },
+        {
+            "kind": "Identifier",
+            "text": "u",
+            "start": 159,
+            "end": 160
+        },
+        {
+            "kind": "Identifier",
+            "text": "v",
+            "start": 161,
+            "end": 162
+        },
+        {
+            "kind": "Identifier",
+            "text": "w",
+            "start": 163,
+            "end": 164
+        },
+        {
+            "kind": "Namespace",
+            "text": "namespace",
+            "start": 195,
+            "end": 204
+        },
+        {
+            "kind": "Identifier",
+            "text": "BasicTypes",
+            "start": 205,
+            "end": 215
+        },
+        {
+            "kind": "Inductive",
+            "text": "inductive",
+            "start": 246,
+            "end": 255
+        },
+        {
+            "kind": "Identifier",
+            "text": "Bool",
+            "start": 256,
+            "end": 260
+        },
+        {
+            "kind": "Colon",
+            "text": ":",
+            "start": 261,
+            "end": 262
+        },
+        {
+            "kind": "Identifier",
+            "text": "Type",
+            "start": 263,
+            "end": 267
+        },
+        {
+            "kind": "Where",
+            "text": "where",
+            "start": 268,
+            "end": 273
+        },
+        {
+            "kind": "Pipe",
+            "text": "|",
+            "start": 277,
+            "end": 278
+        },
+        {
+            "kind": "Identifier",
+            "text": "true",
+            "start": 279,
+            "end": 283
+        },
+        {
+            "kind": "Colon",
+            "text": ":",
+            "start": 284,
+            "end": 285
+        },
+        {
+            "kind": "Identifier",
+            "text": "Bool",
+            "start": 286,
+            "end": 290
+        },
+        {
+            "kind": "Pipe",
+            "text": "|",
+            "start": 294,
+            "end": 295
+        },
+        {
+            "kind": "Identifier",
+            "text": "false",
+            "start": 296,
+            "end": 301
+        },
+        {
+            "kind": "Colon",
+            "text": ":",
+            "start": 302,
+            "end": 303
+        },
+        {
+            "kind": "Identifier",
+            "text": "Bool",
+            "start": 304,
+            "end": 308
+        },
+        {
+            "kind": "Inductive",
+            "text": "inductive",
+            "start": 312,
+            "end": 321
+        },
+        {
+            "kind": "Identifier",
+            "text": "Nat",
+            "start": 322,
+            "end": 325
+        },
+        {
+            "kind": "Colon",
+            "text": ":",
+            "start": 326,
+            "end": 327
+        },
+        {
+            "kind": "Identifier",
+            "text": "Type",
+            "start": 328,
+            "end": 332
+        },
+        {
+            "kind": "Where",
+            "text": "where",
+            "start": 333,
+            "end": 338
+        },
+        {
+            "kind": "Pipe",
+            "text": "|",
+            "start": 342,
+            "end": 343
+        },
+        {
+            "kind": "Identifier",
+            "text": "zero",
+            "start": 344,
+            "end": 348
+        },
+        {
+            "kind": "Colon",
+            "text": ":",
+            "start": 349,
+            "end": 350
+        },
+        {
+            "kind": "Identifier",
+            "text": "Nat",
+            "start": 351,
+            "end": 354
+        },
+        {
+            "kind": "Pipe",
+            "text": "|",
+            "start": 358,
+            "end": 359
+        },
+        {
+            "kind": "Identifier",
+            "text": "succ",
+            "start": 360,
+            "end": 364
+        },
+        {
+            "kind": "Colon",
+            "text": ":",
+            "start": 365,
+            "end": 366
+        },
+        {
+            "kind": "Identifier",
+            "text": "Nat",
+            "start": 367,
+            "end": 370
+        },
+        {
+            "kind": "Error",
+            "text": "→",
+            "start": 371,
+            "end": 374
+        },
+        {
+            "kind": "Identifier",
+            "text": "Nat",
+            "start": 375,
+            "end": 378
+        },
+        {
+            "kind": "Def",
+            "text": "def",
+            "start": 417,
+            "end": 420
+        },
+        {
+            "kind": "Identifier",
+            "text": "not",
+            "start": 421,
+            "end": 424
+        },
+        {
+            "kind": "Colon",
+            "text": ":",
+            "start": 425,
+            "end": 426
+        },
+        {
+            "kind": "Identifier",
+            "text": "Bool",
+            "start": 427,
+            "end": 431
+        },
+        {
+            "kind": "Error",
+            "text": "→",
+            "start": 432,
+            "end": 435
+        },
+        {
+            "kind": "Identifier",
+            "text": "Bool",
+            "start": 436,
+            "end": 440
+        },
+        {
+            "kind": "Pipe",
+            "text": "|",
+            "start": 444,
+            "end": 445
+        },
+        {
+            "kind": "Identifier",
+            "text": "Bool",
+            "start": 446,
+            "end": 450
+        },
+        {
+            "kind": "Dot",
+            "text": ".",
+            "start": 450,
+            "end": 451
+        },
+        {
+            "kind": "Identifier",
+            "text": "true",
+            "start": 451,
+            "end": 455
+        },
+        {
+            "kind": "Eq",
+            "text": "=",
+            "start": 456,
+            "end": 457
+        },
+        {
+            "kind": "Gt",
+            "text": ">",
+            "start": 457,
+            "end": 458
+        },
+        {
+            "kind": "Identifier",
+            "text": "Bool",
+            "start": 459,
+            "end": 463
+        },
+        {
+            "kind": "Dot",
+            "text": ".",
+            "start": 463,
+            "end": 464
+        },
+        {
+            "kind": "Identifier",
+            "text": "false",
+            "start": 464,
+            "end": 469
+        },
+        {
+            "kind": "Pipe",
+            "text": "|",
+            "start": 473,
+            "end": 474
+        },
+        {
+            "kind": "Identifier",
+            "text": "Bool",
+            "start": 475,
+            "end": 479
+        },
+        {
+            "kind": "Dot",
+            "text": ".",
+            "start": 479,
+            "end": 480
+        },
+        {
+            "kind": "Identifier",
+            "text": "false",
+            "start": 480,
+            "end": 485
+        },
+        {
+            "kind": "Eq",
+            "text": "=",
+            "start": 486,
+            "end": 487
+        },
+        {
+            "kind": "Gt",
+            "text": ">",
+            "start": 487,
+            "end": 488
+        },
+        {
+            "kind": "Identifier",
+            "text": "Bool",
+            "start": 489,
+            "end": 493
+        },
+        {
+            "kind": "Dot",
+            "text": ".",
+            "start": 493,
+            "end": 494
+        },
+        {
+            "kind": "Identifier",
+            "text": "true",
+            "start": 494,
+            "end": 498
+        },
+        {
+            "kind": "Def",
+            "text": "def",
+            "start": 502,
+            "end": 505
+        },
+        {
+            "kind": "Identifier",
+            "text": "add",
+            "start": 506,
+            "end": 509
+        },
+        {
+            "kind": "Colon",
+            "text": ":",
+            "start": 510,
+            "end": 511
+        },
+        {
+            "kind": "Identifier",
+            "text": "Nat",
+            "start": 512,
+            "end": 515
+        },
+        {
+            "kind": "Error",
+            "text": "→",
+            "start": 516,
+            "end": 519
+        },
+        {
+            "kind": "Identifier",
+            "text": "Nat",
+            "start": 520,
+            "end": 523
+        },
+        {
+            "kind": "Error",
+            "text": "→",
+            "start": 524,
+            "end": 527
+        },
+        {
+            "kind": "Identifier",
+            "text": "Nat",
+            "start": 528,
+            "end": 531
+        },
+        {
+            "kind": "Pipe",
+            "text": "|",
+            "start": 535,
+            "end": 536
+        },
+        {
+            "kind": "Identifier",
+            "text": "Nat",
+            "start": 537,
+            "end": 540
+        },
+        {
+            "kind": "Dot",
+            "text": ".",
+            "start": 540,
+            "end": 541
+        },
+        {
+            "kind": "Identifier",
+            "text": "zero",
+            "start": 541,
+            "end": 545
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 545,
+            "end": 546
+        },
+        {
+            "kind": "Identifier",
+            "text": "n",
+            "start": 547,
+            "end": 548
+        },
+        {
+            "kind": "Eq",
+            "text": "=",
+            "start": 549,
+            "end": 550
+        },
+        {
+            "kind": "Gt",
+            "text": ">",
+            "start": 550,
+            "end": 551
+        },
+        {
+            "kind": "Identifier",
+            "text": "n",
+            "start": 552,
+            "end": 553
+        },
+        {
+            "kind": "Pipe",
+            "text": "|",
+            "start": 557,
+            "end": 558
+        },
+        {
+            "kind": "Identifier",
+            "text": "Nat",
+            "start": 559,
+            "end": 562
+        },
+        {
+            "kind": "Dot",
+            "text": ".",
+            "start": 562,
+            "end": 563
+        },
+        {
+            "kind": "Identifier",
+            "text": "succ",
+            "start": 563,
+            "end": 567
+        },
+        {
+            "kind": "Identifier",
+            "text": "m",
+            "start": 568,
+            "end": 569
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 569,
+            "end": 570
+        },
+        {
+            "kind": "Identifier",
+            "text": "n",
+            "start": 571,
+            "end": 572
+        },
+        {
+            "kind": "Eq",
+            "text": "=",
+            "start": 573,
+            "end": 574
+        },
+        {
+            "kind": "Gt",
+            "text": ">",
+            "start": 574,
+            "end": 575
+        },
+        {
+            "kind": "Identifier",
+            "text": "Nat",
+            "start": 576,
+            "end": 579
+        },
+        {
+            "kind": "Dot",
+            "text": ".",
+            "start": 579,
+            "end": 580
+        },
+        {
+            "kind": "Identifier",
+            "text": "succ",
+            "start": 580,
+            "end": 584
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 585,
+            "end": 586
+        },
+        {
+            "kind": "Identifier",
+            "text": "add",
+            "start": 586,
+            "end": 589
+        },
+        {
+            "kind": "Identifier",
+            "text": "m",
+            "start": 590,
+            "end": 591
+        },
+        {
+            "kind": "Identifier",
+            "text": "n",
+            "start": 592,
+            "end": 593
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 593,
+            "end": 594
+        },
+        {
+            "kind": "Def",
+            "text": "def",
+            "start": 598,
+            "end": 601
+        },
+        {
+            "kind": "Identifier",
+            "text": "mul",
+            "start": 602,
+            "end": 605
+        },
+        {
+            "kind": "Colon",
+            "text": ":",
+            "start": 606,
+            "end": 607
+        },
+        {
+            "kind": "Identifier",
+            "text": "Nat",
+            "start": 608,
+            "end": 611
+        },
+        {
+            "kind": "Error",
+            "text": "→",
+            "start": 612,
+            "end": 615
+        },
+        {
+            "kind": "Identifier",
+            "text": "Nat",
+            "start": 616,
+            "end": 619
+        },
+        {
+            "kind": "Error",
+            "text": "→",
+            "start": 620,
+            "end": 623
+        },
+        {
+            "kind": "Identifier",
+            "text": "Nat",
+            "start": 624,
+            "end": 627
+        }
+    ],
+    "errors": []
+}

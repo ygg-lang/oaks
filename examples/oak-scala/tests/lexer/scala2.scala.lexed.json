@@ -1,0 +1,607 @@
+{
+    "success": true,
+    "count": 100,
+    "tokens": [
+        {
+            "kind": "Package",
+            "text": "package",
+            "start": 40,
+            "end": 47
+        },
+        {
+            "kind": "Identifier",
+            "text": "com",
+            "start": 48,
+            "end": 51
+        },
+        {
+            "kind": "Dot",
+            "text": ".",
+            "start": 51,
+            "end": 52
+        },
+        {
+            "kind": "Identifier",
+            "text": "example",
+            "start": 52,
+            "end": 59
+        },
+        {
+            "kind": "Dot",
+            "text": ".",
+            "start": 59,
+            "end": 60
+        },
+        {
+            "kind": "Identifier",
+            "text": "test",
+            "start": 60,
+            "end": 64
+        },
+        {
+            "kind": "Import",
+            "text": "import",
+            "start": 68,
+            "end": 74
+        },
+        {
+            "kind": "Identifier",
+            "text": "scala",
+            "start": 75,
+            "end": 80
+        },
+        {
+            "kind": "Dot",
+            "text": ".",
+            "start": 80,
+            "end": 81
+        },
+        {
+            "kind": "Identifier",
+            "text": "collection",
+            "start": 81,
+            "end": 91
+        },
+        {
+            "kind": "Dot",
+            "text": ".",
+            "start": 91,
+            "end": 92
+        },
+        {
+            "kind": "Identifier",
+            "text": "mutable",
+            "start": 92,
+            "end": 99
+        },
+        {
+            "kind": "Import",
+            "text": "import",
+            "start": 101,
+            "end": 107
+        },
+        {
+            "kind": "Identifier",
+            "text": "scala",
+            "start": 108,
+            "end": 113
+        },
+        {
+            "kind": "Dot",
+            "text": ".",
+            "start": 113,
+            "end": 114
+        },
+        {
+            "kind": "Identifier",
+            "text": "concurrent",
+            "start": 114,
+            "end": 124
+        },
+        {
+            "kind": "Dot",
+            "text": ".",
+            "start": 124,
+            "end": 125
+        },
+        {
+            "kind": "LeftBrace",
+            "text": "{",
+            "start": 125,
+            "end": 126
+        },
+        {
+            "kind": "Identifier",
+            "text": "Future",
+            "start": 126,
+            "end": 132
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 132,
+            "end": 133
+        },
+        {
+            "kind": "Identifier",
+            "text": "ExecutionContext",
+            "start": 134,
+            "end": 150
+        },
+        {
+            "kind": "RightBrace",
+            "text": "}",
+            "start": 150,
+            "end": 151
+        },
+        {
+            "kind": "Import",
+            "text": "import",
+            "start": 153,
+            "end": 159
+        },
+        {
+            "kind": "Identifier",
+            "text": "scala",
+            "start": 160,
+            "end": 165
+        },
+        {
+            "kind": "Dot",
+            "text": ".",
+            "start": 165,
+            "end": 166
+        },
+        {
+            "kind": "Identifier",
+            "text": "util",
+            "start": 166,
+            "end": 170
+        },
+        {
+            "kind": "Dot",
+            "text": ".",
+            "start": 170,
+            "end": 171
+        },
+        {
+            "kind": "LeftBrace",
+            "text": "{",
+            "start": 171,
+            "end": 172
+        },
+        {
+            "kind": "Identifier",
+            "text": "Try",
+            "start": 172,
+            "end": 175
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 175,
+            "end": 176
+        },
+        {
+            "kind": "Identifier",
+            "text": "Success",
+            "start": 177,
+            "end": 184
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 184,
+            "end": 185
+        },
+        {
+            "kind": "Identifier",
+            "text": "Failure",
+            "start": 186,
+            "end": 193
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 193,
+            "end": 194
+        },
+        {
+            "kind": "Identifier",
+            "text": "Random",
+            "start": 195,
+            "end": 201
+        },
+        {
+            "kind": "RightBrace",
+            "text": "}",
+            "start": 201,
+            "end": 202
+        },
+        {
+            "kind": "Import",
+            "text": "import",
+            "start": 204,
+            "end": 210
+        },
+        {
+            "kind": "Identifier",
+            "text": "java",
+            "start": 211,
+            "end": 215
+        },
+        {
+            "kind": "Dot",
+            "text": ".",
+            "start": 215,
+            "end": 216
+        },
+        {
+            "kind": "Identifier",
+            "text": "time",
+            "start": 216,
+            "end": 220
+        },
+        {
+            "kind": "Dot",
+            "text": ".",
+            "start": 220,
+            "end": 221
+        },
+        {
+            "kind": "Identifier",
+            "text": "LocalDateTime",
+            "start": 221,
+            "end": 234
+        },
+        {
+            "kind": "Import",
+            "text": "import",
+            "start": 236,
+            "end": 242
+        },
+        {
+            "kind": "Identifier",
+            "text": "java",
+            "start": 243,
+            "end": 247
+        },
+        {
+            "kind": "Dot",
+            "text": ".",
+            "start": 247,
+            "end": 248
+        },
+        {
+            "kind": "Identifier",
+            "text": "util",
+            "start": 248,
+            "end": 252
+        },
+        {
+            "kind": "Dot",
+            "text": ".",
+            "start": 252,
+            "end": 253
+        },
+        {
+            "kind": "Identifier",
+            "text": "UUID",
+            "start": 253,
+            "end": 257
+        },
+        {
+            "kind": "Implicit",
+            "text": "implicit",
+            "start": 304,
+            "end": 312
+        },
+        {
+            "kind": "Val",
+            "text": "val",
+            "start": 313,
+            "end": 316
+        },
+        {
+            "kind": "Identifier",
+            "text": "ec",
+            "start": 317,
+            "end": 319
+        },
+        {
+            "kind": "Colon",
+            "text": ":",
+            "start": 319,
+            "end": 320
+        },
+        {
+            "kind": "Identifier",
+            "text": "ExecutionContext",
+            "start": 321,
+            "end": 337
+        },
+        {
+            "kind": "Eq",
+            "text": "=",
+            "start": 338,
+            "end": 339
+        },
+        {
+            "kind": "Identifier",
+            "text": "ExecutionContext",
+            "start": 340,
+            "end": 356
+        },
+        {
+            "kind": "Dot",
+            "text": ".",
+            "start": 356,
+            "end": 357
+        },
+        {
+            "kind": "Identifier",
+            "text": "global",
+            "start": 357,
+            "end": 363
+        },
+        {
+            "kind": "Object",
+            "text": "object",
+            "start": 395,
+            "end": 401
+        },
+        {
+            "kind": "Identifier",
+            "text": "ScalaTestApp",
+            "start": 402,
+            "end": 414
+        },
+        {
+            "kind": "Extends",
+            "text": "extends",
+            "start": 415,
+            "end": 422
+        },
+        {
+            "kind": "Identifier",
+            "text": "App",
+            "start": 423,
+            "end": 426
+        },
+        {
+            "kind": "LeftBrace",
+            "text": "{",
+            "start": 427,
+            "end": 428
+        },
+        {
+            "kind": "Identifier",
+            "text": "println",
+            "start": 432,
+            "end": 439
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 439,
+            "end": 440
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "\"=== Scala Test Application ===\"",
+            "start": 440,
+            "end": 472
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 472,
+            "end": 473
+        },
+        {
+            "kind": "Identifier",
+            "text": "testBasicTypes",
+            "start": 513,
+            "end": 527
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 527,
+            "end": 528
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 528,
+            "end": 529
+        },
+        {
+            "kind": "Identifier",
+            "text": "testCollections",
+            "start": 533,
+            "end": 548
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 548,
+            "end": 549
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 549,
+            "end": 550
+        },
+        {
+            "kind": "Identifier",
+            "text": "testFunctions",
+            "start": 554,
+            "end": 567
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 567,
+            "end": 568
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 568,
+            "end": 569
+        },
+        {
+            "kind": "Identifier",
+            "text": "testClasses",
+            "start": 573,
+            "end": 584
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 584,
+            "end": 585
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 585,
+            "end": 586
+        },
+        {
+            "kind": "Identifier",
+            "text": "testTraits",
+            "start": 590,
+            "end": 600
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 600,
+            "end": 601
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 601,
+            "end": 602
+        },
+        {
+            "kind": "Identifier",
+            "text": "testCaseClasses",
+            "start": 606,
+            "end": 621
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 621,
+            "end": 622
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 622,
+            "end": 623
+        },
+        {
+            "kind": "Identifier",
+            "text": "testPatternMatching",
+            "start": 627,
+            "end": 646
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 646,
+            "end": 647
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 647,
+            "end": 648
+        },
+        {
+            "kind": "Identifier",
+            "text": "testForComprehensions",
+            "start": 652,
+            "end": 673
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 673,
+            "end": 674
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 674,
+            "end": 675
+        },
+        {
+            "kind": "Identifier",
+            "text": "testFutures",
+            "start": 679,
+            "end": 690
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 690,
+            "end": 691
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 691,
+            "end": 692
+        },
+        {
+            "kind": "Identifier",
+            "text": "testImplicits",
+            "start": 696,
+            "end": 709
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 709,
+            "end": 710
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 710,
+            "end": 711
+        },
+        {
+            "kind": "Identifier",
+            "text": "testHigherOrderFunctions",
+            "start": 715,
+            "end": 739
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 739,
+            "end": 740
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 740,
+            "end": 741
+        },
+        {
+            "kind": "Identifier",
+            "text": "println",
+            "start": 749,
+            "end": 756
+        }
+    ],
+    "errors": []
+}

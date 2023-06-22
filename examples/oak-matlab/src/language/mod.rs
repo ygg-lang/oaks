@@ -1,7 +1,12 @@
-use crate::kind::MatlabSyntaxKind;
-use oak_core::Language;
+use oak_core::{Language, LanguageCategory};
 
 pub struct MatlabLanguage {}
+
+impl MatlabLanguage {
+    pub fn new() -> Self {
+        Self::default()
+    }
+}
 
 impl Default for MatlabLanguage {
     fn default() -> Self {
@@ -10,6 +15,10 @@ impl Default for MatlabLanguage {
 }
 
 impl Language for MatlabLanguage {
-    type SyntaxKind = MatlabSyntaxKind;
-    type TypedRoot = ();
+    const NAME: &'static str = "matlab";
+    const CATEGORY: LanguageCategory = LanguageCategory::Programming;
+
+    type TokenType = crate::kind::MatlabSyntaxKind;
+    type ElementType = crate::kind::MatlabSyntaxKind;
+    type TypedRoot = crate::ast::MatlabRoot;
 }

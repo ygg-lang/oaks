@@ -1,7 +1,7 @@
-use oak_core::SyntaxKind;
+use oak_core::{ElementType, TokenType, UniversalElementRole, UniversalTokenRole};
 use serde::{Deserialize, Serialize};
 
-#[derive(Copy, Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Copy, Clone, Debug, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub enum PhpSyntaxKind {
     // 空白字符和换行
     Whitespace,
@@ -159,11 +159,58 @@ pub enum PhpSyntaxKind {
     // 特殊
     Eof,
     Error,
+
+    // Element types
+    Root,
+    ClassDef,
+    FunctionDef,
+    MethodDef,
+    PropertyDef,
+    ConstDef,
+    TraitDef,
+    InterfaceDef,
+    NamespaceDef,
+    UseStatement,
+    IfStatement,
+    WhileStatement,
+    DoWhileStatement,
+    ForStatement,
+    ForeachStatement,
+    SwitchStatement,
+    TryStatement,
+    CatchBlock,
+    FinallyBlock,
+    ExpressionStatement,
+    ReturnStatement,
+    ThrowStatement,
+    BreakStatement,
+    ContinueStatement,
+    EchoStatement,
+    GlobalStatement,
+    StaticStatement,
+    UnsetStatement,
+    CompoundStatement,
+
+    // Expressions
+    Literal,
+    ParenthesizedExpression,
+    CallExpression,
+    ArrayAccessExpression,
+    MemberAccessExpression,
+    BinaryExpression,
 }
 
-impl SyntaxKind for PhpSyntaxKind {
-    fn is_trivia(&self) -> bool {
-        matches!(self, Self::Whitespace | Self::Newline | Self::Comment)
+impl TokenType for PhpSyntaxKind {
+    const END_OF_STREAM: Self = Self::Eof;
+    type Role = UniversalTokenRole;
+
+    fn role(&self) -> Self::Role {
+        match self {
+            Self::Whitespace | Self::Newline => UniversalTokenRole::Whitespace,
+            Self::Comment => UniversalTokenRole::Comment,
+            Self::Eof => UniversalTokenRole::Eof,
+            _ => UniversalTokenRole::None,
+        }
     }
 
     fn is_comment(&self) -> bool {
@@ -173,14 +220,67 @@ impl SyntaxKind for PhpSyntaxKind {
     fn is_whitespace(&self) -> bool {
         matches!(self, Self::Whitespace | Self::Newline)
     }
+}
 
-    fn is_token_type(&self) -> bool {
-        true // PHP doesn't have element types in this simple implementation
-    }
-
-    fn is_element_type(&self) -> bool {
-        false // PHP doesn't have element types in this simple implementation
+impl PhpSyntaxKind {
+    pub fn is_token(&self) -> bool {
+        !self.is_element()
     }
 }
 
-pub type PhpNode = oak_core::tree::RedNode<PhpSyntaxKind>;
+impl ElementType for PhpSyntaxKind {
+    type Role = UniversalElementRole;
+
+    fn role(&self) -> Self::Role {
+        match self {
+            Self::Error => UniversalElementRole::Error,
+            Self::Root => UniversalElementRole::Root,
+            Self::ClassDef | Self::FunctionDef | Self::NamespaceDef => UniversalElementRole::Detail,
+            Self::Literal | Self::ParenthesizedExpression | Self::CallExpression | Self::ArrayAccessExpression | Self::MemberAccessExpression | Self::BinaryExpression => UniversalElementRole::Expression,
+            _ => UniversalElementRole::None,
+        }
+    }
+}
+
+impl PhpSyntaxKind {
+    pub fn is_element(&self) -> bool {
+        matches!(
+            self,
+            Self::Root
+                | Self::ClassDef
+                | Self::FunctionDef
+                | Self::MethodDef
+                | Self::PropertyDef
+                | Self::ConstDef
+                | Self::TraitDef
+                | Self::InterfaceDef
+                | Self::NamespaceDef
+                | Self::UseStatement
+                | Self::IfStatement
+                | Self::WhileStatement
+                | Self::DoWhileStatement
+                | Self::ForStatement
+                | Self::ForeachStatement
+                | Self::SwitchStatement
+                | Self::TryStatement
+                | Self::CatchBlock
+                | Self::FinallyBlock
+                | Self::ExpressionStatement
+                | Self::ReturnStatement
+                | Self::ThrowStatement
+                | Self::BreakStatement
+                | Self::ContinueStatement
+                | Self::EchoStatement
+                | Self::GlobalStatement
+                | Self::StaticStatement
+                | Self::UnsetStatement
+                | Self::CompoundStatement
+                | Self::Literal
+                | Self::ParenthesizedExpression
+                | Self::CallExpression
+                | Self::ArrayAccessExpression
+                | Self::MemberAccessExpression
+                | Self::BinaryExpression
+        )
+    }
+}

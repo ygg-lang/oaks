@@ -1,19 +1,17 @@
 use crate::{kind::PrologSyntaxKind, language::PrologLanguage};
-use oak_core::{IncrementalCache, Lexer, LexerState, OakError, lexer::LexOutput, source::Source};
+use oak_core::{Lexer, LexerCache, LexerState, OakError, lexer::LexOutput, source::Source};
 
-type State<S: Source> = LexerState<S, PrologLanguage>;
+type State<'s, S> = LexerState<'s, S, PrologLanguage>;
 
-#[derive(Clone)]
-pub struct PrologLexer<'config> {
-    config: &'config PrologLanguage,
-}
+#[derive(Clone, Default)]
+pub struct PrologLexer {}
 
-impl<'config> PrologLexer<'config> {
-    pub fn new(config: &'config PrologLanguage) -> Self {
-        Self { config }
+impl PrologLexer {
+    pub fn new(_config: &PrologLanguage) -> Self {
+        Self {}
     }
 
-    fn run<S: Source>(&self, state: &mut State<S>) -> Result<(), OakError> {
+    fn run<'s, S: Source + ?Sized>(&self, state: &mut State<'s, S>) -> Result<(), OakError> {
         while state.not_at_end() {
             if self.skip_whitespace(state) {
                 continue;
@@ -66,7 +64,7 @@ impl<'config> PrologLexer<'config> {
         Ok(())
     }
 
-    fn skip_whitespace<S: Source>(&self, state: &mut State<S>) -> bool {
+    fn skip_whitespace<'s, S: Source + ?Sized>(&self, state: &mut State<'s, S>) -> bool {
         let start_pos = state.get_position();
 
         while let Some(ch) = state.peek() {
@@ -87,7 +85,7 @@ impl<'config> PrologLexer<'config> {
         }
     }
 
-    fn lex_newline<S: Source>(&self, state: &mut State<S>) -> bool {
+    fn lex_newline<'s, S: Source + ?Sized>(&self, state: &mut State<'s, S>) -> bool {
         let start_pos = state.get_position();
 
         if let Some('\n') = state.peek() {
@@ -108,7 +106,7 @@ impl<'config> PrologLexer<'config> {
         }
     }
 
-    fn lex_comment<S: Source>(&self, state: &mut State<S>) -> bool {
+    fn lex_comment<'s, S: Source + ?Sized>(&self, state: &mut State<'s, S>) -> bool {
         let start_pos = state.get_position();
 
         if let Some('%') = state.peek() {
@@ -154,7 +152,7 @@ impl<'config> PrologLexer<'config> {
         }
     }
 
-    fn lex_string<S: Source>(&self, state: &mut State<S>) -> bool {
+    fn lex_string<'s, S: Source + ?Sized>(&self, state: &mut State<'s, S>) -> bool {
         let start_pos = state.get_position();
 
         if let Some(quote_char) = state.peek() {
@@ -196,7 +194,7 @@ impl<'config> PrologLexer<'config> {
         }
     }
 
-    fn lex_number<S: Source>(&self, state: &mut State<S>) -> bool {
+    fn lex_number<'s, S: Source + ?Sized>(&self, state: &mut State<'s, S>) -> bool {
         if let Some(ch) = state.peek() {
             if ch.is_ascii_digit() {
                 let start_pos = state.get_position();
@@ -257,7 +255,7 @@ impl<'config> PrologLexer<'config> {
         }
     }
 
-    fn lex_atom_or_keyword<S: Source>(&self, state: &mut State<S>) -> bool {
+    fn lex_atom_or_keyword<'s, S: Source + ?Sized>(&self, state: &mut State<'s, S>) -> bool {
         if let Some(ch) = state.peek() {
             if ch.is_ascii_lowercase() || ch == '_' {
                 let start_pos = state.get_position();
@@ -293,7 +291,7 @@ impl<'config> PrologLexer<'config> {
         }
     }
 
-    fn lex_variable<S: Source>(&self, state: &mut State<S>) -> bool {
+    fn lex_variable<'s, S: Source + ?Sized>(&self, state: &mut State<'s, S>) -> bool {
         if let Some(ch) = state.peek() {
             if ch.is_ascii_uppercase() || ch == '_' {
                 let start_pos = state.get_position();
@@ -320,7 +318,7 @@ impl<'config> PrologLexer<'config> {
         }
     }
 
-    fn lex_operators_and_punctuation<S: Source>(&self, state: &mut State<S>) -> bool {
+    fn lex_operators_and_punctuation<'s, S: Source + ?Sized>(&self, state: &mut State<'s, S>) -> bool {
         if let Some(ch) = state.peek() {
             let start_pos = state.get_position();
 
@@ -501,15 +499,14 @@ impl<'config> PrologLexer<'config> {
     }
 }
 
-impl<'config> Lexer<PrologLanguage> for PrologLexer<'config> {
-    fn lex_incremental(
-        &self,
-        source: impl Source,
-        _changed: usize,
-        _cache: IncrementalCache<PrologLanguage>,
-    ) -> LexOutput<PrologLanguage> {
+impl Lexer<PrologLanguage> for PrologLexer {
+    fn lex<'a, S: Source + ?Sized>(&self, source: &'a S, _edits: &[oak_core::source::TextEdit], cache: &'a mut impl LexerCache<PrologLanguage>) -> LexOutput<PrologLanguage> {
         let mut state = LexerState::new(source);
         let result = self.run(&mut state);
-        state.finish(result)
+        if result.is_ok() {
+            // state.run already adds EOF, but LexerState::new doesn't include it by default
+            // PrologLexer::run adds EOF manually, so we don't need to add it again here
+        }
+        state.finish_with_cache(result, cache)
     }
 }

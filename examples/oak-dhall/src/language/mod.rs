@@ -1,7 +1,8 @@
-use crate::{ast::DHallRoot, kind::DHallSyntaxKind};
-use oak_core::Language;
+use crate::ast::DHallRoot;
+use oak_core::{Language, LanguageCategory};
+use serde::{Deserialize, Serialize};
 
-#[derive(Copy, Clone, Debug)]
+#[derive(Copy, Clone, Debug, Serialize, Deserialize)]
 pub struct DHallLanguage {
     /// Allow unicode identifiers
     pub unicode_identifiers: bool,
@@ -14,6 +15,10 @@ impl Default for DHallLanguage {
 }
 
 impl Language for DHallLanguage {
-    type SyntaxKind = DHallSyntaxKind;
+    const NAME: &'static str = "dhall";
+    const CATEGORY: LanguageCategory = LanguageCategory::Programming;
+
+    type TokenType = crate::kind::DHallSyntaxKind;
+    type ElementType = crate::kind::DHallSyntaxKind;
     type TypedRoot = DHallRoot;
 }

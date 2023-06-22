@@ -1,7 +1,5 @@
-#![feature(new_range_api)]
-
 use oak_core::helpers::LexerTester;
-use oak_ini::{language::IniLanguage, lexer::IniLexer};
+use oak_ini::{IniLanguage, IniLexer};
 use std::{path::Path, time::Duration};
 
 #[test]
@@ -10,7 +8,7 @@ fn test_ini_lexer() {
     let language = Box::leak(Box::new(IniLanguage::default()));
     let lexer = IniLexer::new(language);
     let test_runner = LexerTester::new(here.join("tests/lexer")).with_extension("ini").with_timeout(Duration::from_secs(5));
-    match test_runner.run_tests::<IniLanguage, _>(lexer) {
+    match test_runner.run_tests::<IniLanguage, _>(&lexer) {
         Ok(()) => println!("Ini lexer tests passed!"),
         Err(e) => panic!("Ini lexer tests failed: {}", e),
     }
@@ -19,13 +17,14 @@ fn test_ini_lexer() {
 #[test]
 fn test_basic_lexing() {
     use oak_core::{Lexer, SourceText};
-    use oak_ini::language::IniLanguage;
+    use oak_ini::IniLanguage;
 
     let source = SourceText::new(r#"key = "value""#);
     let language = Box::leak(Box::new(IniLanguage::default()));
     let lexer = IniLexer::new(language);
 
-    let result = lexer.lex(&source);
+    let mut cache = oak_core::parser::session::ParseSession::<IniLanguage>::default();
+    let result = lexer.lex(&source, &[], &mut cache);
     assert!(result.result.is_ok());
 
     let tokens = result.result.unwrap();

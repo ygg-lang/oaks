@@ -14,5 +14,5 @@ fn test_fortran_lexer_integration() {
     test_dir.push("lexer");
     test_dir.push("fixtures");
 
-    LexerTester::new(test_dir).with_extension("f90").run_tests(lexer).expect("Lexer tests should pass");
+    LexerTester::new(test_dir).with_extension("f90").run_tests(&lexer).expect("Lexer tests should pass");
 }

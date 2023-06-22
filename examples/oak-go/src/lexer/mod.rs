@@ -1,42 +1,42 @@
-use crate::{kind::GoLangSyntaxKind, language::GoLangLanguage};
+use crate::{kind::GoSyntaxKind, language::GoLanguage};
 use oak_core::{
-    IncrementalCache, Lexer, LexerState, OakError,
-    lexer::{CommentLine, LexOutput, StringConfig, WhitespaceConfig},
+    Lexer, LexerCache, LexerState, OakError, TextEdit,
+    lexer::{CommentConfig, LexOutput, StringConfig, WhitespaceConfig},
     source::Source,
 };
 use std::sync::LazyLock;
 
-type State<S> = LexerState<S, GoLangLanguage>;
+type State<'a, S> = LexerState<'a, S, GoLanguage>;
 
 static GO_WHITESPACE: LazyLock<WhitespaceConfig> = LazyLock::new(|| WhitespaceConfig { unicode_whitespace: true });
-static GO_COMMENT: LazyLock<CommentLine> = LazyLock::new(|| CommentLine { line_markers: &["//"] });
+static GO_COMMENT: LazyLock<CommentConfig> = LazyLock::new(|| CommentConfig { line_marker: "//", block_start: "/*", block_end: "*/", nested_blocks: false });
 static GO_STRING: LazyLock<StringConfig> = LazyLock::new(|| StringConfig { quotes: &['"'], escape: Some('\\') });
 static GO_CHAR: LazyLock<StringConfig> = LazyLock::new(|| StringConfig { quotes: &['\''], escape: Some('\\') });
 
 #[derive(Clone)]
 pub struct GoLexer<'config> {
-    config: &'config GoLangLanguage,
+    pub(crate) _config: &'config GoLanguage,
 }
 
-impl<'config> Lexer<GoLangLanguage> for GoLexer<'config> {
-    fn lex_incremental(
-        &self,
-        source: impl Source,
-        changed: usize,
-        cache: IncrementalCache<GoLangLanguage>,
-    ) -> LexOutput<GoLangLanguage> {
-        let mut state = LexerState::new_with_cache(source, changed, cache);
+impl<'config> GoLexer<'config> {
+    pub fn new(config: &'config GoLanguage) -> Self {
+        Self { _config: config }
+    }
+}
+
+impl<'config> Lexer<GoLanguage> for GoLexer<'config> {
+    fn lex<'a, S: Source + ?Sized>(&self, source: &S, _edits: &[TextEdit], cache: &'a mut impl LexerCache<GoLanguage>) -> LexOutput<GoLanguage> {
+        let mut state = State::new(source);
         let result = self.run(&mut state);
-        state.finish(result)
+        if result.is_ok() {
+            state.add_eof();
+        }
+        state.finish_with_cache(result, cache)
     }
 }
 
 impl<'config> GoLexer<'config> {
-    pub fn new(config: &'config GoLangLanguage) -> Self {
-        Self { config }
-    }
-
-    fn run<S: Source>(&self, state: &mut State<S>) -> Result<(), OakError> {
+    fn run<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> Result<(), OakError> {
         while state.not_at_end() {
             let safe_point = state.get_position();
 
@@ -72,82 +72,44 @@ impl<'config> GoLexer<'config> {
                 continue;
             }
 
-            state.safe_check(safe_point);
+            state.advance_if_dead_lock(safe_point);
         }
 
-        // 添加 EOF token
-        let eof_pos = state.get_position();
-        state.add_token(GoLangSyntaxKind::Eof, eof_pos, eof_pos);
         Ok(())
     }
 
     /// 跳过空白字符
-    fn skip_whitespace<S: Source>(&self, state: &mut State<S>) -> bool {
-        match GO_WHITESPACE.scan(state.rest(), state.get_position(), GoLangSyntaxKind::Whitespace) {
-            Some(token) => {
-                state.advance_with(token);
-                true
-            }
-            None => false,
-        }
+    fn skip_whitespace<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
+        GO_WHITESPACE.scan(state, GoSyntaxKind::Whitespace)
     }
 
     /// 跳过注释
-    fn skip_comment<S: Source>(&self, state: &mut State<S>) -> bool {
-        // 行注释 //
-        if let Some(token) = GO_COMMENT.scan(state.rest(), state.get_position(), GoLangSyntaxKind::Comment) {
-            state.advance_with(token);
-            return true;
-        }
-
-        // 块注释 /* */
-        if state.rest().starts_with("/*") {
-            let start = state.get_position();
-            state.advance(2); // 跳过 /*
-
-            while state.not_at_end() {
-                if state.rest().starts_with("*/") {
-                    state.advance(2); // 跳过 */
-                    break;
-                }
-                if let Some(ch) = state.peek() {
-                    state.advance(ch.len_utf8());
-                }
-            }
-
-            let end = state.get_position();
-            state.add_token(GoLangSyntaxKind::Comment, start, end);
-            return true;
-        }
-
-        false
+    fn skip_comment<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
+        GO_COMMENT.scan(state, GoSyntaxKind::Comment, GoSyntaxKind::Comment)
     }
 
     /// 词法分析字符串字面量
-    fn lex_string_literal<S: Source>(&self, state: &mut State<S>) -> bool {
+    fn lex_string_literal<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         // 普通字符串 "..."
-        if let Some(token) = GO_STRING.scan(state.rest(), state.get_position(), GoLangSyntaxKind::StringLiteral) {
-            state.advance_with(token);
+        if GO_STRING.scan(state, GoSyntaxKind::StringLiteral) {
             return true;
         }
 
         // 原始字符串 `...`
-        if state.rest().starts_with('`') {
+        if state.starts_with("`") {
             let start = state.get_position();
             state.advance(1); // 跳过开始的 `
 
-            while state.not_at_end() {
-                if state.rest().starts_with('`') {
+            while let Some(ch) = state.peek() {
+                if ch == '`' {
                     state.advance(1); // 跳过结束的 `
                     break;
                 }
-                if let Some(ch) = state.peek() {
-                    state.advance(ch.len_utf8());
-                }
+                state.advance(ch.len_utf8());
             }
 
             let end = state.get_position();
-            state.add_token(GoLangSyntaxKind::StringLiteral, start, end);
+            state.add_token(GoSyntaxKind::StringLiteral, start, end);
             return true;
         }
 
@@ -155,25 +117,18 @@ impl<'config> GoLexer<'config> {
     }
 
     /// 词法分析字符字面量
-    fn lex_char_literal<S: Source>(&self, state: &mut State<S>) -> bool {
-        if let Some(token) = GO_CHAR.scan(state.rest(), state.get_position(), GoLangSyntaxKind::RuneLiteral) {
-            state.advance_with(token);
-            true
-        }
-        else {
-            false
-        }
+    fn lex_char_literal<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
+        GO_CHAR.scan(state, GoSyntaxKind::RuneLiteral)
     }
 
     /// 词法分析数字字面量
-    fn lex_number_literal<S: Source>(&self, state: &mut State<S>) -> bool {
+    fn lex_number_literal<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start = state.get_position();
         let mut has_digits = false;
         let mut is_float = false;
 
         // 处理十六进制 0x...
-        if state.rest().starts_with("0x") || state.rest().starts_with("0X") {
-            state.advance(2);
+        if state.consume_if_starts_with("0x") || state.consume_if_starts_with("0X") {
             while let Some(ch) = state.peek() {
                 if ch.is_ascii_hexdigit() {
                     state.advance(ch.len_utf8());
@@ -185,17 +140,16 @@ impl<'config> GoLexer<'config> {
             }
             if has_digits {
                 let end = state.get_position();
-                state.add_token(GoLangSyntaxKind::IntLiteral, start, end);
+                state.add_token(GoSyntaxKind::IntLiteral, start, end);
                 return true;
             }
             return false;
         }
 
         // 处理八进制 0...
-        if state.rest().starts_with('0') && state.rest().len() > 1 {
-            if let Some(next_ch) = state.rest().chars().nth(1) {
+        if state.consume_if_starts_with("0") {
+            if let Some(next_ch) = state.peek() {
                 if next_ch.is_ascii_digit() && next_ch != '8' && next_ch != '9' {
-                    state.advance(1); // 跳过 0
                     while let Some(ch) = state.peek() {
                         if ch >= '0' && ch <= '7' {
                             state.advance(ch.len_utf8());
@@ -207,7 +161,7 @@ impl<'config> GoLexer<'config> {
                     }
                     if has_digits {
                         let end = state.get_position();
-                        state.add_token(GoLangSyntaxKind::IntLiteral, start, end);
+                        state.add_token(GoSyntaxKind::IntLiteral, start, end);
                         return true;
                     }
                 }
@@ -222,7 +176,7 @@ impl<'config> GoLexer<'config> {
             }
             else if ch == '.' && !is_float {
                 // 检查是否是浮点数
-                if let Some(next_ch) = state.rest().chars().nth(1) {
+                if let Some(next_ch) = state.peek_next_n(1) {
                     if next_ch.is_ascii_digit() {
                         state.advance(ch.len_utf8()); // 跳过 .
                         is_float = true;
@@ -265,7 +219,7 @@ impl<'config> GoLexer<'config> {
 
         if has_digits {
             let end = state.get_position();
-            let kind = if is_float { GoLangSyntaxKind::FloatLiteral } else { GoLangSyntaxKind::IntLiteral };
+            let kind = if is_float { GoSyntaxKind::FloatLiteral } else { GoSyntaxKind::IntLiteral };
             state.add_token(kind, start, end);
             true
         }
@@ -275,7 +229,7 @@ impl<'config> GoLexer<'config> {
     }
 
     /// 词法分析标识符或关键字
-    fn lex_identifier_or_keyword<S: Source>(&self, state: &mut State<S>) -> bool {
+    fn lex_identifier_or_keyword<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start = state.get_position();
 
         // 标识符必须以字母或下划线开始
@@ -298,7 +252,7 @@ impl<'config> GoLexer<'config> {
 
             let end = state.get_position();
             let text = state.get_text_in((start..end).into());
-            let kind = self.keyword_or_identifier(&text);
+            let kind = self.keyword_or_identifier(text.as_ref());
             state.add_token(kind, start, end);
             true
         }
@@ -308,230 +262,144 @@ impl<'config> GoLexer<'config> {
     }
 
     /// 判断是关键字还是标识符
-    fn keyword_or_identifier(&self, text: &str) -> GoLangSyntaxKind {
+    fn keyword_or_identifier(&self, text: &str) -> GoSyntaxKind {
         match text {
             // 关键字
-            "break" => GoLangSyntaxKind::Break,
-            "case" => GoLangSyntaxKind::Case,
-            "chan" => GoLangSyntaxKind::Chan,
-            "const" => GoLangSyntaxKind::Const,
-            "continue" => GoLangSyntaxKind::Continue,
-            "default" => GoLangSyntaxKind::Default,
-            "defer" => GoLangSyntaxKind::Defer,
-            "else" => GoLangSyntaxKind::Else,
-            "fallthrough" => GoLangSyntaxKind::Fallthrough,
-            "for" => GoLangSyntaxKind::For,
-            "func" => GoLangSyntaxKind::Func,
-            "go" => GoLangSyntaxKind::Go,
-            "goto" => GoLangSyntaxKind::Goto,
-            "if" => GoLangSyntaxKind::If,
-            "import" => GoLangSyntaxKind::Import,
-            "interface" => GoLangSyntaxKind::Interface,
-            "map" => GoLangSyntaxKind::Map,
-            "package" => GoLangSyntaxKind::Package,
-            "range" => GoLangSyntaxKind::Range,
-            "return" => GoLangSyntaxKind::Return,
-            "select" => GoLangSyntaxKind::Select,
-            "struct" => GoLangSyntaxKind::Struct,
-            "switch" => GoLangSyntaxKind::Switch,
-            "type" => GoLangSyntaxKind::Type,
-            "var" => GoLangSyntaxKind::Var,
+            "break" => GoSyntaxKind::Break,
+            "case" => GoSyntaxKind::Case,
+            "chan" => GoSyntaxKind::Chan,
+            "const" => GoSyntaxKind::Const,
+            "continue" => GoSyntaxKind::Continue,
+            "default" => GoSyntaxKind::Default,
+            "defer" => GoSyntaxKind::Defer,
+            "else" => GoSyntaxKind::Else,
+            "fallthrough" => GoSyntaxKind::Fallthrough,
+            "for" => GoSyntaxKind::For,
+            "func" => GoSyntaxKind::Func,
+            "go" => GoSyntaxKind::Go,
+            "goto" => GoSyntaxKind::Goto,
+            "if" => GoSyntaxKind::If,
+            "import" => GoSyntaxKind::Import,
+            "interface" => GoSyntaxKind::Interface,
+            "map" => GoSyntaxKind::Map,
+            "package" => GoSyntaxKind::Package,
+            "range" => GoSyntaxKind::Range,
+            "return" => GoSyntaxKind::Return,
+            "select" => GoSyntaxKind::Select,
+            "struct" => GoSyntaxKind::Struct,
+            "switch" => GoSyntaxKind::Switch,
+            "type" => GoSyntaxKind::Type,
+            "var" => GoSyntaxKind::Var,
 
             // 内置类型
-            "bool" => GoLangSyntaxKind::Bool,
-            "byte" => GoLangSyntaxKind::Byte,
-            "complex64" => GoLangSyntaxKind::Complex64,
-            "complex128" => GoLangSyntaxKind::Complex128,
-            "error" => GoLangSyntaxKind::ErrorType,
-            "float32" => GoLangSyntaxKind::Float32,
-            "float64" => GoLangSyntaxKind::Float64,
-            "int" => GoLangSyntaxKind::Int,
-            "int8" => GoLangSyntaxKind::Int8,
-            "int16" => GoLangSyntaxKind::Int16,
-            "int32" => GoLangSyntaxKind::Int32,
-            "int64" => GoLangSyntaxKind::Int64,
-            "rune" => GoLangSyntaxKind::Rune,
-            "string" => GoLangSyntaxKind::String,
-            "uint" => GoLangSyntaxKind::Uint,
-            "uint8" => GoLangSyntaxKind::Uint8,
-            "uint16" => GoLangSyntaxKind::Uint16,
-            "uint32" => GoLangSyntaxKind::Uint32,
-            "uint64" => GoLangSyntaxKind::Uint64,
-            "uintptr" => GoLangSyntaxKind::Uintptr,
+            "bool" => GoSyntaxKind::Bool,
+            "byte" => GoSyntaxKind::Byte,
+            "complex64" => GoSyntaxKind::Complex64,
+            "complex128" => GoSyntaxKind::Complex128,
+            "error" => GoSyntaxKind::ErrorType,
+            "float32" => GoSyntaxKind::Float32,
+            "float64" => GoSyntaxKind::Float64,
+            "int" => GoSyntaxKind::Int,
+            "int8" => GoSyntaxKind::Int8,
+            "int16" => GoSyntaxKind::Int16,
+            "int32" => GoSyntaxKind::Int32,
+            "int64" => GoSyntaxKind::Int64,
+            "rune" => GoSyntaxKind::Rune,
+            "string" => GoSyntaxKind::String,
+            "uint" => GoSyntaxKind::Uint,
+            "uint8" => GoSyntaxKind::Uint8,
+            "uint16" => GoSyntaxKind::Uint16,
+            "uint32" => GoSyntaxKind::Uint32,
+            "uint64" => GoSyntaxKind::Uint64,
+            "uintptr" => GoSyntaxKind::Uintptr,
 
             // 特殊字面量
-            "nil" => GoLangSyntaxKind::NilLiteral,
-            "true" | "false" => GoLangSyntaxKind::BoolLiteral,
+            "nil" => GoSyntaxKind::NilLiteral,
+            "true" | "false" => GoSyntaxKind::BoolLiteral,
 
             // 默认为标识符
-            _ => GoLangSyntaxKind::Identifier,
+            _ => GoSyntaxKind::Identifier,
         }
     }
 
     /// 词法分析操作符
-    fn lex_operators<S: Source>(&self, state: &mut State<S>) -> bool {
+    fn lex_operators<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start = state.get_position();
-        let rest = state.rest();
 
         // 三字符操作符
-        if rest.starts_with("<<=") {
-            state.advance(3);
-            state.add_token(GoLangSyntaxKind::LeftShiftAssign, start, state.get_position());
-            return true;
-        }
-        if rest.starts_with(">>=") {
-            state.advance(3);
-            state.add_token(GoLangSyntaxKind::RightShiftAssign, start, state.get_position());
-            return true;
-        }
-        if rest.starts_with("&^=") {
-            state.advance(3);
-            state.add_token(GoLangSyntaxKind::AmpersandCaretAssign, start, state.get_position());
-            return true;
-        }
-        if rest.starts_with("...") {
-            state.advance(3);
-            state.add_token(GoLangSyntaxKind::Ellipsis, start, state.get_position());
-            return true;
+        let patterns_3: &[(&str, GoSyntaxKind)] = &[("<<=", GoSyntaxKind::LeftShiftAssign), (">>=", GoSyntaxKind::RightShiftAssign), ("&^=", GoSyntaxKind::AmpersandCaretAssign), ("...", GoSyntaxKind::Ellipsis)];
+
+        for (pat, kind) in patterns_3 {
+            if state.starts_with(pat) {
+                state.advance(3);
+                state.add_token(*kind, start, state.get_position());
+                return true;
+            }
         }
 
         // 双字符操作符
-        if rest.starts_with("++") {
-            state.advance(2);
-            state.add_token(GoLangSyntaxKind::Increment, start, state.get_position());
-            return true;
-        }
-        if rest.starts_with("--") {
-            state.advance(2);
-            state.add_token(GoLangSyntaxKind::Decrement, start, state.get_position());
-            return true;
-        }
-        if rest.starts_with("==") {
-            state.advance(2);
-            state.add_token(GoLangSyntaxKind::Equal, start, state.get_position());
-            return true;
-        }
-        if rest.starts_with("!=") {
-            state.advance(2);
-            state.add_token(GoLangSyntaxKind::NotEqual, start, state.get_position());
-            return true;
-        }
-        if rest.starts_with("<=") {
-            state.advance(2);
-            state.add_token(GoLangSyntaxKind::LessEqual, start, state.get_position());
-            return true;
-        }
-        if rest.starts_with(">=") {
-            state.advance(2);
-            state.add_token(GoLangSyntaxKind::GreaterEqual, start, state.get_position());
-            return true;
-        }
-        if rest.starts_with("<<") {
-            state.advance(2);
-            state.add_token(GoLangSyntaxKind::LeftShift, start, state.get_position());
-            return true;
-        }
-        if rest.starts_with(">>") {
-            state.advance(2);
-            state.add_token(GoLangSyntaxKind::RightShift, start, state.get_position());
-            return true;
-        }
-        if rest.starts_with("&&") {
-            state.advance(2);
-            state.add_token(GoLangSyntaxKind::LogicalAnd, start, state.get_position());
-            return true;
-        }
-        if rest.starts_with("||") {
-            state.advance(2);
-            state.add_token(GoLangSyntaxKind::LogicalOr, start, state.get_position());
-            return true;
-        }
-        if rest.starts_with("<-") {
-            state.advance(2);
-            state.add_token(GoLangSyntaxKind::Arrow, start, state.get_position());
-            return true;
-        }
-        if rest.starts_with(":=") {
-            state.advance(2);
-            state.add_token(GoLangSyntaxKind::ColonAssign, start, state.get_position());
-            return true;
-        }
-        if rest.starts_with("&^") {
-            state.advance(2);
-            state.add_token(GoLangSyntaxKind::AmpersandCaret, start, state.get_position());
-            return true;
-        }
-        if rest.starts_with("+=") {
-            state.advance(2);
-            state.add_token(GoLangSyntaxKind::PlusAssign, start, state.get_position());
-            return true;
-        }
-        if rest.starts_with("-=") {
-            state.advance(2);
-            state.add_token(GoLangSyntaxKind::MinusAssign, start, state.get_position());
-            return true;
-        }
-        if rest.starts_with("*=") {
-            state.advance(2);
-            state.add_token(GoLangSyntaxKind::StarAssign, start, state.get_position());
-            return true;
-        }
-        if rest.starts_with("/=") {
-            state.advance(2);
-            state.add_token(GoLangSyntaxKind::SlashAssign, start, state.get_position());
-            return true;
-        }
-        if rest.starts_with("%=") {
-            state.advance(2);
-            state.add_token(GoLangSyntaxKind::PercentAssign, start, state.get_position());
-            return true;
-        }
-        if rest.starts_with("&=") {
-            state.advance(2);
-            state.add_token(GoLangSyntaxKind::AmpersandAssign, start, state.get_position());
-            return true;
-        }
-        if rest.starts_with("|=") {
-            state.advance(2);
-            state.add_token(GoLangSyntaxKind::PipeAssign, start, state.get_position());
-            return true;
-        }
-        if rest.starts_with("^=") {
-            state.advance(2);
-            state.add_token(GoLangSyntaxKind::CaretAssign, start, state.get_position());
-            return true;
+        let patterns_2: &[(&str, GoSyntaxKind)] = &[
+            ("++", GoSyntaxKind::Increment),
+            ("--", GoSyntaxKind::Decrement),
+            ("==", GoSyntaxKind::Equal),
+            ("!=", GoSyntaxKind::NotEqual),
+            ("<=", GoSyntaxKind::LessEqual),
+            (">=", GoSyntaxKind::GreaterEqual),
+            ("<<", GoSyntaxKind::LeftShift),
+            (">>", GoSyntaxKind::RightShift),
+            ("&&", GoSyntaxKind::LogicalAnd),
+            ("||", GoSyntaxKind::LogicalOr),
+            ("<-", GoSyntaxKind::Arrow),
+            (":=", GoSyntaxKind::ColonAssign),
+            ("&^", GoSyntaxKind::AmpersandCaret),
+            ("+=", GoSyntaxKind::PlusAssign),
+            ("-=", GoSyntaxKind::MinusAssign),
+            ("*=", GoSyntaxKind::StarAssign),
+            ("/=", GoSyntaxKind::SlashAssign),
+            ("%=", GoSyntaxKind::PercentAssign),
+            ("&=", GoSyntaxKind::AmpersandAssign),
+            ("|=", GoSyntaxKind::PipeAssign),
+            ("^=", GoSyntaxKind::CaretAssign),
+        ];
+
+        for (pat, kind) in patterns_2 {
+            if state.starts_with(pat) {
+                state.advance(2);
+                state.add_token(*kind, start, state.get_position());
+                return true;
+            }
         }
 
         false
     }
 
     /// 词法分析单字符 token
-    fn lex_single_char_tokens<S: Source>(&self, state: &mut State<S>) -> bool {
+    fn lex_single_char_tokens<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         if let Some(ch) = state.peek() {
             let start = state.get_position();
             let kind = match ch {
-                '+' => Some(GoLangSyntaxKind::Plus),
-                '-' => Some(GoLangSyntaxKind::Minus),
-                '*' => Some(GoLangSyntaxKind::Star),
-                '/' => Some(GoLangSyntaxKind::Slash),
-                '%' => Some(GoLangSyntaxKind::Percent),
-                '&' => Some(GoLangSyntaxKind::Ampersand),
-                '|' => Some(GoLangSyntaxKind::Pipe),
-                '^' => Some(GoLangSyntaxKind::Caret),
-                '<' => Some(GoLangSyntaxKind::Less),
-                '>' => Some(GoLangSyntaxKind::Greater),
-                '=' => Some(GoLangSyntaxKind::Assign),
-                '!' => Some(GoLangSyntaxKind::LogicalNot),
-                '(' => Some(GoLangSyntaxKind::LeftParen),
-                ')' => Some(GoLangSyntaxKind::RightParen),
-                '[' => Some(GoLangSyntaxKind::LeftBracket),
-                ']' => Some(GoLangSyntaxKind::RightBracket),
-                '{' => Some(GoLangSyntaxKind::LeftBrace),
-                '}' => Some(GoLangSyntaxKind::RightBrace),
-                ',' => Some(GoLangSyntaxKind::Comma),
-                '.' => Some(GoLangSyntaxKind::Period),
-                ';' => Some(GoLangSyntaxKind::Semicolon),
-                ':' => Some(GoLangSyntaxKind::Colon),
+                '+' => Some(GoSyntaxKind::Plus),
+                '-' => Some(GoSyntaxKind::Minus),
+                '*' => Some(GoSyntaxKind::Star),
+                '/' => Some(GoSyntaxKind::Slash),
+                '%' => Some(GoSyntaxKind::Percent),
+                '&' => Some(GoSyntaxKind::Ampersand),
+                '|' => Some(GoSyntaxKind::Pipe),
+                '^' => Some(GoSyntaxKind::Caret),
+                '<' => Some(GoSyntaxKind::Less),
+                '>' => Some(GoSyntaxKind::Greater),
+                '=' => Some(GoSyntaxKind::Assign),
+                '!' => Some(GoSyntaxKind::LogicalNot),
+                '(' => Some(GoSyntaxKind::LeftParen),
+                ')' => Some(GoSyntaxKind::RightParen),
+                '[' => Some(GoSyntaxKind::LeftBracket),
+                ']' => Some(GoSyntaxKind::RightBracket),
+                '{' => Some(GoSyntaxKind::LeftBrace),
+                '}' => Some(GoSyntaxKind::RightBrace),
+                ',' => Some(GoSyntaxKind::Comma),
+                '.' => Some(GoSyntaxKind::Period),
+                ';' => Some(GoSyntaxKind::Semicolon),
+                ':' => Some(GoSyntaxKind::Colon),
                 _ => None,
             };
 

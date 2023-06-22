@@ -4,5 +4,6 @@
 pub mod kind;
 pub mod language;
 pub mod lexer;
+pub mod parser;
 
-pub use crate::{kind::VerilogKind, language::VerilogLanguage, lexer::VerilogLexer};
+pub use crate::{kind::VerilogKind, language::VerilogLanguage, lexer::VerilogLexer, parser::VerilogParser};

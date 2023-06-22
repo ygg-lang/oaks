@@ -1,19 +1,23 @@
 use crate::{kind::PowerShellSyntaxKind, language::PowerShellLanguage};
-use oak_core::{IncrementalCache, Lexer, LexerState, OakError, lexer::LexOutput, source::Source};
+use oak_core::{
+    Lexer, LexerCache, LexerState, OakError,
+    lexer::LexOutput,
+    source::{Source, TextEdit},
+};
 
-type State<S: Source> = LexerState<S, PowerShellLanguage>;
+type State<'a, S> = LexerState<'a, S, PowerShellLanguage>;
 
 #[derive(Clone)]
 pub struct PowerShellLexer<'config> {
-    config: &'config PowerShellLanguage,
+    _config: &'config PowerShellLanguage,
 }
 
 impl<'config> PowerShellLexer<'config> {
     pub fn new(config: &'config PowerShellLanguage) -> Self {
-        Self { config }
+        Self { _config: config }
     }
 
-    fn run<S: Source>(&self, state: &mut State<S>) -> Result<(), OakError> {
+    fn run<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> Result<(), OakError> {
         while state.not_at_end() {
             if self.skip_whitespace(state) {
                 continue;
@@ -66,7 +70,7 @@ impl<'config> PowerShellLexer<'config> {
         Ok(())
     }
 
-    fn skip_whitespace<S: Source>(&self, state: &mut State<S>) -> bool {
+    fn skip_whitespace<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start_pos = state.get_position();
 
         while let Some(ch) = state.peek() {
@@ -87,7 +91,7 @@ impl<'config> PowerShellLexer<'config> {
         }
     }
 
-    fn lex_newline<S: Source>(&self, state: &mut State<S>) -> bool {
+    fn lex_newline<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start_pos = state.get_position();
 
         if let Some('\n') = state.peek() {
@@ -108,7 +112,7 @@ impl<'config> PowerShellLexer<'config> {
         }
     }
 
-    fn lex_comment<S: Source>(&self, state: &mut State<S>) -> bool {
+    fn lex_comment<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start_pos = state.get_position();
 
         if let Some('#') = state.peek() {
@@ -129,9 +133,10 @@ impl<'config> PowerShellLexer<'config> {
                 state.advance(1);
                 // 多行注释 <# ... #>
                 let mut depth = 1;
-                while let Some(ch) = state.peek()
-                    && depth > 0
-                {
+                while let Some(ch) = state.peek() {
+                    if depth == 0 {
+                        break;
+                    }
                     if ch == '<' {
                         state.advance(1);
                         if let Some('#') = state.peek() {
@@ -164,7 +169,7 @@ impl<'config> PowerShellLexer<'config> {
         }
     }
 
-    fn lex_string<S: Source>(&self, state: &mut State<S>) -> bool {
+    fn lex_string<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start_pos = state.get_position();
 
         if let Some(quote_char) = state.peek() {
@@ -207,7 +212,7 @@ impl<'config> PowerShellLexer<'config> {
         }
     }
 
-    fn lex_number<S: Source>(&self, state: &mut State<S>) -> bool {
+    fn lex_number<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         if let Some(ch) = state.peek() {
             if ch.is_ascii_digit() {
                 let start_pos = state.get_position();
@@ -268,7 +273,7 @@ impl<'config> PowerShellLexer<'config> {
         }
     }
 
-    fn lex_variable<S: Source>(&self, state: &mut State<S>) -> bool {
+    fn lex_variable<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start_pos = state.get_position();
 
         if let Some('$') = state.peek() {
@@ -308,7 +313,7 @@ impl<'config> PowerShellLexer<'config> {
         }
     }
 
-    fn lex_identifier_or_keyword<S: Source>(&self, state: &mut State<S>) -> bool {
+    fn lex_identifier_or_keyword<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         if let Some(ch) = state.peek() {
             if ch.is_alphabetic() || ch == '_' {
                 let start_pos = state.get_position();
@@ -378,7 +383,7 @@ impl<'config> PowerShellLexer<'config> {
         }
     }
 
-    fn lex_operators_and_punctuation<S: Source>(&self, state: &mut State<S>) -> bool {
+    fn lex_operators_and_punctuation<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         if let Some(ch) = state.peek() {
             let start_pos = state.get_position();
 
@@ -586,14 +591,9 @@ impl<'config> PowerShellLexer<'config> {
 }
 
 impl<'config> Lexer<PowerShellLanguage> for PowerShellLexer<'config> {
-    fn lex_incremental(
-        &self,
-        source: impl Source,
-        _changed: usize,
-        _cache: IncrementalCache<PowerShellLanguage>,
-    ) -> LexOutput<PowerShellLanguage> {
-        let mut state = LexerState::new_with_cache(source, _changed, _cache);
+    fn lex<'a, S: Source + ?Sized>(&self, source: &S, _edits: &[TextEdit], cache: &'a mut impl LexerCache<PowerShellLanguage>) -> LexOutput<PowerShellLanguage> {
+        let mut state = LexerState::new(source);
         let result = self.run(&mut state);
-        state.finish(result)
+        state.finish_with_cache(result, cache)
     }
 }

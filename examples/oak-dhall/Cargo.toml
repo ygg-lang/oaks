@@ -1,9 +1,9 @@
 [package]
 name = "oak-dhall"
-description = "Erlang language parser with support for concurrent programming and OTP features."
+description = "Dhall language parser with support for functional programming and type system features."
 categories = ["parsing"]
-keywords = ["parser", "erlang", "otp", "concurrent"]
-documentation = "https://docs.rs/oak-erlang"
+keywords = ["parser", "dhall", "functional", "type-safe"]
+documentation = "https://docs.rs/oak-dhall"
 readme = "readme.md"
 version.workspace = true
 authors.workspace = true
@@ -16,6 +16,7 @@ edition.workspace = true
 oak-core = { workspace = true }
 oak-highlight = { workspace = true, optional = true }
 oak-pretty-print = { workspace = true, optional = true }
+serde = { workspace = true }
 
 [dev-dependencies]
 oak-core = { workspace = true, features = ["testing"] }

@@ -1,11 +1,7 @@
-use oak_core::{
-    OakError,
-    lexer::{LexOutput, Lexer, LexerState},
-    source::Source,
-    tree::IncrementalCache,
-};
+use crate::{GsglLanguage, syntax::GsglSyntaxKind};
+use oak_core::{Lexer, LexerCache, LexerState, OakError, TextEdit, lexer::LexOutput, source::Source};
 
-use crate::{GsglLanguage, GsglSyntaxKind};
+type State<'a, S> = LexerState<'a, S, GsglLanguage>;
 
 /// GSGL 词法分析器
 #[derive(Clone)]
@@ -16,7 +12,7 @@ impl GsglLexer {
         Self
     }
 
-    fn run<S: Source>(&self, state: &mut LexerState<S, GsglLanguage>) -> Result<(), OakError> {
+    fn run<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> Result<(), OakError> {
         while state.not_at_end() {
             let start = state.get_position();
 
@@ -65,7 +61,7 @@ impl GsglLexer {
         Ok(())
     }
 
-    fn skip_whitespace<S: Source>(&self, state: &mut LexerState<S, GsglLanguage>) -> bool {
+    fn skip_whitespace<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start = state.get_position();
 
         while let Some(ch) = state.peek() {
@@ -86,7 +82,7 @@ impl GsglLexer {
         }
     }
 
-    fn lex_newline<S: Source>(&self, state: &mut LexerState<S, GsglLanguage>) -> bool {
+    fn lex_newline<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start = state.get_position();
         if state.peek() == Some('\n') {
             state.advance(1);
@@ -103,7 +99,7 @@ impl GsglLexer {
         }
     }
 
-    fn lex_comment<S: Source>(&self, state: &mut LexerState<S, GsglLanguage>) -> bool {
+    fn lex_comment<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start = state.get_position();
 
         if state.peek() == Some('/') && state.peek_next_n(1) == Some('/') {
@@ -136,7 +132,7 @@ impl GsglLexer {
         }
     }
 
-    fn lex_string_literal<S: Source>(&self, state: &mut LexerState<S, GsglLanguage>) -> bool {
+    fn lex_string_literal<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start = state.get_position();
 
         if state.peek() == Some('"') {
@@ -168,7 +164,7 @@ impl GsglLexer {
         }
     }
 
-    fn lex_char_literal<S: Source>(&self, state: &mut LexerState<S, GsglLanguage>) -> bool {
+    fn lex_char_literal<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start = state.get_position();
 
         if state.peek() == Some('\'') {
@@ -198,7 +194,7 @@ impl GsglLexer {
         }
     }
 
-    fn lex_number_literal<S: Source>(&self, state: &mut LexerState<S, GsglLanguage>) -> bool {
+    fn lex_number_literal<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start = state.get_position();
 
         if let Some(ch) = state.peek() {
@@ -255,7 +251,7 @@ impl GsglLexer {
         false
     }
 
-    fn lex_identifier_or_keyword<S: Source>(&self, state: &mut LexerState<S, GsglLanguage>) -> bool {
+    fn lex_identifier_or_keyword<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start = state.get_position();
 
         if let Some(ch) = state.peek() {
@@ -269,8 +265,9 @@ impl GsglLexer {
                     }
                 }
 
-                let text = state.get_text_in((start..state.get_position()).into());
-                let kind = match text {
+                let end = state.get_position();
+                let text = state.get_text_in(oak_core::Range { start, end });
+                let kind = match text.as_ref() {
                     "shader" => GsglSyntaxKind::Shader,
                     "vertex" => GsglSyntaxKind::Vertex,
                     "fragment" => GsglSyntaxKind::Fragment,
@@ -318,7 +315,7 @@ impl GsglLexer {
         false
     }
 
-    fn lex_operator_or_delimiter<S: Source>(&self, state: &mut LexerState<S, GsglLanguage>) -> bool {
+    fn lex_operator_or_delimiter<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start = state.get_position();
 
         // 检查双字符操作符
@@ -389,14 +386,12 @@ impl GsglLexer {
 }
 
 impl Lexer<GsglLanguage> for GsglLexer {
-    fn lex_incremental(
-        &self,
-        source: impl Source,
-        changed: usize,
-        cache: IncrementalCache<GsglLanguage>,
-    ) -> LexOutput<GsglLanguage> {
-        let mut state = LexerState::new_with_cache(source, changed, cache);
+    fn lex<'a, S: Source + ?Sized>(&self, source: &'a S, _edits: &[TextEdit], cache: &'a mut impl LexerCache<GsglLanguage>) -> LexOutput<GsglLanguage> {
+        let mut state = State::new(source);
         let result = self.run(&mut state);
-        state.finish(result)
+        if result.is_ok() {
+            state.add_eof();
+        }
+        state.finish_with_cache(result, cache)
     }
 }

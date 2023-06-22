@@ -1,9 +1,15 @@
-use oak_core::Language;
+use crate::{ast::BashRoot, lexer::BashTokenType, parser::BashElementType};
+use oak_core::{Language, LanguageCategory};
+use serde::{Deserialize, Serialize};
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Default)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Deserialize, Default)]
 pub struct BashLanguage;
 
 impl Language for BashLanguage {
-    type SyntaxKind = crate::kind::BashSyntaxKind;
-    type TypedRoot = crate::ast::SourceFile;
+    const NAME: &'static str = "bash";
+    const CATEGORY: LanguageCategory = LanguageCategory::Programming;
+
+    type TokenType = BashTokenType;
+    type ElementType = BashElementType;
+    type TypedRoot = BashRoot;
 }

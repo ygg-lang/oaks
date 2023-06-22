@@ -1,17 +1,12 @@
-use std::{range::Range, string::String, vec::Vec};
+use crate::OrgModeLanguage;
+use oak_core::tree::RedNode;
 
-/// Org-mode AST 根节点
-#[derive(Debug, Clone)]
-pub struct OrgModeRoot {
-    pub items: Vec<OrgModeItem>,
-    pub range: Range<usize>,
+pub struct OrgModeRoot<'a> {
+    pub node: RedNode<'a, OrgModeLanguage>,
 }
 
-/// Org-mode 项目
-#[derive(Debug, Clone)]
-pub enum OrgModeItem {
-    Heading { level: usize, title: String, content: Vec<OrgModeItem>, range: Range<usize> },
-    Text { content: String, range: Range<usize> },
-    Link { url: String, description: Option<String>, range: Range<usize> },
-    Comment { content: String, range: Range<usize> },
+impl<'a> OrgModeRoot<'a> {
+    pub fn new(node: RedNode<'a, OrgModeLanguage>) -> Self {
+        Self { node }
+    }
 }

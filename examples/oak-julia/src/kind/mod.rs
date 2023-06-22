@@ -1,19 +1,21 @@
 use core::{fmt, range::Range};
-use oak_core::SyntaxKind;
+use oak_core::{ElementType, TokenType, UniversalElementRole, UniversalTokenRole};
 use serde::{Deserialize, Serialize};
 
 /// Julia 令牌
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct JuliaToken {
     pub kind: JuliaSyntaxKind,
+    #[serde(with = "oak_core::serde_range")]
     pub span: Range<usize>,
 }
 
 use core::str::FromStr;
 
 /// Julia 令牌种类
-#[derive(Debug, Clone, PartialEq, Eq, Copy, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Copy, Serialize, Deserialize, Hash)]
 pub enum JuliaSyntaxKind {
+    Root,
     // 关键字
     If,
     ElseIf,
@@ -134,6 +136,7 @@ impl FromStr for JuliaSyntaxKind {
 impl JuliaSyntaxKind {
     pub fn as_str(&self) -> &'static str {
         match self {
+            JuliaSyntaxKind::Root => "root",
             JuliaSyntaxKind::If => "if",
             JuliaSyntaxKind::ElseIf => "elseif",
             JuliaSyntaxKind::Else => "else",
@@ -246,24 +249,28 @@ impl fmt::Display for JuliaSyntaxKind {
     }
 }
 
-impl SyntaxKind for JuliaSyntaxKind {
-    fn is_trivia(&self) -> bool {
-        matches!(self, Self::Whitespace | Self::Newline | Self::Comment)
-    }
+impl TokenType for JuliaSyntaxKind {
+    const END_OF_STREAM: Self = Self::Eof;
+    type Role = UniversalTokenRole;
 
-    fn is_comment(&self) -> bool {
-        matches!(self, Self::Comment)
+    fn role(&self) -> Self::Role {
+        match self {
+            Self::Whitespace | Self::Newline => UniversalTokenRole::Whitespace,
+            Self::Comment => UniversalTokenRole::Comment,
+            Self::Eof => UniversalTokenRole::Eof,
+            _ => UniversalTokenRole::None,
+        }
     }
+}
 
-    fn is_whitespace(&self) -> bool {
-        matches!(self, Self::Whitespace | Self::Newline)
-    }
+impl ElementType for JuliaSyntaxKind {
+    type Role = UniversalElementRole;
 
-    fn is_token_type(&self) -> bool {
-        true // Julia doesn't have element types in this simple implementation
-    }
-
-    fn is_element_type(&self) -> bool {
-        false // Julia doesn't have element types in this simple implementation
+    fn role(&self) -> Self::Role {
+        match self {
+            Self::Root => UniversalElementRole::Root,
+            Self::Error => UniversalElementRole::Error,
+            _ => UniversalElementRole::None,
+        }
     }
 }

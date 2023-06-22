@@ -1,5 +1,4 @@
-use crate::NimSyntaxKind;
-use oak_core::Language;
+use oak_core::{Language, LanguageCategory};
 
 #[derive(Debug)]
 pub struct NimLanguage {
@@ -7,8 +6,18 @@ pub struct NimLanguage {
 }
 
 impl Language for NimLanguage {
-    type SyntaxKind = NimSyntaxKind;
-    type TypedRoot = ();
+    const NAME: &'static str = "nim";
+    const CATEGORY: LanguageCategory = LanguageCategory::Programming;
+
+    type TokenType = crate::kind::NimSyntaxKind;
+    type ElementType = crate::kind::NimSyntaxKind;
+    type TypedRoot = crate::builder::NimRoot;
+}
+
+impl NimLanguage {
+    pub fn new() -> Self {
+        Self::default()
+    }
 }
 
 impl Default for NimLanguage {

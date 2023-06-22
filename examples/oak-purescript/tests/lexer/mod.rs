@@ -1,5 +1,5 @@
 use oak_core::helpers::LexerTester;
-use oak_purescript::{language::PurescriptLanguage, lexer::PurescriptLexer};
+use oak_purescript::{PurescriptLanguage, PurescriptLexer};
 use std::{path::Path, time::Duration};
 
 #[test]
@@ -10,7 +10,7 @@ fn test_purescript_lexer() {
     let lexer = PurescriptLexer::new(language);
     let test_runner = LexerTester::new(tests).with_extension("purs").with_timeout(Duration::from_secs(5));
 
-    match test_runner.run_tests::<PurescriptLanguage, _>(lexer) {
+    match test_runner.run_tests::<PurescriptLanguage, _>(&lexer) {
         Ok(_) => println!("All PureScript lexer tests passed!"),
         Err(e) => panic!("PureScript lexer tests failed: {}", e),
     }

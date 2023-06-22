@@ -1,0 +1,607 @@
+{
+    "success": true,
+    "count": 100,
+    "tokens": [
+        {
+            "kind": "DocumentStart",
+            "text": "---",
+            "start": 18,
+            "end": 21
+        },
+        {
+            "kind": "Identifier",
+            "text": "title",
+            "start": 23,
+            "end": 28
+        },
+        {
+            "kind": "Colon",
+            "text": ":",
+            "start": 28,
+            "end": 29
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "\"Sample YAML Document\"",
+            "start": 30,
+            "end": 52
+        },
+        {
+            "kind": "Identifier",
+            "text": "version",
+            "start": 54,
+            "end": 61
+        },
+        {
+            "kind": "Colon",
+            "text": ":",
+            "start": 61,
+            "end": 62
+        },
+        {
+            "kind": "NumberLiteral",
+            "text": "1.0",
+            "start": 63,
+            "end": 66
+        },
+        {
+            "kind": "Identifier",
+            "text": "date",
+            "start": 68,
+            "end": 72
+        },
+        {
+            "kind": "Colon",
+            "text": ":",
+            "start": 72,
+            "end": 73
+        },
+        {
+            "kind": "NumberLiteral",
+            "text": "2024",
+            "start": 74,
+            "end": 78
+        },
+        {
+            "kind": "NumberLiteral",
+            "text": "-01",
+            "start": 78,
+            "end": 81
+        },
+        {
+            "kind": "NumberLiteral",
+            "text": "-01",
+            "start": 81,
+            "end": 84
+        },
+        {
+            "kind": "Identifier",
+            "text": "config",
+            "start": 113,
+            "end": 119
+        },
+        {
+            "kind": "Colon",
+            "text": ":",
+            "start": 119,
+            "end": 120
+        },
+        {
+            "kind": "Identifier",
+            "text": "debug",
+            "start": 124,
+            "end": 129
+        },
+        {
+            "kind": "Colon",
+            "text": ":",
+            "start": 129,
+            "end": 130
+        },
+        {
+            "kind": "BooleanLiteral",
+            "text": "true",
+            "start": 131,
+            "end": 135
+        },
+        {
+            "kind": "Identifier",
+            "text": "timeout",
+            "start": 139,
+            "end": 146
+        },
+        {
+            "kind": "Colon",
+            "text": ":",
+            "start": 146,
+            "end": 147
+        },
+        {
+            "kind": "NumberLiteral",
+            "text": "30",
+            "start": 148,
+            "end": 150
+        },
+        {
+            "kind": "Identifier",
+            "text": "retries",
+            "start": 154,
+            "end": 161
+        },
+        {
+            "kind": "Colon",
+            "text": ":",
+            "start": 161,
+            "end": 162
+        },
+        {
+            "kind": "NumberLiteral",
+            "text": "3",
+            "start": 163,
+            "end": 164
+        },
+        {
+            "kind": "Identifier",
+            "text": "database",
+            "start": 191,
+            "end": 199
+        },
+        {
+            "kind": "Colon",
+            "text": ":",
+            "start": 199,
+            "end": 200
+        },
+        {
+            "kind": "Identifier",
+            "text": "host",
+            "start": 204,
+            "end": 208
+        },
+        {
+            "kind": "Colon",
+            "text": ":",
+            "start": 208,
+            "end": 209
+        },
+        {
+            "kind": "Identifier",
+            "text": "localhost",
+            "start": 210,
+            "end": 219
+        },
+        {
+            "kind": "Identifier",
+            "text": "port",
+            "start": 223,
+            "end": 227
+        },
+        {
+            "kind": "Colon",
+            "text": ":",
+            "start": 227,
+            "end": 228
+        },
+        {
+            "kind": "NumberLiteral",
+            "text": "5432",
+            "start": 229,
+            "end": 233
+        },
+        {
+            "kind": "Identifier",
+            "text": "name",
+            "start": 237,
+            "end": 241
+        },
+        {
+            "kind": "Colon",
+            "text": ":",
+            "start": 241,
+            "end": 242
+        },
+        {
+            "kind": "Identifier",
+            "text": "testdb",
+            "start": 243,
+            "end": 249
+        },
+        {
+            "kind": "Identifier",
+            "text": "credentials",
+            "start": 253,
+            "end": 264
+        },
+        {
+            "kind": "Colon",
+            "text": ":",
+            "start": 264,
+            "end": 265
+        },
+        {
+            "kind": "Identifier",
+            "text": "username",
+            "start": 271,
+            "end": 279
+        },
+        {
+            "kind": "Colon",
+            "text": ":",
+            "start": 279,
+            "end": 280
+        },
+        {
+            "kind": "Identifier",
+            "text": "admin",
+            "start": 281,
+            "end": 286
+        },
+        {
+            "kind": "Identifier",
+            "text": "password",
+            "start": 292,
+            "end": 300
+        },
+        {
+            "kind": "Colon",
+            "text": ":",
+            "start": 300,
+            "end": 301
+        },
+        {
+            "kind": "Identifier",
+            "text": "secret123",
+            "start": 302,
+            "end": 311
+        },
+        {
+            "kind": "Identifier",
+            "text": "app",
+            "start": 339,
+            "end": 342
+        },
+        {
+            "kind": "Colon",
+            "text": ":",
+            "start": 342,
+            "end": 343
+        },
+        {
+            "kind": "Identifier",
+            "text": "name",
+            "start": 347,
+            "end": 351
+        },
+        {
+            "kind": "Colon",
+            "text": ":",
+            "start": 351,
+            "end": 352
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "\"Test Application\"",
+            "start": 353,
+            "end": 371
+        },
+        {
+            "kind": "Identifier",
+            "text": "features",
+            "start": 375,
+            "end": 383
+        },
+        {
+            "kind": "Colon",
+            "text": ":",
+            "start": 383,
+            "end": 384
+        },
+        {
+            "kind": "Dash",
+            "text": "-",
+            "start": 390,
+            "end": 391
+        },
+        {
+            "kind": "Identifier",
+            "text": "authentication",
+            "start": 392,
+            "end": 406
+        },
+        {
+            "kind": "Dash",
+            "text": "-",
+            "start": 412,
+            "end": 413
+        },
+        {
+            "kind": "Identifier",
+            "text": "logging",
+            "start": 414,
+            "end": 421
+        },
+        {
+            "kind": "Dash",
+            "text": "-",
+            "start": 427,
+            "end": 428
+        },
+        {
+            "kind": "Identifier",
+            "text": "monitoring",
+            "start": 429,
+            "end": 439
+        },
+        {
+            "kind": "Dash",
+            "text": "-",
+            "start": 445,
+            "end": 446
+        },
+        {
+            "kind": "Identifier",
+            "text": "caching",
+            "start": 447,
+            "end": 454
+        },
+        {
+            "kind": "Identifier",
+            "text": "environments",
+            "start": 462,
+            "end": 474
+        },
+        {
+            "kind": "Colon",
+            "text": ":",
+            "start": 474,
+            "end": 475
+        },
+        {
+            "kind": "Identifier",
+            "text": "development",
+            "start": 481,
+            "end": 492
+        },
+        {
+            "kind": "Colon",
+            "text": ":",
+            "start": 492,
+            "end": 493
+        },
+        {
+            "kind": "Identifier",
+            "text": "url",
+            "start": 501,
+            "end": 504
+        },
+        {
+            "kind": "Colon",
+            "text": ":",
+            "start": 504,
+            "end": 505
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "\"http://localhost:3000\"",
+            "start": 506,
+            "end": 529
+        },
+        {
+            "kind": "Identifier",
+            "text": "debug",
+            "start": 537,
+            "end": 542
+        },
+        {
+            "kind": "Colon",
+            "text": ":",
+            "start": 542,
+            "end": 543
+        },
+        {
+            "kind": "BooleanLiteral",
+            "text": "true",
+            "start": 544,
+            "end": 548
+        },
+        {
+            "kind": "Identifier",
+            "text": "production",
+            "start": 554,
+            "end": 564
+        },
+        {
+            "kind": "Colon",
+            "text": ":",
+            "start": 564,
+            "end": 565
+        },
+        {
+            "kind": "Identifier",
+            "text": "url",
+            "start": 573,
+            "end": 576
+        },
+        {
+            "kind": "Colon",
+            "text": ":",
+            "start": 576,
+            "end": 577
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "\"https://example.com\"",
+            "start": 578,
+            "end": 599
+        },
+        {
+            "kind": "Identifier",
+            "text": "debug",
+            "start": 607,
+            "end": 612
+        },
+        {
+            "kind": "Colon",
+            "text": ":",
+            "start": 612,
+            "end": 613
+        },
+        {
+            "kind": "BooleanLiteral",
+            "text": "false",
+            "start": 614,
+            "end": 619
+        },
+        {
+            "kind": "Identifier",
+            "text": "users",
+            "start": 637,
+            "end": 642
+        },
+        {
+            "kind": "Colon",
+            "text": ":",
+            "start": 642,
+            "end": 643
+        },
+        {
+            "kind": "Dash",
+            "text": "-",
+            "start": 647,
+            "end": 648
+        },
+        {
+            "kind": "Identifier",
+            "text": "id",
+            "start": 649,
+            "end": 651
+        },
+        {
+            "kind": "Colon",
+            "text": ":",
+            "start": 651,
+            "end": 652
+        },
+        {
+            "kind": "NumberLiteral",
+            "text": "1",
+            "start": 653,
+            "end": 654
+        },
+        {
+            "kind": "Identifier",
+            "text": "name",
+            "start": 660,
+            "end": 664
+        },
+        {
+            "kind": "Colon",
+            "text": ":",
+            "start": 664,
+            "end": 665
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "\"John Doe\"",
+            "start": 666,
+            "end": 676
+        },
+        {
+            "kind": "Identifier",
+            "text": "email",
+            "start": 682,
+            "end": 687
+        },
+        {
+            "kind": "Colon",
+            "text": ":",
+            "start": 687,
+            "end": 688
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "\"john@example.com\"",
+            "start": 689,
+            "end": 707
+        },
+        {
+            "kind": "Identifier",
+            "text": "roles",
+            "start": 713,
+            "end": 718
+        },
+        {
+            "kind": "Colon",
+            "text": ":",
+            "start": 718,
+            "end": 719
+        },
+        {
+            "kind": "LeftBracket",
+            "text": "[",
+            "start": 720,
+            "end": 721
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "\"admin\"",
+            "start": 721,
+            "end": 728
+        },
+        {
+            "kind": "Error",
+            "text": ",",
+            "start": 728,
+            "end": 729
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "\"user\"",
+            "start": 730,
+            "end": 736
+        },
+        {
+            "kind": "RightBracket",
+            "text": "]",
+            "start": 736,
+            "end": 737
+        },
+        {
+            "kind": "Identifier",
+            "text": "active",
+            "start": 743,
+            "end": 749
+        },
+        {
+            "kind": "Colon",
+            "text": ":",
+            "start": 749,
+            "end": 750
+        },
+        {
+            "kind": "BooleanLiteral",
+            "text": "true",
+            "start": 751,
+            "end": 755
+        },
+        {
+            "kind": "Dash",
+            "text": "-",
+            "start": 765,
+            "end": 766
+        },
+        {
+            "kind": "Identifier",
+            "text": "id",
+            "start": 767,
+            "end": 769
+        },
+        {
+            "kind": "Colon",
+            "text": ":",
+            "start": 769,
+            "end": 770
+        }
+    ],
+    "errors": []
+}

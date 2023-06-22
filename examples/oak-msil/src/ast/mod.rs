@@ -1,57 +1,61 @@
-//! MSIL (Microsoft Intermediate Language) 抽象语法(AST) 模块
-//!
-//! 这个模块定义MSIL 汇编语言的抽象语法树结构，用于表示解析后MSIL 代码
-//! AST 节点对应MSIL 汇编语言中的各种构造，如程序集、模块、类、方法等
+use core::range::Range;
+use serde::{Deserialize, Serialize};
 
-/// MSIL 程序的根节点
-///
-/// 表示一个完整的 MSIL 程序，包含程序中的所有类
-///
-/// # 示例
-///
-/// ```rust
-/// # use oak_msil::ast::MsilRoot;
-///
-/// let root = MsilRoot { classes: vec![] };
-/// ```
-#[derive(Clone, Debug)]
+/// MSIL 抽象语法树的根节点
+#[derive(Clone, Debug, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub struct MsilRoot {
-    /// 程序中的所有类
-    pub classes: Vec<MsilClass>,
+    /// 指令、类、方法等项目列表
+    pub items: Vec<Item>,
 }
 
-/// MSIL 类声
-///
-/// 表示 MSIL 程序中的类定
-///
-/// # 示例
-///
-/// ```rust
-/// # use oak_msil::ast::MsilClass;
-///
-/// let class = MsilClass { name: "MyClass".to_string(), methods: vec![] };
-/// ```
-#[derive(Clone, Debug)]
-pub struct MsilClass {
-    /// 类名
+/// MSIL 中的顶级项目
+#[derive(Clone, Debug, PartialEq, Eq, Hash, Serialize, Deserialize)]
+pub enum Item {
+    /// 程序集定义
+    Assembly(Assembly),
+    /// 模块定义
+    Module(String),
+    /// 类定义
+    Class(Class),
+    /// 外部程序集引用
+    AssemblyExtern(String),
+}
+
+/// 程序集定义
+#[derive(Clone, Debug, PartialEq, Eq, Hash, Serialize, Deserialize)]
+pub struct Assembly {
     pub name: String,
-    /// 类中的方
-    pub methods: Vec<MsilMethod>,
+    #[serde(with = "oak_core::serde_range")]
+    pub span: Range<usize>,
 }
 
-/// MSIL 方法声明
-///
-/// 表示类中的方法定
-///
-/// # 示例
-///
-/// ```rust
-/// # use oak_msil::ast::MsilMethod;
-///
-/// let method = MsilMethod { name: "MyMethod".to_string() };
-/// ```
-#[derive(Clone, Debug)]
-pub struct MsilMethod {
-    /// 方法
+/// 类定义
+#[derive(Clone, Debug, PartialEq, Eq, Hash, Serialize, Deserialize)]
+pub struct Class {
+    pub name: String,
+    pub methods: Vec<Method>,
+    #[serde(with = "oak_core::serde_range")]
+    pub span: Range<usize>,
+}
+
+/// 方法定义
+#[derive(Clone, Debug, PartialEq, Eq, Hash, Serialize, Deserialize)]
+pub struct Method {
+    pub name: String,
+    pub instructions: Vec<Instruction>,
+    #[serde(with = "oak_core::serde_range")]
+    pub span: Range<usize>,
+}
+
+/// 指令
+#[derive(Clone, Debug, PartialEq, Eq, Hash, Serialize, Deserialize)]
+pub struct Instruction {
+    pub opcode: String,
+    pub operand: Option<String>,
+    #[serde(with = "oak_core::serde_range")]
+    pub span: Range<usize>,
+}
+
+pub struct MsilAssembly {
     pub name: String,
 }

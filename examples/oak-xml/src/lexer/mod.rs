@@ -1,46 +1,43 @@
 use crate::{kind::XmlSyntaxKind, language::XmlLanguage};
 use oak_core::{
-    IncrementalCache, Lexer, LexerState, OakError,
-    lexer::{CommentBlock, LexOutput, StringConfig, WhitespaceConfig},
+    Lexer, LexerCache, LexerState, OakError,
+    lexer::{CommentConfig, LexOutput, StringConfig, WhitespaceConfig},
     source::Source,
 };
 use std::sync::LazyLock;
 
-type State<S: Source> = LexerState<S, XmlLanguage>;
+type State<'a, S> = LexerState<'a, S, XmlLanguage>;
 
 // XML 静态配置
 static XML_WHITESPACE: LazyLock<WhitespaceConfig> = LazyLock::new(|| WhitespaceConfig { unicode_whitespace: true });
 
-static XML_COMMENT: LazyLock<CommentBlock> =
-    LazyLock::new(|| CommentBlock { block_markers: &[("<!--", "-->")], nested_blocks: false });
+static XML_COMMENT: LazyLock<CommentConfig> = LazyLock::new(|| CommentConfig { line_marker: "", block_start: "<!--", block_end: "-->", nested_blocks: false });
 
 static XML_STRING: LazyLock<StringConfig> = LazyLock::new(|| StringConfig { quotes: &['"', '\''], escape: None });
 
 impl<'config> Lexer<XmlLanguage> for XmlLexer<'config> {
-    fn lex_incremental(
-        &self,
-        source: impl Source,
-        changed: usize,
-        cache: IncrementalCache<XmlLanguage>,
-    ) -> LexOutput<XmlLanguage> {
-        let mut state = LexerState::new_with_cache(source, changed, cache);
+    fn lex<'a, S: Source + ?Sized>(&self, source: &'a S, _edits: &[oak_core::TextEdit], cache: &'a mut impl LexerCache<XmlLanguage>) -> LexOutput<XmlLanguage> {
+        let mut state = LexerState::new(source);
         let result = self.run(&mut state);
-        state.finish(result)
+        if result.is_ok() {
+            state.add_eof();
+        }
+        state.finish_with_cache(result, cache)
     }
 }
 
 #[derive(Clone)]
 pub struct XmlLexer<'config> {
-    config: &'config XmlLanguage,
+    _config: &'config XmlLanguage,
 }
 
 impl<'config> XmlLexer<'config> {
     pub fn new(config: &'config XmlLanguage) -> Self {
-        Self { config }
+        Self { _config: config }
     }
 
     /// 主要的词法分析循环
-    fn run<S: Source>(&self, state: &mut State<S>) -> Result<(), OakError> {
+    fn run<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> Result<(), OakError> {
         while state.not_at_end() {
             let safe_point = state.get_position();
 
@@ -64,7 +61,7 @@ impl<'config> XmlLexer<'config> {
                 continue;
             }
 
-            if self.lex_tag_operators(state) {
+            if self.lex_tag_start(state) {
                 continue;
             }
 
@@ -76,7 +73,7 @@ impl<'config> XmlLexer<'config> {
                 continue;
             }
 
-            if self.lex_identifier(state) {
+            if self.lex_identifier_or_tag_name(state) {
                 continue;
             }
 
@@ -88,38 +85,21 @@ impl<'config> XmlLexer<'config> {
                 continue;
             }
 
-            state.safe_check(safe_point);
+            state.advance_if_dead_lock(safe_point);
         }
 
-        // 添加 EOF token
-        let eof_pos = state.get_position();
-        state.add_token(XmlSyntaxKind::Eof, eof_pos, eof_pos);
         Ok(())
     }
 
-    /// 跳过空白字符
-    fn skip_whitespace<S: Source>(&self, state: &mut State<S>) -> bool {
-        match XML_WHITESPACE.scan(state.rest(), state.get_position(), XmlSyntaxKind::Whitespace) {
-            Some(token) => {
-                state.advance_with(token);
-                true
-            }
-            None => false,
-        }
+    fn skip_whitespace<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
+        XML_WHITESPACE.scan(state, XmlSyntaxKind::Whitespace)
     }
 
-    /// 解析XML注释 <!-- ... -->
-    fn lex_comment<S: Source>(&self, state: &mut State<S>) -> bool {
-        match XML_COMMENT.scan(state.rest(), state.get_position(), XmlSyntaxKind::Comment) {
-            Some(token) => {
-                state.advance_with(token);
-                true
-            }
-            None => false,
-        }
+    fn lex_comment<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
+        XML_COMMENT.scan(state, XmlSyntaxKind::Comment, XmlSyntaxKind::Comment)
     }
 
-    fn lex_doctype<S: Source>(&self, state: &mut State<S>) -> bool {
+    fn lex_doctype<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start_pos = state.get_position();
 
         if let Some('<') = state.peek() {
@@ -182,7 +162,7 @@ impl<'config> XmlLexer<'config> {
         false
     }
 
-    fn lex_cdata<S: Source>(&self, state: &mut State<S>) -> bool {
+    fn lex_cdata<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start_pos = state.get_position();
 
         if let Some('<') = state.peek() {
@@ -237,7 +217,7 @@ impl<'config> XmlLexer<'config> {
         false
     }
 
-    fn lex_processing_instruction<S: Source>(&self, state: &mut State<S>) -> bool {
+    fn lex_processing_instruction<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start_pos = state.get_position();
 
         if let Some('<') = state.peek() {
@@ -270,7 +250,7 @@ impl<'config> XmlLexer<'config> {
         false
     }
 
-    fn lex_tag_operators<S: Source>(&self, state: &mut State<S>) -> bool {
+    fn lex_tag_start<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start_pos = state.get_position();
 
         match state.peek() {
@@ -309,7 +289,7 @@ impl<'config> XmlLexer<'config> {
         }
     }
 
-    fn lex_entity_reference<S: Source>(&self, state: &mut State<S>) -> bool {
+    fn lex_entity_reference<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start_pos = state.get_position();
 
         if state.peek() == Some('&') {
@@ -380,20 +360,11 @@ impl<'config> XmlLexer<'config> {
         false
     }
 
-    fn lex_string_literal<S: Source>(&self, state: &mut State<S>) -> bool {
-        match XML_STRING.scan(state.rest(), 0, XmlSyntaxKind::StringLiteral) {
-            Some(mut token) => {
-                // Adjust token span to absolute position
-                token.span.start += state.get_position();
-                token.span.end += state.get_position();
-                state.advance_with(token);
-                true
-            }
-            None => false,
-        }
+    fn lex_string_literal<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
+        XML_STRING.scan(state, XmlSyntaxKind::StringLiteral)
     }
 
-    fn lex_identifier<S: Source>(&self, state: &mut State<S>) -> bool {
+    fn lex_identifier_or_tag_name<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start_pos = state.get_position();
 
         if let Some(ch) = state.peek() {
@@ -417,7 +388,7 @@ impl<'config> XmlLexer<'config> {
         false
     }
 
-    fn lex_single_char_tokens<S: Source>(&self, state: &mut State<S>) -> bool {
+    fn lex_single_char_tokens<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start_pos = state.get_position();
 
         match state.peek() {
@@ -455,7 +426,7 @@ impl<'config> XmlLexer<'config> {
         }
     }
 
-    fn lex_text<S: Source>(&self, state: &mut State<S>) -> bool {
+    fn lex_text<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start_pos = state.get_position();
 
         while let Some(ch) = state.peek() {

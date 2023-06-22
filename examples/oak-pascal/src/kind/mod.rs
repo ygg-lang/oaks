@@ -1,9 +1,9 @@
-use oak_core::{SyntaxKind, Token};
+use oak_core::{ElementType, Token, TokenType, UniversalElementRole, UniversalTokenRole};
 use serde::{Deserialize, Serialize};
 
 pub type PascalToken = Token<PascalSyntaxKind>;
 
-#[derive(Copy, Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Copy, Clone, Debug, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub enum PascalSyntaxKind {
     // 空白和换行
     Whitespace,
@@ -81,14 +81,36 @@ pub enum PascalSyntaxKind {
     Range,        // ..
     Caret,        // ^
 
+    // Element kinds
+    Root,
+    ProgramBlock,
+    VarSection,
+    ConstSection,
+    TypeSection,
+    ProcedureDef,
+    FunctionDef,
+    CompoundStmt,
+    IfStmt,
+    WhileStmt,
+    ForStmt,
+    Expression,
+
     // 特殊
     Error,
     Eof,
 }
 
-impl SyntaxKind for PascalSyntaxKind {
-    fn is_trivia(&self) -> bool {
-        matches!(self, Self::Whitespace | Self::Newline | Self::Comment)
+impl TokenType for PascalSyntaxKind {
+    const END_OF_STREAM: Self = Self::Eof;
+    type Role = UniversalTokenRole;
+
+    fn role(&self) -> Self::Role {
+        match self {
+            Self::Whitespace | Self::Newline => UniversalTokenRole::Whitespace,
+            Self::Comment => UniversalTokenRole::Comment,
+            Self::Eof => UniversalTokenRole::Eof,
+            _ => UniversalTokenRole::None,
+        }
     }
 
     fn is_comment(&self) -> bool {
@@ -98,12 +120,17 @@ impl SyntaxKind for PascalSyntaxKind {
     fn is_whitespace(&self) -> bool {
         matches!(self, Self::Whitespace | Self::Newline)
     }
+}
 
-    fn is_token_type(&self) -> bool {
-        true // Pascal doesn't have element types in this simple implementation
-    }
+impl ElementType for PascalSyntaxKind {
+    type Role = UniversalElementRole;
 
-    fn is_element_type(&self) -> bool {
-        false // Pascal doesn't have element types in this simple implementation
+    fn role(&self) -> Self::Role {
+        match self {
+            Self::Error => UniversalElementRole::Error,
+            Self::Root => UniversalElementRole::Root,
+            Self::ProgramBlock | Self::ProcedureDef | Self::FunctionDef | Self::VarSection => UniversalElementRole::Detail,
+            _ => UniversalElementRole::None,
+        }
     }
 }

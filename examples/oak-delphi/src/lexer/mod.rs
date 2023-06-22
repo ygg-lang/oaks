@@ -1,41 +1,20 @@
 use crate::{kind::DelphiSyntaxKind, language::DelphiLanguage};
-use oak_core::{
-    IncrementalCache, Lexer, LexerState, OakError,
-    lexer::{CommentLine, LexOutput, StringConfig, WhitespaceConfig},
-    source::Source,
-};
-use std::sync::LazyLock;
+use oak_core::{Lexer, LexerCache, LexerState, OakError, TextEdit, lexer::LexOutput, source::Source};
 
-type State<S: Source> = LexerState<S, DelphiLanguage>;
+type State<'a, S> = LexerState<'a, S, DelphiLanguage>;
 
-static DELPHI_WHITESPACE: LazyLock<WhitespaceConfig> = LazyLock::new(|| WhitespaceConfig { unicode_whitespace: true });
-static DELPHI_COMMENT: LazyLock<CommentLine> = LazyLock::new(|| CommentLine { line_markers: &["//"] });
-static DELPHI_STRING: LazyLock<StringConfig> = LazyLock::new(|| StringConfig { quotes: &['\''], escape: None });
-
+/// Lexer implementation for Delphi programming language
 #[derive(Clone)]
 pub struct DelphiLexer<'config> {
-    config: &'config DelphiLanguage,
-}
-
-impl<'config> Lexer<DelphiLanguage> for DelphiLexer<'config> {
-    fn lex_incremental(
-        &self,
-        source: impl Source,
-        changed: usize,
-        cache: IncrementalCache<DelphiLanguage>,
-    ) -> LexOutput<DelphiLanguage> {
-        let mut state = LexerState::new_with_cache(source, changed, cache);
-        let result = self.run(&mut state);
-        state.finish(result)
-    }
+    _config: &'config DelphiLanguage,
 }
 
 impl<'config> DelphiLexer<'config> {
     pub fn new(config: &'config DelphiLanguage) -> Self {
-        Self { config }
+        Self { _config: config }
     }
 
-    fn run<S: Source>(&self, state: &mut State<S>) -> Result<(), OakError> {
+    fn run<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> Result<(), OakError> {
         while state.not_at_end() {
             let safe_point = state.get_position();
 
@@ -67,105 +46,115 @@ impl<'config> DelphiLexer<'config> {
                 continue;
             }
 
-            state.safe_check(safe_point);
+            // 如果没有匹配任何规则，添加错误 token 并前进
+            let start_pos = state.get_position();
+            if let Some(ch) = state.peek() {
+                state.advance(ch.len_utf8());
+                state.add_token(DelphiSyntaxKind::Error, start_pos, state.get_position());
+            }
+
+            state.advance_if_dead_lock(safe_point);
         }
 
-        // 添加 EOF token
-        let eof_pos = state.get_position();
-        state.add_token(DelphiSyntaxKind::Eof, eof_pos, eof_pos);
         Ok(())
     }
 
-    fn skip_whitespace<S: Source>(&self, state: &mut State<S>) -> bool {
-        match DELPHI_WHITESPACE.scan(state.rest(), state.get_position(), DelphiSyntaxKind::Whitespace) {
-            Some(token) => {
-                state.advance_with(token);
-                true
+    fn skip_whitespace<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
+        let start_pos = state.get_position();
+        let mut consumed = false;
+        while let Some(ch) = state.peek() {
+            if ch.is_whitespace() {
+                consumed = true;
+                state.advance(ch.len_utf8());
             }
-            None => false,
+            else {
+                break;
+            }
+        }
+        if consumed {
+            state.add_token(DelphiSyntaxKind::Whitespace, start_pos, state.get_position());
+            true
+        }
+        else {
+            false
         }
     }
 
-    fn skip_comment<S: Source>(&self, state: &mut State<S>) -> bool {
+    fn skip_comment<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start = state.get_position();
-        let rest = state.rest();
 
         // Line comment: // ... until newline
-        if rest.starts_with("//") {
-            state.advance(2);
+        if state.consume_if_starts_with("//") {
             while let Some(ch) = state.peek() {
                 if ch == '\n' || ch == '\r' {
                     break;
                 }
                 state.advance(ch.len_utf8());
             }
-            state.add_token(DelphiSyntaxKind::Comment, start, state.get_position());
+            state.add_token(DelphiSyntaxKind::LineComment, start, state.get_position());
             return true;
         }
 
-        // Block comment: { ... } or (* ... *)
-        if rest.starts_with("{") {
-            state.advance(1);
+        // Block comment: { ... }
+        if state.consume_if_starts_with("{") {
+            let mut depth = 1usize;
             while let Some(ch) = state.peek() {
-                if ch == '}' {
-                    state.advance(1);
+                if ch == '{' {
+                    depth += 1;
+                }
+                else if ch == '}' {
+                    depth -= 1;
+                    if depth == 0 {
+                        state.advance(1);
+                        break;
+                    }
+                }
+                state.advance(ch.len_utf8());
+            }
+            state.add_token(DelphiSyntaxKind::BlockComment, start, state.get_position());
+            return true;
+        }
+
+        // Block comment: (* ... *)
+        if state.consume_if_starts_with("(*") {
+            while let Some(ch) = state.peek() {
+                if state.consume_if_starts_with("*)") {
                     break;
                 }
                 state.advance(ch.len_utf8());
             }
-            state.add_token(DelphiSyntaxKind::Comment, start, state.get_position());
-            return true;
-        }
-
-        if rest.starts_with("(*") {
-            state.advance(2);
-            while let Some(ch) = state.peek() {
-                if ch == '*' && state.peek_next_n(1) == Some(')') {
-                    state.advance(2);
-                    break;
-                }
-                state.advance(ch.len_utf8());
-            }
-            state.add_token(DelphiSyntaxKind::Comment, start, state.get_position());
+            state.add_token(DelphiSyntaxKind::BlockComment, start, state.get_position());
             return true;
         }
 
         false
     }
 
-    fn lex_string_literal<S: Source>(&self, state: &mut State<S>) -> bool {
+    fn lex_string_literal<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start = state.get_position();
-
-        if state.current() != Some('\'') {
-            return false;
-        }
-
-        state.advance(1); // consume opening quote
-        while let Some(ch) = state.peek() {
-            if ch == '\'' {
-                // Check for escaped quote (double quote)
-                if state.peek_next_n(1) == Some('\'') {
-                    state.advance(2); // consume both quotes
-                    continue;
-                }
-                else {
-                    state.advance(1); // consume closing quote
+        if let Some('\'') = state.peek() {
+            state.advance(1);
+            while let Some(ch) = state.peek() {
+                if ch == '\'' {
+                    state.advance(1);
+                    if state.peek() == Some('\'') {
+                        // Double single quote is an escaped single quote
+                        state.advance(1);
+                        continue;
+                    }
                     break;
                 }
+                state.advance(ch.len_utf8());
             }
-            if ch == '\n' || ch == '\r' {
-                break; // unterminated string
-            }
-            state.advance(ch.len_utf8());
+            state.add_token(DelphiSyntaxKind::String, start, state.get_position());
+            return true;
         }
-
-        state.add_token(DelphiSyntaxKind::String, start, state.get_position());
-        true
+        false
     }
 
-    fn lex_number_literal<S: Source>(&self, state: &mut State<S>) -> bool {
+    fn lex_number_literal<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start = state.get_position();
-        let first = match state.current() {
+        let first = match state.peek() {
             Some(c) => c,
             None => return false,
         };
@@ -242,13 +231,13 @@ impl<'config> DelphiLexer<'config> {
             }
         }
 
-        state.add_token(DelphiSyntaxKind::Number, start, state.get_position());
+        state.add_token(if is_float { DelphiSyntaxKind::Float } else { DelphiSyntaxKind::Number }, start, state.get_position());
         true
     }
 
-    fn lex_identifier_or_keyword<S: Source>(&self, state: &mut State<S>) -> bool {
+    fn lex_identifier_or_keyword<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start = state.get_position();
-        let ch = match state.current() {
+        let ch = match state.peek() {
             Some(c) => c,
             None => return false,
         };
@@ -257,10 +246,10 @@ impl<'config> DelphiLexer<'config> {
             return false;
         }
 
-        state.advance(1);
-        while let Some(c) = state.current() {
+        state.advance(ch.len_utf8());
+        while let Some(c) = state.peek() {
             if c.is_ascii_alphanumeric() || c == '_' {
-                state.advance(1);
+                state.advance(c.len_utf8());
             }
             else {
                 break;
@@ -321,29 +310,21 @@ impl<'config> DelphiLexer<'config> {
         true
     }
 
-    fn lex_operators<S: Source>(&self, state: &mut State<S>) -> bool {
+    fn lex_operators<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start = state.get_position();
-        let rest = state.rest();
 
         // Multi-character operators (longest first)
-        let patterns: &[(&str, DelphiSyntaxKind)] = &[
-            (":=", DelphiSyntaxKind::Assign),
-            ("<=", DelphiSyntaxKind::LessEqual),
-            (">=", DelphiSyntaxKind::GreaterEqual),
-            ("<>", DelphiSyntaxKind::NotEqual),
-            ("..", DelphiSyntaxKind::DotDot),
-        ];
+        let patterns: &[(&str, DelphiSyntaxKind)] = &[(":=", DelphiSyntaxKind::Assign), ("<=", DelphiSyntaxKind::LessEqual), (">=", DelphiSyntaxKind::GreaterEqual), ("<>", DelphiSyntaxKind::NotEqual), ("..", DelphiSyntaxKind::DotDot)];
 
         for (pat, kind) in patterns {
-            if rest.starts_with(pat) {
-                state.advance(pat.len());
+            if state.consume_if_starts_with(pat) {
                 state.add_token(*kind, start, state.get_position());
                 return true;
             }
         }
 
         // Single-character operators
-        if let Some(ch) = state.current() {
+        if let Some(ch) = state.peek() {
             let kind = match ch {
                 '+' => Some(DelphiSyntaxKind::Plus),
                 '-' => Some(DelphiSyntaxKind::Minus),
@@ -369,10 +350,10 @@ impl<'config> DelphiLexer<'config> {
         false
     }
 
-    fn lex_single_char_tokens<S: Source>(&self, state: &mut State<S>) -> bool {
+    fn lex_single_char_tokens<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start = state.get_position();
 
-        if let Some(ch) = state.current() {
+        if let Some(ch) = state.peek() {
             let kind = match ch {
                 '(' => DelphiSyntaxKind::LeftParen,
                 ')' => DelphiSyntaxKind::RightParen,
@@ -390,5 +371,16 @@ impl<'config> DelphiLexer<'config> {
         else {
             false
         }
+    }
+}
+
+impl<'config> Lexer<DelphiLanguage> for DelphiLexer<'config> {
+    fn lex<'a, S: Source + ?Sized>(&self, source: &'a S, _edits: &[TextEdit], cache: &'a mut impl LexerCache<DelphiLanguage>) -> LexOutput<DelphiLanguage> {
+        let mut state = LexerState::new(source);
+        let result = self.run(&mut state);
+        if result.is_ok() {
+            state.add_eof();
+        }
+        state.finish_with_cache(result, cache)
     }
 }

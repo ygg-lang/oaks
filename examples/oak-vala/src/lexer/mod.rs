@@ -1,45 +1,37 @@
-use crate::{
-    kind::{ValaSyntaxKind, ValaToken},
-    language::ValaLanguage,
-};
+use crate::{kind::ValaSyntaxKind, language::ValaLanguage};
 use oak_core::{
-    IncrementalCache, Lexer, LexerState, OakError,
-    lexer::{CommentLine, LexOutput, StringConfig, WhitespaceConfig},
+    Lexer, LexerCache, LexerState, OakError,
+    lexer::{CommentConfig, LexOutput, StringConfig, WhitespaceConfig},
     source::Source,
 };
 use std::sync::LazyLock;
 
-type State<S: Source> = LexerState<S, ValaLanguage>;
+type State<'a, S> = LexerState<'a, S, ValaLanguage>;
 
 static VALA_WHITESPACE: LazyLock<WhitespaceConfig> = LazyLock::new(|| WhitespaceConfig { unicode_whitespace: true });
-static VALA_COMMENT: LazyLock<CommentLine> = LazyLock::new(|| CommentLine { line_markers: &["//"] });
+static VALA_COMMENT: LazyLock<CommentConfig> = LazyLock::new(|| CommentConfig { line_marker: "//", block_start: "/*", block_end: "*/", nested_blocks: true });
 static VALA_STRING: LazyLock<StringConfig> = LazyLock::new(|| StringConfig { quotes: &['"'], escape: Some('\\') });
 static VALA_CHAR: LazyLock<StringConfig> = LazyLock::new(|| StringConfig { quotes: &['\''], escape: Some('\\') });
 
 #[derive(Clone)]
 pub struct ValaLexer<'config> {
-    config: &'config ValaLanguage,
+    _config: &'config ValaLanguage,
 }
 
 impl<'config> Lexer<ValaLanguage> for ValaLexer<'config> {
-    fn lex_incremental(
-        &self,
-        source: impl Source,
-        changed: usize,
-        cache: IncrementalCache<ValaLanguage>,
-    ) -> LexOutput<ValaLanguage> {
-        let mut state = LexerState::new_with_cache(source, changed, cache);
+    fn lex<'a, S: Source + ?Sized>(&self, source: &S, _edits: &[oak_core::TextEdit], cache: &'a mut impl LexerCache<ValaLanguage>) -> LexOutput<ValaLanguage> {
+        let mut state: State<'_, S> = LexerState::new(source);
         let result = self.run(&mut state);
-        state.finish(result)
+        state.finish_with_cache(result, cache)
     }
 }
 
 impl<'config> ValaLexer<'config> {
     pub fn new(config: &'config ValaLanguage) -> Self {
-        Self { config }
+        Self { _config: config }
     }
 
-    fn run<S: Source>(&self, state: &mut State<S>) -> Result<(), OakError> {
+    fn run<S: Source + ?Sized>(&self, state: &mut State<'_, S>) -> Result<(), OakError> {
         while state.not_at_end() {
             let safe_point = state.get_position();
 
@@ -75,135 +67,33 @@ impl<'config> ValaLexer<'config> {
                 continue;
             }
 
-            state.safe_check(safe_point);
+            state.advance_if_dead_lock(safe_point);
         }
 
         // 添加 EOF token
-        let eof_pos = state.get_position();
-        state.add_token(ValaSyntaxKind::Eof, eof_pos, eof_pos);
+        state.add_eof();
         Ok(())
     }
 
-    fn skip_whitespace<S: Source>(&self, state: &mut State<S>) -> bool {
-        match VALA_WHITESPACE.scan(state.rest(), state.get_position(), ValaSyntaxKind::Whitespace) {
-            Some(token) => {
-                state.advance_with(token);
-                true
-            }
-            None => false,
-        }
+    fn skip_whitespace<S: Source + ?Sized>(&self, state: &mut State<'_, S>) -> bool {
+        VALA_WHITESPACE.scan(state, ValaSyntaxKind::Whitespace)
     }
 
-    fn skip_comment<S: Source>(&self, state: &mut State<S>) -> bool {
-        let start = state.get_position();
-        let rest = state.rest();
-
-        // 行注释: // ... until newline
-        if rest.starts_with("//") {
-            state.advance(2);
-            while let Some(ch) = state.peek() {
-                if ch == '\n' || ch == '\r' {
-                    break;
-                }
-                state.advance(ch.len_utf8());
-            }
-            state.add_token(ValaSyntaxKind::LineComment, start, state.get_position());
-            return true;
-        }
-
-        // 块注释: /* ... */ with nesting support
-        if rest.starts_with("/*") {
-            state.advance(2);
-            let mut depth = 1usize;
-            while let Some(ch) = state.peek() {
-                if ch == '/' && state.peek_next_n(1) == Some('*') {
-                    state.advance(2);
-                    depth += 1;
-                    continue;
-                }
-                if ch == '*' && state.peek_next_n(1) == Some('/') {
-                    state.advance(2);
-                    depth -= 1;
-                    if depth == 0 {
-                        break;
-                    }
-                    continue;
-                }
-                state.advance(ch.len_utf8());
-            }
-            state.add_token(ValaSyntaxKind::BlockComment, start, state.get_position());
-            return true;
-        }
-
-        false
+    fn skip_comment<S: Source + ?Sized>(&self, state: &mut State<'_, S>) -> bool {
+        VALA_COMMENT.scan(state, ValaSyntaxKind::LineComment, ValaSyntaxKind::BlockComment)
     }
 
-    fn lex_string_literal<S: Source>(&self, state: &mut State<S>) -> bool {
-        let start = state.get_position();
-
-        // 普通字符串: "..."
-        if state.current() == Some('"') {
-            state.advance(1);
-            let mut escaped = false;
-            while let Some(ch) = state.peek() {
-                if ch == '"' && !escaped {
-                    state.advance(1); // consume closing quote
-                    break;
-                }
-                state.advance(ch.len_utf8());
-                if escaped {
-                    escaped = false;
-                    continue;
-                }
-                if ch == '\\' {
-                    escaped = true;
-                    continue;
-                }
-                if ch == '\n' || ch == '\r' {
-                    break;
-                }
-            }
-            state.add_token(ValaSyntaxKind::StringLiteral, start, state.get_position());
-            return true;
-        }
-
-        false
+    fn lex_string_literal<S: Source + ?Sized>(&self, state: &mut State<'_, S>) -> bool {
+        VALA_STRING.scan(state, ValaSyntaxKind::StringLiteral)
     }
 
-    fn lex_char_literal<S: Source>(&self, state: &mut State<S>) -> bool {
-        let start = state.get_position();
-        if state.current() != Some('\'') {
-            return false;
-        }
-
-        state.advance(1); // opening '
-        if let Some('\\') = state.peek() {
-            state.advance(1);
-            if let Some(c) = state.peek() {
-                state.advance(c.len_utf8());
-            }
-        }
-        else if let Some(c) = state.peek() {
-            state.advance(c.len_utf8());
-        }
-        else {
-            state.set_position(start);
-            return false;
-        }
-
-        if state.peek() == Some('\'') {
-            state.advance(1);
-            state.add_token(ValaSyntaxKind::CharLiteral, start, state.get_position());
-            return true;
-        }
-
-        state.set_position(start);
-        false
+    fn lex_char_literal<S: Source + ?Sized>(&self, state: &mut State<'_, S>) -> bool {
+        VALA_CHAR.scan(state, ValaSyntaxKind::CharLiteral)
     }
 
-    fn lex_number_literal<S: Source>(&self, state: &mut State<S>) -> bool {
+    fn lex_number_literal<S: Source + ?Sized>(&self, state: &mut State<'_, S>) -> bool {
         let start = state.get_position();
-        let first = match state.current() {
+        let first = match state.peek() {
             Some(c) => c,
             None => return false,
         };
@@ -331,9 +221,9 @@ impl<'config> ValaLexer<'config> {
         true
     }
 
-    fn lex_identifier_or_keyword<S: Source>(&self, state: &mut State<S>) -> bool {
+    fn lex_identifier_or_keyword<S: Source + ?Sized>(&self, state: &mut State<'_, S>) -> bool {
         let start = state.get_position();
-        let ch = match state.current() {
+        let ch = match state.peek() {
             Some(c) => c,
             None => return false,
         };
@@ -342,10 +232,10 @@ impl<'config> ValaLexer<'config> {
             return false;
         }
 
-        state.advance(1);
-        while let Some(c) = state.current() {
+        state.advance(ch.len_utf8());
+        while let Some(c) = state.peek() {
             if c.is_ascii_alphanumeric() || c == '_' {
-                state.advance(1);
+                state.advance(c.len_utf8());
             }
             else {
                 break;
@@ -353,8 +243,8 @@ impl<'config> ValaLexer<'config> {
         }
 
         let end = state.get_position();
-        let text = state.get_text_in((start..end).into());
-        let kind = match text {
+        let text = state.get_text_in(oak_core::Range { start, end });
+        let kind = match text.as_ref() {
             "abstract" => ValaSyntaxKind::AbstractKw,
             "as" => ValaSyntaxKind::AsKw,
             "base" => ValaSyntaxKind::BaseKw,
@@ -446,9 +336,8 @@ impl<'config> ValaLexer<'config> {
         true
     }
 
-    fn lex_operators<S: Source>(&self, state: &mut State<S>) -> bool {
+    fn lex_operators<S: Source + ?Sized>(&self, state: &mut State<'_, S>) -> bool {
         let start = state.get_position();
-        let rest = state.rest();
 
         // 优先匹配较长的操作符
         let patterns: &[(&str, ValaSyntaxKind)] = &[
@@ -471,7 +360,7 @@ impl<'config> ValaLexer<'config> {
         ];
 
         for (pat, kind) in patterns {
-            if rest.starts_with(pat) {
+            if state.starts_with(pat) {
                 state.advance(pat.len());
                 state.add_token(*kind, start, state.get_position());
                 return true;
@@ -513,32 +402,27 @@ impl<'config> ValaLexer<'config> {
         false
     }
 
-    fn lex_single_char_tokens<S: Source>(&self, state: &mut State<S>) -> bool {
+    fn lex_single_char_tokens<S: Source + ?Sized>(&self, state: &mut State<'_, S>) -> bool {
         let start = state.get_position();
         if let Some(ch) = state.current() {
             let kind = match ch {
-                '(' => ValaSyntaxKind::LeftParen,
-                ')' => ValaSyntaxKind::RightParen,
-                '{' => ValaSyntaxKind::LeftBrace,
-                '}' => ValaSyntaxKind::RightBrace,
-                '[' => ValaSyntaxKind::LeftBracket,
-                ']' => ValaSyntaxKind::RightBracket,
-                ',' => ValaSyntaxKind::Comma,
-                ';' => ValaSyntaxKind::Semicolon,
-                _ => {
-                    // 如果不是已知的单字符token，添加为错误并前进
-                    state.advance(ch.len_utf8());
-                    state.add_token(ValaSyntaxKind::Error, start, state.get_position());
-                    return true;
-                }
+                '(' => Some(ValaSyntaxKind::LeftParen),
+                ')' => Some(ValaSyntaxKind::RightParen),
+                '{' => Some(ValaSyntaxKind::LeftBrace),
+                '}' => Some(ValaSyntaxKind::RightBrace),
+                '[' => Some(ValaSyntaxKind::LeftBracket),
+                ']' => Some(ValaSyntaxKind::RightBracket),
+                ',' => Some(ValaSyntaxKind::Comma),
+                ';' => Some(ValaSyntaxKind::Semicolon),
+                _ => None,
             };
 
-            state.advance(ch.len_utf8());
-            state.add_token(kind, start, state.get_position());
-            true
+            if let Some(k) = kind {
+                state.advance(ch.len_utf8());
+                state.add_token(k, start, state.get_position());
+                return true;
+            }
         }
-        else {
-            false
-        }
+        false
     }
 }

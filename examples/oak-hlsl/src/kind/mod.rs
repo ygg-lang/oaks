@@ -1,6 +1,6 @@
-use serde::{Serialize, Deserialize};
+use serde::{Deserialize, Serialize};
 
-#[derive(Copy, Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Copy, Clone, Debug, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub enum HlslSyntaxKind {
     // 空白字符和换行
     Whitespace,
@@ -139,6 +139,8 @@ pub enum HlslSyntaxKind {
     Struct,
     Cbuffer,
     Tbuffer,
+    Technique,
+    Pass,
     Interface,
     Class,
     Namespace,
@@ -195,7 +197,6 @@ pub enum HlslSyntaxKind {
     BitwiseXorAssign,
     Increment,
     Decrement,
-
     Dot,
     Arrow,
     Conditional,
@@ -218,29 +219,42 @@ pub enum HlslSyntaxKind {
 
     // 特殊标记
     Eof,
+    Root,
     Error,
 }
 
-use oak_core::SyntaxKind;
+use oak_core::{ElementType, TokenType, UniversalElementRole, UniversalTokenRole};
 
-impl SyntaxKind for HlslSyntaxKind {
-    fn is_trivia(&self) -> bool {
-        matches!(self, Self::Whitespace | Self::Newline | Self::Comment)
+impl TokenType for HlslSyntaxKind {
+    const END_OF_STREAM: Self = Self::Eof;
+    type Role = UniversalTokenRole;
+
+    fn role(&self) -> Self::Role {
+        match self {
+            Self::Whitespace | Self::Newline => UniversalTokenRole::Whitespace,
+            Self::Comment => UniversalTokenRole::Comment,
+            Self::Eof => UniversalTokenRole::Eof,
+            _ => UniversalTokenRole::None,
+        }
+    }
+}
+
+impl ElementType for HlslSyntaxKind {
+    type Role = UniversalElementRole;
+
+    fn role(&self) -> Self::Role {
+        match self {
+            Self::Root => UniversalElementRole::Root,
+            Self::Error => UniversalElementRole::Error,
+            _ => UniversalElementRole::None,
+        }
     }
 
-    fn is_comment(&self) -> bool {
-        matches!(self, Self::Comment)
+    fn is_error(&self) -> bool {
+        matches!(self, Self::Error)
     }
 
-    fn is_whitespace(&self) -> bool {
-        matches!(self, Self::Whitespace | Self::Newline)
-    }
-
-    fn is_token_type(&self) -> bool {
-        !matches!(self, Self::Error)
-    }
-
-    fn is_element_type(&self) -> bool {
-        false
+    fn is_root(&self) -> bool {
+        matches!(self, Self::Root)
     }
 }

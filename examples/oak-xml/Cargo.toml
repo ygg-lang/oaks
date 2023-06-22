@@ -16,7 +16,7 @@ edition.workspace = true
 oak-core = { workspace = true }
 oak-highlight = { workspace = true, optional = true }
 oak-pretty-print = { workspace = true, optional = true }
-serde = { version = "1.0", features = ["derive"] }
+serde = { workspace = true }
 
 [dev-dependencies]
 oak-core = { workspace = true, features = ["testing"] }

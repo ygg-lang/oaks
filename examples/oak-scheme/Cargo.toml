@@ -1,6 +1,6 @@
 [package]
 name = "oak-scheme"
-description = "High-performance incremental Scheme parser for the oak ecosystem with flexible configuration, optimized for functional programming and symbolic computation."
+description = "Scheme functional programming language parser with support for Lisp dialect and symbolic computation."
 categories = ["parsing"]
 keywords = ["parser", "scheme", "streaming", "validation"]
 documentation = "https://docs.rs/oak-scheme"
@@ -15,13 +15,26 @@ edition.workspace = true
 
 [dependencies]
 oak-core = { workspace = true }
+oak-highlight = { workspace = true }
+oak-pretty-print = { workspace = true }
+oak-lsp = { workspace = true }
+oak-hover = { workspace = true }
+oak-vfs = { workspace = true }
+oak-mcp = { workspace = true, optional = true }
+serde = { workspace = true }
+futures = { workspace = true }
+tracing = { workspace = true }
+tokio = { workspace = true, optional = true }
+axum = { workspace = true, optional = true }
 
 [dev-dependencies]
 oak-core = { workspace = true, features = ["testing"] }
 
-
 [features]
 default = []
+mcp = ["dep:oak-mcp"]
+axum = ["mcp", "dep:tokio", "dep:axum", "oak-mcp/axum", "oak-lsp/axum"]
+semantic-search = ["mcp"]
 
 
 [package.metadata.docs.rs]

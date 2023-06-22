@@ -1,5 +1,5 @@
 use core::fmt;
-use oak_core::SyntaxKind;
+use oak_core::{ElementType, TokenType, UniversalElementRole, UniversalTokenRole};
 
 /// GSGL 语法节点类型
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, serde::Serialize)]
@@ -193,21 +193,7 @@ impl GsglSyntaxKind {
 
     /// 检查是否为数据类型
     pub fn is_type(self) -> bool {
-        matches!(
-            self,
-            Self::Float
-                | Self::Int
-                | Self::Bool
-                | Self::Vec2
-                | Self::Vec3
-                | Self::Vec4
-                | Self::Mat2
-                | Self::Mat3
-                | Self::Mat4
-                | Self::Sampler2D
-                | Self::SamplerCube
-                | Self::Void
-        )
+        matches!(self, Self::Float | Self::Int | Self::Bool | Self::Vec2 | Self::Vec3 | Self::Vec4 | Self::Mat2 | Self::Mat3 | Self::Mat4 | Self::Sampler2D | Self::SamplerCube | Self::Void)
     }
 
     /// 检查是否为操作符
@@ -377,64 +363,40 @@ impl fmt::Display for GsglSyntaxKind {
     }
 }
 
-impl SyntaxKind for GsglSyntaxKind {
-    fn is_trivia(&self) -> bool {
-        matches!(self, Self::Whitespace | Self::Newline | Self::Comment)
+impl TokenType for GsglSyntaxKind {
+    const END_OF_STREAM: Self = Self::Eof;
+    type Role = UniversalTokenRole;
+
+    fn role(&self) -> Self::Role {
+        match self {
+            Self::Whitespace | Self::Newline => UniversalTokenRole::Whitespace,
+            Self::Comment => UniversalTokenRole::Comment,
+            _ if self.is_keyword() => UniversalTokenRole::Keyword,
+            Self::Eof => UniversalTokenRole::Eof,
+            _ => UniversalTokenRole::None,
+        }
+    }
+}
+
+impl ElementType for GsglSyntaxKind {
+    type Role = UniversalElementRole;
+
+    fn role(&self) -> Self::Role {
+        match self {
+            Self::Root | Self::SourceFile => UniversalElementRole::Root,
+            Self::FunctionDecl | Self::VariableDecl | Self::StructDecl => UniversalElementRole::Definition,
+            Self::Statement => UniversalElementRole::Statement,
+            Self::Expression | Self::BinaryExpr | Self::UnaryExpr | Self::AssignmentExpr | Self::ConditionalExpr => UniversalElementRole::Expression,
+            Self::Error => UniversalElementRole::Error,
+            _ => UniversalElementRole::None,
+        }
     }
 
-    fn is_comment(&self) -> bool {
-        matches!(self, Self::Comment)
+    fn is_error(&self) -> bool {
+        matches!(self, Self::Error)
     }
 
-    fn is_whitespace(&self) -> bool {
-        matches!(self, Self::Whitespace | Self::Newline)
-    }
-
-    fn is_token_type(&self) -> bool {
-        !matches!(
-            self,
-            Self::Root
-                | Self::SourceFile
-                | Self::FunctionDecl
-                | Self::VariableDecl
-                | Self::StructDecl
-                | Self::Block
-                | Self::Statement
-                | Self::Expression
-                | Self::Parameter
-                | Self::Argument
-                | Self::FieldAccess
-                | Self::ArrayAccess
-                | Self::FunctionCall
-                | Self::BinaryExpr
-                | Self::UnaryExpr
-                | Self::AssignmentExpr
-                | Self::ConditionalExpr
-                | Self::Literal
-        )
-    }
-
-    fn is_element_type(&self) -> bool {
-        matches!(
-            self,
-            Self::Root
-                | Self::SourceFile
-                | Self::FunctionDecl
-                | Self::VariableDecl
-                | Self::StructDecl
-                | Self::Block
-                | Self::Statement
-                | Self::Expression
-                | Self::Parameter
-                | Self::Argument
-                | Self::FieldAccess
-                | Self::ArrayAccess
-                | Self::FunctionCall
-                | Self::BinaryExpr
-                | Self::UnaryExpr
-                | Self::AssignmentExpr
-                | Self::ConditionalExpr
-                | Self::Literal
-        )
+    fn is_root(&self) -> bool {
+        matches!(self, Self::Root | Self::SourceFile)
     }
 }

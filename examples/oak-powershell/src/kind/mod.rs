@@ -1,9 +1,9 @@
-use oak_core::{SyntaxKind, Token};
+use oak_core::{ElementType, Token, TokenType, UniversalElementRole, UniversalTokenRole};
 use serde::{Deserialize, Serialize};
 
 pub type PowerShellToken = Token<PowerShellSyntaxKind>;
 
-#[derive(Copy, Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Copy, Clone, Debug, PartialEq, Eq, Serialize, Deserialize, Hash)]
 pub enum PowerShellSyntaxKind {
     // Whitespace and comments
     Whitespace,
@@ -120,13 +120,41 @@ pub enum PowerShellSyntaxKind {
 
     // Special
     Root,
+    FunctionDef,
+    ClassDef,
+    IfStatement,
+    ForStatement,
+    ForEachStatement,
+    WhileStatement,
+    DoWhileStatement,
+    SwitchStatement,
+    TryStatement,
+    CatchBlock,
+    FinallyBlock,
+    ParamBlock,
+    ProcessBlock,
+    BeginBlock,
+    EndBlock,
+    ExpressionStatement,
+    Pipeline,
+    Command,
+    CommandParameter,
+    CommandArgument,
     Error,
     Eof,
 }
 
-impl SyntaxKind for PowerShellSyntaxKind {
-    fn is_trivia(&self) -> bool {
-        matches!(self, Self::Whitespace | Self::Newline | Self::Comment)
+impl TokenType for PowerShellSyntaxKind {
+    const END_OF_STREAM: Self = Self::Eof;
+    type Role = UniversalTokenRole;
+
+    fn role(&self) -> Self::Role {
+        match self {
+            Self::Whitespace | Self::Newline => UniversalTokenRole::Whitespace,
+            Self::Comment => UniversalTokenRole::Comment,
+            Self::Eof => UniversalTokenRole::Eof,
+            _ => UniversalTokenRole::None,
+        }
     }
 
     fn is_comment(&self) -> bool {
@@ -136,12 +164,17 @@ impl SyntaxKind for PowerShellSyntaxKind {
     fn is_whitespace(&self) -> bool {
         matches!(self, Self::Whitespace | Self::Newline)
     }
+}
 
-    fn is_token_type(&self) -> bool {
-        !matches!(self, Self::Root)
-    }
+impl ElementType for PowerShellSyntaxKind {
+    type Role = UniversalElementRole;
 
-    fn is_element_type(&self) -> bool {
-        matches!(self, Self::Root)
+    fn role(&self) -> Self::Role {
+        match self {
+            Self::Error => UniversalElementRole::Error,
+            Self::Root => UniversalElementRole::Root,
+            Self::FunctionDef | Self::ClassDef | Self::IfStatement => UniversalElementRole::Detail,
+            _ => UniversalElementRole::None,
+        }
     }
 }

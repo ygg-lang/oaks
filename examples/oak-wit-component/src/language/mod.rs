@@ -1,9 +1,14 @@
-use crate::kind::WitSyntaxKind;
-use oak_core::Language;
+// use crate::kind::WitSyntaxKind;
+use oak_core::{Language, LanguageCategory};
 
+#[derive(Default)]
 pub struct WitLanguage {}
 
 impl Language for WitLanguage {
-    type SyntaxKind = WitSyntaxKind;
+    const NAME: &'static str = "wit-component";
+    const CATEGORY: LanguageCategory = LanguageCategory::Dsl;
+
+    type TokenType = crate::kind::WitSyntaxKind;
+    type ElementType = crate::kind::WitSyntaxKind;
     type TypedRoot = ();
 }

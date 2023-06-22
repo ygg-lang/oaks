@@ -1,5 +1,4 @@
-use crate::kind::XmlSyntaxKind;
-use oak_core::Language;
+use oak_core::{Language, LanguageCategory};
 
 #[derive(Debug, Clone)]
 pub struct XmlLanguage {}
@@ -11,6 +10,10 @@ impl Default for XmlLanguage {
 }
 
 impl Language for XmlLanguage {
-    type SyntaxKind = XmlSyntaxKind;
+    const NAME: &'static str = "xml";
+    const CATEGORY: LanguageCategory = LanguageCategory::Markup;
+
+    type TokenType = crate::kind::XmlSyntaxKind;
+    type ElementType = crate::kind::XmlSyntaxKind;
     type TypedRoot = ();
 }

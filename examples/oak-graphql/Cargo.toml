@@ -1,9 +1,9 @@
 [package]
 name = "oak-graphql"
-description = "High-performance incremental Go parser for the oak ecosystem with flexible configuration, supporting concurrent programming and cloud-native development."
+description = "GraphQL query language parser with support for modern GraphQL specifications and schema definitions."
 categories = ["parsing"]
-keywords = ["parser", "go", "golang", "syntax-analysis"]
-documentation = "https://docs.rs/oak-go"
+keywords = ["parser", "graphql", "query-language", "api"]
+documentation = "https://docs.rs/oak-graphql"
 readme = "readme.md"
 version.workspace = true
 authors.workspace = true

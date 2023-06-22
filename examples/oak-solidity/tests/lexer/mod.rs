@@ -3,11 +3,11 @@ use oak_solidity::{SolidityLanguage, SolidityLexer};
 
 #[test]
 fn test_solidity_lexer_simple() {
-    let config = SolidityLanguage::default();
-    let lexer = SolidityLexer::new(&config);
+    let language = SolidityLanguage::default();
+    let lexer = SolidityLexer::new(&language);
     let source = SourceText::new("contract");
-
-    let result = lexer.lex(&source);
+    let mut cache = oak_core::ParseSession::<SolidityLanguage>::default();
+    let result = lexer.lex(&source, &[], &mut cache);
     assert!(result.result.is_ok());
 
     let tokens = result.result.unwrap();

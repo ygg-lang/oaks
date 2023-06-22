@@ -1,42 +1,40 @@
 use crate::{kind::ScalaSyntaxKind, language::ScalaLanguage};
 use oak_core::{
-    IncrementalCache, Lexer, LexerState, OakError,
-    lexer::{CommentLine, LexOutput, StringConfig, WhitespaceConfig},
+    Lexer, LexerCache, LexerState, OakError, TextEdit,
+    lexer::{CommentConfig, LexOutput, StringConfig, WhitespaceConfig},
     source::Source,
 };
 use std::sync::LazyLock;
 
-type State<S: Source> = LexerState<S, ScalaLanguage>;
+type State<'s, S> = LexerState<'s, S, ScalaLanguage>;
 
 static SCALA_WHITESPACE: LazyLock<WhitespaceConfig> = LazyLock::new(|| WhitespaceConfig { unicode_whitespace: true });
-static SCALA_COMMENT: LazyLock<CommentLine> = LazyLock::new(|| CommentLine { line_markers: &["//"] });
+static SCALA_COMMENT: LazyLock<CommentConfig> = LazyLock::new(|| CommentConfig { line_marker: "//", block_start: "/*", block_end: "*/", nested_blocks: true });
 static SCALA_STRING: LazyLock<StringConfig> = LazyLock::new(|| StringConfig { quotes: &['"'], escape: Some('\\') });
 static SCALA_CHAR: LazyLock<StringConfig> = LazyLock::new(|| StringConfig { quotes: &['\''], escape: None });
 
 #[derive(Clone)]
 pub struct ScalaLexer<'config> {
-    config: &'config ScalaLanguage,
+    _config: &'config ScalaLanguage,
 }
 
 impl<'config> Lexer<ScalaLanguage> for ScalaLexer<'config> {
-    fn lex_incremental(
-        &self,
-        source: impl Source,
-        changed: usize,
-        cache: IncrementalCache<ScalaLanguage>,
-    ) -> LexOutput<ScalaLanguage> {
-        let mut state = LexerState::new_with_cache(source, changed, cache);
+    fn lex<'a, S: Source + ?Sized>(&self, source: &'a S, _edits: &[TextEdit], _cache: &'a mut impl LexerCache<ScalaLanguage>) -> LexOutput<ScalaLanguage> {
+        let mut state: State<'_, S> = LexerState::new(source);
         let result = self.run(&mut state);
+        if result.is_ok() {
+            state.add_eof();
+        }
         state.finish(result)
     }
 }
 
 impl<'config> ScalaLexer<'config> {
     pub fn new(config: &'config ScalaLanguage) -> Self {
-        Self { config }
+        Self { _config: config }
     }
 
-    fn run<S: Source>(&self, state: &mut State<S>) -> Result<(), OakError> {
+    fn run<'s, S: Source + ?Sized>(&self, state: &mut State<'s, S>) -> Result<(), OakError> {
         while state.not_at_end() {
             let safe_point = state.get_position();
 
@@ -83,28 +81,18 @@ impl<'config> ScalaLexer<'config> {
                 state.add_token(ScalaSyntaxKind::Error, start_pos, state.get_position());
             }
 
-            state.safe_check(safe_point);
+            state.advance_if_dead_lock(safe_point);
         }
 
-        // 添加 EOF token
-        let eof_pos = state.get_position();
-        state.add_token(ScalaSyntaxKind::Eof, eof_pos, eof_pos);
         Ok(())
     }
 
-    fn skip_whitespace<S: Source>(&self, state: &mut State<S>) -> bool {
-        match SCALA_WHITESPACE.scan(state.rest(), state.get_position(), ScalaSyntaxKind::Whitespace) {
-            Some(token) => {
-                state.advance_with(token);
-                return true;
-            }
-            None => {}
-        }
-        false
+    fn skip_whitespace<'s, S: Source + ?Sized>(&self, state: &mut State<'s, S>) -> bool {
+        SCALA_WHITESPACE.scan(state, ScalaSyntaxKind::Whitespace)
     }
 
     /// 处理换行
-    fn lex_newline<S: Source>(&self, state: &mut State<S>) -> bool {
+    fn lex_newline<'s, S: Source + ?Sized>(&self, state: &mut State<'s, S>) -> bool {
         let start_pos = state.get_position();
 
         if let Some('\n') = state.peek() {
@@ -125,62 +113,25 @@ impl<'config> ScalaLexer<'config> {
         }
     }
 
-    fn skip_comment<S: Source>(&self, state: &mut State<S>) -> bool {
-        // 行注释
-        match SCALA_COMMENT.scan(state.rest(), state.get_position(), ScalaSyntaxKind::LineComment) {
-            Some(token) => {
-                state.advance_with(token);
-                return true;
-            }
-            None => {}
-        }
-
-        // 块注释
-        if state.rest().starts_with("/*") {
-            let start = state.get_position();
-            state.advance(2);
-
-            while state.not_at_end() && !state.rest().starts_with("*/") {
-                state.advance(1);
-            }
-
-            if state.rest().starts_with("*/") {
-                state.advance(2);
-            }
-
-            let end = state.get_position();
-            state.add_token(ScalaSyntaxKind::BlockComment, start, end);
+    fn skip_comment<'s, S: Source + ?Sized>(&self, state: &mut State<'s, S>) -> bool {
+        // 行注释 & 块注释
+        if SCALA_COMMENT.scan(state, ScalaSyntaxKind::LineComment, ScalaSyntaxKind::BlockComment) {
             return true;
         }
 
         false
     }
 
-    fn lex_string_literal<S: Source>(&self, state: &mut State<S>) -> bool {
-        match SCALA_STRING.scan(state.rest(), state.get_position(), ScalaSyntaxKind::StringLiteral) {
-            Some(token) => {
-                state.advance_with(token);
-                return true;
-            }
-            None => {}
-        }
-        false
+    fn lex_string_literal<'s, S: Source + ?Sized>(&self, state: &mut State<'s, S>) -> bool {
+        SCALA_STRING.scan(state, ScalaSyntaxKind::StringLiteral)
     }
 
-    fn lex_char_literal<S: Source>(&self, state: &mut State<S>) -> bool {
-        match SCALA_CHAR.scan(state.rest(), state.get_position(), ScalaSyntaxKind::CharLiteral) {
-            Some(token) => {
-                state.advance_with(token);
-                return true;
-            }
-            None => {}
-        }
-        false
+    fn lex_char_literal<'s, S: Source + ?Sized>(&self, state: &mut State<'s, S>) -> bool {
+        SCALA_CHAR.scan(state, ScalaSyntaxKind::CharLiteral)
     }
 
-    fn lex_number_literal<S: Source>(&self, state: &mut State<S>) -> bool {
-        let rest = state.rest();
-        if rest.is_empty() || !rest.chars().next().unwrap().is_ascii_digit() {
+    fn lex_number_literal<'s, S: Source + ?Sized>(&self, state: &mut State<'s, S>) -> bool {
+        if !state.current().map_or(false, |c| c.is_ascii_digit()) {
             return false;
         }
 
@@ -188,14 +139,14 @@ impl<'config> ScalaLexer<'config> {
         let mut len = 0;
 
         // 跳过数字
-        for ch in rest.chars() {
+        while let Some(ch) = state.source().get_char_at(start + len) {
             if ch.is_ascii_digit() {
                 len += ch.len_utf8();
             }
             else if ch == '.' {
                 // 浮点数
                 len += ch.len_utf8();
-                for ch in rest[len..].chars() {
+                while let Some(ch) = state.source().get_char_at(start + len) {
                     if ch.is_ascii_digit() {
                         len += ch.len_utf8();
                     }
@@ -216,21 +167,16 @@ impl<'config> ScalaLexer<'config> {
         true
     }
 
-    fn lex_identifier_or_keyword<S: Source>(&self, state: &mut State<S>) -> bool {
-        let rest = state.rest();
-        if rest.is_empty() {
-            return false;
-        }
-
-        let first_char = rest.chars().next().unwrap();
-        if !first_char.is_alphabetic() && first_char != '_' {
-            return false;
-        }
+    fn lex_identifier_or_keyword<'s, S: Source + ?Sized>(&self, state: &mut State<'s, S>) -> bool {
+        let first_char = match state.current() {
+            Some(c) if c.is_alphabetic() || c == '_' => c,
+            _ => return false,
+        };
 
         let start = state.get_position();
-        let mut len = 0;
+        let mut len = first_char.len_utf8();
 
-        for ch in rest.chars() {
+        while let Some(ch) = state.source().get_char_at(start + len) {
             if ch.is_alphanumeric() || ch == '_' {
                 len += ch.len_utf8();
             }
@@ -239,11 +185,11 @@ impl<'config> ScalaLexer<'config> {
             }
         }
 
-        let text = rest[..len].to_string();
+        let text = state.source().get_text_in((start..start + len).into());
         state.advance(len);
         let end = state.get_position();
 
-        let kind = match text.as_str() {
+        let kind = match text.as_ref() {
             "abstract" => ScalaSyntaxKind::Abstract,
             "case" => ScalaSyntaxKind::Case,
             "catch" => ScalaSyntaxKind::Catch,
@@ -289,32 +235,31 @@ impl<'config> ScalaLexer<'config> {
         true
     }
 
-    fn lex_operators<S: Source>(&self, state: &mut State<S>) -> bool {
-        let rest = state.rest();
+    fn lex_operators<'s, S: Source + ?Sized>(&self, state: &mut State<'s, S>) -> bool {
         let start = state.get_position();
 
         // 多字符操作符
-        if rest.starts_with("=>") {
+        if state.starts_with("=>") {
             state.advance(2);
             state.add_token(ScalaSyntaxKind::Arrow, start, state.get_position());
             return true;
         }
-        if rest.starts_with("<=") {
+        if state.starts_with("<=") {
             state.advance(2);
             state.add_token(ScalaSyntaxKind::LessEqual, start, state.get_position());
             return true;
         }
-        if rest.starts_with(">=") {
+        if state.starts_with(">=") {
             state.advance(2);
             state.add_token(ScalaSyntaxKind::GreaterEqual, start, state.get_position());
             return true;
         }
-        if rest.starts_with("==") {
+        if state.starts_with("==") {
             state.advance(2);
             state.add_token(ScalaSyntaxKind::EqualEqual, start, state.get_position());
             return true;
         }
-        if rest.starts_with("!=") {
+        if state.starts_with("!=") {
             state.advance(2);
             state.add_token(ScalaSyntaxKind::NotEqual, start, state.get_position());
             return true;
@@ -323,13 +268,11 @@ impl<'config> ScalaLexer<'config> {
         false
     }
 
-    fn lex_single_char_tokens<S: Source>(&self, state: &mut State<S>) -> bool {
-        let rest = state.rest();
-        if rest.is_empty() {
-            return false;
-        }
-
-        let ch = rest.chars().next().unwrap();
+    fn lex_single_char_tokens<'s, S: Source + ?Sized>(&self, state: &mut State<'s, S>) -> bool {
+        let ch = match state.current() {
+            Some(c) => c,
+            None => return false,
+        };
         let start = state.get_position();
         state.advance(ch.len_utf8());
         let end = state.get_position();

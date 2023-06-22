@@ -1,0 +1,19 @@
+[package]
+name = "oak-vue"
+description = "High-performance incremental Vue SFC parser for the oak ecosystem."
+categories = ["parsing"]
+keywords = ["parser", "vue", "sfc", "incremental"]
+version.workspace = true
+authors.workspace = true
+homepage.workspace = true
+repository.workspace = true
+license.workspace = true
+edition.workspace = true
+
+[dependencies]
+oak-core = { workspace = true }
+serde = { workspace = true }
+
+[dev-dependencies]
+oak-core = { workspace = true, features = ["testing"] }
+serde_json = { workspace = true }

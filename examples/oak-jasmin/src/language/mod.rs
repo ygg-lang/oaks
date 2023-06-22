@@ -1,5 +1,4 @@
-use crate::kind::JasminSyntaxKind;
-use oak_core::Language;
+use oak_core::{Language, LanguageCategory};
 
 /// JASMIN 语言绑定与配置
 #[derive(Debug, Default, Copy, Clone)]
@@ -21,6 +20,10 @@ impl JasminLanguage {
 }
 
 impl Language for JasminLanguage {
-    type SyntaxKind = JasminSyntaxKind;
-    type TypedRoot = (); // TODO: 定义 TypedRoot
+    const NAME: &'static str = "jasmin";
+    const CATEGORY: LanguageCategory = LanguageCategory::Programming;
+
+    type TokenType = crate::kind::JasminSyntaxKind;
+    type ElementType = crate::kind::JasminSyntaxKind;
+    type TypedRoot = crate::ast::JasminRoot;
 }

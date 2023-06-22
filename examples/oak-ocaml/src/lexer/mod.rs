@@ -1,43 +1,37 @@
-use crate::{OCamlToken, kind::OCamlSyntaxKind, language::OCamlLanguage};
+use crate::{kind::OCamlSyntaxKind, language::OCamlLanguage};
 use oak_core::{
-    IncrementalCache, Lexer, LexerState, OakError,
-    lexer::{CommentLine, LexOutput, StringConfig, WhitespaceConfig},
+    Lexer, LexerCache, LexerState, OakError,
+    lexer::{CommentConfig, LexOutput, WhitespaceConfig},
     source::Source,
 };
 use std::sync::LazyLock;
 
-type State<S: Source> = LexerState<S, OCamlLanguage>;
+type State<'a, S> = LexerState<'a, S, OCamlLanguage>;
 
 static OCAML_WHITESPACE: LazyLock<WhitespaceConfig> = LazyLock::new(|| WhitespaceConfig { unicode_whitespace: true });
-static OCAML_COMMENT: LazyLock<CommentLine> = LazyLock::new(|| CommentLine { line_markers: &["//"] });
-static OCAML_STRING: LazyLock<StringConfig> = LazyLock::new(|| StringConfig { quotes: &['"'], escape: Some('\\') });
-static OCAML_CHAR: LazyLock<StringConfig> = LazyLock::new(|| StringConfig { quotes: &['\''], escape: Some('\\') });
+static OCAML_COMMENT: LazyLock<CommentConfig> = LazyLock::new(|| CommentConfig { line_marker: "//", block_start: "(*", block_end: "*)", nested_blocks: true });
 
-#[derive(Clone)]
-pub struct OCamlLexer<'config> {
-    config: &'config OCamlLanguage,
-}
+#[derive(Clone, Default)]
+pub struct OCamlLexer {}
 
-impl<'config> Lexer<OCamlLanguage> for OCamlLexer<'config> {
-    fn lex_incremental(
-        &self,
-        source: impl Source,
-        changed: usize,
-        cache: IncrementalCache<OCamlLanguage>,
-    ) -> LexOutput<OCamlLanguage> {
-        let mut state = LexerState::new_with_cache(source, changed, cache);
+impl Lexer<OCamlLanguage> for OCamlLexer {
+    fn lex<'a, S: Source + ?Sized>(&self, source: &'a S, _edits: &[oak_core::TextEdit], cache: &'a mut impl LexerCache<OCamlLanguage>) -> LexOutput<OCamlLanguage> {
+        let mut state = LexerState::new(source);
         let result = self.run(&mut state);
-        state.finish(result)
+        if result.is_ok() {
+            // run adds EOF
+        }
+        state.finish_with_cache(result, cache)
     }
 }
 
-impl<'config> OCamlLexer<'config> {
-    pub fn new(config: &'config OCamlLanguage) -> Self {
-        Self { config }
+impl OCamlLexer {
+    pub fn new(_config: &OCamlLanguage) -> Self {
+        Self {}
     }
 
     /// 主词法分析循环
-    fn run<S: Source>(&self, state: &mut State<S>) -> Result<(), OakError> {
+    fn run<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> Result<(), OakError> {
         while state.not_at_end() {
             let safe_point = state.get_position();
 
@@ -73,7 +67,7 @@ impl<'config> OCamlLexer<'config> {
                 continue;
             }
 
-            state.safe_check(safe_point);
+            state.advance_if_dead_lock(safe_point);
         }
 
         // 添加 EOF token
@@ -83,48 +77,15 @@ impl<'config> OCamlLexer<'config> {
     }
 
     /// 跳过空白字符
-    fn skip_whitespace<S: Source>(&self, state: &mut State<S>) -> bool {
-        match OCAML_WHITESPACE.scan(state.rest(), state.get_position(), OCamlSyntaxKind::Whitespace) {
-            Some(token) => {
-                state.advance_with(token);
-                true
-            }
-            None => false,
-        }
+    fn skip_whitespace<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
+        OCAML_WHITESPACE.scan(state, OCamlSyntaxKind::Whitespace)
     }
 
-    fn skip_comment<S: Source>(&self, state: &mut State<S>) -> bool {
-        let start = state.get_position();
-        let rest = state.rest();
-
-        // OCaml block comment: (* ... *)
-        if rest.starts_with("(*") {
-            state.advance(2);
-            let mut depth = 1;
-            while let Some(ch) = state.peek() {
-                if ch == '(' && state.peek_next_n(1) == Some('*') {
-                    state.advance(2);
-                    depth += 1;
-                    continue;
-                }
-                if ch == '*' && state.peek_next_n(1) == Some(')') {
-                    state.advance(2);
-                    depth -= 1;
-                    if depth == 0 {
-                        break;
-                    }
-                    continue;
-                }
-                state.advance(ch.len_utf8());
-            }
-            state.add_token(OCamlSyntaxKind::Comment, start, state.get_position());
-            return true;
-        }
-
-        false
+    fn skip_comment<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
+        OCAML_COMMENT.scan(state, OCamlSyntaxKind::Comment, OCamlSyntaxKind::Comment)
     }
 
-    fn lex_string_literal<S: Source>(&self, state: &mut State<S>) -> bool {
+    fn lex_string_literal<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start = state.get_position();
         if state.current() != Some('"') {
             return false;
@@ -154,7 +115,7 @@ impl<'config> OCamlLexer<'config> {
         true
     }
 
-    fn lex_char_literal<S: Source>(&self, state: &mut State<S>) -> bool {
+    fn lex_char_literal<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start = state.get_position();
         if state.current() != Some('\'') {
             return false;
@@ -185,7 +146,7 @@ impl<'config> OCamlLexer<'config> {
         false
     }
 
-    fn lex_number_literal<S: Source>(&self, state: &mut State<S>) -> bool {
+    fn lex_number_literal<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start = state.get_position();
         let first = match state.current() {
             Some(c) => c,
@@ -255,7 +216,7 @@ impl<'config> OCamlLexer<'config> {
         true
     }
 
-    fn lex_identifier_or_keyword<S: Source>(&self, state: &mut State<S>) -> bool {
+    fn lex_identifier_or_keyword<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start = state.get_position();
         let ch = match state.current() {
             Some(c) => c,
@@ -278,7 +239,7 @@ impl<'config> OCamlLexer<'config> {
 
         let end = state.get_position();
         let text = state.get_text_in((start..end).into());
-        let kind = match text {
+        let kind = match text.as_ref() {
             // OCaml keywords
             "and" => OCamlSyntaxKind::And,
             "as" => OCamlSyntaxKind::As,
@@ -336,7 +297,7 @@ impl<'config> OCamlLexer<'config> {
         true
     }
 
-    fn lex_operators<S: Source>(&self, state: &mut State<S>) -> bool {
+    fn lex_operators<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start = state.get_position();
         let rest = state.rest();
 
@@ -398,7 +359,7 @@ impl<'config> OCamlLexer<'config> {
         false
     }
 
-    fn lex_single_char_tokens<S: Source>(&self, state: &mut State<S>) -> bool {
+    fn lex_single_char_tokens<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start = state.get_position();
         if let Some(ch) = state.current() {
             let kind = match ch {

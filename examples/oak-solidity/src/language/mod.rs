@@ -1,5 +1,4 @@
-use crate::kind::SoliditySyntaxKind;
-use oak_core::Language;
+use oak_core::{Language, LanguageCategory};
 
 #[derive(Debug, Clone, Default)]
 pub struct SolidityLanguage {}
@@ -11,6 +10,10 @@ impl SolidityLanguage {
 }
 
 impl Language for SolidityLanguage {
-    type SyntaxKind = SoliditySyntaxKind;
+    const NAME: &'static str = "solidity";
+    const CATEGORY: LanguageCategory = LanguageCategory::Programming;
+
+    type TokenType = crate::kind::SoliditySyntaxKind;
+    type ElementType = crate::kind::SoliditySyntaxKind;
     type TypedRoot = ();
 }

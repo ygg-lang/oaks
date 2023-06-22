@@ -1,0 +1,127 @@
+{
+    "success": true,
+    "count": 20,
+    "tokens": [
+        {
+            "kind": "Hash",
+            "text": "#",
+            "start": 0,
+            "end": 1
+        },
+        {
+            "kind": "Identifier",
+            "text": "comment",
+            "start": 2,
+            "end": 9
+        },
+        {
+            "kind": "Keyword(Class)",
+            "text": "class",
+            "start": 11,
+            "end": 16
+        },
+        {
+            "kind": "Identifier",
+            "text": "A",
+            "start": 17,
+            "end": 18
+        },
+        {
+            "kind": "LeftBrace",
+            "text": "{",
+            "start": 19,
+            "end": 20
+        },
+        {
+            "kind": "RightBrace",
+            "text": "}",
+            "start": 24,
+            "end": 25
+        },
+        {
+            "kind": "Keyword(Trait)",
+            "text": "trait",
+            "start": 33,
+            "end": 38
+        },
+        {
+            "kind": "Identifier",
+            "text": "B",
+            "start": 39,
+            "end": 40
+        },
+        {
+            "kind": "LeftBrace",
+            "text": "{",
+            "start": 41,
+            "end": 42
+        },
+        {
+            "kind": "RightBrace",
+            "text": "}",
+            "start": 46,
+            "end": 47
+        },
+        {
+            "kind": "Keyword(Union)",
+            "text": "union",
+            "start": 53,
+            "end": 58
+        },
+        {
+            "kind": "Identifier",
+            "text": "C",
+            "start": 59,
+            "end": 60
+        },
+        {
+            "kind": "LeftBrace",
+            "text": "{",
+            "start": 61,
+            "end": 62
+        },
+        {
+            "kind": "RightBrace",
+            "text": "}",
+            "start": 66,
+            "end": 67
+        },
+        {
+            "kind": "Keyword(Micro)",
+            "text": "micro",
+            "start": 71,
+            "end": 76
+        },
+        {
+            "kind": "Identifier",
+            "text": "F",
+            "start": 77,
+            "end": 78
+        },
+        {
+            "kind": "LeftBrace",
+            "text": "{",
+            "start": 79,
+            "end": 80
+        },
+        {
+            "kind": "RightBrace",
+            "text": "}",
+            "start": 85,
+            "end": 86
+        },
+        {
+            "kind": "Eof",
+            "text": "",
+            "start": 86,
+            "end": 86
+        },
+        {
+            "kind": "Eof",
+            "text": "",
+            "start": 86,
+            "end": 86
+        }
+    ],
+    "errors": []
+}

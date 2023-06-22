@@ -1,5 +1,5 @@
-use oak_core::{GreenBuilder, IncrementalCache, Lexer, SourceText, lexer::LexOutput, source::Source};
-use oak_csharp::{CSharpLanguage, CSharpLexer, CSharpSyntaxKind};
+use oak_core::{Lexer, SourceText};
+use oak_csharp::{CSharpLanguage, CSharpLexer};
 
 #[test]
 fn test_csharp_lexer_basic() {
@@ -7,9 +7,8 @@ fn test_csharp_lexer_basic() {
     let language = CSharpLanguage;
     let lexer = CSharpLexer::new(&language);
 
-    let mut builder = GreenBuilder::new(0);
-    let cache = IncrementalCache::new(&mut builder);
-    let result = lexer.lex_incremental(&source, 0, cache);
+    let mut session = oak_core::parser::session::ParseSession::<CSharpLanguage>::default();
+    let result = lexer.lex(&source, &[], &mut session);
 
     assert!(result.result.is_ok());
 }
@@ -20,9 +19,8 @@ fn test_csharp_lexer_keywords() {
     let language = CSharpLanguage;
     let lexer = CSharpLexer::new(&language);
 
-    let mut builder = GreenBuilder::new(0);
-    let cache = IncrementalCache::new(&mut builder);
-    let result = lexer.lex_incremental(&source, 0, cache);
+    let mut session = oak_core::parser::session::ParseSession::<CSharpLanguage>::default();
+    let result = lexer.lex(&source, &[], &mut session);
 
     assert!(result.result.is_ok());
 }
@@ -33,9 +31,8 @@ fn test_csharp_lexer_operators() {
     let language = CSharpLanguage;
     let lexer = CSharpLexer::new(&language);
 
-    let mut builder = GreenBuilder::new(0);
-    let cache = IncrementalCache::new(&mut builder);
-    let result = lexer.lex_incremental(&source, 0, cache);
+    let mut session = oak_core::parser::session::ParseSession::<CSharpLanguage>::default();
+    let result = lexer.lex(&source, &[], &mut session);
 
     assert!(result.result.is_ok());
 }
@@ -46,9 +43,8 @@ fn test_csharp_lexer_strings() {
     let language = CSharpLanguage;
     let lexer = CSharpLexer::new(&language);
 
-    let mut builder = GreenBuilder::new(0);
-    let cache = IncrementalCache::new(&mut builder);
-    let result = lexer.lex_incremental(&source, 0, cache);
+    let mut session = oak_core::parser::session::ParseSession::<CSharpLanguage>::default();
+    let result = lexer.lex(&source, &[], &mut session);
 
     assert!(result.result.is_ok());
 }
@@ -59,9 +55,8 @@ fn test_csharp_lexer_numbers() {
     let language = CSharpLanguage;
     let lexer = CSharpLexer::new(&language);
 
-    let mut builder = GreenBuilder::new(0);
-    let cache = IncrementalCache::new(&mut builder);
-    let result = lexer.lex_incremental(&source, 0, cache);
+    let mut session = oak_core::parser::session::ParseSession::<CSharpLanguage>::default();
+    let result = lexer.lex(&source, &[], &mut session);
 
     assert!(result.result.is_ok());
 }
@@ -72,9 +67,8 @@ fn test_csharp_lexer_comments() {
     let language = CSharpLanguage;
     let lexer = CSharpLexer::new(&language);
 
-    let mut builder = GreenBuilder::new(0);
-    let cache = IncrementalCache::new(&mut builder);
-    let result = lexer.lex_incremental(&source, 0, cache);
+    let mut session = oak_core::parser::session::ParseSession::<CSharpLanguage>::default();
+    let result = lexer.lex(&source, &[], &mut session);
 
     assert!(result.result.is_ok());
 }

@@ -7,9 +7,8 @@ fn test_fortran_lexer() {
     let here = Path::new(env!("CARGO_MANIFEST_DIR"));
     let language = Box::leak(Box::new(FortranLanguage::default()));
     let lexer = FortranLexer::new(language);
-    let test_runner =
-        LexerTester::new(here.join("tests/lexer/fixtures")).with_extension("f90").with_timeout(Duration::from_secs(5));
-    match test_runner.run_tests::<FortranLanguage, _>(lexer) {
+    let test_runner = LexerTester::new(here.join("tests/lexer/fixtures")).with_extension("f90").with_timeout(Duration::from_secs(5));
+    match test_runner.run_tests::<FortranLanguage, _>(&lexer) {
         Ok(()) => println!("Fortran lexer tests passed!"),
         Err(e) => panic!("Fortran lexer tests failed: {}", e),
     }
@@ -17,11 +16,12 @@ fn test_fortran_lexer() {
 
 #[test]
 fn test_peek_behavior() {
-    use oak_core::{SourceText, lexer::LexerState};
+    use oak_core::{LexerState, SourceText, parser::session::ParseSession};
     use oak_fortran::FortranLanguage;
 
     let source = SourceText::new("NESTED_CONSTANT");
-    let mut state = LexerState::<&SourceText, FortranLanguage>::new(&source);
+    let _cache = ParseSession::<FortranLanguage>::default();
+    let mut state = LexerState::<SourceText, FortranLanguage>::new(&source);
 
     println!("初始状态:");
     println!("位置: {}", state.get_position());
@@ -43,14 +43,15 @@ fn test_peek_behavior() {
 
 #[test]
 fn test_fortran_program_parsing() {
-    use oak_core::{Lexer, SourceText};
+    use oak_core::{Lexer, SourceText, parser::session::ParseSession};
     use oak_fortran::{FortranLanguage, FortranLexer};
 
     let source = SourceText::new("program hello\n  print *, 'Hello, World!'\nend program hello");
     let language = Box::leak(Box::new(FortranLanguage::default()));
     let lexer = FortranLexer::new(language);
 
-    let result = lexer.lex(&source);
+    let mut cache = ParseSession::<FortranLanguage>::default();
+    let result = lexer.lex(&source, &[], &mut cache);
 
     println!("测试 Fortran 程序解析:");
     println!("源代码: '{}'", (&source).get_text_from(0));

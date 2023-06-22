@@ -1,42 +1,38 @@
 use crate::{kind::IdlSyntaxKind, language::IdlLanguage};
 use oak_core::{
-    IncrementalCache, Lexer, LexerState, OakError,
-    lexer::{CommentLine, LexOutput, StringConfig, WhitespaceConfig},
+    Lexer, LexerCache, LexerState, OakError,
+    lexer::{LexOutput, WhitespaceConfig},
     source::Source,
 };
 use std::sync::LazyLock;
 
-type State<S: Source> = LexerState<S, IdlLanguage>;
+type State<'s, S> = LexerState<'s, S, IdlLanguage>;
 
 static IDL_WHITESPACE: LazyLock<WhitespaceConfig> = LazyLock::new(|| WhitespaceConfig { unicode_whitespace: true });
-static IDL_COMMENT: LazyLock<CommentLine> = LazyLock::new(|| CommentLine { line_markers: &["//"] });
-static IDL_STRING: LazyLock<StringConfig> = LazyLock::new(|| StringConfig { quotes: &['"'], escape: Some('\\') });
 
 #[derive(Clone)]
 pub struct IdlLexer<'config> {
-    config: &'config IdlLanguage,
+    _config: &'config IdlLanguage,
 }
 
 impl<'config> Lexer<IdlLanguage> for IdlLexer<'config> {
-    fn lex_incremental(
-        &self,
-        source: impl Source,
-        changed: usize,
-        cache: IncrementalCache<IdlLanguage>,
-    ) -> LexOutput<IdlLanguage> {
-        let mut state = LexerState::new_with_cache(source, changed, cache);
+    fn lex<'a, S: Source + ?Sized>(&self, source: &S, _edits: &[oak_core::TextEdit], cache: &'a mut impl LexerCache<IdlLanguage>) -> LexOutput<IdlLanguage> {
+        let mut state = LexerState::new(source);
         let result = self.run(&mut state);
-        state.finish(result)
+        if result.is_ok() {
+            state.add_eof();
+        }
+        state.finish_with_cache(result, cache)
     }
 }
 
 impl<'config> IdlLexer<'config> {
     pub fn new(config: &'config IdlLanguage) -> Self {
-        Self { config }
+        Self { _config: config }
     }
 
     /// 主要的词法分析循环
-    fn run<S: Source>(&self, state: &mut State<S>) -> Result<(), OakError> {
+    fn run<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> Result<(), OakError> {
         while state.not_at_end() {
             let safe_point = state.get_position();
 
@@ -72,29 +68,19 @@ impl<'config> IdlLexer<'config> {
                 continue;
             }
 
-            state.safe_check(safe_point);
+            state.advance_if_dead_lock(safe_point);
         }
 
-        // 添加 EOF token
-        let eof_pos = state.get_position();
-        state.add_token(IdlSyntaxKind::Eof, eof_pos, eof_pos);
         Ok(())
     }
 
     /// 跳过空白字符
-    fn skip_whitespace<S: Source>(&self, state: &mut State<S>) -> bool {
-        match IDL_WHITESPACE.scan(state.rest(), state.get_position(), IdlSyntaxKind::Whitespace) {
-            Some(token) => {
-                state.advance_with(token);
-                return true;
-            }
-            None => {}
-        }
-        false
+    fn skip_whitespace<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
+        IDL_WHITESPACE.scan(state, IdlSyntaxKind::Whitespace)
     }
 
     /// 跳过注释
-    fn skip_comment<S: Source>(&self, state: &mut State<S>) -> bool {
+    fn skip_comment<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start = state.get_position();
         let rest = state.rest();
 
@@ -129,7 +115,7 @@ impl<'config> IdlLexer<'config> {
     }
 
     /// 处理字符串字面量
-    fn lex_string_literal<S: Source>(&self, state: &mut State<S>) -> bool {
+    fn lex_string_literal<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start = state.get_position();
 
         if state.current() == Some('"') {
@@ -160,7 +146,7 @@ impl<'config> IdlLexer<'config> {
     }
 
     /// 处理数字字面量
-    fn lex_number_literal<S: Source>(&self, state: &mut State<S>) -> bool {
+    fn lex_number_literal<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start = state.get_position();
         let first = match state.current() {
             Some(c) => c,
@@ -237,7 +223,7 @@ impl<'config> IdlLexer<'config> {
     }
 
     /// 处理标识符和关键字
-    fn lex_identifier_or_keyword<S: Source>(&self, state: &mut State<S>) -> bool {
+    fn lex_identifier_or_keyword<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start = state.get_position();
         let ch = match state.current() {
             Some(c) => c,
@@ -260,7 +246,7 @@ impl<'config> IdlLexer<'config> {
 
         let end = state.get_position();
         let text = state.get_text_in((start..end).into());
-        let kind = match text {
+        let kind = match text.as_ref() {
             // 基本数据类型
             "void" => IdlSyntaxKind::Void,
             "boolean" => IdlSyntaxKind::Boolean,
@@ -322,7 +308,7 @@ impl<'config> IdlLexer<'config> {
     }
 
     /// 处理预处理器指令
-    fn lex_preprocessor<S: Source>(&self, state: &mut State<S>) -> bool {
+    fn lex_preprocessor<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start = state.get_position();
 
         if state.current() != Some('#') {
@@ -354,7 +340,7 @@ impl<'config> IdlLexer<'config> {
 
         let kind = if state.get_position() > directive_start {
             let directive = state.get_text_in((directive_start..state.get_position()).into());
-            match directive {
+            match directive.as_ref() {
                 "include" => IdlSyntaxKind::Include,
                 "pragma" => IdlSyntaxKind::Pragma,
                 "define" => IdlSyntaxKind::Define,
@@ -384,7 +370,7 @@ impl<'config> IdlLexer<'config> {
     }
 
     /// 处理操作符
-    fn lex_operators<S: Source>(&self, state: &mut State<S>) -> bool {
+    fn lex_operators<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start = state.get_position();
         let rest = state.rest();
 
@@ -441,7 +427,7 @@ impl<'config> IdlLexer<'config> {
     }
 
     /// 处理单字符标记
-    fn lex_single_char_tokens<S: Source>(&self, state: &mut State<S>) -> bool {
+    fn lex_single_char_tokens<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start = state.get_position();
 
         if let Some(ch) = state.current() {

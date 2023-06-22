@@ -1,0 +1,607 @@
+{
+    "success": true,
+    "count": 100,
+    "tokens": [
+        {
+            "kind": "Unit",
+            "text": "unit",
+            "start": 0,
+            "end": 4
+        },
+        {
+            "kind": "Identifier",
+            "text": "DelphiTestFile",
+            "start": 5,
+            "end": 19
+        },
+        {
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 19,
+            "end": 20
+        },
+        {
+            "kind": "Interface",
+            "text": "interface",
+            "start": 24,
+            "end": 33
+        },
+        {
+            "kind": "Uses",
+            "text": "uses",
+            "start": 37,
+            "end": 41
+        },
+        {
+            "kind": "Identifier",
+            "text": "System",
+            "start": 45,
+            "end": 51
+        },
+        {
+            "kind": "Dot",
+            "text": ".",
+            "start": 51,
+            "end": 52
+        },
+        {
+            "kind": "Identifier",
+            "text": "SysUtils",
+            "start": 52,
+            "end": 60
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 60,
+            "end": 61
+        },
+        {
+            "kind": "Identifier",
+            "text": "System",
+            "start": 62,
+            "end": 68
+        },
+        {
+            "kind": "Dot",
+            "text": ".",
+            "start": 68,
+            "end": 69
+        },
+        {
+            "kind": "Identifier",
+            "text": "Classes",
+            "start": 69,
+            "end": 76
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 76,
+            "end": 77
+        },
+        {
+            "kind": "Identifier",
+            "text": "System",
+            "start": 78,
+            "end": 84
+        },
+        {
+            "kind": "Dot",
+            "text": ".",
+            "start": 84,
+            "end": 85
+        },
+        {
+            "kind": "Identifier",
+            "text": "Generics",
+            "start": 85,
+            "end": 93
+        },
+        {
+            "kind": "Dot",
+            "text": ".",
+            "start": 93,
+            "end": 94
+        },
+        {
+            "kind": "Identifier",
+            "text": "Collections",
+            "start": 94,
+            "end": 105
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 105,
+            "end": 106
+        },
+        {
+            "kind": "Identifier",
+            "text": "System",
+            "start": 110,
+            "end": 116
+        },
+        {
+            "kind": "Dot",
+            "text": ".",
+            "start": 116,
+            "end": 117
+        },
+        {
+            "kind": "Identifier",
+            "text": "DateUtils",
+            "start": 117,
+            "end": 126
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 126,
+            "end": 127
+        },
+        {
+            "kind": "Identifier",
+            "text": "System",
+            "start": 128,
+            "end": 134
+        },
+        {
+            "kind": "Dot",
+            "text": ".",
+            "start": 134,
+            "end": 135
+        },
+        {
+            "kind": "Identifier",
+            "text": "Math",
+            "start": 135,
+            "end": 139
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 139,
+            "end": 140
+        },
+        {
+            "kind": "Identifier",
+            "text": "System",
+            "start": 141,
+            "end": 147
+        },
+        {
+            "kind": "Dot",
+            "text": ".",
+            "start": 147,
+            "end": 148
+        },
+        {
+            "kind": "Identifier",
+            "text": "StrUtils",
+            "start": 148,
+            "end": 156
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 156,
+            "end": 157
+        },
+        {
+            "kind": "Identifier",
+            "text": "System",
+            "start": 158,
+            "end": 164
+        },
+        {
+            "kind": "Dot",
+            "text": ".",
+            "start": 164,
+            "end": 165
+        },
+        {
+            "kind": "Identifier",
+            "text": "IOUtils",
+            "start": 165,
+            "end": 172
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 172,
+            "end": 173
+        },
+        {
+            "kind": "Identifier",
+            "text": "Vcl",
+            "start": 177,
+            "end": 180
+        },
+        {
+            "kind": "Dot",
+            "text": ".",
+            "start": 180,
+            "end": 181
+        },
+        {
+            "kind": "Identifier",
+            "text": "Graphics",
+            "start": 181,
+            "end": 189
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 189,
+            "end": 190
+        },
+        {
+            "kind": "Identifier",
+            "text": "Vcl",
+            "start": 191,
+            "end": 194
+        },
+        {
+            "kind": "Dot",
+            "text": ".",
+            "start": 194,
+            "end": 195
+        },
+        {
+            "kind": "Identifier",
+            "text": "Controls",
+            "start": 195,
+            "end": 203
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 203,
+            "end": 204
+        },
+        {
+            "kind": "Identifier",
+            "text": "Vcl",
+            "start": 205,
+            "end": 208
+        },
+        {
+            "kind": "Dot",
+            "text": ".",
+            "start": 208,
+            "end": 209
+        },
+        {
+            "kind": "Identifier",
+            "text": "Forms",
+            "start": 209,
+            "end": 214
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 214,
+            "end": 215
+        },
+        {
+            "kind": "Identifier",
+            "text": "Vcl",
+            "start": 216,
+            "end": 219
+        },
+        {
+            "kind": "Dot",
+            "text": ".",
+            "start": 219,
+            "end": 220
+        },
+        {
+            "kind": "Identifier",
+            "text": "Dialogs",
+            "start": 220,
+            "end": 227
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 227,
+            "end": 228
+        },
+        {
+            "kind": "Identifier",
+            "text": "Vcl",
+            "start": 229,
+            "end": 232
+        },
+        {
+            "kind": "Dot",
+            "text": ".",
+            "start": 232,
+            "end": 233
+        },
+        {
+            "kind": "Identifier",
+            "text": "StdCtrls",
+            "start": 233,
+            "end": 241
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 241,
+            "end": 242
+        },
+        {
+            "kind": "Identifier",
+            "text": "Vcl",
+            "start": 246,
+            "end": 249
+        },
+        {
+            "kind": "Dot",
+            "text": ".",
+            "start": 249,
+            "end": 250
+        },
+        {
+            "kind": "Identifier",
+            "text": "ExtCtrls",
+            "start": 250,
+            "end": 258
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 258,
+            "end": 259
+        },
+        {
+            "kind": "Identifier",
+            "text": "Vcl",
+            "start": 260,
+            "end": 263
+        },
+        {
+            "kind": "Dot",
+            "text": ".",
+            "start": 263,
+            "end": 264
+        },
+        {
+            "kind": "Identifier",
+            "text": "ComCtrls",
+            "start": 264,
+            "end": 272
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 272,
+            "end": 273
+        },
+        {
+            "kind": "Identifier",
+            "text": "Vcl",
+            "start": 274,
+            "end": 277
+        },
+        {
+            "kind": "Dot",
+            "text": ".",
+            "start": 277,
+            "end": 278
+        },
+        {
+            "kind": "Identifier",
+            "text": "Menus",
+            "start": 278,
+            "end": 283
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 283,
+            "end": 284
+        },
+        {
+            "kind": "Identifier",
+            "text": "Vcl",
+            "start": 285,
+            "end": 288
+        },
+        {
+            "kind": "Dot",
+            "text": ".",
+            "start": 288,
+            "end": 289
+        },
+        {
+            "kind": "Identifier",
+            "text": "ToolWin",
+            "start": 289,
+            "end": 296
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 296,
+            "end": 297
+        },
+        {
+            "kind": "Identifier",
+            "text": "Vcl",
+            "start": 298,
+            "end": 301
+        },
+        {
+            "kind": "Dot",
+            "text": ".",
+            "start": 301,
+            "end": 302
+        },
+        {
+            "kind": "Identifier",
+            "text": "ActnList",
+            "start": 302,
+            "end": 310
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 310,
+            "end": 311
+        },
+        {
+            "kind": "Identifier",
+            "text": "Vcl",
+            "start": 315,
+            "end": 318
+        },
+        {
+            "kind": "Dot",
+            "text": ".",
+            "start": 318,
+            "end": 319
+        },
+        {
+            "kind": "Identifier",
+            "text": "ImgList",
+            "start": 319,
+            "end": 326
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 326,
+            "end": 327
+        },
+        {
+            "kind": "Identifier",
+            "text": "Vcl",
+            "start": 328,
+            "end": 331
+        },
+        {
+            "kind": "Dot",
+            "text": ".",
+            "start": 331,
+            "end": 332
+        },
+        {
+            "kind": "Identifier",
+            "text": "Grids",
+            "start": 332,
+            "end": 337
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 337,
+            "end": 338
+        },
+        {
+            "kind": "Identifier",
+            "text": "Vcl",
+            "start": 339,
+            "end": 342
+        },
+        {
+            "kind": "Dot",
+            "text": ".",
+            "start": 342,
+            "end": 343
+        },
+        {
+            "kind": "Identifier",
+            "text": "DBGrids",
+            "start": 343,
+            "end": 350
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 350,
+            "end": 351
+        },
+        {
+            "kind": "Identifier",
+            "text": "Vcl",
+            "start": 352,
+            "end": 355
+        },
+        {
+            "kind": "Dot",
+            "text": ".",
+            "start": 355,
+            "end": 356
+        },
+        {
+            "kind": "Identifier",
+            "text": "DBCtrls",
+            "start": 356,
+            "end": 363
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 363,
+            "end": 364
+        },
+        {
+            "kind": "Identifier",
+            "text": "Vcl",
+            "start": 365,
+            "end": 368
+        },
+        {
+            "kind": "Dot",
+            "text": ".",
+            "start": 368,
+            "end": 369
+        },
+        {
+            "kind": "Identifier",
+            "text": "Mask",
+            "start": 369,
+            "end": 373
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 373,
+            "end": 374
+        },
+        {
+            "kind": "Identifier",
+            "text": "Data",
+            "start": 378,
+            "end": 382
+        },
+        {
+            "kind": "Dot",
+            "text": ".",
+            "start": 382,
+            "end": 383
+        },
+        {
+            "kind": "Identifier",
+            "text": "DB",
+            "start": 383,
+            "end": 385
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 385,
+            "end": 386
+        },
+        {
+            "kind": "Identifier",
+            "text": "Data",
+            "start": 387,
+            "end": 391
+        }
+    ],
+    "errors": []
+}

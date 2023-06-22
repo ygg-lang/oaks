@@ -1,12 +1,13 @@
-use crate::{ast::DelphiRoot, kind::DelphiSyntaxKind};
-use oak_core::Language;
+use crate::ast::DelphiRoot;
+use oak_core::{Language, LanguageCategory};
+use serde::{Deserialize, Serialize};
 
-/// Delphi 语言配置
-#[derive(Debug, Clone)]
+/// Language definition for Delphi programming language
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct DelphiLanguage {
-    /// 是否启用严格语法检查
+    /// Whether to enable strict syntax checking
     pub strict_syntax: bool,
-    /// 是否支持 Unicode 字符串
+    /// Whether to support Unicode strings
     pub unicode_strings: bool,
 }
 
@@ -17,6 +18,10 @@ impl Default for DelphiLanguage {
 }
 
 impl Language for DelphiLanguage {
-    type SyntaxKind = DelphiSyntaxKind;
+    const NAME: &'static str = "delphi";
+    const CATEGORY: LanguageCategory = LanguageCategory::Programming;
+
+    type TokenType = crate::kind::DelphiSyntaxKind;
+    type ElementType = crate::kind::DelphiSyntaxKind;
     type TypedRoot = DelphiRoot;
 }

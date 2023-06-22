@@ -20,15 +20,6 @@ A Solidity parser for the Oak parsing framework, providing robust parsing capabi
 
 ## Installation
 
-Add this to your `Cargo.toml`:
-
-```toml
-[dependencies]
-oak-solidity = "0.1.0"
-```
-
-## Quick Start
-
 ```rust
 use oak::Parser;
 use oak_solidity::SolidityLanguage;

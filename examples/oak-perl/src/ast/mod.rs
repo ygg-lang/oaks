@@ -87,25 +87,10 @@ pub struct PerlIf {
 /// 循环语句
 #[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub enum PerlLoop {
-    While {
-        condition: PerlExpression,
-        body: Vec<PerlStatement>,
-    },
-    Until {
-        condition: PerlExpression,
-        body: Vec<PerlStatement>,
-    },
-    For {
-        init: Option<PerlExpression>,
-        condition: Option<PerlExpression>,
-        update: Option<PerlExpression>,
-        body: Vec<PerlStatement>,
-    },
-    Foreach {
-        variable: String,
-        iterable: PerlExpression,
-        body: Vec<PerlStatement>,
-    },
+    While { condition: PerlExpression, body: Vec<PerlStatement> },
+    Until { condition: PerlExpression, body: Vec<PerlStatement> },
+    For { init: Option<PerlExpression>, condition: Option<PerlExpression>, update: Option<PerlExpression>, body: Vec<PerlStatement> },
+    Foreach { variable: String, iterable: PerlExpression, body: Vec<PerlStatement> },
 }
 
 /// 控制流语句

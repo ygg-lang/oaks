@@ -1,6 +1,6 @@
 [package]
 name = "oak-html"
-description = "High-performance incremental HTML parser for the oak ecosystem with flexible configuration, optimized for web content and document structure processing."
+description = "HTML markup language parser with support for web content and document structure processing."
 categories = ["parsing"]
 keywords = ["parser", "html", "web", "markup"]
 documentation = "https://docs.rs/oak-html"
@@ -14,9 +14,16 @@ edition.workspace = true
 
 [dependencies]
 oak-core = { workspace = true }
-oak-highlight = { workspace = true, optional = true }
-oak-pretty-print = { workspace = true, optional = true }
+oak-highlight = { workspace = true }
+oak-pretty-print = { workspace = true }
+oak-lsp = { workspace = true }
+oak-mcp = { workspace = true, optional = true }
+oak-hover = { workspace = true }
+oak-vfs = { workspace = true }
 serde = { workspace = true }
+futures = { workspace = true }
+axum = { workspace = true, optional = true }
+tokio = { workspace = true, optional = true }
 
 [lib]
 path = "src/lib.rs"
@@ -24,9 +31,10 @@ path = "src/lib.rs"
 [dev-dependencies]
 oak-core = { workspace = true, features = ["testing"] }
 
-
 [features]
 default = []
+mcp = ["dep:oak-mcp"]
+axum = ["mcp", "dep:tokio", "dep:axum", "oak-mcp/axum", "oak-lsp/axum"]
 
 
 [package.metadata.docs.rs]

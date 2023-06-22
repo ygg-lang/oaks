@@ -1,0 +1,607 @@
+{
+    "success": true,
+    "count": 100,
+    "tokens": [
+        {
+            "kind": "Param",
+            "text": "param",
+            "start": 24,
+            "end": 29
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 29,
+            "end": 30
+        },
+        {
+            "kind": "LeftBracket",
+            "text": "[",
+            "start": 36,
+            "end": 37
+        },
+        {
+            "kind": "Identifier",
+            "text": "string",
+            "start": 37,
+            "end": 43
+        },
+        {
+            "kind": "RightBracket",
+            "text": "]",
+            "start": 43,
+            "end": 44
+        },
+        {
+            "kind": "Variable",
+            "text": "$Name",
+            "start": 44,
+            "end": 49
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 50,
+            "end": 51
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "\"World\"",
+            "start": 52,
+            "end": 59
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 59,
+            "end": 60
+        },
+        {
+            "kind": "LeftBracket",
+            "text": "[",
+            "start": 66,
+            "end": 67
+        },
+        {
+            "kind": "Identifier",
+            "text": "int",
+            "start": 67,
+            "end": 70
+        },
+        {
+            "kind": "RightBracket",
+            "text": "]",
+            "start": 70,
+            "end": 71
+        },
+        {
+            "kind": "Variable",
+            "text": "$Count",
+            "start": 71,
+            "end": 77
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 78,
+            "end": 79
+        },
+        {
+            "kind": "NumberLiteral",
+            "text": "1",
+            "start": 80,
+            "end": 81
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 83,
+            "end": 84
+        },
+        {
+            "kind": "Identifier",
+            "text": "Write-Host",
+            "start": 88,
+            "end": 98
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "\"Hello, $Name!\"",
+            "start": 99,
+            "end": 114
+        },
+        {
+            "kind": "Minus",
+            "text": "-",
+            "start": 115,
+            "end": 116
+        },
+        {
+            "kind": "Identifier",
+            "text": "ForegroundColor",
+            "start": 116,
+            "end": 131
+        },
+        {
+            "kind": "Identifier",
+            "text": "Green",
+            "start": 132,
+            "end": 137
+        },
+        {
+            "kind": "Variable",
+            "text": "$numbers",
+            "start": 154,
+            "end": 162
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 163,
+            "end": 164
+        },
+        {
+            "kind": "At",
+            "text": "@",
+            "start": 165,
+            "end": 166
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 166,
+            "end": 167
+        },
+        {
+            "kind": "NumberLiteral",
+            "text": "1",
+            "start": 167,
+            "end": 168
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 168,
+            "end": 169
+        },
+        {
+            "kind": "NumberLiteral",
+            "text": "2",
+            "start": 170,
+            "end": 171
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 171,
+            "end": 172
+        },
+        {
+            "kind": "NumberLiteral",
+            "text": "3",
+            "start": 173,
+            "end": 174
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 174,
+            "end": 175
+        },
+        {
+            "kind": "NumberLiteral",
+            "text": "4",
+            "start": 176,
+            "end": 177
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 177,
+            "end": 178
+        },
+        {
+            "kind": "NumberLiteral",
+            "text": "5",
+            "start": 179,
+            "end": 180
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 180,
+            "end": 181
+        },
+        {
+            "kind": "Variable",
+            "text": "$hashtable",
+            "start": 183,
+            "end": 193
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 194,
+            "end": 195
+        },
+        {
+            "kind": "At",
+            "text": "@",
+            "start": 196,
+            "end": 197
+        },
+        {
+            "kind": "LeftBrace",
+            "text": "{",
+            "start": 197,
+            "end": 198
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "\"key1\"",
+            "start": 204,
+            "end": 210
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 211,
+            "end": 212
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "\"value1\"",
+            "start": 213,
+            "end": 221
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "\"key2\"",
+            "start": 227,
+            "end": 233
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 234,
+            "end": 235
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "\"value2\"",
+            "start": 236,
+            "end": 244
+        },
+        {
+            "kind": "RightBrace",
+            "text": "}",
+            "start": 246,
+            "end": 247
+        },
+        {
+            "kind": "Function",
+            "text": "function",
+            "start": 264,
+            "end": 272
+        },
+        {
+            "kind": "Identifier",
+            "text": "Get-Square",
+            "start": 273,
+            "end": 283
+        },
+        {
+            "kind": "LeftBrace",
+            "text": "{",
+            "start": 284,
+            "end": 285
+        },
+        {
+            "kind": "Param",
+            "text": "param",
+            "start": 291,
+            "end": 296
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 296,
+            "end": 297
+        },
+        {
+            "kind": "LeftBracket",
+            "text": "[",
+            "start": 297,
+            "end": 298
+        },
+        {
+            "kind": "Identifier",
+            "text": "int",
+            "start": 298,
+            "end": 301
+        },
+        {
+            "kind": "RightBracket",
+            "text": "]",
+            "start": 301,
+            "end": 302
+        },
+        {
+            "kind": "Variable",
+            "text": "$Number",
+            "start": 302,
+            "end": 309
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 309,
+            "end": 310
+        },
+        {
+            "kind": "Return",
+            "text": "return",
+            "start": 316,
+            "end": 322
+        },
+        {
+            "kind": "Variable",
+            "text": "$Number",
+            "start": 323,
+            "end": 330
+        },
+        {
+            "kind": "Multiply",
+            "text": "*",
+            "start": 331,
+            "end": 332
+        },
+        {
+            "kind": "Variable",
+            "text": "$Number",
+            "start": 333,
+            "end": 340
+        },
+        {
+            "kind": "RightBrace",
+            "text": "}",
+            "start": 342,
+            "end": 343
+        },
+        {
+            "kind": "For",
+            "text": "for",
+            "start": 356,
+            "end": 359
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 360,
+            "end": 361
+        },
+        {
+            "kind": "Variable",
+            "text": "$i",
+            "start": 361,
+            "end": 363
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 364,
+            "end": 365
+        },
+        {
+            "kind": "NumberLiteral",
+            "text": "0",
+            "start": 366,
+            "end": 367
+        },
+        {
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 367,
+            "end": 368
+        },
+        {
+            "kind": "Variable",
+            "text": "$i",
+            "start": 369,
+            "end": 371
+        },
+        {
+            "kind": "Minus",
+            "text": "-",
+            "start": 372,
+            "end": 373
+        },
+        {
+            "kind": "Identifier",
+            "text": "lt",
+            "start": 373,
+            "end": 375
+        },
+        {
+            "kind": "Variable",
+            "text": "$Count",
+            "start": 376,
+            "end": 382
+        },
+        {
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 382,
+            "end": 383
+        },
+        {
+            "kind": "Variable",
+            "text": "$i",
+            "start": 384,
+            "end": 386
+        },
+        {
+            "kind": "Plus",
+            "text": "++",
+            "start": 386,
+            "end": 388
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 388,
+            "end": 389
+        },
+        {
+            "kind": "LeftBrace",
+            "text": "{",
+            "start": 390,
+            "end": 391
+        },
+        {
+            "kind": "Variable",
+            "text": "$result",
+            "start": 397,
+            "end": 404
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 405,
+            "end": 406
+        },
+        {
+            "kind": "Identifier",
+            "text": "Get-Square",
+            "start": 407,
+            "end": 417
+        },
+        {
+            "kind": "Minus",
+            "text": "-",
+            "start": 418,
+            "end": 419
+        },
+        {
+            "kind": "Identifier",
+            "text": "Number",
+            "start": 419,
+            "end": 425
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 426,
+            "end": 427
+        },
+        {
+            "kind": "Variable",
+            "text": "$i",
+            "start": 427,
+            "end": 429
+        },
+        {
+            "kind": "Plus",
+            "text": "+",
+            "start": 430,
+            "end": 431
+        },
+        {
+            "kind": "NumberLiteral",
+            "text": "1",
+            "start": 432,
+            "end": 433
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 433,
+            "end": 434
+        },
+        {
+            "kind": "Identifier",
+            "text": "Write-Output",
+            "start": 440,
+            "end": 452
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "\"Square of $($i + 1) is $result\"",
+            "start": 453,
+            "end": 485
+        },
+        {
+            "kind": "RightBrace",
+            "text": "}",
+            "start": 487,
+            "end": 488
+        },
+        {
+            "kind": "If",
+            "text": "if",
+            "start": 507,
+            "end": 509
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 510,
+            "end": 511
+        },
+        {
+            "kind": "Variable",
+            "text": "$Count",
+            "start": 511,
+            "end": 517
+        },
+        {
+            "kind": "Minus",
+            "text": "-",
+            "start": 518,
+            "end": 519
+        },
+        {
+            "kind": "Identifier",
+            "text": "gt",
+            "start": 519,
+            "end": 521
+        },
+        {
+            "kind": "NumberLiteral",
+            "text": "5",
+            "start": 522,
+            "end": 523
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 523,
+            "end": 524
+        },
+        {
+            "kind": "LeftBrace",
+            "text": "{",
+            "start": 525,
+            "end": 526
+        },
+        {
+            "kind": "Identifier",
+            "text": "Write-Warning",
+            "start": 532,
+            "end": 545
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "\"Count is greater than 5\"",
+            "start": 546,
+            "end": 571
+        },
+        {
+            "kind": "RightBrace",
+            "text": "}",
+            "start": 573,
+            "end": 574
+        }
+    ],
+    "errors": []
+}

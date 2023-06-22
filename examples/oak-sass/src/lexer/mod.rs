@@ -1,43 +1,39 @@
 use crate::{kind::SassSyntaxKind, language::SassLanguage};
 use oak_core::{
-    IncrementalCache, Lexer, LexerState, OakError,
-    lexer::{CommentLine, LexOutput, StringConfig, WhitespaceConfig},
+    Lexer, LexerState, OakError, TextEdit,
+    lexer::{CommentConfig, LexOutput, LexerCache, StringConfig, WhitespaceConfig},
     source::Source,
 };
 use std::sync::LazyLock;
 
-type State<S: Source> = LexerState<S, SassLanguage>;
+type State<'s, S> = LexerState<'s, S, SassLanguage>;
 
 static SASS_WHITESPACE: LazyLock<WhitespaceConfig> = LazyLock::new(|| WhitespaceConfig { unicode_whitespace: true });
-static SASS_COMMENT: LazyLock<CommentLine> = LazyLock::new(|| CommentLine { line_markers: &["//"] });
+static SASS_COMMENT: LazyLock<CommentConfig> = LazyLock::new(|| CommentConfig { line_marker: "//", block_start: "/*", block_end: "*/", nested_blocks: false });
 static SASS_STRING: LazyLock<StringConfig> = LazyLock::new(|| StringConfig { quotes: &['"'], escape: Some('\\') });
 static SASS_CHAR: LazyLock<StringConfig> = LazyLock::new(|| StringConfig { quotes: &['\''], escape: Some('\\') });
 
-#[derive(Clone)]
-pub struct SassLexer<'config> {
-    config: &'config SassLanguage,
-}
+#[derive(Clone, Default)]
+pub struct SassLexer {}
 
-impl<'config> Lexer<SassLanguage> for SassLexer<'config> {
-    fn lex_incremental(
-        &self,
-        source: impl Source,
-        changed: usize,
-        cache: IncrementalCache<SassLanguage>,
-    ) -> LexOutput<SassLanguage> {
-        let mut state = LexerState::new_with_cache(source, changed, cache);
+impl Lexer<SassLanguage> for SassLexer {
+    fn lex<'a, S: Source + ?Sized>(&self, source: &S, _edits: &[TextEdit], cache: &'a mut impl LexerCache<SassLanguage>) -> LexOutput<SassLanguage> {
+        let mut state = LexerState::new(source);
         let result = self.run(&mut state);
-        state.finish(result)
+        if result.is_ok() {
+            state.add_eof();
+        }
+        state.finish_with_cache(result, cache)
     }
 }
 
-impl<'config> SassLexer<'config> {
-    pub fn new(config: &'config SassLanguage) -> Self {
-        Self { config }
+impl SassLexer {
+    pub fn new(_config: &SassLanguage) -> Self {
+        Self {}
     }
 
     /// 主要的词法分析循环
-    fn run<S: Source>(&self, state: &mut State<S>) -> Result<(), OakError> {
+    fn run<'s, S: Source + ?Sized>(&self, state: &mut State<'s, S>) -> Result<(), OakError> {
         while state.not_at_end() {
             let safe_point = state.get_position();
 
@@ -77,92 +73,32 @@ impl<'config> SassLexer<'config> {
                 continue;
             }
 
-            state.safe_check(safe_point);
+            state.advance_if_dead_lock(safe_point);
         }
 
-        // 添加 EOF token
-        let eof_pos = state.get_position();
-        state.add_token(SassSyntaxKind::Eof, eof_pos, eof_pos);
         Ok(())
     }
 
     /// 跳过空白字符
-    fn skip_whitespace<S: Source>(&self, state: &mut State<S>) -> bool {
-        match SASS_WHITESPACE.scan(state.rest(), state.get_position(), SassSyntaxKind::Whitespace) {
-            Some(token) => {
-                state.advance_with(token);
-                return true;
-            }
-            None => {}
-        }
-        false
+    fn skip_whitespace<'s, S: Source + ?Sized>(&self, state: &mut State<'s, S>) -> bool {
+        SASS_WHITESPACE.scan(state, SassSyntaxKind::Whitespace)
     }
 
-    fn skip_comment<S: Source>(&self, state: &mut State<S>) -> bool {
-        let start = state.get_position();
-        let rest = state.rest();
-        // line comment: // ... until newline
-        if rest.starts_with("//") {
-            state.advance(2);
-            while let Some(ch) = state.peek() {
-                if ch == '\n' || ch == '\r' {
-                    break;
-                }
-                state.advance(ch.len_utf8());
-            }
-            state.add_token(SassSyntaxKind::LineComment, start, state.get_position());
+    fn skip_comment<'s, S: Source + ?Sized>(&self, state: &mut State<'s, S>) -> bool {
+        SASS_COMMENT.scan(state, SassSyntaxKind::LineComment, SassSyntaxKind::BlockComment)
+    }
+
+    fn lex_string_literal<'s, S: Source + ?Sized>(&self, state: &mut State<'s, S>) -> bool {
+        if SASS_STRING.scan(state, SassSyntaxKind::StringLiteral) {
             return true;
         }
-        // block comment: /* ... */
-        if rest.starts_with("/*") {
-            state.advance(2);
-            while let Some(ch) = state.peek() {
-                if ch == '*' && state.peek_next_n(1) == Some('/') {
-                    state.advance(2);
-                    break;
-                }
-                state.advance(ch.len_utf8());
-            }
-            state.add_token(SassSyntaxKind::BlockComment, start, state.get_position());
+        if SASS_CHAR.scan(state, SassSyntaxKind::StringLiteral) {
             return true;
         }
         false
     }
 
-    fn lex_string_literal<S: Source>(&self, state: &mut State<S>) -> bool {
-        let start = state.get_position();
-
-        // normal string: "..." or '...'
-        if let Some(quote) = state.current() {
-            if quote == '"' || quote == '\'' {
-                state.advance(1);
-                let mut escaped = false;
-                while let Some(ch) = state.peek() {
-                    if ch == quote && !escaped {
-                        state.advance(1); // consume closing quote
-                        break;
-                    }
-                    state.advance(ch.len_utf8());
-                    if escaped {
-                        escaped = false;
-                        continue;
-                    }
-                    if ch == '\\' {
-                        escaped = true;
-                        continue;
-                    }
-                    if ch == '\n' || ch == '\r' {
-                        break;
-                    }
-                }
-                state.add_token(SassSyntaxKind::StringLiteral, start, state.get_position());
-                return true;
-            }
-        }
-        false
-    }
-
-    fn lex_number_literal<S: Source>(&self, state: &mut State<S>) -> bool {
+    fn lex_number_literal<'s, S: Source + ?Sized>(&self, state: &mut State<'s, S>) -> bool {
         let start = state.get_position();
         let first = match state.current() {
             Some(c) => c,
@@ -173,12 +109,12 @@ impl<'config> SassLexer<'config> {
         }
 
         let mut is_float = false;
-        state.advance(1);
+        state.advance(first.len_utf8());
 
         // 读取数字部分
-        while let Some(c) = state.peek() {
+        while let Some(c) = state.current() {
             if c.is_ascii_digit() || c == '_' {
-                state.advance(1);
+                state.advance(c.len_utf8());
             }
             else {
                 break;
@@ -186,14 +122,14 @@ impl<'config> SassLexer<'config> {
         }
 
         // fractional part
-        if state.peek() == Some('.') {
-            let n1 = state.peek_next_n(1);
+        if state.current() == Some('.') {
+            let n1 = state.source().get_char_at(state.get_position() + 1);
             if n1.map(|c| c.is_ascii_digit()).unwrap_or(false) {
                 is_float = true;
                 state.advance(1); // consume '.'
-                while let Some(c) = state.peek() {
+                while let Some(c) = state.current() {
                     if c.is_ascii_digit() || c == '_' {
-                        state.advance(1);
+                        state.advance(c.len_utf8());
                     }
                     else {
                         break;
@@ -203,9 +139,9 @@ impl<'config> SassLexer<'config> {
         }
 
         // 单位后缀 (px, em, rem, %, etc.)
-        while let Some(c) = state.peek() {
+        while let Some(c) = state.current() {
             if c.is_ascii_alphabetic() || c == '%' {
-                state.advance(1);
+                state.advance(c.len_utf8());
             }
             else {
                 break;
@@ -217,27 +153,27 @@ impl<'config> SassLexer<'config> {
         true
     }
 
-    fn lex_identifier_or_keyword<S: Source>(&self, state: &mut State<S>) -> bool {
+    fn lex_identifier_or_keyword<'s, S: Source + ?Sized>(&self, state: &mut State<'s, S>) -> bool {
         let start = state.get_position();
         let ch = match state.current() {
             Some(c) => c,
             None => return false,
         };
-        if !(ch.is_ascii_alphabetic() || ch == '_' || ch == '-') {
+        if !(ch.is_ascii_alphabetic() || ch == '_' || ch == '-' || ch == '@' || ch == '!') {
             return false;
         }
-        state.advance(1);
+        state.advance(ch.len_utf8());
         while let Some(c) = state.current() {
             if c.is_ascii_alphanumeric() || c == '_' || c == '-' {
-                state.advance(1);
+                state.advance(c.len_utf8());
             }
             else {
                 break;
             }
         }
         let end = state.get_position();
-        let text = state.get_text_in((start..end).into());
-        let kind = match text {
+        let text = state.source().get_text_in(core::range::Range { start, end });
+        let kind = match text.as_ref() {
             "@import" => SassSyntaxKind::Import,
             "@include" => SassSyntaxKind::Include,
             "@extend" => SassSyntaxKind::Extend,
@@ -259,11 +195,11 @@ impl<'config> SassLexer<'config> {
             "not" => SassSyntaxKind::Not,
             _ => SassSyntaxKind::Identifier,
         };
-        state.add_token(kind, start, state.get_position());
+        state.add_token(kind, start, end);
         true
     }
 
-    fn lex_variable<S: Source>(&self, state: &mut State<S>) -> bool {
+    fn lex_variable<'s, S: Source + ?Sized>(&self, state: &mut State<'s, S>) -> bool {
         let start = state.get_position();
         if state.current() != Some('$') {
             return false;
@@ -271,12 +207,12 @@ impl<'config> SassLexer<'config> {
         state.advance(1);
 
         // 变量名必须以字母或下划线开头
-        if let Some(ch) = state.peek() {
+        if let Some(ch) = state.current() {
             if ch.is_ascii_alphabetic() || ch == '_' {
-                state.advance(1);
-                while let Some(c) = state.peek() {
+                state.advance(ch.len_utf8());
+                while let Some(c) = state.current() {
                     if c.is_ascii_alphanumeric() || c == '_' || c == '-' {
-                        state.advance(1);
+                        state.advance(c.len_utf8());
                     }
                     else {
                         break;
@@ -290,7 +226,7 @@ impl<'config> SassLexer<'config> {
         false
     }
 
-    fn lex_color_literal<S: Source>(&self, state: &mut State<S>) -> bool {
+    fn lex_color_literal<'s, S: Source + ?Sized>(&self, state: &mut State<'s, S>) -> bool {
         let start = state.get_position();
         if state.current() != Some('#') {
             return false;
@@ -298,9 +234,9 @@ impl<'config> SassLexer<'config> {
         state.advance(1);
 
         let mut hex_digits = 0;
-        while let Some(c) = state.peek() {
+        while let Some(c) = state.current() {
             if c.is_ascii_hexdigit() {
-                state.advance(1);
+                state.advance(c.len_utf8());
                 hex_digits += 1;
             }
             else {
@@ -318,16 +254,14 @@ impl<'config> SassLexer<'config> {
         false
     }
 
-    fn lex_operators<S: Source>(&self, state: &mut State<S>) -> bool {
+    fn lex_operators<'s, S: Source + ?Sized>(&self, state: &mut State<'s, S>) -> bool {
         let start = state.get_position();
-        let rest = state.rest();
 
         // 多字符操作符
-        let patterns: &[(&str, SassSyntaxKind)] =
-            &[("==", SassSyntaxKind::EqEq), ("!=", SassSyntaxKind::Ne), ("<=", SassSyntaxKind::Le), (">=", SassSyntaxKind::Ge)];
+        let patterns: &[(&str, SassSyntaxKind)] = &[("==", SassSyntaxKind::EqEq), ("!=", SassSyntaxKind::Ne), ("<=", SassSyntaxKind::Le), (">=", SassSyntaxKind::Ge)];
 
         for (pat, kind) in patterns {
-            if rest.starts_with(pat) {
+            if state.source().get_text_from(start).as_ref().starts_with(pat) {
                 state.advance(pat.len());
                 state.add_token(*kind, start, state.get_position());
                 return true;
@@ -356,7 +290,7 @@ impl<'config> SassLexer<'config> {
         false
     }
 
-    fn lex_single_char_tokens<S: Source>(&self, state: &mut State<S>) -> bool {
+    fn lex_single_char_tokens<'s, S: Source + ?Sized>(&self, state: &mut State<'s, S>) -> bool {
         let start = state.get_position();
         if let Some(ch) = state.current() {
             let kind = match ch {

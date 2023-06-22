@@ -1,4 +1,4 @@
-use oak_core::{SyntaxKind, Token};
+use oak_core::{ElementType, Token, TokenType, UniversalElementRole, UniversalTokenRole};
 
 /// TOML tokens
 pub type TomlToken = Token<TomlTokenKind>;
@@ -62,65 +62,17 @@ pub enum TomlTokenKind {
     Invalid,
 }
 
-impl SyntaxKind for TomlTokenKind {
-    fn is_trivia(&self) -> bool {
-        matches!(self, TomlTokenKind::Whitespace | TomlTokenKind::Comment)
-    }
+impl TokenType for TomlTokenKind {
+    const END_OF_STREAM: Self = Self::Eof;
+    type Role = UniversalTokenRole;
 
-    fn is_comment(&self) -> bool {
-        matches!(self, TomlTokenKind::Comment)
-    }
-
-    fn is_whitespace(&self) -> bool {
-        matches!(self, TomlTokenKind::Whitespace)
-    }
-
-    fn is_token_type(&self) -> bool {
-        matches!(
-            self,
-            TomlTokenKind::BasicString
-                | TomlTokenKind::LiteralString
-                | TomlTokenKind::MultilineBasicString
-                | TomlTokenKind::MultilineLiteralString
-                | TomlTokenKind::Integer
-                | TomlTokenKind::Float
-                | TomlTokenKind::Boolean
-                | TomlTokenKind::OffsetDateTime
-                | TomlTokenKind::LocalDateTime
-                | TomlTokenKind::LocalDate
-                | TomlTokenKind::LocalTime
-                | TomlTokenKind::LeftBrace
-                | TomlTokenKind::RightBrace
-                | TomlTokenKind::LeftBracket
-                | TomlTokenKind::RightBracket
-                | TomlTokenKind::Comma
-                | TomlTokenKind::Dot
-                | TomlTokenKind::Equal
-                | TomlTokenKind::DoubleLeftBracket
-                | TomlTokenKind::DoubleRightBracket
-                | TomlTokenKind::BareKey
-                | TomlTokenKind::QuotedKey
-                | TomlTokenKind::Whitespace
-                | TomlTokenKind::Comment
-                | TomlTokenKind::Eof
-                | TomlTokenKind::Invalid
-        )
-    }
-
-    fn is_element_type(&self) -> bool {
-        matches!(
-            self,
-            TomlTokenKind::Document
-                | TomlTokenKind::Root
-                | TomlTokenKind::Key
-                | TomlTokenKind::Value
-                | TomlTokenKind::KeyValue
-                | TomlTokenKind::Table
-                | TomlTokenKind::ArrayOfTables
-                | TomlTokenKind::Array
-                | TomlTokenKind::InlineTable
-                | TomlTokenKind::ErrorNode
-        )
+    fn role(&self) -> Self::Role {
+        match self {
+            TomlTokenKind::Whitespace => UniversalTokenRole::Whitespace,
+            TomlTokenKind::Comment => UniversalTokenRole::Comment,
+            Self::Eof => UniversalTokenRole::Eof,
+            _ => UniversalTokenRole::None,
+        }
     }
 }
 
@@ -163,6 +115,17 @@ impl core::fmt::Display for TomlTokenKind {
             TomlTokenKind::Comment => write!(f, "Comment"),
             TomlTokenKind::Eof => write!(f, "EOF"),
             TomlTokenKind::Invalid => write!(f, "Invalid"),
+        }
+    }
+}
+
+impl ElementType for TomlTokenKind {
+    type Role = UniversalElementRole;
+
+    fn role(&self) -> Self::Role {
+        match self {
+            TomlTokenKind::Invalid | TomlTokenKind::ErrorNode => UniversalElementRole::Error,
+            _ => UniversalElementRole::None,
         }
     }
 }

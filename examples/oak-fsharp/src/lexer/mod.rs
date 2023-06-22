@@ -1,27 +1,38 @@
 use crate::{kind::FSharpSyntaxKind, language::FSharpLanguage};
 use oak_core::{
-    IncrementalCache, Lexer, LexerState, OakError,
+    Lexer, LexerCache, LexerState, OakError,
     lexer::{LexOutput, WhitespaceConfig},
     source::Source,
 };
 use std::sync::LazyLock;
 
-type State<S: Source> = LexerState<S, FSharpLanguage>;
+type State<'a, S> = LexerState<'a, S, FSharpLanguage>;
 
 static FS_WHITESPACE: LazyLock<WhitespaceConfig> = LazyLock::new(|| WhitespaceConfig { unicode_whitespace: true });
 
 /// F# 词法分析器
 #[derive(Clone)]
 pub struct FSharpLexer<'config> {
-    config: &'config FSharpLanguage,
+    _config: &'config FSharpLanguage,
+}
+
+impl<'config> Lexer<FSharpLanguage> for FSharpLexer<'config> {
+    fn lex<'a, S: Source + ?Sized>(&self, source: &S, _edits: &[oak_core::source::TextEdit], cache: &'a mut impl LexerCache<FSharpLanguage>) -> LexOutput<FSharpLanguage> {
+        let mut state = LexerState::new(source);
+        let result = self.run(&mut state);
+        if result.is_ok() {
+            state.add_eof();
+        }
+        state.finish_with_cache(result, cache)
+    }
 }
 
 impl<'config> FSharpLexer<'config> {
     pub fn new(config: &'config FSharpLanguage) -> Self {
-        Self { config }
+        Self { _config: config }
     }
 
-    fn run<S: Source>(&self, state: &mut State<S>) -> Result<(), OakError> {
+    fn run<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> Result<(), OakError> {
         while state.not_at_end() {
             // 跳过空白字符
             if self.skip_whitespace(state) {
@@ -66,24 +77,15 @@ impl<'config> FSharpLexer<'config> {
             }
         }
 
-        // 添加 EOF token
-        let eof_pos = state.get_position();
-        state.add_token(FSharpSyntaxKind::Eof, eof_pos, eof_pos);
         Ok(())
     }
 
-    fn skip_whitespace<S: Source>(&self, state: &mut State<S>) -> bool {
-        match FS_WHITESPACE.scan(state.rest(), state.get_position(), FSharpSyntaxKind::Whitespace) {
-            Some(token) => {
-                state.advance_with(token);
-                return true;
-            }
-            None => {}
-        }
-        false
+    /// 跳过空白字符
+    fn skip_whitespace<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
+        FS_WHITESPACE.scan(state, FSharpSyntaxKind::Whitespace)
     }
 
-    fn skip_comment<S: Source>(&self, state: &mut State<S>) -> bool {
+    fn skip_comment<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start = state.get_position();
         let rest = state.rest();
 
@@ -126,7 +128,7 @@ impl<'config> FSharpLexer<'config> {
         false
     }
 
-    fn lex_string_literal<S: Source>(&self, state: &mut State<S>) -> bool {
+    fn lex_string_literal<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start = state.get_position();
 
         // 原始字符串: @"..."
@@ -167,7 +169,7 @@ impl<'config> FSharpLexer<'config> {
         false
     }
 
-    fn lex_char_literal<S: Source>(&self, state: &mut State<S>) -> bool {
+    fn lex_char_literal<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start = state.get_position();
 
         if state.peek() == Some('\'') {
@@ -192,7 +194,7 @@ impl<'config> FSharpLexer<'config> {
         false
     }
 
-    fn lex_number<S: Source>(&self, state: &mut State<S>) -> bool {
+    fn lex_number<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         if !state.current().map_or(false, |c| c.is_ascii_digit()) {
             return false;
         }
@@ -238,7 +240,7 @@ impl<'config> FSharpLexer<'config> {
         true
     }
 
-    fn lex_identifier_or_keyword<S: Source>(&self, state: &mut State<S>) -> bool {
+    fn lex_identifier_or_keyword<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         if !state.current().map_or(false, |c| c.is_ascii_alphabetic() || c == '_') {
             return false;
         }
@@ -330,7 +332,7 @@ impl<'config> FSharpLexer<'config> {
         }
     }
 
-    fn lex_operator_or_punctuation<S: Source>(&self, state: &mut State<S>) -> bool {
+    fn lex_operator_or_punctuation<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let current = state.current();
         if current.is_none() {
             return false;
@@ -411,18 +413,5 @@ impl<'config> FSharpLexer<'config> {
         state.advance(1);
         state.add_token(kind, start, state.get_position());
         true
-    }
-}
-
-impl<'config> Lexer<FSharpLanguage> for FSharpLexer<'config> {
-    fn lex_incremental(
-        &self,
-        source: impl Source,
-        changed: usize,
-        cache: IncrementalCache<FSharpLanguage>,
-    ) -> LexOutput<FSharpLanguage> {
-        let mut state = LexerState::new_with_cache(source, changed, cache);
-        let result = self.run(&mut state);
-        state.finish(result)
     }
 }

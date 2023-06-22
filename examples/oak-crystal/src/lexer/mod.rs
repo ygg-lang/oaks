@@ -1,11 +1,26 @@
-use crate::{kind::CrystalSyntaxKind, language::CrystalLanguage};
-use oak_core::{IncrementalCache, Lexer, LexerState, lexer::LexOutput, source::Source};
+pub mod token_type;
+use crate::language::CrystalLanguage;
+use oak_core::{Lexer, LexerCache, LexerState, OakError, TextEdit, lexer::LexOutput, source::Source};
+pub use token_type::CrystalTokenType;
 
-type State<S> = LexerState<S, CrystalLanguage>;
+type State<'a, S> = LexerState<'a, S, CrystalLanguage>;
 
 /// Crystal 词法分析器
+#[derive(Clone)]
 pub struct CrystalLexer<'config> {
+    #[allow(dead_code)]
     config: &'config CrystalLanguage,
+}
+
+impl<'config> Lexer<CrystalLanguage> for CrystalLexer<'config> {
+    fn lex<'a, S: Source + ?Sized>(&self, source: &'a S, _edits: &[TextEdit], mut cache: &'a mut impl LexerCache<CrystalLanguage>) -> LexOutput<CrystalLanguage> {
+        let mut state = LexerState::new(source);
+        let result = self.run(&mut state);
+        if result.is_ok() {
+            state.add_eof();
+        }
+        state.finish_with_cache(result, &mut cache)
+    }
 }
 
 impl<'config> CrystalLexer<'config> {
@@ -13,8 +28,58 @@ impl<'config> CrystalLexer<'config> {
         Self { config }
     }
 
+    /// 主要词法分析循环
+    fn run<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> Result<(), OakError> {
+        while state.not_at_end() {
+            let safe_point = state.get_position();
+
+            if self.skip_whitespace(state) {
+                continue;
+            }
+
+            if self.lex_newline(state) {
+                continue;
+            }
+
+            if self.lex_comment(state) {
+                continue;
+            }
+
+            if self.lex_string(state) {
+                continue;
+            }
+
+            if self.lex_number(state) {
+                continue;
+            }
+
+            if self.lex_keyword_or_identifier(state) {
+                continue;
+            }
+
+            if self.lex_operator(state) {
+                continue;
+            }
+
+            if self.lex_delimiter(state) {
+                continue;
+            }
+
+            // 如果没有匹配任何规则，跳过当前字符并标记错误
+            let start_pos = state.get_position();
+            if let Some(ch) = state.peek() {
+                state.advance(ch.len_utf8());
+                state.add_token(CrystalTokenType::Error, start_pos, state.get_position());
+            }
+
+            state.advance_if_dead_lock(safe_point);
+        }
+
+        Ok(())
+    }
+
     /// 跳过空白字符
-    fn skip_whitespace<S: Source>(&self, state: &mut State<S>) -> bool {
+    fn skip_whitespace<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start_pos = state.get_position();
 
         while let Some(ch) = state.peek() {
@@ -27,7 +92,7 @@ impl<'config> CrystalLexer<'config> {
         }
 
         if state.get_position() > start_pos {
-            state.add_token(CrystalSyntaxKind::Whitespace, start_pos, state.get_position());
+            state.add_token(CrystalTokenType::Whitespace, start_pos, state.get_position());
             true
         }
         else {
@@ -36,12 +101,12 @@ impl<'config> CrystalLexer<'config> {
     }
 
     /// 处理换行
-    fn lex_newline<S: Source>(&self, state: &mut State<S>) -> bool {
+    fn lex_newline<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start_pos = state.get_position();
 
         if let Some('\n') = state.peek() {
             state.advance(1);
-            state.add_token(CrystalSyntaxKind::Newline, start_pos, state.get_position());
+            state.add_token(CrystalTokenType::Newline, start_pos, state.get_position());
             true
         }
         else if let Some('\r') = state.peek() {
@@ -49,7 +114,7 @@ impl<'config> CrystalLexer<'config> {
             if let Some('\n') = state.peek() {
                 state.advance(1);
             }
-            state.add_token(CrystalSyntaxKind::Newline, start_pos, state.get_position());
+            state.add_token(CrystalTokenType::Newline, start_pos, state.get_position());
             true
         }
         else {
@@ -58,7 +123,7 @@ impl<'config> CrystalLexer<'config> {
     }
 
     /// 处理注释
-    fn lex_comment<S: Source>(&self, state: &mut State<S>) -> bool {
+    fn lex_comment<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start_pos = state.get_position();
 
         if let Some('#') = state.peek() {
@@ -72,7 +137,7 @@ impl<'config> CrystalLexer<'config> {
                 state.advance(ch.len_utf8());
             }
 
-            state.add_token(CrystalSyntaxKind::Comment, start_pos, state.get_position());
+            state.add_token(CrystalTokenType::Comment, start_pos, state.get_position());
             true
         }
         else {
@@ -81,7 +146,7 @@ impl<'config> CrystalLexer<'config> {
     }
 
     /// 处理字符串
-    fn lex_string<S: Source>(&self, state: &mut State<S>) -> bool {
+    fn lex_string<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start_pos = state.get_position();
 
         if let Some(quote) = state.peek() {
@@ -104,7 +169,7 @@ impl<'config> CrystalLexer<'config> {
                     }
                 }
 
-                state.add_token(CrystalSyntaxKind::String, start_pos, state.get_position());
+                state.add_token(CrystalTokenType::String, start_pos, state.get_position());
                 true
             }
             else {
@@ -117,7 +182,7 @@ impl<'config> CrystalLexer<'config> {
     }
 
     /// 处理数字
-    fn lex_number<S: Source>(&self, state: &mut State<S>) -> bool {
+    fn lex_number<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start_pos = state.get_position();
 
         if let Some(ch) = state.peek() {
@@ -133,7 +198,7 @@ impl<'config> CrystalLexer<'config> {
                     }
                 }
 
-                state.add_token(CrystalSyntaxKind::Number, start_pos, state.get_position());
+                state.add_token(CrystalTokenType::Number, start_pos, state.get_position());
                 true
             }
             else {
@@ -146,7 +211,7 @@ impl<'config> CrystalLexer<'config> {
     }
 
     /// 处理关键字或标识符
-    fn lex_keyword_or_identifier<S: Source>(&self, state: &mut State<S>) -> bool {
+    fn lex_keyword_or_identifier<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start_pos = state.get_position();
 
         if let Some(ch) = state.peek() {
@@ -162,41 +227,42 @@ impl<'config> CrystalLexer<'config> {
                     }
                 }
 
-                let text = state.get_text_in((start_pos..state.get_position()).into());
-                let token_kind = match text {
+                let end_pos = state.get_position();
+                let text = state.get_text_in(oak_core::Range { start: start_pos, end: end_pos });
+                let token_kind = match text.as_ref() {
                     // Crystal 关键字
-                    "class" => CrystalSyntaxKind::ClassKeyword,
-                    "module" => CrystalSyntaxKind::ModuleKeyword,
-                    "def" => CrystalSyntaxKind::DefKeyword,
-                    "end" => CrystalSyntaxKind::EndKeyword,
-                    "if" => CrystalSyntaxKind::IfKeyword,
-                    "else" => CrystalSyntaxKind::ElseKeyword,
-                    "elsif" => CrystalSyntaxKind::ElsifKeyword,
-                    "unless" => CrystalSyntaxKind::UnlessKeyword,
-                    "case" => CrystalSyntaxKind::CaseKeyword,
-                    "when" => CrystalSyntaxKind::WhenKeyword,
-                    "then" => CrystalSyntaxKind::ThenKeyword,
-                    "while" => CrystalSyntaxKind::WhileKeyword,
-                    "until" => CrystalSyntaxKind::UntilKeyword,
-                    "for" => CrystalSyntaxKind::ForKeyword,
-                    "in" => CrystalSyntaxKind::InKeyword,
-                    "do" => CrystalSyntaxKind::DoKeyword,
-                    "begin" => CrystalSyntaxKind::BeginKeyword,
-                    "rescue" => CrystalSyntaxKind::RescueKeyword,
-                    "ensure" => CrystalSyntaxKind::EnsureKeyword,
-                    "break" => CrystalSyntaxKind::BreakKeyword,
-                    "next" => CrystalSyntaxKind::NextKeyword,
-                    "return" => CrystalSyntaxKind::ReturnKeyword,
-                    "yield" => CrystalSyntaxKind::YieldKeyword,
-                    "super" => CrystalSyntaxKind::SuperKeyword,
-                    "self" => CrystalSyntaxKind::SelfKeyword,
-                    "true" => CrystalSyntaxKind::TrueKeyword,
-                    "false" => CrystalSyntaxKind::FalseKeyword,
-                    "nil" => CrystalSyntaxKind::NilKeyword,
-                    "and" => CrystalSyntaxKind::AndKeyword,
-                    "or" => CrystalSyntaxKind::OrKeyword,
-                    "not" => CrystalSyntaxKind::NotKeyword,
-                    _ => CrystalSyntaxKind::Identifier,
+                    "class" => CrystalTokenType::ClassKeyword,
+                    "module" => CrystalTokenType::ModuleKeyword,
+                    "def" => CrystalTokenType::DefKeyword,
+                    "end" => CrystalTokenType::EndKeyword,
+                    "if" => CrystalTokenType::IfKeyword,
+                    "else" => CrystalTokenType::ElseKeyword,
+                    "elsif" => CrystalTokenType::ElsifKeyword,
+                    "unless" => CrystalTokenType::UnlessKeyword,
+                    "case" => CrystalTokenType::CaseKeyword,
+                    "when" => CrystalTokenType::WhenKeyword,
+                    "then" => CrystalTokenType::ThenKeyword,
+                    "while" => CrystalTokenType::WhileKeyword,
+                    "until" => CrystalTokenType::UntilKeyword,
+                    "for" => CrystalTokenType::ForKeyword,
+                    "in" => CrystalTokenType::InKeyword,
+                    "do" => CrystalTokenType::DoKeyword,
+                    "begin" => CrystalTokenType::BeginKeyword,
+                    "rescue" => CrystalTokenType::RescueKeyword,
+                    "ensure" => CrystalTokenType::EnsureKeyword,
+                    "break" => CrystalTokenType::BreakKeyword,
+                    "next" => CrystalTokenType::NextKeyword,
+                    "return" => CrystalTokenType::ReturnKeyword,
+                    "yield" => CrystalTokenType::YieldKeyword,
+                    "super" => CrystalTokenType::SuperKeyword,
+                    "self" => CrystalTokenType::SelfKeyword,
+                    "true" => CrystalTokenType::TrueKeyword,
+                    "false" => CrystalTokenType::FalseKeyword,
+                    "nil" => CrystalTokenType::NilKeyword,
+                    "and" => CrystalTokenType::AndKeyword,
+                    "or" => CrystalTokenType::OrKeyword,
+                    "not" => CrystalTokenType::NotKeyword,
+                    _ => CrystalTokenType::Identifier,
                 };
 
                 state.add_token(token_kind, start_pos, state.get_position());
@@ -212,7 +278,7 @@ impl<'config> CrystalLexer<'config> {
     }
 
     /// 处理操作符
-    fn lex_operator<S: Source>(&self, state: &mut State<S>) -> bool {
+    fn lex_operator<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start_pos = state.get_position();
 
         if let Some(ch) = state.peek() {
@@ -221,20 +287,20 @@ impl<'config> CrystalLexer<'config> {
                     state.advance(1);
                     if let Some('=') = state.peek() {
                         state.advance(1);
-                        CrystalSyntaxKind::PlusEqual
+                        CrystalTokenType::PlusEqual
                     }
                     else {
-                        CrystalSyntaxKind::Plus
+                        CrystalTokenType::Plus
                     }
                 }
                 '-' => {
                     state.advance(1);
                     if let Some('=') = state.peek() {
                         state.advance(1);
-                        CrystalSyntaxKind::MinusEqual
+                        CrystalTokenType::MinusEqual
                     }
                     else {
-                        CrystalSyntaxKind::Minus
+                        CrystalTokenType::Minus
                     }
                 }
                 '*' => {
@@ -243,66 +309,66 @@ impl<'config> CrystalLexer<'config> {
                         state.advance(1);
                         if let Some('=') = state.peek() {
                             state.advance(1);
-                            CrystalSyntaxKind::StarStarEqual
+                            CrystalTokenType::StarStarEqual
                         }
                         else {
-                            CrystalSyntaxKind::StarStar
+                            CrystalTokenType::StarStar
                         }
                     }
                     else if let Some('=') = state.peek() {
                         state.advance(1);
-                        CrystalSyntaxKind::StarEqual
+                        CrystalTokenType::StarEqual
                     }
                     else {
-                        CrystalSyntaxKind::Star
+                        CrystalTokenType::Star
                     }
                 }
                 '/' => {
                     state.advance(1);
                     if let Some('=') = state.peek() {
                         state.advance(1);
-                        CrystalSyntaxKind::SlashEqual
+                        CrystalTokenType::SlashEqual
                     }
                     else {
-                        CrystalSyntaxKind::Slash
+                        CrystalTokenType::Slash
                     }
                 }
                 '%' => {
                     state.advance(1);
                     if let Some('=') = state.peek() {
                         state.advance(1);
-                        CrystalSyntaxKind::PercentEqual
+                        CrystalTokenType::PercentEqual
                     }
                     else {
-                        CrystalSyntaxKind::Percent
+                        CrystalTokenType::Percent
                     }
                 }
                 '=' => {
                     state.advance(1);
                     if let Some('=') = state.peek() {
                         state.advance(1);
-                        CrystalSyntaxKind::EqualEqual
+                        CrystalTokenType::EqualEqual
                     }
                     else if let Some('~') = state.peek() {
                         state.advance(1);
-                        CrystalSyntaxKind::Match
+                        CrystalTokenType::Match
                     }
                     else {
-                        CrystalSyntaxKind::Equal
+                        CrystalTokenType::Equal
                     }
                 }
                 '!' => {
                     state.advance(1);
                     if let Some('=') = state.peek() {
                         state.advance(1);
-                        CrystalSyntaxKind::NotEqual
+                        CrystalTokenType::NotEqual
                     }
                     else if let Some('~') = state.peek() {
                         state.advance(1);
-                        CrystalSyntaxKind::NotMatch
+                        CrystalTokenType::NotMatch
                     }
                     else {
-                        CrystalSyntaxKind::Not
+                        CrystalTokenType::Not
                     }
                 }
                 '<' => {
@@ -311,44 +377,44 @@ impl<'config> CrystalLexer<'config> {
                         state.advance(1);
                         if let Some('>') = state.peek() {
                             state.advance(1);
-                            CrystalSyntaxKind::Spaceship
+                            CrystalTokenType::Spaceship
                         }
                         else {
-                            CrystalSyntaxKind::LessEqual
+                            CrystalTokenType::LessEqual
                         }
                     }
                     else if let Some('<') = state.peek() {
                         state.advance(1);
                         if let Some('=') = state.peek() {
                             state.advance(1);
-                            CrystalSyntaxKind::LeftShiftEqual
+                            CrystalTokenType::LeftShiftEqual
                         }
                         else {
-                            CrystalSyntaxKind::LeftShift
+                            CrystalTokenType::LeftShift
                         }
                     }
                     else {
-                        CrystalSyntaxKind::Less
+                        CrystalTokenType::Less
                     }
                 }
                 '>' => {
                     state.advance(1);
                     if let Some('=') = state.peek() {
                         state.advance(1);
-                        CrystalSyntaxKind::GreaterEqual
+                        CrystalTokenType::GreaterEqual
                     }
                     else if let Some('>') = state.peek() {
                         state.advance(1);
                         if let Some('=') = state.peek() {
                             state.advance(1);
-                            CrystalSyntaxKind::RightShiftEqual
+                            CrystalTokenType::RightShiftEqual
                         }
                         else {
-                            CrystalSyntaxKind::RightShift
+                            CrystalTokenType::RightShift
                         }
                     }
                     else {
-                        CrystalSyntaxKind::Greater
+                        CrystalTokenType::Greater
                     }
                 }
                 '&' => {
@@ -357,18 +423,18 @@ impl<'config> CrystalLexer<'config> {
                         state.advance(1);
                         if let Some('=') = state.peek() {
                             state.advance(1);
-                            CrystalSyntaxKind::LogicalAndEqual
+                            CrystalTokenType::LogicalAndEqual
                         }
                         else {
-                            CrystalSyntaxKind::LogicalAnd
+                            CrystalTokenType::LogicalAnd
                         }
                     }
                     else if let Some('=') = state.peek() {
                         state.advance(1);
-                        CrystalSyntaxKind::AndEqual
+                        CrystalTokenType::AndEqual
                     }
                     else {
-                        CrystalSyntaxKind::BitwiseAnd
+                        CrystalTokenType::BitwiseAnd
                     }
                 }
                 '|' => {
@@ -377,33 +443,33 @@ impl<'config> CrystalLexer<'config> {
                         state.advance(1);
                         if let Some('=') = state.peek() {
                             state.advance(1);
-                            CrystalSyntaxKind::LogicalOrEqual
+                            CrystalTokenType::LogicalOrEqual
                         }
                         else {
-                            CrystalSyntaxKind::LogicalOr
+                            CrystalTokenType::LogicalOr
                         }
                     }
                     else if let Some('=') = state.peek() {
                         state.advance(1);
-                        CrystalSyntaxKind::OrEqual
+                        CrystalTokenType::OrEqual
                     }
                     else {
-                        CrystalSyntaxKind::BitwiseOr
+                        CrystalTokenType::BitwiseOr
                     }
                 }
                 '^' => {
                     state.advance(1);
                     if let Some('=') = state.peek() {
                         state.advance(1);
-                        CrystalSyntaxKind::XorEqual
+                        CrystalTokenType::XorEqual
                     }
                     else {
-                        CrystalSyntaxKind::BitwiseXor
+                        CrystalTokenType::BitwiseXor
                     }
                 }
                 '~' => {
                     state.advance(1);
-                    CrystalSyntaxKind::BitwiseNot
+                    CrystalTokenType::BitwiseNot
                 }
                 _ => return false,
             };
@@ -417,42 +483,42 @@ impl<'config> CrystalLexer<'config> {
     }
 
     /// 处理分隔符
-    fn lex_delimiter<S: Source>(&self, state: &mut State<S>) -> bool {
+    fn lex_delimiter<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start_pos = state.get_position();
 
         if let Some(ch) = state.peek() {
             let token_kind = match ch {
                 '(' => {
                     state.advance(1);
-                    CrystalSyntaxKind::LeftParen
+                    CrystalTokenType::LeftParen
                 }
                 ')' => {
                     state.advance(1);
-                    CrystalSyntaxKind::RightParen
+                    CrystalTokenType::RightParen
                 }
                 '{' => {
                     state.advance(1);
-                    CrystalSyntaxKind::LeftBrace
+                    CrystalTokenType::LeftBrace
                 }
                 '}' => {
                     state.advance(1);
-                    CrystalSyntaxKind::RightBrace
+                    CrystalTokenType::RightBrace
                 }
                 '[' => {
                     state.advance(1);
-                    CrystalSyntaxKind::LeftBracket
+                    CrystalTokenType::LeftBracket
                 }
                 ']' => {
                     state.advance(1);
-                    CrystalSyntaxKind::RightBracket
+                    CrystalTokenType::RightBracket
                 }
                 ',' => {
                     state.advance(1);
-                    CrystalSyntaxKind::Comma
+                    CrystalTokenType::Comma
                 }
                 ';' => {
                     state.advance(1);
-                    CrystalSyntaxKind::Semicolon
+                    CrystalTokenType::Semicolon
                 }
                 '.' => {
                     state.advance(1);
@@ -460,43 +526,43 @@ impl<'config> CrystalLexer<'config> {
                         state.advance(1);
                         if let Some('.') = state.peek() {
                             state.advance(1);
-                            CrystalSyntaxKind::DotDotDot
+                            CrystalTokenType::DotDotDot
                         }
                         else {
-                            CrystalSyntaxKind::DotDot
+                            CrystalTokenType::DotDot
                         }
                     }
                     else {
-                        CrystalSyntaxKind::Dot
+                        CrystalTokenType::Dot
                     }
                 }
                 ':' => {
                     state.advance(1);
                     if let Some(':') = state.peek() {
                         state.advance(1);
-                        CrystalSyntaxKind::DoubleColon
+                        CrystalTokenType::DoubleColon
                     }
                     else {
-                        CrystalSyntaxKind::Colon
+                        CrystalTokenType::At // In Crystal, colon can be at the end of a symbol or for named arguments
                     }
                 }
                 '?' => {
                     state.advance(1);
-                    CrystalSyntaxKind::Question
+                    CrystalTokenType::Question
                 }
                 '@' => {
                     state.advance(1);
                     if let Some('@') = state.peek() {
                         state.advance(1);
-                        CrystalSyntaxKind::DoubleAt
+                        CrystalTokenType::DoubleAt
                     }
                     else {
-                        CrystalSyntaxKind::At
+                        CrystalTokenType::At
                     }
                 }
                 '$' => {
                     state.advance(1);
-                    CrystalSyntaxKind::Dollar
+                    CrystalTokenType::Dollar
                 }
                 _ => return false,
             };
@@ -507,62 +573,5 @@ impl<'config> CrystalLexer<'config> {
         else {
             false
         }
-    }
-}
-
-impl<'config> Lexer<CrystalLanguage> for CrystalLexer<'config> {
-    fn lex_incremental(
-        &self,
-        source: impl Source,
-        _changed: usize,
-        _cache: IncrementalCache<CrystalLanguage>,
-    ) -> LexOutput<CrystalLanguage> {
-        let mut state = LexerState::new_with_cache(source, _changed, _cache);
-
-        while state.not_at_end() {
-            if self.skip_whitespace(&mut state) {
-                continue;
-            }
-
-            if self.lex_newline(&mut state) {
-                continue;
-            }
-
-            if self.lex_comment(&mut state) {
-                continue;
-            }
-
-            if self.lex_string(&mut state) {
-                continue;
-            }
-
-            if self.lex_number(&mut state) {
-                continue;
-            }
-
-            if self.lex_keyword_or_identifier(&mut state) {
-                continue;
-            }
-
-            if self.lex_operator(&mut state) {
-                continue;
-            }
-
-            if self.lex_delimiter(&mut state) {
-                continue;
-            }
-
-            // 如果没有匹配到任何模式，处理错误字符并前进
-            let start_pos = state.get_position();
-            if let Some(ch) = state.peek() {
-                state.advance(ch.len_utf8());
-                state.add_token(CrystalSyntaxKind::Error, start_pos, state.get_position());
-            }
-            else {
-                break;
-            }
-        }
-
-        state.finish(Ok(()))
     }
 }

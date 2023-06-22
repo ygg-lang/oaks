@@ -1,518 +1,365 @@
 use crate::{kind::CoqSyntaxKind, language::CoqLanguage};
-use oak_core::{IncrementalCache, Lexer, LexerState, lexer::LexOutput, source::Source};
+use oak_core::{
+    Lexer, LexerState, TextEdit,
+    lexer::{LexOutput, LexerCache},
+    source::Source,
+};
 
+/// A lexer for the Coq programming language.
+#[derive(Clone, Debug)]
 pub struct CoqLexer<'config> {
+    #[allow(dead_code)]
     config: &'config CoqLanguage,
 }
 
+type State<'a, S> = LexerState<'a, S, CoqLanguage>;
+
 impl<'config> CoqLexer<'config> {
+    /// Creates a new CoqLexer with the given configuration.
+    ///
+    /// # Arguments
+    ///
+    /// * `config` - A reference to the CoqLanguage configuration
+    ///
+    /// # Returns
+    ///
+    /// A new CoqLexer instance
     pub fn new(config: &'config CoqLanguage) -> Self {
         Self { config }
     }
 
-    /// 跳过空白字符
-    fn skip_whitespace(&self, state: &mut LexerState<impl Source, CoqLanguage>) -> bool {
-        let start_pos = state.get_position();
-
-        while let Some(ch) = state.peek() {
-            if ch == ' ' || ch == '\t' {
-                state.advance(ch.len_utf8());
-            }
-            else {
-                break;
-            }
-        }
-
-        if state.get_position() > start_pos {
-            state.add_token(CoqSyntaxKind::Whitespace, start_pos, state.get_position());
-            true
-        }
-        else {
-            false
-        }
-    }
-
-    /// 处理换行
-    fn lex_newline(&self, state: &mut LexerState<impl Source, CoqLanguage>) -> bool {
-        let start_pos = state.get_position();
-
-        if let Some('\n') = state.peek() {
-            state.advance(1);
-            state.add_token(CoqSyntaxKind::Newline, start_pos, state.get_position());
-            true
-        }
-        else if let Some('\r') = state.peek() {
-            state.advance(1);
-            if let Some('\n') = state.peek() {
-                state.advance(1);
-            }
-            state.add_token(CoqSyntaxKind::Newline, start_pos, state.get_position());
-            true
-        }
-        else {
-            false
-        }
-    }
-
-    /// 处理注释
-    fn lex_comment(&self, state: &mut LexerState<impl Source, CoqLanguage>) -> bool {
-        let start_pos = state.get_position();
-
-        if let Some('(') = state.peek() {
-            if let Some('*') = state.peek_next_n(1) {
-                // Coq 多行注释 (* ... *)
-                state.advance(2);
-                let mut depth = 1;
-
-                while depth > 0 && state.not_at_end() {
-                    if let Some('(') = state.peek() {
-                        if let Some('*') = state.peek_next_n(1) {
-                            state.advance(2);
-                            depth += 1;
-                            continue;
-                        }
-                    }
-                    if let Some('*') = state.peek() {
-                        if let Some(')') = state.peek_next_n(1) {
-                            state.advance(2);
-                            depth -= 1;
-                            continue;
-                        }
-                    }
-                    if let Some(ch) = state.peek() {
-                        state.advance(ch.len_utf8());
-                    }
-                }
-
-                state.add_token(CoqSyntaxKind::Comment, start_pos, state.get_position());
-                true
-            }
-            else {
-                false
-            }
-        }
-        else {
-            false
-        }
-    }
-
-    /// 处理字符串字面量
-    fn lex_string(&self, state: &mut LexerState<impl Source, CoqLanguage>) -> bool {
-        let start_pos = state.get_position();
-
-        if let Some('"') = state.peek() {
-            state.advance(1);
-
-            while let Some(ch) = state.peek() {
-                if ch == '"' {
+    fn lex_internal<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) {
+        while let Some(c) = state.peek() {
+            let start = state.get_position();
+            match c {
+                ' ' | '\t' | '\r' => {
                     state.advance(1);
-                    break;
+                    while let Some(' ' | '\t' | '\r') = state.peek() {
+                        state.advance(1);
+                    }
+                    state.add_token(CoqSyntaxKind::Whitespace, start, state.get_position());
                 }
-                else if ch == '\\' {
-                    // 处理转义字符
+                '\n' => {
                     state.advance(1);
-                    if let Some(escaped) = state.peek() {
-                        state.advance(escaped.len_utf8());
-                    }
+                    state.add_token(CoqSyntaxKind::Newline, start, state.get_position());
                 }
-                else {
-                    state.advance(ch.len_utf8());
-                }
-            }
-
-            state.add_token(CoqSyntaxKind::StringLiteral, start_pos, state.get_position());
-            true
-        }
-        else {
-            false
-        }
-    }
-
-    /// 处理数字字面量
-    fn lex_number(&self, state: &mut LexerState<impl Source, CoqLanguage>) -> bool {
-        let start_pos = state.get_position();
-
-        if let Some(ch) = state.peek() {
-            if ch.is_ascii_digit() {
-                state.advance(ch.len_utf8());
-
-                // 继续读取数字
-                while let Some(ch) = state.peek() {
-                    if ch.is_ascii_digit() {
-                        state.advance(ch.len_utf8());
-                    }
-                    else {
-                        break;
-                    }
-                }
-
-                // 检查小数点
-                if let Some('.') = state.peek() {
-                    if let Some(next_ch) = state.peek_next_n(1) {
-                        if next_ch.is_ascii_digit() {
-                            state.advance(1); // 跳过小数点
-                            while let Some(ch) = state.peek() {
-                                if ch.is_ascii_digit() {
-                                    state.advance(ch.len_utf8());
-                                }
-                                else {
-                                    break;
-                                }
-                            }
-                        }
-                    }
-                }
-
-                state.add_token(CoqSyntaxKind::NumberLiteral, start_pos, state.get_position());
-                true
-            }
-            else {
-                false
-            }
-        }
-        else {
-            false
-        }
-    }
-
-    /// 处理标识符和关键字
-    fn lex_identifier_or_keyword(&self, state: &mut LexerState<impl Source, CoqLanguage>) -> bool {
-        let start_pos = state.get_position();
-
-        if let Some(ch) = state.peek() {
-            if ch.is_ascii_alphabetic() || ch == '_' {
-                state.advance(ch.len_utf8());
-
-                // 继续读取标识符字符
-                while let Some(ch) = state.peek() {
-                    if ch.is_ascii_alphanumeric() || ch == '_' || ch == '\'' {
-                        state.advance(ch.len_utf8());
-                    }
-                    else {
-                        break;
-                    }
-                }
-
-                // 检查是否为关键字
-                let text = state.get_text_in((start_pos..state.get_position()).into());
-                let kind = match text {
-                    "Theorem" => CoqSyntaxKind::Theorem,
-                    "Lemma" => CoqSyntaxKind::Lemma,
-                    "Definition" => CoqSyntaxKind::Definition,
-                    "Fixpoint" => CoqSyntaxKind::Fixpoint,
-                    "Inductive" => CoqSyntaxKind::Inductive,
-                    "Record" => CoqSyntaxKind::Record,
-                    "Module" => CoqSyntaxKind::Module,
-                    "Class" => CoqSyntaxKind::Class,
-                    "Instance" => CoqSyntaxKind::Instance,
-                    "Proof" => CoqSyntaxKind::Proof,
-                    "Qed" => CoqSyntaxKind::Qed,
-                    "End" => CoqSyntaxKind::End,
-                    "match" => CoqSyntaxKind::Match,
-                    "with" => CoqSyntaxKind::With,
-                    "Type" => CoqSyntaxKind::Type,
-                    "Set" => CoqSyntaxKind::Set,
-                    "Prop" => CoqSyntaxKind::Prop,
-                    "forall" => CoqSyntaxKind::Forall,
-                    "fun" => CoqSyntaxKind::Fun,
-                    "let" => CoqSyntaxKind::Let,
-                    "in" => CoqSyntaxKind::In,
-                    "if" => CoqSyntaxKind::If,
-                    "then" => CoqSyntaxKind::Then,
-                    "else" => CoqSyntaxKind::Else,
-                    "intros" => CoqSyntaxKind::Intros,
-                    "simpl" => CoqSyntaxKind::Simpl,
-                    "reflexivity" => CoqSyntaxKind::Reflexivity,
-                    "rewrite" => CoqSyntaxKind::Rewrite,
-                    "apply" => CoqSyntaxKind::Apply,
-                    "exact" => CoqSyntaxKind::Exact,
-                    "assumption" => CoqSyntaxKind::Assumption,
-                    "auto" => CoqSyntaxKind::Auto,
-                    "trivial" => CoqSyntaxKind::Trivial,
-                    "discriminate" => CoqSyntaxKind::Discriminate,
-                    "injection" => CoqSyntaxKind::Injection,
-                    "inversion" => CoqSyntaxKind::Inversion,
-                    "destruct" => CoqSyntaxKind::Destruct,
-                    "induction" => CoqSyntaxKind::Induction,
-                    "generalize" => CoqSyntaxKind::Generalize,
-                    "clear" => CoqSyntaxKind::Clear,
-                    "unfold" => CoqSyntaxKind::Unfold,
-                    "fold" => CoqSyntaxKind::Fold,
-                    "compute" => CoqSyntaxKind::Compute,
-                    "eval" => CoqSyntaxKind::Eval,
-                    "Check" => CoqSyntaxKind::Check,
-                    "Print" => CoqSyntaxKind::Print,
-                    "Search" => CoqSyntaxKind::Search,
-                    "Locate" => CoqSyntaxKind::Locate,
-                    "About" => CoqSyntaxKind::About,
-                    "Show" => CoqSyntaxKind::Show,
-                    "Goal" => CoqSyntaxKind::Goal,
-                    "Goals" => CoqSyntaxKind::Goals,
-                    "Undo" => CoqSyntaxKind::Undo,
-                    "Restart" => CoqSyntaxKind::Restart,
-                    "Abort" => CoqSyntaxKind::Abort,
-                    "Admit" => CoqSyntaxKind::Admit,
-                    "Admitted" => CoqSyntaxKind::Admitted,
-                    "Parameter" => CoqSyntaxKind::Parameter,
-                    "Axiom" => CoqSyntaxKind::Axiom,
-                    "Variable" => CoqSyntaxKind::Variable,
-                    "Hypothesis" => CoqSyntaxKind::Hypothesis,
-                    "Section" => CoqSyntaxKind::Section,
-                    "Chapter" => CoqSyntaxKind::Chapter,
-                    "Require" => CoqSyntaxKind::Require,
-                    "Import" => CoqSyntaxKind::Import,
-                    "Export" => CoqSyntaxKind::Export,
-                    "Open" => CoqSyntaxKind::Open,
-                    "Close" => CoqSyntaxKind::Close,
-                    "Scope" => CoqSyntaxKind::Scope,
-                    "Notation" => CoqSyntaxKind::Notation,
-                    "Infix" => CoqSyntaxKind::Infix,
-                    "Reserved" => CoqSyntaxKind::Reserved,
-                    "Bind" => CoqSyntaxKind::Bind,
-                    "Delimit" => CoqSyntaxKind::Delimit,
-                    "Arguments" => CoqSyntaxKind::Arguments,
-                    "Implicit" => CoqSyntaxKind::Implicit,
-                    "Coercion" => CoqSyntaxKind::Coercion,
-                    "Identity" => CoqSyntaxKind::Identity,
-                    "Canonical" => CoqSyntaxKind::Canonical,
-                    "Structure" => CoqSyntaxKind::Structure,
-                    _ => CoqSyntaxKind::Identifier,
-                };
-
-                state.add_token(kind, start_pos, state.get_position());
-                true
-            }
-            else {
-                false
-            }
-        }
-        else {
-            false
-        }
-    }
-
-    /// 处理操作符和分隔符
-    fn lex_operator_or_delimiter(&self, state: &mut LexerState<impl Source, CoqLanguage>) -> bool {
-        let start_pos = state.get_position();
-
-        if let Some(ch) = state.peek() {
-            let kind = match ch {
                 '(' => {
                     state.advance(1);
-                    CoqSyntaxKind::LeftParen
+                    if let Some('*') = state.peek() {
+                        state.advance(1);
+                        self.lex_comment(state, start);
+                    }
+                    else {
+                        state.add_token(CoqSyntaxKind::LeftParen, start, state.get_position());
+                    }
                 }
                 ')' => {
                     state.advance(1);
-                    CoqSyntaxKind::RightParen
+                    state.add_token(CoqSyntaxKind::RightParen, start, state.get_position());
                 }
                 '[' => {
                     state.advance(1);
-                    CoqSyntaxKind::LeftBracket
+                    state.add_token(CoqSyntaxKind::LeftBracket, start, state.get_position());
                 }
                 ']' => {
                     state.advance(1);
-                    CoqSyntaxKind::RightBracket
+                    state.add_token(CoqSyntaxKind::RightBracket, start, state.get_position());
                 }
                 '{' => {
                     state.advance(1);
-                    CoqSyntaxKind::LeftBrace
+                    state.add_token(CoqSyntaxKind::LeftBrace, start, state.get_position());
                 }
                 '}' => {
                     state.advance(1);
-                    CoqSyntaxKind::RightBrace
-                }
-                ':' => {
-                    state.advance(1);
-                    CoqSyntaxKind::Colon
-                }
-                ';' => {
-                    state.advance(1);
-                    CoqSyntaxKind::Semicolon
+                    state.add_token(CoqSyntaxKind::RightBrace, start, state.get_position());
                 }
                 ',' => {
                     state.advance(1);
-                    CoqSyntaxKind::Comma
+                    state.add_token(CoqSyntaxKind::Comma, start, state.get_position());
+                }
+                ';' => {
+                    state.advance(1);
+                    state.add_token(CoqSyntaxKind::Semicolon, start, state.get_position());
                 }
                 '.' => {
                     state.advance(1);
-                    CoqSyntaxKind::Dot
+                    state.add_token(CoqSyntaxKind::Dot, start, state.get_position());
                 }
-                '|' => {
+                ':' => {
                     state.advance(1);
-                    CoqSyntaxKind::Pipe
-                }
-                '_' => {
-                    state.advance(1);
-                    CoqSyntaxKind::Underscore
+                    if let Some(':') = state.peek() {
+                        state.advance(1);
+                        if let Some('=') = state.peek() {
+                            state.advance(1);
+                            state.add_token(CoqSyntaxKind::DoubleColonEqual, start, state.get_position());
+                        }
+                        else {
+                            state.add_token(CoqSyntaxKind::DoubleColon, start, state.get_position());
+                        }
+                    }
+                    else if let Some('=') = state.peek() {
+                        state.advance(1);
+                        state.add_token(CoqSyntaxKind::ColonEqual, start, state.get_position());
+                    }
+                    else {
+                        state.add_token(CoqSyntaxKind::Colon, start, state.get_position());
+                    }
                 }
                 '=' => {
                     state.advance(1);
                     if let Some('>') = state.peek() {
                         state.advance(1);
-                        CoqSyntaxKind::DoubleArrow
+                        state.add_token(CoqSyntaxKind::DoubleArrow, start, state.get_position());
                     }
                     else {
-                        CoqSyntaxKind::Equal
+                        state.add_token(CoqSyntaxKind::Equal, start, state.get_position());
                     }
-                }
-                '-' => {
-                    state.advance(1);
-                    if let Some('>') = state.peek() {
-                        state.advance(1);
-                        CoqSyntaxKind::Arrow
-                    }
-                    else {
-                        CoqSyntaxKind::Minus
-                    }
-                }
-                '+' => {
-                    state.advance(1);
-                    CoqSyntaxKind::Plus
-                }
-                '*' => {
-                    state.advance(1);
-                    CoqSyntaxKind::Star
-                }
-                '/' => {
-                    state.advance(1);
-                    CoqSyntaxKind::Slash
-                }
-                '%' => {
-                    state.advance(1);
-                    CoqSyntaxKind::Percent
                 }
                 '<' => {
                     state.advance(1);
-                    if let Some('=') = state.peek() {
+                    if let Some('-') = state.peek() {
                         state.advance(1);
-                        CoqSyntaxKind::LessEqual
+                        state.add_token(CoqSyntaxKind::LeftArrow, start, state.get_position());
                     }
                     else if let Some('>') = state.peek() {
                         state.advance(1);
-                        CoqSyntaxKind::NotEqual
+                        state.add_token(CoqSyntaxKind::DoubleArrow, start, state.get_position());
+                    }
+                    else if let Some('=') = state.peek() {
+                        state.advance(1);
+                        state.add_token(CoqSyntaxKind::LessEqual, start, state.get_position());
                     }
                     else {
-                        CoqSyntaxKind::Less
+                        state.add_token(CoqSyntaxKind::Less, start, state.get_position());
                     }
                 }
                 '>' => {
                     state.advance(1);
                     if let Some('=') = state.peek() {
                         state.advance(1);
-                        CoqSyntaxKind::GreaterEqual
+                        state.add_token(CoqSyntaxKind::GreaterEqual, start, state.get_position());
                     }
                     else {
-                        CoqSyntaxKind::Greater
+                        state.add_token(CoqSyntaxKind::Greater, start, state.get_position());
+                    }
+                }
+                '|' => {
+                    state.advance(1);
+                    if let Some('-') = state.peek() {
+                        state.advance(1);
+                        state.add_token(CoqSyntaxKind::Turnstile, start, state.get_position());
+                    }
+                    else {
+                        state.add_token(CoqSyntaxKind::Pipe, start, state.get_position());
+                    }
+                }
+                '-' => {
+                    state.advance(1);
+                    if let Some('>') = state.peek() {
+                        state.advance(1);
+                        state.add_token(CoqSyntaxKind::Arrow, start, state.get_position());
+                    }
+                    else {
+                        state.add_token(CoqSyntaxKind::Minus, start, state.get_position());
+                    }
+                }
+                '+' => {
+                    state.advance(1);
+                    state.add_token(CoqSyntaxKind::Plus, start, state.get_position());
+                }
+                '*' => {
+                    state.advance(1);
+                    state.add_token(CoqSyntaxKind::Star, start, state.get_position());
+                }
+                '/' => {
+                    state.advance(1);
+                    if let Some('\\') = state.peek() {
+                        state.advance(1);
+                        state.add_token(CoqSyntaxKind::And, start, state.get_position());
+                    }
+                    else {
+                        state.add_token(CoqSyntaxKind::Slash, start, state.get_position());
+                    }
+                }
+                '\\' => {
+                    state.advance(1);
+                    if let Some('/') = state.peek() {
+                        state.advance(1);
+                        state.add_token(CoqSyntaxKind::Or, start, state.get_position());
+                    }
+                    else {
+                        state.add_token(CoqSyntaxKind::Backslash, start, state.get_position());
                     }
                 }
                 '~' => {
                     state.advance(1);
-                    CoqSyntaxKind::Tilde
-                }
-                '@' => {
-                    state.advance(1);
-                    CoqSyntaxKind::At
-                }
-                '?' => {
-                    state.advance(1);
-                    CoqSyntaxKind::Question
+                    state.add_token(CoqSyntaxKind::Tilde, start, state.get_position());
                 }
                 '!' => {
                     state.advance(1);
-                    CoqSyntaxKind::Exclamation
+                    state.add_token(CoqSyntaxKind::Exclamation, start, state.get_position());
                 }
-                '&' => {
+                '?' => {
                     state.advance(1);
-                    CoqSyntaxKind::Ampersand
+                    state.add_token(CoqSyntaxKind::Question, start, state.get_position());
+                }
+                '@' => {
+                    state.advance(1);
+                    state.add_token(CoqSyntaxKind::At, start, state.get_position());
                 }
                 '#' => {
                     state.advance(1);
-                    CoqSyntaxKind::Hash
+                    state.add_token(CoqSyntaxKind::Hash, start, state.get_position());
                 }
                 '$' => {
                     state.advance(1);
-                    CoqSyntaxKind::Dollar
+                    state.add_token(CoqSyntaxKind::Dollar, start, state.get_position());
                 }
-                '\\' => {
+                '%' => {
                     state.advance(1);
-                    CoqSyntaxKind::Backslash
+                    state.add_token(CoqSyntaxKind::Percent, start, state.get_position());
                 }
                 '^' => {
                     state.advance(1);
-                    CoqSyntaxKind::Caret
+                    state.add_token(CoqSyntaxKind::Caret, start, state.get_position());
                 }
-                _ => return false,
-            };
+                '&' => {
+                    state.advance(1);
+                    state.add_token(CoqSyntaxKind::Ampersand, start, state.get_position());
+                }
+                '"' => {
+                    state.advance(1);
+                    self.lex_string(state, start);
+                }
+                '0'..='9' => {
+                    state.advance(1);
+                    while let Some('0'..='9') = state.peek() {
+                        state.advance(1);
+                    }
+                    state.add_token(CoqSyntaxKind::NumberLiteral, start, state.get_position());
+                }
+                'a'..='z' | 'A'..='Z' | '_' => {
+                    state.advance(1);
+                    while let Some('a'..='z' | 'A'..='Z' | '0'..='9' | '_' | '\'') = state.peek() {
+                        state.advance(1);
+                    }
+                    let end = state.get_position();
+                    let text = state.get_text_in((start..end).into());
+                    let kind = match text.as_ref() {
+                        "Theorem" => CoqSyntaxKind::Theorem,
+                        "Lemma" => CoqSyntaxKind::Lemma,
+                        "Remark" => CoqSyntaxKind::Remark,
+                        "Fact" => CoqSyntaxKind::Fact,
+                        "Corollary" => CoqSyntaxKind::Corollary,
+                        "Proposition" => CoqSyntaxKind::Proposition,
+                        "Definition" => CoqSyntaxKind::Definition,
+                        "Example" => CoqSyntaxKind::Example,
+                        "Fixpoint" => CoqSyntaxKind::Fixpoint,
+                        "CoFixpoint" => CoqSyntaxKind::CoFixpoint,
+                        "Inductive" => CoqSyntaxKind::Inductive,
+                        "CoInductive" => CoqSyntaxKind::CoInductive,
+                        "Record" => CoqSyntaxKind::Record,
+                        "Structure" => CoqSyntaxKind::Structure,
+                        "Variant" => CoqSyntaxKind::Variant,
+                        "Module" => CoqSyntaxKind::Module,
+                        "Section" => CoqSyntaxKind::Section,
+                        "End" => CoqSyntaxKind::End,
+                        "Require" => CoqSyntaxKind::Require,
+                        "Import" => CoqSyntaxKind::Import,
+                        "Export" => CoqSyntaxKind::Export,
+                        "Proof" => CoqSyntaxKind::Proof,
+                        "Qed" => CoqSyntaxKind::Qed,
+                        "Defined" => CoqSyntaxKind::Defined,
+                        "Admitted" => CoqSyntaxKind::Admitted,
+                        "Abort" => CoqSyntaxKind::Abort,
+                        "Match" => CoqSyntaxKind::Match,
+                        "With" => CoqSyntaxKind::With,
+                        "Forall" => CoqSyntaxKind::Forall,
+                        "Exists" => CoqSyntaxKind::Exists,
+                        "Fun" => CoqSyntaxKind::Fun,
+                        "Let" => CoqSyntaxKind::Let,
+                        "In" => CoqSyntaxKind::In,
+                        "If" => CoqSyntaxKind::If,
+                        "Then" => CoqSyntaxKind::Then,
+                        "Else" => CoqSyntaxKind::Else,
+                        "Type" => CoqSyntaxKind::Type,
+                        "Prop" => CoqSyntaxKind::Prop,
+                        "Set" => CoqSyntaxKind::Set,
+                        "Check" => CoqSyntaxKind::Check,
+                        "Print" => CoqSyntaxKind::Print,
+                        "Search" => CoqSyntaxKind::Search,
+                        "Locate" => CoqSyntaxKind::Locate,
+                        "About" => CoqSyntaxKind::About,
+                        _ => CoqSyntaxKind::Identifier,
+                    };
+                    state.add_token(kind, start, end);
+                }
+                _ => {
+                    state.advance(1);
+                    state.add_token(CoqSyntaxKind::Error, start, state.get_position());
+                }
+            }
+        }
+    }
 
-            state.add_token(kind, start_pos, state.get_position());
-            true
+    fn lex_comment<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>, start: usize) {
+        let mut depth = 1;
+        while let Some(c) = state.peek() {
+            match c {
+                '(' => {
+                    state.advance(1);
+                    if let Some('*') = state.peek() {
+                        state.advance(1);
+                        depth += 1;
+                    }
+                }
+                '*' => {
+                    state.advance(1);
+                    if let Some(')') = state.peek() {
+                        state.advance(1);
+                        depth -= 1;
+                        if depth == 0 {
+                            state.add_token(CoqSyntaxKind::Comment, start, state.get_position());
+                            return;
+                        }
+                    }
+                }
+                _ => {
+                    state.advance(1);
+                }
+            }
         }
-        else {
-            false
+        state.add_token(CoqSyntaxKind::Comment, start, state.get_position());
+    }
+
+    fn lex_string<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>, start: usize) {
+        while let Some(c) = state.peek() {
+            match c {
+                '"' => {
+                    state.advance(1);
+                    if let Some('"') = state.peek() {
+                        state.advance(1); // Escaped quote
+                    }
+                    else {
+                        state.add_token(CoqSyntaxKind::StringLiteral, start, state.get_position());
+                        return;
+                    }
+                }
+                _ => {
+                    state.advance(1);
+                }
+            }
         }
+        state.add_token(CoqSyntaxKind::StringLiteral, start, state.get_position());
     }
 }
 
 impl<'config> Lexer<CoqLanguage> for CoqLexer<'config> {
-    fn lex_incremental(
-        &self,
-        source: impl Source,
-        _changed: usize,
-        _cache: IncrementalCache<CoqLanguage>,
-    ) -> LexOutput<CoqLanguage> {
-        let mut state = LexerState::new_with_cache(source, _changed, _cache);
-        while state.not_at_end() {
-            // 跳过空白字符
-            if self.skip_whitespace(&mut state) {
-                continue;
-            }
-
-            // 处理换行
-            if self.lex_newline(&mut state) {
-                continue;
-            }
-
-            // 处理注释
-            if self.lex_comment(&mut state) {
-                continue;
-            }
-
-            // 处理字符串字面量
-            if self.lex_string(&mut state) {
-                continue;
-            }
-
-            // 处理数字字面量
-            if self.lex_number(&mut state) {
-                continue;
-            }
-
-            // 处理标识符或关键字
-            if self.lex_identifier_or_keyword(&mut state) {
-                continue;
-            }
-
-            // 处理操作符和分隔符
-            if self.lex_operator_or_delimiter(&mut state) {
-                continue;
-            }
-
-            // 如果所有规则都不匹配，检查是否到达文件末尾
-            if let Some(ch) = state.peek() {
-                // 跳过当前字符并标记为错误
-                let start_pos = state.get_position();
-                state.advance(ch.len_utf8());
-                state.add_token(CoqSyntaxKind::Error, start_pos, state.get_position());
-            }
-            else {
-                // 到达文件末尾，退出循环
-                break;
-            }
-        }
-
-        // 添加 EOF token
-        let pos = state.get_position();
-        state.add_token(CoqSyntaxKind::Eof, pos, pos);
-        state.finish(Ok(()))
+    fn lex<'a, S: Source + ?Sized>(&self, text: &S, _edits: &[TextEdit], cache: &'a mut impl LexerCache<CoqLanguage>) -> LexOutput<CoqLanguage> {
+        let mut state: State<'_, S> = LexerState::new(text);
+        // TODO: Implement incremental lexing using edits and cache
+        self.lex_internal(&mut state);
+        state.add_eof();
+        state.finish_with_cache(Ok(()), cache)
     }
 }

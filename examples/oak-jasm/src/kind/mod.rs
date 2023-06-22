@@ -1,9 +1,11 @@
 use crate::syntax::JasmSyntaxKind;
-use std::range::Range;
+use core::range::Range;
+use serde::{Deserialize, Serialize};
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct JasmToken {
     pub kind: JasmSyntaxKind,
+    #[serde(with = "oak_core::serde_range")]
     pub span: Range<usize>,
     pub text: String,
 }

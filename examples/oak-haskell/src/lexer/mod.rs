@@ -1,21 +1,23 @@
 use crate::{kind::HaskellSyntaxKind, language::HaskellLanguage};
-use oak_core::{IncrementalCache, Lexer, LexerState, SourceText, lexer::LexOutput, source::Source};
+use oak_core::{Lexer, LexerCache, LexerState, TextEdit, lexer::LexOutput, source::Source};
+
+type State<'a, S> = LexerState<'a, S, HaskellLanguage>;
 
 #[derive(Clone)]
 pub struct HaskellLexer<'config> {
-    config: &'config HaskellLanguage,
+    _config: &'config HaskellLanguage,
 }
 
 impl<'config> HaskellLexer<'config> {
     pub fn new(config: &'config HaskellLanguage) -> Self {
-        Self { config }
+        Self { _config: config }
     }
 
-    fn skip_whitespace<S: Source>(&self, state: &mut LexerState<S, HaskellLanguage>) -> bool {
+    fn skip_whitespace<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start_pos = state.get_position();
         while let Some(ch) = state.peek() {
             if ch == ' ' || ch == '\t' {
-                state.advance(1);
+                state.bump();
             }
             else {
                 break;
@@ -31,18 +33,18 @@ impl<'config> HaskellLexer<'config> {
         }
     }
 
-    fn lex_newline<S: Source>(&self, state: &mut LexerState<S, HaskellLanguage>) -> bool {
+    fn lex_newline<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start_pos = state.get_position();
 
         if let Some('\n') = state.peek() {
-            state.advance(1);
+            state.bump();
             state.add_token(HaskellSyntaxKind::Newline, start_pos, state.get_position());
             true
         }
         else if let Some('\r') = state.peek() {
-            state.advance(1);
+            state.bump();
             if let Some('\n') = state.peek() {
-                state.advance(1);
+                state.bump();
             }
             state.add_token(HaskellSyntaxKind::Newline, start_pos, state.get_position());
             true
@@ -52,7 +54,7 @@ impl<'config> HaskellLexer<'config> {
         }
     }
 
-    fn lex_single_line_comment<S: Source>(&self, state: &mut LexerState<S, HaskellLanguage>) -> bool {
+    fn lex_single_line_comment<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start_pos = state.get_position();
 
         if let Some('-') = state.peek() {
@@ -62,7 +64,7 @@ impl<'config> HaskellLexer<'config> {
                     if ch == '\n' || ch == '\r' {
                         break;
                     }
-                    state.advance(1);
+                    state.bump();
                 }
                 state.add_token(HaskellSyntaxKind::Comment, start_pos, state.get_position());
                 true
@@ -76,7 +78,7 @@ impl<'config> HaskellLexer<'config> {
         }
     }
 
-    fn lex_multi_line_comment<S: Source>(&self, state: &mut LexerState<S, HaskellLanguage>) -> bool {
+    fn lex_multi_line_comment<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start_pos = state.get_position();
 
         if let Some('{') = state.peek() {
@@ -96,7 +98,7 @@ impl<'config> HaskellLexer<'config> {
                         }
                     }
                     else {
-                        state.advance(1);
+                        state.bump();
                     }
                 }
                 state.add_token(HaskellSyntaxKind::Comment, start_pos, state.get_position());
@@ -111,16 +113,16 @@ impl<'config> HaskellLexer<'config> {
         }
     }
 
-    fn lex_identifier_or_keyword<S: Source>(&self, state: &mut LexerState<S, HaskellLanguage>) -> bool {
+    fn lex_identifier_or_keyword<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start_pos = state.get_position();
 
         if let Some(ch) = state.peek() {
             if ch.is_ascii_alphabetic() || ch == '_' {
-                state.advance(1);
+                state.bump();
 
                 while let Some(ch) = state.peek() {
                     if ch.is_ascii_alphanumeric() || ch == '_' || ch == '\'' {
-                        state.advance(1);
+                        state.bump();
                     }
                     else {
                         break;
@@ -170,22 +172,22 @@ impl<'config> HaskellLexer<'config> {
         }
     }
 
-    fn lex_number<S: Source>(&self, state: &mut LexerState<S, HaskellLanguage>) -> bool {
+    fn lex_number<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start_pos = state.get_position();
 
         if let Some(ch) = state.peek() {
             if ch.is_ascii_digit() {
-                state.advance(1);
+                state.bump();
 
                 while let Some(ch) = state.peek() {
                     if ch.is_ascii_digit() {
-                        state.advance(1);
+                        state.bump();
                     }
                     else if ch == '.' {
-                        state.advance(1);
+                        state.bump();
                         while let Some(ch) = state.peek() {
                             if ch.is_ascii_digit() {
-                                state.advance(ch.len_utf8());
+                                state.bump();
                             }
                             else {
                                 break;
@@ -210,26 +212,26 @@ impl<'config> HaskellLexer<'config> {
         }
     }
 
-    fn lex_string<S: Source>(&self, state: &mut LexerState<S, HaskellLanguage>) -> bool {
+    fn lex_string<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start_pos = state.get_position();
 
         if let Some('"') = state.peek() {
-            state.advance(1);
+            state.bump();
 
             while let Some(ch) = state.peek() {
                 if ch == '"' {
-                    state.advance(1);
+                    state.bump();
                     state.add_token(HaskellSyntaxKind::StringLiteral, start_pos, state.get_position());
                     return true;
                 }
                 else if ch == '\\' {
-                    state.advance(1);
+                    state.bump();
                     if let Some(_) = state.peek() {
-                        state.advance(1);
+                        state.bump();
                     }
                 }
                 else {
-                    state.advance(1);
+                    state.bump();
                 }
             }
 
@@ -241,26 +243,26 @@ impl<'config> HaskellLexer<'config> {
         }
     }
 
-    fn lex_char<S: Source>(&self, state: &mut LexerState<S, HaskellLanguage>) -> bool {
+    fn lex_char<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start_pos = state.get_position();
 
         if let Some('\'') = state.peek() {
-            state.advance(1);
+            state.bump();
 
             if let Some(ch) = state.peek() {
                 if ch == '\\' {
-                    state.advance(1);
+                    state.bump();
                     if let Some(_) = state.peek() {
-                        state.advance(1);
+                        state.bump();
                     }
                 }
                 else if ch != '\'' {
-                    state.advance(1);
+                    state.bump();
                 }
             }
 
             if let Some('\'') = state.peek() {
-                state.advance(1);
+                state.bump();
                 state.add_token(HaskellSyntaxKind::CharLiteral, start_pos, state.get_position());
                 true
             }
@@ -274,15 +276,15 @@ impl<'config> HaskellLexer<'config> {
         }
     }
 
-    fn lex_operators<S: Source>(&self, state: &mut LexerState<S, HaskellLanguage>) -> bool {
+    fn lex_operators<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start_pos = state.get_position();
 
         if let Some(ch) = state.peek() {
             let token_kind = match ch {
                 '+' => {
-                    state.advance(1);
+                    state.bump();
                     if let Some('+') = state.peek() {
-                        state.advance(1);
+                        state.bump();
                         HaskellSyntaxKind::Append
                     }
                     else {
@@ -290,9 +292,9 @@ impl<'config> HaskellLexer<'config> {
                     }
                 }
                 '-' => {
-                    state.advance(1);
+                    state.bump();
                     if let Some('>') = state.peek() {
-                        state.advance(1);
+                        state.bump();
                         HaskellSyntaxKind::Arrow
                     }
                     else {
@@ -300,17 +302,17 @@ impl<'config> HaskellLexer<'config> {
                     }
                 }
                 '*' => {
-                    state.advance(1);
+                    state.bump();
                     HaskellSyntaxKind::Star
                 }
                 '/' => {
-                    state.advance(1);
+                    state.bump();
                     HaskellSyntaxKind::Slash
                 }
                 '=' => {
-                    state.advance(1);
+                    state.bump();
                     if let Some('=') = state.peek() {
-                        state.advance(1);
+                        state.bump();
                         HaskellSyntaxKind::Equal
                     }
                     else {
@@ -318,13 +320,13 @@ impl<'config> HaskellLexer<'config> {
                     }
                 }
                 '<' => {
-                    state.advance(1);
+                    state.bump();
                     if let Some('=') = state.peek() {
-                        state.advance(1);
+                        state.bump();
                         HaskellSyntaxKind::LessEqual
                     }
                     else if let Some('-') = state.peek() {
-                        state.advance(1);
+                        state.bump();
                         HaskellSyntaxKind::LeftArrow
                     }
                     else {
@@ -332,9 +334,9 @@ impl<'config> HaskellLexer<'config> {
                     }
                 }
                 '>' => {
-                    state.advance(1);
+                    state.bump();
                     if let Some('=') = state.peek() {
-                        state.advance(1);
+                        state.bump();
                         HaskellSyntaxKind::GreaterEqual
                     }
                     else {
@@ -342,9 +344,9 @@ impl<'config> HaskellLexer<'config> {
                     }
                 }
                 ':' => {
-                    state.advance(1);
+                    state.bump();
                     if let Some(':') = state.peek() {
-                        state.advance(1);
+                        state.bump();
                         HaskellSyntaxKind::DoubleColon
                     }
                     else {
@@ -352,33 +354,33 @@ impl<'config> HaskellLexer<'config> {
                     }
                 }
                 '|' => {
-                    state.advance(1);
+                    state.bump();
                     HaskellSyntaxKind::Pipe
                 }
                 '&' => {
-                    state.advance(1);
+                    state.bump();
                     HaskellSyntaxKind::Ampersand
                 }
                 '!' => {
-                    state.advance(1);
+                    state.bump();
                     HaskellSyntaxKind::Bang
                 }
                 '?' => {
-                    state.advance(1);
+                    state.bump();
                     HaskellSyntaxKind::Question
                 }
                 ';' => {
-                    state.advance(1);
+                    state.bump();
                     HaskellSyntaxKind::Semicolon
                 }
                 ',' => {
-                    state.advance(1);
+                    state.bump();
                     HaskellSyntaxKind::Comma
                 }
                 '.' => {
-                    state.advance(1);
+                    state.bump();
                     if let Some('.') = state.peek() {
-                        state.advance(1);
+                        state.bump();
                         HaskellSyntaxKind::DoubleDot
                     }
                     else {
@@ -386,23 +388,23 @@ impl<'config> HaskellLexer<'config> {
                     }
                 }
                 '$' => {
-                    state.advance(1);
+                    state.bump();
                     HaskellSyntaxKind::Dollar
                 }
                 '@' => {
-                    state.advance(1);
+                    state.bump();
                     HaskellSyntaxKind::At
                 }
                 '~' => {
-                    state.advance(1);
+                    state.bump();
                     HaskellSyntaxKind::Tilde
                 }
                 '\\' => {
-                    state.advance(1);
+                    state.bump();
                     HaskellSyntaxKind::Backslash
                 }
                 '`' => {
-                    state.advance(1);
+                    state.bump();
                     HaskellSyntaxKind::Backtick
                 }
                 _ => return false,
@@ -416,33 +418,33 @@ impl<'config> HaskellLexer<'config> {
         }
     }
 
-    fn lex_delimiters<S: Source>(&self, state: &mut LexerState<S, HaskellLanguage>) -> bool {
+    fn lex_delimiters<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start_pos = state.get_position();
 
         if let Some(ch) = state.peek() {
             let token_kind = match ch {
                 '(' => {
-                    state.advance(1);
+                    state.bump();
                     HaskellSyntaxKind::LeftParen
                 }
                 ')' => {
-                    state.advance(1);
+                    state.bump();
                     HaskellSyntaxKind::RightParen
                 }
                 '[' => {
-                    state.advance(1);
+                    state.bump();
                     HaskellSyntaxKind::LeftBracket
                 }
                 ']' => {
-                    state.advance(1);
+                    state.bump();
                     HaskellSyntaxKind::RightBracket
                 }
                 '{' => {
-                    state.advance(1);
+                    state.bump();
                     HaskellSyntaxKind::LeftBrace
                 }
                 '}' => {
-                    state.advance(1);
+                    state.bump();
                     HaskellSyntaxKind::RightBrace
                 }
                 _ => return false,
@@ -458,15 +460,11 @@ impl<'config> HaskellLexer<'config> {
 }
 
 impl<'config> Lexer<HaskellLanguage> for HaskellLexer<'config> {
-    fn lex_incremental(
-        &self,
-        source: impl Source,
-        changed: usize,
-        cache: IncrementalCache<HaskellLanguage>,
-    ) -> LexOutput<HaskellLanguage> {
-        let mut state = LexerState::new_with_cache(source, changed, cache);
+    fn lex<'a, S: Source + ?Sized>(&self, source: &'a S, _edits: &[TextEdit], cache: &'a mut impl LexerCache<HaskellLanguage>) -> LexOutput<HaskellLanguage> {
+        let mut state = State::new(source);
 
         while state.not_at_end() {
+            let safe_point = state.get_position();
             if self.skip_whitespace(&mut state) {
                 continue;
             }
@@ -509,16 +507,18 @@ impl<'config> Lexer<HaskellLanguage> for HaskellLexer<'config> {
 
             // 如果没有匹配到任何模式，跳过当前字符并标记为错误
             let start_pos = state.get_position();
-            if let Some(ch) = state.peek() {
+            if state.peek().is_some() {
                 state.advance(1);
                 state.add_token(HaskellSyntaxKind::Error, start_pos, state.get_position());
             }
+
+            state.advance_if_dead_lock(safe_point);
         }
 
         // 添加 EOF token
         let pos = state.get_position();
         state.add_token(HaskellSyntaxKind::Eof, pos, pos);
 
-        state.finish(Ok(()))
+        state.finish_with_cache(Ok(()), cache)
     }
 }

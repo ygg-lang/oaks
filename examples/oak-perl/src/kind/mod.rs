@@ -1,7 +1,8 @@
-use oak_core::SyntaxKind;
+use crate::PerlLanguage;
+use oak_core::{ElementType, TokenType, UniversalElementRole, UniversalTokenRole};
 use serde::{Deserialize, Serialize};
 
-#[derive(Copy, Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Copy, Clone, Debug, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub enum PerlSyntaxKind {
     // Basic tokens
     Whitespace,
@@ -226,9 +227,17 @@ pub enum PerlSyntaxKind {
     Eof,
 }
 
-impl SyntaxKind for PerlSyntaxKind {
-    fn is_trivia(&self) -> bool {
-        matches!(self, Self::Whitespace | Self::Newline | Self::Comment)
+impl TokenType for PerlSyntaxKind {
+    const END_OF_STREAM: Self = Self::Eof;
+    type Role = UniversalTokenRole;
+
+    fn role(&self) -> Self::Role {
+        match self {
+            Self::Whitespace | Self::Newline => UniversalTokenRole::Whitespace,
+            Self::Comment => UniversalTokenRole::Comment,
+            Self::Eof => UniversalTokenRole::Eof,
+            _ => UniversalTokenRole::None,
+        }
     }
 
     fn is_comment(&self) -> bool {
@@ -238,26 +247,36 @@ impl SyntaxKind for PerlSyntaxKind {
     fn is_whitespace(&self) -> bool {
         matches!(self, Self::Whitespace | Self::Newline)
     }
+}
 
-    fn is_token_type(&self) -> bool {
-        !matches!(
-            self,
-            Self::LoopStatement
-                | Self::IfStatement
-                | Self::UnlessStatement
-                | Self::WhileStatement
-                | Self::UntilStatement
-                | Self::ForStatement
-                | Self::ForeachStatement
-                | Self::DoStatement
-                | Self::EvalStatement
-        )
+pub type PerlToken = oak_core::Token<PerlSyntaxKind>;
+pub type PerlNode<'a> = oak_core::tree::RedNode<'a, PerlLanguage>;
+
+impl PerlSyntaxKind {
+    pub fn is_token(&self) -> bool {
+        !self.is_element()
     }
 
-    fn is_element_type(&self) -> bool {
+    pub fn is_element(&self) -> bool {
         matches!(
             self,
-            Self::LoopStatement
+            Self::Program
+                | Self::Statement
+                | Self::Expression
+                | Self::Block
+                | Self::SubroutineDeclaration
+                | Self::PackageDeclaration
+                | Self::UseStatement
+                | Self::VariableDeclaration
+                | Self::Assignment
+                | Self::FunctionCall
+                | Self::MethodCall
+                | Self::ArrayAccess
+                | Self::HashAccess
+                | Self::Reference
+                | Self::Dereference
+                | Self::ConditionalExpression
+                | Self::LoopStatement
                 | Self::IfStatement
                 | Self::UnlessStatement
                 | Self::WhileStatement
@@ -266,9 +285,22 @@ impl SyntaxKind for PerlSyntaxKind {
                 | Self::ForeachStatement
                 | Self::DoStatement
                 | Self::EvalStatement
+                | Self::RegexMatch
+                | Self::RegexSubstitution
+                | Self::RegexTransliteration
         )
     }
 }
 
-pub type PerlToken = oak_core::Token<PerlSyntaxKind>;
-pub type PerlNode = oak_core::tree::RedNode<PerlSyntaxKind>;
+impl ElementType for PerlSyntaxKind {
+    type Role = UniversalElementRole;
+
+    fn role(&self) -> Self::Role {
+        match self {
+            Self::Error => UniversalElementRole::Error,
+            Self::Program => UniversalElementRole::Root,
+            Self::SubroutineDeclaration | Self::PackageDeclaration | Self::VariableDeclaration => UniversalElementRole::Detail,
+            _ => UniversalElementRole::None,
+        }
+    }
+}

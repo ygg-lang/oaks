@@ -1,6 +1,6 @@
 [package]
 name = "oak-groovy"
-description = "Groovy language parser with support for modern Groovy syntax and JVM features."
+description = "Groovy dynamic programming language parser with support for modern Groovy syntax and JVM ecosystem integration."
 categories = ["parsing"]
 keywords = ["parser", "groovy", "jvm", "language"]
 documentation = "https://docs.rs/oak-groovy"
@@ -17,6 +17,7 @@ edition.workspace = true
 oak-core = { workspace = true }
 oak-highlight = { workspace = true, optional = true }
 oak-pretty-print = { workspace = true, optional = true }
+serde = { workspace = true }
 
 [dev-dependencies]
 oak-core = { workspace = true, features = ["testing"] }

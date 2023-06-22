@@ -1,0 +1,607 @@
+{
+    "success": true,
+    "count": 100,
+    "tokens": [
+        {
+            "kind": "LeftBracket",
+            "text": "[",
+            "start": 63,
+            "end": 64
+        },
+        {
+            "kind": "Identifier",
+            "text": "Database",
+            "start": 64,
+            "end": 72
+        },
+        {
+            "kind": "RightBracket",
+            "text": "]",
+            "start": 72,
+            "end": 73
+        },
+        {
+            "kind": "Identifier",
+            "text": "host",
+            "start": 109,
+            "end": 113
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 114,
+            "end": 115
+        },
+        {
+            "kind": "Identifier",
+            "text": "localhost",
+            "start": 116,
+            "end": 125
+        },
+        {
+            "kind": "Identifier",
+            "text": "port",
+            "start": 127,
+            "end": 131
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 132,
+            "end": 133
+        },
+        {
+            "kind": "Integer",
+            "text": "5432",
+            "start": 134,
+            "end": 138
+        },
+        {
+            "kind": "Identifier",
+            "text": "username",
+            "start": 140,
+            "end": 148
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 149,
+            "end": 150
+        },
+        {
+            "kind": "Identifier",
+            "text": "dbuser",
+            "start": 151,
+            "end": 157
+        },
+        {
+            "kind": "Identifier",
+            "text": "password",
+            "start": 159,
+            "end": 167
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 168,
+            "end": 169
+        },
+        {
+            "kind": "Identifier",
+            "text": "secret123",
+            "start": 170,
+            "end": 179
+        },
+        {
+            "kind": "Identifier",
+            "text": "encrypted_password",
+            "start": 212,
+            "end": 230
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 231,
+            "end": 232
+        },
+        {
+            "kind": "Identifier",
+            "text": "U2VjdXJlUGFzc3dvcmQxMjM",
+            "start": 233,
+            "end": 256
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 256,
+            "end": 257
+        },
+        {
+            "kind": "Identifier",
+            "text": "database_name",
+            "start": 259,
+            "end": 272
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 273,
+            "end": 274
+        },
+        {
+            "kind": "Identifier",
+            "text": "myapp_production",
+            "start": 275,
+            "end": 291
+        },
+        {
+            "kind": "Identifier",
+            "text": "connection_timeout",
+            "start": 293,
+            "end": 311
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 312,
+            "end": 313
+        },
+        {
+            "kind": "Integer",
+            "text": "30",
+            "start": 314,
+            "end": 316
+        },
+        {
+            "kind": "Identifier",
+            "text": "max_connections",
+            "start": 318,
+            "end": 333
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 334,
+            "end": 335
+        },
+        {
+            "kind": "Integer",
+            "text": "100",
+            "start": 336,
+            "end": 339
+        },
+        {
+            "kind": "LeftBracket",
+            "text": "[",
+            "start": 343,
+            "end": 344
+        },
+        {
+            "kind": "Identifier",
+            "text": "Server",
+            "start": 344,
+            "end": 350
+        },
+        {
+            "kind": "RightBracket",
+            "text": "]",
+            "start": 350,
+            "end": 351
+        },
+        {
+            "kind": "Identifier",
+            "text": "host",
+            "start": 381,
+            "end": 385
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 386,
+            "end": 387
+        },
+        {
+            "kind": "Float",
+            "text": "0.0",
+            "start": 388,
+            "end": 391
+        },
+        {
+            "kind": "Dot",
+            "text": ".",
+            "start": 391,
+            "end": 392
+        },
+        {
+            "kind": "Float",
+            "text": "0.0",
+            "start": 392,
+            "end": 395
+        },
+        {
+            "kind": "Identifier",
+            "text": "port",
+            "start": 397,
+            "end": 401
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 402,
+            "end": 403
+        },
+        {
+            "kind": "Integer",
+            "text": "8080",
+            "start": 404,
+            "end": 408
+        },
+        {
+            "kind": "Identifier",
+            "text": "ssl_enabled",
+            "start": 410,
+            "end": 421
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 422,
+            "end": 423
+        },
+        {
+            "kind": "Boolean",
+            "text": "true",
+            "start": 424,
+            "end": 428
+        },
+        {
+            "kind": "Identifier",
+            "text": "certificate_path",
+            "start": 430,
+            "end": 446
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 447,
+            "end": 448
+        },
+        {
+            "kind": "Identifier",
+            "text": "etc",
+            "start": 450,
+            "end": 453
+        },
+        {
+            "kind": "Identifier",
+            "text": "ssl",
+            "start": 454,
+            "end": 457
+        },
+        {
+            "kind": "Identifier",
+            "text": "certs",
+            "start": 458,
+            "end": 463
+        },
+        {
+            "kind": "Identifier",
+            "text": "server",
+            "start": 464,
+            "end": 470
+        },
+        {
+            "kind": "Dot",
+            "text": ".",
+            "start": 470,
+            "end": 471
+        },
+        {
+            "kind": "Identifier",
+            "text": "crt",
+            "start": 471,
+            "end": 474
+        },
+        {
+            "kind": "Identifier",
+            "text": "private_key_path",
+            "start": 476,
+            "end": 492
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 493,
+            "end": 494
+        },
+        {
+            "kind": "Identifier",
+            "text": "etc",
+            "start": 496,
+            "end": 499
+        },
+        {
+            "kind": "Identifier",
+            "text": "ssl",
+            "start": 500,
+            "end": 503
+        },
+        {
+            "kind": "Identifier",
+            "text": "private",
+            "start": 504,
+            "end": 511
+        },
+        {
+            "kind": "Identifier",
+            "text": "server",
+            "start": 512,
+            "end": 518
+        },
+        {
+            "kind": "Dot",
+            "text": ".",
+            "start": 518,
+            "end": 519
+        },
+        {
+            "kind": "Identifier",
+            "text": "key",
+            "start": 519,
+            "end": 522
+        },
+        {
+            "kind": "Identifier",
+            "text": "max_request_size",
+            "start": 524,
+            "end": 540
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 541,
+            "end": 542
+        },
+        {
+            "kind": "Integer",
+            "text": "10",
+            "start": 543,
+            "end": 545
+        },
+        {
+            "kind": "Identifier",
+            "text": "MB",
+            "start": 545,
+            "end": 547
+        },
+        {
+            "kind": "Identifier",
+            "text": "keep_alive_timeout",
+            "start": 549,
+            "end": 567
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 568,
+            "end": 569
+        },
+        {
+            "kind": "Integer",
+            "text": "65",
+            "start": 570,
+            "end": 572
+        },
+        {
+            "kind": "LeftBracket",
+            "text": "[",
+            "start": 576,
+            "end": 577
+        },
+        {
+            "kind": "Identifier",
+            "text": "Application",
+            "start": 577,
+            "end": 588
+        },
+        {
+            "kind": "RightBracket",
+            "text": "]",
+            "start": 588,
+            "end": 589
+        },
+        {
+            "kind": "Identifier",
+            "text": "debug_mode",
+            "start": 615,
+            "end": 625
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 626,
+            "end": 627
+        },
+        {
+            "kind": "Boolean",
+            "text": "false",
+            "start": 628,
+            "end": 633
+        },
+        {
+            "kind": "Identifier",
+            "text": "log_level",
+            "start": 635,
+            "end": 644
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 645,
+            "end": 646
+        },
+        {
+            "kind": "Identifier",
+            "text": "INFO",
+            "start": 647,
+            "end": 651
+        },
+        {
+            "kind": "Identifier",
+            "text": "environment",
+            "start": 653,
+            "end": 664
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 665,
+            "end": 666
+        },
+        {
+            "kind": "Identifier",
+            "text": "production",
+            "start": 667,
+            "end": 677
+        },
+        {
+            "kind": "Identifier",
+            "text": "timezone",
+            "start": 679,
+            "end": 687
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 688,
+            "end": 689
+        },
+        {
+            "kind": "Identifier",
+            "text": "UTC",
+            "start": 690,
+            "end": 693
+        },
+        {
+            "kind": "Identifier",
+            "text": "default_language",
+            "start": 695,
+            "end": 711
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 712,
+            "end": 713
+        },
+        {
+            "kind": "Identifier",
+            "text": "en",
+            "start": 714,
+            "end": 716
+        },
+        {
+            "kind": "Identifier",
+            "text": "supported_languages",
+            "start": 718,
+            "end": 737
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 738,
+            "end": 739
+        },
+        {
+            "kind": "Identifier",
+            "text": "en",
+            "start": 740,
+            "end": 742
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 742,
+            "end": 743
+        },
+        {
+            "kind": "Identifier",
+            "text": "es",
+            "start": 743,
+            "end": 745
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 745,
+            "end": 746
+        },
+        {
+            "kind": "Identifier",
+            "text": "fr",
+            "start": 746,
+            "end": 748
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 748,
+            "end": 749
+        },
+        {
+            "kind": "Identifier",
+            "text": "de",
+            "start": 749,
+            "end": 751
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 751,
+            "end": 752
+        },
+        {
+            "kind": "Identifier",
+            "text": "it",
+            "start": 752,
+            "end": 754
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 754,
+            "end": 755
+        },
+        {
+            "kind": "Identifier",
+            "text": "pt",
+            "start": 755,
+            "end": 757
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 757,
+            "end": 758
+        },
+        {
+            "kind": "Identifier",
+            "text": "zh",
+            "start": 758,
+            "end": 760
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 760,
+            "end": 761
+        },
+        {
+            "kind": "Identifier",
+            "text": "ja",
+            "start": 761,
+            "end": 763
+        }
+    ],
+    "errors": []
+}

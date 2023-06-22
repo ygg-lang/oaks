@@ -1,4 +1,4 @@
-use core::range::Range;
+use oak_core::Range;
 
 /// Dockerfile AST root type
 #[derive(Debug, PartialEq, Clone)]

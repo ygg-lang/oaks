@@ -1,11 +1,14 @@
-use crate::syntax::IniSyntaxKind;
-use oak_core::Language;
+use oak_core::{Language, LanguageCategory};
 
 /// Ini 语言定义
-#[derive(Debug, Default)]
+#[derive(Debug, Default, Clone, Copy)]
 pub struct IniLanguage;
 
 impl Language for IniLanguage {
-    type SyntaxKind = IniSyntaxKind;
-    type TypedRoot = (); // TODO: 添加 AST 根类型
+    const NAME: &'static str = "ini";
+    const CATEGORY: LanguageCategory = LanguageCategory::Config;
+
+    type TokenType = crate::kind::IniSyntaxKind;
+    type ElementType = crate::kind::IniSyntaxKind;
+    type TypedRoot = crate::ast::IniRoot;
 }

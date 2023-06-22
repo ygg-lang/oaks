@@ -1,5 +1,4 @@
-use crate::{ast::OrgModeRoot, kind::OrgModeSyntaxKind};
-use oak_core::Language;
+use oak_core::{Language, LanguageCategory};
 use std::{
     string::{String, ToString},
     vec,
@@ -15,11 +14,7 @@ pub struct OrgModeLanguage {
 
 impl OrgModeLanguage {
     pub fn new() -> Self {
-        Self {
-            todo_keywords: vec!["TODO".to_string(), "NEXT".to_string(), "WAITING".to_string()],
-            done_keywords: vec!["DONE".to_string(), "CANCELLED".to_string()],
-            strict_mode: false,
-        }
+        Self { todo_keywords: vec!["TODO".to_string(), "NEXT".to_string(), "WAITING".to_string()], done_keywords: vec!["DONE".to_string(), "CANCELLED".to_string()], strict_mode: false }
     }
 
     pub fn with_todo_keywords(mut self, keywords: Vec<String>) -> Self {
@@ -45,6 +40,10 @@ impl Default for OrgModeLanguage {
 }
 
 impl Language for OrgModeLanguage {
-    type SyntaxKind = OrgModeSyntaxKind;
-    type TypedRoot = OrgModeRoot;
+    const NAME: &'static str = "org-mode";
+    const CATEGORY: LanguageCategory = LanguageCategory::Markup;
+
+    type TokenType = crate::kind::OrgModeSyntaxKind;
+    type ElementType = crate::kind::OrgModeSyntaxKind;
+    type TypedRoot = ();
 }

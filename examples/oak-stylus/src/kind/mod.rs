@@ -38,84 +38,56 @@ pub enum StylusSyntaxKind {
     Error,
 }
 
-impl oak_core::SyntaxKind for StylusSyntaxKind {
-    fn is_trivia(&self) -> bool {
-        matches!(self, StylusSyntaxKind::Whitespace | StylusSyntaxKind::Comment | StylusSyntaxKind::Newline)
-    }
+impl oak_core::TokenType for StylusSyntaxKind {
+    type Role = oak_core::UniversalTokenRole;
+    const END_OF_STREAM: Self = StylusSyntaxKind::Eof;
 
-    fn is_comment(&self) -> bool {
-        matches!(self, StylusSyntaxKind::Comment)
+    fn role(&self) -> Self::Role {
+        match self {
+            StylusSyntaxKind::Identifier => oak_core::UniversalTokenRole::Name,
+            StylusSyntaxKind::Number => oak_core::UniversalTokenRole::Literal,
+            StylusSyntaxKind::String => oak_core::UniversalTokenRole::Literal,
+            StylusSyntaxKind::Color => oak_core::UniversalTokenRole::Literal,
+            StylusSyntaxKind::LeftBrace | StylusSyntaxKind::RightBrace | StylusSyntaxKind::LeftParen | StylusSyntaxKind::RightParen | StylusSyntaxKind::Colon | StylusSyntaxKind::Semicolon | StylusSyntaxKind::Comma => {
+                oak_core::UniversalTokenRole::Punctuation
+            }
+            StylusSyntaxKind::Dot | StylusSyntaxKind::Hash | StylusSyntaxKind::Ampersand | StylusSyntaxKind::Plus | StylusSyntaxKind::Minus | StylusSyntaxKind::Star | StylusSyntaxKind::Slash | StylusSyntaxKind::Percent | StylusSyntaxKind::Equal => {
+                oak_core::UniversalTokenRole::Operator
+            }
+            StylusSyntaxKind::Whitespace | StylusSyntaxKind::Newline => oak_core::UniversalTokenRole::Whitespace,
+            StylusSyntaxKind::Comment => oak_core::UniversalTokenRole::Comment,
+            StylusSyntaxKind::Error => oak_core::UniversalTokenRole::Error,
+            _ => oak_core::UniversalTokenRole::None,
+        }
     }
+}
 
-    fn is_whitespace(&self) -> bool {
-        matches!(self, StylusSyntaxKind::Whitespace | StylusSyntaxKind::Newline)
-    }
+impl oak_core::ElementType for StylusSyntaxKind {
+    type Role = oak_core::UniversalElementRole;
 
-    fn is_token_type(&self) -> bool {
-        matches!(
-            self,
-            StylusSyntaxKind::Identifier
-                | StylusSyntaxKind::Number
-                | StylusSyntaxKind::String
-                | StylusSyntaxKind::Color
-                | StylusSyntaxKind::LeftBrace
-                | StylusSyntaxKind::RightBrace
-                | StylusSyntaxKind::LeftParen
-                | StylusSyntaxKind::RightParen
-                | StylusSyntaxKind::Colon
-                | StylusSyntaxKind::Semicolon
-                | StylusSyntaxKind::Comma
-                | StylusSyntaxKind::Dot
-                | StylusSyntaxKind::Hash
-                | StylusSyntaxKind::Ampersand
-                | StylusSyntaxKind::Plus
-                | StylusSyntaxKind::Minus
-                | StylusSyntaxKind::Star
-                | StylusSyntaxKind::Slash
-                | StylusSyntaxKind::Percent
-                | StylusSyntaxKind::Equal
-                | StylusSyntaxKind::Whitespace
-                | StylusSyntaxKind::Newline
-                | StylusSyntaxKind::Comment
-                | StylusSyntaxKind::Eof
-                | StylusSyntaxKind::Error
-        )
-    }
-
-    fn is_element_type(&self) -> bool {
-        matches!(
-            self,
-            StylusSyntaxKind::Root
-                | StylusSyntaxKind::Document
-                | StylusSyntaxKind::Rule
-                | StylusSyntaxKind::Selector
-                | StylusSyntaxKind::Property
-                | StylusSyntaxKind::Value
-                | StylusSyntaxKind::Block
-        )
+    fn role(&self) -> Self::Role {
+        match self {
+            StylusSyntaxKind::Root => oak_core::UniversalElementRole::Root,
+            StylusSyntaxKind::Document => oak_core::UniversalElementRole::Container,
+            StylusSyntaxKind::Rule => oak_core::UniversalElementRole::Statement,
+            StylusSyntaxKind::Selector => oak_core::UniversalElementRole::Binding,
+            StylusSyntaxKind::Property => oak_core::UniversalElementRole::AttributeKey,
+            StylusSyntaxKind::Value => oak_core::UniversalElementRole::Value,
+            StylusSyntaxKind::Block => oak_core::UniversalElementRole::Container,
+            _ => oak_core::UniversalElementRole::Value,
+        }
     }
 }
 
 impl StylusSyntaxKind {
     /// 检查是否为值类型
     pub fn is_value(self) -> bool {
-        matches!(
-            self,
-            StylusSyntaxKind::Number | StylusSyntaxKind::String | StylusSyntaxKind::Color | StylusSyntaxKind::Identifier
-        )
+        matches!(self, StylusSyntaxKind::Number | StylusSyntaxKind::String | StylusSyntaxKind::Color | StylusSyntaxKind::Identifier)
     }
 
     /// 检查是否为操作符
     pub fn is_operator(self) -> bool {
-        matches!(
-            self,
-            StylusSyntaxKind::Plus
-                | StylusSyntaxKind::Minus
-                | StylusSyntaxKind::Star
-                | StylusSyntaxKind::Slash
-                | StylusSyntaxKind::Percent
-                | StylusSyntaxKind::Equal
-        )
+        matches!(self, StylusSyntaxKind::Plus | StylusSyntaxKind::Minus | StylusSyntaxKind::Star | StylusSyntaxKind::Slash | StylusSyntaxKind::Percent | StylusSyntaxKind::Equal)
     }
 }
 

@@ -1,13 +1,12 @@
-use oak_core::{GreenBuilder, IncrementalCache, Lexer, source::SourceText};
+use oak_core::{Lexer, ParseSession, source::SourceText};
 use oak_vhdl::{VhdlLanguage, VhdlLexer};
 
 #[test]
 fn test_vhdl_lexer_simple() {
     let lexer = VhdlLexer::new(&VhdlLanguage);
     let source = SourceText::new("entity test is end entity;");
-    let mut builder = GreenBuilder::new(0);
-    let cache = IncrementalCache::new(&mut builder);
-    let result = lexer.lex_incremental(&source, 0, cache);
+    let mut session = ParseSession::<VhdlLanguage>::new(16);
+    let result = lexer.lex(&source, &[], &mut session);
 
     // 检查是否成功生成了 tokens
     match &result.result {

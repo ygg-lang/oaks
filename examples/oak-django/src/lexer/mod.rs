@@ -1,28 +1,40 @@
 use crate::{kind::DjangoSyntaxKind, language::DjangoLanguage};
 use oak_core::{
-    IncrementalCache, Lexer, LexerState, OakError,
-    lexer::{CommentLine, LexOutput, StringConfig, WhitespaceConfig},
-    source::Source,
+    Lexer, LexerCache, LexerState, OakError,
+    lexer::{CommentConfig, LexOutput, StringConfig, WhitespaceConfig},
+    source::{Source, TextEdit},
 };
 use std::sync::LazyLock;
 
-type State<S: Source> = LexerState<S, DjangoLanguage>;
+type State<'a, S> = LexerState<'a, S, DjangoLanguage>;
 
 static DJANGO_WHITESPACE: LazyLock<WhitespaceConfig> = LazyLock::new(|| WhitespaceConfig { unicode_whitespace: true });
-static DJANGO_COMMENT: LazyLock<CommentLine> = LazyLock::new(|| CommentLine { line_markers: &["{#"] });
-static DJANGO_STRING: LazyLock<StringConfig> = LazyLock::new(|| StringConfig { quotes: &['"', '\''], escape: Some('\\') });
+static _DJANGO_COMMENT: LazyLock<CommentConfig> = LazyLock::new(|| CommentConfig { line_marker: "{#", block_start: "{#", block_end: "#}", nested_blocks: false });
+static DJANGO_STRING_DOUBLE: LazyLock<StringConfig> = LazyLock::new(|| StringConfig { quotes: &['"'], escape: Some('\\') });
+static DJANGO_STRING_SINGLE: LazyLock<StringConfig> = LazyLock::new(|| StringConfig { quotes: &['\''], escape: Some('\\') });
 
 #[derive(Clone)]
 pub struct DjangoLexer<'config> {
-    config: &'config DjangoLanguage,
+    _config: &'config DjangoLanguage,
+}
+
+impl<'config> Lexer<DjangoLanguage> for DjangoLexer<'config> {
+    fn lex<'a, S: Source + ?Sized>(&self, source: &S, _edits: &[TextEdit], cache: &'a mut impl LexerCache<DjangoLanguage>) -> LexOutput<DjangoLanguage> {
+        let mut state = LexerState::new(source);
+        let result = self.run(&mut state);
+        if result.is_ok() {
+            state.add_eof();
+        }
+        state.finish_with_cache(result, cache)
+    }
 }
 
 impl<'config> DjangoLexer<'config> {
     pub fn new(config: &'config DjangoLanguage) -> Self {
-        Self { config }
+        Self { _config: config }
     }
 
-    fn run<S: Source>(&self, state: &mut State<S>) -> Result<(), OakError> {
+    fn run<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> Result<(), OakError> {
         while state.not_at_end() {
             let safe_point = state.get_position();
             if self.skip_whitespace(state) {
@@ -33,7 +45,7 @@ impl<'config> DjangoLexer<'config> {
                 continue;
             }
 
-            if self.lex_string(state) {
+            if self.lex_string(state) || self.lex_string_manual(state) {
                 continue;
             }
 
@@ -61,30 +73,19 @@ impl<'config> DjangoLexer<'config> {
                 continue;
             }
 
-            state.safe_check(safe_point);
+            state.advance_if_dead_lock(safe_point);
         }
 
-        // 添加 EOF kind
-        let eof_pos = state.get_position();
-        state.add_token(DjangoSyntaxKind::Eof, eof_pos, eof_pos);
         Ok(())
     }
 
     /// 跳过空白字符
-    fn skip_whitespace<S: Source>(&self, state: &mut State<S>) -> bool {
-        match DJANGO_WHITESPACE.scan(state.rest(), state.get_position(), DjangoSyntaxKind::Whitespace) {
-            Some(token) => {
-                let start = state.get_position();
-                state.advance(token.length());
-                state.add_token(DjangoSyntaxKind::Whitespace, start, state.get_position());
-                true
-            }
-            None => false,
-        }
+    fn skip_whitespace<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
+        DJANGO_WHITESPACE.scan(state, DjangoSyntaxKind::Whitespace)
     }
 
     /// 跳过注释
-    fn skip_comment<S: Source>(&self, state: &mut State<S>) -> bool {
+    fn skip_comment<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         if state.rest().starts_with("{#") {
             let start = state.get_position();
             state.advance(2); // 跳过 "{#"
@@ -99,28 +100,18 @@ impl<'config> DjangoLexer<'config> {
             }
 
             state.add_token(DjangoSyntaxKind::Comment, start, state.get_position());
-            true
+            return true;
         }
-        else {
-            false
-        }
+        false
     }
 
-    /// 处理字符串字面量
-    fn lex_string_literal<S: Source>(&self, state: &mut State<S>) -> bool {
-        match DJANGO_STRING.scan(state.rest(), state.get_position(), DjangoSyntaxKind::String) {
-            Some(token) => {
-                let start = state.get_position();
-                state.advance(token.length());
-                state.add_token(DjangoSyntaxKind::String, start, state.get_position());
-                true
-            }
-            None => false,
-        }
+    /// 词法分析字符串
+    fn lex_string<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
+        DJANGO_STRING_DOUBLE.scan(state, DjangoSyntaxKind::String) || DJANGO_STRING_SINGLE.scan(state, DjangoSyntaxKind::String)
     }
 
     /// 处理换行
-    fn lex_newline<S: Source>(&self, state: &mut State<S>) -> bool {
+    fn _lex_newline<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start_pos = state.get_position();
 
         if let Some('\n') = state.peek() {
@@ -142,7 +133,7 @@ impl<'config> DjangoLexer<'config> {
     }
 
     /// 处理标识符和关键字
-    fn lex_identifier_or_keyword<S: Source>(&self, state: &mut State<S>) -> bool {
+    fn lex_identifier_or_keyword<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start_pos = state.get_position();
 
         if let Some(ch) = state.peek() {
@@ -161,7 +152,7 @@ impl<'config> DjangoLexer<'config> {
                 let end_pos = state.get_position();
                 let text = state.get_text_in((start_pos..end_pos).into());
 
-                let token_kind = match text {
+                let token_kind = match text.as_ref() {
                     "if" => DjangoSyntaxKind::If,
                     "elif" => DjangoSyntaxKind::Elif,
                     "else" => DjangoSyntaxKind::Else,
@@ -209,7 +200,8 @@ impl<'config> DjangoLexer<'config> {
     }
 
     /// 处理数字
-    fn lex_number<S: Source>(&self, state: &mut State<S>) -> bool {
+    /// 词法分析数字
+    fn lex_number<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start_pos = state.get_position();
 
         if let Some(ch) = state.peek() {
@@ -267,7 +259,7 @@ impl<'config> DjangoLexer<'config> {
 
     /// 处理字符
 
-    fn lex_string<S: Source>(&self, state: &mut State<S>) -> bool {
+    fn lex_string_manual<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start_pos = state.get_position();
 
         if let Some(quote) = state.peek() {
@@ -306,7 +298,7 @@ impl<'config> DjangoLexer<'config> {
     }
 
     /// 处理 Django 标签
-    fn lex_django_tags<S: Source>(&self, state: &mut State<S>) -> bool {
+    fn lex_django_tags<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start_pos = state.get_position();
 
         if let Some('{') = state.peek() {
@@ -357,11 +349,11 @@ impl<'config> DjangoLexer<'config> {
                 false
             }
         }
-        else if let Some('#') = state.peek() {
+        else if let Some('}') = state.peek() {
             state.advance(1);
             if let Some('}') = state.peek() {
                 state.advance(1);
-                state.add_token(DjangoSyntaxKind::CommentEnd, start_pos, state.get_position());
+                state.add_token(DjangoSyntaxKind::VariableEnd, start_pos, state.get_position());
                 true
             }
             else {
@@ -374,108 +366,123 @@ impl<'config> DjangoLexer<'config> {
         }
     }
 
-    /// 处理操作
-    fn lex_operator<S: Source>(&self, state: &mut State<S>) -> bool {
+    /// 处理操作符
+    fn lex_operator<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start_pos = state.get_position();
 
         if let Some(ch) = state.peek() {
-            let token_kind = match ch {
+            let kind = match ch {
                 '=' => {
                     state.advance(1);
                     if let Some('=') = state.peek() {
                         state.advance(1);
-                        DjangoSyntaxKind::EqualEqual
+                        Some(DjangoSyntaxKind::EqualEqual)
                     }
                     else {
-                        DjangoSyntaxKind::Equal
+                        Some(DjangoSyntaxKind::Equal)
                     }
                 }
                 '!' => {
                     state.advance(1);
                     if let Some('=') = state.peek() {
                         state.advance(1);
-                        DjangoSyntaxKind::NotEqual
+                        Some(DjangoSyntaxKind::NotEqual)
                     }
                     else {
-                        return false;
+                        None
                     }
                 }
                 '<' => {
                     state.advance(1);
                     if let Some('=') = state.peek() {
                         state.advance(1);
-                        DjangoSyntaxKind::LessEqual
+                        Some(DjangoSyntaxKind::LessEqual)
                     }
                     else {
-                        DjangoSyntaxKind::Less
+                        Some(DjangoSyntaxKind::Less)
                     }
                 }
                 '>' => {
                     state.advance(1);
                     if let Some('=') = state.peek() {
                         state.advance(1);
-                        DjangoSyntaxKind::GreaterEqual
+                        Some(DjangoSyntaxKind::GreaterEqual)
                     }
                     else {
-                        DjangoSyntaxKind::Greater
+                        Some(DjangoSyntaxKind::Greater)
                     }
-                }
-                '+' => {
-                    state.advance(1);
-                    DjangoSyntaxKind::Plus
-                }
-                '-' => {
-                    state.advance(1);
-                    DjangoSyntaxKind::Minus
-                }
-                '*' => {
-                    state.advance(1);
-                    DjangoSyntaxKind::Star
-                }
-                '/' => {
-                    state.advance(1);
-                    DjangoSyntaxKind::Slash
-                }
-                '%' => {
-                    state.advance(1);
-                    DjangoSyntaxKind::Percent
                 }
                 '|' => {
                     state.advance(1);
-                    DjangoSyntaxKind::Pipe
+                    Some(DjangoSyntaxKind::Pipe)
                 }
-                _ => return false,
+                ':' => {
+                    state.advance(1);
+                    Some(DjangoSyntaxKind::Colon)
+                }
+                '.' => {
+                    state.advance(1);
+                    Some(DjangoSyntaxKind::Dot)
+                }
+                ',' => {
+                    state.advance(1);
+                    Some(DjangoSyntaxKind::Comma)
+                }
+                '+' => {
+                    state.advance(1);
+                    Some(DjangoSyntaxKind::Plus)
+                }
+                '-' => {
+                    state.advance(1);
+                    Some(DjangoSyntaxKind::Minus)
+                }
+                '*' => {
+                    state.advance(1);
+                    Some(DjangoSyntaxKind::Star)
+                }
+                '/' => {
+                    state.advance(1);
+                    Some(DjangoSyntaxKind::Slash)
+                }
+                _ => None,
             };
 
-            state.add_token(token_kind, start_pos, state.get_position());
-            true
+            if let Some(kind) = kind {
+                state.add_token(kind, start_pos, state.get_position());
+                true
+            }
+            else {
+                state.set_position(start_pos);
+                false
+            }
         }
         else {
             false
         }
     }
 
-    /// 处理分隔
-
-    fn lex_delimiter<S: Source>(&self, state: &mut State<S>) -> bool {
+    /// 处理分隔符
+    fn lex_delimiter<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start_pos = state.get_position();
 
         if let Some(ch) = state.peek() {
-            let token_kind = match ch {
-                '(' => DjangoSyntaxKind::LeftParen,
-                ')' => DjangoSyntaxKind::RightParen,
-                '[' => DjangoSyntaxKind::LeftBracket,
-                ']' => DjangoSyntaxKind::RightBracket,
-                ',' => DjangoSyntaxKind::Comma,
-                '.' => DjangoSyntaxKind::Dot,
-                ':' => DjangoSyntaxKind::Colon,
-                ';' => DjangoSyntaxKind::Semicolon,
-                _ => return false,
+            let kind = match ch {
+                '(' => Some(DjangoSyntaxKind::LeftParen),
+                ')' => Some(DjangoSyntaxKind::RightParen),
+                '[' => Some(DjangoSyntaxKind::LeftBracket),
+                ']' => Some(DjangoSyntaxKind::RightBracket),
+                ';' => Some(DjangoSyntaxKind::Semicolon),
+                _ => None,
             };
 
-            state.advance(ch.len_utf8());
-            state.add_token(token_kind, start_pos, state.get_position());
-            true
+            if let Some(kind) = kind {
+                state.advance(1);
+                state.add_token(kind, start_pos, state.get_position());
+                true
+            }
+            else {
+                false
+            }
         }
         else {
             false
@@ -483,17 +490,20 @@ impl<'config> DjangoLexer<'config> {
     }
 
     /// 处理 HTML 文本
-    fn lex_html_text<S: Source>(&self, state: &mut State<S>) -> bool {
+    fn lex_html_text<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start_pos = state.get_position();
 
         while let Some(ch) = state.peek() {
-            // 遇到 Django 标签开始符号时停止
-            if ch == '{' || ch == '%' || ch == '#' {
-                break;
-            }
-            // 遇到特殊字符时停
-            if ch == ' ' || ch == '\t' || ch == '\n' || ch == '\r' {
-                break;
+            // 如果遇到 Django 标签的开始，停止
+            if ch == '{' {
+                let current_pos = state.get_position();
+                state.advance(1);
+                if let Some(next_ch) = state.peek() {
+                    if next_ch == '{' || next_ch == '%' || next_ch == '#' {
+                        state.set_position(current_pos);
+                        break;
+                    }
+                }
             }
             state.advance(ch.len_utf8());
         }
@@ -505,18 +515,5 @@ impl<'config> DjangoLexer<'config> {
         else {
             false
         }
-    }
-}
-
-impl<'config> Lexer<DjangoLanguage> for DjangoLexer<'config> {
-    fn lex_incremental(
-        &self,
-        source: impl Source,
-        _changed: usize,
-        _cache: IncrementalCache<DjangoLanguage>,
-    ) -> LexOutput<DjangoLanguage> {
-        let mut state = LexerState::new_with_cache(source, _changed, _cache);
-        let result = self.run(&mut state);
-        state.finish(result)
     }
 }

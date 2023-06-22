@@ -1,15 +1,18 @@
 #![feature(new_range_api)]
-#![doc = include_str!("readme.md")]
 #![doc(html_logo_url = "https://raw.githubusercontent.com/ygg-lang/oaks/refs/heads/dev/documents/logo.svg")]
 #![doc(html_favicon_url = "https://raw.githubusercontent.com/ygg-lang/oaks/refs/heads/dev/documents/logo.svg")]
+#![doc = include_str!("readme.md")]
+#![allow(missing_docs)]
 
 pub mod ast;
+pub mod builder;
+pub mod highlighter;
 pub mod kind;
-pub mod language;
+mod language;
 pub mod lexer;
+pub mod lsp;
+#[cfg(feature = "mcp")]
+pub mod mcp;
+pub mod parser;
 
-// Re-exports
-pub use ast::CoqRoot;
-pub use kind::CoqSyntaxKind;
-pub use language::CoqLanguage;
-pub use lexer::CoqLexer;
+pub use crate::{ast::CoqRoot, builder::CoqBuilder, highlighter::CoqHighlighter, language::CoqLanguage, lexer::CoqLexer, lsp::CoqLanguageService, parser::CoqParser};

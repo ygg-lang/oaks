@@ -1,0 +1,25 @@
+{
+    "success": true,
+    "count": 3,
+    "tokens": [
+        {
+            "kind": "Begin",
+            "text": "begin",
+            "start": 0,
+            "end": 5
+        },
+        {
+            "kind": "End",
+            "text": "end",
+            "start": 7,
+            "end": 10
+        },
+        {
+            "kind": "Eof",
+            "text": "",
+            "start": 10,
+            "end": 10
+        }
+    ],
+    "errors": []
+}

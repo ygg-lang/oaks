@@ -1,6 +1,4 @@
-#![feature(new_range_api)]
-
-use oak_core::{helpers::LexerTester, source::Source};
+use oak_core::helpers::LexerTester;
 use oak_django::{DjangoLanguage, DjangoLexer};
 use std::{path::Path, time::Duration};
 
@@ -10,7 +8,7 @@ fn test_django_lexer() {
     let language = Box::leak(Box::new(DjangoLanguage::default()));
     let lexer = DjangoLexer::new(language);
     let test_runner = LexerTester::new(here.join("tests/lexer")).with_extension("django").with_timeout(Duration::from_secs(5));
-    match test_runner.run_tests::<DjangoLanguage, _>(lexer) {
+    match test_runner.run_tests::<DjangoLanguage, _>(&lexer) {
         Ok(()) => println!("Django lexer tests passed!"),
         Err(e) => panic!("Django lexer tests failed: {}", e),
     }

@@ -1,4 +1,4 @@
-use oak_core::SyntaxKind;
+use oak_core::{ElementType, TokenType, UniversalElementRole, UniversalTokenRole};
 use serde::{Deserialize, Serialize};
 
 /// JavaScript 语法种类（包含节点与词法）
@@ -201,128 +201,27 @@ pub enum JavaScriptSyntaxKind {
     Error,
 }
 
-impl SyntaxKind for JavaScriptSyntaxKind {
-    fn is_trivia(&self) -> bool {
-        matches!(self, Self::LineComment | Self::BlockComment | Self::Whitespace | Self::Newline)
-    }
+impl TokenType for JavaScriptSyntaxKind {
+    const END_OF_STREAM: Self = Self::Eof;
+    type Role = UniversalTokenRole;
 
-    fn is_comment(&self) -> bool {
-        matches!(self, Self::LineComment | Self::BlockComment)
+    fn role(&self) -> Self::Role {
+        match self {
+            Self::Whitespace | Self::Newline => UniversalTokenRole::Whitespace,
+            Self::LineComment | Self::BlockComment => UniversalTokenRole::Comment,
+            Self::Eof => UniversalTokenRole::Eof,
+            _ => UniversalTokenRole::None,
+        }
     }
+}
 
-    fn is_whitespace(&self) -> bool {
-        matches!(self, Self::Whitespace | Self::Newline)
-    }
+impl ElementType for JavaScriptSyntaxKind {
+    type Role = UniversalElementRole;
 
-    fn is_token_type(&self) -> bool {
-        !matches!(
-            self,
-            Self::Root
-                | Self::Program
-                | Self::Statement
-                | Self::Expression
-                | Self::Declaration
-                | Self::FunctionDeclaration
-                | Self::VariableDeclaration
-                | Self::ClassDeclaration
-                | Self::ImportDeclaration
-                | Self::ExportDeclaration
-                | Self::IfStatement
-                | Self::WhileStatement
-                | Self::ForStatement
-                | Self::BlockStatement
-                | Self::ExpressionStatement
-                | Self::ReturnStatement
-                | Self::BreakStatement
-                | Self::ContinueStatement
-                | Self::ThrowStatement
-                | Self::TryStatement
-                | Self::CatchClause
-                | Self::FinallyClause
-                | Self::SwitchStatement
-                | Self::CaseClause
-                | Self::DefaultClause
-                | Self::BinaryExpression
-                | Self::UnaryExpression
-                | Self::AssignmentExpression
-                | Self::CallExpression
-                | Self::MemberExpression
-                | Self::ConditionalExpression
-                | Self::ArrayExpression
-                | Self::ObjectExpression
-                | Self::FunctionExpression
-                | Self::ArrowFunctionExpression
-                | Self::NewExpression
-                | Self::UpdateExpression
-                | Self::LogicalExpression
-                | Self::SequenceExpression
-                | Self::ThisExpression
-                | Self::Identifier
-                | Self::Literal
-                | Self::TemplateLiteral
-                | Self::TaggedTemplateExpression
-                | Self::ObjectPattern
-                | Self::ArrayPattern
-                | Self::RestElement
-                | Self::AssignmentPattern
-                | Self::Property
-                | Self::ErrorNode
-        )
-    }
-
-    fn is_element_type(&self) -> bool {
-        matches!(
-            self,
-            Self::Root
-                | Self::Program
-                | Self::Statement
-                | Self::Expression
-                | Self::Declaration
-                | Self::FunctionDeclaration
-                | Self::VariableDeclaration
-                | Self::ClassDeclaration
-                | Self::ImportDeclaration
-                | Self::ExportDeclaration
-                | Self::IfStatement
-                | Self::WhileStatement
-                | Self::ForStatement
-                | Self::BlockStatement
-                | Self::ExpressionStatement
-                | Self::ReturnStatement
-                | Self::BreakStatement
-                | Self::ContinueStatement
-                | Self::ThrowStatement
-                | Self::TryStatement
-                | Self::CatchClause
-                | Self::FinallyClause
-                | Self::SwitchStatement
-                | Self::CaseClause
-                | Self::DefaultClause
-                | Self::BinaryExpression
-                | Self::UnaryExpression
-                | Self::AssignmentExpression
-                | Self::CallExpression
-                | Self::MemberExpression
-                | Self::ConditionalExpression
-                | Self::ArrayExpression
-                | Self::ObjectExpression
-                | Self::FunctionExpression
-                | Self::ArrowFunctionExpression
-                | Self::NewExpression
-                | Self::UpdateExpression
-                | Self::LogicalExpression
-                | Self::SequenceExpression
-                | Self::ThisExpression
-                | Self::Identifier
-                | Self::Literal
-                | Self::TemplateLiteral
-                | Self::TaggedTemplateExpression
-                | Self::ObjectPattern
-                | Self::ArrayPattern
-                | Self::RestElement
-                | Self::AssignmentPattern
-                | Self::Property
-                | Self::ErrorNode
-        )
+    fn role(&self) -> Self::Role {
+        match self {
+            Self::Error => UniversalElementRole::Error,
+            _ => UniversalElementRole::None,
+        }
     }
 }

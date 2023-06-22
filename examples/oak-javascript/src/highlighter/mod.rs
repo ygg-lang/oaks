@@ -1,11 +1,10 @@
-#[cfg(feature = "oak-highlight")]
-use oak_highlight::highlighter::Highlighter;
+use oak_core::errors::ParseResult;
+use oak_highlight::{HighlightResult, highlighter::Highlighter, themes::Theme};
 
-/// JSON 高亮
-#[cfg(feature = "oak-highlight")]
-pub struct JsonHighlighter {
-    use_parser: bool,
+pub struct JavaScriptHighlighter;
+
+impl Highlighter for JavaScriptHighlighter {
+    fn highlight<'a>(&self, source: &'a str, _language: &str, _theme: Theme) -> ParseResult<HighlightResult<'a>> {
+        Ok(HighlightResult { segments: Vec::new(), source: source.into() })
+    }
 }
-
-#[cfg(feature = "oak-highlight")]
-impl Highlighter for JsonHighlighter {}

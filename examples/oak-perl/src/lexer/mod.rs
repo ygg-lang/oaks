@@ -1,48 +1,35 @@
 use crate::{kind::PerlSyntaxKind, language::PerlLanguage};
 use oak_core::{
-    IncrementalCache, Lexer, LexerState, OakError,
-    lexer::{CommentLine, LexOutput, StringConfig, WhitespaceConfig},
+    Lexer, LexerCache, LexerState, OakError,
+    lexer::{CommentConfig, LexOutput, WhitespaceConfig},
     source::Source,
 };
 use std::sync::LazyLock;
 
-type State<S: Source> = LexerState<S, PerlLanguage>;
+type State<'s, S> = LexerState<'s, S, PerlLanguage>;
 
 static PERL_WHITESPACE: LazyLock<WhitespaceConfig> = LazyLock::new(|| WhitespaceConfig { unicode_whitespace: true });
-static PERL_COMMENT: LazyLock<CommentLine> = LazyLock::new(|| CommentLine { line_markers: &["#"] });
-static PERL_STRING: LazyLock<StringConfig> = LazyLock::new(|| StringConfig { quotes: &['"', '\''], escape: Some('\\') });
+static PERL_COMMENT: LazyLock<CommentConfig> = LazyLock::new(|| CommentConfig { line_marker: "#", block_start: "", block_end: "", nested_blocks: false });
 
 #[derive(Clone)]
 pub struct PerlLexer<'config> {
-    config: &'config PerlLanguage,
+    _config: &'config PerlLanguage,
 }
 
 impl<'config> PerlLexer<'config> {
     pub fn new(config: &'config PerlLanguage) -> Self {
-        Self { config }
+        Self { _config: config }
     }
 
-    fn skip_whitespace<S: Source>(&self, state: &mut State<S>) -> bool {
-        match PERL_WHITESPACE.scan(state.rest(), state.get_position(), PerlSyntaxKind::Whitespace) {
-            Some(token) => {
-                state.advance_with(token);
-                true
-            }
-            None => false,
-        }
+    fn skip_whitespace<'s, S: Source + ?Sized>(&self, state: &mut State<'s, S>) -> bool {
+        PERL_WHITESPACE.scan(state, PerlSyntaxKind::Whitespace)
     }
 
-    fn skip_comment<S: Source>(&self, state: &mut State<S>) -> bool {
-        match PERL_COMMENT.scan(state.rest(), state.get_position(), PerlSyntaxKind::Comment) {
-            Some(token) => {
-                state.advance_with(token);
-                true
-            }
-            None => false,
-        }
+    fn skip_comment<'s, S: Source + ?Sized>(&self, state: &mut State<'s, S>) -> bool {
+        PERL_COMMENT.scan(state, PerlSyntaxKind::Comment, PerlSyntaxKind::Comment)
     }
 
-    fn lex_string<S: Source>(&self, state: &mut State<S>) -> bool {
+    fn lex_string<'s, S: Source + ?Sized>(&self, state: &mut State<'s, S>) -> bool {
         let start_pos = state.get_position();
 
         if let Some(quote_char) = state.peek() {
@@ -84,7 +71,7 @@ impl<'config> PerlLexer<'config> {
         }
     }
 
-    fn lex_variable<S: Source>(&self, state: &mut State<S>) -> bool {
+    fn lex_variable<'s, S: Source + ?Sized>(&self, state: &mut State<'s, S>) -> bool {
         if let Some(ch) = state.peek() {
             let start_pos = state.get_position();
 
@@ -139,7 +126,7 @@ impl<'config> PerlLexer<'config> {
         }
     }
 
-    fn lex_identifier_or_keyword<S: Source>(&self, state: &mut State<S>) -> bool {
+    fn lex_identifier_or_keyword<'s, S: Source + ?Sized>(&self, state: &mut State<'s, S>) -> bool {
         if let Some(ch) = state.peek() {
             if ch.is_alphabetic() || ch == '_' {
                 let start_pos = state.get_position();
@@ -219,7 +206,7 @@ impl<'config> PerlLexer<'config> {
         }
     }
 
-    fn lex_number<S: Source>(&self, state: &mut State<S>) -> bool {
+    fn lex_number<'s, S: Source + ?Sized>(&self, state: &mut State<'s, S>) -> bool {
         if let Some(ch) = state.peek() {
             if ch.is_ascii_digit() {
                 let start_pos = state.get_position();
@@ -253,7 +240,7 @@ impl<'config> PerlLexer<'config> {
         }
     }
 
-    fn lex_operators_and_punctuation<S: Source>(&self, state: &mut State<S>) -> bool {
+    fn lex_operators_and_punctuation<'s, S: Source + ?Sized>(&self, state: &mut State<'s, S>) -> bool {
         if let Some(ch) = state.peek() {
             let start_pos = state.get_position();
 
@@ -474,21 +461,21 @@ impl<'config> PerlLexer<'config> {
 }
 
 impl<'config> Lexer<PerlLanguage> for PerlLexer<'config> {
-    fn lex_incremental(
-        &self,
-        source: impl Source,
-        changed: usize,
-        cache: IncrementalCache<PerlLanguage>,
-    ) -> LexOutput<PerlLanguage> {
-        let mut state = LexerState::new_with_cache(source, changed, cache);
+    fn lex<'a, S: Source + ?Sized>(&self, source: &'a S, _edits: &[oak_core::source::TextEdit], cache: &'a mut impl LexerCache<PerlLanguage>) -> LexOutput<PerlLanguage> {
+        let mut state = State::new_with_cache(source, 0, cache);
         let result = self.run(&mut state);
-        state.finish(result)
+        if result.is_ok() {
+            state.add_eof();
+        }
+        state.finish_with_cache(result, cache)
     }
 }
 
 impl<'config> PerlLexer<'config> {
-    fn run<S: Source>(&self, state: &mut State<S>) -> Result<(), OakError> {
+    fn run<'s, S: Source + ?Sized>(&self, state: &mut State<'s, S>) -> Result<(), OakError> {
         while state.not_at_end() {
+            let safe_point = state.get_position();
+
             // 跳过空白字符
             if self.skip_whitespace(state) {
                 continue;
@@ -530,9 +517,8 @@ impl<'config> PerlLexer<'config> {
                 state.advance(ch.len_utf8());
                 state.add_token(PerlSyntaxKind::Error, start_pos, state.get_position());
             }
-            else {
-                break;
-            }
+
+            state.advance_if_dead_lock(safe_point);
         }
 
         Ok(())

@@ -1,8 +1,8 @@
 [package]
 name = "oak-pascal"
-description = "High-performance incremental Pascal parser for the oak ecosystem with flexible configuration."
+description = "Pascal programming language parser with support for structured programming and modern Pascal dialects."
 categories = ["parsing"]
-keywords = ["parser", "pascal", "delphi", "ast"]
+keywords = ["parser", "pascal", "imperative"]
 documentation = "https://docs.rs/oak-pascal"
 readme = "readme.md"
 version.workspace = true
@@ -14,11 +14,17 @@ edition.workspace = true
 
 [dependencies]
 oak-core = { workspace = true }
-oak-highlight = { workspace = true, optional = true }
-oak-pretty-print = { workspace = true, optional = true }
+oak-highlight = { workspace = true }
+oak-pretty-print = { workspace = true }
+oak-lsp = { workspace = true }
+oak-hover = { workspace = true }
+oak-vfs = { workspace = true }
+oak-mcp = { workspace = true, optional = true }
 serde = { workspace = true }
+tracing = { workspace = true }
 serde_json = { workspace = true }
-
+tokio = { workspace = true, optional = true }
+axum = { workspace = true, optional = true }
 
 [dev-dependencies]
 oak-core = { workspace = true, features = ["testing"] }
@@ -26,6 +32,8 @@ serde_json = { workspace = true }
 
 [features]
 default = []
+mcp = ["dep:oak-mcp"]
+axum = ["mcp", "dep:tokio", "dep:axum", "oak-mcp/axum", "oak-lsp/axum"]
 
 
 [package.metadata.docs.rs]

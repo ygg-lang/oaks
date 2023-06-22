@@ -1,10 +1,11 @@
-use oak_core::{SyntaxKind, Token};
+use oak_core::{ElementType, Token, TokenType, UniversalElementRole, UniversalTokenRole};
 use serde::{Deserialize, Serialize};
 
-pub type LuaToken = Token<LuaSyntaxKind>;
+pub type LuaToken = Token<LuaLanguage>;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub enum LuaSyntaxKind {
+    Root,
     // 关键字
     And,
     Break,
@@ -73,10 +74,11 @@ pub enum LuaSyntaxKind {
 
     // 空白和注释
     Whitespace,
+    Newline,
     Comment,
 
     // 特殊标记
-    Eof,
+    EndOfStream,
     Error,
 
     // 语法节点类型 (非终结符)
@@ -92,6 +94,7 @@ pub enum LuaSyntaxKind {
     WhileStatement,
     ForStatement,
     RepeatStatement,
+    DoStatement,
     BreakStatement,
     ReturnStatement,
     GotoStatement,
@@ -104,9 +107,9 @@ pub enum LuaSyntaxKind {
     BinaryExpression,
     UnaryExpression,
     CallExpression,
-    FieldExpression,
+    MemberExpression,
     IndexExpression,
-    TableExpression,
+    TableConstructorExpression,
     FunctionExpression,
     VarargExpression,
     TableField,
@@ -121,9 +124,70 @@ pub enum LuaSyntaxKind {
     StatementList,
 }
 
-impl SyntaxKind for LuaSyntaxKind {
-    fn is_trivia(&self) -> bool {
-        matches!(self, Self::Whitespace | Self::Comment)
+use crate::language::LuaLanguage;
+
+impl TokenType for LuaSyntaxKind {
+    type Role = UniversalTokenRole;
+    const END_OF_STREAM: Self = Self::EndOfStream;
+
+    fn role(&self) -> Self::Role {
+        match self {
+            Self::And
+            | Self::Break
+            | Self::Do
+            | Self::Else
+            | Self::Elseif
+            | Self::End
+            | Self::False
+            | Self::For
+            | Self::Function
+            | Self::Goto
+            | Self::If
+            | Self::In
+            | Self::Local
+            | Self::Nil
+            | Self::Not
+            | Self::Or
+            | Self::Repeat
+            | Self::Return
+            | Self::Then
+            | Self::True
+            | Self::Until
+            | Self::While => UniversalTokenRole::Keyword,
+            Self::Identifier => UniversalTokenRole::Name,
+            Self::Number | Self::String => UniversalTokenRole::Literal,
+            Self::Plus
+            | Self::Minus
+            | Self::Star
+            | Self::Slash
+            | Self::Percent
+            | Self::Caret
+            | Self::Hash
+            | Self::Ampersand
+            | Self::Tilde
+            | Self::Pipe
+            | Self::LtLt
+            | Self::GtGt
+            | Self::SlashSlash
+            | Self::EqEq
+            | Self::TildeEq
+            | Self::LtEq
+            | Self::GtEq
+            | Self::Lt
+            | Self::Gt
+            | Self::Eq
+            | Self::DotDot
+            | Self::DotDotDot => UniversalTokenRole::Operator,
+            Self::LeftParen | Self::RightParen | Self::LeftBrace | Self::RightBrace | Self::LeftBracket | Self::RightBracket | Self::ColonColon | Self::Semicolon | Self::Colon | Self::Comma | Self::Dot => UniversalTokenRole::Punctuation,
+            Self::Whitespace | Self::Newline => UniversalTokenRole::Whitespace,
+            Self::Comment => UniversalTokenRole::Comment,
+            Self::Error => UniversalTokenRole::Error,
+            _ => UniversalTokenRole::None,
+        }
+    }
+
+    fn is_ignored(&self) -> bool {
+        matches!(self, Self::Whitespace | Self::Newline | Self::Comment)
     }
 
     fn is_comment(&self) -> bool {
@@ -131,42 +195,19 @@ impl SyntaxKind for LuaSyntaxKind {
     }
 
     fn is_whitespace(&self) -> bool {
-        matches!(self, Self::Whitespace)
+        matches!(self, Self::Whitespace | Self::Newline)
     }
+}
 
-    fn is_token_type(&self) -> bool {
-        use LuaSyntaxKind::*;
-        !matches!(
-            self,
-            Error | Eof |
-            // 语法节点类型 (非终结符)
-            SourceFile | FunctionDeclaration | ParameterList | Parameter | BlockStatement |
-            LocalStatement | AssignmentStatement | ExpressionStatement | IfStatement |
-            WhileStatement | ForStatement | RepeatStatement | BreakStatement |
-            ReturnStatement | GotoStatement | LabelStatement | IdentifierExpression |
-            LiteralExpression | BooleanLiteral | NilLiteral | ParenthesizedExpression |
-            BinaryExpression | UnaryExpression | CallExpression | FieldExpression |
-            IndexExpression | TableExpression | FunctionExpression | VarargExpression |
-            TableField | FieldList | ArgumentList | VariableList | ExpressionList |
-            NameList | FunctionName | FunctionBody | ChunkStatement | StatementList
-        )
-    }
+impl ElementType for LuaSyntaxKind {
+    type Role = UniversalElementRole;
 
-    fn is_element_type(&self) -> bool {
-        use LuaSyntaxKind::*;
-        matches!(
-            self,
-            Error | Eof |
-            // 语法节点类型 (非终结符)
-            SourceFile | FunctionDeclaration | ParameterList | Parameter | BlockStatement |
-            LocalStatement | AssignmentStatement | ExpressionStatement | IfStatement |
-            WhileStatement | ForStatement | RepeatStatement | BreakStatement |
-            ReturnStatement | GotoStatement | LabelStatement | IdentifierExpression |
-            LiteralExpression | BooleanLiteral | NilLiteral | ParenthesizedExpression |
-            BinaryExpression | UnaryExpression | CallExpression | FieldExpression |
-            IndexExpression | TableExpression | FunctionExpression | VarargExpression |
-            TableField | FieldList | ArgumentList | VariableList | ExpressionList |
-            NameList | FunctionName | FunctionBody | ChunkStatement | StatementList
-        )
+    fn role(&self) -> Self::Role {
+        match self {
+            Self::Root | Self::SourceFile => UniversalElementRole::Root,
+            Self::FunctionDeclaration | Self::FunctionExpression => UniversalElementRole::Definition,
+            Self::Error => UniversalElementRole::Error,
+            _ => UniversalElementRole::None,
+        }
     }
 }

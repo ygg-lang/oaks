@@ -1,7 +1,7 @@
 use crate::{kind::StylusSyntaxKind, language::StylusLanguage};
-use oak_core::{IncrementalCache, Lexer, LexerState, OakError, lexer::LexOutput, source::Source};
+use oak_core::{Lexer, LexerCache, LexerState, OakError, TextEdit, lexer::LexOutput, source::Source};
 
-type State<S: Source> = LexerState<S, StylusLanguage>;
+type State<'a, S> = LexerState<'a, S, StylusLanguage>;
 
 #[derive(Clone)]
 pub struct StylusLexer<'config> {
@@ -14,7 +14,7 @@ impl<'config> StylusLexer<'config> {
     }
 
     /// 跳过空白字符（不包括换行符）
-    fn skip_whitespace<S: Source>(&self, state: &mut State<S>) -> bool {
+    fn skip_whitespace<S: Source + ?Sized>(&self, state: &mut State<'_, S>) -> bool {
         let start_pos = state.get_position();
 
         while let Some(ch) = state.peek() {
@@ -36,7 +36,7 @@ impl<'config> StylusLexer<'config> {
     }
 
     /// 处理换行
-    fn lex_newline<S: Source>(&self, state: &mut State<S>) -> bool {
+    fn lex_newline<S: Source + ?Sized>(&self, state: &mut State<'_, S>) -> bool {
         let start_pos = state.get_position();
 
         if let Some('\n') = state.peek() {
@@ -58,7 +58,7 @@ impl<'config> StylusLexer<'config> {
     }
 
     /// 处理注释
-    fn lex_comment<S: Source>(&self, state: &mut State<S>) -> bool {
+    fn lex_comment<S: Source + ?Sized>(&self, state: &mut State<'_, S>) -> bool {
         let start_pos = state.get_position();
 
         if let Some('#') = state.peek() {
@@ -82,12 +82,12 @@ impl<'config> StylusLexer<'config> {
     }
 
     /// 处理字符串字面量
-    fn lex_string<S: Source>(&self, state: &mut State<S>) -> bool {
+    fn lex_string<S: Source + ?Sized>(&self, state: &mut State<'_, S>) -> bool {
         let start_pos = state.get_position();
 
         if let Some(quote) = state.peek() {
             if quote == '"' || quote == '\'' {
-                // 检查是否为多行字符串（三个引号
+                // 检查是否为多行字符串（三个引号）
                 let mut quote_count = 0;
 
                 // 计算连续的引号数
@@ -101,13 +101,12 @@ impl<'config> StylusLexer<'config> {
                 }
 
                 if quote_count >= 3 {
-                    // 多行字符
+                    // 多行字符串
                     state.advance(3); // 跳过开始的三个引号
 
-                    let mut found_end = false;
                     while let Some(ch) = state.peek() {
                         if ch == quote {
-                            // 检查是否为结束的三个引
+                            // 检查是否为结束的三个引号
                             let mut end_quote_count = 0;
 
                             while let Some(check_ch) = state.peek_next_n(end_quote_count) {
@@ -120,8 +119,7 @@ impl<'config> StylusLexer<'config> {
                             }
 
                             if end_quote_count >= 3 {
-                                state.advance(3); // 跳过结束的三个引
-                                found_end = true;
+                                state.advance(3); // 跳过结束的三个引号
                                 break;
                             }
                             else {
@@ -180,8 +178,8 @@ impl<'config> StylusLexer<'config> {
         }
     }
 
-    /// 处理数字字面
-    fn lex_number<S: Source>(&self, state: &mut State<S>) -> bool {
+    /// 处理数字字面量
+    fn lex_number<S: Source + ?Sized>(&self, state: &mut State<'_, S>) -> bool {
         let start_pos = state.get_position();
         let mut is_float = false;
 
@@ -194,8 +192,8 @@ impl<'config> StylusLexer<'config> {
 
         // 处理十六进制数字（如果允许）
         if self.config.allow_hex_numbers {
-            if let Some('0') = state.current() {
-                if let Some('x') | Some('X') = state.peek() {
+            if state.peek() == Some('0') {
+                if let Some('x') | Some('X') = state.peek_next_n(1) {
                     state.advance(2); // 跳过 "0x"
 
                     while let Some(ch) = state.peek() {
@@ -228,7 +226,7 @@ impl<'config> StylusLexer<'config> {
             if let Some(next_ch) = state.peek_next_n(1) {
                 if next_ch.is_ascii_digit() {
                     is_float = true;
-                    state.advance(1); // 小数
+                    state.advance(1); // 小数点
 
                     while let Some(ch) = state.peek() {
                         if ch.is_ascii_digit() || ch == '_' {
@@ -267,8 +265,8 @@ impl<'config> StylusLexer<'config> {
         true
     }
 
-    /// 处理标识符或关键
-    fn lex_identifier_or_keyword<S: Source>(&self, state: &mut State<S>) -> bool {
+    /// 处理标识符或关键字
+    fn lex_identifier_or_keyword<S: Source + ?Sized>(&self, state: &mut State<'_, S>) -> bool {
         let start_pos = state.get_position();
 
         if let Some(ch) = state.peek() {
@@ -284,8 +282,9 @@ impl<'config> StylusLexer<'config> {
                     }
                 }
 
-                let text = state.get_text_in((start_pos..state.get_position()).into());
-                let token_kind = self.keyword_or_identifier(text);
+                let end_pos = state.get_position();
+                let text = state.get_text_in(oak_core::Range { start: start_pos, end: end_pos });
+                let token_kind = self.keyword_or_identifier(&text);
                 state.add_token(token_kind, start_pos, state.get_position());
                 true
             }
@@ -309,7 +308,7 @@ impl<'config> StylusLexer<'config> {
     }
 
     /// 处理分隔符和操作符
-    fn lex_delimiter<S: Source>(&self, state: &mut State<S>) -> bool {
+    fn lex_delimiter<S: Source + ?Sized>(&self, state: &mut State<'_, S>) -> bool {
         let start_pos = state.get_position();
 
         if let Some(ch) = state.peek() {
@@ -341,23 +340,8 @@ impl<'config> StylusLexer<'config> {
             false
         }
     }
-}
 
-impl<'config> Lexer<StylusLanguage> for StylusLexer<'config> {
-    fn lex_incremental(
-        &self,
-        source: impl Source,
-        changed: usize,
-        cache: IncrementalCache<StylusLanguage>,
-    ) -> LexOutput<StylusLanguage> {
-        let mut state = LexerState::new_with_cache(source, changed, cache);
-        let result = self.run(&mut state);
-        state.finish(result)
-    }
-}
-
-impl<'config> StylusLexer<'config> {
-    fn run<S: Source>(&self, state: &mut State<S>) -> Result<(), OakError> {
+    fn run<S: Source + ?Sized>(&self, state: &mut State<'_, S>) -> Result<(), OakError> {
         while state.not_at_end() {
             let safe_point = state.get_position();
 
@@ -400,12 +384,21 @@ impl<'config> StylusLexer<'config> {
                 state.advance(ch.len_utf8());
                 state.add_token(StylusSyntaxKind::Error, start_pos, state.get_position());
             }
+
+            state.advance_if_dead_lock(safe_point);
         }
 
-        // 添加 EOF 标记，保持与 oak-rust 风格一致
-        let eof_pos = state.get_position();
-        state.add_token(StylusSyntaxKind::Eof, eof_pos, eof_pos);
-
         Ok(())
+    }
+}
+
+impl<'config> Lexer<StylusLanguage> for StylusLexer<'config> {
+    fn lex<'a, S: Source + ?Sized>(&self, source: &S, _edits: &[TextEdit], cache: &'a mut impl LexerCache<StylusLanguage>) -> LexOutput<StylusLanguage> {
+        let mut state: State<'_, S> = LexerState::new(source);
+        let result = self.run(&mut state);
+        if result.is_ok() {
+            state.add_eof();
+        }
+        state.finish_with_cache(result, cache)
     }
 }

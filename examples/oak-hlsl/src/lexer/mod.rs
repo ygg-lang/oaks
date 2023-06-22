@@ -1,21 +1,76 @@
 use crate::{kind::HlslSyntaxKind, language::HlslLanguage};
-use oak_core::{Lexer, LexerState, lexer::LexOutput, source::Source};
-use std::range::Range;
+use oak_core::{Lexer, LexerCache, LexerState, OakError, lexer::LexOutput, source::Source};
 
-type State<S> = LexerState<S, HlslLanguage>;
+type State<'a, S> = LexerState<'a, S, HlslLanguage>;
 
-#[derive(Clone, Debug)]
 pub struct HlslLexer<'config> {
-    config: &'config HlslLanguage,
+    _config: &'config HlslLanguage,
+}
+
+impl<'config> Clone for HlslLexer<'config> {
+    fn clone(&self) -> Self {
+        Self { _config: self._config }
+    }
 }
 
 impl<'config> HlslLexer<'config> {
     pub fn new(config: &'config HlslLanguage) -> Self {
-        Self { config }
+        Self { _config: config }
+    }
+
+    /// 主要的词法分析循环
+    fn run<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> Result<(), OakError> {
+        while state.not_at_end() {
+            let safe_point = state.get_position();
+
+            // 尝试各种词法规则
+            if self.skip_whitespace(state) {
+                continue;
+            }
+
+            if self.lex_newline(state) {
+                continue;
+            }
+
+            if self.lex_comment(state) {
+                continue;
+            }
+
+            if self.lex_preprocessor(state) {
+                continue;
+            }
+
+            if self.lex_string(state) {
+                continue;
+            }
+
+            if self.lex_number(state) {
+                continue;
+            }
+
+            if self.lex_identifier_or_keyword(state) {
+                continue;
+            }
+
+            if self.lex_operator_or_delimiter(state) {
+                continue;
+            }
+
+            // 如果所有规则都不匹配，跳过当前字符并标记为错误
+            let start_pos = state.get_position();
+            if let Some(ch) = state.peek() {
+                state.advance(ch.len_utf8());
+                state.add_token(HlslSyntaxKind::Error, start_pos, state.get_position());
+            }
+
+            state.advance_if_dead_lock(safe_point);
+        }
+
+        Ok(())
     }
 
     /// 跳过空白字符
-    fn skip_whitespace<S: Source>(&self, state: &mut State<S>) -> bool {
+    fn skip_whitespace<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start_pos = state.get_position();
 
         while let Some(ch) = state.peek() {
@@ -37,7 +92,7 @@ impl<'config> HlslLexer<'config> {
     }
 
     /// 处理换行
-    fn lex_newline<S: Source>(&self, state: &mut State<S>) -> bool {
+    fn lex_newline<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start_pos = state.get_position();
 
         if let Some('\n') = state.peek() {
@@ -59,7 +114,7 @@ impl<'config> HlslLexer<'config> {
     }
 
     /// 处理注释
-    fn lex_comment<S: Source>(&self, state: &mut State<S>) -> bool {
+    fn lex_comment<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start_pos = state.get_position();
 
         // 单行注释 //
@@ -101,7 +156,7 @@ impl<'config> HlslLexer<'config> {
     }
 
     /// 处理预处理器指令
-    fn lex_preprocessor<S: Source>(&self, state: &mut State<S>) -> bool {
+    fn lex_preprocessor<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start_pos = state.get_position();
 
         if let Some('#') = state.peek() {
@@ -129,7 +184,7 @@ impl<'config> HlslLexer<'config> {
             }
 
             if state.get_position() > directive_start {
-                let directive = state.get_text_in(Range { start: directive_start, end: state.get_position() }).to_string();
+                let directive = state.get_text_in((directive_start..state.get_position()).into()).to_string();
 
                 // 读取指令的其余部分直到行尾
                 while let Some(ch) = state.peek() {
@@ -169,7 +224,7 @@ impl<'config> HlslLexer<'config> {
     }
 
     /// 处理字符串字面量
-    fn lex_string<S: Source>(&self, state: &mut State<S>) -> bool {
+    fn lex_string<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start_pos = state.get_position();
 
         if let Some('"') = state.peek() {
@@ -201,7 +256,7 @@ impl<'config> HlslLexer<'config> {
     }
 
     /// 处理数字字面量
-    fn lex_number<S: Source>(&self, state: &mut State<S>) -> bool {
+    fn lex_number<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start_pos = state.get_position();
 
         if let Some(ch) = state.peek() {
@@ -278,15 +333,7 @@ impl<'config> HlslLexer<'config> {
 
                 // 处理后缀 (f, h, l, u 等)
                 if let Some(suffix) = state.peek() {
-                    if suffix == 'f'
-                        || suffix == 'F'
-                        || suffix == 'h'
-                        || suffix == 'H'
-                        || suffix == 'l'
-                        || suffix == 'L'
-                        || suffix == 'u'
-                        || suffix == 'U'
-                    {
+                    if suffix == 'f' || suffix == 'F' || suffix == 'h' || suffix == 'H' || suffix == 'l' || suffix == 'L' || suffix == 'u' || suffix == 'U' {
                         state.advance(1);
                     }
                 }
@@ -300,7 +347,7 @@ impl<'config> HlslLexer<'config> {
     }
 
     /// 处理标识符和关键字
-    fn lex_identifier_or_keyword<S: Source>(&self, state: &mut State<S>) -> bool {
+    fn lex_identifier_or_keyword<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start_pos = state.get_position();
 
         if let Some(ch) = state.peek() {
@@ -314,8 +361,8 @@ impl<'config> HlslLexer<'config> {
                     }
                 }
 
-                let text = state.get_text_in(Range { start: start_pos, end: state.get_position() });
-                let token_kind = match text {
+                let text = state.get_text_in((start_pos..state.get_position()).into());
+                let token_kind = match text.as_ref() {
                     // 基本数据类型
                     "bool" => HlslSyntaxKind::Bool,
                     "int" => HlslSyntaxKind::Int,
@@ -449,7 +496,7 @@ impl<'config> HlslLexer<'config> {
     }
 
     /// 处理运算符和分隔符
-    fn lex_operator_or_delimiter<S: Source>(&self, state: &mut State<S>) -> bool {
+    fn lex_operator_or_delimiter<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start_pos = state.get_position();
 
         if let Some(ch) = state.peek() {
@@ -685,65 +732,12 @@ impl<'config> HlslLexer<'config> {
 }
 
 impl<'config> Lexer<HlslLanguage> for HlslLexer<'config> {
-    fn lex(&self, source: impl Source) -> LexOutput<HlslLanguage> {
-        let mut state = LexerState::new(source);
-
-        while state.not_at_end() {
-            // 尝试各种词法规则
-            if self.skip_whitespace(&mut state) {
-                continue;
-            }
-
-            if self.lex_newline(&mut state) {
-                continue;
-            }
-
-            if self.lex_comment(&mut state) {
-                continue;
-            }
-
-            if self.lex_preprocessor(&mut state) {
-                continue;
-            }
-
-            if self.lex_string(&mut state) {
-                continue;
-            }
-
-            if self.lex_number(&mut state) {
-                continue;
-            }
-
-            if self.lex_identifier_or_keyword(&mut state) {
-                continue;
-            }
-
-            if self.lex_operator_or_delimiter(&mut state) {
-                continue;
-            }
-
-            // 如果所有规则都不匹配，跳过当前字符并标记为错误
-            let start_pos = state.get_position();
-            if let Some(ch) = state.peek() {
-                state.advance(ch.len_utf8());
-                state.add_token(HlslSyntaxKind::Error, start_pos, state.get_position());
-            }
+    fn lex<'a, S: Source + ?Sized>(&self, source: &S, _edits: &[oak_core::TextEdit], cache: &'a mut impl LexerCache<HlslLanguage>) -> LexOutput<HlslLanguage> {
+        let mut state = State::new(source);
+        let result = self.run(&mut state);
+        if result.is_ok() {
+            state.add_eof();
         }
-
-        // 添加 EOF token
-        let eof_pos = state.get_position();
-        state.add_token(HlslSyntaxKind::Eof, eof_pos, eof_pos);
-
-        state.finish(Ok(()))
-    }
-
-    fn lex_incremental(
-        &self,
-        source: impl Source,
-        _offset: usize,
-        _cache: oak_core::IncrementalCache<'_, HlslLanguage>,
-    ) -> LexOutput<HlslLanguage> {
-        // 简单实现：忽略增量缓存，直接进行完整词法分析
-        self.lex(source)
+        state.finish_with_cache(result, cache)
     }
 }

@@ -1,5 +1,4 @@
-use crate::JuliaSyntaxKind;
-use oak_core::Language;
+use oak_core::{Language, LanguageCategory};
 
 /// Julia 语言实现
 #[derive(Debug)]
@@ -8,8 +7,12 @@ pub struct JuliaLanguage {
 }
 
 impl Language for JuliaLanguage {
-    type SyntaxKind = JuliaSyntaxKind;
-    type TypedRoot = ();
+    const NAME: &'static str = "julia";
+    const CATEGORY: LanguageCategory = LanguageCategory::Programming;
+
+    type TokenType = crate::kind::JuliaSyntaxKind;
+    type ElementType = crate::kind::JuliaSyntaxKind;
+    type TypedRoot = crate::ast::JuliaRoot;
 }
 
 impl Default for JuliaLanguage {

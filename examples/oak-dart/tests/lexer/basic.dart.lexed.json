@@ -1,0 +1,607 @@
+{
+    "success": true,
+    "count": 100,
+    "tokens": [
+        {
+            "kind": "Void",
+            "text": "void",
+            "start": 76,
+            "end": 80
+        },
+        {
+            "kind": "Identifier",
+            "text": "main",
+            "start": 81,
+            "end": 85
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 85,
+            "end": 86
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 86,
+            "end": 87
+        },
+        {
+            "kind": "Async",
+            "text": "async",
+            "start": 88,
+            "end": 93
+        },
+        {
+            "kind": "LeftBrace",
+            "text": "{",
+            "start": 94,
+            "end": 95
+        },
+        {
+            "kind": "Identifier",
+            "text": "print",
+            "start": 99,
+            "end": 104
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 104,
+            "end": 105
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "'Hello, Dart!'",
+            "start": 105,
+            "end": 119
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 119,
+            "end": 120
+        },
+        {
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 120,
+            "end": 121
+        },
+        {
+            "kind": "Var",
+            "text": "var",
+            "start": 178,
+            "end": 181
+        },
+        {
+            "kind": "Identifier",
+            "text": "name",
+            "start": 182,
+            "end": 186
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 187,
+            "end": 188
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "'Dart'",
+            "start": 189,
+            "end": 195
+        },
+        {
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 195,
+            "end": 196
+        },
+        {
+            "kind": "Identifier",
+            "text": "String",
+            "start": 200,
+            "end": 206
+        },
+        {
+            "kind": "Identifier",
+            "text": "version",
+            "start": 207,
+            "end": 214
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 215,
+            "end": 216
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "'3.0'",
+            "start": 217,
+            "end": 222
+        },
+        {
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 222,
+            "end": 223
+        },
+        {
+            "kind": "Identifier",
+            "text": "int",
+            "start": 227,
+            "end": 230
+        },
+        {
+            "kind": "Identifier",
+            "text": "year",
+            "start": 231,
+            "end": 235
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 236,
+            "end": 237
+        },
+        {
+            "kind": "IntegerLiteral",
+            "text": "2023",
+            "start": 238,
+            "end": 242
+        },
+        {
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 242,
+            "end": 243
+        },
+        {
+            "kind": "Identifier",
+            "text": "double",
+            "start": 247,
+            "end": 253
+        },
+        {
+            "kind": "Identifier",
+            "text": "pi",
+            "start": 254,
+            "end": 256
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 257,
+            "end": 258
+        },
+        {
+            "kind": "DoubleLiteral",
+            "text": "3.14159",
+            "start": 259,
+            "end": 266
+        },
+        {
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 266,
+            "end": 267
+        },
+        {
+            "kind": "Identifier",
+            "text": "bool",
+            "start": 271,
+            "end": 275
+        },
+        {
+            "kind": "Identifier",
+            "text": "isAwesome",
+            "start": 276,
+            "end": 285
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 286,
+            "end": 287
+        },
+        {
+            "kind": "True",
+            "text": "true",
+            "start": 288,
+            "end": 292
+        },
+        {
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 292,
+            "end": 293
+        },
+        {
+            "kind": "Identifier",
+            "text": "String",
+            "start": 319,
+            "end": 325
+        },
+        {
+            "kind": "Question",
+            "text": "?",
+            "start": 325,
+            "end": 326
+        },
+        {
+            "kind": "Identifier",
+            "text": "nullableString",
+            "start": 327,
+            "end": 341
+        },
+        {
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 341,
+            "end": 342
+        },
+        {
+            "kind": "Late",
+            "text": "late",
+            "start": 346,
+            "end": 350
+        },
+        {
+            "kind": "Identifier",
+            "text": "String",
+            "start": 351,
+            "end": 357
+        },
+        {
+            "kind": "Identifier",
+            "text": "lateString",
+            "start": 358,
+            "end": 368
+        },
+        {
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 368,
+            "end": 369
+        },
+        {
+            "kind": "Identifier",
+            "text": "List",
+            "start": 398,
+            "end": 402
+        },
+        {
+            "kind": "Less",
+            "text": "<",
+            "start": 402,
+            "end": 403
+        },
+        {
+            "kind": "Identifier",
+            "text": "String",
+            "start": 403,
+            "end": 409
+        },
+        {
+            "kind": "Greater",
+            "text": ">",
+            "start": 409,
+            "end": 410
+        },
+        {
+            "kind": "Identifier",
+            "text": "fruits",
+            "start": 411,
+            "end": 417
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 418,
+            "end": 419
+        },
+        {
+            "kind": "LeftBracket",
+            "text": "[",
+            "start": 420,
+            "end": 421
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "'apple'",
+            "start": 421,
+            "end": 428
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 428,
+            "end": 429
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "'banana'",
+            "start": 430,
+            "end": 438
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 438,
+            "end": 439
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "'orange'",
+            "start": 440,
+            "end": 448
+        },
+        {
+            "kind": "RightBracket",
+            "text": "]",
+            "start": 448,
+            "end": 449
+        },
+        {
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 449,
+            "end": 450
+        },
+        {
+            "kind": "Identifier",
+            "text": "Map",
+            "start": 454,
+            "end": 457
+        },
+        {
+            "kind": "Less",
+            "text": "<",
+            "start": 457,
+            "end": 458
+        },
+        {
+            "kind": "Identifier",
+            "text": "String",
+            "start": 458,
+            "end": 464
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 464,
+            "end": 465
+        },
+        {
+            "kind": "Identifier",
+            "text": "int",
+            "start": 466,
+            "end": 469
+        },
+        {
+            "kind": "Greater",
+            "text": ">",
+            "start": 469,
+            "end": 470
+        },
+        {
+            "kind": "Identifier",
+            "text": "scores",
+            "start": 471,
+            "end": 477
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 478,
+            "end": 479
+        },
+        {
+            "kind": "LeftBrace",
+            "text": "{",
+            "start": 480,
+            "end": 481
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "'Alice'",
+            "start": 487,
+            "end": 494
+        },
+        {
+            "kind": "Colon",
+            "text": ":",
+            "start": 494,
+            "end": 495
+        },
+        {
+            "kind": "IntegerLiteral",
+            "text": "95",
+            "start": 496,
+            "end": 498
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 498,
+            "end": 499
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "'Bob'",
+            "start": 505,
+            "end": 510
+        },
+        {
+            "kind": "Colon",
+            "text": ":",
+            "start": 510,
+            "end": 511
+        },
+        {
+            "kind": "IntegerLiteral",
+            "text": "87",
+            "start": 512,
+            "end": 514
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 514,
+            "end": 515
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "'Charlie'",
+            "start": 521,
+            "end": 530
+        },
+        {
+            "kind": "Colon",
+            "text": ":",
+            "start": 530,
+            "end": 531
+        },
+        {
+            "kind": "IntegerLiteral",
+            "text": "92",
+            "start": 532,
+            "end": 534
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 534,
+            "end": 535
+        },
+        {
+            "kind": "RightBrace",
+            "text": "}",
+            "start": 539,
+            "end": 540
+        },
+        {
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 540,
+            "end": 541
+        },
+        {
+            "kind": "Identifier",
+            "text": "int",
+            "start": 565,
+            "end": 568
+        },
+        {
+            "kind": "Identifier",
+            "text": "add",
+            "start": 569,
+            "end": 572
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 572,
+            "end": 573
+        },
+        {
+            "kind": "Identifier",
+            "text": "int",
+            "start": 573,
+            "end": 576
+        },
+        {
+            "kind": "Identifier",
+            "text": "a",
+            "start": 577,
+            "end": 578
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 578,
+            "end": 579
+        },
+        {
+            "kind": "Identifier",
+            "text": "int",
+            "start": 580,
+            "end": 583
+        },
+        {
+            "kind": "Identifier",
+            "text": "b",
+            "start": 584,
+            "end": 585
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 585,
+            "end": 586
+        },
+        {
+            "kind": "LeftBrace",
+            "text": "{",
+            "start": 587,
+            "end": 588
+        },
+        {
+            "kind": "Return",
+            "text": "return",
+            "start": 594,
+            "end": 600
+        },
+        {
+            "kind": "Identifier",
+            "text": "a",
+            "start": 601,
+            "end": 602
+        },
+        {
+            "kind": "Plus",
+            "text": "+",
+            "start": 603,
+            "end": 604
+        },
+        {
+            "kind": "Identifier",
+            "text": "b",
+            "start": 605,
+            "end": 606
+        },
+        {
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 606,
+            "end": 607
+        },
+        {
+            "kind": "RightBrace",
+            "text": "}",
+            "start": 611,
+            "end": 612
+        },
+        {
+            "kind": "Identifier",
+            "text": "int",
+            "start": 641,
+            "end": 644
+        },
+        {
+            "kind": "Identifier",
+            "text": "multiply",
+            "start": 645,
+            "end": 653
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 653,
+            "end": 654
+        }
+    ],
+    "errors": []
+}

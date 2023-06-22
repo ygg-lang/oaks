@@ -1,0 +1,43 @@
+{
+    "success": true,
+    "count": 6,
+    "tokens": [
+        {
+            "kind": "Identifier",
+            "text": "puts",
+            "start": 20,
+            "end": 24
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "\"Hello\"",
+            "start": 25,
+            "end": 32
+        },
+        {
+            "kind": "Identifier",
+            "text": "x",
+            "start": 34,
+            "end": 35
+        },
+        {
+            "kind": "Assign",
+            "text": "=",
+            "start": 36,
+            "end": 37
+        },
+        {
+            "kind": "IntegerLiteral",
+            "text": "42",
+            "start": 38,
+            "end": 40
+        },
+        {
+            "kind": "Eof",
+            "text": "",
+            "start": 40,
+            "end": 40
+        }
+    ],
+    "errors": []
+}

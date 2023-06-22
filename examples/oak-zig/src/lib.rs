@@ -5,5 +5,6 @@
 pub mod kind;
 pub mod language;
 pub mod lexer;
+pub mod parser;
 
-pub use crate::{kind::ZigSyntaxKind, language::ZigLanguage, lexer::ZigLexer};
+pub use crate::{kind::ZigSyntaxKind, language::ZigLanguage, lexer::ZigLexer, parser::ZigParser};

@@ -1,0 +1,607 @@
+{
+    "success": true,
+    "count": 100,
+    "tokens": [
+        {
+            "kind": "LBrack",
+            "text": "[",
+            "start": 0,
+            "end": 1
+        },
+        {
+            "kind": "Character",
+            "text": "a",
+            "start": 1,
+            "end": 2
+        },
+        {
+            "kind": "Character",
+            "text": "-",
+            "start": 2,
+            "end": 3
+        },
+        {
+            "kind": "Character",
+            "text": "z",
+            "start": 3,
+            "end": 4
+        },
+        {
+            "kind": "RBrack",
+            "text": "]",
+            "start": 4,
+            "end": 5
+        },
+        {
+            "kind": "Plus",
+            "text": "+",
+            "start": 5,
+            "end": 6
+        },
+        {
+            "kind": "Backslash",
+            "text": "\\",
+            "start": 8,
+            "end": 9
+        },
+        {
+            "kind": "Character",
+            "text": "d",
+            "start": 9,
+            "end": 10
+        },
+        {
+            "kind": "LBrace",
+            "text": "{",
+            "start": 10,
+            "end": 11
+        },
+        {
+            "kind": "Digit",
+            "text": "1",
+            "start": 11,
+            "end": 12
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 12,
+            "end": 13
+        },
+        {
+            "kind": "Digit",
+            "text": "3",
+            "start": 13,
+            "end": 14
+        },
+        {
+            "kind": "RBrace",
+            "text": "}",
+            "start": 14,
+            "end": 15
+        },
+        {
+            "kind": "LParen",
+            "text": "(",
+            "start": 17,
+            "end": 18
+        },
+        {
+            "kind": "LBrack",
+            "text": "[",
+            "start": 18,
+            "end": 19
+        },
+        {
+            "kind": "Character",
+            "text": "a",
+            "start": 19,
+            "end": 20
+        },
+        {
+            "kind": "Character",
+            "text": "-",
+            "start": 20,
+            "end": 21
+        },
+        {
+            "kind": "Character",
+            "text": "z",
+            "start": 21,
+            "end": 22
+        },
+        {
+            "kind": "Character",
+            "text": "A",
+            "start": 22,
+            "end": 23
+        },
+        {
+            "kind": "Character",
+            "text": "-",
+            "start": 23,
+            "end": 24
+        },
+        {
+            "kind": "Character",
+            "text": "Z",
+            "start": 24,
+            "end": 25
+        },
+        {
+            "kind": "Character",
+            "text": "0",
+            "start": 25,
+            "end": 26
+        },
+        {
+            "kind": "Character",
+            "text": "-",
+            "start": 26,
+            "end": 27
+        },
+        {
+            "kind": "Character",
+            "text": "9",
+            "start": 27,
+            "end": 28
+        },
+        {
+            "kind": "Character",
+            "text": ".",
+            "start": 28,
+            "end": 29
+        },
+        {
+            "kind": "Character",
+            "text": "_",
+            "start": 29,
+            "end": 30
+        },
+        {
+            "kind": "Character",
+            "text": "%",
+            "start": 30,
+            "end": 31
+        },
+        {
+            "kind": "Character",
+            "text": "+",
+            "start": 31,
+            "end": 32
+        },
+        {
+            "kind": "Character",
+            "text": "-",
+            "start": 32,
+            "end": 33
+        },
+        {
+            "kind": "RBrack",
+            "text": "]",
+            "start": 33,
+            "end": 34
+        },
+        {
+            "kind": "Plus",
+            "text": "+",
+            "start": 34,
+            "end": 35
+        },
+        {
+            "kind": "Character",
+            "text": "@",
+            "start": 35,
+            "end": 36
+        },
+        {
+            "kind": "LBrack",
+            "text": "[",
+            "start": 36,
+            "end": 37
+        },
+        {
+            "kind": "Character",
+            "text": "a",
+            "start": 37,
+            "end": 38
+        },
+        {
+            "kind": "Character",
+            "text": "-",
+            "start": 38,
+            "end": 39
+        },
+        {
+            "kind": "Character",
+            "text": "z",
+            "start": 39,
+            "end": 40
+        },
+        {
+            "kind": "Character",
+            "text": "A",
+            "start": 40,
+            "end": 41
+        },
+        {
+            "kind": "Character",
+            "text": "-",
+            "start": 41,
+            "end": 42
+        },
+        {
+            "kind": "Character",
+            "text": "Z",
+            "start": 42,
+            "end": 43
+        },
+        {
+            "kind": "Character",
+            "text": "0",
+            "start": 43,
+            "end": 44
+        },
+        {
+            "kind": "Character",
+            "text": "-",
+            "start": 44,
+            "end": 45
+        },
+        {
+            "kind": "Character",
+            "text": "9",
+            "start": 45,
+            "end": 46
+        },
+        {
+            "kind": "Character",
+            "text": ".",
+            "start": 46,
+            "end": 47
+        },
+        {
+            "kind": "Character",
+            "text": "-",
+            "start": 47,
+            "end": 48
+        },
+        {
+            "kind": "RBrack",
+            "text": "]",
+            "start": 48,
+            "end": 49
+        },
+        {
+            "kind": "Plus",
+            "text": "+",
+            "start": 49,
+            "end": 50
+        },
+        {
+            "kind": "Backslash",
+            "text": "\\",
+            "start": 50,
+            "end": 51
+        },
+        {
+            "kind": "Character",
+            "text": ".",
+            "start": 51,
+            "end": 52
+        },
+        {
+            "kind": "LBrack",
+            "text": "[",
+            "start": 52,
+            "end": 53
+        },
+        {
+            "kind": "Character",
+            "text": "a",
+            "start": 53,
+            "end": 54
+        },
+        {
+            "kind": "Character",
+            "text": "-",
+            "start": 54,
+            "end": 55
+        },
+        {
+            "kind": "Character",
+            "text": "z",
+            "start": 55,
+            "end": 56
+        },
+        {
+            "kind": "Character",
+            "text": "A",
+            "start": 56,
+            "end": 57
+        },
+        {
+            "kind": "Character",
+            "text": "-",
+            "start": 57,
+            "end": 58
+        },
+        {
+            "kind": "Character",
+            "text": "Z",
+            "start": 58,
+            "end": 59
+        },
+        {
+            "kind": "RBrack",
+            "text": "]",
+            "start": 59,
+            "end": 60
+        },
+        {
+            "kind": "LBrace",
+            "text": "{",
+            "start": 60,
+            "end": 61
+        },
+        {
+            "kind": "Digit",
+            "text": "2",
+            "start": 61,
+            "end": 62
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 62,
+            "end": 63
+        },
+        {
+            "kind": "RBrace",
+            "text": "}",
+            "start": 63,
+            "end": 64
+        },
+        {
+            "kind": "RParen",
+            "text": ")",
+            "start": 64,
+            "end": 65
+        },
+        {
+            "kind": "LParen",
+            "text": "(",
+            "start": 67,
+            "end": 68
+        },
+        {
+            "kind": "Question",
+            "text": "?",
+            "start": 68,
+            "end": 69
+        },
+        {
+            "kind": "Character",
+            "text": ":",
+            "start": 69,
+            "end": 70
+        },
+        {
+            "kind": "Character",
+            "text": "h",
+            "start": 70,
+            "end": 71
+        },
+        {
+            "kind": "Character",
+            "text": "t",
+            "start": 71,
+            "end": 72
+        },
+        {
+            "kind": "Character",
+            "text": "t",
+            "start": 72,
+            "end": 73
+        },
+        {
+            "kind": "Character",
+            "text": "p",
+            "start": 73,
+            "end": 74
+        },
+        {
+            "kind": "Character",
+            "text": "s",
+            "start": 74,
+            "end": 75
+        },
+        {
+            "kind": "Question",
+            "text": "?",
+            "start": 75,
+            "end": 76
+        },
+        {
+            "kind": "Character",
+            "text": ":",
+            "start": 76,
+            "end": 77
+        },
+        {
+            "kind": "Character",
+            "text": "/",
+            "start": 77,
+            "end": 78
+        },
+        {
+            "kind": "Character",
+            "text": "/",
+            "start": 78,
+            "end": 79
+        },
+        {
+            "kind": "RParen",
+            "text": ")",
+            "start": 79,
+            "end": 80
+        },
+        {
+            "kind": "Question",
+            "text": "?",
+            "start": 80,
+            "end": 81
+        },
+        {
+            "kind": "LParen",
+            "text": "(",
+            "start": 81,
+            "end": 82
+        },
+        {
+            "kind": "Question",
+            "text": "?",
+            "start": 82,
+            "end": 83
+        },
+        {
+            "kind": "Character",
+            "text": ":",
+            "start": 83,
+            "end": 84
+        },
+        {
+            "kind": "Character",
+            "text": "w",
+            "start": 84,
+            "end": 85
+        },
+        {
+            "kind": "Character",
+            "text": "w",
+            "start": 85,
+            "end": 86
+        },
+        {
+            "kind": "Character",
+            "text": "w",
+            "start": 86,
+            "end": 87
+        },
+        {
+            "kind": "Backslash",
+            "text": "\\",
+            "start": 87,
+            "end": 88
+        },
+        {
+            "kind": "Character",
+            "text": ".",
+            "start": 88,
+            "end": 89
+        },
+        {
+            "kind": "RParen",
+            "text": ")",
+            "start": 89,
+            "end": 90
+        },
+        {
+            "kind": "Question",
+            "text": "?",
+            "start": 90,
+            "end": 91
+        },
+        {
+            "kind": "LBrack",
+            "text": "[",
+            "start": 91,
+            "end": 92
+        },
+        {
+            "kind": "Character",
+            "text": "a",
+            "start": 92,
+            "end": 93
+        },
+        {
+            "kind": "Character",
+            "text": "-",
+            "start": 93,
+            "end": 94
+        },
+        {
+            "kind": "Character",
+            "text": "z",
+            "start": 94,
+            "end": 95
+        },
+        {
+            "kind": "Character",
+            "text": "A",
+            "start": 95,
+            "end": 96
+        },
+        {
+            "kind": "Character",
+            "text": "-",
+            "start": 96,
+            "end": 97
+        },
+        {
+            "kind": "Character",
+            "text": "Z",
+            "start": 97,
+            "end": 98
+        },
+        {
+            "kind": "Character",
+            "text": "0",
+            "start": 98,
+            "end": 99
+        },
+        {
+            "kind": "Character",
+            "text": "-",
+            "start": 99,
+            "end": 100
+        },
+        {
+            "kind": "Character",
+            "text": "9",
+            "start": 100,
+            "end": 101
+        },
+        {
+            "kind": "Character",
+            "text": "-",
+            "start": 101,
+            "end": 102
+        },
+        {
+            "kind": "RBrack",
+            "text": "]",
+            "start": 102,
+            "end": 103
+        },
+        {
+            "kind": "Plus",
+            "text": "+",
+            "start": 103,
+            "end": 104
+        },
+        {
+            "kind": "Backslash",
+            "text": "\\",
+            "start": 104,
+            "end": 105
+        },
+        {
+            "kind": "Character",
+            "text": ".",
+            "start": 105,
+            "end": 106
+        }
+    ],
+    "errors": []
+}

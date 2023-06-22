@@ -1,4 +1,4 @@
-use oak_core::{GreenBuilder, IncrementalCache, Lexer, SourceText};
+use oak_core::{Lexer, ParseSession, SourceText};
 use oak_sql::{SqlLanguage, SqlLexer};
 
 #[test]
@@ -7,9 +7,8 @@ fn test_sql_lexer_basic() {
     let language = SqlLanguage::default();
     let lexer = SqlLexer::new(&language);
 
-    let mut pool = GreenBuilder::new(0);
-    let cache = IncrementalCache::new(&mut pool);
-    let result = lexer.lex_incremental(&source, 0, cache);
+    let mut session = ParseSession::<SqlLanguage>::new(16);
+    let result = lexer.lex(&source, &[], &mut session);
 
     assert!(result.result.is_ok(), "词法分析应该成功");
     let tokens = result.result.unwrap();

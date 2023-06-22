@@ -3,8 +3,25 @@
 #![doc(html_logo_url = "https://raw.githubusercontent.com/ygg-lang/oaks/refs/heads/dev/documents/logo.svg")]
 #![doc(html_favicon_url = "https://raw.githubusercontent.com/ygg-lang/oaks/refs/heads/dev/documents/logo.svg")]
 pub mod ast;
+pub mod builder;
+pub mod highlighter;
 pub mod kind;
 pub mod language;
 pub mod lexer;
+pub mod lsp;
+#[cfg(feature = "mcp")]
+pub mod mcp;
+pub mod parser;
 
-pub use crate::{kind::PhpSyntaxKind, language::PhpLanguage};
+pub use crate::{
+    ast::PhpRoot,
+    builder::PhpBuilder,
+    highlighter::{HighlightKind, Highlighter, PhpHighlighter},
+    kind::PhpSyntaxKind,
+    language::PhpLanguage,
+    lsp::PhpLanguageService,
+    parser::PhpParser,
+};
+
+#[cfg(feature = "mcp")]
+pub use crate::mcp::serve_php_mcp;

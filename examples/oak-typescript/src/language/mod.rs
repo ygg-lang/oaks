@@ -1,5 +1,5 @@
-use crate::{ast::TypeScriptRoot, kind::TypeScriptSyntaxKind};
-use oak_core::Language;
+use crate::ast::TypeScriptRoot;
+use oak_core::{Language, LanguageCategory};
 
 /// TypeScript 语言配置
 pub struct TypeScriptLanguage {
@@ -59,6 +59,10 @@ impl TypeScriptLanguage {
 }
 
 impl Language for TypeScriptLanguage {
-    type SyntaxKind = TypeScriptSyntaxKind;
+    const NAME: &'static str = "typescript";
+    const CATEGORY: LanguageCategory = LanguageCategory::Programming;
+
+    type TokenType = crate::kind::TypeScriptSyntaxKind;
+    type ElementType = crate::kind::TypeScriptSyntaxKind;
     type TypedRoot = TypeScriptRoot;
 }

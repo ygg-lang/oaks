@@ -1,6 +1,6 @@
 [package]
 name = "oak-clojure"
-description = "High-performance incremental Clojure parser for the oak ecosystem with flexible configuration, supporting functional programming and Lisp syntax on the JVM."
+description = "Clojure functional programming language parser with support for Lisp syntax and JVM ecosystem integration."
 categories = ["parsing"]
 keywords = ["parser", "clojure", "lisp", "functional"]
 documentation = "https://docs.rs/oak-clojure"
@@ -14,6 +14,7 @@ edition.workspace = true
 
 [dependencies]
 oak-core = { workspace = true }
+serde = { workspace = true }
 oak-highlight = { workspace = true, optional = true }
 oak-pretty-print = { workspace = true, optional = true }
 

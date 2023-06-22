@@ -21,17 +21,19 @@ Oak R is a robust parser for R, designed to handle complete R syntax including m
 Basic example:
 
 ```rust
-use oak_r::{Parser, RLanguage, SourceText};
+use oak_core::{Parser, SourceText, parser::session::ParseSession};
+use oak_r::{RParser, RLanguage};
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
-    let parser = Parser::new();
+    let mut session = ParseSession::<RLanguage>::default();
+    let parser = RParser::new();
     let source = SourceText::new(r#"
 print("Hello, World!")
 x <- c(1, 2, 3, 4, 5)
 mean(x)
     "#);
     
-    let result = parser.parse(&source);
+    let result = parser.parse(&[], &mut session);
     println!("Parsed R successfully.");
     Ok(())
 }
@@ -41,24 +43,28 @@ mean(x)
 
 ### Function Parsing
 ```rust
-use oak_r::{Parser, RLanguage, SourceText};
+use oak_core::{Parser, SourceText, parser::session::ParseSession};
+use oak_r::{RParser, RLanguage};
 
-let parser = Parser::new();
+let mut session = ParseSession::<RLanguage>::default();
+let parser = RParser::new();
 let source = SourceText::new(r#"
 add <- function(a, b) {
   return(a + b)
 }
 "#);
 
-let result = parser.parse(&source);
+let result = parser.parse(&[], &mut session);
 println!("Function parsed successfully.");
 ```
 
 ### Data Structure Parsing
 ```rust
-use oak_r::{Parser, RLanguage, SourceText};
+use oak_core::{Parser, SourceText, parser::session::ParseSession};
+use oak_r::{RParser, RLanguage};
 
-let parser = Parser::new();
+let mut session = ParseSession::<RLanguage>::default();
+let parser = RParser::new();
 let source = SourceText::new(r#"
 data <- data.frame(
   name = c("Alice", "Bob", "Charlie"),
@@ -67,7 +73,7 @@ data <- data.frame(
 )
 "#);
 
-let result = parser.parse(&source);
+let result = parser.parse(&[], &mut session);
 println!("Data structure parsed successfully.");
 ```
 
@@ -75,25 +81,29 @@ println!("Data structure parsed successfully.");
 
 ### Token-Level Parsing
 ```rust
-use oak_r::{Parser, RLanguage, SourceText};
+use oak_core::{Parser, SourceText, parser::session::ParseSession};
+use oak_r::{RParser, RLanguage};
 
-let parser = Parser::new();
+let mut session = ParseSession::<RLanguage>::default();
+let parser = RParser::new();
 let source = SourceText::new("x <- c(1, 2, 3)");
-let result = parser.parse(&source);
+let result = parser.parse(&[], &mut session);
 println!("Token parsing completed.");
 ```
 
 ### Error Handling
 ```rust
-use oak_r::{Parser, RLanguage, SourceText};
+use oak_core::{Parser, SourceText, parser::session::ParseSession};
+use oak_r::{RParser, RLanguage};
 
-let parser = Parser::new();
+let mut session = ParseSession::<RLanguage>::default();
+let parser = RParser::new();
 let source = SourceText::new(r#"
 # Invalid R code example
 invalid_function(
 "#);
 
-let result = parser.parse(&source);
+let result = parser.parse(&[], &mut session);
 if let Some(errors) = result.result.err() {
     println!("Parse errors found: {:?}", errors);
 } else {

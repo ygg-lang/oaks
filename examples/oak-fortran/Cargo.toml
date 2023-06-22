@@ -1,9 +1,9 @@
 [package]
 name = "oak-fortran"
-description = "High-performance incremental Julia parser for the oak ecosystem with flexible configuration, supporting scientific computing and high-performance numerical analysis."
+description = "Fortran scientific computing language parser with support for modern Fortran standards and numerical computing."
 categories = ["parsing"]
-keywords = ["parser", "julia", "ast", "language"]
-documentation = "https://docs.rs/oak-julia"
+keywords = ["parser", "fortran", "scientific-computing", "hpc"]
+documentation = "https://docs.rs/oak-fortran"
 readme = "readme.md"
 version.workspace = true
 authors.workspace = true
@@ -20,8 +20,7 @@ serde = { workspace = true }
 
 [dev-dependencies]
 oak-core = { workspace = true, features = ["testing"] }
-
-walkdir = "2.5"
+walkdir = { workspace = true }
 
 [features]
 default = []

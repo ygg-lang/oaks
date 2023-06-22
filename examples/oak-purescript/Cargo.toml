@@ -1,9 +1,9 @@
 [package]
 name = "oak-purescript"
-description = "Erlang language parser with support for concurrent programming and OTP features."
+description = "PureScript language parser with support for functional programming and strong type system features."
 categories = ["parsing"]
-keywords = ["parser", "erlang", "otp", "concurrent"]
-documentation = "https://docs.rs/oak-erlang"
+keywords = ["parser", "purescript", "functional", "type-safe"]
+documentation = "https://docs.rs/oak-purescript"
 readme = "readme.md"
 version.workspace = true
 authors.workspace = true
@@ -16,6 +16,8 @@ edition.workspace = true
 oak-core = { workspace = true }
 oak-highlight = { workspace = true, optional = true }
 oak-pretty-print = { workspace = true, optional = true }
+oak-lsp = { workspace = true, optional = true }
+oak-mcp = { workspace = true, optional = true }
 serde = { workspace = true }
 
 [dev-dependencies]
@@ -24,6 +26,8 @@ oak-core = { workspace = true, features = ["testing"] }
 
 [features]
 default = []
+mcp = ["oak-mcp"]
+lsp = ["oak-lsp"]
 
 
 [package.metadata.docs.rs]

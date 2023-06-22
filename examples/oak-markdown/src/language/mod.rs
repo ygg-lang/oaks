@@ -1,14 +1,17 @@
-use crate::kind::MarkdownSyntaxKind;
-use oak_core::Language;
+use oak_core::{Language, LanguageCategory};
 
-#[derive(Debug)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub struct MarkdownLanguage {
     pub allow_math: bool,
 }
 
 impl Language for MarkdownLanguage {
-    type SyntaxKind = MarkdownSyntaxKind;
-    type TypedRoot = (); // 暂时使用空类型，后续可以定义具体的AST根节点类型
+    const NAME: &'static str = "markdown";
+    const CATEGORY: LanguageCategory = LanguageCategory::Markup;
+
+    type TokenType = crate::kind::MarkdownSyntaxKind;
+    type ElementType = crate::kind::MarkdownSyntaxKind;
+    type TypedRoot = crate::ast::MarkdownRoot;
 }
 
 impl Default for MarkdownLanguage {

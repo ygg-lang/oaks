@@ -1,0 +1,607 @@
+{
+    "success": true,
+    "count": 100,
+    "tokens": [
+        {
+            "kind": "Package",
+            "text": "package",
+            "start": 50,
+            "end": 57
+        },
+        {
+            "kind": "Identifier",
+            "text": "com",
+            "start": 58,
+            "end": 61
+        },
+        {
+            "kind": "Dot",
+            "text": ".",
+            "start": 61,
+            "end": 62
+        },
+        {
+            "kind": "Identifier",
+            "text": "example",
+            "start": 62,
+            "end": 69
+        },
+        {
+            "kind": "Dot",
+            "text": ".",
+            "start": 69,
+            "end": 70
+        },
+        {
+            "kind": "Identifier",
+            "text": "scala3",
+            "start": 70,
+            "end": 76
+        },
+        {
+            "kind": "Identifier",
+            "text": "enum",
+            "start": 106,
+            "end": 110
+        },
+        {
+            "kind": "Identifier",
+            "text": "Color",
+            "start": 111,
+            "end": 116
+        },
+        {
+            "kind": "Colon",
+            "text": ":",
+            "start": 116,
+            "end": 117
+        },
+        {
+            "kind": "Case",
+            "text": "case",
+            "start": 121,
+            "end": 125
+        },
+        {
+            "kind": "Identifier",
+            "text": "Red",
+            "start": 126,
+            "end": 129
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 129,
+            "end": 130
+        },
+        {
+            "kind": "Identifier",
+            "text": "Green",
+            "start": 131,
+            "end": 136
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 136,
+            "end": 137
+        },
+        {
+            "kind": "Identifier",
+            "text": "Blue",
+            "start": 138,
+            "end": 142
+        },
+        {
+            "kind": "Case",
+            "text": "case",
+            "start": 146,
+            "end": 150
+        },
+        {
+            "kind": "Identifier",
+            "text": "Custom",
+            "start": 151,
+            "end": 157
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 157,
+            "end": 158
+        },
+        {
+            "kind": "Identifier",
+            "text": "r",
+            "start": 158,
+            "end": 159
+        },
+        {
+            "kind": "Colon",
+            "text": ":",
+            "start": 159,
+            "end": 160
+        },
+        {
+            "kind": "Identifier",
+            "text": "Int",
+            "start": 161,
+            "end": 164
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 164,
+            "end": 165
+        },
+        {
+            "kind": "Identifier",
+            "text": "g",
+            "start": 166,
+            "end": 167
+        },
+        {
+            "kind": "Colon",
+            "text": ":",
+            "start": 167,
+            "end": 168
+        },
+        {
+            "kind": "Identifier",
+            "text": "Int",
+            "start": 169,
+            "end": 172
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 172,
+            "end": 173
+        },
+        {
+            "kind": "Identifier",
+            "text": "b",
+            "start": 174,
+            "end": 175
+        },
+        {
+            "kind": "Colon",
+            "text": ":",
+            "start": 175,
+            "end": 176
+        },
+        {
+            "kind": "Identifier",
+            "text": "Int",
+            "start": 177,
+            "end": 180
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 180,
+            "end": 181
+        },
+        {
+            "kind": "Object",
+            "text": "object",
+            "start": 225,
+            "end": 231
+        },
+        {
+            "kind": "Identifier",
+            "text": "Meter",
+            "start": 232,
+            "end": 237
+        },
+        {
+            "kind": "Colon",
+            "text": ":",
+            "start": 237,
+            "end": 238
+        },
+        {
+            "kind": "Identifier",
+            "text": "opaque",
+            "start": 242,
+            "end": 248
+        },
+        {
+            "kind": "Type",
+            "text": "type",
+            "start": 249,
+            "end": 253
+        },
+        {
+            "kind": "Identifier",
+            "text": "Meter",
+            "start": 254,
+            "end": 259
+        },
+        {
+            "kind": "Eq",
+            "text": "=",
+            "start": 260,
+            "end": 261
+        },
+        {
+            "kind": "Identifier",
+            "text": "Double",
+            "start": 262,
+            "end": 268
+        },
+        {
+            "kind": "Def",
+            "text": "def",
+            "start": 272,
+            "end": 275
+        },
+        {
+            "kind": "Identifier",
+            "text": "apply",
+            "start": 276,
+            "end": 281
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 281,
+            "end": 282
+        },
+        {
+            "kind": "Identifier",
+            "text": "d",
+            "start": 282,
+            "end": 283
+        },
+        {
+            "kind": "Colon",
+            "text": ":",
+            "start": 283,
+            "end": 284
+        },
+        {
+            "kind": "Identifier",
+            "text": "Double",
+            "start": 285,
+            "end": 291
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 291,
+            "end": 292
+        },
+        {
+            "kind": "Colon",
+            "text": ":",
+            "start": 292,
+            "end": 293
+        },
+        {
+            "kind": "Identifier",
+            "text": "Meter",
+            "start": 294,
+            "end": 299
+        },
+        {
+            "kind": "Eq",
+            "text": "=",
+            "start": 300,
+            "end": 301
+        },
+        {
+            "kind": "Identifier",
+            "text": "d",
+            "start": 302,
+            "end": 303
+        },
+        {
+            "kind": "Identifier",
+            "text": "extension",
+            "start": 307,
+            "end": 316
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 317,
+            "end": 318
+        },
+        {
+            "kind": "Identifier",
+            "text": "m",
+            "start": 318,
+            "end": 319
+        },
+        {
+            "kind": "Colon",
+            "text": ":",
+            "start": 319,
+            "end": 320
+        },
+        {
+            "kind": "Identifier",
+            "text": "Meter",
+            "start": 321,
+            "end": 326
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 326,
+            "end": 327
+        },
+        {
+            "kind": "Def",
+            "text": "def",
+            "start": 333,
+            "end": 336
+        },
+        {
+            "kind": "Identifier",
+            "text": "toCentimeter",
+            "start": 337,
+            "end": 349
+        },
+        {
+            "kind": "Colon",
+            "text": ":",
+            "start": 349,
+            "end": 350
+        },
+        {
+            "kind": "Identifier",
+            "text": "Double",
+            "start": 351,
+            "end": 357
+        },
+        {
+            "kind": "Eq",
+            "text": "=",
+            "start": 358,
+            "end": 359
+        },
+        {
+            "kind": "Identifier",
+            "text": "m",
+            "start": 360,
+            "end": 361
+        },
+        {
+            "kind": "Star",
+            "text": "*",
+            "start": 362,
+            "end": 363
+        },
+        {
+            "kind": "IntegerLiteral",
+            "text": "100",
+            "start": 364,
+            "end": 367
+        },
+        {
+            "kind": "Def",
+            "text": "def",
+            "start": 373,
+            "end": 376
+        },
+        {
+            "kind": "Identifier",
+            "text": "toKilometer",
+            "start": 377,
+            "end": 388
+        },
+        {
+            "kind": "Colon",
+            "text": ":",
+            "start": 388,
+            "end": 389
+        },
+        {
+            "kind": "Identifier",
+            "text": "Double",
+            "start": 390,
+            "end": 396
+        },
+        {
+            "kind": "Eq",
+            "text": "=",
+            "start": 397,
+            "end": 398
+        },
+        {
+            "kind": "Identifier",
+            "text": "m",
+            "start": 399,
+            "end": 400
+        },
+        {
+            "kind": "Slash",
+            "text": "/",
+            "start": 401,
+            "end": 402
+        },
+        {
+            "kind": "IntegerLiteral",
+            "text": "1000",
+            "start": 403,
+            "end": 407
+        },
+        {
+            "kind": "Def",
+            "text": "def",
+            "start": 443,
+            "end": 446
+        },
+        {
+            "kind": "Identifier",
+            "text": "handleId",
+            "start": 447,
+            "end": 455
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 455,
+            "end": 456
+        },
+        {
+            "kind": "Identifier",
+            "text": "id",
+            "start": 456,
+            "end": 458
+        },
+        {
+            "kind": "Colon",
+            "text": ":",
+            "start": 458,
+            "end": 459
+        },
+        {
+            "kind": "Identifier",
+            "text": "Int",
+            "start": 460,
+            "end": 463
+        },
+        {
+            "kind": "Or",
+            "text": "|",
+            "start": 464,
+            "end": 465
+        },
+        {
+            "kind": "Identifier",
+            "text": "String",
+            "start": 466,
+            "end": 472
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 472,
+            "end": 473
+        },
+        {
+            "kind": "Colon",
+            "text": ":",
+            "start": 473,
+            "end": 474
+        },
+        {
+            "kind": "Identifier",
+            "text": "String",
+            "start": 475,
+            "end": 481
+        },
+        {
+            "kind": "Eq",
+            "text": "=",
+            "start": 482,
+            "end": 483
+        },
+        {
+            "kind": "Identifier",
+            "text": "id",
+            "start": 484,
+            "end": 486
+        },
+        {
+            "kind": "Match",
+            "text": "match",
+            "start": 487,
+            "end": 492
+        },
+        {
+            "kind": "Case",
+            "text": "case",
+            "start": 496,
+            "end": 500
+        },
+        {
+            "kind": "Identifier",
+            "text": "i",
+            "start": 501,
+            "end": 502
+        },
+        {
+            "kind": "Colon",
+            "text": ":",
+            "start": 502,
+            "end": 503
+        },
+        {
+            "kind": "Identifier",
+            "text": "Int",
+            "start": 504,
+            "end": 507
+        },
+        {
+            "kind": "Arrow",
+            "text": "=>",
+            "start": 508,
+            "end": 510
+        },
+        {
+            "kind": "Identifier",
+            "text": "s",
+            "start": 511,
+            "end": 512
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "\"Integer ID: $i\"",
+            "start": 512,
+            "end": 528
+        },
+        {
+            "kind": "Case",
+            "text": "case",
+            "start": 532,
+            "end": 536
+        },
+        {
+            "kind": "Identifier",
+            "text": "s",
+            "start": 537,
+            "end": 538
+        },
+        {
+            "kind": "Colon",
+            "text": ":",
+            "start": 538,
+            "end": 539
+        },
+        {
+            "kind": "Identifier",
+            "text": "String",
+            "start": 540,
+            "end": 546
+        },
+        {
+            "kind": "Arrow",
+            "text": "=>",
+            "start": 547,
+            "end": 549
+        },
+        {
+            "kind": "Identifier",
+            "text": "s",
+            "start": 550,
+            "end": 551
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "\"String ID: $s\"",
+            "start": 551,
+            "end": 566
+        },
+        {
+            "kind": "Trait",
+            "text": "trait",
+            "start": 609,
+            "end": 614
+        }
+    ],
+    "errors": []
+}

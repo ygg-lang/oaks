@@ -1,41 +1,36 @@
 use crate::{kind::WitSyntaxKind, language::WitLanguage};
 use oak_core::{
-    IncrementalCache, Lexer, LexerState, OakError,
-    lexer::{CommentLine, LexOutput, StringConfig, WhitespaceConfig},
+    Lexer, LexerCache, LexerState, OakError, TextEdit,
+    lexer::{CommentConfig, LexOutput, StringConfig, WhitespaceConfig},
     source::Source,
 };
 use std::sync::LazyLock;
 
-type State<S: Source> = LexerState<S, WitLanguage>;
+type State<'a, S> = LexerState<'a, S, WitLanguage>;
 
 static WIT_WHITESPACE: LazyLock<WhitespaceConfig> = LazyLock::new(|| WhitespaceConfig { unicode_whitespace: true });
-static WIT_COMMENT: LazyLock<CommentLine> = LazyLock::new(|| CommentLine { line_markers: &["//"] });
+static WIT_COMMENT: LazyLock<CommentConfig> = LazyLock::new(|| CommentConfig { line_marker: "//", block_start: "/*", block_end: "*/", nested_blocks: true });
 static WIT_STRING: LazyLock<StringConfig> = LazyLock::new(|| StringConfig { quotes: &['"'], escape: Some('\\') });
 
 #[derive(Clone)]
 pub struct WitLexer<'config> {
-    config: &'config WitLanguage,
+    _config: &'config WitLanguage,
 }
 
 impl<'config> Lexer<WitLanguage> for WitLexer<'config> {
-    fn lex_incremental(
-        &self,
-        source: impl Source,
-        changed: usize,
-        cache: IncrementalCache<WitLanguage>,
-    ) -> LexOutput<WitLanguage> {
-        let mut state = LexerState::new(source);
-        let _ = self.run(&mut state);
-        state.finish(Ok(()))
+    fn lex<'a, S: Source + ?Sized>(&self, source: &S, _edits: &[TextEdit], cache: &'a mut impl LexerCache<WitLanguage>) -> LexOutput<WitLanguage> {
+        let mut state: State<'_, S> = LexerState::new(source);
+        let result = self.run(&mut state);
+        state.finish_with_cache(result, cache)
     }
 }
 
 impl<'config> WitLexer<'config> {
     pub fn new(config: &'config WitLanguage) -> Self {
-        Self { config }
+        Self { _config: config }
     }
 
-    fn run<S: Source>(&self, state: &mut State<S>) -> Result<(), OakError> {
+    fn run<S: Source + ?Sized>(&self, state: &mut State<'_, S>) -> Result<(), OakError> {
         while state.not_at_end() {
             if self.skip_whitespace(state) {
                 continue;
@@ -79,41 +74,19 @@ impl<'config> WitLexer<'config> {
         Ok(())
     }
 
-    fn skip_whitespace<S: Source>(&self, state: &mut State<S>) -> bool {
-        match WIT_WHITESPACE.scan(state.rest(), state.get_position(), WitSyntaxKind::Whitespace) {
-            Some(token) => {
-                state.advance_with(token);
-                return true;
-            }
-            None => {}
-        }
-        false
+    fn skip_whitespace<S: Source + ?Sized>(&self, state: &mut State<'_, S>) -> bool {
+        WIT_WHITESPACE.scan(state, WitSyntaxKind::Whitespace)
     }
 
-    fn skip_comment<S: Source>(&self, state: &mut State<S>) -> bool {
-        match WIT_COMMENT.scan(state.rest(), state.get_position(), WitSyntaxKind::Comment) {
-            Some(token) => {
-                state.advance_with(token);
-                return true;
-            }
-            None => {}
-        }
-        false
+    fn skip_comment<S: Source + ?Sized>(&self, state: &mut State<'_, S>) -> bool {
+        WIT_COMMENT.scan(state, WitSyntaxKind::Comment, WitSyntaxKind::Comment)
     }
 
-    fn lex_string_literal<S: Source>(&self, state: &mut State<S>) -> bool {
-        let start = state.get_position();
-        match WIT_STRING.scan(state.rest(), start, WitSyntaxKind::StringLiteral) {
-            Some(token) => {
-                state.advance_with(token);
-                return true;
-            }
-            None => {}
-        }
-        false
+    fn lex_string_literal<S: Source + ?Sized>(&self, state: &mut State<'_, S>) -> bool {
+        WIT_STRING.scan(state, WitSyntaxKind::StringLiteral)
     }
 
-    fn lex_number_literal<S: Source>(&self, state: &mut State<S>) -> bool {
+    fn lex_number_literal<S: Source + ?Sized>(&self, state: &mut State<'_, S>) -> bool {
         let start_pos = state.get_position();
         let mut has_digits = false;
 
@@ -136,7 +109,7 @@ impl<'config> WitLexer<'config> {
         false
     }
 
-    fn lex_identifier_or_keyword<S: Source>(&self, state: &mut State<S>) -> bool {
+    fn lex_identifier_or_keyword<S: Source + ?Sized>(&self, state: &mut State<'_, S>) -> bool {
         let start_pos = state.get_position();
 
         if let Some(ch) = state.peek() {
@@ -153,8 +126,8 @@ impl<'config> WitLexer<'config> {
                     }
                 }
 
-                let text = state.get_text_in((start_pos..state.get_position()).into());
-                let token_kind = match text {
+                let text = state.get_text_from(start_pos);
+                let token_kind = match text.as_ref() {
                     // WIT 关键字
                     "world" => WitSyntaxKind::WorldKw,
                     "interface" => WitSyntaxKind::InterfaceKw,
@@ -207,7 +180,7 @@ impl<'config> WitLexer<'config> {
         false
     }
 
-    fn lex_punctuation<S: Source>(&self, state: &mut State<S>) -> bool {
+    fn lex_punctuation<S: Source + ?Sized>(&self, state: &mut State<'_, S>) -> bool {
         let start_pos = state.get_position();
 
         if let Some(ch) = state.peek() {
@@ -296,7 +269,7 @@ impl<'config> WitLexer<'config> {
         false
     }
 
-    fn lex_text<S: Source>(&self, state: &mut State<S>) -> bool {
+    fn lex_text<S: Source + ?Sized>(&self, state: &mut State<'_, S>) -> bool {
         let start_pos = state.get_position();
 
         if let Some(ch) = state.peek() {

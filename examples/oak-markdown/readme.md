@@ -21,10 +21,12 @@ Oak Markdown is a robust parser for Markdown, designed to handle complete Markdo
 Basic example:
 
 ```rust
-use oak_markdown::{Parser, MarkdownLanguage, SourceText};
+use oak_core::{Parser, SourceText, parser::session::ParseSession};
+use oak_markdown::{MarkdownParser, MarkdownLanguage};
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
-    let parser = Parser::new();
+    let mut session = ParseSession::<MarkdownLanguage>::default();
+    let parser = MarkdownParser::new();
     let source = SourceText::new(r#"
 # Hello, Markdown!
 
@@ -37,7 +39,7 @@ This is a **paragraph** with *emphasis*.
 - And more!
     "#);
     
-    let result = parser.parse(&source);
+    let result = parser.parse(&[], &mut session);
     println!("Parsed Markdown successfully.");
     Ok(())
 }
@@ -47,31 +49,35 @@ This is a **paragraph** with *emphasis*.
 
 ### Document Parsing
 ```rust
-use oak_markdown::{Parser, MarkdownLanguage, SourceText};
+use oak_core::{Parser, SourceText, parser::session::ParseSession};
+use oak_markdown::{MarkdownParser, MarkdownLanguage};
 
-let parser = Parser::new();
+let mut session = ParseSession::<MarkdownLanguage>::default();
+let parser = MarkdownParser::new();
 let source = SourceText::new(r#"
 # My Document
 
 This is a simple document.
 "#);
 
-let result = parser.parse(&source);
+let result = parser.parse(&[], &mut session);
 println!("Document parsed successfully.");
 ```
 
 ### Heading Parsing
 ```rust
-use oak_markdown::{Parser, MarkdownLanguage, SourceText};
+use oak_core::{Parser, SourceText, parser::session::ParseSession};
+use oak_markdown::{MarkdownParser, MarkdownLanguage};
 
-let parser = Parser::new();
+let mut session = ParseSession::<MarkdownLanguage>::default();
+let parser = MarkdownParser::new();
 let source = SourceText::new(r#"
 ## My Heading
 
 Some content here.
 "#);
 
-let result = parser.parse(&source);
+let result = parser.parse(&[], &mut session);
 println!("Heading parsed successfully.");
 ```
 
@@ -79,19 +85,23 @@ println!("Heading parsed successfully.");
 
 ### Token-Level Parsing
 ```rust
-use oak_markdown::{Parser, MarkdownLanguage, SourceText};
+use oak_core::{Parser, SourceText, parser::session::ParseSession};
+use oak_markdown::{MarkdownParser, MarkdownLanguage};
 
-let parser = Parser::new();
+let mut session = ParseSession::<MarkdownLanguage>::default();
+let parser = MarkdownParser::new();
 let source = SourceText::new("# Heading\n\nParagraph text");
-let result = parser.parse(&source);
+let result = parser.parse(&[], &mut session);
 println!("Token parsing completed.");
 ```
 
 ### Error Handling
 ```rust
-use oak_markdown::{Parser, MarkdownLanguage, SourceText};
+use oak_core::{Parser, SourceText, parser::session::ParseSession};
+use oak_markdown::{MarkdownParser, MarkdownLanguage};
 
-let parser = Parser::new();
+let mut session = ParseSession::<MarkdownLanguage>::default();
+let parser = MarkdownParser::new();
 let source = SourceText::new(r#"
 # Heading
 
@@ -100,7 +110,7 @@ This is a paragraph
 # Unclosed heading
 "#);
 
-let result = parser.parse(&source);
+let result = parser.parse(&[], &mut session);
 if let Some(errors) = result.result.err() {
     println!("Parse errors found: {:?}", errors);
 } else {

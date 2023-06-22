@@ -1,4 +1,4 @@
-use oak_core::{IncrementalCache, Lexer, source::SourceText, tree::GreenBuilder};
+use oak_core::{Lexer, ParseSession, source::SourceText};
 use oak_groovy::{language::GroovyLanguage, lexer::GroovyLexer};
 
 #[test]
@@ -8,9 +8,8 @@ fn test_groovy_lexer() {
     let language = GroovyLanguage::default();
     let lexer = GroovyLexer::new(&language);
     let source_text = SourceText::new(source);
-    let mut builder = GreenBuilder::new(1024);
-    let cache = IncrementalCache::new(&mut builder);
-    let result = lexer.lex_incremental(&source_text, 0, cache);
+    let mut session = ParseSession::<GroovyLanguage>::new(1024);
+    let result = lexer.lex(&source_text, &[], &mut session);
 
     match result.result {
         Ok(tokens) => {
@@ -27,9 +26,8 @@ fn test_peek_behavior() {
     let language = GroovyLanguage::default();
     let lexer = GroovyLexer::new(&language);
     let source_text = SourceText::new(source);
-    let mut builder = GreenBuilder::new(1024);
-    let cache = IncrementalCache::new(&mut builder);
-    let result = lexer.lex_incremental(&source_text, 0, cache);
+    let mut session = ParseSession::<GroovyLanguage>::new(1024);
+    let result = lexer.lex(&source_text, &[], &mut session);
 
     match result.result {
         Ok(tokens) => {
@@ -46,9 +44,8 @@ fn test_groovy_class_parsing() {
     let language = GroovyLanguage::default();
     let lexer = GroovyLexer::new(&language);
     let source_text = SourceText::new(source);
-    let mut builder = GreenBuilder::new(1024);
-    let cache = IncrementalCache::new(&mut builder);
-    let result = lexer.lex_incremental(&source_text, 0, cache);
+    let mut session = ParseSession::<GroovyLanguage>::new(1024);
+    let result = lexer.lex(&source_text, &[], &mut session);
 
     match result.result {
         Ok(tokens) => {

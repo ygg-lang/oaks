@@ -1,4 +1,4 @@
-use oak_core::{SourceText, lexer::Lexer};
+use oak_core::{ParseSession, SourceText, lexer::Lexer};
 use oak_graphql::{kind::GraphQLSyntaxKind, language::GraphQLLanguage, lexer::GraphQLLexer};
 use std::fs;
 
@@ -27,7 +27,7 @@ impl GraphQLFileTestSuite {
         files
     }
 
-    fn get_json_path(&self, file_path: &str) -> String {
+    fn _get_json_path(&self, file_path: &str) -> String {
         file_path.replace(&format!(".{}", self.extension), ".json")
     }
 
@@ -44,7 +44,8 @@ fn test_lexer() {
 
     let content = "query { user { name } }";
     let source = SourceText::new(content);
-    let lex_result = lexer.lex(&source);
+    let mut session = ParseSession::<GraphQLLanguage>::default();
+    let lex_result = lexer.lex(&source, &[], &mut session);
 
     match lex_result.result {
         Ok(tokens) => {
@@ -73,7 +74,7 @@ fn test_lexer() {
 fn test_parser() {
     println!("Testing GraphQL Parser...");
 
-    let test_suite = GraphQLFileTestSuite::new("tests/parser", "graphql");
+    let test_suite = GraphQLFileTestSuite::new("tests/files", "graphql");
     let test_files = test_suite.find_test_files();
 
     for file_path in test_files {
@@ -85,7 +86,8 @@ fn test_parser() {
                 let language = GraphQLLanguage {};
                 let lexer = GraphQLLexer::new(&language);
                 let source = SourceText::new(&content);
-                let lex_result = lexer.lex(&source);
+                let mut session = ParseSession::<GraphQLLanguage>::default();
+                let lex_result = lexer.lex(&source, &[], &mut session);
 
                 match lex_result.result {
                     Ok(tokens) => {
@@ -93,8 +95,8 @@ fn test_parser() {
                         println!("  Tokens found: {}", tokens.len());
 
                         // TODO: 添加 GraphQL 解析器实现
-                        // let mut parser = GraphQLParser::new(tokens);
-                        // match parser.parse() {
+                        // let mut files = GraphQLParser::new(tokens);
+                        // match files.parse() {
                         //     Ok(ast) => {
                         //         println!("  Parsing completed successfully");
                         //     }

@@ -1,10 +1,13 @@
-use crate::{ast::PascalRoot, kind::PascalSyntaxKind};
-use oak_core::Language;
+use oak_core::{Language, LanguageCategory};
 
 #[derive(Debug, Default)]
 pub struct PascalLanguage {}
 
 impl Language for PascalLanguage {
-    type SyntaxKind = PascalSyntaxKind;
-    type TypedRoot = PascalRoot;
+    const NAME: &'static str = "pascal";
+    const CATEGORY: LanguageCategory = LanguageCategory::Programming;
+
+    type TokenType = crate::kind::PascalSyntaxKind;
+    type ElementType = crate::kind::PascalSyntaxKind;
+    type TypedRoot = crate::ast::PascalRoot;
 }

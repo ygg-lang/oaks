@@ -1,5 +1,5 @@
 use crate::ast::SassRoot;
-use oak_core::language::Language;
+use oak_core::language::{Language, LanguageCategory};
 
 /// Sass 语言实现
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -21,6 +21,10 @@ impl Default for SassLanguage {
 }
 
 impl Language for SassLanguage {
-    type SyntaxKind = crate::kind::SassSyntaxKind;
+    const NAME: &'static str = "sass";
+    const CATEGORY: LanguageCategory = LanguageCategory::Programming;
+
+    type TokenType = crate::kind::SassSyntaxKind;
+    type ElementType = crate::kind::SassSyntaxKind;
     type TypedRoot = SassRoot;
 }

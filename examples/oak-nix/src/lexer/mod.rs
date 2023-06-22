@@ -1,20 +1,24 @@
 use crate::{kind::NixSyntaxKind, language::NixLanguage};
-use oak_core::{IncrementalCache, Lexer, LexerState, lexer::LexOutput, source::Source};
+use oak_core::{
+    Lexer, LexerCache, LexerState,
+    lexer::LexOutput,
+    source::{Source, TextEdit},
+};
 
-type State<S> = LexerState<S, NixLanguage>;
+type State<'a, S> = LexerState<'a, S, NixLanguage>;
 
 #[derive(Clone, Debug)]
 pub struct NixLexer<'config> {
-    config: &'config NixLanguage,
+    _config: &'config NixLanguage,
 }
 
 impl<'config> NixLexer<'config> {
     pub fn new(config: &'config NixLanguage) -> Self {
-        Self { config }
+        Self { _config: config }
     }
 
     /// 跳过空白字符
-    fn skip_whitespace<S: Source>(&self, state: &mut State<S>) -> bool {
+    fn skip_whitespace<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start_pos = state.get_position();
 
         while let Some(ch) = state.peek() {
@@ -36,7 +40,7 @@ impl<'config> NixLexer<'config> {
     }
 
     /// 处理换行
-    fn lex_newline<S: Source>(&self, state: &mut State<S>) -> bool {
+    fn lex_newline<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start_pos = state.get_position();
 
         if let Some('\n') = state.peek() {
@@ -58,7 +62,7 @@ impl<'config> NixLexer<'config> {
     }
 
     /// 处理注释
-    fn lex_comment<S: Source>(&self, state: &mut State<S>) -> bool {
+    fn lex_comment<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start_pos = state.get_position();
 
         if let Some('#') = state.peek() {
@@ -81,7 +85,7 @@ impl<'config> NixLexer<'config> {
     }
 
     /// 处理字符串字面量
-    fn lex_string<S: Source>(&self, state: &mut State<S>) -> bool {
+    fn lex_string<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start_pos = state.get_position();
 
         if let Some('"') = state.peek() {
@@ -111,60 +115,37 @@ impl<'config> NixLexer<'config> {
         }
     }
 
-    /// 处理数字字面
-    fn lex_number<S: Source>(&self, state: &mut State<S>) -> bool {
+    /// 处理数字字面量
+    fn lex_number<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start_pos = state.get_position();
 
         if let Some(ch) = state.peek() {
             if ch.is_ascii_digit() {
                 state.advance(1);
-
-                // 读取更多数字
                 while let Some(ch) = state.peek() {
-                    if ch.is_ascii_digit() {
+                    if ch.is_ascii_digit() || ch == '.' {
                         state.advance(1);
-                    }
-                    else if ch == '.' {
-                        state.advance(1);
-                        // 小数部分
-                        while let Some(ch) = state.peek() {
-                            if ch.is_ascii_digit() {
-                                state.advance(1);
-                            }
-                            else {
-                                break;
-                            }
-                        }
-                        break;
                     }
                     else {
                         break;
                     }
                 }
-
                 state.add_token(NixSyntaxKind::Number, start_pos, state.get_position());
-                true
-            }
-            else {
-                false
+                return true;
             }
         }
-        else {
-            false
-        }
+        false
     }
 
-    /// 处理标识符和关键
-    fn lex_identifier<S: Source>(&self, state: &mut State<S>) -> bool {
+    /// 处理标识符和关键字
+    fn lex_identifier<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start_pos = state.get_position();
 
         if let Some(ch) = state.peek() {
             if ch.is_alphabetic() || ch == '_' {
                 state.advance(ch.len_utf8());
-
-                // 读取更多字符
                 while let Some(ch) = state.peek() {
-                    if ch.is_alphanumeric() || ch == '_' || ch == '-' {
+                    if ch.is_alphanumeric() || ch == '_' || ch == '-' || ch == '\'' {
                         state.advance(ch.len_utf8());
                     }
                     else {
@@ -172,9 +153,8 @@ impl<'config> NixLexer<'config> {
                     }
                 }
 
-                // 检查是否为关键
                 let text = state.get_text_in((start_pos..state.get_position()).into());
-                let kind = match text {
+                let kind = match &*text {
                     "let" => NixSyntaxKind::Let,
                     "in" => NixSyntaxKind::In,
                     "if" => NixSyntaxKind::If,
@@ -202,7 +182,7 @@ impl<'config> NixLexer<'config> {
     }
 
     /// 处理操作
-    fn lex_operator<S: Source>(&self, state: &mut State<S>) -> bool {
+    fn lex_operator<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start_pos = state.get_position();
 
         if let Some(ch) = state.peek() {
@@ -374,13 +354,8 @@ impl<'config> NixLexer<'config> {
 }
 
 impl<'config> Lexer<NixLanguage> for NixLexer<'config> {
-    fn lex_incremental(
-        &self,
-        source: impl Source,
-        changed: usize,
-        cache: IncrementalCache<NixLanguage>,
-    ) -> LexOutput<NixLanguage> {
-        let mut state = LexerState::new_with_cache(source, changed, cache);
+    fn lex<'a, S: Source + ?Sized>(&self, text: &'a S, _edits: &[TextEdit], cache: &'a mut impl LexerCache<NixLanguage>) -> LexOutput<NixLanguage> {
+        let mut state = State::new(text);
 
         while state.not_at_end() {
             if self.skip_whitespace(&mut state) {
@@ -415,6 +390,6 @@ impl<'config> Lexer<NixLanguage> for NixLexer<'config> {
 
         let eof_pos = state.get_position();
         state.add_token(NixSyntaxKind::Eof, eof_pos, eof_pos);
-        state.finish(Ok(()))
+        state.finish_with_cache(Ok(()), cache)
     }
 }

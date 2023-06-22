@@ -1,6 +1,6 @@
 [package]
 name = "oak-csharp"
-description = "High-performance incremental C# parser for the oak ecosystem with flexible configuration, supporting modern .NET features and managed programming."
+description = "C# object-oriented programming language parser with support for modern .NET features and managed programming."
 categories = ["parsing"]
 keywords = ["parser", "csharp", "dotnet", "syntax-analysis"]
 documentation = "https://docs.rs/oak-csharp"
@@ -14,6 +14,7 @@ edition.workspace = true
 
 [dependencies]
 oak-core = { workspace = true }
+serde = { workspace = true }
 oak-highlight = { workspace = true, optional = true }
 oak-pretty-print = { workspace = true, optional = true }
 

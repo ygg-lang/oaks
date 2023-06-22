@@ -1,4 +1,4 @@
-use oak_core::Language;
+use oak_core::{Language, LanguageCategory};
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct CommentConfig {
@@ -27,10 +27,7 @@ pub struct ValaLanguage {
 impl Default for ValaLanguage {
     fn default() -> Self {
         Self {
-            comment_config: CommentConfig {
-                line_comment: Some("//".to_string()),
-                block_comment: Some(("/*".to_string(), "*/".to_string())),
-            },
+            comment_config: CommentConfig { line_comment: Some("//".to_string()), block_comment: Some(("/*".to_string(), "*/".to_string())) },
             string_config: StringConfig { quotes: vec!['"', '\''], escape_char: Some('\\') },
             whitespace_config: WhitespaceConfig { characters: vec![' ', '\t'], new_line_characters: vec!['\n', '\r'] },
         }
@@ -38,6 +35,10 @@ impl Default for ValaLanguage {
 }
 
 impl Language for ValaLanguage {
-    type SyntaxKind = crate::kind::ValaSyntaxKind;
-    type TypedRoot = ();
+    const NAME: &'static str = "vala";
+    const CATEGORY: LanguageCategory = LanguageCategory::Programming;
+
+    type TokenType = crate::kind::ValaSyntaxKind;
+    type ElementType = crate::kind::ValaSyntaxKind;
+    type TypedRoot = crate::ast::ValaRoot;
 }

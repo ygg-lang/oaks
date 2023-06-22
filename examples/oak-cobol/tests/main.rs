@@ -1,5 +1,5 @@
-use oak_cobol::{CobolLexer, CobolSyntaxKind};
-use oak_core::{GreenBuilder, IncrementalCache, Lexer, SourceText};
+use oak_cobol::{CobolLanguage, CobolLexer, CobolTokenType};
+use oak_core::{Lexer, SourceText, parser::session::ParseSession};
 use std::fs;
 
 struct CobolFileTestSuite {
@@ -44,10 +44,10 @@ fn test_lexer() {
         match test_suite.read_file_content(&file_path) {
             Ok(content) => {
                 let source = SourceText::new(&content);
-                let lexer = CobolLexer::new();
-                let mut pool = GreenBuilder::new(0);
-                let cache = IncrementalCache::new(&mut pool);
-                let output = lexer.lex_incremental(&source, 0, cache);
+                let language = CobolLanguage;
+                let lexer = CobolLexer::new(&language);
+                let mut session = ParseSession::<CobolLanguage>::new(16);
+                let output = lexer.lex(&source, &[], &mut session);
 
                 let tokens = match &output.result {
                     Ok(tokens) => tokens,
@@ -70,7 +70,7 @@ fn test_lexer() {
                 // 验证最后一tokens EOF
                 if let Some(last_token) = tokens.last() {
                     match last_token.kind {
-                        CobolSyntaxKind::Eof => println!("  Lexing completed successfully"),
+                        CobolTokenType::Eof => println!("  Lexing completed successfully"),
                         _ => println!("  Warning: Last tokens is not EOF"),
                     }
                 }
@@ -90,7 +90,7 @@ fn test_lexer() {
 fn test_parser() {
     println!("Testing COBOL Parser...");
 
-    let test_suite = CobolFileTestSuite::new("tests/parser", "cob");
+    let test_suite = CobolFileTestSuite::new("tests/files", "cob");
     let test_files = test_suite.find_test_files();
 
     for file_path in test_files {
@@ -100,10 +100,10 @@ fn test_parser() {
             Ok(content) => {
                 // 首先进行词法分析
                 let source = SourceText::new(&content);
-                let lexer = CobolLexer::new();
-                let mut pool = GreenBuilder::new(0);
-                let cache = IncrementalCache::new(&mut pool);
-                let output = lexer.lex_incremental(&source, 0, cache);
+                let language = CobolLanguage;
+                let lexer = CobolLexer::new(&language);
+                let mut session = ParseSession::<CobolLanguage>::new(16);
+                let output = lexer.lex(&source, &[], &mut session);
 
                 match &output.result {
                     Ok(_tokens) => {

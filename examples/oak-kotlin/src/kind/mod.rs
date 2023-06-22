@@ -1,4 +1,4 @@
-use oak_core::SyntaxKind;
+use oak_core::{ElementType, TokenType, UniversalElementRole, UniversalTokenRole};
 
 /// Kotlin 语法种类
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, serde::Serialize)]
@@ -6,8 +6,10 @@ pub enum KotlinSyntaxKind {
     // 节点种类
     Root,
     SourceFile,
+    EndOfStream,
 
-    // 关键    Class,
+    // 关键字
+    Class,
     Fun,
     Val,
     Var,
@@ -98,59 +100,152 @@ pub enum KotlinSyntaxKind {
     GtEq,
     AndAnd,
     OrOr,
-    Not,
-    Question,
-    Elvis,
+    Dot,
+    Comma,
+    Colon,
+    Semi,
+    Arrow,
+    DoubleColon,
     Range,
-    Until,
+    Question,
+    ExclamationExclamation,
+    At,
 
     // 标点符号
-    LeftParen,
-    RightParen,
-    LeftBrace,
-    RightBrace,
-    LeftBracket,
-    RightBracket,
-    Semicolon,
-    Comma,
-    Dot,
-    Colon,
-    DoubleColon,
-    Arrow,
-    At,
-    Hash,
-    Dollar,
+    LParen,
+    RParen,
+    LBracket,
+    RBracket,
+    LBrace,
+    RBrace,
 
-    // 空白和注释
+    // 其他
+    Comment,
     Whitespace,
     Newline,
-    Comment,
-    LineComment,
-    BlockComment,
-
-    // 特殊
-    Eof,
     Error,
 }
 
-impl SyntaxKind for KotlinSyntaxKind {
-    fn is_trivia(&self) -> bool {
-        matches!(self, Self::Whitespace | Self::Newline | Self::Comment | Self::LineComment | Self::BlockComment)
-    }
+impl TokenType for KotlinSyntaxKind {
+    type Role = UniversalTokenRole;
+    const END_OF_STREAM: Self = Self::EndOfStream;
 
-    fn is_comment(&self) -> bool {
-        matches!(self, Self::Comment | Self::LineComment | Self::BlockComment)
-    }
+    fn role(&self) -> Self::Role {
+        match self {
+            Self::Class
+            | Self::Fun
+            | Self::Val
+            | Self::Var
+            | Self::If
+            | Self::Else
+            | Self::When
+            | Self::For
+            | Self::While
+            | Self::Return
+            | Self::Break
+            | Self::Continue
+            | Self::Try
+            | Self::Catch
+            | Self::Finally
+            | Self::Throw
+            | Self::Import
+            | Self::Package
+            | Self::Public
+            | Self::Private
+            | Self::Protected
+            | Self::Internal
+            | Self::Abstract
+            | Self::Final
+            | Self::Open
+            | Self::Override
+            | Self::Companion
+            | Self::Object
+            | Self::Interface
+            | Self::Enum
+            | Self::Data
+            | Self::Sealed
+            | Self::Inline
+            | Self::Suspend
+            | Self::Operator
+            | Self::Infix
+            | Self::Tailrec
+            | Self::External
+            | Self::Annotation
+            | Self::Crossinline
+            | Self::Noinline
+            | Self::Reified
+            | Self::Vararg
+            | Self::Out
+            | Self::In
+            | Self::Is
+            | Self::As
+            | Self::This
+            | Self::Super
+            | Self::Null
+            | Self::True
+            | Self::False
+            | Self::Keyword => UniversalTokenRole::Keyword,
 
-    fn is_whitespace(&self) -> bool {
-        matches!(self, Self::Whitespace | Self::Newline)
-    }
+            Self::Identifier => UniversalTokenRole::Name,
 
-    fn is_token_type(&self) -> bool {
-        !matches!(self, Self::Root | Self::SourceFile)
-    }
+            Self::StringLiteral | Self::CharLiteral | Self::NumberLiteral | Self::IntLiteral | Self::FloatLiteral | Self::BooleanLiteral => UniversalTokenRole::Literal,
 
-    fn is_element_type(&self) -> bool {
-        matches!(self, Self::Root | Self::SourceFile)
+            Self::Plus
+            | Self::Minus
+            | Self::Star
+            | Self::Slash
+            | Self::Percent
+            | Self::Equals
+            | Self::Less
+            | Self::Greater
+            | Self::Ampersand
+            | Self::Pipe
+            | Self::Caret
+            | Self::Tilde
+            | Self::Exclamation
+            | Self::Assign
+            | Self::PlusAssign
+            | Self::MinusAssign
+            | Self::StarAssign
+            | Self::SlashAssign
+            | Self::PercentAssign
+            | Self::EqEq
+            | Self::NotEq
+            | Self::Lt
+            | Self::Gt
+            | Self::LtEq
+            | Self::GtEq
+            | Self::AndAnd
+            | Self::OrOr
+            | Self::Dot
+            | Self::Comma
+            | Self::Colon
+            | Self::Semi
+            | Self::At
+            | Self::Arrow
+            | Self::DoubleColon
+            | Self::Range
+            | Self::Question
+            | Self::ExclamationExclamation => UniversalTokenRole::Operator,
+
+            Self::LParen | Self::RParen | Self::LBracket | Self::RBracket | Self::LBrace | Self::RBrace => UniversalTokenRole::Punctuation,
+
+            Self::Comment => UniversalTokenRole::Comment,
+            Self::Whitespace | Self::Newline => UniversalTokenRole::Whitespace,
+            Self::Error => UniversalTokenRole::Error,
+            _ => UniversalTokenRole::None,
+        }
+    }
+}
+
+impl ElementType for KotlinSyntaxKind {
+    type Role = UniversalElementRole;
+
+    fn role(&self) -> Self::Role {
+        match self {
+            Self::Root | Self::SourceFile => UniversalElementRole::Root,
+            Self::Error => UniversalElementRole::Error,
+            _ => UniversalElementRole::None,
+        }
     }
 }

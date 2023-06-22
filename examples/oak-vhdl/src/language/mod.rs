@@ -1,5 +1,4 @@
-use crate::ast::VhdlRoot;
-use oak_core::Language;
+use oak_core::{Language, LanguageCategory};
 
 /// VHDL 语言定义
 #[derive(Debug, Clone)]
@@ -18,6 +17,10 @@ impl Default for VhdlLanguage {
 }
 
 impl Language for VhdlLanguage {
-    type SyntaxKind = crate::kind::VhdlSyntaxKind;
-    type TypedRoot = VhdlRoot;
+    const NAME: &'static str = "vhdl";
+    const CATEGORY: LanguageCategory = LanguageCategory::Programming;
+
+    type TokenType = crate::kind::VhdlSyntaxKind;
+    type ElementType = crate::kind::VhdlSyntaxKind;
+    type TypedRoot = ();
 }

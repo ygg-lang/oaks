@@ -9,7 +9,7 @@ fn test_kotlin_lexer() {
     let binding = KotlinLanguage::default();
     let lexer = KotlinLexer::new(&binding);
     let test_runner = LexerTester::new(tests).with_extension("kt");
-    match test_runner.run_tests::<KotlinLanguage, _>(lexer) {
+    match test_runner.run_tests::<KotlinLanguage, _>(&lexer) {
         Ok(()) => println!("Kotlin lexer tests passed!"),
         Err(e) => panic!("Kotlin lexer tests failed: {}", e),
     }

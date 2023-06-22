@@ -1,42 +1,33 @@
 use crate::{VerilogKind, language::VerilogLanguage};
 use oak_core::{
-    IncrementalCache, Lexer, LexerState, OakError,
-    lexer::{CommentLine, LexOutput, StringConfig, WhitespaceConfig},
+    Lexer, LexerCache, LexerState, OakError,
+    lexer::{LexOutput, WhitespaceConfig},
     source::Source,
 };
 use std::sync::LazyLock;
 
-type State<S: Source> = LexerState<S, VerilogLanguage>;
+type State<'a, S> = LexerState<'a, S, VerilogLanguage>;
 
 static VL_WHITESPACE: LazyLock<WhitespaceConfig> = LazyLock::new(|| WhitespaceConfig { unicode_whitespace: true });
-static VL_COMMENT: LazyLock<CommentLine> = LazyLock::new(|| CommentLine { line_markers: &["//"] });
-static VL_STRING: LazyLock<StringConfig> = LazyLock::new(|| StringConfig { quotes: &['"'], escape: Some('\\') });
 
 #[derive(Clone)]
-pub struct VerilogLexer<'config> {
-    config: &'config VerilogLanguage,
-}
+pub struct VerilogLexer;
 
-impl<'config> Lexer<VerilogLanguage> for VerilogLexer<'config> {
-    fn lex_incremental(
-        &self,
-        source: impl Source,
-        changed: usize,
-        cache: IncrementalCache<VerilogLanguage>,
-    ) -> LexOutput<VerilogLanguage> {
-        let mut state = LexerState::new_with_cache(source, changed, cache);
+impl Lexer<VerilogLanguage> for VerilogLexer {
+    fn lex<'a, S: Source + ?Sized>(&self, source: &'a S, _edits: &[oak_core::TextEdit], cache: &'a mut impl LexerCache<VerilogLanguage>) -> LexOutput<VerilogLanguage> {
+        let mut state = LexerState::new(source);
         let result = self.run(&mut state);
-        state.finish(result)
+        state.finish_with_cache(result, cache)
     }
 }
 
-impl<'config> VerilogLexer<'config> {
-    pub fn new(config: &'config VerilogLanguage) -> Self {
-        Self { config }
+impl VerilogLexer {
+    pub fn new(_config: &VerilogLanguage) -> Self {
+        Self
     }
 
     /// 主要词法分析循环
-    fn run<S: Source>(&self, state: &mut State<S>) -> Result<(), OakError> {
+    fn run<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> Result<(), OakError> {
         while state.not_at_end() {
             let safe_point = state.get_position();
 
@@ -68,7 +59,7 @@ impl<'config> VerilogLexer<'config> {
                 continue;
             }
 
-            state.safe_check(safe_point);
+            state.advance_if_dead_lock(safe_point);
         }
 
         // 添加 EOF token
@@ -78,19 +69,12 @@ impl<'config> VerilogLexer<'config> {
     }
 
     /// 跳过空白字符
-    fn skip_whitespace<S: Source>(&self, state: &mut State<S>) -> bool {
-        match VL_WHITESPACE.scan(state.rest(), state.get_position(), VerilogKind::Whitespace) {
-            Some(token) => {
-                state.advance_with(token);
-                return true;
-            }
-            None => {}
-        }
-        false
+    fn skip_whitespace<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
+        VL_WHITESPACE.scan(state, VerilogKind::Whitespace)
     }
 
     /// 跳过注释
-    fn skip_comment<S: Source>(&self, state: &mut State<S>) -> bool {
+    fn skip_comment<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start = state.get_position();
         let rest = state.rest();
 
@@ -125,7 +109,7 @@ impl<'config> VerilogLexer<'config> {
     }
 
     /// 处理字符串字面量
-    fn lex_string_literal<S: Source>(&self, state: &mut State<S>) -> bool {
+    fn lex_string_literal<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start = state.get_position();
 
         if state.current() == Some('"') {
@@ -156,7 +140,7 @@ impl<'config> VerilogLexer<'config> {
     }
 
     /// 处理数字字面量
-    fn lex_number_literal<S: Source>(&self, state: &mut State<S>) -> bool {
+    fn lex_number_literal<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start = state.get_position();
         let first = match state.current() {
             Some(c) => c,
@@ -201,7 +185,7 @@ impl<'config> VerilogLexer<'config> {
     }
 
     /// 处理标识符和关键字
-    fn lex_identifier_or_keyword<S: Source>(&self, state: &mut State<S>) -> bool {
+    fn lex_identifier_or_keyword<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start = state.get_position();
         let ch = match state.current() {
             Some(c) => c,
@@ -224,7 +208,7 @@ impl<'config> VerilogLexer<'config> {
 
         let end = state.get_position();
         let text = state.get_text_in((start..end).into());
-        let kind = match text {
+        let kind = match text.as_ref() {
             "module" => VerilogKind::ModuleKw,
             "endmodule" => VerilogKind::EndmoduleKw,
             "wire" => VerilogKind::WireKw,
@@ -250,7 +234,7 @@ impl<'config> VerilogLexer<'config> {
     }
 
     /// 处理操作符
-    fn lex_operators<S: Source>(&self, state: &mut State<S>) -> bool {
+    fn lex_operators<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start = state.get_position();
         let rest = state.rest();
 
@@ -302,7 +286,7 @@ impl<'config> VerilogLexer<'config> {
     }
 
     /// 处理单字符标记
-    fn lex_single_char_tokens<S: Source>(&self, state: &mut State<S>) -> bool {
+    fn lex_single_char_tokens<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start = state.get_position();
 
         if let Some(ch) = state.current() {

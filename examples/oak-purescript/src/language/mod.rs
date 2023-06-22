@@ -1,5 +1,4 @@
-use crate::kind::PurescriptSyntaxKind;
-use oak_core::Language;
+use oak_core::{Language, LanguageCategory};
 
 /// PureScript 语言实现
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
@@ -15,6 +14,10 @@ impl Default for PurescriptLanguage {
 }
 
 impl Language for PurescriptLanguage {
-    type SyntaxKind = PurescriptSyntaxKind;
-    type TypedRoot = crate::ast::SourceFile;
+    const NAME: &'static str = "purescript";
+    const CATEGORY: LanguageCategory = LanguageCategory::Programming;
+
+    type TokenType = crate::kind::PurescriptSyntaxKind;
+    type ElementType = crate::kind::PurescriptSyntaxKind;
+    type TypedRoot = ();
 }

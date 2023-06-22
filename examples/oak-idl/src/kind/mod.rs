@@ -1,4 +1,4 @@
-use oak_core::{SyntaxKind, Token};
+use oak_core::{ElementType, Token, TokenType, UniversalElementRole, UniversalTokenRole};
 use serde::{Deserialize, Serialize};
 
 pub type IdlToken = Token<IdlSyntaxKind>;
@@ -131,130 +131,36 @@ pub enum IdlSyntaxKind {
     Eof,
 }
 
-impl SyntaxKind for IdlSyntaxKind {
-    fn is_trivia(&self) -> bool {
-        matches!(self, Self::Whitespace | Self::Newline | Self::Comment)
+impl TokenType for IdlSyntaxKind {
+    const END_OF_STREAM: Self = Self::Eof;
+    type Role = UniversalTokenRole;
+
+    fn role(&self) -> Self::Role {
+        match self {
+            Self::Whitespace | Self::Newline => UniversalTokenRole::Whitespace,
+            Self::Comment => UniversalTokenRole::Comment,
+            Self::Eof => UniversalTokenRole::Eof,
+            _ => UniversalTokenRole::None,
+        }
+    }
+}
+
+impl ElementType for IdlSyntaxKind {
+    type Role = UniversalElementRole;
+
+    fn role(&self) -> Self::Role {
+        match self {
+            Self::SourceFile => UniversalElementRole::Root,
+            Self::Error => UniversalElementRole::Error,
+            _ => UniversalElementRole::None,
+        }
     }
 
-    fn is_comment(&self) -> bool {
-        matches!(self, Self::Comment)
+    fn is_error(&self) -> bool {
+        matches!(self, Self::Error)
     }
 
-    fn is_whitespace(&self) -> bool {
-        matches!(self, Self::Whitespace | Self::Newline)
-    }
-
-    fn is_token_type(&self) -> bool {
-        matches!(
-            self,
-            Self::Whitespace
-                | Self::Newline
-                | Self::Comment
-                | Self::StringLiteral
-                | Self::NumberLiteral
-                | Self::BooleanLiteral
-                | Self::CharLiteral
-                | Self::Identifier
-                | Self::Void
-                | Self::Boolean
-                | Self::Byte
-                | Self::Octet
-                | Self::Short
-                | Self::UnsignedShort
-                | Self::Long
-                | Self::UnsignedLong
-                | Self::LongLong
-                | Self::UnsignedLongLong
-                | Self::Float
-                | Self::Double
-                | Self::LongDouble
-                | Self::Char
-                | Self::WChar
-                | Self::String
-                | Self::WString
-                | Self::Any
-                | Self::Object
-                | Self::ValueBase
-                | Self::Struct
-                | Self::Union
-                | Self::Enum
-                | Self::Interface
-                | Self::Module
-                | Self::Exception
-                | Self::Typedef
-                | Self::Sequence
-                | Self::Array
-                | Self::Fixed
-                | Self::Const
-                | Self::Readonly
-                | Self::Attribute
-                | Self::Oneway
-                | Self::In
-                | Self::Out
-                | Self::Inout
-                | Self::Raises
-                | Self::Context
-                | Self::Local
-                | Self::Abstract
-                | Self::Custom
-                | Self::Private
-                | Self::Public
-                | Self::Truncatable
-                | Self::Supports
-                | Self::ValueType
-                | Self::Native
-                | Self::Factory
-                | Self::Include
-                | Self::Pragma
-                | Self::Define
-                | Self::Ifdef
-                | Self::Ifndef
-                | Self::Endif
-                | Self::Else
-                | Self::Elif
-                | Self::Undef
-                | Self::Plus
-                | Self::Minus
-                | Self::Multiply
-                | Self::Divide
-                | Self::Modulo
-                | Self::BitwiseAnd
-                | Self::BitwiseOr
-                | Self::BitwiseXor
-                | Self::BitwiseNot
-                | Self::LeftShift
-                | Self::RightShift
-                | Self::LogicalAnd
-                | Self::LogicalOr
-                | Self::LogicalNot
-                | Self::Equal
-                | Self::NotEqual
-                | Self::Less
-                | Self::Greater
-                | Self::LessEqual
-                | Self::GreaterEqual
-                | Self::Assign
-                | Self::LeftParen
-                | Self::RightParen
-                | Self::LeftBracket
-                | Self::RightBracket
-                | Self::LeftBrace
-                | Self::RightBrace
-                | Self::LeftAngle
-                | Self::RightAngle
-                | Self::Semicolon
-                | Self::Comma
-                | Self::Colon
-                | Self::DoubleColon
-                | Self::Dot
-                | Self::Arrow
-                | Self::Hash
-                | Self::Eof
-                | Self::Error
-        )
-    }
-
-    fn is_element_type(&self) -> bool {
+    fn is_root(&self) -> bool {
         matches!(self, Self::SourceFile)
     }
 }

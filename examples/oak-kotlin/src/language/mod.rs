@@ -1,4 +1,4 @@
-use oak_core::language::Language;
+use oak_core::language::{Language, LanguageCategory};
 
 /// Kotlin 语言实现
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -33,6 +33,10 @@ impl Default for KotlinLanguage {
 }
 
 impl Language for KotlinLanguage {
-    type SyntaxKind = crate::kind::KotlinSyntaxKind;
-    type TypedRoot = (); // 暂时使用空类型，后续可以定义具体的AST根节点类型
+    const NAME: &'static str = "kotlin";
+    const CATEGORY: LanguageCategory = LanguageCategory::Programming;
+
+    type TokenType = crate::kind::KotlinSyntaxKind;
+    type ElementType = crate::kind::KotlinSyntaxKind;
+    type TypedRoot = crate::ast::KotlinRoot;
 }

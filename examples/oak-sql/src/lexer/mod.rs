@@ -1,91 +1,94 @@
 use crate::{kind::SqlSyntaxKind, language::SqlLanguage};
 use oak_core::{
-    IncrementalCache, Lexer, LexerState, OakError,
-    lexer::{CommentLine, LexOutput, StringConfig, WhitespaceConfig},
+    Lexer, LexerCache, LexerState, OakError, TextEdit,
+    lexer::{LexOutput, WhitespaceConfig},
     source::Source,
 };
 use std::sync::LazyLock;
 
-type State<S> = LexerState<S, SqlLanguage>;
+type State<'a, S> = LexerState<'a, S, SqlLanguage>;
 
 static SQL_WHITESPACE: LazyLock<WhitespaceConfig> = LazyLock::new(|| WhitespaceConfig { unicode_whitespace: true });
-static SQL_COMMENT: LazyLock<CommentLine> = LazyLock::new(|| CommentLine { line_markers: &["--"] });
-static SQL_STRING: LazyLock<StringConfig> = LazyLock::new(|| StringConfig { quotes: &['"', '\''], escape: Some('\\') });
 
 #[derive(Clone)]
 pub struct SqlLexer<'config> {
-    config: &'config SqlLanguage,
+    _config: &'config SqlLanguage,
 }
 
 impl<'config> Lexer<SqlLanguage> for SqlLexer<'config> {
-    fn lex_incremental(
-        &self,
-        source: impl Source,
-        changed: usize,
-        cache: IncrementalCache<SqlLanguage>,
-    ) -> LexOutput<SqlLanguage> {
-        let mut state = LexerState::new_with_cache(source, changed, cache);
+    fn lex<'a, S: Source + ?Sized>(&self, text: &'a S, _edits: &[TextEdit], cache: &'a mut impl LexerCache<SqlLanguage>) -> LexOutput<SqlLanguage> {
+        let mut state = State::new(text);
         let result = self.run(&mut state);
-        state.finish(result)
+        if result.is_ok() {
+            state.add_eof();
+        }
+        state.finish_with_cache(result, cache)
     }
 }
 
 impl<'config> SqlLexer<'config> {
     pub fn new(config: &'config SqlLanguage) -> Self {
-        Self { config }
+        Self { _config: config }
     }
 
-    fn run<S: Source>(&self, state: &mut State<S>) -> Result<(), OakError> {
+    fn run<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> Result<(), OakError> {
         while state.not_at_end() {
             let safe_point = state.get_position();
 
-            if self.skip_whitespace(state) {
-                continue;
-            }
-
-            if self.lex_newline(state) {
-                continue;
-            }
-
-            if self.skip_comment(state) {
-                continue;
-            }
-
-            if self.lex_string_literal(state) {
-                continue;
-            }
-
-            if self.lex_number_literal(state) {
-                continue;
-            }
-
-            if self.lex_identifier_or_keyword(state) {
-                continue;
-            }
-
-            if self.lex_operators(state) {
-                continue;
-            }
-
-            if self.lex_single_char_tokens(state) {
-                continue;
-            }
-
-            // 如果没有匹配任何模式，跳过当前字符并添加错误 token
             if let Some(ch) = state.peek() {
-                state.advance(ch.len_utf8());
-                state.add_token(SqlSyntaxKind::Error, safe_point, state.get_position());
+                match ch {
+                    ' ' | '\t' => {
+                        self.skip_whitespace(state);
+                    }
+                    '\n' | '\r' => {
+                        self.lex_newline(state);
+                    }
+                    '-' => {
+                        if state.starts_with("--") {
+                            self.skip_comment(state);
+                        }
+                        else {
+                            self.lex_operators(state);
+                        }
+                    }
+                    '/' => {
+                        if state.starts_with("/*") {
+                            self.skip_comment(state);
+                        }
+                        else {
+                            self.lex_operators(state);
+                        }
+                    }
+                    '\'' | '"' => {
+                        self.lex_string_literal(state);
+                    }
+                    '0'..='9' => {
+                        self.lex_number_literal(state);
+                    }
+                    'a'..='z' | 'A'..='Z' | '_' => {
+                        self.lex_identifier_or_keyword(state);
+                    }
+                    '<' | '>' | '!' | '=' | '+' | '*' | '%' => {
+                        self.lex_operators(state);
+                    }
+                    '(' | ')' | ',' | ';' | '.' => {
+                        self.lex_single_char_tokens(state);
+                    }
+                    _ => {
+                        // 如果没有匹配任何模式，跳过当前字符并添加错误 token
+                        state.advance(ch.len_utf8());
+                        state.add_token(SqlSyntaxKind::Error, safe_point, state.get_position());
+                    }
+                }
             }
-        }
 
-        // 添加 EOF token
-        let eof_pos = state.get_position();
-        state.add_token(SqlSyntaxKind::Eof, eof_pos, eof_pos);
+            state.advance_if_dead_lock(safe_point);
+        }
         Ok(())
     }
 
     /// 处理换行
-    fn lex_newline<S: Source>(&self, state: &mut State<S>) -> bool {
+    fn lex_newline<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start_pos = state.get_position();
 
         if let Some('\n') = state.peek() {
@@ -106,42 +109,32 @@ impl<'config> SqlLexer<'config> {
         }
     }
 
-    fn skip_whitespace<S: Source>(&self, state: &mut State<S>) -> bool {
-        match SQL_WHITESPACE.scan(state.rest(), state.get_position(), SqlSyntaxKind::Whitespace) {
-            Some(token) => {
-                state.advance_with(token);
-                true
-            }
-            None => false,
-        }
+    fn skip_whitespace<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
+        SQL_WHITESPACE.scan(state, SqlSyntaxKind::Whitespace)
     }
 
-    fn skip_comment<S: Source>(&self, state: &mut State<S>) -> bool {
+    fn skip_comment<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start = state.get_position();
-        let rest = state.rest();
 
         // 行注释: -- ... 直到换行
-        if rest.starts_with("--") {
+        if state.starts_with("--") {
             state.advance(2);
-            while let Some(ch) = state.peek() {
-                if ch == '\n' || ch == '\r' {
-                    break;
-                }
-                state.advance(ch.len_utf8());
-            }
+            state.take_while(|ch| ch != '\n' && ch != '\r');
             state.add_token(SqlSyntaxKind::Comment, start, state.get_position());
             return true;
         }
 
         // 块注释: /* ... */
-        if rest.starts_with("/*") {
+        if state.starts_with("/*") {
             state.advance(2);
-            while let Some(ch) = state.peek() {
-                if ch == '*' && state.peek_next_n(1) == Some('/') {
+            while state.not_at_end() {
+                if state.starts_with("*/") {
                     state.advance(2);
                     break;
                 }
-                state.advance(ch.len_utf8());
+                if let Some(ch) = state.current() {
+                    state.advance(ch.len_utf8());
+                }
             }
             state.add_token(SqlSyntaxKind::Comment, start, state.get_position());
             return true;
@@ -150,19 +143,20 @@ impl<'config> SqlLexer<'config> {
         false
     }
 
-    fn lex_string_literal<S: Source>(&self, state: &mut State<S>) -> bool {
+    fn lex_string_literal<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start = state.get_position();
-        let ch = match state.current() {
-            Some(c) => c,
-            None => return false,
-        };
-
-        if ch == '\'' || ch == '"' {
-            let quote = ch;
+        if let Some(quote) = state.current() {
+            if quote != '\'' && quote != '"' {
+                return false;
+            }
             state.advance(1);
             let mut escaped = false;
+            while state.not_at_end() {
+                let ch = match state.peek() {
+                    Some(c) => c,
+                    None => break,
+                };
 
-            while let Some(ch) = state.peek() {
                 if ch == quote && !escaped {
                     state.advance(1); // 消费结束引号
                     break;
@@ -186,7 +180,7 @@ impl<'config> SqlLexer<'config> {
         false
     }
 
-    fn lex_number_literal<S: Source>(&self, state: &mut State<S>) -> bool {
+    fn lex_number_literal<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start = state.get_position();
         let first = match state.current() {
             Some(c) => c,
@@ -256,21 +250,21 @@ impl<'config> SqlLexer<'config> {
         true
     }
 
-    fn lex_identifier_or_keyword<S: Source>(&self, state: &mut State<S>) -> bool {
+    fn lex_identifier_or_keyword<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start = state.get_position();
         let ch = match state.current() {
             Some(c) => c,
             None => return false,
         };
 
-        if !(ch.is_ascii_alphabetic() || ch == '_') {
+        if !ch.is_alphabetic() && ch != '_' {
             return false;
         }
 
-        state.advance(1);
-        while let Some(c) = state.current() {
-            if c.is_ascii_alphanumeric() || c == '_' {
-                state.advance(1);
+        state.advance(ch.len_utf8());
+        while let Some(c) = state.peek() {
+            if c.is_alphanumeric() || c == '_' {
+                state.advance(c.len_utf8());
             }
             else {
                 break;
@@ -278,165 +272,113 @@ impl<'config> SqlLexer<'config> {
         }
 
         let end = state.get_position();
-        let text = state.get_text_in((start..end).into());
-        let kind = self.keyword_kind(&text).unwrap_or(SqlSyntaxKind::Identifier);
+        let text = state.source().get_text_in(oak_core::Range { start, end }).to_uppercase();
+        let kind = match text.as_str() {
+            "SELECT" => SqlSyntaxKind::Select,
+            "FROM" => SqlSyntaxKind::From,
+            "WHERE" => SqlSyntaxKind::Where,
+            "INSERT" => SqlSyntaxKind::Insert,
+            "UPDATE" => SqlSyntaxKind::Update,
+            "DELETE" => SqlSyntaxKind::Delete,
+            "CREATE" => SqlSyntaxKind::Create,
+            "DROP" => SqlSyntaxKind::Drop,
+            "ALTER" => SqlSyntaxKind::Alter,
+            "TABLE" => SqlSyntaxKind::Table,
+            "INDEX" => SqlSyntaxKind::Index,
+            "INTO" => SqlSyntaxKind::Into,
+            "VALUES" => SqlSyntaxKind::Values,
+            "SET" => SqlSyntaxKind::Set,
+            "JOIN" => SqlSyntaxKind::Join,
+            "ON" => SqlSyntaxKind::On,
+            "AND" => SqlSyntaxKind::And,
+            "OR" => SqlSyntaxKind::Or,
+            "NOT" => SqlSyntaxKind::Not,
+            "NULL" => SqlSyntaxKind::Null,
+            "TRUE" => SqlSyntaxKind::True,
+            "FALSE" => SqlSyntaxKind::False,
+            "AS" => SqlSyntaxKind::As,
+            "BY" => SqlSyntaxKind::By,
+            "ORDER" => SqlSyntaxKind::Order,
+            "GROUP" => SqlSyntaxKind::Group,
+            "HAVING" => SqlSyntaxKind::Having,
+            "LIMIT" => SqlSyntaxKind::Limit,
+            "OFFSET" => SqlSyntaxKind::Offset,
+            "UNION" => SqlSyntaxKind::Union,
+            "ALL" => SqlSyntaxKind::All,
+            "DISTINCT" => SqlSyntaxKind::Distinct,
+            "PRIMARY" => SqlSyntaxKind::Primary,
+            "KEY" => SqlSyntaxKind::Key,
+            "FOREIGN" => SqlSyntaxKind::Foreign,
+            "REFERENCES" => SqlSyntaxKind::References,
+            "DEFAULT" => SqlSyntaxKind::Default,
+            "UNIQUE" => SqlSyntaxKind::Unique,
+            "AUTO_INCREMENT" => SqlSyntaxKind::AutoIncrement,
+            "INT" => SqlSyntaxKind::Int,
+            "INTEGER" => SqlSyntaxKind::Integer,
+            "VARCHAR" => SqlSyntaxKind::Varchar,
+            "CHAR" => SqlSyntaxKind::Char,
+            "TEXT" => SqlSyntaxKind::Text,
+            "DATE" => SqlSyntaxKind::Date,
+            "TIME" => SqlSyntaxKind::Time,
+            "TIMESTAMP" => SqlSyntaxKind::Timestamp,
+            "DECIMAL" => SqlSyntaxKind::Decimal,
+            "FLOAT" => SqlSyntaxKind::Float,
+            "DOUBLE" => SqlSyntaxKind::Double,
+            "BOOLEAN" => SqlSyntaxKind::Boolean,
+            _ => SqlSyntaxKind::Identifier,
+        };
+
         state.add_token(kind, start, end);
         true
     }
 
-    fn keyword_kind(&self, text: &str) -> Option<SqlSyntaxKind> {
-        match text.to_uppercase().as_str() {
-            "SELECT" => Some(SqlSyntaxKind::Select),
-            "FROM" => Some(SqlSyntaxKind::From),
-            "WHERE" => Some(SqlSyntaxKind::Where),
-            "INSERT" => Some(SqlSyntaxKind::Insert),
-            "INTO" => Some(SqlSyntaxKind::Into),
-            "VALUES" => Some(SqlSyntaxKind::Values),
-            "UPDATE" => Some(SqlSyntaxKind::Update),
-            "SET" => Some(SqlSyntaxKind::Set),
-            "DELETE" => Some(SqlSyntaxKind::Delete),
-            "CREATE" => Some(SqlSyntaxKind::Create),
-            "DROP" => Some(SqlSyntaxKind::Drop),
-            "ALTER" => Some(SqlSyntaxKind::Alter),
-            "ADD" => Some(SqlSyntaxKind::Add),
-            "COLUMN" => Some(SqlSyntaxKind::Column),
-            "TABLE" => Some(SqlSyntaxKind::Table),
-            "PRIMARY" => Some(SqlSyntaxKind::Primary),
-            "KEY" => Some(SqlSyntaxKind::Key),
-            "FOREIGN" => Some(SqlSyntaxKind::Foreign),
-            "REFERENCES" => Some(SqlSyntaxKind::References),
-            "INDEX" => Some(SqlSyntaxKind::Index),
-            "UNIQUE" => Some(SqlSyntaxKind::Unique),
-            "NOT" => Some(SqlSyntaxKind::Not),
-            "NULL" => Some(SqlSyntaxKind::Null),
-            "DEFAULT" => Some(SqlSyntaxKind::Default),
-            "AUTO_INCREMENT" => Some(SqlSyntaxKind::AutoIncrement),
-            "AND" => Some(SqlSyntaxKind::And),
-            "OR" => Some(SqlSyntaxKind::Or),
-            "IN" => Some(SqlSyntaxKind::In),
-            "LIKE" => Some(SqlSyntaxKind::Like),
-            "BETWEEN" => Some(SqlSyntaxKind::Between),
-            "IS" => Some(SqlSyntaxKind::Is),
-            "AS" => Some(SqlSyntaxKind::As),
-            "JOIN" => Some(SqlSyntaxKind::Join),
-            "INNER" => Some(SqlSyntaxKind::Inner),
-            "LEFT" => Some(SqlSyntaxKind::Left),
-            "RIGHT" => Some(SqlSyntaxKind::Right),
-            "FULL" => Some(SqlSyntaxKind::Full),
-            "OUTER" => Some(SqlSyntaxKind::Outer),
-            "ON" => Some(SqlSyntaxKind::On),
-            "GROUP" => Some(SqlSyntaxKind::Group),
-            "BY" => Some(SqlSyntaxKind::By),
-            "HAVING" => Some(SqlSyntaxKind::Having),
-            "ORDER" => Some(SqlSyntaxKind::Order),
-            "ASC" => Some(SqlSyntaxKind::Asc),
-            "DESC" => Some(SqlSyntaxKind::Desc),
-            "LIMIT" => Some(SqlSyntaxKind::Limit),
-            "OFFSET" => Some(SqlSyntaxKind::Offset),
-            "UNION" => Some(SqlSyntaxKind::Union),
-            "ALL" => Some(SqlSyntaxKind::All),
-            "DISTINCT" => Some(SqlSyntaxKind::Distinct),
-            "COUNT" => Some(SqlSyntaxKind::Count),
-            "SUM" => Some(SqlSyntaxKind::Sum),
-            "AVG" => Some(SqlSyntaxKind::Avg),
-            "MIN" => Some(SqlSyntaxKind::Min),
-            "MAX" => Some(SqlSyntaxKind::Max),
-            "VIEW" => Some(SqlSyntaxKind::View),
-            "DATABASE" => Some(SqlSyntaxKind::Database),
-            "SCHEMA" => Some(SqlSyntaxKind::Schema),
-            "TRUE" => Some(SqlSyntaxKind::True),
-            "FALSE" => Some(SqlSyntaxKind::False),
-            "EXISTS" => Some(SqlSyntaxKind::Exists),
-            "CASE" => Some(SqlSyntaxKind::Case),
-            "WHEN" => Some(SqlSyntaxKind::When),
-            "THEN" => Some(SqlSyntaxKind::Then),
-            "ELSE" => Some(SqlSyntaxKind::Else),
-            "END" => Some(SqlSyntaxKind::End),
-            "IF" => Some(SqlSyntaxKind::If),
-            "BEGIN" => Some(SqlSyntaxKind::Begin),
-            "COMMIT" => Some(SqlSyntaxKind::Commit),
-            "ROLLBACK" => Some(SqlSyntaxKind::Rollback),
-            "TRANSACTION" => Some(SqlSyntaxKind::Transaction),
-            // 数据类型
-            "INT" => Some(SqlSyntaxKind::Int),
-            "INTEGER" => Some(SqlSyntaxKind::Integer),
-            "VARCHAR" => Some(SqlSyntaxKind::Varchar),
-            "CHAR" => Some(SqlSyntaxKind::Char),
-            "TEXT" => Some(SqlSyntaxKind::Text),
-            "DATE" => Some(SqlSyntaxKind::Date),
-            "TIME" => Some(SqlSyntaxKind::Time),
-            "TIMESTAMP" => Some(SqlSyntaxKind::Timestamp),
-            "DECIMAL" => Some(SqlSyntaxKind::Decimal),
-            "FLOAT" => Some(SqlSyntaxKind::Float),
-            "DOUBLE" => Some(SqlSyntaxKind::Double),
-            "BOOLEAN" => Some(SqlSyntaxKind::Boolean),
-            _ => None,
-        }
-    }
-
-    fn lex_operators<S: Source>(&self, state: &mut State<S>) -> bool {
+    fn lex_operators<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start = state.get_position();
-        let rest = state.rest();
 
-        // 优先匹配较长的操作符
-        let patterns: &[(&str, SqlSyntaxKind)] = &[
-            ("<=", SqlSyntaxKind::Le),
-            (">=", SqlSyntaxKind::Ge),
-            ("!=", SqlSyntaxKind::Ne),
-            ("<>", SqlSyntaxKind::Ne),
-            ("||", SqlSyntaxKind::Concat),
+        let ops = [
+            ("<=", SqlSyntaxKind::LessEqual),
+            (">=", SqlSyntaxKind::GreaterEqual),
+            ("<>", SqlSyntaxKind::NotEqual),
+            ("!=", SqlSyntaxKind::NotEqual),
+            ("=", SqlSyntaxKind::Equal),
+            ("<", SqlSyntaxKind::Less),
+            (">", SqlSyntaxKind::Greater),
+            ("+", SqlSyntaxKind::Plus),
+            ("-", SqlSyntaxKind::Minus),
+            ("*", SqlSyntaxKind::Star),
+            ("/", SqlSyntaxKind::Slash),
+            ("%", SqlSyntaxKind::Percent),
         ];
 
-        for (pat, kind) in patterns {
-            if rest.starts_with(pat) {
-                state.advance(pat.len());
-                state.add_token(*kind, start, state.get_position());
+        for (op, kind) in ops {
+            if state.starts_with(op) {
+                state.advance(op.len());
+                state.add_token(kind, start, state.get_position());
                 return true;
             }
         }
 
-        if let Some(ch) = state.current() {
-            let kind = match ch {
-                '=' => Some(SqlSyntaxKind::Equal),
-                '<' => Some(SqlSyntaxKind::Lt),
-                '>' => Some(SqlSyntaxKind::Gt),
-                '+' => Some(SqlSyntaxKind::Plus),
-                '-' => Some(SqlSyntaxKind::Minus),
-                '*' => Some(SqlSyntaxKind::Star),
-                '/' => Some(SqlSyntaxKind::Slash),
-                '%' => Some(SqlSyntaxKind::Percent),
-                '.' => Some(SqlSyntaxKind::Dot),
-                _ => None,
-            };
-            if let Some(k) = kind {
-                state.advance(ch.len_utf8());
-                state.add_token(k, start, state.get_position());
-                return true;
-            }
-        }
         false
     }
 
-    fn lex_single_char_tokens<S: Source>(&self, state: &mut State<S>) -> bool {
+    fn lex_single_char_tokens<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start = state.get_position();
-        if let Some(ch) = state.current() {
-            let kind = match ch {
-                '(' => SqlSyntaxKind::LeftParen,
-                ')' => SqlSyntaxKind::RightParen,
-                '{' => SqlSyntaxKind::LeftBrace,
-                '}' => SqlSyntaxKind::RightBrace,
-                '[' => SqlSyntaxKind::LeftBracket,
-                ']' => SqlSyntaxKind::RightBracket,
-                ',' => SqlSyntaxKind::Comma,
-                ';' => SqlSyntaxKind::Semicolon,
-                ':' => SqlSyntaxKind::Colon,
-                '?' => SqlSyntaxKind::Question,
-                _ => return false,
-            };
-            state.advance(ch.len_utf8());
-            state.add_token(kind, start, state.get_position());
-            return true;
-        }
-        false
+        let ch = match state.current() {
+            Some(c) => c,
+            None => return false,
+        };
+
+        let kind = match ch {
+            '(' => SqlSyntaxKind::LeftParen,
+            ')' => SqlSyntaxKind::RightParen,
+            ',' => SqlSyntaxKind::Comma,
+            ';' => SqlSyntaxKind::Semicolon,
+            '.' => SqlSyntaxKind::Dot,
+            _ => return false,
+        };
+
+        state.advance(ch.len_utf8());
+        state.add_token(kind, start, state.get_position());
+        true
     }
 }

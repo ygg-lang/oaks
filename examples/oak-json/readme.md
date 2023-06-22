@@ -21,10 +21,12 @@ Oak JSON is a robust parser for JSON, designed to handle complete JSON syntax in
 Basic example:
 
 ```rust
-use oak_json::{Parser, JsonLanguage, SourceText};
+use oak_core::{Parser, SourceText, parser::session::ParseSession};
+use oak_json::{JsonParser, JsonLanguage};
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
-    let parser = Parser::new();
+    let mut session = ParseSession::<JsonLanguage>::default();
+    let parser = JsonParser::new();
     let source = SourceText::new(r#"
         {
             "name": "Alice",
@@ -33,7 +35,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         }
     "#);
     
-    let result = parser.parse(&source);
+    let result = parser.parse(&source, &[], &mut session);
     println!("Parsed JSON successfully.");
     Ok(())
 }
@@ -43,23 +45,27 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
 ### Object Parsing
 ```rust
-use oak_json::{Parser, JsonLanguage, SourceText};
+use oak_core::{Parser, SourceText, parser::session::ParseSession};
+use oak_json::{JsonParser, JsonLanguage};
 
-let parser = Parser::new();
+let mut session = ParseSession::<JsonLanguage>::default();
+let parser = JsonParser::new();
 let source = SourceText::new(r#"{"name": "Alice", "age": 30}"#);
 
-let result = parser.parse(&source);
+let result = parser.parse(&source, &[], &mut session);
 println!("Object parsed successfully.");
 ```
 
 ### Array Parsing
 ```rust
-use oak_json::{Parser, JsonLanguage, SourceText};
+use oak_core::{Parser, SourceText, parser::session::ParseSession};
+use oak_json::{JsonParser, JsonLanguage};
 
-let parser = Parser::new();
+let mut session = ParseSession::<JsonLanguage>::default();
+let parser = JsonParser::new();
 let source = SourceText::new(r#"[1, 2, 3, 4, 5]"#);
 
-let result = parser.parse(&source);
+let result = parser.parse(&source, &[], &mut session);
 println!("Array parsed successfully.");
 ```
 
@@ -67,19 +73,23 @@ println!("Array parsed successfully.");
 
 ### Token-Level Parsing
 ```rust
-use oak_json::{Parser, JsonLanguage, SourceText};
+use oak_core::{Parser, SourceText, parser::session::ParseSession};
+use oak_json::{JsonParser, JsonLanguage};
 
-let parser = Parser::new();
+let mut session = ParseSession::<JsonLanguage>::default();
+let parser = JsonParser::new();
 let source = SourceText::new(r#"{"key": "value"}"#);
-let result = parser.parse(&source);
+let result = parser.parse(&source, &[], &mut session);
 println!("Token parsing completed.");
 ```
 
 ### Error Handling
 ```rust
-use oak_json::{Parser, JsonLanguage, SourceText};
+use oak_core::{Parser, SourceText, parser::session::ParseSession};
+use oak_json::{JsonParser, JsonLanguage};
 
-let parser = Parser::new();
+let mut session = ParseSession::<JsonLanguage>::default();
+let parser = JsonParser::new();
 let source = SourceText::new(r#"
     {
         "name": "Alice",
@@ -88,7 +98,7 @@ let source = SourceText::new(r#"
     // Missing closing brace
 "#);
 
-let result = parser.parse(&source);
+let result = parser.parse(&source, &[], &mut session);
 if let Some(errors) = result.result.err() {
     println!("Parse errors found: {:?}", errors);
 } else {

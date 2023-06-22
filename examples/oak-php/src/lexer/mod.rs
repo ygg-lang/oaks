@@ -1,19 +1,19 @@
 use crate::{kind::PhpSyntaxKind, language::PhpLanguage};
-use oak_core::{IncrementalCache, Lexer, LexerState, OakError, lexer::LexOutput, source::Source};
+use oak_core::{Lexer, LexerCache, LexerState, OakError, lexer::LexOutput, source::Source};
 
-type State<S: Source> = LexerState<S, PhpLanguage>;
+type State<'s, S> = LexerState<'s, S, PhpLanguage>;
 
 #[derive(Clone)]
 pub struct PhpLexer<'config> {
-    config: &'config PhpLanguage,
+    _config: &'config PhpLanguage,
 }
 
 impl<'config> PhpLexer<'config> {
     pub fn new(config: &'config PhpLanguage) -> Self {
-        Self { config }
+        Self { _config: config }
     }
 
-    fn run<S: Source>(&self, state: &mut State<S>) -> Result<(), OakError> {
+    fn run<'s, S: Source + ?Sized>(&self, state: &mut State<'s, S>) -> Result<(), OakError> {
         while state.not_at_end() {
             if self.skip_whitespace(state) {
                 continue;
@@ -56,13 +56,12 @@ impl<'config> PhpLexer<'config> {
         }
 
         // Add EOF token
-        let pos = state.get_position();
-        state.add_token(PhpSyntaxKind::Eof, pos, pos);
+        state.add_eof();
 
         Ok(())
     }
 
-    fn skip_whitespace<S: Source>(&self, state: &mut State<S>) -> bool {
+    fn skip_whitespace<'s, S: Source + ?Sized>(&self, state: &mut State<'s, S>) -> bool {
         let start_pos = state.get_position();
 
         while let Some(ch) = state.peek() {
@@ -83,7 +82,7 @@ impl<'config> PhpLexer<'config> {
         }
     }
 
-    fn lex_newline<S: Source>(&self, state: &mut State<S>) -> bool {
+    fn lex_newline<'s, S: Source + ?Sized>(&self, state: &mut State<'s, S>) -> bool {
         let start_pos = state.get_position();
 
         if let Some('\n') = state.peek() {
@@ -104,7 +103,7 @@ impl<'config> PhpLexer<'config> {
         }
     }
 
-    fn lex_comment<S: Source>(&self, state: &mut State<S>) -> bool {
+    fn lex_comment<'s, S: Source + ?Sized>(&self, state: &mut State<'s, S>) -> bool {
         let start_pos = state.get_position();
 
         if let Some('/') = state.peek() {
@@ -162,7 +161,7 @@ impl<'config> PhpLexer<'config> {
         }
     }
 
-    fn lex_string<S: Source>(&self, state: &mut State<S>) -> bool {
+    fn lex_string<'s, S: Source + ?Sized>(&self, state: &mut State<'s, S>) -> bool {
         let start_pos = state.get_position();
 
         if let Some(quote_char) = state.peek() {
@@ -204,7 +203,7 @@ impl<'config> PhpLexer<'config> {
         }
     }
 
-    fn lex_number<S: Source>(&self, state: &mut State<S>) -> bool {
+    fn lex_number<'s, S: Source + ?Sized>(&self, state: &mut State<'s, S>) -> bool {
         if let Some(ch) = state.peek() {
             if ch.is_ascii_digit() {
                 let start_pos = state.get_position();
@@ -265,16 +264,14 @@ impl<'config> PhpLexer<'config> {
         }
     }
 
-    fn lex_identifier_or_keyword<S: Source>(&self, state: &mut State<S>) -> bool {
+    fn lex_identifier_or_keyword<'s, S: Source + ?Sized>(&self, state: &mut State<'s, S>) -> bool {
         if let Some(ch) = state.peek() {
             if ch.is_alphabetic() || ch == '_' || ch == '$' {
                 let start_pos = state.get_position();
-                let mut text = String::new();
 
                 // 读取标识符
                 while let Some(ch) = state.peek() {
                     if ch.is_alphanumeric() || ch == '_' || ch == '$' {
-                        text.push(ch);
                         state.advance(ch.len_utf8());
                     }
                     else {
@@ -282,8 +279,11 @@ impl<'config> PhpLexer<'config> {
                     }
                 }
 
+                let end_pos = state.get_position();
+                let text = state.source().get_text_in(oak_core::Range { start: start_pos, end: end_pos });
+
                 // 检查是否是关键字
-                let kind = match text.as_str() {
+                let kind = match text.as_ref() {
                     "abstract" => PhpSyntaxKind::Abstract,
                     "and" => PhpSyntaxKind::And,
                     "array" => PhpSyntaxKind::Array,
@@ -368,7 +368,7 @@ impl<'config> PhpLexer<'config> {
         }
     }
 
-    fn lex_operators_and_punctuation<S: Source>(&self, state: &mut State<S>) -> bool {
+    fn lex_operators_and_punctuation<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         if let Some(ch) = state.peek() {
             let start_pos = state.get_position();
 
@@ -644,14 +644,9 @@ impl<'config> PhpLexer<'config> {
 }
 
 impl<'config> Lexer<PhpLanguage> for PhpLexer<'config> {
-    fn lex_incremental(
-        &self,
-        source: impl Source,
-        _changed: usize,
-        _cache: IncrementalCache<PhpLanguage>,
-    ) -> LexOutput<PhpLanguage> {
-        let mut state = LexerState::new(source);
+    fn lex<'a, S: Source + ?Sized>(&self, source: &S, _edits: &[oak_core::TextEdit], cache: &'a mut impl LexerCache<PhpLanguage>) -> LexOutput<PhpLanguage> {
+        let mut state: State<'_, S> = LexerState::new(source);
         let result = self.run(&mut state);
-        state.finish(result)
+        state.finish_with_cache(result, cache)
     }
 }

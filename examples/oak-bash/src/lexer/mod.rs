@@ -1,21 +1,37 @@
-use crate::{kind::BashSyntaxKind, language::BashLanguage};
-use oak_core::{IncrementalCache, Lexer, LexerState, OakError, lexer::LexOutput, source::Source};
+pub mod token_type;
+
+pub use token_type::BashTokenType;
+
+use crate::language::BashLanguage;
+use oak_core::{Lexer, LexerCache, LexerState, OakError, lexer::LexOutput, source::Source};
 use std::sync::LazyLock;
 
-type State<S> = LexerState<S, BashLanguage>;
+type State<'a, S> = LexerState<'a, S, BashLanguage>;
 
 #[derive(Clone)]
 pub struct BashLexer<'config> {
-    config: &'config BashLanguage,
+    _config: &'config BashLanguage,
+}
+
+impl<'config> Lexer<BashLanguage> for BashLexer<'config> {
+    fn lex<'a, S: Source + ?Sized>(&self, source: &S, _edits: &[oak_core::source::TextEdit], mut cache: &'a mut impl LexerCache<BashLanguage>) -> LexOutput<BashLanguage> {
+        let mut state = LexerState::new(source);
+        let result = self.run(&mut state);
+        if result.is_ok() {
+            state.add_eof();
+        }
+        state.finish_with_cache(result, &mut cache)
+    }
 }
 
 impl<'config> BashLexer<'config> {
     pub fn new(config: &'config BashLanguage) -> Self {
-        Self { config }
+        Self { _config: config }
     }
 
-    fn run<S: Source>(&self, state: &mut State<S>) -> Result<(), OakError> {
+    fn run<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> Result<(), OakError> {
         while state.not_at_end() {
+            let safe_point = state.get_position();
             if self.skip_whitespace(state) {
                 continue;
             }
@@ -64,13 +80,19 @@ impl<'config> BashLexer<'config> {
                 continue;
             }
 
-            // 如果没有匹配任何模式，跳过一个字符
-            state.advance(1);
+            // 如果没有匹配任何模式，跳过一个字符并生成 Error token
+            let start_pos = state.get_position();
+            if let Some(ch) = state.peek() {
+                state.advance(ch.len_utf8());
+                state.add_token(BashTokenType::Error, start_pos, state.get_position());
+            }
+
+            state.advance_if_dead_lock(safe_point);
         }
         Ok(())
     }
 
-    fn skip_whitespace<S: Source>(&self, state: &mut State<S>) -> bool {
+    fn skip_whitespace<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start_pos = state.get_position();
 
         while let Some(ch) = state.peek() {
@@ -83,7 +105,7 @@ impl<'config> BashLexer<'config> {
         }
 
         if state.get_position() > start_pos {
-            state.add_token(BashSyntaxKind::Whitespace, start_pos, state.get_position());
+            state.add_token(BashTokenType::Whitespace, start_pos, state.get_position());
             true
         }
         else {
@@ -91,7 +113,7 @@ impl<'config> BashLexer<'config> {
         }
     }
 
-    fn skip_comment<S: Source>(&self, state: &mut State<S>) -> bool {
+    fn skip_comment<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start_pos = state.get_position();
 
         if let Some('#') = state.peek() {
@@ -102,7 +124,7 @@ impl<'config> BashLexer<'config> {
                 }
                 state.advance(ch.len_utf8());
             }
-            state.add_token(BashSyntaxKind::Comment, start_pos, state.get_position());
+            state.add_token(BashTokenType::Comment, start_pos, state.get_position());
             true
         }
         else {
@@ -110,12 +132,12 @@ impl<'config> BashLexer<'config> {
         }
     }
 
-    fn lex_newline<S: Source>(&self, state: &mut State<S>) -> bool {
+    fn lex_newline<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start_pos = state.get_position();
 
         if let Some('\n') = state.peek() {
             state.advance(1);
-            state.add_token(BashSyntaxKind::Newline, start_pos, state.get_position());
+            state.add_token(BashTokenType::Newline, start_pos, state.get_position());
             true
         }
         else if let Some('\r') = state.peek() {
@@ -123,7 +145,7 @@ impl<'config> BashLexer<'config> {
             if let Some('\n') = state.peek() {
                 state.advance(1);
             }
-            state.add_token(BashSyntaxKind::Newline, start_pos, state.get_position());
+            state.add_token(BashTokenType::Newline, start_pos, state.get_position());
             true
         }
         else {
@@ -131,7 +153,7 @@ impl<'config> BashLexer<'config> {
         }
     }
 
-    fn lex_string<S: Source>(&self, state: &mut State<S>) -> bool {
+    fn lex_string<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start_pos = state.get_position();
 
         if let Some(quote) = state.peek() {
@@ -160,7 +182,7 @@ impl<'config> BashLexer<'config> {
                     state.advance(ch.len_utf8());
                 }
 
-                state.add_token(BashSyntaxKind::StringLiteral, start_pos, state.get_position());
+                state.add_token(BashTokenType::StringLiteral, start_pos, state.get_position());
                 return true;
             }
         }
@@ -168,7 +190,7 @@ impl<'config> BashLexer<'config> {
         false
     }
 
-    fn lex_variable<S: Source>(&self, state: &mut State<S>) -> bool {
+    fn lex_variable<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start_pos = state.get_position();
 
         if let Some('$') = state.peek() {
@@ -178,7 +200,7 @@ impl<'config> BashLexer<'config> {
             if let Some(ch) = state.peek() {
                 if ch.is_ascii_digit() || ch == '?' || ch == '$' || ch == '#' || ch == '@' || ch == '*' {
                     state.advance(1);
-                    state.add_token(BashSyntaxKind::Variable, start_pos, state.get_position());
+                    state.add_token(BashTokenType::Variable, start_pos, state.get_position());
                     return true;
                 }
             }
@@ -193,7 +215,7 @@ impl<'config> BashLexer<'config> {
                     }
                     state.advance(ch.len_utf8());
                 }
-                state.add_token(BashSyntaxKind::Variable, start_pos, state.get_position());
+                state.add_token(BashTokenType::Variable, start_pos, state.get_position());
                 return true;
             }
 
@@ -209,7 +231,7 @@ impl<'config> BashLexer<'config> {
                             break;
                         }
                     }
-                    state.add_token(BashSyntaxKind::Variable, start_pos, state.get_position());
+                    state.add_token(BashTokenType::Variable, start_pos, state.get_position());
                     return true;
                 }
             }
@@ -221,7 +243,7 @@ impl<'config> BashLexer<'config> {
         false
     }
 
-    fn lex_number<S: Source>(&self, state: &mut State<S>) -> bool {
+    fn lex_number<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start_pos = state.get_position();
 
         if let Some(ch) = state.peek() {
@@ -235,7 +257,7 @@ impl<'config> BashLexer<'config> {
                         break;
                     }
                 }
-                state.add_token(BashSyntaxKind::NumberLiteral, start_pos, state.get_position());
+                state.add_token(BashTokenType::NumberLiteral, start_pos, state.get_position());
                 return true;
             }
         }
@@ -243,14 +265,14 @@ impl<'config> BashLexer<'config> {
         false
     }
 
-    fn lex_keyword_or_identifier<S: Source>(&self, state: &mut State<S>) -> bool {
+    fn lex_keyword_or_identifier<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start_pos = state.get_position();
 
         if let Some(ch) = state.peek() {
-            if ch.is_alphabetic() || ch == '_' {
+            if ch.is_ascii_alphabetic() || ch == '_' {
                 state.advance(ch.len_utf8());
                 while let Some(ch) = state.peek() {
-                    if ch.is_alphanumeric() || ch == '_' {
+                    if ch.is_ascii_alphanumeric() || ch == '_' {
                         state.advance(ch.len_utf8());
                     }
                     else {
@@ -259,7 +281,7 @@ impl<'config> BashLexer<'config> {
                 }
 
                 let text = state.get_text_in((start_pos..state.get_position()).into());
-                let kind = if BASH_KEYWORDS.contains(&text) { BashSyntaxKind::Keyword } else { BashSyntaxKind::Identifier };
+                let kind = if BASH_KEYWORDS.contains(&text.as_ref()) { BashTokenType::Keyword } else { BashTokenType::Identifier };
 
                 state.add_token(kind, start_pos, state.get_position());
                 return true;
@@ -269,7 +291,7 @@ impl<'config> BashLexer<'config> {
         false
     }
 
-    fn lex_operator_or_delimiter<S: Source>(&self, state: &mut State<S>) -> bool {
+    fn lex_operator_or_delimiter<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start_pos = state.get_position();
 
         if let Some(ch) = state.peek() {
@@ -278,7 +300,7 @@ impl<'config> BashLexer<'config> {
             // 检查双字符操作符
             if BASH_TWO_CHAR_OPERATORS.contains(&two_char.as_str()) {
                 state.advance(2);
-                state.add_token(BashSyntaxKind::Operator, start_pos, state.get_position());
+                state.add_token(BashTokenType::Operator, start_pos, state.get_position());
                 return true;
             }
 
@@ -286,13 +308,13 @@ impl<'config> BashLexer<'config> {
             let ch_str = ch.to_string();
             if BASH_OPERATORS.contains(&ch_str.as_str()) {
                 state.advance(1);
-                state.add_token(BashSyntaxKind::Operator, start_pos, state.get_position());
+                state.add_token(BashTokenType::Operator, start_pos, state.get_position());
                 return true;
             }
 
             if BASH_DELIMITERS.contains(&ch_str.as_str()) {
                 state.advance(1);
-                state.add_token(BashSyntaxKind::Delimiter, start_pos, state.get_position());
+                state.add_token(BashTokenType::Delimiter, start_pos, state.get_position());
                 return true;
             }
         }
@@ -300,7 +322,7 @@ impl<'config> BashLexer<'config> {
         false
     }
 
-    fn lex_heredoc<S: Source>(&self, state: &mut State<S>) -> bool {
+    fn lex_heredoc<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start_pos = state.get_position();
 
         // 检查 << 开始的 heredoc
@@ -323,7 +345,7 @@ impl<'config> BashLexer<'config> {
                     }
                 }
 
-                state.add_token(BashSyntaxKind::Heredoc, start_pos, state.get_position());
+                state.add_token(BashTokenType::Heredoc, start_pos, state.get_position());
                 return true;
             }
         }
@@ -331,7 +353,7 @@ impl<'config> BashLexer<'config> {
         false
     }
 
-    fn lex_glob_pattern<S: Source>(&self, state: &mut State<S>) -> bool {
+    fn lex_glob_pattern<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start_pos = state.get_position();
 
         if let Some(ch) = state.peek() {
@@ -352,7 +374,7 @@ impl<'config> BashLexer<'config> {
                     }
                 }
 
-                state.add_token(BashSyntaxKind::GlobPattern, start_pos, state.get_position());
+                state.add_token(BashTokenType::GlobPattern, start_pos, state.get_position());
                 return true;
             }
         }
@@ -360,13 +382,13 @@ impl<'config> BashLexer<'config> {
         false
     }
 
-    fn lex_special_char<S: Source>(&self, state: &mut State<S>) -> bool {
+    fn lex_special_char<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start_pos = state.get_position();
 
         if let Some(ch) = state.peek() {
             if BASH_SPECIAL_CHARS.contains(&ch) {
                 state.advance(1);
-                state.add_token(BashSyntaxKind::SpecialChar, start_pos, state.get_position());
+                state.add_token(BashTokenType::SpecialChar, start_pos, state.get_position());
                 return true;
             }
         }
@@ -374,13 +396,13 @@ impl<'config> BashLexer<'config> {
         false
     }
 
-    fn lex_text<S: Source>(&self, state: &mut State<S>) -> bool {
+    fn lex_text<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start_pos = state.get_position();
 
         if let Some(ch) = state.peek() {
             if !ch.is_whitespace() && !BASH_SPECIAL_CHARS.contains(&ch) {
                 state.advance(ch.len_utf8());
-                state.add_token(BashSyntaxKind::Text, start_pos, state.get_position());
+                state.add_token(BashTokenType::Text, start_pos, state.get_position());
                 return true;
             }
         }
@@ -389,46 +411,17 @@ impl<'config> BashLexer<'config> {
     }
 }
 
-impl<'config> Lexer<BashLanguage> for BashLexer<'config> {
-    fn lex_incremental(
-        &self,
-        source: impl Source,
-        _changed: usize,
-        _cache: IncrementalCache<BashLanguage>,
-    ) -> LexOutput<BashLanguage> {
-        let mut state = LexerState::new_with_cache(source, _changed, _cache);
-        let result = self.run(&mut state);
-        if result.is_ok() {
-            let eof_pos = state.get_position();
-            state.add_token(BashSyntaxKind::Eof, eof_pos, eof_pos);
-        }
-        state.finish(result)
-    }
-}
-
 static BASH_KEYWORDS: LazyLock<&[&str]> = LazyLock::new(|| {
     &[
-        "if", "then", "else", "elif", "fi", "case", "esac", "for", "while", "until", "do", "done", "function", "return",
-        "break", "continue", "local", "export", "readonly", "declare", "typeset", "unset", "shift", "exit", "source", ".",
-        "eval", "exec", "trap", "wait", "jobs", "bg", "fg", "disown", "suspend", "alias", "unalias", "history", "fc", "let",
-        "test", "[", "[[", "]]", "time", "coproc", "select", "in",
+        "if", "then", "else", "elif", "fi", "case", "esac", "for", "while", "until", "do", "done", "function", "return", "break", "continue", "local", "export", "readonly", "declare", "typeset", "unset", "shift", "exit", "source", ".", "eval", "exec",
+        "trap", "wait", "jobs", "bg", "fg", "disown", "suspend", "alias", "unalias", "history", "fc", "let", "test", "[", "[[", "]]", "time", "coproc", "select", "in",
     ]
 });
 
 static BASH_OPERATORS: LazyLock<&[&str]> = LazyLock::new(|| &["+", "-", "*", "/", "%", "=", "!", "<", ">", "&", "|", "^", "~"]);
 
-static BASH_TWO_CHAR_OPERATORS: LazyLock<&[&str]> = LazyLock::new(|| {
-    &[
-        "==", "!=", "<=", ">=", "&&", "||", "<<", ">>", "++", "--", "+=", "-=", "*=", "/=", "%=", "&=", "|=", "^=", "<<=",
-        ">>=", "**",
-    ]
-});
+static BASH_TWO_CHAR_OPERATORS: LazyLock<&[&str]> = LazyLock::new(|| &["==", "!=", "<=", ">=", "&&", "||", "<<", ">>", "++", "--", "+=", "-=", "*=", "/=", "%=", "&=", "|=", "^=", "<<=", ">>=", "**"]);
 
 static BASH_DELIMITERS: LazyLock<&[&str]> = LazyLock::new(|| &["(", ")", "{", "}", "[", "]", ";", ",", ":", "."]);
 
-static BASH_SPECIAL_CHARS: LazyLock<&[char]> = LazyLock::new(|| {
-    &[
-        '\\', '`', '~', '@', '#', '$', '%', '^', '&', '*', '(', ')', '-', '+', '=', '{', '}', '[', ']', '|', '\\', ':', ';',
-        '"', '\'', '<', '>', ',', '.', '?', '/', '!', '`',
-    ]
-});
+static BASH_SPECIAL_CHARS: LazyLock<&[char]> = LazyLock::new(|| &['\\', '`', '~', '@', '#', '$', '%', '^', '&', '*', '(', ')', '-', '+', '=', '{', '}', '[', ']', '|', '\\', ':', ';', '"', '\'', '<', '>', ',', '.', '?', '/', '!', '`']);

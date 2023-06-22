@@ -21,10 +21,12 @@ Oak JASMIN is a robust parser for JASMIN, designed to handle complete Java assem
 Basic example:
 
 ```rust
-use oak_jasmin::{Parser, JasminLanguage, SourceText};
+use oak_core::{Parser, SourceText, parser::session::ParseSession};
+use oak_jasmin::{JasminParser, JasminLanguage};
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
-    let parser = Parser::new();
+    let mut session = ParseSession::<JasminLanguage>::default();
+    let parser = JasminParser::new();
     let source = SourceText::new(r#"
 .class public HelloWorld
 .super java/lang/Object
@@ -41,7 +43,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 .end method
     "#);
     
-    let result = parser.parse(&source);
+    let result = parser.parse(&[], &mut session);
     println!("Parsed JASMIN successfully.");
     Ok(())
 }
@@ -51,9 +53,11 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
 ### Class Parsing
 ```rust
-use oak_jasmin::{Parser, JasminLanguage, SourceText};
+use oak_core::{Parser, SourceText, parser::session::ParseSession};
+use oak_jasmin::{JasminParser, JasminLanguage};
 
-let parser = Parser::new();
+let mut session = ParseSession::<JasminLanguage>::default();
+let parser = JasminParser::new();
 let source = SourceText::new(r#"
 .class public Calculator
 .super java/lang/Object
@@ -79,15 +83,17 @@ let source = SourceText::new(r#"
 .end method
 "#);
 
-let result = parser.parse(&source);
+let result = parser.parse(&[], &mut session);
 println!("Class parsed successfully.");
 ```
 
 ### Method Parsing
 ```rust
-use oak_jasmin::{Parser, JasminLanguage, SourceText};
+use oak_core::{Parser, SourceText, parser::session::ParseSession};
+use oak_jasmin::{JasminParser, JasminLanguage};
 
-let parser = Parser::new();
+let mut session = ParseSession::<JasminLanguage>::default();
+let parser = JasminParser::new();
 let source = SourceText::new(r#"
 .method public factorial(I)I
     .limit stack 2
@@ -112,7 +118,7 @@ Lbase:
 .end method
 "#);
 
-let result = parser.parse(&source);
+let result = parser.parse(&[], &mut session);
 println!("Method parsed successfully.");
 ```
 
@@ -120,19 +126,23 @@ println!("Method parsed successfully.");
 
 ### Token-Level Parsing
 ```rust
-use oak_jasmin::{Parser, JasminLanguage, SourceText};
+use oak_core::{Parser, SourceText, parser::session::ParseSession};
+use oak_jasmin::{JasminParser, JasminLanguage};
 
-let parser = Parser::new();
+let mut session = ParseSession::<JasminLanguage>::default();
+let parser = JasminParser::new();
 let source = SourceText::new("getstatic java/lang/System/out Ljava/io/PrintStream;");
-let result = parser.parse(&source);
+let result = parser.parse(&[], &mut session);
 println!("Token parsing completed.");
 ```
 
 ### Error Handling
 ```rust
-use oak_jasmin::{Parser, JasminLanguage, SourceText};
+use oak_core::{Parser, SourceText, parser::session::ParseSession};
+use oak_jasmin::{JasminParser, JasminLanguage};
 
-let parser = Parser::new();
+let mut session = ParseSession::<JasminLanguage>::default();
+let parser = JasminParser::new();
 let source = SourceText::new(r#"
 .class Broken
 .method public bad_method()V
@@ -144,7 +154,7 @@ let source = SourceText::new(r#"
 .end class
 "#);
 
-let result = parser.parse(&source);
+let result = parser.parse(&[], &mut session);
 if let Some(errors) = result.result.err() {
     println!("Parse errors found: {:?}", errors);
 } else {

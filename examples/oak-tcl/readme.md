@@ -25,11 +25,13 @@ Oak Tcl provides robust parsing capabilities for Tcl script files, supporting co
 ### Basic Command Parsing
 
 ```rust
-use oak::{Parser, Language};
-use oak_tcl::TclLanguage;
+use oak_core::{Parser, SourceText, parser::session::ParseSession};
+use oak_tcl::{TclParser, TclLanguage};
 
 fn main() {
-    let source = r#"
+    let mut session = ParseSession::<TclLanguage>::default();
+    let parser = TclParser::new();
+    let source = SourceText::new(r#"
         set name "World"
         puts "Hello, $name!"
         
@@ -39,28 +41,22 @@ fn main() {
             set sum [expr {$sum + $num}]
         }
         puts "Sum: $sum"
-    "#;
+    "#);
     
-    let mut parser = Parser::<TclLanguage>::new();
-    match parser.parse(&source) {
-        Ok(ast) => {
-            println!("Parsed AST: {:#?}", ast);
-        }
-        Err(error) => {
-            eprintln!("Parse error: {}", error);
-        }
-    }
+    let result = parser.parse(&source, &[], &mut session);
 }
 ```
 
 ### Procedure Definition
 
 ```rust
-use oak::{Parser, Language};
-use oak_tcl::TclLanguage;
+use oak_core::{Parser, SourceText, parser::session::ParseSession};
+use oak_tcl::{TclParser, TclLanguage};
 
 fn main() {
-    let source = r#"
+    let mut session = ParseSession::<TclLanguage>::default();
+    let parser = TclParser::new();
+    let source = SourceText::new(r#"
         proc factorial {n} {
             if {$n <= 1} {
                 return 1
@@ -76,17 +72,9 @@ fn main() {
         puts [factorial 5]
         puts [greet "World"]
         puts [greet "World" "Hi"]
-    "#;
+    "#);
     
-    let mut parser = Parser::<TclLanguage>::new();
-    match parser.parse(&source) {
-        Ok(ast) => {
-            println!("Procedures parsed successfully!");
-        }
-        Err(error) => {
-            eprintln!("Parse error: {}", error);
-        }
-    }
+    let result = parser.parse(&source, &[], &mut session);
 }
 ```
 
@@ -97,19 +85,23 @@ fn main() {
 Oak Tcl supports parsing complex list operations:
 
 ```rust
-let source = r#"
-    set mylist [list a b c d e]
-    set element [lindex $mylist 2]
-    set length [llength $mylist]
-    set reversed [lreverse $mylist]
+use oak_core::{Parser, SourceText, parser::session::ParseSession};
+use oak_tcl::{TclParser, TclLanguage};
+
+let mut session = ParseSession::<TclLanguage>::default();
+let parser = TclParser::new();
+let source = SourceText::new(r#"
+    set my_list {apple banana cherry}
+    set first [lindex $my_list 0]
+    set last [lindex $my_list end]
     
-    array set colors {
-        red   #FF0000
-        green #00FF00
-        blue  #0000FF
+    array set my_array {
+        key1 value1
+        key2 value2
     }
-    puts $colors(red)
-"#;
+"#);
+
+let result = parser.parse(&source, &[], &mut session);
 ```
 
 ### Regular Expressions

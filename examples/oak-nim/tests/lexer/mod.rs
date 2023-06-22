@@ -8,7 +8,7 @@ fn test_nim_lexer() {
     let language = Box::leak(Box::new(NimLanguage::default()));
     let lexer = NimLexer::new(language);
     let test_runner = LexerTester::new(here.join("tests/lexer")).with_extension("nim").with_timeout(Duration::from_secs(5));
-    match test_runner.run_tests::<NimLanguage, _>(lexer) {
+    match test_runner.run_tests::<NimLanguage, _>(&lexer) {
         Ok(()) => println!("Nim lexer tests passed!"),
         Err(e) => panic!("Nim lexer tests failed: {}", e),
     }

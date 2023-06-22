@@ -21,10 +21,12 @@ Oak Java is a robust parser for Java, designed to handle complete Java syntax in
 Basic example:
 
 ```rust
-use oak_java::{Parser, JavaLanguage, SourceText};
+use oak_core::{Parser, SourceText, parser::session::ParseSession};
+use oak_java::{JavaParser, JavaLanguage};
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
-    let parser = Parser::new();
+    let mut session = ParseSession::<JavaLanguage>::default();
+    let parser = JavaParser::new();
     let source = SourceText::new(r#"
 public class HelloWorld {
     public static void main(String[] args) {
@@ -33,7 +35,7 @@ public class HelloWorld {
 }
     "#);
     
-    let result = parser.parse(&source);
+    let result = parser.parse(&[], &mut session);
     println!("Parsed Java successfully.");
     Ok(())
 }
@@ -43,9 +45,11 @@ public class HelloWorld {
 
 ### Method Parsing
 ```rust
-use oak_java::{Parser, JavaLanguage, SourceText};
+use oak_core::{Parser, SourceText, parser::session::ParseSession};
+use oak_java::{JavaParser, JavaLanguage};
 
-let parser = Parser::new();
+let mut session = ParseSession::<JavaLanguage>::default();
+let parser = JavaParser::new();
 let source = SourceText::new(r#"
 public class Calculator {
     public int add(int a, int b) {
@@ -60,15 +64,17 @@ public class Calculator {
 }
 "#);
 
-let result = parser.parse(&source);
+let result = parser.parse(&[], &mut session);
 println!("Method parsed successfully.");
 ```
 
 ### Class Parsing
 ```rust
-use oak_java::{Parser, JavaLanguage, SourceText};
+use oak_core::{Parser, SourceText, parser::session::ParseSession};
+use oak_java::{JavaParser, JavaLanguage};
 
-let parser = Parser::new();
+let mut session = ParseSession::<JavaLanguage>::default();
+let parser = JavaParser::new();
 let source = SourceText::new(r#"
 public class Person {
     private String name;
@@ -89,7 +95,7 @@ public class Person {
 }
 "#);
 
-let result = parser.parse(&source);
+let result = parser.parse(&[], &mut session);
 println!("Class parsed successfully.");
 ```
 
@@ -97,11 +103,14 @@ println!("Class parsed successfully.");
 
 ### Token-Level Parsing
 ```rust
-use oak_java::{Parser, JavaLanguage, SourceText};
+use oak_core::{Parser, SourceText, parser::session::ParseSession};
+use oak_java::{JavaParser, JavaLanguage};
 
-let parser = Parser::new();
+let mut session = ParseSession::<JavaLanguage>::default();
+let parser = JavaParser::new();
 let source = SourceText::new("int x = 42;");
-let result = parser.parse(&source);
+let result = parser.parse(&[], &mut session);
+```
 println!("Token parsing completed.");
 ```
 

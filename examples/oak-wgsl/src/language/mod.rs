@@ -1,9 +1,13 @@
-use crate::kind::WgslSyntaxKind;
-use oak_core::Language;
+use oak_core::{Language, LanguageCategory};
 
+#[derive(Default)]
 pub struct WgslLanguage;
 
 impl Language for WgslLanguage {
-    type SyntaxKind = WgslSyntaxKind;
+    const NAME: &'static str = "wgsl";
+    const CATEGORY: LanguageCategory = LanguageCategory::Programming;
+
+    type TokenType = crate::kind::WgslSyntaxKind;
+    type ElementType = crate::kind::WgslSyntaxKind;
     type TypedRoot = ();
 }

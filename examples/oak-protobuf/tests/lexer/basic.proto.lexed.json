@@ -1,0 +1,607 @@
+{
+    "success": true,
+    "count": 100,
+    "tokens": [
+        {
+            "kind": "Identifier",
+            "text": "syntax",
+            "start": 167,
+            "end": 173
+        },
+        {
+            "kind": "Assign",
+            "text": "=",
+            "start": 174,
+            "end": 175
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "\"proto3\"",
+            "start": 176,
+            "end": 184
+        },
+        {
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 184,
+            "end": 185
+        },
+        {
+            "kind": "Package",
+            "text": "package",
+            "start": 213,
+            "end": 220
+        },
+        {
+            "kind": "Identifier",
+            "text": "com",
+            "start": 221,
+            "end": 224
+        },
+        {
+            "kind": "Dot",
+            "text": ".",
+            "start": 224,
+            "end": 225
+        },
+        {
+            "kind": "Identifier",
+            "text": "example",
+            "start": 225,
+            "end": 232
+        },
+        {
+            "kind": "Dot",
+            "text": ".",
+            "start": 232,
+            "end": 233
+        },
+        {
+            "kind": "Identifier",
+            "text": "comprehensive",
+            "start": 233,
+            "end": 246
+        },
+        {
+            "kind": "Dot",
+            "text": ".",
+            "start": 246,
+            "end": 247
+        },
+        {
+            "kind": "Identifier",
+            "text": "test",
+            "start": 247,
+            "end": 251
+        },
+        {
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 251,
+            "end": 252
+        },
+        {
+            "kind": "Import",
+            "text": "import",
+            "start": 278,
+            "end": 284
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "\"google/protobuf/any.proto\"",
+            "start": 285,
+            "end": 312
+        },
+        {
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 312,
+            "end": 313
+        },
+        {
+            "kind": "Import",
+            "text": "import",
+            "start": 315,
+            "end": 321
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "\"google/protobuf/timestamp.proto\"",
+            "start": 322,
+            "end": 355
+        },
+        {
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 355,
+            "end": 356
+        },
+        {
+            "kind": "Import",
+            "text": "import",
+            "start": 358,
+            "end": 364
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "\"google/protobuf/duration.proto\"",
+            "start": 365,
+            "end": 397
+        },
+        {
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 397,
+            "end": 398
+        },
+        {
+            "kind": "Import",
+            "text": "import",
+            "start": 400,
+            "end": 406
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "\"google/protobuf/empty.proto\"",
+            "start": 407,
+            "end": 436
+        },
+        {
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 436,
+            "end": 437
+        },
+        {
+            "kind": "Import",
+            "text": "import",
+            "start": 439,
+            "end": 445
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "\"google/protobuf/wrappers.proto\"",
+            "start": 446,
+            "end": 478
+        },
+        {
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 478,
+            "end": 479
+        },
+        {
+            "kind": "Import",
+            "text": "import",
+            "start": 481,
+            "end": 487
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "\"google/protobuf/struct.proto\"",
+            "start": 488,
+            "end": 518
+        },
+        {
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 518,
+            "end": 519
+        },
+        {
+            "kind": "Import",
+            "text": "import",
+            "start": 521,
+            "end": 527
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "\"google/protobuf/field_mask.proto\"",
+            "start": 528,
+            "end": 562
+        },
+        {
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 562,
+            "end": 563
+        },
+        {
+            "kind": "Option",
+            "text": "option",
+            "start": 591,
+            "end": 597
+        },
+        {
+            "kind": "Identifier",
+            "text": "java_package",
+            "start": 598,
+            "end": 610
+        },
+        {
+            "kind": "Assign",
+            "text": "=",
+            "start": 611,
+            "end": 612
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "\"com.example.comprehensive.test\"",
+            "start": 613,
+            "end": 645
+        },
+        {
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 645,
+            "end": 646
+        },
+        {
+            "kind": "Option",
+            "text": "option",
+            "start": 648,
+            "end": 654
+        },
+        {
+            "kind": "Identifier",
+            "text": "java_outer_classname",
+            "start": 655,
+            "end": 675
+        },
+        {
+            "kind": "Assign",
+            "text": "=",
+            "start": 676,
+            "end": 677
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "\"ComprehensiveTestProtos\"",
+            "start": 678,
+            "end": 703
+        },
+        {
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 703,
+            "end": 704
+        },
+        {
+            "kind": "Option",
+            "text": "option",
+            "start": 706,
+            "end": 712
+        },
+        {
+            "kind": "Identifier",
+            "text": "java_multiple_files",
+            "start": 713,
+            "end": 732
+        },
+        {
+            "kind": "Assign",
+            "text": "=",
+            "start": 733,
+            "end": 734
+        },
+        {
+            "kind": "BooleanLiteral",
+            "text": "true",
+            "start": 735,
+            "end": 739
+        },
+        {
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 739,
+            "end": 740
+        },
+        {
+            "kind": "Option",
+            "text": "option",
+            "start": 742,
+            "end": 748
+        },
+        {
+            "kind": "Identifier",
+            "text": "go_package",
+            "start": 749,
+            "end": 759
+        },
+        {
+            "kind": "Assign",
+            "text": "=",
+            "start": 760,
+            "end": 761
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "\"github.com/example/comprehensive-test\"",
+            "start": 762,
+            "end": 801
+        },
+        {
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 801,
+            "end": 802
+        },
+        {
+            "kind": "Option",
+            "text": "option",
+            "start": 804,
+            "end": 810
+        },
+        {
+            "kind": "Identifier",
+            "text": "csharp_namespace",
+            "start": 811,
+            "end": 827
+        },
+        {
+            "kind": "Assign",
+            "text": "=",
+            "start": 828,
+            "end": 829
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "\"Example.Comprehensive.Test\"",
+            "start": 830,
+            "end": 858
+        },
+        {
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 858,
+            "end": 859
+        },
+        {
+            "kind": "Option",
+            "text": "option",
+            "start": 861,
+            "end": 867
+        },
+        {
+            "kind": "Identifier",
+            "text": "php_namespace",
+            "start": 868,
+            "end": 881
+        },
+        {
+            "kind": "Assign",
+            "text": "=",
+            "start": 882,
+            "end": 883
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "\"Example\\\\Comprehensive\\\\Test\"",
+            "start": 884,
+            "end": 914
+        },
+        {
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 914,
+            "end": 915
+        },
+        {
+            "kind": "Option",
+            "text": "option",
+            "start": 917,
+            "end": 923
+        },
+        {
+            "kind": "Identifier",
+            "text": "ruby_package",
+            "start": 924,
+            "end": 936
+        },
+        {
+            "kind": "Assign",
+            "text": "=",
+            "start": 937,
+            "end": 938
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "\"Example::Comprehensive::Test\"",
+            "start": 939,
+            "end": 969
+        },
+        {
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 969,
+            "end": 970
+        },
+        {
+            "kind": "Option",
+            "text": "option",
+            "start": 972,
+            "end": 978
+        },
+        {
+            "kind": "Identifier",
+            "text": "objc_class_prefix",
+            "start": 979,
+            "end": 996
+        },
+        {
+            "kind": "Assign",
+            "text": "=",
+            "start": 997,
+            "end": 998
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "\"ECT\"",
+            "start": 999,
+            "end": 1004
+        },
+        {
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 1004,
+            "end": 1005
+        },
+        {
+            "kind": "Option",
+            "text": "option",
+            "start": 1007,
+            "end": 1013
+        },
+        {
+            "kind": "Identifier",
+            "text": "cc_enable_arenas",
+            "start": 1014,
+            "end": 1030
+        },
+        {
+            "kind": "Assign",
+            "text": "=",
+            "start": 1031,
+            "end": 1032
+        },
+        {
+            "kind": "BooleanLiteral",
+            "text": "true",
+            "start": 1033,
+            "end": 1037
+        },
+        {
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 1037,
+            "end": 1038
+        },
+        {
+            "kind": "Option",
+            "text": "option",
+            "start": 1040,
+            "end": 1046
+        },
+        {
+            "kind": "Identifier",
+            "text": "optimize_for",
+            "start": 1047,
+            "end": 1059
+        },
+        {
+            "kind": "Assign",
+            "text": "=",
+            "start": 1060,
+            "end": 1061
+        },
+        {
+            "kind": "Identifier",
+            "text": "SPEED",
+            "start": 1062,
+            "end": 1067
+        },
+        {
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 1067,
+            "end": 1068
+        },
+        {
+            "kind": "Enum",
+            "text": "enum",
+            "start": 1111,
+            "end": 1115
+        },
+        {
+            "kind": "Identifier",
+            "text": "Status",
+            "start": 1116,
+            "end": 1122
+        },
+        {
+            "kind": "LeftBrace",
+            "text": "{",
+            "start": 1123,
+            "end": 1124
+        },
+        {
+            "kind": "Identifier",
+            "text": "STATUS_UNSPECIFIED",
+            "start": 1128,
+            "end": 1146
+        },
+        {
+            "kind": "Assign",
+            "text": "=",
+            "start": 1147,
+            "end": 1148
+        },
+        {
+            "kind": "NumberLiteral",
+            "text": "0",
+            "start": 1149,
+            "end": 1150
+        },
+        {
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 1150,
+            "end": 1151
+        },
+        {
+            "kind": "Identifier",
+            "text": "STATUS_PENDING",
+            "start": 1155,
+            "end": 1169
+        },
+        {
+            "kind": "Assign",
+            "text": "=",
+            "start": 1170,
+            "end": 1171
+        },
+        {
+            "kind": "NumberLiteral",
+            "text": "1",
+            "start": 1172,
+            "end": 1173
+        },
+        {
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 1173,
+            "end": 1174
+        },
+        {
+            "kind": "Identifier",
+            "text": "STATUS_APPROVED",
+            "start": 1178,
+            "end": 1193
+        },
+        {
+            "kind": "Assign",
+            "text": "=",
+            "start": 1194,
+            "end": 1195
+        },
+        {
+            "kind": "NumberLiteral",
+            "text": "2",
+            "start": 1196,
+            "end": 1197
+        },
+        {
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 1197,
+            "end": 1198
+        },
+        {
+            "kind": "Identifier",
+            "text": "STATUS_REJECTED",
+            "start": 1202,
+            "end": 1217
+        }
+    ],
+    "errors": []
+}

@@ -1,20 +1,26 @@
 use crate::{kind::ProtobufSyntaxKind, language::ProtobufLanguage};
-use oak_core::{IncrementalCache, Lexer, LexerState, OakError, lexer::LexOutput, source::Source};
+use oak_core::{
+    Lexer, LexerCache, LexerState, OakError,
+    lexer::LexOutput,
+    source::{Source, TextEdit},
+};
 
-type State<S> = LexerState<S, ProtobufLanguage>;
+type State<'a, S> = LexerState<'a, S, ProtobufLanguage>;
 
 #[derive(Clone)]
 pub struct ProtobufLexer<'config> {
-    config: &'config ProtobufLanguage,
+    _config: &'config ProtobufLanguage,
 }
 
 impl<'config> ProtobufLexer<'config> {
     pub fn new(config: &'config ProtobufLanguage) -> Self {
-        Self { config }
+        Self { _config: config }
     }
 
-    fn run<S: Source>(&self, state: &mut State<S>) -> Result<(), OakError> {
+    fn run<S: Source + ?Sized>(&self, state: &mut State<'_, S>) -> Result<(), OakError> {
         while state.not_at_end() {
+            let safe_point = state.get_position();
+
             if self.skip_whitespace(state) {
                 continue;
             }
@@ -53,6 +59,8 @@ impl<'config> ProtobufLexer<'config> {
                 // 如果已到达文件末尾，退出循环
                 break;
             }
+
+            state.advance_if_dead_lock(safe_point);
         }
 
         // Add EOF token
@@ -62,7 +70,7 @@ impl<'config> ProtobufLexer<'config> {
         Ok(())
     }
 
-    fn skip_whitespace<S: Source>(&self, state: &mut State<S>) -> bool {
+    fn skip_whitespace<S: Source + ?Sized>(&self, state: &mut State<'_, S>) -> bool {
         let start_pos = state.get_position();
 
         while let Some(ch) = state.peek() {
@@ -83,7 +91,7 @@ impl<'config> ProtobufLexer<'config> {
         }
     }
 
-    fn lex_newline<S: Source>(&self, state: &mut State<S>) -> bool {
+    fn lex_newline<S: Source + ?Sized>(&self, state: &mut State<'_, S>) -> bool {
         let start_pos = state.get_position();
 
         if let Some('\n') = state.peek() {
@@ -104,7 +112,7 @@ impl<'config> ProtobufLexer<'config> {
         }
     }
 
-    fn lex_comment<S: Source>(&self, state: &mut State<S>) -> bool {
+    fn lex_comment<S: Source + ?Sized>(&self, state: &mut State<'_, S>) -> bool {
         let start_pos = state.get_position();
 
         if let Some('/') = state.peek() {
@@ -150,7 +158,7 @@ impl<'config> ProtobufLexer<'config> {
         }
     }
 
-    fn lex_string_literal<S: Source>(&self, state: &mut State<S>) -> bool {
+    fn lex_string_literal<S: Source + ?Sized>(&self, state: &mut State<'_, S>) -> bool {
         let start_pos = state.get_position();
 
         if let Some(quote_char) = state.peek() {
@@ -192,7 +200,7 @@ impl<'config> ProtobufLexer<'config> {
         }
     }
 
-    fn lex_number_literal<S: Source>(&self, state: &mut State<S>) -> bool {
+    fn lex_number_literal<S: Source + ?Sized>(&self, state: &mut State<'_, S>) -> bool {
         if let Some(ch) = state.peek() {
             if ch.is_ascii_digit() || (ch == '-' && state.peek_next_n(1).map_or(false, |c| c.is_ascii_digit())) {
                 let start_pos = state.get_position();
@@ -260,7 +268,7 @@ impl<'config> ProtobufLexer<'config> {
         }
     }
 
-    fn lex_identifier_or_keyword<S: Source>(&self, state: &mut State<S>) -> bool {
+    fn lex_identifier_or_keyword<S: Source + ?Sized>(&self, state: &mut State<'_, S>) -> bool {
         if let Some(ch) = state.peek() {
             if ch.is_ascii_alphabetic() || ch == '_' {
                 let start_pos = state.get_position();
@@ -333,7 +341,7 @@ impl<'config> ProtobufLexer<'config> {
         }
     }
 
-    fn lex_operators_and_delimiters<S: Source>(&self, state: &mut State<S>) -> bool {
+    fn lex_operators_and_delimiters<S: Source + ?Sized>(&self, state: &mut State<'_, S>) -> bool {
         if let Some(ch) = state.peek() {
             let start_pos = state.get_position();
 
@@ -399,14 +407,9 @@ impl<'config> ProtobufLexer<'config> {
 }
 
 impl<'config> Lexer<ProtobufLanguage> for ProtobufLexer<'config> {
-    fn lex_incremental(
-        &self,
-        source: impl Source,
-        changed: usize,
-        cache: IncrementalCache<ProtobufLanguage>,
-    ) -> LexOutput<ProtobufLanguage> {
-        let mut state = LexerState::new_with_cache(source, changed, cache);
+    fn lex<'a, S: Source + ?Sized>(&self, source: &'a S, _edits: &[TextEdit], cache: &'a mut impl LexerCache<ProtobufLanguage>) -> LexOutput<ProtobufLanguage> {
+        let mut state = State::new(source);
         let result = self.run(&mut state);
-        state.finish(result)
+        state.finish_with_cache(result, cache)
     }
 }

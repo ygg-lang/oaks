@@ -1,42 +1,41 @@
 use crate::{kind::ElixirSyntaxKind, language::ElixirLanguage};
 use oak_core::{
-    IncrementalCache, Lexer, LexerState, OakError,
-    lexer::{CommentLine, LexOutput, StringConfig, WhitespaceConfig},
+    Lexer, LexerCache, LexerState,
+    errors::OakError,
+    lexer::{CommentConfig, LexOutput, StringConfig, WhitespaceConfig},
     source::Source,
 };
 use std::sync::LazyLock;
 
-type State<S: Source> = LexerState<S, ElixirLanguage>;
+type State<'s, S> = LexerState<'s, S, ElixirLanguage>;
 
 static ELIXIR_WHITESPACE: LazyLock<WhitespaceConfig> = LazyLock::new(|| WhitespaceConfig { unicode_whitespace: true });
-static ELIXIR_COMMENT: LazyLock<CommentLine> = LazyLock::new(|| CommentLine { line_markers: &["#"] });
+static ELIXIR_COMMENT: LazyLock<CommentConfig> = LazyLock::new(|| CommentConfig { line_marker: "#", block_start: "", block_end: "", nested_blocks: false });
 static ELIXIR_STRING: LazyLock<StringConfig> = LazyLock::new(|| StringConfig { quotes: &['"'], escape: Some('\\') });
 static ELIXIR_CHAR: LazyLock<StringConfig> = LazyLock::new(|| StringConfig { quotes: &['\''], escape: None });
 
 #[derive(Clone)]
 pub struct ElixirLexer<'config> {
-    config: &'config ElixirLanguage,
+    _config: &'config ElixirLanguage,
 }
 
 impl<'config> Lexer<ElixirLanguage> for ElixirLexer<'config> {
-    fn lex_incremental(
-        &self,
-        source: impl Source,
-        changed: usize,
-        cache: IncrementalCache<ElixirLanguage>,
-    ) -> LexOutput<ElixirLanguage> {
-        let mut state = LexerState::new_with_cache(source, changed, cache);
+    fn lex<'a, S: Source + ?Sized>(&self, source: &S, _edits: &[oak_core::source::TextEdit], cache: &'a mut impl LexerCache<ElixirLanguage>) -> LexOutput<ElixirLanguage> {
+        let mut state = State::new(source);
         let result = self.run(&mut state);
-        state.finish(result)
+        if result.is_ok() {
+            state.add_eof();
+        }
+        state.finish_with_cache(result, cache)
     }
 }
 
 impl<'config> ElixirLexer<'config> {
     pub fn new(config: &'config ElixirLanguage) -> Self {
-        Self { config }
+        Self { _config: config }
     }
 
-    fn run<S: Source>(&self, state: &mut State<S>) -> Result<(), OakError> {
+    fn run<'s, S: Source + ?Sized>(&self, state: &mut State<'s, S>) -> Result<(), OakError> {
         while state.not_at_end() {
             let safe_point = state.get_position();
 
@@ -76,68 +75,33 @@ impl<'config> ElixirLexer<'config> {
                 continue;
             }
 
-            state.safe_check(safe_point);
+            state.advance_if_dead_lock(safe_point);
         }
 
-        // 添加 EOF token
-        let eof_pos = state.get_position();
-        state.add_token(ElixirSyntaxKind::Eof, eof_pos, eof_pos);
         Ok(())
     }
 
     /// 跳过空白字符
-    fn skip_whitespace<S: Source>(&self, state: &mut State<S>) -> bool {
-        match ELIXIR_WHITESPACE.scan(state.rest(), state.get_position(), ElixirSyntaxKind::Whitespace) {
-            Some(token) => {
-                state.advance_with(token);
-                return true;
-            }
-            None => {}
-        }
-        false
+    fn skip_whitespace<'s, S: Source + ?Sized>(&self, state: &mut State<'s, S>) -> bool {
+        ELIXIR_WHITESPACE.scan(state, ElixirSyntaxKind::Whitespace)
     }
 
-    fn skip_comment<S: Source>(&self, state: &mut State<S>) -> bool {
-        match ELIXIR_COMMENT.scan(state.rest(), state.get_position(), ElixirSyntaxKind::Comment) {
-            Some(token) => {
-                state.advance_with(token);
-                return true;
-            }
-            None => {}
-        }
-        false
+    fn skip_comment<'s, S: Source + ?Sized>(&self, state: &mut State<'s, S>) -> bool {
+        ELIXIR_COMMENT.scan(state, ElixirSyntaxKind::Comment, ElixirSyntaxKind::Comment)
     }
 
-    fn lex_string_literal<S: Source>(&self, state: &mut State<S>) -> bool {
-        let _start = state.get_position();
-        match ELIXIR_STRING.scan(state.rest(), state.get_position(), ElixirSyntaxKind::String) {
-            Some(token) => {
-                state.advance_with(token);
-                return true;
-            }
-            None => {}
-        }
-        false
+    fn lex_string_literal<'s, S: Source + ?Sized>(&self, state: &mut State<'s, S>) -> bool {
+        ELIXIR_STRING.scan(state, ElixirSyntaxKind::String)
     }
 
-    fn lex_char_literal<S: Source>(&self, state: &mut State<S>) -> bool {
-        let _start = state.get_position();
-        match ELIXIR_CHAR.scan(state.rest(), state.get_position(), ElixirSyntaxKind::Character) {
-            Some(token) => {
-                state.advance_with(token);
-                return true;
-            }
-            None => {}
-        }
-        false
+    fn lex_char_literal<'s, S: Source + ?Sized>(&self, state: &mut State<'s, S>) -> bool {
+        ELIXIR_CHAR.scan(state, ElixirSyntaxKind::Character)
     }
 
-    fn lex_sigil<S: Source>(&self, state: &mut State<S>) -> bool {
+    fn lex_sigil<'s, S: Source + ?Sized>(&self, state: &mut State<'s, S>) -> bool {
         let start = state.get_position();
-        let rest = state.rest();
 
-        if rest.starts_with("~") {
-            state.advance(1);
+        if state.consume_if_starts_with("~") {
             if let Some(sigil_type) = state.peek() {
                 if sigil_type.is_alphabetic() {
                     state.advance(sigil_type.len_utf8());
@@ -167,14 +131,7 @@ impl<'config> ElixirLexer<'config> {
                         }
 
                         // 可选的修饰符
-                        while let Some(ch) = state.peek() {
-                            if ch.is_alphabetic() {
-                                state.advance(ch.len_utf8());
-                            }
-                            else {
-                                break;
-                            }
-                        }
+                        state.take_while(|c| c.is_alphabetic());
 
                         state.add_token(ElixirSyntaxKind::Sigil, start, state.get_position());
                         return true;
@@ -185,9 +142,9 @@ impl<'config> ElixirLexer<'config> {
         false
     }
 
-    fn lex_number_literal<S: Source>(&self, state: &mut State<S>) -> bool {
+    fn lex_number_literal<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start = state.get_position();
-        let first = match state.current() {
+        let first = match state.peek() {
             Some(c) => c,
             None => return false,
         };
@@ -199,60 +156,25 @@ impl<'config> ElixirLexer<'config> {
             match state.peek_next_n(1) {
                 Some('x') | Some('X') => {
                     state.advance(2);
-                    while let Some(c) = state.peek() {
-                        if c.is_ascii_hexdigit() || c == '_' {
-                            state.advance(1);
-                        }
-                        else {
-                            break;
-                        }
-                    }
+                    state.take_while(|c| c.is_ascii_hexdigit() || c == '_');
                 }
                 Some('b') | Some('B') => {
                     state.advance(2);
-                    while let Some(c) = state.peek() {
-                        if c == '0' || c == '1' || c == '_' {
-                            state.advance(1);
-                        }
-                        else {
-                            break;
-                        }
-                    }
+                    state.take_while(|c| c == '0' || c == '1' || c == '_');
                 }
                 Some('o') | Some('O') => {
                     state.advance(2);
-                    while let Some(c) = state.peek() {
-                        if ('0'..='7').contains(&c) || c == '_' {
-                            state.advance(1);
-                        }
-                        else {
-                            break;
-                        }
-                    }
+                    state.take_while(|c| ('0'..='7').contains(&c) || c == '_');
                 }
                 _ => {
                     state.advance(1);
-                    while let Some(c) = state.peek() {
-                        if c.is_ascii_digit() || c == '_' {
-                            state.advance(1);
-                        }
-                        else {
-                            break;
-                        }
-                    }
+                    state.take_while(|c| c.is_ascii_digit() || c == '_');
                 }
             }
         }
         else {
             state.advance(1);
-            while let Some(c) = state.peek() {
-                if c.is_ascii_digit() || c == '_' {
-                    state.advance(1);
-                }
-                else {
-                    break;
-                }
-            }
+            state.take_while(|c| c.is_ascii_digit() || c == '_');
         }
         // fractional part
         if state.peek() == Some('.') {
@@ -260,14 +182,7 @@ impl<'config> ElixirLexer<'config> {
             if n1.map(|c| c.is_ascii_digit()).unwrap_or(false) {
                 is_float = true;
                 state.advance(1); // consume '.'
-                while let Some(c) = state.peek() {
-                    if c.is_ascii_digit() || c == '_' {
-                        state.advance(1);
-                    }
-                    else {
-                        break;
-                    }
-                }
+                state.take_while(|c| c.is_ascii_digit() || c == '_');
             }
         }
         // exponent
@@ -282,49 +197,27 @@ impl<'config> ElixirLexer<'config> {
                             state.advance(1);
                         }
                     }
-                    while let Some(d) = state.peek() {
-                        if d.is_ascii_digit() || d == '_' {
-                            state.advance(1);
-                        }
-                        else {
-                            break;
-                        }
-                    }
+                    state.take_while(|d| d.is_ascii_digit() || d == '_');
                 }
             }
         }
-        // suffix letters (Elixir does not have explicit number suffixes like Rust, but we keep the structure for consistency if needed later)
-        while let Some(c) = state.peek() {
-            if c.is_ascii_alphabetic() {
-                state.advance(1);
-            }
-            else {
-                break;
-            }
-        }
+        // suffix letters
+        state.take_while(|c| c.is_ascii_alphabetic());
         let end = state.get_position();
         state.add_token(if is_float { ElixirSyntaxKind::Float } else { ElixirSyntaxKind::Number }, start, end);
         true
     }
 
-    fn lex_identifier_or_keyword<S: Source>(&self, state: &mut State<S>) -> bool {
+    fn lex_identifier_or_keyword<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start = state.get_position();
 
-        if let Some(ch) = state.current() {
+        if let Some(ch) = state.peek() {
             if ch.is_alphabetic() || ch == '_' {
                 state.advance(ch.len_utf8());
-
-                while let Some(next_ch) = state.peek() {
-                    if next_ch.is_alphanumeric() || next_ch == '_' || next_ch == '?' || next_ch == '!' {
-                        state.advance(next_ch.len_utf8());
-                    }
-                    else {
-                        break;
-                    }
-                }
+                state.take_while(|next_ch| next_ch.is_alphanumeric() || next_ch == '_' || next_ch == '?' || next_ch == '!');
 
                 let text = state.get_text_in((start..state.get_position()).into());
-                let kind = match text {
+                let kind = match text.as_ref() {
                     "after" => ElixirSyntaxKind::After,
                     "and" => ElixirSyntaxKind::And,
                     "case" => ElixirSyntaxKind::Case,
@@ -356,7 +249,7 @@ impl<'config> ElixirLexer<'config> {
                     "when" => ElixirSyntaxKind::When,
                     "with" => ElixirSyntaxKind::With,
                     _ => {
-                        if text.chars().next().unwrap().is_uppercase() {
+                        if text.as_ref().chars().next().unwrap().is_uppercase() {
                             ElixirSyntaxKind::Variable
                         }
                         else {
@@ -372,22 +265,18 @@ impl<'config> ElixirLexer<'config> {
         false
     }
 
-    fn lex_atom<S: Source>(&self, state: &mut State<S>) -> bool {
+    fn lex_atom<'s, S: Source + ?Sized>(&self, state: &mut State<'s, S>) -> bool {
         let start = state.get_position();
 
-        if state.current() == Some(':') {
-            state.advance(1);
-
+        if state.consume_if_starts_with(":") {
             // 处理引用的原子 :"atom"
-            if state.peek() == Some('"') {
-                state.advance(1);
+            if state.consume_if_starts_with("\"") {
                 while let Some(ch) = state.peek() {
                     if ch == '"' {
                         state.advance(1);
                         break;
                     }
-                    if ch == '\\' {
-                        state.advance(1);
+                    if state.consume_if_starts_with("\\") {
                         if let Some(escaped) = state.peek() {
                             state.advance(escaped.len_utf8());
                         }
@@ -400,14 +289,7 @@ impl<'config> ElixirLexer<'config> {
             else if let Some(ch) = state.peek() {
                 if ch.is_alphabetic() || ch == '_' {
                     state.advance(ch.len_utf8());
-                    while let Some(next_ch) = state.peek() {
-                        if next_ch.is_alphanumeric() || next_ch == '_' || next_ch == '?' || next_ch == '!' {
-                            state.advance(next_ch.len_utf8());
-                        }
-                        else {
-                            break;
-                        }
-                    }
+                    state.take_while(|next_ch| next_ch.is_alphanumeric() || next_ch == '_' || next_ch == '?' || next_ch == '!');
                 }
             }
 
@@ -417,89 +299,37 @@ impl<'config> ElixirLexer<'config> {
         false
     }
 
-    fn lex_operators<S: Source>(&self, state: &mut State<S>) -> bool {
+    fn lex_operators<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start = state.get_position();
-        let rest = state.rest();
 
         // 多字符操作符
-        if rest.starts_with("===") {
-            state.advance(3);
-            state.add_token(ElixirSyntaxKind::EqualEqualEqual, start, state.get_position());
-            return true;
-        }
-        if rest.starts_with("!==") {
-            state.advance(3);
-            state.add_token(ElixirSyntaxKind::NotEqualEqual, start, state.get_position());
-            return true;
-        }
-        if rest.starts_with("==") {
-            state.advance(2);
-            state.add_token(ElixirSyntaxKind::EqualEqual, start, state.get_position());
-            return true;
-        }
-        if rest.starts_with("!=") {
-            state.advance(2);
-            state.add_token(ElixirSyntaxKind::NotEqual, start, state.get_position());
-            return true;
-        }
-        if rest.starts_with("<=") {
-            state.advance(2);
-            state.add_token(ElixirSyntaxKind::LessEqual, start, state.get_position());
-            return true;
-        }
-        if rest.starts_with(">=") {
-            state.advance(2);
-            state.add_token(ElixirSyntaxKind::GreaterEqual, start, state.get_position());
-            return true;
-        }
-        if rest.starts_with("++") {
-            state.advance(2);
-            state.add_token(ElixirSyntaxKind::PlusPlus, start, state.get_position());
-            return true;
-        }
-        if rest.starts_with("--") {
-            state.advance(2);
-            state.add_token(ElixirSyntaxKind::MinusMinus, start, state.get_position());
-            return true;
-        }
-        if rest.starts_with("**") {
-            state.advance(2);
-            state.add_token(ElixirSyntaxKind::StarStar, start, state.get_position());
-            return true;
-        }
-        if rest.starts_with("<<") {
-            state.advance(2);
-            state.add_token(ElixirSyntaxKind::LeftShift, start, state.get_position());
-            return true;
-        }
-        if rest.starts_with(">>") {
-            state.advance(2);
-            state.add_token(ElixirSyntaxKind::RightShift, start, state.get_position());
-            return true;
-        }
-        if rest.starts_with("=~") {
-            state.advance(2);
-            state.add_token(ElixirSyntaxKind::MatchOp, start, state.get_position());
-            return true;
-        }
-        if rest.starts_with("|>") {
-            state.advance(2);
-            state.add_token(ElixirSyntaxKind::PipeRight, start, state.get_position());
-            return true;
-        }
-        if rest.starts_with("||") {
-            state.advance(2);
-            state.add_token(ElixirSyntaxKind::PipePipe, start, state.get_position());
-            return true;
-        }
-        if rest.starts_with("->") {
-            state.advance(2);
-            state.add_token(ElixirSyntaxKind::Arrow, start, state.get_position());
-            return true;
+        let ops = [
+            ("===", ElixirSyntaxKind::EqualEqualEqual),
+            ("!==", ElixirSyntaxKind::NotEqualEqual),
+            ("==", ElixirSyntaxKind::EqualEqual),
+            ("!=", ElixirSyntaxKind::NotEqual),
+            ("<=", ElixirSyntaxKind::LessEqual),
+            (">=", ElixirSyntaxKind::GreaterEqual),
+            ("++", ElixirSyntaxKind::PlusPlus),
+            ("--", ElixirSyntaxKind::MinusMinus),
+            ("**", ElixirSyntaxKind::StarStar),
+            ("<<", ElixirSyntaxKind::LeftShift),
+            (">>", ElixirSyntaxKind::RightShift),
+            ("=~", ElixirSyntaxKind::MatchOp),
+            ("|>", ElixirSyntaxKind::PipeRight),
+            ("||", ElixirSyntaxKind::PipePipe),
+            ("->", ElixirSyntaxKind::Arrow),
+        ];
+
+        for (pattern, kind) in ops {
+            if state.consume_if_starts_with(pattern) {
+                state.add_token(kind, start, state.get_position());
+                return true;
+            }
         }
 
         // 单字符操作符
-        if let Some(ch) = state.current() {
+        if let Some(ch) = state.peek() {
             let kind = match ch {
                 '+' => ElixirSyntaxKind::Plus,
                 '-' => ElixirSyntaxKind::Minus,

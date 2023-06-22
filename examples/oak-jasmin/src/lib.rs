@@ -4,15 +4,15 @@
 #![doc(html_favicon_url = "https://raw.githubusercontent.com/ygg-lang/oaks/refs/heads/dev/documents/logo.svg")]
 
 pub mod ast;
-pub mod kind;
-pub mod language;
-pub mod lexer;
-pub mod parser;
+pub mod builder;
+pub mod highlighter;
+mod kind;
+mod language;
+mod lexer;
+pub mod lsp;
+mod parser;
 
-// 统一导出主要类型
-pub use crate::{
-    kind::{JasminSyntaxKind, JasminToken},
-    language::JasminLanguage,
-    lexer::JasminLexer,
-    parser::{ClassInfo, FieldInfo, JasminParser, MethodInfo, ParseResult},
-};
+#[cfg(feature = "mcp")]
+pub mod mcp;
+
+pub use crate::{ast::JasminRoot, builder::JasminBuilder, highlighter::JasminHighlighter, language::JasminLanguage, lexer::JasminLexer, lsp::JasminLanguageService, parser::JasminParser};

@@ -1,10 +1,14 @@
-use crate::kind::CsvSyntaxKind;
-use oak_core::Language;
+use crate::{lexer::CsvTokenType, parser::CsvElementType};
+use oak_core::{Language, LanguageCategory};
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Default)]
 pub struct CsvLanguage;
 
 impl Language for CsvLanguage {
-    type SyntaxKind = CsvSyntaxKind;
+    const NAME: &'static str = "csv";
+    const CATEGORY: LanguageCategory = LanguageCategory::Config;
+
+    type TokenType = CsvTokenType;
+    type ElementType = CsvElementType;
     type TypedRoot = ();
 }

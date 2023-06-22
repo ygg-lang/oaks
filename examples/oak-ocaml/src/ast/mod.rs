@@ -1,4 +1,5 @@
-use std::{range::Range, string::String, vec::Vec};
+use core::range::Range;
+use std::{string::String, vec::Vec};
 
 /// OCaml AST 根节点
 #[derive(Debug, PartialEq, Clone)]

@@ -1,34 +1,34 @@
 use crate::{kind::TwigSyntaxKind, language::TwigLanguage};
-use oak_core::{IncrementalCache, Lexer, LexerState, OakError, lexer::LexOutput, source::Source};
+use oak_core::{Lexer, LexerCache, LexerState, OakError, lexer::LexOutput, source::Source};
 
 #[derive(Clone)]
 pub struct TwigLexer<'config> {
-    config: &'config TwigLanguage,
+    /// 语言配置
+    _config: &'config TwigLanguage,
 }
 
-type State<S: Source> = LexerState<S, TwigLanguage>;
+type State<'a, S> = LexerState<'a, S, TwigLanguage>;
 
 impl<'config> TwigLexer<'config> {
+    /// 创建新的 Twig 词法分析器
     pub fn new(config: &'config TwigLanguage) -> Self {
-        Self { config }
+        Self { _config: config }
     }
 }
 
 impl<'config> Lexer<TwigLanguage> for TwigLexer<'config> {
-    fn lex_incremental(
-        &self,
-        source: impl Source,
-        changed: usize,
-        cache: IncrementalCache<TwigLanguage>,
-    ) -> LexOutput<TwigLanguage> {
-        let mut state = LexerState::new_with_cache(source, changed, cache);
+    fn lex<'a, S: Source + ?Sized>(&self, source: &'a S, _edits: &[oak_core::TextEdit], cache: &'a mut impl LexerCache<TwigLanguage>) -> LexOutput<TwigLanguage> {
+        let mut state = LexerState::new(source);
         let result = self.run(&mut state);
-        state.finish(result)
+        if result.is_ok() {
+            state.add_eof();
+        }
+        state.finish_with_cache(result, cache)
     }
 }
 
 impl<'config> TwigLexer<'config> {
-    fn run<S: Source>(&self, state: &mut State<S>) -> Result<(), OakError> {
+    fn run<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> Result<(), OakError> {
         while state.not_at_end() {
             let safe_point = state.get_position();
 
@@ -56,16 +56,13 @@ impl<'config> TwigLexer<'config> {
                 continue;
             }
 
-            state.safe_check(safe_point);
+            state.advance_if_dead_lock(safe_point);
         }
 
-        // 添加 EOF token
-        let eof_pos = state.get_position();
-        state.add_token(TwigSyntaxKind::Eof, eof_pos, eof_pos);
         Ok(())
     }
 
-    fn skip_whitespace<S: Source>(&self, state: &mut State<S>) -> bool {
+    fn skip_whitespace<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start = state.get_position();
         let mut found = false;
 
@@ -86,28 +83,24 @@ impl<'config> TwigLexer<'config> {
         found
     }
 
-    fn skip_comment<S: Source>(&self, state: &mut State<S>) -> bool {
+    fn skip_comment<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start = state.get_position();
-        let rest = state.rest();
-
-        // Twig comment: {# ... #}
-        if rest.starts_with("{#") {
-            state.advance(2);
-            while let Some(ch) = state.peek() {
-                if ch == '#' && state.peek_next_n(1) == Some('}') {
-                    state.advance(2);
+        if state.consume_if_starts_with("{#") {
+            while state.not_at_end() {
+                if state.consume_if_starts_with("#}") {
                     break;
                 }
-                state.advance(ch.len_utf8());
+                if let Some(ch) = state.peek() {
+                    state.advance(ch.len_utf8());
+                }
             }
             state.add_token(TwigSyntaxKind::Comment, start, state.get_position());
             return true;
         }
-
         false
     }
 
-    fn lex_string<S: Source>(&self, state: &mut State<S>) -> bool {
+    fn lex_string<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start = state.get_position();
 
         if let Some(quote) = state.peek() {
@@ -138,7 +131,7 @@ impl<'config> TwigLexer<'config> {
         false
     }
 
-    fn lex_number<S: Source>(&self, state: &mut State<S>) -> bool {
+    fn lex_number<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start = state.get_position();
 
         if let Some(ch) = state.peek() {
@@ -162,7 +155,7 @@ impl<'config> TwigLexer<'config> {
         false
     }
 
-    fn lex_punctuation<S: Source>(&self, state: &mut State<S>) -> bool {
+    fn lex_punctuation<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start = state.get_position();
         let rest = state.rest();
 
@@ -226,21 +219,15 @@ impl<'config> TwigLexer<'config> {
         false
     }
 
-    fn lex_identifier<S: Source>(&self, state: &mut State<S>) -> bool {
+    fn lex_identifier<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start = state.get_position();
 
         if let Some(ch) = state.peek() {
-            if ch.is_alphabetic() || ch == '_' {
-                let mut text = String::new();
-
-                // 添加第一个字符
-                text.push(ch);
+            if ch.is_ascii_alphabetic() || ch == '_' {
                 state.advance(ch.len_utf8());
 
-                // 继续添加字母数字字符
                 while let Some(ch) = state.peek() {
-                    if ch.is_alphanumeric() || ch == '_' {
-                        text.push(ch);
+                    if ch.is_ascii_alphanumeric() || ch == '_' {
                         state.advance(ch.len_utf8());
                     }
                     else {
@@ -249,18 +236,17 @@ impl<'config> TwigLexer<'config> {
                 }
 
                 let end = state.get_position();
+                let text = state.get_text_in((start..end).into());
 
                 // 检查是否为布尔关键字
-                let kind = match text.as_str() {
+                let kind = match text.as_ref() {
                     "true" | "false" => TwigSyntaxKind::Boolean,
                     _ => TwigSyntaxKind::Identifier,
                 };
-
                 state.add_token(kind, start, end);
                 return true;
             }
         }
-
         false
     }
 }

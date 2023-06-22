@@ -1,5 +1,5 @@
 use oak_core::helpers::LexerTester;
-use oak_verilog::{VerilogKind, VerilogLanguage, VerilogLexer};
+use oak_verilog::{VerilogLanguage, VerilogLexer};
 use std::{path::Path, time::Duration};
 
 #[test]
@@ -9,7 +9,7 @@ fn test_verilog_lexer() {
     let lexer = VerilogLexer::new(language);
     let test_runner = LexerTester::new(here.join("tests/lexer")).with_extension("v").with_timeout(Duration::from_secs(10));
 
-    match test_runner.run_tests::<VerilogLanguage, _>(lexer) {
+    match test_runner.run_tests(&lexer) {
         Ok(()) => println!("Verilog lexer tests passed!"),
         Err(e) => panic!("Verilog lexer tests failed: {}", e),
     }

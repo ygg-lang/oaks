@@ -21,10 +21,12 @@ Oak Scala is a robust parser for Scala, designed to handle complete Scala syntax
 Basic example:
 
 ```rust
-use oak_scala::{Parser, ScalaLanguage, SourceText};
+use oak_core::{Parser, SourceText, parser::session::ParseSession};
+use oak_scala::{ScalaParser, ScalaLanguage};
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
-    let parser = Parser::new();
+    let mut session = ParseSession::<ScalaLanguage>::default();
+    let parser = ScalaParser::new();
     let source = SourceText::new(r#"
 object HelloWorld {
     def main(args: Array[String]): Unit = {
@@ -33,7 +35,7 @@ object HelloWorld {
 }
     "#);
     
-    let result = parser.parse(&source);
+    let result = parser.parse(&source, &mut session);
     println!("Parsed Scala successfully.");
     Ok(())
 }
@@ -43,9 +45,11 @@ object HelloWorld {
 
 ### Object Parsing
 ```rust
-use oak_scala::{Parser, ScalaLanguage, SourceText};
+use oak_core::{Parser, SourceText, parser::session::ParseSession};
+use oak_scala::{ScalaParser, ScalaLanguage};
 
-let parser = Parser::new();
+let mut session = ParseSession::<ScalaLanguage>::default();
+let parser = ScalaParser::new();
 let source = SourceText::new(r#"
 object Calculator {
     def add(a: Int, b: Int): Int = a + b
@@ -60,15 +64,17 @@ object Calculator {
 }
 "#);
 
-let result = parser.parse(&source);
+let result = parser.parse(&source, &mut session);
 println!("Object parsed successfully.");
 ```
 
 ### Class Parsing
 ```rust
-use oak_scala::{Parser, ScalaLanguage, SourceText};
+use oak_core::{Parser, SourceText, parser::session::ParseSession};
+use oak_scala::{ScalaParser, ScalaLanguage};
 
-let parser = Parser::new();
+let mut session = ParseSession::<ScalaLanguage>::default();
+let parser = ScalaParser::new();
 let source = SourceText::new(r#"
 class Person(val name: String, var age: Int) {
     def greet(): Unit = {
@@ -90,7 +96,7 @@ object Main {
 }
 "#);
 
-let result = parser.parse(&source);
+let result = parser.parse(&source, &mut session);
 println!("Class parsed successfully.");
 ```
 
@@ -98,30 +104,33 @@ println!("Class parsed successfully.");
 
 ### Token-Level Parsing
 ```rust
-use oak_scala::{Parser, ScalaLanguage, SourceText};
+use oak_core::{Parser, SourceText, parser::session::ParseSession};
+use oak_scala::{ScalaParser, ScalaLanguage};
 
-let parser = Parser::new();
+let mut session = ParseSession::<ScalaLanguage>::default();
+let parser = ScalaParser::new();
 let source = SourceText::new("val x = 42");
-let result = parser.parse(&source);
+let result = parser.parse(&source, &mut session);
 println!("Token parsing completed.");
 ```
 
 ### Error Handling
 ```rust
-use oak_scala::{Parser, ScalaLanguage, SourceText};
+use oak_core::{Parser, SourceText, parser::session::ParseSession};
+use oak_scala::{ScalaParser, ScalaLanguage};
 
-let parser = Parser::new();
+let mut session = ParseSession::<ScalaLanguage>::default();
+let parser = ScalaParser::new();
 let source = SourceText::new(r#"
-// Invalid Scala code example
-object BrokenObject {
-    def brokenMethod {
-        println("Hello")
-        // Missing method parameters and return type
+object Broken {
+    def main(args: Array[String]): Unit = {
+        val x = 
+        // Missing value
     }
 }
 "#);
 
-let result = parser.parse(&source);
+let result = parser.parse(&source, &mut session);
 if let Some(errors) = result.result.err() {
     println!("Parse errors found: {:?}", errors);
 } else {

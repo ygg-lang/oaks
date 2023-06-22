@@ -9,7 +9,7 @@ fn test_org_mode_lexer() {
     let lexer = OrgModeLexer::new(language);
     let test_runner = LexerTester::new(here.join("tests/lexer")).with_extension("org").with_timeout(Duration::from_secs(5));
 
-    match test_runner.run_tests::<OrgModeLanguage, _>(lexer) {
+    match test_runner.run_tests::<OrgModeLanguage, _>(&lexer) {
         Ok(()) => println!("Org-mode lexer tests passed!"),
         Err(e) => panic!("Org-mode lexer tests failed: {}", e),
     }

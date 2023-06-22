@@ -22,19 +22,22 @@ Oak Valkyrie is a robust parser for the Valkyrie programming language, designed 
 Basic example:
 
 ```rust
-use oak_valkyrie::{Parser, ValkyrieLanguage, SourceText};
+use oak_valkyrie::{ValkyrieParser, ValkyrieLanguage};
+use oak_core::{Parser, source::SourceText, parser::ParseSession};
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
-    let parser = Parser::new();
+    let language = ValkyrieLanguage::default();
+    let parser = ValkyrieParser::new(&language);
     let source = SourceText::new(r#"
-mod main {
+namespace main {
     fn add(a: i32, b: i32) -> i32 {
         a + b
     }
 }
     "#);
     
-    let result = parser.parse(&source);
+    let mut cache = ParseSession::default();
+    let result = parser.parse(&source, &[], &mut cache);
     println!("Parsed Valkyrie module successfully.");
     Ok(())
 }
@@ -44,11 +47,13 @@ mod main {
 
 ### Module Parsing
 ```rust
-use oak_valkyrie::{Parser, ValkyrieLanguage, SourceText};
+use oak_valkyrie::{ValkyrieParser, ValkyrieLanguage};
+use oak_core::{Parser, source::SourceText, parser::ParseSession};
 
-let parser = Parser::new();
+let language = ValkyrieLanguage::default();
+let parser = ValkyrieParser::new(&language);
 let source = SourceText::new(r#"
-mod math {
+namespace math {
     pub struct Point {
         x: f64,
         y: f64,
@@ -66,15 +71,18 @@ mod math {
 }
 "#);
 
-let result = parser.parse(&source);
+let mut cache = ParseSession::default();
+let result = parser.parse(&source, &[], &mut cache);
 println!("Parsed Valkyrie module successfully.");
 ```
 
 ### Trait Parsing
 ```rust
-use oak_valkyrie::{Parser, ValkyrieLanguage, SourceText};
+use oak_valkyrie::{ValkyrieParser, ValkyrieLanguage};
+use oak_core::{Parser, source::SourceText, parser::ParseSession};
 
-let parser = Parser::new();
+let language = ValkyrieLanguage::default();
+let parser = ValkyrieParser::new(&language);
 let source = SourceText::new(r#"
 pub trait Drawable {
     fn draw(&self);
@@ -100,27 +108,33 @@ impl Drawable for Circle {
 }
 "#);
 
-let result = parser.parse(&source);
-println!("Parsed Valkyrie trait successfully.");
+let mut cache = ParseSession::default();
+let result = parser.parse(&source, &[], &mut cache);
+println!("Parsed Valkyrie module successfully.");
 ```
 
 ## 🔧 Advanced Features
 
 ### Token-Level Parsing
 ```rust
-use oak_valkyrie::{Parser, ValkyrieLanguage, SourceText};
+use oak_valkyrie::{ValkyrieParser, ValkyrieLanguage};
+use oak_core::{Parser, source::SourceText, parser::ParseSession};
 
-let parser = Parser::new();
+let language = ValkyrieLanguage::default();
+let parser = ValkyrieParser::new(&language);
 let source = SourceText::new("fn main() { let x = 42; println!(\"{}\", x); }");
-let result = parser.parse(&source);
+let mut cache = ParseSession::default();
+let result = parser.parse(&source, &[], &mut cache);
 // Token information is available in the parse result
 ```
 
 ### Error Handling
 ```rust
-use oak_valkyrie::{Parser, ValkyrieLanguage, SourceText};
+use oak_valkyrie::{ValkyrieParser, ValkyrieLanguage};
+use oak_core::{Parser, source::SourceText, parser::ParseSession};
 
-let parser = Parser::new();
+let language = ValkyrieLanguage::default();
+let parser = ValkyrieParser::new(&language);
 let source = SourceText::new(r#"
 fn broken_function() -> i32 {
     let x: i32 = "not a number"; // Type mismatch
@@ -132,7 +146,8 @@ fn invalid_syntax() { // Missing return type
 }
 "#);
 
-let result = parser.parse(&source);
+let mut cache = ParseSession::default();
+let result = parser.parse(&source, &[], &mut cache);
 if let Err(e) = result.result {
     println!("Parse error: {:?}", e);
 }

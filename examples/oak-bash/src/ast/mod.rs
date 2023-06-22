@@ -1,7 +1,5 @@
-pub type BashToken = crate::kind::BashSyntaxKind;
-
 #[derive(Debug, Clone)]
-pub struct SourceFile {
+pub struct BashRoot {
     pub elements: Vec<Element>,
 }
 

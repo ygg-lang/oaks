@@ -1,14 +1,29 @@
+//! Delphi programming language parser implementation
+//!
+//! This module provides a complete parser for the Delphi programming language,
+//! including lexer, syntax definitions, and language configuration.
+
 #![feature(new_range_api)]
 #![doc = include_str!("readme.md")]
 #![doc(html_logo_url = "https://raw.githubusercontent.com/ygg-lang/oaks/refs/heads/dev/documents/logo.svg")]
 #![doc(html_favicon_url = "https://raw.githubusercontent.com/ygg-lang/oaks/refs/heads/dev/documents/logo.svg")]
 
 pub mod ast;
-pub mod kind;
-pub mod language;
-pub mod lexer;
+mod builder;
+mod formatter;
+pub mod highlighter;
+mod kind;
+mod language;
+mod lexer;
+pub mod parser;
 
-pub use ast::DelphiRoot;
-pub use kind::DelphiSyntaxKind;
-pub use language::DelphiLanguage;
-pub use lexer::DelphiLexer;
+// Re-export main types
+pub use crate::{
+    ast::DelphiRoot,
+    builder::DelphiBuilder,
+    formatter::DelphiFormatter,
+    highlighter::DelphiHighlighter,
+    kind::{DelphiSyntaxKind, DelphiToken},
+    language::DelphiLanguage,
+    lexer::DelphiLexer,
+};

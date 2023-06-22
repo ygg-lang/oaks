@@ -1,4 +1,4 @@
-use oak_core::SyntaxKind;
+use oak_core::{ElementType, TokenType, UniversalElementRole, UniversalTokenRole};
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
@@ -111,94 +111,27 @@ pub enum TypstSyntaxKind {
     Error,
 }
 
-impl SyntaxKind for TypstSyntaxKind {
-    fn is_trivia(&self) -> bool {
-        matches!(
-            self,
-            TypstSyntaxKind::Whitespace
-                | TypstSyntaxKind::Newline
-                | TypstSyntaxKind::LineComment
-                | TypstSyntaxKind::BlockComment
-        )
-    }
+impl TokenType for TypstSyntaxKind {
+    const END_OF_STREAM: Self = Self::Eof;
+    type Role = UniversalTokenRole;
 
-    fn is_comment(&self) -> bool {
-        matches!(self, TypstSyntaxKind::LineComment | TypstSyntaxKind::BlockComment)
+    fn role(&self) -> Self::Role {
+        match self {
+            TypstSyntaxKind::Whitespace | TypstSyntaxKind::Newline => UniversalTokenRole::Whitespace,
+            TypstSyntaxKind::LineComment | TypstSyntaxKind::BlockComment => UniversalTokenRole::Comment,
+            Self::Eof => UniversalTokenRole::Eof,
+            _ => UniversalTokenRole::None,
+        }
     }
+}
 
-    fn is_whitespace(&self) -> bool {
-        matches!(self, TypstSyntaxKind::Whitespace | TypstSyntaxKind::Newline)
-    }
+impl ElementType for TypstSyntaxKind {
+    type Role = UniversalElementRole;
 
-    fn is_token_type(&self) -> bool {
-        !matches!(
-            self,
-            TypstSyntaxKind::Root
-                | TypstSyntaxKind::Document
-                | TypstSyntaxKind::Block
-                | TypstSyntaxKind::Heading
-                | TypstSyntaxKind::Paragraph
-                | TypstSyntaxKind::List
-                | TypstSyntaxKind::ListItem
-                | TypstSyntaxKind::Table
-                | TypstSyntaxKind::TableRow
-                | TypstSyntaxKind::TableCell
-                | TypstSyntaxKind::Figure
-                | TypstSyntaxKind::Image
-                | TypstSyntaxKind::Link
-                | TypstSyntaxKind::Text
-                | TypstSyntaxKind::Strong
-                | TypstSyntaxKind::Emphasis
-                | TypstSyntaxKind::Code
-                | TypstSyntaxKind::Math
-                | TypstSyntaxKind::InlineMath
-                | TypstSyntaxKind::DisplayMath
-                | TypstSyntaxKind::Raw
-                | TypstSyntaxKind::Quote
-                | TypstSyntaxKind::Script
-                | TypstSyntaxKind::Expression
-                | TypstSyntaxKind::FunctionCall
-                | TypstSyntaxKind::Variable
-                | TypstSyntaxKind::Assignment
-                | TypstSyntaxKind::Conditional
-                | TypstSyntaxKind::Loop
-                | TypstSyntaxKind::Style
-        )
-    }
-
-    fn is_element_type(&self) -> bool {
-        matches!(
-            self,
-            TypstSyntaxKind::Root
-                | TypstSyntaxKind::Document
-                | TypstSyntaxKind::Block
-                | TypstSyntaxKind::Heading
-                | TypstSyntaxKind::Paragraph
-                | TypstSyntaxKind::List
-                | TypstSyntaxKind::ListItem
-                | TypstSyntaxKind::Table
-                | TypstSyntaxKind::TableRow
-                | TypstSyntaxKind::TableCell
-                | TypstSyntaxKind::Figure
-                | TypstSyntaxKind::Image
-                | TypstSyntaxKind::Link
-                | TypstSyntaxKind::Text
-                | TypstSyntaxKind::Strong
-                | TypstSyntaxKind::Emphasis
-                | TypstSyntaxKind::Code
-                | TypstSyntaxKind::Math
-                | TypstSyntaxKind::InlineMath
-                | TypstSyntaxKind::DisplayMath
-                | TypstSyntaxKind::Raw
-                | TypstSyntaxKind::Quote
-                | TypstSyntaxKind::Script
-                | TypstSyntaxKind::Expression
-                | TypstSyntaxKind::FunctionCall
-                | TypstSyntaxKind::Variable
-                | TypstSyntaxKind::Assignment
-                | TypstSyntaxKind::Conditional
-                | TypstSyntaxKind::Loop
-                | TypstSyntaxKind::Style
-        )
+    fn role(&self) -> Self::Role {
+        match self {
+            Self::Error => UniversalElementRole::Error,
+            _ => UniversalElementRole::None,
+        }
     }
 }

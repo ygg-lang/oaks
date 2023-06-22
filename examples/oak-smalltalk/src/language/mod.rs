@@ -1,4 +1,4 @@
-use oak_core::Language;
+use oak_core::{Language, LanguageCategory};
 
 /// Smalltalk 语言定义
 #[derive(Debug, Clone)]
@@ -17,6 +17,10 @@ impl Default for SmalltalkLanguage {
 }
 
 impl Language for SmalltalkLanguage {
-    type SyntaxKind = crate::kind::SmalltalkKind;
+    const NAME: &'static str = "smalltalk";
+    const CATEGORY: LanguageCategory = LanguageCategory::Programming;
+
+    type TokenType = crate::kind::SmalltalkSyntaxKind;
+    type ElementType = crate::kind::SmalltalkSyntaxKind;
     type TypedRoot = ();
 }

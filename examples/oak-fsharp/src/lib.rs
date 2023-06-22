@@ -6,6 +6,7 @@
 mod kind;
 mod language;
 mod lexer;
+pub mod parser;
 
 pub use kind::FSharpSyntaxKind;
 pub use language::FSharpLanguage;

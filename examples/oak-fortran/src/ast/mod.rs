@@ -1,15 +1,13 @@
-use std::{boxed::Box, string::String, vec::Vec};
-use std::range::Range;
+use core::range::Range;
 use serde::{Deserialize, Serialize};
-
-/// Fortran AST 根节点
-pub type FortranAst = ProgramNode;
+use std::{boxed::Box, string::String, vec::Vec};
 
 /// 程序节点
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
-pub struct ProgramNode {
+pub struct FortranRoot {
     pub name: Option<String>,
     pub units: Vec<ProgramUnitKind>,
+    #[serde(with = "oak_core::serde_range")]
     pub span: Range<usize>,
 }
 
@@ -37,6 +35,7 @@ pub struct MainProgramNode {
     pub specification_part: Vec<SpecificationStmt>,
     pub execution_part: Vec<ExecutableStmt>,
     pub internal_subprograms: Vec<ProgramUnitKind>,
+    #[serde(with = "oak_core::serde_range")]
     pub span: Range<usize>,
 }
 
@@ -48,6 +47,7 @@ pub struct SubroutineNode {
     pub specification_part: Vec<SpecificationStmt>,
     pub execution_part: Vec<ExecutableStmt>,
     pub internal_subprograms: Vec<ProgramUnitKind>,
+    #[serde(with = "oak_core::serde_range")]
     pub span: Range<usize>,
 }
 
@@ -61,6 +61,7 @@ pub struct FunctionNode {
     pub specification_part: Vec<SpecificationStmt>,
     pub execution_part: Vec<ExecutableStmt>,
     pub internal_subprograms: Vec<ProgramUnitKind>,
+    #[serde(with = "oak_core::serde_range")]
     pub span: Range<usize>,
 }
 
@@ -70,6 +71,7 @@ pub struct ModuleNode {
     pub name: String,
     pub specification_part: Vec<SpecificationStmt>,
     pub module_subprograms: Vec<ProgramUnitKind>,
+    #[serde(with = "oak_core::serde_range")]
     pub span: Range<usize>,
 }
 
@@ -80,6 +82,7 @@ pub struct SubmoduleNode {
     pub name: String,
     pub specification_part: Vec<SpecificationStmt>,
     pub module_subprograms: Vec<ProgramUnitKind>,
+    #[serde(with = "oak_core::serde_range")]
     pub span: Range<usize>,
 }
 
@@ -88,6 +91,7 @@ pub struct SubmoduleNode {
 pub struct BlockDataNode {
     pub name: Option<String>,
     pub specification_part: Vec<SpecificationStmt>,
+    #[serde(with = "oak_core::serde_range")]
     pub span: Range<usize>,
 }
 
@@ -202,6 +206,7 @@ pub struct TypeDeclarationNode {
     pub type_spec: TypeSpec,
     pub attributes: Vec<AttributeSpec>,
     pub entities: Vec<EntityDecl>,
+    #[serde(with = "oak_core::serde_range")]
     pub span: Range<usize>,
 }
 
@@ -271,6 +276,7 @@ pub struct EntityDecl {
     pub array_spec: Option<Vec<DimensionSpec>>,
     pub char_length: Option<ExprKind>,
     pub initialization: Option<ExprKind>,
+    #[serde(with = "oak_core::serde_range")]
     pub span: Range<usize>,
 }
 
@@ -307,6 +313,7 @@ pub enum LiteralKind {
 pub struct ArrayRefNode {
     pub array: Box<ExprKind>,
     pub subscripts: Vec<SubscriptKind>,
+    #[serde(with = "oak_core::serde_range")]
     pub span: Range<usize>,
 }
 
@@ -324,6 +331,7 @@ pub enum SubscriptKind {
 pub struct StructureRefNode {
     pub structure: Box<ExprKind>,
     pub component: String,
+    #[serde(with = "oak_core::serde_range")]
     pub span: Range<usize>,
 }
 
@@ -332,6 +340,7 @@ pub struct StructureRefNode {
 pub struct FunctionCallNode {
     pub function: Box<ExprKind>,
     pub arguments: Vec<ExprKind>,
+    #[serde(with = "oak_core::serde_range")]
     pub span: Range<usize>,
 }
 
@@ -341,6 +350,7 @@ pub struct BinaryOpNode {
     pub left: Box<ExprKind>,
     pub operator: BinaryOperator,
     pub right: Box<ExprKind>,
+    #[serde(with = "oak_core::serde_range")]
     pub span: Range<usize>,
 }
 
@@ -386,6 +396,7 @@ pub enum BinaryOperator {
 pub struct UnaryOpNode {
     pub operator: UnaryOperator,
     pub operand: Box<ExprKind>,
+    #[serde(with = "oak_core::serde_range")]
     pub span: Range<usize>,
 }
 
@@ -405,6 +416,7 @@ pub enum UnaryOperator {
 pub struct AssignmentNode {
     pub target: ExprKind,
     pub value: ExprKind,
+    #[serde(with = "oak_core::serde_range")]
     pub span: Range<usize>,
 }
 
@@ -413,6 +425,7 @@ pub struct AssignmentNode {
 pub struct PointerAssignmentNode {
     pub target: ExprKind,
     pub value: ExprKind,
+    #[serde(with = "oak_core::serde_range")]
     pub span: Range<usize>,
 }
 
@@ -421,6 +434,7 @@ pub struct PointerAssignmentNode {
 pub struct CallNode {
     pub procedure: String,
     pub arguments: Vec<ExprKind>,
+    #[serde(with = "oak_core::serde_range")]
     pub span: Range<usize>,
 }
 
@@ -431,6 +445,7 @@ pub struct IfConstructNode {
     pub then_part: Vec<ExecutableStmt>,
     pub else_if_parts: Vec<ElseIfNode>,
     pub else_part: Option<Vec<ExecutableStmt>>,
+    #[serde(with = "oak_core::serde_range")]
     pub span: Range<usize>,
 }
 
@@ -439,6 +454,7 @@ pub struct IfConstructNode {
 pub struct ElseIfNode {
     pub condition: ExprKind,
     pub statements: Vec<ExecutableStmt>,
+    #[serde(with = "oak_core::serde_range")]
     pub span: Range<usize>,
 }
 
@@ -448,6 +464,7 @@ pub struct DoConstructNode {
     pub label: Option<String>,
     pub control: Option<DoControl>,
     pub body: Vec<ExecutableStmt>,
+    #[serde(with = "oak_core::serde_range")]
     pub span: Range<usize>,
 }
 
@@ -475,6 +492,7 @@ pub struct SelectCaseNode {
     pub expression: ExprKind,
     pub cases: Vec<CaseNode>,
     pub default_case: Option<Vec<ExecutableStmt>>,
+    #[serde(with = "oak_core::serde_range")]
     pub span: Range<usize>,
 }
 
@@ -483,6 +501,7 @@ pub struct SelectCaseNode {
 pub struct CaseNode {
     pub selectors: Vec<CaseSelector>,
     pub statements: Vec<ExecutableStmt>,
+    #[serde(with = "oak_core::serde_range")]
     pub span: Range<usize>,
 }
 
@@ -501,6 +520,7 @@ pub struct WhereConstructNode {
     pub mask: ExprKind,
     pub statements: Vec<ExecutableStmt>,
     pub elsewhere_parts: Vec<ElsewhereNode>,
+    #[serde(with = "oak_core::serde_range")]
     pub span: Range<usize>,
 }
 
@@ -509,6 +529,7 @@ pub struct WhereConstructNode {
 pub struct ElsewhereNode {
     pub mask: Option<ExprKind>,
     pub statements: Vec<ExecutableStmt>,
+    #[serde(with = "oak_core::serde_range")]
     pub span: Range<usize>,
 }
 
@@ -517,6 +538,7 @@ pub struct ElsewhereNode {
 pub struct ForallConstructNode {
     pub header: ForallHeader,
     pub statements: Vec<ExecutableStmt>,
+    #[serde(with = "oak_core::serde_range")]
     pub span: Range<usize>,
 }
 
@@ -541,6 +563,7 @@ pub struct ForallTriplet {
 pub struct AssociateConstructNode {
     pub associations: Vec<Association>,
     pub statements: Vec<ExecutableStmt>,
+    #[serde(with = "oak_core::serde_range")]
     pub span: Range<usize>,
 }
 
@@ -557,6 +580,7 @@ pub struct BlockConstructNode {
     pub label: Option<String>,
     pub specification_part: Vec<SpecificationStmt>,
     pub execution_part: Vec<ExecutableStmt>,
+    #[serde(with = "oak_core::serde_range")]
     pub span: Range<usize>,
 }
 
@@ -565,6 +589,7 @@ pub struct BlockConstructNode {
 pub struct CriticalConstructNode {
     pub label: Option<String>,
     pub statements: Vec<ExecutableStmt>,
+    #[serde(with = "oak_core::serde_range")]
     pub span: Range<usize>,
 }
 
@@ -577,6 +602,7 @@ pub struct AllocateNode {
     pub mold: Option<ExprKind>,
     pub stat: Option<String>,
     pub errmsg: Option<String>,
+    #[serde(with = "oak_core::serde_range")]
     pub span: Range<usize>,
 }
 
@@ -586,6 +612,7 @@ pub struct DeallocateNode {
     pub objects: Vec<ExprKind>,
     pub stat: Option<String>,
     pub errmsg: Option<String>,
+    #[serde(with = "oak_core::serde_range")]
     pub span: Range<usize>,
 }
 
@@ -593,6 +620,7 @@ pub struct DeallocateNode {
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct NullifyNode {
     pub objects: Vec<ExprKind>,
+    #[serde(with = "oak_core::serde_range")]
     pub span: Range<usize>,
 }
 
@@ -601,6 +629,7 @@ pub struct NullifyNode {
 pub struct StopNode {
     pub code: Option<ExprKind>,
     pub quiet: bool,
+    #[serde(with = "oak_core::serde_range")]
     pub span: Range<usize>,
 }
 
@@ -608,6 +637,7 @@ pub struct StopNode {
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct ReturnNode {
     pub expression: Option<ExprKind>,
+    #[serde(with = "oak_core::serde_range")]
     pub span: Range<usize>,
 }
 
@@ -620,6 +650,7 @@ pub struct ReadNode {
     pub iostat: Option<String>,
     pub err: Option<String>,
     pub end: Option<String>,
+    #[serde(with = "oak_core::serde_range")]
     pub span: Range<usize>,
 }
 
@@ -631,6 +662,7 @@ pub struct WriteNode {
     pub items: Vec<ExprKind>,
     pub iostat: Option<String>,
     pub err: Option<String>,
+    #[serde(with = "oak_core::serde_range")]
     pub span: Range<usize>,
 }
 
@@ -639,6 +671,7 @@ pub struct WriteNode {
 pub struct PrintNode {
     pub format: Option<ExprKind>,
     pub items: Vec<ExprKind>,
+    #[serde(with = "oak_core::serde_range")]
     pub span: Range<usize>,
 }
 
@@ -646,6 +679,7 @@ pub struct PrintNode {
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct ParameterNode {
     pub assignments: Vec<ParameterAssignment>,
+    #[serde(with = "oak_core::serde_range")]
     pub span: Range<usize>,
 }
 
@@ -686,6 +720,7 @@ pub struct UseNode {
     pub nature: Option<String>,
     pub only_list: Option<Vec<UseItem>>,
     pub rename_list: Option<Vec<UseRename>>,
+    #[serde(with = "oak_core::serde_range")]
     pub span: Range<usize>,
 }
 
@@ -709,6 +744,7 @@ pub struct UseRename {
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct ImportNode {
     pub items: Vec<String>,
+    #[serde(with = "oak_core::serde_range")]
     pub span: Range<usize>,
 }
 
@@ -717,6 +753,7 @@ pub struct ImportNode {
 pub struct InterfaceNode {
     pub generic_spec: Option<String>,
     pub interface_body: Vec<InterfaceBody>,
+    #[serde(with = "oak_core::serde_range")]
     pub span: Range<usize>,
 }
 
@@ -737,6 +774,7 @@ pub struct ProcedureNode {
     pub names: Vec<String>,
     pub interface: Option<String>,
     pub attributes: Vec<AttributeSpec>,
+    #[serde(with = "oak_core::serde_range")]
     pub span: Range<usize>,
 }
 
@@ -745,6 +783,7 @@ pub struct ProcedureNode {
 pub struct GenericNode {
     pub spec: String,
     pub procedures: Vec<String>,
+    #[serde(with = "oak_core::serde_range")]
     pub span: Range<usize>,
 }
 
@@ -752,5 +791,6 @@ pub struct GenericNode {
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct FinalNode {
     pub procedures: Vec<String>,
+    #[serde(with = "oak_core::serde_range")]
     pub span: Range<usize>,
 }

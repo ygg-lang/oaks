@@ -3,8 +3,16 @@
 #![doc(html_logo_url = "https://raw.githubusercontent.com/ygg-lang/oaks/refs/heads/dev/documents/logo.svg")]
 #![doc(html_favicon_url = "https://raw.githubusercontent.com/ygg-lang/oaks/refs/heads/dev/documents/logo.svg")]
 
+pub mod ast;
+pub mod builder;
+pub mod highlighter;
 mod kind;
 mod language;
 mod lexer;
+pub mod lsp;
+mod parser;
 
-pub use crate::{language::HaskellLanguage, lexer::HaskellLexer};
+#[cfg(feature = "mcp")]
+pub mod mcp;
+
+pub use crate::{ast::HaskellRoot, builder::HaskellBuilder, highlighter::HaskellHighlighter, language::HaskellLanguage, lexer::HaskellLexer, lsp::HaskellLanguageService, parser::HaskellParser};

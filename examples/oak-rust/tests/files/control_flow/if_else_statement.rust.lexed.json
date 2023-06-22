@@ -1,0 +1,115 @@
+{
+    "success": true,
+    "count": 18,
+    "tokens": [
+        {
+            "kind": "Keyword(Fn)",
+            "text": "fn",
+            "start": 0,
+            "end": 2
+        },
+        {
+            "kind": "Identifier",
+            "text": "main",
+            "start": 3,
+            "end": 7
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 7,
+            "end": 8
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 8,
+            "end": 9
+        },
+        {
+            "kind": "LeftBrace",
+            "text": "{",
+            "start": 10,
+            "end": 11
+        },
+        {
+            "kind": "Keyword(If)",
+            "text": "if",
+            "start": 17,
+            "end": 19
+        },
+        {
+            "kind": "Keyword(True)",
+            "text": "true",
+            "start": 20,
+            "end": 24
+        },
+        {
+            "kind": "LeftBrace",
+            "text": "{",
+            "start": 25,
+            "end": 26
+        },
+        {
+            "kind": "IntegerLiteral",
+            "text": "1",
+            "start": 36,
+            "end": 37
+        },
+        {
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 37,
+            "end": 38
+        },
+        {
+            "kind": "RightBrace",
+            "text": "}",
+            "start": 44,
+            "end": 45
+        },
+        {
+            "kind": "Keyword(Else)",
+            "text": "else",
+            "start": 46,
+            "end": 50
+        },
+        {
+            "kind": "LeftBrace",
+            "text": "{",
+            "start": 51,
+            "end": 52
+        },
+        {
+            "kind": "IntegerLiteral",
+            "text": "2",
+            "start": 62,
+            "end": 63
+        },
+        {
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 63,
+            "end": 64
+        },
+        {
+            "kind": "RightBrace",
+            "text": "}",
+            "start": 70,
+            "end": 71
+        },
+        {
+            "kind": "RightBrace",
+            "text": "}",
+            "start": 73,
+            "end": 74
+        },
+        {
+            "kind": "Eof",
+            "text": "",
+            "start": 74,
+            "end": 74
+        }
+    ],
+    "errors": []
+}

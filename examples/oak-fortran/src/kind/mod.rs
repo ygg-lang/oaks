@@ -1,4 +1,4 @@
-use oak_core::{SyntaxKind, Token};
+use oak_core::{ElementType, Token, TokenType, UniversalElementRole, UniversalTokenRole};
 use serde::Serialize;
 
 pub type FortranToken = Token<FortranSyntaxKind>;
@@ -185,6 +185,9 @@ pub enum FortranSyntaxKind {
     Ampersand,    // &
     Dot,          // .
 
+    // 语法节点类型
+    Root,
+
     // 特殊
     Error,
     Eof,
@@ -309,24 +312,68 @@ impl FortranSyntaxKind {
     }
 }
 
-impl SyntaxKind for FortranSyntaxKind {
-    fn is_trivia(&self) -> bool {
-        matches!(self, FortranSyntaxKind::Whitespace | FortranSyntaxKind::Comment)
+impl TokenType for FortranSyntaxKind {
+    const END_OF_STREAM: Self = Self::Eof;
+    type Role = UniversalTokenRole;
+
+    fn role(&self) -> Self::Role {
+        match self {
+            Self::Whitespace | Self::Newline => UniversalTokenRole::Whitespace,
+            Self::Comment => UniversalTokenRole::Comment,
+            Self::Error => UniversalTokenRole::Error,
+            _ if self.is_keyword() => UniversalTokenRole::Keyword,
+            Self::Identifier => UniversalTokenRole::Name,
+            Self::IntegerLiteral
+            | Self::Number
+            | Self::NumberLiteral
+            | Self::RealLiteral
+            | Self::DoublePrecisionLiteral
+            | Self::ComplexLiteral
+            | Self::CharacterLiteral
+            | Self::CharLiteral
+            | Self::String
+            | Self::StringLiteral
+            | Self::LogicalLiteral
+            | Self::True
+            | Self::False => UniversalTokenRole::Literal,
+            Self::Plus
+            | Self::Minus
+            | Self::Star
+            | Self::Slash
+            | Self::StarStar
+            | Self::Concatenate
+            | Self::Equal
+            | Self::EqualEqual
+            | Self::SlashEqual
+            | Self::LessThan
+            | Self::LessEqual
+            | Self::GreaterThan
+            | Self::GreaterEqual
+            | Self::Not
+            | Self::And
+            | Self::Or
+            | Self::Eqv
+            | Self::Neqv => UniversalTokenRole::Operator,
+            Self::LeftParen | Self::RightParen | Self::LeftBracket | Self::RightBracket | Self::Comma | Self::Colon | Self::DoubleColon | Self::Semicolon | Self::Percent | Self::Arrow | Self::Ampersand => UniversalTokenRole::Punctuation,
+            Self::Eof => UniversalTokenRole::Eof,
+            _ => UniversalTokenRole::None,
+        }
+    }
+}
+
+impl ElementType for FortranSyntaxKind {
+    type Role = UniversalElementRole;
+
+    fn role(&self) -> Self::Role {
+        match self {
+            Self::Root => UniversalElementRole::Root,
+            Self::Program | Self::Subroutine | Self::Function | Self::Module | Self::Interface | Self::Type => UniversalElementRole::Definition,
+            Self::Error => UniversalElementRole::Error,
+            _ => UniversalElementRole::None,
+        }
     }
 
-    fn is_comment(&self) -> bool {
-        matches!(self, FortranSyntaxKind::Comment)
-    }
-
-    fn is_whitespace(&self) -> bool {
-        matches!(self, FortranSyntaxKind::Whitespace)
-    }
-
-    fn is_token_type(&self) -> bool {
-        !matches!(self, FortranSyntaxKind::Error | FortranSyntaxKind::Eof)
-    }
-
-    fn is_element_type(&self) -> bool {
-        false
+    fn is_root(&self) -> bool {
+        matches!(self, Self::Root)
     }
 }

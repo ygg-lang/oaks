@@ -1,6 +1,4 @@
-use std::range::Range;
-
-use oak_core::{SyntaxKind, Token};
+use oak_core::{ElementType, Token, TokenType, UniversalElementRole, UniversalTokenRole};
 use serde::{Deserialize, Serialize};
 
 pub type MsilToken = Token<MsilSyntaxKind>;
@@ -58,48 +56,45 @@ pub enum MsilSyntaxKind {
     Error,
 }
 
-impl SyntaxKind for MsilSyntaxKind {
-    fn is_trivia(&self) -> bool {
-        matches!(self, Self::Whitespace | Self::CommentToken)
+impl TokenType for MsilSyntaxKind {
+    const END_OF_STREAM: Self = Self::Eof;
+    type Role = UniversalTokenRole;
+
+    fn role(&self) -> Self::Role {
+        match self {
+            Self::Whitespace => UniversalTokenRole::Whitespace,
+            Self::CommentToken | Self::Comment => UniversalTokenRole::Comment,
+            Self::Eof => UniversalTokenRole::Eof,
+            _ => UniversalTokenRole::None,
+        }
     }
 
     fn is_comment(&self) -> bool {
-        matches!(self, Self::CommentToken)
+        matches!(self, Self::CommentToken | Self::Comment)
     }
 
     fn is_whitespace(&self) -> bool {
         matches!(self, Self::Whitespace)
     }
+}
 
-    fn is_token_type(&self) -> bool {
-        !matches!(
-            self,
-            Self::Root
-                | Self::Assembly
-                | Self::Module
-                | Self::Class
-                | Self::Method
-                | Self::Instruction
-                | Self::Label
-                | Self::Directive
-                | Self::Type
-                | Self::ErrorNode
-        )
+impl ElementType for MsilSyntaxKind {
+    type Role = UniversalElementRole;
+
+    fn role(&self) -> Self::Role {
+        match self {
+            Self::ErrorNode | Self::Error => UniversalElementRole::Error,
+            Self::Root => UniversalElementRole::Root,
+            Self::Method | Self::Class => UniversalElementRole::Detail,
+            _ => UniversalElementRole::None,
+        }
     }
 
-    fn is_element_type(&self) -> bool {
-        matches!(
-            self,
-            Self::Root
-                | Self::Assembly
-                | Self::Module
-                | Self::Class
-                | Self::Method
-                | Self::Instruction
-                | Self::Label
-                | Self::Directive
-                | Self::Type
-                | Self::ErrorNode
-        )
+    fn is_root(&self) -> bool {
+        matches!(self, Self::Root)
+    }
+
+    fn is_error(&self) -> bool {
+        matches!(self, Self::Error | Self::ErrorNode)
     }
 }

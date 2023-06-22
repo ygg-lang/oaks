@@ -1,0 +1,9 @@
+{
+    "string": "hello",
+    "number": 123.456,
+    "bool": true,
+    "null": null,
+    "nested": {
+        "key": "value"
+    }
+}

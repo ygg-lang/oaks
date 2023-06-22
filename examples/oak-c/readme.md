@@ -21,10 +21,12 @@ Oak C is a robust parser for C, designed to handle complete C syntax including m
 Basic example:
 
 ```rust
-use oak_c::{Parser, CLanguage, SourceText};
+use oak_core::{Parser, SourceText, parser::session::ParseSession};
+use oak_c::{CParser, CLanguage};
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
-    let parser = Parser::new();
+    let mut session = ParseSession::<CLanguage>::default();
+    let parser = CParser::new();
     let source = SourceText::new(r#"
         #include <stdio.h>
 
@@ -34,7 +36,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         }
     "#);
     
-    let result = parser.parse(&source);
+    let result = parser.parse(&[], &mut session);
     println!("Parsed C program successfully.");
     Ok(())
 }
@@ -44,24 +46,28 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
 ### Function Parsing
 ```rust
-use oak_c::{Parser, CLanguage, SourceText};
+use oak_core::{Parser, SourceText, parser::session::ParseSession};
+use oak_c::{CParser, CLanguage};
 
-let parser = Parser::new();
+let mut session = ParseSession::<CLanguage>::default();
+let parser = CParser::new();
 let source = SourceText::new(r#"
     int add(int a, int b) {
         return a + b;
     }
 "#);
 
-let result = parser.parse(&source);
+let result = parser.parse(&[], &mut session);
 println!("Parsed C function successfully.");
 ```
 
 ### Struct Parsing
 ```rust
-use oak_c::{Parser, CLanguage, SourceText};
+use oak_core::{Parser, SourceText, parser::session::ParseSession};
+use oak_c::{CParser, CLanguage};
 
-let parser = Parser::new();
+let mut session = ParseSession::<CLanguage>::default();
+let parser = CParser::new();
 let source = SourceText::new(r#"
     struct Point {
         int x;
@@ -69,7 +75,7 @@ let source = SourceText::new(r#"
     };
 "#);
 
-let result = parser.parse(&source);
+let result = parser.parse(&[], &mut session);
 println!("Parsed C struct successfully.");
 ```
 
@@ -77,19 +83,23 @@ println!("Parsed C struct successfully.");
 
 ### Token-Level Parsing
 ```rust
-use oak_c::{Parser, CLanguage, SourceText};
+use oak_core::{Parser, SourceText, parser::session::ParseSession};
+use oak_c::{CParser, CLanguage};
 
-let parser = Parser::new();
+let mut session = ParseSession::<CLanguage>::default();
+let parser = CParser::new();
 let source = SourceText::new("int main() { return 0; }");
-let result = parser.parse(&source);
+let result = parser.parse(&[], &mut session);
 // Token information is available in the parse result
 ```
 
 ### Error Handling
 ```rust
-use oak_c::{Parser, CLanguage, SourceText};
+use oak_core::{Parser, SourceText, parser::session::ParseSession};
+use oak_c::{CParser, CLanguage};
 
-let parser = Parser::new();
+let mut session = ParseSession::<CLanguage>::default();
+let parser = CParser::new();
 let source = SourceText::new(r#"
     int main() {
         printf("Hello, World!\n")
@@ -97,7 +107,7 @@ let source = SourceText::new(r#"
     }
 "#);
 
-let result = parser.parse(&source);
+let result = parser.parse(&[], &mut session);
 if let Err(e) = result.result {
     println!("Parse error: {:?}", e);
 }

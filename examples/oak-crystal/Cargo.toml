@@ -1,9 +1,9 @@
 [package]
 name = "oak-crystal"
-description = "High-performance incremental ActionScript parser for the oak ecosystem with flexible configuration, supporting modern ActionScript features and Flash development."
+description = "Crystal language parser with support for modern Crystal syntax and Ruby-like features."
 categories = ["parsing"]
-keywords = ["parser", "actionscript", "flash", "syntax-analysis"]
-documentation = "https://docs.rs/oak-actionscript"
+keywords = ["parser", "crystal", "ruby-like", "compiled"]
+documentation = "https://docs.rs/oak-crystal"
 readme = "readme.md"
 version.workspace = true
 authors.workspace = true
@@ -14,6 +14,7 @@ edition.workspace = true
 
 [dependencies]
 oak-core = { workspace = true }
+serde = { workspace = true }
 oak-highlight = { workspace = true, optional = true }
 oak-pretty-print = { workspace = true, optional = true }
 

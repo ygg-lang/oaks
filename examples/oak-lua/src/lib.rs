@@ -3,10 +3,16 @@
 #![doc(html_logo_url = "https://raw.githubusercontent.com/ygg-lang/oaks/refs/heads/dev/documents/logo.svg")]
 #![doc(html_favicon_url = "https://raw.githubusercontent.com/ygg-lang/oaks/refs/heads/dev/documents/logo.svg")]
 
-mod kind;
-mod language;
-mod lexer;
+pub mod ast;
+mod builder;
+pub mod highlighter;
+pub mod kind;
+pub mod language;
+pub mod lexer;
+pub mod lsp;
+pub mod parser;
 
-pub use kind::{LuaSyntaxKind, LuaToken};
-pub use language::LuaLanguage;
-pub use lexer::LuaLexer;
+#[cfg(feature = "mcp")]
+pub mod mcp;
+
+pub use crate::{ast::LuaRoot, builder::LuaBuilder, highlighter::LuaHighlighter, kind::LuaSyntaxKind, language::LuaLanguage, lexer::LuaLexer, lsp::LuaLanguageService, parser::LuaParser};

@@ -1,10 +1,10 @@
-use oak_core::{SyntaxKind, Token};
+use oak_core::{ElementType, Token, TokenType, UniversalElementRole, UniversalTokenRole};
 use serde::Serialize;
 
-pub type ObjectiveCToken = Token<ObjectiveCLanguageSyntaxKind>;
+pub type ObjectiveCToken = Token<ObjectiveCSyntaxKind>;
 
-#[derive(Copy, Clone, Debug, PartialEq, Eq, Serialize)]
-pub enum ObjectiveCLanguageSyntaxKind {
+#[derive(Copy, Clone, Debug, PartialEq, Eq, Hash, Serialize, serde::Deserialize)]
+pub enum ObjectiveCSyntaxKind {
     // 节点类型
     Root,
     InterfaceDeclaration,
@@ -94,44 +94,27 @@ pub enum ObjectiveCLanguageSyntaxKind {
     Eof,
 }
 
-impl SyntaxKind for ObjectiveCLanguageSyntaxKind {
-    fn is_trivia(&self) -> bool {
-        matches!(self, Self::Whitespace | Self::Newline | Self::CommentToken)
-    }
+impl TokenType for ObjectiveCSyntaxKind {
+    const END_OF_STREAM: Self = Self::Eof;
+    type Role = UniversalTokenRole;
 
-    fn is_comment(&self) -> bool {
-        matches!(self, Self::CommentToken)
+    fn role(&self) -> Self::Role {
+        match self {
+            Self::Whitespace | Self::Newline => UniversalTokenRole::Whitespace,
+            Self::CommentToken => UniversalTokenRole::Comment,
+            Self::Eof => UniversalTokenRole::Eof,
+            _ => UniversalTokenRole::None,
+        }
     }
+}
 
-    fn is_whitespace(&self) -> bool {
-        matches!(self, Self::Whitespace | Self::Newline)
-    }
+impl ElementType for ObjectiveCSyntaxKind {
+    type Role = UniversalElementRole;
 
-    fn is_token_type(&self) -> bool {
-        !matches!(
-            self,
-            Self::Root
-                | Self::InterfaceDeclaration
-                | Self::ImplementationDeclaration
-                | Self::MethodDeclaration
-                | Self::PropertyDeclaration
-                | Self::ProtocolDeclaration
-                | Self::CategoryDeclaration
-                | Self::ClassExtension
-        )
-    }
-
-    fn is_element_type(&self) -> bool {
-        matches!(
-            self,
-            Self::Root
-                | Self::InterfaceDeclaration
-                | Self::ImplementationDeclaration
-                | Self::MethodDeclaration
-                | Self::PropertyDeclaration
-                | Self::ProtocolDeclaration
-                | Self::CategoryDeclaration
-                | Self::ClassExtension
-        )
+    fn role(&self) -> Self::Role {
+        match self {
+            Self::Error => UniversalElementRole::Error,
+            _ => UniversalElementRole::None,
+        }
     }
 }

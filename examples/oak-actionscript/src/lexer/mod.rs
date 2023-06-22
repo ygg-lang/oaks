@@ -1,43 +1,45 @@
-use crate::{kind::ActionScriptSyntaxKind, language::ActionScriptLanguage};
+pub mod token_type;
+
+pub use token_type::ActionScriptTokenType;
+
+use crate::language::ActionScriptLanguage;
 use oak_core::{
-    IncrementalCache, Lexer, LexerState, OakError,
-    lexer::{CommentLine, LexOutput, StringConfig, WhitespaceConfig},
+    Lexer, LexerCache, LexerState, OakError,
+    lexer::{CommentConfig, LexOutput, StringConfig, WhitespaceConfig},
     source::Source,
 };
 use std::sync::LazyLock;
 
-type State<S: Source> = LexerState<S, ActionScriptLanguage>;
+type State<'a, S> = LexerState<'a, S, ActionScriptLanguage>;
 
 static AS_WHITESPACE: LazyLock<WhitespaceConfig> = LazyLock::new(|| WhitespaceConfig { unicode_whitespace: true });
-static AS_COMMENT: LazyLock<CommentLine> = LazyLock::new(|| CommentLine { line_markers: &["//"] });
+static AS_COMMENT: LazyLock<CommentConfig> = LazyLock::new(|| CommentConfig { line_marker: "//", block_start: "/*", block_end: "*/", nested_blocks: true });
 static AS_STRING: LazyLock<StringConfig> = LazyLock::new(|| StringConfig { quotes: &['"'], escape: Some('\\') });
 static AS_CHAR: LazyLock<StringConfig> = LazyLock::new(|| StringConfig { quotes: &['\''], escape: Some('\\') });
 
 #[derive(Clone)]
 pub struct ActionScriptLexer<'config> {
-    config: &'config ActionScriptLanguage,
+    _config: &'config ActionScriptLanguage,
 }
 
 impl<'config> Lexer<ActionScriptLanguage> for ActionScriptLexer<'config> {
-    fn lex_incremental(
-        &self,
-        source: impl Source,
-        changed: usize,
-        cache: IncrementalCache<ActionScriptLanguage>,
-    ) -> LexOutput<ActionScriptLanguage> {
-        let mut state = LexerState::new_with_cache(source, changed, cache);
+    fn lex<'a, S: Source + ?Sized>(&self, source: &S, _edits: &[oak_core::TextEdit], cache: &'a mut impl LexerCache<ActionScriptLanguage>) -> LexOutput<ActionScriptLanguage> {
+        let mut state = LexerState::new(source);
         let result = self.run(&mut state);
-        state.finish(result)
+        if result.is_ok() {
+            state.add_eof();
+        }
+        state.finish_with_cache(result, cache)
     }
 }
 
 impl<'config> ActionScriptLexer<'config> {
     pub fn new(config: &'config ActionScriptLanguage) -> Self {
-        Self { config }
+        Self { _config: config }
     }
 
     /// 主要词法分析逻辑
-    fn run<S: Source>(&self, state: &mut State<S>) -> Result<(), OakError> {
+    fn run<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> Result<(), OakError> {
         while state.not_at_end() {
             let safe_point = state.get_position();
             if self.skip_whitespace(state) {
@@ -68,69 +70,22 @@ impl<'config> ActionScriptLexer<'config> {
                 continue;
             }
 
-            state.safe_check(safe_point);
+            state.advance_if_dead_lock(safe_point);
         }
 
-        // 添加 EOF kind
-        let eof_pos = state.get_position();
-        state.add_token(ActionScriptSyntaxKind::Eof, eof_pos, eof_pos);
         Ok(())
     }
 
     /// 跳过空白字符
-    fn skip_whitespace<S: Source>(&self, state: &mut State<S>) -> bool {
-        match AS_WHITESPACE.scan(state.rest(), state.get_position(), ActionScriptSyntaxKind::Whitespace) {
-            Some(token) => {
-                state.advance_with(token);
-                return true;
-            }
-            None => {}
-        }
-        false
+    fn skip_whitespace<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
+        AS_WHITESPACE.scan(state, ActionScriptTokenType::Whitespace)
     }
 
-    fn skip_comment<S: Source>(&self, state: &mut State<S>) -> bool {
-        let start = state.get_position();
-        let rest = state.rest();
-        // line comment: // ... until newline
-        if rest.starts_with("//") {
-            state.advance(2);
-            while let Some(ch) = state.peek() {
-                if ch == '\n' || ch == '\r' {
-                    break;
-                }
-                state.advance(ch.len_utf8());
-            }
-            state.add_token(ActionScriptSyntaxKind::Comment, start, state.get_position());
-            return true;
-        }
-        // block comment: /* ... */ with nesting support
-        if rest.starts_with("/*") {
-            state.advance(2);
-            let mut depth = 1usize;
-            while let Some(ch) = state.peek() {
-                if ch == '/' && state.peek_next_n(1) == Some('*') {
-                    state.advance(2);
-                    depth += 1;
-                    continue;
-                }
-                if ch == '*' && state.peek_next_n(1) == Some('/') {
-                    state.advance(2);
-                    depth -= 1;
-                    if depth == 0 {
-                        break;
-                    }
-                    continue;
-                }
-                state.advance(ch.len_utf8());
-            }
-            state.add_token(ActionScriptSyntaxKind::Comment, start, state.get_position());
-            return true;
-        }
-        false
+    fn skip_comment<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
+        AS_COMMENT.scan(state, ActionScriptTokenType::Comment, ActionScriptTokenType::Comment)
     }
 
-    fn lex_number_literal<S: Source>(&self, state: &mut State<S>) -> bool {
+    fn lex_number_literal<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start = state.get_position();
         let first = match state.peek() {
             Some(c) => c,
@@ -149,65 +104,28 @@ impl<'config> ActionScriptLexer<'config> {
                 break;
             }
         }
-
-        // fractional part
-        if state.peek() == Some('.') {
-            let n1 = state.peek_next_n(1);
-            if n1.map(|c| c.is_ascii_digit()).unwrap_or(false) {
-                state.advance(1); // consume '.'
-                while let Some(c) = state.peek() {
-                    if c.is_ascii_digit() || c == '_' {
-                        state.advance(c.len_utf8());
-                    }
-                    else {
-                        break;
-                    }
-                }
-            }
-        }
-        // exponent
-        if let Some(c) = state.peek() {
-            if c == 'e' || c == 'E' {
-                let n1 = state.peek_next_n(1);
-                if n1 == Some('+') || n1 == Some('-') || n1.map(|d| d.is_ascii_digit()).unwrap_or(false) {
-                    state.advance(1);
-                    if let Some(sign) = state.peek() {
-                        if sign == '+' || sign == '-' {
-                            state.advance(1);
-                        }
-                    }
-                    while let Some(d) = state.peek() {
-                        if d.is_ascii_digit() || d == '_' {
-                            state.advance(d.len_utf8());
-                        }
-                        else {
-                            break;
-                        }
-                    }
-                }
-            }
-        }
-        let end = state.get_position();
-        state.add_token(ActionScriptSyntaxKind::NumberLiteral, start, end);
+        state.add_token(ActionScriptTokenType::NumberLiteral, start, state.get_position());
         true
     }
 
-    fn lex_identifier_or_keyword<S: Source>(&self, state: &mut State<S>) -> bool {
+    fn lex_string_literal<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
+        AS_STRING.scan(state, ActionScriptTokenType::StringLiteral)
+    }
+
+    fn lex_char_literal<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
+        AS_CHAR.scan(state, ActionScriptTokenType::CharLiteral)
+    }
+
+    fn lex_identifier_or_keyword<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start = state.get_position();
         let first = match state.peek() {
-            Some(c) => c,
-            None => return false,
+            Some(c) if c.is_ascii_alphabetic() || c == '_' || c == '$' => c,
+            _ => return false,
         };
-        if !first.is_ascii_alphabetic() && first != '_' && first != '$' {
-            return false;
-        }
 
-        let mut buf = String::new();
-        buf.push(first);
         state.advance(first.len_utf8());
         while let Some(c) = state.peek() {
             if c.is_ascii_alphanumeric() || c == '_' || c == '$' {
-                buf.push(c);
                 state.advance(c.len_utf8());
             }
             else {
@@ -216,100 +134,99 @@ impl<'config> ActionScriptLexer<'config> {
         }
 
         let end = state.get_position();
-        let kind = match buf.as_str() {
-            "as" => ActionScriptSyntaxKind::As,
-            "break" => ActionScriptSyntaxKind::Break,
-            "case" => ActionScriptSyntaxKind::Case,
-            "catch" => ActionScriptSyntaxKind::Catch,
-            "class" => ActionScriptSyntaxKind::Class,
-            "const" => ActionScriptSyntaxKind::Const,
-            "continue" => ActionScriptSyntaxKind::Continue,
-            "default" => ActionScriptSyntaxKind::Default,
-            "delete" => ActionScriptSyntaxKind::Delete,
-            "do" => ActionScriptSyntaxKind::Do,
-            "else" => ActionScriptSyntaxKind::Else,
-            "extends" => ActionScriptSyntaxKind::Extends,
-            "false" => ActionScriptSyntaxKind::False,
-            "finally" => ActionScriptSyntaxKind::Finally,
-            "for" => ActionScriptSyntaxKind::For,
-            "function" => ActionScriptSyntaxKind::Function,
-            "if" => ActionScriptSyntaxKind::If,
-            "implements" => ActionScriptSyntaxKind::Implements,
-            "import" => ActionScriptSyntaxKind::Import,
-            "in" => ActionScriptSyntaxKind::In,
-            "instanceof" => ActionScriptSyntaxKind::Instanceof,
-            "interface" => ActionScriptSyntaxKind::Interface,
-            "internal" => ActionScriptSyntaxKind::Internal,
-            "is" => ActionScriptSyntaxKind::Is,
-            "native" => ActionScriptSyntaxKind::Native,
-            "new" => ActionScriptSyntaxKind::New,
-            "null" => ActionScriptSyntaxKind::Null,
-            "package" => ActionScriptSyntaxKind::Package,
-            "private" => ActionScriptSyntaxKind::Private,
-            "protected" => ActionScriptSyntaxKind::Protected,
-            "public" => ActionScriptSyntaxKind::Public,
-            "return" => ActionScriptSyntaxKind::Return,
-            "static" => ActionScriptSyntaxKind::Static,
-            "super" => ActionScriptSyntaxKind::Super,
-            "switch" => ActionScriptSyntaxKind::Switch,
-            "this" => ActionScriptSyntaxKind::This,
-            "throw" => ActionScriptSyntaxKind::Throw,
-            "true" => ActionScriptSyntaxKind::True,
-            "try" => ActionScriptSyntaxKind::Try,
-            "typeof" => ActionScriptSyntaxKind::Typeof,
-            "use" => ActionScriptSyntaxKind::Use,
-            "var" => ActionScriptSyntaxKind::Var,
-            "void" => ActionScriptSyntaxKind::Void,
-            "while" => ActionScriptSyntaxKind::While,
-            "with" => ActionScriptSyntaxKind::With,
-            "each" => ActionScriptSyntaxKind::Each,
-            "get" => ActionScriptSyntaxKind::Get,
-            "set" => ActionScriptSyntaxKind::Set,
-            "namespace" => ActionScriptSyntaxKind::Namespace,
-            "include" => ActionScriptSyntaxKind::Include,
-            "dynamic" => ActionScriptSyntaxKind::Dynamic,
-            "final" => ActionScriptSyntaxKind::Final,
-            "override" => ActionScriptSyntaxKind::Override,
-            "Array" => ActionScriptSyntaxKind::Array,
-            "Boolean" => ActionScriptSyntaxKind::Boolean,
-            "Date" => ActionScriptSyntaxKind::Date,
-            "Error" => ActionScriptSyntaxKind::Error,
-            "Function" => ActionScriptSyntaxKind::Function_,
-            "Number" => ActionScriptSyntaxKind::Number,
-            "Object" => ActionScriptSyntaxKind::Object,
-            "RegExp" => ActionScriptSyntaxKind::RegExp,
-            "String" => ActionScriptSyntaxKind::String_,
-            "uint" => ActionScriptSyntaxKind::Uint,
-            "Vector" => ActionScriptSyntaxKind::Vector,
-            "XML" => ActionScriptSyntaxKind::Xml,
-            "XMLList" => ActionScriptSyntaxKind::XmlList,
-            _ => ActionScriptSyntaxKind::Identifier,
+        let text = state.get_text_in((start..end).into());
+        let kind = match text.as_ref() {
+            "as" => ActionScriptTokenType::As,
+            "break" => ActionScriptTokenType::Break,
+            "case" => ActionScriptTokenType::Case,
+            "catch" => ActionScriptTokenType::Catch,
+            "class" => ActionScriptTokenType::Class,
+            "const" => ActionScriptTokenType::Const,
+            "continue" => ActionScriptTokenType::Continue,
+            "default" => ActionScriptTokenType::Default,
+            "delete" => ActionScriptTokenType::Delete,
+            "do" => ActionScriptTokenType::Do,
+            "else" => ActionScriptTokenType::Else,
+            "extends" => ActionScriptTokenType::Extends,
+            "false" => ActionScriptTokenType::False,
+            "finally" => ActionScriptTokenType::Finally,
+            "for" => ActionScriptTokenType::For,
+            "function" => ActionScriptTokenType::Function,
+            "if" => ActionScriptTokenType::If,
+            "implements" => ActionScriptTokenType::Implements,
+            "import" => ActionScriptTokenType::Import,
+            "in" => ActionScriptTokenType::In,
+            "instanceof" => ActionScriptTokenType::Instanceof,
+            "interface" => ActionScriptTokenType::Interface,
+            "internal" => ActionScriptTokenType::Internal,
+            "is" => ActionScriptTokenType::Is,
+            "native" => ActionScriptTokenType::Native,
+            "new" => ActionScriptTokenType::New,
+            "null" => ActionScriptTokenType::Null,
+            "package" => ActionScriptTokenType::Package,
+            "private" => ActionScriptTokenType::Private,
+            "protected" => ActionScriptTokenType::Protected,
+            "public" => ActionScriptTokenType::Public,
+            "return" => ActionScriptTokenType::Return,
+            "static" => ActionScriptTokenType::Static,
+            "super" => ActionScriptTokenType::Super,
+            "switch" => ActionScriptTokenType::Switch,
+            "this" => ActionScriptTokenType::This,
+            "throw" => ActionScriptTokenType::Throw,
+            "true" => ActionScriptTokenType::True,
+            "try" => ActionScriptTokenType::Try,
+            "typeof" => ActionScriptTokenType::Typeof,
+            "use" => ActionScriptTokenType::Use,
+            "var" => ActionScriptTokenType::Var,
+            "void" => ActionScriptTokenType::Void,
+            "while" => ActionScriptTokenType::While,
+            "with" => ActionScriptTokenType::With,
+            "each" => ActionScriptTokenType::Each,
+            "get" => ActionScriptTokenType::Get,
+            "set" => ActionScriptTokenType::Set,
+            "namespace" => ActionScriptTokenType::Namespace,
+            "include" => ActionScriptTokenType::Include,
+            "dynamic" => ActionScriptTokenType::Dynamic,
+            "final" => ActionScriptTokenType::Final,
+            "override" => ActionScriptTokenType::Override,
+            "Array" => ActionScriptTokenType::Array,
+            "Boolean" => ActionScriptTokenType::Boolean,
+            "Date" => ActionScriptTokenType::Date,
+            "Number" => ActionScriptTokenType::Number,
+            "Object" => ActionScriptTokenType::ObjectType,
+            "RegExp" => ActionScriptTokenType::RegExp,
+            "String" => ActionScriptTokenType::StringType,
+            "uint" => ActionScriptTokenType::Uint,
+            "Vector" => ActionScriptTokenType::Vector,
+            "XML" => ActionScriptTokenType::Xml,
+            "XMLList" => ActionScriptTokenType::XmlList,
+            _ => ActionScriptTokenType::Identifier,
         };
 
         state.add_token(kind, start, end);
         true
     }
 
-    fn lex_operator_or_delimiter<S: Source>(&self, state: &mut State<S>) -> bool {
+    fn lex_operator_or_delimiter<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start = state.get_position();
-        let first = match state.peek() {
+        let c = match state.peek() {
             Some(c) => c,
             None => return false,
         };
 
-        let kind = match first {
+        let kind = match c {
             '+' => {
                 state.advance(1);
                 match state.peek() {
                     Some('=') => {
                         state.advance(1);
-                        ActionScriptSyntaxKind::PlusAssign
+                        ActionScriptTokenType::PlusAssign
                     }
                     Some('+') => {
                         state.advance(1);
-                        ActionScriptSyntaxKind::Increment
+                        ActionScriptTokenType::Increment
                     }
-                    _ => ActionScriptSyntaxKind::Plus,
+                    _ => ActionScriptTokenType::Plus,
                 }
             }
             '-' => {
@@ -317,47 +234,47 @@ impl<'config> ActionScriptLexer<'config> {
                 match state.peek() {
                     Some('=') => {
                         state.advance(1);
-                        ActionScriptSyntaxKind::MinusAssign
+                        ActionScriptTokenType::MinusAssign
                     }
                     Some('-') => {
                         state.advance(1);
-                        ActionScriptSyntaxKind::Decrement
+                        ActionScriptTokenType::Decrement
                     }
                     Some('>') => {
                         state.advance(1);
-                        ActionScriptSyntaxKind::Arrow
+                        ActionScriptTokenType::Arrow
                     }
-                    _ => ActionScriptSyntaxKind::Minus,
+                    _ => ActionScriptTokenType::Minus,
                 }
             }
             '*' => {
                 state.advance(1);
-                if state.peek() == Some('=') {
-                    state.advance(1);
-                    ActionScriptSyntaxKind::StarAssign
-                }
-                else {
-                    ActionScriptSyntaxKind::Star
+                match state.peek() {
+                    Some('=') => {
+                        state.advance(1);
+                        ActionScriptTokenType::StarAssign
+                    }
+                    _ => ActionScriptTokenType::Star,
                 }
             }
             '/' => {
                 state.advance(1);
-                if state.peek() == Some('=') {
-                    state.advance(1);
-                    ActionScriptSyntaxKind::SlashAssign
-                }
-                else {
-                    ActionScriptSyntaxKind::Slash
+                match state.peek() {
+                    Some('=') => {
+                        state.advance(1);
+                        ActionScriptTokenType::SlashAssign
+                    }
+                    _ => ActionScriptTokenType::Slash,
                 }
             }
             '%' => {
                 state.advance(1);
-                if state.peek() == Some('=') {
-                    state.advance(1);
-                    ActionScriptSyntaxKind::PercentAssign
-                }
-                else {
-                    ActionScriptSyntaxKind::Percent
+                match state.peek() {
+                    Some('=') => {
+                        state.advance(1);
+                        ActionScriptTokenType::PercentAssign
+                    }
+                    _ => ActionScriptTokenType::Percent,
                 }
             }
             '=' => {
@@ -365,15 +282,15 @@ impl<'config> ActionScriptLexer<'config> {
                 match state.peek() {
                     Some('=') => {
                         state.advance(1);
-                        if state.peek() == Some('=') {
-                            state.advance(1);
-                            ActionScriptSyntaxKind::EqualEqualEqual
-                        }
-                        else {
-                            ActionScriptSyntaxKind::EqualEqual
+                        match state.peek() {
+                            Some('=') => {
+                                state.advance(1);
+                                ActionScriptTokenType::EqualEqualEqual
+                            }
+                            _ => ActionScriptTokenType::EqualEqual,
                         }
                     }
-                    _ => ActionScriptSyntaxKind::Equal,
+                    _ => ActionScriptTokenType::Equal,
                 }
             }
             '!' => {
@@ -381,65 +298,65 @@ impl<'config> ActionScriptLexer<'config> {
                 match state.peek() {
                     Some('=') => {
                         state.advance(1);
-                        if state.peek() == Some('=') {
-                            state.advance(1);
-                            ActionScriptSyntaxKind::NotEqualEqual
-                        }
-                        else {
-                            ActionScriptSyntaxKind::NotEqual
+                        match state.peek() {
+                            Some('=') => {
+                                state.advance(1);
+                                ActionScriptTokenType::NotEqualEqual
+                            }
+                            _ => ActionScriptTokenType::NotEqual,
                         }
                     }
-                    _ => ActionScriptSyntaxKind::LogicalNot,
+                    _ => ActionScriptTokenType::LogicalNot,
                 }
             }
             '<' => {
                 state.advance(1);
                 match state.peek() {
-                    Some('=') => {
-                        state.advance(1);
-                        ActionScriptSyntaxKind::LessEqual
-                    }
                     Some('<') => {
                         state.advance(1);
-                        if state.peek() == Some('=') {
-                            state.advance(1);
-                            ActionScriptSyntaxKind::LeftShiftAssign
-                        }
-                        else {
-                            ActionScriptSyntaxKind::LeftShift
+                        match state.peek() {
+                            Some('=') => {
+                                state.advance(1);
+                                ActionScriptTokenType::LeftShiftAssign
+                            }
+                            _ => ActionScriptTokenType::LeftShift,
                         }
                     }
-                    _ => ActionScriptSyntaxKind::LessThan,
+                    Some('=') => {
+                        state.advance(1);
+                        ActionScriptTokenType::LessEqual
+                    }
+                    _ => ActionScriptTokenType::LessThan,
                 }
             }
             '>' => {
                 state.advance(1);
                 match state.peek() {
-                    Some('=') => {
-                        state.advance(1);
-                        ActionScriptSyntaxKind::GreaterEqual
-                    }
                     Some('>') => {
                         state.advance(1);
                         match state.peek() {
                             Some('>') => {
                                 state.advance(1);
-                                if state.peek() == Some('=') {
-                                    state.advance(1);
-                                    ActionScriptSyntaxKind::UnsignedRightShiftAssign
-                                }
-                                else {
-                                    ActionScriptSyntaxKind::UnsignedRightShift
+                                match state.peek() {
+                                    Some('=') => {
+                                        state.advance(1);
+                                        ActionScriptTokenType::UnsignedRightShiftAssign
+                                    }
+                                    _ => ActionScriptTokenType::UnsignedRightShift,
                                 }
                             }
                             Some('=') => {
                                 state.advance(1);
-                                ActionScriptSyntaxKind::RightShiftAssign
+                                ActionScriptTokenType::RightShiftAssign
                             }
-                            _ => ActionScriptSyntaxKind::RightShift,
+                            _ => ActionScriptTokenType::RightShift,
                         }
                     }
-                    _ => ActionScriptSyntaxKind::GreaterThan,
+                    Some('=') => {
+                        state.advance(1);
+                        ActionScriptTokenType::GreaterEqual
+                    }
+                    _ => ActionScriptTokenType::GreaterThan,
                 }
             }
             '&' => {
@@ -447,13 +364,13 @@ impl<'config> ActionScriptLexer<'config> {
                 match state.peek() {
                     Some('&') => {
                         state.advance(1);
-                        ActionScriptSyntaxKind::LogicalAnd
+                        ActionScriptTokenType::LogicalAnd
                     }
                     Some('=') => {
                         state.advance(1);
-                        ActionScriptSyntaxKind::BitwiseAndAssign
+                        ActionScriptTokenType::BitwiseAndAssign
                     }
-                    _ => ActionScriptSyntaxKind::BitwiseAnd,
+                    _ => ActionScriptTokenType::BitwiseAnd,
                 }
             }
             '|' => {
@@ -461,166 +378,105 @@ impl<'config> ActionScriptLexer<'config> {
                 match state.peek() {
                     Some('|') => {
                         state.advance(1);
-                        ActionScriptSyntaxKind::LogicalOr
+                        ActionScriptTokenType::LogicalOr
                     }
                     Some('=') => {
                         state.advance(1);
-                        ActionScriptSyntaxKind::BitwiseOrAssign
+                        ActionScriptTokenType::BitwiseOrAssign
                     }
-                    _ => ActionScriptSyntaxKind::BitwiseOr,
+                    _ => ActionScriptTokenType::BitwiseOr,
                 }
             }
             '^' => {
                 state.advance(1);
-                if state.peek() == Some('=') {
-                    state.advance(1);
-                    ActionScriptSyntaxKind::BitwiseXorAssign
-                }
-                else {
-                    ActionScriptSyntaxKind::BitwiseXor
+                match state.peek() {
+                    Some('=') => {
+                        state.advance(1);
+                        ActionScriptTokenType::BitwiseXorAssign
+                    }
+                    _ => ActionScriptTokenType::BitwiseXor,
                 }
             }
             '~' => {
                 state.advance(1);
-                ActionScriptSyntaxKind::BitwiseNot
+                ActionScriptTokenType::BitwiseNot
             }
             '?' => {
                 state.advance(1);
-                ActionScriptSyntaxKind::Question
+                ActionScriptTokenType::Question
             }
             ':' => {
                 state.advance(1);
-                ActionScriptSyntaxKind::Colon
-            }
-            '(' => {
-                state.advance(1);
-                ActionScriptSyntaxKind::LeftParen
-            }
-            ')' => {
-                state.advance(1);
-                ActionScriptSyntaxKind::RightParen
-            }
-            '{' => {
-                state.advance(1);
-                ActionScriptSyntaxKind::LeftBrace
-            }
-            '}' => {
-                state.advance(1);
-                ActionScriptSyntaxKind::RightBrace
-            }
-            '[' => {
-                state.advance(1);
-                ActionScriptSyntaxKind::LeftBracket
-            }
-            ']' => {
-                state.advance(1);
-                ActionScriptSyntaxKind::RightBracket
-            }
-            ';' => {
-                state.advance(1);
-                ActionScriptSyntaxKind::Semicolon
-            }
-            ',' => {
-                state.advance(1);
-                ActionScriptSyntaxKind::Comma
+                ActionScriptTokenType::Colon
             }
             '.' => {
                 state.advance(1);
-                ActionScriptSyntaxKind::Dot
+                ActionScriptTokenType::Dot
+            }
+            '(' => {
+                state.advance(1);
+                ActionScriptTokenType::LeftParen
+            }
+            ')' => {
+                state.advance(1);
+                ActionScriptTokenType::RightParen
+            }
+            '{' => {
+                state.advance(1);
+                ActionScriptTokenType::LeftBrace
+            }
+            '}' => {
+                state.advance(1);
+                ActionScriptTokenType::RightBrace
+            }
+            '[' => {
+                state.advance(1);
+                ActionScriptTokenType::LeftBracket
+            }
+            ']' => {
+                state.advance(1);
+                ActionScriptTokenType::RightBracket
+            }
+            ';' => {
+                state.advance(1);
+                ActionScriptTokenType::Semicolon
+            }
+            ',' => {
+                state.advance(1);
+                ActionScriptTokenType::Comma
             }
             '@' => {
                 state.advance(1);
-                ActionScriptSyntaxKind::At
+                ActionScriptTokenType::At
             }
             '#' => {
                 state.advance(1);
-                ActionScriptSyntaxKind::Hash
+                ActionScriptTokenType::Hash
             }
             '$' => {
                 state.advance(1);
-                ActionScriptSyntaxKind::Dollar
+                ActionScriptTokenType::Dollar
             }
             '\\' => {
                 state.advance(1);
-                ActionScriptSyntaxKind::Backslash
+                ActionScriptTokenType::Backslash
             }
             '\'' => {
                 state.advance(1);
-                ActionScriptSyntaxKind::Quote
+                ActionScriptTokenType::Quote
             }
             '"' => {
                 state.advance(1);
-                ActionScriptSyntaxKind::DoubleQuote
+                ActionScriptTokenType::DoubleQuote
             }
             '`' => {
                 state.advance(1);
-                ActionScriptSyntaxKind::Backtick
+                ActionScriptTokenType::Backtick
             }
             _ => return false,
         };
 
-        let end = state.get_position();
-        state.add_token(kind, start, end);
+        state.add_token(kind, start, state.get_position());
         true
-    }
-
-    fn lex_string_literal<S: Source>(&self, state: &mut State<S>) -> bool {
-        let start = state.get_position();
-
-        // normal string: "..." or '...'
-        if state.current() == Some('"') || state.current() == Some('\'') {
-            let quote_char = state.current().unwrap();
-            state.advance(1);
-            let mut escaped = false;
-            while let Some(ch) = state.peek() {
-                if ch == quote_char && !escaped {
-                    state.advance(1); // consume closing quote
-                    break;
-                }
-                state.advance(ch.len_utf8());
-                if escaped {
-                    escaped = false;
-                    continue;
-                }
-                if ch == '\\' {
-                    escaped = true;
-                    continue;
-                }
-                if ch == '\n' || ch == '\r' {
-                    break;
-                }
-            }
-            state.add_token(ActionScriptSyntaxKind::StringLiteral, start, state.get_position());
-            return true;
-        }
-        false
-    }
-
-    fn lex_char_literal<S: Source>(&self, state: &mut State<S>) -> bool {
-        let start = state.get_position();
-        if state.peek() != Some('\'') {
-            return false;
-        }
-
-        state.advance(1); // consume opening quote
-        if let Some('\\') = state.peek() {
-            state.advance(1); // consume backslash
-            if let Some(escaped) = state.peek() {
-                state.advance(escaped.len_utf8()); // consume escaped character
-            }
-        }
-        else if let Some(ch) = state.peek() {
-            state.advance(ch.len_utf8()); // consume character
-        }
-
-        if state.peek() == Some('\'') {
-            state.advance(1); // consume closing quote
-            state.add_token(ActionScriptSyntaxKind::CharLiteral, start, state.get_position());
-            return true;
-        }
-
-        // Reset position if not a valid char literal
-        state.set_position(start);
-        false
     }
 }

@@ -1,0 +1,70 @@
+use crate::{kind::NimSyntaxKind, language::NimLanguage};
+use dashmap::DashMap;
+use oak_core::{Range, parser::session::ParseSession, tree::RedNode};
+use oak_hover::HoverProvider;
+use oak_lsp::service::LanguageService;
+use oak_vfs::Vfs;
+use std::{future::Future, sync::Arc};
+
+/// Hover provider implementation for Nim.
+pub struct NimHoverProvider;
+
+impl HoverProvider<NimLanguage> for NimHoverProvider {
+    fn hover(&self, node: &RedNode<'_, NimLanguage>, _range: Range<usize>) -> Option<oak_hover::Hover> {
+        let kind = node.green.kind;
+
+        let contents = match kind {
+            NimSyntaxKind::ProcKeyword => "### Nim Procedure\nDefines a callable procedure in Nim.",
+            NimSyntaxKind::TypeKeyword => "### Nim Type Definition\nDefines a new type or type alias.",
+            NimSyntaxKind::ConstKeyword => "### Nim Constant\nDefines a compile-time constant.",
+            NimSyntaxKind::Root => "### Nim Module\nThe root of a Nim module.",
+            _ => return None,
+        };
+
+        Some(oak_hover::Hover { contents: contents.to_string(), range: Some(node.span()) })
+    }
+}
+
+/// Language service implementation for Nim.
+pub struct NimLanguageService<V: Vfs> {
+    vfs: V,
+    workspace: oak_lsp::workspace::WorkspaceManager,
+    hover_provider: NimHoverProvider,
+    _cache: Arc<DashMap<String, ParseSession<NimLanguage>>>,
+}
+
+impl<V: Vfs> NimLanguageService<V> {
+    pub fn new(vfs: V) -> Self {
+        Self { vfs, workspace: oak_lsp::workspace::WorkspaceManager::default(), hover_provider: NimHoverProvider, _cache: Arc::new(DashMap::new()) }
+    }
+}
+
+impl<V: Vfs + Send + Sync + 'static + oak_vfs::WritableVfs> LanguageService for NimLanguageService<V> {
+    type Lang = NimLanguage;
+    type Vfs = V;
+
+    fn vfs(&self) -> &Self::Vfs {
+        &self.vfs
+    }
+
+    fn workspace(&self) -> &oak_lsp::workspace::WorkspaceManager {
+        &self.workspace
+    }
+
+    fn get_root(&self, uri: &str) -> impl Future<Output = Option<RedNode<'_, NimLanguage>>> + Send + '_ {
+        let source = self.get_source(uri);
+        async move {
+            let _source = source?;
+            // TODO: Implement proper caching and conversion to RedNode
+            None
+        }
+    }
+
+    fn hover(&self, uri: &str, range: Range<usize>) -> impl Future<Output = Option<oak_lsp::types::Hover>> + Send + '_ {
+        let uri = uri.to_string();
+        async move {
+            let hover = self.with_root(&uri, |root| self.hover_provider.hover(&root, range)).await.flatten()?;
+            Some(oak_lsp::types::Hover { contents: hover.contents, range: hover.range })
+        }
+    }
+}

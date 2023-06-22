@@ -4,9 +4,23 @@
 #![doc(html_favicon_url = "https://raw.githubusercontent.com/ygg-lang/oaks/refs/heads/dev/documents/logo.svg")]
 
 pub mod ast;
+
+mod builder;
 pub mod kind;
 pub mod language;
 pub mod lexer;
 pub mod parser;
 
-pub use crate::{kind::TwigSyntaxKind, language::TwigLanguage, lexer::TwigLexer, parser::TwigParser};
+mod formatter;
+pub mod highlighter;
+pub mod lsp;
+#[cfg(feature = "mcp")]
+pub mod mcp;
+
+pub use crate::{ast::TwigRoot, builder::TwigBuilder, formatter::TwigFormatter, highlighter::TwigHighlighter, language::TwigLanguage, lexer::TwigLexer, lsp::TwigLanguageService, parser::TwigParser};
+
+#[cfg(feature = "mcp")]
+pub use crate::mcp::serve_twig_mcp;
+
+#[cfg(all(feature = "mcp", feature = "axum"))]
+pub use crate::mcp::serve_twig_mcp_axum;

@@ -21,10 +21,12 @@ Oak Julia is a robust parser for Julia, designed to handle complete Julia syntax
 Basic example:
 
 ```rust
-use oak_julia::{Parser, JuliaLanguage, SourceText};
+use oak_core::{Parser, SourceText, parser::session::ParseSession};
+use oak_julia::{JuliaParser, JuliaLanguage};
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
-    let parser = Parser::new();
+    let mut session = ParseSession::<JuliaLanguage>::default();
+    let parser = JuliaParser::new();
     let source = SourceText::new(r#"
 function fibonacci(n)
     if n <= 1
@@ -37,7 +39,7 @@ end
 println(fibonacci(10))
     "#);
     
-    let result = parser.parse(&source);
+    let result = parser.parse(&[], &mut session);
     println!("Parsed Julia successfully.");
     Ok(())
 }
@@ -47,24 +49,28 @@ println(fibonacci(10))
 
 ### Function Parsing
 ```rust
-use oak_julia::{Parser, JuliaLanguage, SourceText};
+use oak_core::{Parser, SourceText, parser::session::ParseSession};
+use oak_julia::{JuliaParser, JuliaLanguage};
 
-let parser = Parser::new();
+let mut session = ParseSession::<JuliaLanguage>::default();
+let parser = JuliaParser::new();
 let source = SourceText::new(r#"
 function greet(name::String)
     println("Hello, $name!")
 end
 "#);
 
-let result = parser.parse(&source);
+let result = parser.parse(&[], &mut session);
 println!("Function parsed successfully.");
 ```
 
 ### Type Parsing
 ```rust
-use oak_julia::{Parser, JuliaLanguage, SourceText};
+use oak_core::{Parser, SourceText, parser::session::ParseSession};
+use oak_julia::{JuliaParser, JuliaLanguage};
 
-let parser = Parser::new();
+let mut session = ParseSession::<JuliaLanguage>::default();
+let parser = JuliaParser::new();
 let source = SourceText::new(r#"
 struct Person
     name::String
@@ -74,7 +80,7 @@ struct Person
 end
 "#);
 
-let result = parser.parse(&source);
+let result = parser.parse(&[], &mut session);
 println!("Type parsed successfully.");
 ```
 
@@ -82,19 +88,23 @@ println!("Type parsed successfully.");
 
 ### Token-Level Parsing
 ```rust
-use oak_julia::{Parser, JuliaLanguage, SourceText};
+use oak_core::{Parser, SourceText, parser::session::ParseSession};
+use oak_julia::{JuliaParser, JuliaLanguage};
 
-let parser = Parser::new();
+let mut session = ParseSession::<JuliaLanguage>::default();
+let parser = JuliaParser::new();
 let source = SourceText::new("x = [1, 2, 3, 4, 5]");
-let result = parser.parse(&source);
+let result = parser.parse(&[], &mut session);
 println!("Token parsing completed.");
 ```
 
 ### Error Handling
 ```rust
-use oak_julia::{Parser, JuliaLanguage, SourceText};
+use oak_core::{Parser, SourceText, parser::session::ParseSession};
+use oak_julia::{JuliaParser, JuliaLanguage};
 
-let parser = Parser::new();
+let mut session = ParseSession::<JuliaLanguage>::default();
+let parser = JuliaParser::new();
 let source = SourceText::new(r#"
 function broken_function(x)
     if x > 0
@@ -102,7 +112,7 @@ function broken_function(x)
     // Missing 'end' keyword
 "#);
 
-let result = parser.parse(&source);
+let result = parser.parse(&[], &mut session);
 if let Some(errors) = result.result.err() {
     println!("Parse errors found: {:?}", errors);
 } else {

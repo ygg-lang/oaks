@@ -1,4 +1,4 @@
-use oak_core::{GreenBuilder, IncrementalCache, Lexer, Parser, SourceText};
+use oak_core::{Lexer, ParseSession, Parser, SourceText};
 use oak_jasmin::{JasminLanguage, JasminLexer, JasminParser};
 
 #[test]
@@ -8,16 +8,13 @@ fn parser_basic_class() {
     let lexer = JasminLexer::new(&language);
     let parser = JasminParser::new(&language);
 
-    let mut pool = GreenBuilder::new(0);
-    let cache = IncrementalCache::new(&mut pool);
+    let mut session = ParseSession::<JasminLanguage>::new(16);
 
     // 使用新的 API
-    let lex_output = lexer.lex_incremental(&source, 0, cache);
+    let lex_output = lexer.lex(&source, &[], &mut session);
     assert!(lex_output.result.is_ok());
 
-    let mut pool2 = GreenBuilder::new(0);
-    let cache2 = IncrementalCache::new(&mut pool2);
-    let parse_output = parser.parse_incremental(&source, 0, cache2);
+    let parse_output = parser.parse(&source, &[], &mut session);
     assert!(parse_output.result.is_ok());
 }
 
@@ -27,9 +24,8 @@ fn parser_empty_input() {
     let language = JasminLanguage::default();
     let parser = JasminParser::new(&language);
 
-    let mut pool = GreenBuilder::new(0);
-    let cache = IncrementalCache::new(&mut pool);
-    let result = parser.parse_incremental(&source, 0, cache);
+    let mut session = ParseSession::<JasminLanguage>::new(16);
+    let result = parser.parse(&source, &[], &mut session);
     assert!(result.result.is_ok());
 }
 
@@ -48,14 +44,11 @@ fn parser_class_with_method() {
     let lexer = JasminLexer::new(&language);
     let parser = JasminParser::new(&language);
 
-    let mut pool = GreenBuilder::new(0);
-    let cache = IncrementalCache::new(&mut pool);
-    let lex_output = lexer.lex_incremental(&source, 0, cache);
+    let mut session = ParseSession::<JasminLanguage>::new(16);
+    let lex_output = lexer.lex(&source, &[], &mut session);
     assert!(lex_output.result.is_ok());
 
-    let mut pool2 = GreenBuilder::new(0);
-    let cache2 = IncrementalCache::new(&mut pool2);
-    let parse_output = parser.parse_incremental(&source, 0, cache2);
+    let parse_output = parser.parse(&source, &[], &mut session);
     assert!(parse_output.result.is_ok());
 }
 
@@ -71,14 +64,11 @@ fn parser_class_with_field() {
     let lexer = JasminLexer::new(&language);
     let parser = JasminParser::new(&language);
 
-    let mut pool = GreenBuilder::new(0);
-    let cache = IncrementalCache::new(&mut pool);
-    let lex_output = lexer.lex_incremental(&source, 0, cache);
+    let mut session = ParseSession::<JasminLanguage>::new(16);
+    let lex_output = lexer.lex(&source, &[], &mut session);
     assert!(lex_output.result.is_ok());
 
-    let mut pool2 = GreenBuilder::new(0);
-    let cache2 = IncrementalCache::new(&mut pool2);
-    let parse_output = parser.parse_incremental(&source, 0, cache2);
+    let parse_output = parser.parse(&source, &[], &mut session);
     assert!(parse_output.result.is_ok());
 }
 
@@ -106,13 +96,10 @@ fn parser_complex_class() {
     let lexer = JasminLexer::new(&language);
     let parser = JasminParser::new(&language);
 
-    let mut pool = GreenBuilder::new(0);
-    let cache = IncrementalCache::new(&mut pool);
-    let lex_output = lexer.lex_incremental(&source, 0, cache);
+    let mut session = ParseSession::<JasminLanguage>::new(16);
+    let lex_output = lexer.lex(&source, &[], &mut session);
     assert!(lex_output.result.is_ok());
 
-    let mut pool2 = GreenBuilder::new(0);
-    let cache2 = IncrementalCache::new(&mut pool2);
-    let parse_output = parser.parse_incremental(&source, 0, cache2);
+    let parse_output = parser.parse(&source, &[], &mut session);
     assert!(parse_output.result.is_ok());
 }

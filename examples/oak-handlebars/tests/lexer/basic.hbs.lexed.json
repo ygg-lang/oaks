@@ -1,0 +1,607 @@
+{
+    "success": true,
+    "count": 100,
+    "tokens": [
+        {
+            "kind": "Content",
+            "text": "<h1>Welcome ",
+            "start": 98,
+            "end": 110
+        },
+        {
+            "kind": "Open",
+            "text": "{{",
+            "start": 110,
+            "end": 112
+        },
+        {
+            "kind": "Identifier",
+            "text": "userName",
+            "start": 112,
+            "end": 120
+        },
+        {
+            "kind": "Close",
+            "text": "}}",
+            "start": 120,
+            "end": 122
+        },
+        {
+            "kind": "Content",
+            "text": "!</h1>\r\n<p>Your age is ",
+            "start": 122,
+            "end": 145
+        },
+        {
+            "kind": "Open",
+            "text": "{{",
+            "start": 145,
+            "end": 147
+        },
+        {
+            "kind": "Identifier",
+            "text": "userAge",
+            "start": 147,
+            "end": 154
+        },
+        {
+            "kind": "Close",
+            "text": "}}",
+            "start": 154,
+            "end": 156
+        },
+        {
+            "kind": "Identifier",
+            "text": "years",
+            "start": 157,
+            "end": 162
+        },
+        {
+            "kind": "Identifier",
+            "text": "old.",
+            "start": 163,
+            "end": 167
+        },
+        {
+            "kind": "Content",
+            "text": "</p>\r\n\r\n",
+            "start": 167,
+            "end": 175
+        },
+        {
+            "kind": "OpenBlock",
+            "text": "{{#",
+            "start": 206,
+            "end": 209
+        },
+        {
+            "kind": "Identifier",
+            "text": "if",
+            "start": 209,
+            "end": 211
+        },
+        {
+            "kind": "Identifier",
+            "text": "isLoggedIn",
+            "start": 212,
+            "end": 222
+        },
+        {
+            "kind": "Close",
+            "text": "}}",
+            "start": 222,
+            "end": 224
+        },
+        {
+            "kind": "Content",
+            "text": "<div class=\"user-dashboard\">\r\n        <h2>Hello ",
+            "start": 230,
+            "end": 278
+        },
+        {
+            "kind": "Open",
+            "text": "{{",
+            "start": 278,
+            "end": 280
+        },
+        {
+            "kind": "Identifier",
+            "text": "firstName",
+            "start": 280,
+            "end": 289
+        },
+        {
+            "kind": "Close",
+            "text": "}}",
+            "start": 289,
+            "end": 291
+        },
+        {
+            "kind": "Open",
+            "text": "{{",
+            "start": 292,
+            "end": 294
+        },
+        {
+            "kind": "Identifier",
+            "text": "lastName",
+            "start": 294,
+            "end": 302
+        },
+        {
+            "kind": "Close",
+            "text": "}}",
+            "start": 302,
+            "end": 304
+        },
+        {
+            "kind": "Content",
+            "text": "!</h2>\r\n        ",
+            "start": 304,
+            "end": 320
+        },
+        {
+            "kind": "OpenBlock",
+            "text": "{{#",
+            "start": 320,
+            "end": 323
+        },
+        {
+            "kind": "Identifier",
+            "text": "if",
+            "start": 323,
+            "end": 325
+        },
+        {
+            "kind": "Identifier",
+            "text": "hasNotifications",
+            "start": 326,
+            "end": 342
+        },
+        {
+            "kind": "Close",
+            "text": "}}",
+            "start": 342,
+            "end": 344
+        },
+        {
+            "kind": "Content",
+            "text": "<div class=\"notifications\">\r\n                You have ",
+            "start": 358,
+            "end": 412
+        },
+        {
+            "kind": "Open",
+            "text": "{{",
+            "start": 412,
+            "end": 414
+        },
+        {
+            "kind": "Identifier",
+            "text": "notificationCount",
+            "start": 414,
+            "end": 431
+        },
+        {
+            "kind": "Close",
+            "text": "}}",
+            "start": 431,
+            "end": 433
+        },
+        {
+            "kind": "Identifier",
+            "text": "new",
+            "start": 434,
+            "end": 437
+        },
+        {
+            "kind": "Identifier",
+            "text": "notifications.",
+            "start": 438,
+            "end": 452
+        },
+        {
+            "kind": "Content",
+            "text": "</div>\r\n        ",
+            "start": 466,
+            "end": 482
+        },
+        {
+            "kind": "Open",
+            "text": "{{",
+            "start": 482,
+            "end": 484
+        },
+        {
+            "kind": "Else",
+            "text": "else",
+            "start": 484,
+            "end": 488
+        },
+        {
+            "kind": "Close",
+            "text": "}}",
+            "start": 488,
+            "end": 490
+        },
+        {
+            "kind": "Content",
+            "text": "<p>No new notifications.</p>\r\n        ",
+            "start": 504,
+            "end": 542
+        },
+        {
+            "kind": "CloseBlock",
+            "text": "{{/",
+            "start": 542,
+            "end": 545
+        },
+        {
+            "kind": "Identifier",
+            "text": "if",
+            "start": 545,
+            "end": 547
+        },
+        {
+            "kind": "Close",
+            "text": "}}",
+            "start": 547,
+            "end": 549
+        },
+        {
+            "kind": "Content",
+            "text": "</div>\r\n",
+            "start": 555,
+            "end": 563
+        },
+        {
+            "kind": "Open",
+            "text": "{{",
+            "start": 563,
+            "end": 565
+        },
+        {
+            "kind": "Else",
+            "text": "else",
+            "start": 565,
+            "end": 569
+        },
+        {
+            "kind": "Close",
+            "text": "}}",
+            "start": 569,
+            "end": 571
+        },
+        {
+            "kind": "Content",
+            "text": "<div class=\"login-prompt\">\r\n        Please <a href=\"/login\">log in</a> to continue.\r\n    </div>\r\n",
+            "start": 577,
+            "end": 674
+        },
+        {
+            "kind": "CloseBlock",
+            "text": "{{/",
+            "start": 674,
+            "end": 677
+        },
+        {
+            "kind": "Identifier",
+            "text": "if",
+            "start": 677,
+            "end": 679
+        },
+        {
+            "kind": "Close",
+            "text": "}}",
+            "start": 679,
+            "end": 681
+        },
+        {
+            "kind": "Content",
+            "text": "<ul class=\"product-list\">\r\n    ",
+            "start": 707,
+            "end": 738
+        },
+        {
+            "kind": "OpenBlock",
+            "text": "{{#",
+            "start": 738,
+            "end": 741
+        },
+        {
+            "kind": "Identifier",
+            "text": "each",
+            "start": 741,
+            "end": 745
+        },
+        {
+            "kind": "Identifier",
+            "text": "products",
+            "start": 746,
+            "end": 754
+        },
+        {
+            "kind": "Close",
+            "text": "}}",
+            "start": 754,
+            "end": 756
+        },
+        {
+            "kind": "Content",
+            "text": "<li class=\"product-item\">\r\n            <h3>",
+            "start": 766,
+            "end": 809
+        },
+        {
+            "kind": "Open",
+            "text": "{{",
+            "start": 809,
+            "end": 811
+        },
+        {
+            "kind": "Identifier",
+            "text": "this.name",
+            "start": 811,
+            "end": 820
+        },
+        {
+            "kind": "Close",
+            "text": "}}",
+            "start": 820,
+            "end": 822
+        },
+        {
+            "kind": "Content",
+            "text": "</h3>\r\n            <p>Price: $",
+            "start": 822,
+            "end": 852
+        },
+        {
+            "kind": "Open",
+            "text": "{{",
+            "start": 852,
+            "end": 854
+        },
+        {
+            "kind": "Identifier",
+            "text": "this.price",
+            "start": 854,
+            "end": 864
+        },
+        {
+            "kind": "Close",
+            "text": "}}",
+            "start": 864,
+            "end": 866
+        },
+        {
+            "kind": "Content",
+            "text": "</p>\r\n            ",
+            "start": 866,
+            "end": 884
+        },
+        {
+            "kind": "OpenBlock",
+            "text": "{{#",
+            "start": 884,
+            "end": 887
+        },
+        {
+            "kind": "Identifier",
+            "text": "if",
+            "start": 887,
+            "end": 889
+        },
+        {
+            "kind": "Identifier",
+            "text": "this.inStock",
+            "start": 890,
+            "end": 902
+        },
+        {
+            "kind": "Close",
+            "text": "}}",
+            "start": 902,
+            "end": 904
+        },
+        {
+            "kind": "Content",
+            "text": "<span class=\"in-stock\">In Stock (",
+            "start": 922,
+            "end": 955
+        },
+        {
+            "kind": "Open",
+            "text": "{{",
+            "start": 955,
+            "end": 957
+        },
+        {
+            "kind": "Identifier",
+            "text": "this.quantity",
+            "start": 957,
+            "end": 970
+        },
+        {
+            "kind": "Close",
+            "text": "}}",
+            "start": 970,
+            "end": 972
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 972,
+            "end": 973
+        },
+        {
+            "kind": "Content",
+            "text": "</span>\r\n            ",
+            "start": 973,
+            "end": 994
+        },
+        {
+            "kind": "Open",
+            "text": "{{",
+            "start": 994,
+            "end": 996
+        },
+        {
+            "kind": "Else",
+            "text": "else",
+            "start": 996,
+            "end": 1000
+        },
+        {
+            "kind": "Close",
+            "text": "}}",
+            "start": 1000,
+            "end": 1002
+        },
+        {
+            "kind": "Content",
+            "text": "<span class=\"out-of-stock\">Out of Stock</span>\r\n            ",
+            "start": 1020,
+            "end": 1080
+        },
+        {
+            "kind": "CloseBlock",
+            "text": "{{/",
+            "start": 1080,
+            "end": 1083
+        },
+        {
+            "kind": "Identifier",
+            "text": "if",
+            "start": 1083,
+            "end": 1085
+        },
+        {
+            "kind": "Close",
+            "text": "}}",
+            "start": 1085,
+            "end": 1087
+        },
+        {
+            "kind": "Content",
+            "text": "</li>\r\n    ",
+            "start": 1097,
+            "end": 1108
+        },
+        {
+            "kind": "CloseBlock",
+            "text": "{{/",
+            "start": 1108,
+            "end": 1111
+        },
+        {
+            "kind": "Identifier",
+            "text": "each",
+            "start": 1111,
+            "end": 1115
+        },
+        {
+            "kind": "Close",
+            "text": "}}",
+            "start": 1115,
+            "end": 1117
+        },
+        {
+            "kind": "Content",
+            "text": "</ul>\r\n\r\n",
+            "start": 1119,
+            "end": 1128
+        },
+        {
+            "kind": "OpenBlock",
+            "text": "{{#",
+            "start": 1151,
+            "end": 1154
+        },
+        {
+            "kind": "Identifier",
+            "text": "with",
+            "start": 1154,
+            "end": 1158
+        },
+        {
+            "kind": "Identifier",
+            "text": "company",
+            "start": 1159,
+            "end": 1166
+        },
+        {
+            "kind": "Close",
+            "text": "}}",
+            "start": 1166,
+            "end": 1168
+        },
+        {
+            "kind": "Content",
+            "text": "<div class=\"company-info\">\r\n        <h2>",
+            "start": 1174,
+            "end": 1214
+        },
+        {
+            "kind": "Open",
+            "text": "{{",
+            "start": 1214,
+            "end": 1216
+        },
+        {
+            "kind": "Identifier",
+            "text": "name",
+            "start": 1216,
+            "end": 1220
+        },
+        {
+            "kind": "Close",
+            "text": "}}",
+            "start": 1220,
+            "end": 1222
+        },
+        {
+            "kind": "Content",
+            "text": "</h2>\r\n        <p>Founded in ",
+            "start": 1222,
+            "end": 1251
+        },
+        {
+            "kind": "Open",
+            "text": "{{",
+            "start": 1251,
+            "end": 1253
+        },
+        {
+            "kind": "Identifier",
+            "text": "foundedYear",
+            "start": 1253,
+            "end": 1264
+        },
+        {
+            "kind": "Close",
+            "text": "}}",
+            "start": 1264,
+            "end": 1266
+        },
+        {
+            "kind": "Content",
+            "text": "</p>\r\n        <address>\r\n            ",
+            "start": 1266,
+            "end": 1303
+        },
+        {
+            "kind": "Open",
+            "text": "{{",
+            "start": 1303,
+            "end": 1305
+        },
+        {
+            "kind": "Identifier",
+            "text": "address.street",
+            "start": 1305,
+            "end": 1319
+        }
+    ],
+    "errors": []
+}

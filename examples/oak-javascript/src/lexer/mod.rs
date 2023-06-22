@@ -1,123 +1,132 @@
 use crate::{kind::JavaScriptSyntaxKind, language::JavaScriptLanguage};
-use oak_core::{
-    IncrementalCache, Lexer, LexerState, OakError,
-    lexer::{LexOutput, StringConfig, WhitespaceConfig},
-    source::Source,
-};
-use std::sync::LazyLock;
+use oak_core::{Lexer, LexerCache, LexerState, OakError, TextEdit, lexer::LexOutput, source::Source};
+use std::simd::prelude::*;
 
-type State<S> = LexerState<S, JavaScriptLanguage>;
+type State<'a, S> = LexerState<'a, S, JavaScriptLanguage>;
 
-static JS_WHITESPACE: LazyLock<WhitespaceConfig> = LazyLock::new(|| WhitespaceConfig { unicode_whitespace: true });
-static JS_STRING: LazyLock<StringConfig> = LazyLock::new(|| StringConfig { quotes: &['"', '\''], escape: Some('\\') });
+#[derive(Clone, Default)]
+pub struct JavaScriptLexer {}
 
-#[cfg(feature = "lexer_debug")]
-macro_rules! lex_debug { ($($arg:tt)*) => { println!($($arg)*); } }
-#[cfg(not(feature = "lexer_debug"))]
-macro_rules! lex_debug {
-    ($($arg:tt)*) => {};
-}
-
-#[derive(Clone)]
-pub struct JavaScriptLexer<'config> {
-    config: &'config JavaScriptLanguage,
-}
-
-impl<'config> JavaScriptLexer<'config> {
-    pub fn new(config: &'config JavaScriptLanguage) -> Self {
-        Self { config }
+impl JavaScriptLexer {
+    pub fn new(_config: &JavaScriptLanguage) -> Self {
+        Self {}
     }
 
-    fn safe_check<S: Source>(&self, state: &State<S>) -> Result<(), OakError> {
-        if state.get_position() <= state.length() {
-            Ok(())
-        }
-        else {
-            Err(OakError::custom_error(format!("Lexer out-of-bounds: pos={}, len={}", state.get_position(), state.length())))
-        }
+    fn safe_check<'a, S: Source + ?Sized>(&self, state: &State<'a, S>) -> Result<(), OakError> {
+        if state.get_position() <= state.get_length() { Ok(()) } else { Err(OakError::custom_error(format!("Lexer out-of-bounds: pos={}, len={}", state.get_position(), state.get_length()))) }
     }
 
     /// 主要的词法分析运行方法
-    fn run<S: Source>(&self, state: &mut State<S>) -> Result<(), OakError> {
-        lex_debug!("Starting lexer run, source length: {}", state.length());
+    fn run<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> Result<(), OakError> {
         while state.not_at_end() {
-            let current_pos = state.get_position();
-            let current_char = state.peek();
-            lex_debug!("At position {}, char: {:?}", current_pos, current_char);
-
+            let safe_point = state.get_position();
             self.safe_check(state)?;
 
-            if self.skip_whitespace(state) {
-                lex_debug!("Skipped whitespace");
-                continue;
-            }
-
-            if self.lex_newline(state) {
-                lex_debug!("Lexed newline");
-                continue;
-            }
-
-            if self.lex_comment(state) {
-                lex_debug!("Lexed comment");
-                continue;
-            }
-
-            if self.lex_string_literal(state) {
-                lex_debug!("Lexed string literal");
-                continue;
-            }
-
-            if self.lex_template_literal(state) {
-                lex_debug!("Lexed template literal");
-                continue;
-            }
-
-            if self.lex_numeric_literal(state) {
-                lex_debug!("Lexed numeric literal");
-                continue;
-            }
-
-            if self.lex_identifier_or_keyword(state) {
-                lex_debug!("Lexed identifier or keyword");
-                continue;
-            }
-
-            if self.lex_operator_or_punctuation(state) {
-                lex_debug!("Lexed operator or punctuation");
-                continue;
-            }
-
-            let start = state.get_position();
             if let Some(ch) = state.peek() {
-                lex_debug!("No pattern matched for char {:?}, adding error token", ch);
-                state.advance(ch.len_utf8());
-                state.add_token(JavaScriptSyntaxKind::Error, start, state.get_position());
+                match ch {
+                    ' ' | '\t' => {
+                        self.skip_whitespace(state);
+                    }
+                    '\n' | '\r' => {
+                        self.lex_newline(state);
+                    }
+                    '/' => {
+                        // Comment or Slash or SlashEqual
+                        if let Some(next) = state.peek_next_n(1) {
+                            if next == '/' || next == '*' {
+                                self.lex_comment(state);
+                            }
+                            else {
+                                self.lex_operator_or_punctuation(state);
+                            }
+                        }
+                        else {
+                            self.lex_operator_or_punctuation(state);
+                        }
+                    }
+                    '"' | '\'' => {
+                        self.lex_string_literal(state);
+                    }
+                    '`' => {
+                        self.lex_template_literal(state);
+                    }
+                    '0'..='9' => {
+                        self.lex_numeric_literal(state);
+                    }
+                    '.' => {
+                        // Dot, DotDotDot, or Number (.5)
+                        if self.is_next_digit(state) {
+                            self.lex_numeric_literal(state);
+                        }
+                        else {
+                            self.lex_operator_or_punctuation(state);
+                        }
+                    }
+                    'a'..='z' | 'A'..='Z' | '_' | '$' => {
+                        self.lex_identifier_or_keyword(state);
+                    }
+                    '+' | '-' | '*' | '%' | '<' | '>' | '=' | '!' | '&' | '|' | '^' | '~' | '?' | '(' | ')' | '{' | '}' | '[' | ']' | ';' | ',' | ':' => {
+                        self.lex_operator_or_punctuation(state);
+                    }
+                    _ => {
+                        let start = state.get_position();
+                        state.advance(ch.len_utf8());
+                        state.add_token(JavaScriptSyntaxKind::Error, start, state.get_position());
+                    }
+                }
             }
-            else {
-                lex_debug!("Reached end of file");
-                break;
-            }
-        }
-        lex_debug!("Finished lexer run");
 
-        let eof_pos = state.get_position();
-        state.add_token(JavaScriptSyntaxKind::Eof, eof_pos, eof_pos);
+            state.advance_if_dead_lock(safe_point);
+        }
+
         Ok(())
     }
 
     /// 跳过空白字符
-    fn skip_whitespace<S: Source>(&self, state: &mut State<S>) -> bool {
-        match JS_WHITESPACE.scan(state.rest(), state.get_position(), JavaScriptSyntaxKind::Whitespace) {
-            Some(token) => {
-                state.advance_with(token);
-                true
+    fn skip_whitespace<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
+        let start = state.get_position();
+        let bytes = state.rest_bytes();
+        let mut i = 0;
+        let len = bytes.len();
+        const LANES: usize = 32;
+
+        while i + LANES <= len {
+            let chunk = Simd::<u8, LANES>::from_slice(unsafe { bytes.get_unchecked(i..i + LANES) });
+            let is_space = chunk.simd_eq(Simd::splat(b' '));
+            let is_tab = chunk.simd_eq(Simd::splat(b'\t'));
+            let is_ws = is_space | is_tab;
+
+            if !is_ws.all() {
+                let not_ws = !is_ws;
+                let idx = not_ws.first_set().unwrap();
+                i += idx;
+                state.advance(i);
+                state.add_token(JavaScriptSyntaxKind::Whitespace, start, state.get_position());
+                return true;
             }
-            None => false,
+            i += LANES;
+        }
+
+        while i < len {
+            let ch = unsafe { *bytes.get_unchecked(i) };
+            if ch != b' ' && ch != b'\t' {
+                break;
+            }
+            i += 1;
+        }
+
+        if i > 0 {
+            state.advance(i);
+            state.add_token(JavaScriptSyntaxKind::Whitespace, start, state.get_position());
+            true
+        }
+        else {
+            false
         }
     }
 
     /// 处理换行
-    fn lex_newline<S: Source>(&self, state: &mut State<S>) -> bool {
+    fn lex_newline<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start_pos = state.get_position();
 
         if let Some('\n') = state.peek() {
@@ -139,7 +148,7 @@ impl<'config> JavaScriptLexer<'config> {
     }
 
     /// 处理注释（行注释和块注释）
-    fn lex_comment<S: Source>(&self, state: &mut State<S>) -> bool {
+    fn lex_comment<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start = state.get_position();
         let rest = state.rest();
 
@@ -170,7 +179,7 @@ impl<'config> JavaScriptLexer<'config> {
             }
 
             if !found_end {
-                let error = state.syntax_error("Unterminated comment", start);
+                let error = OakError::syntax_error("Unterminated comment".to_string(), start, None);
                 state.add_error(error);
             }
 
@@ -182,7 +191,7 @@ impl<'config> JavaScriptLexer<'config> {
     }
 
     /// 处理字符串字面量
-    fn lex_string_literal<S: Source>(&self, state: &mut State<S>) -> bool {
+    fn lex_string_literal<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start_pos = state.get_position();
 
         if let Some(first_char) = state.peek() {
@@ -200,13 +209,9 @@ impl<'config> JavaScriptLexer<'config> {
                     else if ch == '\\' {
                         // Skip escaped character
                         state.advance(1);
-                        if let Some(_escaped) = state.peek() {
-                            state.advance(1);
+                        if let Some(escaped) = state.peek() {
+                            state.advance(escaped.len_utf8());
                         }
-                    }
-                    else if ch == '\n' || ch == '\r' {
-                        // Strings cannot span multiple lines in JavaScript
-                        break;
                     }
                     else {
                         state.advance(ch.len_utf8());
@@ -214,30 +219,26 @@ impl<'config> JavaScriptLexer<'config> {
                 }
 
                 if !found_end {
-                    let error = state.syntax_error("Unterminated string literal", start_pos);
+                    let error = OakError::syntax_error("Unterminated string literal".to_string(), start_pos, None);
                     state.add_error(error);
                 }
 
                 state.add_token(JavaScriptSyntaxKind::StringLiteral, start_pos, state.get_position());
-                true
-            }
-            else {
-                false
+                return true;
             }
         }
-        else {
-            false
-        }
+
+        false
     }
 
-    /// 处理模板字符
-    fn lex_template_literal<S: Source>(&self, state: &mut State<S>) -> bool {
+    /// 处理模板字符串
+    fn lex_template_literal<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start_pos = state.get_position();
 
         if let Some('`') = state.peek() {
             state.advance(1);
-
             let mut found_end = false;
+
             while let Some(ch) = state.peek() {
                 if ch == '`' {
                     state.advance(1);
@@ -280,7 +281,7 @@ impl<'config> JavaScriptLexer<'config> {
             }
 
             if !found_end {
-                let error = state.syntax_error("Unterminated template literal", start_pos);
+                let error = OakError::syntax_error("Unterminated template literal".to_string(), start_pos, None);
                 state.add_error(error);
             }
 
@@ -293,7 +294,7 @@ impl<'config> JavaScriptLexer<'config> {
     }
 
     /// 处理数字字面量
-    fn lex_numeric_literal<S: Source>(&self, state: &mut State<S>) -> bool {
+    fn lex_numeric_literal<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start_pos = state.get_position();
 
         if let Some(ch) = state.peek() {
@@ -314,7 +315,7 @@ impl<'config> JavaScriptLexer<'config> {
                         }
 
                         if !has_digits {
-                            let error = state.syntax_error("Invalid hexadecimal number", start_pos);
+                            let error = OakError::syntax_error("Invalid hexadecimal number".to_string(), start_pos, None);
                             state.add_error(error);
                         }
 
@@ -383,7 +384,7 @@ impl<'config> JavaScriptLexer<'config> {
                         }
 
                         if !has_exp_digits {
-                            let error = state.syntax_error("Invalid number exponent", start_pos);
+                            let error = OakError::syntax_error("Invalid number exponent".to_string(), start_pos, None);
                             state.add_error(error);
                         }
                     }
@@ -409,12 +410,12 @@ impl<'config> JavaScriptLexer<'config> {
     }
 
     /// 检查下一个字符是否是数字
-    fn is_next_digit<S: Source>(&self, state: &State<S>) -> bool {
+    fn is_next_digit<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         if let Some(next_ch) = state.peek_next_n(1) { next_ch.is_ascii_digit() } else { false }
     }
 
-    /// 处理标识符和关键
-    fn lex_identifier_or_keyword<S: Source>(&self, state: &mut State<S>) -> bool {
+    /// 处理标识符或关键字
+    fn lex_identifier_or_keyword<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start_pos = state.get_position();
 
         if let Some(ch) = state.peek() {
@@ -502,7 +503,7 @@ impl<'config> JavaScriptLexer<'config> {
     }
 
     /// 处理操作符和标点符号
-    fn lex_operator_or_punctuation<S: Source>(&self, state: &mut State<S>) -> bool {
+    fn lex_operator_or_punctuation<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start_pos = state.get_position();
 
         if let Some(ch) = state.peek() {
@@ -804,15 +805,13 @@ impl<'config> JavaScriptLexer<'config> {
     }
 }
 
-impl<'config> Lexer<JavaScriptLanguage> for JavaScriptLexer<'config> {
-    fn lex_incremental(
-        &self,
-        source: impl Source,
-        changed: usize,
-        cache: IncrementalCache<JavaScriptLanguage>,
-    ) -> LexOutput<JavaScriptLanguage> {
-        let mut state = LexerState::new_with_cache(source, changed, cache);
+impl Lexer<JavaScriptLanguage> for JavaScriptLexer {
+    fn lex<'a, S: Source + ?Sized>(&self, text: &S, _edits: &[TextEdit], cache: &'a mut impl LexerCache<JavaScriptLanguage>) -> LexOutput<JavaScriptLanguage> {
+        let mut state = LexerState::new(text);
         let result = self.run(&mut state);
-        state.finish(result)
+        if result.is_ok() {
+            state.add_eof();
+        }
+        state.finish_with_cache(result, cache)
     }
 }

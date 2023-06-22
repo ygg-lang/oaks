@@ -1,6 +1,6 @@
-﻿/// PureScript AST 根节点
+/// PureScript AST 根节点
 #[derive(Debug, Clone)]
-pub struct SourceFile {
+pub struct PurescriptRoot {
     pub elements: Vec<Element>,
 }
 

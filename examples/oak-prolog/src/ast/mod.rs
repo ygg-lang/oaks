@@ -1,3 +1,6 @@
+#[derive(Debug, Clone)]
+pub struct PrologRoot;
+
 pub type PrologToken = crate::kind::PrologSyntaxKind;
 
 #[derive(Debug, Clone)]

@@ -1,8 +1,9 @@
-use oak_core::SyntaxKind;
+use oak_core::{ElementType, TokenType, UniversalElementRole, UniversalTokenRole};
 
-#[derive(Copy, Clone, Debug, PartialEq, Eq)]
+#[derive(Copy, Clone, Debug, PartialEq, Eq, Hash)]
 pub enum WitSyntaxKind {
     // 基础 kind
+    Root,
     Whitespace,
     Newline,
     Comment,
@@ -98,24 +99,38 @@ pub enum WitSyntaxKind {
     RightBracket, // ]
 }
 
-impl SyntaxKind for WitSyntaxKind {
-    fn is_trivia(&self) -> bool {
-        matches!(self, Self::Whitespace | Self::Newline | Self::Comment)
+impl std::fmt::Display for WitSyntaxKind {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{:?}", self)
+    }
+}
+
+impl TokenType for WitSyntaxKind {
+    const END_OF_STREAM: Self = Self::Eof;
+    type Role = UniversalTokenRole;
+
+    fn role(&self) -> Self::Role {
+        match self {
+            Self::Whitespace | Self::Newline => UniversalTokenRole::Whitespace,
+            Self::Comment => UniversalTokenRole::Comment,
+            Self::Eof => UniversalTokenRole::Eof,
+            _ => UniversalTokenRole::None,
+        }
+    }
+}
+
+impl ElementType for WitSyntaxKind {
+    type Role = UniversalElementRole;
+
+    fn is_root(&self) -> bool {
+        matches!(self, Self::Root)
     }
 
-    fn is_comment(&self) -> bool {
-        matches!(self, Self::Comment)
-    }
-
-    fn is_whitespace(&self) -> bool {
-        matches!(self, Self::Whitespace | Self::Newline)
-    }
-
-    fn is_token_type(&self) -> bool {
-        true // WIT 组件语法主要是 token 类型
-    }
-
-    fn is_element_type(&self) -> bool {
-        false // WIT 组件语法主要是 token 类型
+    fn role(&self) -> Self::Role {
+        match self {
+            Self::Root => UniversalElementRole::Root,
+            Self::Error => UniversalElementRole::Error,
+            _ => UniversalElementRole::None,
+        }
     }
 }

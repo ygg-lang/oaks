@@ -1,12 +1,19 @@
-use crate::{kind::CppSyntaxKind, lexer::CppLexer};
-use oak_core::Language;
+use crate::{
+    lexer::{CppLexer, CppTokenType},
+    parser::CppElementType,
+};
+use oak_core::{Language, LanguageCategory};
 
 /// C++ 语言实现
 #[derive(Debug, Clone)]
 pub struct CppLanguage;
 
 impl Language for CppLanguage {
-    type SyntaxKind = CppSyntaxKind;
+    const NAME: &'static str = "cpp";
+    const CATEGORY: LanguageCategory = LanguageCategory::Programming;
+
+    type TokenType = CppTokenType;
+    type ElementType = CppElementType;
     type TypedRoot = ();
 }
 

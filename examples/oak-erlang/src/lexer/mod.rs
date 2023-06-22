@@ -1,24 +1,35 @@
 use crate::{kind::ErlangSyntaxKind, language::ErlangLanguage};
 use oak_core::{
-    IncrementalCache, Lexer,
-    lexer::{LexOutput, LexerState},
-    source::Source,
+    errors::OakError,
+    lexer::{LexOutput, Lexer, LexerCache, LexerState},
+    source::{Source, TextEdit},
 };
 use std::{collections::HashSet, sync::LazyLock};
 
 /// Erlang 词法分析器
 #[derive(Clone)]
 pub struct ErlangLexer<'config> {
-    config: &'config ErlangLanguage,
+    _config: &'config ErlangLanguage,
+}
+
+impl<'config> Lexer<ErlangLanguage> for ErlangLexer<'config> {
+    fn lex<'a, S: Source + ?Sized>(&self, text: &'a S, _edits: &[TextEdit], cache: &'a mut impl LexerCache<ErlangLanguage>) -> LexOutput<ErlangLanguage> {
+        let mut state = LexerState::new(text);
+        let result = self.run(&mut state);
+        if result.is_ok() {
+            state.add_eof();
+        }
+        state.finish_with_cache(result, cache)
+    }
 }
 
 impl<'config> ErlangLexer<'config> {
     pub fn new(config: &'config ErlangLanguage) -> Self {
-        Self { config }
+        Self { _config: config }
     }
 
     /// 主要的词法分析运行方法
-    pub fn run<S: Source>(&self, state: &mut LexerState<S, ErlangLanguage>) {
+    pub fn run<'a, S: Source + ?Sized>(&self, state: &mut LexerState<'a, S, ErlangLanguage>) -> Result<(), OakError> {
         while state.not_at_end() {
             // 安全检查，防止无限循环
             let start_pos = state.get_position();
@@ -58,18 +69,16 @@ impl<'config> ErlangLexer<'config> {
                 // 如果位置没有前进，跳过一个字符以避免无限循环
                 if let Some(ch) = state.current() {
                     state.advance(ch.len_utf8());
-                    state.add_token(ErlangSyntaxKind::Error, start_pos, state.get_position());
+                    let end = state.get_position();
+                    state.add_token(ErlangSyntaxKind::Error, start_pos, end);
                 }
             }
         }
-
-        // 添加 EOF token
-        let eof_pos = state.get_position();
-        state.add_token(ErlangSyntaxKind::Eof, eof_pos, eof_pos);
+        Ok(())
     }
 
     /// 跳过空白字符和注释
-    fn skip_whitespace_and_comments<S: Source>(&self, state: &mut LexerState<S, ErlangLanguage>) -> bool {
+    fn skip_whitespace_and_comments<S: Source + ?Sized>(&self, state: &mut LexerState<S, ErlangLanguage>) -> bool {
         let mut skipped = false;
 
         // 跳过空白字符
@@ -119,7 +128,7 @@ impl<'config> ErlangLexer<'config> {
     }
 
     /// 词法分析字符串字面量
-    fn lex_string_literal<S: Source>(&self, state: &mut LexerState<S, ErlangLanguage>) -> bool {
+    fn lex_string_literal<S: Source + ?Sized>(&self, state: &mut LexerState<S, ErlangLanguage>) -> bool {
         if let Some('"') = state.current() {
             let start = state.get_position();
             state.advance(1); // 跳过开始的 '"'
@@ -127,13 +136,14 @@ impl<'config> ErlangLexer<'config> {
             while let Some(ch) = state.current() {
                 if ch == '"' {
                     state.advance(1); // 跳过结束的 '"'
-                    state.add_token(ErlangSyntaxKind::String, start, state.get_position());
+                    let end = state.get_position();
+                    state.add_token(ErlangSyntaxKind::String, start, end);
                     return true;
                 }
                 else if ch == '\\' {
                     state.advance(1); // 跳过转义字符
-                    if let Some(_) = state.current() {
-                        state.advance(state.current().unwrap().len_utf8());
+                    if let Some(ch) = state.current() {
+                        state.advance(ch.len_utf8());
                     }
                 }
                 else {
@@ -142,7 +152,8 @@ impl<'config> ErlangLexer<'config> {
             }
 
             // 未闭合的字符串
-            state.add_token(ErlangSyntaxKind::Error, start, state.get_position());
+            let end = state.get_position();
+            state.add_token(ErlangSyntaxKind::String, start, end);
             true
         }
         else {
@@ -151,16 +162,32 @@ impl<'config> ErlangLexer<'config> {
     }
 
     /// 词法分析字符字面量
-    fn lex_character_literal<S: Source>(&self, state: &mut LexerState<S, ErlangLanguage>) -> bool {
+    fn lex_character_literal<S: Source + ?Sized>(&self, state: &mut LexerState<S, ErlangLanguage>) -> bool {
         if let Some('$') = state.current() {
             let start = state.get_position();
             state.advance(1); // 跳过 '$'
 
             if let Some(ch) = state.current() {
                 if ch == '\\' {
-                    state.advance(1); // 跳过转义字符
-                    if let Some(_) = state.current() {
-                        state.advance(state.current().unwrap().len_utf8());
+                    state.advance(1);
+                    // 简单的转义或八进制转义
+                    if let Some(next) = state.current() {
+                        if next.is_ascii_digit() {
+                            // 八进制
+                            let mut count = 0;
+                            while let Some(ch) = state.current() {
+                                if ch.is_ascii_digit() && count < 3 {
+                                    state.advance(1);
+                                    count += 1;
+                                }
+                                else {
+                                    break;
+                                }
+                            }
+                        }
+                        else {
+                            state.advance(next.len_utf8());
+                        }
                     }
                 }
                 else {
@@ -170,6 +197,7 @@ impl<'config> ErlangLexer<'config> {
                 true
             }
             else {
+                // 只有 $ 没有字符
                 state.add_token(ErlangSyntaxKind::Error, start, state.get_position());
                 true
             }
@@ -180,7 +208,7 @@ impl<'config> ErlangLexer<'config> {
     }
 
     /// 词法分析数字
-    fn lex_number<S: Source>(&self, state: &mut LexerState<S, ErlangLanguage>) -> bool {
+    fn lex_number<S: Source + ?Sized>(&self, state: &mut LexerState<S, ErlangLanguage>) -> bool {
         if let Some(ch) = state.current() {
             if ch.is_ascii_digit() {
                 let start = state.get_position();
@@ -251,24 +279,42 @@ impl<'config> ErlangLexer<'config> {
     }
 
     /// 词法分析标识符、原子或关键字
-    fn lex_identifier_atom_or_keyword<S: Source>(&self, state: &mut LexerState<S, ErlangLanguage>) -> bool {
+    fn lex_identifier_atom_or_keyword<S: Source + ?Sized>(&self, state: &mut LexerState<S, ErlangLanguage>) -> bool {
         if let Some(ch) = state.current() {
-            if ch.is_ascii_alphabetic() || ch == '_' {
-                let start = state.get_position();
+            let start = state.get_position();
 
-                // 读取标识符
+            // 变量 (大写字母或下划线开头)
+            if ch.is_ascii_uppercase() || ch == '_' {
+                state.advance(1);
                 while let Some(ch) = state.current() {
-                    if ch.is_ascii_alphanumeric() || ch == '_' {
-                        state.advance(ch.len_utf8());
+                    if ch.is_ascii_alphanumeric() || ch == '_' || ch == '@' {
+                        state.advance(1);
                     }
                     else {
                         break;
                     }
                 }
+                state.add_token(ErlangSyntaxKind::Variable, start, state.get_position());
+                return true;
+            }
 
-                let text = state.get_text_in((start..state.get_position()).into());
-                let kind = if KEYWORDS.contains(text) {
-                    match text {
+            // 原子 (小写字母开头)
+            if ch.is_ascii_lowercase() {
+                state.advance(1);
+                while let Some(ch) = state.current() {
+                    if ch.is_ascii_alphanumeric() || ch == '_' || ch == '@' {
+                        state.advance(1);
+                    }
+                    else {
+                        break;
+                    }
+                }
+                let end = state.get_position();
+                let text = state.source().get_text_in(oak_core::Range { start, end });
+
+                // 检查是否是关键字
+                if KEYWORDS.contains(text.as_ref()) {
+                    let kind = match text.as_ref() {
                         "after" => ErlangSyntaxKind::After,
                         "and" => ErlangSyntaxKind::And,
                         "andalso" => ErlangSyntaxKind::Andalso,
@@ -297,56 +343,44 @@ impl<'config> ErlangLexer<'config> {
                         "try" => ErlangSyntaxKind::Try,
                         "when" => ErlangSyntaxKind::When,
                         "xor" => ErlangSyntaxKind::Xor,
-                        _ => ErlangSyntaxKind::Identifier,
-                    }
-                }
-                else if ch.is_ascii_uppercase() || ch == '_' {
-                    ErlangSyntaxKind::Variable
+                        _ => ErlangSyntaxKind::Atom,
+                    };
+                    state.add_token(kind, start, end);
                 }
                 else {
-                    ErlangSyntaxKind::Identifier
-                };
-
-                state.add_token(kind, start, state.get_position());
-                true
+                    state.add_token(ErlangSyntaxKind::Atom, start, end);
+                }
+                return true;
             }
-            else if ch == '\'' {
-                // 引用原子
-                let start = state.get_position();
-                state.advance(1); // 跳过开始的 '\''
 
+            // 引用原子 ('atom')
+            if ch == '\'' {
+                state.advance(1);
                 while let Some(ch) = state.current() {
                     if ch == '\'' {
-                        state.advance(1); // 跳过结束的 '\''
+                        state.advance(1);
                         state.add_token(ErlangSyntaxKind::Atom, start, state.get_position());
                         return true;
                     }
                     else if ch == '\\' {
-                        state.advance(1); // 跳过转义字符
-                        if let Some(_) = state.current() {
-                            state.advance(state.current().unwrap().len_utf8());
+                        state.advance(1);
+                        if let Some(next) = state.current() {
+                            state.advance(next.len_utf8());
                         }
                     }
                     else {
                         state.advance(ch.len_utf8());
                     }
                 }
-
-                // 未闭合的原子
-                state.add_token(ErlangSyntaxKind::Error, start, state.get_position());
-                true
-            }
-            else {
-                false
+                state.add_token(ErlangSyntaxKind::Atom, start, state.get_position());
+                return true;
             }
         }
-        else {
-            false
-        }
+        false
     }
 
     /// 词法分析操作符
-    fn lex_operator<S: Source>(&self, state: &mut LexerState<S, ErlangLanguage>) -> bool {
+    fn lex_operator<S: Source + ?Sized>(&self, state: &mut LexerState<S, ErlangLanguage>) -> bool {
         if let Some(ch) = state.current() {
             let start = state.get_position();
 
@@ -485,7 +519,7 @@ impl<'config> ErlangLexer<'config> {
     }
 
     /// 词法分析单字符 token
-    fn lex_single_char_token<S: Source>(&self, state: &mut LexerState<S, ErlangLanguage>) -> bool {
+    fn lex_single_char_token<S: Source + ?Sized>(&self, state: &mut LexerState<S, ErlangLanguage>) -> bool {
         if let Some(ch) = state.current() {
             let start = state.get_position();
             let kind = match ch {
@@ -517,27 +551,9 @@ impl<'config> ErlangLexer<'config> {
     }
 }
 
-impl<'config> Lexer<ErlangLanguage> for ErlangLexer<'config> {
-    fn lex_incremental(
-        &self,
-        source: impl Source,
-        changed: usize,
-        cache: IncrementalCache<ErlangLanguage>,
-    ) -> LexOutput<ErlangLanguage> {
-        let mut state = LexerState::new_with_cache(source, changed, cache);
-        self.run(&mut state);
-        state.finish(Ok(()))
-    }
-}
-
 // 静态配置
 static WHITESPACE: LazyLock<HashSet<char>> = LazyLock::new(|| [' ', '\t', '\r', '\n'].into_iter().collect());
 
 static KEYWORDS: LazyLock<HashSet<&'static str>> = LazyLock::new(|| {
-    [
-        "after", "and", "andalso", "band", "begin", "bnot", "bor", "bsl", "bsr", "bxor", "case", "catch", "cond", "div", "end",
-        "fun", "if", "let", "not", "of", "or", "orelse", "query", "receive", "rem", "try", "when", "xor",
-    ]
-    .into_iter()
-    .collect()
+    ["after", "and", "andalso", "band", "begin", "bnot", "bor", "bsl", "bsr", "bxor", "case", "catch", "cond", "div", "end", "fun", "if", "let", "not", "of", "or", "orelse", "query", "receive", "rem", "try", "when", "xor"].into_iter().collect()
 });

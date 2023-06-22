@@ -1,0 +1,607 @@
+{
+    "success": true,
+    "count": 100,
+    "tokens": [
+        {
+            "kind": "ModuleKeyword",
+            "text": "module",
+            "start": 45,
+            "end": 51
+        },
+        {
+            "kind": "Identifier",
+            "text": "basic",
+            "start": 52,
+            "end": 57
+        },
+        {
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 57,
+            "end": 58
+        },
+        {
+            "kind": "ImportKeyword",
+            "text": "import",
+            "start": 62,
+            "end": 68
+        },
+        {
+            "kind": "Identifier",
+            "text": "std",
+            "start": 69,
+            "end": 72
+        },
+        {
+            "kind": "Dot",
+            "text": ".",
+            "start": 72,
+            "end": 73
+        },
+        {
+            "kind": "Identifier",
+            "text": "stdio",
+            "start": 73,
+            "end": 78
+        },
+        {
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 78,
+            "end": 79
+        },
+        {
+            "kind": "ImportKeyword",
+            "text": "import",
+            "start": 81,
+            "end": 87
+        },
+        {
+            "kind": "Identifier",
+            "text": "std",
+            "start": 88,
+            "end": 91
+        },
+        {
+            "kind": "Dot",
+            "text": ".",
+            "start": 91,
+            "end": 92
+        },
+        {
+            "kind": "StringType",
+            "text": "string",
+            "start": 92,
+            "end": 98
+        },
+        {
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 98,
+            "end": 99
+        },
+        {
+            "kind": "ImportKeyword",
+            "text": "import",
+            "start": 101,
+            "end": 107
+        },
+        {
+            "kind": "Identifier",
+            "text": "std",
+            "start": 108,
+            "end": 111
+        },
+        {
+            "kind": "Dot",
+            "text": ".",
+            "start": 111,
+            "end": 112
+        },
+        {
+            "kind": "Identifier",
+            "text": "conv",
+            "start": 112,
+            "end": 116
+        },
+        {
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 116,
+            "end": 117
+        },
+        {
+            "kind": "ImportKeyword",
+            "text": "import",
+            "start": 119,
+            "end": 125
+        },
+        {
+            "kind": "Identifier",
+            "text": "std",
+            "start": 126,
+            "end": 129
+        },
+        {
+            "kind": "Dot",
+            "text": ".",
+            "start": 129,
+            "end": 130
+        },
+        {
+            "kind": "Identifier",
+            "text": "algorithm",
+            "start": 130,
+            "end": 139
+        },
+        {
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 139,
+            "end": 140
+        },
+        {
+            "kind": "VoidType",
+            "text": "void",
+            "start": 273,
+            "end": 277
+        },
+        {
+            "kind": "Identifier",
+            "text": "main",
+            "start": 278,
+            "end": 282
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 282,
+            "end": 283
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 283,
+            "end": 284
+        },
+        {
+            "kind": "LeftBrace",
+            "text": "{",
+            "start": 286,
+            "end": 287
+        },
+        {
+            "kind": "IntType",
+            "text": "int",
+            "start": 339,
+            "end": 342
+        },
+        {
+            "kind": "Identifier",
+            "text": "integerVar",
+            "start": 343,
+            "end": 353
+        },
+        {
+            "kind": "Assign",
+            "text": "=",
+            "start": 354,
+            "end": 355
+        },
+        {
+            "kind": "IntegerLiteral",
+            "text": "10",
+            "start": 356,
+            "end": 358
+        },
+        {
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 358,
+            "end": 359
+        },
+        {
+            "kind": "FloatType",
+            "text": "float",
+            "start": 365,
+            "end": 370
+        },
+        {
+            "kind": "Identifier",
+            "text": "floatVar",
+            "start": 371,
+            "end": 379
+        },
+        {
+            "kind": "Assign",
+            "text": "=",
+            "start": 380,
+            "end": 381
+        },
+        {
+            "kind": "IntegerLiteral",
+            "text": "10.5f",
+            "start": 382,
+            "end": 387
+        },
+        {
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 387,
+            "end": 388
+        },
+        {
+            "kind": "DoubleType",
+            "text": "double",
+            "start": 394,
+            "end": 400
+        },
+        {
+            "kind": "Identifier",
+            "text": "doubleVar",
+            "start": 401,
+            "end": 410
+        },
+        {
+            "kind": "Assign",
+            "text": "=",
+            "start": 411,
+            "end": 412
+        },
+        {
+            "kind": "IntegerLiteral",
+            "text": "20.25",
+            "start": 413,
+            "end": 418
+        },
+        {
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 418,
+            "end": 419
+        },
+        {
+            "kind": "CharType",
+            "text": "char",
+            "start": 425,
+            "end": 429
+        },
+        {
+            "kind": "Identifier",
+            "text": "charVar",
+            "start": 430,
+            "end": 437
+        },
+        {
+            "kind": "Assign",
+            "text": "=",
+            "start": 438,
+            "end": 439
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "'A'",
+            "start": 440,
+            "end": 443
+        },
+        {
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 443,
+            "end": 444
+        },
+        {
+            "kind": "StringType",
+            "text": "string",
+            "start": 450,
+            "end": 456
+        },
+        {
+            "kind": "Identifier",
+            "text": "stringVar",
+            "start": 457,
+            "end": 466
+        },
+        {
+            "kind": "Assign",
+            "text": "=",
+            "start": 467,
+            "end": 468
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "\"Hello, D!\"",
+            "start": 469,
+            "end": 480
+        },
+        {
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 480,
+            "end": 481
+        },
+        {
+            "kind": "BoolType",
+            "text": "bool",
+            "start": 487,
+            "end": 491
+        },
+        {
+            "kind": "Identifier",
+            "text": "boolVar",
+            "start": 492,
+            "end": 499
+        },
+        {
+            "kind": "Assign",
+            "text": "=",
+            "start": 500,
+            "end": 501
+        },
+        {
+            "kind": "TrueKeyword",
+            "text": "true",
+            "start": 502,
+            "end": 506
+        },
+        {
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 506,
+            "end": 507
+        },
+        {
+            "kind": "AutoKeyword",
+            "text": "auto",
+            "start": 513,
+            "end": 517
+        },
+        {
+            "kind": "Identifier",
+            "text": "inferredVar",
+            "start": 518,
+            "end": 529
+        },
+        {
+            "kind": "Assign",
+            "text": "=",
+            "start": 530,
+            "end": 531
+        },
+        {
+            "kind": "IntegerLiteral",
+            "text": "123.456",
+            "start": 532,
+            "end": 539
+        },
+        {
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 539,
+            "end": 540
+        },
+        {
+            "kind": "ConstKeyword",
+            "text": "const",
+            "start": 548,
+            "end": 553
+        },
+        {
+            "kind": "IntType",
+            "text": "int",
+            "start": 554,
+            "end": 557
+        },
+        {
+            "kind": "Identifier",
+            "text": "constVar",
+            "start": 558,
+            "end": 566
+        },
+        {
+            "kind": "Assign",
+            "text": "=",
+            "start": 567,
+            "end": 568
+        },
+        {
+            "kind": "IntegerLiteral",
+            "text": "100",
+            "start": 569,
+            "end": 572
+        },
+        {
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 572,
+            "end": 573
+        },
+        {
+            "kind": "ImmutableKeyword",
+            "text": "immutable",
+            "start": 579,
+            "end": 588
+        },
+        {
+            "kind": "StringType",
+            "text": "string",
+            "start": 589,
+            "end": 595
+        },
+        {
+            "kind": "Identifier",
+            "text": "immutableVar",
+            "start": 596,
+            "end": 608
+        },
+        {
+            "kind": "Assign",
+            "text": "=",
+            "start": 609,
+            "end": 610
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "\"Immutable string\"",
+            "start": 611,
+            "end": 629
+        },
+        {
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 629,
+            "end": 630
+        },
+        {
+            "kind": "EnumKeyword",
+            "text": "enum",
+            "start": 638,
+            "end": 642
+        },
+        {
+            "kind": "Identifier",
+            "text": "Color",
+            "start": 643,
+            "end": 648
+        },
+        {
+            "kind": "LeftBrace",
+            "text": "{",
+            "start": 649,
+            "end": 650
+        },
+        {
+            "kind": "Identifier",
+            "text": "Red",
+            "start": 651,
+            "end": 654
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 654,
+            "end": 655
+        },
+        {
+            "kind": "Identifier",
+            "text": "Green",
+            "start": 656,
+            "end": 661
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 661,
+            "end": 662
+        },
+        {
+            "kind": "Identifier",
+            "text": "Blue",
+            "start": 663,
+            "end": 667
+        },
+        {
+            "kind": "RightBrace",
+            "text": "}",
+            "start": 668,
+            "end": 669
+        },
+        {
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 669,
+            "end": 670
+        },
+        {
+            "kind": "Identifier",
+            "text": "Color",
+            "start": 676,
+            "end": 681
+        },
+        {
+            "kind": "Identifier",
+            "text": "myColor",
+            "start": 682,
+            "end": 689
+        },
+        {
+            "kind": "Assign",
+            "text": "=",
+            "start": 690,
+            "end": 691
+        },
+        {
+            "kind": "Identifier",
+            "text": "Color",
+            "start": 692,
+            "end": 697
+        },
+        {
+            "kind": "Dot",
+            "text": ".",
+            "start": 697,
+            "end": 698
+        },
+        {
+            "kind": "Identifier",
+            "text": "Green",
+            "start": 698,
+            "end": 703
+        },
+        {
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 703,
+            "end": 704
+        },
+        {
+            "kind": "Identifier",
+            "text": "writeln",
+            "start": 727,
+            "end": 734
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 734,
+            "end": 735
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "\"Integer: \"",
+            "start": 735,
+            "end": 746
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 746,
+            "end": 747
+        },
+        {
+            "kind": "Identifier",
+            "text": "integerVar",
+            "start": 748,
+            "end": 758
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 758,
+            "end": 759
+        },
+        {
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 759,
+            "end": 760
+        },
+        {
+            "kind": "Identifier",
+            "text": "writeln",
+            "start": 766,
+            "end": 773
+        }
+    ],
+    "errors": []
+}

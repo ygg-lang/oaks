@@ -4,8 +4,25 @@
 #![doc(html_favicon_url = "https://raw.githubusercontent.com/ygg-lang/oaks/refs/heads/dev/documents/logo.svg")]
 
 pub mod ast;
+pub mod builder;
+pub mod highlighter;
 pub mod kind;
 pub mod language;
 pub mod lexer;
+pub mod lsp;
+#[cfg(feature = "mcp")]
+pub mod mcp;
+pub mod parser;
 
-pub use crate::{kind::PowerShellToken, language::PowerShellLanguage};
+pub use crate::{
+    ast::PowerShellRoot,
+    builder::PowerShellBuilder,
+    highlighter::{HighlightKind, Highlighter, PowerShellHighlighter},
+    kind::PowerShellSyntaxKind,
+    language::PowerShellLanguage,
+    lsp::PowerShellLanguageService,
+    parser::PowerShellParser,
+};
+
+#[cfg(feature = "mcp")]
+pub use crate::mcp::serve_powershell_mcp;

@@ -1,5 +1,5 @@
+use oak_core::{ElementType, TokenType, UniversalElementRole, UniversalTokenRole};
 use serde::{Deserialize, Serialize};
-use oak_core::SyntaxKind;
 
 #[derive(Copy, Clone, Debug, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub enum NginxSyntaxKind {
@@ -43,24 +43,47 @@ pub enum NginxSyntaxKind {
     Error,
 }
 
-impl SyntaxKind for NginxSyntaxKind {
-    fn is_trivia(&self) -> bool {
-        matches!(self, Self::Whitespace | Self::Newline | Self::CommentToken)
+impl TokenType for NginxSyntaxKind {
+    const END_OF_STREAM: Self = Self::Eof;
+    type Role = UniversalTokenRole;
+
+    fn role(&self) -> Self::Role {
+        match self {
+            Self::Whitespace | Self::Newline => UniversalTokenRole::Whitespace,
+            Self::CommentToken | Self::Comment => UniversalTokenRole::Comment,
+            Self::Eof => UniversalTokenRole::Eof,
+            _ => UniversalTokenRole::None,
+        }
     }
 
     fn is_comment(&self) -> bool {
-        matches!(self, Self::CommentToken)
+        matches!(self, Self::CommentToken | Self::Comment)
     }
 
     fn is_whitespace(&self) -> bool {
         matches!(self, Self::Whitespace | Self::Newline)
     }
+}
 
-    fn is_token_type(&self) -> bool {
-        !matches!(self, Self::Root | Self::Directive | Self::Block | Self::Parameter | Self::Value | Self::Comment)
+impl ElementType for NginxSyntaxKind {
+    type Role = UniversalElementRole;
+
+    fn role(&self) -> Self::Role {
+        match self {
+            Self::Error => UniversalElementRole::Error,
+            Self::Root => UniversalElementRole::Root,
+            Self::Directive | Self::Block => UniversalElementRole::Detail,
+            _ => UniversalElementRole::None,
+        }
+    }
+}
+
+impl NginxSyntaxKind {
+    pub fn is_element(&self) -> bool {
+        matches!(self, Self::Root | Self::Directive | Self::Block | Self::Parameter | Self::Value | Self::Comment)
     }
 
-    fn is_element_type(&self) -> bool {
-        matches!(self, Self::Root | Self::Directive | Self::Block | Self::Parameter | Self::Value | Self::Comment)
+    pub fn is_token(&self) -> bool {
+        !self.is_element()
     }
 }

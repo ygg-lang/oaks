@@ -1,10 +1,14 @@
-use crate::{ast::OCamlRoot, kind::OCamlSyntaxKind};
-use oak_core::Language;
+use crate::ast::OCamlRoot;
+use oak_core::{Language, LanguageCategory};
 
 #[derive(Debug, Clone)]
 pub struct OCamlLanguage;
 
 impl Language for OCamlLanguage {
-    type SyntaxKind = OCamlSyntaxKind;
+    const NAME: &'static str = "ocaml";
+    const CATEGORY: LanguageCategory = LanguageCategory::Programming;
+
+    type TokenType = crate::kind::OCamlSyntaxKind;
+    type ElementType = crate::kind::OCamlSyntaxKind;
     type TypedRoot = OCamlRoot;
 }

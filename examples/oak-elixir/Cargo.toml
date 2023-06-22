@@ -1,9 +1,9 @@
 [package]
 name = "oak-elixir"
-description = "Erlang language parser with support for concurrent programming and OTP features."
+description = "Elixir functional programming language parser with support for metaprogramming and concurrent programming features."
 categories = ["parsing"]
-keywords = ["parser", "erlang", "otp", "concurrent"]
-documentation = "https://docs.rs/oak-erlang"
+keywords = ["parser", "elixir", "functional", "metaprogramming"]
+documentation = "https://docs.rs/oak-elixir"
 readme = "readme.md"
 version.workspace = true
 authors.workspace = true

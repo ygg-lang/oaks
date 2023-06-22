@@ -21,16 +21,18 @@ Oak Wolfram is a robust parser for the Wolfram Language, designed to handle comp
 Basic example:
 
 ```rust
-use oak_wolfram::{Parser, WolframLanguage, SourceText};
+use oak_core::{Parser, SourceText, parser::session::ParseSession};
+use oak_wolfram::{WolframParser, WolframLanguage};
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
-    let parser = Parser::new();
+    let mut session = ParseSession::<WolframLanguage>::default();
+    let parser = WolframParser::new();
     let source = SourceText::new(r#"
         f[x_] := x^2 + 2*x + 1
         Plot[f[x], {x, -10, 10}]
     "#);
     
-    let result = parser.parse(&source);
+    let result = parser.parse(&source, &[], &mut session);
     println!("Parsed Wolfram successfully.");
     Ok(())
 }
@@ -40,27 +42,31 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
 ### Function Definition Parsing
 ```rust
-use oak_wolfram::{Parser, WolframLanguage, SourceText};
+use oak_core::{Parser, SourceText, parser::session::ParseSession};
+use oak_wolfram::{WolframParser, WolframLanguage};
 
-let parser = Parser::new();
+let mut session = ParseSession::<WolframLanguage>::default();
+let parser = WolframParser::new();
 let source = SourceText::new(r#"
     factorial[n_] := If[n <= 1, 1, n * factorial[n - 1]]
 "#);
 
-let result = parser.parse(&source);
+let result = parser.parse(&source, &[], &mut session);
 println!("Function parsed successfully.");
 ```
 
 ### Expression Parsing
 ```rust
-use oak_wolfram::{Parser, WolframLanguage, SourceText};
+use oak_core::{Parser, SourceText, parser::session::ParseSession};
+use oak_wolfram::{WolframParser, WolframLanguage};
 
-let parser = Parser::new();
+let mut session = ParseSession::<WolframLanguage>::default();
+let parser = WolframParser::new();
 let source = SourceText::new(r#"
     Integrate[Sin[x], {x, 0, Pi}]
 "#);
 
-let result = parser.parse(&source);
+let result = parser.parse(&source, &[], &mut session);
 println!("Expression parsed successfully.");
 ```
 
@@ -68,25 +74,29 @@ println!("Expression parsed successfully.");
 
 ### Token-Level Parsing
 ```rust
-use oak_wolfram::{Parser, WolframLanguage, SourceText};
+use oak_core::{Parser, SourceText, parser::session::ParseSession};
+use oak_wolfram::{WolframParser, WolframLanguage};
 
-let parser = Parser::new();
+let mut session = ParseSession::<WolframLanguage>::default();
+let parser = WolframParser::new();
 let source = SourceText::new("f[x_] := x^2");
-let result = parser.parse(&source);
+let result = parser.parse(&source, &[], &mut session);
 println!("Token parsing completed.");
 ```
 
 ### Error Handling
 ```rust
-use oak_wolfram::{Parser, WolframLanguage, SourceText};
+use oak_core::{Parser, SourceText, parser::session::ParseSession};
+use oak_wolfram::{WolframParser, WolframLanguage};
 
-let parser = Parser::new();
+let mut session = ParseSession::<WolframLanguage>::default();
+let parser = WolframParser::new();
 let source = SourceText::new(r#"
     f[x_ := x^2 + 1
     (* Missing closing bracket *)
 "#);
 
-let result = parser.parse(&source);
+let result = parser.parse(&source, &[], &mut session);
 if let Some(errors) = result.result.err() {
     println!("Parse errors found: {:?}", errors);
 } else {

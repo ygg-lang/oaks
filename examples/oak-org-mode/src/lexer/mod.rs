@@ -1,66 +1,45 @@
 use crate::{kind::OrgModeSyntaxKind, language::OrgModeLanguage};
 use oak_core::{
-    IncrementalCache, Lexer, LexerState, OakError,
-    lexer::{CommentLine, LexOutput, StringConfig, WhitespaceConfig},
+    TextEdit,
+    errors::OakError,
+    lexer::{CommentConfig, LexOutput, Lexer, LexerCache, LexerState, StringConfig, WhitespaceConfig},
     source::Source,
 };
 use std::sync::LazyLock;
 
-type State<S> = LexerState<S, OrgModeLanguage>;
+type State<'a, S> = LexerState<'a, S, OrgModeLanguage>;
 
 static ORG_WHITESPACE: LazyLock<WhitespaceConfig> = LazyLock::new(|| WhitespaceConfig { unicode_whitespace: true });
-static ORG_COMMENT: LazyLock<CommentLine> = LazyLock::new(|| CommentLine { line_markers: &["#"] });
+static ORG_COMMENT: LazyLock<CommentConfig> = LazyLock::new(|| CommentConfig { line_marker: "#", block_start: "", block_end: "", nested_blocks: false });
 static ORG_STRING: LazyLock<StringConfig> = LazyLock::new(|| StringConfig { quotes: &['"'], escape: Some('\\') });
 
-#[derive(Clone)]
-pub struct OrgModeLexer<'config> {
-    config: &'config OrgModeLanguage,
-}
+#[derive(Clone, Debug, Default)]
+pub struct OrgModeLexer {}
 
-impl<'config> OrgModeLexer<'config> {
-    pub fn new(config: &'config OrgModeLanguage) -> Self {
-        Self { config }
+impl OrgModeLexer {
+    pub fn new(_config: &OrgModeLanguage) -> Self {
+        Self {}
     }
 
-    fn skip_whitespace<S: Source>(&self, state: &mut State<S>) -> bool {
-        match ORG_WHITESPACE.scan(state.rest(), state.get_position(), OrgModeSyntaxKind::Whitespace) {
-            Some(token) => {
-                state.advance_with(token);
-                true
-            }
-            None => false,
-        }
+    fn skip_whitespace<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
+        ORG_WHITESPACE.scan(state, OrgModeSyntaxKind::Whitespace)
     }
 
-    fn skip_comment<S: Source>(&self, state: &mut State<S>) -> bool {
-        match ORG_COMMENT.scan(state.rest(), state.get_position(), OrgModeSyntaxKind::Comment) {
-            Some(token) => {
-                state.advance_with(token);
-                true
-            }
-            None => false,
-        }
+    fn skip_comment<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
+        ORG_COMMENT.scan(state, OrgModeSyntaxKind::Comment, OrgModeSyntaxKind::Comment)
     }
 
-    fn lex_string<S: Source>(&self, state: &mut State<S>) -> bool {
-        match ORG_STRING.scan(state.rest(), state.get_position(), OrgModeSyntaxKind::Text) {
-            Some(token) => {
-                state.advance_with(token);
-                true
-            }
-            None => false,
-        }
+    fn lex_string<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
+        ORG_STRING.scan(state, OrgModeSyntaxKind::Text)
     }
 
-    fn lex_heading<S: Source>(&self, state: &mut State<S>) -> bool {
+    fn lex_heading<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         if let Some('*') = state.peek() {
             let start_pos = state.get_position();
-            let mut level = 0;
 
             // 计算星号数量
             while let Some('*') = state.peek() {
                 state.advance(1);
-                level += 1;
             }
 
             // 必须跟空格
@@ -89,25 +68,22 @@ impl<'config> OrgModeLexer<'config> {
         }
     }
 
-    fn lex_text_or_keyword<S: Source>(&self, state: &mut State<S>) -> bool {
+    fn lex_text_or_keyword<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         if let Some(ch) = state.peek() {
             if ch.is_alphabetic() || ch == '_' {
                 let start_pos = state.get_position();
-                let mut text = String::new();
-
                 // 读取字母、数字和下划线
                 while let Some(ch) = state.peek() {
                     if ch.is_alphanumeric() || ch == '_' {
-                        text.push(ch);
                         state.advance(ch.len_utf8());
                     }
                     else {
                         break;
                     }
                 }
-
-                // 检查是否是关键字
-                let kind = match text.as_str() {
+                let end_pos = state.get_position();
+                let text = state.source().get_text_in((start_pos..end_pos).into());
+                let kind = match text.as_ref() {
                     "TODO" => OrgModeSyntaxKind::Todo,
                     "DONE" => OrgModeSyntaxKind::Done,
                     "NEXT" => OrgModeSyntaxKind::Next,
@@ -115,136 +91,55 @@ impl<'config> OrgModeLexer<'config> {
                     "CANCELLED" => OrgModeSyntaxKind::Cancelled,
                     _ => OrgModeSyntaxKind::Text,
                 };
-
-                state.add_token(kind, start_pos, state.get_position());
-                true
-            }
-            else {
-                false
+                state.add_token(kind, start_pos, end_pos);
+                return true;
             }
         }
-        else {
-            false
-        }
+        false
     }
 
-    fn lex_number_or_date<S: Source>(&self, state: &mut State<S>) -> bool {
-        if let Some(ch) = state.peek() {
-            if ch.is_ascii_digit() {
-                let start_pos = state.get_position();
-                let mut has_dash = false;
-                let mut has_colon = false;
-
-                // 读取数字、破折号和冒号
-                while let Some(ch) = state.peek() {
-                    if ch.is_ascii_digit() {
-                        state.advance(1);
-                    }
-                    else if ch == '-' && !has_dash {
-                        has_dash = true;
-                        state.advance(1);
-                    }
-                    else if ch == ':' && !has_colon {
-                        has_colon = true;
-                        state.advance(1);
-                    }
-                    else {
-                        break;
-                    }
-                }
-
-                let kind = if has_dash {
-                    OrgModeSyntaxKind::Date
-                }
-                else if has_colon {
-                    OrgModeSyntaxKind::Time
-                }
-                else {
-                    OrgModeSyntaxKind::Number
-                };
-
-                state.add_token(kind, start_pos, state.get_position());
-                true
-            }
-            else {
-                false
-            }
-        }
-        else {
-            false
-        }
-    }
-
-    fn lex_link<S: Source>(&self, state: &mut State<S>) -> bool {
-        if let Some('[') = state.peek() {
+    fn lex_link<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
+        if state.starts_with("[[") {
             let start_pos = state.get_position();
-            state.advance(1);
+            state.advance(2);
 
-            if let Some('[') = state.peek() {
-                state.advance(1);
-
-                // 读取链接内容直到 ]]
-                let mut bracket_count = 0;
-                while let Some(ch) = state.peek() {
-                    if ch == ']' {
-                        state.advance(1);
-                        if let Some(']') = state.peek() {
-                            state.advance(1);
-                            bracket_count += 1;
-                            if bracket_count == 1 {
-                                break;
-                            }
-                        }
-                    }
-                    else {
-                        state.advance(ch.len_utf8());
-                    }
+            // 读取链接内容直到 ]] 或行尾
+            while let Some(ch) = state.peek() {
+                if state.starts_with("]]") {
+                    state.advance(2);
+                    state.add_token(OrgModeSyntaxKind::Link, start_pos, state.get_position());
+                    return true;
                 }
+                if ch == '\n' {
+                    break;
+                }
+                state.advance(ch.len_utf8());
+            }
 
-                state.add_token(OrgModeSyntaxKind::Link, start_pos, state.get_position());
-                true
-            }
-            else {
-                // 回退
-                state.set_position(start_pos);
-                false
-            }
+            state.add_token(OrgModeSyntaxKind::Text, start_pos, state.get_position());
+            true
         }
         else {
             false
         }
     }
 
-    fn lex_priority<S: Source>(&self, state: &mut State<S>) -> bool {
-        if let Some('[') = state.peek() {
+    fn lex_priority<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
+        if state.starts_with("[#") {
             let start_pos = state.get_position();
-            state.advance(1);
+            state.advance(2);
 
-            if let Some('#') = state.peek() {
-                state.advance(1);
-
-                if let Some(priority_char) = state.peek() {
-                    if priority_char == 'A' || priority_char == 'B' || priority_char == 'C' {
+            if let Some(ch) = state.peek() {
+                if ch.is_alphabetic() {
+                    state.advance(ch.len_utf8());
+                    if let Some(']') = state.peek() {
                         state.advance(1);
-
-                        if let Some(']') = state.peek() {
-                            state.advance(1);
-
-                            let kind = match priority_char {
-                                'A' => OrgModeSyntaxKind::PriorityA,
-                                'B' => OrgModeSyntaxKind::PriorityB,
-                                'C' => OrgModeSyntaxKind::PriorityC,
-                                _ => unreachable!(),
-                            };
-
-                            state.add_token(kind, start_pos, state.get_position());
-                            return true;
-                        }
+                        state.add_token(OrgModeSyntaxKind::Priority, start_pos, state.get_position());
+                        return true;
                     }
                 }
             }
 
-            // 回退
             state.set_position(start_pos);
             false
         }
@@ -253,7 +148,35 @@ impl<'config> OrgModeLexer<'config> {
         }
     }
 
-    fn lex_symbols<S: Source>(&self, state: &mut State<S>) -> bool {
+    fn lex_number_or_date<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
+        if let Some(ch) = state.peek() {
+            if ch.is_ascii_digit() {
+                let start_pos = state.get_position();
+                let mut has_dash = false;
+
+                while let Some(ch) = state.peek() {
+                    if ch.is_ascii_digit() {
+                        state.advance(1);
+                    }
+                    else if ch == '-' {
+                        state.advance(1);
+                        has_dash = true;
+                    }
+                    else {
+                        break;
+                    }
+                }
+
+                let kind = if has_dash { OrgModeSyntaxKind::Date } else { OrgModeSyntaxKind::Number };
+
+                state.add_token(kind, start_pos, state.get_position());
+                return true;
+            }
+        }
+        false
+    }
+
+    fn lex_symbols<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         if let Some(ch) = state.peek() {
             let start_pos = state.get_position();
             state.advance(ch.len_utf8());
@@ -295,22 +218,21 @@ impl<'config> OrgModeLexer<'config> {
     }
 }
 
-impl<'config> Lexer<OrgModeLanguage> for OrgModeLexer<'config> {
-    fn lex_incremental(
-        &self,
-        source: impl Source,
-        changed: usize,
-        cache: IncrementalCache<OrgModeLanguage>,
-    ) -> LexOutput<OrgModeLanguage> {
-        let mut state = LexerState::new_with_cache(source, changed, cache);
+impl Lexer<OrgModeLanguage> for OrgModeLexer {
+    fn lex<'a, S: Source + ?Sized>(&self, source: &'a S, _edits: &[TextEdit], cache: &'a mut impl LexerCache<OrgModeLanguage>) -> LexOutput<OrgModeLanguage> {
+        let mut state = State::new(source);
         let result = self.run(&mut state);
-        state.finish(result)
+        if result.is_ok() {
+            state.add_eof();
+        }
+        state.finish_with_cache(result, cache)
     }
 }
 
-impl<'config> OrgModeLexer<'config> {
-    fn run<S: Source>(&self, state: &mut State<S>) -> Result<(), OakError> {
+impl OrgModeLexer {
+    fn run<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> Result<(), OakError> {
         while state.not_at_end() {
+            let safe_point = state.get_position();
             // 跳过空白字符
             if self.skip_whitespace(state) {
                 continue;
@@ -365,11 +287,9 @@ impl<'config> OrgModeLexer<'config> {
             else {
                 break;
             }
-        }
 
-        // 添加 EOF token
-        let eof_pos = state.get_position();
-        state.add_token(OrgModeSyntaxKind::Eof, eof_pos, eof_pos);
+            state.advance_if_dead_lock(safe_point);
+        }
         Ok(())
     }
 }

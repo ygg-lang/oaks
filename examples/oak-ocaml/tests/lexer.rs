@@ -8,7 +8,7 @@ fn test_ocaml_lexer() {
     let language = Box::leak(Box::new(OCamlLanguage));
     let lexer = OCamlLexer::new(language);
     let test_runner = LexerTester::new(here.join("tests/lexer")).with_extension("ml").with_timeout(Duration::from_secs(5));
-    match test_runner.run_tests::<OCamlLanguage, _>(lexer) {
+    match test_runner.run_tests::<OCamlLanguage, _>(&lexer) {
         Ok(()) => println!("OCaml lexer tests passed!"),
         Err(e) => panic!("OCaml lexer tests failed: {}", e),
     }

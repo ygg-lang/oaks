@@ -22,10 +22,13 @@ Oak Vala is a robust parser for the Vala programming language, designed to handl
 Basic example:
 
 ```rust
-use oak_vala::{Parser, ValaLanguage, SourceText};
+use oak_vala::{ValaLanguage, ValaParser};
+use oak_core::{Parser, source::SourceText, parser::session::ParseSession};
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
-    let parser = Parser::new();
+    let language = ValaLanguage::default();
+    let parser = ValaParser::new(&language);
+    let mut session = ParseSession::<ValaLanguage>::default();
     let source = SourceText::new(r#"
 public class HelloWorld : Object {
     public static int main(string[] args) {
@@ -35,7 +38,7 @@ public class HelloWorld : Object {
 }
     "#);
     
-    let result = parser.parse(&source);
+    let result = parser.parse(&source, &[], &mut session);
     println!("Parsed Vala class successfully.");
     Ok(())
 }
@@ -45,9 +48,12 @@ public class HelloWorld : Object {
 
 ### Class Parsing
 ```rust
-use oak_vala::{Parser, ValaLanguage, SourceText};
+use oak_vala::{ValaLanguage, ValaParser};
+use oak_core::{Parser, source::SourceText, parser::session::ParseSession};
 
-let parser = Parser::new();
+let language = ValaLanguage::default();
+let parser = ValaParser::new(&language);
+let mut session = ParseSession::<ValaLanguage>::default();
 let source = SourceText::new(r#"
 public class Calculator : Object {
     private double _result;
@@ -70,15 +76,18 @@ public class Calculator : Object {
 }
 "#);
 
-let result = parser.parse(&source);
+let result = parser.parse(&source, &[], &mut session);
 println!("Parsed Vala class successfully.");
 ```
 
 ### Interface Parsing
 ```rust
-use oak_vala::{Parser, ValaLanguage, SourceText};
+use oak_vala::{ValaLanguage, ValaParser};
+use oak_core::{Parser, source::SourceText, parser::session::ParseSession};
 
-let parser = Parser::new();
+let language = ValaLanguage::default();
+let parser = ValaParser::new(&language);
+let mut session = ParseSession::<ValaLanguage>::default();
 let source = SourceText::new(r#"
 public interface Drawable {
     public abstract void draw(Context ctx);
@@ -89,7 +98,7 @@ public interface Drawable {
 }
 "#);
 
-let result = parser.parse(&source);
+let result = parser.parse(&source, &[], &mut session);
 println!("Parsed Vala interface successfully.");
 ```
 
@@ -97,19 +106,25 @@ println!("Parsed Vala interface successfully.");
 
 ### Token-Level Parsing
 ```rust
-use oak_vala::{Parser, ValaLanguage, SourceText};
+use oak_vala::{ValaLanguage, ValaParser};
+use oak_core::{Parser, source::SourceText, parser::session::ParseSession};
 
-let parser = Parser::new();
+let language = ValaLanguage::default();
+let parser = ValaParser::new(&language);
+let mut session = ParseSession::<ValaLanguage>::default();
 let source = SourceText::new("public class Test { public int value; }");
-let result = parser.parse(&source);
+let result = parser.parse(&source, &[], &mut session);
 // Token information is available in the parse result
 ```
 
 ### Error Handling
 ```rust
-use oak_vala::{Parser, ValaLanguage, SourceText};
+use oak_vala::{ValaLanguage, ValaParser};
+use oak_core::{Parser, source::SourceText, parser::session::ParseSession};
 
-let parser = Parser::new();
+let language = ValaLanguage::default();
+let parser = ValaParser::new(&language);
+let mut session = ParseSession::<ValaLanguage>::default();
 let source = SourceText::new(r#"
 public class Broken {
     public int invalid_method() {
@@ -121,7 +136,7 @@ public class Broken {
 }
 "#);
 
-let result = parser.parse(&source);
+let result = parser.parse(&source, &[], &mut session);
 if let Err(e) = result.result {
     println!("Parse error: {:?}", e);
 }

@@ -1,50 +1,34 @@
 use crate::{kind::PascalSyntaxKind, language::PascalLanguage};
 use oak_core::{
-    IncrementalCache, Lexer, LexerState, OakError,
-    lexer::{CommentLine, LexOutput, StringConfig, WhitespaceConfig},
+    Lexer, LexerCache, LexerState, OakError,
+    lexer::{CommentConfig, LexOutput, WhitespaceConfig},
     source::Source,
 };
 use std::sync::LazyLock;
 
-type State<S: Source> = LexerState<S, PascalLanguage>;
+type State<'s, S> = LexerState<'s, S, PascalLanguage>;
 
 static PASCAL_WHITESPACE: LazyLock<WhitespaceConfig> = LazyLock::new(|| WhitespaceConfig { unicode_whitespace: true });
-static PASCAL_COMMENT: LazyLock<CommentLine> = LazyLock::new(|| CommentLine { line_markers: &["//"] });
-static PASCAL_STRING: LazyLock<StringConfig> = LazyLock::new(|| StringConfig { quotes: &['\''], escape: None });
+static PASCAL_COMMENT: LazyLock<CommentConfig> = LazyLock::new(|| CommentConfig { line_marker: "//", block_start: "{", block_end: "}", nested_blocks: false });
 
-#[derive(Clone)]
-pub struct PascalLexer<'config> {
-    config: &'config PascalLanguage,
-}
+#[derive(Clone, Default)]
+pub struct PascalLexer;
 
-impl<'config> PascalLexer<'config> {
-    pub fn new(config: &'config PascalLanguage) -> Self {
-        Self { config }
+impl PascalLexer {
+    pub fn new(_config: &PascalLanguage) -> Self {
+        Self
     }
 
-    fn skip_whitespace<S: Source>(&self, state: &mut State<S>) -> bool {
-        match PASCAL_WHITESPACE.scan(state.rest(), state.get_position(), PascalSyntaxKind::Whitespace) {
-            Some(token) => {
-                state.advance_with(token);
-                true
-            }
-            None => false,
-        }
+    fn skip_whitespace<'s, S: Source + ?Sized>(&self, state: &mut State<'s, S>) -> bool {
+        PASCAL_WHITESPACE.scan(state, PascalSyntaxKind::Whitespace)
     }
 
-    fn skip_comment<S: Source>(&self, state: &mut State<S>) -> bool {
+    fn skip_comment<'s, S: Source + ?Sized>(&self, state: &mut State<'s, S>) -> bool {
         let start = state.get_position();
-        let rest = state.rest();
 
         // Line comment starting with //
-        if rest.starts_with("//") {
-            match PASCAL_COMMENT.scan(rest, start, PascalSyntaxKind::Comment) {
-                Some(token) => {
-                    state.advance_with(token);
-                    return true;
-                }
-                None => return false,
-            }
+        if state.rest().starts_with("//") {
+            return PASCAL_COMMENT.scan(state, PascalSyntaxKind::Comment, PascalSyntaxKind::Comment);
         }
 
         // Block comment: { ... }
@@ -62,7 +46,7 @@ impl<'config> PascalLexer<'config> {
         }
 
         // Block comment: (* ... *)
-        if rest.starts_with("(*") {
+        if state.rest().starts_with("(*") {
             state.advance(2);
             while let Some(ch) = state.peek() {
                 if ch == '*' && state.peek_next_n(1) == Some(')') {
@@ -78,7 +62,7 @@ impl<'config> PascalLexer<'config> {
         false
     }
 
-    fn lex_string<S: Source>(&self, state: &mut State<S>) -> bool {
+    fn lex_string<'s, S: Source + ?Sized>(&self, state: &mut State<'s, S>) -> bool {
         let start = state.get_position();
 
         // Pascal 字符串字面量：'...'
@@ -104,7 +88,7 @@ impl<'config> PascalLexer<'config> {
         false
     }
 
-    fn lex_identifier_or_keyword<S: Source>(&self, state: &mut State<S>) -> bool {
+    fn lex_identifier_or_keyword<'s, S: Source + ?Sized>(&self, state: &mut State<'s, S>) -> bool {
         if let Some(ch) = state.peek() {
             if ch.is_alphabetic() || ch == '_' {
                 let start_pos = state.get_position();
@@ -174,7 +158,7 @@ impl<'config> PascalLexer<'config> {
         }
     }
 
-    fn lex_number<S: Source>(&self, state: &mut State<S>) -> bool {
+    fn lex_number<'s, S: Source + ?Sized>(&self, state: &mut State<'s, S>) -> bool {
         if let Some(ch) = state.peek() {
             if ch.is_ascii_digit() {
                 let start_pos = state.get_position();
@@ -208,7 +192,7 @@ impl<'config> PascalLexer<'config> {
         }
     }
 
-    fn lex_operators_and_punctuation<S: Source>(&self, state: &mut State<S>) -> bool {
+    fn lex_operators_and_punctuation<'s, S: Source + ?Sized>(&self, state: &mut State<'s, S>) -> bool {
         if let Some(ch) = state.peek() {
             let start_pos = state.get_position();
 
@@ -324,21 +308,20 @@ impl<'config> PascalLexer<'config> {
     }
 }
 
-impl<'config> Lexer<PascalLanguage> for PascalLexer<'config> {
-    fn lex_incremental(
-        &self,
-        source: impl Source,
-        changed: usize,
-        cache: IncrementalCache<PascalLanguage>,
-    ) -> LexOutput<PascalLanguage> {
-        let mut state = LexerState::new_with_cache(source, changed, cache);
+impl Lexer<PascalLanguage> for PascalLexer {
+    fn lex<'a, S: Source + ?Sized>(&self, source: &'a S, _edits: &[oak_core::source::TextEdit], cache: &'a mut impl LexerCache<PascalLanguage>) -> LexOutput<PascalLanguage> {
+        let mut state = State::new(source);
         let result = self.run(&mut state);
-        state.finish(result)
+        if result.is_ok() {
+            state.add_eof();
+        }
+        state.finish_with_cache(result, cache)
     }
 }
 
-impl<'config> PascalLexer<'config> {
-    fn run<S: Source>(&self, state: &mut State<S>) -> Result<(), OakError> {
+impl PascalLexer {
+    fn run<'s, S: Source + ?Sized>(&self, state: &mut State<'s, S>) -> Result<(), OakError> {
+        let safe_point = state.get_position();
         while state.not_at_end() {
             // 跳过空白字符
             if self.skip_whitespace(state) {
@@ -376,14 +359,11 @@ impl<'config> PascalLexer<'config> {
                 state.advance(ch.len_utf8());
                 state.add_token(PascalSyntaxKind::Error, start_pos, state.get_position());
             }
-            else {
-                break;
-            }
+
+            state.advance_if_dead_lock(safe_point);
         }
 
         // 添加 EOF token
-        let eof_pos = state.get_position();
-        state.add_token(PascalSyntaxKind::Eof, eof_pos, eof_pos);
         Ok(())
     }
 }

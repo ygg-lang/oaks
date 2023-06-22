@@ -4,11 +4,19 @@
 #![doc(html_favicon_url = "https://raw.githubusercontent.com/ygg-lang/oaks/refs/heads/dev/documents/logo.svg")]
 
 pub mod ast;
-pub mod highlighter;
-pub mod kind;
-pub mod language;
-pub mod lexer;
-pub mod parser;
+#[cfg(feature = "oak-highlight")]
+mod highlighter;
+mod kind;
+mod language;
+mod lexer;
+mod parser;
 
-// 重新导出主要类型
-pub use crate::{kind::DjangoSyntaxKind, language::DjangoLanguage, lexer::DjangoLexer, parser::DjangoParser};
+#[cfg(feature = "oak-highlight")]
+pub use crate::highlighter::DjangoHighlighter;
+pub use crate::{
+    ast::DjangoRoot,
+    kind::{DjangoSyntaxKind, DjangoToken},
+    language::DjangoLanguage,
+    lexer::DjangoLexer,
+    parser::DjangoParser,
+};

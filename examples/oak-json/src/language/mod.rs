@@ -1,4 +1,4 @@
-use oak_core::language::Language;
+use oak_core::language::{Language, LanguageCategory};
 
 /// JSON 语言实现
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -25,43 +25,26 @@ impl JsonLanguage {
 
     /// 创建 JSON5 语言实例
     pub fn json5() -> Self {
-        Self {
-            trailing_comma: true,
-            bare_keys: true,
-            single_quotes: true,
-            comments: true,
-            hex_numbers: true,
-            infinity_and_nan: true,
-        }
+        Self { trailing_comma: true, bare_keys: true, single_quotes: true, comments: true, hex_numbers: true, infinity_and_nan: true }
     }
 
     /// 创建宽松 JSON 语言实例
     pub fn relaxed() -> Self {
-        Self {
-            trailing_comma: true,
-            bare_keys: true,
-            single_quotes: true,
-            comments: true,
-            hex_numbers: true,
-            infinity_and_nan: true,
-        }
+        Self { trailing_comma: true, bare_keys: true, single_quotes: true, comments: true, hex_numbers: true, infinity_and_nan: true }
     }
 }
 
 impl Default for JsonLanguage {
     fn default() -> Self {
-        Self {
-            trailing_comma: false,
-            bare_keys: false,
-            single_quotes: false,
-            comments: false,
-            hex_numbers: false,
-            infinity_and_nan: false,
-        }
+        Self { trailing_comma: false, bare_keys: false, single_quotes: false, comments: false, hex_numbers: false, infinity_and_nan: false }
     }
 }
 
 impl Language for JsonLanguage {
-    type SyntaxKind = crate::kind::JsonSyntaxKind;
-    type TypedRoot = (); // 暂时使用空类型，后续可以定义具体的AST根节点类型
+    const NAME: &'static str = "json";
+    const CATEGORY: LanguageCategory = LanguageCategory::Config;
+
+    type TokenType = crate::kind::JsonSyntaxKind;
+    type ElementType = crate::kind::JsonSyntaxKind;
+    type TypedRoot = crate::ast::JsonRoot;
 }

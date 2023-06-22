@@ -1,14 +1,16 @@
-use crate::{kind::TwigSyntaxKind, language::TwigLanguage};
+use crate::{language::TwigLanguage, lexer::TwigLexer};
 use oak_core::{
-    GreenNode, IncrementalCache, OakError, Parser, errors::OakDiagnostics, parser::ParserState, source::Source, tree::Arc,
+    parser::{ParseCache, ParseOutput, Parser, ParserState, parse_with_lexer},
+    source::{Source, TextEdit},
 };
 
-#[derive(Clone)]
-pub struct TwigParser<'config> {
-    config: &'config TwigLanguage,
-}
+mod parse;
 
-type State<'a, S> = ParserState<'a, S, TwigLanguage>;
+pub(crate) type State<'a, S> = ParserState<'a, TwigLanguage, S>;
+
+pub struct TwigParser<'config> {
+    pub(crate) config: &'config TwigLanguage,
+}
 
 impl<'config> TwigParser<'config> {
     pub fn new(config: &'config TwigLanguage) -> Self {
@@ -17,26 +19,8 @@ impl<'config> TwigParser<'config> {
 }
 
 impl<'config> Parser<TwigLanguage> for TwigParser<'config> {
-    fn parse_incremental(
-        &self,
-        text: impl Source,
-        changed: usize,
-        cache: IncrementalCache<TwigLanguage>,
-    ) -> OakDiagnostics<Arc<GreenNode<TwigSyntaxKind>>> {
-        let mut state = ParserState::new_with_cache(text, changed, cache);
-        let result = self.run(&mut state);
-        state.finish(result)
-    }
-}
-
-impl<'config> TwigParser<'config> {
-    fn run<S: Source>(&self, state: &mut State<S>) -> Result<(), OakError> {
-        // 构建根节点
-        let root = oak_core::GreenBuilder::<TwigLanguage>::new(1).token(TwigSyntaxKind::Eof, 0).finish(TwigSyntaxKind::Root);
-
-        // 存储到 cache
-        state.cache.last_parse = Some(root);
-
-        Ok(())
+    fn parse<'a, S: Source + ?Sized>(&self, text: &'a S, edits: &[TextEdit], cache: &'a mut impl ParseCache<TwigLanguage>) -> ParseOutput<'a, TwigLanguage> {
+        let lexer = TwigLexer::new(self.config);
+        parse_with_lexer(&lexer, text, edits, cache, |state| self.parse_root_internal(state))
     }
 }

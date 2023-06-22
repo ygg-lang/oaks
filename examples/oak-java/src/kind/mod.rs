@@ -1,4 +1,4 @@
-use oak_core::SyntaxKind;
+use oak_core::{ElementType, TokenType, UniversalElementRole, UniversalTokenRole};
 use serde::{Deserialize, Serialize};
 
 /// Java 语言Token 类型
@@ -124,11 +124,176 @@ pub enum JavaSyntaxKind {
     Eof,
     // 错误
     Error,
+    // 非终端节点
+    CompilationUnit,
 }
 
-impl SyntaxKind for JavaSyntaxKind {
-    fn is_trivia(&self) -> bool {
-        matches!(self, Self::Whitespace | Self::LineComment | Self::BlockComment)
+impl JavaSyntaxKind {
+    pub fn is_keyword(&self) -> bool {
+        matches!(
+            self,
+            Self::Abstract
+                | Self::Assert
+                | Self::Boolean
+                | Self::Break
+                | Self::Byte
+                | Self::Case
+                | Self::Catch
+                | Self::Char
+                | Self::Class
+                | Self::Const
+                | Self::Continue
+                | Self::Default
+                | Self::Do
+                | Self::Double
+                | Self::Else
+                | Self::Enum
+                | Self::Extends
+                | Self::Final
+                | Self::Finally
+                | Self::Float
+                | Self::For
+                | Self::If
+                | Self::Goto
+                | Self::Implements
+                | Self::Import
+                | Self::Instanceof
+                | Self::Int
+                | Self::Interface
+                | Self::Long
+                | Self::Native
+                | Self::New
+                | Self::Package
+                | Self::Private
+                | Self::Protected
+                | Self::Public
+                | Self::Return
+                | Self::Short
+                | Self::Static
+                | Self::Strictfp
+                | Self::Super
+                | Self::Switch
+                | Self::Synchronized
+                | Self::This
+                | Self::Throw
+                | Self::Throws
+                | Self::Transient
+                | Self::Try
+                | Self::Void
+                | Self::Volatile
+                | Self::While
+        )
+    }
+
+    pub fn from_keyword(s: &str) -> Option<Self> {
+        match s {
+            "abstract" => Some(Self::Abstract),
+            "assert" => Some(Self::Assert),
+            "boolean" => Some(Self::Boolean),
+            "break" => Some(Self::Break),
+            "byte" => Some(Self::Byte),
+            "case" => Some(Self::Case),
+            "catch" => Some(Self::Catch),
+            "char" => Some(Self::Char),
+            "class" => Some(Self::Class),
+            "const" => Some(Self::Const),
+            "continue" => Some(Self::Continue),
+            "default" => Some(Self::Default),
+            "do" => Some(Self::Do),
+            "double" => Some(Self::Double),
+            "else" => Some(Self::Else),
+            "enum" => Some(Self::Enum),
+            "extends" => Some(Self::Extends),
+            "final" => Some(Self::Final),
+            "finally" => Some(Self::Finally),
+            "float" => Some(Self::Float),
+            "for" => Some(Self::For),
+            "if" => Some(Self::If),
+            "goto" => Some(Self::Goto),
+            "implements" => Some(Self::Implements),
+            "import" => Some(Self::Import),
+            "instanceof" => Some(Self::Instanceof),
+            "int" => Some(Self::Int),
+            "interface" => Some(Self::Interface),
+            "long" => Some(Self::Long),
+            "native" => Some(Self::Native),
+            "new" => Some(Self::New),
+            "package" => Some(Self::Package),
+            "private" => Some(Self::Private),
+            "protected" => Some(Self::Protected),
+            "public" => Some(Self::Public),
+            "return" => Some(Self::Return),
+            "short" => Some(Self::Short),
+            "static" => Some(Self::Static),
+            "strictfp" => Some(Self::Strictfp),
+            "super" => Some(Self::Super),
+            "switch" => Some(Self::Switch),
+            "synchronized" => Some(Self::Synchronized),
+            "this" => Some(Self::This),
+            "throw" => Some(Self::Throw),
+            "throws" => Some(Self::Throws),
+            "transient" => Some(Self::Transient),
+            "try" => Some(Self::Try),
+            "void" => Some(Self::Void),
+            "volatile" => Some(Self::Volatile),
+            "while" => Some(Self::While),
+            _ => None,
+        }
+    }
+}
+
+impl TokenType for JavaSyntaxKind {
+    const END_OF_STREAM: Self = Self::Eof;
+    type Role = UniversalTokenRole;
+
+    fn role(&self) -> Self::Role {
+        match self {
+            Self::Whitespace => UniversalTokenRole::Whitespace,
+            Self::LineComment | Self::BlockComment => UniversalTokenRole::Comment,
+            Self::Identifier => UniversalTokenRole::Name,
+            Self::IntegerLiteral | Self::FloatingPointLiteral | Self::BooleanLiteral | Self::CharacterLiteral | Self::StringLiteral | Self::NullLiteral => UniversalTokenRole::Literal,
+            _ if self.is_keyword() => UniversalTokenRole::Keyword,
+            Self::Assign
+            | Self::GreaterThan
+            | Self::LessThan
+            | Self::Bang
+            | Self::Tilde
+            | Self::Question
+            | Self::Colon
+            | Self::Equals
+            | Self::LessThanEquals
+            | Self::GreaterThanEquals
+            | Self::BangEquals
+            | Self::AmpersandAmpersand
+            | Self::PipePipe
+            | Self::PlusPlus
+            | Self::MinusMinus
+            | Self::Plus
+            | Self::Minus
+            | Self::Asterisk
+            | Self::Slash
+            | Self::Ampersand
+            | Self::Pipe
+            | Self::Caret
+            | Self::Percent
+            | Self::LeftShift
+            | Self::RightShift
+            | Self::UnsignedRightShift
+            | Self::PlusEquals
+            | Self::MinusEquals
+            | Self::AsteriskEquals
+            | Self::SlashEquals
+            | Self::AmpersandEquals
+            | Self::PipeEquals
+            | Self::CaretEquals
+            | Self::PercentEquals
+            | Self::LeftShiftEquals
+            | Self::RightShiftEquals
+            | Self::UnsignedRightShiftEquals => UniversalTokenRole::Operator,
+            Self::LeftParen | Self::RightParen | Self::LeftBrace | Self::RightBrace | Self::LeftBracket | Self::RightBracket | Self::Semicolon | Self::Comma | Self::Dot | Self::Ellipsis | Self::At | Self::DoubleColon => UniversalTokenRole::Punctuation,
+            Self::Eof => UniversalTokenRole::Eof,
+            _ => UniversalTokenRole::None,
+        }
     }
 
     fn is_comment(&self) -> bool {
@@ -138,129 +303,24 @@ impl SyntaxKind for JavaSyntaxKind {
     fn is_whitespace(&self) -> bool {
         matches!(self, Self::Whitespace)
     }
-
-    fn is_token_type(&self) -> bool {
-        !matches!(self, Self::Error | Self::Eof)
-    }
-
-    fn is_element_type(&self) -> bool {
-        matches!(self, Self::Error | Self::Eof)
-    }
 }
 
-impl JavaSyntaxKind {
-    pub fn is_keyword(s: &str) -> bool {
-        matches!(
-            s,
-            "abstract"
-                | "assert"
-                | "boolean"
-                | "break"
-                | "byte"
-                | "case"
-                | "catch"
-                | "char"
-                | "class"
-                | "const"
-                | "continue"
-                | "default"
-                | "do"
-                | "double"
-                | "else"
-                | "enum"
-                | "extends"
-                | "final"
-                | "finally"
-                | "float"
-                | "for"
-                | "if"
-                | "goto"
-                | "implements"
-                | "import"
-                | "instanceof"
-                | "int"
-                | "interface"
-                | "long"
-                | "native"
-                | "new"
-                | "package"
-                | "private"
-                | "protected"
-                | "public"
-                | "return"
-                | "short"
-                | "static"
-                | "strictfp"
-                | "super"
-                | "switch"
-                | "synchronized"
-                | "this"
-                | "throw"
-                | "throws"
-                | "transient"
-                | "try"
-                | "void"
-                | "volatile"
-                | "while"
-        )
+impl ElementType for JavaSyntaxKind {
+    type Role = UniversalElementRole;
+
+    fn role(&self) -> Self::Role {
+        match self {
+            Self::CompilationUnit => UniversalElementRole::Root,
+            Self::Error => UniversalElementRole::Error,
+            _ => UniversalElementRole::None,
+        }
     }
 
-    pub fn from_keyword_str(s: &str) -> Option<JavaSyntaxKind> {
-        match s {
-            "abstract" => Some(JavaSyntaxKind::Abstract),
-            "assert" => Some(JavaSyntaxKind::Assert),
-            "boolean" => Some(JavaSyntaxKind::Boolean),
-            "break" => Some(JavaSyntaxKind::Break),
-            "byte" => Some(JavaSyntaxKind::Byte),
-            "case" => Some(JavaSyntaxKind::Case),
-            "catch" => Some(JavaSyntaxKind::Catch),
-            "char" => Some(JavaSyntaxKind::Char),
-            "class" => Some(JavaSyntaxKind::Class),
-            "const" => Some(JavaSyntaxKind::Const),
-            "continue" => Some(JavaSyntaxKind::Continue),
-            "default" => Some(JavaSyntaxKind::Default),
-            "do" => Some(JavaSyntaxKind::Do),
-            "double" => Some(JavaSyntaxKind::Double),
-            "else" => Some(JavaSyntaxKind::Else),
-            "enum" => Some(JavaSyntaxKind::Enum),
-            "extends" => Some(JavaSyntaxKind::Extends),
-            "final" => Some(JavaSyntaxKind::Final),
-            "finally" => Some(JavaSyntaxKind::Finally),
-            "float" => Some(JavaSyntaxKind::Float),
-            "for" => Some(JavaSyntaxKind::For),
-            "if" => Some(JavaSyntaxKind::If),
-            "goto" => Some(JavaSyntaxKind::Goto),
-            "implements" => Some(JavaSyntaxKind::Implements),
-            "import" => Some(JavaSyntaxKind::Import),
-            "instanceof" => Some(JavaSyntaxKind::Instanceof),
-            "int" => Some(JavaSyntaxKind::Int),
-            "interface" => Some(JavaSyntaxKind::Interface),
-            "long" => Some(JavaSyntaxKind::Long),
-            "native" => Some(JavaSyntaxKind::Native),
-            "new" => Some(JavaSyntaxKind::New),
-            "package" => Some(JavaSyntaxKind::Package),
-            "private" => Some(JavaSyntaxKind::Private),
-            "protected" => Some(JavaSyntaxKind::Protected),
-            "public" => Some(JavaSyntaxKind::Public),
-            "return" => Some(JavaSyntaxKind::Return),
-            "short" => Some(JavaSyntaxKind::Short),
-            "static" => Some(JavaSyntaxKind::Static),
-            "strictfp" => Some(JavaSyntaxKind::Strictfp),
-            "super" => Some(JavaSyntaxKind::Super),
-            "switch" => Some(JavaSyntaxKind::Switch),
-            "synchronized" => Some(JavaSyntaxKind::Synchronized),
-            "this" => Some(JavaSyntaxKind::This),
-            "throw" => Some(JavaSyntaxKind::Throw),
-            "throws" => Some(JavaSyntaxKind::Throws),
-            "transient" => Some(JavaSyntaxKind::Transient),
-            "try" => Some(JavaSyntaxKind::Try),
-            "void" => Some(JavaSyntaxKind::Void),
-            "volatile" => Some(JavaSyntaxKind::Volatile),
-            "while" => Some(JavaSyntaxKind::While),
-            "true" => Some(JavaSyntaxKind::BooleanLiteral),
-            "false" => Some(JavaSyntaxKind::BooleanLiteral),
-            "null" => Some(JavaSyntaxKind::NullLiteral),
-            _ => None,
-        }
+    fn is_root(&self) -> bool {
+        matches!(self, Self::CompilationUnit)
+    }
+
+    fn is_error(&self) -> bool {
+        matches!(self, Self::Error)
     }
 }

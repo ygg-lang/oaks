@@ -1,34 +1,32 @@
 use crate::{kind::TypeScriptSyntaxKind, language::TypeScriptLanguage};
-use oak_core::{IncrementalCache, Lexer, LexerState, OakError, lexer::LexOutput, source::Source};
+use oak_core::{Lexer, LexerCache, LexerState, OakError, TextEdit, lexer::LexOutput, source::Source};
 
 #[derive(Clone)]
 pub struct TypeScriptLexer<'config> {
-    config: &'config TypeScriptLanguage,
+    _config: &'config TypeScriptLanguage,
 }
 
-type State<S: Source> = LexerState<S, TypeScriptLanguage>;
+type State<'a, S> = LexerState<'a, S, TypeScriptLanguage>;
 
 impl<'config> TypeScriptLexer<'config> {
     pub fn new(config: &'config TypeScriptLanguage) -> Self {
-        Self { config }
+        Self { _config: config }
     }
 }
 
 impl<'config> Lexer<TypeScriptLanguage> for TypeScriptLexer<'config> {
-    fn lex_incremental(
-        &self,
-        source: impl Source,
-        changed: usize,
-        cache: IncrementalCache<TypeScriptLanguage>,
-    ) -> LexOutput<TypeScriptLanguage> {
-        let mut state = LexerState::new_with_cache(source, changed, cache);
+    fn lex<'a, S: Source + ?Sized>(&self, text: &S, _edits: &[TextEdit], cache: &'a mut impl LexerCache<TypeScriptLanguage>) -> LexOutput<TypeScriptLanguage> {
+        let mut state: State<'_, S> = LexerState::new(text);
         let result = self.run(&mut state);
-        state.finish(result)
+        if result.is_ok() {
+            state.add_eof();
+        }
+        state.finish_with_cache(result, cache)
     }
 }
 
 impl<'config> TypeScriptLexer<'config> {
-    fn run<S: Source>(&self, state: &mut State<S>) -> Result<(), OakError> {
+    fn run<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> Result<(), OakError> {
         while state.not_at_end() {
             let safe_point = state.get_position();
 
@@ -71,16 +69,13 @@ impl<'config> TypeScriptLexer<'config> {
                 state.add_token(TypeScriptSyntaxKind::Error, start_pos, state.get_position());
             }
 
-            state.safe_check(safe_point);
+            state.advance_if_dead_lock(safe_point);
         }
 
-        // 添加 EOF token
-        let eof_pos = state.get_position();
-        state.add_token(TypeScriptSyntaxKind::Eof, eof_pos, eof_pos);
         Ok(())
     }
 
-    fn skip_whitespace<S: Source>(&self, state: &mut State<S>) -> bool {
+    fn skip_whitespace<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start = state.get_position();
         let mut found = false;
 
@@ -101,7 +96,7 @@ impl<'config> TypeScriptLexer<'config> {
         found
     }
 
-    fn lex_newline<S: Source>(&self, state: &mut State<S>) -> bool {
+    fn lex_newline<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start = state.get_position();
 
         if let Some(ch) = state.peek() {
@@ -123,7 +118,7 @@ impl<'config> TypeScriptLexer<'config> {
         false
     }
 
-    fn skip_comment<S: Source>(&self, state: &mut State<S>) -> bool {
+    fn skip_comment<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start = state.get_position();
         let rest = state.rest();
 
@@ -157,7 +152,7 @@ impl<'config> TypeScriptLexer<'config> {
         false
     }
 
-    fn lex_string_literal<S: Source>(&self, state: &mut State<S>) -> bool {
+    fn lex_string_literal<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start = state.get_position();
 
         if let Some(quote) = state.peek() {
@@ -188,7 +183,7 @@ impl<'config> TypeScriptLexer<'config> {
         false
     }
 
-    fn lex_template_literal<S: Source>(&self, state: &mut State<S>) -> bool {
+    fn lex_template_literal<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start = state.get_position();
 
         if state.peek() == Some('`') {
@@ -217,7 +212,7 @@ impl<'config> TypeScriptLexer<'config> {
         false
     }
 
-    fn lex_numeric_literal<S: Source>(&self, state: &mut State<S>) -> bool {
+    fn lex_numeric_literal<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start = state.get_position();
 
         if let Some(ch) = state.peek() {
@@ -276,7 +271,7 @@ impl<'config> TypeScriptLexer<'config> {
         false
     }
 
-    fn lex_identifier_or_keyword<S: Source>(&self, state: &mut State<S>) -> bool {
+    fn lex_identifier_or_keyword<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start = state.get_position();
 
         if let Some(ch) = state.peek() {
@@ -294,7 +289,7 @@ impl<'config> TypeScriptLexer<'config> {
 
                 // 获取标识符文本并检查是否为关键字
                 let end = state.get_position();
-                let text = state.get_text_in((start..end).into());
+                let text = state.get_text_in(oak_core::Range { start, end });
                 let kind = self.keyword_or_identifier(&text);
 
                 state.add_token(kind, start, state.get_position());
@@ -385,7 +380,7 @@ impl<'config> TypeScriptLexer<'config> {
         }
     }
 
-    fn lex_operator_or_punctuation<S: Source>(&self, state: &mut State<S>) -> bool {
+    fn lex_operator_or_punctuation<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start = state.get_position();
         let rest = state.rest();
 

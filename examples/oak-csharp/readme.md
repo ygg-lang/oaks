@@ -21,10 +21,12 @@ Oak C# is a robust parser for C#, designed to handle complete C# syntax includin
 Basic example:
 
 ```rust
-use oak_csharp::{Parser, CSharpLanguage, SourceText};
+use oak_core::{Parser, SourceText, parser::session::ParseSession};
+use oak_csharp::{CSharpParser, CSharpLanguage};
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
-    let parser = Parser::new();
+    let mut session = ParseSession::<CSharpLanguage>::default();
+    let parser = CSharpParser::new();
     let source = SourceText::new(r#"
 using System;
 
@@ -35,7 +37,7 @@ class Program {
 }
     "#);
     
-    let result = parser.parse(&source);
+    let result = parser.parse(&[], &mut session);
     println!("Parsed C# successfully.");
     Ok(())
 }
@@ -45,9 +47,11 @@ class Program {
 
 ### Class Parsing
 ```rust
-use oak_csharp::{Parser, CSharpLanguage, SourceText};
+use oak_core::{Parser, SourceText, parser::session::ParseSession};
+use oak_csharp::{CSharpParser, CSharpLanguage};
 
-let parser = Parser::new();
+let mut session = ParseSession::<CSharpLanguage>::default();
+let parser = CSharpParser::new();
 let source = SourceText::new(r#"
 public class Calculator {
     public int Add(int a, int b) {
@@ -60,15 +64,17 @@ public class Calculator {
 }
 "#);
 
-let result = parser.parse(&source);
+let result = parser.parse(&[], &mut session);
 println!("Class parsed successfully.");
 ```
 
 ### Interface Parsing
 ```rust
-use oak_csharp::{Parser, CSharpLanguage, SourceText};
+use oak_core::{Parser, SourceText, parser::session::ParseSession};
+use oak_csharp::{CSharpParser, CSharpLanguage};
 
-let parser = Parser::new();
+let mut session = ParseSession::<CSharpLanguage>::default();
+let parser = CSharpParser::new();
 let source = SourceText::new(r#"
 public interface IDrawable {
     void Draw();
@@ -86,7 +92,7 @@ public class Circle : IDrawable {
 }
 "#);
 
-let result = parser.parse(&source);
+let result = parser.parse(&[], &mut session);
 println!("Interface parsed successfully.");
 ```
 
@@ -94,29 +100,37 @@ println!("Interface parsed successfully.");
 
 ### Token-Level Parsing
 ```rust
-use oak_csharp::{Parser, CSharpLanguage, SourceText};
+use oak_core::{Parser, SourceText, parser::session::ParseSession};
+use oak_csharp::{CSharpParser, CSharpLanguage};
 
-let parser = Parser::new();
+let mut session = ParseSession::<CSharpLanguage>::default();
+let parser = CSharpParser::new();
 let source = SourceText::new("int x = 42;");
-let result = parser.parse(&source);
-// Token information is available in the parse result
+let result = parser.parse(&[], &mut session);
+println!("Token parsing completed.");
 ```
 
 ### Error Handling
 ```rust
-use oak_csharp::{Parser, CSharpLanguage, SourceText};
+use oak_core::{Parser, SourceText, parser::session::ParseSession};
+use oak_csharp::{CSharpParser, CSharpLanguage};
 
-let parser = Parser::new();
+let mut session = ParseSession::<CSharpLanguage>::default();
+let parser = CSharpParser::new();
 let source = SourceText::new(r#"
-public class BrokenClass {
-    public void Method() {
-        Console.WriteLine("Hello")
-    // Missing closing brace
+public class Calculator {
+    public int Add(int a, int b) {
+        return a + b
+    }
+}
+# Missing semicolon
 "#);
 
-let result = parser.parse(&source);
-if let Err(e) = result.result {
-    println!("Parse error: {:?}", e);
+let result = parser.parse(&[], &mut session);
+if let Some(errors) = result.result.err() {
+    println!("Parse errors found: {:?}", errors);
+} else {
+    println!("Parsed successfully.");
 }
 ```
 

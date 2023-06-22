@@ -1,43 +1,29 @@
 use crate::{kind::TclSyntaxKind, language::TclLanguage};
 use oak_core::{
-    IncrementalCache, Lexer, LexerState, OakError,
-    lexer::{CommentLine, LexOutput, StringConfig, WhitespaceConfig},
+    Lexer, LexerState, OakError,
+    lexer::{CommentConfig, LexOutput, LexerCache, StringConfig, WhitespaceConfig},
     source::Source,
 };
-use std::sync::LazyLock;
 
-type State<S: Source> = LexerState<S, TclLanguage>;
+type State<'s, S> = LexerState<'s, S, TclLanguage>;
 
-static TCL_WHITESPACE: LazyLock<WhitespaceConfig> = LazyLock::new(|| WhitespaceConfig { unicode_whitespace: true });
-static TCL_COMMENT: LazyLock<CommentLine> = LazyLock::new(|| CommentLine { line_markers: &["#"] });
-static TCL_STRING: LazyLock<StringConfig> = LazyLock::new(|| StringConfig { quotes: &['"'], escape: Some('\\') });
+static TCL_WHITESPACE: WhitespaceConfig = WhitespaceConfig { unicode_whitespace: true };
+static TCL_COMMENT: CommentConfig = CommentConfig { line_marker: "#", block_start: "", block_end: "", nested_blocks: false };
+static TCL_STRING: StringConfig = StringConfig { quotes: &['"'], escape: Some('\\') };
 
 #[derive(Clone)]
-pub struct TclLexer<'config> {
-    config: &'config TclLanguage,
+pub struct TclLexer {
+    _config: TclLanguage,
 }
 
-impl<'config> Lexer<TclLanguage> for TclLexer<'config> {
-    fn lex_incremental(
-        &self,
-        source: impl Source,
-        changed: usize,
-        cache: IncrementalCache<TclLanguage>,
-    ) -> LexOutput<TclLanguage> {
-        let mut state = LexerState::new_with_cache(source, changed, cache);
-        let result = self.run(&mut state);
-        state.finish(result)
-    }
-}
-
-impl<'config> TclLexer<'config> {
-    pub fn new(config: &'config TclLanguage) -> Self {
-        Self { config }
+impl TclLexer {
+    pub fn new(config: &TclLanguage) -> Self {
+        Self { _config: config.clone() }
     }
 
-    fn run<S: Source>(&self, state: &mut State<S>) -> Result<(), OakError> {
+    fn run<'s, S: Source + ?Sized>(&self, state: &mut State<'s, S>) -> Result<(), OakError> {
         while state.not_at_end() {
-            let _safe_point = state.get_position();
+            let safe_point = state.get_position();
 
             if self.skip_whitespace(state) {
                 continue;
@@ -79,36 +65,40 @@ impl<'config> TclLexer<'config> {
             if let Some(ch) = state.current() {
                 state.advance(ch.len_utf8());
             }
+
+            state.advance_if_dead_lock(safe_point);
         }
 
-        // 添加 EOF token
-        let eof_pos = state.get_position();
-        state.add_token(TclSyntaxKind::Eof, eof_pos, eof_pos);
+        state.add_eof();
         Ok(())
     }
+}
 
-    fn skip_whitespace<S: Source>(&self, state: &mut State<S>) -> bool {
-        match TCL_WHITESPACE.scan(state.rest(), state.get_position(), TclSyntaxKind::Whitespace) {
-            Some(token) => {
-                state.advance_with(token);
-                true
-            }
-            None => false,
-        }
+impl Lexer<TclLanguage> for TclLexer {
+    fn lex<'a, S: Source + ?Sized>(&self, source: &'a S, _edits: &[oak_core::TextEdit], cache: &'a mut impl LexerCache<TclLanguage>) -> LexOutput<TclLanguage> {
+        let mut state = State::new(source);
+        let result = self.run(&mut state);
+        state.finish_with_cache(result, cache)
+    }
+}
+
+impl TclLexer {
+    fn skip_whitespace<'s, S: Source + ?Sized>(&self, state: &mut State<'s, S>) -> bool {
+        TCL_WHITESPACE.scan(state, TclSyntaxKind::Whitespace)
     }
 
-    fn lex_newline<S: Source>(&self, state: &mut State<S>) -> bool {
-        let start = state.get_position();
-
+    fn lex_newline<'s, S: Source + ?Sized>(&self, state: &mut State<'s, S>) -> bool {
         if let Some(ch) = state.current() {
             if ch == '\n' {
+                let start = state.get_position();
                 state.advance(1);
                 state.add_token(TclSyntaxKind::Newline, start, state.get_position());
                 return true;
             }
             else if ch == '\r' {
+                let start = state.get_position();
                 state.advance(1);
-                if state.peek() == Some('\n') {
+                if state.current() == Some('\n') {
                     state.advance(1);
                 }
                 state.add_token(TclSyntaxKind::Newline, start, state.get_position());
@@ -118,51 +108,15 @@ impl<'config> TclLexer<'config> {
         false
     }
 
-    fn skip_comment<S: Source>(&self, state: &mut State<S>) -> bool {
-        match TCL_COMMENT.scan(state.rest(), state.get_position(), TclSyntaxKind::Comment) {
-            Some(token) => {
-                state.advance_with(token);
-                true
-            }
-            None => false,
-        }
+    fn skip_comment<'s, S: Source + ?Sized>(&self, state: &mut State<'s, S>) -> bool {
+        TCL_COMMENT.scan(state, TclSyntaxKind::Comment, TclSyntaxKind::Comment)
     }
 
-    fn lex_string_literal<S: Source>(&self, state: &mut State<S>) -> bool {
-        if state.current() != Some('"') {
-            return false;
-        }
-
-        let start = state.get_position();
-        state.advance(1); // consume opening quote
-
-        let mut escaped = false;
-        while let Some(ch) = state.peek() {
-            if escaped {
-                escaped = false;
-                state.advance(ch.len_utf8());
-                continue;
-            }
-
-            if ch == '\\' {
-                escaped = true;
-                state.advance(1);
-                continue;
-            }
-
-            if ch == '"' {
-                state.advance(1); // consume closing quote
-                break;
-            }
-
-            state.advance(ch.len_utf8());
-        }
-
-        state.add_token(TclSyntaxKind::StringLiteral, start, state.get_position());
-        true
+    fn lex_string_literal<'s, S: Source + ?Sized>(&self, state: &mut State<'s, S>) -> bool {
+        TCL_STRING.scan(state, TclSyntaxKind::StringLiteral)
     }
 
-    fn lex_brace_string<S: Source>(&self, state: &mut State<S>) -> bool {
+    fn lex_brace_string<'s, S: Source + ?Sized>(&self, state: &mut State<'s, S>) -> bool {
         let start = state.get_position();
 
         if state.current() != Some('{') {
@@ -190,7 +144,7 @@ impl<'config> TclLexer<'config> {
         true
     }
 
-    fn lex_numeric_literal<S: Source>(&self, state: &mut State<S>) -> bool {
+    fn lex_numeric_literal<'s, S: Source + ?Sized>(&self, state: &mut State<'s, S>) -> bool {
         let start = state.get_position();
         let first = match state.current() {
             Some(c) => c,
@@ -255,7 +209,7 @@ impl<'config> TclLexer<'config> {
         true
     }
 
-    fn lex_identifier_or_keyword<S: Source>(&self, state: &mut State<S>) -> bool {
+    fn lex_identifier_or_keyword<'s, S: Source + ?Sized>(&self, state: &mut State<'s, S>) -> bool {
         let start = state.get_position();
         let ch = match state.current() {
             Some(c) => c,
@@ -277,8 +231,8 @@ impl<'config> TclLexer<'config> {
         }
 
         let end = state.get_position();
-        let text = state.get_text_in((start..end).into());
-        let kind = match text {
+        let text = state.source().get_text_in(oak_core::Range { start, end });
+        let kind = match text.as_ref() {
             "if" => TclSyntaxKind::If,
             "else" => TclSyntaxKind::Else,
             "elseif" => TclSyntaxKind::ElseIf,
@@ -301,22 +255,23 @@ impl<'config> TclLexer<'config> {
         true
     }
 
-    fn lex_operators<S: Source>(&self, state: &mut State<S>) -> bool {
+    fn lex_operators<'s, S: Source + ?Sized>(&self, state: &mut State<'s, S>) -> bool {
         let start = state.get_position();
-        let rest = state.rest();
 
         // 多字符操作符
-        let patterns: &[(&str, TclSyntaxKind)] = &[
-            ("==", TclSyntaxKind::Equal),
-            ("!=", TclSyntaxKind::NotEqual),
-            ("<=", TclSyntaxKind::LessEqual),
-            (">=", TclSyntaxKind::GreaterEqual),
-            ("&&", TclSyntaxKind::AmpersandAmpersand),
-            ("||", TclSyntaxKind::PipePipe),
-        ];
+        let patterns: &[(&str, TclSyntaxKind)] =
+            &[("==", TclSyntaxKind::Equal), ("!=", TclSyntaxKind::NotEqual), ("<=", TclSyntaxKind::LessEqual), (">=", TclSyntaxKind::GreaterEqual), ("&&", TclSyntaxKind::AmpersandAmpersand), ("||", TclSyntaxKind::PipePipe)];
 
         for (pat, kind) in patterns {
-            if rest.starts_with(pat) {
+            let mut matches = true;
+            for (i, c) in pat.chars().enumerate() {
+                if state.peek_next_n(i) != Some(c) {
+                    matches = false;
+                    break;
+                }
+            }
+
+            if matches {
                 state.advance(pat.len());
                 state.add_token(*kind, start, state.get_position());
                 return true;
@@ -349,7 +304,7 @@ impl<'config> TclLexer<'config> {
         false
     }
 
-    fn lex_single_char_tokens<S: Source>(&self, state: &mut State<S>) -> bool {
+    fn lex_single_char_tokens<'s, S: Source + ?Sized>(&self, state: &mut State<'s, S>) -> bool {
         let start = state.get_position();
 
         if let Some(ch) = state.current() {

@@ -8,7 +8,7 @@ fn test_msil_lexer() {
     let language = Box::leak(Box::new(MsilLanguage::default()));
     let lexer = MsilLexer::new(language);
     let test_runner = LexerTester::new(here.join("tests/lexer")).with_extension("il").with_timeout(Duration::from_secs(5));
-    match test_runner.run_tests::<MsilLanguage, _>(lexer) {
+    match test_runner.run_tests(&lexer) {
         Ok(()) => println!("Msil lexer tests passed!"),
         Err(e) => panic!("Msil lexer tests failed: {}", e),
     }

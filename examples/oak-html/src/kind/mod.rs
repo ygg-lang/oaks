@@ -1,4 +1,4 @@
-use oak_core::SyntaxKind;
+use oak_core::{ElementType, TokenType, UniversalElementRole, UniversalTokenRole};
 use serde::{Deserialize, Serialize};
 
 /// HTML 语法节点类型
@@ -43,13 +43,27 @@ pub enum HtmlSyntaxKind {
     Newline,
 
     // 特殊
+    Document,
+    Element,
     Eof,
     Error,
 }
 
-impl SyntaxKind for HtmlSyntaxKind {
-    fn is_trivia(&self) -> bool {
-        matches!(self, Self::Whitespace | Self::Comment | Self::Newline)
+impl TokenType for HtmlSyntaxKind {
+    const END_OF_STREAM: Self = Self::Eof;
+    type Role = UniversalTokenRole;
+
+    fn role(&self) -> Self::Role {
+        match self {
+            Self::Whitespace | Self::Newline => UniversalTokenRole::Whitespace,
+            Self::Comment => UniversalTokenRole::Comment,
+            Self::TagName => UniversalTokenRole::Name,
+            Self::AttributeName => UniversalTokenRole::Name,
+            Self::AttributeValue | Self::Text | Self::CData | Self::ProcessingInstruction | Self::EntityRef | Self::CharRef => UniversalTokenRole::Literal,
+            Self::TagOpen | Self::TagClose | Self::TagSlashOpen | Self::TagSelfClose | Self::Equal | Self::Quote | Self::Doctype => UniversalTokenRole::Punctuation,
+            Self::Eof => UniversalTokenRole::Eof,
+            _ => UniversalTokenRole::None,
+        }
     }
 
     fn is_comment(&self) -> bool {
@@ -59,12 +73,24 @@ impl SyntaxKind for HtmlSyntaxKind {
     fn is_whitespace(&self) -> bool {
         matches!(self, Self::Whitespace | Self::Newline)
     }
+}
 
-    fn is_token_type(&self) -> bool {
-        !matches!(self, Self::Error)
+impl ElementType for HtmlSyntaxKind {
+    type Role = UniversalElementRole;
+
+    fn role(&self) -> Self::Role {
+        match self {
+            Self::Document => UniversalElementRole::Root,
+            Self::Error => UniversalElementRole::Error,
+            _ => UniversalElementRole::None,
+        }
     }
 
-    fn is_element_type(&self) -> bool {
+    fn is_error(&self) -> bool {
         matches!(self, Self::Error)
+    }
+
+    fn is_root(&self) -> bool {
+        matches!(self, Self::Document)
     }
 }

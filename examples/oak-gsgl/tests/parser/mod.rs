@@ -1,4 +1,4 @@
-use oak_core::{Parser, SourceText};
+use oak_core::{Parser, SourceText, parser::session::ParseSession};
 use oak_gsgl::{GsglLanguage, GsglParser};
 
 #[test]
@@ -6,8 +6,9 @@ fn test_parser_basic() {
     let language = GsglLanguage::default();
     let parser = GsglParser::new(&language);
     let source = SourceText::new(r#"local x = 42"#);
+    let mut cache = ParseSession::<GsglLanguage>::default();
 
-    let result = parser.parse(&source);
+    let result = parser.parse(&source, &[], &mut cache);
     assert!(result.result.is_ok());
     println!("Parsed successfully: {:?}", result.result);
 }
@@ -23,8 +24,9 @@ fn test_parser_function_declaration() {
         end
         "#,
     );
+    let mut cache = ParseSession::<GsglLanguage>::default();
 
-    let result = parser.parse(&source);
+    let result = parser.parse(&source, &[], &mut cache);
     assert!(result.result.is_ok());
     println!("Function declaration parsed: {:?}", result.result);
 }
@@ -47,8 +49,9 @@ fn test_parser_local_function() {
         print(result)
         "#,
     );
+    let mut cache = ParseSession::<GsglLanguage>::default();
 
-    let result = parser.parse(&source);
+    let result = parser.parse(&source, &[], &mut cache);
     assert!(result.result.is_ok());
     println!("Local function parsed: {:?}", result.result);
 }
@@ -59,7 +62,8 @@ fn test_parser_table_constructor() {
     let parser = GsglParser::new(&language);
     let source = SourceText::new(r#"local t = {a = 1, b = 2, [3] = "three"}"#);
 
-    let result = parser.parse(&source);
+    let mut cache = ParseSession::<GsglLanguage>::default();
+    let result = parser.parse(&source, &[], &mut cache);
     assert!(result.result.is_ok());
     println!("Table constructor parsed: {:?}", result.result);
 }
@@ -96,7 +100,8 @@ fn test_parser_control_structures() {
         "#,
     );
 
-    let result = parser.parse(&source);
+    let mut cache = ParseSession::<GsglLanguage>::default();
+    let result = parser.parse(&source, &[], &mut cache);
     assert!(result.result.is_ok());
     println!("Control structures parsed: {:?}", result.result);
 }
@@ -114,7 +119,8 @@ fn test_parser_expressions() {
         "#,
     );
 
-    let result = parser.parse(&source);
+    let mut cache = ParseSession::<GsglLanguage>::default();
+    let result = parser.parse(&source, &[], &mut cache);
     assert!(result.result.is_ok());
     println!("Expressions parsed: {:?}", result.result);
 }
@@ -132,7 +138,8 @@ fn test_parser_function_calls() {
         "#,
     );
 
-    let result = parser.parse(&source);
+    let mut cache = ParseSession::<GsglLanguage>::default();
+    let result = parser.parse(&source, &[], &mut cache);
     assert!(result.result.is_ok());
     println!("Function calls parsed: {:?}", result.result);
 }
@@ -143,8 +150,9 @@ fn test_parser_syntax_error() {
     let parser = GsglParser::new(&language);
     let source = SourceText::new(r#"local x = "#); // Incomplete assignment
 
-    let result = parser.parse(&source);
-    // For now, our basic parser doesn't detect kind errors
+    let mut cache = ParseSession::<GsglLanguage>::default();
+    let result = parser.parse(&source, &[], &mut cache);
+    // For now, our basic files doesn't detect kind errors
     // In a real implementation, this should fail
     println!("Syntax error test result: {:?}", result.result);
 }
@@ -160,8 +168,9 @@ fn test_parser_incomplete_function() {
         "#,
     ); // Missing closing 'end' and incomplete expression
 
-    let result = parser.parse(&source);
-    // For now, our basic parser doesn't detect kind errors
+    let mut cache = ParseSession::<GsglLanguage>::default();
+    let result = parser.parse(&source, &[], &mut cache);
+    // For now, our basic files doesn't detect kind errors
     // In a real implementation, this should fail
     println!("Incomplete function test result: {:?}", result.result);
 }
@@ -172,8 +181,9 @@ fn test_parser_invalid_table_syntax() {
     let parser = GsglParser::new(&language);
     let source = SourceText::new(r#"local t = {a = 1, b = 2,}"#); // Trailing comma
 
-    let result = parser.parse(&source);
-    // For now, our basic parser doesn't detect kind errors
+    let mut cache = ParseSession::<GsglLanguage>::default();
+    let result = parser.parse(&source, &[], &mut cache);
+    // For now, our basic files doesn't detect kind errors
     // In a real implementation, this might be valid or invalid depending on Lua version
     println!("Invalid table kind test result: {:?}", result.result);
 }

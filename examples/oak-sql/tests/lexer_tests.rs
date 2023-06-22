@@ -1,4 +1,4 @@
-use oak_core::{SourceText, lexer::Lexer};
+use oak_core::{SourceText, lexer::Lexer, parser::session::ParseSession};
 use oak_sql::{SqlLanguage, SqlLexer, SqlSyntaxKind};
 
 #[test]
@@ -7,7 +7,8 @@ fn test_sql_lexer_basic_tokens() {
     let lexer = SqlLexer::new(&config);
     let source = SourceText::new("SELECT * FROM users WHERE id = 42;");
 
-    let result = lexer.lex(&source);
+    let mut session = ParseSession::<SqlLanguage>::default();
+    let result = lexer.lex(&source, &[], &mut session);
     assert!(result.result.is_ok());
 
     let tokens = result.result.unwrap();
@@ -30,7 +31,8 @@ fn test_sql_lexer_insert() {
     let lexer = SqlLexer::new(&config);
     let source = SourceText::new("INSERT INTO users (name, age) VALUES ('John', 25);");
 
-    let result = lexer.lex(&source);
+    let mut session = oak_core::parser::session::ParseSession::<SqlLanguage>::default();
+    let result = lexer.lex(&source, &[], &mut session);
     assert!(result.result.is_ok());
 
     let tokens = result.result.unwrap();
@@ -49,7 +51,8 @@ fn test_sql_lexer_keywords() {
     let lexer = SqlLexer::new(&config);
     let source = SourceText::new("CREATE TABLE test (id INT PRIMARY KEY);");
 
-    let result = lexer.lex(&source);
+    let mut session = oak_core::parser::session::ParseSession::<SqlLanguage>::default();
+    let result = lexer.lex(&source, &[], &mut session);
     assert!(result.result.is_ok());
 
     let tokens = result.result.unwrap();
@@ -68,7 +71,8 @@ fn test_sql_lexer_strings() {
     let lexer = SqlLexer::new(&config);
     let source = SourceText::new("SELECT 'hello world', \"quoted identifier\";");
 
-    let result = lexer.lex(&source);
+    let mut session = oak_core::parser::session::ParseSession::<SqlLanguage>::default();
+    let result = lexer.lex(&source, &[], &mut session);
     assert!(result.result.is_ok());
 
     let tokens = result.result.unwrap();

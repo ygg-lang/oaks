@@ -1,4 +1,4 @@
-use oak_core::{Lexer, SourceText};
+use oak_core::{Lexer, SourceText, parser::session::ParseSession};
 use oak_matlab::{MatlabLanguage, MatlabLexer, MatlabSyntaxKind};
 
 #[test]
@@ -6,8 +6,9 @@ fn test_basic_identifier() {
     let language = MatlabLanguage::default();
     let lexer = MatlabLexer::new(&language);
     let source = SourceText::new("x");
+    let mut cache = ParseSession::default();
 
-    let result = lexer.lex(&source);
+    let result = lexer.lex(&source, &[], &mut cache);
     assert!(result.result.is_ok());
 
     let tokens = result.result.unwrap();
@@ -20,8 +21,9 @@ fn test_keywords() {
     let language = MatlabLanguage::default();
     let lexer = MatlabLexer::new(&language);
     let source = SourceText::new("function end if else while for");
+    let mut cache = ParseSession::default();
 
-    let result = lexer.lex(&source);
+    let result = lexer.lex(&source, &[], &mut cache);
     assert!(result.result.is_ok());
 
     let tokens = result.result.unwrap();

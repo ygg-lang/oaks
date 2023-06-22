@@ -7,7 +7,8 @@ fn test_lexer_basic() {
     let lexer = StylusLexer::new(&language);
     let source = SourceText::new("body\n  color red");
 
-    let result = lexer.lex(&source);
+    let mut session = oak_core::parser::session::ParseSession::<StylusLanguage>::default();
+    let result = lexer.lex(&source, &[], &mut session);
     assert!(result.result.is_ok());
 
     let tokens = result.result.unwrap();
@@ -21,7 +22,8 @@ fn test_lexer_identifiers() {
     let lexer = StylusLexer::new(&language);
     let source = SourceText::new("body div p");
 
-    let result = lexer.lex(&source);
+    let mut session = oak_core::parser::session::ParseSession::<StylusLanguage>::default();
+    let result = lexer.lex(&source, &[], &mut session);
     assert!(result.result.is_ok());
 
     let tokens = result.result.unwrap();
@@ -38,7 +40,8 @@ fn test_lexer_numbers() {
     let lexer = StylusLexer::new(&language);
     let source = SourceText::new("width 100px");
 
-    let result = lexer.lex(&source);
+    let mut session = oak_core::parser::session::ParseSession::<StylusLanguage>::default();
+    let result = lexer.lex(&source, &[], &mut session);
     assert!(result.result.is_ok());
 
     let tokens = result.result.unwrap();
@@ -55,7 +58,8 @@ fn test_empty_input() {
     let lexer = StylusLexer::new(&language);
     let source = SourceText::new("");
 
-    let result = lexer.lex(&source);
+    let mut session = oak_core::parser::session::ParseSession::<StylusLanguage>::default();
+    let result = lexer.lex(&source, &[], &mut session);
     assert!(result.result.is_ok());
 
     let tokens = result.result.unwrap();

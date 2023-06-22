@@ -1,9 +1,9 @@
 [package]
 name = "oak-gsgl"
-description = "High-performance incremental Lua parser for the oak ecosystem with flexible configuration, supporting lightweight scripting and embedded development."
+description = "GSGL language parser with support for modern GSGL syntax and features."
 categories = ["parsing"]
-keywords = ["parser", "lua", "scripting", "language"]
-documentation = "https://docs.rs/oak-lua"
+keywords = ["parser", "gsgl", "language", "syntax"]
+documentation = "https://docs.rs/oak-gsgl"
 readme = "readme.md"
 version.workspace = true
 authors.workspace = true

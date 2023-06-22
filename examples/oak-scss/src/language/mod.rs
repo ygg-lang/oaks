@@ -1,4 +1,4 @@
-use oak_core::language::Language;
+use oak_core::language::{Language, LanguageCategory};
 
 /// Scss 语言实现
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -20,6 +20,10 @@ impl Default for ScssLanguage {
 }
 
 impl Language for ScssLanguage {
-    type SyntaxKind = crate::kind::ScssSyntaxKind;
+    const NAME: &'static str = "scss";
+    const CATEGORY: LanguageCategory = LanguageCategory::Programming;
+
+    type TokenType = crate::kind::ScssSyntaxKind;
+    type ElementType = crate::kind::ScssSyntaxKind;
     type TypedRoot = ();
 }

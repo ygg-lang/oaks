@@ -1,5 +1,4 @@
-use crate::{ast::DockerfileRoot, kind::DockerfileSyntaxKind};
-use oak_core::Language;
+use oak_core::{Language, LanguageCategory};
 
 /// Dockerfile 语言配置
 #[derive(Debug, Clone, Copy)]
@@ -17,6 +16,10 @@ impl Default for DockerfileLanguage {
 }
 
 impl Language for DockerfileLanguage {
-    type SyntaxKind = DockerfileSyntaxKind;
-    type TypedRoot = DockerfileRoot;
+    const NAME: &'static str = "dockerfile";
+    const CATEGORY: LanguageCategory = LanguageCategory::Programming;
+
+    type TokenType = crate::kind::DockerfileSyntaxKind;
+    type ElementType = crate::kind::DockerfileSyntaxKind;
+    type TypedRoot = ();
 }

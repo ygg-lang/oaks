@@ -1,8 +1,4 @@
-use oak_core::{
-    Lexer,
-    helpers::LexerTester,
-    source::{Source, SourceText},
-};
+use oak_core::{Lexer, SourceText, helpers::LexerTester, source::Source};
 use oak_javascript::{language::JavaScriptLanguage, lexer::JavaScriptLexer};
 use std::{path::Path, time::Duration};
 
@@ -12,7 +8,7 @@ fn test_javascript_lexer() {
     let language = Box::leak(Box::new(JavaScriptLanguage::standard()));
     let lexer = JavaScriptLexer::new(language);
     let test_runner = LexerTester::new(here.join("tests/lexer")).with_extension("js").with_timeout(Duration::from_secs(5));
-    match test_runner.run_tests::<JavaScriptLanguage, _>(lexer) {
+    match test_runner.run_tests::<JavaScriptLanguage, _>(&lexer) {
         Ok(()) => println!("JavaScript lexer tests passed!"),
         Err(e) => panic!("JavaScript lexer tests failed: {}", e),
     }
@@ -30,7 +26,8 @@ fn debug_test() {
     println!("Source length: {}", (&source).length());
     println!("Source content: '{}'", (&source).get_text_in((0..(&source).length()).into()));
 
-    let result = lexer.lex(&source);
+    let mut session = oak_core::parser::ParseSession::<JavaScriptLanguage>::default();
+    let result = lexer.lex(&source, &[], &mut session);
     println!("Lexing completed.");
 
     match result.result {

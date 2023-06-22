@@ -1,20 +1,130 @@
 use crate::{kind::MarkdownSyntaxKind, language::MarkdownLanguage};
-use oak_core::{IncrementalCache, Lexer, LexerState, lexer::LexOutput, source::Source};
+use oak_core::{Lexer, LexerCache, LexerState, TextEdit, errors::OakError, lexer::LexOutput, source::Source};
 
-type State<S> = LexerState<S, MarkdownLanguage>;
+type State<'a, S> = LexerState<'a, S, MarkdownLanguage>;
 
 #[derive(Clone, Debug)]
 pub struct MarkdownLexer<'config> {
-    config: &'config MarkdownLanguage,
+    _config: &'config MarkdownLanguage,
 }
 
 impl<'config> MarkdownLexer<'config> {
     pub fn new(config: &'config MarkdownLanguage) -> Self {
-        Self { config }
+        Self { _config: config }
+    }
+
+    fn run<S: Source + ?Sized>(&self, state: &mut State<S>) -> Result<(), OakError> {
+        while state.not_at_end() {
+            let safe_point = state.get_position();
+
+            if let Some(ch) = state.peek() {
+                match ch {
+                    ' ' | '\t' => {
+                        self.skip_whitespace(state);
+                    }
+                    '\n' | '\r' => {
+                        self.lex_newline(state);
+                    }
+                    '#' => {
+                        if self.lex_heading(state) {
+                            continue;
+                        }
+                        self.lex_special_char(state);
+                    }
+                    '`' => {
+                        if self.lex_code_block(state) {
+                            continue;
+                        }
+                        if self.lex_inline_code(state) {
+                            continue;
+                        }
+                        self.lex_special_char(state);
+                    }
+                    '~' => {
+                        if self.lex_code_block(state) {
+                            continue;
+                        }
+                        if self.lex_strikethrough(state) {
+                            continue;
+                        }
+                        self.lex_special_char(state);
+                    }
+                    '*' | '_' => {
+                        if self.lex_horizontal_rule(state) {
+                            continue;
+                        }
+                        if self.lex_list_marker(state) {
+                            continue;
+                        }
+                        if self.lex_emphasis(state) {
+                            continue;
+                        }
+                        self.lex_special_char(state);
+                    }
+                    '-' => {
+                        if self.lex_horizontal_rule(state) {
+                            continue;
+                        }
+                        if self.lex_list_marker(state) {
+                            continue;
+                        }
+                        self.lex_special_char(state);
+                    }
+                    '+' => {
+                        if self.lex_list_marker(state) {
+                            continue;
+                        }
+                        self.lex_special_char(state);
+                    }
+                    '!' => {
+                        if self.lex_link_or_image(state) {
+                            continue;
+                        }
+                        self.lex_special_char(state);
+                    }
+                    '[' => {
+                        if self.lex_task_marker(state) {
+                            continue;
+                        }
+                        if self.lex_link_or_image(state) {
+                            continue;
+                        }
+                        self.lex_special_char(state);
+                    }
+                    '>' => {
+                        if self.lex_blockquote(state) {
+                            continue;
+                        }
+                        self.lex_special_char(state);
+                    }
+                    '0'..='9' => {
+                        if self.lex_list_marker(state) {
+                            continue;
+                        }
+                        self.lex_text(state);
+                    }
+                    ']' | '(' | ')' | '<' | '|' | '.' | ':' | '\\' => {
+                        self.lex_special_char(state);
+                    }
+                    _ => {
+                        if self.lex_text(state) {
+                            continue;
+                        }
+                        // 如果所有规则都不匹配，跳过当前字符并标记为错误
+                        let start_pos = state.get_position();
+                        state.advance(ch.len_utf8());
+                        state.add_token(MarkdownSyntaxKind::Error, start_pos, state.get_position());
+                    }
+                }
+            }
+
+            state.advance_if_dead_lock(safe_point);
+        }
+        Ok(())
     }
 
     /// 跳过空白字符
-    fn skip_whitespace<S: Source>(&self, state: &mut State<S>) -> bool {
+    fn skip_whitespace<S: Source + ?Sized>(&self, state: &mut State<S>) -> bool {
         let start_pos = state.get_position();
 
         while let Some(ch) = state.peek() {
@@ -36,7 +146,7 @@ impl<'config> MarkdownLexer<'config> {
     }
 
     /// 处理换行
-    fn lex_newline<S: Source>(&self, state: &mut State<S>) -> bool {
+    fn lex_newline<S: Source + ?Sized>(&self, state: &mut State<S>) -> bool {
         let start_pos = state.get_position();
 
         if let Some('\n') = state.peek() {
@@ -58,12 +168,12 @@ impl<'config> MarkdownLexer<'config> {
     }
 
     /// 处理标题
-    fn lex_heading<S: Source>(&self, state: &mut State<S>) -> bool {
+    fn lex_heading<S: Source + ?Sized>(&self, state: &mut State<S>) -> bool {
         let start_pos = state.get_position();
 
         // 检查是否在行首
         if start_pos > 0 {
-            if let Some(prev_char) = state.get_char_at(start_pos - 1) {
+            if let Some(prev_char) = state.source().get_char_at(start_pos - 1) {
                 if prev_char != '\n' && prev_char != '\r' {
                     return false;
                 }
@@ -75,7 +185,7 @@ impl<'config> MarkdownLexer<'config> {
             let mut pos = start_pos;
 
             // 计算 # 的数
-            while let Some('#') = state.get_char_at(pos) {
+            while let Some('#') = state.source().get_char_at(pos) {
                 level += 1;
                 pos += 1;
                 if level > 6 {
@@ -84,7 +194,7 @@ impl<'config> MarkdownLexer<'config> {
             }
 
             // 检# 后面是否有空
-            if let Some(ch) = state.get_char_at(pos) {
+            if let Some(ch) = state.source().get_char_at(pos) {
                 if ch != ' ' && ch != '\t' && ch != '\n' && ch != '\r' {
                     return false;
                 }
@@ -111,7 +221,7 @@ impl<'config> MarkdownLexer<'config> {
     }
 
     /// 处理内联代码
-    fn lex_inline_code<S: Source>(&self, state: &mut State<S>) -> bool {
+    fn lex_inline_code<S: Source + ?Sized>(&self, state: &mut State<S>) -> bool {
         let start_pos = state.get_position();
 
         if let Some('`') = state.peek() {
@@ -148,12 +258,12 @@ impl<'config> MarkdownLexer<'config> {
     }
 
     /// 处理代码
-    fn lex_code_block<S: Source>(&self, state: &mut State<S>) -> bool {
+    fn lex_code_block<S: Source + ?Sized>(&self, state: &mut State<S>) -> bool {
         let start_pos = state.get_position();
 
         // 检查是否在行首
         if start_pos > 0 {
-            if let Some(prev_char) = state.get_char_at(start_pos - 1) {
+            if let Some(prev_char) = state.source().get_char_at(start_pos - 1) {
                 if prev_char != '\n' && prev_char != '\r' {
                     return false;
                 }
@@ -175,7 +285,7 @@ impl<'config> MarkdownLexer<'config> {
         let mut pos = start_pos;
 
         // 计算围栏字符数量
-        while let Some(ch) = state.get_char_at(pos) {
+        while let Some(ch) = state.source().get_char_at(pos) {
             if ch == fence_char {
                 fence_count += 1;
                 pos += 1;
@@ -214,7 +324,7 @@ impl<'config> MarkdownLexer<'config> {
     }
 
     /// 处理强调和加
-    fn lex_emphasis<S: Source>(&self, state: &mut State<S>) -> bool {
+    fn lex_emphasis<S: Source + ?Sized>(&self, state: &mut State<S>) -> bool {
         let start_pos = state.get_position();
 
         let marker_char = if let Some('*') = state.peek() {
@@ -231,7 +341,7 @@ impl<'config> MarkdownLexer<'config> {
         let mut pos = start_pos;
 
         // 计算标记字符数量
-        while let Some(ch) = state.get_char_at(pos) {
+        while let Some(ch) = state.source().get_char_at(pos) {
             if ch == marker_char {
                 marker_count += 1;
                 pos += 1;
@@ -254,11 +364,11 @@ impl<'config> MarkdownLexer<'config> {
     }
 
     /// 处理删除
-    fn lex_strikethrough<S: Source>(&self, state: &mut State<S>) -> bool {
+    fn lex_strikethrough<S: Source + ?Sized>(&self, state: &mut State<S>) -> bool {
         let start_pos = state.get_position();
 
         if let Some('~') = state.peek() {
-            if let Some('~') = state.get_char_at(start_pos + 1) {
+            if let Some('~') = state.source().get_char_at(start_pos + 1) {
                 state.advance(2);
                 state.add_token(MarkdownSyntaxKind::Strikethrough, start_pos, state.get_position());
                 true
@@ -273,7 +383,7 @@ impl<'config> MarkdownLexer<'config> {
     }
 
     /// 处理链接和图
-    fn lex_link_or_image<S: Source>(&self, state: &mut State<S>) -> bool {
+    fn lex_link_or_image<S: Source + ?Sized>(&self, state: &mut State<S>) -> bool {
         let start_pos = state.get_position();
 
         // 检查是否是图片 ![
@@ -303,14 +413,14 @@ impl<'config> MarkdownLexer<'config> {
     }
 
     /// 处理列表标记
-    fn lex_list_marker<S: Source>(&self, state: &mut State<S>) -> bool {
+    fn lex_list_marker<S: Source + ?Sized>(&self, state: &mut State<S>) -> bool {
         let start_pos = state.get_position();
 
         // 检查是否在行首或前面只有空
         let mut check_pos = start_pos;
         while check_pos > 0 {
             check_pos -= 1;
-            if let Some(ch) = state.get_char_at(check_pos) {
+            if let Some(ch) = state.source().get_char_at(check_pos) {
                 if ch == '\n' || ch == '\r' {
                     break;
                 }
@@ -367,7 +477,7 @@ impl<'config> MarkdownLexer<'config> {
     }
 
     /// 处理任务列表
-    fn lex_task_marker<S: Source>(&self, state: &mut State<S>) -> bool {
+    fn lex_task_marker<S: Source + ?Sized>(&self, state: &mut State<S>) -> bool {
         let start_pos = state.get_position();
 
         if let Some('[') = state.peek() {
@@ -388,14 +498,14 @@ impl<'config> MarkdownLexer<'config> {
     }
 
     /// 处理引用
-    fn lex_blockquote<S: Source>(&self, state: &mut State<S>) -> bool {
+    fn lex_blockquote<S: Source + ?Sized>(&self, state: &mut State<S>) -> bool {
         let start_pos = state.get_position();
 
         // 检查是否在行首或前面只有空
         let mut check_pos = start_pos;
         while check_pos > 0 {
             check_pos -= 1;
-            if let Some(ch) = state.get_char_at(check_pos) {
+            if let Some(ch) = state.source().get_char_at(check_pos) {
                 if ch == '\n' || ch == '\r' {
                     break;
                 }
@@ -416,14 +526,14 @@ impl<'config> MarkdownLexer<'config> {
     }
 
     /// 处理水平分隔
-    fn lex_horizontal_rule<S: Source>(&self, state: &mut State<S>) -> bool {
+    fn lex_horizontal_rule<S: Source + ?Sized>(&self, state: &mut State<S>) -> bool {
         let start_pos = state.get_position();
 
         // 检查是否在行首或前面只有空
         let mut check_pos = start_pos;
         while check_pos > 0 {
             check_pos -= 1;
-            if let Some(ch) = state.get_char_at(check_pos) {
+            if let Some(ch) = state.source().get_char_at(check_pos) {
                 if ch == '\n' || ch == '\r' {
                     break;
                 }
@@ -440,7 +550,7 @@ impl<'config> MarkdownLexer<'config> {
                 let mut pos = start_pos;
 
                 // 计算连续的分隔符数量
-                while let Some(current_ch) = state.get_char_at(pos) {
+                while let Some(current_ch) = state.source().get_char_at(pos) {
                     if current_ch == rule_char {
                         count += 1;
                         pos += 1;
@@ -455,7 +565,7 @@ impl<'config> MarkdownLexer<'config> {
 
                 if count >= 3 {
                     // 检查到行尾
-                    while let Some(current_ch) = state.get_char_at(pos) {
+                    while let Some(current_ch) = state.source().get_char_at(pos) {
                         if current_ch == '\n' || current_ch == '\r' {
                             break;
                         }
@@ -477,7 +587,7 @@ impl<'config> MarkdownLexer<'config> {
     }
 
     /// 处理特殊字符
-    fn lex_special_char<S: Source>(&self, state: &mut State<S>) -> bool {
+    fn lex_special_char<S: Source + ?Sized>(&self, state: &mut State<S>) -> bool {
         let start_pos = state.get_position();
 
         if let Some(ch) = state.peek() {
@@ -513,14 +623,13 @@ impl<'config> MarkdownLexer<'config> {
     }
 
     /// 处理普通文
-    fn lex_text<S: Source>(&self, state: &mut State<S>) -> bool {
+    fn lex_text<S: Source + ?Sized>(&self, state: &mut State<S>) -> bool {
         let start_pos = state.get_position();
 
         while let Some(ch) = state.peek() {
             // 遇到特殊字符时停
             match ch {
-                ' ' | '\t' | '\n' | '\r' | '#' | '*' | '_' | '`' | '~' | '[' | ']' | '(' | ')' | '<' | '>' | '|' | '-'
-                | '+' | '.' | ':' | '!' | '\\' => break,
+                ' ' | '\t' | '\n' | '\r' | '#' | '*' | '_' | '`' | '~' | '[' | ']' | '(' | ')' | '<' | '>' | '|' | '-' | '+' | '.' | ':' | '!' | '\\' => break,
                 _ => {
                     state.advance(ch.len_utf8());
                 }
@@ -538,162 +647,20 @@ impl<'config> MarkdownLexer<'config> {
 }
 
 impl<'config> Lexer<MarkdownLanguage> for MarkdownLexer<'config> {
-    fn lex_incremental(
-        &self,
-        source: impl Source,
-        changed: usize,
-        cache: IncrementalCache<MarkdownLanguage>,
-    ) -> LexOutput<MarkdownLanguage> {
-        let mut state = LexerState::new_with_cache(source, changed, cache);
-
-        while state.not_at_end() {
-            // 尝试各种词法规则
-            if self.skip_whitespace(&mut state) {
-                continue;
-            }
-
-            if self.lex_newline(&mut state) {
-                continue;
-            }
-
-            if self.lex_heading(&mut state) {
-                continue;
-            }
-
-            if self.lex_code_block(&mut state) {
-                continue;
-            }
-
-            if self.lex_inline_code(&mut state) {
-                continue;
-            }
-
-            if self.lex_strikethrough(&mut state) {
-                continue;
-            }
-
-            if self.lex_emphasis(&mut state) {
-                continue;
-            }
-
-            if self.lex_link_or_image(&mut state) {
-                continue;
-            }
-
-            if self.lex_task_marker(&mut state) {
-                continue;
-            }
-
-            if self.lex_list_marker(&mut state) {
-                continue;
-            }
-
-            if self.lex_blockquote(&mut state) {
-                continue;
-            }
-
-            if self.lex_horizontal_rule(&mut state) {
-                continue;
-            }
-
-            if self.lex_special_char(&mut state) {
-                continue;
-            }
-
-            if self.lex_text(&mut state) {
-                continue;
-            }
-
-            // 如果所有规则都不匹配，跳过当前字符并标记为错误
-            let start_pos = state.get_position();
-            if let Some(ch) = state.peek() {
-                state.advance(ch.len_utf8());
-                state.add_token(MarkdownSyntaxKind::Error, start_pos, state.get_position());
-            }
+    fn lex<'a, S: Source + ?Sized>(&self, text: &'a S, _edits: &[TextEdit], cache: &'a mut impl LexerCache<MarkdownLanguage>) -> LexOutput<MarkdownLanguage> {
+        let mut state = State::new(text);
+        let result = self.run(&mut state);
+        if result.is_ok() {
+            state.add_eof();
         }
-
-        // 添加 EOF token
-        let eof_pos = state.get_position();
-        state.add_token(MarkdownSyntaxKind::Eof, eof_pos, eof_pos);
-
-        state.finish(Ok(()))
+        state.finish_with_cache(result, cache)
     }
 }
 
 impl<'config> MarkdownLexer<'config> {
-    fn lex_internal<S: Source>(&self, source: S) -> LexOutput<MarkdownLanguage> {
+    pub fn lex_internal<'a, S: Source + ?Sized>(&self, source: &'a S) -> LexOutput<MarkdownLanguage> {
         let mut state = State::new(source);
-
-        while state.not_at_end() {
-            // 尝试各种词法规则
-            if self.skip_whitespace(&mut state) {
-                continue;
-            }
-
-            if self.lex_newline(&mut state) {
-                continue;
-            }
-
-            if self.lex_heading(&mut state) {
-                continue;
-            }
-
-            if self.lex_code_block(&mut state) {
-                continue;
-            }
-
-            if self.lex_inline_code(&mut state) {
-                continue;
-            }
-
-            if self.lex_strikethrough(&mut state) {
-                continue;
-            }
-
-            if self.lex_emphasis(&mut state) {
-                continue;
-            }
-
-            if self.lex_link_or_image(&mut state) {
-                continue;
-            }
-
-            if self.lex_task_marker(&mut state) {
-                continue;
-            }
-
-            if self.lex_list_marker(&mut state) {
-                continue;
-            }
-
-            if self.lex_blockquote(&mut state) {
-                continue;
-            }
-
-            if self.lex_horizontal_rule(&mut state) {
-                continue;
-            }
-
-            if self.lex_special_char(&mut state) {
-                continue;
-            }
-
-            if self.lex_text(&mut state) {
-                continue;
-            }
-
-            // 如果所有规则都不匹配，跳过当前字符并标记为错误
-            let start_pos = state.get_position();
-            if let Some(ch) = state.peek() {
-                state.advance(ch.len_utf8());
-                state.add_token(MarkdownSyntaxKind::Error, start_pos, state.get_position());
-            }
-        }
-
-        // 添加 EOF kind
-        let eof_pos = state.get_position();
-        state.add_token(MarkdownSyntaxKind::Eof, eof_pos, eof_pos);
-
-        state.finish(Ok(()))
+        let result = self.run(&mut state);
+        state.finish(result)
     }
 }

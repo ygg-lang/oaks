@@ -1,25 +1,27 @@
-#![doc = include_str!("readme.md")]
+use crate::{language::MsilLanguage, lexer::MsilLexer};
+use oak_core::{
+    TextEdit,
+    parser::{ParseCache, Parser, ParserState},
+    source::Source,
+};
 
-use crate::{ast::*, kind::MsilToken};
+mod parse;
 
-/// MSIL 解析
-#[derive(Clone, Debug)]
-pub struct MsilParser {
-    /// 当前解析位置
-    position: usize,
-    /// Token 列表
-    tokens: Vec<MsilToken>,
+pub(crate) type State<'a, S> = ParserState<'a, MsilLanguage, S>;
+
+pub struct MsilParser<'config> {
+    pub(crate) _config: &'config MsilLanguage,
 }
 
-impl MsilParser {
-    /// 创建新的 MSIL 解析
-    pub fn new() -> Self {
-        Self { position: 0, tokens: Vec::new() }
+impl<'config> MsilParser<'config> {
+    pub fn new(config: &'config MsilLanguage) -> Self {
+        Self { _config: config }
     }
 }
 
-impl Default for MsilParser {
-    fn default() -> Self {
-        Self::new()
+impl<'config> Parser<MsilLanguage> for MsilParser<'config> {
+    fn parse<'a, S: Source + ?Sized>(&self, text: &'a S, edits: &[TextEdit], cache: &'a mut impl ParseCache<MsilLanguage>) -> oak_core::ParseOutput<'a, MsilLanguage> {
+        let lexer = MsilLexer::new(self._config);
+        oak_core::parser::parse_with_lexer(&lexer, text, edits, cache, |state| self.parse_root_internal(state))
     }
 }

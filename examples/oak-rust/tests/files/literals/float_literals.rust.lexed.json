@@ -1,0 +1,97 @@
+{
+    "success": true,
+    "count": 15,
+    "tokens": [
+        {
+            "kind": "Keyword(Fn)",
+            "text": "fn",
+            "start": 0,
+            "end": 2
+        },
+        {
+            "kind": "Identifier",
+            "text": "main",
+            "start": 3,
+            "end": 7
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 7,
+            "end": 8
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 8,
+            "end": 9
+        },
+        {
+            "kind": "LeftBrace",
+            "text": "{",
+            "start": 10,
+            "end": 11
+        },
+        {
+            "kind": "IntegerLiteral",
+            "text": "3.14",
+            "start": 17,
+            "end": 21
+        },
+        {
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 21,
+            "end": 22
+        },
+        {
+            "kind": "IntegerLiteral",
+            "text": "2.0",
+            "start": 28,
+            "end": 31
+        },
+        {
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 31,
+            "end": 32
+        },
+        {
+            "kind": "IntegerLiteral",
+            "text": "1e10",
+            "start": 38,
+            "end": 42
+        },
+        {
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 42,
+            "end": 43
+        },
+        {
+            "kind": "IntegerLiteral",
+            "text": "2.5e-3",
+            "start": 49,
+            "end": 55
+        },
+        {
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 55,
+            "end": 56
+        },
+        {
+            "kind": "RightBrace",
+            "text": "}",
+            "start": 58,
+            "end": 59
+        },
+        {
+            "kind": "Eof",
+            "text": "",
+            "start": 59,
+            "end": 59
+        }
+    ],
+    "errors": []
+}

@@ -1,0 +1,607 @@
+{
+    "success": true,
+    "count": 100,
+    "tokens": [
+        {
+            "kind": "Let",
+            "text": "let",
+            "start": 31,
+            "end": 34
+        },
+        {
+            "kind": "Rec",
+            "text": "rec",
+            "start": 35,
+            "end": 38
+        },
+        {
+            "kind": "Identifier",
+            "text": "factorial",
+            "start": 39,
+            "end": 48
+        },
+        {
+            "kind": "Identifier",
+            "text": "n",
+            "start": 49,
+            "end": 50
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 51,
+            "end": 52
+        },
+        {
+            "kind": "If",
+            "text": "if",
+            "start": 56,
+            "end": 58
+        },
+        {
+            "kind": "Identifier",
+            "text": "n",
+            "start": 59,
+            "end": 60
+        },
+        {
+            "kind": "LessEqual",
+            "text": "<=",
+            "start": 61,
+            "end": 63
+        },
+        {
+            "kind": "IntegerLiteral",
+            "text": "1",
+            "start": 64,
+            "end": 65
+        },
+        {
+            "kind": "Then",
+            "text": "then",
+            "start": 66,
+            "end": 70
+        },
+        {
+            "kind": "IntegerLiteral",
+            "text": "1",
+            "start": 71,
+            "end": 72
+        },
+        {
+            "kind": "Else",
+            "text": "else",
+            "start": 76,
+            "end": 80
+        },
+        {
+            "kind": "Identifier",
+            "text": "n",
+            "start": 81,
+            "end": 82
+        },
+        {
+            "kind": "Star",
+            "text": "*",
+            "start": 83,
+            "end": 84
+        },
+        {
+            "kind": "Identifier",
+            "text": "factorial",
+            "start": 85,
+            "end": 94
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 95,
+            "end": 96
+        },
+        {
+            "kind": "Identifier",
+            "text": "n",
+            "start": 96,
+            "end": 97
+        },
+        {
+            "kind": "Minus",
+            "text": "-",
+            "start": 98,
+            "end": 99
+        },
+        {
+            "kind": "IntegerLiteral",
+            "text": "1",
+            "start": 100,
+            "end": 101
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 101,
+            "end": 102
+        },
+        {
+            "kind": "Let",
+            "text": "let",
+            "start": 106,
+            "end": 109
+        },
+        {
+            "kind": "Identifier",
+            "text": "main",
+            "start": 110,
+            "end": 114
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 115,
+            "end": 116
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 116,
+            "end": 117
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 118,
+            "end": 119
+        },
+        {
+            "kind": "Let",
+            "text": "let",
+            "start": 123,
+            "end": 126
+        },
+        {
+            "kind": "Identifier",
+            "text": "result",
+            "start": 127,
+            "end": 133
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 134,
+            "end": 135
+        },
+        {
+            "kind": "Identifier",
+            "text": "factorial",
+            "start": 136,
+            "end": 145
+        },
+        {
+            "kind": "IntegerLiteral",
+            "text": "5",
+            "start": 146,
+            "end": 147
+        },
+        {
+            "kind": "In",
+            "text": "in",
+            "start": 148,
+            "end": 150
+        },
+        {
+            "kind": "Identifier",
+            "text": "Printf",
+            "start": 154,
+            "end": 160
+        },
+        {
+            "kind": "Dot",
+            "text": ".",
+            "start": 160,
+            "end": 161
+        },
+        {
+            "kind": "Identifier",
+            "text": "printf",
+            "start": 161,
+            "end": 167
+        },
+        {
+            "kind": "StringLiteral",
+            "text": "\"Factorial of 5 is %d\\n\"",
+            "start": 168,
+            "end": 192
+        },
+        {
+            "kind": "Identifier",
+            "text": "result",
+            "start": 193,
+            "end": 199
+        },
+        {
+            "kind": "Type",
+            "text": "type",
+            "start": 203,
+            "end": 207
+        },
+        {
+            "kind": "Identifier",
+            "text": "a",
+            "start": 209,
+            "end": 210
+        },
+        {
+            "kind": "Identifier",
+            "text": "tree",
+            "start": 211,
+            "end": 215
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 216,
+            "end": 217
+        },
+        {
+            "kind": "Pipe",
+            "text": "|",
+            "start": 221,
+            "end": 222
+        },
+        {
+            "kind": "Identifier",
+            "text": "Leaf",
+            "start": 223,
+            "end": 227
+        },
+        {
+            "kind": "Of",
+            "text": "of",
+            "start": 228,
+            "end": 230
+        },
+        {
+            "kind": "Identifier",
+            "text": "a",
+            "start": 232,
+            "end": 233
+        },
+        {
+            "kind": "Pipe",
+            "text": "|",
+            "start": 237,
+            "end": 238
+        },
+        {
+            "kind": "Identifier",
+            "text": "Node",
+            "start": 239,
+            "end": 243
+        },
+        {
+            "kind": "Of",
+            "text": "of",
+            "start": 244,
+            "end": 246
+        },
+        {
+            "kind": "Identifier",
+            "text": "a",
+            "start": 248,
+            "end": 249
+        },
+        {
+            "kind": "Identifier",
+            "text": "tree",
+            "start": 250,
+            "end": 254
+        },
+        {
+            "kind": "Star",
+            "text": "*",
+            "start": 255,
+            "end": 256
+        },
+        {
+            "kind": "Identifier",
+            "text": "a",
+            "start": 258,
+            "end": 259
+        },
+        {
+            "kind": "Star",
+            "text": "*",
+            "start": 260,
+            "end": 261
+        },
+        {
+            "kind": "Identifier",
+            "text": "a",
+            "start": 263,
+            "end": 264
+        },
+        {
+            "kind": "Identifier",
+            "text": "tree",
+            "start": 265,
+            "end": 269
+        },
+        {
+            "kind": "Let",
+            "text": "let",
+            "start": 273,
+            "end": 276
+        },
+        {
+            "kind": "Rec",
+            "text": "rec",
+            "start": 277,
+            "end": 280
+        },
+        {
+            "kind": "Identifier",
+            "text": "insert",
+            "start": 281,
+            "end": 287
+        },
+        {
+            "kind": "Identifier",
+            "text": "x",
+            "start": 288,
+            "end": 289
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 290,
+            "end": 291
+        },
+        {
+            "kind": "Function",
+            "text": "function",
+            "start": 292,
+            "end": 300
+        },
+        {
+            "kind": "Pipe",
+            "text": "|",
+            "start": 304,
+            "end": 305
+        },
+        {
+            "kind": "Identifier",
+            "text": "Leaf",
+            "start": 306,
+            "end": 310
+        },
+        {
+            "kind": "Identifier",
+            "text": "y",
+            "start": 311,
+            "end": 312
+        },
+        {
+            "kind": "RightArrow",
+            "text": "->",
+            "start": 313,
+            "end": 315
+        },
+        {
+            "kind": "If",
+            "text": "if",
+            "start": 316,
+            "end": 318
+        },
+        {
+            "kind": "Identifier",
+            "text": "x",
+            "start": 319,
+            "end": 320
+        },
+        {
+            "kind": "LessEqual",
+            "text": "<=",
+            "start": 321,
+            "end": 323
+        },
+        {
+            "kind": "Identifier",
+            "text": "y",
+            "start": 324,
+            "end": 325
+        },
+        {
+            "kind": "Then",
+            "text": "then",
+            "start": 326,
+            "end": 330
+        },
+        {
+            "kind": "Identifier",
+            "text": "Node",
+            "start": 331,
+            "end": 335
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 336,
+            "end": 337
+        },
+        {
+            "kind": "Identifier",
+            "text": "Leaf",
+            "start": 337,
+            "end": 341
+        },
+        {
+            "kind": "Identifier",
+            "text": "x",
+            "start": 342,
+            "end": 343
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 343,
+            "end": 344
+        },
+        {
+            "kind": "Identifier",
+            "text": "y",
+            "start": 345,
+            "end": 346
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 346,
+            "end": 347
+        },
+        {
+            "kind": "Identifier",
+            "text": "Leaf",
+            "start": 348,
+            "end": 352
+        },
+        {
+            "kind": "Identifier",
+            "text": "y",
+            "start": 353,
+            "end": 354
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 354,
+            "end": 355
+        },
+        {
+            "kind": "Else",
+            "text": "else",
+            "start": 356,
+            "end": 360
+        },
+        {
+            "kind": "Identifier",
+            "text": "Node",
+            "start": 361,
+            "end": 365
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 366,
+            "end": 367
+        },
+        {
+            "kind": "Identifier",
+            "text": "Leaf",
+            "start": 367,
+            "end": 371
+        },
+        {
+            "kind": "Identifier",
+            "text": "y",
+            "start": 372,
+            "end": 373
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 373,
+            "end": 374
+        },
+        {
+            "kind": "Identifier",
+            "text": "y",
+            "start": 375,
+            "end": 376
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 376,
+            "end": 377
+        },
+        {
+            "kind": "Identifier",
+            "text": "Leaf",
+            "start": 378,
+            "end": 382
+        },
+        {
+            "kind": "Identifier",
+            "text": "x",
+            "start": 383,
+            "end": 384
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 384,
+            "end": 385
+        },
+        {
+            "kind": "Pipe",
+            "text": "|",
+            "start": 389,
+            "end": 390
+        },
+        {
+            "kind": "Identifier",
+            "text": "Node",
+            "start": 391,
+            "end": 395
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 396,
+            "end": 397
+        },
+        {
+            "kind": "Identifier",
+            "text": "l",
+            "start": 397,
+            "end": 398
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 398,
+            "end": 399
+        },
+        {
+            "kind": "Identifier",
+            "text": "v",
+            "start": 400,
+            "end": 401
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 401,
+            "end": 402
+        },
+        {
+            "kind": "Identifier",
+            "text": "r",
+            "start": 403,
+            "end": 404
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 404,
+            "end": 405
+        },
+        {
+            "kind": "RightArrow",
+            "text": "->",
+            "start": 406,
+            "end": 408
+        }
+    ],
+    "errors": []
+}

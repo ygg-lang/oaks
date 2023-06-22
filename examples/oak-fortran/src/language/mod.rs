@@ -1,5 +1,4 @@
-use crate::kind::FortranSyntaxKind;
-use oak_core::Language;
+use oak_core::{Language, LanguageCategory};
 
 /// Fortran 语言配置
 #[derive(Debug, Clone)]
@@ -22,9 +21,11 @@ impl Default for FortranLanguage {
     }
 }
 
-pub struct FortranRoot;
-
 impl Language for FortranLanguage {
-    type SyntaxKind = FortranSyntaxKind;
-    type TypedRoot = FortranRoot;
+    const NAME: &'static str = "fortran";
+    const CATEGORY: LanguageCategory = LanguageCategory::Programming;
+
+    type TokenType = crate::kind::FortranSyntaxKind;
+    type ElementType = crate::kind::FortranSyntaxKind;
+    type TypedRoot = ();
 }

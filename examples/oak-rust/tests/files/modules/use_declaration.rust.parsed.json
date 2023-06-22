@@ -1,0 +1,45 @@
+{
+    "success": true,
+    "node_count": 6,
+    "ast_structure": {
+        "kind": "SourceFile",
+        "children": [
+            {
+                "kind": "UseItem",
+                "children": [
+                    {
+                        "kind": "UseItem",
+                        "children": [
+                            {
+                                "kind": "Leaves(8)",
+                                "children": [],
+                                "text_length": 30,
+                                "is_leaf": true
+                            }
+                        ],
+                        "text_length": 30,
+                        "is_leaf": false
+                    }
+                ],
+                "text_length": 30,
+                "is_leaf": false
+            },
+            {
+                "kind": "Error",
+                "children": [
+                    {
+                        "kind": "Leaves(1)",
+                        "children": [],
+                        "text_length": 0,
+                        "is_leaf": true
+                    }
+                ],
+                "text_length": 0,
+                "is_leaf": false
+            }
+        ],
+        "text_length": 30,
+        "is_leaf": false
+    },
+    "errors": []
+}

@@ -1,0 +1,31 @@
+{
+    "success": true,
+    "typed_root": {
+        "type_name": "oak_rust::ast::RustRoot",
+        "content": {
+            "items": [
+                {
+                    "Enum": {
+                        "name": {
+                            "name": "",
+                            "span": {
+                                "end": 0,
+                                "start": 0
+                            }
+                        },
+                        "span": {
+                            "end": 47,
+                            "start": 0
+                        },
+                        "variants": []
+                    }
+                }
+            ]
+        }
+    },
+    "errors": [
+        "Expected 'Identifier' at 4",
+        "Expected 'LeftBrace' at 4",
+        "Expected 'RightBrace' at 43"
+    ]
+}

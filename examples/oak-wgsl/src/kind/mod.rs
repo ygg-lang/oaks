@@ -1,6 +1,6 @@
-use oak_core::SyntaxKind;
+use oak_core::{ElementType, TokenType, UniversalElementRole, UniversalTokenRole};
 
-#[derive(Copy, Clone, Debug, PartialEq, Eq)]
+#[derive(Copy, Clone, Debug, PartialEq, Eq, Hash)]
 pub enum WgslSyntaxKind {
     // 基础 kind
     Whitespace,
@@ -17,7 +17,7 @@ pub enum WgslSyntaxKind {
     BoolLiteral,
     Identifier,
 
-    // WGSL 关键- 类型
+    // WGSL 关键字 - 类型
     BoolKw,
     I32Kw,
     U32Kw,
@@ -55,7 +55,7 @@ pub enum WgslSyntaxKind {
     TextureStorage2dArrayKw,
     TextureStorage3dKw,
 
-    // WGSL 关键- 函数和控制流
+    // WGSL 关键字 - 函数和控制流
     FnKw,
     VarKw,
     LetKw,
@@ -99,7 +99,8 @@ pub enum WgslSyntaxKind {
     AlignKw,
     WorkgroupSizeKw,
 
-    // WGSL 关键- 内置    PositionKw,
+    // WGSL 关键字 - 内置
+    PositionKw,
     VertexIndexKw,
     InstanceIndexKw,
     FrontFacingKw,
@@ -112,7 +113,7 @@ pub enum WgslSyntaxKind {
     SampleIndexKw,
     SampleMaskKw,
 
-    // WGSL 关键- 其他
+    // WGSL 关键字 - 其他
     StructKw,
     TypeKw,
     AliasKw,
@@ -145,7 +146,8 @@ pub enum WgslSyntaxKind {
     Increment,
     Decrement,
 
-    // 比较操作    Eq,
+    // 比较操作
+    Eq,
     Ne,
     Lt,
     Le,
@@ -180,26 +182,37 @@ pub enum WgslSyntaxKind {
     At,
     Hash,
     Dollar,
+
+    // 语法节点
+    Root,
+    Function,
+    Struct,
+    Variable,
+    Block,
+    TypeAlias,
 }
 
-impl SyntaxKind for WgslSyntaxKind {
-    fn is_trivia(&self) -> bool {
-        matches!(self, Self::Whitespace | Self::Newline | Self::Comment)
-    }
+impl TokenType for WgslSyntaxKind {
+    const END_OF_STREAM: Self = Self::Eof;
+    type Role = UniversalTokenRole;
 
-    fn is_comment(&self) -> bool {
-        todo!()
+    fn role(&self) -> Self::Role {
+        match self {
+            Self::Whitespace | Self::Newline => UniversalTokenRole::Whitespace,
+            Self::Comment => UniversalTokenRole::Comment,
+            Self::Eof => UniversalTokenRole::Eof,
+            _ => UniversalTokenRole::None,
+        }
     }
+}
 
-    fn is_whitespace(&self) -> bool {
-        todo!()
-    }
+impl ElementType for WgslSyntaxKind {
+    type Role = UniversalElementRole;
 
-    fn is_token_type(&self) -> bool {
-        todo!()
-    }
-
-    fn is_element_type(&self) -> bool {
-        todo!()
+    fn role(&self) -> Self::Role {
+        match self {
+            Self::Error => UniversalElementRole::Error,
+            _ => UniversalElementRole::None,
+        }
     }
 }

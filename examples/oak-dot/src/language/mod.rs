@@ -1,5 +1,4 @@
-use crate::{ast::DotRoot, kind::DotSyntaxKind};
-use oak_core::Language;
+use oak_core::{Language, LanguageCategory};
 
 /// DOT 语言配置（Graphviz）
 #[derive(Debug, Clone, Copy)]
@@ -17,6 +16,10 @@ impl Default for DotLanguage {
 }
 
 impl Language for DotLanguage {
-    type SyntaxKind = DotSyntaxKind;
-    type TypedRoot = DotRoot;
+    const NAME: &'static str = "dot";
+    const CATEGORY: LanguageCategory = LanguageCategory::Programming;
+
+    type TokenType = crate::kind::DotSyntaxKind;
+    type ElementType = crate::kind::DotSyntaxKind;
+    type TypedRoot = ();
 }

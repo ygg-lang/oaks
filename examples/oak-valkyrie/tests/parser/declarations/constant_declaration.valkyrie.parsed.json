@@ -1,0 +1,14 @@
+{
+    "success": false,
+    "node_count": 1,
+    "ast_structure": {
+        "kind": "Error",
+        "children": [],
+        "text_length": 0,
+        "is_leaf": true
+    },
+    "errors": [
+        "Expected 'Eq' at 10",
+        "Expected 'Eq' at 10"
+    ]
+}

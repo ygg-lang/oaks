@@ -1,9 +1,8 @@
 [package]
 name = "oak-tcl"
-description = "High-performance incremental TypeScript parser for the oak ecosystem with flexible configuration, supporting modern web development and type-safe programming."
+description = "Tcl language parser with support for scripting, command substitution, and procedural programming features."
 categories = ["parsing"]
-keywords = ["parser", "typescript", "javascript", "language"]
-documentation = "https://docs.rs/oak-typescript"
+documentation = "https://docs.rs/oak-tcl"
 readme = "readme.md"
 version.workspace = true
 authors.workspace = true
@@ -16,14 +15,22 @@ edition.workspace = true
 oak-core = { workspace = true }
 oak-highlight = { workspace = true, optional = true }
 oak-pretty-print = { workspace = true, optional = true }
-serde = { workspace = true }
+oak-lsp = { workspace = true }
+oak-mcp = { workspace = true, optional = true }
+oak-hover = { workspace = true }
+oak-vfs = { workspace = true }
+futures = { workspace = true }
+serde = { workspace = true, features = ["derive"] }
+axum = { workspace = true, optional = true }
+tokio = { workspace = true, optional = true }
 
 [dev-dependencies]
 oak-core = { workspace = true, features = ["testing"] }
 
-
 [features]
 default = []
+mcp = ["dep:oak-mcp"]
+axum = ["mcp", "dep:axum", "dep:tokio", "oak-mcp/axum", "oak-lsp/axum"]
 std = []
 
 [package.metadata.docs.rs]
