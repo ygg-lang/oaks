@@ -1,20 +1,22 @@
 #![doc = include_str!("readme.md")]
-
 use core::range::Range;
+#[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
 
 /// Vampire 根节点
-#[derive(Clone, Debug, Serialize, Deserialize)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[derive(Clone, Debug)]
 pub struct VampireRoot {
-    #[serde(with = "oak_core::serde_range")]
+    #[cfg_attr(feature = "serde", serde(with = "oak_core::serde_range"))]
     pub span: Range<usize>,
     pub formulas: Vec<VampireFormula>,
 }
 
 /// Vampire 公式
-#[derive(Clone, Debug, Serialize, Deserialize)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[derive(Clone, Debug)]
 pub struct VampireFormula {
-    #[serde(with = "oak_core::serde_range")]
+    #[cfg_attr(feature = "serde", serde(with = "oak_core::serde_range"))]
     pub span: Range<usize>,
     pub name: String,
     pub role: String,
@@ -22,9 +24,10 @@ pub struct VampireFormula {
 }
 
 /// Vampire 包含指令
-#[derive(Clone, Debug, Serialize, Deserialize)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[derive(Clone, Debug)]
 pub struct VampireInclude {
-    #[serde(with = "oak_core::serde_range")]
+    #[cfg_attr(feature = "serde", serde(with = "oak_core::serde_range"))]
     pub span: Range<usize>,
     pub path: String,
     pub selection: Vec<String>,

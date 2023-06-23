@@ -68,7 +68,7 @@ impl<'a> TextChunk<'a> {
 /// let edit = TextEdit {
 ///     span: Range { start: 4, end: 9 }, // Replace characters at positions 4-8
 ///     text: "world".into(),             // With the text "world"
-/// };
+/// }
 /// ```
 pub struct TextEdit {
     /// The byte range in the original text to be replaced (start..end)
@@ -81,69 +81,63 @@ pub struct TextEdit {
 ///
 /// This trait provides a unified interface for different text sources that may have:
 /// - Different character representations (Unicode escapes, HTML entities)
-/// - Different internal storage formats
+/// - Different internal storage formats (contiguous, chunked, ropes)
 /// - Different error handling requirements
 ///
-/// All offsets exposed by this trait are simple text ranges from the start of this source.
+/// All offsets exposed by this trait are simple byte ranges from the start of this source.
 pub trait Source: Send + Sync {
-    /// Get the length of this source.
-    ///
-    /// This represents the total size of this source in bytes.
+    /// Returns the total length of this source in bytes.
     fn length(&self) -> usize;
 
-    /// Returns the ID of this source, if available.
+    /// Returns a unique identifier for this source, if available.
+    ///
+    /// Useful for associating diagnostics with specific files.
     fn source_id(&self) -> Option<SourceId> {
         None
     }
 
-    /// Returns a text chunk containing the specified offset.
+    /// Returns a text chunk containing the specified byte offset.
+    ///
+    /// This allows for efficient traversal of large or non-contiguous sources.
     fn chunk_at(&self, offset: usize) -> TextChunk<'_>;
 
-    /// Check if the source is empty.
+    /// Returns `true` if the source has no content.
     fn is_empty(&self) -> bool {
         self.length() == 0
     }
 
-    /// Get a single character at the specified offset.
+    /// Returns the character at the specified byte offset.
     ///
     /// This method should handle any character encoding transformations
     /// and return the actual character that would be seen by the parser.
     ///
     /// # Arguments
     ///
-    /// * `offset` - The byte offset from the start of this source
+    /// * `offset` - The byte offset from the start of this source.
     ///
     /// # Returns
     ///
-    /// The character at the specified offset, or `None` if the offset is invalid
+    /// The character at the specified offset, or `None` if the offset is invalid.
     fn get_char_at(&self, offset: usize) -> Option<char> {
         self.chunk_at(offset).slice_from(offset).chars().next()
     }
 
-    /// Get the text content at the specified range.
-    ///
-    /// The range is specified as simple offsets from the start of this source.
-    /// The returned text should have any character encoding transformations
-    /// already applied (e.g., Unicode escapes decoded, HTML entities resolved).
+    /// Returns the text content within the specified byte range.
     ///
     /// # Arguments
     ///
-    /// * `range` - The byte range to extract text from (relative to this source)
+    /// * `range` - The byte range to extract text from.
     ///
     /// # Returns
     ///
-    /// The text content in the specified range.
+    /// The text content in the specified range, potentially as a borrowed slice.
     fn get_text_in(&self, range: Range<usize>) -> Cow<'_, str>;
 
-    /// Get the text from the current position to the end of the source.
+    /// Returns the text from the specified byte offset to the end of the source.
     ///
     /// # Arguments
     ///
-    /// * `offset` - The byte offset to start from (relative to this source)
-    ///
-    /// # Returns
-    ///
-    /// The remaining text from the offset to the end.
+    /// * `offset` - The byte offset to start from.
     fn get_text_from(&self, offset: usize) -> Cow<'_, str> {
         if offset >= self.length() {
             return Cow::Borrowed("");
@@ -151,16 +145,16 @@ pub trait Source: Send + Sync {
         self.get_text_in(core::range::Range { start: offset, end: self.length() })
     }
 
-    /// Find the next occurrence of a character starting from an offset.
+    /// Finds the next occurrence of a character starting from an offset.
     ///
     /// # Arguments
     ///
-    /// * `offset` - The byte offset to start searching from (relative to this source)
-    /// * `ch` - The character to search for
+    /// * `offset` - The byte offset to start searching from.
+    /// * `ch` - The character to search for.
     ///
     /// # Returns
     ///
-    /// The offset of the next occurrence, or `None` if not found
+    /// The absolute byte offset of the next occurrence, or `None` if not found.
     fn find_char_from(&self, offset: usize, ch: char) -> Option<usize> {
         let mut cursor = SourceCursor::new_at(self, offset);
         let mut base = offset;
@@ -178,31 +172,27 @@ pub trait Source: Send + Sync {
         }
     }
 
-    /// Find the next occurrence of a substring starting from an offset.
+    /// Finds the next occurrence of a substring starting from an offset.
     ///
     /// # Arguments
     ///
-    /// * `offset` - The byte offset to start searching from (relative to this source)
-    /// * `pattern` - The substring to search for
+    /// * `offset` - The byte offset to start searching from.
+    /// * `pattern` - The substring to search for.
     ///
     /// # Returns
     ///
-    /// The offset of the next occurrence, or `None` if not found
+    /// The absolute byte offset of the next occurrence, or `None` if not found.
     fn find_str_from(&self, offset: usize, pattern: &str) -> Option<usize> {
         let mut cursor = SourceCursor::new_at(self, offset);
         cursor.find_str(pattern)
     }
 
-    /// Create a syntax error with location information.
+    /// Creates a syntax error with location information associated with this source.
     ///
     /// # Arguments
     ///
-    /// * `message` - The error message
-    /// * `offset` - The byte offset where the error occurred
-    ///
-    /// # Returns
-    ///
-    /// An [`OakError`] with precise location information.
+    /// * `message` - The error message.
+    /// * `offset` - The byte offset where the error occurred.
     fn syntax_error(&self, message: String, offset: usize) -> OakError {
         OakError::syntax_error(message, offset, self.source_id())
     }

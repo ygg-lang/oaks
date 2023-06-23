@@ -1,5 +1,5 @@
-use oak_diagnostic::testing::lexing::LexerTester;
 use oak_purescript::{PurescriptLanguage, PurescriptLexer};
+use oak_testing::lexing::LexerTester;
 use std::{path::Path, time::Duration};
 
 #[test]

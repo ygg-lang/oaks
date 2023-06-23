@@ -238,7 +238,7 @@
         },
         {
             "kind": "StringLiteral",
-            "text": "\"${fruits[@]}\"",
+            "text": "\"${fruits[↯]}\"",
             "start": 364,
             "end": 378
         },

@@ -1,8 +1,10 @@
-use crate::{kind::ScssSyntaxKind, language::ScssLanguage};
+#![doc = include_str!("readme.md")]
+pub mod token_type;
+
+use crate::{language::ScssLanguage, lexer::token_type::ScssTokenType};
 use oak_core::{
-    Lexer, LexerState, OakError, TextEdit,
+    Lexer, LexerState, OakError, Source, TextEdit,
     lexer::{CommentConfig, LexOutput, LexerCache, StringConfig, WhitespaceConfig},
-    source::Source,
 };
 use std::sync::LazyLock;
 
@@ -12,12 +14,14 @@ static SCSS_WHITESPACE: LazyLock<WhitespaceConfig> = LazyLock::new(|| Whitespace
 static SCSS_COMMENT: LazyLock<CommentConfig> = LazyLock::new(|| CommentConfig { line_marker: "//", block_start: "/*", block_end: "*/", nested_blocks: true });
 static SCSS_STRING: LazyLock<StringConfig> = LazyLock::new(|| StringConfig { quotes: &['"'], escape: Some('\\') });
 
+/// Lexer for the SCSS language.
 #[derive(Debug, Clone)]
 pub struct ScssLexer<'config> {
     _config: &'config ScssLanguage,
 }
 
 impl<'config> Lexer<ScssLanguage> for ScssLexer<'config> {
+    /// Tokenizes the input source text.
     fn lex<'a, S: Source + ?Sized>(&self, text: &S, _edits: &[TextEdit], cache: &'a mut impl LexerCache<ScssLanguage>) -> LexOutput<ScssLanguage> {
         let mut state = LexerState::new(text);
         let result = self.run(&mut state);
@@ -29,10 +33,12 @@ impl<'config> Lexer<ScssLanguage> for ScssLexer<'config> {
 }
 
 impl<'config> ScssLexer<'config> {
+    /// Creates a new `ScssLexer` with the given configuration.
     pub fn new(config: &'config ScssLanguage) -> Self {
         Self { _config: config }
     }
 
+    /// Main lexer loop that tokenizes the source text.
     fn run<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> Result<(), OakError> {
         while state.not_at_end() {
             let safe_point = state.get_position();
@@ -69,38 +75,39 @@ impl<'config> ScssLexer<'config> {
                 continue;
             }
 
-            // 错误处理：如果没有匹配任何规则，跳过当前字符并标记为错误
+            // Error handling: if no rule matches, skip current character and mark as error
             let start_pos = state.get_position();
             if let Some(ch) = state.peek() {
                 state.advance(ch.len_utf8());
-                state.add_token(ScssSyntaxKind::Error, start_pos, state.get_position());
+                state.add_token(ScssTokenType::Error, start_pos, state.get_position());
             }
 
-            state.advance_if_dead_lock(safe_point);
+            state.advance_if_dead_lock(safe_point)
         }
 
         Ok(())
     }
 
+    /// Skips whitespace characters.
     fn skip_whitespace<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
-        SCSS_WHITESPACE.scan(state, ScssSyntaxKind::Whitespace)
+        SCSS_WHITESPACE.scan(state, ScssTokenType::Whitespace)
     }
 
-    /// 处理换行
+    /// Handles newlines.
     fn lex_newline<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start_pos = state.get_position();
 
         if let Some('\n') = state.peek() {
             state.advance(1);
-            state.add_token(ScssSyntaxKind::Newline, start_pos, state.get_position());
+            state.add_token(ScssTokenType::Newline, start_pos, state.get_position());
             true
         }
         else if let Some('\r') = state.peek() {
             state.advance(1);
             if let Some('\n') = state.peek() {
-                state.advance(1);
+                state.advance(1)
             }
-            state.add_token(ScssSyntaxKind::Newline, start_pos, state.get_position());
+            state.add_token(ScssTokenType::Newline, start_pos, state.get_position());
             true
         }
         else {
@@ -108,14 +115,17 @@ impl<'config> ScssLexer<'config> {
         }
     }
 
+    /// Skips comments.
     fn skip_comment<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
-        SCSS_COMMENT.scan(state, ScssSyntaxKind::Comment, ScssSyntaxKind::Comment)
+        SCSS_COMMENT.scan(state, ScssTokenType::Comment, ScssTokenType::Comment)
     }
 
+    /// Lexes string literals.
     fn lex_string_literal<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
-        SCSS_STRING.scan(state, ScssSyntaxKind::StringLiteral)
+        SCSS_STRING.scan(state, ScssTokenType::StringLiteral)
     }
 
+    /// Lexes number literals.
     fn lex_number_literal<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start = state.get_position();
 
@@ -125,34 +135,25 @@ impl<'config> ScssLexer<'config> {
 
                 // Continue with digits
                 while let Some(ch) = state.peek() {
-                    if ch.is_ascii_digit() {
-                        state.advance(ch.len_utf8());
-                    }
-                    else {
-                        break;
-                    }
+                    if ch.is_ascii_digit() { state.advance(ch.len_utf8()) } else { break }
                 }
 
                 // Handle decimal point
                 if state.peek() == Some('.') && state.peek_next_n(1).map_or(false, |c| c.is_ascii_digit()) {
                     state.advance(1); // consume '.'
                     while let Some(ch) = state.peek() {
-                        if ch.is_ascii_digit() {
-                            state.advance(ch.len_utf8());
-                        }
-                        else {
-                            break;
-                        }
+                        if ch.is_ascii_digit() { state.advance(ch.len_utf8()) } else { break }
                     }
                 }
 
-                state.add_token(ScssSyntaxKind::IntegerLiteral, start, state.get_position());
+                state.add_token(ScssTokenType::IntegerLiteral, start, state.get_position());
                 return true;
             }
         }
         false
     }
 
+    /// Lexes identifiers or keywords.
     fn lex_identifier_or_keyword<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start = state.get_position();
         let text = state.source().get_text_from(start);
@@ -172,7 +173,7 @@ impl<'config> ScssLexer<'config> {
                 }
 
                 let word = &text[..len];
-                let kind = self.keyword_kind(word).unwrap_or(ScssSyntaxKind::Identifier);
+                let kind = self.keyword_kind(word).unwrap_or(ScssTokenType::Identifier);
                 state.advance(len);
                 state.add_token(kind, start, state.get_position());
                 return true;
@@ -181,6 +182,7 @@ impl<'config> ScssLexer<'config> {
         false
     }
 
+    /// Lexes operators.
     fn lex_operators<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start = state.get_position();
         let text = state.source().get_text_from(start);
@@ -208,6 +210,7 @@ impl<'config> ScssLexer<'config> {
         false
     }
 
+    /// Lexes single character tokens.
     fn lex_single_char_tokens<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start = state.get_position();
         let text = state.source().get_text_from(start);
@@ -224,65 +227,66 @@ impl<'config> ScssLexer<'config> {
         false
     }
 
-    fn keyword_kind(&self, text: &str) -> Option<ScssSyntaxKind> {
+    /// Returns the syntax kind for a given keyword.
+    fn keyword_kind(&self, text: &str) -> Option<ScssTokenType> {
         match text {
-            "import" => Some(ScssSyntaxKind::Import),
-            "include" => Some(ScssSyntaxKind::Include),
-            "mixin" => Some(ScssSyntaxKind::Mixin),
-            "function" => Some(ScssSyntaxKind::Function),
-            "return" => Some(ScssSyntaxKind::Return),
-            "if" => Some(ScssSyntaxKind::If),
-            "else" => Some(ScssSyntaxKind::Else),
-            "for" => Some(ScssSyntaxKind::For),
-            "while" => Some(ScssSyntaxKind::While),
-            "each" => Some(ScssSyntaxKind::Each),
-            "in" => Some(ScssSyntaxKind::In),
-            "true" => Some(ScssSyntaxKind::True),
-            "false" => Some(ScssSyntaxKind::False),
-            "null" => Some(ScssSyntaxKind::Null),
+            "import" => Some(ScssTokenType::Import),
+            "include" => Some(ScssTokenType::Include),
+            "mixin" => Some(ScssTokenType::Mixin),
+            "function" => Some(ScssTokenType::Function),
+            "return" => Some(ScssTokenType::Return),
+            "if" => Some(ScssTokenType::If),
+            "else" => Some(ScssTokenType::Else),
+            "for" => Some(ScssTokenType::For),
+            "while" => Some(ScssTokenType::While),
+            "each" => Some(ScssTokenType::Each),
+            "in" => Some(ScssTokenType::In),
+            "true" => Some(ScssTokenType::True),
+            "false" => Some(ScssTokenType::False),
+            "null" => Some(ScssTokenType::Null),
             _ => None,
         }
     }
 
-    fn operator_kind(&self, text: &str) -> Option<ScssSyntaxKind> {
+    fn operator_kind(&self, text: &str) -> Option<ScssTokenType> {
         match text {
-            "==" => Some(ScssSyntaxKind::EqEq),
-            "!=" => Some(ScssSyntaxKind::Ne),
-            "<=" => Some(ScssSyntaxKind::Le),
-            ">=" => Some(ScssSyntaxKind::Ge),
-            "&&" => Some(ScssSyntaxKind::AndAnd),
-            "||" => Some(ScssSyntaxKind::OrOr),
-            "=" => Some(ScssSyntaxKind::Eq),
-            "<" => Some(ScssSyntaxKind::Lt),
-            ">" => Some(ScssSyntaxKind::Gt),
-            "&" => Some(ScssSyntaxKind::And),
-            "|" => Some(ScssSyntaxKind::Or),
-            "^" => Some(ScssSyntaxKind::Xor),
-            "+" => Some(ScssSyntaxKind::Plus),
-            "-" => Some(ScssSyntaxKind::Minus),
-            "*" => Some(ScssSyntaxKind::Star),
-            "/" => Some(ScssSyntaxKind::Slash),
-            "%" => Some(ScssSyntaxKind::Percent),
-            "!" => Some(ScssSyntaxKind::Bang),
+            "==" => Some(ScssTokenType::EqEq),
+            "!=" => Some(ScssTokenType::Ne),
+            "<=" => Some(ScssTokenType::Le),
+            ">=" => Some(ScssTokenType::Ge),
+            "&&" => Some(ScssTokenType::AndAnd),
+            "||" => Some(ScssTokenType::OrOr),
+            "=" => Some(ScssTokenType::Eq),
+            "<" => Some(ScssTokenType::Lt),
+            ">" => Some(ScssTokenType::Gt),
+            "&" => Some(ScssTokenType::And),
+            "|" => Some(ScssTokenType::Or),
+            "^" => Some(ScssTokenType::Xor),
+            "+" => Some(ScssTokenType::Plus),
+            "-" => Some(ScssTokenType::Minus),
+            "*" => Some(ScssTokenType::Star),
+            "/" => Some(ScssTokenType::Slash),
+            "%" => Some(ScssTokenType::Percent),
+            "!" => Some(ScssTokenType::Bang),
             _ => None,
         }
     }
 
-    fn single_char_kind(&self, text: &str) -> Option<ScssSyntaxKind> {
+    fn single_char_kind(&self, text: &str) -> Option<ScssTokenType> {
         match text {
-            "(" => Some(ScssSyntaxKind::LeftParen),
-            ")" => Some(ScssSyntaxKind::RightParen),
-            "{" => Some(ScssSyntaxKind::LeftBrace),
-            "}" => Some(ScssSyntaxKind::RightBrace),
-            "[" => Some(ScssSyntaxKind::LeftBracket),
-            "]" => Some(ScssSyntaxKind::RightBracket),
-            ";" => Some(ScssSyntaxKind::Semicolon),
-            ":" => Some(ScssSyntaxKind::Colon),
-            "," => Some(ScssSyntaxKind::Comma),
-            "." => Some(ScssSyntaxKind::Dot),
-            "#" => Some(ScssSyntaxKind::Hash),
-            "@" => Some(ScssSyntaxKind::At),
-            "$" => Some(ScssSyntaxKind::Dollar),
+            "(" => Some(ScssTokenType::LeftParen),
+            ")" => Some(ScssTokenType::RightParen),
+            "{" => Some(ScssTokenType::LeftBrace),
+            "}" => Some(ScssTokenType::RightBrace),
+            "[" => Some(ScssTokenType::LeftBracket),
+            "]" => Some(ScssTokenType::RightBracket),
+            ";" => Some(ScssTokenType::Semicolon),
+            ":" => Some(ScssTokenType::Colon),
+            "," => Some(ScssTokenType::Comma),
+            "." => Some(ScssTokenType::Dot),
+            "#" => Some(ScssTokenType::Hash),
+            "@" => Some(ScssTokenType::At),
+            "$" => Some(ScssTokenType::Dollar),
             _ => None,
         }
     }

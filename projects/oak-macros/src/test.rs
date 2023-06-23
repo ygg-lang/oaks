@@ -18,7 +18,7 @@ pub fn test_lexer(input: TokenStream) -> TokenStream {
     let expanded = quote! {
         #[test]
         fn #name() -> Result<(), oak_core::OakError> {
-            use oak_diagnostic::testing::lexing::LexerTester;
+            use oak_testing::lexing::LexerTester;
             use std::{path::Path, time::Duration};
 
             let here = Path::new(env!("CARGO_MANIFEST_DIR"));
@@ -46,7 +46,7 @@ pub fn test_parser(input: TokenStream) -> TokenStream {
     let expanded = quote! {
         #[test]
         fn #name() -> Result<(), oak_core::OakError> {
-            use oak_diagnostic::testing::parsing::ParserTester;
+            use oak_testing::parsing::ParserTester;
             use std::{path::Path, time::Duration};
 
             let here = Path::new(env!("CARGO_MANIFEST_DIR"));
@@ -86,12 +86,12 @@ pub fn oak_test(_attr: TokenStream, item: TokenStream) -> TokenStream {
             match rx.recv_timeout(Duration::from_secs(10)) {
                 Ok(result) => result,
                 Err(mpsc::RecvTimeoutError::Timeout) => {
-                    panic!("Test timed out after 10 seconds. Possible infinite loop detected in parser.");
+                    panic!("Test timed out after 10 seconds. Possible infinite loop detected in parser.")
                 }
                 Err(mpsc::RecvTimeoutError::Disconnected) => {
-                    panic!("Test thread panicked or disconnected unexpectedly.");
+                    panic!("Test thread panicked or disconnected unexpectedly.")
                 }
-            }
+            };
         }
     };
     TokenStream::from(expanded)
@@ -129,7 +129,7 @@ impl Parse for TestConfig {
                     let lit: LitInt = input.parse()?;
                     timeout = Some(lit.base10_parse()?);
                 }
-                _ => return Err(syn::Error::new(key.span(), format!("未知字段: {}", key))),
+                _ => return Err(syn::Error::new(key.span(), format!("Unknown field: {}", key))),
             }
 
             if input.peek(Token![,]) {
@@ -138,11 +138,11 @@ impl Parse for TestConfig {
         }
 
         Ok(TestConfig {
-            name: name.ok_or_else(|| input.error("缺少字段: name"))?,
-            language: language.ok_or_else(|| input.error("缺少字段: language"))?,
-            lexer: lexer.ok_or_else(|| input.error("缺少字段: lexer/parser"))?,
-            extension: extension.ok_or_else(|| input.error("缺少字段: extension"))?,
-            path: path.ok_or_else(|| input.error("缺少字段: path"))?,
+            name: name.ok_or_else(|| input.error("Missing field: name"))?,
+            language: language.ok_or_else(|| input.error("Missing field: language"))?,
+            lexer: lexer.ok_or_else(|| input.error("Missing field: lexer/parser"))?,
+            extension: extension.ok_or_else(|| input.error("Missing field: extension"))?,
+            path: path.ok_or_else(|| input.error("Missing field: path"))?,
             timeout,
         })
     }

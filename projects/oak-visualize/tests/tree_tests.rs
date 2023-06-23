@@ -72,6 +72,7 @@ fn test_tree_depth_calculation() {
     assert_eq!(deep_tree.depth(), 4);
     assert_eq!(deep_tree.node_count(), 4);
     assert_eq!(deep_tree.leaf_count(), 1);
+    assert!(!deep_tree.is_leaf());
 }
 
 #[test]

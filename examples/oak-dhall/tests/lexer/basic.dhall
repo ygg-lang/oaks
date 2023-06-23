@@ -20,7 +20,7 @@ let mixed : List (Natural, Text) = [{fst = 1, snd = "one"}, {fst = 2, snd = "two
 let person : { name : Text, age : Natural, email : Text } = {
   name = "Alice",
   age = 30,
-  email = "alice@example.com"
+  email = "alice↯example.com"
 }
 
 -- Record operations

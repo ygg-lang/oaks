@@ -42,7 +42,7 @@ impl ChunkedBuffer {
         for chunk in chunkify(text) {
             self.starts.push(self.len);
             self.len += chunk.len();
-            self.chunks.push(chunk);
+            self.chunks.push(chunk)
         }
     }
 
@@ -115,14 +115,14 @@ fn chunkify(text: &str) -> Vec<Arc<str>> {
     while start < text.len() {
         let mut end = (start + CHUNK_SIZE).min(text.len());
         while end > start && !text.is_char_boundary(end) {
-            end -= 1;
+            end -= 1
         }
         if end == start {
-            end = text.len();
+            end = text.len()
         }
         let part = &text[start..end];
         out.push(Arc::<str>::from(part.to_string()));
-        start = end;
+        start = end
     }
     out
 }

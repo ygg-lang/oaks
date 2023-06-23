@@ -1,96 +1,137 @@
+#![doc = include_str!("readme.md")]
 use core::range::Range;
+#[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
 
-/// Type alias for source span
+/// Type alias for source span.
 type SourceSpan = Range<usize>;
 
-/// Abstract syntax tree for C++ language
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+/// C++ language abstract syntax tree root.
+#[derive(Debug, Clone, PartialEq)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct CppRoot {
+    /// Translation unit.
     pub translation_unit: TranslationUnit,
 }
 
-/// Translation unit (top-level structure of a C++ program)
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+/// Translation unit (top-level structure of a C++ program).
+#[derive(Debug, Clone, PartialEq)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct TranslationUnit {
+    /// List of external declarations.
     pub external_declarations: Vec<ExternalDeclaration>,
-    #[serde(with = "oak_core::serde_range")]
+    /// Source span.
+    #[cfg_attr(feature = "serde", serde(with = "oak_core::serde_range"))]
     pub span: Range<usize>,
 }
 
-/// External declaration
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+/// External declaration.
+#[derive(Debug, Clone, PartialEq)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub enum ExternalDeclaration {
-    /// Function definition
+    /// Function definition.
     FunctionDefinition(FunctionDefinition),
-    /// Declaration
+    /// Declaration.
     Declaration(Declaration),
 }
 
-/// Function definition
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+/// Function definition.
+#[derive(Debug, Clone, PartialEq)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct FunctionDefinition {
+    /// Declaration specifiers.
     pub declaration_specifiers: Vec<DeclarationSpecifier>,
+    /// Declarator.
     pub declarator: Declarator,
+    /// Compound statement.
     pub compound_statement: CompoundStatement,
-    #[serde(with = "oak_core::serde_range")]
+    /// Source span.
+    #[cfg_attr(feature = "serde", serde(with = "oak_core::serde_range"))]
     pub span: SourceSpan,
 }
 
-/// Declaration
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+/// Declaration.
+#[derive(Debug, Clone, PartialEq)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct Declaration {
+    /// Declaration specifiers.
     pub declaration_specifiers: Vec<DeclarationSpecifier>,
+    /// List of initialization declarators.
     pub init_declarators: Vec<InitDeclarator>,
-    #[serde(with = "oak_core::serde_range")]
+    /// Source span.
+    #[cfg_attr(feature = "serde", serde(with = "oak_core::serde_range"))]
     pub span: SourceSpan,
 }
 
-/// Declaration specifier
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+/// Declaration specifier.
+#[derive(Debug, Clone, PartialEq)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub enum DeclarationSpecifier {
-    /// Storage class specifier
+    /// Storage class specifier.
     StorageClassSpecifier(StorageClassSpecifier),
-    /// Type specifier
+    /// Type specifier.
     TypeSpecifier(TypeSpecifier),
-    /// Type qualifier
+    /// Type qualifier.
     TypeQualifier(TypeQualifier),
-    /// Function specifier
+    /// Function specifier.
     FunctionSpecifier(FunctionSpecifier),
 }
 
-/// Storage class specifier
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+/// Storage class specifier.
+#[derive(Debug, Clone, PartialEq)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub enum StorageClassSpecifier {
+    /// typedef
     Typedef,
+    /// extern
     Extern,
+    /// static
     Static,
+    /// auto
     Auto,
+    /// register
     Register,
 }
 
-/// Type specifier
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+/// Type specifier.
+#[derive(Debug, Clone, PartialEq)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub enum TypeSpecifier {
+    /// void
     Void,
+    /// char
     Char,
+    /// short
     Short,
+    /// int
     Int,
+    /// long
     Long,
+    /// float
     Float,
+    /// double
     Double,
+    /// signed
     Signed,
+    /// unsigned
     Unsigned,
+    /// bool
     Bool,
+    /// _Complex
     Complex,
+    /// _Imaginary
     Imaginary,
+    /// Struct or union specifier.
     StructOrUnion(StructOrUnionSpecifier),
+    /// Enum specifier.
     Enum(EnumSpecifier),
+    /// typedef name.
     TypedefName(String),
 }
 
 /// Type qualifier
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub enum TypeQualifier {
     Const,
     Restrict,
@@ -98,153 +139,224 @@ pub enum TypeQualifier {
 }
 
 /// Function specifier
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub enum FunctionSpecifier {
     Inline,
     Noreturn,
 }
 
 /// Struct or union specifier
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct StructOrUnionSpecifier {
     pub struct_or_union: StructOrUnion,
     pub identifier: Option<String>,
     pub struct_declarations: Option<Vec<StructDeclaration>>,
-    #[serde(with = "oak_core::serde_range")]
+    #[cfg_attr(feature = "serde", serde(with = "oak_core::serde_range"))]
     pub span: SourceSpan,
 }
 
 /// Struct or union
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub enum StructOrUnion {
     Struct,
     Union,
 }
 
 /// Struct declaration
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct StructDeclaration {
     pub specifier_qualifiers: Vec<SpecifierQualifier>,
     pub struct_declarators: Vec<StructDeclarator>,
-    #[serde(with = "oak_core::serde_range")]
+    #[cfg_attr(feature = "serde", serde(with = "oak_core::serde_range"))]
     pub span: SourceSpan,
 }
 
 /// Specifier qualifier
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub enum SpecifierQualifier {
     TypeSpecifier(TypeSpecifier),
     TypeQualifier(TypeQualifier),
 }
 
 /// Struct declarator
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct StructDeclarator {
     pub declarator: Option<Declarator>,
     pub constant_expression: Option<Expression>,
-    #[serde(with = "oak_core::serde_range")]
+    #[cfg_attr(feature = "serde", serde(with = "oak_core::serde_range"))]
     pub span: SourceSpan,
 }
 
 /// Enum specifier
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct EnumSpecifier {
     pub identifier: Option<String>,
     pub enumerators: Option<Vec<Enumerator>>,
-    #[serde(with = "oak_core::serde_range")]
+    #[cfg_attr(feature = "serde", serde(with = "oak_core::serde_range"))]
     pub span: SourceSpan,
 }
 
 /// Enumerator
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct Enumerator {
+    /// Enumerator identifier.
     pub identifier: String,
+    /// Constant expression.
     pub constant_expression: Option<Expression>,
-    #[serde(with = "oak_core::serde_range")]
+    /// Source span.
+    #[cfg_attr(feature = "serde", serde(with = "oak_core::serde_range"))]
     pub span: SourceSpan,
 }
 
 /// Init declarator
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct InitDeclarator {
+    /// Declarator.
     pub declarator: Declarator,
+    /// Initializer.
     pub initializer: Option<Initializer>,
-    #[serde(with = "oak_core::serde_range")]
+    /// Source span.
+    #[cfg_attr(feature = "serde", serde(with = "oak_core::serde_range"))]
     pub span: SourceSpan,
 }
 
 /// Declarator
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct Declarator {
+    /// Pointer.
     pub pointer: Option<Pointer>,
+    /// Direct declarator.
     pub direct_declarator: DirectDeclarator,
-    #[serde(with = "oak_core::serde_range")]
+    /// Source span.
+    #[cfg_attr(feature = "serde", serde(with = "oak_core::serde_range"))]
     pub span: SourceSpan,
 }
 
 /// Pointer
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct Pointer {
+    /// Type qualifiers.
     pub type_qualifiers: Vec<TypeQualifier>,
+    /// Pointer.
     pub pointer: Option<Box<Pointer>>,
-    #[serde(with = "oak_core::serde_range")]
+    /// Source span.
+    #[cfg_attr(feature = "serde", serde(with = "oak_core::serde_range"))]
     pub span: SourceSpan,
 }
 
 /// Direct declarator
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub enum DirectDeclarator {
+    /// Identifier.
     Identifier(String),
+    /// Declarator.
     Declarator(Box<Declarator>),
-    Array { declarator: Box<DirectDeclarator>, assignment_expression: Option<Expression> },
-    Function { declarator: Box<DirectDeclarator>, parameter_type_list: Option<ParameterTypeList>, identifier_list: Option<Vec<String>> },
+    /// Array.
+    Array {
+        /// Declarator.
+        declarator: Box<DirectDeclarator>,
+        /// Assignment expression.
+        assignment_expression: Option<Expression>,
+    },
+    /// Function.
+    Function {
+        /// Declarator.
+        declarator: Box<DirectDeclarator>,
+        /// Parameter type list.
+        parameter_type_list: Option<ParameterTypeList>,
+        /// Identifier list.
+        identifier_list: Option<Vec<String>>,
+    },
 }
 
 /// Parameter type list
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct ParameterTypeList {
+    /// Parameter list.
     pub parameter_list: Vec<ParameterDeclaration>,
+    /// Whether it is variadic.
     pub variadic: bool,
-    #[serde(with = "oak_core::serde_range")]
+    /// Source span.
+    #[cfg_attr(feature = "serde", serde(with = "oak_core::serde_range"))]
     pub span: SourceSpan,
 }
 
 /// Parameter declaration
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct ParameterDeclaration {
+    /// Declaration specifiers.
     pub declaration_specifiers: Vec<DeclarationSpecifier>,
+    /// Declarator.
     pub declarator: Option<Declarator>,
+    /// Abstract declarator.
     pub abstract_declarator: Option<AbstractDeclarator>,
-    #[serde(with = "oak_core::serde_range")]
+    /// Source span.
+    #[cfg_attr(feature = "serde", serde(with = "oak_core::serde_range"))]
     pub span: SourceSpan,
 }
 
 /// Abstract declarator
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct AbstractDeclarator {
+    /// Pointer.
     pub pointer: Option<Pointer>,
+    /// Direct abstract declarator.
     pub direct_abstract_declarator: Option<Box<DirectAbstractDeclarator>>,
-    #[serde(with = "oak_core::serde_range")]
+    /// Source span.
+    #[cfg_attr(feature = "serde", serde(with = "oak_core::serde_range"))]
     pub span: Range<usize>,
 }
 
 /// Direct abstract declarator
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub enum DirectAbstractDeclarator {
+    /// Abstract declarator.
     AbstractDeclarator(Box<AbstractDeclarator>),
-    Array { declarator: Option<Box<DirectAbstractDeclarator>>, assignment_expression: Option<Box<Expression>> },
-    Function { declarator: Option<Box<DirectAbstractDeclarator>>, parameter_type_list: Option<ParameterTypeList> },
+    /// Array.
+    Array {
+        /// Declarator.
+        declarator: Option<Box<DirectAbstractDeclarator>>,
+        /// Assignment expression.
+        assignment_expression: Option<Box<Expression>>,
+    },
+    /// Function.
+    Function {
+        /// Declarator.
+        declarator: Option<Box<DirectAbstractDeclarator>>,
+        /// Parameter type list.
+        parameter_type_list: Option<ParameterTypeList>,
+    },
 }
 
 /// Initializer
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub enum Initializer {
+    /// Assignment expression.
     AssignmentExpression(Expression),
+    /// Initializer list.
     InitializerList(Vec<Initializer>),
 }
 
 /// Statement
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub enum Statement {
     /// Labeled statement
     Labeled(LabeledStatement),
@@ -261,77 +373,153 @@ pub enum Statement {
 }
 
 /// Labeled statement
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub enum LabeledStatement {
-    Label { identifier: String, statement: Box<Statement> },
-    Case { constant_expression: Expression, statement: Box<Statement> },
-    Default { statement: Box<Statement> },
+    /// Label.
+    Label {
+        /// Identifier.
+        identifier: String,
+        /// Statement.
+        statement: Box<Statement>,
+    },
+    /// Case.
+    Case {
+        /// Constant expression.
+        constant_expression: Expression,
+        /// Statement.
+        statement: Box<Statement>,
+    },
+    /// Default.
+    Default {
+        /// Statement.
+        statement: Box<Statement>,
+    },
 }
 
 /// Compound statement
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct CompoundStatement {
+    /// Block items.
     pub block_items: Vec<BlockItem>,
-    #[serde(with = "oak_core::serde_range")]
+    /// Source span.
+    #[cfg_attr(feature = "serde", serde(with = "oak_core::serde_range"))]
     pub span: SourceSpan,
 }
 
 /// Block item
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub enum BlockItem {
+    /// Declaration.
     Declaration(Declaration),
+    /// Statement.
     Statement(Statement),
 }
 
 /// Expression statement
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct ExpressionStatement {
+    /// Expression.
     pub expression: Option<Expression>,
-    #[serde(with = "oak_core::serde_range")]
+    /// Source span.
+    #[cfg_attr(feature = "serde", serde(with = "oak_core::serde_range"))]
     pub span: SourceSpan,
 }
 
 /// Selection statement
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub enum SelectionStatement {
-    If { condition: Expression, then_branch: Box<Statement>, else_branch: Option<Box<Statement>> },
-    Switch { condition: Expression, statement: Box<Statement> },
+    /// If statement.
+    If {
+        /// Condition.
+        condition: Expression,
+        /// Then branch.
+        then_branch: Box<Statement>,
+        /// Else branch.
+        else_branch: Option<Box<Statement>>,
+    },
+    /// Switch statement.
+    Switch {
+        /// Condition.
+        condition: Expression,
+        /// Statement.
+        statement: Box<Statement>,
+    },
 }
 
 /// Iteration statement
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub enum IterationStatement {
-    While { condition: Expression, statement: Box<Statement> },
-    DoWhile { statement: Box<Statement>, condition: Expression },
-    For { initializer: Option<Box<ForInitializer>>, condition: Option<Expression>, increment: Option<Expression>, statement: Box<Statement> },
+    /// While loop.
+    While {
+        /// Condition.
+        condition: Expression,
+        /// Statement.
+        statement: Box<Statement>,
+    },
+    /// Do-while loop.
+    DoWhile {
+        /// Statement.
+        statement: Box<Statement>,
+        /// Condition.
+        condition: Expression,
+    },
+    /// For loop.
+    For {
+        /// Initializer.
+        initializer: Option<Box<ForInitializer>>,
+        /// Condition.
+        condition: Option<Expression>,
+        /// Increment.
+        increment: Option<Expression>,
+        /// Statement.
+        statement: Box<Statement>,
+    },
 }
 
 /// For initializer
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub enum ForInitializer {
+    /// Expression.
     Expression(Expression),
+    /// Declaration.
     Declaration(Declaration),
 }
 
 /// Jump statement
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub enum JumpStatement {
+    /// Goto.
     Goto(String),
+    /// Continue.
     Continue,
+    /// Break.
     Break,
+    /// Return.
     Return(Option<Expression>),
 }
 
 /// Expression
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct Expression {
+    /// Expression kind.
     pub kind: ExpressionKind,
-    #[serde(with = "oak_core::serde_range")]
+    /// Source span.
+    #[cfg_attr(feature = "serde", serde(with = "oak_core::serde_range"))]
     pub span: SourceSpan,
 }
 
 /// Expression kind
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub enum ExpressionKind {
     /// Identifier
     Identifier(String),
@@ -342,84 +530,173 @@ pub enum ExpressionKind {
     /// Parenthesized expression
     Parenthesized(Box<Expression>),
     /// Array access
-    ArrayAccess { array: Box<Expression>, index: Box<Expression> },
+    ArrayAccess {
+        /// Array.
+        array: Box<Expression>,
+        /// Index.
+        index: Box<Expression>,
+    },
     /// Function call
-    FunctionCall { function: Box<Expression>, arguments: Vec<Expression> },
+    FunctionCall {
+        /// Function.
+        function: Box<Expression>,
+        /// Arguments.
+        arguments: Vec<Expression>,
+    },
     /// Member access
-    MemberAccess { object: Box<Expression>, member: String, is_pointer: bool },
+    MemberAccess {
+        /// Object.
+        object: Box<Expression>,
+        /// Member.
+        member: String,
+        /// Whether it's a pointer.
+        is_pointer: bool,
+    },
     /// Unary operation
-    Unary { operator: UnaryOperator, operand: Box<Expression> },
+    Unary {
+        /// Operator.
+        operator: UnaryOperator,
+        /// Operand.
+        operand: Box<Expression>,
+    },
     /// Binary operation
-    Binary { left: Box<Expression>, operator: BinaryOperator, right: Box<Expression> },
+    Binary {
+        /// Left.
+        left: Box<Expression>,
+        /// Operator.
+        operator: BinaryOperator,
+        /// Right.
+        right: Box<Expression>,
+    },
     /// Conditional expression
-    Conditional { condition: Box<Expression>, then_branch: Box<Expression>, else_branch: Box<Expression> },
+    Conditional {
+        /// Condition.
+        condition: Box<Expression>,
+        /// Then branch.
+        then_branch: Box<Expression>,
+        /// Else branch.
+        else_branch: Box<Expression>,
+    },
     /// Assignment
-    Assignment { left: Box<Expression>, operator: AssignmentOperator, right: Box<Expression> },
+    Assignment {
+        /// Left.
+        left: Box<Expression>,
+        /// Operator.
+        operator: AssignmentOperator,
+        /// Right.
+        right: Box<Expression>,
+    },
     /// Comma expression
     Comma(Vec<Expression>),
 }
 
 /// Unary operator
-#[derive(Debug, Clone, Copy, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, Clone, Copy, PartialEq)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub enum UnaryOperator {
+    /// Post-increment (x++)
     PostIncrement,
+    /// Post-decrement (x--)
     PostDecrement,
+    /// Pre-increment (++x)
     PreIncrement,
+    /// Pre-decrement (--x)
     PreDecrement,
+    /// Address of (&x)
     AddressOf,
+    /// Indirection (*x)
     Deref,
+    /// Unary plus (+x)
     Plus,
+    /// Unary minus (-x)
     Minus,
+    /// Bitwise NOT (~x)
     BitNot,
+    /// Logical NOT (!x)
     LogicalNot,
+    /// Size of (sizeof)
     Sizeof,
+    /// Align of (alignof)
+    AlignOf,
 }
 
 /// Binary operator
-#[derive(Debug, Clone, Copy, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, Clone, Copy, PartialEq)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub enum BinaryOperator {
-    Multiply,
-    Divide,
-    Remainder,
+    /// Addition (+)
     Add,
+    /// Subtraction (-)
     Subtract,
+    /// Multiplication (*)
+    Multiply,
+    /// Division (/)
+    Divide,
+    /// Modulo (%)
+    Remainder,
+    /// Bitwise shift left (<<)
     ShiftLeft,
+    /// Bitwise shift right (>>)
     ShiftRight,
+    /// Less than (<)
     Less,
+    /// Greater than (>)
     Greater,
+    /// Less than or equal (<=)
     LessEqual,
+    /// Greater than or equal (>=)
     GreaterEqual,
+    /// Equal (==)
     Equal,
+    /// Not equal (!=)
     NotEqual,
+    /// Bitwise AND (&)
     BitAnd,
+    /// Bitwise XOR (^)
     BitXor,
+    /// Bitwise OR (|)
     BitOr,
+    /// Logical AND (&&)
     LogicalAnd,
+    /// Logical OR (||)
     LogicalOr,
 }
 
 /// Assignment operator
-#[derive(Debug, Clone, Copy, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, Clone, Copy, PartialEq)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub enum AssignmentOperator {
+    /// Assignment (=)
     Assign,
-    MulAssign,
-    DivAssign,
-    RemAssign,
+    /// Addition assignment (+=)
     AddAssign,
+    /// Subtraction assignment (-=)
     SubAssign,
+    /// Multiplication assignment (*=)
+    MulAssign,
+    /// Division assignment (/=)
+    DivAssign,
+    /// Modulo assignment (%=)
+    RemAssign,
+    /// Bitwise shift left assignment (<<=)
     ShlAssign,
+    /// Bitwise shift right assignment (>>=)
     ShrAssign,
+    /// Bitwise AND assignment (&=)
     AndAssign,
+    /// Bitwise XOR assignment (^=)
     XorAssign,
+    /// Bitwise OR assignment (|=)
     OrAssign,
 }
 
 /// Type name
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct TypeName {
     pub specifier_qualifiers: Vec<SpecifierQualifier>,
     pub abstract_declarator: Option<Box<AbstractDeclarator>>,
-    #[serde(with = "oak_core::serde_range")]
+    #[cfg_attr(feature = "serde", serde(with = "oak_core::serde_range"))]
     pub span: Range<usize>,
 }
 

@@ -1,6 +1,9 @@
-use crate::{kind::XmlSyntaxKind, language::XmlLanguage};
+#![doc = include_str!("readme.md")]
+pub mod token_type;
+
+use crate::{language::XmlLanguage, lexer::token_type::XmlTokenType};
 use oak_core::{
-    Lexer, LexerCache, LexerState, OakError,
+    Lexer, LexerCache, LexerState, OakError, TextEdit,
     lexer::{CommentConfig, LexOutput, StringConfig, WhitespaceConfig},
     source::Source,
 };
@@ -92,11 +95,11 @@ impl<'config> XmlLexer<'config> {
     }
 
     fn skip_whitespace<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
-        XML_WHITESPACE.scan(state, XmlSyntaxKind::Whitespace)
+        XML_WHITESPACE.scan(state, XmlTokenType::Whitespace)
     }
 
     fn lex_comment<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
-        XML_COMMENT.scan(state, XmlSyntaxKind::Comment, XmlSyntaxKind::Comment)
+        XML_COMMENT.scan(state, XmlTokenType::Comment, XmlTokenType::Comment)
     }
 
     fn lex_doctype<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
@@ -138,7 +141,7 @@ impl<'config> XmlLexer<'config> {
                             Some('>') => {
                                 if bracket_depth == 0 {
                                     state.advance(1); // Skip >
-                                    state.add_token(XmlSyntaxKind::DoctypeDeclaration, start_pos, state.get_position());
+                                    state.add_token(XmlTokenType::DoctypeDeclaration, start_pos, state.get_position());
                                     return true;
                                 }
                                 else {
@@ -153,7 +156,7 @@ impl<'config> XmlLexer<'config> {
                     }
 
                     // Unclosed DOCTYPE
-                    state.add_token(XmlSyntaxKind::Error, start_pos, state.get_position());
+                    state.add_token(XmlTokenType::Error, start_pos, state.get_position());
                     return true;
                 }
             }
@@ -193,7 +196,7 @@ impl<'config> XmlLexer<'config> {
                                 if let Some(']') = state.peek_next_n(1) {
                                     if let Some('>') = state.peek_next_n(2) {
                                         state.advance(3); // Skip ]]>
-                                        state.add_token(XmlSyntaxKind::CData, start_pos, state.get_position());
+                                        state.add_token(XmlTokenType::CData, start_pos, state.get_position());
                                         return true;
                                     }
                                 }
@@ -207,7 +210,7 @@ impl<'config> XmlLexer<'config> {
                         }
 
                         // Unclosed CDATA
-                        state.add_token(XmlSyntaxKind::Error, start_pos, state.get_position());
+                        state.add_token(XmlTokenType::Error, start_pos, state.get_position());
                         return true;
                     }
                 }
@@ -229,7 +232,7 @@ impl<'config> XmlLexer<'config> {
                     if let Some('?') = state.peek() {
                         if let Some('>') = state.peek_next_n(1) {
                             state.advance(2); // Skip ?>
-                            state.add_token(XmlSyntaxKind::ProcessingInstruction, start_pos, state.get_position());
+                            state.add_token(XmlTokenType::ProcessingInstruction, start_pos, state.get_position());
                             return true;
                         }
                     }
@@ -242,7 +245,7 @@ impl<'config> XmlLexer<'config> {
                 }
 
                 // Unclosed processing instruction
-                state.add_token(XmlSyntaxKind::Error, start_pos, state.get_position());
+                state.add_token(XmlTokenType::Error, start_pos, state.get_position());
                 return true;
             }
         }
@@ -258,17 +261,17 @@ impl<'config> XmlLexer<'config> {
                 state.advance(1);
                 if state.peek() == Some('/') {
                     state.advance(1);
-                    state.add_token(XmlSyntaxKind::LeftAngleSlash, start_pos, state.get_position());
+                    state.add_token(XmlTokenType::LeftAngleSlash, start_pos, state.get_position());
                 }
                 else {
-                    state.add_token(XmlSyntaxKind::LeftAngle, start_pos, state.get_position());
+                    state.add_token(XmlTokenType::LeftAngle, start_pos, state.get_position());
                 }
                 true
             }
             Some('/') => {
                 if state.peek_next_n(1) == Some('>') {
                     state.advance(2);
-                    state.add_token(XmlSyntaxKind::SlashRightAngle, start_pos, state.get_position());
+                    state.add_token(XmlTokenType::SlashRightAngle, start_pos, state.get_position());
                     true
                 }
                 else {
@@ -277,12 +280,12 @@ impl<'config> XmlLexer<'config> {
             }
             Some('>') => {
                 state.advance(1);
-                state.add_token(XmlSyntaxKind::RightAngle, start_pos, state.get_position());
+                state.add_token(XmlTokenType::RightAngle, start_pos, state.get_position());
                 true
             }
             Some('=') => {
                 state.advance(1);
-                state.add_token(XmlSyntaxKind::Equals, start_pos, state.get_position());
+                state.add_token(XmlTokenType::Equals, start_pos, state.get_position());
                 true
             }
             _ => false,
@@ -328,7 +331,7 @@ impl<'config> XmlLexer<'config> {
 
                 if has_digits && state.peek() == Some(';') {
                     state.advance(1);
-                    state.add_token(XmlSyntaxKind::CharacterReference, start_pos, state.get_position());
+                    state.add_token(XmlTokenType::CharacterReference, start_pos, state.get_position());
                     return true;
                 }
             }
@@ -347,13 +350,13 @@ impl<'config> XmlLexer<'config> {
 
                 if has_name && state.peek() == Some(';') {
                     state.advance(1);
-                    state.add_token(XmlSyntaxKind::EntityReference, start_pos, state.get_position());
+                    state.add_token(XmlTokenType::EntityReference, start_pos, state.get_position());
                     return true;
                 }
             }
 
             // Invalid entity reference
-            state.add_token(XmlSyntaxKind::Error, start_pos, state.get_position());
+            state.add_token(XmlTokenType::Error, start_pos, state.get_position());
             return true;
         }
 
@@ -361,7 +364,7 @@ impl<'config> XmlLexer<'config> {
     }
 
     fn lex_string_literal<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
-        XML_STRING.scan(state, XmlSyntaxKind::StringLiteral)
+        XML_STRING.scan(state, XmlTokenType::StringLiteral)
     }
 
     fn lex_identifier_or_tag_name<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
@@ -380,7 +383,7 @@ impl<'config> XmlLexer<'config> {
                     }
                 }
 
-                state.add_token(XmlSyntaxKind::Identifier, start_pos, state.get_position());
+                state.add_token(XmlTokenType::Identifier, start_pos, state.get_position());
                 return true;
             }
         }
@@ -394,32 +397,32 @@ impl<'config> XmlLexer<'config> {
         match state.peek() {
             Some('"') => {
                 state.advance(1);
-                state.add_token(XmlSyntaxKind::Quote, start_pos, state.get_position());
+                state.add_token(XmlTokenType::Quote, start_pos, state.get_position());
                 true
             }
             Some('\'') => {
                 state.advance(1);
-                state.add_token(XmlSyntaxKind::SingleQuote, start_pos, state.get_position());
+                state.add_token(XmlTokenType::SingleQuote, start_pos, state.get_position());
                 true
             }
             Some('!') => {
                 state.advance(1);
-                state.add_token(XmlSyntaxKind::Exclamation, start_pos, state.get_position());
+                state.add_token(XmlTokenType::Exclamation, start_pos, state.get_position());
                 true
             }
             Some('?') => {
                 state.advance(1);
-                state.add_token(XmlSyntaxKind::Question, start_pos, state.get_position());
+                state.add_token(XmlTokenType::Question, start_pos, state.get_position());
                 true
             }
             Some('&') => {
                 state.advance(1);
-                state.add_token(XmlSyntaxKind::Ampersand, start_pos, state.get_position());
+                state.add_token(XmlTokenType::Ampersand, start_pos, state.get_position());
                 true
             }
             Some(';') => {
                 state.advance(1);
-                state.add_token(XmlSyntaxKind::Semicolon, start_pos, state.get_position());
+                state.add_token(XmlTokenType::Semicolon, start_pos, state.get_position());
                 true
             }
             _ => false,
@@ -440,7 +443,7 @@ impl<'config> XmlLexer<'config> {
         }
 
         if state.get_position() > start_pos {
-            state.add_token(XmlSyntaxKind::Text, start_pos, state.get_position());
+            state.add_token(XmlTokenType::Text, start_pos, state.get_position());
             true
         }
         else {

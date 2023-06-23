@@ -123,24 +123,19 @@ $z-index: (
 
 @mixin button-variant($bg-color, $text-color: white) {
   background-color: $bg-color;
+  border-color: darken($bg-color, 5%);
   color: $text-color;
-  border: 1px solid $bg-color;
-  
-  &:hover {
+
+  &:hover, &:focus, &.active {
     background-color: darken($bg-color, 10%);
-    border-color: darken($bg-color, 10%);
-  }
-  
-  &:active {
-    background-color: darken($bg-color, 15%);
     border-color: darken($bg-color, 15%);
+    color: $text-color;
   }
-  
-  &:disabled {
-    background-color: lighten($bg-color, 20%);
-    border-color: lighten($bg-color, 20%);
-    opacity: 0.6;
-    cursor: not-allowed;
+
+  &:disabled, &.disabled {
+    background-color: lighten($bg-color, 15%);
+    border-color: lighten($bg-color, 10%);
+    color: rgba($text-color, 0.65);
   }
 }
 

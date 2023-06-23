@@ -1,14 +1,18 @@
 use core::fmt;
 use oak_core::{ElementType, TokenType, UniversalElementRole, UniversalTokenRole};
 
-/// GSGL 语法节点类型
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, serde::Serialize, serde::Deserialize)]
-pub enum GsglSyntaxKind {
-    // 根节点
+#[cfg(feature = "serde")]
+use serde::{Deserialize, Serialize};
+
+/// GSGL syntax kind.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+pub enum GsglTokenType {
+    // Root nodes
     Root,
     SourceFile,
 
-    // 关键字
+    // Keywords
     Shader,
     Vertex,
     Fragment,
@@ -34,7 +38,7 @@ pub enum GsglSyntaxKind {
     True,
     False,
 
-    // 数据类型
+    // Data types
     Float,
     Int,
     Bool,
@@ -48,12 +52,12 @@ pub enum GsglSyntaxKind {
     SamplerCube,
     Void,
 
-    // 标识符和字面量
+    // Identifiers and literals
     Identifier,
     Number,
     String,
 
-    // 操作符
+    // Operators
     Plus,
     Minus,
     Star,
@@ -65,7 +69,7 @@ pub enum GsglSyntaxKind {
     StarAssign,
     SlashAssign,
 
-    // 比较操作符
+    // Comparison operators
     Eq,
     Ne,
     Lt,
@@ -73,12 +77,12 @@ pub enum GsglSyntaxKind {
     Gt,
     Ge,
 
-    // 逻辑操作符
+    // Logical operators
     And,
     Or,
     Not,
 
-    // 位操作符
+    // Bitwise operators
     BitAnd,
     BitOr,
     BitXor,
@@ -86,7 +90,7 @@ pub enum GsglSyntaxKind {
     LeftShift,
     RightShift,
 
-    // 分隔符
+    // Punctuations
     LeftParen,
     RightParen,
     LeftBrace,
@@ -99,7 +103,7 @@ pub enum GsglSyntaxKind {
     Colon,
     Question,
 
-    // 预处理器
+    // Preprocessors
     Preprocessor,
     Include,
     Define,
@@ -108,7 +112,7 @@ pub enum GsglSyntaxKind {
     Endif,
     Version,
 
-    // 内置函数
+    // Builtin functions
     Sin,
     Cos,
     Tan,
@@ -131,16 +135,16 @@ pub enum GsglSyntaxKind {
     Texture2D,
     TextureCube,
 
-    // 空白和注释
+    // Whitespace and comments
     Whitespace,
     Newline,
     Comment,
 
-    // 错误和结束
+    // Error and EOF
     Error,
     Eof,
 
-    // 语法结构
+    // Syntax structures
     FunctionDecl,
     VariableDecl,
     StructDecl,
@@ -159,8 +163,8 @@ pub enum GsglSyntaxKind {
     Literal,
 }
 
-impl GsglSyntaxKind {
-    /// 检查是否为关键字
+impl GsglTokenType {
+    /// Checks if the kind is a keyword.
     pub fn is_keyword(self) -> bool {
         matches!(
             self,
@@ -191,12 +195,12 @@ impl GsglSyntaxKind {
         )
     }
 
-    /// 检查是否为数据类型
+    /// Checks if the kind is a data type.
     pub fn is_type(self) -> bool {
         matches!(self, Self::Float | Self::Int | Self::Bool | Self::Vec2 | Self::Vec3 | Self::Vec4 | Self::Mat2 | Self::Mat3 | Self::Mat4 | Self::Sampler2D | Self::SamplerCube | Self::Void)
     }
 
-    /// 检查是否为操作符
+    /// Checks if the kind is an operator.
     pub fn is_operator(self) -> bool {
         matches!(
             self,
@@ -229,7 +233,7 @@ impl GsglSyntaxKind {
     }
 }
 
-impl fmt::Display for GsglSyntaxKind {
+impl fmt::Display for GsglTokenType {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         let name = match self {
             Self::Root => "ROOT",
@@ -363,7 +367,7 @@ impl fmt::Display for GsglSyntaxKind {
     }
 }
 
-impl TokenType for GsglSyntaxKind {
+impl TokenType for GsglTokenType {
     const END_OF_STREAM: Self = Self::Eof;
     type Role = UniversalTokenRole;
 
@@ -378,7 +382,7 @@ impl TokenType for GsglSyntaxKind {
     }
 }
 
-impl ElementType for GsglSyntaxKind {
+impl ElementType for GsglTokenType {
     type Role = UniversalElementRole;
 
     fn role(&self) -> Self::Role {

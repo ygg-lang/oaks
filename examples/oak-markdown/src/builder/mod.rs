@@ -1,20 +1,20 @@
 use crate::{ast::*, language::MarkdownLanguage, parser::MarkdownParser};
 use oak_core::{Builder, BuilderCache, GreenNode, OakError, Parser, RedNode, RedTree, SourceText, TextEdit, source::Source};
 
-/// Markdown 语言的 AST 构建器
+/// AST builder for the Markdown language.
 #[derive(Clone)]
 pub struct MarkdownBuilder<'config> {
-    /// 语言配置
+    /// Language configuration.
     config: &'config MarkdownLanguage,
 }
 
 impl<'config> MarkdownBuilder<'config> {
-    /// 创建新的 Markdown 构建器
+    /// Creates a new MarkdownBuilder with the given configuration.
     pub fn new(config: &'config MarkdownLanguage) -> Self {
         Self { config }
     }
 
-    /// 从语法树构建 AST 根节点
+    /// Builds the AST root node from the green tree.
     fn build_root(&self, green_tree: &GreenNode<MarkdownLanguage>, source: &SourceText) -> Result<MarkdownRoot, OakError> {
         let red_root = RedNode::new(green_tree, 0);
 
@@ -22,7 +22,7 @@ impl<'config> MarkdownBuilder<'config> {
         for child in red_root.children() {
             if let RedTree::Node(node) = child {
                 if let Some(block) = self.build_block(node, source) {
-                    blocks.push(block);
+                    blocks.push(block)
                 }
             }
         }
@@ -32,36 +32,36 @@ impl<'config> MarkdownBuilder<'config> {
 
     /// 构建块级元素
     fn build_block(&self, node: RedNode<MarkdownLanguage>, source: &SourceText) -> Option<Block> {
-        use crate::kind::MarkdownSyntaxKind::*;
+        use crate::{lexer::token_type::MarkdownTokenType as TT, parser::element_type::MarkdownElementType as ET};
 
         let kind = node.green.kind;
         match kind {
-            Heading1 | Heading2 | Heading3 | Heading4 | Heading5 | Heading6 => {
+            ET::Heading1 | ET::Heading2 | ET::Heading3 | ET::Heading4 | ET::Heading5 | ET::Heading6 => {
                 let level = match kind {
-                    Heading1 => 1,
-                    Heading2 => 2,
-                    Heading3 => 3,
-                    Heading4 => 4,
-                    Heading5 => 5,
-                    Heading6 => 6,
+                    ET::Heading1 => 1,
+                    ET::Heading2 => 2,
+                    ET::Heading3 => 3,
+                    ET::Heading4 => 4,
+                    ET::Heading5 => 5,
+                    ET::Heading6 => 6,
                     _ => unreachable!(),
                 };
                 let text = source.get_text_in(node.span());
                 let content = text.trim_start_matches('#').trim_start().to_string();
                 Some(Block::Heading(crate::ast::Heading { level, content, span: node.span() }))
             }
-            Paragraph => Some(Block::Paragraph(crate::ast::Paragraph { content: source.get_text_in(node.span()).to_string(), span: node.span() })),
-            CodeBlock => {
+            ET::Paragraph => Some(Block::Paragraph(crate::ast::Paragraph { content: source.get_text_in(node.span()).to_string(), span: node.span() })),
+            ET::CodeBlock => {
                 let mut language = None;
                 let mut content = String::new();
 
                 for child in node.children() {
                     match child {
                         RedTree::Leaf(leaf) => {
-                            if leaf.kind == CodeLanguage {
+                            if leaf.kind == TT::CodeLanguage {
                                 language = Some(source.get_text_in(leaf.span).trim().to_string());
                             }
-                            else if leaf.kind != CodeFence {
+                            else if leaf.kind != TT::CodeFence {
                                 content.push_str(&source.get_text_in(leaf.span));
                             }
                         }
@@ -69,10 +69,10 @@ impl<'config> MarkdownBuilder<'config> {
                             // 检查子节点是否包含语言标识
                             for sub_child in child_node.children() {
                                 if let RedTree::Leaf(sub_leaf) = sub_child {
-                                    if sub_leaf.kind == CodeLanguage {
+                                    if sub_leaf.kind == TT::CodeLanguage {
                                         language = Some(source.get_text_in(sub_leaf.span).trim().to_string());
                                     }
-                                    else if sub_leaf.kind != CodeFence {
+                                    else if sub_leaf.kind != TT::CodeFence {
                                         content.push_str(&source.get_text_in(sub_leaf.span));
                                     }
                                 }
@@ -86,37 +86,35 @@ impl<'config> MarkdownBuilder<'config> {
 
                 Some(Block::CodeBlock(crate::ast::CodeBlock { language, content: content.trim().to_string(), span: node.span() }))
             }
-            UnorderedList | OrderedList => {
+            ET::UnorderedList | ET::OrderedList => {
                 let mut items = Vec::new();
                 for child in node.children() {
                     if let RedTree::Node(child_node) = child {
-                        if child_node.green.kind == ListItem {
+                        if child_node.green.kind == ET::ListItem {
                             items.push(self.build_list_item(child_node, source));
                         }
                     }
                 }
-                Some(Block::List(crate::ast::List { is_ordered: kind == OrderedList, items, span: node.span() }))
+                Some(Block::List(crate::ast::List { is_ordered: kind == ET::OrderedList, items, span: node.span() }))
             }
-            Blockquote => {
+            ET::Blockquote => {
                 let mut content_text = String::new();
                 for child in node.children() {
                     match child {
                         RedTree::Leaf(leaf) => {
-                            if leaf.kind != BlockquoteMarker {
-                                content_text.push_str(&source.get_text_in(leaf.span));
+                            if leaf.kind != TT::BlockquoteMarker {
+                                content_text.push_str(&source.get_text_in(leaf.span))
                             }
                         }
-                        RedTree::Node(child_node) => {
-                            content_text.push_str(&source.get_text_in(child_node.span()));
-                        }
+                        RedTree::Node(child_node) => content_text.push_str(&source.get_text_in(child_node.span())),
                     }
                 }
 
                 // 简单的引用处理：将其内容作为段落
                 Some(Block::Blockquote(crate::ast::Blockquote { content: vec![Block::Paragraph(crate::ast::Paragraph { content: content_text.trim().to_string(), span: node.span() })], span: node.span() }))
             }
-            HorizontalRule => Some(Block::HorizontalRule(crate::ast::HorizontalRule { span: node.span() })),
-            Table => {
+            ET::HorizontalRule => Some(Block::HorizontalRule(crate::ast::HorizontalRule { span: node.span() })),
+            ET::Table => {
                 let text = source.get_text_in(node.span());
                 let lines: Vec<&str> = text.lines().collect();
                 if lines.is_empty() {
@@ -144,12 +142,12 @@ impl<'config> MarkdownBuilder<'config> {
                     if line.trim().is_empty() {
                         continue;
                     }
-                    rows.push(parse_row(line));
+                    rows.push(parse_row(line))
                 }
 
                 Some(Block::Table(crate::ast::Table { header, rows, span: node.span() }))
             }
-            HtmlTag => {
+            ET::HtmlTag => {
                 // TODO: 实现 HTML 构建
                 None
             }
@@ -162,7 +160,7 @@ impl<'config> MarkdownBuilder<'config> {
         for child in node.children() {
             if let RedTree::Node(child_node) = child {
                 if let Some(block) = self.build_block(child_node, source) {
-                    content.push(block);
+                    content.push(block)
                 }
             }
         }
@@ -183,7 +181,7 @@ impl<'config> MarkdownBuilder<'config> {
                     text
                 };
 
-                content.push(crate::ast::Block::Paragraph(crate::ast::Paragraph { content: display_text.trim().to_string(), span: node.span() }));
+                content.push(crate::ast::Block::Paragraph(crate::ast::Paragraph { content: display_text.trim().to_string(), span: node.span() }))
             }
         }
 

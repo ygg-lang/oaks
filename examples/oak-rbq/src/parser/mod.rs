@@ -1,17 +1,22 @@
-use crate::{kind::RbqSyntaxKind, language::RbqLanguage};
+pub mod element_type;
+
+use crate::{language::RbqLanguage, lexer::token_type::RbqTokenType, parser::element_type::RbqElementType};
 use oak_core::{OakError, Parser, ParserState, Source, TextEdit, TokenType};
 
 pub(crate) type State<'a, S> = ParserState<'a, RbqLanguage, S>;
 
+/// Parser for the RBQ language.
 pub struct RbqParser<'config> {
     pub(crate) config: &'config RbqLanguage,
 }
 
 impl<'config> RbqParser<'config> {
+    /// Creates a new `RbqParser` with the given configuration.
     pub fn new(config: &'config RbqLanguage) -> Self {
         Self { config }
     }
 
+    /// Parses the root node of an RBQ document.
     pub(crate) fn parse_root<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> Result<(), OakError> {
         self.skip_trivia(state);
 
@@ -21,46 +26,47 @@ impl<'config> RbqParser<'config> {
             self.skip_trivia(state);
 
             if state.checkpoint() == checkpoint && state.not_at_end() {
-                state.bump();
+                state.bump()
             }
         }
 
         Ok(())
     }
 
+    /// Parses a top-level definition or expression.
     fn parse_top_level<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> Result<(), OakError> {
         self.skip_trivia(state);
         // Handle annotations
-        while state.at(RbqSyntaxKind::At) {
+        while state.at(RbqTokenType::At) {
             self.parse_annotation(state)?;
-            self.skip_trivia(state);
+            self.skip_trivia(state)
         }
 
-        if state.at(RbqSyntaxKind::NamespaceKw) {
+        if state.at(RbqTokenType::NamespaceKw) {
             self.parse_namespace(state)
         }
-        else if state.at(RbqSyntaxKind::UseKw) {
+        else if state.at(RbqTokenType::UseKw) {
             self.parse_import(state)
         }
-        else if state.at(RbqSyntaxKind::ClassKw) {
+        else if state.at(RbqTokenType::ClassKw) {
             self.parse_class(state)
         }
-        else if state.at(RbqSyntaxKind::StructKw) {
+        else if state.at(RbqTokenType::StructKw) {
             self.parse_struct(state)
         }
-        else if state.at(RbqSyntaxKind::UnionKw) {
+        else if state.at(RbqTokenType::UnionKw) {
             self.parse_union(state)
         }
-        else if state.at(RbqSyntaxKind::EnumKw) {
+        else if state.at(RbqTokenType::EnumKw) {
             self.parse_enum(state)
         }
-        else if state.at(RbqSyntaxKind::TraitKw) {
+        else if state.at(RbqTokenType::TraitKw) {
             self.parse_trait(state)
         }
-        else if state.at(RbqSyntaxKind::TypeKw) {
+        else if state.at(RbqTokenType::TypeKw) {
             self.parse_type_alias(state)
         }
-        else if state.at(RbqSyntaxKind::MicroKw) {
+        else if state.at(RbqTokenType::MicroKw) {
             self.parse_micro_function(state)
         }
         else {
@@ -69,28 +75,29 @@ impl<'config> RbqParser<'config> {
             self.parse_expression(state)?;
             self.skip_trivia(state);
             if state.checkpoint() == checkpoint && state.not_at_end() {
-                state.bump();
+                state.bump()
             }
             Ok(())
         }
     }
 
+    /// Parses an annotation (e.g., `@name` or `@name(args)`).
     fn parse_annotation<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> Result<(), OakError> {
-        state.incremental_node(RbqSyntaxKind::Annotation, |state| {
-            state.eat(RbqSyntaxKind::At);
+        state.incremental_node(RbqElementType::Annotation, |state| {
+            state.eat(RbqTokenType::At);
             self.skip_trivia(state);
-            if !state.eat(RbqSyntaxKind::Ident) {
-                state.record_expected("annotation name");
+            if !state.eat(RbqTokenType::Ident) {
+                state.record_expected("annotation name")
             }
             self.skip_trivia(state);
-            if state.eat(RbqSyntaxKind::LeftParen) {
+            if state.eat(RbqTokenType::LeftParen) {
                 self.skip_trivia(state);
-                state.incremental_node(RbqSyntaxKind::AnnotationArgs, |state| {
-                    while !state.at(RbqSyntaxKind::RightParen) && state.not_at_end() {
+                state.incremental_node(RbqElementType::AnnotationArgs, |state| {
+                    while !state.at(RbqTokenType::RightParen) && state.not_at_end() {
                         let checkpoint = state.checkpoint();
                         self.parse_expression(state)?;
                         self.skip_trivia(state);
-                        if !state.eat(RbqSyntaxKind::Comma) {
+                        if !state.eat(RbqTokenType::Comma) {
                             if state.checkpoint() == checkpoint {
                                 state.bump();
                                 self.skip_trivia(state);
@@ -106,20 +113,20 @@ impl<'config> RbqParser<'config> {
                     Ok(())
                 })?;
                 self.skip_trivia(state);
-                state.eat(RbqSyntaxKind::RightParen);
+                state.eat(RbqTokenType::RightParen);
             }
             Ok(())
         })
     }
 
     fn parse_namespace<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> Result<(), OakError> {
-        state.incremental_node(RbqSyntaxKind::NamespaceDef, |state| {
+        state.incremental_node(RbqElementType::NamespaceDef, |state| {
             state.bump(); // namespace
             self.skip_trivia(state);
             self.parse_path(state)?;
             self.skip_trivia(state);
-            if state.eat(RbqSyntaxKind::LeftBrace) {
-                while state.not_at_end() && !state.at(RbqSyntaxKind::RightBrace) {
+            if state.eat(RbqTokenType::LeftBrace) {
+                while state.not_at_end() && !state.at(RbqTokenType::RightBrace) {
                     self.skip_trivia(state);
                     let checkpoint = state.checkpoint();
                     self.parse_top_level(state)?;
@@ -129,46 +136,46 @@ impl<'config> RbqParser<'config> {
                         self.skip_trivia(state);
                     }
                 }
-                state.eat(RbqSyntaxKind::RightBrace);
+                state.eat(RbqTokenType::RightBrace);
             }
             else {
-                state.eat(RbqSyntaxKind::Semicolon);
+                state.eat(RbqTokenType::Semicolon);
             }
             Ok(())
         })
     }
 
     fn parse_import<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> Result<(), OakError> {
-        state.incremental_node(RbqSyntaxKind::ImportDef, |state| {
+        state.incremental_node(RbqElementType::ImportDef, |state| {
             state.bump(); // use
             self.skip_trivia(state);
             self.parse_path(state)?;
             self.skip_trivia(state);
-            state.eat(RbqSyntaxKind::Semicolon);
+            state.eat(RbqTokenType::Semicolon);
             Ok(())
         })
     }
 
     fn parse_struct<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> Result<(), OakError> {
-        state.incremental_node(RbqSyntaxKind::StructDef, |state| {
+        state.incremental_node(RbqElementType::StructDef, |state| {
             state.bump(); // struct
             self.skip_trivia(state);
-            if !state.eat(RbqSyntaxKind::Ident) {
-                state.record_expected("struct name");
+            if !state.eat(RbqTokenType::Ident) {
+                state.record_expected("struct name")
             }
             self.skip_trivia(state);
-            if state.eat(RbqSyntaxKind::LeftBrace) {
-                while state.not_at_end() && !state.at(RbqSyntaxKind::RightBrace) {
+            if state.eat(RbqTokenType::LeftBrace) {
+                while state.not_at_end() && !state.at(RbqTokenType::RightBrace) {
                     self.skip_trivia(state);
                     let checkpoint = state.checkpoint();
-                    if state.at(RbqSyntaxKind::At) {
-                        self.parse_annotation(state)?;
+                    if state.at(RbqTokenType::At) {
+                        self.parse_annotation(state)?
                     }
-                    else if state.at(RbqSyntaxKind::UsingKw) {
-                        self.parse_using(state)?;
+                    else if state.at(RbqTokenType::UsingKw) {
+                        self.parse_using(state)?
                     }
                     else {
-                        self.parse_field(state)?;
+                        self.parse_field(state)?
                     }
                     self.skip_trivia(state);
                     if state.checkpoint() == checkpoint && state.not_at_end() {
@@ -176,28 +183,28 @@ impl<'config> RbqParser<'config> {
                         self.skip_trivia(state);
                     }
                 }
-                state.eat(RbqSyntaxKind::RightBrace);
+                state.eat(RbqTokenType::RightBrace);
             }
             Ok(())
         })
     }
 
     fn parse_class<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> Result<(), OakError> {
-        state.incremental_node(RbqSyntaxKind::ClassDef, |state| {
+        state.incremental_node(RbqElementType::ClassDef, |state| {
             state.bump(); // class
             self.skip_trivia(state);
-            if !state.eat(RbqSyntaxKind::Ident) {
-                state.record_expected("class name");
+            if !state.eat(RbqTokenType::Ident) {
+                state.record_expected("class name")
             }
             self.skip_trivia(state);
-            if state.eat(RbqSyntaxKind::LeftBrace) {
-                while state.not_at_end() && !state.at(RbqSyntaxKind::RightBrace) {
+            if state.eat(RbqTokenType::LeftBrace) {
+                while state.not_at_end() && !state.at(RbqTokenType::RightBrace) {
                     self.skip_trivia(state);
                     let checkpoint = state.checkpoint();
-                    if state.at(RbqSyntaxKind::At) {
+                    if state.at(RbqTokenType::At) {
                         self.parse_annotation(state)?;
                     }
-                    else if state.at(RbqSyntaxKind::UsingKw) {
+                    else if state.at(RbqTokenType::UsingKw) {
                         self.parse_using(state)?;
                     }
                     else {
@@ -209,52 +216,52 @@ impl<'config> RbqParser<'config> {
                         self.skip_trivia(state);
                     }
                 }
-                state.eat(RbqSyntaxKind::RightBrace);
+                state.eat(RbqTokenType::RightBrace);
             }
             Ok(())
         })
     }
 
     fn parse_field<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> Result<(), OakError> {
-        state.incremental_node(RbqSyntaxKind::FieldDef, |state| {
+        state.incremental_node(RbqElementType::FieldDef, |state| {
             self.skip_trivia(state);
-            if !state.eat(RbqSyntaxKind::Ident) {
-                state.record_expected("field name");
+            if !state.eat(RbqTokenType::Ident) {
+                state.record_expected("field name")
             }
             self.skip_trivia(state);
-            state.eat(RbqSyntaxKind::Colon);
+            state.eat(RbqTokenType::Colon);
             self.skip_trivia(state);
             self.parse_type_ref(state)?;
             self.skip_trivia(state);
-            if state.eat(RbqSyntaxKind::Eq) {
+            if state.eat(RbqTokenType::Eq) {
                 self.skip_trivia(state);
                 self.parse_expression(state)?;
                 self.skip_trivia(state);
             }
-            state.eat(RbqSyntaxKind::Semicolon);
+            state.eat(RbqTokenType::Semicolon);
             Ok(())
         })
     }
 
     fn parse_using<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> Result<(), OakError> {
-        state.incremental_node(RbqSyntaxKind::UsingDef, |state| {
+        state.incremental_node(RbqElementType::UsingDef, |state| {
             state.bump(); // using
             self.skip_trivia(state);
             self.parse_path(state)?;
             self.skip_trivia(state);
-            state.eat(RbqSyntaxKind::Semicolon);
+            state.eat(RbqTokenType::Semicolon);
             Ok(())
         })
     }
 
     fn parse_union<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> Result<(), OakError> {
-        state.incremental_node(RbqSyntaxKind::UnionDef, |state| {
+        state.incremental_node(RbqElementType::UnionDef, |state| {
             state.bump(); // union
             self.skip_trivia(state);
-            state.eat(RbqSyntaxKind::Ident);
+            state.eat(RbqTokenType::Ident);
             self.skip_trivia(state);
-            if state.eat(RbqSyntaxKind::LeftBrace) {
-                while state.not_at_end() && !state.at(RbqSyntaxKind::RightBrace) {
+            if state.eat(RbqTokenType::LeftBrace) {
+                while state.not_at_end() && !state.at(RbqTokenType::RightBrace) {
                     self.skip_trivia(state);
                     let checkpoint = state.checkpoint();
                     self.parse_union_member(state)?;
@@ -264,20 +271,20 @@ impl<'config> RbqParser<'config> {
                         self.skip_trivia(state);
                     }
                 }
-                state.eat(RbqSyntaxKind::RightBrace);
+                state.eat(RbqTokenType::RightBrace);
             }
             Ok(())
         })
     }
 
     fn parse_enum<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> Result<(), OakError> {
-        state.incremental_node(RbqSyntaxKind::EnumDef, |state| {
-            state.bump(); // enums
+        state.incremental_node(RbqElementType::EnumDef, |state| {
+            state.bump(); // enum
             self.skip_trivia(state);
-            state.eat(RbqSyntaxKind::Ident);
+            state.eat(RbqTokenType::Ident);
             self.skip_trivia(state);
-            if state.eat(RbqSyntaxKind::LeftBrace) {
-                while state.not_at_end() && !state.at(RbqSyntaxKind::RightBrace) {
+            if state.eat(RbqTokenType::LeftBrace) {
+                while state.not_at_end() && !state.at(RbqTokenType::RightBrace) {
                     self.skip_trivia(state);
                     let checkpoint = state.checkpoint();
                     self.parse_enum_member(state)?;
@@ -287,47 +294,47 @@ impl<'config> RbqParser<'config> {
                         self.skip_trivia(state);
                     }
                 }
-                state.eat(RbqSyntaxKind::RightBrace);
+                state.eat(RbqTokenType::RightBrace);
             }
             Ok(())
         })
     }
 
     fn parse_enum_member<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> Result<(), OakError> {
-        state.incremental_node(RbqSyntaxKind::EnumMember, |state| {
+        state.incremental_node(RbqElementType::EnumMember, |state| {
             self.skip_trivia(state);
-            if state.at(RbqSyntaxKind::At) {
+            if state.at(RbqTokenType::At) {
                 self.parse_annotation(state)?;
                 self.skip_trivia(state);
             }
-            state.eat(RbqSyntaxKind::Ident);
+            state.eat(RbqTokenType::Ident);
             self.skip_trivia(state);
-            if state.eat(RbqSyntaxKind::Eq) {
+            if state.eat(RbqTokenType::Eq) {
                 self.skip_trivia(state);
                 self.parse_expression(state)?;
                 self.skip_trivia(state);
             }
-            if !state.eat(RbqSyntaxKind::Comma) {
+            if !state.eat(RbqTokenType::Comma) {
                 self.skip_trivia(state);
-                state.eat(RbqSyntaxKind::Semicolon);
+                state.eat(RbqTokenType::Semicolon);
             }
             Ok(())
         })
     }
 
     fn parse_union_member<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> Result<(), OakError> {
-        state.incremental_node(RbqSyntaxKind::UnionMember, |state| {
+        state.incremental_node(RbqElementType::UnionMember, |state| {
             self.skip_trivia(state);
-            if state.at(RbqSyntaxKind::At) {
+            if state.at(RbqTokenType::At) {
                 self.parse_annotation(state)?;
                 self.skip_trivia(state);
             }
-            state.eat(RbqSyntaxKind::Ident);
+            state.eat(RbqTokenType::Ident);
             self.skip_trivia(state);
-            if state.at(RbqSyntaxKind::LeftBrace) {
+            if state.at(RbqTokenType::LeftBrace) {
                 // ADT member with fields
                 state.bump();
-                while state.not_at_end() && !state.at(RbqSyntaxKind::RightBrace) {
+                while state.not_at_end() && !state.at(RbqTokenType::RightBrace) {
                     self.skip_trivia(state);
                     let checkpoint = state.checkpoint();
                     self.parse_field(state)?;
@@ -337,30 +344,30 @@ impl<'config> RbqParser<'config> {
                         self.skip_trivia(state);
                     }
                 }
-                state.eat(RbqSyntaxKind::RightBrace);
+                state.eat(RbqTokenType::RightBrace);
             }
-            else if state.eat(RbqSyntaxKind::Eq) {
+            else if state.eat(RbqTokenType::Eq) {
                 self.skip_trivia(state);
                 self.parse_expression(state)?;
                 self.skip_trivia(state);
             }
             self.skip_trivia(state);
-            state.eat(RbqSyntaxKind::Semicolon);
+            state.eat(RbqTokenType::Semicolon);
             Ok(())
         })
     }
 
     fn parse_trait<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> Result<(), OakError> {
-        state.incremental_node(RbqSyntaxKind::TraitDef, |state| {
+        state.incremental_node(RbqElementType::TraitDef, |state| {
             state.bump(); // trait
             self.skip_trivia(state);
-            state.eat(RbqSyntaxKind::Ident);
+            state.eat(RbqTokenType::Ident);
             self.skip_trivia(state);
-            if state.eat(RbqSyntaxKind::LeftBrace) {
-                while state.not_at_end() && !state.at(RbqSyntaxKind::RightBrace) {
+            if state.eat(RbqTokenType::LeftBrace) {
+                while state.not_at_end() && !state.at(RbqTokenType::RightBrace) {
                     self.skip_trivia(state);
                     let checkpoint = state.checkpoint();
-                    if state.at(RbqSyntaxKind::UsingKw) {
+                    if state.at(RbqTokenType::UsingKw) {
                         self.parse_using(state)?;
                     }
                     else {
@@ -372,85 +379,85 @@ impl<'config> RbqParser<'config> {
                         self.skip_trivia(state);
                     }
                 }
-                state.eat(RbqSyntaxKind::RightBrace);
+                state.eat(RbqTokenType::RightBrace);
             }
             Ok(())
         })
     }
 
     fn parse_type_alias<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> Result<(), OakError> {
-        state.incremental_node(RbqSyntaxKind::TypeDef, |state| {
+        state.incremental_node(RbqElementType::TypeDef, |state| {
             state.bump(); // type
             self.skip_trivia(state);
-            state.eat(RbqSyntaxKind::Ident);
+            state.eat(RbqTokenType::Ident);
             self.skip_trivia(state);
-            state.eat(RbqSyntaxKind::Eq);
+            state.eat(RbqTokenType::Eq);
             self.skip_trivia(state);
             self.parse_type_ref(state)?;
             self.skip_trivia(state);
-            state.eat(RbqSyntaxKind::Semicolon);
+            state.eat(RbqTokenType::Semicolon);
             Ok(())
         })
     }
 
     fn parse_micro_function<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> Result<(), OakError> {
-        state.incremental_node(RbqSyntaxKind::MicroDef, |state| {
+        state.incremental_node(RbqElementType::MicroDef, |state| {
             state.bump(); // micro
             self.skip_trivia(state);
-            state.eat(RbqSyntaxKind::Ident); // Optional identifier for lambda form
+            state.eat(RbqTokenType::Ident); // Optional identifier for lambda form
             self.skip_trivia(state);
-            if state.eat(RbqSyntaxKind::LeftParen) {
+            if state.eat(RbqTokenType::LeftParen) {
                 self.skip_trivia(state);
-                while state.not_at_end() && !state.at(RbqSyntaxKind::RightParen) {
+                while state.not_at_end() && !state.at(RbqTokenType::RightParen) {
                     self.skip_trivia(state);
                     let checkpoint = state.checkpoint();
-                    state.eat(RbqSyntaxKind::Ident);
+                    state.eat(RbqTokenType::Ident);
                     self.skip_trivia(state);
-                    state.eat(RbqSyntaxKind::Colon);
+                    state.eat(RbqTokenType::Colon);
                     self.skip_trivia(state);
                     self.parse_type_ref(state)?;
                     self.skip_trivia(state);
-                    if !state.eat(RbqSyntaxKind::Comma) {
+                    if !state.eat(RbqTokenType::Comma) {
                         break;
                     }
                     self.skip_trivia(state);
                     if state.checkpoint() == checkpoint && state.not_at_end() {
                         state.bump();
-                        self.skip_trivia(state);
+                        self.skip_trivia(state)
                     }
                 }
-                state.eat(RbqSyntaxKind::RightParen);
+                state.eat(RbqTokenType::RightParen);
             }
             self.skip_trivia(state);
-            if state.eat(RbqSyntaxKind::Arrow) {
+            if state.eat(RbqTokenType::Arrow) {
                 self.skip_trivia(state);
                 self.parse_type_ref(state)?;
                 self.skip_trivia(state);
             }
-            if state.at(RbqSyntaxKind::LeftBrace) {
+            if state.at(RbqTokenType::LeftBrace) {
                 self.parse_closure(state)?;
             }
             self.skip_trivia(state);
-            state.eat(RbqSyntaxKind::Semicolon);
+            state.eat(RbqTokenType::Semicolon);
             Ok(())
         })
     }
 
     fn parse_type_ref<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> Result<(), OakError> {
-        state.incremental_node(RbqSyntaxKind::TypeRef, |state| {
+        state.incremental_node(RbqElementType::TypeRef, |state| {
             self.skip_trivia(state);
-            state.eat(RbqSyntaxKind::Ampersand); // Physical foreign key &T
+            state.eat(RbqTokenType::Ampersand); // Physical foreign key &T
             self.skip_trivia(state);
             self.parse_path(state)?;
             self.skip_trivia(state);
-            if state.eat(RbqSyntaxKind::Lt) {
+            if state.eat(RbqTokenType::Lt) {
                 self.skip_trivia(state);
-                state.incremental_node(RbqSyntaxKind::GenericArgs, |state| {
-                    while state.not_at_end() && !state.at(RbqSyntaxKind::Gt) {
+                state.incremental_node(RbqElementType::GenericArgs, |state| {
+                    while state.not_at_end() && !state.at(RbqTokenType::Gt) {
                         let checkpoint = state.checkpoint();
                         self.parse_type_ref(state)?;
                         self.skip_trivia(state);
-                        if !state.at(RbqSyntaxKind::Gt) && !state.eat(RbqSyntaxKind::Comma) {
+                        if !state.at(RbqTokenType::Gt) && !state.eat(RbqTokenType::Comma) {
                             if state.checkpoint() == checkpoint && state.not_at_end() {
                                 state.bump();
                                 self.skip_trivia(state);
@@ -466,24 +473,24 @@ impl<'config> RbqParser<'config> {
                     Ok(())
                 })?;
                 self.skip_trivia(state);
-                state.eat(RbqSyntaxKind::Gt);
+                state.eat(RbqTokenType::Gt);
             }
             self.skip_trivia(state);
-            state.eat(RbqSyntaxKind::Question); // Optional type T?
+            state.eat(RbqTokenType::Question); // Optional type T?
             Ok(())
         })
     }
 
     fn parse_path<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> Result<(), OakError> {
         self.skip_trivia(state);
-        if !state.eat(RbqSyntaxKind::Ident) {
-            state.eat(RbqSyntaxKind::Utf8Kw);
+        if !state.eat(RbqTokenType::Ident) {
+            state.eat(RbqTokenType::Utf8Kw);
         }
         self.skip_trivia(state);
-        while state.eat(RbqSyntaxKind::Dot) {
+        while state.eat(RbqTokenType::Dot) {
             self.skip_trivia(state);
-            if !state.eat(RbqSyntaxKind::Ident) {
-                state.eat(RbqSyntaxKind::Utf8Kw);
+            if !state.eat(RbqTokenType::Ident) {
+                state.eat(RbqTokenType::Utf8Kw);
             }
             self.skip_trivia(state);
         }
@@ -504,57 +511,57 @@ impl<'config> RbqParser<'config> {
                 break;
             }
 
-            state.incremental_node(RbqSyntaxKind::BinaryExpr, |state| {
+            state.incremental_node(RbqElementType::BinaryExpr, |state| {
                 state.bump(); // operator
                 self.skip_trivia(state);
                 self.parse_binary_expr(state, precedence + 1)?;
                 self.skip_trivia(state);
                 Ok(())
-            })?;
+            })?
         }
 
         Ok(())
     }
 
-    // Removed get_precedence as it's now in RbqSyntaxKind
+    // Removed get_precedence as it's now in RbqTokenType
 
     fn parse_primary_expr<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> Result<(), OakError> {
         self.skip_trivia(state);
 
-        if state.at(RbqSyntaxKind::Dollar) {
-            state.incremental_node(RbqSyntaxKind::MagicVar, |state| {
+        if state.at(RbqTokenType::Dollar) {
+            state.incremental_node(RbqElementType::MagicVar, |state| {
                 state.bump();
                 self.skip_trivia(state);
-                state.eat(RbqSyntaxKind::Ident);
+                state.eat(RbqTokenType::Ident);
                 Ok(())
-            })?;
+            })?
         }
-        else if state.at(RbqSyntaxKind::StringLiteral) || state.at(RbqSyntaxKind::NumberLiteral) || state.at(RbqSyntaxKind::TrueKw) || state.at(RbqSyntaxKind::FalseKw) {
-            state.incremental_node(RbqSyntaxKind::Literal, |state| {
+        else if state.at(RbqTokenType::StringLiteral) || state.at(RbqTokenType::NumberLiteral) || state.at(RbqTokenType::TrueKw) || state.at(RbqTokenType::FalseKw) {
+            state.incremental_node(RbqElementType::Literal, |state| {
                 state.bump();
                 Ok(())
-            })?;
+            })?
         }
-        else if state.at(RbqSyntaxKind::Ident) || state.at(RbqSyntaxKind::Utf8Kw) {
-            state.bump();
+        else if state.at(RbqTokenType::Ident) || state.at(RbqTokenType::Utf8Kw) {
+            state.bump()
         }
-        else if state.at(RbqSyntaxKind::LeftParen) {
+        else if state.at(RbqTokenType::LeftParen) {
             state.bump();
             self.skip_trivia(state);
             self.parse_expression(state)?;
             self.skip_trivia(state);
-            state.eat(RbqSyntaxKind::RightParen);
+            state.eat(RbqTokenType::RightParen);
         }
-        else if state.at(RbqSyntaxKind::LeftBrace) {
-            self.parse_closure(state)?;
+        else if state.at(RbqTokenType::LeftBrace) {
+            self.parse_closure(state)?
         }
-        else if state.at(RbqSyntaxKind::MicroKw) {
-            self.parse_micro_function(state)?;
+        else if state.at(RbqTokenType::MicroKw) {
+            self.parse_micro_function(state)?
         }
         else {
             state.record_expected("expression");
             if state.not_at_end() {
-                state.bump();
+                state.bump()
             }
         }
 
@@ -562,20 +569,20 @@ impl<'config> RbqParser<'config> {
         // Handle member access, calls, and indexing
         loop {
             let checkpoint = state.checkpoint();
-            if state.at(RbqSyntaxKind::Dot) {
-                state.incremental_node(RbqSyntaxKind::MemberExpr, |state| {
+            if state.at(RbqTokenType::Dot) {
+                state.incremental_node(RbqElementType::MemberExpr, |state| {
                     state.bump(); // .
                     self.skip_trivia(state);
-                    state.eat(RbqSyntaxKind::Ident);
+                    state.eat(RbqTokenType::Ident);
                     self.skip_trivia(state);
-                    if state.at(RbqSyntaxKind::LeftParen) {
+                    if state.at(RbqTokenType::LeftParen) {
                         state.bump();
                         self.skip_trivia(state);
-                        while state.not_at_end() && !state.at(RbqSyntaxKind::RightParen) {
+                        while state.not_at_end() && !state.at(RbqTokenType::RightParen) {
                             let arg_checkpoint = state.checkpoint();
                             self.parse_expression(state)?;
                             self.skip_trivia(state);
-                            if !state.eat(RbqSyntaxKind::Comma) {
+                            if !state.eat(RbqTokenType::Comma) {
                                 break;
                             }
                             self.skip_trivia(state);
@@ -583,20 +590,20 @@ impl<'config> RbqParser<'config> {
                                 break;
                             }
                         }
-                        state.eat(RbqSyntaxKind::RightParen);
+                        state.eat(RbqTokenType::RightParen);
                     }
                     Ok(())
-                })?;
+                })?
             }
-            else if state.at(RbqSyntaxKind::LeftParen) {
-                state.incremental_node(RbqSyntaxKind::CallExpr, |state| {
+            else if state.at(RbqTokenType::LeftParen) {
+                state.incremental_node(RbqElementType::CallExpr, |state| {
                     state.bump(); // (
                     self.skip_trivia(state);
-                    while state.not_at_end() && !state.at(RbqSyntaxKind::RightParen) {
+                    while state.not_at_end() && !state.at(RbqTokenType::RightParen) {
                         let arg_checkpoint = state.checkpoint();
                         self.parse_expression(state)?;
                         self.skip_trivia(state);
-                        if !state.eat(RbqSyntaxKind::Comma) {
+                        if !state.eat(RbqTokenType::Comma) {
                             break;
                         }
                         self.skip_trivia(state);
@@ -604,20 +611,20 @@ impl<'config> RbqParser<'config> {
                             break;
                         }
                     }
-                    state.eat(RbqSyntaxKind::RightParen);
+                    state.eat(RbqTokenType::RightParen);
                     Ok(())
-                })?;
+                })?
             }
-            else if state.at(RbqSyntaxKind::LeftBracket) {
-                state.incremental_node(RbqSyntaxKind::MemberExpr, |state| {
+            else if state.at(RbqTokenType::LeftBracket) {
+                state.incremental_node(RbqElementType::MemberExpr, |state| {
                     // Reusing MemberExpr for indexer
                     state.bump(); // [
                     self.skip_trivia(state);
                     self.parse_expression(state)?;
                     self.skip_trivia(state);
-                    state.eat(RbqSyntaxKind::RightBracket);
+                    state.eat(RbqTokenType::RightBracket);
                     Ok(())
-                })?;
+                })?
             }
             else {
                 break;
@@ -633,43 +640,40 @@ impl<'config> RbqParser<'config> {
     }
 
     fn parse_closure<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> Result<(), OakError> {
-        state.incremental_node(RbqSyntaxKind::Closure, |state| {
+        state.incremental_node(RbqElementType::Closure, |state| {
             state.bump(); // {
-            while state.not_at_end() && !state.at(RbqSyntaxKind::RightBrace) {
+            while state.not_at_end() && !state.at(RbqTokenType::RightBrace) {
                 self.skip_trivia(state);
                 let checkpoint = state.checkpoint();
                 self.parse_expression(state)?;
                 self.skip_trivia(state);
-                state.eat(RbqSyntaxKind::Semicolon);
+                state.eat(RbqTokenType::Semicolon);
                 self.skip_trivia(state);
                 if state.checkpoint() == checkpoint && state.not_at_end() {
-                    state.bump();
+                    state.bump()
                 }
             }
-            state.eat(RbqSyntaxKind::RightBrace);
+            state.eat(RbqTokenType::RightBrace);
             Ok(())
         })
     }
 
+    /// Skips whitespace and comments.
     fn skip_trivia<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) {
         while let Some(token) = state.current() {
-            if token.kind.is_ignored() {
-                state.bump();
-            }
-            else {
-                break;
-            }
+            if token.kind.is_ignored() { state.bump() } else { break }
         }
     }
 }
 
 impl<'config> Parser<RbqLanguage> for RbqParser<'config> {
+    /// Parses the source text into an RBQ syntax tree.
     fn parse<'a, S: Source + ?Sized>(&self, text: &'a S, edits: &[TextEdit], cache: &'a mut impl oak_core::ParseCache<RbqLanguage>) -> oak_core::ParseOutput<'a, RbqLanguage> {
         let lexer = crate::lexer::RbqLexer::new(&self.config);
         oak_core::parser::parse_with_lexer(&lexer, text, edits, cache, |state| {
             let checkpoint = state.checkpoint();
             self.parse_root(state)?;
-            Ok(state.finish_at(checkpoint, RbqSyntaxKind::Root))
+            Ok(state.finish_at(checkpoint, crate::parser::element_type::RbqElementType::Root))
         })
     }
 }

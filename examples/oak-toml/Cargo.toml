@@ -1,26 +1,27 @@
 [package]
 name = "oak-toml"
-description = "High-performance incremental TOML parser for the oak ecosystem with flexible configuration, optimized for configuration files and data serialization."
-categories = ["parsing"]
-keywords = ["parser", "toml", "streaming", "validation"]
-documentation = "https://docs.rs/oak-toml"
-readme = "readme.md"
 version.workspace = true
 authors.workspace = true
-homepage.workspace = true
-repository.workspace = true
-license.workspace = true
+description = "High-performance incremental TOML parser for the oak ecosystem with flexible configuration, optimized for configuration files and data serialization."
 edition.workspace = true
+license.workspace = true
+readme = "readme.md"
+homepage.workspace = true
+repository = "https://github.com/ygg-lang/oaks/tree/master/examples/oak-toml"
+documentation = "https://docs.rs/oak-toml"
+categories = ["parsing"]
+keywords = ["parser", "toml", "streaming", "validation"]
 
 [dependencies]
 oak-core = { workspace = true }
+toml = { workspace = true }
 oak-highlight = { workspace = true, optional = true }
 oak-pretty-print = { workspace = true, optional = true }
 oak-lsp = { workspace = true, optional = true }
 oak-hover = { workspace = true, optional = true }
 oak-vfs = { workspace = true, optional = true }
 oak-mcp = { workspace = true, optional = true }
-serde = { workspace = true, features = ["derive"] }
+serde = { workspace = true, features = ["derive"] , optional = true }
 futures = { workspace = true, optional = true }
 tracing = { workspace = true }
 tokio = { workspace = true, optional = true }
@@ -28,13 +29,13 @@ tokio = { workspace = true, optional = true }
 [dev-dependencies]
 oak-testing = { workspace = true }
 
-
 [features]
-default = []
-lsp = ["dep:oak-highlight", "dep:oak-pretty-print", "dep:oak-lsp", "dep:oak-hover", "dep:oak-vfs", "dep:oak-mcp", "dep:futures"]
-mcp-stdio = ["lsp", "oak-mcp/io-std"]
-semantic-search = []
-
+default = ["serde"]
+serde = ["dep:serde", "oak-core/serde"]
+oak-highlight = ["dep:oak-highlight"]
+oak-pretty-print = ["dep:oak-pretty-print"]
+lsp = ["dep:oak-lsp", "dep:oak-hover", "dep:oak-vfs", "oak-highlight", "oak-pretty-print", "dep:futures"]
+mcp = ["lsp", "oak-mcp/io-std"]
 
 [package.metadata.docs.rs]
 all-features = true

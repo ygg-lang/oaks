@@ -1,4 +1,4 @@
-use oak_diagnostic::testing::lexing::LexerTester;
+use oak_testing::lexing::LexerTester;
 use oak_xml::{XmlLanguage, XmlLexer};
 use std::{path::Path, time::Duration};
 
@@ -38,7 +38,7 @@ fn test_peek_behavior() {
     state.advance(1);
     println!("位置: {}", state.get_position());
     println!("current(): {:?}", state.current());
-    println!("peek(): {:?}", state.peek());
+    println!("peek(): {:?}", state.peek())
 }
 
 #[test]
@@ -54,7 +54,7 @@ fn test_xml_comment_parsing() {
 
     println!("Result: {:?}", result);
     let tokens = result.result.expect("词法分析应该成功");
-    assert!(!tokens.is_empty());
+    assert!(!tokens.is_empty())
 }
 
 #[test]
@@ -70,7 +70,7 @@ fn test_xml_tag_parsing() {
 
     println!("Result: {:?}", result);
     let tokens = result.result.expect("词法分析应该成功");
-    assert!(!tokens.is_empty());
+    assert!(!tokens.is_empty())
 }
 
 #[test]
@@ -86,7 +86,7 @@ fn test_xml_cdata_parsing() {
 
     println!("Result: {:?}", result);
     let tokens = result.result.expect("词法分析应该成功");
-    assert!(!tokens.is_empty());
+    assert!(!tokens.is_empty())
 }
 
 #[test]
@@ -102,5 +102,5 @@ fn test_xml_processing_instruction_parsing() {
 
     println!("Result: {:?}", result);
     let tokens = result.result.expect("词法分析应该成功");
-    assert!(!tokens.is_empty());
+    assert!(!tokens.is_empty())
 }

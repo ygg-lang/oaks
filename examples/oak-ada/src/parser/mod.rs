@@ -1,3 +1,4 @@
+#![doc = include_str!("readme.md")]
 pub mod element_type;
 
 pub use element_type::AdaElementType;
@@ -138,19 +139,19 @@ impl<'config> Parser<AdaLanguage> for AdaParser<'config> {
 
             while state.not_at_end() && !state.at(AdaTokenType::Eof) {
                 if state.at(AdaTokenType::With) {
-                    self.parse_context_clause(state)?;
+                    self.parse_context_clause(state)?
                 }
                 else if state.at(AdaTokenType::Package) {
-                    self.parse_package_declaration(state)?;
+                    self.parse_package_declaration(state)?
                 }
                 else if state.at(AdaTokenType::Procedure) || state.at(AdaTokenType::Function) {
-                    self.parse_subprogram_declaration(state)?;
+                    self.parse_subprogram_declaration(state)?
                 }
                 else if state.at(AdaTokenType::Pragma) {
-                    self.parse_pragma(state)?;
+                    self.parse_pragma(state)?
                 }
                 else {
-                    state.bump();
+                    state.bump()
                 }
             }
 

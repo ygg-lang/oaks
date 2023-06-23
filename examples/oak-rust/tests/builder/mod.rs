@@ -1,5 +1,5 @@
 use oak_core::LexerCache;
-use oak_rust::highlighter::Highlighter;
+use oak_rust::Highlighter;
 
 #[test]
 fn test_rust_integration() -> Result<(), oak_core::OakError> {
@@ -8,10 +8,10 @@ fn test_rust_integration() -> Result<(), oak_core::OakError> {
 
     let language = RustLanguage::default();
     let lexer = RustLexer::new(&language);
-    let parser = RustParser::new(language);
+    let parser = RustParser::new(&language);
 
     // Test basic integration
-    let source = SourceText::new("fn main() { let x = 42; println!(\"Hello, world!\"); }");
+    let source = SourceText::new("fn main() { let x = 42; println!(\"Hello, world!\") }");
 
     // Test lexer
     let mut cache = oak_core::parser::session::ParseSession::<RustLanguage>::default();
@@ -33,7 +33,7 @@ fn test_rust_builder_single_file() -> Result<(), oak_core::OakError> {
     use oak_rust::{RustBuilder, RustLanguage};
 
     let language = RustLanguage::default();
-    let builder = RustBuilder::new(language);
+    let builder = RustBuilder::new(&language);
 
     // 测试简单的函数
     let source = SourceText::new("fn add(x: i32, y: i32) -> i32 { x + y }");
@@ -52,7 +52,7 @@ fn test_rust_builder_complex() -> Result<(), oak_core::OakError> {
     use oak_rust::{RustBuilder, RustLanguage};
 
     let language = RustLanguage::default();
-    let builder = RustBuilder::new(language);
+    let builder = RustBuilder::new(&language);
 
     // 测试更复杂的 Rust 代码
     let source = SourceText::new(
@@ -74,7 +74,7 @@ impl Point {
 
 fn main() {
     let p = Point::new(3, 4);
-    println!("Distance: {}", p.distance());
+    println!("Distance: {}", p.distance())
 }
 "#,
     );
@@ -87,14 +87,14 @@ fn main() {
     let diagnostics = builder.build(&source, &[], &mut cache);
     match diagnostics.result {
         Ok(_typed_root) => {
-            println!("Successfully built complex typed root");
+            println!("Successfully built complex typed root")
         }
         Err(e) => {
-            println!("Complex build failed with error: {}", e);
+            println!("Complex build failed with error: {}", e)
         }
     }
     if !diagnostics.diagnostics.is_empty() {
-        println!("Complex build diagnostics: {:?}", diagnostics.diagnostics);
+        println!("Complex build diagnostics: {:?}", diagnostics.diagnostics)
     }
     Ok(())
 }
@@ -134,7 +134,7 @@ fn main() {
     people.insert(1, person);
     
     if let Some(p) = people.get(&1) {
-        println!("{}", p.greet());
+        println!("{}", p.greet())
     }
 }
 "#;

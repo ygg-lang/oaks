@@ -1,3 +1,4 @@
+#![doc = include_str!("readme.md")]
 pub mod element_type;
 pub use element_type::CElementType;
 
@@ -10,15 +11,19 @@ use oak_core::{
 
 pub(crate) type State<'a, S> = ParserState<'a, CLanguage, S>;
 
+/// Parser for the C language.
 pub struct CParser<'config> {
+    /// Language configuration.
     pub(crate) config: &'config CLanguage,
 }
 
 impl<'config> CParser<'config> {
+    /// Creates a new `CParser` with the given language configuration.
     pub fn new(config: &'config CLanguage) -> Self {
         Self { config }
     }
 
+    /// Parses a C statement.
     pub(crate) fn parse_statement<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> Result<(), OakError> {
         use crate::lexer::CTokenType::*;
         self.skip_trivia(state);
@@ -39,6 +44,7 @@ impl<'config> CParser<'config> {
         Ok(())
     }
 
+    /// Skips trivia tokens (whitespace and comments).
     fn skip_trivia<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) {
         while let Some(kind) = state.peek_kind() {
             if matches!(kind, CTokenType::Whitespace | CTokenType::Comment) {
@@ -50,6 +56,7 @@ impl<'config> CParser<'config> {
         }
     }
 
+    /// Parses a C declaration or function definition.
     fn parse_declaration<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> Result<(), OakError> {
         use crate::lexer::CTokenType::*;
         let cp = state.checkpoint();
@@ -92,19 +99,14 @@ impl<'config> CParser<'config> {
         self.skip_trivia(state);
 
         if state.at(LeftBrace) {
-            state.bump(); // {
-            self.skip_trivia(state);
-            while state.not_at_end() && !state.at(RightBrace) {
-                self.parse_statement(state)?;
-                self.skip_trivia(state);
-            }
-            state.expect(RightBrace).ok();
+            self.parse_compound_statement(state)?;
             state.finish_at(cp, CElementType::FunctionDefinition);
         }
         else {
             state.eat(Semicolon);
             state.finish_at(cp, CElementType::DeclarationStatement);
         }
+
         Ok(())
     }
 

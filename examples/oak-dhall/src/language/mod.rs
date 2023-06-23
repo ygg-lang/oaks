@@ -1,8 +1,11 @@
+#![doc = include_str!("readme.md")]
 use crate::ast::DHallRoot;
 use oak_core::{Language, LanguageCategory};
+#[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
 
-#[derive(Copy, Clone, Debug, PartialEq, Eq, Hash, Serialize, Deserialize)]
+#[derive(Copy, Clone, Debug, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct DHallLanguage {
     /// Allow unicode identifiers
     pub unicode_identifiers: bool,
@@ -24,7 +27,7 @@ impl Language for DHallLanguage {
     const NAME: &'static str = "dhall";
     const CATEGORY: LanguageCategory = LanguageCategory::Programming;
 
-    type TokenType = crate::kind::DHallSyntaxKind;
-    type ElementType = crate::kind::DHallSyntaxKind;
+    type TokenType = crate::lexer::token_type::DHallTokenType;
+    type ElementType = crate::parser::element_type::DHallElementType;
     type TypedRoot = DHallRoot;
 }

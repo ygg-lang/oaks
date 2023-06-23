@@ -3,6 +3,19 @@ use core::range::Range;
 use std::fmt;
 
 /// A cursor over a source that allows for efficient navigation and scanning.
+///
+/// # Examples
+///
+/// ```rust
+/// # #![feature(new_range_api)]
+/// # use oak_core::source::{SourceCursor, SourceText};
+/// let source = SourceText::new("hello world");
+/// let mut cursor = SourceCursor::new(&source);
+///
+/// assert_eq!(cursor.peek_char(), Some('h'));
+/// cursor.set_position(6);
+/// assert_eq!(cursor.peek_char(), Some('w'));
+/// ```
 pub struct SourceCursor<'s, S: Source + ?Sized> {
     source: &'s S,
     offset: usize,
@@ -55,10 +68,12 @@ impl<'s, S: Source + ?Sized> SourceCursor<'s, S> {
     fn ensure_chunk(&mut self) {
         let end = self.source.length();
         if self.offset > end {
-            self.offset = end;
+            self.offset = end
         }
-        if self.offset < self.chunk.start || self.offset > self.chunk.end() {
-            self.chunk = self.source.chunk_at(self.offset);
+        // If the offset is outside the current chunk, or at the very end of the current chunk
+        // (but not at the end of the source), we need to fetch a new chunk.
+        if self.offset < self.chunk.start || self.offset > self.chunk.end() || (self.offset == self.chunk.end() && self.offset < end) {
+            self.chunk = self.source.chunk_at(self.offset)
         }
     }
 
@@ -79,9 +94,23 @@ impl<'s, S: Source + ?Sized> SourceCursor<'s, S> {
         if self.offset >= self.chunk.start {
             let rel = self.offset - self.chunk.start;
             if rel < self.chunk.text.len() {
-                // Safety: rel is checked to be less than text length
-                let text = unsafe { self.chunk.text.get_unchecked(rel..) };
-                return text.chars().next();
+                // Ensure rel is at a character boundary
+                if self.chunk.text.is_char_boundary(rel) {
+                    let text = unsafe { self.chunk.text.get_unchecked(rel..) };
+                    return text.chars().next();
+                }
+                else {
+                    // If not at a boundary, something is wrong with the offset
+                    // We should probably advance to the next boundary
+                    let mut i = rel;
+                    while i < self.chunk.text.len() && !self.chunk.text.is_char_boundary(i) {
+                        i += 1
+                    }
+                    if i < self.chunk.text.len() {
+                        let text = unsafe { self.chunk.text.get_unchecked(i..) };
+                        return text.chars().next();
+                    }
+                }
             }
         }
         self.rest().chars().next()
@@ -95,10 +124,16 @@ impl<'s, S: Source + ?Sized> SourceCursor<'s, S> {
         }
         if target_offset >= self.chunk.start && target_offset < self.chunk.end() {
             let rel = target_offset - self.chunk.start;
-            let text = unsafe { self.chunk.text.get_unchecked(rel..) };
+            let text = self.chunk.text.get(rel..).unwrap_or("");
             return text.chars().next();
         }
         self.source.get_char_at(target_offset)
+    }
+
+    /// Peeks at the character immediately following the current character.
+    pub fn peek_next_char(&mut self) -> Option<char> {
+        let ch = self.peek_char()?;
+        self.peek_next_n(ch.len_utf8())
     }
 
     /// Skips common ASCII whitespace using SIMD if possible.
@@ -276,7 +311,7 @@ impl<'s, S: Source + ?Sized> SourceCursor<'s, S> {
                     stop = true;
                     break;
                 }
-                advanced = i + ch.len_utf8();
+                advanced = i + ch.len_utf8()
             }
 
             self.offset += advanced;
@@ -322,7 +357,7 @@ impl<'s, S: Source + ?Sized> SourceCursor<'s, S> {
                     stop = true;
                     break;
                 }
-                advanced = i + 1;
+                advanced = i + 1
             }
 
             self.offset += advanced;
@@ -338,9 +373,23 @@ impl<'s, S: Source + ?Sized> SourceCursor<'s, S> {
     pub fn starts_with(&mut self, pattern: &str) -> bool {
         self.ensure_chunk();
         let chunk_text = self.chunk.text;
-        let rest = chunk_text.get(self.offset.saturating_sub(self.chunk.start)..).unwrap_or("");
+        let offset_in_chunk = self.offset.saturating_sub(self.chunk.start);
+
+        // Ensure offset_in_chunk is on a character boundary
+        let rest = if chunk_text.is_char_boundary(offset_in_chunk) {
+            chunk_text.get(offset_in_chunk..).unwrap_or("")
+        }
+        else {
+            // If not on a boundary, try to find the next boundary
+            let mut i = offset_in_chunk;
+            while i < chunk_text.len() && !chunk_text.is_char_boundary(i) {
+                i += 1
+            }
+            chunk_text.get(i..).unwrap_or("")
+        };
+
         if rest.len() >= pattern.len() {
-            return rest.as_bytes().get(..pattern.len()) == Some(pattern.as_bytes());
+            return rest.starts_with(pattern);
         }
 
         self.scratch.clear();
@@ -350,9 +399,9 @@ impl<'s, S: Source + ?Sized> SourceCursor<'s, S> {
         while self.scratch.len() < pattern.len() && next < end {
             let chunk = self.source.chunk_at(next);
             self.scratch.push_str(chunk.text);
-            next = chunk.end();
+            next = chunk.end()
         }
-        self.scratch.as_bytes().get(..pattern.len()) == Some(pattern.as_bytes())
+        self.scratch.starts_with(pattern)
     }
 
     /// Consumes the given pattern if it matches at the current position.
@@ -398,7 +447,7 @@ impl<'s, S: Source + ?Sized> SourceCursor<'s, S> {
                 }
             }
 
-            offset = chunk_end;
+            offset = chunk_end
         }
         None
     }

@@ -1,148 +1,35 @@
-# Oak SQL Parser
+# 🚀 Oak SQL Parser
 
 [![Crates.io](https://img.shields.io/crates/v/oak-sql.svg)](https://crates.io/crates/oak-sql)
 [![Documentation](https://docs.rs/oak-sql/badge.svg)](https://docs.rs/oak-sql)
 
-High-performance incremental SQL parser for the oak ecosystem with flexible configuration, optimized for database query analysis and SQL processing.
+**Structured Power and Speed for Data** — A high-performance, incremental SQL parser built on the Oak framework. Optimized for multi-dialect support (MySQL, PostgreSQL, SQLite), complex query analysis, and real-time database tooling.
 
-## 🎯 Overview
+## 🎯 Project Vision
 
-Oak SQL is a robust parser for SQL, designed to handle complete SQL syntax including modern features. Built on the solid foundation of oak-core, it provides both high-level convenience and detailed AST generation for database query analysis and SQL processing.
+SQL is the universal language of data, but its diverse dialects and complex syntax make it challenging to parse accurately and efficiently. `oak-sql` aims to provide a robust, modern, Rust-powered infrastructure for parsing SQL that is both dialect-aware and incredibly fast. By utilizing Oak's incremental parsing architecture, we enable the creation of highly responsive IDEs, database managers, static analyzers, and migration tools that can handle massive SQL scripts and complex schemas in real-time. Whether you are building custom query optimizers, security auditors, or sophisticated database developer tools, `oak-sql` provides the high-fidelity AST and efficiency needed to manage the complexities of modern data environments.
 
-## ✨ Features
+## ✨ Core Features
 
-- **Complete SQL Syntax**: Supports all SQL features including modern specifications
-- **Full AST Generation**: Generates comprehensive Abstract Syntax Trees
-- **Lexer Support**: Built-in tokenization with proper span information
-- **Error Recovery**: Graceful handling of syntax errors with detailed diagnostics
+- **⚡ Blazing Fast**: Leverages Rust's performance and memory safety to provide sub-millisecond parsing, essential for high-frequency developer tools and real-time analysis of large SQL scripts.
+- **🔄 Incremental by Nature**: Built-in support for partial updates—re-parse only modified sections of large SQL files. Ideal for database migration scripts and real-time schema editing.
+- **🌳 High-Fidelity AST**: Generates a comprehensive and precise Abstract Syntax Tree capturing the full depth of SQL:
+    - **Multi-Dialect Support**: Robust parsing for MySQL, PostgreSQL, SQLite, and ANSI SQL standards.
+    - **DDL & DML**: Deep support for Data Definition Language (`CREATE`, `ALTER`, `DROP`) and Data Manipulation Language (`SELECT`, `INSERT`, `UPDATE`, `DELETE`).
+    - **Complex Queries**: Precise mapping of Joins, Subqueries, CTEs (Common Table Expressions), and Window Functions.
+    - **Stored Procedures & Triggers**: Support for parsing complex procedural logic across different dialects.
+    - **Schema Awareness**: Detailed tracking of tables, columns, constraints, and relationships.
+- **🛡️ Industrial-Grade Fault Tolerance**: Engineered to recover from syntax errors gracefully, providing precise diagnostics—crucial for maintaining a smooth developer experience when writing complex queries.
+- **🧩 Deep Ecosystem Integration**: Seamlessly works with `oak-lsp` for full LSP support and `oak-mcp` for intelligent database schema discovery and analysis.
 
-## 🚀 Quick Start
+## 🏗️ Architecture
 
-Basic example:
+The parser follows the **Green/Red Tree** architecture (inspired by Roslyn), which allows for:
+1. **Efficient Immutability**: Share nodes across different versions of the tree without copying.
+2. **Lossless Syntax Trees**: Retains all trivia (whitespace and comments), enabling faithful code formatting and refactoring of SQL scripts.
+3. **Type Safety**: Strongly-typed "Red" nodes provide a convenient and safe API for tree traversal and analysis.
 
-```rust
-use oak_sql::{Parser, SqlLanguage, SourceText};
-
-fn main() -> Result<(), Box<dyn std::error::Error>> {
-    let parser = Parser::new();
-    let source = SourceText::new(r#"
-        SELECT u.id, u.name, p.title
-        FROM users u
-        JOIN posts p ON u.id = p.user_id
-        WHERE u.active = true
-        ORDER BY u.created_at DESC
-        LIMIT 10;
-    "#);
-    
-    let result = parser.parse(&source);
-    println!("Parsed SQL successfully.");
-    Ok(())
-}
-```
-
-## 📋 Parsing Examples
-
-### Select Statement Parsing
-```rust
-use oak_sql::{Parser, SqlLanguage, SourceText};
-
-let parser = Parser::new();
-let source = SourceText::new(r#"
-    SELECT id, name, email
-    FROM customers
-    WHERE country = 'USA' AND age > 21
-    ORDER BY name ASC
-    LIMIT 100;
-"#);
-
-let result = parser.parse(&source);
-println!("Select statement parsed successfully.");
-```
-
-### Insert Statement Parsing
-```rust
-use oak_sql::{Parser, SqlLanguage, SourceText};
-
-let parser = Parser::new();
-let source = SourceText::new(r#"
-    INSERT INTO products (name, price, category)
-    VALUES ('Laptop', 999.99, 'Electronics');
-"#);
-
-let result = parser.parse(&source);
-println!("Insert statement parsed successfully.");
-```
-
-## 🔧 Advanced Features
-
-### Token-Level Parsing
-```rust
-use oak_sql::{Parser, SqlLanguage, SourceText};
-
-let parser = Parser::new();
-let source = SourceText::new("SELECT * FROM users WHERE id = 1;");
-let result = parser.parse(&source);
-println!("Token parsing completed.");
-```
-
-### Error Handling
-```rust
-use oak_sql::{Parser, SqlLanguage, SourceText};
-
-let parser = Parser::new();
-let source = SourceText::new(r#"
-    SELECT name, 
-    FROM users
-    WHERE id = 1;
-"#);
-
-let result = parser.parse(&source);
-if let Some(errors) = result.result.err() {
-    println!("Parse errors found: {:?}", errors);
-} else {
-    println!("Parsed successfully.");
-}
-```
-
-## 🏗️ AST Structure
-
-The parser generates a comprehensive AST with the following main structures:
-
-- **SelectStatement**: SELECT queries with columns, tables, conditions
-- **InsertStatement**: INSERT statements with table and values
-- **UpdateStatement**: UPDATE statements with table, sets, and conditions
-- **DeleteStatement**: DELETE statements with table and conditions
-- **CreateTableStatement**: CREATE TABLE statements with schema definitions
-- **Expression**: Various expression types (comparison, logical, arithmetic)
-
-## 📊 Performance
-
-- **Streaming**: Parse large SQL files without loading entirely into memory
-- **Incremental**: Re-parse only changed sections
-- **Memory Efficient**: Smart AST node allocation
-- **Fast Recovery**: Quick error recovery for better IDE integration
-
-## 🔗 Integration
-
-Oak SQL integrates seamlessly with:
-
-- **Database Tools**: Build SQL query analyzers and optimizers
-- **IDE Support**: Language server protocol compatibility for SQL
-- **Migration Tools**: Analyze and transform database schemas
-- **Query Builders**: Generate SQL from AST representations
-- **Data Analysis**: Extract information from SQL queries
-
-## 📚 Examples
-
-Check out the [examples](examples/) directory for comprehensive examples:
-
-- Complete SQL statement parsing
-- Query analysis and optimization
-- Schema extraction and validation
-- Integration with development workflows
 
 ## 🤝 Contributing
 
-Contributions are welcome! 
-
-Please feel free to submit pull requests at the [project repository](https://github.com/ygg-lang/oaks/tree/dev/examples/oak-sql) or open [issues](https://github.com/ygg-lang/oaks/issues).
+We welcome contributions of all kinds! If you find a bug, have a feature request, or want to contribute code, please check our [issues](https://github.com/ygg-lang/oaks/issues) or submit a pull request.

@@ -1,8 +1,10 @@
 use oak_core::{TokenType, UniversalTokenRole};
+#[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
 
 /// CSV token type
-#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Deserialize)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub enum CsvTokenType {
     /// Whitespace
     Whitespace,

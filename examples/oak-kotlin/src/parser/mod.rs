@@ -1,4 +1,10 @@
-use crate::{kind::KotlinSyntaxKind, language::KotlinLanguage, lexer::KotlinLexer};
+pub mod element_type;
+
+use crate::{
+    language::KotlinLanguage,
+    lexer::{KotlinLexer, token_type::KotlinTokenType},
+    parser::element_type::KotlinElementType,
+};
 use oak_core::{
     GreenNode, OakError, TextEdit,
     parser::{
@@ -29,11 +35,11 @@ impl<'config> KotlinParser<'config> {
             }
         }
 
-        Ok(state.finish_at(checkpoint, KotlinSyntaxKind::SourceFile.into()))
+        Ok(state.finish_at(checkpoint, crate::parser::element_type::KotlinElementType::SourceFile))
     }
 
     fn skip_trivia<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) {
-        use crate::kind::KotlinSyntaxKind::*;
+        use crate::lexer::token_type::KotlinTokenType::*;
         while let Some(kind) = state.peek_kind() {
             if matches!(kind, Whitespace | Newline | Comment) {
                 state.bump();
@@ -45,7 +51,7 @@ impl<'config> KotlinParser<'config> {
     }
 
     fn parse_statement<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> Result<(), OakError> {
-        use crate::kind::KotlinSyntaxKind::*;
+        use crate::lexer::token_type::KotlinTokenType::*;
         self.skip_trivia(state);
         match state.peek_kind() {
             Some(Fun) => self.parse_function_declaration(state)?,
@@ -65,7 +71,7 @@ impl<'config> KotlinParser<'config> {
     }
 
     fn parse_class_declaration<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> Result<(), OakError> {
-        use crate::kind::KotlinSyntaxKind::*;
+        use crate::lexer::token_type::KotlinTokenType::*;
         let cp = state.checkpoint();
         state.expect(Class).ok();
         self.skip_trivia(state);
@@ -84,7 +90,7 @@ impl<'config> KotlinParser<'config> {
                     self.skip_trivia(state);
                     state.expect(Identifier).ok();
                 }
-                state.finish_at(p_cp, Parameter.into());
+                state.finish_at(p_cp, crate::parser::element_type::KotlinElementType::Parameter);
                 self.skip_trivia(state);
                 state.eat(Comma);
             }
@@ -95,12 +101,12 @@ impl<'config> KotlinParser<'config> {
         if state.at(LBrace) {
             self.parse_block(state)?;
         }
-        state.finish_at(cp, ClassDeclaration.into());
+        state.finish_at(cp, crate::parser::element_type::KotlinElementType::ClassDeclaration);
         Ok(())
     }
 
     fn parse_function_declaration<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> Result<(), OakError> {
-        use crate::kind::KotlinSyntaxKind::*;
+        use crate::lexer::token_type::KotlinTokenType::*;
         let cp = state.checkpoint();
         state.expect(Fun).ok();
         self.skip_trivia(state);
@@ -116,7 +122,7 @@ impl<'config> KotlinParser<'config> {
                     self.skip_trivia(state);
                     state.expect(Identifier).ok();
                 }
-                state.finish_at(p_cp, Parameter.into());
+                state.finish_at(p_cp, crate::parser::element_type::KotlinElementType::Parameter);
                 self.skip_trivia(state);
                 state.eat(Comma);
             }
@@ -130,12 +136,12 @@ impl<'config> KotlinParser<'config> {
         }
         self.skip_trivia(state);
         self.parse_block(state)?;
-        state.finish_at(cp, FunctionDeclaration.into());
+        state.finish_at(cp, crate::parser::element_type::KotlinElementType::FunctionDeclaration);
         Ok(())
     }
 
     fn parse_variable_declaration<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> Result<(), OakError> {
-        use crate::kind::KotlinSyntaxKind::*;
+        use crate::lexer::token_type::KotlinTokenType::*;
         let cp = state.checkpoint();
         state.bump(); // val/var
         self.skip_trivia(state);
@@ -152,12 +158,12 @@ impl<'config> KotlinParser<'config> {
         }
         self.skip_trivia(state);
         state.eat(Semi);
-        state.finish_at(cp, VariableDeclaration.into());
+        state.finish_at(cp, crate::parser::element_type::KotlinElementType::VariableDeclaration);
         Ok(())
     }
 
     fn parse_if_statement<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> Result<(), OakError> {
-        use crate::kind::KotlinSyntaxKind::*;
+        use crate::lexer::token_type::KotlinTokenType::*;
         let cp = state.checkpoint();
         state.expect(If).ok();
         self.skip_trivia(state);
@@ -173,12 +179,12 @@ impl<'config> KotlinParser<'config> {
             self.skip_trivia(state);
             self.parse_statement(state)?;
         }
-        state.finish_at(cp, IfStatement.into());
+        state.finish_at(cp, crate::parser::element_type::KotlinElementType::IfStatement);
         Ok(())
     }
 
     fn parse_while_statement<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> Result<(), OakError> {
-        use crate::kind::KotlinSyntaxKind::*;
+        use crate::lexer::token_type::KotlinTokenType::*;
         let cp = state.checkpoint();
         state.expect(While).ok();
         self.skip_trivia(state);
@@ -189,12 +195,12 @@ impl<'config> KotlinParser<'config> {
         state.expect(RParen).ok();
         self.skip_trivia(state);
         self.parse_statement(state)?;
-        state.finish_at(cp, WhileStatement.into());
+        state.finish_at(cp, crate::parser::element_type::KotlinElementType::WhileStatement);
         Ok(())
     }
 
     fn parse_return_statement<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> Result<(), OakError> {
-        use crate::kind::KotlinSyntaxKind::*;
+        use crate::lexer::token_type::KotlinTokenType::*;
         let cp = state.checkpoint();
         state.expect(Return).ok();
         self.skip_trivia(state);
@@ -203,12 +209,12 @@ impl<'config> KotlinParser<'config> {
         }
         self.skip_trivia(state);
         state.eat(Semi);
-        state.finish_at(cp, ReturnStatement.into());
+        state.finish_at(cp, crate::parser::element_type::KotlinElementType::ReturnStatement);
         Ok(())
     }
 
     fn parse_block<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> Result<(), OakError> {
-        use crate::kind::KotlinSyntaxKind::*;
+        use crate::lexer::token_type::KotlinTokenType::*;
         let cp = state.checkpoint();
         state.expect(LBrace).ok();
         while state.not_at_end() && !state.at(RBrace) {
@@ -220,24 +226,24 @@ impl<'config> KotlinParser<'config> {
         }
         self.skip_trivia(state);
         state.expect(RBrace).ok();
-        state.finish_at(cp, Block.into());
+        state.finish_at(cp, crate::parser::element_type::KotlinElementType::Block);
         Ok(())
     }
 }
 
 impl<'config> Pratt<KotlinLanguage> for KotlinParser<'config> {
     fn primary<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> &'a GreenNode<'a, KotlinLanguage> {
-        use crate::kind::KotlinSyntaxKind::*;
+        use crate::lexer::token_type::KotlinTokenType::*;
         self.skip_trivia(state);
         let cp = state.checkpoint();
         match state.peek_kind() {
             Some(Identifier) => {
                 state.bump();
-                state.finish_at(cp, Identifier.into())
+                state.finish_at(cp, crate::parser::element_type::KotlinElementType::Identifier)
             }
             Some(StringLiteral) | Some(CharLiteral) | Some(NumberLiteral) | Some(IntLiteral) | Some(FloatLiteral) | Some(BooleanLiteral) | Some(Null) | Some(True) | Some(False) => {
                 state.bump();
-                state.finish_at(cp, IntLiteral.into()) // Simplified
+                state.finish_at(cp, crate::parser::element_type::KotlinElementType::IntLiteral) // Simplified
             }
             Some(LParen) => {
                 state.bump();
@@ -245,17 +251,17 @@ impl<'config> Pratt<KotlinLanguage> for KotlinParser<'config> {
                 PrattParser::parse(state, 0, self);
                 self.skip_trivia(state);
                 state.expect(RParen).ok();
-                state.finish_at(cp, SourceFile.into()) // Placeholder
+                state.finish_at(cp, crate::parser::element_type::KotlinElementType::SourceFile) // Placeholder
             }
             _ => {
                 state.bump();
-                state.finish_at(cp, Error.into())
+                state.finish_at(cp, crate::parser::element_type::KotlinElementType::Error)
             }
         }
     }
 
     fn prefix<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> &'a GreenNode<'a, KotlinLanguage> {
-        use crate::kind::KotlinSyntaxKind::*;
+        use crate::lexer::token_type::KotlinTokenType::*;
         self.skip_trivia(state);
         let kind = match state.peek_kind() {
             Some(k) => k,
@@ -263,7 +269,7 @@ impl<'config> Pratt<KotlinLanguage> for KotlinParser<'config> {
         };
 
         match kind {
-            Plus | Minus | Exclamation | Tilde => unary(state, kind, 12, SourceFile.into(), |s, p| {
+            Plus | Minus | Exclamation | Tilde => unary(state, kind, 12, crate::parser::element_type::KotlinElementType::PrefixExpression.into(), |s, p| {
                 self.skip_trivia(s);
                 PrattParser::parse(s, p, self)
             }),
@@ -272,7 +278,7 @@ impl<'config> Pratt<KotlinLanguage> for KotlinParser<'config> {
     }
 
     fn infix<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>, left: &'a GreenNode<'a, KotlinLanguage>, min_precedence: u8) -> Option<&'a GreenNode<'a, KotlinLanguage>> {
-        use crate::kind::KotlinSyntaxKind::*;
+        use crate::lexer::token_type::KotlinTokenType::*;
         self.skip_trivia(state);
         let kind = state.peek_kind()?;
 
@@ -285,7 +291,7 @@ impl<'config> Pratt<KotlinLanguage> for KotlinParser<'config> {
             Star | Slash | Percent | Ampersand => (7, Associativity::Left),
             Dot | DoubleColon | Range => (8, Associativity::Left),
             LParen | LBracket => (9, Associativity::Left),
-            _ => return None,
+            _ => (0, Associativity::Left),
         };
 
         if prec < min_precedence {
@@ -299,7 +305,7 @@ impl<'config> Pratt<KotlinLanguage> for KotlinParser<'config> {
                 state.bump();
                 self.skip_trivia(state);
                 state.expect(Identifier).ok();
-                Some(state.finish_at(cp, MemberAccessExpression.into()))
+                Some(state.finish_at(cp, crate::parser::element_type::KotlinElementType::MemberAccessExpression))
             }
             LParen => {
                 let cp = state.checkpoint();
@@ -315,7 +321,7 @@ impl<'config> Pratt<KotlinLanguage> for KotlinParser<'config> {
                 }
                 self.skip_trivia(state);
                 state.expect(RParen).ok();
-                Some(state.finish_at(cp, CallExpression.into()))
+                Some(state.finish_at(cp, crate::parser::element_type::KotlinElementType::CallExpression))
             }
             LBracket => {
                 let cp = state.checkpoint();
@@ -325,13 +331,13 @@ impl<'config> Pratt<KotlinLanguage> for KotlinParser<'config> {
                 PrattParser::parse(state, 0, self);
                 self.skip_trivia(state);
                 state.expect(RBracket).ok();
-                Some(state.finish_at(cp, MemberAccessExpression.into()))
+                Some(state.finish_at(cp, crate::parser::element_type::KotlinElementType::MemberAccessExpression))
             }
-            Assign | PlusAssign | MinusAssign | StarAssign | SlashAssign | PercentAssign => Some(binary(state, left, kind, prec, assoc, AssignmentExpression.into(), |s, p| {
+            Assign | PlusAssign | MinusAssign | StarAssign | SlashAssign | PercentAssign => Some(binary(state, left, kind, prec, assoc, crate::parser::element_type::KotlinElementType::AssignmentExpression.into(), |s, p| {
                 self.skip_trivia(s);
                 PrattParser::parse(s, p, self)
             })),
-            _ => Some(binary(state, left, kind, prec, assoc, BinaryExpression.into(), |s, p| {
+            _ => Some(binary(state, left, kind, prec, assoc, crate::parser::element_type::KotlinElementType::BinaryExpression.into(), |s, p| {
                 self.skip_trivia(s);
                 PrattParser::parse(s, p, self)
             })),

@@ -1,3 +1,4 @@
+#![doc = include_str!("readme.md")]
 use oak_core::{Language, LanguageCategory};
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Default)]
@@ -13,7 +14,7 @@ impl Language for ProtobufLanguage {
     const NAME: &'static str = "protobuf";
     const CATEGORY: LanguageCategory = LanguageCategory::Programming;
 
-    type TokenType = crate::kind::ProtobufSyntaxKind;
-    type ElementType = crate::kind::ProtobufSyntaxKind;
+    type TokenType = crate::lexer::token_type::ProtobufTokenType;
+    type ElementType = crate::parser::element_type::ProtobufElementType;
     type TypedRoot = crate::ast::ProtobufRoot;
 }

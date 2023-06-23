@@ -13,7 +13,7 @@ fn test_syntax_unification() {
     let mut cache1 = oak_core::parser::ParseSession::default();
     let result1 = parser.parse(&source1, &[], &mut cache1);
     if let Ok(tree) = result1.result {
-        println!("Tree 1:\n{:#?}", tree);
+        println!("Tree 1:\n{:#?}", tree)
     }
     assert!(result1.result.is_ok(), "Failed to parse object initialization: {:?}", result1.diagnostics);
 
@@ -23,15 +23,15 @@ fn test_syntax_unification() {
     // Check if it's an ApplyBlock/Object in AST
     if let Item::Statement(Statement::ExprStmt { expr: Expr::Object { callee, block, .. }, .. }) = &ast1.items[0] {
         if let Expr::Ident(ident) = callee.as_ref() {
-            assert_eq!(ident.name, "Point");
+            assert_eq!(ident.name, "Point")
         }
         else {
-            panic!("Expected Ident callee, got {:?}", callee);
+            panic!("Expected Ident callee, got {:?}", callee)
         }
-        assert_eq!(block.statements.len(), 2);
+        assert_eq!(block.statements.len(), 2)
     }
     else {
-        panic!("Expected Expr::Object, got {:?}", ast1.items[0]);
+        panic!("Expected Expr::Object, got {:?}", ast1.items[0])
     }
 
     // 2. Trailing closure style
@@ -45,14 +45,14 @@ fn test_syntax_unification() {
 
     if let Item::Statement(Statement::ExprStmt { expr: Expr::Object { callee, block, .. }, .. }) = &ast2.items[0] {
         if let Expr::Ident(ident) = callee.as_ref() {
-            assert_eq!(ident.name, "run_task");
+            assert_eq!(ident.name, "run_task")
         }
         else {
-            panic!("Expected Ident callee, got {:?}", callee);
+            panic!("Expected Ident callee, got {:?}", callee)
         }
-        assert_eq!(block.statements.len(), 1);
+        assert_eq!(block.statements.len(), 1)
     }
     else {
-        panic!("Expected Expr::Object, got {:?}", ast2.items[0]);
+        panic!("Expected Expr::Object, got {:?}", ast2.items[0])
     }
 }

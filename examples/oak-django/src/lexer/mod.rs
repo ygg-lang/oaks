@@ -1,8 +1,11 @@
-use crate::{kind::DjangoSyntaxKind, language::DjangoLanguage};
+#![doc = include_str!("readme.md")]
+pub mod token_type;
+
+use crate::{language::DjangoLanguage, lexer::token_type::DjangoTokenType};
 use oak_core::{
-    Lexer, LexerCache, LexerState, OakError,
+    Lexer, LexerCache, LexerState, OakError, Source,
     lexer::{CommentConfig, LexOutput, StringConfig, WhitespaceConfig},
-    source::{Source, TextEdit},
+    source::TextEdit,
 };
 use std::sync::LazyLock;
 
@@ -23,7 +26,7 @@ impl<'config> Lexer<DjangoLanguage> for DjangoLexer<'config> {
         let mut state = LexerState::new(source);
         let result = self.run(&mut state);
         if result.is_ok() {
-            state.add_eof();
+            state.add_eof()
         }
         state.finish_with_cache(result, cache)
     }
@@ -73,7 +76,7 @@ impl<'config> DjangoLexer<'config> {
                 continue;
             }
 
-            state.advance_if_dead_lock(safe_point);
+            state.advance_if_dead_lock(safe_point)
         }
 
         Ok(())
@@ -81,7 +84,7 @@ impl<'config> DjangoLexer<'config> {
 
     /// 跳过空白字符
     fn skip_whitespace<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
-        DJANGO_WHITESPACE.scan(state, DjangoSyntaxKind::Whitespace)
+        DJANGO_WHITESPACE.scan(state, DjangoTokenType::Whitespace)
     }
 
     /// 跳过注释
@@ -96,10 +99,10 @@ impl<'config> DjangoLexer<'config> {
                     state.advance(2); // 跳过 "#}"
                     break;
                 }
-                state.advance(1);
+                state.advance(1)
             }
 
-            state.add_token(DjangoSyntaxKind::Comment, start, state.get_position());
+            state.add_token(DjangoTokenType::Comment, start, state.get_position());
             return true;
         }
         false
@@ -107,7 +110,7 @@ impl<'config> DjangoLexer<'config> {
 
     /// 词法分析字符串
     fn lex_string<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
-        DJANGO_STRING_DOUBLE.scan(state, DjangoSyntaxKind::String) || DJANGO_STRING_SINGLE.scan(state, DjangoSyntaxKind::String)
+        DJANGO_STRING_DOUBLE.scan(state, DjangoTokenType::String) || DJANGO_STRING_SINGLE.scan(state, DjangoTokenType::String)
     }
 
     /// 处理换行
@@ -116,15 +119,15 @@ impl<'config> DjangoLexer<'config> {
 
         if let Some('\n') = state.peek() {
             state.advance(1);
-            state.add_token(DjangoSyntaxKind::Newline, start_pos, state.get_position());
+            state.add_token(DjangoTokenType::Newline, start_pos, state.get_position());
             true
         }
         else if let Some('\r') = state.peek() {
             state.advance(1);
             if let Some('\n') = state.peek() {
-                state.advance(1);
+                state.advance(1)
             }
-            state.add_token(DjangoSyntaxKind::Newline, start_pos, state.get_position());
+            state.add_token(DjangoTokenType::Newline, start_pos, state.get_position());
             true
         }
         else {
@@ -141,50 +144,45 @@ impl<'config> DjangoLexer<'config> {
                 state.advance(ch.len_utf8());
 
                 while let Some(ch) = state.peek() {
-                    if ch.is_alphanumeric() || ch == '_' {
-                        state.advance(ch.len_utf8());
-                    }
-                    else {
-                        break;
-                    }
+                    if ch.is_alphanumeric() || ch == '_' { state.advance(ch.len_utf8()) } else { break }
                 }
 
                 let end_pos = state.get_position();
                 let text = state.get_text_in((start_pos..end_pos).into());
 
                 let token_kind = match text.as_ref() {
-                    "if" => DjangoSyntaxKind::If,
-                    "elif" => DjangoSyntaxKind::Elif,
-                    "else" => DjangoSyntaxKind::Else,
-                    "endif" => DjangoSyntaxKind::Endif,
-                    "for" => DjangoSyntaxKind::For,
-                    "empty" => DjangoSyntaxKind::Empty,
-                    "endfor" => DjangoSyntaxKind::Endfor,
-                    "block" => DjangoSyntaxKind::Block,
-                    "endblock" => DjangoSyntaxKind::Endblock,
-                    "extends" => DjangoSyntaxKind::Extends,
-                    "include" => DjangoSyntaxKind::Include,
-                    "load" => DjangoSyntaxKind::Load,
-                    "with" => DjangoSyntaxKind::With,
-                    "endwith" => DjangoSyntaxKind::Endwith,
-                    "autoescape" => DjangoSyntaxKind::Autoescape,
-                    "endautoescape" => DjangoSyntaxKind::Endautoescape,
-                    "csrf_token" => DjangoSyntaxKind::Csrf,
-                    "url" => DjangoSyntaxKind::Url,
-                    "static" => DjangoSyntaxKind::Static,
-                    "now" => DjangoSyntaxKind::Now,
-                    "cycle" => DjangoSyntaxKind::Cycle,
-                    "filter" => DjangoSyntaxKind::Filter,
-                    "endfilter" => DjangoSyntaxKind::Endfilter,
-                    "spaceless" => DjangoSyntaxKind::Spaceless,
-                    "endspaceless" => DjangoSyntaxKind::Endspaceless,
-                    "verbatim" => DjangoSyntaxKind::Verbatim,
-                    "endverbatim" => DjangoSyntaxKind::Endverbatim,
-                    "and" => DjangoSyntaxKind::And,
-                    "or" => DjangoSyntaxKind::Or,
-                    "not" => DjangoSyntaxKind::Not,
-                    "in" => DjangoSyntaxKind::In,
-                    _ => DjangoSyntaxKind::Identifier,
+                    "if" => DjangoTokenType::If,
+                    "elif" => DjangoTokenType::Elif,
+                    "else" => DjangoTokenType::Else,
+                    "endif" => DjangoTokenType::Endif,
+                    "for" => DjangoTokenType::For,
+                    "empty" => DjangoTokenType::Empty,
+                    "endfor" => DjangoTokenType::Endfor,
+                    "block" => DjangoTokenType::Block,
+                    "endblock" => DjangoTokenType::Endblock,
+                    "extends" => DjangoTokenType::Extends,
+                    "include" => DjangoTokenType::Include,
+                    "load" => DjangoTokenType::Load,
+                    "with" => DjangoTokenType::With,
+                    "endwith" => DjangoTokenType::Endwith,
+                    "autoescape" => DjangoTokenType::Autoescape,
+                    "endautoescape" => DjangoTokenType::Endautoescape,
+                    "csrf_token" => DjangoTokenType::Csrf,
+                    "url" => DjangoTokenType::Url,
+                    "static" => DjangoTokenType::Static,
+                    "now" => DjangoTokenType::Now,
+                    "cycle" => DjangoTokenType::Cycle,
+                    "filter" => DjangoTokenType::Filter,
+                    "endfilter" => DjangoTokenType::Endfilter,
+                    "spaceless" => DjangoTokenType::Spaceless,
+                    "endspaceless" => DjangoTokenType::Endspaceless,
+                    "verbatim" => DjangoTokenType::Verbatim,
+                    "endverbatim" => DjangoTokenType::Endverbatim,
+                    "and" => DjangoTokenType::And,
+                    "or" => DjangoTokenType::Or,
+                    "not" => DjangoTokenType::Not,
+                    "in" => DjangoTokenType::In,
+                    _ => DjangoTokenType::Identifier,
                 };
 
                 state.add_token(token_kind, start_pos, state.get_position());
@@ -245,7 +243,7 @@ impl<'config> DjangoLexer<'config> {
                     }
                 }
 
-                state.add_token(DjangoSyntaxKind::Number, start_pos, state.get_position());
+                state.add_token(DjangoTokenType::Number, start_pos, state.get_position());
                 true
             }
             else {
@@ -269,23 +267,23 @@ impl<'config> DjangoLexer<'config> {
                 while let Some(ch) = state.peek() {
                     if ch == quote {
                         state.advance(1);
-                        state.add_token(DjangoSyntaxKind::String, start_pos, state.get_position());
+                        state.add_token(DjangoTokenType::String, start_pos, state.get_position());
                         return true;
                     }
                     else if ch == '\\' {
                         state.advance(1);
                         if state.peek().is_some() {
-                            state.advance(1);
+                            state.advance(1)
                         }
                     }
                     else {
-                        state.advance(ch.len_utf8());
+                        state.advance(ch.len_utf8())
                     }
                 }
 
                 // 未闭合的字符
 
-                state.add_token(DjangoSyntaxKind::Error, start_pos, state.get_position());
+                state.add_token(DjangoTokenType::Error, start_pos, state.get_position());
                 true
             }
             else {
@@ -309,19 +307,19 @@ impl<'config> DjangoLexer<'config> {
                     '{' => {
                         // 变量标签 {{
                         state.advance(1);
-                        state.add_token(DjangoSyntaxKind::VariableStart, start_pos, state.get_position());
+                        state.add_token(DjangoTokenType::VariableStart, start_pos, state.get_position());
                         true
                     }
                     '%' => {
                         // 模板标签 {%
                         state.advance(1);
-                        state.add_token(DjangoSyntaxKind::TagStart, start_pos, state.get_position());
+                        state.add_token(DjangoTokenType::TagStart, start_pos, state.get_position());
                         true
                     }
                     '#' => {
                         // 注释标签 {#
                         state.advance(1);
-                        state.add_token(DjangoSyntaxKind::CommentStart, start_pos, state.get_position());
+                        state.add_token(DjangoTokenType::CommentStart, start_pos, state.get_position());
                         true
                     }
                     _ => {
@@ -341,7 +339,7 @@ impl<'config> DjangoLexer<'config> {
             state.advance(1);
             if let Some('}') = state.peek() {
                 state.advance(1);
-                state.add_token(DjangoSyntaxKind::TagEnd, start_pos, state.get_position());
+                state.add_token(DjangoTokenType::TagEnd, start_pos, state.get_position());
                 true
             }
             else {
@@ -353,7 +351,7 @@ impl<'config> DjangoLexer<'config> {
             state.advance(1);
             if let Some('}') = state.peek() {
                 state.advance(1);
-                state.add_token(DjangoSyntaxKind::VariableEnd, start_pos, state.get_position());
+                state.add_token(DjangoTokenType::VariableEnd, start_pos, state.get_position());
                 true
             }
             else {
@@ -376,17 +374,17 @@ impl<'config> DjangoLexer<'config> {
                     state.advance(1);
                     if let Some('=') = state.peek() {
                         state.advance(1);
-                        Some(DjangoSyntaxKind::EqualEqual)
+                        Some(DjangoTokenType::EqualEqual)
                     }
                     else {
-                        Some(DjangoSyntaxKind::Equal)
+                        Some(DjangoTokenType::Equal)
                     }
                 }
                 '!' => {
                     state.advance(1);
                     if let Some('=') = state.peek() {
                         state.advance(1);
-                        Some(DjangoSyntaxKind::NotEqual)
+                        Some(DjangoTokenType::NotEqual)
                     }
                     else {
                         None
@@ -396,53 +394,53 @@ impl<'config> DjangoLexer<'config> {
                     state.advance(1);
                     if let Some('=') = state.peek() {
                         state.advance(1);
-                        Some(DjangoSyntaxKind::LessEqual)
+                        Some(DjangoTokenType::LessEqual)
                     }
                     else {
-                        Some(DjangoSyntaxKind::Less)
+                        Some(DjangoTokenType::Less)
                     }
                 }
                 '>' => {
                     state.advance(1);
                     if let Some('=') = state.peek() {
                         state.advance(1);
-                        Some(DjangoSyntaxKind::GreaterEqual)
+                        Some(DjangoTokenType::GreaterEqual)
                     }
                     else {
-                        Some(DjangoSyntaxKind::Greater)
+                        Some(DjangoTokenType::Greater)
                     }
                 }
                 '|' => {
                     state.advance(1);
-                    Some(DjangoSyntaxKind::Pipe)
+                    Some(DjangoTokenType::Pipe)
                 }
                 ':' => {
                     state.advance(1);
-                    Some(DjangoSyntaxKind::Colon)
+                    Some(DjangoTokenType::Colon)
                 }
                 '.' => {
                     state.advance(1);
-                    Some(DjangoSyntaxKind::Dot)
+                    Some(DjangoTokenType::Dot)
                 }
                 ',' => {
                     state.advance(1);
-                    Some(DjangoSyntaxKind::Comma)
+                    Some(DjangoTokenType::Comma)
                 }
                 '+' => {
                     state.advance(1);
-                    Some(DjangoSyntaxKind::Plus)
+                    Some(DjangoTokenType::Plus)
                 }
                 '-' => {
                     state.advance(1);
-                    Some(DjangoSyntaxKind::Minus)
+                    Some(DjangoTokenType::Minus)
                 }
                 '*' => {
                     state.advance(1);
-                    Some(DjangoSyntaxKind::Star)
+                    Some(DjangoTokenType::Star)
                 }
                 '/' => {
                     state.advance(1);
-                    Some(DjangoSyntaxKind::Slash)
+                    Some(DjangoTokenType::Slash)
                 }
                 _ => None,
             };
@@ -467,11 +465,11 @@ impl<'config> DjangoLexer<'config> {
 
         if let Some(ch) = state.peek() {
             let kind = match ch {
-                '(' => Some(DjangoSyntaxKind::LeftParen),
-                ')' => Some(DjangoSyntaxKind::RightParen),
-                '[' => Some(DjangoSyntaxKind::LeftBracket),
-                ']' => Some(DjangoSyntaxKind::RightBracket),
-                ';' => Some(DjangoSyntaxKind::Semicolon),
+                '(' => Some(DjangoTokenType::LeftParen),
+                ')' => Some(DjangoTokenType::RightParen),
+                '[' => Some(DjangoTokenType::LeftBracket),
+                ']' => Some(DjangoTokenType::RightBracket),
+                ';' => Some(DjangoTokenType::Semicolon),
                 _ => None,
             };
 
@@ -505,11 +503,11 @@ impl<'config> DjangoLexer<'config> {
                     }
                 }
             }
-            state.advance(ch.len_utf8());
+            state.advance(ch.len_utf8())
         }
 
         if state.get_position() > start_pos {
-            state.add_token(DjangoSyntaxKind::HtmlText, start_pos, state.get_position());
+            state.add_token(DjangoTokenType::HtmlContent, start_pos, state.get_position());
             true
         }
         else {

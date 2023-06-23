@@ -1,12 +1,16 @@
-use crate::{ast::CRoot, lexer::CTokenType, parser::CElementType};
+#![doc = include_str!("readme.md")]
+use crate::ast::CRoot;
 use oak_core::{Language, LanguageCategory};
+#[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
 
-/// C 语言实现
-#[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Deserialize)]
+/// C language implementation for the Oaks framework.
+#[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct CLanguage {}
 
 impl CLanguage {
+    /// Creates a new `CLanguage` instance.
     pub fn new() -> Self {
         Self {}
     }
@@ -16,8 +20,8 @@ impl Language for CLanguage {
     const NAME: &'static str = "c";
     const CATEGORY: LanguageCategory = LanguageCategory::Programming;
 
-    type TokenType = CTokenType;
-    type ElementType = CElementType;
+    type TokenType = crate::lexer::token_type::CTokenType;
+    type ElementType = crate::parser::element_type::CElementType;
     type TypedRoot = CRoot;
 }
 

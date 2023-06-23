@@ -1,3 +1,4 @@
+#![doc = include_str!("readme.md")]
 use oak_core::{Language, LanguageCategory};
 
 #[derive(Default)]
@@ -13,7 +14,7 @@ impl Language for WatLanguage {
     const NAME: &'static str = "wat";
     const CATEGORY: LanguageCategory = LanguageCategory::Dsl;
 
-    type TokenType = crate::kind::WatSyntaxKind;
-    type ElementType = crate::kind::WatSyntaxKind;
+    type TokenType = crate::lexer::token_type::WatTokenType;
+    type ElementType = crate::parser::element_type::WatElementType;
     type TypedRoot = ();
 }

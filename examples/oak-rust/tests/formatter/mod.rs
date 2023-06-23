@@ -3,7 +3,7 @@ fn test_rust_formatter() -> Result<(), oak_core::OakError> {
     use oak_rust::RustFormatter;
 
     let formatter = RustFormatter::new();
-    let source = "fn main(){let x=42;println!(\"x={}\",x);}";
+    let source = "fn main(){let x=42;println!(\"x={}\",x)}";
     let formatted = formatter.format(source);
 
     assert!(!formatted.is_empty(), "Formatter should produce output");

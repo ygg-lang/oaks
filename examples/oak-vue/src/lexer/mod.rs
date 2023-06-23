@@ -1,4 +1,7 @@
-use crate::kind::{VueLanguage, VueSyntaxKind};
+#![doc = include_str!("readme.md")]
+pub mod token_type;
+
+use crate::lexer::token_type::{VueLanguage, VueTokenType};
 use oak_core::{
     Lexer, LexerState,
     lexer::{LexOutput, LexerCache},
@@ -29,7 +32,7 @@ impl<'config> VueLexer<'config> {
         let ch = match state.peek() {
             Some(c) => c,
             None => {
-                state.add_token(VueSyntaxKind::Eof, start_pos, start_pos);
+                state.add_token(VueTokenType::Eof, start_pos, start_pos);
                 return;
             }
         };
@@ -38,61 +41,61 @@ impl<'config> VueLexer<'config> {
             '|' => {
                 if state.peek_next_n(1) == Some('|') {
                     state.advance(2);
-                    state.add_token(VueSyntaxKind::Or, start_pos, start_pos + 2);
+                    state.add_token(VueTokenType::Or, start_pos, start_pos + 2);
                 }
                 else {
                     state.advance(1);
-                    state.add_token(VueSyntaxKind::Pipe, start_pos, start_pos + 1);
+                    state.add_token(VueTokenType::Pipe, start_pos, start_pos + 1);
                 }
             }
             '&' => {
                 if state.peek_next_n(1) == Some('&') {
                     state.advance(2);
-                    state.add_token(VueSyntaxKind::And, start_pos, start_pos + 2);
+                    state.add_token(VueTokenType::And, start_pos, start_pos + 2);
                 }
                 else {
                     state.advance(1);
-                    state.add_token(VueSyntaxKind::Amp, start_pos, start_pos + 1);
+                    state.add_token(VueTokenType::Amp, start_pos, start_pos + 1);
                 }
             }
             '!' => {
                 if state.peek_next_n(1) == Some('=') {
                     state.advance(2);
-                    state.add_token(VueSyntaxKind::NotEq, start_pos, start_pos + 2);
+                    state.add_token(VueTokenType::NotEq, start_pos, start_pos + 2);
                 }
                 else {
                     state.advance(1);
-                    state.add_token(VueSyntaxKind::Bang, start_pos, start_pos + 1);
+                    state.add_token(VueTokenType::Bang, start_pos, start_pos + 1);
                 }
             }
             '+' => {
                 state.advance(1);
-                state.add_token(VueSyntaxKind::Plus, start_pos, start_pos + 1);
+                state.add_token(VueTokenType::Plus, start_pos, start_pos + 1);
             }
             '-' => {
                 state.advance(1);
-                state.add_token(VueSyntaxKind::Minus, start_pos, start_pos + 1);
+                state.add_token(VueTokenType::Minus, start_pos, start_pos + 1);
             }
             '*' => {
                 state.advance(1);
-                state.add_token(VueSyntaxKind::Star, start_pos, start_pos + 1);
+                state.add_token(VueTokenType::Star, start_pos, start_pos + 1);
             }
             '%' => {
                 state.advance(1);
-                state.add_token(VueSyntaxKind::Percent, start_pos, start_pos + 1);
+                state.add_token(VueTokenType::Percent, start_pos, start_pos + 1);
             }
             '?' => {
                 state.advance(1);
-                state.add_token(VueSyntaxKind::Question, start_pos, start_pos + 1);
+                state.add_token(VueTokenType::Question, start_pos, start_pos + 1);
             }
             '<' => {
                 if state.rest().starts_with("</") {
                     state.advance(2);
-                    state.add_token(VueSyntaxKind::LtSlash, start_pos, start_pos + 2);
+                    state.add_token(VueTokenType::LtSlash, start_pos, start_pos + 2);
                 }
                 else if state.peek_next_n(1) == Some('=') {
                     state.advance(2);
-                    state.add_token(VueSyntaxKind::LtEq, start_pos, start_pos + 2);
+                    state.add_token(VueTokenType::LtEq, start_pos, start_pos + 2);
                 }
                 else if state.rest().starts_with("<!--") {
                     state.advance(4);
@@ -102,122 +105,122 @@ impl<'config> VueLexer<'config> {
                     if state.rest().starts_with("-->") {
                         state.advance(3);
                     }
-                    state.add_token(VueSyntaxKind::Comment, start_pos, state.get_position());
+                    state.add_token(VueTokenType::Comment, start_pos, state.get_position());
                 }
                 else if state.rest().starts_with("<!") {
                     state.advance(2);
-                    state.add_token(VueSyntaxKind::DocTypeStart, start_pos, start_pos + 2);
+                    state.add_token(VueTokenType::DocTypeStart, start_pos, start_pos + 2);
                 }
                 else if state.rest().starts_with("<script") && !is_ident_continue(state.peek_next_n(7).unwrap_or(' ')) {
                     state.advance(7);
-                    state.add_token(VueSyntaxKind::ScriptStart, start_pos, start_pos + 7);
+                    state.add_token(VueTokenType::ScriptStart, start_pos, start_pos + 7);
                 }
                 else if state.rest().starts_with("<style") && !is_ident_continue(state.peek_next_n(6).unwrap_or(' ')) {
                     state.advance(6);
-                    state.add_token(VueSyntaxKind::StyleStart, start_pos, start_pos + 6);
+                    state.add_token(VueTokenType::StyleStart, start_pos, start_pos + 6);
                 }
                 else if state.rest().starts_with("<template") && !is_ident_continue(state.peek_next_n(9).unwrap_or(' ')) {
                     state.advance(9);
-                    state.add_token(VueSyntaxKind::TemplateStart, start_pos, start_pos + 9);
+                    state.add_token(VueTokenType::TemplateStart, start_pos, start_pos + 9);
                 }
                 else {
                     state.advance(1);
-                    state.add_token(VueSyntaxKind::Lt, start_pos, start_pos + 1);
+                    state.add_token(VueTokenType::Lt, start_pos, start_pos + 1);
                 }
             }
             '>' => {
                 if state.peek_next_n(1) == Some('=') {
                     state.advance(2);
-                    state.add_token(VueSyntaxKind::GtEq, start_pos, start_pos + 2);
+                    state.add_token(VueTokenType::GtEq, start_pos, start_pos + 2);
                 }
                 else {
                     state.advance(1);
-                    state.add_token(VueSyntaxKind::Gt, start_pos, start_pos + 1);
+                    state.add_token(VueTokenType::Gt, start_pos, start_pos + 1);
                 }
             }
             '/' => {
                 if state.peek_next_n(1) == Some('>') {
                     state.advance(2);
-                    state.add_token(VueSyntaxKind::SelfClosingEnd, start_pos, start_pos + 2);
+                    state.add_token(VueTokenType::SlashGt, start_pos, start_pos + 2);
                 }
                 else {
                     state.advance(1);
-                    state.add_token(VueSyntaxKind::Slash, start_pos, start_pos + 1);
+                    state.add_token(VueTokenType::Slash, start_pos, start_pos + 1);
                 }
             }
             '=' => {
                 if state.peek_next_n(1) == Some('>') {
                     state.advance(2);
-                    state.add_token(VueSyntaxKind::Arrow, start_pos, start_pos + 2);
+                    state.add_token(VueTokenType::Arrow, start_pos, start_pos + 2);
                 }
                 else if state.peek_next_n(1) == Some('=') {
                     state.advance(2);
-                    state.add_token(VueSyntaxKind::EqEq, start_pos, start_pos + 2);
+                    state.add_token(VueTokenType::EqEq, start_pos, start_pos + 2);
                 }
                 else {
                     state.advance(1);
-                    state.add_token(VueSyntaxKind::Eq, start_pos, start_pos + 1);
+                    state.add_token(VueTokenType::Eq, start_pos, start_pos + 1);
                 }
             }
             '{' => {
                 if state.peek_next_n(1) == Some('{') {
                     state.advance(2);
-                    state.add_token(VueSyntaxKind::InterpolationStart, start_pos, start_pos + 2);
+                    state.add_token(VueTokenType::InterpolationStart, start_pos, start_pos + 2);
                 }
                 else {
                     state.advance(1);
-                    state.add_token(VueSyntaxKind::LeftBrace, start_pos, start_pos + 1);
+                    state.add_token(VueTokenType::LeftBrace, start_pos, start_pos + 1);
                 }
             }
             '}' => {
                 if state.peek_next_n(1) == Some('}') {
                     state.advance(2);
-                    state.add_token(VueSyntaxKind::InterpolationEnd, start_pos, start_pos + 2);
+                    state.add_token(VueTokenType::InterpolationEnd, start_pos, start_pos + 2);
                 }
                 else {
                     state.advance(1);
-                    state.add_token(VueSyntaxKind::RightBrace, start_pos, start_pos + 1);
+                    state.add_token(VueTokenType::RightBrace, start_pos, start_pos + 1);
                 }
             }
             '(' => {
                 state.advance(1);
-                state.add_token(VueSyntaxKind::LeftParen, start_pos, start_pos + 1);
+                state.add_token(VueTokenType::LeftParen, start_pos, start_pos + 1);
             }
             ')' => {
                 state.advance(1);
-                state.add_token(VueSyntaxKind::RightParen, start_pos, start_pos + 1);
+                state.add_token(VueTokenType::RightParen, start_pos, start_pos + 1);
             }
             '[' => {
                 state.advance(1);
-                state.add_token(VueSyntaxKind::LeftBracket, start_pos, start_pos + 1);
+                state.add_token(VueTokenType::LeftBracket, start_pos, start_pos + 1);
             }
             ']' => {
                 state.advance(1);
-                state.add_token(VueSyntaxKind::RightBracket, start_pos, start_pos + 1);
+                state.add_token(VueTokenType::RightBracket, start_pos, start_pos + 1);
             }
             ',' => {
                 state.advance(1);
-                state.add_token(VueSyntaxKind::Comma, start_pos, start_pos + 1);
+                state.add_token(VueTokenType::Comma, start_pos, start_pos + 1);
             }
             ':' => {
                 state.advance(1);
-                state.add_token(VueSyntaxKind::Colon, start_pos, start_pos + 1);
+                state.add_token(VueTokenType::Colon, start_pos, start_pos + 1);
             }
             ';' => {
                 state.advance(1);
-                state.add_token(VueSyntaxKind::Semicolon, start_pos, start_pos + 1);
+                state.add_token(VueTokenType::Semicolon, start_pos, start_pos + 1);
             }
             '.' => {
                 state.advance(1);
-                state.add_token(VueSyntaxKind::Dot, start_pos, start_pos + 1);
+                state.add_token(VueTokenType::Dot, start_pos, start_pos + 1);
             }
             '@' => {
                 state.advance(1);
-                state.add_token(VueSyntaxKind::At, start_pos, start_pos + 1);
+                state.add_token(VueTokenType::At, start_pos, start_pos + 1);
             }
             '#' => {
                 state.advance(1);
-                state.add_token(VueSyntaxKind::Hash, start_pos, start_pos + 1);
+                state.add_token(VueTokenType::Hash, start_pos, start_pos + 1);
             }
             '"' | '\'' => {
                 self.lex_string(state);
@@ -240,10 +243,10 @@ impl<'config> VueLexer<'config> {
             if ch == '<' || ch == '{' || ch.is_whitespace() {
                 break;
             }
-            state.advance(ch.len_utf8());
+            state.advance(ch.len_utf8())
         }
         if state.get_position() > start_pos {
-            state.add_token(VueSyntaxKind::Text, start_pos, state.get_position());
+            state.add_token(VueTokenType::Text, start_pos, state.get_position())
         }
     }
 
@@ -253,14 +256,14 @@ impl<'config> VueLexer<'config> {
         while let Some(ch) = state.peek() {
             if ch.is_whitespace() {
                 state.advance(ch.len_utf8());
-                found = true;
+                found = true
             }
             else {
                 break;
             }
         }
         if found {
-            state.add_token(VueSyntaxKind::Whitespace, start_pos, state.get_position());
+            state.add_token(VueTokenType::Whitespace, start_pos, state.get_position())
         }
         found
     }
@@ -274,9 +277,9 @@ impl<'config> VueLexer<'config> {
                     state.advance(3);
                     break;
                 }
-                state.advance(c.len_utf8());
+                state.advance(c.len_utf8())
             }
-            state.add_token(VueSyntaxKind::Comment, start_pos, state.get_position());
+            state.add_token(VueTokenType::Comment, start_pos, state.get_position());
             return true;
         }
         // JS style comments
@@ -286,9 +289,9 @@ impl<'config> VueLexer<'config> {
                 if ch == '\n' || ch == '\r' {
                     break;
                 }
-                state.advance(ch.len_utf8());
+                state.advance(ch.len_utf8())
             }
-            state.add_token(VueSyntaxKind::Comment, start_pos, state.get_position());
+            state.add_token(VueTokenType::Comment, start_pos, state.get_position());
             return true;
         }
         if state.rest().starts_with("/*") {
@@ -298,9 +301,9 @@ impl<'config> VueLexer<'config> {
                     state.advance(2);
                     break;
                 }
-                state.advance(ch.len_utf8());
+                state.advance(ch.len_utf8())
             }
-            state.add_token(VueSyntaxKind::Comment, start_pos, state.get_position());
+            state.add_token(VueTokenType::Comment, start_pos, state.get_position());
             return true;
         }
         false
@@ -317,75 +320,65 @@ impl<'config> VueLexer<'config> {
         while let Some(ch) = state.peek() {
             if escaped {
                 escaped = false;
-                state.advance(ch.len_utf8());
+                state.advance(ch.len_utf8())
             }
             else if ch == '\\' {
                 escaped = true;
-                state.advance(1);
+                state.advance(1)
             }
             else if ch == quote {
                 state.advance(1);
                 break;
             }
             else {
-                state.advance(ch.len_utf8());
+                state.advance(ch.len_utf8())
             }
         }
-        state.add_token(VueSyntaxKind::StringLiteral, start_pos, state.get_position());
+        state.add_token(VueTokenType::StringLiteral, start_pos, state.get_position())
     }
 
     fn lex_number<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) {
         let start_pos = state.get_position();
         while let Some(ch) = state.peek() {
-            if ch.is_ascii_digit() || ch == '.' {
-                state.advance(1);
-            }
-            else {
-                break;
-            }
+            if ch.is_ascii_digit() || ch == '.' { state.advance(1) } else { break }
         }
-        state.add_token(VueSyntaxKind::NumberLiteral, start_pos, state.get_position());
+        state.add_token(VueTokenType::NumberLiteral, start_pos, state.get_position())
     }
 
     fn lex_identifier<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) {
         let start_pos = state.get_position();
         while let Some(ch) = state.peek() {
-            if is_ident_continue(ch) {
-                state.advance(ch.len_utf8());
-            }
-            else {
-                break;
-            }
+            if is_ident_continue(ch) { state.advance(ch.len_utf8()) } else { break }
         }
         let text = state.get_text_in((start_pos..state.get_position()).into());
         let kind = match text.as_ref() {
-            "import" => VueSyntaxKind::Import,
-            "export" => VueSyntaxKind::Export,
-            "default" => VueSyntaxKind::Default,
-            "from" => VueSyntaxKind::From,
-            "as" => VueSyntaxKind::As,
-            "const" => VueSyntaxKind::Const,
-            "let" => VueSyntaxKind::Let,
-            "var" => VueSyntaxKind::Var,
-            "function" => VueSyntaxKind::Function,
-            "if" => VueSyntaxKind::If,
-            "else" => VueSyntaxKind::Else,
-            "while" => VueSyntaxKind::While,
-            "for" => VueSyntaxKind::For,
-            "return" => VueSyntaxKind::Return,
-            "break" => VueSyntaxKind::Break,
-            "continue" => VueSyntaxKind::Continue,
-            "switch" => VueSyntaxKind::Switch,
-            "try" => VueSyntaxKind::Try,
-            "throw" => VueSyntaxKind::Throw,
-            "in" => VueSyntaxKind::In,
-            "of" => VueSyntaxKind::Of,
-            "true" => VueSyntaxKind::True,
-            "false" => VueSyntaxKind::False,
-            "null" => VueSyntaxKind::Null,
-            _ => VueSyntaxKind::Identifier,
+            "import" => VueTokenType::Import,
+            "export" => VueTokenType::Export,
+            "default" => VueTokenType::Default,
+            "from" => VueTokenType::From,
+            "as" => VueTokenType::As,
+            "const" => VueTokenType::Const,
+            "let" => VueTokenType::Let,
+            "var" => VueTokenType::Var,
+            "function" => VueTokenType::Function,
+            "if" => VueTokenType::If,
+            "else" => VueTokenType::Else,
+            "while" => VueTokenType::While,
+            "for" => VueTokenType::For,
+            "return" => VueTokenType::Return,
+            "break" => VueTokenType::Break,
+            "continue" => VueTokenType::Continue,
+            "switch" => VueTokenType::Switch,
+            "try" => VueTokenType::Try,
+            "throw" => VueTokenType::Throw,
+            "in" => VueTokenType::In,
+            "of" => VueTokenType::Of,
+            "true" => VueTokenType::True,
+            "false" => VueTokenType::False,
+            "null" => VueTokenType::Null,
+            _ => VueTokenType::Identifier,
         };
-        state.add_token(kind, start_pos, state.get_position());
+        state.add_token(kind, start_pos, state.get_position())
     }
 }
 
@@ -402,7 +395,7 @@ impl<'config> Lexer<VueLanguage> for VueLexer<'config> {
         let mut state = State::new_with_cache(source, 0, cache);
 
         while state.not_at_end() {
-            self.lex_token(&mut state);
+            self.lex_token(&mut state)
         }
 
         state.add_eof();

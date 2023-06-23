@@ -1,3 +1,4 @@
+#![doc = include_str!("readme.md")]
 use oak_core::source::{SourceBuffer, ToSource};
 
 /// Wat 根节点
@@ -10,7 +11,7 @@ impl ToSource for WatRoot {
     fn to_source(&self, buffer: &mut SourceBuffer) {
         for item in &self.items {
             item.to_source(buffer);
-            buffer.push("\n");
+            buffer.push("\n")
         }
     }
 }
@@ -41,13 +42,13 @@ impl ToSource for WatModule {
         buffer.push("(module");
         if let Some(name) = &self.name {
             buffer.push(" ");
-            buffer.push(name);
+            buffer.push(name)
         }
         for item in &self.items {
             buffer.push("\n  ");
-            item.to_source(buffer);
+            item.to_source(buffer)
         }
-        buffer.push(")");
+        buffer.push(")")
     }
 }
 
@@ -92,25 +93,25 @@ impl ToSource for WatFunc {
         buffer.push("(func");
         if let Some(name) = &self.name {
             buffer.push(" ");
-            buffer.push(name);
+            buffer.push(name)
         }
         for param in &self.params {
             buffer.push(" ");
-            param.to_source(buffer);
+            param.to_source(buffer)
         }
         for result in &self.results {
             buffer.push(" ");
-            result.to_source(buffer);
+            result.to_source(buffer)
         }
         for local in &self.locals {
             buffer.push(" ");
-            local.to_source(buffer);
+            local.to_source(buffer)
         }
         for instr in &self.body {
             buffer.push("\n    ");
-            instr.to_source(buffer);
+            instr.to_source(buffer)
         }
-        buffer.push(")");
+        buffer.push(")")
     }
 }
 
@@ -126,11 +127,11 @@ impl ToSource for WatParam {
         buffer.push("(param");
         if let Some(name) = &self.name {
             buffer.push(" ");
-            buffer.push(name);
+            buffer.push(name)
         }
         buffer.push(" ");
         self.ty.to_source(buffer);
-        buffer.push(")");
+        buffer.push(")")
     }
 }
 
@@ -144,7 +145,7 @@ impl ToSource for WatResult {
     fn to_source(&self, buffer: &mut SourceBuffer) {
         buffer.push("(result ");
         self.ty.to_source(buffer);
-        buffer.push(")");
+        buffer.push(")")
     }
 }
 
@@ -160,11 +161,11 @@ impl ToSource for WatLocal {
         buffer.push("(local");
         if let Some(name) = &self.name {
             buffer.push(" ");
-            buffer.push(name);
+            buffer.push(name)
         }
         buffer.push(" ");
         self.ty.to_source(buffer);
-        buffer.push(")");
+        buffer.push(")")
     }
 }
 
@@ -196,7 +197,7 @@ pub struct WatInstruction {
 
 impl ToSource for WatInstruction {
     fn to_source(&self, buffer: &mut SourceBuffer) {
-        buffer.push(&self.name);
+        buffer.push(&self.name)
     }
 }
 
@@ -205,6 +206,8 @@ impl ToSource for WatInstruction {
 pub struct WatImport {
     pub module: String,
     pub field: String,
+    pub kind: String,
+    pub index: u32,
 }
 
 impl ToSource for WatImport {
@@ -213,7 +216,11 @@ impl ToSource for WatImport {
         buffer.push(&self.module);
         buffer.push("\" \"");
         buffer.push(&self.field);
-        buffer.push("\")");
+        buffer.push("\" (");
+        buffer.push(&self.kind);
+        buffer.push(" ");
+        buffer.push(&self.index.to_string());
+        buffer.push("))")
     }
 }
 
@@ -221,13 +228,19 @@ impl ToSource for WatImport {
 #[derive(Clone, Debug)]
 pub struct WatExport {
     pub name: String,
+    pub kind: String,
+    pub index: u32,
 }
 
 impl ToSource for WatExport {
     fn to_source(&self, buffer: &mut SourceBuffer) {
         buffer.push("(export \"");
         buffer.push(&self.name);
-        buffer.push("\")");
+        buffer.push("\" (");
+        buffer.push(&self.kind);
+        buffer.push(" ");
+        buffer.push(&self.index.to_string());
+        buffer.push("))")
     }
 }
 
@@ -242,9 +255,9 @@ impl ToSource for WatType {
         buffer.push("(type");
         if let Some(name) = &self.name {
             buffer.push(" ");
-            buffer.push(name);
+            buffer.push(name)
         }
-        buffer.push(")");
+        buffer.push(")")
     }
 }
 
@@ -259,9 +272,9 @@ impl ToSource for WatTable {
         buffer.push("(table");
         if let Some(name) = &self.name {
             buffer.push(" ");
-            buffer.push(name);
+            buffer.push(name)
         }
-        buffer.push(")");
+        buffer.push(")")
     }
 }
 
@@ -276,9 +289,9 @@ impl ToSource for WatMemory {
         buffer.push("(memory");
         if let Some(name) = &self.name {
             buffer.push(" ");
-            buffer.push(name);
+            buffer.push(name)
         }
-        buffer.push(")");
+        buffer.push(")")
     }
 }
 
@@ -293,8 +306,8 @@ impl ToSource for WatGlobal {
         buffer.push("(global");
         if let Some(name) = &self.name {
             buffer.push(" ");
-            buffer.push(name);
+            buffer.push(name)
         }
-        buffer.push(")");
+        buffer.push(")")
     }
 }

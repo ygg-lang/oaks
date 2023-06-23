@@ -1,10 +1,12 @@
+pub mod element_type;
+
 use crate::language::WgslLanguage;
 use oak_core::{
     parser::{Parser, ParserState},
     source::Source,
 };
 
-mod parse;
+mod parse_top_level;
 
 pub(crate) type State<'a, S> = ParserState<'a, WgslLanguage, S>;
 

@@ -1,30 +1,40 @@
 [package]
 name = "oak-fortran"
-description = "Fortran scientific computing language parser with support for modern Fortran standards and numerical computing."
-categories = ["parsing"]
-keywords = ["parser", "fortran", "scientific", "hpc"]
-documentation = "https://docs.rs/oak-fortran"
-readme = "readme.md"
 version.workspace = true
 authors.workspace = true
-homepage.workspace = true
-repository.workspace = true
-license.workspace = true
+description = "Fortran scientific computing language parser with support for modern Fortran standards and numerical computing."
 edition.workspace = true
+license.workspace = true
+readme = "readme.md"
+homepage.workspace = true
+repository = "https://github.com/ygg-lang/oaks/tree/master/examples/oak-fortran"
+documentation = "https://docs.rs/oak-fortran"
+categories = ["parsing"]
+keywords = ["parser", "fortran", "scientific", "hpc"]
 
 [dependencies]
 oak-core = { workspace = true }
 oak-highlight = { workspace = true, optional = true }
 oak-pretty-print = { workspace = true, optional = true }
-serde = { workspace = true }
+serde = { workspace = true, optional = true }
+
+oak-lsp = { workspace = true, optional = true }
+oak-hover = { workspace = true, optional = true }
+oak-vfs = { workspace = true, optional = true }
+oak-mcp = { workspace = true, optional = true }
+futures = { workspace = true, optional = true }
 
 [dev-dependencies]
 oak-testing = { workspace = true }
 walkdir = { workspace = true }
 
 [features]
-default = []
-
+default = ["serde"]
+serde = ["dep:serde", "oak-core/serde"]
+oak-highlight = ["dep:oak-highlight"]
+oak-pretty-print = ["dep:oak-pretty-print"]
+lsp = ["dep:oak-lsp", "dep:oak-hover", "dep:oak-vfs", "oak-highlight", "oak-pretty-print", "dep:futures"]
+mcp = ["lsp", "oak-mcp/io-std"]
 
 [package.metadata.docs.rs]
 all-features = true

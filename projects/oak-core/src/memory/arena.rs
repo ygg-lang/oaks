@@ -34,6 +34,7 @@
 //! - The arena is not `Sync` or `Send` in a way that allows cross-thread allocation,
 //!   though the underlying chunks are managed safely via thread-local storage.
 //! - Memory is only reclaimed when the entire `SyntaxArena` is dropped.
+use crate::tree::TokenProvenance;
 use std::{
     alloc::{Layout, alloc, dealloc},
     cell::{RefCell, UnsafeCell},
@@ -59,7 +60,7 @@ const ALIGN: usize = 8;
 // - **Automatic Cleanup:** All chunks are either recycled into this pool or freed when
 //   the `SyntaxArena` is dropped.
 thread_local! {
-    static CHUNK_POOL: RefCell<Vec<NonNull<u8>>> = RefCell::new(Vec::with_capacity(16));
+    static CHUNK_POOL: RefCell<Vec<NonNull<u8>>> = RefCell::new(Vec::with_capacity(16))
 }
 
 /// A high-performance bump allocator optimized for AST nodes.
@@ -78,6 +79,8 @@ pub struct SyntaxArena {
     full_chunks: UnsafeCell<Vec<(NonNull<u8>, usize)>>,
     /// The start pointer of the current chunk (used for recycling/freeing).
     current_chunk_start: UnsafeCell<NonNull<u8>>,
+    /// Store for token provenance metadata.
+    metadata: UnsafeCell<Vec<TokenProvenance>>,
 }
 
 impl SyntaxArena {
@@ -88,7 +91,20 @@ impl SyntaxArena {
     pub fn new(capacity: usize) -> Self {
         // Use a pointer aligned to ALIGN even for the dangling state to satisfy debug assertions.
         let dangling = unsafe { NonNull::new_unchecked(ALIGN as *mut u8) };
-        Self { ptr: UnsafeCell::new(dangling), end: UnsafeCell::new(dangling), full_chunks: UnsafeCell::new(Vec::with_capacity(capacity)), current_chunk_start: UnsafeCell::new(NonNull::dangling()) }
+        Self { ptr: UnsafeCell::new(dangling), end: UnsafeCell::new(dangling), full_chunks: UnsafeCell::new(Vec::with_capacity(capacity)), current_chunk_start: UnsafeCell::new(NonNull::dangling()), metadata: UnsafeCell::new(Vec::new()) }
+    }
+
+    /// Stores a token provenance in the arena and returns its index.
+    pub fn add_metadata(&self, provenance: TokenProvenance) -> std::num::NonZeroU32 {
+        let metadata = unsafe { &mut *self.metadata.get() };
+        metadata.push(provenance);
+        std::num::NonZeroU32::new(metadata.len() as u32).expect("Metadata index overflow")
+    }
+
+    /// Retrieves a token provenance by index.
+    pub fn get_metadata(&self, index: std::num::NonZeroU32) -> Option<&TokenProvenance> {
+        let metadata = unsafe { &*self.metadata.get() };
+        metadata.get(index.get() as usize - 1)
     }
 
     /// Allocates a value of type `T` in the arena and moves `value` into it.
@@ -171,7 +187,7 @@ impl SyntaxArena {
                     break;
                 }
                 base_ptr.add(i).write(item);
-                i += 1;
+                i += 1
             }
 
             // In a production-ready system, we should handle the case where iter is short.
@@ -231,7 +247,7 @@ impl SyntaxArena {
                 // Note: for now we assume chunks are either CHUNK_SIZE or specially sized.
                 let current_end = (*self.end.get()).as_ptr() as usize;
                 let actual_size = current_end - current_start.as_ptr() as usize;
-                (*self.full_chunks.get()).push((current_start, actual_size));
+                (*self.full_chunks.get()).push((current_start, actual_size))
             }
 
             // Allocate new chunk.
@@ -273,7 +289,7 @@ impl SyntaxArena {
         unsafe {
             let ptr = alloc(layout);
             if ptr.is_null() {
-                std::alloc::handle_alloc_error(layout);
+                std::alloc::handle_alloc_error(layout)
             }
             NonNull::new_unchecked(ptr)
         }
@@ -289,12 +305,12 @@ impl Drop for SyntaxArena {
             if current != NonNull::dangling() {
                 let current_end = (*self.end.get()).as_ptr() as usize;
                 let actual_size = current_end - current.as_ptr() as usize;
-                Self::recycle_chunk(current, actual_size);
+                Self::recycle_chunk(current, actual_size)
             }
 
             // Recycle all full chunks.
             for (ptr, size) in (*self.full_chunks.get()).iter() {
-                Self::recycle_chunk(*ptr, *size);
+                Self::recycle_chunk(*ptr, *size)
             }
         }
     }
@@ -313,7 +329,7 @@ impl SyntaxArena {
                 let mut pool = pool.borrow_mut();
                 if pool.len() < 64 {
                     // Hard limit to prevent memory bloating per thread.
-                    pool.push(ptr);
+                    pool.push(ptr)
                 }
             });
             // If try_with fails (e.g. during thread destruction), we just leak or dealloc?
@@ -324,9 +340,7 @@ impl SyntaxArena {
         }
         // If not pooled (either because it's a huge chunk or the pool is full/unreachable), deallocate immediately.
         let layout = Layout::from_size_align(size, ALIGN).unwrap();
-        unsafe {
-            dealloc(ptr.as_ptr(), layout);
-        }
+        unsafe { dealloc(ptr.as_ptr(), layout) }
     }
 }
 

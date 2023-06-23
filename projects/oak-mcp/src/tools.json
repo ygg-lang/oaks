@@ -156,5 +156,26 @@
         "query"
       ]
     }
+  },
+  {
+    "name": "semantic_search",
+    "description": "Perform a semantic search across the codebase using natural language",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "query": {
+          "type": "string",
+          "description": "The search query (e.g., 'how to handle errors')"
+        },
+        "limit": {
+          "type": "integer",
+          "description": "Maximum number of results to return",
+          "default": 5
+        }
+      },
+      "required": [
+        "query"
+      ]
+    }
   }
 ]

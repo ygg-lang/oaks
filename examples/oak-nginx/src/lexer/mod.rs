@@ -1,4 +1,7 @@
-use crate::{kind::NginxSyntaxKind, language::NginxLanguage};
+#![doc = include_str!("readme.md")]
+pub mod token_type;
+
+use crate::{language::NginxLanguage, lexer::token_type::NginxTokenType};
 use oak_core::{Lexer, LexerCache, LexerState, lexer::LexOutput, source::Source};
 
 type State<'a, S> = LexerState<'a, S, NginxLanguage>;
@@ -27,7 +30,7 @@ impl<'config> NginxLexer<'config> {
         }
 
         if state.get_position() > start_pos {
-            state.add_token(NginxSyntaxKind::Whitespace, start_pos, state.get_position());
+            state.add_token(NginxTokenType::Whitespace, start_pos, state.get_position());
             true
         }
         else {
@@ -41,7 +44,7 @@ impl<'config> NginxLexer<'config> {
 
         if let Some('\n') = state.peek() {
             state.advance(1);
-            state.add_token(NginxSyntaxKind::Newline, start_pos, state.get_position());
+            state.add_token(NginxTokenType::Newline, start_pos, state.get_position());
             true
         }
         else if let Some('\r') = state.peek() {
@@ -49,7 +52,7 @@ impl<'config> NginxLexer<'config> {
             if let Some('\n') = state.peek() {
                 state.advance(1);
             }
-            state.add_token(NginxSyntaxKind::Newline, start_pos, state.get_position());
+            state.add_token(NginxTokenType::Newline, start_pos, state.get_position());
             true
         }
         else {
@@ -72,7 +75,7 @@ impl<'config> NginxLexer<'config> {
                 state.advance(ch.len_utf8());
             }
 
-            state.add_token(NginxSyntaxKind::CommentToken, start_pos, state.get_position());
+            state.add_token(NginxTokenType::CommentToken, start_pos, state.get_position());
             true
         }
         else {
@@ -106,7 +109,7 @@ impl<'config> NginxLexer<'config> {
                 }
             }
 
-            state.add_token(NginxSyntaxKind::String, start_pos, state.get_position());
+            state.add_token(NginxTokenType::String, start_pos, state.get_position());
             true
         }
         else {
@@ -164,7 +167,7 @@ impl<'config> NginxLexer<'config> {
                 }
             }
 
-            state.add_token(NginxSyntaxKind::Number, start_pos, state.get_position());
+            state.add_token(NginxTokenType::Number, start_pos, state.get_position());
             true
         }
         else {
@@ -188,7 +191,7 @@ impl<'config> NginxLexer<'config> {
                 }
             }
 
-            state.add_token(NginxSyntaxKind::Path, start_pos, state.get_position());
+            state.add_token(NginxTokenType::Path, start_pos, state.get_position());
             true
         }
         else {
@@ -214,7 +217,7 @@ impl<'config> NginxLexer<'config> {
                 }
             }
 
-            state.add_token(NginxSyntaxKind::Url, start_pos, state.get_position());
+            state.add_token(NginxTokenType::Url, start_pos, state.get_position());
             true
         }
         else {
@@ -227,13 +230,13 @@ impl<'config> NginxLexer<'config> {
         let start_pos = state.get_position();
 
         if let Some(ch) = state.peek() {
-            if !ch.is_ascii_alphabetic() && ch != '_' {
+            if !ch.is_ascii_alphanumeric() && ch != '_' && ch != '$' {
                 return false;
             }
 
             // 收集标识符字
             while let Some(ch) = state.peek() {
-                if ch.is_ascii_alphanumeric() || ch == '_' {
+                if ch.is_ascii_alphanumeric() || ch == '_' || ch == '$' {
                     state.advance(ch.len_utf8());
                 }
                 else {
@@ -245,17 +248,17 @@ impl<'config> NginxLexer<'config> {
             let end_pos = state.get_position();
             let text = state.source().get_text_in(oak_core::Range { start: start_pos, end: end_pos });
             let token_kind = match text.as_ref() {
-                "server" => NginxSyntaxKind::ServerKeyword,
-                "location" => NginxSyntaxKind::LocationKeyword,
-                "upstream" => NginxSyntaxKind::UpstreamKeyword,
-                "http" => NginxSyntaxKind::HttpKeyword,
-                "events" => NginxSyntaxKind::EventsKeyword,
-                "listen" => NginxSyntaxKind::ListenKeyword,
-                "server_name" => NginxSyntaxKind::ServerNameKeyword,
-                "root" => NginxSyntaxKind::RootKeyword,
-                "index" => NginxSyntaxKind::IndexKeyword,
-                "proxy_pass" => NginxSyntaxKind::ProxyPassKeyword,
-                _ => NginxSyntaxKind::Identifier,
+                "server" => NginxTokenType::ServerKeyword,
+                "location" => NginxTokenType::LocationKeyword,
+                "upstream" => NginxTokenType::UpstreamKeyword,
+                "http" => NginxTokenType::HttpKeyword,
+                "events" => NginxTokenType::EventsKeyword,
+                "listen" => NginxTokenType::ListenKeyword,
+                "server_name" => NginxTokenType::ServerNameKeyword,
+                "root" => NginxTokenType::RootKeyword,
+                "index" => NginxTokenType::IndexKeyword,
+                "proxy_pass" => NginxTokenType::ProxyPassKeyword,
+                _ => NginxTokenType::Identifier,
             };
 
             state.add_token(token_kind, start_pos, end_pos);
@@ -272,9 +275,9 @@ impl<'config> NginxLexer<'config> {
 
         if let Some(ch) = state.peek() {
             let token_kind = match ch {
-                '{' => NginxSyntaxKind::LeftBrace,
-                '}' => NginxSyntaxKind::RightBrace,
-                ';' => NginxSyntaxKind::Semicolon,
+                '{' => NginxTokenType::LeftBrace,
+                '}' => NginxTokenType::RightBrace,
+                ';' => NginxTokenType::Semicolon,
                 _ => return false,
             };
 
@@ -331,7 +334,7 @@ impl<'config> NginxLexer<'config> {
             // 如果所有规则都不匹配，跳过当前字符并标记为错误
             state.advance_if_dead_lock(start_pos);
             if state.get_position() > start_pos {
-                state.add_token(NginxSyntaxKind::Error, start_pos, state.get_position());
+                state.add_token(NginxTokenType::Error, start_pos, state.get_position())
             }
         }
         Ok(())
@@ -343,7 +346,7 @@ impl<'config> Lexer<NginxLanguage> for NginxLexer<'config> {
         let mut state = LexerState::new(source);
         let result = self.run(&mut state);
         if result.is_ok() {
-            state.add_eof();
+            state.add_eof()
         }
         state.finish_with_cache(result, cache)
     }

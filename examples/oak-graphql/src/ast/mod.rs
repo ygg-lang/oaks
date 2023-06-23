@@ -1,3 +1,4 @@
+#![doc = include_str!("readme.md")]
 use core::range::Range;
 
 type SourceSpan = Range<usize>;

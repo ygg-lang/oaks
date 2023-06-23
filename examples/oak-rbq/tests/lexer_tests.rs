@@ -21,7 +21,7 @@ fn test_rbq_lexer_basic_tokens() {
     assert!(token_kinds.contains(&RbqSyntaxKind::Ident));
     assert!(token_kinds.contains(&RbqSyntaxKind::LeftBrace));
     assert!(token_kinds.contains(&RbqSyntaxKind::RightBrace));
-    assert!(token_kinds.contains(&RbqSyntaxKind::Colon));
+    assert!(token_kinds.contains(&RbqSyntaxKind::Colon))
 }
 
 #[test]
@@ -37,7 +37,7 @@ fn test_rbq_lexer_micro_keyword() {
     let tokens = result.result.unwrap();
     let token_kinds: Vec<_> = tokens.iter().map(|t| t.kind).collect();
 
-    assert!(token_kinds.contains(&RbqSyntaxKind::MicroKw));
+    assert!(token_kinds.contains(&RbqSyntaxKind::MicroKw))
 }
 
 #[test]
@@ -54,7 +54,7 @@ fn test_rbq_lexer_annotations() {
     let token_kinds: Vec<_> = tokens.iter().map(|t| t.kind).collect();
 
     assert!(token_kinds.contains(&RbqSyntaxKind::At));
-    assert!(token_kinds.contains(&RbqSyntaxKind::StringLiteral));
+    assert!(token_kinds.contains(&RbqSyntaxKind::StringLiteral))
 }
 
 #[test]
@@ -72,7 +72,7 @@ fn test_rbq_lexer_types() {
 
     assert!(token_kinds.contains(&RbqSyntaxKind::Lt));
     assert!(token_kinds.contains(&RbqSyntaxKind::Gt));
-    assert!(token_kinds.contains(&RbqSyntaxKind::Question));
+    assert!(token_kinds.contains(&RbqSyntaxKind::Question))
 }
 
 #[test]
@@ -88,5 +88,5 @@ fn test_rbq_lexer_utf8_keyword() {
     let tokens = result.result.unwrap();
     let token_kinds: Vec<_> = tokens.iter().map(|t| t.kind).collect();
 
-    assert!(token_kinds.contains(&RbqSyntaxKind::Utf8Kw));
+    assert!(token_kinds.contains(&RbqSyntaxKind::Utf8Kw))
 }

@@ -1,3 +1,6 @@
+#![doc = include_str!("readme.md")]
+pub mod token_type;
+
 use crate::language::RegexLanguage;
 use oak_core::{
     Lexer, LexerCache, LexerState,
@@ -60,7 +63,7 @@ impl<'config> Lexer<RegexLanguage> for RegexLexer<'config> {
         let mut state = State::new(source);
         let result = self.run(&mut state);
         if result.is_ok() {
-            state.add_eof();
+            state.add_eof()
         }
         state.finish_with_cache(result, cache)
     }

@@ -3,10 +3,10 @@
 
 # Basic CSV with header
 Name,Age,City,Country,Email
-John Doe,30,New York,USA,john.doe@example.com
-Jane Smith,25,London,UK,jane.smith@example.com
-Bob Johnson,35,Toronto,Canada,bob.johnson@example.com
-Alice Brown,28,Sydney,Australia,alice.brown@example.com
+John Doe,30,New York,USA,john.doe↯example.com
+Jane Smith,25,London,UK,jane.smith↯example.com
+Bob Johnson,35,Toronto,Canada,bob.johnson↯example.com
+Alice Brown,28,Sydney,Australia,alice.brown↯example.com
 
 # CSV with quoted fields containing commas
 Product,Category,Price,Description,Tags

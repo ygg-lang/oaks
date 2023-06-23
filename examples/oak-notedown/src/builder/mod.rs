@@ -1,3 +1,4 @@
+#![doc = include_str!("readme.md")]
 use crate::{ast::NoteDocument, language::NotedownLanguage};
 use oak_core::{Builder, BuilderCache, TextEdit, source::Source};
 

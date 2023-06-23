@@ -1,13 +1,13 @@
 use crate::{
-    XmlLanguage,
+    XmlElementType, XmlLanguage,
     ast::{XmlAttribute, XmlElement, XmlRoot, XmlValue},
-    kind::XmlSyntaxKind,
+    lexer::token_type::XmlTokenType,
 };
 use core::range::Range;
 use oak_core::{
-    Builder, BuilderCache, GreenNode, GreenTree, OakDiagnostics, OakError, Parser,
+    Builder, BuilderCache, GreenNode, GreenTree, OakDiagnostics, OakError, Parser, Source,
     builder::BuildOutput,
-    source::{Source, SourceText, TextEdit},
+    source::{SourceText, TextEdit},
 };
 
 pub struct XmlBuilder;
@@ -25,10 +25,10 @@ impl XmlBuilder {
             match child {
                 GreenTree::Node(node) => {
                     match node.kind {
-                        XmlSyntaxKind::Prolog => {
+                        XmlElementType::Prolog => {
                             // For now we might ignore prolog or handle it if needed
                         }
-                        XmlSyntaxKind::Element => {
+                        XmlElementType::Element => {
                             children.push(self.build_element(node, current_offset, source)?);
                         }
                         _ => {}
@@ -56,14 +56,14 @@ impl XmlBuilder {
             match child {
                 GreenTree::Node(n) => {
                     match n.kind {
-                        XmlSyntaxKind::StartTag | XmlSyntaxKind::SelfClosingTag => {
+                        XmlElementType::StartTag | XmlElementType::SelfClosingTag => {
                             let mut sub_offset = current_offset;
                             for sub_child in n.children {
                                 match sub_child {
-                                    GreenTree::Leaf(t) if t.kind == XmlSyntaxKind::Identifier => {
+                                    GreenTree::Leaf(t) if t.kind == XmlTokenType::Identifier => {
                                         name = source.get_text_in(Range { start: sub_offset, end: sub_offset + t.length as usize }).to_string();
                                     }
-                                    GreenTree::Node(attr_node) if attr_node.kind == XmlSyntaxKind::Attribute => {
+                                    GreenTree::Node(attr_node) if attr_node.kind == XmlElementType::Attribute => {
                                         attributes.push(self.build_attribute(attr_node, sub_offset, source)?);
                                     }
                                     _ => {}
@@ -71,7 +71,7 @@ impl XmlBuilder {
                                 sub_offset += sub_child.len() as usize;
                             }
                         }
-                        XmlSyntaxKind::Element => {
+                        XmlElementType::Element => {
                             children.push(XmlValue::Element(self.build_element(n, current_offset, source)?));
                         }
                         _ => {}
@@ -80,7 +80,7 @@ impl XmlBuilder {
                 }
                 GreenTree::Leaf(t) => {
                     match t.kind {
-                        XmlSyntaxKind::Text => {
+                        XmlTokenType::Text => {
                             let text = source.get_text_in(Range { start: current_offset, end: current_offset + t.length as usize });
                             if !text.trim().is_empty() {
                                 children.push(XmlValue::Text(text.to_string()));
@@ -105,10 +105,10 @@ impl XmlBuilder {
             match child {
                 GreenTree::Leaf(t) => {
                     match t.kind {
-                        XmlSyntaxKind::Identifier => {
+                        XmlTokenType::Identifier => {
                             name = source.get_text_in(Range { start: current_offset, end: current_offset + t.length as usize }).to_string();
                         }
-                        XmlSyntaxKind::StringLiteral => {
+                        XmlTokenType::StringLiteral => {
                             let raw = source.get_text_in(Range { start: current_offset, end: current_offset + t.length as usize });
                             // Strip quotes
                             if raw.len() >= 2 {
@@ -144,7 +144,7 @@ impl Builder<XmlLanguage> for XmlBuilder {
             diagnostics.push(error);
         }
 
-        let result = if let Ok(green_tree) = parse_output.result { self.build_root(green_tree, &source) } else { Err(parse_output.result.err().unwrap()) };
+        let result = parse_output.result.and_then(|green_tree| self.build_root(green_tree, &source));
 
         OakDiagnostics { result, diagnostics }
     }

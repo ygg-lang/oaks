@@ -25,7 +25,7 @@ The Java AST is the central data structure used by the compiler, static analysis
 - **`FieldDeclaration`**: Field definition with modifiers and initializers.
 - **`ConstructorDeclaration`**: Class constructor definition.
 - **`EnumConstant`**: Individual constant in an enum.
-- **`Annotation`**: Represents an annotation usage (e.g., `@Override`).
+- **`Annotation`**: Represents an annotation usage (e.g., `↯Override`).
 
 ### Statements and Expressions
 - **`Statement`**: Represents various Java statements (local variables, blocks, control flow, etc.).

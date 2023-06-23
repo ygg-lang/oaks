@@ -1,4 +1,7 @@
-use crate::{kind::GraphQLSyntaxKind, language::GraphQLLanguage};
+#![doc = include_str!("readme.md")]
+pub mod token_type;
+
+use crate::{language::GraphQLLanguage, lexer::token_type::GraphQLTokenType};
 use oak_core::{
     Lexer, LexerCache, LexerState, OakError, TextEdit,
     lexer::{CommentConfig, LexOutput, StringConfig, WhitespaceConfig},
@@ -73,18 +76,18 @@ impl<'config> GraphQLLexer<'config> {
 
     /// 跳过空白字符
     fn skip_whitespace<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
-        GRAPHQL_WHITESPACE.scan(state, GraphQLSyntaxKind::Whitespace)
+        GRAPHQL_WHITESPACE.scan(state, GraphQLTokenType::Whitespace)
     }
 
     /// 跳过注释
     fn skip_comment<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
-        GRAPHQL_COMMENT.scan(state, GraphQLSyntaxKind::Comment, GraphQLSyntaxKind::Comment)
+        GRAPHQL_COMMENT.scan(state, GraphQLTokenType::Comment, GraphQLTokenType::Comment)
     }
 
     /// 词法分析字符串字面量
     fn lex_string_literal<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         // 普通字符串 "..."
-        if GRAPHQL_STRING.scan(state, GraphQLSyntaxKind::StringLiteral) {
+        if GRAPHQL_STRING.scan(state, GraphQLTokenType::StringLiteral) {
             return true;
         }
 
@@ -104,7 +107,7 @@ impl<'config> GraphQLLexer<'config> {
             }
 
             let end = state.get_position();
-            state.add_token(GraphQLSyntaxKind::StringLiteral, start, end);
+            state.add_token(GraphQLTokenType::StringLiteral, start, end);
             return true;
         }
 
@@ -190,7 +193,7 @@ impl<'config> GraphQLLexer<'config> {
             return false;
         }
 
-        let kind = if is_float { GraphQLSyntaxKind::FloatLiteral } else { GraphQLSyntaxKind::IntLiteral };
+        let kind = if is_float { GraphQLTokenType::FloatLiteral } else { GraphQLTokenType::IntLiteral };
         state.add_token(kind, start, state.get_position());
         true
     }
@@ -229,32 +232,32 @@ impl<'config> GraphQLLexer<'config> {
     }
 
     /// 判断是关键字还是标识符
-    fn keyword_or_identifier(&self, text: &str) -> GraphQLSyntaxKind {
+    fn keyword_or_identifier(&self, text: &str) -> GraphQLTokenType {
         match text {
             // 关键字
-            "query" => GraphQLSyntaxKind::QueryKeyword,
-            "mutation" => GraphQLSyntaxKind::MutationKeyword,
-            "subscription" => GraphQLSyntaxKind::SubscriptionKeyword,
-            "fragment" => GraphQLSyntaxKind::FragmentKeyword,
-            "on" => GraphQLSyntaxKind::OnKeyword,
-            "type" => GraphQLSyntaxKind::TypeKeyword,
-            "interface" => GraphQLSyntaxKind::InterfaceKeyword,
-            "union" => GraphQLSyntaxKind::UnionKeyword,
-            "scalar" => GraphQLSyntaxKind::ScalarKeyword,
-            "enum" => GraphQLSyntaxKind::EnumKeyword,
-            "input" => GraphQLSyntaxKind::InputKeyword,
-            "extend" => GraphQLSyntaxKind::ExtendKeyword,
-            "schema" => GraphQLSyntaxKind::SchemaKeyword,
-            "directive" => GraphQLSyntaxKind::DirectiveKeyword,
-            "implements" => GraphQLSyntaxKind::ImplementsKeyword,
-            "repeats" => GraphQLSyntaxKind::RepeatsKeyword,
+            "query" => GraphQLTokenType::QueryKeyword,
+            "mutation" => GraphQLTokenType::MutationKeyword,
+            "subscription" => GraphQLTokenType::SubscriptionKeyword,
+            "fragment" => GraphQLTokenType::FragmentKeyword,
+            "on" => GraphQLTokenType::OnKeyword,
+            "type" => GraphQLTokenType::TypeKeyword,
+            "interface" => GraphQLTokenType::InterfaceKeyword,
+            "union" => GraphQLTokenType::UnionKeyword,
+            "scalar" => GraphQLTokenType::ScalarKeyword,
+            "enum" => GraphQLTokenType::EnumKeyword,
+            "input" => GraphQLTokenType::InputKeyword,
+            "extend" => GraphQLTokenType::ExtendKeyword,
+            "schema" => GraphQLTokenType::SchemaKeyword,
+            "directive" => GraphQLTokenType::DirectiveKeyword,
+            "implements" => GraphQLTokenType::ImplementsKeyword,
+            "repeats" => GraphQLTokenType::RepeatsKeyword,
 
             // 特殊字面量
-            "true" | "false" => GraphQLSyntaxKind::BooleanLiteral,
-            "null" => GraphQLSyntaxKind::NullLiteral,
+            "true" | "false" => GraphQLTokenType::BooleanLiteral,
+            "null" => GraphQLTokenType::NullLiteral,
 
             // 默认为名称
-            _ => GraphQLSyntaxKind::Name,
+            _ => GraphQLTokenType::Name,
         }
     }
 
@@ -265,7 +268,7 @@ impl<'config> GraphQLLexer<'config> {
         // 三字符操作符
         if state.starts_with("...") {
             state.advance(3);
-            state.add_token(GraphQLSyntaxKind::Spread, start, state.get_position());
+            state.add_token(GraphQLTokenType::Spread, start, state.get_position());
             return true;
         }
 
@@ -277,21 +280,21 @@ impl<'config> GraphQLLexer<'config> {
         if let Some(ch) = state.peek() {
             let start = state.get_position();
             let kind = match ch {
-                '(' => Some(GraphQLSyntaxKind::LeftParen),
-                ')' => Some(GraphQLSyntaxKind::RightParen),
-                '[' => Some(GraphQLSyntaxKind::LeftBracket),
-                ']' => Some(GraphQLSyntaxKind::RightBracket),
-                '{' => Some(GraphQLSyntaxKind::LeftBrace),
-                '}' => Some(GraphQLSyntaxKind::RightBrace),
-                ',' => Some(GraphQLSyntaxKind::Comma),
-                ':' => Some(GraphQLSyntaxKind::Colon),
-                ';' => Some(GraphQLSyntaxKind::Semicolon),
-                '|' => Some(GraphQLSyntaxKind::Pipe),
-                '&' => Some(GraphQLSyntaxKind::Ampersand),
-                '=' => Some(GraphQLSyntaxKind::Equals),
-                '!' => Some(GraphQLSyntaxKind::Exclamation),
-                '@' => Some(GraphQLSyntaxKind::At),
-                '$' => Some(GraphQLSyntaxKind::Dollar),
+                '(' => Some(GraphQLTokenType::LeftParen),
+                ')' => Some(GraphQLTokenType::RightParen),
+                '[' => Some(GraphQLTokenType::LeftBracket),
+                ']' => Some(GraphQLTokenType::RightBracket),
+                '{' => Some(GraphQLTokenType::LeftBrace),
+                '}' => Some(GraphQLTokenType::RightBrace),
+                ',' => Some(GraphQLTokenType::Comma),
+                ':' => Some(GraphQLTokenType::Colon),
+                ';' => Some(GraphQLTokenType::Semicolon),
+                '|' => Some(GraphQLTokenType::Pipe),
+                '&' => Some(GraphQLTokenType::Ampersand),
+                '=' => Some(GraphQLTokenType::Equals),
+                '!' => Some(GraphQLTokenType::Exclamation),
+                '@' => Some(GraphQLTokenType::At),
+                '$' => Some(GraphQLTokenType::Dollar),
                 _ => None,
             };
 

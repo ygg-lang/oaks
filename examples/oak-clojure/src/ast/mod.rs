@@ -1,3 +1,4 @@
+#![doc = include_str!("readme.md")]
 use crate::{language::ClojureLanguage, parser::ClojureElementType};
 use oak_core::tree::{RedLeaf, RedNode};
 

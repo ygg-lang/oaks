@@ -46,16 +46,16 @@ impl Layout {
     pub fn add_node(&mut self, id: String, rect: Rect) {
         let label = id.clone();
         self.nodes.insert(id.clone(), PositionedNode { id, label, rect, node_type: NodeType::Default });
-        self.update_bounds();
+        self.update_bounds()
     }
 
     pub fn add_node_with_metadata(&mut self, id: String, label: String, rect: Rect, node_type: NodeType) {
         self.nodes.insert(id.clone(), PositionedNode { id, label, rect, node_type });
-        self.update_bounds();
+        self.update_bounds()
     }
 
     pub fn add_edge(&mut self, edge: Edge) {
-        self.edges.push(edge);
+        self.edges.push(edge)
     }
 
     fn update_bounds(&mut self) {
@@ -314,7 +314,7 @@ impl LayoutEngine for ForceDirectedLayout {
                         let force = Point::new(force_direction.x * force_magnitude, force_direction.y * force_magnitude);
 
                         *forces.get_mut(&node1.id).unwrap() = *forces.get(&node1.id).unwrap() + force;
-                        *forces.get_mut(&node2.id).unwrap() = *forces.get(&node2.id).unwrap() - force;
+                        *forces.get_mut(&node2.id).unwrap() = *forces.get(&node2.id).unwrap() - force
                     }
                 }
             }
@@ -330,7 +330,7 @@ impl LayoutEngine for ForceDirectedLayout {
                     let force = Point::new(force_direction.x * force_magnitude, force_direction.y * force_magnitude);
 
                     *forces.get_mut(&edge.from).unwrap() = *forces.get(&edge.from).unwrap() + force;
-                    *forces.get_mut(&edge.to).unwrap() = *forces.get(&edge.to).unwrap() - force;
+                    *forces.get_mut(&edge.to).unwrap() = *forces.get(&edge.to).unwrap() - force
                 }
             }
 
@@ -338,7 +338,7 @@ impl LayoutEngine for ForceDirectedLayout {
             for node in nodes {
                 if let (Some(force), Some(velocity), Some(position)) = (forces.get(&node.id), velocities.get_mut(&node.id), positions.get_mut(&node.id)) {
                     *velocity = Point::new(velocity.x * self.damping + force.x, velocity.y * self.damping + force.y);
-                    *position = *position + *velocity;
+                    *position = *position + *velocity
                 }
             }
         }
@@ -347,7 +347,7 @@ impl LayoutEngine for ForceDirectedLayout {
         for node in nodes {
             if let Some(position) = positions.get(&node.id) {
                 let rect = Rect::new(Point::new(position.x - node.size.width / 2.0, position.y - node.size.height / 2.0), node.size);
-                layout.add_node(node.id.clone(), rect);
+                layout.add_node(node.id.clone(), rect)
             }
         }
 
@@ -355,7 +355,7 @@ impl LayoutEngine for ForceDirectedLayout {
         for edge in edges {
             if let (Some(from_node), Some(to_node)) = (layout.nodes.get(&edge.from), layout.nodes.get(&edge.to)) {
                 let routed_edge = route_edge(&from_node.rect, &to_node.rect, &edge.from, &edge.to, edge.label.clone());
-                layout.add_edge(routed_edge);
+                layout.add_edge(routed_edge)
             }
         }
 
@@ -394,7 +394,7 @@ fn build_hierarchy(nodes: &[LayoutNode], edges: &[LayoutEdge]) -> crate::Result<
     let mut roots = Vec::new();
     for node in nodes {
         if !has_parent.contains(&node.id) {
-            roots.push(build_hierarchy_node(&node.id, nodes, &children_map));
+            roots.push(build_hierarchy_node(&node.id, nodes, &children_map))
         }
     }
 
@@ -414,7 +414,7 @@ fn layout_top_down(hierarchy: &[HierarchyNode], config: &LayoutConfig) -> HashMa
 
     for root in hierarchy {
         layout_node_top_down(root, config.margin, &mut current_y, config, &mut positions);
-        current_y += config.vertical_spacing;
+        current_y += config.vertical_spacing
     }
 
     positions
@@ -429,7 +429,7 @@ fn layout_node_top_down(node: &HierarchyNode, x: f64, y: &mut f64, config: &Layo
     let mut child_x = x + config.horizontal_spacing;
     for child in &node.children {
         layout_node_top_down(child, child_x, y, config, positions);
-        child_x += child.size.width + config.horizontal_spacing;
+        child_x += child.size.width + config.horizontal_spacing
     }
 }
 
@@ -439,7 +439,7 @@ fn layout_left_right(hierarchy: &[HierarchyNode], config: &LayoutConfig) -> Hash
 
     for root in hierarchy {
         layout_node_left_right(root, &mut current_x, config.margin, config, &mut positions);
-        current_x += config.horizontal_spacing;
+        current_x += config.horizontal_spacing
     }
 
     positions
@@ -454,7 +454,7 @@ fn layout_node_left_right(node: &HierarchyNode, x: &mut f64, y: f64, config: &La
     let mut child_y = y + config.vertical_spacing;
     for child in &node.children {
         layout_node_left_right(child, x, child_y, config, positions);
-        child_y += child.size.height + config.vertical_spacing;
+        child_y += child.size.height + config.vertical_spacing
     }
 }
 

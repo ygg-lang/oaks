@@ -3,7 +3,7 @@ use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Serialize, Deserialize, PartialEq)]
 struct User {
-    #[serde(rename = "@id")]
+    #[serde(rename = "↯id")]
     id: u32,
     name: String,
     active: bool,

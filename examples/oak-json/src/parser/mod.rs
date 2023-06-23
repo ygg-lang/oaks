@@ -1,4 +1,6 @@
-use crate::{kind::JsonSyntaxKind, language::JsonLanguage};
+pub mod element_type;
+
+use crate::{language::JsonLanguage, lexer::token_type::JsonTokenType, parser::element_type::JsonElementType};
 use oak_core::{OakError, Parser, ParserState, Source, TextEdit, TokenType};
 
 pub(crate) type State<'a, S> = ParserState<'a, JsonLanguage, S>;
@@ -17,7 +19,7 @@ impl<'config> JsonParser<'config> {
     pub(crate) fn parse_value<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> Result<(), OakError> {
         self.skip_trivia(state);
         let token = if let Some(t) = state.current() {
-            if t.kind == JsonSyntaxKind::Eof {
+            if t.kind == JsonTokenType::Eof {
                 return Err(state.unexpected_eof());
             }
             t
@@ -27,14 +29,14 @@ impl<'config> JsonParser<'config> {
         };
 
         let kind = match token.kind {
-            JsonSyntaxKind::LeftBrace => JsonSyntaxKind::Object,
-            JsonSyntaxKind::LeftBracket => JsonSyntaxKind::Array,
-            JsonSyntaxKind::StringLiteral => JsonSyntaxKind::String,
-            JsonSyntaxKind::NumberLiteral => JsonSyntaxKind::Number,
-            JsonSyntaxKind::BooleanLiteral => JsonSyntaxKind::Boolean,
-            JsonSyntaxKind::NullLiteral => JsonSyntaxKind::Null,
+            JsonTokenType::LeftBrace => JsonTokenType::Object,
+            JsonTokenType::LeftBracket => JsonTokenType::Array,
+            JsonTokenType::StringLiteral => JsonTokenType::String,
+            JsonTokenType::NumberLiteral => JsonTokenType::Number,
+            JsonTokenType::BooleanLiteral => JsonTokenType::Boolean,
+            JsonTokenType::NullLiteral => JsonTokenType::Null,
             _ => {
-                if self.config.bare_keys && token.kind == JsonSyntaxKind::BareKey {
+                if self.config.bare_keys && token.kind == JsonTokenType::BareKey {
                     state.record_unexpected_token(format!("{:?}", token.kind));
                     return Err(state.errors.last().unwrap().clone());
                 }
@@ -43,9 +45,9 @@ impl<'config> JsonParser<'config> {
             }
         };
 
-        state.incremental_node(kind, |state| match kind {
-            JsonSyntaxKind::Object => self.parse_object(state),
-            JsonSyntaxKind::Array => self.parse_array(state),
+        state.incremental_node(kind.into(), |state| match kind {
+            JsonTokenType::Object => self.parse_object(state),
+            JsonTokenType::Array => self.parse_array(state),
             _ => {
                 state.bump();
                 Ok(())
@@ -54,7 +56,7 @@ impl<'config> JsonParser<'config> {
     }
 
     fn parse_object<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> Result<(), OakError> {
-        if !state.eat(JsonSyntaxKind::LeftBrace) {
+        if !state.eat(JsonTokenType::LeftBrace) {
             state.record_expected("{");
             return Err(state.errors.last().cloned().expect("Error should have been recorded"));
         }
@@ -62,23 +64,23 @@ impl<'config> JsonParser<'config> {
         let mut first = true;
         while state.not_at_end() {
             self.skip_trivia(state);
-            if state.at(JsonSyntaxKind::RightBrace) {
+            if state.at(JsonTokenType::RightBrace) {
                 break;
             }
 
-            if state.at(JsonSyntaxKind::Eof) {
+            if state.at(JsonTokenType::Eof) {
                 return Err(state.unexpected_eof());
             }
 
             if !first {
-                if !state.eat(JsonSyntaxKind::Comma) {
+                if !state.eat(JsonTokenType::Comma) {
                     state.record_expected(",");
                     // Don't break here to try recover
                     break;
                 }
 
                 self.skip_trivia(state);
-                if state.at(JsonSyntaxKind::RightBrace) {
+                if state.at(JsonTokenType::RightBrace) {
                     if !self.config.trailing_comma {
                         state.record_trailing_comma_not_allowed();
                         return Err(state.errors.last().cloned().expect("Error should have been recorded"));
@@ -92,19 +94,20 @@ impl<'config> JsonParser<'config> {
             self.skip_trivia(state);
         }
 
-        if !state.eat(JsonSyntaxKind::RightBrace) {
+        if !state.eat(JsonTokenType::RightBrace) {
             // Check if we are at EOF, if so return unexpected EOF
-            if state.at(JsonSyntaxKind::Eof) || !state.not_at_end() {
+            if state.at(JsonTokenType::Eof) || !state.not_at_end() {
                 return Err(state.unexpected_eof());
             }
             state.record_expected("}");
+            return Err(state.errors.last().cloned().expect("Error should have been recorded"));
         }
         Ok(())
     }
 
     fn parse_object_entry<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> Result<(), OakError> {
-        state.incremental_node(JsonSyntaxKind::ObjectEntry, |state| {
-            if state.at(JsonSyntaxKind::StringLiteral) || (self.config.bare_keys && state.at(JsonSyntaxKind::BareKey)) {
+        state.incremental_node(JsonElementType::ObjectEntry, |state| {
+            if state.at(JsonTokenType::StringLiteral) || (self.config.bare_keys && state.at(JsonTokenType::BareKey)) {
                 state.bump();
             }
             else {
@@ -113,7 +116,7 @@ impl<'config> JsonParser<'config> {
             }
 
             self.skip_trivia(state);
-            if !state.eat(JsonSyntaxKind::Colon) {
+            if !state.eat(JsonTokenType::Colon) {
                 state.record_expected(":");
             }
             self.skip_trivia(state);
@@ -123,7 +126,7 @@ impl<'config> JsonParser<'config> {
     }
 
     fn parse_array<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> Result<(), OakError> {
-        if !state.eat(JsonSyntaxKind::LeftBracket) {
+        if !state.eat(JsonTokenType::LeftBracket) {
             state.record_expected("[");
             return Err(state.errors.last().cloned().expect("Error should have been recorded"));
         }
@@ -131,22 +134,22 @@ impl<'config> JsonParser<'config> {
         let mut first = true;
         while state.not_at_end() {
             self.skip_trivia(state);
-            if state.at(JsonSyntaxKind::RightBracket) {
+            if state.at(JsonTokenType::RightBracket) {
                 break;
             }
 
-            if state.at(JsonSyntaxKind::Eof) {
+            if state.at(JsonTokenType::Eof) {
                 return Err(state.unexpected_eof());
             }
 
             if !first {
-                if !state.eat(JsonSyntaxKind::Comma) {
+                if !state.eat(JsonTokenType::Comma) {
                     state.record_expected(",");
                     break;
                 }
 
                 self.skip_trivia(state);
-                if state.at(JsonSyntaxKind::RightBracket) {
+                if state.at(JsonTokenType::RightBracket) {
                     if !self.config.trailing_comma {
                         state.record_trailing_comma_not_allowed();
                         return Err(state.errors.last().cloned().expect("Error should have been recorded"));
@@ -160,11 +163,12 @@ impl<'config> JsonParser<'config> {
             self.skip_trivia(state);
         }
 
-        if !state.eat(JsonSyntaxKind::RightBracket) {
-            if state.at(JsonSyntaxKind::Eof) || !state.not_at_end() {
+        if !state.eat(JsonTokenType::RightBracket) {
+            if state.at(JsonTokenType::Eof) || !state.not_at_end() {
                 return Err(state.unexpected_eof());
             }
             state.record_expected("]");
+            return Err(state.errors.last().cloned().expect("Error should have been recorded"));
         }
         Ok(())
     }
@@ -204,7 +208,7 @@ impl<'config> Parser<JsonLanguage> for JsonParser<'config> {
                 break;
             }
 
-            let root = state.finish_at(checkpoint, JsonSyntaxKind::Root);
+            let root = state.finish_at(checkpoint, crate::parser::element_type::JsonElementType::Root);
             Ok(root)
         })
     }

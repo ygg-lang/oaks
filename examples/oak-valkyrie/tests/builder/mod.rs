@@ -15,6 +15,33 @@ fn test_valkyrie_builder() -> Result<(), oak_core::OakError> {
 }
 
 #[test]
+fn test_flags_builder() {
+    use oak_core::{Builder, SourceText};
+
+    let language = ValkyrieLanguage::default();
+    let builder = ValkyrieBuilder::new(&language);
+
+    // 测试 flags 声明
+    let source = SourceText::new("flags Permissions { Read, Write, Execute }");
+
+    println!("Testing builder with flags");
+
+    let mut cache = oak_core::parser::ParseSession::<ValkyrieLanguage>::default();
+    let diagnostics = builder.build(&source, &[], &mut cache);
+    match diagnostics.result {
+        Ok(typed_root) => {
+            println!("Successfully built flags typed root: {:?}", typed_root);
+            // 验证是否生成了 Flags 项
+            let has_flags = typed_root.items.iter().any(|item| matches!(item, oak_valkyrie::ast::Item::Flags(_)));
+            assert!(has_flags, "Builder should have generated a Flags item")
+        }
+        Err(e) => {
+            panic!("Flags build failed with error: {}", e)
+        }
+    }
+}
+
+#[test]
 fn test_valkyrie_builder_single_file() {
     use oak_core::{Builder, SourceText};
 
@@ -30,18 +57,18 @@ fn test_valkyrie_builder_single_file() {
     let diagnostics = builder.build(&source, &[], &mut cache);
     match diagnostics.result {
         Ok(typed_root) => {
-            println!("Successfully built typed root: {:?}", typed_root);
+            println!("Successfully built typed root: {:?}", typed_root)
         }
         Err(e) => {
-            println!("Build failed with error: {}", e);
+            println!("Build failed with error: {}", e)
         }
     }
     if !diagnostics.diagnostics.is_empty() {
-        println!("Build diagnostics: {:?}", diagnostics.diagnostics);
+        println!("Build diagnostics: {:?}", diagnostics.diagnostics)
     }
 
     // 暂时总是通过测试，直到实现完成
-    assert!(true, "Single file builder test placeholder");
+    assert!(true, "Single file builder test placeholder")
 }
 
 #[test]
@@ -52,7 +79,7 @@ fn test_valkyrie_builder_namespace() {
     let builder = ValkyrieBuilder::new(&language);
 
     // 测试 namespace 声明
-    let source = SourceText::new("namespace Test { micro main() { let x = 42; } }");
+    let source = SourceText::new("namespace Test { micro main() { let x = 42 } }");
 
     println!("Testing builder with namespace");
 
@@ -60,12 +87,12 @@ fn test_valkyrie_builder_namespace() {
     let diagnostics = builder.build(&source, &[], &mut cache);
     match diagnostics.result {
         Ok(typed_root) => {
-            println!("Successfully built namespace typed root: {:?}", typed_root);
+            println!("Successfully built namespace typed root: {:?}", typed_root)
         }
         Err(e) => {
-            println!("Namespace build failed with error: {}", e);
+            println!("Namespace build failed with error: {}", e)
         }
     }
 
-    assert!(true, "Namespace builder test placeholder");
+    assert!(true, "Namespace builder test placeholder")
 }

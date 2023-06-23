@@ -88,12 +88,7 @@ impl HighlightTheme {
             if let Some(style) = self.styles.get(current_scope) {
                 return style.clone();
             }
-            if let Some(pos) = current_scope.rfind('.') {
-                current_scope = &current_scope[..pos];
-            }
-            else {
-                break;
-            }
+            if let Some(pos) = current_scope.rfind('.') { current_scope = &current_scope[..pos] } else { break }
         }
         self.styles.get("none").cloned().unwrap_or_default()
     }
@@ -113,13 +108,13 @@ impl HighlightTheme {
                 if let Some(style) = self.styles.get(current_scope) {
                     if depth > best_depth {
                         best_depth = depth;
-                        best_style = Some(style.clone());
+                        best_style = Some(style.clone())
                     }
                     break; // Found the most specific match for this scope string
                 }
                 if let Some(pos) = current_scope.rfind('.') {
                     current_scope = &current_scope[..pos];
-                    depth -= 1;
+                    depth -= 1
                 }
                 else {
                     break;
@@ -154,7 +149,7 @@ fn get_token_scopes<R: TokenRole>(role: R, language: &str, category: oak_core::l
         _ => "source",
     };
 
-    let mut scopes = Vec::new();
+    let mut scopes = Vec::with_capacity(5);
 
     // 1. Language-specific scope (e.g., "keyword.control.rust")
     scopes.push(format!("{}.{}", specific_name, language));
@@ -189,7 +184,7 @@ fn get_element_scopes<R: ElementRole>(role: R, language: &str, category: oak_cor
         _ => "source",
     };
 
-    let mut scopes = Vec::new();
+    let mut scopes = Vec::with_capacity(5);
 
     // 1. Language-specific scope
     scopes.push(format!("{}.{}", specific_name, language));
@@ -254,16 +249,22 @@ pub struct HighlightSegment<'a> {
     pub text: Cow<'a, str>,
 }
 
-/// Result of kind highlighting containing styled text segments.
+/// Result of token highlighting containing styled text segments.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct HighlightResult<'a> {
+    /// The collection of styled text segments.
     pub segments: Vec<HighlightSegment<'a>>,
+    /// The original source text that was highlighted.
     pub source: Cow<'a, str>,
 }
 
+/// A visitor that traverses the syntax tree to generate highlighting segments.
 pub struct HighlightVisitor<'a, 't> {
+    /// The theme used for style resolution.
     pub theme: &'t HighlightTheme,
+    /// The segments collected during traversal.
     pub segments: Vec<HighlightSegment<'a>>,
+    /// The source text.
     pub source: &'a str,
 }
 
@@ -354,13 +355,13 @@ impl OakHighlighter {
         Ok(HighlightResult { segments, source: Cow::Borrowed(source) })
     }
 
-    pub fn highlight_with_language<'a, L: Language + Send + Sync + 'static, P: oak_core::parser::Parser<L>, LX: oak_core::Lexer<L>>(
-        &self,
-        source: &'a str,
-        theme: crate::themes::Theme,
-        parser: &P,
-        _lexer: &LX,
-    ) -> oak_core::errors::ParseResult<HighlightResult<'a>> {
+    pub fn highlight_with_language<'a, L, P, LX>(&self, source: &'a str, theme: crate::themes::Theme, parser: &P, _lexer: &LX) -> oak_core::errors::ParseResult<HighlightResult<'a>>
+    where
+        L: Language + Send + Sync + 'static,
+        P: oak_core::parser::Parser<L>,
+        LX: oak_core::Lexer<L>,
+        L::ElementType: From<L::TokenType>,
+    {
         let theme_config = theme.get_theme();
         let source_text = oak_core::source::SourceText::new(source.to_string());
         let mut cache = oak_core::parser::session::ParseSession::<L>::new(1024);

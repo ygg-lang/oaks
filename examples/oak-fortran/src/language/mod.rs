@@ -1,23 +1,26 @@
+#![doc = include_str!("readme.md")]
 use oak_core::{Language, LanguageCategory};
+#[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
 
-/// Fortran 语言配置
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
+/// Fortran language configuration.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct FortranLanguage {
-    /// 是否启用 Fortran 2008
+    /// Whether to enable Fortran 2008 support.
     pub fortran_2008: bool,
-    /// 是否启用 Fortran 2018
+    /// Whether to enable Fortran 2018 support.
     pub fortran_2018: bool,
-    /// 是否启用固定格式（Fortran 77 风格）
+    /// Whether to use fixed format (Fortran 77 style).
     pub fixed_format: bool,
-    /// 是否启用 OpenMP 支持
+    /// Whether to enable OpenMP support.
     pub openmp: bool,
-    /// 是否启用 Coarray 支持
+    /// Whether to enable Coarray support.
     pub coarray: bool,
 }
 
 impl FortranLanguage {
-    /// 创建新的 Fortran 语言实例
+    /// Creates a new Fortran language configuration.
     pub fn new() -> Self {
         Self::default()
     }
@@ -33,7 +36,7 @@ impl Language for FortranLanguage {
     const NAME: &'static str = "fortran";
     const CATEGORY: LanguageCategory = LanguageCategory::Programming;
 
-    type TokenType = crate::kind::FortranSyntaxKind;
-    type ElementType = crate::kind::FortranSyntaxKind;
-    type TypedRoot = ();
+    type TokenType = crate::lexer::token_type::FortranTokenType;
+    type ElementType = crate::parser::element_type::FortranElementType;
+    type TypedRoot = crate::ast::FortranRoot;
 }

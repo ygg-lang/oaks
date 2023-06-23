@@ -1,155 +1,34 @@
-# Oak C Parser
+# 🚀 Oak C Parser
 
 [![Crates.io](https://img.shields.io/crates/v/oak-c.svg)](https://crates.io/crates/oak-c)
 [![Documentation](https://docs.rs/oak-c/badge.svg)](https://docs.rs/oak-c)
 
-High-performance incremental C parser for the oak ecosystem with flexible configuration, optimized for code analysis and compilation.
+**Legacy Performance, Modern Tooling** — A high-performance, incremental C parser built on the Oak framework. Optimized for systems programming, legacy codebase analysis, and real-time developer tooling.
 
-## 🎯 Overview
+## 🎯 Project Vision
 
-Oak C is a robust parser for C, designed to handle complete C syntax including modern features. Built on the solid foundation of oak-core, it provides both high-level convenience and detailed AST generation for static analysis and code generation.
+C is the foundation of modern computing, but its aging syntax and complex preprocessor make it a challenge for modern developer tools. `oak-c` provides a robust, high-performance, Rust-powered infrastructure for parsing C that is both accurate and incredibly fast. By utilizing Oak's incremental parsing architecture, we enable the creation of highly responsive IDEs, security analyzers, and refactoring tools that can handle massive C codebases and complex header chains in real-time.
 
-## ✨ Features
+## ✨ Core Features
 
-- **Complete C Syntax**: Supports all C features including modern specifications
-- **Full AST Generation**: Generates comprehensive Abstract Syntax Trees
-- **Lexer Support**: Built-in tokenization with proper span information
-- **Error Recovery**: Graceful handling of syntax errors with detailed diagnostics
+- **⚡ Blazing Fast**: Leverages Rust's zero-cost abstractions to deliver sub-millisecond parsing, essential for real-time feedback in systems-level development.
+- **🔄 Incremental by Design**: Built-in support for partial updates—re-parse only the sections of the C file that changed. Ideal for large-scale source files and complex build systems.
+- **🌳 High-Fidelity AST**: Generates a comprehensive Abstract Syntax Tree capturing the full depth of C:
+    - **Declarations & Definitions**: Precise mapping of variables, functions, structs, unions, and enums.
+    - **Expressions & Statements**: Full support for C's complex operator precedence and control flow.
+    - **Preprocessor Awareness**: Robust handling of directives and macro definitions.
+    - **Comments & Formatting**: Retains all trivia, enabling faithful round-trip processing and refactoring.
+- **🛡️ Industrial-Grade Fault Tolerance**: Engineered to recover from syntax errors gracefully, providing precise diagnostics—crucial for maintaining a smooth developer experience when editing complex C code.
+- **🧩 Deep Ecosystem Integration**: Seamlessly works with `oak-lsp` for full LSP support and `oak-mcp` for intelligent code structure discovery.
 
-## 🚀 Quick Start
+## 🏗️ Architecture
 
-Basic example:
+The parser follows the **Green/Red Tree** architecture (inspired by Roslyn), which allows for:
+1. **Efficient Immutability**: Share nodes across different versions of the tree without copying.
+2. **Lossless Syntax Trees**: Retains all trivia (whitespace and comments), enabling faithful code formatting and refactoring.
+3. **Type Safety**: Strongly-typed "Red" nodes provide a convenient and safe API for tree traversal and analysis.
 
-```rust
-use oak_core::{Parser, SourceText, parser::session::ParseSession};
-use oak_c::{CParser, CLanguage};
-
-fn main() -> Result<(), Box<dyn std::error::Error>> {
-    let mut session = ParseSession::<CLanguage>::default();
-    let parser = CParser::new();
-    let source = SourceText::new(r#"
-        #include <stdio.h>
-
-        int main() {
-            printf("Hello, World!\n");
-            return 0;
-        }
-    "#);
-    
-    let result = parser.parse(&[], &mut session);
-    println!("Parsed C program successfully.");
-    Ok(())
-}
-```
-
-## 📋 Parsing Examples
-
-### Function Parsing
-```rust
-use oak_core::{Parser, SourceText, parser::session::ParseSession};
-use oak_c::{CParser, CLanguage};
-
-let mut session = ParseSession::<CLanguage>::default();
-let parser = CParser::new();
-let source = SourceText::new(r#"
-    int add(int a, int b) {
-        return a + b;
-    }
-"#);
-
-let result = parser.parse(&[], &mut session);
-println!("Parsed C function successfully.");
-```
-
-### Struct Parsing
-```rust
-use oak_core::{Parser, SourceText, parser::session::ParseSession};
-use oak_c::{CParser, CLanguage};
-
-let mut session = ParseSession::<CLanguage>::default();
-let parser = CParser::new();
-let source = SourceText::new(r#"
-    struct Point {
-        int x;
-        int y;
-    };
-"#);
-
-let result = parser.parse(&[], &mut session);
-println!("Parsed C struct successfully.");
-```
-
-## 🔧 Advanced Features
-
-### Token-Level Parsing
-```rust
-use oak_core::{Parser, SourceText, parser::session::ParseSession};
-use oak_c::{CParser, CLanguage};
-
-let mut session = ParseSession::<CLanguage>::default();
-let parser = CParser::new();
-let source = SourceText::new("int main() { return 0; }");
-let result = parser.parse(&[], &mut session);
-// Token information is available in the parse result
-```
-
-### Error Handling
-```rust
-use oak_core::{Parser, SourceText, parser::session::ParseSession};
-use oak_c::{CParser, CLanguage};
-
-let mut session = ParseSession::<CLanguage>::default();
-let parser = CParser::new();
-let source = SourceText::new(r#"
-    int main() {
-        printf("Hello, World!\n")
-        return 0;
-    }
-"#);
-
-let result = parser.parse(&[], &mut session);
-if let Err(e) = result.result {
-    println!("Parse error: {:?}", e);
-}
-```
-
-## 🏗️ AST Structure
-
-The parser generates a comprehensive AST with the following main structures:
-
-- **Program**: Root container for C programs
-- **FunctionDefinition**: Function declarations and definitions
-- **StructDefinition**: Structure definitions
-- **Declaration**: Variable and type declarations
-- **Statement**: Control flow, expressions, blocks
-
-## 📊 Performance
-
-- **Streaming**: Parse large C files without loading entirely into memory
-- **Incremental**: Re-parse only changed sections
-- **Memory Efficient**: Smart AST node allocation
-- **Fast Recovery**: Quick error recovery for better IDE integration
-
-## 🔗 Integration
-
-Oak C integrates seamlessly with:
-
-- **Compilers**: Front-end for C compilers
-- **Static Analysis Tools**: Code quality and security analysis
-- **IDE Support**: Language server protocol compatibility
-- **Code Generation**: Generating code from AST
-
-## 📚 Examples
-
-Check out the [examples](examples/) directory for comprehensive examples:
-
-- Complete C program parsing
-- Function and struct analysis
-- Code transformation
-- Integration with development workflows
 
 ## 🤝 Contributing
 
-Contributions are welcome! 
-
-Please feel free to submit pull requests at the [project repository](https://github.com/ygg-lang/oaks/tree/dev/examples/oak-c) or open [issues](https://github.com/ygg-lang/oaks/issues).
+We welcome contributions of all kinds! If you find a bug, have a feature request, or want to contribute code, please check our [issues](https://github.com/ygg-lang/oaks/issues) or submit a pull request.

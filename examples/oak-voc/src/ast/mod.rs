@@ -1,5 +1,4 @@
 #![doc = include_str!("readme.md")]
-
 /// V 根节点
 #[derive(Clone, Debug)]
 pub struct VRoot {

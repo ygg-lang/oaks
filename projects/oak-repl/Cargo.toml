@@ -2,10 +2,11 @@
 name = "oak-repl"
 version.workspace = true
 authors.workspace = true
+description = "Custom-built REPL infrastructure for Oak languages"
 edition.workspace = true
 license.workspace = true
-repository.workspace = true
-description = "Custom-built REPL infrastructure for Oak languages"
+readme = "readme.md"
+repository = "https://github.com/ygg-lang/oaks/tree/master/projects/oak-repl"
 
 [dependencies]
 crossterm = { workspace = true }

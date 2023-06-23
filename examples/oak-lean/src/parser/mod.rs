@@ -1,10 +1,13 @@
+pub mod element_type;
+
 use crate::{language::LeanLanguage, lexer::LeanLexer};
+use element_type::LeanElementType;
 use oak_core::{
     parser::{ParseCache, ParseOutput, Parser, ParserState, parse_with_lexer},
     source::{Source, TextEdit},
 };
 
-mod parse;
+mod parse_top_level;
 
 pub(crate) type State<'a, S> = ParserState<'a, LeanLanguage, S>;
 

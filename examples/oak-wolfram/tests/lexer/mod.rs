@@ -1,6 +1,51 @@
-use oak_core::{LexerState, helpers::LexerTester, source::Source};
+#![feature(new_range_api)]
+use oak_core::{LexerState, source::Source};
+use oak_testing::lexing::LexerTester;
 use oak_wolfram::{WolframLanguage, WolframLexer};
 use std::{path::Path, time::Duration};
+
+#[test]
+fn generate_baseline() {
+    use oak_core::{Lexer, ParseSession, SourceText, source::Source};
+    use oak_wolfram::{WolframLanguage, WolframLexer};
+    use serde_json::json;
+    use std::{fs, path::Path};
+
+    let here = Path::new(env!("CARGO_MANIFEST_DIR"));
+    let source_path = here.join("tests/lexer/basic.wl");
+    let source_text = fs::read_to_string(source_path).expect("Failed to read source");
+    let source = SourceText::new(source_text);
+    let language = WolframLanguage::default();
+    let lexer = WolframLexer::new(&language);
+    let mut cache = ParseSession::default();
+    let result = lexer.lex(&source, &[], &mut cache);
+
+    let tokens = result.result.expect("Lexing failed");
+    let token_data: Vec<_> = tokens
+        .iter()
+        .map(|t| {
+            let text = source.get_text_in(t.span.clone()).to_string();
+            json!({
+                "kind": format!("{:?}", t.kind),
+                "text": text,
+                "start": t.span.start,
+                "end": t.span.end
+            })
+        })
+        .collect();
+
+    let output = json!({
+        "success": true,
+        "count": tokens.len(),
+        "tokens": token_data,
+        "errors": []
+    });
+
+    let output_path = here.join("tests/lexer/basic.wl.lexed.json");
+    fs::write(output_path, serde_json::to_string_pretty(&output).unwrap()).expect("Failed to write baseline");
+
+    println!("Baseline updated at {:?}", here.join("tests/lexer/basic.wl.lexed.json"));
+}
 
 #[test]
 fn test_wolfram_lexer() {
@@ -37,7 +82,7 @@ fn test_peek_behavior() {
     state.advance(1);
     println!("位置: {}", state.get_position());
     println!("current(): {:?}", state.current());
-    println!("peek(): {:?}", state.peek());
+    println!("peek(): {:?}", state.peek())
 }
 
 #[test]
@@ -68,5 +113,5 @@ fn test_wolfram_function_parsing() {
     assert_eq!(first_token.span.start, 0, "标记应该从位置 0 开始");
     assert_eq!(first_token.span.end, 6, "标记应该在位置 6 结束");
 
-    println!("✅ Module 解析测试通过！");
+    println!("✅ Module 解析测试通过！")
 }

@@ -1,4 +1,4 @@
-use crate::{ast::ProgramNode, language::RubyLanguage, parser::RubyParser};
+use crate::{ast::RubyRoot, language::RubyLanguage, parser::RubyParser};
 use oak_core::{Builder, BuilderCache, Lexer, OakDiagnostics, Parser, TextEdit, source::Source};
 
 pub struct RubyBuilder<'config> {
@@ -23,7 +23,7 @@ impl<'config> Builder<RubyLanguage> for RubyBuilder<'config> {
         match parse_result.result {
             Ok(_green_tree) => {
                 // Simple conversion for now
-                OakDiagnostics { result: Ok(ProgramNode { statements: vec![], span: core::range::Range { start: 0, end: source.length() } }), diagnostics: parse_result.diagnostics }
+                OakDiagnostics { result: Ok(RubyRoot { statements: vec![], span: core::range::Range { start: 0, end: source.length() } }), diagnostics: parse_result.diagnostics }
             }
             Err(parse_error) => OakDiagnostics { result: Err(parse_error), diagnostics: parse_result.diagnostics },
         }

@@ -1,43 +1,75 @@
-This crate provides a parser for the ActionScript language, built using the `oaks` parsing framework. It includes a lexer and language definition to facilitate parsing ActionScript code.
+# 🛠️ ActionScript Parser Developer Guide
 
-## Usage
+This guide is designed to help you quickly get started with developing and integrating `oak-actionscript`.
 
-To use the `oak-actionscript` parser, you typically need to interact with `ActionScriptLanguage` and `ActionScriptLexer`.
+## 🚦 Quick Start
 
-### `ActionScriptLanguage`
+### Basic Parsing Example
 
-The `ActionScriptLanguage` struct defines the grammar and rules for ActionScript. It implements the `Language` trait from the `oaks` framework.
-
-```rust
-use oak_actionscript::ActionScriptLanguage;
-
-let language = ActionScriptLanguage::default();
-```
-
-### `ActionScriptLexer`
-
-The `ActionScriptLexer` is responsible for tokenizing the input ActionScript code based on the `ActionScriptLanguage` definition.
+The following is a standard workflow for parsing an ActionScript class featuring metadata and E4X:
 
 ```rust
-use oak_actionscript::{ActionScriptLanguage, ActionScriptLexer};
-use oak_core::{Lexer, source::SourceText, parser::session::ParseSession};
+use oak_actionscript::{Parser, SourceText};
 
-// Initialize the language
-let language = Box::leak(Box::new(ActionScriptLanguage::default()));
+fn main() {
+    // 1. Prepare source code
+    let code = r#"
+        package com.example {
+            [Bindable]
+            public class User {
+                public var name:String;
+                
+                public function toXML():XML {
+                    return <user name={name}/>;
+                }
+            }
+        }
+    "#;
+    let source = SourceText::new(code);
 
-// Create a lexer instance
-let lexer = ActionScriptLexer::new(language);
+    // 2. Initialize parser
+    let parser = Parser::new();
 
-// Prepare the input source code
-let source_code = "var x:int = 10;";
-let source = SourceText::new(source_code);
-let mut session = ParseSession::default();
+    // 3. Execute parsing
+    let result = parser.parse(&source);
 
-// Lex the input
-let lex_output = lexer.lex(&source, &[], &mut session);
-
-// Access tokens via .result
-println!("Lexed tokens: {:?}", lex_output.result);
+    // 4. Handle results
+    if result.is_success() {
+        println!("Parsing successful! AST node count: {}", result.node_count());
+    } else {
+        eprintln!("Errors found during parsing.");
+    }
+}
 ```
 
-This example demonstrates how to initialize the `ActionScriptLanguage` and `ActionScriptLexer`, and then use the lexer to tokenize a simple ActionScript code snippet. The `lex_output` will contain a list of `ActionScriptToken`s that represent the structure of the input code.
+## 🔍 Core API Usage
+
+### 1. Syntax Tree Traversal
+After a successful parse, you can use the built-in visitor pattern or manually traverse the Green/Red Tree to extract ActionScript-specific constructs like metadata tags (`[Bindable]`), E4X XML literals, or complex package/class hierarchies.
+
+### 2. Incremental Parsing
+No need to re-parse the entire source file when small changes occur:
+```rust
+// Assuming you have an old parse result 'old_result' and new source text 'new_source'
+let new_result = parser.reparse(&new_source, &old_result);
+```
+
+### 3. Diagnostics
+`oak-actionscript` provides rich error contexts specifically tailored for AS3 developers, handling legacy Flex/Flash syntax quirks:
+```rust
+for diag in result.diagnostics() {
+    println!("[{}:{}] {}", diag.line, diag.column, diag.message);
+}
+```
+
+## 🏗️ Architecture Overview
+
+- **Lexer**: Tokenizes ActionScript source text into a stream of tokens, including support for metadata brackets and E4X XML tokens.
+- **Parser**: Syntax analyzer based on the Pratt parsing algorithm to handle complex AS3 expression precedence and E4X syntax integration.
+- **AST**: A strongly-typed syntax abstraction layer designed for high-performance AS3 analysis tools and migration engines.
+
+## 🔗 Advanced Resources
+
+- **Full Examples**: Check the [examples/](examples/) folder in the project root.
+- **API Documentation**: Run `cargo doc --open` for detailed type definitions.
+- **Test Cases**: See [tests/](tests/) for handling of various AS3/Flex edge cases.

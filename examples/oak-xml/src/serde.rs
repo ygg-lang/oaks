@@ -1,3 +1,4 @@
+#![cfg(feature = "serde")]
 use crate::ast::{XmlAttribute, XmlElement, XmlValue};
 use serde::{
     de::{self, Visitor},
@@ -10,7 +11,8 @@ pub struct Error(String);
 
 impl fmt::Display for Error {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "{}", self.0)
+        write!(f, "{}", self.0);
+        Ok(())
     }
 }
 
@@ -265,7 +267,7 @@ impl ser::SerializeMap for SerializeObject {
         let key = self.current_key.take().unwrap();
         let val = value.serialize(Serializer)?;
 
-        if key.starts_with('@') {
+        if key.starts_with('↯') {
             self.attributes.push(XmlAttribute {
                 name: key[1..].to_string(),
                 value: match val {
@@ -274,16 +276,12 @@ impl ser::SerializeMap for SerializeObject {
                     _ => val.as_str().unwrap_or("").to_string(),
                 },
                 span: (0..0).into(),
-            });
+            })
         }
         else if key == "$value" {
             match val {
-                XmlValue::Fragment(elements) => {
-                    self.children.extend(elements);
-                }
-                _ => {
-                    self.children.push(val);
-                }
+                XmlValue::Fragment(elements) => self.children.extend(elements),
+                _ => self.children.push(val),
             }
         }
         else {
@@ -557,7 +555,7 @@ impl<'de> de::Deserializer<'de> for XmlValue {
                     let mut text = String::new();
                     for child in e.children {
                         if let XmlValue::Text(t) = child {
-                            text.push_str(&t);
+                            text.push_str(&t)
                         }
                     }
                     visitor.visit_string(text)
@@ -569,7 +567,7 @@ impl<'de> de::Deserializer<'de> for XmlValue {
             XmlValue::Fragment(fs) => {
                 let mut text = String::new();
                 for f in fs {
-                    text.push_str(&f.to_string());
+                    text.push_str(&f.to_string())
                 }
                 visitor.visit_string(text)
             }
@@ -665,27 +663,27 @@ impl MapDeserializer {
         let mut entries: Vec<(String, Vec<XmlValue>)> = Vec::new();
 
         for attr in element.attributes {
-            let key = "@".to_string() + &attr.name;
-            entries.push((key, vec![XmlValue::Text(attr.value)]));
+            let key = "↯".to_string() + &attr.name;
+            entries.push((key, vec![XmlValue::Text(attr.value)]))
         }
 
         for child in element.children {
             match child {
                 XmlValue::Element(e) => {
                     if let Some(entry) = entries.iter_mut().find(|(k, _)| k == &e.name) {
-                        entry.1.push(XmlValue::Element(e));
+                        entry.1.push(XmlValue::Element(e))
                     }
                     else {
                         let name = e.name.clone();
-                        entries.push((name, vec![XmlValue::Element(e)]));
+                        entries.push((name, vec![XmlValue::Element(e)]))
                     }
                 }
                 XmlValue::Text(t) => {
                     if let Some(entry) = entries.iter_mut().find(|(k, _)| k == "$value") {
-                        entry.1.push(XmlValue::Text(t.clone()));
+                        entry.1.push(XmlValue::Text(t.clone()))
                     }
                     else {
-                        entries.push(("$value".to_string(), vec![XmlValue::Text(t.clone())]));
+                        entries.push(("$value".to_string(), vec![XmlValue::Text(t.clone())]))
                     }
                 }
                 _ => {}

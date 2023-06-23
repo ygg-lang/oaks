@@ -45,6 +45,6 @@
     
     <footer>
         <copyright>&copy; 2024 Test Company</copyright>
-        <contact email="test@example.com"/>
+        <contact email="test↯example.com"/>
     </footer>
 </root>

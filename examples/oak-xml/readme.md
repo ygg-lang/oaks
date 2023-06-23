@@ -1,157 +1,34 @@
-# Oak XML Parser
+# 🚀 Oak XML Parser
 
 [![Crates.io](https://img.shields.io/crates/v/oak-xml.svg)](https://crates.io/crates/oak-xml)
 [![Documentation](https://docs.rs/oak-xml/badge.svg)](https://docs.rs/oak-xml)
 
-High-performance incremental XML parser for the oak ecosystem with flexible configuration, optimized for data processing and document parsing.
+**Structured Markup with Unmatched Speed** — A high-performance, incremental XML parser built on the Oak framework. Optimized for large-scale data interchange, document processing, and real-time validation.
 
-## 🎯 Overview
+## 🎯 Project Vision
 
-Oak of xml is a robust parser for XML, designed to handle complete XML syntax including modern features. Built on the solid foundation of oak-core, it provides both high-level convenience and detailed AST generation for data processing and document parsing.
+XML remains a foundational technology for data representation and document structure, but its complex rules for tags, attributes, and namespaces require a robust and efficient parser. `oak-xml` provides a high-performance, Rust-powered infrastructure for parsing XML that is both accurate and incredibly fast. By utilizing Oak's incremental parsing architecture, we enable the creation of highly responsive IDEs, document editors, and data processing pipelines that can handle massive XML files and complex document trees in real-time.
 
-## ✨ Features
+## ✨ Core Features
 
-- **Complete XML Syntax**: Supports all XML features including modern specifications
-- **Full AST Generation**: Generates comprehensive Abstract Syntax Trees
-- **Lexer Support**: Built-in tokenization with proper span information
-- **Error Recovery**: Graceful handling of syntax errors with detailed diagnostics
+- **⚡ Blazing Fast**: Leverages Rust's zero-cost abstractions to deliver sub-millisecond parsing, essential for real-time validation and large-scale document analysis.
+- **🔄 Incremental by Design**: Built-in support for partial updates—re-parse only the sections of the XML file that changed. Ideal for real-time editing of large SVG files or data exports.
+- **🌳 High-Fidelity AST**: Generates a comprehensive Abstract Syntax Tree capturing the full depth of XML:
+    - **Elements & Attributes**: Precise mapping of start tags, end tags, self-closing tags, and attribute-value pairs.
+    - **Namespaces**: Robust handling of XML namespaces and prefixes.
+    - **CDATAs & Entities**: Full support for character data sections and entity references.
+    - **Comments & Processing Instructions**: Retains all trivia, enabling faithful round-trip processing and refactoring.
+- **🛡️ Industrial-Grade Fault Tolerance**: Engineered to recover from syntax errors gracefully, providing precise diagnostics—crucial for maintaining a smooth developer experience when editing complex markup.
+- **🧩 Deep Ecosystem Integration**: Seamlessly works with `oak-lsp` for full LSP support and `oak-mcp` for intelligent document structure discovery.
 
-## 🚀 Quick Start
+## 🏗️ Architecture
 
-Basic example:
+The parser follows the **Green/Red Tree** architecture (inspired by Roslyn), which allows for:
+1. **Efficient Immutability**: Share nodes across different versions of the tree without copying.
+2. **Lossless Syntax Trees**: Retains all trivia (whitespace and comments), enabling faithful code formatting and refactoring.
+3. **Type Safety**: Strongly-typed "Red" nodes provide a convenient and safe API for tree traversal and analysis.
 
-```rust
-use oak_xml::XmlParser;
-
-fn main() -> Result<(), Box<dyn std::error::Error>> {
-    let parser = XmlParser::new();
-    let xml_content = r#"
-<?xml version="1.0" encoding="UTF-8"?>
-<root>
-    <item id="1" type="example">Value 1</item>
-    <item id="2" type="sample">Value 2</item>
-</root>
-    "#;
-    
-    let document = parser.parse_document(xml_content)?;
-    println!("Parsed XML document successfully.");
-    Ok(())
-}
-```
-
-## 📋 Parsing Examples
-
-### Document Parsing
-```rust
-use oak_xml::{XmlParser, ast::Document};
-
-let parser = XmlParser::new();
-let xml_content = r#"
-<?xml version="1.0"?>
-<catalog>
-    <book id="bk101">
-        <title>XML Developer's Guide</title>
-    </book>
-</catalog>
-"#;
-
-let document = parser.parse_document(xml_content)?;
-println!("Root element: {}", document.root_element.name);
-```
-
-### Element Parsing
-```rust
-use oak_xml::{XmlParser, ast::Element};
-
-let parser = XmlParser::new();
-let xml_content = r#"
-<person age="30">
-    <name>John Doe</name>
-    <email>john@example.com</email>
-</person>
-"#;
-
-let element = parser.parse_element(xml_content)?;
-println!("Element tag: {}", element.tag_name);
-println!("Attributes: {}", element.attributes.len());
-```
-
-## 🔧 Advanced Features
-
-### Token-Level Parsing
-```rust
-use oak_xml::{XmlParser, lexer::Token};
-
-let parser = XmlParser::new();
-let tokens = parser.tokenize("<root><item>value</item></root>")?;
-for token in tokens {
-    println!("{:?}", token.kind);
-}
-```
-
-### Error Handling
-```rust
-use oak_xml::XmlParser;
-
-let parser = XmlParser::new();
-let invalid_xml = r#"
-<?xml version="1.0"?>
-<root>
-    <item>Missing closing tag
-</root>
-"#;
-
-match parser.parse_document(invalid_xml) {
-    Ok(document) => println!("Parsed XML document successfully."),
-    Err(e) => {
-        println!("Parse error at line {} column {}: {}", 
-            e.line(), e.column(), e.message());
-        if let Some(context) = e.context() {
-            println!("Error context: {}", context);
-        }
-    }
-}
-```
-
-## 🏗️ AST Structure
-
-The parser generates a comprehensive AST with the following main structures:
-
-- **Document**: Root container for XML documents
-- **Element**: XML elements with tags and attributes
-- **Attribute**: Element attributes with name-value pairs
-- **Text**: Text content nodes
-- **Comment**: XML comments
-- **ProcessingInstruction**: XML processing instructions
-
-## 📊 Performance
-
-- **Streaming**: Parse large XML files without loading entirely into memory
-- **Incremental**: Re-parse only changed sections
-- **Memory Efficient**: Smart AST node allocation
-- **Fast Recovery**: Quick error recovery for better IDE integration
-
-## 🔗 Integration
-
-Oak of xml integrates seamlessly with:
-
-- **Data Processing**: Extract data from XML documents
-- **Configuration Files**: Parse XML configuration files
-- **Web Services**: Process XML API responses
-- **IDE Support**: Language server protocol compatibility
-- **Document Processing**: XML parsing for document management
-
-## 📚 Examples
-
-Check out the [examples](examples/) directory for comprehensive examples:
-
-- Complete XML document parsing
-- Element and attribute analysis
-- Data extraction and transformation
-- Integration with development workflows
 
 ## 🤝 Contributing
 
-Contributions are welcome! 
-
-Please feel free to submit pull requests at the [project repository](https://github.com/ygg-lang/oaks/tree/dev/examples/oak-xml) or open [issues](https://github.com/ygg-lang/oaks/issues).
+We welcome contributions of all kinds! If you find a bug, have a feature request, or want to contribute code, please check our [issues](https://github.com/ygg-lang/oaks/issues) or submit a pull request.

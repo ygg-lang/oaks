@@ -1,4 +1,7 @@
-use crate::{kind::FortranSyntaxKind, language::FortranLanguage};
+#![doc = include_str!("readme.md")]
+pub mod token_type;
+
+use crate::{language::FortranLanguage, lexer::token_type::FortranTokenType};
 use oak_core::{Lexer, LexerCache, LexerState, OakError, lexer::LexOutput, source::Source};
 
 type State<'a, S> = LexerState<'a, S, FortranLanguage>;
@@ -13,7 +16,7 @@ impl<'config> Lexer<FortranLanguage> for FortranLexer<'config> {
         let mut state = LexerState::new(source);
         let result = self.run(&mut state);
         if result.is_ok() {
-            state.add_eof();
+            state.add_eof()
         }
         state.finish_with_cache(result, cache)
     }
@@ -62,10 +65,10 @@ impl<'config> FortranLexer<'config> {
 
             // If no lexer matched, advance by one character to avoid infinite loop
             if let Some(c) = state.current() {
-                state.advance(c.len_utf8());
+                state.advance(c.len_utf8())
             }
 
-            state.advance_if_dead_lock(safe_point);
+            state.advance_if_dead_lock(safe_point)
         }
 
         Ok(())
@@ -76,15 +79,15 @@ impl<'config> FortranLexer<'config> {
         if let Some(ch) = state.current() {
             if ch == '\n' {
                 state.advance(1);
-                state.add_token(FortranSyntaxKind::Newline, start, state.get_position());
+                state.add_token(FortranTokenType::Newline, start, state.get_position());
                 return true;
             }
             if ch == '\r' {
                 state.advance(1);
                 if state.current() == Some('\n') {
-                    state.advance(1);
+                    state.advance(1)
                 }
-                state.add_token(FortranSyntaxKind::Newline, start, state.get_position());
+                state.add_token(FortranTokenType::Newline, start, state.get_position());
                 return true;
             }
         }
@@ -97,7 +100,7 @@ impl<'config> FortranLexer<'config> {
         while let Some(ch) = state.current() {
             if ch == ' ' || ch == '\t' {
                 state.advance(ch.len_utf8());
-                advanced = true;
+                advanced = true
             }
             else {
                 break;
@@ -116,7 +119,7 @@ impl<'config> FortranLexer<'config> {
                     if c == '\n' || c == '\r' {
                         break;
                     }
-                    state.advance(c.len_utf8());
+                    state.advance(c.len_utf8())
                 }
                 return true;
             }
@@ -141,10 +144,10 @@ impl<'config> FortranLexer<'config> {
             if ch == '\n' || ch == '\r' {
                 break; // Fortran strings don't span lines
             }
-            state.advance(ch.len_utf8());
+            state.advance(ch.len_utf8())
         }
 
-        state.add_token(FortranSyntaxKind::StringLiteral, start, state.get_position());
+        state.add_token(FortranTokenType::StringLiteral, start, state.get_position());
         true
     }
 
@@ -160,16 +163,16 @@ impl<'config> FortranLexer<'config> {
         // Consume exactly one character (or none for empty char literal)
         if let Some(ch) = state.current() {
             if ch != '\'' && ch != '\n' && ch != '\r' {
-                state.advance(ch.len_utf8());
+                state.advance(ch.len_utf8())
             }
         }
 
         // Consume closing quote if present
         if state.current() == Some('\'') {
-            state.advance(1);
+            state.advance(1)
         }
 
-        state.add_token(FortranSyntaxKind::CharLiteral, start, state.get_position());
+        state.add_token(FortranTokenType::CharLiteral, start, state.get_position());
         true
     }
 
@@ -187,12 +190,7 @@ impl<'config> FortranLexer<'config> {
         // Read integer part
         state.advance(1);
         while let Some(c) = state.current() {
-            if c.is_ascii_digit() || c == '_' {
-                state.advance(1);
-            }
-            else {
-                break;
-            }
+            if c.is_ascii_digit() || c == '_' { state.advance(1) } else { break }
         }
 
         // Check for decimal point
@@ -201,12 +199,7 @@ impl<'config> FortranLexer<'config> {
             if n1.map(|c| c.is_ascii_digit()).unwrap_or(false) {
                 state.advance(1); // consume '.'
                 while let Some(c) = state.current() {
-                    if c.is_ascii_digit() || c == '_' {
-                        state.advance(1);
-                    }
-                    else {
-                        break;
-                    }
+                    if c.is_ascii_digit() || c == '_' { state.advance(1) } else { break }
                 }
             }
         }
@@ -219,23 +212,18 @@ impl<'config> FortranLexer<'config> {
                     state.advance(1);
                     if let Some(sign) = state.current() {
                         if sign == '+' || sign == '-' {
-                            state.advance(1);
+                            state.advance(1)
                         }
                     }
                     while let Some(d) = state.current() {
-                        if d.is_ascii_digit() || d == '_' {
-                            state.advance(1);
-                        }
-                        else {
-                            break;
-                        }
+                        if d.is_ascii_digit() || d == '_' { state.advance(1) } else { break }
                     }
                 }
             }
         }
 
         let end = state.get_position();
-        state.add_token(FortranSyntaxKind::NumberLiteral, start, end);
+        state.add_token(FortranTokenType::NumberLiteral, start, end);
         true
     }
 
@@ -252,74 +240,69 @@ impl<'config> FortranLexer<'config> {
 
         state.advance(1);
         while let Some(c) = state.current() {
-            if c.is_ascii_alphanumeric() || c == '_' {
-                state.advance(1);
-            }
-            else {
-                break;
-            }
+            if c.is_ascii_alphanumeric() || c == '_' { state.advance(1) } else { break }
         }
 
         let end = state.get_position();
         let text = state.get_text_in((start..end).into());
 
         let kind = match text.to_lowercase().as_str() {
-            "program" => FortranSyntaxKind::Program,
-            "end" => FortranSyntaxKind::End,
-            "subroutine" => FortranSyntaxKind::Subroutine,
-            "function" => FortranSyntaxKind::Function,
-            "integer" => FortranSyntaxKind::Integer,
-            "real" => FortranSyntaxKind::Real,
-            "double" => FortranSyntaxKind::Double,
-            "precision" => FortranSyntaxKind::Precision,
-            "character" => FortranSyntaxKind::Character,
-            "logical" => FortranSyntaxKind::Logical,
-            "complex" => FortranSyntaxKind::Complex,
-            "if" => FortranSyntaxKind::If,
-            "then" => FortranSyntaxKind::Then,
-            "else" => FortranSyntaxKind::Else,
-            "elseif" => FortranSyntaxKind::ElseIf,
-            "endif" => FortranSyntaxKind::EndIf,
-            "do" => FortranSyntaxKind::Do,
-            "enddo" => FortranSyntaxKind::EndDo,
-            "while" => FortranSyntaxKind::While,
-            "call" => FortranSyntaxKind::Call,
-            "return" => FortranSyntaxKind::Return,
-            "stop" => FortranSyntaxKind::Stop,
-            "continue" => FortranSyntaxKind::Continue,
-            "goto" => FortranSyntaxKind::Goto,
-            "implicit" => FortranSyntaxKind::Implicit,
-            "none" => FortranSyntaxKind::None,
-            "parameter" => FortranSyntaxKind::Parameter,
-            "dimension" => FortranSyntaxKind::Dimension,
-            "common" => FortranSyntaxKind::Common,
-            "equivalence" => FortranSyntaxKind::Equivalence,
-            "external" => FortranSyntaxKind::External,
-            "intrinsic" => FortranSyntaxKind::Intrinsic,
-            "save" => FortranSyntaxKind::Save,
-            "data" => FortranSyntaxKind::Data,
-            "format" => FortranSyntaxKind::Format,
-            "read" => FortranSyntaxKind::Read,
-            "write" => FortranSyntaxKind::Write,
-            "print" => FortranSyntaxKind::Print,
-            "open" => FortranSyntaxKind::Open,
-            "close" => FortranSyntaxKind::Close,
-            "inquire" => FortranSyntaxKind::Inquire,
-            "rewind" => FortranSyntaxKind::Rewind,
-            "backspace" => FortranSyntaxKind::Backspace,
-            "endfile" => FortranSyntaxKind::EndFile,
-            "true" => FortranSyntaxKind::True,
-            "false" => FortranSyntaxKind::False,
-            "and" => FortranSyntaxKind::And,
-            "or" => FortranSyntaxKind::Or,
-            "not" => FortranSyntaxKind::Not,
-            "eq" => FortranSyntaxKind::Eq,
-            "ne" => FortranSyntaxKind::Ne,
-            "lt" => FortranSyntaxKind::Lt,
-            "le" => FortranSyntaxKind::Le,
-            "gt" => FortranSyntaxKind::Gt,
-            "ge" => FortranSyntaxKind::Ge,
-            _ => FortranSyntaxKind::Identifier,
+            "program" => FortranTokenType::Program,
+            "end" => FortranTokenType::End,
+            "subroutine" => FortranTokenType::Subroutine,
+            "function" => FortranTokenType::Function,
+            "integer" => FortranTokenType::Integer,
+            "real" => FortranTokenType::Real,
+            "double" => FortranTokenType::Double,
+            "precision" => FortranTokenType::Precision,
+            "character" => FortranTokenType::Character,
+            "logical" => FortranTokenType::Logical,
+            "complex" => FortranTokenType::Complex,
+            "if" => FortranTokenType::If,
+            "then" => FortranTokenType::Then,
+            "else" => FortranTokenType::Else,
+            "elseif" => FortranTokenType::ElseIf,
+            "endif" => FortranTokenType::EndIf,
+            "do" => FortranTokenType::Do,
+            "enddo" => FortranTokenType::EndDo,
+            "while" => FortranTokenType::While,
+            "call" => FortranTokenType::Call,
+            "return" => FortranTokenType::Return,
+            "stop" => FortranTokenType::Stop,
+            "continue" => FortranTokenType::Continue,
+            "goto" => FortranTokenType::Goto,
+            "implicit" => FortranTokenType::Implicit,
+            "none" => FortranTokenType::None,
+            "parameter" => FortranTokenType::Parameter,
+            "dimension" => FortranTokenType::Dimension,
+            "common" => FortranTokenType::Common,
+            "equivalence" => FortranTokenType::Equivalence,
+            "external" => FortranTokenType::External,
+            "intrinsic" => FortranTokenType::Intrinsic,
+            "save" => FortranTokenType::Save,
+            "data" => FortranTokenType::Data,
+            "format" => FortranTokenType::Format,
+            "read" => FortranTokenType::Read,
+            "write" => FortranTokenType::Write,
+            "print" => FortranTokenType::Print,
+            "open" => FortranTokenType::Open,
+            "close" => FortranTokenType::Close,
+            "inquire" => FortranTokenType::Inquire,
+            "rewind" => FortranTokenType::Rewind,
+            "backspace" => FortranTokenType::Backspace,
+            "endfile" => FortranTokenType::EndFile,
+            "true" => FortranTokenType::True,
+            "false" => FortranTokenType::False,
+            "and" => FortranTokenType::And,
+            "or" => FortranTokenType::Or,
+            "not" => FortranTokenType::Not,
+            "eq" => FortranTokenType::Eq,
+            "ne" => FortranTokenType::Ne,
+            "lt" => FortranTokenType::Lt,
+            "le" => FortranTokenType::Le,
+            "gt" => FortranTokenType::Gt,
+            "ge" => FortranTokenType::Ge,
+            _ => FortranTokenType::Identifier,
         };
 
         state.add_token(kind, start, end);
@@ -336,107 +319,105 @@ impl<'config> FortranLexer<'config> {
         match c {
             '\n' => {
                 state.advance(1);
-                state.add_token(FortranSyntaxKind::Newline, start, state.get_position());
+                state.add_token(FortranTokenType::Newline, start, state.get_position())
             }
             '(' => {
                 state.advance(1);
-                state.add_token(FortranSyntaxKind::LeftParen, start, state.get_position());
+                state.add_token(FortranTokenType::LeftParen, start, state.get_position())
             }
             ')' => {
                 state.advance(1);
-                state.add_token(FortranSyntaxKind::RightParen, start, state.get_position());
+                state.add_token(FortranTokenType::RightParen, start, state.get_position())
             }
             ',' => {
                 state.advance(1);
-                state.add_token(FortranSyntaxKind::Comma, start, state.get_position());
+                state.add_token(FortranTokenType::Comma, start, state.get_position())
             }
             '=' => {
                 state.advance(1);
                 if state.current() == Some('=') {
                     state.advance(1);
-                    state.add_token(FortranSyntaxKind::EqualEqual, start, state.get_position());
+                    state.add_token(FortranTokenType::EqualEqual, start, state.get_position())
                 }
                 else {
-                    state.add_token(FortranSyntaxKind::Equal, start, state.get_position());
+                    state.add_token(FortranTokenType::Equal, start, state.get_position())
                 }
             }
             '+' => {
                 state.advance(1);
-                state.add_token(FortranSyntaxKind::Plus, start, state.get_position());
+                state.add_token(FortranTokenType::Plus, start, state.get_position())
             }
             '-' => {
                 state.advance(1);
-                state.add_token(FortranSyntaxKind::Minus, start, state.get_position());
+                state.add_token(FortranTokenType::Minus, start, state.get_position())
             }
             '*' => {
                 state.advance(1);
                 if state.current() == Some('*') {
                     state.advance(1);
-                    state.add_token(FortranSyntaxKind::StarStar, start, state.get_position());
+                    state.add_token(FortranTokenType::StarStar, start, state.get_position())
                 }
                 else {
-                    state.add_token(FortranSyntaxKind::Star, start, state.get_position());
+                    state.add_token(FortranTokenType::Star, start, state.get_position())
                 }
             }
             '/' => {
                 state.advance(1);
                 if state.current() == Some('=') {
                     state.advance(1);
-                    state.add_token(FortranSyntaxKind::SlashEqual, start, state.get_position());
+                    state.add_token(FortranTokenType::SlashEqual, start, state.get_position())
                 }
                 else {
-                    state.add_token(FortranSyntaxKind::Slash, start, state.get_position());
+                    state.add_token(FortranTokenType::Slash, start, state.get_position())
                 }
             }
             '<' => {
                 state.advance(1);
                 if state.current() == Some('=') {
                     state.advance(1);
-                    state.add_token(FortranSyntaxKind::LessEqual, start, state.get_position());
+                    state.add_token(FortranTokenType::LessEqual, start, state.get_position())
                 }
                 else {
-                    state.add_token(FortranSyntaxKind::Less, start, state.get_position());
+                    state.add_token(FortranTokenType::Less, start, state.get_position())
                 }
             }
             '>' => {
                 state.advance(1);
                 if state.current() == Some('=') {
                     state.advance(1);
-                    state.add_token(FortranSyntaxKind::GreaterEqual, start, state.get_position());
+                    state.add_token(FortranTokenType::GreaterEqual, start, state.get_position())
                 }
                 else {
-                    state.add_token(FortranSyntaxKind::Greater, start, state.get_position());
+                    state.add_token(FortranTokenType::Greater, start, state.get_position())
                 }
             }
             '.' => {
                 state.advance(1);
-                state.add_token(FortranSyntaxKind::Dot, start, state.get_position());
+                state.add_token(FortranTokenType::Dot, start, state.get_position())
             }
             ':' => {
                 state.advance(1);
                 if state.current() == Some(':') {
                     state.advance(1);
-                    state.add_token(FortranSyntaxKind::ColonColon, start, state.get_position());
+                    state.add_token(FortranTokenType::ColonColon, start, state.get_position())
                 }
                 else {
-                    state.add_token(FortranSyntaxKind::Colon, start, state.get_position());
+                    state.add_token(FortranTokenType::Colon, start, state.get_position())
                 }
             }
             ';' => {
                 state.advance(1);
-                state.add_token(FortranSyntaxKind::Semicolon, start, state.get_position());
+                state.add_token(FortranTokenType::Semicolon, start, state.get_position())
             }
             '&' => {
                 state.advance(1);
-                state.add_token(FortranSyntaxKind::Ampersand, start, state.get_position());
+                state.add_token(FortranTokenType::Ampersand, start, state.get_position())
             }
             '%' => {
                 state.advance(1);
-                state.add_token(FortranSyntaxKind::Percent, start, state.get_position());
+                state.add_token(FortranTokenType::Percent, start, state.get_position())
             }
-            _ => {
-                return false;
-            }
+            _ => return false,
         }
         true
     }

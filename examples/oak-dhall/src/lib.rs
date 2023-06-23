@@ -1,24 +1,38 @@
-#![feature(new_range_api)]
 #![doc = include_str!("readme.md")]
+#![feature(new_range_api)]
+#![warn(missing_docs)]
 #![doc(html_logo_url = "https://raw.githubusercontent.com/ygg-lang/oaks/refs/heads/dev/documents/logo.svg")]
 #![doc(html_favicon_url = "https://raw.githubusercontent.com/ygg-lang/oaks/refs/heads/dev/documents/logo.svg")]
+//! Dhall support for the Oak language framework.
 
+/// AST module.
 pub mod ast;
-mod kind;
-mod language;
-mod lexer;
+/// Builder module.
+pub mod builder;
+
+/// Kind definition module.
+/// Language configuration module.
+pub mod language;
+/// Lexer module.
+pub mod lexer;
+/// LSP module.
+#[cfg(any(feature = "lsp", feature = "oak-highlight", feature = "oak-pretty-print"))]
+pub mod lsp;
+
+/// Parser module.
 pub mod parser;
 
-mod builder;
-mod formatter;
-pub mod highlighter;
+pub use crate::{ast::DHallRoot, builder::DHallBuilder, language::DHallLanguage, lexer::DHallLexer, parser::DHallParser};
 
-pub use crate::{
-    ast::DHallRoot,
-    builder::DHallBuilder,
-    formatter::DHallFormatter,
-    highlighter::DHallHighlighter,
-    kind::{DHallSyntaxKind, DHallToken},
-    language::DHallLanguage,
-    lexer::DHallLexer,
-};
+/// Highlighter implementation.
+#[cfg(feature = "oak-highlight")]
+pub use crate::lsp::highlighter::DHallHighlighter;
+
+#[cfg(feature = "lsp")]
+pub use crate::lsp::DHallLanguageService;
+/// LSP implementation.
+#[cfg(feature = "lsp")]
+pub use crate::lsp::formatter::DHallFormatter;
+
+pub use lexer::token_type::DHallTokenType;
+pub use parser::element_type::DHallElementType;

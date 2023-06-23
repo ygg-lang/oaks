@@ -1,154 +1,34 @@
-# Oak R Parser
+# 🚀 Oak R Parser
 
 [![Crates.io](https://img.shields.io/crates/v/oak-r.svg)](https://crates.io/crates/oak-r)
 [![Documentation](https://docs.rs/oak-r/badge.svg)](https://docs.rs/oak-r)
 
-High-performance incremental R parser for the oak ecosystem with flexible configuration, optimized for static analysis and code generation.
+**Statistical Power, Modern Engineering** — A high-performance, incremental R parser built on the Oak framework. Optimized for data science workflows, large-scale statistical analysis, and real-time developer tools.
 
-## 🎯 Overview
+## 🎯 Project Vision
 
-Oak R is a robust parser for R, designed to handle complete R syntax including modern features. Built on the solid foundation of oak-core, it provides both high-level convenience and detailed AST generation for static analysis and code generation.
+R is the language of choice for statistical computing and graphics, but its flexible and sometimes idiosyncratic syntax can be challenging for robust tool development. `oak-r` provides a modern, Rust-powered infrastructure for parsing R that is both accurate and incredibly fast. By utilizing Oak's incremental parsing architecture, we enable the creation of highly responsive IDEs, code analyzers, and automated reporting tools that can handle massive R scripts and complex data processing pipelines in real-time.
 
-## ✨ Features
+## ✨ Core Features
 
-- **Complete R Syntax**: Supports all R features including modern specifications
-- **Full AST Generation**: Generates comprehensive Abstract Syntax Trees
-- **Lexer Support**: Built-in tokenization with proper span information
-- **Error Recovery**: Graceful handling of syntax errors with detailed diagnostics
+- **⚡ Blazing Fast**: Leverages Rust's zero-cost abstractions to deliver sub-millisecond parsing, essential for high-frequency feedback in data-intensive environments.
+- **🔄 Incremental by Design**: Built-in support for partial updates—re-parse only the sections of the R script that changed. Ideal for interactive data analysis and large-scale script processing.
+- **🌳 High-Fidelity AST**: Generates a comprehensive Abstract Syntax Tree capturing the full depth of R:
+    - **Functional Programming**: Precise mapping of functions, closures, and lazy evaluation constructs.
+    - **Vectorized Operations**: Full support for R's unique array and matrix manipulation syntax.
+    - **Statistical Formulas**: Robust handling of R's formula notation (`~`).
+    - **Comments & Formatting**: Retains all trivia, enabling faithful round-trip processing and refactoring.
+- **🛡️ Industrial-Grade Fault Tolerance**: Engineered to recover from syntax errors gracefully, providing precise diagnostics—crucial for maintaining a smooth developer experience during iterative analysis.
+- **🧩 Deep Ecosystem Integration**: Seamlessly works with `oak-lsp` for full LSP support and `oak-mcp` for intelligent data structure discovery.
 
-## 🚀 Quick Start
+## 🏗️ Architecture
 
-Basic example:
+The parser follows the **Green/Red Tree** architecture (inspired by Roslyn), which allows for:
+1. **Efficient Immutability**: Share nodes across different versions of the tree without copying.
+2. **Lossless Syntax Trees**: Retains all trivia (whitespace and comments), enabling faithful code formatting and refactoring.
+3. **Type Safety**: Strongly-typed "Red" nodes provide a convenient and safe API for tree traversal and analysis.
 
-```rust
-use oak_core::{Parser, SourceText, parser::session::ParseSession};
-use oak_r::{RParser, RLanguage};
-
-fn main() -> Result<(), Box<dyn std::error::Error>> {
-    let mut session = ParseSession::<RLanguage>::default();
-    let parser = RParser::new();
-    let source = SourceText::new(r#"
-print("Hello, World!")
-x <- c(1, 2, 3, 4, 5)
-mean(x)
-    "#);
-    
-    let result = parser.parse(&[], &mut session);
-    println!("Parsed R successfully.");
-    Ok(())
-}
-```
-
-## 📋 Parsing Examples
-
-### Function Parsing
-```rust
-use oak_core::{Parser, SourceText, parser::session::ParseSession};
-use oak_r::{RParser, RLanguage};
-
-let mut session = ParseSession::<RLanguage>::default();
-let parser = RParser::new();
-let source = SourceText::new(r#"
-add <- function(a, b) {
-  return(a + b)
-}
-"#);
-
-let result = parser.parse(&[], &mut session);
-println!("Function parsed successfully.");
-```
-
-### Data Structure Parsing
-```rust
-use oak_core::{Parser, SourceText, parser::session::ParseSession};
-use oak_r::{RParser, RLanguage};
-
-let mut session = ParseSession::<RLanguage>::default();
-let parser = RParser::new();
-let source = SourceText::new(r#"
-data <- data.frame(
-  name = c("Alice", "Bob", "Charlie"),
-  age = c(25, 30, 35),
-  city = c("New York", "London", "Paris")
-)
-"#);
-
-let result = parser.parse(&[], &mut session);
-println!("Data structure parsed successfully.");
-```
-
-## 🔧 Advanced Features
-
-### Token-Level Parsing
-```rust
-use oak_core::{Parser, SourceText, parser::session::ParseSession};
-use oak_r::{RParser, RLanguage};
-
-let mut session = ParseSession::<RLanguage>::default();
-let parser = RParser::new();
-let source = SourceText::new("x <- c(1, 2, 3)");
-let result = parser.parse(&[], &mut session);
-println!("Token parsing completed.");
-```
-
-### Error Handling
-```rust
-use oak_core::{Parser, SourceText, parser::session::ParseSession};
-use oak_r::{RParser, RLanguage};
-
-let mut session = ParseSession::<RLanguage>::default();
-let parser = RParser::new();
-let source = SourceText::new(r#"
-# Invalid R code example
-invalid_function(
-"#);
-
-let result = parser.parse(&[], &mut session);
-if let Some(errors) = result.result.err() {
-    println!("Parse errors found: {:?}", errors);
-} else {
-    println!("Parsed successfully.");
-}
-```
-
-## 🏗️ AST Structure
-
-The parser generates a comprehensive AST with the following main structures:
-
-- **RProgram**: Root container for R programs
-- **Function**: R functions and methods
-- **Expression**: R expressions and operations
-- **DataFrame**: R data structures
-- **Vector**: R vector operations
-
-## 📊 Performance
-
-- **Streaming**: Parse large R files without loading entirely into memory
-- **Incremental**: Re-parse only changed sections
-- **Memory Efficient**: Smart AST node allocation
-- **Fast Recovery**: Quick error recovery for better IDE integration
-
-## 🔗 Integration
-
-Oak R integrates seamlessly with:
-
-- **Static Analysis**: Code quality and security analysis
-- **Code Generation**: Generating code from R AST
-- **IDE Support**: Language server protocol compatibility
-- **Refactoring**: Automated code refactoring
-- **Documentation**: Generating documentation from R code
-
-## 📚 Examples
-
-Check out the [examples](examples/) directory for comprehensive examples:
-
-- Complete R program parsing
-- Function and data analysis
-- Code transformation
-- Integration with development workflows
 
 ## 🤝 Contributing
 
-Contributions are welcome! 
-
-Please feel free to submit pull requests at the [project repository](https://github.com/ygg-lang/oaks/tree/dev/examples/oak-r) or open [issues](https://github.com/ygg-lang/oaks/issues).
+We welcome contributions of all kinds! If you find a bug, have a feature request, or want to contribute code, please check our [issues](https://github.com/ygg-lang/oaks/issues) or submit a pull request.

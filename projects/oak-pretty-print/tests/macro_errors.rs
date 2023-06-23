@@ -2,7 +2,7 @@ use oak_pretty_print::doc;
 
 #[test]
 fn test_macro_error_cases() {
-    // 这是一个合法的调用，用于对比
+    // This is a valid call, used for comparison
     let _ = doc!(nil);
 }
 

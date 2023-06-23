@@ -1,3 +1,4 @@
+#![doc = include_str!("readme.md")]
 use oak_core::{Language, LanguageCategory};
 
 /// Erlang 语言配置
@@ -14,7 +15,7 @@ impl Language for ErlangLanguage {
     const NAME: &'static str = "erlang";
     const CATEGORY: LanguageCategory = LanguageCategory::Programming;
 
-    type TokenType = crate::kind::ErlangSyntaxKind;
-    type ElementType = crate::kind::ErlangSyntaxKind;
+    type TokenType = crate::lexer::token_type::ErlangTokenType;
+    type ElementType = crate::parser::element_type::ErlangElementType;
     type TypedRoot = ();
 }

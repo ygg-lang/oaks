@@ -10,7 +10,7 @@ fn test_parser_basic() {
 
     let result = parser.parse(&source, &[], &mut cache);
     assert!(result.result.is_ok());
-    println!("Parsed successfully: {:?}", result.result);
+    println!("Parsed successfully: {:?}", result.result)
 }
 
 #[test]
@@ -28,7 +28,7 @@ fn test_parser_function_declaration() {
 
     let result = parser.parse(&source, &[], &mut cache);
     assert!(result.result.is_ok());
-    println!("Function declaration parsed: {:?}", result.result);
+    println!("Function declaration parsed: {:?}", result.result)
 }
 
 #[test]
@@ -53,7 +53,7 @@ fn test_parser_local_function() {
 
     let result = parser.parse(&source, &[], &mut cache);
     assert!(result.result.is_ok());
-    println!("Local function parsed: {:?}", result.result);
+    println!("Local function parsed: {:?}", result.result)
 }
 
 #[test]
@@ -65,7 +65,7 @@ fn test_parser_table_constructor() {
     let mut cache = ParseSession::<GsglLanguage>::default();
     let result = parser.parse(&source, &[], &mut cache);
     assert!(result.result.is_ok());
-    println!("Table constructor parsed: {:?}", result.result);
+    println!("Table constructor parsed: {:?}", result.result)
 }
 
 #[test]
@@ -103,7 +103,7 @@ fn test_parser_control_structures() {
 
     let result = parser.parse(&source, &[], &mut cache);
     assert!(result.result.is_ok());
-    println!("Control structures parsed: {:?}", result.result);
+    println!("Control structures parsed: {:?}", result.result)
 }
 
 #[test]
@@ -122,7 +122,7 @@ fn test_parser_expressions() {
     let mut cache = ParseSession::<GsglLanguage>::default();
     let result = parser.parse(&source, &[], &mut cache);
     assert!(result.result.is_ok());
-    println!("Expressions parsed: {:?}", result.result);
+    println!("Expressions parsed: {:?}", result.result)
 }
 
 #[test]
@@ -141,7 +141,7 @@ fn test_parser_function_calls() {
     let mut cache = ParseSession::<GsglLanguage>::default();
     let result = parser.parse(&source, &[], &mut cache);
     assert!(result.result.is_ok());
-    println!("Function calls parsed: {:?}", result.result);
+    println!("Function calls parsed: {:?}", result.result)
 }
 
 #[test]
@@ -154,7 +154,7 @@ fn test_parser_syntax_error() {
     let result = parser.parse(&source, &[], &mut cache);
     // For now, our basic files doesn't detect kind errors
     // In a real implementation, this should fail
-    println!("Syntax error test result: {:?}", result.result);
+    println!("Syntax error test result: {:?}", result.result)
 }
 
 #[test]
@@ -172,7 +172,7 @@ fn test_parser_incomplete_function() {
     let result = parser.parse(&source, &[], &mut cache);
     // For now, our basic files doesn't detect kind errors
     // In a real implementation, this should fail
-    println!("Incomplete function test result: {:?}", result.result);
+    println!("Incomplete function test result: {:?}", result.result)
 }
 
 #[test]
@@ -185,5 +185,5 @@ fn test_parser_invalid_table_syntax() {
     let result = parser.parse(&source, &[], &mut cache);
     // For now, our basic files doesn't detect kind errors
     // In a real implementation, this might be valid or invalid depending on Lua version
-    println!("Invalid table kind test result: {:?}", result.result);
+    println!("Invalid table kind test result: {:?}", result.result)
 }

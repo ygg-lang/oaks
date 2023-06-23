@@ -1,5 +1,5 @@
 use crate::{ast::DjangoRoot, language::DjangoLanguage, parser::DjangoParser};
-use oak_core::{Builder, BuilderCache, GreenNode, OakDiagnostics, OakError, SourceText, TextEdit, source::Source};
+use oak_core::{Builder, BuilderCache, GreenNode, OakDiagnostics, OakError, Parser, SourceText, TextEdit, source::Source};
 
 pub struct DjangoBuilder<'config> {
     config: &'config DjangoLanguage,

@@ -1,3 +1,4 @@
+#![doc = include_str!("readme.md")]
 use oak_core::{Language, LanguageCategory};
 use std::{
     string::{String, ToString},
@@ -43,7 +44,7 @@ impl Language for OrgModeLanguage {
     const NAME: &'static str = "org-mode";
     const CATEGORY: LanguageCategory = LanguageCategory::Markup;
 
-    type TokenType = crate::kind::OrgModeSyntaxKind;
-    type ElementType = crate::kind::OrgModeSyntaxKind;
+    type TokenType = crate::lexer::token_type::OrgModeTokenType;
+    type ElementType = crate::parser::element_type::OrgModeElementType;
     type TypedRoot = ();
 }

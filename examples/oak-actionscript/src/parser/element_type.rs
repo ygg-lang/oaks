@@ -1,165 +1,203 @@
-use crate::lexer::ActionScriptTokenType;
-use oak_core::{ElementType, GreenNode, UniversalElementRole};
+use oak_core::{ElementType, Parser, UniversalElementRole};
+#[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
-use std::sync::Arc;
 
-/// ActionScript 语法树元素的类型别名
-pub type ActionScriptElement<'a> = Arc<GreenNode<'a, ActionScriptElementType>>;
-
-/// ActionScript 语法树中所有可能的元素类型。
-#[derive(Copy, Clone, Debug, PartialEq, Eq, Hash, Serialize, Deserialize)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub enum ActionScriptElementType {
-    /// Root node of the program
-    Program,
-    /// Root node
-    Root,
-    /// Generic statement node
-    Statement,
-    /// Generic expression node
-    Expression,
-    /// Block of statements
-    Block,
-    /// Class declaration
-    Class,
-    /// Interface declaration
-    Interface,
-    /// Function declaration
-    Function,
-    /// Variable declaration
-    Variable,
-    /// Import statement
-    Import,
-    /// Package declaration
-    Package,
-    /// Namespace declaration
-    Namespace,
-    /// Assignment expression
-    Assignment,
-    /// Function call
-    FunctionCall,
-    /// Method call
-    MethodCall,
-    /// Property access
-    PropertyAccess,
-    /// Array access
-    ArrayAccess,
-    /// Conditional expression (ternary)
-    ConditionalExpression,
-    /// Binary expression
-    BinaryExpression,
-    /// Unary expression
-    UnaryExpression,
-    /// If statement
-    IfStatement,
-    /// For statement
-    ForStatement,
-    /// While statement
-    WhileStatement,
-    /// Do-while statement
-    DoWhileStatement,
-    /// Switch statement
-    SwitchStatement,
-    /// Try statement
-    TryStatement,
-    /// Throw statement
-    ThrowStatement,
-    /// Return statement
-    ReturnStatement,
-    /// Break statement
-    BreakStatement,
-    /// Continue statement
-    ContinueStatement,
-
-    /// Error token
-    Error,
-
-    /// Identifier
+    Whitespace,
+    Newline,
+    Comment,
     Identifier,
-    /// Literal
-    LiteralExpression,
-    /// Identifier expression
-    IdentifierExpression,
-    /// Parenthesized expression
-    ParenthesizedExpression,
-    /// Source file
-    SourceFile,
-    /// Parameter list
+    StringLiteral,
+    CharLiteral,
+    NumberLiteral,
+    BooleanLiteral,
+    NullLiteral,
+    As,
+    Break,
+    Case,
+    Catch,
+    Class,
+    Const,
+    Continue,
+    Default,
+    Delete,
+    Do,
+    Else,
+    Extends,
+    False,
+    Finally,
+    For,
+    Function,
+    If,
+    Implements,
+    Import,
+    In,
+    Instanceof,
+    Interface,
+    Internal,
+    Is,
+    Native,
+    New,
+    Null,
+    Package,
+    Private,
+    Protected,
+    Public,
+    Return,
+    Static,
+    Super,
+    Switch,
+    This,
+    Throw,
+    True,
+    Try,
+    Typeof,
+    Use,
+    Var,
+    Void,
+    While,
+    With,
+    Each,
+    Get,
+    Set,
+    Namespace,
+    Include,
+    Dynamic,
+    Final,
+    Override,
+    Array,
+    Boolean,
+    Date,
+    Number,
+    ObjectType,
+    RegExp,
+    StringType,
+    Uint,
+    Vector,
+    VoidType,
+    Xml,
+    XmlList,
+    Plus,
+    Minus,
+    Star,
+    Slash,
+    Percent,
+    Equal,
+    EqualEqual,
+    EqualEqualEqual,
+    NotEqual,
+    NotEqualEqual,
+    LessThan,
+    LessEqual,
+    GreaterThan,
+    GreaterEqual,
+    LogicalAnd,
+    LogicalOr,
+    LogicalNot,
+    BitwiseAnd,
+    BitwiseOr,
+    BitwiseXor,
+    BitwiseNot,
+    LeftShift,
+    RightShift,
+    UnsignedRightShift,
+    Increment,
+    Decrement,
+    PlusAssign,
+    MinusAssign,
+    StarAssign,
+    SlashAssign,
+    PercentAssign,
+    LeftShiftAssign,
+    RightShiftAssign,
+    UnsignedRightShiftAssign,
+    BitwiseAndAssign,
+    BitwiseOrAssign,
+    BitwiseXorAssign,
+    Question,
+    Colon,
+    Dot,
+    Arrow,
+    LeftParen,
+    RightParen,
+    LeftBrace,
+    RightBrace,
+    LeftBracket,
+    RightBracket,
+    Semicolon,
+    Comma,
+    At,
+    Hash,
+    Dollar,
+    Ampersand,
+    Backslash,
+    Quote,
+    DoubleQuote,
+    Backtick,
+    Eof,
+    Program,
+    Block,
+    Variable,
+    FunctionCall,
+    MethodCall,
+    PropertyAccess,
+    ArrayAccess,
     ParameterList,
-    /// Block expression
-    BlockExpression,
-    /// Use item
     UseItem,
-    /// Module item
     ModuleItem,
-    /// Struct item
     StructItem,
-    /// Enum item
     EnumItem,
-    /// Let statement
+    FunctionType,
+    Root,
+    Statement,
+    Expression,
+    Assignment,
+    ConditionalExpression,
+    BinaryExpression,
+    UnaryExpression,
+    IfStatement,
+    ForStatement,
+    WhileStatement,
+    DoWhileStatement,
+    SwitchStatement,
+    TryStatement,
+    ThrowStatement,
+    ReturnStatement,
+    BreakStatement,
+    ContinueStatement,
+    Error,
+    LiteralExpression,
+    IdentifierExpression,
+    ParenthesizedExpression,
+    SourceFile,
+    BlockExpression,
     LetStatement,
-    /// If expression
     IfExpression,
-    /// While expression
     WhileExpression,
-    /// Loop expression
     LoopExpression,
-    /// For expression
     ForExpression,
-    /// Call expression
     CallExpression,
-    /// Index expression
     IndexExpression,
-    /// Field expression
     FieldExpression,
 }
 
 impl ElementType for ActionScriptElementType {
     type Role = UniversalElementRole;
 
-    fn is_root(&self) -> bool {
-        matches!(self, Self::Program | Self::Root | Self::SourceFile)
-    }
-
-    fn is_error(&self) -> bool {
-        matches!(self, Self::Error)
-    }
-
     fn role(&self) -> Self::Role {
-        use UniversalElementRole::*;
         match self {
-            Self::Program | Self::Root | Self::SourceFile => Root,
-            Self::Class | Self::Interface | Self::Function | Self::Variable | Self::Package | Self::Namespace | Self::ModuleItem | Self::StructItem | Self::EnumItem => Definition,
-            Self::Block | Self::BlockExpression | Self::ParameterList | Self::ParenthesizedExpression => Container,
-            Self::Statement | Self::Import | Self::UseItem | Self::LetStatement | Self::ReturnStatement | Self::BreakStatement | Self::ContinueStatement | Self::ThrowStatement => Statement,
-            Self::Expression
-            | Self::Assignment
-            | Self::BinaryExpression
-            | Self::UnaryExpression
-            | Self::ConditionalExpression
-            | Self::IfExpression
-            | Self::WhileExpression
-            | Self::LoopExpression
-            | Self::ForExpression
-            | Self::IdentifierExpression
-            | Self::LiteralExpression
-            | Self::IndexExpression
-            | Self::FieldExpression
-            | Self::PropertyAccess
-            | Self::ArrayAccess => Expression,
-            Self::FunctionCall | Self::MethodCall | Self::CallExpression => Call,
-            Self::Identifier => Reference,
-            Self::Error => Error,
-            _ => None,
+            Self::Root => UniversalElementRole::Root,
+            Self::SourceFile => UniversalElementRole::Root,
+            Self::Error => UniversalElementRole::Error,
+            _ => UniversalElementRole::None,
         }
     }
 }
 
-impl From<ActionScriptTokenType> for ActionScriptElementType {
-    fn from(token_type: ActionScriptTokenType) -> Self {
-        match token_type {
-            ActionScriptTokenType::Identifier => Self::Identifier,
-            ActionScriptTokenType::StringLiteral | ActionScriptTokenType::NumberLiteral | ActionScriptTokenType::BooleanLiteral | ActionScriptTokenType::NullLiteral => Self::LiteralExpression,
-            _ => Self::Error,
-        }
+impl From<crate::lexer::token_type::ActionScriptTokenType> for ActionScriptElementType {
+    fn from(token: crate::lexer::token_type::ActionScriptTokenType) -> Self {
+        unsafe { std::mem::transmute(token) }
     }
 }

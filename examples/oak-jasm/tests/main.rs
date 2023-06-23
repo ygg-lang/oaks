@@ -3,5 +3,5 @@ mod parser;
 
 #[test]
 fn ready() {
-    println!("oak-jasm tests ready!");
+    println!("oak-jasm tests ready!")
 }

@@ -1,14 +1,16 @@
 #![doc = include_str!("readme.md")]
-
 use oak_core::Range;
 
+#[cfg(feature = "serde")]
+#[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
 
-/// The root node of a Coq AST (Abstract Syntax Tree).
+/// Root node of the Coq AST (Abstract Syntax Tree).
 ///
 /// This structure represents the top-level node of a Coq document,
-/// containing a collection of vernacular statements.
-#[derive(Debug, PartialEq, Clone, Serialize, Deserialize)]
+/// containing a sequence of vernacular statements.
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[derive(Debug, PartialEq, Clone)]
 pub struct CoqRoot {
     /// A vector of vernacular statements that make up the Coq document.
     pub vernaculars: Vec<Vernacular>,
@@ -16,9 +18,10 @@ pub struct CoqRoot {
 
 /// Represents a vernacular statement in Coq.
 ///
-/// A vernacular is a top-level command in Coq, such as definitions,
+/// Vernaculars are top-level commands in Coq, such as definitions,
 /// theorems, inductive types, etc.
-#[derive(Debug, PartialEq, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[derive(Debug, PartialEq, Clone)]
 pub enum Vernacular {
     /// A definition statement with a name, body, and source span.
     Definition {
@@ -27,7 +30,7 @@ pub enum Vernacular {
         /// The body of the definition.
         body: String,
         /// The source span of the definition.
-        #[serde(with = "oak_core::serde_range")]
+        #[cfg_attr(feature = "serde", serde(with = "oak_core::serde_range"))]
         span: Range<usize>,
     },
     /// A theorem statement with a name, statement, proof, and source span.
@@ -39,7 +42,7 @@ pub enum Vernacular {
         /// The proof of the theorem.
         proof: String,
         /// The source span of the theorem.
-        #[serde(with = "oak_core::serde_range")]
+        #[cfg_attr(feature = "serde", serde(with = "oak_core::serde_range"))]
         span: Range<usize>,
     },
     /// An inductive type definition with a name, constructors, and source span.
@@ -48,8 +51,8 @@ pub enum Vernacular {
         name: String,
         /// The constructors of the inductive type.
         constructors: Vec<String>,
-        /// The source span of the inductive type.
-        #[serde(with = "oak_core::serde_range")]
+        /// The source span of the inductive type definition.
+        #[cfg_attr(feature = "serde", serde(with = "oak_core::serde_range"))]
         span: Range<usize>,
     },
     /// A fixpoint (recursive function) definition with a name, body, and source span.
@@ -58,24 +61,24 @@ pub enum Vernacular {
         name: String,
         /// The body of the fixpoint.
         body: String,
-        /// The source span of the fixpoint.
-        #[serde(with = "oak_core::serde_range")]
+        /// The source span of the fixpoint definition.
+        #[cfg_attr(feature = "serde", serde(with = "oak_core::serde_range"))]
         span: Range<usize>,
     },
     /// A Check command with a term and source span.
     Check {
         /// The term to check.
         term: String,
-        /// The source span of the check command.
-        #[serde(with = "oak_core::serde_range")]
+        /// The source span of the Check command.
+        #[cfg_attr(feature = "serde", serde(with = "oak_core::serde_range"))]
         span: Range<usize>,
     },
     /// A Print command with a name and source span.
     Print {
         /// The name to print.
         name: String,
-        /// The source span of the print command.
-        #[serde(with = "oak_core::serde_range")]
+        /// The source span of the Print command.
+        #[cfg_attr(feature = "serde", serde(with = "oak_core::serde_range"))]
         span: Range<usize>,
     },
 }
@@ -94,7 +97,7 @@ impl CoqRoot {
     ///
     /// # Arguments
     ///
-    /// * `vernaculars` - A vector of vernacular statements to include in the root.
+    /// * `vernaculars` - A vector of vernacular statements.
     ///
     /// # Returns
     ///

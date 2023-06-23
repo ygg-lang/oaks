@@ -13,5 +13,5 @@ fn test_parser_basic() {
     let parser = WatParser::new(&language);
     let parse_output = parser.parse(&source, &[], &mut session);
 
-    assert!(parse_output.result.is_ok());
+    assert!(parse_output.result.is_ok())
 }

@@ -1,22 +1,22 @@
-#![feature(new_range_api)]
 #![doc = include_str!("readme.md")]
+#![feature(new_range_api)]
 #![doc(html_logo_url = "https://raw.githubusercontent.com/ygg-lang/oaks/refs/heads/dev/documents/logo.svg")]
 #![doc(html_favicon_url = "https://raw.githubusercontent.com/ygg-lang/oaks/refs/heads/dev/documents/logo.svg")]
+#![warn(missing_docs)]
+//! Django support for the Oak language framework.
 
 pub mod ast;
-#[cfg(feature = "oak-highlight")]
-mod highlighter;
-mod kind;
 mod language;
 mod lexer;
+#[cfg(any(feature = "lsp", feature = "oak-highlight", feature = "oak-pretty-print"))]
+pub mod lsp;
 mod parser;
 
 #[cfg(feature = "oak-highlight")]
-pub use crate::highlighter::DjangoHighlighter;
+pub use crate::lsp::highlighter::DjangoHighlighter;
 pub use crate::{
     ast::DjangoRoot,
-    kind::{DjangoSyntaxKind, DjangoToken},
     language::DjangoLanguage,
-    lexer::DjangoLexer,
-    parser::DjangoParser,
+    lexer::{DjangoLexer, token_type::DjangoTokenType},
+    parser::{DjangoParser, element_type::DjangoElementType},
 };

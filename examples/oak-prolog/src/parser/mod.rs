@@ -1,4 +1,10 @@
-use crate::{kind::PrologSyntaxKind, language::PrologLanguage, lexer::PrologLexer};
+pub mod element_type;
+
+use crate::{
+    language::PrologLanguage,
+    lexer::{PrologLexer, token_type::PrologTokenType},
+    parser::element_type::PrologElementType,
+};
 use oak_core::{
     GreenNode, OakError,
     parser::{ParseCache, ParseOutput, Parser, ParserState},
@@ -16,47 +22,47 @@ impl PrologParser {
 
     fn parse_directive<'s, S: Source + ?Sized>(&self, state: &mut ParserState<'s, PrologLanguage, S>) {
         let checkpoint = state.checkpoint();
-        state.expect(PrologSyntaxKind::ColonMinus).ok();
-        while !state.at(PrologSyntaxKind::Dot) && state.not_at_end() {
-            state.bump();
+        state.expect(PrologTokenType::ColonMinus).ok();
+        while !state.at(PrologTokenType::Dot) && state.not_at_end() {
+            state.bump()
         }
-        state.expect(PrologSyntaxKind::Dot).ok();
-        state.finish_at(checkpoint, PrologSyntaxKind::Directive);
+        state.expect(PrologTokenType::Dot).ok();
+        state.finish_at(checkpoint, crate::parser::element_type::PrologElementType::Directive);
     }
 
     fn parse_query<'s, S: Source + ?Sized>(&self, state: &mut ParserState<'s, PrologLanguage, S>) {
         let checkpoint = state.checkpoint();
-        state.expect(PrologSyntaxKind::QuestionMinus).ok();
-        while !state.at(PrologSyntaxKind::Dot) && state.not_at_end() {
-            state.bump();
+        state.expect(PrologTokenType::QuestionMinus).ok();
+        while !state.at(PrologTokenType::Dot) && state.not_at_end() {
+            state.bump()
         }
-        state.expect(PrologSyntaxKind::Dot).ok();
-        state.finish_at(checkpoint, PrologSyntaxKind::Query);
+        state.expect(PrologTokenType::Dot).ok();
+        state.finish_at(checkpoint, crate::parser::element_type::PrologElementType::Query);
     }
 
     fn parse_clause<'s, S: Source + ?Sized>(&self, state: &mut ParserState<'s, PrologLanguage, S>) {
         let checkpoint = state.checkpoint();
-        while !state.at(PrologSyntaxKind::Dot) && state.not_at_end() {
-            state.bump();
+        while !state.at(PrologTokenType::Dot) && state.not_at_end() {
+            state.bump()
         }
-        state.expect(PrologSyntaxKind::Dot).ok();
-        state.finish_at(checkpoint, PrologSyntaxKind::Clause);
+        state.expect(PrologTokenType::Dot).ok();
+        state.finish_at(checkpoint, crate::parser::element_type::PrologElementType::Clause);
     }
 
     fn parse_root_internal<'s, S: Source + ?Sized>(&self, state: &mut ParserState<'s, PrologLanguage, S>) -> Result<&'s GreenNode<'s, PrologLanguage>, OakError> {
         let checkpoint = state.checkpoint();
         while state.not_at_end() {
-            if state.at(PrologSyntaxKind::ColonMinus) {
-                self.parse_directive(state);
+            if state.at(PrologTokenType::ColonMinus) {
+                self.parse_directive(state)
             }
-            else if state.at(PrologSyntaxKind::QuestionMinus) {
-                self.parse_query(state);
+            else if state.at(PrologTokenType::QuestionMinus) {
+                self.parse_query(state)
             }
             else {
-                self.parse_clause(state);
+                self.parse_clause(state)
             }
         }
-        Ok(state.finish_at(checkpoint, PrologSyntaxKind::Root))
+        Ok(state.finish_at(checkpoint, crate::parser::element_type::PrologElementType::Root))
     }
 }
 

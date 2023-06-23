@@ -1,151 +1,34 @@
-# Oak Go Parser
+# 🚀 Oak Go Parser
 
 [![Crates.io](https://img.shields.io/crates/v/oak-go.svg)](https://crates.io/crates/oak-go)
 [![Documentation](https://docs.rs/oak-go/badge.svg)](https://docs.rs/oak-go)
 
-High-performance incremental Go parser for the oak ecosystem with flexible configuration, optimized for static analysis and code generation.
+**Simplicity at Scale** — A high-performance, incremental Go parser built on the Oak framework. Optimized for cloud-native toolchains, microservices, and modern IDE support for the Go programming language.
 
-## 🎯 Overview
+## 🎯 Project Vision
 
-Oak Go is a robust parser for Go, designed to handle complete Go syntax including modern features. Built on the solid foundation of oak-core, it provides both high-level convenience and detailed AST generation for static analysis and code generation.
+Go was designed for engineering at scale, emphasizing simplicity and fast compilation. `oak-go` brings these same principles to parsing, providing a modern, Rust-powered infrastructure for analyzing Go code. By utilizing Oak's incremental parsing capabilities, it enables developers to build highly responsive tools for massive Go monorepos, ensuring that developer productivity remains high even as projects grow. Whether you are building custom linters, automated refactoring tools, or sophisticated IDE extensions, `oak-go` provides the robust, efficient foundation you need.
 
-## ✨ Features
+## ✨ Core Features
 
-- **Complete Go Syntax**: Supports all Go features including modern specifications
-- **Full AST Generation**: Generates comprehensive Abstract Syntax Trees
-- **Lexer Support**: Built-in tokenization with proper span information
-- **Error Recovery**: Graceful handling of syntax errors with detailed diagnostics
+- **⚡ Blazing Fast**: Leverages Rust's performance and memory safety to provide sub-millisecond parsing, essential for high-frequency developer tools and real-time analysis.
+- **🔄 Incremental by Nature**: Built-in support for partial updates—re-parse only what has changed. Ideal for large-scale Go projects where performance is critical.
+- **🌳 High-Fidelity AST**: Generates a clean and easy-to-traverse Abstract Syntax Tree capturing:
+    - **Packages & Imports**: Comprehensive management of package declarations and complex import blocks.
+    - **Types & Interfaces**: Precise mapping of structs, interfaces, and Go's unique structural typing system.
+    - **Concurrency Constructs**: First-class support for `go` routines, `chan`nels, and `select` statements.
+    - **Methods & Functions**: Detailed tracking of function signatures, receivers, and multiple return values.
+- **🛡️ Robust Error Recovery**: Engineered to handle incomplete or malformed code gracefully, providing precise diagnostics—crucial for maintaining a smooth developer experience during active coding.
+- **🧩 Deep Ecosystem Integration**: Seamlessly works with `oak-lsp` for full LSP support and `oak-mcp` for Model Context Protocol capabilities.
 
-## 🚀 Quick Start
+## 🏗️ Architecture
 
-Basic example:
+The parser follows the **Green/Red Tree** architecture (inspired by Roslyn), which allows for:
+1. **Efficient Immutability**: Share nodes across different versions of the tree without copying.
+2. **Lossless Syntax Trees**: Retains all trivia (whitespace and comments), enabling faithful code formatting and refactoring.
+3. **Type Safety**: Strongly-typed "Red" nodes provide a convenient and safe API for tree traversal and analysis.
 
-```rust
-use oak_go::{Parser, GoLanguage, SourceText};
-
-fn main() -> Result<(), Box<dyn std::error::Error>> {
-    let parser = Parser::new();
-    let source = SourceText::new(r#"
-package main
-
-import "fmt"
-
-func main() {
-    fmt.Println("Hello, Go!")
-}
-    "#);
-    
-    let result = parser.parse(&source);
-    println!("Parsed Go successfully.");
-    Ok(())
-}
-```
-
-## 📋 Parsing Examples
-
-### Function Parsing
-```rust
-use oak_go::{Parser, GoLanguage, SourceText};
-
-let parser = Parser::new();
-let source = SourceText::new(r#"
-func add(a, b int) int {
-    return a + b
-}
-"#);
-
-let result = parser.parse(&source);
-println!("Function parsed successfully.");
-```
-
-### Struct Parsing
-```rust
-use oak_go::{Parser, GoLanguage, SourceText};
-
-let parser = Parser::new();
-let source = SourceText::new(r#"
-type Person struct {
-    Name string
-    Age  int
-}
-
-func (p *Person) Greet() {
-    fmt.Printf("Hello, I'm %s and I'm %d years old\n", p.Name, p.Age)
-}
-"#);
-
-let result = parser.parse(&source);
-println!("Struct parsed successfully.");
-```
-
-## 🔧 Advanced Features
-
-### Token-Level Parsing
-```rust
-use oak_go::{Parser, GoLanguage, SourceText};
-
-let parser = Parser::new();
-let source = SourceText::new("x := 42");
-let result = parser.parse(&source);
-// Token information is available in the parse result
-```
-
-### Error Handling
-```rust
-use oak_go::{Parser, GoLanguage, SourceText};
-
-let parser = Parser::new();
-let source = SourceText::new(r#"
-func main() {
-    fmt.Println("Hello, Go!")
-// Missing closing brace
-"#);
-
-let result = parser.parse(&source);
-if let Err(e) = result.result {
-    println!("Parse error: {:?}", e);
-}
-```
-
-## 🏗️ AST Structure
-
-The parser generates a comprehensive AST with the following main structures:
-
-- **Package**: Root container for Go programs
-- **Function**: Go functions and methods
-- **Struct**: Go struct definitions
-- **Interface**: Go interface definitions
-- **Statement**: Various statement types
-- **Expression**: Various expression types
-
-## 📊 Performance
-
-- **Streaming**: Parse large Go files without loading entirely into memory
-- **Incremental**: Re-parse only changed sections
-- **Memory Efficient**: Smart AST node allocation
-- **Fast Recovery**: Quick error recovery for better IDE integration
-
-## 🔗 Integration
-
-Oak Go integrates seamlessly with:
-
-- **Static Analysis**: Code quality and security analysis
-- **Code Generation**: Generating code from Go AST
-- **IDE Support**: Language server protocol compatibility
-- **Refactoring**: Automated code refactoring
-- **Documentation**: Generating documentation from Go code
-
-## 📚 Examples
-
-Check out the [examples](examples/) directory for comprehensive examples:
-
-- Complete Go program parsing
-- Function and struct analysis
-- Code transformation
-- Integration with development workflows
 
 ## 🤝 Contributing
 
-Contributions are welcome! 
-
-Please feel free to submit pull requests at the [project repository](https://github.com/ygg-lang/oaks/tree/dev/examples/oak-go) or open [issues](https://github.com/ygg-lang/oaks/issues).
+We welcome contributions of all kinds! If you find a bug, have a feature request, or want to contribute code, please check our [issues](https://github.com/ygg-lang/oaks/issues) or submit a pull request.

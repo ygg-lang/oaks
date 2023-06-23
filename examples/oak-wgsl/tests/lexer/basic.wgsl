@@ -3,22 +3,22 @@
 
 // Struct definitions
 struct VertexInput {
-    @location(0) position: vec3<f32>,
-    @location(1) normal: vec3<f32>,
-    @location(2) uv: vec2<f32>,
-    @location(3) color: vec4<f32>,
+    ↯location(0) position: vec3<f32>,
+    ↯location(1) normal: vec3<f32>,
+    ↯location(2) uv: vec2<f32>,
+    ↯location(3) color: vec4<f32>,
 }
 
 struct VertexOutput {
-    @builtin(position) clip_position: vec4<f32>,
-    @location(0) world_position: vec3<f32>,
-    @location(1) world_normal: vec3<f32>,
-    @location(2) uv: vec2<f32>,
-    @location(3) color: vec4<f32>,
+    ↯builtin(position) clip_position: vec4<f32>,
+    ↯location(0) world_position: vec3<f32>,
+    ↯location(1) world_normal: vec3<f32>,
+    ↯location(2) uv: vec2<f32>,
+    ↯location(3) color: vec4<f32>,
 }
 
 struct FragmentOutput {
-    @location(0) color: vec4<f32>,
+    ↯location(0) color: vec4<f32>,
 }
 
 struct Camera {
@@ -50,27 +50,27 @@ struct Transform {
 }
 
 // Uniform buffer bindings
-@group(0) @binding(0) var<uniform> camera: Camera;
-@group(0) @binding(1) var<uniform> transform: Transform;
-@group(0) @binding(2) var<uniform> material: Material;
-@group(0) @binding(3) var<uniform> lights: array<Light, 8>;
-@group(0) @binding(4) var<uniform> time: f32;
+↯group(0) ↯binding(0) var<uniform> camera: Camera;
+↯group(0) ↯binding(1) var<uniform> transform: Transform;
+↯group(0) ↯binding(2) var<uniform> material: Material;
+↯group(0) ↯binding(3) var<uniform> lights: array<Light, 8>;
+↯group(0) ↯binding(4) var<uniform> time: f32;
 
 // Texture and sampler bindings
-@group(1) @binding(0) var albedo_texture: texture_2d<f32>;
-@group(1) @binding(1) var normal_texture: texture_2d<f32>;
-@group(1) @binding(2) var metallic_roughness_texture: texture_2d<f32>;
-@group(1) @binding(3) var ao_texture: texture_2d<f32>;
-@group(1) @binding(4) var emissive_texture: texture_2d<f32>;
-@group(1) @binding(5) var texture_sampler: sampler;
+↯group(1) ↯binding(0) var albedo_texture: texture_2d<f32>;
+↯group(1) ↯binding(1) var normal_texture: texture_2d<f32>;
+↯group(1) ↯binding(2) var metallic_roughness_texture: texture_2d<f32>;
+↯group(1) ↯binding(3) var ao_texture: texture_2d<f32>;
+↯group(1) ↯binding(4) var emissive_texture: texture_2d<f32>;
+↯group(1) ↯binding(5) var texture_sampler: sampler;
 
 // Cube texture for environment mapping
-@group(2) @binding(0) var environment_map: texture_cube<f32>;
-@group(2) @binding(1) var environment_sampler: sampler;
+↯group(2) ↯binding(0) var environment_map: texture_cube<f32>;
+↯group(2) ↯binding(1) var environment_sampler: sampler;
 
 // Storage buffers
-@group(3) @binding(0) var<storage, read> vertex_buffer: array<VertexInput>;
-@group(3) @binding(1) var<storage, read_write> compute_buffer: array<f32>;
+↯group(3) ↯binding(0) var<storage, read> vertex_buffer: array<VertexInput>;
+↯group(3) ↯binding(1) var<storage, read_write> compute_buffer: array<f32>;
 
 // Constants
 const PI: f32 = 3.14159265359;
@@ -235,7 +235,7 @@ fn gamma_correct(color: vec3<f32>) -> vec3<f32> {
 }
 
 // Vertex shader
-@vertex
+↯vertex
 fn vs_main(input: VertexInput) -> VertexOutput {
     var output: VertexOutput;
     
@@ -259,7 +259,7 @@ fn vs_main(input: VertexInput) -> VertexOutput {
 }
 
 // Fragment shader
-@fragment
+↯fragment
 fn fs_main(input: VertexOutput) -> FragmentOutput {
     var output: FragmentOutput;
     
@@ -318,12 +318,12 @@ struct Particle {
     size: f32,
 }
 
-@group(0) @binding(0) var<storage, read_write> particles: array<Particle>;
-@group(0) @binding(1) var<uniform> delta_time: f32;
-@group(0) @binding(2) var<uniform> gravity: vec3<f32>;
+↯group(0) ↯binding(0) var<storage, read_write> particles: array<Particle>;
+↯group(0) ↯binding(1) var<uniform> delta_time: f32;
+↯group(0) ↯binding(2) var<uniform> gravity: vec3<f32>;
 
-@compute @workgroup_size(64)
-fn cs_particle_update(@builtin(global_invocation_id) global_id: vec3<u32>) {
+↯compute ↯workgroup_size(64)
+fn cs_particle_update(↯builtin(global_invocation_id) global_id: vec3<u32>) {
     let index = global_id.x;
     
     if (index >= arrayLength(&particles)) {
@@ -357,11 +357,11 @@ fn cs_particle_update(@builtin(global_invocation_id) global_id: vec3<u32>) {
 }
 
 // Post-processing compute shader
-@group(0) @binding(0) var input_texture: texture_2d<f32>;
-@group(0) @binding(1) var output_texture: texture_storage_2d<rgba8unorm, write>;
+↯group(0) ↯binding(0) var input_texture: texture_2d<f32>;
+↯group(0) ↯binding(1) var output_texture: texture_storage_2d<rgba8unorm, write>;
 
-@compute @workgroup_size(8, 8)
-fn cs_post_process(@builtin(global_invocation_id) global_id: vec3<u32>) {
+↯compute ↯workgroup_size(8, 8)
+fn cs_post_process(↯builtin(global_invocation_id) global_id: vec3<u32>) {
     let coords = vec2<i32>(global_id.xy);
     let dimensions = textureDimensions(input_texture);
     
@@ -395,19 +395,19 @@ fn cs_post_process(@builtin(global_invocation_id) global_id: vec3<u32>) {
 }
 
 // Shadow mapping vertex shader
-@vertex
-fn vs_shadow(@location(0) position: vec3<f32>) -> @builtin(position) vec4<f32> {
+↯vertex
+fn vs_shadow(↯location(0) position: vec3<f32>) -> ↯builtin(position) vec4<f32> {
     return camera.view_proj * transform.model * vec4<f32>(position, 1.0);
 }
 
 // Skybox vertex shader
 struct SkyboxOutput {
-    @builtin(position) position: vec4<f32>,
-    @location(0) world_position: vec3<f32>,
+    ↯builtin(position) position: vec4<f32>,
+    ↯location(0) world_position: vec3<f32>,
 }
 
-@vertex
-fn vs_skybox(@location(0) position: vec3<f32>) -> SkyboxOutput {
+↯vertex
+fn vs_skybox(↯location(0) position: vec3<f32>) -> SkyboxOutput {
     var output: SkyboxOutput;
     
     // Remove translation from view matrix
@@ -423,8 +423,8 @@ fn vs_skybox(@location(0) position: vec3<f32>) -> SkyboxOutput {
     return output;
 }
 
-@fragment
-fn fs_skybox(input: SkyboxOutput) -> @location(0) vec4<f32> {
+↯fragment
+fn fs_skybox(input: SkyboxOutput) -> ↯location(0) vec4<f32> {
     return textureSample(environment_map, environment_sampler, input.world_position);
 }
 
@@ -434,14 +434,14 @@ struct InstanceData {
     color: vec4<f32>,
 }
 
-@group(0) @binding(0) var<storage, read> instances: array<InstanceData>;
+↯group(0) ↯binding(0) var<storage, read> instances: array<InstanceData>;
 
-@vertex
+↯vertex
 fn vs_instanced(
-    @location(0) position: vec3<f32>,
-    @location(1) normal: vec3<f32>,
-    @location(2) uv: vec2<f32>,
-    @builtin(instance_index) instance_index: u32
+    ↯location(0) position: vec3<f32>,
+    ↯location(1) normal: vec3<f32>,
+    ↯location(2) uv: vec2<f32>,
+    ↯builtin(instance_index) instance_index: u32
 ) -> VertexOutput {
     var output: VertexOutput;
     

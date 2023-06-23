@@ -1,4 +1,7 @@
-use crate::{kind::ElixirSyntaxKind, language::ElixirLanguage};
+#![doc = include_str!("readme.md")]
+pub mod token_type;
+
+use crate::{language::ElixirLanguage, lexer::token_type::ElixirTokenType};
 use oak_core::{
     Lexer, LexerCache, LexerState,
     errors::OakError,
@@ -16,7 +19,7 @@ static ELIXIR_CHAR: LazyLock<StringConfig> = LazyLock::new(|| StringConfig { quo
 
 #[derive(Clone, Debug)]
 pub struct ElixirLexer<'config> {
-    _config: &'config ElixirLanguage,
+    config: &'config ElixirLanguage,
 }
 
 impl<'config> Lexer<ElixirLanguage> for ElixirLexer<'config> {
@@ -24,7 +27,7 @@ impl<'config> Lexer<ElixirLanguage> for ElixirLexer<'config> {
         let mut state = State::new_with_cache(source, 0, cache);
         let result = self.run(&mut state);
         if result.is_ok() {
-            state.add_eof();
+            state.add_eof()
         }
         state.finish_with_cache(result, cache)
     }
@@ -32,7 +35,7 @@ impl<'config> Lexer<ElixirLanguage> for ElixirLexer<'config> {
 
 impl<'config> ElixirLexer<'config> {
     pub fn new(config: &'config ElixirLanguage) -> Self {
-        Self { _config: config }
+        Self { config }
     }
 
     fn run<'s, S: Source + ?Sized>(&self, state: &mut State<'s, S>) -> Result<(), OakError> {
@@ -83,182 +86,109 @@ impl<'config> ElixirLexer<'config> {
 
     /// 跳过空白字符
     fn skip_whitespace<'s, S: Source + ?Sized>(&self, state: &mut State<'s, S>) -> bool {
-        ELIXIR_WHITESPACE.scan(state, ElixirSyntaxKind::Whitespace)
+        ELIXIR_WHITESPACE.scan(state, ElixirTokenType::Whitespace)
     }
 
     fn skip_comment<'s, S: Source + ?Sized>(&self, state: &mut State<'s, S>) -> bool {
-        ELIXIR_COMMENT.scan(state, ElixirSyntaxKind::Comment, ElixirSyntaxKind::Comment)
+        ELIXIR_COMMENT.scan(state, ElixirTokenType::Comment, ElixirTokenType::Comment)
     }
 
     fn lex_string_literal<'s, S: Source + ?Sized>(&self, state: &mut State<'s, S>) -> bool {
-        ELIXIR_STRING.scan(state, ElixirSyntaxKind::String)
+        ELIXIR_STRING.scan(state, ElixirTokenType::String)
     }
 
     fn lex_char_literal<'s, S: Source + ?Sized>(&self, state: &mut State<'s, S>) -> bool {
-        ELIXIR_CHAR.scan(state, ElixirSyntaxKind::Character)
+        ELIXIR_CHAR.scan(state, ElixirTokenType::Character)
     }
 
     fn lex_sigil<'s, S: Source + ?Sized>(&self, state: &mut State<'s, S>) -> bool {
         let start = state.get_position();
-
-        if state.consume_if_starts_with("~") {
-            if let Some(sigil_type) = state.peek() {
-                if sigil_type.is_alphabetic() {
-                    state.advance(sigil_type.len_utf8());
-
-                    // 查找分隔符
-                    if let Some(delimiter) = state.peek() {
-                        let closing_delimiter = match delimiter {
-                            '(' => ')',
-                            '[' => ']',
-                            '{' => '}',
-                            '<' => '>',
-                            '/' => '/',
-                            '|' => '|',
-                            '"' => '"',
-                            '\'' => '\'',
-                            _ => delimiter,
-                        };
-
-                        state.advance(delimiter.len_utf8());
-
-                        while let Some(ch) = state.peek() {
-                            if ch == closing_delimiter {
-                                state.advance(ch.len_utf8());
-                                break;
-                            }
-                            state.advance(ch.len_utf8());
-                        }
-
-                        // 可选的修饰符
-                        state.take_while(|c| c.is_alphabetic());
-
-                        state.add_token(ElixirSyntaxKind::Sigil, start, state.get_position());
-                        return true;
+        if state.peek() == Some('~') {
+            state.advance(1);
+            state.take_while(|c| c.is_alphabetic());
+            if let Some(ch) = state.peek() {
+                if "\"\'([{<".contains(ch) {
+                    // Simplified sigil lexing
+                    state.advance(ch.len_utf8());
+                    let closer = match ch {
+                        '(' => ')',
+                        '[' => ']',
+                        '{' => '}',
+                        '<' => '>',
+                        c => c,
+                    };
+                    state.take_while(|c| c != closer);
+                    if state.peek() == Some(closer) {
+                        state.advance(closer.len_utf8());
                     }
                 }
+            }
+            state.add_token(ElixirTokenType::Sigil, start, state.get_position());
+            return true;
+        }
+        false
+    }
+
+    fn lex_number_literal<'s, S: Source + ?Sized>(&self, state: &mut State<'s, S>) -> bool {
+        let start = state.get_position();
+        if let Some(ch) = state.peek() {
+            if ch.is_ascii_digit() {
+                state.take_while(|c| c.is_ascii_digit() || c == '_');
+                if state.peek() == Some('.') {
+                    state.advance(1);
+                    state.take_while(|c| c.is_ascii_digit() || c == '_');
+                    state.add_token(ElixirTokenType::Float, start, state.get_position());
+                }
+                else {
+                    state.add_token(ElixirTokenType::Number, start, state.get_position());
+                }
+                return true;
             }
         }
         false
     }
 
-    fn lex_number_literal<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
+    fn lex_identifier_or_keyword<'s, S: Source + ?Sized>(&self, state: &mut State<'s, S>) -> bool {
         let start = state.get_position();
-        let first = match state.peek() {
-            Some(c) => c,
-            None => return false,
-        };
-        if !first.is_ascii_digit() {
-            return false;
-        }
-        let mut is_float = false;
-        if first == '0' {
-            match state.peek_next_n(1) {
-                Some('x') | Some('X') => {
-                    state.advance(2);
-                    state.take_while(|c| c.is_ascii_hexdigit() || c == '_');
-                }
-                Some('b') | Some('B') => {
-                    state.advance(2);
-                    state.take_while(|c| c == '0' || c == '1' || c == '_');
-                }
-                Some('o') | Some('O') => {
-                    state.advance(2);
-                    state.take_while(|c| ('0'..='7').contains(&c) || c == '_');
-                }
-                _ => {
-                    state.advance(1);
-                    state.take_while(|c| c.is_ascii_digit() || c == '_');
-                }
-            }
-        }
-        else {
-            state.advance(1);
-            state.take_while(|c| c.is_ascii_digit() || c == '_');
-        }
-        // fractional part
-        if state.peek() == Some('.') {
-            let n1 = state.peek_next_n(1);
-            if n1.map(|c| c.is_ascii_digit()).unwrap_or(false) {
-                is_float = true;
-                state.advance(1); // consume '.'
-                state.take_while(|c| c.is_ascii_digit() || c == '_');
-            }
-        }
-        // exponent
-        if let Some(c) = state.peek() {
-            if c == 'e' || c == 'E' {
-                let n1 = state.peek_next_n(1);
-                if n1 == Some('+') || n1 == Some('-') || n1.map(|d| d.is_ascii_digit()).unwrap_or(false) {
-                    is_float = true;
-                    state.advance(1);
-                    if let Some(sign) = state.peek() {
-                        if sign == '+' || sign == '-' {
-                            state.advance(1);
-                        }
-                    }
-                    state.take_while(|d| d.is_ascii_digit() || d == '_');
-                }
-            }
-        }
-        // suffix letters
-        state.take_while(|c| c.is_ascii_alphabetic());
-        let end = state.get_position();
-        state.add_token(if is_float { ElixirSyntaxKind::Float } else { ElixirSyntaxKind::Number }, start, end);
-        true
-    }
-
-    fn lex_identifier_or_keyword<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
-        let start = state.get_position();
-
         if let Some(ch) = state.peek() {
             if ch.is_alphabetic() || ch == '_' {
-                state.advance(ch.len_utf8());
-                state.take_while(|next_ch| next_ch.is_alphanumeric() || next_ch == '_' || next_ch == '?' || next_ch == '!');
-
-                let text = state.get_text_in((start..state.get_position()).into());
-                let kind = match text.as_ref() {
-                    "after" => ElixirSyntaxKind::After,
-                    "and" => ElixirSyntaxKind::And,
-                    "case" => ElixirSyntaxKind::Case,
-                    "catch" => ElixirSyntaxKind::Catch,
-                    "cond" => ElixirSyntaxKind::Cond,
-                    "def" => ElixirSyntaxKind::Def,
-                    "defp" => ElixirSyntaxKind::Defp,
-                    "defmodule" => ElixirSyntaxKind::Defmodule,
-                    "defstruct" => ElixirSyntaxKind::Defstruct,
-                    "defprotocol" => ElixirSyntaxKind::Defprotocol,
-                    "defimpl" => ElixirSyntaxKind::Defimpl,
-                    "defmacro" => ElixirSyntaxKind::Defmacro,
-                    "defmacrop" => ElixirSyntaxKind::Defmacrop,
-                    "do" => ElixirSyntaxKind::Do,
-                    "else" => ElixirSyntaxKind::Else,
-                    "elsif" => ElixirSyntaxKind::Elsif,
-                    "end" => ElixirSyntaxKind::End,
-                    "false" => ElixirSyntaxKind::False,
-                    "fn" => ElixirSyntaxKind::Fn,
-                    "if" => ElixirSyntaxKind::If,
-                    "in" => ElixirSyntaxKind::In,
-                    "not" => ElixirSyntaxKind::Not,
-                    "or" => ElixirSyntaxKind::Or,
-                    "receive" => ElixirSyntaxKind::Receive,
-                    "rescue" => ElixirSyntaxKind::Rescue,
-                    "true" => ElixirSyntaxKind::True,
-                    "try" => ElixirSyntaxKind::Try,
-                    "unless" => ElixirSyntaxKind::Unless,
-                    "when" => ElixirSyntaxKind::When,
-                    "with" => ElixirSyntaxKind::With,
-                    _ => {
-                        if text.as_ref().chars().next().unwrap().is_uppercase() {
-                            ElixirSyntaxKind::Variable
-                        }
-                        else {
-                            ElixirSyntaxKind::Identifier
-                        }
-                    }
+                state.take_while(|c| c.is_alphanumeric() || c == '_' || c == '!' || c == '?');
+                let text = state.get_text_in(oak_core::Range { start, end: state.get_position() });
+                let token_type = match text.as_ref() {
+                    "after" => ElixirTokenType::After,
+                    "and" => ElixirTokenType::And,
+                    "case" => ElixirTokenType::Case,
+                    "catch" => ElixirTokenType::Catch,
+                    "cond" => ElixirTokenType::Cond,
+                    "def" => ElixirTokenType::Def,
+                    "defp" => ElixirTokenType::Defp,
+                    "defmodule" => ElixirTokenType::Defmodule,
+                    "defstruct" => ElixirTokenType::Defstruct,
+                    "defprotocol" => ElixirTokenType::Defprotocol,
+                    "defimpl" => ElixirTokenType::Defimpl,
+                    "defmacro" => ElixirTokenType::Defmacro,
+                    "defmacrop" => ElixirTokenType::Defmacrop,
+                    "do" => ElixirTokenType::Do,
+                    "else" => ElixirTokenType::Else,
+                    "elsif" => ElixirTokenType::Elsif,
+                    "end" => ElixirTokenType::End,
+                    "false" => ElixirTokenType::False,
+                    "fn" => ElixirTokenType::Fn,
+                    "if" => ElixirTokenType::If,
+                    "in" => ElixirTokenType::In,
+                    "not" => ElixirTokenType::Not,
+                    "or" => ElixirTokenType::Or,
+                    "receive" => ElixirTokenType::Receive,
+                    "rescue" => ElixirTokenType::Rescue,
+                    "true" => ElixirTokenType::True,
+                    "try" => ElixirTokenType::Try,
+                    "unless" => ElixirTokenType::Unless,
+                    "when" => ElixirTokenType::When,
+                    "with" => ElixirTokenType::With,
+                    _ if text.chars().next().map_or(false, |c| c.is_uppercase()) => ElixirTokenType::Variable,
+                    _ => ElixirTokenType::Identifier,
                 };
-
-                state.add_token(kind, start, state.get_position());
+                state.add_token(token_type, start, state.get_position());
                 return true;
             }
         }
@@ -267,104 +197,72 @@ impl<'config> ElixirLexer<'config> {
 
     fn lex_atom<'s, S: Source + ?Sized>(&self, state: &mut State<'s, S>) -> bool {
         let start = state.get_position();
-
-        if state.consume_if_starts_with(":") {
-            // 处理引用的原子 :"atom"
-            if state.consume_if_starts_with("\"") {
-                while let Some(ch) = state.peek() {
-                    if ch == '"' {
-                        state.advance(1);
-                        break;
-                    }
-                    if state.consume_if_starts_with("\\") {
-                        if let Some(escaped) = state.peek() {
-                            state.advance(escaped.len_utf8());
-                        }
-                    }
-                    else {
-                        state.advance(ch.len_utf8());
-                    }
-                }
-            }
-            else if let Some(ch) = state.peek() {
+        if state.peek() == Some(':') {
+            state.advance(1);
+            if let Some(ch) = state.peek() {
                 if ch.is_alphabetic() || ch == '_' {
-                    state.advance(ch.len_utf8());
-                    state.take_while(|next_ch| next_ch.is_alphanumeric() || next_ch == '_' || next_ch == '?' || next_ch == '!');
+                    state.take_while(|c| c.is_alphanumeric() || c == '_' || c == '!' || c == '?');
+                }
+                else if ch == '"' {
+                    state.advance(1);
+                    state.take_while(|c| c != '"');
+                    if state.peek() == Some('"') {
+                        state.advance(1);
+                    }
                 }
             }
-
-            state.add_token(ElixirSyntaxKind::Atom, start, state.get_position());
+            state.add_token(ElixirTokenType::Atom, start, state.get_position());
             return true;
         }
         false
     }
 
-    fn lex_operators<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
+    fn lex_operators<'s, S: Source + ?Sized>(&self, state: &mut State<'s, S>) -> bool {
         let start = state.get_position();
-
-        // 多字符操作符
-        let ops = [
-            ("===", ElixirSyntaxKind::EqualEqualEqual),
-            ("!==", ElixirSyntaxKind::NotEqualEqual),
-            ("==", ElixirSyntaxKind::EqualEqual),
-            ("!=", ElixirSyntaxKind::NotEqual),
-            ("<=", ElixirSyntaxKind::LessEqual),
-            (">=", ElixirSyntaxKind::GreaterEqual),
-            ("++", ElixirSyntaxKind::PlusPlus),
-            ("--", ElixirSyntaxKind::MinusMinus),
-            ("**", ElixirSyntaxKind::StarStar),
-            ("<<", ElixirSyntaxKind::LeftShift),
-            (">>", ElixirSyntaxKind::RightShift),
-            ("=~", ElixirSyntaxKind::MatchOp),
-            ("|>", ElixirSyntaxKind::PipeRight),
-            ("||", ElixirSyntaxKind::PipePipe),
-            ("->", ElixirSyntaxKind::Arrow),
+        let operators = [
+            ("|>", ElixirTokenType::Pipeline),
+            ("++", ElixirTokenType::PlusPlus),
+            ("--", ElixirTokenType::MinusMinus),
+            ("<>", ElixirTokenType::Concat),
+            ("==", ElixirTokenType::EqEq),
+            ("!=", ElixirTokenType::Ne),
+            ("<=", ElixirTokenType::Le),
+            (">=", ElixirTokenType::Ge),
+            ("&&", ElixirTokenType::AndAnd),
+            ("||", ElixirTokenType::OrOr),
+            ("<<", ElixirTokenType::LeftDoubleBracket),
+            (">>", ElixirTokenType::RightDoubleBracket),
+            ("->", ElixirTokenType::Arrow),
+            ("+", ElixirTokenType::Plus),
+            ("-", ElixirTokenType::Minus),
+            ("*", ElixirTokenType::Mul),
+            ("/", ElixirTokenType::Div),
+            (".", ElixirTokenType::Dot),
+            (",", ElixirTokenType::Comma),
+            (";", ElixirTokenType::Semicolon),
+            (":", ElixirTokenType::Colon),
+            ("(", ElixirTokenType::LeftParen),
+            (")", ElixirTokenType::RightParen),
+            ("{", ElixirTokenType::LeftBrace),
+            ("}", ElixirTokenType::RightBrace),
+            ("[", ElixirTokenType::LeftBracket),
+            ("]", ElixirTokenType::RightBracket),
+            ("|", ElixirTokenType::Pipe),
+            ("=", ElixirTokenType::Eq),
+            ("<", ElixirTokenType::Lt),
+            (">", ElixirTokenType::Gt),
+            ("!", ElixirTokenType::Bang),
+            ("@", ElixirTokenType::At),
+            ("%", ElixirTokenType::Percent),
         ];
 
-        for (pattern, kind) in ops {
-            if state.consume_if_starts_with(pattern) {
-                state.add_token(kind, start, state.get_position());
+        for (op, token_type) in operators {
+            if state.starts_with(op) {
+                state.advance(op.len());
+                state.add_token(token_type, start, state.get_position());
                 return true;
             }
         }
-
-        // 单字符操作符
-        if let Some(ch) = state.peek() {
-            let kind = match ch {
-                '+' => ElixirSyntaxKind::Plus,
-                '-' => ElixirSyntaxKind::Minus,
-                '*' => ElixirSyntaxKind::Star,
-                '/' => ElixirSyntaxKind::Slash,
-                '=' => ElixirSyntaxKind::Equal,
-                '<' => ElixirSyntaxKind::Less,
-                '>' => ElixirSyntaxKind::Greater,
-                '!' => ElixirSyntaxKind::Exclamation,
-                '?' => ElixirSyntaxKind::Question,
-                '&' => ElixirSyntaxKind::Ampersand,
-                '@' => ElixirSyntaxKind::At,
-                '^' => ElixirSyntaxKind::Caret,
-                '~' => ElixirSyntaxKind::Tilde,
-                '|' => ElixirSyntaxKind::Pipe,
-                '#' => ElixirSyntaxKind::Hash,
-                '(' => ElixirSyntaxKind::LeftParen,
-                ')' => ElixirSyntaxKind::RightParen,
-                '{' => ElixirSyntaxKind::LeftBrace,
-                '}' => ElixirSyntaxKind::RightBrace,
-                '[' => ElixirSyntaxKind::LeftBracket,
-                ']' => ElixirSyntaxKind::RightBracket,
-                ',' => ElixirSyntaxKind::Comma,
-                ';' => ElixirSyntaxKind::Semicolon,
-                '.' => ElixirSyntaxKind::Dot,
-                ':' => ElixirSyntaxKind::Colon,
-                '\n' => ElixirSyntaxKind::Newline,
-                _ => return false,
-            };
-
-            state.advance(ch.len_utf8());
-            state.add_token(kind, start, state.get_position());
-            return true;
-        }
-
         false
     }
 }

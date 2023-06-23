@@ -1,9 +1,11 @@
 use crate::lexer::BashTokenType;
 use oak_core::{ElementType, UniversalElementRole};
+#[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
 
 /// Represents all possible element kinds in the Bash shell scripting language.
-#[derive(Debug, Copy, Clone, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Deserialize)]
+#[derive(Debug, Copy, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub enum BashElementType {
     /// A wrapper for tokens
     Token(BashTokenType),

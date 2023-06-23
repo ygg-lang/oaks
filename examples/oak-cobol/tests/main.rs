@@ -18,7 +18,7 @@ impl CobolFileTestSuite {
             for entry in entries.flatten() {
                 if let Some(file_name) = entry.file_name().to_str() {
                     if file_name.ends_with(&format!(".{}", self.extension)) {
-                        files.push(entry.path().to_string_lossy().to_string());
+                        files.push(entry.path().to_string_lossy().to_string())
                     }
                 }
             }
@@ -43,8 +43,8 @@ fn test_lexer() {
 
         match test_suite.read_file_content(&file_path) {
             Ok(content) => {
-                let source = SourceText::new(&content);
-                let language = CobolLanguage;
+                let source = SourceText::new(&*content);
+                let language = CobolLanguage {};
                 let lexer = CobolLexer::new(&language);
                 let mut session = ParseSession::<CobolLanguage>::new(16);
                 let output = lexer.lex(&source, &[], &mut session);
@@ -60,11 +60,11 @@ fn test_lexer() {
 
                 // 显示前几tokens 作为示例
                 for (i, token) in tokens.iter().take(10).enumerate() {
-                    println!("    {}: {:?}", i, token);
+                    println!("    {}: {:?}", i, token)
                 }
 
                 if tokens.len() > 10 {
-                    println!("    ... and {} more tokens", tokens.len() - 10);
+                    println!("    ... and {} more tokens", tokens.len() - 10)
                 }
 
                 // 验证最后一tokens EOF
@@ -75,15 +75,15 @@ fn test_lexer() {
                     }
                 }
                 else {
-                    println!("  Warning: No tokens generated");
+                    println!("  Warning: No tokens generated")
                 }
             }
             Err(e) => {
-                println!("  Error reading file: {}", e);
+                println!("  Error reading file: {}", e)
             }
         }
 
-        println!();
+        println!()
     }
 }
 
@@ -99,8 +99,8 @@ fn test_parser() {
         match test_suite.read_file_content(&file_path) {
             Ok(content) => {
                 // 首先进行词法分析
-                let source = SourceText::new(&content);
-                let language = CobolLanguage;
+                let source = SourceText::new(&*content);
+                let language = CobolLanguage {};
                 let lexer = CobolLexer::new(&language);
                 let mut session = ParseSession::<CobolLanguage>::new(16);
                 let output = lexer.lex(&source, &[], &mut session);
@@ -108,19 +108,19 @@ fn test_parser() {
                 match &output.result {
                     Ok(_tokens) => {
                         // 解析器测试暂时跳过，因为 COBOL 解析器可能还未实现
-                        println!("  Parser test skipped (not implemented yet)");
+                        println!("  Parser test skipped (not implemented yet)")
                     }
                     Err(e) => {
-                        println!("  Lexing error: {:?}", e);
+                        println!("  Lexing error: {:?}", e)
                     }
                 }
             }
             Err(e) => {
-                println!("  Error reading file: {}", e);
+                println!("  Error reading file: {}", e)
             }
         }
 
-        println!();
+        println!()
     }
 }
 

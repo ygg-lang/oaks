@@ -1,12 +1,15 @@
+#![doc = include_str!("readme.md")]
 use oak_core::{Language, LanguageCategory};
+#[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
 
-/// Python 语言定义
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Default, Serialize, Deserialize)]
+/// Python language definition.
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Default)]
 pub struct PythonLanguage {}
 
 impl PythonLanguage {
-    /// 创建新的 Python 语言配置
+    /// Creates a new Python language configuration.
     pub fn new() -> Self {
         Self {}
     }
@@ -16,7 +19,7 @@ impl Language for PythonLanguage {
     const NAME: &'static str = "python";
     const CATEGORY: LanguageCategory = LanguageCategory::Programming;
 
-    type TokenType = crate::kind::PythonSyntaxKind;
-    type ElementType = crate::kind::PythonSyntaxKind;
+    type TokenType = crate::lexer::token_type::PythonTokenType;
+    type ElementType = crate::parser::element_type::PythonElementType;
     type TypedRoot = crate::ast::PythonRoot;
 }

@@ -1,4 +1,3 @@
-use oak_core::errors::OakError;
 use oak_html::{HtmlLanguage, HtmlParser};
 use oak_testing::parsing::ParserTester;
 use std::{path::Path, time::Duration};

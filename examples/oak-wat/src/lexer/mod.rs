@@ -1,4 +1,7 @@
-use crate::{kind::WatSyntaxKind, language::WatLanguage};
+#![doc = include_str!("readme.md")]
+pub mod token_type;
+
+use crate::{language::WatLanguage, lexer::token_type::WatTokenType};
 use oak_core::{
     Lexer, LexerCache, LexerState, OakError,
     lexer::{CommentConfig, LexOutput, StringConfig, WhitespaceConfig},
@@ -9,7 +12,7 @@ use std::sync::LazyLock;
 type State<'a, S> = LexerState<'a, S, WatLanguage>;
 
 static WAT_WHITESPACE: LazyLock<WhitespaceConfig> = LazyLock::new(|| WhitespaceConfig { unicode_whitespace: true });
-static WAT_COMMENT: LazyLock<CommentConfig> = LazyLock::new(|| CommentConfig { line_marker: ";;", block_start: "(;", block_end: ";)", nested_blocks: true });
+static WAT_COMMENT: LazyLock<CommentConfig> = LazyLock::new(|| CommentConfig { line_marker: ";;", block_start: "(;", block_end: ")", nested_blocks: true });
 static WAT_STRING: LazyLock<StringConfig> = LazyLock::new(|| StringConfig { quotes: &['"'], escape: Some('\\') });
 
 #[derive(Clone)]
@@ -69,17 +72,17 @@ impl<'config> WatLexer<'config> {
 
     /// 跳过空白字符
     fn skip_whitespace<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
-        WAT_WHITESPACE.scan(state, WatSyntaxKind::Whitespace)
+        WAT_WHITESPACE.scan(state, WatTokenType::Whitespace)
     }
 
     /// 跳过注释
     fn skip_comment<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
-        WAT_COMMENT.scan(state, WatSyntaxKind::Comment, WatSyntaxKind::Comment)
+        WAT_COMMENT.scan(state, WatTokenType::Comment, WatTokenType::Comment)
     }
 
     /// 解析字符串字面量
     fn lex_string_literal<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
-        WAT_STRING.scan(state, WatSyntaxKind::StringLiteral)
+        WAT_STRING.scan(state, WatTokenType::StringLiteral)
     }
 
     /// 解析数字字面量
@@ -104,7 +107,7 @@ impl<'config> WatLexer<'config> {
                         break;
                     }
                 }
-                let kind = if is_float { WatSyntaxKind::FloatLiteral } else { WatSyntaxKind::IntegerLiteral };
+                let kind = if is_float { WatTokenType::FloatLiteral } else { WatTokenType::IntegerLiteral };
                 state.add_token(kind, start, state.get_position());
                 return true;
             }
@@ -129,84 +132,84 @@ impl<'config> WatLexer<'config> {
                 let end = state.get_position();
                 let text = state.get_text_in((start..end).into());
                 let kind = if text.starts_with('$') {
-                    WatSyntaxKind::Identifier
+                    WatTokenType::Identifier
                 }
                 else {
                     match text.as_ref() {
-                        "module" => WatSyntaxKind::ModuleKw,
-                        "func" => WatSyntaxKind::FuncKw,
-                        "param" => WatSyntaxKind::ParamKw,
-                        "result" => WatSyntaxKind::ResultKw,
-                        "export" => WatSyntaxKind::ExportKw,
-                        "import" => WatSyntaxKind::ImportKw,
-                        "table" => WatSyntaxKind::TableKw,
-                        "memory" => WatSyntaxKind::MemoryKw,
-                        "global" => WatSyntaxKind::GlobalKw,
-                        "type" => WatSyntaxKind::TypeKw,
-                        "elem" => WatSyntaxKind::ElemKw,
-                        "data" => WatSyntaxKind::DataKw,
-                        "start" => WatSyntaxKind::StartKw,
-                        "block" => WatSyntaxKind::BlockKw,
-                        "loop" => WatSyntaxKind::LoopKw,
-                        "if" => WatSyntaxKind::IfKw,
-                        "then" => WatSyntaxKind::ThenKw,
-                        "else" => WatSyntaxKind::ElseKw,
-                        "end" => WatSyntaxKind::EndKw,
-                        "br" => WatSyntaxKind::BrKw,
-                        "br_if" => WatSyntaxKind::BrIfKw,
-                        "br_table" => WatSyntaxKind::BrTableKw,
-                        "return" => WatSyntaxKind::ReturnKw,
-                        "call" => WatSyntaxKind::CallKw,
-                        "call_indirect" => WatSyntaxKind::CallIndirectKw,
-                        "local" => WatSyntaxKind::LocalKw,
-                        "local.get" => WatSyntaxKind::LocalGetKw,
-                        "local.set" => WatSyntaxKind::LocalSetKw,
-                        "local.tee" => WatSyntaxKind::LocalTeeKw,
-                        "global.get" => WatSyntaxKind::GlobalGetKw,
-                        "global.set" => WatSyntaxKind::GlobalSetKw,
-                        "i32.load" => WatSyntaxKind::I32LoadKw,
-                        "i64.load" => WatSyntaxKind::I64LoadKw,
-                        "f32.load" => WatSyntaxKind::F32LoadKw,
-                        "f64.load" => WatSyntaxKind::F64LoadKw,
-                        "i32.store" => WatSyntaxKind::I32StoreKw,
-                        "i64.store" => WatSyntaxKind::I64StoreKw,
-                        "f32.store" => WatSyntaxKind::F32StoreKw,
-                        "f64.store" => WatSyntaxKind::F64StoreKw,
-                        "memory.size" => WatSyntaxKind::MemorySizeKw,
-                        "memory.grow" => WatSyntaxKind::MemoryGrowKw,
-                        "i32.const" => WatSyntaxKind::I32ConstKw,
-                        "i64.const" => WatSyntaxKind::I64ConstKw,
-                        "f32.const" => WatSyntaxKind::F32ConstKw,
-                        "f64.const" => WatSyntaxKind::F64ConstKw,
-                        "i32.add" => WatSyntaxKind::I32AddKw,
-                        "i64.add" => WatSyntaxKind::I64AddKw,
-                        "f32.add" => WatSyntaxKind::F32AddKw,
-                        "f64.add" => WatSyntaxKind::F64AddKw,
-                        "i32.sub" => WatSyntaxKind::I32SubKw,
-                        "i64.sub" => WatSyntaxKind::I64SubKw,
-                        "f32.sub" => WatSyntaxKind::F32SubKw,
-                        "f64.sub" => WatSyntaxKind::F64SubKw,
-                        "i32.mul" => WatSyntaxKind::I32MulKw,
-                        "i64.mul" => WatSyntaxKind::I64MulKw,
-                        "f32.mul" => WatSyntaxKind::F32MulKw,
-                        "f64.mul" => WatSyntaxKind::F64MulKw,
-                        "i32.eq" => WatSyntaxKind::I32EqKw,
-                        "i64.eq" => WatSyntaxKind::I64EqKw,
-                        "f32.eq" => WatSyntaxKind::F32EqKw,
-                        "f64.eq" => WatSyntaxKind::F64EqKw,
-                        "i32.ne" => WatSyntaxKind::I32NeKw,
-                        "i64.ne" => WatSyntaxKind::I64NeKw,
-                        "f32.ne" => WatSyntaxKind::F32NeKw,
-                        "f64.ne" => WatSyntaxKind::F64NeKw,
-                        "drop" => WatSyntaxKind::DropKw,
-                        "select" => WatSyntaxKind::SelectKw,
-                        "unreachable" => WatSyntaxKind::UnreachableKw,
-                        "nop" => WatSyntaxKind::NopKw,
-                        "i32" => WatSyntaxKind::I32Kw,
-                        "i64" => WatSyntaxKind::I64Kw,
-                        "f32" => WatSyntaxKind::F32Kw,
-                        "f64" => WatSyntaxKind::F64Kw,
-                        _ => WatSyntaxKind::Identifier,
+                        "module" => WatTokenType::ModuleKw,
+                        "func" => WatTokenType::FuncKw,
+                        "param" => WatTokenType::ParamKw,
+                        "result" => WatTokenType::ResultKw,
+                        "export" => WatTokenType::ExportKw,
+                        "import" => WatTokenType::ImportKw,
+                        "table" => WatTokenType::TableKw,
+                        "memory" => WatTokenType::MemoryKw,
+                        "global" => WatTokenType::GlobalKw,
+                        "type" => WatTokenType::TypeKw,
+                        "elem" => WatTokenType::ElemKw,
+                        "data" => WatTokenType::DataKw,
+                        "start" => WatTokenType::StartKw,
+                        "block" => WatTokenType::BlockKw,
+                        "loop" => WatTokenType::LoopKw,
+                        "if" => WatTokenType::IfKw,
+                        "then" => WatTokenType::ThenKw,
+                        "else" => WatTokenType::ElseKw,
+                        "end" => WatTokenType::EndKw,
+                        "br" => WatTokenType::BrKw,
+                        "br_if" => WatTokenType::BrIfKw,
+                        "br_table" => WatTokenType::BrTableKw,
+                        "return" => WatTokenType::ReturnKw,
+                        "call" => WatTokenType::CallKw,
+                        "call_indirect" => WatTokenType::CallIndirectKw,
+                        "local" => WatTokenType::LocalKw,
+                        "local.get" => WatTokenType::LocalGetKw,
+                        "local.set" => WatTokenType::LocalSetKw,
+                        "local.tee" => WatTokenType::LocalTeeKw,
+                        "global.get" => WatTokenType::GlobalGetKw,
+                        "global.set" => WatTokenType::GlobalSetKw,
+                        "i32.load" => WatTokenType::I32LoadKw,
+                        "i64.load" => WatTokenType::I64LoadKw,
+                        "f32.load" => WatTokenType::F32LoadKw,
+                        "f64.load" => WatTokenType::F64LoadKw,
+                        "i32.store" => WatTokenType::I32StoreKw,
+                        "i64.store" => WatTokenType::I64StoreKw,
+                        "f32.store" => WatTokenType::F32StoreKw,
+                        "f64.store" => WatTokenType::F64StoreKw,
+                        "memory.size" => WatTokenType::MemorySizeKw,
+                        "memory.grow" => WatTokenType::MemoryGrowKw,
+                        "i32.const" => WatTokenType::I32ConstKw,
+                        "i64.const" => WatTokenType::I64ConstKw,
+                        "f32.const" => WatTokenType::F32ConstKw,
+                        "f64.const" => WatTokenType::F64ConstKw,
+                        "i32.add" => WatTokenType::I32AddKw,
+                        "i64.add" => WatTokenType::I64AddKw,
+                        "f32.add" => WatTokenType::F32AddKw,
+                        "f64.add" => WatTokenType::F64AddKw,
+                        "i32.sub" => WatTokenType::I32SubKw,
+                        "i64.sub" => WatTokenType::I64SubKw,
+                        "f32.sub" => WatTokenType::F32SubKw,
+                        "f64.sub" => WatTokenType::F64SubKw,
+                        "i32.mul" => WatTokenType::I32MulKw,
+                        "i64.mul" => WatTokenType::I64MulKw,
+                        "f32.mul" => WatTokenType::F32MulKw,
+                        "f64.mul" => WatTokenType::F64MulKw,
+                        "i32.eq" => WatTokenType::I32EqKw,
+                        "i64.eq" => WatTokenType::I64EqKw,
+                        "f32.eq" => WatTokenType::F32EqKw,
+                        "f64.eq" => WatTokenType::F64EqKw,
+                        "i32.ne" => WatTokenType::I32NeKw,
+                        "i64.ne" => WatTokenType::I64NeKw,
+                        "f32.ne" => WatTokenType::F32NeKw,
+                        "f64.ne" => WatTokenType::F64NeKw,
+                        "drop" => WatTokenType::DropKw,
+                        "select" => WatTokenType::SelectKw,
+                        "unreachable" => WatTokenType::UnreachableKw,
+                        "nop" => WatTokenType::NopKw,
+                        "i32" => WatTokenType::I32Kw,
+                        "i64" => WatTokenType::I64Kw,
+                        "f32" => WatTokenType::F32Kw,
+                        "f64" => WatTokenType::F64Kw,
+                        _ => WatTokenType::Identifier,
                     }
                 };
                 state.add_token(kind, start, end);
@@ -221,9 +224,9 @@ impl<'config> WatLexer<'config> {
         let start = state.get_position();
         if let Some(ch) = state.peek() {
             let kind = match ch {
-                '(' => Some(WatSyntaxKind::LeftParen),
-                ')' => Some(WatSyntaxKind::RightParen),
-                '=' => Some(WatSyntaxKind::Eq),
+                '(' => Some(WatTokenType::LeftParen),
+                ')' => Some(WatTokenType::RightParen),
+                '=' => Some(WatTokenType::Eq),
                 _ => None,
             };
 
@@ -241,7 +244,7 @@ impl<'config> WatLexer<'config> {
         let start = state.get_position();
         if let Some(_ch) = state.peek() {
             state.bump();
-            state.add_token(WatSyntaxKind::Text, start, state.get_position());
+            state.add_token(WatTokenType::Text, start, state.get_position());
             true
         }
         else {

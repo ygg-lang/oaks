@@ -1,8 +1,11 @@
+#![doc = include_str!("readme.md")]
 use oak_core::{Language, LanguageCategory};
+#[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
 
 /// MSIL 语言实现
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct MsilLanguage {
     /// 是否允许扩展指令
     pub extended_instructions: bool,
@@ -39,7 +42,7 @@ impl Language for MsilLanguage {
     const NAME: &'static str = "msil";
     const CATEGORY: LanguageCategory = LanguageCategory::Programming;
 
-    type TokenType = crate::kind::MsilSyntaxKind;
-    type ElementType = crate::kind::MsilSyntaxKind;
+    type TokenType = crate::lexer::token_type::MsilTokenType;
+    type ElementType = crate::parser::element_type::MsilElementType;
     type TypedRoot = crate::ast::MsilRoot;
 }

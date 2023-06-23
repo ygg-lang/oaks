@@ -1,3 +1,4 @@
+#![doc = include_str!("readme.md")]
 pub mod token_type;
 
 pub use token_type::AsciiDocTokenType;
@@ -25,7 +26,7 @@ impl<'config> Lexer<AsciiDocLanguage> for AsciiDocLexer<'config> {
         let mut state = State::new(text);
         let result = self.run(&mut state);
         if result.is_ok() {
-            state.add_eof();
+            state.add_eof()
         }
         state.finish_with_cache(result, cache)
     }
@@ -85,7 +86,7 @@ impl<'config> AsciiDocLexer<'config> {
                 continue;
             }
 
-            state.advance_if_dead_lock(safe_point);
+            state.advance_if_dead_lock(safe_point)
         }
 
         Ok(())
@@ -252,12 +253,7 @@ impl<'config> AsciiDocLexer<'config> {
                 state.advance(ch.len_utf8());
 
                 while let Some(ch) = state.peek() {
-                    if ch.is_alphanumeric() || ch == '_' || ch == ' ' {
-                        state.advance(ch.len_utf8());
-                    }
-                    else {
-                        break;
-                    }
+                    if ch.is_alphanumeric() || ch == '_' || ch == ' ' { state.advance(ch.len_utf8()) } else { break }
                 }
 
                 state.add_token(AsciiDocTokenType::Text, start, state.get_position());

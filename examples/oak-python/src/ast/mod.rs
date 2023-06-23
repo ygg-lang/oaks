@@ -1,306 +1,711 @@
+#![doc = include_str!("readme.md")]
 use core::range::Range;
+#[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
 
-/// Python 源文件的根节点
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+/// Root node of a Python source file.
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[derive(Debug, Clone, PartialEq)]
 pub struct PythonRoot {
+    /// The program structure
     pub program: Program,
-    #[serde(with = "oak_core::serde_range")]
+    /// Source code span
+    #[cfg_attr(feature = "serde", serde(with = "oak_core::serde_range"))]
     pub span: Range<usize>,
 }
 
-/// Python 程序
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+/// A Python program consisting of a list of statements.
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[derive(Debug, Clone, PartialEq)]
 pub struct Program {
+    /// List of statements in the program
     pub statements: Vec<Statement>,
 }
 
-/// 语句
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+/// Represents a Python statement.
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[derive(Debug, Clone, PartialEq)]
 pub enum Statement {
-    /// 函数定义
-    FunctionDef { name: String, parameters: Vec<Parameter>, return_type: Option<Type>, body: Vec<Statement> },
-    /// 类定义
-    ClassDef { name: String, bases: Vec<Expression>, body: Vec<Statement> },
-    /// 变量赋值
-    Assignment { target: Expression, value: Expression },
-    /// 复合赋值 (+=, -=, 等)
-    AugmentedAssignment { target: Expression, operator: AugmentedOperator, value: Expression },
-    /// 表达式语句
+    /// Function definition
+    FunctionDef {
+        /// Decorators applied to the function
+        decorators: Vec<Expression>,
+        /// Function name
+        name: String,
+        /// List of parameters
+        parameters: Vec<Parameter>,
+        /// Optional return type annotation
+        return_type: Option<Type>,
+        /// Function body
+        body: Vec<Statement>,
+    },
+    /// Async function definition
+    AsyncFunctionDef {
+        /// Decorators applied to the function
+        decorators: Vec<Expression>,
+        /// Function name
+        name: String,
+        /// List of parameters
+        parameters: Vec<Parameter>,
+        /// Optional return type annotation
+        return_type: Option<Type>,
+        /// Function body
+        body: Vec<Statement>,
+    },
+    /// Class definition
+    ClassDef {
+        /// Decorators applied to the class
+        decorators: Vec<Expression>,
+        /// Class name
+        name: String,
+        /// Base classes
+        bases: Vec<Expression>,
+        /// Class body
+        body: Vec<Statement>,
+    },
+    /// Variable assignment
+    Assignment {
+        /// Target expression
+        target: Expression,
+        /// Value expression
+        value: Expression,
+    },
+    /// Augmented assignment (e.g., `+=`, `-=`)
+    AugmentedAssignment {
+        /// Target expression
+        target: Expression,
+        /// Augmented operator
+        operator: AugmentedOperator,
+        /// Value expression
+        value: Expression,
+    },
+    /// Expression statement
     Expression(Expression),
-    /// 返回语句
+    /// Return statement
     Return(Option<Expression>),
-    /// 条件语句
-    If { test: Expression, body: Vec<Statement>, orelse: Vec<Statement> },
-    /// for 循环
-    For { target: Expression, iter: Expression, body: Vec<Statement>, orelse: Vec<Statement> },
-    /// while 循环
-    While { test: Expression, body: Vec<Statement>, orelse: Vec<Statement> },
-    /// break 语句
+    /// If statement
+    If {
+        /// Test expression
+        test: Expression,
+        /// Body of the if block
+        body: Vec<Statement>,
+        /// Else block (or empty)
+        orelse: Vec<Statement>,
+    },
+    /// For loop
+    For {
+        /// Loop target
+        target: Expression,
+        /// Iterable expression
+        iter: Expression,
+        /// Loop body
+        body: Vec<Statement>,
+        /// Else block (or empty)
+        orelse: Vec<Statement>,
+    },
+    /// Async for loop
+    AsyncFor {
+        /// Loop target
+        target: Expression,
+        /// Iterable expression
+        iter: Expression,
+        /// Loop body
+        body: Vec<Statement>,
+        /// Else block (or empty)
+        orelse: Vec<Statement>,
+    },
+    /// While loop
+    While {
+        /// Test expression
+        test: Expression,
+        /// Loop body
+        body: Vec<Statement>,
+        /// Else block (or empty)
+        orelse: Vec<Statement>,
+    },
+    /// Break statement
     Break,
-    /// continue 语句
+    /// Continue statement
     Continue,
-    /// pass 语句
+    /// Pass statement
     Pass,
-    /// import 语句
-    Import { names: Vec<ImportName> },
-    /// from import 语句
-    ImportFrom { module: Option<String>, names: Vec<ImportName> },
-    /// try 语句
-    Try { body: Vec<Statement>, handlers: Vec<ExceptHandler>, orelse: Vec<Statement>, finalbody: Vec<Statement> },
-    /// raise 语句
-    Raise { exc: Option<Expression>, cause: Option<Expression> },
-    /// with 语句
-    With { items: Vec<WithItem>, body: Vec<Statement> },
+    /// Import statement
+    Import {
+        /// List of names being imported
+        names: Vec<ImportName>,
+    },
+    /// From-import statement
+    ImportFrom {
+        /// Optional module name
+        module: Option<String>,
+        /// List of names being imported
+        names: Vec<ImportName>,
+    },
+    /// Global statement
+    Global {
+        /// List of global names
+        names: Vec<String>,
+    },
+    /// Nonlocal statement
+    Nonlocal {
+        /// List of nonlocal names
+        names: Vec<String>,
+    },
+    /// Try statement
+    Try {
+        /// Try body
+        body: Vec<Statement>,
+        /// Exception handlers
+        handlers: Vec<ExceptHandler>,
+        /// Else block
+        orelse: Vec<Statement>,
+        /// Finally block
+        finalbody: Vec<Statement>,
+    },
+    /// Raise statement
+    Raise {
+        /// Optional exception
+        exc: Option<Expression>,
+        /// Optional cause
+        cause: Option<Expression>,
+    },
+    /// With statement
+    With {
+        /// With items
+        items: Vec<WithItem>,
+        /// With body
+        body: Vec<Statement>,
+    },
+    /// Async with statement
+    AsyncWith {
+        /// With items
+        items: Vec<WithItem>,
+        /// With body
+        body: Vec<Statement>,
+    },
+    /// Assert statement
+    Assert {
+        /// Test expression
+        test: Expression,
+        /// Optional error message
+        msg: Option<Expression>,
+    },
+    /// Match statement
+    Match {
+        /// Subject expression
+        subject: Expression,
+        /// Match cases
+        cases: Vec<MatchCase>,
+    },
 }
 
-/// 表达式
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
-pub enum Expression {
-    /// 字面量
-    Literal(Literal),
-    /// 标识符
-    Name(String),
-    /// 二元运算
-    BinaryOp { left: Box<Expression>, operator: BinaryOperator, right: Box<Expression> },
-    /// 一元运算
-    UnaryOp { operator: UnaryOperator, operand: Box<Expression> },
-    /// 布尔运算 (and, or)
-    BoolOp { operator: BoolOperator, values: Vec<Expression> },
-    /// 比较运算
-    Compare { left: Box<Expression>, ops: Vec<CompareOperator>, comparators: Vec<Expression> },
-    /// 函数调用
-    Call { func: Box<Expression>, args: Vec<Expression>, keywords: Vec<Keyword> },
-    /// 属性访问
-    Attribute { value: Box<Expression>, attr: String },
-    /// 下标访问
-    Subscript { value: Box<Expression>, slice: Box<Expression> },
-    /// 列表
-    List { elts: Vec<Expression> },
-    /// 元组
-    Tuple { elts: Vec<Expression> },
-    /// 字典
-    Dict { keys: Vec<Option<Expression>>, values: Vec<Expression> },
-    /// 集合
-    Set { elts: Vec<Expression> },
-    /// 列表推导式
-    ListComp { elt: Box<Expression>, generators: Vec<Comprehension> },
-    /// 字典推导式
-    DictComp { key: Box<Expression>, value: Box<Expression>, generators: Vec<Comprehension> },
-    /// 集合推导式
-    SetComp { elt: Box<Expression>, generators: Vec<Comprehension> },
-    /// lambda 表达式
-    Lambda { args: Vec<Parameter>, body: Box<Expression> },
-    /// 条件表达式 (三元运算符)
-    IfExp { test: Box<Expression>, body: Box<Expression>, orelse: Box<Expression> },
-}
-
-/// 字面量
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
-pub enum Literal {
-    /// 整数
-    Integer(i64),
-    /// 浮点数
-    Float(f64),
-    /// 字符串
-    String(String),
-    /// 布尔值
-    Boolean(bool),
-    /// None
-    None,
-}
-
-/// 二元运算符
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
-pub enum BinaryOperator {
-    Add,      // +
-    Sub,      // -
-    Mult,     // *
-    Div,      // /
-    FloorDiv, // //
-    Mod,      // %
-    Pow,      // **
-    LShift,   // <<
-    RShift,   // >>
-    BitOr,    // |
-    BitXor,   // ^
-    BitAnd,   // &
-}
-
-/// 一元运算符
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
-pub enum UnaryOperator {
-    Invert, // ~
-    Not,    // not
-    UAdd,   // +
-    USub,   // -
-}
-
-/// 布尔运算符
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
-pub enum BoolOperator {
-    And, // and
-    Or,  // or
-}
-
-/// 比较运算符
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
-pub enum CompareOperator {
-    Eq,    // ==
-    NotEq, // !=
-    Lt,    // <
-    LtE,   // <=
-    Gt,    // >
-    GtE,   // >=
-    Is,    // is
-    IsNot, // is not
-    In,    // in
-    NotIn, // not in
-}
-
-/// 复合赋值运算符
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
-pub enum AugmentedOperator {
-    Add,      // +=
-    Sub,      // -=
-    Mult,     // *=
-    Div,      // /=
-    FloorDiv, // //=
-    Mod,      // %=
-    Pow,      // **=
-    LShift,   // <<=
-    RShift,   // >>=
-    BitOr,    // |=
-    BitXor,   // ^=
-    BitAnd,   // &=
-}
-
-/// 函数参数
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
-pub struct Parameter {
-    pub name: String,
-    pub annotation: Option<Type>,
-    pub default: Option<Expression>,
-}
-
-/// 类型注解
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
-pub enum Type {
-    /// 基本类型名称
-    Name(String),
-    /// 泛型类型
-    Generic { name: String, args: Vec<Type> },
-    /// 联合类型
-    Union(Vec<Type>),
-    /// 可选类型
-    Optional(Box<Type>),
-}
-
-/// 关键字参数
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
-pub struct Keyword {
-    pub arg: Option<String>,
-    pub value: Expression,
-}
-
-/// 推导式
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
-pub struct Comprehension {
-    pub target: Expression,
-    pub iter: Expression,
-    pub ifs: Vec<Expression>,
-    pub is_async: bool,
-}
-
-/// import 名称
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
-pub struct ImportName {
-    pub name: String,
-    pub asname: Option<String>,
-}
-
-/// 异常处理器
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
-pub struct ExceptHandler {
-    pub type_: Option<Expression>,
-    pub name: Option<String>,
+/// Represents a case in a match statement.
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[derive(Debug, Clone, PartialEq)]
+pub struct MatchCase {
+    /// Pattern to match
+    pub pattern: Pattern,
+    /// Optional guard expression
+    pub guard: Option<Expression>,
+    /// Case body
     pub body: Vec<Statement>,
 }
 
-/// with 语句项
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+/// Represents a pattern in a match case.
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[derive(Debug, Clone, PartialEq)]
+pub enum Pattern {
+    /// Value pattern
+    Value(Expression),
+    /// Wildcard pattern
+    Wildcard,
+    /// As pattern
+    As {
+        /// Optional sub-pattern
+        pattern: Option<Box<Pattern>>,
+        /// Target name
+        name: String,
+    },
+    /// Sequence pattern
+    Sequence(Vec<Pattern>),
+    /// Mapping pattern
+    Mapping {
+        /// Keys to match
+        keys: Vec<Expression>,
+        /// Corresponding patterns
+        patterns: Vec<Pattern>,
+    },
+    /// Class pattern
+    Class {
+        /// Class expression
+        cls: Expression,
+        /// Positional patterns
+        patterns: Vec<Pattern>,
+        /// Keyword names
+        keywords: Vec<String>,
+        /// Keyword patterns
+        keyword_patterns: Vec<Pattern>,
+    },
+    /// Or pattern
+    Or(Vec<Pattern>),
+}
+
+/// Represents a Python expression.
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[derive(Debug, Clone, PartialEq)]
+pub enum Expression {
+    /// Literal value
+    Literal(Literal),
+    /// Identifier name
+    Name(String),
+    /// Binary operation
+    BinaryOp {
+        /// Left operand
+        left: Box<Expression>,
+        /// Binary operator
+        operator: BinaryOperator,
+        /// Right operand
+        right: Box<Expression>,
+    },
+    /// Unary operation
+    UnaryOp {
+        /// Unary operator
+        operator: UnaryOperator,
+        /// Operand
+        operand: Box<Expression>,
+    },
+    /// Boolean operation (and, or)
+    BoolOp {
+        /// Boolean operator
+        operator: BoolOperator,
+        /// List of values
+        values: Vec<Expression>,
+    },
+    /// Comparison operation
+    Compare {
+        /// Leftmost operand
+        left: Box<Expression>,
+        /// Comparison operators
+        ops: Vec<CompareOperator>,
+        /// Subsequent operands
+        comparators: Vec<Expression>,
+    },
+    /// Function call
+    Call {
+        /// Function being called
+        func: Box<Expression>,
+        /// Positional arguments
+        args: Vec<Expression>,
+        /// Keyword arguments
+        keywords: Vec<Keyword>,
+    },
+    /// Attribute access
+    Attribute {
+        /// Base expression
+        value: Box<Expression>,
+        /// Attribute name
+        attr: String,
+    },
+    /// Subscript access
+    Subscript {
+        /// Base expression
+        value: Box<Expression>,
+        /// Slice or index expression
+        slice: Box<Expression>,
+    },
+    /// List literal
+    List {
+        /// List elements
+        elts: Vec<Expression>,
+    },
+    /// Tuple literal
+    Tuple {
+        /// Tuple elements
+        elts: Vec<Expression>,
+    },
+    /// Slice expression
+    Slice {
+        /// Optional lower bound
+        lower: Option<Box<Expression>>,
+        /// Optional upper bound
+        upper: Option<Box<Expression>>,
+        /// Optional step
+        step: Option<Box<Expression>>,
+    },
+    /// Dictionary literal
+    Dict {
+        /// Optional keys
+        keys: Vec<Option<Expression>>,
+        /// Values
+        values: Vec<Expression>,
+    },
+    /// Set literal
+    Set {
+        /// Set elements
+        elts: Vec<Expression>,
+    },
+    /// List comprehension
+    ListComp {
+        /// Result expression
+        elt: Box<Expression>,
+        /// Generators
+        generators: Vec<Comprehension>,
+    },
+    /// Dictionary comprehension
+    DictComp {
+        /// Key expression
+        key: Box<Expression>,
+        /// Value expression
+        value: Box<Expression>,
+        /// Generators
+        generators: Vec<Comprehension>,
+    },
+    /// Set comprehension
+    SetComp {
+        /// Result expression
+        elt: Box<Expression>,
+        /// Generators
+        generators: Vec<Comprehension>,
+    },
+    /// Generator expression
+    GeneratorExp {
+        /// Result expression
+        elt: Box<Expression>,
+        /// Generators
+        generators: Vec<Comprehension>,
+    },
+    /// Lambda expression
+    Lambda {
+        /// Lambda arguments
+        args: Vec<Parameter>,
+        /// Lambda body
+        body: Box<Expression>,
+    },
+    /// Conditional expression (ternary operator)
+    IfExp {
+        /// Test expression
+        test: Box<Expression>,
+        /// Body expression
+        body: Box<Expression>,
+        /// Else expression
+        orelse: Box<Expression>,
+    },
+    /// f-string
+    JoinedStr {
+        /// f-string parts
+        values: Vec<Expression>,
+    },
+    /// Formatted value within an f-string
+    FormattedValue {
+        /// Value to format
+        value: Box<Expression>,
+        /// Conversion type
+        conversion: usize,
+        /// Optional format specification
+        format_spec: Option<Box<Expression>>,
+    },
+    /// Yield expression
+    Yield(Option<Box<Expression>>),
+    /// Yield from expression
+    YieldFrom(Box<Expression>),
+    /// Await expression
+    Await(Box<Expression>),
+    /// Starred expression (*args, **kwargs)
+    Starred {
+        /// Value being starred
+        value: Box<Expression>,
+        /// Whether it's a double star (**kwargs)
+        is_double: bool,
+    },
+}
+
+/// Represents a literal value.
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[derive(Debug, Clone, PartialEq)]
+pub enum Literal {
+    /// Integer literal
+    Integer(i64),
+    /// Float literal
+    Float(f64),
+    /// String literal
+    String(String),
+    /// Bytes literal
+    Bytes(Vec<u8>),
+    /// Boolean literal
+    Boolean(bool),
+    /// None literal
+    None,
+}
+
+/// Represents binary operators.
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[derive(Debug, Clone, PartialEq)]
+pub enum BinaryOperator {
+    /// `+`
+    Add,
+    /// `-`
+    Sub,
+    /// `*`
+    Mult,
+    /// `/`
+    Div,
+    /// `//`
+    FloorDiv,
+    /// `%`
+    Mod,
+    /// `**`
+    Pow,
+    /// `<<`
+    LShift,
+    /// `>>`
+    RShift,
+    /// `|`
+    BitOr,
+    /// `^`
+    BitXor,
+    /// `&`
+    BitAnd,
+}
+
+/// Represents unary operators.
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[derive(Debug, Clone, PartialEq)]
+pub enum UnaryOperator {
+    /// `~`
+    Invert,
+    /// `not`
+    Not,
+    /// `+`
+    UAdd,
+    /// `-`
+    USub,
+}
+
+/// Represents boolean operators.
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[derive(Debug, Clone, PartialEq)]
+pub enum BoolOperator {
+    /// `and`
+    And,
+    /// `or`
+    Or,
+}
+
+/// Represents comparison operators.
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[derive(Debug, Clone, PartialEq)]
+pub enum CompareOperator {
+    /// `==`
+    Eq,
+    /// `!=`
+    NotEq,
+    /// `<`
+    Lt,
+    /// `<=`
+    LtE,
+    /// `>`
+    Gt,
+    /// `>=`
+    GtE,
+    /// `is`
+    Is,
+    /// `is not`
+    IsNot,
+    /// `in`
+    In,
+    /// `not in`
+    NotIn,
+}
+
+/// Represents augmented assignment operators.
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[derive(Debug, Clone, PartialEq)]
+pub enum AugmentedOperator {
+    /// `+=`
+    Add,
+    /// `-=`
+    Sub,
+    /// `*=`
+    Mult,
+    /// `/=`
+    Div,
+    /// `//= `
+    FloorDiv,
+    /// `%=`
+    Mod,
+    /// `**=`
+    Pow,
+    /// `<<=`
+    LShift,
+    /// `>>=`
+    RShift,
+    /// `|=`
+    BitOr,
+    /// `^=`
+    BitXor,
+    /// `&=`
+    BitAnd,
+}
+
+/// Represents a function parameter.
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[derive(Debug, Clone, PartialEq)]
+pub struct Parameter {
+    /// Parameter name
+    pub name: String,
+    /// Optional type annotation
+    pub annotation: Option<Type>,
+    /// Optional default value
+    pub default: Option<Expression>,
+    /// Whether it's a variable positional argument (*args)
+    pub is_vararg: bool,
+    /// Whether it's a variable keyword argument (**kwargs)
+    pub is_kwarg: bool,
+}
+
+/// Represents a type annotation.
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[derive(Debug, Clone, PartialEq)]
+pub enum Type {
+    /// Basic type name
+    Name(String),
+    /// Generic type
+    Generic {
+        /// Type name
+        name: String,
+        /// Type arguments
+        args: Vec<Type>,
+    },
+    /// Union type
+    Union(Vec<Type>),
+    /// Optional type
+    Optional(Box<Type>),
+}
+
+/// Represents a keyword argument.
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[derive(Debug, Clone, PartialEq)]
+pub struct Keyword {
+    /// Optional argument name
+    pub arg: Option<String>,
+    /// Argument value
+    pub value: Expression,
+}
+
+/// Represents a comprehension in a list/dict/set/generator.
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[derive(Debug, Clone, PartialEq)]
+pub struct Comprehension {
+    /// Target expression
+    pub target: Expression,
+    /// Iterable expression
+    pub iter: Expression,
+    /// Optional conditions
+    pub ifs: Vec<Expression>,
+    /// Whether it's an async comprehension
+    pub is_async: bool,
+}
+
+/// Represents a name in an import statement.
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[derive(Debug, Clone, PartialEq)]
+pub struct ImportName {
+    /// Name being imported
+    pub name: String,
+    /// Optional alias (asname)
+    pub asname: Option<String>,
+}
+
+/// Represents an exception handler in a try statement.
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[derive(Debug, Clone, PartialEq)]
+pub struct ExceptHandler {
+    /// Optional exception type
+    pub type_: Option<Expression>,
+    /// Optional name for the exception instance
+    pub name: Option<String>,
+    /// Handler body
+    pub body: Vec<Statement>,
+}
+
+/// Represents an item in a with statement.
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[derive(Debug, Clone, PartialEq)]
 pub struct WithItem {
+    /// Context manager expression
     pub context_expr: Expression,
+    /// Optional variables to bind to
     pub optional_vars: Option<Expression>,
 }
 
 impl Program {
-    /// 创建一个新的程序
+    /// Creates a new empty program.
     pub fn new() -> Self {
         Self { statements: Vec::new() }
     }
 
-    /// 添加语句
+    /// Adds a statement to the program.
     pub fn add_statement(&mut self, statement: Statement) {
-        self.statements.push(statement);
+        self.statements.push(statement)
     }
 }
 
 impl Default for Program {
+    /// Returns a default empty program.
     fn default() -> Self {
         Self::new()
     }
 }
 
 impl Expression {
-    /// 创建一个标识符表达式
+    /// Creates a name expression.
     pub fn name(name: impl Into<String>) -> Self {
         Self::Name(name.into())
     }
 
-    /// 创建一个字符串字面量表达式
+    /// Creates a string literal expression.
     pub fn string(value: impl Into<String>) -> Self {
         Self::Literal(Literal::String(value.into()))
     }
 
-    /// 创建一个整数字面量表达式
+    /// Creates an integer literal expression.
     pub fn integer(value: i64) -> Self {
         Self::Literal(Literal::Integer(value))
     }
 
-    /// 创建一个浮点数字面量表达式
+    /// Creates a float literal expression.
     pub fn float(value: f64) -> Self {
         Self::Literal(Literal::Float(value))
     }
 
-    /// 创建一个布尔字面量表达式
+    /// Creates a boolean literal expression.
     pub fn boolean(value: bool) -> Self {
         Self::Literal(Literal::Boolean(value))
     }
 
-    /// 创建一个 None 字面量表达式
+    /// Creates a None literal expression.
     pub fn none() -> Self {
         Self::Literal(Literal::None)
     }
 }
 
 impl Statement {
-    /// 创建一个函数定义语句
+    /// Creates a function definition statement.
     pub fn function_def(name: impl Into<String>, parameters: Vec<Parameter>, return_type: Option<Type>, body: Vec<Statement>) -> Self {
-        Self::FunctionDef { name: name.into(), parameters, return_type, body }
+        Self::FunctionDef { decorators: Vec::new(), name: name.into(), parameters, return_type, body }
     }
 
-    /// 创建一个赋值语句
+    /// Creates an assignment statement.
     pub fn assignment(target: Expression, value: Expression) -> Self {
         Self::Assignment { target, value }
     }
 
-    /// 创建一个表达式语句
+    /// Creates an expression statement.
     pub fn expression(expr: Expression) -> Self {
         Self::Expression(expr)
     }
 
-    /// 创建一个返回语句
+    /// Creates a return statement.
     pub fn return_stmt(value: Option<Expression>) -> Self {
         Self::Return(value)
     }

@@ -1,4 +1,7 @@
-use crate::{kind::JsonSyntaxKind, language::JsonLanguage};
+#![doc = include_str!("readme.md")]
+pub mod token_type;
+
+use crate::{language::JsonLanguage, lexer::token_type::JsonTokenType};
 use oak_core::{
     errors::OakError,
     lexer::{CommentConfig, LexOutput, Lexer, LexerCache, LexerState, StringConfig},
@@ -49,7 +52,7 @@ impl<'config> JsonLexer<'config> {
                     self.lex_string_fast(state);
                 }
                 '/' if self.config.comments => {
-                    JSON_COMMENT.scan(state, JsonSyntaxKind::Comment, JsonSyntaxKind::Comment);
+                    JSON_COMMENT.scan(state, JsonTokenType::Comment, JsonTokenType::Comment);
                 }
                 '-' | '0'..='9' => {
                     self.lex_number(state);
@@ -65,7 +68,7 @@ impl<'config> JsonLexer<'config> {
                     }
                 }
                 '\'' if self.config.single_quotes => {
-                    JSON_SINGLE_QUOTE_STRING.scan(state, JsonSyntaxKind::StringLiteral);
+                    JSON_SINGLE_QUOTE_STRING.scan(state, JsonTokenType::StringLiteral);
                 }
                 _ => {
                     let mut handled = false;
@@ -76,7 +79,7 @@ impl<'config> JsonLexer<'config> {
                     if !handled {
                         // 如果所有规则都不匹配，跳过当前字符并标记为错误
                         state.advance(ch.len_utf8());
-                        state.add_token(JsonSyntaxKind::Error, safe_point, state.get_position());
+                        state.add_token(JsonTokenType::Error, safe_point, state.get_position());
                     }
                 }
             }
@@ -103,7 +106,7 @@ impl<'config> JsonLexer<'config> {
                 state.advance(2); // 跳过 '0x'
                 let range = state.take_while(|c| c.is_ascii_hexdigit() || c == '_');
                 if range.end > range.start {
-                    state.add_token(JsonSyntaxKind::NumberLiteral, start_pos, state.get_position());
+                    state.add_token(JsonTokenType::NumberLiteral, start_pos, state.get_position());
                     return true;
                 }
                 // Fallback to decimal handling if no hex digits
@@ -138,7 +141,7 @@ impl<'config> JsonLexer<'config> {
         }
 
         if has_digits {
-            state.add_token(JsonSyntaxKind::NumberLiteral, start_pos, state.get_position());
+            state.add_token(JsonTokenType::NumberLiteral, start_pos, state.get_position());
             true
         }
         else {
@@ -150,11 +153,11 @@ impl<'config> JsonLexer<'config> {
     fn lex_keyword<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start_pos = state.get_position();
         if state.consume_if_starts_with("true") || state.consume_if_starts_with("false") {
-            state.add_token(JsonSyntaxKind::BooleanLiteral, start_pos, state.get_position());
+            state.add_token(JsonTokenType::BooleanLiteral, start_pos, state.get_position());
             return true;
         }
         if state.consume_if_starts_with("null") {
-            state.add_token(JsonSyntaxKind::NullLiteral, start_pos, state.get_position());
+            state.add_token(JsonTokenType::NullLiteral, start_pos, state.get_position());
             return true;
         }
         false
@@ -167,7 +170,7 @@ impl<'config> JsonLexer<'config> {
             if ch.is_alphabetic() || ch == '_' || ch == '$' {
                 state.advance(ch.len_utf8());
                 state.take_while(|c| c.is_alphanumeric() || c == '_' || c == '$');
-                state.add_token(JsonSyntaxKind::BareKey, start_pos, state.get_position());
+                state.add_token(JsonTokenType::BareKey, start_pos, state.get_position());
                 return true;
             }
         }
@@ -179,12 +182,12 @@ impl<'config> JsonLexer<'config> {
         let start_pos = state.get_position();
         if let Some(ch) = state.peek() {
             let token_kind = match ch {
-                '{' => JsonSyntaxKind::LeftBrace,
-                '}' => JsonSyntaxKind::RightBrace,
-                '[' => JsonSyntaxKind::LeftBracket,
-                ']' => JsonSyntaxKind::RightBracket,
-                ',' => JsonSyntaxKind::Comma,
-                ':' => JsonSyntaxKind::Colon,
+                '{' => JsonTokenType::LeftBrace,
+                '}' => JsonTokenType::RightBrace,
+                '[' => JsonTokenType::LeftBracket,
+                ']' => JsonTokenType::RightBracket,
+                ',' => JsonTokenType::Comma,
+                ':' => JsonTokenType::Colon,
                 _ => return false,
             };
 
@@ -209,9 +212,8 @@ impl<'config> JsonLexer<'config> {
                 break;
             }
         }
-
         if count > 0 {
-            state.add_token(JsonSyntaxKind::Whitespace, start_pos, state.get_position());
+            state.add_token(JsonTokenType::Whitespace, start_pos, state.get_position());
             true
         }
         else {
@@ -225,24 +227,24 @@ impl<'config> JsonLexer<'config> {
             return false;
         }
 
+        let mut escaped = false;
         while let Some(ch) = state.peek() {
+            state.advance(ch.len_utf8());
+            if escaped {
+                escaped = false;
+                continue;
+            }
+            if ch == '\\' {
+                escaped = true;
+                continue;
+            }
             if ch == '"' {
-                state.advance(ch.len_utf8());
-                state.add_token(JsonSyntaxKind::StringLiteral, start_pos, state.get_position());
+                state.add_token(JsonTokenType::StringLiteral, start_pos, state.get_position());
                 return true;
             }
-            else if ch == '\\' {
-                state.advance(ch.len_utf8());
-                if let Some(escaped) = state.peek() {
-                    state.advance(escaped.len_utf8());
-                }
-            }
-            else {
-                state.advance(ch.len_utf8());
-            }
         }
-
-        state.add_token(JsonSyntaxKind::StringLiteral, start_pos, state.get_position());
-        true
+        // 未闭合的字符串
+        state.add_token(JsonTokenType::Error, start_pos, state.get_position());
+        false
     }
 }

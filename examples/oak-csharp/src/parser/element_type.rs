@@ -1,372 +1,505 @@
-use crate::lexer::CSharpTokenType;
 use oak_core::{ElementType, UniversalElementRole};
+#[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
 
-/// C# element type
-#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Deserialize)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[repr(u16)]
 pub enum CSharpElementType {
-    /// Root node of the syntax tree
-    Root,
-    /// Compilation unit (source file)
-    CompilationUnit,
-    /// Namespace declaration
-    NamespaceDeclaration,
-    /// Using directive
-    UsingDirective,
-    /// Class declaration
-    ClassDeclaration,
-    /// Struct declaration
-    StructDeclaration,
-    /// Interface declaration
-    InterfaceDeclaration,
-    /// Enum declaration
-    EnumDeclaration,
-    /// Delegate declaration
-    DelegateDeclaration,
-    /// Method declaration
-    MethodDeclaration,
-    /// Property declaration
-    PropertyDeclaration,
-    /// Field declaration
-    FieldDeclaration,
-    /// Event declaration
-    EventDeclaration,
-    /// Indexer declaration
-    IndexerDeclaration,
-    /// Constructor declaration
-    ConstructorDeclaration,
-    /// Destructor declaration
-    DestructorDeclaration,
-    /// Operator declaration
-    OperatorDeclaration,
-    /// Conversion operator declaration
-    ConversionOperatorDeclaration,
-    /// Parameter
-    Parameter,
-    /// Type parameter
-    TypeParameter,
-    /// Constraint
-    Constraint,
-    /// Attribute
-    Attribute,
-    /// Attribute list
-    AttributeList,
-    /// Block statement
-    Block,
-    /// Expression statement
-    ExpressionStatement,
-    /// If statement
+    // Tokens (copied from CSharpTokenType)
+    Whitespace,
+    Newline,
+    Comment,
+    Identifier,
+    Number,
+    String,
+    Character,
+    VerbatimString,
+    InterpolatedString,
+    NumberLiteral,
+    StringLiteral,
+    CharLiteral,
+
+    // Keywords
+    Abstract,
+    As,
+    Base,
+    Bool,
+    Break,
+    Byte,
+    Case,
+    Catch,
+    Char,
+    Checked,
+    Class,
+    Const,
+    Continue,
+    Decimal,
+    Default,
+    Delegate,
+    Do,
+    Double,
+    Else,
+    Enum,
+    Event,
+    Explicit,
+    Extern,
+    False,
+    Finally,
+    Fixed,
+    Float,
+    For,
+    Foreach,
+    Goto,
+    If,
+    Implicit,
+    In,
+    Int,
+    Interface,
+    Internal,
+    Is,
+    Lock,
+    Long,
+    Namespace,
+    New,
+    Null,
+    Object,
+    Operator,
+    Out,
+    Override,
+    Params,
+    Private,
+    Protected,
+    Public,
+    Readonly,
+    Record,
+    Ref,
+    Return,
+    Sbyte,
+    Sealed,
+    Short,
+    Sizeof,
+    Stackalloc,
+    Static,
+    Struct,
+    Switch,
+    This,
+    Throw,
+    True,
+    Try,
+    Typeof,
+    Uint,
+    Ulong,
+    Unchecked,
+    Unsafe,
+    Ushort,
+    Using,
+    Virtual,
+    Void,
+    Volatile,
+    While,
+
+    // Long keyword variants
+    AbstractKeyword,
+    AsKeyword,
+    BaseKeyword,
+    BoolKeyword,
+    BreakKeyword,
+    ByteKeyword,
+    CaseKeyword,
+    CatchKeyword,
+    CharKeyword,
+    CheckedKeyword,
+    ClassKeyword,
+    ConstKeyword,
+    ContinueKeyword,
+    DecimalKeyword,
+    DefaultKeyword,
+    DelegateKeyword,
+    DoKeyword,
+    DoubleKeyword,
+    ElseKeyword,
+    EnumKeyword,
+    EventKeyword,
+    ExplicitKeyword,
+    ExternKeyword,
+    FalseKeyword,
+    FinallyKeyword,
+    FixedKeyword,
+    FloatKeyword,
+    ForKeyword,
+    ForeachKeyword,
+    GotoKeyword,
+    IfKeyword,
+    ImplicitKeyword,
+    InKeyword,
+    IntKeyword,
+    InterfaceKeyword,
+    InternalKeyword,
+    IsKeyword,
+    LockKeyword,
+    LongKeyword,
+    NamespaceKeyword,
+    NewKeyword,
+    NullKeyword,
+    ObjectKeyword,
+    OperatorKeyword,
+    OutKeyword,
+    OverrideKeyword,
+    ParamsKeyword,
+    PrivateKeyword,
+    ProtectedKeyword,
+    PublicKeyword,
+    ReadonlyKeyword,
+    RefKeyword,
+    ReturnKeyword,
+    SbyteKeyword,
+    SealedKeyword,
+    ShortKeyword,
+    SizeofKeyword,
+    StackallocKeyword,
+    StaticKeyword,
+    StringKeyword,
+    StructKeyword,
+    SwitchKeyword,
+    ThisKeyword,
+    ThrowKeyword,
+    TrueKeyword,
+    TryKeyword,
+    TypeofKeyword,
+    UintKeyword,
+    UlongKeyword,
+    UncheckedKeyword,
+    UnsafeKeyword,
+    UshortKeyword,
+    UsingKeyword,
+    VirtualKeyword,
+    VoidKeyword,
+    VolatileKeyword,
+    WhileKeyword,
+
+    // Contextual keywords
+    AddKeyword,
+    AliasKeyword,
+    AscendingKeyword,
+    ByKeyword,
+    DescendingKeyword,
+    FromKeyword,
+    GetKeyword,
+    GlobalKeyword,
+    GroupKeyword,
+    IntoKeyword,
+    JoinKeyword,
+    LetKeyword,
+    OrderbyKeyword,
+    PartialKeyword,
+    RemoveKeyword,
+    SelectKeyword,
+    SetKeyword,
+    ValueKeyword,
+    VarKeyword,
+    WhereKeyword,
+    YieldKeyword,
+
+    // Operators
+    Plus,
+    Minus,
+    Star,
+    Slash,
+    Percent,
+    Ampersand,
+    Pipe,
+    Caret,
+    Tilde,
+    BitAnd,
+    BitOr,
+    BitXor,
+    BitNot,
+    LeftShift,
+    RightShift,
+    Equal,
+    NotEqual,
+    Less,
+    LessEqual,
+    Greater,
+    GreaterEqual,
+    LogicalAnd,
+    LogicalOr,
+    LogicalNot,
+    Question,
+    QuestionQuestion,
+    Increment,
+    Decrement,
+    Arrow,
+    Lambda,
+
+    // Assignment operators
+    Assign,
+    PlusAssign,
+    MinusAssign,
+    StarAssign,
+    SlashAssign,
+    PercentAssign,
+    AmpersandAssign,
+    PipeAssign,
+    CaretAssign,
+    LeftShiftAssign,
+    RightShiftAssign,
+    QuestionQuestionAssign,
+    AndAssign,
+    OrAssign,
+    XorAssign,
+
+    // Delimiters
+    LeftParen,
+    RightParen,
+    LeftBracket,
+    RightBracket,
+    LeftBrace,
+    RightBrace,
+    Comma,
+    Semicolon,
+    Colon,
+    ColonColon,
+    Dot,
+    QuestionDot,
+    At,
+    Hash,
+    Dollar,
+
+    Eof,
+    Error,
+
+    // Non-terminal elements
     IfStatement,
-    /// Switch statement
-    SwitchStatement,
-    /// While statement
     WhileStatement,
-    /// For statement
     ForStatement,
-    /// Foreach statement
-    ForeachStatement,
-    /// Do-while statement
-    DoStatement,
-    /// Try statement
-    TryStatement,
-    /// Catch clause
-    CatchClause,
-    /// Finally clause
-    FinallyClause,
-    /// Throw statement
-    ThrowStatement,
-    /// Return statement
+    Block,
     ReturnStatement,
-    /// Break statement
-    BreakStatement,
-    /// Continue statement
-    ContinueStatement,
-    /// Goto statement
-    GotoStatement,
-    /// Labeled statement
-    LabeledStatement,
-    /// Lock statement
-    LockStatement,
-    /// Using statement
-    UsingStatement,
-    /// Fixed statement
-    FixedStatement,
-    /// Unsafe statement
-    UnsafeStatement,
-    /// Checked statement
-    CheckedStatement,
-    /// Unchecked statement
-    UncheckedStatement,
-    /// Yield statement
-    YieldStatement,
-    /// Local declaration statement
-    LocalDeclarationStatement,
-    /// Binary expression
-    BinaryExpression,
-    /// Unary expression
-    UnaryExpression,
-    /// Assignment expression
-    AssignmentExpression,
-    /// Conditional expression (ternary)
-    ConditionalExpression,
-    /// Method invocation expression
-    InvocationExpression,
-    /// Member access expression
-    MemberAccessExpression,
-    /// Element access expression
-    ElementAccessExpression,
-    /// Cast expression
-    CastExpression,
-    /// As expression
-    AsExpression,
-    /// Is expression
-    IsExpression,
-    /// Typeof expression
-    TypeOfExpression,
-    /// Sizeof expression
-    SizeOfExpression,
-    /// Default value expression
-    DefaultExpression,
-    /// Literal expression
-    LiteralExpression,
-    /// This expression
-    ThisExpression,
-    /// Base expression
-    BaseExpression,
-    /// Identifier name
+    MethodDeclaration,
+    PropertyDeclaration,
+    FieldDeclaration,
+    IndexerDeclaration,
     IdentifierName,
-    /// Qualified name
-    QualifiedName,
-    /// Generic name
-    GenericName,
-    /// Alias qualified name
-    AliasQualifiedName,
-    /// Predefined type
-    PredefinedType,
-    /// Array type
-    ArrayType,
-    /// Pointer type
-    PointerType,
-    /// Nullable type
-    NullableType,
-    /// Tuple type
-    TupleType,
-    /// Ref type
-    RefType,
-    /// Array creation expression
-    ArrayCreationExpression,
-    /// Implicit array creation expression
-    ImplicitArrayCreationExpression,
-    /// Stack alloc array creation expression
-    StackAllocArrayCreationExpression,
-    /// Object creation expression
-    ObjectCreationExpression,
-    /// Anonymous object creation expression
-    AnonymousObjectCreationExpression,
-    /// Array initializer expression
-    ArrayInitializerExpression,
-    /// Collection initializer expression
-    CollectionInitializerExpression,
-    /// Complex element initializer expression
-    ComplexElementInitializerExpression,
-    /// Object initializer expression
-    ObjectInitializerExpression,
-    /// Member initializer expression
-    MemberInitializerExpression,
-    /// Lambda expression
-    LambdaExpression,
-    /// Anonymous method expression
-    AnonymousMethodExpression,
-    /// Query expression
-    QueryExpression,
-    /// Query body
-    QueryBody,
-    /// From clause
-    FromClause,
-    /// Let clause
-    LetClause,
-    /// Where clause
-    WhereClause,
-    /// Join clause
-    JoinClause,
-    /// Join into clause
-    JoinIntoClause,
-    /// Order by clause
-    OrderByClause,
-    /// Ordering
-    Ordering,
-    /// Select clause
-    SelectClause,
-    /// Group clause
-    GroupClause,
-    /// Query continuation
-    QueryContinuation,
-    /// Omitted array size expression
-    OmittedArraySizeExpression,
-    /// Interpolated string expression
-    InterpolatedStringExpression,
-    /// Interpolated string text
-    InterpolatedStringText,
-    /// Interpolation
-    Interpolation,
-    /// Interpolation alignment clause
-    InterpolationAlignmentClause,
-    /// Interpolation format clause
-    InterpolationFormatClause,
-    /// Global statement
-    GlobalStatement,
-    /// Simple lambda expression
-    SimpleLambdaExpression,
-    /// Parenthesized lambda expression
-    ParenthesizedLambdaExpression,
-    /// Initializer expression
-    InitializerExpression,
-    /// Implicit element access
-    ImplicitElementAccess,
-    /// Postfix unary expression
-    PostfixUnaryExpression,
-    /// Prefix unary expression
-    PrefixUnaryExpression,
-    /// Await expression
+    LiteralExpression,
+    BinaryExpression,
+    InvocationExpression,
+    ElementAccessExpression,
+    MemberAccessExpression,
+    AssignmentExpression,
+    BreakStatement,
+    ContinueStatement,
+    ExpressionStatement,
+    ForeachStatement,
+    NamespaceDeclaration,
+    UsingDirective,
+    ClassDeclaration,
+    InterfaceDeclaration,
+    StructDeclaration,
+    EnumDeclaration,
+    RecordDeclaration,
+    DelegateDeclaration,
+    EventDeclaration,
     AwaitExpression,
-    /// Name colon
-    NameColon,
-    /// Declaration expression
-    DeclarationExpression,
-    /// Tuple expression
-    TupleExpression,
-    /// Tuple element
-    TupleElement,
-    /// Single variable designation
-    SingleVariableDesignation,
-    /// Parenthesized variable designation
-    ParenthesizedVariableDesignation,
-    /// Discard designation
-    DiscardDesignation,
-    /// Ref expression
-    RefExpression,
-    /// Ref type expression
-    RefTypeExpression,
-    /// Ref value expression
-    RefValueExpression,
-    /// Make ref expression
-    MakeRefExpression,
-    /// Checked expression
-    CheckedExpression,
-    /// Unchecked expression
-    UncheckedExpression,
-    /// Default literal expression
-    DefaultLiteralExpression,
-    /// Conditional access expression
-    ConditionalAccessExpression,
-    /// Member binding expression
-    MemberBindingExpression,
-    /// Element binding expression
-    ElementBindingExpression,
-    ImplicitStackAllocArrayCreationExpression,
-    IsPatternExpression,
-    ThrowExpression,
-    WhenClause,
-    ConstantPattern,
-    DeclarationPattern,
-    VarPattern,
-    RecursivePattern,
-    PositionalPatternClause,
-    PropertyPatternClause,
-    Subpattern,
-    /// Switch expression
-    SwitchExpression,
-    /// Switch expression arm
-    SwitchExpressionArm,
-    /// Case pattern switch label
-    CasePatternSwitchLabel,
-    /// Case switch label
-    CaseSwitchLabel,
-    /// Discard pattern
-    DiscardPattern,
-    /// Tuple pattern
-    TuplePattern,
-    /// Parenthesized pattern
-    ParenthesizedPattern,
-    /// Relational pattern
-    RelationalPattern,
-    /// Type pattern
-    TypePattern,
-    /// Binary pattern
-    BinaryPattern,
-    /// Unary pattern
-    UnaryPattern,
-    /// Slice pattern
-    SlicePattern,
-    /// Range expression
-    RangeExpression,
-    /// Index expression
-    IndexExpression,
-    /// With expression
-    WithExpression,
-    /// Anonymous object member declarator
-    AnonymousObjectMemberDeclarator,
-    /// Argument list
-    ArgumentList,
-    /// Bracketed argument list
-    BracketedArgumentList,
-    /// Argument
-    Argument,
-    /// Name equals
-    NameEquals,
-    /// Type argument list
-    TypeArgumentList,
-    /// Type parameter list
-    TypeParameterList,
-    /// Type parameter constraint clause
-    TypeParameterConstraintClause,
-    /// Constructor constraint
-    ConstructorConstraint,
-    /// Class or struct constraint
-    ClassOrStructConstraint,
-    /// Type constraint
-    TypeConstraint,
-    /// Base list
-    BaseList,
-    /// Simple base type
-    SimpleBaseType,
-    /// Primary constructor base type
-    PrimaryConstructorBaseType,
-    /// Accessor list
-    AccessorList,
-    /// Accessor declaration
-    AccessorDeclaration,
-    /// Parameter list
-    ParameterList,
-    /// Bracketed parameter list
-    BracketedParameterList,
-    /// Arrow expression clause
-    ArrowExpressionClause,
-    /// Equals value clause
-    EqualsValueClause,
-    /// Variable declaration
-    VariableDeclaration,
-    /// Variable declarator
-    VariableDeclarator,
-    /// Separated syntax list
-    SeparatedSyntaxList,
-    /// Syntax list
-    SyntaxList,
+    AttributeList,
+    Attribute,
+    Root,
+}
+
+impl CSharpElementType {
+    pub fn is_keyword(&self) -> bool {
+        matches!(
+            self,
+            Self::Abstract
+                | Self::As
+                | Self::Base
+                | Self::Bool
+                | Self::Break
+                | Self::Byte
+                | Self::Case
+                | Self::Catch
+                | Self::Char
+                | Self::Checked
+                | Self::Class
+                | Self::Const
+                | Self::Continue
+                | Self::Decimal
+                | Self::Default
+                | Self::Delegate
+                | Self::Do
+                | Self::Double
+                | Self::Else
+                | Self::Enum
+                | Self::Event
+                | Self::Explicit
+                | Self::Extern
+                | Self::False
+                | Self::Finally
+                | Self::Fixed
+                | Self::Float
+                | Self::For
+                | Self::Foreach
+                | Self::Goto
+                | Self::If
+                | Self::Implicit
+                | Self::In
+                | Self::Int
+                | Self::Interface
+                | Self::Internal
+                | Self::Is
+                | Self::Lock
+                | Self::Long
+                | Self::Namespace
+                | Self::New
+                | Self::Null
+                | Self::Object
+                | Self::Operator
+                | Self::Out
+                | Self::Override
+                | Self::Params
+                | Self::Private
+                | Self::Protected
+                | Self::Public
+                | Self::Readonly
+                | Self::Ref
+                | Self::Return
+                | Self::Sbyte
+                | Self::Sealed
+                | Self::Short
+                | Self::Sizeof
+                | Self::Stackalloc
+                | Self::Static
+                | Self::Struct
+                | Self::Switch
+                | Self::This
+                | Self::Throw
+                | Self::True
+                | Self::Try
+                | Self::Typeof
+                | Self::Uint
+                | Self::Ulong
+                | Self::Unchecked
+                | Self::Unsafe
+                | Self::Ushort
+                | Self::Using
+                | Self::Virtual
+                | Self::Void
+                | Self::Volatile
+                | Self::While
+                | Self::AbstractKeyword
+                | Self::AsKeyword
+                | Self::BaseKeyword
+                | Self::BoolKeyword
+                | Self::BreakKeyword
+                | Self::ByteKeyword
+                | Self::CaseKeyword
+                | Self::CatchKeyword
+                | Self::CharKeyword
+                | Self::CheckedKeyword
+                | Self::ClassKeyword
+                | Self::ConstKeyword
+                | Self::ContinueKeyword
+                | Self::DecimalKeyword
+                | Self::DefaultKeyword
+                | Self::DelegateKeyword
+                | Self::DoKeyword
+                | Self::DoubleKeyword
+                | Self::ElseKeyword
+                | Self::EnumKeyword
+                | Self::EventKeyword
+                | Self::ExplicitKeyword
+                | Self::ExternKeyword
+                | Self::FalseKeyword
+                | Self::FinallyKeyword
+                | Self::FixedKeyword
+                | Self::FloatKeyword
+                | Self::ForKeyword
+                | Self::ForeachKeyword
+                | Self::GotoKeyword
+                | Self::IfKeyword
+                | Self::ImplicitKeyword
+                | Self::InKeyword
+                | Self::IntKeyword
+                | Self::InterfaceKeyword
+                | Self::InternalKeyword
+                | Self::IsKeyword
+                | Self::LockKeyword
+                | Self::LongKeyword
+                | Self::NamespaceKeyword
+                | Self::NewKeyword
+                | Self::NullKeyword
+                | Self::ObjectKeyword
+                | Self::OperatorKeyword
+                | Self::OutKeyword
+                | Self::OverrideKeyword
+                | Self::ParamsKeyword
+                | Self::PrivateKeyword
+                | Self::ProtectedKeyword
+                | Self::PublicKeyword
+                | Self::ReadonlyKeyword
+                | Self::RefKeyword
+                | Self::ReturnKeyword
+                | Self::SbyteKeyword
+                | Self::SealedKeyword
+                | Self::ShortKeyword
+                | Self::SizeofKeyword
+                | Self::StackallocKeyword
+                | Self::StaticKeyword
+                | Self::StringKeyword
+                | Self::StructKeyword
+                | Self::SwitchKeyword
+                | Self::ThisKeyword
+                | Self::ThrowKeyword
+                | Self::TrueKeyword
+                | Self::TryKeyword
+                | Self::TypeofKeyword
+                | Self::UintKeyword
+                | Self::UlongKeyword
+                | Self::UncheckedKeyword
+                | Self::UnsafeKeyword
+                | Self::UshortKeyword
+                | Self::UsingKeyword
+                | Self::VirtualKeyword
+                | Self::VoidKeyword
+                | Self::VolatileKeyword
+                | Self::WhileKeyword
+                | Self::AddKeyword
+                | Self::AliasKeyword
+                | Self::AscendingKeyword
+                | Self::ByKeyword
+                | Self::DescendingKeyword
+                | Self::FromKeyword
+                | Self::GetKeyword
+                | Self::GlobalKeyword
+                | Self::GroupKeyword
+                | Self::IntoKeyword
+                | Self::JoinKeyword
+                | Self::LetKeyword
+                | Self::OrderbyKeyword
+                | Self::PartialKeyword
+                | Self::RemoveKeyword
+                | Self::SelectKeyword
+                | Self::SetKeyword
+                | Self::ValueKeyword
+                | Self::VarKeyword
+                | Self::WhereKeyword
+                | Self::YieldKeyword
+        )
+    }
 }
 
 impl ElementType for CSharpElementType {
     type Role = UniversalElementRole;
 
     fn role(&self) -> Self::Role {
-        UniversalElementRole::None
+        match self {
+            _ => UniversalElementRole::None,
+        }
     }
 }
 
-impl From<CSharpTokenType> for CSharpElementType {
-    fn from(token: CSharpTokenType) -> Self {
-        match token {
-            CSharpTokenType::Eof => Self::SyntaxList, // Default or Error?
-            _ => Self::SyntaxList,
-        }
+impl From<crate::lexer::token_type::CSharpTokenType> for CSharpElementType {
+    fn from(token: crate::lexer::token_type::CSharpTokenType) -> Self {
+        unsafe { std::mem::transmute(token as u16) }
     }
 }

@@ -1,4 +1,10 @@
-use crate::{kind::MatlabSyntaxKind, language::MatlabLanguage, lexer::MatlabLexer};
+pub mod element_type;
+
+use crate::{
+    language::MatlabLanguage,
+    lexer::{MatlabLexer, token_type::MatlabTokenType},
+    parser::element_type::MatlabElementType,
+};
 use oak_core::{
     GreenNode, OakError, TextEdit,
     parser::{ParseCache, ParseOutput, Parser, ParserState},
@@ -30,34 +36,34 @@ impl<'p> MatlabParser<'p> {
         let cp = state.checkpoint();
 
         while state.not_at_end() {
-            self.parse_statement(state);
+            self.parse_statement(state)
         }
 
-        Ok(state.finish_at(cp, MatlabSyntaxKind::Script))
+        Ok(state.finish_at(cp, MatlabElementType::Script))
     }
 
     fn parse_statement<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) {
         let checkpoint = state.checkpoint();
 
         match state.peek_kind() {
-            Some(MatlabSyntaxKind::Function) => self.parse_function_def(state),
-            Some(MatlabSyntaxKind::If) => self.parse_if_statement(state),
+            Some(MatlabTokenType::Function) => self.parse_function_def(state),
+            Some(MatlabTokenType::If) => self.parse_if_statement(state),
             _ => {
                 self.parse_expression(state);
-                if state.at(MatlabSyntaxKind::Semicolon) {
-                    state.bump();
+                if state.at(MatlabTokenType::Semicolon) {
+                    state.bump()
                 }
             }
         }
 
-        state.finish_at(checkpoint, MatlabSyntaxKind::Statement);
+        state.finish_at(checkpoint, MatlabElementType::Statement);
     }
 
     fn parse_function_def<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) {
         let checkpoint = state.checkpoint();
         state.bump(); // function
         // ... simple function parsing logic
-        state.finish_at(checkpoint, MatlabSyntaxKind::FunctionDef);
+        state.finish_at(checkpoint, MatlabElementType::FunctionDef);
     }
 
     fn parse_if_statement<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) {
@@ -69,6 +75,6 @@ impl<'p> MatlabParser<'p> {
     fn parse_expression<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) {
         let checkpoint = state.checkpoint();
         state.bump();
-        state.finish_at(checkpoint, MatlabSyntaxKind::Expression);
+        state.finish_at(checkpoint, MatlabElementType::Expression);
     }
 }

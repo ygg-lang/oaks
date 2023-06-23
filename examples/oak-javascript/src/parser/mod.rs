@@ -1,4 +1,8 @@
-use crate::{kind::JavaScriptSyntaxKind, language::JavaScriptLanguage};
+//! JavaScript parser implementation.
+
+pub mod element_type;
+
+use crate::{language::JavaScriptLanguage, parser::element_type::JavaScriptElementType};
 use oak_core::{
     GreenNode, OakError, ParseCache, TextEdit,
     parser::{Associativity, Parser, ParserState, Pratt, PrattParser, binary},
@@ -7,17 +11,20 @@ use oak_core::{
 
 pub(crate) type State<'a, S> = ParserState<'a, JavaScriptLanguage, S>;
 
+/// JavaScript parser.
 pub struct JavaScriptParser<'config> {
+    /// Configuration for the JavaScript language.
     pub(crate) config: &'config JavaScriptLanguage,
 }
 
 impl<'config> JavaScriptParser<'config> {
+    /// Creates a new JavaScript parser.
     pub fn new(config: &'config JavaScriptLanguage) -> Self {
         Self { config }
     }
 
     fn parse_statement<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> Result<(), OakError> {
-        use crate::kind::JavaScriptSyntaxKind::*;
+        use crate::lexer::token_type::JavaScriptTokenType::*;
         match state.peek_kind() {
             Some(Function) => self.parse_function_declaration(state)?,
             Some(Var) | Some(Let) | Some(Const) => self.parse_variable_declaration(state)?,
@@ -35,22 +42,22 @@ impl<'config> JavaScriptParser<'config> {
     }
 
     fn parse_function_declaration<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> Result<(), OakError> {
-        use crate::kind::JavaScriptSyntaxKind::*;
+        use crate::lexer::token_type::JavaScriptTokenType::*;
         let cp = state.checkpoint();
         state.expect(Function).ok();
         state.eat(IdentifierName);
         state.expect(LeftParen).ok();
         while state.not_at_end() && !state.at(RightParen) {
-            state.advance();
+            state.advance()
         }
         state.expect(RightParen).ok();
         self.parse_block_statement(state)?;
-        state.finish_at(cp, FunctionDeclaration.into());
+        state.finish_at(cp, crate::parser::element_type::JavaScriptElementType::FunctionDeclaration);
         Ok(())
     }
 
     fn parse_variable_declaration<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> Result<(), OakError> {
-        use crate::kind::JavaScriptSyntaxKind::*;
+        use crate::lexer::token_type::JavaScriptTokenType::*;
         let cp = state.checkpoint();
         state.bump(); // var/let/const
         state.expect(IdentifierName).ok();
@@ -58,12 +65,12 @@ impl<'config> JavaScriptParser<'config> {
             PrattParser::parse(state, 0, self);
         }
         state.eat(Semicolon);
-        state.finish_at(cp, VariableDeclaration.into());
+        state.finish_at(cp, crate::parser::element_type::JavaScriptElementType::VariableDeclaration);
         Ok(())
     }
 
     fn parse_if_statement<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> Result<(), OakError> {
-        use crate::kind::JavaScriptSyntaxKind::*;
+        use crate::lexer::token_type::JavaScriptTokenType::*;
         let cp = state.checkpoint();
         state.expect(If).ok();
         state.expect(LeftParen).ok();
@@ -71,92 +78,92 @@ impl<'config> JavaScriptParser<'config> {
         state.expect(RightParen).ok();
         self.parse_statement(state)?;
         if state.eat(Else) {
-            self.parse_statement(state)?;
+            self.parse_statement(state)?
         }
-        state.finish_at(cp, IfStatement.into());
+        state.finish_at(cp, crate::parser::element_type::JavaScriptElementType::IfStatement);
         Ok(())
     }
 
     fn parse_while_statement<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> Result<(), OakError> {
-        use crate::kind::JavaScriptSyntaxKind::*;
+        use crate::lexer::token_type::JavaScriptTokenType::*;
         let cp = state.checkpoint();
         state.expect(While).ok();
         state.expect(LeftParen).ok();
         PrattParser::parse(state, 0, self);
         state.expect(RightParen).ok();
         self.parse_statement(state)?;
-        state.finish_at(cp, WhileStatement.into());
+        state.finish_at(cp, crate::parser::element_type::JavaScriptElementType::WhileStatement);
         Ok(())
     }
 
     fn parse_for_statement<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> Result<(), OakError> {
-        use crate::kind::JavaScriptSyntaxKind::*;
+        use crate::lexer::token_type::JavaScriptTokenType::*;
         let cp = state.checkpoint();
         state.expect(For).ok();
         state.expect(LeftParen).ok();
-        // 简化处理
+        // Simplified handling
         while state.not_at_end() && !state.at(RightParen) {
-            state.advance();
+            state.advance()
         }
         state.expect(RightParen).ok();
         self.parse_statement(state)?;
-        state.finish_at(cp, ForStatement.into());
+        state.finish_at(cp, crate::parser::element_type::JavaScriptElementType::ForStatement);
         Ok(())
     }
 
     fn parse_return_statement<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> Result<(), OakError> {
-        use crate::kind::JavaScriptSyntaxKind::*;
+        use crate::lexer::token_type::JavaScriptTokenType::*;
         let cp = state.checkpoint();
         state.expect(Return).ok();
         if !state.at(Semicolon) {
             PrattParser::parse(state, 0, self);
         }
         state.eat(Semicolon);
-        state.finish_at(cp, ReturnStatement.into());
+        state.finish_at(cp, crate::parser::element_type::JavaScriptElementType::ReturnStatement);
         Ok(())
     }
 
     fn parse_block_statement<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> Result<(), OakError> {
-        use crate::kind::JavaScriptSyntaxKind::*;
+        use crate::lexer::token_type::JavaScriptTokenType::*;
         let cp = state.checkpoint();
         state.expect(LeftBrace).ok();
         while state.not_at_end() && !state.at(RightBrace) {
-            self.parse_statement(state)?;
+            self.parse_statement(state)?
         }
         state.expect(RightBrace).ok();
-        state.finish_at(cp, BlockStatement.into());
+        state.finish_at(cp, crate::parser::element_type::JavaScriptElementType::BlockStatement);
         Ok(())
     }
 }
 
 impl<'config> Pratt<JavaScriptLanguage> for JavaScriptParser<'config> {
     fn primary<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> &'a GreenNode<'a, JavaScriptLanguage> {
-        use crate::kind::JavaScriptSyntaxKind::*;
+        use crate::lexer::token_type::JavaScriptTokenType::*;
         let cp = state.checkpoint();
         match state.peek_kind() {
             Some(IdentifierName) => {
                 state.bump();
-                state.finish_at(cp, Identifier.into())
+                state.finish_at(cp, crate::parser::element_type::JavaScriptElementType::Identifier)
             }
             Some(NumericLiteral) | Some(StringLiteral) | Some(True) | Some(False) | Some(Null) => {
                 state.bump();
-                state.finish_at(cp, Literal.into())
+                state.finish_at(cp, crate::parser::element_type::JavaScriptElementType::Literal)
             }
             Some(LeftParen) => {
                 state.bump();
                 PrattParser::parse(state, 0, self);
                 state.expect(RightParen).ok();
-                state.finish_at(cp, Expression.into())
+                state.finish_at(cp, crate::parser::element_type::JavaScriptElementType::Expression)
             }
             _ => {
                 state.bump();
-                state.finish_at(cp, Error.into())
+                state.finish_at(cp, crate::parser::element_type::JavaScriptElementType::Error)
             }
         }
     }
 
     fn infix<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>, left: &'a GreenNode<'a, JavaScriptLanguage>, min_precedence: u8) -> Option<&'a GreenNode<'a, JavaScriptLanguage>> {
-        use crate::kind::JavaScriptSyntaxKind::*;
+        use crate::lexer::token_type::JavaScriptTokenType::*;
         let kind = state.peek_kind()?;
 
         let (prec, assoc) = match kind {
@@ -195,17 +202,17 @@ impl<'config> Pratt<JavaScriptLanguage> for JavaScriptParser<'config> {
                 state.push_child(left);
                 state.expect(LeftParen).ok();
                 while state.not_at_end() && !state.at(RightParen) {
-                    state.advance();
+                    state.advance()
                 }
                 state.expect(RightParen).ok();
-                Some(state.finish_at(cp, CallExpression.into()))
+                Some(state.finish_at(cp, crate::parser::element_type::JavaScriptElementType::CallExpression))
             }
             Dot => {
                 let cp = state.checkpoint();
                 state.push_child(left);
                 state.expect(Dot).ok();
                 state.expect(IdentifierName).ok();
-                Some(state.finish_at(cp, MemberExpression.into()))
+                Some(state.finish_at(cp, crate::parser::element_type::JavaScriptElementType::MemberExpression))
             }
             _ => {
                 let result_kind = match kind {
@@ -224,9 +231,9 @@ impl<'config> Pratt<JavaScriptLanguage> for JavaScriptParser<'config> {
                     | CaretEqual
                     | AmpersandAmpersandEqual
                     | PipePipeEqual
-                    | QuestionQuestionEqual => AssignmentExpression,
-                    PipePipe | AmpersandAmpersand => LogicalExpression,
-                    _ => BinaryExpression,
+                    | QuestionQuestionEqual => JavaScriptElementType::AssignmentExpression,
+                    PipePipe | AmpersandAmpersand => JavaScriptElementType::LogicalExpression,
+                    _ => JavaScriptElementType::BinaryExpression,
                 };
                 Some(binary(state, left, kind, prec, assoc, result_kind.into(), |s, p| PrattParser::parse(s, p, self)))
             }
@@ -240,7 +247,7 @@ impl<'config> JavaScriptParser<'config> {
         while state.not_at_end() {
             self.parse_statement(state).ok();
         }
-        Ok(state.finish_at(cp, JavaScriptSyntaxKind::Root.into()))
+        Ok(state.finish_at(cp, crate::parser::element_type::JavaScriptElementType::Root))
     }
 }
 

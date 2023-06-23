@@ -3,26 +3,26 @@ use oak_cpp::{CppLanguage, CppLexer};
 
 #[test]
 fn test_cpp_lexer_basic() {
-    let source = SourceText::new("int main() { return 0; }");
+    let source = SourceText::new("int main() { return 0 }");
     let language = CppLanguage::new();
     let lexer = CppLexer::new(&language);
 
     let mut session = ParseSession::<CppLanguage>::new(16);
     let result = lexer.lex(&source, &[], &mut session);
     assert!(result.diagnostics.is_empty());
-    println!("✓ C++ 基本词法分析测试通过");
+    println!("✓ C++ 基本词法分析测试通过")
 }
 
 #[test]
 fn test_cpp_lexer_keywords() {
-    let source = SourceText::new("class MyClass { public: int value; };");
+    let source = SourceText::new("class MyClass { public: int value }");
     let language = CppLanguage::new();
     let lexer = CppLexer::new(&language);
 
     let mut session = ParseSession::<CppLanguage>::new(16);
     let result = lexer.lex(&source, &[], &mut session);
     assert!(result.diagnostics.is_empty());
-    println!("✓ C++ 关键字词法分析测试通过");
+    println!("✓ C++ 关键字词法分析测试通过")
 }
 
 #[test]
@@ -34,7 +34,7 @@ fn test_cpp_lexer_operators() {
     let mut session = ParseSession::<CppLanguage>::new(16);
     let result = lexer.lex(&source, &[], &mut session);
     assert!(result.diagnostics.is_empty());
-    println!("✓ C++ 操作符词法分析测试通过");
+    println!("✓ C++ 操作符词法分析测试通过")
 }
 
 #[test]
@@ -46,7 +46,7 @@ fn test_cpp_lexer_strings() {
     let mut session = ParseSession::<CppLanguage>::new(16);
     let result = lexer.lex(&source, &[], &mut session);
     assert!(result.diagnostics.is_empty());
-    println!("✓ C++ 字符串词法分析测试通过");
+    println!("✓ C++ 字符串词法分析测试通过")
 }
 
 #[test]
@@ -58,5 +58,5 @@ fn test_cpp_lexer_comments() {
     let mut session = ParseSession::<CppLanguage>::new(16);
     let result = lexer.lex(&source, &[], &mut session);
     assert!(result.diagnostics.is_empty());
-    println!("✓ C++ 注释词法分析测试通过");
+    println!("✓ C++ 注释词法分析测试通过")
 }

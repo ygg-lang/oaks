@@ -1,4 +1,8 @@
-use crate::{TomlSyntaxKind, language::TomlLanguage};
+#![doc = include_str!("readme.md")]
+pub mod token_type;
+pub use crate::lexer::token_type::TomlTokenType;
+
+use crate::{language::TomlLanguage, lexer::token_type::TomlTokenKind as TomlSyntaxKind};
 use oak_core::{
     Lexer, LexerState, OakError, TextEdit,
     lexer::{LexOutput, LexerCache},

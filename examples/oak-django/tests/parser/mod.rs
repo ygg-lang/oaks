@@ -11,7 +11,7 @@ fn test_parse_django_variable() {
 
     assert!(result.result.is_ok());
     // Should have minimal diagnostics for valid Django variable
-    assert!(result.diagnostics.is_empty() || result.diagnostics.len() <= 1);
+    assert!(result.diagnostics.is_empty() || result.diagnostics.len() <= 1)
 }
 
 #[test]
@@ -22,7 +22,7 @@ fn test_parse_django_tag() {
     let mut cache = ParseSession::<DjangoLanguage>::default();
     let result = parser.parse(&source, &[], &mut cache);
 
-    assert!(result.result.is_ok());
+    assert!(result.result.is_ok())
 }
 
 #[test]
@@ -45,7 +45,7 @@ fn test_parse_django_filter() {
     let mut cache = ParseSession::<DjangoLanguage>::default();
     let result = parser.parse(&source, &[], &mut cache);
 
-    assert!(result.result.is_ok());
+    assert!(result.result.is_ok())
 }
 
 #[test]
@@ -57,5 +57,5 @@ fn test_parse_invalid_syntax() {
     let result = parser.parse(&source, &[], &mut cache);
 
     // 当前的简单实现总是成功解析，只是创建一个基本的语法树
-    assert!(result.result.is_ok());
+    assert!(result.result.is_ok())
 }

@@ -1,4 +1,7 @@
-use crate::{kind::OCamlSyntaxKind, language::OCamlLanguage};
+#![doc = include_str!("readme.md")]
+pub mod token_type;
+
+use crate::{language::OCamlLanguage, lexer::token_type::OCamlTokenType};
 use oak_core::{
     Lexer, LexerCache, LexerState, OakError,
     lexer::{CommentConfig, LexOutput, WhitespaceConfig},
@@ -21,7 +24,7 @@ impl<'config> Lexer<OCamlLanguage> for OCamlLexer<'config> {
         let mut state = State::new_with_cache(source, 0, cache);
         let result = self.run(&mut state);
         if result.is_ok() {
-            state.add_eof();
+            state.add_eof()
         }
         state.finish_with_cache(result, cache)
     }
@@ -69,7 +72,7 @@ impl<'config> OCamlLexer<'config> {
                 continue;
             }
 
-            state.advance_if_dead_lock(safe_point);
+            state.advance_if_dead_lock(safe_point)
         }
 
         Ok(())
@@ -77,11 +80,11 @@ impl<'config> OCamlLexer<'config> {
 
     /// 跳过空白字符
     fn skip_whitespace<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
-        OCAML_WHITESPACE.scan(state, OCamlSyntaxKind::Whitespace)
+        OCAML_WHITESPACE.scan(state, OCamlTokenType::Whitespace)
     }
 
     fn skip_comment<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
-        OCAML_COMMENT.scan(state, OCamlSyntaxKind::Comment, OCamlSyntaxKind::Comment)
+        OCAML_COMMENT.scan(state, OCamlTokenType::Comment, OCamlTokenType::Comment)
     }
 
     fn lex_string_literal<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
@@ -110,7 +113,7 @@ impl<'config> OCamlLexer<'config> {
                 break;
             }
         }
-        state.add_token(OCamlSyntaxKind::StringLiteral, start, state.get_position());
+        state.add_token(OCamlTokenType::StringLiteral, start, state.get_position());
         true
     }
 
@@ -124,11 +127,11 @@ impl<'config> OCamlLexer<'config> {
         if let Some('\\') = state.peek() {
             state.advance(1);
             if let Some(c) = state.peek() {
-                state.advance(c.len_utf8());
+                state.advance(c.len_utf8())
             }
         }
         else if let Some(c) = state.peek() {
-            state.advance(c.len_utf8());
+            state.advance(c.len_utf8())
         }
         else {
             state.set_position(start);
@@ -137,7 +140,7 @@ impl<'config> OCamlLexer<'config> {
 
         if state.peek() == Some('\'') {
             state.advance(1);
-            state.add_token(OCamlSyntaxKind::CharLiteral, start, state.get_position());
+            state.add_token(OCamlTokenType::CharLiteral, start, state.get_position());
             return true;
         }
 
@@ -211,7 +214,7 @@ impl<'config> OCamlLexer<'config> {
         }
 
         let end = state.get_position();
-        state.add_token(if is_float { OCamlSyntaxKind::FloatLiteral } else { OCamlSyntaxKind::IntegerLiteral }, start, end);
+        state.add_token(if is_float { OCamlTokenType::FloatLiteral } else { OCamlTokenType::IntegerLiteral }, start, end);
         true
     }
 
@@ -228,68 +231,63 @@ impl<'config> OCamlLexer<'config> {
 
         state.advance(1);
         while let Some(c) = state.current() {
-            if c.is_ascii_alphanumeric() || c == '_' || c == '\'' {
-                state.advance(1);
-            }
-            else {
-                break;
-            }
+            if c.is_ascii_alphanumeric() || c == '_' || c == '\'' { state.advance(1) } else { break }
         }
 
         let end = state.get_position();
         let text = state.get_text_in((start..end).into());
         let kind = match text.as_ref() {
             // OCaml keywords
-            "and" => OCamlSyntaxKind::And,
-            "as" => OCamlSyntaxKind::As,
-            "assert" => OCamlSyntaxKind::Assert,
-            "begin" => OCamlSyntaxKind::Begin,
-            "class" => OCamlSyntaxKind::Class,
-            "constraint" => OCamlSyntaxKind::Constraint,
-            "do" => OCamlSyntaxKind::Do,
-            "done" => OCamlSyntaxKind::Done,
-            "downto" => OCamlSyntaxKind::Downto,
-            "else" => OCamlSyntaxKind::Else,
-            "end" => OCamlSyntaxKind::End,
-            "exception" => OCamlSyntaxKind::Exception,
-            "external" => OCamlSyntaxKind::External,
-            "false" => OCamlSyntaxKind::False,
-            "for" => OCamlSyntaxKind::For,
-            "fun" => OCamlSyntaxKind::Fun,
-            "function" => OCamlSyntaxKind::Function,
-            "functor" => OCamlSyntaxKind::Functor,
-            "if" => OCamlSyntaxKind::If,
-            "in" => OCamlSyntaxKind::In,
-            "include" => OCamlSyntaxKind::Include,
-            "inherit" => OCamlSyntaxKind::Inherit,
-            "initializer" => OCamlSyntaxKind::Initializer,
-            "lazy" => OCamlSyntaxKind::Lazy,
-            "let" => OCamlSyntaxKind::Let,
-            "match" => OCamlSyntaxKind::Match,
-            "method" => OCamlSyntaxKind::Method,
-            "module" => OCamlSyntaxKind::Module,
-            "mutable" => OCamlSyntaxKind::Mutable,
-            "new" => OCamlSyntaxKind::New,
-            "object" => OCamlSyntaxKind::Object,
-            "of" => OCamlSyntaxKind::Of,
-            "open" => OCamlSyntaxKind::Open,
-            "or" => OCamlSyntaxKind::Or,
-            "private" => OCamlSyntaxKind::Private,
-            "rec" => OCamlSyntaxKind::Rec,
-            "sig" => OCamlSyntaxKind::Sig,
-            "struct" => OCamlSyntaxKind::Struct,
-            "then" => OCamlSyntaxKind::Then,
-            "to" => OCamlSyntaxKind::To,
-            "true" => OCamlSyntaxKind::True,
-            "try" => OCamlSyntaxKind::Try,
-            "type" => OCamlSyntaxKind::Type,
-            "val" => OCamlSyntaxKind::Val,
-            "virtual" => OCamlSyntaxKind::Virtual,
-            "when" => OCamlSyntaxKind::When,
-            "while" => OCamlSyntaxKind::While,
-            "with" => OCamlSyntaxKind::With,
+            "and" => OCamlTokenType::And,
+            "as" => OCamlTokenType::As,
+            "assert" => OCamlTokenType::Assert,
+            "begin" => OCamlTokenType::Begin,
+            "class" => OCamlTokenType::Class,
+            "constraint" => OCamlTokenType::Constraint,
+            "do" => OCamlTokenType::Do,
+            "done" => OCamlTokenType::Done,
+            "downto" => OCamlTokenType::Downto,
+            "else" => OCamlTokenType::Else,
+            "end" => OCamlTokenType::End,
+            "exception" => OCamlTokenType::Exception,
+            "external" => OCamlTokenType::External,
+            "false" => OCamlTokenType::False,
+            "for" => OCamlTokenType::For,
+            "fun" => OCamlTokenType::Fun,
+            "function" => OCamlTokenType::Function,
+            "functor" => OCamlTokenType::Functor,
+            "if" => OCamlTokenType::If,
+            "in" => OCamlTokenType::In,
+            "include" => OCamlTokenType::Include,
+            "inherit" => OCamlTokenType::Inherit,
+            "initializer" => OCamlTokenType::Initializer,
+            "lazy" => OCamlTokenType::Lazy,
+            "let" => OCamlTokenType::Let,
+            "match" => OCamlTokenType::Match,
+            "method" => OCamlTokenType::Method,
+            "module" => OCamlTokenType::Module,
+            "mutable" => OCamlTokenType::Mutable,
+            "new" => OCamlTokenType::New,
+            "object" => OCamlTokenType::Object,
+            "of" => OCamlTokenType::Of,
+            "open" => OCamlTokenType::Open,
+            "or" => OCamlTokenType::Or,
+            "private" => OCamlTokenType::Private,
+            "rec" => OCamlTokenType::Rec,
+            "sig" => OCamlTokenType::Sig,
+            "struct" => OCamlTokenType::Struct,
+            "then" => OCamlTokenType::Then,
+            "to" => OCamlTokenType::To,
+            "true" => OCamlTokenType::True,
+            "try" => OCamlTokenType::Try,
+            "type" => OCamlTokenType::Type,
+            "val" => OCamlTokenType::Val,
+            "virtual" => OCamlTokenType::Virtual,
+            "when" => OCamlTokenType::When,
+            "while" => OCamlTokenType::While,
+            "with" => OCamlTokenType::With,
 
-            _ => OCamlSyntaxKind::Identifier,
+            _ => OCamlTokenType::Identifier,
         };
 
         state.add_token(kind, start, state.get_position());
@@ -301,16 +299,16 @@ impl<'config> OCamlLexer<'config> {
         let rest = state.rest();
 
         // prefer longest matches first
-        let patterns: &[(&str, OCamlSyntaxKind)] = &[
-            ("==", OCamlSyntaxKind::EqualEqual),
-            ("!=", OCamlSyntaxKind::NotEqual),
-            (">=", OCamlSyntaxKind::GreaterEqual),
-            ("<=", OCamlSyntaxKind::LessEqual),
-            ("&&", OCamlSyntaxKind::AndAnd),
-            ("||", OCamlSyntaxKind::OrOr),
-            ("::", OCamlSyntaxKind::ColonColon),
-            ("->", OCamlSyntaxKind::RightArrow),
-            ("<-", OCamlSyntaxKind::LeftArrow),
+        let patterns: &[(&str, OCamlTokenType)] = &[
+            ("==", OCamlTokenType::EqualEqual),
+            ("!=", OCamlTokenType::NotEqual),
+            (">=", OCamlTokenType::GreaterEqual),
+            ("<=", OCamlTokenType::LessEqual),
+            ("&&", OCamlTokenType::AndAnd),
+            ("||", OCamlTokenType::OrOr),
+            ("::", OCamlTokenType::ColonColon),
+            ("->", OCamlTokenType::RightArrow),
+            ("<-", OCamlTokenType::LeftArrow),
         ];
 
         for (pat, kind) in patterns {
@@ -323,28 +321,28 @@ impl<'config> OCamlLexer<'config> {
 
         if let Some(ch) = state.current() {
             let kind = match ch {
-                '+' => Some(OCamlSyntaxKind::Plus),
-                '-' => Some(OCamlSyntaxKind::Minus),
-                '*' => Some(OCamlSyntaxKind::Star),
-                '/' => Some(OCamlSyntaxKind::Slash),
-                '%' => Some(OCamlSyntaxKind::Percent),
-                '=' => Some(OCamlSyntaxKind::Equal),
-                '>' => Some(OCamlSyntaxKind::Greater),
-                '<' => Some(OCamlSyntaxKind::Less),
-                '!' => Some(OCamlSyntaxKind::Bang),
-                '?' => Some(OCamlSyntaxKind::Question),
-                ':' => Some(OCamlSyntaxKind::Colon),
-                ';' => Some(OCamlSyntaxKind::Semicolon),
-                ',' => Some(OCamlSyntaxKind::Comma),
-                '.' => Some(OCamlSyntaxKind::Dot),
-                '|' => Some(OCamlSyntaxKind::Pipe),
-                '&' => Some(OCamlSyntaxKind::Ampersand),
-                '^' => Some(OCamlSyntaxKind::Caret),
-                '~' => Some(OCamlSyntaxKind::Tilde),
-                '@' => Some(OCamlSyntaxKind::At),
-                '#' => Some(OCamlSyntaxKind::Hash),
-                '$' => Some(OCamlSyntaxKind::Dollar),
-                '`' => Some(OCamlSyntaxKind::Backtick),
+                '+' => Some(OCamlTokenType::Plus),
+                '-' => Some(OCamlTokenType::Minus),
+                '*' => Some(OCamlTokenType::Star),
+                '/' => Some(OCamlTokenType::Slash),
+                '%' => Some(OCamlTokenType::Percent),
+                '=' => Some(OCamlTokenType::Equal),
+                '>' => Some(OCamlTokenType::Greater),
+                '<' => Some(OCamlTokenType::Less),
+                '!' => Some(OCamlTokenType::Bang),
+                '?' => Some(OCamlTokenType::Question),
+                ':' => Some(OCamlTokenType::Colon),
+                ';' => Some(OCamlTokenType::Semicolon),
+                ',' => Some(OCamlTokenType::Comma),
+                '.' => Some(OCamlTokenType::Dot),
+                '|' => Some(OCamlTokenType::Pipe),
+                '&' => Some(OCamlTokenType::Ampersand),
+                '^' => Some(OCamlTokenType::Caret),
+                '~' => Some(OCamlTokenType::Tilde),
+                '@' => Some(OCamlTokenType::At),
+                '#' => Some(OCamlTokenType::Hash),
+                '$' => Some(OCamlTokenType::Dollar),
+                '`' => Some(OCamlTokenType::Backtick),
                 _ => None,
             };
 
@@ -362,12 +360,12 @@ impl<'config> OCamlLexer<'config> {
         let start = state.get_position();
         if let Some(ch) = state.current() {
             let kind = match ch {
-                '(' => OCamlSyntaxKind::LeftParen,
-                ')' => OCamlSyntaxKind::RightParen,
-                '[' => OCamlSyntaxKind::LeftBracket,
-                ']' => OCamlSyntaxKind::RightBracket,
-                '{' => OCamlSyntaxKind::LeftBrace,
-                '}' => OCamlSyntaxKind::RightBrace,
+                '(' => OCamlTokenType::LeftParen,
+                ')' => OCamlTokenType::RightParen,
+                '[' => OCamlTokenType::LeftBracket,
+                ']' => OCamlTokenType::RightBracket,
+                '{' => OCamlTokenType::LeftBrace,
+                '}' => OCamlTokenType::RightBrace,
                 _ => return false,
             };
 

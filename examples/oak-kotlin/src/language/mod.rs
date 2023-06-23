@@ -1,32 +1,35 @@
+#![doc = include_str!("readme.md")]
 use oak_core::language::{Language, LanguageCategory};
+#[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
 
-/// Kotlin 语言实现
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+/// Kotlin language implementation.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct KotlinLanguage {
-    /// 是否启用严格模式
+    /// Whether to enable strict mode.
     pub strict_mode: bool,
-    /// 是否允许实验性特性
+    /// Whether to allow experimental features.
     pub experimental_features: bool,
 }
 
 impl KotlinLanguage {
-    /// 创建新的 Kotlin 语言实例
+    /// Creates a new Kotlin language instance.
     pub fn new() -> Self {
         Self::default()
     }
 
-    /// 创建标准 Kotlin 语言实例
+    /// Creates a standard Kotlin language instance.
     pub fn standard() -> Self {
         Self::default()
     }
 
-    /// 创建启用实验性特性的 Kotlin 语言实例
+    /// Creates a Kotlin language instance with experimental features enabled.
     pub fn experimental() -> Self {
         Self { strict_mode: false, experimental_features: true }
     }
 
-    /// 创建严格模式Kotlin 语言实例
+    /// Creates a Kotlin language instance with strict mode enabled.
     pub fn strict() -> Self {
         Self { strict_mode: true, experimental_features: false }
     }
@@ -42,7 +45,7 @@ impl Language for KotlinLanguage {
     const NAME: &'static str = "kotlin";
     const CATEGORY: LanguageCategory = LanguageCategory::Programming;
 
-    type TokenType = crate::kind::KotlinSyntaxKind;
-    type ElementType = crate::kind::KotlinSyntaxKind;
+    type TokenType = crate::lexer::token_type::KotlinTokenType;
+    type ElementType = crate::parser::element_type::KotlinElementType;
     type TypedRoot = crate::ast::KotlinRoot;
 }

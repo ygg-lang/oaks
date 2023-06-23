@@ -1,159 +1,33 @@
-# Oak ActionScript Parser
+# 🚀 Oak ActionScript Parser
 
 [![Crates.io](https://img.shields.io/crates/v/oak-actionscript.svg)](https://crates.io/crates/oak-actionscript)
 [![Documentation](https://docs.rs/oak-actionscript/badge.svg)](https://docs.rs/oak-actionscript)
 
-High-performance incremental ActionScript parser for the oak ecosystem with flexible configuration, optimized for Adobe Flash and Apache Flex development.
+**Bringing Legacy Code Back to Life** — A high-performance, incremental ActionScript 3.0 parser built on the Oak framework. Specially optimized for Adobe Flash, Apache Flex development, and automated code migration.
 
-## 🎯 Overview
+## 🎯 Project Vision
 
-Oak ActionScript is a robust parser for ActionScript 3.0, designed to handle both legacy Flash and modern Flex applications. Built on the solid foundation of oak-core, it provides both high-level convenience and detailed AST generation for ActionScript analysis and tooling.
+In today's development landscape, legacy systems written in ActionScript 3.0 often lack modern toolchain support. `oak-actionscript` aims to bridge this gap by providing enterprise-grade parsing capabilities using modern Rust infrastructure. Whether you are building IDE plugins, static analysis tools, or complex code refactoring systems, this parser provides the robust, efficient foundation you need.
 
-## ✨ Features
+## ✨ Core Features
 
-- **Complete AS3 Syntax**: Supports all ActionScript 3.0 features including modern specifications
-- **Full AST Generation**: Generates comprehensive Abstract Syntax Trees
-- **Lexer Support**: Built-in tokenization with proper span information
-- **Error Recovery**: Graceful handling of syntax errors with detailed diagnostics
+- **⚡ Blazing Fast**: Leverages Rust's memory safety and zero-cost abstractions to deliver sub-millisecond parsing performance.
+- **🔄 Incremental Parsing**: Built-in support for partial updates—only re-parse what changed, making it ideal for real-time IDE integration and large-scale codebases.
+- **🌳 Comprehensive AST**: Generates a high-fidelity Abstract Syntax Tree that captures every detail:
+    - Package and Namespace declarations
+    - Class and Interface inheritance hierarchies
+    - Metadata/Annotations (e.g., `[Bindable]`, `[Event]`)
+    - E4X (ECMAScript for XML) extensions
+- **🛡️ Industrial-Grade Fault Tolerance**: Engineered to handle malformed input gracefully. It can recover from syntax errors and continue parsing, providing precise diagnostics to help developers fix issues quickly.
+- **🧩 Seamless Integration**: Part of the Oak ecosystem—easily combine it with `oak-lsp` for full Language Server Protocol support or `oak-semantic-search` for intelligent code discovery.
 
-## 🚀 Quick Start
+## 🏗️ Architecture
 
-Basic example:
-
-```rust
-use oak_actionscript::{Parser, ActionScriptLanguage, SourceText};
-
-fn main() -> Result<(), Box<dyn std::error::Error>> {
-    let parser = Parser::new();
-    let source = SourceText::new(r#"
-package com.example {
-    public class Main {
-        public function Main() {
-            trace("Hello, ActionScript!");
-        }
-    }
-}
-    "#);
-    
-    let result = parser.parse(&source);
-    println!("Parsed ActionScript package successfully.");
-    Ok(())
-}
-```
-
-## 📋 Parsing Examples
-
-### Class Parsing
-```rust
-use oak_actionscript::{Parser, ActionScriptLanguage, SourceText};
-
-let parser = Parser::new();
-let source = SourceText::new(r#"
-public class MovieClip extends flash.display.MovieClip {
-    private var frameCount:int;
-    
-    public function MovieClip() {
-        frameCount = 0;
-    }
-    
-    public function play():void {
-        super.play();
-    }
-}
-"#);
-
-let result = parser.parse(&source);
-println!("Parsed ActionScript class successfully.");
-```
-
-### Function Parsing
-```rust
-use oak_actionscript::{Parser, ActionScriptLanguage, SourceText};
-
-let parser = Parser::new();
-let source = SourceText::new(r#"
-public function calculateArea(width:Number, height:Number):Number {
-    return width * height;
-}
-"#);
-
-let result = parser.parse(&source);
-println!("Parsed ActionScript function successfully.");
-```
-
-## 🔧 Advanced Features
-
-### Token-Level Parsing
-```rust
-use oak_actionscript::{Parser, ActionScriptLanguage, SourceText};
-
-let parser = Parser::new();
-let source = SourceText::new("public function test():void {}");
-let result = parser.parse(&source);
-// Token information is available in the parse result
-```
-
-### Error Handling
-```rust
-use oak_actionscript::{Parser, ActionScriptLanguage, SourceText};
-
-let parser = Parser::new();
-let source = SourceText::new(r#"
-package {
-    public class Test {
-        public function test( {
-            trace("Missing closing parenthesis");
-        }
-    }
-}
-"#);
-
-let result = parser.parse(&source);
-if let Err(e) = result.result {
-    println!("Parse error: {:?}", e);
-}
-```
-
-## 🏗️ AST Structure
-
-The parser generates a comprehensive AST with the following main structures:
-
-- **Package**: ActionScript package declarations
-- **ClassDefinition**: Class definitions with inheritance
-- **FunctionDefinition**: Function and method definitions
-- **VariableDeclaration**: Variable declarations with type annotations
-- **Expression**: Expressions including arithmetic, logical, and function calls
-- **Statement**: Control flow statements and assignments
-- **TypeAnnotation**: Type specifications and annotations
-
-## 📊 Performance
-
-- **Streaming**: Parse large ActionScript files without loading entirely into memory
-- **Incremental**: Re-parse only changed sections
-- **Memory Efficient**: Smart AST node allocation
-- **Fast Recovery**: Quick error recovery for better IDE integration
-
-## 🔗 Integration
-
-Oak of actionscript integrates seamlessly with:
-
-- **Flash Development**: Build Flash applications and games
-- **Code Analysis**: Static analysis and refactoring tools
-- **IDE Support**: Language server protocol compatibility for ActionScript
-- **Migration Tools**: Convert ActionScript to other languages
-- **Educational Tools**: Build programming language learning environments
-
-## 📚 Examples
-
-Check out the [examples](examples/) directory for comprehensive examples:
-
-- Complete ActionScript class parsing
-- Flash API integration
-- Event handling and animation
-- Integration with development workflows
+The parser follows the **Green/Red Tree** architecture (inspired by Roslyn), which allows for:
+1. **Efficient Immutability**: Share nodes across different versions of the tree without copying.
+2. **Lossless Syntax Trees**: Retains all trivia (whitespace and comments), enabling faithful code formatting and refactoring.
+3. **Type Safety**: Strongly-typed "Red" nodes provide a convenient and safe API for tree traversal and analysis.
 
 ## 🤝 Contributing
 
-Contributions are welcome! 
-
-Please feel free to submit pull requests at the [project repository](https://github.com/ygg-lang/oaks/tree/dev/examples/oak-actionscript) or open [issues](https://github.com/ygg-lang/oaks/issues).
+We welcome contributions of all kinds! If you find a bug, have a feature request, or want to contribute code, please check our [issues](https://github.com/ygg-lang/oaks/issues) or submit a pull request.

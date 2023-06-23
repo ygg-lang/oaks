@@ -1,150 +1,165 @@
+#![doc = include_str!("readme.md")]
 use core::range::Range;
+#[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
 
-/// Markdown 抽象语法树的根节点
-#[derive(Clone, Debug, PartialEq, Eq, Hash, Serialize, Deserialize)]
+/// Root node of the Markdown Abstract Syntax Tree.
+#[derive(Clone, Debug, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct MarkdownRoot {
-    /// 文档中的块列表
+    /// List of blocks in the document.
     pub blocks: Vec<Block>,
 }
 
-/// Markdown 中的块级元素
-#[derive(Clone, Debug, PartialEq, Eq, Hash, Serialize, Deserialize)]
+/// Block-level elements in Markdown.
+#[derive(Clone, Debug, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub enum Block {
-    /// 标题 (h1-h6)
+    /// Heading (h1-h6).
     Heading(Heading),
-    /// 段落
+    /// Paragraph.
     Paragraph(Paragraph),
-    /// 代码块
+    /// Code block.
     CodeBlock(CodeBlock),
-    /// 列表
+    /// List.
     List(List),
-    /// 引用
+    /// Blockquote.
     Blockquote(Blockquote),
-    /// 水平分割线
+    /// Horizontal rule.
     HorizontalRule(HorizontalRule),
-    /// 表格
+    /// Table.
     Table(Table),
-    /// HTML 块
+    /// HTML block.
     Html(Html),
 }
 
-/// 标题
-#[derive(Clone, Debug, PartialEq, Eq, Hash, Serialize, Deserialize)]
+/// Heading element.
+#[derive(Clone, Debug, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct Heading {
-    /// 标题级别 (1-6)
+    /// Heading level (1-6).
     pub level: u32,
-    /// 标题内容
+    /// Heading text content.
     pub content: String,
-    /// 源代码范围
-    #[serde(with = "oak_core::serde_range")]
+    /// Source code range.
+    #[cfg_attr(feature = "serde", serde(with = "oak_core::serde_range"))]
     pub span: Range<usize>,
 }
 
-/// 段落
-#[derive(Clone, Debug, PartialEq, Eq, Hash, Serialize, Deserialize)]
+/// Paragraph element.
+#[derive(Clone, Debug, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct Paragraph {
-    /// 段落内容
+    /// Paragraph text content.
     pub content: String,
-    /// 源代码范围
-    #[serde(with = "oak_core::serde_range")]
+    /// Source code range.
+    #[cfg_attr(feature = "serde", serde(with = "oak_core::serde_range"))]
     pub span: Range<usize>,
 }
 
-/// 代码块
-#[derive(Clone, Debug, PartialEq, Eq, Hash, Serialize, Deserialize)]
+/// Code block element.
+#[derive(Clone, Debug, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct CodeBlock {
-    /// 编程语言标识符
+    /// Programming language identifier.
     pub language: Option<String>,
-    /// 代码内容
+    /// Code content.
     pub content: String,
-    /// 源代码范围
-    #[serde(with = "oak_core::serde_range")]
+    /// Source code range.
+    #[cfg_attr(feature = "serde", serde(with = "oak_core::serde_range"))]
     pub span: Range<usize>,
 }
 
-/// 列表
-#[derive(Clone, Debug, PartialEq, Eq, Hash, Serialize, Deserialize)]
+/// List element.
+#[derive(Clone, Debug, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct List {
-    /// 是否为有序列表
+    /// Whether it's an ordered list.
     pub is_ordered: bool,
-    /// 列表项
+    /// List items.
     pub items: Vec<ListItem>,
-    /// 源代码范围
-    #[serde(with = "oak_core::serde_range")]
+    /// Source code range.
+    #[cfg_attr(feature = "serde", serde(with = "oak_core::serde_range"))]
     pub span: Range<usize>,
 }
 
-/// 列表项
-#[derive(Clone, Debug, PartialEq, Eq, Hash, Serialize, Deserialize)]
+/// List item element.
+#[derive(Clone, Debug, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct ListItem {
-    /// 列表项内容
+    /// List item content blocks.
     pub content: Vec<Block>,
-    /// 是否为任务列表项
+    /// Whether it's a task list item.
     pub is_task: bool,
-    /// 任务完成状态 (如果 is_task 为 true)
+    /// Task completion status (if is_task is true).
     pub is_checked: Option<bool>,
-    /// 源代码范围
-    #[serde(with = "oak_core::serde_range")]
+    /// Source code range.
+    #[cfg_attr(feature = "serde", serde(with = "oak_core::serde_range"))]
     pub span: Range<usize>,
 }
 
-/// 引用
-#[derive(Clone, Debug, PartialEq, Eq, Hash, Serialize, Deserialize)]
+/// Blockquote element.
+#[derive(Clone, Debug, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct Blockquote {
-    /// 引用内容
+    /// Blockquote content blocks.
     pub content: Vec<Block>,
-    /// 源代码范围
-    #[serde(with = "oak_core::serde_range")]
+    /// Source code range.
+    #[cfg_attr(feature = "serde", serde(with = "oak_core::serde_range"))]
     pub span: Range<usize>,
 }
 
-/// 水平分割线
-#[derive(Clone, Debug, PartialEq, Eq, Hash, Serialize, Deserialize)]
+/// Horizontal rule element.
+#[derive(Clone, Debug, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct HorizontalRule {
-    /// 源代码范围
-    #[serde(with = "oak_core::serde_range")]
+    /// Source code range.
+    #[cfg_attr(feature = "serde", serde(with = "oak_core::serde_range"))]
     pub span: Range<usize>,
 }
 
-/// 表格
-#[derive(Clone, Debug, PartialEq, Eq, Hash, Serialize, Deserialize)]
+/// Table element.
+#[derive(Clone, Debug, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct Table {
-    /// 表头
+    /// Table header row.
     pub header: TableRow,
-    /// 表行
+    /// Table data rows.
     pub rows: Vec<TableRow>,
-    /// 源代码范围
-    #[serde(with = "oak_core::serde_range")]
+    /// Source code range.
+    #[cfg_attr(feature = "serde", serde(with = "oak_core::serde_range"))]
     pub span: Range<usize>,
 }
 
-/// 表格行
-#[derive(Clone, Debug, PartialEq, Eq, Hash, Serialize, Deserialize)]
+/// Table row element.
+#[derive(Clone, Debug, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct TableRow {
-    /// 单元格列表
+    /// List of cells in the row.
     pub cells: Vec<TableCell>,
-    /// 源代码范围
-    #[serde(with = "oak_core::serde_range")]
+    /// Source code range.
+    #[cfg_attr(feature = "serde", serde(with = "oak_core::serde_range"))]
     pub span: Range<usize>,
 }
 
-/// 表格单元格
-#[derive(Clone, Debug, PartialEq, Eq, Hash, Serialize, Deserialize)]
+/// Table cell element.
+#[derive(Clone, Debug, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct TableCell {
-    /// 单元格内容
+    /// Cell content string.
     pub content: String,
-    /// 源代码范围
-    #[serde(with = "oak_core::serde_range")]
+    /// Source code range.
+    #[cfg_attr(feature = "serde", serde(with = "oak_core::serde_range"))]
     pub span: Range<usize>,
 }
 
-/// HTML 块
-#[derive(Clone, Debug, PartialEq, Eq, Hash, Serialize, Deserialize)]
+/// HTML block element.
+#[derive(Clone, Debug, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct Html {
-    /// HTML 内容
+    /// HTML content string.
     pub content: String,
-    /// 源代码范围
-    #[serde(with = "oak_core::serde_range")]
+    /// Source code range.
+    #[cfg_attr(feature = "serde", serde(with = "oak_core::serde_range"))]
     pub span: Range<usize>,
 }

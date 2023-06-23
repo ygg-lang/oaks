@@ -1,9 +1,12 @@
 use crate::lexer::CppTokenType;
 use oak_core::{ElementType, UniversalElementRole};
+#[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Deserialize)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 #[repr(u16)]
+/// Syntax element types for the C++ language.
 pub enum CppElementType {
     /// A wrapper for tokens
     Token(CppTokenType),

@@ -230,9 +230,9 @@ function result = power_function(base, exponent)
 end
 
 % Anonymous functions
-square = @(x) x.^2;
-add_func = @(x, y) x + y;
-complex_func = @(x) sin(x) + cos(x);
+square = ↯(x) x.^2;
+add_func = ↯(x, y) x + y;
+complex_func = ↯(x) sin(x) + cos(x);
 
 %% Mathematical Functions
 % Trigonometric functions

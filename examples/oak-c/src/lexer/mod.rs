@@ -1,35 +1,43 @@
+#![doc = include_str!("readme.md")]
 pub mod token_type;
 
 pub use token_type::CTokenType;
 
 use crate::language::CLanguage;
 use oak_core::{Lexer, LexerCache, LexerState, OakError, lexer::LexOutput, source::Source};
+#[cfg(feature = "serde")]
 use serde::Serialize;
 use std::sync::LazyLock;
 
 type State<'a, S> = LexerState<'a, S, CLanguage>;
 
-#[derive(Clone, Copy, Debug, Serialize)]
+/// Lexer for the C language.
+#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Clone, Copy, Debug)]
 pub struct CLexer<'config> {
+    /// Language configuration.
     config: &'config CLanguage,
 }
 
 impl<'config> Lexer<CLanguage> for CLexer<'config> {
+    /// Tokenizes the source code into a stream of C tokens.
     fn lex<'a, S: Source + ?Sized>(&self, source: &S, _edits: &[oak_core::source::TextEdit], cache: &'a mut impl LexerCache<CLanguage>) -> LexOutput<CLanguage> {
         let mut state = State::new_with_cache(source, 0, cache);
         let result = self.run(&mut state);
         if result.is_ok() {
-            state.add_eof();
+            state.add_eof()
         }
         state.finish_with_cache(result, cache)
     }
 }
 
 impl<'config> CLexer<'config> {
+    /// Creates a new `CLexer` with the given language configuration.
     pub fn new(config: &'config CLanguage) -> Self {
         Self { config }
     }
 
+    /// Runs the lexer on the current state until the end of the source.
     fn run<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> Result<(), OakError> {
         while state.not_at_end() {
             let safe_point = state.get_position();
@@ -67,14 +75,15 @@ impl<'config> CLexer<'config> {
                 let start = state.get_position();
                 if let Some(ch) = state.peek() {
                     state.advance(ch.len_utf8());
-                    state.add_token(CTokenType::Error, start, state.get_position());
+                    state.add_token(CTokenType::Error, start, state.get_position())
                 }
             }
-            state.advance_if_dead_lock(safe_point);
+            state.advance_if_dead_lock(safe_point)
         }
         Ok(())
     }
 
+    /// Skips whitespace characters (except newlines).
     fn skip_whitespace<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start = state.get_position();
         let mut count = 0;
@@ -82,7 +91,7 @@ impl<'config> CLexer<'config> {
         while let Some(ch) = state.peek() {
             if ch.is_whitespace() && ch != '\n' && ch != '\r' {
                 state.advance(ch.len_utf8());
-                count += 1;
+                count += 1
             }
             else {
                 break;
@@ -106,7 +115,7 @@ impl<'config> CLexer<'config> {
                 if ch == '\n' || ch == '\r' {
                     break;
                 }
-                state.advance(ch.len_utf8());
+                state.advance(ch.len_utf8())
             }
             state.add_token(CTokenType::Comment, start, state.get_position());
             return true;
@@ -116,12 +125,7 @@ impl<'config> CLexer<'config> {
                 if state.consume_if_starts_with("*/") {
                     break;
                 }
-                if let Some(ch) = state.peek() {
-                    state.advance(ch.len_utf8());
-                }
-                else {
-                    break;
-                }
+                if let Some(ch) = state.peek() { state.advance(ch.len_utf8()) } else { break }
             }
             state.add_token(CTokenType::Comment, start, state.get_position());
             return true;
@@ -141,7 +145,7 @@ impl<'config> CLexer<'config> {
             else if ch == '\r' {
                 state.advance(1);
                 if state.peek() == Some('\n') {
-                    state.advance(1);
+                    state.advance(1)
                 }
                 state.add_token(CTokenType::Whitespace, start, state.get_position());
                 return true;
@@ -163,11 +167,11 @@ impl<'config> CLexer<'config> {
                 else if ch == '\\' {
                     state.advance(1);
                     if let Some(escaped) = state.peek() {
-                        state.advance(escaped.len_utf8());
+                        state.advance(escaped.len_utf8())
                     }
                 }
                 else {
-                    state.advance(ch.len_utf8());
+                    state.advance(ch.len_utf8())
                 }
             }
             state.add_token(CTokenType::StringLiteral, start, state.get_position());
@@ -189,11 +193,11 @@ impl<'config> CLexer<'config> {
                 else if ch == '\\' {
                     state.advance(1);
                     if let Some(escaped) = state.peek() {
-                        state.advance(escaped.len_utf8());
+                        state.advance(escaped.len_utf8())
                     }
                 }
                 else {
-                    state.advance(ch.len_utf8());
+                    state.advance(ch.len_utf8())
                 }
             }
             state.add_token(CTokenType::CharLiteral, start, state.get_position());
@@ -209,12 +213,7 @@ impl<'config> CLexer<'config> {
             if ch.is_ascii_digit() {
                 state.advance(1);
                 while let Some(ch) = state.peek() {
-                    if ch.is_ascii_alphanumeric() || ch == '.' || ch == 'e' || ch == 'E' || ch == '+' || ch == '-' {
-                        state.advance(ch.len_utf8());
-                    }
-                    else {
-                        break;
-                    }
+                    if ch.is_ascii_alphanumeric() || ch == '.' || ch == 'e' || ch == 'E' || ch == '+' || ch == '-' { state.advance(ch.len_utf8()) } else { break }
                 }
 
                 let text = state.get_text_in((start..state.get_position()).into());
@@ -233,12 +232,7 @@ impl<'config> CLexer<'config> {
             if ch.is_ascii_alphabetic() || ch == '_' {
                 state.advance(ch.len_utf8());
                 while let Some(ch) = state.peek() {
-                    if ch.is_ascii_alphanumeric() || ch == '_' {
-                        state.advance(ch.len_utf8());
-                    }
-                    else {
-                        break;
-                    }
+                    if ch.is_ascii_alphanumeric() || ch == '_' { state.advance(ch.len_utf8()) } else { break }
                 }
 
                 let text = state.get_text_in((start..state.get_position()).into());
@@ -368,7 +362,7 @@ impl<'config> CLexer<'config> {
                 if ch == '\n' || ch == '\r' {
                     break;
                 }
-                state.advance(ch.len_utf8());
+                state.advance(ch.len_utf8())
             }
             state.add_token(CTokenType::PreprocessorDirective, start, state.get_position());
             return true;

@@ -154,7 +154,7 @@
         },
         {
             "kind": "Field",
-            "text": "john.doe@example.com",
+            "text": "john.doe↯example.com",
             "start": 149,
             "end": 169
         },
@@ -214,7 +214,7 @@
         },
         {
             "kind": "Field",
-            "text": "jane.smith@example.com",
+            "text": "jane.smith↯example.com",
             "start": 195,
             "end": 217
         },
@@ -274,7 +274,7 @@
         },
         {
             "kind": "Field",
-            "text": "bob.johnson@example.com",
+            "text": "bob.johnson↯example.com",
             "start": 249,
             "end": 272
         },
@@ -334,7 +334,7 @@
         },
         {
             "kind": "Field",
-            "text": "alice.brown@example.com",
+            "text": "alice.brown↯example.com",
             "start": 306,
             "end": 329
         },

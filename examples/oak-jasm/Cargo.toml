@@ -1,35 +1,39 @@
 [package]
 name = "oak-jasm"
-description = "JASM assembly language parser with support for modern assembly syntax and features."
-categories = ["parsing"]
-keywords = ["parser", "jasm", "assembly-language", "syntax"]
-documentation = "https://docs.rs/oak-jasm"
-readme = "readme.md"
 version.workspace = true
 authors.workspace = true
-homepage.workspace = true
-repository.workspace = true
-license.workspace = true
+description = "JASM assembly language parser with support for modern assembly syntax and features."
 edition.workspace = true
+license.workspace = true
+readme = "readme.md"
+homepage.workspace = true
+repository = "https://github.com/ygg-lang/oaks/tree/master/examples/oak-jasm"
+documentation = "https://docs.rs/oak-jasm"
+categories = ["parsing"]
+keywords = ["parser", "jasm", "assembly-language", "syntax"]
 
 [dependencies]
 oak-core = { workspace = true }
-oak-highlight = { workspace = true }
-oak-pretty-print = { workspace = true }
-oak-lsp = { workspace = true }
-oak-mcp = { workspace = true }
-oak-hover = { workspace = true }
-oak-vfs = { workspace = true }
-serde = { workspace = true }
-futures = { workspace = true }
+oak-highlight = { workspace = true, optional = true }
+oak-pretty-print = { workspace = true, optional = true }
+oak-lsp = { workspace = true, optional = true }
+oak-mcp = { workspace = true, optional = true, features = ["io-std"] }
+oak-hover = { workspace = true, optional = true }
+oak-vfs = { workspace = true, optional = true }
+serde = { workspace = true, optional = true }
+futures = { workspace = true, optional = true }
 tokio = { workspace = true, optional = true }
 
 [dev-dependencies]
 oak-testing = { workspace = true }
 
 [features]
-default = []
-
+default = ["serde"]
+serde = ["dep:serde", "oak-core/serde"]
+oak-highlight = ["dep:oak-highlight"]
+oak-pretty-print = ["dep:oak-pretty-print"]
+lsp = ["dep:oak-lsp", "dep:oak-hover", "dep:oak-vfs", "oak-highlight", "oak-pretty-print", "dep:futures"]
+mcp = ["lsp", "oak-mcp/io-std"]
 
 [package.metadata.docs.rs]
 all-features = true

@@ -1,15 +1,16 @@
 use crate::{
     Language,
     errors::OakError,
+    language::TokenType,
     lexer::{LexOutput, Token, Tokens},
     memory::arena::SyntaxArena,
     source::Source,
-    tree::{Cursor, GreenLeaf, GreenNode, GreenTree},
+    tree::{Cursor, GreenLeaf, GreenNode, GreenTree, TokenProvenance},
 };
 use core::range::Range;
 use triomphe::Arc;
 
-/// Helper function to perform deep clone of a node into an arena.
+/// Helper function to raise deep clone of a node into an arena.
 ///
 /// This is used to "promote" nodes from a previous generation's arena to the current one,
 /// ensuring that the new tree is self-contained and has good memory locality.
@@ -96,6 +97,12 @@ impl<'a, L: Language> TreeSink<'a, L> {
         self.children.push(GreenTree::Leaf(GreenLeaf::new(kind, len as u32)));
     }
 
+    /// Pushes a leaf node (token) with provenance metadata to the current list of children.
+    pub fn push_leaf_with_metadata(&mut self, kind: L::TokenType, len: usize, provenance: TokenProvenance) {
+        let index = self.arena.add_metadata(provenance);
+        self.children.push(GreenTree::Leaf(GreenLeaf::with_metadata(kind, len as u32, Some(index))));
+    }
+
     /// Pushes an existing node to the current list of children.
     pub fn push_node(&mut self, node: &'a GreenNode<'a, L>) {
         self.children.push(GreenTree::Node(node));
@@ -113,7 +120,7 @@ impl<'a, L: Language> TreeSink<'a, L> {
 
     /// Restores the sink to a previous checkpoint by truncating the children list.
     pub fn restore(&mut self, checkpoint: usize) {
-        self.children.truncate(checkpoint);
+        self.children.truncate(checkpoint)
     }
 
     /// Finishes a node starting from the given checkpoint and adds it as a child.
@@ -229,7 +236,9 @@ impl<'a, L: Language, S: Source + ?Sized> ParserState<'a, L, S> {
         };
         errors.extend(lex_output.diagnostics);
 
-        Self { tokens: TokenSource::new(tokens), sink: TreeSink::new(arena, capacity_hint), incremental: None, errors, source }
+        let mut st = Self { tokens: TokenSource::new(tokens), sink: TreeSink::new(arena, capacity_hint), incremental: None, errors, source };
+        st.skip_trivia();
+        st
     }
 
     /// Creates a nested parser state that shares the same arena and source.
@@ -275,35 +284,35 @@ impl<'a, L: Language, S: Source + ?Sized> ParserState<'a, L, S> {
     /// Records an unexpected token error.
     pub fn record_unexpected_token(&mut self, token: impl Into<String>) {
         let err = OakError::unexpected_token(token, self.current_offset(), self.source.source_id());
-        self.errors.push(err);
+        self.errors.push(err)
     }
 
     /// Records an expected token error.
     pub fn record_expected(&mut self, expected: impl Into<String>) {
         let offset = self.tokens.current().map(|t| t.span.start).unwrap_or(self.source.length());
         let err = OakError::expected_token(expected, offset, self.source.source_id());
-        self.errors.push(err);
+        self.errors.push(err)
     }
 
     /// Records an expected name error.
     pub fn record_expected_name(&mut self, name_kind: impl Into<String>) {
         let offset = self.tokens.current().map(|t| t.span.start).unwrap_or(self.source.length());
         let err = OakError::expected_name(name_kind, offset, self.source.source_id());
-        self.errors.push(err);
+        self.errors.push(err)
     }
 
     /// Records a trailing comma not allowed error.
     pub fn record_trailing_comma_not_allowed(&mut self) {
         let offset = self.tokens.current().map(|t| t.span.start).unwrap_or(self.source.length());
         let err = OakError::trailing_comma_not_allowed(offset, self.source.source_id());
-        self.errors.push(err);
+        self.errors.push(err)
     }
 
     /// Records an unexpected end of file error.
     pub fn record_unexpected_eof(&mut self) {
         let offset = self.source.length();
         let err = OakError::unexpected_eof(offset, self.source.source_id());
-        self.errors.push(err);
+        self.errors.push(err)
     }
 
     /// Records an unexpected end of file error and returns it.
@@ -334,10 +343,30 @@ impl<'a, L: Language, S: Source + ?Sized> ParserState<'a, L, S> {
         self.tokens.peek_at(offset)
     }
 
+    /// Peeks at the Nth non-trivia token from the current position.
+    pub fn peek_non_trivia_at(&self, mut n: usize) -> Option<&Token<L::TokenType>> {
+        let mut offset = 0;
+        while let Some(token) = self.tokens.peek_at(offset) {
+            if !L::TokenType::is_ignored(&token.kind) {
+                if n == 0 {
+                    return Some(token);
+                }
+                n -= 1
+            }
+            offset += 1
+        }
+        None
+    }
+
     /// Returns the kind of the token at the specified offset from the current position.
     #[inline]
     pub fn peek_kind_at(&self, offset: usize) -> Option<L::TokenType> {
         self.tokens.peek_at(offset).map(|t| t.kind)
+    }
+
+    /// Returns the kind of the Nth non-trivia token from the current position.
+    pub fn peek_non_trivia_kind_at(&self, n: usize) -> Option<L::TokenType> {
+        self.peek_non_trivia_at(n).map(|t| t.kind)
     }
 
     /// Checks if the parser has not yet reached the end of the token stream.
@@ -361,39 +390,47 @@ impl<'a, L: Language, S: Source + ?Sized> ParserState<'a, L, S> {
     /// Advances the current position to the next token.
     pub fn advance(&mut self) {
         self.tokens.advance();
+        self.skip_trivia()
+    }
+
+    /// Skips trivia tokens and adds them to the syntax tree.
+    pub fn skip_trivia(&mut self) {
+        while let Some(token) = self.tokens.current() {
+            if L::TokenType::is_ignored(&token.kind) {
+                self.sink.push_leaf(token.kind, token.length());
+                self.tokens.advance()
+            }
+            else {
+                break;
+            }
+        }
     }
 
     /// Advances until a token of the specified kind is found, or the end of the token stream is reached.
     pub fn advance_until(&mut self, kind: L::TokenType) {
         while self.not_at_end() && !self.at(kind) {
-            self.advance();
+            self.advance()
         }
     }
 
     /// Advances until any token of the specified kinds is found, or the end of the token stream is reached.
     pub fn advance_until_any(&mut self, kinds: &[L::TokenType]) {
         while self.not_at_end() && !kinds.iter().any(|&k| self.at(k)) {
-            self.advance();
+            self.advance()
         }
     }
 
     /// Consumes the current token and adds it to the syntax tree as a leaf node.
-    pub fn bump(&mut self)
-    where
-        L::ElementType: From<L::TokenType>,
-    {
+    pub fn bump(&mut self) {
         if let Some(token) = self.current() {
             self.sink.push_leaf(token.kind, token.length());
-            self.tokens.advance();
+            self.advance()
         }
     }
 
     /// Consumes the current token if it matches the specified kind.
     /// Returns `true` if the token was consumed, `false` otherwise.
-    pub fn eat(&mut self, kind: L::TokenType) -> bool
-    where
-        L::ElementType: From<L::TokenType>,
-    {
+    pub fn eat(&mut self, kind: L::TokenType) -> bool {
         if self.at(kind) {
             self.bump();
             true
@@ -405,10 +442,7 @@ impl<'a, L: Language, S: Source + ?Sized> ParserState<'a, L, S> {
 
     /// Expects the current token to be of the specified kind, consuming it if it matches.
     /// If the token does not match, an error is recorded and returned.
-    pub fn expect(&mut self, kind: L::TokenType) -> Result<(), OakError>
-    where
-        L::ElementType: From<L::TokenType>,
-    {
+    pub fn expect(&mut self, kind: L::TokenType) -> Result<(), OakError> {
         if self.eat(kind) {
             Ok(())
         }
@@ -463,7 +497,7 @@ impl<'a, L: Language, S: Source + ?Sized> ParserState<'a, L, S> {
     /// Restores the parser state to a previous checkpoint.
     pub fn restore(&mut self, (token_index, tree_checkpoint): (usize, usize)) {
         self.tokens.set_index(token_index);
-        self.sink.restore(tree_checkpoint);
+        self.sink.restore(tree_checkpoint)
     }
 
     /// Finishes a node starting from the given checkpoint and adds it as a child.
@@ -471,9 +505,25 @@ impl<'a, L: Language, S: Source + ?Sized> ParserState<'a, L, S> {
         self.sink.finish_node(checkpoint.1, kind)
     }
 
+    /// Creates a checkpoint before an existing node.
+    pub fn checkpoint_before(&mut self, node: &'a GreenNode<'a, L>) -> (usize, usize) {
+        // Find the index of the node in the sink's children
+        let sink_checkpoint = self.sink.checkpoint();
+        for i in (0..sink_checkpoint).rev() {
+            if let Some(child) = self.sink.children.get(i) {
+                if let GreenTree::Node(n) = child {
+                    if std::ptr::eq(*n, node) {
+                        return (0, i); // token_index is hard to determine, but usually not needed for infix wrapping
+                    }
+                }
+            }
+        }
+        (0, sink_checkpoint)
+    }
+
     /// Adds an existing node as a child to the current node.
     pub fn push_child(&mut self, node: &'a GreenNode<'a, L>) {
-        self.sink.push_node(node);
+        self.sink.push_node(node)
     }
 
     /// Attempts to reuse a previous syntax node at the current position.
@@ -495,7 +545,7 @@ impl<'a, L: Language, S: Source + ?Sized> ParserState<'a, L, S> {
         };
 
         #[cfg(test)]
-        println!("Trying to reuse node at pos {}: {:?}", new_pos, kind);
+        println!("Trying to reuse node at pos {};: {:?}", new_pos, kind);
 
         let mut steps = 0;
         const MAX_STEPS: usize = 100;
@@ -582,7 +632,7 @@ impl<'a, L: Language, S: Source + ?Sized> ParserState<'a, L, S> {
     {
         if self.try_reuse(kind) {
             return Ok(());
-        }
+        };
 
         let checkpoint = self.checkpoint();
         let res = f(self);
@@ -600,7 +650,7 @@ impl<'a, L: Language, S: Source + ?Sized> ParserState<'a, L, S> {
     {
         if self.try_reuse(kind) {
             return Ok(true);
-        }
+        };
 
         let checkpoint = self.checkpoint();
         match f(self) {

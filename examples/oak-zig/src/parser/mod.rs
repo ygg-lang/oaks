@@ -1,4 +1,10 @@
-use crate::{kind::ZigSyntaxKind, language::ZigLanguage, lexer::ZigLexer};
+pub mod element_type;
+
+use crate::{
+    language::ZigLanguage,
+    lexer::{ZigLexer, token_type::ZigTokenType},
+    parser::element_type::ZigElementType,
+};
 use oak_core::{
     GreenNode, OakError,
     parser::{
@@ -22,56 +28,66 @@ impl<'config> ZigParser<'config> {
 
 impl<'config> Pratt<ZigLanguage> for ZigParser<'config> {
     fn primary<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> &'a GreenNode<'a, ZigLanguage> {
-        use crate::kind::ZigSyntaxKind::*;
         let cp = state.checkpoint();
         match state.peek_kind() {
-            Some(Identifier) => {
+            Some(ZigTokenType::Identifier) => {
                 state.bump();
-                state.finish_at(cp, Identifier.into())
+                state.finish_at(cp, ZigElementType::Identifier)
             }
-            Some(IntegerLiteral) | Some(FloatLiteral) | Some(StringLiteral) | Some(CharLiteral) | Some(BooleanLiteral) | Some(Null) | Some(Undefined) => {
+            Some(ZigTokenType::IntegerLiteral) | Some(ZigTokenType::FloatLiteral) | Some(ZigTokenType::StringLiteral) | Some(ZigTokenType::CharLiteral) | Some(ZigTokenType::BooleanLiteral) | Some(ZigTokenType::Null) | Some(ZigTokenType::Undefined) => {
                 state.bump();
-                state.finish_at(cp, Root.into()) // Simplified
+                state.finish_at(cp, ZigElementType::Literal)
             }
-            Some(LeftParen) => {
+            Some(ZigTokenType::LeftParen) => {
                 state.bump();
                 PrattParser::parse(state, 0, self);
-                state.expect(RightParen).ok();
-                state.finish_at(cp, Root.into())
+                state.expect(ZigTokenType::RightParen).ok();
+                state.finish_at(cp, ZigElementType::Root)
             }
             _ => {
                 state.bump();
-                state.finish_at(cp, Error.into())
+                state.finish_at(cp, ZigElementType::Error)
             }
         }
     }
 
     fn prefix<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> &'a GreenNode<'a, ZigLanguage> {
-        use crate::kind::ZigSyntaxKind::*;
         let kind = match state.peek_kind() {
             Some(k) => k,
             None => return self.primary(state),
         };
 
         match kind {
-            Minus | Tilde | Exclamation | Ampersand | TryKeyword | AwaitKeyword => unary(state, kind, 12, Root.into(), |s, p| PrattParser::parse(s, p, self)),
+            ZigTokenType::Minus | ZigTokenType::Tilde | ZigTokenType::Exclamation | ZigTokenType::Ampersand | ZigTokenType::TryKeyword | ZigTokenType::AwaitKeyword => {
+                // unary expects kind to be ZigLanguage::TokenType
+                unary(state, kind, 12, ZigElementType::UnaryExpr, |s, p| PrattParser::parse(s, p, self))
+            }
             _ => self.primary(state),
         }
     }
 
     fn infix<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>, left: &'a GreenNode<'a, ZigLanguage>, min_precedence: u8) -> Option<&'a GreenNode<'a, ZigLanguage>> {
-        use crate::kind::ZigSyntaxKind::*;
         let kind = state.peek_kind()?;
 
         let (prec, assoc) = match kind {
-            Assign | PlusAssign | MinusAssign | StarAssign | SlashAssign | PercentAssign | AmpersandAssign | PipeAssign | CaretAssign | LessLessAssign | GreaterGreaterAssign => (1, Associativity::Right),
-            Or | OrOr => (2, Associativity::Left),
-            And | AndAnd => (3, Associativity::Left),
-            Equal | NotEqual | Less | Greater | LessEqual | GreaterEqual => (4, Associativity::Left),
-            Plus | Minus | PlusPercent | MinusPercent | PlusPlus => (5, Associativity::Left),
-            Star | Slash | Percent | StarPercent | StarStar => (6, Associativity::Left),
-            CatchKeyword | OrElse => (7, Associativity::Right),
-            Dot | LeftParen | LeftBracket => (10, Associativity::Left),
+            ZigTokenType::Assign
+            | ZigTokenType::PlusAssign
+            | ZigTokenType::MinusAssign
+            | ZigTokenType::StarAssign
+            | ZigTokenType::SlashAssign
+            | ZigTokenType::PercentAssign
+            | ZigTokenType::AmpersandAssign
+            | ZigTokenType::PipeAssign
+            | ZigTokenType::CaretAssign
+            | ZigTokenType::LessLessAssign
+            | ZigTokenType::GreaterGreaterAssign => (1, Associativity::Right),
+            ZigTokenType::Or | ZigTokenType::OrOr => (2, Associativity::Left),
+            ZigTokenType::And | ZigTokenType::AndAnd => (3, Associativity::Left),
+            ZigTokenType::Equal | ZigTokenType::NotEqual | ZigTokenType::Less | ZigTokenType::Greater | ZigTokenType::LessEqual | ZigTokenType::GreaterEqual => (4, Associativity::Left),
+            ZigTokenType::Plus | ZigTokenType::Minus | ZigTokenType::PlusPercent | ZigTokenType::MinusPercent | ZigTokenType::PlusPlus => (5, Associativity::Left),
+            ZigTokenType::Star | ZigTokenType::Slash | ZigTokenType::Percent | ZigTokenType::StarPercent | ZigTokenType::StarStar => (6, Associativity::Left),
+            ZigTokenType::CatchKeyword | ZigTokenType::OrElse => (7, Associativity::Right),
+            ZigTokenType::Dot | ZigTokenType::LeftParen | ZigTokenType::LeftBracket => (10, Associativity::Left),
             _ => return None,
         };
 
@@ -80,42 +96,42 @@ impl<'config> Pratt<ZigLanguage> for ZigParser<'config> {
         }
 
         match kind {
-            Dot => {
+            ZigTokenType::Dot => {
                 let cp = state.checkpoint();
                 state.push_child(left);
                 state.bump();
-                state.expect(Identifier).ok();
-                Some(state.finish_at(cp, Root.into()))
+                state.expect(ZigTokenType::Identifier).ok();
+                Some(state.finish_at(cp, ZigElementType::Root))
             }
-            LeftParen => {
+            ZigTokenType::LeftParen => {
                 let cp = state.checkpoint();
                 state.push_child(left);
                 state.bump();
-                while state.not_at_end() && !state.at(RightParen) {
+                while state.not_at_end() && !state.at(ZigTokenType::RightParen) {
                     PrattParser::parse(state, 0, self);
-                    if !state.eat(Comma) {
+                    if !state.eat(ZigTokenType::Comma) {
                         break;
                     }
                 }
-                state.expect(RightParen).ok();
-                Some(state.finish_at(cp, Root.into()))
+                state.expect(ZigTokenType::RightParen).ok();
+                Some(state.finish_at(cp, ZigElementType::Root))
             }
-            LeftBracket => {
+            ZigTokenType::LeftBracket => {
                 let cp = state.checkpoint();
                 state.push_child(left);
                 state.bump();
                 PrattParser::parse(state, 0, self);
-                state.expect(RightBracket).ok();
-                Some(state.finish_at(cp, Root.into()))
+                state.expect(ZigTokenType::RightBracket).ok();
+                Some(state.finish_at(cp, ZigElementType::Root))
             }
-            _ => Some(binary(state, left, kind, prec, assoc, Root.into(), |s, p| PrattParser::parse(s, p, self))),
+            _ => Some(binary(state, left, kind, prec, assoc, ZigElementType::BinaryExpr.into(), |s, p| PrattParser::parse(s, p, self))),
         }
     }
 }
 
 impl<'config> Parser<ZigLanguage> for ZigParser<'config> {
     fn parse<'a, S: Source + ?Sized>(&self, source: &'a S, edits: &[TextEdit], cache: &'a mut impl ParseCache<ZigLanguage>) -> ParseOutput<'a, ZigLanguage> {
-        let lexer = ZigLexer::new(&self.config);
+        let lexer = ZigLexer::new(self.config);
         parse_with_lexer(&lexer, source, edits, cache, |state| self.parse_root_internal(state))
     }
 }
@@ -128,123 +144,115 @@ impl<'p> ZigParser<'p> {
             self.parse_statement(state)?;
         }
 
-        Ok(state.finish_at(checkpoint, ZigSyntaxKind::Root.into()))
+        Ok(state.finish_at(checkpoint, ZigElementType::Root))
     }
 
     fn parse_statement<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> Result<(), OakError> {
-        use crate::kind::ZigSyntaxKind::*;
         match state.peek_kind() {
-            Some(Fn) => self.parse_function_declaration(state)?,
-            Some(Const) | Some(Var) => self.parse_variable_declaration(state)?,
-            Some(If) => self.parse_if_statement(state)?,
-            Some(While) => self.parse_while_statement(state)?,
-            Some(For) => self.parse_for_statement(state)?,
-            Some(Return) => self.parse_return_statement(state)?,
-            Some(LeftBrace) => self.parse_block(state)?,
+            Some(ZigTokenType::Fn) => self.parse_function_declaration(state)?,
+            Some(ZigTokenType::Const) | Some(ZigTokenType::Var) => self.parse_variable_declaration(state)?,
+            Some(ZigTokenType::If) => self.parse_if_statement(state)?,
+            Some(ZigTokenType::While) => self.parse_while_statement(state)?,
+            Some(ZigTokenType::For) => self.parse_for_statement(state)?,
+            Some(ZigTokenType::Return) => self.parse_return_statement(state)?,
+            Some(ZigTokenType::LeftBrace) => self.parse_block(state)?,
             _ => {
                 PrattParser::parse(state, 0, self);
-                state.eat(Semicolon);
+                state.eat(ZigTokenType::Semicolon);
             }
         }
         Ok(())
     }
 
     fn parse_function_declaration<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> Result<(), OakError> {
-        use crate::kind::ZigSyntaxKind::*;
         let cp = state.checkpoint();
-        state.expect(Fn).ok();
-        state.expect(Identifier).ok();
-        state.expect(LeftParen).ok();
-        while state.not_at_end() && !state.at(RightParen) {
+        state.expect(ZigTokenType::Fn).ok();
+        state.expect(ZigTokenType::Identifier).ok();
+        state.expect(ZigTokenType::LeftParen).ok();
+        while state.not_at_end() && !state.at(ZigTokenType::RightParen) {
             state.advance();
         }
-        state.expect(RightParen).ok();
-        while state.not_at_end() && !state.at(LeftBrace) {
+        state.expect(ZigTokenType::RightParen).ok();
+        while state.not_at_end() && !state.at(ZigTokenType::LeftBrace) {
             state.bump();
         }
         self.parse_block(state)?;
-        state.finish_at(cp, ZigSyntaxKind::FnDeclaration.into());
+        state.finish_at(cp, ZigElementType::FnDeclaration);
         Ok(())
     }
 
     fn parse_variable_declaration<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> Result<(), OakError> {
-        use crate::kind::ZigSyntaxKind::*;
         let cp = state.checkpoint();
         state.bump(); // const or var
-        state.expect(Identifier).ok();
-        if state.eat(Colon) {
-            while state.not_at_end() && !state.at(Assign) && !state.at(Semicolon) {
+        state.expect(ZigTokenType::Identifier).ok();
+        if state.eat(ZigTokenType::Colon) {
+            while state.not_at_end() && !state.at(ZigTokenType::Assign) && !state.at(ZigTokenType::Semicolon) {
                 state.bump();
             }
         }
-        if state.eat(Assign) {
+        if state.eat(ZigTokenType::Assign) {
             PrattParser::parse(state, 0, self);
         }
-        state.eat(Semicolon);
-        state.finish_at(cp, ZigSyntaxKind::VarDeclaration.into());
+        state.eat(ZigTokenType::Semicolon);
+        state.finish_at(cp, ZigElementType::VarDeclaration);
         Ok(())
     }
 
     fn parse_if_statement<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> Result<(), OakError> {
-        use crate::kind::ZigSyntaxKind::*;
         let cp = state.checkpoint();
-        state.expect(If).ok();
-        state.expect(LeftParen).ok();
+        state.expect(ZigTokenType::If).ok();
+        state.expect(ZigTokenType::LeftParen).ok();
         PrattParser::parse(state, 0, self);
-        state.expect(RightParen).ok();
+        state.expect(ZigTokenType::RightParen).ok();
         self.parse_statement(state)?;
-        if state.eat(Else) {
+        if state.eat(ZigTokenType::Else) {
             self.parse_statement(state)?;
         }
-        state.finish_at(cp, ZigSyntaxKind::IfStatement.into());
+        state.finish_at(cp, ZigElementType::IfStatement);
         Ok(())
     }
 
     fn parse_while_statement<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> Result<(), OakError> {
-        use crate::kind::ZigSyntaxKind::*;
         let cp = state.checkpoint();
-        state.expect(While).ok();
-        state.expect(LeftParen).ok();
+        state.expect(ZigTokenType::While).ok();
+        state.expect(ZigTokenType::LeftParen).ok();
         PrattParser::parse(state, 0, self);
-        state.expect(RightParen).ok();
+        state.expect(ZigTokenType::RightParen).ok();
         self.parse_statement(state)?;
-        state.finish_at(cp, ZigSyntaxKind::WhileStatement.into());
+        state.finish_at(cp, ZigElementType::WhileStatement);
         Ok(())
     }
 
     fn parse_for_statement<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> Result<(), OakError> {
-        use crate::kind::ZigSyntaxKind::*;
         let cp = state.checkpoint();
-        state.expect(For).ok();
-        state.expect(LeftParen).ok();
+        state.expect(ZigTokenType::For).ok();
+        state.expect(ZigTokenType::LeftParen).ok();
         PrattParser::parse(state, 0, self);
-        state.expect(RightParen).ok();
+        state.expect(ZigTokenType::RightParen).ok();
         self.parse_statement(state)?;
-        state.finish_at(cp, ZigSyntaxKind::ForStatement.into());
+        state.finish_at(cp, ZigElementType::ForStatement);
         Ok(())
     }
 
     fn parse_return_statement<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> Result<(), OakError> {
-        use crate::kind::ZigSyntaxKind::*;
         let cp = state.checkpoint();
-        state.expect(Return).ok();
-        if !state.at(Semicolon) {
+        state.expect(ZigTokenType::Return).ok();
+        if !state.at(ZigTokenType::Semicolon) {
             PrattParser::parse(state, 0, self);
         }
-        state.eat(Semicolon);
-        state.finish_at(cp, ZigSyntaxKind::ReturnStatement.into());
+        state.eat(ZigTokenType::Semicolon);
+        state.finish_at(cp, ZigElementType::ReturnStatement);
         Ok(())
     }
 
     fn parse_block<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> Result<(), OakError> {
-        use crate::kind::ZigSyntaxKind::*;
         let cp = state.checkpoint();
-        state.expect(LeftBrace).ok();
-        while state.not_at_end() && !state.at(RightBrace) {
+        state.expect(ZigTokenType::LeftBrace).ok();
+        while state.not_at_end() && !state.at(ZigTokenType::RightBrace) {
             self.parse_statement(state)?;
         }
-        state.expect(RightBrace).ok();
-        state.finish_at(cp, ZigSyntaxKind::Block.into());
+        state.expect(ZigTokenType::RightBrace).ok();
+        state.finish_at(cp, ZigElementType::Block);
         Ok(())
     }
 }

@@ -1,8 +1,9 @@
 #![feature(new_range_api)]
 
-use criterion::{Criterion, black_box, criterion_group, criterion_main};
+use criterion::{Criterion, criterion_group, criterion_main};
 use oak_core::{Lexer, ParseSession, Parser, source::SourceText};
 use oak_yaml::{language::YamlLanguage, lexer::YamlLexer, parser::YamlParser};
+use std::hint::black_box;
 
 fn generate_yaml(n: usize) -> String {
     let mut s = String::with_capacity(n * 100);
@@ -14,7 +15,7 @@ fn generate_yaml(n: usize) -> String {
             i,
             (i as f64) * 1.5,
             if i % 2 == 0 { "true" } else { "false" }
-        ));
+        ))
     }
     s
 }
@@ -28,7 +29,7 @@ fn bench_yaml_comparison(c: &mut Criterion) {
     {
         let mut group = c.benchmark_group("YAML_Small");
         let s = generate_yaml(5);
-        let src = SourceText::new(&s);
+        let src = SourceText::new(s.as_str());
 
         group.bench_function("oak_yaml_lex", |b| {
             b.iter(|| {
@@ -52,14 +53,14 @@ fn bench_yaml_comparison(c: &mut Criterion) {
                 black_box(val);
             })
         });
-        group.finish();
+        group.finish()
     }
 
     // 2. Medium YAML
     {
         let mut group = c.benchmark_group("YAML_Medium");
         let s = generate_yaml(50);
-        let src = SourceText::new(&s);
+        let src = SourceText::new(s.as_str());
 
         group.bench_function("oak_yaml_lex", |b| {
             b.iter(|| {
@@ -83,14 +84,14 @@ fn bench_yaml_comparison(c: &mut Criterion) {
                 black_box(val);
             })
         });
-        group.finish();
+        group.finish()
     }
 
     // 3. Large YAML
     {
         let mut group = c.benchmark_group("YAML_Large_500");
         let s = generate_yaml(500);
-        let src = SourceText::new(&s);
+        let src = SourceText::new(s.as_str());
 
         group.bench_function("oak_yaml_lex", |b| {
             b.iter(|| {
@@ -114,7 +115,7 @@ fn bench_yaml_comparison(c: &mut Criterion) {
                 black_box(val);
             })
         });
-        group.finish();
+        group.finish()
     }
 }
 

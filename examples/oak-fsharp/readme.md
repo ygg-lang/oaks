@@ -1,155 +1,32 @@
-# Oak F# Parser
+# 🚀 oak-fsharp
 
 [![Crates.io](https://img.shields.io/crates/v/oak-fsharp.svg)](https://crates.io/crates/oak-fsharp)
 [![Documentation](https://docs.rs/oak-fsharp/badge.svg)](https://docs.rs/oak-fsharp)
 
-High-performance incremental F# parser for the oak ecosystem with flexible configuration, optimized for static analysis and code generation.
+**Making F# processing simple** — A high-performance, incremental F# parser built on the Oak framework.
 
-## 🎯 Overview
+## 🎯 Project Vision
 
-Oak F# is a robust parser for F#, designed to handle complete F# syntax including modern features. Built on the solid foundation of oak-core, it provides both high-level convenience and detailed AST generation for static analysis and code generation.
+`oak-fsharp` is dedicated to providing industrial-grade parsing support for the F# language. By leveraging Rust's high-performance characteristics and Oak's incremental parsing architecture, it can easily handle a variety of application scenarios, from simple script analysis to complex IDE language servers.
 
-## ✨ Features
+## ✨ Core Features
 
-- **Complete F# Syntax**: Supports all F# features including modern specifications
-- **Full AST Generation**: Generates comprehensive Abstract Syntax Trees
-- **Lexer Support**: Built-in tokenization with proper span information
-- **Error Recovery**: Graceful handling of syntax errors with detailed diagnostics
+- **⚡ Blazing Fast**: Fully utilizes Rust's performance advantages to achieve sub-millisecond parsing response times.
+- **🔄 Incremental Parsing**: Built-in support for partial updates, demonstrating extremely high efficiency when processing large files.
+- **🌳 High-Fidelity AST**: Captures language-specific constructs and trivia (comments/whitespace) for refactoring and analysis.
+- **🛡️ Robustness**: Features a comprehensive error recovery mechanism, ensuring normal operation even when input is incomplete.
+- **🧩 Easy Integration**: Designed with high cohesion and low coupling, allowing for quick integration into existing Rust projects.
 
-## 🚀 Quick Start
+## 🏗️ Architecture
 
-Basic example:
+`oak-fsharp` follows the modern Green/Red Tree architecture (inspired by Roslyn):
 
-```rust
-use oak_core::{Parser, SourceText, parser::session::ParseSession};
-use oak_fsharp::{FSharpParser, FSharpLanguage};
+- **Green Tree**: Immutable, lossless, and syntax-only tree. It captures the full fidelity of the source code, including trivia (comments, whitespace).
+- **Red Tree**: A facade over the Green Tree that provides a convenient, type-safe API for tree traversal and analysis, including parent pointers and absolute offsets.
 
-fn main() -> Result<(), Box<dyn std::error::Error>> {
-    let mut session = ParseSession::<FSharpLanguage>::default();
-    let parser = FSharpParser::new();
-    let source = SourceText::new(r#"
-let helloWorld = 
-    printfn "Hello, F#!"
+This design enables efficient incremental parsing and powerful refactoring capabilities.
 
-helloWorld
-    "#);
-    
-    let result = parser.parse(&source, &[], &mut session);
-    println!("Parsed F# successfully.");
-    Ok(())
-}
-```
 
-## 📋 Parsing Examples
+## 🛠️ Contributing
 
-### Function Parsing
-```rust
-use oak_core::{Parser, SourceText, parser::session::ParseSession};
-use oak_fsharp::{FSharpParser, FSharpLanguage};
-
-let mut session = ParseSession::<FSharpLanguage>::default();
-let parser = FSharpParser::new();
-let source = SourceText::new(r#"
-let add x y = x + y
-let result = add 5 10
-"#);
-
-let result = parser.parse(&source, &[], &mut session);
-println!("Function parsed successfully.");
-```
-
-### Type Parsing
-```rust
-use oak_core::{Parser, SourceText, parser::session::ParseSession};
-use oak_fsharp::{FSharpParser, FSharpLanguage};
-
-let mut session = ParseSession::<FSharpLanguage>::default();
-let parser = FSharpParser::new();
-let source = SourceText::new(r#"
-type Person = {
-    Name: string
-    Age: int
-}
-"#);
-
-let result = parser.parse(&source, &[], &mut session);
-println!("Type parsed successfully.");
-```
-
-## 🔧 Advanced Features
-
-### Token-Level Parsing
-```rust
-use oak_core::{Parser, SourceText, parser::session::ParseSession};
-use oak_fsharp::{FSharpParser, FSharpLanguage};
-
-let mut session = ParseSession::<FSharpLanguage>::default();
-let parser = FSharpParser::new();
-let source = SourceText::new("let x = 42");
-let result = parser.parse(&source, &[], &mut session);
-println!("Token parsing completed.");
-```
-
-### Error Handling
-```rust
-use oak_core::{Parser, SourceText, parser::session::ParseSession};
-use oak_fsharp::{FSharpParser, FSharpLanguage};
-
-let mut session = ParseSession::<FSharpLanguage>::default();
-let parser = FSharpParser::new();
-let source = SourceText::new(r#"
-let broken = 
-    if x > 0 then
-# Missing else
-"#);
-
-let result = parser.parse(&source, &[], &mut session);
-if let Some(errors) = result.result.err() {
-    println!("Parse errors found: {:?}", errors);
-} else {
-    println!("Parsed successfully.");
-}
-```
-
-## 🏗️ AST Structure
-
-The parser generates a comprehensive AST with the following main structures:
-
-- **FSharpProgram**: Root container for F# programs
-- **Module**: F# module definitions
-- **Function**: F# functions and methods
-- **Expression**: Various expression types including operators
-- **Type**: F# type system constructs
-- **Statement**: Various statement types
-
-## 📊 Performance
-
-- **Streaming**: Parse large F# files without loading entirely into memory
-- **Incremental**: Re-parse only changed sections
-- **Memory Efficient**: Smart AST node allocation
-- **Fast Recovery**: Quick error recovery for better IDE integration
-
-## 🔗 Integration
-
-Oak F# integrates seamlessly with:
-
-- **Static Analysis**: Code quality and security analysis
-- **Code Generation**: Generating code from F# AST
-- **IDE Support**: Language server protocol compatibility
-- **Refactoring**: Automated code refactoring
-- **Documentation**: Generating documentation from F# code
-
-## 📚 Examples
-
-Check out the [examples](examples/) directory for comprehensive examples:
-
-- Complete F# program parsing
-- Function and module analysis
-- Code transformation
-- Integration with development workflows
-
-## 🤝 Contributing
-
-Contributions are welcome! 
-
-Please feel free to submit pull requests at the [project repository](https://github.com/ygg-lang/oaks/tree/dev/examples/oak-fsharp) or open [issues](https://github.com/ygg-lang/oaks/issues).
+Contributions are welcome! Please feel free to submit a Pull Request. For major changes, please open an issue first to discuss what you would like to change.

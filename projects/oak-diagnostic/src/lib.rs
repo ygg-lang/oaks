@@ -1,4 +1,10 @@
 #![feature(new_range_api)]
+#![warn(missing_docs)]
+//! Diagnostic reporting for the Oak language framework.
+//!
+//! This crate provides structures and traits for representing and managing
+//! diagnostics (errors, warnings, advice) in a way that is compatible with
+//! various frontends like LSP or CLI output.
 
 use oak_core::{
     errors::{OakError, OakErrorKind},
@@ -10,65 +16,86 @@ use serde::{Deserialize, Serialize};
 /// Severity of a diagnostic.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 pub enum Severity {
+    /// An error that must be fixed.
     Error,
+    /// A warning that should be addressed.
     Warning,
+    /// An advice or suggestion for improvement.
     Advice,
 }
 
 /// A labeled region in the source code.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Label {
+    /// The message associated with the label.
     pub message: Option<String>,
+    /// The byte range within the resource.
     #[serde(with = "oak_core::serde_range")]
     pub span: core::range::Range<usize>,
+    /// The color of the label (optional).
     pub color: Option<String>,
 }
 
 /// A diagnostic message.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Diagnostic {
+    /// The diagnostic code.
     pub code: Option<String>,
+    /// The primary message.
     pub message: String,
+    /// The internationalization key.
     pub i18n_key: Option<String>,
+    /// The internationalization arguments.
     pub i18n_args: std::collections::HashMap<String, String>,
+    /// The severity of the diagnostic.
     pub severity: Severity,
+    /// The labeled regions in the source.
     pub labels: Vec<Label>,
+    /// A help message providing more details or suggestions.
     pub help: Option<String>,
 }
 
 impl Diagnostic {
+    /// Creates a new error diagnostic with the given message.
     pub fn error(message: impl Into<String>) -> Self {
         Self { code: None, message: message.into(), i18n_key: None, i18n_args: std::collections::HashMap::new(), severity: Severity::Error, labels: Vec::new(), help: None }
     }
 
+    /// Creates a new warning diagnostic with the given message.
     pub fn warning(message: impl Into<String>) -> Self {
         Self { code: None, message: message.into(), i18n_key: None, i18n_args: std::collections::HashMap::new(), severity: Severity::Warning, labels: Vec::new(), help: None }
     }
 
+    /// Sets the internationalization key for the diagnostic.
     pub fn with_i18n(mut self, key: impl Into<String>) -> Self {
         self.i18n_key = Some(key.into());
         self
     }
 
+    /// Adds an internationalization argument to the diagnostic.
     pub fn with_arg(mut self, key: impl Into<String>, value: impl Into<String>) -> Self {
         self.i18n_args.insert(key.into(), value.into());
         self
     }
 
+    /// Creates a diagnostic from a provider and a source.
     pub fn from_provider<P: DiagnosticProvider, S: Source + ?Sized>(provider: &P, source: &S) -> Self {
         provider.to_diagnostic(source)
     }
 
+    /// Adds a labeled region to the diagnostic.
     pub fn with_label(mut self, span: core::range::Range<usize>, message: impl Into<String>) -> Self {
         self.labels.push(Label { message: Some(message.into()), span, color: None });
         self
     }
 
+    /// Adds a help message to the diagnostic.
     pub fn with_help(mut self, help: impl Into<String>) -> Self {
         self.help = Some(help.into());
         self
     }
 
+    /// Sets the diagnostic code.
     pub fn with_code(mut self, code: impl Into<String>) -> Self {
         self.code = Some(code.into());
         self
@@ -84,8 +111,19 @@ impl From<&OakError> for Diagnostic {
 
 /// A trait for objects that can be converted into a diagnostic.
 pub trait DiagnosticProvider {
-    /// Convert this object into a diagnostic.
+    /// Converts this object into a diagnostic message using the given source provider.
     fn to_diagnostic<S: Source + ?Sized>(&self, source: &S) -> Diagnostic;
+}
+
+/// A provider that emits diagnostics for a language.
+pub trait OakDiagnosticsProvider<L: oak_core::Language> {
+    /// Emits diagnostics for the given syntax tree and source.
+    fn emit_diagnostics<S: Source + ?Sized>(&self, uri: &str, root: &oak_core::tree::RedNode<L>, source: &S) -> Vec<Diagnostic>;
+    /// Emits all diagnostics for the given source.
+    fn emit_all_diagnostics<S: Source + ?Sized>(&self, uri: &str, source: &S) -> Vec<Diagnostic> {
+        let _ = (uri, source);
+        Vec::new()
+    }
 }
 
 impl DiagnosticProvider for OakError {
@@ -155,6 +193,7 @@ pub trait Emitter {
 
 /// Emitter for ANSI-colored console output.
 pub struct ConsoleEmitter {
+    /// Whether to use Unicode characters for drawing boxes and lines.
     pub unicode: bool,
 }
 
@@ -299,6 +338,7 @@ impl ConsoleEmitter {
 
 /// Emitter for plain text output without colors.
 pub struct PlainTextEmitter {
+    /// Whether to use Unicode characters for drawing boxes and lines.
     pub unicode: bool,
 }
 

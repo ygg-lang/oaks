@@ -1,4 +1,7 @@
-use crate::{kind::StylusSyntaxKind, language::StylusLanguage};
+#![doc = include_str!("readme.md")]
+pub mod token_type;
+
+use crate::{language::StylusLanguage, lexer::token_type::StylusTokenType};
 use oak_core::{Lexer, LexerCache, LexerState, OakError, TextEdit, lexer::LexOutput, source::Source};
 
 type State<'a, S> = LexerState<'a, S, StylusLanguage>;
@@ -18,16 +21,11 @@ impl<'config> StylusLexer<'config> {
         let start_pos = state.get_position();
 
         while let Some(ch) = state.peek() {
-            if ch == ' ' || ch == '\t' {
-                state.advance(ch.len_utf8());
-            }
-            else {
-                break;
-            }
+            if ch == ' ' || ch == '\t' { state.advance(ch.len_utf8()) } else { break }
         }
 
         if state.get_position() > start_pos {
-            state.add_token(StylusSyntaxKind::Whitespace, start_pos, state.get_position());
+            state.add_token(StylusTokenType::Whitespace, start_pos, state.get_position());
             true
         }
         else {
@@ -41,15 +39,15 @@ impl<'config> StylusLexer<'config> {
 
         if let Some('\n') = state.peek() {
             state.advance(1);
-            state.add_token(StylusSyntaxKind::Newline, start_pos, state.get_position());
+            state.add_token(StylusTokenType::Newline, start_pos, state.get_position());
             true
         }
         else if let Some('\r') = state.peek() {
             state.advance(1);
             if let Some('\n') = state.peek() {
-                state.advance(1);
+                state.advance(1)
             }
-            state.add_token(StylusSyntaxKind::Newline, start_pos, state.get_position());
+            state.add_token(StylusTokenType::Newline, start_pos, state.get_position());
             true
         }
         else {
@@ -65,15 +63,10 @@ impl<'config> StylusLexer<'config> {
             state.advance(1);
 
             while let Some(ch) = state.peek() {
-                if ch == '\n' || ch == '\r' {
-                    break;
-                }
-                else {
-                    state.advance(ch.len_utf8());
-                }
+                if ch == '\n' || ch == '\r' { break } else { state.advance(ch.len_utf8()) }
             }
 
-            state.add_token(StylusSyntaxKind::Comment, start_pos, state.get_position());
+            state.add_token(StylusTokenType::Comment, start_pos, state.get_position());
             true
         }
         else {
@@ -92,12 +85,7 @@ impl<'config> StylusLexer<'config> {
 
                 // 计算连续的引号数
                 while let Some(ch) = state.peek_next_n(quote_count) {
-                    if ch == quote {
-                        quote_count += 1;
-                    }
-                    else {
-                        break;
-                    }
+                    if ch == quote { quote_count += 1 } else { break }
                 }
 
                 if quote_count >= 3 {
@@ -110,12 +98,7 @@ impl<'config> StylusLexer<'config> {
                             let mut end_quote_count = 0;
 
                             while let Some(check_ch) = state.peek_next_n(end_quote_count) {
-                                if check_ch == quote {
-                                    end_quote_count += 1;
-                                }
-                                else {
-                                    break;
-                                }
+                                if check_ch == quote { end_quote_count += 1 } else { break }
                             }
 
                             if end_quote_count >= 3 {
@@ -123,22 +106,22 @@ impl<'config> StylusLexer<'config> {
                                 break;
                             }
                             else {
-                                state.advance(1);
+                                state.advance(1)
                             }
                         }
                         else if ch == '\\' && quote == '"' {
                             // 处理转义字符（仅在基本字符串中）
                             state.advance(1);
                             if let Some(_) = state.peek() {
-                                state.advance(1);
+                                state.advance(1)
                             }
                         }
                         else {
-                            state.advance(ch.len_utf8());
+                            state.advance(ch.len_utf8())
                         }
                     }
 
-                    state.add_token(StylusSyntaxKind::String, start_pos, state.get_position());
+                    state.add_token(StylusTokenType::String, start_pos, state.get_position());
                     true
                 }
                 else {
@@ -157,15 +140,15 @@ impl<'config> StylusLexer<'config> {
                             // 处理转义字符（仅在双引号字符串中）
                             state.advance(1);
                             if let Some(_) = state.peek() {
-                                state.advance(1);
+                                state.advance(1)
                             }
                         }
                         else {
-                            state.advance(ch.len_utf8());
+                            state.advance(ch.len_utf8())
                         }
                     }
 
-                    state.add_token(StylusSyntaxKind::String, start_pos, state.get_position());
+                    state.add_token(StylusTokenType::String, start_pos, state.get_position());
                     true
                 }
             }
@@ -186,7 +169,7 @@ impl<'config> StylusLexer<'config> {
         // 处理符号
         if let Some(ch) = state.peek() {
             if ch == '+' || ch == '-' {
-                state.advance(1);
+                state.advance(1)
             }
         }
 
@@ -197,15 +180,10 @@ impl<'config> StylusLexer<'config> {
                     state.advance(2); // 跳过 "0x"
 
                     while let Some(ch) = state.peek() {
-                        if ch.is_ascii_hexdigit() || ch == '_' {
-                            state.advance(1);
-                        }
-                        else {
-                            break;
-                        }
+                        if ch.is_ascii_hexdigit() || ch == '_' { state.advance(1) } else { break }
                     }
 
-                    state.add_token(StylusSyntaxKind::Number, start_pos, state.get_position());
+                    state.add_token(StylusTokenType::Number, start_pos, state.get_position());
                     return true;
                 }
             }
@@ -213,12 +191,7 @@ impl<'config> StylusLexer<'config> {
 
         // 处理十进制数
         while let Some(ch) = state.peek() {
-            if ch.is_ascii_digit() || ch == '_' {
-                state.advance(1);
-            }
-            else {
-                break;
-            }
+            if ch.is_ascii_digit() || ch == '_' { state.advance(1) } else { break }
         }
 
         // 处理小数
@@ -229,12 +202,7 @@ impl<'config> StylusLexer<'config> {
                     state.advance(1); // 小数点
 
                     while let Some(ch) = state.peek() {
-                        if ch.is_ascii_digit() || ch == '_' {
-                            state.advance(1);
-                        }
-                        else {
-                            break;
-                        }
+                        if ch.is_ascii_digit() || ch == '_' { state.advance(1) } else { break }
                     }
                 }
             }
@@ -250,16 +218,11 @@ impl<'config> StylusLexer<'config> {
             }
 
             while let Some(ch) = state.peek() {
-                if ch.is_ascii_digit() || ch == '_' {
-                    state.advance(1);
-                }
-                else {
-                    break;
-                }
+                if ch.is_ascii_digit() || ch == '_' { state.advance(1) } else { break }
             }
         }
 
-        let token_kind = if is_float { StylusSyntaxKind::Number } else { StylusSyntaxKind::Number };
+        let token_kind = if is_float { StylusTokenType::Number } else { StylusTokenType::Number };
 
         state.add_token(token_kind, start_pos, state.get_position());
         true
@@ -274,12 +237,7 @@ impl<'config> StylusLexer<'config> {
                 state.advance(ch.len_utf8());
 
                 while let Some(ch) = state.peek() {
-                    if ch.is_ascii_alphanumeric() || ch == '_' || ch == '-' {
-                        state.advance(ch.len_utf8());
-                    }
-                    else {
-                        break;
-                    }
+                    if ch.is_ascii_alphanumeric() || ch == '_' || ch == '-' { state.advance(ch.len_utf8()) } else { break }
                 }
 
                 let end_pos = state.get_position();
@@ -298,12 +256,12 @@ impl<'config> StylusLexer<'config> {
     }
 
     /// 判断是关键字还是标识符
-    fn keyword_or_identifier(&self, text: &str) -> StylusSyntaxKind {
+    fn keyword_or_identifier(&self, text: &str) -> StylusTokenType {
         match text {
             // CSS 颜色关键字
-            "red" | "blue" | "green" | "white" | "black" | "transparent" => StylusSyntaxKind::Color,
+            "red" | "blue" | "green" | "white" | "black" | "transparent" => StylusTokenType::Color,
             // 其他都是标识符
-            _ => StylusSyntaxKind::Identifier,
+            _ => StylusTokenType::Identifier,
         }
     }
 
@@ -313,22 +271,22 @@ impl<'config> StylusLexer<'config> {
 
         if let Some(ch) = state.peek() {
             let token_kind = match ch {
-                '{' => StylusSyntaxKind::LeftBrace,
-                '}' => StylusSyntaxKind::RightBrace,
-                '(' => StylusSyntaxKind::LeftParen,
-                ')' => StylusSyntaxKind::RightParen,
-                ':' => StylusSyntaxKind::Colon,
-                ';' => StylusSyntaxKind::Semicolon,
-                ',' => StylusSyntaxKind::Comma,
-                '.' => StylusSyntaxKind::Dot,
-                '#' => StylusSyntaxKind::Hash,
-                '&' => StylusSyntaxKind::Ampersand,
-                '+' => StylusSyntaxKind::Plus,
-                '-' => StylusSyntaxKind::Minus,
-                '*' => StylusSyntaxKind::Star,
-                '/' => StylusSyntaxKind::Slash,
-                '%' => StylusSyntaxKind::Percent,
-                '=' => StylusSyntaxKind::Equal,
+                '{' => StylusTokenType::LeftBrace,
+                '}' => StylusTokenType::RightBrace,
+                '(' => StylusTokenType::LeftParen,
+                ')' => StylusTokenType::RightParen,
+                ':' => StylusTokenType::Colon,
+                ';' => StylusTokenType::Semicolon,
+                ',' => StylusTokenType::Comma,
+                '.' => StylusTokenType::Dot,
+                '#' => StylusTokenType::Hash,
+                '&' => StylusTokenType::Ampersand,
+                '+' => StylusTokenType::Plus,
+                '-' => StylusTokenType::Minus,
+                '*' => StylusTokenType::Star,
+                '/' => StylusTokenType::Slash,
+                '%' => StylusTokenType::Percent,
+                '=' => StylusTokenType::Equal,
                 _ => return false,
             };
 
@@ -384,7 +342,7 @@ impl<'config> StylusLexer<'config> {
             let start_pos = state.get_position();
             if let Some(ch) = state.peek() {
                 state.advance(ch.len_utf8());
-                state.add_token(StylusSyntaxKind::Error, start_pos, state.get_position());
+                state.add_token(StylusTokenType::Error, start_pos, state.get_position());
             }
 
             state.advance_if_dead_lock(safe_point);
@@ -400,7 +358,7 @@ impl<'config> Lexer<StylusLanguage> for StylusLexer<'config> {
         let mut state = LexerState::new(source);
         let result = self.run(&mut state);
         if result.is_ok() {
-            state.add_eof();
+            state.add_eof()
         }
         state.finish_with_cache(result, cache)
     }

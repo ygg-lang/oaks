@@ -1,160 +1,33 @@
-# Oak Ada Parser
+# 🚀 Oak Ada Parser
 
 [![Crates.io](https://img.shields.io/crates/v/oak-ada.svg)](https://crates.io/crates/oak-ada)
 [![Documentation](https://docs.rs/oak-ada/badge.svg)](https://docs.rs/oak-ada)
 
-High-performance incremental Ada parser for the oak ecosystem with flexible configuration, optimized for embedded systems and safety-critical applications.
+**Safety and Precision for Mission-Critical Systems** — A high-performance, incremental Ada parser built on the Oak framework. Optimized for safety-critical systems, large-scale engineering, and modern IDE support for the Ada programming language.
 
-## 🎯 Overview
+## 🎯 Project Vision
 
-Oak Ada is a robust parser for Ada 2012, designed to handle complete Ada syntax including SPARK annotations and modern features. Built on the solid foundation of oak-core, it provides both high-level convenience and detailed AST generation for Ada analysis and tooling.
+Ada was designed for safety-critical and large-scale software engineering, emphasizing reliability, readability, and maintainability. `oak-ada` brings these same principles to parsing, providing a modern, Rust-powered infrastructure for analyzing Ada code. By utilizing Oak's incremental parsing capabilities, it enables developers to build highly responsive tools for complex Ada projects, ensuring that safety and productivity go hand-in-hand. Whether you are building static analyzers, automated refactoring tools, or sophisticated IDE extensions, `oak-ada` provides the robust, efficient foundation you need.
 
-## ✨ Features
+## ✨ Core Features
 
-- **Complete Ada 2012 Syntax**: Supports all Ada features including modern specifications
-- **SPARK Support**: Handles SPARK annotations and contracts
-- **Full AST Generation**: Generates comprehensive Abstract Syntax Trees
-- **Lexer Support**: Built-in tokenization with proper span information
-- **Error Recovery**: Graceful handling of syntax errors with detailed diagnostics
+- **⚡ Blazing Fast**: Leverages Rust's performance and memory safety to provide sub-millisecond parsing, essential for real-time analysis in large-scale systems.
+- **🔄 Incremental by Nature**: Built-in support for partial updates—re-parse only what has changed. Ideal for large Ada codebases where performance is critical.
+- **🌳 High-Fidelity AST**: Generates a clean and easy-to-traverse Abstract Syntax Tree capturing:
+    - **Packages & Subprograms**: Comprehensive management of package specifications, bodies, and nested subprograms.
+    - **Tasking & Concurrency**: Precise mapping of tasks, entries, and protected objects.
+    - **Strong Typing**: Detailed tracking of Ada's unique type system, including range constraints and private types.
+    - **Generics**: Robust handling of Ada generic units and formal parameters.
+- **🛡️ Robust Error Recovery**: Engineered to handle incomplete or malformed code gracefully, providing precise diagnostics—crucial for maintaining a smooth developer experience during active coding.
+- **🧩 Deep Ecosystem Integration**: Seamlessly works with `oak-lsp` for full LSP support and `oak-mcp` for Model Context Protocol capabilities.
 
-## 🚀 Quick Start
+## 🏗️ Architecture
 
-Basic example:
-
-```rust
-use oak_ada::{Parser, AdaLanguage, SourceText};
-
-fn main() -> Result<(), Box<dyn std::error::Error>> {
-    let parser = Parser::new();
-    let source = SourceText::new(r#"
-procedure Hello is
-begin
-    Put_Line("Hello, Ada!");
-end Hello;
-    "#);
-    
-    let result = parser.parse(&source);
-    println!("Parsed Ada procedure successfully.");
-    Ok(())
-}
-```
-
-## 📋 Parsing Examples
-
-### Package Parsing
-```rust
-use oak_ada::{Parser, AdaLanguage, SourceText};
-
-let parser = Parser::new();
-let source = SourceText::new(r#"
-package My_Package is
-    procedure Say_Hello;
-    function Get_Value return Integer;
-end My_Package;
-
-package body My_Package is
-    procedure Say_Hello is
-    begin
-        Put_Line("Hello from Ada!");
-    end Say_Hello;
-    
-    function Get_Value return Integer is
-    begin
-        return 42;
-    end Get_Value;
-end My_Package;
-"#);
-
-let result = parser.parse(&source);
-println!("Parsed Ada package successfully.");
-```
-
-### Procedure Parsing
-```rust
-use oak_ada::{Parser, AdaLanguage, SourceText};
-
-let parser = Parser::new();
-let source = SourceText::new(r#"
-procedure Calculate_Area(Width, Height : in Float; Area : out Float) is
-begin
-    Area := Width * Height;
-    Put_Line("Area calculated successfully.");
-end Calculate_Area;
-"#);
-
-let result = parser.parse(&source);
-println!("Parsed Ada procedure successfully.");
-```
-
-## 🔧 Advanced Features
-
-### Token-Level Parsing
-```rust
-use oak_ada::{Parser, AdaLanguage, SourceText};
-
-let parser = Parser::new();
-let source = SourceText::new("procedure Hello is begin null; end Hello;");
-let result = parser.parse(&source);
-// Token information is available in the parse result
-```
-
-### Error Handling
-```rust
-use oak_ada::{Parser, AdaLanguage, SourceText};
-
-let parser = Parser::new();
-let source = SourceText::new(r#"
-procedure Broken is
-    X : Integer := "not a number"; -- Type mismatch
-    Y : Integer  -- Missing assignment or semicolon
-begin
-    Put_Line("Hello" -- Missing closing parenthesis
-end Broken; -- Missing semicolon before end
-"#);
-
-let result = parser.parse(&source);
-if let Err(e) = result.result {
-    println!("Parse error: {:?}", e);
-}
-```
-
-## 🏗️ AST Structure
-
-The parser generates a comprehensive AST with the following main structures:
-
-- **Package**: Root container for Ada packages
-- **Procedure**: Ada procedures
-- **Declarations**: Variable, constant, type declarations
-- **Statements**: Assignment, if, loop, case statements
-
-## 📊 Performance
-
-- **Streaming**: Parse large Ada files without loading entirely into memory
-- **Incremental**: Re-parse only changed sections
-- **Memory Efficient**: Smart AST node allocation
-- **Fast Recovery**: Quick error recovery for better IDE integration
-
-## 🔗 Integration
-
-Oak-ada integrates seamlessly with:
-
-- **Static Analysis**: Code quality and security analysis
-- **Code Generation**: Generating code from Ada AST
-- **IDE Support**: Language server protocol compatibility
-- **Refactoring**: Automated code refactoring
-- **Documentation**: Generating documentation from Ada code
-
-## 📚 Examples
-
-Check out the [examples](examples/) directory for comprehensive examples:
-
-- Complete Ada package parsing
-- Procedure and function analysis
-- Code transformation
-- Integration with development workflows
+The parser follows the **Green/Red Tree** architecture (inspired by Roslyn), which allows for:
+1. **Efficient Immutability**: Share nodes across different versions of the tree without copying.
+2. **Lossless Syntax Trees**: Retains all trivia (whitespace and comments), enabling faithful code formatting and refactoring.
+3. **Type Safety**: Strongly-typed "Red" nodes provide a convenient and safe API for tree traversal and analysis.
 
 ## 🤝 Contributing
 
-Contributions are welcome! 
-
-Please feel free to submit pull requests at the [project repository](https://github.com/ygg-lang/oaks/tree/dev/examples/oak-ada) or open [issues](https://github.com/ygg-lang/oaks/issues).
+We welcome contributions of all kinds! If you find a bug, have a feature request, or want to contribute code, please check our [issues](https://github.com/ygg-lang/oaks/issues) or submit a pull request.

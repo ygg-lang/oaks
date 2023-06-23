@@ -1,511 +1,745 @@
 {
-    "success": true,
-    "count": 84,
-    "tokens": [
-        {
-            "kind": "Identifier",
-            "text": "f",
-            "start": 34,
-            "end": 35
-        },
-        {
-            "kind": "LeftBracket",
-            "text": "[",
-            "start": 35,
-            "end": 36
-        },
-        {
-            "kind": "Identifier",
-            "text": "x",
-            "start": 36,
-            "end": 37
-        },
-        {
-            "kind": "Underscore",
-            "text": "_",
-            "start": 37,
-            "end": 38
-        },
-        {
-            "kind": "RightBracket",
-            "text": "]",
-            "start": 38,
-            "end": 39
-        },
-        {
-            "kind": "Colon",
-            "text": ":",
-            "start": 40,
-            "end": 41
-        },
-        {
-            "kind": "Assign",
-            "text": "=",
-            "start": 41,
-            "end": 42
-        },
-        {
-            "kind": "Identifier",
-            "text": "x",
-            "start": 43,
-            "end": 44
-        },
-        {
-            "kind": "Power",
-            "text": "^",
-            "start": 44,
-            "end": 45
-        },
-        {
-            "kind": "Integer",
-            "text": "2",
-            "start": 45,
-            "end": 46
-        },
-        {
-            "kind": "Plus",
-            "text": "+",
-            "start": 47,
-            "end": 48
-        },
-        {
-            "kind": "Integer",
-            "text": "2",
-            "start": 49,
-            "end": 50
-        },
-        {
-            "kind": "Times",
-            "text": "*",
-            "start": 50,
-            "end": 51
-        },
-        {
-            "kind": "Identifier",
-            "text": "x",
-            "start": 51,
-            "end": 52
-        },
-        {
-            "kind": "Plus",
-            "text": "+",
-            "start": 53,
-            "end": 54
-        },
-        {
-            "kind": "Integer",
-            "text": "1",
-            "start": 55,
-            "end": 56
-        },
-        {
-            "kind": "Identifier",
-            "text": "result",
-            "start": 60,
-            "end": 66
-        },
-        {
-            "kind": "Assign",
-            "text": "=",
-            "start": 67,
-            "end": 68
-        },
-        {
-            "kind": "Identifier",
-            "text": "f",
-            "start": 69,
-            "end": 70
-        },
-        {
-            "kind": "LeftBracket",
-            "text": "[",
-            "start": 70,
-            "end": 71
-        },
-        {
-            "kind": "Integer",
-            "text": "5",
-            "start": 71,
-            "end": 72
-        },
-        {
-            "kind": "RightBracket",
-            "text": "]",
-            "start": 72,
-            "end": 73
-        },
-        {
-            "kind": "If",
-            "text": "If",
-            "start": 77,
-            "end": 79
-        },
-        {
-            "kind": "LeftBracket",
-            "text": "[",
-            "start": 79,
-            "end": 80
-        },
-        {
-            "kind": "Identifier",
-            "text": "result",
-            "start": 80,
-            "end": 86
-        },
-        {
-            "kind": "Greater",
-            "text": ">",
-            "start": 87,
-            "end": 88
-        },
-        {
-            "kind": "Integer",
-            "text": "30",
-            "start": 89,
-            "end": 91
-        },
-        {
-            "kind": "Comma",
-            "text": ",",
-            "start": 91,
-            "end": 92
-        },
-        {
-            "kind": "Identifier",
-            "text": "Print",
-            "start": 97,
-            "end": 102
-        },
-        {
-            "kind": "LeftBracket",
-            "text": "[",
-            "start": 102,
-            "end": 103
-        },
-        {
-            "kind": "String",
-            "text": "\"Result is large: \"",
-            "start": 103,
-            "end": 122
-        },
-        {
-            "kind": "Comma",
-            "text": ",",
-            "start": 122,
-            "end": 123
-        },
-        {
-            "kind": "Identifier",
-            "text": "result",
-            "start": 124,
-            "end": 130
-        },
-        {
-            "kind": "RightBracket",
-            "text": "]",
-            "start": 130,
-            "end": 131
-        },
-        {
-            "kind": "Comma",
-            "text": ",",
-            "start": 131,
-            "end": 132
-        },
-        {
-            "kind": "Identifier",
-            "text": "Print",
-            "start": 136,
-            "end": 141
-        },
-        {
-            "kind": "LeftBracket",
-            "text": "[",
-            "start": 141,
-            "end": 142
-        },
-        {
-            "kind": "String",
-            "text": "\"Result is small: \"",
-            "start": 142,
-            "end": 161
-        },
-        {
-            "kind": "Comma",
-            "text": ",",
-            "start": 161,
-            "end": 162
-        },
-        {
-            "kind": "Identifier",
-            "text": "result",
-            "start": 163,
-            "end": 169
-        },
-        {
-            "kind": "RightBracket",
-            "text": "]",
-            "start": 169,
-            "end": 170
-        },
-        {
-            "kind": "RightBracket",
-            "text": "]",
-            "start": 172,
-            "end": 173
-        },
-        {
-            "kind": "Identifier",
-            "text": "list",
-            "start": 177,
-            "end": 181
-        },
-        {
-            "kind": "Assign",
-            "text": "=",
-            "start": 182,
-            "end": 183
-        },
-        {
-            "kind": "LeftBrace",
-            "text": "{",
-            "start": 184,
-            "end": 185
-        },
-        {
-            "kind": "Integer",
-            "text": "1",
-            "start": 185,
-            "end": 186
-        },
-        {
-            "kind": "Comma",
-            "text": ",",
-            "start": 186,
-            "end": 187
-        },
-        {
-            "kind": "Integer",
-            "text": "2",
-            "start": 188,
-            "end": 189
-        },
-        {
-            "kind": "Comma",
-            "text": ",",
-            "start": 189,
-            "end": 190
-        },
-        {
-            "kind": "Integer",
-            "text": "3",
-            "start": 191,
-            "end": 192
-        },
-        {
-            "kind": "Comma",
-            "text": ",",
-            "start": 192,
-            "end": 193
-        },
-        {
-            "kind": "Integer",
-            "text": "4",
-            "start": 194,
-            "end": 195
-        },
-        {
-            "kind": "Comma",
-            "text": ",",
-            "start": 195,
-            "end": 196
-        },
-        {
-            "kind": "Integer",
-            "text": "5",
-            "start": 197,
-            "end": 198
-        },
-        {
-            "kind": "RightBrace",
-            "text": "}",
-            "start": 198,
-            "end": 199
-        },
-        {
-            "kind": "Identifier",
-            "text": "squared",
-            "start": 201,
-            "end": 208
-        },
-        {
-            "kind": "Assign",
-            "text": "=",
-            "start": 209,
-            "end": 210
-        },
-        {
-            "kind": "Map",
-            "text": "Map",
-            "start": 211,
-            "end": 214
-        },
-        {
-            "kind": "LeftBracket",
-            "text": "[",
-            "start": 214,
-            "end": 215
-        },
-        {
-            "kind": "Slot",
-            "text": "#",
-            "start": 215,
-            "end": 216
-        },
-        {
-            "kind": "Power",
-            "text": "^",
-            "start": 216,
-            "end": 217
-        },
-        {
-            "kind": "Integer",
-            "text": "2",
-            "start": 217,
-            "end": 218
-        },
-        {
-            "kind": "Error",
-            "text": "&",
-            "start": 219,
-            "end": 220
-        },
-        {
-            "kind": "Comma",
-            "text": ",",
-            "start": 220,
-            "end": 221
-        },
-        {
-            "kind": "Identifier",
-            "text": "list",
-            "start": 222,
-            "end": 226
-        },
-        {
-            "kind": "RightBracket",
-            "text": "]",
-            "start": 226,
-            "end": 227
-        },
-        {
-            "kind": "Identifier",
-            "text": "Plot",
-            "start": 231,
-            "end": 235
-        },
-        {
-            "kind": "LeftBracket",
-            "text": "[",
-            "start": 235,
-            "end": 236
-        },
-        {
-            "kind": "Identifier",
-            "text": "Sin",
-            "start": 236,
-            "end": 239
-        },
-        {
-            "kind": "LeftBracket",
-            "text": "[",
-            "start": 239,
-            "end": 240
-        },
-        {
-            "kind": "Identifier",
-            "text": "x",
-            "start": 240,
-            "end": 241
-        },
-        {
-            "kind": "RightBracket",
-            "text": "]",
-            "start": 241,
-            "end": 242
-        },
-        {
-            "kind": "Comma",
-            "text": ",",
-            "start": 242,
-            "end": 243
-        },
-        {
-            "kind": "LeftBrace",
-            "text": "{",
-            "start": 244,
-            "end": 245
-        },
-        {
-            "kind": "Identifier",
-            "text": "x",
-            "start": 245,
-            "end": 246
-        },
-        {
-            "kind": "Comma",
-            "text": ",",
-            "start": 246,
-            "end": 247
-        },
-        {
-            "kind": "Integer",
-            "text": "0",
-            "start": 248,
-            "end": 249
-        },
-        {
-            "kind": "Comma",
-            "text": ",",
-            "start": 249,
-            "end": 250
-        },
-        {
-            "kind": "Integer",
-            "text": "2",
-            "start": 251,
-            "end": 252
-        },
-        {
-            "kind": "Times",
-            "text": "*",
-            "start": 252,
-            "end": 253
-        },
-        {
-            "kind": "Identifier",
-            "text": "Pi",
-            "start": 253,
-            "end": 255
-        },
-        {
-            "kind": "RightBrace",
-            "text": "}",
-            "start": 255,
-            "end": 256
-        },
-        {
-            "kind": "RightBracket",
-            "text": "]",
-            "start": 256,
-            "end": 257
-        },
-        {
-            "kind": "Eof",
-            "text": "",
-            "start": 257,
-            "end": 257
-        }
-    ],
-    "errors": []
+  "count": 123,
+  "errors": [],
+  "success": true,
+  "tokens": [
+    {
+      "end": 32,
+      "kind": "Comment",
+      "start": 0,
+      "text": "(* Wolfram Language test file *)"
+    },
+    {
+      "end": 34,
+      "kind": "Newline",
+      "start": 32,
+      "text": "\r\n"
+    },
+    {
+      "end": 35,
+      "kind": "Identifier",
+      "start": 34,
+      "text": "f"
+    },
+    {
+      "end": 36,
+      "kind": "LeftBracket",
+      "start": 35,
+      "text": "["
+    },
+    {
+      "end": 37,
+      "kind": "Identifier",
+      "start": 36,
+      "text": "x"
+    },
+    {
+      "end": 38,
+      "kind": "Underscore",
+      "start": 37,
+      "text": "_"
+    },
+    {
+      "end": 39,
+      "kind": "RightBracket",
+      "start": 38,
+      "text": "]"
+    },
+    {
+      "end": 40,
+      "kind": "Whitespace",
+      "start": 39,
+      "text": " "
+    },
+    {
+      "end": 42,
+      "kind": "SetDelayed",
+      "start": 40,
+      "text": ":="
+    },
+    {
+      "end": 43,
+      "kind": "Whitespace",
+      "start": 42,
+      "text": " "
+    },
+    {
+      "end": 44,
+      "kind": "Identifier",
+      "start": 43,
+      "text": "x"
+    },
+    {
+      "end": 45,
+      "kind": "Power",
+      "start": 44,
+      "text": "^"
+    },
+    {
+      "end": 46,
+      "kind": "Integer",
+      "start": 45,
+      "text": "2"
+    },
+    {
+      "end": 47,
+      "kind": "Whitespace",
+      "start": 46,
+      "text": " "
+    },
+    {
+      "end": 48,
+      "kind": "Plus",
+      "start": 47,
+      "text": "+"
+    },
+    {
+      "end": 49,
+      "kind": "Whitespace",
+      "start": 48,
+      "text": " "
+    },
+    {
+      "end": 50,
+      "kind": "Integer",
+      "start": 49,
+      "text": "2"
+    },
+    {
+      "end": 51,
+      "kind": "Times",
+      "start": 50,
+      "text": "*"
+    },
+    {
+      "end": 52,
+      "kind": "Identifier",
+      "start": 51,
+      "text": "x"
+    },
+    {
+      "end": 53,
+      "kind": "Whitespace",
+      "start": 52,
+      "text": " "
+    },
+    {
+      "end": 54,
+      "kind": "Plus",
+      "start": 53,
+      "text": "+"
+    },
+    {
+      "end": 55,
+      "kind": "Whitespace",
+      "start": 54,
+      "text": " "
+    },
+    {
+      "end": 56,
+      "kind": "Integer",
+      "start": 55,
+      "text": "1"
+    },
+    {
+      "end": 58,
+      "kind": "Newline",
+      "start": 56,
+      "text": "\r\n"
+    },
+    {
+      "end": 60,
+      "kind": "Newline",
+      "start": 58,
+      "text": "\r\n"
+    },
+    {
+      "end": 66,
+      "kind": "Identifier",
+      "start": 60,
+      "text": "result"
+    },
+    {
+      "end": 67,
+      "kind": "Whitespace",
+      "start": 66,
+      "text": " "
+    },
+    {
+      "end": 68,
+      "kind": "Assign",
+      "start": 67,
+      "text": "="
+    },
+    {
+      "end": 69,
+      "kind": "Whitespace",
+      "start": 68,
+      "text": " "
+    },
+    {
+      "end": 70,
+      "kind": "Identifier",
+      "start": 69,
+      "text": "f"
+    },
+    {
+      "end": 71,
+      "kind": "LeftBracket",
+      "start": 70,
+      "text": "["
+    },
+    {
+      "end": 72,
+      "kind": "Integer",
+      "start": 71,
+      "text": "5"
+    },
+    {
+      "end": 73,
+      "kind": "RightBracket",
+      "start": 72,
+      "text": "]"
+    },
+    {
+      "end": 75,
+      "kind": "Newline",
+      "start": 73,
+      "text": "\r\n"
+    },
+    {
+      "end": 77,
+      "kind": "Newline",
+      "start": 75,
+      "text": "\r\n"
+    },
+    {
+      "end": 79,
+      "kind": "If",
+      "start": 77,
+      "text": "If"
+    },
+    {
+      "end": 80,
+      "kind": "LeftBracket",
+      "start": 79,
+      "text": "["
+    },
+    {
+      "end": 86,
+      "kind": "Identifier",
+      "start": 80,
+      "text": "result"
+    },
+    {
+      "end": 87,
+      "kind": "Whitespace",
+      "start": 86,
+      "text": " "
+    },
+    {
+      "end": 88,
+      "kind": "Greater",
+      "start": 87,
+      "text": ">"
+    },
+    {
+      "end": 89,
+      "kind": "Whitespace",
+      "start": 88,
+      "text": " "
+    },
+    {
+      "end": 91,
+      "kind": "Integer",
+      "start": 89,
+      "text": "30"
+    },
+    {
+      "end": 92,
+      "kind": "Comma",
+      "start": 91,
+      "text": ","
+    },
+    {
+      "end": 97,
+      "kind": "Whitespace",
+      "start": 92,
+      "text": " \r\n  "
+    },
+    {
+      "end": 102,
+      "kind": "Identifier",
+      "start": 97,
+      "text": "Print"
+    },
+    {
+      "end": 103,
+      "kind": "LeftBracket",
+      "start": 102,
+      "text": "["
+    },
+    {
+      "end": 122,
+      "kind": "String",
+      "start": 103,
+      "text": "\"Result is large: \""
+    },
+    {
+      "end": 123,
+      "kind": "Comma",
+      "start": 122,
+      "text": ","
+    },
+    {
+      "end": 124,
+      "kind": "Whitespace",
+      "start": 123,
+      "text": " "
+    },
+    {
+      "end": 130,
+      "kind": "Identifier",
+      "start": 124,
+      "text": "result"
+    },
+    {
+      "end": 131,
+      "kind": "RightBracket",
+      "start": 130,
+      "text": "]"
+    },
+    {
+      "end": 132,
+      "kind": "Comma",
+      "start": 131,
+      "text": ","
+    },
+    {
+      "end": 134,
+      "kind": "Newline",
+      "start": 132,
+      "text": "\r\n"
+    },
+    {
+      "end": 136,
+      "kind": "Whitespace",
+      "start": 134,
+      "text": "  "
+    },
+    {
+      "end": 141,
+      "kind": "Identifier",
+      "start": 136,
+      "text": "Print"
+    },
+    {
+      "end": 142,
+      "kind": "LeftBracket",
+      "start": 141,
+      "text": "["
+    },
+    {
+      "end": 161,
+      "kind": "String",
+      "start": 142,
+      "text": "\"Result is small: \""
+    },
+    {
+      "end": 162,
+      "kind": "Comma",
+      "start": 161,
+      "text": ","
+    },
+    {
+      "end": 163,
+      "kind": "Whitespace",
+      "start": 162,
+      "text": " "
+    },
+    {
+      "end": 169,
+      "kind": "Identifier",
+      "start": 163,
+      "text": "result"
+    },
+    {
+      "end": 170,
+      "kind": "RightBracket",
+      "start": 169,
+      "text": "]"
+    },
+    {
+      "end": 172,
+      "kind": "Newline",
+      "start": 170,
+      "text": "\r\n"
+    },
+    {
+      "end": 173,
+      "kind": "RightBracket",
+      "start": 172,
+      "text": "]"
+    },
+    {
+      "end": 175,
+      "kind": "Newline",
+      "start": 173,
+      "text": "\r\n"
+    },
+    {
+      "end": 177,
+      "kind": "Newline",
+      "start": 175,
+      "text": "\r\n"
+    },
+    {
+      "end": 181,
+      "kind": "Identifier",
+      "start": 177,
+      "text": "list"
+    },
+    {
+      "end": 182,
+      "kind": "Whitespace",
+      "start": 181,
+      "text": " "
+    },
+    {
+      "end": 183,
+      "kind": "Assign",
+      "start": 182,
+      "text": "="
+    },
+    {
+      "end": 184,
+      "kind": "Whitespace",
+      "start": 183,
+      "text": " "
+    },
+    {
+      "end": 185,
+      "kind": "LeftBrace",
+      "start": 184,
+      "text": "{"
+    },
+    {
+      "end": 186,
+      "kind": "Integer",
+      "start": 185,
+      "text": "1"
+    },
+    {
+      "end": 187,
+      "kind": "Comma",
+      "start": 186,
+      "text": ","
+    },
+    {
+      "end": 188,
+      "kind": "Whitespace",
+      "start": 187,
+      "text": " "
+    },
+    {
+      "end": 189,
+      "kind": "Integer",
+      "start": 188,
+      "text": "2"
+    },
+    {
+      "end": 190,
+      "kind": "Comma",
+      "start": 189,
+      "text": ","
+    },
+    {
+      "end": 191,
+      "kind": "Whitespace",
+      "start": 190,
+      "text": " "
+    },
+    {
+      "end": 192,
+      "kind": "Integer",
+      "start": 191,
+      "text": "3"
+    },
+    {
+      "end": 193,
+      "kind": "Comma",
+      "start": 192,
+      "text": ","
+    },
+    {
+      "end": 194,
+      "kind": "Whitespace",
+      "start": 193,
+      "text": " "
+    },
+    {
+      "end": 195,
+      "kind": "Integer",
+      "start": 194,
+      "text": "4"
+    },
+    {
+      "end": 196,
+      "kind": "Comma",
+      "start": 195,
+      "text": ","
+    },
+    {
+      "end": 197,
+      "kind": "Whitespace",
+      "start": 196,
+      "text": " "
+    },
+    {
+      "end": 198,
+      "kind": "Integer",
+      "start": 197,
+      "text": "5"
+    },
+    {
+      "end": 199,
+      "kind": "RightBrace",
+      "start": 198,
+      "text": "}"
+    },
+    {
+      "end": 201,
+      "kind": "Newline",
+      "start": 199,
+      "text": "\r\n"
+    },
+    {
+      "end": 208,
+      "kind": "Identifier",
+      "start": 201,
+      "text": "squared"
+    },
+    {
+      "end": 209,
+      "kind": "Whitespace",
+      "start": 208,
+      "text": " "
+    },
+    {
+      "end": 210,
+      "kind": "Assign",
+      "start": 209,
+      "text": "="
+    },
+    {
+      "end": 211,
+      "kind": "Whitespace",
+      "start": 210,
+      "text": " "
+    },
+    {
+      "end": 214,
+      "kind": "Map",
+      "start": 211,
+      "text": "Map"
+    },
+    {
+      "end": 215,
+      "kind": "LeftBracket",
+      "start": 214,
+      "text": "["
+    },
+    {
+      "end": 216,
+      "kind": "Slot",
+      "start": 215,
+      "text": "#"
+    },
+    {
+      "end": 217,
+      "kind": "Power",
+      "start": 216,
+      "text": "^"
+    },
+    {
+      "end": 218,
+      "kind": "Integer",
+      "start": 217,
+      "text": "2"
+    },
+    {
+      "end": 219,
+      "kind": "Whitespace",
+      "start": 218,
+      "text": " "
+    },
+    {
+      "end": 220,
+      "kind": "Ampersand",
+      "start": 219,
+      "text": "&"
+    },
+    {
+      "end": 221,
+      "kind": "Comma",
+      "start": 220,
+      "text": ","
+    },
+    {
+      "end": 222,
+      "kind": "Whitespace",
+      "start": 221,
+      "text": " "
+    },
+    {
+      "end": 226,
+      "kind": "Identifier",
+      "start": 222,
+      "text": "list"
+    },
+    {
+      "end": 227,
+      "kind": "RightBracket",
+      "start": 226,
+      "text": "]"
+    },
+    {
+      "end": 229,
+      "kind": "Newline",
+      "start": 227,
+      "text": "\r\n"
+    },
+    {
+      "end": 231,
+      "kind": "Newline",
+      "start": 229,
+      "text": "\r\n"
+    },
+    {
+      "end": 235,
+      "kind": "Identifier",
+      "start": 231,
+      "text": "Plot"
+    },
+    {
+      "end": 236,
+      "kind": "LeftBracket",
+      "start": 235,
+      "text": "["
+    },
+    {
+      "end": 239,
+      "kind": "Identifier",
+      "start": 236,
+      "text": "Sin"
+    },
+    {
+      "end": 240,
+      "kind": "LeftBracket",
+      "start": 239,
+      "text": "["
+    },
+    {
+      "end": 241,
+      "kind": "Identifier",
+      "start": 240,
+      "text": "x"
+    },
+    {
+      "end": 242,
+      "kind": "RightBracket",
+      "start": 241,
+      "text": "]"
+    },
+    {
+      "end": 243,
+      "kind": "Comma",
+      "start": 242,
+      "text": ","
+    },
+    {
+      "end": 244,
+      "kind": "Whitespace",
+      "start": 243,
+      "text": " "
+    },
+    {
+      "end": 245,
+      "kind": "LeftBrace",
+      "start": 244,
+      "text": "{"
+    },
+    {
+      "end": 246,
+      "kind": "Identifier",
+      "start": 245,
+      "text": "x"
+    },
+    {
+      "end": 247,
+      "kind": "Comma",
+      "start": 246,
+      "text": ","
+    },
+    {
+      "end": 248,
+      "kind": "Whitespace",
+      "start": 247,
+      "text": " "
+    },
+    {
+      "end": 249,
+      "kind": "Integer",
+      "start": 248,
+      "text": "0"
+    },
+    {
+      "end": 250,
+      "kind": "Comma",
+      "start": 249,
+      "text": ","
+    },
+    {
+      "end": 251,
+      "kind": "Whitespace",
+      "start": 250,
+      "text": " "
+    },
+    {
+      "end": 252,
+      "kind": "Integer",
+      "start": 251,
+      "text": "2"
+    },
+    {
+      "end": 253,
+      "kind": "Times",
+      "start": 252,
+      "text": "*"
+    },
+    {
+      "end": 255,
+      "kind": "Identifier",
+      "start": 253,
+      "text": "Pi"
+    },
+    {
+      "end": 256,
+      "kind": "RightBrace",
+      "start": 255,
+      "text": "}"
+    },
+    {
+      "end": 257,
+      "kind": "RightBracket",
+      "start": 256,
+      "text": "]"
+    },
+    {
+      "end": 257,
+      "kind": "Eof",
+      "start": 257,
+      "text": ""
+    }
+  ]
 }

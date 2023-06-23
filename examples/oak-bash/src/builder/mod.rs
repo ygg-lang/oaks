@@ -1,4 +1,5 @@
-use crate::{BashParser, ast::*, language::BashLanguage};
+#![doc = include_str!("readme.md")]
+use crate::{ast::*, language::BashLanguage, parser::BashParser};
 use oak_core::{Builder, BuilderCache, GreenNode, OakDiagnostics, Parser, SourceText, TextEdit, source::Source};
 
 /// Bash 语言的 AST 构建器

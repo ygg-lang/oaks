@@ -1,4 +1,7 @@
-use crate::{kind::DSyntaxKind, language::DLanguage};
+#![doc = include_str!("readme.md")]
+pub mod token_type;
+
+use crate::{language::DLanguage, lexer::token_type::DTokenType};
 use oak_core::{Lexer, LexerCache, LexerState, TextEdit, lexer::LexOutput, source::Source};
 
 type State<'a, S> = LexerState<'a, S, DLanguage>;
@@ -14,7 +17,7 @@ impl<'config> Lexer<DLanguage> for DLexer<'config> {
         let mut state = LexerState::new(source);
         let result = self.run(&mut state);
         if result.is_ok() {
-            state.add_eof();
+            state.add_eof()
         }
         state.finish_with_cache(result, cache)
     }
@@ -77,7 +80,7 @@ impl<'config> DLexer<'config> {
             // 如果没有匹配任何规则，添加错误token并强行推进，防止死循环
             state.advance_if_dead_lock(start_pos);
             if state.get_position() > start_pos {
-                state.add_token(DSyntaxKind::Error, start_pos, state.get_position());
+                state.add_token(DTokenType::Error, start_pos, state.get_position())
             }
         }
         Ok(())
@@ -91,9 +94,9 @@ impl<'config> DLexer<'config> {
                     if !ch.is_whitespace() || ch == '\n' || ch == '\r' {
                         break;
                     }
-                    state.advance(ch.len_utf8());
+                    state.advance(ch.len_utf8())
                 }
-                state.add_token(DSyntaxKind::Whitespace, start_pos, state.get_position());
+                state.add_token(DTokenType::Whitespace, start_pos, state.get_position());
                 return true;
             }
         }
@@ -107,13 +110,13 @@ impl<'config> DLexer<'config> {
                 if ch == '\r' {
                     state.advance(1);
                     if state.peek() == Some('\n') {
-                        state.advance(1);
+                        state.advance(1)
                     }
                 }
                 else {
-                    state.advance(1);
+                    state.advance(1)
                 }
-                state.add_token(DSyntaxKind::Newline, start_pos, state.get_position());
+                state.add_token(DTokenType::Newline, start_pos, state.get_position());
                 return true;
             }
         }
@@ -125,125 +128,120 @@ impl<'config> DLexer<'config> {
             if ch.is_alphabetic() || ch == '_' {
                 let start_pos = state.get_position();
                 while let Some(ch) = state.peek() {
-                    if ch.is_alphanumeric() || ch == '_' {
-                        state.advance(ch.len_utf8());
-                    }
-                    else {
-                        break;
-                    }
+                    if ch.is_alphanumeric() || ch == '_' { state.advance(ch.len_utf8()) } else { break }
                 }
                 let end_pos = state.get_position();
                 let text = state.get_text_in((start_pos..end_pos).into());
 
                 let kind = match text.as_ref() {
-                    "module" => DSyntaxKind::ModuleKeyword,
-                    "import" => DSyntaxKind::ImportKeyword,
-                    "public" => DSyntaxKind::PublicKeyword,
-                    "private" => DSyntaxKind::PrivateKeyword,
-                    "protected" => DSyntaxKind::ProtectedKeyword,
-                    "package" => DSyntaxKind::PackageKeyword,
-                    "export" => DSyntaxKind::ExportKeyword,
-                    "static" => DSyntaxKind::StaticKeyword,
-                    "final" => DSyntaxKind::FinalKeyword,
-                    "abstract" => DSyntaxKind::AbstractKeyword,
-                    "override" => DSyntaxKind::OverrideKeyword,
-                    "synchronized" => DSyntaxKind::SynchronizedKeyword,
-                    "const" => DSyntaxKind::ConstKeyword,
-                    "immutable" => DSyntaxKind::ImmutableKeyword,
-                    "inout" => DSyntaxKind::InoutKeyword,
-                    "shared" => DSyntaxKind::SharedKeyword,
-                    "class" => DSyntaxKind::ClassKeyword,
-                    "struct" => DSyntaxKind::StructKeyword,
-                    "interface" => DSyntaxKind::InterfaceKeyword,
-                    "union" => DSyntaxKind::UnionKeyword,
-                    "enum" => DSyntaxKind::EnumKeyword,
-                    "function" => DSyntaxKind::FunctionKeyword,
-                    "delegate" => DSyntaxKind::DelegateKeyword,
-                    "if" => DSyntaxKind::IfKeyword,
-                    "else" => DSyntaxKind::ElseKeyword,
-                    "while" => DSyntaxKind::WhileKeyword,
-                    "for" => DSyntaxKind::ForKeyword,
-                    "foreach" => DSyntaxKind::ForeachKeyword,
-                    "do" => DSyntaxKind::DoKeyword,
-                    "switch" => DSyntaxKind::SwitchKeyword,
-                    "case" => DSyntaxKind::CaseKeyword,
-                    "default" => DSyntaxKind::DefaultKeyword,
-                    "break" => DSyntaxKind::BreakKeyword,
-                    "continue" => DSyntaxKind::ContinueKeyword,
-                    "return" => DSyntaxKind::ReturnKeyword,
-                    "goto" => DSyntaxKind::GotoKeyword,
-                    "try" => DSyntaxKind::TryKeyword,
-                    "catch" => DSyntaxKind::CatchKeyword,
-                    "finally" => DSyntaxKind::FinallyKeyword,
-                    "throw" => DSyntaxKind::ThrowKeyword,
-                    "scope" => DSyntaxKind::ScopeKeyword,
-                    "with" => DSyntaxKind::WithKeyword,
-                    "asm" => DSyntaxKind::AsmKeyword,
-                    "mixin" => DSyntaxKind::MixinKeyword,
-                    "template" => DSyntaxKind::TemplateKeyword,
-                    "alias" => DSyntaxKind::AliasKeyword,
-                    "typeof" => DSyntaxKind::TypeofKeyword,
-                    "typeid" => DSyntaxKind::TypeidKeyword,
-                    "is" => DSyntaxKind::IsKeyword,
-                    "in" => DSyntaxKind::InKeyword,
-                    "out" => DSyntaxKind::OutKeyword,
-                    "ref" => DSyntaxKind::RefKeyword,
-                    "lazy" => DSyntaxKind::LazyKeyword,
-                    "auto" => DSyntaxKind::AutoKeyword,
-                    "extern" => DSyntaxKind::ExternKeyword,
-                    "align" => DSyntaxKind::AlignKeyword,
-                    "pragma" => DSyntaxKind::PragmaKeyword,
-                    "debug" => DSyntaxKind::DebugKeyword,
-                    "version" => DSyntaxKind::VersionKeyword,
-                    "unittest" => DSyntaxKind::UnitTestKeyword,
-                    "invariant" => DSyntaxKind::InvariantKeyword,
-                    "body" => DSyntaxKind::BodyKeyword,
-                    "new" => DSyntaxKind::NewKeyword,
-                    "delete" => DSyntaxKind::DeleteKeyword,
-                    "this" => DSyntaxKind::ThisKeyword,
-                    "super" => DSyntaxKind::SuperKeyword,
-                    "null" => DSyntaxKind::NullKeyword,
-                    "true" => DSyntaxKind::TrueKeyword,
-                    "false" => DSyntaxKind::FalseKeyword,
-                    "cast" => DSyntaxKind::CastKeyword,
-                    "void" => DSyntaxKind::VoidType,
-                    "bool" => DSyntaxKind::BoolType,
-                    "byte" => DSyntaxKind::ByteType,
-                    "ubyte" => DSyntaxKind::UbyteType,
-                    "short" => DSyntaxKind::ShortType,
-                    "ushort" => DSyntaxKind::UshortType,
-                    "int" => DSyntaxKind::IntType,
-                    "uint" => DSyntaxKind::UintType,
-                    "long" => DSyntaxKind::LongType,
-                    "ulong" => DSyntaxKind::UlongType,
-                    "cent" => DSyntaxKind::CentType,
-                    "ucent" => DSyntaxKind::UcentType,
-                    "float" => DSyntaxKind::FloatType,
-                    "double" => DSyntaxKind::DoubleType,
-                    "real" => DSyntaxKind::RealType,
-                    "ifloat" => DSyntaxKind::IfloatType,
-                    "idouble" => DSyntaxKind::IdoubleType,
-                    "ireal" => DSyntaxKind::IrealType,
-                    "cfloat" => DSyntaxKind::CfloatType,
-                    "cdouble" => DSyntaxKind::CdoubleType,
-                    "creal" => DSyntaxKind::CrealType,
-                    "char" => DSyntaxKind::CharType,
-                    "wchar" => DSyntaxKind::WcharType,
-                    "dchar" => DSyntaxKind::DcharType,
-                    "string" => DSyntaxKind::StringType,
-                    "wstring" => DSyntaxKind::WstringType,
-                    "dstring" => DSyntaxKind::DstringType,
-                    "typedef" => DSyntaxKind::TypedefKeyword,
-                    "pure" => DSyntaxKind::PureKeyword,
-                    "nothrow" => DSyntaxKind::NothrowKeyword,
-                    "safe" => DSyntaxKind::SafeKeyword,
-                    "trusted" => DSyntaxKind::TrustedKeyword,
-                    "system" => DSyntaxKind::SystemKeyword,
-                    "nogc" => DSyntaxKind::NogcKeyword,
-                    "property" => DSyntaxKind::PropertyKeyword,
-                    "disable" => DSyntaxKind::DisableKeyword,
-                    "deprecated" => DSyntaxKind::DeprecatedKeyword,
-                    _ => DSyntaxKind::Identifier,
+                    "module" => DTokenType::ModuleKeyword,
+                    "import" => DTokenType::ImportKeyword,
+                    "public" => DTokenType::PublicKeyword,
+                    "private" => DTokenType::PrivateKeyword,
+                    "protected" => DTokenType::ProtectedKeyword,
+                    "package" => DTokenType::PackageKeyword,
+                    "export" => DTokenType::ExportKeyword,
+                    "static" => DTokenType::StaticKeyword,
+                    "final" => DTokenType::FinalKeyword,
+                    "abstract" => DTokenType::AbstractKeyword,
+                    "override" => DTokenType::OverrideKeyword,
+                    "synchronized" => DTokenType::SynchronizedKeyword,
+                    "const" => DTokenType::ConstKeyword,
+                    "immutable" => DTokenType::ImmutableKeyword,
+                    "inout" => DTokenType::InoutKeyword,
+                    "shared" => DTokenType::SharedKeyword,
+                    "class" => DTokenType::ClassKeyword,
+                    "struct" => DTokenType::StructKeyword,
+                    "interface" => DTokenType::InterfaceKeyword,
+                    "union" => DTokenType::UnionKeyword,
+                    "enum" => DTokenType::EnumKeyword,
+                    "function" => DTokenType::FunctionKeyword,
+                    "delegate" => DTokenType::DelegateKeyword,
+                    "if" => DTokenType::IfKeyword,
+                    "else" => DTokenType::ElseKeyword,
+                    "while" => DTokenType::WhileKeyword,
+                    "for" => DTokenType::ForKeyword,
+                    "foreach" => DTokenType::ForeachKeyword,
+                    "do" => DTokenType::DoKeyword,
+                    "switch" => DTokenType::SwitchKeyword,
+                    "case" => DTokenType::CaseKeyword,
+                    "default" => DTokenType::DefaultKeyword,
+                    "break" => DTokenType::BreakKeyword,
+                    "continue" => DTokenType::ContinueKeyword,
+                    "return" => DTokenType::ReturnKeyword,
+                    "goto" => DTokenType::GotoKeyword,
+                    "try" => DTokenType::TryKeyword,
+                    "catch" => DTokenType::CatchKeyword,
+                    "finally" => DTokenType::FinallyKeyword,
+                    "throw" => DTokenType::ThrowKeyword,
+                    "scope" => DTokenType::ScopeKeyword,
+                    "with" => DTokenType::WithKeyword,
+                    "asm" => DTokenType::AsmKeyword,
+                    "mixin" => DTokenType::MixinKeyword,
+                    "template" => DTokenType::TemplateKeyword,
+                    "alias" => DTokenType::AliasKeyword,
+                    "typeof" => DTokenType::TypeofKeyword,
+                    "typeid" => DTokenType::TypeidKeyword,
+                    "is" => DTokenType::IsKeyword,
+                    "in" => DTokenType::InKeyword,
+                    "out" => DTokenType::OutKeyword,
+                    "ref" => DTokenType::RefKeyword,
+                    "lazy" => DTokenType::LazyKeyword,
+                    "auto" => DTokenType::AutoKeyword,
+                    "extern" => DTokenType::ExternKeyword,
+                    "align" => DTokenType::AlignKeyword,
+                    "pragma" => DTokenType::PragmaKeyword,
+                    "debug" => DTokenType::DebugKeyword,
+                    "version" => DTokenType::VersionKeyword,
+                    "unittest" => DTokenType::UnitTestKeyword,
+                    "invariant" => DTokenType::InvariantKeyword,
+                    "body" => DTokenType::BodyKeyword,
+                    "new" => DTokenType::NewKeyword,
+                    "delete" => DTokenType::DeleteKeyword,
+                    "this" => DTokenType::ThisKeyword,
+                    "super" => DTokenType::SuperKeyword,
+                    "null" => DTokenType::NullKeyword,
+                    "true" => DTokenType::TrueKeyword,
+                    "false" => DTokenType::FalseKeyword,
+                    "cast" => DTokenType::CastKeyword,
+                    "void" => DTokenType::VoidType,
+                    "bool" => DTokenType::BoolType,
+                    "byte" => DTokenType::ByteType,
+                    "ubyte" => DTokenType::UbyteType,
+                    "short" => DTokenType::ShortType,
+                    "ushort" => DTokenType::UshortType,
+                    "int" => DTokenType::IntType,
+                    "uint" => DTokenType::UintType,
+                    "long" => DTokenType::LongType,
+                    "ulong" => DTokenType::UlongType,
+                    "cent" => DTokenType::CentType,
+                    "ucent" => DTokenType::UcentType,
+                    "float" => DTokenType::FloatType,
+                    "double" => DTokenType::DoubleType,
+                    "real" => DTokenType::RealType,
+                    "ifloat" => DTokenType::IfloatType,
+                    "idouble" => DTokenType::IdoubleType,
+                    "ireal" => DTokenType::IrealType,
+                    "cfloat" => DTokenType::CfloatType,
+                    "cdouble" => DTokenType::CdoubleType,
+                    "creal" => DTokenType::CrealType,
+                    "char" => DTokenType::CharType,
+                    "wchar" => DTokenType::WcharType,
+                    "dchar" => DTokenType::DcharType,
+                    "string" => DTokenType::StringType,
+                    "wstring" => DTokenType::WstringType,
+                    "dstring" => DTokenType::DstringType,
+                    "typedef" => DTokenType::TypedefKeyword,
+                    "pure" => DTokenType::PureKeyword,
+                    "nothrow" => DTokenType::NothrowKeyword,
+                    "safe" => DTokenType::SafeKeyword,
+                    "trusted" => DTokenType::TrustedKeyword,
+                    "system" => DTokenType::SystemKeyword,
+                    "nogc" => DTokenType::NogcKeyword,
+                    "property" => DTokenType::PropertyKeyword,
+                    "disable" => DTokenType::DisableKeyword,
+                    "deprecated" => DTokenType::DeprecatedKeyword,
+                    _ => DTokenType::Identifier,
                 };
 
                 state.add_token(kind, start_pos, end_pos);
@@ -260,24 +258,14 @@ impl<'config> DLexer<'config> {
 
                 // 处理数字
                 while let Some(ch) = state.peek() {
-                    if ch.is_ascii_digit() || ch == '_' {
-                        state.advance(ch.len_utf8());
-                    }
-                    else {
-                        break;
-                    }
+                    if ch.is_ascii_digit() || ch == '_' { state.advance(ch.len_utf8()) } else { break }
                 }
 
                 // 检查小数点
                 if let Some('.') = state.peek() {
                     state.advance(1);
                     while let Some(ch) = state.peek() {
-                        if ch.is_ascii_digit() || ch == '_' {
-                            state.advance(ch.len_utf8());
-                        }
-                        else {
-                            break;
-                        }
+                        if ch.is_ascii_digit() || ch == '_' { state.advance(ch.len_utf8()) } else { break }
                     }
                 }
 
@@ -287,16 +275,11 @@ impl<'config> DLexer<'config> {
                         state.advance(1);
                         if let Some(ch) = state.peek() {
                             if ch == '+' || ch == '-' {
-                                state.advance(1);
+                                state.advance(1)
                             }
                         }
                         while let Some(ch) = state.peek() {
-                            if ch.is_ascii_digit() || ch == '_' {
-                                state.advance(ch.len_utf8());
-                            }
-                            else {
-                                break;
-                            }
+                            if ch.is_ascii_digit() || ch == '_' { state.advance(ch.len_utf8()) } else { break }
                         }
                     }
                 }
@@ -304,11 +287,11 @@ impl<'config> DLexer<'config> {
                 // 检查后缀
                 if let Some(ch) = state.peek() {
                     if ch == 'f' || ch == 'F' || ch == 'L' || ch == 'u' || ch == 'U' {
-                        state.advance(1);
+                        state.advance(1)
                     }
                 }
 
-                state.add_token(DSyntaxKind::IntegerLiteral, start_pos, state.get_position());
+                state.add_token(DTokenType::IntegerLiteral, start_pos, state.get_position());
                 return true;
             }
         }
@@ -334,11 +317,11 @@ impl<'config> DLexer<'config> {
                         }
                     }
                     else {
-                        state.advance(ch.len_utf8());
+                        state.advance(ch.len_utf8())
                     }
                 }
 
-                state.add_token(DSyntaxKind::StringLiteral, start_pos, state.get_position());
+                state.add_token(DTokenType::StringLiteral, start_pos, state.get_position());
                 return true;
             }
         }
@@ -358,7 +341,7 @@ impl<'config> DLexer<'config> {
                     }
                 }
                 else {
-                    state.advance(ch.len_utf8());
+                    state.advance(ch.len_utf8())
                 }
             }
 
@@ -366,7 +349,7 @@ impl<'config> DLexer<'config> {
                 state.advance(1); // consume closing quote
             }
 
-            state.add_token(DSyntaxKind::CharLiteral, start_pos, state.get_position());
+            state.add_token(DTokenType::CharLiteral, start_pos, state.get_position());
             return true;
         }
         false
@@ -381,9 +364,9 @@ impl<'config> DLexer<'config> {
                     if ch == '\n' || ch == '\r' {
                         break;
                     }
-                    state.advance(ch.len_utf8());
+                    state.advance(ch.len_utf8())
                 }
-                state.add_token(DSyntaxKind::LineComment, start_pos, state.get_position());
+                state.add_token(DTokenType::LineComment, start_pos, state.get_position());
                 return true;
             }
         }
@@ -404,10 +387,10 @@ impl<'config> DLexer<'config> {
                         }
                     }
                     else {
-                        state.advance(ch.len_utf8());
+                        state.advance(ch.len_utf8())
                     }
                 }
-                state.add_token(DSyntaxKind::BlockComment, start_pos, state.get_position());
+                state.add_token(DTokenType::BlockComment, start_pos, state.get_position());
                 return true;
             }
         }
@@ -425,7 +408,7 @@ impl<'config> DLexer<'config> {
                         state.advance(1);
                         if state.peek() == Some('+') {
                             state.advance(1);
-                            depth += 1;
+                            depth += 1
                         }
                     }
                     else if ch == '+' {
@@ -439,10 +422,10 @@ impl<'config> DLexer<'config> {
                         }
                     }
                     else {
-                        state.advance(ch.len_utf8());
+                        state.advance(ch.len_utf8())
                     }
                 }
-                state.add_token(DSyntaxKind::NestedComment, start_pos, state.get_position());
+                state.add_token(DTokenType::NestedComment, start_pos, state.get_position());
                 return true;
             }
         }
@@ -458,14 +441,14 @@ impl<'config> DLexer<'config> {
                     state.advance(1);
                     if let Some('=') = state.peek() {
                         state.advance(1);
-                        state.add_token(DSyntaxKind::PlusAssign, start_pos, state.get_position());
+                        state.add_token(DTokenType::PlusAssign, start_pos, state.get_position())
                     }
                     else if let Some('+') = state.peek() {
                         state.advance(1);
-                        state.add_token(DSyntaxKind::Increment, start_pos, state.get_position());
+                        state.add_token(DTokenType::Increment, start_pos, state.get_position())
                     }
                     else {
-                        state.add_token(DSyntaxKind::Plus, start_pos, state.get_position());
+                        state.add_token(DTokenType::Plus, start_pos, state.get_position())
                     }
                     return true;
                 }
@@ -473,14 +456,14 @@ impl<'config> DLexer<'config> {
                     state.advance(1);
                     if let Some('=') = state.peek() {
                         state.advance(1);
-                        state.add_token(DSyntaxKind::MinusAssign, start_pos, state.get_position());
+                        state.add_token(DTokenType::MinusAssign, start_pos, state.get_position())
                     }
                     else if let Some('-') = state.peek() {
                         state.advance(1);
-                        state.add_token(DSyntaxKind::Decrement, start_pos, state.get_position());
+                        state.add_token(DTokenType::Decrement, start_pos, state.get_position())
                     }
                     else {
-                        state.add_token(DSyntaxKind::Minus, start_pos, state.get_position());
+                        state.add_token(DTokenType::Minus, start_pos, state.get_position())
                     }
                     return true;
                 }
@@ -488,10 +471,10 @@ impl<'config> DLexer<'config> {
                     state.advance(1);
                     if let Some('=') = state.peek() {
                         state.advance(1);
-                        state.add_token(DSyntaxKind::MultiplyAssign, start_pos, state.get_position());
+                        state.add_token(DTokenType::MultiplyAssign, start_pos, state.get_position())
                     }
                     else {
-                        state.add_token(DSyntaxKind::Multiply, start_pos, state.get_position());
+                        state.add_token(DTokenType::Multiply, start_pos, state.get_position())
                     }
                     return true;
                 }
@@ -503,10 +486,10 @@ impl<'config> DLexer<'config> {
                     state.advance(1);
                     if let Some('=') = state.peek() {
                         state.advance(1);
-                        state.add_token(DSyntaxKind::ModuloAssign, start_pos, state.get_position());
+                        state.add_token(DTokenType::ModuloAssign, start_pos, state.get_position())
                     }
                     else {
-                        state.add_token(DSyntaxKind::Modulo, start_pos, state.get_position());
+                        state.add_token(DTokenType::Modulo, start_pos, state.get_position())
                     }
                     return true;
                 }
@@ -514,14 +497,14 @@ impl<'config> DLexer<'config> {
                     state.advance(1);
                     if let Some('&') = state.peek() {
                         state.advance(1);
-                        state.add_token(DSyntaxKind::LogicalAnd, start_pos, state.get_position());
+                        state.add_token(DTokenType::LogicalAnd, start_pos, state.get_position())
                     }
                     else if let Some('=') = state.peek() {
                         state.advance(1);
-                        state.add_token(DSyntaxKind::BitwiseAndAssign, start_pos, state.get_position());
+                        state.add_token(DTokenType::BitwiseAndAssign, start_pos, state.get_position())
                     }
                     else {
-                        state.add_token(DSyntaxKind::BitwiseAnd, start_pos, state.get_position());
+                        state.add_token(DTokenType::BitwiseAnd, start_pos, state.get_position())
                     }
                     return true;
                 }
@@ -529,14 +512,14 @@ impl<'config> DLexer<'config> {
                     state.advance(1);
                     if let Some('|') = state.peek() {
                         state.advance(1);
-                        state.add_token(DSyntaxKind::LogicalOr, start_pos, state.get_position());
+                        state.add_token(DTokenType::LogicalOr, start_pos, state.get_position())
                     }
                     else if let Some('=') = state.peek() {
                         state.advance(1);
-                        state.add_token(DSyntaxKind::BitwiseOrAssign, start_pos, state.get_position());
+                        state.add_token(DTokenType::BitwiseOrAssign, start_pos, state.get_position())
                     }
                     else {
-                        state.add_token(DSyntaxKind::BitwiseOr, start_pos, state.get_position());
+                        state.add_token(DTokenType::BitwiseOr, start_pos, state.get_position())
                     }
                     return true;
                 }
@@ -544,10 +527,10 @@ impl<'config> DLexer<'config> {
                     state.advance(1);
                     if let Some('=') = state.peek() {
                         state.advance(1);
-                        state.add_token(DSyntaxKind::BitwiseXorAssign, start_pos, state.get_position());
+                        state.add_token(DTokenType::BitwiseXorAssign, start_pos, state.get_position())
                     }
                     else {
-                        state.add_token(DSyntaxKind::BitwiseXor, start_pos, state.get_position());
+                        state.add_token(DTokenType::BitwiseXor, start_pos, state.get_position())
                     }
                     return true;
                 }
@@ -555,10 +538,10 @@ impl<'config> DLexer<'config> {
                     state.advance(1);
                     if let Some('=') = state.peek() {
                         state.advance(1);
-                        state.add_token(DSyntaxKind::ConcatenateAssign, start_pos, state.get_position());
+                        state.add_token(DTokenType::ConcatenateAssign, start_pos, state.get_position())
                     }
                     else {
-                        state.add_token(DSyntaxKind::BitwiseNot, start_pos, state.get_position());
+                        state.add_token(DTokenType::BitwiseNot, start_pos, state.get_position())
                     }
                     return true;
                 }
@@ -566,10 +549,10 @@ impl<'config> DLexer<'config> {
                     state.advance(1);
                     if let Some('=') = state.peek() {
                         state.advance(1);
-                        state.add_token(DSyntaxKind::NotEqual, start_pos, state.get_position());
+                        state.add_token(DTokenType::NotEqual, start_pos, state.get_position())
                     }
                     else {
-                        state.add_token(DSyntaxKind::Not, start_pos, state.get_position());
+                        state.add_token(DTokenType::Not, start_pos, state.get_position())
                     }
                     return true;
                 }
@@ -579,18 +562,18 @@ impl<'config> DLexer<'config> {
                         state.advance(1);
                         if let Some('=') = state.peek() {
                             state.advance(1);
-                            state.add_token(DSyntaxKind::LeftShiftAssign, start_pos, state.get_position());
+                            state.add_token(DTokenType::LeftShiftAssign, start_pos, state.get_position())
                         }
                         else {
-                            state.add_token(DSyntaxKind::LeftShift, start_pos, state.get_position());
+                            state.add_token(DTokenType::LeftShift, start_pos, state.get_position())
                         }
                     }
                     else if let Some('=') = state.peek() {
                         state.advance(1);
-                        state.add_token(DSyntaxKind::LessEqual, start_pos, state.get_position());
+                        state.add_token(DTokenType::LessEqual, start_pos, state.get_position())
                     }
                     else {
-                        state.add_token(DSyntaxKind::Less, start_pos, state.get_position());
+                        state.add_token(DTokenType::Less, start_pos, state.get_position())
                     }
                     return true;
                 }
@@ -600,18 +583,18 @@ impl<'config> DLexer<'config> {
                         state.advance(1);
                         if let Some('=') = state.peek() {
                             state.advance(1);
-                            state.add_token(DSyntaxKind::RightShiftAssign, start_pos, state.get_position());
+                            state.add_token(DTokenType::RightShiftAssign, start_pos, state.get_position())
                         }
                         else {
-                            state.add_token(DSyntaxKind::RightShift, start_pos, state.get_position());
+                            state.add_token(DTokenType::RightShift, start_pos, state.get_position())
                         }
                     }
                     else if let Some('=') = state.peek() {
                         state.advance(1);
-                        state.add_token(DSyntaxKind::GreaterEqual, start_pos, state.get_position());
+                        state.add_token(DTokenType::GreaterEqual, start_pos, state.get_position())
                     }
                     else {
-                        state.add_token(DSyntaxKind::Greater, start_pos, state.get_position());
+                        state.add_token(DTokenType::Greater, start_pos, state.get_position())
                     }
                     return true;
                 }
@@ -619,10 +602,10 @@ impl<'config> DLexer<'config> {
                     state.advance(1);
                     if let Some('=') = state.peek() {
                         state.advance(1);
-                        state.add_token(DSyntaxKind::Equal, start_pos, state.get_position());
+                        state.add_token(DTokenType::Equal, start_pos, state.get_position())
                     }
                     else {
-                        state.add_token(DSyntaxKind::Assign, start_pos, state.get_position());
+                        state.add_token(DTokenType::Assign, start_pos, state.get_position())
                     }
                     return true;
                 }
@@ -641,57 +624,57 @@ impl<'config> DLexer<'config> {
             match ch {
                 '(' => {
                     state.advance(1);
-                    state.add_token(DSyntaxKind::LeftParen, start_pos, state.get_position());
+                    state.add_token(DTokenType::LeftParen, start_pos, state.get_position());
                     return true;
                 }
                 ')' => {
                     state.advance(1);
-                    state.add_token(DSyntaxKind::RightParen, start_pos, state.get_position());
+                    state.add_token(DTokenType::RightParen, start_pos, state.get_position());
                     return true;
                 }
                 '[' => {
                     state.advance(1);
-                    state.add_token(DSyntaxKind::LeftBracket, start_pos, state.get_position());
+                    state.add_token(DTokenType::LeftBracket, start_pos, state.get_position());
                     return true;
                 }
                 ']' => {
                     state.advance(1);
-                    state.add_token(DSyntaxKind::RightBracket, start_pos, state.get_position());
+                    state.add_token(DTokenType::RightBracket, start_pos, state.get_position());
                     return true;
                 }
                 '{' => {
                     state.advance(1);
-                    state.add_token(DSyntaxKind::LeftBrace, start_pos, state.get_position());
+                    state.add_token(DTokenType::LeftBrace, start_pos, state.get_position());
                     return true;
                 }
                 '}' => {
                     state.advance(1);
-                    state.add_token(DSyntaxKind::RightBrace, start_pos, state.get_position());
+                    state.add_token(DTokenType::RightBrace, start_pos, state.get_position());
                     return true;
                 }
                 ';' => {
                     state.advance(1);
-                    state.add_token(DSyntaxKind::Semicolon, start_pos, state.get_position());
+                    state.add_token(DTokenType::Semicolon, start_pos, state.get_position());
                     return true;
                 }
                 ',' => {
                     state.advance(1);
-                    state.add_token(DSyntaxKind::Comma, start_pos, state.get_position());
+                    state.add_token(DTokenType::Comma, start_pos, state.get_position());
                     return true;
                 }
                 '.' => {
                     state.advance(1);
-                    state.add_token(DSyntaxKind::Dot, start_pos, state.get_position());
+                    state.add_token(DTokenType::Dot, start_pos, state.get_position());
                     return true;
                 }
                 ':' => {
                     state.advance(1);
-                    state.add_token(DSyntaxKind::Colon, start_pos, state.get_position());
+                    state.add_token(DTokenType::Colon, start_pos, state.get_position());
                     return true;
                 }
                 '?' => {
                     state.advance(1);
-                    state.add_token(DSyntaxKind::Question, start_pos, state.get_position());
+                    state.add_token(DTokenType::Question, start_pos, state.get_position());
                     return true;
                 }
                 _ => false,

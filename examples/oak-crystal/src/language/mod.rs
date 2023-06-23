@@ -1,3 +1,4 @@
+#![doc = include_str!("readme.md")]
 use crate::{ast::CrystalRoot, lexer::CrystalTokenType, parser::CrystalElementType};
 use oak_core::{Language, LanguageCategory};
 
@@ -15,7 +16,7 @@ impl Language for CrystalLanguage {
     const NAME: &'static str = "Crystal";
     const CATEGORY: LanguageCategory = LanguageCategory::Programming;
 
-    type TokenType = CrystalTokenType;
-    type ElementType = CrystalElementType;
+    type TokenType = crate::lexer::token_type::CrystalTokenType;
+    type ElementType = crate::parser::element_type::CrystalElementType;
     type TypedRoot = CrystalRoot;
 }

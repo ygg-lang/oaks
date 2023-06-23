@@ -1,3 +1,4 @@
+#![doc = include_str!("readme.md")]
 /// WAT 根节
 #[derive(Clone, Debug)]
 pub struct WatRoot {

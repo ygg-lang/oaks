@@ -190,7 +190,7 @@ proc `$`(p: Point): string =
 
 # Stack implementation
 proc newStack[T](): Stack[T] =
-  Stack[T](items: @[], top: -1)
+  Stack[T](items: ↯[], top: -1)
 
 proc push[T](stack: var Stack[T], item: T) =
   stack.items.add(item)
@@ -356,7 +356,7 @@ proc stringOperations() =
 # Collection operations
 proc collectionOperations() =
   # Sequences
-  var numbers = @[1, 2, 3, 4, 5]
+  var numbers = ↯[1, 2, 3, 4, 5]
   numbers.add(6)
   numbers.insert(0, 0)
   echo fmt"Numbers: {numbers}"
@@ -441,10 +441,10 @@ proc controlFlowExamples() =
   for i in countdown(5, 1):
     echo fmt"Countdown: {i}"
   
-  for item in @["a", "b", "c"]:
+  for item in ↯["a", "b", "c"]:
     echo fmt"Item: {item}"
   
-  for i, item in @["x", "y", "z"]:
+  for i, item in ↯["x", "y", "z"]:
     echo fmt"Index {i}: {item}"
   
   # While loops
@@ -464,13 +464,13 @@ proc controlFlowExamples() =
 # Object-oriented features
 proc objectOrientedExamples() =
   # Create objects
-  var person = Person(name: "John Doe", age: 35, email: "john@example.com", active: true)
+  var person = Person(name: "John Doe", age: 35, email: "john↯example.com", active: true)
   echo fmt"Person: {person.name}, Age: {person.age}"
   
   var employee = Employee(
     name: "Jane Smith",
     age: 28,
-    email: "jane@company.com",
+    email: "jane↯company.com",
     active: true,
     id: 1001,
     department: "Engineering",
@@ -488,7 +488,7 @@ proc objectOrientedExamples() =
 
 # Functional programming features
 proc functionalExamples() =
-  let numbers = @[1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+  let numbers = ↯[1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
   
   # Higher-order functions
   let evens = numbers.filter(proc(x: int): bool = x mod 2 == 0)

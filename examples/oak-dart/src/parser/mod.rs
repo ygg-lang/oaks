@@ -1,10 +1,12 @@
+pub mod element_type;
+
 use crate::{language::DartLanguage, lexer::DartLexer};
 use oak_core::{
     parser::{ParseOutput, Parser, ParserState, parse_with_lexer},
     source::{Source, TextEdit},
 };
 
-mod parse;
+mod parse_top_level;
 
 pub(crate) type State<'a, S> = ParserState<'a, DartLanguage, S>;
 

@@ -1,3 +1,4 @@
+#![doc = include_str!("readme.md")]
 //! Objective-C AST 定义
 
 /// Objective-C 语法树的根节点

@@ -1,5 +1,5 @@
 // Zig test file
-const std = @import("std");
+const std = ↯import("std");
 const print = std.debug.print;
 const ArrayList = std.ArrayList;
 const Allocator = std.mem.Allocator;
@@ -16,7 +16,7 @@ const Point = struct {
     fn distance(self: Point, other: Point) f64 {
         const dx = self.x - other.x;
         const dy = self.y - other.y;
-        return @sqrt(dx * dx + dy * dy);
+        return ↯sqrt(dx * dx + dy * dy);
     }
     
     fn init(x: f64, y: f64) Point {
@@ -83,7 +83,7 @@ fn divide(a: f64, b: f64) MathError!f64 {
 
 fn sqrt_positive(x: f64) MathError!f64 {
     if (x < 0) return MathError.NegativeSquareRoot;
-    return @sqrt(x);
+    return ↯sqrt(x);
 }
 
 pub fn main() !void {

@@ -1,15 +1,18 @@
 #![doc = include_str!("readme.md")]
-
+#[cfg(feature = "serde")]
+#[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
 
 /// Jasmin 根节点
-#[derive(Clone, Debug, Serialize, Deserialize)]
+#[derive(Clone, Debug, PartialEq, Eq)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct JasminRoot {
     pub class: JasminClass,
 }
 
 /// Jasmin 类声明的 AST 节点
-#[derive(Clone, Debug, Serialize, Deserialize)]
+#[derive(Clone, Debug, PartialEq, Eq)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct JasminClass {
     /// 访问修饰符（public, private 等）
     pub modifiers: Vec<String>,
@@ -25,12 +28,13 @@ pub struct JasminClass {
     pub source_file: Option<String>,
 }
 
-/// Jasmin 方法声明AST 节点
-#[derive(Clone, Debug, Serialize, Deserialize)]
+/// Jasmin 方法声明的 AST 节点
+#[derive(Clone, Debug, PartialEq, Eq)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct JasminMethod {
     /// 访问修饰符（public, static 等）
     pub modifiers: Vec<String>,
-    /// 方法名和类型描述符（"main":"([Ljava/lang/String;)V"）
+    /// 方法名和类型描述符（"main":"([Ljava/lang/String)V"）
     pub name_and_descriptor: String,
     /// 栈大小
     pub stack_size: Option<u32>,
@@ -40,8 +44,9 @@ pub struct JasminMethod {
     pub instructions: Vec<JasminInstruction>,
 }
 
-/// Jasmin 字段声明AST 节点
-#[derive(Clone, Debug, Serialize, Deserialize)]
+/// Jasmin 字段声明的 AST 节点
+#[derive(Clone, Debug, PartialEq, Eq)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct JasminField {
     /// 访问修饰符（public, static 等）
     pub modifiers: Vec<String>,
@@ -49,8 +54,9 @@ pub struct JasminField {
     pub name_and_descriptor: String,
 }
 
-/// Jasmin 指令AST 节点
-#[derive(Clone, Debug, Serialize, Deserialize)]
+/// Jasmin 指令的 AST 节点
+#[derive(Clone, Debug, PartialEq, Eq)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub enum JasminInstruction {
     /// 简单指令（aload_0, return）
     Simple(String),

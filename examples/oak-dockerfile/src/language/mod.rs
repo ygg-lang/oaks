@@ -1,3 +1,4 @@
+#![doc = include_str!("readme.md")]
 use oak_core::{Language, LanguageCategory};
 
 /// Dockerfile 语言配置
@@ -19,7 +20,7 @@ impl Language for DockerfileLanguage {
     const NAME: &'static str = "dockerfile";
     const CATEGORY: LanguageCategory = LanguageCategory::Programming;
 
-    type TokenType = crate::kind::DockerfileSyntaxKind;
-    type ElementType = crate::kind::DockerfileSyntaxKind;
+    type TokenType = crate::lexer::token_type::DockerfileTokenType;
+    type ElementType = crate::parser::element_type::DockerfileElementType;
     type TypedRoot = ();
 }

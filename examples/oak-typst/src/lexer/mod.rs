@@ -1,4 +1,7 @@
-use crate::{kind::TypstSyntaxKind, language::TypstLanguage};
+#![doc = include_str!("readme.md")]
+pub mod token_type;
+
+use crate::{language::TypstLanguage, lexer::token_type::TypstTokenType};
 use oak_core::{
     Lexer, LexerCache, LexerState, OakError,
     lexer::{CommentConfig, LexOutput, StringConfig, WhitespaceConfig},
@@ -41,11 +44,11 @@ impl<'config> TypstLexer<'config> {
                 continue;
             }
 
-            if TYPST_COMMENT.scan(state, TypstSyntaxKind::LineComment, TypstSyntaxKind::BlockComment) {
+            if TYPST_COMMENT.scan(state, TypstTokenType::LineComment, TypstTokenType::BlockComment) {
                 continue;
             }
 
-            if TYPST_STRING.scan(state, TypstSyntaxKind::StringLiteral) {
+            if TYPST_STRING.scan(state, TypstTokenType::StringLiteral) {
                 continue;
             }
 
@@ -65,7 +68,7 @@ impl<'config> TypstLexer<'config> {
                 continue;
             }
 
-            state.advance_if_dead_lock(safe_point);
+            state.advance_if_dead_lock(safe_point)
         }
 
         Ok(())
@@ -79,11 +82,11 @@ impl<'config> TypstLexer<'config> {
                 if ch == '\r' && state.peek() == Some('\n') {
                     state.advance(1);
                 }
-                state.add_token(TypstSyntaxKind::Newline, start, state.get_position());
+                state.add_token(TypstTokenType::Newline, start, state.get_position());
                 return true;
             }
         }
-        TYPST_WHITESPACE.scan(state, TypstSyntaxKind::Whitespace)
+        TYPST_WHITESPACE.scan(state, TypstTokenType::Whitespace)
     }
 
     fn lex_number_literal<'s, S: Source + ?Sized>(&self, state: &mut State<'s, S>) -> bool {
@@ -122,7 +125,7 @@ impl<'config> TypstLexer<'config> {
 
         if pos > 0 {
             state.advance(pos);
-            state.add_token(TypstSyntaxKind::NumericLiteral, start, state.get_position());
+            state.add_token(TypstTokenType::NumericLiteral, start, state.get_position());
             return true;
         }
 
@@ -163,23 +166,23 @@ impl<'config> TypstLexer<'config> {
         false
     }
 
-    fn keyword_or_identifier(&self, text: &str) -> TypstSyntaxKind {
+    fn keyword_or_identifier(&self, text: &str) -> TypstTokenType {
         match text {
-            "let" => TypstSyntaxKind::Let,
-            "if" => TypstSyntaxKind::If,
-            "else" => TypstSyntaxKind::Else,
-            "for" => TypstSyntaxKind::For,
-            "while" => TypstSyntaxKind::While,
-            "break" => TypstSyntaxKind::Break,
-            "continue" => TypstSyntaxKind::Continue,
-            "return" => TypstSyntaxKind::Return,
-            "true" => TypstSyntaxKind::True,
-            "false" => TypstSyntaxKind::False,
-            "set" => TypstSyntaxKind::Set,
-            "show" => TypstSyntaxKind::Show,
-            "import" => TypstSyntaxKind::Import,
-            "include" => TypstSyntaxKind::Include,
-            _ => TypstSyntaxKind::Identifier,
+            "let" => TypstTokenType::Let,
+            "if" => TypstTokenType::If,
+            "else" => TypstTokenType::Else,
+            "for" => TypstTokenType::For,
+            "while" => TypstTokenType::While,
+            "break" => TypstTokenType::Break,
+            "continue" => TypstTokenType::Continue,
+            "return" => TypstTokenType::Return,
+            "true" => TypstTokenType::True,
+            "false" => TypstTokenType::False,
+            "set" => TypstTokenType::Set,
+            "show" => TypstTokenType::Show,
+            "import" => TypstTokenType::Import,
+            "include" => TypstTokenType::Include,
+            _ => TypstTokenType::Identifier,
         }
     }
 
@@ -198,35 +201,35 @@ impl<'config> TypstLexer<'config> {
                 while count < chars.len() && chars[count] == '=' {
                     count += 1;
                 }
-                (TypstSyntaxKind::Equal, count)
+                (TypstTokenType::Equal, count)
             }
             '!' => {
                 if chars.len() > 1 && chars[1] == '=' {
-                    (TypstSyntaxKind::NotEqual, 2)
+                    (TypstTokenType::NotEqual, 2)
                 }
                 else {
-                    (TypstSyntaxKind::Not, 1)
+                    (TypstTokenType::Not, 1)
                 }
             }
             '<' => {
                 if chars.len() > 1 && chars[1] == '=' {
-                    (TypstSyntaxKind::LessEqual, 2)
+                    (TypstTokenType::LessEqual, 2)
                 }
                 else {
-                    (TypstSyntaxKind::Less, 1)
+                    (TypstTokenType::Less, 1)
                 }
             }
             '>' => {
                 if chars.len() > 1 && chars[1] == '=' {
-                    (TypstSyntaxKind::GreaterEqual, 2)
+                    (TypstTokenType::GreaterEqual, 2)
                 }
                 else {
-                    (TypstSyntaxKind::Greater, 1)
+                    (TypstTokenType::Greater, 1)
                 }
             }
             '&' => {
                 if chars.len() > 1 && chars[1] == '&' {
-                    (TypstSyntaxKind::And, 2)
+                    (TypstTokenType::And, 2)
                 }
                 else {
                     return false;
@@ -234,17 +237,17 @@ impl<'config> TypstLexer<'config> {
             }
             '|' => {
                 if chars.len() > 1 && chars[1] == '|' {
-                    (TypstSyntaxKind::Or, 2)
+                    (TypstTokenType::Or, 2)
                 }
                 else {
                     return false;
                 }
             }
-            '+' => (TypstSyntaxKind::Plus, 1),
-            '-' => (TypstSyntaxKind::Minus, 1),
-            '*' => (TypstSyntaxKind::Star, 1),
-            '/' => (TypstSyntaxKind::Slash, 1),
-            '%' => (TypstSyntaxKind::Percent, 1),
+            '+' => (TypstTokenType::Plus, 1),
+            '-' => (TypstTokenType::Minus, 1),
+            '*' => (TypstTokenType::Star, 1),
+            '/' => (TypstTokenType::Slash, 1),
+            '%' => (TypstTokenType::Percent, 1),
             _ => return false,
         };
 
@@ -263,22 +266,22 @@ impl<'config> TypstLexer<'config> {
         let ch = text.chars().next().unwrap();
 
         let kind = match ch {
-            '(' => TypstSyntaxKind::LeftParen,
-            ')' => TypstSyntaxKind::RightParen,
-            '{' => TypstSyntaxKind::LeftBrace,
-            '}' => TypstSyntaxKind::RightBrace,
-            '[' => TypstSyntaxKind::LeftBracket,
-            ']' => TypstSyntaxKind::RightBracket,
-            ';' => TypstSyntaxKind::Semicolon,
-            ',' => TypstSyntaxKind::Comma,
-            '.' => TypstSyntaxKind::Dot,
-            ':' => TypstSyntaxKind::Colon,
-            '#' => TypstSyntaxKind::Hash,
-            '@' => TypstSyntaxKind::At,
-            '$' => TypstSyntaxKind::Dollar,
-            '_' => TypstSyntaxKind::Underscore,
-            '`' => TypstSyntaxKind::Backtick,
-            _ => TypstSyntaxKind::Error,
+            '(' => TypstTokenType::LeftParen,
+            ')' => TypstTokenType::RightParen,
+            '{' => TypstTokenType::LeftBrace,
+            '}' => TypstTokenType::RightBrace,
+            '[' => TypstTokenType::LeftBracket,
+            ']' => TypstTokenType::RightBracket,
+            ';' => TypstTokenType::Semicolon,
+            ',' => TypstTokenType::Comma,
+            '.' => TypstTokenType::Dot,
+            ':' => TypstTokenType::Colon,
+            '#' => TypstTokenType::Hash,
+            '@' => TypstTokenType::At,
+            '$' => TypstTokenType::Dollar,
+            '_' => TypstTokenType::Underscore,
+            '`' => TypstTokenType::Backtick,
+            _ => TypstTokenType::Error,
         };
 
         state.advance(1);

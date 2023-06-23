@@ -1,19 +1,22 @@
-use crate::{kind::VLangSyntaxKind, language::VLangLanguage};
+#![doc = include_str!("readme.md")]
 use oak_core::{
-    Lexer, LexerState,
+    Lexer, LexerState, Source, TextEdit,
     lexer::{LexOutput, LexerCache},
-    source::Source,
 };
 
-type State<'a, S> = LexerState<'a, S, VLangLanguage>;
+pub mod token_type;
+use crate::language::VonLanguage;
+pub use token_type::{VonToken, VonTokenType};
+
+type State<'a, S> = LexerState<'a, S, VonLanguage>;
 
 #[derive(Clone, Debug)]
-pub struct VLangLexer<'config> {
-    _config: &'config VLangLanguage,
+pub struct VonLexer<'config> {
+    _config: &'config VonLanguage,
 }
 
-impl<'config> VLangLexer<'config> {
-    pub fn new(config: &'config VLangLanguage) -> Self {
+impl<'config> VonLexer<'config> {
+    pub fn new(config: &'config VonLanguage) -> Self {
         Self { _config: config }
     }
 
@@ -31,7 +34,7 @@ impl<'config> VLangLexer<'config> {
         }
 
         if state.get_position() > start_pos {
-            state.add_token(VLangSyntaxKind::Whitespace, start_pos, state.get_position());
+            state.add_token(VonTokenType::Whitespace, start_pos, state.get_position());
             true
         }
         else {
@@ -45,7 +48,7 @@ impl<'config> VLangLexer<'config> {
 
         if let Some('\n') = state.peek() {
             state.advance(1);
-            state.add_token(VLangSyntaxKind::Newline, start_pos, state.get_position());
+            state.add_token(VonTokenType::Newline, start_pos, state.get_position());
             true
         }
         else if let Some('\r') = state.peek() {
@@ -53,7 +56,7 @@ impl<'config> VLangLexer<'config> {
             if let Some('\n') = state.peek() {
                 state.advance(1);
             }
-            state.add_token(VLangSyntaxKind::Newline, start_pos, state.get_position());
+            state.add_token(VonTokenType::Newline, start_pos, state.get_position());
             true
         }
         else {
@@ -65,84 +68,114 @@ impl<'config> VLangLexer<'config> {
     fn lex_comment<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start_pos = state.get_position();
 
-        // 单行注释 //
-        if let Some('/') = state.peek() {
-            if let Some('/') = state.peek_next_n(1) {
-                state.advance(2);
+        // 单行注释 #
+        if let Some('#') = state.peek() {
+            state.advance(1);
 
-                // 读取到行尾
-                while let Some(ch) = state.peek() {
-                    if ch == '\n' || ch == '\r' {
-                        break;
-                    }
-                    state.advance(ch.len_utf8());
+            // 读取到行尾
+            while let Some(ch) = state.peek() {
+                if ch == '\n' || ch == '\r' {
+                    break;
                 }
-
-                state.add_token(VLangSyntaxKind::Comment, start_pos, state.get_position());
-                return true;
+                state.advance(ch.len_utf8());
             }
-            // 多行注释 /* */
-            else if let Some('*') = state.peek_next_n(1) {
-                state.advance(2);
 
-                while let Some(ch) = state.peek() {
-                    if ch == '*' {
-                        if let Some('/') = state.peek_next_n(1) {
-                            state.advance(2);
-                            break;
-                        }
-                    }
-                    state.advance(ch.len_utf8());
-                }
-
-                state.add_token(VLangSyntaxKind::Comment, start_pos, state.get_position());
-                return true;
-            }
+            state.add_token(VonTokenType::Comment, start_pos, state.get_position());
+            return true;
         }
         false
     }
 
-    /// 处理字符串字面量
+    /// 处理对称引号字符串字面量或原始字符串
     fn lex_string<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
-        let start_pos = state.get_position();
+        let start = state.get_position();
 
-        if let Some(quote) = state.peek() {
-            if quote == '"' || quote == '\'' {
-                state.advance(1);
-                let mut escaped = false;
-
-                while let Some(ch) = state.peek() {
-                    if escaped {
-                        escaped = false;
-                        state.advance(ch.len_utf8());
-                    }
-                    else if ch == '\\' {
-                        escaped = true;
-                        state.advance(1);
-                    }
-                    else if ch == quote {
-                        state.advance(1);
-                        break;
-                    }
-                    else if ch == '\n' || ch == '\r' {
-                        break; // 字符串不能跨行
-                    }
-                    else {
-                        state.advance(ch.len_utf8());
+        // 检查原始字符串 raw"..."
+        let mut is_raw = false;
+        if let Some('r') = state.peek() {
+            if let Some('a') = state.peek_next_n(1) {
+                if let Some('w') = state.peek_next_n(2) {
+                    if let Some(c) = state.peek_next_n(3) {
+                        if c == '"' || c == '\'' {
+                            is_raw = true;
+                            // 注意：这里不要直接 advance，而是让后面的逻辑处理引号
+                        }
                     }
                 }
+            }
+        }
 
-                let token_kind = if quote == '"' { VLangSyntaxKind::StringLiteral } else { VLangSyntaxKind::CharLiteral };
-                state.add_token(token_kind, start_pos, state.get_position());
-                true
-            }
-            else {
-                false
-            }
+        let quote = if is_raw {
+            state.peek_next_n(3).unwrap()
         }
         else {
-            false
+            match state.peek() {
+                Some(c) if c == '"' || c == '\'' => c,
+                _ => return false,
+            }
+        };
+
+        if is_raw {
+            state.advance(3);
         }
+
+        let mut quote_count = 0;
+        while let Some(c) = state.peek() {
+            if c == quote {
+                quote_count += 1;
+                state.advance(c.len_utf8());
+            }
+            else {
+                break;
+            }
+        }
+
+        // "" 或 '' 是空字符串
+        if quote_count == 2 {
+            state.add_token(VonTokenType::StringLiteral, start, state.get_position());
+            return true;
+        }
+
+        if quote_count == 0 {
+            state.set_position(start);
+            return false;
+        }
+
+        let mut current_consecutive = 0;
+        let mut escaped = false;
+
+        while let Some(c) = state.peek() {
+            if !is_raw && escaped {
+                escaped = false;
+                state.advance(c.len_utf8());
+                current_consecutive = 0;
+                continue;
+            }
+
+            if !is_raw && c == '\\' && quote_count == 1 {
+                escaped = true;
+                state.advance(1);
+                current_consecutive = 0;
+                continue;
+            }
+
+            if c == quote {
+                current_consecutive += 1;
+                state.advance(c.len_utf8());
+                if current_consecutive == quote_count {
+                    state.add_token(VonTokenType::StringLiteral, start, state.get_position());
+                    return true;
+                }
+            }
+            else {
+                current_consecutive = 0;
+                state.advance(c.len_utf8());
+            }
+        }
+
+        // 未闭合的字符串，标记为错误以提醒用户，但在语法高亮中仍可视为字符串
+        state.add_token(VonTokenType::Error, start, state.get_position());
+        true
     }
 
     /// 处理数字字面量
@@ -150,43 +183,73 @@ impl<'config> VLangLexer<'config> {
         let start_pos = state.get_position();
 
         if let Some(ch) = state.peek() {
-            if ch.is_ascii_digit() {
-                // 整数部分
-                while let Some(digit) = state.peek() {
-                    if digit.is_ascii_digit() {
-                        state.advance(1);
+            // eprintln!("lex_number peeks '{}' at {}", ch, start_pos);
+            // 数字必须以数字、负号或小数点（后面跟数字）开始
+            let is_number_start = ch.is_ascii_digit() || (ch == '-' && state.peek_next_n(1).map_or(false, |c| c.is_ascii_digit())) || (ch == '.' && state.peek_next_n(1).map_or(false, |c| c.is_ascii_digit()));
+
+            if !is_number_start {
+                return false;
+            }
+
+            if ch == '-' {
+                state.advance(1);
+            }
+
+            // 整数部分
+            if let Some(first) = state.peek() {
+                if first.is_ascii_digit() {
+                    while let Some(digit) = state.peek() {
+                        if digit.is_ascii_digit() || digit == '_' {
+                            state.advance(1);
+                        }
+                        else {
+                            break;
+                        }
+                    }
+                }
+            }
+
+            // 检查小数点
+            if let Some('.') = state.peek() {
+                let mut lookahead = 1;
+                while let Some(c) = state.peek_next_n(lookahead) {
+                    if c == '_' {
+                        lookahead += 1;
                     }
                     else {
                         break;
                     }
                 }
-
-                // 检查小数点
-                let mut is_float = false;
-                if let Some('.') = state.peek() {
-                    if let Some(next_ch) = state.peek_next_n(1) {
-                        if next_ch.is_ascii_digit() {
-                            is_float = true;
-                            state.advance(1); // 跳过小数点
-
-                            // 小数部分
-                            while let Some(digit) = state.peek() {
-                                if digit.is_ascii_digit() {
-                                    state.advance(1);
-                                }
-                                else {
-                                    break;
-                                }
+                if let Some(next_ch) = state.peek_next_n(lookahead) {
+                    if next_ch.is_ascii_digit() {
+                        state.advance(1); // 跳过小数点
+                        while let Some(digit) = state.peek() {
+                            if digit.is_ascii_digit() || digit == '_' {
+                                state.advance(1);
+                            }
+                            else {
+                                break;
                             }
                         }
                     }
                 }
+            }
 
-                // 检查指数
-                if let Some(e) = state.peek() {
-                    if e == 'e' || e == 'E' {
-                        let exp_start = state.get_position();
-                        state.advance(1);
+            // 检查指数
+            if let Some(e) = state.peek() {
+                if e == 'e' || e == 'E' {
+                    // 确保指数后面跟着数字（或符号+数字）
+                    let mut lookahead = 1;
+                    if let Some(sign) = state.peek_next_n(lookahead) {
+                        if sign == '+' || sign == '-' {
+                            lookahead += 1;
+                        }
+                    }
+
+                    let has_digits = state.peek_next_n(lookahead).map_or(false, |c| c.is_ascii_digit() || (c == '_' && state.peek_next_n(lookahead + 1).map_or(false, |n| n.is_ascii_digit())));
+
+                    if has_digits {
+                        state.advance(1); // 跳过 e/E
 
                         // 可选的符号
                         if let Some(sign) = state.peek() {
@@ -196,34 +259,31 @@ impl<'config> VLangLexer<'config> {
                         }
 
                         // 指数数字
-                        let mut has_exp_digits = false;
                         while let Some(digit) = state.peek() {
-                            if digit.is_ascii_digit() {
-                                has_exp_digits = true;
+                            if digit.is_ascii_digit() || digit == '_' {
                                 state.advance(1);
                             }
                             else {
                                 break;
                             }
                         }
-
-                        if has_exp_digits {
-                            is_float = true;
-                        }
-                        else {
-                            // 回退到指数开始位置
-                            state.set_position(exp_start);
-                        }
                     }
                 }
+            }
 
-                let token_kind = if is_float { VLangSyntaxKind::FloatLiteral } else { VLangSyntaxKind::IntegerLiteral };
-                state.add_token(token_kind, start_pos, state.get_position());
-                true
+            // 只有当至少消费了一个数字或者是负号后跟数字时，才认为是数字
+            // 还要检查后面不能直接跟字母，否则可能是标识符（如 version）
+            if state.get_position() > start_pos {
+                if let Some(next) = state.peek() {
+                    if next.is_ascii_alphabetic() || next == '_' {
+                        state.set_position(start_pos);
+                        return false;
+                    }
+                }
+                state.add_token(VonTokenType::NumberLiteral, start_pos, state.get_position());
+                return true;
             }
-            else {
-                false
-            }
+            false
         }
         else {
             false
@@ -236,6 +296,20 @@ impl<'config> VLangLexer<'config> {
 
         if let Some(ch) = state.peek() {
             if ch.is_ascii_alphabetic() || ch == '_' {
+                // 如果是 'r'，可能是 'raw'，需要检查是否是原始字符串的开始
+                if ch == 'r' {
+                    if let Some('a') = state.peek_next_n(1) {
+                        if let Some('w') = state.peek_next_n(2) {
+                            if let Some(c) = state.peek_next_n(3) {
+                                if c == '"' || c == '\'' {
+                                    // 这是原始字符串，由 lex_string 处理
+                                    return false;
+                                }
+                            }
+                        }
+                    }
+                }
+
                 while let Some(ch) = state.peek() {
                     if ch.is_ascii_alphanumeric() || ch == '_' {
                         state.advance(ch.len_utf8());
@@ -247,77 +321,16 @@ impl<'config> VLangLexer<'config> {
 
                 let text = state.get_text_in((start_pos..state.get_position()).into());
                 let token_kind = match text.as_ref() {
-                    "module" => VLangSyntaxKind::ModuleKw,
-                    "import" => VLangSyntaxKind::ImportKw,
-                    "pub" => VLangSyntaxKind::PubKw,
-                    "fn" => VLangSyntaxKind::FnKw,
-                    "struct" => VLangSyntaxKind::StructKw,
-                    "interface" => VLangSyntaxKind::InterfaceKw,
-                    "enum" => VLangSyntaxKind::EnumKw,
-                    "type" => VLangSyntaxKind::TypeKw,
-                    "const" => VLangSyntaxKind::ConstKw,
-                    "mut" => VLangSyntaxKind::MutKw,
-                    "shared" => VLangSyntaxKind::SharedKw,
-                    "volatile" => VLangSyntaxKind::VolatileKw,
-                    "unsafe" => VLangSyntaxKind::UnsafeKw,
-                    "if" => VLangSyntaxKind::IfKw,
-                    "else" => VLangSyntaxKind::ElseKw,
-                    "for" => VLangSyntaxKind::ForKw,
-                    "in" => VLangSyntaxKind::InKw,
-                    "match" => VLangSyntaxKind::MatchKw,
-                    "or" => VLangSyntaxKind::OrKw,
-                    "return" => VLangSyntaxKind::ReturnKw,
-                    "break" => VLangSyntaxKind::BreakKw,
-                    "continue" => VLangSyntaxKind::ContinueKw,
-                    "goto" => VLangSyntaxKind::GotoKw,
-                    "defer" => VLangSyntaxKind::DeferKw,
-                    "go" => VLangSyntaxKind::GoKw,
-                    "select" => VLangSyntaxKind::SelectKw,
-                    "lock" => VLangSyntaxKind::LockKw,
-                    "rlock" => VLangSyntaxKind::RlockKw,
-                    "as" => VLangSyntaxKind::AsKw,
-                    "is" => VLangSyntaxKind::IsKw,
-                    "sizeof" => VLangSyntaxKind::SizeofKw,
-                    "typeof" => VLangSyntaxKind::TypeofKw,
-                    "offsetof" => VLangSyntaxKind::OffsetofKw,
-                    "assert" => VLangSyntaxKind::AssertKw,
-                    "panic" => VLangSyntaxKind::PanicKw,
-                    "eprintln" => VLangSyntaxKind::EprintlnKw,
-                    "println" => VLangSyntaxKind::PrintlnKw,
-                    "print" => VLangSyntaxKind::PrintKw,
-                    "eprint" => VLangSyntaxKind::EprintKw,
-                    "bool" => VLangSyntaxKind::BoolKw,
-                    "i8" => VLangSyntaxKind::I8Kw,
-                    "i16" => VLangSyntaxKind::I16Kw,
-                    "i32" => VLangSyntaxKind::I32Kw,
-                    "i64" => VLangSyntaxKind::I64Kw,
-                    "u8" => VLangSyntaxKind::U8Kw,
-                    "u16" => VLangSyntaxKind::U16Kw,
-                    "u32" => VLangSyntaxKind::U32Kw,
-                    "u64" => VLangSyntaxKind::U64Kw,
-                    "int" => VLangSyntaxKind::IntKw,
-                    "uint" => VLangSyntaxKind::UintKw,
-                    "f32" => VLangSyntaxKind::F32Kw,
-                    "f64" => VLangSyntaxKind::F64Kw,
-                    "string" => VLangSyntaxKind::StringKw,
-                    "rune" => VLangSyntaxKind::RuneKw,
-                    "byte" => VLangSyntaxKind::ByteKw,
-                    "voidptr" => VLangSyntaxKind::VoidptrKw,
-                    "char" => VLangSyntaxKind::CharKw,
-                    "true" | "false" => VLangSyntaxKind::BoolLiteral,
-                    _ => VLangSyntaxKind::Identifier,
+                    "true" | "false" => VonTokenType::BoolLiteral,
+                    "null" => VonTokenType::NullLiteral,
+                    _ => VonTokenType::Identifier,
                 };
 
                 state.add_token(token_kind, start_pos, state.get_position());
-                true
-            }
-            else {
-                false
+                return true;
             }
         }
-        else {
-            false
-        }
+        false
     }
 
     /// 处理操作符和标点符号
@@ -326,236 +339,36 @@ impl<'config> VLangLexer<'config> {
 
         if let Some(ch) = state.peek() {
             let token_kind = match ch {
-                '+' => {
-                    if let Some('=') = state.peek_next_n(1) {
-                        state.advance(2);
-                        VLangSyntaxKind::PlusEq
-                    }
-                    else if let Some('+') = state.peek_next_n(1) {
-                        state.advance(2);
-                        VLangSyntaxKind::PlusPlus
-                    }
-                    else {
-                        state.advance(1);
-                        VLangSyntaxKind::Plus
-                    }
-                }
-                '-' => {
-                    if let Some('=') = state.peek_next_n(1) {
-                        state.advance(2);
-                        VLangSyntaxKind::MinusEq
-                    }
-                    else if let Some('-') = state.peek_next_n(1) {
-                        state.advance(2);
-                        VLangSyntaxKind::MinusMinus
-                    }
-                    else if let Some('>') = state.peek_next_n(1) {
-                        state.advance(2);
-                        VLangSyntaxKind::Arrow
-                    }
-                    else {
-                        state.advance(1);
-                        VLangSyntaxKind::Minus
-                    }
-                }
-                '*' => {
-                    if let Some('=') = state.peek_next_n(1) {
-                        state.advance(2);
-                        VLangSyntaxKind::StarEq
-                    }
-                    else {
-                        state.advance(1);
-                        VLangSyntaxKind::Star
-                    }
-                }
-                '/' => {
-                    if let Some('=') = state.peek_next_n(1) {
-                        state.advance(2);
-                        VLangSyntaxKind::SlashEq
-                    }
-                    else {
-                        state.advance(1);
-                        VLangSyntaxKind::Slash
-                    }
-                }
-                '%' => {
-                    if let Some('=') = state.peek_next_n(1) {
-                        state.advance(2);
-                        VLangSyntaxKind::PercentEq
-                    }
-                    else {
-                        state.advance(1);
-                        VLangSyntaxKind::Percent
-                    }
-                }
-                '&' => {
-                    if let Some('=') = state.peek_next_n(1) {
-                        state.advance(2);
-                        VLangSyntaxKind::AmpersandEq
-                    }
-                    else if let Some('&') = state.peek_next_n(1) {
-                        state.advance(2);
-                        VLangSyntaxKind::AndAnd
-                    }
-                    else {
-                        state.advance(1);
-                        VLangSyntaxKind::Ampersand
-                    }
-                }
-                '|' => {
-                    if let Some('=') = state.peek_next_n(1) {
-                        state.advance(2);
-                        VLangSyntaxKind::PipeEq
-                    }
-                    else if let Some('|') = state.peek_next_n(1) {
-                        state.advance(2);
-                        VLangSyntaxKind::OrOr
-                    }
-                    else {
-                        state.advance(1);
-                        VLangSyntaxKind::Pipe
-                    }
-                }
-                '^' => {
-                    if let Some('=') = state.peek_next_n(1) {
-                        state.advance(2);
-                        VLangSyntaxKind::CaretEq
-                    }
-                    else {
-                        state.advance(1);
-                        VLangSyntaxKind::Caret
-                    }
-                }
-                '=' => {
-                    if let Some('=') = state.peek_next_n(1) {
-                        state.advance(2);
-                        VLangSyntaxKind::EqEq
-                    }
-                    else if let Some('>') = state.peek_next_n(1) {
-                        state.advance(2);
-                        VLangSyntaxKind::FatArrow
-                    }
-                    else {
-                        state.advance(1);
-                        VLangSyntaxKind::Eq
-                    }
-                }
-                '!' => {
-                    if let Some('=') = state.peek_next_n(1) {
-                        state.advance(2);
-                        VLangSyntaxKind::Ne
-                    }
-                    else {
-                        state.advance(1);
-                        VLangSyntaxKind::Bang
-                    }
-                }
-                '<' => {
-                    if let Some('=') = state.peek_next_n(1) {
-                        state.advance(2);
-                        VLangSyntaxKind::Le
-                    }
-                    else if let Some('<') = state.peek_next_n(1) {
-                        if let Some('=') = state.peek_next_n(2) {
-                            state.advance(3);
-                            VLangSyntaxKind::LeftShiftEq
-                        }
-                        else {
-                            state.advance(2);
-                            VLangSyntaxKind::LeftShift
-                        }
-                    }
-                    else {
-                        state.advance(1);
-                        VLangSyntaxKind::LessThan
-                    }
-                }
-                '>' => {
-                    if let Some('=') = state.peek_next_n(1) {
-                        state.advance(2);
-                        VLangSyntaxKind::Ge
-                    }
-                    else if let Some('>') = state.peek_next_n(1) {
-                        if let Some('=') = state.peek_next_n(2) {
-                            state.advance(3);
-                            VLangSyntaxKind::RightShiftEq
-                        }
-                        else {
-                            state.advance(2);
-                            VLangSyntaxKind::RightShift
-                        }
-                    }
-                    else {
-                        state.advance(1);
-                        VLangSyntaxKind::GreaterThan
-                    }
-                }
-                '.' => {
-                    if let Some('.') = state.peek_next_n(1) {
-                        if let Some('.') = state.peek_next_n(2) {
-                            state.advance(3);
-                            VLangSyntaxKind::DotDotDot
-                        }
-                        else {
-                            state.advance(2);
-                            VLangSyntaxKind::DotDot
-                        }
-                    }
-                    else {
-                        state.advance(1);
-                        VLangSyntaxKind::Dot
-                    }
-                }
-                ',' => {
-                    state.advance(1);
-                    VLangSyntaxKind::Comma
-                }
-                ':' => {
-                    state.advance(1);
-                    VLangSyntaxKind::Colon
-                }
-                ';' => {
-                    state.advance(1);
-                    VLangSyntaxKind::Semicolon
-                }
-                '(' => {
-                    state.advance(1);
-                    VLangSyntaxKind::LeftParen
-                }
-                ')' => {
-                    state.advance(1);
-                    VLangSyntaxKind::RightParen
-                }
                 '[' => {
                     state.advance(1);
-                    VLangSyntaxKind::LeftBracket
+                    VonTokenType::LeftBracket
                 }
                 ']' => {
                     state.advance(1);
-                    VLangSyntaxKind::RightBracket
+                    VonTokenType::RightBracket
                 }
                 '{' => {
                     state.advance(1);
-                    VLangSyntaxKind::LeftBrace
+                    VonTokenType::LeftBrace
                 }
                 '}' => {
                     state.advance(1);
-                    VLangSyntaxKind::RightBrace
+                    VonTokenType::RightBrace
                 }
-                '?' => {
+                ',' => {
                     state.advance(1);
-                    VLangSyntaxKind::Question
+                    VonTokenType::Comma
                 }
-                '~' => {
+                ':' => {
                     state.advance(1);
-                    VLangSyntaxKind::Tilde
+                    VonTokenType::Colon
                 }
-                _ => {
-                    state.advance(ch.len_utf8());
-                    VLangSyntaxKind::Error
+                '=' => {
+                    state.advance(1);
+                    VonTokenType::Eq
                 }
+                _ => return false,
             };
-
             state.add_token(token_kind, start_pos, state.get_position());
             true
         }
@@ -565,48 +378,43 @@ impl<'config> VLangLexer<'config> {
     }
 }
 
-impl<'config> Lexer<VLangLanguage> for VLangLexer<'config> {
-    fn lex<'a, S: Source + ?Sized>(&self, source: &'a S, _edits: &[oak_core::TextEdit], cache: &'a mut impl LexerCache<VLangLanguage>) -> LexOutput<VLangLanguage> {
-        let mut state = State::new_with_cache(source, 0, cache);
-
-        while let Some(_ch) = state.peek() {
+impl<'config> Lexer<VonLanguage> for VonLexer<'config> {
+    fn lex<'a, S: Source + ?Sized>(&self, source: &'a S, _edits: &[TextEdit], _cache: &'a mut impl LexerCache<VonLanguage>) -> LexOutput<VonLanguage> {
+        let mut state = State::new(source);
+        while state.not_at_end() {
             if self.skip_whitespace(&mut state) {
                 continue;
             }
-
             if self.lex_newline(&mut state) {
                 continue;
             }
-
             if self.lex_comment(&mut state) {
                 continue;
             }
-
-            if self.lex_string(&mut state) {
-                continue;
-            }
-
-            if self.lex_number(&mut state) {
-                continue;
-            }
-
             if self.lex_identifier_or_keyword(&mut state) {
                 continue;
             }
-
+            if self.lex_number(&mut state) {
+                continue;
+            }
+            if self.lex_string(&mut state) {
+                continue;
+            }
             if self.lex_operator(&mut state) {
                 continue;
             }
 
-            // 如果都没有匹配，则跳过当前字符并标记为错误
+            // 如果都没有匹配，按错误处理并跳过一个字符
             let start_pos = state.get_position();
             if let Some(ch) = state.peek() {
                 state.advance(ch.len_utf8());
-                state.add_token(VLangSyntaxKind::Error, start_pos, state.get_position());
+                state.add_token(VonTokenType::Error, start_pos, state.get_position());
+            }
+            else {
+                break;
             }
         }
 
-        state.add_eof();
-        state.finish_with_cache(Ok(()), cache)
+        state.finish(Ok(()))
     }
 }

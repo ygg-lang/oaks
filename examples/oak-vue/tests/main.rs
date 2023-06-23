@@ -1,6 +1,6 @@
 #[test]
 fn ready() {
-    println!("oak-vue tests ready!");
+    println!("oak-vue tests ready!")
 }
 
 #[cfg(test)]

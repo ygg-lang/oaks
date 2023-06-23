@@ -1,7 +1,9 @@
 use oak_core::{TokenType, UniversalTokenRole};
+#[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Deserialize)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 #[repr(u16)]
 /// Represents all possible token kinds in the Bash shell scripting language.
 pub enum BashTokenType {
@@ -23,7 +25,7 @@ pub enum BashTokenType {
     Keyword,
     /// Operators (&&, ||, >, <, etc.)
     Operator,
-    /// Delimiters (;, (, ), {, }, etc.)
+    /// Delimiters (, (, ), {, }, etc.)
     Delimiter,
     /// Command names
     Command,

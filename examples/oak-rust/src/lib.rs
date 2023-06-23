@@ -1,31 +1,38 @@
 #![doc = include_str!("readme.md")]
-#![doc(html_logo_url = "https://raw.githubusercontent.com/ygg-lang/oaks/refs/heads/dev/documents/logo.svg")]
-#![doc(html_favicon_url = "https://raw.githubusercontent.com/ygg-lang/oaks/refs/heads/dev/documents/logo.svg")]
 #![feature(new_range_api)]
 #![feature(portable_simd)]
 #![warn(missing_docs)]
+#![doc(html_logo_url = "https://raw.githubusercontent.com/ygg-lang/oaks/refs/heads/dev/documents/logo.svg")]
+#![doc(html_favicon_url = "https://raw.githubusercontent.com/ygg-lang/oaks/refs/heads/dev/documents/logo.svg")]
+//! Rust support for the Oak language framework.
 
-extern crate oak_core;
-extern crate serde;
-
+/// AST module.
 pub mod ast;
+/// Builder module.
+pub mod builder;
 
-mod builder;
-mod language;
-/// 词法分析器模块
+/// Language configuration module.
+pub mod language;
+/// Lexer module.
 pub mod lexer;
-/// 语法分析器模块
-pub mod parser;
-
-mod formatter;
-/// 高亮模块
-pub mod highlighter;
-/// LSP 模块
+#[cfg(any(feature = "lsp", feature = "oak-highlight", feature = "oak-pretty-print"))]
 pub mod lsp;
-/// MCP integration for Rust.
+/// MCP module.
+#[cfg(feature = "mcp")]
 pub mod mcp;
 
-// 重新导出主要类型
-pub use crate::{ast::RustRoot, builder::RustBuilder, formatter::RustFormatter, highlighter::RustHighlighter, language::RustLanguage, lexer::RustLexer, lsp::RustLanguageService, parser::RustParser};
+/// Parser module.
+pub mod parser;
 
-pub use crate::mcp::serve_rust_mcp;
+pub use crate::{ast::RustRoot, builder::RustBuilder, language::RustLanguage, lexer::RustLexer, parser::RustParser};
+pub use lexer::token_type::RustTokenType;
+pub use parser::RustElementType;
+
+#[cfg(feature = "oak-highlight")]
+pub use crate::lsp::highlighter::{Highlighter, RustHighlighter};
+
+#[cfg(feature = "lsp")]
+pub use crate::lsp::RustLanguageService;
+
+#[cfg(feature = "oak-pretty-print")]
+pub use crate::lsp::formatter::RustFormatter;

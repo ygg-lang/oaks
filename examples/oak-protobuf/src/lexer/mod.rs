@@ -1,4 +1,8 @@
-use crate::{kind::ProtobufSyntaxKind, language::ProtobufLanguage};
+#![doc = include_str!("readme.md")]
+pub mod token_type;
+pub use token_type::ProtobufTokenType;
+
+use crate::language::ProtobufLanguage;
 use oak_core::{
     Lexer, LexerCache, LexerState, OakError,
     lexer::LexOutput,
@@ -53,19 +57,19 @@ impl<'config> ProtobufLexer<'config> {
             if let Some(ch) = state.peek() {
                 let start_pos = state.get_position();
                 state.advance(ch.len_utf8());
-                state.add_token(ProtobufSyntaxKind::Error, start_pos, state.get_position());
+                state.add_token(ProtobufTokenType::Error, start_pos, state.get_position())
             }
             else {
                 // 如果已到达文件末尾，退出循环
                 break;
             }
 
-            state.advance_if_dead_lock(safe_point);
+            state.advance_if_dead_lock(safe_point)
         }
 
         // Add EOF token
         let pos = state.get_position();
-        state.add_token(ProtobufSyntaxKind::Eof, pos, pos);
+        state.add_token(ProtobufTokenType::Eof, pos, pos);
 
         Ok(())
     }
@@ -74,16 +78,11 @@ impl<'config> ProtobufLexer<'config> {
         let start_pos = state.get_position();
 
         while let Some(ch) = state.peek() {
-            if ch == ' ' || ch == '\t' {
-                state.advance(ch.len_utf8());
-            }
-            else {
-                break;
-            }
+            if ch == ' ' || ch == '\t' { state.advance(ch.len_utf8()) } else { break }
         }
 
         if state.get_position() > start_pos {
-            state.add_token(ProtobufSyntaxKind::Whitespace, start_pos, state.get_position());
+            state.add_token(ProtobufTokenType::Whitespace, start_pos, state.get_position());
             true
         }
         else {
@@ -96,15 +95,15 @@ impl<'config> ProtobufLexer<'config> {
 
         if let Some('\n') = state.peek() {
             state.advance(1);
-            state.add_token(ProtobufSyntaxKind::Newline, start_pos, state.get_position());
+            state.add_token(ProtobufTokenType::Newline, start_pos, state.get_position());
             true
         }
         else if let Some('\r') = state.peek() {
             state.advance(1);
             if let Some('\n') = state.peek() {
-                state.advance(1);
+                state.advance(1)
             }
-            state.add_token(ProtobufSyntaxKind::Newline, start_pos, state.get_position());
+            state.add_token(ProtobufTokenType::Newline, start_pos, state.get_position());
             true
         }
         else {
@@ -124,9 +123,9 @@ impl<'config> ProtobufLexer<'config> {
                     if ch == '\n' || ch == '\r' {
                         break;
                     }
-                    state.advance(ch.len_utf8());
+                    state.advance(ch.len_utf8())
                 }
-                state.add_token(ProtobufSyntaxKind::Comment, start_pos, state.get_position());
+                state.add_token(ProtobufTokenType::Comment, start_pos, state.get_position());
                 true
             }
             else if let Some('*') = state.peek() {
@@ -141,10 +140,10 @@ impl<'config> ProtobufLexer<'config> {
                         }
                     }
                     else {
-                        state.advance(ch.len_utf8());
+                        state.advance(ch.len_utf8())
                     }
                 }
-                state.add_token(ProtobufSyntaxKind::Comment, start_pos, state.get_position());
+                state.add_token(ProtobufTokenType::Comment, start_pos, state.get_position());
                 true
             }
             else {
@@ -169,11 +168,11 @@ impl<'config> ProtobufLexer<'config> {
                 while let Some(ch) = state.peek() {
                     if escaped {
                         escaped = false;
-                        state.advance(ch.len_utf8());
+                        state.advance(ch.len_utf8())
                     }
                     else if ch == '\\' {
                         escaped = true;
-                        state.advance(1);
+                        state.advance(1)
                     }
                     else if ch == quote_char {
                         state.advance(1); // 跳过结束引号
@@ -184,11 +183,11 @@ impl<'config> ProtobufLexer<'config> {
                         break;
                     }
                     else {
-                        state.advance(ch.len_utf8());
+                        state.advance(ch.len_utf8())
                     }
                 }
 
-                state.add_token(ProtobufSyntaxKind::StringLiteral, start_pos, state.get_position());
+                state.add_token(ProtobufTokenType::StringLiteral, start_pos, state.get_position());
                 true
             }
             else {
@@ -207,17 +206,12 @@ impl<'config> ProtobufLexer<'config> {
 
                 // 处理负号
                 if ch == '-' {
-                    state.advance(1);
+                    state.advance(1)
                 }
 
                 // 读取整数部分
                 while let Some(ch) = state.peek() {
-                    if ch.is_ascii_digit() {
-                        state.advance(1);
-                    }
-                    else {
-                        break;
-                    }
+                    if ch.is_ascii_digit() { state.advance(1) } else { break }
                 }
 
                 // 检查小数点
@@ -226,12 +220,7 @@ impl<'config> ProtobufLexer<'config> {
                         state.advance(1);
                         // 读取小数部分
                         while let Some(ch) = state.peek() {
-                            if ch.is_ascii_digit() {
-                                state.advance(1);
-                            }
-                            else {
-                                break;
-                            }
+                            if ch.is_ascii_digit() { state.advance(1) } else { break }
                         }
                     }
                 }
@@ -242,21 +231,16 @@ impl<'config> ProtobufLexer<'config> {
                         state.advance(1);
                         if let Some(ch) = state.peek() {
                             if ch == '+' || ch == '-' {
-                                state.advance(1);
+                                state.advance(1)
                             }
                         }
                         while let Some(ch) = state.peek() {
-                            if ch.is_ascii_digit() {
-                                state.advance(1);
-                            }
-                            else {
-                                break;
-                            }
+                            if ch.is_ascii_digit() { state.advance(1) } else { break }
                         }
                     }
                 }
 
-                state.add_token(ProtobufSyntaxKind::NumberLiteral, start_pos, state.get_position());
+                state.add_token(ProtobufTokenType::NumberLiteral, start_pos, state.get_position());
                 true
             }
             else {
@@ -278,7 +262,7 @@ impl<'config> ProtobufLexer<'config> {
                 while let Some(ch) = state.peek() {
                     if ch.is_alphanumeric() || ch == '_' {
                         text.push(ch);
-                        state.advance(ch.len_utf8());
+                        state.advance(ch.len_utf8())
                     }
                     else {
                         break;
@@ -287,46 +271,46 @@ impl<'config> ProtobufLexer<'config> {
 
                 // 检查是否是关键字
                 let kind = match text.as_str() {
-                    "kind" => ProtobufSyntaxKind::Syntax,
-                    "package" => ProtobufSyntaxKind::Package,
-                    "import" => ProtobufSyntaxKind::Import,
-                    "option" => ProtobufSyntaxKind::Option,
-                    "message" => ProtobufSyntaxKind::Message,
-                    "enum" => ProtobufSyntaxKind::Enum,
-                    "service" => ProtobufSyntaxKind::Service,
-                    "rpc" => ProtobufSyntaxKind::Rpc,
-                    "returns" => ProtobufSyntaxKind::Returns,
-                    "stream" => ProtobufSyntaxKind::Stream,
-                    "repeated" => ProtobufSyntaxKind::Repeated,
-                    "optional" => ProtobufSyntaxKind::Optional,
-                    "required" => ProtobufSyntaxKind::Required,
-                    "oneof" => ProtobufSyntaxKind::Oneof,
-                    "map" => ProtobufSyntaxKind::Map,
-                    "reserved" => ProtobufSyntaxKind::Reserved,
-                    "extensions" => ProtobufSyntaxKind::Extensions,
-                    "extend" => ProtobufSyntaxKind::Extend,
-                    "group" => ProtobufSyntaxKind::Group,
-                    "public" => ProtobufSyntaxKind::Public,
-                    "weak" => ProtobufSyntaxKind::Weak,
+                    "kind" => ProtobufTokenType::Syntax,
+                    "package" => ProtobufTokenType::Package,
+                    "import" => ProtobufTokenType::Import,
+                    "option" => ProtobufTokenType::Option,
+                    "message" => ProtobufTokenType::Message,
+                    "enum" => ProtobufTokenType::Enum,
+                    "service" => ProtobufTokenType::Service,
+                    "rpc" => ProtobufTokenType::Rpc,
+                    "returns" => ProtobufTokenType::Returns,
+                    "stream" => ProtobufTokenType::Stream,
+                    "repeated" => ProtobufTokenType::Repeated,
+                    "optional" => ProtobufTokenType::Optional,
+                    "required" => ProtobufTokenType::Required,
+                    "oneof" => ProtobufTokenType::Oneof,
+                    "map" => ProtobufTokenType::Map,
+                    "reserved" => ProtobufTokenType::Reserved,
+                    "extensions" => ProtobufTokenType::Extensions,
+                    "extend" => ProtobufTokenType::Extend,
+                    "group" => ProtobufTokenType::Group,
+                    "public" => ProtobufTokenType::Public,
+                    "weak" => ProtobufTokenType::Weak,
                     // 数据类型
-                    "double" => ProtobufSyntaxKind::Double,
-                    "float" => ProtobufSyntaxKind::Float,
-                    "int32" => ProtobufSyntaxKind::Int32,
-                    "int64" => ProtobufSyntaxKind::Int64,
-                    "uint32" => ProtobufSyntaxKind::Uint32,
-                    "uint64" => ProtobufSyntaxKind::Uint64,
-                    "sint32" => ProtobufSyntaxKind::Sint32,
-                    "sint64" => ProtobufSyntaxKind::Sint64,
-                    "fixed32" => ProtobufSyntaxKind::Fixed32,
-                    "fixed64" => ProtobufSyntaxKind::Fixed64,
-                    "sfixed32" => ProtobufSyntaxKind::Sfixed32,
-                    "sfixed64" => ProtobufSyntaxKind::Sfixed64,
-                    "bool" => ProtobufSyntaxKind::Bool,
-                    "string" => ProtobufSyntaxKind::String,
-                    "bytes" => ProtobufSyntaxKind::Bytes,
+                    "double" => ProtobufTokenType::Double,
+                    "float" => ProtobufTokenType::Float,
+                    "int32" => ProtobufTokenType::Int32,
+                    "int64" => ProtobufTokenType::Int64,
+                    "uint32" => ProtobufTokenType::Uint32,
+                    "uint64" => ProtobufTokenType::Uint64,
+                    "sint32" => ProtobufTokenType::Sint32,
+                    "sint64" => ProtobufTokenType::Sint64,
+                    "fixed32" => ProtobufTokenType::Fixed32,
+                    "fixed64" => ProtobufTokenType::Fixed64,
+                    "sfixed32" => ProtobufTokenType::Sfixed32,
+                    "sfixed64" => ProtobufTokenType::Sfixed64,
+                    "bool" => ProtobufTokenType::Bool,
+                    "string" => ProtobufTokenType::String,
+                    "bytes" => ProtobufTokenType::Bytes,
                     // 布尔字面量
-                    "true" | "false" => ProtobufSyntaxKind::BooleanLiteral,
-                    _ => ProtobufSyntaxKind::Identifier,
+                    "true" | "false" => ProtobufTokenType::BooleanLiteral,
+                    _ => ProtobufTokenType::Identifier,
                 };
 
                 state.add_token(kind, start_pos, state.get_position());
@@ -348,51 +332,51 @@ impl<'config> ProtobufLexer<'config> {
             let kind = match ch {
                 '=' => {
                     state.advance(1);
-                    ProtobufSyntaxKind::Assign
+                    ProtobufTokenType::Assign
                 }
                 ';' => {
                     state.advance(1);
-                    ProtobufSyntaxKind::Semicolon
+                    ProtobufTokenType::Semicolon
                 }
                 ',' => {
                     state.advance(1);
-                    ProtobufSyntaxKind::Comma
+                    ProtobufTokenType::Comma
                 }
                 '.' => {
                     state.advance(1);
-                    ProtobufSyntaxKind::Dot
+                    ProtobufTokenType::Dot
                 }
                 '(' => {
                     state.advance(1);
-                    ProtobufSyntaxKind::LeftParen
+                    ProtobufTokenType::LeftParen
                 }
                 ')' => {
                     state.advance(1);
-                    ProtobufSyntaxKind::RightParen
+                    ProtobufTokenType::RightParen
                 }
                 '[' => {
                     state.advance(1);
-                    ProtobufSyntaxKind::LeftBracket
+                    ProtobufTokenType::LeftBracket
                 }
                 ']' => {
                     state.advance(1);
-                    ProtobufSyntaxKind::RightBracket
+                    ProtobufTokenType::RightBracket
                 }
                 '{' => {
                     state.advance(1);
-                    ProtobufSyntaxKind::LeftBrace
+                    ProtobufTokenType::LeftBrace
                 }
                 '}' => {
                     state.advance(1);
-                    ProtobufSyntaxKind::RightBrace
+                    ProtobufTokenType::RightBrace
                 }
                 '<' => {
                     state.advance(1);
-                    ProtobufSyntaxKind::LeftAngle
+                    ProtobufTokenType::LeftAngle
                 }
                 '>' => {
                     state.advance(1);
-                    ProtobufSyntaxKind::RightAngle
+                    ProtobufTokenType::RightAngle
                 }
                 _ => return false,
             };

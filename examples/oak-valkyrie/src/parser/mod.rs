@@ -1,14 +1,22 @@
-use crate::{ValkyrieLanguage, kind::ValkyrieSyntaxKind};
+#![doc = include_str!("readme.md")]
+pub mod element_type;
+pub use crate::parser::element_type::ValkyrieElementType;
+
+use crate::{
+    language::ValkyrieLanguage,
+    lexer::{ValkyrieKeywords, token_type::ValkyrieSyntaxKind},
+};
 use oak_core::{
     GreenNode,
     parser::{Associativity, ParserState, Pratt, binary, unary},
     source::Source,
 };
 
+#[allow(unused_imports)]
 #[allow(dead_code)]
 type State<'a, S> = ParserState<'a, ValkyrieLanguage, S>;
 
-mod parse;
+mod parse_top_level;
 
 /// A parser for the Valkyrie programming language.
 #[derive(Clone)]
@@ -56,6 +64,7 @@ impl<'config> Pratt<ValkyrieLanguage> for ValkyrieParser<'config> {
             | ValkyrieSyntaxKind::ShrEq => (10, Associativity::Right, ValkyrieSyntaxKind::BinaryExpression),
 
             // Logical
+            ValkyrieSyntaxKind::PipeGreater => (12, Associativity::Left, ValkyrieSyntaxKind::BinaryExpression),
             ValkyrieSyntaxKind::OrOr => (14, Associativity::Left, ValkyrieSyntaxKind::BinaryExpression),
             ValkyrieSyntaxKind::AndAnd => (15, Associativity::Left, ValkyrieSyntaxKind::BinaryExpression),
 
@@ -65,11 +74,11 @@ impl<'config> Pratt<ValkyrieLanguage> for ValkyrieParser<'config> {
             ValkyrieSyntaxKind::And => (22, Associativity::Left, ValkyrieSyntaxKind::BinaryExpression),
 
             // Comparison
-            ValkyrieSyntaxKind::EqEq | ValkyrieSyntaxKind::Ne => (25, Associativity::None, ValkyrieSyntaxKind::BinaryExpression),
-            ValkyrieSyntaxKind::Lt | ValkyrieSyntaxKind::Gt | ValkyrieSyntaxKind::Le | ValkyrieSyntaxKind::Ge => (30, Associativity::None, ValkyrieSyntaxKind::BinaryExpression),
+            ValkyrieSyntaxKind::EqEq | ValkyrieSyntaxKind::NotEq | ValkyrieSyntaxKind::Keyword(ValkyrieKeywords::Is) | ValkyrieSyntaxKind::Keyword(ValkyrieKeywords::In) => (80, Associativity::None, ValkyrieSyntaxKind::BinaryExpression),
+            ValkyrieSyntaxKind::LessThan | ValkyrieSyntaxKind::GreaterThan | ValkyrieSyntaxKind::LessEq | ValkyrieSyntaxKind::GreaterEq => (90, Associativity::None, ValkyrieSyntaxKind::BinaryExpression),
 
             // Shift
-            ValkyrieSyntaxKind::Shl | ValkyrieSyntaxKind::Shr => (35, Associativity::Left, ValkyrieSyntaxKind::BinaryExpression),
+            ValkyrieSyntaxKind::LeftShift | ValkyrieSyntaxKind::RightShift => (35, Associativity::Left, ValkyrieSyntaxKind::BinaryExpression),
 
             // Additive
             ValkyrieSyntaxKind::Plus | ValkyrieSyntaxKind::Minus => (40, Associativity::Left, ValkyrieSyntaxKind::BinaryExpression),
@@ -78,10 +87,11 @@ impl<'config> Pratt<ValkyrieLanguage> for ValkyrieParser<'config> {
             ValkyrieSyntaxKind::Star | ValkyrieSyntaxKind::Slash | ValkyrieSyntaxKind::Percent => (50, Associativity::Left, ValkyrieSyntaxKind::BinaryExpression),
 
             // Postfix / Access
-            ValkyrieSyntaxKind::LeftParen => (70, Associativity::Left, ValkyrieSyntaxKind::CallExpression),
-            ValkyrieSyntaxKind::Dot => (70, Associativity::Left, ValkyrieSyntaxKind::FieldExpression),
-            ValkyrieSyntaxKind::LeftBracket => (70, Associativity::Left, ValkyrieSyntaxKind::IndexExpression),
-            ValkyrieSyntaxKind::LeftBrace => (70, Associativity::Left, ValkyrieSyntaxKind::ApplyBlock),
+            ValkyrieSyntaxKind::LeftParen => (100, Associativity::Left, ValkyrieSyntaxKind::CallExpression),
+            ValkyrieSyntaxKind::Dot => (100, Associativity::Left, ValkyrieSyntaxKind::FieldExpression),
+            ValkyrieSyntaxKind::LeftBracket => (100, Associativity::Left, ValkyrieSyntaxKind::IndexExpression),
+            ValkyrieSyntaxKind::LeftBrace => (5, Associativity::Left, ValkyrieSyntaxKind::ObjectExpression),
+            ValkyrieSyntaxKind::Colon => (150, Associativity::Left, ValkyrieSyntaxKind::BinaryExpression),
 
             _ => return None,
         };
@@ -90,39 +100,49 @@ impl<'config> Pratt<ValkyrieLanguage> for ValkyrieParser<'config> {
             return None;
         }
 
-        let cp = state.checkpoint();
+        let _cp = state.checkpoint();
         let node = match kind {
             ValkyrieSyntaxKind::LeftParen => {
-                let cp_inner = state.checkpoint();
-                state.push_child(left);
+                let cp = state.checkpoint_before(left);
                 state.expect(ValkyrieSyntaxKind::LeftParen).ok();
                 while let Some(t) = state.current() {
                     if t.kind == ValkyrieSyntaxKind::RightParen {
                         break;
                     }
-                    let arg = self.parse_expression_internal(state, 0);
-                    state.push_child(arg);
+                    self.parse_expression_internal(state, 0);
                     if state.at(ValkyrieSyntaxKind::Comma) {
                         state.expect(ValkyrieSyntaxKind::Comma).ok();
                     }
+                    self.skip_trivia(state);
                 }
                 state.expect(ValkyrieSyntaxKind::RightParen).ok();
-                state.finish_at(cp_inner, ValkyrieSyntaxKind::CallExpression)
+                self.skip_trivia(state);
+                if state.at(ValkyrieSyntaxKind::LeftBrace) {
+                    self.parse_block_expr_node(state).ok();
+                    state.finish_at(cp, ValkyrieSyntaxKind::ObjectExpression)
+                }
+                else {
+                    state.finish_at(cp, ValkyrieSyntaxKind::CallExpression)
+                }
             }
             ValkyrieSyntaxKind::LeftBracket => {
-                let cp_inner = state.checkpoint();
-                state.push_child(left);
+                let cp = state.checkpoint_before(left);
                 state.expect(ValkyrieSyntaxKind::LeftBracket).ok();
-                let index = self.parse_expression_internal(state, 0);
-                state.push_child(index);
+                self.parse_expression_internal(state, 0);
                 state.expect(ValkyrieSyntaxKind::RightBracket).ok();
-                state.finish_at(cp_inner, ValkyrieSyntaxKind::IndexExpression)
+                self.skip_trivia(state);
+                if state.at(ValkyrieSyntaxKind::LeftBrace) {
+                    self.parse_block_expr_node(state).ok();
+                    state.finish_at(cp, ValkyrieSyntaxKind::ObjectExpression)
+                }
+                else {
+                    state.finish_at(cp, ValkyrieSyntaxKind::IndexExpression)
+                }
             }
             ValkyrieSyntaxKind::LeftBrace => {
-                let cp_inner = state.checkpoint();
-                state.push_child(left);
+                let cp = state.checkpoint_before(left);
                 self.parse_block_expr_node(state).ok();
-                state.finish_at(cp_inner, ValkyrieSyntaxKind::ApplyBlock)
+                state.finish_at(cp, ValkyrieSyntaxKind::ObjectExpression)
             }
             _ => binary(state, left, kind, prec, assoc, result_kind, |s, p| self.parse_expression_internal(s, p)),
         };
@@ -142,7 +162,7 @@ impl<'config> Pratt<ValkyrieLanguage> for ValkyrieParser<'config> {
             _ => return self.primary(state),
         };
 
-        let cp = state.checkpoint();
+        let _cp = state.checkpoint();
         unary(state, kind, prec, result_kind, |s, p| self.parse_expression_internal(s, p))
     }
 }

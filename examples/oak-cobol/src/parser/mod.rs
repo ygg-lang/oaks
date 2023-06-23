@@ -1,3 +1,4 @@
+#![doc = include_str!("readme.md")]
 use crate::language::CobolLanguage;
 pub mod element_type;
 pub use element_type::CobolElementType;
@@ -7,7 +8,7 @@ use oak_core::{
     source::{Source, TextEdit},
 };
 
-mod parse;
+mod parse_top_level;
 
 pub(crate) type State<'a, S> = ParserState<'a, CobolLanguage, S>;
 

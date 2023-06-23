@@ -14,11 +14,11 @@ fn main() {
         Ok(tokens) => {
             println!("Found {} tokens", tokens.len());
             for token in tokens.iter() {
-                println!("Token: {:?}", token);
+                println!("Token: {:?}", token)
             }
         }
         Err(e) => {
-            println!("Error: {:?}", e);
+            println!("Error: {:?}", e)
         }
     }
 }

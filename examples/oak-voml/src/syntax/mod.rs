@@ -1,6 +1,6 @@
 /// WAT 语法种类
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
-pub enum WatSyntaxKind {
+pub enum WatTokenType {
     // 节点类型
     Root,
     Module,

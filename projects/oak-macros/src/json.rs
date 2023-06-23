@@ -59,6 +59,9 @@ impl Parse for JsonExpr {
                 if content.peek(Token![,]) {
                     content.parse::<Token![,]>()?;
                 }
+                else if !content.is_empty() {
+                    return Err(content.error("expected `,` or `}`"));
+                }
             }
             Ok(JsonExpr::Object(fields))
         }

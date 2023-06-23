@@ -21,4 +21,4 @@ pub trait BuilderCache<L: Language>: crate::parser::ParseCache<L> {}
 
 impl<'a, L: Language, C: BuilderCache<L> + ?Sized> BuilderCache<L> for &'a mut C {}
 
-impl<L: Language + Send + Sync + 'static> BuilderCache<L> for crate::parser::ParseSession<L> {}
+impl<L: Language + Send + Sync> BuilderCache<L> for crate::parser::ParseSession<L> {}

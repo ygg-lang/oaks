@@ -1,158 +1,33 @@
-# Oak Coq Parser
+# 🚀 Oak Coq Parser
 
 [![Crates.io](https://img.shields.io/crates/v/oak-coq.svg)](https://crates.io/crates/oak-coq)
 [![Documentation](https://docs.rs/oak-coq/badge.svg)](https://docs.rs/oak-coq)
 
-High-performance incremental Coq parser for the oak ecosystem with flexible configuration, optimized for theorem proving and formal verification.
+**Formally Verified Development at Scale** — A high-performance, incremental Coq parser built on the Oak framework. Optimized for interactive theorem proving, formal verification workflows, and modern IDE support for the Coq proof assistant.
 
-## 🎯 Overview
+## 🎯 Project Vision
 
-Oak Coq is a robust parser for Coq, designed to handle complete Coq syntax including modern features like tactics, definitions, and proofs. Built on the solid foundation of oak-core, it provides both high-level convenience and detailed AST generation for theorem proving and formal verification.
+Coq is a powerful formal proof management system used to develop verified software and mathematical proofs. `oak-coq` brings modern parsing infrastructure to the Coq ecosystem, providing a high-performance, Rust-powered alternative for analyzing Coq scripts. By utilizing Oak's incremental parsing capabilities, it enables the creation of highly responsive IDEs and interactive tools that can handle large formal developments with sub-millisecond latency. Whether you are building automated proof search tools, documentation generators, or sophisticated IDE extensions, `oak-coq` provides the robust foundation needed for deep analysis of Gallina and Ltac constructs.
 
-## ✨ Features
+## ✨ Core Features
 
-- **Complete Coq Syntax**: Supports all Coq features including modern specifications
-- **Full AST Generation**: Generates comprehensive Abstract Syntax Trees
-- **Lexer Support**: Built-in tokenization with proper span information
-- **Error Recovery**: Graceful handling of syntax errors with detailed diagnostics
+- **⚡ Blazing Fast**: Leverages Rust's performance and memory safety to parse complex Coq scripts with exceptional speed.
+- **🔄 Incremental by Nature**: Built-in support for partial updates—re-parse only what has changed. Ideal for providing immediate feedback during interactive proof development.
+- **🌳 High-Fidelity AST**: Generates a precise Abstract Syntax Tree capturing the full structure of Coq developments:
+    - **Vernacular Commands**: Comprehensive mapping of definitions, theorems, lemmas, and module structures.
+    - **Gallina Terms**: Precise representation of types, functions, and inductive definitions.
+    - **Ltac & Tactics**: Robust support for proof scripts and custom tactic definitions.
+    - **Notations**: Handles complex user-defined notations and syntax extensions.
+- **🛡️ Robust Error Recovery**: Engineered to handle incomplete or malformed scripts gracefully, providing precise diagnostics—essential for maintaining a smooth proof engineering experience.
+- **🧩 Deep Ecosystem Integration**: Seamlessly works with `oak-lsp` for full LSP support and `oak-mcp` for intelligent proof discovery and formal analysis.
 
-## 🚀 Quick Start
+## 🏗️ Architecture
 
-Basic example:
-
-```rust
-use oak_coq::{Parser, CoqLanguage, SourceText};
-
-fn main() -> Result<(), Box<dyn std::error::Error>> {
-    let parser = Parser::new();
-    let source = SourceText::new(r#"
-Theorem plus_comm : forall n m : nat, n + m = m + n.
-Proof.
-  intros n m.
-  induction n as [| n' IHn'].
-  - simpl. reflexivity.
-  - simpl. rewrite IHn'. reflexivity.
-Qed.
-    "#);
-    
-    let result = parser.parse(&source);
-    println!("Parsed Coq theorem successfully.");
-    Ok(())
-}
-```
-
-## 📋 Parsing Examples
-
-### Theorem Parsing
-```rust
-use oak_coq::{Parser, CoqLanguage, SourceText};
-
-let parser = Parser::new();
-let source = SourceText::new(r#"
-Theorem plus_assoc : forall n m p : nat,
-  n + (m + p) = (n + m) + p.
-Proof.
-  intros n m p.
-  induction n as [| n' IHn'].
-  - simpl. reflexivity.
-  - simpl. rewrite IHn'. reflexivity.
-Qed.
-    "#);
-
-let result = parser.parse(&source);
-println!("Parsed Coq theorem successfully.");
-```
-
-### Definition Parsing
-```rust
-use oak_coq::{Parser, CoqLanguage, SourceText};
-
-let parser = Parser::new();
-let source = SourceText::new(r#"
-Definition double (n : nat) : nat :=
-  n + n.
-
-Fixpoint factorial (n : nat) : nat :=
-  match n with
-  | 0 => 1
-  | S n' => n * factorial n'
-  end.
-    "#);
-
-let result = parser.parse(&source);
-println!("Parsed Coq definitions successfully.");
-```
-
-## 🔧 Advanced Features
-
-### Token-Level Parsing
-```rust
-use oak_coq::{Parser, CoqLanguage, SourceText};
-
-let parser = Parser::new();
-let source = SourceText::new("Theorem plus_comm : forall n m : nat, n + m = m + n.");
-let result = parser.parse(&source);
-// Token information is available in the parse result
-```
-
-### Error Handling
-```rust
-use oak_coq::{Parser, CoqLanguage, SourceText};
-
-let parser = Parser::new();
-let source = SourceText::new(r#"
-Theorem invalid : forall n : nat,
-  n = n.
-Proof.
-  intros n.
-  (* Missing Qed *)
-    "#);
-
-let result = parser.parse(&source);
-if let Err(e) = result.result {
-    println!("Parse error: {:?}", e);
-}
-```
-
-## 🏗️ AST Structure
-
-The parser generates a comprehensive AST with the following main structures:
-
-- **VernacularCommand**: Top-level commands (Theorem, Definition, etc.)
-- **Proof**: Proof scripts with tactics
-- **Term**: Coq terms and expressions
-- **Inductive**: Inductive definitions
-- **Fixpoint**: Recursive function definitions
-- **Tactic**: Proof tactics
-
-## 📊 Performance
-
-- **Streaming**: Parse large Coq files without loading entirely into memory
-- **Incremental**: Re-parse only changed sections
-- **Memory Efficient**: Smart AST node allocation
-- **Fast Recovery**: Quick error recovery for better IDE integration
-
-## 🔗 Integration
-
-Oak Coq integrates seamlessly with:
-
-- **Proof Assistants**: Integration with Coq and related tools
-- **Formal Verification**: Analyzing and verifying formal specifications
-- **IDE Support**: Language server protocol compatibility for Coq
-- **Documentation**: Extracting documentation from Coq source code
-- **Educational Tools**: Building interactive learning environments
-
-## 📚 Examples
-
-Check out the [examples](examples/) directory for comprehensive examples:
-
-- Complete Coq theorem parsing
-- Proof script analysis
-- Code transformation
-- Integration with development workflows
+The parser follows the **Green/Red Tree** architecture (inspired by Roslyn), which allows for:
+1. **Efficient Immutability**: Share nodes across different versions of the tree without copying.
+2. **Lossless Syntax Trees**: Retains all trivia (whitespace and comments), enabling faithful code formatting and refactoring.
+3. **Type Safety**: Strongly-typed "Red" nodes provide a convenient and safe API for tree traversal and analysis.
 
 ## 🤝 Contributing
 
-Contributions are welcome! 
-
-Please feel free to submit pull requests at the [project repository](https://github.com/ygg-lang/oaks/tree/dev/examples/oak-coq) or open [issues](https://github.com/ygg-lang/oaks/issues).
+We welcome contributions of all kinds! If you find a bug, have a feature request, or want to contribute code, please check our [issues](https://github.com/ygg-lang/oaks/issues) or submit a pull request.

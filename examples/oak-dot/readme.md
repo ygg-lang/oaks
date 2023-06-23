@@ -1,93 +1,33 @@
-# Oak DOT Language Parser
+# 🚀 Oak DOT Parser
 
-## Overview
+[![Crates.io](https://img.shields.io/crates/v/oak-dot.svg)](https://crates.io/crates/oak-dot)
+[![Documentation](https://docs.rs/oak-dot/badge.svg)](https://docs.rs/oak-dot)
 
-`Oak of dot` is a powerful and efficient parser for the DOT graph description language, built using the `oak` parser combinator library. It provides a robust solution for parsing DOT syntax, enabling various applications such as static analysis of graph definitions, visualization tools, and automated graph generation.
+**Visualizing Complexity with Speed** — A high-performance, incremental DOT parser built on the Oak framework. Optimized for Graphviz integration, automated diagram generation, and modern IDE support for the DOT graph description language.
 
-## Features
+## 🎯 Project Vision
 
-- **Comprehensive DOT Grammar**: Supports all standard DOT graph, subgraph, node, and edge definitions.
-- **High Performance**: Leverages `oak`'s optimized parsing techniques for speed.
-- **Abstract Syntax Tree (AST)**: Generates a detailed and easy-to-navigate AST representing the DOT structure.
-- **Error Handling**: Provides meaningful error messages for better debugging of malformed DOT files.
-- **Extensible**: Easily extendable to support custom DOT extensions or dialects.
+The DOT language is the industry standard for describing graphs and networks, widely used for everything from architectural diagrams to state machines. `oak-dot` provides a modern, Rust-powered infrastructure for analyzing and manipulating graph structures with extreme efficiency. By utilizing Oak's incremental parsing capabilities, it enables the creation of highly responsive visual tools that can handle massive graphs with sub-millisecond updates. Whether you are building automated diagram generators, network analysis tools, or sophisticated graph editors, `oak-dot` provides the robust, efficient foundation you need for high-fidelity graph extraction.
 
-## Quick Start
+## ✨ Core Features
 
-To use `Oak of dot` in your Rust project, add it as a dependency in your `Cargo.toml`:
+- **⚡ Blazing Fast**: Leverages Rust's performance and memory safety to parse complex graph descriptions with sub-millisecond latency.
+- **🔄 Incremental by Nature**: Built-in support for partial updates—re-parse only modified nodes, edges, or attributes. Ideal for real-time graph visualization and interactive editing.
+- **🌳 High-Fidelity AST**: Generates a precise Abstract Syntax Tree capturing the full structure of DOT:
+    - **Graphs & Subgraphs**: Comprehensive mapping of directed/undirected graphs and nested subgraphs.
+    - **Nodes & Edges**: Detailed tracking of node definitions, edge connections, and complex port mappings.
+    - **Attributes**: Robust handling of global and local attribute lists for styling and metadata.
+    - **Comments**: Retains all trivia for faithful code formatting and documentation generation.
+- **🛡️ Industrial-Grade Fault Tolerance**: Gracefully recovers from syntax errors, providing clear and actionable diagnostics—critical for maintaining a smooth developer experience during active graph design.
+- **🧩 Deep Ecosystem Integration**: Seamlessly works with `oak-lsp` for full LSP support and `oak-mcp` for intelligent graph discovery and structural analysis.
 
-```toml
-[dependencies]
-Oak of dot = "0.1.0" # Replace with the latest version
-oak = "0.1.0" # Replace with the latest version
-```
+## 🏗️ Architecture
 
-## Parsing Examples
+The parser follows the **Green/Red Tree** architecture (inspired by Roslyn), which allows for:
+1. **Efficient Immutability**: Share nodes across different versions of the tree without copying.
+2. **Lossless Syntax Trees**: Retains all trivia (whitespace and comments), enabling faithful code formatting and refactoring.
+3. **Type Safety**: Strongly-typed "Red" nodes provide a convenient and safe API for tree traversal and analysis.
 
-Here's a simple example demonstrating how to parse DOT language content:
+## 🤝 Contributing
 
-```rust
-use pex_dot::dot_parser;
-
-fn main() {
-    let input = r#"
-digraph G {
-    A -> B;
-    B -> C;
-    C -> A;
-}
-"#;
-    match dot_parser::parse(input) {
-        Ok(ast) => {
-            println!("Successfully parsed DOT:\n{:#?}", ast);
-        }
-        Err(err) => {
-            eprintln!("Failed to parse DOT: {}", err);
-        }
-    }
-}
-```
-
-## Advanced Features
-
-### Customizing the Parser
-
-The `oak` library allows for flexible customization of the parser. You can modify the grammar rules or add new ones to suit your specific needs, such as supporting experimental DOT features. Refer to the `oak` documentation for more details on parser customization.
-
-### Error Recovery
-
-`Oak of dot` can be extended with error recovery mechanisms to handle malformed DOT files gracefully, allowing for partial parsing and better resilience in real-world scenarios.
-
-## AST Structure
-
-The generated AST for DOT provides a hierarchical representation of the graph elements. For instance, a node definition might result in an AST structure similar to this:
-
-```rust
-// Simplified AST representation for:
-// A -> B;
-pex_dot::ast::Node::Edge {
-    source: "A".to_string(),
-    target: "B".to_string(),
-    attributes: vec![],
-}
-```
-
-## Performance
-
-`Oak of dot` is designed for performance. Benchmarks show efficient parsing of large DOT files. Optimizations include memoization, efficient backtracking, and direct AST construction.
-
-## Integration
-
-`Oak of dot` can be integrated into various tools and applications:
-
-- **Graph Visualization Tools**: Parse DOT files for rendering.
-- **Graph Analysis Tools**: Analyze graph structures for properties and patterns.
-- **Code Generation**: Generate DOT files from other data structures.
-
-## Examples
-
-Explore the `examples` directory within the `oak-dot` project for more usage examples and demonstrations of specific DOT parsing features.
-
-## Contributing
-
-Contributions to `Oak of dot` are welcome! If you find a bug or have a feature request, please open an issue on the GitHub repository. For major changes, please open a discussion first.
+We welcome contributions of all kinds! If you find a bug, have a feature request, or want to contribute code, please check our [issues](https://github.com/ygg-lang/oaks/issues) or submit a pull request.

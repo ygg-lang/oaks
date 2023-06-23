@@ -1,5 +1,5 @@
-use oak_diagnostic::testing::lexing::LexerTester;
 use oak_ini::{IniLanguage, IniLexer};
+use oak_testing::lexing::LexerTester;
 use std::{path::Path, time::Duration};
 
 #[test]
@@ -29,5 +29,5 @@ fn test_basic_lexing() {
 
     let tokens = result.result.unwrap();
     assert!(!tokens.is_empty());
-    println!("Lexed {} tokens", tokens.len());
+    println!("Lexed {} tokens", tokens.len())
 }

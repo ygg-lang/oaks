@@ -1,0 +1,38 @@
+[package]
+name = "oak-raku"
+version.workspace = true
+authors.workspace = true
+description = "Raku (formerly Perl 6) language parser with support for advanced concurrency, grammar, and multi-paradigm programming."
+edition.workspace = true
+license.workspace = true
+readme = "readme.md"
+homepage.workspace = true
+repository = "https://github.com/ygg-lang/oaks/tree/master/examples/oak-raku"
+documentation = "https://docs.rs/oak-raku"
+categories = ["parsing"]
+keywords = ["parser", "raku", "perl6", "scripting"]
+
+[dependencies]
+oak-core = { workspace = true }
+serde = { workspace = true, optional = true }
+oak-highlight = { workspace = true, optional = true }
+oak-pretty-print = { workspace = true, optional = true }
+oak-lsp = { workspace = true, optional = true }
+oak-hover = { workspace = true, optional = true }
+oak-vfs = { workspace = true, optional = true }
+oak-mcp = { workspace = true, optional = true }
+futures = { workspace = true, optional = true }
+
+[dev-dependencies]
+oak-testing = { workspace = true }
+
+[features]
+default = ["serde"]
+serde = ["dep:serde", "oak-core/serde"]
+oak-highlight = ["dep:oak-highlight"]
+oak-pretty-print = ["dep:oak-pretty-print"]
+lsp = ["dep:oak-lsp", "dep:oak-hover", "dep:oak-vfs", "oak-highlight", "oak-pretty-print", "dep:futures"]
+mcp = ["lsp", "oak-mcp/io-std"]
+
+[package.metadata.docs.rs]
+all-features = true

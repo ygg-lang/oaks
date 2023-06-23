@@ -1,22 +1,28 @@
+#![doc = include_str!("readme.md")]
 use core::range::Range;
+#[cfg(feature = "serde")]
+#[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
 
 /// Identifier in the Dart language
-#[derive(Debug, PartialEq, Eq, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[derive(Debug, PartialEq, Eq, Clone)]
 pub struct Identifier {
     pub name: String,
-    #[serde(with = "oak_core::serde_range")]
+    #[cfg_attr(feature = "serde", serde(with = "oak_core::serde_range"))]
     pub span: Range<usize>,
 }
 
 /// Strongly-typed AST root for Dart language
-#[derive(Debug, PartialEq, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[derive(Debug, PartialEq, Clone)]
 pub struct DartRoot {
     pub items: Vec<Item>,
 }
 
 /// Top-level items: classes, functions, variable declarations, etc.
-#[derive(Debug, PartialEq, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[derive(Debug, PartialEq, Clone)]
 pub enum Item {
     Class(ClassDeclaration),
     Function(FunctionDeclaration),
@@ -24,25 +30,28 @@ pub enum Item {
 }
 
 /// Class declaration in Dart
-#[derive(Debug, PartialEq, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[derive(Debug, PartialEq, Clone)]
 pub struct ClassDeclaration {
     pub name: Identifier,
-    #[serde(with = "oak_core::serde_range")]
+    #[cfg_attr(feature = "serde", serde(with = "oak_core::serde_range"))]
     pub span: Range<usize>,
 }
 
 /// Function declaration in Dart
-#[derive(Debug, PartialEq, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[derive(Debug, PartialEq, Clone)]
 pub struct FunctionDeclaration {
     pub name: Identifier,
-    #[serde(with = "oak_core::serde_range")]
+    #[cfg_attr(feature = "serde", serde(with = "oak_core::serde_range"))]
     pub span: Range<usize>,
 }
 
 /// Variable declaration in Dart
-#[derive(Debug, PartialEq, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[derive(Debug, PartialEq, Clone)]
 pub struct VariableDeclaration {
     pub name: Identifier,
-    #[serde(with = "oak_core::serde_range")]
+    #[cfg_attr(feature = "serde", serde(with = "oak_core::serde_range"))]
     pub span: Range<usize>,
 }

@@ -10,7 +10,7 @@ fn test_rbq_parser_basic() {
     let mut session = ParseSession::<RbqLanguage>::new(16);
     let result = parser.parse(&source, &[], &mut session);
 
-    assert!(result.diagnostics.is_empty(), "解析应该没有错误: {:?}", result.diagnostics);
+    assert!(result.diagnostics.is_empty(), "解析应该没有错误: {:?}", result.diagnostics)
 }
 
 #[test]
@@ -41,5 +41,5 @@ fn test_rbq_parser_complex() {
     let mut session = ParseSession::<RbqLanguage>::new(16);
     let result = parser.parse(&source, &[], &mut session);
 
-    assert!(result.diagnostics.is_empty(), "解析应该没有错误: {:?}", result.diagnostics);
+    assert!(result.diagnostics.is_empty(), "解析应该没有错误: {:?}", result.diagnostics)
 }

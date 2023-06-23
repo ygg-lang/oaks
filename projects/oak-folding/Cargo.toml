@@ -1,13 +1,13 @@
 [package]
 name = "oak-folding"
-description = "Code folding logic and AST-based region detection for the Oak framework."
-categories = ["development-tools"]
-keywords = ["folding", "code-folding", "ast"]
 version.workspace = true
 authors.workspace = true
+description = "Code folding logic and AST-based region detection for the Oak framework."
 edition.workspace = true
 license.workspace = true
-repository.workspace = true
+repository = "https://github.com/ygg-lang/oaks/tree/master/projects/oak-folding"
+categories = ["development-tools"]
+keywords = ["folding", "code-folding", "ast"]
 
 [dependencies]
 oak-core = { workspace = true, features = ["serde"] }

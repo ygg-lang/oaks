@@ -1,207 +1,34 @@
-# Oak VHDL Parser
+# 🚀 oak-vhdl
 
 [![Crates.io](https://img.shields.io/crates/v/oak-vhdl.svg)](https://crates.io/crates/oak-vhdl)
 [![Documentation](https://docs.rs/oak-vhdl/badge.svg)](https://docs.rs/oak-vhdl)
 
-High-performance incremental VHDL parser for the oak ecosystem with flexible configuration, optimized for hardware description and digital circuit design.
+**High-Fidelity Hardware Description Parsing** — A high-performance, incremental VHDL parser built on the Oak framework. Optimized for industrial-grade FPGA/ASIC design tools, formal verification, and real-time hardware development environments.
 
-## 🎯 Overview
+## 🎯 Project Vision
 
-Oak VHDL is a robust parser for VHDL, designed to handle complete VHDL syntax including modern features. Built on the solid foundation of oak-core, it provides both high-level convenience and detailed AST generation for hardware description and digital circuit design.
+VHDL is a foundational language for hardware description, but its verbose syntax and complex scoping rules make it challenging for traditional parsers. `oak-vhdl` aims to provide a robust, modern, Rust-powered infrastructure for parsing VHDL that is both accurate and incredibly fast. By utilizing Oak's incremental parsing architecture, we enable the creation of highly responsive IDEs, linting tools, and synthesis front-ends that can handle massive hardware designs in real-time. Our goal is to empower hardware engineers with the same level of sophisticated tooling available in the software world.
 
-## ✨ Features
+## ✨ Core Features
 
-- **Complete VHDL Syntax**: Supports all VHDL features including modern specifications
-- **Full AST Generation**: Generates comprehensive Abstract Syntax Trees
-- **Lexer Support**: Built-in tokenization with proper span information
-- **Error Recovery**: Graceful handling of syntax errors with detailed diagnostics
+- **⚡ Blazing Fast**: Leverages Rust's performance and memory safety to provide sub-millisecond parsing, essential for high-frequency developer tools and real-time analysis of large VHDL projects.
+- **🔄 Incremental by Nature**: Built-in support for partial updates—re-parse only modified sections of large VHDL files. Ideal for large-scale FPGA designs and real-time error checking.
+- **🌳 High-Fidelity AST**: Generates a comprehensive and precise Abstract Syntax Tree capturing the full depth of VHDL:
+    - **Entity & Architecture**: Detailed mapping of hardware interfaces and their internal logic implementations.
+    - **Processes & Concurrent Statements**: Precise tracking of sensitivity lists, signal assignments, and component instantiations.
+    - **Packages & Libraries**: Robust support for VHDL's modularity and reusable component ecosystem.
+    - **Types & Subtypes**: Detailed tracking of complex data types, records, and arrays.
+- **🛡️ Industrial-Grade Fault Tolerance**: Engineered to recover from syntax errors gracefully, providing precise diagnostics—crucial for maintaining a smooth developer experience when writing complex hardware logic.
+- **🧩 Deep Ecosystem Integration**: Seamlessly works with `oak-lsp` for full LSP support and `oak-mcp` for intelligent hardware design discovery and analysis.
 
-## 🚀 Quick Start
+## 🏗️ Architecture
 
-Basic example:
+The parser follows the **Green/Red Tree** architecture (inspired by Roslyn), which allows for:
+1. **Efficient Immutability**: Share nodes across different versions of the tree without copying.
+2. **Lossless Syntax Trees**: Retains all trivia (whitespace and comments), enabling faithful code formatting and refactoring of VHDL source files.
+3. **Type Safety**: Strongly-typed "Red" nodes provide a convenient and safe API for tree traversal and analysis.
 
-```rust
-use oak_core::{Parser, source::SourceText, ParseSession};
-use oak_vhdl::{VhdlParser, VhdlLanguage};
-
-fn main() -> Result<(), Box<dyn std::error::Error>> {
-    let language = VhdlLanguage::default();
-    let parser = VhdlParser::new(&language);
-    let mut session = ParseSession::<VhdlLanguage>::default();
-    let source = SourceText::new(r#"
-library IEEE;
-use IEEE.STD_LOGIC_1164.ALL;
-use IEEE.NUMERIC_STD.ALL;
-
-entity counter is
-    Port ( clk : in STD_LOGIC;
-           reset : in STD_LOGIC;
-           count : out STD_LOGIC_VECTOR (3 downto 0));
-end counter;
-
-architecture Behavioral of counter is
-    signal internal_count : unsigned(3 downto 0) := (others => '0');
-begin
-    process(clk, reset)
-    begin
-        if reset = '1' then
-            internal_count <= (others => '0');
-        elsif rising_edge(clk) then
-            internal_count <= internal_count + 1;
-        end if;
-    end process;
-    
-    count <= std_logic_vector(internal_count);
-end Behavioral;
-    "#);
-    
-    let result = parser.parse(&source, &[], &mut session);
-    println!("Parsed VHDL successfully.");
-    Ok(())
-}
-```
-
-## 📋 Parsing Examples
-
-### Entity Parsing
-```rust
-use oak_core::{Parser, source::SourceText, ParseSession};
-use oak_vhdl::{VhdlParser, VhdlLanguage};
-
-let language = VhdlLanguage::default();
-let parser = VhdlParser::new(&language);
-let mut session = ParseSession::<VhdlLanguage>::default();
-let source = SourceText::new(r#"
-library IEEE;
-use IEEE.STD_LOGIC_1164.ALL;
-
-entity full_adder is
-    Port ( a : in STD_LOGIC;
-           b : in STD_LOGIC;
-           cin : in STD_LOGIC;
-           sum : out STD_LOGIC;
-           cout : out STD_LOGIC);
-end full_adder;
-"#);
-
-let result = parser.parse(&source, &[], &mut session);
-println!("Entity parsed successfully.");
-```
-
-### Architecture Parsing
-```rust
-use oak_core::{Parser, source::SourceText, ParseSession};
-use oak_vhdl::{VhdlParser, VhdlLanguage};
-
-let language = VhdlLanguage::default();
-let parser = VhdlParser::new(&language);
-let mut session = ParseSession::<VhdlLanguage>::default();
-let source = SourceText::new(r#"
-architecture Structural of full_adder is
-begin
-    sum <= a xor b xor cin;
-    cout <= (a and b) or (cin and (a xor b));
-end Structural;
-"#);
-
-let result = parser.parse(&source, &[], &mut session);
-println!("Architecture parsed successfully.");
-```
-
-### Package Parsing
-```rust
-use oak_core::{Parser, source::SourceText, parser::session::ParseSession};
-use oak_vhdl::{VhdlParser, VhdlLanguage};
-
-let language = VhdlLanguage::default();
-let parser = VhdlParser::new(&language);
-let mut session = ParseSession::<VhdlLanguage>::default();
-let source = SourceText::new(r#"
-package my_types is
-    type state_type is (IDLE, READ, WRITE, DONE);
-    constant MAX_COUNT : integer := 255;
-end my_types;
-"#);
-
-let result = parser.parse(&source, &[], &mut session);
-println!("Package parsed successfully.");
-```
-
-## 🔧 Advanced Features
-
-### Token-Level Parsing
-```rust
-use oak_core::{Parser, source::SourceText, parser::session::ParseSession};
-use oak_vhdl::{VhdlParser, VhdlLanguage};
-
-let language = VhdlLanguage::default();
-let parser = VhdlParser::new(&language);
-let mut session = ParseSession::<VhdlLanguage>::default();
-let source = SourceText::new("entity Test is end Test;");
-let result = parser.parse(&source, &[], &mut session);
-// Token information is available in the parse result
-```
-
-### Error Handling
-```rust
-use oak_core::{Parser, source::SourceText, parser::session::ParseSession};
-use oak_vhdl::{VhdlParser, VhdlLanguage};
-
-let language = VhdlLanguage::default();
-let parser = VhdlParser::new(&language);
-let mut session = ParseSession::<VhdlLanguage>::default();
-let source = SourceText::new(r#"
-entity Broken is
-    Port ( clk : in STD_LOGIC -- Missing semicolon
-end Broken;
-"#);
-
-let result = parser.parse(&source, &[], &mut session);
-if let Err(e) = result.result {
-    println!("Parse error: {:?}", e);
-}
-```
-
-## 🏗️ AST Structure
-
-The parser generates a comprehensive AST with the following main structures:
-
-- **VhdlSource**: Root container for VHDL source files
-- **DesignUnit**: VHDL design units (entity, architecture, package, etc.)
-- **Entity**: Entity declarations with ports and generics
-- **Architecture**: Architecture implementations with statements
-- **Process**: Process statements with sensitivity lists
-- **SignalDeclaration**: Signal and variable declarations
-- **ConcurrentStatement**: Concurrent statements (assignments, instances, etc.)
-- **SequentialStatement**: Sequential statements within processes
-
-## 📊 Performance
-
-- **Streaming**: Parse large VHDL files without loading entirely into memory
-- **Incremental**: Re-parse only changed sections
-- **Memory Efficient**: Smart AST node allocation
-- **Fast Recovery**: Quick error recovery for better IDE integration
-
-## 🔗 Integration
-
-Oak VHDL integrates seamlessly with:
-
-- **Hardware Design**: Building hardware design tools
-- **Simulation**: Creating simulation and verification tools
-- **Synthesis**: Front-end for synthesis tools
-- **IDE Support**: Language server protocol compatibility for VHDL
-- **Educational Tools**: Building VHDL learning environments
-
-## 📚 Examples
-
-Check out the [examples](examples/) directory for comprehensive examples:
-
-- Complete VHDL design unit parsing
-- Hardware description analysis
-- Integration with development workflows
 
 ## 🤝 Contributing
 
-Contributions are welcome! 
-
-Please feel free to submit pull requests at the [project repository](https://github.com/ygg-lang/oaks/tree/dev/examples/oak-vhdl) or open [issues](https://github.com/ygg-lang/oaks/issues).
+We welcome contributions of all kinds! If you find a bug, have a feature request, or want to contribute code, please check our [issues](https://github.com/ygg-lang/oaks/issues) or submit a pull request.

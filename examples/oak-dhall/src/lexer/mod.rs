@@ -1,4 +1,7 @@
-use crate::{kind::DHallSyntaxKind, language::DHallLanguage};
+#![doc = include_str!("readme.md")]
+pub mod token_type;
+
+use crate::{language::DHallLanguage, lexer::token_type::DHallTokenType};
 use oak_core::{
     LexOutput, Lexer, LexerCache, LexerState, OakError,
     lexer::{CommentConfig, StringConfig, WhitespaceConfig},
@@ -33,7 +36,7 @@ impl<'config> DHallLexer<'config> {
             let safe_point = state.get_position();
             if self.skip_whitespace(state) {
                 continue;
-            }
+            };
 
             if self.skip_comment(state) {
                 continue;
@@ -59,22 +62,22 @@ impl<'config> DHallLexer<'config> {
                 continue;
             }
 
-            state.advance_if_dead_lock(safe_point);
+            state.advance_if_dead_lock(safe_point)
         }
 
         Ok(())
     }
 
     fn skip_whitespace<'a, S: Source + ?Sized>(&self, state: &mut LexerState<'a, S, DHallLanguage>) -> bool {
-        DHALL_WHITESPACE.scan(state, DHallSyntaxKind::Whitespace)
+        DHALL_WHITESPACE.scan(state, DHallTokenType::Whitespace)
     }
 
     fn skip_comment<'a, S: Source + ?Sized>(&self, state: &mut LexerState<'a, S, DHallLanguage>) -> bool {
-        DHALL_COMMENT.scan(state, DHallSyntaxKind::Comment, DHallSyntaxKind::Comment)
+        DHALL_COMMENT.scan(state, DHallTokenType::Comment, DHallTokenType::Comment)
     }
 
     fn lex_string_literal<'a, S: Source + ?Sized>(&self, state: &mut LexerState<'a, S, DHallLanguage>) -> bool {
-        DHALL_STRING.scan(state, DHallSyntaxKind::String)
+        DHALL_STRING.scan(state, DHallTokenType::String)
     }
 
     fn lex_number_literal<'a, S: Source + ?Sized>(&self, state: &mut LexerState<'a, S, DHallLanguage>) -> bool {
@@ -90,15 +93,10 @@ impl<'config> DHallLexer<'config> {
 
         state.advance(1);
         while let Some(c) = state.peek() {
-            if c.is_ascii_digit() {
-                state.advance(1);
-            }
-            else {
-                break;
-            }
+            if c.is_ascii_digit() { state.advance(1) } else { break }
         }
 
-        state.add_token(DHallSyntaxKind::Number, start, state.get_position());
+        state.add_token(DHallTokenType::Number, start, state.get_position());
         true
     }
 
@@ -109,48 +107,43 @@ impl<'config> DHallLexer<'config> {
             None => return false,
         };
 
-        if !first.is_alphabetic() && first != '_' {
+        if !first.is_alphabetic() && first != '_' && first != 'λ' {
             return false;
         }
 
         state.advance(1);
         while let Some(c) = state.peek() {
-            if c.is_alphanumeric() || c == '_' || c == '-' || c == '/' {
-                state.advance(1);
-            }
-            else {
-                break;
-            }
+            if c.is_alphanumeric() || c == '_' || c == '-' || c == '/' { state.advance(1) } else { break }
         }
 
         let end = state.get_position();
         let text = state.get_text_in((start..end).into());
 
         let kind = match text.as_ref() {
-            "if" => DHallSyntaxKind::If,
-            "then" => DHallSyntaxKind::Then,
-            "else" => DHallSyntaxKind::Else,
-            "let" => DHallSyntaxKind::Let,
-            "in" => DHallSyntaxKind::In,
-            "using" => DHallSyntaxKind::Using,
-            "as" => DHallSyntaxKind::As,
-            "merge" => DHallSyntaxKind::Merge,
-            "Some" => DHallSyntaxKind::Some,
-            "None" => DHallSyntaxKind::None,
-            "with" => DHallSyntaxKind::With,
-            "forall" => DHallSyntaxKind::Forall,
-            "assert" => DHallSyntaxKind::Assert,
-            "Bool" => DHallSyntaxKind::Bool,
-            "Natural" => DHallSyntaxKind::Natural,
-            "Integer" => DHallSyntaxKind::Integer,
-            "Double" => DHallSyntaxKind::Double,
-            "Text" => DHallSyntaxKind::Text,
-            "List" => DHallSyntaxKind::List,
-            "Optional" => DHallSyntaxKind::Optional,
-            "True" => DHallSyntaxKind::True,
-            "False" => DHallSyntaxKind::False,
-            "λ" => DHallSyntaxKind::Lambda,
-            _ => DHallSyntaxKind::Identifier,
+            "if" => DHallTokenType::If,
+            "then" => DHallTokenType::Then,
+            "else" => DHallTokenType::Else,
+            "let" => DHallTokenType::Let,
+            "in" => DHallTokenType::In,
+            "using" => DHallTokenType::Using,
+            "as" => DHallTokenType::As,
+            "merge" => DHallTokenType::Merge,
+            "Some" => DHallTokenType::Some,
+            "None" => DHallTokenType::None,
+            "with" => DHallTokenType::With,
+            "forall" => DHallTokenType::Forall,
+            "assert" => DHallTokenType::Assert,
+            "Bool" => DHallTokenType::Bool,
+            "Natural" => DHallTokenType::Natural,
+            "Integer" => DHallTokenType::Integer,
+            "Double" => DHallTokenType::Double,
+            "Text" => DHallTokenType::Text,
+            "List" => DHallTokenType::List,
+            "Optional" => DHallTokenType::Optional,
+            "True" => DHallTokenType::True,
+            "False" => DHallTokenType::False,
+            "λ" => DHallTokenType::Lambda,
+            _ => DHallTokenType::Identifier,
         };
 
         state.add_token(kind, start, end);
@@ -162,24 +155,24 @@ impl<'config> DHallLexer<'config> {
         let text = state.rest();
 
         let ops = [
-            ("->", DHallSyntaxKind::Arrow),
-            ("→", DHallSyntaxKind::Arrow),
-            ("=>", DHallSyntaxKind::FatArrow),
-            ("==", DHallSyntaxKind::EqualEqual),
-            ("≡", DHallSyntaxKind::EqualEqual),
-            ("!=", DHallSyntaxKind::NotEqual),
-            ("&&", DHallSyntaxKind::And),
-            ("∧", DHallSyntaxKind::And),
-            ("||", DHallSyntaxKind::Or),
-            ("∨", DHallSyntaxKind::Or),
-            ("++", DHallSyntaxKind::Append),
-            ("//", DHallSyntaxKind::Combine),
-            ("⫽", DHallSyntaxKind::Combine),
-            ("/\\", DHallSyntaxKind::CombineTypes),
-            ("⩓", DHallSyntaxKind::CombineTypes),
-            ("//\\", DHallSyntaxKind::Prefer),
-            ("∀", DHallSyntaxKind::Forall),
-            ("λ", DHallSyntaxKind::Lambda),
+            ("->", DHallTokenType::Arrow),
+            ("→", DHallTokenType::Arrow),
+            ("=>", DHallTokenType::FatArrow),
+            ("==", DHallTokenType::EqualEqual),
+            ("≡", DHallTokenType::EqualEqual),
+            ("!=", DHallTokenType::NotEqual),
+            ("&&", DHallTokenType::And),
+            ("∧", DHallTokenType::And),
+            ("||", DHallTokenType::Or),
+            ("∨", DHallTokenType::Or),
+            ("++", DHallTokenType::Append),
+            ("//", DHallTokenType::Combine),
+            ("⫽", DHallTokenType::Combine),
+            ("/\\", DHallTokenType::CombineTypes),
+            ("⩓", DHallTokenType::CombineTypes),
+            ("//\\", DHallTokenType::Prefer),
+            ("∀", DHallTokenType::Forall),
+            ("λ", DHallTokenType::Lambda),
         ];
 
         for (op, kind) in ops {
@@ -201,27 +194,27 @@ impl<'config> DHallLexer<'config> {
         };
 
         let kind = match c {
-            '(' => DHallSyntaxKind::LeftParen,
-            ')' => DHallSyntaxKind::RightParen,
-            '[' => DHallSyntaxKind::LeftBracket,
-            ']' => DHallSyntaxKind::RightBracket,
-            '{' => DHallSyntaxKind::LeftBrace,
-            '}' => DHallSyntaxKind::RightBrace,
-            '<' => DHallSyntaxKind::Less,
-            '>' => DHallSyntaxKind::Greater,
-            ',' => DHallSyntaxKind::Comma,
-            '.' => DHallSyntaxKind::Dot,
-            ':' => DHallSyntaxKind::Colon,
-            ';' => DHallSyntaxKind::Semicolon,
-            '=' => DHallSyntaxKind::Equal,
-            '@' => DHallSyntaxKind::At,
-            '#' => DHallSyntaxKind::Hash,
-            '?' => DHallSyntaxKind::Question,
-            '+' => DHallSyntaxKind::Plus,
-            '*' => DHallSyntaxKind::Star,
-            '/' => DHallSyntaxKind::Slash,
-            '|' => DHallSyntaxKind::Pipe,
-            '\\' => DHallSyntaxKind::Lambda,
+            '(' => DHallTokenType::LeftParen,
+            ')' => DHallTokenType::RightParen,
+            '[' => DHallTokenType::LeftBracket,
+            ']' => DHallTokenType::RightBracket,
+            '{' => DHallTokenType::LeftBrace,
+            '}' => DHallTokenType::RightBrace,
+            '<' => DHallTokenType::Less,
+            '>' => DHallTokenType::Greater,
+            ',' => DHallTokenType::Comma,
+            '.' => DHallTokenType::Dot,
+            ':' => DHallTokenType::Colon,
+            ';' => DHallTokenType::Semicolon,
+            '=' => DHallTokenType::Equal,
+            '@' => DHallTokenType::At,
+            '#' => DHallTokenType::Hash,
+            '?' => DHallTokenType::Question,
+            '+' => DHallTokenType::Plus,
+            '*' => DHallTokenType::Star,
+            '/' => DHallTokenType::Slash,
+            '|' => DHallTokenType::Pipe,
+            '\\' => DHallTokenType::Lambda,
             _ => return false,
         };
 

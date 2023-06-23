@@ -10,7 +10,7 @@ async fn main() -> tokio::io::Result<()> {
     let vfs = MemoryVfs::new();
 
     // Example: Add a virtual file
-    vfs.write_file("example.rs", "fn main() { println!(\"Hello, MCP!\"); }".to_string());
+    vfs.write_file("example.rs", "fn main() { println!(\"Hello, MCP!\") }".to_string());
 
     let service = RustLanguageService::new(vfs);
 
@@ -18,5 +18,7 @@ async fn main() -> tokio::io::Result<()> {
     let server = oak_mcp::McpServer::new(service);
 
     println!("Starting Rust MCP server on Stdio...");
-    server.run().await
+    let stdin = tokio::io::stdin();
+    let stdout = tokio::io::stdout();
+    server.run(tokio::io::BufReader::new(stdin), stdout).await.map_err(|e| tokio::io::Error::new(tokio::io::ErrorKind::Other, e))
 }

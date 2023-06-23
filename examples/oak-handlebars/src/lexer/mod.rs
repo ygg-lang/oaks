@@ -1,4 +1,9 @@
-use crate::{kind::HandlebarsSyntaxKind, language::HandlebarsLanguage};
+#![doc = include_str!("readme.md")]
+use crate::language::HandlebarsLanguage;
+pub mod token_type;
+pub use token_type::HandlebarsTokenType;
+
+use crate::lexer::token_type::HandlebarsTokenType as T;
 use oak_core::{
     Lexer, LexerCache, LexerState, OakError, Range,
     lexer::{LexOutput, StringConfig, WhitespaceConfig},
@@ -23,7 +28,7 @@ impl<'config> Lexer<HandlebarsLanguage> for HandlebarsLexer<'config> {
         let mut state: State<'_, S> = LexerState::new(source);
         let result = self.run(&mut state);
         if result.is_ok() {
-            state.add_eof();
+            state.add_eof()
         }
         state.finish_with_cache(result, cache)
     }
@@ -74,14 +79,14 @@ impl<'config> HandlebarsLexer<'config> {
                 continue;
             }
 
-            state.advance_if_dead_lock(safe_point);
+            state.advance_if_dead_lock(safe_point)
         }
 
         Ok(())
     }
 
     fn skip_whitespace<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
-        HB_WHITESPACE.scan(state, HandlebarsSyntaxKind::Whitespace)
+        HB_WHITESPACE.scan(state, HandlebarsTokenType::Whitespace)
     }
 
     fn skip_newline<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
@@ -89,10 +94,10 @@ impl<'config> HandlebarsLexer<'config> {
             let start = state.get_position();
             state.advance(1);
             if state.current() == Some('\n') && state.peek() == Some('\r') {
-                state.advance(1);
+                state.advance(1)
             }
             let end = state.get_position();
-            state.add_token(HandlebarsSyntaxKind::Newline, start, end);
+            state.add_token(HandlebarsTokenType::Newline, start, end);
             true
         }
         else {
@@ -101,96 +106,62 @@ impl<'config> HandlebarsLexer<'config> {
     }
 
     fn lex_comment<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
-        let start = state.get_position();
-        if state.consume_if_starts_with("{{!--") {
-            // Find the end of the comment
-            while state.not_at_end() {
-                if state.starts_with("--}}") {
-                    state.advance(4); // Skip "--}}"
-                    break;
+        if state.current() == Some('{') && state.peek() == Some('{') {
+            if state.peek_next_n(2) == Some('!') && state.peek_next_n(3) == Some('-') && state.peek_next_n(4) == Some('-') {
+                let start = state.get_position();
+                state.advance(5);
+                while state.not_at_end() {
+                    if state.current() == Some('-') && state.peek() == Some('-') && state.peek_next_n(2) == Some('}') && state.peek_next_n(3) == Some('}') {
+                        state.advance(4);
+                        let end = state.get_position();
+                        state.add_token(HandlebarsTokenType::Comment, start, end);
+                        return true;
+                    }
+                    state.advance(1);
                 }
-                state.advance(1);
+                return true;
             }
-
-            let end = state.get_position();
-            state.add_token(HandlebarsSyntaxKind::Comment, start, end);
-            true
-        }
-        else if state.consume_if_starts_with("{{!") {
-            // Find the end of the comment
-            while state.not_at_end() {
-                if state.starts_with("}}") {
-                    state.advance(2); // Skip "}}"
-                    break;
+            else if state.peek_next_n(2) == Some('!') {
+                let start = state.get_position();
+                state.advance(3);
+                while state.not_at_end() {
+                    if state.current() == Some('}') && state.peek() == Some('}') {
+                        state.advance(2);
+                        let end = state.get_position();
+                        state.add_token(HandlebarsTokenType::Comment, start, end);
+                        return true;
+                    }
+                    state.advance(1);
                 }
-                state.advance(1);
+                return true;
             }
-
-            let end = state.get_position();
-            state.add_token(HandlebarsSyntaxKind::Comment, start, end);
-            true
         }
-        else {
-            false
-        }
+        false
     }
 
     fn lex_handlebars_expression<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
-        let start = state.get_position();
-
-        if state.consume_if_starts_with("{{{{/") {
-            let end = state.get_position();
-            state.add_token(HandlebarsSyntaxKind::OpenEndRawBlock, start, end);
+        if state.current() == Some('{') && state.peek() == Some('{') {
+            let start = state.get_position();
+            if state.peek_next_n(2) == Some('{') {
+                state.advance(3);
+                state.add_token(HandlebarsTokenType::OpenUnescaped, start, state.get_position());
+            }
+            else {
+                state.advance(2);
+                state.add_token(HandlebarsTokenType::Open, start, state.get_position());
+            }
             true
         }
-        else if state.consume_if_starts_with("{{{{") {
-            let end = state.get_position();
-            state.add_token(HandlebarsSyntaxKind::OpenRawBlock, start, end);
-            true
-        }
-        else if state.consume_if_starts_with("}}}}") {
-            let end = state.get_position();
-            state.add_token(HandlebarsSyntaxKind::CloseRawBlock, start, end);
-            true
-        }
-        else if state.consume_if_starts_with("{{{") {
-            let end = state.get_position();
-            state.add_token(HandlebarsSyntaxKind::OpenUnescaped, start, end);
-            true
-        }
-        else if state.consume_if_starts_with("{{#") {
-            let end = state.get_position();
-            state.add_token(HandlebarsSyntaxKind::OpenBlock, start, end);
-            true
-        }
-        else if state.consume_if_starts_with("{{^") {
-            let end = state.get_position();
-            state.add_token(HandlebarsSyntaxKind::OpenInverseBlock, start, end);
-            true
-        }
-        else if state.consume_if_starts_with("{{/") {
-            let end = state.get_position();
-            state.add_token(HandlebarsSyntaxKind::CloseBlock, start, end);
-            true
-        }
-        else if state.consume_if_starts_with("{{>") {
-            let end = state.get_position();
-            state.add_token(HandlebarsSyntaxKind::OpenPartial, start, end);
-            true
-        }
-        else if state.consume_if_starts_with("{{") {
-            let end = state.get_position();
-            state.add_token(HandlebarsSyntaxKind::Open, start, end);
-            true
-        }
-        else if state.consume_if_starts_with("}}}") {
-            let end = state.get_position();
-            state.add_token(HandlebarsSyntaxKind::CloseUnescaped, start, end);
-            true
-        }
-        else if state.consume_if_starts_with("}}") {
-            let end = state.get_position();
-            state.add_token(HandlebarsSyntaxKind::Close, start, end);
+        else if state.current() == Some('}') && state.peek() == Some('}') {
+            let start = state.get_position();
+            if state.peek_next_n(2) == Some('}') {
+                state.advance(3);
+                state.add_token(HandlebarsTokenType::CloseUnescaped, start, state.get_position());
+            }
+            else {
+                state.advance(2);
+                state.add_token(HandlebarsTokenType::Close, start, state.get_position());
+            }
             true
         }
         else {
@@ -209,7 +180,7 @@ impl<'config> HandlebarsLexer<'config> {
             return false;
         };
 
-        config.scan(state, HandlebarsSyntaxKind::StringLiteral)
+        config.scan(state, HandlebarsTokenType::StringLiteral)
     }
 
     fn lex_number_literal<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
@@ -217,15 +188,10 @@ impl<'config> HandlebarsLexer<'config> {
             if c.is_ascii_digit() {
                 let start = state.get_position();
                 while let Some(c) = state.current() {
-                    if c.is_ascii_digit() || c == '.' {
-                        state.advance(1);
-                    }
-                    else {
-                        break;
-                    }
+                    if c.is_ascii_digit() || c == '.' { state.advance(1) } else { break }
                 }
                 let end = state.get_position();
-                state.add_token(HandlebarsSyntaxKind::NumberLiteral, start, end);
+                state.add_token(HandlebarsTokenType::NumberLiteral, start, end);
                 true
             }
             else {
@@ -242,19 +208,14 @@ impl<'config> HandlebarsLexer<'config> {
             if c.is_alphabetic() || c == '_' || c == '@' {
                 let start = state.get_position();
                 while let Some(c) = state.current() {
-                    if c.is_alphanumeric() || c == '_' || c == '-' || c == '.' {
-                        state.advance(1);
-                    }
-                    else {
-                        break;
-                    }
+                    if c.is_alphanumeric() || c == '_' || c == '-' || c == '.' { state.advance(1) } else { break }
                 }
                 let end = state.get_position();
                 let text = state.get_text_in(Range { start, end });
                 let kind = match text.as_ref() {
-                    "else" => HandlebarsSyntaxKind::Else,
-                    "true" | "false" => HandlebarsSyntaxKind::BooleanLiteral,
-                    _ => HandlebarsSyntaxKind::Identifier,
+                    "else" => HandlebarsTokenType::Else,
+                    "true" | "false" => HandlebarsTokenType::BooleanLiteral,
+                    _ => HandlebarsTokenType::Identifier,
                 };
                 state.add_token(kind, start, end);
                 true
@@ -272,17 +233,17 @@ impl<'config> HandlebarsLexer<'config> {
         if let Some(c) = state.current() {
             let start = state.get_position();
             let kind = match c {
-                '(' => HandlebarsSyntaxKind::LeftParen,
-                ')' => HandlebarsSyntaxKind::RightParen,
-                '[' => HandlebarsSyntaxKind::LeftBracket,
-                ']' => HandlebarsSyntaxKind::RightBracket,
-                '=' => HandlebarsSyntaxKind::Equal,
-                '|' => HandlebarsSyntaxKind::Pipe,
-                '#' => HandlebarsSyntaxKind::Hash,
-                '.' => HandlebarsSyntaxKind::Dot,
-                '/' => HandlebarsSyntaxKind::Slash,
-                '@' => HandlebarsSyntaxKind::At,
-                '^' => HandlebarsSyntaxKind::Caret,
+                '(' => HandlebarsTokenType::LeftParen,
+                ')' => HandlebarsTokenType::RightParen,
+                '[' => HandlebarsTokenType::LeftBracket,
+                ']' => HandlebarsTokenType::RightBracket,
+                '=' => HandlebarsTokenType::Equal,
+                '|' => HandlebarsTokenType::Pipe,
+                '#' => HandlebarsTokenType::Hash,
+                '.' => HandlebarsTokenType::Dot,
+                '/' => HandlebarsTokenType::Slash,
+                '@' => HandlebarsTokenType::At,
+                '^' => HandlebarsTokenType::Caret,
                 _ => return false,
             };
             state.advance(1);
@@ -304,12 +265,12 @@ impl<'config> HandlebarsLexer<'config> {
                 break;
             }
             state.advance(1);
-            count += 1;
+            count += 1
         }
 
         if count > 0 {
             let end = state.get_position();
-            state.add_token(HandlebarsSyntaxKind::Content, start, end);
+            state.add_token(HandlebarsTokenType::Content, start, end);
             true
         }
         else {

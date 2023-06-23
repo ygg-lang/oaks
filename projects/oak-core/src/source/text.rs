@@ -81,13 +81,13 @@ impl SourceText {
             let start_new = (span.start as isize + delta) as usize;
             let end_new = start_new + text.len();
             reparse_to = reparse_to.max(end_new);
-            delta += text.len() as isize - (span.end - span.start) as isize;
+            delta += text.len() as isize - (span.end - span.start) as isize
         }
 
         let mut raw = self.raw.to_string();
         for &i in order.iter().rev() {
             let TextEdit { span, text } = &edits[i];
-            raw.replace_range(span.start..span.end, text);
+            raw.replace_range(span.start..span.end, text)
         }
         self.raw = Arc::from(raw);
 
@@ -116,7 +116,7 @@ impl SourceText {
     /// # use oak_core::source::TextEdit;
     /// # use core::range::Range;
     /// let mut source = SourceText::new("let x = 5;");
-    /// let edits = vec![TextEdit { span: Range { start: 4, end: 5 }, text: "y".to_string() }];
+    /// let edits = vec![TextEdit { span: Range { start: 4, end: 5 }, text: "y".to_string().into() }];
     /// let min_offset = source.apply_edits(&edits);
     /// assert_eq!(min_offset, 4);
     /// ```

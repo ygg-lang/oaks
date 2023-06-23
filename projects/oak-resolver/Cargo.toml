@@ -2,10 +2,11 @@
 name = "oak-resolver"
 version.workspace = true
 authors.workspace = true
+description = "Module resolution and global symbol management for the Oaks framework."
 edition.workspace = true
 license.workspace = true
-repository.workspace = true
-description = "Module resolution and global symbol management for the Oaks framework."
+readme = "readme.md"
+repository = "https://github.com/ygg-lang/oaks/tree/master/projects/oak-resolver"
 
 [dependencies]
 oak-core = { workspace = true }

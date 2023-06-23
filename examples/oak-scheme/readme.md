@@ -1,271 +1,36 @@
-# Oak Scheme Parser
+# 🚀 oak-scheme
 
 [![Crates.io](https://img.shields.io/crates/v/oak-scheme.svg)](https://crates.io/crates/oak-scheme)
 [![Documentation](https://docs.rs/oak-scheme/badge.svg)](https://docs.rs/oak-scheme)
 
+**The Elegance of Lisp with the Power of Rust** — A high-performance, incremental Scheme parser built on the Oak framework. Optimized for various R*RS standards, complex macro systems, and responsive developer tools.
 
-A comprehensive Scheme parser supporting modern Scheme syntax, built on oak-core for accurate parsing and AST generation.
+## 🎯 Project Vision
 
-## 🎯 Overview
+Scheme is celebrated for its minimalistic design and powerful macro system. `oak-scheme` aims to provide a robust, modern, Rust-powered infrastructure for parsing Scheme that is both accurate and incredibly fast. By utilizing Oak's incremental parsing architecture, we enable the creation of highly responsive IDEs, static analyzers, and refactoring tools that can handle complex Scheme projects in real-time. Whether you are building custom linters, automated code transformation tools, or sophisticated IDE extensions, `oak-scheme` provides the high-fidelity AST and efficiency needed to keep pace with the Scheme ecosystem.
 
-Oak-scheme is a robust Scheme parser designed to handle the complete Scheme programming language syntax including modern Scheme features. Built on the solid foundation of oak-core, it provides accurate parsing of Scheme source code with detailed AST generation and comprehensive language support.
+## ✨ Core Features
 
-## ✨ Features
+- **⚡ Blazing Fast**: Leverages Rust's performance and memory safety to provide sub-millisecond parsing, essential for high-frequency developer tools and real-time analysis in large Scheme projects.
+- **🔄 Incremental by Nature**: Built-in support for partial updates—re-parse only what has changed. Ideal for interactive development environments where tool responsiveness is critical.
+- **🌳 High-Fidelity AST**: Generates a comprehensive and precise syntax tree capturing the full depth of Scheme:
+    - **Standards Support**: Robust parsing of R5RS, R6RS, and R7RS syntax patterns.
+    - **S-Expressions**: Detailed mapping of atoms, pairs, and lists.
+    - **Macro Systems**: Precise handling of `syntax-rules` and other macro-related constructs.
+    - **Indentation & Formatting**: Precise capture of indentation and whitespace for faithful code refactoring.
+- **🛡️ Industrial-Grade Fault Tolerance**: Engineered to recover from syntax errors gracefully, providing precise diagnostics—crucial for maintaining a smooth developer experience during active coding.
+- **🧩 Deep Ecosystem Integration**: Seamlessly works with `oak-lsp` for full LSP support and `oak-mcp` for intelligent code discovery and analysis.
 
-- **Complete Scheme Syntax**: Full support for Scheme programming language features
-- **S-Expression Parsing**: Accurate parsing of symbolic expressions and lists
-- **Streaming Support**: Parse large Scheme source files efficiently
-- **AST Generation**: Detailed Abstract Syntax Tree for code analysis
-- **Error Recovery**: Graceful handling of syntax errors with detailed diagnostics
-- **Macro Support**: Accurate parsing of Scheme macro definitions
+## 🏗️ Architecture
 
-## 🚀 Quick Start
+`oak-scheme` follows the modern Green/Red Tree architecture (inspired by Roslyn):
 
-Basic example:
+- **Green Tree**: Immutable, lossless, and syntax-only tree. It captures the full fidelity of the source code, including trivia (comments, whitespace).
+- **Red Tree**: A facade over the Green Tree that provides a convenient, type-safe API for tree traversal and analysis, including parent pointers and absolute offsets.
 
-```rust
-use oak_markdown::MarkdownParser;
+This design enables efficient incremental parsing and powerful refactoring capabilities.
 
-fn main() -> Result<(), Box<dyn std::error::Error>> {
-    let parser = MarkdownParser::new();
-    let markdown = r#"# Hello World
 
-This is a **bold** statement and this is *italic* text.
+## 🛠️ Contributing
 
-## Features
-
-- First item
-- Second item
-- Third item
-
-[Link to documentation](https://docs.rs/oak-markdown)"#;
-    
-    let document = parser.parse(markdown)?;
-    println!("Parsed {} blocks", document.blocks.len());
-    Ok(())
-}
-```
-
-## 📋 Parsing Examples
-
-### Document Structure
-```rust
-use oak_markdown::{MarkdownParser, ast::Block};
-
-let parser = MarkdownParser::new();
-let markdown = r#"# Main Title
-
-## Section 1
-
-This is the first paragraph with **bold** and *italic* text.
-
-### Subsection
-
-Here's a [link](https://example.com) and some `inline code`.
-
-## Section 2
-
-- List item 1
-- List item 2
-- List item 3"#;
-
-let document = parser.parse(markdown)?;
-for block in &document.blocks {
-    match block {
-        Block::Heading(heading) => {
-            println!("Heading level {}: {}", heading.level, heading.text);
-        }
-        Block::Paragraph(paragraph) => {
-            println!("Paragraph with {} inline elements", paragraph.inlines.len());
-        }
-        _ => {}
-    }
-}
-```
-
-### Table Parsing
-```rust
-use oak_markdown::{MarkdownParser, ast::Block};
-
-let parser = MarkdownParser::new();
-let markdown = r#"| Name | Age | City |
-|------|-----|------|
-| Alice | 25 | New York |
-| Bob | 30 | London |
-| Carol | 28 | Tokyo |
-
-## Code Block
-
-```rust
-fn main() {
-    println!("Hello, World!");
-}
-```"#;
-
-let document = parser.parse(markdown)?;
-for block in &document.blocks {
-    match block {
-        Block::Table(table) => {
-            println!("Table with {} rows and {} columns", 
-                table.rows.len(), table.headers.len());
-        }
-        Block::CodeBlock(code) => {
-            println!("Code block ({}): {}", code.language.as_deref().unwrap_or("text"), code.content);
-        }
-        _ => {}
-    }
-}
-```
-
-### Task Lists and Extensions
-```rust
-use oak_markdown::{MarkdownParser, ast::Block, extensions::Extensions};
-
-let mut parser = MarkdownParser::new();
-parser.enable_extensions(Extensions::all());
-
-let markdown = r#"## Todo List
-
-- [x] Complete the project
-- [ ] Write documentation
-- [ ] Add tests
-- [x] Review code
-
-### Strikethrough
-
-This is ~~deleted~~ text and this is ==highlighted== text.
-
-### Autolinks
-
-Visit https://github.com for more information."#;
-
-let document = parser.parse(markdown)?;
-for block in &document.blocks {
-    match block {
-        Block::List(list) => {
-            println!("List with {} items:", list.items.len());
-            for item in &list.items {
-                if let Some(checked) = item.checked {
-                    println!("  - [{}] {}", 
-                        if checked { "x" } else { " " }, 
-                        item.text);
-                }
-            }
-        }
-        _ => {}
-    }
-}
-```
-
-## 🔧 Advanced Features
-
-### Custom Extensions
-```rust
-use oak_markdown::{MarkdownParser, extensions::Extension};
-
-struct CustomEmojiExtension;
-
-impl Extension for CustomEmojiExtension {
-    fn name(&self) -> &str { "custom_emoji" }
-    
-    fn process_inline(&self, text: &str) -> Option<Vec<ast::Inline>> {
-        // Convert :smile: to emoji
-        if text.contains(":smile:") {
-            Some(vec![ast::Inline::Text("😊".to_string())])
-        } else {
-            None
-        }
-    }
-}
-
-let mut parser = MarkdownParser::new();
-parser.add_extension(Box::new(CustomEmojiExtension));
-
-let markdown = "Hello :smile: World!";
-let document = parser.parse(markdown)?;
-```
-
-### AST Manipulation
-```rust
-use oak_markdown::{MarkdownParser, ast::{Block, Document}};
-
-let parser = MarkdownParser::new();
-let markdown = "# Original Title\n\nOriginal content.";
-let mut document = parser.parse(markdown)?;
-
-// Add a new heading
-document.blocks.push(Block::Heading(ast::Heading {
-    level: 2,
-    text: "Added Section".to_string(),
-    inlines: vec![ast::Inline::Text("Added Section".to_string())]
-}));
-
-// Serialize back to markdown
-let new_markdown = document.to_markdown();
-println!("Modified markdown:\n{}", new_markdown);
-```
-
-### HTML Generation
-```rust
-use oak_markdown::{MarkdownParser, html::HtmlRenderer};
-
-let parser = MarkdownParser::new();
-let markdown = r#"# Document Title
-
-This is a paragraph with **bold** text.
-
-- List item 1
-- List item 2
-
-[Link](https://example.com)"#;
-
-let document = parser.parse(markdown)?;
-let renderer = HtmlRenderer::new();
-let html = renderer.render(&document)?;
-
-println!("Generated HTML:\n{}", html);
-```
-
-## 🏗️ AST Structure
-
-The parser generates a comprehensive AST with the following main structures:
-
-- **Document**: Root container with metadata and blocks
-- **Blocks**: Headings, paragraphs, lists, code blocks, tables, blockquotes
-- **Inlines**: Text, emphasis, strong, code, links, images
-- **Extensions**: Tables, task lists, strikethrough, autolinks
-
-## 📊 Performance
-
-- **Streaming**: Parse large Markdown documents efficiently
-- **Incremental**: Re-parse only changed sections
-- **Fast Recovery**: Quick error recovery for better IDE integration
-- **Memory Efficient**: Minimal memory footprint for large documents
-
-## 🔗 Integration
-
-Oak of markdown integrates seamlessly with:
-
-- **Static Site Generators**: Convert Markdown to HTML for websites
-- **Documentation Tools**: Parse documentation in Markdown format
-- **Content Management**: Handle user-generated Markdown content
-- **IDE Support**: Language server protocol compatibility
-- **Blog Platforms**: Process blog posts and articles
-
-## 📚 Examples
-
-Check out the [examples](examples/) directory for comprehensive examples:
-
-- Basic Markdown parsing and HTML generation
-- Custom extensions and plugins
-- Document manipulation and transformation
-- Performance benchmarks
-- Integration with web frameworks
-
-## 🤝 Contributing
-
-Contributions are welcome! Please feel free to submit issues or pull requests.
-
----
-
-**Pex Markdown Parser** - Comprehensive Markdown parsing for Rust applications 🚀
+Contributions are welcome! Please feel free to submit a Pull Request. For major changes, please open an issue first to discuss what you would like to change.

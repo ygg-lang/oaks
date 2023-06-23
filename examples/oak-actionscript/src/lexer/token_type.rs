@@ -1,33 +1,22 @@
-use oak_core::{Token, TokenType, UniversalTokenRole};
+use oak_core::{Source, Token, TokenType, UniversalElementRole, UniversalTokenRole};
+#[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
 
-/// ActionScript 语言的标记
 pub type ActionScriptToken = Token<ActionScriptTokenType>;
 
-/// Represents the different types of tokens in the ActionScript language.
-#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash, Serialize, Deserialize)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[repr(u8)]
 pub enum ActionScriptTokenType {
-    /// Whitespace characters (spaces, tabs)
     Whitespace,
-    /// Newline characters
     Newline,
-    /// Comments (both single-line and multi-line)
     Comment,
-
-    /// Identifiers (variable names, function names, etc.)
     Identifier,
-    /// String literals (e.g., "hello")
     StringLiteral,
-    /// Character literals (e.g., 'a')
     CharLiteral,
-    /// Number literals (integer and floating-point)
     NumberLiteral,
-    /// Boolean literals (true, false)
     BooleanLiteral,
-    /// Null literal
     NullLiteral,
-
-    // Keywords
     As,
     Break,
     Case,
@@ -73,8 +62,6 @@ pub enum ActionScriptTokenType {
     Void,
     While,
     With,
-
-    // AS3 specific keywords
     Each,
     Get,
     Set,
@@ -83,12 +70,9 @@ pub enum ActionScriptTokenType {
     Dynamic,
     Final,
     Override,
-
-    // Built-in types
     Array,
     Boolean,
     Date,
-    FunctionType,
     Number,
     ObjectType,
     RegExp,
@@ -98,8 +82,6 @@ pub enum ActionScriptTokenType {
     VoidType,
     Xml,
     XmlList,
-
-    // Operators
     Plus,
     Minus,
     Star,
@@ -141,8 +123,6 @@ pub enum ActionScriptTokenType {
     Colon,
     Dot,
     Arrow,
-
-    // Punctuation
     LeftParen,
     RightParen,
     LeftBrace,
@@ -151,8 +131,6 @@ pub enum ActionScriptTokenType {
     RightBracket,
     Semicolon,
     Comma,
-
-    // Symbols
     At,
     Hash,
     Dollar,
@@ -161,137 +139,180 @@ pub enum ActionScriptTokenType {
     Quote,
     DoubleQuote,
     Backtick,
-
-    /// End of file marker
     Eof,
+    Program,
+    Block,
+    Variable,
+    FunctionCall,
+    MethodCall,
+    PropertyAccess,
+    ArrayAccess,
+    ParameterList,
+    UseItem,
+    ModuleItem,
+    StructItem,
+    EnumItem,
+    FunctionType,
+    Root,
+    Statement,
+    Expression,
+    Assignment,
+    ConditionalExpression,
+    BinaryExpression,
+    UnaryExpression,
+    IfStatement,
+    ForStatement,
+    WhileStatement,
+    DoWhileStatement,
+    SwitchStatement,
+    TryStatement,
+    ThrowStatement,
+    ReturnStatement,
+    BreakStatement,
+    ContinueStatement,
+    Error,
+    LiteralExpression,
+    IdentifierExpression,
+    ParenthesizedExpression,
+    SourceFile,
+    BlockExpression,
+    LetStatement,
+    IfExpression,
+    WhileExpression,
+    LoopExpression,
+    ForExpression,
+    CallExpression,
+    IndexExpression,
+    FieldExpression,
 }
 
 impl TokenType for ActionScriptTokenType {
     type Role = UniversalTokenRole;
-    const END_OF_STREAM: Self = ActionScriptTokenType::Eof;
+    const END_OF_STREAM: Self = Self::Eof;
 
     fn is_ignored(&self) -> bool {
         matches!(self, Self::Whitespace | Self::Newline | Self::Comment)
     }
 
-    fn is_comment(&self) -> bool {
-        matches!(self, Self::Comment)
-    }
-
-    fn is_whitespace(&self) -> bool {
-        matches!(self, Self::Whitespace | Self::Newline)
-    }
-
     fn role(&self) -> Self::Role {
         match self {
-            Self::Whitespace | Self::Newline => UniversalTokenRole::Whitespace,
-            Self::Comment => UniversalTokenRole::Comment,
+            t if t.is_keyword() => UniversalTokenRole::Keyword,
+            t if t.is_operator() => UniversalTokenRole::Operator,
+            t if t.is_punctuation() => UniversalTokenRole::Punctuation,
             Self::Identifier => UniversalTokenRole::Name,
-            Self::StringLiteral | Self::CharLiteral | Self::NumberLiteral | Self::BooleanLiteral | Self::NullLiteral => UniversalTokenRole::Literal,
-            Self::As
-            | Self::Break
-            | Self::Case
-            | Self::Catch
-            | Self::Class
-            | Self::Const
-            | Self::Continue
-            | Self::Default
-            | Self::Delete
-            | Self::Do
-            | Self::Else
-            | Self::Extends
-            | Self::False
-            | Self::Finally
-            | Self::For
-            | Self::Function
-            | Self::If
-            | Self::Implements
-            | Self::Import
-            | Self::In
-            | Self::Instanceof
-            | Self::Interface
-            | Self::Internal
-            | Self::Is
-            | Self::Native
-            | Self::New
-            | Self::Null
-            | Self::Package
-            | Self::Private
-            | Self::Protected
-            | Self::Public
-            | Self::Return
-            | Self::Static
-            | Self::Super
-            | Self::Switch
-            | Self::This
-            | Self::Throw
-            | Self::True
-            | Self::Try
-            | Self::Typeof
-            | Self::Use
-            | Self::Var
-            | Self::Void
-            | Self::While
-            | Self::With
-            | Self::Each
-            | Self::Get
-            | Self::Set
-            | Self::Namespace
-            | Self::Include
-            | Self::Dynamic
-            | Self::Final
-            | Self::Override => UniversalTokenRole::Keyword,
-            Self::Array | Self::Boolean | Self::Date | Self::FunctionType | Self::Number | Self::ObjectType | Self::RegExp | Self::StringType | Self::Uint | Self::Vector | Self::VoidType | Self::Xml | Self::XmlList => UniversalTokenRole::Keyword,
-            Self::Plus
-            | Self::Minus
-            | Self::Star
-            | Self::Slash
-            | Self::Percent
-            | Self::Equal
-            | Self::EqualEqual
-            | Self::EqualEqualEqual
-            | Self::NotEqual
-            | Self::NotEqualEqual
-            | Self::LessThan
-            | Self::LessEqual
-            | Self::GreaterThan
-            | Self::GreaterEqual
-            | Self::LogicalAnd
-            | Self::LogicalOr
-            | Self::LogicalNot
-            | Self::BitwiseAnd
-            | Self::BitwiseOr
-            | Self::BitwiseXor
-            | Self::BitwiseNot
-            | Self::LeftShift
-            | Self::RightShift
-            | Self::UnsignedRightShift
-            | Self::Increment
-            | Self::Decrement
-            | Self::PlusAssign
-            | Self::MinusAssign
-            | Self::StarAssign
-            | Self::SlashAssign
-            | Self::PercentAssign
-            | Self::LeftShiftAssign
-            | Self::RightShiftAssign
-            | Self::UnsignedRightShiftAssign
-            | Self::BitwiseAndAssign
-            | Self::BitwiseOrAssign
-            | Self::BitwiseXorAssign
-            | Self::Question
-            | Self::Colon
-            | Self::Dot
-            | Self::Arrow => UniversalTokenRole::Operator,
-            Self::LeftParen | Self::RightParen | Self::LeftBrace | Self::RightBrace | Self::LeftBracket | Self::RightBracket | Self::Semicolon | Self::Comma => UniversalTokenRole::Punctuation,
+            t if t.is_literal() => UniversalTokenRole::Literal,
+            Self::Comment => UniversalTokenRole::Comment,
+            Self::Eof => UniversalTokenRole::Eof,
+            Self::Error => UniversalTokenRole::Error,
             _ => UniversalTokenRole::None,
         }
     }
 }
 
 impl ActionScriptTokenType {
-    /// Returns true if the token is a literal.
     pub fn is_literal(&self) -> bool {
-        matches!(self, Self::StringLiteral | Self::CharLiteral | Self::NumberLiteral | Self::BooleanLiteral | Self::NullLiteral)
+        matches!(self, Self::StringLiteral | Self::CharLiteral | Self::NumberLiteral | Self::BooleanLiteral | Self::NullLiteral | Self::True | Self::False | Self::Null)
+    }
+
+    pub fn is_keyword(&self) -> bool {
+        matches!(
+            self,
+            Self::As
+                | Self::Break
+                | Self::Case
+                | Self::Catch
+                | Self::Class
+                | Self::Const
+                | Self::Continue
+                | Self::Default
+                | Self::Delete
+                | Self::Do
+                | Self::Else
+                | Self::Extends
+                | Self::Finally
+                | Self::For
+                | Self::Function
+                | Self::If
+                | Self::Implements
+                | Self::Import
+                | Self::In
+                | Self::Instanceof
+                | Self::Interface
+                | Self::Internal
+                | Self::Is
+                | Self::Native
+                | Self::New
+                | Self::Package
+                | Self::Private
+                | Self::Protected
+                | Self::Public
+                | Self::Return
+                | Self::Static
+                | Self::Super
+                | Self::Switch
+                | Self::This
+                | Self::Throw
+                | Self::Try
+                | Self::Typeof
+                | Self::Use
+                | Self::Var
+                | Self::Void
+                | Self::While
+                | Self::With
+                | Self::Each
+                | Self::Get
+                | Self::Set
+                | Self::Namespace
+                | Self::Include
+                | Self::Dynamic
+                | Self::Final
+                | Self::Override
+        )
+    }
+
+    pub fn is_operator(&self) -> bool {
+        matches!(
+            self,
+            Self::Plus
+                | Self::Minus
+                | Self::Star
+                | Self::Slash
+                | Self::Percent
+                | Self::Equal
+                | Self::EqualEqual
+                | Self::EqualEqualEqual
+                | Self::NotEqual
+                | Self::NotEqualEqual
+                | Self::LessThan
+                | Self::LessEqual
+                | Self::GreaterThan
+                | Self::GreaterEqual
+                | Self::LogicalAnd
+                | Self::LogicalOr
+                | Self::LogicalNot
+                | Self::BitwiseAnd
+                | Self::BitwiseOr
+                | Self::BitwiseXor
+                | Self::BitwiseNot
+                | Self::LeftShift
+                | Self::RightShift
+                | Self::UnsignedRightShift
+                | Self::PlusAssign
+                | Self::MinusAssign
+                | Self::StarAssign
+                | Self::SlashAssign
+                | Self::PercentAssign
+                | Self::LeftShiftAssign
+                | Self::RightShiftAssign
+                | Self::UnsignedRightShiftAssign
+                | Self::BitwiseAndAssign
+                | Self::BitwiseOrAssign
+                | Self::BitwiseXorAssign
+                | Self::Question
+        )
+    }
+
+    pub fn is_punctuation(&self) -> bool {
+        matches!(self, Self::LeftParen | Self::RightParen | Self::LeftBracket | Self::RightBracket | Self::LeftBrace | Self::RightBrace | Self::Dot | Self::Comma | Self::Colon | Self::Semicolon)
     }
 }

@@ -1,7 +1,10 @@
 #![doc = include_str!("readme.md")]
+#[cfg(feature = "serde")]
+use serde::{Deserialize, Serialize};
 
 /// V 根节点
 #[derive(Clone, Debug)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct VRoot {
     pub module_name: String,
     pub imports: Vec<String>,
@@ -10,6 +13,7 @@ pub struct VRoot {
 
 /// V 项目
 #[derive(Clone, Debug)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub enum VItem {
     Struct(VStruct),
     Function(VFunction),
@@ -19,6 +23,7 @@ pub enum VItem {
 
 /// V 结构体
 #[derive(Clone, Debug)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct VStruct {
     pub name: String,
     pub is_pub: bool,
@@ -27,6 +32,7 @@ pub struct VStruct {
 
 /// V 字段
 #[derive(Clone, Debug)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct VField {
     pub name: String,
     pub field_type: String,
@@ -36,6 +42,7 @@ pub struct VField {
 
 /// V 函数
 #[derive(Clone, Debug)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct VFunction {
     pub name: String,
     pub is_pub: bool,
@@ -47,6 +54,7 @@ pub struct VFunction {
 
 /// V 接收者 (Method)
 #[derive(Clone, Debug)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct VReceiver {
     pub name: String,
     pub receiver_type: String,
@@ -55,6 +63,7 @@ pub struct VReceiver {
 
 /// V 参数
 #[derive(Clone, Debug)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct VParam {
     pub name: String,
     pub param_type: String,
@@ -63,6 +72,7 @@ pub struct VParam {
 
 /// V 枚举
 #[derive(Clone, Debug)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct VEnum {
     pub name: String,
     pub is_pub: bool,
@@ -71,6 +81,7 @@ pub struct VEnum {
 
 /// V 常量
 #[derive(Clone, Debug)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct VConst {
     pub name: String,
     pub is_pub: bool,

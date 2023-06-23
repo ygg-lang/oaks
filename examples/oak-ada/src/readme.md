@@ -1,45 +1,69 @@
-# `oak-ada`
+# 🛠️ Ada Parser Developer Guide
 
-This crate provides a parser for the Ada language, built using the `oaks` parsing framework. It includes a lexer and language definition to facilitate parsing Ada code.
+This guide is designed to help you quickly get started with developing and integrating `oak-ada`.
 
-## Usage
+## 🚦 Quick Start
 
-To use the `oak-ada` parser, you typically need to interact with `AdaLanguage` and `AdaLexer`.
+### Basic Parsing Example
 
-### `AdaLanguage`
-
-The `AdaLanguage` struct defines the grammar and rules for Ada. It implements the `Language` trait from the `oaks` framework.
+The following is a standard workflow for parsing an Ada package specification:
 
 ```rust
-use oak_ada::AdaLanguage;
+use oak_ada::{AdaParser, SourceText, AdaLanguage};
 
-let language = AdaLanguage::default();
+fn main() {
+    // 1. Prepare source code
+    let code = r#"
+        package Hello_World is
+           procedure Say_Hello;
+        end Hello_World;
+    "#;
+    let source = SourceText::new(code);
+
+    // 2. Initialize parser
+    let config = AdaLanguage::new();
+    let parser = AdaParser::new(&config);
+
+    // 3. Execute parsing
+    let result = parser.parse(&source);
+
+    // 4. Handle results
+    if result.is_success() {
+        println!("Parsing successful! AST node count: {}", result.node_count());
+    } else {
+        eprintln!("Errors found during parsing.");
+    }
+}
 ```
 
-### `AdaLexer`
+## 🔍 Core API Usage
 
-The `AdaLexer` is responsible for tokenizing the input Ada code based on the `AdaLanguage` definition.
+### 1. Syntax Tree Traversal
+After a successful parse, you can use the built-in visitor pattern or manually traverse the Green/Red Tree to extract Ada constructs like package declarations, procedure signatures, or tasking statements.
 
+### 2. Incremental Parsing
+No need to re-parse the entire file when small changes occur:
 ```rust
-use oak_ada::{AdaLanguage, AdaLexer};
-use oak_core::{Lexer, source::SourceText, parser::session::ParseSession};
-
-// Initialize the language
-let language = Box::leak(Box::new(AdaLanguage::default()));
-
-// Create a lexer instance
-let lexer = AdaLexer::new(language);
-
-// Prepare the input source code
-let source_code = "procedure Hello is begin Put_Line(\"Hello, world!\"); end Hello;";
-let source = SourceText::new(source_code);
-let mut session = ParseSession::default();
-
-// Lex the input
-let lex_output = lexer.lex(&source, &[], &mut session);
-
-// You can now process the lex_output which contains the tokens
-println!("Lexed tokens: {:?}", lex_output.result);
+// Assuming you have an old parse result 'old_result' and new source text 'new_source'
+let new_result = parser.reparse(&new_source, &old_result);
 ```
 
-This example demonstrates how to initialize the `AdaLanguage` and `AdaLexer`, and then use the lexer to tokenize a simple Ada code snippet. The `lex_output` will contain a list of `AdaToken`s that represent the structure of the input code.
+### 3. Diagnostics
+`oak-ada` provides rich error contexts specifically tailored for Ada developers:
+```rust
+for diag in result.diagnostics() {
+    println!("[{}:{}] {}", diag.line, diag.column, diag.message);
+}
+```
+
+## 🏗️ Architecture Overview
+
+- **Lexer**: Tokenizes Ada source text into a stream of tokens, handling keywords (case-insensitive), operators, and numeric literals.
+- **Parser**: Syntax analyzer based on the Pratt parsing algorithm to handle Ada's structural declarations and expression precedence.
+- **AST**: A strongly-typed syntax abstraction layer designed for building high-performance Ada analysis tools and IDEs.
+
+## 🔗 Advanced Resources
+
+- **Full Examples**: Check the [examples/](examples/) folder in the project root.
+- **API Documentation**: Run `cargo doc --open` for detailed type definitions.
+- **Test Cases**: See [tests/](tests/) for handling of various Ada edge cases and language versions.

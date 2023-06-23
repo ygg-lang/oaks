@@ -1,19 +1,28 @@
-use crate::{ast::ValkyrieRoot, kind::ValkyrieSyntaxKind};
+#![doc = include_str!("readme.md")]
+use crate::{ast::ValkyrieRoot, lexer::token_type::ValkyrieSyntaxKind};
 use oak_core::{Language, LanguageCategory};
+#[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
 
-#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash, Serialize, Deserialize)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+/// Syntax modes for Valkyrie parser.
+pub enum SyntaxMode {
+    /// Programming mode: Standard .vk file
+    Programming,
+}
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 /// The Valkyrie programming language definition.
 pub struct ValkyrieLanguage {
-    /// Allow using `<xml/>` syntax in source code
-    pub allow_xml: bool,
-    /// Allow using `<$ template $>` syntax in source code
-    pub allow_template: bool,
+    /// Current syntax mode
+    pub syntax_mode: SyntaxMode,
 }
 
 impl Default for ValkyrieLanguage {
     fn default() -> Self {
-        Self { allow_xml: false, allow_template: false }
+        Self { syntax_mode: SyntaxMode::Programming }
     }
 }
 

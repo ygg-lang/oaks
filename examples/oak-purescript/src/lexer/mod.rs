@@ -1,4 +1,7 @@
-use crate::{kind::PurescriptSyntaxKind, language::PurescriptLanguage};
+#![doc = include_str!("readme.md")]
+pub mod token_type;
+
+use crate::{language::PurescriptLanguage, lexer::token_type::PurescriptTokenType};
 use oak_core::{Lexer, LexerCache, LexerState, OakError, lexer::LexOutput, source::Source};
 
 type State<'a, S> = LexerState<'a, S, PurescriptLanguage>;
@@ -20,6 +23,7 @@ impl<'config> Lexer<PurescriptLanguage> for PurescriptLexer<'config> {
 }
 
 impl<'config> PurescriptLexer<'config> {
+    /// 创建一个新的 PurescriptLexer
     pub fn new(config: &'config PurescriptLanguage) -> Self {
         Self { _config: config }
     }
@@ -67,10 +71,10 @@ impl<'config> PurescriptLexer<'config> {
             let start_pos = state.get_position();
             if let Some(ch) = state.peek() {
                 state.advance(ch.len_utf8());
-                state.add_token(PurescriptSyntaxKind::Error, start_pos, state.get_position());
+                state.add_token(PurescriptTokenType::Error, start_pos, state.get_position())
             }
 
-            state.advance_if_dead_lock(safe_point);
+            state.advance_if_dead_lock(safe_point)
         }
 
         Ok(())
@@ -81,16 +85,11 @@ impl<'config> PurescriptLexer<'config> {
         let start_pos = state.get_position();
 
         while let Some(ch) = state.peek() {
-            if ch == ' ' || ch == '\t' {
-                state.advance(ch.len_utf8());
-            }
-            else {
-                break;
-            }
+            if ch == ' ' || ch == '\t' { state.advance(ch.len_utf8()) } else { break }
         }
 
         if state.get_position() > start_pos {
-            state.add_token(PurescriptSyntaxKind::Whitespace, start_pos, state.get_position());
+            state.add_token(PurescriptTokenType::Whitespace, start_pos, state.get_position());
             true
         }
         else {
@@ -104,15 +103,15 @@ impl<'config> PurescriptLexer<'config> {
 
         if let Some('\n') = state.peek() {
             state.advance(1);
-            state.add_token(PurescriptSyntaxKind::Newline, start_pos, state.get_position());
+            state.add_token(PurescriptTokenType::Newline, start_pos, state.get_position());
             true
         }
         else if let Some('\r') = state.peek() {
             state.advance(1);
             if let Some('\n') = state.peek() {
-                state.advance(1);
+                state.advance(1)
             }
-            state.add_token(PurescriptSyntaxKind::Newline, start_pos, state.get_position());
+            state.add_token(PurescriptTokenType::Newline, start_pos, state.get_position());
             true
         }
         else {
@@ -133,9 +132,9 @@ impl<'config> PurescriptLexer<'config> {
                     if ch == '\n' || ch == '\r' {
                         break;
                     }
-                    state.advance(ch.len_utf8());
+                    state.advance(ch.len_utf8())
                 }
-                state.add_token(PurescriptSyntaxKind::Comment, start_pos, state.get_position());
+                state.add_token(PurescriptTokenType::Comment, start_pos, state.get_position());
                 true
             }
             else {
@@ -154,7 +153,7 @@ impl<'config> PurescriptLexer<'config> {
                         state.advance(1);
                         if let Some('-') = state.peek() {
                             depth += 1;
-                            state.advance(1);
+                            state.advance(1)
                         }
                     }
                     else if ch == '-' {
@@ -168,10 +167,10 @@ impl<'config> PurescriptLexer<'config> {
                         }
                     }
                     else {
-                        state.advance(ch.len_utf8());
+                        state.advance(ch.len_utf8())
                     }
                 }
-                state.add_token(PurescriptSyntaxKind::Comment, start_pos, state.get_position());
+                state.add_token(PurescriptTokenType::Comment, start_pos, state.get_position());
                 true
             }
             else {
@@ -184,7 +183,7 @@ impl<'config> PurescriptLexer<'config> {
         }
     }
 
-    /// 处理标识符或关键
+    /// 处理标识符或关键字
     fn lex_identifier_or_keyword<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start_pos = state.get_position();
 
@@ -205,32 +204,32 @@ impl<'config> PurescriptLexer<'config> {
                 let text = state.get_text_in((start_pos..state.get_position()).into());
 
                 let token_kind = match text.as_ref() {
-                    "ado" => PurescriptSyntaxKind::Ado,
-                    "case" => PurescriptSyntaxKind::Case,
-                    "class" => PurescriptSyntaxKind::Class,
-                    "data" => PurescriptSyntaxKind::Data,
-                    "derive" => PurescriptSyntaxKind::Derive,
-                    "do" => PurescriptSyntaxKind::Do,
-                    "else" => PurescriptSyntaxKind::Else,
-                    "false" => PurescriptSyntaxKind::False,
-                    "forall" => PurescriptSyntaxKind::Forall,
-                    "foreign" => PurescriptSyntaxKind::Foreign,
-                    "if" => PurescriptSyntaxKind::If,
-                    "import" => PurescriptSyntaxKind::Import,
-                    "in" => PurescriptSyntaxKind::In,
-                    "infix" => PurescriptSyntaxKind::Infix,
-                    "infixl" => PurescriptSyntaxKind::Infixl,
-                    "infixr" => PurescriptSyntaxKind::Infixr,
-                    "instance" => PurescriptSyntaxKind::Instance,
-                    "let" => PurescriptSyntaxKind::Let,
-                    "module" => PurescriptSyntaxKind::Module,
-                    "newtype" => PurescriptSyntaxKind::Newtype,
-                    "of" => PurescriptSyntaxKind::Of,
-                    "then" => PurescriptSyntaxKind::Then,
-                    "true" => PurescriptSyntaxKind::True,
-                    "type" => PurescriptSyntaxKind::Type,
-                    "where" => PurescriptSyntaxKind::Where,
-                    _ => PurescriptSyntaxKind::Identifier,
+                    "ado" => PurescriptTokenType::Ado,
+                    "case" => PurescriptTokenType::Case,
+                    "class" => PurescriptTokenType::Class,
+                    "data" => PurescriptTokenType::Data,
+                    "derive" => PurescriptTokenType::Derive,
+                    "do" => PurescriptTokenType::Do,
+                    "else" => PurescriptTokenType::Else,
+                    "false" => PurescriptTokenType::False,
+                    "forall" => PurescriptTokenType::Forall,
+                    "foreign" => PurescriptTokenType::Foreign,
+                    "if" => PurescriptTokenType::If,
+                    "import" => PurescriptTokenType::Import,
+                    "in" => PurescriptTokenType::In,
+                    "infix" => PurescriptTokenType::Infix,
+                    "infixl" => PurescriptTokenType::Infixl,
+                    "infixr" => PurescriptTokenType::Infixr,
+                    "instance" => PurescriptTokenType::Instance,
+                    "let" => PurescriptTokenType::Let,
+                    "module" => PurescriptTokenType::Module,
+                    "newtype" => PurescriptTokenType::Newtype,
+                    "of" => PurescriptTokenType::Of,
+                    "then" => PurescriptTokenType::Then,
+                    "true" => PurescriptTokenType::True,
+                    "type" => PurescriptTokenType::Type,
+                    "where" => PurescriptTokenType::Where,
+                    _ => PurescriptTokenType::Identifier,
                 };
                 state.add_token(token_kind, start_pos, state.get_position());
                 true
@@ -268,24 +267,14 @@ impl<'config> PurescriptLexer<'config> {
                     else {
                         // 处理普通数
                         while let Some(ch) = state.peek() {
-                            if ch.is_ascii_digit() {
-                                state.advance(1);
-                            }
-                            else {
-                                break;
-                            }
+                            if ch.is_ascii_digit() { state.advance(1) } else { break }
                         }
                     }
                 }
                 else {
                     // 处理十进制数
                     while let Some(ch) = state.peek() {
-                        if ch.is_ascii_digit() {
-                            state.advance(1);
-                        }
-                        else {
-                            break;
-                        }
+                        if ch.is_ascii_digit() { state.advance(1) } else { break }
                     }
                 }
 
@@ -293,12 +282,7 @@ impl<'config> PurescriptLexer<'config> {
                 if let Some('.') = state.peek() {
                     state.advance(1);
                     while let Some(ch) = state.peek() {
-                        if ch.is_ascii_digit() {
-                            state.advance(1);
-                        }
-                        else {
-                            break;
-                        }
+                        if ch.is_ascii_digit() { state.advance(1) } else { break }
                     }
                 }
 
@@ -306,19 +290,14 @@ impl<'config> PurescriptLexer<'config> {
                 if let Some('e') | Some('E') = state.peek() {
                     state.advance(1);
                     if let Some('+') | Some('-') = state.peek() {
-                        state.advance(1);
+                        state.advance(1)
                     }
                     while let Some(ch) = state.peek() {
-                        if ch.is_ascii_digit() {
-                            state.advance(1);
-                        }
-                        else {
-                            break;
-                        }
+                        if ch.is_ascii_digit() { state.advance(1) } else { break }
                     }
                 }
 
-                state.add_token(PurescriptSyntaxKind::NumberLiteral, start_pos, state.get_position());
+                state.add_token(PurescriptTokenType::NumberLiteral, start_pos, state.get_position());
                 true
             }
             else {
@@ -345,18 +324,18 @@ impl<'config> PurescriptLexer<'config> {
                 else if ch == '\\' {
                     state.advance(1);
                     if let Some(_) = state.peek() {
-                        state.advance(1);
+                        state.advance(1)
                     }
                 }
                 else if ch == '\n' || ch == '\r' {
                     break; // 字符串不能跨行
                 }
                 else {
-                    state.advance(ch.len_utf8());
+                    state.advance(ch.len_utf8())
                 }
             }
 
-            state.add_token(PurescriptSyntaxKind::StringLiteral, start_pos, state.get_position());
+            state.add_token(PurescriptTokenType::StringLiteral, start_pos, state.get_position());
             true
         }
         else {
@@ -375,17 +354,17 @@ impl<'config> PurescriptLexer<'config> {
                 if ch == '\\' {
                     state.advance(1);
                     if let Some(_) = state.peek() {
-                        state.advance(1);
+                        state.advance(1)
                     }
                 }
                 else if ch != '\'' {
-                    state.advance(ch.len_utf8());
+                    state.advance(ch.len_utf8())
                 }
             }
 
             if let Some('\'') = state.peek() {
                 state.advance(1);
-                state.add_token(PurescriptSyntaxKind::CharLiteral, start_pos, state.get_position());
+                state.add_token(PurescriptTokenType::CharLiteral, start_pos, state.get_position());
                 true
             }
             else {
@@ -406,54 +385,54 @@ impl<'config> PurescriptLexer<'config> {
             let token_kind = match ch {
                 '+' => {
                     state.advance(1);
-                    PurescriptSyntaxKind::Plus
+                    PurescriptTokenType::Plus
                 }
                 '-' => {
                     state.advance(1);
                     if let Some('>') = state.peek() {
                         state.advance(1);
-                        PurescriptSyntaxKind::Arrow
+                        PurescriptTokenType::Arrow
                     }
                     else {
-                        PurescriptSyntaxKind::Minus
+                        PurescriptTokenType::Minus
                     }
                 }
                 '*' => {
                     state.advance(1);
                     if let Some('*') = state.peek() {
                         state.advance(1);
-                        PurescriptSyntaxKind::Caret // 使用 Caret 代替 Power
+                        PurescriptTokenType::Caret // 使用 Caret 代替 Power
                     }
                     else {
-                        PurescriptSyntaxKind::Star
+                        PurescriptTokenType::Star
                     }
                 }
                 '/' => {
                     state.advance(1);
                     if let Some('=') = state.peek() {
                         state.advance(1);
-                        PurescriptSyntaxKind::NotEqual
+                        PurescriptTokenType::NotEqual
                     }
                     else {
-                        PurescriptSyntaxKind::Slash
+                        PurescriptTokenType::Slash
                     }
                 }
                 '%' => {
                     state.advance(1);
-                    PurescriptSyntaxKind::Percent
+                    PurescriptTokenType::Percent
                 }
                 '=' => {
                     state.advance(1);
                     match state.peek() {
                         Some('=') => {
                             state.advance(1);
-                            PurescriptSyntaxKind::Equal
+                            PurescriptTokenType::Equal
                         }
                         Some('>') => {
                             state.advance(1);
-                            PurescriptSyntaxKind::FatArrow
+                            PurescriptTokenType::FatArrow
                         }
-                        _ => PurescriptSyntaxKind::Equal,
+                        _ => PurescriptTokenType::Equal,
                     }
                 }
                 '<' => {
@@ -461,30 +440,30 @@ impl<'config> PurescriptLexer<'config> {
                     match state.peek() {
                         Some('=') => {
                             state.advance(1);
-                            PurescriptSyntaxKind::LessEqual
+                            PurescriptTokenType::LessEqual
                         }
                         Some('-') => {
                             state.advance(1);
-                            PurescriptSyntaxKind::Bind
+                            PurescriptTokenType::Bind
                         }
-                        _ => PurescriptSyntaxKind::Less,
+                        _ => PurescriptTokenType::Less,
                     }
                 }
                 '>' => {
                     state.advance(1);
                     if let Some('=') = state.peek() {
                         state.advance(1);
-                        PurescriptSyntaxKind::GreaterEqual
+                        PurescriptTokenType::GreaterEqual
                     }
                     else {
-                        PurescriptSyntaxKind::Greater
+                        PurescriptTokenType::Greater
                     }
                 }
                 '&' => {
                     state.advance(1);
                     if let Some('&') = state.peek() {
                         state.advance(1);
-                        PurescriptSyntaxKind::And
+                        PurescriptTokenType::And
                     }
                     else {
                         return false;
@@ -494,15 +473,15 @@ impl<'config> PurescriptLexer<'config> {
                     state.advance(1);
                     if let Some('|') = state.peek() {
                         state.advance(1);
-                        PurescriptSyntaxKind::Or
+                        PurescriptTokenType::Or
                     }
                     else {
-                        PurescriptSyntaxKind::Pipe
+                        PurescriptTokenType::Pipe
                     }
                 }
                 '\\' => {
                     state.advance(1);
-                    PurescriptSyntaxKind::Backslash
+                    PurescriptTokenType::Backslash
                 }
                 _ => return false,
             };
@@ -521,30 +500,31 @@ impl<'config> PurescriptLexer<'config> {
 
         if let Some(ch) = state.peek() {
             let token_kind = match ch {
-                '(' => PurescriptSyntaxKind::LeftParen,
-                ')' => PurescriptSyntaxKind::RightParen,
-                '[' => PurescriptSyntaxKind::LeftBracket,
-                ']' => PurescriptSyntaxKind::RightBracket,
-                '{' => PurescriptSyntaxKind::LeftBrace,
-                '}' => PurescriptSyntaxKind::RightBrace,
-                ',' => PurescriptSyntaxKind::Comma,
-                ';' => PurescriptSyntaxKind::Semicolon,
-                '.' => PurescriptSyntaxKind::Dot,
+                '(' => PurescriptTokenType::LeftParen,
+                ')' => PurescriptTokenType::RightParen,
+                '[' => PurescriptTokenType::LeftBracket,
+                ']' => PurescriptTokenType::RightBracket,
+                '{' => PurescriptTokenType::LeftBrace,
+                '}' => PurescriptTokenType::RightBrace,
+                ',' => PurescriptTokenType::Comma,
+                ';' => PurescriptTokenType::Semicolon,
+                '.' => PurescriptTokenType::Dot,
                 ':' => {
                     state.advance(1);
                     if let Some(':') = state.peek() {
                         state.advance(1);
-                        state.add_token(PurescriptSyntaxKind::ColonColon, start_pos, state.get_position());
+                        state.add_token(PurescriptTokenType::ColonColon, start_pos, state.get_position());
                         return true;
                     }
                     else {
-                        state.add_token(PurescriptSyntaxKind::Colon, start_pos, state.get_position());
+                        state.add_token(PurescriptTokenType::Colon, start_pos, state.get_position());
                         return true;
                     }
                 }
-                '?' => PurescriptSyntaxKind::Question,
-                '_' => PurescriptSyntaxKind::Underscore,
-                '@' => PurescriptSyntaxKind::At,
+                '?' => PurescriptTokenType::Question,
+                '_' => PurescriptTokenType::Underscore,
+                '@' => PurescriptTokenType::At,
+                '`' => PurescriptTokenType::Tick,
                 _ => return false,
             };
 

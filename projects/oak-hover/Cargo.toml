@@ -1,13 +1,13 @@
 [package]
 name = "oak-hover"
-description = "Hover information and documentation lookup support for the Oak framework."
-categories = ["development-tools"]
-keywords = ["hover", "documentation", "lsp"]
 version.workspace = true
 authors.workspace = true
+description = "Hover information and documentation lookup support for the Oak framework."
 edition.workspace = true
 license.workspace = true
-repository.workspace = true
+repository = "https://github.com/ygg-lang/oaks/tree/master/projects/oak-hover"
+categories = ["development-tools"]
+keywords = ["hover", "documentation", "lsp"]
 
 [dependencies]
 oak-core = { workspace = true, features = ["serde"] }

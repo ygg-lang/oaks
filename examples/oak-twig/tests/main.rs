@@ -15,7 +15,7 @@ fn test_lexer_basic() {
 
     let tokens = result.result.unwrap();
     assert!(!tokens.is_empty());
-    println!("Lexed {} tokens", tokens.len());
+    println!("Lexed {} tokens", tokens.len())
 }
 
 #[test]
@@ -29,7 +29,7 @@ fn test_parser_basic() {
     assert!(result.result.is_ok());
 
     let tree = result.result.unwrap();
-    println!("Parsed tree with {} children", tree.children.len());
+    println!("Parsed tree with {} children", tree.children.len())
 }
 
 #[test]
@@ -47,7 +47,7 @@ fn test_lexer_string() {
 
     // 检查是否包含字符串 kind
     let has_string = tokens.iter().any(|t| matches!(t.kind, TwigSyntaxKind::String));
-    assert!(has_string, "Should contain a string token");
+    assert!(has_string, "Should contain a string token")
 }
 
 #[test]
@@ -65,7 +65,7 @@ fn test_lexer_number() {
 
     // 检查是否包含数字token
     let has_number = tokens.iter().any(|t| matches!(t.kind, TwigSyntaxKind::Number));
-    assert!(has_number, "Should contain a number token");
+    assert!(has_number, "Should contain a number token")
 }
 
 #[test]
@@ -83,7 +83,7 @@ fn test_lexer_boolean() {
 
     // 检查是否包含布尔token
     let has_boolean = tokens.iter().any(|t| matches!(t.kind, TwigSyntaxKind::Boolean));
-    assert!(has_boolean, "Should contain a boolean token");
+    assert!(has_boolean, "Should contain a boolean token")
 }
 
 #[test]
@@ -97,7 +97,7 @@ fn test_parser_variable() {
     assert!(result.result.is_ok());
 
     let tree = result.result.unwrap();
-    assert!(!tree.children.is_empty(), "Parsed tree should have children");
+    assert!(!tree.children.is_empty(), "Parsed tree should have children")
 }
 
 #[test]
@@ -115,7 +115,7 @@ fn test_parser_block() {
     assert!(result.result.is_ok());
 
     let tree = result.result.unwrap();
-    assert!(!tree.children.is_empty(), "Parsed tree should have children");
+    assert!(!tree.children.is_empty(), "Parsed tree should have children")
 }
 
 #[test]
@@ -132,5 +132,5 @@ fn test_empty_input() {
 
     // 测试空输入的语法分析
     let parse_result = parser.parse(&source, &[], &mut session);
-    assert!(parse_result.result.is_ok());
+    assert!(parse_result.result.is_ok())
 }

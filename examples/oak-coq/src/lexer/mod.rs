@@ -1,8 +1,10 @@
-use crate::{kind::CoqSyntaxKind, language::CoqLanguage};
+#![doc = include_str!("readme.md")]
+pub mod token_type;
+
+use crate::{language::CoqLanguage, lexer::token_type::CoqTokenType};
 use oak_core::{
-    Lexer, LexerState, TextEdit,
+    Lexer, LexerState, Source, TextEdit,
     lexer::{LexOutput, LexerCache},
-    source::Source,
 };
 
 /// A lexer for the Coq programming language.
@@ -35,55 +37,55 @@ impl<'config> CoqLexer<'config> {
                 ' ' | '\t' | '\r' => {
                     state.advance(1);
                     while let Some(' ' | '\t' | '\r') = state.peek() {
-                        state.advance(1);
+                        state.advance(1)
                     }
-                    state.add_token(CoqSyntaxKind::Whitespace, start, state.get_position());
+                    state.add_token(CoqTokenType::Whitespace, start, state.get_position())
                 }
                 '\n' => {
                     state.advance(1);
-                    state.add_token(CoqSyntaxKind::Newline, start, state.get_position());
+                    state.add_token(CoqTokenType::Newline, start, state.get_position())
                 }
                 '(' => {
                     state.advance(1);
                     if let Some('*') = state.peek() {
                         state.advance(1);
-                        self.lex_comment(state, start);
+                        self.lex_comment(state, start)
                     }
                     else {
-                        state.add_token(CoqSyntaxKind::LeftParen, start, state.get_position());
+                        state.add_token(CoqTokenType::LeftParen, start, state.get_position())
                     }
                 }
                 ')' => {
                     state.advance(1);
-                    state.add_token(CoqSyntaxKind::RightParen, start, state.get_position());
+                    state.add_token(CoqTokenType::RightParen, start, state.get_position())
                 }
                 '[' => {
                     state.advance(1);
-                    state.add_token(CoqSyntaxKind::LeftBracket, start, state.get_position());
+                    state.add_token(CoqTokenType::LeftBracket, start, state.get_position())
                 }
                 ']' => {
                     state.advance(1);
-                    state.add_token(CoqSyntaxKind::RightBracket, start, state.get_position());
+                    state.add_token(CoqTokenType::RightBracket, start, state.get_position())
                 }
                 '{' => {
                     state.advance(1);
-                    state.add_token(CoqSyntaxKind::LeftBrace, start, state.get_position());
+                    state.add_token(CoqTokenType::LeftBrace, start, state.get_position())
                 }
                 '}' => {
                     state.advance(1);
-                    state.add_token(CoqSyntaxKind::RightBrace, start, state.get_position());
+                    state.add_token(CoqTokenType::RightBrace, start, state.get_position())
                 }
                 ',' => {
                     state.advance(1);
-                    state.add_token(CoqSyntaxKind::Comma, start, state.get_position());
+                    state.add_token(CoqTokenType::Comma, start, state.get_position())
                 }
                 ';' => {
                     state.advance(1);
-                    state.add_token(CoqSyntaxKind::Semicolon, start, state.get_position());
+                    state.add_token(CoqTokenType::Semicolon, start, state.get_position())
                 }
                 '.' => {
                     state.advance(1);
-                    state.add_token(CoqSyntaxKind::Dot, start, state.get_position());
+                    state.add_token(CoqTokenType::Dot, start, state.get_position())
                 }
                 ':' => {
                     state.advance(1);
@@ -91,212 +93,212 @@ impl<'config> CoqLexer<'config> {
                         state.advance(1);
                         if let Some('=') = state.peek() {
                             state.advance(1);
-                            state.add_token(CoqSyntaxKind::DoubleColonEqual, start, state.get_position());
+                            state.add_token(CoqTokenType::DoubleColonEqual, start, state.get_position())
                         }
                         else {
-                            state.add_token(CoqSyntaxKind::DoubleColon, start, state.get_position());
+                            state.add_token(CoqTokenType::DoubleColon, start, state.get_position())
                         }
                     }
                     else if let Some('=') = state.peek() {
                         state.advance(1);
-                        state.add_token(CoqSyntaxKind::ColonEqual, start, state.get_position());
+                        state.add_token(CoqTokenType::ColonEqual, start, state.get_position())
                     }
                     else {
-                        state.add_token(CoqSyntaxKind::Colon, start, state.get_position());
+                        state.add_token(CoqTokenType::Colon, start, state.get_position())
                     }
                 }
                 '=' => {
                     state.advance(1);
                     if let Some('>') = state.peek() {
                         state.advance(1);
-                        state.add_token(CoqSyntaxKind::DoubleArrow, start, state.get_position());
+                        state.add_token(CoqTokenType::DoubleArrow, start, state.get_position())
                     }
                     else {
-                        state.add_token(CoqSyntaxKind::Equal, start, state.get_position());
+                        state.add_token(CoqTokenType::Equal, start, state.get_position())
                     }
                 }
                 '<' => {
                     state.advance(1);
                     if let Some('-') = state.peek() {
                         state.advance(1);
-                        state.add_token(CoqSyntaxKind::LeftArrow, start, state.get_position());
+                        state.add_token(CoqTokenType::LeftArrow, start, state.get_position())
                     }
                     else if let Some('>') = state.peek() {
                         state.advance(1);
-                        state.add_token(CoqSyntaxKind::DoubleArrow, start, state.get_position());
+                        state.add_token(CoqTokenType::DoubleArrow, start, state.get_position())
                     }
                     else if let Some('=') = state.peek() {
                         state.advance(1);
-                        state.add_token(CoqSyntaxKind::LessEqual, start, state.get_position());
+                        state.add_token(CoqTokenType::LessEqual, start, state.get_position())
                     }
                     else {
-                        state.add_token(CoqSyntaxKind::Less, start, state.get_position());
+                        state.add_token(CoqTokenType::Less, start, state.get_position())
                     }
                 }
                 '>' => {
                     state.advance(1);
                     if let Some('=') = state.peek() {
                         state.advance(1);
-                        state.add_token(CoqSyntaxKind::GreaterEqual, start, state.get_position());
+                        state.add_token(CoqTokenType::GreaterEqual, start, state.get_position())
                     }
                     else {
-                        state.add_token(CoqSyntaxKind::Greater, start, state.get_position());
+                        state.add_token(CoqTokenType::Greater, start, state.get_position())
                     }
                 }
                 '|' => {
                     state.advance(1);
                     if let Some('-') = state.peek() {
                         state.advance(1);
-                        state.add_token(CoqSyntaxKind::Turnstile, start, state.get_position());
+                        state.add_token(CoqTokenType::Turnstile, start, state.get_position())
                     }
                     else {
-                        state.add_token(CoqSyntaxKind::Pipe, start, state.get_position());
+                        state.add_token(CoqTokenType::Pipe, start, state.get_position())
                     }
                 }
                 '-' => {
                     state.advance(1);
                     if let Some('>') = state.peek() {
                         state.advance(1);
-                        state.add_token(CoqSyntaxKind::Arrow, start, state.get_position());
+                        state.add_token(CoqTokenType::Arrow, start, state.get_position())
                     }
                     else {
-                        state.add_token(CoqSyntaxKind::Minus, start, state.get_position());
+                        state.add_token(CoqTokenType::Minus, start, state.get_position())
                     }
                 }
                 '+' => {
                     state.advance(1);
-                    state.add_token(CoqSyntaxKind::Plus, start, state.get_position());
+                    state.add_token(CoqTokenType::Plus, start, state.get_position())
                 }
                 '*' => {
                     state.advance(1);
-                    state.add_token(CoqSyntaxKind::Star, start, state.get_position());
+                    state.add_token(CoqTokenType::Star, start, state.get_position())
                 }
                 '/' => {
                     state.advance(1);
                     if let Some('\\') = state.peek() {
                         state.advance(1);
-                        state.add_token(CoqSyntaxKind::And, start, state.get_position());
+                        state.add_token(CoqTokenType::And, start, state.get_position())
                     }
                     else {
-                        state.add_token(CoqSyntaxKind::Slash, start, state.get_position());
+                        state.add_token(CoqTokenType::Slash, start, state.get_position())
                     }
                 }
                 '\\' => {
                     state.advance(1);
                     if let Some('/') = state.peek() {
                         state.advance(1);
-                        state.add_token(CoqSyntaxKind::Or, start, state.get_position());
+                        state.add_token(CoqTokenType::Or, start, state.get_position())
                     }
                     else {
-                        state.add_token(CoqSyntaxKind::Backslash, start, state.get_position());
+                        state.add_token(CoqTokenType::Backslash, start, state.get_position())
                     }
                 }
                 '~' => {
                     state.advance(1);
-                    state.add_token(CoqSyntaxKind::Tilde, start, state.get_position());
+                    state.add_token(CoqTokenType::Tilde, start, state.get_position())
                 }
                 '!' => {
                     state.advance(1);
-                    state.add_token(CoqSyntaxKind::Exclamation, start, state.get_position());
+                    state.add_token(CoqTokenType::Exclamation, start, state.get_position())
                 }
                 '?' => {
                     state.advance(1);
-                    state.add_token(CoqSyntaxKind::Question, start, state.get_position());
+                    state.add_token(CoqTokenType::Question, start, state.get_position())
                 }
                 '@' => {
                     state.advance(1);
-                    state.add_token(CoqSyntaxKind::At, start, state.get_position());
+                    state.add_token(CoqTokenType::At, start, state.get_position())
                 }
                 '#' => {
                     state.advance(1);
-                    state.add_token(CoqSyntaxKind::Hash, start, state.get_position());
+                    state.add_token(CoqTokenType::Hash, start, state.get_position())
                 }
                 '$' => {
                     state.advance(1);
-                    state.add_token(CoqSyntaxKind::Dollar, start, state.get_position());
+                    state.add_token(CoqTokenType::Dollar, start, state.get_position())
                 }
                 '%' => {
                     state.advance(1);
-                    state.add_token(CoqSyntaxKind::Percent, start, state.get_position());
+                    state.add_token(CoqTokenType::Percent, start, state.get_position())
                 }
                 '^' => {
                     state.advance(1);
-                    state.add_token(CoqSyntaxKind::Caret, start, state.get_position());
+                    state.add_token(CoqTokenType::Caret, start, state.get_position())
                 }
                 '&' => {
                     state.advance(1);
-                    state.add_token(CoqSyntaxKind::Ampersand, start, state.get_position());
+                    state.add_token(CoqTokenType::Ampersand, start, state.get_position())
                 }
                 '"' => {
                     state.advance(1);
-                    self.lex_string(state, start);
+                    self.lex_string(state, start)
                 }
                 '0'..='9' => {
                     state.advance(1);
                     while let Some('0'..='9') = state.peek() {
-                        state.advance(1);
+                        state.advance(1)
                     }
-                    state.add_token(CoqSyntaxKind::NumberLiteral, start, state.get_position());
+                    state.add_token(CoqTokenType::NumberLiteral, start, state.get_position())
                 }
                 'a'..='z' | 'A'..='Z' | '_' => {
                     state.advance(1);
                     while let Some('a'..='z' | 'A'..='Z' | '0'..='9' | '_' | '\'') = state.peek() {
-                        state.advance(1);
+                        state.advance(1)
                     }
                     let end = state.get_position();
                     let text = state.get_text_in((start..end).into());
                     let kind = match text.as_ref() {
-                        "Theorem" => CoqSyntaxKind::Theorem,
-                        "Lemma" => CoqSyntaxKind::Lemma,
-                        "Remark" => CoqSyntaxKind::Remark,
-                        "Fact" => CoqSyntaxKind::Fact,
-                        "Corollary" => CoqSyntaxKind::Corollary,
-                        "Proposition" => CoqSyntaxKind::Proposition,
-                        "Definition" => CoqSyntaxKind::Definition,
-                        "Example" => CoqSyntaxKind::Example,
-                        "Fixpoint" => CoqSyntaxKind::Fixpoint,
-                        "CoFixpoint" => CoqSyntaxKind::CoFixpoint,
-                        "Inductive" => CoqSyntaxKind::Inductive,
-                        "CoInductive" => CoqSyntaxKind::CoInductive,
-                        "Record" => CoqSyntaxKind::Record,
-                        "Structure" => CoqSyntaxKind::Structure,
-                        "Variant" => CoqSyntaxKind::Variant,
-                        "Module" => CoqSyntaxKind::Module,
-                        "Section" => CoqSyntaxKind::Section,
-                        "End" => CoqSyntaxKind::End,
-                        "Require" => CoqSyntaxKind::Require,
-                        "Import" => CoqSyntaxKind::Import,
-                        "Export" => CoqSyntaxKind::Export,
-                        "Proof" => CoqSyntaxKind::Proof,
-                        "Qed" => CoqSyntaxKind::Qed,
-                        "Defined" => CoqSyntaxKind::Defined,
-                        "Admitted" => CoqSyntaxKind::Admitted,
-                        "Abort" => CoqSyntaxKind::Abort,
-                        "Match" => CoqSyntaxKind::Match,
-                        "With" => CoqSyntaxKind::With,
-                        "Forall" => CoqSyntaxKind::Forall,
-                        "Exists" => CoqSyntaxKind::Exists,
-                        "Fun" => CoqSyntaxKind::Fun,
-                        "Let" => CoqSyntaxKind::Let,
-                        "In" => CoqSyntaxKind::In,
-                        "If" => CoqSyntaxKind::If,
-                        "Then" => CoqSyntaxKind::Then,
-                        "Else" => CoqSyntaxKind::Else,
-                        "Type" => CoqSyntaxKind::Type,
-                        "Prop" => CoqSyntaxKind::Prop,
-                        "Set" => CoqSyntaxKind::Set,
-                        "Check" => CoqSyntaxKind::Check,
-                        "Print" => CoqSyntaxKind::Print,
-                        "Search" => CoqSyntaxKind::Search,
-                        "Locate" => CoqSyntaxKind::Locate,
-                        "About" => CoqSyntaxKind::About,
-                        _ => CoqSyntaxKind::Identifier,
+                        "Theorem" => CoqTokenType::Theorem,
+                        "Lemma" => CoqTokenType::Lemma,
+                        "Remark" => CoqTokenType::Remark,
+                        "Fact" => CoqTokenType::Fact,
+                        "Corollary" => CoqTokenType::Corollary,
+                        "Proposition" => CoqTokenType::Proposition,
+                        "Definition" => CoqTokenType::Definition,
+                        "Example" => CoqTokenType::Example,
+                        "Fixpoint" => CoqTokenType::Fixpoint,
+                        "CoFixpoint" => CoqTokenType::CoFixpoint,
+                        "Inductive" => CoqTokenType::Inductive,
+                        "CoInductive" => CoqTokenType::CoInductive,
+                        "Record" => CoqTokenType::Record,
+                        "Structure" => CoqTokenType::Structure,
+                        "Variant" => CoqTokenType::Variant,
+                        "Module" => CoqTokenType::Module,
+                        "Section" => CoqTokenType::Section,
+                        "End" => CoqTokenType::End,
+                        "Require" => CoqTokenType::Require,
+                        "Import" => CoqTokenType::Import,
+                        "Export" => CoqTokenType::Export,
+                        "Proof" => CoqTokenType::Proof,
+                        "Qed" => CoqTokenType::Qed,
+                        "Defined" => CoqTokenType::Defined,
+                        "Admitted" => CoqTokenType::Admitted,
+                        "Abort" => CoqTokenType::Abort,
+                        "Match" => CoqTokenType::Match,
+                        "With" => CoqTokenType::With,
+                        "Forall" => CoqTokenType::Forall,
+                        "Exists" => CoqTokenType::Exists,
+                        "Fun" => CoqTokenType::Fun,
+                        "Let" => CoqTokenType::Let,
+                        "In" => CoqTokenType::In,
+                        "If" => CoqTokenType::If,
+                        "Then" => CoqTokenType::Then,
+                        "Else" => CoqTokenType::Else,
+                        "Type" => CoqTokenType::Type,
+                        "Prop" => CoqTokenType::Prop,
+                        "Set" => CoqTokenType::Set,
+                        "Check" => CoqTokenType::Check,
+                        "Print" => CoqTokenType::Print,
+                        "Search" => CoqTokenType::Search,
+                        "Locate" => CoqTokenType::Locate,
+                        "About" => CoqTokenType::About,
+                        _ => CoqTokenType::Identifier,
                     };
-                    state.add_token(kind, start, end);
+                    state.add_token(kind, start, end)
                 }
                 _ => {
                     state.advance(1);
-                    state.add_token(CoqSyntaxKind::Error, start, state.get_position());
+                    state.add_token(CoqTokenType::Error, start, state.get_position());
                 }
             }
         }
@@ -319,17 +321,15 @@ impl<'config> CoqLexer<'config> {
                         state.advance(1);
                         depth -= 1;
                         if depth == 0 {
-                            state.add_token(CoqSyntaxKind::Comment, start, state.get_position());
+                            state.add_token(CoqTokenType::Comment, start, state.get_position());
                             return;
                         }
                     }
                 }
-                _ => {
-                    state.advance(1);
-                }
+                _ => state.advance(1),
             }
         }
-        state.add_token(CoqSyntaxKind::Comment, start, state.get_position());
+        state.add_token(CoqTokenType::Comment, start, state.get_position());
     }
 
     fn lex_string<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>, start: usize) {
@@ -341,16 +341,14 @@ impl<'config> CoqLexer<'config> {
                         state.advance(1); // Escaped quote
                     }
                     else {
-                        state.add_token(CoqSyntaxKind::StringLiteral, start, state.get_position());
+                        state.add_token(CoqTokenType::StringLiteral, start, state.get_position());
                         return;
                     }
                 }
-                _ => {
-                    state.advance(1);
-                }
+                _ => state.advance(1),
             }
         }
-        state.add_token(CoqSyntaxKind::StringLiteral, start, state.get_position());
+        state.add_token(CoqTokenType::StringLiteral, start, state.get_position());
     }
 }
 

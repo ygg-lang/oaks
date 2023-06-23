@@ -41,6 +41,9 @@ pub enum ExportFormat {
 /// A trait for exporting [HighlightResult] into various string formats.
 pub trait Exporter {
     /// Exports the highlighting result into a string representation.
+    ///
+    /// # Arguments
+    /// * `result` - The highlighting result to export.
     fn export(&self, result: &HighlightResult<'_>) -> String;
 }
 
@@ -65,10 +68,10 @@ impl Exporter for HtmlExporter {
 
         if self.include_css {
             html.push_str("<style>\n");
-            html.push_str(".highlight { font-family: 'Courier New', monospace; white-space: pre; }\n");
-            html.push_str(".highlight .bold { font-weight: bold; }\n");
-            html.push_str(".highlight .italic { font-style: italic; }\n");
-            html.push_str(".highlight .underline { text-decoration: underline; }\n");
+            html.push_str(".highlight { font-family: 'Courier New', monospace; white-space: pre }\n");
+            html.push_str(".highlight .bold { font-weight: bold }\n");
+            html.push_str(".highlight .italic { font-style: italic }\n");
+            html.push_str(".highlight .underline { text-decoration: underline }\n");
             html.push_str("</style>\n");
         }
 
@@ -93,23 +96,23 @@ impl HtmlExporter {
         let mut style_attrs = Vec::new();
 
         if let Some(color) = &segment.style.color {
-            style_attrs.push(format!("color: {}", color));
+            style_attrs.push(format!("color: {}", color))
         }
 
         if let Some(bg_color) = &segment.style.background_color {
-            style_attrs.push(format!("background-color: {}", bg_color));
+            style_attrs.push(format!("background-color: {}", bg_color))
         }
 
         if segment.style.bold {
-            style_attrs.push("font-weight: bold".to_string());
+            style_attrs.push("font-weight: bold".to_string())
         }
 
         if segment.style.italic {
-            style_attrs.push("font-style: italic".to_string());
+            style_attrs.push("font-style: italic".to_string())
         }
 
         if segment.style.underline {
-            style_attrs.push("text-decoration: underline".to_string());
+            style_attrs.push("text-decoration: underline".to_string())
         }
 
         let escaped_text = html_escape(&segment.text);
@@ -124,15 +127,15 @@ impl HtmlExporter {
         let mut classes = Vec::new();
 
         if segment.style.bold {
-            classes.push("bold");
+            classes.push("bold")
         }
 
         if segment.style.italic {
-            classes.push("italic");
+            classes.push("italic")
         }
 
         if segment.style.underline {
-            classes.push("underline");
+            classes.push("underline")
         }
 
         if classes.is_empty() { escaped_text } else { format!("<span class=\"{}\">{}</span>", classes.join(" "), escaped_text) }
@@ -151,9 +154,9 @@ impl Exporter for CssExporter {
         css.push_str("  white-space: pre;\n");
         css.push_str("}\n\n");
 
-        css.push_str(".highlight .bold { font-weight: bold; }\n");
-        css.push_str(".highlight .italic { font-style: italic; }\n");
-        css.push_str(".highlight .underline { text-decoration: underline; }\n");
+        css.push_str(".highlight .bold { font-weight: bold }\n");
+        css.push_str(".highlight .italic { font-style: italic }\n");
+        css.push_str(".highlight .underline { text-decoration: underline }\n");
 
         css
     }
@@ -172,7 +175,7 @@ impl Exporter for JsonExporter {
 
         for (i, segment) in result.segments.iter().enumerate() {
             if i > 0 {
-                json.push(',');
+                json.push(',')
             }
             json.push_str("{\"span\":{\"start\":");
             json.push_str(&segment.span.start.to_string());
@@ -186,16 +189,16 @@ impl Exporter for JsonExporter {
             style_parts.push(format!("\"underline\":{}", segment.style.underline));
 
             if let Some(color) = &segment.style.color {
-                style_parts.push(format!("\"color\":\"{}\"", json_escape(color)));
+                style_parts.push(format!("\"color\":\"{}\"", json_escape(color)))
             }
             if let Some(bg) = &segment.style.background_color {
-                style_parts.push(format!("\"background_color\":\"{}\"", json_escape(bg)));
+                style_parts.push(format!("\"background_color\":\"{}\"", json_escape(bg)))
             }
 
             json.push_str(&style_parts.join(","));
             json.push_str("},\"text\":\"");
             json.push_str(&json_escape(&segment.text));
-            json.push_str("\"}");
+            json.push_str("\"}")
         }
 
         json.push_str("],\"source\":\"");
@@ -214,7 +217,7 @@ impl Exporter for AnsiExporter {
         let mut output = String::new();
 
         for segment in &result.segments {
-            output.push_str(&self.segment_to_ansi(segment));
+            output.push_str(&self.segment_to_ansi(segment))
         }
 
         output
@@ -229,15 +232,15 @@ impl AnsiExporter {
         codes.push("0");
 
         if segment.style.bold {
-            codes.push("1");
+            codes.push("1")
         }
 
         if segment.style.italic {
-            codes.push("3");
+            codes.push("3")
         }
 
         if segment.style.underline {
-            codes.push("4");
+            codes.push("4")
         }
 
         // Basic color mapping
@@ -257,7 +260,7 @@ impl AnsiExporter {
     }
 }
 
-/// HTML 转义
+/// HTML escape
 fn html_escape(text: &str) -> String {
     text.chars()
         .map(|c| match c {

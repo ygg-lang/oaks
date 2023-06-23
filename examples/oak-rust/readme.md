@@ -1,101 +1,35 @@
-# Oak Rust Parser
+# 🚀 Oak Rust Parser
 
 [![Crates.io](https://img.shields.io/crates/v/oak-rust.svg)](https://crates.io/crates/oak-rust)
 [![Documentation](https://docs.rs/oak-rust/badge.svg)](https://docs.rs/oak-rust)
 
-A high-performance incremental Rust parser built on the Oak framework, providing full Rust syntax analysis, code formatting, and syntax highlighting.
+**Safety and Speed for the System** — A high-performance, incremental Rust parser built on the Oak framework. Designed for building the next generation of Rust developer tools, IDEs, and static analyzers.
 
-## 🎯 Overview
+## 🎯 Project Vision
 
-Oak Rust is a powerful parser designed specifically for the Rust language, supporting full Rust syntax including modern language features. Built on the solid foundation of oak-core, it provides high-level convenience and detailed AST generation suitable for static analysis, code generation, formatting, and syntax highlighting.
+Rust has redefined systems programming with its focus on memory safety and performance. `oak-rust` aims to provide a parsing infrastructure that is as robust and efficient as the language itself. By leveraging Oak's incremental parsing architecture, we enable the creation of highly responsive tools that can handle large Rust projects with ease. Whether you're building a custom linter, a code refactoring engine, or an advanced IDE extension, `oak-rust` provides the high-fidelity AST and sub-millisecond performance required to keep up with Rust's rapid evolution and complex syntax.
 
-## ✨ Key Features
+## ✨ Core Features
 
-- **Full Rust Syntax Support**: Supports all Rust language features, including modern specifications.
-- **Complete AST Generation**: Generates a comprehensive abstract syntax tree.
-- **Lexer**: Built-in tokenization with accurate position information.
-- **Syntax Highlighting**: Supports highlighting for keywords, strings, numbers, comments, macros, etc.
-- **Code Formatting**: Provides code formatting compliant with official style guides.
-- **Error Recovery**: Gracefully handles syntax errors and provides detailed diagnostic information.
-- **Incremental Parsing**: Based on the Oak framework's incremental parsing capabilities for efficient code analysis.
+- **⚡ Blazing Fast**: Engineered in Rust to parse Rust—achieving sub-millisecond latency through zero-cost abstractions and efficient memory management.
+- **🔄 Incremental by Design**: Only re-parse what changed. Essential for providing real-time feedback in large-scale Rust crates and workspaces.
+- **🌳 High-Fidelity AST**: Generates a comprehensive and precise Abstract Syntax Tree capturing the full depth of Rust:
+    - **Ownership & Lifetimes**: Accurate representation of borrowing, ownership transitions, and explicit lifetime annotations.
+    - **Generics & Traits**: Deep support for trait bounds, associated types, and complex generic constraints.
+    - **Macros**: Robust handling of both declarative (`macro_rules!`) and procedural macros.
+    - **Pattern Matching**: Precise mapping of complex `match` arms, destructuring, and guard expressions.
+    - **Async/Await**: First-class support for modern asynchronous programming constructs.
+- **🛡️ Industrial-Grade Fault Tolerance**: Gracefully recovers from syntax errors during active development, providing clear and actionable diagnostics.
+- **🧩 Deep Ecosystem Integration**: Seamlessly works with `oak-lsp` for full LSP support and `oak-mcp` for intelligent code discovery and analysis.
 
-## 🚀 Quick Start
+## 🏗️ Architecture
 
-### Basic Parsing Example
+The parser follows the **Green/Red Tree** architecture (inspired by Roslyn), which allows for:
+1. **Efficient Immutability**: Share nodes across different versions of the tree without copying.
+2. **Lossless Syntax Trees**: Retains all trivia (whitespace and comments), enabling faithful code formatting and refactoring.
+3. **Type Safety**: Strongly-typed "Red" nodes provide a convenient and safe API for tree traversal and analysis.
 
-```rust
-use oak_rust::{RustLanguage, RustParser};
-use oak_core::language::Language;
 
-fn main() -> Result<(), Box<dyn std::error::Error>> {
-    let language = RustLanguage::new();
-    let parser = RustParser::new();
-    
-    let source = r#"
-        fn main() {
-            let x = 42;
-            println!("Hello, Rust! x = {}", x);
-        }
-    "#;
-    
-    let result = language.parse(source);
-    match result {
-        Ok(ast) => println!("Parsing successful: {:?}", ast),
-        Err(errors) => println!("Parsing error: {:?}", errors),
-    }
-    Ok(())
-}
-```
+## 🤝 Contributing
 
-### Syntax Highlighting Example
-
-```rust
-use oak_rust::RustHighlighter;
-use oak_highlight::highlighter::Highlighter;
-
-fn main() {
-    let highlighter = RustHighlighter::new();
-    let code = r#"
-        fn fibonacci(n: u32) -> u32 {
-            match n {
-                0 => 0,
-                1 => 1,
-                _ => fibonacci(n - 1) + fibonacci(n - 2),
-            }
-        }
-    "#;
-    
-    let highlights = highlighter.highlight(code);
-    for (start, end, kind) in highlights {
-        println!("Highlight range: {}..{}, Type: {:?}", start, end, kind);
-    }
-}
-```
-
-### Code Formatting Example
-
-```rust
-use oak_rust::RustFormatter;
-
-fn main() {
-    let formatter = RustFormatter::new();
-    let unformatted_code = "fn main(){let x=42;println!(\"x={}\",x);}";
-    
-    let formatted = formatter.format(unformatted_code);
-    println!("Formatted code:\n{}", formatted);
-}
-```
-
-## 📋 Parsing Examples
-
-### Function Parsing
-```rust
-use oak_rust::{RustLanguage, RustParser};
-
-let language = RustLanguage::new();
-let source = r#"
-    fn add(a: i32, b: i32) -> i32 {
-        a + b
-    }
-"#;
-```
+We welcome contributions of all kinds! If you find a bug, have a feature request, or want to contribute code, please check our [issues](https://github.com/ygg-lang/oaks/issues) or submit a pull request.

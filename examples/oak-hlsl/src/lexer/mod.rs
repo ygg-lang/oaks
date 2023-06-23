@@ -1,4 +1,7 @@
-use crate::{kind::HlslSyntaxKind, language::HlslLanguage};
+#![doc = include_str!("readme.md")]
+pub mod token_type;
+
+use crate::{language::HlslLanguage, lexer::token_type::HlslTokenType};
 use oak_core::{Lexer, LexerCache, LexerState, OakError, lexer::LexOutput, source::Source};
 
 type State<'a, S> = LexerState<'a, S, HlslLanguage>;
@@ -60,10 +63,10 @@ impl<'config> HlslLexer<'config> {
             let start_pos = state.get_position();
             if let Some(ch) = state.peek() {
                 state.advance(ch.len_utf8());
-                state.add_token(HlslSyntaxKind::Error, start_pos, state.get_position());
+                state.add_token(HlslTokenType::Error, start_pos, state.get_position());
             }
 
-            state.advance_if_dead_lock(safe_point);
+            state.advance_if_dead_lock(safe_point)
         }
 
         Ok(())
@@ -83,7 +86,7 @@ impl<'config> HlslLexer<'config> {
         }
 
         if state.get_position() > start_pos {
-            state.add_token(HlslSyntaxKind::Whitespace, start_pos, state.get_position());
+            state.add_token(HlslTokenType::Whitespace, start_pos, state.get_position());
             true
         }
         else {
@@ -97,15 +100,15 @@ impl<'config> HlslLexer<'config> {
 
         if let Some('\n') = state.peek() {
             state.advance(1);
-            state.add_token(HlslSyntaxKind::Newline, start_pos, state.get_position());
+            state.add_token(HlslTokenType::Newline, start_pos, state.get_position());
             true
         }
         else if let Some('\r') = state.peek() {
             state.advance(1);
             if let Some('\n') = state.peek() {
-                state.advance(1);
+                state.advance(1)
             }
-            state.add_token(HlslSyntaxKind::Newline, start_pos, state.get_position());
+            state.add_token(HlslTokenType::Newline, start_pos, state.get_position());
             true
         }
         else {
@@ -125,9 +128,9 @@ impl<'config> HlslLexer<'config> {
                     if ch == '\n' || ch == '\r' {
                         break;
                     }
-                    state.advance(ch.len_utf8());
+                    state.advance(ch.len_utf8())
                 }
-                state.add_token(HlslSyntaxKind::Comment, start_pos, state.get_position());
+                state.add_token(HlslTokenType::Comment, start_pos, state.get_position());
                 return true;
             }
         }
@@ -144,10 +147,10 @@ impl<'config> HlslLexer<'config> {
                         }
                     }
                     if let Some(ch) = state.peek() {
-                        state.advance(ch.len_utf8());
+                        state.advance(ch.len_utf8())
                     }
                 }
-                state.add_token(HlslSyntaxKind::Comment, start_pos, state.get_position());
+                state.add_token(HlslTokenType::Comment, start_pos, state.get_position());
                 return true;
             }
         }
@@ -164,23 +167,13 @@ impl<'config> HlslLexer<'config> {
 
             // 跳过空白
             while let Some(ch) = state.peek() {
-                if ch == ' ' || ch == '\t' {
-                    state.advance(1);
-                }
-                else {
-                    break;
-                }
+                if ch == ' ' || ch == '\t' { state.advance(1) } else { break }
             }
 
             // 读取指令名称
             let directive_start = state.get_position();
             while let Some(ch) = state.peek() {
-                if ch.is_ascii_alphabetic() || ch == '_' {
-                    state.advance(1);
-                }
-                else {
-                    break;
-                }
+                if ch.is_ascii_alphabetic() || ch == '_' { state.advance(1) } else { break }
             }
 
             if state.get_position() > directive_start {
@@ -191,23 +184,23 @@ impl<'config> HlslLexer<'config> {
                     if ch == '\n' || ch == '\r' {
                         break;
                     }
-                    state.advance(ch.len_utf8());
+                    state.advance(ch.len_utf8())
                 }
 
                 let token_kind = match directive.as_str() {
-                    "include" => HlslSyntaxKind::Include,
-                    "define" => HlslSyntaxKind::Define,
-                    "undef" => HlslSyntaxKind::Undef,
-                    "if" => HlslSyntaxKind::If_,
-                    "ifdef" => HlslSyntaxKind::Ifdef,
-                    "ifndef" => HlslSyntaxKind::Ifndef,
-                    "else" => HlslSyntaxKind::Else_,
-                    "elif" => HlslSyntaxKind::Elif,
-                    "endif" => HlslSyntaxKind::Endif,
-                    "line" => HlslSyntaxKind::Line,
-                    "error" => HlslSyntaxKind::Error,
-                    "pragma" => HlslSyntaxKind::Pragma,
-                    _ => HlslSyntaxKind::Hash,
+                    "include" => HlslTokenType::Include,
+                    "define" => HlslTokenType::Define,
+                    "undef" => HlslTokenType::Undef,
+                    "if" => HlslTokenType::If_,
+                    "ifdef" => HlslTokenType::Ifdef,
+                    "ifndef" => HlslTokenType::Ifndef,
+                    "else" => HlslTokenType::Else_,
+                    "elif" => HlslTokenType::Elif,
+                    "endif" => HlslTokenType::Endif,
+                    "line" => HlslTokenType::Line,
+                    "error" => HlslTokenType::Error,
+                    "pragma" => HlslTokenType::Pragma,
+                    _ => HlslTokenType::Hash,
                 };
 
                 state.add_token(token_kind, start_pos, state.get_position());
@@ -215,7 +208,7 @@ impl<'config> HlslLexer<'config> {
             }
             else {
                 // 只是一个 # 符号
-                state.add_token(HlslSyntaxKind::Hash, start_pos, state.get_position());
+                state.add_token(HlslTokenType::Hash, start_pos, state.get_position());
                 return true;
             }
         }
@@ -248,7 +241,7 @@ impl<'config> HlslLexer<'config> {
                 state.advance(ch.len_utf8());
             }
 
-            state.add_token(HlslSyntaxKind::StringLiteral, start_pos, state.get_position());
+            state.add_token(HlslTokenType::StringLiteral, start_pos, state.get_position());
             return true;
         }
 
@@ -308,19 +301,14 @@ impl<'config> HlslLexer<'config> {
                             // 可选的符号
                             if let Some(sign) = state.peek() {
                                 if sign == '+' || sign == '-' {
-                                    state.advance(1);
+                                    state.advance(1)
                                 }
                             }
 
                             // 指数数字
                             let exp_start = state.get_position();
                             while let Some(ch) = state.peek() {
-                                if ch.is_ascii_digit() {
-                                    state.advance(1);
-                                }
-                                else {
-                                    break;
-                                }
+                                if ch.is_ascii_digit() { state.advance(1) } else { break }
                             }
 
                             if state.get_position() == exp_start {
@@ -338,7 +326,7 @@ impl<'config> HlslLexer<'config> {
                     }
                 }
 
-                state.add_token(HlslSyntaxKind::NumberLiteral, start_pos, state.get_position());
+                state.add_token(HlslTokenType::NumberLiteral, start_pos, state.get_position());
                 return true;
             }
         }
@@ -364,127 +352,127 @@ impl<'config> HlslLexer<'config> {
                 let text = state.get_text_in((start_pos..state.get_position()).into());
                 let token_kind = match text.as_ref() {
                     // 基本数据类型
-                    "bool" => HlslSyntaxKind::Bool,
-                    "int" => HlslSyntaxKind::Int,
-                    "uint" => HlslSyntaxKind::Uint,
-                    "half" => HlslSyntaxKind::Half,
-                    "float" => HlslSyntaxKind::Float,
-                    "double" => HlslSyntaxKind::Double,
-                    "min16float" => HlslSyntaxKind::Min16float,
-                    "min10float" => HlslSyntaxKind::Min10float,
-                    "min16int" => HlslSyntaxKind::Min16int,
-                    "min12int" => HlslSyntaxKind::Min12int,
-                    "min16uint" => HlslSyntaxKind::Min16uint,
+                    "bool" => HlslTokenType::Bool,
+                    "int" => HlslTokenType::Int,
+                    "uint" => HlslTokenType::Uint,
+                    "half" => HlslTokenType::Half,
+                    "float" => HlslTokenType::Float,
+                    "double" => HlslTokenType::Double,
+                    "min16float" => HlslTokenType::Min16float,
+                    "min10float" => HlslTokenType::Min10float,
+                    "min16int" => HlslTokenType::Min16int,
+                    "min12int" => HlslTokenType::Min12int,
+                    "min16uint" => HlslTokenType::Min16uint,
 
                     // 向量类型
-                    "bool2" => HlslSyntaxKind::Bool2,
-                    "bool3" => HlslSyntaxKind::Bool3,
-                    "bool4" => HlslSyntaxKind::Bool4,
-                    "int2" => HlslSyntaxKind::Int2,
-                    "int3" => HlslSyntaxKind::Int3,
-                    "int4" => HlslSyntaxKind::Int4,
-                    "uint2" => HlslSyntaxKind::Uint2,
-                    "uint3" => HlslSyntaxKind::Uint3,
-                    "uint4" => HlslSyntaxKind::Uint4,
-                    "half2" => HlslSyntaxKind::Half2,
-                    "half3" => HlslSyntaxKind::Half3,
-                    "half4" => HlslSyntaxKind::Half4,
-                    "float2" => HlslSyntaxKind::Float2,
-                    "float3" => HlslSyntaxKind::Float3,
-                    "float4" => HlslSyntaxKind::Float4,
-                    "double2" => HlslSyntaxKind::Double2,
-                    "double3" => HlslSyntaxKind::Double3,
-                    "double4" => HlslSyntaxKind::Double4,
+                    "bool2" => HlslTokenType::Bool2,
+                    "bool3" => HlslTokenType::Bool3,
+                    "bool4" => HlslTokenType::Bool4,
+                    "int2" => HlslTokenType::Int2,
+                    "int3" => HlslTokenType::Int3,
+                    "int4" => HlslTokenType::Int4,
+                    "uint2" => HlslTokenType::Uint2,
+                    "uint3" => HlslTokenType::Uint3,
+                    "uint4" => HlslTokenType::Uint4,
+                    "half2" => HlslTokenType::Half2,
+                    "half3" => HlslTokenType::Half3,
+                    "half4" => HlslTokenType::Half4,
+                    "float2" => HlslTokenType::Float2,
+                    "float3" => HlslTokenType::Float3,
+                    "float4" => HlslTokenType::Float4,
+                    "double2" => HlslTokenType::Double2,
+                    "double3" => HlslTokenType::Double3,
+                    "double4" => HlslTokenType::Double4,
 
                     // 矩阵类型
-                    "float2x2" => HlslSyntaxKind::Float2x2,
-                    "float2x3" => HlslSyntaxKind::Float2x3,
-                    "float2x4" => HlslSyntaxKind::Float2x4,
-                    "float3x2" => HlslSyntaxKind::Float3x2,
-                    "float3x3" => HlslSyntaxKind::Float3x3,
-                    "float3x4" => HlslSyntaxKind::Float3x4,
-                    "float4x2" => HlslSyntaxKind::Float4x2,
-                    "float4x3" => HlslSyntaxKind::Float4x3,
-                    "float4x4" => HlslSyntaxKind::Float4x4,
-                    "double2x2" => HlslSyntaxKind::Double2x2,
-                    "double2x3" => HlslSyntaxKind::Double2x3,
-                    "double2x4" => HlslSyntaxKind::Double2x4,
-                    "double3x2" => HlslSyntaxKind::Double3x2,
-                    "double3x3" => HlslSyntaxKind::Double3x3,
-                    "double3x4" => HlslSyntaxKind::Double3x4,
-                    "double4x2" => HlslSyntaxKind::Double4x2,
-                    "double4x3" => HlslSyntaxKind::Double4x3,
-                    "double4x4" => HlslSyntaxKind::Double4x4,
+                    "float2x2" => HlslTokenType::Float2x2,
+                    "float2x3" => HlslTokenType::Float2x3,
+                    "float2x4" => HlslTokenType::Float2x4,
+                    "float3x2" => HlslTokenType::Float3x2,
+                    "float3x3" => HlslTokenType::Float3x3,
+                    "float3x4" => HlslTokenType::Float3x4,
+                    "float4x2" => HlslTokenType::Float4x2,
+                    "float4x3" => HlslTokenType::Float4x3,
+                    "float4x4" => HlslTokenType::Float4x4,
+                    "double2x2" => HlslTokenType::Double2x2,
+                    "double2x3" => HlslTokenType::Double2x3,
+                    "double2x4" => HlslTokenType::Double2x4,
+                    "double3x2" => HlslTokenType::Double3x2,
+                    "double3x3" => HlslTokenType::Double3x3,
+                    "double3x4" => HlslTokenType::Double3x4,
+                    "double4x2" => HlslTokenType::Double4x2,
+                    "double4x3" => HlslTokenType::Double4x3,
+                    "double4x4" => HlslTokenType::Double4x4,
 
                     // 纹理类型
-                    "Texture1D" => HlslSyntaxKind::Texture1D,
-                    "Texture1DArray" => HlslSyntaxKind::Texture1DArray,
-                    "Texture2D" => HlslSyntaxKind::Texture2D,
-                    "Texture2DArray" => HlslSyntaxKind::Texture2DArray,
-                    "Texture2DMS" => HlslSyntaxKind::Texture2DMS,
-                    "Texture2DMSArray" => HlslSyntaxKind::Texture2DMSArray,
-                    "Texture3D" => HlslSyntaxKind::Texture3D,
-                    "TextureCube" => HlslSyntaxKind::TextureCube,
-                    "TextureCubeArray" => HlslSyntaxKind::TextureCubeArray,
+                    "Texture1D" => HlslTokenType::Texture1D,
+                    "Texture1DArray" => HlslTokenType::Texture1DArray,
+                    "Texture2D" => HlslTokenType::Texture2D,
+                    "Texture2DArray" => HlslTokenType::Texture2DArray,
+                    "Texture2DMS" => HlslTokenType::Texture2DMS,
+                    "Texture2DMSArray" => HlslTokenType::Texture2DMSArray,
+                    "Texture3D" => HlslTokenType::Texture3D,
+                    "TextureCube" => HlslTokenType::TextureCube,
+                    "TextureCubeArray" => HlslTokenType::TextureCubeArray,
 
                     // 采样器类型
-                    "sampler" => HlslSyntaxKind::Sampler,
-                    "SamplerState" => HlslSyntaxKind::SamplerState,
-                    "SamplerComparisonState" => HlslSyntaxKind::SamplerComparisonState,
+                    "sampler" => HlslTokenType::Sampler,
+                    "SamplerState" => HlslTokenType::SamplerState,
+                    "SamplerComparisonState" => HlslTokenType::SamplerComparisonState,
 
                     // 缓冲区类型
-                    "Buffer" => HlslSyntaxKind::Buffer,
-                    "StructuredBuffer" => HlslSyntaxKind::StructuredBuffer,
-                    "ByteAddressBuffer" => HlslSyntaxKind::ByteAddressBuffer,
-                    "RWBuffer" => HlslSyntaxKind::RWBuffer,
-                    "RWStructuredBuffer" => HlslSyntaxKind::RWStructuredBuffer,
-                    "RWByteAddressBuffer" => HlslSyntaxKind::RWByteAddressBuffer,
-                    "AppendStructuredBuffer" => HlslSyntaxKind::AppendStructuredBuffer,
-                    "ConsumeStructuredBuffer" => HlslSyntaxKind::ConsumeStructuredBuffer,
+                    "Buffer" => HlslTokenType::Buffer,
+                    "StructuredBuffer" => HlslTokenType::StructuredBuffer,
+                    "ByteAddressBuffer" => HlslTokenType::ByteAddressBuffer,
+                    "RWBuffer" => HlslTokenType::RWBuffer,
+                    "RWStructuredBuffer" => HlslTokenType::RWStructuredBuffer,
+                    "RWByteAddressBuffer" => HlslTokenType::RWByteAddressBuffer,
+                    "AppendStructuredBuffer" => HlslTokenType::AppendStructuredBuffer,
+                    "ConsumeStructuredBuffer" => HlslTokenType::ConsumeStructuredBuffer,
 
                     // 控制流关键字
-                    "if" => HlslSyntaxKind::If,
-                    "else" => HlslSyntaxKind::Else,
-                    "for" => HlslSyntaxKind::For,
-                    "while" => HlslSyntaxKind::While,
-                    "do" => HlslSyntaxKind::Do,
-                    "switch" => HlslSyntaxKind::Switch,
-                    "case" => HlslSyntaxKind::Case,
-                    "default" => HlslSyntaxKind::Default,
-                    "break" => HlslSyntaxKind::Break,
-                    "continue" => HlslSyntaxKind::Continue,
-                    "return" => HlslSyntaxKind::Return,
-                    "discard" => HlslSyntaxKind::Discard,
+                    "if" => HlslTokenType::If,
+                    "else" => HlslTokenType::Else,
+                    "for" => HlslTokenType::For,
+                    "while" => HlslTokenType::While,
+                    "do" => HlslTokenType::Do,
+                    "switch" => HlslTokenType::Switch,
+                    "case" => HlslTokenType::Case,
+                    "default" => HlslTokenType::Default,
+                    "break" => HlslTokenType::Break,
+                    "continue" => HlslTokenType::Continue,
+                    "return" => HlslTokenType::Return,
+                    "discard" => HlslTokenType::Discard,
 
                     // 函数和变量修饰符
-                    "static" => HlslSyntaxKind::Static,
-                    "const" => HlslSyntaxKind::Const,
-                    "volatile" => HlslSyntaxKind::Volatile,
-                    "extern" => HlslSyntaxKind::Extern,
-                    "shared" => HlslSyntaxKind::Shared,
-                    "groupshared" => HlslSyntaxKind::Groupshared,
-                    "uniform" => HlslSyntaxKind::Uniform,
-                    "in" => HlslSyntaxKind::In,
-                    "out" => HlslSyntaxKind::Out,
-                    "inout" => HlslSyntaxKind::Inout,
-                    "inline" => HlslSyntaxKind::Inline,
-                    "target" => HlslSyntaxKind::Target,
+                    "static" => HlslTokenType::Static,
+                    "const" => HlslTokenType::Const,
+                    "volatile" => HlslTokenType::Volatile,
+                    "extern" => HlslTokenType::Extern,
+                    "shared" => HlslTokenType::Shared,
+                    "groupshared" => HlslTokenType::Groupshared,
+                    "uniform" => HlslTokenType::Uniform,
+                    "in" => HlslTokenType::In,
+                    "out" => HlslTokenType::Out,
+                    "inout" => HlslTokenType::Inout,
+                    "inline" => HlslTokenType::Inline,
+                    "target" => HlslTokenType::Target,
 
                     // 语义修饰符
-                    "register" => HlslSyntaxKind::Register,
-                    "packoffset" => HlslSyntaxKind::Packoffset,
+                    "register" => HlslTokenType::Register,
+                    "packoffset" => HlslTokenType::Packoffset,
 
                     // 着色器类型
-                    "struct" => HlslSyntaxKind::Struct,
-                    "cbuffer" => HlslSyntaxKind::Cbuffer,
-                    "tbuffer" => HlslSyntaxKind::Tbuffer,
-                    "interface" => HlslSyntaxKind::Interface,
-                    "class" => HlslSyntaxKind::Class,
+                    "struct" => HlslTokenType::Struct,
+                    "cbuffer" => HlslTokenType::Cbuffer,
+                    "tbuffer" => HlslTokenType::Tbuffer,
+                    "interface" => HlslTokenType::Interface,
+                    "class" => HlslTokenType::Class,
 
                     // 布尔字面量
-                    "true" | "false" => HlslSyntaxKind::BooleanLiteral,
+                    "true" | "false" => HlslTokenType::BooleanLiteral,
 
-                    _ => HlslSyntaxKind::Identifier,
+                    _ => HlslTokenType::Identifier,
                 };
 
                 state.add_token(token_kind, start_pos, state.get_position());
@@ -505,229 +493,236 @@ impl<'config> HlslLexer<'config> {
                     state.advance(1);
                     if let Some('=') = state.peek() {
                         state.advance(1);
-                        HlslSyntaxKind::PlusAssign
+                        HlslTokenType::PlusAssign
                     }
                     else if let Some('+') = state.peek() {
                         state.advance(1);
-                        HlslSyntaxKind::Increment
+                        HlslTokenType::Increment
                     }
                     else {
-                        HlslSyntaxKind::Plus
+                        HlslTokenType::Plus
                     }
                 }
                 '-' => {
                     state.advance(1);
                     if let Some('=') = state.peek() {
                         state.advance(1);
-                        HlslSyntaxKind::MinusAssign
+                        HlslTokenType::MinusAssign
                     }
                     else if let Some('-') = state.peek() {
                         state.advance(1);
-                        HlslSyntaxKind::Decrement
+                        HlslTokenType::Decrement
                     }
                     else if let Some('>') = state.peek() {
                         state.advance(1);
-                        HlslSyntaxKind::Arrow
+                        HlslTokenType::Arrow
                     }
                     else {
-                        HlslSyntaxKind::Minus
+                        HlslTokenType::Minus
                     }
                 }
                 '*' => {
                     state.advance(1);
                     if let Some('=') = state.peek() {
                         state.advance(1);
-                        HlslSyntaxKind::MultiplyAssign
+                        HlslTokenType::MultiplyAssign
                     }
                     else {
-                        HlslSyntaxKind::Multiply
+                        HlslTokenType::Multiply
                     }
                 }
                 '/' => {
                     state.advance(1);
                     if let Some('=') = state.peek() {
                         state.advance(1);
-                        HlslSyntaxKind::DivideAssign
+                        HlslTokenType::DivideAssign
                     }
                     else {
-                        HlslSyntaxKind::Divide
+                        HlslTokenType::Divide
                     }
                 }
                 '%' => {
                     state.advance(1);
                     if let Some('=') = state.peek() {
                         state.advance(1);
-                        HlslSyntaxKind::ModuloAssign
+                        HlslTokenType::ModuloAssign
                     }
                     else {
-                        HlslSyntaxKind::Modulo
+                        HlslTokenType::Modulo
                     }
                 }
                 '=' => {
                     state.advance(1);
                     if let Some('=') = state.peek() {
                         state.advance(1);
-                        HlslSyntaxKind::Equal
+                        HlslTokenType::Equal
                     }
                     else {
-                        HlslSyntaxKind::Assign
+                        HlslTokenType::Assign
                     }
                 }
                 '!' => {
                     state.advance(1);
                     if let Some('=') = state.peek() {
                         state.advance(1);
-                        HlslSyntaxKind::NotEqual
+                        HlslTokenType::NotEqual
                     }
                     else {
-                        HlslSyntaxKind::LogicalNot
+                        HlslTokenType::LogicalNot
                     }
                 }
                 '<' => {
                     state.advance(1);
                     if let Some('=') = state.peek() {
                         state.advance(1);
-                        HlslSyntaxKind::LessEqual
+                        HlslTokenType::LessEqual
                     }
                     else if let Some('<') = state.peek() {
                         state.advance(1);
                         if let Some('=') = state.peek() {
                             state.advance(1);
-                            HlslSyntaxKind::LeftShiftAssign
+                            HlslTokenType::LeftShiftAssign
                         }
                         else {
-                            HlslSyntaxKind::LeftShift
+                            HlslTokenType::LeftShift
                         }
                     }
                     else {
-                        HlslSyntaxKind::Less
+                        HlslTokenType::Less
                     }
                 }
                 '>' => {
                     state.advance(1);
                     if let Some('=') = state.peek() {
                         state.advance(1);
-                        HlslSyntaxKind::GreaterEqual
+                        HlslTokenType::GreaterEqual
                     }
                     else if let Some('>') = state.peek() {
                         state.advance(1);
                         if let Some('=') = state.peek() {
                             state.advance(1);
-                            HlslSyntaxKind::RightShiftAssign
+                            HlslTokenType::RightShiftAssign
                         }
                         else {
-                            HlslSyntaxKind::RightShift
+                            HlslTokenType::RightShift
                         }
                     }
                     else {
-                        HlslSyntaxKind::Greater
+                        HlslTokenType::Greater
                     }
                 }
                 '&' => {
                     state.advance(1);
                     if let Some('&') = state.peek() {
                         state.advance(1);
-                        HlslSyntaxKind::LogicalAnd
+                        HlslTokenType::LogicalAnd
                     }
                     else if let Some('=') = state.peek() {
                         state.advance(1);
-                        HlslSyntaxKind::BitwiseAndAssign
+                        HlslTokenType::BitwiseAndAssign
                     }
                     else {
-                        HlslSyntaxKind::BitwiseAnd
+                        HlslTokenType::BitwiseAnd
                     }
                 }
                 '|' => {
                     state.advance(1);
                     if let Some('|') = state.peek() {
                         state.advance(1);
-                        HlslSyntaxKind::LogicalOr
+                        HlslTokenType::LogicalOr
                     }
                     else if let Some('=') = state.peek() {
                         state.advance(1);
-                        HlslSyntaxKind::BitwiseOrAssign
+                        HlslTokenType::BitwiseOrAssign
                     }
                     else {
-                        HlslSyntaxKind::BitwiseOr
+                        HlslTokenType::BitwiseOr
                     }
                 }
                 '^' => {
                     state.advance(1);
                     if let Some('=') = state.peek() {
                         state.advance(1);
-                        HlslSyntaxKind::BitwiseXorAssign
+                        HlslTokenType::BitwiseXorAssign
                     }
                     else {
-                        HlslSyntaxKind::BitwiseXor
+                        HlslTokenType::BitwiseXor
                     }
                 }
                 '~' => {
                     state.advance(1);
-                    HlslSyntaxKind::BitwiseNot
+                    HlslTokenType::BitwiseNot
                 }
                 '?' => {
                     state.advance(1);
-                    HlslSyntaxKind::Conditional
+                    HlslTokenType::Conditional
                 }
                 '.' => {
                     state.advance(1);
-                    HlslSyntaxKind::Dot
+                    HlslTokenType::Dot
                 }
                 ':' => {
                     state.advance(1);
                     if let Some(':') = state.peek() {
                         state.advance(1);
-                        HlslSyntaxKind::DoubleColon
+                        HlslTokenType::DoubleColon
                     }
                     else {
-                        HlslSyntaxKind::Colon
+                        HlslTokenType::Colon
                     }
                 }
                 ';' => {
                     state.advance(1);
-                    HlslSyntaxKind::Semicolon
+                    HlslTokenType::Semicolon
                 }
                 ',' => {
                     state.advance(1);
-                    HlslSyntaxKind::Comma
+                    HlslTokenType::Comma
                 }
                 '(' => {
                     state.advance(1);
-                    HlslSyntaxKind::LeftParen
+                    HlslTokenType::LeftParen
                 }
                 ')' => {
                     state.advance(1);
-                    HlslSyntaxKind::RightParen
+                    HlslTokenType::RightParen
                 }
                 '[' => {
                     state.advance(1);
-                    HlslSyntaxKind::LeftBracket
+                    HlslTokenType::LeftBracket
                 }
                 ']' => {
                     state.advance(1);
-                    HlslSyntaxKind::RightBracket
+                    HlslTokenType::RightBracket
                 }
                 '{' => {
                     state.advance(1);
-                    HlslSyntaxKind::LeftBrace
+                    HlslTokenType::LeftBrace
                 }
                 '}' => {
                     state.advance(1);
-                    HlslSyntaxKind::RightBrace
+                    HlslTokenType::RightBrace
                 }
                 '\\' => {
                     state.advance(1);
-                    HlslSyntaxKind::Backslash
+                    HlslTokenType::Backslash
+                }
+                '#' => {
+                    state.advance(1);
+                    HlslTokenType::Hash
+                }
+                '@' => {
+                    state.advance(1);
+                    HlslTokenType::At
                 }
                 _ => return false,
             };
 
             state.add_token(token_kind, start_pos, state.get_position());
-            true
+            return true;
         }
-        else {
-            false
-        }
+
+        false
     }
 }
 

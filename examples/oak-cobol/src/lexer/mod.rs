@@ -1,3 +1,4 @@
+#![doc = include_str!("readme.md")]
 pub mod token_type;
 pub use token_type::CobolTokenType;
 
@@ -19,7 +20,7 @@ impl<'config> Lexer<CobolLanguage> for CobolLexer<'config> {
         let mut state: State<'_, S> = LexerState::new(source);
         let result = self.run(&mut state);
         if result.is_ok() {
-            state.add_eof();
+            state.add_eof()
         }
         state.finish_with_cache(result, &mut cache)
     }
@@ -67,10 +68,10 @@ impl<'config> CobolLexer<'config> {
             let start_pos = state.get_position();
             if let Some(ch) = state.peek() {
                 state.advance(ch.len_utf8());
-                state.add_token(CobolTokenType::Error, start_pos, state.get_position());
+                state.add_token(CobolTokenType::Error, start_pos, state.get_position())
             }
 
-            state.advance_if_dead_lock(safe_point);
+            state.advance_if_dead_lock(safe_point)
         }
 
         Ok(())
@@ -81,12 +82,7 @@ impl<'config> CobolLexer<'config> {
             if ch.is_whitespace() && ch != '\n' && ch != '\r' {
                 let start_pos = state.get_position();
                 while let Some(ch) = state.peek() {
-                    if ch.is_whitespace() && ch != '\n' && ch != '\r' {
-                        state.advance(ch.len_utf8());
-                    }
-                    else {
-                        break;
-                    }
+                    if ch.is_whitespace() && ch != '\n' && ch != '\r' { state.advance(ch.len_utf8()) } else { break }
                 }
                 state.add_token(CobolTokenType::Whitespace, start_pos, state.get_position());
                 return true;
@@ -101,7 +97,7 @@ impl<'config> CobolLexer<'config> {
                 let start_pos = state.get_position();
                 state.advance(ch.len_utf8());
                 if ch == '\r' && state.peek() == Some('\n') {
-                    state.advance(1);
+                    state.advance(1)
                 }
                 state.add_token(CobolTokenType::Newline, start_pos, state.get_position());
                 return true;
@@ -118,7 +114,7 @@ impl<'config> CobolLexer<'config> {
                 if ch == '\n' || ch == '\r' {
                     break;
                 }
-                state.advance(ch.len_utf8());
+                state.advance(ch.len_utf8())
             }
             state.add_token(CobolTokenType::Comment, start_pos, state.get_position());
             return true;
@@ -135,18 +131,13 @@ impl<'config> CobolLexer<'config> {
                     if ch == quote {
                         state.advance(1);
                         // 处理双引号转义
-                        if state.peek() == Some(quote) {
-                            state.advance(1);
-                        }
-                        else {
-                            break;
-                        }
+                        if state.peek() == Some(quote) { state.advance(1) } else { break }
                     }
                     else if ch == '\n' || ch == '\r' {
                         break;
                     }
                     else {
-                        state.advance(ch.len_utf8());
+                        state.advance(ch.len_utf8())
                     }
                 }
                 state.add_token(CobolTokenType::StringLiteral, start_pos, state.get_position());
@@ -172,11 +163,11 @@ impl<'config> CobolLexer<'config> {
 
                 while let Some(ch) = state.peek() {
                     if ch.is_ascii_digit() {
-                        state.advance(1);
+                        state.advance(1)
                     }
                     else if ch == '.' && !has_dot {
                         has_dot = true;
-                        state.advance(1);
+                        state.advance(1)
                     }
                     else {
                         break;
@@ -194,12 +185,7 @@ impl<'config> CobolLexer<'config> {
             if ch.is_alphabetic() {
                 let start_pos = state.get_position();
                 while let Some(ch) = state.peek() {
-                    if ch.is_alphanumeric() || ch == '-' {
-                        state.advance(1);
-                    }
-                    else {
-                        break;
-                    }
+                    if ch.is_alphanumeric() || ch == '-' { state.advance(1) } else { break }
                 }
                 let end_pos = state.get_position();
                 let text = state.get_text_in((start_pos..end_pos).into()).to_uppercase();
@@ -223,16 +209,11 @@ impl<'config> CobolLexer<'config> {
                             let save = state.get_position();
                             state.advance(1);
                             while state.peek() == Some(' ') {
-                                state.advance(1);
+                                state.advance(1)
                             }
                             let next_start = state.get_position();
                             while let Some(c) = state.peek() {
-                                if c.is_alphanumeric() {
-                                    state.advance(1);
-                                }
-                                else {
-                                    break;
-                                }
+                                if c.is_alphanumeric() { state.advance(1) } else { break }
                             }
                             if state.get_text_in((next_start..state.get_position()).into()).to_uppercase() == "TO" {
                                 CobolTokenType::GoTo

@@ -409,6 +409,7 @@ impl TreeLayout {
         }
     }
 
+    /// Recursively add edges from the given node to all its descendants
     fn add_tree_edges(&self, node: &TreeNode, layout: &mut Layout) {
         for child in &node.children {
             let edge = Edge::new(node.id.clone(), child.id.clone());
@@ -479,7 +480,7 @@ impl TreeRenderer {
     //     use svg::{
     //         Document,
     //         node::element::{Group, Line, Rectangle, Text},
-    //     };
+    //     }
     //
     //     let mut document = Document::new().set("viewBox", format!("0 0 {} {}", layout.bounds.width(), layout.bounds.height()));
     //
@@ -544,13 +545,7 @@ impl TreeRenderer {
             return Some(node.label.clone());
         }
 
-        for child in &node.children {
-            if let Some(label) = self.find_node_label(child, target_id) {
-                return Some(label);
-            }
-        }
-
-        None
+        node.children.iter().find_map(|child| self.find_node_label(child, target_id))
     }
 }
 

@@ -1,5 +1,5 @@
-use oak_diagnostic::testing::lexing::LexerTester;
 use oak_clojure::{ClojureLanguage, ClojureLexer};
+use oak_testing::lexing::LexerTester;
 use std::{path::Path, time::Duration};
 
 #[test]

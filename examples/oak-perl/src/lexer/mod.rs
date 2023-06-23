@@ -1,4 +1,7 @@
-use crate::{kind::PerlSyntaxKind, language::PerlLanguage};
+#![doc = include_str!("readme.md")]
+pub mod token_type;
+
+use crate::{language::PerlLanguage, lexer::token_type::PerlTokenType};
 use oak_core::{
     Lexer, LexerCache, LexerState, OakError,
     lexer::{CommentConfig, LexOutput, WhitespaceConfig},
@@ -11,55 +14,62 @@ type State<'s, S> = LexerState<'s, S, PerlLanguage>;
 static PERL_WHITESPACE: LazyLock<WhitespaceConfig> = LazyLock::new(|| WhitespaceConfig { unicode_whitespace: true });
 static PERL_COMMENT: LazyLock<CommentConfig> = LazyLock::new(|| CommentConfig { line_marker: "#", block_start: "", block_end: "", nested_blocks: false });
 
+/// Lexer for the Perl language.
+///
+/// This lexer transforms a source string into a stream of [`PerlTokenType`] tokens.
 #[derive(Clone, Debug)]
 pub struct PerlLexer<'config> {
     _config: &'config PerlLanguage,
 }
 
 impl<'config> PerlLexer<'config> {
+    /// Creates a new `PerlLexer` with the given language configuration.
     pub fn new(config: &'config PerlLanguage) -> Self {
         Self { _config: config }
     }
 
+    /// Skips whitespace characters.
     fn skip_whitespace<'s, S: Source + ?Sized>(&self, state: &mut State<'s, S>) -> bool {
-        PERL_WHITESPACE.scan(state, PerlSyntaxKind::Whitespace)
+        PERL_WHITESPACE.scan(state, PerlTokenType::Whitespace)
     }
 
+    /// Skips single-line comments.
     fn skip_comment<'s, S: Source + ?Sized>(&self, state: &mut State<'s, S>) -> bool {
-        PERL_COMMENT.scan(state, PerlSyntaxKind::Comment, PerlSyntaxKind::Comment)
+        PERL_COMMENT.scan(state, PerlTokenType::Comment, PerlTokenType::Comment)
     }
 
+    /// Lexes a string literal (single or double quoted).
     fn lex_string<'s, S: Source + ?Sized>(&self, state: &mut State<'s, S>) -> bool {
         let start_pos = state.get_position();
 
         if let Some(quote_char) = state.peek() {
             if quote_char == '"' || quote_char == '\'' {
-                state.advance(1); // 跳过开始引号
+                state.advance(1); // Skip opening quote
 
                 let mut escaped = false;
                 while let Some(ch) = state.peek() {
                     if escaped {
                         escaped = false;
-                        state.advance(ch.len_utf8());
+                        state.advance(ch.len_utf8())
                     }
                     else if ch == '\\' {
                         escaped = true;
-                        state.advance(1);
+                        state.advance(1)
                     }
                     else if ch == quote_char {
-                        state.advance(1); // 跳过结束引号
+                        state.advance(1); // Skip closing quote
                         break;
                     }
                     else if ch == '\n' || ch == '\r' {
-                        // 字符串不能跨行（除非转义）
+                        // Strings cannot span lines unless escaped
                         break;
                     }
                     else {
-                        state.advance(ch.len_utf8());
+                        state.advance(ch.len_utf8())
                     }
                 }
 
-                state.add_token(PerlSyntaxKind::StringLiteral, start_pos, state.get_position());
+                state.add_token(PerlTokenType::StringLiteral, start_pos, state.get_position());
                 true
             }
             else {
@@ -71,6 +81,7 @@ impl<'config> PerlLexer<'config> {
         }
     }
 
+    /// Lexes a variable name (starting with $, @, or %).
     fn lex_variable<'s, S: Source + ?Sized>(&self, state: &mut State<'s, S>) -> bool {
         if let Some(ch) = state.peek() {
             let start_pos = state.get_position();
@@ -78,44 +89,29 @@ impl<'config> PerlLexer<'config> {
             match ch {
                 '$' => {
                     state.advance(1);
-                    // 读取变量名
+                    // Read variable name
                     while let Some(ch) = state.peek() {
-                        if ch.is_alphanumeric() || ch == '_' {
-                            state.advance(ch.len_utf8());
-                        }
-                        else {
-                            break;
-                        }
+                        if ch.is_alphanumeric() || ch == '_' { state.advance(ch.len_utf8()) } else { break }
                     }
-                    state.add_token(PerlSyntaxKind::Dollar, start_pos, state.get_position());
+                    state.add_token(PerlTokenType::Dollar, start_pos, state.get_position());
                     true
                 }
                 '@' => {
                     state.advance(1);
-                    // 读取数组变量名
+                    // Read array variable name
                     while let Some(ch) = state.peek() {
-                        if ch.is_alphanumeric() || ch == '_' {
-                            state.advance(ch.len_utf8());
-                        }
-                        else {
-                            break;
-                        }
+                        if ch.is_alphanumeric() || ch == '_' { state.advance(ch.len_utf8()) } else { break }
                     }
-                    state.add_token(PerlSyntaxKind::At, start_pos, state.get_position());
+                    state.add_token(PerlTokenType::At, start_pos, state.get_position());
                     true
                 }
                 '%' => {
                     state.advance(1);
-                    // 读取哈希变量名
+                    // Read hash variable name
                     while let Some(ch) = state.peek() {
-                        if ch.is_alphanumeric() || ch == '_' {
-                            state.advance(ch.len_utf8());
-                        }
-                        else {
-                            break;
-                        }
+                        if ch.is_alphanumeric() || ch == '_' { state.advance(ch.len_utf8()) } else { break }
                     }
-                    state.add_token(PerlSyntaxKind::Percent_, start_pos, state.get_position());
+                    state.add_token(PerlTokenType::Percent_, start_pos, state.get_position());
                     true
                 }
                 _ => false,
@@ -126,6 +122,7 @@ impl<'config> PerlLexer<'config> {
         }
     }
 
+    /// Lexes an identifier or a keyword.
     fn lex_identifier_or_keyword<'s, S: Source + ?Sized>(&self, state: &mut State<'s, S>) -> bool {
         if let Some(ch) = state.peek() {
             if ch.is_alphabetic() || ch == '_' {
@@ -136,7 +133,7 @@ impl<'config> PerlLexer<'config> {
                 while let Some(ch) = state.peek() {
                     if ch.is_alphanumeric() || ch == '_' {
                         text.push(ch);
-                        state.advance(ch.len_utf8());
+                        state.advance(ch.len_utf8())
                     }
                     else {
                         break;
@@ -145,53 +142,53 @@ impl<'config> PerlLexer<'config> {
 
                 // 检查是否是关键字
                 let kind = match text.as_str() {
-                    "if" => PerlSyntaxKind::If,
-                    "else" => PerlSyntaxKind::Else,
-                    "elsif" => PerlSyntaxKind::Elsif,
-                    "unless" => PerlSyntaxKind::Unless,
-                    "while" => PerlSyntaxKind::While,
-                    "until" => PerlSyntaxKind::Until,
-                    "for" => PerlSyntaxKind::For,
-                    "foreach" => PerlSyntaxKind::Foreach,
-                    "do" => PerlSyntaxKind::Do,
-                    "sub" => PerlSyntaxKind::Sub,
-                    "package" => PerlSyntaxKind::Package,
-                    "use" => PerlSyntaxKind::Use,
-                    "require" => PerlSyntaxKind::Require,
-                    "my" => PerlSyntaxKind::My,
-                    "our" => PerlSyntaxKind::Our,
-                    "local" => PerlSyntaxKind::Local,
-                    "return" => PerlSyntaxKind::Return,
-                    "last" => PerlSyntaxKind::Last,
-                    "next" => PerlSyntaxKind::Next,
-                    "redo" => PerlSyntaxKind::Redo,
-                    "die" => PerlSyntaxKind::Die,
-                    "warn" => PerlSyntaxKind::Warn,
-                    "eval" => PerlSyntaxKind::Eval,
-                    "print" => PerlSyntaxKind::Print,
-                    "printf" => PerlSyntaxKind::Printf,
-                    "chomp" => PerlSyntaxKind::Chomp,
-                    "chop" => PerlSyntaxKind::Chop,
-                    "split" => PerlSyntaxKind::Split,
-                    "join" => PerlSyntaxKind::Join,
-                    "push" => PerlSyntaxKind::Push,
-                    "pop" => PerlSyntaxKind::Pop,
-                    "shift" => PerlSyntaxKind::Shift,
-                    "unshift" => PerlSyntaxKind::Unshift,
-                    "keys" => PerlSyntaxKind::Keys,
-                    "values" => PerlSyntaxKind::Values,
-                    "each" => PerlSyntaxKind::Each,
-                    "exists" => PerlSyntaxKind::Exists,
-                    "delete" => PerlSyntaxKind::Delete,
-                    "defined" => PerlSyntaxKind::Defined,
-                    "undef" => PerlSyntaxKind::Undef,
-                    "ref" => PerlSyntaxKind::Ref,
-                    "bless" => PerlSyntaxKind::Bless,
-                    "new" => PerlSyntaxKind::New,
-                    "and" => PerlSyntaxKind::And,
-                    "or" => PerlSyntaxKind::Or,
-                    "not" => PerlSyntaxKind::Not,
-                    _ => PerlSyntaxKind::Identifier,
+                    "if" => PerlTokenType::If,
+                    "else" => PerlTokenType::Else,
+                    "elsif" => PerlTokenType::Elsif,
+                    "unless" => PerlTokenType::Unless,
+                    "while" => PerlTokenType::While,
+                    "until" => PerlTokenType::Until,
+                    "for" => PerlTokenType::For,
+                    "foreach" => PerlTokenType::Foreach,
+                    "do" => PerlTokenType::Do,
+                    "sub" => PerlTokenType::Sub,
+                    "package" => PerlTokenType::Package,
+                    "use" => PerlTokenType::Use,
+                    "require" => PerlTokenType::Require,
+                    "my" => PerlTokenType::My,
+                    "our" => PerlTokenType::Our,
+                    "local" => PerlTokenType::Local,
+                    "return" => PerlTokenType::Return,
+                    "last" => PerlTokenType::Last,
+                    "next" => PerlTokenType::Next,
+                    "redo" => PerlTokenType::Redo,
+                    "die" => PerlTokenType::Die,
+                    "warn" => PerlTokenType::Warn,
+                    "eval" => PerlTokenType::Eval,
+                    "print" => PerlTokenType::Print,
+                    "printf" => PerlTokenType::Printf,
+                    "chomp" => PerlTokenType::Chomp,
+                    "chop" => PerlTokenType::Chop,
+                    "split" => PerlTokenType::Split,
+                    "join" => PerlTokenType::Join,
+                    "push" => PerlTokenType::Push,
+                    "pop" => PerlTokenType::Pop,
+                    "shift" => PerlTokenType::Shift,
+                    "unshift" => PerlTokenType::Unshift,
+                    "keys" => PerlTokenType::Keys,
+                    "values" => PerlTokenType::Values,
+                    "each" => PerlTokenType::Each,
+                    "exists" => PerlTokenType::Exists,
+                    "delete" => PerlTokenType::Delete,
+                    "defined" => PerlTokenType::Defined,
+                    "undef" => PerlTokenType::Undef,
+                    "ref" => PerlTokenType::Ref,
+                    "bless" => PerlTokenType::Bless,
+                    "new" => PerlTokenType::New,
+                    "and" => PerlTokenType::And,
+                    "or" => PerlTokenType::Or,
+                    "not" => PerlTokenType::Not,
+                    _ => PerlTokenType::Identifier,
                 };
 
                 state.add_token(kind, start_pos, state.get_position());
@@ -206,6 +203,7 @@ impl<'config> PerlLexer<'config> {
         }
     }
 
+    /// Lexes a number literal.
     fn lex_number<'s, S: Source + ?Sized>(&self, state: &mut State<'s, S>) -> bool {
         if let Some(ch) = state.peek() {
             if ch.is_ascii_digit() {
@@ -215,18 +213,18 @@ impl<'config> PerlLexer<'config> {
                 // 读取数字
                 while let Some(ch) = state.peek() {
                     if ch.is_ascii_digit() {
-                        state.advance(1);
+                        state.advance(1)
                     }
                     else if ch == '.' && !has_dot {
                         has_dot = true;
-                        state.advance(1);
+                        state.advance(1)
                     }
                     else {
                         break;
                     }
                 }
 
-                let kind = PerlSyntaxKind::NumberLiteral;
+                let kind = PerlTokenType::NumberLiteral;
 
                 state.add_token(kind, start_pos, state.get_position());
                 true
@@ -240,6 +238,7 @@ impl<'config> PerlLexer<'config> {
         }
     }
 
+    /// Lexes operators and punctuation characters.
     fn lex_operators_and_punctuation<'s, S: Source + ?Sized>(&self, state: &mut State<'s, S>) -> bool {
         if let Some(ch) = state.peek() {
             let start_pos = state.get_position();
@@ -249,205 +248,209 @@ impl<'config> PerlLexer<'config> {
                     state.advance(1);
                     if let Some('+') = state.peek() {
                         state.advance(1);
-                        PerlSyntaxKind::Increment
+                        PerlTokenType::Increment
                     }
                     else if let Some('=') = state.peek() {
                         state.advance(1);
-                        PerlSyntaxKind::PlusAssign
+                        PerlTokenType::PlusAssign
                     }
                     else {
-                        PerlSyntaxKind::Plus
+                        PerlTokenType::Plus
                     }
                 }
                 '-' => {
                     state.advance(1);
                     if let Some('-') = state.peek() {
                         state.advance(1);
-                        PerlSyntaxKind::Decrement
+                        PerlTokenType::Decrement
                     }
                     else if let Some('=') = state.peek() {
                         state.advance(1);
-                        PerlSyntaxKind::MinusAssign
+                        PerlTokenType::MinusAssign
                     }
                     else if let Some('>') = state.peek() {
                         state.advance(1);
-                        PerlSyntaxKind::Arrow
+                        PerlTokenType::Arrow
                     }
                     else {
-                        PerlSyntaxKind::Minus
+                        PerlTokenType::Minus
                     }
                 }
                 '*' => {
                     state.advance(1);
                     if let Some('*') = state.peek() {
                         state.advance(1);
-                        PerlSyntaxKind::Power
+                        PerlTokenType::Power
                     }
                     else if let Some('=') = state.peek() {
                         state.advance(1);
-                        PerlSyntaxKind::MultiplyAssign
+                        PerlTokenType::MultiplyAssign
                     }
                     else {
-                        PerlSyntaxKind::Star
+                        PerlTokenType::Star
                     }
                 }
                 '/' => {
                     state.advance(1);
                     if let Some('=') = state.peek() {
                         state.advance(1);
-                        PerlSyntaxKind::DivideAssign
+                        PerlTokenType::DivideAssign
                     }
                     else {
-                        PerlSyntaxKind::Slash
+                        PerlTokenType::Slash
+                    }
+                }
+                '%' => {
+                    state.advance(1);
+                    if let Some('=') = state.peek() {
+                        state.advance(1);
+                        PerlTokenType::ModuloAssign
+                    }
+                    else {
+                        PerlTokenType::Percent
                     }
                 }
                 '=' => {
                     state.advance(1);
                     if let Some('=') = state.peek() {
                         state.advance(1);
-                        PerlSyntaxKind::Equal
+                        if let Some('>') = state.peek() {
+                            state.advance(1);
+                            PerlTokenType::FatArrow
+                        }
+                        else {
+                            PerlTokenType::Equal
+                        }
                     }
                     else if let Some('~') = state.peek() {
                         state.advance(1);
-                        PerlSyntaxKind::Match
+                        PerlTokenType::Match
                     }
                     else {
-                        PerlSyntaxKind::Assign
+                        PerlTokenType::Assign
+                    }
+                }
+                '<' => {
+                    state.advance(1);
+                    if let Some('<') = state.peek() {
+                        state.advance(1);
+                        PerlTokenType::LeftShift
+                    }
+                    else if let Some('=') = state.peek() {
+                        state.advance(1);
+                        if let Some('>') = state.peek() {
+                            state.advance(1);
+                            PerlTokenType::Spaceship
+                        }
+                        else {
+                            PerlTokenType::LessEqual
+                        }
+                    }
+                    else {
+                        PerlTokenType::LessThan
+                    }
+                }
+                '>' => {
+                    state.advance(1);
+                    if let Some('>') = state.peek() {
+                        state.advance(1);
+                        PerlTokenType::RightShift
+                    }
+                    else if let Some('=') = state.peek() {
+                        state.advance(1);
+                        PerlTokenType::GreaterEqual
+                    }
+                    else {
+                        PerlTokenType::GreaterThan
                     }
                 }
                 '!' => {
                     state.advance(1);
                     if let Some('=') = state.peek() {
                         state.advance(1);
-                        PerlSyntaxKind::NotEqual
+                        PerlTokenType::NotEqual
                     }
                     else if let Some('~') = state.peek() {
                         state.advance(1);
-                        PerlSyntaxKind::NotMatch
+                        PerlTokenType::NotMatch
                     }
                     else {
-                        PerlSyntaxKind::Not
-                    }
-                }
-                '<' => {
-                    state.advance(1);
-                    if let Some('=') = state.peek() {
-                        state.advance(1);
-                        if let Some('>') = state.peek() {
-                            state.advance(1);
-                            PerlSyntaxKind::Spaceship
-                        }
-                        else {
-                            PerlSyntaxKind::LessEqual
-                        }
-                    }
-                    else if let Some('<') = state.peek() {
-                        state.advance(1);
-                        PerlSyntaxKind::LeftShift
-                    }
-                    else {
-                        PerlSyntaxKind::LessThan
-                    }
-                }
-                '>' => {
-                    state.advance(1);
-                    if let Some('=') = state.peek() {
-                        state.advance(1);
-                        PerlSyntaxKind::GreaterEqual
-                    }
-                    else if let Some('>') = state.peek() {
-                        state.advance(1);
-                        PerlSyntaxKind::RightShift
-                    }
-                    else {
-                        PerlSyntaxKind::GreaterThan
+                        PerlTokenType::LogicalNot
                     }
                 }
                 '&' => {
                     state.advance(1);
-                    if let Some('&') = state.peek() {
-                        state.advance(1);
-                        PerlSyntaxKind::LogicalAnd
-                    }
-                    else {
-                        PerlSyntaxKind::BitwiseAnd
-                    }
+                    PerlTokenType::BitwiseAnd
                 }
                 '|' => {
                     state.advance(1);
-                    if let Some('|') = state.peek() {
-                        state.advance(1);
-                        PerlSyntaxKind::LogicalOr
-                    }
-                    else {
-                        PerlSyntaxKind::BitwiseOr
-                    }
+                    PerlTokenType::BitwiseOr
                 }
                 '^' => {
                     state.advance(1);
-                    PerlSyntaxKind::BitwiseXor
+                    PerlTokenType::BitwiseXor
                 }
                 '~' => {
                     state.advance(1);
-                    PerlSyntaxKind::BitwiseNot
+                    PerlTokenType::BitwiseNot
                 }
                 '.' => {
                     state.advance(1);
                     if let Some('.') = state.peek() {
                         state.advance(1);
-                        PerlSyntaxKind::Range
+                        PerlTokenType::Range
                     }
                     else {
-                        PerlSyntaxKind::Concat
+                        PerlTokenType::Concat
                     }
                 }
                 '?' => {
                     state.advance(1);
-                    PerlSyntaxKind::Question
+                    PerlTokenType::Question
                 }
                 ':' => {
                     state.advance(1);
-                    PerlSyntaxKind::Colon
+                    PerlTokenType::Colon
                 }
                 ';' => {
                     state.advance(1);
-                    PerlSyntaxKind::Semicolon
+                    PerlTokenType::Semicolon
                 }
                 ',' => {
                     state.advance(1);
-                    PerlSyntaxKind::Comma
+                    PerlTokenType::Comma
                 }
                 '(' => {
                     state.advance(1);
-                    PerlSyntaxKind::LeftParen
+                    PerlTokenType::LeftParen
                 }
                 ')' => {
                     state.advance(1);
-                    PerlSyntaxKind::RightParen
+                    PerlTokenType::RightParen
                 }
                 '[' => {
                     state.advance(1);
-                    PerlSyntaxKind::LeftBracket
+                    PerlTokenType::LeftBracket
                 }
                 ']' => {
                     state.advance(1);
-                    PerlSyntaxKind::RightBracket
+                    PerlTokenType::RightBracket
                 }
                 '{' => {
                     state.advance(1);
-                    PerlSyntaxKind::LeftBrace
+                    PerlTokenType::LeftBrace
                 }
                 '}' => {
                     state.advance(1);
-                    PerlSyntaxKind::RightBrace
+                    PerlTokenType::RightBrace
                 }
                 '\n' => {
                     state.advance(1);
-                    PerlSyntaxKind::Newline
+                    PerlTokenType::Newline
                 }
                 _ => {
                     state.advance(ch.len_utf8());
-                    PerlSyntaxKind::Error
+                    PerlTokenType::Error
                 }
             };
 
@@ -472,53 +475,54 @@ impl<'config> Lexer<PerlLanguage> for PerlLexer<'config> {
 }
 
 impl<'config> PerlLexer<'config> {
+    /// Runs the lexer on the given state until the end of the source is reached.
     fn run<'s, S: Source + ?Sized>(&self, state: &mut State<'s, S>) -> Result<(), OakError> {
         while state.not_at_end() {
             let safe_point = state.get_position();
 
-            // 跳过空白字符
+            // Skip whitespace characters
             if self.skip_whitespace(state) {
                 continue;
             }
 
-            // 处理注释
+            // Handle comments
             if self.skip_comment(state) {
                 continue;
             }
 
-            // 处理字符串
+            // Handle strings
             if self.lex_string(state) {
                 continue;
             }
 
-            // 处理变量
+            // Handle variables
             if self.lex_variable(state) {
                 continue;
             }
 
-            // 处理标识符和关键字
+            // Handle identifiers and keywords
             if self.lex_identifier_or_keyword(state) {
                 continue;
             }
 
-            // 处理数字
+            // Handle numbers
             if self.lex_number(state) {
                 continue;
             }
 
-            // 处理操作符和标点符号
+            // Handle operators and punctuation
             if self.lex_operators_and_punctuation(state) {
                 continue;
             }
 
-            // 如果没有匹配任何模式，创建错误 token
+            // If no pattern matches, create an error token
             let start_pos = state.get_position();
             if let Some(ch) = state.peek() {
                 state.advance(ch.len_utf8());
-                state.add_token(PerlSyntaxKind::Error, start_pos, state.get_position());
+                state.add_token(PerlTokenType::Error, start_pos, state.get_position())
             }
 
-            state.advance_if_dead_lock(safe_point);
+            state.advance_if_dead_lock(safe_point)
         }
 
         Ok(())

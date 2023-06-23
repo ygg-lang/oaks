@@ -13,5 +13,5 @@ fn test_parser_basic() {
     let parser = WgslParser::new(&language);
     let diagnostics = parser.parse(&source, &[], &mut session);
 
-    assert!(diagnostics.result.is_ok());
+    assert!(diagnostics.result.is_ok())
 }

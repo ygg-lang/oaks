@@ -1,41 +1,44 @@
+#![doc = include_str!("readme.md")]
 use oak_core::{Language, LanguageCategory};
+#[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
 
-/// SQL 语言实现
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
+/// SQL language implementation.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct SqlLanguage {
-    /// 是否区分大小
+    /// Whether it is case sensitive.
     pub case_sensitive: bool,
-    /// 是否允许双引号标识符
+    /// Whether to allow double-quoted identifiers.
     pub quoted_identifiers: bool,
-    /// 是否允许反引号标识符
+    /// Whether to allow backtick identifiers.
     pub backtick_identifiers: bool,
-    /// 是否允许方括号标识符
+    /// Whether to allow bracket identifiers.
     pub bracket_identifiers: bool,
 }
 
 impl SqlLanguage {
-    /// 创建新的 SQL 语言实例
+    /// Creates a new SQL language instance.
     pub fn new() -> Self {
         Self::default()
     }
 
-    /// 创建标准 SQL 语言实例
+    /// Creates a standard SQL language instance.
     pub fn standard() -> Self {
         Self::default()
     }
 
-    /// 创建 MySQL 风格SQL 语言实例
+    /// Creates a MySQL-style SQL language instance.
     pub fn mysql() -> Self {
         Self { case_sensitive: false, quoted_identifiers: true, backtick_identifiers: true, bracket_identifiers: false }
     }
 
-    /// 创建 PostgreSQL 风格SQL 语言实例
+    /// Creates a PostgreSQL-style SQL language instance.
     pub fn postgresql() -> Self {
         Self { case_sensitive: false, quoted_identifiers: true, backtick_identifiers: false, bracket_identifiers: false }
     }
 
-    /// 创建 SQL Server 风格SQL 语言实例
+    /// Creates a SQL Server-style SQL language instance.
     pub fn sqlserver() -> Self {
         Self { case_sensitive: false, quoted_identifiers: true, backtick_identifiers: false, bracket_identifiers: true }
     }
@@ -51,7 +54,7 @@ impl Language for SqlLanguage {
     const NAME: &'static str = "sql";
     const CATEGORY: LanguageCategory = LanguageCategory::Dsl;
 
-    type TokenType = crate::kind::SqlSyntaxKind;
-    type ElementType = crate::kind::SqlSyntaxKind;
+    type TokenType = crate::lexer::token_type::SqlTokenType;
+    type ElementType = crate::parser::element_type::SqlElementType;
     type TypedRoot = ();
 }

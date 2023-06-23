@@ -1,4 +1,7 @@
-use crate::{kind::VampireSyntaxKind, language::VampireLanguage};
+#![doc = include_str!("readme.md")]
+pub mod token_type;
+
+use crate::{language::VampireLanguage, lexer::token_type::VampireTokenType};
 use oak_core::{
     Lexer, LexerCache, LexerState, OakError, TextEdit,
     lexer::{CommentConfig, LexOutput, StringConfig, WhitespaceConfig},
@@ -27,7 +30,6 @@ impl<'config> Lexer<VampireLanguage> for VampireLexer<'config> {
         state.finish(result)
     }
 }
-
 impl<'config> VampireLexer<'config> {
     pub fn new(config: &'config VampireLanguage) -> Self {
         Self { _config: config }
@@ -74,17 +76,17 @@ impl<'config> VampireLexer<'config> {
 
     /// Skip whitespace characters
     fn skip_whitespace<'s, S: Source + ?Sized>(&self, state: &mut State<'s, S>) -> bool {
-        VAMPIRE_WHITESPACE.scan(state, VampireSyntaxKind::Whitespace)
+        VAMPIRE_WHITESPACE.scan(state, VampireTokenType::Whitespace)
     }
 
     /// Skip comment lines
     fn skip_comment<'s, S: Source + ?Sized>(&self, state: &mut State<'s, S>) -> bool {
-        VAMPIRE_COMMENT.scan(state, VampireSyntaxKind::LineComment, VampireSyntaxKind::BlockComment)
+        VAMPIRE_COMMENT.scan(state, VampireTokenType::LineComment, VampireTokenType::BlockComment)
     }
 
     /// Lex string literals
     fn lex_string_literal<'s, S: Source + ?Sized>(&self, state: &mut State<'s, S>) -> bool {
-        VAMPIRE_STRING.scan(state, VampireSyntaxKind::StringLiteral)
+        VAMPIRE_STRING.scan(state, VampireTokenType::StringLiteral)
     }
 
     /// Lex number literals
@@ -150,7 +152,7 @@ impl<'config> VampireLexer<'config> {
             }
         }
 
-        let kind = if is_float { VampireSyntaxKind::RealLiteral } else { VampireSyntaxKind::IntegerLiteral };
+        let kind = if is_float { VampireTokenType::RealLiteral } else { VampireTokenType::IntegerLiteral };
         state.add_token(kind, start, state.get_position());
         true
     }
@@ -162,12 +164,7 @@ impl<'config> VampireLexer<'config> {
             if ch.is_ascii_alphabetic() || ch == '_' || ch == '$' {
                 state.advance(ch.len_utf8());
                 while let Some(ch) = state.peek() {
-                    if ch.is_ascii_alphanumeric() || ch == '_' || ch == '$' {
-                        state.advance(ch.len_utf8());
-                    }
-                    else {
-                        break;
-                    }
+                    if ch.is_ascii_alphanumeric() || ch == '_' || ch == '$' { state.advance(ch.len_utf8()) } else { break }
                 }
 
                 let end = state.get_position();
@@ -186,59 +183,59 @@ impl<'config> VampireLexer<'config> {
     }
 
     /// Determine if text is a keyword or identifier
-    fn keyword_or_identifier(&self, text: &str) -> VampireSyntaxKind {
+    fn keyword_or_identifier(&self, text: &str) -> VampireTokenType {
         match text {
             // TPTP formula types
-            "fof" => VampireSyntaxKind::FofKw,
-            "cnf" => VampireSyntaxKind::CnfKw,
-            "tff" => VampireSyntaxKind::TffKw,
-            "thf" => VampireSyntaxKind::ThfKw,
-            "tpi" => VampireSyntaxKind::TpiKw,
-            "include" => VampireSyntaxKind::IncludeKw,
+            "fof" => VampireTokenType::FofKw,
+            "cnf" => VampireTokenType::CnfKw,
+            "tff" => VampireTokenType::TffKw,
+            "thf" => VampireTokenType::ThfKw,
+            "tpi" => VampireTokenType::TpiKw,
+            "include" => VampireTokenType::IncludeKw,
 
             // Formula roles
-            "axiom" => VampireSyntaxKind::AxiomKw,
-            "hypothesis" => VampireSyntaxKind::HypothesisKw,
-            "definition" => VampireSyntaxKind::DefinitionKw,
-            "assumption" => VampireSyntaxKind::AssumptionKw,
-            "lemma" => VampireSyntaxKind::LemmaKw,
-            "theorem" => VampireSyntaxKind::TheoremKw,
-            "conjecture" => VampireSyntaxKind::ConjectureKw,
-            "negated_conjecture" => VampireSyntaxKind::NegatedConjectureKw,
-            "plain" => VampireSyntaxKind::PlainKw,
-            "type" => VampireSyntaxKind::TypeKw,
-            "fi_domain" => VampireSyntaxKind::FiDomainKw,
-            "fi_functors" => VampireSyntaxKind::FiFunctorsKw,
-            "fi_predicates" => VampireSyntaxKind::FiPredicatesKw,
-            "unknown" => VampireSyntaxKind::UnknownKw,
+            "axiom" => VampireTokenType::AxiomKw,
+            "hypothesis" => VampireTokenType::HypothesisKw,
+            "definition" => VampireTokenType::DefinitionKw,
+            "assumption" => VampireTokenType::AssumptionKw,
+            "lemma" => VampireTokenType::LemmaKw,
+            "theorem" => VampireTokenType::TheoremKw,
+            "conjecture" => VampireTokenType::ConjectureKw,
+            "negated_conjecture" => VampireTokenType::NegatedConjectureKw,
+            "plain" => VampireTokenType::PlainKw,
+            "type" => VampireTokenType::TypeKw,
+            "fi_domain" => VampireTokenType::FiDomainKw,
+            "fi_functors" => VampireTokenType::FiFunctorsKw,
+            "fi_predicates" => VampireTokenType::FiPredicatesKw,
+            "unknown" => VampireTokenType::UnknownKw,
 
             // Logical operators
-            "!" => VampireSyntaxKind::ForallKw,
-            "?" => VampireSyntaxKind::ExistsKw,
-            "&" => VampireSyntaxKind::AndKw,
-            "|" => VampireSyntaxKind::OrKw,
-            "~" => VampireSyntaxKind::NotKw,
-            "=>" => VampireSyntaxKind::ImpliesKw,
-            "<=>" => VampireSyntaxKind::IffKw,
-            "<~>" => VampireSyntaxKind::XorKw,
-            "~|" => VampireSyntaxKind::NorKw,
-            "~&" => VampireSyntaxKind::NandKw,
+            "!" => VampireTokenType::ForallKw,
+            "?" => VampireTokenType::ExistsKw,
+            "&" => VampireTokenType::AndKw,
+            "|" => VampireTokenType::OrKw,
+            "~" => VampireTokenType::NotKw,
+            "=>" => VampireTokenType::ImpliesKw,
+            "<=>" => VampireTokenType::IffKw,
+            "<~>" => VampireTokenType::XorKw,
+            "~|" => VampireTokenType::NorKw,
+            "~&" => VampireTokenType::NandKw,
 
             // Types
-            "$o" => VampireSyntaxKind::BoolKw,
-            "$i" => VampireSyntaxKind::IndividualKw,
-            "$int" => VampireSyntaxKind::IntKw,
-            "$real" => VampireSyntaxKind::RealKw,
-            "$rat" => VampireSyntaxKind::RatKw,
-            "$tType" => VampireSyntaxKind::TTypeKw,
-            "$oType" => VampireSyntaxKind::OTypeKw,
-            "$iType" => VampireSyntaxKind::ITypeKw,
+            "$o" => VampireTokenType::BoolKw,
+            "$i" => VampireTokenType::IndividualKw,
+            "$int" => VampireTokenType::IntKw,
+            "$real" => VampireTokenType::RealKw,
+            "$rat" => VampireTokenType::RatKw,
+            "$tType" => VampireTokenType::TTypeKw,
+            "$oType" => VampireTokenType::OTypeKw,
+            "$iType" => VampireTokenType::ITypeKw,
 
             // Boolean literals
-            "$true" => VampireSyntaxKind::BoolLiteral,
-            "$false" => VampireSyntaxKind::BoolLiteral,
+            "$true" => VampireTokenType::BoolLiteral,
+            "$false" => VampireTokenType::BoolLiteral,
 
-            _ => VampireSyntaxKind::Identifier,
+            _ => VampireTokenType::Identifier,
         }
     }
 
@@ -248,67 +245,67 @@ impl<'config> VampireLexer<'config> {
         let rest = state.rest();
 
         let (kind, len) = if rest.starts_with("==>") {
-            (VampireSyntaxKind::ImpliesKw, 3)
+            (VampireTokenType::ImpliesKw, 3)
         }
         else if rest.starts_with("<=>") {
-            (VampireSyntaxKind::IffKw, 3)
+            (VampireTokenType::IffKw, 3)
         }
         else if rest.starts_with("<~>") {
-            (VampireSyntaxKind::XorKw, 3)
+            (VampireTokenType::XorKw, 3)
         }
         else if rest.starts_with("~|") {
-            (VampireSyntaxKind::NorKw, 2)
+            (VampireTokenType::NorKw, 2)
         }
         else if rest.starts_with("~&") {
-            (VampireSyntaxKind::NandKw, 2)
+            (VampireTokenType::NandKw, 2)
         }
         else if rest.starts_with("==") {
-            (VampireSyntaxKind::EqEq, 2)
+            (VampireTokenType::DoubleEq, 2)
         }
         else if rest.starts_with("!=") {
-            (VampireSyntaxKind::NotEq, 2)
+            (VampireTokenType::NotEq, 2)
         }
         else if rest.starts_with("<=") {
-            (VampireSyntaxKind::LessEq, 2)
+            (VampireTokenType::LessEq, 2)
         }
         else if rest.starts_with(">=") {
-            (VampireSyntaxKind::GreaterEq, 2)
+            (VampireTokenType::GreaterEq, 2)
         }
         else if rest.starts_with("&&") {
-            (VampireSyntaxKind::AndAnd, 2)
+            (VampireTokenType::AndAnd, 2)
         }
         else if rest.starts_with("||") {
-            (VampireSyntaxKind::OrOr, 2)
+            (VampireTokenType::OrOr, 2)
         }
         else if rest.starts_with("++") {
-            (VampireSyntaxKind::PlusPlus, 2)
+            (VampireTokenType::PlusPlus, 2)
         }
         else if rest.starts_with("--") {
-            (VampireSyntaxKind::MinusMinus, 2)
+            (VampireTokenType::MinusMinus, 2)
         }
         else if rest.starts_with("+=") {
-            (VampireSyntaxKind::PlusEq, 2)
+            (VampireTokenType::PlusEq, 2)
         }
         else if rest.starts_with("-=") {
-            (VampireSyntaxKind::MinusEq, 2)
+            (VampireTokenType::MinusEq, 2)
         }
         else if rest.starts_with("*=") {
-            (VampireSyntaxKind::StarEq, 2)
+            (VampireTokenType::StarEq, 2)
         }
         else if rest.starts_with("/=") {
-            (VampireSyntaxKind::SlashEq, 2)
+            (VampireTokenType::SlashEq, 2)
         }
         else if rest.starts_with("%=") {
-            (VampireSyntaxKind::PercentEq, 2)
+            (VampireTokenType::PercentEq, 2)
         }
         else if rest.starts_with("<<") {
-            (VampireSyntaxKind::LeftShift, 2)
+            (VampireTokenType::LeftShift, 2)
         }
         else if rest.starts_with(">>") {
-            (VampireSyntaxKind::RightShift, 2)
+            (VampireTokenType::RightShift, 2)
         }
         else if rest.starts_with("->") {
-            (VampireSyntaxKind::Arrow, 2)
+            (VampireTokenType::Arrow, 2)
         }
         else {
             return false;
@@ -324,34 +321,34 @@ impl<'config> VampireLexer<'config> {
         if let Some(ch) = state.peek() {
             let start = state.get_position();
             let kind = match ch {
-                '(' => Some(VampireSyntaxKind::LeftParen),
-                ')' => Some(VampireSyntaxKind::RightParen),
-                '[' => Some(VampireSyntaxKind::LeftBracket),
-                ']' => Some(VampireSyntaxKind::RightBracket),
-                '{' => Some(VampireSyntaxKind::LeftBrace),
-                '}' => Some(VampireSyntaxKind::RightBrace),
-                ':' => Some(VampireSyntaxKind::Colon),
-                ';' => Some(VampireSyntaxKind::Semicolon),
-                '.' => Some(VampireSyntaxKind::Dot),
-                ',' => Some(VampireSyntaxKind::Comma),
-                '?' => Some(VampireSyntaxKind::Question),
-                '!' => Some(VampireSyntaxKind::Bang),
-                '@' => Some(VampireSyntaxKind::At),
-                '#' => Some(VampireSyntaxKind::Hash),
-                '$' => Some(VampireSyntaxKind::Dollar),
-                '%' => Some(VampireSyntaxKind::Percent),
-                '^' => Some(VampireSyntaxKind::Caret),
-                '&' => Some(VampireSyntaxKind::Ampersand),
-                '*' => Some(VampireSyntaxKind::Star),
-                '+' => Some(VampireSyntaxKind::Plus),
-                '-' => Some(VampireSyntaxKind::Minus),
-                '=' => Some(VampireSyntaxKind::Eq),
-                '<' => Some(VampireSyntaxKind::LessThan),
-                '>' => Some(VampireSyntaxKind::GreaterThan),
-                '/' => Some(VampireSyntaxKind::Slash),
-                '\\' => Some(VampireSyntaxKind::Backslash),
-                '|' => Some(VampireSyntaxKind::Pipe),
-                '~' => Some(VampireSyntaxKind::Tilde),
+                '(' => Some(VampireTokenType::LeftParen),
+                ')' => Some(VampireTokenType::RightParen),
+                '[' => Some(VampireTokenType::LeftBracket),
+                ']' => Some(VampireTokenType::RightBracket),
+                '{' => Some(VampireTokenType::LeftBrace),
+                '}' => Some(VampireTokenType::RightBrace),
+                ':' => Some(VampireTokenType::Colon),
+                ';' => Some(VampireTokenType::Semicolon),
+                '.' => Some(VampireTokenType::Dot),
+                ',' => Some(VampireTokenType::Comma),
+                '?' => Some(VampireTokenType::Question),
+                '!' => Some(VampireTokenType::Bang),
+                '@' => Some(VampireTokenType::At),
+                '#' => Some(VampireTokenType::Hash),
+                '$' => Some(VampireTokenType::Dollar),
+                '%' => Some(VampireTokenType::Percent),
+                '^' => Some(VampireTokenType::Caret),
+                '&' => Some(VampireTokenType::Ampersand),
+                '*' => Some(VampireTokenType::Star),
+                '+' => Some(VampireTokenType::Plus),
+                '-' => Some(VampireTokenType::Minus),
+                '=' => Some(VampireTokenType::Eq),
+                '<' => Some(VampireTokenType::LessThan),
+                '>' => Some(VampireTokenType::GreaterThan),
+                '/' => Some(VampireTokenType::Slash),
+                '\\' => Some(VampireTokenType::Backslash),
+                '|' => Some(VampireTokenType::Pipe),
+                '~' => Some(VampireTokenType::Tilde),
                 _ => None,
             };
 

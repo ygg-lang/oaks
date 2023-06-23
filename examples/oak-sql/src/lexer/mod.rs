@@ -1,8 +1,12 @@
-use crate::{kind::SqlSyntaxKind, language::SqlLanguage};
+#![doc = include_str!("readme.md")]
+use oak_core::Source;
+pub mod token_type;
+pub use token_type::SqlTokenType;
+
+use crate::language::SqlLanguage;
 use oak_core::{
     Lexer, LexerCache, LexerState, OakError, TextEdit,
     lexer::{LexOutput, WhitespaceConfig},
-    source::Source,
 };
 use std::sync::LazyLock;
 
@@ -77,7 +81,7 @@ impl<'config> SqlLexer<'config> {
                     _ => {
                         // 如果没有匹配任何模式，跳过当前字符并添加错误 token
                         state.advance(ch.len_utf8());
-                        state.add_token(SqlSyntaxKind::Error, safe_point, state.get_position());
+                        state.add_token(SqlTokenType::Error, safe_point, state.get_position());
                     }
                 }
             }
@@ -93,7 +97,7 @@ impl<'config> SqlLexer<'config> {
 
         if let Some('\n') = state.peek() {
             state.advance(1);
-            state.add_token(SqlSyntaxKind::Newline, start_pos, state.get_position());
+            state.add_token(SqlTokenType::Newline, start_pos, state.get_position());
             true
         }
         else if let Some('\r') = state.peek() {
@@ -101,7 +105,7 @@ impl<'config> SqlLexer<'config> {
             if let Some('\n') = state.peek() {
                 state.advance(1);
             }
-            state.add_token(SqlSyntaxKind::Newline, start_pos, state.get_position());
+            state.add_token(SqlTokenType::Newline, start_pos, state.get_position());
             true
         }
         else {
@@ -110,7 +114,8 @@ impl<'config> SqlLexer<'config> {
     }
 
     fn skip_whitespace<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
-        SQL_WHITESPACE.scan(state, SqlSyntaxKind::Whitespace)
+        SQL_WHITESPACE.scan(state, SqlTokenType::Whitespace);
+        true
     }
 
     fn skip_comment<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
@@ -120,7 +125,7 @@ impl<'config> SqlLexer<'config> {
         if state.starts_with("--") {
             state.advance(2);
             state.take_while(|ch| ch != '\n' && ch != '\r');
-            state.add_token(SqlSyntaxKind::Comment, start, state.get_position());
+            state.add_token(SqlTokenType::Comment, start, state.get_position());
             return true;
         }
 
@@ -136,7 +141,7 @@ impl<'config> SqlLexer<'config> {
                     state.advance(ch.len_utf8());
                 }
             }
-            state.add_token(SqlSyntaxKind::Comment, start, state.get_position());
+            state.add_token(SqlTokenType::Comment, start, state.get_position());
             return true;
         }
 
@@ -174,10 +179,12 @@ impl<'config> SqlLexer<'config> {
                     break;
                 }
             }
-            state.add_token(SqlSyntaxKind::StringLiteral, start, state.get_position());
-            return true;
+            state.add_token(SqlTokenType::StringLiteral, start, state.get_position());
+            true
         }
-        false
+        else {
+            false
+        }
     }
 
     fn lex_number_literal<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
@@ -246,7 +253,7 @@ impl<'config> SqlLexer<'config> {
         }
 
         let end = state.get_position();
-        state.add_token(if is_float { SqlSyntaxKind::FloatLiteral } else { SqlSyntaxKind::NumberLiteral }, start, end);
+        state.add_token(if is_float { SqlTokenType::FloatLiteral } else { SqlTokenType::NumberLiteral }, start, end);
         true
     }
 
@@ -274,65 +281,65 @@ impl<'config> SqlLexer<'config> {
         let end = state.get_position();
         let text = state.source().get_text_in(oak_core::Range { start, end }).to_uppercase();
         let kind = match text.as_str() {
-            "SELECT" => SqlSyntaxKind::Select,
-            "FROM" => SqlSyntaxKind::From,
-            "WHERE" => SqlSyntaxKind::Where,
-            "INSERT" => SqlSyntaxKind::Insert,
-            "UPDATE" => SqlSyntaxKind::Update,
-            "DELETE" => SqlSyntaxKind::Delete,
-            "CREATE" => SqlSyntaxKind::Create,
-            "DROP" => SqlSyntaxKind::Drop,
-            "ALTER" => SqlSyntaxKind::Alter,
-            "TABLE" => SqlSyntaxKind::Table,
-            "INDEX" => SqlSyntaxKind::Index,
-            "INTO" => SqlSyntaxKind::Into,
-            "VALUES" => SqlSyntaxKind::Values,
-            "SET" => SqlSyntaxKind::Set,
-            "JOIN" => SqlSyntaxKind::Join,
-            "INNER" => SqlSyntaxKind::Inner,
-            "LEFT" => SqlSyntaxKind::Left,
-            "RIGHT" => SqlSyntaxKind::Right,
-            "FULL" => SqlSyntaxKind::Full,
-            "OUTER" => SqlSyntaxKind::Outer,
-            "ON" => SqlSyntaxKind::On,
-            "AND" => SqlSyntaxKind::And,
-            "OR" => SqlSyntaxKind::Or,
-            "NOT" => SqlSyntaxKind::Not,
-            "NULL" => SqlSyntaxKind::Null,
-            "TRUE" => SqlSyntaxKind::True,
-            "FALSE" => SqlSyntaxKind::False,
-            "AS" => SqlSyntaxKind::As,
-            "BY" => SqlSyntaxKind::By,
-            "ORDER" => SqlSyntaxKind::Order,
-            "ASC" => SqlSyntaxKind::Asc,
-            "DESC" => SqlSyntaxKind::Desc,
-            "GROUP" => SqlSyntaxKind::Group,
-            "HAVING" => SqlSyntaxKind::Having,
-            "LIMIT" => SqlSyntaxKind::Limit,
-            "OFFSET" => SqlSyntaxKind::Offset,
-            "UNION" => SqlSyntaxKind::Union,
-            "ALL" => SqlSyntaxKind::All,
-            "DISTINCT" => SqlSyntaxKind::Distinct,
-            "PRIMARY" => SqlSyntaxKind::Primary,
-            "KEY" => SqlSyntaxKind::Key,
-            "FOREIGN" => SqlSyntaxKind::Foreign,
-            "REFERENCES" => SqlSyntaxKind::References,
-            "DEFAULT" => SqlSyntaxKind::Default,
-            "UNIQUE" => SqlSyntaxKind::Unique,
-            "AUTO_INCREMENT" => SqlSyntaxKind::AutoIncrement,
-            "INT" => SqlSyntaxKind::Int,
-            "INTEGER" => SqlSyntaxKind::Integer,
-            "VARCHAR" => SqlSyntaxKind::Varchar,
-            "CHAR" => SqlSyntaxKind::Char,
-            "TEXT" => SqlSyntaxKind::Text,
-            "DATE" => SqlSyntaxKind::Date,
-            "TIME" => SqlSyntaxKind::Time,
-            "TIMESTAMP" => SqlSyntaxKind::Timestamp,
-            "DECIMAL" => SqlSyntaxKind::Decimal,
-            "FLOAT" => SqlSyntaxKind::Float,
-            "DOUBLE" => SqlSyntaxKind::Double,
-            "BOOLEAN" => SqlSyntaxKind::Boolean,
-            _ => SqlSyntaxKind::Identifier,
+            "SELECT" => SqlTokenType::Select,
+            "FROM" => SqlTokenType::From,
+            "WHERE" => SqlTokenType::Where,
+            "INSERT" => SqlTokenType::Insert,
+            "UPDATE" => SqlTokenType::Update,
+            "DELETE" => SqlTokenType::Delete,
+            "CREATE" => SqlTokenType::Create,
+            "DROP" => SqlTokenType::Drop,
+            "ALTER" => SqlTokenType::Alter,
+            "TABLE" => SqlTokenType::Table,
+            "INDEX" => SqlTokenType::Index,
+            "INTO" => SqlTokenType::Into,
+            "VALUES" => SqlTokenType::Values,
+            "SET" => SqlTokenType::Set,
+            "JOIN" => SqlTokenType::Join,
+            "INNER" => SqlTokenType::Inner,
+            "LEFT" => SqlTokenType::Left,
+            "RIGHT" => SqlTokenType::Right,
+            "FULL" => SqlTokenType::Full,
+            "OUTER" => SqlTokenType::Outer,
+            "ON" => SqlTokenType::On,
+            "AND" => SqlTokenType::And,
+            "OR" => SqlTokenType::Or,
+            "NOT" => SqlTokenType::Not,
+            "NULL" => SqlTokenType::Null,
+            "TRUE" => SqlTokenType::True,
+            "FALSE" => SqlTokenType::False,
+            "AS" => SqlTokenType::As,
+            "BY" => SqlTokenType::By,
+            "ORDER" => SqlTokenType::Order,
+            "ASC" => SqlTokenType::Asc,
+            "DESC" => SqlTokenType::Desc,
+            "GROUP" => SqlTokenType::Group,
+            "HAVING" => SqlTokenType::Having,
+            "LIMIT" => SqlTokenType::Limit,
+            "OFFSET" => SqlTokenType::Offset,
+            "UNION" => SqlTokenType::Union,
+            "ALL" => SqlTokenType::All,
+            "DISTINCT" => SqlTokenType::Distinct,
+            "PRIMARY" => SqlTokenType::Primary,
+            "KEY" => SqlTokenType::Key,
+            "FOREIGN" => SqlTokenType::Foreign,
+            "REFERENCES" => SqlTokenType::References,
+            "DEFAULT" => SqlTokenType::Default,
+            "UNIQUE" => SqlTokenType::Unique,
+            "AUTO_INCREMENT" => SqlTokenType::AutoIncrement,
+            "INT" => SqlTokenType::Int,
+            "INTEGER" => SqlTokenType::Integer,
+            "VARCHAR" => SqlTokenType::Varchar,
+            "CHAR" => SqlTokenType::Char,
+            "TEXT" => SqlTokenType::Text,
+            "DATE" => SqlTokenType::Date,
+            "TIME" => SqlTokenType::Time,
+            "TIMESTAMP" => SqlTokenType::Timestamp,
+            "DECIMAL" => SqlTokenType::Decimal,
+            "FLOAT" => SqlTokenType::Float,
+            "DOUBLE" => SqlTokenType::Double,
+            "BOOLEAN" => SqlTokenType::Boolean,
+            _ => SqlTokenType::Identifier,
         };
 
         state.add_token(kind, start, end);
@@ -343,18 +350,18 @@ impl<'config> SqlLexer<'config> {
         let start = state.get_position();
 
         let ops = [
-            ("<=", SqlSyntaxKind::LessEqual),
-            (">=", SqlSyntaxKind::GreaterEqual),
-            ("<>", SqlSyntaxKind::NotEqual),
-            ("!=", SqlSyntaxKind::NotEqual),
-            ("=", SqlSyntaxKind::Equal),
-            ("<", SqlSyntaxKind::Less),
-            (">", SqlSyntaxKind::Greater),
-            ("+", SqlSyntaxKind::Plus),
-            ("-", SqlSyntaxKind::Minus),
-            ("*", SqlSyntaxKind::Star),
-            ("/", SqlSyntaxKind::Slash),
-            ("%", SqlSyntaxKind::Percent),
+            ("<=", SqlTokenType::LessEqual),
+            (">=", SqlTokenType::GreaterEqual),
+            ("<>", SqlTokenType::NotEqual),
+            ("!=", SqlTokenType::NotEqual),
+            ("=", SqlTokenType::Equal),
+            ("<", SqlTokenType::Less),
+            (">", SqlTokenType::Greater),
+            ("+", SqlTokenType::Plus),
+            ("-", SqlTokenType::Minus),
+            ("*", SqlTokenType::Star),
+            ("/", SqlTokenType::Slash),
+            ("%", SqlTokenType::Percent),
         ];
 
         for (op, kind) in ops {
@@ -376,11 +383,11 @@ impl<'config> SqlLexer<'config> {
         };
 
         let kind = match ch {
-            '(' => SqlSyntaxKind::LeftParen,
-            ')' => SqlSyntaxKind::RightParen,
-            ',' => SqlSyntaxKind::Comma,
-            ';' => SqlSyntaxKind::Semicolon,
-            '.' => SqlSyntaxKind::Dot,
+            '(' => SqlTokenType::LeftParen,
+            ')' => SqlTokenType::RightParen,
+            ',' => SqlTokenType::Comma,
+            ';' => SqlTokenType::Semicolon,
+            '.' => SqlTokenType::Dot,
             _ => return false,
         };
 

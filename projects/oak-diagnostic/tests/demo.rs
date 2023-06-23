@@ -35,9 +35,9 @@ fn test_demo_diagnostic() {
         fn localize(&self, key: &str, args: &std::collections::HashMap<String, String>) -> String {
             match key {
                 "error.missing_semicolon" => {
-                    let mut msg = "缺少分号".to_string();
+                    let mut msg = "missing semicolon".to_string();
                     if !args.is_empty() {
-                        msg.push_str(&format!(" (args: {:?})", args));
+                        msg.push_str(&format!(" (args: {:?})", args))
                     }
                     msg
                 }
@@ -65,5 +65,5 @@ fn test_demo_diagnostic() {
     println!("{}", ConsoleEmitter { unicode: true }.render(&source, &multi_diag));
 
     println!("--- Console Output (ASCII) ---");
-    println!("{}", ConsoleEmitter { unicode: false }.render(&source, &multi_diag));
+    println!("{}", ConsoleEmitter { unicode: false }.render(&source, &multi_diag))
 }

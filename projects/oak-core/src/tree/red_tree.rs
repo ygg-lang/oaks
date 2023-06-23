@@ -10,10 +10,14 @@ use core::range::Range;
 use std::fmt;
 
 /// A red tree element with absolute position information.
+///
+/// Red trees are the "red" side of the red-green tree architecture. They are
+/// lazily computed from green trees and include absolute byte offsets in
+/// the source code.
 pub enum RedTree<'a, L: Language> {
-    /// A red node with child elements
+    /// A red node with child elements.
     Node(RedNode<'a, L>),
-    /// A red leaf kind
+    /// A red leaf (token).
     Leaf(RedLeaf<L>),
 }
 
@@ -49,6 +53,8 @@ impl<'a, L: Language> Eq for RedTree<'a, L> {}
 
 impl<'a, L: Language> RedTree<'a, L> {
     /// Returns the absolute byte span of this red tree element.
+    ///
+    /// The span includes the start and end offsets in the source text.
     #[inline]
     pub fn span(&self) -> Range<usize> {
         match self {
@@ -58,6 +64,10 @@ impl<'a, L: Language> RedTree<'a, L> {
     }
 
     /// Returns the kind of this red tree element.
+    ///
+    /// # Type Parameters
+    ///
+    /// * `T` - A type that can be converted from both node and token kinds.
     pub fn kind<T>(&self) -> T
     where
         T: From<L::ElementType> + From<L::TokenType>,
@@ -68,12 +78,18 @@ impl<'a, L: Language> RedTree<'a, L> {
         }
     }
 
-    /// Returns the text of this red tree element from the source.
+    /// Returns the text content of this red tree element from the source.
+    ///
+    /// # Arguments
+    ///
+    /// * `source` - The source text provider.
     pub fn text<'s, S: crate::source::Source + ?Sized>(&self, source: &'s S) -> std::borrow::Cow<'s, str> {
         source.get_text_in(self.span())
     }
 
     /// Returns an iterator over the child elements if this is a node.
+    ///
+    /// Returns an empty iterator if this is a leaf.
     pub fn children(&self) -> RedChildren<'a, L> {
         match self {
             RedTree::Node(n) => n.children(),
@@ -99,10 +115,14 @@ impl<'a, L: Language> RedTree<'a, L> {
 }
 
 /// A red node that wraps a green node with absolute offset information.
+///
+/// Red nodes are position-aware views into the immutable green tree structure.
+/// They are small, copyable handles that can be used for traversal and
+/// analysis.
 pub struct RedNode<'a, L: Language> {
-    /// The underlying green node that contains the structural information
+    /// The underlying green node that contains the structural information.
     pub green: &'a GreenNode<'a, L>,
-    /// The absolute byte offset of this node in the source text
+    /// The absolute byte offset of this node in the source text.
     pub offset: usize,
 }
 
@@ -130,10 +150,12 @@ impl<'a, L: Language> fmt::Debug for RedNode<'a, L> {
 }
 
 /// A red leaf kind with absolute position information.
+///
+/// Red leaves represent individual tokens with their location in the source.
 pub struct RedLeaf<L: Language> {
-    /// The kind kind/category
+    /// The token kind/category.
     pub kind: L::TokenType,
-    /// The absolute byte span of this kind in the source text
+    /// The absolute byte span of this token in the source text.
     pub span: Range<usize>,
 }
 
@@ -161,9 +183,15 @@ impl<L: Language> fmt::Debug for RedLeaf<L> {
 }
 
 /// An iterator over the child elements of a red node.
+///
+/// This iterator lazily computes the absolute offsets of each child
+/// as it traverses the tree.
 pub struct RedChildren<'a, L: Language> {
+    /// The parent red node being iterated.
     node: Option<RedNode<'a, L>>,
+    /// The current index in the children slice.
     index: usize,
+    /// The current absolute byte offset.
     offset: usize,
 }
 
@@ -175,7 +203,7 @@ impl<'a, L: Language> RedChildren<'a, L> {
 }
 
 impl<'a, L: Language> RedNode<'a, L> {
-    /// Creates a new red node from a green node and offset.
+    /// Creates a new red node from a green node and absolute offset.
     #[inline]
     pub fn new(green: &'a GreenNode<'a, L>, offset: usize) -> Self {
         Self { green, offset }
@@ -187,6 +215,18 @@ impl<'a, L: Language> RedNode<'a, L> {
         Range { start: self.offset, end: self.offset + self.green.text_len() as usize }
     }
 
+    /// Returns the element type of this red node.
+    #[inline]
+    pub fn element_type(&self) -> L::ElementType {
+        self.green.kind
+    }
+
+    /// Returns the underlying green node.
+    #[inline]
+    pub fn green(&self) -> &'a GreenNode<'a, L> {
+        self.green
+    }
+
     /// Returns the kind of this red node.
     pub fn kind<T>(&self) -> T
     where
@@ -196,6 +236,14 @@ impl<'a, L: Language> RedNode<'a, L> {
     }
 
     /// Gets the child element at the specified index.
+    ///
+    /// # Arguments
+    ///
+    /// * `idx` - The zero-based index of the child.
+    ///
+    /// # Panics
+    ///
+    /// Panics if the index is out of bounds.
     pub fn child_at(&self, idx: usize) -> RedTree<'a, L> {
         let children = self.green.children();
         let green_child = &children[idx];
@@ -203,7 +251,7 @@ impl<'a, L: Language> RedNode<'a, L> {
         // Calculate offset by summing lengths of previous siblings
         let mut offset = self.offset;
         for i in 0..idx {
-            offset += children[i].len() as usize;
+            offset += children[i].len() as usize
         }
 
         match green_child {
@@ -217,7 +265,11 @@ impl<'a, L: Language> RedNode<'a, L> {
         RedChildren { node: Some(*self), index: 0, offset: self.offset }
     }
 
-    /// Finds the child element at the specified absolute byte offset.
+    /// Finds the index of the child element containing the specified absolute byte offset.
+    ///
+    /// # Arguments
+    ///
+    /// * `offset` - The absolute byte offset to search for.
     pub fn child_index_at_offset(&self, offset: usize) -> Option<usize> {
         if offset < self.offset || offset >= self.offset + self.green.text_len() as usize {
             return None;
@@ -231,18 +283,28 @@ impl<'a, L: Language> RedNode<'a, L> {
             if relative_offset < current_pos + len {
                 return Some(idx);
             }
-            current_pos += len;
+            current_pos += len
         }
 
         None
     }
 
-    /// Finds the child element at the specified absolute byte offset.
+    /// Finds the child element containing the specified absolute byte offset.
+    ///
+    /// # Arguments
+    ///
+    /// * `offset` - The absolute byte offset to search for.
     pub fn child_at_offset(&self, offset: usize) -> Option<RedTree<'a, L>> {
         self.child_index_at_offset(offset).map(|idx| self.child_at(idx))
     }
 
     /// Finds the leaf element at the specified absolute byte offset by traversing down the tree.
+    ///
+    /// This method performs a deep search, following child nodes until a leaf is found.
+    ///
+    /// # Arguments
+    ///
+    /// * `offset` - The absolute byte offset to search for.
     pub fn leaf_at_offset(&self, offset: usize) -> Option<RedLeaf<L>> {
         let mut current = *self;
         loop {

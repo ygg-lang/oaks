@@ -1,4 +1,5 @@
-mod element_type;
+#![doc = include_str!("readme.md")]
+pub mod element_type;
 pub use element_type::CppElementType;
 
 use crate::{
@@ -13,29 +14,36 @@ use oak_core::{
 
 pub(crate) type State<'a, S> = ParserState<'a, CppLanguage, S>;
 
+/// Parser for the C++ language.
+///
+/// This parser transforms a stream of tokens into a green tree of C++ syntax nodes,
+/// using a combination of top-down recursive descent and Pratt parsing for expressions.
 pub struct CppParser<'config> {
     pub(crate) config: &'config CppLanguage,
 }
 
 impl<'config> CppParser<'config> {
+    /// Creates a new `CppParser` with the given configuration.
     pub fn new(config: &'config CppLanguage) -> Self {
         Self { config }
     }
 
+    /// Parses a single C++ statement.
+    ///
+    /// This includes keywords, compound statements, preprocessor directives,
+    /// and expressions followed by a semicolon.
     fn parse_statement<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> Result<(), OakError> {
         use crate::lexer::CppTokenType::*;
         match state.peek_kind() {
             Some(Keyword) => {
                 state.bump();
                 while state.not_at_end() && !state.at(Semicolon) {
-                    state.advance();
+                    state.advance()
                 }
                 state.eat(Semicolon);
             }
             Some(LeftBrace) => self.parse_compound_statement(state)?,
-            Some(Preprocessor) => {
-                state.bump();
-            }
+            Some(Preprocessor) => state.bump(),
             _ => {
                 PrattParser::parse(state, 0, self);
                 state.eat(Semicolon);
@@ -44,10 +52,11 @@ impl<'config> CppParser<'config> {
         Ok(())
     }
 
+    /// Parses a compound statement (a block of statements enclosed in braces).
     fn parse_compound_statement<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> Result<(), OakError> {
         state.expect(CppTokenType::LeftBrace).ok();
         while state.not_at_end() && !state.at(CppTokenType::RightBrace) {
-            self.parse_statement(state)?;
+            self.parse_statement(state)?
         }
         state.expect(CppTokenType::RightBrace).ok();
         Ok(())
@@ -55,12 +64,13 @@ impl<'config> CppParser<'config> {
 }
 
 impl<'config> Parser<CppLanguage> for CppParser<'config> {
+    /// Parses the entire C++ source file.
     fn parse<'a, S: Source + ?Sized>(&self, text: &'a S, edits: &[TextEdit], cache: &'a mut impl ParseCache<CppLanguage>) -> ParseOutput<'a, CppLanguage> {
         let lexer = CppLexer::new(self.config);
         parse_with_lexer(&lexer, text, edits, cache, |state| {
             let cp = state.checkpoint();
             while state.not_at_end() {
-                self.parse_statement(state)?;
+                self.parse_statement(state)?
             }
             Ok(state.finish_at(cp, CppElementType::SourceFile))
         })
@@ -68,17 +78,18 @@ impl<'config> Parser<CppLanguage> for CppParser<'config> {
 }
 
 impl<'config> Pratt<CppLanguage> for CppParser<'config> {
+    /// Parses a primary expression (e.g., identifiers, literals, parenthesized expressions).
     fn primary<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> &'a GreenNode<'a, CppLanguage> {
         use crate::lexer::CppTokenType::*;
         let cp = state.checkpoint();
         match state.peek_kind() {
             Some(Identifier) => {
                 state.bump();
-                state.finish_at(cp, CppElementType::SourceFile) // 简化处理
+                state.finish_at(cp, CppElementType::SourceFile) // Simplified handling
             }
             Some(IntegerLiteral) | Some(FloatLiteral) | Some(CharacterLiteral) | Some(StringLiteral) | Some(BooleanLiteral) => {
                 state.bump();
-                state.finish_at(cp, CppElementType::SourceFile) // 简化处理
+                state.finish_at(cp, CppElementType::SourceFile) // Simplified handling
             }
             Some(LeftParen) => {
                 state.bump();
@@ -123,7 +134,7 @@ impl<'config> Pratt<CppLanguage> for CppParser<'config> {
                 state.push_child(left);
                 state.expect(LeftParen).ok();
                 while state.not_at_end() && !state.at(RightParen) {
-                    state.bump();
+                    state.bump()
                 }
                 state.expect(RightParen).ok();
                 Some(state.finish_at(cp, CppElementType::SourceFile))

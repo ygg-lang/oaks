@@ -1,39 +1,228 @@
-use oak_core::{TokenType, UniversalTokenRole};
+use oak_core::{Source, Token, TokenType, UniversalElementRole, UniversalTokenRole};
+#[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
 
-/// C# token type
-#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Deserialize)]
+pub type CSharpToken = Token<CSharpTokenType>;
+
+impl CSharpTokenType {
+    pub fn is_keyword(&self) -> bool {
+        matches!(
+            self,
+            Self::Abstract
+                | Self::As
+                | Self::Async
+                | Self::Await
+                | Self::Base
+                | Self::Bool
+                | Self::Break
+                | Self::Byte
+                | Self::Case
+                | Self::Catch
+                | Self::Char
+                | Self::Checked
+                | Self::Class
+                | Self::Const
+                | Self::Continue
+                | Self::Decimal
+                | Self::Default
+                | Self::Delegate
+                | Self::Do
+                | Self::Double
+                | Self::Else
+                | Self::Enum
+                | Self::Event
+                | Self::Explicit
+                | Self::Extern
+                | Self::False
+                | Self::Finally
+                | Self::Fixed
+                | Self::Float
+                | Self::For
+                | Self::Foreach
+                | Self::Goto
+                | Self::If
+                | Self::Implicit
+                | Self::In
+                | Self::Int
+                | Self::Interface
+                | Self::Internal
+                | Self::Is
+                | Self::Lock
+                | Self::Long
+                | Self::Namespace
+                | Self::New
+                | Self::Null
+                | Self::Object
+                | Self::Operator
+                | Self::Out
+                | Self::Override
+                | Self::Params
+                | Self::Private
+                | Self::Protected
+                | Self::Public
+                | Self::Readonly
+                | Self::Ref
+                | Self::Return
+                | Self::Sbyte
+                | Self::Sealed
+                | Self::Short
+                | Self::Sizeof
+                | Self::Stackalloc
+                | Self::Static
+                | Self::Struct
+                | Self::Switch
+                | Self::This
+                | Self::Throw
+                | Self::True
+                | Self::Try
+                | Self::Typeof
+                | Self::Uint
+                | Self::Ulong
+                | Self::Unchecked
+                | Self::Unsafe
+                | Self::Ushort
+                | Self::Using
+                | Self::Virtual
+                | Self::Void
+                | Self::Volatile
+                | Self::While
+                | Self::AbstractKeyword
+                | Self::AsKeyword
+                | Self::AsyncKeyword
+                | Self::AwaitKeyword
+                | Self::BaseKeyword
+                | Self::BoolKeyword
+                | Self::BreakKeyword
+                | Self::ByteKeyword
+                | Self::CaseKeyword
+                | Self::CatchKeyword
+                | Self::CharKeyword
+                | Self::CheckedKeyword
+                | Self::ClassKeyword
+                | Self::ConstKeyword
+                | Self::ContinueKeyword
+                | Self::DecimalKeyword
+                | Self::DefaultKeyword
+                | Self::DelegateKeyword
+                | Self::DoKeyword
+                | Self::DoubleKeyword
+                | Self::ElseKeyword
+                | Self::EnumKeyword
+                | Self::EventKeyword
+                | Self::ExplicitKeyword
+                | Self::ExternKeyword
+                | Self::FalseKeyword
+                | Self::FinallyKeyword
+                | Self::FixedKeyword
+                | Self::FloatKeyword
+                | Self::ForKeyword
+                | Self::ForeachKeyword
+                | Self::GotoKeyword
+                | Self::IfKeyword
+                | Self::ImplicitKeyword
+                | Self::InKeyword
+                | Self::IntKeyword
+                | Self::InterfaceKeyword
+                | Self::InternalKeyword
+                | Self::IsKeyword
+                | Self::LockKeyword
+                | Self::LongKeyword
+                | Self::NamespaceKeyword
+                | Self::NewKeyword
+                | Self::NullKeyword
+                | Self::ObjectKeyword
+                | Self::OperatorKeyword
+                | Self::OutKeyword
+                | Self::OverrideKeyword
+                | Self::ParamsKeyword
+                | Self::PrivateKeyword
+                | Self::ProtectedKeyword
+                | Self::PublicKeyword
+                | Self::ReadonlyKeyword
+                | Self::RefKeyword
+                | Self::ReturnKeyword
+                | Self::SbyteKeyword
+                | Self::SealedKeyword
+                | Self::ShortKeyword
+                | Self::SizeofKeyword
+                | Self::StackallocKeyword
+                | Self::StaticKeyword
+                | Self::StringKeyword
+                | Self::StructKeyword
+                | Self::SwitchKeyword
+                | Self::ThisKeyword
+                | Self::ThrowKeyword
+                | Self::TrueKeyword
+                | Self::TryKeyword
+                | Self::TypeofKeyword
+                | Self::UintKeyword
+                | Self::UlongKeyword
+                | Self::UncheckedKeyword
+                | Self::UnsafeKeyword
+                | Self::UshortKeyword
+                | Self::UsingKeyword
+                | Self::VirtualKeyword
+                | Self::VoidKeyword
+                | Self::VolatileKeyword
+                | Self::WhileKeyword
+                | Self::AddKeyword
+                | Self::AliasKeyword
+                | Self::AscendingKeyword
+                | Self::ByKeyword
+                | Self::DescendingKeyword
+                | Self::FromKeyword
+                | Self::GetKeyword
+                | Self::GlobalKeyword
+                | Self::GroupKeyword
+                | Self::IntoKeyword
+                | Self::JoinKeyword
+                | Self::LetKeyword
+                | Self::OrderbyKeyword
+                | Self::PartialKeyword
+                | Self::RemoveKeyword
+                | Self::SelectKeyword
+                | Self::SetKeyword
+                | Self::ValueKeyword
+                | Self::VarKeyword
+                | Self::WhereKeyword
+                | Self::YieldKeyword
+        )
+    }
+}
+
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub enum CSharpTokenType {
-    /// Whitespace characters (spaces, tabs)
     Whitespace,
-    /// Newline characters
+
     Newline,
-    /// Comments (both single-line and multi-line)
+
     Comment,
-    /// Identifiers (variable names, function names, etc.)
+
     Identifier,
 
     // Literals
-    /// Number literals (integer and floating-point)
     Number,
-    /// String literals (e.g., "hello")
+
     String,
-    /// Character literals (e.g., 'a')
+
     Character,
-    /// Verbatim string literals (e.g., @"hello")
+
     VerbatimString,
-    /// Interpolated string literals (e.g., $"hello {name}")
+
     InterpolatedString,
-    /// Number literals
+
     NumberLiteral,
-    /// String literals
+
     StringLiteral,
-    /// Character literals
+
     CharLiteral,
 
     // Keywords
     Abstract,
     As,
+    Async,
+    Await,
     Base,
     Bool,
     Break,
@@ -83,6 +272,7 @@ pub enum CSharpTokenType {
     Protected,
     Public,
     Readonly,
+    Record,
     Ref,
     Return,
     Sbyte,
@@ -109,9 +299,11 @@ pub enum CSharpTokenType {
     Volatile,
     While,
 
-    // Long keyword variants (as found in kind/mod.rs)
+    // Long keyword variants
     AbstractKeyword,
     AsKeyword,
+    AsyncKeyword,
+    AwaitKeyword,
     BaseKeyword,
     BoolKeyword,
     BreakKeyword,
@@ -277,37 +469,22 @@ pub enum CSharpTokenType {
     Hash,
     Dollar,
 
-    /// End of file marker
     Eof,
-    /// Error token
+
     Error,
 }
 
 impl TokenType for CSharpTokenType {
-    const END_OF_STREAM: Self = Self::Eof;
     type Role = UniversalTokenRole;
+    const END_OF_STREAM: Self = Self::Error;
+
+    fn is_ignored(&self) -> bool {
+        false
+    }
 
     fn role(&self) -> Self::Role {
         match self {
-            Self::Whitespace | Self::Newline => UniversalTokenRole::Whitespace,
-            Self::Comment => UniversalTokenRole::Comment,
-            Self::Identifier => UniversalTokenRole::Name,
-            Self::Number | Self::NumberLiteral | Self::String | Self::StringLiteral | Self::Character | Self::CharLiteral | Self::VerbatimString | Self::InterpolatedString => UniversalTokenRole::Literal,
-            Self::Error => UniversalTokenRole::Error,
-            Self::Eof => UniversalTokenRole::Eof,
             _ => UniversalTokenRole::None,
         }
-    }
-
-    fn is_ignored(&self) -> bool {
-        matches!(self, Self::Whitespace | Self::Newline | Self::Comment)
-    }
-
-    fn is_comment(&self) -> bool {
-        matches!(self, Self::Comment)
-    }
-
-    fn is_whitespace(&self) -> bool {
-        matches!(self, Self::Whitespace | Self::Newline)
     }
 }

@@ -1,3 +1,4 @@
+#![doc = include_str!("readme.md")]
 // No imports needed for now
 
 pub struct NoteDocument {

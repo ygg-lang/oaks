@@ -7,13 +7,14 @@ target triple = "x86_64-pc-windows-msvc19.29.30146"
 define dso_local i32 @main() #0 {
   %1 = alloca i32, align 4
   %2 = alloca i32, align 4
-  store i32 0, i32* %1, align 4
-  store i32 5, i32* %2, align 4
-  %3 = load i32, i32* %2, align 4
-  %4 = add nsw i32 %3, 10
-  store i32 %4, i32* %2, align 4
-  %5 = load i32, i32* %2, align 4
-  ret i32 %5
+  %3 = alloca i32, align 4
+  store i32 0, ptr %1, align 4
+  store i32 5, ptr %2, align 4
+  store i32 10, ptr %3, align 4
+  %4 = load i32, ptr %2, align 4
+  %5 = load i32, ptr %3, align 4
+  %6 = call i32 @sum(i32 noundef %4, i32 noundef %5)
+  ret i32 %6
 }
 
 ; Function Attrs: noinline nounwind optnone uwtable

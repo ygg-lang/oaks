@@ -1,4 +1,11 @@
-use crate::{kind::ScalaSyntaxKind, language::ScalaLanguage, lexer::ScalaLexer};
+#![doc = include_str!("readme.md")]
+pub mod element_type;
+
+use crate::{
+    language::ScalaLanguage,
+    lexer::{ScalaLexer, token_type::ScalaTokenType},
+    parser::element_type::ScalaElementType,
+};
 use oak_core::{
     GreenNode, OakError, TextEdit,
     parser::{ParseCache, ParseOutput, Parser, ParserState, parse_with_lexer},
@@ -20,10 +27,10 @@ impl<'config> ScalaParser<'config> {
         let checkpoint = state.checkpoint();
 
         while state.not_at_end() {
-            state.advance();
+            state.advance()
         }
 
-        Ok(state.finish_at(checkpoint, ScalaSyntaxKind::SourceFile.into()))
+        Ok(state.finish_at(checkpoint, ScalaElementType::SourceFile.into()))
     }
 }
 

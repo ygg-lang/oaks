@@ -1,10 +1,12 @@
-#[doc = include_str!("readme.md")]
-use crate::{ast::RustRoot, lexer::RustTokenType, parser::RustElementType};
+#![doc = include_str!("readme.md")]
+use crate::ast::RustRoot;
 use oak_core::{Language, LanguageCategory};
+#[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
 
-/// Rust 语言配置和元数据。
-#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash, Serialize, Deserialize)]
+/// Configuration and metadata for the Rust language.
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct RustLanguage {
     /// Allow using `unsafe` blocks and functions
     pub allow_unsafe: bool,
@@ -15,7 +17,7 @@ pub struct RustLanguage {
 }
 
 impl RustLanguage {
-    /// 创建新的 Rust 语言配置
+    /// Creates a new default Rust language configuration.
     pub fn new() -> Self {
         Self::default()
     }
@@ -31,7 +33,7 @@ impl Language for RustLanguage {
     const NAME: &'static str = "rust";
     const CATEGORY: LanguageCategory = LanguageCategory::Programming;
 
-    type TokenType = RustTokenType;
-    type ElementType = RustElementType;
+    type TokenType = crate::lexer::RustTokenType;
+    type ElementType = crate::parser::RustElementType;
     type TypedRoot = RustRoot;
 }

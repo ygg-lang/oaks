@@ -62,12 +62,12 @@ impl RopeBuffer {
             let start_new = (span.start as isize + delta) as usize;
             let end_new = start_new + text.len();
             reparse_to = reparse_to.max(end_new);
-            delta += text.len() as isize - (span.end - span.start) as isize;
+            delta += text.len() as isize - (span.end - span.start) as isize
         }
 
         for &i in order.iter().rev() {
             let TextEdit { span, text } = &edits[i];
-            self.replace_range(Range { start: span.start, end: span.end }, text);
+            self.replace_range(Range { start: span.start, end: span.end }, text)
         }
 
         Range { start: reparse_from, end: reparse_to }
@@ -205,7 +205,7 @@ fn rebuild_starts(chunks: &[Arc<str>]) -> (Vec<usize>, usize) {
     let mut offset = 0usize;
     for c in chunks {
         starts.push(offset);
-        offset += c.len();
+        offset += c.len()
     }
     (starts, offset)
 }
@@ -219,14 +219,14 @@ fn chunkify(text: &str) -> Vec<Arc<str>> {
     while start < text.len() {
         let mut end = (start + CHUNK_SIZE).min(text.len());
         while end > start && !text.is_char_boundary(end) {
-            end -= 1;
+            end -= 1
         }
         if end == start {
-            end = text.len();
+            end = text.len()
         }
         let part = &text[start..end];
         out.push(Arc::<str>::from(part.to_string()));
-        start = end;
+        start = end
     }
     out
 }

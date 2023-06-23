@@ -1,7 +1,9 @@
-#[doc = include_str!("readme.md")]
-use crate::kind::ValkyrieSyntaxKind;
+#![doc = include_str!("readme.md")]
+
+use crate::lexer::token_type::ValkyrieSyntaxKind;
 use core::range::Range;
-use serde::{self, Deserialize, Serialize};
+#[cfg(feature = "serde")]
+use serde::{Deserialize, Serialize};
 
 /// Represents an identifier in Valkyrie source code.
 ///
@@ -15,15 +17,40 @@ use serde::{self, Deserialize, Serialize};
 /// use core::range::Range;
 /// use oak_valkyrie::ast::Identifier;
 ///
-/// let ident = Identifier { name: "main".to_string(), span: (0..4).into() };
+/// let ident = Identifier { name: "main".to_string(), span: (0..4).into() }
 /// assert_eq!(ident.name, "main");
 /// ```
-#[derive(Debug, PartialEq, Eq, Clone, Serialize, Deserialize)]
+#[derive(Debug, PartialEq, Eq, Clone)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct Identifier {
     /// The textual name of the identifier
     pub name: String,
     /// Source code span where this identifier appears
-    #[serde(with = "oak_core::serde_range")]
+    #[cfg_attr(feature = "serde", serde(with = "oak_core::serde_range"))]
+    pub span: Range<usize>,
+}
+
+/// Represents a sequence of identifiers separated by double colons.
+#[derive(Debug, PartialEq, Eq, Clone)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+pub struct NamePath {
+    /// The list of identifiers in the path
+    pub parts: Vec<Identifier>,
+    /// Source code span where this name path appears
+    #[cfg_attr(feature = "serde", serde(with = "oak_core::serde_range"))]
+    pub span: Range<usize>,
+}
+
+/// Represents an attribute/annotation in Valkyrie source code.
+#[derive(Debug, PartialEq, Clone)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+pub struct Attribute {
+    /// The name of the attribute
+    pub name: Identifier,
+    /// Optional arguments to the attribute
+    pub args: Vec<Expr>,
+    /// Source code span where this attribute appears
+    #[cfg_attr(feature = "serde", serde(with = "oak_core::serde_range"))]
     pub span: Range<usize>,
 }
 
@@ -31,7 +58,8 @@ pub struct Identifier {
 ///
 /// This is the top-level structure that contains all items (functions, statements, etc.)
 /// parsed from a Valkyrie source file.
-#[derive(Debug, PartialEq, Clone, Serialize, Deserialize)]
+#[derive(Debug, PartialEq, Clone)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct ValkyrieRoot {
     /// Collection of top-level items in the Valkyrie file
     pub items: Vec<Item>,
@@ -41,81 +69,204 @@ pub struct ValkyrieRoot {
 ///
 /// These represent the main constructs that can exist at the module level,
 /// such as function definitions and statements.
-#[derive(Debug, PartialEq, Clone, Serialize, Deserialize)]
+#[derive(Debug, PartialEq, Clone)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub enum Item {
     /// A standalone statement
     Statement(Statement),
     /// A namespace definition
     Namespace(Namespace),
+    /// An import statement
+    Using(Using),
     /// A class definition
     Class(Class),
+    /// A flags definition
+    Flags(Flags),
+    /// An enums definition
+    Enums(Enums),
+    /// A trait definition
+    Trait(Trait),
     /// A widget definition
     Widget(Widget),
     /// A type function definition
     TypeFunction(TypeFunction),
     /// A micro definition
     Micro(MicroDefinition),
+    /// An effect definition
+    Effect(EffectDefinition),
+    /// A variant definition (for enums and flags)
+    Variant(Variant),
+}
+
+impl Item {
+    /// Returns the source code span of this item.
+    pub fn span(&self) -> Range<usize> {
+        match self {
+            Item::Statement(s) => s.span(),
+            Item::Namespace(n) => n.span,
+            Item::Using(u) => u.span,
+            Item::Class(c) => c.span,
+            Item::Flags(f) => f.span,
+            Item::Enums(e) => e.span,
+            Item::Trait(t) => t.span,
+            Item::Widget(w) => w.span,
+            Item::TypeFunction(t) => t.span,
+            Item::Micro(m) => m.span,
+            Item::Effect(e) => e.span,
+            Item::Variant(v) => v.span,
+        }
+    }
+}
+
+/// Represents a variant definition (for enums and flags) in Valkyrie source code.
+#[derive(Debug, PartialEq, Clone)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+pub struct Variant {
+    /// The name identifier of the variant
+    pub name: Identifier,
+    /// The list of annotations for this variant
+    pub annotations: Vec<Attribute>,
+    /// Optional value for the variant (e.g., in flags)
+    pub value: Option<Expr>,
+    /// Source code span where this variant appears
+    #[cfg_attr(feature = "serde", serde(with = "oak_core::serde_range"))]
+    pub span: Range<usize>,
 }
 
 /// Represents a type function definition (mezzo) in Valkyrie source code.
-#[derive(Debug, PartialEq, Clone, Serialize, Deserialize)]
+#[derive(Debug, PartialEq, Clone)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct TypeFunction {
     /// The name identifier of the type function
     pub name: Identifier,
+    /// The list of annotations for this type function
+    pub annotations: Vec<Attribute>,
     /// Parameters of the type function
     pub params: Vec<Param>,
     /// The body of the type function
     pub body: Block,
     /// Source code span where this type function appears
-    #[serde(with = "oak_core::serde_range")]
+    #[cfg_attr(feature = "serde", serde(with = "oak_core::serde_range"))]
     pub span: Range<usize>,
 }
 
 /// Represents a class definition in Valkyrie source code.
-#[derive(Debug, PartialEq, Clone, Serialize, Deserialize)]
+#[derive(Debug, PartialEq, Clone)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct Class {
     /// The name identifier of the class
     pub name: Identifier,
+    /// The list of annotations for this class
+    pub annotations: Vec<Attribute>,
+    /// Parent classes/traits
+    pub parents: Vec<NamePath>,
     /// List of items within the class
     pub items: Vec<Item>,
     /// Source code span where this class appears
-    #[serde(with = "oak_core::serde_range")]
+    #[cfg_attr(feature = "serde", serde(with = "oak_core::serde_range"))]
+    pub span: Range<usize>,
+}
+
+/// Represents a flags definition in Valkyrie source code.
+#[derive(Debug, PartialEq, Clone)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+pub struct Flags {
+    /// The name identifier of the flags
+    pub name: Identifier,
+    /// The list of annotations for this flags
+    pub annotations: Vec<Attribute>,
+    /// List of items within the flags
+    pub items: Vec<Item>,
+    /// Source code span where this flags appears
+    #[cfg_attr(feature = "serde", serde(with = "oak_core::serde_range"))]
+    pub span: Range<usize>,
+}
+
+/// Represents an enums definition in Valkyrie source code.
+#[derive(Debug, PartialEq, Clone)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+pub struct Enums {
+    /// The name identifier of the enums
+    pub name: Identifier,
+    /// The list of annotations for this enums
+    pub annotations: Vec<Attribute>,
+    /// List of items within the enums
+    pub items: Vec<Item>,
+    /// Source code span where this enums appears
+    #[cfg_attr(feature = "serde", serde(with = "oak_core::serde_range"))]
+    pub span: Range<usize>,
+}
+
+/// Represents a trait definition in Valkyrie source code.
+#[derive(Debug, PartialEq, Clone)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+pub struct Trait {
+    /// The name identifier of the trait
+    pub name: Identifier,
+    /// The list of annotations for this trait
+    pub annotations: Vec<Attribute>,
+    /// Parent traits
+    pub parents: Vec<NamePath>,
+    /// List of items within the trait
+    pub items: Vec<Item>,
+    /// Source code span where this trait appears
+    #[cfg_attr(feature = "serde", serde(with = "oak_core::serde_range"))]
     pub span: Range<usize>,
 }
 
 /// Represents a widget definition in Valkyrie source code.
-#[derive(Debug, PartialEq, Clone, Serialize, Deserialize)]
+#[derive(Debug, PartialEq, Clone)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct Widget {
     /// The name identifier of the widget
     pub name: Identifier,
+    /// The list of annotations for this widget
+    pub annotations: Vec<Attribute>,
     /// List of items within the widget
     pub items: Vec<Item>,
     /// Source code span where this widget appears
-    #[serde(with = "oak_core::serde_range")]
+    #[cfg_attr(feature = "serde", serde(with = "oak_core::serde_range"))]
     pub span: Range<usize>,
 }
 
 /// Represents a namespace definition in Valkyrie source code.
 ///
 /// Namespaces are used to organize code and prevent naming conflicts.
-#[derive(Debug, PartialEq, Clone, Serialize, Deserialize)]
+#[derive(Debug, PartialEq, Clone)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct Namespace {
-    /// The name identifier of the namespace
-    pub name: Identifier,
+    /// The name path of the namespace
+    pub name: NamePath,
+    /// The list of annotations for this namespace
+    pub annotations: Vec<Attribute>,
     /// List of items within the namespace
     pub items: Vec<Item>,
     /// Source code span where this namespace appears
-    #[serde(with = "oak_core::serde_range")]
+    #[cfg_attr(feature = "serde", serde(with = "oak_core::serde_range"))]
+    pub span: Range<usize>,
+}
+
+/// Represents an import statement in Valkyrie source code.
+#[derive(Debug, PartialEq, Clone)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+pub struct Using {
+    /// The name path being imported
+    pub path: NamePath,
+    /// Source code span where this using statement appears
+    #[cfg_attr(feature = "serde", serde(with = "oak_core::serde_range"))]
     pub span: Range<usize>,
 }
 
 /// Represents a micro definition in Valkyrie source code.
 ///
 /// Micro definitions are specialized constructs in the Valkyrie language.
-#[derive(Debug, PartialEq, Clone, Serialize, Deserialize)]
+#[derive(Debug, PartialEq, Clone)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct MicroDefinition {
     /// The name identifier of the micro definition
     pub name: Identifier,
+    /// The list of annotations for this micro definition
+    pub annotations: Vec<Attribute>,
     /// List of function parameters
     pub params: Vec<Param>,
     /// The optional return type of the function
@@ -123,21 +274,54 @@ pub struct MicroDefinition {
     /// The function body containing executable statements
     pub body: Block,
     /// Source code span where this micro definition appears
-    #[serde(with = "oak_core::serde_range")]
+    #[cfg_attr(feature = "serde", serde(with = "oak_core::serde_range"))]
+    pub span: Range<usize>,
+}
+
+/// Represents an effect definition in Valkyrie source code.
+#[derive(Debug, PartialEq, Clone)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+pub struct EffectDefinition {
+    /// The name identifier of the effect
+    pub name: Identifier,
+    /// The list of annotations for this effect
+    pub annotations: Vec<Attribute>,
+    /// List of items within the effect
+    pub items: Vec<Item>,
+    /// Source code span where this effect appears
+    #[cfg_attr(feature = "serde", serde(with = "oak_core::serde_range"))]
+    pub span: Range<usize>,
+}
+
+/// Represents a lambda expression in Valkyrie source code.
+#[derive(Debug, PartialEq, Clone)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+pub struct Lambda {
+    /// List of function parameters
+    pub params: Vec<Param>,
+    /// The optional return type of the function
+    pub return_type: Option<String>,
+    /// The function body containing executable statements
+    pub body: Block,
+    /// Source code span where this lambda appears
+    #[cfg_attr(feature = "serde", serde(with = "oak_core::serde_range"))]
     pub span: Range<usize>,
 }
 
 /// Represents a function parameter with its type annotation.
 ///
 /// Parameters define the inputs that a function can accept, with their respective types.
-#[derive(Debug, PartialEq, Clone, Serialize, Deserialize)]
+#[derive(Debug, PartialEq, Clone)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct Param {
+    /// The list of annotations for this parameter
+    pub annotations: Vec<Attribute>,
     /// The parameter name identifier
     pub name: Identifier,
     /// The type annotation for this parameter
-    pub ty: String,
+    pub ty: Option<String>,
     /// Source code span where this parameter appears
-    #[serde(with = "oak_core::serde_range")]
+    #[cfg_attr(feature = "serde", serde(with = "oak_core::serde_range"))]
     pub span: Range<usize>,
 }
 
@@ -145,57 +329,76 @@ pub struct Param {
 ///
 /// Blocks are fundamental control structures in Valkyrie that group statements together.
 /// They create new scopes and can be used as expressions.
-#[derive(Debug, PartialEq, Clone, Serialize, Deserialize)]
+#[derive(Debug, PartialEq, Clone)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct Block {
     /// Collection of statements within the block
     pub statements: Vec<Statement>,
     /// Source code span where this block appears
-    #[serde(with = "oak_core::serde_range")]
+    #[cfg_attr(feature = "serde", serde(with = "oak_core::serde_range"))]
     pub span: Range<usize>,
 }
 
-/// Represents different types of statements in Valkyrie source code.
+/// Represents different types of patterns in Valkyrie source code.
 ///
 /// Statements are executable instructions that don't return values.
 /// They form the body of functions and other code blocks.
-#[derive(Debug, PartialEq, Clone, Serialize, Deserialize)]
+#[derive(Debug, PartialEq, Clone)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub enum Statement {
     /// A variable binding statement with `let` keyword
     ///
-    /// Contains the variable name, initialization expression, and source location
+    /// Contains the pattern, initialization expression, and source location
     Let {
+        /// The list of annotations for this let statement
+        annotations: Vec<Attribute>,
         /// Whether the variable is mutable
         is_mutable: bool,
-        /// The variable name identifier
-        name: Identifier,
+        /// The pattern being bound
+        pattern: Pattern,
         /// The initialization expression
         expr: Expr,
         /// Source code span where this statement appears
-        #[serde(with = "oak_core::serde_range")]
+        #[cfg_attr(feature = "serde", serde(with = "oak_core::serde_range"))]
         span: Range<usize>,
     },
     /// An expression statement that may end with a semicolon
     ///
     /// Contains the expression, whether it ends with semicolon, and source location
     ExprStmt {
+        /// The list of annotations for this expression statement
+        annotations: Vec<Attribute>,
         /// The expression being evaluated
         expr: Expr,
         /// Whether this statement ends with a semicolon
         semi: bool,
         /// Source code span where this statement appears
-        #[serde(with = "oak_core::serde_range")]
+        #[cfg_attr(feature = "serde", serde(with = "oak_core::serde_range"))]
         span: Range<usize>,
     },
+}
+
+impl Statement {
+    /// Returns the source code span of this statement.
+    pub fn span(&self) -> Range<usize> {
+        match self {
+            Statement::Let { span, .. } => *span,
+            Statement::ExprStmt { span, .. } => *span,
+        }
+    }
 }
 
 /// Represents different types of expressions in Valkyrie source code.
 ///
 /// Expressions are code constructs that evaluate to values. They can be simple
 /// like identifiers and literals, or complex like function calls and binary operations.
-#[derive(Debug, PartialEq, Clone, Serialize, Deserialize)]
+#[derive(Debug, PartialEq, Clone)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub enum Expr {
     /// An identifier that refers to a variable, function, or other named entity
     Ident(Identifier),
+    /// A path to a symbol (e.g., A::B::f)
+    Path(NamePath),
     /// A string or numeric literal value
     ///
     /// Contains the literal value as a string and its source location
@@ -203,7 +406,7 @@ pub enum Expr {
         /// The string representation of the literal value
         value: String,
         /// Source code span where this literal appears
-        #[serde(with = "oak_core::serde_range")]
+        #[cfg_attr(feature = "serde", serde(with = "oak_core::serde_range"))]
         span: Range<usize>,
     },
     /// A boolean literal (true or false)
@@ -213,7 +416,7 @@ pub enum Expr {
         /// The boolean value
         value: bool,
         /// Source code span where this boolean appears
-        #[serde(with = "oak_core::serde_range")]
+        #[cfg_attr(feature = "serde", serde(with = "oak_core::serde_range"))]
         span: Range<usize>,
     },
     /// A unary operation expression (e.g., !x, -y)
@@ -225,7 +428,7 @@ pub enum Expr {
         /// The operand expression
         expr: Box<Expr>,
         /// Source code span where this unary expression appears
-        #[serde(with = "oak_core::serde_range")]
+        #[cfg_attr(feature = "serde", serde(with = "oak_core::serde_range"))]
         span: Range<usize>,
     },
     /// A binary operation expression (e.g., x + y, a == b)
@@ -239,7 +442,7 @@ pub enum Expr {
         /// The right operand expression
         right: Box<Expr>,
         /// Source code span where this binary expression appears
-        #[serde(with = "oak_core::serde_range")]
+        #[cfg_attr(feature = "serde", serde(with = "oak_core::serde_range"))]
         span: Range<usize>,
     },
     /// A function call expression
@@ -251,7 +454,7 @@ pub enum Expr {
         /// List of argument expressions
         args: Vec<Expr>,
         /// Source code span where this function call appears
-        #[serde(with = "oak_core::serde_range")]
+        #[cfg_attr(feature = "serde", serde(with = "oak_core::serde_range"))]
         span: Range<usize>,
     },
     /// A field access expression (e.g., obj.field)
@@ -263,7 +466,7 @@ pub enum Expr {
         /// The field name identifier
         field: Identifier,
         /// Source code span where this field access appears
-        #[serde(with = "oak_core::serde_range")]
+        #[cfg_attr(feature = "serde", serde(with = "oak_core::serde_range"))]
         span: Range<usize>,
     },
     /// An array/slice indexing expression (e.g., arr[i])
@@ -275,7 +478,7 @@ pub enum Expr {
         /// The index expression
         index: Box<Expr>,
         /// Source code span where this indexing expression appears
-        #[serde(with = "oak_core::serde_range")]
+        #[cfg_attr(feature = "serde", serde(with = "oak_core::serde_range"))]
         span: Range<usize>,
     },
     /// A parenthesized expression
@@ -285,11 +488,13 @@ pub enum Expr {
         /// The expression wrapped in parentheses
         expr: Box<Expr>,
         /// Source code span where this parenthesized expression appears
-        #[serde(with = "oak_core::serde_range")]
+        #[cfg_attr(feature = "serde", serde(with = "oak_core::serde_range"))]
         span: Range<usize>,
     },
     /// A block expression that can be used as a value
     Block(Block),
+    /// A lambda expression
+    Lambda(Lambda),
     /// An anonymous class definition
     AnonymousClass {
         /// List of parent types/traits
@@ -297,11 +502,13 @@ pub enum Expr {
         /// List of fields and methods
         items: Vec<Item>,
         /// Source code span where this anonymous class appears
-        #[serde(with = "oak_core::serde_range")]
+        #[cfg_attr(feature = "serde", serde(with = "oak_core::serde_range"))]
         span: Range<usize>,
     },
     /// An if-else expression
     If {
+        /// The optional pattern for if-let
+        pattern: Option<Pattern>,
         /// The condition expression
         condition: Box<Expr>,
         /// The then-branch block
@@ -309,7 +516,7 @@ pub enum Expr {
         /// The optional else-branch block
         else_branch: Option<Block>,
         /// Source code span where this if expression appears
-        #[serde(with = "oak_core::serde_range")]
+        #[cfg_attr(feature = "serde", serde(with = "oak_core::serde_range"))]
         span: Range<usize>,
     },
     /// A match expression
@@ -319,17 +526,21 @@ pub enum Expr {
         /// List of match arms
         arms: Vec<MatchArm>,
         /// Source code span where this match expression appears
-        #[serde(with = "oak_core::serde_range")]
+        #[cfg_attr(feature = "serde", serde(with = "oak_core::serde_range"))]
         span: Range<usize>,
     },
     /// A loop expression
     Loop {
         /// Optional loop label
         label: Option<String>,
+        /// The optional pattern for while-let or for-in
+        pattern: Option<Pattern>,
+        /// The optional loop condition or iterable expression
+        condition: Option<Box<Expr>>,
         /// The loop body block
         body: Block,
         /// Source code span where this loop expression appears
-        #[serde(with = "oak_core::serde_range")]
+        #[cfg_attr(feature = "serde", serde(with = "oak_core::serde_range"))]
         span: Range<usize>,
     },
     /// A return expression
@@ -337,7 +548,7 @@ pub enum Expr {
         /// The optional return value
         expr: Option<Box<Expr>>,
         /// Source code span where this return expression appears
-        #[serde(with = "oak_core::serde_range")]
+        #[cfg_attr(feature = "serde", serde(with = "oak_core::serde_range"))]
         span: Range<usize>,
     },
     /// A break expression
@@ -347,7 +558,7 @@ pub enum Expr {
         /// Optional break value
         expr: Option<Box<Expr>>,
         /// Source code span where this break expression appears
-        #[serde(with = "oak_core::serde_range")]
+        #[cfg_attr(feature = "serde", serde(with = "oak_core::serde_range"))]
         span: Range<usize>,
     },
     /// A continue expression
@@ -355,7 +566,7 @@ pub enum Expr {
         /// Optional continue label
         label: Option<String>,
         /// Source code span where this continue expression appears
-        #[serde(with = "oak_core::serde_range")]
+        #[cfg_attr(feature = "serde", serde(with = "oak_core::serde_range"))]
         span: Range<usize>,
     },
     /// A yield expression
@@ -365,7 +576,7 @@ pub enum Expr {
         /// Whether this is a yield-from expression
         yield_from: bool,
         /// Source code span where this yield expression appears
-        #[serde(with = "oak_core::serde_range")]
+        #[cfg_attr(feature = "serde", serde(with = "oak_core::serde_range"))]
         span: Range<usize>,
     },
     /// A raise/throw expression
@@ -373,17 +584,35 @@ pub enum Expr {
         /// The exception expression to raise
         expr: Box<Expr>,
         /// Source code span where this raise expression appears
-        #[serde(with = "oak_core::serde_range")]
+        #[cfg_attr(feature = "serde", serde(with = "oak_core::serde_range"))]
+        span: Range<usize>,
+    },
+    /// A resume expression
+    Resume {
+        /// The optional value to resume with
+        expr: Option<Box<Expr>>,
+        /// Source code span where this resume expression appears
+        #[cfg_attr(feature = "serde", serde(with = "oak_core::serde_range"))]
+        span: Range<usize>,
+    },
+    /// A raise expression
+    Perform {
+        /// The effect expression to raise
+        expr: Box<Expr>,
+        /// Source code span where this raise expression appears
+        #[cfg_attr(feature = "serde", serde(with = "oak_core::serde_range"))]
         span: Range<usize>,
     },
     /// A catch expression
     Catch {
+        /// Optional explicit return type (e.g., try Result<T, E> { ... })
+        return_type: Option<NamePath>,
         /// The expression to try
         expr: Box<Expr>,
         /// List of catch arms
         arms: Vec<MatchArm>,
         /// Source code span where this catch expression appears
-        #[serde(with = "oak_core::serde_range")]
+        #[cfg_attr(feature = "serde", serde(with = "oak_core::serde_range"))]
         span: Range<usize>,
     },
     /// An object creation or trailing closure call (e.g., Point { x: 1 })
@@ -393,13 +622,47 @@ pub enum Expr {
         /// The block contents
         block: Block,
         /// Source code span
-        #[serde(with = "oak_core::serde_range")]
+        #[cfg_attr(feature = "serde", serde(with = "oak_core::serde_range"))]
         span: Range<usize>,
     },
 }
 
+impl Expr {
+    /// Returns the source code span of this expression.
+    pub fn span(&self) -> Range<usize> {
+        match self {
+            Expr::Ident(i) => i.span.clone(),
+            Expr::Path(p) => p.span.clone(),
+            Expr::Literal { span, .. } => span.clone(),
+            Expr::Bool { span, .. } => span.clone(),
+            Expr::Unary { span, .. } => span.clone(),
+            Expr::Binary { span, .. } => span.clone(),
+            Expr::Call { span, .. } => span.clone(),
+            Expr::Field { span, .. } => span.clone(),
+            Expr::Index { span, .. } => span.clone(),
+            Expr::Paren { span, .. } => span.clone(),
+            Expr::Block(b) => b.span.clone(),
+            Expr::Lambda(l) => l.span.clone(),
+            Expr::AnonymousClass { span, .. } => span.clone(),
+            Expr::If { span, .. } => span.clone(),
+            Expr::Match { span, .. } => span.clone(),
+            Expr::Loop { span, .. } => span.clone(),
+            Expr::Return { span, .. } => span.clone(),
+            Expr::Break { span, .. } => span.clone(),
+            Expr::Continue { span, .. } => span.clone(),
+            Expr::Yield { span, .. } => span.clone(),
+            Expr::Raise { span, .. } => span.clone(),
+            Expr::Resume { span, .. } => span.clone(),
+            Expr::Perform { span, .. } => span.clone(),
+            Expr::Catch { span, .. } => span.clone(),
+            Expr::Object { span, .. } => span.clone(),
+        }
+    }
+}
+
 /// Represents an arm in a match or catch expression.
-#[derive(Debug, PartialEq, Clone, Serialize, Deserialize)]
+#[derive(Debug, PartialEq, Clone)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct MatchArm {
     /// The pattern to match
     pub pattern: Pattern,
@@ -408,28 +671,72 @@ pub struct MatchArm {
     /// The body expression
     pub body: Expr,
     /// Source code span where this match arm appears
-    #[serde(with = "oak_core::serde_range")]
+    #[cfg_attr(feature = "serde", serde(with = "oak_core::serde_range"))]
     pub span: Range<usize>,
 }
 
 /// Represents different types of patterns in Valkyrie.
-#[derive(Debug, PartialEq, Clone, Serialize, Deserialize)]
+#[derive(Debug, PartialEq, Clone)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub enum Pattern {
     /// A wildcard pattern (_)
     Wildcard {
-        #[serde(with = "oak_core::serde_range")]
+        /// The span of the pattern
+        #[cfg_attr(feature = "serde", serde(with = "oak_core::serde_range"))]
         span: Range<usize>,
     },
     /// A variable pattern
     Variable {
+        /// The name of the variable
         name: Identifier,
-        #[serde(with = "oak_core::serde_range")]
+        /// The span of the pattern
+        #[cfg_attr(feature = "serde", serde(with = "oak_core::serde_range"))]
         span: Range<usize>,
     },
     /// A literal pattern
     Literal {
+        /// The value of the literal
         value: String,
-        #[serde(with = "oak_core::serde_range")]
+        /// The span of the pattern
+        #[cfg_attr(feature = "serde", serde(with = "oak_core::serde_range"))]
         span: Range<usize>,
     },
+    /// A type pattern (is Type)
+    Type {
+        /// The name of the type
+        name: NamePath,
+        /// The span of the pattern
+        #[cfg_attr(feature = "serde", serde(with = "oak_core::serde_range"))]
+        span: Range<usize>,
+    },
+    /// An else pattern
+    Else {
+        /// The span of the pattern
+        #[cfg_attr(feature = "serde", serde(with = "oak_core::serde_range"))]
+        span: Range<usize>,
+    },
+    /// A class pattern (Point { x = a, y = b })
+    Class {
+        /// The name of the class
+        name: NamePath,
+        /// The fields of the class pattern
+        fields: Vec<(Identifier, Pattern)>,
+        /// The span of the pattern
+        #[cfg_attr(feature = "serde", serde(with = "oak_core::serde_range"))]
+        span: Range<usize>,
+    },
+}
+
+impl Pattern {
+    /// Returns the source code span of this pattern.
+    pub fn span(&self) -> Range<usize> {
+        match self {
+            Pattern::Wildcard { span, .. } => *span,
+            Pattern::Variable { span, .. } => *span,
+            Pattern::Literal { span, .. } => *span,
+            Pattern::Type { span, .. } => *span,
+            Pattern::Else { span, .. } => *span,
+            Pattern::Class { span, .. } => *span,
+        }
+    }
 }

@@ -9,7 +9,7 @@ use oak_core::{
 
 pub(crate) type State<'a, S> = ParserState<'a, CrystalLanguage, S>;
 
-mod parse;
+mod parse_top_level;
 
 pub struct CrystalParser<'config> {
     pub(crate) _config: &'config CrystalLanguage,

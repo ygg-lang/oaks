@@ -154,10 +154,10 @@ impl SvgRenderer {
         // Define styles
         svg.push_str("  <defs>\n");
         svg.push_str("    <style>\n");
-        svg.push_str("      .node { cursor: pointer; }\n");
-        svg.push_str("      .node:hover { opacity: 0.8; }\n");
-        svg.push_str("      .edge { pointer-events: none; }\n");
-        svg.push_str("      .label { pointer-events: none; user-select: none; }\n");
+        svg.push_str("      .node { cursor: pointer }\n");
+        svg.push_str("      .node:hover { opacity: 0.8 }\n");
+        svg.push_str("      .edge { pointer-events: none }\n");
+        svg.push_str("      .label { pointer-events: none; user-select: none }\n");
         svg.push_str("    </style>\n");
 
         // Arrow marker for directed edges
@@ -175,7 +175,7 @@ impl SvgRenderer {
                 self.config.arrow_size,
                 self.config.edge_color
             ));
-            svg.push('\n');
+            svg.push('\n')
         }
 
         svg.push_str("  </defs>\n");
@@ -186,12 +186,12 @@ impl SvgRenderer {
 
         // Render edges first (so they appear behind nodes)
         for edge in &layout.edges {
-            self.render_edge(&mut svg, edge)?;
+            self.render_edge(&mut svg, edge)?
         }
 
         // Render nodes
         for node in layout.nodes.values() {
-            self.render_node(&mut svg, node)?;
+            self.render_node(&mut svg, node)?
         }
 
         svg.push_str("  </g>\n");
@@ -214,13 +214,13 @@ impl SvgRenderer {
         // Add custom attributes
         if let Some(style) = style {
             if let Some(opacity) = style.opacity {
-                svg.push_str(&format!(r#" opacity="{}""#, opacity));
+                svg.push_str(&format!(r#" opacity="{}""#, opacity))
             }
             if let Some(class) = &style.class_name {
-                svg.push_str(&format!(r#" class="node {}""#, class));
+                svg.push_str(&format!(r#" class="node {}""#, class))
             }
             for (key, value) in &style.attributes {
-                svg.push_str(&format!(r#" {}="{}""#, key, value));
+                svg.push_str(&format!(r#" {}="{}""#, key, value))
             }
         }
 
@@ -236,7 +236,7 @@ impl SvgRenderer {
                 r#"    <text x="{}" y="{}" text-anchor="middle" dominant-baseline="central" fill="{}" font-size="{}" font-family="{}" class="label">{}</text>"#,
                 center.x, center.y, text_color, text_size, self.config.font_family, node.label
             ));
-            svg.push('\n');
+            svg.push('\n')
         }
 
         Ok(())
@@ -258,26 +258,26 @@ impl SvgRenderer {
         path_data.push_str(&format!("M {} {}", edge.points[0].x, edge.points[0].y));
 
         for point in &edge.points[1..] {
-            path_data.push_str(&format!(" L {} {}", point.x, point.y));
+            path_data.push_str(&format!(" L {} {}", point.x, point.y))
         }
 
         svg.push_str(&format!(r#"    <path d="{}" stroke="{}" stroke-width="{}" fill="none" class="edge""#, path_data, stroke_color, stroke_width));
 
         // Add arrow marker for directed edges
         if self.config.show_arrows {
-            svg.push_str(r#" marker-end="url(#arrowhead)""#);
+            svg.push_str(r#" marker-end="url(#arrowhead)""#)
         }
 
         // Add custom attributes
         if let Some(style) = style {
             if let Some(opacity) = style.opacity {
-                svg.push_str(&format!(r#" opacity="{}""#, opacity));
+                svg.push_str(&format!(r#" opacity="{}""#, opacity))
             }
             if let Some(class) = &style.class_name {
-                svg.push_str(&format!(r#" class="edge {}""#, class));
+                svg.push_str(&format!(r#" class="edge {}""#, class))
             }
             for (key, value) in &style.attributes {
-                svg.push_str(&format!(r#" {}="{}""#, key, value));
+                svg.push_str(&format!(r#" {}="{}""#, key, value))
             }
         }
 
@@ -306,7 +306,7 @@ impl SvgRenderer {
                 self.config.font_family,
                 label
             ));
-            svg.push('\n');
+            svg.push('\n')
         }
 
         Ok(())
@@ -327,7 +327,7 @@ impl SvgRenderer {
             min_x = min_x.min(rect.origin.x);
             min_y = min_y.min(rect.origin.y);
             max_x = max_x.max(rect.origin.x + rect.size.width);
-            max_y = max_y.max(rect.origin.y + rect.size.height);
+            max_y = max_y.max(rect.origin.y + rect.size.height)
         }
 
         Rect::new(Point::new(min_x, min_y), Size::new(max_x - min_x, max_y - min_y))
@@ -391,7 +391,7 @@ impl LayoutExporter {
             margin: 0;
             padding: 20px;
             font-family: Arial, sans-serif;
-            background-color: #f5f5f5;
+            background-color: #f5f5f5
         }}
         .container {{
             max-width: 100%;
@@ -399,13 +399,13 @@ impl LayoutExporter {
             background-color: white;
             border-radius: 8px;
             box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-            padding: 20px;
+            padding: 20px
         }}
         svg {{
             max-width: 100%;
             height: auto;
             border: 1px solid #ddd;
-            border-radius: 4px;
+            border-radius: 4px
         }}
     </style>
 </head>
@@ -444,14 +444,14 @@ impl LayoutExporter {
                 points.push(serde_json::json!({
                     "x": p.x,
                     "y": p.y
-                }));
+                }))
             }
             edges.push(serde_json::json!({
                 "from": edge.from.clone(),
                 "to": edge.to.clone(),
                 "points": points,
                 "label": edge.label.clone()
-            }));
+            }))
         }
 
         let json_layout = serde_json::json!({

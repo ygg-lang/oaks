@@ -1,3 +1,4 @@
+#![doc = include_str!("readme.md")]
 use core::range::Range;
 
 /// Identifier in the Crystal language

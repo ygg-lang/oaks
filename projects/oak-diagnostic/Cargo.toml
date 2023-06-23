@@ -1,14 +1,14 @@
 [package]
 name = "oak-diagnostic"
 version.workspace = true
-edition.workspace = true
-description = "Beautiful diagnostic reporting for the Oak ecosystem, inspired by miette."
-categories = ["development-tools"]
-keywords = ["diagnostic", "error", "reporting", "miette"]
 authors.workspace = true
+description = "Beautiful diagnostic reporting for the Oak ecosystem, inspired by miette."
+edition.workspace = true
 license.workspace = true
 homepage = "https://github.com/ygg-lang/oaks"
-repository = "https://github.com/ygg-lang/oaks"
+repository = "https://github.com/ygg-lang/oaks/tree/master/projects/oak-diagnostic"
+categories = ["development-tools"]
+keywords = ["diagnostic", "error", "reporting", "miette"]
 
 [lib]
 path = "src/lib.rs"

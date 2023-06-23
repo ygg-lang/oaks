@@ -12,5 +12,5 @@ fn test_format_config_default() {
     assert!(config.preserve_blank_lines);
     assert_eq!(config.max_blank_lines, 2);
     assert!(config.format_comments);
-    assert!(!config.format_strings);
+    assert!(!config.format_strings)
 }

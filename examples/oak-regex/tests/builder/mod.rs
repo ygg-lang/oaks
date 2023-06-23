@@ -9,5 +9,5 @@ fn test_regex_builder() {
     let _source = r"[a-z]+";
 
     // For now, just test that the builder can be created
-    assert!(true);
+    assert!(true)
 }

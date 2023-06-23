@@ -1,180 +1,35 @@
-# Oak Java Parser
+# 🚀 Oak Java Parser
 
 [![Crates.io](https://img.shields.io/crates/v/oak-java.svg)](https://crates.io/crates/oak-java)
 [![Documentation](https://docs.rs/oak-java/badge.svg)](https://docs.rs/oak-java)
 
-High-performance incremental Java parser for the oak ecosystem with flexible configuration, optimized for static analysis and code generation.
+**Enterprise-Grade Performance for the JVM Ecosystem** — A high-performance, incremental Java parser built on the Oak framework. Optimized for modern Java features, large-scale enterprise systems, and real-time developer tools.
 
-## 🎯 Overview
+## 🎯 Project Vision
 
-Oak Java is a robust parser for Java, designed to handle complete Java syntax including modern features. Built on the solid foundation of oak-core, it provides both high-level convenience and detailed AST generation for static analysis and code generation.
+Java powers some of the world's most complex and massive software systems. `oak-java` aims to provide a robust, modern, Rust-powered infrastructure for parsing Java that is both accurate and incredibly fast. By utilizing Oak's incremental parsing architecture, we enable the creation of highly responsive IDEs, static analyzers, and refactoring tools that can handle massive Java projects in real-time. Whether you are building custom linters, automated migration tools, or sophisticated IDE extensions, `oak-java` provides the high-fidelity AST and efficiency needed to keep pace with Java's rapid six-month release cycle and evolving feature set.
 
-## ✨ Features
+## ✨ Core Features
 
-- **Complete Java Syntax**: Supports all Java features including modern specifications
-- **Full AST Generation**: Generates comprehensive Abstract Syntax Trees
-- **Lexer Support**: Built-in tokenization with proper span information
-- **Error Recovery**: Graceful handling of syntax errors with detailed diagnostics
+- **⚡ Blazing Fast**: Leverages Rust's performance and memory safety to provide sub-millisecond parsing, essential for high-frequency developer tools and real-time analysis in large enterprise codebases.
+- **🔄 Incremental by Nature**: Built-in support for partial updates—re-parse only what has changed. Ideal for large-scale Java projects where maintainability and tool responsiveness are critical.
+- **🌳 High-Fidelity AST**: Generates a comprehensive and precise Abstract Syntax Tree capturing the full depth of modern Java:
+    - **Object-Oriented**: Deep support for classes, interfaces, inheritance, and access modifiers.
+    - **Modern Java Features**: Full support for Records, Sealed Classes, and Pattern Matching for `switch`.
+    - **Generics & Annotations**: Precise mapping of complex generic types and both built-in and custom annotations.
+    - **Modules**: Robust handling of Java Platform Module System (Project Jigsaw) declarations.
+    - **Functional Programming**: Support for Lambda expressions and Method References.
+- **🛡️ Industrial-Grade Fault Tolerance**: Engineered to recover from syntax errors gracefully, providing precise diagnostics—crucial for maintaining a smooth developer experience during active coding in complex environments.
+- **🧩 Deep Ecosystem Integration**: Seamlessly works with `oak-lsp` for full LSP support and `oak-mcp` for intelligent code discovery and analysis.
 
-## 🚀 Quick Start
+## 🏗️ Architecture
 
-Basic example:
+The parser follows the **Green/Red Tree** architecture (inspired by Roslyn), which allows for:
+1. **Efficient Immutability**: Share nodes across different versions of the tree without copying.
+2. **Lossless Syntax Trees**: Retains all trivia (whitespace and comments), enabling faithful code formatting and refactoring.
+3. **Type Safety**: Strongly-typed "Red" nodes provide a convenient and safe API for tree traversal and analysis.
 
-```rust
-use oak_core::{Parser, SourceText, parser::session::ParseSession};
-use oak_java::{JavaParser, JavaLanguage};
-
-fn main() -> Result<(), Box<dyn std::error::Error>> {
-    let mut session = ParseSession::<JavaLanguage>::default();
-    let parser = JavaParser::new();
-    let source = SourceText::new(r#"
-public class HelloWorld {
-    public static void main(String[] args) {
-        System.out.println("Hello, World!");
-    }
-}
-    "#);
-    
-    let result = parser.parse(&[], &mut session);
-    println!("Parsed Java successfully.");
-    Ok(())
-}
-```
-
-## 📋 Parsing Examples
-
-### Method Parsing
-```rust
-use oak_core::{Parser, SourceText, parser::session::ParseSession};
-use oak_java::{JavaParser, JavaLanguage};
-
-let mut session = ParseSession::<JavaLanguage>::default();
-let parser = JavaParser::new();
-let source = SourceText::new(r#"
-public class Calculator {
-    public int add(int a, int b) {
-        return a + b;
-    }
-    
-    public static void main(String[] args) {
-        Calculator calc = new Calculator();
-        int result = calc.add(5, 3);
-        System.out.println("Result: " + result);
-    }
-}
-"#);
-
-let result = parser.parse(&[], &mut session);
-println!("Method parsed successfully.");
-```
-
-### Class Parsing
-```rust
-use oak_core::{Parser, SourceText, parser::session::ParseSession};
-use oak_java::{JavaParser, JavaLanguage};
-
-let mut session = ParseSession::<JavaLanguage>::default();
-let parser = JavaParser::new();
-let source = SourceText::new(r#"
-public class Person {
-    private String name;
-    private int age;
-    
-    public Person(String name, int age) {
-        this.name = name;
-        this.age = age;
-    }
-    
-    public String getName() {
-        return name;
-    }
-    
-    public int getAge() {
-        return age;
-    }
-}
-"#);
-
-let result = parser.parse(&[], &mut session);
-println!("Class parsed successfully.");
-```
-
-## 🔧 Advanced Features
-
-### Token-Level Parsing
-```rust
-use oak_core::{Parser, SourceText, parser::session::ParseSession};
-use oak_java::{JavaParser, JavaLanguage};
-
-let mut session = ParseSession::<JavaLanguage>::default();
-let parser = JavaParser::new();
-let source = SourceText::new("int x = 42;");
-let result = parser.parse(&[], &mut session);
-```
-println!("Token parsing completed.");
-```
-
-### Error Handling
-```rust
-use oak_java::{Parser, JavaLanguage, SourceText};
-
-let parser = Parser::new();
-let source = SourceText::new(r#"
-// Invalid Java code example
-public class BrokenClass {
-    public static void main(String[] args {
-        System.out.println("Hello")
-    // Missing closing braces
-}
-"#);
-
-let result = parser.parse(&source);
-if let Some(errors) = result.result.err() {
-    println!("Parse errors found: {:?}", errors);
-} else {
-    println!("Parsed successfully.");
-}
-```
-
-## 🏗️ AST Structure
-
-The parser generates a comprehensive AST with the following main structures:
-
-- **JavaProgram**: Root container for Java programs
-- **Class**: Java class definitions
-- **Method**: Java methods and constructors
-- **Statement**: Various statement types including control flow
-- **Expression**: Various expression types including operators
-- **Type**: Java type system constructs
-
-## 📊 Performance
-
-- **Streaming**: Parse large Java files without loading entirely into memory
-- **Incremental**: Re-parse only changed sections
-- **Memory Efficient**: Smart AST node allocation
-- **Fast Recovery**: Quick error recovery for better IDE integration
-
-## 🔗 Integration
-
-Oak Java integrates seamlessly with:
-
-- **Static Analysis**: Code quality and security analysis
-- **Code Generation**: Generating code from Java AST
-- **IDE Support**: Language server protocol compatibility
-- **Refactoring**: Automated code refactoring
-- **Documentation**: Generating documentation from Java code
-
-## 📚 Examples
-
-Check out the [examples](examples/) directory for comprehensive examples:
-
-- Complete Java program parsing
-- Method and class analysis
-- Code transformation
-- Integration with development workflows
 
 ## 🤝 Contributing
 
-Contributions are welcome! 
-
-Please feel free to submit pull requests at the [project repository](https://github.com/ygg-lang/oaks/tree/dev/examples/oak-java) or open [issues](https://github.com/ygg-lang/oaks/issues).
+We welcome contributions of all kinds! If you find a bug, have a feature request, or want to contribute code, please check our [issues](https://github.com/ygg-lang/oaks/issues) or submit a pull request.

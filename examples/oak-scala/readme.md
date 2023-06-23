@@ -1,183 +1,36 @@
-# Oak Scala Parser
+# 🚀 oak-scala
 
 [![Crates.io](https://img.shields.io/crates/v/oak-scala.svg)](https://crates.io/crates/oak-scala)
 [![Documentation](https://docs.rs/oak-scala/badge.svg)](https://docs.rs/oak-scala)
 
-High-performance incremental Scala parser for the oak ecosystem with flexible configuration, optimized for static analysis and code generation.
+**Scalable Parsing for a Scalable Language** — A high-performance, incremental Scala parser built on the Oak framework. Optimized for Scala 3 features, complex type systems, and responsive developer tools.
 
-## 🎯 Overview
+## 🎯 Project Vision
 
-Oak Scala is a robust parser for Scala, designed to handle complete Scala syntax including modern features. Built on the solid foundation of oak-core, it provides both high-level convenience and detailed AST generation for static analysis and code generation.
+Scala is known for its sophisticated type system and fusion of object-oriented and functional programming. `oak-scala` aims to provide a robust, modern, Rust-powered infrastructure for parsing Scala that is both accurate and incredibly fast. By utilizing Oak's incremental parsing architecture, we enable the creation of highly responsive IDEs, static analyzers, and refactoring tools that can handle massive Scala projects in real-time. Whether you are building custom linters, automated migration tools for Scala 2 to 3, or sophisticated IDE extensions, `oak-scala` provides the high-fidelity AST and efficiency needed to keep pace with the evolving Scala ecosystem.
 
-## ✨ Features
+## ✨ Core Features
 
-- **Complete Scala Syntax**: Supports all Scala features including modern specifications
-- **Full AST Generation**: Generates comprehensive Abstract Syntax Trees
-- **Lexer Support**: Built-in tokenization with proper span information
-- **Error Recovery**: Graceful handling of syntax errors with detailed diagnostics
+- **⚡ Blazing Fast**: Leverages Rust's performance and memory safety to provide sub-millisecond parsing, essential for high-frequency developer tools and real-time analysis in large Scala projects.
+- **🔄 Incremental by Nature**: Built-in support for partial updates—re-parse only what has changed. Ideal for large-scale Scala apps where maintainability and tool responsiveness are critical.
+- **🌳 High-Fidelity AST**: Generates a comprehensive and precise syntax tree capturing the full depth of modern Scala:
+    - **Scala 3 Support**: Full support for enums, opaque types, extension methods, and context parameters.
+    - **Functional & OOP**: Detailed mapping of traits, classes, objects, and higher-order functions.
+    - **Indentation Syntax**: Precise handling of Scala 3's significant indentation rules.
+    - **Macros & Meta**: Robust parsing of inline methods and macro-related constructs.
+- **🛡️ Industrial-Grade Fault Tolerance**: Engineered to recover from syntax errors gracefully, providing precise diagnostics—crucial for maintaining a smooth developer experience during active coding.
+- **🧩 Deep Ecosystem Integration**: Seamlessly works with `oak-lsp` for full LSP support and `oak-mcp` for intelligent code discovery and analysis.
 
-## 🚀 Quick Start
+## 🏗️ Architecture
 
-Basic example:
+`oak-scala` follows the modern Green/Red Tree architecture (inspired by Roslyn):
 
-```rust
-use oak_core::{Parser, SourceText, parser::session::ParseSession};
-use oak_scala::{ScalaParser, ScalaLanguage};
+- **Green Tree**: Immutable, lossless, and syntax-only tree. It captures the full fidelity of the source code, including trivia (comments, whitespace).
+- **Red Tree**: A facade over the Green Tree that provides a convenient, type-safe API for tree traversal and analysis, including parent pointers and absolute offsets.
 
-fn main() -> Result<(), Box<dyn std::error::Error>> {
-    let mut session = ParseSession::<ScalaLanguage>::default();
-    let parser = ScalaParser::new();
-    let source = SourceText::new(r#"
-object HelloWorld {
-    def main(args: Array[String]): Unit = {
-        println("Hello, World!")
-    }
-}
-    "#);
-    
-    let result = parser.parse(&source, &mut session);
-    println!("Parsed Scala successfully.");
-    Ok(())
-}
-```
+This design enables efficient incremental parsing and powerful refactoring capabilities.
 
-## 📋 Parsing Examples
 
-### Object Parsing
-```rust
-use oak_core::{Parser, SourceText, parser::session::ParseSession};
-use oak_scala::{ScalaParser, ScalaLanguage};
+## 🛠️ Contributing
 
-let mut session = ParseSession::<ScalaLanguage>::default();
-let parser = ScalaParser::new();
-let source = SourceText::new(r#"
-object Calculator {
-    def add(a: Int, b: Int): Int = a + b
-    def subtract(a: Int, b: Int): Int = a - b
-    def multiply(a: Int, b: Int): Int = a * b
-    
-    def main(args: Array[String]): Unit = {
-        println(s"2 + 3 = ${add(2, 3)}")
-        println(s"5 - 2 = ${subtract(5, 2)}")
-        println(s"4 * 6 = ${multiply(4, 6)}")
-    }
-}
-"#);
-
-let result = parser.parse(&source, &mut session);
-println!("Object parsed successfully.");
-```
-
-### Class Parsing
-```rust
-use oak_core::{Parser, SourceText, parser::session::ParseSession};
-use oak_scala::{ScalaParser, ScalaLanguage};
-
-let mut session = ParseSession::<ScalaLanguage>::default();
-let parser = ScalaParser::new();
-let source = SourceText::new(r#"
-class Person(val name: String, var age: Int) {
-    def greet(): Unit = {
-        println(s"Hello, I'm $name and I'm $age years old")
-    }
-    
-    def haveBirthday(): Unit = {
-        age += 1
-        println(s"Happy birthday! Now I'm $age")
-    }
-}
-
-object Main {
-    def main(args: Array[String]): Unit = {
-        val person = new Person("Alice", 25)
-        person.greet()
-        person.haveBirthday()
-    }
-}
-"#);
-
-let result = parser.parse(&source, &mut session);
-println!("Class parsed successfully.");
-```
-
-## 🔧 Advanced Features
-
-### Token-Level Parsing
-```rust
-use oak_core::{Parser, SourceText, parser::session::ParseSession};
-use oak_scala::{ScalaParser, ScalaLanguage};
-
-let mut session = ParseSession::<ScalaLanguage>::default();
-let parser = ScalaParser::new();
-let source = SourceText::new("val x = 42");
-let result = parser.parse(&source, &mut session);
-println!("Token parsing completed.");
-```
-
-### Error Handling
-```rust
-use oak_core::{Parser, SourceText, parser::session::ParseSession};
-use oak_scala::{ScalaParser, ScalaLanguage};
-
-let mut session = ParseSession::<ScalaLanguage>::default();
-let parser = ScalaParser::new();
-let source = SourceText::new(r#"
-object Broken {
-    def main(args: Array[String]): Unit = {
-        val x = 
-        // Missing value
-    }
-}
-"#);
-
-let result = parser.parse(&source, &mut session);
-if let Some(errors) = result.result.err() {
-    println!("Parse errors found: {:?}", errors);
-} else {
-    println!("Parsed successfully.");
-}
-```
-
-## 🏗️ AST Structure
-
-The parser generates a comprehensive AST with the following main structures:
-
-- **ScalaProgram**: Root container for Scala programs
-- **Object**: Scala object definitions
-- **Class**: Scala class definitions
-- **Method**: Scala methods and functions
-- **Statement**: Various statement types including control flow
-- **Expression**: Various expression types including operators
-- **Type**: Scala type system constructs
-
-## 📊 Performance
-
-- **Streaming**: Parse large Scala files without loading entirely into memory
-- **Incremental**: Re-parse only changed sections
-- **Memory Efficient**: Smart AST node allocation
-- **Fast Recovery**: Quick error recovery for better IDE integration
-
-## 🔗 Integration
-
-Oak Scala integrates seamlessly with:
-
-- **Static Analysis**: Code quality and security analysis
-- **Code Generation**: Generating code from Scala AST
-- **IDE Support**: Language server protocol compatibility
-- **Refactoring**: Automated code refactoring
-- **Documentation**: Generating documentation from Scala code
-
-## 📚 Examples
-
-Check out the [examples](examples/) directory for comprehensive examples:
-
-- Complete Scala program parsing
-- Object and class analysis
-- Code transformation
-- Integration with development workflows
-
-## 🤝 Contributing
-
-Contributions are welcome! 
-
-Please feel free to submit pull requests at the [project repository](https://github.com/ygg-lang/oaks/tree/dev/examples/oak-scala) or open [issues](https://github.com/ygg-lang/oaks/issues).
+Contributions are welcome! Please feel free to submit a Pull Request. For major changes, please open an issue first to discuss what you would like to change.

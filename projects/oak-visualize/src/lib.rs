@@ -2,6 +2,11 @@
 #![doc(html_logo_url = "https://raw.githubusercontent.com/ygg-lang/oaks/refs/heads/dev/documents/logo.svg")]
 #![doc(html_favicon_url = "https://raw.githubusercontent.com/ygg-lang/oaks/refs/heads/dev/documents/logo.svg")]
 #![feature(new_range_api)]
+#![allow(missing_docs)]
+//! Visualization tools for the Oak language framework.
+//!
+//! This crate provides tools for generating visual representations of
+//! syntax trees and other language structures, primarily in SVG format.
 
 use std::fmt;
 

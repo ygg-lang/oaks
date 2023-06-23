@@ -1,8 +1,10 @@
-use crate::{kind::VocSyntaxKind, language::VocLanguage};
+#![doc = include_str!("readme.md")]
+pub mod token_type;
+
+use crate::{language::VocLanguage, lexer::token_type::VocTokenType};
 use oak_core::{
-    Lexer, LexerState,
+    Lexer, LexerState, Source,
     lexer::{LexOutput, LexerCache},
-    source::Source,
 };
 
 type State<'a, S> = LexerState<'a, S, VocLanguage>;
@@ -42,7 +44,7 @@ impl<'config> VocLexer<'config> {
         }
 
         if state.get_position() > start_pos {
-            state.add_token(VocSyntaxKind::Whitespace, start_pos, state.get_position());
+            state.add_token(VocTokenType::Whitespace, start_pos, state.get_position());
             true
         }
         else {
@@ -56,7 +58,7 @@ impl<'config> VocLexer<'config> {
 
         if let Some('\n') = state.peek() {
             state.advance(1);
-            state.add_token(VocSyntaxKind::Newline, start_pos, state.get_position());
+            state.add_token(VocTokenType::Newline, start_pos, state.get_position());
             true
         }
         else if let Some('\r') = state.peek() {
@@ -64,7 +66,7 @@ impl<'config> VocLexer<'config> {
             if let Some('\n') = state.peek() {
                 state.advance(1);
             }
-            state.add_token(VocSyntaxKind::Newline, start_pos, state.get_position());
+            state.add_token(VocTokenType::Newline, start_pos, state.get_position());
             true
         }
         else {
@@ -89,7 +91,7 @@ impl<'config> VocLexer<'config> {
                     state.advance(ch.len_utf8());
                 }
 
-                state.add_token(VocSyntaxKind::Comment, start_pos, state.get_position());
+                state.add_token(VocTokenType::Comment, start_pos, state.get_position());
                 return true;
             }
             // 多行注释 /* */
@@ -106,7 +108,7 @@ impl<'config> VocLexer<'config> {
                     state.advance(ch.len_utf8());
                 }
 
-                state.add_token(VocSyntaxKind::Comment, start_pos, state.get_position());
+                state.add_token(VocTokenType::Comment, start_pos, state.get_position());
                 return true;
             }
         }
@@ -143,7 +145,7 @@ impl<'config> VocLexer<'config> {
                     }
                 }
 
-                let token_kind = if quote == '"' { VocSyntaxKind::StringLiteral } else { VocSyntaxKind::CharLiteral };
+                let token_kind = if quote == '"' { VocTokenType::StringLiteral } else { VocTokenType::CharLiteral };
                 state.add_token(token_kind, start_pos, state.get_position());
                 true
             }
@@ -228,7 +230,7 @@ impl<'config> VocLexer<'config> {
                     }
                 }
 
-                let token_kind = if is_float { VocSyntaxKind::FloatLiteral } else { VocSyntaxKind::IntegerLiteral };
+                let token_kind = if is_float { VocTokenType::FloatLiteral } else { VocTokenType::IntegerLiteral };
                 state.add_token(token_kind, start_pos, state.get_position());
                 true
             }
@@ -257,66 +259,44 @@ impl<'config> VocLexer<'config> {
                 }
 
                 let text = state.get_text_in((start_pos..state.get_position()).into());
+                use oak_valkyrie::ValkyrieKeywords as VK;
                 let token_kind = match text.as_ref() {
-                    "module" => VocSyntaxKind::ModuleKw,
-                    "import" => VocSyntaxKind::ImportKw,
-                    "pub" => VocSyntaxKind::PubKw,
-                    "fn" => VocSyntaxKind::FnKw,
-                    "struct" => VocSyntaxKind::StructKw,
-                    "interface" => VocSyntaxKind::InterfaceKw,
-                    "enum" => VocSyntaxKind::EnumKw,
-                    "type" => VocSyntaxKind::TypeKw,
-                    "const" => VocSyntaxKind::ConstKw,
-                    "mut" => VocSyntaxKind::MutKw,
-                    "shared" => VocSyntaxKind::SharedKw,
-                    "volatile" => VocSyntaxKind::VolatileKw,
-                    "unsafe" => VocSyntaxKind::UnsafeKw,
-                    "if" => VocSyntaxKind::IfKw,
-                    "else" => VocSyntaxKind::ElseKw,
-                    "for" => VocSyntaxKind::ForKw,
-                    "in" => VocSyntaxKind::InKw,
-                    "match" => VocSyntaxKind::MatchKw,
-                    "or" => VocSyntaxKind::OrKw,
-                    "return" => VocSyntaxKind::ReturnKw,
-                    "break" => VocSyntaxKind::BreakKw,
-                    "continue" => VocSyntaxKind::ContinueKw,
-                    "goto" => VocSyntaxKind::GotoKw,
-                    "defer" => VocSyntaxKind::DeferKw,
-                    "go" => VocSyntaxKind::GoKw,
-                    "select" => VocSyntaxKind::SelectKw,
-                    "lock" => VocSyntaxKind::LockKw,
-                    "rlock" => VocSyntaxKind::RlockKw,
-                    "as" => VocSyntaxKind::AsKw,
-                    "is" => VocSyntaxKind::IsKw,
-                    "sizeof" => VocSyntaxKind::SizeofKw,
-                    "typeof" => VocSyntaxKind::TypeofKw,
-                    "offsetof" => VocSyntaxKind::OffsetofKw,
-                    "assert" => VocSyntaxKind::AssertKw,
-                    "panic" => VocSyntaxKind::PanicKw,
-                    "eprintln" => VocSyntaxKind::EprintlnKw,
-                    "println" => VocSyntaxKind::PrintlnKw,
-                    "print" => VocSyntaxKind::PrintKw,
-                    "eprint" => VocSyntaxKind::EprintKw,
-                    "bool" => VocSyntaxKind::BoolKw,
-                    "i8" => VocSyntaxKind::I8Kw,
-                    "i16" => VocSyntaxKind::I16Kw,
-                    "i32" => VocSyntaxKind::I32Kw,
-                    "i64" => VocSyntaxKind::I64Kw,
-                    "u8" => VocSyntaxKind::U8Kw,
-                    "u16" => VocSyntaxKind::U16Kw,
-                    "u32" => VocSyntaxKind::U32Kw,
-                    "u64" => VocSyntaxKind::U64Kw,
-                    "int" => VocSyntaxKind::IntKw,
-                    "uint" => VocSyntaxKind::UintKw,
-                    "f32" => VocSyntaxKind::F32Kw,
-                    "f64" => VocSyntaxKind::F64Kw,
-                    "string" => VocSyntaxKind::StringKw,
-                    "rune" => VocSyntaxKind::RuneKw,
-                    "byte" => VocSyntaxKind::ByteKw,
-                    "voidptr" => VocSyntaxKind::VoidptrKw,
-                    "char" => VocSyntaxKind::CharKw,
-                    "true" | "false" => VocSyntaxKind::BoolLiteral,
-                    _ => VocSyntaxKind::Identifier,
+                    "module" => VocTokenType::Keyword(VK::Namespace), // Map module to namespace
+                    "import" => VocTokenType::Keyword(VK::Using),     // Map import to using
+                    "pub" => VocTokenType::Identifier,                // pub is not in VK keywords yet
+                    "fn" => VocTokenType::Keyword(VK::Micro),         // Map fn to micro
+                    "struct" => VocTokenType::Keyword(VK::Class),     // Map struct to class
+                    "interface" => VocTokenType::Keyword(VK::Trait),  // Map interface to trait
+                    "enum" => VocTokenType::Keyword(VK::Enums),
+                    "type" => VocTokenType::Keyword(VK::Type),
+                    "const" => VocTokenType::Keyword(VK::Let),
+                    "mut" => VocTokenType::Keyword(VK::Mut),
+                    "if" => VocTokenType::Keyword(VK::If),
+                    "else" => VocTokenType::Keyword(VK::Else),
+                    "for" => VocTokenType::Keyword(VK::For),
+                    "in" => VocTokenType::Keyword(VK::In),
+                    "match" => VocTokenType::Keyword(VK::Match),
+                    "return" => VocTokenType::Keyword(VK::Return),
+                    "break" => VocTokenType::Keyword(VK::Break),
+                    "continue" => VocTokenType::Keyword(VK::Continue),
+                    "as" => VocTokenType::Keyword(VK::Is),
+                    "true" | "false" => VocTokenType::BoolLiteral,
+                    "bool" => VocTokenType::BoolKw,
+                    "i8" => VocTokenType::I8Kw,
+                    "i16" => VocTokenType::I16Kw,
+                    "i32" => VocTokenType::I32Kw,
+                    "i64" => VocTokenType::I64Kw,
+                    "u8" => VocTokenType::U8Kw,
+                    "u16" => VocTokenType::U16Kw,
+                    "u32" => VocTokenType::U32Kw,
+                    "u64" => VocTokenType::U64Kw,
+                    "int" => VocTokenType::IntKw,
+                    "uint" => VocTokenType::UintKw,
+                    "f32" => VocTokenType::F32Kw,
+                    "f64" => VocTokenType::F64Kw,
+                    "string" => VocTokenType::StringKw,
+                    "char" => VocTokenType::CharKw,
+                    _ => VocTokenType::Identifier,
                 };
 
                 state.add_token(token_kind, start_pos, state.get_position());
@@ -340,230 +320,230 @@ impl<'config> VocLexer<'config> {
                 '+' => {
                     if let Some('=') = state.peek_next_n(1) {
                         state.advance(2);
-                        VocSyntaxKind::PlusEq
+                        VocTokenType::PlusEq
                     }
                     else if let Some('+') = state.peek_next_n(1) {
                         state.advance(2);
-                        VocSyntaxKind::PlusPlus
+                        VocTokenType::PlusPlus
                     }
                     else {
                         state.advance(1);
-                        VocSyntaxKind::Plus
+                        VocTokenType::Plus
                     }
                 }
                 '-' => {
                     if let Some('=') = state.peek_next_n(1) {
                         state.advance(2);
-                        VocSyntaxKind::MinusEq
+                        VocTokenType::MinusEq
                     }
                     else if let Some('-') = state.peek_next_n(1) {
                         state.advance(2);
-                        VocSyntaxKind::MinusMinus
+                        VocTokenType::MinusMinus
                     }
                     else if let Some('>') = state.peek_next_n(1) {
                         state.advance(2);
-                        VocSyntaxKind::Arrow
+                        VocTokenType::Arrow
                     }
                     else {
                         state.advance(1);
-                        VocSyntaxKind::Minus
+                        VocTokenType::Minus
                     }
                 }
                 '*' => {
                     if let Some('=') = state.peek_next_n(1) {
                         state.advance(2);
-                        VocSyntaxKind::StarEq
+                        VocTokenType::StarEq
                     }
                     else {
                         state.advance(1);
-                        VocSyntaxKind::Star
+                        VocTokenType::Star
                     }
                 }
                 '/' => {
                     if let Some('=') = state.peek_next_n(1) {
                         state.advance(2);
-                        VocSyntaxKind::SlashEq
+                        VocTokenType::SlashEq
                     }
                     else {
                         state.advance(1);
-                        VocSyntaxKind::Slash
+                        VocTokenType::Slash
                     }
                 }
                 '%' => {
                     if let Some('=') = state.peek_next_n(1) {
                         state.advance(2);
-                        VocSyntaxKind::PercentEq
+                        VocTokenType::PercentEq
                     }
                     else {
                         state.advance(1);
-                        VocSyntaxKind::Percent
+                        VocTokenType::Percent
                     }
                 }
                 '&' => {
                     if let Some('=') = state.peek_next_n(1) {
                         state.advance(2);
-                        VocSyntaxKind::AmpersandEq
+                        VocTokenType::AmpersandEq
                     }
                     else if let Some('&') = state.peek_next_n(1) {
                         state.advance(2);
-                        VocSyntaxKind::AndAnd
+                        VocTokenType::AndAnd
                     }
                     else {
                         state.advance(1);
-                        VocSyntaxKind::Ampersand
+                        VocTokenType::Ampersand
                     }
                 }
                 '|' => {
                     if let Some('=') = state.peek_next_n(1) {
                         state.advance(2);
-                        VocSyntaxKind::PipeEq
+                        VocTokenType::PipeEq
                     }
                     else if let Some('|') = state.peek_next_n(1) {
                         state.advance(2);
-                        VocSyntaxKind::OrOr
+                        VocTokenType::OrOr
                     }
                     else {
                         state.advance(1);
-                        VocSyntaxKind::Pipe
+                        VocTokenType::Pipe
                     }
                 }
                 '^' => {
                     if let Some('=') = state.peek_next_n(1) {
                         state.advance(2);
-                        VocSyntaxKind::CaretEq
+                        VocTokenType::CaretEq
                     }
                     else {
                         state.advance(1);
-                        VocSyntaxKind::Caret
+                        VocTokenType::Caret
                     }
                 }
                 '=' => {
                     if let Some('=') = state.peek_next_n(1) {
                         state.advance(2);
-                        VocSyntaxKind::EqEq
+                        VocTokenType::EqEq
                     }
                     else if let Some('>') = state.peek_next_n(1) {
                         state.advance(2);
-                        VocSyntaxKind::FatArrow
+                        VocTokenType::FatArrow
                     }
                     else {
                         state.advance(1);
-                        VocSyntaxKind::Eq
+                        VocTokenType::Eq
                     }
                 }
                 '!' => {
                     if let Some('=') = state.peek_next_n(1) {
                         state.advance(2);
-                        VocSyntaxKind::Ne
+                        VocTokenType::Ne
                     }
                     else {
                         state.advance(1);
-                        VocSyntaxKind::Bang
+                        VocTokenType::Bang
                     }
                 }
                 '<' => {
                     if let Some('=') = state.peek_next_n(1) {
                         state.advance(2);
-                        VocSyntaxKind::Le
+                        VocTokenType::Le
                     }
                     else if let Some('<') = state.peek_next_n(1) {
                         if let Some('=') = state.peek_next_n(2) {
                             state.advance(3);
-                            VocSyntaxKind::LeftShiftEq
+                            VocTokenType::LeftShiftEq
                         }
                         else {
                             state.advance(2);
-                            VocSyntaxKind::LeftShift
+                            VocTokenType::LeftShift
                         }
                     }
                     else {
                         state.advance(1);
-                        VocSyntaxKind::LessThan
+                        VocTokenType::LessThan
                     }
                 }
                 '>' => {
                     if let Some('=') = state.peek_next_n(1) {
                         state.advance(2);
-                        VocSyntaxKind::Ge
+                        VocTokenType::Ge
                     }
                     else if let Some('>') = state.peek_next_n(1) {
                         if let Some('=') = state.peek_next_n(2) {
                             state.advance(3);
-                            VocSyntaxKind::RightShiftEq
+                            VocTokenType::RightShiftEq
                         }
                         else {
                             state.advance(2);
-                            VocSyntaxKind::RightShift
+                            VocTokenType::RightShift
                         }
                     }
                     else {
                         state.advance(1);
-                        VocSyntaxKind::GreaterThan
+                        VocTokenType::GreaterThan
                     }
                 }
                 '.' => {
                     if let Some('.') = state.peek_next_n(1) {
                         if let Some('.') = state.peek_next_n(2) {
                             state.advance(3);
-                            VocSyntaxKind::DotDotDot
+                            VocTokenType::DotDotDot
                         }
                         else {
                             state.advance(2);
-                            VocSyntaxKind::DotDot
+                            VocTokenType::DotDot
                         }
                     }
                     else {
                         state.advance(1);
-                        VocSyntaxKind::Dot
+                        VocTokenType::Dot
                     }
                 }
                 ',' => {
                     state.advance(1);
-                    VocSyntaxKind::Comma
+                    VocTokenType::Comma
                 }
                 ':' => {
                     state.advance(1);
-                    VocSyntaxKind::Colon
+                    VocTokenType::Colon
                 }
                 ';' => {
                     state.advance(1);
-                    VocSyntaxKind::Semicolon
+                    VocTokenType::Semicolon
                 }
                 '(' => {
                     state.advance(1);
-                    VocSyntaxKind::LeftParen
+                    VocTokenType::LeftParen
                 }
                 ')' => {
                     state.advance(1);
-                    VocSyntaxKind::RightParen
+                    VocTokenType::RightParen
                 }
                 '[' => {
                     state.advance(1);
-                    VocSyntaxKind::LeftBracket
+                    VocTokenType::LeftBracket
                 }
                 ']' => {
                     state.advance(1);
-                    VocSyntaxKind::RightBracket
+                    VocTokenType::RightBracket
                 }
                 '{' => {
                     state.advance(1);
-                    VocSyntaxKind::LeftBrace
+                    VocTokenType::LeftBrace
                 }
                 '}' => {
                     state.advance(1);
-                    VocSyntaxKind::RightBrace
+                    VocTokenType::RightBrace
                 }
                 '?' => {
                     state.advance(1);
-                    VocSyntaxKind::Question
+                    VocTokenType::Question
                 }
                 '~' => {
                     state.advance(1);
-                    VocSyntaxKind::Tilde
+                    VocTokenType::Tilde
                 }
                 _ => {
                     state.advance(ch.len_utf8());
-                    VocSyntaxKind::Error
+                    VocTokenType::Error
                 }
             };
 
@@ -577,6 +557,13 @@ impl<'config> VocLexer<'config> {
 
     /// 主要的词法分析循环
     fn run<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> Result<(), oak_core::OakError> {
+        match self._config.mode {
+            crate::language::VocMode::Programming => self.run_programming(state),
+            crate::language::VocMode::Component => self.run_component(state),
+        }
+    }
+
+    fn run_programming<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> Result<(), oak_core::OakError> {
         while state.not_at_end() {
             if self.skip_whitespace(state) {
                 continue;
@@ -610,9 +597,182 @@ impl<'config> VocLexer<'config> {
             let start_pos = state.get_position();
             if let Some(ch) = state.peek() {
                 state.advance(ch.len_utf8());
-                state.add_token(VocSyntaxKind::Error, start_pos, state.get_position());
+                state.add_token(VocTokenType::Error, start_pos, state.get_position());
             }
         }
+
         Ok(())
+    }
+
+    fn run_component<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> Result<(), oak_core::OakError> {
+        let start = state.get_position();
+        // Find the end of the source
+        while let Some(ch) = state.peek() {
+            state.advance(ch.len_utf8());
+        }
+        let end = state.get_position();
+
+        // Reset to start and lex with interpolation/template support
+        state.set_position(start);
+        self.lex_template_content(state, start, end);
+
+        Ok(())
+    }
+
+    fn lex_template_content<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>, start: usize, end: usize) {
+        let mut current = start;
+        state.set_position(start);
+
+        while state.get_position() < end {
+            // Handle escaped characters
+            if state.peek() == Some('\\') {
+                state.advance(1);
+                if let Some(c) = state.peek() {
+                    state.advance(c.len_utf8());
+                }
+                continue;
+            }
+
+            // Handle <% template control %>
+            if state.starts_with("<%") {
+                let text_end = state.get_position();
+                if current < text_end {
+                    state.add_token(VocTokenType::TextPart, current, text_end);
+                }
+
+                let control_start = state.get_position();
+                state.advance(2); // skip <%
+                state.add_token(VocTokenType::TemplateControlStart, control_start, state.get_position());
+
+                // Find matching %>
+                while state.get_position() < end {
+                    if state.starts_with("%>") {
+                        let control_end = state.get_position();
+                        state.advance(2);
+                        state.add_token(VocTokenType::TemplateControlEnd, control_end, state.get_position());
+                        break;
+                    }
+                    if let Some(c) = state.peek() {
+                        state.advance(c.len_utf8());
+                    }
+                    else {
+                        break;
+                    }
+                }
+                current = state.get_position();
+                continue;
+            }
+
+            // Handle { interpolation }
+            if state.peek() == Some('{') {
+                let text_end = state.get_position();
+                if current < text_end {
+                    state.add_token(VocTokenType::TextPart, current, text_end);
+                }
+
+                let interp_start = state.get_position();
+                state.advance(1); // skip {
+                state.add_token(VocTokenType::InterpolationStart, interp_start, state.get_position());
+
+                // Find matching }
+                let mut depth = 1;
+                while depth > 0 && state.get_position() < end {
+                    if let Some(c) = state.peek() {
+                        if c == '{' {
+                            depth += 1;
+                        }
+                        else if c == '}' {
+                            depth -= 1;
+                            if depth == 0 {
+                                let interp_end = state.get_position();
+                                state.advance(1);
+                                state.add_token(VocTokenType::InterpolationEnd, interp_end, state.get_position());
+                                break;
+                            }
+                        }
+                        state.advance(c.len_utf8());
+                    }
+                    else {
+                        break;
+                    }
+                }
+                current = state.get_position();
+                continue;
+            }
+
+            // Handle XML-like tags
+            if state.peek() == Some('<') {
+                let text_end = state.get_position();
+                if current < text_end {
+                    state.add_token(VocTokenType::TextPart, current, text_end);
+                }
+
+                let tag_start = state.get_position();
+                state.advance(1); // skip <
+
+                if state.peek() == Some('/') {
+                    state.advance(1);
+                    state.add_token(VocTokenType::TagOpen, tag_start, state.get_position());
+                    state.add_token(VocTokenType::TagSlash, tag_start + 1, state.get_position());
+                }
+                else {
+                    state.add_token(VocTokenType::TagOpen, tag_start, state.get_position());
+                }
+
+                // Lex tag name
+                let name_start = state.get_position();
+                if self.lex_identifier_or_keyword(state) {
+                    // Re-tag the identifier as TagName if needed, but for now just use Identifier
+                }
+
+                // Lex attributes until > or />
+                while state.get_position() < end {
+                    self.skip_whitespace(state);
+                    if state.starts_with("/>") {
+                        let self_close_start = state.get_position();
+                        state.advance(2);
+                        state.add_token(VocTokenType::TagSelfClose, self_close_start, state.get_position());
+                        break;
+                    }
+                    if state.peek() == Some('>') {
+                        let close_start = state.get_position();
+                        state.advance(1);
+                        state.add_token(VocTokenType::TagClose, close_start, state.get_position());
+                        break;
+                    }
+
+                    // Lex attribute
+                    if self.lex_identifier_or_keyword(state) {
+                        if state.peek() == Some('=') {
+                            let eq_start = state.get_position();
+                            state.advance(1);
+                            state.add_token(VocTokenType::AttrEq, eq_start, state.get_position());
+                            self.lex_string(state);
+                        }
+                    }
+                    else if let Some(c) = state.peek() {
+                        state.advance(c.len_utf8());
+                    }
+                    else {
+                        break;
+                    }
+                }
+
+                current = state.get_position();
+                continue;
+            }
+
+            // Regular character
+            if let Some(c) = state.peek() {
+                state.advance(c.len_utf8());
+            }
+            else {
+                break;
+            }
+        }
+
+        if current < end {
+            state.add_token(VocTokenType::TextPart, current, end);
+        }
     }
 }

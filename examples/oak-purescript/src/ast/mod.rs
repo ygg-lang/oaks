@@ -1,3 +1,4 @@
+#![doc = include_str!("readme.md")]
 /// PureScript AST 根节点
 #[derive(Debug, Clone)]
 pub struct PurescriptRoot {

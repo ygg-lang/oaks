@@ -1,9 +1,12 @@
+#![doc = include_str!("readme.md")]
 use crate::ast::DjangoRoot;
 use oak_core::{Language, LanguageCategory};
+#[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
 
 /// Django 模板语言配置
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct DjangoLanguage {
     /// 是否启用严格模式
     pub strict_mode: bool,
@@ -28,7 +31,7 @@ impl Language for DjangoLanguage {
     const NAME: &'static str = "django";
     const CATEGORY: LanguageCategory = LanguageCategory::Programming;
 
-    type TokenType = crate::kind::DjangoSyntaxKind;
-    type ElementType = crate::kind::DjangoSyntaxKind;
+    type TokenType = crate::lexer::token_type::DjangoTokenType;
+    type ElementType = crate::parser::element_type::DjangoElementType;
     type TypedRoot = DjangoRoot;
 }

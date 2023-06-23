@@ -1,16 +1,16 @@
 [package]
 name = "oak-core"
-description = "Core parser combinator library providing fundamental parsing primitives."
-categories = ["parsing", "no-std"]
-keywords = ["parser", "parser-combinators", "core", "primitive"]
-documentation = "https://docs.rs/oak-core"
-readme = "readme.md"
 version.workspace = true
 authors.workspace = true
-homepage.workspace = true
-repository.workspace = true
-license.workspace = true
+description = "Core parser combinator library providing fundamental parsing primitives."
 edition.workspace = true
+license.workspace = true
+readme = "readme.md"
+homepage.workspace = true
+repository = "https://github.com/ygg-lang/oaks/tree/master/projects/oak-core"
+documentation = "https://docs.rs/oak-core"
+categories = ["parsing", "no-std"]
+keywords = ["parser", "parser-combinators", "core", "primitive"]
 
 [dependencies]
 serde = { workspace = true, optional = true }

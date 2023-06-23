@@ -1,4 +1,7 @@
-use crate::{kind::JasminSyntaxKind, language::JasminLanguage};
+#![doc = include_str!("readme.md")]
+pub mod token_type;
+
+use crate::{language::JasminLanguage, lexer::token_type::JasminTokenType};
 use oak_core::{Lexer, LexerCache, LexerState, OakError, TextEdit, lexer::LexOutput, source::Source};
 
 type State<'a, S> = LexerState<'a, S, JasminLanguage>;
@@ -15,65 +18,65 @@ impl<'config> JasminLexer<'config> {
     }
 
     /// 判断是关键字还是标识符
-    fn keyword_or_identifier(&self, text: &str) -> JasminSyntaxKind {
+    fn keyword_or_identifier(&self, text: &str) -> JasminTokenType {
         match text {
-            ".class" => JasminSyntaxKind::ClassKw,
-            ".version" => JasminSyntaxKind::VersionKw,
-            ".method" => JasminSyntaxKind::MethodKw,
-            ".field" => JasminSyntaxKind::FieldKw,
-            ".string" => JasminSyntaxKind::StringKw,
-            ".source" => JasminSyntaxKind::SourceFileKw,
-            ".stack" => JasminSyntaxKind::StackKw,
-            ".locals" => JasminSyntaxKind::LocalsKw,
-            ".end" => JasminSyntaxKind::EndKw,
-            ".compiled" => JasminSyntaxKind::CompiledKw,
-            ".from" => JasminSyntaxKind::FromKw,
-            ".inner" => JasminSyntaxKind::InnerClassKw,
-            ".nest" => JasminSyntaxKind::NestMembersKw,
-            ".bootstrap" => JasminSyntaxKind::BootstrapMethodKw,
+            ".class" => JasminTokenType::ClassKw,
+            ".version" => JasminTokenType::VersionKw,
+            ".method" => JasminTokenType::MethodKw,
+            ".field" => JasminTokenType::FieldKw,
+            ".string" => JasminTokenType::StringKw,
+            ".source" => JasminTokenType::SourceFileKw,
+            ".stack" => JasminTokenType::StackKw,
+            ".locals" => JasminTokenType::LocalsKw,
+            ".end" => JasminTokenType::EndKw,
+            ".compiled" => JasminTokenType::CompiledKw,
+            ".from" => JasminTokenType::FromKw,
+            ".inner" => JasminTokenType::InnerClassKw,
+            ".nest" => JasminTokenType::NestMembersKw,
+            ".bootstrap" => JasminTokenType::BootstrapMethodKw,
 
-            "public" => JasminSyntaxKind::Public,
-            "private" => JasminSyntaxKind::Private,
-            "protected" => JasminSyntaxKind::Protected,
-            "static" => JasminSyntaxKind::Static,
-            "super" => JasminSyntaxKind::Super,
-            "final" => JasminSyntaxKind::Final,
-            "abstract" => JasminSyntaxKind::Abstract,
-            "synchronized" => JasminSyntaxKind::Synchronized,
-            "native" => JasminSyntaxKind::Native,
-            "synthetic" => JasminSyntaxKind::Synthetic,
-            "deprecated" => JasminSyntaxKind::Deprecated,
-            "varargs" => JasminSyntaxKind::Varargs,
+            "public" => JasminTokenType::Public,
+            "private" => JasminTokenType::Private,
+            "protected" => JasminTokenType::Protected,
+            "static" => JasminTokenType::Static,
+            "super" => JasminTokenType::Super,
+            "final" => JasminTokenType::Final,
+            "abstract" => JasminTokenType::Abstract,
+            "synchronized" => JasminTokenType::Synchronized,
+            "native" => JasminTokenType::Native,
+            "synthetic" => JasminTokenType::Synthetic,
+            "deprecated" => JasminTokenType::Deprecated,
+            "varargs" => JasminTokenType::Varargs,
 
-            "aload_0" => JasminSyntaxKind::ALoad0,
-            "aload_1" => JasminSyntaxKind::ALoad1,
-            "aload_2" => JasminSyntaxKind::ALoad2,
-            "aload_3" => JasminSyntaxKind::ALoad3,
-            "iload_0" => JasminSyntaxKind::ILoad0,
-            "iload_1" => JasminSyntaxKind::ILoad1,
-            "iload_2" => JasminSyntaxKind::ILoad2,
-            "iload_3" => JasminSyntaxKind::ILoad3,
-            "ldc" => JasminSyntaxKind::Ldc,
-            "ldc_w" => JasminSyntaxKind::LdcW,
-            "ldc2_w" => JasminSyntaxKind::Ldc2W,
-            "invokespecial" => JasminSyntaxKind::InvokeSpecial,
-            "invokevirtual" => JasminSyntaxKind::InvokeVirtual,
-            "invokestatic" => JasminSyntaxKind::InvokeStatic,
-            "invokeinterface" => JasminSyntaxKind::InvokeInterface,
-            "invokedynamic" => JasminSyntaxKind::InvokeDynamic,
-            "getstatic" => JasminSyntaxKind::GetStatic,
-            "putstatic" => JasminSyntaxKind::PutStatic,
-            "getfield" => JasminSyntaxKind::GetField,
-            "putfield" => JasminSyntaxKind::PutField,
-            "return" => JasminSyntaxKind::Return,
-            "areturn" => JasminSyntaxKind::AReturn,
-            "ireturn" => JasminSyntaxKind::IReturn,
-            "pop" => JasminSyntaxKind::Pop,
-            "new" => JasminSyntaxKind::New,
+            "aload_0" => JasminTokenType::ALoad0,
+            "aload_1" => JasminTokenType::ALoad1,
+            "aload_2" => JasminTokenType::ALoad2,
+            "aload_3" => JasminTokenType::ALoad3,
+            "iload_0" => JasminTokenType::ILoad0,
+            "iload_1" => JasminTokenType::ILoad1,
+            "iload_2" => JasminTokenType::ILoad2,
+            "iload_3" => JasminTokenType::ILoad3,
+            "ldc" => JasminTokenType::Ldc,
+            "ldc_w" => JasminTokenType::LdcW,
+            "ldc2_w" => JasminTokenType::Ldc2W,
+            "invokespecial" => JasminTokenType::InvokeSpecial,
+            "invokevirtual" => JasminTokenType::InvokeVirtual,
+            "invokestatic" => JasminTokenType::InvokeStatic,
+            "invokeinterface" => JasminTokenType::InvokeInterface,
+            "invokedynamic" => JasminTokenType::InvokeDynamic,
+            "getstatic" => JasminTokenType::GetStatic,
+            "putstatic" => JasminTokenType::PutStatic,
+            "getfield" => JasminTokenType::GetField,
+            "putfield" => JasminTokenType::PutField,
+            "return" => JasminTokenType::Return,
+            "areturn" => JasminTokenType::AReturn,
+            "ireturn" => JasminTokenType::IReturn,
+            "pop" => JasminTokenType::Pop,
+            "new" => JasminTokenType::New,
 
             _ => {
                 // 检查是否是类型描述符
-                if self.is_type_descriptor(text) { JasminSyntaxKind::TypeDescriptor } else { JasminSyntaxKind::IdentifierToken }
+                if self.is_type_descriptor(text) { JasminTokenType::TypeDescriptor } else { JasminTokenType::IdentifierToken }
             }
         }
     }
@@ -118,7 +121,7 @@ impl<'config> JasminLexer<'config> {
         }
 
         if consumed {
-            state.add_token(JasminSyntaxKind::Whitespace, start_pos, state.get_position());
+            state.add_token(JasminTokenType::Whitespace, start_pos, state.get_position());
             true
         }
         else {
@@ -138,7 +141,7 @@ impl<'config> JasminLexer<'config> {
                         break;
                     }
                 }
-                state.add_token(JasminSyntaxKind::Comment, start_pos, state.get_position());
+                state.add_token(JasminTokenType::Comment, start_pos, state.get_position());
                 return true;
             }
         }
@@ -168,7 +171,7 @@ impl<'config> JasminLexer<'config> {
                     }
                 }
 
-                state.add_token(JasminSyntaxKind::StringLiteral, start_pos, state.get_position());
+                state.add_token(JasminTokenType::StringLiteral, start_pos, state.get_position());
                 return true;
             }
         }
@@ -208,7 +211,7 @@ impl<'config> JasminLexer<'config> {
                 }
             }
 
-            state.add_token(JasminSyntaxKind::Number, start_pos, state.get_position());
+            state.add_token(JasminTokenType::Number, start_pos, state.get_position());
             return true;
         }
 
@@ -257,17 +260,17 @@ impl<'config> JasminLexer<'config> {
         };
 
         let kind = match ch {
-            '{' => JasminSyntaxKind::LeftBrace,
-            '}' => JasminSyntaxKind::RightBrace,
-            '(' => JasminSyntaxKind::LeftParen,
-            ')' => JasminSyntaxKind::RightParen,
-            '[' => JasminSyntaxKind::LeftBracket,
-            ']' => JasminSyntaxKind::RightBracket,
-            ':' => JasminSyntaxKind::Colon,
-            ';' => JasminSyntaxKind::Semicolon,
-            '.' => JasminSyntaxKind::Dot,
-            ',' => JasminSyntaxKind::Comma,
-            '/' => JasminSyntaxKind::Slash,
+            '{' => JasminTokenType::LeftBrace,
+            '}' => JasminTokenType::RightBrace,
+            '(' => JasminTokenType::LeftParen,
+            ')' => JasminTokenType::RightParen,
+            '[' => JasminTokenType::LeftBracket,
+            ']' => JasminTokenType::RightBracket,
+            ':' => JasminTokenType::Colon,
+            ';' => JasminTokenType::Semicolon,
+            '.' => JasminTokenType::Dot,
+            ',' => JasminTokenType::Comma,
+            '/' => JasminTokenType::Slash,
             _ => return false,
         };
 
@@ -310,7 +313,7 @@ impl<'config> JasminLexer<'config> {
             let start_pos = state.get_position();
             if let Some(ch) = state.peek() {
                 state.advance(ch.len_utf8());
-                state.add_token(JasminSyntaxKind::Error, start_pos, state.get_position());
+                state.add_token(JasminTokenType::Error, start_pos, state.get_position());
             }
 
             state.advance_if_dead_lock(safe_point);

@@ -11,7 +11,7 @@ fn test_graph_creation() {
     assert_eq!(graph.nodes.len(), 2);
     assert_eq!(graph.edges.len(), 1);
     assert_eq!(graph.get_degree("a"), 1);
-    assert_eq!(graph.get_degree("b"), 0);
+    assert_eq!(graph.get_degree("b"), 0)
 }
 
 #[test]
@@ -19,7 +19,7 @@ fn test_circular_layout() {
     let mut graph = Graph::new(false);
 
     for i in 0..5 {
-        graph.add_node(GraphNode::new(format!("node{}", i), format!("Node {}", i)));
+        graph.add_node(GraphNode::new(format!("node{}", i), format!("Node {}", i)))
     }
 
     let layout_engine = GraphLayout::new().with_algorithm(GraphLayoutAlgorithm::Circular);
@@ -27,7 +27,7 @@ fn test_circular_layout() {
 
     assert!(result.is_ok());
     let layout = result.unwrap();
-    assert_eq!(layout.nodes.len(), 5);
+    assert_eq!(layout.nodes.len(), 5)
 }
 
 #[test]
@@ -47,7 +47,7 @@ fn test_force_directed_layout() {
 
     let layout = result.unwrap();
     assert_eq!(layout.nodes.len(), 3);
-    assert_eq!(layout.edges.len(), 2);
+    assert_eq!(layout.edges.len(), 2)
 }
 
 #[test]
@@ -57,7 +57,7 @@ fn test_graph_node_builder() {
     assert_eq!(node.id, "test");
     assert_eq!(node.label, "Test Node");
     assert_eq!(node.node_type, "function");
-    assert_eq!(node.weight, 2.5);
+    assert_eq!(node.weight, 2.5)
 }
 
 #[test]
@@ -69,7 +69,7 @@ fn test_graph_edge_builder() {
     assert_eq!(edge.label, Some("calls".to_string()));
     assert_eq!(edge.edge_type, "dependency");
     assert_eq!(edge.weight, 1.5);
-    assert!(!edge.directed);
+    assert!(!edge.directed)
 }
 
 #[test]
@@ -86,7 +86,7 @@ fn test_graph_neighbors() {
     let neighbors = graph.get_neighbors("a");
     assert_eq!(neighbors.len(), 2);
     assert!(neighbors.contains(&"b"));
-    assert!(neighbors.contains(&"c"));
+    assert!(neighbors.contains(&"c"))
 }
 
 #[test]
@@ -102,5 +102,5 @@ fn test_graph_connectivity() {
 
     // Disconnected graph
     graph.add_node(GraphNode::new("c".to_string(), "C".to_string()));
-    assert!(!graph.is_connected());
+    assert!(!graph.is_connected())
 }

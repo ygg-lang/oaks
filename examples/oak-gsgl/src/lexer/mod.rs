@@ -1,9 +1,12 @@
-use crate::{GsglLanguage, syntax::GsglSyntaxKind};
+#![doc = include_str!("readme.md")]
+pub mod token_type;
+
+use crate::{language::GsglLanguage, lexer::token_type::GsglTokenType};
 use oak_core::{Lexer, LexerCache, LexerState, OakError, TextEdit, lexer::LexOutput, source::Source};
 
 type State<'a, S> = LexerState<'a, S, GsglLanguage>;
 
-/// GSGL 词法分析器
+/// GSGL lexer.
 #[derive(Clone, Debug)]
 pub struct GsglLexer<'config> {
     _config: &'config GsglLanguage,
@@ -50,10 +53,10 @@ impl<'config> GsglLexer<'config> {
                 continue;
             }
 
-            // 如果没有任何方法处理当前字符，创建错误 token 并前进
+            // If no method handles the current character, create an error token and advance
             if let Some(ch) = state.peek() {
                 state.advance(ch.len_utf8());
-                state.add_token(GsglSyntaxKind::Error, start, state.get_position());
+                state.add_token(GsglTokenType::Error, start, state.get_position());
             }
             else {
                 break;
@@ -76,7 +79,7 @@ impl<'config> GsglLexer<'config> {
         }
 
         if state.get_position() > start {
-            state.add_token(GsglSyntaxKind::Whitespace, start, state.get_position());
+            state.add_token(GsglTokenType::Whitespace, start, state.get_position());
             true
         }
         else {
@@ -88,12 +91,12 @@ impl<'config> GsglLexer<'config> {
         let start = state.get_position();
         if state.peek() == Some('\n') {
             state.advance(1);
-            state.add_token(GsglSyntaxKind::Newline, start, state.get_position());
+            state.add_token(GsglTokenType::Newline, start, state.get_position());
             true
         }
         else if state.peek() == Some('\r') && state.peek_next_n(1) == Some('\n') {
             state.advance(2);
-            state.add_token(GsglSyntaxKind::Newline, start, state.get_position());
+            state.add_token(GsglTokenType::Newline, start, state.get_position());
             true
         }
         else {
@@ -105,7 +108,7 @@ impl<'config> GsglLexer<'config> {
         let start = state.get_position();
 
         if state.peek() == Some('/') && state.peek_next_n(1) == Some('/') {
-            // 单行注释
+            // Single-line comment
             state.advance(2);
             while let Some(ch) = state.peek() {
                 if ch == '\n' || ch == '\r' {
@@ -113,11 +116,11 @@ impl<'config> GsglLexer<'config> {
                 }
                 state.advance(1);
             }
-            state.add_token(GsglSyntaxKind::Comment, start, state.get_position());
+            state.add_token(GsglTokenType::Comment, start, state.get_position());
             true
         }
         else if state.peek() == Some('/') && state.peek_next_n(1) == Some('*') {
-            // 多行注释
+            // Multi-line comment
             state.advance(2);
             while let Some(ch) = state.peek() {
                 if ch == '*' && state.peek_next_n(1) == Some('/') {
@@ -126,7 +129,7 @@ impl<'config> GsglLexer<'config> {
                 }
                 state.advance(1);
             }
-            state.add_token(GsglSyntaxKind::Comment, start, state.get_position());
+            state.add_token(GsglTokenType::Comment, start, state.get_position());
             true
         }
         else {
@@ -138,18 +141,18 @@ impl<'config> GsglLexer<'config> {
         let start = state.get_position();
 
         if state.peek() == Some('"') {
-            state.advance(1); // 消费开始的引号
+            state.advance(1); // Consume start quote
 
             while let Some(ch) = state.peek() {
                 if ch == '"' {
-                    state.advance(1); // 消费结束的引号
-                    state.add_token(GsglSyntaxKind::String, start, state.get_position());
+                    state.advance(1); // Consume end quote
+                    state.add_token(GsglTokenType::String, start, state.get_position());
                     return true;
                 }
                 else if ch == '\\' {
-                    state.advance(1); // 消费转义字符
+                    state.advance(1); // Consume escape character
                     if state.peek().is_some() {
-                        state.advance(1); // 消费被转义的字符
+                        state.advance(1); // Consume escaped character
                     }
                 }
                 else {
@@ -157,8 +160,8 @@ impl<'config> GsglLexer<'config> {
                 }
             }
 
-            // 未闭合的字符串
-            state.add_token(GsglSyntaxKind::String, start, state.get_position());
+            // Unterminated string
+            state.add_token(GsglTokenType::String, start, state.get_position());
             true
         }
         else {
@@ -170,25 +173,25 @@ impl<'config> GsglLexer<'config> {
         let start = state.get_position();
 
         if state.peek() == Some('\'') {
-            state.advance(1); // 消费开始的单引号
+            state.advance(1); // Consume start single quote
 
             if let Some(ch) = state.peek() {
                 if ch == '\\' {
-                    state.advance(1); // 消费转义字符
+                    state.advance(1); // Consume escape character
                     if state.peek().is_some() {
-                        state.advance(1); // 消费被转义的字符
+                        state.advance(1); // Consume escaped character
                     }
                 }
                 else if ch != '\'' {
-                    state.advance(1); // 消费字符
+                    state.advance(1); // Consume character
                 }
             }
 
             if state.peek() == Some('\'') {
-                state.advance(1); // 消费结束的单引号
+                state.advance(1); // Consume end single quote
             }
 
-            state.add_token(GsglSyntaxKind::String, start, state.get_position());
+            state.add_token(GsglTokenType::String, start, state.get_position());
             true
         }
         else {
@@ -201,7 +204,7 @@ impl<'config> GsglLexer<'config> {
 
         if let Some(ch) = state.peek() {
             if ch.is_ascii_digit() {
-                // 消费数字
+                // Consume digits
                 while let Some(ch) = state.peek() {
                     if ch.is_ascii_digit() {
                         state.advance(1);
@@ -211,9 +214,9 @@ impl<'config> GsglLexer<'config> {
                     }
                 }
 
-                // 检查小数点
+                // Check for decimal point
                 if state.peek() == Some('.') && state.peek_next_n(1).map_or(false, |c| c.is_ascii_digit()) {
-                    state.advance(1); // 消费 '.'
+                    state.advance(1); // Consume '.'
                     while let Some(ch) = state.peek() {
                         if ch.is_ascii_digit() {
                             state.advance(1);
@@ -224,7 +227,7 @@ impl<'config> GsglLexer<'config> {
                     }
                 }
 
-                // 检查科学记数法
+                // Check for scientific notation
                 if matches!(state.peek(), Some('e') | Some('E')) {
                     state.advance(1);
                     if matches!(state.peek(), Some('+') | Some('-')) {
@@ -240,12 +243,12 @@ impl<'config> GsglLexer<'config> {
                     }
                 }
 
-                // 检查浮点后缀
+                // Check for float suffix
                 if matches!(state.peek(), Some('f') | Some('F')) {
                     state.advance(1);
                 }
 
-                state.add_token(GsglSyntaxKind::Number, start, state.get_position());
+                state.add_token(GsglTokenType::Number, start, state.get_position());
                 return true;
             }
         }
@@ -270,43 +273,43 @@ impl<'config> GsglLexer<'config> {
                 let end = state.get_position();
                 let text = state.get_text_in(oak_core::Range { start, end });
                 let kind = match text.as_ref() {
-                    "shader" => GsglSyntaxKind::Shader,
-                    "vertex" => GsglSyntaxKind::Vertex,
-                    "fragment" => GsglSyntaxKind::Fragment,
-                    "geometry" => GsglSyntaxKind::Geometry,
-                    "compute" => GsglSyntaxKind::Compute,
-                    "uniform" => GsglSyntaxKind::Uniform,
-                    "attribute" => GsglSyntaxKind::Attribute,
-                    "varying" => GsglSyntaxKind::Varying,
-                    "in" => GsglSyntaxKind::In,
-                    "out" => GsglSyntaxKind::Out,
-                    "inout" => GsglSyntaxKind::Inout,
-                    "const" => GsglSyntaxKind::Const,
-                    "struct" => GsglSyntaxKind::Struct,
-                    "if" => GsglSyntaxKind::If,
-                    "else" => GsglSyntaxKind::Else,
-                    "for" => GsglSyntaxKind::For,
-                    "while" => GsglSyntaxKind::While,
-                    "do" => GsglSyntaxKind::Do,
-                    "break" => GsglSyntaxKind::Break,
-                    "continue" => GsglSyntaxKind::Continue,
-                    "return" => GsglSyntaxKind::Return,
-                    "discard" => GsglSyntaxKind::Discard,
-                    "true" => GsglSyntaxKind::True,
-                    "false" => GsglSyntaxKind::False,
-                    "float" => GsglSyntaxKind::Float,
-                    "int" => GsglSyntaxKind::Int,
-                    "bool" => GsglSyntaxKind::Bool,
-                    "vec2" => GsglSyntaxKind::Vec2,
-                    "vec3" => GsglSyntaxKind::Vec3,
-                    "vec4" => GsglSyntaxKind::Vec4,
-                    "mat2" => GsglSyntaxKind::Mat2,
-                    "mat3" => GsglSyntaxKind::Mat3,
-                    "mat4" => GsglSyntaxKind::Mat4,
-                    "sampler2D" => GsglSyntaxKind::Sampler2D,
-                    "samplerCube" => GsglSyntaxKind::SamplerCube,
-                    "void" => GsglSyntaxKind::Void,
-                    _ => GsglSyntaxKind::Identifier,
+                    "shader" => GsglTokenType::Shader,
+                    "vertex" => GsglTokenType::Vertex,
+                    "fragment" => GsglTokenType::Fragment,
+                    "geometry" => GsglTokenType::Geometry,
+                    "compute" => GsglTokenType::Compute,
+                    "uniform" => GsglTokenType::Uniform,
+                    "attribute" => GsglTokenType::Attribute,
+                    "varying" => GsglTokenType::Varying,
+                    "in" => GsglTokenType::In,
+                    "out" => GsglTokenType::Out,
+                    "inout" => GsglTokenType::Inout,
+                    "const" => GsglTokenType::Const,
+                    "struct" => GsglTokenType::Struct,
+                    "if" => GsglTokenType::If,
+                    "else" => GsglTokenType::Else,
+                    "for" => GsglTokenType::For,
+                    "while" => GsglTokenType::While,
+                    "do" => GsglTokenType::Do,
+                    "break" => GsglTokenType::Break,
+                    "continue" => GsglTokenType::Continue,
+                    "return" => GsglTokenType::Return,
+                    "discard" => GsglTokenType::Discard,
+                    "true" => GsglTokenType::True,
+                    "false" => GsglTokenType::False,
+                    "float" => GsglTokenType::Float,
+                    "int" => GsglTokenType::Int,
+                    "bool" => GsglTokenType::Bool,
+                    "vec2" => GsglTokenType::Vec2,
+                    "vec3" => GsglTokenType::Vec3,
+                    "vec4" => GsglTokenType::Vec4,
+                    "mat2" => GsglTokenType::Mat2,
+                    "mat3" => GsglTokenType::Mat3,
+                    "mat4" => GsglTokenType::Mat4,
+                    "sampler2D" => GsglTokenType::Sampler2D,
+                    "samplerCube" => GsglTokenType::SamplerCube,
+                    "void" => GsglTokenType::Void,
+                    _ => GsglTokenType::Identifier,
                 };
 
                 state.add_token(kind, start, state.get_position());
@@ -320,22 +323,22 @@ impl<'config> GsglLexer<'config> {
     fn lex_operator_or_delimiter<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start = state.get_position();
 
-        // 检查双字符操作符
+        // Check for two-character operators
         if let (Some(ch1), Some(ch2)) = (state.peek(), state.peek_next_n(1)) {
             let two_char = format!("{}{}", ch1, ch2);
             let kind = match two_char.as_str() {
-                "+=" => Some(GsglSyntaxKind::PlusAssign),
-                "-=" => Some(GsglSyntaxKind::MinusAssign),
-                "*=" => Some(GsglSyntaxKind::StarAssign),
-                "/=" => Some(GsglSyntaxKind::SlashAssign),
-                "==" => Some(GsglSyntaxKind::Eq),
-                "!=" => Some(GsglSyntaxKind::Ne),
-                "<=" => Some(GsglSyntaxKind::Le),
-                ">=" => Some(GsglSyntaxKind::Ge),
-                "&&" => Some(GsglSyntaxKind::And),
-                "||" => Some(GsglSyntaxKind::Or),
-                "<<" => Some(GsglSyntaxKind::LeftShift),
-                ">>" => Some(GsglSyntaxKind::RightShift),
+                "+=" => Some(GsglTokenType::PlusAssign),
+                "-=" => Some(GsglTokenType::MinusAssign),
+                "*=" => Some(GsglTokenType::StarAssign),
+                "/=" => Some(GsglTokenType::SlashAssign),
+                "==" => Some(GsglTokenType::Eq),
+                "!=" => Some(GsglTokenType::Ne),
+                "<=" => Some(GsglTokenType::Le),
+                ">=" => Some(GsglTokenType::Ge),
+                "&&" => Some(GsglTokenType::And),
+                "||" => Some(GsglTokenType::Or),
+                "<<" => Some(GsglTokenType::LeftShift),
+                ">>" => Some(GsglTokenType::RightShift),
                 _ => None,
             };
 
@@ -346,33 +349,34 @@ impl<'config> GsglLexer<'config> {
             }
         }
 
-        // 单字符操作符和分隔符
+        // Single-character operators and delimiters
         if let Some(ch) = state.peek() {
             let kind = match ch {
-                '+' => Some(GsglSyntaxKind::Plus),
-                '-' => Some(GsglSyntaxKind::Minus),
-                '*' => Some(GsglSyntaxKind::Star),
-                '/' => Some(GsglSyntaxKind::Slash),
-                '%' => Some(GsglSyntaxKind::Percent),
-                '=' => Some(GsglSyntaxKind::Assign),
-                '!' => Some(GsglSyntaxKind::Not),
-                '<' => Some(GsglSyntaxKind::Lt),
-                '>' => Some(GsglSyntaxKind::Gt),
-                '&' => Some(GsglSyntaxKind::BitAnd),
-                '|' => Some(GsglSyntaxKind::BitOr),
-                '^' => Some(GsglSyntaxKind::BitXor),
-                '~' => Some(GsglSyntaxKind::BitNot),
-                '?' => Some(GsglSyntaxKind::Question),
-                ':' => Some(GsglSyntaxKind::Colon),
-                ';' => Some(GsglSyntaxKind::Semicolon),
-                ',' => Some(GsglSyntaxKind::Comma),
-                '.' => Some(GsglSyntaxKind::Dot),
-                '(' => Some(GsglSyntaxKind::LeftParen),
-                ')' => Some(GsglSyntaxKind::RightParen),
-                '[' => Some(GsglSyntaxKind::LeftBracket),
-                ']' => Some(GsglSyntaxKind::RightBracket),
-                '{' => Some(GsglSyntaxKind::LeftBrace),
-                '}' => Some(GsglSyntaxKind::RightBrace),
+                '+' => Some(GsglTokenType::Plus),
+                '-' => Some(GsglTokenType::Minus),
+                '*' => Some(GsglTokenType::Star),
+                '/' => Some(GsglTokenType::Slash),
+                '%' => Some(GsglTokenType::Percent),
+                '=' => Some(GsglTokenType::Assign),
+                '!' => Some(GsglTokenType::Not),
+                '<' => Some(GsglTokenType::Lt),
+                '>' => Some(GsglTokenType::Gt),
+                '&' => Some(GsglTokenType::BitAnd),
+                '|' => Some(GsglTokenType::BitOr),
+                '^' => Some(GsglTokenType::BitXor),
+                '~' => Some(GsglTokenType::BitNot),
+                '?' => Some(GsglTokenType::Question),
+                ':' => Some(GsglTokenType::Colon),
+                '#' => Some(GsglTokenType::Hash),
+                ';' => Some(GsglTokenType::Semicolon),
+                ',' => Some(GsglTokenType::Comma),
+                '.' => Some(GsglTokenType::Dot),
+                '(' => Some(GsglTokenType::LeftParen),
+                ')' => Some(GsglTokenType::RightParen),
+                '[' => Some(GsglTokenType::LeftBracket),
+                ']' => Some(GsglTokenType::RightBracket),
+                '{' => Some(GsglTokenType::LeftBrace),
+                '}' => Some(GsglTokenType::RightBrace),
                 _ => None,
             };
 

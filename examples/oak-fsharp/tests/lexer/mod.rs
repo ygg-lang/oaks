@@ -1,6 +1,6 @@
 use oak_core::{LexerState, source::Source};
-use oak_testing::lexing::LexerTester;
 use oak_fsharp::{FSharpLanguage, FSharpLexer};
+use oak_testing::lexing::LexerTester;
 use std::{path::Path, time::Duration};
 
 #[test]
@@ -35,7 +35,7 @@ fn test_peek_behavior() {
     state.advance(1);
     println!("位置: {}", state.get_position());
     println!("current(): {:?}", state.current());
-    println!("peek(): {:?}", state.peek());
+    println!("peek(): {:?}", state.peek())
 }
 
 #[test]
@@ -61,5 +61,5 @@ fn test_fsharp_function_parsing() {
 
     println!("第一个标记: 类型={:?}, 文本='{}'", first_token.kind, token_text);
 
-    println!("✅ F# 函数解析测试通过！");
+    println!("✅ F# 函数解析测试通过！")
 }

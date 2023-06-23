@@ -1,4 +1,7 @@
-use crate::{kind::OrgModeSyntaxKind, language::OrgModeLanguage};
+#![doc = include_str!("readme.md")]
+pub mod token_type;
+
+use crate::{language::OrgModeLanguage, lexer::token_type::OrgModeTokenType};
 use oak_core::{
     TextEdit,
     errors::OakError,
@@ -24,15 +27,15 @@ impl<'config> OrgModeLexer<'config> {
     }
 
     fn skip_whitespace<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
-        ORG_WHITESPACE.scan(state, OrgModeSyntaxKind::Whitespace)
+        ORG_WHITESPACE.scan(state, OrgModeTokenType::Whitespace)
     }
 
     fn skip_comment<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
-        ORG_COMMENT.scan(state, OrgModeSyntaxKind::Comment, OrgModeSyntaxKind::Comment)
+        ORG_COMMENT.scan(state, OrgModeTokenType::Comment, OrgModeTokenType::Comment)
     }
 
     fn lex_string<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
-        ORG_STRING.scan(state, OrgModeSyntaxKind::Text)
+        ORG_STRING.scan(state, OrgModeTokenType::Text)
     }
 
     fn lex_text_or_keyword<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
@@ -51,13 +54,13 @@ impl<'config> OrgModeLexer<'config> {
                 let end_pos = state.get_position();
                 let text = state.source().get_text_in((start_pos..end_pos).into());
                 let kind = if self._config.todo_keywords.iter().any(|k| k == text.as_ref()) {
-                    OrgModeSyntaxKind::Todo
+                    OrgModeTokenType::Todo
                 }
                 else if self._config.done_keywords.iter().any(|k| k == text.as_ref()) {
-                    OrgModeSyntaxKind::Done
+                    OrgModeTokenType::Done
                 }
                 else {
-                    OrgModeSyntaxKind::Text
+                    OrgModeTokenType::Text
                 };
                 state.add_token(kind, start_pos, end_pos);
                 return true;
@@ -76,7 +79,7 @@ impl<'config> OrgModeLexer<'config> {
                     state.advance(ch.len_utf8());
                     if let Some(']') = state.peek() {
                         state.advance(1);
-                        state.add_token(OrgModeSyntaxKind::Priority, start_pos, state.get_position());
+                        state.add_token(OrgModeTokenType::Priority, start_pos, state.get_position());
                         return true;
                     }
                 }
@@ -109,7 +112,7 @@ impl<'config> OrgModeLexer<'config> {
                     }
                 }
 
-                let kind = if has_dash { OrgModeSyntaxKind::Date } else { OrgModeSyntaxKind::Number };
+                let kind = if has_dash { OrgModeTokenType::Date } else { OrgModeTokenType::Number };
 
                 state.add_token(kind, start_pos, state.get_position());
                 return true;
@@ -124,29 +127,29 @@ impl<'config> OrgModeLexer<'config> {
             state.advance(ch.len_utf8());
 
             let kind = match ch {
-                '+' => OrgModeSyntaxKind::Plus,
-                '-' => OrgModeSyntaxKind::Minus,
-                '*' => OrgModeSyntaxKind::Star,
-                '#' => OrgModeSyntaxKind::Hash,
-                '|' => OrgModeSyntaxKind::Pipe,
-                ':' => OrgModeSyntaxKind::Colon,
-                '[' => OrgModeSyntaxKind::LeftBracket,
-                ']' => OrgModeSyntaxKind::RightBracket,
-                '(' => OrgModeSyntaxKind::LeftParen,
-                ')' => OrgModeSyntaxKind::RightParen,
-                '{' => OrgModeSyntaxKind::LeftBrace,
-                '}' => OrgModeSyntaxKind::RightBrace,
-                '<' => OrgModeSyntaxKind::LessThan,
-                '>' => OrgModeSyntaxKind::GreaterThan,
-                '=' => OrgModeSyntaxKind::Equal,
-                '_' => OrgModeSyntaxKind::Underscore,
-                '~' => OrgModeSyntaxKind::Tilde,
-                '/' => OrgModeSyntaxKind::Slash,
-                '\\' => OrgModeSyntaxKind::Backslash,
-                '\n' => OrgModeSyntaxKind::Newline,
+                '+' => OrgModeTokenType::Plus,
+                '-' => OrgModeTokenType::Minus,
+                '*' => OrgModeTokenType::Star,
+                '#' => OrgModeTokenType::Hash,
+                '|' => OrgModeTokenType::Pipe,
+                ':' => OrgModeTokenType::Colon,
+                '[' => OrgModeTokenType::LeftBracket,
+                ']' => OrgModeTokenType::RightBracket,
+                '(' => OrgModeTokenType::LeftParen,
+                ')' => OrgModeTokenType::RightParen,
+                '{' => OrgModeTokenType::LeftBrace,
+                '}' => OrgModeTokenType::RightBrace,
+                '<' => OrgModeTokenType::LessThan,
+                '>' => OrgModeTokenType::GreaterThan,
+                '=' => OrgModeTokenType::Equal,
+                '_' => OrgModeTokenType::Underscore,
+                '~' => OrgModeTokenType::Tilde,
+                '/' => OrgModeTokenType::Slash,
+                '\\' => OrgModeTokenType::Backslash,
+                '\n' => OrgModeTokenType::Newline,
                 _ => {
                     // 未知字符，作为文本处理
-                    state.add_token(OrgModeSyntaxKind::Text, start_pos, state.get_position());
+                    state.add_token(OrgModeTokenType::Text, start_pos, state.get_position());
                     return true;
                 }
             };
@@ -167,7 +170,7 @@ impl<'config> OrgModeLexer<'config> {
             if let Some('\n') = state.peek() {
                 let start_pos = state.get_position();
                 state.advance(1);
-                state.add_token(OrgModeSyntaxKind::Newline, start_pos, state.get_position());
+                state.add_token(OrgModeTokenType::Newline, start_pos, state.get_position());
                 continue;
             }
 
@@ -210,7 +213,7 @@ impl<'config> OrgModeLexer<'config> {
             let start_pos = state.get_position();
             if let Some(ch) = state.peek() {
                 state.advance(ch.len_utf8());
-                state.add_token(OrgModeSyntaxKind::Error, start_pos, state.get_position());
+                state.add_token(OrgModeTokenType::Error, start_pos, state.get_position());
             }
             else {
                 break;
@@ -227,7 +230,7 @@ impl<'config> Lexer<OrgModeLanguage> for OrgModeLexer<'config> {
         let mut state = State::new(source);
         let result = self.run(&mut state);
         if result.is_ok() {
-            state.add_eof();
+            state.add_eof()
         }
         state.finish_with_cache(result, cache)
     }

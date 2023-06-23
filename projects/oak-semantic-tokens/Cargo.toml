@@ -1,13 +1,13 @@
 [package]
 name = "oak-semantic-tokens"
-description = "Semantic syntax highlighting and token classification for the Oak framework."
-categories = ["development-tools"]
-keywords = ["semantic-tokens", "highlighting", "lsp"]
 version.workspace = true
 authors.workspace = true
+description = "Semantic syntax highlighting and token classification for the Oak framework."
 edition.workspace = true
 license.workspace = true
-repository.workspace = true
+repository = "https://github.com/ygg-lang/oaks/tree/master/projects/oak-semantic-tokens"
+categories = ["development-tools"]
+keywords = ["semantic-tokens", "highlighting", "lsp"]
 
 [dependencies]
 oak-core = { workspace = true }

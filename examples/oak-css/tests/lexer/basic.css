@@ -76,7 +76,7 @@ li:nth-child(even) {
 }
 
 /* Media queries */
-@media screen and (max-width: 768px) {
+↯media screen and (max-width: 768px) {
     .container {
         padding: 10px;
     }
@@ -119,7 +119,7 @@ li:nth-child(even) {
 }
 
 /* Keyframe animations */
-@keyframes fadeIn {
+↯keyframes fadeIn {
     from {
         opacity: 0;
         transform: translateY(20px);
@@ -143,10 +143,10 @@ li:nth-child(even) {
 }
 
 /* Import statement */
-@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&display=swap');
+↯import url('https://fonts.googleapis.com/css2?family=Roboto:wght↯300;400;700&display=swap');
 
 /* Font face */
-@font-face {
+↯font-face {
     font-family: 'CustomFont';
     src: url('custom-font.woff2') format('woff2'),
          url('custom-font.woff') format('woff');

@@ -1,8 +1,10 @@
 use oak_core::{TokenType, UniversalTokenRole};
+#[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
 
 /// CSS token type
-#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Deserialize)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub enum CssTokenType {
     /// Whitespace
     Whitespace,

@@ -1,3 +1,4 @@
+#![doc = include_str!("readme.md")]
 use oak_core::{Language, LanguageCategory};
 
 pub struct ObjectiveCLanguage {
@@ -31,7 +32,7 @@ impl Language for ObjectiveCLanguage {
     const NAME: &'static str = "objective-c";
     const CATEGORY: LanguageCategory = LanguageCategory::Programming;
 
-    type TokenType = crate::kind::ObjectiveCSyntaxKind;
-    type ElementType = crate::kind::ObjectiveCSyntaxKind;
+    type TokenType = crate::lexer::token_type::ObjectiveCTokenType;
+    type ElementType = crate::parser::element_type::ObjectiveCElementType;
     type TypedRoot = crate::ast::ObjectiveCRoot;
 }

@@ -1,101 +1,124 @@
-/// The root node of an Ada kind tree
+#![doc = include_str!("readme.md")]
+/// Root node of the Ada syntax tree.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct AdaRoot {
-    /// The items in this Ada file
+    /// Items in this Ada file.
     pub items: Vec<AdaItem>,
 }
 
 impl AdaRoot {
-    /// Create a new Ada root
+    /// Creates a new Ada root node.
     pub fn new(items: Vec<AdaItem>) -> Self {
         Self { items }
     }
 
-    /// Get all top-level items in this Ada file
+    /// Gets all top-level items in this Ada file.
     pub fn items(&self) -> &[AdaItem] {
         &self.items
     }
 }
 
-/// An item in an Ada file (package, procedure, function, etc.)
+/// Item in an Ada file (package, procedure, function, etc.).
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum AdaItem {
+    /// Package declaration.
     Package(AdaPackage),
+    /// Procedure declaration.
     Procedure(AdaProcedure),
+    /// Function declaration.
     Function(AdaFunction),
+    /// Type declaration.
     Type(AdaTypeDeclaration),
+    /// Variable declaration.
     Variable(AdaVariableDeclaration),
 }
 
-/// An Ada package declaration
+/// Ada package declaration.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct AdaPackage {
+    /// Package name.
     pub name: String,
 }
 
 impl AdaPackage {
+    /// Creates a new package declaration.
     pub fn new(name: String) -> Self {
         Self { name }
     }
 }
 
-/// An Ada procedure declaration
+/// Ada procedure declaration.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct AdaProcedure {
+    /// Procedure name.
     pub name: String,
+    /// Parameter list.
     pub parameters: Vec<AdaParameter>,
 }
 
 impl AdaProcedure {
+    /// Creates a new procedure declaration.
     pub fn new(name: String, parameters: Vec<AdaParameter>) -> Self {
         Self { name, parameters }
     }
 }
 
-/// An Ada function declaration
+/// Ada function declaration.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct AdaFunction {
+    /// Function name.
     pub name: String,
+    /// Parameter list.
     pub parameters: Vec<AdaParameter>,
+    /// Return type.
     pub return_type: String,
 }
 
 impl AdaFunction {
+    /// Creates a new function declaration.
     pub fn new(name: String, parameters: Vec<AdaParameter>, return_type: String) -> Self {
         Self { name, parameters, return_type }
     }
 }
 
-/// An Ada parameter
+/// Ada parameter.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct AdaParameter {
+    /// Parameter name.
     pub name: String,
+    /// Parameter type.
     pub param_type: String,
 }
 
 impl AdaParameter {
+    /// Creates a new parameter.
     pub fn new(name: String, param_type: String) -> Self {
         Self { name, param_type }
     }
 }
 
-/// An Ada type declaration
+/// Ada type declaration.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct AdaTypeDeclaration {
+    /// Type name.
     pub name: String,
+    /// Type definition.
     pub type_def: String,
 }
 
 impl AdaTypeDeclaration {
+    /// Creates a new type declaration.
     pub fn new(name: String, type_def: String) -> Self {
         Self { name, type_def }
     }
 }
 
-/// An Ada variable declaration
+/// Ada variable declaration.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct AdaVariableDeclaration {
+    /// Variable name.
     pub name: String,
+    /// Variable type.
     pub var_type: String,
 }
 

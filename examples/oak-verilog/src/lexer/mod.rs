@@ -1,9 +1,14 @@
-use crate::{VerilogKind, language::VerilogLanguage};
+#![doc = include_str!("readme.md")]
+pub mod token_type;
+
+pub use crate::lexer::token_type::VerilogKind as VerilogTokenType;
+use crate::{language::VerilogLanguage, lexer::token_type::VerilogKind};
 use oak_core::{
     Lexer, LexerCache, LexerState, OakError,
     lexer::{LexOutput, WhitespaceConfig},
     source::Source,
 };
+
 use std::sync::LazyLock;
 
 type State<'a, S> = LexerState<'a, S, VerilogLanguage>;
@@ -228,6 +233,9 @@ impl<'config> VerilogLexer<'config> {
             "case" => VerilogKind::CaseKw,
             "endcase" => VerilogKind::EndcaseKw,
             "default" => VerilogKind::DefaultKw,
+            "initial" => VerilogKind::InitialKw,
+            "inout" => VerilogKind::InoutKw,
+            "parameter" => VerilogKind::ParameterKw,
             _ => VerilogKind::Identifier,
         };
 
@@ -305,9 +313,22 @@ impl<'config> VerilogLexer<'config> {
                 ':' => VerilogKind::Colon,
                 '#' => VerilogKind::Hash,
                 '@' => VerilogKind::At,
+                '=' => VerilogKind::Equal,
+                '+' => VerilogKind::Plus,
+                '-' => VerilogKind::Minus,
+                '*' => VerilogKind::Star,
+                '/' => VerilogKind::Slash,
+                '%' => VerilogKind::Percent,
+                '<' => VerilogKind::Less,
+                '>' => VerilogKind::Greater,
+                '!' => VerilogKind::Bang,
+                '&' => VerilogKind::Ampersand,
+                '|' => VerilogKind::Pipe,
+                '^' => VerilogKind::Caret,
+                '~' => VerilogKind::Tilde,
+                '?' => VerilogKind::Question,
                 _ => return false,
             };
-
             state.advance(ch.len_utf8());
             state.add_token(kind, start, state.get_position());
             return true;

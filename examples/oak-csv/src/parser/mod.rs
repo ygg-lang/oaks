@@ -1,5 +1,6 @@
+#![doc = include_str!("readme.md")]
 pub mod element_type;
-pub mod parse;
+pub mod parse_top_level;
 use crate::{language::CsvLanguage, lexer::CsvLexer};
 pub use element_type::CsvElementType;
 use oak_core::{

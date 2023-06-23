@@ -1,8 +1,11 @@
-use crate::{kind::IdlSyntaxKind, language::IdlLanguage};
+#![doc = include_str!("readme.md")]
+pub mod token_type;
+
+use crate::{language::IdlLanguage, lexer::token_type::IdlTokenType};
 use oak_core::{
-    Lexer, LexerCache, LexerState, OakError,
+    Lexer, LexerCache, LexerState, OakError, Source,
     lexer::{LexOutput, WhitespaceConfig},
-    source::Source,
+    source::TextEdit,
 };
 use std::sync::LazyLock;
 
@@ -12,7 +15,7 @@ static IDL_WHITESPACE: LazyLock<WhitespaceConfig> = LazyLock::new(|| WhitespaceC
 
 #[derive(Clone, Debug)]
 pub struct IdlLexer<'config> {
-    _config: &'config IdlLanguage,
+    config: &'config IdlLanguage,
 }
 
 impl<'config> Lexer<IdlLanguage> for IdlLexer<'config> {
@@ -28,7 +31,7 @@ impl<'config> Lexer<IdlLanguage> for IdlLexer<'config> {
 
 impl<'config> IdlLexer<'config> {
     pub fn new(config: &'config IdlLanguage) -> Self {
-        Self { _config: config }
+        Self { config }
     }
 
     /// 主要的词法分析循环
@@ -68,7 +71,7 @@ impl<'config> IdlLexer<'config> {
                 continue;
             }
 
-            state.advance_if_dead_lock(safe_point);
+            state.advance_if_dead_lock(safe_point)
         }
 
         Ok(())
@@ -76,7 +79,7 @@ impl<'config> IdlLexer<'config> {
 
     /// 跳过空白字符
     fn skip_whitespace<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
-        IDL_WHITESPACE.scan(state, IdlSyntaxKind::Whitespace)
+        IDL_WHITESPACE.scan(state, IdlTokenType::Whitespace)
     }
 
     /// 跳过注释
@@ -93,7 +96,7 @@ impl<'config> IdlLexer<'config> {
                 }
                 state.advance(ch.len_utf8());
             }
-            state.add_token(IdlSyntaxKind::Comment, start, state.get_position());
+            state.add_token(IdlTokenType::Comment, start, state.get_position());
             return true;
         }
 
@@ -107,7 +110,7 @@ impl<'config> IdlLexer<'config> {
                 }
                 state.advance(ch.len_utf8());
             }
-            state.add_token(IdlSyntaxKind::Comment, start, state.get_position());
+            state.add_token(IdlTokenType::Comment, start, state.get_position());
             return true;
         }
 
@@ -139,7 +142,7 @@ impl<'config> IdlLexer<'config> {
                     break;
                 }
             }
-            state.add_token(IdlSyntaxKind::StringLiteral, start, state.get_position());
+            state.add_token(IdlTokenType::StringLiteral, start, state.get_position());
             return true;
         }
         false
@@ -218,7 +221,7 @@ impl<'config> IdlLexer<'config> {
             }
         }
 
-        state.add_token(IdlSyntaxKind::NumberLiteral, start, state.get_position());
+        state.add_token(IdlTokenType::NumberLiteral, start, state.get_position());
         true
     }
 
@@ -248,59 +251,59 @@ impl<'config> IdlLexer<'config> {
         let text = state.get_text_in((start..end).into());
         let kind = match text.as_ref() {
             // 基本数据类型
-            "void" => IdlSyntaxKind::Void,
-            "boolean" => IdlSyntaxKind::Boolean,
-            "byte" => IdlSyntaxKind::Byte,
-            "octet" => IdlSyntaxKind::Octet,
-            "short" => IdlSyntaxKind::Short,
-            "unsigned" => IdlSyntaxKind::UnsignedShort, // 简化处理
-            "long" => IdlSyntaxKind::Long,
-            "float" => IdlSyntaxKind::Float,
-            "double" => IdlSyntaxKind::Double,
-            "char" => IdlSyntaxKind::Char,
-            "wchar" => IdlSyntaxKind::WChar,
-            "string" => IdlSyntaxKind::String,
-            "wstring" => IdlSyntaxKind::WString,
-            "any" => IdlSyntaxKind::Any,
-            "Object" => IdlSyntaxKind::Object,
-            "ValueBase" => IdlSyntaxKind::ValueBase,
+            "void" => IdlTokenType::Void,
+            "boolean" => IdlTokenType::Boolean,
+            "byte" => IdlTokenType::Byte,
+            "octet" => IdlTokenType::Octet,
+            "short" => IdlTokenType::Short,
+            "unsigned" => IdlTokenType::UnsignedShort, // 简化处理
+            "long" => IdlTokenType::Long,
+            "float" => IdlTokenType::Float,
+            "double" => IdlTokenType::Double,
+            "char" => IdlTokenType::Char,
+            "wchar" => IdlTokenType::WChar,
+            "string" => IdlTokenType::String,
+            "wstring" => IdlTokenType::WString,
+            "any" => IdlTokenType::Any,
+            "Object" => IdlTokenType::Object,
+            "ValueBase" => IdlTokenType::ValueBase,
 
             // 复合类型关键字
-            "struct" => IdlSyntaxKind::Struct,
-            "union" => IdlSyntaxKind::Union,
-            "enum" => IdlSyntaxKind::Enum,
-            "interface" => IdlSyntaxKind::Interface,
-            "module" => IdlSyntaxKind::Module,
-            "exception" => IdlSyntaxKind::Exception,
-            "typedef" => IdlSyntaxKind::Typedef,
-            "sequence" => IdlSyntaxKind::Sequence,
-            "fixed" => IdlSyntaxKind::Fixed,
+            "struct" => IdlTokenType::Struct,
+            "union" => IdlTokenType::Union,
+            "enum" => IdlTokenType::Enum,
+            "interface" => IdlTokenType::Interface,
+            "module" => IdlTokenType::Module,
+            "exception" => IdlTokenType::Exception,
+            "typedef" => IdlTokenType::Typedef,
+            "sequence" => IdlTokenType::Sequence,
+            "fixed" => IdlTokenType::Fixed,
 
             // 修饰符
-            "const" => IdlSyntaxKind::Const,
-            "readonly" => IdlSyntaxKind::Readonly,
-            "attribute" => IdlSyntaxKind::Attribute,
-            "oneway" => IdlSyntaxKind::Oneway,
-            "in" => IdlSyntaxKind::In,
-            "out" => IdlSyntaxKind::Out,
-            "inout" => IdlSyntaxKind::Inout,
-            "raises" => IdlSyntaxKind::Raises,
-            "context" => IdlSyntaxKind::Context,
-            "local" => IdlSyntaxKind::Local,
-            "abstract" => IdlSyntaxKind::Abstract,
-            "custom" => IdlSyntaxKind::Custom,
-            "private" => IdlSyntaxKind::Private,
-            "public" => IdlSyntaxKind::Public,
-            "truncatable" => IdlSyntaxKind::Truncatable,
-            "supports" => IdlSyntaxKind::Supports,
-            "valuetype" => IdlSyntaxKind::ValueType,
-            "native" => IdlSyntaxKind::Native,
-            "factory" => IdlSyntaxKind::Factory,
+            "const" => IdlTokenType::Const,
+            "readonly" => IdlTokenType::Readonly,
+            "attribute" => IdlTokenType::Attribute,
+            "oneway" => IdlTokenType::Oneway,
+            "in" => IdlTokenType::In,
+            "out" => IdlTokenType::Out,
+            "inout" => IdlTokenType::Inout,
+            "raises" => IdlTokenType::Raises,
+            "context" => IdlTokenType::Context,
+            "local" => IdlTokenType::Local,
+            "abstract" => IdlTokenType::Abstract,
+            "custom" => IdlTokenType::Custom,
+            "private" => IdlTokenType::Private,
+            "public" => IdlTokenType::Public,
+            "truncatable" => IdlTokenType::Truncatable,
+            "supports" => IdlTokenType::Supports,
+            "valuetype" => IdlTokenType::ValueType,
+            "native" => IdlTokenType::Native,
+            "factory" => IdlTokenType::Factory,
 
             // 布尔字面量
-            "TRUE" | "FALSE" => IdlSyntaxKind::BooleanLiteral,
+            "TRUE" | "FALSE" => IdlTokenType::BooleanLiteral,
 
-            _ => IdlSyntaxKind::Identifier,
+            _ => IdlTokenType::Identifier,
         };
 
         state.add_token(kind, start, state.get_position());
@@ -341,20 +344,20 @@ impl<'config> IdlLexer<'config> {
         let kind = if state.get_position() > directive_start {
             let directive = state.get_text_in((directive_start..state.get_position()).into());
             match directive.as_ref() {
-                "include" => IdlSyntaxKind::Include,
-                "pragma" => IdlSyntaxKind::Pragma,
-                "define" => IdlSyntaxKind::Define,
-                "ifdef" => IdlSyntaxKind::Ifdef,
-                "ifndef" => IdlSyntaxKind::Ifndef,
-                "endif" => IdlSyntaxKind::Endif,
-                "else" => IdlSyntaxKind::Else,
-                "elif" => IdlSyntaxKind::Elif,
-                "undef" => IdlSyntaxKind::Undef,
-                _ => IdlSyntaxKind::Hash,
+                "include" => IdlTokenType::Include,
+                "pragma" => IdlTokenType::Pragma,
+                "define" => IdlTokenType::Define,
+                "ifdef" => IdlTokenType::Ifdef,
+                "ifndef" => IdlTokenType::Ifndef,
+                "endif" => IdlTokenType::Endif,
+                "else" => IdlTokenType::Else,
+                "elif" => IdlTokenType::Elif,
+                "undef" => IdlTokenType::Undef,
+                _ => IdlTokenType::Hash,
             }
         }
         else {
-            IdlSyntaxKind::Hash
+            IdlTokenType::Hash
         };
 
         // 读取到行尾
@@ -375,17 +378,17 @@ impl<'config> IdlLexer<'config> {
         let rest = state.rest();
 
         // 优先匹配较长的操作符
-        let patterns: &[(&str, IdlSyntaxKind)] = &[
-            ("::", IdlSyntaxKind::DoubleColon),
-            ("<<", IdlSyntaxKind::LeftShift),
-            (">>", IdlSyntaxKind::RightShift),
-            ("<=", IdlSyntaxKind::LessEqual),
-            (">=", IdlSyntaxKind::GreaterEqual),
-            ("==", IdlSyntaxKind::Equal),
-            ("!=", IdlSyntaxKind::NotEqual),
-            ("&&", IdlSyntaxKind::LogicalAnd),
-            ("||", IdlSyntaxKind::LogicalOr),
-            ("->", IdlSyntaxKind::Arrow),
+        let patterns: &[(&str, IdlTokenType)] = &[
+            ("::", IdlTokenType::DoubleColon),
+            ("<<", IdlTokenType::LeftShift),
+            (">>", IdlTokenType::RightShift),
+            ("<=", IdlTokenType::LessEqual),
+            (">=", IdlTokenType::GreaterEqual),
+            ("==", IdlTokenType::Equal),
+            ("!=", IdlTokenType::NotEqual),
+            ("&&", IdlTokenType::LogicalAnd),
+            ("||", IdlTokenType::LogicalOr),
+            ("->", IdlTokenType::Arrow),
         ];
 
         for (pat, kind) in patterns {
@@ -398,21 +401,21 @@ impl<'config> IdlLexer<'config> {
 
         if let Some(ch) = state.current() {
             let kind = match ch {
-                '+' => Some(IdlSyntaxKind::Plus),
-                '-' => Some(IdlSyntaxKind::Minus),
-                '*' => Some(IdlSyntaxKind::Multiply),
-                '/' => Some(IdlSyntaxKind::Divide),
-                '%' => Some(IdlSyntaxKind::Modulo),
-                '&' => Some(IdlSyntaxKind::BitwiseAnd),
-                '|' => Some(IdlSyntaxKind::BitwiseOr),
-                '^' => Some(IdlSyntaxKind::BitwiseXor),
-                '~' => Some(IdlSyntaxKind::BitwiseNot),
-                '!' => Some(IdlSyntaxKind::LogicalNot),
-                '=' => Some(IdlSyntaxKind::Assign),
-                '<' => Some(IdlSyntaxKind::Less),
-                '>' => Some(IdlSyntaxKind::Greater),
-                '.' => Some(IdlSyntaxKind::Dot),
-                ':' => Some(IdlSyntaxKind::Colon),
+                '+' => Some(IdlTokenType::Plus),
+                '-' => Some(IdlTokenType::Minus),
+                '*' => Some(IdlTokenType::Multiply),
+                '/' => Some(IdlTokenType::Divide),
+                '%' => Some(IdlTokenType::Modulo),
+                '&' => Some(IdlTokenType::BitwiseAnd),
+                '|' => Some(IdlTokenType::BitwiseOr),
+                '^' => Some(IdlTokenType::BitwiseXor),
+                '~' => Some(IdlTokenType::BitwiseNot),
+                '!' => Some(IdlTokenType::LogicalNot),
+                '=' => Some(IdlTokenType::Assign),
+                '<' => Some(IdlTokenType::Less),
+                '>' => Some(IdlTokenType::Greater),
+                '.' => Some(IdlTokenType::Dot),
+                ':' => Some(IdlTokenType::Colon),
                 _ => None,
             };
 
@@ -432,15 +435,15 @@ impl<'config> IdlLexer<'config> {
 
         if let Some(ch) = state.current() {
             let kind = match ch {
-                '(' => IdlSyntaxKind::LeftParen,
-                ')' => IdlSyntaxKind::RightParen,
-                '{' => IdlSyntaxKind::LeftBrace,
-                '}' => IdlSyntaxKind::RightBrace,
-                '[' => IdlSyntaxKind::LeftBracket,
-                ']' => IdlSyntaxKind::RightBracket,
-                ',' => IdlSyntaxKind::Comma,
-                ';' => IdlSyntaxKind::Semicolon,
-                '#' => IdlSyntaxKind::Hash,
+                '(' => IdlTokenType::LeftParen,
+                ')' => IdlTokenType::RightParen,
+                '{' => IdlTokenType::LeftBrace,
+                '}' => IdlTokenType::RightBrace,
+                '[' => IdlTokenType::LeftBracket,
+                ']' => IdlTokenType::RightBracket,
+                ',' => IdlTokenType::Comma,
+                ';' => IdlTokenType::Semicolon,
+                '#' => IdlTokenType::Hash,
                 _ => return false,
             };
 

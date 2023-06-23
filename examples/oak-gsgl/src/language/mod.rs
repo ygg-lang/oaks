@@ -1,11 +1,15 @@
-//! GSGL 语言定义
+#![doc = include_str!("readme.md")]
+//! GSGL language definition.
 //!
-//! 定义GSGL 语言的核心结构体，实现了 oak-core Language trait
+//! Defines the core structure for GSGL language, implementing oak-core's Language trait.
 use oak_core::{Language, LanguageCategory};
+#[cfg(feature = "serde")]
+#[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
 
-/// GSGL 语言 definition
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Default, Serialize, Deserialize)]
+/// GSGL language definition.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Default)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct GsglLanguage {}
 
 impl GsglLanguage {
@@ -18,7 +22,7 @@ impl Language for GsglLanguage {
     const NAME: &'static str = "gsgl";
     const CATEGORY: LanguageCategory = LanguageCategory::Programming;
 
-    type TokenType = crate::syntax::GsglSyntaxKind;
-    type ElementType = crate::syntax::GsglSyntaxKind;
+    type TokenType = crate::lexer::token_type::GsglTokenType;
+    type ElementType = crate::parser::element_type::GsglElementType;
     type TypedRoot = ();
 }

@@ -1,6 +1,6 @@
 use oak_core::Lexer;
-use oak_diagnostic::testing::lexing::LexerTester;
 use oak_erlang::{ErlangLanguage, ErlangLexer};
+use oak_testing::lexing::LexerTester;
 use std::{path::Path, time::Duration};
 
 #[test]
@@ -31,7 +31,7 @@ fn test_peek_behavior() {
     state.advance(1);
     println!("位置: {}", state.get_position());
     println!("current(): {:?}", state.current());
-    println!("peek(): {:?}", state.peek());
+    println!("peek(): {:?}", state.peek())
 }
 
 #[test]
@@ -60,7 +60,7 @@ hello() ->
 
     println!("Parsed {} tokens:", tokens.len());
     for (i, token) in tokens.iter().enumerate() {
-        println!("  {}: {:?} at {:?}", i, token.kind, token.span);
+        println!("  {}: {:?} at {:?}", i, token.kind, token.span)
     }
 
     // 检查是否有 EOF token
@@ -69,5 +69,5 @@ hello() ->
     // 验证包含预期的 token 类型
     let token_kinds: Vec<_> = tokens.iter().map(|t| t.kind).collect();
     assert!(token_kinds.contains(&ErlangSyntaxKind::Minus));
-    assert!(token_kinds.contains(&ErlangSyntaxKind::Atom));
+    assert!(token_kinds.contains(&ErlangSyntaxKind::Atom))
 }

@@ -1,8 +1,12 @@
-use crate::{kind::GroovySyntaxKind, language::GroovyLanguage};
+#![doc = include_str!("readme.md")]
+use oak_core::Source;
+pub mod token_type;
+
+use crate::{language::GroovyLanguage, lexer::token_type::GroovyTokenType};
 use oak_core::{
     Lexer, LexerCache, LexerState, OakError,
     lexer::{CommentConfig, LexOutput, StringConfig, WhitespaceConfig},
-    source::Source,
+    source::TextEdit,
 };
 use std::sync::LazyLock;
 
@@ -78,13 +82,13 @@ impl<'config> GroovyLexer<'config> {
 
     /// 跳过空白字符
     fn skip_whitespace<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
-        GROOVY_WHITESPACE.scan(state, GroovySyntaxKind::Whitespace)
+        GROOVY_WHITESPACE.scan(state, GroovyTokenType::Whitespace)
     }
 
     /// 跳过注释
     fn skip_comment<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         // 行注释 // 和 块注释 /* ... */
-        if GROOVY_COMMENT.scan(state, GroovySyntaxKind::Comment, GroovySyntaxKind::Comment) {
+        if GROOVY_COMMENT.scan(state, GroovyTokenType::Comment, GroovyTokenType::Comment) {
             return true;
         }
 
@@ -94,7 +98,7 @@ impl<'config> GroovyLexer<'config> {
     /// 词法分析字符串字面量
     fn lex_string_literal<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         // 普通字符串 "..."
-        if GROOVY_STRING.scan(state, GroovySyntaxKind::StringLiteral) {
+        if GROOVY_STRING.scan(state, GroovyTokenType::StringLiteral) {
             return true;
         }
 
@@ -112,7 +116,7 @@ impl<'config> GroovyLexer<'config> {
             }
 
             let end = state.get_position();
-            state.add_token(GroovySyntaxKind::StringLiteral, start, end);
+            state.add_token(GroovyTokenType::StringLiteral, start, end);
             return true;
         }
 
@@ -130,7 +134,7 @@ impl<'config> GroovyLexer<'config> {
             }
 
             let end = state.get_position();
-            state.add_token(GroovySyntaxKind::StringLiteral, start, end);
+            state.add_token(GroovyTokenType::StringLiteral, start, end);
             return true;
         }
 
@@ -139,7 +143,7 @@ impl<'config> GroovyLexer<'config> {
 
     /// 词法分析字符字面量
     fn lex_char_literal<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
-        GROOVY_CHAR.scan(state, GroovySyntaxKind::CharLiteral)
+        GROOVY_CHAR.scan(state, GroovyTokenType::CharLiteral)
     }
 
     /// 词法分析数字字面量
@@ -255,7 +259,7 @@ impl<'config> GroovyLexer<'config> {
 
         if has_digits {
             let end = state.get_position();
-            let kind = if is_float { GroovySyntaxKind::FloatLiteral } else { GroovySyntaxKind::IntLiteral };
+            let kind = if is_float { GroovyTokenType::FloatLiteral } else { GroovyTokenType::IntLiteral };
             state.add_token(kind, start, end);
             true
         }
@@ -278,12 +282,7 @@ impl<'config> GroovyLexer<'config> {
 
             // 后续字符可以是字母、数字或下划线
             while let Some(ch) = state.peek() {
-                if ch.is_alphanumeric() || ch == '_' || ch == '$' {
-                    state.advance(ch.len_utf8());
-                }
-                else {
-                    break;
-                }
+                if ch.is_alphanumeric() || ch == '_' || ch == '$' { state.advance(ch.len_utf8()) } else { break }
             }
 
             let end = state.get_position();
@@ -298,62 +297,62 @@ impl<'config> GroovyLexer<'config> {
     }
 
     /// 判断是关键字还是标识符
-    fn keyword_or_identifier(&self, text: &str) -> GroovySyntaxKind {
+    fn keyword_or_identifier(&self, text: &str) -> GroovyTokenType {
         match text {
             // 关键字
-            "abstract" => GroovySyntaxKind::AbstractKeyword,
-            "as" => GroovySyntaxKind::AsKeyword,
-            "assert" => GroovySyntaxKind::AssertKeyword,
-            "break" => GroovySyntaxKind::BreakKeyword,
-            "case" => GroovySyntaxKind::CaseKeyword,
-            "catch" => GroovySyntaxKind::CatchKeyword,
-            "class" => GroovySyntaxKind::ClassKeyword,
-            "const" => GroovySyntaxKind::ConstKeyword,
-            "continue" => GroovySyntaxKind::ContinueKeyword,
-            "def" => GroovySyntaxKind::DefKeyword,
-            "default" => GroovySyntaxKind::DefaultKeyword,
-            "do" => GroovySyntaxKind::DoKeyword,
-            "else" => GroovySyntaxKind::ElseKeyword,
-            "enum" => GroovySyntaxKind::EnumKeyword,
-            "extends" => GroovySyntaxKind::ExtendsKeyword,
-            "final" => GroovySyntaxKind::FinalKeyword,
-            "finally" => GroovySyntaxKind::FinallyKeyword,
-            "for" => GroovySyntaxKind::ForKeyword,
-            "goto" => GroovySyntaxKind::GotoKeyword,
-            "if" => GroovySyntaxKind::IfKeyword,
-            "implements" => GroovySyntaxKind::ImplementsKeyword,
-            "import" => GroovySyntaxKind::ImportKeyword,
-            "in" => GroovySyntaxKind::InKeyword,
-            "instanceof" => GroovySyntaxKind::InstanceofKeyword,
-            "interface" => GroovySyntaxKind::InterfaceKeyword,
-            "native" => GroovySyntaxKind::NativeKeyword,
-            "new" => GroovySyntaxKind::NewKeyword,
-            "package" => GroovySyntaxKind::PackageKeyword,
-            "private" => GroovySyntaxKind::PrivateKeyword,
-            "protected" => GroovySyntaxKind::ProtectedKeyword,
-            "public" => GroovySyntaxKind::PublicKeyword,
-            "return" => GroovySyntaxKind::ReturnKeyword,
-            "static" => GroovySyntaxKind::StaticKeyword,
-            "strictfp" => GroovySyntaxKind::StrictfpKeyword,
-            "super" => GroovySyntaxKind::SuperKeyword,
-            "switch" => GroovySyntaxKind::SwitchKeyword,
-            "synchronized" => GroovySyntaxKind::SynchronizedKeyword,
-            "this" => GroovySyntaxKind::ThisKeyword,
-            "throw" => GroovySyntaxKind::ThrowKeyword,
-            "throws" => GroovySyntaxKind::ThrowsKeyword,
-            "trait" => GroovySyntaxKind::TraitKeyword,
-            "transient" => GroovySyntaxKind::TransientKeyword,
-            "try" => GroovySyntaxKind::TryKeyword,
-            "void" => GroovySyntaxKind::VoidKeyword,
-            "volatile" => GroovySyntaxKind::VolatileKeyword,
-            "while" => GroovySyntaxKind::WhileKeyword,
+            "abstract" => GroovyTokenType::AbstractKeyword,
+            "as" => GroovyTokenType::AsKeyword,
+            "assert" => GroovyTokenType::AssertKeyword,
+            "break" => GroovyTokenType::BreakKeyword,
+            "case" => GroovyTokenType::CaseKeyword,
+            "catch" => GroovyTokenType::CatchKeyword,
+            "class" => GroovyTokenType::ClassKeyword,
+            "const" => GroovyTokenType::ConstKeyword,
+            "continue" => GroovyTokenType::ContinueKeyword,
+            "def" => GroovyTokenType::DefKeyword,
+            "default" => GroovyTokenType::DefaultKeyword,
+            "do" => GroovyTokenType::DoKeyword,
+            "else" => GroovyTokenType::ElseKeyword,
+            "enum" => GroovyTokenType::EnumKeyword,
+            "extends" => GroovyTokenType::ExtendsKeyword,
+            "final" => GroovyTokenType::FinalKeyword,
+            "finally" => GroovyTokenType::FinallyKeyword,
+            "for" => GroovyTokenType::ForKeyword,
+            "goto" => GroovyTokenType::GotoKeyword,
+            "if" => GroovyTokenType::IfKeyword,
+            "implements" => GroovyTokenType::ImplementsKeyword,
+            "import" => GroovyTokenType::ImportKeyword,
+            "in" => GroovyTokenType::InKeyword,
+            "instanceof" => GroovyTokenType::InstanceofKeyword,
+            "interface" => GroovyTokenType::InterfaceKeyword,
+            "native" => GroovyTokenType::NativeKeyword,
+            "new" => GroovyTokenType::NewKeyword,
+            "package" => GroovyTokenType::PackageKeyword,
+            "private" => GroovyTokenType::PrivateKeyword,
+            "protected" => GroovyTokenType::ProtectedKeyword,
+            "public" => GroovyTokenType::PublicKeyword,
+            "return" => GroovyTokenType::ReturnKeyword,
+            "static" => GroovyTokenType::StaticKeyword,
+            "strictfp" => GroovyTokenType::StrictfpKeyword,
+            "super" => GroovyTokenType::SuperKeyword,
+            "switch" => GroovyTokenType::SwitchKeyword,
+            "synchronized" => GroovyTokenType::SynchronizedKeyword,
+            "this" => GroovyTokenType::ThisKeyword,
+            "throw" => GroovyTokenType::ThrowKeyword,
+            "throws" => GroovyTokenType::ThrowsKeyword,
+            "trait" => GroovyTokenType::TraitKeyword,
+            "transient" => GroovyTokenType::TransientKeyword,
+            "try" => GroovyTokenType::TryKeyword,
+            "void" => GroovyTokenType::VoidKeyword,
+            "volatile" => GroovyTokenType::VolatileKeyword,
+            "while" => GroovyTokenType::WhileKeyword,
 
             // 特殊字面量
-            "true" | "false" => GroovySyntaxKind::BooleanLiteral,
-            "null" => GroovySyntaxKind::NullLiteral,
+            "true" | "false" => GroovyTokenType::BooleanLiteral,
+            "null" => GroovyTokenType::NullLiteral,
 
             // 默认为标识符
-            _ => GroovySyntaxKind::Identifier,
+            _ => GroovyTokenType::Identifier,
         }
     }
 
@@ -363,89 +362,89 @@ impl<'config> GroovyLexer<'config> {
 
         // 三字符操作符
         if state.consume_if_starts_with(">>>") {
-            state.add_token(GroovySyntaxKind::UnsignedRightShift, start, state.get_position());
+            state.add_token(GroovyTokenType::UnsignedRightShift, start, state.get_position());
             return true;
         }
         if state.consume_if_starts_with("<=>") {
-            state.add_token(GroovySyntaxKind::Spaceship, start, state.get_position());
+            state.add_token(GroovyTokenType::Spaceship, start, state.get_position());
             return true;
         }
 
         // 两字符操作符
         if state.consume_if_starts_with("**") {
-            state.add_token(GroovySyntaxKind::Power, start, state.get_position());
+            state.add_token(GroovyTokenType::Power, start, state.get_position());
             return true;
         }
         if state.consume_if_starts_with("+=") {
-            state.add_token(GroovySyntaxKind::PlusAssign, start, state.get_position());
+            state.add_token(GroovyTokenType::PlusAssign, start, state.get_position());
             return true;
         }
         if state.consume_if_starts_with("-=") {
-            state.add_token(GroovySyntaxKind::MinusAssign, start, state.get_position());
+            state.add_token(GroovyTokenType::MinusAssign, start, state.get_position());
             return true;
         }
         if state.consume_if_starts_with("*=") {
-            state.add_token(GroovySyntaxKind::StarAssign, start, state.get_position());
+            state.add_token(GroovyTokenType::StarAssign, start, state.get_position());
             return true;
         }
         if state.consume_if_starts_with("/=") {
-            state.add_token(GroovySyntaxKind::SlashAssign, start, state.get_position());
+            state.add_token(GroovyTokenType::SlashAssign, start, state.get_position());
             return true;
         }
         if state.consume_if_starts_with("%=") {
-            state.add_token(GroovySyntaxKind::PercentAssign, start, state.get_position());
+            state.add_token(GroovyTokenType::PercentAssign, start, state.get_position());
             return true;
         }
         if state.consume_if_starts_with("**=") {
-            state.add_token(GroovySyntaxKind::PowerAssign, start, state.get_position());
+            state.add_token(GroovyTokenType::PowerAssign, start, state.get_position());
             return true;
         }
         if state.consume_if_starts_with("==") {
-            state.add_token(GroovySyntaxKind::Equal, start, state.get_position());
+            state.add_token(GroovyTokenType::Equal, start, state.get_position());
             return true;
         }
         if state.consume_if_starts_with("!=") {
-            state.add_token(GroovySyntaxKind::NotEqual, start, state.get_position());
+            state.add_token(GroovyTokenType::NotEqual, start, state.get_position());
             return true;
         }
         if state.consume_if_starts_with("<=") {
-            state.add_token(GroovySyntaxKind::LessEqual, start, state.get_position());
+            state.add_token(GroovyTokenType::LessEqual, start, state.get_position());
             return true;
         }
         if state.consume_if_starts_with(">=") {
-            state.add_token(GroovySyntaxKind::GreaterEqual, start, state.get_position());
+            state.add_token(GroovyTokenType::GreaterEqual, start, state.get_position());
             return true;
         }
         if state.consume_if_starts_with("&&") {
-            state.add_token(GroovySyntaxKind::LogicalAnd, start, state.get_position());
+            state.add_token(GroovyTokenType::LogicalAnd, start, state.get_position());
             return true;
         }
         if state.consume_if_starts_with("||") {
-            state.add_token(GroovySyntaxKind::LogicalOr, start, state.get_position());
+            state.add_token(GroovyTokenType::LogicalOr, start, state.get_position());
             return true;
         }
         if state.consume_if_starts_with("<<") {
-            state.add_token(GroovySyntaxKind::LeftShift, start, state.get_position());
+            state.add_token(GroovyTokenType::LeftShift, start, state.get_position());
             return true;
         }
         if state.consume_if_starts_with(">>") {
-            state.add_token(GroovySyntaxKind::RightShift, start, state.get_position());
+            state.add_token(GroovyTokenType::RightShift, start, state.get_position());
             return true;
         }
         if state.consume_if_starts_with("++") {
-            state.add_token(GroovySyntaxKind::Increment, start, state.get_position());
+            state.add_token(GroovyTokenType::Increment, start, state.get_position());
             return true;
         }
         if state.consume_if_starts_with("--") {
-            state.add_token(GroovySyntaxKind::Decrement, start, state.get_position());
+            state.add_token(GroovyTokenType::Decrement, start, state.get_position());
             return true;
         }
         if state.consume_if_starts_with("?:") {
-            state.add_token(GroovySyntaxKind::Elvis, start, state.get_position());
+            state.add_token(GroovyTokenType::Elvis, start, state.get_position());
             return true;
         }
         if state.consume_if_starts_with("?.") {
-            state.add_token(GroovySyntaxKind::SafeNavigation, start, state.get_position());
+            state.add_token(GroovyTokenType::SafeNavigation, start, state.get_position());
             return true;
         }
 
@@ -457,31 +456,31 @@ impl<'config> GroovyLexer<'config> {
         if let Some(ch) = state.peek() {
             let start = state.get_position();
             let kind = match ch {
-                '+' => Some(GroovySyntaxKind::Plus),
-                '-' => Some(GroovySyntaxKind::Minus),
-                '*' => Some(GroovySyntaxKind::Star),
-                '/' => Some(GroovySyntaxKind::Slash),
-                '%' => Some(GroovySyntaxKind::Percent),
-                '=' => Some(GroovySyntaxKind::Assign),
-                '<' => Some(GroovySyntaxKind::Less),
-                '>' => Some(GroovySyntaxKind::Greater),
-                '!' => Some(GroovySyntaxKind::LogicalNot),
-                '&' => Some(GroovySyntaxKind::BitAnd),
-                '|' => Some(GroovySyntaxKind::BitOr),
-                '^' => Some(GroovySyntaxKind::BitXor),
-                '~' => Some(GroovySyntaxKind::BitNot),
-                '?' => Some(GroovySyntaxKind::Question),
-                ':' => Some(GroovySyntaxKind::Colon),
-                '(' => Some(GroovySyntaxKind::LeftParen),
-                ')' => Some(GroovySyntaxKind::RightParen),
-                '[' => Some(GroovySyntaxKind::LeftBracket),
-                ']' => Some(GroovySyntaxKind::RightBracket),
-                '{' => Some(GroovySyntaxKind::LeftBrace),
-                '}' => Some(GroovySyntaxKind::RightBrace),
-                ',' => Some(GroovySyntaxKind::Comma),
-                '.' => Some(GroovySyntaxKind::Period),
-                ';' => Some(GroovySyntaxKind::Semicolon),
-                '@' => Some(GroovySyntaxKind::At),
+                '+' => Some(GroovyTokenType::Plus),
+                '-' => Some(GroovyTokenType::Minus),
+                '*' => Some(GroovyTokenType::Star),
+                '/' => Some(GroovyTokenType::Slash),
+                '%' => Some(GroovyTokenType::Percent),
+                '=' => Some(GroovyTokenType::Assign),
+                '<' => Some(GroovyTokenType::Less),
+                '>' => Some(GroovyTokenType::Greater),
+                '!' => Some(GroovyTokenType::LogicalNot),
+                '&' => Some(GroovyTokenType::BitAnd),
+                '|' => Some(GroovyTokenType::BitOr),
+                '^' => Some(GroovyTokenType::BitXor),
+                '~' => Some(GroovyTokenType::BitNot),
+                '?' => Some(GroovyTokenType::Question),
+                ':' => Some(GroovyTokenType::Colon),
+                '(' => Some(GroovyTokenType::LeftParen),
+                ')' => Some(GroovyTokenType::RightParen),
+                '[' => Some(GroovyTokenType::LeftBracket),
+                ']' => Some(GroovyTokenType::RightBracket),
+                '{' => Some(GroovyTokenType::LeftBrace),
+                '}' => Some(GroovyTokenType::RightBrace),
+                ',' => Some(GroovyTokenType::Comma),
+                '.' => Some(GroovyTokenType::Period),
+                ';' => Some(GroovyTokenType::Semicolon),
+                '@' => Some(GroovyTokenType::At),
                 _ => None,
             };
 

@@ -1,9 +1,11 @@
+#![doc = include_str!("readme.md")]
+/// Rust token type definitions.
+pub mod token_type;
 pub use self::token_type::{RustToken, RustTokenType};
 use crate::language::RustLanguage;
-use oak_core::{Lexer, LexerCache, LexerState, lexer::LexOutput, source::Source};
+use oak_core::{Lexer, LexerCache, LexerState, Source, lexer::LexOutput};
 
 mod lex;
-mod token_type;
 
 /// A lexer for the Rust programming language.
 ///
@@ -21,7 +23,7 @@ mod token_type;
 ///
 /// let language = RustLanguage::default();
 /// let lexer = RustLexer::new(&language);
-/// let source = SourceText::new("fn main() { println!(\"Hello, world!\"); }");
+/// let source = SourceText::new("fn main() { println!(\"Hello, world!\") }");
 /// let mut cache = oak_core::parser::session::ParseSession::<RustLanguage>::default();
 /// let output = lexer.lex(&source, &[], &mut cache);
 ///
@@ -66,7 +68,7 @@ impl<'config> Lexer<RustLanguage> for RustLexer<'config> {
         let mut state = State::new_with_cache(source, 0, cache);
         let result = self.run(&mut state);
         if result.is_ok() {
-            state.add_eof();
+            state.add_eof()
         }
         state.finish_with_cache(result, cache)
     }

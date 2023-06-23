@@ -1,7 +1,9 @@
 use oak_core::{TokenType, UniversalTokenRole};
+#[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Deserialize)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Default)]
 #[repr(u16)]
 pub enum CTokenType {
     /// Left parenthesis: `(`
@@ -201,6 +203,7 @@ pub enum CTokenType {
     /// Text
     Text,
     /// Error token
+    #[default]
     Error,
     /// End of file marker
     Eof,

@@ -1,6 +1,6 @@
 {
   "success": true,
-  "node_count": 51,
+  "node_count": 32,
   "ast_structure": {
     "kind": "ValkyrieRoot",
     "children": [
@@ -11,13 +11,13 @@
             "kind": "ParameterList",
             "children": [
               {
-                "kind": "Leaves(2)",
+                "kind": "Leaves(3)",
                 "children": [],
-                "text_length": 2,
+                "text_length": 3,
                 "is_leaf": true
               }
             ],
-            "text_length": 2,
+            "text_length": 3,
             "is_leaf": false
           },
           {
@@ -40,44 +40,18 @@
                     "is_leaf": false
                   },
                   {
-                    "kind": "LiteralExpression",
-                    "children": [
-                      {
-                        "kind": "Leaves(1)",
-                        "children": [],
-                        "text_length": 2,
-                        "is_leaf": true
-                      }
-                    ],
-                    "text_length": 2,
-                    "is_leaf": false
-                  },
-                  {
-                    "kind": "Leaves(1)",
+                    "kind": "Leaves(2)",
                     "children": [],
-                    "text_length": 1,
+                    "text_length": 7,
                     "is_leaf": true
                   }
                 ],
-                "text_length": 5,
+                "text_length": 9,
                 "is_leaf": false
               },
               {
                 "kind": "ExpressionStatement",
                 "children": [
-                  {
-                    "kind": "LiteralExpression",
-                    "children": [
-                      {
-                        "kind": "Leaves(1)",
-                        "children": [],
-                        "text_length": 1,
-                        "is_leaf": true
-                      }
-                    ],
-                    "text_length": 1,
-                    "is_leaf": false
-                  },
                   {
                     "kind": "LiteralExpression",
                     "children": [
@@ -92,7 +66,7 @@
                     "is_leaf": false
                   }
                 ],
-                "text_length": 2,
+                "text_length": 1,
                 "is_leaf": false
               },
               {
@@ -112,44 +86,18 @@
                     "is_leaf": false
                   },
                   {
-                    "kind": "IdentifierExpression",
-                    "children": [
-                      {
-                        "kind": "Leaves(1)",
-                        "children": [],
-                        "text_length": 3,
-                        "is_leaf": true
-                      }
-                    ],
-                    "text_length": 3,
-                    "is_leaf": false
-                  },
-                  {
-                    "kind": "Leaves(1)",
+                    "kind": "Leaves(2)",
                     "children": [],
-                    "text_length": 1,
+                    "text_length": 7,
                     "is_leaf": true
                   }
                 ],
-                "text_length": 7,
+                "text_length": 10,
                 "is_leaf": false
               },
               {
                 "kind": "ExpressionStatement",
                 "children": [
-                  {
-                    "kind": "LiteralExpression",
-                    "children": [
-                      {
-                        "kind": "Leaves(1)",
-                        "children": [],
-                        "text_length": 1,
-                        "is_leaf": true
-                      }
-                    ],
-                    "text_length": 1,
-                    "is_leaf": false
-                  },
                   {
                     "kind": "LiteralExpression",
                     "children": [
@@ -164,7 +112,7 @@
                     "is_leaf": false
                   }
                 ],
-                "text_length": 2,
+                "text_length": 1,
                 "is_leaf": false
               },
               {
@@ -184,26 +132,13 @@
                     "is_leaf": false
                   },
                   {
-                    "kind": "IdentifierExpression",
-                    "children": [
-                      {
-                        "kind": "Leaves(1)",
-                        "children": [],
-                        "text_length": 3,
-                        "is_leaf": true
-                      }
-                    ],
-                    "text_length": 3,
-                    "is_leaf": false
-                  },
-                  {
-                    "kind": "Leaves(1)",
+                    "kind": "Leaves(2)",
                     "children": [],
-                    "text_length": 1,
+                    "text_length": 7,
                     "is_leaf": true
                   }
                 ],
-                "text_length": 7,
+                "text_length": 10,
                 "is_leaf": false
               },
               {
@@ -221,22 +156,9 @@
                     ],
                     "text_length": 1,
                     "is_leaf": false
-                  },
-                  {
-                    "kind": "LiteralExpression",
-                    "children": [
-                      {
-                        "kind": "Leaves(1)",
-                        "children": [],
-                        "text_length": 1,
-                        "is_leaf": true
-                      }
-                    ],
-                    "text_length": 1,
-                    "is_leaf": false
                   }
                 ],
-                "text_length": 2,
+                "text_length": 1,
                 "is_leaf": false
               },
               {
@@ -256,83 +178,37 @@
                     "is_leaf": false
                   },
                   {
-                    "kind": "IdentifierExpression",
-                    "children": [
-                      {
-                        "kind": "Leaves(1)",
-                        "children": [],
-                        "text_length": 5,
-                        "is_leaf": true
-                      }
-                    ],
-                    "text_length": 5,
-                    "is_leaf": false
-                  },
-                  {
-                    "kind": "Leaves(1)",
+                    "kind": "Leaves(2)",
                     "children": [],
-                    "text_length": 1,
+                    "text_length": 3,
                     "is_leaf": true
                   }
                 ],
-                "text_length": 11,
+                "text_length": 8,
                 "is_leaf": false
               },
               {
-                "kind": "Leaves(2)",
+                "kind": "Leaves(3)",
                 "children": [],
-                "text_length": 2,
+                "text_length": 8,
                 "is_leaf": true
               }
             ],
-            "text_length": 38,
+            "text_length": 48,
             "is_leaf": false
           },
           {
-            "kind": "Leaves(2)",
+            "kind": "Leaves(3)",
             "children": [],
-            "text_length": 9,
+            "text_length": 10,
             "is_leaf": true
           }
         ],
-        "text_length": 49,
-        "is_leaf": false
-      },
-      {
-        "kind": "ExpressionStatement",
-        "children": [
-          {
-            "kind": "Error",
-            "children": [
-              {
-                "kind": "Leaves(1)",
-                "children": [],
-                "text_length": 0,
-                "is_leaf": true
-              }
-            ],
-            "text_length": 0,
-            "is_leaf": false
-          },
-          {
-            "kind": "Error",
-            "children": [
-              {
-                "kind": "Leaves(1)",
-                "children": [],
-                "text_length": 0,
-                "is_leaf": true
-              }
-            ],
-            "text_length": 0,
-            "is_leaf": false
-          }
-        ],
-        "text_length": 0,
+        "text_length": 61,
         "is_leaf": false
       }
     ],
-    "text_length": 49,
+    "text_length": 61,
     "is_leaf": false
   },
   "errors": []

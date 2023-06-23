@@ -1,9 +1,11 @@
-use crate::{kind::IniSyntaxKind, language::IniLanguage};
+#![doc = include_str!("readme.md")]
 use oak_core::{
-    Lexer, LexerCache, LexerState, OakError,
+    Lexer, LexerCache, LexerState, OakError, Source,
     lexer::{CommentConfig, LexOutput, StringConfig, WhitespaceConfig},
-    source::Source,
 };
+pub mod token_type;
+
+use crate::{language::IniLanguage, lexer::token_type::IniTokenType};
 
 type State<'a, S> = LexerState<'a, S, IniLanguage>;
 
@@ -85,7 +87,7 @@ impl<'config> IniLexer<'config> {
         }
 
         if state.get_position() > start {
-            state.add_token(IniSyntaxKind::Whitespace, start, state.get_position());
+            state.add_token(IniTokenType::Whitespace, start, state.get_position());
             return true;
         }
         false
@@ -97,7 +99,7 @@ impl<'config> IniLexer<'config> {
 
         if state.current() == Some('\n') {
             state.advance(1);
-            state.add_token(IniSyntaxKind::Newline, start, state.get_position());
+            state.add_token(IniTokenType::Newline, start, state.get_position());
             return true;
         }
         false
@@ -122,7 +124,7 @@ impl<'config> IniLexer<'config> {
                     }
                 }
 
-                state.add_token(IniSyntaxKind::Comment, start, state.get_position());
+                state.add_token(IniTokenType::Comment, start, state.get_position());
                 return true;
             }
         }
@@ -157,7 +159,7 @@ impl<'config> IniLexer<'config> {
                     }
                 }
 
-                state.add_token(IniSyntaxKind::String, start, state.get_position());
+                state.add_token(IniTokenType::String, start, state.get_position());
                 return true;
             }
         }
@@ -228,7 +230,7 @@ impl<'config> IniLexer<'config> {
         }
 
         // 判断是整数还是浮点数
-        let kind = if has_dot || has_exp { IniSyntaxKind::Float } else { IniSyntaxKind::Integer };
+        let kind = if has_dot || has_exp { IniTokenType::Float } else { IniTokenType::Integer };
 
         state.add_token(kind, start, state.get_position());
         true
@@ -262,13 +264,13 @@ impl<'config> IniLexer<'config> {
 
         // 检查是否为布尔值或日期时间
         let kind = match text.to_lowercase().as_str() {
-            "true" | "false" => IniSyntaxKind::Boolean,
+            "true" | "false" => IniTokenType::Boolean,
             _ => {
                 if self.is_datetime_like(text.as_ref()) {
-                    IniSyntaxKind::DateTime
+                    IniTokenType::DateTime
                 }
                 else {
-                    IniSyntaxKind::Identifier
+                    IniTokenType::Identifier
                 }
             }
         };
@@ -284,25 +286,25 @@ impl<'config> IniLexer<'config> {
         // 优先匹配较长的符号
         if state.starts_with("[[") {
             state.advance(2);
-            state.add_token(IniSyntaxKind::DoubleLeftBracket, start, state.get_position());
+            state.add_token(IniTokenType::DoubleLeftBracket, start, state.get_position());
             return true;
         }
 
         if state.starts_with("]]") {
             state.advance(2);
-            state.add_token(IniSyntaxKind::DoubleRightBracket, start, state.get_position());
+            state.add_token(IniTokenType::DoubleRightBracket, start, state.get_position());
             return true;
         }
 
         if let Some(ch) = state.current() {
             let kind = match ch {
-                '{' => IniSyntaxKind::LeftBrace,
-                '}' => IniSyntaxKind::RightBrace,
-                '[' => IniSyntaxKind::LeftBracket,
-                ']' => IniSyntaxKind::RightBracket,
-                ',' => IniSyntaxKind::Comma,
-                '.' => IniSyntaxKind::Dot,
-                '=' => IniSyntaxKind::Equal,
+                '{' => IniTokenType::LeftBrace,
+                '}' => IniTokenType::RightBrace,
+                '[' => IniTokenType::LeftBracket,
+                ']' => IniTokenType::RightBracket,
+                ',' => IniTokenType::Comma,
+                '.' => IniTokenType::Dot,
+                '=' => IniTokenType::Equal,
                 _ => return false,
             };
 
@@ -314,35 +316,8 @@ impl<'config> IniLexer<'config> {
         false
     }
 
-    /// 判断是否类似日期时间格式
     fn is_datetime_like(&self, text: &str) -> bool {
-        // 简单的日期时间格式检查
-        // 支持 ISO 8601 格式：YYYY-MM-DD, YYYY-MM-DDTHH:MM:SS 等
-        if text.len() < 8 {
-            return false;
-        }
-
-        // 检查是否包含日期分隔符
-        if text.contains('-') || text.contains(':') || text.contains('T') {
-            // 更详细的检查可以在这里添加
-            let chars: Vec<char> = text.chars().collect();
-            let mut digit_count = 0;
-            let mut separator_count = 0;
-
-            for ch in chars {
-                if ch.is_ascii_digit() {
-                    digit_count += 1;
-                }
-                else if ch == '-' || ch == ':' || ch == 'T' || ch == 'Z' || ch == '+' {
-                    separator_count += 1;
-                }
-            }
-
-            // 简单启发式：如果数字多于分隔符，可能是日期时间
-            digit_count > separator_count && digit_count >= 6
-        }
-        else {
-            false
-        }
+        // 极简判断：包含 - 和 : 的可能是日期时间
+        text.contains('-') && text.contains(':')
     }
 }

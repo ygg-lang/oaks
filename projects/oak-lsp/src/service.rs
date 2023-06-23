@@ -9,28 +9,45 @@ use oak_resolver::ModuleResolver;
 use oak_vfs::{Vfs, WritableVfs};
 use std::future::Future;
 
+/// A trait that defines the capabilities and behavior of a language-specific service.
+///
+/// This trait is the primary interface for implementing Language Server Protocol (LSP)
+/// features. It provides hooks for various IDE features like hover, completion,
+/// diagnostics, and symbol navigation.
+///
+/// # Implementation
+///
+/// Implementors should provide language-specific logic for parsing, resolving symbols,
+/// and generating IDE-specific data structures.
 pub trait LanguageService: Send + Sync {
+    /// The language type this service supports.
     type Lang: Language;
+    /// The VFS type used for source management.
     type Vfs: WritableVfs;
 
-    /// Get the underlying VFS.
+    /// Returns a reference to the underlying Virtual File System.
     fn vfs(&self) -> &Self::Vfs;
 
-    /// Get the workspace manager.
+    /// Returns a reference to the workspace manager.
     fn workspace(&self) -> &crate::workspace::WorkspaceManager;
 
-    /// Helper to get source from VFS.
+    /// Retrieves the source content for a given URI from the VFS.
     fn get_source(&self, uri: &str) -> Option<<Self::Vfs as Vfs>::Source> {
         self.vfs().get_source(uri)
     }
 
-    /// Helper to get the root red node of a file.
-    /// Implementations should override this to provide actual parsing/caching.
+    /// Retrieves the root red node of a file for the given URI.
+    ///
+    /// This method is responsible for parsing the source and providing a position-aware
+    /// syntax tree. Implementations should typically use a cache to avoid re-parsing
+    /// unchanged files.
     fn get_root(&self, _uri: &str) -> impl Future<Output = Option<RedNode<'_, Self::Lang>>> + Send + '_ {
         async { None }
     }
 
-    /// Helper to run logic with the root node.
+    /// Executes a closure with the root red node of a file.
+    ///
+    /// This is a convenience helper for running logic that requires the syntax tree.
     fn with_root<'a, R, F>(&'a self, uri: &'a str, f: F) -> impl Future<Output = Option<R>> + Send + 'a
     where
         R: Send,
@@ -42,7 +59,9 @@ pub trait LanguageService: Send + Sync {
         }
     }
 
-    /// Helper to run logic with multiple root nodes in parallel.
+    /// Executes a closure with multiple root nodes in parallel.
+    ///
+    /// Useful for cross-file operations like workspace symbol search or global rename.
     fn with_roots<'a, R, F>(&'a self, uris: Vec<String>, f: F) -> impl Future<Output = Vec<R>> + Send + 'a
     where
         R: Send + 'static,
@@ -53,23 +72,31 @@ pub trait LanguageService: Send + Sync {
 
         for uri in uris {
             let f = f.clone();
-            futures.push(async move { if let Some(root) = self.get_root(&uri).await { Some(f(root)) } else { None } });
+            futures.push(async move { if let Some(root) = self.get_root(&uri).await { Some(f(root)) } else { None } })
         }
 
         async move { futures::future::join_all(futures).await.into_iter().flatten().collect() }
     }
 
-    /// Provide hover information. Defaults to None.
+    /// Provides hover information for a specific range in a file.
+    ///
+    /// # Arguments
+    /// * `uri` - The URI of the file.
+    /// * `range` - The byte range to provide information for.
     fn hover(&self, _uri: &str, _range: Range<usize>) -> impl Future<Output = Option<Hover>> + Send + '_ {
         async { None }
     }
 
-    /// Provide folding ranges. Defaults to empty.
+    /// Provides folding ranges for a file.
     fn folding_ranges(&self, _uri: &str) -> impl Future<Output = Vec<FoldingRange>> + Send + '_ {
         async { vec![] }
     }
 
-    /// Provide document symbols. Defaults to empty.
+    /// Provides document symbols (structure) for a file.
+    ///
+    /// This method extracts structural elements like classes, functions, and variables
+    /// from the source file. It first tries to query the workspace symbol index,
+    /// falling back to parsing the file if necessary.
     fn document_symbols<'a>(&'a self, uri: &'a str) -> impl Future<Output = Vec<StructureItem>> + Send + 'a {
         let uri = uri.to_string();
         async move {
@@ -89,27 +116,30 @@ pub trait LanguageService: Send + Sync {
         }
     }
 
-    /// Provide workspace symbols.
+    /// Provides workspace-wide symbol search based on a query string.
+    ///
+    /// This method searches across all files in the workspace for symbols
+    /// that match the given query string.
     fn workspace_symbols<'a>(&'a self, query: String) -> impl Future<Output = Vec<WorkspaceSymbol>> + Send + 'a {
         async move { self.workspace().symbols.query(&query).into_iter().map(|s| WorkspaceSymbol::from(s)).collect() }
     }
 
-    /// Helper to list all files recursively.
+    /// Recursively lists all files in the VFS starting from the given root URI.
+    ///
+    /// This is used to discover all relevant source files in a workspace or directory.
     fn list_all_files(&self, root_uri: &str) -> impl Future<Output = Vec<String>> + Send + '_ {
-        let root_uri = root_uri.to_string();
+        let root_uri: oak_core::Arc<str> = root_uri.into();
         async move {
             let mut files = Vec::new();
             let mut stack = vec![root_uri];
 
             while let Some(uri) = stack.pop() {
                 if self.vfs().is_file(&uri) {
-                    files.push(uri);
+                    files.push(uri.to_string());
                 }
                 else if self.vfs().is_dir(&uri) {
                     if let Some(entries) = self.vfs().read_dir(&uri) {
-                        for entry in entries {
-                            stack.push(entry.to_string());
-                        }
+                        stack.extend(entries);
                     }
                 }
             }
@@ -117,7 +147,13 @@ pub trait LanguageService: Send + Sync {
         }
     }
 
-    /// Find definition. Defaults to empty.
+    /// Finds the definition(s) of a symbol at the specified range.
+    ///
+    /// This method attempts to resolve the symbol under the cursor to its
+    /// original definition. It handles:
+    /// 1. Local symbol resolution (language-specific).
+    /// 2. Global symbol lookup via the workspace index.
+    /// 3. Module/file import resolution.
     fn definition<'a>(&'a self, uri: &'a str, range: Range<usize>) -> impl Future<Output = Vec<LocationRange>> + Send + 'a {
         let uri = uri.to_string();
         async move {
@@ -154,88 +190,85 @@ pub trait LanguageService: Send + Sync {
                 if let Some(resolved_uri) = self.workspace().resolver.resolve(&uri, name) {
                     return vec![LocationRange { uri: resolved_uri.into(), range: (0..0).into() }];
                 }
+
+                // Try local symbols (TODO)
             }
 
             vec![]
         }
     }
 
-    /// Find references. Defaults to empty.
-    fn references<'a>(&'a self, _uri: &'a str, _range: Range<usize>) -> impl Future<Output = Vec<LocationRange>> + Send + 'a {
+    /// Provides document highlights for a symbol at the specified range.
+    fn document_highlight<'a>(&'a self, _uri: &'a str, _range: Range<usize>) -> impl Future<Output = Vec<DocumentHighlight>> + Send + 'a {
         async { vec![] }
     }
 
-    /// Find type definition. Defaults to empty.
-    fn type_definition<'a>(&'a self, _uri: &'a str, _range: Range<usize>) -> impl Future<Output = Vec<LocationRange>> + Send + 'a {
+    /// Provides code actions for a specific range in a file.
+    fn code_action<'a>(&'a self, _uri: &'a str, _range: Range<usize>) -> impl Future<Output = Vec<CodeAction>> + Send + 'a {
         async { vec![] }
     }
 
-    /// Find implementation. Defaults to empty.
-    fn implementation<'a>(&'a self, _uri: &'a str, _range: Range<usize>) -> impl Future<Output = Vec<LocationRange>> + Send + 'a {
-        async { vec![] }
-    }
-
-    /// Provide document highlights. Defaults to empty.
-    fn document_highlights<'a>(&'a self, _uri: &'a str, _range: Range<usize>) -> impl Future<Output = Vec<DocumentHighlight>> + Send + 'a {
-        async { vec![] }
-    }
-
-    /// Rename a symbol.
-    fn rename<'a>(&'a self, _uri: &'a str, _range: Range<usize>, _new_name: String) -> impl Future<Output = Option<WorkspaceEdit>> + Send + 'a {
-        async { None }
-    }
-
-    /// Provide completion items. Defaults to empty.
-    fn completion<'a>(&'a self, _uri: &'a str, _position: usize) -> impl Future<Output = Vec<CompletionItem>> + Send + 'a {
-        async { vec![] }
-    }
-
-    /// Provide diagnostics for a file. Defaults to empty.
-    fn diagnostics<'a>(&'a self, _uri: &'a str) -> impl Future<Output = Vec<Diagnostic>> + Send + 'a {
-        async { vec![] }
-    }
-
-    /// Provide semantic tokens for a file. Defaults to None.
-    fn semantic_tokens<'a>(&'a self, _uri: &'a str) -> impl Future<Output = Option<SemanticTokens>> + Send + 'a {
-        async { None }
-    }
-
-    /// Provide semantic tokens for a range. Defaults to None.
-    fn semantic_tokens_range<'a>(&'a self, _uri: &'a str, _range: Range<usize>) -> impl Future<Output = Option<SemanticTokens>> + Send + 'a {
-        async { None }
-    }
-
-    /// Provide selection ranges for a file. Defaults to empty.
-    fn selection_ranges<'a>(&'a self, _uri: &'a str, _ranges: Vec<usize>) -> impl Future<Output = Vec<SelectionRange>> + Send + 'a {
-        async { vec![] }
-    }
-
-    /// Provide signature help at a position. Defaults to None.
-    fn signature_help<'a>(&'a self, _uri: &'a str, _position: usize) -> impl Future<Output = Option<SignatureHelp>> + Send + 'a {
-        async { None }
-    }
-
-    /// Provide inlay hints for a file. Defaults to empty.
-    fn inlay_hints<'a>(&'a self, _uri: &'a str) -> impl Future<Output = Vec<InlayHint>> + Send + 'a {
-        async { vec![] }
-    }
-
-    /// Provide document formatting. Defaults to empty.
+    /// Provides formatting edits for a file.
     fn formatting<'a>(&'a self, _uri: &'a str) -> impl Future<Output = Vec<TextEdit>> + Send + 'a {
         async { vec![] }
     }
 
-    /// Provide code actions for a file. Defaults to empty.
-    fn code_actions<'a>(&'a self, _uri: &'a str, _range: Range<usize>) -> impl Future<Output = Vec<CodeAction>> + Send + 'a {
+    /// Provides range formatting edits for a file.
+    fn range_formatting<'a>(&'a self, _uri: &'a str, _range: Range<usize>) -> impl Future<Output = Vec<TextEdit>> + Send + 'a {
         async { vec![] }
     }
 
-    /// Called when the language server is initialized.
+    /// Provides rename edits for a symbol at the specified range.
+    fn rename<'a>(&'a self, _uri: &'a str, _range: Range<usize>, _new_name: String) -> impl Future<Output = Option<WorkspaceEdit>> + Send + 'a {
+        async { None }
+    }
+
+    /// Provides semantic tokens for a file.
+    fn semantic_tokens<'a>(&'a self, _uri: &'a str) -> impl Future<Output = Option<SemanticTokens>> + Send + 'a {
+        async { None }
+    }
+
+    /// Provides inlay hints for a file.
+    fn inlay_hint<'a>(&'a self, _uri: &'a str, _range: Range<usize>) -> impl Future<Output = Vec<InlayHint>> + Send + 'a {
+        async { vec![] }
+    }
+
+    /// Provides selection ranges for a file.
+    fn selection_range<'a>(&'a self, _uri: &'a str, _positions: Vec<usize>) -> impl Future<Output = Vec<SelectionRange>> + Send + 'a {
+        async { vec![] }
+    }
+
+    /// Provides signature help for a file.
+    fn signature_help<'a>(&'a self, _uri: &'a str, _range: Range<usize>) -> impl Future<Output = Option<SignatureHelp>> + Send + 'a {
+        async { None }
+    }
+
+    /// Provides completion items for a file at the specified position.
+    fn completion<'a>(&'a self, _uri: &'a str, _offset: usize) -> impl Future<Output = Vec<CompletionItem>> + Send + 'a {
+        async { vec![] }
+    }
+
+    /// Finds all references to a symbol at the specified range.
+    fn references<'a>(&'a self, _uri: &'a str, _range: Range<usize>) -> impl Future<Output = Vec<LocationRange>> + Send + 'a {
+        async { vec![] }
+    }
+
+    /// Finds the type definition of a symbol at the specified range.
+    fn type_definition<'a>(&'a self, _uri: &'a str, _range: Range<usize>) -> impl Future<Output = Vec<LocationRange>> + Send + 'a {
+        async { vec![] }
+    }
+
+    /// Finds the implementation(s) of a symbol at the specified range.
+    fn implementation<'a>(&'a self, _uri: &'a str, _range: Range<usize>) -> impl Future<Output = Vec<LocationRange>> + Send + 'a {
+        async { vec![] }
+    }
+
+    /// Handles an LSP initialize request.
     fn initialize<'a>(&'a self, _params: InitializeParams) -> impl Future<Output = ()> + Send + 'a {
         async {}
     }
 
-    /// Called when the language server is initialized (notification).
+    /// Called when the language server is fully initialized.
     fn initialized<'a>(&'a self) -> impl Future<Output = ()> + Send + 'a {
         async {}
     }
@@ -245,13 +278,18 @@ pub trait LanguageService: Send + Sync {
         async {}
     }
 
-    /// Called when a file is saved.
+    /// Called when a file is saved in the editor.
     fn did_save<'a>(&'a self, _uri: &'a str) -> impl Future<Output = ()> + Send + 'a {
         async {}
     }
 
-    /// Called when a file is closed.
+    /// Called when a file is closed in the editor.
     fn did_close<'a>(&'a self, _uri: &'a str) -> impl Future<Output = ()> + Send + 'a {
         async {}
+    }
+
+    /// Provides diagnostics for a file.
+    fn diagnostics<'a>(&'a self, _uri: &'a str) -> impl Future<Output = Vec<Diagnostic>> + Send + 'a {
+        async { vec![] }
     }
 }

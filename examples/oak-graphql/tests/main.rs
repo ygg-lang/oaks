@@ -18,7 +18,7 @@ impl GraphQLFileTestSuite {
             for entry in entries.flatten() {
                 if let Some(file_name) = entry.file_name().to_str() {
                     if file_name.ends_with(&format!(".{}", self.extension)) {
-                        files.push(entry.path().to_string_lossy().to_string());
+                        files.push(entry.path().to_string_lossy().to_string())
                     }
                 }
             }
@@ -62,12 +62,12 @@ fn test_lexer() {
             }
         }
         Err(e) => {
-            println!("✗ Lexer error: {}", e);
+            println!("✗ Lexer error: {}", e)
         }
     }
 
     if !lex_result.diagnostics.is_empty() {
-        println!("Diagnostics: {} warnings/errors", lex_result.diagnostics.len());
+        println!("Diagnostics: {} warnings/errors", lex_result.diagnostics.len())
     }
 }
 
@@ -106,20 +106,20 @@ fn test_parser() {
                         // }
                     }
                     Err(e) => {
-                        println!("  Lexer error: {}", e);
+                        println!("  Lexer error: {}", e)
                     }
                 }
 
                 if !lex_result.diagnostics.is_empty() {
-                    println!("  Diagnostics: {} warnings/errors", lex_result.diagnostics.len());
+                    println!("  Diagnostics: {} warnings/errors", lex_result.diagnostics.len())
                 }
             }
             Err(e) => {
-                println!("  Error reading file: {}", e);
+                println!("  Error reading file: {}", e)
             }
         }
 
-        println!();
+        println!()
     }
 }
 
@@ -130,5 +130,5 @@ fn main() {
     test_lexer();
     test_parser();
 
-    println!("All tests completed!");
+    println!("All tests completed!")
 }

@@ -1,3 +1,5 @@
+#![doc = include_str!("readme.md")]
+use oak_core::Source;
 pub mod token_type;
 
 pub use token_type::ActionScriptTokenType;
@@ -6,7 +8,6 @@ use crate::language::ActionScriptLanguage;
 use oak_core::{
     Lexer, LexerCache, LexerState, OakError,
     lexer::{CommentConfig, LexOutput, StringConfig, WhitespaceConfig},
-    source::Source,
 };
 use std::sync::LazyLock;
 
@@ -113,15 +114,19 @@ impl<'config> ActionScriptLexer<'config> {
     }
 
     fn lex_char_literal<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
-        AS_CHAR.scan(state, ActionScriptTokenType::CharLiteral)
+        AS_CHAR.scan(state, ActionScriptTokenType::StringLiteral)
     }
 
     fn lex_identifier_or_keyword<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start = state.get_position();
         let first = match state.peek() {
-            Some(c) if c.is_ascii_alphabetic() || c == '_' || c == '$' => c,
-            _ => return false,
+            Some(c) => c,
+            None => return false,
         };
+
+        if !first.is_ascii_alphabetic() && first != '_' && first != '$' {
+            return false;
+        }
 
         state.advance(first.len_utf8());
         while let Some(c) = state.peek() {
@@ -134,72 +139,45 @@ impl<'config> ActionScriptLexer<'config> {
         }
 
         let end = state.get_position();
-        let text = state.get_text_in((start..end).into());
+        let text = state.source().get_text_in(oak_core::Range { start, end });
         let kind = match text.as_ref() {
-            "as" => ActionScriptTokenType::As,
-            "break" => ActionScriptTokenType::Break,
-            "case" => ActionScriptTokenType::Case,
-            "catch" => ActionScriptTokenType::Catch,
             "class" => ActionScriptTokenType::Class,
-            "const" => ActionScriptTokenType::Const,
-            "continue" => ActionScriptTokenType::Continue,
-            "default" => ActionScriptTokenType::Default,
-            "delete" => ActionScriptTokenType::Delete,
-            "do" => ActionScriptTokenType::Do,
-            "else" => ActionScriptTokenType::Else,
-            "extends" => ActionScriptTokenType::Extends,
-            "false" => ActionScriptTokenType::False,
-            "finally" => ActionScriptTokenType::Finally,
-            "for" => ActionScriptTokenType::For,
-            "function" => ActionScriptTokenType::Function,
-            "if" => ActionScriptTokenType::If,
-            "implements" => ActionScriptTokenType::Implements,
-            "import" => ActionScriptTokenType::Import,
-            "in" => ActionScriptTokenType::In,
-            "instanceof" => ActionScriptTokenType::Instanceof,
             "interface" => ActionScriptTokenType::Interface,
-            "internal" => ActionScriptTokenType::Internal,
-            "is" => ActionScriptTokenType::Is,
-            "native" => ActionScriptTokenType::Native,
-            "new" => ActionScriptTokenType::New,
-            "null" => ActionScriptTokenType::Null,
-            "package" => ActionScriptTokenType::Package,
+            "function" => ActionScriptTokenType::Function,
+            "var" => ActionScriptTokenType::Var,
+            "const" => ActionScriptTokenType::Const,
+            "public" => ActionScriptTokenType::Public,
             "private" => ActionScriptTokenType::Private,
             "protected" => ActionScriptTokenType::Protected,
-            "public" => ActionScriptTokenType::Public,
-            "return" => ActionScriptTokenType::Return,
+            "internal" => ActionScriptTokenType::Internal,
             "static" => ActionScriptTokenType::Static,
-            "super" => ActionScriptTokenType::Super,
-            "switch" => ActionScriptTokenType::Switch,
-            "this" => ActionScriptTokenType::This,
-            "throw" => ActionScriptTokenType::Throw,
-            "true" => ActionScriptTokenType::True,
-            "try" => ActionScriptTokenType::Try,
-            "typeof" => ActionScriptTokenType::Typeof,
-            "use" => ActionScriptTokenType::Use,
-            "var" => ActionScriptTokenType::Var,
-            "void" => ActionScriptTokenType::Void,
-            "while" => ActionScriptTokenType::While,
-            "with" => ActionScriptTokenType::With,
-            "each" => ActionScriptTokenType::Each,
-            "get" => ActionScriptTokenType::Get,
-            "set" => ActionScriptTokenType::Set,
-            "namespace" => ActionScriptTokenType::Namespace,
-            "include" => ActionScriptTokenType::Include,
-            "dynamic" => ActionScriptTokenType::Dynamic,
-            "final" => ActionScriptTokenType::Final,
             "override" => ActionScriptTokenType::Override,
-            "Array" => ActionScriptTokenType::Array,
-            "Boolean" => ActionScriptTokenType::Boolean,
-            "Date" => ActionScriptTokenType::Date,
-            "Number" => ActionScriptTokenType::Number,
-            "Object" => ActionScriptTokenType::ObjectType,
-            "RegExp" => ActionScriptTokenType::RegExp,
-            "String" => ActionScriptTokenType::StringType,
-            "uint" => ActionScriptTokenType::Uint,
-            "Vector" => ActionScriptTokenType::Vector,
-            "XML" => ActionScriptTokenType::Xml,
-            "XMLList" => ActionScriptTokenType::XmlList,
+            "package" => ActionScriptTokenType::Package,
+            "import" => ActionScriptTokenType::Import,
+            "extends" => ActionScriptTokenType::Extends,
+            "implements" => ActionScriptTokenType::Implements,
+            "new" => ActionScriptTokenType::New,
+            "this" => ActionScriptTokenType::This,
+            "super" => ActionScriptTokenType::Super,
+            "if" => ActionScriptTokenType::If,
+            "else" => ActionScriptTokenType::Else,
+            "for" => ActionScriptTokenType::For,
+            "while" => ActionScriptTokenType::While,
+            "do" => ActionScriptTokenType::Do,
+            "switch" => ActionScriptTokenType::Switch,
+            "case" => ActionScriptTokenType::Case,
+            "default" => ActionScriptTokenType::Default,
+            "break" => ActionScriptTokenType::Break,
+            "continue" => ActionScriptTokenType::Continue,
+            "return" => ActionScriptTokenType::Return,
+            "try" => ActionScriptTokenType::Try,
+            "catch" => ActionScriptTokenType::Catch,
+            "finally" => ActionScriptTokenType::Finally,
+            "throw" => ActionScriptTokenType::Throw,
+            "void" => ActionScriptTokenType::Void,
+            "null" => ActionScriptTokenType::Null,
+            "true" => ActionScriptTokenType::True,
+            "false" => ActionScriptTokenType::False,
             _ => ActionScriptTokenType::Identifier,
         };
 

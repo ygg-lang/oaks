@@ -6,12 +6,16 @@ use url::Url;
 
 /// A manager for workspace folders and path resolution.
 pub struct WorkspaceManager {
+    /// The workspace folders.
     folders: DashMap<String, PathBuf>,
+    /// The global symbol table for the workspace.
     pub symbols: GlobalSymbolTable,
+    /// The resolver for the workspace.
     pub resolver: StandardResolver,
 }
 
 impl WorkspaceManager {
+    /// Creates a new workspace manager.
     pub fn new() -> Self {
         Self { folders: DashMap::new(), symbols: GlobalSymbolTable::new(), resolver: StandardResolver::new(Vec::new()) }
     }

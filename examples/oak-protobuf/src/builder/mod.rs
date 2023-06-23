@@ -1,5 +1,4 @@
 use crate::{ast::ProtobufRoot, language::ProtobufLanguage, parser::ProtobufParser};
-
 use oak_core::{
     OakDiagnostics,
     builder::{BuildOutput, Builder, BuilderCache},

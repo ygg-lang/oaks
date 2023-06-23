@@ -1,3 +1,5 @@
+pub mod element_type;
+
 use crate::{language::DLanguage, lexer::DLexer};
 use oak_core::{
     TextEdit,
@@ -5,7 +7,7 @@ use oak_core::{
     source::Source,
 };
 
-mod parse;
+mod parse_top_level;
 
 pub(crate) type State<'a, S> = ParserState<'a, DLanguage, S>;
 

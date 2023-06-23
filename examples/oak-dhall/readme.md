@@ -1,99 +1,35 @@
-# Oak Dhall Parser
+# 🚀 Oak Dhall Parser
 
-## Overview
+[![Crates.io](https://img.shields.io/crates/v/oak-dhall.svg)](https://crates.io/crates/oak-dhall)
+[![Documentation](https://docs.rs/oak-dhall/badge.svg)](https://docs.rs/oak-dhall)
 
-`Oak of Dhall` is a powerful and efficient parser for the Dhall programming language, built using the `oak` parser combinator library. It provides a robust solution for parsing Dhall syntax, enabling various applications such as static analysis of Dhall code, refactoring tools, and automated code generation.
+**Programmable Configuration with Total Safety** — A high-performance, incremental Dhall parser built on the Oak framework. Optimized for programmable configuration, cloud-native infrastructure, and modern developer tooling.
 
-## Features
+## 🎯 Project Vision
 
-- **Comprehensive Dhall Grammar**: Supports all standard Dhall constructs, including expressions, types, and imports.
-- **High Performance**: Leverages `oak`'s optimized parsing techniques for speed.
-- **Abstract Syntax Tree (AST)**: Generates a detailed and easy-to-navigate AST representing the Dhall code structure.
-- **Error Handling**: Provides meaningful error messages for better debugging of malformed Dhall code.
-- **Extensible**: Easily extendable to support custom Dhall extensions or dialects.
+Dhall is a programmable configuration language that is guaranteed to terminate and is completely safe to evaluate. `oak-dhall` aims to provide a robust, modern, Rust-powered infrastructure for parsing Dhall that is both accurate and incredibly fast. By utilizing Oak's incremental parsing architecture, we enable the creation of highly responsive configuration editors, linting tools, and automated deployment pipelines that can handle complex Dhall graphs in real-time. Whether you are building custom configuration validators, cloud infrastructure generators, or sophisticated IDE extensions, `oak-dhall` provides the high-fidelity AST and efficiency needed to harness the power of Dhall.
 
-## 🚀 Quick Start
+## ✨ Core Features
 
-Here's a simple example demonstrating how to parse Dhall code:
+- **⚡ Blazing Fast**: Leverages Rust's performance and memory safety to provide sub-millisecond parsing, essential for high-frequency developer tools and real-time configuration analysis.
+- **🔄 Incremental by Design**: Built-in support for partial updates—re-parse only modified sections of large Dhall files. Ideal for complex configuration environments where maintainability and tool responsiveness are critical.
+- **🌳 High-Fidelity AST**: Generates a comprehensive and precise Abstract Syntax Tree capturing the full depth of Dhall:
+    - **Functional Constructs**: Full support for functions, let-bindings, and lambda expressions.
+    - **Types & Records**: Precise mapping of Dhall's powerful type system, including records, unions, and optional types.
+    - **Imports**: Robust handling of Dhall's unique import system (local files, URLs, environment variables).
+    - **Built-in Functions**: Comprehensive support for Dhall's standard library and built-in operators.
+    - **Comments & Whitespace**: Retains all trivia, enabling faithful round-trip processing and refactoring.
+- **🛡️ Industrial-Grade Fault Tolerance**: Engineered to recover from syntax errors gracefully, providing precise diagnostics—crucial for maintaining a smooth developer experience during active configuration editing.
+- **🧩 Deep Ecosystem Integration**: Seamlessly works with `oak-lsp` for full LSP support and `oak-mcp` for intelligent configuration discovery and analysis.
 
-```rust
-use oak_core::{Parser, SourceText, parser::session::ParseSession};
-use oak_dhall::{DhallParser, DhallLanguage};
+## 🏗️ Architecture
 
-fn main() -> Result<(), Box<dyn std::error::Error>> {
-    let mut session = ParseSession::<DhallLanguage>::default();
-    let parser = DhallParser::new();
-    let source = SourceText::new(r#"
-let greeting = "Hello, Dhall!"
-in greeting
-"#);
-    
-    let result = parser.parse(&source, &[], &mut session);
-    if let Some(errors) = result.result.err() {
-        println!("Parse errors found: {:?}", errors);
-    } else {
-        println!("Parsed Dhall successfully.");
-    }
-    Ok(())
-}
-```
+The parser follows the **Green/Red Tree** architecture (inspired by Roslyn), which allows for:
+1. **Efficient Immutability**: Share nodes across different versions of the tree without copying.
+2. **Lossless Syntax Trees**: Retains all trivia (whitespace and comments), enabling faithful code formatting and refactoring of Dhall files.
+3. **Type Safety**: Strongly-typed "Red" nodes provide a convenient and safe API for tree traversal and analysis.
 
-## 📋 Parsing Examples
 
-### Expression Parsing
-```rust
-use oak_core::{Parser, SourceText, parser::session::ParseSession};
-use oak_dhall::{DhallParser, DhallLanguage};
+## 🤝 Contributing
 
-let mut session = ParseSession::<DhallLanguage>::default();
-let parser = DhallParser::new();
-let source = SourceText::new(r#"{ x = 1, y = 2 }"#);
-
-let result = parser.parse(&source, &[], &mut session);
-println!("Parsed Dhall expression successfully.");
-```
-
-## Advanced Features
-
-### Customizing the Parser
-
-The `oak` library allows for flexible customization of the parser. You can modify the grammar rules or add new ones to suit your specific needs, such as supporting experimental Dhall features. Refer to the `oak` documentation for more details on parser customization.
-
-### Error Recovery
-
-`Oak of Dhall` can be extended with error recovery mechanisms to handle malformed Dhall code gracefully, allowing for partial parsing and better resilience in real-world scenarios.
-
-## AST Structure
-
-The generated AST for Dhall provides a hierarchical representation of the code elements. For instance, a let expression might result in an AST structure similar to this:
-
-```rust
-// Simplified AST representation for:
-// let greeting = "Hello, Dhall!" in greeting
-pex_dhall::ast::Node::LetExpression {
-    bindings: vec![
-        // ... binding details ...
-    ],
-    expression: // ... expression details ...
-}
-```
-
-## Performance
-
-`Oak of Dhall` is designed for performance. Benchmarks show efficient parsing of large Dhall codebases. Optimizations include memoization, efficient backtracking, and direct AST construction.
-
-## Integration
-
-`Oak of Dhall` can be integrated into various tools and applications:
-
-- **Dhall IDEs**: Provide syntax highlighting, code completion, and refactoring capabilities.
-- **Static Analyzers**: Identify potential bugs, code smells, and security vulnerabilities.
-- **Code Transformers**: Automate code modifications and migrations.
-
-## Examples
-
-Explore the `examples` directory within the `oak-dhall` project for more usage examples and demonstrations of specific Dhall parsing features.
-
-## Contributing
-
-Contributions to `Oak of Dhall` are welcome! If you find a bug or have a feature request, please open an issue on the GitHub repository. For major changes, please open a discussion first.
+We welcome contributions of all kinds! If you find a bug, have a feature request, or want to contribute code, please check our [issues](https://github.com/ygg-lang/oaks/issues) or submit a pull request.

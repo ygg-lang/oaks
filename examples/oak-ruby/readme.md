@@ -1,160 +1,36 @@
-# Oak Ruby Parser
+# 🚀 oak-ruby
 
 [![Crates.io](https://img.shields.io/crates/v/oak-ruby.svg)](https://crates.io/crates/oak-ruby)
 [![Documentation](https://docs.rs/oak-ruby/badge.svg)](https://docs.rs/oak-ruby)
 
-High-performance incremental Ruby parser for the oak ecosystem with flexible configuration, optimized for static analysis and code generation.
+**Elegance Meets Performance** — A high-performance, incremental Ruby parser built on the Oak framework. Optimized for static analysis, automated refactoring, and modern IDE integration for the Ruby programming language.
 
-## 🎯 Overview
+## 🎯 Project Vision
 
-Oak Ruby is a robust parser for Ruby, designed to handle complete Ruby syntax including modern features. Built on the solid foundation of oak-core, it provides both high-level convenience and detailed AST generation for static analysis and code generation.
+Ruby is celebrated for its developer happiness and expressive syntax. `oak-ruby` aims to bring that same level of joy to tool developers by providing a fast, modern, Rust-powered parsing foundation. By leveraging Oak's incremental parsing architecture, it enables the creation of highly responsive tools that can handle large Ruby codebases—from Rails applications to complex DSLs. We provide the high-fidelity AST and efficiency needed to build the next generation of Ruby developer tools, ensuring that developers can focus on writing elegant code while their tools keep up with them in real-time.
 
-## ✨ Features
+## ✨ Core Features
 
-- **Complete Ruby Syntax**: Supports all Ruby features including modern specifications
-- **Full AST Generation**: Generates comprehensive Abstract Syntax Trees
-- **Lexer Support**: Built-in tokenization with proper span information
-- **Error Recovery**: Graceful handling of syntax errors with detailed diagnostics
+- **⚡ Blazing Fast**: Combines Rust's efficiency with advanced parsing techniques to deliver sub-millisecond response times, even for complex Ruby scripts with deep nesting.
+- **🔄 Incremental Parsing**: Only re-parse what changed. Perfect for IDEs where rapid feedback is essential for maintaining developer flow in large projects.
+- **🌳 High-Fidelity AST**: Generates a detailed and easy-to-traverse syntax tree capturing:
+    - **OOP Structures**: Full support for Classes, Modules, Inheritance, and Mixins.
+    - **Flexible Syntax**: Precise handling of Ruby's unique features like heredocs, percent literals (`%q`, `%w`, `%x`), and command-style method calls.
+    - **Functional Blocks**: Robust parsing of Blocks (`do...end` and `{...}`), Procs, and Lambdas.
+    - **DSL Support**: Optimized for parsing domain-specific languages common in the Ruby ecosystem (e.g., Rails routes, RSpec tests).
+- **🛡️ Robust Error Recovery**: Engineered to handle malformed or incomplete Ruby code gracefully, providing precise diagnostics while maintaining a valid syntax tree for continuous analysis.
+- **🧩 Ecosystem Integration**: Seamlessly works with `oak-lsp` for full LSP support and other Oak-based code analysis utilities.
 
-## 🚀 Quick Start
+## 🏗️ Architecture
 
-Basic example:
+`oak-ruby` follows the modern Green/Red Tree architecture (inspired by Roslyn):
 
-```rust
-use oak_ruby::{Parser, RubyLanguage, SourceText};
+- **Green Tree**: Immutable, lossless, and syntax-only tree. It captures the full fidelity of the source code, including trivia (comments, whitespace).
+- **Red Tree**: A facade over the Green Tree that provides a convenient, type-safe API for tree traversal and analysis, including parent pointers and absolute offsets.
 
-fn main() -> Result<(), Box<dyn std::error::Error>> {
-    let parser = Parser::new();
-    let source = SourceText::new(r#"
-puts "Hello, World!"
+This design enables efficient incremental parsing and powerful refactoring capabilities.
 
-name = "Ruby"
-puts "Welcome to #{name}!"
-    "#);
-    
-    let result = parser.parse(&source);
-    println!("Parsed Ruby successfully.");
-    Ok(())
-}
-```
 
-## 📋 Parsing Examples
+## 🛠️ Contributing
 
-### Method Parsing
-```rust
-use oak_ruby::{Parser, RubyLanguage, SourceText};
-
-let parser = Parser::new();
-let source = SourceText::new(r#"
-def add(a, b)
-    return a + b
-end
-
-result = add(5, 3)
-puts "Result: #{result}"
-"#);
-
-let result = parser.parse(&source);
-println!("Method parsed successfully.");
-```
-
-### Class Parsing
-```rust
-use oak_ruby::{Parser, RubyLanguage, SourceText};
-
-let parser = Parser::new();
-let source = SourceText::new(r#"
-class Calculator
-    def initialize
-        @result = 0
-    end
-    
-    def add(value)
-        @result += value
-        self
-    end
-    
-    def get_result
-        @result
-    end
-end
-"#);
-
-let result = parser.parse(&source);
-println!("Class parsed successfully.");
-```
-
-## 🔧 Advanced Features
-
-### Token-Level Parsing
-```rust
-use oak_ruby::{Parser, RubyLanguage, SourceText};
-
-let parser = Parser::new();
-let source = SourceText::new("x = 42");
-let result = parser.parse(&source);
-println!("Token parsing completed.");
-```
-
-### Error Handling
-```rust
-use oak_ruby::{Parser, RubyLanguage, SourceText};
-
-let parser = Parser::new();
-let source = SourceText::new(r#"
-# Invalid Ruby code example
-def broken_function(
-    puts "Hello"
-# Missing closing brace
-"#);
-
-let result = parser.parse(&source);
-if let Some(errors) = result.result.err() {
-    println!("Parse errors found: {:?}", errors);
-} else {
-    println!("Parsed successfully.");
-}
-```
-
-## 🏗️ AST Structure
-
-The parser generates a comprehensive AST with the following main structures:
-
-- **RubyProgram**: Root container for Ruby programs
-- **Function**: Ruby functions and methods
-- **Class**: Ruby class definitions
-- **Statement**: Various statement types including control flow
-- **Expression**: Various expression types including operators
-- **Variable**: Ruby variable constructs
-
-## 📊 Performance
-
-- **Streaming**: Parse large Ruby files without loading entirely into memory
-- **Incremental**: Re-parse only changed sections
-- **Memory Efficient**: Smart AST node allocation
-- **Fast Recovery**: Quick error recovery for better IDE integration
-
-## 🔗 Integration
-
-Oak Ruby integrates seamlessly with:
-
-- **Static Analysis**: Code quality and security analysis
-- **Code Generation**: Generating code from Ruby AST
-- **IDE Support**: Language server protocol compatibility
-- **Refactoring**: Automated code refactoring
-- **Documentation**: Generating documentation from Ruby code
-
-## 📚 Examples
-
-Check out the [examples](examples/) directory for comprehensive examples:
-
-- Complete Ruby program parsing
-- Method and class analysis
-- Code transformation
-- Integration with development workflows
-
-## 🤝 Contributing
-
-Contributions are welcome! 
-
-Please feel free to submit pull requests at the [project repository](https://github.com/ygg-lang/oaks/tree/dev/examples/oak-ruby) or open [issues](https://github.com/ygg-lang/oaks/issues).
+Contributions are welcome! Please feel free to submit a Pull Request. For major changes, please open an issue first to discuss what you would like to change.

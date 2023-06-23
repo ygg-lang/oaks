@@ -1,8 +1,11 @@
+#![doc = include_str!("readme.md")]
 use oak_core::{Language, LanguageCategory};
+#[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
 
 /// Smalltalk 语言定义
-#[derive(Debug, Clone, Copy, Serialize, Deserialize)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[derive(Debug, Clone, Copy)]
 pub struct SmalltalkLanguage {}
 
 impl SmalltalkLanguage {
@@ -21,7 +24,7 @@ impl Language for SmalltalkLanguage {
     const NAME: &'static str = "smalltalk";
     const CATEGORY: LanguageCategory = LanguageCategory::Programming;
 
-    type TokenType = crate::kind::SmalltalkSyntaxKind;
-    type ElementType = crate::kind::SmalltalkSyntaxKind;
+    type TokenType = crate::lexer::token_type::SmalltalkTokenType;
+    type ElementType = crate::parser::element_type::SmalltalkElementType;
     type TypedRoot = ();
 }

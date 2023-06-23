@@ -49,15 +49,21 @@ impl<T> OakDiagnostics<T> {
     pub fn error(error: OakError) -> Self {
         Self { result: Err(error), diagnostics: Vec::new() }
     }
+
+    /// Returns true if there are any fatal errors or diagnostics.
+    pub fn has_errors(&self) -> bool {
+        self.result.is_err() || !self.diagnostics.is_empty()
+    }
 }
 
 /// The main error type for the Oak Core parsing framework.
 ///
 /// `OakError` represents all possible language that can occur during
 /// lexical analysis and parsing operations. It provides detailed
-/// error information including error kind and/// precise source location.
+/// error information including error kind and precise source location.
 #[derive(Clone)]
 pub struct OakError {
+    /// The specific kind of error.
     kind: Box<OakErrorKind>,
 }
 
@@ -65,6 +71,11 @@ impl OakError {
     /// Creates a new OakError with the given kind.
     pub fn new(kind: OakErrorKind) -> Self {
         Self { kind: Box::new(kind) }
+    }
+
+    /// Creates a new custom error with the given message.
+    pub fn custom_error(message: impl Into<String>) -> Self {
+        Self::new(OakErrorKind::CustomError { message: message.into() })
     }
 }
 
@@ -104,7 +115,7 @@ pub enum OakErrorKind {
     },
     /// Syntax error encountered during parsing.
     SyntaxError {
-        /// Human-readable error message describing the kind issue.
+        /// The error message.
         message: String,
         /// The byte offset where the error occurred.
         offset: usize,
@@ -141,7 +152,7 @@ pub enum OakErrorKind {
 
     /// Custom error for user-defined error conditions.
     CustomError {
-        /// The error message describing the custom error condition.
+        /// The error message.
         message: String,
     },
 
@@ -219,13 +230,13 @@ pub enum OakErrorKind {
         actual: String,
     },
 
-    /// Test expected result file was missing or regenerated.
+    /// Test regenerated.
     TestRegenerated {
         /// The file that was regenerated.
         path: std::path::PathBuf,
     },
 
-    /// Serde serialization error.
+    /// Serde error.
     SerdeError {
         /// The error message.
         message: String,
@@ -237,19 +248,19 @@ pub enum OakErrorKind {
         message: String,
     },
 
-    /// XML writing error.
+    /// XML error.
     XmlError {
         /// The error message.
         message: String,
     },
 
-    /// Zip archive error.
+    /// Zip error.
     ZipError {
         /// The error message.
         message: String,
     },
 
-    /// Parsing error (generic).
+    /// Parse error.
     ParseError {
         /// The error message.
         message: String,
@@ -393,23 +404,6 @@ impl OakError {
         OakErrorKind::TrailingCommaNotAllowed { offset, source_id }.into()
     }
 
-    /// Creates a custom error for user-defined error conditions.with a message.
-    ///
-    /// # Arguments
-    ///
-    /// * `message` - The error message describing what went wrong
-    ///
-    /// # Examples
-    ///
-    /// ```rust
-    /// # use oak_core::OakError;
-    ///
-    /// let error = OakError::custom_error("Invalid configuration");
-    /// ```
-    pub fn custom_error(message: impl Into<String>) -> Self {
-        OakErrorKind::CustomError { message: message.into() }.into()
-    }
-
     /// Creates an invalid theme error.
     pub fn invalid_theme(message: impl Into<String>) -> Self {
         OakErrorKind::InvalidTheme { message: message.into() }.into()
@@ -440,7 +434,7 @@ impl OakError {
         OakErrorKind::ProtocolError { message: message.into() }.into()
     }
 
-    /// Creates a serde serialization error.
+    /// Creates a serde error.
     pub fn serde_error(message: impl Into<String>) -> Self {
         OakErrorKind::SerdeError { message: message.into() }.into()
     }

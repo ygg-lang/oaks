@@ -1,142 +1,35 @@
-# Oak Bash Parser
+# 🚀 Oak Bash Parser
 
 [![Crates.io](https://img.shields.io/crates/v/oak-bash.svg)](https://crates.io/crates/oak-bash)
 [![Documentation](https://docs.rs/oak-bash/badge.svg)](https://docs.rs/oak-bash)
 
-High-performance incremental Bash parser for the oak ecosystem with flexible configuration, optimized for script analysis and automation.
+**Industrial-Grade Shell Script Analysis** — A high-performance, incremental Bash parser built on the Oak framework. Optimized for complex shell scripts, command-line tools, and modern IDE integration.
 
-## 🎯 Overview
+## 🎯 Project Vision
 
-Oak Bash is a robust parser for Bash, designed to handle complete Bash syntax including modern features like conditionals, loops, and functions. Built on the solid foundation of oak-core, it provides both high-level convenience and detailed AST generation for script analysis and automation.
+Shell scripts are the glue of the modern computing world, yet they are notoriously difficult to parse and analyze due to their flexible and often ambiguous syntax. `oak-bash` aims to provide a robust, modern, Rust-powered infrastructure for parsing Bash that is both accurate and incredibly fast. By utilizing Oak's incremental parsing architecture, we enable the creation of highly responsive IDEs, static analyzers (like a modern ShellCheck), and automated refactoring tools that can handle massive script libraries in real-time. Whether you are building custom linters, DevOps automation tools, or sophisticated IDE extensions, `oak-bash` provides the high-fidelity AST and efficiency needed to tame the complexity of Bash.
 
-## ✨ Features
+## ✨ Core Features
 
-- **Complete Bash Syntax**: Supports all Bash features including modern specifications
-- **Full AST Generation**: Generates comprehensive Abstract Syntax Trees
-- **Lexer Support**: Built-in tokenization with proper span information
-- **Error Recovery**: Graceful handling of syntax errors with detailed diagnostics
+- **⚡ Blazing Fast**: Leverages Rust's performance and memory safety to provide sub-millisecond parsing, essential for high-frequency developer tools and real-time script analysis.
+- **🔄 Incremental by Nature**: Built-in support for partial updates—re-parse only what has changed. Ideal for long scripts and continuous integration pipelines.
+- **🌳 High-Fidelity AST**: Generates a comprehensive and precise Abstract Syntax Tree capturing the full depth of Bash:
+    - **Complex Commands**: Full support for pipelines, loops (`for`, `while`, `until`), and conditional constructs (`if`, `case`).
+    - **Variable Expansion**: Precise mapping of parameter expansion, command substitution, and arithmetic expansion.
+    - **Redirections**: Detailed tracking of file descriptor redirections and here-documents.
+    - **Functions**: Robust parsing of function definitions and call sites.
+    - **Shell Options**: Awareness of common shell behaviors and extensions.
+- **🛡️ Industrial-Grade Fault Tolerance**: Engineered to recover from syntax errors gracefully, providing precise diagnostics—crucial for maintaining a smooth developer experience during active script editing.
+- **🧩 Deep Ecosystem Integration**: Seamlessly works with `oak-lsp` for full LSP support and `oak-mcp` for intelligent code discovery and analysis.
 
-## 🚀 Quick Start
+## 🏗️ Architecture
 
-Basic example:
+The parser follows the **Green/Red Tree** architecture (inspired by Roslyn), which allows for:
+1. **Efficient Immutability**: Share nodes across different versions of the tree without copying.
+2. **Lossless Syntax Trees**: Retains all trivia (whitespace and comments), enabling faithful code formatting and refactoring of Bash scripts.
+3. **Type Safety**: Strongly-typed "Red" nodes provide a convenient and safe API for tree traversal and analysis.
 
-```rust
-use oak_bash::{Parser, BashLanguage, SourceText};
-
-fn main() -> Result<(), Box<dyn std::error::Error>> {
-    let parser = Parser::new();
-    let source = SourceText::new(r#"
-        #!/bin/bash
-        NAME="World"
-        echo "Hello, $NAME!"
-        if [ "$NAME" == "World" ]; then
-            echo "It's a small world."
-        fi
-    "#);
-    
-    let result = parser.parse(&source);
-    println!("Parsed Bash script successfully.");
-    Ok(())
-}
-```
-
-## 📋 Parsing Examples
-
-### Script Parsing
-```rust
-use oak_bash::{Parser, BashLanguage, SourceText};
-
-let parser = Parser::new();
-let source = SourceText::new(r#"
-    #!/bin/bash
-    echo "Hello"
-    "#);
-
-let result = parser.parse(&source);
-println!("Parsed Bash script successfully.");
-```
-
-### Command Parsing
-```rust
-use oak_bash::{Parser, BashLanguage, SourceText};
-
-let parser = Parser::new();
-let source = SourceText::new(r#"
-    ls -la /tmp
-    grep "error" /var/log/syslog
-    "#);
-
-let result = parser.parse(&source);
-println!("Parsed Bash commands successfully.");
-```
-
-## 🔧 Advanced Features
-
-### Token-Level Parsing
-```rust
-use oak_bash::{Parser, BashLanguage, SourceText};
-
-let parser = Parser::new();
-let source = SourceText::new("echo \"Hello World\"");
-let result = parser.parse(&source);
-// Token information is available in the parse result
-```
-
-### Error Handling
-```rust
-use oak_bash::{Parser, BashLanguage, SourceText};
-
-let parser = Parser::new();
-let source = SourceText::new(r#"
-    if [ -f /tmp/file ]; then
-        echo "File exists"
-    else
-        echo "File does not exist"
-    fi_invalid
-    "#);
-
-let result = parser.parse(&source);
-if let Err(e) = result.result {
-    println!("Parse error: {:?}", e);
-}
-```
-
-## 🏗️ AST Structure
-
-The parser generates a comprehensive AST with the following main structures:
-
-- **Script**: Root container for Bash scripts
-- **Command**: Simple commands, pipelines, conditionals, loops
-- **Expression**: Arithmetic, string, file test expressions
-- **Word**: Literal words, variables, command substitutions
-
-## 📊 Performance
-
-- **Streaming**: Parse large Bash files without loading entirely into memory
-- **Incremental**: Re-parse only changed sections
-- **Memory Efficient**: Smart AST node allocation
-- **Fast Recovery**: Quick error recovery for better IDE integration
-
-## 🔗 Integration
-
-Oak Bash integrates seamlessly with:
-
-- **Shell Scripting Tools**: Integration with linters, formatters
-- **Automation**: Parsing scripts for automated tasks
-- **IDE Support**: Language server protocol compatibility
-- **Security Analysis**: Analyzing scripts for vulnerabilities
-
-## 📚 Examples
-
-Check out the [examples](examples/) directory for comprehensive examples:
-
-- Complete Bash script parsing
-- Command and expression analysis
-- Code transformation
-- Integration with development workflows
 
 ## 🤝 Contributing
 
-Contributions are welcome! 
-
-Please feel free to submit pull requests at the [project repository](https://github.com/ygg-lang/oaks/tree/dev/examples/oak-bash) or open [issues](https://github.com/ygg-lang/oaks/issues).
+We welcome contributions of all kinds! If you find a bug, have a feature request, or want to contribute code, please check our [issues](https://github.com/ygg-lang/oaks/issues) or submit a pull request.

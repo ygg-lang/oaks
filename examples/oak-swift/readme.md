@@ -1,157 +1,37 @@
-# Oak Swift Parser
+# 🚀 oak-swift
 
 [![Crates.io](https://img.shields.io/crates/v/oak-swift.svg)](https://crates.io/crates/oak-swift)
 [![Documentation](https://docs.rs/oak-swift/badge.svg)](https://docs.rs/oak-swift)
 
-High-performance incremental Swift parser for the oak ecosystem with flexible configuration, optimized for static analysis and code generation.
+**Safety and Speed for Apple Ecosystem Development** — A high-performance, incremental Swift parser built on the Oak framework. Optimized for Swift 5.10+ features, complex generic systems, and highly responsive developer tools.
 
-## 🎯 Overview
+## 🎯 Project Vision
 
-Oak Swift is a robust parser for Swift, designed to handle complete Swift syntax including modern features. Built on the solid foundation of oak-core, it provides both high-level convenience and detailed AST generation for static analysis and code generation.
+Swift is the modern foundation for Apple platform development, and its evolution brings sophisticated features like property wrappers, result builders, and complex concurrency models. `oak-swift` aims to provide a robust, premium, Rust-powered infrastructure for parsing Swift that is both accurate and incredibly fast. By utilizing Oak's incremental parsing architecture, we enable the creation of highly responsive IDEs, static analyzers, and refactoring tools that can handle massive Swift projects in real-time. Whether you are building custom linters, automated code generation tools, or sophisticated IDE extensions, `oak-swift` provides the high-fidelity AST and efficiency needed to keep pace with the continuous growth of the Swift language.
 
-## ✨ Features
+## ✨ Core Features
 
-- **Complete Swift Syntax**: Supports all Swift features including modern specifications
-- **Full AST Generation**: Generates comprehensive Abstract Syntax Trees
-- **Lexer Support**: Built-in tokenization with proper span information
-- **Error Recovery**: Graceful handling of syntax errors with detailed diagnostics
+- **⚡ Blazing Fast**: Leverages Rust's performance and memory safety to provide sub-millisecond parsing, essential for high-frequency developer tools and real-time analysis in large Swift projects.
+- **🔄 Incremental by Nature**: Built-in support for partial updates—re-parse only what has changed. Ideal for large-scale Swift apps where maintainability and tool responsiveness are critical.
+- **🌳 High-Fidelity AST**: Generates a comprehensive and precise syntax tree capturing the full depth of modern Swift:
+    - **Modern Features**: Full support for Property Wrappers, Result Builders, Variadic Generics, and Macros.
+    - **Concurrency**: Deep integration of `async`/`await`, `actors`, and `Sendable` protocol-related constructs.
+    - **Advanced Type System**: Robust handling of complex generic constraints, opaque types (`some`), and existential types (`any`).
+    - **Functional & OOP**: Detailed mapping of Closures, Enums with associated values, Protocols, and Extensions.
+    - **SwiftUI Support**: Precise parsing of declarative UI syntax patterns common in SwiftUI projects.
+- **🛡️ Industrial-Grade Fault Tolerance**: Engineered to recover from syntax errors gracefully, providing precise diagnostics—crucial for maintaining a smooth developer experience during active coding.
+- **🧩 Deep Ecosystem Integration**: Seamlessly works with `oak-lsp` for full LSP support and `oak-mcp` for intelligent code discovery and analysis.
 
-## 🚀 Quick Start
+## 🏗️ Architecture
 
-Basic example:
+`oak-swift` follows the modern Green/Red Tree architecture (inspired by Roslyn):
 
-```rust
-use oak_swift::{Parser, SwiftLanguage, SourceText};
+- **Green Tree**: Immutable, lossless, and syntax-only tree. It captures the full fidelity of the source code, including trivia (comments, whitespace).
+- **Red Tree**: A facade over the Green Tree that provides a convenient, type-safe API for tree traversal and analysis, including parent pointers and absolute offsets.
 
-fn main() -> Result<(), Box<dyn std::error::Error>> {
-    let parser = Parser::new();
-    let source = SourceText::new(r#"
-func hello() {
-    print("Hello, World!")
-}
+This design enables efficient incremental parsing and powerful refactoring capabilities.
 
-hello()
-    "#);
-    
-    let result = parser.parse(&source);
-    println!("Parsed Swift successfully.");
-    Ok(())
-}
-```
 
-## 📋 Parsing Examples
+## 🛠️ Contributing
 
-### Function Parsing
-```rust
-use oak_swift::{Parser, SwiftLanguage, SourceText};
-
-let parser = Parser::new();
-let source = SourceText::new(r#"
-func add(a: Int, b: Int) -> Int {
-    return a + b
-}
-
-let result = add(a: 5, b: 3)
-print("Result: \(result)")
-"#);
-
-let result = parser.parse(&source);
-println!("Function parsed successfully.");
-```
-
-### Struct Parsing
-```rust
-use oak_swift::{Parser, SwiftLanguage, SourceText};
-
-let parser = Parser::new();
-let source = SourceText::new(r#"
-struct Point {
-    var x: Double
-    var y: Double
-    
-    func distance(to other: Point) -> Double {
-        let dx = self.x - other.x
-        let dy = self.y - other.y
-        return sqrt(dx * dx + dy * dy)
-    }
-}
-"#);
-
-let result = parser.parse(&source);
-println!("Struct parsed successfully.");
-```
-
-## 🔧 Advanced Features
-
-### Token-Level Parsing
-```rust
-use oak_swift::{Parser, SwiftLanguage, SourceText};
-
-let parser = Parser::new();
-let source = SourceText::new("let x: Int = 42");
-let result = parser.parse(&source);
-println!("Token parsing completed.");
-```
-
-### Error Handling
-```rust
-use oak_swift::{Parser, SwiftLanguage, SourceText};
-
-let parser = Parser::new();
-let source = SourceText::new(r#"
-// Invalid Swift code example
-func brokenFunction(
-    print("Hello")
-// Missing closing brace
-"#);
-
-let result = parser.parse(&source);
-if let Some(errors) = result.result.err() {
-    println!("Parse errors found: {:?}", errors);
-} else {
-    println!("Parsed successfully.");
-}
-```
-
-## 🏗️ AST Structure
-
-The parser generates a comprehensive AST with the following main structures:
-
-- **SwiftProgram**: Root container for Swift programs
-- **Function**: Swift functions and methods
-- **Struct**: Swift struct definitions
-- **Statement**: Various statement types including control flow
-- **Expression**: Various expression types including operators
-- **Type**: Swift type system constructs
-
-## 📊 Performance
-
-- **Streaming**: Parse large Swift files without loading entirely into memory
-- **Incremental**: Re-parse only changed sections
-- **Memory Efficient**: Smart AST node allocation
-- **Fast Recovery**: Quick error recovery for better IDE integration
-
-## 🔗 Integration
-
-Oak Swift integrates seamlessly with:
-
-- **Static Analysis**: Code quality and security analysis
-- **Code Generation**: Generating code from Swift AST
-- **IDE Support**: Language server protocol compatibility
-- **Refactoring**: Automated code refactoring
-- **Documentation**: Generating documentation from Swift code
-
-## 📚 Examples
-
-Check out the [examples](examples/) directory for comprehensive examples:
-
-- Complete Swift program parsing
-- Function and struct analysis
-- Code transformation
-- Integration with development workflows
-
-## 🤝 Contributing
-
-Contributions are welcome! 
-
-Please feel free to submit pull requests at the [project repository](https://github.com/ygg-lang/oaks/tree/dev/examples/oak-swift) or open [issues](https://github.com/ygg-lang/oaks/issues).
+Contributions are welcome! Please feel free to submit a Pull Request. For major changes, please open an issue first to discuss what you would like to change.

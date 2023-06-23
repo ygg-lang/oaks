@@ -1,3 +1,4 @@
+#![doc = include_str!("readme.md")]
 use crate::{ast::TomlRoot, language::TomlLanguage};
 use oak_core::{Builder, BuilderCache, OakDiagnostics, TextEdit, source::Source};
 

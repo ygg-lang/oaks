@@ -1,3 +1,4 @@
+#![doc = include_str!("readme.md")]
 use oak_core::{Language, LanguageCategory};
 
 /// GraphQL 语言实现
@@ -8,7 +9,7 @@ impl Language for GraphQLLanguage {
     const NAME: &'static str = "graphql";
     const CATEGORY: LanguageCategory = LanguageCategory::Dsl;
 
-    type TokenType = crate::kind::GraphQLSyntaxKind;
-    type ElementType = crate::kind::GraphQLSyntaxKind;
+    type TokenType = crate::lexer::token_type::GraphQLTokenType;
+    type ElementType = crate::parser::element_type::GraphQLElementType;
     type TypedRoot = ();
 }

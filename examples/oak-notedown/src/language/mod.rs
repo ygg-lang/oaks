@@ -1,4 +1,5 @@
-use crate::kind::NoteSyntaxKind;
+#![doc = include_str!("readme.md")]
+use crate::{lexer::token_type::NoteTokenType, parser::element_type::NoteElementType};
 use oak_core::{Language, LanguageCategory};
 
 #[derive(Debug)]
@@ -10,8 +11,8 @@ impl Language for NotedownLanguage {
     const NAME: &'static str = "notedown";
     const CATEGORY: LanguageCategory = LanguageCategory::Markup;
 
-    type TokenType = NoteSyntaxKind;
-    type ElementType = NoteSyntaxKind;
+    type TokenType = crate::lexer::token_type::NoteTokenType;
+    type ElementType = crate::parser::element_type::NoteElementType;
     type TypedRoot = crate::ast::NoteDocument;
 }
 

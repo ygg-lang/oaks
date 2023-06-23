@@ -1,4 +1,7 @@
-use crate::{kind::ObjectiveCSyntaxKind, language::ObjectiveCLanguage};
+#![doc = include_str!("readme.md")]
+pub mod token_type;
+
+use crate::{language::ObjectiveCLanguage, lexer::token_type::ObjectiveCTokenType};
 use oak_core::{Lexer, LexerCache, LexerState, OakError, TextEdit, lexer::LexOutput, source::Source};
 
 type State<'a, S> = LexerState<'a, S, ObjectiveCLanguage>;
@@ -66,7 +69,7 @@ impl<'config> ObjectiveCLexer<'config> {
             let start_pos = state.get_position();
             if let Some(ch) = state.peek() {
                 state.advance(ch.len_utf8());
-                state.add_token(ObjectiveCSyntaxKind::Error, start_pos, state.get_position());
+                state.add_token(ObjectiveCTokenType::Error, start_pos, state.get_position());
             }
 
             state.advance_if_dead_lock(safe_point);
@@ -87,7 +90,7 @@ impl<'config> ObjectiveCLexer<'config> {
             }
         }
         if state.get_position() > start {
-            state.add_token(ObjectiveCSyntaxKind::Whitespace, start, state.get_position());
+            state.add_token(ObjectiveCTokenType::Whitespace, start, state.get_position());
             true
         }
         else {
@@ -107,7 +110,7 @@ impl<'config> ObjectiveCLexer<'config> {
                 }
                 state.advance(ch.len_utf8());
             }
-            state.add_token(ObjectiveCSyntaxKind::CommentToken, start, state.get_position());
+            state.add_token(ObjectiveCTokenType::CommentToken, start, state.get_position());
             return true;
         }
         // block comment: /* ... */ with nesting support
@@ -130,7 +133,7 @@ impl<'config> ObjectiveCLexer<'config> {
                 }
                 state.advance(ch.len_utf8());
             }
-            state.add_token(ObjectiveCSyntaxKind::CommentToken, start, state.get_position());
+            state.add_token(ObjectiveCTokenType::CommentToken, start, state.get_position());
             return true;
         }
         false
@@ -161,7 +164,7 @@ impl<'config> ObjectiveCLexer<'config> {
                     break;
                 }
             }
-            state.add_token(ObjectiveCSyntaxKind::String, start, state.get_position());
+            state.add_token(ObjectiveCTokenType::String, start, state.get_position());
             return true;
         }
 
@@ -187,7 +190,7 @@ impl<'config> ObjectiveCLexer<'config> {
                     break;
                 }
             }
-            state.add_token(ObjectiveCSyntaxKind::String, start, state.get_position());
+            state.add_token(ObjectiveCTokenType::String, start, state.get_position());
             return true;
         }
 
@@ -217,7 +220,7 @@ impl<'config> ObjectiveCLexer<'config> {
 
         if state.peek() == Some('\'') {
             state.advance(1);
-            state.add_token(ObjectiveCSyntaxKind::Character, start, state.get_position());
+            state.add_token(ObjectiveCTokenType::Character, start, state.get_position());
             return true;
         }
 
@@ -301,7 +304,7 @@ impl<'config> ObjectiveCLexer<'config> {
         }
 
         let end = state.get_position();
-        state.add_token(if is_float { ObjectiveCSyntaxKind::FloatLiteral } else { ObjectiveCSyntaxKind::IntegerLiteral }, start, end);
+        state.add_token(if is_float { ObjectiveCTokenType::FloatLiteral } else { ObjectiveCTokenType::IntegerLiteral }, start, end);
         true
     }
 
@@ -330,43 +333,43 @@ impl<'config> ObjectiveCLexer<'config> {
         let text = state.get_text_in(oak_core::Range { start, end });
         let kind = match text.as_ref() {
             // Objective-C keywords
-            "@interface" => ObjectiveCSyntaxKind::InterfaceKeyword,
-            "@implementation" => ObjectiveCSyntaxKind::ImplementationKeyword,
-            "@end" => ObjectiveCSyntaxKind::EndKeyword,
-            "@property" => ObjectiveCSyntaxKind::PropertyKeyword,
-            "@synthesize" => ObjectiveCSyntaxKind::SynthesizeKeyword,
-            "@dynamic" => ObjectiveCSyntaxKind::DynamicKeyword,
-            "@protocol" => ObjectiveCSyntaxKind::ProtocolKeyword,
-            "@import" => ObjectiveCSyntaxKind::ImportKeyword,
-            "#import" => ObjectiveCSyntaxKind::ImportKeyword,
-            "#include" => ObjectiveCSyntaxKind::IncludeKeyword,
+            "@interface" => ObjectiveCTokenType::InterfaceKeyword,
+            "@implementation" => ObjectiveCTokenType::ImplementationKeyword,
+            "@end" => ObjectiveCTokenType::EndKeyword,
+            "@property" => ObjectiveCTokenType::PropertyKeyword,
+            "@synthesize" => ObjectiveCTokenType::SynthesizeKeyword,
+            "@dynamic" => ObjectiveCTokenType::DynamicKeyword,
+            "@protocol" => ObjectiveCTokenType::ProtocolKeyword,
+            "@import" => ObjectiveCTokenType::ImportKeyword,
+            "#import" => ObjectiveCTokenType::ImportKeyword,
+            "#include" => ObjectiveCTokenType::IncludeKeyword,
 
             // C keywords
-            "if" => ObjectiveCSyntaxKind::IfKeyword,
-            "else" => ObjectiveCSyntaxKind::ElseKeyword,
-            "for" => ObjectiveCSyntaxKind::ForKeyword,
-            "while" => ObjectiveCSyntaxKind::WhileKeyword,
-            "do" => ObjectiveCSyntaxKind::DoKeyword,
-            "switch" => ObjectiveCSyntaxKind::SwitchKeyword,
-            "case" => ObjectiveCSyntaxKind::CaseKeyword,
-            "default" => ObjectiveCSyntaxKind::DefaultKeyword,
-            "break" => ObjectiveCSyntaxKind::BreakKeyword,
-            "continue" => ObjectiveCSyntaxKind::ContinueKeyword,
-            "return" => ObjectiveCSyntaxKind::ReturnKeyword,
-            "void" => ObjectiveCSyntaxKind::VoidKeyword,
-            "int" => ObjectiveCSyntaxKind::IntKeyword,
-            "float" => ObjectiveCSyntaxKind::FloatKeyword,
-            "double" => ObjectiveCSyntaxKind::DoubleKeyword,
-            "char" => ObjectiveCSyntaxKind::CharKeyword,
-            "BOOL" => ObjectiveCSyntaxKind::BoolKeyword,
-            "id" => ObjectiveCSyntaxKind::IdKeyword,
-            "self" => ObjectiveCSyntaxKind::SelfKeyword,
-            "super" => ObjectiveCSyntaxKind::SuperKeyword,
-            "nil" => ObjectiveCSyntaxKind::NilKeyword,
-            "YES" => ObjectiveCSyntaxKind::YesKeyword,
-            "NO" => ObjectiveCSyntaxKind::NoKeyword,
+            "if" => ObjectiveCTokenType::IfKeyword,
+            "else" => ObjectiveCTokenType::ElseKeyword,
+            "for" => ObjectiveCTokenType::ForKeyword,
+            "while" => ObjectiveCTokenType::WhileKeyword,
+            "do" => ObjectiveCTokenType::DoKeyword,
+            "switch" => ObjectiveCTokenType::SwitchKeyword,
+            "case" => ObjectiveCTokenType::CaseKeyword,
+            "default" => ObjectiveCTokenType::DefaultKeyword,
+            "break" => ObjectiveCTokenType::BreakKeyword,
+            "continue" => ObjectiveCTokenType::ContinueKeyword,
+            "return" => ObjectiveCTokenType::ReturnKeyword,
+            "void" => ObjectiveCTokenType::VoidKeyword,
+            "int" => ObjectiveCTokenType::IntKeyword,
+            "float" => ObjectiveCTokenType::FloatKeyword,
+            "double" => ObjectiveCTokenType::DoubleKeyword,
+            "char" => ObjectiveCTokenType::CharKeyword,
+            "BOOL" => ObjectiveCTokenType::BoolKeyword,
+            "id" => ObjectiveCTokenType::IdKeyword,
+            "self" => ObjectiveCTokenType::SelfKeyword,
+            "super" => ObjectiveCTokenType::SuperKeyword,
+            "nil" => ObjectiveCTokenType::NilKeyword,
+            "YES" => ObjectiveCTokenType::YesKeyword,
+            "NO" => ObjectiveCTokenType::NoKeyword,
 
-            _ => ObjectiveCSyntaxKind::Identifier,
+            _ => ObjectiveCTokenType::Identifier,
         };
 
         state.add_token(kind, start, state.get_position());
@@ -378,8 +381,8 @@ impl<'config> ObjectiveCLexer<'config> {
         let rest = state.rest();
 
         // prefer longest matches first
-        let patterns: &[(&str, ObjectiveCSyntaxKind)] =
-            &[("==", ObjectiveCSyntaxKind::EqualEqual), ("!=", ObjectiveCSyntaxKind::NotEqual), (">=", ObjectiveCSyntaxKind::GreaterEqual), ("<=", ObjectiveCSyntaxKind::LessEqual), ("&&", ObjectiveCSyntaxKind::And), ("||", ObjectiveCSyntaxKind::Or)];
+        let patterns: &[(&str, ObjectiveCTokenType)] =
+            &[("==", ObjectiveCTokenType::EqualEqual), ("!=", ObjectiveCTokenType::NotEqual), (">=", ObjectiveCTokenType::GreaterEqual), ("<=", ObjectiveCTokenType::LessEqual), ("&&", ObjectiveCTokenType::And), ("||", ObjectiveCTokenType::Or)];
 
         for (pat, kind) in patterns {
             if rest.starts_with(pat) {
@@ -391,18 +394,18 @@ impl<'config> ObjectiveCLexer<'config> {
 
         if let Some(ch) = state.peek() {
             let kind = match ch {
-                '+' => Some(ObjectiveCSyntaxKind::Plus),
-                '-' => Some(ObjectiveCSyntaxKind::Minus),
-                '*' => Some(ObjectiveCSyntaxKind::Star),
-                '/' => Some(ObjectiveCSyntaxKind::Slash),
-                '%' => Some(ObjectiveCSyntaxKind::Percent),
-                '=' => Some(ObjectiveCSyntaxKind::Equal),
-                '>' => Some(ObjectiveCSyntaxKind::Greater),
-                '<' => Some(ObjectiveCSyntaxKind::Less),
-                '!' => Some(ObjectiveCSyntaxKind::Not),
-                '?' => Some(ObjectiveCSyntaxKind::Question),
-                ':' => Some(ObjectiveCSyntaxKind::Colon),
-                '.' => Some(ObjectiveCSyntaxKind::Dot),
+                '+' => Some(ObjectiveCTokenType::Plus),
+                '-' => Some(ObjectiveCTokenType::Minus),
+                '*' => Some(ObjectiveCTokenType::Star),
+                '/' => Some(ObjectiveCTokenType::Slash),
+                '%' => Some(ObjectiveCTokenType::Percent),
+                '=' => Some(ObjectiveCTokenType::Equal),
+                '>' => Some(ObjectiveCTokenType::Greater),
+                '<' => Some(ObjectiveCTokenType::Less),
+                '!' => Some(ObjectiveCTokenType::Not),
+                '?' => Some(ObjectiveCTokenType::Question),
+                ':' => Some(ObjectiveCTokenType::Colon),
+                '.' => Some(ObjectiveCTokenType::Dot),
                 _ => None,
             };
 
@@ -420,15 +423,15 @@ impl<'config> ObjectiveCLexer<'config> {
         let start = state.get_position();
         if let Some(ch) = state.peek() {
             let kind = match ch {
-                '(' => ObjectiveCSyntaxKind::LeftParen,
-                ')' => ObjectiveCSyntaxKind::RightParen,
-                '[' => ObjectiveCSyntaxKind::LeftBracket,
-                ']' => ObjectiveCSyntaxKind::RightBracket,
-                '{' => ObjectiveCSyntaxKind::LeftBrace,
-                '}' => ObjectiveCSyntaxKind::RightBrace,
-                ',' => ObjectiveCSyntaxKind::Comma,
-                ';' => ObjectiveCSyntaxKind::Semicolon,
-                '@' => ObjectiveCSyntaxKind::At,
+                '(' => ObjectiveCTokenType::LeftParen,
+                ')' => ObjectiveCTokenType::RightParen,
+                '[' => ObjectiveCTokenType::LeftBracket,
+                ']' => ObjectiveCTokenType::RightBracket,
+                '{' => ObjectiveCTokenType::LeftBrace,
+                '}' => ObjectiveCTokenType::RightBrace,
+                ',' => ObjectiveCTokenType::Comma,
+                ';' => ObjectiveCTokenType::Semicolon,
+                '@' => ObjectiveCTokenType::At,
                 _ => return false,
             };
 

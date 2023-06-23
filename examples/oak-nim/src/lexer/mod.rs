@@ -1,4 +1,7 @@
-use crate::{kind::NimSyntaxKind, language::NimLanguage};
+#![doc = include_str!("readme.md")]
+pub mod token_type;
+
+use crate::{language::NimLanguage, lexer::token_type::NimTokenType};
 use oak_core::{Lexer, LexerCache, LexerState, lexer::LexOutput, source::Source};
 use std::borrow::Cow;
 
@@ -28,7 +31,7 @@ impl<'config> NimLexer<'config> {
         }
 
         if state.get_position() > start_pos {
-            state.add_token(NimSyntaxKind::Whitespace, start_pos, state.get_position());
+            state.add_token(NimTokenType::Whitespace, start_pos, state.get_position());
             true
         }
         else {
@@ -42,7 +45,7 @@ impl<'config> NimLexer<'config> {
 
         if let Some('\n') = state.peek() {
             state.advance(1);
-            state.add_token(NimSyntaxKind::Newline, start_pos, state.get_position());
+            state.add_token(NimTokenType::Newline, start_pos, state.get_position());
             true
         }
         else if let Some('\r') = state.peek() {
@@ -50,7 +53,7 @@ impl<'config> NimLexer<'config> {
             if let Some('\n') = state.peek() {
                 state.advance(1);
             }
-            state.add_token(NimSyntaxKind::Newline, start_pos, state.get_position());
+            state.add_token(NimTokenType::Newline, start_pos, state.get_position());
             true
         }
         else {
@@ -78,7 +81,7 @@ impl<'config> NimLexer<'config> {
                 state.advance(ch.len_utf8());
             }
 
-            let kind = NimSyntaxKind::CommentToken;
+            let kind = NimTokenType::CommentToken;
 
             state.add_token(kind, start_pos, state.get_position());
             true
@@ -111,7 +114,7 @@ impl<'config> NimLexer<'config> {
                 }
             }
 
-            state.add_token(NimSyntaxKind::StringLiteral, start_pos, state.get_position());
+            state.add_token(NimTokenType::StringLiteral, start_pos, state.get_position());
             true
         }
         else {
@@ -142,7 +145,7 @@ impl<'config> NimLexer<'config> {
                 state.advance(1);
             }
 
-            state.add_token(NimSyntaxKind::CharLiteral, start_pos, state.get_position());
+            state.add_token(NimTokenType::CharLiteral, start_pos, state.get_position());
             true
         }
         else {
@@ -159,7 +162,7 @@ impl<'config> NimLexer<'config> {
                 state.advance(ch.len_utf8());
 
                 while let Some(ch) = state.peek() {
-                    if ch.is_ascii_digit() || ch == '_' {
+                    if ch.is_alphanumeric() || ch == '_' {
                         state.advance(ch.len_utf8());
                     }
                     else {
@@ -182,7 +185,7 @@ impl<'config> NimLexer<'config> {
                     }
                 }
 
-                let kind = if is_float { NimSyntaxKind::FloatLiteral } else { NimSyntaxKind::IntLiteral };
+                let kind = if is_float { NimTokenType::FloatLiteral } else { NimTokenType::IntLiteral };
                 state.add_token(kind, start_pos, state.get_position());
                 true
             }
@@ -214,38 +217,38 @@ impl<'config> NimLexer<'config> {
 
                 let text = state.get_text_in((start_pos..state.get_position()).into());
                 let kind = match text {
-                    Cow::Borrowed("and") => NimSyntaxKind::AndKeyword,
-                    Cow::Borrowed("or") => NimSyntaxKind::OrKeyword,
-                    Cow::Borrowed("not") => NimSyntaxKind::NotKeyword,
-                    Cow::Borrowed("if") => NimSyntaxKind::IfKeyword,
-                    Cow::Borrowed("else") => NimSyntaxKind::ElseKeyword,
-                    Cow::Borrowed("elif") => NimSyntaxKind::ElifKeyword,
-                    Cow::Borrowed("while") => NimSyntaxKind::WhileKeyword,
-                    Cow::Borrowed("for") => NimSyntaxKind::ForKeyword,
-                    Cow::Borrowed("proc") => NimSyntaxKind::ProcKeyword,
-                    Cow::Borrowed("func") => NimSyntaxKind::FuncKeyword,
-                    Cow::Borrowed("var") => NimSyntaxKind::VarKeyword,
-                    Cow::Borrowed("let") => NimSyntaxKind::LetKeyword,
-                    Cow::Borrowed("const") => NimSyntaxKind::ConstKeyword,
-                    Cow::Borrowed("type") => NimSyntaxKind::TypeKeyword,
-                    Cow::Borrowed("import") => NimSyntaxKind::ImportKeyword,
-                    Cow::Borrowed("from") => NimSyntaxKind::FromKeyword,
-                    Cow::Borrowed("include") => NimSyntaxKind::IncludeKeyword,
-                    Cow::Borrowed("return") => NimSyntaxKind::ReturnKeyword,
-                    Cow::Borrowed("yield") => NimSyntaxKind::YieldKeyword,
-                    Cow::Borrowed("break") => NimSyntaxKind::BreakKeyword,
-                    Cow::Borrowed("continue") => NimSyntaxKind::ContinueKeyword,
-                    Cow::Borrowed("try") => NimSyntaxKind::TryKeyword,
-                    Cow::Borrowed("except") => NimSyntaxKind::ExceptKeyword,
-                    Cow::Borrowed("finally") => NimSyntaxKind::FinallyKeyword,
-                    Cow::Borrowed("raise") => NimSyntaxKind::RaiseKeyword,
-                    Cow::Borrowed("case") => NimSyntaxKind::CaseKeyword,
-                    Cow::Borrowed("of") => NimSyntaxKind::OfKeyword,
-                    Cow::Borrowed("when") => NimSyntaxKind::WhenKeyword,
-                    Cow::Borrowed("is") => NimSyntaxKind::IsKeyword,
-                    Cow::Borrowed("in") => NimSyntaxKind::InKeyword,
-                    Cow::Borrowed("nil") => NimSyntaxKind::NilKeyword,
-                    _ => NimSyntaxKind::Identifier,
+                    Cow::Borrowed("and") => NimTokenType::AndKeyword,
+                    Cow::Borrowed("or") => NimTokenType::OrKeyword,
+                    Cow::Borrowed("not") => NimTokenType::NotKeyword,
+                    Cow::Borrowed("if") => NimTokenType::IfKeyword,
+                    Cow::Borrowed("else") => NimTokenType::ElseKeyword,
+                    Cow::Borrowed("elif") => NimTokenType::ElifKeyword,
+                    Cow::Borrowed("while") => NimTokenType::WhileKeyword,
+                    Cow::Borrowed("for") => NimTokenType::ForKeyword,
+                    Cow::Borrowed("proc") => NimTokenType::ProcKeyword,
+                    Cow::Borrowed("func") => NimTokenType::FuncKeyword,
+                    Cow::Borrowed("var") => NimTokenType::VarKeyword,
+                    Cow::Borrowed("let") => NimTokenType::LetKeyword,
+                    Cow::Borrowed("const") => NimTokenType::ConstKeyword,
+                    Cow::Borrowed("type") => NimTokenType::TypeKeyword,
+                    Cow::Borrowed("import") => NimTokenType::ImportKeyword,
+                    Cow::Borrowed("from") => NimTokenType::FromKeyword,
+                    Cow::Borrowed("include") => NimTokenType::IncludeKeyword,
+                    Cow::Borrowed("return") => NimTokenType::ReturnKeyword,
+                    Cow::Borrowed("yield") => NimTokenType::YieldKeyword,
+                    Cow::Borrowed("break") => NimTokenType::BreakKeyword,
+                    Cow::Borrowed("continue") => NimTokenType::ContinueKeyword,
+                    Cow::Borrowed("try") => NimTokenType::TryKeyword,
+                    Cow::Borrowed("except") => NimTokenType::ExceptKeyword,
+                    Cow::Borrowed("finally") => NimTokenType::FinallyKeyword,
+                    Cow::Borrowed("raise") => NimTokenType::RaiseKeyword,
+                    Cow::Borrowed("case") => NimTokenType::CaseKeyword,
+                    Cow::Borrowed("of") => NimTokenType::OfKeyword,
+                    Cow::Borrowed("when") => NimTokenType::WhenKeyword,
+                    Cow::Borrowed("is") => NimTokenType::IsKeyword,
+                    Cow::Borrowed("in") => NimTokenType::InKeyword,
+                    Cow::Borrowed("nil") => NimTokenType::NilKeyword,
+                    _ => NimTokenType::Identifier,
                 };
 
                 state.add_token(kind, start_pos, state.get_position());
@@ -268,32 +271,32 @@ impl<'config> NimLexer<'config> {
             match ch {
                 '+' => {
                     state.advance(1);
-                    state.add_token(NimSyntaxKind::Plus, start_pos, state.get_position());
+                    state.add_token(NimTokenType::Plus, start_pos, state.get_position());
                     true
                 }
                 '-' => {
                     state.advance(1);
-                    state.add_token(NimSyntaxKind::Minus, start_pos, state.get_position());
+                    state.add_token(NimTokenType::Minus, start_pos, state.get_position());
                     true
                 }
                 '*' => {
                     state.advance(1);
-                    state.add_token(NimSyntaxKind::Star, start_pos, state.get_position());
+                    state.add_token(NimTokenType::Star, start_pos, state.get_position());
                     true
                 }
                 '/' => {
                     state.advance(1);
-                    state.add_token(NimSyntaxKind::Slash, start_pos, state.get_position());
+                    state.add_token(NimTokenType::Slash, start_pos, state.get_position());
                     true
                 }
                 '=' => {
                     state.advance(1);
                     if state.peek() == Some('=') {
                         state.advance(1);
-                        state.add_token(NimSyntaxKind::EqualEqual, start_pos, state.get_position());
+                        state.add_token(NimTokenType::EqualEqual, start_pos, state.get_position());
                     }
                     else {
-                        state.add_token(NimSyntaxKind::Equal, start_pos, state.get_position());
+                        state.add_token(NimTokenType::Equal, start_pos, state.get_position());
                     }
                     true
                 }
@@ -301,10 +304,10 @@ impl<'config> NimLexer<'config> {
                     state.advance(1);
                     if state.peek() == Some('=') {
                         state.advance(1);
-                        state.add_token(NimSyntaxKind::NotEqual, start_pos, state.get_position());
+                        state.add_token(NimTokenType::NotEqual, start_pos, state.get_position());
                     }
                     else {
-                        state.add_token(NimSyntaxKind::Error, start_pos, state.get_position());
+                        state.add_token(NimTokenType::Error, start_pos, state.get_position());
                     }
                     true
                 }
@@ -312,14 +315,14 @@ impl<'config> NimLexer<'config> {
                     state.advance(1);
                     if state.peek() == Some('=') {
                         state.advance(1);
-                        state.add_token(NimSyntaxKind::LessEqual, start_pos, state.get_position());
+                        state.add_token(NimTokenType::LessEqual, start_pos, state.get_position());
                     }
                     else if state.peek() == Some('<') {
                         state.advance(1);
-                        state.add_token(NimSyntaxKind::LeftShift, start_pos, state.get_position());
+                        state.add_token(NimTokenType::LeftShift, start_pos, state.get_position());
                     }
                     else {
-                        state.add_token(NimSyntaxKind::Less, start_pos, state.get_position());
+                        state.add_token(NimTokenType::Less, start_pos, state.get_position());
                     }
                     true
                 }
@@ -327,65 +330,65 @@ impl<'config> NimLexer<'config> {
                     state.advance(1);
                     if state.peek() == Some('=') {
                         state.advance(1);
-                        state.add_token(NimSyntaxKind::GreaterEqual, start_pos, state.get_position());
+                        state.add_token(NimTokenType::GreaterEqual, start_pos, state.get_position());
                     }
                     else if state.peek() == Some('>') {
                         state.advance(1);
-                        state.add_token(NimSyntaxKind::RightShift, start_pos, state.get_position());
+                        state.add_token(NimTokenType::RightShift, start_pos, state.get_position());
                     }
                     else {
-                        state.add_token(NimSyntaxKind::Greater, start_pos, state.get_position());
+                        state.add_token(NimTokenType::Greater, start_pos, state.get_position());
                     }
                     true
                 }
                 '(' => {
                     state.advance(1);
-                    state.add_token(NimSyntaxKind::LeftParen, start_pos, state.get_position());
+                    state.add_token(NimTokenType::LeftParen, start_pos, state.get_position());
                     true
                 }
                 ')' => {
                     state.advance(1);
-                    state.add_token(NimSyntaxKind::RightParen, start_pos, state.get_position());
+                    state.add_token(NimTokenType::RightParen, start_pos, state.get_position());
                     true
                 }
                 '[' => {
                     state.advance(1);
-                    state.add_token(NimSyntaxKind::LeftBracket, start_pos, state.get_position());
+                    state.add_token(NimTokenType::LeftBracket, start_pos, state.get_position());
                     true
                 }
                 ']' => {
                     state.advance(1);
-                    state.add_token(NimSyntaxKind::RightBracket, start_pos, state.get_position());
+                    state.add_token(NimTokenType::RightBracket, start_pos, state.get_position());
                     true
                 }
                 '{' => {
                     state.advance(1);
-                    state.add_token(NimSyntaxKind::LeftBrace, start_pos, state.get_position());
+                    state.add_token(NimTokenType::LeftBrace, start_pos, state.get_position());
                     true
                 }
                 '}' => {
                     state.advance(1);
-                    state.add_token(NimSyntaxKind::RightBrace, start_pos, state.get_position());
+                    state.add_token(NimTokenType::RightBrace, start_pos, state.get_position());
                     true
                 }
                 ',' => {
                     state.advance(1);
-                    state.add_token(NimSyntaxKind::Comma, start_pos, state.get_position());
+                    state.add_token(NimTokenType::Comma, start_pos, state.get_position());
                     true
                 }
                 ';' => {
                     state.advance(1);
-                    state.add_token(NimSyntaxKind::Semicolon, start_pos, state.get_position());
+                    state.add_token(NimTokenType::Semicolon, start_pos, state.get_position());
                     true
                 }
                 ':' => {
                     state.advance(1);
-                    state.add_token(NimSyntaxKind::Colon, start_pos, state.get_position());
+                    state.add_token(NimTokenType::Colon, start_pos, state.get_position());
                     true
                 }
                 '.' => {
                     state.advance(1);
-                    state.add_token(NimSyntaxKind::Dot, start_pos, state.get_position());
+                    state.add_token(NimTokenType::Dot, start_pos, state.get_position());
                     true
                 }
                 _ => false,
@@ -398,35 +401,7 @@ impl<'config> NimLexer<'config> {
 
     pub fn run<'s, S: Source + ?Sized>(&self, state: &mut State<'s, S>) -> Result<(), oak_core::OakError> {
         while state.not_at_end() {
-            if self.skip_whitespace(state) {
-                continue;
-            }
-
-            if self.lex_newline(state) {
-                continue;
-            }
-
-            if self.lex_comment(state) {
-                continue;
-            }
-
-            if self.lex_string(state) {
-                continue;
-            }
-
-            if self.lex_char(state) {
-                continue;
-            }
-
-            if self.lex_number(state) {
-                continue;
-            }
-
-            if self.lex_identifier(state) {
-                continue;
-            }
-
-            if self.lex_operator(state) {
+            if self.skip_whitespace(state) || self.lex_newline(state) || self.lex_comment(state) || self.lex_string(state) || self.lex_char(state) || self.lex_number(state) || self.lex_identifier(state) || self.lex_operator(state) {
                 continue;
             }
 
@@ -434,7 +409,7 @@ impl<'config> NimLexer<'config> {
             let start_pos = state.get_position();
             if let Some(ch) = state.peek() {
                 state.advance(ch.len_utf8());
-                state.add_token(NimSyntaxKind::Error, start_pos, state.get_position());
+                state.add_token(NimTokenType::Error, start_pos, state.get_position());
             }
         }
         Ok(())

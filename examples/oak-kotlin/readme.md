@@ -1,164 +1,35 @@
-# Oak Kotlin Parser
+# 🚀 Oak Kotlin Parser
 
 [![Crates.io](https://img.shields.io/crates/v/oak-kotlin.svg)](https://crates.io/crates/oak-kotlin)
 [![Documentation](https://docs.rs/oak-kotlin/badge.svg)](https://docs.rs/oak-kotlin)
 
-High-performance incremental Kotlin parser for the oak ecosystem with flexible configuration, optimized for static analysis and code generation.
+**Modern, Concise, and Incremental Parsing for Kotlin** — A high-performance Kotlin parser built on the Oak framework. Optimized for Kotlin 1.9+ features, multiplatform projects, and highly responsive IDE integration.
 
-## 🎯 Overview
+## 🎯 Project Vision
 
-Oak Kotlin is a robust parser for Kotlin, designed to handle complete Kotlin syntax including modern features. Built on the solid foundation of oak-core, it provides both high-level convenience and detailed AST generation for static analysis and code generation.
+Kotlin has redefined modern JVM and multiplatform development with its concise syntax and powerful safety features. `oak-kotlin` aims to provide a premium, Rust-powered parsing infrastructure that matches Kotlin's expressiveness with incredible speed. By leveraging Oak's incremental parsing architecture, we enable the creation of ultra-responsive developer tools—from IDEs and static analyzers to custom refactoring engines—that can handle complex Kotlin codebases in real-time. Whether you are building linting tools for Android, KMP-aware analyzers, or sophisticated code generators, `oak-kotlin` provides the high-fidelity AST and sub-millisecond efficiency required for the next generation of Kotlin tooling.
 
-## ✨ Features
+## ✨ Core Features
 
-- **Complete Kotlin Syntax**: Supports all Kotlin features including modern specifications
-- **Full AST Generation**: Generates comprehensive Abstract Syntax Trees
-- **Lexer Support**: Built-in tokenization with proper span information
-- **Error Recovery**: Graceful handling of syntax errors with detailed diagnostics
+- **⚡ Blazing Fast**: Fully utilizes Rust's performance and memory safety to achieve sub-millisecond parsing response times, essential for high-frequency analysis in modern IDEs.
+- **🔄 Incremental by Design**: Built-in support for partial updates—re-parse only modified code blocks. This is a game-changer for large Kotlin projects and complex multiplatform setups.
+- **🌳 High-Fidelity AST**: Generates a comprehensive and precise Abstract Syntax Tree capturing the full depth of modern Kotlin:
+    - **Modern Features**: Full support for Data Classes, Sealed Classes, Context Receivers, and Context Parameters.
+    - **Functional Programming**: Precise parsing of Lambdas, Higher-order functions, and Inline functions.
+    - **Concurrency**: Deep integration of `suspend` functions and Coroutine-related constructs.
+    - **Multiplatform (KMP)**: Robust handling of `expect`/`actual` declarations and platform-specific syntax.
+    - **Type System**: Detailed mapping of Generics, Reified type parameters, and Type aliases.
+- **🛡️ Industrial-Grade Fault Tolerance**: Engineered to recover from syntax errors gracefully, providing precise diagnostics—crucial for maintaining a fluid developer experience during active coding.
+- **🧩 Deep Ecosystem Integration**: Seamlessly works with `oak-lsp` for full LSP support and `oak-mcp` for intelligent code discovery and analysis.
 
-## 🚀 Quick Start
+## 🏗️ Architecture
 
-Basic example:
+The parser follows the **Green/Red Tree** architecture (inspired by Roslyn), which allows for:
+1. **Efficient Immutability**: Share nodes across different versions of the tree without copying.
+2. **Lossless Syntax Trees**: Retains all trivia (whitespace and comments), enabling faithful code formatting and refactoring of Kotlin files.
+3. **Type Safety**: Strongly-typed "Red" nodes provide a convenient and safe API for tree traversal and analysis.
 
-```rust
-use oak_kotlin::{Parser, KotlinLanguage, SourceText};
-
-fn main() -> Result<(), Box<dyn std::error::Error>> {
-    let parser = Parser::new();
-    let source = SourceText::new(r#"
-fun main() {
-    println("Hello, Kotlin!")
-}
-    "#);
-    
-    let result = parser.parse(&source);
-    println!("Parsed Kotlin successfully.");
-    Ok(())
-}
-```
-
-## 📋 Parsing Examples
-
-### Function Parsing
-```rust
-use oak_kotlin::{Parser, KotlinLanguage, SourceText};
-
-let parser = Parser::new();
-let source = SourceText::new(r#"
-fun calculateArea(radius: Double): Double {
-    return Math.PI * radius * radius
-}
-
-fun main() {
-    val area = calculateArea(5.0)
-    println("Area: $area")
-}
-"#);
-
-let result = parser.parse(&source);
-println!("Function parsed successfully.");
-```
-
-### Class Parsing
-```rust
-use oak_kotlin::{Parser, KotlinLanguage, SourceText};
-
-let parser = Parser::new();
-let source = SourceText::new(r#"
-class Person(val name: String, var age: Int) {
-    fun greet() {
-        println("Hello, I'm $name and I'm $age years old")
-    }
-    
-    fun haveBirthday() {
-        age++
-        println("Happy birthday! Now I'm $age")
-    }
-}
-
-fun main() {
-    val person = Person("Alice", 25)
-    person.greet()
-    person.haveBirthday()
-}
-"#);
-
-let result = parser.parse(&source);
-println!("Class parsed successfully.");
-```
-
-## 🔧 Advanced Features
-
-### Token-Level Parsing
-```rust
-use oak_kotlin::{Parser, KotlinLanguage, SourceText};
-
-let parser = Parser::new();
-let source = SourceText::new("val x = 42");
-let result = parser.parse(&source);
-println!("Token parsing completed.");
-```
-
-### Error Handling
-```rust
-use oak_kotlin::{Parser, KotlinLanguage, SourceText};
-
-let parser = Parser::new();
-let source = SourceText::new(r#"
-// Invalid Kotlin code example
-fun brokenFunction {
-    println("Hello")
-    // Missing function parameters and return type
-}
-"#);
-
-let result = parser.parse(&source);
-if let Some(errors) = result.result.err() {
-    println!("Parse errors found: {:?}", errors);
-} else {
-    println!("Parsed successfully.");
-}
-```
-
-## 🏗️ AST Structure
-
-The parser generates a comprehensive AST with the following main structures:
-
-- **KotlinProgram**: Root container for Kotlin programs
-- **Class**: Kotlin class definitions
-- **Function**: Kotlin functions and methods
-- **Statement**: Various statement types including control flow
-- **Expression**: Various expression types including operators
-- **Type**: Kotlin type system constructs
-
-## 📊 Performance
-
-- **Streaming**: Parse large Kotlin files without loading entirely into memory
-- **Incremental**: Re-parse only changed sections
-- **Memory Efficient**: Smart AST node allocation
-- **Fast Recovery**: Quick error recovery for better IDE integration
-
-## 🔗 Integration
-
-Oak Kotlin integrates seamlessly with:
-
-- **Static Analysis**: Code quality and security analysis
-- **Code Generation**: Generating code from Kotlin AST
-- **IDE Support**: Language server protocol compatibility
-- **Refactoring**: Automated code refactoring
-- **Documentation**: Generating documentation from Kotlin code
-
-## 📚 Examples
-
-Check out the [examples](examples/) directory for comprehensive examples:
-
-- Complete Kotlin program parsing
-- Function and class analysis
-- Code transformation
-- Integration with development workflows
 
 ## 🤝 Contributing
 
-Contributions are welcome! 
-
-Please feel free to submit pull requests at the [project repository](https://github.com/ygg-lang/oaks/tree/dev/examples/oak-kotlin) or open [issues](https://github.com/ygg-lang/oaks/issues).
+We welcome contributions of all kinds! If you find a bug, have a feature request, or want to contribute code, please check our [issues](https://github.com/ygg-lang/oaks/issues) or submit a pull request.

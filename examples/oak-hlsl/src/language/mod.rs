@@ -1,7 +1,10 @@
+#![doc = include_str!("readme.md")]
 use oak_core::{Language, LanguageCategory};
+#[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub struct HlslLanguage {
     pub allow_comment: bool,
 }
@@ -16,8 +19,8 @@ impl Language for HlslLanguage {
     const NAME: &'static str = "hlsl";
     const CATEGORY: LanguageCategory = LanguageCategory::Programming;
 
-    type TokenType = crate::kind::HlslSyntaxKind;
-    type ElementType = crate::kind::HlslSyntaxKind;
+    type TokenType = crate::lexer::token_type::HlslTokenType;
+    type ElementType = crate::parser::element_type::HlslElementType;
     type TypedRoot = crate::ast::HlslRoot;
 }
 

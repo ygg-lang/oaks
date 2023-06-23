@@ -5,7 +5,7 @@ use oak_rbq::{RbqLanguage, RbqParser, ast::RbqRoot};
 fn test_span_with_whitespace() {
     let config = RbqLanguage::default();
     let parser = RbqParser::new(&config);
-    let source_str = "@table(\"users\") struct Users { @key user_id: uuid; user_name: utf8; }";
+    let source_str = "@table(\"users\") struct Users { @key user_id: uuid; user_name: utf8 }";
     let source = SourceText::new(source_str);
 
     let mut session = ParseSession::<RbqLanguage>::default();
@@ -13,7 +13,7 @@ fn test_span_with_whitespace() {
     assert!(output.result.is_ok());
 
     let green = output.result.unwrap();
-    assert_eq!(green.length(), source_str.len() as u32, "GreenNode length should match source length");
+    assert_eq!(green.text_len(), source_str.len() as u32, "GreenNode length should match source length");
 
     let red = oak_core::tree::RedNode::new(green, 0);
     let root = RbqRoot::lower(red, source_str);
@@ -27,10 +27,10 @@ fn test_span_with_whitespace() {
 
         // Verify annotation on struct
         assert_eq!(s.annotations.len(), 1);
-        assert_eq!(s.annotations[0].name, "table");
+        assert_eq!(s.annotations[0].name, "table")
     }
     else {
-        panic!("Expected struct");
+        panic!("Expected struct")
     }
 }
 
@@ -40,14 +40,15 @@ fn test_top_level_annotation_propagation() {
 @table("users")
 struct Users {
     @key user_id: uuid;
-    user_name: utf8;
+    user_name: utf8
 }
 "#;
-    let parser = RbqParser::new(&RbqLanguage);
+    let parser = RbqParser::new(&RbqLanguage {});
     let mut session = ParseSession::default();
     let source_text = SourceText::new(source.to_string());
-    let output = parser.parse(&source_text, &[], &mut session).unwrap();
-    let root = RbqRoot::lower(output.result.unwrap(), source);
+    let output = parser.parse(&source_text, &[], &mut session);
+    let red = oak_core::tree::RedNode::new(output.result.unwrap(), 0);
+    let root = RbqRoot::lower(red, source);
 
     assert_eq!(root.items.len(), 1);
     if let oak_rbq::ast::RbqItem::Struct(s) = &root.items[0] {
@@ -58,9 +59,9 @@ struct Users {
 
         assert_eq!(s.fields[0].name, "user_id");
         assert_eq!(s.fields[0].annotations.len(), 1);
-        assert_eq!(s.fields[0].annotations[0].name, "key");
+        assert_eq!(s.fields[0].annotations[0].name, "key")
     }
     else {
-        panic!("Expected struct item");
+        panic!("Expected struct item")
     }
 }

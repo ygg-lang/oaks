@@ -1,7 +1,7 @@
 use proc_macro::TokenStream;
 use quote::{ToTokens, quote};
 use syn::{
-    Expr, Ident, LitStr, Result, Token, bracketed,
+    Expr, Ident, LitStr, Result, Token, bracketed, parenthesized,
     parse::{Parse, ParseStream},
     parse_macro_input,
 };
@@ -87,7 +87,7 @@ impl DocExpr {
                 "indent" => {
                     input.parse::<Ident>()?;
                     let content;
-                    syn::parenthesized!(content in input);
+                    parenthesized!(content in input);
                     Ok(DocExpr::Indent(Box::new(content.parse()?)))
                 }
                 "group" => {
@@ -127,35 +127,29 @@ impl ToTokens for DocExpr {
             DocExpr::HardLine => tokens.extend(quote! { ::oak_pretty_print::Doc::HardLine }),
             DocExpr::Indent(content) => tokens.extend(quote! { ::oak_pretty_print::Doc::Indent(Box::new(#content)) }),
             DocExpr::Group(content) => tokens.extend(quote! { ::oak_pretty_print::Doc::Group(Box::new(#content)) }),
-            DocExpr::Concat(items) => {
-                tokens.extend(quote! { ::oak_pretty_print::Doc::Concat(vec![#(#items),*]) });
-            }
-            DocExpr::Join { items, sep } => {
-                tokens.extend(quote! {
-                    ::oak_pretty_print::Doc::Concat({
-                        #[allow(unused_imports)]
-                        use ::oak_pretty_print::document::JoinDoc;
-                        #items.into_iter()
-                            .map(|i| {
-                                #[allow(unused_imports)]
-                                use ::oak_pretty_print::ToDocument;
-                                i.to_document()
-                            })
-                            .collect::<Vec<_>>()
-                            .join_doc(#sep.into())
-                    })
-                });
-            }
+            DocExpr::Concat(items) => tokens.extend(quote! { ::oak_pretty_print::Doc::Concat(vec![#(#items),*]) }),
+            DocExpr::Join { items, sep } => tokens.extend(quote! {
+                {
+                    #[allow(unused_imports)]
+                    use ::oak_pretty_print::document::JoinDoc;
+                    #items.into_iter()
+                        .map(|i| {
+                            #[allow(unused_imports)]
+                            use ::oak_pretty_print::ToDocument;
+                            i.to_document()
+                        })
+                        .collect::<Vec<_>>()
+                        .join_doc(#sep.into())
+                }
+            }),
             DocExpr::Text(lit) => tokens.extend(quote! { ::oak_pretty_print::Doc::Text(#lit.into()) }),
-            DocExpr::Expr(expr) => {
-                tokens.extend(quote! {
-                    {
-                        #[allow(unused_imports)]
-                        use ::oak_pretty_print::ToDocument;
-                        #expr.to_document()
-                    }
-                });
-            }
+            DocExpr::Expr(expr) => tokens.extend(quote! {
+                {
+                    #[allow(unused_imports)]
+                    use ::oak_pretty_print::ToDocument;
+                    #expr.to_document()
+                }
+            }),
         }
     }
 }

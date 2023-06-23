@@ -1,4 +1,8 @@
-use crate::{kind::PrologSyntaxKind, language::PrologLanguage};
+#![doc = include_str!("readme.md")]
+pub mod token_type;
+pub use token_type::PrologTokenType;
+
+use crate::language::PrologLanguage;
 use oak_core::{Lexer, LexerCache, LexerState, OakError, lexer::LexOutput, source::Source};
 
 type State<'s, S> = LexerState<'s, S, PrologLanguage>;
@@ -53,10 +57,10 @@ impl<'config> PrologLexer<'config> {
             if let Some(ch) = state.peek() {
                 let start_pos = state.get_position();
                 state.advance(ch.len_utf8());
-                state.add_token(PrologSyntaxKind::Error, start_pos, state.get_position());
+                state.add_token(PrologTokenType::Error, start_pos, state.get_position())
             }
 
-            state.advance_if_dead_lock(safe_point);
+            state.advance_if_dead_lock(safe_point)
         }
 
         Ok(())
@@ -66,16 +70,11 @@ impl<'config> PrologLexer<'config> {
         let start_pos = state.get_position();
 
         while let Some(ch) = state.peek() {
-            if ch == ' ' || ch == '\t' {
-                state.advance(ch.len_utf8());
-            }
-            else {
-                break;
-            }
+            if ch == ' ' || ch == '\t' { state.advance(ch.len_utf8()) } else { break }
         }
 
         if state.get_position() > start_pos {
-            state.add_token(PrologSyntaxKind::Whitespace, start_pos, state.get_position());
+            state.add_token(PrologTokenType::Whitespace, start_pos, state.get_position());
             true
         }
         else {
@@ -88,15 +87,15 @@ impl<'config> PrologLexer<'config> {
 
         if let Some('\n') = state.peek() {
             state.advance(1);
-            state.add_token(PrologSyntaxKind::Newline, start_pos, state.get_position());
+            state.add_token(PrologTokenType::Newline, start_pos, state.get_position());
             true
         }
         else if let Some('\r') = state.peek() {
             state.advance(1);
             if let Some('\n') = state.peek() {
-                state.advance(1);
+                state.advance(1)
             }
-            state.add_token(PrologSyntaxKind::Newline, start_pos, state.get_position());
+            state.add_token(PrologTokenType::Newline, start_pos, state.get_position());
             true
         }
         else {
@@ -114,9 +113,9 @@ impl<'config> PrologLexer<'config> {
                 if ch == '\n' || ch == '\r' {
                     break;
                 }
-                state.advance(ch.len_utf8());
+                state.advance(ch.len_utf8())
             }
-            state.add_token(PrologSyntaxKind::Comment, start_pos, state.get_position());
+            state.add_token(PrologTokenType::Comment, start_pos, state.get_position());
             true
         }
         else if let Some('/') = state.peek() {
@@ -133,10 +132,10 @@ impl<'config> PrologLexer<'config> {
                         }
                     }
                     else {
-                        state.advance(ch.len_utf8());
+                        state.advance(ch.len_utf8())
                     }
                 }
-                state.add_token(PrologSyntaxKind::Comment, start_pos, state.get_position());
+                state.add_token(PrologTokenType::Comment, start_pos, state.get_position());
                 true
             }
             else {
@@ -161,11 +160,11 @@ impl<'config> PrologLexer<'config> {
                 while let Some(ch) = state.peek() {
                     if escaped {
                         escaped = false;
-                        state.advance(ch.len_utf8());
+                        state.advance(ch.len_utf8())
                     }
                     else if ch == '\\' {
                         escaped = true;
-                        state.advance(1);
+                        state.advance(1)
                     }
                     else if ch == quote_char {
                         state.advance(1); // 跳过结束引号
@@ -176,11 +175,11 @@ impl<'config> PrologLexer<'config> {
                         break;
                     }
                     else {
-                        state.advance(ch.len_utf8());
+                        state.advance(ch.len_utf8())
                     }
                 }
 
-                state.add_token(PrologSyntaxKind::String, start_pos, state.get_position());
+                state.add_token(PrologTokenType::String, start_pos, state.get_position());
                 true
             }
             else {
@@ -199,12 +198,7 @@ impl<'config> PrologLexer<'config> {
 
                 // 读取整数部分
                 while let Some(ch) = state.peek() {
-                    if ch.is_ascii_digit() {
-                        state.advance(1);
-                    }
-                    else {
-                        break;
-                    }
+                    if ch.is_ascii_digit() { state.advance(1) } else { break }
                 }
 
                 // 检查小数点
@@ -212,12 +206,7 @@ impl<'config> PrologLexer<'config> {
                     state.advance(1);
                     // 读取小数部分
                     while let Some(ch) = state.peek() {
-                        if ch.is_ascii_digit() {
-                            state.advance(1);
-                        }
-                        else {
-                            break;
-                        }
+                        if ch.is_ascii_digit() { state.advance(1) } else { break }
                     }
                 }
 
@@ -227,21 +216,16 @@ impl<'config> PrologLexer<'config> {
                         state.advance(1);
                         if let Some(ch) = state.peek() {
                             if ch == '+' || ch == '-' {
-                                state.advance(1);
+                                state.advance(1)
                             }
                         }
                         while let Some(ch) = state.peek() {
-                            if ch.is_ascii_digit() {
-                                state.advance(1);
-                            }
-                            else {
-                                break;
-                            }
+                            if ch.is_ascii_digit() { state.advance(1) } else { break }
                         }
                     }
                 }
 
-                state.add_token(PrologSyntaxKind::Integer, start_pos, state.get_position());
+                state.add_token(PrologTokenType::Integer, start_pos, state.get_position());
                 true
             }
             else {
@@ -263,7 +247,7 @@ impl<'config> PrologLexer<'config> {
                 while let Some(ch) = state.peek() {
                     if ch.is_alphanumeric() || ch == '_' {
                         text.push(ch);
-                        state.advance(ch.len_utf8());
+                        state.advance(ch.len_utf8())
                     }
                     else {
                         break;
@@ -272,9 +256,9 @@ impl<'config> PrologLexer<'config> {
 
                 // 检查是否是关键字
                 let kind = match text.as_str() {
-                    "is" => PrologSyntaxKind::Is,
-                    "mod" => PrologSyntaxKind::Modulo,
-                    _ => PrologSyntaxKind::Atom,
+                    "is" => PrologTokenType::Is,
+                    "mod" => PrologTokenType::Modulo,
+                    _ => PrologTokenType::Atom,
                 };
 
                 state.add_token(kind, start_pos, state.get_position());
@@ -296,15 +280,10 @@ impl<'config> PrologLexer<'config> {
 
                 // 读取变量名
                 while let Some(ch) = state.peek() {
-                    if ch.is_alphanumeric() || ch == '_' {
-                        state.advance(ch.len_utf8());
-                    }
-                    else {
-                        break;
-                    }
+                    if ch.is_alphanumeric() || ch == '_' { state.advance(ch.len_utf8()) } else { break }
                 }
 
-                state.add_token(PrologSyntaxKind::Variable, start_pos, state.get_position());
+                state.add_token(PrologTokenType::Variable, start_pos, state.get_position());
                 true
             }
             else {
@@ -323,88 +302,88 @@ impl<'config> PrologLexer<'config> {
             let kind = match ch {
                 '+' => {
                     state.advance(1);
-                    PrologSyntaxKind::Plus
+                    PrologTokenType::Plus
                 }
                 '-' => {
                     state.advance(1);
-                    PrologSyntaxKind::Minus
+                    PrologTokenType::Minus
                 }
                 '*' => {
                     state.advance(1);
                     if let Some('*') = state.peek() {
                         state.advance(1);
-                        PrologSyntaxKind::Power
+                        PrologTokenType::Power
                     }
                     else {
-                        PrologSyntaxKind::Multiply
+                        PrologTokenType::Multiply
                     }
                 }
                 '/' => {
                     state.advance(1);
                     if let Some('/') = state.peek() {
                         state.advance(1);
-                        PrologSyntaxKind::IntDivide
+                        PrologTokenType::IntDivide
                     }
                     else {
-                        PrologSyntaxKind::Divide
+                        PrologTokenType::Divide
                     }
                 }
                 '=' => {
                     state.advance(1);
                     if let Some('=') = state.peek() {
                         state.advance(1);
-                        PrologSyntaxKind::Equal
+                        PrologTokenType::Equal
                     }
                     else if let Some(':') = state.peek() {
                         state.advance(1);
                         if let Some('=') = state.peek() {
                             state.advance(1);
-                            PrologSyntaxKind::ArithEqual
+                            PrologTokenType::ArithEqual
                         }
                         else {
                             // 回退
                             state.set_position(start_pos + 1);
-                            PrologSyntaxKind::Unify
+                            PrologTokenType::Unify
                         }
                     }
                     else if let Some('\\') = state.peek() {
                         state.advance(1);
                         if let Some('=') = state.peek() {
                             state.advance(1);
-                            PrologSyntaxKind::NotUnify
+                            PrologTokenType::NotUnify
                         }
                         else {
                             // 回退
                             state.set_position(start_pos + 1);
-                            PrologSyntaxKind::Unify
+                            PrologTokenType::Unify
                         }
                     }
                     else if let Some('<') = state.peek() {
                         state.advance(1);
-                        PrologSyntaxKind::ArithNotEqual
+                        PrologTokenType::ArithNotEqual
                     }
                     else {
-                        PrologSyntaxKind::Unify
+                        PrologTokenType::Unify
                     }
                 }
                 '<' => {
                     state.advance(1);
                     if let Some('=') = state.peek() {
                         state.advance(1);
-                        PrologSyntaxKind::LessEqual
+                        PrologTokenType::LessEqual
                     }
                     else {
-                        PrologSyntaxKind::Less
+                        PrologTokenType::Less
                     }
                 }
                 '>' => {
                     state.advance(1);
                     if let Some('=') = state.peek() {
                         state.advance(1);
-                        PrologSyntaxKind::GreaterEqual
+                        PrologTokenType::GreaterEqual
                     }
                     else {
-                        PrologSyntaxKind::Greater
+                        PrologTokenType::Greater
                     }
                 }
                 '\\' => {
@@ -413,77 +392,77 @@ impl<'config> PrologLexer<'config> {
                         state.advance(1);
                         if let Some('=') = state.peek() {
                             state.advance(1);
-                            PrologSyntaxKind::NotEqual
+                            PrologTokenType::NotEqual
                         }
                         else {
-                            PrologSyntaxKind::NotUnify
+                            PrologTokenType::NotUnify
                         }
                     }
                     else {
-                        PrologSyntaxKind::BitwiseNot
+                        PrologTokenType::BitwiseNot
                     }
                 }
                 '!' => {
                     state.advance(1);
-                    PrologSyntaxKind::Cut
+                    PrologTokenType::Cut
                 }
                 '?' => {
                     state.advance(1);
-                    PrologSyntaxKind::Question
+                    PrologTokenType::Question
                 }
                 ':' => {
                     state.advance(1);
                     if let Some('-') = state.peek() {
                         state.advance(1);
-                        PrologSyntaxKind::ColonMinus
+                        PrologTokenType::ColonMinus
                     }
                     else {
-                        PrologSyntaxKind::Colon
+                        PrologTokenType::Colon
                     }
                 }
                 ';' => {
                     state.advance(1);
-                    PrologSyntaxKind::Semicolon
+                    PrologTokenType::Semicolon
                 }
                 ',' => {
                     state.advance(1);
-                    PrologSyntaxKind::Comma
+                    PrologTokenType::Comma
                 }
                 '.' => {
                     state.advance(1);
-                    PrologSyntaxKind::Dot
+                    PrologTokenType::Dot
                 }
                 '(' => {
                     state.advance(1);
-                    PrologSyntaxKind::LeftParen
+                    PrologTokenType::LeftParen
                 }
                 ')' => {
                     state.advance(1);
-                    PrologSyntaxKind::RightParen
+                    PrologTokenType::RightParen
                 }
                 '[' => {
                     state.advance(1);
-                    PrologSyntaxKind::LeftBracket
+                    PrologTokenType::LeftBracket
                 }
                 ']' => {
                     state.advance(1);
-                    PrologSyntaxKind::RightBracket
+                    PrologTokenType::RightBracket
                 }
                 '{' => {
                     state.advance(1);
-                    PrologSyntaxKind::LeftBrace
+                    PrologTokenType::LeftBrace
                 }
                 '}' => {
                     state.advance(1);
-                    PrologSyntaxKind::RightBrace
+                    PrologTokenType::RightBrace
                 }
                 '|' => {
                     state.advance(1);
-                    PrologSyntaxKind::Pipe
+                    PrologTokenType::Pipe
                 }
                 '^' => {
                     state.advance(1);
-                    PrologSyntaxKind::BitwiseXor
+                    PrologTokenType::BitwiseXor
                 }
                 _ => return false,
             };
@@ -502,7 +481,7 @@ impl<'config> Lexer<PrologLanguage> for PrologLexer<'config> {
         let mut state = State::new_with_cache(source, 0, cache);
         let result = self.run(&mut state);
         if result.is_ok() {
-            state.add_eof();
+            state.add_eof()
         }
         state.finish_with_cache(result, cache)
     }

@@ -19,5 +19,5 @@ fn test_purescript_lexer_basic() {
 
     // 这里只是验证词法分析器可以创建，不进行复杂的测试
     println!("PureScript lexer created successfully");
-    println!("Test code: {}", test_code);
+    println!("Test code: {}", test_code)
 }

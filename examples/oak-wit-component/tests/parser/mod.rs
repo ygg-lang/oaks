@@ -11,5 +11,5 @@ fn test_parser_basic() {
     let mut session = oak_core::parser::session::ParseSession::<WitLanguage>::default();
     let diagnostics = parser.parse(&source, &[], &mut session);
 
-    assert!(diagnostics.result.is_ok());
+    assert!(diagnostics.result.is_ok())
 }

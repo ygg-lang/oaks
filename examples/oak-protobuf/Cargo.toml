@@ -1,35 +1,41 @@
 [package]
 name = "oak-protobuf"
-description = "High-performance incremental Protocol Buffers parser for the oak ecosystem with flexible configuration, optimized for structured data serialization."
-categories = ["parsing"]
-keywords = ["parser", "protobuf", "protocol-buffers", "serialization"]
-documentation = "https://docs.rs/oak-protobuf"
-readme = "readme.md"
 version.workspace = true
 authors.workspace = true
-homepage.workspace = true
-repository.workspace = true
-license.workspace = true
+description = "High-performance incremental Protocol Buffers parser for the oak ecosystem with flexible configuration, optimized for structured data serialization."
 edition.workspace = true
+license.workspace = true
+readme = "readme.md"
+homepage.workspace = true
+repository = "https://github.com/ygg-lang/oaks/tree/master/examples/oak-protobuf"
+documentation = "https://docs.rs/oak-protobuf"
+categories = ["parsing"]
+keywords = ["parser", "protobuf", "protocol-buffers", "serialization"]
 
 [dependencies]
 oak-core = { workspace = true }
-oak-highlight = { workspace = true }
-oak-pretty-print = { workspace = true }
-oak-lsp = { workspace = true }
-oak-hover = { workspace = true }
-oak-vfs = { workspace = true }
-oak-mcp = { workspace = true }
-serde = { workspace = true, features = ["derive"] }
+oak-highlight = { workspace = true, optional = true }
+oak-pretty-print = { workspace = true, optional = true }
+oak-lsp = { workspace = true, optional = true }
+oak-hover = { workspace = true, optional = true }
+oak-vfs = { workspace = true, optional = true }
+oak-mcp = { workspace = true, optional = true }
+serde = { workspace = true, features = ["derive"] , optional = true }
 tracing = { workspace = true }
 tokio = { workspace = true, optional = true }
+
+futures = { workspace = true, optional = true }
 
 [dev-dependencies]
 oak-testing = { workspace = true }
 
 [features]
-default = []
-std = []
+default = ["serde"]
+serde = ["dep:serde", "oak-core/serde"]
+oak-highlight = ["dep:oak-highlight"]
+oak-pretty-print = ["dep:oak-pretty-print"]
+lsp = ["dep:oak-lsp", "dep:oak-hover", "dep:oak-vfs", "oak-highlight", "oak-pretty-print", "dep:futures"]
+mcp = ["lsp", "oak-mcp/io-std"]
 
 [package.metadata.docs.rs]
 all-features = true

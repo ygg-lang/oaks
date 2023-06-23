@@ -20,14 +20,12 @@ impl<'config> Builder<RbqLanguage> for RbqBuilder<'config> {
         lexer.lex(source, edits, &mut parse_cache);
         let parse_result = parser.parse(source, edits, &mut parse_cache);
 
+        let source_text = source.get_text_in((0..source.length()).into());
         let result = parse_result.result.map(|green| {
             let red = RedNode::new(green, 0);
-            crate::ast::RbqRoot::lower(red, source)
+            crate::ast::RbqRoot::lower(red, &source_text)
         });
 
-        oak_core::errors::OakDiagnostics {
-            result,
-            diagnostics: parse_result.diagnostics,
-        }
+        oak_core::errors::OakDiagnostics { result, diagnostics: parse_result.diagnostics }
     }
 }

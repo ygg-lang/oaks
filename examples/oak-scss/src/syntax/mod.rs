@@ -1,7 +1,7 @@
-/// 统一JSON 语法种类（包含节点与词法
+/// Unified SCSS syntax kinds (includes nodes and tokens)
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
-pub enum JsonSyntaxKind {
-    // 节点种类
+pub enum ScssTokenType {
+    // Node kinds
     Root,
     Value,
     Object,
@@ -14,7 +14,7 @@ pub enum JsonSyntaxKind {
     ArrayElement,
     ErrorNode,
 
-    // 词法种类
+    // Token kinds
     LeftBrace,    // {
     RightBrace,   // }
     LeftBracket,  // [

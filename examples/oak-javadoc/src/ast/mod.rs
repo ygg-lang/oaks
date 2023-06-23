@@ -1,31 +1,43 @@
 #![doc = include_str!("readme.md")]
-
+#[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
 
-/// Javadoc 根节点
-#[derive(Clone, Debug, Serialize, Deserialize)]
+/// Javadoc root node.
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[derive(Clone, Debug)]
 pub struct JavadocRoot {
+    /// Description items
     pub description: Vec<JavadocItem>,
+    /// Block tags
     pub tags: Vec<JavadocBlockTag>,
 }
 
-/// Javadoc 内容项（文本或内联标签）
-#[derive(Clone, Debug, Serialize, Deserialize)]
+/// Javadoc content item (text or inline tag).
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[derive(Clone, Debug)]
 pub enum JavadocItem {
+    /// Raw text
     Text(String),
+    /// Inline tag
     InlineTag(JavadocInlineTag),
 }
 
-/// Javadoc 内联标签（如 {@link ...}）
-#[derive(Clone, Debug, Serialize, Deserialize)]
+/// Javadoc inline tag (e.g., {@link ...}).
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[derive(Clone, Debug)]
 pub struct JavadocInlineTag {
+    /// Tag name
     pub tag: String,
+    /// Tag content
     pub content: String,
 }
 
-/// Javadoc 块标签（如 @param, @return）
-#[derive(Clone, Debug, Serialize, Deserialize)]
+/// Javadoc block tag (e.g., @param, @return).
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[derive(Clone, Debug)]
 pub struct JavadocBlockTag {
+    /// Tag name
     pub tag: String,
+    /// Tag content
     pub content: Vec<JavadocItem>,
 }

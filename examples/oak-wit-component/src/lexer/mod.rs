@@ -1,4 +1,7 @@
-use crate::{kind::WitSyntaxKind, language::WitLanguage};
+#![doc = include_str!("readme.md")]
+pub mod token_type;
+
+use crate::{language::WitLanguage, lexer::token_type::WitTokenType};
 use oak_core::{
     Lexer, LexerCache, LexerState, OakError, TextEdit,
     lexer::{CommentConfig, LexOutput, StringConfig, WhitespaceConfig},
@@ -14,7 +17,7 @@ static WIT_STRING: LazyLock<StringConfig> = LazyLock::new(|| StringConfig { quot
 
 #[derive(Clone)]
 pub struct WitLexer<'config> {
-    _config: &'config WitLanguage,
+    config: &'config WitLanguage,
 }
 
 impl<'config> Lexer<WitLanguage> for WitLexer<'config> {
@@ -27,7 +30,7 @@ impl<'config> Lexer<WitLanguage> for WitLexer<'config> {
 
 impl<'config> WitLexer<'config> {
     pub fn new(config: &'config WitLanguage) -> Self {
-        Self { _config: config }
+        Self { config }
     }
 
     fn run<S: Source + ?Sized>(&self, state: &mut State<'_, S>) -> Result<(), OakError> {
@@ -64,26 +67,26 @@ impl<'config> WitLexer<'config> {
             let start_pos = state.get_position();
             if let Some(ch) = state.peek() {
                 state.advance(ch.len_utf8());
-                state.add_token(WitSyntaxKind::Error, start_pos, state.get_position());
+                state.add_token(WitTokenType::Error, start_pos, state.get_position());
             }
         }
 
         // 添加 EOF token
         let eof_pos = state.get_position();
-        state.add_token(WitSyntaxKind::Eof, eof_pos, eof_pos);
+        state.add_token(WitTokenType::Eof, eof_pos, eof_pos);
         Ok(())
     }
 
     fn skip_whitespace<S: Source + ?Sized>(&self, state: &mut State<'_, S>) -> bool {
-        WIT_WHITESPACE.scan(state, WitSyntaxKind::Whitespace)
+        WIT_WHITESPACE.scan(state, WitTokenType::Whitespace)
     }
 
     fn skip_comment<S: Source + ?Sized>(&self, state: &mut State<'_, S>) -> bool {
-        WIT_COMMENT.scan(state, WitSyntaxKind::Comment, WitSyntaxKind::Comment)
+        WIT_COMMENT.scan(state, WitTokenType::Comment, WitTokenType::Comment)
     }
 
     fn lex_string_literal<S: Source + ?Sized>(&self, state: &mut State<'_, S>) -> bool {
-        WIT_STRING.scan(state, WitSyntaxKind::StringLiteral)
+        WIT_STRING.scan(state, WitTokenType::StringLiteral)
     }
 
     fn lex_number_literal<S: Source + ?Sized>(&self, state: &mut State<'_, S>) -> bool {
@@ -102,7 +105,7 @@ impl<'config> WitLexer<'config> {
         }
 
         if has_digits {
-            state.add_token(WitSyntaxKind::IntegerLiteral, start_pos, state.get_position());
+            state.add_token(WitTokenType::IntegerLiteral, start_pos, state.get_position());
             return true;
         }
 
@@ -129,47 +132,47 @@ impl<'config> WitLexer<'config> {
                 let text = state.get_text_from(start_pos);
                 let token_kind = match text.as_ref() {
                     // WIT 关键字
-                    "world" => WitSyntaxKind::WorldKw,
-                    "interface" => WitSyntaxKind::InterfaceKw,
-                    "package" => WitSyntaxKind::PackageKw,
-                    "component" => WitSyntaxKind::ComponentKw,
-                    "instance" => WitSyntaxKind::InstanceKw,
-                    "module" => WitSyntaxKind::ModuleKw,
-                    "core" => WitSyntaxKind::CoreKw,
-                    "func" => WitSyntaxKind::FuncKw,
-                    "type" => WitSyntaxKind::TypeKw,
-                    "record" => WitSyntaxKind::RecordKw,
-                    "variant" => WitSyntaxKind::VariantKw,
-                    "enum" => WitSyntaxKind::EnumKw,
-                    "flags" => WitSyntaxKind::FlagsKw,
-                    "union" => WitSyntaxKind::UnionKw,
-                    "tuple" => WitSyntaxKind::TupleKw,
-                    "list" => WitSyntaxKind::ListKw,
-                    "option" => WitSyntaxKind::OptionKw,
-                    "result" => WitSyntaxKind::ResultKw,
-                    "static" => WitSyntaxKind::StaticKw,
-                    "constructor" => WitSyntaxKind::ConstructorKw,
-                    "method" => WitSyntaxKind::MethodKw,
-                    "import" => WitSyntaxKind::ImportKw,
-                    "export" => WitSyntaxKind::ExportKw,
-                    "use" => WitSyntaxKind::UseKw,
-                    "include" => WitSyntaxKind::IncludeKw,
-                    "with" => WitSyntaxKind::WithKw,
-                    "resource" => WitSyntaxKind::ResourceKw,
-                    "bool" => WitSyntaxKind::BoolKw,
-                    "u8" => WitSyntaxKind::U8Kw,
-                    "u16" => WitSyntaxKind::U16Kw,
-                    "u32" => WitSyntaxKind::U32Kw,
-                    "u64" => WitSyntaxKind::U64Kw,
-                    "s8" => WitSyntaxKind::S8Kw,
-                    "s16" => WitSyntaxKind::S16Kw,
-                    "s32" => WitSyntaxKind::S32Kw,
-                    "s64" => WitSyntaxKind::S64Kw,
-                    "f32" => WitSyntaxKind::F32Kw,
-                    "f64" => WitSyntaxKind::F64Kw,
-                    "char" => WitSyntaxKind::CharKw,
-                    "string" => WitSyntaxKind::StringKw,
-                    _ => WitSyntaxKind::Identifier,
+                    "world" => WitTokenType::WorldKw,
+                    "interface" => WitTokenType::InterfaceKw,
+                    "package" => WitTokenType::PackageKw,
+                    "component" => WitTokenType::ComponentKw,
+                    "instance" => WitTokenType::InstanceKw,
+                    "module" => WitTokenType::ModuleKw,
+                    "core" => WitTokenType::CoreKw,
+                    "func" => WitTokenType::FuncKw,
+                    "type" => WitTokenType::TypeKw,
+                    "record" => WitTokenType::RecordKw,
+                    "variant" => WitTokenType::VariantKw,
+                    "enum" => WitTokenType::EnumKw,
+                    "flags" => WitTokenType::FlagsKw,
+                    "union" => WitTokenType::UnionKw,
+                    "tuple" => WitTokenType::TupleKw,
+                    "list" => WitTokenType::ListKw,
+                    "option" => WitTokenType::OptionKw,
+                    "result" => WitTokenType::ResultKw,
+                    "static" => WitTokenType::StaticKw,
+                    "constructor" => WitTokenType::ConstructorKw,
+                    "method" => WitTokenType::MethodKw,
+                    "import" => WitTokenType::ImportKw,
+                    "export" => WitTokenType::ExportKw,
+                    "use" => WitTokenType::UseKw,
+                    "include" => WitTokenType::IncludeKw,
+                    "with" => WitTokenType::WithKw,
+                    "resource" => WitTokenType::ResourceKw,
+                    "bool" => WitTokenType::BoolKw,
+                    "u8" => WitTokenType::U8Kw,
+                    "u16" => WitTokenType::U16Kw,
+                    "u32" => WitTokenType::U32Kw,
+                    "u64" => WitTokenType::U64Kw,
+                    "s8" => WitTokenType::S8Kw,
+                    "s16" => WitTokenType::S16Kw,
+                    "s32" => WitTokenType::S32Kw,
+                    "s64" => WitTokenType::S64Kw,
+                    "f32" => WitTokenType::F32Kw,
+                    "f64" => WitTokenType::F64Kw,
+                    "char" => WitTokenType::CharKw,
+                    "string" => WitTokenType::StringKw,
+                    _ => WitTokenType::Identifier,
                 };
 
                 state.add_token(token_kind, start_pos, state.get_position());
@@ -187,76 +190,76 @@ impl<'config> WitLexer<'config> {
             let token_kind = match ch {
                 '(' => {
                     state.advance(1);
-                    WitSyntaxKind::LeftParen
+                    WitTokenType::LeftParen
                 }
                 ')' => {
                     state.advance(1);
-                    WitSyntaxKind::RightParen
+                    WitTokenType::RightParen
                 }
                 '{' => {
                     state.advance(1);
-                    WitSyntaxKind::LeftBrace
+                    WitTokenType::LeftBrace
                 }
                 '}' => {
                     state.advance(1);
-                    WitSyntaxKind::RightBrace
+                    WitTokenType::RightBrace
                 }
                 '[' => {
                     state.advance(1);
-                    WitSyntaxKind::LeftBracket
+                    WitTokenType::LeftBracket
                 }
                 ']' => {
                     state.advance(1);
-                    WitSyntaxKind::RightBracket
+                    WitTokenType::RightBracket
                 }
                 '<' => {
                     state.advance(1);
-                    WitSyntaxKind::Lt
+                    WitTokenType::Lt
                 }
                 '>' => {
                     state.advance(1);
-                    WitSyntaxKind::Gt
+                    WitTokenType::Gt
                 }
                 ',' => {
                     state.advance(1);
-                    WitSyntaxKind::Comma
+                    WitTokenType::Comma
                 }
                 ';' => {
                     state.advance(1);
-                    WitSyntaxKind::Semicolon
+                    WitTokenType::Semicolon
                 }
                 ':' => {
                     state.advance(1);
-                    WitSyntaxKind::Colon
+                    WitTokenType::Colon
                 }
                 '=' => {
                     state.advance(1);
-                    WitSyntaxKind::Assign
+                    WitTokenType::Assign
                 }
                 '.' => {
                     state.advance(1);
-                    WitSyntaxKind::Dot
+                    WitTokenType::Dot
                 }
                 '*' => {
                     state.advance(1);
-                    WitSyntaxKind::Star
+                    WitTokenType::Star
                 }
                 '/' => {
                     state.advance(1);
-                    WitSyntaxKind::Slash
+                    WitTokenType::Slash
                 }
                 '@' => {
                     state.advance(1);
-                    WitSyntaxKind::At
+                    WitTokenType::At
                 }
                 '-' => {
                     state.advance(1);
                     if state.peek() == Some('>') {
                         state.advance(1);
-                        WitSyntaxKind::Arrow
+                        WitTokenType::Arrow
                     }
                     else {
-                        WitSyntaxKind::Minus
+                        WitTokenType::Minus
                     }
                 }
                 _ => return false,
@@ -274,7 +277,7 @@ impl<'config> WitLexer<'config> {
 
         if let Some(ch) = state.peek() {
             state.advance(ch.len_utf8());
-            state.add_token(WitSyntaxKind::Error, start_pos, state.get_position());
+            state.add_token(WitTokenType::Error, start_pos, state.get_position());
             return true;
         }
 

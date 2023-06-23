@@ -1,3 +1,4 @@
+#![doc = include_str!("readme.md")]
 pub mod token_type;
 use crate::language::CssLanguage;
 use oak_core::{Lexer, LexerState, OakError, lexer::LexOutput, source::Source};
@@ -5,26 +6,24 @@ pub use token_type::CssTokenType;
 
 type State<'s, S> = LexerState<'s, S, CssLanguage>;
 
+/// Lexer for the CSS language.
 pub struct CssLexer<'config> {
+    /// Language configuration.
     _config: &'config CssLanguage,
 }
 
 impl<'config> CssLexer<'config> {
+    /// Creates a new `CssLexer` with the given language configuration.
     pub fn new(config: &'config CssLanguage) -> Self {
         Self { _config: config }
     }
 
-    /// 跳过空白字符
+    /// Skips whitespace characters.
     fn skip_whitespace<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start_pos = state.get_position();
 
         while let Some(ch) = state.peek() {
-            if ch == ' ' || ch == '\t' {
-                state.advance(ch.len_utf8());
-            }
-            else {
-                break;
-            }
+            if ch == ' ' || ch == '\t' { state.advance(ch.len_utf8()) } else { break }
         }
 
         if state.get_position() > start_pos {
@@ -36,7 +35,7 @@ impl<'config> CssLexer<'config> {
         }
     }
 
-    /// 处理换行
+    /// Handles newline characters.
     fn lex_newline<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start_pos = state.get_position();
 
@@ -48,7 +47,7 @@ impl<'config> CssLexer<'config> {
         else if let Some('\r') = state.peek() {
             state.advance(1);
             if let Some('\n') = state.peek() {
-                state.advance(1);
+                state.advance(1)
             }
             state.add_token(CssTokenType::Newline, start_pos, state.get_position());
             true
@@ -58,7 +57,7 @@ impl<'config> CssLexer<'config> {
         }
     }
 
-    /// 处理注释
+    /// Handles CSS comments (`/* ... */`).
     fn lex_comment<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start_pos = state.get_position();
 
@@ -71,7 +70,7 @@ impl<'config> CssLexer<'config> {
                         state.advance(2); // Skip */
                         break;
                     }
-                    state.advance(ch.len_utf8());
+                    state.advance(ch.len_utf8())
                 }
 
                 state.add_token(CssTokenType::Comment, start_pos, state.get_position());
@@ -86,7 +85,7 @@ impl<'config> CssLexer<'config> {
         }
     }
 
-    /// 处理字符串字面量
+    /// Handles string literals (both single and double quoted).
     fn lex_string<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start_pos = state.get_position();
 
@@ -102,11 +101,11 @@ impl<'config> CssLexer<'config> {
                     else if ch == '\\' {
                         state.advance(1); // Skip escape character
                         if state.peek().is_some() {
-                            state.advance(1);
+                            state.advance(1)
                         }
                     }
                     else {
-                        state.advance(ch.len_utf8());
+                        state.advance(ch.len_utf8())
                     }
                 }
 
@@ -122,7 +121,7 @@ impl<'config> CssLexer<'config> {
         }
     }
 
-    /// 处理 URL
+    /// Handles CSS URLs (`url(...)`).
     fn lex_url<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start_pos = state.get_position();
 
@@ -132,12 +131,7 @@ impl<'config> CssLexer<'config> {
 
                 // Skip whitespace
                 while let Some(ch) = state.peek() {
-                    if ch.is_whitespace() {
-                        state.advance(ch.len_utf8());
-                    }
-                    else {
-                        break;
-                    }
+                    if ch.is_whitespace() { state.advance(ch.len_utf8()) } else { break }
                 }
 
                 // Check for quoted or unquoted URL
@@ -152,11 +146,11 @@ impl<'config> CssLexer<'config> {
                             else if ch == '\\' {
                                 state.advance(1);
                                 if state.peek().is_some() {
-                                    state.advance(1);
+                                    state.advance(1)
                                 }
                             }
                             else {
-                                state.advance(ch.len_utf8());
+                                state.advance(ch.len_utf8())
                             }
                         }
                     }
@@ -165,24 +159,19 @@ impl<'config> CssLexer<'config> {
                             if ch == ')' || ch.is_whitespace() {
                                 break;
                             }
-                            state.advance(ch.len_utf8());
+                            state.advance(ch.len_utf8())
                         }
                     }
                 }
 
                 // Skip whitespace
                 while let Some(ch) = state.peek() {
-                    if ch.is_whitespace() {
-                        state.advance(ch.len_utf8());
-                    }
-                    else {
-                        break;
-                    }
+                    if ch.is_whitespace() { state.advance(ch.len_utf8()) } else { break }
                 }
 
                 // Skip closing )
                 if let Some(')') = state.peek() {
-                    state.advance(1);
+                    state.advance(1)
                 }
 
                 state.add_token(CssTokenType::UrlLiteral, start_pos, state.get_position());
@@ -197,7 +186,7 @@ impl<'config> CssLexer<'config> {
         }
     }
 
-    /// 处理颜色字面量
+    /// Handles color literals (e.g., `#fff`, `#ffffff`).
     fn lex_color<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start_pos = state.get_position();
 
@@ -208,7 +197,7 @@ impl<'config> CssLexer<'config> {
             while let Some(ch) = state.peek() {
                 if ch.is_ascii_hexdigit() {
                     state.advance(1);
-                    count += 1;
+                    count += 1
                 }
                 else {
                     break;
@@ -232,21 +221,21 @@ impl<'config> CssLexer<'config> {
         }
     }
 
-    /// 处理数字字面量
+    /// Handles number literals and units (e.g., `10px`, `1.5em`, `100%`).
     fn lex_number<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start_pos = state.get_position();
 
         let mut has_digits = false;
         if let Some(ch) = state.peek() {
             if ch == '+' || ch == '-' {
-                state.advance(1);
+                state.advance(1)
             }
         }
 
         while let Some(ch) = state.peek() {
             if ch.is_ascii_digit() {
                 state.advance(1);
-                has_digits = true;
+                has_digits = true
             }
             else {
                 break;
@@ -260,7 +249,7 @@ impl<'config> CssLexer<'config> {
                     while let Some(ch) = state.peek() {
                         if ch.is_ascii_digit() {
                             state.advance(1);
-                            has_digits = true;
+                            has_digits = true
                         }
                         else {
                             break;
@@ -274,20 +263,15 @@ impl<'config> CssLexer<'config> {
             // Check for units
             let unit_start = state.get_position();
             while let Some(ch) = state.peek() {
-                if ch.is_alphabetic() || ch == '%' {
-                    state.advance(ch.len_utf8());
-                }
-                else {
-                    break;
-                }
+                if ch.is_alphabetic() || ch == '%' { state.advance(ch.len_utf8()) } else { break }
             }
 
             if state.get_position() > unit_start {
                 // We have a number with a unit
-                state.add_token(CssTokenType::NumberLiteral, start_pos, state.get_position());
+                state.add_token(CssTokenType::NumberLiteral, start_pos, state.get_position())
             }
             else {
-                state.add_token(CssTokenType::NumberLiteral, start_pos, state.get_position());
+                state.add_token(CssTokenType::NumberLiteral, start_pos, state.get_position())
             }
             true
         }
@@ -297,19 +281,14 @@ impl<'config> CssLexer<'config> {
         }
     }
 
-    /// 处理标识符
+    /// Handles identifiers (e.g., property names, selectors).
     fn lex_identifier<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start_pos = state.get_position();
 
         if let Some(ch) = state.peek() {
             if ch.is_alphabetic() || ch == '_' || ch == '-' {
                 while let Some(ch) = state.peek() {
-                    if ch.is_alphanumeric() || ch == '_' || ch == '-' {
-                        state.advance(ch.len_utf8());
-                    }
-                    else {
-                        break;
-                    }
+                    if ch.is_alphanumeric() || ch == '_' || ch == '-' { state.advance(ch.len_utf8()) } else { break }
                 }
 
                 state.add_token(CssTokenType::Identifier, start_pos, state.get_position());
@@ -324,7 +303,7 @@ impl<'config> CssLexer<'config> {
         }
     }
 
-    /// 处理 at-rule
+    /// Handles CSS at-rules (e.g., `@import`, `@media`).
     fn lex_at_rule<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start_pos = state.get_position();
 
@@ -333,12 +312,7 @@ impl<'config> CssLexer<'config> {
 
             let rule_start = state.get_position();
             while let Some(ch) = state.peek() {
-                if ch.is_alphabetic() || ch == '-' {
-                    state.advance(ch.len_utf8());
-                }
-                else {
-                    break;
-                }
+                if ch.is_alphabetic() || ch == '-' { state.advance(ch.len_utf8()) } else { break }
             }
 
             let rule_name = state.get_text_in((rule_start..state.get_position()).into());
@@ -363,7 +337,7 @@ impl<'config> CssLexer<'config> {
         }
     }
 
-    /// 处理分隔符
+    /// Handles delimiters (e.g., `(`, `)`, `{`, `}`, `,`, `;`).
     fn lex_delimiter<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start_pos = state.get_position();
 
@@ -389,7 +363,7 @@ impl<'config> CssLexer<'config> {
         }
     }
 
-    /// 处理操作符
+    /// Handles operators (e.g., `:`, `.`, `>`, `+`, `~`, `*`, `/`).
     fn lex_operator<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start_pos = state.get_position();
 
@@ -420,11 +394,12 @@ impl<'config> CssLexer<'config> {
         }
     }
 
+    /// Main entry point for the lexer.
     fn run<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> Result<(), OakError> {
         while state.not_at_end() {
             let safe_point = state.get_position();
 
-            // 尝试各种词法规则
+            // Try various lexing rules
             if self.skip_whitespace(state) {
                 continue;
             }
@@ -469,28 +444,29 @@ impl<'config> CssLexer<'config> {
                 continue;
             }
 
-            // 如果所有规则都不匹配，跳过当前字符并标记为错误
+            // If no rules match, skip the current character and mark as error
             let start_pos = state.get_position();
             if let Some(ch) = state.peek() {
                 state.advance(ch.len_utf8());
-                state.add_token(CssTokenType::Error, start_pos, state.get_position());
+                state.add_token(CssTokenType::Error, start_pos, state.get_position())
             }
             else {
                 break;
             }
 
-            state.advance_if_dead_lock(safe_point);
+            state.advance_if_dead_lock(safe_point)
         }
         Ok(())
     }
 }
 
 impl<'config> Lexer<CssLanguage> for CssLexer<'config> {
+    /// Tokenizes the source code into a stream of CSS tokens.
     fn lex<'a, S: Source + ?Sized>(&self, source: &'a S, _edits: &[oak_core::source::TextEdit], mut cache: &'a mut impl oak_core::lexer::LexerCache<CssLanguage>) -> LexOutput<CssLanguage> {
         let mut state = LexerState::new(source);
         let result = self.run(&mut state);
         if result.is_ok() {
-            state.add_eof();
+            state.add_eof()
         }
         state.finish_with_cache(result, &mut cache)
     }

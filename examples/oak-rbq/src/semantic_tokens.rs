@@ -1,6 +1,7 @@
-use crate::{kind::RbqSyntaxKind, language::RbqLanguage};
+use crate::{language::RbqLanguage, lexer::token_type::RbqTokenType, parser::element_type::RbqElementType};
 use oak_core::{
-    language::{TokenType, UniversalTokenRole},
+    TokenType,
+    language::UniversalTokenRole,
     source::Source,
     tree::{RedNode, RedTree},
 };
@@ -20,11 +21,11 @@ impl SemanticTokensProvider<RbqLanguage> for RbqSemanticTokensProvider {
 }
 
 impl RbqSemanticTokensProvider {
-    fn collect_semantic_tokens<S: Source + ?Sized>(&self, node: &RedNode<RbqLanguage>, source: &S, line_map: &LineMap, tokens: &mut Vec<SemanticToken>, last_line: &mut u32, last_start: &mut u32, parent_kind: Option<RbqSyntaxKind>) {
+    fn collect_semantic_tokens<S: Source + ?Sized>(&self, node: &RedNode<RbqLanguage>, source: &S, line_map: &LineMap, tokens: &mut Vec<SemanticToken>, last_line: &mut u32, last_start: &mut u32, parent_kind: Option<RbqElementType>) {
         for child in node.children() {
             match child {
                 RedTree::Leaf(leaf) => {
-                    if leaf.kind == RbqSyntaxKind::Whitespace || leaf.kind == RbqSyntaxKind::Newline {
+                    if leaf.kind == RbqTokenType::Whitespace || leaf.kind == RbqTokenType::Newline {
                         continue;
                     }
 
@@ -33,8 +34,8 @@ impl RbqSemanticTokensProvider {
                         UniversalTokenRole::Keyword => 4, // keyword
                         UniversalTokenRole::Literal => {
                             match leaf.kind {
-                                RbqSyntaxKind::StringLiteral => 5, // string
-                                RbqSyntaxKind::NumberLiteral => 6, // number
+                                RbqTokenType::StringLiteral => 5, // string
+                                RbqTokenType::NumberLiteral => 6, // number
                                 _ => 5,
                             }
                         }
@@ -42,7 +43,7 @@ impl RbqSemanticTokensProvider {
                         UniversalTokenRole::Operator => 7, // operator
                         UniversalTokenRole::Name => 2,     // variable
                         _ => {
-                            if leaf.kind == RbqSyntaxKind::Identifier_ {
+                            if leaf.kind == RbqTokenType::Ident {
                                 2 // variable
                             }
                             else {
@@ -52,16 +53,16 @@ impl RbqSemanticTokensProvider {
                     };
 
                     // Contextual overrides for identifiers
-                    if leaf.kind == RbqSyntaxKind::Identifier_ {
+                    if leaf.kind == RbqTokenType::Ident {
                         if let Some(pk) = parent_kind {
                             token_type = match pk {
-                                RbqSyntaxKind::NamespaceDefinition => 8, // namespace
-                                RbqSyntaxKind::StructDefinition => 9,    // struct
-                                RbqSyntaxKind::EnumDefinition => 10,     // enum
-                                RbqSyntaxKind::TypeReference => 12,      // type
-                                RbqSyntaxKind::Annotation => 13,         // decorator
-                                RbqSyntaxKind::FieldDefinition => 2,     // variable
-                                RbqSyntaxKind::EnumVariant => 3,         // function (using function for enum variant for now)
+                                RbqElementType::NAMESPACE_DEFINITION => 8, // namespace
+                                RbqElementType::STRUCT_DEFINITION => 9,    // struct
+                                RbqElementType::ENUM_DEFINITION => 10,     // enum
+                                RbqElementType::TYPE_REFERENCE => 12,      // type
+                                RbqElementType::ANNOTATION => 13,          // decorator
+                                RbqElementType::FIELD_DEFINITION => 2,     // variable
+                                RbqElementType::ENUM_VARIANT => 3,         // function (using function for enum variant for now)
                                 _ => 2,
                             };
                         }

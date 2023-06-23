@@ -13,7 +13,7 @@ fn test_fsharp_lexer_integration() {
     match result.result {
         Ok(tokens) => {
             println!("F# lexer tests passed! Parsed {} tokens", tokens.len());
-            assert!(!tokens.is_empty(), "Should parse at least one token");
+            assert!(!tokens.is_empty(), "Should parse at least one token")
         }
         Err(e) => panic!("F# lexer tests failed: {:?}", e),
     }

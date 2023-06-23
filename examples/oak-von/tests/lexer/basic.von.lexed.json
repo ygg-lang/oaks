@@ -1,0 +1,199 @@
+{
+  "success": true,
+  "count": 32,
+  "tokens": [
+    {
+      "kind": "Identifier",
+      "text": "name",
+      "start": 24,
+      "end": 28
+    },
+    {
+      "kind": "Eq",
+      "text": "=",
+      "start": 29,
+      "end": 30
+    },
+    {
+      "kind": "StringLiteral",
+      "text": "\"VON\"",
+      "start": 31,
+      "end": 36
+    },
+    {
+      "kind": "Identifier",
+      "text": "version",
+      "start": 37,
+      "end": 44
+    },
+    {
+      "kind": "Eq",
+      "text": "=",
+      "start": 45,
+      "end": 46
+    },
+    {
+      "kind": "NumberLiteral",
+      "text": "1.0",
+      "start": 47,
+      "end": 50
+    },
+    {
+      "kind": "Identifier",
+      "text": "features",
+      "start": 51,
+      "end": 59
+    },
+    {
+      "kind": "Eq",
+      "text": "=",
+      "start": 60,
+      "end": 61
+    },
+    {
+      "kind": "LeftBracket",
+      "text": "[",
+      "start": 62,
+      "end": 63
+    },
+    {
+      "kind": "StringLiteral",
+      "text": "\"JSON compatible\"",
+      "start": 63,
+      "end": 80
+    },
+    {
+      "kind": "Comma",
+      "text": ",",
+      "start": 80,
+      "end": 81
+    },
+    {
+      "kind": "StringLiteral",
+      "text": "\"Valkyrie style\"",
+      "start": 82,
+      "end": 98
+    },
+    {
+      "kind": "RightBracket",
+      "text": "]",
+      "start": 98,
+      "end": 99
+    },
+    {
+      "kind": "Identifier",
+      "text": "null_value",
+      "start": 100,
+      "end": 110
+    },
+    {
+      "kind": "Eq",
+      "text": "=",
+      "start": 111,
+      "end": 112
+    },
+    {
+      "kind": "NullLiteral",
+      "text": "null",
+      "start": 113,
+      "end": 117
+    },
+    {
+      "kind": "Identifier",
+      "text": "nested",
+      "start": 118,
+      "end": 124
+    },
+    {
+      "kind": "Eq",
+      "text": "=",
+      "start": 125,
+      "end": 126
+    },
+    {
+      "kind": "LeftBrace",
+      "text": "{",
+      "start": 127,
+      "end": 128
+    },
+    {
+      "kind": "Identifier",
+      "text": "enabled",
+      "start": 133,
+      "end": 140
+    },
+    {
+      "kind": "Eq",
+      "text": "=",
+      "start": 141,
+      "end": 142
+    },
+    {
+      "kind": "BoolLiteral",
+      "text": "true",
+      "start": 143,
+      "end": 147
+    },
+    {
+      "kind": "RightBrace",
+      "text": "}",
+      "start": 148,
+      "end": 149
+    },
+    {
+      "kind": "Identifier",
+      "text": "path",
+      "start": 175,
+      "end": 179
+    },
+    {
+      "kind": "Eq",
+      "text": "=",
+      "start": 180,
+      "end": 181
+    },
+    {
+      "kind": "StringLiteral",
+      "text": "raw\"C:\\Users\\Admin\"",
+      "start": 182,
+      "end": 201
+    },
+    {
+      "kind": "Identifier",
+      "text": "regex",
+      "start": 202,
+      "end": 207
+    },
+    {
+      "kind": "Eq",
+      "text": "=",
+      "start": 208,
+      "end": 209
+    },
+    {
+      "kind": "StringLiteral",
+      "text": "raw\"\"\"\\d+\\.\\d+\"\"\"",
+      "start": 210,
+      "end": 227
+    },
+    {
+      "kind": "Identifier",
+      "text": "multi_line",
+      "start": 228,
+      "end": 238
+    },
+    {
+      "kind": "Eq",
+      "text": "=",
+      "start": 239,
+      "end": 240
+    },
+    {
+      "kind": "StringLiteral",
+      "text": "\"\"\"\n    This is a\n    multi-line string\n\"\"\"",
+      "start": 241,
+      "end": 284
+    }
+  ],
+  "errors": []
+}

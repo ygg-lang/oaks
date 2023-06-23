@@ -1,15 +1,18 @@
+#![doc = include_str!("readme.md")]
 use crate::ast::SassRoot;
 use oak_core::language::{Language, LanguageCategory};
+#[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
 
-/// Sass 语言实现
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
+/// Implementation of the Sass language.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct SassLanguage {
-    // Sass 语言特有的配置，目前为空
+    // Sass-specific configuration, currently empty
 }
 
 impl SassLanguage {
-    /// 创建 Sass 语言实例
+    /// Creates a new Sass language instance.
     pub fn new() -> Self {
         Self {}
     }
@@ -25,7 +28,7 @@ impl Language for SassLanguage {
     const NAME: &'static str = "sass";
     const CATEGORY: LanguageCategory = LanguageCategory::Programming;
 
-    type TokenType = crate::kind::SassSyntaxKind;
-    type ElementType = crate::kind::SassSyntaxKind;
+    type TokenType = crate::lexer::token_type::SassTokenType;
+    type ElementType = crate::parser::element_type::SassElementType;
     type TypedRoot = SassRoot;
 }

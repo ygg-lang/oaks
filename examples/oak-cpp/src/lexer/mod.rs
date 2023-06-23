@@ -1,4 +1,5 @@
-mod token_type;
+#![doc = include_str!("readme.md")]
+pub mod token_type;
 pub use token_type::CppTokenType;
 
 use crate::language::CppLanguage;
@@ -6,29 +7,26 @@ use oak_core::{Lexer, LexerCache, LexerState, TextEdit, lexer::LexOutput, source
 
 type State<'a, S> = LexerState<'a, S, CppLanguage>;
 
+/// Lexer for the C++ language.
 pub struct CppLexer<'config> {
     _config: &'config CppLanguage,
 }
 
-/// C 词法分析器类型别名
+/// Type alias for a C lexer.
 pub type CLexer<'config> = CppLexer<'config>;
 
 impl<'config> CppLexer<'config> {
+    /// Creates a new `CppLexer` with the given configuration.
     pub fn new(config: &'config CppLanguage) -> Self {
         Self { _config: config }
     }
 
-    /// 跳过空白字符
+    /// Skips whitespace characters.
     fn skip_whitespace<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start_pos = state.get_position();
 
         while let Some(ch) = state.peek() {
-            if ch == ' ' || ch == '\t' {
-                state.advance(ch.len_utf8());
-            }
-            else {
-                break;
-            }
+            if ch == ' ' || ch == '\t' { state.advance(ch.len_utf8()) } else { break }
         }
 
         if state.get_position() > start_pos {
@@ -40,7 +38,7 @@ impl<'config> CppLexer<'config> {
         }
     }
 
-    /// 处理换行
+    /// Lexes a newline sequence.
     fn lex_newline<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start_pos = state.get_position();
 
@@ -52,7 +50,7 @@ impl<'config> CppLexer<'config> {
         else if let Some('\r') = state.peek() {
             state.advance(1);
             if let Some('\n') = state.peek() {
-                state.advance(1);
+                state.advance(1)
             }
             state.add_token(CppTokenType::Newline, start_pos, state.get_position());
             true
@@ -62,32 +60,32 @@ impl<'config> CppLexer<'config> {
         }
     }
 
-    /// 处理注释
+    /// Lexes a comment (single-line or multi-line).
     fn lex_comment<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start_pos = state.get_position();
 
         if let Some('/') = state.peek() {
             if let Some('/') = state.peek_next_n(1) {
-                // 单行注释
+                // Single-line comment
                 state.advance(2);
                 while let Some(ch) = state.peek() {
                     if ch == '\n' || ch == '\r' {
                         break;
                     }
-                    state.advance(ch.len_utf8());
+                    state.advance(ch.len_utf8())
                 }
                 state.add_token(CppTokenType::Comment, start_pos, state.get_position());
                 true
             }
             else if let Some('*') = state.peek_next_n(1) {
-                // 多行注释
+                // Multi-line comment
                 state.advance(2);
                 while let Some(ch) = state.peek() {
                     if ch == '*' && state.peek_next_n(1) == Some('/') {
                         state.advance(2);
                         break;
                     }
-                    state.advance(ch.len_utf8());
+                    state.advance(ch.len_utf8())
                 }
                 state.add_token(CppTokenType::Comment, start_pos, state.get_position());
                 true
@@ -101,7 +99,7 @@ impl<'config> CppLexer<'config> {
         }
     }
 
-    /// 处理字符串字面量
+    /// Lexes a string literal.
     fn lex_string<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start_pos = state.get_position();
 
@@ -128,10 +126,10 @@ impl<'config> CppLexer<'config> {
                 }
 
                 if ch == '\n' || ch == '\r' {
-                    break; // 未闭合的字符
+                    break; // Unclosed string
                 }
 
-                state.advance(ch.len_utf8());
+                state.advance(ch.len_utf8())
             }
 
             state.add_token(CppTokenType::StringLiteral, start_pos, state.get_position());
@@ -142,7 +140,7 @@ impl<'config> CppLexer<'config> {
         }
     }
 
-    /// 处理字符字面量
+    /// Lexes a character literal.
     fn lex_character<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start_pos = state.get_position();
 
@@ -169,10 +167,10 @@ impl<'config> CppLexer<'config> {
                 }
 
                 if ch == '\n' || ch == '\r' {
-                    break; // 未闭合的字符
+                    break; // Unclosed character
                 }
 
-                state.advance(ch.len_utf8());
+                state.advance(ch.len_utf8())
             }
 
             state.add_token(CppTokenType::CharacterLiteral, start_pos, state.get_position());
@@ -183,7 +181,7 @@ impl<'config> CppLexer<'config> {
         }
     }
 
-    /// 处理数字字面量
+    /// Lexes a numeric literal.
     fn lex_number<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start_pos = state.get_position();
 
@@ -191,111 +189,76 @@ impl<'config> CppLexer<'config> {
             if ch.is_ascii_digit() || (ch == '.' && state.peek_next_n(1).map_or(false, |c| c.is_ascii_digit())) {
                 let mut is_float = false;
 
-                // 处理十六进制、八进制、二进制
+                // Handle hex, octal, binary
                 if ch == '0' {
                     if let Some(next_ch) = state.peek_next_n(1) {
                         if next_ch == 'x' || next_ch == 'X' {
-                            // 十六进制
+                            // Hexadecimal
                             state.advance(2);
                             while let Some(ch) = state.peek() {
-                                if ch.is_ascii_hexdigit() {
-                                    state.advance(1);
-                                }
-                                else {
-                                    break;
-                                }
+                                if ch.is_ascii_hexdigit() { state.advance(1) } else { break }
                             }
                         }
                         else if next_ch == 'b' || next_ch == 'B' {
-                            // 二进
+                            // Binary
                             state.advance(2);
                             while let Some(ch) = state.peek() {
-                                if ch == '0' || ch == '1' {
-                                    state.advance(1);
-                                }
-                                else {
-                                    break;
-                                }
+                                if ch == '0' || ch == '1' { state.advance(1) } else { break }
                             }
                         }
                         else if next_ch.is_ascii_digit() {
-                            // 八进
+                            // Octal
                             while let Some(ch) = state.peek() {
-                                if ch.is_ascii_digit() {
-                                    state.advance(1);
-                                }
-                                else {
-                                    break;
-                                }
+                                if ch.is_ascii_digit() { state.advance(1) } else { break }
                             }
                         }
                         else {
-                            state.advance(1); // 只是 '0'
+                            state.advance(1); // just '0'
                         }
                     }
                     else {
-                        state.advance(1); // 只是 '0'
+                        state.advance(1); // just '0'
                     }
                 }
                 else {
-                    // 十进制整数部
+                    // Decimal integer part
                     while let Some(ch) = state.peek() {
-                        if ch.is_ascii_digit() {
-                            state.advance(1);
-                        }
-                        else {
-                            break;
-                        }
+                        if ch.is_ascii_digit() { state.advance(1) } else { break }
                     }
                 }
 
-                // 检查小数点
+                // Check for decimal point
                 if let Some('.') = state.peek() {
                     if let Some(next_ch) = state.peek_next_n(1) {
                         if next_ch.is_ascii_digit() {
                             is_float = true;
-                            state.advance(1); // 消费小数
+                            state.advance(1); // consume '.'
                             while let Some(ch) = state.peek() {
-                                if ch.is_ascii_digit() {
-                                    state.advance(1);
-                                }
-                                else {
-                                    break;
-                                }
+                                if ch.is_ascii_digit() { state.advance(1) } else { break }
                             }
                         }
                     }
                 }
 
-                // 检查科学记数法
+                // Check for scientific notation
                 if let Some(ch) = state.peek() {
                     if ch == 'e' || ch == 'E' {
                         is_float = true;
                         state.advance(1);
                         if let Some(sign) = state.peek() {
                             if sign == '+' || sign == '-' {
-                                state.advance(1);
+                                state.advance(1)
                             }
                         }
                         while let Some(ch) = state.peek() {
-                            if ch.is_ascii_digit() {
-                                state.advance(1);
-                            }
-                            else {
-                                break;
-                            }
+                            if ch.is_ascii_digit() { state.advance(1) } else { break }
                         }
                     }
                 }
 
-                // 检查后缀
+                // Check for suffix
                 while let Some(ch) = state.peek() {
-                    if ch.is_ascii_alphabetic() {
-                        state.advance(1);
-                    }
-                    else {
-                        break;
-                    }
+                    if ch.is_ascii_alphabetic() { state.advance(1) } else { break }
                 }
 
                 let token_kind = if is_float { CppTokenType::FloatLiteral } else { CppTokenType::IntegerLiteral };
@@ -311,24 +274,19 @@ impl<'config> CppLexer<'config> {
         }
     }
 
-    /// 处理关键字或标识符
+    /// Lexes a keyword or identifier.
     fn lex_keyword_or_identifier<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start_pos = state.get_position();
 
         if let Some(ch) = state.peek() {
             if ch.is_ascii_alphabetic() || ch == '_' {
                 while let Some(ch) = state.peek() {
-                    if ch.is_ascii_alphanumeric() || ch == '_' {
-                        state.advance(ch.len_utf8());
-                    }
-                    else {
-                        break;
-                    }
+                    if ch.is_ascii_alphanumeric() || ch == '_' { state.advance(ch.len_utf8()) } else { break }
                 }
 
                 let text = state.get_text_in((start_pos..state.get_position()).into());
                 let token_kind = match text.as_ref() {
-                    // C++ 关键
+                    // C++ Keywords
                     "alignas" | "alignof" | "and" | "and_eq" | "asm" | "atomic_cancel" | "atomic_commit" | "atomic_noexcept" | "auto" | "bitand" | "bitor" | "bool" | "break" | "case" | "catch" | "char" | "char8_t" | "char16_t" | "char32_t" | "class"
                     | "compl" | "concept" | "const" | "consteval" | "constexpr" | "constinit" | "const_cast" | "continue" | "co_await" | "co_return" | "co_yield" | "decltype" | "default" | "delete" | "do" | "double" | "dynamic_cast" | "else" | "enum"
                     | "explicit" | "export" | "extern" | "float" | "for" | "friend" | "goto" | "if" | "inline" | "int" | "long" | "mutable" | "namespace" | "new" | "noexcept" | "not" | "not_eq" | "nullptr" | "operator" | "or" | "or_eq" | "private"
@@ -350,7 +308,7 @@ impl<'config> CppLexer<'config> {
         }
     }
 
-    /// 处理操作符
+    /// Lexes an operator.
     fn lex_operator<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start_pos = state.get_position();
 
@@ -496,7 +454,7 @@ impl<'config> CppLexer<'config> {
         }
     }
 
-    /// 处理分隔符
+    /// Lexes a delimiter.
     fn lex_delimiter<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start_pos = state.get_position();
 
@@ -522,17 +480,17 @@ impl<'config> CppLexer<'config> {
         }
     }
 
-    /// 处理预处理指令
+    /// Lexes a preprocessor directive.
     fn lex_preprocessor<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start_pos = state.get_position();
 
         if let Some('#') = state.peek() {
-            // 读取到行
+            // Read until end of line
             while let Some(ch) = state.peek() {
                 if ch == '\n' || ch == '\r' {
                     break;
                 }
-                state.advance(ch.len_utf8());
+                state.advance(ch.len_utf8())
             }
 
             state.add_token(CppTokenType::Preprocessor, start_pos, state.get_position());
@@ -545,6 +503,7 @@ impl<'config> CppLexer<'config> {
 }
 
 impl<'config> Lexer<CppLanguage> for CppLexer<'config> {
+    /// Tokenizes the input source text.
     fn lex<'a, S: Source + ?Sized>(&self, source: &'a S, _edits: &[TextEdit], cache: &'a mut impl LexerCache<CppLanguage>) -> LexOutput<CppLanguage> {
         let mut state = LexerState::new(source);
         let result = self.run(&mut state);
@@ -553,9 +512,10 @@ impl<'config> Lexer<CppLanguage> for CppLexer<'config> {
 }
 
 impl<'config> CppLexer<'config> {
+    /// Main lexer loop that tokenizes the source text.
     fn run<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> Result<(), oak_core::OakError> {
         while state.not_at_end() {
-            // 尝试各种词法规则
+            // Try various lexing rules
             if self.skip_whitespace(state) {
                 continue;
             }
@@ -600,7 +560,7 @@ impl<'config> CppLexer<'config> {
             let start = state.get_position();
             if let Some(ch) = state.peek() {
                 state.advance(ch.len_utf8());
-                state.add_token(CppTokenType::Error, start, state.get_position());
+                state.add_token(CppTokenType::Error, start, state.get_position())
             }
         }
         Ok(())

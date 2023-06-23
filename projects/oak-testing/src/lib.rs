@@ -1,4 +1,5 @@
 #![feature(new_range_api)]
+#![allow(missing_docs)]
 //! Testing utilities for the Oak ecosystem.
 //!
 //! This module provides comprehensive testing infrastructure for lexers, parsers,
@@ -37,7 +38,7 @@ pub fn open_file(path: &Path) -> Result<File, OakError> {
 /// Creates a file and its parent directories.
 pub fn create_file(path: &Path) -> Result<std::fs::File, OakError> {
     if let Some(parent) = path.parent() {
-        std::fs::create_dir_all(parent).map_err(|e| OakError::custom_error(e.to_string()))?;
+        std::fs::create_dir_all(parent).map_err(|e| OakError::custom_error(e.to_string()))?
     }
     std::fs::File::create(path).map_err(|e| OakError::custom_error(e.to_string()))
 }

@@ -1,200 +1,33 @@
-# Oak Valkyrie Parser
+# 🚀 Oak Valkyrie Parser
 
 [![Crates.io](https://img.shields.io/crates/v/oak-valkyrie.svg)](https://crates.io/crates/oak-valkyrie)
 [![Documentation](https://docs.rs/oak-valkyrie/badge.svg)](https://docs.rs/oak-valkyrie)
 
-High-performance incremental Valkyrie parser for the oak ecosystem with flexible configuration, optimized for modern systems programming with advanced type safety and concurrency features.
+**Making VALKYRIE processing simple** — A high-performance, incremental VALKYRIE parser built on the Oak framework. Specially optimized for large-scale codebases and modern IDE integration for the Valkyrie programming language.
 
-## 🎯 Overview
+## 🎯 Project Vision
 
-Oak Valkyrie is a robust parser for the Valkyrie programming language, designed to handle complete Valkyrie syntax including modern language features and advanced type system. Built on the solid foundation of oak-core, it provides both high-level convenience and detailed AST generation for Valkyrie analysis and tooling.
+`oak-valkyrie` is dedicated to providing industrial-grade parsing support for the VALKYRIE language. By leveraging Rust's high-performance characteristics and Oak's incremental parsing architecture, it can easily handle a variety of application scenarios, from simple script analysis to complex IDE language servers. Our goal is to empower developers with a robust, efficient, and high-fidelity parsing infrastructure that serves as the foundation for the next generation of Valkyrie developer tools.
 
-## ✨ Features
+## ✨ Core Features
 
-- **Complete Valkyrie Syntax**: Supports all Valkyrie features including modern specifications
-- **Advanced Type System**: Handles generics, traits, and type inference
-- **Full AST Generation**: Generates comprehensive Abstract Syntax Trees
-- **Lexer Support**: Built-in tokenization with proper span information
-- **Error Recovery**: Graceful handling of syntax errors with detailed diagnostics
+- **⚡ Blazing Fast**: Fully utilizes Rust's performance advantages to achieve sub-millisecond parsing response times, even for complex Valkyrie constructs.
+- **🔄 Incremental Parsing**: Built-in support for partial updates—re-parse only what has changed, demonstrating extremely high efficiency when processing large files.
+- **🌳 High-Fidelity AST**: Generates a clean and easy-to-traverse Abstract Syntax Tree capturing:
+    - **Namespaces & Scopes**: Precise tracking of namespace declarations and hierarchical scopes.
+    - **Micro Functions**: First-class support for Valkyrie's micro function definitions and call sites.
+    - **Strongly Typed Expressions**: Detailed mapping of complex expressions, including field access and indexing.
+    - **Fault-Tolerant Statements**: Robust handling of variable bindings and control flow structures.
+- **🛡️ Robust Error Recovery**: Engineered to handle incomplete or malformed code gracefully, providing precise diagnostics while maintaining parser state.
+- **🧩 Easy Integration**: Designed with high cohesion and low coupling, allowing for quick integration into existing Rust projects and Oak-based tools.
 
-## 🚀 Quick Start
+## 🏗️ Architecture
 
-Basic example:
-
-```rust
-use oak_valkyrie::{ValkyrieParser, ValkyrieLanguage};
-use oak_core::{Parser, source::SourceText, parser::ParseSession};
-
-fn main() -> Result<(), Box<dyn std::error::Error>> {
-    let language = ValkyrieLanguage::default();
-    let parser = ValkyrieParser::new(language);
-    let source = SourceText::new(r#"
-namespace main {
-    micro add(a: i32, b: i32) -> i32 {
-        a + b
-    }
-}
-    "#);
-    
-    let mut cache = ParseSession::default();
-    let result = parser.parse(&source, &[], &mut cache);
-    println!("Parsed Valkyrie module successfully.");
-    Ok(())
-}
-```
-
-## 📋 Parsing Examples
-
-### Module Parsing
-```rust
-use oak_valkyrie::{ValkyrieParser, ValkyrieLanguage};
-use oak_core::{Parser, source::SourceText, parser::ParseSession};
-
-let language = ValkyrieLanguage::default();
-let parser = ValkyrieParser::new(language);
-let source = SourceText::new(r#"
-namespace math {
-    pub struct Point {
-        x: f64,
-        y: f64,
-    }
-    
-    impl Point {
-        pub micro new(x: f64, y: f64) -> Self {
-            Self { x, y }
-        }
-        
-        pub micro distance(&self, other: &Point) -> f64 {
-            ((self.x - other.x).powi(2) + (self.y - other.y).powi(2)).sqrt()
-        }
-    }
-}
-"#);
-
-let mut cache = ParseSession::default();
-let result = parser.parse(&source, &[], &mut cache);
-println!("Parsed Valkyrie module successfully.");
-```
-
-### Trait Parsing
-```rust
-use oak_valkyrie::{ValkyrieParser, ValkyrieLanguage};
-use oak_core::{Parser, source::SourceText, parser::ParseSession};
-
-let language = ValkyrieLanguage::default();
-let parser = ValkyrieParser::new(language);
-let source = SourceText::new(r#"
-pub trait Drawable {
-    micro draw(&self);
-    micro area(&self) -> f64;
-    
-    micro describe(&self) -> String {
-        format!("Shape with area: {}", self.area())
-    }
-}
-
-pub struct Circle {
-    radius: f64,
-}
-
-impl Drawable for Circle {
-    micro draw(&self) {
-        println!("Drawing circle with radius: {}", self.radius);
-    }
-    
-    micro area(&self) -> f64 {
-        3.14159 * self.radius * self.radius
-    }
-}
-"#);
-
-let mut cache = ParseSession::default();
-let result = parser.parse(&source, &[], &mut cache);
-println!("Parsed Valkyrie module successfully.");
-```
-
-## 🔧 Advanced Features
-
-### Token-Level Parsing
-```rust
-use oak_valkyrie::{ValkyrieParser, ValkyrieLanguage};
-use oak_core::{Parser, source::SourceText, parser::ParseSession};
-
-let language = ValkyrieLanguage::default();
-let parser = ValkyrieParser::new(language);
-let source = SourceText::new("micro main() { let x = 42; println!(\"{}\", x); }");
-let mut cache = ParseSession::default();
-let result = parser.parse(&source, &[], &mut cache);
-// Token information is available in the parse result
-```
-
-### Error Handling
-```rust
-use oak_valkyrie::{ValkyrieParser, ValkyrieLanguage};
-use oak_core::{Parser, source::SourceText, parser::ParseSession};
-
-let language = ValkyrieLanguage::default();
-let parser = ValkyrieParser::new(language);
-let source = SourceText::new(r#"
-micro broken_function() -> i32 {
-    let x: i32 = "not a number"; // Type mismatch
-    return x; // Type mismatch in return
-}
-
-micro invalid_syntax() { // Missing return type
-    let y = 1 // Missing semicolon
-}
-"#);
-
-let mut cache = ParseSession::default();
-let result = parser.parse(&source, &[], &mut cache);
-if let Err(e) = result.result {
-    println!("Parse error: {:?}", e);
-}
-```
-
-## 🏗️ AST Structure
-
-The parser generates a comprehensive AST with the following main structures:
-
-- **Module**: Module definitions with visibility
-- **Function**: Function definitions with parameters and return types
-- **Struct**: Struct definitions with fields
-- **Enum**: Enumeration definitions with variants
-- **Trait**: Trait definitions for shared behavior
-- **Impl**: Implementation blocks for types
-- **Statement**: Assignment, if, match, loop statements
-- **Expression**: Binary, unary, method call expressions
-- **Pattern**: Pattern matching constructs
-
-## 📊 Performance
-
-- **Streaming**: Parse large Valkyrie files without loading entirely into memory
-- **Incremental**: Re-parse only changed sections
-- **Memory Efficient**: Smart AST node allocation
-- **Fast Recovery**: Quick error recovery for better IDE integration
-
-## 🔗 Integration
-
-Oak-valkyrie integrates seamlessly with:
-
-- **Static Analysis**: Code quality and security analysis
-- **Code Generation**: Generating executable code from Valkyrie AST
-- **IDE Support**: Language server protocol compatibility
-- **Refactoring**: Automated code refactoring
-- **Documentation**: Generating documentation from Valkyrie code
-
-## 📚 Examples
-
-Check out the [examples](examples/) directory for comprehensive examples:
-
-- Complete Valkyrie module parsing
-- Trait and implementation analysis
-- Pattern matching processing
-- Integration with build systems
+The parser follows the **Green/Red Tree** architecture (inspired by Roslyn), which allows for:
+1. **Efficient Immutability**: Share nodes across different versions of the tree without copying.
+2. **Lossless Syntax Trees**: Retains all trivia (whitespace and comments), enabling faithful code formatting and refactoring.
+3. **Type Safety**: Strongly-typed "Red" nodes provide a convenient and safe API for tree traversal and analysis.
 
 ## 🤝 Contributing
 
-Contributions are welcome! 
-
-Please feel free to submit pull requests at the [project repository](https://github.com/ygg-lang/oaks/tree/dev/examples/oak-valkyrie) or open [issues](https://github.com/ygg-lang/oaks/issues).
+We welcome contributions of all kinds! If you find a bug, have a feature request, or want to contribute code, please check our [issues](https://github.com/ygg-lang/oaks/issues) or submit a pull request.

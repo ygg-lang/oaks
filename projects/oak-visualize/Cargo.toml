@@ -1,16 +1,16 @@
 [package]
 name = "oak-visualize"
-description = "High-performance visualization and layout algorithms for the oak ecosystem with flexible configuration, emphasizing tree and graph visualization."
-categories = ["visualization", "algorithms"]
-keywords = ["visualization", "layout", "ast", "tree", "graph"]
-documentation = "https://docs.rs/oak-visualize"
-readme = "readme.md"
 version.workspace = true
 authors.workspace = true
-homepage.workspace = true
-repository.workspace = true
-license.workspace = true
+description = "High-performance visualization and layout algorithms for the oak ecosystem with flexible configuration, emphasizing tree and graph visualization."
 edition.workspace = true
+license.workspace = true
+readme = "readme.md"
+homepage.workspace = true
+repository = "https://github.com/ygg-lang/oaks/tree/master/projects/oak-visualize"
+documentation = "https://docs.rs/oak-visualize"
+categories = ["visualization", "algorithms"]
+keywords = ["visualization", "layout", "ast", "tree", "graph"]
 
 [dependencies]
 oak-core = { workspace = true }
@@ -22,7 +22,6 @@ serde_json = { workspace = true }
 [dev-dependencies]
 oak-testing = { workspace = true }
 oak-json = { workspace = true }
-
 
 [features]
 default = []

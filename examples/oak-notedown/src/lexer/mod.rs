@@ -1,4 +1,7 @@
-use crate::{kind::NoteSyntaxKind, language::NotedownLanguage};
+#![doc = include_str!("readme.md")]
+pub mod token_type;
+
+use crate::{language::NotedownLanguage, lexer::token_type::NoteTokenType};
 use oak_core::{Lexer, LexerCache, LexerState, lexer::LexOutput, source::Source};
 
 type State<'a, S> = LexerState<'a, S, NotedownLanguage>;
@@ -107,7 +110,7 @@ impl<'config> NotedownLexer<'config> {
         }
 
         if state.get_position() > start_pos {
-            state.add_token(NoteSyntaxKind::Whitespace, start_pos, state.get_position());
+            state.add_token(NoteTokenType::Whitespace, start_pos, state.get_position());
             true
         }
         else {
@@ -121,7 +124,7 @@ impl<'config> NotedownLexer<'config> {
 
         if let Some('\n') = state.peek() {
             state.advance(1);
-            state.add_token(NoteSyntaxKind::Newline, start_pos, state.get_position());
+            state.add_token(NoteTokenType::Newline, start_pos, state.get_position());
             true
         }
         else if let Some('\r') = state.peek() {
@@ -129,7 +132,7 @@ impl<'config> NotedownLexer<'config> {
             if let Some('\n') = state.peek() {
                 state.advance(1);
             }
-            state.add_token(NoteSyntaxKind::Newline, start_pos, state.get_position());
+            state.add_token(NoteTokenType::Newline, start_pos, state.get_position());
             true
         }
         else {
@@ -163,7 +166,7 @@ impl<'config> NotedownLexer<'config> {
                 }
             }
 
-            // 检# 后面是否有空
+            // 检查 # 后面是否有空格
             if let Some(ch) = state.get_char_at(pos) {
                 if ch != ' ' && ch != '\t' && ch != '\n' && ch != '\r' {
                     return false;
@@ -173,12 +176,12 @@ impl<'config> NotedownLexer<'config> {
             state.advance(level);
 
             let heading_kind = match level {
-                1 => NoteSyntaxKind::Heading1,
-                2 => NoteSyntaxKind::Heading2,
-                3 => NoteSyntaxKind::Heading3,
-                4 => NoteSyntaxKind::Heading4,
-                5 => NoteSyntaxKind::Heading5,
-                6 => NoteSyntaxKind::Heading6,
+                1 => NoteTokenType::Heading1,
+                2 => NoteTokenType::Heading2,
+                3 => NoteTokenType::Heading3,
+                4 => NoteTokenType::Heading4,
+                5 => NoteTokenType::Heading5,
+                6 => NoteTokenType::Heading6,
                 _ => return false,
             };
 
@@ -213,7 +216,7 @@ impl<'config> NotedownLexer<'config> {
             }
 
             if found_end {
-                state.add_token(NoteSyntaxKind::InlineCode, start_pos, state.get_position());
+                state.add_token(NoteTokenType::InlineCode, start_pos, state.get_position());
                 true
             }
             else {
@@ -266,11 +269,11 @@ impl<'config> NotedownLexer<'config> {
         }
 
         if fence_count < 3 {
-            return false; // 至少需个围栏字
+            return false; // 至少需要3个围栏字符
         }
 
         state.advance(fence_count);
-        state.add_token(NoteSyntaxKind::CodeFence, start_pos, state.get_position());
+        state.add_token(NoteTokenType::CodeFence, start_pos, state.get_position());
 
         // 处理语言标识
         let lang_start = state.get_position();
@@ -287,7 +290,7 @@ impl<'config> NotedownLexer<'config> {
         }
 
         if state.get_position() > lang_start {
-            state.add_token(NoteSyntaxKind::CodeLanguage, lang_start, state.get_position());
+            state.add_token(NoteTokenType::CodeLanguage, lang_start, state.get_position());
         }
 
         true
@@ -327,7 +330,7 @@ impl<'config> NotedownLexer<'config> {
 
         state.advance(marker_count);
 
-        let token_kind = if marker_count >= 2 { NoteSyntaxKind::Strong } else { NoteSyntaxKind::Emphasis };
+        let token_kind = if marker_count >= 2 { NoteTokenType::Strong } else { NoteTokenType::Emphasis };
 
         state.add_token(token_kind, start_pos, state.get_position());
         true
@@ -340,7 +343,7 @@ impl<'config> NotedownLexer<'config> {
         if let Some('~') = state.peek() {
             if let Some('~') = state.get_char_at(start_pos + 1) {
                 state.advance(2);
-                state.add_token(NoteSyntaxKind::Strikethrough, start_pos, state.get_position());
+                state.add_token(NoteTokenType::Strikethrough, start_pos, state.get_position());
                 true
             }
             else {
@@ -368,7 +371,7 @@ impl<'config> NotedownLexer<'config> {
         if let Some('[') = state.peek() {
             state.advance(1);
 
-            let token_kind = if is_image { NoteSyntaxKind::Image } else { NoteSyntaxKind::Link };
+            let token_kind = if is_image { NoteTokenType::Image } else { NoteTokenType::Link };
 
             state.add_token(token_kind, start_pos, state.get_position());
             true
@@ -407,7 +410,7 @@ impl<'config> NotedownLexer<'config> {
                     state.advance(1);
                     if let Some(next_ch) = state.peek() {
                         if next_ch == ' ' || next_ch == '\t' {
-                            state.add_token(NoteSyntaxKind::ListMarker, start_pos, state.get_position());
+                            state.add_token(NoteTokenType::ListMarker, start_pos, state.get_position());
                             return true;
                         }
                     }
@@ -429,7 +432,7 @@ impl<'config> NotedownLexer<'config> {
                         state.advance(1);
                         if let Some(next_ch) = state.peek() {
                             if next_ch == ' ' || next_ch == '\t' {
-                                state.add_token(NoteSyntaxKind::ListMarker, start_pos, state.get_position());
+                                state.add_token(NoteTokenType::ListMarker, start_pos, state.get_position());
                                 return true;
                             }
                         }
@@ -458,7 +461,7 @@ impl<'config> NotedownLexer<'config> {
                     state.advance(1);
                     if let Some(']') = state.peek() {
                         state.advance(1);
-                        state.add_token(NoteSyntaxKind::TaskMarker, start_pos, state.get_position());
+                        state.add_token(NoteTokenType::TaskMarker, start_pos, state.get_position());
                         return true;
                     }
                 }
@@ -488,7 +491,7 @@ impl<'config> NotedownLexer<'config> {
 
         if let Some('>') = state.peek() {
             state.advance(1);
-            state.add_token(NoteSyntaxKind::BlockquoteMarker, start_pos, state.get_position());
+            state.add_token(NoteTokenType::BlockquoteMarker, start_pos, state.get_position());
             true
         }
         else {
@@ -544,12 +547,12 @@ impl<'config> NotedownLexer<'config> {
                             pos += 1;
                         }
                         else {
-                            return false; // 行尾有其他字
+                            return false; // 行尾有其他字符
                         }
                     }
 
                     state.set_position(pos);
-                    state.add_token(NoteSyntaxKind::HorizontalRule, start_pos, state.get_position());
+                    state.add_token(NoteTokenType::HorizontalRule, start_pos, state.get_position());
                     return true;
                 }
             }
@@ -563,24 +566,24 @@ impl<'config> NotedownLexer<'config> {
 
         if let Some(ch) = state.peek() {
             let token_kind = match ch {
-                '[' => NoteSyntaxKind::LeftBracket,
-                ']' => NoteSyntaxKind::RightBracket,
-                '(' => NoteSyntaxKind::LeftParen,
-                ')' => NoteSyntaxKind::RightParen,
-                '<' => NoteSyntaxKind::LeftAngle,
-                '>' => NoteSyntaxKind::RightAngle,
-                '*' => NoteSyntaxKind::Asterisk,
-                '_' => NoteSyntaxKind::Underscore,
-                '`' => NoteSyntaxKind::Backtick,
-                '~' => NoteSyntaxKind::Tilde,
-                '#' => NoteSyntaxKind::Hash,
-                '|' => NoteSyntaxKind::Pipe,
-                '-' => NoteSyntaxKind::Dash,
-                '+' => NoteSyntaxKind::Plus,
-                '.' => NoteSyntaxKind::Dot,
-                ':' => NoteSyntaxKind::Colon,
-                '!' => NoteSyntaxKind::Exclamation,
-                '\\' => NoteSyntaxKind::Escape,
+                '[' => NoteTokenType::LeftBracket,
+                ']' => NoteTokenType::RightBracket,
+                '(' => NoteTokenType::LeftParen,
+                ')' => NoteTokenType::RightParen,
+                '<' => NoteTokenType::LeftAngle,
+                '>' => NoteTokenType::RightAngle,
+                '*' => NoteTokenType::Asterisk,
+                '_' => NoteTokenType::Underscore,
+                '`' => NoteTokenType::Backtick,
+                '~' => NoteTokenType::Tilde,
+                '#' => NoteTokenType::Hash,
+                '|' => NoteTokenType::Pipe,
+                '-' => NoteTokenType::Dash,
+                '+' => NoteTokenType::Plus,
+                '.' => NoteTokenType::Dot,
+                ':' => NoteTokenType::Colon,
+                '!' => NoteTokenType::Exclamation,
+                '\\' => NoteTokenType::Escape,
                 _ => return false,
             };
 
@@ -601,14 +604,12 @@ impl<'config> NotedownLexer<'config> {
             // 遇到特殊字符时停
             match ch {
                 ' ' | '\t' | '\n' | '\r' | '#' | '*' | '_' | '`' | '~' | '[' | ']' | '(' | ')' | '<' | '>' | '|' | '-' | '+' | '.' | ':' | '!' | '\\' => break,
-                _ => {
-                    state.advance(ch.len_utf8());
-                }
+                _ => state.advance(ch.len_utf8()),
             }
         }
 
         if state.get_position() > start_pos {
-            state.add_token(NoteSyntaxKind::Text, start_pos, state.get_position());
+            state.add_token(NoteTokenType::Text, start_pos, state.get_position());
             true
         }
         else {

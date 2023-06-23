@@ -1,3 +1,4 @@
+#![doc = include_str!("readme.md")]
 pub mod element_type;
 
 pub use element_type::BashElementType;
@@ -30,12 +31,12 @@ impl<'config> BashParser<'config> {
             let checkpoint = state.checkpoint();
             state.bump();
             while state.not_at_end() && !state.at(BashTokenType::Newline) && !state.at(BashTokenType::Delimiter) {
-                state.bump();
+                state.bump()
             }
             state.finish_at(checkpoint, BashElementType::CommandStatement);
         }
         else {
-            self.parse_command(state)?;
+            self.parse_command(state)?
         }
         Ok(())
     }
@@ -43,7 +44,7 @@ impl<'config> BashParser<'config> {
     pub(crate) fn parse_command<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> Result<(), OakError> {
         let checkpoint = state.checkpoint();
         while state.not_at_end() && !state.at(BashTokenType::Newline) && !state.at(BashTokenType::Delimiter) {
-            state.bump();
+            state.bump()
         }
         state.finish_at(checkpoint, BashElementType::CommandStatement);
         Ok(())
@@ -58,7 +59,7 @@ impl<'config> Parser<BashLanguage> for BashParser<'config> {
 
             while state.not_at_end() && !state.at(BashTokenType::Eof) {
                 if state.at(BashTokenType::Newline) || state.at(BashTokenType::Delimiter) {
-                    state.bump();
+                    state.bump()
                 }
                 else {
                     self.parse_statement(state).ok();

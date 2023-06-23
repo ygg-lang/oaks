@@ -1,16 +1,16 @@
 [package]
 name = "oak-pretty-print"
-description = "Syntax highlighter supporting multiple programming languages."
-categories = ["text-processing"]
-keywords = ["syntax-highlighting", "code", "highlighting", "multi-language"]
-documentation = "https://docs.rs/oak-pretty-print"
-readme = "readme.md"
 version.workspace = true
 authors.workspace = true
-homepage.workspace = true
-repository.workspace = true
-license.workspace = true
+description = "Syntax highlighter supporting multiple programming languages."
 edition.workspace = true
+license.workspace = true
+readme = "readme.md"
+homepage.workspace = true
+repository = "https://github.com/ygg-lang/oaks/tree/master/projects/oak-pretty-print"
+documentation = "https://docs.rs/oak-pretty-print"
+categories = ["text-processing"]
+keywords = ["syntax-highlighting", "code", "highlighting", "multi-language"]
 
 [dependencies]
 oak-core = { workspace = true, features = ["serde"] }
@@ -20,10 +20,8 @@ serde = { workspace = true, features = ["derive"] }
 [dev-dependencies]
 oak-testing = { workspace = true }
 
-
 [features]
 default = []
-
 
 [package.metadata.docs.rs]
 all-features = true

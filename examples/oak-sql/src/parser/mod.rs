@@ -1,4 +1,6 @@
-use crate::{SqlLanguage, kind::SqlSyntaxKind};
+pub mod element_type;
+
+use crate::{SqlElementType, SqlLanguage};
 use oak_core::{
     GreenNode, OakError, Parser, ParserState, TextEdit, TokenType,
     parser::{
@@ -17,26 +19,26 @@ type State<'a, S> = ParserState<'a, SqlLanguage, S>;
 
 impl<'config> Pratt<SqlLanguage> for SqlParser<'config> {
     fn primary<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> &'a GreenNode<'a, SqlLanguage> {
-        use crate::kind::SqlSyntaxKind::*;
+        use crate::lexer::SqlTokenType::*;
         let cp = state.checkpoint();
         match state.peek_kind() {
             Some(Identifier_) => {
                 state.bump();
-                state.finish_at(cp, Identifier.into())
+                state.finish_at(cp, SqlElementType::Identifier)
             }
             Some(NumberLiteral) | Some(StringLiteral) | Some(BooleanLiteral) | Some(NullLiteral) => {
                 state.bump();
-                state.finish_at(cp, Expression.into())
+                state.finish_at(cp, SqlElementType::Expression)
             }
             Some(LeftParen) => {
                 state.bump();
                 PrattParser::parse(state, 0, self);
                 state.expect(RightParen).ok();
-                state.finish_at(cp, Expression.into())
+                state.finish_at(cp, SqlElementType::Expression)
             }
             _ => {
                 state.bump();
-                state.finish_at(cp, ErrorNode.into())
+                state.finish_at(cp, SqlElementType::ErrorNode)
             }
         }
     }
@@ -46,7 +48,7 @@ impl<'config> Pratt<SqlLanguage> for SqlParser<'config> {
     }
 
     fn infix<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>, left: &'a GreenNode<'a, SqlLanguage>, min_precedence: u8) -> Option<&'a GreenNode<'a, SqlLanguage>> {
-        use crate::kind::SqlSyntaxKind::*;
+        use crate::lexer::SqlTokenType::*;
         let kind = state.peek_kind()?;
 
         let (prec, assoc) = match kind {
@@ -78,13 +80,13 @@ impl<'config> SqlParser<'config> {
                 state.advance();
                 continue;
             }
-            self.parse_statement(state)?;
+            self.parse_statement(state)?
         }
-        Ok(state.finish_at(cp, SqlSyntaxKind::Root.into()))
+        Ok(state.finish_at(cp, SqlElementType::Root))
     }
 
     fn parse_statement<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> Result<(), OakError> {
-        use crate::kind::SqlSyntaxKind::*;
+        use crate::lexer::SqlTokenType::*;
         match state.peek_kind() {
             Some(Select) => self.parse_select(state)?,
             Some(Insert) => self.parse_insert(state)?,
@@ -102,7 +104,7 @@ impl<'config> SqlParser<'config> {
     }
 
     fn parse_select<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> Result<(), OakError> {
-        use crate::kind::SqlSyntaxKind::*;
+        use crate::lexer::SqlTokenType::*;
         let cp = state.checkpoint();
         state.expect(Select).ok();
 
@@ -128,7 +130,7 @@ impl<'config> SqlParser<'config> {
                     if state.eat(On) {
                         PrattParser::parse(state, 0, self); // Join condition
                     }
-                    state.finish_at(join_cp, JoinClause.into());
+                    state.finish_at(join_cp, SqlElementType::JoinClause);
                 }
                 else {
                     break;
@@ -149,13 +151,13 @@ impl<'config> SqlParser<'config> {
                     break;
                 }
             }
-            state.finish_at(group_cp, GroupByClause.into());
+            state.finish_at(group_cp, SqlElementType::GroupByClause);
         }
 
         if state.eat(Having) {
             let having_cp = state.checkpoint();
             PrattParser::parse(state, 0, self);
-            state.finish_at(having_cp, HavingClause.into());
+            state.finish_at(having_cp, SqlElementType::HavingClause);
         }
 
         if state.eat(Order) {
@@ -170,7 +172,7 @@ impl<'config> SqlParser<'config> {
                     break;
                 }
             }
-            state.finish_at(order_cp, OrderByClause.into());
+            state.finish_at(order_cp, SqlElementType::OrderByClause);
         }
 
         if state.eat(Limit) {
@@ -179,21 +181,21 @@ impl<'config> SqlParser<'config> {
             if state.eat(Offset) {
                 state.expect(NumberLiteral).ok();
             }
-            state.finish_at(limit_cp, LimitClause.into());
+            state.finish_at(limit_cp, SqlElementType::LimitClause);
         }
         else if state.eat(Offset) {
             let offset_cp = state.checkpoint();
             state.expect(NumberLiteral).ok();
-            state.finish_at(offset_cp, LimitClause.into());
+            state.finish_at(offset_cp, SqlElementType::LimitClause);
         }
 
         state.eat(Semicolon);
-        state.finish_at(cp, SelectStatement.into());
+        state.finish_at(cp, SqlElementType::SelectStatement);
         Ok(())
     }
 
     fn parse_insert<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> Result<(), OakError> {
-        use crate::kind::SqlSyntaxKind::*;
+        use crate::lexer::SqlTokenType::*;
         let cp = state.checkpoint();
         state.expect(Insert).ok();
         state.eat(Into);
@@ -210,12 +212,12 @@ impl<'config> SqlParser<'config> {
         }
 
         state.eat(Semicolon);
-        state.finish_at(cp, InsertStatement.into());
+        state.finish_at(cp, SqlElementType::InsertStatement);
         Ok(())
     }
 
     fn parse_update<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> Result<(), OakError> {
-        use crate::kind::SqlSyntaxKind::*;
+        use crate::lexer::SqlTokenType::*;
         let cp = state.checkpoint();
         state.expect(Update).ok();
         state.expect(Identifier_).ok(); // TableName
@@ -236,12 +238,12 @@ impl<'config> SqlParser<'config> {
         }
 
         state.eat(Semicolon);
-        state.finish_at(cp, UpdateStatement.into());
+        state.finish_at(cp, SqlElementType::UpdateStatement);
         Ok(())
     }
 
     fn parse_delete<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> Result<(), OakError> {
-        use crate::kind::SqlSyntaxKind::*;
+        use crate::lexer::SqlTokenType::*;
         let cp = state.checkpoint();
         state.expect(Delete).ok();
         state.eat(From);
@@ -252,34 +254,37 @@ impl<'config> SqlParser<'config> {
         }
 
         state.eat(Semicolon);
-        state.finish_at(cp, DeleteStatement.into());
+        state.finish_at(cp, SqlElementType::DeleteStatement);
         Ok(())
     }
 
     fn parse_create<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> Result<(), OakError> {
+        use crate::lexer::SqlTokenType::*;
         let cp = state.checkpoint();
         state.bump(); // create
-        state.advance_until(crate::kind::SqlSyntaxKind::Semicolon);
-        state.eat(crate::kind::SqlSyntaxKind::Semicolon);
-        state.finish_at(cp, crate::kind::SqlSyntaxKind::CreateStatement.into());
+        state.advance_until(Semicolon);
+        state.eat(Semicolon);
+        state.finish_at(cp, SqlElementType::CreateStatement);
         Ok(())
     }
 
     fn parse_drop<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> Result<(), OakError> {
+        use crate::lexer::SqlTokenType::*;
         let cp = state.checkpoint();
         state.bump(); // drop
-        state.advance_until(crate::kind::SqlSyntaxKind::Semicolon);
-        state.eat(crate::kind::SqlSyntaxKind::Semicolon);
-        state.finish_at(cp, crate::kind::SqlSyntaxKind::DropStatement.into());
+        state.advance_until(Semicolon);
+        state.eat(Semicolon);
+        state.finish_at(cp, SqlElementType::DropStatement);
         Ok(())
     }
 
     fn parse_alter<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> Result<(), OakError> {
+        use crate::lexer::SqlTokenType::*;
         let cp = state.checkpoint();
         state.bump(); // alter
-        state.advance_until(crate::kind::SqlSyntaxKind::Semicolon);
-        state.eat(crate::kind::SqlSyntaxKind::Semicolon);
-        state.finish_at(cp, crate::kind::SqlSyntaxKind::AlterStatement.into());
+        state.advance_until(Semicolon);
+        state.eat(Semicolon);
+        state.finish_at(cp, SqlElementType::AlterStatement);
         Ok(())
     }
 }

@@ -1,13 +1,13 @@
 [package]
 name = "oak-symbols"
-description = "Symbol extraction and management for the Oak framework."
-categories = ["development-tools"]
-keywords = ["symbols", "extraction", "indexing"]
 version.workspace = true
 authors.workspace = true
+description = "Symbol extraction and management for the Oak framework."
 edition.workspace = true
 license.workspace = true
-repository.workspace = true
+repository = "https://github.com/ygg-lang/oaks/tree/master/projects/oak-symbols"
+categories = ["development-tools"]
+keywords = ["symbols", "extraction", "indexing"]
 
 [dependencies]
 oak-core = { workspace = true, features = ["serde"] }

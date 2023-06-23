@@ -84,7 +84,7 @@ pub type LexOutput<L: Language> = OakDiagnostics<Tokens<L>>;
 ///     }
 /// }
 /// ```
-pub trait Lexer<L: Language + Send + Sync + 'static> {
+pub trait Lexer<L: Language + Send + Sync> {
     /// Tokenizes the given source text into a sequence of tokens.
     ///
     /// This method performs a full lexical analysis of the source text,
@@ -153,7 +153,7 @@ pub trait LexerCache<L: Language> {
 
 impl<'a, L: Language, C: LexerCache<L> + ?Sized> LexerCache<L> for &'a mut C {
     fn set_lex_output(&mut self, output: LexOutput<L>) {
-        (**self).set_lex_output(output);
+        (**self).set_lex_output(output)
     }
 
     fn get_token(&self, index: usize) -> Option<Token<L::TokenType>> {
@@ -200,7 +200,7 @@ impl<K> Token<K> {
     /// #![feature(new_range_api)]
     /// # use oak_core::lexer::Token;
     /// # use core::range::Range;
-    /// let kind = Token { kind: "ident", span: Range { start: 0, end: 5 } };
+    /// let kind = Token { kind: "ident", span: Range { start: 0, end: 5 } }
     /// assert_eq!(kind.length(), 5);
     /// ```
     #[inline]
@@ -293,14 +293,14 @@ impl<'s, S: Source + ?Sized, L: Language> LexerState<'s, S, L> {
         if relex_from >= len {
             let mut tokens = Vec::new();
             if let Some(cached) = cache.get_tokens() {
-                tokens.extend_from_slice(cached);
+                tokens.extend_from_slice(cached)
             }
             else {
                 let count = cache.count_tokens();
                 tokens.reserve(count);
                 for i in 0..count {
                     if let Some(t) = cache.get_token(i) {
-                        tokens.push(t);
+                        tokens.push(t)
                     }
                 }
             }
@@ -320,7 +320,7 @@ impl<'s, S: Source + ?Sized, L: Language> LexerState<'s, S, L> {
             let idx = cached.partition_point(|t| t.span.end <= relex_from);
             let keep = idx.saturating_sub(BACKTRACK_TOKENS);
             if keep > 0 {
-                reused_tokens.extend_from_slice(&cached[..keep]);
+                reused_tokens.extend_from_slice(&cached[..keep])
             }
         }
         else {
@@ -356,12 +356,16 @@ impl<'s, S: Source + ?Sized, L: Language> LexerState<'s, S, L> {
     }
 
     /// Gets the remaining text as a byte slice.
+    ///
+    /// Useful for byte-oriented scanning operations.
     #[inline]
     pub fn rest_bytes(&mut self) -> &[u8] {
         self.cursor.rest().as_bytes()
     }
 
     /// Checks if the lexer has consumed all input from the source.
+    ///
+    /// Returns `true` if the current position is at or beyond the end of the source.
     pub fn fully_reused(&self) -> bool {
         self.cursor.position() >= self.cursor.source().length()
     }
@@ -370,22 +374,32 @@ impl<'s, S: Source + ?Sized, L: Language> LexerState<'s, S, L> {
     ///
     /// # Returns
     ///
-    /// The current byte offset from the start of the source text
+    /// The current byte offset from the start of the source text.
     #[inline]
     pub fn get_position(&self) -> usize {
         self.cursor.position()
     }
 
     /// Checks if the lexer has NOT consumed all input from the source.
+    ///
+    /// Returns `true` if there are still bytes left to be scanned.
     #[inline]
     pub fn not_at_end(&self) -> bool {
         self.cursor.position() < self.cursor.source().length()
     }
 
-    /// Peeks at the next character without advancing.
+    /// Peeks at the next character without advancing the cursor.
+    ///
+    /// Returns `None` if at the end of the source.
     #[inline]
     pub fn peek(&mut self) -> Option<char> {
         self.cursor.peek_char()
+    }
+
+    /// Peeks at the character immediately following the current character.
+    #[inline]
+    pub fn peek_next(&mut self) -> Option<char> {
+        self.cursor.peek_next_char()
     }
 
     /// Peeks at the character at the specified byte offset relative to the current position.
@@ -406,13 +420,13 @@ impl<'s, S: Source + ?Sized, L: Language> LexerState<'s, S, L> {
         self.cursor.source().length()
     }
 
-    /// Gets a single character at the specified byte offset.
+    /// Gets a single character at the specified absolute byte offset.
     #[inline]
     pub fn get_char_at(&self, offset: usize) -> Option<char> {
         self.cursor.source().get_char_at(offset)
     }
 
-    /// Peeks at the next byte without advancing.
+    /// Peeks at the next byte without advancing the cursor.
     #[inline]
     pub fn peek_byte(&mut self) -> Option<u8> {
         self.cursor.peek_byte()
@@ -425,36 +439,60 @@ impl<'s, S: Source + ?Sized, L: Language> LexerState<'s, S, L> {
     }
 
     /// Advances the cursor while the byte predicate is true.
+    ///
+    /// Returns the byte range covered by the matched bytes.
     #[inline]
     pub fn take_while_byte(&mut self, pred: impl FnMut(u8) -> bool) -> Range<usize> {
         self.cursor.take_while_byte(pred)
     }
 
-    /// Skips common ASCII whitespace using SIMD if possible.
+    /// Skips common ASCII whitespace (space, tab, newline, carriage return).
+    ///
+    /// Uses SIMD acceleration if available on the platform.
+    /// Returns the range of the skipped whitespace.
     #[inline]
     pub fn skip_ascii_whitespace(&mut self) -> Range<usize> {
         self.cursor.skip_ascii_whitespace()
     }
 
-    /// Skips all ASCII digits at the current position.
+    /// Skips all consecutive ASCII digits at the current position.
+    ///
+    /// Returns the range of the skipped digits.
     #[inline]
     pub fn skip_ascii_digits(&mut self) -> Range<usize> {
         self.cursor.skip_ascii_digits()
     }
 
     /// Skips all characters that can continue an ASCII identifier.
+    ///
+    /// This includes alphanumeric characters and underscores.
+    /// Returns the range of the skipped characters.
     #[inline]
     pub fn skip_ascii_ident_continue(&mut self) -> Range<usize> {
         self.cursor.skip_ascii_ident_continue()
     }
 
     /// Skips all characters until the target byte is encountered.
+    ///
+    /// The target byte itself is NOT consumed.
+    /// Returns the range of the skipped characters.
     #[inline]
     pub fn skip_until(&mut self, target: u8) -> Range<usize> {
         self.cursor.skip_until(target)
     }
 
-    /// Scans an ASCII identifier (starts with alpha/_, continues with alphanumeric/_).
+    /// Scans an ASCII identifier.
+    ///
+    /// An identifier must start with an alphabetic character or an underscore,
+    /// and can be followed by any number of alphanumeric characters or underscores.
+    ///
+    /// # Arguments
+    ///
+    /// * `kind` - The token type to assign if an identifier is found.
+    ///
+    /// # Returns
+    ///
+    /// `true` if an identifier was successfully scanned and added.
     #[inline]
     pub fn scan_ascii_identifier(&mut self, kind: L::TokenType) -> bool {
         let start = self.get_position();
@@ -470,6 +508,13 @@ impl<'s, S: Source + ?Sized, L: Language> LexerState<'s, S, L> {
     }
 
     /// Scans a line comment starting with the given prefix.
+    ///
+    /// Consumes the prefix and all characters until the next newline or EOF.
+    ///
+    /// # Arguments
+    ///
+    /// * `kind` - The token type for the line comment.
+    /// * `prefix` - The string sequence that starts the comment (e.g., "//").
     #[inline]
     pub fn scan_line_comment(&mut self, kind: L::TokenType, prefix: &str) -> bool {
         let start = self.get_position();
@@ -482,6 +527,15 @@ impl<'s, S: Source + ?Sized, L: Language> LexerState<'s, S, L> {
     }
 
     /// Scans a block comment with given start and end sequences.
+    ///
+    /// Handles nested comments if the underlying implementation supports it,
+    /// though this basic implementation is non-recursive.
+    ///
+    /// # Arguments
+    ///
+    /// * `kind` - The token type for the block comment.
+    /// * `start_seq` - The sequence that starts the block (e.g., "/*").
+    /// * `end_seq` - The sequence that ends the block (e.g., "*/").
     #[inline]
     pub fn scan_block_comment(&mut self, kind: L::TokenType, start_seq: &str, end_seq: &str) -> bool {
         let start = self.get_position();
@@ -506,7 +560,7 @@ impl<'s, S: Source + ?Sized, L: Language> LexerState<'s, S, L> {
     ///
     /// # Returns
     ///
-    /// A slice of tokens collected during the lexing process
+    /// A slice of tokens collected during the lexing process.
     #[inline]
     pub fn tokens(&self) -> &[Token<L::TokenType>] {
         &self.tokens
@@ -516,11 +570,11 @@ impl<'s, S: Source + ?Sized, L: Language> LexerState<'s, S, L> {
     ///
     /// # Arguments
     ///
-    /// * `offset` - The new byte offset position
+    /// * `offset` - The new byte offset position.
     ///
     /// # Returns
     ///
-    /// The previous byte offset position
+    /// The previous byte offset position.
     #[inline]
     pub fn set_position(&mut self, offset: usize) -> usize {
         self.cursor.set_position(offset)
@@ -531,12 +585,12 @@ impl<'s, S: Source + ?Sized, L: Language> LexerState<'s, S, L> {
         self.cursor.source()
     }
 
-    /// Returns the text in the specified range.
+    /// Returns the text in the specified byte range.
     pub fn get_text_in(&self, range: Range<usize>) -> Cow<'_, str> {
         self.cursor.source().get_text_in(range)
     }
 
-    /// Returns the text from the specified offset to the end.
+    /// Returns the text from the specified byte offset to the end of the source.
     pub fn get_text_from(&self, offset: usize) -> Cow<'_, str> {
         self.cursor.source().get_text_from(offset)
     }
@@ -547,6 +601,8 @@ impl<'s, S: Source + ?Sized, L: Language> LexerState<'s, S, L> {
     }
 
     /// Consumes the pattern if it exists at the current position.
+    ///
+    /// Returns `true` if the pattern was found and consumed, advancing the cursor.
     pub fn consume_if_starts_with(&mut self, pattern: &str) -> bool {
         self.cursor.consume_if_starts_with(pattern)
     }
@@ -555,17 +611,17 @@ impl<'s, S: Source + ?Sized, L: Language> LexerState<'s, S, L> {
     ///
     /// # Returns
     ///
-    /// A slice of tokens collected during lexing
+    /// A slice of tokens collected during lexing.
     #[inline]
     pub fn get_tokens(&self) -> &[Token<L::TokenType>] {
         &self.tokens
     }
 
-    /// Adds an error to the lexer state.
+    /// Adds an error to the lexer state's diagnostics.
     ///
     /// # Arguments
     ///
-    /// * `error` - The error to add to the diagnostics
+    /// * `error` - The error to add.
     #[inline]
     pub fn add_error(&mut self, error: impl Into<OakError>) {
         self.errors.push(error.into());
@@ -575,19 +631,18 @@ impl<'s, S: Source + ?Sized, L: Language> LexerState<'s, S, L> {
     ///
     /// # Arguments
     ///
-    /// * `kind` - The kind of the token
-    /// * `start` - The starting byte offset of the token
-    /// * `end` - The ending byte offset of the token
+    /// * `kind` - The kind/type of the token.
+    /// * `start` - The starting byte offset.
+    /// * `end` - The ending byte offset.
     #[inline]
     pub fn add_token(&mut self, kind: L::TokenType, start: usize, end: usize) {
         self.tokens.push(Token { kind, span: Range { start, end } });
     }
 
-    /// Adds an end-of-file token to the lexer state.
+    /// Adds an end-of-file (EOF) token to the lexer state.
     ///
-    /// This method creates and adds an END_OF_STREAM token at the current position.
-    /// It's typically called when the lexer reaches the end of the source text
-    /// to mark the termination of the token stream.
+    /// This method creates and adds an `END_OF_STREAM` token at the current position.
+    /// It is typically called when the lexer reaches the end of the source text.
     ///
     /// # Examples
     ///
@@ -637,7 +692,7 @@ impl<'s, S: Source + ?Sized, L: Language> LexerState<'s, S, L> {
     #[inline]
     pub fn add_eof(&mut self) {
         let end = self.get_position();
-        self.add_token(L::TokenType::END_OF_STREAM, end, end);
+        self.add_token(L::TokenType::END_OF_STREAM, end, end)
     }
 
     /// Gets the current character at the current position.
@@ -715,7 +770,7 @@ impl<'s, S: Source + ?Sized, L: Language> LexerState<'s, S, L> {
     /// let mut state = LexerState::<_, SimpleLanguage>::new(&source);
     ///
     /// // Create a token for "hello"
-    /// let token = Token { kind: SimpleToken::Identifier, span: Range { start: 0, end: 5 } };
+    /// let token = Token { kind: SimpleToken::Identifier, span: Range { start: 0, end: 5 } }
     ///
     /// // Initially at position 0
     /// assert_eq!(state.get_position(), 0);
@@ -819,12 +874,7 @@ impl<'s, S: Source + ?Sized, L: Language> LexerState<'s, S, L> {
     pub fn take_while(&mut self, mut pred: impl FnMut(char) -> bool) -> Range<usize> {
         let start = self.cursor.position();
         while let Some(ch) = self.peek() {
-            if pred(ch) {
-                self.advance(ch.len_utf8());
-            }
-            else {
-                break;
-            }
+            if pred(ch) { self.advance(ch.len_utf8()) } else { break }
         }
         Range { start, end: self.cursor.position() }
     }
@@ -923,13 +973,13 @@ impl<'s, S: Source + ?Sized, L: Language> LexerState<'s, S, L> {
         if self.cursor.position() == safe_point {
             if let Some(ch) = self.current() {
                 // Skip current character
-                self.advance(ch.len_utf8());
+                self.advance(ch.len_utf8())
             }
             else {
                 // Advance anyway to prevent infinite loop
-                self.advance(1);
+                self.advance(1)
             }
-            // tracing::warn!("deadlock");
+            // tracing::warn!("deadlock")
         }
     }
 

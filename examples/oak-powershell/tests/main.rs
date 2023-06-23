@@ -1,7 +1,7 @@
 mod lexer;
 
-use oak_diagnostic::testing::lexing::LexerTester;
 use oak_powershell::{language::PowerShellLanguage, lexer::PowerShellLexer};
+use oak_testing::lexing::LexerTester;
 use std::{path::Path, time::Duration};
 
 #[test]

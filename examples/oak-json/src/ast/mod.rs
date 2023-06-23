@@ -1,31 +1,43 @@
+#![doc = include_str!("readme.md")]
 use core::range::Range;
 use oak_core::source::{SourceBuffer, ToSource};
+#[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
 
-#[cfg(feature = "pretty-print")]
-use oak_pretty_print::{AsDocument, Document, FormatRule, doc as pp_doc};
+#[cfg(feature = "oak-pretty-print")]
+use oak_pretty_print::{AsDocument, doc as pp_doc};
 
-/// JSON AST 根节点
-#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
-#[cfg_attr(feature = "pretty-print", derive(AsDocument))]
+/// The root node of a JSON AST.
+#[derive(Clone, Debug, PartialEq)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "oak-pretty-print", derive(AsDocument))]
 pub struct JsonRoot {
+    /// The top-level value of the JSON document.
     pub value: JsonValue,
 }
 
 impl ToSource for JsonRoot {
     fn to_source(&self, buffer: &mut SourceBuffer) {
-        self.value.to_source(buffer);
+        self.value.to_source(buffer)
     }
 }
 
-#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
-#[cfg_attr(feature = "pretty-print", derive(AsDocument))]
+/// Represents any valid JSON value.
+#[derive(Clone, Debug, PartialEq)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "oak-pretty-print", derive(AsDocument))]
 pub enum JsonValue {
+    /// A JSON object (collection of key-value pairs).
     Object(JsonObject),
+    /// A JSON array (ordered list of values).
     Array(JsonArray),
+    /// A JSON string.
     String(JsonString),
+    /// A JSON number (represented as f64).
     Number(JsonNumber),
+    /// A JSON boolean (true or false).
     Boolean(JsonBoolean),
+    /// A JSON null value.
     Null(JsonNull),
 }
 
@@ -215,25 +227,32 @@ impl ToSource for JsonValue {
     }
 }
 
-#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
-#[cfg_attr(feature = "pretty-print", derive(AsDocument))]
-#[cfg_attr(feature = "pretty-print", oak(doc = if self.fields.is_empty() {
-    pp_doc!("{}")
-} else {
-    pp_doc!(group [
-        "{",
-        indent [line, join(&self.fields, [",", line])],
-        line,
-        "}"
-    ])
-}))]
+/// Represents a JSON object.
+#[derive(Clone, Debug, PartialEq)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "oak-pretty-print", derive(AsDocument))]
+#[cfg_attr(feature = "oak-pretty-print", oak(doc = 
+    if _self.fields.is_empty() {
+        pp_doc!("{}")
+    } else {
+        pp_doc!(group( [
+            "{",
+            indent( [line, join(_self.fields.iter(), [",", line])]),
+            line,
+            "}"
+        ]))
+    }
+))]
 pub struct JsonObject {
+    /// The fields (key-value pairs) of the object.
     pub fields: Vec<JsonField>,
-    #[serde(with = "oak_core::serde_range")]
+    /// The source range of the object.
+    #[cfg_attr(feature = "serde", serde(with = "oak_core::serde_range"))]
     pub span: Range<usize>,
 }
 
 impl JsonObject {
+    /// Returns the value associated with the given key, if it exists.
     pub fn get(&self, key: &str) -> Option<&JsonValue> {
         self.fields.iter().find(|f| f.name.value == key).map(|f| &f.value)
     }
@@ -244,21 +263,26 @@ impl ToSource for JsonObject {
         buffer.push("{");
         for (i, field) in self.fields.iter().enumerate() {
             if i > 0 {
-                buffer.push(",");
+                buffer.push(",")
             }
-            field.to_source(buffer);
+            field.to_source(buffer)
         }
-        buffer.push("}");
+        buffer.push("}")
     }
 }
 
-#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
-#[cfg_attr(feature = "pretty-print", derive(AsDocument))]
-#[cfg_attr(feature = "pretty-print", oak(doc = [&self.name, ": ", &self.value]))]
+/// Represents a single field (key-value pair) in a JSON object.
+#[derive(Clone, Debug, PartialEq)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "oak-pretty-print", derive(AsDocument))]
+#[cfg_attr(feature = "oak-pretty-print", oak(doc = [self.name.as_document(), ": ", self.value.as_document()]))]
 pub struct JsonField {
+    /// The name (key) of the field.
     pub name: JsonString,
+    /// The value of the field.
     pub value: JsonValue,
-    #[serde(with = "oak_core::serde_range")]
+    /// The source range of the field.
+    #[cfg_attr(feature = "serde", serde(with = "oak_core::serde_range"))]
     pub span: Range<usize>,
 }
 
@@ -266,25 +290,31 @@ impl ToSource for JsonField {
     fn to_source(&self, buffer: &mut SourceBuffer) {
         self.name.to_source(buffer);
         buffer.push(":");
-        self.value.to_source(buffer);
+        self.value.to_source(buffer)
     }
 }
 
-#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
-#[cfg_attr(feature = "pretty-print", derive(AsDocument))]
-#[cfg_attr(feature = "pretty-print", oak(doc = if self.elements.is_empty() {
-    pp_doc!("[]")
-} else {
-    pp_doc!(group [
-        "[",
-        indent [line, join(&self.elements, [",", line])],
-        line,
-        "]"
-    ])
-}))]
+/// Represents a JSON array.
+#[derive(Clone, Debug, PartialEq)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "oak-pretty-print", derive(AsDocument))]
+#[cfg_attr(feature = "oak-pretty-print", oak(doc = 
+    if _self.elements.is_empty() {
+        pp_doc!("[]")
+    } else {
+        pp_doc!(group( [
+            "[",
+            indent( [line, join(_self.elements.iter(), [",", line])]),
+            line,
+            "]"
+        ]))
+    }
+))]
 pub struct JsonArray {
+    /// The elements of the array.
     pub elements: Vec<JsonValue>,
-    #[serde(with = "oak_core::serde_range")]
+    /// The source range of the array.
+    #[cfg_attr(feature = "serde", serde(with = "oak_core::serde_range"))]
     pub span: Range<usize>,
 }
 
@@ -293,20 +323,24 @@ impl ToSource for JsonArray {
         buffer.push("[");
         for (i, element) in self.elements.iter().enumerate() {
             if i > 0 {
-                buffer.push(",");
+                buffer.push(",")
             }
-            element.to_source(buffer);
+            element.to_source(buffer)
         }
-        buffer.push("]");
+        buffer.push("]")
     }
 }
 
-#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
-#[cfg_attr(feature = "pretty-print", derive(AsDocument))]
-#[cfg_attr(feature = "pretty-print", oak(doc = format!("\"{}\"", self.value)))]
+/// Represents a JSON string literal.
+#[derive(Clone, Debug, PartialEq)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "oak-pretty-print", derive(AsDocument))]
+#[cfg_attr(feature = "oak-pretty-print", oak(doc = format!("\"{}\"", self.value)))]
 pub struct JsonString {
+    /// The string content (without quotes).
     pub value: String,
-    #[serde(with = "oak_core::serde_range")]
+    /// The source range of the string literal.
+    #[cfg_attr(feature = "serde", serde(with = "oak_core::serde_range"))]
     pub span: Range<usize>,
 }
 
@@ -314,50 +348,61 @@ impl ToSource for JsonString {
     fn to_source(&self, buffer: &mut SourceBuffer) {
         buffer.push("\"");
         buffer.push(&self.value);
-        buffer.push("\"");
+        buffer.push("\"")
     }
 }
 
-#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
-#[cfg_attr(feature = "pretty-print", derive(AsDocument))]
-#[cfg_attr(feature = "pretty-print", oak(doc = self.value.to_string()))]
+/// Represents a JSON number literal.
+#[derive(Clone, Debug, PartialEq)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "oak-pretty-print", derive(AsDocument))]
+#[cfg_attr(feature = "oak-pretty-print", oak(doc = self.value.to_string()))]
 pub struct JsonNumber {
+    /// The numeric value.
     pub value: f64,
-    #[serde(with = "oak_core::serde_range")]
+    /// The source range of the number literal.
+    #[cfg_attr(feature = "serde", serde(with = "oak_core::serde_range"))]
     pub span: Range<usize>,
 }
 
 impl ToSource for JsonNumber {
     fn to_source(&self, buffer: &mut SourceBuffer) {
-        buffer.push(&self.value.to_string());
+        buffer.push(&self.value.to_string())
     }
 }
 
-#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
-#[cfg_attr(feature = "pretty-print", derive(AsDocument))]
-#[cfg_attr(feature = "pretty-print", oak(doc = if self.value { "true" } else { "false" }))]
+/// Represents a JSON boolean literal.
+#[derive(Clone, Debug, PartialEq)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "oak-pretty-print", derive(AsDocument))]
+#[cfg_attr(feature = "oak-pretty-print", oak(doc = if self.value { "true" } else { "false" }))]
 pub struct JsonBoolean {
+    /// The boolean value.
     pub value: bool,
-    #[serde(with = "oak_core::serde_range")]
+    /// The source range of the boolean literal.
+    #[cfg_attr(feature = "serde", serde(with = "oak_core::serde_range"))]
     pub span: Range<usize>,
 }
 
 impl ToSource for JsonBoolean {
     fn to_source(&self, buffer: &mut SourceBuffer) {
-        buffer.push(if self.value { "true" } else { "false" });
+        buffer.push(if self.value { "true" } else { "false" })
     }
 }
 
-#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
-#[cfg_attr(feature = "pretty-print", derive(AsDocument))]
-#[cfg_attr(feature = "pretty-print", oak(doc = "null"))]
+/// Represents a JSON null literal.
+#[derive(Clone, Debug, PartialEq)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "oak-pretty-print", derive(AsDocument))]
+#[cfg_attr(feature = "oak-pretty-print", oak(doc = "null"))]
 pub struct JsonNull {
-    #[serde(with = "oak_core::serde_range")]
+    /// The source range of the null literal.
+    #[cfg_attr(feature = "serde", serde(with = "oak_core::serde_range"))]
     pub span: Range<usize>,
 }
 
 impl ToSource for JsonNull {
     fn to_source(&self, buffer: &mut SourceBuffer) {
-        buffer.push("null");
+        buffer.push("null")
     }
 }

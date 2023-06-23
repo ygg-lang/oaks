@@ -1,101 +1,18 @@
-# Oak PureScript Parser
+# 🚀 oak-purescript
 
-## Overview
+[![Crates.io](https://img.shields.io/crates/v/oak-purescript.svg)](https://crates.io/crates/oak-purescript)
+[![Documentation](https://docs.rs/oak-purescript/badge.svg)](https://docs.rs/oak-purescript)
 
-`Oak of PureScript` is a powerful and efficient parser for the PureScript programming language, built using the `oak` parser combinator library. It provides a robust solution for parsing PureScript syntax, enabling various applications such as static analysis of PureScript code, refactoring tools, and automated code generation.
+**Making PURESCRIPT processing simple** — A high-performance, incremental PURESCRIPT parser built on the Oak framework.
 
-## Features
+## 🎯 Project Vision
 
-- **Comprehensive PureScript Grammar**: Supports all standard PureScript constructs, including modules, functions, types, and expressions.
-- **High Performance**: Leverages `oak`'s optimized parsing techniques for speed.
-- **Abstract Syntax Tree (AST)**: Generates a detailed and easy-to-navigate AST representing the PureScript code structure.
-- **Error Handling**: Provides meaningful error messages for better debugging of malformed PureScript code.
-- **Extensible**: Easily extendable to support custom PureScript extensions or dialects.
+`oak-purescript` is dedicated to providing industrial-grade parsing support for the PURESCRIPT language. By leveraging Rust's high-performance characteristics and Oak's incremental parsing architecture, it can easily handle a variety of application scenarios, from simple script analysis to complex IDE language servers.
 
-## Quick Start
+## ✨ Core Features
 
-To use `Oak of PureScript` in your Rust project, add it as a dependency in your `Cargo.toml`:
-
-```toml
-[dependencies]
-Oak of PureScript = "0.1.0" # Replace with the latest version
-oak = "0.1.0" # Replace with the latest version
-```
-
-## Parsing Examples
-
-Here's a simple example demonstrating how to parse PureScript code:
-
-```rust
-use pex_purescript::purescript_parser;
-
-fn main() {
-    let input = r#"
-module HelloWorld where
-
-import Prelude
-
-greet :: String -> String
-greet name = "Hello, " <> name <> "!"
-
-main :: Effect Unit
-main = log (greet "PureScript")
-"#;
-    match purescript_parser::parse(input) {
-        Ok(ast) => {
-            println!("Successfully parsed PureScript code:\n{:#?}", ast);
-        }
-        Err(err) => {
-            eprintln!("Failed to parse PureScript code: {}", err);
-        }
-    }
-}
-```
-
-## Advanced Features
-
-### Customizing the Parser
-
-The `oak` library allows for flexible customization of the parser. You can modify the grammar rules or add new ones to suit your specific needs, such as supporting experimental PureScript features. Refer to the `oak` documentation for more details on parser customization.
-
-### Error Recovery
-
-`Oak of PureScript` can be extended with error recovery mechanisms to handle malformed PureScript code gracefully, allowing for partial parsing and better resilience in real-world scenarios.
-
-## AST Structure
-
-The generated AST for PureScript provides a hierarchical representation of the code elements. For instance, a function definition might result in an AST structure similar to this:
-
-```rust
-// Simplified AST representation for:
-// greet :: String -> String
-// greet name = "Hello, " <> name <> "!"
-pex_purescript::ast::Node::FunctionDefinition {
-    name: "greet".to_string(),
-    type_signature: Some(TypeSignature {
-        input: "String".to_string(),
-        output: "String".to_string()
-    }),
-    implementation: // ... implementation details ...
-}
-```
-
-## Performance
-
-`Oak of PureScript` is designed for performance. Benchmarks show efficient parsing of large PureScript codebases. Optimizations include memoization, efficient backtracking, and direct AST construction.
-
-## Integration
-
-`Oak of PureScript` can be integrated into various tools and applications:
-
-- **PureScript IDEs**: Provide syntax highlighting, code completion, and refactoring capabilities.
-- **Static Analyzers**: Identify potential bugs, code smells, and security vulnerabilities.
-- **Code Transformers**: Automate code modifications and migrations.
-
-## Examples
-
-Explore the `examples` directory within the `oak-purescript` project for more usage examples and demonstrations of specific PureScript parsing features.
-
-## Contributing
-
-Contributions to `Oak of PureScript` are welcome! If you find a bug or have a feature request, please open an issue on the GitHub repository. For major changes, please open a discussion first.
+- **⚡ Blazing Fast**: Fully utilizes Rust's performance advantages to achieve sub-millisecond parsing response times.
+- **🔄 Incremental Parsing**: Built-in support for partial updates, demonstrating extremely high efficiency when processing large files.
+- **🌳 Structured Output**: Provides a clear, easy-to-traverse syntax tree or data structure.
+- **🛡️ Robustness**: Features a comprehensive error recovery mechanism, ensuring normal operation even when input is incomplete.
+- **🧩 Easy Integration**: Designed with high cohesion and low coupling, allowing for quick integration into existing Rust projects.

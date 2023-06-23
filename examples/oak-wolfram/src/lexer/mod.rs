@@ -1,4 +1,7 @@
-use crate::{kind::WolframSyntaxKind, language::WolframLanguage};
+#![doc = include_str!("readme.md")]
+pub mod token_type;
+
+use crate::{language::WolframLanguage, lexer::token_type::WolframTokenType};
 use oak_core::{
     Lexer, LexerCache, LexerState, OakError,
     lexer::{CommentConfig, LexOutput, StringConfig, WhitespaceConfig},
@@ -72,11 +75,7 @@ impl<'config> WolframLexer<'config> {
     }
 
     fn skip_whitespace<S: Source + ?Sized>(&self, state: &mut State<S>) -> bool {
-        if WL_WHITESPACE.scan(state, WolframSyntaxKind::Whitespace) {
-            return true;
-        }
-
-        // Handle newlines separately
+        // Handle newlines first
         if let Some(ch) = state.peek() {
             if ch == '\n' || ch == '\r' {
                 let start = state.get_position();
@@ -84,19 +83,24 @@ impl<'config> WolframLexer<'config> {
                 if ch == '\r' && state.peek() == Some('\n') {
                     state.advance(1);
                 }
-                state.add_token(WolframSyntaxKind::Newline, start, state.get_position());
+                state.add_token(WolframTokenType::Newline, start, state.get_position());
                 return true;
             }
         }
+
+        if WL_WHITESPACE.scan(state, WolframTokenType::Whitespace) {
+            return true;
+        }
+
         false
     }
 
     fn skip_comment<S: Source + ?Sized>(&self, state: &mut State<S>) -> bool {
-        WL_COMMENT.scan(state, WolframSyntaxKind::Comment, WolframSyntaxKind::Comment)
+        WL_COMMENT.scan(state, WolframTokenType::Comment, WolframTokenType::Comment)
     }
 
     fn lex_string_literal<S: Source + ?Sized>(&self, state: &mut State<S>) -> bool {
-        WL_STRING.scan(state, WolframSyntaxKind::String)
+        WL_STRING.scan(state, WolframTokenType::String)
     }
 
     fn lex_number_literal<S: Source + ?Sized>(&self, state: &mut State<S>) -> bool {
@@ -165,7 +169,7 @@ impl<'config> WolframLexer<'config> {
         }
 
         let end = state.get_position();
-        state.add_token(if is_real { WolframSyntaxKind::Real } else { WolframSyntaxKind::Integer }, start, end);
+        state.add_token(if is_real { WolframTokenType::Real } else { WolframTokenType::Integer }, start, end);
         true
     }
 
@@ -193,39 +197,39 @@ impl<'config> WolframLexer<'config> {
         let end = state.get_position();
         let text = state.source().get_text_in((start..end).into());
         let kind = match text.as_ref() {
-            "If" => WolframSyntaxKind::If,
-            "Then" => WolframSyntaxKind::Then,
-            "Else" => WolframSyntaxKind::Else,
-            "While" => WolframSyntaxKind::While,
-            "For" => WolframSyntaxKind::For,
-            "Do" => WolframSyntaxKind::Do,
-            "Function" => WolframSyntaxKind::Function,
-            "Module" => WolframSyntaxKind::Module,
-            "Block" => WolframSyntaxKind::Block,
-            "With" => WolframSyntaxKind::With,
-            "Table" => WolframSyntaxKind::Table,
-            "Map" => WolframSyntaxKind::Map,
-            "Apply" => WolframSyntaxKind::Apply,
-            "Select" => WolframSyntaxKind::Select,
-            "Cases" => WolframSyntaxKind::Cases,
-            "Rule" => WolframSyntaxKind::Rule,
-            "RuleDelayed" => WolframSyntaxKind::RuleDelayed,
-            "Set" => WolframSyntaxKind::Set,
-            "SetDelayed" => WolframSyntaxKind::SetDelayed,
-            "Unset" => WolframSyntaxKind::Unset,
-            "Clear" => WolframSyntaxKind::Clear,
-            "ClearAll" => WolframSyntaxKind::ClearAll,
-            "Return" => WolframSyntaxKind::Return,
-            "Break" => WolframSyntaxKind::Break,
-            "Continue" => WolframSyntaxKind::Continue,
-            "True" => WolframSyntaxKind::True,
-            "False" => WolframSyntaxKind::False,
-            "Null" => WolframSyntaxKind::Null,
-            "Export" => WolframSyntaxKind::Export,
-            "Import" => WolframSyntaxKind::Import,
-            _ => WolframSyntaxKind::Identifier,
+            "If" => WolframTokenType::If,
+            "Then" => WolframTokenType::Then,
+            "Else" => WolframTokenType::Else,
+            "While" => WolframTokenType::While,
+            "For" => WolframTokenType::For,
+            "Do" => WolframTokenType::Do,
+            "Function" => WolframTokenType::Function,
+            "Module" => WolframTokenType::Module,
+            "Block" => WolframTokenType::Block,
+            "With" => WolframTokenType::With,
+            "Table" => WolframTokenType::Table,
+            "Map" => WolframTokenType::Map,
+            "Apply" => WolframTokenType::Apply,
+            "Select" => WolframTokenType::Select,
+            "Cases" => WolframTokenType::Cases,
+            "Rule" => WolframTokenType::Rule,
+            "RuleDelayed" => WolframTokenType::RuleDelayed,
+            "Set" => WolframTokenType::Set,
+            "SetDelayed" => WolframTokenType::SetDelayed,
+            "Unset" => WolframTokenType::Unset,
+            "Clear" => WolframTokenType::Clear,
+            "ClearAll" => WolframTokenType::ClearAll,
+            "Return" => WolframTokenType::Return,
+            "Break" => WolframTokenType::Break,
+            "Continue" => WolframTokenType::Continue,
+            "True" => WolframTokenType::True,
+            "False" => WolframTokenType::False,
+            "Null" => WolframTokenType::Null,
+            "Export" => WolframTokenType::Export,
+            "Import" => WolframTokenType::Import,
+            _ => WolframTokenType::Identifier,
         };
-        state.add_token(kind, start, state.get_position());
+        state.add_token(kind, start, end);
         true
     }
 
@@ -233,24 +237,35 @@ impl<'config> WolframLexer<'config> {
         let start = state.get_position();
 
         // Multi-character operators (prefer longest matches first)
-        let patterns: &[(&str, WolframSyntaxKind)] = &[
-            ("===", WolframSyntaxKind::Equal),    // SameQ
-            ("=!=", WolframSyntaxKind::NotEqual), // UnsameQ
-            ("->", WolframSyntaxKind::Arrow),
-            ("=>", WolframSyntaxKind::DoubleArrow),
-            ("==", WolframSyntaxKind::Equal),
-            ("!=", WolframSyntaxKind::NotEqual),
-            ("<=", WolframSyntaxKind::LessEqual),
-            (">=", WolframSyntaxKind::GreaterEqual),
-            ("&&", WolframSyntaxKind::And),
-            ("||", WolframSyntaxKind::Or),
-            ("+=", WolframSyntaxKind::AddTo),
-            ("-=", WolframSyntaxKind::SubtractFrom),
-            ("*=", WolframSyntaxKind::TimesBy),
-            ("/=", WolframSyntaxKind::DivideBy),
-            ("___", WolframSyntaxKind::TripleUnderscore),
-            ("__", WolframSyntaxKind::DoubleUnderscore),
-            ("##", WolframSyntaxKind::SlotSequence),
+        let patterns: &[(&str, WolframTokenType)] = &[
+            ("===", WolframTokenType::Equal),    // SameQ
+            ("=!=", WolframTokenType::NotEqual), // UnsameQ
+            ("@@@", WolframTokenType::ApplyLevelOperator),
+            ("//@", WolframTokenType::MapAllOperator),
+            (":=", WolframTokenType::SetDelayed),
+            (":>", WolframTokenType::RuleDelayedOp),
+            ("->", WolframTokenType::Arrow),
+            ("=>", WolframTokenType::DoubleArrow),
+            ("/@", WolframTokenType::MapOperator),
+            ("@@", WolframTokenType::ApplyOperator),
+            ("//", WolframTokenType::SlashSlash),
+            ("@*", WolframTokenType::AtStar),
+            ("/*", WolframTokenType::StarSlash),
+            ("<>", WolframTokenType::StringJoin),
+            ("==", WolframTokenType::Equal),
+            ("!=", WolframTokenType::NotEqual),
+            ("<=", WolframTokenType::LessEqual),
+            (">=", WolframTokenType::GreaterEqual),
+            ("&&", WolframTokenType::And),
+            ("||", WolframTokenType::Or),
+            ("+=", WolframTokenType::AddTo),
+            ("-=", WolframTokenType::SubtractFrom),
+            ("*=", WolframTokenType::TimesBy),
+            ("/=", WolframTokenType::DivideBy),
+            ("!!", WolframTokenType::Factorial), // Double Factorial
+            ("___", WolframTokenType::TripleUnderscore),
+            ("__", WolframTokenType::DoubleUnderscore),
+            ("##", WolframTokenType::SlotSequence),
         ];
 
         for (pat, kind) in patterns {
@@ -264,20 +279,22 @@ impl<'config> WolframLexer<'config> {
         // Single-character operators
         if let Some(ch) = state.peek() {
             let kind = match ch {
-                '+' => Some(WolframSyntaxKind::Plus),
-                '-' => Some(WolframSyntaxKind::Minus),
-                '*' => Some(WolframSyntaxKind::Times),
-                '/' => Some(WolframSyntaxKind::Divide),
-                '^' => Some(WolframSyntaxKind::Power),
-                '=' => Some(WolframSyntaxKind::Assign),
-                '<' => Some(WolframSyntaxKind::Less),
-                '>' => Some(WolframSyntaxKind::Greater),
-                '!' => Some(WolframSyntaxKind::Not),
-                '?' => Some(WolframSyntaxKind::Question),
-                '_' => Some(WolframSyntaxKind::Underscore),
-                '#' => Some(WolframSyntaxKind::Slot),
-                '.' => Some(WolframSyntaxKind::Dot),
-                ':' => Some(WolframSyntaxKind::Colon),
+                '+' => Some(WolframTokenType::Plus),
+                '-' => Some(WolframTokenType::Minus),
+                '*' => Some(WolframTokenType::Times),
+                '/' => Some(WolframTokenType::Divide),
+                '^' => Some(WolframTokenType::Power),
+                '=' => Some(WolframTokenType::Assign),
+                '<' => Some(WolframTokenType::Less),
+                '>' => Some(WolframTokenType::Greater),
+                '?' => Some(WolframTokenType::Question),
+                '_' => Some(WolframTokenType::Underscore),
+                '#' => Some(WolframTokenType::Slot),
+                '.' => Some(WolframTokenType::Dot),
+                ':' => Some(WolframTokenType::Colon),
+                '@' => Some(WolframTokenType::At),
+                '&' => Some(WolframTokenType::Ampersand),
+                '!' => Some(WolframTokenType::Factorial),
                 _ => None,
             };
             if let Some(k) = kind {
@@ -293,18 +310,18 @@ impl<'config> WolframLexer<'config> {
         let start = state.get_position();
         if let Some(ch) = state.peek() {
             let kind = match ch {
-                '(' => WolframSyntaxKind::LeftParen,
-                ')' => WolframSyntaxKind::RightParen,
-                '[' => WolframSyntaxKind::LeftBracket,
-                ']' => WolframSyntaxKind::RightBracket,
-                '{' => WolframSyntaxKind::LeftBrace,
-                '}' => WolframSyntaxKind::RightBrace,
-                ',' => WolframSyntaxKind::Comma,
-                ';' => WolframSyntaxKind::Semicolon,
+                '(' => WolframTokenType::LeftParen,
+                ')' => WolframTokenType::RightParen,
+                '[' => WolframTokenType::LeftBracket,
+                ']' => WolframTokenType::RightBracket,
+                '{' => WolframTokenType::LeftBrace,
+                '}' => WolframTokenType::RightBrace,
+                ',' => WolframTokenType::Comma,
+                ';' => WolframTokenType::Semicolon,
                 _ => {
                     // Unknown character, treat as error
                     state.advance(ch.len_utf8());
-                    state.add_token(WolframSyntaxKind::Error, start, state.get_position());
+                    state.add_token(WolframTokenType::Error, start, state.get_position());
                     return true;
                 }
             };

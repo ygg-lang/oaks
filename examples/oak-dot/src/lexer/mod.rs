@@ -1,4 +1,7 @@
-use crate::{kind::DotSyntaxKind, language::DotLanguage};
+#![doc = include_str!("readme.md")]
+pub mod token_type;
+
+use crate::{language::DotLanguage, lexer::token_type::DotTokenType};
 use oak_core::{Lexer, LexerCache, LexerState, OakError, lexer::LexOutput, source::Source};
 
 type State<'a, S> = LexerState<'a, S, DotLanguage>;
@@ -27,7 +30,7 @@ impl<'config> DotLexer<'config> {
         }
 
         if state.get_position() > start_pos {
-            state.add_token(DotSyntaxKind::Whitespace, start_pos, state.get_position());
+            state.add_token(DotTokenType::Whitespace, start_pos, state.get_position());
             true
         }
         else {
@@ -41,7 +44,7 @@ impl<'config> DotLexer<'config> {
 
         if let Some('\n') = state.peek() {
             state.advance(1);
-            state.add_token(DotSyntaxKind::Newline, start_pos, state.get_position());
+            state.add_token(DotTokenType::Newline, start_pos, state.get_position());
             true
         }
         else if let Some('\r') = state.peek() {
@@ -49,7 +52,7 @@ impl<'config> DotLexer<'config> {
             if let Some('\n') = state.peek() {
                 state.advance(1);
             }
-            state.add_token(DotSyntaxKind::Newline, start_pos, state.get_position());
+            state.add_token(DotTokenType::Newline, start_pos, state.get_position());
             true
         }
         else {
@@ -70,7 +73,7 @@ impl<'config> DotLexer<'config> {
                 state.advance(ch.len_utf8());
             }
 
-            state.add_token(DotSyntaxKind::Comment, start_pos, state.get_position());
+            state.add_token(DotTokenType::Comment, start_pos, state.get_position());
             true
         }
         else if state.consume_if_starts_with("/*") {
@@ -83,7 +86,7 @@ impl<'config> DotLexer<'config> {
                 state.advance(ch.len_utf8());
             }
 
-            state.add_token(DotSyntaxKind::Comment, start_pos, state.get_position());
+            state.add_token(DotTokenType::Comment, start_pos, state.get_position());
             true
         }
         else if state.consume_if_starts_with("#") {
@@ -95,7 +98,7 @@ impl<'config> DotLexer<'config> {
                 state.advance(ch.len_utf8());
             }
 
-            state.add_token(DotSyntaxKind::Comment, start_pos, state.get_position());
+            state.add_token(DotTokenType::Comment, start_pos, state.get_position());
             true
         }
         else {
@@ -124,13 +127,13 @@ impl<'config> DotLexer<'config> {
                 let text = state.get_text_in((start_pos..end_pos).into());
 
                 let token_kind = match text.to_lowercase().as_str() {
-                    "graph" => DotSyntaxKind::Graph,
-                    "digraph" => DotSyntaxKind::Digraph,
-                    "subgraph" => DotSyntaxKind::Subgraph,
-                    "node" => DotSyntaxKind::Node,
-                    "edge" => DotSyntaxKind::Edge,
-                    "strict" => DotSyntaxKind::Strict,
-                    _ => DotSyntaxKind::Identifier,
+                    "graph" => DotTokenType::Graph,
+                    "digraph" => DotTokenType::Digraph,
+                    "subgraph" => DotTokenType::Subgraph,
+                    "node" => DotTokenType::Node,
+                    "edge" => DotTokenType::Edge,
+                    "strict" => DotTokenType::Strict,
+                    _ => DotTokenType::Identifier,
                 };
 
                 state.add_token(token_kind, start_pos, state.get_position());
@@ -213,7 +216,7 @@ impl<'config> DotLexer<'config> {
             }
 
             if has_digit || (is_negative && state.get_position() > start_pos + 1) {
-                state.add_token(DotSyntaxKind::Number, start_pos, state.get_position());
+                state.add_token(DotTokenType::Number, start_pos, state.get_position());
                 true
             }
             else {
@@ -237,7 +240,7 @@ impl<'config> DotLexer<'config> {
             while let Some(ch) = state.peek() {
                 if ch == '"' {
                     state.advance(1);
-                    state.add_token(DotSyntaxKind::String, start_pos, state.get_position());
+                    state.add_token(DotTokenType::String, start_pos, state.get_position());
                     return true;
                 }
                 else if ch == '\\' {
@@ -252,7 +255,7 @@ impl<'config> DotLexer<'config> {
             }
 
             // 未闭合的字符
-            state.add_token(DotSyntaxKind::Error, start_pos, state.get_position());
+            state.add_token(DotTokenType::Error, start_pos, state.get_position());
             true
         }
         else {
@@ -265,11 +268,11 @@ impl<'config> DotLexer<'config> {
         let start_pos = state.get_position();
 
         if state.consume_if_starts_with("->") {
-            state.add_token(DotSyntaxKind::Arrow, start_pos, state.get_position());
+            state.add_token(DotTokenType::Arrow, start_pos, state.get_position());
             return true;
         }
         if state.consume_if_starts_with("--") {
-            state.add_token(DotSyntaxKind::Line, start_pos, state.get_position());
+            state.add_token(DotTokenType::Line, start_pos, state.get_position());
             return true;
         }
 
@@ -277,17 +280,17 @@ impl<'config> DotLexer<'config> {
             match ch {
                 '=' => {
                     state.advance(1);
-                    state.add_token(DotSyntaxKind::Equal, start_pos, state.get_position());
+                    state.add_token(DotTokenType::Equal, start_pos, state.get_position());
                     true
                 }
                 ';' => {
                     state.advance(1);
-                    state.add_token(DotSyntaxKind::Semicolon, start_pos, state.get_position());
+                    state.add_token(DotTokenType::Semicolon, start_pos, state.get_position());
                     true
                 }
                 ',' => {
                     state.advance(1);
-                    state.add_token(DotSyntaxKind::Comma, start_pos, state.get_position());
+                    state.add_token(DotTokenType::Comma, start_pos, state.get_position());
                     true
                 }
                 _ => false,
@@ -304,12 +307,12 @@ impl<'config> DotLexer<'config> {
 
         if let Some(ch) = state.peek() {
             let token_kind = match ch {
-                '{' => DotSyntaxKind::LeftBrace,
-                '}' => DotSyntaxKind::RightBrace,
-                '[' => DotSyntaxKind::LeftBracket,
-                ']' => DotSyntaxKind::RightBracket,
-                '(' => DotSyntaxKind::LeftParen,
-                ')' => DotSyntaxKind::RightParen,
+                '{' => DotTokenType::LeftBrace,
+                '}' => DotTokenType::RightBrace,
+                '[' => DotTokenType::LeftBracket,
+                ']' => DotTokenType::RightBracket,
+                '(' => DotTokenType::LeftParen,
+                ')' => DotTokenType::RightParen,
                 _ => return false,
             };
 
@@ -377,7 +380,7 @@ impl<'config> DotLexer<'config> {
             let start_pos = state.get_position();
             if let Some(ch) = state.peek() {
                 state.advance(ch.len_utf8());
-                state.add_token(DotSyntaxKind::Error, start_pos, state.get_position());
+                state.add_token(DotTokenType::Error, start_pos, state.get_position());
             }
 
             state.advance_if_dead_lock(safe_point);

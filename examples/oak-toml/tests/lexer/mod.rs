@@ -1,6 +1,5 @@
-use oak_core::source::Source;
 use oak_testing::lexing::LexerTester;
-use oak_toml::{TomlLanguage, TomlLexer};
+use oak_toml::{language::TomlLanguage, lexer::TomlLexer};
 use std::{path::Path, time::Duration};
 
 #[test]

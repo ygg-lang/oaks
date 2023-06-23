@@ -1,4 +1,10 @@
-use crate::{kind::RubySyntaxKind, language::RubyLanguage, lexer::RubyLexer};
+use oak_core::TokenType;
+pub mod element_type;
+
+use crate::{
+    language::RubyLanguage,
+    lexer::{RubyLexer, token_type::RubyTokenType},
+};
 use oak_core::{
     GreenNode, OakError, TextEdit,
     parser::{
@@ -26,13 +32,13 @@ impl<'config> RubyParser<'config> {
                 state.bump();
                 continue;
             }
-            self.parse_statement(state).ok();
+            let _ = self.parse_statement(state);
         }
-        Ok(state.finish_at(cp, RubySyntaxKind::Root))
+        Ok(state.finish_at(cp, crate::parser::element_type::RubyElementType::Root))
     }
 
     fn parse_statement<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> Result<(), OakError> {
-        use crate::kind::RubySyntaxKind::*;
+        use crate::lexer::token_type::RubyTokenType::*;
         match state.peek_kind() {
             Some(Def) => self.parse_method_def(state)?,
             Some(Class) => self.parse_class_def(state)?,
@@ -50,119 +56,119 @@ impl<'config> RubyParser<'config> {
     }
 
     fn parse_method_def<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> Result<(), OakError> {
-        use crate::kind::RubySyntaxKind::*;
+        use crate::lexer::token_type::RubyTokenType::*;
         let cp = state.checkpoint();
         state.bump(); // def
         state.expect(Identifier).ok();
         if state.eat(LeftParen) {
             while state.not_at_end() && !state.at(RightParen) {
-                state.advance();
+                state.advance()
             }
-            state.expect(RightParen).ok();
+            let _ = state.expect(RightParen);
         }
         self.parse_body(state)?;
-        state.finish_at(cp, MethodDefinition);
+        state.finish_at(cp, crate::parser::element_type::RubyElementType::MethodDefinition);
         Ok(())
     }
 
     fn parse_body<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> Result<(), OakError> {
-        use crate::kind::RubySyntaxKind::*;
+        use crate::lexer::token_type::RubyTokenType::*;
         while state.not_at_end() && !state.at(End) && !state.at(Else) && !state.at(Elsif) && !state.at(Rescue) && !state.at(Ensure) {
-            self.parse_statement(state)?;
+            self.parse_statement(state)?
         }
         state.eat(End);
         Ok(())
     }
 
     fn parse_class_def<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> Result<(), OakError> {
-        use crate::kind::RubySyntaxKind::*;
+        use crate::lexer::token_type::RubyTokenType::*;
         let cp = state.checkpoint();
         state.bump(); // class
         state.expect(Constant).ok();
         self.parse_body(state)?;
-        state.finish_at(cp, ClassDefinition);
+        state.finish_at(cp, crate::parser::element_type::RubyElementType::ClassDefinition);
         Ok(())
     }
 
     fn parse_module_def<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> Result<(), OakError> {
-        use crate::kind::RubySyntaxKind::*;
+        use crate::lexer::token_type::RubyTokenType::*;
         let cp = state.checkpoint();
         state.bump(); // module
         state.expect(Constant).ok();
         self.parse_body(state)?;
-        state.finish_at(cp, ModuleDefinition);
+        state.finish_at(cp, crate::parser::element_type::RubyElementType::ModuleDefinition);
         Ok(())
     }
 
     fn parse_if_stmt<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> Result<(), OakError> {
-        use crate::kind::RubySyntaxKind::*;
+        use crate::lexer::token_type::RubyTokenType::*;
         let cp = state.checkpoint();
         state.bump(); // if
         PrattParser::parse(state, 0, self);
         self.parse_body(state)?;
-        state.finish_at(cp, IfStatement);
+        state.finish_at(cp, crate::parser::element_type::RubyElementType::IfStatement);
         Ok(())
     }
 
     fn parse_while_stmt<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> Result<(), OakError> {
-        use crate::kind::RubySyntaxKind::*;
+        use crate::lexer::token_type::RubyTokenType::*;
         let cp = state.checkpoint();
         state.bump(); // while
         PrattParser::parse(state, 0, self);
         self.parse_body(state)?;
-        state.finish_at(cp, WhileStatement);
+        state.finish_at(cp, crate::parser::element_type::RubyElementType::WhileStatement);
         Ok(())
     }
 
     fn parse_return_stmt<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> Result<(), OakError> {
-        use crate::kind::RubySyntaxKind::*;
+        use crate::lexer::token_type::RubyTokenType::*;
         let cp = state.checkpoint();
         state.bump(); // return
         PrattParser::parse(state, 0, self);
-        state.finish_at(cp, ReturnStatement);
+        state.finish_at(cp, crate::parser::element_type::RubyElementType::ReturnStatement);
         Ok(())
     }
 }
 
 impl<'config> Pratt<RubyLanguage> for RubyParser<'config> {
     fn primary<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> &'a GreenNode<'a, RubyLanguage> {
-        use crate::kind::RubySyntaxKind::*;
+        use crate::lexer::token_type::RubyTokenType::*;
         let cp = state.checkpoint();
         match state.peek_kind() {
             Some(Identifier) | Some(Constant) | Some(GlobalVariable) | Some(InstanceVariable) | Some(ClassVariable) => {
                 state.bump();
-                state.finish_at(cp, Identifier)
+                state.finish_at(cp, crate::parser::element_type::RubyElementType::Identifier)
             }
             Some(IntegerLiteral) | Some(FloatLiteral) | Some(StringLiteral) | Some(True) | Some(False) | Some(Nil) | Some(Self_) => {
                 state.bump();
-                state.finish_at(cp, LiteralExpression) // 简化处理
+                state.finish_at(cp, crate::parser::element_type::RubyElementType::LiteralExpression) // 简化处理
             }
             Some(LeftParen) => {
                 state.bump();
                 PrattParser::parse(state, 0, self);
                 state.expect(RightParen).ok();
-                state.finish_at(cp, ParenExpression) // 简化处理
+                state.finish_at(cp, crate::parser::element_type::RubyElementType::ParenExpression) // 简化处理
             }
             _ => {
                 state.bump();
-                state.finish_at(cp, Error)
+                state.finish_at(cp, crate::parser::element_type::RubyElementType::Error)
             }
         }
     }
 
     fn prefix<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> &'a GreenNode<'a, RubyLanguage> {
-        use crate::kind::RubySyntaxKind::*;
+        use crate::lexer::token_type::RubyTokenType::*;
         match state.peek_kind() {
             Some(kind @ (Plus | Minus | Not | Tilde)) => {
                 state.bump();
-                unary(state, kind, 13, UnaryExpression, |st, p| PrattParser::parse(st, p, self))
+                unary(state, kind, 13, crate::parser::element_type::RubyElementType::UnaryExpression, |st, p| PrattParser::parse(st, p, self))
             }
             _ => self.primary(state),
         }
     }
 
     fn infix<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>, left: &'a GreenNode<'a, RubyLanguage>, min_precedence: u8) -> Option<&'a GreenNode<'a, RubyLanguage>> {
-        use crate::kind::RubySyntaxKind::*;
+        use crate::lexer::token_type::RubyTokenType::*;
         let kind = state.peek_kind()?;
 
         let (prec, assoc) = match kind {
@@ -179,7 +185,7 @@ impl<'config> Pratt<RubyLanguage> for RubyParser<'config> {
             return None;
         }
 
-        Some(binary(state, left, kind, prec, assoc, BinaryExpression, |s, p| PrattParser::parse(s, p, self)))
+        Some(binary(state, left, kind, prec, assoc, crate::parser::element_type::RubyElementType::BinaryExpression, |s, p| PrattParser::parse(s, p, self)))
     }
 }
 

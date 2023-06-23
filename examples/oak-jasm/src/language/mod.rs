@@ -1,24 +1,30 @@
+#![doc = include_str!("readme.md")]
 use oak_core::language::{Language, LanguageCategory};
+#[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
 
-/// JASM 语言绑定与配置
-#[derive(Clone, Copy, Debug, Default, PartialEq, Eq, Hash, Serialize, Deserialize)]
+/// JASM language binding and configuration.
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct JasmLanguage {
-    /// 是否启用扩展指令（如 invokedynamic 等）
+    /// Whether to enable extended instructions (e.g., invokedynamic, etc.).
     pub extended: bool,
-    /// 是否允许注释
+    /// Whether to allow comments.
     pub comments: bool,
 }
 
 impl JasmLanguage {
+    /// Creates a new JASM language configuration.
     pub fn new() -> Self {
         Self::default()
     }
 
+    /// Creates a standard JASM language configuration.
     pub fn standard() -> Self {
         Self { extended: true, comments: true }
     }
 
+    /// Creates a minimal JASM language configuration.
     pub fn minimal() -> Self {
         Self { extended: false, comments: false }
     }
@@ -28,7 +34,7 @@ impl Language for JasmLanguage {
     const NAME: &'static str = "jasm";
     const CATEGORY: LanguageCategory = LanguageCategory::Programming;
 
-    type TokenType = crate::syntax::JasmSyntaxKind;
-    type ElementType = crate::syntax::JasmSyntaxKind;
+    type TokenType = crate::lexer::token_type::JasmTokenType;
+    type ElementType = crate::parser::element_type::JasmElementType;
     type TypedRoot = crate::ast::JasmRoot;
 }

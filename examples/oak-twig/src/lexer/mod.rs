@@ -1,4 +1,7 @@
-use crate::{kind::TwigSyntaxKind, language::TwigLanguage};
+#![doc = include_str!("readme.md")]
+pub mod token_type;
+
+use crate::{language::TwigLanguage, lexer::token_type::TwigTokenType};
 use oak_core::{Lexer, LexerCache, LexerState, OakError, lexer::LexOutput, source::Source};
 
 #[derive(Clone, Debug)]
@@ -14,7 +17,7 @@ impl<'config> Lexer<TwigLanguage> for TwigLexer<'config> {
         let mut state = LexerState::new(source);
         let result = self.run(&mut state);
         if result.is_ok() {
-            state.add_eof();
+            state.add_eof()
         }
         state.finish_with_cache(result, cache)
     }
@@ -53,7 +56,7 @@ impl<'config> TwigLexer<'config> {
                 continue;
             }
 
-            state.advance_if_dead_lock(safe_point);
+            state.advance_if_dead_lock(safe_point)
         }
 
         Ok(())
@@ -74,7 +77,7 @@ impl<'config> TwigLexer<'config> {
         }
 
         if found {
-            state.add_token(TwigSyntaxKind::Whitespace, start, state.get_position());
+            state.add_token(TwigTokenType::Whitespace, start, state.get_position());
         }
 
         found
@@ -91,7 +94,7 @@ impl<'config> TwigLexer<'config> {
                     state.advance(ch.len_utf8());
                 }
             }
-            state.add_token(TwigSyntaxKind::Comment, start, state.get_position());
+            state.add_token(TwigTokenType::Comment, start, state.get_position());
             return true;
         }
         false
@@ -120,7 +123,7 @@ impl<'config> TwigLexer<'config> {
                     }
                 }
 
-                state.add_token(TwigSyntaxKind::String, start, state.get_position());
+                state.add_token(TwigTokenType::String, start, state.get_position());
                 return true;
             }
         }
@@ -144,7 +147,7 @@ impl<'config> TwigLexer<'config> {
                     }
                 }
 
-                state.add_token(TwigSyntaxKind::Number, start, state.get_position());
+                state.add_token(TwigTokenType::Number, start, state.get_position());
                 return true;
             }
         }
@@ -159,56 +162,56 @@ impl<'config> TwigLexer<'config> {
         // 双字符操作符
         if rest.starts_with("{{") {
             state.advance(2);
-            state.add_token(TwigSyntaxKind::DoubleLeftBrace, start, state.get_position());
+            state.add_token(TwigTokenType::DoubleLeftBrace, start, state.get_position());
             return true;
         }
         if rest.starts_with("}}") {
             state.advance(2);
-            state.add_token(TwigSyntaxKind::DoubleRightBrace, start, state.get_position());
+            state.add_token(TwigTokenType::DoubleRightBrace, start, state.get_position());
             return true;
         }
         if rest.starts_with("{%") {
             state.advance(2);
-            state.add_token(TwigSyntaxKind::LeftBracePercent, start, state.get_position());
+            state.add_token(TwigTokenType::LeftBracePercent, start, state.get_position());
             return true;
         }
         if rest.starts_with("%}") {
             state.advance(2);
-            state.add_token(TwigSyntaxKind::PercentRightBrace, start, state.get_position());
+            state.add_token(TwigTokenType::PercentRightBrace, start, state.get_position());
             return true;
         }
 
         // 单字符操作符
         if let Some(ch) = state.peek() {
             let kind = match ch {
-                '{' => TwigSyntaxKind::LeftBrace,
-                '}' => TwigSyntaxKind::RightBrace,
-                '(' => TwigSyntaxKind::LeftParen,
-                ')' => TwigSyntaxKind::RightParen,
-                '[' => TwigSyntaxKind::LeftBracket,
-                ']' => TwigSyntaxKind::RightBracket,
-                ',' => TwigSyntaxKind::Comma,
-                '.' => TwigSyntaxKind::Dot,
-                ':' => TwigSyntaxKind::Colon,
-                ';' => TwigSyntaxKind::Semicolon,
-                '|' => TwigSyntaxKind::Pipe,
-                '=' => TwigSyntaxKind::Eq,
-                '+' => TwigSyntaxKind::Plus,
-                '-' => TwigSyntaxKind::Minus,
-                '*' => TwigSyntaxKind::Star,
-                '/' => TwigSyntaxKind::Slash,
-                '%' => TwigSyntaxKind::Percent,
-                '!' => TwigSyntaxKind::Bang,
-                '?' => TwigSyntaxKind::Question,
-                '<' => TwigSyntaxKind::Lt,
-                '>' => TwigSyntaxKind::Gt,
-                '&' => TwigSyntaxKind::Amp,
-                '^' => TwigSyntaxKind::Caret,
-                '~' => TwigSyntaxKind::Tilde,
+                '{' => TwigTokenType::LeftBrace,
+                '}' => TwigTokenType::RightBrace,
+                '(' => TwigTokenType::LeftParen,
+                ')' => TwigTokenType::RightParen,
+                '[' => TwigTokenType::LeftBracket,
+                ']' => TwigTokenType::RightBracket,
+                ',' => TwigTokenType::Comma,
+                '.' => TwigTokenType::Dot,
+                ':' => TwigTokenType::Colon,
+                ';' => TwigTokenType::Semicolon,
+                '|' => TwigTokenType::Pipe,
+                '=' => TwigTokenType::Eq,
+                '+' => TwigTokenType::Plus,
+                '-' => TwigTokenType::Minus,
+                '*' => TwigTokenType::Star,
+                '/' => TwigTokenType::Slash,
+                '%' => TwigTokenType::Percent,
+                '!' => TwigTokenType::Bang,
+                '?' => TwigTokenType::Question,
+                '<' => TwigTokenType::Lt,
+                '>' => TwigTokenType::Gt,
+                '&' => TwigTokenType::Amp,
+                '^' => TwigTokenType::Caret,
+                '~' => TwigTokenType::Tilde,
                 _ => return false,
             };
 
-            state.advance(1);
+            state.advance(ch.len_utf8());
             state.add_token(kind, start, state.get_position());
             return true;
         }
@@ -237,8 +240,8 @@ impl<'config> TwigLexer<'config> {
 
                 // 检查是否为布尔关键字
                 let kind = match text.as_ref() {
-                    "true" | "false" => TwigSyntaxKind::Boolean,
-                    _ => TwigSyntaxKind::Identifier,
+                    "true" | "false" => TwigTokenType::Boolean,
+                    _ => TwigTokenType::Identifier,
                 };
                 state.add_token(kind, start, end);
                 return true;

@@ -1,18 +1,22 @@
+pub mod element_type;
+
 use crate::{language::ScssLanguage, lexer::ScssLexer};
 use oak_core::{
     parser::{ParseCache, ParseOutput, Parser, ParserState, parse_with_lexer},
     source::{Source, TextEdit},
 };
 
-mod parse;
+mod parse_top_level;
 
 pub(crate) type State<'a, S> = ParserState<'a, ScssLanguage, S>;
 
+/// Parser for the SCSS language.
 pub struct ScssParser<'config> {
     pub(crate) config: &'config ScssLanguage,
 }
 
 impl<'config> ScssParser<'config> {
+    /// Creates a new `ScssParser` with the given configuration.
     pub fn new(config: &'config ScssLanguage) -> Self {
         Self { config }
     }

@@ -785,11 +785,11 @@ respondsToMessage: selector
 
 performMessage: selector
     "Perform a message dynamically"
-    ^self perform: selector!
+    ^self raise: selector!
 
 performMessage: selector with: argument
     "Perform a message with argument"
-    ^self perform: selector with: argument!
+    ^self raise: selector with: argument!
 ! !
 
 !MetaExample methodsFor: 'dynamic behavior'!

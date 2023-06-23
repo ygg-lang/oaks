@@ -1,4 +1,9 @@
-use crate::{ast::*, kind::TypstSyntaxKind, language::TypstLanguage, parser::TypstParser};
+use crate::{
+    ast::*,
+    language::TypstLanguage,
+    lexer::token_type::TypstTokenType,
+    parser::{TypstParser, element_type::TypstElementType},
+};
 use oak_core::{
     Builder, BuilderCache, GreenNode, OakDiagnostics, OakError, Parser, RedNode, RedTree,
     source::{Source, TextEdit},
@@ -54,34 +59,15 @@ impl<'config> TypstBuilder<'config> {
         match tree {
             RedTree::Node(node) => self.build_item(node, source),
             RedTree::Leaf(leaf) => match leaf.kind {
-                TypstSyntaxKind::Whitespace | TypstSyntaxKind::Newline => Ok(Some(TypstItem::Space)),
+                TypstTokenType::Whitespace | TypstTokenType::Newline => Ok(Some(TypstItem::Space)),
                 _ => Ok(Some(TypstItem::Text(source.get_text_in(leaf.span).to_string()))),
             },
         }
     }
 
     fn build_item<S: Source + ?Sized>(&self, node: RedNode<TypstLanguage>, source: &S) -> Result<Option<TypstItem>, OakError> {
-        match node.kind::<TypstSyntaxKind>() {
-            TypstSyntaxKind::Text => Ok(Some(TypstItem::Text(source.get_text_in(node.span()).to_string()))),
-            TypstSyntaxKind::Paragraph => {
-                let mut root = TypstRoot::new(node.span());
-                for child in node.children() {
-                    if let Some(item) = self.build_tree(child, source)? {
-                        root.items.push(item);
-                    }
-                }
-                Ok(Some(TypstItem::Block(root)))
-            }
-            TypstSyntaxKind::Math | TypstSyntaxKind::InlineMath | TypstSyntaxKind::DisplayMath => {
-                let mut root = TypstRoot::new(node.span());
-                for child in node.children() {
-                    if let Some(item) = self.build_tree(child, source)? {
-                        root.items.push(item);
-                    }
-                }
-                Ok(Some(TypstItem::Math(root)))
-            }
-            TypstSyntaxKind::Heading => {
+        match node.kind::<TypstElementType>() {
+            TypstElementType::Heading => {
                 let text = source.get_text_in(node.span());
                 let mut level = 0;
                 for ch in text.chars() {
@@ -98,7 +84,16 @@ impl<'config> TypstBuilder<'config> {
 
                 Ok(Some(TypstItem::Heading(TypstHeading { level, content })))
             }
-            TypstSyntaxKind::Strong => {
+            TypstElementType::Math => {
+                let mut root = TypstRoot::new(node.span());
+                for child in node.children() {
+                    if let Some(item) = self.build_tree(child, source)? {
+                        root.items.push(item);
+                    }
+                }
+                Ok(Some(TypstItem::Math(root)))
+            }
+            TypstElementType::Strong => {
                 let mut root = TypstRoot::new(node.span());
                 for child in node.children() {
                     if let Some(item) = self.build_tree(child, source)? {
@@ -107,7 +102,7 @@ impl<'config> TypstBuilder<'config> {
                 }
                 Ok(Some(TypstItem::Strong(root)))
             }
-            TypstSyntaxKind::Emphasis => {
+            TypstElementType::Emphasis => {
                 let mut root = TypstRoot::new(node.span());
                 for child in node.children() {
                     if let Some(item) = self.build_tree(child, source)? {
@@ -116,7 +111,16 @@ impl<'config> TypstBuilder<'config> {
                 }
                 Ok(Some(TypstItem::Emphasis(root)))
             }
-            TypstSyntaxKind::ListItem => {
+            TypstElementType::Quote => {
+                let mut root = TypstRoot::new(node.span());
+                for child in node.children() {
+                    if let Some(item) = self.build_tree(child, source)? {
+                        root.items.push(item);
+                    }
+                }
+                Ok(Some(TypstItem::Quote(root)))
+            }
+            TypstElementType::ListItem => {
                 let mut root = TypstRoot::new(node.span());
                 for child in node.children() {
                     if let Some(item) = self.build_tree(child, source)? {
@@ -125,7 +129,7 @@ impl<'config> TypstBuilder<'config> {
                 }
                 Ok(Some(TypstItem::ListItem(root)))
             }
-            TypstSyntaxKind::EnumItem => {
+            TypstElementType::EnumItem => {
                 let mut root = TypstRoot::new(node.span());
                 for child in node.children() {
                     if let Some(item) = self.build_tree(child, source)? {
@@ -134,36 +138,8 @@ impl<'config> TypstBuilder<'config> {
                 }
                 Ok(Some(TypstItem::EnumItem(root)))
             }
-            TypstSyntaxKind::Link => Ok(Some(TypstItem::Link(TypstLink { url: source.get_text_in(node.span()).to_string(), content: None }))),
-            TypstSyntaxKind::Raw => Ok(Some(TypstItem::Raw(source.get_text_in(node.span()).to_string()))),
-            TypstSyntaxKind::Quote => {
-                let mut root = TypstRoot::new(node.span());
-                // In our simple parser, Quote just contains the whole line
-                // But for the converter, we want the content inside #quote[...]
-                let text = source.get_text_in(node.span()).to_string();
-                let content = if text.starts_with("#quote[") && text.ends_with("]") {
-                    &text[7..text.len() - 1]
-                }
-                else if text.starts_with("#quote") {
-                    &text[6..]
-                }
-                else {
-                    &text
-                };
-                root.items.push(TypstItem::Text(content.trim().to_string()));
-                Ok(Some(TypstItem::Quote(root)))
-            }
-            _ => {
-                let mut has_children = false;
-                for _ in node.children() {
-                    has_children = true;
-                    break;
-                }
-                if has_children {
-                    // Could recursively build, but for now just return None for unknown blocks
-                }
-                Ok(None)
-            }
+            TypstElementType::Raw => Ok(Some(TypstItem::Raw(source.get_text_in(node.span()).to_string()))),
+            _ => Ok(None),
         }
     }
 }

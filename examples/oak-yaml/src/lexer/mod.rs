@@ -1,10 +1,11 @@
-use crate::{kind::YamlSyntaxKind, language::YamlLanguage};
-use oak_core::{
-    Lexer, LexerState, OakError,
-    lexer::{CommentConfig, LexOutput, LexerCache, StringConfig, WhitespaceConfig},
-    source::Source,
-};
+#![doc = include_str!("readme.md")]
+pub mod token_type;
 
+use crate::{language::YamlLanguage, lexer::token_type::YamlTokenType};
+use oak_core::{
+    Lexer, LexerState, OakError, Source,
+    lexer::{CommentConfig, LexOutput, LexerCache, StringConfig, WhitespaceConfig},
+};
 static YAML_WHITESPACE: WhitespaceConfig = WhitespaceConfig { unicode_whitespace: false };
 
 static YAML_COMMENT: CommentConfig = CommentConfig { line_marker: "#", block_start: "", block_end: "", nested_blocks: false };
@@ -72,7 +73,7 @@ impl<'config> YamlLexer<'config> {
                         }
                         // If we reach here, we have an unexpected character (handled below)
                         state.advance(ch.len_utf8());
-                        state.add_token(YamlSyntaxKind::Error, safe_point, state.get_position());
+                        state.add_token(YamlTokenType::Error, safe_point, state.get_position());
                     }
                     'a'..='z' | 'A'..='Z' | '_' => {
                         self.lex_identifier_or_keyword(state)?;
@@ -84,12 +85,12 @@ impl<'config> YamlLexer<'config> {
 
                         // If we reach here, we have an unexpected character
                         state.advance(ch.len_utf8());
-                        state.add_token(YamlSyntaxKind::Error, safe_point, state.get_position());
+                        state.add_token(YamlTokenType::Error, safe_point, state.get_position());
                     }
                 }
             }
 
-            state.advance_if_dead_lock(safe_point);
+            state.advance_if_dead_lock(safe_point)
         }
 
         state.add_eof();
@@ -107,11 +108,11 @@ impl<'config> Lexer<YamlLanguage> for YamlLexer<'config> {
 
 impl YamlLexer<'_> {
     fn lex_whitespace<'s, S: Source + ?Sized>(&self, state: &mut State<'s, S>) -> bool {
-        YAML_WHITESPACE.scan(state, YamlSyntaxKind::Whitespace)
+        YAML_WHITESPACE.scan(state, YamlTokenType::Whitespace)
     }
 
     fn lex_comment<'s, S: Source + ?Sized>(&self, state: &mut State<'s, S>) -> bool {
-        YAML_COMMENT.scan(state, YamlSyntaxKind::Comment, YamlSyntaxKind::Comment)
+        YAML_COMMENT.scan(state, YamlTokenType::Comment, YamlTokenType::Comment)
     }
 
     fn lex_newline<'s, S: Source + ?Sized>(&self, state: &mut State<'s, S>) -> bool {
@@ -119,16 +120,16 @@ impl YamlLexer<'_> {
             if ch == '\n' {
                 let start = state.get_position();
                 state.advance(1);
-                state.add_token(YamlSyntaxKind::Newline, start, state.get_position());
+                state.add_token(YamlTokenType::Newline, start, state.get_position());
                 return true;
             }
             else if ch == '\r' {
                 let start = state.get_position();
                 state.advance(1);
                 if state.current() == Some('\n') {
-                    state.advance(1);
+                    state.advance(1)
                 }
-                state.add_token(YamlSyntaxKind::Newline, start, state.get_position());
+                state.add_token(YamlTokenType::Newline, start, state.get_position());
                 return true;
             }
         }
@@ -136,7 +137,7 @@ impl YamlLexer<'_> {
     }
 
     fn lex_string_literal<'s, S: Source + ?Sized>(&self, state: &mut State<'s, S>) -> Result<bool, OakError> {
-        Ok(YAML_STRING.scan(state, YamlSyntaxKind::StringLiteral))
+        Ok(YAML_STRING.scan(state, YamlTokenType::StringLiteral))
     }
 
     fn lex_number_literal<'s, S: Source + ?Sized>(&self, state: &mut State<'s, S>) -> Result<bool, OakError> {
@@ -155,24 +156,14 @@ impl YamlLexer<'_> {
 
                 // Integer part
                 while let Some(ch) = state.peek() {
-                    if ch.is_ascii_digit() || ch == '_' {
-                        state.advance(ch.len_utf8());
-                    }
-                    else {
-                        break;
-                    }
+                    if ch.is_ascii_digit() || ch == '_' { state.advance(ch.len_utf8()) } else { break }
                 }
 
                 // Decimal part
                 if state.peek() == Some('.') {
                     state.advance(1);
                     while let Some(ch) = state.peek() {
-                        if ch.is_ascii_digit() || ch == '_' {
-                            state.advance(ch.len_utf8());
-                        }
-                        else {
-                            break;
-                        }
+                        if ch.is_ascii_digit() || ch == '_' { state.advance(ch.len_utf8()) } else { break }
                     }
                 }
 
@@ -180,19 +171,14 @@ impl YamlLexer<'_> {
                 if state.peek() == Some('e') || state.peek() == Some('E') {
                     state.advance(1);
                     if state.peek() == Some('+') || state.peek() == Some('-') {
-                        state.advance(1);
+                        state.advance(1)
                     }
                     while let Some(ch) = state.peek() {
-                        if ch.is_ascii_digit() || ch == '_' {
-                            state.advance(ch.len_utf8());
-                        }
-                        else {
-                            break;
-                        }
+                        if ch.is_ascii_digit() || ch == '_' { state.advance(ch.len_utf8()) } else { break }
                     }
                 }
 
-                state.add_token(YamlSyntaxKind::NumberLiteral, start, state.get_position());
+                state.add_token(YamlTokenType::NumberLiteral, start, state.get_position());
                 Ok(true)
             }
             else {
@@ -212,17 +198,12 @@ impl YamlLexer<'_> {
                 state.advance(ch.len_utf8());
 
                 while let Some(ch) = state.peek() {
-                    if ch.is_alphanumeric() || ch == '_' || ch == '-' {
-                        state.advance(ch.len_utf8());
-                    }
-                    else {
-                        break;
-                    }
+                    if ch.is_alphanumeric() || ch == '_' || ch == '-' { state.advance(ch.len_utf8()) } else { break }
                 }
 
                 let end = state.get_position();
                 let text = state.source().get_text_in((start..end).into());
-                let kind = self.keyword_kind(text.as_ref()).unwrap_or(YamlSyntaxKind::Identifier);
+                let kind = self.keyword_kind(text.as_ref()).unwrap_or(YamlTokenType::Identifier);
                 state.add_token(kind, start, end);
                 Ok(true)
             }
@@ -241,14 +222,14 @@ impl YamlLexer<'_> {
         // Document start: ---
         if state.peek() == Some('-') && state.peek_next_n(1) == Some('-') && state.peek_next_n(2) == Some('-') {
             state.advance(3);
-            state.add_token(YamlSyntaxKind::DocumentStart, start, state.get_position());
+            state.add_token(YamlTokenType::DocumentStart, start, state.get_position());
             return true;
         }
 
         // Document end: ...
         if state.peek() == Some('.') && state.peek_next_n(1) == Some('.') && state.peek_next_n(2) == Some('.') {
             state.advance(3);
-            state.add_token(YamlSyntaxKind::DocumentEnd, start, state.get_position());
+            state.add_token(YamlTokenType::DocumentEnd, start, state.get_position());
             return true;
         }
 
@@ -268,28 +249,28 @@ impl YamlLexer<'_> {
         false
     }
 
-    fn keyword_kind(&self, text: &str) -> Option<YamlSyntaxKind> {
+    fn keyword_kind(&self, text: &str) -> Option<YamlTokenType> {
         match text {
-            "true" | "True" | "TRUE" | "false" | "False" | "FALSE" => Some(YamlSyntaxKind::BooleanLiteral),
-            "null" | "Null" | "NULL" | "~" => Some(YamlSyntaxKind::NullLiteral),
+            "true" | "True" | "TRUE" | "false" | "False" | "FALSE" => Some(YamlTokenType::BooleanLiteral),
+            "null" | "Null" | "NULL" | "~" => Some(YamlTokenType::NullLiteral),
             _ => None,
         }
     }
 
-    fn single_char_kind(&self, ch: char) -> Option<YamlSyntaxKind> {
+    fn single_char_kind(&self, ch: char) -> Option<YamlTokenType> {
         match ch {
-            ':' => Some(YamlSyntaxKind::Colon),
-            '-' => Some(YamlSyntaxKind::Dash),
-            '|' => Some(YamlSyntaxKind::Pipe),
-            '>' => Some(YamlSyntaxKind::GreaterThan),
-            '?' => Some(YamlSyntaxKind::Question),
-            '&' => Some(YamlSyntaxKind::Ampersand),
-            '*' => Some(YamlSyntaxKind::Asterisk),
-            '!' => Some(YamlSyntaxKind::Exclamation),
-            '[' => Some(YamlSyntaxKind::LeftBracket),
-            ']' => Some(YamlSyntaxKind::RightBracket),
-            '{' => Some(YamlSyntaxKind::LeftBrace),
-            '}' => Some(YamlSyntaxKind::RightBrace),
+            ':' => Some(YamlTokenType::Colon),
+            '-' => Some(YamlTokenType::Dash),
+            '|' => Some(YamlTokenType::Pipe),
+            '>' => Some(YamlTokenType::GreaterThan),
+            '?' => Some(YamlTokenType::Question),
+            '&' => Some(YamlTokenType::Ampersand),
+            '*' => Some(YamlTokenType::Asterisk),
+            '!' => Some(YamlTokenType::Exclamation),
+            '[' => Some(YamlTokenType::LeftBracket),
+            ']' => Some(YamlTokenType::RightBracket),
+            '{' => Some(YamlTokenType::LeftBrace),
+            '}' => Some(YamlTokenType::RightBrace),
             _ => None,
         }
     }

@@ -1,107 +1,35 @@
-# Oak LLVM Parser
+# 🚀 Oak LLVM IR Parser
 
 [![Crates.io](https://img.shields.io/crates/v/oak-llvm-ir.svg)](https://crates.io/crates/oak-llvm-ir)
 [![Documentation](https://docs.rs/oak-llvm-ir/badge.svg)](https://docs.rs/oak-llvm-ir)
 
-High-performance incremental LLVM IR parser for the oak ecosystem with flexible configuration, optimized for LLVM intermediate representation processing.
+**The Backbone of Modern Compiler Infrastructure** — A high-performance, incremental LLVM Intermediate Representation (IR) parser built on the Oak framework. Optimized for compiler middle-end analysis, optimization passes, and toolchain development.
 
-## 🎯 Overview
+## 🎯 Project Vision
 
-Oak LLVM is a robust parser for LLVM IR (Intermediate Representation), designed to handle complete LLVM syntax including modern specifications. Built on the solid foundation of oak-core, it provides both high-level convenience and detailed AST generation for LLVM IR analysis and code generation.
+LLVM IR is the universal language of modern compiler technology, serving as the bridge between high-level source languages and low-level machine code. `oak-llvm-ir` aims to provide a robust, modern, Rust-powered infrastructure for parsing LLVM IR that is both accurate and incredibly fast. By utilizing Oak's incremental parsing architecture, we enable the creation of highly responsive compiler tools, static analyzers, and visualization utilities that can handle massive IR files with sub-millisecond latency. Whether you are building custom optimization passes, security auditors, or sophisticated IDE extensions for compiler engineers, `oak-llvm-ir` provides the high-fidelity AST and efficiency needed to interact with LLVM IR at scale.
 
-## ✨ Features
+## ✨ Core Features
 
-- **Complete LLVM IR Syntax**: Supports all LLVM IR features including types, instructions, and metadata
-- **Full AST Generation**: Generates comprehensive Abstract Syntax Trees
-- **Lexer Support**: Built-in tokenization with proper span information
-- **Error Recovery**: Graceful handling of syntax errors with detailed diagnostics
+- **⚡ Blazing Fast**: Leverages Rust's performance and memory safety to provide sub-millisecond parsing, essential for high-throughput compiler pipelines and real-time analysis of large IR files.
+- **🔄 Incremental by Nature**: Built-in support for partial updates—re-parse only the functions or blocks that changed. Ideal for iterative compiler development and interactive optimization tools.
+- **🌳 High-Fidelity AST**: Generates a comprehensive and precise Abstract Syntax Tree capturing the full depth of LLVM IR:
+    - **Module Structure**: Precise mapping of Global Variables, Function Definitions, and Declarations.
+    - **Basic Blocks**: Detailed tracking of Control Flow Graph (CFG) nodes and edges.
+    - **Instruction Set**: Robust parsing of all LLVM instructions, including SSA form variables and types.
+    - **Metadata & Attributes**: Full support for debug metadata, function attributes, and calling conventions.
+    - **Comments & Trivia**: Retains all comments and formatting, enabling faithful round-trip processing and analysis.
+- **🛡️ Industrial-Grade Fault Tolerance**: Engineered to recover from syntax errors gracefully, providing precise diagnostics—crucial for debugging generated IR or malformed inputs.
+- **🧩 Deep Ecosystem Integration**: Seamlessly works with `oak-lsp` for full LSP support and `oak-mcp` for intelligent code discovery and analysis.
 
-## 🚀 Quick Start
+## 🏗️ Architecture
 
-Basic example:
+The parser follows the **Green/Red Tree** architecture (inspired by Roslyn), which allows for:
+1. **Efficient Immutability**: Share nodes across different versions of the tree without copying.
+2. **Lossless Syntax Trees**: Retains all trivia (whitespace and comments), enabling faithful code formatting and refactoring of LLVM IR files.
+3. **Type Safety**: Strongly-typed "Red" nodes provide a convenient and safe API for tree traversal and analysis.
 
-```rust
-use oak_llvm_ir::{LlirParser, LLvmLanguage};
-use oak_core::SourceText;
 
-fn main() -> Result<(), Box<dyn std::error::Error>> {
-    let parser = LlirParser::new();
-    let source = SourceText::new(r#"
-        define i32 @add(i32 %a, i32 %b) {
-        entry:
-            %sum = add i32 %a, %b
-            ret i32 %sum
-        }
-    "#);
-    
-    let result = parser.parse(&source);
-    println!("Parsed LLVM IR successfully.");
-    Ok(())
-}
-```
+## 🛠️ Contributing
 
-## 📋 Parsing Examples
-
-### Function Definition Parsing
-```rust
-use oak_llvm_ir::{LlirParser, LLvmLanguage};
-use oak_core::SourceText;
-
-let parser = LlirParser::new();
-let source = SourceText::new(r#"
-    define i32 @multiply(i32 %a, i32 %b) {
-    entry:
-        %product = mul i32 %a, %b
-        ret i32 %product
-    }
-"#);
-
-let result = parser.parse(&source);
-println!("Function definition parsed successfully.");
-```
-
-### Type Declaration Parsing
-```rust
-use oak_llvm_ir::{LlirParser, LLvmLanguage};
-use oak_core::SourceText;
-
-let parser = LlirParser::new();
-let source = SourceText::new(r#"
-    %Person = type { i32, [10 x i8], i8* }
-    %ListNode = type { i32, %ListNode* }
-"#);
-
-let result = parser.parse(&source);
-println!("Type declarations parsed successfully.");
-```
-
-## 🔧 Advanced Features
-
-### Token-Level Parsing
-```rust
-use oak_llvm_ir::{LlirParser, LLvmLanguage};
-use oak_core::SourceText;
-
-let parser = LlirParser::new();
-let source = SourceText::new("define i32 @test() { ret i32 0 }");
-let result = parser.parse(&source);
-println!("Token parsing completed.");
-```
-
-### Error Handling
-```rust
-use oak_llvm_ir::{LlirParser, LLvmLanguage};
-use oak_core::SourceText;
-
-let parser = LlirParser::new();
-let source = SourceText::new(r#"
-    define i32 @invalid(
-        %result = add i32 %a %b
-    // Missing closing parenthesis and return
-"#);
-
-let result = parser.parse(&source);
-if let Some(errors) = result.result.err() {
-    println!("Parse errors found: {:?}", errors);
-}
-```
+Contributions are welcome! Please feel free to submit a Pull Request. For major changes, please open an issue first to discuss what you would like to change.

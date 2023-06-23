@@ -16,6 +16,8 @@ pub enum LanguageCategory {
     StyleSheet,
     /// Domain-specific languages or specialized notation (e.g., SQL, Regex, Math).
     Dsl,
+    /// Modeling languages (e.g., UML, Mermaid, PlantUML).
+    Modeling,
     /// Other or unclassified.
     Other,
 }
@@ -79,7 +81,7 @@ pub enum LanguageCategory {
 ///     fn role(&self) -> Self::Role { UniversalElementRole::None }
 /// }
 /// ```
-pub trait Language: Send + Sync + 'static {
+pub trait Language: Send + Sync {
     /// The name of the language (e.g., "rust", "sql").
     const NAME: &'static str;
 
@@ -211,7 +213,7 @@ pub trait Language: Send + Sync + 'static {
 ///     // ... other methods
 /// }
 /// ```
-pub trait TokenType: Copy + Eq + Hash + Send + Sync + 'static + std::fmt::Debug {
+pub trait TokenType: Copy + Eq + Hash + Send + Sync + std::fmt::Debug {
     /// The associated role type for this token kind.
     type Role: TokenRole;
 
@@ -447,7 +449,7 @@ impl TokenRole for UniversalTokenRole {
 ///     }
 /// }
 /// ```
-pub trait ElementType: Copy + Eq + Hash + Send + Sync + 'static + std::fmt::Debug {
+pub trait ElementType: Copy + Eq + Hash + Send + Sync + std::fmt::Debug {
     /// The associated role type for this element kind.
     type Role: ElementRole;
 
@@ -509,7 +511,7 @@ pub trait ElementRole: Copy + Eq + Send {
 ///   (e.g., Rust's `FnDeclaration`, SQL's `SelectStatement`, or YAML's `Mapping`).
 /// - **Deep Structure**: Refers to the universal structural patterns defined in this enum.
 ///
-/// By mapping to these roles, we can perform sophisticated analysis across diverse
+/// By mapping to these roles, we can raise sophisticated analysis across diverse
 /// language families:
 /// - **Containers & Statements**: Identify hierarchical scopes and their constituents
 ///   (e.g., a SQL table is a container, its clauses are statements).
@@ -526,31 +528,31 @@ pub trait ElementRole: Copy + Eq + Send {
 /// ### 1. Structural Identity (The "What")
 /// Roles describe a node's primary structural responsibility in the tree, not its
 /// domain-specific semantic meaning. For example:
-/// - A "Class" or "Function" is structurally a [`Definition`] and often a [`Container`].
-/// - An "Import" is structurally a [`Statement`] that contains a [`Reference`].
+/// - A "Class" or "Function" is structurally a [`UniversalElementRole::Definition`] and often a [`UniversalElementRole::Container`].
+/// - An "Import" is structurally a [`UniversalElementRole::Statement`] that contains a [`UniversalElementRole::Reference`].
 ///
 /// ### 2. Broad Categories (The "How")
 /// We categorize elements into four major structural groups:
-/// - **Flow Control & logic**: [`Statement`], [`Expression`], [`Call`], and [`Root`].
-/// - **Symbol Management**: [`Definition`], [`Binding`], and [`Reference`].
-/// - **Hierarchy & Scoping**: [`Container`].
-/// - **Metadata & Auxiliaries**: [`Typing`], [`Metadata`], [`Attribute`], [`Documentation`], etc.
+/// - **Flow Control & logic**: [`UniversalElementRole::Statement`], [`UniversalElementRole::Expression`], [`UniversalElementRole::Call`], and [`UniversalElementRole::Root`].
+/// - **Symbol Management**: [`UniversalElementRole::Definition`], [`UniversalElementRole::Binding`], and [`UniversalElementRole::Reference`].
+/// - **Hierarchy & Scoping**: [`UniversalElementRole::Container`].
+/// - **Metadata & Auxiliaries**: [`UniversalElementRole::Typing`], [`UniversalElementRole::Metadata`], [`UniversalElementRole::Attribute`], [`UniversalElementRole::Documentation`], etc.
 ///
 /// ### 3. Intent-Based Selection
 /// When a node could fit multiple roles, choose the one that represents its **primary
 /// structural intent**.
 /// - **Example**: In Rust, an `if` expression is both an `Expression` and a `Container`.
-///   However, its primary role in the tree is as an [`Expression`] (producing a value),
-///   whereas its children (the blocks) are [`Container`]s.
-/// - **Example**: In Markdown, a "List" is a [`Container`], while each "ListItem" is a
-///   [`Statement`] within that container.
+///   However, its primary role in the tree is as an [`UniversalElementRole::Expression`] (producing a value),
+///   whereas its children (the blocks) are [`UniversalElementRole::Container`]s.
+/// - **Example**: In Markdown, a "List" is a [`UniversalElementRole::Container`], while each "ListItem" is a
+///   [`UniversalElementRole::Statement`] within that container.
 ///
 /// ### 4. Intentional Exclusions
 /// We intentionally exclude roles that can be represented by combining existing roles or
 /// that require deep semantic analysis:
 /// - **Keyword-specific roles**: Roles like "Loop", "Conditional", or "Module" are excluded.
-///   These are surface-level distinctions. In the Deep Structure, they are all [`Container`]s
-///   or [`Statement`]s.
+///   These are surface-level distinctions. In the Deep Structure, they are all [`UniversalElementRole::Container`]s
+///   or [`UniversalElementRole::Statement`]s.
 /// - **Semantic Relationships**: Roles like "Inheritance", "Implementation", or "Dependency"
 ///   are excluded. These are better handled by semantic graph analysis rather than
 ///   syntactic tree roles.
@@ -635,8 +637,8 @@ pub enum UniversalElementRole {
     /// # Examples
     /// - **Rust**: `Attribute` (e.g., `#[derive(...)]`) or `MacroCall`.
     /// - **Markdown**: `Frontmatter` (YAML/TOML header).
-    /// - **Java/TS**: `@Decorator` or `@Annotation`.
-    /// - **Python**: `@decorator` syntax.
+    /// - **Java/TS**: `↯Decorator` or `↯Annotation`.
+    /// - **Python**: `↯decorator` syntax.
     Metadata,
 
     /// A specific property, flag, or attribute-value pair.
@@ -660,7 +662,7 @@ pub enum UniversalElementRole {
     ///
     /// # Examples
     /// - **HTML**: The `id` in `id="main"`.
-    /// - **Markdown**: `AttributeName` (in Pandoc-style `{ #id .class }`).
+    /// - **Markdown**: `AttributeName` (in Pandoc-style `{ #id .class };`).
     /// - **YAML**: The key in a property mapping.
     /// - **TOML**: The key in a table entry.
     AttributeKey,

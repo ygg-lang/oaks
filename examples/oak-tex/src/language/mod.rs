@@ -1,9 +1,12 @@
-use crate::{ast::TexRoot, kind::TexSyntaxKind};
+#![doc = include_str!("readme.md")]
+use crate::ast::TexRoot;
 use oak_core::{Language, LanguageCategory};
+#[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
 
-/// TeX 语言定义
-#[derive(Debug, Default, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
+/// TeX language definition.
+#[derive(Debug, Default, Clone, Copy, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct TexLanguage {}
 
 impl TexLanguage {
@@ -15,7 +18,7 @@ impl TexLanguage {
 impl Language for TexLanguage {
     const NAME: &'static str = "tex";
     const CATEGORY: LanguageCategory = LanguageCategory::Markup;
-    type TokenType = TexSyntaxKind;
-    type ElementType = TexSyntaxKind;
-    type TypedRoot = TexRoot;
+    type TokenType = crate::lexer::token_type::TexTokenType;
+    type ElementType = crate::parser::element_type::TexElementType;
+    type TypedRoot = crate::ast::TexRoot;
 }

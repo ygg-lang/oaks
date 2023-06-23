@@ -1,4 +1,5 @@
-//! ActionScript AST 定义
+#![doc = include_str!("readme.md")]
+/// ActionScript AST 定义
 
 /// ActionScript 语法树的根节点
 #[derive(Debug, Clone, PartialEq)]

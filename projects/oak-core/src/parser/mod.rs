@@ -26,7 +26,10 @@ pub use crate::{
 pub type ParseOutput<'a, L: Language> = OakDiagnostics<&'a GreenNode<'a, L>>;
 
 /// Core parser trait that defines how to run the parser.
-pub trait Parser<L: Language + Send + Sync + 'static> {
+pub trait Parser<L: Language + Send + Sync>
+where
+    L::ElementType: From<L::TokenType>,
+{
     /// The core parsing entry point.
     ///
     /// This method orchestrates the parsing process using the provided cache.
@@ -45,7 +48,8 @@ pub trait Parser<L: Language + Send + Sync + 'static> {
 /// in one call.
 pub fn parse<'a, L, P, Lex, S>(parser: &P, _lexer: &Lex, text: &'a S, edits: &[TextEdit], cache: &'a mut impl ParseCache<L>) -> ParseOutput<'a, L>
 where
-    L: Language + Send + Sync + 'static,
+    L: Language + Send + Sync,
+    L::ElementType: From<L::TokenType>,
     P: Parser<L>,
     Lex: Lexer<L>,
     S: Source + ?Sized,
@@ -58,7 +62,8 @@ where
 /// This is a convenience function for parsing a source from scratch.
 pub fn parse_one_pass<'a, L, P, S>(parser: &P, text: &'a S, cache: &'a mut impl ParseCache<L>) -> ParseOutput<'a, L>
 where
-    L: Language + Send + Sync + 'static,
+    L: Language + Send + Sync,
+    L::ElementType: From<L::TokenType>,
     P: Parser<L>,
     S: Source + ?Sized,
 {
@@ -71,7 +76,8 @@ where
 /// setting up the parser state, and committing the result.
 pub fn parse_with_lexer<'a, L, S, Lex>(lexer: &Lex, text: &'a S, edits: &[TextEdit], cache: &'a mut impl ParseCache<L>, run: impl FnOnce(&mut ParserState<'a, L, S>) -> Result<&'a GreenNode<'a, L>, OakError>) -> ParseOutput<'a, L>
 where
-    L: Language + Send + Sync + 'static,
+    L: Language + Send + Sync,
+    L::ElementType: From<L::TokenType>,
     S: Source + ?Sized,
     Lex: Lexer<L>,
 {
@@ -107,7 +113,7 @@ where
 
     // 5. Commit Generation
     if let Ok(root) = output.result {
-        cache.commit_generation(root);
+        cache.commit_generation(root)
     }
 
     output

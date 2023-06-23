@@ -35,7 +35,7 @@ fn test_peek_behavior() {
     state.advance(1);
     println!("位置: {}", state.get_position());
     println!("current(): {:?}", state.current());
-    println!("peek(): {:?}", state.peek());
+    println!("peek(): {:?}", state.peek())
 }
 
 #[test]
@@ -62,5 +62,5 @@ fn test_fortran_program_parsing() {
 
     println!("第一个标记: 类型={:?}, 文本='{}'", first_token.kind, token_text);
 
-    println!("✅ Fortran 程序解析测试通过！");
+    println!("✅ Fortran 程序解析测试通过！")
 }

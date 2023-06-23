@@ -1,3 +1,4 @@
+#![doc = include_str!("readme.md")]
 use oak_core::language::{Language, LanguageCategory};
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Default)]
@@ -20,7 +21,7 @@ impl Language for VerilogLanguage {
     const NAME: &'static str = "verilog";
     const CATEGORY: LanguageCategory = LanguageCategory::Programming;
 
-    type TokenType = crate::kind::VerilogKind;
-    type ElementType = crate::kind::VerilogKind;
+    type TokenType = crate::lexer::token_type::VerilogTokenType;
+    type ElementType = crate::parser::element_type::VerilogElementType;
     type TypedRoot = ();
 }

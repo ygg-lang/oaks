@@ -1,13 +1,18 @@
+#![doc = include_str!("readme.md")]
+#[cfg(feature = "serde")]
+#[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
 
 /// PowerShell AST 根节点
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct PowerShellRoot {
     pub items: Vec<PowerShellItem>,
 }
 
 /// PowerShell 顶级项目
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub enum PowerShellItem {
     Statement(PowerShellStatement),
     Function(PowerShellFunction),
@@ -16,7 +21,8 @@ pub enum PowerShellItem {
 }
 
 /// PowerShell 语句
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub enum PowerShellStatement {
     Expression(Box<PowerShellExpression>),
     Assignment(PowerShellAssignment),
@@ -35,7 +41,8 @@ pub enum PowerShellStatement {
 }
 
 /// PowerShell 表达式
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub enum PowerShellExpression {
     Literal(PowerShellLiteral),
     Variable(PowerShellVariable),
@@ -52,7 +59,8 @@ pub enum PowerShellExpression {
 }
 
 /// PowerShell 字面量
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub enum PowerShellLiteral {
     String(String),
     Number(String),
@@ -61,21 +69,24 @@ pub enum PowerShellLiteral {
 }
 
 /// PowerShell 变量
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct PowerShellVariable {
     pub name: String,
     pub scope: Option<String>,
 }
 
 /// PowerShell 命令
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct PowerShellCommand {
     pub name: String,
     pub arguments: Vec<PowerShellArgument>,
 }
 
 /// PowerShell 参数
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub enum PowerShellArgument {
     Positional(Box<PowerShellExpression>),
     Named(String, Box<PowerShellExpression>),
@@ -83,13 +94,15 @@ pub enum PowerShellArgument {
 }
 
 /// PowerShell 管道
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct PowerShellPipeline {
     pub commands: Vec<PowerShellCommand>,
 }
 
 /// PowerShell 二元操作
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct PowerShellBinaryOp {
     pub left: Box<PowerShellExpression>,
     pub operator: PowerShellBinaryOperator,
@@ -97,7 +110,8 @@ pub struct PowerShellBinaryOp {
 }
 
 /// PowerShell 二元操作符
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub enum PowerShellBinaryOperator {
     Add,
     Subtract,
@@ -127,14 +141,16 @@ pub enum PowerShellBinaryOperator {
 }
 
 /// PowerShell 一元操作
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct PowerShellUnaryOp {
     pub operator: PowerShellUnaryOperator,
     pub operand: Box<PowerShellExpression>,
 }
 
 /// PowerShell 一元操作符
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub enum PowerShellUnaryOperator {
     Plus,
     Minus,
@@ -145,46 +161,53 @@ pub enum PowerShellUnaryOperator {
 }
 
 /// PowerShell 成员访问
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct PowerShellMemberAccess {
     pub object: Box<PowerShellExpression>,
     pub member: String,
 }
 
 /// PowerShell 索引访问
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct PowerShellIndexAccess {
     pub object: Box<PowerShellExpression>,
     pub index: Box<PowerShellExpression>,
 }
 
 /// PowerShell 数组
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct PowerShellArray {
     pub elements: Vec<PowerShellExpression>,
 }
 
 /// PowerShell 哈希表
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct PowerShellHashtable {
     pub entries: Vec<PowerShellHashtableEntry>,
 }
 
-/// PowerShell 哈希表条目
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+/// PowerShell 哈希表项
+#[derive(Debug, Clone, PartialEq)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct PowerShellHashtableEntry {
     pub key: Box<PowerShellExpression>,
     pub value: Box<PowerShellExpression>,
 }
 
 /// PowerShell 脚本块
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct PowerShellScriptBlock {
     pub statements: Vec<PowerShellStatement>,
 }
 
 /// PowerShell 赋值
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct PowerShellAssignment {
     pub target: Box<PowerShellExpression>,
     pub operator: PowerShellAssignmentOperator,
@@ -192,7 +215,8 @@ pub struct PowerShellAssignment {
 }
 
 /// PowerShell 赋值操作符
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub enum PowerShellAssignmentOperator {
     Assign,
     PlusAssign,
@@ -202,8 +226,9 @@ pub enum PowerShellAssignmentOperator {
     ModuloAssign,
 }
 
-/// PowerShell if 语句
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+/// PowerShell If 语句
+#[derive(Debug, Clone, PartialEq)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct PowerShellIf {
     pub condition: Box<PowerShellExpression>,
     pub then_block: PowerShellScriptBlock,
@@ -211,22 +236,25 @@ pub struct PowerShellIf {
     pub else_block: Option<PowerShellScriptBlock>,
 }
 
-/// PowerShell elseif 语句
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+/// PowerShell ElseIf 子句
+#[derive(Debug, Clone, PartialEq)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct PowerShellElseIf {
     pub condition: Box<PowerShellExpression>,
     pub block: PowerShellScriptBlock,
 }
 
-/// PowerShell while 语句
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+/// PowerShell While 语句
+#[derive(Debug, Clone, PartialEq)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct PowerShellWhile {
     pub condition: Box<PowerShellExpression>,
     pub block: PowerShellScriptBlock,
 }
 
-/// PowerShell for 语句
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+/// PowerShell For 语句
+#[derive(Debug, Clone, PartialEq)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct PowerShellFor {
     pub init: Option<Box<PowerShellExpression>>,
     pub condition: Option<Box<PowerShellExpression>>,
@@ -234,91 +262,110 @@ pub struct PowerShellFor {
     pub block: PowerShellScriptBlock,
 }
 
-/// PowerShell foreach 语句
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+/// PowerShell ForEach 语句
+#[derive(Debug, Clone, PartialEq)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct PowerShellForEach {
     pub variable: PowerShellVariable,
     pub collection: Box<PowerShellExpression>,
     pub block: PowerShellScriptBlock,
 }
 
-/// PowerShell switch 语句
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+/// PowerShell Switch 语句
+#[derive(Debug, Clone, PartialEq)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct PowerShellSwitch {
     pub expression: Box<PowerShellExpression>,
     pub cases: Vec<PowerShellSwitchCase>,
     pub default: Option<PowerShellScriptBlock>,
 }
 
-/// PowerShell switch case
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+/// PowerShell Switch Case 子句
+#[derive(Debug, Clone, PartialEq)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct PowerShellSwitchCase {
     pub pattern: Box<PowerShellExpression>,
     pub block: PowerShellScriptBlock,
 }
 
-/// PowerShell try 语句
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+/// PowerShell Try 语句
+#[derive(Debug, Clone, PartialEq)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct PowerShellTry {
     pub block: PowerShellScriptBlock,
     pub catch_blocks: Vec<PowerShellCatch>,
     pub finally_block: Option<PowerShellScriptBlock>,
 }
 
-/// PowerShell catch 语句
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+/// PowerShell Catch 子句
+#[derive(Debug, Clone, PartialEq)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct PowerShellCatch {
     pub exception_type: Option<String>,
     pub block: PowerShellScriptBlock,
 }
 
-/// PowerShell return 语句
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+/// PowerShell Return 语句
+#[derive(Debug, Clone, PartialEq)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct PowerShellReturn {
     pub value: Option<Box<PowerShellExpression>>,
 }
 
-/// PowerShell break 语句
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+/// PowerShell Break 语句
+#[derive(Debug, Clone, PartialEq)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct PowerShellBreak {
     pub label: Option<String>,
 }
 
-/// PowerShell continue 语句
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+/// PowerShell Continue 语句
+#[derive(Debug, Clone, PartialEq)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct PowerShellContinue {
     pub label: Option<String>,
 }
 
-/// PowerShell exit 语句
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+/// PowerShell Exit 语句
+#[derive(Debug, Clone, PartialEq)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct PowerShellExit {
     pub code: Option<Box<PowerShellExpression>>,
 }
 
-/// PowerShell throw 语句
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+/// PowerShell Throw 语句
+#[derive(Debug, Clone, PartialEq)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct PowerShellThrow {
     pub exception: Option<Box<PowerShellExpression>>,
 }
 
-/// PowerShell 代码块
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+/// PowerShell 块
+#[derive(Debug, Clone, PartialEq)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct PowerShellBlock {
     pub statements: Vec<PowerShellStatement>,
 }
 
 /// PowerShell 函数
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct PowerShellFunction {
     pub name: String,
-    pub parameters: Vec<PowerShellParameter>,
     pub body: PowerShellScriptBlock,
     pub attributes: Vec<PowerShellAttribute>,
 }
 
-/// PowerShell 参数定义
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+/// PowerShell 参数块
+#[derive(Debug, Clone, PartialEq)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+pub struct PowerShellParamBlock {
+    pub parameters: Vec<PowerShellParameter>,
+}
+
+/// PowerShell 参数
+#[derive(Debug, Clone, PartialEq)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct PowerShellParameter {
     pub name: String,
     pub param_type: Option<String>,
@@ -327,14 +374,16 @@ pub struct PowerShellParameter {
 }
 
 /// PowerShell 属性
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct PowerShellAttribute {
     pub name: String,
     pub arguments: Vec<PowerShellExpression>,
 }
 
 /// PowerShell 类
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct PowerShellClass {
     pub name: String,
     pub base_class: Option<String>,
@@ -342,7 +391,8 @@ pub struct PowerShellClass {
 }
 
 /// PowerShell 类成员
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub enum PowerShellClassMember {
     Property(PowerShellProperty),
     Method(PowerShellMethod),
@@ -350,7 +400,8 @@ pub enum PowerShellClassMember {
 }
 
 /// PowerShell 属性
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct PowerShellProperty {
     pub name: String,
     pub property_type: Option<String>,
@@ -359,24 +410,27 @@ pub struct PowerShellProperty {
 }
 
 /// PowerShell 方法
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct PowerShellMethod {
     pub name: String,
-    pub parameters: Vec<PowerShellParameter>,
     pub return_type: Option<String>,
+    pub parameters: Vec<PowerShellParameter>,
     pub body: PowerShellScriptBlock,
     pub attributes: Vec<PowerShellAttribute>,
 }
 
 /// PowerShell 构造函数
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct PowerShellConstructor {
     pub parameters: Vec<PowerShellParameter>,
     pub body: PowerShellScriptBlock,
 }
 
 /// PowerShell 工作流
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct PowerShellWorkflow {
     pub name: String,
     pub parameters: Vec<PowerShellParameter>,

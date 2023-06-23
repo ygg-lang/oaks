@@ -1,19 +1,22 @@
+#![doc = include_str!("readme.md")]
 use crate::ast::TypeScriptRoot;
 use oak_core::{Language, LanguageCategory};
+#[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
 
-/// TypeScript 语言配置
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
+/// TypeScript language configuration.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct TypeScriptLanguage {
-    /// 是否支持 JSX 语法
+    /// Whether to support JSX syntax.
     pub jsx: bool,
-    /// 是否支持装饰器
+    /// Whether to support decorators.
     pub decorators: bool,
-    /// 是否启用严格模式
+    /// Whether to enable strict mode.
     pub strict: bool,
-    /// 目标 ECMAScript 版本
+    /// Target ECMAScript version.
     pub target: EcmaVersion,
-    /// 是否允许实验性语法
+    /// Whether to allow experimental syntax.
     pub experimental: bool,
 }
 
@@ -23,8 +26,9 @@ impl Default for TypeScriptLanguage {
     }
 }
 
-/// ECMAScript 版本
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
+/// ECMAScript version.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub enum EcmaVersion {
     ES3,
     ES5,
@@ -40,32 +44,32 @@ pub enum EcmaVersion {
 }
 
 impl TypeScriptLanguage {
-    /// 创建新的 TypeScript 语言配置
+    /// Creates a new TypeScript language configuration.
     pub fn new() -> Self {
         Self::default()
     }
 
-    /// 创建标准 TypeScript 配置
+    /// Creates a standard TypeScript configuration.
     pub fn standard() -> Self {
-        Self { jsx: false, decorators: false, strict: false, target: EcmaVersion::ES2020, experimental: false }
+        Self { jsx: true, decorators: true, strict: false, target: EcmaVersion::ES2020, experimental: true }
     }
 
-    /// 创建支持 JSX TypeScript 配置
+    /// Creates a TypeScript configuration with JSX support.
     pub fn with_jsx() -> Self {
         Self { jsx: true, decorators: false, strict: false, target: EcmaVersion::ES2020, experimental: false }
     }
 
-    /// 创建支持装饰器的 TypeScript 配置
+    /// Creates a TypeScript configuration with decorator support.
     pub fn with_decorators() -> Self {
         Self { jsx: false, decorators: true, strict: false, target: EcmaVersion::ES2020, experimental: false }
     }
 
-    /// 创建严格模式TypeScript 配置
+    /// Creates a strict mode TypeScript configuration.
     pub fn strict() -> Self {
         Self { jsx: false, decorators: false, strict: true, target: EcmaVersion::ES2020, experimental: false }
     }
 
-    /// 创建实验性语法的 TypeScript 配置
+    /// Creates a TypeScript configuration with experimental syntax.
     pub fn experimental() -> Self {
         Self { jsx: true, decorators: true, strict: true, target: EcmaVersion::ESNext, experimental: true }
     }
@@ -75,7 +79,7 @@ impl Language for TypeScriptLanguage {
     const NAME: &'static str = "typescript";
     const CATEGORY: LanguageCategory = LanguageCategory::Programming;
 
-    type TokenType = crate::kind::TypeScriptSyntaxKind;
-    type ElementType = crate::kind::TypeScriptSyntaxKind;
+    type TokenType = crate::lexer::token_type::TypeScriptTokenType;
+    type ElementType = crate::parser::element_type::TypeScriptElementType;
     type TypedRoot = TypeScriptRoot;
 }

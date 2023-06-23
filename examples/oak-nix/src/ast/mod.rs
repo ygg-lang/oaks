@@ -1,3 +1,4 @@
+#![doc = include_str!("readme.md")]
 use crate::language::NixLanguage;
 use oak_core::tree::RedNode;
 

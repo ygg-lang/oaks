@@ -1,4 +1,7 @@
-use crate::{kind::SmalltalkSyntaxKind, language::SmalltalkLanguage};
+#![doc = include_str!("readme.md")]
+pub mod token_type;
+
+use crate::{language::SmalltalkLanguage, lexer::token_type::SmalltalkTokenType};
 use oak_core::{
     OakError,
     lexer::{LexOutput, Lexer, LexerCache, LexerState},
@@ -62,10 +65,10 @@ impl<'config> SmalltalkLexer<'config> {
             let start_pos = state.get_position();
             if let Some(ch) = state.peek() {
                 state.advance(ch.len_utf8());
-                state.add_token(SmalltalkSyntaxKind::Error, start_pos, state.get_position());
+                state.add_token(SmalltalkTokenType::Error, start_pos, state.get_position());
             }
 
-            state.advance_if_dead_lock(safe_point);
+            state.advance_if_dead_lock(safe_point)
         }
 
         // 添加 EOF token
@@ -87,7 +90,7 @@ impl<'config> SmalltalkLexer<'config> {
         }
 
         if state.get_position() > start_pos {
-            state.add_token(SmalltalkSyntaxKind::Whitespace, start_pos, state.get_position());
+            state.add_token(SmalltalkTokenType::Whitespace, start_pos, state.get_position());
             true
         }
         else {
@@ -101,7 +104,7 @@ impl<'config> SmalltalkLexer<'config> {
 
         if let Some('\n') = state.peek() {
             state.advance(1);
-            state.add_token(SmalltalkSyntaxKind::Newline, start_pos, state.get_position());
+            state.add_token(SmalltalkTokenType::Newline, start_pos, state.get_position());
             true
         }
         else if let Some('\r') = state.peek() {
@@ -109,7 +112,7 @@ impl<'config> SmalltalkLexer<'config> {
             if let Some('\n') = state.peek() {
                 state.advance(1);
             }
-            state.add_token(SmalltalkSyntaxKind::Newline, start_pos, state.get_position());
+            state.add_token(SmalltalkTokenType::Newline, start_pos, state.get_position());
             true
         }
         else {
@@ -132,7 +135,7 @@ impl<'config> SmalltalkLexer<'config> {
                 state.advance(ch.len_utf8());
             }
 
-            state.add_token(SmalltalkSyntaxKind::Comment, start_pos, state.get_position());
+            state.add_token(SmalltalkTokenType::Comment, start_pos, state.get_position());
             true
         }
         else {
@@ -157,7 +160,7 @@ impl<'config> SmalltalkLexer<'config> {
                     }
                 }
 
-                state.add_token(SmalltalkSyntaxKind::Identifier, start_pos, state.get_position());
+                state.add_token(SmalltalkTokenType::Identifier, start_pos, state.get_position());
                 true
             }
             else {
@@ -186,7 +189,7 @@ impl<'config> SmalltalkLexer<'config> {
                     }
                 }
 
-                state.add_token(SmalltalkSyntaxKind::Number, start_pos, state.get_position());
+                state.add_token(SmalltalkTokenType::Number, start_pos, state.get_position());
                 true
             }
             else {
@@ -204,22 +207,22 @@ impl<'config> SmalltalkLexer<'config> {
 
         if let Some(ch) = state.peek() {
             let kind = match ch {
-                '(' => SmalltalkSyntaxKind::LeftParen,
-                ')' => SmalltalkSyntaxKind::RightParen,
-                '[' => SmalltalkSyntaxKind::LeftBracket,
-                ']' => SmalltalkSyntaxKind::RightBracket,
-                '{' => SmalltalkSyntaxKind::LeftBrace,
-                '}' => SmalltalkSyntaxKind::RightBrace,
-                '.' => SmalltalkSyntaxKind::Dot,
-                ';' => SmalltalkSyntaxKind::Semicolon,
-                ',' => SmalltalkSyntaxKind::Comma,
-                '+' => SmalltalkSyntaxKind::Plus,
-                '-' => SmalltalkSyntaxKind::Minus,
-                '*' => SmalltalkSyntaxKind::Star,
-                '/' => SmalltalkSyntaxKind::Slash,
-                '=' => SmalltalkSyntaxKind::Equal,
-                '<' => SmalltalkSyntaxKind::Less,
-                '>' => SmalltalkSyntaxKind::Greater,
+                '(' => SmalltalkTokenType::LeftParen,
+                ')' => SmalltalkTokenType::RightParen,
+                '[' => SmalltalkTokenType::LeftBracket,
+                ']' => SmalltalkTokenType::RightBracket,
+                '{' => SmalltalkTokenType::LeftBrace,
+                '}' => SmalltalkTokenType::RightBrace,
+                '.' => SmalltalkTokenType::Dot,
+                ';' => SmalltalkTokenType::Semicolon,
+                ',' => SmalltalkTokenType::Comma,
+                '+' => SmalltalkTokenType::Plus,
+                '-' => SmalltalkTokenType::Minus,
+                '*' => SmalltalkTokenType::Star,
+                '/' => SmalltalkTokenType::Slash,
+                '=' => SmalltalkTokenType::Equal,
+                '<' => SmalltalkTokenType::Less,
+                '>' => SmalltalkTokenType::Greater,
                 _ => return false,
             };
 

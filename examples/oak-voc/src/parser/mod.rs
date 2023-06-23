@@ -1,3 +1,6 @@
+pub mod element_type;
+pub use element_type::VocElementType;
+
 use crate::{language::VocLanguage, lexer::VocLexer};
 use oak_core::{
     TextEdit,
@@ -5,7 +8,7 @@ use oak_core::{
     source::Source,
 };
 
-mod parse;
+mod parse_top_level;
 
 pub(crate) type State<'a, S> = ParserState<'a, VocLanguage, S>;
 

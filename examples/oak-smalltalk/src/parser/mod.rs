@@ -1,4 +1,6 @@
-use crate::{kind::SmalltalkSyntaxKind, language::SmalltalkLanguage, lexer::SmalltalkLexer};
+pub mod element_type;
+
+use crate::{language::SmalltalkLanguage, lexer::SmalltalkLexer, parser::element_type::SmalltalkElementType};
 use oak_core::{
     GreenNode, OakError,
     parser::{ParseCache, ParseOutput, Parser, ParserState, parse_with_lexer},
@@ -20,10 +22,10 @@ impl<'config> SmalltalkParser<'config> {
         let checkpoint = state.checkpoint();
 
         while state.not_at_end() {
-            state.bump();
+            state.bump()
         }
 
-        let root = state.finish_at(checkpoint, SmalltalkSyntaxKind::Root.into());
+        let root = state.finish_at(checkpoint, crate::parser::element_type::SmalltalkElementType::Root);
         Ok(root)
     }
 }

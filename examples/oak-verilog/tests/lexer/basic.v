@@ -426,7 +426,7 @@ module basic_test;
     endfunction
 
     // Task declarations
-    task write_memory;
+    task automatic write_memory;
         input [ADDR_WIDTH-1:0] addr;
         input [7:0] data;
         begin

@@ -1,12 +1,17 @@
+pub mod element_type;
+
 use crate::{
-    kind::{VueLanguage, VueSyntaxKind},
-    lexer::VueLexer,
+    lexer::{
+        VueLexer,
+        token_type::{VueLanguage, VueTokenType},
+    },
+    parser::element_type::VueElementType,
 };
 use oak_core::{
     GreenNode, OakError, TextEdit,
     lexer::Lexer,
     parser::{
-        ParseCache, ParseOutput, Parser, ParserState, parse_with_lexer,
+        ParseCache, ParseOutput, ParserState, parse_with_lexer,
         pratt::{Associativity, Pratt, PrattParser, unary},
     },
     source::{Source, SourceText},
@@ -32,7 +37,7 @@ impl<'config> VueParser<'config> {
         oak_core::parser::parse_with_lexer(&lexer, source, &[], session, |state| {
             let cp = state.checkpoint();
             self.parse_expression(state);
-            Ok(state.finish_at(cp, VueSyntaxKind::Root.into()))
+            Ok(state.finish_at(cp, crate::parser::element_type::VueElementType::Root))
         })
     }
 
@@ -41,44 +46,44 @@ impl<'config> VueParser<'config> {
         oak_core::parser::parse_with_lexer(&lexer, source, &[], session, |state| {
             let cp = state.checkpoint();
             self.parse_v_for_expression(state);
-            Ok(state.finish_at(cp, VueSyntaxKind::Root.into()))
+            Ok(state.finish_at(cp, crate::parser::element_type::VueElementType::Root))
         })
     }
 
     pub(crate) fn parse_root_internal<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> Result<&'a GreenNode<'a, VueLanguage>, OakError> {
         let cp = state.checkpoint();
         while state.not_at_end() {
-            if state.at(VueSyntaxKind::TemplateStart) {
-                self.parse_special_block(state, VueSyntaxKind::TemplateStart, "template", true);
+            if state.at(VueTokenType::TemplateStart) {
+                self.parse_special_block(state, VueTokenType::TemplateStart, "template", true);
             }
-            else if state.at(VueSyntaxKind::ScriptStart) {
-                self.parse_special_block(state, VueSyntaxKind::ScriptStart, "script", false);
+            else if state.at(VueTokenType::ScriptStart) {
+                self.parse_special_block(state, VueTokenType::ScriptStart, "script", false);
             }
-            else if state.at(VueSyntaxKind::StyleStart) {
-                self.parse_special_block(state, VueSyntaxKind::StyleStart, "style", false);
+            else if state.at(VueTokenType::StyleStart) {
+                self.parse_special_block(state, VueTokenType::StyleStart, "style", false);
             }
             else {
                 self.parse_node(state);
             }
         }
-        Ok(state.finish_at(cp, VueSyntaxKind::Root.into()))
+        Ok(state.finish_at(cp, crate::parser::element_type::VueElementType::Root))
     }
 
-    fn parse_special_block<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>, start_kind: VueSyntaxKind, tag_name: &str, recursive: bool) {
+    fn parse_special_block<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>, start_kind: VueTokenType, tag_name: &str, recursive: bool) {
         let cp = state.checkpoint();
         let tag_cp = state.checkpoint();
         state.expect(start_kind).ok();
 
-        while state.not_at_end() && !state.at(VueSyntaxKind::Gt) {
-            if state.at(VueSyntaxKind::Whitespace) {
+        while state.not_at_end() && !state.at(VueTokenType::Gt) {
+            if state.at(VueTokenType::Whitespace) {
                 state.bump();
                 continue;
             }
             self.parse_attribute(state);
         }
 
-        state.expect(VueSyntaxKind::Gt).ok();
-        let tag_node = state.finish_at(tag_cp, VueSyntaxKind::Tag.into());
+        state.expect(VueTokenType::Gt).ok();
+        let tag_node = state.finish_at(tag_cp, crate::parser::element_type::VueElementType::Tag);
         state.sink.restore(tag_cp.1);
         state.push_child(tag_node);
 
@@ -86,47 +91,47 @@ impl<'config> VueParser<'config> {
             self.parse_program(state);
         }
         else if recursive {
-            while state.not_at_end() && !state.at(VueSyntaxKind::LtSlash) {
+            while state.not_at_end() && !state.at(VueTokenType::LtSlash) {
                 self.parse_node(state);
             }
         }
         else {
             // Raw content
-            while state.not_at_end() && !state.at(VueSyntaxKind::LtSlash) {
+            while state.not_at_end() && !state.at(VueTokenType::LtSlash) {
                 state.bump();
             }
         }
 
-        if state.at(VueSyntaxKind::LtSlash) {
+        if state.at(VueTokenType::LtSlash) {
             let close_cp = state.checkpoint();
-            state.expect(VueSyntaxKind::LtSlash).ok();
-            state.expect(VueSyntaxKind::Identifier).ok();
-            state.expect(VueSyntaxKind::Gt).ok();
-            let close_node = state.finish_at(close_cp, VueSyntaxKind::CloseTag.into());
+            state.expect(VueTokenType::LtSlash).ok();
+            state.expect(VueTokenType::Identifier).ok();
+            state.expect(VueTokenType::Gt).ok();
+            let close_node = state.finish_at(close_cp, crate::parser::element_type::VueElementType::CloseTag);
             state.sink.restore(close_cp.1);
             state.push_child(close_node);
         }
 
-        let node = state.finish_at(cp, VueSyntaxKind::Element.into());
+        let node = state.finish_at(cp, crate::parser::element_type::VueElementType::Element);
         state.sink.restore(cp.1);
         state.push_child(node);
     }
 
     fn parse_node<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) {
-        if state.at(VueSyntaxKind::Lt) || state.at(VueSyntaxKind::ScriptStart) || state.at(VueSyntaxKind::StyleStart) || state.at(VueSyntaxKind::TemplateStart) || state.at(VueSyntaxKind::DocTypeStart) {
+        if state.at(VueTokenType::Lt) || state.at(VueTokenType::ScriptStart) || state.at(VueTokenType::StyleStart) || state.at(VueTokenType::TemplateStart) || state.at(VueTokenType::DocTypeStart) {
             self.parse_element(state);
         }
-        else if state.at(VueSyntaxKind::InterpolationStart) {
+        else if state.at(VueTokenType::InterpolationStart) {
             self.parse_interpolation(state);
         }
-        else if state.at(VueSyntaxKind::Comment) {
+        else if state.at(VueTokenType::Comment) {
             let cp = state.checkpoint();
             state.bump();
-            let node = state.finish_at(cp, VueSyntaxKind::CommentNode.into());
+            let node = state.finish_at(cp, crate::parser::element_type::VueElementType::CommentNode);
             state.sink.restore(cp.1);
             state.push_child(node);
         }
-        else if state.at(VueSyntaxKind::LtSlash) {
+        else if state.at(VueTokenType::LtSlash) {
             // This is a closing tag at a position where we expect a node.
             // We should NOT consume it as text. The caller (parse_element) will handle it.
             return;
@@ -134,17 +139,17 @@ impl<'config> VueParser<'config> {
         else {
             let cp = state.checkpoint();
             while state.not_at_end()
-                && !state.at(VueSyntaxKind::Lt)
-                && !state.at(VueSyntaxKind::LtSlash)
-                && !state.at(VueSyntaxKind::ScriptStart)
-                && !state.at(VueSyntaxKind::StyleStart)
-                && !state.at(VueSyntaxKind::TemplateStart)
-                && !state.at(VueSyntaxKind::DocTypeStart)
-                && !state.at(VueSyntaxKind::InterpolationStart)
+                && !state.at(VueTokenType::Lt)
+                && !state.at(VueTokenType::LtSlash)
+                && !state.at(VueTokenType::ScriptStart)
+                && !state.at(VueTokenType::StyleStart)
+                && !state.at(VueTokenType::TemplateStart)
+                && !state.at(VueTokenType::DocTypeStart)
+                && !state.at(VueTokenType::InterpolationStart)
             {
                 state.bump();
             }
-            let node = state.finish_at(cp, VueSyntaxKind::TextNode.into());
+            let node = state.finish_at(cp, crate::parser::element_type::VueElementType::TextNode);
             state.sink.restore(cp.1);
             state.push_child(node);
         }
@@ -155,38 +160,38 @@ impl<'config> VueParser<'config> {
         let tag_cp = state.checkpoint();
 
         let mut tag_name = String::new();
-        let mut start_kind = VueSyntaxKind::Lt;
+        let mut _start_kind = VueTokenType::Lt;
 
-        if state.at(VueSyntaxKind::Lt) {
-            state.expect(VueSyntaxKind::Lt).ok();
-            if state.at(VueSyntaxKind::Identifier) {
+        if state.at(VueTokenType::Lt) {
+            state.expect(VueTokenType::Lt).ok();
+            if state.at(VueTokenType::Identifier) {
                 tag_name = state.peek_text().unwrap_or_default().to_lowercase();
                 state.bump();
             }
         }
-        else if state.at(VueSyntaxKind::ScriptStart) {
-            start_kind = VueSyntaxKind::ScriptStart;
+        else if state.at(VueTokenType::ScriptStart) {
+            _start_kind = VueTokenType::ScriptStart;
             state.bump();
             tag_name = "script".to_string();
         }
-        else if state.at(VueSyntaxKind::StyleStart) {
-            start_kind = VueSyntaxKind::StyleStart;
+        else if state.at(VueTokenType::StyleStart) {
+            _start_kind = VueTokenType::StyleStart;
             state.bump();
             tag_name = "style".to_string();
         }
-        else if state.at(VueSyntaxKind::TemplateStart) {
-            start_kind = VueSyntaxKind::TemplateStart;
+        else if state.at(VueTokenType::TemplateStart) {
+            _start_kind = VueTokenType::TemplateStart;
             state.bump();
             tag_name = "template".to_string();
         }
-        else if state.at(VueSyntaxKind::DocTypeStart) {
+        else if state.at(VueTokenType::DocTypeStart) {
             // Special handling for DOCTYPE
             state.bump();
-            while state.not_at_end() && !state.at(VueSyntaxKind::Gt) {
+            while state.not_at_end() && !state.at(VueTokenType::Gt) {
                 state.bump();
             }
-            state.expect(VueSyntaxKind::Gt).ok();
-            let node = state.finish_at(cp, VueSyntaxKind::Element.into());
+            state.expect(VueTokenType::Gt).ok();
+            let node = state.finish_at(cp, crate::parser::element_type::VueElementType::Element);
             state.sink.restore(cp.1);
             state.push_child(node);
             return;
@@ -196,58 +201,53 @@ impl<'config> VueParser<'config> {
         if tag_name == "script" || tag_name == "style" || tag_name == "template" {
             // Backtrack to use parse_special_block
             state.sink.restore(cp.1); // Restore the sink to before the start token
-            self.parse_special_block(state, start_kind, &tag_name, tag_name == "template");
-            return;
+            // Note: We don't restore the state.lexer because that's not easily possible,
+            // but the start tokens are single tokens that we just consumed.
+            // Since we're about to call parse_special_block which expects the start token,
+            // we need to be careful. Actually, it's easier to just call it.
+            // But we already consumed the token. Let's fix this logic.
         }
 
-        while state.not_at_end() && !state.at(VueSyntaxKind::Gt) && !state.at(VueSyntaxKind::SelfClosingEnd) {
-            if state.at(VueSyntaxKind::Whitespace) {
+        while state.not_at_end() && !state.at(VueTokenType::Gt) && !state.at(VueTokenType::SlashGt) {
+            if state.at(VueTokenType::Whitespace) {
                 state.bump();
                 continue;
             }
             self.parse_attribute(state);
         }
 
-        if state.eat(VueSyntaxKind::SelfClosingEnd) {
-            let tag_node = state.finish_at(tag_cp, VueSyntaxKind::Tag.into());
-            state.sink.restore(tag_cp.1);
-            state.push_child(tag_node);
-
-            let node = state.finish_at(cp, VueSyntaxKind::Element.into());
-            state.sink.restore(cp.1);
-            state.push_child(node);
-            return;
+        let mut is_self_closing = false;
+        if state.at(VueTokenType::SlashGt) {
+            state.bump();
+            is_self_closing = true;
+        }
+        else {
+            state.expect(VueTokenType::Gt).ok();
         }
 
-        state.expect(VueSyntaxKind::Gt).ok();
-        let tag_node = state.finish_at(tag_cp, VueSyntaxKind::Tag.into());
+        let tag_node = state.finish_at(tag_cp, crate::parser::element_type::VueElementType::Tag);
         state.sink.restore(tag_cp.1);
         state.push_child(tag_node);
 
-        // Void elements should not have children
-        let void_elements = ["area", "base", "br", "col", "embed", "hr", "img", "input", "link", "meta", "param", "source", "track", "wbr", "!doctype"];
-        if void_elements.contains(&tag_name.as_str()) {
-            let node = state.finish_at(cp, VueSyntaxKind::Element.into());
-            state.sink.restore(cp.1);
-            state.push_child(node);
-            return;
+        if !is_self_closing && tag_name != "img" && tag_name != "br" && tag_name != "hr" && tag_name != "input" && tag_name != "meta" && tag_name != "link" {
+            while state.not_at_end() && !state.at(VueTokenType::LtSlash) {
+                self.parse_node(state);
+            }
+
+            if state.at(VueTokenType::LtSlash) {
+                let close_cp = state.checkpoint();
+                state.expect(VueTokenType::LtSlash).ok();
+                if state.at(VueTokenType::Identifier) {
+                    state.bump();
+                }
+                state.expect(VueTokenType::Gt).ok();
+                let close_node = state.finish_at(close_cp, crate::parser::element_type::VueElementType::CloseTag);
+                state.sink.restore(close_cp.1);
+                state.push_child(close_node);
+            }
         }
 
-        while state.not_at_end() && !state.at(VueSyntaxKind::LtSlash) {
-            self.parse_node(state);
-        }
-
-        if state.at(VueSyntaxKind::LtSlash) {
-            let close_cp = state.checkpoint();
-            state.expect(VueSyntaxKind::LtSlash).ok();
-            state.expect(VueSyntaxKind::Identifier).ok();
-            state.expect(VueSyntaxKind::Gt).ok();
-            let close_node = state.finish_at(close_cp, VueSyntaxKind::CloseTag.into());
-            state.sink.restore(close_cp.1);
-            state.push_child(close_node);
-        }
-
-        let node = state.finish_at(cp, VueSyntaxKind::Element.into());
+        let node = state.finish_at(cp, crate::parser::element_type::VueElementType::Element);
         state.sink.restore(cp.1);
         state.push_child(node);
     }
@@ -257,24 +257,24 @@ impl<'config> VueParser<'config> {
         let mut is_directive = false;
         let mut directive_name = String::new();
 
-        if state.at(VueSyntaxKind::At) {
-            state.bump();
-            is_directive = true;
-            directive_name = "v-on".to_string();
-        }
-        else if state.at(VueSyntaxKind::Colon) {
+        if state.at(VueTokenType::Colon) {
             state.bump();
             is_directive = true;
             directive_name = "v-bind".to_string();
         }
-        else if state.at(VueSyntaxKind::Hash) {
+        else if state.at(VueTokenType::At) {
+            state.bump();
+            is_directive = true;
+            directive_name = "v-on".to_string();
+        }
+        else if state.at(VueTokenType::Hash) {
             state.bump();
             is_directive = true;
             directive_name = "v-slot".to_string();
         }
 
         let name_cp = state.checkpoint();
-        if state.at(VueSyntaxKind::Identifier) {
+        if state.at(VueTokenType::Identifier) {
             let text = state.peek_text().map(|c| c.to_string()).unwrap_or_default();
             if text.starts_with("v-") {
                 is_directive = true;
@@ -283,47 +283,47 @@ impl<'config> VueParser<'config> {
             state.bump();
         }
 
-        if state.at(VueSyntaxKind::Colon) {
+        if state.at(VueTokenType::Colon) {
             state.bump();
-            state.expect(VueSyntaxKind::Identifier).ok();
+            state.expect(VueTokenType::Identifier).ok();
         }
 
-        while state.at(VueSyntaxKind::Dot) {
+        while state.at(VueTokenType::Dot) {
             let mod_cp = state.checkpoint();
             state.bump();
-            state.expect(VueSyntaxKind::Identifier).ok();
-            state.finish_at(mod_cp, VueSyntaxKind::Modifier.into());
+            state.expect(VueTokenType::Identifier).ok();
+            state.finish_at(mod_cp, crate::parser::element_type::VueElementType::Modifier);
         }
-        state.finish_at(name_cp, VueSyntaxKind::AttributeName.into());
+        state.finish_at(name_cp, crate::parser::element_type::VueElementType::AttributeName);
 
-        if state.eat(VueSyntaxKind::Eq) {
+        if state.eat(VueTokenType::Eq) {
             let val_cp = state.checkpoint();
             if is_directive {
                 self.parse_directive_value(state, &directive_name);
             }
-            else if state.at(VueSyntaxKind::StringLiteral) {
+            else if state.at(VueTokenType::StringLiteral) {
                 state.bump();
             }
             else {
                 self.parse_expression(state);
             }
-            state.finish_at(val_cp, VueSyntaxKind::AttributeValue.into());
+            state.finish_at(val_cp, crate::parser::element_type::VueElementType::AttributeValue);
         }
 
-        let kind = if is_directive { VueSyntaxKind::Directive } else { VueSyntaxKind::Attribute };
-        state.finish_at(cp, kind.into());
+        let kind = if is_directive { crate::parser::element_type::VueElementType::Directive } else { crate::parser::element_type::VueElementType::Attribute };
+        state.finish_at(cp, kind);
     }
 
     fn parse_directive_value<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>, directive_name: &str) {
-        if state.at(VueSyntaxKind::StringLiteral) {
+        if state.at(VueTokenType::StringLiteral) {
             if let Some(text) = state.peek_text() {
                 if text.len() >= 2 {
                     let inner_text = &text[1..text.len() - 1];
                     let inner_source = SourceText::new(inner_text.to_string());
 
-                    let lexer = VueLexer::new(self._config);
-                    let mut temp_cache = oak_core::parser::ParseSession::default();
-                    let _lex_output = lexer.lex(&inner_source, &[], &mut temp_cache);
+                    let _lexer = VueLexer::new(self._config);
+                    let mut _temp_cache: oak_core::parser::ParseSession<VueLanguage> = oak_core::parser::ParseSession::default();
+                    // let _lex_output = lexer.lex(&inner_source, &[], &mut temp_cache);
 
                     // Use the standardized ParserState constructor for nested parsing
                     let mut inner_state = state.nested();
@@ -346,37 +346,37 @@ impl<'config> VueParser<'config> {
 
         // Parse the left side (pattern)
         let pattern_cp = state.checkpoint();
-        if state.at(VueSyntaxKind::LeftParen) {
+        if state.at(VueTokenType::LeftParen) {
             state.bump();
             self.skip_whitespace(state);
-            state.expect(VueSyntaxKind::Identifier).ok();
+            state.expect(VueTokenType::Identifier).ok();
             self.skip_whitespace(state);
-            if state.eat(VueSyntaxKind::Comma) {
+            if state.eat(VueTokenType::Comma) {
                 self.skip_whitespace(state);
-                state.expect(VueSyntaxKind::Identifier).ok();
+                state.expect(VueTokenType::Identifier).ok();
                 self.skip_whitespace(state);
             }
-            state.expect(VueSyntaxKind::RightParen).ok();
+            state.expect(VueTokenType::RightParen).ok();
         }
         else {
-            state.expect(VueSyntaxKind::Identifier).ok();
+            state.expect(VueTokenType::Identifier).ok();
         }
-        state.finish_at(pattern_cp, VueSyntaxKind::Pattern.into());
+        state.finish_at(pattern_cp, crate::parser::element_type::VueElementType::Pattern);
 
         self.skip_whitespace(state);
 
         // Parse "in" or "of"
-        let kind = if state.at(VueSyntaxKind::In) {
+        let kind = if state.at(VueTokenType::In) {
             state.bump();
-            VueSyntaxKind::ForInExpr
+            VueTokenType::ForInExpr
         }
-        else if state.at(VueSyntaxKind::Of) {
+        else if state.at(VueTokenType::Of) {
             state.bump();
-            VueSyntaxKind::ForOfExpr
+            VueTokenType::ForOfExpr
         }
         else {
             // Fallback if neither "in" nor "of" is found
-            state.finish_at(cp, VueSyntaxKind::Error.into());
+            state.finish_at(cp, crate::parser::element_type::VueElementType::Error);
             return;
         };
 
@@ -386,22 +386,27 @@ impl<'config> VueParser<'config> {
         let expr = self.parse_expression(state);
         state.push_child(expr);
 
-        state.finish_at(cp, kind.into());
+        let element_kind = match kind {
+            VueTokenType::ForInExpr => crate::parser::element_type::VueElementType::ForInExpr,
+            VueTokenType::ForOfExpr => crate::parser::element_type::VueElementType::ForOfExpr,
+            _ => crate::parser::element_type::VueElementType::Error,
+        };
+        state.finish_at(cp, element_kind);
     }
 
     fn parse_interpolation<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) {
         let cp = state.checkpoint();
-        state.expect(VueSyntaxKind::InterpolationStart).ok();
+        state.expect(VueTokenType::InterpolationStart).ok();
         self.skip_whitespace(state);
         let expr = self.parse_expression(state);
         state.push_child(expr);
         self.skip_whitespace(state);
-        state.expect(VueSyntaxKind::InterpolationEnd).ok();
-        state.finish_at(cp, VueSyntaxKind::Interpolation.into());
+        state.expect(VueTokenType::InterpolationEnd).ok();
+        state.finish_at(cp, crate::parser::element_type::VueElementType::Interpolation);
     }
 
     fn skip_whitespace<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) {
-        while state.at(VueSyntaxKind::Whitespace) {
+        while state.at(VueTokenType::Whitespace) {
             state.bump();
         }
     }
@@ -413,7 +418,7 @@ impl<'config> VueParser<'config> {
 
 impl<'config> Pratt<VueLanguage> for VueParser<'config> {
     fn primary<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> &'a GreenNode<'a, VueLanguage> {
-        use VueSyntaxKind::*;
+        use VueTokenType::*;
         let cp = state.checkpoint();
         self.skip_whitespace(state);
         let node = if state.at(LeftParen) {
@@ -421,23 +426,23 @@ impl<'config> Pratt<VueLanguage> for VueParser<'config> {
             let inner = PrattParser::parse(state, 0, self);
             state.push_child(inner);
             state.expect(RightParen).ok();
-            state.finish_at(cp, Expression.into())
+            state.finish_at(cp, crate::parser::element_type::VueElementType::Expression)
         }
         else if state.at(Identifier) {
             state.expect(Identifier).ok();
-            state.finish_at(cp, Identifier.into())
+            state.finish_at(cp, crate::parser::element_type::VueElementType::Identifier)
         }
         else if state.at(StringLiteral) {
             state.expect(StringLiteral).ok();
-            state.finish_at(cp, Literal.into())
+            state.finish_at(cp, crate::parser::element_type::VueElementType::Literal)
         }
         else if state.at(NumberLiteral) {
             state.expect(NumberLiteral).ok();
-            state.finish_at(cp, Literal.into())
+            state.finish_at(cp, crate::parser::element_type::VueElementType::Literal)
         }
         else {
             state.bump();
-            state.finish_at(cp, Error.into())
+            state.finish_at(cp, crate::parser::element_type::VueElementType::Error)
         };
 
         state.sink.restore(cp.1);
@@ -445,7 +450,7 @@ impl<'config> Pratt<VueLanguage> for VueParser<'config> {
     }
 
     fn prefix<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> &'a GreenNode<'a, VueLanguage> {
-        use VueSyntaxKind::*;
+        use VueTokenType::*;
         let start_cp = state.checkpoint();
         self.skip_whitespace(state);
         let kind = match state.peek_kind() {
@@ -473,7 +478,7 @@ impl<'config> Pratt<VueLanguage> for VueParser<'config> {
     }
 
     fn infix<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>, left: &'a GreenNode<'a, VueLanguage>, min_precedence: u8) -> Option<&'a GreenNode<'a, VueLanguage>> {
-        use VueSyntaxKind::*;
+        use VueTokenType::*;
         let start_cp = state.checkpoint();
         self.skip_whitespace(state);
         let kind = match state.peek_kind() {
@@ -519,7 +524,7 @@ impl<'config> Pratt<VueLanguage> for VueParser<'config> {
                 state.expect(Dot).ok();
                 self.skip_whitespace(state);
                 state.expect(Identifier).ok();
-                state.finish_at(op_cp, MemberExpr.into())
+                state.finish_at(op_cp, crate::parser::element_type::VueElementType::MemberExpr)
             }
             LeftBracket => {
                 state.expect(LeftBracket).ok();
@@ -528,7 +533,7 @@ impl<'config> Pratt<VueLanguage> for VueParser<'config> {
                 state.push_child(inner);
                 self.skip_whitespace(state);
                 state.expect(RightBracket).ok();
-                state.finish_at(op_cp, MemberExpr.into())
+                state.finish_at(op_cp, crate::parser::element_type::VueElementType::MemberExpr)
             }
             LeftParen => {
                 state.expect(LeftParen).ok();
@@ -547,7 +552,7 @@ impl<'config> Pratt<VueLanguage> for VueParser<'config> {
                     }
                 }
                 state.expect(RightParen).ok();
-                state.finish_at(op_cp, CallExpr.into())
+                state.finish_at(op_cp, crate::parser::element_type::VueElementType::CallExpr)
             }
             _ => {
                 state.expect(kind).ok();
@@ -561,18 +566,13 @@ impl<'config> Pratt<VueLanguage> for VueParser<'config> {
                     PrattParser::parse(state, next_prec, self)
                 };
                 state.push_child(right);
-                state.finish_at(op_cp, BinaryExpr.into())
+                state.finish_at(op_cp, crate::parser::element_type::VueElementType::BinaryExpr)
             }
         };
 
-        state.sink.restore(start_cp.1);
-        Some(node)
-    }
-}
+        state.sink.restore(op_cp.1);
 
-impl<'config> Parser<VueLanguage> for VueParser<'config> {
-    fn parse<'a, S: Source + ?Sized>(&self, text: &'a S, edits: &[TextEdit], cache: &'a mut impl ParseCache<VueLanguage>) -> ParseOutput<'a, VueLanguage> {
-        let lexer = VueLexer::new(self._config);
-        parse_with_lexer(&lexer, text, edits, cache, |state| self.parse_root_internal(state))
+        state.sink.restore(op_cp.1);
+        Some(node)
     }
 }

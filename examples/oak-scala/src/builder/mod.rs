@@ -1,3 +1,4 @@
+#![doc = include_str!("readme.md")]
 use crate::{ast::ScalaRoot, language::ScalaLanguage, parser::ScalaParser};
 use oak_core::{Builder, BuilderCache, Lexer, OakDiagnostics, Parser, RedNode, TextEdit, source::Source};
 

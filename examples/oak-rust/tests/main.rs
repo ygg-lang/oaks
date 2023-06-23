@@ -9,5 +9,5 @@ mod parser;
 
 #[test]
 fn ready() {
-    println!("Oak Rust Compiler Ready!");
+    println!("Oak Rust Compiler Ready!")
 }

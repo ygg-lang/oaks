@@ -1,17 +1,18 @@
+#![doc = include_str!("readme.md")]
 use crate::language::CobolLanguage;
 use oak_core::tree::{RedLeaf, RedNode};
 
 pub type CobolNode<'a> = RedNode<'a, CobolLanguage>;
 pub type CobolToken = RedLeaf<CobolLanguage>;
 
-#[derive(Debug, Clone, Copy)]
-pub struct CobolRoot<'a> {
-    pub syntax: CobolNode<'a>,
+#[derive(Debug, Clone)]
+pub struct CobolRoot {
+    pub program: CobolProgram,
 }
 
-impl<'a> CobolRoot<'a> {
-    pub fn new(syntax: CobolNode<'a>) -> Self {
-        Self { syntax }
+impl CobolRoot {
+    pub fn new(program: CobolProgram) -> Self {
+        Self { program }
     }
 }
 
@@ -120,6 +121,7 @@ pub struct DataItem {
 pub struct ProcedureDivision {
     pub sections: Vec<Section>,
     pub paragraphs: Vec<Paragraph>,
+    pub statements: Vec<Statement>,
 }
 
 /// 节

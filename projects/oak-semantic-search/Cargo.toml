@@ -1,14 +1,14 @@
 [package]
 name = "oak-semantic-search"
-description = "Fuzzy semantic search and code indexing for the Oak framework."
-categories = ["development-tools"]
-keywords = ["search", "semantic", "fuzzy", "indexing"]
 version.workspace = true
-edition.workspace = true
 authors.workspace = true
+description = "Fuzzy semantic search and code indexing for the Oak framework."
+edition.workspace = true
 license.workspace = true
 homepage.workspace = true
-repository.workspace = true
+repository = "https://github.com/ygg-lang/oaks/tree/master/projects/oak-semantic-search"
+categories = ["development-tools"]
+keywords = ["search", "semantic", "fuzzy", "indexing"]
 
 [dependencies]
 oak-core = { workspace = true }

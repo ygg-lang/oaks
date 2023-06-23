@@ -1,0 +1,152 @@
+#![doc = include_str!("readme.md")]
+/// Kind of highlighting.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum HighlightKind {
+    /// Keyword highlighting.
+    Keyword,
+    /// String highlighting.
+    String,
+    /// Number highlighting.
+    Number,
+    /// Comment highlighting.
+    Comment,
+    /// Identifier highlighting.
+    Identifier,
+    /// Decorator highlighting.
+    Decorator,
+}
+
+/// Highlighter trait.
+pub trait Highlighter {
+    /// Highlights the given text.
+    fn highlight(&self, text: &str) -> Vec<(usize, usize, HighlightKind)>;
+}
+
+/// Python highlighter implementation.
+pub struct PythonHighlighter {
+    /// Whether to use the parser for highlighting.
+    pub use_parser: bool,
+}
+
+impl Default for PythonHighlighter {
+    fn default() -> Self {
+        Self { use_parser: false }
+    }
+}
+
+impl PythonHighlighter {
+    pub fn new() -> Self {
+        Self::default()
+    }
+
+    pub fn with_parser() -> Self {
+        Self { use_parser: true }
+    }
+
+    fn highlight_keywords(&self, text: &str) -> Vec<(usize, usize, HighlightKind)> {
+        let mut highlights = Vec::new();
+        let keywords = [
+            "False", "None", "True", "and", "as", "assert", "async", "await", "break", "class", "continue", "def", "del", "elif", "else", "except", "finally", "for", "from", "global", "if", "import", "in", "is", "lambda", "nonlocal", "not", "or", "pass",
+            "raise", "return", "try", "while", "with", "yield",
+        ];
+
+        for keyword in &keywords {
+            let mut start = 0;
+            while let Some(pos) = text[start..].find(keyword) {
+                let absolute_pos = start + pos;
+                let end_pos = absolute_pos + keyword.len();
+
+                let is_word_boundary_before = absolute_pos == 0 || !text.chars().nth(absolute_pos - 1).unwrap_or(' ').is_alphanumeric();
+                let is_word_boundary_after = end_pos >= text.len() || !text.chars().nth(end_pos).unwrap_or(' ').is_alphanumeric();
+
+                if is_word_boundary_before && is_word_boundary_after {
+                    highlights.push((absolute_pos, end_pos, HighlightKind::Keyword))
+                }
+
+                start = absolute_pos + 1
+            }
+        }
+
+        highlights
+    }
+    fn highlight_strings(&self, text: &str) -> Vec<(usize, usize, HighlightKind)> {
+        let mut highlights = Vec::new();
+        let mut chars = text.char_indices().peekable();
+
+        while let Some((i, ch)) = chars.next() {
+            match ch {
+                '"' | '\'' => {
+                    let quote = ch;
+                    let start = i;
+                    let mut escaped = false;
+                    let mut found_end = false;
+
+                    while let Some((j, next_ch)) = chars.next() {
+                        if escaped {
+                            escaped = false
+                        }
+                        else if next_ch == '\\' {
+                            escaped = true
+                        }
+                        else if next_ch == quote {
+                            highlights.push((start, j + 1, HighlightKind::String));
+                            found_end = true;
+                            break;
+                        }
+                    }
+                    if !found_end {
+                        highlights.push((start, text.len(), HighlightKind::String))
+                    }
+                }
+                _ => {}
+            }
+        }
+        highlights
+    }
+
+    fn highlight_numbers(&self, text: &str) -> Vec<(usize, usize, HighlightKind)> {
+        let mut highlights = Vec::new();
+        let mut start = None;
+
+        for (i, ch) in text.char_indices() {
+            if ch.is_ascii_digit() {
+                if start.is_none() {
+                    start = Some(i)
+                }
+            }
+            else {
+                if let Some(s) = start {
+                    highlights.push((s, i, HighlightKind::Number));
+                    start = None
+                }
+            }
+        }
+        if let Some(s) = start {
+            highlights.push((s, text.len(), HighlightKind::Number))
+        }
+        highlights
+    }
+
+    fn highlight_comments(&self, text: &str) -> Vec<(usize, usize, HighlightKind)> {
+        let mut highlights = Vec::new();
+        let mut start = 0;
+        while let Some(pos) = text[start..].find('#') {
+            let absolute_pos = start + pos;
+            let end_pos = text[absolute_pos..].find('\n').map(|n| absolute_pos + n).unwrap_or(text.len());
+            highlights.push((absolute_pos, end_pos, HighlightKind::Comment));
+            start = end_pos
+        }
+        highlights
+    }
+}
+
+impl Highlighter for PythonHighlighter {
+    fn highlight(&self, text: &str) -> Vec<(usize, usize, HighlightKind)> {
+        let mut highlights = self.highlight_keywords(text);
+        highlights.extend(self.highlight_strings(text));
+        highlights.extend(self.highlight_numbers(text));
+        highlights.extend(self.highlight_comments(text));
+        highlights.sort_by_key(|h| h.0);
+        highlights
+    }
+}

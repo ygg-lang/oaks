@@ -28,16 +28,16 @@ impl JvmToJasmConverter {
             methods: Vec::new(),
             fields: Vec::new(),
             source_file: program.source_file,
-        };
+        }
 
         for jvm_field in program.fields {
             let jasm_field = self.convert_field(jvm_field)?;
-            jasm_class.fields.push(jasm_field);
+            jasm_class.fields.push(jasm_field)
         }
 
         for jvm_method in program.methods {
             let jasm_method = self.convert_method(jvm_method)?;
-            jasm_class.methods.push(jasm_method);
+            jasm_class.methods.push(jasm_method)
         }
 
         Ok(jasm_class)
@@ -52,7 +52,7 @@ impl JvmToJasmConverter {
         let mut instructions = Vec::new();
         for jvm_instruction in method.instructions {
             let jasm_instruction = self.convert_instruction(jvm_instruction)?;
-            instructions.push(jasm_instruction);
+            instructions.push(jasm_instruction)
         }
 
         Ok(JasmMethod { modifiers, name_and_descriptor, stack_size, locals_count, instructions })

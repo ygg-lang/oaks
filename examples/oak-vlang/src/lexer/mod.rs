@@ -1,4 +1,7 @@
-use crate::{kind::VLangSyntaxKind, language::VLangLanguage};
+#![doc = include_str!("readme.md")]
+pub mod token_type;
+
+use crate::{language::VLangLanguage, lexer::token_type::VLangTokenType};
 use oak_core::{
     Lexer, LexerState,
     lexer::{LexOutput, LexerCache},
@@ -31,7 +34,7 @@ impl<'config> VLangLexer<'config> {
         }
 
         if state.get_position() > start_pos {
-            state.add_token(VLangSyntaxKind::Whitespace, start_pos, state.get_position());
+            state.add_token(VLangTokenType::Whitespace, start_pos, state.get_position());
             true
         }
         else {
@@ -45,7 +48,7 @@ impl<'config> VLangLexer<'config> {
 
         if let Some('\n') = state.peek() {
             state.advance(1);
-            state.add_token(VLangSyntaxKind::Newline, start_pos, state.get_position());
+            state.add_token(VLangTokenType::Newline, start_pos, state.get_position());
             true
         }
         else if let Some('\r') = state.peek() {
@@ -53,7 +56,7 @@ impl<'config> VLangLexer<'config> {
             if let Some('\n') = state.peek() {
                 state.advance(1);
             }
-            state.add_token(VLangSyntaxKind::Newline, start_pos, state.get_position());
+            state.add_token(VLangTokenType::Newline, start_pos, state.get_position());
             true
         }
         else {
@@ -78,7 +81,7 @@ impl<'config> VLangLexer<'config> {
                     state.advance(ch.len_utf8());
                 }
 
-                state.add_token(VLangSyntaxKind::Comment, start_pos, state.get_position());
+                state.add_token(VLangTokenType::Comment, start_pos, state.get_position());
                 return true;
             }
             // 多行注释 /* */
@@ -95,7 +98,7 @@ impl<'config> VLangLexer<'config> {
                     state.advance(ch.len_utf8());
                 }
 
-                state.add_token(VLangSyntaxKind::Comment, start_pos, state.get_position());
+                state.add_token(VLangTokenType::Comment, start_pos, state.get_position());
                 return true;
             }
         }
@@ -132,7 +135,7 @@ impl<'config> VLangLexer<'config> {
                     }
                 }
 
-                let token_kind = if quote == '"' { VLangSyntaxKind::StringLiteral } else { VLangSyntaxKind::CharLiteral };
+                let token_kind = if quote == '"' { VLangTokenType::StringLiteral } else { VLangTokenType::CharLiteral };
                 state.add_token(token_kind, start_pos, state.get_position());
                 true
             }
@@ -217,7 +220,7 @@ impl<'config> VLangLexer<'config> {
                     }
                 }
 
-                let token_kind = if is_float { VLangSyntaxKind::FloatLiteral } else { VLangSyntaxKind::IntegerLiteral };
+                let token_kind = if is_float { VLangTokenType::FloatLiteral } else { VLangTokenType::IntegerLiteral };
                 state.add_token(token_kind, start_pos, state.get_position());
                 true
             }
@@ -247,65 +250,65 @@ impl<'config> VLangLexer<'config> {
 
                 let text = state.get_text_in((start_pos..state.get_position()).into());
                 let token_kind = match text.as_ref() {
-                    "module" => VLangSyntaxKind::ModuleKw,
-                    "import" => VLangSyntaxKind::ImportKw,
-                    "pub" => VLangSyntaxKind::PubKw,
-                    "fn" => VLangSyntaxKind::FnKw,
-                    "struct" => VLangSyntaxKind::StructKw,
-                    "interface" => VLangSyntaxKind::InterfaceKw,
-                    "enum" => VLangSyntaxKind::EnumKw,
-                    "type" => VLangSyntaxKind::TypeKw,
-                    "const" => VLangSyntaxKind::ConstKw,
-                    "mut" => VLangSyntaxKind::MutKw,
-                    "shared" => VLangSyntaxKind::SharedKw,
-                    "volatile" => VLangSyntaxKind::VolatileKw,
-                    "unsafe" => VLangSyntaxKind::UnsafeKw,
-                    "if" => VLangSyntaxKind::IfKw,
-                    "else" => VLangSyntaxKind::ElseKw,
-                    "for" => VLangSyntaxKind::ForKw,
-                    "in" => VLangSyntaxKind::InKw,
-                    "match" => VLangSyntaxKind::MatchKw,
-                    "or" => VLangSyntaxKind::OrKw,
-                    "return" => VLangSyntaxKind::ReturnKw,
-                    "break" => VLangSyntaxKind::BreakKw,
-                    "continue" => VLangSyntaxKind::ContinueKw,
-                    "goto" => VLangSyntaxKind::GotoKw,
-                    "defer" => VLangSyntaxKind::DeferKw,
-                    "go" => VLangSyntaxKind::GoKw,
-                    "select" => VLangSyntaxKind::SelectKw,
-                    "lock" => VLangSyntaxKind::LockKw,
-                    "rlock" => VLangSyntaxKind::RlockKw,
-                    "as" => VLangSyntaxKind::AsKw,
-                    "is" => VLangSyntaxKind::IsKw,
-                    "sizeof" => VLangSyntaxKind::SizeofKw,
-                    "typeof" => VLangSyntaxKind::TypeofKw,
-                    "offsetof" => VLangSyntaxKind::OffsetofKw,
-                    "assert" => VLangSyntaxKind::AssertKw,
-                    "panic" => VLangSyntaxKind::PanicKw,
-                    "eprintln" => VLangSyntaxKind::EprintlnKw,
-                    "println" => VLangSyntaxKind::PrintlnKw,
-                    "print" => VLangSyntaxKind::PrintKw,
-                    "eprint" => VLangSyntaxKind::EprintKw,
-                    "bool" => VLangSyntaxKind::BoolKw,
-                    "i8" => VLangSyntaxKind::I8Kw,
-                    "i16" => VLangSyntaxKind::I16Kw,
-                    "i32" => VLangSyntaxKind::I32Kw,
-                    "i64" => VLangSyntaxKind::I64Kw,
-                    "u8" => VLangSyntaxKind::U8Kw,
-                    "u16" => VLangSyntaxKind::U16Kw,
-                    "u32" => VLangSyntaxKind::U32Kw,
-                    "u64" => VLangSyntaxKind::U64Kw,
-                    "int" => VLangSyntaxKind::IntKw,
-                    "uint" => VLangSyntaxKind::UintKw,
-                    "f32" => VLangSyntaxKind::F32Kw,
-                    "f64" => VLangSyntaxKind::F64Kw,
-                    "string" => VLangSyntaxKind::StringKw,
-                    "rune" => VLangSyntaxKind::RuneKw,
-                    "byte" => VLangSyntaxKind::ByteKw,
-                    "voidptr" => VLangSyntaxKind::VoidptrKw,
-                    "char" => VLangSyntaxKind::CharKw,
-                    "true" | "false" => VLangSyntaxKind::BoolLiteral,
-                    _ => VLangSyntaxKind::Identifier,
+                    "module" => VLangTokenType::ModuleKw,
+                    "import" => VLangTokenType::ImportKw,
+                    "pub" => VLangTokenType::PubKw,
+                    "fn" => VLangTokenType::FnKw,
+                    "struct" => VLangTokenType::StructKw,
+                    "interface" => VLangTokenType::InterfaceKw,
+                    "enum" => VLangTokenType::EnumKw,
+                    "type" => VLangTokenType::TypeKw,
+                    "const" => VLangTokenType::ConstKw,
+                    "mut" => VLangTokenType::MutKw,
+                    "shared" => VLangTokenType::SharedKw,
+                    "volatile" => VLangTokenType::VolatileKw,
+                    "unsafe" => VLangTokenType::UnsafeKw,
+                    "if" => VLangTokenType::IfKw,
+                    "else" => VLangTokenType::ElseKw,
+                    "for" => VLangTokenType::ForKw,
+                    "in" => VLangTokenType::InKw,
+                    "match" => VLangTokenType::MatchKw,
+                    "or" => VLangTokenType::OrKw,
+                    "return" => VLangTokenType::ReturnKw,
+                    "break" => VLangTokenType::BreakKw,
+                    "continue" => VLangTokenType::ContinueKw,
+                    "goto" => VLangTokenType::GotoKw,
+                    "defer" => VLangTokenType::DeferKw,
+                    "go" => VLangTokenType::GoKw,
+                    "select" => VLangTokenType::SelectKw,
+                    "lock" => VLangTokenType::LockKw,
+                    "rlock" => VLangTokenType::RlockKw,
+                    "as" => VLangTokenType::AsKw,
+                    "is" => VLangTokenType::IsKw,
+                    "sizeof" => VLangTokenType::SizeofKw,
+                    "typeof" => VLangTokenType::TypeofKw,
+                    "offsetof" => VLangTokenType::OffsetofKw,
+                    "assert" => VLangTokenType::AssertKw,
+                    "panic" => VLangTokenType::PanicKw,
+                    "eprintln" => VLangTokenType::EprintlnKw,
+                    "println" => VLangTokenType::PrintlnKw,
+                    "print" => VLangTokenType::PrintKw,
+                    "eprint" => VLangTokenType::EprintKw,
+                    "bool" => VLangTokenType::BoolKw,
+                    "i8" => VLangTokenType::I8Kw,
+                    "i16" => VLangTokenType::I16Kw,
+                    "i32" => VLangTokenType::I32Kw,
+                    "i64" => VLangTokenType::I64Kw,
+                    "u8" => VLangTokenType::U8Kw,
+                    "u16" => VLangTokenType::U16Kw,
+                    "u32" => VLangTokenType::U32Kw,
+                    "u64" => VLangTokenType::U64Kw,
+                    "int" => VLangTokenType::IntKw,
+                    "uint" => VLangTokenType::UintKw,
+                    "f32" => VLangTokenType::F32Kw,
+                    "f64" => VLangTokenType::F64Kw,
+                    "string" => VLangTokenType::StringKw,
+                    "rune" => VLangTokenType::RuneKw,
+                    "byte" => VLangTokenType::ByteKw,
+                    "voidptr" => VLangTokenType::VoidptrKw,
+                    "char" => VLangTokenType::CharKw,
+                    "true" | "false" => VLangTokenType::BoolLiteral,
+                    _ => VLangTokenType::Identifier,
                 };
 
                 state.add_token(token_kind, start_pos, state.get_position());
@@ -329,230 +332,230 @@ impl<'config> VLangLexer<'config> {
                 '+' => {
                     if let Some('=') = state.peek_next_n(1) {
                         state.advance(2);
-                        VLangSyntaxKind::PlusEq
+                        VLangTokenType::PlusEq
                     }
                     else if let Some('+') = state.peek_next_n(1) {
                         state.advance(2);
-                        VLangSyntaxKind::PlusPlus
+                        VLangTokenType::PlusPlus
                     }
                     else {
                         state.advance(1);
-                        VLangSyntaxKind::Plus
+                        VLangTokenType::Plus
                     }
                 }
                 '-' => {
                     if let Some('=') = state.peek_next_n(1) {
                         state.advance(2);
-                        VLangSyntaxKind::MinusEq
+                        VLangTokenType::MinusEq
                     }
                     else if let Some('-') = state.peek_next_n(1) {
                         state.advance(2);
-                        VLangSyntaxKind::MinusMinus
+                        VLangTokenType::MinusMinus
                     }
                     else if let Some('>') = state.peek_next_n(1) {
                         state.advance(2);
-                        VLangSyntaxKind::Arrow
+                        VLangTokenType::Arrow
                     }
                     else {
                         state.advance(1);
-                        VLangSyntaxKind::Minus
+                        VLangTokenType::Minus
                     }
                 }
                 '*' => {
                     if let Some('=') = state.peek_next_n(1) {
                         state.advance(2);
-                        VLangSyntaxKind::StarEq
+                        VLangTokenType::StarEq
                     }
                     else {
                         state.advance(1);
-                        VLangSyntaxKind::Star
+                        VLangTokenType::Star
                     }
                 }
                 '/' => {
                     if let Some('=') = state.peek_next_n(1) {
                         state.advance(2);
-                        VLangSyntaxKind::SlashEq
+                        VLangTokenType::SlashEq
                     }
                     else {
                         state.advance(1);
-                        VLangSyntaxKind::Slash
+                        VLangTokenType::Slash
                     }
                 }
                 '%' => {
                     if let Some('=') = state.peek_next_n(1) {
                         state.advance(2);
-                        VLangSyntaxKind::PercentEq
+                        VLangTokenType::PercentEq
                     }
                     else {
                         state.advance(1);
-                        VLangSyntaxKind::Percent
+                        VLangTokenType::Percent
                     }
                 }
                 '&' => {
                     if let Some('=') = state.peek_next_n(1) {
                         state.advance(2);
-                        VLangSyntaxKind::AmpersandEq
+                        VLangTokenType::AmpersandEq
                     }
                     else if let Some('&') = state.peek_next_n(1) {
                         state.advance(2);
-                        VLangSyntaxKind::AndAnd
+                        VLangTokenType::AndAnd
                     }
                     else {
                         state.advance(1);
-                        VLangSyntaxKind::Ampersand
+                        VLangTokenType::Ampersand
                     }
                 }
                 '|' => {
                     if let Some('=') = state.peek_next_n(1) {
                         state.advance(2);
-                        VLangSyntaxKind::PipeEq
+                        VLangTokenType::PipeEq
                     }
                     else if let Some('|') = state.peek_next_n(1) {
                         state.advance(2);
-                        VLangSyntaxKind::OrOr
+                        VLangTokenType::OrOr
                     }
                     else {
                         state.advance(1);
-                        VLangSyntaxKind::Pipe
+                        VLangTokenType::Pipe
                     }
                 }
                 '^' => {
                     if let Some('=') = state.peek_next_n(1) {
                         state.advance(2);
-                        VLangSyntaxKind::CaretEq
+                        VLangTokenType::CaretEq
                     }
                     else {
                         state.advance(1);
-                        VLangSyntaxKind::Caret
+                        VLangTokenType::Caret
                     }
                 }
                 '=' => {
                     if let Some('=') = state.peek_next_n(1) {
                         state.advance(2);
-                        VLangSyntaxKind::EqEq
+                        VLangTokenType::EqEq
                     }
                     else if let Some('>') = state.peek_next_n(1) {
                         state.advance(2);
-                        VLangSyntaxKind::FatArrow
+                        VLangTokenType::FatArrow
                     }
                     else {
                         state.advance(1);
-                        VLangSyntaxKind::Eq
+                        VLangTokenType::Eq
                     }
                 }
                 '!' => {
                     if let Some('=') = state.peek_next_n(1) {
                         state.advance(2);
-                        VLangSyntaxKind::Ne
+                        VLangTokenType::Ne
                     }
                     else {
                         state.advance(1);
-                        VLangSyntaxKind::Bang
+                        VLangTokenType::Bang
                     }
                 }
                 '<' => {
                     if let Some('=') = state.peek_next_n(1) {
                         state.advance(2);
-                        VLangSyntaxKind::Le
+                        VLangTokenType::Le
                     }
                     else if let Some('<') = state.peek_next_n(1) {
                         if let Some('=') = state.peek_next_n(2) {
                             state.advance(3);
-                            VLangSyntaxKind::LeftShiftEq
+                            VLangTokenType::LeftShiftEq
                         }
                         else {
                             state.advance(2);
-                            VLangSyntaxKind::LeftShift
+                            VLangTokenType::LeftShift
                         }
                     }
                     else {
                         state.advance(1);
-                        VLangSyntaxKind::LessThan
+                        VLangTokenType::LessThan
                     }
                 }
                 '>' => {
                     if let Some('=') = state.peek_next_n(1) {
                         state.advance(2);
-                        VLangSyntaxKind::Ge
+                        VLangTokenType::Ge
                     }
                     else if let Some('>') = state.peek_next_n(1) {
                         if let Some('=') = state.peek_next_n(2) {
                             state.advance(3);
-                            VLangSyntaxKind::RightShiftEq
+                            VLangTokenType::RightShiftEq
                         }
                         else {
                             state.advance(2);
-                            VLangSyntaxKind::RightShift
+                            VLangTokenType::RightShift
                         }
                     }
                     else {
                         state.advance(1);
-                        VLangSyntaxKind::GreaterThan
+                        VLangTokenType::GreaterThan
                     }
                 }
                 '.' => {
                     if let Some('.') = state.peek_next_n(1) {
                         if let Some('.') = state.peek_next_n(2) {
                             state.advance(3);
-                            VLangSyntaxKind::DotDotDot
+                            VLangTokenType::DotDotDot
                         }
                         else {
                             state.advance(2);
-                            VLangSyntaxKind::DotDot
+                            VLangTokenType::DotDot
                         }
                     }
                     else {
                         state.advance(1);
-                        VLangSyntaxKind::Dot
+                        VLangTokenType::Dot
                     }
                 }
                 ',' => {
                     state.advance(1);
-                    VLangSyntaxKind::Comma
+                    VLangTokenType::Comma
                 }
                 ':' => {
                     state.advance(1);
-                    VLangSyntaxKind::Colon
+                    VLangTokenType::Colon
                 }
                 ';' => {
                     state.advance(1);
-                    VLangSyntaxKind::Semicolon
+                    VLangTokenType::Semicolon
                 }
                 '(' => {
                     state.advance(1);
-                    VLangSyntaxKind::LeftParen
+                    VLangTokenType::LeftParen
                 }
                 ')' => {
                     state.advance(1);
-                    VLangSyntaxKind::RightParen
+                    VLangTokenType::RightParen
                 }
                 '[' => {
                     state.advance(1);
-                    VLangSyntaxKind::LeftBracket
+                    VLangTokenType::LeftBracket
                 }
                 ']' => {
                     state.advance(1);
-                    VLangSyntaxKind::RightBracket
+                    VLangTokenType::RightBracket
                 }
                 '{' => {
                     state.advance(1);
-                    VLangSyntaxKind::LeftBrace
+                    VLangTokenType::LeftBrace
                 }
                 '}' => {
                     state.advance(1);
-                    VLangSyntaxKind::RightBrace
+                    VLangTokenType::RightBrace
                 }
                 '?' => {
                     state.advance(1);
-                    VLangSyntaxKind::Question
+                    VLangTokenType::Question
                 }
                 '~' => {
                     state.advance(1);
-                    VLangSyntaxKind::Tilde
+                    VLangTokenType::Tilde
                 }
                 _ => {
                     state.advance(ch.len_utf8());
-                    VLangSyntaxKind::Error
+                    VLangTokenType::Error
                 }
             };
 
@@ -602,7 +605,7 @@ impl<'config> Lexer<VLangLanguage> for VLangLexer<'config> {
             let start_pos = state.get_position();
             if let Some(ch) = state.peek() {
                 state.advance(ch.len_utf8());
-                state.add_token(VLangSyntaxKind::Error, start_pos, state.get_position());
+                state.add_token(VLangTokenType::Error, start_pos, state.get_position());
             }
         }
 

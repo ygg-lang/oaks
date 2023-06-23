@@ -1,184 +1,311 @@
+#![doc = include_str!("readme.md")]
+#[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
 
-/// Perl 程序的根节点
-#[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
+/// Root node of a Perl program.
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct PerlRoot {
+    /// Top-level items in the program.
     pub items: Vec<PerlItem>,
 }
 
-/// Perl 程序中的顶级项目
-#[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
+/// Top-level items in a Perl program.
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub enum PerlItem {
-    /// 包声明
+    /// Package declaration.
     Package(PerlPackage),
-    /// 使用声明
+    /// Use statement.
     Use(PerlUse),
-    /// 子程序定义
+    /// Subroutine definition.
     Subroutine(PerlSubroutine),
-    /// 变量声明
+    /// Variable declaration.
     Variable(PerlVariable),
-    /// 表达式语句
+    /// Expression statement.
     Expression(PerlExpression),
-    /// 注释
+    /// Comment.
     Comment(String),
 }
 
-/// 包声明
-#[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
+/// Package declaration.
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct PerlPackage {
+    /// Package name.
     pub name: String,
 }
 
-/// 使用声明
-#[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
+/// Use statement.
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct PerlUse {
+    /// Module name.
     pub module: String,
+    /// Optional imports.
     pub imports: Option<Vec<String>>,
 }
 
-/// 子程序定义
-#[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
+/// Subroutine definition.
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct PerlSubroutine {
+    /// Subroutine name.
     pub name: String,
+    /// Parameter names.
     pub parameters: Vec<String>,
+    /// Subroutine body statements.
     pub body: Vec<PerlStatement>,
 }
 
-/// 变量声明
-#[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
+/// Variable declaration.
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct PerlVariable {
+    /// Variable scope.
     pub scope: PerlScope,
+    /// Variable name.
     pub name: String,
+    /// Optional initial value.
     pub value: Option<PerlExpression>,
 }
 
-/// 变量作用域
-#[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
+/// Variable scope.
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub enum PerlScope {
+    /// Lexical scope (`my`).
     My,
+    /// Package scope (`our`).
     Our,
+    /// Dynamic scope (`local`).
     Local,
 }
 
-/// Perl 语句
-#[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
+/// Perl statement.
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub enum PerlStatement {
-    /// 表达式语句
+    /// Expression statement.
     Expression(PerlExpression),
-    /// 条件语句
-    If(PerlIf),
-    /// 循环语句
+    /// If statement.    If(PerlIf),
+    /// Loop statement.
     Loop(PerlLoop),
-    /// 返回语句
+    /// Return statement.
     Return(Option<PerlExpression>),
-    /// 控制流语句
+    /// Control flow statement.
     Control(PerlControl),
 }
 
-/// 条件语句
-#[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
+/// If statement.
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct PerlIf {
+    /// Condition expression.
     pub condition: PerlExpression,
+    /// `then` block statements.
     pub then_block: Vec<PerlStatement>,
+    /// `elsif` blocks (condition and statements).
     pub elsif_blocks: Vec<(PerlExpression, Vec<PerlStatement>)>,
+    /// `else` block statements.
     pub else_block: Option<Vec<PerlStatement>>,
 }
 
-/// 循环语句
-#[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
+/// Loop statement.
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub enum PerlLoop {
-    While { condition: PerlExpression, body: Vec<PerlStatement> },
-    Until { condition: PerlExpression, body: Vec<PerlStatement> },
-    For { init: Option<PerlExpression>, condition: Option<PerlExpression>, update: Option<PerlExpression>, body: Vec<PerlStatement> },
-    Foreach { variable: String, iterable: PerlExpression, body: Vec<PerlStatement> },
+    /// `while` loop.
+    While {
+        /// Loop condition.
+        condition: PerlExpression,
+        /// Loop body.
+        body: Vec<PerlStatement>,
+    },
+    /// `until` loop.
+    Until {
+        /// Loop condition.
+        condition: PerlExpression,
+        /// Loop body.
+        body: Vec<PerlStatement>,
+    },
+    /// `for` loop.
+    For {
+        /// Initializer.
+        init: Option<PerlExpression>,
+        /// Condition.
+        condition: Option<PerlExpression>,
+        /// Update expression.
+        update: Option<PerlExpression>,
+        /// Loop body.
+        body: Vec<PerlStatement>,
+    },
+    /// `foreach` loop.
+    Foreach {
+        /// Iterator variable name.
+        variable: String,
+        /// Iterable expression.
+        iterable: PerlExpression,
+        /// Loop body.
+        body: Vec<PerlStatement>,
+    },
 }
 
-/// 控制流语句
-#[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
+/// Control flow statement.
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub enum PerlControl {
+    /// Exit the innermost loop.
     Last,
+    /// Start the next iteration of the loop.
     Next,
+    /// Restart the current iteration of the loop.
     Redo,
 }
 
-/// Perl 表达式
-#[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
+/// Perl expression.
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub enum PerlExpression {
-    /// 字面量
+    /// Literal value.
     Literal(PerlLiteral),
-    /// 变量引用
+    /// Variable reference.
     Variable(PerlVariableRef),
-    /// 二元操作
-    Binary { left: Box<PerlExpression>, operator: PerlBinaryOp, right: Box<PerlExpression> },
-    /// 一元操作
-    Unary { operator: PerlUnaryOp, operand: Box<PerlExpression> },
-    /// 函数调用
-    Call { function: String, arguments: Vec<PerlExpression> },
-    /// 数组访问
-    ArrayAccess { array: Box<PerlExpression>, index: Box<PerlExpression> },
-    /// 哈希访问
-    HashAccess { hash: Box<PerlExpression>, key: Box<PerlExpression> },
+    /// Binary operation.
+    Binary {
+        /// Left operand.
+        left: Box<PerlExpression>,
+        /// Binary operator.
+        operator: PerlBinaryOp,
+        /// Right operand.
+        right: Box<PerlExpression>,
+    },
+    /// Unary operation.
+    Unary {
+        /// Unary operator.
+        operator: PerlUnaryOp,
+        /// Operand.
+        operand: Box<PerlExpression>,
+    },
+    /// Function or subroutine call.
+    Call {
+        /// Function name.
+        function: String,
+        /// Arguments.
+        arguments: Vec<PerlExpression>,
+    },
+    /// Array access.
+    ArrayAccess {
+        /// Array expression.
+        array: Box<PerlExpression>,
+        /// Index expression.
+        index: Box<PerlExpression>,
+    },
+    /// Hash access.
+    HashAccess {
+        /// Hash expression.
+        hash: Box<PerlExpression>,
+        /// Key expression.
+        key: Box<PerlExpression>,
+    },
 }
 
-/// 字面量
-#[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
+/// Literal value.
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub enum PerlLiteral {
+    /// String literal.
     String(String),
+    /// Numeric literal.
     Number(String),
+    /// Array literal.
     Array(Vec<PerlExpression>),
+    /// Hash literal.
     Hash(Vec<(PerlExpression, PerlExpression)>),
 }
 
-/// 变量引用
-#[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
+/// Variable reference.
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct PerlVariableRef {
+    /// Variable sigil.
     pub sigil: PerlSigil,
+    /// Variable name.
     pub name: String,
 }
 
-/// 变量符号
-#[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
+/// Variable sigil.
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub enum PerlSigil {
-    Scalar, // $
-    Array,  // @
-    Hash,   // %
-    Code,   // &
-    Glob,   // *
+    /// Scalar sigil (`$`).
+    Scalar,
+    /// Array sigil (`@`).
+    Array,
+    /// Hash sigil (`%`).
+    Hash,
+    /// Code sigil (`&`).
+    Code,
+    /// Glob sigil (`*`).
+    Glob,
 }
 
-/// 二元操作符
-#[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
+/// Binary operator.
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub enum PerlBinaryOp {
-    // 算术操作符
+    // Arithmetic operators
+    /// Addition.
     Add,
+    /// Subtraction.
     Subtract,
+    /// Multiplication.
     Multiply,
+    /// Division.
     Divide,
+    /// Modulo.
     Modulo,
+    /// Power.
     Power,
 
-    // 字符串操作符
+    // String operators
+    /// Concatenation.
     Concat,
+    /// Repetition.
     Repeat,
 
-    // 比较操作符
+    // Comparison operators
+    /// Equality.
     Equal,
+    /// Inequality.
     NotEqual,
+    /// Less than.
     LessThan,
+    /// Less than or equal to.
     LessEqual,
+    /// Greater than.
     GreaterThan,
+    /// Greater than or equal to.
     GreaterEqual,
+    /// Spaceship operator.
     Spaceship,
 
-    // 逻辑操作符
+    // Logical operators
+    /// Logical AND.
     LogicalAnd,
+    /// Logical OR.
     LogicalOr,
 
-    // 位操作符
+    // Bitwise operators
+    /// Bitwise AND.
     BitwiseAnd,
+    /// Bitwise OR.
     BitwiseOr,
+    /// Bitwise XOR.
     BitwiseXor,
+    /// Left shift.
     LeftShift,
+    /// Right shift.
     RightShift,
 
     // 赋值操作符
@@ -190,7 +317,8 @@ pub enum PerlBinaryOp {
 }
 
 /// 一元操作符
-#[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub enum PerlUnaryOp {
     Plus,
     Minus,

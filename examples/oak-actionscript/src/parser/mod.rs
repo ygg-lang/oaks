@@ -9,7 +9,7 @@ use oak_core::{
     source::{Source, TextEdit},
 };
 
-mod parse;
+mod parse_top_level;
 
 pub(crate) type State<'a, S> = ParserState<'a, ActionScriptLanguage, S>;
 
@@ -23,55 +23,66 @@ impl<'config> Pratt<ActionScriptLanguage> for ActionScriptParser<'config> {
         match state.peek_kind() {
             Some(crate::lexer::ActionScriptTokenType::Identifier) => {
                 state.bump();
-                state.finish_at(cp, ActionScriptElementType::IdentifierExpression.into())
+                state.finish_at(cp, crate::parser::element_type::ActionScriptElementType::IdentifierExpression)
             }
             Some(k) if k.is_literal() => {
                 state.bump();
-                state.finish_at(cp, ActionScriptElementType::LiteralExpression.into())
+                state.finish_at(cp, crate::parser::element_type::ActionScriptElementType::LiteralExpression)
             }
             Some(crate::lexer::ActionScriptTokenType::LeftParen) => {
                 state.bump();
                 PrattParser::parse(state, 0, self);
                 state.expect(crate::lexer::ActionScriptTokenType::RightParen).ok();
-                state.finish_at(cp, ActionScriptElementType::ParenthesizedExpression.into())
+                state.finish_at(cp, crate::parser::element_type::ActionScriptElementType::ParenthesizedExpression)
             }
             _ => {
                 state.bump();
-                state.finish_at(cp, ActionScriptElementType::Error.into())
+                state.finish_at(cp, crate::parser::element_type::ActionScriptElementType::Error)
             }
         }
     }
 
     fn prefix<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> &'a GreenNode<'a, ActionScriptLanguage> {
-        use crate::{lexer::ActionScriptTokenType::*, parser::ActionScriptElementType::*};
+        use crate::{lexer::ActionScriptTokenType as TT, parser::element_type::ActionScriptElementType as ET};
         let kind = match state.peek_kind() {
             Some(k) => k,
             None => return self.primary(state),
         };
 
         match kind {
-            Minus | LogicalNot | BitwiseNot => unary(state, kind, 13, UnaryExpression.into(), |s, p| PrattParser::parse(s, p, self)),
+            TT::Minus | TT::LogicalNot | TT::BitwiseNot => unary(state, kind, 13, ET::UnaryExpression.into(), |s, p| PrattParser::parse(s, p, self)),
             _ => self.primary(state),
         }
     }
 
     fn infix<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>, left: &'a GreenNode<'a, ActionScriptLanguage>, min_precedence: u8) -> Option<&'a GreenNode<'a, ActionScriptLanguage>> {
-        use crate::{lexer::ActionScriptTokenType::*, parser::ActionScriptElementType::*};
+        use crate::{lexer::ActionScriptTokenType as TT, parser::element_type::ActionScriptElementType as ET};
         let kind = state.peek_kind()?;
 
         let (prec, assoc) = match kind {
-            Equal | PlusAssign | MinusAssign | StarAssign | SlashAssign | PercentAssign | LeftShiftAssign | RightShiftAssign | UnsignedRightShiftAssign | BitwiseAndAssign | BitwiseOrAssign | BitwiseXorAssign => (1, Associativity::Right),
-            LogicalOr => (3, Associativity::Left),
-            LogicalAnd => (4, Associativity::Left),
-            EqualEqual | NotEqual | EqualEqualEqual | NotEqualEqual => (5, Associativity::Left),
-            LessThan | LessEqual | GreaterThan | GreaterEqual | Is | Instanceof => (6, Associativity::Left),
-            BitwiseOr => (7, Associativity::Left),
-            BitwiseXor => (8, Associativity::Left),
-            BitwiseAnd => (9, Associativity::Left),
-            LeftShift | RightShift | UnsignedRightShift => (10, Associativity::Left),
-            Plus | Minus => (11, Associativity::Left),
-            Star | Slash | Percent => (12, Associativity::Left),
-            LeftParen | LeftBracket | Dot => (14, Associativity::Left),
+            TT::Equal
+            | TT::PlusAssign
+            | TT::MinusAssign
+            | TT::StarAssign
+            | TT::SlashAssign
+            | TT::PercentAssign
+            | TT::LeftShiftAssign
+            | TT::RightShiftAssign
+            | TT::UnsignedRightShiftAssign
+            | TT::BitwiseAndAssign
+            | TT::BitwiseOrAssign
+            | TT::BitwiseXorAssign => (1, Associativity::Right),
+            TT::LogicalOr => (3, Associativity::Left),
+            TT::LogicalAnd => (4, Associativity::Left),
+            TT::EqualEqual | TT::NotEqual | TT::EqualEqualEqual | TT::NotEqualEqual => (5, Associativity::Left),
+            TT::LessThan | TT::LessEqual | TT::GreaterThan | TT::GreaterEqual | TT::Is | TT::Instanceof => (6, Associativity::Left),
+            TT::BitwiseOr => (7, Associativity::Left),
+            TT::BitwiseXor => (8, Associativity::Left),
+            TT::BitwiseAnd => (9, Associativity::Left),
+            TT::LeftShift | TT::RightShift | TT::UnsignedRightShift => (10, Associativity::Left),
+            TT::Plus | TT::Minus => (11, Associativity::Left),
+            TT::Star | TT::Slash | TT::Percent => (12, Associativity::Left),
+            TT::LeftParen | TT::LeftBracket | TT::Dot => (14, Associativity::Left),
             _ => return None,
         };
 
@@ -80,37 +91,37 @@ impl<'config> Pratt<ActionScriptLanguage> for ActionScriptParser<'config> {
         }
 
         match kind {
-            LeftParen => {
+            TT::LeftParen => {
                 let cp = state.checkpoint();
                 state.push_child(left);
-                state.expect(LeftParen).ok();
-                if !state.at(RightParen) {
+                state.expect(TT::LeftParen).ok();
+                if !state.at(TT::RightParen) {
                     loop {
                         PrattParser::parse(state, 0, self);
-                        if !state.eat(Comma) {
+                        if !state.eat(TT::Comma) {
                             break;
                         }
                     }
                 }
-                state.expect(RightParen).ok();
-                Some(state.finish_at(cp, CallExpression.into()))
+                state.expect(TT::RightParen).ok();
+                Some(state.finish_at(cp, ET::CallExpression))
             }
-            LeftBracket => {
+            TT::LeftBracket => {
                 let cp = state.checkpoint();
                 state.push_child(left);
-                state.expect(LeftBracket).ok();
+                state.expect(TT::LeftBracket).ok();
                 PrattParser::parse(state, 0, self);
-                state.expect(RightBracket).ok();
-                Some(state.finish_at(cp, IndexExpression.into()))
+                state.expect(TT::RightBracket).ok();
+                Some(state.finish_at(cp, ET::IndexExpression))
             }
-            Dot => {
+            TT::Dot => {
                 let cp = state.checkpoint();
                 state.push_child(left);
-                state.expect(Dot).ok();
-                state.expect(crate::lexer::ActionScriptTokenType::Identifier).ok();
-                Some(state.finish_at(cp, FieldExpression.into()))
+                state.expect(TT::Dot).ok();
+                state.expect(TT::Identifier).ok();
+                Some(state.finish_at(cp, ET::FieldExpression))
             }
-            _ => Some(binary(state, left, kind, prec, assoc, BinaryExpression.into(), |s, p| PrattParser::parse(s, p, self))),
+            _ => Some(binary(state, left, kind, prec, assoc, ET::BinaryExpression.into(), |s, p| PrattParser::parse(s, p, self))),
         }
     }
 }

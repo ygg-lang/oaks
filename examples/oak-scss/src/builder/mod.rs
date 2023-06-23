@@ -1,4 +1,3 @@
-#![doc = include_str!("../readme.md")]
 use crate::language::ScssLanguage;
 use oak_core::{Builder, BuilderCache, Lexer, OakDiagnostics, Parser, TextEdit, builder::BuildOutput, source::Source};
 

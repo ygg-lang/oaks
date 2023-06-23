@@ -1,150 +1,35 @@
-# Oak DOT Language Parser
+# 🚀 Oak Delphi Parser
 
-[![Crates.io](https://img.shields.io/crates/v/oak-dot.svg)](https://crates.io/crates/oak-dot)
-[![Documentation](https://docs.rs/oak-dot/badge.svg)](https://docs.rs/oak-dot)
+[![Crates.io](https://img.shields.io/crates/v/oak-delphi.svg)](https://crates.io/crates/oak-delphi)
+[![Documentation](https://docs.rs/oak-delphi/badge.svg)](https://docs.rs/oak-delphi)
 
-High-performance incremental DOT parser for the oak ecosystem with flexible configuration, optimized for graph description and visualization.
+**Legacy Power, Modern Performance** — A high-performance, incremental Delphi/Object Pascal parser built on the Oak framework. Optimized for large-scale enterprise applications, legacy codebase modernization, and real-time developer tooling.
 
-## 🎯 Overview
+## 🎯 Project Vision
 
-Oak DOT is a robust parser for the DOT graph description language, designed to handle complete DOT syntax including modern features. Built on the solid foundation of oak-core, it provides both high-level convenience and detailed AST generation for graph analysis and visualization.
+Delphi (Object Pascal) has been a mainstay of enterprise application development for decades, with millions of lines of code still in active use. `oak-delphi` aims to provide a robust, modern, Rust-powered infrastructure for parsing Delphi that is both accurate and incredibly fast. By utilizing Oak's incremental parsing architecture, we enable the creation of highly responsive IDEs, code analysis tools, and automated migration utilities that can handle massive Delphi projects in real-time. Whether you are building custom linters, refactoring tools, or sophisticated IDE extensions, `oak-delphi` provides the high-fidelity AST and efficiency needed to tame the complexity of Delphi codebases.
 
-## ✨ Features
+## ✨ Core Features
 
-- **Complete DOT Syntax**: Supports all DOT features including modern specifications
-- **Full AST Generation**: Generates comprehensive Abstract Syntax Trees
-- **Lexer Support**: Built-in tokenization with proper span information
-- **Error Recovery**: Graceful handling of syntax errors with detailed diagnostics
+- **⚡ Blazing Fast**: Leverages Rust's performance and memory safety to provide sub-millisecond parsing, essential for high-frequency developer tools and real-time analysis in large Delphi projects.
+- **🔄 Incremental by Nature**: Built-in support for partial updates—re-parse only modified sections of large source files. Ideal for large-scale projects where maintainability and tool responsiveness are critical.
+- **🌳 High-Fidelity AST**: Generates a comprehensive and precise Abstract Syntax Tree capturing the full depth of Delphi/Object Pascal:
+    - **Units & Programs**: Precise mapping of `unit`, `interface`, `implementation`, and `program` blocks.
+    - **Object-Oriented**: Full support for classes, interfaces, inheritance, and method overloading.
+    - **Properties & Events**: Detailed tracking of property declarations and event handling mechanisms.
+    - **Generics & Attributes**: Robust handling of modern Delphi features like generics and custom attributes.
+    - **Comments & Whitespace**: Retains all trivia, enabling faithful round-trip processing and refactoring.
+- **🛡️ Industrial-Grade Fault Tolerance**: Engineered to recover from syntax errors gracefully, providing precise diagnostics—crucial for maintaining a smooth developer experience during active coding.
+- **🧩 Deep Ecosystem Integration**: Seamlessly works with `oak-lsp` for full LSP support and `oak-mcp` for intelligent code structure discovery.
 
-## 🚀 Quick Start
+## 🏗️ Architecture
 
-Basic example:
+The parser follows the **Green/Red Tree** architecture (inspired by Roslyn), which allows for:
+1. **Efficient Immutability**: Share nodes across different versions of the tree without copying.
+2. **Lossless Syntax Trees**: Retains all trivia (whitespace and comments), enabling faithful code formatting and refactoring of Delphi source files.
+3. **Type Safety**: Strongly-typed "Red" nodes provide a convenient and safe API for tree traversal and analysis.
 
-```rust
-use oak_dot::{Parser, DotLanguage, SourceText};
-
-fn main() -> Result<(), Box<dyn std::error::Error>> {
-    let parser = Parser::new();
-    let source = SourceText::new(r#"
-digraph G {
-    A -> B;
-    B -> C;
-    C -> A;
-}
-    "#);
-    
-    let result = parser.parse(&source);
-    println!("Parsed DOT graph successfully.");
-    Ok(())
-}
-```
-
-## 📋 Parsing Examples
-
-### Graph Parsing
-```rust
-use oak_dot::{Parser, DotLanguage, SourceText};
-
-let parser = Parser::new();
-let source = SourceText::new(r#"
-graph G {
-    A -- B -- C;
-    A -- C;
-}
-"#);
-
-let result = parser.parse(&source);
-println!("Parsed DOT graph successfully.");
-```
-
-### Digraph Parsing
-```rust
-use oak_dot::{Parser, DotLanguage, SourceText};
-
-let parser = Parser::new();
-let source = SourceText::new(r#"
-digraph workflow {
-    start -> process1;
-    process1 -> decision;
-    decision -> process2 [label="yes"];
-    decision -> end [label="no"];
-}
-"#);
-
-let result = parser.parse(&source);
-println!("Parsed DOT digraph successfully.");
-```
-
-## 🔧 Advanced Features
-
-### Token-Level Parsing
-```rust
-use oak_dot::{Parser, DotLanguage, SourceText};
-
-let parser = Parser::new();
-let source = SourceText::new("A -> B [color=red];");
-let result = parser.parse(&source);
-// Token information is available in the parse result
-```
-
-### Error Handling
-```rust
-use oak_dot::{Parser, DotLanguage, SourceText};
-
-let parser = Parser::new();
-let source = SourceText::new(r#"
-digraph G {
-    A -> B
-    B -> C;
-    C -> A;
-}
-"#);
-
-let result = parser.parse(&source);
-if let Err(e) = result.result {
-    println!("Parse error: {:?}", e);
-}
-```
-
-## 🏗️ AST Structure
-
-The parser generates a comprehensive AST with the following main structures:
-
-- **Graph**: Root container for undirected graphs
-- **Digraph**: Root container for directed graphs
-- **Node**: Node definitions with attributes
-- **Edge**: Edge definitions with attributes
-- **Subgraph**: Nested graph structures
-- **Attribute**: Key-value attribute pairs
-
-## 📊 Performance
-
-- **Streaming**: Parse large DOT files without loading entirely into memory
-- **Incremental**: Re-parse only changed sections
-- **Memory Efficient**: Smart AST node allocation
-- **Fast Recovery**: Quick error recovery for better IDE integration
-
-## 🔗 Integration
-
-Oak of dot integrates seamlessly with:
-
-- **Graph Visualization**: Parse DOT files for rendering
-- **Graph Analysis**: Analyze graph structures for properties and patterns
-- **Code Generation**: Generate DOT files from other data structures
-- **IDE Support**: Language server protocol compatibility for DOT
-- **Documentation**: Generate documentation from graph definitions
-
-## 📚 Examples
-
-Check out the [examples](examples/) directory for comprehensive examples:
-
-- Complete DOT graph parsing
-- Node and edge analysis
-- Attribute processing
-- Integration with development workflows
 
 ## 🤝 Contributing
 
-Contributions are welcome! 
-
-Please feel free to submit pull requests at the [project repository](https://github.com/ygg-lang/oaks/tree/dev/examples/oak-delphi) or open [issues](https://github.com/ygg-lang/oaks/issues).
+We welcome contributions of all kinds! If you find a bug, have a feature request, or want to contribute code, please check our [issues](https://github.com/ygg-lang/oaks/issues) or submit a pull request.

@@ -1,4 +1,10 @@
-use crate::{kind::ObjectiveCSyntaxKind, language::ObjectiveCLanguage, lexer::ObjectiveCLexer};
+pub mod element_type;
+
+use crate::{
+    language::ObjectiveCLanguage,
+    lexer::{ObjectiveCLexer, token_type::ObjectiveCTokenType},
+    parser::element_type::ObjectiveCElementType,
+};
 use oak_core::{
     parser::{ParseCache, ParseOutput, Parser, ParserState, parse_with_lexer},
     source::{Source, TextEdit},
@@ -16,24 +22,24 @@ impl<'config> ObjectiveCParser<'config> {
     }
 
     fn parse_item<'b, S: Source + ?Sized>(&self, state: &mut State<'b, S>) {
-        if state.at(ObjectiveCSyntaxKind::At) {
+        if state.at(ObjectiveCTokenType::At) {
             state.bump();
-            if state.at(ObjectiveCSyntaxKind::InterfaceKeyword) {
+            if state.at(ObjectiveCTokenType::InterfaceKeyword) {
                 self.parse_interface(state);
             }
-            else if state.at(ObjectiveCSyntaxKind::ImplementationKeyword) {
+            else if state.at(ObjectiveCTokenType::ImplementationKeyword) {
                 self.parse_implementation(state);
             }
-            else if state.at(ObjectiveCSyntaxKind::ProtocolKeyword) {
+            else if state.at(ObjectiveCTokenType::ProtocolKeyword) {
                 self.parse_protocol(state);
             }
             else {
                 let checkpoint = state.checkpoint();
                 state.bump();
-                state.finish_at(checkpoint, ObjectiveCSyntaxKind::Error.into());
+                state.finish_at(checkpoint, crate::parser::element_type::ObjectiveCElementType::Error);
             }
         }
-        else if state.at(ObjectiveCSyntaxKind::ImportKeyword) || state.at(ObjectiveCSyntaxKind::IncludeKeyword) {
+        else if state.at(ObjectiveCTokenType::ImportKeyword) || state.at(ObjectiveCTokenType::IncludeKeyword) {
             self.parse_import(state);
         }
         else {
@@ -44,51 +50,51 @@ impl<'config> ObjectiveCParser<'config> {
 
     fn parse_interface<'b, S: Source + ?Sized>(&self, state: &mut State<'b, S>) {
         let checkpoint = state.checkpoint();
-        state.expect(ObjectiveCSyntaxKind::InterfaceKeyword).ok();
+        state.expect(ObjectiveCTokenType::InterfaceKeyword).ok();
         // Simplified: consume until @end
-        while state.not_at_end() && !state.at(ObjectiveCSyntaxKind::EndKeyword) {
+        while state.not_at_end() && !state.at(ObjectiveCTokenType::EndKeyword) {
             state.bump();
         }
-        if state.at(ObjectiveCSyntaxKind::EndKeyword) {
-            state.expect(ObjectiveCSyntaxKind::EndKeyword).ok();
+        if state.at(ObjectiveCTokenType::EndKeyword) {
+            state.expect(ObjectiveCTokenType::EndKeyword).ok();
         }
-        state.finish_at(checkpoint, ObjectiveCSyntaxKind::InterfaceDeclaration.into());
+        state.finish_at(checkpoint, crate::parser::element_type::ObjectiveCElementType::InterfaceDeclaration);
     }
 
     fn parse_implementation<'b, S: Source + ?Sized>(&self, state: &mut State<'b, S>) {
         let checkpoint = state.checkpoint();
-        state.expect(ObjectiveCSyntaxKind::ImplementationKeyword).ok();
+        state.expect(ObjectiveCTokenType::ImplementationKeyword).ok();
         // Simplified: consume until @end
-        while state.not_at_end() && !state.at(ObjectiveCSyntaxKind::EndKeyword) {
+        while state.not_at_end() && !state.at(ObjectiveCTokenType::EndKeyword) {
             state.bump();
         }
-        if state.at(ObjectiveCSyntaxKind::EndKeyword) {
-            state.expect(ObjectiveCSyntaxKind::EndKeyword).ok();
+        if state.at(ObjectiveCTokenType::EndKeyword) {
+            state.expect(ObjectiveCTokenType::EndKeyword).ok();
         }
-        state.finish_at(checkpoint, ObjectiveCSyntaxKind::ImplementationDeclaration.into());
+        state.finish_at(checkpoint, crate::parser::element_type::ObjectiveCElementType::ImplementationDeclaration);
     }
 
     fn parse_protocol<'b, S: Source + ?Sized>(&self, state: &mut State<'b, S>) {
         let checkpoint = state.checkpoint();
-        state.expect(ObjectiveCSyntaxKind::ProtocolKeyword).ok();
+        state.expect(ObjectiveCTokenType::ProtocolKeyword).ok();
         // Simplified: consume until @end
-        while state.not_at_end() && !state.at(ObjectiveCSyntaxKind::EndKeyword) {
+        while state.not_at_end() && !state.at(ObjectiveCTokenType::EndKeyword) {
             state.bump();
         }
-        if state.at(ObjectiveCSyntaxKind::EndKeyword) {
-            state.expect(ObjectiveCSyntaxKind::EndKeyword).ok();
+        if state.at(ObjectiveCTokenType::EndKeyword) {
+            state.expect(ObjectiveCTokenType::EndKeyword).ok();
         }
-        state.finish_at(checkpoint, ObjectiveCSyntaxKind::ProtocolDeclaration.into());
+        state.finish_at(checkpoint, crate::parser::element_type::ObjectiveCElementType::ProtocolDeclaration);
     }
 
     fn parse_import<'b, S: Source + ?Sized>(&self, state: &mut State<'b, S>) {
         // Simplified: consume until semicolon or newline
         state.bump(); // #import or #include
-        while state.not_at_end() && !state.at(ObjectiveCSyntaxKind::Semicolon) && !state.at(ObjectiveCSyntaxKind::Newline) {
+        while state.not_at_end() && !state.at(ObjectiveCTokenType::Semicolon) && !state.at(ObjectiveCTokenType::Newline) {
             state.bump();
         }
-        if state.at(ObjectiveCSyntaxKind::Semicolon) {
-            state.expect(ObjectiveCSyntaxKind::Semicolon).ok();
+        if state.at(ObjectiveCTokenType::Semicolon) {
+            state.expect(ObjectiveCTokenType::Semicolon).ok();
         }
     }
 }
@@ -103,7 +109,7 @@ impl<'config> Parser<ObjectiveCLanguage> for ObjectiveCParser<'config> {
                 self.parse_item(state);
             }
 
-            Ok(state.finish_at(checkpoint, ObjectiveCSyntaxKind::Root.into()))
+            Ok(state.finish_at(checkpoint, crate::parser::element_type::ObjectiveCElementType::Root))
         })
     }
 }

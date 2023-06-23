@@ -1,3 +1,9 @@
+#![warn(missing_docs)]
+//! Symbol and module resolution for the Oak language framework.
+//!
+//! This crate provides traits and implementations for resolving module imports
+//! and managing global symbol tables across a workspace.
+
 use dashmap::DashMap;
 use oak_symbols::SymbolInformation;
 use std::path::PathBuf;
@@ -13,10 +19,12 @@ pub trait ModuleResolver: Send + Sync {
 
 /// A standard resolver that handles relative and absolute file paths.
 pub struct StandardResolver {
+    /// The list of root directories to search for modules.
     root_dirs: RwLock<Vec<PathBuf>>,
 }
 
 impl StandardResolver {
+    /// Creates a new standard resolver with the given root directories.
     pub fn new(root_dirs: Vec<PathBuf>) -> Self {
         Self { root_dirs: RwLock::new(root_dirs) }
     }
@@ -65,6 +73,7 @@ pub struct GlobalSymbolTable {
 }
 
 impl GlobalSymbolTable {
+    /// Creates a new, empty `GlobalSymbolTable`.
     pub fn new() -> Self {
         Self { file_symbols: DashMap::new(), qualified_symbols: DashMap::new() }
     }

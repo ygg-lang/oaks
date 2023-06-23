@@ -1,171 +1,36 @@
-# Oak Tcl Parser
+# 🚀 oak-tcl
 
 [![Crates.io](https://img.shields.io/crates/v/oak-tcl.svg)](https://crates.io/crates/oak-tcl)
 [![Documentation](https://docs.rs/oak-tcl/badge.svg)](https://docs.rs/oak-tcl)
 
-A high-performance Tcl parser for Rust, built with the Oak parser combinator framework. Parse Tool Command Language scripts with comprehensive AST generation and error handling.
+**Dynamic Scripting with Industrial Precision** — A high-performance, incremental Tcl parser built on the Oak framework. Optimized for Tcl's unique "everything is a string" philosophy, complex command substitutions, and responsive developer tools.
 
-## Overview
+## 🎯 Project Vision
 
-Oak Tcl provides robust parsing capabilities for Tcl script files, supporting commands, procedures, control structures, and all major Tcl constructs. Built on the Oak parser combinator framework, it delivers excellent performance and detailed error messages.
+Tcl (Tool Command Language) is a powerful, dynamic language widely used in EDA, networking, and embedded systems. `oak-tcl` aims to provide a robust, modern, Rust-powered infrastructure for parsing Tcl that is both accurate and incredibly fast. By utilizing Oak's incremental parsing architecture, we enable the creation of highly responsive IDEs, static analyzers, and refactoring tools that can handle complex Tcl scripts in real-time. Whether you are building custom linters, automated test generation tools, or sophisticated IDE extensions for Tcl/Tk projects, `oak-tcl` provides the high-fidelity AST and efficiency needed to support the Tcl community.
 
-## Features
+## ✨ Core Features
 
-- ✅ **Complete Tcl Support**: Parse commands, procedures, control structures, and variables
-- ✅ **Modern Rust API**: Type-safe parsing with comprehensive error handling
-- ✅ **High Performance**: Built on the efficient Oak parser combinator framework
-- ✅ **Rich AST**: Detailed Abstract Syntax Tree with source location tracking
-- ✅ **Extensible**: Easy to extend for custom Tcl dialects
-- ✅ **Well Tested**: Comprehensive test suite with real-world examples
+- **⚡ Blazing Fast**: Leverages Rust's performance and memory safety to provide sub-millisecond parsing, essential for high-frequency developer tools and real-time analysis in large Tcl projects.
+- **🔄 Incremental by Nature**: Built-in support for partial updates—re-parse only what has changed. Ideal for large-scale Tcl scripts where maintainability and tool responsiveness are critical.
+- **🌳 High-Fidelity AST**: Generates a comprehensive and precise syntax tree capturing the full depth of Tcl:
+    - **Command Substitution**: Precise mapping of `[...]` and `$...` constructs.
+    - **Dynamic Scoping**: Detailed tracking of procedures, variables, and namespaces.
+    - **Grouping Rules**: Robust parsing of braces `{...}` and double quotes `"..."`.
+    - **Indentation & Formatting**: Precise capture of indentation and whitespace for faithful code refactoring.
+- **🛡️ Industrial-Grade Fault Tolerance**: Engineered to recover from syntax errors gracefully, providing precise diagnostics—crucial for maintaining a smooth developer experience during active coding.
+- **🧩 Deep Ecosystem Integration**: Seamlessly works with `oak-lsp` for full LSP support and `oak-mcp` for intelligent code discovery and analysis.
 
-## Quick Start
+## 🏗️ Architecture
 
-## Parsing Examples
+`oak-tcl` follows the modern Green/Red Tree architecture (inspired by Roslyn):
 
-### Basic Command Parsing
+- **Green Tree**: Immutable, lossless, and syntax-only tree. It captures the full fidelity of the source code, including trivia (comments, whitespace).
+- **Red Tree**: A facade over the Green Tree that provides a convenient, type-safe API for tree traversal and analysis, including parent pointers and absolute offsets.
 
-```rust
-use oak_core::{Parser, SourceText, parser::session::ParseSession};
-use oak_tcl::{TclParser, TclLanguage};
+This design enables efficient incremental parsing and powerful refactoring capabilities.
 
-fn main() {
-    let mut session = ParseSession::<TclLanguage>::default();
-    let parser = TclParser::new();
-    let source = SourceText::new(r#"
-        set name "World"
-        puts "Hello, $name!"
-        
-        set numbers {1 2 3 4 5}
-        set sum 0
-        foreach num $numbers {
-            set sum [expr {$sum + $num}]
-        }
-        puts "Sum: $sum"
-    "#);
-    
-    let result = parser.parse(&source, &[], &mut session);
-}
-```
 
-### Procedure Definition
+## 🛠️ Contributing
 
-```rust
-use oak_core::{Parser, SourceText, parser::session::ParseSession};
-use oak_tcl::{TclParser, TclLanguage};
-
-fn main() {
-    let mut session = ParseSession::<TclLanguage>::default();
-    let parser = TclParser::new();
-    let source = SourceText::new(r#"
-        proc factorial {n} {
-            if {$n <= 1} {
-                return 1
-            } else {
-                return [expr {$n * [factorial [expr {$n - 1}]]}]
-            }
-        }
-        
-        proc greet {name {greeting "Hello"}} {
-            return "$greeting, $name!"
-        }
-        
-        puts [factorial 5]
-        puts [greet "World"]
-        puts [greet "World" "Hi"]
-    "#);
-    
-    let result = parser.parse(&source, &[], &mut session);
-}
-```
-
-## Advanced Features
-
-### Lists and Arrays
-
-Oak Tcl supports parsing complex list operations:
-
-```rust
-use oak_core::{Parser, SourceText, parser::session::ParseSession};
-use oak_tcl::{TclParser, TclLanguage};
-
-let mut session = ParseSession::<TclLanguage>::default();
-let parser = TclParser::new();
-let source = SourceText::new(r#"
-    set my_list {apple banana cherry}
-    set first [lindex $my_list 0]
-    set last [lindex $my_list end]
-    
-    array set my_array {
-        key1 value1
-        key2 value2
-    }
-"#);
-
-let result = parser.parse(&source, &[], &mut session);
-```
-
-### Regular Expressions
-
-Parse regexp operations:
-
-```rust
-let source = r#"
-    set text "Hello World 123"
-    set pattern {\d+}
-    if {[regexp $pattern $text match]} {
-        puts "Found number: $match"
-    }
-    
-    set result [regsub $pattern $text "XXX"]
-    puts "Modified: $result"
-"#;
-```
-
-## AST Structure
-
-The parser generates a rich AST with the following main node types:
-
-- `TclFile` - Root node containing the entire file
-- `Command` - Tcl commands with arguments
-- `Procedure` - Procedure definitions with parameters and body
-- `Variable` - Variable references and assignments
-- `Expression` - Expressions in square brackets
-- `List` - List literals and operations
-- `ControlFlow` - if, while, for, foreach statements
-- `String` - String literals with interpolation
-
-## Performance
-
-Oak Tcl is designed for high performance:
-
-- **Zero-copy parsing** where possible
-- **Streaming support** for large script files
-- **Efficient memory usage** with minimal allocations
-- **Fast error recovery** for better developer experience
-
-## Integration
-
-Oak Tcl integrates seamlessly with the Oak ecosystem:
-
-```rust
-use oak::{Parser, Language};
-use oak_tcl::TclLanguage;
-
-// Use with other Oak parsers
-let mut parser = Parser::<TclLanguage>::new();
-let result = parser.parse(tcl_source);
-```
-
-## Examples
-
-More examples can be found in the [examples directory](https://github.com/axodotdev/oak/tree/main/examples/oak-tcl/examples):
-
-- [Basic commands](examples/commands.rs)
-- [Procedures](examples/procedures.rs)
-- [Control structures](examples/control.rs)
-- [Lists and arrays](examples/lists.rs)
-- [Error handling](examples/error_handling.rs)
-
-## Contributing
-
-We welcome contributions! Please see our [Contributing Guide](https://github.com/axodotdev/oak/blob/main/CONTRIBUTING.md) for details.
+Contributions are welcome! Please feel free to submit a Pull Request. For major changes, please open an issue first to discuss what you would like to change.

@@ -1,178 +1,37 @@
-# Oak PHP Parser
+# 🚀 oak-php
 
 [![Crates.io](https://img.shields.io/crates/v/oak-php.svg)](https://crates.io/crates/oak-php)
 [![Documentation](https://docs.rs/oak-php/badge.svg)](https://docs.rs/oak-php)
 
-High-performance incremental PHP parser for the oak ecosystem with flexible configuration, optimized for static analysis and code generation.
+**Powering the Modern Web with Precision and Speed** — A high-performance, incremental PHP parser built on the Oak framework. Optimized for PHP 8.x features, complex legacy codebases, and real-time developer tools.
 
-## 🎯 Overview
+## 🎯 Project Vision
 
-Oak PHP is a robust parser for PHP, designed to handle complete PHP syntax including modern features. Built on the solid foundation of oak-core, it provides both high-level convenience and detailed AST generation for static analysis and code generation.
+PHP continues to power a vast portion of the web, and its evolution from a simple scripting language to a modern, type-safe language brings significant complexity. `oak-php` aims to provide a robust, modern, Rust-powered infrastructure for parsing PHP that is both accurate and incredibly fast. By utilizing Oak's incremental parsing architecture, we enable the creation of highly responsive IDEs, static analyzers, and refactoring tools that can handle massive PHP projects in real-time. Whether you are building custom linters, automated migration tools for PHP 8.3+, or sophisticated IDE extensions, `oak-php` provides the high-fidelity AST and efficiency needed to keep pace with the modern PHP ecosystem.
 
-## ✨ Features
+## ✨ Core Features
 
-- **Complete PHP Syntax**: Supports all PHP features including modern specifications
-- **Full AST Generation**: Generates comprehensive Abstract Syntax Trees
-- **Lexer Support**: Built-in tokenization with proper span information
-- **Error Recovery**: Graceful handling of syntax errors with detailed diagnostics
+- **⚡ Blazing Fast**: Fully utilizes Rust's performance and memory safety to achieve sub-millisecond parsing response times, essential for high-frequency analysis in large PHP applications.
+- **🔄 Incremental by Nature**: Built-in support for partial updates—re-parse only what has changed. This is a massive advantage for large-scale PHP codebases where maintainability and tool responsiveness are critical.
+- **🌳 High-Fidelity AST**: Generates a comprehensive and precise syntax tree capturing the full depth of modern PHP:
+    - **Modern Features**: Full support for Attributes (annotations), Constructor Property Promotion, Union/Intersection Types, and Readonly Classes.
+    - **Legacy Support**: Robust parsing of older PHP versions and mixed HTML/PHP files.
+    - **Functional & OOP**: Detailed mapping of Anonymous Classes, Arrow Functions, Enums, and Traits.
+    - **Asynchronous Flow**: Support for parsing modern async/fiber-related constructs.
+    - **Indentation & Formatting**: Precise capture of indentation and whitespace for faithful code refactoring.
+- **🛡️ Industrial-Grade Fault Tolerance**: Engineered to recover from syntax errors gracefully, providing precise diagnostics—crucial for maintaining a fluid developer experience during active coding.
+- **🧩 Deep Ecosystem Integration**: Seamlessly works with `oak-lsp` for full LSP support and `oak-mcp` for intelligent code discovery and analysis.
 
-## 🚀 Quick Start
+## 🏗️ Architecture
 
-Basic example:
+`oak-php` follows the modern Green/Red Tree architecture (inspired by Roslyn):
 
-```rust
-use oak_core::{Parser, SourceText, parser::session::ParseSession};
-use oak_php::{PhpParser, PhpLanguage};
+- **Green Tree**: Immutable, lossless, and syntax-only tree. It captures the full fidelity of the source code, including trivia (comments, whitespace).
+- **Red Tree**: A facade over the Green Tree that provides a convenient, type-safe API for tree traversal and analysis, including parent pointers and absolute offsets.
 
-fn main() -> Result<(), Box<dyn std::error::Error>> {
-    let mut session = ParseSession::<PhpLanguage>::default();
-    let parser = PhpParser::new();
-    let source = SourceText::new(r#"
-<?php
-echo "Hello, World!";
+This design enables efficient incremental parsing and powerful refactoring capabilities.
 
-$name = "PHP";
-echo "Welcome to $name!";
-?>
-    "#);
-    
-    let result = parser.parse(&[], &mut session);
-    println!("Parsed PHP successfully.");
-    Ok(())
-}
-```
 
-## 📋 Parsing Examples
+## 🛠️ Contributing
 
-### Function Parsing
-```rust
-use oak_core::{Parser, SourceText, parser::session::ParseSession};
-use oak_php::{PhpParser, PhpLanguage};
-
-let mut session = ParseSession::<PhpLanguage>::default();
-let parser = PhpParser::new();
-let source = SourceText::new(r#"
-<?php
-function add($a, $b) {
-    return $a + $b;
-}
-
-$result = add(5, 3);
-echo "Result: $result";
-?>
-"#);
-
-let result = parser.parse(&[], &mut session);
-println!("Function parsed successfully.");
-```
-
-### Class Parsing
-```rust
-use oak_core::{Parser, SourceText, parser::session::ParseSession};
-use oak_php::{PhpParser, PhpLanguage};
-
-let mut session = ParseSession::<PhpLanguage>::default();
-let parser = PhpParser::new();
-let source = SourceText::new(r#"
-<?php
-class Calculator {
-    private $result;
-    
-    public function __construct() {
-        $this->result = 0;
-    }
-    
-    public function add($value) {
-        $this->result += $value;
-        return $this;
-    }
-    
-    public function getResult() {
-        return $this->result;
-    }
-}
-?>
-"#);
-
-let result = parser.parse(&[], &mut session);
-println!("Class parsed successfully.");
-```
-
-## 🔧 Advanced Features
-
-### Token-Level Parsing
-```rust
-use oak_core::{Parser, SourceText, parser::session::ParseSession};
-use oak_php::{PhpParser, PhpLanguage};
-
-let mut session = ParseSession::<PhpLanguage>::default();
-let parser = PhpParser::new();
-let source = SourceText::new("<?php $x = 42; ?>");
-let result = parser.parse(&[], &mut session);
-println!("Token parsing completed.");
-```
-
-### Error Handling
-```rust
-use oak_php::{Parser, PhpLanguage, SourceText};
-
-let parser = Parser::new();
-let source = SourceText::new(r#"
-<?php
-// Invalid PHP code example
-function broken_function(
-    echo "Hello"
-// Missing closing brace
-?>
-"#);
-
-let result = parser.parse(&source);
-if let Some(errors) = result.result.err() {
-    println!("Parse errors found: {:?}", errors);
-} else {
-    println!("Parsed successfully.");
-}
-```
-
-## 🏗️ AST Structure
-
-The parser generates a comprehensive AST with the following main structures:
-
-- **PhpProgram**: Root container for PHP programs
-- **Function**: PHP functions and methods
-- **Class**: PHP class definitions
-- **Statement**: Various statement types including control flow
-- **Expression**: Various expression types including operators
-- **Variable**: PHP variable constructs
-
-## 📊 Performance
-
-- **Streaming**: Parse large PHP files without loading entirely into memory
-- **Incremental**: Re-parse only changed sections
-- **Memory Efficient**: Smart AST node allocation
-- **Fast Recovery**: Quick error recovery for better IDE integration
-
-## 🔗 Integration
-
-Oak PHP integrates seamlessly with:
-
-- **Static Analysis**: Code quality and security analysis
-- **Code Generation**: Generating code from PHP AST
-- **IDE Support**: Language server protocol compatibility
-- **Refactoring**: Automated code refactoring
-- **Documentation**: Generating documentation from PHP code
-
-## 📚 Examples
-
-Check out the [examples](examples/) directory for comprehensive examples:
-
-- Complete PHP program parsing
-- Function and class analysis
-- Code transformation
-- Integration with development workflows
-
-## 🤝 Contributing
-
-Contributions are welcome! 
-
-Please feel free to submit pull requests at the [project repository](https://github.com/ygg-lang/oaks/tree/dev/examples/oak-php) or open [issues](https://github.com/ygg-lang/oaks/issues).
+Contributions are welcome! Please feel free to submit a Pull Request. For major changes, please open an issue first to discuss what you would like to change.

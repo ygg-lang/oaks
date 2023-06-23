@@ -1,7 +1,8 @@
-//! Oak REPL (Custom Implementation)
+#![warn(missing_docs)]
+//! Oak REPL (Read-Eval-Print Loop) framework.
 //!
-//! 深度集成 Oak 语言特性的 REPL 框架。
-//! 支持多行输入、语法完整性检查、以及自定义高亮。
+//! A REPL framework deeply integrated with Oak language features.
+//! Supports multi-line input, syntax integrity checking, and custom highlighting.
 
 use crossterm::{
     cursor::MoveToColumn,
@@ -17,9 +18,12 @@ use std::{
     fmt::{Display, Formatter},
 };
 
+/// Errors that can occur during REPL execution.
 #[derive(Debug)]
 pub enum ReplError {
+    /// An I/O error occurred.
     Io(std::io::Error),
+    /// A custom error occurred.
     Other(String),
 }
 
@@ -52,54 +56,61 @@ impl From<&str> for ReplError {
     }
 }
 
-/// REPL 处理结果
+/// The result of handling a line in the REPL.
 pub enum HandleResult {
-    /// 继续 REPL
+    /// Continue the REPL session.
     Continue,
-    /// 退出 REPL
+    /// Exit the REPL session.
     Exit,
 }
 
-/// 语言集成接口
+/// Interface for language integration in the REPL.
 pub trait ReplHandler {
-    /// 获取语法高亮结果
+    /// Get syntax highlighting for the given code.
     fn highlight<'a>(&self, _code: &'a str) -> Option<HighlightResult<'a>> {
         None
     }
 
-    /// 提示符
+    /// The prompt to display. `is_continuation` is true for multi-line input.
     fn prompt(&self, is_continuation: bool) -> &str;
 
-    /// 检查输入是否已完整（例如括号是否闭合）
-    /// 如果返回 false，REPL 将进入多行输入模式
+    /// Check if the input is complete (e.g., all brackets are closed).
+    /// If it returns false, the REPL will enter multi-line input mode.
     fn is_complete(&self, code: &str) -> bool;
 
-    /// 执行代码行
+    /// Execute the given line of code.
     fn handle_line(&mut self, line: &str) -> Result<HandleResult, ReplError>;
 
-    /// 获取当前缩进级别
+    /// Get the current indentation level for the next line in multi-line mode.
     fn get_indent(&self, _code: &str) -> usize {
-        // 默认不缩进
+        // No indentation by default
         0
     }
 }
 
+/// A buffer for managing lines of text in the REPL.
 pub struct LineBuffer {
+    /// The lines of text in the buffer.
     lines: Vec<String>,
+    /// The index of the current line being edited.
     current_line: usize,
+    /// The cursor position within the current line.
     cursor_pos: usize,
 }
 
 impl LineBuffer {
+    /// Create a new empty line buffer.
     pub fn new() -> Self {
         Self { lines: vec![String::new()], current_line: 0, cursor_pos: 0 }
     }
 
+    /// Insert a character at the current cursor position.
     pub fn insert(&mut self, ch: char) {
         self.lines[self.current_line].insert(self.cursor_pos, ch);
         self.cursor_pos += 1;
     }
 
+    /// Remove a character before the current cursor position.
     pub fn backspace(&mut self) -> bool {
         if self.cursor_pos > 0 {
             self.cursor_pos -= 1;
@@ -107,7 +118,7 @@ impl LineBuffer {
             true
         }
         else if self.current_line > 0 {
-            // 合并到上一行
+            // Merge with the previous line
             let current = self.lines.remove(self.current_line);
             self.current_line -= 1;
             self.cursor_pos = self.lines[self.current_line].chars().count();
@@ -119,30 +130,37 @@ impl LineBuffer {
         }
     }
 
+    /// Get the full text content of the buffer.
     pub fn full_text(&self) -> String {
         self.lines.join("\n")
     }
 
+    /// Clear the buffer.
     pub fn clear(&mut self) {
         self.lines = vec![String::new()];
         self.current_line = 0;
         self.cursor_pos = 0;
     }
 
+    /// Returns true if the buffer is empty.
     pub fn is_empty(&self) -> bool {
         self.lines.len() == 1 && self.lines[0].is_empty()
     }
 }
 
+/// The main REPL engine.
 pub struct OakRepl<H: ReplHandler> {
+    /// The handler that implements language-specific logic.
     handler: H,
 }
 
 impl<H: ReplHandler> OakRepl<H> {
+    /// Create a new Oak REPL with the given handler.
     pub fn new(handler: H) -> Self {
         Self { handler }
     }
 
+    /// Run the REPL loop.
     pub fn run(&mut self) -> Result<(), ReplError> {
         let mut stdout = io::stdout();
         let mut line_buf = LineBuffer::new();
@@ -153,13 +171,13 @@ impl<H: ReplHandler> OakRepl<H> {
         terminal::enable_raw_mode()?;
 
         loop {
-            // 绘制当前行
+            // Draw the current line
             execute!(stdout, MoveToColumn(0), Clear(ClearType::CurrentLine))?;
             let prompt = self.handler.prompt(is_continuation);
 
             let current_line_text = &line_buf.lines[line_buf.current_line];
 
-            // 语法高亮
+            // Syntax highlighting
             let displayed_text = if let Some(highlighted) = self.handler.highlight(current_line_text) { exporter.export(&highlighted) } else { current_line_text.clone() };
 
             write!(stdout, "{}{}", prompt, displayed_text)?;
@@ -203,14 +221,14 @@ impl<H: ReplHandler> OakRepl<H> {
                             terminal::enable_raw_mode()?;
                         }
                         else {
-                            // 继续多行输入
+                            // Continue multi-line input
                             println!();
                             line_buf.lines.push(String::new());
                             line_buf.current_line += 1;
                             line_buf.cursor_pos = 0;
                             is_continuation = true;
 
-                            // 自动缩进
+                            // Auto-indent
                             let indent_size = self.handler.get_indent(&full_code);
                             for _ in 0..indent_size {
                                 line_buf.insert(' ');
@@ -227,7 +245,7 @@ impl<H: ReplHandler> OakRepl<H> {
                     }
                     KeyCode::Right => {
                         if line_buf.cursor_pos < line_buf.lines[line_buf.current_line].chars().count() {
-                            line_buf.cursor_pos += 1;
+                            line_buf.cursor_pos += 1
                         }
                     }
                     _ => {}

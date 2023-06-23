@@ -66,7 +66,7 @@ package com.example.lexer {
             
             // Access XML data
             for each (var item:XML in xmlData..item) {
-                trace("XML Item ID: " + item.@id + ", Value: " + item.text());
+                trace("XML Item ID: " + item.↯id + ", Value: " + item.text());
             }
         }
 

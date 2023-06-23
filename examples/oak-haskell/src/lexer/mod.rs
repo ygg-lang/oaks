@@ -1,4 +1,7 @@
-use crate::{kind::HaskellSyntaxKind, language::HaskellLanguage};
+#![doc = include_str!("readme.md")]
+pub mod token_type;
+
+use crate::{language::HaskellLanguage, lexer::token_type::HaskellTokenType};
 use oak_core::{Lexer, LexerCache, LexerState, TextEdit, lexer::LexOutput, source::Source};
 
 type State<'a, S> = LexerState<'a, S, HaskellLanguage>;
@@ -25,7 +28,7 @@ impl<'config> HaskellLexer<'config> {
         }
 
         if state.get_position() > start_pos {
-            state.add_token(HaskellSyntaxKind::Whitespace, start_pos, state.get_position());
+            state.add_token(HaskellTokenType::Whitespace, start_pos, state.get_position());
             true
         }
         else {
@@ -38,7 +41,7 @@ impl<'config> HaskellLexer<'config> {
 
         if let Some('\n') = state.peek() {
             state.bump();
-            state.add_token(HaskellSyntaxKind::Newline, start_pos, state.get_position());
+            state.add_token(HaskellTokenType::Newline, start_pos, state.get_position());
             true
         }
         else if let Some('\r') = state.peek() {
@@ -46,7 +49,7 @@ impl<'config> HaskellLexer<'config> {
             if let Some('\n') = state.peek() {
                 state.bump();
             }
-            state.add_token(HaskellSyntaxKind::Newline, start_pos, state.get_position());
+            state.add_token(HaskellTokenType::Newline, start_pos, state.get_position());
             true
         }
         else {
@@ -66,7 +69,7 @@ impl<'config> HaskellLexer<'config> {
                     }
                     state.bump();
                 }
-                state.add_token(HaskellSyntaxKind::Comment, start_pos, state.get_position());
+                state.add_token(HaskellTokenType::Comment, start_pos, state.get_position());
                 true
             }
             else {
@@ -88,7 +91,7 @@ impl<'config> HaskellLexer<'config> {
                 while let Some(ch) = state.peek() {
                     if ch == '{' && state.peek_next_n(1) == Some('-') {
                         depth += 1;
-                        state.advance(2);
+                        state.advance(2)
                     }
                     else if ch == '-' && state.peek_next_n(1) == Some('}') {
                         depth -= 1;
@@ -101,7 +104,7 @@ impl<'config> HaskellLexer<'config> {
                         state.bump();
                     }
                 }
-                state.add_token(HaskellSyntaxKind::Comment, start_pos, state.get_position());
+                state.add_token(HaskellTokenType::Comment, start_pos, state.get_position());
                 true
             }
             else {
@@ -145,30 +148,30 @@ impl<'config> HaskellLexer<'config> {
         }
     }
 
-    fn keyword_or_identifier(&self, text: &str) -> HaskellSyntaxKind {
+    fn keyword_or_identifier(&self, text: &str) -> HaskellTokenType {
         match text {
-            "case" => HaskellSyntaxKind::Case,
-            "class" => HaskellSyntaxKind::Class,
-            "data" => HaskellSyntaxKind::Data,
-            "default" => HaskellSyntaxKind::Default,
-            "deriving" => HaskellSyntaxKind::Deriving,
-            "do" => HaskellSyntaxKind::Do,
-            "else" => HaskellSyntaxKind::Else,
-            "if" => HaskellSyntaxKind::If,
-            "import" => HaskellSyntaxKind::Import,
-            "in" => HaskellSyntaxKind::In,
-            "infix" => HaskellSyntaxKind::Infix,
-            "infixl" => HaskellSyntaxKind::Infixl,
-            "infixr" => HaskellSyntaxKind::Infixr,
-            "instance" => HaskellSyntaxKind::Instance,
-            "let" => HaskellSyntaxKind::Let,
-            "module" => HaskellSyntaxKind::Module,
-            "newtype" => HaskellSyntaxKind::Newtype,
-            "of" => HaskellSyntaxKind::Of,
-            "then" => HaskellSyntaxKind::Then,
-            "type" => HaskellSyntaxKind::Type,
-            "where" => HaskellSyntaxKind::Where,
-            _ => HaskellSyntaxKind::Identifier,
+            "case" => HaskellTokenType::Case,
+            "class" => HaskellTokenType::Class,
+            "data" => HaskellTokenType::Data,
+            "default" => HaskellTokenType::Default,
+            "deriving" => HaskellTokenType::Deriving,
+            "do" => HaskellTokenType::Do,
+            "else" => HaskellTokenType::Else,
+            "if" => HaskellTokenType::If,
+            "import" => HaskellTokenType::Import,
+            "in" => HaskellTokenType::In,
+            "infix" => HaskellTokenType::Infix,
+            "infixl" => HaskellTokenType::Infixl,
+            "infixr" => HaskellTokenType::Infixr,
+            "instance" => HaskellTokenType::Instance,
+            "let" => HaskellTokenType::Let,
+            "module" => HaskellTokenType::Module,
+            "newtype" => HaskellTokenType::Newtype,
+            "of" => HaskellTokenType::Of,
+            "then" => HaskellTokenType::Then,
+            "type" => HaskellTokenType::Type,
+            "where" => HaskellTokenType::Where,
+            _ => HaskellTokenType::Identifier,
         }
     }
 
@@ -200,7 +203,7 @@ impl<'config> HaskellLexer<'config> {
                     }
                 }
 
-                state.add_token(HaskellSyntaxKind::Number, start_pos, state.get_position());
+                state.add_token(HaskellTokenType::Number, start_pos, state.get_position());
                 true
             }
             else {
@@ -221,7 +224,7 @@ impl<'config> HaskellLexer<'config> {
             while let Some(ch) = state.peek() {
                 if ch == '"' {
                     state.bump();
-                    state.add_token(HaskellSyntaxKind::StringLiteral, start_pos, state.get_position());
+                    state.add_token(HaskellTokenType::StringLiteral, start_pos, state.get_position());
                     return true;
                 }
                 else if ch == '\\' {
@@ -235,7 +238,7 @@ impl<'config> HaskellLexer<'config> {
                 }
             }
 
-            state.add_token(HaskellSyntaxKind::StringLiteral, start_pos, state.get_position());
+            state.add_token(HaskellTokenType::StringLiteral, start_pos, state.get_position());
             true
         }
         else {
@@ -263,11 +266,11 @@ impl<'config> HaskellLexer<'config> {
 
             if let Some('\'') = state.peek() {
                 state.bump();
-                state.add_token(HaskellSyntaxKind::CharLiteral, start_pos, state.get_position());
+                state.add_token(HaskellTokenType::CharLiteral, start_pos, state.get_position());
                 true
             }
             else {
-                state.add_token(HaskellSyntaxKind::CharLiteral, start_pos, state.get_position());
+                state.add_token(HaskellTokenType::CharLiteral, start_pos, state.get_position());
                 true
             }
         }
@@ -285,127 +288,127 @@ impl<'config> HaskellLexer<'config> {
                     state.bump();
                     if let Some('+') = state.peek() {
                         state.bump();
-                        HaskellSyntaxKind::Append
+                        HaskellTokenType::Append
                     }
                     else {
-                        HaskellSyntaxKind::Plus
+                        HaskellTokenType::Plus
                     }
                 }
                 '-' => {
                     state.bump();
                     if let Some('>') = state.peek() {
                         state.bump();
-                        HaskellSyntaxKind::Arrow
+                        HaskellTokenType::Arrow
                     }
                     else {
-                        HaskellSyntaxKind::Minus
+                        HaskellTokenType::Minus
                     }
                 }
                 '*' => {
                     state.bump();
-                    HaskellSyntaxKind::Star
+                    HaskellTokenType::Star
                 }
                 '/' => {
                     state.bump();
-                    HaskellSyntaxKind::Slash
+                    HaskellTokenType::Slash
                 }
                 '=' => {
                     state.bump();
                     if let Some('=') = state.peek() {
                         state.bump();
-                        HaskellSyntaxKind::Equal
+                        HaskellTokenType::Equal
                     }
                     else {
-                        HaskellSyntaxKind::Assign
+                        HaskellTokenType::Assign
                     }
                 }
                 '<' => {
                     state.bump();
                     if let Some('=') = state.peek() {
                         state.bump();
-                        HaskellSyntaxKind::LessEqual
+                        HaskellTokenType::LessEqual
                     }
                     else if let Some('-') = state.peek() {
                         state.bump();
-                        HaskellSyntaxKind::LeftArrow
+                        HaskellTokenType::LeftArrow
                     }
                     else {
-                        HaskellSyntaxKind::Less
+                        HaskellTokenType::Less
                     }
                 }
                 '>' => {
                     state.bump();
                     if let Some('=') = state.peek() {
                         state.bump();
-                        HaskellSyntaxKind::GreaterEqual
+                        HaskellTokenType::GreaterEqual
                     }
                     else {
-                        HaskellSyntaxKind::Greater
+                        HaskellTokenType::Greater
                     }
                 }
                 ':' => {
                     state.bump();
                     if let Some(':') = state.peek() {
                         state.bump();
-                        HaskellSyntaxKind::DoubleColon
+                        HaskellTokenType::DoubleColon
                     }
                     else {
-                        HaskellSyntaxKind::Colon
+                        HaskellTokenType::Colon
                     }
                 }
                 '|' => {
                     state.bump();
-                    HaskellSyntaxKind::Pipe
+                    HaskellTokenType::Pipe
                 }
                 '&' => {
                     state.bump();
-                    HaskellSyntaxKind::Ampersand
+                    HaskellTokenType::Ampersand
                 }
                 '!' => {
                     state.bump();
-                    HaskellSyntaxKind::Bang
+                    HaskellTokenType::Bang
                 }
                 '?' => {
                     state.bump();
-                    HaskellSyntaxKind::Question
+                    HaskellTokenType::Question
                 }
                 ';' => {
                     state.bump();
-                    HaskellSyntaxKind::Semicolon
+                    HaskellTokenType::Semicolon
                 }
                 ',' => {
                     state.bump();
-                    HaskellSyntaxKind::Comma
+                    HaskellTokenType::Comma
                 }
                 '.' => {
                     state.bump();
                     if let Some('.') = state.peek() {
                         state.bump();
-                        HaskellSyntaxKind::DoubleDot
+                        HaskellTokenType::DoubleDot
                     }
                     else {
-                        HaskellSyntaxKind::Dot
+                        HaskellTokenType::Dot
                     }
                 }
                 '$' => {
                     state.bump();
-                    HaskellSyntaxKind::Dollar
+                    HaskellTokenType::Dollar
                 }
                 '@' => {
                     state.bump();
-                    HaskellSyntaxKind::At
+                    HaskellTokenType::At
                 }
                 '~' => {
                     state.bump();
-                    HaskellSyntaxKind::Tilde
+                    HaskellTokenType::Tilde
                 }
                 '\\' => {
                     state.bump();
-                    HaskellSyntaxKind::Backslash
+                    HaskellTokenType::Backslash
                 }
                 '`' => {
                     state.bump();
-                    HaskellSyntaxKind::Backtick
+                    HaskellTokenType::Backtick
                 }
                 _ => return false,
             };
@@ -425,27 +428,27 @@ impl<'config> HaskellLexer<'config> {
             let token_kind = match ch {
                 '(' => {
                     state.bump();
-                    HaskellSyntaxKind::LeftParen
+                    HaskellTokenType::LeftParen
                 }
                 ')' => {
                     state.bump();
-                    HaskellSyntaxKind::RightParen
+                    HaskellTokenType::RightParen
                 }
                 '[' => {
                     state.bump();
-                    HaskellSyntaxKind::LeftBracket
+                    HaskellTokenType::LeftBracket
                 }
                 ']' => {
                     state.bump();
-                    HaskellSyntaxKind::RightBracket
+                    HaskellTokenType::RightBracket
                 }
                 '{' => {
                     state.bump();
-                    HaskellSyntaxKind::LeftBrace
+                    HaskellTokenType::LeftBrace
                 }
                 '}' => {
                     state.bump();
-                    HaskellSyntaxKind::RightBrace
+                    HaskellTokenType::RightBrace
                 }
                 _ => return false,
             };
@@ -509,15 +512,15 @@ impl<'config> Lexer<HaskellLanguage> for HaskellLexer<'config> {
             let start_pos = state.get_position();
             if state.peek().is_some() {
                 state.advance(1);
-                state.add_token(HaskellSyntaxKind::Error, start_pos, state.get_position());
+                state.add_token(HaskellTokenType::Error, start_pos, state.get_position())
             }
 
-            state.advance_if_dead_lock(safe_point);
+            state.advance_if_dead_lock(safe_point)
         }
 
         // 添加 EOF token
         let pos = state.get_position();
-        state.add_token(HaskellSyntaxKind::Eof, pos, pos);
+        state.add_token(HaskellTokenType::Eof, pos, pos);
 
         state.finish_with_cache(Ok(()), cache)
     }

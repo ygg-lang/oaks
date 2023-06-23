@@ -1,4 +1,7 @@
-use crate::{kind::RubySyntaxKind, language::RubyLanguage};
+#![doc = include_str!("readme.md")]
+pub mod token_type;
+
+use crate::{language::RubyLanguage, lexer::token_type::RubyTokenType};
 use oak_core::{LexOutput, Lexer, LexerCache, LexerState, OakError, Source, TextEdit};
 
 type State<'a, S> = LexerState<'a, S, RubyLanguage>;
@@ -13,7 +16,7 @@ impl<'config> Lexer<RubyLanguage> for RubyLexer<'config> {
         let mut state: State<'_, S> = LexerState::new(source);
         let result = self.run(&mut state);
         if result.is_ok() {
-            state.add_eof();
+            state.add_eof()
         }
         state.finish_with_cache(result, cache)
     }
@@ -64,7 +67,7 @@ impl<'config> RubyLexer<'config> {
                 continue;
             }
 
-            state.advance_if_dead_lock(safe_point);
+            state.advance_if_dead_lock(safe_point)
         }
 
         Ok(())
@@ -75,16 +78,11 @@ impl<'config> RubyLexer<'config> {
         let start_pos = state.get_position();
 
         while let Some(ch) = state.peek() {
-            if ch == ' ' || ch == '\t' {
-                state.advance(ch.len_utf8());
-            }
-            else {
-                break;
-            }
+            if ch == ' ' || ch == '\t' { state.advance(ch.len_utf8()) } else { break }
         }
 
         if state.get_position() > start_pos {
-            state.add_token(RubySyntaxKind::Whitespace, start_pos, state.get_position());
+            state.add_token(RubyTokenType::Whitespace, start_pos, state.get_position());
             true
         }
         else {
@@ -98,15 +96,15 @@ impl<'config> RubyLexer<'config> {
 
         if let Some('\n') = state.peek() {
             state.advance(1);
-            state.add_token(RubySyntaxKind::Newline, start_pos, state.get_position());
+            state.add_token(RubyTokenType::Newline, start_pos, state.get_position());
             true
         }
         else if let Some('\r') = state.peek() {
             state.advance(1);
             if let Some('\n') = state.peek() {
-                state.advance(1);
+                state.advance(1)
             }
-            state.add_token(RubySyntaxKind::Newline, start_pos, state.get_position());
+            state.add_token(RubyTokenType::Newline, start_pos, state.get_position());
             true
         }
         else {
@@ -125,10 +123,10 @@ impl<'config> RubyLexer<'config> {
                 if ch == '\n' || ch == '\r' {
                     break;
                 }
-                state.advance(ch.len_utf8());
+                state.advance(ch.len_utf8())
             }
 
-            state.add_token(RubySyntaxKind::Comment, start_pos, state.get_position());
+            state.add_token(RubyTokenType::Comment, start_pos, state.get_position());
             true
         }
         else {
@@ -148,7 +146,7 @@ impl<'config> RubyLexer<'config> {
             _ => return false,
         };
 
-        state.advance(1); // 跳过开始引
+        state.advance(1); // 跳过开始引号
         let mut escaped = false;
         while let Some(ch) = state.peek() {
             if escaped {
@@ -169,14 +167,14 @@ impl<'config> RubyLexer<'config> {
             }
             else if ch == '\n' || ch == '\r' {
                 // Ruby 字符串可以跨多行
-                state.advance(ch.len_utf8());
+                state.advance(ch.len_utf8())
             }
             else {
-                state.advance(ch.len_utf8());
+                state.advance(ch.len_utf8())
             }
         }
 
-        state.add_token(RubySyntaxKind::StringLiteral, start_pos, state.get_position());
+        state.add_token(RubyTokenType::StringLiteral, start_pos, state.get_position());
         true
     }
 
@@ -191,14 +189,9 @@ impl<'config> RubyLexer<'config> {
                 if ch.is_ascii_alphabetic() || ch == '_' {
                     // 读取标识
                     while let Some(ch) = state.peek() {
-                        if ch.is_ascii_alphanumeric() || ch == '_' || ch == '?' || ch == '!' {
-                            state.advance(1);
-                        }
-                        else {
-                            break;
-                        }
+                        if ch.is_ascii_alphanumeric() || ch == '_' || ch == '?' || ch == '!' { state.advance(1) } else { break }
                     }
-                    state.add_token(RubySyntaxKind::Symbol, start_pos, state.get_position());
+                    state.add_token(RubyTokenType::Symbol, start_pos, state.get_position());
                     return true;
                 }
                 else if ch == '"' || ch == '\'' {
@@ -225,10 +218,10 @@ impl<'config> RubyLexer<'config> {
                             break;
                         }
                         else {
-                            state.advance(ch.len_utf8());
+                            state.advance(ch.len_utf8())
                         }
                     }
-                    state.add_token(RubySyntaxKind::Symbol, start_pos, state.get_position());
+                    state.add_token(RubyTokenType::Symbol, start_pos, state.get_position());
                     return true;
                 }
             }
@@ -297,16 +290,16 @@ impl<'config> RubyLexer<'config> {
                 }
                 _ => {
                     // 十进制数
-                    self.lex_decimal_number(state, &mut is_float);
+                    self.lex_decimal_number(state, &mut is_float)
                 }
             }
         }
         else {
             // 十进制数
-            self.lex_decimal_number(state, &mut is_float);
+            self.lex_decimal_number(state, &mut is_float)
         }
 
-        let kind = if is_float { RubySyntaxKind::FloatLiteral } else { RubySyntaxKind::IntegerLiteral };
+        let kind = if is_float { RubyTokenType::FloatLiteral } else { RubyTokenType::IntegerLiteral };
 
         state.add_token(kind, start_pos, state.get_position());
         true
@@ -320,7 +313,9 @@ impl<'config> RubyLexer<'config> {
                 state.advance(1);
             }
             else if ch == '_' {
-                state.advance(1); // 数字分隔            } else {
+                state.advance(1); // 数字分隔
+            }
+            else {
                 break;
             }
         }
@@ -359,7 +354,9 @@ impl<'config> RubyLexer<'config> {
                     state.advance(1);
                 }
                 else if ch == '_' {
-                    state.advance(1); // 数字分隔                } else {
+                    state.advance(1); // 数字分隔
+                }
+                else {
                     break;
                 }
             }
@@ -370,7 +367,7 @@ impl<'config> RubyLexer<'config> {
     fn lex_identifier_or_keyword<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start_pos = state.get_position();
 
-        // 检查第一个字
+        // 检查第一个字符
         if !state.peek().map_or(false, |c| c.is_ascii_alphabetic() || c == '_') {
             return false;
         }
@@ -378,7 +375,7 @@ impl<'config> RubyLexer<'config> {
         // 构建标识符字符串
         let mut buf = String::new();
 
-        // 读取标识
+        // 读取标识符
         while let Some(ch) = state.peek() {
             if ch.is_ascii_alphanumeric() || ch == '_' || ch == '?' || ch == '!' {
                 buf.push(ch);
@@ -391,51 +388,51 @@ impl<'config> RubyLexer<'config> {
 
         // 检查是否是关键字
         let kind = match buf.as_str() {
-            "if" => RubySyntaxKind::If,
-            "unless" => RubySyntaxKind::Unless,
-            "elsif" => RubySyntaxKind::Elsif,
-            "else" => RubySyntaxKind::Else,
-            "case" => RubySyntaxKind::Case,
-            "when" => RubySyntaxKind::When,
-            "then" => RubySyntaxKind::Then,
-            "for" => RubySyntaxKind::For,
-            "while" => RubySyntaxKind::While,
-            "until" => RubySyntaxKind::Until,
-            "break" => RubySyntaxKind::Break,
-            "next" => RubySyntaxKind::Next,
-            "redo" => RubySyntaxKind::Redo,
-            "retry" => RubySyntaxKind::Retry,
-            "return" => RubySyntaxKind::Return,
-            "yield" => RubySyntaxKind::Yield,
-            "def" => RubySyntaxKind::Def,
-            "class" => RubySyntaxKind::Class,
-            "module" => RubySyntaxKind::Module,
-            "end" => RubySyntaxKind::End,
-            "lambda" => RubySyntaxKind::Lambda,
-            "proc" => RubySyntaxKind::Proc,
-            "begin" => RubySyntaxKind::Begin,
-            "rescue" => RubySyntaxKind::Rescue,
-            "ensure" => RubySyntaxKind::Ensure,
-            "raise" => RubySyntaxKind::Raise,
-            "require" => RubySyntaxKind::Require,
-            "load" => RubySyntaxKind::Load,
-            "include" => RubySyntaxKind::Include,
-            "extend" => RubySyntaxKind::Extend,
-            "prepend" => RubySyntaxKind::Prepend,
-            "and" => RubySyntaxKind::And,
-            "or" => RubySyntaxKind::Or,
-            "not" => RubySyntaxKind::Not,
-            "in" => RubySyntaxKind::In,
-            "true" => RubySyntaxKind::True,
-            "false" => RubySyntaxKind::False,
-            "nil" => RubySyntaxKind::Nil,
-            "super" => RubySyntaxKind::Super,
-            "self" => RubySyntaxKind::Self_,
-            "alias" => RubySyntaxKind::Alias,
-            "undef" => RubySyntaxKind::Undef,
-            "defined?" => RubySyntaxKind::Defined,
-            "do" => RubySyntaxKind::Do,
-            _ => RubySyntaxKind::Identifier,
+            "if" => RubyTokenType::If,
+            "unless" => RubyTokenType::Unless,
+            "elsif" => RubyTokenType::Elsif,
+            "else" => RubyTokenType::Else,
+            "case" => RubyTokenType::Case,
+            "when" => RubyTokenType::When,
+            "then" => RubyTokenType::Then,
+            "for" => RubyTokenType::For,
+            "while" => RubyTokenType::While,
+            "until" => RubyTokenType::Until,
+            "break" => RubyTokenType::Break,
+            "next" => RubyTokenType::Next,
+            "redo" => RubyTokenType::Redo,
+            "retry" => RubyTokenType::Retry,
+            "return" => RubyTokenType::Return,
+            "yield" => RubyTokenType::Yield,
+            "def" => RubyTokenType::Def,
+            "class" => RubyTokenType::Class,
+            "module" => RubyTokenType::Module,
+            "end" => RubyTokenType::End,
+            "lambda" => RubyTokenType::Lambda,
+            "proc" => RubyTokenType::Proc,
+            "begin" => RubyTokenType::Begin,
+            "rescue" => RubyTokenType::Rescue,
+            "ensure" => RubyTokenType::Ensure,
+            "raise" => RubyTokenType::Raise,
+            "require" => RubyTokenType::Require,
+            "load" => RubyTokenType::Load,
+            "include" => RubyTokenType::Include,
+            "extend" => RubyTokenType::Extend,
+            "prepend" => RubyTokenType::Prepend,
+            "and" => RubyTokenType::And,
+            "or" => RubyTokenType::Or,
+            "not" => RubyTokenType::Not,
+            "in" => RubyTokenType::In,
+            "true" => RubyTokenType::True,
+            "false" => RubyTokenType::False,
+            "nil" => RubyTokenType::Nil,
+            "super" => RubyTokenType::Super,
+            "self" => RubyTokenType::Self_,
+            "alias" => RubyTokenType::Alias,
+            "undef" => RubyTokenType::Undef,
+            "defined?" => RubyTokenType::Defined,
+            "do" => RubyTokenType::Do,
+            _ => RubyTokenType::Identifier,
         };
 
         state.add_token(kind, start_pos, state.get_position());
@@ -452,15 +449,15 @@ impl<'config> RubyLexer<'config> {
             if state.peek() == op.chars().nth(0) && state.peek_next_n(1) == op.chars().nth(1) && state.peek_next_n(2) == op.chars().nth(2) {
                 state.advance(3);
                 let kind = match *op {
-                    "<=>" => RubySyntaxKind::Spaceship,
-                    "===" => RubySyntaxKind::EqualEqualEqual,
-                    "**=" => RubySyntaxKind::PowerAssign,
-                    "<<=" => RubySyntaxKind::LeftShiftAssign,
-                    ">>=" => RubySyntaxKind::RightShiftAssign,
-                    "||=" => RubySyntaxKind::OrOrAssign,
-                    "&&=" => RubySyntaxKind::AndAndAssign,
-                    "..." => RubySyntaxKind::DotDotDot,
-                    _ => RubySyntaxKind::Invalid,
+                    "<=>" => RubyTokenType::Spaceship,
+                    "===" => RubyTokenType::EqualEqualEqual,
+                    "**=" => RubyTokenType::PowerAssign,
+                    "<<=" => RubyTokenType::LeftShiftAssign,
+                    ">>=" => RubyTokenType::RightShiftAssign,
+                    "||=" => RubyTokenType::OrOrAssign,
+                    "&&=" => RubyTokenType::AndAndAssign,
+                    "..." => RubyTokenType::DotDotDot,
+                    _ => RubyTokenType::Invalid,
                 };
                 state.add_token(kind, start_pos, state.get_position());
                 return true;
@@ -472,27 +469,27 @@ impl<'config> RubyLexer<'config> {
             if state.peek() == op.chars().nth(0) && state.peek_next_n(1) == op.chars().nth(1) {
                 state.advance(2);
                 let kind = match *op {
-                    "**" => RubySyntaxKind::Power,
-                    "<<" => RubySyntaxKind::LeftShift,
-                    ">>" => RubySyntaxKind::RightShift,
-                    "<=" => RubySyntaxKind::LessEqual,
-                    ">=" => RubySyntaxKind::GreaterEqual,
-                    "==" => RubySyntaxKind::EqualEqual,
-                    "!=" => RubySyntaxKind::NotEqual,
-                    "=~" => RubySyntaxKind::Match,
-                    "!~" => RubySyntaxKind::NotMatch,
-                    "&&" => RubySyntaxKind::AndAnd,
-                    "||" => RubySyntaxKind::OrOr,
-                    "+=" => RubySyntaxKind::PlusAssign,
-                    "-=" => RubySyntaxKind::MinusAssign,
-                    "*=" => RubySyntaxKind::MultiplyAssign,
-                    "/=" => RubySyntaxKind::DivideAssign,
-                    "%=" => RubySyntaxKind::ModuloAssign,
-                    "&=" => RubySyntaxKind::AndAssign,
-                    "|=" => RubySyntaxKind::OrAssign,
-                    "^=" => RubySyntaxKind::XorAssign,
-                    ".." => RubySyntaxKind::DotDot,
-                    _ => RubySyntaxKind::Invalid,
+                    "**" => RubyTokenType::Power,
+                    "<<" => RubyTokenType::LeftShift,
+                    ">>" => RubyTokenType::RightShift,
+                    "<=" => RubyTokenType::LessEqual,
+                    ">=" => RubyTokenType::GreaterEqual,
+                    "==" => RubyTokenType::EqualEqual,
+                    "!=" => RubyTokenType::NotEqual,
+                    "=~" => RubyTokenType::Match,
+                    "!~" => RubyTokenType::NotMatch,
+                    "&&" => RubyTokenType::AndAnd,
+                    "||" => RubyTokenType::OrOr,
+                    "+=" => RubyTokenType::PlusAssign,
+                    "-=" => RubyTokenType::MinusAssign,
+                    "*=" => RubyTokenType::MultiplyAssign,
+                    "/=" => RubyTokenType::DivideAssign,
+                    "%=" => RubyTokenType::ModuloAssign,
+                    "&=" => RubyTokenType::AndAssign,
+                    "|=" => RubyTokenType::OrAssign,
+                    "^=" => RubyTokenType::XorAssign,
+                    ".." => RubyTokenType::DotDot,
+                    _ => RubyTokenType::Invalid,
                 };
                 state.add_token(kind, start_pos, state.get_position());
                 return true;
@@ -506,21 +503,21 @@ impl<'config> RubyLexer<'config> {
             if single_char_ops.contains(&ch) {
                 state.advance(1);
                 let kind = match ch {
-                    '+' => RubySyntaxKind::Plus,
-                    '-' => RubySyntaxKind::Minus,
-                    '*' => RubySyntaxKind::Multiply,
-                    '/' => RubySyntaxKind::Divide,
-                    '%' => RubySyntaxKind::Modulo,
-                    '=' => RubySyntaxKind::Assign,
-                    '<' => RubySyntaxKind::Less,
-                    '>' => RubySyntaxKind::Greater,
-                    '&' => RubySyntaxKind::BitAnd,
-                    '|' => RubySyntaxKind::BitOr,
-                    '^' => RubySyntaxKind::Xor,
-                    '!' => RubySyntaxKind::LogicalNot,
-                    '~' => RubySyntaxKind::Tilde,
-                    '?' => RubySyntaxKind::Question,
-                    _ => RubySyntaxKind::Invalid,
+                    '+' => RubyTokenType::Plus,
+                    '-' => RubyTokenType::Minus,
+                    '*' => RubyTokenType::Multiply,
+                    '/' => RubyTokenType::Divide,
+                    '%' => RubyTokenType::Modulo,
+                    '=' => RubyTokenType::Assign,
+                    '<' => RubyTokenType::Less,
+                    '>' => RubyTokenType::Greater,
+                    '&' => RubyTokenType::BitAnd,
+                    '|' => RubyTokenType::BitOr,
+                    '^' => RubyTokenType::Xor,
+                    '!' => RubyTokenType::LogicalNot,
+                    '~' => RubyTokenType::Tilde,
+                    '?' => RubyTokenType::Question,
+                    _ => RubyTokenType::Invalid,
                 };
                 state.add_token(kind, start_pos, state.get_position());
                 return true;
@@ -530,14 +527,14 @@ impl<'config> RubyLexer<'config> {
         false
     }
 
-    /// 处理分隔
+    /// 处理分隔符
     fn lex_single_char_tokens<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start_pos = state.get_position();
 
         // 检查双冒号
         if state.peek() == Some(':') && state.peek_next_n(1) == Some(':') {
             state.advance(2);
-            state.add_token(RubySyntaxKind::DoubleColon, start_pos, state.get_position());
+            state.add_token(RubyTokenType::DoubleColon, start_pos, state.get_position());
             return true;
         }
 
@@ -548,19 +545,19 @@ impl<'config> RubyLexer<'config> {
             if delimiters.contains(&ch) {
                 state.advance(1);
                 let kind = match ch {
-                    '(' => RubySyntaxKind::LeftParen,
-                    ')' => RubySyntaxKind::RightParen,
-                    '[' => RubySyntaxKind::LeftBracket,
-                    ']' => RubySyntaxKind::RightBracket,
-                    '{' => RubySyntaxKind::LeftBrace,
-                    '}' => RubySyntaxKind::RightBrace,
-                    ',' => RubySyntaxKind::Comma,
-                    ';' => RubySyntaxKind::Semicolon,
-                    '.' => RubySyntaxKind::Dot,
-                    ':' => RubySyntaxKind::Colon,
-                    '@' => RubySyntaxKind::At,
-                    '$' => RubySyntaxKind::Dollar,
-                    _ => RubySyntaxKind::Invalid,
+                    '(' => RubyTokenType::LeftParen,
+                    ')' => RubyTokenType::RightParen,
+                    '[' => RubyTokenType::LeftBracket,
+                    ']' => RubyTokenType::RightBracket,
+                    '{' => RubyTokenType::LeftBrace,
+                    '}' => RubyTokenType::RightBrace,
+                    ',' => RubyTokenType::Comma,
+                    ';' => RubyTokenType::Semicolon,
+                    '.' => RubyTokenType::Dot,
+                    ':' => RubyTokenType::Colon,
+                    '@' => RubyTokenType::At,
+                    '$' => RubyTokenType::Dollar,
+                    _ => RubyTokenType::Invalid,
                 };
                 state.add_token(kind, start_pos, state.get_position());
                 return true;
@@ -570,7 +567,7 @@ impl<'config> RubyLexer<'config> {
         // 如果没有匹配任何已知字符，将其标记为 Invalid 并推进位置
         if let Some(_ch) = state.peek() {
             state.advance(1);
-            state.add_token(RubySyntaxKind::Invalid, start_pos, state.get_position());
+            state.add_token(RubyTokenType::Invalid, start_pos, state.get_position());
             return true;
         }
 

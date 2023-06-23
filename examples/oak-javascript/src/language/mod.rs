@@ -1,60 +1,77 @@
+//! JavaScript language implementation.
+
 use oak_core::language::{Language, LanguageCategory};
+#[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
 
-/// JavaScript 语言实现
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
+/// JavaScript language implementation.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct JavaScriptLanguage {
-    /// 是否允许 JSX 语法
+    /// Whether to allow JSX syntax.
     pub jsx: bool,
-    /// 是否允许 TypeScript 语法
+    /// Whether to allow TypeScript syntax.
     pub typescript: bool,
-    /// 是否允许实验性语
+    /// Whether to allow experimental features.
     pub experimental: bool,
-    /// 是否严格模式
+    /// Whether to enable strict mode.
     pub strict_mode: bool,
-    /// ECMAScript 版本
+    /// ECMAScript version.
     pub ecma_version: EcmaVersion,
 }
 
-/// ECMAScript 版本
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
+/// ECMAScript version.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub enum EcmaVersion {
+    /// ES3
     ES3,
+    /// ES5
     ES5,
+    /// ES2015 (ES6)
     ES2015,
+    /// ES2016
     ES2016,
+    /// ES2017
     ES2017,
+    /// ES2018
     ES2018,
+    /// ES2019
     ES2019,
+    /// ES2020
     ES2020,
+    /// ES2021
     ES2021,
+    /// ES2022
     ES2022,
+    /// ES2023
     ES2023,
+    /// Latest supported version
     Latest,
 }
 
 impl JavaScriptLanguage {
-    /// 创建新的 JavaScript 语言配置
+    /// Creates a new JavaScript language configuration.
     pub fn new() -> Self {
         Self::default()
     }
 
-    /// 创建标准 JavaScript 语言实例
+    /// Creates a standard JavaScript language instance.
     pub fn standard() -> Self {
         Self::default()
     }
 
-    /// 创建 ES2015+ JavaScript 语言实例
+    /// Creates a modern (ES2015+) JavaScript language instance.
     pub fn modern() -> Self {
         Self { jsx: false, typescript: false, experimental: false, strict_mode: true, ecma_version: EcmaVersion::Latest }
     }
 
-    /// 创建支持 JSX JavaScript 语言实例
+    /// Creates a JavaScript language instance with JSX support.
     pub fn jsx() -> Self {
         Self { jsx: true, typescript: false, experimental: false, strict_mode: true, ecma_version: EcmaVersion::Latest }
     }
 
-    /// 创建 TypeScript 语言实例
+    /// Creates a TypeScript language instance.
     pub fn typescript() -> Self {
         Self { jsx: false, typescript: true, experimental: false, strict_mode: true, ecma_version: EcmaVersion::Latest }
     }
@@ -70,7 +87,7 @@ impl Language for JavaScriptLanguage {
     const NAME: &'static str = "javascript";
     const CATEGORY: LanguageCategory = LanguageCategory::Programming;
 
-    type TokenType = crate::kind::JavaScriptSyntaxKind;
-    type ElementType = crate::kind::JavaScriptSyntaxKind;
+    type TokenType = crate::lexer::token_type::JavaScriptTokenType;
+    type ElementType = crate::parser::element_type::JavaScriptElementType;
     type TypedRoot = crate::ast::JavaScriptRoot;
 }

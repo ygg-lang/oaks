@@ -1,9 +1,11 @@
 use crate::lexer::CsvTokenType;
 use oak_core::{ElementType, UniversalElementRole};
+#[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
 
 /// CSV element type
-#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Deserialize)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub enum CsvElementType {
     /// Source file (root)
     SourceFile,

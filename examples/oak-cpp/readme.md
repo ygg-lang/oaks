@@ -1,154 +1,34 @@
-# Oak C++ Parser
+# 🚀 Oak C++ Parser
 
 [![Crates.io](https://img.shields.io/crates/v/oak-cpp.svg)](https://crates.io/crates/oak-cpp)
 [![Documentation](https://docs.rs/oak-cpp/badge.svg)](https://docs.rs/oak-cpp)
 
-High-performance incremental C++ parser for the oak ecosystem with flexible configuration, optimized for code analysis and compilation.
+**Mastering Complexity with High Performance** — A high-performance, incremental C++ parser built on the Oak framework. Designed to navigate the vast and complex landscape of modern C++, from high-frequency trading systems to large-scale game engines.
 
-## 🎯 Overview
+## 🎯 Project Vision
 
-Oak C++ is a robust parser for C++, designed to handle complete C++ syntax including modern features. Built on the solid foundation of oak-core, it provides both high-level convenience and detailed AST generation for static analysis and code generation.
+C++ is notorious for its parsing complexity, yet it remains the language of choice for performance-critical systems. `oak-cpp` aims to provide a robust, modern, Rust-powered infrastructure for parsing C++ that is both accurate and incredibly fast. By utilizing Oak's incremental parsing architecture, we enable the creation of highly responsive tools that can handle modern C++ standards (up to C++23) in real-time, allowing developers to build sophisticated IDEs, refactoring tools, and static analyzers that keep pace with the language's evolution.
 
-## ✨ Features
+## ✨ Core Features
 
-- **Complete C++ Syntax**: Supports all C++ features including modern specifications
-- **Full AST Generation**: Generates comprehensive Abstract Syntax Trees
-- **Lexer Support**: Built-in tokenization with proper span information
-- **Error Recovery**: Graceful handling of syntax errors with detailed diagnostics
+- **⚡ Blazing Performance**: Leverages Rust's memory safety and zero-cost abstractions to parse complex C++ templates and headers with sub-millisecond latency.
+- **🔄 Incremental by Design**: Only re-parse what changed. Essential for maintaining high responsiveness in massive C++ projects with deep header dependencies.
+- **🌳 High-Fidelity AST**: Generates a comprehensive Abstract Syntax Tree that captures the intricacies of C++:
+    - **Templates**: Deep support for template declarations, specializations, and instantiations.
+    - **Object-Oriented**: Precise mapping of classes, multiple inheritance, access specifiers, and virtual functions.
+    - **Namespaces**: Robust handling of nested namespaces, aliases, and `using` directives.
+    - **Modern C++**: Full support for `auto`, lambdas, `constexpr`, and other features from C++11 through C++23.
+- **🛡️ Industrial-Grade Fault Tolerance**: Engineered to recover from syntax errors gracefully, providing precise diagnostics—crucial for analyzing code during active development in complex C++ environments.
+- **🧩 Deep Ecosystem Integration**: Seamlessly works with `oak-lsp` for full LSP support and `oak-mcp` for intelligent, AI-driven code discovery.
 
-## 🚀 Quick Start
+## 🏗️ Architecture
 
-Basic example:
+The parser follows the **Green/Red Tree** architecture (inspired by Roslyn), which allows for:
+1. **Efficient Immutability**: Share nodes across different versions of the tree without copying.
+2. **Lossless Syntax Trees**: Retains all trivia (whitespace and comments), enabling faithful code formatting and refactoring.
+3. **Type Safety**: Strongly-typed "Red" nodes provide a convenient and safe API for tree traversal and analysis.
 
-```rust
-use oak_cpp::{Parser, CppLanguage, SourceText};
-
-fn main() -> Result<(), Box<dyn std::error::Error>> {
-    let parser = Parser::new();
-    let source = SourceText::new(r#"
-        #include <iostream>
-
-        class Greeter {
-        public:
-            void greet() {
-                std::cout << "Hello, C++!" << std::endl;
-            }
-        };
-
-        int main() {
-            Greeter greeter;
-            greeter.greet();
-            return 0;
-        }
-    "#);
-    
-    let result = parser.parse(&source);
-    println!("Parsed C++ program successfully.");
-    Ok(())
-}
-```
-
-## 📋 Parsing Examples
-
-### Class Parsing
-```rust
-use oak_cpp::{Parser, CppLanguage, SourceText};
-
-let parser = Parser::new();
-let source = SourceText::new(r#"
-    class MyClass {
-    public:
-        int myMethod(int x) { return x * 2; }
-    };
-    "#);
-
-let result = parser.parse(&source);
-println!("Parsed C++ class successfully.");
-```
-
-### Template Parsing
-```rust
-use oak_cpp::{Parser, CppLanguage, SourceText};
-
-let parser = Parser::new();
-let source = SourceText::new(r#"
-    template <typename T>
-    T max(T a, T b) {
-        return (a > b) ? a : b;
-    }
-    "#);
-
-let result = parser.parse(&source);
-println!("Parsed C++ template successfully.");
-```
-
-## 🔧 Advanced Features
-
-### Token-Level Parsing
-```rust
-use oak_cpp::{Parser, CppLanguage, SourceText};
-
-let parser = Parser::new();
-let source = SourceText::new("int main() { return 0; }");
-let result = parser.parse(&source);
-// Token information is available in the parse result
-```
-
-### Error Handling
-```rust
-use oak_cpp::{Parser, CppLanguage, SourceText};
-
-let parser = Parser::new();
-let source = SourceText::new(r#"
-    int main() {
-        std::cout << "Hello, World!" << std::endl
-        return 0;
-    }
-    "#);
-
-let result = parser.parse(&source);
-if let Err(e) = result.result {
-    println!("Parse error: {:?}", e);
-}
-```
-
-## 🏗️ AST Structure
-
-The parser generates a comprehensive AST with the following main structures:
-
-- **Program**: Root container for C++ programs
-- **ClassDefinition**: Class and struct definitions
-- **FunctionDefinition**: Function declarations and definitions
-- **TemplateDeclaration**: Template definitions
-- **Statement**: Control flow, expressions, blocks
-
-## 📊 Performance
-
-- **Streaming**: Parse large C++ files without loading entirely into memory
-- **Incremental**: Re-parse only changed sections
-- **Memory Efficient**: Smart AST node allocation
-- **Fast Recovery**: Quick error recovery for better IDE integration
-
-## 🔗 Integration
-
-Oak C++ integrates seamlessly with:
-
-- **Compilers**: Front-end for C++ compilers
-- **Static Analysis Tools**: Code quality and security analysis
-- **IDE Support**: Language server protocol compatibility
-- **Code Generation**: Generating code from AST
-
-## 📚 Examples
-
-Check out the [examples](examples/) directory for comprehensive examples:
-
-- Complete C++ program parsing
-- Class and template analysis
-- Code transformation
-- Integration with development workflows
 
 ## 🤝 Contributing
 
-Contributions are welcome! 
-
-Please feel free to submit pull requests at the [project repository](https://github.com/ygg-lang/oaks/tree/dev/examples/oak-cpp) or open [issues](https://github.com/ygg-lang/oaks/issues).
+We welcome contributions of all kinds! If you find a bug, have a feature request, or want to contribute code, please check our [issues](https://github.com/ygg-lang/oaks/issues) or submit a pull request.

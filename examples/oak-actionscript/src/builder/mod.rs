@@ -1,6 +1,8 @@
-use crate::parser::ActionScriptParser;
-#[doc = include_str!("readme.md")]
-use crate::{ast::*, language::ActionScriptLanguage, parser::ActionScriptElementType};
+use crate::{
+    ast::*,
+    language::ActionScriptLanguage,
+    parser::{ActionScriptElementType, ActionScriptParser},
+};
 use oak_core::{Builder, BuilderCache, GreenNode, Lexer, OakDiagnostics, OakError, Parser, RedNode, RedTree, SourceText, TextEdit, source::Source};
 
 /// ActionScript 语言的 AST 构建器
@@ -52,15 +54,9 @@ impl<'config> ActionScriptBuilder<'config> {
         for child in red_root.children() {
             match child {
                 RedTree::Node(n) => match n.green.kind {
-                    ActionScriptElementType::Class => {
-                        items.push(ActionScriptItem::Class);
-                    }
-                    ActionScriptElementType::Interface => {
-                        items.push(ActionScriptItem::Interface);
-                    }
-                    ActionScriptElementType::Function => {
-                        items.push(ActionScriptItem::Function);
-                    }
+                    ActionScriptElementType::Class => items.push(ActionScriptItem::Class),
+                    ActionScriptElementType::Interface => items.push(ActionScriptItem::Interface),
+                    ActionScriptElementType::Function => items.push(ActionScriptItem::Function),
                     _ => {}
                 },
                 _ => {}

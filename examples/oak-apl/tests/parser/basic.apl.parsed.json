@@ -1,0 +1,32 @@
+{
+  "success": true,
+  "node_count": 4,
+  "ast_structure": {
+    "kind": "Root",
+    "children": [
+      {
+        "kind": "Statement",
+        "children": [
+          {
+            "kind": "Expression",
+            "children": [
+              {
+                "kind": "Leaves(12)",
+                "children": [],
+                "text_length": 12,
+                "is_leaf": true
+              }
+            ],
+            "text_length": 12,
+            "is_leaf": false
+          }
+        ],
+        "text_length": 12,
+        "is_leaf": false
+      }
+    ],
+    "text_length": 12,
+    "is_leaf": false
+  },
+  "errors": []
+}

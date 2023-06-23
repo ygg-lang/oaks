@@ -1,5 +1,5 @@
-use oak_diagnostic::testing::lexing::LexerTester;
 use oak_django::{DjangoLanguage, DjangoLexer};
+use oak_testing::lexing::LexerTester;
 use std::{path::Path, time::Duration};
 
 #[test]

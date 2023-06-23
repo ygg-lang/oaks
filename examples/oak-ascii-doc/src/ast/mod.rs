@@ -1,3 +1,4 @@
+#![doc = include_str!("readme.md")]
 use core::range::Range;
 use std::{string::String, vec::Vec};
 

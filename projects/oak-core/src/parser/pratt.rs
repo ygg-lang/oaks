@@ -41,6 +41,44 @@ impl OperatorInfo {
 ///
 /// Users implement this trait to define the grammar rules for expressions.
 /// Using a trait allows the compiler to optimize operator lookups using match statements.
+///
+/// # Example
+///
+/// ```rust
+/// # use oak_core::{Language, ParserState, Pratt, binary, unary, OperatorInfo, Associativity};
+/// # use oak_core::tree::GreenNode;
+/// # use oak_core::source::Source;
+/// # struct MyLanguage;
+/// # impl Language for MyLanguage {
+/// #     type TokenType = u16;
+/// #     type ElementType = u16;
+/// # }
+/// # struct MyPratt;
+/// # impl Pratt<MyLanguage> for MyPratt {
+/// #     fn primary<'a, S: Source + ?Sized>(&self, state: &mut ParserState<'a, MyLanguage, S>) -> &'a GreenNode<'a, MyLanguage> {
+/// #         // Parse literals, identifiers, or parenthesized expressions
+/// #         state.checkpoint().finish(1)
+/// #     }
+/// #
+/// #     fn infix<'a, S: Source + ?Sized>(&self, state: &mut ParserState<'a, MyLanguage, S>, left: &'a GreenNode<'a, MyLanguage>, min_precedence: u8) -> Option<&'a GreenNode<'a, MyLanguage>> {
+/// #         let token = state.peek()?;
+/// #         let info = match token.kind {
+/// #             1 => Some(OperatorInfo::left(10)), // '+'
+/// #             2 => Some(OperatorInfo::left(20)), // '*'
+/// #             _ => None,
+/// #         }?;
+/// #
+/// #         if info.precedence < min_precedence { return None }
+/// #
+/// #         Some(binary(state, left, token.kind, info.precedence, info.associativity, 100, |s, p| self.parse(s, p)))
+/// #     }
+/// # }
+/// # impl MyPratt {
+/// #     fn parse<'a, S: Source + ?Sized>(&self, state: &mut ParserState<'a, MyLanguage, S>, min_precedence: u8) -> &'a GreenNode<'a, MyLanguage> {
+/// #         oak_core::parser::PrattParser::new(self).parse(state, min_precedence)
+/// #     }
+/// # }
+/// ```
 pub trait Pratt<L: Language> {
     /// Parses a primary expression (e.g., literals, identifiers, group).
     fn primary<'a, S: Source + ?Sized>(&self, state: &mut ParserState<'a, L, S>) -> &'a GreenNode<'a, L>;
@@ -68,8 +106,7 @@ where
     F: FnMut(&mut ParserState<'a, L, S>, u8) -> &'a GreenNode<'a, L>,
     L::ElementType: From<L::TokenType>,
 {
-    let cp = state.checkpoint();
-    state.push_child(left);
+    let cp = state.checkpoint_before(left);
     state.expect(op_kind).ok();
 
     let next_prec = match assoc {
@@ -78,8 +115,7 @@ where
         Associativity::None => op_precedence + 1,
     };
 
-    let right = parse_expr(state, next_prec);
-    state.push_child(right);
+    let _right = parse_expr(state, next_prec);
     state.finish_at(cp, result_kind)
 }
 
@@ -94,8 +130,7 @@ where
 {
     let cp = state.checkpoint();
     state.expect(op_kind).ok();
-    let right = parse_expr(state, op_precedence);
-    state.push_child(right);
+    let _right = parse_expr(state, op_precedence);
     state.finish_at(cp, result_kind)
 }
 
@@ -107,13 +142,81 @@ where
     S: Source + ?Sized,
     L::ElementType: From<L::TokenType>,
 {
-    let cp = state.checkpoint();
-    state.push_child(left);
+    let cp = state.checkpoint_before(left);
     state.expect(op_kind).ok();
     state.finish_at(cp, result_kind)
 }
 
 /// A Pratt parser implementation.
+///
+/// # Examples
+///
+/// ```rust
+/// # use oak_core::{Language, TokenType, ElementType, UniversalTokenRole, UniversalElementRole, ParserState, Pratt, PrattParser, binary, unary, SyntaxArena, LexOutput, SourceText};
+/// # use triomphe::Arc;
+/// #
+/// #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
+/// enum Token { Number, Plus, Minus, Star, Slash, Eof }
+/// impl TokenType for Token {
+///     const END_OF_STREAM: Self = Token::Eof;
+///     type Role = UniversalTokenRole;
+///     fn role(&self) -> Self::Role { UniversalTokenRole::None }
+/// }
+///
+/// #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
+/// enum Element { Expr, Number, Plus, Minus, Star, Slash }
+/// impl ElementType for Element {
+///     type Role = UniversalElementRole;
+///     fn role(&self) -> Self::Role { UniversalElementRole::None }
+/// }
+/// impl From<Token> for Element {
+///     fn from(t: Token) -> Self {
+///         match t {
+///             Token::Number => Element::Number,
+///             Token::Plus => Element::Plus,
+///             Token::Minus => Element::Minus,
+///             Token::Star => Element::Star,
+///             Token::Slash => Element::Slash,
+///             Token::Eof => unreachable!(),
+///         }
+///     }
+/// }
+///
+/// #[derive(Clone, Copy)]
+/// struct Lang;
+/// impl Language for Lang {
+///     const NAME: &'static str = "test";
+///     type TokenType = Token;
+///     type ElementType = Element;
+///     type TypedRoot = ();
+/// }
+///
+/// struct ExprParser;
+/// impl Pratt<Lang> for ExprParser {
+///     fn primary<'a, S: oak_core::Source + ?Sized>(&self, state: &mut ParserState<'a, Lang, S>) -> &'a oak_core::GreenNode<'a, Lang> {
+///         let cp = state.checkpoint();
+///         state.bump(); // bump number
+///         state.finish_at(cp, Element::Number)
+///     }
+///
+///     fn infix<'a, S: oak_core::Source + ?Sized>(&self, state: &mut ParserState<'a, Lang, S>, left: &'a oak_core::GreenNode<'a, Lang>, min_prec: u8) -> Option<&'a oak_core::GreenNode<'a, Lang>> {
+///         let kind = state.peek_kind()?;
+///         let (prec, assoc) = match kind {
+///             Token::Plus | Token::Minus => (1, oak_core::Associativity::Left),
+///             Token::Star | Token::Slash => (2, oak_core::Associativity::Left),
+///             _ => return None,
+///         }
+///         if prec < min_prec { return None }
+///         Some(binary(state, left, kind, prec, assoc, Element::Expr, |s, p| self.parse_expr(s, p)))
+///     }
+/// }
+///
+/// impl ExprParser {
+///     fn parse_expr<'a, S: oak_core::Source + ?Sized>(&self, state: &mut ParserState<'a, Lang, S>, min_prec: u8) -> &'a oak_core::GreenNode<'a, Lang> {
+///         PrattParser::new(ExprParser).parse_expr(state, min_prec)
+///     }
+/// }
+/// ```
 pub struct PrattParser<L: Language, T: Pratt<L>> {
     spec: T,
     _marker: core::marker::PhantomData<L>,
@@ -134,7 +237,7 @@ impl<L: Language, T: Pratt<L>> PrattParser<L, T> {
     pub fn parse<'a, S: Source + ?Sized>(state: &mut ParserState<'a, L, S>, min_precedence: u8, spec: &T) -> &'a GreenNode<'a, L> {
         let mut left = spec.prefix(state);
         while let Some(node) = spec.infix(state, left, min_precedence) {
-            left = node;
+            left = node
         }
         left
     }

@@ -1,4 +1,7 @@
-use crate::{kind::VhdlSyntaxKind, language::VhdlLanguage};
+#![doc = include_str!("readme.md")]
+pub mod token_type;
+
+use crate::{language::VhdlLanguage, lexer::token_type::VhdlTokenType};
 use oak_core::{
     Lexer, LexerCache, LexerState, OakError,
     lexer::LexOutput,
@@ -64,7 +67,7 @@ impl<'config> VhdlLexer<'config> {
             let start_pos = state.get_position();
             if let Some(ch) = state.peek() {
                 state.advance(ch.len_utf8());
-                state.add_token(VhdlSyntaxKind::Error, start_pos, state.get_position());
+                state.add_token(VhdlTokenType::Error, start_pos, state.get_position());
             }
 
             state.advance_if_dead_lock(safe_point);
@@ -79,15 +82,13 @@ impl<'config> VhdlLexer<'config> {
 
         while let Some(ch) = state.peek() {
             match ch {
-                ' ' | '\t' | '\n' | '\r' => {
-                    state.advance(ch.len_utf8());
-                }
+                ' ' | '\t' | '\n' | '\r' => state.advance(ch.len_utf8()),
                 _ => break,
             }
         }
 
         if state.get_position() > start_pos {
-            state.add_token(VhdlSyntaxKind::Whitespace, start_pos, state.get_position());
+            state.add_token(VhdlTokenType::Whitespace, start_pos, state.get_position());
             true
         }
         else {
@@ -107,7 +108,7 @@ impl<'config> VhdlLexer<'config> {
                 }
                 state.advance(ch.len_utf8());
             }
-            state.add_token(VhdlSyntaxKind::Comment, start_pos, state.get_position());
+            state.add_token(VhdlTokenType::Comment, start_pos, state.get_position());
             return true;
         }
 
@@ -130,7 +131,7 @@ impl<'config> VhdlLexer<'config> {
                         state.advance(1);
                         continue;
                     }
-                    state.add_token(VhdlSyntaxKind::StringLiteral, start_pos, state.get_position());
+                    state.add_token(VhdlTokenType::StringLiteral, start_pos, state.get_position());
                     return true;
                 }
                 else if ch == '\n' || ch == '\r' {
@@ -142,7 +143,7 @@ impl<'config> VhdlLexer<'config> {
             }
 
             // 未闭合的字符串
-            state.add_token(VhdlSyntaxKind::Error, start_pos, state.get_position());
+            state.add_token(VhdlTokenType::Error, start_pos, state.get_position());
             return true;
         }
 
@@ -154,13 +155,13 @@ impl<'config> VhdlLexer<'config> {
                 state.advance(ch.len_utf8());
                 if let Some('\'') = state.peek() {
                     state.advance(1);
-                    state.add_token(VhdlSyntaxKind::CharLiteral, start_pos, state.get_position());
+                    state.add_token(VhdlTokenType::CharLiteral, start_pos, state.get_position());
                     return true;
                 }
             }
 
             // 未闭合的字符字面量
-            state.add_token(VhdlSyntaxKind::Error, start_pos, state.get_position());
+            state.add_token(VhdlTokenType::Error, start_pos, state.get_position());
             return true;
         }
 
@@ -173,7 +174,7 @@ impl<'config> VhdlLexer<'config> {
                     while let Some(ch) = state.peek() {
                         if ch == '"' {
                             state.advance(1);
-                            state.add_token(VhdlSyntaxKind::BitStringLiteral, start_pos, state.get_position());
+                            state.add_token(VhdlTokenType::BitStringLiteral, start_pos, state.get_position());
                             return true;
                         }
                         else if ch.is_ascii_alphanumeric() || ch == '_' {
@@ -188,7 +189,7 @@ impl<'config> VhdlLexer<'config> {
                     }
 
                     // 未闭合的位字符串
-                    state.add_token(VhdlSyntaxKind::Error, start_pos, state.get_position());
+                    state.add_token(VhdlTokenType::Error, start_pos, state.get_position());
                     return true;
                 }
             }
@@ -222,7 +223,7 @@ impl<'config> VhdlLexer<'config> {
                         }
                         else if ch == '#' {
                             state.advance(1);
-                            state.add_token(VhdlSyntaxKind::BasedLiteral, start_pos, state.get_position());
+                            state.add_token(VhdlTokenType::BasedLiteral, start_pos, state.get_position());
                             return true;
                         }
                         else {
@@ -230,7 +231,7 @@ impl<'config> VhdlLexer<'config> {
                         }
                     }
                     // 未闭合的基数字面量
-                    state.add_token(VhdlSyntaxKind::Error, start_pos, state.get_position());
+                    state.add_token(VhdlTokenType::Error, start_pos, state.get_position());
                     return true;
                 }
 
@@ -268,13 +269,13 @@ impl<'config> VhdlLexer<'config> {
                                 }
                             }
 
-                            state.add_token(VhdlSyntaxKind::RealLiteral, start_pos, state.get_position());
+                            state.add_token(VhdlTokenType::RealLiteral, start_pos, state.get_position());
                             return true;
                         }
                     }
                 }
 
-                state.add_token(VhdlSyntaxKind::IntegerLiteral, start_pos, state.get_position());
+                state.add_token(VhdlTokenType::IntegerLiteral, start_pos, state.get_position());
                 return true;
             }
         }
@@ -303,100 +304,100 @@ impl<'config> VhdlLexer<'config> {
                 let text = state.get_text_in((start_pos..state.get_position()).into()).to_lowercase();
                 let token_kind = match text.as_str() {
                     // VHDL 关键字
-                    "entity" => VhdlSyntaxKind::EntityKw,
-                    "architecture" => VhdlSyntaxKind::ArchitectureKw,
-                    "begin" => VhdlSyntaxKind::BeginKw,
-                    "end" => VhdlSyntaxKind::EndKw,
-                    "process" => VhdlSyntaxKind::ProcessKw,
-                    "signal" => VhdlSyntaxKind::SignalKw,
-                    "variable" => VhdlSyntaxKind::VariableKw,
-                    "constant" => VhdlSyntaxKind::ConstantKw,
-                    "component" => VhdlSyntaxKind::ComponentKw,
-                    "port" => VhdlSyntaxKind::PortKw,
-                    "map" => VhdlSyntaxKind::MapKw,
-                    "generic" => VhdlSyntaxKind::GenericKw,
-                    "library" => VhdlSyntaxKind::LibraryKw,
-                    "use" => VhdlSyntaxKind::UseKw,
-                    "package" => VhdlSyntaxKind::PackageKw,
-                    "function" => VhdlSyntaxKind::FunctionKw,
-                    "procedure" => VhdlSyntaxKind::ProcedureKw,
-                    "type" => VhdlSyntaxKind::TypeKw,
-                    "subtype" => VhdlSyntaxKind::SubtypeKw,
-                    "record" => VhdlSyntaxKind::RecordKw,
-                    "array" => VhdlSyntaxKind::ArrayKw,
-                    "if" => VhdlSyntaxKind::IfKw,
-                    "then" => VhdlSyntaxKind::ThenKw,
-                    "else" => VhdlSyntaxKind::ElseKw,
-                    "elsif" => VhdlSyntaxKind::ElsifKw,
-                    "case" => VhdlSyntaxKind::CaseKw,
-                    "when" => VhdlSyntaxKind::WhenKw,
-                    "loop" => VhdlSyntaxKind::LoopKw,
-                    "for" => VhdlSyntaxKind::ForKw,
-                    "while" => VhdlSyntaxKind::WhileKw,
-                    "exit" => VhdlSyntaxKind::ExitKw,
-                    "next" => VhdlSyntaxKind::NextKw,
-                    "return" => VhdlSyntaxKind::ReturnKw,
-                    "wait" => VhdlSyntaxKind::WaitKw,
-                    "until" => VhdlSyntaxKind::UntilKw,
-                    "in" => VhdlSyntaxKind::InKw,
-                    "out" => VhdlSyntaxKind::OutKw,
-                    "inout" => VhdlSyntaxKind::InoutKw,
-                    "buffer" => VhdlSyntaxKind::BufferKw,
-                    "linkage" => VhdlSyntaxKind::LinkageKw,
-                    "downto" => VhdlSyntaxKind::DowntoKw,
-                    "to" => VhdlSyntaxKind::ToKw,
-                    "generate" => VhdlSyntaxKind::GenerateKw,
-                    "with" => VhdlSyntaxKind::WithKw,
-                    "select" => VhdlSyntaxKind::SelectKw,
-                    "all" => VhdlSyntaxKind::AllKw,
-                    "others" => VhdlSyntaxKind::OthersKw,
-                    "null" => VhdlSyntaxKind::NullKw,
-                    "open" => VhdlSyntaxKind::OpenKw,
-                    "is" => VhdlSyntaxKind::IsKw,
-                    "of" => VhdlSyntaxKind::OfKw,
-                    "range" => VhdlSyntaxKind::RangeKw,
-                    "reverse_range" => VhdlSyntaxKind::ReverseRangeKw,
-                    "attribute" => VhdlSyntaxKind::AttributeKw,
-                    "alias" => VhdlSyntaxKind::AliasKw,
-                    "file" => VhdlSyntaxKind::FileKw,
-                    "access" => VhdlSyntaxKind::AccessKw,
-                    "after" => VhdlSyntaxKind::AfterKw,
-                    "assert" => VhdlSyntaxKind::AssertKw,
-                    "report" => VhdlSyntaxKind::ReportKw,
-                    "severity" => VhdlSyntaxKind::SeverityKw,
+                    "entity" => VhdlTokenType::EntityKw,
+                    "architecture" => VhdlTokenType::ArchitectureKw,
+                    "begin" => VhdlTokenType::BeginKw,
+                    "end" => VhdlTokenType::EndKw,
+                    "process" => VhdlTokenType::ProcessKw,
+                    "signal" => VhdlTokenType::SignalKw,
+                    "variable" => VhdlTokenType::VariableKw,
+                    "constant" => VhdlTokenType::ConstantKw,
+                    "component" => VhdlTokenType::ComponentKw,
+                    "port" => VhdlTokenType::PortKw,
+                    "map" => VhdlTokenType::MapKw,
+                    "generic" => VhdlTokenType::GenericKw,
+                    "library" => VhdlTokenType::LibraryKw,
+                    "use" => VhdlTokenType::UseKw,
+                    "package" => VhdlTokenType::PackageKw,
+                    "function" => VhdlTokenType::FunctionKw,
+                    "procedure" => VhdlTokenType::ProcedureKw,
+                    "type" => VhdlTokenType::TypeKw,
+                    "subtype" => VhdlTokenType::SubtypeKw,
+                    "record" => VhdlTokenType::RecordKw,
+                    "array" => VhdlTokenType::ArrayKw,
+                    "if" => VhdlTokenType::IfKw,
+                    "then" => VhdlTokenType::ThenKw,
+                    "else" => VhdlTokenType::ElseKw,
+                    "elsif" => VhdlTokenType::ElsifKw,
+                    "case" => VhdlTokenType::CaseKw,
+                    "when" => VhdlTokenType::WhenKw,
+                    "loop" => VhdlTokenType::LoopKw,
+                    "for" => VhdlTokenType::ForKw,
+                    "while" => VhdlTokenType::WhileKw,
+                    "exit" => VhdlTokenType::ExitKw,
+                    "next" => VhdlTokenType::NextKw,
+                    "return" => VhdlTokenType::ReturnKw,
+                    "wait" => VhdlTokenType::WaitKw,
+                    "until" => VhdlTokenType::UntilKw,
+                    "in" => VhdlTokenType::InKw,
+                    "out" => VhdlTokenType::OutKw,
+                    "inout" => VhdlTokenType::InoutKw,
+                    "buffer" => VhdlTokenType::BufferKw,
+                    "linkage" => VhdlTokenType::LinkageKw,
+                    "downto" => VhdlTokenType::DowntoKw,
+                    "to" => VhdlTokenType::ToKw,
+                    "generate" => VhdlTokenType::GenerateKw,
+                    "with" => VhdlTokenType::WithKw,
+                    "select" => VhdlTokenType::SelectKw,
+                    "all" => VhdlTokenType::AllKw,
+                    "others" => VhdlTokenType::OthersKw,
+                    "null" => VhdlTokenType::NullKw,
+                    "open" => VhdlTokenType::OpenKw,
+                    "is" => VhdlTokenType::IsKw,
+                    "of" => VhdlTokenType::OfKw,
+                    "range" => VhdlTokenType::RangeKw,
+                    "reverse_range" => VhdlTokenType::ReverseRangeKw,
+                    "attribute" => VhdlTokenType::AttributeKw,
+                    "alias" => VhdlTokenType::AliasKw,
+                    "file" => VhdlTokenType::FileKw,
+                    "access" => VhdlTokenType::AccessKw,
+                    "after" => VhdlTokenType::AfterKw,
+                    "assert" => VhdlTokenType::AssertKw,
+                    "report" => VhdlTokenType::ReportKw,
+                    "severity" => VhdlTokenType::SeverityKw,
                     // 基本类型
-                    "bit" => VhdlSyntaxKind::BitKw,
-                    "bit_vector" => VhdlSyntaxKind::BitVectorKw,
-                    "boolean" => VhdlSyntaxKind::BooleanKw,
-                    "character" => VhdlSyntaxKind::CharacterKw,
-                    "integer" => VhdlSyntaxKind::IntegerKw,
-                    "natural" => VhdlSyntaxKind::NaturalKw,
-                    "positive" => VhdlSyntaxKind::PositiveKw,
-                    "real" => VhdlSyntaxKind::RealKw,
-                    "string" => VhdlSyntaxKind::StringKw,
-                    "time" => VhdlSyntaxKind::TimeKw,
-                    "std_logic" => VhdlSyntaxKind::StdLogicKw,
-                    "std_logic_vector" => VhdlSyntaxKind::StdLogicVectorKw,
-                    "unsigned" => VhdlSyntaxKind::UnsignedKw,
-                    "signed" => VhdlSyntaxKind::SignedKw,
+                    "bit" => VhdlTokenType::BitKw,
+                    "bit_vector" => VhdlTokenType::BitVectorKw,
+                    "boolean" => VhdlTokenType::BooleanKw,
+                    "character" => VhdlTokenType::CharacterKw,
+                    "integer" => VhdlTokenType::IntegerKw,
+                    "natural" => VhdlTokenType::NaturalKw,
+                    "positive" => VhdlTokenType::PositiveKw,
+                    "real" => VhdlTokenType::RealKw,
+                    "string" => VhdlTokenType::StringKw,
+                    "time" => VhdlTokenType::TimeKw,
+                    "std_logic" => VhdlTokenType::StdLogicKw,
+                    "std_logic_vector" => VhdlTokenType::StdLogicVectorKw,
+                    "unsigned" => VhdlTokenType::UnsignedKw,
+                    "signed" => VhdlTokenType::SignedKw,
                     // 逻辑操作符
-                    "and" => VhdlSyntaxKind::And,
-                    "or" => VhdlSyntaxKind::Or,
-                    "nand" => VhdlSyntaxKind::Nand,
-                    "nor" => VhdlSyntaxKind::Nor,
-                    "xor" => VhdlSyntaxKind::Xor,
-                    "xnor" => VhdlSyntaxKind::Xnor,
-                    "not" => VhdlSyntaxKind::Not,
-                    "sll" => VhdlSyntaxKind::Sll,
-                    "srl" => VhdlSyntaxKind::Srl,
-                    "sla" => VhdlSyntaxKind::Sla,
-                    "sra" => VhdlSyntaxKind::Sra,
-                    "rol" => VhdlSyntaxKind::Rol,
-                    "ror" => VhdlSyntaxKind::Ror,
-                    "mod" => VhdlSyntaxKind::Mod,
-                    "rem" => VhdlSyntaxKind::Rem,
-                    "abs" => VhdlSyntaxKind::Abs,
-                    _ => VhdlSyntaxKind::Identifier,
+                    "and" => VhdlTokenType::And,
+                    "or" => VhdlTokenType::Or,
+                    "nand" => VhdlTokenType::Nand,
+                    "nor" => VhdlTokenType::Nor,
+                    "xor" => VhdlTokenType::Xor,
+                    "xnor" => VhdlTokenType::Xnor,
+                    "not" => VhdlTokenType::Not,
+                    "sll" => VhdlTokenType::Sll,
+                    "srl" => VhdlTokenType::Srl,
+                    "sla" => VhdlTokenType::Sla,
+                    "sra" => VhdlTokenType::Sra,
+                    "rol" => VhdlTokenType::Rol,
+                    "ror" => VhdlTokenType::Ror,
+                    "mod" => VhdlTokenType::Mod,
+                    "rem" => VhdlTokenType::Rem,
+                    "abs" => VhdlTokenType::Abs,
+                    _ => VhdlTokenType::Identifier,
                 };
 
                 state.add_token(token_kind, start_pos, state.get_position());
@@ -413,83 +414,95 @@ impl<'config> VhdlLexer<'config> {
 
         if let Some(ch) = state.peek() {
             let token_kind = match ch {
-                ':' => {
-                    if let Some('=') = state.peek_next_n(1) {
-                        state.advance(2);
-                        VhdlSyntaxKind::Assign
-                    }
-                    else {
-                        state.advance(1);
-                        VhdlSyntaxKind::Colon
-                    }
-                }
-                '-' => {
+                '=' => {
                     if let Some('>') = state.peek_next_n(1) {
                         state.advance(2);
-                        VhdlSyntaxKind::Arrow
+                        VhdlTokenType::Arrow
                     }
                     else {
                         state.advance(1);
-                        VhdlSyntaxKind::Minus
-                    }
-                }
-                '*' => {
-                    if let Some('*') = state.peek_next_n(1) {
-                        state.advance(2);
-                        VhdlSyntaxKind::Pow
-                    }
-                    else {
-                        state.advance(1);
-                        VhdlSyntaxKind::Star
+                        VhdlTokenType::Eq
                     }
                 }
                 '/' => {
                     if let Some('=') = state.peek_next_n(1) {
                         state.advance(2);
-                        VhdlSyntaxKind::Ne
+                        VhdlTokenType::Ne
                     }
                     else {
                         state.advance(1);
-                        VhdlSyntaxKind::Slash
-                    }
-                }
-                '=' => {
-                    if let Some('>') = state.peek_next_n(1) {
-                        state.advance(2);
-                        VhdlSyntaxKind::DoubleArrow
-                    }
-                    else {
-                        state.advance(1);
-                        VhdlSyntaxKind::Eq
+                        VhdlTokenType::Slash
                     }
                 }
                 '<' => {
                     if let Some('=') = state.peek_next_n(1) {
                         state.advance(2);
-                        VhdlSyntaxKind::Le
+                        VhdlTokenType::Le
+                    }
+                    else if let Some('>') = state.peek_next_n(1) {
+                        state.advance(2);
+                        VhdlTokenType::Ne
+                    }
+                    else if let Some('<') = state.peek_next_n(1) {
+                        state.advance(2);
+                        VhdlTokenType::ShiftLeft
                     }
                     else {
                         state.advance(1);
-                        VhdlSyntaxKind::Lt
+                        VhdlTokenType::Lt
                     }
                 }
                 '>' => {
                     if let Some('=') = state.peek_next_n(1) {
                         state.advance(2);
-                        VhdlSyntaxKind::Ge
+                        VhdlTokenType::Ge
+                    }
+                    else if let Some('>') = state.peek_next_n(1) {
+                        state.advance(2);
+                        VhdlTokenType::ShiftRight
                     }
                     else {
                         state.advance(1);
-                        VhdlSyntaxKind::Gt
+                        VhdlTokenType::Gt
                     }
                 }
                 '+' => {
                     state.advance(1);
-                    VhdlSyntaxKind::Plus
+                    VhdlTokenType::Plus
+                }
+                '-' => {
+                    if let Some('>') = state.peek_next_n(1) {
+                        state.advance(2);
+                        VhdlTokenType::Arrow
+                    }
+                    else {
+                        state.advance(1);
+                        VhdlTokenType::Minus
+                    }
+                }
+                '*' => {
+                    if let Some('*') = state.peek_next_n(1) {
+                        state.advance(2);
+                        VhdlTokenType::Pow
+                    }
+                    else {
+                        state.advance(1);
+                        VhdlTokenType::Star
+                    }
+                }
+                ':' => {
+                    if let Some('=') = state.peek_next_n(1) {
+                        state.advance(2);
+                        VhdlTokenType::Assign
+                    }
+                    else {
+                        state.advance(1);
+                        VhdlTokenType::Colon
+                    }
                 }
                 '&' => {
                     state.advance(1);
-                    VhdlSyntaxKind::Ampersand
+                    VhdlTokenType::Ampersand
                 }
                 _ => return false,
             };
@@ -508,22 +521,23 @@ impl<'config> VhdlLexer<'config> {
 
         if let Some(ch) = state.peek() {
             let token_kind = match ch {
-                '(' => VhdlSyntaxKind::LeftParen,
-                ')' => VhdlSyntaxKind::RightParen,
-                '[' => VhdlSyntaxKind::LeftBracket,
-                ']' => VhdlSyntaxKind::RightBracket,
-                ';' => VhdlSyntaxKind::Semicolon,
-                ',' => VhdlSyntaxKind::Comma,
-                '.' => VhdlSyntaxKind::Dot,
-                '|' => VhdlSyntaxKind::Pipe,
-                '#' => VhdlSyntaxKind::Hash,
-                '@' => VhdlSyntaxKind::At,
-                '?' => VhdlSyntaxKind::Question,
-                '$' => VhdlSyntaxKind::Dollar,
-                '%' => VhdlSyntaxKind::Percent,
-                '^' => VhdlSyntaxKind::Caret,
-                '~' => VhdlSyntaxKind::Tilde,
-                '\\' => VhdlSyntaxKind::Backslash,
+                '(' => VhdlTokenType::LeftParen,
+                ')' => VhdlTokenType::RightParen,
+                '[' => VhdlTokenType::LeftBracket,
+                ']' => VhdlTokenType::RightBracket,
+                ';' => VhdlTokenType::Semicolon,
+                ',' => VhdlTokenType::Comma,
+                '.' => VhdlTokenType::Dot,
+                '|' => VhdlTokenType::Pipe,
+                '#' => VhdlTokenType::Hash,
+                '@' => VhdlTokenType::At,
+                '?' => VhdlTokenType::Question,
+                '$' => VhdlTokenType::Dollar,
+                '%' => VhdlTokenType::Percent,
+                '^' => VhdlTokenType::Caret,
+                '~' => VhdlTokenType::Tilde,
+                '\\' => VhdlTokenType::Backslash,
+                '!' => VhdlTokenType::Exclamation,
                 _ => return false,
             };
 

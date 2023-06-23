@@ -1,27 +1,32 @@
-use crate::{kind::TailwindSyntaxKind, language::TailwindLanguage};
+#![doc = include_str!("readme.md")]
+pub mod token_type;
+
+use crate::{language::TailwindLanguage, lexer::token_type::TailwindTokenType};
 use oak_core::{Lexer, LexerCache, LexerState, OakError, lexer::LexOutput, source::Source};
 
+/// Lexer for the Tailwind language.
 #[derive(Clone, Debug)]
 pub struct TailwindLexer<'config> {
-    /// 语言配置
+    /// Language configuration
     _config: &'config TailwindLanguage,
 }
 
 type State<'a, S> = LexerState<'a, S, TailwindLanguage>;
 
 impl<'config> TailwindLexer<'config> {
-    /// 创建新的 Tailwind 词法分析器
+    /// Creates a new `TailwindLexer` with the given configuration.
     pub fn new(config: &'config TailwindLanguage) -> Self {
         Self { _config: config }
     }
 }
 
 impl<'config> Lexer<TailwindLanguage> for TailwindLexer<'config> {
+    /// Tokenizes the source text into a sequence of Tailwind tokens.
     fn lex<'a, S: Source + ?Sized>(&self, source: &S, _edits: &[oak_core::TextEdit], cache: &'a mut impl LexerCache<TailwindLanguage>) -> LexOutput<TailwindLanguage> {
         let mut state = LexerState::new(source);
         let result = self.run(&mut state);
         if result.is_ok() {
-            state.add_eof();
+            state.add_eof()
         }
         state.finish_with_cache(result, cache)
     }
@@ -56,7 +61,7 @@ impl<'config> TailwindLexer<'config> {
                 continue;
             }
 
-            state.advance_if_dead_lock(safe_point);
+            state.advance_if_dead_lock(safe_point)
         }
 
         Ok(())
@@ -69,7 +74,7 @@ impl<'config> TailwindLexer<'config> {
         while let Some(ch) = state.peek() {
             if ch.is_whitespace() {
                 state.advance(ch.len_utf8());
-                found = true;
+                found = true
             }
             else {
                 break;
@@ -77,7 +82,7 @@ impl<'config> TailwindLexer<'config> {
         }
 
         if found {
-            state.add_token(TailwindSyntaxKind::Whitespace, start, state.get_position());
+            state.add_token(TailwindTokenType::Whitespace, start, state.get_position())
         }
 
         found
@@ -91,10 +96,10 @@ impl<'config> TailwindLexer<'config> {
                     break;
                 }
                 if let Some(ch) = state.peek() {
-                    state.advance(ch.len_utf8());
+                    state.advance(ch.len_utf8())
                 }
             }
-            state.add_token(TailwindSyntaxKind::Comment, start, state.get_position());
+            state.add_token(TailwindTokenType::Comment, start, state.get_position());
             return true;
         }
         false
@@ -115,15 +120,15 @@ impl<'config> TailwindLexer<'config> {
                     else if ch == '\\' {
                         state.advance(1);
                         if let Some(_) = state.peek() {
-                            state.advance(1);
+                            state.advance(1)
                         }
                     }
                     else {
-                        state.advance(ch.len_utf8());
+                        state.advance(ch.len_utf8())
                     }
                 }
 
-                state.add_token(TailwindSyntaxKind::String, start, state.get_position());
+                state.add_token(TailwindTokenType::String, start, state.get_position());
                 return true;
             }
         }
@@ -139,15 +144,10 @@ impl<'config> TailwindLexer<'config> {
                 state.advance(1);
 
                 while let Some(ch) = state.peek() {
-                    if ch.is_ascii_digit() || ch == '.' {
-                        state.advance(1);
-                    }
-                    else {
-                        break;
-                    }
+                    if ch.is_ascii_digit() || ch == '.' { state.advance(1) } else { break }
                 }
 
-                state.add_token(TailwindSyntaxKind::Number, start, state.get_position());
+                state.add_token(TailwindTokenType::Number, start, state.get_position());
                 return true;
             }
         }
@@ -159,55 +159,55 @@ impl<'config> TailwindLexer<'config> {
         let start = state.get_position();
         let rest = state.rest();
 
-        // 双字符操作符
+        // Two-character operators
         if rest.starts_with("{{") {
             state.advance(2);
-            state.add_token(TailwindSyntaxKind::DoubleLeftBrace, start, state.get_position());
+            state.add_token(TailwindTokenType::DoubleLeftBrace, start, state.get_position());
             return true;
         }
         if rest.starts_with("}}") {
             state.advance(2);
-            state.add_token(TailwindSyntaxKind::DoubleRightBrace, start, state.get_position());
+            state.add_token(TailwindTokenType::DoubleRightBrace, start, state.get_position());
             return true;
         }
         if rest.starts_with("{%") {
             state.advance(2);
-            state.add_token(TailwindSyntaxKind::LeftBracePercent, start, state.get_position());
+            state.add_token(TailwindTokenType::LeftBracePercent, start, state.get_position());
             return true;
         }
         if rest.starts_with("%}") {
             state.advance(2);
-            state.add_token(TailwindSyntaxKind::PercentRightBrace, start, state.get_position());
+            state.add_token(TailwindTokenType::PercentRightBrace, start, state.get_position());
             return true;
         }
 
-        // 单字符操作符
+        // Single-character operators
         if let Some(ch) = state.peek() {
             let kind = match ch {
-                '{' => TailwindSyntaxKind::LeftBrace,
-                '}' => TailwindSyntaxKind::RightBrace,
-                '(' => TailwindSyntaxKind::LeftParen,
-                ')' => TailwindSyntaxKind::RightParen,
-                '[' => TailwindSyntaxKind::LeftBracket,
-                ']' => TailwindSyntaxKind::RightBracket,
-                ',' => TailwindSyntaxKind::Comma,
-                '.' => TailwindSyntaxKind::Dot,
-                ':' => TailwindSyntaxKind::Colon,
-                ';' => TailwindSyntaxKind::Semicolon,
-                '|' => TailwindSyntaxKind::Pipe,
-                '=' => TailwindSyntaxKind::Eq,
-                '+' => TailwindSyntaxKind::Plus,
-                '-' => TailwindSyntaxKind::Minus,
-                '*' => TailwindSyntaxKind::Star,
-                '/' => TailwindSyntaxKind::Slash,
-                '%' => TailwindSyntaxKind::Percent,
-                '!' => TailwindSyntaxKind::Bang,
-                '?' => TailwindSyntaxKind::Question,
-                '<' => TailwindSyntaxKind::Lt,
-                '>' => TailwindSyntaxKind::Gt,
-                '&' => TailwindSyntaxKind::Amp,
-                '^' => TailwindSyntaxKind::Caret,
-                '~' => TailwindSyntaxKind::Tilde,
+                '{' => TailwindTokenType::LeftBrace,
+                '}' => TailwindTokenType::RightBrace,
+                '(' => TailwindTokenType::LeftParen,
+                ')' => TailwindTokenType::RightParen,
+                '[' => TailwindTokenType::LeftBracket,
+                ']' => TailwindTokenType::RightBracket,
+                ',' => TailwindTokenType::Comma,
+                '.' => TailwindTokenType::Dot,
+                ':' => TailwindTokenType::Colon,
+                ';' => TailwindTokenType::Semicolon,
+                '|' => TailwindTokenType::Pipe,
+                '=' => TailwindTokenType::Eq,
+                '+' => TailwindTokenType::Plus,
+                '-' => TailwindTokenType::Minus,
+                '*' => TailwindTokenType::Star,
+                '/' => TailwindTokenType::Slash,
+                '%' => TailwindTokenType::Percent,
+                '!' => TailwindTokenType::Bang,
+                '?' => TailwindTokenType::Question,
+                '<' => TailwindTokenType::Lt,
+                '>' => TailwindTokenType::Gt,
+                '&' => TailwindTokenType::Amp,
+                '^' => TailwindTokenType::Caret,
+                '~' => TailwindTokenType::Tilde,
                 _ => return false,
             };
 
@@ -238,10 +238,10 @@ impl<'config> TailwindLexer<'config> {
                 let end = state.get_position();
                 let text = state.get_text_in((start..end).into());
 
-                // 检查是否为布尔关键字
+                // Check if it's a boolean keyword
                 let kind = match text.as_ref() {
-                    "true" | "false" => TailwindSyntaxKind::Boolean,
-                    _ => TailwindSyntaxKind::Identifier,
+                    "true" | "false" => TailwindTokenType::Boolean,
+                    _ => TailwindTokenType::Identifier,
                 };
                 state.add_token(kind, start, end);
                 return true;

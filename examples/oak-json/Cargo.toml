@@ -1,16 +1,16 @@
 [package]
 name = "oak-json"
-description = "High-performance incremental JSON parser for the oak ecosystem with flexible configuration, optimized for data interchange and configuration files."
-categories = ["parsing"]
-keywords = ["parser", "json", "streaming", "validation"]
-documentation = "https://docs.rs/oak-json"
-readme = "readme.md"
 version.workspace = true
 authors.workspace = true
-homepage.workspace = true
-repository.workspace = true
-license.workspace = true
+description = "High-performance incremental JSON parser for the oak ecosystem with flexible configuration, optimized for data interchange and configuration files."
 edition.workspace = true
+license.workspace = true
+readme = "readme.md"
+homepage.workspace = true
+repository = "https://github.com/ygg-lang/oaks/tree/master/examples/oak-json"
+documentation = "https://docs.rs/oak-json"
+categories = ["parsing"]
+keywords = ["parser", "json", "streaming", "validation"]
 
 [dependencies]
 oak-core = { workspace = true, features = ["serde"] }
@@ -24,7 +24,7 @@ oak-vfs = { workspace = true, optional = true }
 oak-navigation = { workspace = true, optional = true }
 oak-mcp = { workspace = true, optional = true }
 dashmap = { workspace = true, optional = true }
-serde = { workspace = true }
+serde = { workspace = true, optional = true }
 futures = { workspace = true, optional = true }
 tokio = { workspace = true, optional = true }
 
@@ -33,12 +33,12 @@ oak-testing = { workspace = true }
 serde_json = { workspace = true }
 
 [features]
-default = []
-lsp = ["dep:oak-lsp", "dep:oak-hover", "dep:oak-vfs", "dep:oak-navigation", "dep:oak-mcp", "dep:dashmap", "dep:futures"]
-mcp-stdio = ["lsp", "oak-mcp/io-std"]
-highlight = ["dep:oak-highlight"]
-pretty-print = ["dep:oak-pretty-print"]
-
+default = ["serde"]
+serde = ["dep:serde", "oak-core/serde"]
+oak-highlight = ["dep:oak-highlight"]
+oak-pretty-print = ["dep:oak-pretty-print"]
+lsp = ["dep:oak-lsp", "dep:oak-hover", "dep:oak-vfs", "oak-highlight", "oak-pretty-print", "dep:futures"]
+mcp = ["lsp", "oak-mcp/io-std", "dep:tokio"]
 
 [package.metadata.docs.rs]
 all-features = true

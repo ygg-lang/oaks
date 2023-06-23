@@ -1,8 +1,11 @@
-use crate::{kind::TclSyntaxKind, language::TclLanguage};
+#![doc = include_str!("readme.md")]
+use oak_core::Source;
+pub mod token_type;
+
+use crate::{language::TclLanguage, lexer::token_type::TclTokenType};
 use oak_core::{
     Lexer, LexerState, OakError,
     lexer::{CommentConfig, LexOutput, LexerCache, StringConfig, WhitespaceConfig},
-    source::Source,
 };
 
 type State<'s, S> = LexerState<'s, S, TclLanguage>;
@@ -84,7 +87,24 @@ impl<'config> Lexer<TclLanguage> for TclLexer<'config> {
 
 impl<'config> TclLexer<'config> {
     fn skip_whitespace<'s, S: Source + ?Sized>(&self, state: &mut State<'s, S>) -> bool {
-        TCL_WHITESPACE.scan(state, TclSyntaxKind::Whitespace)
+        let start = state.get_position();
+
+        while let Some(ch) = state.current() {
+            if ch == ' ' || ch == '\t' || ch == '\u{00A0}' {
+                state.advance(ch.len_utf8());
+            }
+            else {
+                break;
+            }
+        }
+
+        if state.get_position() > start {
+            state.add_token(TclTokenType::Whitespace, start, state.get_position());
+            true
+        }
+        else {
+            false
+        }
     }
 
     fn lex_newline<'s, S: Source + ?Sized>(&self, state: &mut State<'s, S>) -> bool {
@@ -92,7 +112,7 @@ impl<'config> TclLexer<'config> {
             if ch == '\n' {
                 let start = state.get_position();
                 state.advance(1);
-                state.add_token(TclSyntaxKind::Newline, start, state.get_position());
+                state.add_token(TclTokenType::Newline, start, state.get_position());
                 return true;
             }
             else if ch == '\r' {
@@ -101,7 +121,7 @@ impl<'config> TclLexer<'config> {
                 if state.current() == Some('\n') {
                     state.advance(1);
                 }
-                state.add_token(TclSyntaxKind::Newline, start, state.get_position());
+                state.add_token(TclTokenType::Newline, start, state.get_position());
                 return true;
             }
         }
@@ -109,11 +129,11 @@ impl<'config> TclLexer<'config> {
     }
 
     fn skip_comment<'s, S: Source + ?Sized>(&self, state: &mut State<'s, S>) -> bool {
-        TCL_COMMENT.scan(state, TclSyntaxKind::Comment, TclSyntaxKind::Comment)
+        TCL_COMMENT.scan(state, TclTokenType::Comment, TclTokenType::Comment)
     }
 
     fn lex_string_literal<'s, S: Source + ?Sized>(&self, state: &mut State<'s, S>) -> bool {
-        TCL_STRING.scan(state, TclSyntaxKind::StringLiteral)
+        TCL_STRING.scan(state, TclTokenType::StringLiteral)
     }
 
     fn lex_brace_string<'s, S: Source + ?Sized>(&self, state: &mut State<'s, S>) -> bool {
@@ -140,7 +160,7 @@ impl<'config> TclLexer<'config> {
             state.advance(ch.len_utf8());
         }
 
-        state.add_token(TclSyntaxKind::StringLiteral, start, state.get_position());
+        state.add_token(TclTokenType::StringLiteral, start, state.get_position());
         true
     }
 
@@ -205,7 +225,7 @@ impl<'config> TclLexer<'config> {
             }
         }
 
-        state.add_token(TclSyntaxKind::Number, start, state.get_position());
+        state.add_token(TclTokenType::Number, start, state.get_position());
         true
     }
 
@@ -233,22 +253,22 @@ impl<'config> TclLexer<'config> {
         let end = state.get_position();
         let text = state.source().get_text_in(oak_core::Range { start, end });
         let kind = match text.as_ref() {
-            "if" => TclSyntaxKind::If,
-            "else" => TclSyntaxKind::Else,
-            "elseif" => TclSyntaxKind::ElseIf,
-            "for" => TclSyntaxKind::For,
-            "while" => TclSyntaxKind::While,
-            "foreach" => TclSyntaxKind::ForEach,
-            "proc" => TclSyntaxKind::Proc,
-            "return" => TclSyntaxKind::Return,
-            "break" => TclSyntaxKind::Break,
-            "continue" => TclSyntaxKind::Continue,
-            "set" => TclSyntaxKind::Set,
-            "unset" => TclSyntaxKind::Unset,
-            "global" => TclSyntaxKind::Global,
-            "upvar" => TclSyntaxKind::Upvar,
-            "variable" => TclSyntaxKind::Variable,
-            _ => TclSyntaxKind::Identifier,
+            "if" => TclTokenType::If,
+            "else" => TclTokenType::Else,
+            "elseif" => TclTokenType::ElseIf,
+            "for" => TclTokenType::For,
+            "while" => TclTokenType::While,
+            "foreach" => TclTokenType::ForEach,
+            "proc" => TclTokenType::Proc,
+            "return" => TclTokenType::Return,
+            "break" => TclTokenType::Break,
+            "continue" => TclTokenType::Continue,
+            "set" => TclTokenType::Set,
+            "unset" => TclTokenType::Unset,
+            "global" => TclTokenType::Global,
+            "upvar" => TclTokenType::Upvar,
+            "variable" => TclTokenType::Variable,
+            _ => TclTokenType::Identifier,
         };
 
         state.add_token(kind, start, state.get_position());
@@ -259,8 +279,7 @@ impl<'config> TclLexer<'config> {
         let start = state.get_position();
 
         // 多字符操作符
-        let patterns: &[(&str, TclSyntaxKind)] =
-            &[("==", TclSyntaxKind::Equal), ("!=", TclSyntaxKind::NotEqual), ("<=", TclSyntaxKind::LessEqual), (">=", TclSyntaxKind::GreaterEqual), ("&&", TclSyntaxKind::AmpersandAmpersand), ("||", TclSyntaxKind::PipePipe)];
+        let patterns: &[(&str, TclTokenType)] = &[("==", TclTokenType::Equal), ("!=", TclTokenType::NotEqual), ("<=", TclTokenType::LessEqual), (">=", TclTokenType::GreaterEqual), ("&&", TclTokenType::AmpersandAmpersand), ("||", TclTokenType::PipePipe)];
 
         for (pat, kind) in patterns {
             let mut matches = true;
@@ -281,17 +300,17 @@ impl<'config> TclLexer<'config> {
         // 单字符操作符
         if let Some(ch) = state.current() {
             let kind = match ch {
-                '+' => Some(TclSyntaxKind::Plus),
-                '-' => Some(TclSyntaxKind::Minus),
-                '*' => Some(TclSyntaxKind::Star),
-                '/' => Some(TclSyntaxKind::Slash),
-                '%' => Some(TclSyntaxKind::Percent),
-                '<' => Some(TclSyntaxKind::Less),
-                '>' => Some(TclSyntaxKind::Greater),
-                '!' => Some(TclSyntaxKind::Exclamation),
-                '&' => Some(TclSyntaxKind::Ampersand),
-                '|' => Some(TclSyntaxKind::Pipe),
-                '=' => Some(TclSyntaxKind::Equal),
+                '+' => Some(TclTokenType::Plus),
+                '-' => Some(TclTokenType::Minus),
+                '*' => Some(TclTokenType::Star),
+                '/' => Some(TclTokenType::Slash),
+                '%' => Some(TclTokenType::Percent),
+                '<' => Some(TclTokenType::Less),
+                '>' => Some(TclTokenType::Greater),
+                '!' => Some(TclTokenType::Exclamation),
+                '&' => Some(TclTokenType::Ampersand),
+                '|' => Some(TclTokenType::Pipe),
+                '=' => Some(TclTokenType::Equal),
                 _ => None,
             };
 
@@ -309,15 +328,15 @@ impl<'config> TclLexer<'config> {
 
         if let Some(ch) = state.current() {
             let kind = match ch {
-                '(' => TclSyntaxKind::LeftParen,
-                ')' => TclSyntaxKind::RightParen,
-                '[' => TclSyntaxKind::LeftBracket,
-                ']' => TclSyntaxKind::RightBracket,
-                '{' => TclSyntaxKind::LeftBrace,
-                '}' => TclSyntaxKind::RightBrace,
-                ';' => TclSyntaxKind::Semicolon,
-                ',' => TclSyntaxKind::Comma,
-                '$' => TclSyntaxKind::Dollar,
+                '(' => TclTokenType::LeftParen,
+                ')' => TclTokenType::RightParen,
+                '[' => TclTokenType::LeftBracket,
+                ']' => TclTokenType::RightBracket,
+                '{' => TclTokenType::LeftBrace,
+                '}' => TclTokenType::RightBrace,
+                ';' => TclTokenType::Semicolon,
+                ',' => TclTokenType::Comma,
+                '$' => TclTokenType::Dollar,
                 _ => return false,
             };
 

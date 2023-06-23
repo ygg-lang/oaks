@@ -75,7 +75,7 @@ pub fn derive_as_document(input: TokenStream) -> TokenStream {
                                 #name::#variant_name { #ident, .. } => {
                                     let _self = #ident;
                                     #expr
-                                }
+                                },
                             }
                         }
                         else {
@@ -83,7 +83,7 @@ pub fn derive_as_document(input: TokenStream) -> TokenStream {
                                 #name::#variant_name(_v) => {
                                     let _self = _v;
                                     #expr
-                                }
+                                },
                             }
                         }
                     }

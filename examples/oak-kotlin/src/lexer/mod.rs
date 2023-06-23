@@ -1,8 +1,10 @@
-use crate::{kind::KotlinSyntaxKind, language::KotlinLanguage};
+#![doc = include_str!("readme.md")]
+pub mod token_type;
+
+use crate::{language::KotlinLanguage, lexer::token_type::KotlinTokenType};
 use oak_core::{
-    Lexer, LexerState, OakError, TextEdit,
+    Lexer, LexerState, OakError, Source, TextEdit,
     lexer::{LexOutput, LexerCache},
-    source::Source,
 };
 
 type State<'a, S> = LexerState<'a, S, KotlinLanguage>;
@@ -38,16 +40,11 @@ impl<'config> KotlinLexer<'config> {
         let start_pos = state.get_position();
 
         while let Some(ch) = state.peek() {
-            if ch == ' ' || ch == '\t' {
-                state.advance(ch.len_utf8());
-            }
-            else {
-                break;
-            }
+            if ch == ' ' || ch == '\t' { state.advance(ch.len_utf8()) } else { break }
         }
 
         if state.get_position() > start_pos {
-            state.add_token(KotlinSyntaxKind::Whitespace, start_pos, state.get_position());
+            state.add_token(KotlinTokenType::Whitespace, start_pos, state.get_position());
             true
         }
         else {
@@ -61,15 +58,15 @@ impl<'config> KotlinLexer<'config> {
 
         if let Some('\n') = state.peek() {
             state.advance(1);
-            state.add_token(KotlinSyntaxKind::Newline, start_pos, state.get_position());
+            state.add_token(KotlinTokenType::Newline, start_pos, state.get_position());
             true
         }
         else if let Some('\r') = state.peek() {
             state.advance(1);
             if let Some('\n') = state.peek() {
-                state.advance(1);
+                state.advance(1)
             }
-            state.add_token(KotlinSyntaxKind::Newline, start_pos, state.get_position());
+            state.add_token(KotlinTokenType::Newline, start_pos, state.get_position());
             true
         }
         else {
@@ -92,7 +89,7 @@ impl<'config> KotlinLexer<'config> {
                     }
                     state.advance(ch.len_utf8());
                 }
-                state.add_token(KotlinSyntaxKind::Comment, start_pos, state.get_position());
+                state.add_token(KotlinTokenType::Comment, start_pos, state.get_position());
                 true
             }
             else if let Some('*') = state.peek() {
@@ -121,7 +118,7 @@ impl<'config> KotlinLexer<'config> {
                         break;
                     }
                 }
-                state.add_token(KotlinSyntaxKind::Comment, start_pos, state.get_position());
+                state.add_token(KotlinTokenType::Comment, start_pos, state.get_position());
                 true
             }
             else {
@@ -166,12 +163,12 @@ impl<'config> KotlinLexer<'config> {
                             break;
                         }
                     }
-                    state.add_token(KotlinSyntaxKind::StringLiteral, start_pos, state.get_position());
+                    state.add_token(KotlinTokenType::StringLiteral, start_pos, state.get_position());
                     return true;
                 }
                 else {
                     // 空字符串
-                    state.add_token(KotlinSyntaxKind::StringLiteral, start_pos, state.get_position());
+                    state.add_token(KotlinTokenType::StringLiteral, start_pos, state.get_position());
                     return true;
                 }
             }
@@ -185,17 +182,17 @@ impl<'config> KotlinLexer<'config> {
                 else if ch == '\\' {
                     state.advance(1);
                     if let Some(escaped) = state.peek() {
-                        state.advance(escaped.len_utf8());
+                        state.advance(escaped.len_utf8())
                     }
                 }
                 else if ch == '\n' || ch == '\r' {
                     break; // 字符串不能跨行
                 }
                 else {
-                    state.advance(ch.len_utf8());
+                    state.advance(ch.len_utf8())
                 }
             }
-            state.add_token(KotlinSyntaxKind::StringLiteral, start_pos, state.get_position());
+            state.add_token(KotlinTokenType::StringLiteral, start_pos, state.get_position());
             true
         }
         else if let Some('\'') = state.peek() {
@@ -219,7 +216,7 @@ impl<'config> KotlinLexer<'config> {
                     state.advance(ch.len_utf8());
                 }
             }
-            state.add_token(KotlinSyntaxKind::CharLiteral, start_pos, state.get_position());
+            state.add_token(KotlinTokenType::CharLiteral, start_pos, state.get_position());
             true
         }
         else {
@@ -277,7 +274,7 @@ impl<'config> KotlinLexer<'config> {
                     }
                 }
 
-                state.add_token(KotlinSyntaxKind::NumberLiteral, start_pos, state.get_position());
+                state.add_token(KotlinTokenType::NumberLiteral, start_pos, state.get_position());
                 return true;
             }
         }
@@ -302,59 +299,59 @@ impl<'config> KotlinLexer<'config> {
 
                 let text = state.get_text_in((start_pos..state.get_position()).into());
                 let kind = match text.as_ref() {
-                    "abstract" => KotlinSyntaxKind::Abstract,
-                    "annotation" => KotlinSyntaxKind::Annotation,
-                    "as" => KotlinSyntaxKind::As,
-                    "break" => KotlinSyntaxKind::Break,
-                    "catch" => KotlinSyntaxKind::Catch,
-                    "class" => KotlinSyntaxKind::Class,
-                    "companion" => KotlinSyntaxKind::Companion,
-                    "continue" => KotlinSyntaxKind::Continue,
-                    "crossinline" => KotlinSyntaxKind::Crossinline,
-                    "data" => KotlinSyntaxKind::Data,
-                    "else" => KotlinSyntaxKind::Else,
-                    "enum" => KotlinSyntaxKind::Enum,
-                    "external" => KotlinSyntaxKind::External,
-                    "false" => KotlinSyntaxKind::False,
-                    "final" => KotlinSyntaxKind::Final,
-                    "finally" => KotlinSyntaxKind::Finally,
-                    "for" => KotlinSyntaxKind::For,
-                    "fun" => KotlinSyntaxKind::Fun,
-                    "if" => KotlinSyntaxKind::If,
-                    "import" => KotlinSyntaxKind::Import,
-                    "in" => KotlinSyntaxKind::In,
-                    "infix" => KotlinSyntaxKind::Infix,
-                    "inline" => KotlinSyntaxKind::Inline,
-                    "interface" => KotlinSyntaxKind::Interface,
-                    "internal" => KotlinSyntaxKind::Internal,
-                    "is" => KotlinSyntaxKind::Is,
-                    "noinline" => KotlinSyntaxKind::Noinline,
-                    "null" => KotlinSyntaxKind::Null,
-                    "object" => KotlinSyntaxKind::Object,
-                    "open" => KotlinSyntaxKind::Open,
-                    "operator" => KotlinSyntaxKind::Operator,
-                    "out" => KotlinSyntaxKind::Out,
-                    "override" => KotlinSyntaxKind::Override,
-                    "package" => KotlinSyntaxKind::Package,
-                    "private" => KotlinSyntaxKind::Private,
-                    "protected" => KotlinSyntaxKind::Protected,
-                    "public" => KotlinSyntaxKind::Public,
-                    "reified" => KotlinSyntaxKind::Reified,
-                    "return" => KotlinSyntaxKind::Return,
-                    "sealed" => KotlinSyntaxKind::Sealed,
-                    "super" => KotlinSyntaxKind::Super,
-                    "suspend" => KotlinSyntaxKind::Suspend,
-                    "tailrec" => KotlinSyntaxKind::Tailrec,
-                    "this" => KotlinSyntaxKind::This,
-                    "throw" => KotlinSyntaxKind::Throw,
-                    "true" => KotlinSyntaxKind::True,
-                    "try" => KotlinSyntaxKind::Try,
-                    "val" => KotlinSyntaxKind::Val,
-                    "var" => KotlinSyntaxKind::Var,
-                    "vararg" => KotlinSyntaxKind::Vararg,
-                    "when" => KotlinSyntaxKind::When,
-                    "while" => KotlinSyntaxKind::While,
-                    _ => KotlinSyntaxKind::Identifier,
+                    "abstract" => KotlinTokenType::Abstract,
+                    "annotation" => KotlinTokenType::Annotation,
+                    "as" => KotlinTokenType::As,
+                    "break" => KotlinTokenType::Break,
+                    "catch" => KotlinTokenType::Catch,
+                    "class" => KotlinTokenType::Class,
+                    "companion" => KotlinTokenType::Companion,
+                    "continue" => KotlinTokenType::Continue,
+                    "crossinline" => KotlinTokenType::Crossinline,
+                    "data" => KotlinTokenType::Data,
+                    "else" => KotlinTokenType::Else,
+                    "enum" => KotlinTokenType::Enum,
+                    "external" => KotlinTokenType::External,
+                    "false" => KotlinTokenType::False,
+                    "final" => KotlinTokenType::Final,
+                    "finally" => KotlinTokenType::Finally,
+                    "for" => KotlinTokenType::For,
+                    "fun" => KotlinTokenType::Fun,
+                    "if" => KotlinTokenType::If,
+                    "import" => KotlinTokenType::Import,
+                    "in" => KotlinTokenType::In,
+                    "infix" => KotlinTokenType::Infix,
+                    "inline" => KotlinTokenType::Inline,
+                    "interface" => KotlinTokenType::Interface,
+                    "internal" => KotlinTokenType::Internal,
+                    "is" => KotlinTokenType::Is,
+                    "noinline" => KotlinTokenType::Noinline,
+                    "null" => KotlinTokenType::Null,
+                    "object" => KotlinTokenType::Object,
+                    "open" => KotlinTokenType::Open,
+                    "operator" => KotlinTokenType::Operator,
+                    "out" => KotlinTokenType::Out,
+                    "override" => KotlinTokenType::Override,
+                    "package" => KotlinTokenType::Package,
+                    "private" => KotlinTokenType::Private,
+                    "protected" => KotlinTokenType::Protected,
+                    "public" => KotlinTokenType::Public,
+                    "reified" => KotlinTokenType::Reified,
+                    "return" => KotlinTokenType::Return,
+                    "sealed" => KotlinTokenType::Sealed,
+                    "super" => KotlinTokenType::Super,
+                    "suspend" => KotlinTokenType::Suspend,
+                    "tailrec" => KotlinTokenType::Tailrec,
+                    "this" => KotlinTokenType::This,
+                    "throw" => KotlinTokenType::Throw,
+                    "true" => KotlinTokenType::True,
+                    "try" => KotlinTokenType::Try,
+                    "val" => KotlinTokenType::Val,
+                    "var" => KotlinTokenType::Var,
+                    "vararg" => KotlinTokenType::Vararg,
+                    "when" => KotlinTokenType::When,
+                    "while" => KotlinTokenType::While,
+                    _ => KotlinTokenType::Identifier,
                 };
 
                 state.add_token(kind, start_pos, state.get_position());
@@ -377,119 +374,119 @@ impl<'config> KotlinLexer<'config> {
             let kind = match ch {
                 '(' => {
                     state.advance(1);
-                    KotlinSyntaxKind::LParen
+                    KotlinTokenType::LParen
                 }
                 ')' => {
                     state.advance(1);
-                    KotlinSyntaxKind::RParen
+                    KotlinTokenType::RParen
                 }
                 '{' => {
                     state.advance(1);
-                    KotlinSyntaxKind::LBrace
+                    KotlinTokenType::LBrace
                 }
                 '}' => {
                     state.advance(1);
-                    KotlinSyntaxKind::RBrace
+                    KotlinTokenType::RBrace
                 }
                 '[' => {
                     state.advance(1);
-                    KotlinSyntaxKind::LBracket
+                    KotlinTokenType::LBracket
                 }
                 ']' => {
                     state.advance(1);
-                    KotlinSyntaxKind::RBracket
+                    KotlinTokenType::RBracket
                 }
                 ',' => {
                     state.advance(1);
-                    KotlinSyntaxKind::Comma
+                    KotlinTokenType::Comma
                 }
                 ';' => {
                     state.advance(1);
-                    KotlinSyntaxKind::Semi
+                    KotlinTokenType::Semi
                 }
                 ':' => {
                     state.advance(1);
-                    if state.eat(':') { KotlinSyntaxKind::DoubleColon } else { KotlinSyntaxKind::Colon }
+                    if state.eat(':') { KotlinTokenType::DoubleColon } else { KotlinTokenType::Colon }
                 }
                 '.' => {
                     state.advance(1);
-                    if state.eat('.') { KotlinSyntaxKind::Range } else { KotlinSyntaxKind::Dot }
+                    if state.eat('.') { KotlinTokenType::Range } else { KotlinTokenType::Dot }
                 }
                 '?' => {
                     state.advance(1);
-                    KotlinSyntaxKind::Question
+                    KotlinTokenType::Question
                 }
                 '!' => {
                     state.advance(1);
                     if state.eat('!') {
-                        KotlinSyntaxKind::ExclamationExclamation
+                        KotlinTokenType::ExclamationExclamation
                     }
                     else if state.eat('=') {
-                        KotlinSyntaxKind::NotEq
+                        KotlinTokenType::NotEq
                     }
                     else {
-                        KotlinSyntaxKind::Exclamation
+                        KotlinTokenType::Exclamation
                     }
                 }
                 '+' => {
                     state.advance(1);
-                    if state.eat('=') { KotlinSyntaxKind::PlusAssign } else { KotlinSyntaxKind::Plus }
+                    if state.eat('=') { KotlinTokenType::PlusAssign } else { KotlinTokenType::Plus }
                 }
                 '-' => {
                     state.advance(1);
                     if state.eat('=') {
-                        KotlinSyntaxKind::MinusAssign
+                        KotlinTokenType::MinusAssign
                     }
                     else if state.eat('>') {
-                        KotlinSyntaxKind::Arrow
+                        KotlinTokenType::Arrow
                     }
                     else {
-                        KotlinSyntaxKind::Minus
+                        KotlinTokenType::Minus
                     }
                 }
                 '*' => {
                     state.advance(1);
-                    if state.eat('=') { KotlinSyntaxKind::StarAssign } else { KotlinSyntaxKind::Star }
+                    if state.eat('=') { KotlinTokenType::StarAssign } else { KotlinTokenType::Star }
                 }
                 '/' => {
                     state.advance(1);
-                    if state.eat('=') { KotlinSyntaxKind::SlashAssign } else { KotlinSyntaxKind::Slash }
+                    if state.eat('=') { KotlinTokenType::SlashAssign } else { KotlinTokenType::Slash }
                 }
                 '%' => {
                     state.advance(1);
-                    if state.eat('=') { KotlinSyntaxKind::PercentAssign } else { KotlinSyntaxKind::Percent }
+                    if state.eat('=') { KotlinTokenType::PercentAssign } else { KotlinTokenType::Percent }
                 }
                 '=' => {
                     state.advance(1);
-                    if state.eat('=') { KotlinSyntaxKind::EqEq } else { KotlinSyntaxKind::Assign }
+                    if state.eat('=') { KotlinTokenType::EqEq } else { KotlinTokenType::Assign }
                 }
                 '<' => {
                     state.advance(1);
-                    if state.eat('=') { KotlinSyntaxKind::LtEq } else { KotlinSyntaxKind::Less }
+                    if state.eat('=') { KotlinTokenType::LtEq } else { KotlinTokenType::Less }
                 }
                 '>' => {
                     state.advance(1);
-                    if state.eat('=') { KotlinSyntaxKind::GtEq } else { KotlinSyntaxKind::Greater }
+                    if state.eat('=') { KotlinTokenType::GtEq } else { KotlinTokenType::Greater }
                 }
                 '&' => {
                     state.advance(1);
-                    if state.eat('&') { KotlinSyntaxKind::AndAnd } else { KotlinSyntaxKind::Ampersand }
+                    if state.eat('&') { KotlinTokenType::AndAnd } else { KotlinTokenType::Ampersand }
                 }
                 '|' => {
                     state.advance(1);
-                    if state.eat('|') { KotlinSyntaxKind::OrOr } else { KotlinSyntaxKind::Pipe }
+                    if state.eat('|') { KotlinTokenType::OrOr } else { KotlinTokenType::Pipe }
                 }
                 '^' => {
                     state.advance(1);
-                    KotlinSyntaxKind::Caret
+                    KotlinTokenType::Caret
                 }
                 '~' => {
                     state.advance(1);
-                    KotlinSyntaxKind::Tilde
+                    KotlinTokenType::Tilde
                 }
                 '@' => {
                     state.advance(1);
-                    KotlinSyntaxKind::At
+                    KotlinTokenType::At
                 }
                 _ => return false,
             };
@@ -508,7 +505,7 @@ impl<'config> Lexer<KotlinLanguage> for KotlinLexer<'config> {
         let mut state = State::new(text);
         let result = self.run(&mut state);
         if result.is_ok() {
-            state.add_eof();
+            state.add_eof()
         }
         state.finish_with_cache(result, cache)
     }
@@ -551,7 +548,7 @@ impl<'config> KotlinLexer<'config> {
             let start_pos = state.get_position();
             if let Some(ch) = state.peek() {
                 state.advance(ch.len_utf8());
-                state.add_token(KotlinSyntaxKind::Error, start_pos, state.get_position());
+                state.add_token(KotlinTokenType::Error, start_pos, state.get_position());
             }
 
             state.advance_if_dead_lock(safe_point);

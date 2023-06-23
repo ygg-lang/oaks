@@ -1,8 +1,11 @@
+#![doc = include_str!("readme.md")]
 use crate::NimLanguage;
 use oak_core::Builder;
+#[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
 
-#[derive(Clone, Debug, PartialEq, Eq, Hash, Serialize, Deserialize)]
+#[derive(Clone, Debug, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct NimRoot {
     pub items: Vec<String>,
 }

@@ -1,3 +1,4 @@
+#![doc = include_str!("readme.md")]
 pub mod token_type;
 use crate::language::CsvLanguage;
 use oak_core::{Lexer, LexerState, OakError, lexer::LexOutput, source::Source};
@@ -17,7 +18,7 @@ impl<'config> Lexer<CsvLanguage> for CsvLexer<'config> {
         let mut state = State::new(text);
         let result = self.run(&mut state);
         if result.is_ok() {
-            state.add_eof();
+            state.add_eof()
         }
         state.finish_with_cache(result, cache)
     }
@@ -46,7 +47,7 @@ impl<'config> CsvLexer<'config> {
         while let Some(ch) = state.peek() {
             if ch == ' ' || ch == '\t' {
                 state.advance(ch.len_utf8());
-                found_whitespace = true;
+                found_whitespace = true
             }
             else {
                 break;
@@ -71,7 +72,7 @@ impl<'config> CsvLexer<'config> {
                 state.advance(1);
                 // 检查是否是 CRLF
                 if state.peek() == Some('\n') {
-                    state.advance(1);
+                    state.advance(1)
                 }
                 state.add_token(CsvTokenType::Newline, start_pos, state.get_position());
                 true
@@ -110,7 +111,7 @@ impl<'config> CsvLexer<'config> {
                         }
                     }
                     else {
-                        state.advance(ch.len_utf8());
+                        state.advance(ch.len_utf8())
                     }
                 }
                 state.add_token(CsvTokenType::Field, start_pos, state.get_position());
@@ -136,7 +137,7 @@ impl<'config> CsvLexer<'config> {
             }
             else {
                 state.advance(ch.len_utf8());
-                found_char = true;
+                found_char = true
             }
         }
 
@@ -195,7 +196,7 @@ impl<'config> CsvLexer<'config> {
             let start_pos = state.get_position();
             if let Some(ch) = state.peek() {
                 state.advance(ch.len_utf8());
-                state.add_token(CsvTokenType::Error, start_pos, state.get_position());
+                state.add_token(CsvTokenType::Error, start_pos, state.get_position())
             }
         }
         Ok(())

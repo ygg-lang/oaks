@@ -1,3 +1,4 @@
+#![doc = include_str!("readme.md")]
 pub mod token_type;
 
 pub use token_type::AdaTokenType;
@@ -24,7 +25,7 @@ impl<'config> Lexer<AdaLanguage> for AdaLexer<'config> {
         let mut state: State<'_, S> = LexerState::new_with_cache(source, 0, cache);
         let result = self.run(&mut state);
         if result.is_ok() {
-            state.add_eof();
+            state.add_eof()
         }
         state.finish_with_cache(result, cache)
     }
@@ -75,7 +76,7 @@ impl<'config> AdaLexer<'config> {
             // 如果没有匹配任何模式，跳过当前字符并生成 Error token
             if let Some(ch) = state.peek() {
                 state.advance(ch.len_utf8());
-                state.add_token(AdaTokenType::Error, safe_point, state.get_position());
+                state.add_token(AdaTokenType::Error, safe_point, state.get_position())
             }
         }
 
@@ -96,7 +97,7 @@ impl<'config> AdaLexer<'config> {
                 if ch == '\n' || ch == '\r' {
                     break;
                 }
-                state.advance(ch.len_utf8());
+                state.advance(ch.len_utf8())
             }
             state.add_token(AdaTokenType::Comment, start, state.get_position());
             return true;
@@ -140,7 +141,7 @@ impl<'config> AdaLexer<'config> {
         // try parse 'x' etc.; if fails, revert
         state.advance(1); // opening '
         if let Some(c) = state.peek() {
-            state.advance(c.len_utf8());
+            state.advance(c.len_utf8())
         }
         else {
             state.set_position(start);
@@ -164,24 +165,14 @@ impl<'config> AdaLexer<'config> {
                 // consume digits
                 state.advance(ch.len_utf8());
                 while let Some(ch) = state.peek() {
-                    if ch.is_ascii_digit() || ch == '_' {
-                        state.advance(ch.len_utf8());
-                    }
-                    else {
-                        break;
-                    }
+                    if ch.is_ascii_digit() || ch == '_' { state.advance(ch.len_utf8()) } else { break }
                 }
 
                 // check for decimal point
                 if state.peek() == Some('.') {
                     state.advance(1);
                     while let Some(ch) = state.peek() {
-                        if ch.is_ascii_digit() || ch == '_' {
-                            state.advance(ch.len_utf8());
-                        }
-                        else {
-                            break;
-                        }
+                        if ch.is_ascii_digit() || ch == '_' { state.advance(ch.len_utf8()) } else { break }
                     }
                 }
 
@@ -191,16 +182,11 @@ impl<'config> AdaLexer<'config> {
                         state.advance(1);
                         if let Some(sign) = state.peek() {
                             if sign == '+' || sign == '-' {
-                                state.advance(1);
+                                state.advance(1)
                             }
                         }
                         while let Some(ch) = state.peek() {
-                            if ch.is_ascii_digit() {
-                                state.advance(ch.len_utf8());
-                            }
-                            else {
-                                break;
-                            }
+                            if ch.is_ascii_digit() { state.advance(ch.len_utf8()) } else { break }
                         }
                     }
                 }
@@ -220,12 +206,7 @@ impl<'config> AdaLexer<'config> {
                 state.advance(ch.len_utf8());
 
                 while let Some(ch) = state.peek() {
-                    if ch.is_ascii_alphanumeric() || ch == '_' {
-                        state.advance(ch.len_utf8());
-                    }
-                    else {
-                        break;
-                    }
+                    if ch.is_ascii_alphanumeric() || ch == '_' { state.advance(ch.len_utf8()) } else { break }
                 }
 
                 let end = state.get_position();

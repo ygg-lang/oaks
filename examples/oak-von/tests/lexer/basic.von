@@ -1,0 +1,16 @@
+# 测试隐式根对象
+name = "VON"
+version = 1.0
+features = ["JSON compatible", "Valkyrie style"]
+null_value = null
+nested = {
+    enabled = true
+}
+
+# 测试原始字符串
+path = raw"C:\Users\Admin"
+regex = raw"""\d+\.\d+"""
+multi_line = """
+    This is a
+    multi-line string
+"""

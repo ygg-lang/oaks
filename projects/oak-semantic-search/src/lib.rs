@@ -1,4 +1,10 @@
 #![feature(new_range_api)]
+#![allow(async_fn_in_trait)]
+#![warn(missing_docs)]
+//! Semantic search support for the Oak language framework.
+//!
+//! This crate provides traits and structures for performing semantic search
+//! on source code, including code chunking and indexing.
 use oak_core::{
     errors::OakError,
     language::{ElementRole, ElementType, Language, UniversalElementRole},
@@ -7,32 +13,49 @@ use oak_core::{
 };
 use serde::{Deserialize, Serialize};
 
+/// Trait for semantic search implementations.
 pub trait SemanticSearch: Send + Sync {
-    fn search(&self, query: &str, limit: usize) -> impl std::future::Future<Output = Result<Vec<String>, OakError>> + Send;
+    /// Search for code segments that are semantically similar to the query.
+    ///
+    /// # Arguments
+    /// * `query` - The search query string.
+    /// * `limit` - The maximum number of results to return.
+    async fn search(&self, query: &str, limit: usize) -> Result<Vec<String>, OakError>;
 }
 
 /// A default implementation of SemanticSearch that does nothing.
 pub struct NoSemanticSearch;
 
 impl SemanticSearch for NoSemanticSearch {
-    fn search(&self, _query: &str, _limit: usize) -> impl std::future::Future<Output = Result<Vec<String>, OakError>> + Send {
-        async { Err(OakError::semantic_error("Semantic search is not enabled on this server")) }
+    /// Always returns an error indicating semantic search is disabled.
+    async fn search(&self, _query: &str, _limit: usize) -> Result<Vec<String>, OakError> {
+        Err(OakError::semantic_error("Semantic search is not enabled on this server"))
     }
 }
 
+/// Represents a chunk of code extracted for semantic indexing.
 #[derive(Debug, Serialize, Deserialize)]
 pub struct CodeChunk {
+    /// The text content of the chunk.
     pub text: String,
+    /// The starting byte offset in the source file.
     pub range_start: usize,
+    /// The ending byte offset in the source file.
     pub range_end: usize,
+    /// The role of the code element (e.g., "Definition", "Statement").
     pub role: String,
 }
 
+/// A searcher that performs semantic search on code.
 pub struct SemanticSearcher {}
 
+/// A visitor that collects code chunks from the syntax tree.
 struct ChunkCollector<'a, L: Language> {
+    /// The source text.
     source: &'a str,
+    /// The collected code chunks.
     chunks: Vec<CodeChunk>,
+    /// Phantom data for the language type.
     _phantom: std::marker::PhantomData<L>,
 }
 
@@ -59,13 +82,14 @@ impl<'a, L: Language> Visitor<'a, L> for ChunkCollector<'a, L> {
             }
             _ => {}
         }
-        self.walk_node(node);
+        self.walk_node(node)
     }
 
     fn visit_token(&mut self, _token: RedLeaf<L>) {}
 }
 
 impl SemanticSearcher {
+    /// Creates a new semantic searcher with the given database path.
     pub async fn new(_db_path: &str) -> Result<Self, OakError> {
         Ok(Self {})
     }

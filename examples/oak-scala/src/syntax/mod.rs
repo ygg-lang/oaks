@@ -1,1 +1,1 @@
-pub use crate::kind::ScalaSyntaxKind;
+pub use crate::lexer::ScalaTokenType;

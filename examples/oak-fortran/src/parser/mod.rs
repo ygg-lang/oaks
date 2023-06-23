@@ -1,4 +1,6 @@
-use crate::{kind::FortranSyntaxKind, language::FortranLanguage};
+pub mod element_type;
+
+use crate::{language::FortranLanguage, parser::element_type::FortranElementType};
 use oak_core::{
     GreenNode, OakError,
     parser::{ParseCache, ParseOutput, Parser, ParserState, parse_with_lexer},
@@ -20,10 +22,10 @@ impl<'config> FortranParser<'config> {
         let checkpoint = state.checkpoint();
 
         while state.not_at_end() {
-            state.advance();
+            state.advance()
         }
 
-        Ok(state.finish_at(checkpoint, FortranSyntaxKind::Root.into()))
+        Ok(state.finish_at(checkpoint, crate::parser::element_type::FortranElementType::Root))
     }
 }
 

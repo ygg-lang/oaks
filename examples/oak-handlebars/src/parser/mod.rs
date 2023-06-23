@@ -1,4 +1,6 @@
-use crate::{language::HandlebarsLanguage, lexer::HandlebarsLexer};
+pub mod element_type;
+
+use crate::{language::HandlebarsLanguage, lexer::HandlebarsLexer, parser::element_type::HandlebarsElementType};
 use oak_core::{
     Parser,
     parser::{ParseCache, ParseOutput, parse_with_lexer},
@@ -24,4 +26,4 @@ impl<'config> Parser<HandlebarsLanguage> for HandlebarsParser<'config> {
     }
 }
 
-mod parse;
+mod parse_top_level;

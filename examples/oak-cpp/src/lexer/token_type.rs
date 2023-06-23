@@ -1,8 +1,11 @@
 use oak_core::{TokenType, UniversalTokenRole};
+#[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Deserialize)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 #[repr(u16)]
+/// Token types for the C++ language.
 pub enum CppTokenType {
     // Trivia tokens
     /// Whitespace characters (spaces, tabs)
@@ -99,16 +102,24 @@ pub enum CppTokenType {
     Decrement,
     /// Arrow operator: ->
     Arrow,
-    /// Dot operator: .
-    Dot,
-    /// Ternary operator: ?
-    Question,
-    /// Colon operator: :
-    Colon,
     /// Scope resolution operator: ::
     Scope,
+    /// Question mark: ?
+    Question,
+    /// Colon: :
+    Colon,
+    /// Semicolon: ;
+    Semicolon,
+    /// Comma: ,
+    Comma,
+    /// Dot operator: .
+    Dot,
+    /// Pointer-to-member operator: .*
+    DotStar,
+    /// Pointer-to-member arrow operator: ->*
+    ArrowStar,
 
-    // Delimiters
+    // Punctuation
     /// Left parenthesis: (
     LeftParen,
     /// Right parenthesis: )
@@ -121,39 +132,81 @@ pub enum CppTokenType {
     LeftBrace,
     /// Right brace: }
     RightBrace,
-    /// Comma: ,
-    Comma,
-    /// Semicolon: ;
-    Semicolon,
 
     // Preprocessor
-    /// Preprocessor directives (e.g., #include, #define)
+    /// Preprocessor hash: #
+    Hash,
+    /// Double hash: ##
+    DoubleHash,
+    /// Preprocessor directive
     Preprocessor,
 
-    Text,
+    // Special
+    /// End of file
+    EndOfFile,
+    /// Unknown token
+    Unknown,
+    /// Error token
     Error,
-    Eof,
 }
 
 impl TokenType for CppTokenType {
-    const END_OF_STREAM: Self = Self::Eof;
     type Role = UniversalTokenRole;
+    const END_OF_STREAM: Self = Self::EndOfFile;
 
-    fn is_comment(&self) -> bool {
-        matches!(self, Self::Comment)
-    }
-
-    fn is_whitespace(&self) -> bool {
-        matches!(self, Self::Whitespace | Self::Newline)
-    }
-
-    fn role(&self) -> Self::Role {
+    fn role(&self) -> UniversalTokenRole {
         match self {
             Self::Whitespace | Self::Newline => UniversalTokenRole::Whitespace,
             Self::Comment => UniversalTokenRole::Comment,
-            Self::Eof => UniversalTokenRole::Eof,
-            Self::Error => UniversalTokenRole::Error,
-            _ => UniversalTokenRole::None,
+            Self::StringLiteral | Self::CharacterLiteral | Self::IntegerLiteral | Self::FloatLiteral => UniversalTokenRole::Literal,
+            Self::BooleanLiteral => UniversalTokenRole::Keyword,
+            Self::Identifier => UniversalTokenRole::Name,
+            Self::Keyword => UniversalTokenRole::Keyword,
+            Self::Plus
+            | Self::Minus
+            | Self::Star
+            | Self::Slash
+            | Self::Percent
+            | Self::Assign
+            | Self::PlusAssign
+            | Self::MinusAssign
+            | Self::StarAssign
+            | Self::SlashAssign
+            | Self::PercentAssign
+            | Self::Equal
+            | Self::NotEqual
+            | Self::Less
+            | Self::Greater
+            | Self::LessEqual
+            | Self::GreaterEqual
+            | Self::LogicalAnd
+            | Self::LogicalOr
+            | Self::LogicalNot
+            | Self::BitAnd
+            | Self::BitOr
+            | Self::BitXor
+            | Self::BitNot
+            | Self::LeftShift
+            | Self::RightShift
+            | Self::AndAssign
+            | Self::OrAssign
+            | Self::XorAssign
+            | Self::LeftShiftAssign
+            | Self::RightShiftAssign
+            | Self::Increment
+            | Self::Decrement
+            | Self::Arrow
+            | Self::Scope
+            | Self::Question
+            | Self::Colon
+            | Self::Dot
+            | Self::DotStar
+            | Self::ArrowStar => UniversalTokenRole::Operator,
+            Self::Semicolon | Self::Comma => UniversalTokenRole::Punctuation,
+            Self::LeftParen | Self::RightParen | Self::LeftBracket | Self::RightBracket | Self::LeftBrace | Self::RightBrace => UniversalTokenRole::Punctuation,
+            Self::Hash | Self::DoubleHash | Self::Preprocessor => UniversalTokenRole::Operator,
+            Self::EndOfFile => UniversalTokenRole::Eof,
+            Self::Unknown | Self::Error => UniversalTokenRole::Error,
         }
     }
 }

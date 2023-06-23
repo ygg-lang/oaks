@@ -1,29 +1,29 @@
 [package]
 name = "oak-rust"
-description = "High-performance incremental Rust parser for the oak ecosystem with flexible configuration, emphasizing memory safety and zero-cost abstractions."
-categories = ["parsing"]
-keywords = ["parser", "rust", "ast", "lexer"]
-documentation = "https://docs.rs/oak-rust"
-readme = "readme.md"
 version.workspace = true
 authors.workspace = true
-homepage.workspace = true
-repository.workspace = true
-license.workspace = true
+description = "High-performance incremental Rust parser for the oak ecosystem with flexible configuration, emphasizing memory safety and zero-cost abstractions."
 edition.workspace = true
+license.workspace = true
+readme = "readme.md"
+homepage.workspace = true
+repository = "https://github.com/ygg-lang/oaks/tree/master/examples/oak-rust"
+documentation = "https://docs.rs/oak-rust"
+categories = ["parsing"]
+keywords = ["parser", "rust", "ast", "lexer"]
 
 [dependencies]
-oak-core = { workspace = true, features = ["serde", "testing"] }
-oak-highlight = { workspace = true }
-oak-pretty-print = { workspace = true }
-oak-lsp = { workspace = true }
-oak-hover = { workspace = true }
-oak-vfs = { workspace = true }
+oak-core = { workspace = true }
+oak-highlight = { workspace = true, optional = true }
+oak-pretty-print = { workspace = true, optional = true }
+oak-lsp = { workspace = true, optional = true }
+oak-hover = { workspace = true, optional = true }
+oak-vfs = { workspace = true, optional = true }
 oak-navigation = { workspace = true }
-oak-mcp = { workspace = true, features = ["io-std"] }
+oak-mcp = { workspace = true, optional = true }
 dashmap = { workspace = true }
-serde = { workspace = true }
-futures = { workspace = true }
+serde = { workspace = true, optional = true }
+futures = { workspace = true, optional = true }
 tracing = { workspace = true }
 unicode-ident = { workspace = true }
 tokio = { workspace = true, optional = true }
@@ -32,8 +32,12 @@ tokio = { workspace = true, optional = true }
 oak-testing = { workspace = true }
 
 [features]
-default = []
-semantic-search = []
+default = ["serde", "lsp"]
+serde = ["dep:serde", "oak-core/serde"]
+oak-highlight = ["dep:oak-highlight"]
+oak-pretty-print = ["dep:oak-pretty-print"]
+lsp = ["dep:oak-lsp", "dep:oak-hover", "dep:oak-vfs", "oak-highlight", "oak-pretty-print", "dep:futures"]
+mcp = ["lsp", "oak-mcp/io-std"]
 
 [package.metadata.docs.rs]
 all-features = true

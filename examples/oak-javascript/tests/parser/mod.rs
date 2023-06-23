@@ -5,5 +5,5 @@
 fn parser_placeholder() {
     // This test passes to allow the test suite to run
     // TODO: Implement actual files tests when files module is available
-    assert!(true);
+    assert!(true)
 }

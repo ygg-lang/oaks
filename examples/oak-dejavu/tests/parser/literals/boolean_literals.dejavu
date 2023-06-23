@@ -1,0 +1,4 @@
+micro main() {
+    true;
+    false;
+}

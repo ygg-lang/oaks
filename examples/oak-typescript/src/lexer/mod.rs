@@ -1,4 +1,8 @@
-use crate::{kind::TypeScriptSyntaxKind, language::TypeScriptLanguage};
+#![doc = include_str!("readme.md")]
+pub mod token_type;
+
+pub use self::token_type::TypeScriptTokenType;
+use crate::language::TypeScriptLanguage;
 use oak_core::{Lexer, LexerCache, LexerState, OakError, TextEdit, lexer::LexOutput, source::Source};
 
 #[derive(Clone, Debug)]
@@ -21,7 +25,7 @@ impl<'config> Lexer<TypeScriptLanguage> for TypeScriptLexer<'config> {
 
         let result = self.run(&mut state);
         if result.is_ok() {
-            state.add_eof();
+            state.add_eof()
         }
         state.finish_with_cache(result, cache)
     }
@@ -68,7 +72,7 @@ impl<'config> TypeScriptLexer<'config> {
             let start_pos = state.get_position();
             if let Some(ch) = state.peek() {
                 state.advance(ch.len_utf8());
-                state.add_token(TypeScriptSyntaxKind::Error, start_pos, state.get_position());
+                state.add_token(TypeScriptTokenType::Error, start_pos, state.get_position());
             }
 
             state.advance_if_dead_lock(safe_point);
@@ -92,7 +96,7 @@ impl<'config> TypeScriptLexer<'config> {
         }
 
         if found {
-            state.add_token(TypeScriptSyntaxKind::Whitespace, start, state.get_position());
+            state.add_token(TypeScriptTokenType::Whitespace, start, state.get_position());
         }
 
         found
@@ -104,7 +108,7 @@ impl<'config> TypeScriptLexer<'config> {
         if let Some(ch) = state.peek() {
             if ch == '\n' {
                 state.advance(1);
-                state.add_token(TypeScriptSyntaxKind::Newline, start, state.get_position());
+                state.add_token(TypeScriptTokenType::Newline, start, state.get_position());
                 return true;
             }
             else if ch == '\r' {
@@ -112,7 +116,7 @@ impl<'config> TypeScriptLexer<'config> {
                 if state.peek() == Some('\n') {
                     state.advance(1);
                 }
-                state.add_token(TypeScriptSyntaxKind::Newline, start, state.get_position());
+                state.add_token(TypeScriptTokenType::Newline, start, state.get_position());
                 return true;
             }
         }
@@ -133,7 +137,7 @@ impl<'config> TypeScriptLexer<'config> {
                 }
                 state.advance(ch.len_utf8());
             }
-            state.add_token(TypeScriptSyntaxKind::LineComment, start, state.get_position());
+            state.add_token(TypeScriptTokenType::LineComment, start, state.get_position());
             return true;
         }
 
@@ -147,7 +151,7 @@ impl<'config> TypeScriptLexer<'config> {
                 }
                 state.advance(ch.len_utf8());
             }
-            state.add_token(TypeScriptSyntaxKind::BlockComment, start, state.get_position());
+            state.add_token(TypeScriptTokenType::BlockComment, start, state.get_position());
             return true;
         }
 
@@ -177,7 +181,7 @@ impl<'config> TypeScriptLexer<'config> {
                     }
                 }
 
-                state.add_token(TypeScriptSyntaxKind::StringLiteral, start, state.get_position());
+                state.add_token(TypeScriptTokenType::StringLiteral, start, state.get_position());
                 return true;
             }
         }
@@ -207,7 +211,7 @@ impl<'config> TypeScriptLexer<'config> {
                 }
             }
 
-            state.add_token(TypeScriptSyntaxKind::TemplateString, start, state.get_position());
+            state.add_token(TypeScriptTokenType::TemplateString, start, state.get_position());
             return true;
         }
 
@@ -260,10 +264,10 @@ impl<'config> TypeScriptLexer<'config> {
                 // 检查 BigInt 后缀
                 if state.peek() == Some('n') {
                     state.advance(1);
-                    state.add_token(TypeScriptSyntaxKind::BigIntLiteral, start, state.get_position());
+                    state.add_token(TypeScriptTokenType::BigIntLiteral, start, state.get_position());
                 }
                 else {
-                    state.add_token(TypeScriptSyntaxKind::NumericLiteral, start, state.get_position());
+                    state.add_token(TypeScriptTokenType::NumericLiteral, start, state.get_position());
                 }
 
                 return true;
@@ -302,8 +306,8 @@ impl<'config> TypeScriptLexer<'config> {
         false
     }
 
-    fn keyword_or_identifier(&self, text: &str) -> TypeScriptSyntaxKind {
-        TypeScriptSyntaxKind::from_keyword(text).unwrap_or(TypeScriptSyntaxKind::IdentifierName)
+    fn keyword_or_identifier(&self, text: &str) -> TypeScriptTokenType {
+        TypeScriptTokenType::from_keyword(text).unwrap_or(TypeScriptTokenType::IdentifierName)
     }
 
     fn lex_operator_or_punctuation<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
@@ -311,38 +315,38 @@ impl<'config> TypeScriptLexer<'config> {
         let rest = state.rest();
 
         let ops = [
-            ("===", TypeScriptSyntaxKind::EqualEqualEqual),
-            ("!==", TypeScriptSyntaxKind::NotEqualEqual),
-            (">>>", TypeScriptSyntaxKind::UnsignedRightShift),
-            ("...", TypeScriptSyntaxKind::DotDotDot),
-            ("**=", TypeScriptSyntaxKind::StarStarEqual),
-            ("<<=", TypeScriptSyntaxKind::LeftShiftEqual),
-            (">>=", TypeScriptSyntaxKind::RightShiftEqual),
-            ("&&=", TypeScriptSyntaxKind::AmpersandAmpersandEqual),
-            ("||=", TypeScriptSyntaxKind::PipePipeEqual),
-            ("??=", TypeScriptSyntaxKind::QuestionQuestionEqual),
-            ("**", TypeScriptSyntaxKind::StarStar),
-            ("<=", TypeScriptSyntaxKind::LessEqual),
-            (">=", TypeScriptSyntaxKind::GreaterEqual),
-            ("==", TypeScriptSyntaxKind::EqualEqual),
-            ("!=", TypeScriptSyntaxKind::NotEqual),
-            ("&&", TypeScriptSyntaxKind::AmpersandAmpersand),
-            ("||", TypeScriptSyntaxKind::PipePipe),
-            ("<<", TypeScriptSyntaxKind::LeftShift),
-            (">>", TypeScriptSyntaxKind::RightShift),
-            ("++", TypeScriptSyntaxKind::PlusPlus),
-            ("--", TypeScriptSyntaxKind::MinusMinus),
-            ("=>", TypeScriptSyntaxKind::Arrow),
-            ("?.", TypeScriptSyntaxKind::QuestionDot),
-            ("??", TypeScriptSyntaxKind::QuestionQuestion),
-            ("+=", TypeScriptSyntaxKind::PlusEqual),
-            ("-=", TypeScriptSyntaxKind::MinusEqual),
-            ("*=", TypeScriptSyntaxKind::StarEqual),
-            ("/=", TypeScriptSyntaxKind::SlashEqual),
-            ("%=", TypeScriptSyntaxKind::PercentEqual),
-            ("&=", TypeScriptSyntaxKind::AmpersandEqual),
-            ("|=", TypeScriptSyntaxKind::PipeEqual),
-            ("^=", TypeScriptSyntaxKind::CaretEqual),
+            ("===", TypeScriptTokenType::EqualEqualEqual),
+            ("!==", TypeScriptTokenType::NotEqualEqual),
+            (">>>", TypeScriptTokenType::UnsignedRightShift),
+            ("...", TypeScriptTokenType::DotDotDot),
+            ("**=", TypeScriptTokenType::StarStarEqual),
+            ("<<=", TypeScriptTokenType::LeftShiftEqual),
+            (">>=", TypeScriptTokenType::RightShiftEqual),
+            ("&&=", TypeScriptTokenType::AmpersandAmpersandEqual),
+            ("||=", TypeScriptTokenType::PipePipeEqual),
+            ("??=", TypeScriptTokenType::QuestionQuestionEqual),
+            ("**", TypeScriptTokenType::StarStar),
+            ("<=", TypeScriptTokenType::LessEqual),
+            (">=", TypeScriptTokenType::GreaterEqual),
+            ("==", TypeScriptTokenType::EqualEqual),
+            ("!=", TypeScriptTokenType::NotEqual),
+            ("&&", TypeScriptTokenType::AmpersandAmpersand),
+            ("||", TypeScriptTokenType::PipePipe),
+            ("<<", TypeScriptTokenType::LeftShift),
+            (">>", TypeScriptTokenType::RightShift),
+            ("++", TypeScriptTokenType::PlusPlus),
+            ("--", TypeScriptTokenType::MinusMinus),
+            ("=>", TypeScriptTokenType::Arrow),
+            ("?.", TypeScriptTokenType::QuestionDot),
+            ("??", TypeScriptTokenType::QuestionQuestion),
+            ("+=", TypeScriptTokenType::PlusEqual),
+            ("-=", TypeScriptTokenType::MinusEqual),
+            ("*=", TypeScriptTokenType::StarEqual),
+            ("/=", TypeScriptTokenType::SlashEqual),
+            ("%=", TypeScriptTokenType::PercentEqual),
+            ("&=", TypeScriptTokenType::AmpersandEqual),
+            ("|=", TypeScriptTokenType::PipeEqual),
+            ("^=", TypeScriptTokenType::CaretEqual),
         ];
 
         for (op, kind) in ops {
@@ -355,30 +359,31 @@ impl<'config> TypeScriptLexer<'config> {
 
         if let Some(ch) = state.peek() {
             let kind = match ch {
-                '+' => TypeScriptSyntaxKind::Plus,
-                '-' => TypeScriptSyntaxKind::Minus,
-                '*' => TypeScriptSyntaxKind::Star,
-                '/' => TypeScriptSyntaxKind::Slash,
-                '%' => TypeScriptSyntaxKind::Percent,
-                '<' => TypeScriptSyntaxKind::Less,
-                '>' => TypeScriptSyntaxKind::Greater,
-                '!' => TypeScriptSyntaxKind::Exclamation,
-                '&' => TypeScriptSyntaxKind::Ampersand,
-                '|' => TypeScriptSyntaxKind::Pipe,
-                '^' => TypeScriptSyntaxKind::Caret,
-                '~' => TypeScriptSyntaxKind::Tilde,
-                '=' => TypeScriptSyntaxKind::Equal,
-                '?' => TypeScriptSyntaxKind::Question,
-                '(' => TypeScriptSyntaxKind::LeftParen,
-                ')' => TypeScriptSyntaxKind::RightParen,
-                '{' => TypeScriptSyntaxKind::LeftBrace,
-                '}' => TypeScriptSyntaxKind::RightBrace,
-                '[' => TypeScriptSyntaxKind::LeftBracket,
-                ']' => TypeScriptSyntaxKind::RightBracket,
-                ';' => TypeScriptSyntaxKind::Semicolon,
-                ',' => TypeScriptSyntaxKind::Comma,
-                '.' => TypeScriptSyntaxKind::Dot,
-                ':' => TypeScriptSyntaxKind::Colon,
+                '+' => TypeScriptTokenType::Plus,
+                '-' => TypeScriptTokenType::Minus,
+                '*' => TypeScriptTokenType::Star,
+                '/' => TypeScriptTokenType::Slash,
+                '%' => TypeScriptTokenType::Percent,
+                '<' => TypeScriptTokenType::Less,
+                '>' => TypeScriptTokenType::Greater,
+                '!' => TypeScriptTokenType::Exclamation,
+                '&' => TypeScriptTokenType::Ampersand,
+                '|' => TypeScriptTokenType::Pipe,
+                '^' => TypeScriptTokenType::Caret,
+                '~' => TypeScriptTokenType::Tilde,
+                '=' => TypeScriptTokenType::Equal,
+                '?' => TypeScriptTokenType::Question,
+                '(' => TypeScriptTokenType::LeftParen,
+                ')' => TypeScriptTokenType::RightParen,
+                '{' => TypeScriptTokenType::LeftBrace,
+                '}' => TypeScriptTokenType::RightBrace,
+                '[' => TypeScriptTokenType::LeftBracket,
+                ']' => TypeScriptTokenType::RightBracket,
+                ';' => TypeScriptTokenType::Semicolon,
+                ',' => TypeScriptTokenType::Comma,
+                '.' => TypeScriptTokenType::Dot,
+                ':' => TypeScriptTokenType::Colon,
+                '@' => TypeScriptTokenType::At,
                 _ => return false,
             };
 

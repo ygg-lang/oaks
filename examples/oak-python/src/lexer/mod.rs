@@ -1,4 +1,8 @@
-use crate::{kind::PythonSyntaxKind, language::PythonLanguage};
+#![doc = include_str!("readme.md")]
+pub mod token_type;
+
+pub use self::token_type::PythonTokenType;
+use crate::language::PythonLanguage;
 use oak_core::{
     Lexer, LexerCache, LexerState, OakError,
     lexer::LexOutput,
@@ -7,6 +11,7 @@ use oak_core::{
 
 type State<'a, S> = LexerState<'a, S, PythonLanguage>;
 
+/// Python lexer implementation.
 #[derive(Clone)]
 pub struct PythonLexer<'config> {
     _config: &'config PythonLanguage,
@@ -24,25 +29,21 @@ impl<'config> Lexer<PythonLanguage> for PythonLexer<'config> {
 }
 
 impl<'config> PythonLexer<'config> {
+    /// Creates a new Python lexer.
     pub fn new(config: &'config PythonLanguage) -> Self {
         Self { _config: config }
     }
 
-    /// 跳过空白字符
+    /// Skips whitespace characters.
     fn skip_whitespace<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start_pos = state.get_position();
 
         while let Some(ch) = state.current() {
-            if ch == ' ' || ch == '\t' {
-                state.advance(ch.len_utf8());
-            }
-            else {
-                break;
-            }
+            if ch == ' ' || ch == '\t' { state.advance(ch.len_utf8()) } else { break }
         }
 
         if state.get_position() > start_pos {
-            state.add_token(PythonSyntaxKind::Whitespace, start_pos, state.get_position());
+            state.add_token(PythonTokenType::Whitespace, start_pos, state.get_position());
             true
         }
         else {
@@ -50,13 +51,14 @@ impl<'config> PythonLexer<'config> {
         }
     }
 
-    /// 处理换行
-    fn lex_newline<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
+    /// Handles newline characters.
+    fn lex_newline<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>, bracket_level: usize) -> bool {
         let start_pos = state.get_position();
+        let kind = if bracket_level > 0 { PythonTokenType::Whitespace } else { PythonTokenType::Newline };
 
         if let Some('\n') = state.current() {
             state.advance(1);
-            state.add_token(PythonSyntaxKind::Newline, start_pos, state.get_position());
+            state.add_token(kind, start_pos, state.get_position());
             true
         }
         else if let Some('\r') = state.current() {
@@ -64,7 +66,7 @@ impl<'config> PythonLexer<'config> {
             if let Some('\n') = state.current() {
                 state.advance(1);
             }
-            state.add_token(PythonSyntaxKind::Newline, start_pos, state.get_position());
+            state.add_token(kind, start_pos, state.get_position());
             true
         }
         else {
@@ -72,21 +74,21 @@ impl<'config> PythonLexer<'config> {
         }
     }
 
-    /// 处理注释
+    /// Handles comments.
     fn lex_comment<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         if let Some('#') = state.current() {
             let start_pos = state.get_position();
-            state.advance(1); // 跳过 '#'
+            state.advance(1); // Skip '#'
 
-            // 读取到行尾
+            // Read until end of line
             while let Some(ch) = state.current() {
                 if ch == '\n' || ch == '\r' {
                     break;
                 }
-                state.advance(ch.len_utf8());
+                state.advance(ch.len_utf8())
             }
 
-            state.add_token(PythonSyntaxKind::Comment, start_pos, state.get_position());
+            state.add_token(PythonTokenType::Comment, start_pos, state.get_position());
             true
         }
         else {
@@ -94,20 +96,46 @@ impl<'config> PythonLexer<'config> {
         }
     }
 
-    /// 处理字符串字面量
+    /// Handles string literals.
     fn lex_string<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start_pos = state.get_position();
 
-        // 检查是否是字符串开始
+        // Check for prefixes (f, r, b, u, etc.)
+        let mut prefix = None;
+        if let Some(ch) = state.current() {
+            if "frbuFRBU".contains(ch) {
+                // Check if next char is a quote
+                if let Some(next_ch) = state.peek_next_n(ch.len_utf8()) {
+                    if next_ch == '"' || next_ch == '\'' {
+                        prefix = Some(ch.to_ascii_lowercase());
+                        state.advance(ch.len_utf8());
+                    }
+                }
+            }
+        }
+
+        // Check if it's the start of a string
         let quote_char = match state.current() {
             Some('"') => '"',
             Some('\'') => '\'',
-            _ => return false,
+            _ => {
+                if prefix.is_some() {
+                    // This shouldn't happen if we checked correctly above
+                    return false;
+                }
+                return false;
+            }
         };
 
-        state.advance(1); // 跳过开始引号
+        state.advance(1); // Skip first quote
 
-        // 检查是否是三引号字符串 - 简化实现，不支持三引号
+        // Check if it's a triple-quoted string
+        let is_triple = if let (Some(c1), Some(c2)) = (state.peek_next_n(0), state.peek_next_n(1)) { c1 == quote_char && c2 == quote_char } else { false };
+
+        if is_triple {
+            state.advance(2); // Skip remaining two quotes
+        }
+
         let mut escaped = false;
         while let Some(ch) = state.current() {
             if escaped {
@@ -123,11 +151,23 @@ impl<'config> PythonLexer<'config> {
             }
 
             if ch == quote_char {
-                state.advance(1); // 跳过结束引号
-                break;
+                if is_triple {
+                    if let (Some(c1), Some(c2)) = (state.peek_next_n(1), state.peek_next_n(2)) {
+                        if c1 == quote_char && c2 == quote_char {
+                            state.advance(3); // Skip three quotes
+                            break;
+                        }
+                    }
+                    state.advance(1);
+                    continue;
+                }
+                else {
+                    state.advance(1); // Skip closing quote
+                    break;
+                }
             }
-            else if ch == '\n' || ch == '\r' {
-                // 单行字符串不能包含换行符
+            else if (ch == '\n' || ch == '\r') && !is_triple {
+                // Single-line strings cannot contain newlines
                 break;
             }
             else {
@@ -135,11 +175,16 @@ impl<'config> PythonLexer<'config> {
             }
         }
 
-        state.add_token(PythonSyntaxKind::String, start_pos, state.get_position());
+        let kind = match prefix {
+            Some('f') => PythonTokenType::FString,
+            Some('b') => PythonTokenType::Bytes,
+            _ => PythonTokenType::String,
+        };
+        state.add_token(kind, start_pos, state.get_position());
         true
     }
 
-    /// 处理数字字面量
+    /// Handles number literals.
     fn lex_number<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start_pos = state.get_position();
 
@@ -147,7 +192,7 @@ impl<'config> PythonLexer<'config> {
             return false;
         }
 
-        // 简化实现：只处理基本的十进制数字
+        // Simple implementation: only handles basic decimal numbers
         while let Some(ch) = state.current() {
             if ch.is_ascii_digit() || ch == '.' {
                 state.advance(1);
@@ -157,20 +202,20 @@ impl<'config> PythonLexer<'config> {
             }
         }
 
-        state.add_token(PythonSyntaxKind::Number, start_pos, state.get_position());
+        state.add_token(PythonTokenType::Number, start_pos, state.get_position());
         true
     }
 
-    /// 处理标识符或关键字
+    /// Handles identifiers or keywords.
     fn lex_identifier_or_keyword<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start_pos = state.get_position();
 
-        // 检查第一个字符
+        // Check first character
         if !state.current().map_or(false, |c| c.is_ascii_alphabetic() || c == '_') {
             return false;
         }
 
-        // 读取标识符
+        // Read identifier
         let mut text = String::new();
         while let Some(ch) = state.current() {
             if ch.is_ascii_alphanumeric() || ch == '_' {
@@ -182,51 +227,51 @@ impl<'config> PythonLexer<'config> {
             }
         }
 
-        // 检查是否是关键字
+        // Check if it's a keyword
         let kind = match text.as_str() {
-            "and" => PythonSyntaxKind::AndKeyword,
-            "as" => PythonSyntaxKind::AsKeyword,
-            "assert" => PythonSyntaxKind::AssertKeyword,
-            "async" => PythonSyntaxKind::AsyncKeyword,
-            "await" => PythonSyntaxKind::AwaitKeyword,
-            "break" => PythonSyntaxKind::BreakKeyword,
-            "class" => PythonSyntaxKind::ClassKeyword,
-            "continue" => PythonSyntaxKind::ContinueKeyword,
-            "def" => PythonSyntaxKind::DefKeyword,
-            "del" => PythonSyntaxKind::DelKeyword,
-            "elif" => PythonSyntaxKind::ElifKeyword,
-            "else" => PythonSyntaxKind::ElseKeyword,
-            "except" => PythonSyntaxKind::ExceptKeyword,
-            "False" => PythonSyntaxKind::FalseKeyword,
-            "finally" => PythonSyntaxKind::FinallyKeyword,
-            "for" => PythonSyntaxKind::ForKeyword,
-            "from" => PythonSyntaxKind::FromKeyword,
-            "global" => PythonSyntaxKind::GlobalKeyword,
-            "if" => PythonSyntaxKind::IfKeyword,
-            "import" => PythonSyntaxKind::ImportKeyword,
-            "in" => PythonSyntaxKind::InKeyword,
-            "is" => PythonSyntaxKind::IsKeyword,
-            "lambda" => PythonSyntaxKind::LambdaKeyword,
-            "None" => PythonSyntaxKind::NoneKeyword,
-            "nonlocal" => PythonSyntaxKind::NonlocalKeyword,
-            "not" => PythonSyntaxKind::NotKeyword,
-            "or" => PythonSyntaxKind::OrKeyword,
-            "pass" => PythonSyntaxKind::PassKeyword,
-            "raise" => PythonSyntaxKind::RaiseKeyword,
-            "return" => PythonSyntaxKind::ReturnKeyword,
-            "True" => PythonSyntaxKind::TrueKeyword,
-            "try" => PythonSyntaxKind::TryKeyword,
-            "while" => PythonSyntaxKind::WhileKeyword,
-            "with" => PythonSyntaxKind::WithKeyword,
-            "yield" => PythonSyntaxKind::YieldKeyword,
-            _ => PythonSyntaxKind::Identifier,
+            "and" => PythonTokenType::AndKeyword,
+            "as" => PythonTokenType::AsKeyword,
+            "assert" => PythonTokenType::AssertKeyword,
+            "async" => PythonTokenType::AsyncKeyword,
+            "await" => PythonTokenType::AwaitKeyword,
+            "break" => PythonTokenType::BreakKeyword,
+            "class" => PythonTokenType::ClassKeyword,
+            "continue" => PythonTokenType::ContinueKeyword,
+            "def" => PythonTokenType::DefKeyword,
+            "del" => PythonTokenType::DelKeyword,
+            "elif" => PythonTokenType::ElifKeyword,
+            "else" => PythonTokenType::ElseKeyword,
+            "except" => PythonTokenType::ExceptKeyword,
+            "False" => PythonTokenType::FalseKeyword,
+            "finally" => PythonTokenType::FinallyKeyword,
+            "for" => PythonTokenType::ForKeyword,
+            "from" => PythonTokenType::FromKeyword,
+            "global" => PythonTokenType::GlobalKeyword,
+            "if" => PythonTokenType::IfKeyword,
+            "import" => PythonTokenType::ImportKeyword,
+            "in" => PythonTokenType::InKeyword,
+            "is" => PythonTokenType::IsKeyword,
+            "lambda" => PythonTokenType::LambdaKeyword,
+            "None" => PythonTokenType::NoneKeyword,
+            "nonlocal" => PythonTokenType::NonlocalKeyword,
+            "not" => PythonTokenType::NotKeyword,
+            "or" => PythonTokenType::OrKeyword,
+            "pass" => PythonTokenType::PassKeyword,
+            "raise" => PythonTokenType::RaiseKeyword,
+            "return" => PythonTokenType::ReturnKeyword,
+            "True" => PythonTokenType::TrueKeyword,
+            "try" => PythonTokenType::TryKeyword,
+            "while" => PythonTokenType::WhileKeyword,
+            "with" => PythonTokenType::WithKeyword,
+            "yield" => PythonTokenType::YieldKeyword,
+            _ => PythonTokenType::Identifier,
         };
 
         state.add_token(kind, start_pos, state.get_position());
         true
     }
 
-    /// 处理操作符
+    /// Handles operators.
     fn lex_operator<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start_pos = state.get_position();
 
@@ -236,131 +281,131 @@ impl<'config> PythonLexer<'config> {
                     state.advance(1);
                     if let Some('=') = state.current() {
                         state.advance(1);
-                        PythonSyntaxKind::PlusAssign
+                        PythonTokenType::PlusAssign
                     }
                     else {
-                        PythonSyntaxKind::Plus
+                        PythonTokenType::Plus
                     }
                 }
                 '-' => {
                     state.advance(1);
                     if let Some('=') = state.current() {
                         state.advance(1);
-                        PythonSyntaxKind::MinusAssign
+                        PythonTokenType::MinusAssign
                     }
                     else if let Some('>') = state.current() {
                         state.advance(1);
-                        PythonSyntaxKind::Arrow
+                        PythonTokenType::Arrow
                     }
                     else {
-                        PythonSyntaxKind::Minus
+                        PythonTokenType::Minus
                     }
                 }
                 '*' => {
                     state.advance(1);
                     if let Some('=') = state.current() {
                         state.advance(1);
-                        PythonSyntaxKind::StarAssign
+                        PythonTokenType::StarAssign
                     }
                     else if let Some('*') = state.current() {
                         state.advance(1);
                         if let Some('=') = state.current() {
                             state.advance(1);
-                            PythonSyntaxKind::DoubleStarAssign
+                            PythonTokenType::DoubleStarAssign
                         }
                         else {
-                            PythonSyntaxKind::DoubleStar
+                            PythonTokenType::DoubleStar
                         }
                     }
                     else {
-                        PythonSyntaxKind::Star
+                        PythonTokenType::Star
                     }
                 }
                 '/' => {
                     state.advance(1);
                     if let Some('=') = state.current() {
                         state.advance(1);
-                        PythonSyntaxKind::SlashAssign
+                        PythonTokenType::SlashAssign
                     }
                     else if let Some('/') = state.current() {
                         state.advance(1);
                         if let Some('=') = state.current() {
                             state.advance(1);
-                            PythonSyntaxKind::DoubleSlashAssign
+                            PythonTokenType::DoubleSlashAssign
                         }
                         else {
-                            PythonSyntaxKind::DoubleSlash
+                            PythonTokenType::DoubleSlash
                         }
                     }
                     else {
-                        PythonSyntaxKind::Slash
+                        PythonTokenType::Slash
                     }
                 }
                 '%' => {
                     state.advance(1);
                     if let Some('=') = state.current() {
                         state.advance(1);
-                        PythonSyntaxKind::PercentAssign
+                        PythonTokenType::PercentAssign
                     }
                     else {
-                        PythonSyntaxKind::Percent
+                        PythonTokenType::Percent
                     }
                 }
                 '=' => {
                     state.advance(1);
                     if let Some('=') = state.current() {
                         state.advance(1);
-                        PythonSyntaxKind::Eq
+                        PythonTokenType::Equal
                     }
                     else {
-                        PythonSyntaxKind::Assign
+                        PythonTokenType::Assign
                     }
                 }
                 '<' => {
                     state.advance(1);
                     if let Some('=') = state.current() {
                         state.advance(1);
-                        PythonSyntaxKind::LessEqual
+                        PythonTokenType::LessEqual
                     }
                     else if let Some('<') = state.current() {
                         state.advance(1);
                         if let Some('=') = state.current() {
                             state.advance(1);
-                            PythonSyntaxKind::LeftShiftAssign
+                            PythonTokenType::LeftShiftAssign
                         }
                         else {
-                            PythonSyntaxKind::LeftShift
+                            PythonTokenType::LeftShift
                         }
                     }
                     else {
-                        PythonSyntaxKind::Less
+                        PythonTokenType::Less
                     }
                 }
                 '>' => {
                     state.advance(1);
                     if let Some('=') = state.current() {
                         state.advance(1);
-                        PythonSyntaxKind::GreaterEqual
+                        PythonTokenType::GreaterEqual
                     }
                     else if let Some('>') = state.current() {
                         state.advance(1);
                         if let Some('=') = state.current() {
                             state.advance(1);
-                            PythonSyntaxKind::RightShiftAssign
+                            PythonTokenType::RightShiftAssign
                         }
                         else {
-                            PythonSyntaxKind::RightShift
+                            PythonTokenType::RightShift
                         }
                     }
                     else {
-                        PythonSyntaxKind::Greater
+                        PythonTokenType::Greater
                     }
                 }
                 '!' => {
                     state.advance(1);
                     if let Some('=') = state.current() {
                         state.advance(1);
-                        PythonSyntaxKind::NotEqual
+                        PythonTokenType::NotEqual
                     }
                     else {
                         return false;
@@ -370,44 +415,44 @@ impl<'config> PythonLexer<'config> {
                     state.advance(1);
                     if let Some('=') = state.current() {
                         state.advance(1);
-                        PythonSyntaxKind::AmpersandAssign
+                        PythonTokenType::AmpersandAssign
                     }
                     else {
-                        PythonSyntaxKind::Ampersand
+                        PythonTokenType::Ampersand
                     }
                 }
                 '|' => {
                     state.advance(1);
                     if let Some('=') = state.current() {
                         state.advance(1);
-                        PythonSyntaxKind::PipeAssign
+                        PythonTokenType::PipeAssign
                     }
                     else {
-                        PythonSyntaxKind::Pipe
+                        PythonTokenType::Pipe
                     }
                 }
                 '^' => {
                     state.advance(1);
                     if let Some('=') = state.current() {
                         state.advance(1);
-                        PythonSyntaxKind::CaretAssign
+                        PythonTokenType::CaretAssign
                     }
                     else {
-                        PythonSyntaxKind::Caret
+                        PythonTokenType::Caret
                     }
                 }
                 '~' => {
                     state.advance(1);
-                    PythonSyntaxKind::Tilde
+                    PythonTokenType::Tilde
                 }
                 '@' => {
                     state.advance(1);
                     if let Some('=') = state.current() {
                         state.advance(1);
-                        PythonSyntaxKind::AtAssign
+                        PythonTokenType::AtAssign
                     }
                     else {
-                        PythonSyntaxKind::At
+                        PythonTokenType::At
                     }
                 }
                 _ => return false,
@@ -420,22 +465,22 @@ impl<'config> PythonLexer<'config> {
         false
     }
 
-    /// 处理分隔符
+    /// Handles delimiters.
     fn lex_delimiter<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start_pos = state.get_position();
 
         if let Some(ch) = state.current() {
             let kind = match ch {
-                '(' => PythonSyntaxKind::LeftParen,
-                ')' => PythonSyntaxKind::RightParen,
-                '[' => PythonSyntaxKind::LeftBracket,
-                ']' => PythonSyntaxKind::RightBracket,
-                '{' => PythonSyntaxKind::LeftBrace,
-                '}' => PythonSyntaxKind::RightBrace,
-                ',' => PythonSyntaxKind::Comma,
-                ':' => PythonSyntaxKind::Colon,
-                ';' => PythonSyntaxKind::Semicolon,
-                '.' => PythonSyntaxKind::Dot, // 简化处理，不支持省略号
+                '(' => PythonTokenType::LeftParen,
+                ')' => PythonTokenType::RightParen,
+                '[' => PythonTokenType::LeftBracket,
+                ']' => PythonTokenType::RightBracket,
+                '{' => PythonTokenType::LeftBrace,
+                '}' => PythonTokenType::RightBrace,
+                ',' => PythonTokenType::Comma,
+                ':' => PythonTokenType::Colon,
+                ';' => PythonTokenType::Semicolon,
+                '.' => PythonTokenType::Dot, // Simple handling, ellipses not supported
                 _ => return false,
             };
 
@@ -469,7 +514,7 @@ impl<'config> PythonLexer<'config> {
                         self.skip_whitespace(state);
                     }
                     '\n' | '\r' => {
-                        self.lex_newline(state);
+                        self.lex_newline(state, bracket_level);
                         at_line_start = true;
                     }
                     '#' => {
@@ -481,7 +526,12 @@ impl<'config> PythonLexer<'config> {
                     '0'..='9' => {
                         self.lex_number(state);
                     }
-                    'a'..='z' | 'A'..='Z' | '_' => {
+                    'f' | 'r' | 'b' | 'u' | 'F' | 'R' | 'B' | 'U' => {
+                        if !self.lex_string(state) {
+                            self.lex_identifier_or_keyword(state);
+                        }
+                    }
+                    'a'..='e' | 'g'..='q' | 's' | 't' | 'v'..='z' | 'A'..='E' | 'G'..='Q' | 'S' | 'T' | 'V'..='Z' | '_' => {
                         self.lex_identifier_or_keyword(state);
                     }
                     '(' | '[' | '{' => {
@@ -501,19 +551,19 @@ impl<'config> PythonLexer<'config> {
                     _ => {
                         // Fallback to error
                         state.advance(ch.len_utf8());
-                        state.add_token(PythonSyntaxKind::Error, safe_point, state.get_position());
+                        state.add_token(PythonTokenType::Error, safe_point, state.get_position())
                     }
                 }
             }
 
-            state.advance_if_dead_lock(safe_point);
+            state.advance_if_dead_lock(safe_point)
         }
 
         // Emit remaining dedents
         while indent_stack.len() > 1 {
             indent_stack.pop();
             let pos = state.get_position();
-            state.add_token(PythonSyntaxKind::Dedent, pos, pos);
+            state.add_token(PythonTokenType::Dedent, pos, pos)
         }
 
         Ok(())
@@ -529,16 +579,16 @@ impl<'config> PythonLexer<'config> {
             let mut indent = 0;
             while let Some(ch) = state.get_char_at(temp_state) {
                 if ch == ' ' {
-                    indent += 1;
+                    indent += 1
                 }
                 else if ch == '\t' {
-                    indent += 8;
+                    indent += 8
                 }
                 // Standard Python tab width
                 else {
                     break;
                 }
-                temp_state += 1;
+                temp_state += 1
             }
 
             match state.get_char_at(temp_state) {
@@ -557,19 +607,19 @@ impl<'config> PythonLexer<'config> {
         // Advance state to skip the indentation we just measured
         if current_indent > 0 {
             let end_pos = state.get_position() + (temp_state - state.get_position());
-            state.add_token(PythonSyntaxKind::Whitespace, start_pos, end_pos);
+            state.add_token(PythonTokenType::Whitespace, start_pos, end_pos);
             state.set_position(end_pos);
         }
 
         let last_indent = *stack.last().unwrap();
         if current_indent > last_indent {
             stack.push(current_indent);
-            state.add_token(PythonSyntaxKind::Indent, state.get_position(), state.get_position());
+            state.add_token(PythonTokenType::Indent, state.get_position(), state.get_position())
         }
         else {
             while current_indent < *stack.last().unwrap() {
                 stack.pop();
-                state.add_token(PythonSyntaxKind::Dedent, state.get_position(), state.get_position());
+                state.add_token(PythonTokenType::Dedent, state.get_position(), state.get_position())
             }
             // If current_indent doesn't match any previous level, it's an indentation error,
             // but for now we just stop at the closest level.

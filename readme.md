@@ -2,7 +2,15 @@
 
 [![Rust Version](https://img.shields.io/badge/rust-nightly-blue.svg)](https://www.rust-lang.org)
 
-Oaks is a modular parser framework for Rust that provides a unified approach to building language parsers. Built on the oak-core foundation, Oaks offers a comprehensive set of tools for lexical analysis, parsing, and syntax tree manipulation.
+Oaks is a modular parser framework for Rust that provides a unified approach to building language parsers. Built on the `oak-core` foundation, Oaks offers a comprehensive set of tools for lexical analysis, parsing, and syntax tree manipulation.
+
+## 🌟 Why Oaks?
+
+Oaks is designed for developers who need more than what parser generators can offer. Our philosophy focuses on three core pillars:
+
+- **Hand-written Optimization**: Unlike generic parser generators, Oaks encourages hand-written parsing logic. This gives you absolute control over the parsing process, allowing for micro-optimizations that generators often miss.
+- **Language-Specific Acceleration**: Every language has its own quirks. Oaks provides the infrastructure to leverage language-specific features for maximum performance, ensuring that your parser is as fast as possible for its specific domain.
+- **Human-Centric Design**: We believe parsers should be easy to debug and use. Oaks produces highly readable syntax trees and provides clear, actionable error messages that help developers identify and fix issues instantly.
 
 ## 🚀 Features
 
@@ -32,44 +40,42 @@ Powered by the `Transformer` trait, it enables high-performance code refactoring
 | Component          | Description                           | Status         |
 |--------------------|---------------------------------------|----------------|
 | `oak-core`         | Core parsing infrastructure and traits| ✅ Active       |
+| `oak-lsp`          | Language Server Protocol support      | ✅ Active       |
+| `oak-vfs`          | Virtual File System for analysis      | ✅ Active       |
 | `oak-highlight`    | Multi-language syntax highlighter     | ✅ Active       |
 | `oak-pretty-print` | Code formatting and pretty printing   | ✅ Active       |
+| `oak-mcp`          | Model Context Protocol integration    | ✅ Active       |
+| `oak-hover`        | Semantic hover information provider   | ✅ Active       |
+| `oak-repl`         | Interactive parser testing tool       | ✅ Active       |
 | `oak-visualize`    | AST visualization and graph rendering | 🔄 Development |
 | `oaks`             | Main unified library                  | ✅ Active       |
 
 ## 🔧 Language Parsers
 
-### System Programming
+Oaks supports a wide range of languages through its modular architecture. Below are some of the supported parsers:
 
-- `oak-c` - C language parser with preprocessor
-- `oak-rust` - Rust language parser
-- `oak-zig` - Zig language parser
-- `oak-go` - Go language parser
+### System & Compiled Languages
+- `oak-c`, `oak-cpp`, `oak-rust`, `oak-go`, `oak-zig`, `oak-swift`, `oak-ada`, `oak-d`, `oak-nim`, `oak-vlang`
 
 ### Web & Scripting
+- `oak-javascript`, `oak-html`, `oak-css`, `oak-sass`, `oak-scss`, `oak-stylus`, `oak-vue`, `oak-php`, `oak-python`, `oak-ruby`, `oak-perl`, `oak-lua`, `oak-bash`, `oak-powershell`, `oak-bat`, `oak-cmd`, `oak-tcl`
 
-- `oak-javascript` - JavaScript/ECMAScript parser
-- `oak-html` - HTML parser
-- `oak-css` - CSS parser
-- `oak-json` - JSON parser with JSON5 support
-- `oak-markdown` - Markdown parser with CommonMark
+### Data & Configuration
+- `oak-json` (with JSON5), `oak-yaml`, `oak-toml`, `oak-ini`, `oak-csv`, `oak-xml`, `oak-nix`, `oak-dhall`, `oak-dot`
 
-### Functional & JVM
+### Functional & Specialized
+- `oak-java`, `oak-kotlin`, `oak-scala`, `oak-clojure`, `oak-elixir`, `oak-erlang`, `oak-fsharp`, `oak-ocaml`, `oak-julia`, `oak-matlab`, `oak-r`
+- `oak-markdown`, `oak-ascii-doc`, `oak-tex`, `oak-typst`
+- `oak-sql`, `oak-regex`, `oak-wgsl`, `oak-hlsl`, `oak-wat`
+- `oak-coq`, `oak-lean`, `oak-prolog`
 
-- `oak-python` - Python language parser
-- `oak-java` - Java language parser
-- `oak-kotlin` - Kotlin language parser
-- `oak-scala` - Scala language parser
+### Legacy & Industrial
+- `oak-cobol`, `oak-pascal`, `oak-delphi`, `oak-vhdl`
 
-### Data & Config
+### Internal & Experimental
+- `oak-voc`, `oak-voml`, `oak-von`, `oak-gsgl`, `oak-jasm`, `oak-msil`, `oak-mojo`
 
-- `oak-yaml` - YAML parser
-- `oak-toml` - TOML parser
-- `oak-ini` - INI parser
-- `oak-csv` - CSV parser
-- `oak-xml` - XML parser
-
-### And many more...
+*...and many more being added regularly.*
 
 ## 🛠️ Quick Start
 
@@ -101,11 +107,12 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
 Oaks is designed from the ground up to be a **High-Performance LSP Foundation**. Its architecture solves the most challenging problems in building modern IDE support:
 
-### The LSP Powerhouse
-- **Native LSP Type Support**: `SourceText` provides built-in, zero-cost conversion between UTF-8 byte offsets and LSP-standard `Line/Character` positions.
-- **Resilient Analysis**: The framework's **Error Recovery** ensures that your Language Server remains responsive even when the user's code is in an invalid state.
-- **HMR-Ready**: Sub-millisecond **Incremental Parsing** means your LSP can provide instant feedback on every keystroke, even in multi-megabyte files.
-- **Refactoring Engine**: The `Transformer` trait combined with **Structural Sharing** allows for complex code actions (like "Rename" or "Extract Method") to be implemented with high performance and 100% comment preservation.
+### The IDE & AI Powerhouse
+- **Native LSP & MCP Support**: Built-in support for Language Server Protocol and Model Context Protocol, enabling seamless integration with both modern IDEs and AI agents.
+- **Virtual File System (VFS)**: Integrated `oak-vfs` provides a high-performance, incremental file system abstraction, perfect for workspace-wide analysis and cross-file refactorings.
+- **Resilient Analysis**: The framework's **Error Recovery** ensures that your analysis tools remain responsive even when the code is in an invalid state.
+- **HMR-Ready**: Sub-millisecond **Incremental Parsing** means your tools can provide instant feedback on every keystroke, even in multi-megabyte files.
+- **Refactoring Engine**: The `Transformer` trait combined with **Structural Sharing** allows for complex code actions to be implemented with high performance and 100% comment preservation.
 
 ### Semantic Integration Ready
 While Oaks focuses on high-performance syntax analysis, it is designed to be the perfect foundation for semantic analysis:
@@ -136,35 +143,20 @@ Each language parser (e.g., `oak-c`, `oak-json`) follows a consistent pattern:
 oaks/
 ├── projects/              # Core libraries
 │   ├── oak-core/         # Core parsing infrastructure
-│   │   ├── src/
-│   │   │   ├── lib.rs    # Main API exports
-│   │   │   ├── language/ # Language trait
-│   │   │   ├── lexer/    # Lexer trait and utilities
-│   │   │   ├── parser/   # Parser trait and Pratt parser
-│   │   │   ├── source/   # SourceText implementation
-│   │   │   ├── tree/     # Green/Red tree implementation
-│   │   │   └── visitor/  # Tree visitor pattern
-│   │   └── Cargo.toml
+│   ├── oak-lsp/          # LSP integration
+│   ├── oak-mcp/          # MCP integration
+│   ├── oak-vfs/          # Virtual File System
 │   ├── oak-highlight/    # Syntax highlighting
 │   ├── oak-pretty-print/ # Code formatting
+│   ├── oak-hover/        # Hover support
+│   ├── oak-repl/         # Interactive testing
 │   ├── oak-visualize/    # AST visualization
 │   └── oaks/             # Main unified library
 ├── examples/             # Language parsers
-│   ├── oak-c/           # C parser example
-│   │   ├── src/
-│   │   │   ├── lib.rs   # Public API
-│   │   │   ├── language/ # Language implementation
-│   │   │   ├── lexer/   # Lexer implementation
-│   │   │   └── kind/    # SyntaxKind definitions
-│   │   └── Cargo.toml
-│   ├── oak-json/        # JSON parser example
-│   │   ├── src/
-│   │   │   ├── lib.rs   # Public API
-│   │   │   ├── language/ # Language implementation
-│   │   │   ├── lexer/   # Lexer implementation
-│   │   │   └── kind/    # SyntaxKind definitions
-│   │   └── Cargo.toml
-│   └── ...              # Other language parsers
+│   ├── oak-c/           # C parser
+│   ├── oak-rust/        # Rust parser
+│   ├── oak-json/        # JSON parser
+│   └── ...              # 50+ other languages
 └── Cargo.toml           # Workspace configuration
 ```
 
@@ -175,147 +167,39 @@ oaks/
 - Rust nightly toolchain (required for `new_range_api` feature)
 - Cargo workspace support
 
-## 📋 Examples
-
-### Parsing C Code
-
-```rust
-use oak_core::{SourceText, Parser};
-use oak_c::{CLanguage, CParser};
-
-fn parse_c_function() -> Result<(), Box<dyn std::error::Error>> {
-    let source = SourceText::new("
-        int factorial(int n) {
-            if (n <= 1) return 1;
-            return n * factorial(n - 1);
-        }
-    ");
-    
-    let parser = CParser::new(CLanguage::default());
-    let result = parser.parse(&source)?;
-    
-    println!("Parsed C function successfully");
-    Ok(())
-}
-```
-
-### Parsing JSON with Configuration
-
-```rust
-use oak_core::{SourceText, Parser};
-use oak_json::{JsonLanguage, JsonParser};
-
-fn parse_json5() -> Result<(), Box<dyn std::error::Error>> {
-    // JSON5 allows comments, trailing commas, and more
-    let source = SourceText::new(r#"
-    {
-        // This is a comment
-        "name": "Oaks Parser",
-        "version": "1.0.0",  // trailing comma
-    }
-    "#);
-    
-    // Use JSON5 configuration
-    let language = JsonLanguage::json5();
-    let parser = JsonParser::new(language);
-    let result = parser.parse(&source)?;
-    
-    println!("Parsed JSON5 successfully");
-    Ok(())
-}
-```
-
-### Incremental Parsing
-
-```rust
-use oak_core::{SourceText, Parser, TextEdit};
-use oak_json::{JsonLanguage, JsonParser};
-
-fn incremental_parsing() -> Result<(), Box<dyn std::error::Error>> {
-    let mut source = SourceText::new(r#"{"name": "Oaks"}"#);
-    
-    let language = JsonLanguage::standard();
-    let parser = JsonParser::new(language);
-    
-    // Initial parse
-    let result = parser.parse(&source)?;
-    
-    // Apply edits
-    let edits = vec![TextEdit {
-        span: 7..7,  // After "name":
-        text: ", \"version\": \"1.0\"".to_string(),
-    }];
-    
-    let min_offset = source.apply_edits(&edits);
-    
-    // Incremental reparse (only affected part)
-    let incremental_result = parser.parse_incremental(&source, min_offset)?;
-    
-    println!("Incremental parsing successful");
-    Ok(())
-}
-```
-
-### Syntax Highlighting
-
-```rust
-use oak_highlight::{Highlighter, Theme};
-use oak_c::CLanguage;
-
-fn syntax_highlighting() -> Result<(), Box<dyn std::error::Error>> {
-    let code = r#"
-    #include <stdio.h>
-    
-    int main() {
-        printf("Hello, World!\n");
-        return 0;
-    }
-    "#;
-    
-    let language = CLanguage::default();
-    let highlighter = Highlighter::new(language);
-    let highlighted = highlighter.highlight_to_html(code, Theme::Github);
-    
-    println!("Highlighted HTML: {}", highlighted);
-    Ok(())
-}
-```
-
-## 🚦 Development Status
+##  Development Status
 
 Oaks is actively developed and maintained. Current status:
 
 ### ✅ Completed
 
-- Core parser framework (`oak-core`)
-  - Language trait and infrastructure
-  - Lexer and Parser traits
-  - Green/Red tree system
-  - SourceText with line/column tracking
-  - Error recovery mechanisms
-- Basic language implementations
-  - C parser with full syntax support
-  - JSON parser with JSON5 support
-  - Other language parsers in various stages
-- Syntax highlighting system (`oak-highlight`)
-- Pretty printing framework (`oak-pretty-print`)
-- Incremental parsing support
-- Native `async trait` support (removed `async-trait` dependency)
+- **Core Framework (`oak-core`)**: Language trait, Lexer/Parser infrastructure, Green/Red tree system, SourceText with line/column tracking, and robust error recovery.
+- **IDE & AI Infrastructure**:
+    - `oak-lsp`: Full Language Server Protocol support.
+    - `oak-mcp`: Model Context Protocol for AI agent integration.
+    - `oak-vfs`: High-performance Virtual File System.
+    - `oak-highlight`: Multi-language syntax highlighting.
+    - `oak-pretty-print`: Advanced code formatting.
+    - `oak-repl`: Interactive testing environment.
+- **Language Support**:
+    - 50+ language parsers in various stages of completion.
+    - Mature implementations for C, JSON, Rust, Go, and more.
+- **Performance**:
+    - Incremental parsing support across all core components.
+    - Zero-copy lexing and efficient structural sharing.
 
 ### 🔄 In Development
 
-- Complete AST implementations for major languages
-- Advanced error recovery mechanisms
-- Performance optimizations
-- Comprehensive test coverage
-- Documentation and examples
+- **Advanced Semantic Analysis**: Symbol resolution, type checking, and cross-reference indexing.
+- **Extended Tooling**: Enhanced `oak-visualize` and automated benchmarking suites.
+- **Language Coverage**: Finalizing AST implementations for legacy and specialized languages.
+- **Documentation**: Comprehensive guides and API references.
 
 ### 📋 Planned
 
-- Language server protocol support
-- Advanced code analysis features
-- IDE integrations
-- Additional language parsers
+- **Cloud-Native Deployment**: Optimized for WASM and remote development environments.
+- **Universal Refactoring Engine**: Cross-language refactoring tools powered by `Transformer`.
+- **Advanced AI Integration**: Deep learning-assisted error recovery and code completion.
 
 ## 🤝 Contributing
 
@@ -338,8 +222,8 @@ For reference implementations, see `oak-c` and `oak-json`.
 
 ## 📚 Resources
 
-- [Repository](https://github.com/oovm/pex)
-- [Issue Tracker](https://github.com/oovm/pex/issues)
+- [Repository](https://github.com/ygg-lang/oaks)
+- [Issue Tracker](https://github.com/ygg-lang/oaks/issues)
 - Development documentation in each crate's `readme.md`
 - Examples in the `examples/` directory
 

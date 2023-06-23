@@ -1,8 +1,10 @@
-use crate::{kind::FSharpSyntaxKind, language::FSharpLanguage};
+#![doc = include_str!("readme.md")]
+pub mod token_type;
+
+use crate::{language::FSharpLanguage, lexer::token_type::FSharpTokenType};
 use oak_core::{
-    Lexer, LexerCache, LexerState, OakError,
+    Lexer, LexerCache, LexerState, OakError, Range, Source, TextEdit,
     lexer::{LexOutput, WhitespaceConfig},
-    source::Source,
 };
 use std::sync::LazyLock;
 
@@ -73,7 +75,7 @@ impl<'config> FSharpLexer<'config> {
             let start = state.get_position();
             if let Some(ch) = state.peek() {
                 state.advance(ch.len_utf8());
-                state.add_token(FSharpSyntaxKind::Error, start, state.get_position());
+                state.add_token(FSharpTokenType::Error, start, state.get_position())
             }
         }
 
@@ -82,7 +84,26 @@ impl<'config> FSharpLexer<'config> {
 
     /// 跳过空白字符
     fn skip_whitespace<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
-        FS_WHITESPACE.scan(state, FSharpSyntaxKind::Whitespace)
+        let start = state.get_position();
+        if let Some(ch) = state.peek() {
+            if ch == '\n' || ch == '\r' {
+                state.advance(ch.len_utf8());
+                state.add_token(FSharpTokenType::Newline, start, state.get_position());
+                return true;
+            }
+            if ch.is_whitespace() {
+                state.advance(ch.len_utf8());
+                while let Some(next) = state.peek() {
+                    if next == '\n' || next == '\r' || !next.is_whitespace() {
+                        break;
+                    }
+                    state.advance(next.len_utf8());
+                }
+                state.add_token(FSharpTokenType::Whitespace, start, state.get_position());
+                return true;
+            }
+        }
+        false
     }
 
     fn skip_comment<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
@@ -98,7 +119,7 @@ impl<'config> FSharpLexer<'config> {
                 }
                 state.advance(ch.len_utf8());
             }
-            state.add_token(FSharpSyntaxKind::LineComment, start, state.get_position());
+            state.add_token(FSharpTokenType::LineComment, start, state.get_position());
             return true;
         }
 
@@ -122,7 +143,7 @@ impl<'config> FSharpLexer<'config> {
                 }
                 state.advance(ch.len_utf8());
             }
-            state.add_token(FSharpSyntaxKind::BlockComment, start, state.get_position());
+            state.add_token(FSharpTokenType::BlockComment, start, state.get_position());
             return true;
         }
         false
@@ -141,7 +162,7 @@ impl<'config> FSharpLexer<'config> {
                 }
                 state.advance(ch.len_utf8());
             }
-            state.add_token(FSharpSyntaxKind::StringLiteral, start, state.get_position());
+            state.add_token(FSharpTokenType::StringLiteral, start, state.get_position());
             return true;
         }
 
@@ -163,7 +184,7 @@ impl<'config> FSharpLexer<'config> {
                     state.advance(ch.len_utf8());
                 }
             }
-            state.add_token(FSharpSyntaxKind::StringLiteral, start, state.get_position());
+            state.add_token(FSharpTokenType::StringLiteral, start, state.get_position());
             return true;
         }
         false
@@ -188,7 +209,7 @@ impl<'config> FSharpLexer<'config> {
             if state.peek() == Some('\'') {
                 state.advance(1); // 跳过结束的 '
             }
-            state.add_token(FSharpSyntaxKind::CharLiteral, start, state.get_position());
+            state.add_token(FSharpTokenType::CharLiteral, start, state.get_position());
             return true;
         }
         false
@@ -212,7 +233,7 @@ impl<'config> FSharpLexer<'config> {
             while state.current().map_or(false, |c| c.is_ascii_digit()) {
                 state.advance(1);
             }
-            state.add_token(FSharpSyntaxKind::FloatLiteral, start, state.get_position());
+            state.add_token(FSharpTokenType::FloatLiteral, start, state.get_position());
         }
         else {
             // 处理科学计数法
@@ -224,7 +245,7 @@ impl<'config> FSharpLexer<'config> {
                 while state.current().map_or(false, |c| c.is_ascii_digit()) {
                     state.advance(1);
                 }
-                state.add_token(FSharpSyntaxKind::FloatLiteral, start, state.get_position());
+                state.add_token(FSharpTokenType::FloatLiteral, start, state.get_position());
             }
             else {
                 // 处理数字后缀
@@ -233,7 +254,7 @@ impl<'config> FSharpLexer<'config> {
                         state.advance(1);
                     }
                 }
-                state.add_token(FSharpSyntaxKind::IntegerLiteral, start, state.get_position());
+                state.add_token(FSharpTokenType::IntegerLiteral, start, state.get_position());
             }
         }
 
@@ -246,90 +267,80 @@ impl<'config> FSharpLexer<'config> {
         }
 
         let start = state.get_position();
-
-        // 读取标识符
         while state.current().map_or(false, |c| c.is_ascii_alphanumeric() || c == '_') {
             state.advance(1);
         }
 
-        let text = state.get_text_from(start);
-        let kind = self.classify_identifier(&text);
+        let text = state.get_text_in((start..state.get_position()).into());
+        let kind = match text.as_ref() {
+            "abstract" => FSharpTokenType::Abstract,
+            "and" => FSharpTokenType::And,
+            "as" => FSharpTokenType::As,
+            "assert" => FSharpTokenType::Assert,
+            "base" => FSharpTokenType::Base,
+            "begin" => FSharpTokenType::Begin,
+            "class" => FSharpTokenType::Class,
+            "default" => FSharpTokenType::Default,
+            "delegate" => FSharpTokenType::Delegate,
+            "do" => FSharpTokenType::Do,
+            "done" => FSharpTokenType::Done,
+            "downcast" => FSharpTokenType::Downcast,
+            "downto" => FSharpTokenType::Downto,
+            "elif" => FSharpTokenType::Elif,
+            "else" => FSharpTokenType::Else,
+            "end" => FSharpTokenType::End,
+            "exception" => FSharpTokenType::Exception,
+            "extern" => FSharpTokenType::Extern,
+            "false" => FSharpTokenType::False,
+            "finally" => FSharpTokenType::Finally,
+            "for" => FSharpTokenType::For,
+            "fun" => FSharpTokenType::Fun,
+            "function" => FSharpTokenType::Function,
+            "if" => FSharpTokenType::If,
+            "in" => FSharpTokenType::In,
+            "inherit" => FSharpTokenType::Inherit,
+            "inline" => FSharpTokenType::Inline,
+            "interface" => FSharpTokenType::Interface,
+            "internal" => FSharpTokenType::Internal,
+            "lazy" => FSharpTokenType::Lazy,
+            "let" => FSharpTokenType::Let,
+            "match" => FSharpTokenType::Match,
+            "member" => FSharpTokenType::Member,
+            "module" => FSharpTokenType::Module,
+            "mutable" => FSharpTokenType::Mutable,
+            "namespace" => FSharpTokenType::Namespace,
+            "new" => FSharpTokenType::New,
+            "not" => FSharpTokenType::Not,
+            "null" => FSharpTokenType::Null,
+            "of" => FSharpTokenType::Of,
+            "open" => FSharpTokenType::Open,
+            "or" => FSharpTokenType::Or,
+            "override" => FSharpTokenType::Override,
+            "private" => FSharpTokenType::Private,
+            "public" => FSharpTokenType::Public,
+            "rec" => FSharpTokenType::Rec,
+            "return" => FSharpTokenType::Return,
+            "select" => FSharpTokenType::Select,
+            "static" => FSharpTokenType::Static,
+            "struct" => FSharpTokenType::Struct,
+            "then" => FSharpTokenType::Then,
+            "to" => FSharpTokenType::To,
+            "true" => FSharpTokenType::True,
+            "try" => FSharpTokenType::Try,
+            "type" => FSharpTokenType::Type,
+            "upcast" => FSharpTokenType::Upcast,
+            "use" => FSharpTokenType::Use,
+            "val" => FSharpTokenType::Val,
+            "void" => FSharpTokenType::Void,
+            "when" => FSharpTokenType::When,
+            "while" => FSharpTokenType::While,
+            "with" => FSharpTokenType::With,
+            "yield" => FSharpTokenType::Yield,
+            _ => FSharpTokenType::Identifier,
+        };
+
         state.add_token(kind, start, state.get_position());
         true
-    }
-
-    fn classify_identifier(&self, text: &str) -> FSharpSyntaxKind {
-        match text {
-            // F# 关键字
-            "abstract" => FSharpSyntaxKind::Abstract,
-            "and" => FSharpSyntaxKind::And,
-            "as" => FSharpSyntaxKind::As,
-            "assert" => FSharpSyntaxKind::Assert,
-            "base" => FSharpSyntaxKind::Base,
-            "begin" => FSharpSyntaxKind::Begin,
-            "class" => FSharpSyntaxKind::Class,
-            "default" => FSharpSyntaxKind::Default,
-            "do" => FSharpSyntaxKind::Do,
-            "done" => FSharpSyntaxKind::Done,
-            "downcast" => FSharpSyntaxKind::Downcast,
-            "downto" => FSharpSyntaxKind::Downto,
-            "elif" => FSharpSyntaxKind::Elif,
-            "else" => FSharpSyntaxKind::Else,
-            "end" => FSharpSyntaxKind::End,
-            "exception" => FSharpSyntaxKind::Exception,
-            "extern" => FSharpSyntaxKind::Extern,
-            "false" => FSharpSyntaxKind::False,
-            "finally" => FSharpSyntaxKind::Finally,
-            "for" => FSharpSyntaxKind::For,
-            "fun" => FSharpSyntaxKind::Fun,
-            "function" => FSharpSyntaxKind::Function,
-            "global" => FSharpSyntaxKind::Global,
-            "if" => FSharpSyntaxKind::If,
-            "in" => FSharpSyntaxKind::In,
-            "inherit" => FSharpSyntaxKind::Inherit,
-            "inline" => FSharpSyntaxKind::Inline,
-            "interface" => FSharpSyntaxKind::Interface,
-            "internal" => FSharpSyntaxKind::Internal,
-            "lazy" => FSharpSyntaxKind::Lazy,
-            "let" => FSharpSyntaxKind::Let,
-            "match" => FSharpSyntaxKind::Match,
-            "member" => FSharpSyntaxKind::Member,
-            "module" => FSharpSyntaxKind::Module,
-            "mutable" => FSharpSyntaxKind::Mutable,
-            "namespace" => FSharpSyntaxKind::Namespace,
-            "new" => FSharpSyntaxKind::New,
-            "not" => FSharpSyntaxKind::Not,
-            "null" => FSharpSyntaxKind::Null,
-            "of" => FSharpSyntaxKind::Of,
-            "open" => FSharpSyntaxKind::Open,
-            "or" => FSharpSyntaxKind::Or,
-            "override" => FSharpSyntaxKind::Override,
-            "private" => FSharpSyntaxKind::Private,
-            "public" => FSharpSyntaxKind::Public,
-            "rec" => FSharpSyntaxKind::Rec,
-            "return" => FSharpSyntaxKind::Return,
-            "sig" => FSharpSyntaxKind::Sig,
-            "static" => FSharpSyntaxKind::Static,
-            "struct" => FSharpSyntaxKind::Struct,
-            "then" => FSharpSyntaxKind::Then,
-            "to" => FSharpSyntaxKind::To,
-            "true" => FSharpSyntaxKind::True,
-            "try" => FSharpSyntaxKind::Try,
-            "type" => FSharpSyntaxKind::Type,
-            "upcast" => FSharpSyntaxKind::Upcast,
-            "use" => FSharpSyntaxKind::Use,
-            "val" => FSharpSyntaxKind::Val,
-            "void" => FSharpSyntaxKind::Void,
-            "when" => FSharpSyntaxKind::When,
-            "while" => FSharpSyntaxKind::While,
-            "with" => FSharpSyntaxKind::With,
-            "yield" => FSharpSyntaxKind::Yield,
-            "async" => FSharpSyntaxKind::Async,
-            "seq" => FSharpSyntaxKind::Seq,
-            "raise" => FSharpSyntaxKind::Raise,
-            "failwith" => FSharpSyntaxKind::Failwith,
-            _ => FSharpSyntaxKind::Identifier,
-        }
     }
 
     fn lex_operator_or_punctuation<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
@@ -346,37 +357,37 @@ impl<'config> FSharpLexer<'config> {
         match (c, next) {
             ('-', Some('>')) => {
                 state.advance(2);
-                state.add_token(FSharpSyntaxKind::Arrow, start, state.get_position());
+                state.add_token(FSharpTokenType::Arrow, start, state.get_position());
                 return true;
             }
             (':', Some(':')) => {
                 state.advance(2);
-                state.add_token(FSharpSyntaxKind::Cons, start, state.get_position());
+                state.add_token(FSharpTokenType::Cons, start, state.get_position());
                 return true;
             }
             ('=', Some('=')) => {
                 state.advance(2);
-                state.add_token(FSharpSyntaxKind::Equal, start, state.get_position());
+                state.add_token(FSharpTokenType::Equal, start, state.get_position());
                 return true;
             }
             ('<', Some('=')) => {
                 state.advance(2);
-                state.add_token(FSharpSyntaxKind::LessEqual, start, state.get_position());
+                state.add_token(FSharpTokenType::LessEqual, start, state.get_position());
                 return true;
             }
             ('>', Some('=')) => {
                 state.advance(2);
-                state.add_token(FSharpSyntaxKind::GreaterEqual, start, state.get_position());
+                state.add_token(FSharpTokenType::GreaterEqual, start, state.get_position());
                 return true;
             }
             ('<', Some('>')) => {
                 state.advance(2);
-                state.add_token(FSharpSyntaxKind::NotEqual, start, state.get_position());
+                state.add_token(FSharpTokenType::NotEqual, start, state.get_position());
                 return true;
             }
             ('|', Some('>')) => {
                 state.advance(2);
-                state.add_token(FSharpSyntaxKind::Pipe, start, state.get_position());
+                state.add_token(FSharpTokenType::Pipe, start, state.get_position());
                 return true;
             }
             _ => {}
@@ -384,29 +395,29 @@ impl<'config> FSharpLexer<'config> {
 
         // 单字符操作符和标点符号
         let kind = match c {
-            '+' => FSharpSyntaxKind::Plus,
-            '-' => FSharpSyntaxKind::Minus,
-            '*' => FSharpSyntaxKind::Star,
-            '/' => FSharpSyntaxKind::Slash,
-            '%' => FSharpSyntaxKind::Percent,
-            '=' => FSharpSyntaxKind::Equal,
-            '<' => FSharpSyntaxKind::LessThan,
-            '>' => FSharpSyntaxKind::GreaterThan,
-            '&' => FSharpSyntaxKind::Ampersand,
-            '|' => FSharpSyntaxKind::Pipe,
-            '^' => FSharpSyntaxKind::Caret,
-            '!' => FSharpSyntaxKind::Not,
-            '?' => FSharpSyntaxKind::Question,
-            ':' => FSharpSyntaxKind::Colon,
-            ';' => FSharpSyntaxKind::Semicolon,
-            ',' => FSharpSyntaxKind::Comma,
-            '.' => FSharpSyntaxKind::Dot,
-            '(' => FSharpSyntaxKind::LeftParen,
-            ')' => FSharpSyntaxKind::RightParen,
-            '[' => FSharpSyntaxKind::LeftBracket,
-            ']' => FSharpSyntaxKind::RightBracket,
-            '{' => FSharpSyntaxKind::LeftBrace,
-            '}' => FSharpSyntaxKind::RightBrace,
+            '+' => FSharpTokenType::Plus,
+            '-' => FSharpTokenType::Minus,
+            '*' => FSharpTokenType::Star,
+            '/' => FSharpTokenType::Slash,
+            '%' => FSharpTokenType::Percent,
+            '=' => FSharpTokenType::Equal,
+            '<' => FSharpTokenType::LessThan,
+            '>' => FSharpTokenType::GreaterThan,
+            '&' => FSharpTokenType::Ampersand,
+            '|' => FSharpTokenType::Pipe,
+            '^' => FSharpTokenType::Caret,
+            '!' => FSharpTokenType::Not,
+            '?' => FSharpTokenType::Question,
+            ':' => FSharpTokenType::Colon,
+            ';' => FSharpTokenType::Semicolon,
+            ',' => FSharpTokenType::Comma,
+            '.' => FSharpTokenType::Dot,
+            '(' => FSharpTokenType::LeftParen,
+            ')' => FSharpTokenType::RightParen,
+            '[' => FSharpTokenType::LeftBracket,
+            ']' => FSharpTokenType::RightBracket,
+            '{' => FSharpTokenType::LeftBrace,
+            '}' => FSharpTokenType::RightBrace,
             _ => return false,
         };
 

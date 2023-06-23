@@ -59,8 +59,8 @@ fn bench_finish_snapshot_32_tokens(b: &mut Bencher) {
         for _ in 0..32 {
             sink.push_leaf(MockToken::Text, 1);
         }
-        test::black_box(sink.finish_node(0, MockElement::Root));
-    });
+        test::black_box(sink.finish_node(0, MockElement::Root))
+    })
 }
 
 #[bench]
@@ -76,8 +76,8 @@ fn bench_finish_at_nested_8x4_tokens(b: &mut Bencher) {
             }
             sink.finish_node(cp, MockElement::Child);
         }
-        test::black_box(sink.finish_node(root_cp, MockElement::Root));
-    });
+        test::black_box(sink.finish_node(root_cp, MockElement::Root))
+    })
 }
 
 #[bench]
@@ -88,6 +88,6 @@ fn bench_hash_consing_same_shape_repeated(b: &mut Bencher) {
         for _ in 0..4 {
             sink.push_leaf(MockToken::Text, 5);
         }
-        test::black_box(sink.finish_node(0, MockElement::Child));
-    });
+        test::black_box(sink.finish_node(0, MockElement::Child))
+    })
 }

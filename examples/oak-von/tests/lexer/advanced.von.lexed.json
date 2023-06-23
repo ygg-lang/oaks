@@ -1,0 +1,397 @@
+{
+  "success": true,
+  "count": 65,
+  "tokens": [
+    {
+      "kind": "LeftBrace",
+      "text": "{",
+      "start": 0,
+      "end": 1
+    },
+    {
+      "kind": "Identifier",
+      "text": "number_with_underscore",
+      "start": 6,
+      "end": 28
+    },
+    {
+      "kind": "Eq",
+      "text": "=",
+      "start": 29,
+      "end": 30
+    },
+    {
+      "kind": "IntegerLiteral",
+      "text": "1_000_000",
+      "start": 31,
+      "end": 40
+    },
+    {
+      "kind": "Comma",
+      "text": ",",
+      "start": 40,
+      "end": 41
+    },
+    {
+      "kind": "Identifier",
+      "text": "float_with_underscore",
+      "start": 46,
+      "end": 67
+    },
+    {
+      "kind": "Eq",
+      "text": "=",
+      "start": 68,
+      "end": 69
+    },
+    {
+      "kind": "FloatLiteral",
+      "text": "1_234.567_8",
+      "start": 70,
+      "end": 81
+    },
+    {
+      "kind": "Comma",
+      "text": ",",
+      "start": 81,
+      "end": 82
+    },
+    {
+      "kind": "Identifier",
+      "text": "colon_style",
+      "start": 87,
+      "end": 98
+    },
+    {
+      "kind": "Colon",
+      "text": ":",
+      "start": 99,
+      "end": 100
+    },
+    {
+      "kind": "StringLiteral",
+      "text": "\"supported\"",
+      "start": 101,
+      "end": 112
+    },
+    {
+      "kind": "Comma",
+      "text": ",",
+      "start": 112,
+      "end": 113
+    },
+    {
+      "kind": "Identifier",
+      "text": "mixed_style",
+      "start": 118,
+      "end": 129
+    },
+    {
+      "kind": "Eq",
+      "text": "=",
+      "start": 130,
+      "end": 131
+    },
+    {
+      "kind": "LeftBrace",
+      "text": "{",
+      "start": 132,
+      "end": 133
+    },
+    {
+      "kind": "Identifier",
+      "text": "key1",
+      "start": 142,
+      "end": 146
+    },
+    {
+      "kind": "Colon",
+      "text": ":",
+      "start": 146,
+      "end": 147
+    },
+    {
+      "kind": "StringLiteral",
+      "text": "\"value1\"",
+      "start": 148,
+      "end": 156
+    },
+    {
+      "kind": "Comma",
+      "text": ",",
+      "start": 156,
+      "end": 157
+    },
+    {
+      "kind": "Identifier",
+      "text": "key2",
+      "start": 166,
+      "end": 170
+    },
+    {
+      "kind": "Eq",
+      "text": "=",
+      "start": 171,
+      "end": 172
+    },
+    {
+      "kind": "StringLiteral",
+      "text": "\"value2\"",
+      "start": 173,
+      "end": 181
+    },
+    {
+      "kind": "RightBrace",
+      "text": "}",
+      "start": 186,
+      "end": 187
+    },
+    {
+      "kind": "Comma",
+      "text": ",",
+      "start": 187,
+      "end": 188
+    },
+    {
+      "kind": "Identifier",
+      "text": "special_values",
+      "start": 193,
+      "end": 207
+    },
+    {
+      "kind": "Eq",
+      "text": "=",
+      "start": 208,
+      "end": 209
+    },
+    {
+      "kind": "LeftBracket",
+      "text": "[",
+      "start": 210,
+      "end": 211
+    },
+    {
+      "kind": "NullLiteral",
+      "text": "none",
+      "start": 211,
+      "end": 215
+    },
+    {
+      "kind": "Comma",
+      "text": ",",
+      "start": 215,
+      "end": 216
+    },
+    {
+      "kind": "NullLiteral",
+      "text": "null",
+      "start": 217,
+      "end": 221
+    },
+    {
+      "kind": "Comma",
+      "text": ",",
+      "start": 221,
+      "end": 222
+    },
+    {
+      "kind": "UndefinedLiteral",
+      "text": "undefined",
+      "start": 223,
+      "end": 232
+    },
+    {
+      "kind": "Comma",
+      "text": ",",
+      "start": 232,
+      "end": 233
+    },
+    {
+      "kind": "InfLiteral",
+      "text": "inf",
+      "start": 234,
+      "end": 237
+    },
+    {
+      "kind": "Comma",
+      "text": ",",
+      "start": 237,
+      "end": 238
+    },
+    {
+      "kind": "InfLiteral",
+      "text": "infinity",
+      "start": 239,
+      "end": 247
+    },
+    {
+      "kind": "Comma",
+      "text": ",",
+      "start": 247,
+      "end": 248
+    },
+    {
+      "kind": "NanLiteral",
+      "text": "nan",
+      "start": 249,
+      "end": 252
+    },
+    {
+      "kind": "RightBracket",
+      "text": "]",
+      "start": 252,
+      "end": 253
+    },
+    {
+      "kind": "Comma",
+      "text": ",",
+      "start": 253,
+      "end": 254
+    },
+    {
+      "kind": "Identifier",
+      "text": "tuple_value",
+      "start": 259,
+      "end": 270
+    },
+    {
+      "kind": "Eq",
+      "text": "=",
+      "start": 271,
+      "end": 272
+    },
+    {
+      "kind": "LeftParen",
+      "text": "(",
+      "start": 273,
+      "end": 274
+    },
+    {
+      "kind": "IntegerLiteral",
+      "text": "1",
+      "start": 274,
+      "end": 275
+    },
+    {
+      "kind": "Comma",
+      "text": ",",
+      "start": 275,
+      "end": 276
+    },
+    {
+      "kind": "StringLiteral",
+      "text": "\"a\"",
+      "start": 277,
+      "end": 280
+    },
+    {
+      "kind": "Comma",
+      "text": ",",
+      "start": 280,
+      "end": 281
+    },
+    {
+      "kind": "BoolLiteral",
+      "text": "true",
+      "start": 282,
+      "end": 286
+    },
+    {
+      "kind": "RightParen",
+      "text": ")",
+      "start": 286,
+      "end": 287
+    },
+    {
+      "kind": "Comma",
+      "text": ",",
+      "start": 287,
+      "end": 288
+    },
+    {
+      "kind": "Identifier",
+      "text": "nested_tuple",
+      "start": 293,
+      "end": 305
+    },
+    {
+      "kind": "Eq",
+      "text": "=",
+      "start": 306,
+      "end": 307
+    },
+    {
+      "kind": "LeftParen",
+      "text": "(",
+      "start": 308,
+      "end": 309
+    },
+    {
+      "kind": "IntegerLiteral",
+      "text": "1",
+      "start": 309,
+      "end": 310
+    },
+    {
+      "kind": "Comma",
+      "text": ",",
+      "start": 310,
+      "end": 311
+    },
+    {
+      "kind": "LeftParen",
+      "text": "(",
+      "start": 312,
+      "end": 313
+    },
+    {
+      "kind": "IntegerLiteral",
+      "text": "2",
+      "start": 313,
+      "end": 314
+    },
+    {
+      "kind": "Comma",
+      "text": ",",
+      "start": 314,
+      "end": 315
+    },
+    {
+      "kind": "IntegerLiteral",
+      "text": "3",
+      "start": 316,
+      "end": 317
+    },
+    {
+      "kind": "RightParen",
+      "text": ")",
+      "start": 317,
+      "end": 318
+    },
+    {
+      "kind": "Comma",
+      "text": ",",
+      "start": 318,
+      "end": 319
+    },
+    {
+      "kind": "IntegerLiteral",
+      "text": "4",
+      "start": 320,
+      "end": 321
+    },
+    {
+      "kind": "RightParen",
+      "text": ")",
+      "start": 321,
+      "end": 322
+    },
+    {
+      "kind": "RightBrace",
+      "text": "}",
+      "start": 323,
+      "end": 324
+    }
+  ],
+  "errors": []
+}

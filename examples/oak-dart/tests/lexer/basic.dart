@@ -62,7 +62,7 @@ void main() async {
     
     Student(String name, int age, this.school) : super(name, age);
     
-    @override
+    ↯override
     void introduce() {
       super.introduce();
       print('I study at $school.');
@@ -93,12 +93,12 @@ void main() async {
   
   // Interface (implicit in Dart)
   class Dog implements Animal {
-    @override
+    ↯override
     String name;
     
     Dog(this.name);
     
-    @override
+    ↯override
     void makeSound() {
       print('$name barks!');
     }

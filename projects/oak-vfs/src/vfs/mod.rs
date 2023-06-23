@@ -1,6 +1,14 @@
+//! Virtual File System (VFS) implementations and management.
+//!
+//! This module provides different implementations of the [`Vfs`](crate::Vfs) trait,
+//! including in-memory and disk-based storage.
+
+/// Disk-based VFS implementation using the local file system.
 #[cfg(feature = "disk")]
 pub mod disk;
+/// In-memory VFS implementation.
 pub mod memory;
+/// File system watcher for tracking changes on disk.
 #[cfg(feature = "disk")]
 pub mod watch;
 

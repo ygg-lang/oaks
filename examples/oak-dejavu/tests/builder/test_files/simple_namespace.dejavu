@@ -1,0 +1,5 @@
+namespace Test {
+    micro main() {
+        let x = 42;
+    }
+}

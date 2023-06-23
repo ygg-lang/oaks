@@ -1,162 +1,32 @@
-# Oak CSV Parser
+# 🚀 Oak CSV Parser
 
 [![Crates.io](https://img.shields.io/crates/v/oak-csv.svg)](https://crates.io/crates/oak-csv)
 [![Documentation](https://docs.rs/oak-csv/badge.svg)](https://docs.rs/oak-csv)
 
-High-performance incremental CSV parser for the oak ecosystem with flexible configuration, optimized for data processing and analysis.
+**High-Performance Tabular Data Processing** — A high-performance, incremental CSV parser built on the Oak framework. Optimized for large-scale data analysis, real-time streaming, and robust handling of tabular data formats.
 
-## 🎯 Overview
+## 🎯 Project Vision
 
-Oak-csv is a robust parser for CSV, designed to handle complete CSV syntax including modern features. Built on the solid foundation of oak-core, it provides both high-level convenience and detailed AST generation for data processing and analysis.
+Comma-Separated Values (CSV) are the universal language of data exchange, used across every industry from finance to scientific research. `oak-csv` provides a modern, Rust-powered infrastructure for analyzing and processing tabular data with extreme efficiency. By utilizing Oak's incremental parsing capabilities, it enables the creation of highly responsive data tools that can handle gigabyte-scale files with sub-millisecond updates. Whether you are building data validation engines, automated ETL pipelines, or sophisticated spreadsheet-like editors, `oak-csv` provides the robust, efficient foundation you need for high-fidelity data extraction.
 
-## ✨ Features
+## ✨ Core Features
 
-- **Complete CSV Syntax**: Supports all CSV features including modern specifications
-- **Full AST Generation**: Generates comprehensive Abstract Syntax Trees
-- **Lexer Support**: Built-in tokenization with proper span information
-- **Error Recovery**: Graceful handling of syntax errors with detailed diagnostics
+- **⚡ Blazing Fast**: Leverages Rust's zero-cost abstractions to parse massive CSV datasets with maximum throughput and minimal memory overhead.
+- **🔄 Incremental by Nature**: Built-in support for partial updates—re-parse only modified rows or columns. Ideal for real-time data monitoring and large-scale dataset editing.
+- **🌳 High-Fidelity AST**: Generates a clean and easy-to-traverse Abstract Syntax Tree capturing:
+    - **Rows & Records**: Precise mapping of records, including support for complex quoting and escaping rules.
+    - **Headers & Fields**: Automatic identification of header rows and field-level metadata.
+    - **Delimiters**: Robust handling of various delimiters (comma, tab, semicolon) and line endings.
+- **🛡️ Industrial-Grade Fault Tolerance**: Engineered to handle malformed data gracefully, providing precise diagnostics for unclosed quotes, mismatched column counts, or invalid encoding.
+- **🧩 Deep Ecosystem Integration**: Seamlessly works with `oak-lsp` for full LSP support and `oak-mcp` for intelligent data discovery and structured analysis.
 
-## 🚀 Quick Start
+## 🏗️ Architecture
 
-Basic example:
-
-```rust
-use oak_csv::CsvParser;
-
-fn main() -> Result<(), Box<dyn std::error::Error>> {
-    let parser = CsvParser::new();
-    let csv_content = r#"
-name,age,city,country
-John Doe,25,New York,USA
-Jane Smith,30,London,UK
-Bob Johnson,35,Paris,France
-    "#;
-    
-    let document = parser.parse_document(csv_content)?;
-    println!("Parsed CSV document with {} records.", document.records.len());
-    Ok(())
-}
-```
-
-## 📋 Parsing Examples
-
-### Document Parsing
-```rust
-use oak_csv::{CsvParser, ast::Document};
-
-let parser = CsvParser::new();
-let csv_content = r#"
-product_id,product_name,price,stock
-001,Smartphone,599.99,50
-002,Laptop,1299.99,25
-003,Headphones,199.99,100
-"#;
-
-let document = parser.parse_document(csv_content)?;
-println!("Headers: {:?}", document.headers);
-println!("Records: {}", document.records.len());
-```
-
-### Record Parsing
-```rust
-use oak_csv::{CsvParser, ast::Record};
-
-let parser = CsvParser::new();
-let csv_content = "Alice,28,Engineer,Seattle";
-
-let record = parser.parse_record(csv_content)?;
-println!("Fields: {:?}", record.fields);
-println!("Field count: {}", record.fields.len());
-```
-
-### Field Parsing
-```rust
-use oak_csv::{CsvParser, ast::Field};
-
-let parser = CsvParser::new();
-let field_content = "\"John \"JD\" Doe\"";
-
-let field = parser.parse_field(field_content)?;
-println!("Field value: {}", field.value);
-println!("Quoted: {}", field.is_quoted);
-```
-
-## 🔧 Advanced Features
-
-### Token-Level Parsing
-```rust
-use oak_csv::{CsvParser, lexer::Token};
-
-let parser = CsvParser::new();
-let tokens = parser.tokenize("name,age,city\nJohn,25,NYC")?;
-for token in tokens {
-    println!("{:?}", token.kind);
-}
-```
-
-### Error Handling
-```rust
-use oak_csv::CsvParser;
-
-let parser = CsvParser::new();
-let invalid_csv = r#"
-name,age,city
-John,25,NYC
-Jane,30  // Missing field
-Bob,35,London,UK
-"#;
-
-match parser.parse_document(invalid_csv) {
-    Ok(document) => println!("Parsed CSV document successfully."),
-    Err(e) => {
-        println!("Parse error at line {} column {}: {}", 
-            e.line(), e.column(), e.message());
-        if let Some(context) = e.context() {
-            println!("Error context: {}", context);
-        }
-    }
-}
-```
-
-## 🏗️ AST Structure
-
-The parser generates a comprehensive AST with the following main structures:
-
-- **Document**: Root container for CSV documents
-- **Record**: CSV records with field values
-- **Field**: Individual CSV fields with optional quoting
-- **Header**: Optional header row with column names
-- **Delimiter**: Field delimiter (usually comma)
-- **Quote**: Quote character for quoted fields
-
-## 📊 Performance
-
-- **Streaming**: Parse large CSV files without loading entirely into memory
-- **Incremental**: Re-parse only changed sections
-- **Memory Efficient**: Smart AST node allocation
-- **Fast Recovery**: Quick error recovery for better IDE integration
-
-## 🔗 Integration
-
-Oak-csv integrates seamlessly with:
-
-- **Data Processing**: Extract data from CSV files
-- **Configuration Files**: Parse CSV configuration files
-- **Data Analysis**: Process CSV data for analysis
-- **IDE Support**: Language server protocol compatibility
-- **ETL Pipelines**: CSV parsing for data transformation
-
-## 📚 Examples
-
-Check out the [examples](examples/) directory for comprehensive examples:
-
-- Complete CSV document parsing
-- Record and field analysis
-- Data extraction and transformation
-- Integration with development workflows
+The parser follows the **Green/Red Tree** architecture (inspired by Roslyn), which allows for:
+1. **Efficient Immutability**: Share nodes across different versions of the tree without copying.
+2. **Lossless Syntax Trees**: Retains all trivia (whitespace and comments), enabling faithful code formatting and refactoring.
+3. **Type Safety**: Strongly-typed "Red" nodes provide a convenient and safe API for tree traversal and analysis.
 
 ## 🤝 Contributing
 
-Contributions are welcome! 
-
-Please feel free to submit pull requests at the [project repository](https://github.com/ygg-lang/oaks/tree/dev/examples/oak-csv) or open [issues](https://github.com/ygg-lang/oaks/issues).
+We welcome contributions of all kinds! If you find a bug, have a feature request, or want to contribute code, please check our [issues](https://github.com/ygg-lang/oaks/issues) or submit a pull request.

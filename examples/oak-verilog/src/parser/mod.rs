@@ -1,3 +1,9 @@
+#![doc = include_str!("readme.md")]
+
+pub mod element_type;
+
+pub use crate::lexer::token_type::VerilogKind as VerilogElementType;
+
 use crate::{language::VerilogLanguage, lexer::VerilogLexer};
 use oak_core::{
     TextEdit,
@@ -5,7 +11,7 @@ use oak_core::{
     source::Source,
 };
 
-mod parse;
+mod parse_top_level;
 
 pub(crate) type State<'a, S> = ParserState<'a, VerilogLanguage, S>;
 

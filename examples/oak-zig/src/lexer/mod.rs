@@ -1,8 +1,9 @@
-use crate::{kind::ZigSyntaxKind, language::ZigLanguage};
+#![doc = include_str!("readme.md")]
+use crate::{language::ZigLanguage, lexer::token_type::ZigTokenType};
+pub mod token_type;
 use oak_core::{
-    Lexer, LexerCache, LexerState, OakError,
+    Lexer, LexerCache, LexerState, OakError, Source,
     lexer::{LexOutput, WhitespaceConfig},
-    source::Source,
 };
 use std::sync::LazyLock;
 
@@ -20,7 +21,7 @@ impl<'config> Lexer<ZigLanguage> for ZigLexer<'config> {
         let mut state = State::new_with_cache(source, 0, cache);
         let result = self.run(&mut state);
         if result.is_ok() {
-            state.add_eof();
+            state.add_eof()
         }
         state.finish_with_cache(result, cache)
     }
@@ -76,10 +77,10 @@ impl<'config> ZigLexer<'config> {
             let start_pos = state.get_position();
             if let Some(ch) = state.peek() {
                 state.advance(ch.len_utf8());
-                state.add_token(ZigSyntaxKind::Error, start_pos, state.get_position());
+                state.add_token(ZigTokenType::Error, start_pos, state.get_position())
             }
 
-            state.advance_if_dead_lock(safe_point);
+            state.advance_if_dead_lock(safe_point)
         }
 
         Ok(())
@@ -87,7 +88,7 @@ impl<'config> ZigLexer<'config> {
 
     /// 跳过空白字符
     fn skip_whitespace<S: Source + ?Sized>(&self, state: &mut State<'_, S>) -> bool {
-        ZIG_WHITESPACE.scan(state, ZigSyntaxKind::Whitespace)
+        ZIG_WHITESPACE.scan(state, ZigTokenType::Whitespace)
     }
 
     /// 跳过注释
@@ -112,10 +113,10 @@ impl<'config> ZigLexer<'config> {
                 if ch == '\n' || ch == '\r' {
                     break;
                 }
-                state.advance(ch.len_utf8());
+                state.advance(ch.len_utf8())
             }
 
-            let kind = if is_doc_comment { ZigSyntaxKind::DocComment } else { ZigSyntaxKind::Comment };
+            let kind = if is_doc_comment { ZigTokenType::DocComment } else { ZigTokenType::Comment };
             state.add_token(kind, start, state.get_position());
             return true;
         }
@@ -137,7 +138,7 @@ impl<'config> ZigLexer<'config> {
                     state.advance(1);
                     break;
                 }
-                state.advance(ch.len_utf8());
+                state.advance(ch.len_utf8())
             }
 
             // 读取多行字符串内容
@@ -157,11 +158,11 @@ impl<'config> ZigLexer<'config> {
                         state.advance(1);
                         break;
                     }
-                    state.advance(ch.len_utf8());
+                    state.advance(ch.len_utf8())
                 }
             }
 
-            state.add_token(ZigSyntaxKind::StringLiteral, start, state.get_position());
+            state.add_token(ZigTokenType::StringLiteral, start, state.get_position());
             return true;
         }
 
@@ -176,13 +177,13 @@ impl<'config> ZigLexer<'config> {
                 if ch == '\\' {
                     state.advance(1);
                     if let Some(next) = state.peek() {
-                        state.advance(next.len_utf8());
+                        state.advance(next.len_utf8())
                     }
                     continue;
                 }
-                state.advance(ch.len_utf8());
+                state.advance(ch.len_utf8())
             }
-            state.add_token(ZigSyntaxKind::StringLiteral, start, state.get_position());
+            state.add_token(ZigTokenType::StringLiteral, start, state.get_position());
             return true;
         }
 
@@ -202,13 +203,13 @@ impl<'config> ZigLexer<'config> {
                 if ch == '\\' {
                     state.advance(1);
                     if let Some(next) = state.peek() {
-                        state.advance(next.len_utf8());
+                        state.advance(next.len_utf8())
                     }
                     continue;
                 }
-                state.advance(ch.len_utf8());
+                state.advance(ch.len_utf8())
             }
-            state.add_token(ZigSyntaxKind::CharLiteral, start, state.get_position());
+            state.add_token(ZigTokenType::CharLiteral, start, state.get_position());
             return true;
         }
         false
@@ -274,7 +275,7 @@ impl<'config> ZigLexer<'config> {
                     }
                 }
 
-                let kind = if is_float { ZigSyntaxKind::FloatLiteral } else { ZigSyntaxKind::IntegerLiteral };
+                let kind = if is_float { ZigTokenType::FloatLiteral } else { ZigTokenType::IntegerLiteral };
                 state.add_token(kind, start, state.get_position());
                 return true;
             }
@@ -301,122 +302,122 @@ impl<'config> ZigLexer<'config> {
     }
 
     /// 获取关键字或标识符类型
-    fn get_keyword_or_identifier(&self, text: &str) -> ZigSyntaxKind {
+    fn get_keyword_or_identifier(&self, text: &str) -> ZigTokenType {
         match text {
             // 基本结构
-            "const" => ZigSyntaxKind::Const,
-            "var" => ZigSyntaxKind::Var,
-            "fn" => ZigSyntaxKind::Fn,
-            "struct" => ZigSyntaxKind::Struct,
-            "union" => ZigSyntaxKind::Union,
-            "enum" => ZigSyntaxKind::Enum,
-            "opaque" => ZigSyntaxKind::Opaque,
-            "type" => ZigSyntaxKind::Type,
-            "comptime" => ZigSyntaxKind::Comptime,
-            "inline" => ZigSyntaxKind::Inline,
-            "noinline" => ZigSyntaxKind::NoInline,
-            "pub" => ZigSyntaxKind::Pub,
-            "export" => ZigSyntaxKind::Export,
-            "extern" => ZigSyntaxKind::Extern,
-            "packed" => ZigSyntaxKind::Packed,
-            "align" => ZigSyntaxKind::Align,
-            "callconv" => ZigSyntaxKind::CallConv,
-            "linksection" => ZigSyntaxKind::LinkSection,
+            "const" => ZigTokenType::Const,
+            "var" => ZigTokenType::Var,
+            "fn" => ZigTokenType::Fn,
+            "struct" => ZigTokenType::Struct,
+            "union" => ZigTokenType::Union,
+            "enum" => ZigTokenType::Enum,
+            "opaque" => ZigTokenType::Opaque,
+            "type" => ZigTokenType::Type,
+            "comptime" => ZigTokenType::Comptime,
+            "inline" => ZigTokenType::Inline,
+            "noinline" => ZigTokenType::NoInline,
+            "pub" => ZigTokenType::Pub,
+            "export" => ZigTokenType::Export,
+            "extern" => ZigTokenType::Extern,
+            "packed" => ZigTokenType::Packed,
+            "align" => ZigTokenType::Align,
+            "callconv" => ZigTokenType::CallConv,
+            "linksection" => ZigTokenType::LinkSection,
 
             // 控制流
-            "if" => ZigSyntaxKind::If,
-            "else" => ZigSyntaxKind::Else,
-            "switch" => ZigSyntaxKind::Switch,
-            "while" => ZigSyntaxKind::While,
-            "for" => ZigSyntaxKind::For,
-            "break" => ZigSyntaxKind::Break,
-            "continue" => ZigSyntaxKind::Continue,
-            "return" => ZigSyntaxKind::Return,
-            "defer" => ZigSyntaxKind::Defer,
-            "errdefer" => ZigSyntaxKind::ErrDefer,
-            "unreachable" => ZigSyntaxKind::Unreachable,
-            "noreturn" => ZigSyntaxKind::NoReturn,
+            "if" => ZigTokenType::If,
+            "else" => ZigTokenType::Else,
+            "switch" => ZigTokenType::Switch,
+            "while" => ZigTokenType::While,
+            "for" => ZigTokenType::For,
+            "break" => ZigTokenType::Break,
+            "continue" => ZigTokenType::Continue,
+            "return" => ZigTokenType::Return,
+            "defer" => ZigTokenType::Defer,
+            "errdefer" => ZigTokenType::ErrDefer,
+            "unreachable" => ZigTokenType::Unreachable,
+            "noreturn" => ZigTokenType::NoReturn,
 
             // 错误处理
-            "try" => ZigSyntaxKind::TryKeyword,
-            "catch" => ZigSyntaxKind::CatchKeyword,
-            "orelse" => ZigSyntaxKind::OrElse,
-            "error" => ZigSyntaxKind::ErrorKeyword,
+            "try" => ZigTokenType::TryKeyword,
+            "catch" => ZigTokenType::CatchKeyword,
+            "orelse" => ZigTokenType::OrElse,
+            "error" => ZigTokenType::ErrorKeyword,
 
             // 测试和异步
-            "test" => ZigSyntaxKind::Test,
-            "async" => ZigSyntaxKind::Async,
-            "await" => ZigSyntaxKind::AwaitKeyword,
-            "suspend" => ZigSyntaxKind::Suspend,
-            "resume" => ZigSyntaxKind::Resume,
-            "cancel" => ZigSyntaxKind::Cancel,
+            "test" => ZigTokenType::Test,
+            "async" => ZigTokenType::Async,
+            "await" => ZigTokenType::AwaitKeyword,
+            "suspend" => ZigTokenType::Suspend,
+            "resume" => ZigTokenType::Resume,
+            "cancel" => ZigTokenType::Cancel,
 
             // 内存管理
-            "undefined" => ZigSyntaxKind::Undefined,
-            "null" => ZigSyntaxKind::Null,
-            "volatile" => ZigSyntaxKind::Volatile,
-            "allowzero" => ZigSyntaxKind::AllowZero,
-            "noalias" => ZigSyntaxKind::NoAlias,
+            "undefined" => ZigTokenType::Undefined,
+            "null" => ZigTokenType::Null,
+            "volatile" => ZigTokenType::Volatile,
+            "allowzero" => ZigTokenType::AllowZero,
+            "noalias" => ZigTokenType::NoAlias,
 
             // 逻辑运算
-            "and" => ZigSyntaxKind::And,
-            "or" => ZigSyntaxKind::Or,
+            "and" => ZigTokenType::And,
+            "or" => ZigTokenType::Or,
 
             // 其他
-            "anyframe" => ZigSyntaxKind::AnyFrame,
-            "anytype" => ZigSyntaxKind::AnyType,
-            "threadlocal" => ZigSyntaxKind::ThreadLocal,
+            "anyframe" => ZigTokenType::AnyFrame,
+            "anytype" => ZigTokenType::AnyType,
+            "threadlocal" => ZigTokenType::ThreadLocal,
 
             // 基本类型
-            "bool" => ZigSyntaxKind::Bool,
-            "i8" => ZigSyntaxKind::I8,
-            "i16" => ZigSyntaxKind::I16,
-            "i32" => ZigSyntaxKind::I32,
-            "i64" => ZigSyntaxKind::I64,
-            "i128" => ZigSyntaxKind::I128,
-            "isize" => ZigSyntaxKind::Isize,
-            "u8" => ZigSyntaxKind::U8,
-            "u16" => ZigSyntaxKind::U16,
-            "u32" => ZigSyntaxKind::U32,
-            "u64" => ZigSyntaxKind::U64,
-            "u128" => ZigSyntaxKind::U128,
-            "usize" => ZigSyntaxKind::Usize,
-            "f16" => ZigSyntaxKind::F16,
-            "f32" => ZigSyntaxKind::F32,
-            "f64" => ZigSyntaxKind::F64,
-            "f80" => ZigSyntaxKind::F80,
-            "f128" => ZigSyntaxKind::F128,
-            "c_short" => ZigSyntaxKind::CShort,
-            "c_ushort" => ZigSyntaxKind::CUshort,
-            "c_int" => ZigSyntaxKind::CInt,
-            "c_uint" => ZigSyntaxKind::CUint,
-            "c_long" => ZigSyntaxKind::CLong,
-            "c_ulong" => ZigSyntaxKind::CUlong,
-            "c_longlong" => ZigSyntaxKind::CLongLong,
-            "c_ulonglong" => ZigSyntaxKind::CUlongLong,
-            "c_longdouble" => ZigSyntaxKind::CLongDouble,
-            "c_void" => ZigSyntaxKind::CVoid,
-            "void" => ZigSyntaxKind::Void,
-            "comptime_int" => ZigSyntaxKind::ComptimeInt,
-            "comptime_float" => ZigSyntaxKind::ComptimeFloat,
+            "bool" => ZigTokenType::Bool,
+            "i8" => ZigTokenType::I8,
+            "i16" => ZigTokenType::I16,
+            "i32" => ZigTokenType::I32,
+            "i64" => ZigTokenType::I64,
+            "i128" => ZigTokenType::I128,
+            "isize" => ZigTokenType::Isize,
+            "u8" => ZigTokenType::U8,
+            "u16" => ZigTokenType::U16,
+            "u32" => ZigTokenType::U32,
+            "u64" => ZigTokenType::U64,
+            "u128" => ZigTokenType::U128,
+            "usize" => ZigTokenType::Usize,
+            "f16" => ZigTokenType::F16,
+            "f32" => ZigTokenType::F32,
+            "f64" => ZigTokenType::F64,
+            "f80" => ZigTokenType::F80,
+            "f128" => ZigTokenType::F128,
+            "c_short" => ZigTokenType::CShort,
+            "c_ushort" => ZigTokenType::CUshort,
+            "c_int" => ZigTokenType::CInt,
+            "c_uint" => ZigTokenType::CUint,
+            "c_long" => ZigTokenType::CLong,
+            "c_ulong" => ZigTokenType::CUlong,
+            "c_longlong" => ZigTokenType::CLongLong,
+            "c_ulonglong" => ZigTokenType::CUlongLong,
+            "c_longdouble" => ZigTokenType::CLongDouble,
+            "c_void" => ZigTokenType::CVoid,
+            "void" => ZigTokenType::Void,
+            "comptime_int" => ZigTokenType::ComptimeInt,
+            "comptime_float" => ZigTokenType::ComptimeFloat,
 
             // 布尔字面量
-            "true" | "false" => ZigSyntaxKind::BooleanLiteral,
+            "true" | "false" => ZigTokenType::BooleanLiteral,
 
-            _ => ZigSyntaxKind::Identifier,
+            _ => ZigTokenType::Identifier,
         }
     }
 
-    /// 解析内置标识符 (@import 等)
+    /// 解析内置标识符 (↯import 等)
     fn lex_builtin<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start = state.get_position();
-        if state.current() == Some('@') {
+        if state.current() == Some('↯') {
             state.advance(1);
             if let Some(ch) = state.current() {
                 if ch.is_ascii_alphabetic() || ch == '_' {
                     state.advance(ch.len_utf8());
                     state.take_while(|c| c.is_ascii_alphanumeric() || c == '_');
-                    state.add_token(ZigSyntaxKind::BuiltinIdentifier, start, state.get_position());
+                    state.add_token(ZigTokenType::BuiltinIdentifier, start, state.get_position());
                     return true;
                 }
             }
@@ -431,32 +432,32 @@ impl<'config> ZigLexer<'config> {
 
         // 尝试匹配最长的操作符
         let ops = [
-            ("<<=", ZigSyntaxKind::LessLessAssign),
-            (">>=", ZigSyntaxKind::GreaterGreaterAssign),
-            ("...", ZigSyntaxKind::DotDotDot),
-            ("==", ZigSyntaxKind::Equal),
-            ("!=", ZigSyntaxKind::NotEqual),
-            ("<=", ZigSyntaxKind::LessEqual),
-            (">=", ZigSyntaxKind::GreaterEqual),
-            ("&&", ZigSyntaxKind::AndAnd),
-            ("||", ZigSyntaxKind::OrOr),
-            ("+=", ZigSyntaxKind::PlusAssign),
-            ("-=", ZigSyntaxKind::MinusAssign),
-            ("*=", ZigSyntaxKind::StarAssign),
-            ("/=", ZigSyntaxKind::SlashAssign),
-            ("%=", ZigSyntaxKind::PercentAssign),
-            ("&=", ZigSyntaxKind::AmpersandAssign),
-            ("|=", ZigSyntaxKind::PipeAssign),
-            ("^=", ZigSyntaxKind::CaretAssign),
-            ("++", ZigSyntaxKind::PlusPlus),
-            ("--", ZigSyntaxKind::MinusMinus),
-            ("**", ZigSyntaxKind::StarStar),
-            ("->", ZigSyntaxKind::Arrow),
-            ("=>", ZigSyntaxKind::FatArrow),
-            ("<<", ZigSyntaxKind::LessLess),
-            (">>", ZigSyntaxKind::GreaterGreater),
-            (".?", ZigSyntaxKind::DotQuestion),
-            (".*", ZigSyntaxKind::DotStar),
+            ("<<=", ZigTokenType::LessLessAssign),
+            (">>=", ZigTokenType::GreaterGreaterAssign),
+            ("...", ZigTokenType::DotDotDot),
+            ("==", ZigTokenType::Equal),
+            ("!=", ZigTokenType::NotEqual),
+            ("<=", ZigTokenType::LessEqual),
+            (">=", ZigTokenType::GreaterEqual),
+            ("&&", ZigTokenType::AndAnd),
+            ("||", ZigTokenType::OrOr),
+            ("+=", ZigTokenType::PlusAssign),
+            ("-=", ZigTokenType::MinusAssign),
+            ("*=", ZigTokenType::StarAssign),
+            ("/=", ZigTokenType::SlashAssign),
+            ("%=", ZigTokenType::PercentAssign),
+            ("&=", ZigTokenType::AmpersandAssign),
+            ("|=", ZigTokenType::PipeAssign),
+            ("^=", ZigTokenType::CaretAssign),
+            ("++", ZigTokenType::PlusPlus),
+            ("--", ZigTokenType::MinusMinus),
+            ("**", ZigTokenType::StarStar),
+            ("->", ZigTokenType::Arrow),
+            ("=>", ZigTokenType::FatArrow),
+            ("<<", ZigTokenType::LessLess),
+            (">>", ZigTokenType::GreaterGreater),
+            (".?", ZigTokenType::DotQuestion),
+            (".*", ZigTokenType::DotStar),
         ];
 
         for (op, kind) in ops {
@@ -475,30 +476,30 @@ impl<'config> ZigLexer<'config> {
         let start = state.get_position();
         if let Some(ch) = state.current() {
             let kind = match ch {
-                '(' => ZigSyntaxKind::LeftParen,
-                ')' => ZigSyntaxKind::RightParen,
-                '{' => ZigSyntaxKind::LeftBrace,
-                '}' => ZigSyntaxKind::RightBrace,
-                '[' => ZigSyntaxKind::LeftBracket,
-                ']' => ZigSyntaxKind::RightBracket,
-                ',' => ZigSyntaxKind::Comma,
-                '.' => ZigSyntaxKind::Dot,
-                ':' => ZigSyntaxKind::Colon,
-                ';' => ZigSyntaxKind::Semicolon,
-                '+' => ZigSyntaxKind::Plus,
-                '-' => ZigSyntaxKind::Minus,
-                '*' => ZigSyntaxKind::Star,
-                '/' => ZigSyntaxKind::Slash,
-                '%' => ZigSyntaxKind::Percent,
-                '&' => ZigSyntaxKind::Ampersand,
-                '|' => ZigSyntaxKind::Pipe,
-                '^' => ZigSyntaxKind::Caret,
-                '~' => ZigSyntaxKind::Tilde,
-                '!' => ZigSyntaxKind::Exclamation,
-                '?' => ZigSyntaxKind::Question,
-                '<' => ZigSyntaxKind::Less,
-                '>' => ZigSyntaxKind::Greater,
-                '=' => ZigSyntaxKind::Assign,
+                '(' => ZigTokenType::LeftParen,
+                ')' => ZigTokenType::RightParen,
+                '{' => ZigTokenType::LeftBrace,
+                '}' => ZigTokenType::RightBrace,
+                '[' => ZigTokenType::LeftBracket,
+                ']' => ZigTokenType::RightBracket,
+                ',' => ZigTokenType::Comma,
+                '.' => ZigTokenType::Dot,
+                ':' => ZigTokenType::Colon,
+                ';' => ZigTokenType::Semicolon,
+                '+' => ZigTokenType::Plus,
+                '-' => ZigTokenType::Minus,
+                '*' => ZigTokenType::Star,
+                '/' => ZigTokenType::Slash,
+                '%' => ZigTokenType::Percent,
+                '&' => ZigTokenType::Ampersand,
+                '|' => ZigTokenType::Pipe,
+                '^' => ZigTokenType::Caret,
+                '~' => ZigTokenType::Tilde,
+                '!' => ZigTokenType::Exclamation,
+                '?' => ZigTokenType::Question,
+                '<' => ZigTokenType::Less,
+                '>' => ZigTokenType::Greater,
+                '=' => ZigTokenType::Assign,
                 _ => return false,
             };
             state.advance(1);

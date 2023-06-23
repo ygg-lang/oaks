@@ -1,78 +1,281 @@
 #![doc = include_str!("readme.md")]
+use core::range::Range;
+use oak_core::source::{SourceBuffer, ToSource};
+#[cfg(feature = "serde")]
+use serde::{Deserialize, Serialize};
 
-/// V 根节点
-#[derive(Clone, Debug)]
-pub struct VRoot {
-    pub module_name: String,
-    pub imports: Vec<String>,
-    pub items: Vec<VItem>,
+/// VON AST 根节点
+#[derive(Clone, Debug, PartialEq)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+pub struct VonRoot {
+    pub value: VonValue,
 }
 
-/// V 项目
-#[derive(Clone, Debug)]
-pub enum VItem {
-    Struct(VStruct),
-    Function(VFunction),
-    Enum(VEnum),
-    Const(VConst),
+impl ToSource for VonRoot {
+    fn to_source(&self, buffer: &mut SourceBuffer) {
+        self.value.to_source(buffer)
+    }
 }
 
-/// V 结构体
-#[derive(Clone, Debug)]
-pub struct VStruct {
+#[derive(Clone, Debug, PartialEq)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+pub enum VonValue {
+    Object(VonObject),
+    Array(VonArray),
+    Tuple(VonTuple),
+    String(VonString),
+    Number(VonNumber),
+    Boolean(VonBoolean),
+    Null(VonNull),
+    Undefined(VonUndefined),
+    Inf(VonInf),
+    Nan(VonNan),
+    Enum(VonEnum),
+}
+
+#[derive(Clone, Debug, PartialEq)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+pub struct VonTuple {
+    pub elements: Vec<VonValue>,
+    #[cfg_attr(feature = "serde", serde(with = "oak_core::serde_range"))]
+    pub span: Range<usize>,
+}
+
+impl VonValue {
+    pub fn to_string(&self) -> String {
+        match self {
+            VonValue::Boolean(b) => b.value.to_string(),
+            VonValue::Number(n) => n.value.to_string(),
+            VonValue::Null(_) => "null".to_string(),
+            VonValue::Undefined(_) => "undefined".to_string(),
+            VonValue::Inf(_) => "inf".to_string(),
+            VonValue::Nan(_) => "nan".to_string(),
+            VonValue::String(s) => format!("\"{}\"", s.value),
+            VonValue::Array(a) => {
+                let elements: Vec<String> = a.elements.iter().map(|e| e.to_string()).collect();
+                format!("[{}]", elements.join(","))
+            }
+            VonValue::Tuple(t) => {
+                let elements: Vec<String> = t.elements.iter().map(|e| e.to_string()).collect();
+                format!("({})", elements.join(","))
+            }
+            VonValue::Object(o) => {
+                let fields: Vec<String> = o.fields.iter().map(|f| format!("{}={}", f.name, f.value.to_string())).collect();
+                format!("{{{}}}", fields.join(","))
+            }
+            VonValue::Enum(e) => {
+                if let Some(payload) = &e.payload {
+                    format!("{} {}", e.variant, payload.to_string())
+                }
+                else {
+                    e.variant.clone()
+                }
+            }
+        }
+    }
+}
+
+impl ToSource for VonValue {
+    fn to_source(&self, buffer: &mut SourceBuffer) {
+        match self {
+            VonValue::Object(v) => v.to_source(buffer),
+            VonValue::Array(v) => v.to_source(buffer),
+            VonValue::Tuple(v) => v.to_source(buffer),
+            VonValue::String(v) => v.to_source(buffer),
+            VonValue::Number(v) => v.to_source(buffer),
+            VonValue::Boolean(v) => v.to_source(buffer),
+            VonValue::Null(v) => v.to_source(buffer),
+            VonValue::Undefined(v) => v.to_source(buffer),
+            VonValue::Inf(v) => v.to_source(buffer),
+            VonValue::Nan(v) => v.to_source(buffer),
+            VonValue::Enum(v) => v.to_source(buffer),
+        }
+    }
+}
+
+impl ToSource for VonTuple {
+    fn to_source(&self, buffer: &mut SourceBuffer) {
+        buffer.push("(");
+        for (i, element) in self.elements.iter().enumerate() {
+            if i > 0 {
+                buffer.push(",")
+            }
+            element.to_source(buffer)
+        }
+        buffer.push(")")
+    }
+}
+
+#[derive(Clone, Debug, PartialEq)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+pub struct VonEnum {
+    pub variant: String,
+    pub payload: Option<Box<VonValue>>,
+    #[cfg_attr(feature = "serde", serde(with = "oak_core::serde_range"))]
+    pub span: Range<usize>,
+}
+
+impl ToSource for VonEnum {
+    fn to_source(&self, buffer: &mut SourceBuffer) {
+        buffer.push(&self.variant);
+        if let Some(payload) = &self.payload {
+            buffer.push(" ");
+            payload.to_source(buffer)
+        }
+    }
+}
+
+#[derive(Clone, Debug, PartialEq)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+pub struct VonObject {
+    pub fields: Vec<VonField>,
+    #[cfg_attr(feature = "serde", serde(with = "oak_core::serde_range"))]
+    pub span: Range<usize>,
+}
+
+impl ToSource for VonObject {
+    fn to_source(&self, buffer: &mut SourceBuffer) {
+        buffer.push("{");
+        for (i, field) in self.fields.iter().enumerate() {
+            if i > 0 {
+                buffer.push(",")
+            }
+            field.to_source(buffer)
+        }
+        buffer.push("}")
+    }
+}
+
+#[derive(Clone, Debug, PartialEq)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+pub struct VonField {
     pub name: String,
-    pub is_pub: bool,
-    pub fields: Vec<VField>,
+    pub value: VonValue,
+    #[cfg_attr(feature = "serde", serde(with = "oak_core::serde_range"))]
+    pub span: Range<usize>,
 }
 
-/// V 字段
-#[derive(Clone, Debug)]
-pub struct VField {
-    pub name: String,
-    pub field_type: String,
-    pub is_pub: bool,
-    pub is_mut: bool,
+impl ToSource for VonField {
+    fn to_source(&self, buffer: &mut SourceBuffer) {
+        buffer.push(&self.name);
+        buffer.push("=");
+        self.value.to_source(buffer)
+    }
 }
 
-/// V 函数
-#[derive(Clone, Debug)]
-pub struct VFunction {
-    pub name: String,
-    pub is_pub: bool,
-    pub receiver: Option<VReceiver>,
-    pub params: Vec<VParam>,
-    pub return_type: Option<String>,
-    pub body: Vec<String>, // 暂时用字符串表示
+#[derive(Clone, Debug, PartialEq)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+pub struct VonArray {
+    pub elements: Vec<VonValue>,
+    #[cfg_attr(feature = "serde", serde(with = "oak_core::serde_range"))]
+    pub span: Range<usize>,
 }
 
-/// V 接收者 (Method)
-#[derive(Clone, Debug)]
-pub struct VReceiver {
-    pub name: String,
-    pub receiver_type: String,
-    pub is_mut: bool,
+impl ToSource for VonArray {
+    fn to_source(&self, buffer: &mut SourceBuffer) {
+        buffer.push("[");
+        for (i, element) in self.elements.iter().enumerate() {
+            if i > 0 {
+                buffer.push(",")
+            }
+            element.to_source(buffer)
+        }
+        buffer.push("]")
+    }
 }
 
-/// V 参数
-#[derive(Clone, Debug)]
-pub struct VParam {
-    pub name: String,
-    pub param_type: String,
-    pub is_mut: bool,
-}
-
-/// V 枚举
-#[derive(Clone, Debug)]
-pub struct VEnum {
-    pub name: String,
-    pub is_pub: bool,
-    pub variants: Vec<String>,
-}
-
-/// V 常量
-#[derive(Clone, Debug)]
-pub struct VConst {
-    pub name: String,
-    pub is_pub: bool,
+#[derive(Clone, Debug, PartialEq)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+pub struct VonString {
     pub value: String,
+    #[cfg_attr(feature = "serde", serde(with = "oak_core::serde_range"))]
+    pub span: Range<usize>,
+}
+
+impl ToSource for VonString {
+    fn to_source(&self, buffer: &mut SourceBuffer) {
+        buffer.push("\"");
+        buffer.push(&self.value);
+        buffer.push("\"")
+    }
+}
+
+#[derive(Clone, Debug, PartialEq)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+pub struct VonNumber {
+    pub value: f64,
+    #[cfg_attr(feature = "serde", serde(with = "oak_core::serde_range"))]
+    pub span: Range<usize>,
+}
+
+impl ToSource for VonNumber {
+    fn to_source(&self, buffer: &mut SourceBuffer) {
+        buffer.push(&self.value.to_string())
+    }
+}
+
+#[derive(Clone, Debug, PartialEq)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+pub struct VonBoolean {
+    pub value: bool,
+    #[cfg_attr(feature = "serde", serde(with = "oak_core::serde_range"))]
+    pub span: Range<usize>,
+}
+
+impl ToSource for VonBoolean {
+    fn to_source(&self, buffer: &mut SourceBuffer) {
+        buffer.push(if self.value { "true" } else { "false" })
+    }
+}
+
+#[derive(Clone, Debug, PartialEq)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+pub struct VonNull {
+    #[cfg_attr(feature = "serde", serde(with = "oak_core::serde_range"))]
+    pub span: Range<usize>,
+}
+
+impl ToSource for VonNull {
+    fn to_source(&self, buffer: &mut SourceBuffer) {
+        buffer.push("null")
+    }
+}
+
+#[derive(Clone, Debug, PartialEq)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+pub struct VonUndefined {
+    #[cfg_attr(feature = "serde", serde(with = "oak_core::serde_range"))]
+    pub span: Range<usize>,
+}
+
+impl ToSource for VonUndefined {
+    fn to_source(&self, buffer: &mut SourceBuffer) {
+        buffer.push("undefined")
+    }
+}
+
+#[derive(Clone, Debug, PartialEq)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+pub struct VonInf {
+    #[cfg_attr(feature = "serde", serde(with = "oak_core::serde_range"))]
+    pub span: Range<usize>,
+}
+
+impl ToSource for VonInf {
+    fn to_source(&self, buffer: &mut SourceBuffer) {
+        buffer.push("inf")
+    }
+}
+
+#[derive(Clone, Debug, PartialEq)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+pub struct VonNan {
+    #[cfg_attr(feature = "serde", serde(with = "oak_core::serde_range"))]
+    pub span: Range<usize>,
+}
+
+impl ToSource for VonNan {
+    fn to_source(&self, buffer: &mut SourceBuffer) {
+        buffer.push("nan")
+    }
 }

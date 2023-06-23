@@ -1,26 +1,18 @@
-# Oak Typst
+# 🚀 oak-typst
 
-A high-performance Typst parser built on the Oak framework.
+[![Crates.io](https://img.shields.io/crates/v/oak-typst.svg)](https://crates.io/crates/oak-typst)
+[![Documentation](https://docs.rs/oak-typst/badge.svg)](https://docs.rs/oak-typst)
 
-## Features
+**Making TYPST processing simple** — A high-performance, incremental TYPST parser built on the Oak framework.
 
-- **Fast**: Incremental parsing with minimal re-parsing
-- **Robust**: Error recovery and fault tolerance
-- **Complete**: Full Typst syntax support
-- **Flexible**: Configurable parsing options
+## 🎯 Project Vision
 
-## Usage
+`oak-typst` is dedicated to providing industrial-grade parsing support for the TYPST language. By leveraging Rust's high-performance characteristics and Oak's incremental parsing architecture, it can easily handle a variety of application scenarios, from simple script analysis to complex IDE language servers.
 
-```rust
-use oak_typst::{TypstLanguage, TypstLexer};
-use oak_core::{parse, SourceText};
+## ✨ Core Features
 
-let source = SourceText::new("#let x = 42");
-let language = TypstLanguage::standard();
-let lexer = TypstLexer::new(&language);
-let tree = parse(&source, &lexer);
-```
-
-## Contributing
-
-Contributions are welcome! Please open an issue or submit a pull request.
+- **⚡ Blazing Fast**: Fully utilizes Rust's performance advantages to achieve sub-millisecond parsing response times.
+- **🔄 Incremental Parsing**: Built-in support for partial updates, demonstrating extremely high efficiency when processing large files.
+- **🌳 Structured Output**: Provides a clear, easy-to-traverse syntax tree or data structure.
+- **🛡️ Robustness**: Features a comprehensive error recovery mechanism, ensuring normal operation even when input is incomplete.
+- **🧩 Easy Integration**: Designed with high cohesion and low coupling, allowing for quick integration into existing Rust projects.

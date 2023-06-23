@@ -1,3 +1,4 @@
+#![doc = include_str!("readme.md")]
 use crate::language::CSharpLanguage;
 pub mod token_type;
 use oak_core::{
@@ -121,11 +122,11 @@ impl<'config> CSharpLexer<'config> {
                 else if ch == '\\' {
                     state.advance(1);
                     if let Some(_) = state.peek() {
-                        state.advance(1);
+                        state.advance(1)
                     }
                 }
                 else {
-                    state.advance(ch.len_utf8());
+                    state.advance(ch.len_utf8())
                 }
             }
             state.add_token(CSharpTokenType::StringLiteral, start_pos, state.get_position());
@@ -142,11 +143,11 @@ impl<'config> CSharpLexer<'config> {
                 else if ch == '\\' {
                     state.advance(1);
                     if let Some(_) = state.peek() {
-                        state.advance(1);
+                        state.advance(1)
                     }
                 }
                 else {
-                    state.advance(ch.len_utf8());
+                    state.advance(ch.len_utf8())
                 }
             }
             state.add_token(CSharpTokenType::CharLiteral, start_pos, state.get_position());
@@ -166,12 +167,7 @@ impl<'config> CSharpLexer<'config> {
                 state.advance(ch.len_utf8());
 
                 while let Some(ch) = state.peek() {
-                    if ch.is_ascii_digit() || ch == '.' || ch == '_' {
-                        state.advance(ch.len_utf8());
-                    }
-                    else {
-                        break;
-                    }
+                    if ch.is_ascii_digit() || ch == '.' || ch == '_' { state.advance(ch.len_utf8()) } else { break }
                 }
 
                 // 处理后缀 (f, d, m, l, ul, etc.)
@@ -180,7 +176,7 @@ impl<'config> CSharpLexer<'config> {
                         state.advance(ch.len_utf8());
                         if let Some(ch2) = state.peek() {
                             if ch2.is_ascii_alphabetic() {
-                                state.advance(ch2.len_utf8());
+                                state.advance(ch2.len_utf8())
                             }
                         }
                     }
@@ -207,12 +203,7 @@ impl<'config> CSharpLexer<'config> {
                 state.advance(ch.len_utf8());
 
                 while let Some(ch) = state.peek() {
-                    if ch.is_ascii_alphanumeric() || ch == '_' {
-                        state.advance(ch.len_utf8());
-                    }
-                    else {
-                        break;
-                    }
+                    if ch.is_ascii_alphanumeric() || ch == '_' { state.advance(ch.len_utf8()) } else { break }
                 }
 
                 let text = state.get_text_in((start_pos..state.get_position()).into());
@@ -220,6 +211,8 @@ impl<'config> CSharpLexer<'config> {
                     // C# 关键字
                     "abstract" => CSharpTokenType::Abstract,
                     "as" => CSharpTokenType::As,
+                    "async" => CSharpTokenType::AsyncKeyword,
+                    "await" => CSharpTokenType::AwaitKeyword,
                     "base" => CSharpTokenType::Base,
                     "bool" => CSharpTokenType::Bool,
                     "break" => CSharpTokenType::Break,
@@ -269,6 +262,7 @@ impl<'config> CSharpLexer<'config> {
                     "protected" => CSharpTokenType::Protected,
                     "public" => CSharpTokenType::Public,
                     "readonly" => CSharpTokenType::Readonly,
+                    "record" => CSharpTokenType::Record,
                     "ref" => CSharpTokenType::Ref,
                     "return" => CSharpTokenType::Return,
                     "sbyte" => CSharpTokenType::Sbyte,
@@ -534,7 +528,7 @@ impl<'config> CSharpLexer<'config> {
                 state.add_token(CSharpTokenType::Error, start_pos, state.get_position());
             }
 
-            state.advance_if_dead_lock(safe_point);
+            state.advance_if_dead_lock(safe_point)
         }
         Ok(())
     }

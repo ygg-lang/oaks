@@ -67,7 +67,7 @@ let
   functionWithEllipsis = { x, y, ... }: x + y;
   
   # Pattern matching in functions
-  destructuringFunction = { name, age, ... }@person: 
+  destructuringFunction = { name, age, ... }↯person: 
     "Person ${name} is ${toString age} years old";
   
   # List pattern matching
@@ -323,7 +323,7 @@ let
       isNormalUser = true;
       extraGroups = [ "wheel" "networkmanager" ];
       openssh.authorizedKeys.keys = [
-        "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQ... alice@example.com"
+        "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQ... alice↯example.com"
       ];
     };
     
@@ -357,7 +357,7 @@ let
       git = {
         enable = true;
         userName = "Alice";
-        userEmail = "alice@example.com";
+        userEmail = "alice↯example.com";
         extraConfig = {
           init.defaultBranch = "main";
           pull.rebase = true;

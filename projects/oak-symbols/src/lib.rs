@@ -1,4 +1,10 @@
 #![feature(new_range_api)]
+#![warn(missing_docs)]
+//! Symbol management for the Oak language framework.
+//!
+//! This crate defines structures and traits for representing and extracting
+//! symbol information (like functions, classes, and variables) from syntax trees.
+
 use oak_core::{
     Arc, Range,
     language::{ElementRole, ElementType, Language, TokenType, UniversalElementRole, UniversalTokenRole},
@@ -28,16 +34,37 @@ pub struct SymbolInformation {
 pub trait SymbolProvider<L: Language> {
     /// Returns symbols defined in the document.
     fn document_symbols<S: Source + ?Sized>(&self, uri: &str, root: &RedNode<L>, source: &S) -> Vec<SymbolInformation>;
+
+    /// Returns symbols defined in the workspace matching the query.
+    fn workspace_symbols(&self, query: &str) -> Vec<SymbolInformation> {
+        let _ = query;
+        Vec::new()
+    }
 }
 
 /// A universal symbol provider that works for any language whose ElementType implements role().
 pub struct UniversalSymbolProvider;
 
+impl Default for UniversalSymbolProvider {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl UniversalSymbolProvider {
-    pub fn new() -> Self {
+    /// Creates a new universal symbol provider.
+    pub const fn new() -> Self {
         Self
     }
 
+    /// Recursively collects symbols from the syntax tree.
+    ///
+    /// # Arguments
+    /// * `uri` - The URI of the source file.
+    /// * `node` - The current node being processed.
+    /// * `symbols` - The list to collect symbols into.
+    /// * `container_name` - The name of the containing symbol, if any.
+    /// * `source` - The source text provider.
     fn collect_symbols<L: Language, S: Source + ?Sized>(&self, uri: &str, node: &RedNode<L>, symbols: &mut Vec<SymbolInformation>, container_name: Option<String>, source: &S) {
         let role = node.green.kind.role();
 
@@ -48,7 +75,7 @@ impl UniversalSymbolProvider {
                 match child {
                     RedTree::Leaf(leaf) => {
                         // In many languages, the first name identifier in a definition is its name
-                        if leaf.kind.is_universal(UniversalTokenRole::Name) || leaf.kind.is_universal(UniversalTokenRole::None) {
+                        if leaf.kind.is_universal(UniversalTokenRole::Name) {
                             name = Some(source.get_text_in(leaf.span).to_string());
                             break;
                         }

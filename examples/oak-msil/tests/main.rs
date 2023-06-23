@@ -3,5 +3,5 @@ mod parser;
 
 #[test]
 fn ready() {
-    println!("oak-msil tests ready!");
+    println!("oak-msil tests ready!")
 }

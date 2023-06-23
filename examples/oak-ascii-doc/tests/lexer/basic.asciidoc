@@ -1,6 +1,6 @@
 = Document Title
 :author: Test Author
-:email: test@example.com
+:email: test↯example.com
 :toc:
 
 == Introduction

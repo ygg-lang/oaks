@@ -21,10 +21,10 @@ fn test_rbq_ast_lowering() {
         assert_eq!(s.name, "User");
         assert_eq!(s.fields.len(), 1);
         assert_eq!(s.fields[0].name, "id");
-        assert_eq!(s.fields[0].type_ref, "i32");
+        assert_eq!(s.fields[0].type_ref, "i32")
     }
     else {
-        panic!("Expected struct");
+        panic!("Expected struct")
     }
 }
 
@@ -48,10 +48,10 @@ fn test_rbq_ast_utf8() {
         assert_eq!(s.name, "User");
         assert_eq!(s.fields.len(), 1);
         assert_eq!(s.fields[0].name, "name");
-        assert_eq!(s.fields[0].type_ref, "utf8");
+        assert_eq!(s.fields[0].type_ref, "utf8")
     }
     else {
-        panic!("Expected struct");
+        panic!("Expected struct")
     }
 }
 
@@ -73,9 +73,9 @@ fn test_rbq_ast_namespace() {
     assert_eq!(root.items.len(), 1);
     if let oak_rbq::ast::RbqItem::Namespace(ns) = &root.items[0] {
         assert_eq!(ns.name, "App");
-        assert_eq!(ns.items.len(), 1);
+        assert_eq!(ns.items.len(), 1)
     }
     else {
-        panic!("Expected namespace");
+        panic!("Expected namespace")
     }
 }

@@ -1,4 +1,7 @@
-use crate::{kind::TomlSyntaxKind, language::TomlLanguage};
+#![doc = include_str!("readme.md")]
+pub mod element_type;
+
+use crate::{language::TomlLanguage, lexer::token_type::TomlTokenKind as TomlSyntaxKind};
 use oak_core::{Parser, source::Source};
 
 /// TOML 语言解析器
@@ -21,7 +24,7 @@ impl<'config> Parser<TomlLanguage> for TomlParser<'config> {
 
             // 简单的解析逻辑：消耗所有 token 并放入 Root 节点
             while state.current().is_some() {
-                state.bump();
+                state.bump()
             }
 
             Ok(state.finish_at(checkpoint, TomlSyntaxKind::Root.into()))

@@ -1,3 +1,4 @@
+#![doc = include_str!("readme.md")]
 /// WIT 根节点
 #[derive(Clone, Debug)]
 pub struct WitRoot {

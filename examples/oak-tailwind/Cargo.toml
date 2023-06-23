@@ -1,16 +1,16 @@
 [package]
 name = "oak-tailwind"
-description = "Tailwind CSS parser with support for modern template syntax and features."
-categories = ["parsing"]
-keywords = ["parser", "tailwind", "template", "templating"]
-documentation = "https://docs.rs/oak-tailwind"
-readme = "readme.md"
 version.workspace = true
 authors.workspace = true
-homepage.workspace = true
-repository.workspace = true
-license.workspace = true
+description = "Tailwind CSS parser with support for modern template syntax and features."
 edition.workspace = true
+license.workspace = true
+readme = "readme.md"
+homepage.workspace = true
+repository = "https://github.com/ygg-lang/oaks/tree/master/examples/oak-tailwind"
+documentation = "https://docs.rs/oak-tailwind"
+categories = ["parsing"]
+keywords = ["parser", "tailwind", "template", "templating"]
 
 [dependencies]
 oak-core = { workspace = true, features = ["serde", "testing"] }
@@ -21,9 +21,9 @@ oak-mcp = { workspace = true, optional = true, features = ["io-std"] }
 oak-hover = { workspace = true, optional = true }
 oak-vfs = { workspace = true, optional = true }
 futures = { workspace = true, optional = true }
-serde = { workspace = true, features = ["derive"] }
-dashmap = { version = "5.5" }
-lazy_static = "1.4"
+serde = { workspace = true, features = ["derive"] , optional = true }
+dashmap = { workspace = true }
+lazy_static = { workspace = true }
 tokio = { workspace = true, optional = true }
 
 [dev-dependencies]
@@ -31,11 +31,12 @@ oak-testing = { workspace = true }
 oak-twig = { workspace = true }
 
 [features]
-default = []
-lsp = ["dep:oak-lsp", "dep:oak-mcp", "dep:oak-hover", "dep:oak-vfs", "dep:futures"]
-mcp-stdio = ["lsp", "oak-mcp/io-std"]
-std = []
-
+default = ["serde"]
+serde = ["dep:serde", "oak-core/serde"]
+oak-highlight = ["dep:oak-highlight"]
+oak-pretty-print = ["dep:oak-pretty-print"]
+lsp = ["dep:oak-lsp", "dep:oak-hover", "dep:oak-vfs", "oak-highlight", "oak-pretty-print", "dep:futures"]
+mcp = ["lsp", "oak-mcp/io-std"]
 
 [package.metadata.docs.rs]
 all-features = true

@@ -1,16 +1,20 @@
+#![doc = include_str!("readme.md")]
 use crate::{lexer::TomlLexer, parser::TomlParser};
 use oak_core::{Language, LanguageCategory};
+#[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
 
-/// 日期时间格式
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
+/// Date-time format.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub enum DateTimeFormat {
     Rfc3339,
-    // 其他可能的日期时间格
+    // Other possible date-time formats
 }
 
-/// TOML 语言定义
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
+/// TOML language definition.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct TomlLanguage {
     pub allow_multiline_strings: bool,
     pub allow_hex_numbers: bool,
@@ -21,8 +25,8 @@ impl Language for TomlLanguage {
     const NAME: &'static str = "toml";
     const CATEGORY: LanguageCategory = LanguageCategory::Config;
 
-    type TokenType = crate::kind::TomlSyntaxKind;
-    type ElementType = crate::kind::TomlSyntaxKind;
+    type TokenType = crate::lexer::TomlTokenType;
+    type ElementType = crate::parser::element_type::TomlElementType;
     type TypedRoot = crate::ast::TomlRoot;
 }
 

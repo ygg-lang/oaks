@@ -22,7 +22,7 @@
         },
         {
             "kind": "BuiltinIdentifier",
-            "text": "@import",
+            "text": "↯import",
             "start": 30,
             "end": 37
         },
@@ -592,7 +592,7 @@
         },
         {
             "kind": "BuiltinIdentifier",
-            "text": "@sqrt",
+            "text": "↯sqrt",
             "start": 441,
             "end": 446
         },

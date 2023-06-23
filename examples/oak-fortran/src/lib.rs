@@ -1,17 +1,22 @@
-#![feature(new_range_api)]
 #![doc = include_str!("readme.md")]
+#![feature(new_range_api)]
 #![doc(html_logo_url = "https://raw.githubusercontent.com/ygg-lang/oaks/refs/heads/dev/documents/logo.svg")]
 #![doc(html_favicon_url = "https://raw.githubusercontent.com/ygg-lang/oaks/refs/heads/dev/documents/logo.svg")]
+#![warn(missing_docs)]
+//! Fortran support for the Oak language framework.
 
 pub mod ast;
-mod kind;
+pub mod builder;
 mod language;
 mod lexer;
+#[cfg(any(feature = "lsp", feature = "oak-highlight", feature = "oak-pretty-print"))]
+pub mod lsp;
 pub mod parser;
 
 pub use crate::{
     ast::FortranRoot,
-    kind::{FortranSyntaxKind, FortranToken},
+    builder::FortranBuilder,
     language::FortranLanguage,
-    lexer::FortranLexer,
+    lexer::{FortranLexer, token_type::FortranTokenType},
+    parser::element_type::FortranElementType,
 };

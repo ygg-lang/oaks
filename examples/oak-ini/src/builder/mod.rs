@@ -1,4 +1,4 @@
-use crate::{IniParser, ast::*, kind::IniSyntaxKind, language::IniLanguage};
+use crate::{IniParser, ast::*, language::IniLanguage, lexer::token_type::IniTokenType, parser::element_type::IniElementType};
 use oak_core::{Builder, BuilderCache, GreenNode, OakDiagnostics, OakError, Parser, RedNode, RedTree, SourceText, TextEdit, source::Source};
 
 pub struct IniBuilder<'config> {
@@ -42,14 +42,11 @@ impl<'config> IniBuilder<'config> {
 
         for child in red_root.children() {
             if let RedTree::Node(n) = child {
-                match n.green.kind {
-                    IniSyntaxKind::Table => {
-                        sections.push(self.build_section(n, source)?);
-                    }
-                    IniSyntaxKind::KeyValue => {
-                        properties.push(self.build_property(n, source)?);
-                    }
-                    _ => {}
+                if n.green.kind == IniElementType::Table {
+                    sections.push(self.build_section(n, source)?);
+                }
+                else if n.green.kind == IniElementType::KeyValue {
+                    properties.push(self.build_property(n, source)?);
                 }
             }
         }
@@ -63,12 +60,8 @@ impl<'config> IniBuilder<'config> {
 
         for child in node.children() {
             match child {
-                RedTree::Leaf(t) if t.kind == IniSyntaxKind::Identifier => {
-                    name = source.get_text_in(t.span.clone().into()).to_string();
-                }
-                RedTree::Node(n) if n.green.kind == IniSyntaxKind::KeyValue => {
-                    properties.push(self.build_property(n, source)?);
-                }
+                RedTree::Leaf(t) if t.kind == IniTokenType::Identifier => name = source.get_text_in(t.span.clone().into()).to_string(),
+                RedTree::Node(n) if n.green.kind == IniElementType::KeyValue => properties.push(self.build_property(n, source)?),
                 _ => {}
             }
         }
@@ -82,10 +75,11 @@ impl<'config> IniBuilder<'config> {
 
         for child in node.children() {
             if let RedTree::Node(n) = child {
-                match n.green.kind {
-                    IniSyntaxKind::Key => key = source.get_text_in(n.span().into()).to_string(),
-                    IniSyntaxKind::Value => value = source.get_text_in(n.span().into()).to_string(),
-                    _ => {}
+                if n.green.kind == IniElementType::Key {
+                    key = source.get_text_in(n.span().into()).to_string();
+                }
+                else if n.green.kind == IniElementType::Value {
+                    value = source.get_text_in(n.span().into()).to_string();
                 }
             }
         }

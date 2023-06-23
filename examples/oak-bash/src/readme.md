@@ -1,45 +1,81 @@
-# `oak-bash`
+# 🛠️ Bash Parser Developer Guide
 
-This crate provides a parser for the Bash language, built using the `oaks` parsing framework. It includes a lexer and language definition to facilitate parsing Bash scripts.
+This guide is designed to help you quickly get started with developing and integrating `oak-bash`.
 
-## Usage
+## 🚦 Quick Start
 
-To use the `oak-bash` parser, you typically need to interact with `BashLanguage` and `BashLexer`.
+Add the dependency to your `Cargo.toml`:
 
-### `BashLanguage`
-
-The `BashLanguage` struct defines the grammar and rules for Bash. It implements the `Language` trait from the `oaks` framework.
-
-```rust
-use oak_bash::BashLanguage;
-
-let language = BashLanguage::default();
+```toml
+[dependencies]
+oak-bash = { path = "..." }
 ```
 
-### `BashLexer`
+### Basic Parsing Example
 
-The `BashLexer` is responsible for tokenizing the input Bash code based on the `BashLanguage` definition.
+The following is a standard workflow for parsing a Bash script with functions, loops, and redirections:
 
 ```rust
-use oak_bash::{BashLanguage, BashLexer};
-use oak_core::{Lexer, source::SourceText, parser::session::ParseSession};
+use oak_bash::{BashParser, SourceText, BashLanguage};
 
-// Initialize the language
-let language = Box::leak(Box::new(BashLanguage::default()));
+fn main() {
+    // 1. Prepare source code
+    let code = r#"
+        #!/bin/bash
 
-// Create a lexer instance
-let lexer = BashLexer::new(language);
+        function greet() {
+            local name=$1
+            echo "Hello, ${name}!" >&2
+        }
 
-// Prepare the input source code
-let source_code = "#!/bin/bash\necho \"Hello, world!\"";
-let source = SourceText::new(source_code);
-let mut cache = ParseSession::default();
+        for i in {1..5}; do
+            greet "User $i"
+        done
+    "#;
+    let source = SourceText::new(code);
 
-// Lex the input
-let lex_output = lexer.lex(&source, &[], &mut cache);
+    // 2. Initialize parser
+    let config = BashLanguage::new();
+    let parser = BashParser::new(&config);
 
-// You can now process the lex_output which contains the tokens
-println!("Lexed tokens: {:?}", lex_output.result);
+    // 3. Execute parsing
+    let result = parser.parse(&source);
+
+    // 4. Handle results
+    if result.is_success() {
+        println!("Parsing successful! AST node count: {}", result.node_count());
+    } else {
+        eprintln!("Errors found during parsing.");
+        for diag in result.diagnostics() {
+            println!("[{}:{}] {}", diag.line, diag.column, diag.message);
+        }
+    }
+}
 ```
 
-This example demonstrates how to initialize the `BashLanguage` and `BashLexer`, and then use the lexer to tokenize a simple Bash script. The `lex_output` will contain a list of `BashToken`s that represent the structure of the input code.
+## 🔍 Core API Usage
+
+### 1. Syntax Tree Traversal
+After a successful parse, you can use the built-in visitor pattern or manually traverse the Green/Red Tree to extract Bash specific constructs like function definitions, command pipelines, variable expansions, and redirections.
+
+### 2. Incremental Parsing
+Bash scripts can sometimes be long and complex. `oak-bash` supports sub-millisecond incremental updates:
+```rust
+// Re-parse only the modified section
+let new_result = parser.reparse(&new_source, &old_result);
+```
+
+### 3. Expansion Awareness
+The parser identifies different types of shell expansions (parameter, command, arithmetic), providing a solid foundation for building advanced static analysis tools.
+
+## 🏗️ Architecture Overview
+
+- **Lexer**: Tokenizes Bash source text, handling complex rules for word splitting, quoting (single, double, ANSI-C), and comment identification.
+- **Parser**: A high-performance syntax analyzer that handles Bash's flexible grammar, including control structures and redirections.
+- **AST**: A strongly-typed, lossless syntax tree that preserves all trivia (comments/whitespace) for refactoring and formatting tools.
+
+## 🔗 Advanced Resources
+
+- **Full Examples**: Check the [examples/](examples/) folder in the project root.
+- **API Documentation**: Run `cargo doc --open` for detailed type definitions.
+- **Test Cases**: See [tests/readme.md](tests/readme.md) for handling of various Bash syntax edge cases.

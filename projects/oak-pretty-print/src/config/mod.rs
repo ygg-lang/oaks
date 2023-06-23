@@ -1,12 +1,12 @@
 use alloc::borrow::Cow;
 
-/// 缩进样式
+/// Indent style
 #[derive(Debug, Clone, Copy, PartialEq, Eq, serde::Serialize)]
 #[serde(rename_all = "snake_case")]
 pub enum IndentStyle {
-    /// 使用空格
+    /// Use spaces
     Spaces(u8),
-    /// 使用制表符
+    /// Use tabs
     Tabs,
 }
 
@@ -16,15 +16,15 @@ impl Default for IndentStyle {
     }
 }
 
-/// 行结束符
+/// Line ending
 #[derive(Debug, Clone, Copy, PartialEq, Eq, serde::Serialize)]
 #[serde(rename_all = "snake_case")]
 pub enum LineEnding {
-    /// Unix 风格 (\n)
+    /// Unix style (\n)
     Unix,
-    /// Windows 风格 (\r\n)
+    /// Windows style (\r\n)
     Windows,
-    /// 自动检测
+    /// Auto detect
     Auto,
 }
 
@@ -34,31 +34,31 @@ impl Default for LineEnding {
     }
 }
 
-/// 格式化配置
+/// Formatting configuration
 #[derive(Debug, Clone, serde::Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct FormatConfig {
-    /// 缩进样式
+    /// Indent style
     pub indent_style: IndentStyle,
-    /// 缩进文本（缓存的单级缩进字符串）
+    /// Indent text (cached single-level indent string)
     pub indent_text: Cow<'static, str>,
-    /// 行结束符
+    /// Line ending
     pub line_ending: LineEnding,
-    /// 最大行长度
+    /// Maximum line length
     pub max_width: usize,
-    /// 是否在文件末尾插入换行符
+    /// Whether to insert a final newline at the end of the file
     pub insert_final_newline: bool,
-    /// 是否修剪行尾空白
+    /// Whether to trim trailing whitespace
     pub trim_trailing_whitespace: bool,
-    /// 是否保留空行
+    /// Whether to preserve blank lines
     pub preserve_blank_lines: bool,
-    /// 最大连续空行数
+    /// Maximum consecutive blank lines
     pub max_blank_lines: usize,
-    /// 是否格式化注释
+    /// Whether to format comments
     pub format_comments: bool,
-    /// 是否格式化字符串
+    /// Whether to format strings
     pub format_strings: bool,
-    /// 缩进大小（用于列计算）
+    /// Indent size (used for column calculation)
     pub indent_size: usize,
 }
 
@@ -87,12 +87,12 @@ impl Default for FormatConfig {
 }
 
 impl FormatConfig {
-    /// 创建新的配置
+    /// Creates a new configuration
     pub fn new() -> Self {
         Self::default()
     }
 
-    /// 设置缩进样式
+    /// Sets the indent style
     pub fn with_indent_style(mut self, style: IndentStyle) -> Self {
         self.indent_style = style;
         let (indent_text, indent_size) = match style {
@@ -104,25 +104,25 @@ impl FormatConfig {
         self
     }
 
-    /// 设置行结束符
+    /// Sets the line ending
     pub fn with_line_ending(mut self, ending: LineEnding) -> Self {
         self.line_ending = ending;
         self
     }
 
-    /// 设置最大行长度
+    /// Sets the maximum line length
     pub fn with_max_width(mut self, length: usize) -> Self {
         self.max_width = length;
         self
     }
 
-    /// 获取行结束符字符串
+    /// Gets the line ending string
     pub fn line_ending_string(&self) -> &'static str {
         match self.line_ending {
             LineEnding::Unix => "\n",
             LineEnding::Windows => "\r\n",
             LineEnding::Auto => {
-                // 在实际使用中，应该根据输入文件检测
+                // In actual use, it should be detected based on the input file
                 #[cfg(windows)]
                 return "\r\n";
                 #[cfg(not(windows))]

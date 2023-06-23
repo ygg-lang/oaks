@@ -3,6 +3,7 @@ use oak_testing::lexing::LexerTester;
 use std::{path::Path, time::Duration};
 
 #[test]
+#[cfg(feature = "serde")]
 fn test_json_lexer() -> Result<(), oak_core::OakError> {
     let here = Path::new(env!("CARGO_MANIFEST_DIR"));
     let language = JsonLanguage::default();

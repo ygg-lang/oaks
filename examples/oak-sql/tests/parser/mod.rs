@@ -4,5 +4,5 @@
 #[test]
 fn placeholder_test() {
     // Placeholder test to prevent compilation errors
-    assert!(true);
+    assert!(true)
 }

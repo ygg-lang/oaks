@@ -1,12 +1,31 @@
 use oak_core::source::Source;
 
+/// A map that tracks line starts in a source file for efficient coordinate conversion.
+///
+/// `LineMap` provides methods to convert between byte offsets and (line, column) coordinates.
+/// It is optimized for cases where multiple conversions are needed for the same source.
 #[derive(Debug, Clone)]
 pub struct LineMap {
+    /// The byte offsets of the start of each line.
     line_starts: Vec<usize>,
+    /// The total length of the source in bytes.
     len: usize,
 }
 
 impl LineMap {
+    /// Creates a new `LineMap` from a source.
+    ///
+    /// This will scan the entire source to find line endings (`\n`).
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # use oak_core::source::SourceText;
+    /// # use oak_vfs::LineMap;
+    /// let source = SourceText::new("hello\nworld");
+    /// let line_map = LineMap::from_source(&source);
+    /// assert_eq!(line_map.line_count(), 2);
+    /// ```
     pub fn from_source<S: Source + ?Sized>(source: &S) -> Self {
         let len = source.length();
         let mut line_starts = Vec::new();
@@ -20,24 +39,30 @@ impl LineMap {
                 if *b == b'\n' {
                     let next = offset + i + 1;
                     if next <= len {
-                        line_starts.push(next);
+                        line_starts.push(next)
                     }
                 }
             }
-            offset = chunk.end();
+            offset = chunk.end()
         }
 
         Self { line_starts, len }
     }
 
+    /// Returns the total number of lines in the source.
     pub fn line_count(&self) -> usize {
         self.line_starts.len()
     }
 
+    /// Returns the byte offset of the start of the given line (0-indexed).
     pub fn line_start(&self, line: u32) -> Option<usize> {
         self.line_starts.get(line as usize).copied()
     }
 
+    /// Returns the byte offset of the end of the given line (0-indexed).
+    ///
+    /// The end of the line includes the line ending character(s) if present,
+    /// except for the last line which ends at the end of the source.
     pub fn line_end(&self, line: u32) -> Option<usize> {
         let idx = line as usize;
         let start = *self.line_starts.get(idx)?;
@@ -45,6 +70,21 @@ impl LineMap {
         Some(next.max(start))
     }
 
+    /// Converts a byte offset to (line, column) coordinates using UTF-16 for the column.
+    ///
+    /// This is useful for LSP integration where positions are typically specified in UTF-16.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # use oak_core::source::SourceText;
+    /// # use oak_vfs::LineMap;
+    /// let source = SourceText::new("hello\nworld");
+    /// let line_map = LineMap::from_source(&source);
+    /// let (line, col) = line_map.offset_to_line_col_utf16(&source, 7);
+    /// assert_eq!(line, 1);
+    /// assert_eq!(col, 1);
+    /// ```
     pub fn offset_to_line_col_utf16<S: Source + ?Sized>(&self, source: &S, offset: usize) -> (u32, u32) {
         let offset = offset.min(self.len);
         let line_idx = match self.line_starts.binary_search(&offset) {
@@ -58,6 +98,18 @@ impl LineMap {
         (line_idx as u32, col)
     }
 
+    /// Converts (line, column) coordinates (in UTF-16) to a byte offset.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # use oak_core::source::SourceText;
+    /// # use oak_vfs::LineMap;
+    /// let source = SourceText::new("hello\nworld");
+    /// let line_map = LineMap::from_source(&source);
+    /// let offset = line_map.line_col_utf16_to_offset(&source, 1, 1);
+    /// assert_eq!(offset, 7);
+    /// ```
     pub fn line_col_utf16_to_offset<S: Source + ?Sized>(&self, source: &S, line: u32, col_utf16: u32) -> usize {
         let Some(line_start) = self.line_start(line)
         else {
@@ -73,7 +125,7 @@ impl LineMap {
             if utf16 >= target {
                 return (line_start + byte_idx).min(self.len);
             }
-            utf16 += ch.len_utf16();
+            utf16 += ch.len_utf16()
         }
         line_end.min(self.len)
     }

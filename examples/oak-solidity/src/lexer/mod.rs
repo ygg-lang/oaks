@@ -1,4 +1,7 @@
-use crate::{kind::SoliditySyntaxKind, language::SolidityLanguage};
+#![doc = include_str!("readme.md")]
+pub mod token_type;
+
+use crate::{language::SolidityLanguage, lexer::token_type::SolidityTokenType};
 use oak_core::{Lexer, LexerCache, LexerState, OakError, TextEdit, lexer::LexOutput, source::Source};
 
 type State<'a, S> = LexerState<'a, S, SolidityLanguage>;
@@ -68,10 +71,10 @@ impl<'config> SolidityLexer<'config> {
             let start_pos = state.get_position();
             if let Some(ch) = state.peek() {
                 state.advance(ch.len_utf8());
-                state.add_token(SoliditySyntaxKind::Error, start_pos, state.get_position());
+                state.add_token(SolidityTokenType::Error, start_pos, state.get_position());
             }
 
-            state.advance_if_dead_lock(safe_point);
+            state.advance_if_dead_lock(safe_point)
         }
 
         Ok(())
@@ -91,7 +94,7 @@ impl<'config> SolidityLexer<'config> {
         }
 
         if state.get_position() > start_pos {
-            state.add_token(SoliditySyntaxKind::Whitespace, start_pos, state.get_position());
+            state.add_token(SolidityTokenType::Whitespace, start_pos, state.get_position());
             true
         }
         else {
@@ -105,7 +108,7 @@ impl<'config> SolidityLexer<'config> {
 
         if let Some('\n') = state.peek() {
             state.advance(1);
-            state.add_token(SoliditySyntaxKind::Newline, start_pos, state.get_position());
+            state.add_token(SolidityTokenType::Newline, start_pos, state.get_position());
             true
         }
         else if let Some('\r') = state.peek() {
@@ -113,7 +116,7 @@ impl<'config> SolidityLexer<'config> {
             if let Some('\n') = state.peek() {
                 state.advance(1);
             }
-            state.add_token(SoliditySyntaxKind::Newline, start_pos, state.get_position());
+            state.add_token(SolidityTokenType::Newline, start_pos, state.get_position());
             true
         }
         else {
@@ -139,7 +142,7 @@ impl<'config> SolidityLexer<'config> {
                     }
                 }
 
-                state.add_token(SoliditySyntaxKind::LineComment, start_pos, state.get_position());
+                state.add_token(SolidityTokenType::LineComment, start_pos, state.get_position());
                 true
             }
             else {
@@ -174,7 +177,7 @@ impl<'config> SolidityLexer<'config> {
                     }
                 }
 
-                state.add_token(SoliditySyntaxKind::BlockComment, start_pos, state.get_position());
+                state.add_token(SolidityTokenType::BlockComment, start_pos, state.get_position());
                 true
             }
             else {
@@ -219,52 +222,52 @@ impl<'config> SolidityLexer<'config> {
     }
 
     /// 判断是关键字还是标识
-    fn keyword_or_identifier(&self, text: &str) -> SoliditySyntaxKind {
+    fn keyword_or_identifier(&self, text: &str) -> SolidityTokenType {
         match text {
-            "contract" => SoliditySyntaxKind::Contract,
-            "interface" => SoliditySyntaxKind::Interface,
-            "library" => SoliditySyntaxKind::Library,
-            "function" => SoliditySyntaxKind::Function,
-            "modifier" => SoliditySyntaxKind::Modifier,
-            "event" => SoliditySyntaxKind::Event,
-            "struct" => SoliditySyntaxKind::Struct,
-            "enum" => SoliditySyntaxKind::Enum,
-            "mapping" => SoliditySyntaxKind::Mapping,
-            "public" => SoliditySyntaxKind::Public,
-            "private" => SoliditySyntaxKind::Private,
-            "internal" => SoliditySyntaxKind::Internal,
-            "external" => SoliditySyntaxKind::External,
-            "pure" => SoliditySyntaxKind::Pure,
-            "view" => SoliditySyntaxKind::View,
-            "payable" => SoliditySyntaxKind::Payable,
-            "constant" => SoliditySyntaxKind::Constant,
-            "bool" => SoliditySyntaxKind::Bool,
-            "string" => SoliditySyntaxKind::String,
-            "bytes" => SoliditySyntaxKind::Bytes,
-            "address" => SoliditySyntaxKind::Address,
-            "uint" => SoliditySyntaxKind::Uint,
-            "int" => SoliditySyntaxKind::Int,
-            "fixed" => SoliditySyntaxKind::Fixed,
-            "ufixed" => SoliditySyntaxKind::Ufixed,
-            "if" => SoliditySyntaxKind::If,
-            "else" => SoliditySyntaxKind::Else,
-            "for" => SoliditySyntaxKind::For,
-            "while" => SoliditySyntaxKind::While,
-            "do" => SoliditySyntaxKind::Do,
-            "break" => SoliditySyntaxKind::Break,
-            "continue" => SoliditySyntaxKind::Continue,
-            "return" => SoliditySyntaxKind::Return,
-            "try" => SoliditySyntaxKind::Try,
-            "catch" => SoliditySyntaxKind::Catch,
-            "import" => SoliditySyntaxKind::Import,
-            "pragma" => SoliditySyntaxKind::Pragma,
-            "using" => SoliditySyntaxKind::Using,
-            "is" => SoliditySyntaxKind::Is,
-            "override" => SoliditySyntaxKind::Override,
-            "virtual" => SoliditySyntaxKind::Virtual,
-            "abstract" => SoliditySyntaxKind::Abstract,
-            "true" | "false" => SoliditySyntaxKind::BooleanLiteral,
-            _ => SoliditySyntaxKind::Identifier,
+            "contract" => SolidityTokenType::Contract,
+            "interface" => SolidityTokenType::Interface,
+            "library" => SolidityTokenType::Library,
+            "function" => SolidityTokenType::Function,
+            "modifier" => SolidityTokenType::Modifier,
+            "event" => SolidityTokenType::Event,
+            "struct" => SolidityTokenType::Struct,
+            "enum" => SolidityTokenType::Enum,
+            "mapping" => SolidityTokenType::Mapping,
+            "public" => SolidityTokenType::Public,
+            "private" => SolidityTokenType::Private,
+            "internal" => SolidityTokenType::Internal,
+            "external" => SolidityTokenType::External,
+            "pure" => SolidityTokenType::Pure,
+            "view" => SolidityTokenType::View,
+            "payable" => SolidityTokenType::Payable,
+            "constant" => SolidityTokenType::Constant,
+            "bool" => SolidityTokenType::Bool,
+            "string" => SolidityTokenType::String,
+            "bytes" => SolidityTokenType::Bytes,
+            "address" => SolidityTokenType::Address,
+            "uint" => SolidityTokenType::Uint,
+            "int" => SolidityTokenType::Int,
+            "fixed" => SolidityTokenType::Fixed,
+            "ufixed" => SolidityTokenType::Ufixed,
+            "if" => SolidityTokenType::If,
+            "else" => SolidityTokenType::Else,
+            "for" => SolidityTokenType::For,
+            "while" => SolidityTokenType::While,
+            "do" => SolidityTokenType::Do,
+            "break" => SolidityTokenType::Break,
+            "continue" => SolidityTokenType::Continue,
+            "return" => SolidityTokenType::Return,
+            "try" => SolidityTokenType::Try,
+            "catch" => SolidityTokenType::Catch,
+            "import" => SolidityTokenType::Import,
+            "pragma" => SolidityTokenType::Pragma,
+            "using" => SolidityTokenType::Using,
+            "is" => SolidityTokenType::Is,
+            "override" => SolidityTokenType::Override,
+            "virtual" => SolidityTokenType::Virtual,
+            "abstract" => SolidityTokenType::Abstract,
+            "true" | "false" => SolidityTokenType::BooleanLiteral,
+            _ => SolidityTokenType::Identifier,
         }
     }
 
@@ -288,7 +291,7 @@ impl<'config> SolidityLexer<'config> {
                                 break;
                             }
                         }
-                        state.add_token(SoliditySyntaxKind::HexLiteral, start_pos, state.get_position());
+                        state.add_token(SolidityTokenType::HexLiteral, start_pos, state.get_position());
                         return true;
                     }
                 }
@@ -332,7 +335,7 @@ impl<'config> SolidityLexer<'config> {
                     }
                 }
 
-                state.add_token(SoliditySyntaxKind::NumberLiteral, start_pos, state.get_position());
+                state.add_token(SolidityTokenType::NumberLiteral, start_pos, state.get_position());
                 true
             }
             else {
@@ -374,10 +377,10 @@ impl<'config> SolidityLexer<'config> {
                 }
 
                 if found_end {
-                    state.add_token(SoliditySyntaxKind::StringLiteral, start_pos, state.get_position());
+                    state.add_token(SolidityTokenType::StringLiteral, start_pos, state.get_position());
                 }
                 else {
-                    state.add_token(SoliditySyntaxKind::Error, start_pos, state.get_position());
+                    state.add_token(SolidityTokenType::Error, start_pos, state.get_position())
                 }
                 true
             }
@@ -400,38 +403,38 @@ impl<'config> SolidityLexer<'config> {
                     state.advance(1);
                     if let Some('=') = state.peek() {
                         state.advance(1);
-                        SoliditySyntaxKind::PlusAssign
+                        SolidityTokenType::PlusAssign
                     }
                     else {
-                        SoliditySyntaxKind::Plus
+                        SolidityTokenType::Plus
                     }
                 }
                 '-' => {
                     state.advance(1);
                     if let Some('=') = state.peek() {
                         state.advance(1);
-                        SoliditySyntaxKind::MinusAssign
+                        SolidityTokenType::MinusAssign
                     }
                     else if let Some('>') = state.peek() {
                         state.advance(1);
-                        SoliditySyntaxKind::Arrow
+                        SolidityTokenType::Arrow
                     }
                     else {
-                        SoliditySyntaxKind::Minus
+                        SolidityTokenType::Minus
                     }
                 }
                 '*' => {
                     state.advance(1);
                     if let Some('=') = state.peek() {
                         state.advance(1);
-                        SoliditySyntaxKind::StarAssign
+                        SolidityTokenType::StarAssign
                     }
                     else if let Some('*') = state.peek() {
                         state.advance(1);
-                        SoliditySyntaxKind::Power
+                        SolidityTokenType::Power
                     }
                     else {
-                        SoliditySyntaxKind::Star
+                        SolidityTokenType::Star
                     }
                 }
                 '/' => {
@@ -439,97 +442,97 @@ impl<'config> SolidityLexer<'config> {
                     state.advance(1);
                     if let Some('=') = state.peek() {
                         state.advance(1);
-                        SoliditySyntaxKind::SlashAssign
+                        SolidityTokenType::SlashAssign
                     }
                     else {
-                        SoliditySyntaxKind::Slash
+                        SolidityTokenType::Slash
                     }
                 }
                 '%' => {
                     state.advance(1);
                     if let Some('=') = state.peek() {
                         state.advance(1);
-                        SoliditySyntaxKind::PercentAssign
+                        SolidityTokenType::PercentAssign
                     }
                     else {
-                        SoliditySyntaxKind::Percent
+                        SolidityTokenType::Percent
                     }
                 }
                 '=' => {
                     state.advance(1);
                     if let Some('=') = state.peek() {
                         state.advance(1);
-                        SoliditySyntaxKind::Equal
+                        SolidityTokenType::Equal
                     }
                     else {
-                        SoliditySyntaxKind::Assign
+                        SolidityTokenType::Assign
                     }
                 }
                 '!' => {
                     state.advance(1);
                     if let Some('=') = state.peek() {
                         state.advance(1);
-                        SoliditySyntaxKind::NotEqual
+                        SolidityTokenType::NotEqual
                     }
                     else {
-                        SoliditySyntaxKind::Not
+                        SolidityTokenType::Not
                     }
                 }
                 '<' => {
                     state.advance(1);
                     if let Some('=') = state.peek() {
                         state.advance(1);
-                        SoliditySyntaxKind::LessEqual
+                        SolidityTokenType::LessEqual
                     }
                     else if let Some('<') = state.peek() {
                         state.advance(1);
-                        SoliditySyntaxKind::LeftShift
+                        SolidityTokenType::LeftShift
                     }
                     else {
-                        SoliditySyntaxKind::Less
+                        SolidityTokenType::Less
                     }
                 }
                 '>' => {
                     state.advance(1);
                     if let Some('=') = state.peek() {
                         state.advance(1);
-                        SoliditySyntaxKind::GreaterEqual
+                        SolidityTokenType::GreaterEqual
                     }
                     else if let Some('>') = state.peek() {
                         state.advance(1);
-                        SoliditySyntaxKind::RightShift
+                        SolidityTokenType::RightShift
                     }
                     else {
-                        SoliditySyntaxKind::Greater
+                        SolidityTokenType::Greater
                     }
                 }
                 '&' => {
                     state.advance(1);
                     if let Some('&') = state.peek() {
                         state.advance(1);
-                        SoliditySyntaxKind::And
+                        SolidityTokenType::And
                     }
                     else {
-                        SoliditySyntaxKind::BitAnd
+                        SolidityTokenType::BitAnd
                     }
                 }
                 '|' => {
                     state.advance(1);
                     if let Some('|') = state.peek() {
                         state.advance(1);
-                        SoliditySyntaxKind::Or
+                        SolidityTokenType::Or
                     }
                     else {
-                        SoliditySyntaxKind::BitOr
+                        SolidityTokenType::BitOr
                     }
                 }
                 '^' => {
                     state.advance(1);
-                    SoliditySyntaxKind::BitXor
+                    SolidityTokenType::BitXor
                 }
                 '~' => {
                     state.advance(1);
-                    SoliditySyntaxKind::BitNot
+                    SolidityTokenType::BitNot
                 }
                 _ => return false,
             };
@@ -548,15 +551,15 @@ impl<'config> SolidityLexer<'config> {
 
         if let Some(ch) = state.peek() {
             let token_kind = match ch {
-                '(' => SoliditySyntaxKind::LeftParen,
-                ')' => SoliditySyntaxKind::RightParen,
-                '{' => SoliditySyntaxKind::LeftBrace,
-                '}' => SoliditySyntaxKind::RightBrace,
-                '[' => SoliditySyntaxKind::LeftBracket,
-                ']' => SoliditySyntaxKind::RightBracket,
-                ';' => SoliditySyntaxKind::Semicolon,
-                ',' => SoliditySyntaxKind::Comma,
-                '.' => SoliditySyntaxKind::Dot,
+                '(' => SolidityTokenType::LeftParen,
+                ')' => SolidityTokenType::RightParen,
+                '{' => SolidityTokenType::LeftBrace,
+                '}' => SolidityTokenType::RightBrace,
+                '[' => SolidityTokenType::LeftBracket,
+                ']' => SolidityTokenType::RightBracket,
+                ';' => SolidityTokenType::Semicolon,
+                ',' => SolidityTokenType::Comma,
+                '.' => SolidityTokenType::Dot,
                 _ => return false,
             };
 

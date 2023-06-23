@@ -31,7 +31,7 @@ fn test_json_to_doc() {
         }),
     };
 
-    let doc = root.to_doc();
+    let doc = root.as_document();
     let formatted = doc.render(FormatConfig::default());
     assert!(formatted.contains("\"name\": \"oak\""));
 }

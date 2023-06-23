@@ -1,11 +1,13 @@
-use crate::{kind::WgslSyntaxKind, language::WgslLanguage};
+#![doc = include_str!("readme.md")]
+pub mod token_type;
+
+use crate::{language::WgslLanguage, lexer::token_type::WgslTokenType};
 use oak_core::{Lexer, LexerCache, LexerState, OakError, TextEdit, lexer::LexOutput, source::Source};
 
 type State<'a, S> = LexerState<'a, S, WgslLanguage>;
 
 #[derive(Clone)]
 pub struct WgslLexer<'config> {
-    #[allow(dead_code)]
     config: &'config WgslLanguage,
 }
 
@@ -28,7 +30,7 @@ impl<'config> WgslLexer<'config> {
         }
 
         if state.get_position() > start_pos {
-            state.add_token(WgslSyntaxKind::Whitespace, start_pos, state.get_position());
+            state.add_token(WgslTokenType::Whitespace, start_pos, state.get_position());
             true
         }
         else {
@@ -42,7 +44,7 @@ impl<'config> WgslLexer<'config> {
 
         if let Some('\n') = state.peek() {
             state.advance(1);
-            state.add_token(WgslSyntaxKind::Newline, start_pos, state.get_position());
+            state.add_token(WgslTokenType::Newline, start_pos, state.get_position());
             true
         }
         else if let Some('\r') = state.peek() {
@@ -50,7 +52,7 @@ impl<'config> WgslLexer<'config> {
             if let Some('\n') = state.peek() {
                 state.advance(1);
             }
-            state.add_token(WgslSyntaxKind::Newline, start_pos, state.get_position());
+            state.add_token(WgslTokenType::Newline, start_pos, state.get_position());
             true
         }
         else {
@@ -74,7 +76,7 @@ impl<'config> WgslLexer<'config> {
                     state.advance(ch.len_utf8());
                 }
 
-                state.add_token(WgslSyntaxKind::Comment, start_pos, state.get_position());
+                state.add_token(WgslTokenType::Comment, start_pos, state.get_position());
                 return true;
             }
         }
@@ -109,7 +111,7 @@ impl<'config> WgslLexer<'config> {
                     }
                 }
 
-                state.add_token(WgslSyntaxKind::Comment, start_pos, state.get_position());
+                state.add_token(WgslTokenType::Comment, start_pos, state.get_position());
                 return true;
             }
         }
@@ -127,7 +129,7 @@ impl<'config> WgslLexer<'config> {
             while let Some(ch) = state.peek() {
                 if ch == '"' {
                     state.advance(1); // 跳过结束的引号
-                    state.add_token(WgslSyntaxKind::StringLiteral, start_pos, state.get_position());
+                    state.add_token(WgslTokenType::StringLiteral, start_pos, state.get_position());
                     return true;
                 }
                 else if ch == '\\' {
@@ -144,7 +146,7 @@ impl<'config> WgslLexer<'config> {
                 }
             }
 
-            state.add_token(WgslSyntaxKind::Error, start_pos, state.get_position());
+            state.add_token(WgslTokenType::Error, start_pos, state.get_position());
             return true;
         }
 
@@ -181,7 +183,7 @@ impl<'config> WgslLexer<'config> {
                             state.advance(1);
                         }
 
-                        state.add_token(WgslSyntaxKind::IntegerLiteral, start_pos, state.get_position());
+                        state.add_token(WgslTokenType::IntegerLiteral, start_pos, state.get_position());
                         return true;
                     }
                 }
@@ -248,7 +250,7 @@ impl<'config> WgslLexer<'config> {
                     if let Some('f') = state.peek() {
                         state.advance(1);
                     }
-                    state.add_token(WgslSyntaxKind::FloatLiteral, start_pos, state.get_position());
+                    state.add_token(WgslTokenType::FloatLiteral, start_pos, state.get_position());
                 }
                 else {
                     if let Some('u') = state.peek() {
@@ -257,7 +259,7 @@ impl<'config> WgslLexer<'config> {
                     else if let Some('i') = state.peek() {
                         state.advance(1);
                     }
-                    state.add_token(WgslSyntaxKind::IntegerLiteral, start_pos, state.get_position());
+                    state.add_token(WgslTokenType::IntegerLiteral, start_pos, state.get_position());
                 }
 
                 return true;
@@ -287,58 +289,58 @@ impl<'config> WgslLexer<'config> {
                 let end_pos = state.get_position();
                 let text = state.get_text_in(oak_core::Range { start: start_pos, end: end_pos });
                 let kind = match text.as_ref() {
-                    "i32" => WgslSyntaxKind::I32Kw,
-                    "u32" => WgslSyntaxKind::U32Kw,
-                    "f32" => WgslSyntaxKind::F32Kw,
-                    "f16" => WgslSyntaxKind::F16Kw,
-                    "bool" => WgslSyntaxKind::BoolKw,
-                    "vec2" => WgslSyntaxKind::Vec2Kw,
-                    "vec3" => WgslSyntaxKind::Vec3Kw,
-                    "vec4" => WgslSyntaxKind::Vec4Kw,
-                    "mat2x2" => WgslSyntaxKind::Mat2x2Kw,
-                    "mat3x3" => WgslSyntaxKind::Mat3x3Kw,
-                    "mat4x4" => WgslSyntaxKind::Mat4x4Kw,
-                    "array" => WgslSyntaxKind::ArrayKw,
-                    "ptr" => WgslSyntaxKind::PtrKw,
-                    "atomic" => WgslSyntaxKind::AtomicKw,
-                    "texture_1d" => WgslSyntaxKind::Texture1dKw,
-                    "texture_2d" => WgslSyntaxKind::Texture2dKw,
-                    "texture_3d" => WgslSyntaxKind::Texture3dKw,
-                    "texture_cube" => WgslSyntaxKind::TextureCubeKw,
-                    "sampler" => WgslSyntaxKind::SamplerKw,
-                    "if" => WgslSyntaxKind::IfKw,
-                    "else" => WgslSyntaxKind::ElseKw,
-                    "switch" => WgslSyntaxKind::SwitchKw,
-                    "case" => WgslSyntaxKind::CaseKw,
-                    "default" => WgslSyntaxKind::DefaultKw,
-                    "loop" => WgslSyntaxKind::LoopKw,
-                    "for" => WgslSyntaxKind::ForKw,
-                    "while" => WgslSyntaxKind::WhileKw,
-                    "break" => WgslSyntaxKind::BreakKw,
-                    "continue" => WgslSyntaxKind::ContinueKw,
-                    "return" => WgslSyntaxKind::ReturnKw,
-                    "discard" => WgslSyntaxKind::DiscardKw,
-                    "fn" => WgslSyntaxKind::FnKw,
-                    "var" => WgslSyntaxKind::VarKw,
-                    "let" => WgslSyntaxKind::LetKw,
-                    "const" => WgslSyntaxKind::ConstKw,
-                    "override" => WgslSyntaxKind::OverrideKw,
-                    "struct" => WgslSyntaxKind::StructKw,
-                    "alias" => WgslSyntaxKind::AliasKw,
-                    "uniform" => WgslSyntaxKind::UniformKw,
-                    "storage" => WgslSyntaxKind::StorageKw,
-                    "workgroup" => WgslSyntaxKind::WorkgroupKw,
-                    "private" => WgslSyntaxKind::PrivateKw,
-                    "function" => WgslSyntaxKind::FunctionKw,
-                    "read" => WgslSyntaxKind::ReadKw,
-                    "write" => WgslSyntaxKind::WriteKw,
-                    "read_write" => WgslSyntaxKind::ReadWriteKw,
-                    "vertex" => WgslSyntaxKind::VertexKw,
-                    "fragment" => WgslSyntaxKind::FragmentKw,
-                    "compute" => WgslSyntaxKind::ComputeKw,
-                    "true" => WgslSyntaxKind::BoolLiteral,
-                    "false" => WgslSyntaxKind::BoolLiteral,
-                    _ => WgslSyntaxKind::Identifier,
+                    "i32" => WgslTokenType::I32Kw,
+                    "u32" => WgslTokenType::U32Kw,
+                    "f32" => WgslTokenType::F32Kw,
+                    "f16" => WgslTokenType::F16Kw,
+                    "bool" => WgslTokenType::BoolKw,
+                    "vec2" => WgslTokenType::Vec2Kw,
+                    "vec3" => WgslTokenType::Vec3Kw,
+                    "vec4" => WgslTokenType::Vec4Kw,
+                    "mat2x2" => WgslTokenType::Mat2x2Kw,
+                    "mat3x3" => WgslTokenType::Mat3x3Kw,
+                    "mat4x4" => WgslTokenType::Mat4x4Kw,
+                    "array" => WgslTokenType::ArrayKw,
+                    "ptr" => WgslTokenType::PtrKw,
+                    "atomic" => WgslTokenType::AtomicKw,
+                    "texture_1d" => WgslTokenType::Texture1dKw,
+                    "texture_2d" => WgslTokenType::Texture2dKw,
+                    "texture_3d" => WgslTokenType::Texture3dKw,
+                    "texture_cube" => WgslTokenType::TextureCubeKw,
+                    "sampler" => WgslTokenType::SamplerKw,
+                    "if" => WgslTokenType::IfKw,
+                    "else" => WgslTokenType::ElseKw,
+                    "switch" => WgslTokenType::SwitchKw,
+                    "case" => WgslTokenType::CaseKw,
+                    "default" => WgslTokenType::DefaultKw,
+                    "loop" => WgslTokenType::LoopKw,
+                    "for" => WgslTokenType::ForKw,
+                    "while" => WgslTokenType::WhileKw,
+                    "break" => WgslTokenType::BreakKw,
+                    "continue" => WgslTokenType::ContinueKw,
+                    "return" => WgslTokenType::ReturnKw,
+                    "discard" => WgslTokenType::DiscardKw,
+                    "fn" => WgslTokenType::FnKw,
+                    "var" => WgslTokenType::VarKw,
+                    "let" => WgslTokenType::LetKw,
+                    "const" => WgslTokenType::ConstKw,
+                    "override" => WgslTokenType::OverrideKw,
+                    "struct" => WgslTokenType::StructKw,
+                    "alias" => WgslTokenType::AliasKw,
+                    "uniform" => WgslTokenType::UniformKw,
+                    "storage" => WgslTokenType::StorageKw,
+                    "workgroup" => WgslTokenType::WorkgroupKw,
+                    "private" => WgslTokenType::PrivateKw,
+                    "function" => WgslTokenType::FunctionKw,
+                    "read" => WgslTokenType::ReadKw,
+                    "write" => WgslTokenType::WriteKw,
+                    "read_write" => WgslTokenType::ReadWriteKw,
+                    "vertex" => WgslTokenType::VertexKw,
+                    "fragment" => WgslTokenType::FragmentKw,
+                    "compute" => WgslTokenType::ComputeKw,
+                    "true" => WgslTokenType::BoolLiteral,
+                    "false" => WgslTokenType::BoolLiteral,
+                    _ => WgslTokenType::Identifier,
                 };
 
                 state.add_token(kind, start_pos, state.get_position());
@@ -357,175 +359,175 @@ impl<'config> WgslLexer<'config> {
             let kind = match ch {
                 '<' if state.peek_next_n(1) == Some('<') && state.peek_next_n(2) == Some('=') => {
                     state.advance(3);
-                    WgslSyntaxKind::LeftShiftAssign
+                    WgslTokenType::LeftShiftAssign
                 }
                 '>' if state.peek_next_n(1) == Some('>') && state.peek_next_n(2) == Some('=') => {
                     state.advance(3);
-                    WgslSyntaxKind::RightShiftAssign
+                    WgslTokenType::RightShiftAssign
                 }
                 '+' if state.peek_next_n(1) == Some('=') => {
                     state.advance(2);
-                    WgslSyntaxKind::PlusAssign
+                    WgslTokenType::PlusAssign
                 }
                 '-' if state.peek_next_n(1) == Some('=') => {
                     state.advance(2);
-                    WgslSyntaxKind::MinusAssign
+                    WgslTokenType::MinusAssign
                 }
                 '*' if state.peek_next_n(1) == Some('=') => {
                     state.advance(2);
-                    WgslSyntaxKind::StarAssign
+                    WgslTokenType::StarAssign
                 }
                 '/' if state.peek_next_n(1) == Some('=') => {
                     state.advance(2);
-                    WgslSyntaxKind::SlashAssign
+                    WgslTokenType::SlashAssign
                 }
                 '%' if state.peek_next_n(1) == Some('=') => {
                     state.advance(2);
-                    WgslSyntaxKind::PercentAssign
+                    WgslTokenType::PercentAssign
                 }
                 '&' if state.peek_next_n(1) == Some('=') => {
                     state.advance(2);
-                    WgslSyntaxKind::AmpersandAssign
+                    WgslTokenType::AmpersandAssign
                 }
                 '|' if state.peek_next_n(1) == Some('=') => {
                     state.advance(2);
-                    WgslSyntaxKind::PipeAssign
+                    WgslTokenType::PipeAssign
                 }
                 '^' if state.peek_next_n(1) == Some('=') => {
                     state.advance(2);
-                    WgslSyntaxKind::CaretAssign
+                    WgslTokenType::CaretAssign
                 }
                 '=' if state.peek_next_n(1) == Some('=') => {
                     state.advance(2);
-                    WgslSyntaxKind::EqEq
+                    WgslTokenType::EqEq
                 }
                 '!' if state.peek_next_n(1) == Some('=') => {
                     state.advance(2);
-                    WgslSyntaxKind::BangEq
+                    WgslTokenType::BangEq
                 }
                 '<' if state.peek_next_n(1) == Some('=') => {
                     state.advance(2);
-                    WgslSyntaxKind::Le
+                    WgslTokenType::Le
                 }
                 '>' if state.peek_next_n(1) == Some('=') => {
                     state.advance(2);
-                    WgslSyntaxKind::Ge
+                    WgslTokenType::Ge
                 }
                 '<' if state.peek_next_n(1) == Some('<') => {
                     state.advance(2);
-                    WgslSyntaxKind::LeftShift
+                    WgslTokenType::LeftShift
                 }
                 '>' if state.peek_next_n(1) == Some('>') => {
                     state.advance(2);
-                    WgslSyntaxKind::RightShift
+                    WgslTokenType::RightShift
                 }
                 '&' if state.peek_next_n(1) == Some('&') => {
                     state.advance(2);
-                    WgslSyntaxKind::AmpersandAmpersand
+                    WgslTokenType::AmpersandAmpersand
                 }
                 '|' if state.peek_next_n(1) == Some('|') => {
                     state.advance(2);
-                    WgslSyntaxKind::PipePipe
+                    WgslTokenType::PipePipe
                 }
                 '-' if state.peek_next_n(1) == Some('>') => {
                     state.advance(2);
-                    WgslSyntaxKind::Arrow
+                    WgslTokenType::Arrow
                 }
                 '+' => {
                     state.advance(1);
-                    WgslSyntaxKind::Plus
+                    WgslTokenType::Plus
                 }
                 '-' => {
                     state.advance(1);
-                    WgslSyntaxKind::Minus
+                    WgslTokenType::Minus
                 }
                 '*' => {
                     state.advance(1);
-                    WgslSyntaxKind::Star
+                    WgslTokenType::Star
                 }
                 '/' => {
                     state.advance(1);
-                    WgslSyntaxKind::Slash
+                    WgslTokenType::Slash
                 }
                 '%' => {
                     state.advance(1);
-                    WgslSyntaxKind::Percent
+                    WgslTokenType::Percent
                 }
                 '=' => {
                     state.advance(1);
-                    WgslSyntaxKind::Assign
+                    WgslTokenType::Assign
                 }
                 '<' => {
                     state.advance(1);
-                    WgslSyntaxKind::Lt
+                    WgslTokenType::Lt
                 }
                 '>' => {
                     state.advance(1);
-                    WgslSyntaxKind::Gt
+                    WgslTokenType::Gt
                 }
                 '!' => {
                     state.advance(1);
-                    WgslSyntaxKind::Bang
+                    WgslTokenType::Bang
                 }
                 '&' => {
                     state.advance(1);
-                    WgslSyntaxKind::Ampersand
+                    WgslTokenType::Ampersand
                 }
                 '|' => {
                     state.advance(1);
-                    WgslSyntaxKind::Pipe
+                    WgslTokenType::Pipe
                 }
                 '^' => {
                     state.advance(1);
-                    WgslSyntaxKind::Caret
+                    WgslTokenType::Caret
                 }
                 '~' => {
                     state.advance(1);
-                    WgslSyntaxKind::Tilde
+                    WgslTokenType::Tilde
                 }
                 '(' => {
                     state.advance(1);
-                    WgslSyntaxKind::LeftParen
+                    WgslTokenType::LeftParen
                 }
                 ')' => {
                     state.advance(1);
-                    WgslSyntaxKind::RightParen
+                    WgslTokenType::RightParen
                 }
                 '{' => {
                     state.advance(1);
-                    WgslSyntaxKind::LeftBrace
+                    WgslTokenType::LeftBrace
                 }
                 '}' => {
                     state.advance(1);
-                    WgslSyntaxKind::RightBrace
+                    WgslTokenType::RightBrace
                 }
                 '[' => {
                     state.advance(1);
-                    WgslSyntaxKind::LeftBracket
+                    WgslTokenType::LeftBracket
                 }
                 ']' => {
                     state.advance(1);
-                    WgslSyntaxKind::RightBracket
+                    WgslTokenType::RightBracket
                 }
                 ',' => {
                     state.advance(1);
-                    WgslSyntaxKind::Comma
+                    WgslTokenType::Comma
                 }
                 ';' => {
                     state.advance(1);
-                    WgslSyntaxKind::Semicolon
+                    WgslTokenType::Semicolon
                 }
                 ':' => {
                     state.advance(1);
-                    WgslSyntaxKind::Colon
+                    WgslTokenType::Colon
                 }
                 '.' => {
                     state.advance(1);
-                    WgslSyntaxKind::Dot
+                    WgslTokenType::Dot
                 }
                 '@' => {
                     state.advance(1);
-                    WgslSyntaxKind::At
+                    WgslTokenType::At
                 }
                 _ => return false,
             };
@@ -544,7 +546,7 @@ impl<'config> WgslLexer<'config> {
 
         if let Some(ch) = state.peek() {
             state.advance(ch.len_utf8());
-            state.add_token(WgslSyntaxKind::Text, start_pos, state.get_position());
+            state.add_token(WgslTokenType::Text, start_pos, state.get_position());
             true
         }
         else {
@@ -589,20 +591,17 @@ impl<'config> WgslLexer<'config> {
             let start_pos = state.get_position();
             if let Some(ch) = state.peek() {
                 state.advance(ch.len_utf8());
-                state.add_token(WgslSyntaxKind::Error, start_pos, state.get_position());
+                state.add_token(WgslTokenType::Error, start_pos, state.get_position());
             }
         }
-
-        let eof_pos = state.get_position();
-        state.add_token(WgslSyntaxKind::Eof, eof_pos, eof_pos);
 
         Ok(())
     }
 }
 
 impl<'config> Lexer<WgslLanguage> for WgslLexer<'config> {
-    fn lex<'a, S: Source + ?Sized>(&self, source: &S, _edits: &[TextEdit], cache: &'a mut impl LexerCache<WgslLanguage>) -> LexOutput<WgslLanguage> {
-        let mut state = State::new(source);
+    fn lex<'a, S: Source + ?Sized>(&self, source: &'a S, _edits: &[TextEdit], cache: &'a mut impl LexerCache<WgslLanguage>) -> LexOutput<WgslLanguage> {
+        let mut state = LexerState::new(source);
         let result = self.run(&mut state);
         if result.is_ok() {
             state.add_eof();

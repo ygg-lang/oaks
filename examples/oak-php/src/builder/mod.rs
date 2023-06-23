@@ -1,11 +1,15 @@
 use crate::{ast::PhpRoot, language::PhpLanguage, lexer::PhpLexer, parser::PhpParser};
 use oak_core::{Builder, BuilderCache, Lexer, OakDiagnostics, Parser, TextEdit, source::Source};
 
+/// A builder for PHP AST nodes.
+///
+/// This builder coordinates the lexing and parsing process to produce a `PhpRoot` AST.
 pub struct PhpBuilder<'config> {
     config: &'config PhpLanguage,
 }
 
 impl<'config> PhpBuilder<'config> {
+    /// Creates a new `PhpBuilder` with the given language configuration.
     pub fn new(config: &'config PhpLanguage) -> Self {
         Self { config }
     }

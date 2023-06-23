@@ -39,7 +39,8 @@ VON is a lightweight data-interchange format designed for the V ecosystem. This 
 ## Usage Example
 
 ```rust
-use oak_von::lexer::VonLexer;
+use oak_von::{VonLexer, VonLanguage};
+use oak_core::{Lexer, parser::session::ParseSession};
 
 fn main() {
     let von_data = r#"
@@ -51,11 +52,15 @@ fn main() {
         }
     "#;
 
-    let mut lexer = VonLexer::new();
-    let tokens = lexer.tokenize(von_data);
+    let config = VonLanguage::default();
+    let lexer = VonLexer::new(&config);
+    let mut session = ParseSession::<VonLanguage>::default();
+    let output = lexer.lex(von_data, &[], &mut session);
 
-    for token in tokens {
-        println!("{:?}: '{}' at {:?}", token.token_type, token.lexeme, token.span);
+    if let Ok(tokens) = output.result {
+        for token in tokens.iter() {
+            println!("{:?}: at {:?}", token.kind, token.span);
+        }
     }
 }
 ```

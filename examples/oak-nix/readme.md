@@ -1,159 +1,35 @@
-# Oak Markdown Parser
+# 🚀 Oak Nix Parser
 
-[![Crates.io](https://img.shields.io/crates/v/oak-markdown.svg)](https://crates.io/crates/oak-markdown)
-[![Documentation](https://docs.rs/oak-markdown/badge.svg)](https://docs.rs/oak-markdown)
+[![Crates.io](https://img.shields.io/crates/v/oak-nix.svg)](https://crates.io/crates/oak-nix)
+[![Documentation](https://docs.rs/oak-nix/badge.svg)](https://docs.rs/oak-nix)
 
-High-performance incremental Markdown parser for the oak ecosystem with flexible configuration, optimized for document processing and rendering.
+**Declarative Configuration with Rust Efficiency** — A high-performance, incremental Nix parser built on the Oak framework. Optimized for reproducible builds, system configuration, and modern developer tooling for the Nix ecosystem.
 
-## 🎯 Overview
+## 🎯 Project Vision
 
-Oak of markdown is a robust parser for Markdown, designed to handle complete Markdown syntax including modern features. Built on the solid foundation of oak-core, it provides both high-level convenience and detailed AST generation for document processing and rendering.
+Nix is a powerful functional language for system configuration and reproducible builds. `oak-nix` aims to provide a robust, modern, Rust-powered infrastructure for parsing Nix that is both accurate and incredibly fast. By utilizing Oak's incremental parsing architecture, we enable the creation of highly responsive IDEs, code analysis tools, and automated refactoring utilities that can handle complex Nix projects (like Nixpkgs) in real-time. Whether you are building custom linters, automated package generators, or sophisticated IDE extensions, `oak-nix` provides the high-fidelity AST and efficiency needed to keep pace with the Nix ecosystem.
 
-## ✨ Features
+## ✨ Core Features
 
-- **Complete Markdown Syntax**: Supports all Markdown features including modern specifications
-- **Full AST Generation**: Generates comprehensive Abstract Syntax Trees
-- **Lexer Support**: Built-in tokenization with proper span information
-- **Error Recovery**: Graceful handling of syntax errors with detailed diagnostics
+- **⚡ Blazing Fast**: Leverages Rust's performance and memory safety to provide sub-millisecond parsing, essential for high-frequency developer tools and real-time analysis in large Nix projects.
+- **🔄 Incremental by Nature**: Built-in support for partial updates—re-parse only what has changed. Ideal for massive Nix projects where maintainability and tool responsiveness are critical.
+- **🌳 High-Fidelity AST**: Generates a comprehensive and precise Abstract Syntax Tree capturing the full depth of Nix:
+    - **Functional Constructs**: Deep support for attributes, sets, lists, and anonymous functions (lambdas).
+    - **String Interpolation**: Precise mapping of `${ ... }` and double-quoted strings.
+    - **Paths & URIs**: Robust handling of Nix-specific path types and URL literals.
+    - **Let-In & With**: Detailed tracking of scoping constructs.
+    - **Comments & Whitespace**: Retains all trivia, enabling faithful round-trip processing and refactoring.
+- **🛡️ Industrial-Grade Fault Tolerance**: Engineered to recover from syntax errors gracefully, providing precise diagnostics—crucial for maintaining a smooth developer experience during active coding.
+- **🧩 Deep Ecosystem Integration**: Seamlessly works with `oak-lsp` for full LSP support and `oak-mcp` for intelligent code discovery and analysis.
 
-## 🚀 Quick Start
+## 🏗️ Architecture
 
-Basic example:
+The parser follows the **Green/Red Tree** architecture (inspired by Roslyn), which allows for:
+1. **Efficient Immutability**: Share nodes across different versions of the tree without copying.
+2. **Lossless Syntax Trees**: Retains all trivia (whitespace and comments), enabling faithful code formatting and refactoring of Nix files.
+3. **Type Safety**: Strongly-typed "Red" nodes provide a convenient and safe API for tree traversal and analysis.
 
-```rust
-use oak_markdown::MarkdownParser;
 
-fn main() -> Result<(), Box<dyn std::error::Error>> {
-    let parser = MarkdownParser::new();
-    let markdown_content = r#"
-# Hello, Markdown!
+## 🛠️ Contributing
 
-This is a **paragraph** with *emphasis*.
-
-## Features
-
-- Lists
-- Code blocks
-- And more!
-    "#;
-    
-    let document = parser.parse_document(markdown_content)?;
-    println!("Parsed Markdown document successfully.");
-    Ok(())
-}
-```
-
-## 📋 Parsing Examples
-
-### Document Parsing
-```rust
-use oak_markdown::{MarkdownParser, ast::Document};
-
-let parser = MarkdownParser::new();
-let markdown_content = r#"
-# My Document
-
-This is a simple document.
-"#;
-
-let document = parser.parse_document(markdown_content)?;
-println!("Document title: {}", document.title);
-```
-
-### Heading Parsing
-```rust
-use oak_markdown::{MarkdownParser, ast::Heading};
-
-let parser = MarkdownParser::new();
-let markdown_content = r#"
-## My Heading
-
-Some content here.
-"#;
-
-let document = parser.parse_document(markdown_content)?;
-for heading in &document.headings {
-    println!("Heading level {}: {}", heading.level, heading.text);
-}
-```
-
-## 🔧 Advanced Features
-
-### Token-Level Parsing
-```rust
-use oak_markdown::{MarkdownParser, lexer::Token};
-
-let parser = MarkdownParser::new();
-let tokens = parser.tokenize("# Heading\n\nParagraph text")?;
-for token in tokens {
-    println!("{:?}", token.kind);
-}
-```
-
-### Error Handling
-```rust
-use oak_markdown::MarkdownParser;
-
-let parser = MarkdownParser::new();
-let invalid_markdown = r#"
-# Heading
-
-This is a paragraph
-## Another heading
-# Unclosed heading
-"#;
-
-match parser.parse_document(invalid_markdown) {
-    Ok(document) => println!("Parsed Markdown document successfully."),
-    Err(e) => {
-        println!("Parse error at line {} column {}: {}", 
-            e.line(), e.column(), e.message());
-        if let Some(context) = e.context() {
-            println!("Error context: {}", context);
-        }
-    }
-}
-```
-
-## 🏗️ AST Structure
-
-The parser generates a comprehensive AST with the following main structures:
-
-- **Document**: Root container for Markdown documents
-- **Heading**: Heading elements with levels
-- **Paragraph**: Text paragraphs
-- **List**: Ordered and unordered lists
-- **CodeBlock**: Fenced code blocks
-- **Inline**: Emphasis, strong, links, and inline code
-
-## 📊 Performance
-
-- **Streaming**: Parse large Markdown files without loading entirely into memory
-- **Incremental**: Re-parse only changed sections
-- **Memory Efficient**: Smart AST node allocation
-- **Fast Recovery**: Quick error recovery for better IDE integration
-
-## 🔗 Integration
-
-Oak of markdown integrates seamlessly with:
-
-- **Static Site Generators**: Convert Markdown to HTML for websites
-- **Documentation Tools**: Process and render Markdown documentation
-- **Content Management**: Handle user-generated Markdown content
-- **IDE Support**: Language server protocol compatibility
-- **Blog Platforms**: Parse and render blog posts in Markdown
-
-## 📚 Examples
-
-Check out the [examples](examples/) directory for comprehensive examples:
-
-- Complete Markdown document parsing
-- Heading and list analysis
-- Code transformation
-- Integration with development workflows
-
-## 🤝 Contributing
-
-Contributions are welcome! 
-
-Please feel free to submit pull requests at the [project repository](https://github.com/ygg-lang/oaks/tree/dev/examples/oak-markdown) or open [issues](https://github.com/ygg-lang/oaks/issues).
+Contributions are welcome! Please feel free to submit a Pull Request. For major changes, please open an issue first to discuss what you would like to change.

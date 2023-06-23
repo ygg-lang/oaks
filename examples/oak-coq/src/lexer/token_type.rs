@@ -1,0 +1,178 @@
+use oak_core::{Token, TokenType, UniversalTokenRole};
+#[cfg(feature = "serde")]
+use serde::{Deserialize, Serialize};
+
+pub type CoqToken = Token<CoqTokenType>;
+
+impl TokenType for CoqTokenType {
+    type Role = UniversalTokenRole;
+    const END_OF_STREAM: Self = Self::Error;
+
+    fn is_ignored(&self) -> bool {
+        false
+    }
+
+    fn role(&self) -> Self::Role {
+        match self {
+            _ => UniversalTokenRole::None,
+        }
+    }
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[repr(u16)]
+pub enum CoqTokenType {
+    Whitespace,
+    Newline,
+    Comment,
+    // Literals
+    StringLiteral,
+    NumberLiteral,
+    Identifier,
+
+    // Keywords
+    Theorem,
+    Lemma,
+    Remark,
+    Fact,
+    Corollary,
+    Proposition,
+    Definition,
+    Example,
+    Fixpoint,
+    CoFixpoint,
+    Inductive,
+    CoInductive,
+    Record,
+    Structure,
+    Variant,
+    Module,
+    Section,
+    End,
+    Require,
+    Import,
+    Export,
+    Proof,
+    Qed,
+    Defined,
+    Admitted,
+    If,
+    Then,
+    Else,
+    Type,
+    Prop,
+    Set,
+    Check,
+    Print,
+    Search,
+    Locate,
+    About,
+    Match,
+    With,
+    Forall,
+    Exists,
+    Fun,
+    Let,
+    In,
+    // Additional Keywords from token_type.rs
+    Class,
+    Instance,
+    Intros,
+    Simpl,
+    Reflexivity,
+    Rewrite,
+    Apply,
+    Exact,
+    Assumption,
+    Auto,
+    Trivial,
+    Discriminate,
+    Injection,
+    Inversion,
+    Destruct,
+    Induction,
+    Generalize,
+    Clear,
+    Unfold,
+    Fold,
+    Compute,
+    Eval,
+    Show,
+    Goal,
+    Goals,
+    Undo,
+    Restart,
+    Admit,
+    Abort,
+    Parameter,
+    Axiom,
+    Variable,
+    Hypothesis,
+    Chapter,
+    Open,
+    Close,
+    Scope,
+    Notation,
+    Infix,
+    Reserved,
+    Bind,
+    Delimit,
+    Arguments,
+    Implicit,
+    Coercion,
+    Identity,
+    Canonical,
+
+    // Operators and delimiters
+    Arrow,
+    DoubleArrow,
+    Colon,
+    Semicolon,
+    Comma,
+    Dot,
+    Pipe,
+    Underscore,
+    Equal,
+    Plus,
+    Minus,
+    Star,
+    Slash,
+    Percent,
+    Less,
+    Greater,
+    LessEqual,
+    GreaterEqual,
+    NotEqual,
+    Tilde,
+    At,
+    Question,
+    Exclamation,
+    Ampersand,
+    Hash,
+    Dollar,
+    Backslash,
+    Caret,
+    LeftParen,
+    RightParen,
+    LeftBracket,
+    RightBracket,
+    LeftBrace,
+    RightBrace,
+    // Additional Operators from lexer/mod.rs
+    DoubleColon,
+    DoubleColonEqual,
+    ColonEqual,
+    Turnstile,
+    And,
+    Or,
+    LeftArrow,
+
+    // Elements
+    Root,
+    Declaration,
+    Statement,
+    Expression,
+    Error,
+    Eof,
+}

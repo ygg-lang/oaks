@@ -1,162 +1,34 @@
-# Oak Markdown Parser
+# 🚀 Oak Markdown Parser
 
 [![Crates.io](https://img.shields.io/crates/v/oak-markdown.svg)](https://crates.io/crates/oak-markdown)
 [![Documentation](https://docs.rs/oak-markdown/badge.svg)](https://docs.rs/oak-markdown)
 
-High-performance incremental Markdown parser for the oak ecosystem with flexible configuration, optimized for document processing and rendering.
+**The Standard for Modern Documentation** — A high-performance, incremental Markdown parser built on the Oak framework. Optimized for CommonMark, GFM features, and real-time editing experiences.
 
-## 🎯 Overview
+## 🎯 Project Vision
 
-Oak Markdown is a robust parser for Markdown, designed to handle complete Markdown syntax including modern features. Built on the solid foundation of oak-core, it provides both high-level convenience and detailed AST generation for document processing and rendering.
+Markdown is the ubiquitous language for documentation, notes, and collaborative writing. `oak-markdown` aims to provide a robust, modern, Rust-powered infrastructure for parsing Markdown that is both accurate and incredibly fast. By utilizing Oak's incremental parsing architecture, we enable the creation of highly responsive editors, live previewers, and static site generators that can handle large documents with sub-millisecond latency. Whether you are building a custom documentation platform, a personal knowledge base tool, or a sophisticated IDE extension, `oak-markdown` provides the high-fidelity AST and efficiency needed to deliver a superior writing experience.
 
-## ✨ Features
+## ✨ Core Features
 
-- **Complete Markdown Syntax**: Supports all Markdown features including modern specifications
-- **Full AST Generation**: Generates comprehensive Abstract Syntax Trees
-- **Lexer Support**: Built-in tokenization with proper span information
-- **Error Recovery**: Graceful handling of syntax errors with detailed diagnostics
+- **⚡ Blazing Fast**: Leverages Rust's performance and memory safety to provide sub-millisecond parsing, essential for real-time feedback in modern Markdown editors.
+- **🔄 Incremental by Nature**: Built-in support for partial updates—re-parse only the sections of the document that changed. Ideal for large documentation projects and live-preview environments.
+- **🌳 High-Fidelity AST**: Generates a comprehensive and precise Abstract Syntax Tree capturing the full structure of Markdown:
+    - **Block Elements**: Precise mapping of Headings, Lists, Blockquotes, Code Blocks, and Tables.
+    - **Inline Elements**: Robust handling of Emphasis, Links, Images, Inline Code, and Strikethrough.
+    - **GFM Support**: Built-in support for GitHub Flavored Markdown extensions like Task Lists and Tables.
+    - **Comments & Trivia**: Retains all whitespace and metadata, enabling faithful round-trip processing.
+- **🛡️ Industrial-Grade Fault Tolerance**: Engineered to handle malformed Markdown gracefully, ensuring a continuous and stable parsing experience even during active editing.
+- **🧩 Deep Ecosystem Integration**: Seamlessly works with `oak-lsp` for full LSP support and `oak-mcp` for intelligent documentation discovery and analysis.
 
-## 🚀 Quick Start
+## 🏗️ Architecture
 
-Basic example:
+The parser follows the **Green/Red Tree** architecture (inspired by Roslyn), which allows for:
+1. **Efficient Immutability**: Share nodes across different versions of the tree without copying.
+2. **Lossless Syntax Trees**: Retains all trivia (whitespace and comments), enabling faithful code formatting and refactoring of Markdown files.
+3. **Type Safety**: Strongly-typed "Red" nodes provide a convenient and safe API for tree traversal and analysis.
 
-```rust
-use oak_core::{Parser, SourceText, parser::session::ParseSession};
-use oak_markdown::{MarkdownParser, MarkdownLanguage};
 
-fn main() -> Result<(), Box<dyn std::error::Error>> {
-    let mut session = ParseSession::<MarkdownLanguage>::default();
-    let parser = MarkdownParser::new();
-    let source = SourceText::new(r#"
-# Hello, Markdown!
+## 🛠️ Contributing
 
-This is a **paragraph** with *emphasis*.
-
-## Features
-
-- Lists
-- Code blocks
-- And more!
-    "#);
-    
-    let result = parser.parse(&[], &mut session);
-    println!("Parsed Markdown successfully.");
-    Ok(())
-}
-```
-
-## 📋 Parsing Examples
-
-### Document Parsing
-```rust
-use oak_core::{Parser, SourceText, parser::session::ParseSession};
-use oak_markdown::{MarkdownParser, MarkdownLanguage};
-
-let mut session = ParseSession::<MarkdownLanguage>::default();
-let parser = MarkdownParser::new();
-let source = SourceText::new(r#"
-# My Document
-
-This is a simple document.
-"#);
-
-let result = parser.parse(&[], &mut session);
-println!("Document parsed successfully.");
-```
-
-### Heading Parsing
-```rust
-use oak_core::{Parser, SourceText, parser::session::ParseSession};
-use oak_markdown::{MarkdownParser, MarkdownLanguage};
-
-let mut session = ParseSession::<MarkdownLanguage>::default();
-let parser = MarkdownParser::new();
-let source = SourceText::new(r#"
-## My Heading
-
-Some content here.
-"#);
-
-let result = parser.parse(&[], &mut session);
-println!("Heading parsed successfully.");
-```
-
-## 🔧 Advanced Features
-
-### Token-Level Parsing
-```rust
-use oak_core::{Parser, SourceText, parser::session::ParseSession};
-use oak_markdown::{MarkdownParser, MarkdownLanguage};
-
-let mut session = ParseSession::<MarkdownLanguage>::default();
-let parser = MarkdownParser::new();
-let source = SourceText::new("# Heading\n\nParagraph text");
-let result = parser.parse(&[], &mut session);
-println!("Token parsing completed.");
-```
-
-### Error Handling
-```rust
-use oak_core::{Parser, SourceText, parser::session::ParseSession};
-use oak_markdown::{MarkdownParser, MarkdownLanguage};
-
-let mut session = ParseSession::<MarkdownLanguage>::default();
-let parser = MarkdownParser::new();
-let source = SourceText::new(r#"
-# Heading
-
-This is a paragraph
-## Another heading
-# Unclosed heading
-"#);
-
-let result = parser.parse(&[], &mut session);
-if let Some(errors) = result.result.err() {
-    println!("Parse errors found: {:?}", errors);
-} else {
-    println!("Parsed successfully.");
-}
-```
-
-## 🏗️ AST Structure
-
-The parser generates a comprehensive AST with the following main structures:
-
-- **MarkdownDocument**: Root container for Markdown documents
-- **Heading**: Heading elements with levels
-- **Paragraph**: Text paragraphs
-- **List**: Ordered and unordered lists
-- **CodeBlock**: Fenced code blocks
-- **Inline**: Emphasis, strong, links, and inline code
-
-## 📊 Performance
-
-- **Streaming**: Parse large Markdown files without loading entirely into memory
-- **Incremental**: Re-parse only changed sections
-- **Memory Efficient**: Smart AST node allocation
-- **Fast Recovery**: Quick error recovery for better IDE integration
-
-## 🔗 Integration
-
-Oak Markdown integrates seamlessly with:
-
-- **Static Site Generators**: Convert Markdown to HTML for websites
-- **Documentation Tools**: Process and render Markdown documentation
-- **Content Management**: Handle user-generated Markdown content
-- **IDE Support**: Language server protocol compatibility
-- **Blog Platforms**: Parse and render blog posts in Markdown
-
-## 📚 Examples
-
-Check out the [examples](examples/) directory for comprehensive examples:
-
-- Complete Markdown document parsing
-- Heading and list analysis
-- Code transformation
-- Integration with development workflows
-
-## 🤝 Contributing
-
-Contributions are welcome! 
-
-Please feel free to submit pull requests at the [project repository](https://github.com/ygg-lang/oaks/tree/dev/examples/oak-markdown) or open [issues](https://github.com/ygg-lang/oaks/issues).
+Contributions are welcome! Please feel free to submit a Pull Request. For major changes, please open an issue first to discuss what you would like to change.

@@ -1,17 +1,43 @@
+#![doc = include_str!("readme.md")]
 #![feature(new_range_api)]
-// pub mod ast;
-mod builder;
-pub mod highlighter;
-pub mod kind;
-pub mod language;
-pub mod lexer;
-pub mod parser;
-// pub mod syntax;
+#![allow(missing_docs)]
+#![doc(html_logo_url = "https://raw.githubusercontent.com/ygg-lang/oaks/refs/heads/dev/documents/logo.svg")]
+#![doc(html_favicon_url = "https://raw.githubusercontent.com/ygg-lang/oaks/refs/heads/dev/documents/logo.svg")]
+//! Yaml support for the Oak language framework.
 
-mod formatter;
+/// AST module.
+pub mod ast;
+/// Builder module.
+pub mod builder;
+/// Kind definition module.
+/// Language configuration module.
+pub mod language;
+/// Lexer module.
+pub mod lexer;
+/// LSP module.
+#[cfg(any(feature = "lsp", feature = "oak-highlight", feature = "mcp"))]
+#[cfg(any(feature = "lsp", feature = "oak-highlight", feature = "oak-pretty-print"))]
 pub mod lsp;
+/// MCP module.
+#[cfg(feature = "mcp")]
 pub mod mcp;
 
-pub use crate::{builder::YamlBuilder, formatter::YamlFormatter, highlighter::YamlHighlighter, kind::YamlSyntaxKind, language::YamlLanguage, lexer::YamlLexer, lsp::YamlLanguageService, parser::YamlParser};
+/// Parser module.
+pub mod parser;
 
+pub use crate::{builder::YamlBuilder, language::YamlLanguage, lexer::YamlLexer, parser::YamlParser};
+
+/// Highlighter implementation.
+#[cfg(feature = "oak-highlight")]
+pub use crate::lsp::highlighter::YamlHighlighter;
+
+/// LSP implementation.
+#[cfg(feature = "lsp")]
+pub use crate::lsp::YamlLanguageService;
+#[cfg(feature = "oak-pretty-print")]
+pub use crate::lsp::formatter::YamlFormatter;
+
+#[cfg(feature = "lsp")]
 pub use crate::mcp::serve_yaml_mcp;
+pub use lexer::token_type::YamlTokenType;
+pub use parser::element_type::YamlElementType;

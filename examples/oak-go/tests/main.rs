@@ -15,7 +15,7 @@ fn test_basic_compilation() {
     // 测试语法种类
     let _kind = GoSyntaxKind::Package;
 
-    println!("Basic compilation test passed");
+    println!("Basic compilation test passed")
 }
 
 #[test]
@@ -27,5 +27,5 @@ fn test_syntax_kinds() {
 
     let _literals = [GoSyntaxKind::BoolLiteral, GoSyntaxKind::NilLiteral, GoSyntaxKind::IntLiteral, GoSyntaxKind::FloatLiteral, GoSyntaxKind::StringLiteral, GoSyntaxKind::RuneLiteral, GoSyntaxKind::NumberLiteral];
 
-    println!("Syntax kinds test passed");
+    println!("Syntax kinds test passed")
 }

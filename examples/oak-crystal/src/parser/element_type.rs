@@ -1,182 +1,312 @@
-use crate::lexer::CrystalTokenType;
-use oak_core::{ElementType, UniversalElementRole};
+use oak_core::{ElementType, Parser, UniversalElementRole};
+#[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
+use std::fmt::{Display, Formatter};
 
-/// Crystal element type
-#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Deserialize)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub enum CrystalElementType {
-    /// Root node
+    Whitespace,
+    Comment,
+    Identifier,
+    Number,
+    String,
+    Character,
+    Symbol,
+    ClassKeyword,
+    ModuleKeyword,
+    DefKeyword,
+    EndKeyword,
+    IfKeyword,
+    ElseKeyword,
+    ElsifKeyword,
+    UnlessKeyword,
+    CaseKeyword,
+    WhenKeyword,
+    ThenKeyword,
+    WhileKeyword,
+    UntilKeyword,
+    ForKeyword,
+    InKeyword,
+    DoKeyword,
+    BeginKeyword,
+    RescueKeyword,
+    EnsureKeyword,
+    BreakKeyword,
+    NextKeyword,
+    ReturnKeyword,
+    YieldKeyword,
+    SuperKeyword,
+    SelfKeyword,
+    TrueKeyword,
+    FalseKeyword,
+    NilKeyword,
+    AndKeyword,
+    OrKeyword,
+    NotKeyword,
+    Plus,
+    Minus,
+    Star,
+    Slash,
+    Percent,
+    StarStar,
+    Equal,
+    EqualEqual,
+    NotEqual,
+    Less,
+    LessEqual,
+    Greater,
+    GreaterEqual,
+    Spaceship,
+    Match,
+    NotMatch,
+    And,
+    Or,
+    Not,
+    BitwiseAnd,
+    BitwiseOr,
+    BitwiseXor,
+    BitwiseNot,
+    LeftShift,
+    RightShift,
+    LogicalAnd,
+    LogicalOr,
+    PlusEqual,
+    MinusEqual,
+    StarEqual,
+    SlashEqual,
+    PercentEqual,
+    StarStarEqual,
+    AndEqual,
+    OrEqual,
+    XorEqual,
+    LeftShiftEqual,
+    RightShiftEqual,
+    LogicalAndEqual,
+    LogicalOrEqual,
+    LeftParen,
+    RightParen,
+    LeftBrace,
+    RightBrace,
+    LeftBracket,
+    RightBracket,
+    Comma,
+    Semicolon,
+    Dot,
+    DotDot,
+    DotDotDot,
+    Colon,
+    DoubleColon,
+    Arrow,
+    FatArrow,
+    Question,
+    At,
+    DoubleAt,
+    Dollar,
+    Newline,
+    Eof,
+    Error,
     Root,
-    /// Program node
     Program,
-    /// Source file node
     SourceFile,
-    /// class definition
     ClassDef,
-    /// module definition
     ModuleDef,
-    /// method definition
     MethodDef,
-    /// block
     Block,
-    /// if expression
     IfExpr,
-    /// unless expression
     UnlessExpr,
-    /// case expression
     CaseExpr,
-    /// when clause
     WhenClause,
-    /// while expression
     WhileExpr,
-    /// until expression
     UntilExpr,
-    /// for expression
     ForExpr,
-    /// begin expression
     BeginExpr,
-    /// rescue clause
     RescueClause,
-    /// ensure clause
     EnsureClause,
-    /// call expression
     CallExpr,
-    /// index expression
     IndexExpr,
-    /// member expression
     MemberExpr,
-    /// binary expression
     BinaryExpr,
-    /// unary expression
     UnaryExpr,
-    /// assignment expression
     AssignExpr,
-    /// literal expression
     LiteralExpr,
-    /// identifier expression
     IdentifierExpr,
-    /// array expression
     ArrayExpr,
-    /// hash expression
     HashExpr,
-    /// hash pair
     HashPair,
-    /// block expression
     BlockExpr,
-    /// lambda expression
     LambdaExpr,
-    /// yield expression
     YieldExpr,
-    /// return expression
     ReturnExpr,
-    /// break expression
     BreakExpr,
-    /// next expression
     NextExpr,
-    /// super expression
     SuperExpr,
-    /// self expression
     SelfExpr,
-    /// parenthesized expression
     ParenExpr,
-    /// type expression
     TypeExpr,
-    /// generic type
     GenericType,
-    /// union type
     UnionType,
-    /// tuple type
     TupleType,
-    /// named tuple type
     NamedTupleType,
-    /// procedure type
     ProcType,
-    /// pattern
     Pattern,
-    /// identifier pattern
     IdentifierPattern,
-    /// literal pattern
     LiteralPattern,
-    /// array pattern
     ArrayPattern,
-    /// hash pattern
     HashPattern,
-    /// tuple pattern
     TuplePattern,
-    /// parameter list
     ParamList,
-    /// parameter
     Param,
-    /// splat parameter
     SplatParam,
-    /// double splat parameter
     DoubleSplatParam,
-    /// block parameter
     BlockParam,
-    /// annotation
     Annotation,
-    /// macro definition
     MacroDef,
-    /// macro call
     MacroCall,
-    /// macro expression
     MacroExpr,
-    /// alias
     Alias,
-    /// include
     Include,
-    /// extend
     Extend,
-    /// require
     Require,
-    /// private
     Private,
-    /// protected
     Protected,
-    /// public
     Public,
-    /// abstract
     Abstract,
-    /// virtual
     Virtual,
-    /// override
     Override,
-    /// struct definition
     StructDef,
-    /// enum definition
     EnumDef,
-    /// union definition
     UnionDef,
-    /// lib definition
     LibDef,
-    /// raise expression
     RaiseExpr,
-    /// range expression
     RangeExpr,
-    /// exclusive range expression
     ExclusiveRangeExpr,
-    /// regex literal
     RegexLiteral,
-    /// string interpolation
     StringInterpolation,
-    /// interpolation expression
     InterpolationExpr,
-    /// symbol literal
     SymbolLiteral,
-    /// constant reference
     ConstantRef,
-    /// instance variable
     InstanceVar,
-    /// class variable
     ClassVar,
-    /// global variable
     GlobalVar,
-    /// getter method
     Getter,
-    /// setter method
     Setter,
-    /// operator definition
     OperatorDef,
+}
+
+impl CrystalElementType {
+    /// Check if the syntax kind is trivia (whitespace, comment, or newline)
+    pub fn is_trivia(&self) -> bool {
+        matches!(self, Self::Whitespace | Self::Comment | Self::Newline)
+    }
+
+    /// Check if the syntax kind is a keyword
+    pub fn is_keyword(self) -> bool {
+        matches!(
+            self,
+            Self::ClassKeyword
+                | Self::ModuleKeyword
+                | Self::DefKeyword
+                | Self::EndKeyword
+                | Self::IfKeyword
+                | Self::ElseKeyword
+                | Self::ElsifKeyword
+                | Self::UnlessKeyword
+                | Self::CaseKeyword
+                | Self::WhenKeyword
+                | Self::ThenKeyword
+                | Self::WhileKeyword
+                | Self::UntilKeyword
+                | Self::ForKeyword
+                | Self::InKeyword
+                | Self::DoKeyword
+                | Self::BeginKeyword
+                | Self::RescueKeyword
+                | Self::EnsureKeyword
+                | Self::BreakKeyword
+                | Self::NextKeyword
+                | Self::ReturnKeyword
+                | Self::YieldKeyword
+                | Self::SuperKeyword
+                | Self::SelfKeyword
+                | Self::TrueKeyword
+                | Self::FalseKeyword
+                | Self::NilKeyword
+                | Self::AndKeyword
+                | Self::OrKeyword
+                | Self::NotKeyword
+        )
+    }
+
+    /// Check if the syntax kind is a literal
+    pub fn is_literal(self) -> bool {
+        matches!(self, Self::Number | Self::String | Self::Character | Self::Symbol | Self::RegexLiteral | Self::SymbolLiteral)
+    }
+
+    /// Check if the syntax kind is an operator
+    pub fn is_operator(self) -> bool {
+        matches!(
+            self,
+            Self::Plus
+                | Self::Minus
+                | Self::Star
+                | Self::Slash
+                | Self::Percent
+                | Self::StarStar
+                | Self::Equal
+                | Self::EqualEqual
+                | Self::NotEqual
+                | Self::Less
+                | Self::LessEqual
+                | Self::Greater
+                | Self::GreaterEqual
+                | Self::Spaceship
+                | Self::Match
+                | Self::NotMatch
+                | Self::And
+                | Self::Or
+                | Self::Not
+                | Self::BitwiseAnd
+                | Self::BitwiseOr
+                | Self::BitwiseXor
+                | Self::BitwiseNot
+                | Self::LeftShift
+                | Self::RightShift
+                | Self::LogicalAnd
+                | Self::LogicalOr
+        )
+    }
+
+    /// Check if the syntax kind is an assignment operator
+    pub fn is_assignment_operator(self) -> bool {
+        matches!(
+            self,
+            Self::PlusEqual
+                | Self::MinusEqual
+                | Self::StarEqual
+                | Self::SlashEqual
+                | Self::PercentEqual
+                | Self::StarStarEqual
+                | Self::AndEqual
+                | Self::OrEqual
+                | Self::XorEqual
+                | Self::LeftShiftEqual
+                | Self::RightShiftEqual
+                | Self::LogicalAndEqual
+                | Self::LogicalOrEqual
+        )
+    }
+
+    /// Check if the syntax kind is a delimiter
+    pub fn is_delimiter(self) -> bool {
+        matches!(self, Self::LeftParen | Self::RightParen | Self::LeftBrace | Self::RightBrace | Self::LeftBracket | Self::RightBracket | Self::Comma | Self::Semicolon)
+    }
+}
+
+impl Display for CrystalElementType {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{:?}", self)
+    }
 }
 
 impl ElementType for CrystalElementType {
@@ -185,16 +315,15 @@ impl ElementType for CrystalElementType {
     fn role(&self) -> Self::Role {
         match self {
             Self::Root => UniversalElementRole::Root,
+            Self::SourceFile => UniversalElementRole::Root,
+            Self::Error => UniversalElementRole::Error,
             _ => UniversalElementRole::None,
         }
     }
 }
 
-impl From<CrystalTokenType> for CrystalElementType {
-    fn from(token: CrystalTokenType) -> Self {
-        match token {
-            CrystalTokenType::Error => Self::Root, // Default or Error?
-            _ => Self::Root,
-        }
+impl From<crate::lexer::token_type::CrystalTokenType> for CrystalElementType {
+    fn from(token: crate::lexer::token_type::CrystalTokenType) -> Self {
+        unsafe { std::mem::transmute(token) }
     }
 }

@@ -1,5 +1,6 @@
+#![cfg(feature = "lsp")]
 use oak_core::{Parser, SourceText, parser::session::ParseSession};
-use oak_rbq::{RbqLanguage, RbqParser, formatter::RbqFormatter};
+use oak_rbq::{RbqFormatter, RbqLanguage, RbqParser};
 
 #[test]
 fn test_rbq_formatter_basic() {
@@ -24,7 +25,7 @@ fn test_rbq_formatter_basic() {
     // Check if the formatted output is reasonable
     // It should have correct spacing and braces
     assert!(formatted.contains("struct User {"));
-    assert!(formatted.contains("id: i32;"));
+    assert!(formatted.contains("id: i32;"))
 }
 
 #[test]
@@ -33,7 +34,7 @@ fn test_rbq_formatter_enum() {
     let parser = RbqParser::new(&config);
     let formatter = RbqFormatter::new(&config);
 
-    let input = "enum Status { Active = 1; Inactive = 0; }";
+    let input = "enum Status { Active = 1; Inactive = 0 }";
     let source = SourceText::new(input);
 
     let mut session = ParseSession::<RbqLanguage>::default();
@@ -49,7 +50,7 @@ fn test_rbq_formatter_enum() {
 
     assert!(formatted.contains("enum Status {"));
     assert!(formatted.contains("Active = 1;"));
-    assert!(formatted.contains("Inactive = 0;"));
+    assert!(formatted.contains("Inactive = 0;"))
 }
 
 #[test]
@@ -73,7 +74,7 @@ fn test_rbq_formatter_namespace() {
     println!("Namespace Formatted:\n'{}'", formatted);
 
     assert!(formatted.contains("namespace App {"));
-    assert!(formatted.contains("struct User {"));
+    assert!(formatted.contains("struct User {"))
 }
 
 #[test]
@@ -82,7 +83,7 @@ fn test_rbq_formatter_complex_enum() {
     let parser = RbqParser::new(&config);
     let formatter = RbqFormatter::new(&config);
 
-    let input = "enum LongStatus { VeryLongMemberName1 = 1; VeryLongMemberName2 = 2; VeryLongMemberName3 = 3; VeryLongMemberName4 = 4; VeryLongMemberName5 = 5; }";
+    let input = "enum LongStatus { VeryLongMemberName1 = 1; VeryLongMemberName2 = 2; VeryLongMemberName3 = 3; VeryLongMemberName4 = 4; VeryLongMemberName5 = 5 }";
     let source = SourceText::new(input);
 
     let mut session = ParseSession::<RbqLanguage>::default();
@@ -95,5 +96,5 @@ fn test_rbq_formatter_complex_enum() {
     let formatted = formatter.format(&red, source.text());
     println!("Complex Enum Formatted:\n'{}'", formatted);
 
-    assert!(formatted.contains("\n    VeryLongMemberName1"));
+    assert!(formatted.contains("\n    VeryLongMemberName1"))
 }

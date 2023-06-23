@@ -1,5 +1,9 @@
-use crate::{kind::JuliaSyntaxKind, language::JuliaLanguage};
+#![doc = include_str!("readme.md")]
+pub mod token_type;
+
+use crate::{language::JuliaLanguage, lexer::token_type::JuliaTokenType};
 use oak_core::{Lexer, LexerCache, LexerState, lexer::LexOutput, source::Source};
+use std::str::FromStr;
 
 type State<'a, S> = LexerState<'a, S, JuliaLanguage>;
 
@@ -19,7 +23,7 @@ impl<'config> Lexer<JuliaLanguage> for JuliaLexer<'config> {
         let mut state = LexerState::new(source);
         let result = self.run(&mut state);
         if result.is_ok() {
-            state.add_eof();
+            state.add_eof()
         }
         state.finish_with_cache(result, cache)
     }
@@ -31,16 +35,11 @@ impl JuliaLexer<'_> {
         let start_pos = state.get_position();
 
         while let Some(ch) = state.peek() {
-            if ch == ' ' || ch == '\t' {
-                state.advance(ch.len_utf8());
-            }
-            else {
-                break;
-            }
+            if ch == ' ' || ch == '\t' { state.advance(ch.len_utf8()) } else { break }
         }
 
         if state.get_position() > start_pos {
-            state.add_token(JuliaSyntaxKind::Whitespace, start_pos, state.get_position());
+            state.add_token(JuliaTokenType::Whitespace, start_pos, state.get_position());
             true
         }
         else {
@@ -54,15 +53,15 @@ impl JuliaLexer<'_> {
 
         if let Some('\n') = state.peek() {
             state.advance(1);
-            state.add_token(JuliaSyntaxKind::Newline, start_pos, state.get_position());
+            state.add_token(JuliaTokenType::Newline, start_pos, state.get_position());
             true
         }
         else if let Some('\r') = state.peek() {
             state.advance(1);
             if let Some('\n') = state.peek() {
-                state.advance(1);
+                state.advance(1)
             }
-            state.add_token(JuliaSyntaxKind::Newline, start_pos, state.get_position());
+            state.add_token(JuliaTokenType::Newline, start_pos, state.get_position());
             true
         }
         else {
@@ -91,11 +90,11 @@ impl JuliaLexer<'_> {
                 let identifier_str = state.get_text_in((start_pos..end_pos).into());
 
                 // 检查是否是关键字
-                if let Some(keyword_kind) = JuliaSyntaxKind::from_str(identifier_str.as_ref()) {
-                    state.add_token(keyword_kind, start_pos, end_pos);
+                if let Ok(keyword_kind) = identifier_str.as_ref().parse::<JuliaTokenType>() {
+                    state.add_token(keyword_kind, start_pos, end_pos)
                 }
                 else {
-                    state.add_token(JuliaSyntaxKind::Identifier, start_pos, end_pos);
+                    state.add_token(JuliaTokenType::Identifier, start_pos, end_pos)
                 }
                 true
             }
@@ -118,12 +117,7 @@ impl JuliaLexer<'_> {
 
                 // 处理整数部分
                 while let Some(ch) = state.peek() {
-                    if ch.is_ascii_digit() || ch == '_' {
-                        state.advance(1);
-                    }
-                    else {
-                        break;
-                    }
+                    if ch.is_ascii_digit() || ch == '_' { state.advance(1) } else { break }
                 }
 
                 let mut is_float = false;
@@ -157,7 +151,7 @@ impl JuliaLexer<'_> {
                         // 可选的符号
                         if let Some(sign) = state.peek() {
                             if sign == '+' || sign == '-' {
-                                state.advance(1);
+                                state.advance(1)
                             }
                         }
 
@@ -187,7 +181,7 @@ impl JuliaLexer<'_> {
                     }
                 }
 
-                let token_kind = if is_float { JuliaSyntaxKind::FloatLiteral } else { JuliaSyntaxKind::IntegerLiteral };
+                let token_kind = if is_float { JuliaTokenType::FloatLiteral } else { JuliaTokenType::IntegerLiteral };
 
                 state.add_token(token_kind, start_pos, state.get_position());
                 true
@@ -229,7 +223,7 @@ impl JuliaLexer<'_> {
                 }
 
                 if found_end {
-                    let token_kind = if quote == '\'' { JuliaSyntaxKind::CharLiteral } else { JuliaSyntaxKind::StringLiteral };
+                    let token_kind = if quote == '\'' { JuliaTokenType::CharLiteral } else { JuliaTokenType::StringLiteral };
                     state.add_token(token_kind, start_pos, state.get_position());
                     true
                 }
@@ -264,7 +258,7 @@ impl JuliaLexer<'_> {
                             if let Some('"') = state.peek_next_n(1) {
                                 if let Some('"') = state.peek_next_n(2) {
                                     state.advance(3);
-                                    state.add_token(JuliaSyntaxKind::StringLiteral, start_pos, state.get_position());
+                                    state.add_token(JuliaTokenType::StringLiteral, start_pos, state.get_position());
                                     return true;
                                 }
                             }
@@ -307,7 +301,7 @@ impl JuliaLexer<'_> {
                     }
                 }
 
-                state.add_token(JuliaSyntaxKind::Comment, start_pos, state.get_position());
+                state.add_token(JuliaTokenType::Comment, start_pos, state.get_position());
                 true
             }
             else {
@@ -321,7 +315,7 @@ impl JuliaLexer<'_> {
                     state.advance(ch.len_utf8());
                 }
 
-                state.add_token(JuliaSyntaxKind::Comment, start_pos, state.get_position());
+                state.add_token(JuliaTokenType::Comment, start_pos, state.get_position());
                 true
             }
         }
@@ -340,154 +334,154 @@ impl JuliaLexer<'_> {
                     state.advance(1);
                     if let Some('=') = state.peek() {
                         state.advance(1);
-                        JuliaSyntaxKind::PlusAssign
+                        JuliaTokenType::PlusAssign
                     }
                     else {
-                        JuliaSyntaxKind::Plus
+                        JuliaTokenType::Plus
                     }
                 }
                 '-' => {
                     state.advance(1);
                     if let Some('=') = state.peek() {
                         state.advance(1);
-                        JuliaSyntaxKind::MinusAssign
+                        JuliaTokenType::MinusAssign
                     }
                     else if let Some('>') = state.peek() {
                         state.advance(1);
-                        JuliaSyntaxKind::Arrow
+                        JuliaTokenType::Arrow
                     }
                     else {
-                        JuliaSyntaxKind::Minus
+                        JuliaTokenType::Minus
                     }
                 }
                 '*' => {
                     state.advance(1);
                     if let Some('=') = state.peek() {
                         state.advance(1);
-                        JuliaSyntaxKind::StarAssign
+                        JuliaTokenType::StarAssign
                     }
                     else {
-                        JuliaSyntaxKind::Star
+                        JuliaTokenType::Star
                     }
                 }
                 '/' => {
                     state.advance(1);
                     if let Some('=') = state.peek() {
                         state.advance(1);
-                        JuliaSyntaxKind::SlashAssign
+                        JuliaTokenType::SlashAssign
                     }
                     else {
-                        JuliaSyntaxKind::Slash
+                        JuliaTokenType::Slash
                     }
                 }
                 '%' => {
                     state.advance(1);
                     if let Some('=') = state.peek() {
                         state.advance(1);
-                        JuliaSyntaxKind::PercentAssign
+                        JuliaTokenType::PercentAssign
                     }
                     else {
-                        JuliaSyntaxKind::Percent
+                        JuliaTokenType::Percent
                     }
                 }
                 '^' => {
                     state.advance(1);
                     if let Some('=') = state.peek() {
                         state.advance(1);
-                        JuliaSyntaxKind::CaretAssign
+                        JuliaTokenType::CaretAssign
                     }
                     else {
-                        JuliaSyntaxKind::Caret
+                        JuliaTokenType::Caret
                     }
                 }
                 '=' => {
                     state.advance(1);
                     if let Some('=') = state.peek() {
                         state.advance(1);
-                        JuliaSyntaxKind::Equal
+                        JuliaTokenType::Equal
                     }
                     else if let Some('>') = state.peek() {
                         state.advance(1);
-                        JuliaSyntaxKind::FatArrow
+                        JuliaTokenType::FatArrow
                     }
                     else {
-                        JuliaSyntaxKind::Assign
+                        JuliaTokenType::Assign
                     }
                 }
                 '!' => {
                     state.advance(1);
                     if let Some('=') = state.peek() {
                         state.advance(1);
-                        JuliaSyntaxKind::NotEqual
+                        JuliaTokenType::NotEqual
                     }
                     else {
-                        JuliaSyntaxKind::Not
+                        JuliaTokenType::Not
                     }
                 }
                 '<' => {
                     state.advance(1);
                     if let Some('=') = state.peek() {
                         state.advance(1);
-                        JuliaSyntaxKind::LessEqual
+                        JuliaTokenType::LessEqual
                     }
                     else if let Some('<') = state.peek() {
                         state.advance(1);
-                        JuliaSyntaxKind::LeftShift
+                        JuliaTokenType::LeftShift
                     }
                     else {
-                        JuliaSyntaxKind::LessThan
+                        JuliaTokenType::LessThan
                     }
                 }
                 '>' => {
                     state.advance(1);
                     if let Some('=') = state.peek() {
                         state.advance(1);
-                        JuliaSyntaxKind::GreaterEqual
+                        JuliaTokenType::GreaterEqual
                     }
                     else if let Some('>') = state.peek() {
                         state.advance(1);
-                        JuliaSyntaxKind::RightShift
+                        JuliaTokenType::RightShift
                     }
                     else {
-                        JuliaSyntaxKind::GreaterThan
+                        JuliaTokenType::GreaterThan
                     }
                 }
                 '&' => {
                     state.advance(1);
                     if let Some('&') = state.peek() {
                         state.advance(1);
-                        JuliaSyntaxKind::And
+                        JuliaTokenType::And
                     }
                     else {
-                        JuliaSyntaxKind::BitAnd
+                        JuliaTokenType::BitAnd
                     }
                 }
                 '|' => {
                     state.advance(1);
                     if let Some('|') = state.peek() {
                         state.advance(1);
-                        JuliaSyntaxKind::Or
+                        JuliaTokenType::Or
                     }
                     else {
-                        JuliaSyntaxKind::BitOr
+                        JuliaTokenType::BitOr
                     }
                 }
                 '~' => {
                     state.advance(1);
-                    JuliaSyntaxKind::BitNot
+                    JuliaTokenType::BitNot
                 }
                 ':' => {
                     state.advance(1);
-                    JuliaSyntaxKind::Colon
+                    JuliaTokenType::Colon
                 }
                 '.' => {
                     state.advance(1);
                     if let Some('.') = state.peek() {
                         state.advance(1);
-                        JuliaSyntaxKind::Range
+                        JuliaTokenType::Range
                     }
                     else {
-                        JuliaSyntaxKind::Dot
+                        JuliaTokenType::Dot
                     }
                 }
                 _ => return false,
@@ -507,14 +501,14 @@ impl JuliaLexer<'_> {
 
         if let Some(ch) = state.peek() {
             let token_kind = match ch {
-                '(' => JuliaSyntaxKind::LeftParen,
-                ')' => JuliaSyntaxKind::RightParen,
-                '[' => JuliaSyntaxKind::LeftBracket,
-                ']' => JuliaSyntaxKind::RightBracket,
-                '{' => JuliaSyntaxKind::LeftBrace,
-                '}' => JuliaSyntaxKind::RightBrace,
-                ',' => JuliaSyntaxKind::Comma,
-                ';' => JuliaSyntaxKind::Semicolon,
+                '(' => JuliaTokenType::LeftParen,
+                ')' => JuliaTokenType::RightParen,
+                '[' => JuliaTokenType::LeftBracket,
+                ']' => JuliaTokenType::RightBracket,
+                '{' => JuliaTokenType::LeftBrace,
+                '}' => JuliaTokenType::RightBrace,
+                ',' => JuliaTokenType::Comma,
+                ';' => JuliaTokenType::Semicolon,
                 _ => return false,
             };
 
@@ -575,10 +569,10 @@ impl<'config> JuliaLexer<'config> {
             let start_pos = state.get_position();
             if let Some(ch) = state.peek() {
                 state.advance(ch.len_utf8());
-                state.add_token(JuliaSyntaxKind::Error, start_pos, state.get_position());
+                state.add_token(JuliaTokenType::Error, start_pos, state.get_position());
             }
 
-            state.advance_if_dead_lock(safe_point);
+            state.advance_if_dead_lock(safe_point)
         }
 
         Ok(())

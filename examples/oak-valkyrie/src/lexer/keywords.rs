@@ -1,7 +1,9 @@
+#[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
 
 /// Keywords or soft keywords
-#[derive(Copy, Clone, Debug, PartialEq, Eq, Hash, Serialize, Deserialize)]
+#[derive(Copy, Clone, Debug, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 #[allow(missing_docs)]
 pub enum ValkyrieKeywords {
     /// Declare a namespace in Valkyrie.
@@ -22,12 +24,30 @@ pub enum ValkyrieKeywords {
     /// class Point { x: f64, y: f64 }
     /// ```
     Class,
+    /// Declare a singleton.
+    ///
+    /// ```v
+    /// singleton GlobalConfig { ... }
+    /// ```
+    Singleton,
     /// Declare a trait.
     ///
     /// ```v
-    /// trait Show { micro show(self); }
+    /// trait Show { micro show(self) }
     /// ```
     Trait,
+    /// Declare flags.
+    ///
+    /// ```v
+    /// flags Permissions { Read, Write, Execute }
+    /// ```
+    Flags,
+    /// Declare enums.
+    ///
+    /// ```v
+    /// enums Priority { High = 3, Normal = 2, Low = 1 }
+    /// ```
+    Enums,
     /// Declare a union.
     ///
     /// ```v
@@ -92,6 +112,12 @@ pub enum ValkyrieKeywords {
     /// try expression catch { pattern => expression }
     /// ```
     Try,
+    /// Lambda expression.
+    ///
+    /// ```v
+    /// lambda(x) { x + 1 }
+    /// ```
+    Lambda,
     /// Catch clause.
     Catch,
     /// While loop.
@@ -100,6 +126,13 @@ pub enum ValkyrieKeywords {
     /// while true { ... }
     /// ```
     While,
+    /// Loop.
+    ///
+    /// ```v
+    /// loop { ... }
+    /// loop i in list { ... }
+    /// ```
+    Loop,
     /// For loop.
     ///
     /// ```v
@@ -136,16 +169,62 @@ pub enum ValkyrieKeywords {
     /// yield x;
     /// ```
     Yield,
+    /// In clause for loops.
+    ///
+    /// ```v
+    /// for i in 0..10 { ... };
+    /// ```
+    In,
     /// Raise an error.
     ///
     /// ```v
     /// raise error;
     /// ```
     Raise,
+    /// Effect declaration.
+    ///
+    /// ```v
+    /// effect Console { micro log(msg: string) }
+    /// ```
+    Effect,
+    /// Resume from an effect operation.
+    ///
+    /// ```v
+    /// resume value;
+    /// ```
+    Resume,
+    /// From keyword for yield from.
+    ///
+    /// ```v
+    /// yield from list;
+    /// ```
+    From,
     /// Mutable variable.
     ///
     /// ```v
     /// let mut x = 1;
     /// ```
     Mut,
+    /// Type check.
+    ///
+    /// ```v
+    /// if x is T { ... }
+    /// ```
+    Is,
+    /// Type pattern in match.
+    ///
+    /// ```v
+    /// match x { type T => ... }
+    /// ```
+    ///
+    /// ```v
+    /// match x { type T => ... }
+    /// ```
+    Type,
+    /// Type casting.
+    ///
+    /// ```v
+    /// x as T
+    /// ```
+    As,
 }

@@ -59,7 +59,7 @@ impl StringConfig {
                     }
                 }
                 else {
-                    state.advance(rest_len);
+                    state.advance(rest_len)
                 }
             }
 
@@ -72,7 +72,7 @@ impl StringConfig {
             if Some(ch) == self.escape {
                 state.advance(ch.len_utf8());
                 if let Some(next) = state.current() {
-                    state.advance(next.len_utf8());
+                    state.advance(next.len_utf8())
                 }
             }
             else if ch == quote {
@@ -81,7 +81,7 @@ impl StringConfig {
                 return true;
             }
             else {
-                state.advance(ch.len_utf8());
+                state.advance(ch.len_utf8())
             }
         }
 

@@ -1,3 +1,6 @@
+pub mod element_type;
+pub use element_type::XmlElementType;
+
 use crate::{language::XmlLanguage, lexer::XmlLexer};
 use oak_core::{
     TextEdit,
@@ -5,7 +8,7 @@ use oak_core::{
     source::Source,
 };
 
-mod parse;
+mod parse_top_level;
 
 pub struct XmlParser<'config> {
     pub(crate) config: &'config XmlLanguage,

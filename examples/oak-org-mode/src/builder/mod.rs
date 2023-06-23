@@ -1,3 +1,4 @@
+#![doc = include_str!("readme.md")]
 use crate::language::OrgModeLanguage;
 use oak_core::{Builder, BuilderCache, OakDiagnostics, TextEdit, source::Source};
 

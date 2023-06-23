@@ -3,11 +3,13 @@ name = "oaks"
 version.workspace = true
 authors.workspace = true
 description = "Unified parser combinator library and IDE feature facade."
-keywords = ["parser", "combinator", "lsp", "ide", "multi-language"]
-categories = ["parsing", "development-tools"]
-readme = "readme.md"
-license.workspace = true
 edition.workspace = true
+license.workspace = true
+publish = false
+readme = "readme.md"
+repository = "https://github.com/ygg-lang/oaks/tree/master/projects/oaks"
+categories = ["parsing", "development-tools"]
+keywords = ["parser", "combinator", "lsp", "ide", "multi-language"]
 
 [dependencies]
 oak-core = { workspace = true }
@@ -16,7 +18,7 @@ oak-folding = { workspace = true }
 oak-hover = { workspace = true }
 oak-navigation = { workspace = true }
 oak-semantic-tokens = { workspace = true }
-oak-structure = { workspace = true }
+oak-structural-view = { workspace = true }
 oak-vfs = { workspace = true }
 oak-symbols = { workspace = true }
 # oak-ada = { workspace = true }
@@ -27,6 +29,7 @@ oak-symbols = { workspace = true }
 # oak-cpp = { workspace = true }
 # oak-csharp = { workspace = true }
 oak-css = { workspace = true }
+# oak-dejavu = { workspace = true }
 # oak-csv = { workspace = true }
 # oak-d = { workspace = true }
 # oak-dart = { workspace = true }
@@ -46,7 +49,7 @@ oak-html = { workspace = true }
 # oak-jasmin = { workspace = true }
 # oak-java = { workspace = true }
 # oak-javadoc = { workspace = true }
-# oak-javascript = { workspace = true }
+oak-javascript = { workspace = true }
 oak-json = { workspace = true }
 # oak-julia = { workspace = true }
 # oak-kotlin = { workspace = true }
@@ -59,18 +62,19 @@ oak-markdown = { workspace = true }
 # oak-ocaml = { workspace = true }
 # oak-org-mode = { workspace = true }
 # oak-pascal = { workspace = true }
-# oak-perl = { workspace = true }
+oak-perl = { workspace = true }
+oak-raku = { workspace = true }
 # oak-php = { workspace = true }
 # oak-powershell = { workspace = true }
 # oak-protobuf = { workspace = true }
-# oak-python = { workspace = true }
+oak-python = { workspace = true }
 # oak-r = { workspace = true }
 # oak-ruby = { workspace = true }
-# oak-rust = { workspace = true }
+oak-rust = { workspace = true }
 # oak-scala = { workspace = true }
 # oak-scheme = { workspace = true }
 # oak-solidity = { workspace = true }
-# oak-sql = { workspace = true }
+oak-sql = { workspace = true }
 # oak-swift = { workspace = true }
 oak-toml = { workspace = true }
 # oak-typescript = { workspace = true }
@@ -80,9 +84,9 @@ oak-toml = { workspace = true }
 # oak-xml = { workspace = true }
 # oak-zig = { workspace = true }
 oak-yaml = { workspace = true }
-oak-rust = { workspace = true }
-oak-sql = { workspace = true }
-oak-python = { workspace = true }
+# oak-rust = { workspace = true }
+# oak-sql = { workspace = true }
+# oak-python = { workspace = true }
 serde = { workspace = true }
 
 [dev-dependencies]
@@ -150,10 +154,8 @@ harness = false
 name = "compare_python"
 harness = false
 
-
 [features]
 default = []
-
 
 [package.metadata.docs.rs]
 all-features = true

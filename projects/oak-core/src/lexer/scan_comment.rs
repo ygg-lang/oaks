@@ -33,14 +33,14 @@ impl CommentConfig {
             while depth > 0 && state.not_at_end() {
                 if self.nested_blocks && !self.block_start.is_empty() && state.starts_with(self.block_start) {
                     depth += 1;
-                    state.advance(self.block_start.len());
+                    state.advance(self.block_start.len())
                 }
                 else if !self.block_end.is_empty() && state.starts_with(self.block_end) {
                     depth -= 1;
-                    state.advance(self.block_end.len());
+                    state.advance(self.block_end.len())
                 }
                 else if let Some(ch) = state.current() {
-                    state.advance(ch.len_utf8());
+                    state.advance(ch.len_utf8())
                 }
             }
             state.add_token(block_kind, start, state.get_position());

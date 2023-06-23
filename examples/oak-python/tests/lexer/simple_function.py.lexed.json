@@ -1,6 +1,6 @@
 {
   "success": true,
-  "count": 40,
+  "count": 28,
   "tokens": [
     {
       "kind": "DefKeyword",
@@ -33,40 +33,10 @@
       "end": 18
     },
     {
-      "kind": "Newline",
-      "text": "\r\n",
-      "start": 18,
-      "end": 20
-    },
-    {
-      "kind": "Indent",
-      "text": "",
+      "kind": "String",
+      "text": "\"\"\"A simple function that prints hello world.\"\"\"",
       "start": 24,
-      "end": 24
-    },
-    {
-      "kind": "String",
-      "text": "\"\"",
-      "start": 24,
-      "end": 26
-    },
-    {
-      "kind": "String",
-      "text": "\"A simple function that prints hello world.\"",
-      "start": 26,
-      "end": 70
-    },
-    {
-      "kind": "String",
-      "text": "\"\"",
-      "start": 70,
       "end": 72
-    },
-    {
-      "kind": "Newline",
-      "text": "\r\n",
-      "start": 72,
-      "end": 74
     },
     {
       "kind": "Identifier",
@@ -93,12 +63,6 @@
       "end": 100
     },
     {
-      "kind": "Newline",
-      "text": "\r\n",
-      "start": 100,
-      "end": 102
-    },
-    {
       "kind": "ReturnKeyword",
       "text": "return",
       "start": 106,
@@ -109,30 +73,6 @@
       "text": "True",
       "start": 113,
       "end": 117
-    },
-    {
-      "kind": "Newline",
-      "text": "\r\n",
-      "start": 117,
-      "end": 119
-    },
-    {
-      "kind": "Newline",
-      "text": "\r\n",
-      "start": 119,
-      "end": 121
-    },
-    {
-      "kind": "Newline",
-      "text": "\r\n",
-      "start": 140,
-      "end": 142
-    },
-    {
-      "kind": "Dedent",
-      "text": "",
-      "start": 142,
-      "end": 142
     },
     {
       "kind": "Identifier",
@@ -153,12 +93,6 @@
       "end": 148
     },
     {
-      "kind": "Newline",
-      "text": "\r\n",
-      "start": 148,
-      "end": 150
-    },
-    {
       "kind": "Identifier",
       "text": "y",
       "start": 150,
@@ -175,12 +109,6 @@
       "text": "\"string literal\"",
       "start": 154,
       "end": 170
-    },
-    {
-      "kind": "Newline",
-      "text": "\r\n",
-      "start": 170,
-      "end": 172
     },
     {
       "kind": "Identifier",

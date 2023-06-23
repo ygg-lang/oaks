@@ -1,8 +1,10 @@
-use crate::{kind::DockerfileSyntaxKind, language::DockerfileLanguage};
+#![doc = include_str!("readme.md")]
+pub mod token_type;
+
+use crate::{language::DockerfileLanguage, lexer::token_type::DockerfileTokenType};
 use oak_core::{
-    Lexer, LexerCache, LexerState, OakError, TextEdit,
+    Lexer, LexerCache, LexerState, OakError, Source, TextEdit,
     lexer::{LexOutput, WhitespaceConfig},
-    source::Source,
 };
 use std::sync::LazyLock;
 
@@ -20,7 +22,7 @@ impl<'config> Lexer<DockerfileLanguage> for DockerfileLexer<'config> {
         let mut state = State::new(text);
         let result = self.run(&mut state);
         if result.is_ok() {
-            state.add_eof();
+            state.add_eof()
         }
         state.finish_with_cache(result, cache)
     }
@@ -71,7 +73,7 @@ impl<'config> DockerfileLexer<'config> {
                 continue;
             }
 
-            state.advance_if_dead_lock(safe_point);
+            state.advance_if_dead_lock(safe_point)
         }
 
         Ok(())
@@ -79,7 +81,7 @@ impl<'config> DockerfileLexer<'config> {
 
     /// 跳过空白字符
     fn skip_whitespace<'s, S: Source + ?Sized>(&self, state: &mut State<'s, S>) -> bool {
-        DOCKERFILE_WHITESPACE.scan(state, DockerfileSyntaxKind::Whitespace)
+        DOCKERFILE_WHITESPACE.scan(state, DockerfileTokenType::Whitespace)
     }
 
     /// 处理换行符
@@ -88,15 +90,15 @@ impl<'config> DockerfileLexer<'config> {
         if let Some(ch) = state.peek() {
             if ch == '\n' {
                 state.advance(1);
-                state.add_token(DockerfileSyntaxKind::Newline, start, state.get_position());
+                state.add_token(DockerfileTokenType::Newline, start, state.get_position());
                 return true;
             }
             else if ch == '\r' {
                 state.advance(1);
                 if state.peek() == Some('\n') {
-                    state.advance(1);
+                    state.advance(1)
                 }
-                state.add_token(DockerfileSyntaxKind::Newline, start, state.get_position());
+                state.add_token(DockerfileTokenType::Newline, start, state.get_position());
                 return true;
             }
         }
@@ -112,9 +114,9 @@ impl<'config> DockerfileLexer<'config> {
                 if ch == '\n' || ch == '\r' {
                     break;
                 }
-                state.advance(ch.len_utf8());
+                state.advance(ch.len_utf8())
             }
-            state.add_token(DockerfileSyntaxKind::Comment, start, state.get_position());
+            state.add_token(DockerfileTokenType::Comment, start, state.get_position());
             return true;
         }
         false
@@ -128,12 +130,7 @@ impl<'config> DockerfileLexer<'config> {
                 state.advance(ch.len_utf8());
 
                 while let Some(ch) = state.peek() {
-                    if ch.is_ascii_alphanumeric() || ch == '_' {
-                        state.advance(ch.len_utf8());
-                    }
-                    else {
-                        break;
-                    }
+                    if ch.is_ascii_alphanumeric() || ch == '_' { state.advance(ch.len_utf8()) } else { break }
                 }
 
                 let end_pos = state.get_position();
@@ -141,31 +138,31 @@ impl<'config> DockerfileLexer<'config> {
 
                 // 检查是否是 Dockerfile 指令
                 let kind = match text.to_uppercase().as_str() {
-                    "FROM" => DockerfileSyntaxKind::From,
-                    "RUN" => DockerfileSyntaxKind::Run,
-                    "CMD" => DockerfileSyntaxKind::Cmd,
-                    "LABEL" => DockerfileSyntaxKind::Label,
-                    "EXPOSE" => DockerfileSyntaxKind::Expose,
-                    "ENV" => DockerfileSyntaxKind::Env,
-                    "ADD" => DockerfileSyntaxKind::Add,
-                    "COPY" => DockerfileSyntaxKind::Copy,
-                    "ENTRYPOINT" => DockerfileSyntaxKind::Entrypoint,
-                    "VOLUME" => DockerfileSyntaxKind::Volume,
-                    "USER" => DockerfileSyntaxKind::User,
-                    "WORKDIR" => DockerfileSyntaxKind::Workdir,
-                    "ARG" => DockerfileSyntaxKind::Arg,
-                    "ONBUILD" => DockerfileSyntaxKind::Onbuild,
-                    "STOPSIGNAL" => DockerfileSyntaxKind::Stopsignal,
-                    "HEALTHCHECK" => DockerfileSyntaxKind::Healthcheck,
-                    "SHELL" => DockerfileSyntaxKind::Shell,
-                    "MAINTAINER" => DockerfileSyntaxKind::Maintainer,
-                    "AS" => DockerfileSyntaxKind::As,
-                    "NONE" => DockerfileSyntaxKind::None,
-                    "INTERVAL" => DockerfileSyntaxKind::Interval,
-                    "TIMEOUT" => DockerfileSyntaxKind::Timeout,
-                    "START_PERIOD" => DockerfileSyntaxKind::StartPeriod,
-                    "RETRIES" => DockerfileSyntaxKind::Retries,
-                    _ => DockerfileSyntaxKind::Identifier,
+                    "FROM" => DockerfileTokenType::From,
+                    "RUN" => DockerfileTokenType::Run,
+                    "CMD" => DockerfileTokenType::Cmd,
+                    "LABEL" => DockerfileTokenType::Label,
+                    "EXPOSE" => DockerfileTokenType::Expose,
+                    "ENV" => DockerfileTokenType::Env,
+                    "ADD" => DockerfileTokenType::Add,
+                    "COPY" => DockerfileTokenType::Copy,
+                    "ENTRYPOINT" => DockerfileTokenType::Entrypoint,
+                    "VOLUME" => DockerfileTokenType::Volume,
+                    "USER" => DockerfileTokenType::User,
+                    "WORKDIR" => DockerfileTokenType::Workdir,
+                    "ARG" => DockerfileTokenType::Arg,
+                    "ONBUILD" => DockerfileTokenType::Onbuild,
+                    "STOPSIGNAL" => DockerfileTokenType::Stopsignal,
+                    "HEALTHCHECK" => DockerfileTokenType::Healthcheck,
+                    "SHELL" => DockerfileTokenType::Shell,
+                    "MAINTAINER" => DockerfileTokenType::Maintainer,
+                    "AS" => DockerfileTokenType::As,
+                    "NONE" => DockerfileTokenType::None,
+                    "INTERVAL" => DockerfileTokenType::Interval,
+                    "TIMEOUT" => DockerfileTokenType::Timeout,
+                    "START_PERIOD" => DockerfileTokenType::StartPeriod,
+                    "RETRIES" => DockerfileTokenType::Retries,
+                    _ => DockerfileTokenType::Identifier,
                 };
 
                 state.add_token(kind, start, end_pos);
@@ -183,15 +180,10 @@ impl<'config> DockerfileLexer<'config> {
                 state.advance(1);
 
                 while let Some(ch) = state.peek() {
-                    if ch.is_ascii_digit() || ch == '.' {
-                        state.advance(1);
-                    }
-                    else {
-                        break;
-                    }
+                    if ch.is_ascii_digit() || ch == '.' { state.advance(1) } else { break }
                 }
 
-                state.add_token(DockerfileSyntaxKind::Number, start, state.get_position());
+                state.add_token(DockerfileTokenType::Number, start, state.get_position());
                 return true;
             }
         }
@@ -213,15 +205,15 @@ impl<'config> DockerfileLexer<'config> {
                     else if ch == '\\' {
                         state.advance(1);
                         if state.peek().is_some() {
-                            state.advance(1);
+                            state.advance(1)
                         }
                     }
                     else {
-                        state.advance(ch.len_utf8());
+                        state.advance(ch.len_utf8())
                     }
                 }
 
-                state.add_token(DockerfileSyntaxKind::String, start, state.get_position());
+                state.add_token(DockerfileTokenType::String, start, state.get_position());
                 return true;
             }
         }
@@ -236,15 +228,10 @@ impl<'config> DockerfileLexer<'config> {
                 state.advance(1);
 
                 while let Some(ch) = state.peek() {
-                    if ch.is_ascii_alphanumeric() || ch == '/' || ch == '.' || ch == '-' || ch == '_' {
-                        state.advance(1);
-                    }
-                    else {
-                        break;
-                    }
+                    if ch.is_ascii_alphanumeric() || ch == '/' || ch == '.' || ch == '-' || ch == '_' { state.advance(1) } else { break }
                 }
 
-                state.add_token(DockerfileSyntaxKind::Path, start, state.get_position());
+                state.add_token(DockerfileTokenType::Path, start, state.get_position());
                 return true;
             }
         }
@@ -256,17 +243,17 @@ impl<'config> DockerfileLexer<'config> {
         let start = state.get_position();
         if let Some(ch) = state.peek() {
             let kind = match ch {
-                '=' => DockerfileSyntaxKind::Equal,
-                ':' => DockerfileSyntaxKind::Colon,
-                '{' => DockerfileSyntaxKind::LeftBrace,
-                '}' => DockerfileSyntaxKind::RightBrace,
-                '[' => DockerfileSyntaxKind::LeftBracket,
-                ']' => DockerfileSyntaxKind::RightBracket,
-                '(' => DockerfileSyntaxKind::LeftParen,
-                ')' => DockerfileSyntaxKind::RightParen,
-                ',' => DockerfileSyntaxKind::Comma,
-                ';' => DockerfileSyntaxKind::Semicolon,
-                '$' => DockerfileSyntaxKind::Dollar,
+                '=' => DockerfileTokenType::Equal,
+                ':' => DockerfileTokenType::Colon,
+                '{' => DockerfileTokenType::LeftBrace,
+                '}' => DockerfileTokenType::RightBrace,
+                '[' => DockerfileTokenType::LeftBracket,
+                ']' => DockerfileTokenType::RightBracket,
+                '(' => DockerfileTokenType::LeftParen,
+                ')' => DockerfileTokenType::RightParen,
+                ',' => DockerfileTokenType::Comma,
+                ';' => DockerfileTokenType::Semicolon,
+                '$' => DockerfileTokenType::Dollar,
                 _ => return false,
             };
 
@@ -282,7 +269,7 @@ impl<'config> DockerfileLexer<'config> {
         let start = state.get_position();
         if let Some(ch) = state.peek() {
             state.advance(ch.len_utf8());
-            state.add_token(DockerfileSyntaxKind::Error, start, state.get_position());
+            state.add_token(DockerfileTokenType::Error, start, state.get_position());
             return true;
         }
         false

@@ -1,20 +1,35 @@
 use crate::{
-    RegexLanguage, RegexParser, RegexSyntaxKind,
     ast::{Alternative, Assertion, AssertionKind, CharacterClass, CharacterRange, Group, GroupKind, Literal, Pattern, PatternElement, RegexRoot, Special, SpecialKind},
-    lexer::RegexLexer,
+    language::RegexLanguage,
+    lexer::{RegexLexer, token_type::RegexTokenType},
+    parser::{RegexParser, element_type::RegexElementType},
 };
 use core::range::Range;
 use oak_core::{
-    Builder, GreenNode, Lexer, OakDiagnostics, OakError, Parser, RedNode, RedTree, SourceText,
+    Builder, GreenNode, Lexer, OakDiagnostics, OakError, Parser, RedNode, RedTree, Source, SourceText,
     builder::{BuildOutput, BuilderCache},
     parser::ParseSession,
-    source::{Source, TextEdit},
+    source::TextEdit,
 };
 
-impl<'config> Builder<RegexLanguage> for RegexParser<'config> {
+/// A builder for constructing a regex AST from a green tree.
+#[derive(Clone)]
+pub struct RegexBuilder<'config> {
+    config: &'config RegexLanguage,
+}
+
+impl<'config> RegexBuilder<'config> {
+    /// Creates a new `RegexBuilder` with the given configuration.
+    pub fn new(config: &'config RegexLanguage) -> Self {
+        Self { config }
+    }
+}
+
+impl<'config> Builder<RegexLanguage> for RegexBuilder<'config> {
+    /// Builds a regex AST from the source text.
     fn build<'a, S: Source + ?Sized>(&self, source: &S, edits: &[TextEdit], _cache: &'a mut impl BuilderCache<RegexLanguage>) -> BuildOutput<RegexLanguage> {
         let parser = RegexParser::new(self.config);
-        let lexer = RegexLexer::new(&self.config);
+        let lexer = RegexLexer::new(self.config);
 
         let mut session = ParseSession::<RegexLanguage>::default();
         lexer.lex(source, edits, &mut session);
@@ -37,7 +52,7 @@ impl<'config> Builder<RegexLanguage> for RegexParser<'config> {
     }
 }
 
-impl<'config> RegexParser<'config> {
+impl<'config> RegexBuilder<'config> {
     pub(crate) fn build_root<'a>(&self, green_tree: &'a GreenNode<'a, RegexLanguage>, source: &SourceText) -> Result<RegexRoot, OakError> {
         let red_root = RedNode::new(green_tree, 0);
         let mut patterns = Vec::new();
@@ -45,7 +60,7 @@ impl<'config> RegexParser<'config> {
         for child in red_root.children() {
             match child {
                 RedTree::Node(n) => match n.green.kind {
-                    RegexSyntaxKind::RegexPattern => {
+                    RegexElementType::RegexPattern => {
                         let pattern = self.build_pattern(n, source)?;
                         patterns.push(pattern);
                     }
@@ -54,7 +69,7 @@ impl<'config> RegexParser<'config> {
                     }
                 },
                 RedTree::Leaf(t) => {
-                    if t.kind == RegexSyntaxKind::Whitespace || t.kind == RegexSyntaxKind::Comment {
+                    if t.kind == RegexTokenType::Whitespace || t.kind == RegexTokenType::Comment {
                         continue;
                     }
                     return Err(OakError::syntax_error("Unexpected token in root".to_string(), t.span.start, None));
@@ -77,14 +92,14 @@ impl<'config> RegexParser<'config> {
                     elements.push(element);
                 }
                 RedTree::Leaf(t) => {
-                    if t.kind == RegexSyntaxKind::Pipe {
+                    if t.kind == RegexTokenType::Pipe {
                         continue;
                     }
-                    if t.kind == RegexSyntaxKind::Whitespace || t.kind == RegexSyntaxKind::Comment {
+                    if t.kind == RegexTokenType::Whitespace || t.kind == RegexTokenType::Comment {
                         continue;
                     }
 
-                    if t.kind == RegexSyntaxKind::Character {
+                    if t.kind == RegexTokenType::Character {
                         let value = text(source, t.span.clone());
                         let lit = Literal { value, span: t.span.clone() };
                         elements.push(PatternElement::Literal(lit));
@@ -104,16 +119,16 @@ impl<'config> RegexParser<'config> {
         let span = node.span();
 
         match node.green.kind {
-            RegexSyntaxKind::Character => {
+            RegexElementType::Character => {
                 let value = text(source, node.span());
                 Ok(PatternElement::Literal(Literal { value, span }))
             }
-            RegexSyntaxKind::Dot => Ok(PatternElement::Special(Special { kind: SpecialKind::Any, span })),
-            RegexSyntaxKind::LBrack => self.build_character_class(node, source),
-            RegexSyntaxKind::LParen => self.build_group(node, source),
-            RegexSyntaxKind::Question | RegexSyntaxKind::Star | RegexSyntaxKind::Plus | RegexSyntaxKind::LBrace => Err(OakError::syntax_error("Quantifier without preceding element".to_string(), span.start, None)),
-            RegexSyntaxKind::Backslash => self.build_escape_sequence(node, source),
-            RegexSyntaxKind::Hat | RegexSyntaxKind::Dollar => self.build_assertion(node, source),
+            RegexElementType::Dot => Ok(PatternElement::Special(Special { kind: SpecialKind::Any, span })),
+            RegexElementType::LBrack => self.build_character_class(node, source),
+            RegexElementType::LParen => self.build_group(node, source),
+            RegexElementType::Question | RegexElementType::Star | RegexElementType::Plus | RegexElementType::LBrace => Err(OakError::syntax_error("Quantifier without preceding element".to_string(), span.start, None)),
+            RegexElementType::Backslash => self.build_escape_sequence(node, source),
+            RegexElementType::Hat | RegexElementType::Dollar => self.build_assertion(node, source),
             _ => Err(OakError::syntax_error(format!("Unexpected pattern element: {:?}", node.green.kind), span.start, None)),
         }
     }
@@ -128,15 +143,15 @@ impl<'config> RegexParser<'config> {
             match child {
                 RedTree::Leaf(t) => {
                     match t.kind {
-                        RegexSyntaxKind::Hat => {
+                        RegexTokenType::Hat => {
                             negated = true;
                         }
-                        RegexSyntaxKind::Character => {
+                        RegexTokenType::Character => {
                             let value = text(source, t.span.clone());
                             let ch = value.chars().next().unwrap();
                             ranges.push(CharacterRange { start: ch, end: None, span: t.span.clone() });
                         }
-                        RegexSyntaxKind::Dash => {
+                        RegexTokenType::Dash => {
                             // Range separator, ignored in this minimal implementation
                         }
                         _ => {
@@ -167,7 +182,7 @@ impl<'config> RegexParser<'config> {
         for child in node.children() {
             match child {
                 RedTree::Leaf(t) => {
-                    if t.kind == RegexSyntaxKind::Character {
+                    if t.kind == RegexTokenType::Character {
                         let value = text(source, t.span.clone());
                         escaped_char = value.chars().next();
                     }
@@ -186,8 +201,8 @@ impl<'config> RegexParser<'config> {
         let span = node.span();
 
         match node.green.kind {
-            RegexSyntaxKind::Hat => Ok(PatternElement::Assertion(Assertion { kind: AssertionKind::Start, span })),
-            RegexSyntaxKind::Dollar => Ok(PatternElement::Assertion(Assertion { kind: AssertionKind::End, span })),
+            RegexElementType::Hat => Ok(PatternElement::Assertion(Assertion { kind: AssertionKind::Start, span })),
+            RegexElementType::Dollar => Ok(PatternElement::Assertion(Assertion { kind: AssertionKind::End, span })),
             _ => Err(OakError::syntax_error(format!("Unexpected assertion: {:?}", node.green.kind), span.start, None)),
         }
     }

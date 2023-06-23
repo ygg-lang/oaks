@@ -1,4 +1,7 @@
-use crate::{kind::MatlabSyntaxKind, language::MatlabLanguage};
+#![doc = include_str!("readme.md")]
+pub mod token_type;
+
+use crate::{language::MatlabLanguage, lexer::token_type::MatlabTokenType};
 use oak_core::{
     Lexer, LexerState,
     lexer::{LexOutput, LexerCache},
@@ -67,7 +70,7 @@ impl<'config> MatlabLexer<'config> {
             let start_pos = state.get_position();
             if let Some(ch) = state.peek() {
                 state.advance(ch.len_utf8());
-                state.add_token(MatlabSyntaxKind::Error, start_pos, state.get_position());
+                state.add_token(MatlabTokenType::Error, start_pos, state.get_position());
             }
 
             state.advance_if_dead_lock(safe_point);
@@ -87,7 +90,7 @@ impl<'config> MatlabLexer<'config> {
             }
         }
         if state.get_position() > start_pos {
-            state.add_token(MatlabSyntaxKind::Whitespace, start_pos, state.get_position());
+            state.add_token(MatlabTokenType::Whitespace, start_pos, state.get_position());
             true
         }
         else {
@@ -98,7 +101,7 @@ impl<'config> MatlabLexer<'config> {
     fn lex_newline<'s, S: Source + ?Sized>(&self, state: &mut State<'s, S>) -> bool {
         let start_pos = state.get_position();
         if state.consume_if_starts_with("\n") || state.consume_if_starts_with("\r\n") || state.consume_if_starts_with("\r") {
-            state.add_token(MatlabSyntaxKind::Newline, start_pos, state.get_position());
+            state.add_token(MatlabTokenType::Newline, start_pos, state.get_position());
             true
         }
         else {
@@ -115,28 +118,28 @@ impl<'config> MatlabLexer<'config> {
 
                 let text = state.get_text_in((start_pos..state.get_position()).into());
                 let token_kind = match text.as_ref() {
-                    "function" => MatlabSyntaxKind::Function,
-                    "end" => MatlabSyntaxKind::End,
-                    "if" => MatlabSyntaxKind::If,
-                    "else" => MatlabSyntaxKind::Else,
-                    "elseif" => MatlabSyntaxKind::Elseif,
-                    "while" => MatlabSyntaxKind::While,
-                    "for" => MatlabSyntaxKind::For,
-                    "break" => MatlabSyntaxKind::Break,
-                    "continue" => MatlabSyntaxKind::Continue,
-                    "return" => MatlabSyntaxKind::Return,
-                    "switch" => MatlabSyntaxKind::Switch,
-                    "case" => MatlabSyntaxKind::Case,
-                    "otherwise" => MatlabSyntaxKind::Otherwise,
-                    "try" => MatlabSyntaxKind::Try,
-                    "catch" => MatlabSyntaxKind::Catch,
-                    "global" => MatlabSyntaxKind::Global,
-                    "persistent" => MatlabSyntaxKind::Persistent,
-                    "classdef" => MatlabSyntaxKind::Classdef,
-                    "properties" => MatlabSyntaxKind::Properties,
-                    "methods" => MatlabSyntaxKind::Methods,
-                    "events" => MatlabSyntaxKind::Events,
-                    _ => MatlabSyntaxKind::Identifier,
+                    "function" => MatlabTokenType::Function,
+                    "end" => MatlabTokenType::End,
+                    "if" => MatlabTokenType::If,
+                    "else" => MatlabTokenType::Else,
+                    "elseif" => MatlabTokenType::Elseif,
+                    "while" => MatlabTokenType::While,
+                    "for" => MatlabTokenType::For,
+                    "break" => MatlabTokenType::Break,
+                    "continue" => MatlabTokenType::Continue,
+                    "return" => MatlabTokenType::Return,
+                    "switch" => MatlabTokenType::Switch,
+                    "case" => MatlabTokenType::Case,
+                    "otherwise" => MatlabTokenType::Otherwise,
+                    "try" => MatlabTokenType::Try,
+                    "catch" => MatlabTokenType::Catch,
+                    "global" => MatlabTokenType::Global,
+                    "persistent" => MatlabTokenType::Persistent,
+                    "classdef" => MatlabTokenType::Classdef,
+                    "properties" => MatlabTokenType::Properties,
+                    "methods" => MatlabTokenType::Methods,
+                    "events" => MatlabTokenType::Events,
+                    _ => MatlabTokenType::Identifier,
                 };
 
                 state.add_token(token_kind, start_pos, state.get_position());
@@ -172,7 +175,7 @@ impl<'config> MatlabLexer<'config> {
                     // complex
                 }
 
-                state.add_token(MatlabSyntaxKind::Number, start_pos, state.get_position());
+                state.add_token(MatlabTokenType::Number, start_pos, state.get_position());
                 return true;
             }
         }
@@ -203,7 +206,7 @@ impl<'config> MatlabLexer<'config> {
                         state.advance(ch.len_utf8());
                     }
                 }
-                let kind = if quote == '\'' { MatlabSyntaxKind::Character } else { MatlabSyntaxKind::String };
+                let kind = if quote == '\'' { MatlabTokenType::Character } else { MatlabTokenType::String };
                 state.add_token(kind, start_pos, state.get_position());
                 return true;
             }
@@ -229,11 +232,11 @@ impl<'config> MatlabLexer<'config> {
                         state.advance(ch.len_utf8());
                     }
                 }
-                state.add_token(MatlabSyntaxKind::BlockComment, start_pos, state.get_position());
+                state.add_token(MatlabTokenType::BlockComment, start_pos, state.get_position());
             }
             else {
                 state.take_while(|c| c != '\n' && c != '\r');
-                state.add_token(MatlabSyntaxKind::Comment, start_pos, state.get_position());
+                state.add_token(MatlabTokenType::Comment, start_pos, state.get_position());
             }
             return true;
         }
@@ -245,14 +248,14 @@ impl<'config> MatlabLexer<'config> {
         let ops = [".*", "./", ".^", ".\\", "==", "~=", "<=", ">=", "&&", "||", "++", "--", ".'"];
         for op in ops {
             if state.consume_if_starts_with(op) {
-                state.add_token(MatlabSyntaxKind::Operator, start_pos, state.get_position());
+                state.add_token(MatlabTokenType::Operator, start_pos, state.get_position());
                 return true;
             }
         }
 
         if let Some(ch) = state.peek() {
             let kind = match ch {
-                '+' | '-' | '*' | '/' | '\\' | '^' | '<' | '>' | '=' | '~' | '&' | '|' | '\'' => MatlabSyntaxKind::Operator,
+                '+' | '-' | '*' | '/' | '\\' | '^' | '<' | '>' | '=' | '~' | '&' | '|' | '\'' => MatlabTokenType::Operator,
                 _ => return false,
             };
             state.advance(1);
@@ -266,7 +269,7 @@ impl<'config> MatlabLexer<'config> {
         let start_pos = state.get_position();
         if let Some(ch) = state.peek() {
             let kind = match ch {
-                '(' | ')' | '[' | ']' | '{' | '}' | ';' | ',' | ':' | '?' | '@' | '.' => MatlabSyntaxKind::Delimiter,
+                '(' | ')' | '[' | ']' | '{' | '}' | ';' | ',' | ':' | '?' | '@' | '.' => MatlabTokenType::Delimiter,
                 _ => return false,
             };
             state.advance(1);

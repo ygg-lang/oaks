@@ -9,7 +9,7 @@ This module is designed to provide a high-performance tokenizer for Vala, suppor
 ## Features
 
 - **Keyword Recognition**: Supports all Vala keywords, including GObject-specific ones like `signal`, `property`, and `construct`.
-- **Identifier Handling**: Correctly parses Vala identifiers, including support for verbatim identifiers (e.g., `@class`).
+- **Identifier Handling**: Correctly parses Vala identifiers, including support for verbatim identifiers (e.g., `↯class`).
 - **Comprehensive Literals**: Parses decimal, hexadecimal, octal, and binary numbers, as well as character and string literals (including verbatim and template strings).
 - **Comment Processing**: Handles single-line (`//`) and multi-line (`/* ... */`) comments, as well as documentation comments (`/** ... */`).
 - **Preprocessor Support**: Recognizes basic Vala preprocessor directives.
@@ -25,7 +25,7 @@ This module is designed to provide a high-performance tokenizer for Vala, suppor
 
 ### Literals
 - **Numeric**: `42`, `0x2A`, `0b101010`, `3.14f`.
-- **String**: `"Hello Vala"`, `"""Verbatim string"""`, `@"Template ${name}"`.
+- **String**: `"Hello Vala"`, `"""Verbatim string"""`, `↯"Template ${name}"`.
 - **Boolean**: `true`, `false`.
 - **Null**: `null`.
 

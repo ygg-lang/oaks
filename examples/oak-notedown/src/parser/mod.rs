@@ -1,4 +1,10 @@
-use crate::{kind::NoteSyntaxKind, language::NotedownLanguage, lexer::NotedownLexer};
+pub mod element_type;
+
+use crate::{
+    language::NotedownLanguage,
+    lexer::{NotedownLexer, token_type::NoteTokenType},
+    parser::element_type::NoteElementType,
+};
 use oak_core::{
     TextEdit,
     errors::OakError,
@@ -33,16 +39,16 @@ impl<'p> NoteParser<'p> {
             self.parse_block(state);
         }
 
-        Ok(state.finish_at(checkpoint, NoteSyntaxKind::Root))
+        Ok(state.finish_at(checkpoint, NoteElementType::Root))
     }
 
     fn parse_block<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) {
         let kind = state.peek_kind();
         match kind {
-            Some(NoteSyntaxKind::Hash) => self.parse_heading(state),
-            Some(NoteSyntaxKind::Asterisk) | Some(NoteSyntaxKind::Dash) | Some(NoteSyntaxKind::Plus) => self.parse_list_item(state),
-            Some(NoteSyntaxKind::Pipe) => self.parse_table(state),
-            Some(NoteSyntaxKind::Backtick) => self.parse_code_block(state),
+            Some(NoteTokenType::Hash) => self.parse_heading(state),
+            Some(NoteTokenType::Asterisk) | Some(NoteTokenType::Dash) | Some(NoteTokenType::Plus) => self.parse_list_item(state),
+            Some(NoteTokenType::Pipe) => self.parse_table(state),
+            Some(NoteTokenType::Backtick) => self.parse_code_block(state),
             _ => self.parse_paragraph(state),
         }
     }
@@ -50,23 +56,23 @@ impl<'p> NoteParser<'p> {
     fn parse_heading<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) {
         let checkpoint = state.checkpoint();
         let mut level = 0;
-        while state.at(NoteSyntaxKind::Hash) {
+        while state.at(NoteTokenType::Hash) {
             state.bump();
             level += 1;
         }
 
-        while state.not_at_end() && !state.at(NoteSyntaxKind::Newline) {
+        while state.not_at_end() && !state.at(NoteTokenType::Newline) {
             state.bump();
         }
 
         let kind = match level {
-            1 => NoteSyntaxKind::Heading1,
-            2 => NoteSyntaxKind::Heading2,
-            3 => NoteSyntaxKind::Heading3,
-            4 => NoteSyntaxKind::Heading4,
-            5 => NoteSyntaxKind::Heading5,
-            6 => NoteSyntaxKind::Heading6,
-            _ => NoteSyntaxKind::Paragraph,
+            1 => NoteElementType::Heading,
+            2 => NoteElementType::Heading,
+            3 => NoteElementType::Heading,
+            4 => NoteElementType::Heading,
+            5 => NoteElementType::Heading,
+            6 => NoteElementType::Heading,
+            _ => NoteElementType::Paragraph,
         };
         state.finish_at(checkpoint, kind);
     }
@@ -74,39 +80,39 @@ impl<'p> NoteParser<'p> {
     fn parse_list_item<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) {
         let checkpoint = state.checkpoint();
         state.bump(); // marker
-        while state.not_at_end() && !state.at(NoteSyntaxKind::Newline) {
+        while state.not_at_end() && !state.at(NoteTokenType::Newline) {
             state.bump();
         }
-        state.finish_at(checkpoint, NoteSyntaxKind::ListItem);
+        state.finish_at(checkpoint, NoteElementType::ListItem);
     }
 
     fn parse_table<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) {
         let checkpoint = state.checkpoint();
-        while state.not_at_end() && state.at(NoteSyntaxKind::Pipe) {
+        while state.not_at_end() && state.at(NoteTokenType::Pipe) {
             self.parse_table_row(state);
         }
-        state.finish_at(checkpoint, NoteSyntaxKind::Table);
+        state.finish_at(checkpoint, NoteElementType::Table);
     }
 
     fn parse_table_row<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) {
         let checkpoint = state.checkpoint();
-        while state.not_at_end() && !state.at(NoteSyntaxKind::Newline) {
-            if state.at(NoteSyntaxKind::Pipe) {
+        while state.not_at_end() && !state.at(NoteTokenType::Newline) {
+            if state.at(NoteTokenType::Pipe) {
                 let cell_checkpoint = state.checkpoint();
                 state.bump(); // |
-                while state.not_at_end() && !state.at(NoteSyntaxKind::Pipe) && !state.at(NoteSyntaxKind::Newline) {
+                while state.not_at_end() && !state.at(NoteTokenType::Pipe) && !state.at(NoteTokenType::Newline) {
                     state.bump();
                 }
-                state.finish_at(cell_checkpoint, NoteSyntaxKind::TableCell);
+                state.finish_at(cell_checkpoint, NoteElementType::Token(NoteTokenType::TableCell));
             }
             else {
                 state.bump();
             }
         }
-        if state.at(NoteSyntaxKind::Newline) {
+        if state.at(NoteTokenType::Newline) {
             state.bump();
         }
-        state.finish_at(checkpoint, NoteSyntaxKind::TableRow);
+        state.finish_at(checkpoint, crate::parser::element_type::NoteElementType::TableRow);
     }
 
     fn parse_code_block<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) {
@@ -114,23 +120,23 @@ impl<'p> NoteParser<'p> {
         // Simplified code block parsing
         state.bump(); // ```
         while state.not_at_end() {
-            if state.at(NoteSyntaxKind::Backtick) {
+            if state.at(NoteTokenType::Backtick) {
                 state.bump();
                 break;
             }
             state.bump();
         }
-        state.finish_at(checkpoint, NoteSyntaxKind::CodeBlock);
+        state.finish_at(checkpoint, crate::parser::element_type::NoteElementType::CodeBlock);
     }
 
     fn parse_paragraph<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) {
         let checkpoint = state.checkpoint();
-        while state.not_at_end() && !state.at(NoteSyntaxKind::Newline) {
+        while state.not_at_end() && !state.at(NoteTokenType::Newline) {
             state.bump();
         }
-        if state.at(NoteSyntaxKind::Newline) {
+        if state.at(NoteTokenType::Newline) {
             state.bump();
         }
-        state.finish_at(checkpoint, NoteSyntaxKind::Paragraph);
+        state.finish_at(checkpoint, crate::parser::element_type::NoteElementType::Paragraph);
     }
 }

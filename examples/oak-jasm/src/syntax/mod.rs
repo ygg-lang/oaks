@@ -1,11 +1,13 @@
 use oak_core::Token;
+#[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
 
-pub type JasmToken = Token<JasmSyntaxKind>;
+pub type JasmToken = Token<JasmTokenType>;
 
 /// 统一JASM 语法种类（节点与词法）
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
-pub enum JasmSyntaxKind {
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+pub enum JasmTokenType {
     // 语法节点
     Root,
     Class,
@@ -100,7 +102,7 @@ pub enum JasmSyntaxKind {
     Error,
 }
 
-impl oak_core::TokenType for JasmSyntaxKind {
+impl oak_core::TokenType for JasmTokenType {
     const END_OF_STREAM: Self = Self::Eof;
     type Role = oak_core::UniversalTokenRole;
 
@@ -185,7 +187,7 @@ impl oak_core::TokenType for JasmSyntaxKind {
     }
 }
 
-impl oak_core::ElementType for JasmSyntaxKind {
+impl oak_core::ElementType for JasmTokenType {
     type Role = oak_core::UniversalElementRole;
 
     fn role(&self) -> Self::Role {

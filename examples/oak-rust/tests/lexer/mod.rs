@@ -35,7 +35,7 @@ fn test_peek_behavior() {
     state.advance(1);
     println!("位置: {}", state.get_position());
     println!("current(): {:?}", state.current());
-    println!("peek(): {:?}", state.peek());
+    println!("peek(): {:?}", state.peek())
 }
 
 #[test]
@@ -68,7 +68,7 @@ fn test_nested_constant_parsing() {
     assert_eq!(first_token.span.start, 0, "标记应该从位置 0 开始");
     assert_eq!(first_token.span.end, 15, "标记应该在位置 15 结束");
 
-    println!("✅ NESTED_CONSTANT 解析测试通过！");
+    println!("✅ NESTED_CONSTANT 解析测试通过！")
 }
 
 #[test]
@@ -88,7 +88,7 @@ fn test_rust_lexer_keywords() {
     let tokens = lex_output.result.unwrap();
     assert!(tokens.len() >= 8, "Should tokenize all keywords");
 
-    println!("Rust lexer keywords test passed - {} tokens generated", tokens.len());
+    println!("Rust lexer keywords test passed - {} tokens generated", tokens.len())
 }
 
 #[test]
@@ -107,7 +107,7 @@ fn test_rust_lexer_literals() {
     let tokens = lex_output.result.unwrap();
     assert!(!tokens.is_empty(), "Should tokenize literals");
 
-    println!("Rust lexer literals test passed - {} tokens generated", tokens.len());
+    println!("Rust lexer literals test passed - {} tokens generated", tokens.len())
 }
 
 #[test]
@@ -133,5 +133,5 @@ fn test_rust_lexer_comments() {
     let tokens = lex_output.result.unwrap();
     assert!(!tokens.is_empty(), "Should tokenize comments");
 
-    println!("Rust lexer comments test passed - {} tokens generated", tokens.len());
+    println!("Rust lexer comments test passed - {} tokens generated", tokens.len())
 }

@@ -1,3 +1,4 @@
+#![doc = include_str!("readme.md")]
 use crate::{lexer::ClojureTokenType, parser::ClojureElementType};
 use oak_core::{Language, LanguageCategory};
 
@@ -14,7 +15,7 @@ impl Language for ClojureLanguage {
     const NAME: &'static str = "clojure";
     const CATEGORY: LanguageCategory = LanguageCategory::Programming;
 
-    type TokenType = ClojureTokenType;
-    type ElementType = ClojureElementType;
+    type TokenType = crate::lexer::token_type::ClojureTokenType;
+    type ElementType = crate::parser::element_type::ClojureElementType;
     type TypedRoot = ();
 }

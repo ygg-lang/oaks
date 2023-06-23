@@ -1,213 +1,209 @@
-use oak_core::{TokenType, UniversalTokenRole};
+use oak_core::{Token, TokenType, UniversalTokenRole};
+#[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
+use std::fmt::{Display, Formatter};
 
-/// Crystal token type
-#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Deserialize)]
+pub type CrystalToken = Token<CrystalTokenType>;
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub enum CrystalTokenType {
-    /// Whitespace characters
     Whitespace,
-    /// Comment
     Comment,
-    /// Identifier
     Identifier,
-    /// Number literal
     Number,
-    /// String literal
     String,
-    /// Character literal
     Character,
-    /// Symbol
     Symbol,
-    /// class keyword
     ClassKeyword,
-    /// module keyword
     ModuleKeyword,
-    /// def keyword
     DefKeyword,
-    /// end keyword
     EndKeyword,
-    /// if keyword
     IfKeyword,
-    /// else keyword
     ElseKeyword,
-    /// elsif keyword
     ElsifKeyword,
-    /// unless keyword
     UnlessKeyword,
-    /// case keyword
     CaseKeyword,
-    /// when keyword
     WhenKeyword,
-    /// then keyword
     ThenKeyword,
-    /// while keyword
     WhileKeyword,
-    /// until keyword
     UntilKeyword,
-    /// for keyword
     ForKeyword,
-    /// in keyword
     InKeyword,
-    /// do keyword
     DoKeyword,
-    /// begin keyword
     BeginKeyword,
-    /// rescue keyword
     RescueKeyword,
-    /// ensure keyword
     EnsureKeyword,
-    /// break keyword
     BreakKeyword,
-    /// next keyword
     NextKeyword,
-    /// return keyword
     ReturnKeyword,
-    /// yield keyword
     YieldKeyword,
-    /// super keyword
     SuperKeyword,
-    /// self keyword
     SelfKeyword,
-    /// true keyword
     TrueKeyword,
-    /// false keyword
     FalseKeyword,
-    /// nil keyword
     NilKeyword,
-    /// and keyword
     AndKeyword,
-    /// or keyword
     OrKeyword,
-    /// not keyword
     NotKeyword,
-    /// plus operator
     Plus,
-    /// minus operator
     Minus,
-    /// multiplication operator
     Star,
-    /// division operator
     Slash,
-    /// modulo operator
     Percent,
-    /// exponentiation operator
     StarStar,
-    /// assignment operator
     Equal,
-    /// equality operator
     EqualEqual,
-    /// inequality operator
     NotEqual,
-    /// less than operator
     Less,
-    /// less than or equal operator
     LessEqual,
-    /// greater than operator
     Greater,
-    /// greater than or equal operator
     GreaterEqual,
-    /// spaceship operator
     Spaceship,
-    /// match operator
     Match,
-    /// not match operator
     NotMatch,
-    /// and operator
     And,
-    /// or operator
     Or,
-    /// not operator
     Not,
-    /// bitwise and operator
     BitwiseAnd,
-    /// bitwise or operator
     BitwiseOr,
-    /// bitwise xor operator
     BitwiseXor,
-    /// bitwise not operator
     BitwiseNot,
-    /// left shift operator
     LeftShift,
-    /// right shift operator
     RightShift,
-    /// logical and operator
     LogicalAnd,
-    /// logical or operator
     LogicalOr,
-    /// plus assignment operator
     PlusEqual,
-    /// minus assignment operator
     MinusEqual,
-    /// multiplication assignment operator
     StarEqual,
-    /// division assignment operator
     SlashEqual,
-    /// modulo assignment operator
     PercentEqual,
-    /// exponentiation assignment operator
     StarStarEqual,
-    /// and assignment operator
     AndEqual,
-    /// or assignment operator
     OrEqual,
-    /// xor assignment operator
     XorEqual,
-    /// left shift assignment operator
     LeftShiftEqual,
-    /// right shift assignment operator
     RightShiftEqual,
-    /// logical and assignment operator
     LogicalAndEqual,
-    /// logical or assignment operator
     LogicalOrEqual,
-    /// left parenthesis
     LeftParen,
-    /// right parenthesis
     RightParen,
-    /// left brace
     LeftBrace,
-    /// right brace
     RightBrace,
-    /// left bracket
     LeftBracket,
-    /// right bracket
     RightBracket,
-    /// comma
     Comma,
-    /// semicolon
     Semicolon,
-    /// dot
     Dot,
-    /// dot dot
     DotDot,
-    /// dot dot dot
     DotDotDot,
-    /// colon
     Colon,
-    /// double colon
     DoubleColon,
-    /// arrow
     Arrow,
-    /// fat arrow
     FatArrow,
-    /// question mark
     Question,
-    /// at sign
     At,
-    /// double at sign
     DoubleAt,
-    /// dollar sign
     Dollar,
-    /// newline
     Newline,
-    /// end of file
     Eof,
-    /// error
     Error,
+    Root,
+    Program,
+    SourceFile,
+    ClassDef,
+    ModuleDef,
+    MethodDef,
+    Block,
+    IfExpr,
+    UnlessExpr,
+    CaseExpr,
+    WhenClause,
+    WhileExpr,
+    UntilExpr,
+    ForExpr,
+    BeginExpr,
+    RescueClause,
+    EnsureClause,
+    CallExpr,
+    IndexExpr,
+    MemberExpr,
+    BinaryExpr,
+    UnaryExpr,
+    AssignExpr,
+    LiteralExpr,
+    IdentifierExpr,
+    ArrayExpr,
+    HashExpr,
+    HashPair,
+    BlockExpr,
+    LambdaExpr,
+    YieldExpr,
+    ReturnExpr,
+    BreakExpr,
+    NextExpr,
+    SuperExpr,
+    SelfExpr,
+    ParenExpr,
+    TypeExpr,
+    GenericType,
+    UnionType,
+    TupleType,
+    NamedTupleType,
+    ProcType,
+    Pattern,
+    IdentifierPattern,
+    LiteralPattern,
+    ArrayPattern,
+    HashPattern,
+    TuplePattern,
+    ParamList,
+    Param,
+    SplatParam,
+    DoubleSplatParam,
+    BlockParam,
+    Annotation,
+    MacroDef,
+    MacroCall,
+    MacroExpr,
+    Alias,
+    Include,
+    Extend,
+    Require,
+    Private,
+    Protected,
+    Public,
+    Abstract,
+    Virtual,
+    Override,
+    StructDef,
+    EnumDef,
+    UnionDef,
+    LibDef,
+    RaiseExpr,
+    RangeExpr,
+    ExclusiveRangeExpr,
+    RegexLiteral,
+    StringInterpolation,
+    InterpolationExpr,
+    SymbolLiteral,
+    ConstantRef,
+    InstanceVar,
+    ClassVar,
+    GlobalVar,
+    Getter,
+    Setter,
+    OperatorDef,
 }
 
 impl CrystalTokenType {
-    pub fn is_keyword(&self) -> bool {
+    /// Check if the syntax kind is trivia (whitespace, comment, or newline)
+    pub fn is_trivia(&self) -> bool {
+        matches!(self, Self::Whitespace | Self::Comment | Self::Newline)
+    }
+
+    /// Check if the syntax kind is a keyword
+    pub fn is_keyword(self) -> bool {
         matches!(
             self,
             Self::ClassKeyword
@@ -244,7 +240,13 @@ impl CrystalTokenType {
         )
     }
 
-    pub fn is_operator(&self) -> bool {
+    /// Check if the syntax kind is a literal
+    pub fn is_literal(self) -> bool {
+        matches!(self, Self::Number | Self::String | Self::Character | Self::Symbol | Self::RegexLiteral | Self::SymbolLiteral)
+    }
+
+    /// Check if the syntax kind is an operator
+    pub fn is_operator(self) -> bool {
         matches!(
             self,
             Self::Plus
@@ -277,7 +279,8 @@ impl CrystalTokenType {
         )
     }
 
-    pub fn is_assignment_operator(&self) -> bool {
+    /// Check if the syntax kind is an assignment operator
+    pub fn is_assignment_operator(self) -> bool {
         matches!(
             self,
             Self::PlusEqual
@@ -296,39 +299,34 @@ impl CrystalTokenType {
         )
     }
 
-    pub fn is_delimiter(&self) -> bool {
+    /// Check if the syntax kind is a delimiter
+    pub fn is_delimiter(self) -> bool {
         matches!(self, Self::LeftParen | Self::RightParen | Self::LeftBrace | Self::RightBrace | Self::LeftBracket | Self::RightBracket | Self::Comma | Self::Semicolon)
     }
 }
 
-impl TokenType for CrystalTokenType {
-    const END_OF_STREAM: Self = Self::Eof;
-    type Role = UniversalTokenRole;
-
-    fn role(&self) -> Self::Role {
-        match self {
-            Self::Whitespace | Self::Newline => UniversalTokenRole::Whitespace,
-            Self::Comment => UniversalTokenRole::Comment,
-            Self::Identifier => UniversalTokenRole::Name,
-            Self::Number | Self::String | Self::Character | Self::Symbol => UniversalTokenRole::Literal,
-            Self::Error => UniversalTokenRole::Error,
-            Self::Eof => UniversalTokenRole::Eof,
-            k if k.is_keyword() => UniversalTokenRole::Keyword,
-            k if k.is_operator() || k.is_assignment_operator() => UniversalTokenRole::Operator,
-            k if k.is_delimiter() => UniversalTokenRole::Punctuation,
-            _ => UniversalTokenRole::None,
-        }
+impl Display for CrystalTokenType {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{:?}", self)
     }
+}
+
+impl TokenType for CrystalTokenType {
+    type Role = UniversalTokenRole;
+    const END_OF_STREAM: Self = Self::Eof;
 
     fn is_ignored(&self) -> bool {
         matches!(self, Self::Whitespace | Self::Newline | Self::Comment)
     }
 
-    fn is_comment(&self) -> bool {
-        matches!(self, Self::Comment)
-    }
-
-    fn is_whitespace(&self) -> bool {
-        matches!(self, Self::Whitespace | Self::Newline)
+    fn role(&self) -> Self::Role {
+        match self {
+            Self::Whitespace => UniversalTokenRole::Whitespace,
+            Self::Newline => UniversalTokenRole::Whitespace,
+            Self::Comment => UniversalTokenRole::Comment,
+            Self::Eof => UniversalTokenRole::Eof,
+            Self::Error => UniversalTokenRole::Error,
+            _ => UniversalTokenRole::None,
+        }
     }
 }

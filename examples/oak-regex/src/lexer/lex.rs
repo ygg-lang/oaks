@@ -1,4 +1,7 @@
-use crate::{RegexLanguage, RegexLexer, RegexSyntaxKind};
+use crate::{
+    language::RegexLanguage,
+    lexer::{RegexLexer, token_type::RegexTokenType},
+};
 use oak_core::{LexerState, OakError, source::Source};
 
 type State<'s, S> = LexerState<'s, S, RegexLanguage>;
@@ -56,7 +59,7 @@ impl<'config> RegexLexer<'config> {
 
     /// Skips whitespace characters
     fn skip_whitespace<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
-        if self.whitespace_rules().scan(state, RegexSyntaxKind::Whitespace) {
+        if self.whitespace_rules().scan(state, RegexTokenType::Whitespace) {
             return true;
         }
         false
@@ -75,7 +78,7 @@ impl<'config> RegexLexer<'config> {
                 }
                 state.advance(ch.len_utf8());
             }
-            state.add_token(RegexSyntaxKind::Comment, start, state.get_position());
+            state.add_token(RegexTokenType::Comment, start, state.get_position());
             return true;
         }
         false
@@ -90,13 +93,13 @@ impl<'config> RegexLexer<'config> {
         }
 
         state.advance(1); // Consume '['
-        state.add_token(RegexSyntaxKind::LBrack, start, state.get_position());
+        state.add_token(RegexTokenType::LBrack, start, state.get_position());
 
         // Check for negation
         if state.current() == Some('^') {
             let hat_start = state.get_position();
             state.advance(1); // Consume '^'
-            state.add_token(RegexSyntaxKind::Hat, hat_start, state.get_position());
+            state.add_token(RegexTokenType::Hat, hat_start, state.get_position());
         }
 
         // Parse until closing ']'
@@ -104,28 +107,28 @@ impl<'config> RegexLexer<'config> {
             if c == ']' {
                 let rbrack_start = state.get_position();
                 state.advance(1); // Consume ']'
-                state.add_token(RegexSyntaxKind::RBrack, rbrack_start, state.get_position());
+                state.add_token(RegexTokenType::RBrack, rbrack_start, state.get_position());
                 return true;
             }
 
             if c == '\\' {
                 let backslash_start = state.get_position();
                 state.advance(1); // Consume '\'
-                state.add_token(RegexSyntaxKind::Backslash, backslash_start, state.get_position());
+                state.add_token(RegexTokenType::Backslash, backslash_start, state.get_position());
                 if let Some(nc) = state.current() {
                     let char_start = state.get_position();
                     state.advance(nc.len_utf8());
-                    state.add_token(RegexSyntaxKind::Character, char_start, state.get_position());
+                    state.add_token(RegexTokenType::Character, char_start, state.get_position());
                 }
             }
             else {
                 let char_start = state.get_position();
                 state.advance(c.len_utf8());
-                state.add_token(RegexSyntaxKind::Character, char_start, state.get_position());
+                state.add_token(RegexTokenType::Character, char_start, state.get_position());
             }
         }
 
-        state.add_token(RegexSyntaxKind::Error, start, state.get_position());
+        state.add_token(RegexTokenType::Error, start, state.get_position());
         true
     }
 
@@ -135,44 +138,44 @@ impl<'config> RegexLexer<'config> {
         match state.current() {
             Some('*') => {
                 state.advance(1);
-                state.add_token(RegexSyntaxKind::Star, start, state.get_position());
+                state.add_token(RegexTokenType::Star, start, state.get_position());
                 true
             }
             Some('+') => {
                 state.advance(1);
-                state.add_token(RegexSyntaxKind::Plus, start, state.get_position());
+                state.add_token(RegexTokenType::Plus, start, state.get_position());
                 true
             }
             Some('?') => {
                 state.advance(1);
-                state.add_token(RegexSyntaxKind::Question, start, state.get_position());
+                state.add_token(RegexTokenType::Question, start, state.get_position());
                 true
             }
             Some('{') => {
                 state.advance(1); // Consume '{'
-                state.add_token(RegexSyntaxKind::LBrace, start, state.get_position());
+                state.add_token(RegexTokenType::LBrace, start, state.get_position());
                 while let Some(c) = state.current() {
                     if c == '}' {
                         let rbrace_start = state.get_position();
                         state.advance(1); // Consume '}'
-                        state.add_token(RegexSyntaxKind::RBrace, rbrace_start, state.get_position());
+                        state.add_token(RegexTokenType::RBrace, rbrace_start, state.get_position());
                         return true;
                     }
                     if c.is_ascii_digit() {
                         let digit_start = state.get_position();
                         state.advance(1);
-                        state.add_token(RegexSyntaxKind::Digit, digit_start, state.get_position());
+                        state.add_token(RegexTokenType::Digit, digit_start, state.get_position());
                     }
                     else if c == ',' {
                         let comma_start = state.get_position();
                         state.advance(1);
-                        state.add_token(RegexSyntaxKind::Comma, comma_start, state.get_position());
+                        state.add_token(RegexTokenType::Comma, comma_start, state.get_position());
                     }
                     else {
                         break;
                     }
                 }
-                state.add_token(RegexSyntaxKind::Error, start, state.get_position());
+                state.add_token(RegexTokenType::Error, start, state.get_position());
                 true
             }
             _ => false,
@@ -184,12 +187,12 @@ impl<'config> RegexLexer<'config> {
         let start = state.get_position();
         if state.current() == Some('(') {
             state.advance(1);
-            state.add_token(RegexSyntaxKind::LParen, start, state.get_position());
+            state.add_token(RegexTokenType::LParen, start, state.get_position());
             return true;
         }
         if state.current() == Some(')') {
             state.advance(1);
-            state.add_token(RegexSyntaxKind::RParen, start, state.get_position());
+            state.add_token(RegexTokenType::RParen, start, state.get_position());
             return true;
         }
         false
@@ -201,12 +204,12 @@ impl<'config> RegexLexer<'config> {
         match state.current() {
             Some('^') => {
                 state.advance(1);
-                state.add_token(RegexSyntaxKind::Hat, start, state.get_position());
+                state.add_token(RegexTokenType::Hat, start, state.get_position());
                 true
             }
             Some('$') => {
                 state.advance(1);
-                state.add_token(RegexSyntaxKind::Dollar, start, state.get_position());
+                state.add_token(RegexTokenType::Dollar, start, state.get_position());
                 true
             }
             _ => false,
@@ -218,11 +221,11 @@ impl<'config> RegexLexer<'config> {
         let start = state.get_position();
         if state.current() == Some('\\') {
             state.advance(1);
-            state.add_token(RegexSyntaxKind::Backslash, start, state.get_position());
+            state.add_token(RegexTokenType::Backslash, start, state.get_position());
             if let Some(c) = state.current() {
                 let char_start = state.get_position();
                 state.advance(c.len_utf8());
-                state.add_token(RegexSyntaxKind::Character, char_start, state.get_position());
+                state.add_token(RegexTokenType::Character, char_start, state.get_position());
             }
             return true;
         }
@@ -234,7 +237,7 @@ impl<'config> RegexLexer<'config> {
         let start = state.get_position();
         if state.current() == Some('.') {
             state.advance(1);
-            state.add_token(RegexSyntaxKind::Dot, start, state.get_position());
+            state.add_token(RegexTokenType::Dot, start, state.get_position());
             return true;
         }
         false
@@ -246,7 +249,7 @@ impl<'config> RegexLexer<'config> {
         if let Some(c) = state.current() {
             if !self.is_operator(c) && !self.is_special(c) && c != '[' && c != '(' && c != ')' && c != '{' && c != '\\' {
                 state.advance(c.len_utf8());
-                state.add_token(RegexSyntaxKind::Character, start, state.get_position());
+                state.add_token(RegexTokenType::Character, start, state.get_position());
                 return true;
             }
         }
@@ -258,7 +261,7 @@ impl<'config> RegexLexer<'config> {
         let start = state.get_position();
         if state.current() == Some('|') {
             state.advance(1);
-            state.add_token(RegexSyntaxKind::Pipe, start, state.get_position());
+            state.add_token(RegexTokenType::Pipe, start, state.get_position());
             return true;
         }
         false

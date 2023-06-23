@@ -1,3 +1,4 @@
+#![doc = include_str!("readme.md")]
 use crate::{AdaParser, ast::*, language::AdaLanguage};
 use oak_core::{Builder, BuilderCache, GreenNode, OakDiagnostics, Parser, SourceText, TextEdit, source::Source};
 

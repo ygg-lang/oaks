@@ -1,4 +1,10 @@
-use crate::{kind::StylusSyntaxKind, language::StylusLanguage, lexer::StylusLexer};
+pub mod element_type;
+
+use crate::{
+    language::StylusLanguage,
+    lexer::{StylusLexer, token_type::StylusTokenType},
+    parser::element_type::StylusElementType,
+};
 use oak_core::{
     parser::{ParseCache, ParseOutput, Parser, parse_with_lexer},
     source::{Source, TextEdit},
@@ -20,9 +26,9 @@ impl<'config> Parser<StylusLanguage> for StylusParser<'config> {
         parse_with_lexer(&lexer, text, edits, cache, |state| {
             let checkpoint = state.checkpoint();
             while state.not_at_end() {
-                state.bump();
+                state.bump()
             }
-            Ok(state.finish_at(checkpoint, StylusSyntaxKind::Root.into()))
+            Ok(state.finish_at(checkpoint, crate::parser::element_type::StylusElementType::Root))
         })
     }
 }

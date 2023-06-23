@@ -1,3 +1,4 @@
+#![doc = include_str!("readme.md")]
 use oak_core::{Language, LanguageCategory};
 
 /// R 语言定义
@@ -14,7 +15,7 @@ impl Language for RLanguage {
     const NAME: &'static str = "r";
     const CATEGORY: LanguageCategory = LanguageCategory::Programming;
 
-    type TokenType = crate::kind::RSyntaxKind;
-    type ElementType = crate::kind::RSyntaxKind;
-    type TypedRoot = ();
+    type TokenType = crate::lexer::token_type::RTokenType;
+    type ElementType = crate::parser::element_type::RElementType;
+    type TypedRoot = crate::ast::RRoot;
 }

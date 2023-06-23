@@ -1,3 +1,4 @@
+#![doc = include_str!("readme.md")]
 use crate::lexer::StylusLexer;
 use oak_core::{Language, LanguageCategory};
 
@@ -21,8 +22,8 @@ impl Language for StylusLanguage {
     const NAME: &'static str = "stylus";
     const CATEGORY: LanguageCategory = LanguageCategory::Programming;
 
-    type TokenType = crate::kind::StylusSyntaxKind;
-    type ElementType = crate::kind::StylusSyntaxKind;
+    type TokenType = crate::lexer::token_type::StylusTokenType;
+    type ElementType = crate::parser::element_type::StylusElementType;
     type TypedRoot = ();
 }
 

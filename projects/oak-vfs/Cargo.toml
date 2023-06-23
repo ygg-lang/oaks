@@ -1,14 +1,14 @@
 [package]
 name = "oak-vfs"
-description = "Virtual file system abstraction for the Oak framework, supporting disk and memory-based storage."
-categories = ["filesystem"]
-keywords = ["vfs", "filesystem", "virtual"]
 version.workspace = true
-edition.workspace = true
 authors.workspace = true
+description = "Virtual file system abstraction for the Oak framework, supporting disk and memory-based storage."
+edition.workspace = true
 license.workspace = true
 homepage.workspace = true
-repository.workspace = true
+repository = "https://github.com/ygg-lang/oaks/tree/master/projects/oak-vfs"
+categories = ["filesystem"]
+keywords = ["vfs", "filesystem", "virtual"]
 
 [dependencies]
 serde = { workspace = true, optional = true }

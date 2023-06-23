@@ -1,28 +1,46 @@
 #![doc = include_str!("readme.md")]
+#![feature(new_range_api)]
+#![warn(missing_docs)]
 #![doc(html_logo_url = "https://raw.githubusercontent.com/ygg-lang/oaks/refs/heads/dev/documents/logo.svg")]
 #![doc(html_favicon_url = "https://raw.githubusercontent.com/ygg-lang/oaks/refs/heads/dev/documents/logo.svg")]
-#![feature(new_range_api)]
-#![allow(missing_docs)]
+//! Ada support for the Oak language framework.
 
-extern crate oak_core;
-extern crate serde;
-
-/// AST 模块
+/// AST module.
 pub mod ast;
-mod builder;
-mod formatter;
-/// 高亮模块
-pub mod highlighter;
-mod language;
-/// 词法分析器模块
+/// Builder module.
+pub mod builder;
+
+/// Type definitions module.
+/// Language configuration module.
+pub mod language;
+/// Lexer module.
 pub mod lexer;
-/// LSP 模块
+/// LSP module.
+#[cfg(any(feature = "lsp", feature = "oak-highlight", feature = "oak-pretty-print"))]
 pub mod lsp;
+/// MCP module.
+#[cfg(feature = "mcp")]
 pub mod mcp;
-/// 语法分析器模块
+
+/// Parser module.
 pub mod parser;
 
-// 重新导出主要类型
-pub use crate::{ast::AdaRoot, builder::AdaBuilder, formatter::AdaFormatter, highlighter::AdaHighlighter, language::AdaLanguage, lexer::AdaLexer, lsp::AdaLanguageService, parser::AdaParser};
+pub use crate::{ast::AdaRoot, language::AdaLanguage, lexer::AdaLexer, parser::AdaParser};
 
+pub use oak_core::{ElementType, TokenType};
+
+/// Highlighter implementation.
+#[cfg(feature = "oak-highlight")]
+pub use crate::lsp::highlighter::AdaHighlighter;
+
+#[cfg(feature = "lsp")]
+pub use crate::lsp::AdaLanguageService;
+/// LSP implementation.
+#[cfg(feature = "lsp")]
+pub use crate::lsp::formatter::AdaFormatter;
+
+/// MCP service implementation.
+#[cfg(feature = "mcp")]
 pub use crate::mcp::serve_ada_mcp;
+pub use lexer::token_type::AdaTokenType;
+pub use parser::element_type::AdaElementType;

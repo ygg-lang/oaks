@@ -28,34 +28,41 @@ pub trait ParseCache<L: Language>: LexerCache<L> {
 ///
 /// `ParseSession` handles the double-buffering of memory arenas (Active vs Old)
 /// to support efficient incremental reuse. It implements `ParseCache`.
-pub struct ParseSession<L: Language + Send + Sync + 'static> {
+pub struct ParseSession<L: Language + Send + Sync> {
     /// The arena holding the most recently parsed tree (or currently building).
     arena_active: SyntaxArena,
     /// The arena holding the previous tree (used for reuse).
     arena_old: Option<SyntaxArena>,
     /// Pointer to the root of the last parsed tree.
-    last_root: Cell<Option<NonNull<GreenNode<'static, L>>>>,
+    last_root: Cell<Option<NonNull<()>>>,
     /// Full output from the last lexing pass.
     last_lex: Option<LexOutput<L>>,
 }
 
-unsafe impl<L: Language + Send + Sync + 'static> Send for ParseSession<L> {}
-unsafe impl<L: Language + Send + Sync + 'static> Sync for ParseSession<L> {}
+unsafe impl<L: Language + Send + Sync> Send for ParseSession<L> {}
+unsafe impl<L: Language + Send + Sync> Sync for ParseSession<L> {}
 
-impl<L: Language + Send + Sync + 'static> Default for ParseSession<L> {
+impl<L: Language + Send + Sync> Default for ParseSession<L> {
     fn default() -> Self {
         Self::new(16)
     }
 }
 
-impl<L: Language + Send + Sync + 'static> ParseSession<L> {
+impl<L: Language + Send + Sync> ParseSession<L> {
     /// Creates a new parse session.
     pub fn new(capacity: usize) -> Self {
         Self { arena_active: SyntaxArena::new(capacity), arena_old: None, last_root: Cell::new(None), last_lex: None }
     }
+
+    /// Returns the root of the last parsed tree.
+    pub fn last_root(&self) -> Option<&GreenNode<'_, L>> {
+        let ptr = self.last_root.get()?;
+        // Safety: last_root is guaranteed to be in arena_active after commit_generation
+        unsafe { Some(&*(ptr.as_ptr() as *const GreenNode<'_, L>)) }
+    }
 }
 
-impl<L: Language + Send + Sync + 'static> ParseCache<L> for ParseSession<L> {
+impl<L: Language + Send + Sync> ParseCache<L> for ParseSession<L> {
     fn arena(&self) -> &SyntaxArena {
         &self.arena_active
     }
@@ -81,20 +88,18 @@ impl<L: Language + Send + Sync + 'static> ParseCache<L> for ParseSession<L> {
 
         // 2. last_root now correctly points into arena_old.
         // 3. Clear last lex output to force re-lexing for the new generation.
-        self.last_lex = None;
+        self.last_lex = None
     }
 
     fn commit_generation(&self, root: &GreenNode<L>) {
-        // Safety: We cast to static because ParseSession manages the lifetime.
-        unsafe {
-            self.last_root.set(Some(NonNull::new_unchecked(root as *const _ as *mut GreenNode<'static, L>)));
-        }
+        // Safety: We cast to void pointer because ParseSession manages the lifetime.
+        unsafe { self.last_root.set(Some(NonNull::new_unchecked(root as *const _ as *mut ()))) }
     }
 }
 
-impl<L: Language + Send + Sync + 'static> LexerCache<L> for ParseSession<L> {
+impl<L: Language + Send + Sync> LexerCache<L> for ParseSession<L> {
     fn set_lex_output(&mut self, output: LexOutput<L>) {
-        self.last_lex = Some(output);
+        self.last_lex = Some(output)
     }
 
     fn get_token(&self, index: usize) -> Option<Token<L::TokenType>> {
@@ -128,10 +133,10 @@ impl<'a, L: Language, C: ParseCache<L> + ?Sized> ParseCache<L> for &'a mut C {
     }
 
     fn prepare_generation(&mut self) {
-        (**self).prepare_generation();
+        (**self).prepare_generation()
     }
 
     fn commit_generation(&self, root: &GreenNode<L>) {
-        (**self).commit_generation(root);
+        (**self).commit_generation(root)
     }
 }

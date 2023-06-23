@@ -1,4 +1,7 @@
-use crate::{kind::DelphiSyntaxKind, language::DelphiLanguage};
+#![doc = include_str!("readme.md")]
+pub mod token_type;
+
+use crate::{language::DelphiLanguage, lexer::token_type::DelphiTokenType};
 use oak_core::{Lexer, LexerCache, LexerState, OakError, TextEdit, lexer::LexOutput, source::Source};
 
 type State<'a, S> = LexerState<'a, S, DelphiLanguage>;
@@ -50,10 +53,10 @@ impl<'config> DelphiLexer<'config> {
             let start_pos = state.get_position();
             if let Some(ch) = state.peek() {
                 state.advance(ch.len_utf8());
-                state.add_token(DelphiSyntaxKind::Error, start_pos, state.get_position());
+                state.add_token(DelphiTokenType::Error, start_pos, state.get_position())
             }
 
-            state.advance_if_dead_lock(safe_point);
+            state.advance_if_dead_lock(safe_point)
         }
 
         Ok(())
@@ -65,14 +68,14 @@ impl<'config> DelphiLexer<'config> {
         while let Some(ch) = state.peek() {
             if ch.is_whitespace() {
                 consumed = true;
-                state.advance(ch.len_utf8());
+                state.advance(ch.len_utf8())
             }
             else {
                 break;
             }
         }
         if consumed {
-            state.add_token(DelphiSyntaxKind::Whitespace, start_pos, state.get_position());
+            state.add_token(DelphiTokenType::Whitespace, start_pos, state.get_position());
             true
         }
         else {
@@ -89,9 +92,9 @@ impl<'config> DelphiLexer<'config> {
                 if ch == '\n' || ch == '\r' {
                     break;
                 }
-                state.advance(ch.len_utf8());
+                state.advance(ch.len_utf8())
             }
-            state.add_token(DelphiSyntaxKind::LineComment, start, state.get_position());
+            state.add_token(DelphiTokenType::LineComment, start, state.get_position());
             return true;
         }
 
@@ -100,7 +103,7 @@ impl<'config> DelphiLexer<'config> {
             let mut depth = 1usize;
             while let Some(ch) = state.peek() {
                 if ch == '{' {
-                    depth += 1;
+                    depth += 1
                 }
                 else if ch == '}' {
                     depth -= 1;
@@ -109,9 +112,9 @@ impl<'config> DelphiLexer<'config> {
                         break;
                     }
                 }
-                state.advance(ch.len_utf8());
+                state.advance(ch.len_utf8())
             }
-            state.add_token(DelphiSyntaxKind::BlockComment, start, state.get_position());
+            state.add_token(DelphiTokenType::BlockComment, start, state.get_position());
             return true;
         }
 
@@ -121,9 +124,9 @@ impl<'config> DelphiLexer<'config> {
                 if state.consume_if_starts_with("*)") {
                     break;
                 }
-                state.advance(ch.len_utf8());
+                state.advance(ch.len_utf8())
             }
-            state.add_token(DelphiSyntaxKind::BlockComment, start, state.get_position());
+            state.add_token(DelphiTokenType::BlockComment, start, state.get_position());
             return true;
         }
 
@@ -144,9 +147,9 @@ impl<'config> DelphiLexer<'config> {
                     }
                     break;
                 }
-                state.advance(ch.len_utf8());
+                state.advance(ch.len_utf8())
             }
-            state.add_token(DelphiSyntaxKind::String, start, state.get_position());
+            state.add_token(DelphiTokenType::String, start, state.get_position());
             return true;
         }
         false
@@ -169,24 +172,14 @@ impl<'config> DelphiLexer<'config> {
         if first == '$' {
             state.advance(1);
             while let Some(c) = state.peek() {
-                if c.is_ascii_hexdigit() {
-                    state.advance(1);
-                }
-                else {
-                    break;
-                }
+                if c.is_ascii_hexdigit() { state.advance(1) } else { break }
             }
         }
         else {
             // Decimal number
             state.advance(1);
             while let Some(c) = state.peek() {
-                if c.is_ascii_digit() {
-                    state.advance(1);
-                }
-                else {
-                    break;
-                }
+                if c.is_ascii_digit() { state.advance(1) } else { break }
             }
 
             // Fractional part
@@ -196,12 +189,7 @@ impl<'config> DelphiLexer<'config> {
                     is_float = true;
                     state.advance(1); // consume '.'
                     while let Some(c) = state.peek() {
-                        if c.is_ascii_digit() {
-                            state.advance(1);
-                        }
-                        else {
-                            break;
-                        }
+                        if c.is_ascii_digit() { state.advance(1) } else { break }
                     }
                 }
             }
@@ -215,23 +203,18 @@ impl<'config> DelphiLexer<'config> {
                         state.advance(1);
                         if let Some(sign) = state.peek() {
                             if sign == '+' || sign == '-' {
-                                state.advance(1);
+                                state.advance(1)
                             }
                         }
                         while let Some(d) = state.peek() {
-                            if d.is_ascii_digit() {
-                                state.advance(1);
-                            }
-                            else {
-                                break;
-                            }
+                            if d.is_ascii_digit() { state.advance(1) } else { break }
                         }
                     }
                 }
             }
         }
 
-        state.add_token(if is_float { DelphiSyntaxKind::Float } else { DelphiSyntaxKind::Number }, start, state.get_position());
+        state.add_token(if is_float { DelphiTokenType::Float } else { DelphiTokenType::Number }, start, state.get_position());
         true
     }
 
@@ -248,62 +231,57 @@ impl<'config> DelphiLexer<'config> {
 
         state.advance(ch.len_utf8());
         while let Some(c) = state.peek() {
-            if c.is_ascii_alphanumeric() || c == '_' {
-                state.advance(c.len_utf8());
-            }
-            else {
-                break;
-            }
+            if c.is_ascii_alphanumeric() || c == '_' { state.advance(c.len_utf8()) } else { break }
         }
 
         let end = state.get_position();
         let text = state.get_text_in((start..end).into());
         let kind = match text.to_lowercase().as_str() {
-            "and" => DelphiSyntaxKind::And_,
-            "array" => DelphiSyntaxKind::Array,
-            "as" => DelphiSyntaxKind::As_,
-            "begin" => DelphiSyntaxKind::Begin,
-            "case" => DelphiSyntaxKind::Case,
-            "class" => DelphiSyntaxKind::Class,
-            "const" => DelphiSyntaxKind::Const,
-            "div" => DelphiSyntaxKind::Div,
-            "do" => DelphiSyntaxKind::Do,
-            "downto" => DelphiSyntaxKind::Downto,
-            "else" => DelphiSyntaxKind::Else,
-            "end" => DelphiSyntaxKind::End,
-            "except" => DelphiSyntaxKind::Except,
-            "false" => DelphiSyntaxKind::False_,
-            "finally" => DelphiSyntaxKind::Finally,
-            "for" => DelphiSyntaxKind::For,
-            "function" => DelphiSyntaxKind::Function,
-            "if" => DelphiSyntaxKind::If,
-            "implementation" => DelphiSyntaxKind::Implementation,
-            "in" => DelphiSyntaxKind::In_,
-            "interface" => DelphiSyntaxKind::Interface,
-            "is" => DelphiSyntaxKind::Is_,
-            "mod" => DelphiSyntaxKind::Mod,
-            "nil" => DelphiSyntaxKind::Nil,
-            "not" => DelphiSyntaxKind::Not_,
-            "object" => DelphiSyntaxKind::Object,
-            "of" => DelphiSyntaxKind::Of,
-            "or" => DelphiSyntaxKind::Or_,
-            "procedure" => DelphiSyntaxKind::Procedure,
-            "program" => DelphiSyntaxKind::Program,
-            "record" => DelphiSyntaxKind::Record,
-            "repeat" => DelphiSyntaxKind::Repeat,
-            "set" => DelphiSyntaxKind::Set,
-            "then" => DelphiSyntaxKind::Then,
-            "to" => DelphiSyntaxKind::To,
-            "true" => DelphiSyntaxKind::True_,
-            "try" => DelphiSyntaxKind::Try,
-            "type" => DelphiSyntaxKind::Type,
-            "unit" => DelphiSyntaxKind::Unit,
-            "until" => DelphiSyntaxKind::Until,
-            "uses" => DelphiSyntaxKind::Uses,
-            "var" => DelphiSyntaxKind::Var,
-            "while" => DelphiSyntaxKind::While,
-            "with" => DelphiSyntaxKind::With,
-            _ => DelphiSyntaxKind::Identifier,
+            "and" => DelphiTokenType::And_,
+            "array" => DelphiTokenType::Array,
+            "as" => DelphiTokenType::As_,
+            "begin" => DelphiTokenType::Begin,
+            "case" => DelphiTokenType::Case,
+            "class" => DelphiTokenType::Class,
+            "const" => DelphiTokenType::Const,
+            "div" => DelphiTokenType::Div,
+            "do" => DelphiTokenType::Do,
+            "downto" => DelphiTokenType::Downto,
+            "else" => DelphiTokenType::Else,
+            "end" => DelphiTokenType::End,
+            "except" => DelphiTokenType::Except,
+            "false" => DelphiTokenType::False_,
+            "finally" => DelphiTokenType::Finally,
+            "for" => DelphiTokenType::For,
+            "function" => DelphiTokenType::Function,
+            "if" => DelphiTokenType::If,
+            "implementation" => DelphiTokenType::Implementation,
+            "in" => DelphiTokenType::In_,
+            "interface" => DelphiTokenType::Interface,
+            "is" => DelphiTokenType::Is_,
+            "mod" => DelphiTokenType::Mod,
+            "nil" => DelphiTokenType::Nil,
+            "not" => DelphiTokenType::Not_,
+            "object" => DelphiTokenType::Object,
+            "of" => DelphiTokenType::Of,
+            "or" => DelphiTokenType::Or_,
+            "procedure" => DelphiTokenType::Procedure,
+            "program" => DelphiTokenType::Program,
+            "record" => DelphiTokenType::Record,
+            "repeat" => DelphiTokenType::Repeat,
+            "set" => DelphiTokenType::Set,
+            "then" => DelphiTokenType::Then,
+            "to" => DelphiTokenType::To,
+            "true" => DelphiTokenType::True_,
+            "try" => DelphiTokenType::Try,
+            "type" => DelphiTokenType::Type,
+            "unit" => DelphiTokenType::Unit,
+            "until" => DelphiTokenType::Until,
+            "uses" => DelphiTokenType::Uses,
+            "var" => DelphiTokenType::Var,
+            "while" => DelphiTokenType::While,
+            "with" => DelphiTokenType::With,
+            _ => DelphiTokenType::Identifier,
         };
 
         state.add_token(kind, start, state.get_position());
@@ -314,7 +292,7 @@ impl<'config> DelphiLexer<'config> {
         let start = state.get_position();
 
         // Multi-character operators (longest first)
-        let patterns: &[(&str, DelphiSyntaxKind)] = &[(":=", DelphiSyntaxKind::Assign), ("<=", DelphiSyntaxKind::LessEqual), (">=", DelphiSyntaxKind::GreaterEqual), ("<>", DelphiSyntaxKind::NotEqual), ("..", DelphiSyntaxKind::DotDot)];
+        let patterns: &[(&str, DelphiTokenType)] = &[(":=", DelphiTokenType::Assign), ("<=", DelphiTokenType::LessEqual), (">=", DelphiTokenType::GreaterEqual), ("<>", DelphiTokenType::NotEqual), ("..", DelphiTokenType::DotDot)];
 
         for (pat, kind) in patterns {
             if state.consume_if_starts_with(pat) {
@@ -326,17 +304,17 @@ impl<'config> DelphiLexer<'config> {
         // Single-character operators
         if let Some(ch) = state.peek() {
             let kind = match ch {
-                '+' => Some(DelphiSyntaxKind::Plus),
-                '-' => Some(DelphiSyntaxKind::Minus),
-                '*' => Some(DelphiSyntaxKind::Star),
-                '/' => Some(DelphiSyntaxKind::Slash),
-                '=' => Some(DelphiSyntaxKind::Equal),
-                '<' => Some(DelphiSyntaxKind::Less),
-                '>' => Some(DelphiSyntaxKind::Greater),
-                '.' => Some(DelphiSyntaxKind::Dot),
-                ':' => Some(DelphiSyntaxKind::Colon),
-                '^' => Some(DelphiSyntaxKind::Caret),
-                '@' => Some(DelphiSyntaxKind::At),
+                '+' => Some(DelphiTokenType::Plus),
+                '-' => Some(DelphiTokenType::Minus),
+                '*' => Some(DelphiTokenType::Star),
+                '/' => Some(DelphiTokenType::Slash),
+                '=' => Some(DelphiTokenType::Equal),
+                '<' => Some(DelphiTokenType::Less),
+                '>' => Some(DelphiTokenType::Greater),
+                '.' => Some(DelphiTokenType::Dot),
+                ':' => Some(DelphiTokenType::Colon),
+                '^' => Some(DelphiTokenType::Caret),
+                '@' => Some(DelphiTokenType::At),
                 _ => None,
             };
 
@@ -355,12 +333,12 @@ impl<'config> DelphiLexer<'config> {
 
         if let Some(ch) = state.peek() {
             let kind = match ch {
-                '(' => DelphiSyntaxKind::LeftParen,
-                ')' => DelphiSyntaxKind::RightParen,
-                '[' => DelphiSyntaxKind::LeftBracket,
-                ']' => DelphiSyntaxKind::RightBracket,
-                ',' => DelphiSyntaxKind::Comma,
-                ';' => DelphiSyntaxKind::Semicolon,
+                '(' => DelphiTokenType::LeftParen,
+                ')' => DelphiTokenType::RightParen,
+                '[' => DelphiTokenType::LeftBracket,
+                ']' => DelphiTokenType::RightBracket,
+                ',' => DelphiTokenType::Comma,
+                ';' => DelphiTokenType::Semicolon,
                 _ => return false,
             };
 
@@ -379,7 +357,7 @@ impl<'config> Lexer<DelphiLanguage> for DelphiLexer<'config> {
         let mut state = State::new_with_cache(source, 0, cache);
         let result = self.run(&mut state);
         if result.is_ok() {
-            state.add_eof();
+            state.add_eof()
         }
         state.finish_with_cache(result, cache)
     }

@@ -5,59 +5,62 @@ use oak_core::{
     tree::{RedLeaf, RedNode, RedTree},
 };
 
-/// 格式化输出
+/// Formatted output
 #[derive(Debug, Clone, serde::Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct FormatOutput {
-    /// 格式化后的代码
+    /// The formatted code string
     pub content: String,
-    /// 是否有变化
+    /// Indicates if the content was changed during formatting
     pub changed: bool,
 }
 
 impl FormatOutput {
-    /// 创建新的格式化输出
+    /// Creates a new format output
     pub fn new(content: String, changed: bool) -> Self {
         Self { content, changed }
     }
 }
 
-/// 路径节点，用于高效记录格式化路径
+/// A path node for efficiently recording the formatting path
 #[derive(Debug)]
 pub struct PathNode<L: Language> {
+    /// The element type of the node
     pub kind: L::ElementType,
+    /// The parent path node
     pub parent: Option<Arc<PathNode<L>>>,
 }
 
-/// 格式化上下文，管理格式化过程中的状态
+/// Formatting context for managing state during the formatting process
 #[derive(Debug, Clone)]
 pub struct FormatContext<L: Language> {
-    /// 格式化配置
+    /// Formatting configuration
     pub config: Arc<FormatConfig>,
-    /// 注释处理器
+    /// Comment processor for handling comments during formatting
     pub comment_processor: Arc<CommentProcessor>,
-    /// 源码内容
+    /// Source code content
     pub source: Option<Arc<str>>,
-    /// 当前嵌套深度
+    /// Current nesting depth
     pub depth: usize,
-    /// 父节点类型路径
+    /// Path of parent node types
     pub path: Option<Arc<PathNode<L>>>,
 }
 
 impl<L: Language> FormatContext<L> {
-    /// 创建新的格式化上下文
+    /// Creates a new formatting context
     pub fn new(config: FormatConfig) -> Self {
         let config = Arc::new(config);
-        Self { config: config.clone(), comment_processor: Arc::new(CommentProcessor::new().with_preserve_comments(config.format_comments).with_format_comments(config.format_comments)), source: None, depth: 0, path: None }
+        let comment_processor = Arc::new(CommentProcessor::new().with_preserve_comments(config.format_comments).with_format_comments(config.format_comments));
+        Self { config, comment_processor, source: None, depth: 0, path: None }
     }
 
-    /// 进入子节点，增加深度并记录路径
+    /// Enters a child node, increasing depth and recording the path
     pub fn enter(&self, kind: L::ElementType) -> Self {
         let path = Some(Arc::new(PathNode { kind, parent: self.path.clone() }));
         Self { config: self.config.clone(), comment_processor: self.comment_processor.clone(), source: self.source.clone(), depth: self.depth + 1, path }
     }
 
-    /// 检查是否处于特定类型的节点内部
+    /// Checks if the formatter is currently inside a node of a specific type
     pub fn is_inside(&self, kind: L::ElementType) -> bool {
         let mut current = self.path.as_ref();
         while let Some(node) = current {
@@ -69,29 +72,27 @@ impl<L: Language> FormatContext<L> {
         false
     }
 
-    /// 获取父节点类型
+    /// Gets the type of the parent node
     pub fn parent_kind(&self) -> Option<L::ElementType> {
-        self.path.as_ref().map(|n| n.kind.clone())
+        self.path.as_ref().and_then(|n| n.parent.as_ref()).map(|n| n.kind.clone())
     }
 }
 
-/// 通用格式化器
+/// A generic formatter
 pub struct Formatter<L: Language + 'static> {
-    /// 格式化规则集合
+    /// Set of formatting rules
     rules: RuleSet<L>,
-    /// 初始格式化上下文
+    /// Initial formatting context
     pub context: FormatContext<L>,
 }
 
 impl<L: Language + 'static> Formatter<L>
-where
-    L::ElementType: oak_core::language::TokenType,
 {
-    /// 创建新的格式化器
+    /// Creates a new formatter
     pub fn new(config: FormatConfig) -> Self {
         let mut formatter = Self { rules: RuleSet::new(), context: FormatContext::new(config) };
 
-        // 添加内置规则
+        // Add built-in rules
         for rule in create_builtin_rules::<L>() {
             let _ = formatter.rules.add_rule(rule);
         }
@@ -99,12 +100,12 @@ where
         formatter
     }
 
-    /// 添加格式化规则
+    /// Adds a formatting rule
     pub fn add_rule(&mut self, rule: Box<dyn crate::FormatRule<L>>) -> FormatResult<()> {
         self.rules.add_rule(rule)
     }
 
-    /// 格式化 AST 节点
+    /// Formats an AST node
     pub fn format<'a>(&mut self, root: &RedNode<L>, source: &'a str) -> FormatResult<FormatOutput> {
         self.context.source = Some(Arc::from(source));
         let doc = self.format_node(root, &self.context, source)?;
@@ -113,12 +114,12 @@ where
         Ok(FormatOutput::new(content, changed))
     }
 
-    /// 递归格式化节点并生成 Document
+    /// Recursively formats a node and generates a Document
     fn format_node<'a>(&self, node: &RedNode<L>, context: &FormatContext<L>, source: &'a str) -> FormatResult<Document<'a>> {
-        // 创建一个新的上下文，记录当前路径和深度
+        // Create a new context, recording current path and depth
         let new_context = context.enter(node.green.kind.clone());
 
-        // 创建一个用于格式化子节点的闭包
+        // Create a closure for formatting child nodes
         let format_children = |n: &RedNode<L>| {
             let mut children_docs = Vec::new();
             for child in n.children() {
@@ -130,23 +131,23 @@ where
             Ok(Document::Concat(children_docs))
         };
 
-        // 应用节点规则
+        // Apply node rules
         if let Some(doc) = self.rules.apply_node_rules(node, &new_context, source, &format_children)? {
             return Ok(doc);
         }
 
-        // 默认逻辑：格式化所有子节点并连接
+        // Default logic: format all child nodes and concatenate
         format_children(node)
     }
 
-    /// 递归格式化 Token 并生成 Document
+    /// Recursively formats a Token and generates a Document
     fn format_token<'a>(&self, token: &RedLeaf<L>, context: &FormatContext<L>, source: &'a str) -> FormatResult<Document<'a>> {
-        // 应用 Token 规则
+        // Apply Token rules
         if let Some(doc) = self.rules.apply_token_rules(token, context, source)? {
             return Ok(doc);
         }
 
-        // 默认逻辑：原样输出
+        // Default logic: output as is
         let text = &source[token.span.start..token.span.end];
         Ok(Document::Text(text.into()))
     }

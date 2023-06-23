@@ -1,13 +1,16 @@
+#![doc = include_str!("readme.md")]
 use crate::ast::TclRoot;
 use oak_core::{Language, LanguageCategory};
+#[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
 
-/// Tcl 语言配置
-#[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
+/// Tcl language configuration.
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct TclLanguage {
-    /// Tcl 版本
+    /// Tcl version.
     pub version: TclVersion,
-    /// 是否启用扩展语法
+    /// Whether to enable extended syntax.
     pub extensions: bool,
 }
 
@@ -18,14 +21,15 @@ impl Default for TclLanguage {
 }
 
 impl TclLanguage {
-    /// 创建新的 Tcl 语言实例
+    /// Creates a new `TclLanguage` instance.
     pub fn new() -> Self {
         Self::default()
     }
 }
 
-/// Tcl 版本
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
+/// Tcl version.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub enum TclVersion {
     /// Tcl 8.0
     Tcl80,
@@ -48,27 +52,27 @@ pub enum TclVersion {
 }
 
 impl TclLanguage {
-    /// 创建标准 Tcl 8.6 配置
+    /// Creates a standard Tcl 8.6 configuration.
     pub fn standard() -> Self {
         Self { version: TclVersion::Tcl86, extensions: false }
     }
 
-    /// 创建 Tcl 8.5 配置
+    /// Creates a Tcl 8.5 configuration.
     pub fn tcl85() -> Self {
         Self { version: TclVersion::Tcl85, extensions: false }
     }
 
-    /// 创建 Tcl 8.6 配置
+    /// Creates a Tcl 8.6 configuration.
     pub fn tcl86() -> Self {
         Self { version: TclVersion::Tcl86, extensions: false }
     }
 
-    /// 创建 Tcl 9.0 配置
+    /// Creates a Tcl 9.0 configuration.
     pub fn tcl90() -> Self {
         Self { version: TclVersion::Tcl90, extensions: true }
     }
 
-    /// 创建支持扩展语法的 Tcl 配置
+    /// Creates a Tcl configuration with extended syntax.
     pub fn with_extensions() -> Self {
         Self { version: TclVersion::Tcl86, extensions: true }
     }
@@ -78,7 +82,7 @@ impl Language for TclLanguage {
     const NAME: &'static str = "tcl";
     const CATEGORY: LanguageCategory = LanguageCategory::Programming;
 
-    type TokenType = crate::kind::TclSyntaxKind;
-    type ElementType = crate::kind::TclSyntaxKind;
+    type TokenType = crate::lexer::token_type::TclTokenType;
+    type ElementType = crate::parser::element_type::TclElementType;
     type TypedRoot = TclRoot;
 }

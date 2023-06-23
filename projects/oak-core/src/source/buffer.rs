@@ -20,6 +20,12 @@ pub struct SourceBuffer {
     last_char: Option<char>,
 }
 
+impl std::fmt::Display for SourceBuffer {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", self.inner)
+    }
+}
+
 impl SourceBuffer {
     /// Creates a new, empty source buffer.
     pub fn new() -> Self {
@@ -32,10 +38,10 @@ impl SourceBuffer {
             // If both the last character and the first character of the new string are "word" characters,
             // we must insert a space to prevent them from merging into a single token (e.g., "let" + "a" -> "let a").
             if self.is_word_char(self.last_char) && self.is_word_char(Some(first)) {
-                self.inner.push(' ');
+                self.inner.push(' ')
             }
             self.inner.push_str(s);
-            self.last_char = s.chars().last();
+            self.last_char = s.chars().last()
         }
     }
 

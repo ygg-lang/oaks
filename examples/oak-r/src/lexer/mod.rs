@@ -1,4 +1,8 @@
-use crate::{kind::RSyntaxKind, language::RLanguage};
+#![doc = include_str!("readme.md")]
+pub mod token_type;
+pub use token_type::RTokenType;
+
+use crate::language::RLanguage;
 use oak_core::{Lexer, LexerCache, LexerState, Range, lexer::LexOutput, source::Source};
 
 type State<'s, S> = LexerState<'s, S, RLanguage>;
@@ -13,7 +17,7 @@ impl<'config> Lexer<RLanguage> for RLexer<'config> {
         let mut state = State::new(source);
         let result = self.run(&mut state);
         if result.is_ok() {
-            state.add_eof();
+            state.add_eof()
         }
         state.finish_with_cache(result, cache)
     }
@@ -59,7 +63,7 @@ impl<'config> RLexer<'config> {
                 continue;
             }
 
-            state.advance_if_dead_lock(safe_point);
+            state.advance_if_dead_lock(safe_point)
         }
         Ok(())
     }
@@ -86,10 +90,10 @@ impl<'config> RLexer<'config> {
                 if ch == '\n' || ch == '\r' {
                     break;
                 }
-                state.advance(ch.len_utf8());
+                state.advance(ch.len_utf8())
             }
 
-            state.add_token(RSyntaxKind::Comment, start_pos, state.get_position());
+            state.add_token(RTokenType::Comment, start_pos, state.get_position());
             return true;
         }
         false
@@ -105,7 +109,7 @@ impl<'config> RLexer<'config> {
                 while let Some(ch) = state.current() {
                     if ch == quote {
                         state.advance(1); // 跳过结束引号
-                        state.add_token(RSyntaxKind::StringLiteral, start_pos, state.get_position());
+                        state.add_token(RTokenType::StringLiteral, start_pos, state.get_position());
                         return true;
                     }
                     if ch == '\\' {
@@ -115,11 +119,11 @@ impl<'config> RLexer<'config> {
                             continue;
                         }
                     }
-                    state.advance(ch.len_utf8());
+                    state.advance(ch.len_utf8())
                 }
 
                 // 未闭合字符串
-                state.add_token(RSyntaxKind::StringLiteral, start_pos, state.get_position());
+                state.add_token(RTokenType::StringLiteral, start_pos, state.get_position());
                 return true;
             }
         }
@@ -135,11 +139,11 @@ impl<'config> RLexer<'config> {
 
                 while let Some(c) = state.current() {
                     if c.is_ascii_digit() {
-                        state.advance(1);
+                        state.advance(1)
                     }
                     else if c == '.' && !has_dot {
                         has_dot = true;
-                        state.advance(1);
+                        state.advance(1)
                     }
                     else if (c == 'e' || c == 'E') && !state.peek_next_n(1).map_or(false, |c| c.is_ascii_digit() || c == '+' || c == '-') {
                         break;
@@ -148,27 +152,22 @@ impl<'config> RLexer<'config> {
                         state.advance(1);
                         if let Some(next) = state.current() {
                             if next == '+' || next == '-' {
-                                state.advance(1);
+                                state.advance(1)
                             }
                         }
                         while let Some(digit) = state.current() {
-                            if digit.is_ascii_digit() {
-                                state.advance(1);
-                            }
-                            else {
-                                break;
-                            }
+                            if digit.is_ascii_digit() { state.advance(1) } else { break }
                         }
                         break;
                     }
                     else if c == 'L' {
                         state.advance(1);
-                        state.add_token(RSyntaxKind::IntegerLiteral, start_pos, state.get_position());
+                        state.add_token(RTokenType::IntegerLiteral, start_pos, state.get_position());
                         return true;
                     }
                     else if c == 'i' {
                         state.advance(1);
-                        state.add_token(RSyntaxKind::FloatLiteral, start_pos, state.get_position());
+                        state.add_token(RTokenType::FloatLiteral, start_pos, state.get_position());
                         return true;
                     }
                     else {
@@ -176,7 +175,7 @@ impl<'config> RLexer<'config> {
                     }
                 }
 
-                let kind = if has_dot { RSyntaxKind::FloatLiteral } else { RSyntaxKind::IntegerLiteral };
+                let kind = if has_dot { RTokenType::FloatLiteral } else { RTokenType::IntegerLiteral };
                 state.add_token(kind, start_pos, state.get_position());
                 return true;
             }
@@ -192,36 +191,31 @@ impl<'config> RLexer<'config> {
                 state.advance(ch.len_utf8());
 
                 while let Some(c) = state.current() {
-                    if c.is_alphanumeric() || c == '.' || c == '_' {
-                        state.advance(c.len_utf8());
-                    }
-                    else {
-                        break;
-                    }
+                    if c.is_alphanumeric() || c == '.' || c == '_' { state.advance(c.len_utf8()) } else { break }
                 }
 
                 let text = state.get_text_in(Range { start: start_pos, end: state.get_position() });
                 let kind = match text.as_ref() {
-                    "if" => RSyntaxKind::If,
-                    "else" => RSyntaxKind::Else,
-                    "for" => RSyntaxKind::For,
-                    "in" => RSyntaxKind::In,
-                    "while" => RSyntaxKind::While,
-                    "repeat" => RSyntaxKind::Repeat,
-                    "next" => RSyntaxKind::Next,
-                    "break" => RSyntaxKind::Break,
-                    "function" => RSyntaxKind::Function,
-                    "TRUE" => RSyntaxKind::True,
-                    "FALSE" => RSyntaxKind::False,
-                    "NULL" => RSyntaxKind::Null,
-                    "Inf" => RSyntaxKind::Inf,
-                    "NaN" => RSyntaxKind::NaN,
-                    "NA" => RSyntaxKind::NA,
-                    "NA_integer_" => RSyntaxKind::NaInteger,
-                    "NA_real_" => RSyntaxKind::NaReal,
-                    "NA_complex_" => RSyntaxKind::NaComplex,
-                    "NA_character_" => RSyntaxKind::NaCharacter,
-                    _ => RSyntaxKind::Identifier,
+                    "if" => RTokenType::If,
+                    "else" => RTokenType::Else,
+                    "for" => RTokenType::For,
+                    "in" => RTokenType::In,
+                    "while" => RTokenType::While,
+                    "repeat" => RTokenType::Repeat,
+                    "next" => RTokenType::Next,
+                    "break" => RTokenType::Break,
+                    "function" => RTokenType::Function,
+                    "TRUE" => RTokenType::True,
+                    "FALSE" => RTokenType::False,
+                    "NULL" => RTokenType::Null,
+                    "Inf" => RTokenType::Inf,
+                    "NaN" => RTokenType::NaN,
+                    "NA" => RTokenType::NA,
+                    "NA_integer_" => RTokenType::NaInteger,
+                    "NA_real_" => RTokenType::NaReal,
+                    "NA_complex_" => RTokenType::NaComplex,
+                    "NA_character_" => RTokenType::NaCharacter,
+                    _ => RTokenType::Identifier,
                 };
 
                 state.add_token(kind, start_pos, state.get_position());
@@ -240,23 +234,23 @@ impl<'config> RLexer<'config> {
                     state.advance(1);
                     if let Some('-') = state.current() {
                         state.advance(1);
-                        state.add_token(RSyntaxKind::LeftArrow, start_pos, state.get_position());
+                        state.add_token(RTokenType::LeftArrow, start_pos, state.get_position());
                         return true;
                     }
                     if let Some('<') = state.current() {
                         state.advance(1);
                         if let Some('-') = state.current() {
                             state.advance(1);
-                            state.add_token(RSyntaxKind::DoubleLeftArrow, start_pos, state.get_position());
+                            state.add_token(RTokenType::DoubleLeftArrow, start_pos, state.get_position());
                             return true;
                         }
                     }
                     if let Some('=') = state.current() {
                         state.advance(1);
-                        state.add_token(RSyntaxKind::LessEqual, start_pos, state.get_position());
+                        state.add_token(RTokenType::LessEqual, start_pos, state.get_position());
                         return true;
                     }
-                    state.add_token(RSyntaxKind::Less, start_pos, state.get_position());
+                    state.add_token(RTokenType::Less, start_pos, state.get_position());
                     return true;
                 }
                 '-' => {
@@ -265,68 +259,68 @@ impl<'config> RLexer<'config> {
                         state.advance(1);
                         if let Some('>') = state.current() {
                             state.advance(1);
-                            state.add_token(RSyntaxKind::DoubleRightArrow, start_pos, state.get_position());
+                            state.add_token(RTokenType::DoubleRightArrow, start_pos, state.get_position());
                             return true;
                         }
-                        state.add_token(RSyntaxKind::RightArrow, start_pos, state.get_position());
+                        state.add_token(RTokenType::RightArrow, start_pos, state.get_position());
                         return true;
                     }
-                    state.add_token(RSyntaxKind::Minus, start_pos, state.get_position());
+                    state.add_token(RTokenType::Minus, start_pos, state.get_position());
                     return true;
                 }
                 '=' => {
                     state.advance(1);
                     if let Some('=') = state.current() {
                         state.advance(1);
-                        state.add_token(RSyntaxKind::EqualEqual, start_pos, state.get_position());
+                        state.add_token(RTokenType::EqualEqual, start_pos, state.get_position());
                         return true;
                     }
-                    state.add_token(RSyntaxKind::Equal, start_pos, state.get_position());
+                    state.add_token(RTokenType::Equal, start_pos, state.get_position());
                     return true;
                 }
                 '!' => {
                     state.advance(1);
                     if let Some('=') = state.current() {
                         state.advance(1);
-                        state.add_token(RSyntaxKind::NotEqual, start_pos, state.get_position());
+                        state.add_token(RTokenType::NotEqual, start_pos, state.get_position());
                         return true;
                     }
-                    state.add_token(RSyntaxKind::Not, start_pos, state.get_position());
+                    state.add_token(RTokenType::Not, start_pos, state.get_position());
                     return true;
                 }
                 '>' => {
                     state.advance(1);
                     if let Some('=') = state.current() {
                         state.advance(1);
-                        state.add_token(RSyntaxKind::GreaterEqual, start_pos, state.get_position());
+                        state.add_token(RTokenType::GreaterEqual, start_pos, state.get_position());
                         return true;
                     }
-                    state.add_token(RSyntaxKind::Greater, start_pos, state.get_position());
+                    state.add_token(RTokenType::Greater, start_pos, state.get_position());
                     return true;
                 }
                 '&' => {
                     state.advance(1);
                     if let Some('&') = state.current() {
                         state.advance(1);
-                        state.add_token(RSyntaxKind::AndAnd, start_pos, state.get_position());
+                        state.add_token(RTokenType::AndAnd, start_pos, state.get_position());
                         return true;
                     }
-                    state.add_token(RSyntaxKind::And, start_pos, state.get_position());
+                    state.add_token(RTokenType::And, start_pos, state.get_position());
                     return true;
                 }
                 '|' => {
                     state.advance(1);
                     if let Some('|') = state.current() {
                         state.advance(1);
-                        state.add_token(RSyntaxKind::OrOr, start_pos, state.get_position());
+                        state.add_token(RTokenType::OrOr, start_pos, state.get_position());
                         return true;
                     }
                     if let Some('>') = state.current() {
                         state.advance(1);
-                        state.add_token(RSyntaxKind::Pipe, start_pos, state.get_position());
+                        state.add_token(RTokenType::Pipe, start_pos, state.get_position());
                         return true;
                     }
-                    state.add_token(RSyntaxKind::Or, start_pos, state.get_position());
+                    state.add_token(RTokenType::Or, start_pos, state.get_position());
                     return true;
                 }
                 '%' => {
@@ -334,12 +328,12 @@ impl<'config> RLexer<'config> {
                     while let Some(c) = state.current() {
                         state.advance(c.len_utf8());
                         if c == '%' {
-                            state.add_token(RSyntaxKind::Operator, start_pos, state.get_position());
+                            state.add_token(RTokenType::Operator, start_pos, state.get_position());
                             return true;
                         }
                     }
                     // 未闭合的操作符
-                    state.add_token(RSyntaxKind::Operator, start_pos, state.get_position());
+                    state.add_token(RTokenType::Operator, start_pos, state.get_position());
                     return true;
                 }
                 _ => {}
@@ -353,46 +347,46 @@ impl<'config> RLexer<'config> {
         if let Some(ch) = state.current() {
             let start_pos = state.get_position();
             let kind = match ch {
-                '(' => Some(RSyntaxKind::LeftParen),
-                ')' => Some(RSyntaxKind::RightParen),
-                '[' => Some(RSyntaxKind::LeftBracket),
-                ']' => Some(RSyntaxKind::RightBracket),
-                '{' => Some(RSyntaxKind::LeftBrace),
-                '}' => Some(RSyntaxKind::RightBrace),
-                ',' => Some(RSyntaxKind::Comma),
-                ';' => Some(RSyntaxKind::Semicolon),
-                '+' => Some(RSyntaxKind::Plus),
-                '*' => Some(RSyntaxKind::Star),
-                '/' => Some(RSyntaxKind::Slash),
-                '^' => Some(RSyntaxKind::Caret),
-                '$' => Some(RSyntaxKind::Dollar),
-                '@' => Some(RSyntaxKind::At),
-                '~' => Some(RSyntaxKind::Tilde),
+                '(' => Some(RTokenType::LeftParen),
+                ')' => Some(RTokenType::RightParen),
+                '[' => Some(RTokenType::LeftBracket),
+                ']' => Some(RTokenType::RightBracket),
+                '{' => Some(RTokenType::LeftBrace),
+                '}' => Some(RTokenType::RightBrace),
+                ',' => Some(RTokenType::Comma),
+                ';' => Some(RTokenType::Semicolon),
+                '+' => Some(RTokenType::Plus),
+                '*' => Some(RTokenType::Star),
+                '/' => Some(RTokenType::Slash),
+                '^' => Some(RTokenType::Caret),
+                '$' => Some(RTokenType::Dollar),
+                '@' => Some(RTokenType::At),
+                '~' => Some(RTokenType::Tilde),
                 ':' => {
                     state.advance(1);
                     if let Some(':') = state.current() {
                         state.advance(1);
                         if let Some(':') = state.current() {
                             state.advance(1);
-                            Some(RSyntaxKind::TripleColon)
+                            Some(RTokenType::TripleColon)
                         }
                         else {
-                            Some(RSyntaxKind::DoubleColon)
+                            Some(RTokenType::DoubleColon)
                         }
                     }
                     else {
                         return {
-                            state.add_token(RSyntaxKind::Colon, start_pos, state.get_position());
+                            state.add_token(RTokenType::Colon, start_pos, state.get_position());
                             true
                         };
                     }
                 }
-                '?' => Some(RSyntaxKind::Question),
+                '?' => Some(RTokenType::Question),
                 _ => None,
             };
 
             if let Some(k) = kind {
-                if !matches!(k, RSyntaxKind::TripleColon | RSyntaxKind::DoubleColon) {
+                if !matches!(k, RTokenType::TripleColon | RTokenType::DoubleColon) {
                     state.advance(1);
                 }
                 state.add_token(k, start_pos, state.get_position());
@@ -408,7 +402,7 @@ impl<'config> RLexer<'config> {
             let start_pos = state.get_position();
             let len = ch.len_utf8();
             state.advance(len);
-            state.add_token(RSyntaxKind::Error, start_pos, state.get_position());
+            state.add_token(RTokenType::Error, start_pos, state.get_position());
             return true;
         }
         false

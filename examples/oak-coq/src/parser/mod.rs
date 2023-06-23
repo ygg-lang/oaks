@@ -1,10 +1,13 @@
+pub mod element_type;
+pub use element_type::CoqElementType;
+
 use crate::{language::CoqLanguage, lexer::CoqLexer};
 use oak_core::{
     parser::{ParseCache, ParseOutput, Parser},
     source::{Source, TextEdit},
 };
 
-mod parse;
+mod parse_top_level;
 
 /// Coq parser implementation.
 pub struct CoqParser<'config> {

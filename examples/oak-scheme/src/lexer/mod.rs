@@ -1,8 +1,9 @@
-use crate::{kind::SchemeSyntaxKind, language::SchemeLanguage};
+#![doc = include_str!("readme.md")]
+use crate::{language::SchemeLanguage, lexer::token_type::SchemeTokenType};
+pub mod token_type;
 use oak_core::{
-    Lexer, LexerCache, LexerState, OakError,
+    Lexer, LexerCache, LexerState, OakError, Source, TextEdit,
     lexer::{CommentConfig, LexOutput, StringConfig, WhitespaceConfig},
-    source::Source,
 };
 use std::sync::LazyLock;
 
@@ -14,11 +15,11 @@ static SCHEME_STRING: LazyLock<StringConfig> = LazyLock::new(|| StringConfig { q
 
 #[derive(Clone, Debug)]
 pub struct SchemeLexer<'config> {
-    _config: &'config SchemeLanguage,
+    config: &'config SchemeLanguage,
 }
 
 impl<'config> Lexer<SchemeLanguage> for SchemeLexer<'config> {
-    fn lex<'a, S: Source + ?Sized>(&self, source: &S, _edits: &[oak_core::TextEdit], cache: &'a mut impl LexerCache<SchemeLanguage>) -> LexOutput<SchemeLanguage> {
+    fn lex<'a, S: Source + ?Sized>(&self, source: &S, _edits: &[TextEdit], cache: &'a mut impl LexerCache<SchemeLanguage>) -> LexOutput<SchemeLanguage> {
         let mut state: State<'_, S> = LexerState::new_with_cache(source, 0, cache);
         let result = self.run(&mut state);
         state.finish_with_cache(result, cache)
@@ -27,7 +28,7 @@ impl<'config> Lexer<SchemeLanguage> for SchemeLexer<'config> {
 
 impl<'config> SchemeLexer<'config> {
     pub fn new(config: &'config SchemeLanguage) -> Self {
-        Self { _config: config }
+        Self { config }
     }
 
     fn run<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> Result<(), OakError> {
@@ -66,10 +67,10 @@ impl<'config> SchemeLexer<'config> {
             let start_pos = state.get_position();
             if let Some(ch) = state.peek() {
                 state.advance(ch.len_utf8());
-                state.add_token(SchemeSyntaxKind::Error, start_pos, state.get_position());
+                state.add_token(SchemeTokenType::Error, start_pos, state.get_position());
             }
 
-            state.advance_if_dead_lock(safe_point);
+            state.advance_if_dead_lock(safe_point)
         }
 
         // 添加 EOF token
@@ -78,7 +79,7 @@ impl<'config> SchemeLexer<'config> {
     }
 
     fn skip_whitespace<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
-        SCHEME_WHITESPACE.scan(state, SchemeSyntaxKind::Whitespace)
+        SCHEME_WHITESPACE.scan(state, SchemeTokenType::Whitespace)
     }
 
     /// 处理换行
@@ -87,7 +88,7 @@ impl<'config> SchemeLexer<'config> {
 
         if let Some('\n') = state.peek() {
             state.advance(1);
-            state.add_token(SchemeSyntaxKind::Newline, start_pos, state.get_position());
+            state.add_token(SchemeTokenType::Newline, start_pos, state.get_position());
             true
         }
         else if let Some('\r') = state.peek() {
@@ -95,7 +96,7 @@ impl<'config> SchemeLexer<'config> {
             if let Some('\n') = state.peek() {
                 state.advance(1);
             }
-            state.add_token(SchemeSyntaxKind::Newline, start_pos, state.get_position());
+            state.add_token(SchemeTokenType::Newline, start_pos, state.get_position());
             true
         }
         else {
@@ -104,11 +105,11 @@ impl<'config> SchemeLexer<'config> {
     }
 
     fn skip_comment<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
-        SCHEME_COMMENT.scan(state, SchemeSyntaxKind::LineComment, SchemeSyntaxKind::Comment)
+        SCHEME_COMMENT.scan(state, SchemeTokenType::LineComment, SchemeTokenType::Comment)
     }
 
     fn lex_string_literal<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
-        SCHEME_STRING.scan(state, SchemeSyntaxKind::StringLiteral)
+        SCHEME_STRING.scan(state, SchemeTokenType::StringLiteral)
     }
 
     fn lex_number_literal<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
@@ -163,7 +164,7 @@ impl<'config> SchemeLexer<'config> {
         if has_digits {
             state.advance(len);
             let end = state.get_position();
-            state.add_token(SchemeSyntaxKind::NumberLiteral, start, end);
+            state.add_token(SchemeTokenType::NumberLiteral, start, end);
             true
         }
         else {
@@ -205,8 +206,8 @@ impl<'config> SchemeLexer<'config> {
 
         let kind = match text.as_str() {
             "define" | "lambda" | "if" | "cond" | "case" | "and" | "or" | "not" | "let" | "let*" | "letrec" | "begin" | "do" | "quote" | "quasiquote" | "unquote" | "unquote-splicing" | "set!" | "delay" | "force" | "#t" | "#f" | "null" | "car" | "cdr"
-            | "cons" | "list" | "append" | "length" | "reverse" | "map" | "for-each" | "apply" => SchemeSyntaxKind::Keyword,
-            _ => SchemeSyntaxKind::Identifier,
+            | "cons" | "list" | "append" | "length" | "reverse" | "map" | "for-each" | "apply" => SchemeTokenType::Keyword,
+            _ => SchemeTokenType::Identifier,
         };
 
         state.add_token(kind, start, end);
@@ -229,17 +230,17 @@ impl<'config> SchemeLexer<'config> {
         };
 
         let kind = match ch {
-            '(' => Some(SchemeSyntaxKind::LeftParen),
-            ')' => Some(SchemeSyntaxKind::RightParen),
-            '[' => Some(SchemeSyntaxKind::LeftBracket),
-            ']' => Some(SchemeSyntaxKind::RightBracket),
-            '{' => Some(SchemeSyntaxKind::LeftBrace),
-            '}' => Some(SchemeSyntaxKind::RightBrace),
-            '\'' => Some(SchemeSyntaxKind::Quote),
-            '`' => Some(SchemeSyntaxKind::Quasiquote),
-            ',' => Some(SchemeSyntaxKind::Unquote),
-            '.' => Some(SchemeSyntaxKind::Dot),
-            '#' => Some(SchemeSyntaxKind::Hash),
+            '(' => Some(SchemeTokenType::LeftParen),
+            ')' => Some(SchemeTokenType::RightParen),
+            '[' => Some(SchemeTokenType::LeftBracket),
+            ']' => Some(SchemeTokenType::RightBracket),
+            '{' => Some(SchemeTokenType::LeftBrace),
+            '}' => Some(SchemeTokenType::RightBrace),
+            '\'' => Some(SchemeTokenType::Quote),
+            '`' => Some(SchemeTokenType::Quasiquote),
+            ',' => Some(SchemeTokenType::Unquote),
+            '.' => Some(SchemeTokenType::Dot),
+            '#' => Some(SchemeTokenType::Hash),
             _ => None,
         };
 

@@ -1,3 +1,4 @@
+#![doc = include_str!("readme.md")]
 use oak_core::{Language, LanguageCategory};
 
 /// JASMIN 语言绑定与配置
@@ -27,7 +28,7 @@ impl Language for JasminLanguage {
     const NAME: &'static str = "jasmin";
     const CATEGORY: LanguageCategory = LanguageCategory::Programming;
 
-    type TokenType = crate::kind::JasminSyntaxKind;
-    type ElementType = crate::kind::JasminSyntaxKind;
+    type TokenType = crate::lexer::token_type::JasminTokenType;
+    type ElementType = crate::parser::element_type::JasminElementType;
     type TypedRoot = crate::ast::JasminRoot;
 }

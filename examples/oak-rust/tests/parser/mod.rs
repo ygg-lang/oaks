@@ -5,9 +5,9 @@ fn test_simple_function_parsing() -> Result<(), oak_core::OakError> {
     use oak_core::{Lexer, Parser, SourceText};
     use oak_rust::{RustLanguage, RustLexer, RustParser};
 
-    let source = SourceText::new("fn main() { println!(\"Hello, world!\"); }");
+    let source = SourceText::new("fn main() { println!(\"Hello, world!\") }");
     let language = RustLanguage::default();
-    let parser = RustParser::new(language);
+    let parser = RustParser::new(&language);
 
     // 先测试词法分析器
     println!("测试词法分析器:");
@@ -29,7 +29,7 @@ fn test_simple_function_parsing() -> Result<(), oak_core::OakError> {
             match &parse_output.result {
                 Ok(root) => {
                     println!("解析结果: {:?}", root);
-                    println!("✅ 简单函数解析测试通过！");
+                    println!("✅ 简单函数解析测试通过！")
                 }
                 Err(e) => {
                     println!("❌ 解析失败: {:?}", e);

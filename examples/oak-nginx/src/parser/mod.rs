@@ -1,4 +1,10 @@
-use crate::{kind::NginxSyntaxKind, language::NginxLanguage, lexer::NginxLexer};
+pub mod element_type;
+
+use crate::{
+    language::NginxLanguage,
+    lexer::{NginxLexer, token_type::NginxTokenType},
+    parser::element_type::NginxElementType,
+};
 use oak_core::{
     GreenNode, OakError,
     parser::{ParseCache, ParseOutput, Parser, ParserState},
@@ -15,14 +21,14 @@ impl<'a> NginxParser<'a> {
     }
 
     fn parse_directive<'b, S: Source + ?Sized>(&self, state: &mut ParserState<'b, NginxLanguage, S>) {
-        if state.at(NginxSyntaxKind::CommentToken) {
+        if state.at(NginxTokenType::CommentToken) {
             let checkpoint = state.checkpoint();
             state.bump();
-            state.finish_at(checkpoint, NginxSyntaxKind::Comment.into());
+            state.finish_at(checkpoint, crate::parser::element_type::NginxElementType::Comment);
             return;
         }
 
-        let is_block_directive = matches!(state.peek_kind(), Some(NginxSyntaxKind::HttpKeyword | NginxSyntaxKind::ServerKeyword | NginxSyntaxKind::LocationKeyword | NginxSyntaxKind::EventsKeyword | NginxSyntaxKind::UpstreamKeyword));
+        let is_block_directive = matches!(state.peek_kind(), Some(NginxTokenType::HttpKeyword | NginxTokenType::ServerKeyword | NginxTokenType::LocationKeyword | NginxTokenType::EventsKeyword | NginxTokenType::UpstreamKeyword));
 
         if is_block_directive {
             self.parse_block(state);
@@ -30,15 +36,15 @@ impl<'a> NginxParser<'a> {
         else {
             let checkpoint = state.checkpoint();
             state.bump(); // directive name
-            while state.not_at_end() && !state.at(NginxSyntaxKind::Semicolon) && !state.at(NginxSyntaxKind::LeftBrace) {
+            while state.not_at_end() && !state.at(NginxTokenType::Semicolon) && !state.at(NginxTokenType::LeftBrace) {
                 let p_checkpoint = state.checkpoint();
                 state.bump();
-                state.finish_at(p_checkpoint, NginxSyntaxKind::Parameter.into());
+                state.finish_at(p_checkpoint, crate::parser::element_type::NginxElementType::Parameter);
             }
-            if state.at(NginxSyntaxKind::Semicolon) {
+            if state.at(NginxTokenType::Semicolon) {
                 state.bump();
             }
-            state.finish_at(checkpoint, NginxSyntaxKind::Directive.into());
+            state.finish_at(checkpoint, crate::parser::element_type::NginxElementType::Directive);
         }
     }
 
@@ -47,22 +53,22 @@ impl<'a> NginxParser<'a> {
         state.bump(); // block keyword (http, server, etc.)
 
         // Optional parameters for location or upstream
-        while state.not_at_end() && !state.at(NginxSyntaxKind::LeftBrace) {
+        while state.not_at_end() && !state.at(NginxTokenType::LeftBrace) {
             let p_checkpoint = state.checkpoint();
             state.bump();
-            state.finish_at(p_checkpoint, NginxSyntaxKind::Parameter.into());
+            state.finish_at(p_checkpoint, crate::parser::element_type::NginxElementType::Parameter);
         }
 
-        if state.at(NginxSyntaxKind::LeftBrace) {
+        if state.at(NginxTokenType::LeftBrace) {
             state.bump();
-            while state.not_at_end() && !state.at(NginxSyntaxKind::RightBrace) {
+            while state.not_at_end() && !state.at(NginxTokenType::RightBrace) {
                 self.parse_directive(state);
             }
-            if state.at(NginxSyntaxKind::RightBrace) {
+            if state.at(NginxTokenType::RightBrace) {
                 state.bump();
             }
         }
-        state.finish_at(checkpoint, NginxSyntaxKind::Block.into());
+        state.finish_at(checkpoint, crate::parser::element_type::NginxElementType::Block);
     }
 
     fn parse_root_internal<'b, S: Source + ?Sized>(&self, state: &mut ParserState<'b, NginxLanguage, S>) -> Result<&'b GreenNode<'b, NginxLanguage>, OakError> {
@@ -71,7 +77,7 @@ impl<'a> NginxParser<'a> {
             self.parse_directive(state);
         }
 
-        Ok(state.finish_at(checkpoint, NginxSyntaxKind::Root.into()))
+        Ok(state.finish_at(checkpoint, crate::parser::element_type::NginxElementType::Root))
     }
 }
 

@@ -1,15 +1,19 @@
+#![doc = include_str!("readme.md")]
 use core::range::Range;
+#[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
 
 /// MATLAB 抽象语法树的根节点
-#[derive(Clone, Debug, PartialEq, Eq, Hash, Serialize, Deserialize)]
+#[derive(Clone, Debug, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct MatlabRoot {
     /// 脚本或函数中的项目列表
     pub items: Vec<Item>,
 }
 
 /// MATLAB 中的顶级项目
-#[derive(Clone, Debug, PartialEq, Eq, Hash, Serialize, Deserialize)]
+#[derive(Clone, Debug, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub enum Item {
     /// 函数定义
     Function(Function),
@@ -20,7 +24,8 @@ pub enum Item {
 }
 
 /// 函数定义
-#[derive(Clone, Debug, PartialEq, Eq, Hash, Serialize, Deserialize)]
+#[derive(Clone, Debug, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct Function {
     /// 函数名
     pub name: String,
@@ -31,12 +36,13 @@ pub struct Function {
     /// 函数体
     pub body: Vec<Statement>,
     /// 源代码范围
-    #[serde(with = "oak_core::serde_range")]
+    #[cfg_attr(feature = "serde", serde(with = "oak_core::serde_range"))]
     pub span: Range<usize>,
 }
 
 /// 类定义
-#[derive(Clone, Debug, PartialEq, Eq, Hash, Serialize, Deserialize)]
+#[derive(Clone, Debug, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct Class {
     /// 类名
     pub name: String,
@@ -47,36 +53,38 @@ pub struct Class {
     /// 方法块
     pub methods: Vec<Function>,
     /// 源代码范围
-    #[serde(with = "oak_core::serde_range")]
+    #[cfg_attr(feature = "serde", serde(with = "oak_core::serde_range"))]
     pub span: Range<usize>,
 }
 
 /// 属性
-#[derive(Clone, Debug, PartialEq, Eq, Hash, Serialize, Deserialize)]
+#[derive(Clone, Debug, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct Property {
     /// 属性名
     pub name: String,
     /// 默认值
     pub default_value: Option<String>,
     /// 源代码范围
-    #[serde(with = "oak_core::serde_range")]
+    #[cfg_attr(feature = "serde", serde(with = "oak_core::serde_range"))]
     pub span: Range<usize>,
 }
 
 /// 语句
-#[derive(Clone, Debug, PartialEq, Eq, Hash, Serialize, Deserialize)]
+#[derive(Clone, Debug, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub enum Statement {
     /// 赋值语句
     Assignment {
         target: String,
         value: String,
-        #[serde(with = "oak_core::serde_range")]
+        #[cfg_attr(feature = "serde", serde(with = "oak_core::serde_range"))]
         span: Range<usize>,
     },
     /// 表达式语句
     Expression {
         value: String,
-        #[serde(with = "oak_core::serde_range")]
+        #[cfg_attr(feature = "serde", serde(with = "oak_core::serde_range"))]
         span: Range<usize>,
     },
     /// If 语句
@@ -85,7 +93,7 @@ pub enum Statement {
         body: Vec<Statement>,
         else_ifs: Vec<(String, Vec<Statement>)>,
         else_body: Option<Vec<Statement>>,
-        #[serde(with = "oak_core::serde_range")]
+        #[cfg_attr(feature = "serde", serde(with = "oak_core::serde_range"))]
         span: Range<usize>,
     },
     /// For 循环
@@ -93,14 +101,14 @@ pub enum Statement {
         variable: String,
         range: String,
         body: Vec<Statement>,
-        #[serde(with = "oak_core::serde_range")]
+        #[cfg_attr(feature = "serde", serde(with = "oak_core::serde_range"))]
         span: Range<usize>,
     },
     /// While 循环
     While {
         condition: String,
         body: Vec<Statement>,
-        #[serde(with = "oak_core::serde_range")]
+        #[cfg_attr(feature = "serde", serde(with = "oak_core::serde_range"))]
         span: Range<usize>,
     },
 }

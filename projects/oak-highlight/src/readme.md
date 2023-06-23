@@ -1,34 +1,26 @@
-# oak-highlight
+# 🛠️ Developer Guide
 
-A lightweight and customizable syntax highlighter for the Oak framework.
+This directory contains the core logic implementation of the project. Below are instructions for a quick start.
 
-## Features
+## 🚦 Quick Start
 
-- **Multi-language Support**: Designed to work with any language defined in the Oak framework.
-- **Customizable Themes**: Supports multiple themes including One Dark Pro and One Light.
-- **Extensible Exporters**: Export highlighted code to HTML, CSS, JSON, and ANSI (terminal).
-- **Universal Element Roles**: Uses Oak's universal element roles for consistent highlighting across different languages.
-
-## Usage
-
+### Core API Usage
 ```rust
-use oak_highlight::{OakHighlighter, Theme, HtmlExporter, Exporter};
-
-// Create a highlighter with a theme
-let highlighter = OakHighlighter::new().theme(Theme::OneDarkPro);
-
-// Highlight source code
-let source = "fn main() { println!(\"Hello, world!\"); }";
-let result = highlighter.highlight(source, "rust", Theme::OneDarkPro).unwrap();
-
-// Export to HTML
-let exporter = HtmlExporter::new(true, true);
-let html = exporter.export(&result);
+// Example: Basic calling workflow
+fn main() {
+    // 1. Initialization
+    // 2. Execute core logic
+    // 3. Handle returned results
+}
 ```
 
-## Supported Formats
+## 🔍 Module Description
+- **lib.rs**: Exports public interfaces and core traits.
+- **parser/ (if exists)**: Implements specific syntax parsing logic.
+- **ast/ (if exists)**: Defines the syntax tree structure.
 
-- **HTML**: Generates HTML with inline styles or CSS classes.
-- **CSS**: Generates CSS style definitions.
-- **JSON**: Generates a JSON representation of the highlighted segments.
-- **ANSI**: Generates ANSI escape codes for terminal output.
+## 🏗️ Architecture Design
+The project follows the general architectural specifications of the Oak ecosystem, emphasizing:
+1. **Immutability**: Uses the Green/Red Tree structure to ensure efficient sharing of syntax trees.
+2. **Fault Tolerance**: Core logic is highly inclusive of erroneous input.
+3. **Scalability**: Convenient for downstream tools to perform secondary development.

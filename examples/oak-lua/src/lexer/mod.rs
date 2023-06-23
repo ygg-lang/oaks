@@ -1,8 +1,11 @@
-//! Lua 词法分析
-//!
-//! 实现Lua 语言的词法分析，将源代码转换token 序列
+#![doc = include_str!("readme.md")]
+pub mod token_type;
 
-use crate::{kind::LuaSyntaxKind, language::LuaLanguage};
+/// Lua 词法分析
+///
+/// 实现Lua 语言的词法分析，将源代码转换token 序列
+use crate::language::LuaLanguage;
+pub use crate::lexer::token_type::LuaTokenType;
 use oak_core::{Lexer, LexerCache, LexerState, OakError, lexer::LexOutput, source::Source};
 
 type State<'a, S> = LexerState<'a, S, LuaLanguage>;
@@ -56,10 +59,10 @@ impl<'config> LuaLexer<'config> {
             let start_pos = state.get_position();
             if let Some(ch) = state.peek() {
                 state.advance(ch.len_utf8());
-                state.add_token(LuaSyntaxKind::Error, start_pos, state.get_position());
+                state.add_token(LuaTokenType::Error, start_pos, state.get_position())
             }
 
-            state.advance_if_dead_lock(safe_point);
+            state.advance_if_dead_lock(safe_point)
         }
 
         Ok(())
@@ -70,16 +73,11 @@ impl<'config> LuaLexer<'config> {
         let start_pos = state.get_position();
 
         while let Some(ch) = state.peek() {
-            if ch == ' ' || ch == '\t' {
-                state.advance(ch.len_utf8());
-            }
-            else {
-                break;
-            }
+            if ch == ' ' || ch == '\t' { state.advance(ch.len_utf8()) } else { break }
         }
 
         if state.get_position() > start_pos {
-            state.add_token(LuaSyntaxKind::Whitespace, start_pos, state.get_position());
+            state.add_token(LuaTokenType::Whitespace, start_pos, state.get_position());
             true
         }
         else {
@@ -93,15 +91,15 @@ impl<'config> LuaLexer<'config> {
 
         if let Some('\n') = state.peek() {
             state.advance(1);
-            state.add_token(LuaSyntaxKind::Newline, start_pos, state.get_position());
+            state.add_token(LuaTokenType::Newline, start_pos, state.get_position());
             true
         }
         else if let Some('\r') = state.peek() {
             state.advance(1);
             if let Some('\n') = state.peek() {
-                state.advance(1);
+                state.advance(1)
             }
-            state.add_token(LuaSyntaxKind::Newline, start_pos, state.get_position());
+            state.add_token(LuaTokenType::Newline, start_pos, state.get_position());
             true
         }
         else {
@@ -133,7 +131,7 @@ impl<'config> LuaLexer<'config> {
                                     break;
                                 }
                             }
-                            state.advance(ch.len_utf8());
+                            state.advance(ch.len_utf8())
                         }
                     }
                     else {
@@ -142,7 +140,7 @@ impl<'config> LuaLexer<'config> {
                             if ch == '\n' || ch == '\r' {
                                 break;
                             }
-                            state.advance(ch.len_utf8());
+                            state.advance(ch.len_utf8())
                         }
                     }
                 }
@@ -152,11 +150,11 @@ impl<'config> LuaLexer<'config> {
                         if ch == '\n' || ch == '\r' {
                             break;
                         }
-                        state.advance(ch.len_utf8());
+                        state.advance(ch.len_utf8())
                     }
                 }
 
-                state.add_token(LuaSyntaxKind::Comment, start_pos, state.get_position());
+                state.add_token(LuaTokenType::Comment, start_pos, state.get_position());
                 true
             }
             else {
@@ -180,11 +178,11 @@ impl<'config> LuaLexer<'config> {
                 while let Some(ch) = state.current() {
                     if escaped {
                         escaped = false;
-                        state.advance(ch.len_utf8());
+                        state.advance(ch.len_utf8())
                     }
                     else if ch == '\\' {
                         escaped = true;
-                        state.advance(1);
+                        state.advance(1)
                     }
                     else if ch == quote_char {
                         state.advance(1); // 跳过结束引号
@@ -195,11 +193,11 @@ impl<'config> LuaLexer<'config> {
                         break;
                     }
                     else {
-                        state.advance(ch.len_utf8());
+                        state.advance(ch.len_utf8())
                     }
                 }
 
-                state.add_token(LuaSyntaxKind::String, start_pos, state.get_position());
+                state.add_token(LuaTokenType::String, start_pos, state.get_position());
                 true
             }
             else if quote_char == '[' {
@@ -217,10 +215,10 @@ impl<'config> LuaLexer<'config> {
                                 break;
                             }
                         }
-                        state.advance(ch.len_utf8());
+                        state.advance(ch.len_utf8())
                     }
 
-                    state.add_token(LuaSyntaxKind::String, start_pos, state.get_position());
+                    state.add_token(LuaTokenType::String, start_pos, state.get_position());
                     true
                 }
                 else {
@@ -251,15 +249,10 @@ impl<'config> LuaLexer<'config> {
 
                             // 读取十六进制数字
                             while let Some(hex_ch) = state.current() {
-                                if hex_ch.is_ascii_hexdigit() {
-                                    state.advance(1);
-                                }
-                                else {
-                                    break;
-                                }
+                                if hex_ch.is_ascii_hexdigit() { state.advance(1) } else { break }
                             }
 
-                            state.add_token(LuaSyntaxKind::Number, start_pos, state.get_position());
+                            state.add_token(LuaTokenType::Number, start_pos, state.get_position());
                             return true;
                         }
                     }
@@ -271,11 +264,11 @@ impl<'config> LuaLexer<'config> {
 
                 while let Some(num_ch) = state.current() {
                     if num_ch.is_ascii_digit() {
-                        state.advance(1);
+                        state.advance(1)
                     }
                     else if num_ch == '.' && !has_dot && !has_exp {
                         has_dot = true;
-                        state.advance(1);
+                        state.advance(1)
                     }
                     else if (num_ch == 'e' || num_ch == 'E') && !has_exp {
                         has_exp = true;
@@ -284,7 +277,7 @@ impl<'config> LuaLexer<'config> {
                         // 可选的符号
                         if let Some(sign_ch) = state.current() {
                             if sign_ch == '+' || sign_ch == '-' {
-                                state.advance(1);
+                                state.advance(1)
                             }
                         }
                     }
@@ -293,7 +286,7 @@ impl<'config> LuaLexer<'config> {
                     }
                 }
 
-                state.add_token(LuaSyntaxKind::Number, start_pos, state.get_position());
+                state.add_token(LuaTokenType::Number, start_pos, state.get_position());
                 true
             }
             else {
@@ -326,31 +319,31 @@ impl<'config> LuaLexer<'config> {
     }
 
     /// 识别关键
-    fn keyword_or_identifier(&self, text: &str) -> LuaSyntaxKind {
+    fn keyword_or_identifier(&self, text: &str) -> LuaTokenType {
         match text {
-            "and" => LuaSyntaxKind::And,
-            "break" => LuaSyntaxKind::Break,
-            "do" => LuaSyntaxKind::Do,
-            "else" => LuaSyntaxKind::Else,
-            "elseif" => LuaSyntaxKind::Elseif,
-            "end" => LuaSyntaxKind::End,
-            "false" => LuaSyntaxKind::False,
-            "for" => LuaSyntaxKind::For,
-            "function" => LuaSyntaxKind::Function,
-            "goto" => LuaSyntaxKind::Goto,
-            "if" => LuaSyntaxKind::If,
-            "in" => LuaSyntaxKind::In,
-            "local" => LuaSyntaxKind::Local,
-            "nil" => LuaSyntaxKind::Nil,
-            "not" => LuaSyntaxKind::Not,
-            "or" => LuaSyntaxKind::Or,
-            "repeat" => LuaSyntaxKind::Repeat,
-            "return" => LuaSyntaxKind::Return,
-            "then" => LuaSyntaxKind::Then,
-            "true" => LuaSyntaxKind::True,
-            "until" => LuaSyntaxKind::Until,
-            "while" => LuaSyntaxKind::While,
-            _ => LuaSyntaxKind::Identifier,
+            "and" => LuaTokenType::And,
+            "break" => LuaTokenType::Break,
+            "do" => LuaTokenType::Do,
+            "else" => LuaTokenType::Else,
+            "elseif" => LuaTokenType::Elseif,
+            "end" => LuaTokenType::End,
+            "false" => LuaTokenType::False,
+            "for" => LuaTokenType::For,
+            "function" => LuaTokenType::Function,
+            "goto" => LuaTokenType::Goto,
+            "if" => LuaTokenType::If,
+            "in" => LuaTokenType::In,
+            "local" => LuaTokenType::Local,
+            "nil" => LuaTokenType::Nil,
+            "not" => LuaTokenType::Not,
+            "or" => LuaTokenType::Or,
+            "repeat" => LuaTokenType::Repeat,
+            "return" => LuaTokenType::Return,
+            "then" => LuaTokenType::Then,
+            "true" => LuaTokenType::True,
+            "until" => LuaTokenType::Until,
+            "while" => LuaTokenType::While,
+            _ => LuaTokenType::Identifier,
         }
     }
 
@@ -364,48 +357,48 @@ impl<'config> LuaLexer<'config> {
                     state.advance(1);
                     if let Some('=') = state.peek() {
                         state.advance(1);
-                        LuaSyntaxKind::EqEq
+                        LuaTokenType::EqEq
                     }
                     else {
-                        LuaSyntaxKind::Eq
+                        LuaTokenType::Eq
                     }
                 }
                 '~' => {
                     state.advance(1);
                     if let Some('=') = state.peek() {
                         state.advance(1);
-                        LuaSyntaxKind::TildeEq
+                        LuaTokenType::TildeEq
                     }
                     else {
-                        LuaSyntaxKind::Tilde
+                        LuaTokenType::Tilde
                     }
                 }
                 '<' => {
                     state.advance(1);
                     if let Some('=') = state.peek() {
                         state.advance(1);
-                        LuaSyntaxKind::LtEq
+                        LuaTokenType::LtEq
                     }
                     else if let Some('<') = state.peek() {
                         state.advance(1);
-                        LuaSyntaxKind::LtLt
+                        LuaTokenType::LtLt
                     }
                     else {
-                        LuaSyntaxKind::Lt
+                        LuaTokenType::Lt
                     }
                 }
                 '>' => {
                     state.advance(1);
                     if let Some('=') = state.peek() {
                         state.advance(1);
-                        LuaSyntaxKind::GtEq
+                        LuaTokenType::GtEq
                     }
                     else if let Some('>') = state.peek() {
                         state.advance(1);
-                        LuaSyntaxKind::GtGt
+                        LuaTokenType::GtGt
                     }
                     else {
-                        LuaSyntaxKind::Gt
+                        LuaTokenType::Gt
                     }
                 }
                 '.' => {
@@ -414,99 +407,99 @@ impl<'config> LuaLexer<'config> {
                         state.advance(1);
                         if let Some('.') = state.peek() {
                             state.advance(1);
-                            LuaSyntaxKind::DotDotDot
+                            LuaTokenType::DotDotDot
                         }
                         else {
-                            LuaSyntaxKind::DotDot
+                            LuaTokenType::DotDot
                         }
                     }
                     else {
-                        LuaSyntaxKind::Dot
+                        LuaTokenType::Dot
                     }
                 }
                 ':' => {
                     state.advance(1);
                     if let Some(':') = state.peek() {
                         state.advance(1);
-                        LuaSyntaxKind::ColonColon
+                        LuaTokenType::ColonColon
                     }
                     else {
-                        LuaSyntaxKind::Colon
+                        LuaTokenType::Colon
                     }
                 }
                 '/' => {
                     state.advance(1);
                     if let Some('/') = state.peek() {
                         state.advance(1);
-                        LuaSyntaxKind::SlashSlash
+                        LuaTokenType::SlashSlash
                     }
                     else {
-                        LuaSyntaxKind::Slash
+                        LuaTokenType::Slash
                     }
                 }
                 '+' => {
                     state.advance(1);
-                    LuaSyntaxKind::Plus
+                    LuaTokenType::Plus
                 }
                 '-' => {
                     state.advance(1);
-                    LuaSyntaxKind::Minus
+                    LuaTokenType::Minus
                 }
                 '*' => {
                     state.advance(1);
-                    LuaSyntaxKind::Star
+                    LuaTokenType::Star
                 }
                 '%' => {
                     state.advance(1);
-                    LuaSyntaxKind::Percent
+                    LuaTokenType::Percent
                 }
                 '^' => {
                     state.advance(1);
-                    LuaSyntaxKind::Caret
+                    LuaTokenType::Caret
                 }
                 '#' => {
                     state.advance(1);
-                    LuaSyntaxKind::Hash
+                    LuaTokenType::Hash
                 }
                 '&' => {
                     state.advance(1);
-                    LuaSyntaxKind::Ampersand
+                    LuaTokenType::Ampersand
                 }
                 '|' => {
                     state.advance(1);
-                    LuaSyntaxKind::Pipe
+                    LuaTokenType::Pipe
                 }
                 '(' => {
                     state.advance(1);
-                    LuaSyntaxKind::LeftParen
+                    LuaTokenType::LeftParen
                 }
                 ')' => {
                     state.advance(1);
-                    LuaSyntaxKind::RightParen
+                    LuaTokenType::RightParen
                 }
                 '{' => {
                     state.advance(1);
-                    LuaSyntaxKind::LeftBrace
+                    LuaTokenType::LeftBrace
                 }
                 '}' => {
                     state.advance(1);
-                    LuaSyntaxKind::RightBrace
+                    LuaTokenType::RightBrace
                 }
                 '[' => {
                     state.advance(1);
-                    LuaSyntaxKind::LeftBracket
+                    LuaTokenType::LeftBracket
                 }
                 ']' => {
                     state.advance(1);
-                    LuaSyntaxKind::RightBracket
+                    LuaTokenType::RightBracket
                 }
                 ';' => {
                     state.advance(1);
-                    LuaSyntaxKind::Semicolon
+                    LuaTokenType::Semicolon
                 }
                 ',' => {
                     state.advance(1);
-                    LuaSyntaxKind::Comma
+                    LuaTokenType::Comma
                 }
                 _ => return false,
             };
@@ -525,7 +518,7 @@ impl<'config> Lexer<LuaLanguage> for LuaLexer<'config> {
         let mut state = State::new_with_cache(source, 0, cache);
         let result = self.run(&mut state);
         if result.is_ok() {
-            state.add_eof();
+            state.add_eof()
         }
         state.finish_with_cache(result, cache)
     }

@@ -1,15 +1,18 @@
+#![doc = include_str!("readme.md")]
 use crate::ast::ScalaRoot;
 use oak_core::{Language, LanguageCategory};
+#[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
 
-/// Scala 语言实现
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
+/// Scala language implementation.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct ScalaLanguage {
-    // Scala 语言特有的配置，目前为空
+    // Scala language-specific configuration, currently empty.
 }
 
 impl ScalaLanguage {
-    /// 创建 Scala 语言实例
+    /// Creates a Scala language instance.
     pub fn new() -> Self {
         Self {}
     }
@@ -25,7 +28,7 @@ impl Language for ScalaLanguage {
     const NAME: &'static str = "scala";
     const CATEGORY: LanguageCategory = LanguageCategory::Programming;
 
-    type TokenType = crate::kind::ScalaSyntaxKind;
-    type ElementType = crate::kind::ScalaSyntaxKind;
+    type TokenType = crate::lexer::token_type::ScalaTokenType;
+    type ElementType = crate::parser::element_type::ScalaElementType;
     type TypedRoot = ScalaRoot;
 }

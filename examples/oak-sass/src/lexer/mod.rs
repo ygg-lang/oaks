@@ -1,4 +1,7 @@
-use crate::{kind::SassSyntaxKind, language::SassLanguage};
+#![doc = include_str!("readme.md")]
+pub mod token_type;
+
+use crate::{language::SassLanguage, lexer::token_type::SassTokenType};
 use oak_core::{
     Lexer, LexerState, OakError, TextEdit,
     lexer::{CommentConfig, LexOutput, LexerCache, StringConfig, WhitespaceConfig},
@@ -34,7 +37,7 @@ impl<'config> SassLexer<'config> {
         Self { _config: config }
     }
 
-    /// 主要的词法分析循环
+    /// Main lexer loop that tokenizes the source text.
     fn run<'s, S: Source + ?Sized>(&self, state: &mut State<'s, S>) -> Result<(), OakError> {
         while state.not_at_end() {
             let safe_point = state.get_position();
@@ -81,20 +84,20 @@ impl<'config> SassLexer<'config> {
         Ok(())
     }
 
-    /// 跳过空白字符
+    /// Skips whitespace characters.
     fn skip_whitespace<'s, S: Source + ?Sized>(&self, state: &mut State<'s, S>) -> bool {
-        SASS_WHITESPACE.scan(state, SassSyntaxKind::Whitespace)
+        SASS_WHITESPACE.scan(state, SassTokenType::Whitespace)
     }
 
     fn skip_comment<'s, S: Source + ?Sized>(&self, state: &mut State<'s, S>) -> bool {
-        SASS_COMMENT.scan(state, SassSyntaxKind::LineComment, SassSyntaxKind::BlockComment)
+        SASS_COMMENT.scan(state, SassTokenType::LineComment, SassTokenType::BlockComment)
     }
 
     fn lex_string_literal<'s, S: Source + ?Sized>(&self, state: &mut State<'s, S>) -> bool {
-        if SASS_STRING.scan(state, SassSyntaxKind::StringLiteral) {
+        if SASS_STRING.scan(state, SassTokenType::StringLiteral) {
             return true;
         }
-        if SASS_CHAR.scan(state, SassSyntaxKind::StringLiteral) {
+        if SASS_CHAR.scan(state, SassTokenType::StringLiteral) {
             return true;
         }
         false
@@ -113,7 +116,7 @@ impl<'config> SassLexer<'config> {
         let mut is_float = false;
         state.advance(first.len_utf8());
 
-        // 读取数字部分
+        // Read integer part
         while let Some(c) = state.current() {
             if c.is_ascii_digit() || c == '_' {
                 state.advance(c.len_utf8());
@@ -140,7 +143,7 @@ impl<'config> SassLexer<'config> {
             }
         }
 
-        // 单位后缀 (px, em, rem, %, etc.)
+        // Unit suffix (px, em, rem, %, etc.)
         while let Some(c) = state.current() {
             if c.is_ascii_alphabetic() || c == '%' {
                 state.advance(c.len_utf8());
@@ -151,7 +154,7 @@ impl<'config> SassLexer<'config> {
         }
 
         let end = state.get_position();
-        state.add_token(if is_float { SassSyntaxKind::FloatLiteral } else { SassSyntaxKind::NumberLiteral }, start, end);
+        state.add_token(if is_float { SassTokenType::FloatLiteral } else { SassTokenType::NumberLiteral }, start, end);
         true
     }
 
@@ -176,26 +179,26 @@ impl<'config> SassLexer<'config> {
         let end = state.get_position();
         let text = state.source().get_text_in(core::range::Range { start, end });
         let kind = match text.as_ref() {
-            "@import" => SassSyntaxKind::Import,
-            "@include" => SassSyntaxKind::Include,
-            "@extend" => SassSyntaxKind::Extend,
-            "@mixin" => SassSyntaxKind::Mixin,
-            "@function" => SassSyntaxKind::Function,
-            "@return" => SassSyntaxKind::Return,
-            "@if" => SassSyntaxKind::If,
-            "@else" => SassSyntaxKind::Else,
-            "@elseif" => SassSyntaxKind::ElseIf,
-            "@for" => SassSyntaxKind::For,
-            "@each" => SassSyntaxKind::Each,
-            "@while" => SassSyntaxKind::While,
-            "!default" => SassSyntaxKind::Default,
-            "!important" => SassSyntaxKind::Important,
-            "!optional" => SassSyntaxKind::Optional,
-            "!global" => SassSyntaxKind::Global,
-            "and" => SassSyntaxKind::And,
-            "or" => SassSyntaxKind::Or,
-            "not" => SassSyntaxKind::Not,
-            _ => SassSyntaxKind::Identifier,
+            "@import" => SassTokenType::Import,
+            "@include" => SassTokenType::Include,
+            "@extend" => SassTokenType::Extend,
+            "@mixin" => SassTokenType::Mixin,
+            "@function" => SassTokenType::Function,
+            "@return" => SassTokenType::Return,
+            "@if" => SassTokenType::If,
+            "@else" => SassTokenType::Else,
+            "@elseif" => SassTokenType::ElseIf,
+            "@for" => SassTokenType::For,
+            "@each" => SassTokenType::Each,
+            "@while" => SassTokenType::While,
+            "!default" => SassTokenType::Default,
+            "!important" => SassTokenType::Important,
+            "!optional" => SassTokenType::Optional,
+            "!global" => SassTokenType::Global,
+            "and" => SassTokenType::And,
+            "or" => SassTokenType::Or,
+            "not" => SassTokenType::Not,
+            _ => SassTokenType::Identifier,
         };
         state.add_token(kind, start, end);
         true
@@ -208,7 +211,7 @@ impl<'config> SassLexer<'config> {
         }
         state.advance(1);
 
-        // 变量名必须以字母或下划线开头
+        // Variable name must start with a letter or underscore
         if let Some(ch) = state.current() {
             if ch.is_ascii_alphabetic() || ch == '_' {
                 state.advance(ch.len_utf8());
@@ -220,7 +223,7 @@ impl<'config> SassLexer<'config> {
                         break;
                     }
                 }
-                state.add_token(SassSyntaxKind::Variable, start, state.get_position());
+                state.add_token(SassTokenType::Variable, start, state.get_position());
                 return true;
             }
         }
@@ -246,9 +249,9 @@ impl<'config> SassLexer<'config> {
             }
         }
 
-        // 有效的颜色值长度: 3, 4, 6, 8
+        // Valid hex color length: 3, 4, 6, 8
         if hex_digits == 3 || hex_digits == 4 || hex_digits == 6 || hex_digits == 8 {
-            state.add_token(SassSyntaxKind::ColorLiteral, start, state.get_position());
+            state.add_token(SassTokenType::ColorLiteral, start, state.get_position());
             return true;
         }
 
@@ -259,8 +262,8 @@ impl<'config> SassLexer<'config> {
     fn lex_operators<'s, S: Source + ?Sized>(&self, state: &mut State<'s, S>) -> bool {
         let start = state.get_position();
 
-        // 多字符操作符
-        let patterns: &[(&str, SassSyntaxKind)] = &[("==", SassSyntaxKind::EqEq), ("!=", SassSyntaxKind::Ne), ("<=", SassSyntaxKind::Le), (">=", SassSyntaxKind::Ge)];
+        // Multi-character operators
+        let patterns: &[(&str, SassTokenType)] = &[("==", SassTokenType::EqEq), ("!=", SassTokenType::Ne), ("<=", SassTokenType::Le), (">=", SassTokenType::Ge)];
 
         for (pat, kind) in patterns {
             if state.source().get_text_from(start).as_ref().starts_with(pat) {
@@ -270,17 +273,17 @@ impl<'config> SassLexer<'config> {
             }
         }
 
-        // 单字符操作符
+        // Single-character operators
         if let Some(ch) = state.current() {
             let kind = match ch {
-                '+' => Some(SassSyntaxKind::Plus),
-                '-' => Some(SassSyntaxKind::Minus),
-                '*' => Some(SassSyntaxKind::Star),
-                '/' => Some(SassSyntaxKind::Slash),
-                '%' => Some(SassSyntaxKind::Percent),
-                '=' => Some(SassSyntaxKind::Eq),
-                '<' => Some(SassSyntaxKind::Lt),
-                '>' => Some(SassSyntaxKind::Gt),
+                '+' => Some(SassTokenType::Plus),
+                '-' => Some(SassTokenType::Minus),
+                '*' => Some(SassTokenType::Star),
+                '/' => Some(SassTokenType::Slash),
+                '%' => Some(SassTokenType::Percent),
+                '=' => Some(SassTokenType::Eq),
+                '<' => Some(SassTokenType::Lt),
+                '>' => Some(SassTokenType::Gt),
                 _ => None,
             };
             if let Some(k) = kind {
@@ -296,23 +299,23 @@ impl<'config> SassLexer<'config> {
         let start = state.get_position();
         if let Some(ch) = state.current() {
             let kind = match ch {
-                '(' => SassSyntaxKind::LeftParen,
-                ')' => SassSyntaxKind::RightParen,
-                '{' => SassSyntaxKind::LeftBrace,
-                '}' => SassSyntaxKind::RightBrace,
-                '[' => SassSyntaxKind::LeftBracket,
-                ']' => SassSyntaxKind::RightBracket,
-                ';' => SassSyntaxKind::Semicolon,
-                ':' => SassSyntaxKind::Colon,
-                ',' => SassSyntaxKind::Comma,
-                '.' => SassSyntaxKind::Dot,
-                '#' => SassSyntaxKind::Hash,
-                '$' => SassSyntaxKind::Dollar,
-                '@' => SassSyntaxKind::At,
-                '&' => SassSyntaxKind::Ampersand,
-                '!' => SassSyntaxKind::Exclamation,
-                '?' => SassSyntaxKind::Question,
-                '~' => SassSyntaxKind::Tilde,
+                '(' => SassTokenType::LeftParen,
+                ')' => SassTokenType::RightParen,
+                '{' => SassTokenType::LeftBrace,
+                '}' => SassTokenType::RightBrace,
+                '[' => SassTokenType::LeftBracket,
+                ']' => SassTokenType::RightBracket,
+                ';' => SassTokenType::Semicolon,
+                ':' => SassTokenType::Colon,
+                ',' => SassTokenType::Comma,
+                '.' => SassTokenType::Dot,
+                '#' => SassTokenType::Hash,
+                '$' => SassTokenType::Dollar,
+                '@' => SassTokenType::At,
+                '&' => SassTokenType::Ampersand,
+                '!' => SassTokenType::Exclamation,
+                '?' => SassTokenType::Question,
+                '~' => SassTokenType::Tilde,
                 _ => return false,
             };
             state.advance(ch.len_utf8());

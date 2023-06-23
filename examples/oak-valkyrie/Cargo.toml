@@ -1,29 +1,28 @@
 [package]
 name = "oak-valkyrie"
-description = "Valkyrie language parser with support for modern Valkyrie syntax and features."
-categories = ["parsing"]
-keywords = ["parser", "valkyrie", "language"]
-documentation = "https://docs.rs/oak-valkyrie"
-readme = "readme.md"
 version.workspace = true
 authors.workspace = true
-homepage.workspace = true
-repository.workspace = true
-license.workspace = true
+description = "Valkyrie language parser with support for modern Valkyrie syntax and features."
 edition.workspace = true
-
+license.workspace = true
+readme = "readme.md"
+homepage.workspace = true
+repository = "https://github.com/ygg-lang/oaks/tree/master/examples/oak-valkyrie"
+documentation = "https://docs.rs/oak-valkyrie"
+categories = ["parsing"]
+keywords = ["parser", "valkyrie", "language"]
 
 [dependencies]
 oak-core = { workspace = true, features = ["serde", "testing"] }
 oak-highlight = { workspace = true, optional = true }
 oak-pretty-print = { workspace = true, optional = true }
-oak-lsp = { workspace = true }
-oak-mcp = { workspace = true, features = ["io-std"] }
-oak-hover = { workspace = true }
+oak-lsp = { workspace = true, optional = true }
+oak-mcp = { workspace = true, optional = true, features = ["io-std"] }
+oak-hover = { workspace = true, optional = true }
 oak-symbols = { workspace = true }
-oak-vfs = { workspace = true }
-futures = { workspace = true }
-serde = { workspace = true, features = ["derive"] }
+oak-vfs = { workspace = true, optional = true }
+futures = { workspace = true, optional = true }
+serde = { workspace = true, features = ["derive"] , optional = true }
 tracing = { workspace = true }
 unicode-ident = { workspace = true }
 tokio = { workspace = true, optional = true, features = ["full"] }
@@ -33,11 +32,12 @@ oak-testing = { workspace = true }
 # serde_json = { workspace = true } # replaced by oak-json
 
 [features]
-default = ["highlight", "pretty-print"]
-highlight = ["dep:oak-highlight"]
-pretty-print = ["dep:oak-pretty-print"]
-std = []
-
+default = ["serde"]
+serde = ["dep:serde", "oak-core/serde"]
+oak-highlight = ["dep:oak-highlight"]
+oak-pretty-print = ["dep:oak-pretty-print"]
+lsp = ["dep:oak-lsp", "dep:oak-hover", "dep:oak-vfs", "oak-highlight", "oak-pretty-print", "dep:futures"]
+mcp = ["lsp", "oak-mcp/io-std"]
 
 [package.metadata.docs.rs]
 all-features = true

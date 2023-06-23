@@ -1,3 +1,4 @@
+#![doc = include_str!("readme.md")]
 use oak_core::{Language, LanguageCategory};
 
 /// PureScript 语言实现
@@ -17,7 +18,7 @@ impl Language for PurescriptLanguage {
     const NAME: &'static str = "purescript";
     const CATEGORY: LanguageCategory = LanguageCategory::Programming;
 
-    type TokenType = crate::kind::PurescriptSyntaxKind;
-    type ElementType = crate::kind::PurescriptSyntaxKind;
+    type TokenType = crate::lexer::token_type::PurescriptTokenType;
+    type ElementType = crate::parser::element_type::PurescriptElementType;
     type TypedRoot = ();
 }

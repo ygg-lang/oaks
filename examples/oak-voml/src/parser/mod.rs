@@ -1,27 +1,28 @@
-use crate::{language::VLangLanguage, lexer::VLangLexer};
+pub mod element_type;
+
+use crate::{language::VomlLanguage, lexer::VomlLexer};
 use oak_core::{
-    TextEdit,
-    parser::{ParseCache, Parser, ParserState},
-    source::Source,
+    Source, TextEdit,
+    parser::{ParseCache, ParseOutput, Parser, ParserState, parse_with_lexer},
 };
 
-mod parse;
+mod parse_top_level;
 
-pub(crate) type State<'a, S> = ParserState<'a, VLangLanguage, S>;
+pub(crate) type State<'a, S> = ParserState<'a, VomlLanguage, S>;
 
-pub struct VLangParser<'config> {
-    pub(crate) config: &'config VLangLanguage,
+pub struct VomlParser<'config> {
+    pub(crate) config: &'config VomlLanguage,
 }
 
-impl<'config> VLangParser<'config> {
-    pub fn new(config: &'config VLangLanguage) -> Self {
+impl<'config> VomlParser<'config> {
+    pub fn new(config: &'config VomlLanguage) -> Self {
         Self { config }
     }
 }
 
-impl<'config> Parser<VLangLanguage> for VLangParser<'config> {
-    fn parse<'a, S: Source + ?Sized>(&self, source: &'a S, edits: &[TextEdit], cache: &'a mut impl ParseCache<VLangLanguage>) -> oak_core::ParseOutput<'a, VLangLanguage> {
-        let lexer = VLangLexer::new(&self.config);
-        oak_core::parser::parse_with_lexer(&lexer, source, edits, cache, |state| self.parse_root_internal(state))
+impl<'config> Parser<VomlLanguage> for VomlParser<'config> {
+    fn parse<'a, S: Source + ?Sized>(&self, source: &'a S, edits: &[TextEdit], cache: &'a mut impl ParseCache<VomlLanguage>) -> ParseOutput<'a, VomlLanguage> {
+        let lexer = VomlLexer::new(self.config);
+        parse_with_lexer(&lexer, source, edits, cache, |state| self.parse_root_internal(state))
     }
 }

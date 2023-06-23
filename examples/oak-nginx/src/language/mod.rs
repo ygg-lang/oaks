@@ -1,11 +1,14 @@
+#![doc = include_str!("readme.md")]
 use oak_core::{Language, LanguageCategory};
+#[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub struct NginxLanguage {
-    /// 是否允许扩展指令
+    /// Whether to allow extended directives.
     pub allow_extensions: bool,
-    /// 是否严格模式
+    /// Whether to enable strict mode.
     pub strict_mode: bool,
 }
 
@@ -19,8 +22,8 @@ impl Language for NginxLanguage {
     const NAME: &'static str = "nginx";
     const CATEGORY: LanguageCategory = LanguageCategory::Programming;
 
-    type TokenType = crate::kind::NginxSyntaxKind;
-    type ElementType = crate::kind::NginxSyntaxKind;
+    type TokenType = crate::lexer::token_type::NginxTokenType;
+    type ElementType = crate::parser::element_type::NginxElementType;
     type TypedRoot = crate::ast::NginxRoot;
 }
 

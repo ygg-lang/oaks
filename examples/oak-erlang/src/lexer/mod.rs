@@ -1,4 +1,8 @@
-use crate::{kind::ErlangSyntaxKind, language::ErlangLanguage};
+#![doc = include_str!("readme.md")]
+pub mod token_type;
+pub use token_type::ErlangTokenType;
+
+use crate::language::ErlangLanguage;
 use oak_core::{
     errors::OakError,
     lexer::{LexOutput, Lexer, LexerCache, LexerState},
@@ -70,7 +74,7 @@ impl<'config> ErlangLexer<'config> {
                 if let Some(ch) = state.current() {
                     state.advance(ch.len_utf8());
                     let end = state.get_position();
-                    state.add_token(ErlangSyntaxKind::Error, start_pos, end);
+                    state.add_token(ErlangTokenType::Error, start_pos, end);
                 }
             }
         }
@@ -87,7 +91,7 @@ impl<'config> ErlangLexer<'config> {
                 let start = state.get_position();
                 if ch == '\n' {
                     state.advance(1);
-                    state.add_token(ErlangSyntaxKind::Newline, start, state.get_position());
+                    state.add_token(ErlangTokenType::Newline, start, state.get_position());
                 }
                 else {
                     // 跳过连续的空白字符
@@ -99,7 +103,7 @@ impl<'config> ErlangLexer<'config> {
                             break;
                         }
                     }
-                    state.add_token(ErlangSyntaxKind::Whitespace, start, state.get_position());
+                    state.add_token(ErlangTokenType::Whitespace, start, state.get_position());
                 }
                 skipped = true;
             }
@@ -116,7 +120,7 @@ impl<'config> ErlangLexer<'config> {
                     state.advance(ch.len_utf8());
                 }
 
-                state.add_token(ErlangSyntaxKind::Comment, start, state.get_position());
+                state.add_token(ErlangTokenType::Comment, start, state.get_position());
                 skipped = true;
             }
             else {
@@ -137,7 +141,7 @@ impl<'config> ErlangLexer<'config> {
                 if ch == '"' {
                     state.advance(1); // 跳过结束的 '"'
                     let end = state.get_position();
-                    state.add_token(ErlangSyntaxKind::String, start, end);
+                    state.add_token(ErlangTokenType::String, start, end);
                     return true;
                 }
                 else if ch == '\\' {
@@ -153,7 +157,7 @@ impl<'config> ErlangLexer<'config> {
 
             // 未闭合的字符串
             let end = state.get_position();
-            state.add_token(ErlangSyntaxKind::String, start, end);
+            state.add_token(ErlangTokenType::String, start, end);
             true
         }
         else {
@@ -193,13 +197,13 @@ impl<'config> ErlangLexer<'config> {
                 else {
                     state.advance(ch.len_utf8());
                 }
-                state.add_token(ErlangSyntaxKind::Character, start, state.get_position());
-                true
+                state.add_token(ErlangTokenType::Character, start, state.get_position());
+                return true;
             }
             else {
                 // 只有 $ 没有字符
-                state.add_token(ErlangSyntaxKind::Error, start, state.get_position());
-                true
+                state.add_token(ErlangTokenType::Error, start, state.get_position());
+                return true;
             }
         }
         else {
@@ -266,7 +270,7 @@ impl<'config> ErlangLexer<'config> {
                     }
                 }
 
-                state.add_token(ErlangSyntaxKind::Number, start, state.get_position());
+                state.add_token(ErlangTokenType::Number, start, state.get_position());
                 true
             }
             else {
@@ -294,7 +298,7 @@ impl<'config> ErlangLexer<'config> {
                         break;
                     }
                 }
-                state.add_token(ErlangSyntaxKind::Variable, start, state.get_position());
+                state.add_token(ErlangTokenType::Variable, start, state.get_position());
                 return true;
             }
 
@@ -315,40 +319,40 @@ impl<'config> ErlangLexer<'config> {
                 // 检查是否是关键字
                 if KEYWORDS.contains(text.as_ref()) {
                     let kind = match text.as_ref() {
-                        "after" => ErlangSyntaxKind::After,
-                        "and" => ErlangSyntaxKind::And,
-                        "andalso" => ErlangSyntaxKind::Andalso,
-                        "band" => ErlangSyntaxKind::Band,
-                        "begin" => ErlangSyntaxKind::Begin,
-                        "bnot" => ErlangSyntaxKind::Bnot,
-                        "bor" => ErlangSyntaxKind::Bor,
-                        "bsl" => ErlangSyntaxKind::Bsl,
-                        "bsr" => ErlangSyntaxKind::Bsr,
-                        "bxor" => ErlangSyntaxKind::Bxor,
-                        "case" => ErlangSyntaxKind::Case,
-                        "catch" => ErlangSyntaxKind::Catch,
-                        "cond" => ErlangSyntaxKind::Cond,
-                        "div" => ErlangSyntaxKind::Div,
-                        "end" => ErlangSyntaxKind::End,
-                        "fun" => ErlangSyntaxKind::Fun,
-                        "if" => ErlangSyntaxKind::If,
-                        "let" => ErlangSyntaxKind::Let,
-                        "not" => ErlangSyntaxKind::Not,
-                        "of" => ErlangSyntaxKind::Of,
-                        "or" => ErlangSyntaxKind::Or,
-                        "orelse" => ErlangSyntaxKind::Orelse,
-                        "query" => ErlangSyntaxKind::Query,
-                        "receive" => ErlangSyntaxKind::Receive,
-                        "rem" => ErlangSyntaxKind::Rem,
-                        "try" => ErlangSyntaxKind::Try,
-                        "when" => ErlangSyntaxKind::When,
-                        "xor" => ErlangSyntaxKind::Xor,
-                        _ => ErlangSyntaxKind::Atom,
+                        "after" => ErlangTokenType::After,
+                        "and" => ErlangTokenType::And,
+                        "andalso" => ErlangTokenType::Andalso,
+                        "band" => ErlangTokenType::Band,
+                        "begin" => ErlangTokenType::Begin,
+                        "bnot" => ErlangTokenType::Bnot,
+                        "bor" => ErlangTokenType::Bor,
+                        "bsl" => ErlangTokenType::Bsl,
+                        "bsr" => ErlangTokenType::Bsr,
+                        "bxor" => ErlangTokenType::Bxor,
+                        "case" => ErlangTokenType::Case,
+                        "catch" => ErlangTokenType::Catch,
+                        "cond" => ErlangTokenType::Cond,
+                        "div" => ErlangTokenType::Div,
+                        "end" => ErlangTokenType::End,
+                        "fun" => ErlangTokenType::Fun,
+                        "if" => ErlangTokenType::If,
+                        "let" => ErlangTokenType::Let,
+                        "not" => ErlangTokenType::Not,
+                        "of" => ErlangTokenType::Of,
+                        "or" => ErlangTokenType::Or,
+                        "orelse" => ErlangTokenType::Orelse,
+                        "query" => ErlangTokenType::Query,
+                        "receive" => ErlangTokenType::Receive,
+                        "rem" => ErlangTokenType::Rem,
+                        "try" => ErlangTokenType::Try,
+                        "when" => ErlangTokenType::When,
+                        "xor" => ErlangTokenType::Xor,
+                        _ => ErlangTokenType::Atom,
                     };
                     state.add_token(kind, start, end);
                 }
                 else {
-                    state.add_token(ErlangSyntaxKind::Atom, start, end);
+                    state.add_token(ErlangTokenType::Atom, start, end);
                 }
                 return true;
             }
@@ -359,7 +363,7 @@ impl<'config> ErlangLexer<'config> {
                 while let Some(ch) = state.current() {
                     if ch == '\'' {
                         state.advance(1);
-                        state.add_token(ErlangSyntaxKind::Atom, start, state.get_position());
+                        state.add_token(ErlangTokenType::Atom, start, state.get_position());
                         return true;
                     }
                     else if ch == '\\' {
@@ -372,7 +376,7 @@ impl<'config> ErlangLexer<'config> {
                         state.advance(ch.len_utf8());
                     }
                 }
-                state.add_token(ErlangSyntaxKind::Atom, start, state.get_position());
+                state.add_token(ErlangTokenType::Atom, start, state.get_position());
                 return true;
             }
         }
@@ -389,10 +393,10 @@ impl<'config> ErlangLexer<'config> {
                     state.advance(1);
                     if let Some('+') = state.current() {
                         state.advance(1);
-                        state.add_token(ErlangSyntaxKind::PlusPlus, start, state.get_position());
+                        state.add_token(ErlangTokenType::PlusPlus, start, state.get_position());
                     }
                     else {
-                        state.add_token(ErlangSyntaxKind::Plus, start, state.get_position());
+                        state.add_token(ErlangTokenType::Plus, start, state.get_position());
                     }
                     true
                 }
@@ -400,30 +404,30 @@ impl<'config> ErlangLexer<'config> {
                     state.advance(1);
                     if let Some('-') = state.current() {
                         state.advance(1);
-                        state.add_token(ErlangSyntaxKind::MinusMinus, start, state.get_position());
+                        state.add_token(ErlangTokenType::MinusMinus, start, state.get_position());
                     }
                     else if let Some('>') = state.current() {
                         state.advance(1);
-                        state.add_token(ErlangSyntaxKind::Arrow, start, state.get_position());
+                        state.add_token(ErlangTokenType::Arrow, start, state.get_position());
                     }
                     else {
-                        state.add_token(ErlangSyntaxKind::Minus, start, state.get_position());
+                        state.add_token(ErlangTokenType::Minus, start, state.get_position());
                     }
                     true
                 }
                 '*' => {
                     state.advance(1);
-                    state.add_token(ErlangSyntaxKind::Star, start, state.get_position());
+                    state.add_token(ErlangTokenType::Star, start, state.get_position());
                     true
                 }
                 '/' => {
                     state.advance(1);
                     if let Some('=') = state.current() {
                         state.advance(1);
-                        state.add_token(ErlangSyntaxKind::SlashEqual, start, state.get_position());
+                        state.add_token(ErlangTokenType::SlashEqual, start, state.get_position());
                     }
                     else {
-                        state.add_token(ErlangSyntaxKind::Slash, start, state.get_position());
+                        state.add_token(ErlangTokenType::Slash, start, state.get_position());
                     }
                     true
                 }
@@ -432,82 +436,82 @@ impl<'config> ErlangLexer<'config> {
                     match state.current() {
                         Some('=') => {
                             state.advance(1);
-                            state.add_token(ErlangSyntaxKind::EqualEqual, start, state.get_position());
+                            state.add_token(ErlangTokenType::EqualEqual, start, state.get_position());
                         }
                         Some(':') => {
                             state.advance(1);
                             if let Some('=') = state.current() {
                                 state.advance(1);
-                                state.add_token(ErlangSyntaxKind::EqualColonEqual, start, state.get_position());
+                                state.add_token(ErlangTokenType::EqualColonEqual, start, state.get_position());
                             }
                             else {
                                 // 回退
                                 state.set_position(start + 1);
-                                state.add_token(ErlangSyntaxKind::Equal, start, state.get_position());
+                                state.add_token(ErlangTokenType::Equal, start, state.get_position());
                             }
                         }
                         Some('/') => {
                             state.advance(1);
                             if let Some('=') = state.current() {
                                 state.advance(1);
-                                state.add_token(ErlangSyntaxKind::EqualSlashEqual, start, state.get_position());
+                                state.add_token(ErlangTokenType::EqualSlashEqual, start, state.get_position());
                             }
                             else {
                                 // 回退
                                 state.set_position(start + 1);
-                                state.add_token(ErlangSyntaxKind::Equal, start, state.get_position());
+                                state.add_token(ErlangTokenType::Equal, start, state.get_position());
                             }
                         }
                         Some('<') => {
                             state.advance(1);
-                            state.add_token(ErlangSyntaxKind::LessEqual, start, state.get_position());
+                            state.add_token(ErlangTokenType::LessEqual, start, state.get_position());
                         }
                         _ => {
-                            state.add_token(ErlangSyntaxKind::Equal, start, state.get_position());
+                            state.add_token(ErlangTokenType::Equal, start, state.get_position());
                         }
                     }
                     true
                 }
                 '<' => {
                     state.advance(1);
-                    state.add_token(ErlangSyntaxKind::Less, start, state.get_position());
+                    state.add_token(ErlangTokenType::Less, start, state.get_position());
                     true
                 }
                 '>' => {
                     state.advance(1);
                     if let Some('=') = state.current() {
                         state.advance(1);
-                        state.add_token(ErlangSyntaxKind::GreaterEqual, start, state.get_position());
+                        state.add_token(ErlangTokenType::GreaterEqual, start, state.get_position());
                     }
                     else {
-                        state.add_token(ErlangSyntaxKind::Greater, start, state.get_position());
+                        state.add_token(ErlangTokenType::Greater, start, state.get_position());
                     }
                     true
                 }
                 '!' => {
                     state.advance(1);
-                    state.add_token(ErlangSyntaxKind::Exclamation, start, state.get_position());
+                    state.add_token(ErlangTokenType::Exclamation, start, state.get_position());
                     true
                 }
                 '?' => {
                     state.advance(1);
-                    state.add_token(ErlangSyntaxKind::Question, start, state.get_position());
+                    state.add_token(ErlangTokenType::Question, start, state.get_position());
                     true
                 }
                 '|' => {
                     state.advance(1);
                     if let Some('|') = state.current() {
                         state.advance(1);
-                        state.add_token(ErlangSyntaxKind::PipePipe, start, state.get_position());
+                        state.add_token(ErlangTokenType::PipePipe, start, state.get_position());
                     }
                     else {
-                        state.add_token(ErlangSyntaxKind::Pipe, start, state.get_position());
+                        state.add_token(ErlangTokenType::Pipe, start, state.get_position());
                     }
                     true
                 }
                 '#' => {
                     state.advance(1);
-                    state.add_token(ErlangSyntaxKind::Hash, start, state.get_position());
+                    state.add_token(ErlangTokenType::Hash, start, state.get_position());
                     true
                 }
                 _ => false,
@@ -523,16 +527,16 @@ impl<'config> ErlangLexer<'config> {
         if let Some(ch) = state.current() {
             let start = state.get_position();
             let kind = match ch {
-                '(' => Some(ErlangSyntaxKind::LeftParen),
-                ')' => Some(ErlangSyntaxKind::RightParen),
-                '{' => Some(ErlangSyntaxKind::LeftBrace),
-                '}' => Some(ErlangSyntaxKind::RightBrace),
-                '[' => Some(ErlangSyntaxKind::LeftBracket),
-                ']' => Some(ErlangSyntaxKind::RightBracket),
-                ',' => Some(ErlangSyntaxKind::Comma),
-                ';' => Some(ErlangSyntaxKind::Semicolon),
-                '.' => Some(ErlangSyntaxKind::Dot),
-                ':' => Some(ErlangSyntaxKind::Colon),
+                '(' => Some(ErlangTokenType::LeftParen),
+                ')' => Some(ErlangTokenType::RightParen),
+                '{' => Some(ErlangTokenType::LeftBrace),
+                '}' => Some(ErlangTokenType::RightBrace),
+                '[' => Some(ErlangTokenType::LeftBracket),
+                ']' => Some(ErlangTokenType::RightBracket),
+                ',' => Some(ErlangTokenType::Comma),
+                ';' => Some(ErlangTokenType::Semicolon),
+                '.' => Some(ErlangTokenType::Dot),
+                ':' => Some(ErlangTokenType::Colon),
                 _ => None,
             };
 

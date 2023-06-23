@@ -1,3 +1,4 @@
+#![doc = include_str!("readme.md")]
 pub mod token_type;
 
 pub use token_type::BashTokenType;
@@ -18,7 +19,7 @@ impl<'config> Lexer<BashLanguage> for BashLexer<'config> {
         let mut state = LexerState::new_with_cache(source, 0, cache);
         let result = self.run(&mut state);
         if result.is_ok() {
-            state.add_eof();
+            state.add_eof()
         }
         state.finish_with_cache(result, cache)
     }
@@ -84,10 +85,10 @@ impl<'config> BashLexer<'config> {
             let start_pos = state.get_position();
             if let Some(ch) = state.peek() {
                 state.advance(ch.len_utf8());
-                state.add_token(BashTokenType::Error, start_pos, state.get_position());
+                state.add_token(BashTokenType::Error, start_pos, state.get_position())
             }
 
-            state.advance_if_dead_lock(safe_point);
+            state.advance_if_dead_lock(safe_point)
         }
         Ok(())
     }
@@ -96,12 +97,7 @@ impl<'config> BashLexer<'config> {
         let start_pos = state.get_position();
 
         while let Some(ch) = state.peek() {
-            if ch == ' ' || ch == '\t' {
-                state.advance(ch.len_utf8());
-            }
-            else {
-                break;
-            }
+            if ch == ' ' || ch == '\t' { state.advance(ch.len_utf8()) } else { break }
         }
 
         if state.get_position() > start_pos {
@@ -122,7 +118,7 @@ impl<'config> BashLexer<'config> {
                 if ch == '\n' || ch == '\r' {
                     break;
                 }
-                state.advance(ch.len_utf8());
+                state.advance(ch.len_utf8())
             }
             state.add_token(BashTokenType::Comment, start_pos, state.get_position());
             true
@@ -143,7 +139,7 @@ impl<'config> BashLexer<'config> {
         else if let Some('\r') = state.peek() {
             state.advance(1);
             if let Some('\n') = state.peek() {
-                state.advance(1);
+                state.advance(1)
             }
             state.add_token(BashTokenType::Newline, start_pos, state.get_position());
             true
@@ -179,7 +175,7 @@ impl<'config> BashLexer<'config> {
                         break;
                     }
 
-                    state.advance(ch.len_utf8());
+                    state.advance(ch.len_utf8())
                 }
 
                 state.add_token(BashTokenType::StringLiteral, start_pos, state.get_position());
@@ -198,7 +194,7 @@ impl<'config> BashLexer<'config> {
 
             // 处理特殊变量 $0, $1, $?, $$ 等
             if let Some(ch) = state.peek() {
-                if ch.is_ascii_digit() || ch == '?' || ch == '$' || ch == '#' || ch == '@' || ch == '*' {
+                if ch.is_ascii_digit() || ch == '?' || ch == '$' || ch == '#' || ch == '↯' || ch == '*' {
                     state.advance(1);
                     state.add_token(BashTokenType::Variable, start_pos, state.get_position());
                     return true;
@@ -213,7 +209,7 @@ impl<'config> BashLexer<'config> {
                         state.advance(1);
                         break;
                     }
-                    state.advance(ch.len_utf8());
+                    state.advance(ch.len_utf8())
                 }
                 state.add_token(BashTokenType::Variable, start_pos, state.get_position());
                 return true;
@@ -224,12 +220,7 @@ impl<'config> BashLexer<'config> {
                 if ch.is_alphabetic() || ch == '_' {
                     state.advance(ch.len_utf8());
                     while let Some(ch) = state.peek() {
-                        if ch.is_alphanumeric() || ch == '_' {
-                            state.advance(ch.len_utf8());
-                        }
-                        else {
-                            break;
-                        }
+                        if ch.is_alphanumeric() || ch == '_' { state.advance(ch.len_utf8()) } else { break }
                     }
                     state.add_token(BashTokenType::Variable, start_pos, state.get_position());
                     return true;
@@ -250,12 +241,7 @@ impl<'config> BashLexer<'config> {
             if ch.is_ascii_digit() {
                 state.advance(1);
                 while let Some(ch) = state.peek() {
-                    if ch.is_ascii_digit() {
-                        state.advance(1);
-                    }
-                    else {
-                        break;
-                    }
+                    if ch.is_ascii_digit() { state.advance(1) } else { break }
                 }
                 state.add_token(BashTokenType::NumberLiteral, start_pos, state.get_position());
                 return true;
@@ -272,12 +258,7 @@ impl<'config> BashLexer<'config> {
             if ch.is_ascii_alphabetic() || ch == '_' {
                 state.advance(ch.len_utf8());
                 while let Some(ch) = state.peek() {
-                    if ch.is_ascii_alphanumeric() || ch == '_' {
-                        state.advance(ch.len_utf8());
-                    }
-                    else {
-                        break;
-                    }
+                    if ch.is_ascii_alphanumeric() || ch == '_' { state.advance(ch.len_utf8()) } else { break }
                 }
 
                 let text = state.get_text_in((start_pos..state.get_position()).into());
@@ -332,17 +313,12 @@ impl<'config> BashLexer<'config> {
 
                 // 跳过可选的 -
                 if let Some('-') = state.peek() {
-                    state.advance(1);
+                    state.advance(1)
                 }
 
                 // 读取标识符
                 while let Some(ch) = state.peek() {
-                    if ch.is_alphanumeric() || ch == '_' {
-                        state.advance(ch.len_utf8());
-                    }
-                    else {
-                        break;
-                    }
+                    if ch.is_alphanumeric() || ch == '_' { state.advance(ch.len_utf8()) } else { break }
                 }
 
                 state.add_token(BashTokenType::Heredoc, start_pos, state.get_position());
@@ -363,14 +339,14 @@ impl<'config> BashLexer<'config> {
                 if ch == '[' {
                     // 处理字符类 [abc] 或 [!abc]
                     if let Some('!') = state.peek() {
-                        state.advance(1);
+                        state.advance(1)
                     }
                     while let Some(ch) = state.peek() {
                         if ch == ']' {
                             state.advance(1);
                             break;
                         }
-                        state.advance(ch.len_utf8());
+                        state.advance(ch.len_utf8())
                     }
                 }
 
@@ -424,4 +400,4 @@ static BASH_TWO_CHAR_OPERATORS: LazyLock<&[&str]> = LazyLock::new(|| &["==", "!=
 
 static BASH_DELIMITERS: LazyLock<&[&str]> = LazyLock::new(|| &["(", ")", "{", "}", "[", "]", ";", ",", ":", "."]);
 
-static BASH_SPECIAL_CHARS: LazyLock<&[char]> = LazyLock::new(|| &['\\', '`', '~', '@', '#', '$', '%', '^', '&', '*', '(', ')', '-', '+', '=', '{', '}', '[', ']', '|', '\\', ':', ';', '"', '\'', '<', '>', ',', '.', '?', '/', '!', '`']);
+static BASH_SPECIAL_CHARS: LazyLock<&[char]> = LazyLock::new(|| &['\\', '`', '~', '↯', '#', '$', '%', '^', '&', '*', '(', ')', '-', '+', '=', '{', '}', '[', ']', '|', '\\', ':', ';', '"', '\'', '<', '>', ',', '.', '?', '/', '!', '`']);

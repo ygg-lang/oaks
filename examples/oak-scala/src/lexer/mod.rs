@@ -1,4 +1,7 @@
-use crate::{kind::ScalaSyntaxKind, language::ScalaLanguage};
+#![doc = include_str!("readme.md")]
+pub mod token_type;
+
+use crate::{language::ScalaLanguage, lexer::token_type::ScalaTokenType};
 use oak_core::{
     Lexer, LexerCache, LexerState, OakError, TextEdit,
     lexer::{CommentConfig, LexOutput, StringConfig, WhitespaceConfig},
@@ -78,7 +81,7 @@ impl<'config> ScalaLexer<'config> {
             let start_pos = state.get_position();
             if let Some(ch) = state.peek() {
                 state.advance(ch.len_utf8());
-                state.add_token(ScalaSyntaxKind::Error, start_pos, state.get_position());
+                state.add_token(ScalaTokenType::Error, start_pos, state.get_position());
             }
 
             state.advance_if_dead_lock(safe_point);
@@ -88,7 +91,7 @@ impl<'config> ScalaLexer<'config> {
     }
 
     fn skip_whitespace<'s, S: Source + ?Sized>(&self, state: &mut State<'s, S>) -> bool {
-        SCALA_WHITESPACE.scan(state, ScalaSyntaxKind::Whitespace)
+        SCALA_WHITESPACE.scan(state, ScalaTokenType::Whitespace)
     }
 
     /// 处理换行
@@ -97,7 +100,7 @@ impl<'config> ScalaLexer<'config> {
 
         if let Some('\n') = state.peek() {
             state.advance(1);
-            state.add_token(ScalaSyntaxKind::Newline, start_pos, state.get_position());
+            state.add_token(ScalaTokenType::Newline, start_pos, state.get_position());
             true
         }
         else if let Some('\r') = state.peek() {
@@ -105,7 +108,7 @@ impl<'config> ScalaLexer<'config> {
             if let Some('\n') = state.peek() {
                 state.advance(1);
             }
-            state.add_token(ScalaSyntaxKind::Newline, start_pos, state.get_position());
+            state.add_token(ScalaTokenType::Newline, start_pos, state.get_position());
             true
         }
         else {
@@ -115,7 +118,7 @@ impl<'config> ScalaLexer<'config> {
 
     fn skip_comment<'s, S: Source + ?Sized>(&self, state: &mut State<'s, S>) -> bool {
         // 行注释 & 块注释
-        if SCALA_COMMENT.scan(state, ScalaSyntaxKind::LineComment, ScalaSyntaxKind::BlockComment) {
+        if SCALA_COMMENT.scan(state, ScalaTokenType::LineComment, ScalaTokenType::BlockComment) {
             return true;
         }
 
@@ -123,11 +126,11 @@ impl<'config> ScalaLexer<'config> {
     }
 
     fn lex_string_literal<'s, S: Source + ?Sized>(&self, state: &mut State<'s, S>) -> bool {
-        SCALA_STRING.scan(state, ScalaSyntaxKind::StringLiteral)
+        SCALA_STRING.scan(state, ScalaTokenType::StringLiteral)
     }
 
     fn lex_char_literal<'s, S: Source + ?Sized>(&self, state: &mut State<'s, S>) -> bool {
-        SCALA_CHAR.scan(state, ScalaSyntaxKind::CharLiteral)
+        SCALA_CHAR.scan(state, ScalaTokenType::CharLiteral)
     }
 
     fn lex_number_literal<'s, S: Source + ?Sized>(&self, state: &mut State<'s, S>) -> bool {
@@ -163,7 +166,7 @@ impl<'config> ScalaLexer<'config> {
 
         state.advance(len);
         let end = state.get_position();
-        state.add_token(ScalaSyntaxKind::IntegerLiteral, start, end);
+        state.add_token(ScalaTokenType::IntegerLiteral, start, end);
         true
     }
 
@@ -190,45 +193,45 @@ impl<'config> ScalaLexer<'config> {
         let end = state.get_position();
 
         let kind = match text.as_ref() {
-            "abstract" => ScalaSyntaxKind::Abstract,
-            "case" => ScalaSyntaxKind::Case,
-            "catch" => ScalaSyntaxKind::Catch,
-            "class" => ScalaSyntaxKind::Class,
-            "def" => ScalaSyntaxKind::Def,
-            "do" => ScalaSyntaxKind::Do,
-            "else" => ScalaSyntaxKind::Else,
-            "extends" => ScalaSyntaxKind::Extends,
-            "false" => ScalaSyntaxKind::False,
-            "final" => ScalaSyntaxKind::Final,
-            "finally" => ScalaSyntaxKind::Finally,
-            "for" => ScalaSyntaxKind::For,
-            "if" => ScalaSyntaxKind::If,
-            "implicit" => ScalaSyntaxKind::Implicit,
-            "import" => ScalaSyntaxKind::Import,
-            "lazy" => ScalaSyntaxKind::Lazy,
-            "match" => ScalaSyntaxKind::Match,
-            "new" => ScalaSyntaxKind::New,
-            "null" => ScalaSyntaxKind::Null,
-            "object" => ScalaSyntaxKind::Object,
-            "override" => ScalaSyntaxKind::Override,
-            "package" => ScalaSyntaxKind::Package,
-            "private" => ScalaSyntaxKind::Private,
-            "protected" => ScalaSyntaxKind::Protected,
-            "return" => ScalaSyntaxKind::Return,
-            "sealed" => ScalaSyntaxKind::Sealed,
-            "super" => ScalaSyntaxKind::Super,
-            "this" => ScalaSyntaxKind::This,
-            "throw" => ScalaSyntaxKind::Throw,
-            "trait" => ScalaSyntaxKind::Trait,
-            "true" => ScalaSyntaxKind::True,
-            "try" => ScalaSyntaxKind::Try,
-            "type" => ScalaSyntaxKind::Type,
-            "val" => ScalaSyntaxKind::Val,
-            "var" => ScalaSyntaxKind::Var,
-            "while" => ScalaSyntaxKind::While,
-            "with" => ScalaSyntaxKind::With,
-            "yield" => ScalaSyntaxKind::Yield,
-            _ => ScalaSyntaxKind::Identifier,
+            "abstract" => ScalaTokenType::Abstract,
+            "case" => ScalaTokenType::Case,
+            "catch" => ScalaTokenType::Catch,
+            "class" => ScalaTokenType::Class,
+            "def" => ScalaTokenType::Def,
+            "do" => ScalaTokenType::Do,
+            "else" => ScalaTokenType::Else,
+            "extends" => ScalaTokenType::Extends,
+            "false" => ScalaTokenType::False,
+            "final" => ScalaTokenType::Final,
+            "finally" => ScalaTokenType::Finally,
+            "for" => ScalaTokenType::For,
+            "if" => ScalaTokenType::If,
+            "implicit" => ScalaTokenType::Implicit,
+            "import" => ScalaTokenType::Import,
+            "lazy" => ScalaTokenType::Lazy,
+            "match" => ScalaTokenType::Match,
+            "new" => ScalaTokenType::New,
+            "null" => ScalaTokenType::Null,
+            "object" => ScalaTokenType::Object,
+            "override" => ScalaTokenType::Override,
+            "package" => ScalaTokenType::Package,
+            "private" => ScalaTokenType::Private,
+            "protected" => ScalaTokenType::Protected,
+            "return" => ScalaTokenType::Return,
+            "sealed" => ScalaTokenType::Sealed,
+            "super" => ScalaTokenType::Super,
+            "this" => ScalaTokenType::This,
+            "throw" => ScalaTokenType::Throw,
+            "trait" => ScalaTokenType::Trait,
+            "true" => ScalaTokenType::True,
+            "try" => ScalaTokenType::Try,
+            "type" => ScalaTokenType::Type,
+            "val" => ScalaTokenType::Val,
+            "var" => ScalaTokenType::Var,
+            "while" => ScalaTokenType::While,
+            "with" => ScalaTokenType::With,
+            "yield" => ScalaTokenType::Yield,
+            _ => ScalaTokenType::Identifier,
         };
 
         state.add_token(kind, start, end);
@@ -241,27 +244,27 @@ impl<'config> ScalaLexer<'config> {
         // 多字符操作符
         if state.starts_with("=>") {
             state.advance(2);
-            state.add_token(ScalaSyntaxKind::Arrow, start, state.get_position());
+            state.add_token(ScalaTokenType::Arrow, start, state.get_position());
             return true;
         }
         if state.starts_with("<=") {
             state.advance(2);
-            state.add_token(ScalaSyntaxKind::LessEqual, start, state.get_position());
+            state.add_token(ScalaTokenType::LessEqual, start, state.get_position());
             return true;
         }
         if state.starts_with(">=") {
             state.advance(2);
-            state.add_token(ScalaSyntaxKind::GreaterEqual, start, state.get_position());
+            state.add_token(ScalaTokenType::GreaterEqual, start, state.get_position());
             return true;
         }
         if state.starts_with("==") {
             state.advance(2);
-            state.add_token(ScalaSyntaxKind::EqualEqual, start, state.get_position());
+            state.add_token(ScalaTokenType::EqualEqual, start, state.get_position());
             return true;
         }
         if state.starts_with("!=") {
             state.advance(2);
-            state.add_token(ScalaSyntaxKind::NotEqual, start, state.get_position());
+            state.add_token(ScalaTokenType::NotEqual, start, state.get_position());
             return true;
         }
 
@@ -278,32 +281,32 @@ impl<'config> ScalaLexer<'config> {
         let end = state.get_position();
 
         let kind = match ch {
-            '(' => ScalaSyntaxKind::LeftParen,
-            ')' => ScalaSyntaxKind::RightParen,
-            '[' => ScalaSyntaxKind::LeftBracket,
-            ']' => ScalaSyntaxKind::RightBracket,
-            '{' => ScalaSyntaxKind::LeftBrace,
-            '}' => ScalaSyntaxKind::RightBrace,
-            ',' => ScalaSyntaxKind::Comma,
-            ';' => ScalaSyntaxKind::Semicolon,
-            ':' => ScalaSyntaxKind::Colon,
-            '.' => ScalaSyntaxKind::Dot,
-            '+' => ScalaSyntaxKind::Plus,
-            '-' => ScalaSyntaxKind::Minus,
-            '*' => ScalaSyntaxKind::Star,
-            '/' => ScalaSyntaxKind::Slash,
-            '%' => ScalaSyntaxKind::Percent,
-            '=' => ScalaSyntaxKind::Eq,
-            '<' => ScalaSyntaxKind::Lt,
-            '>' => ScalaSyntaxKind::Gt,
-            '!' => ScalaSyntaxKind::Not,
-            '&' => ScalaSyntaxKind::And,
-            '|' => ScalaSyntaxKind::Or,
-            '^' => ScalaSyntaxKind::Xor,
-            '~' => ScalaSyntaxKind::Tilde,
-            '?' => ScalaSyntaxKind::Question,
-            '@' => ScalaSyntaxKind::At,
-            '#' => ScalaSyntaxKind::Hash,
+            '(' => ScalaTokenType::LeftParen,
+            ')' => ScalaTokenType::RightParen,
+            '[' => ScalaTokenType::LeftBracket,
+            ']' => ScalaTokenType::RightBracket,
+            '{' => ScalaTokenType::LeftBrace,
+            '}' => ScalaTokenType::RightBrace,
+            ',' => ScalaTokenType::Comma,
+            ';' => ScalaTokenType::Semicolon,
+            ':' => ScalaTokenType::Colon,
+            '.' => ScalaTokenType::Dot,
+            '+' => ScalaTokenType::Plus,
+            '-' => ScalaTokenType::Minus,
+            '*' => ScalaTokenType::Star,
+            '/' => ScalaTokenType::Slash,
+            '%' => ScalaTokenType::Percent,
+            '=' => ScalaTokenType::Eq,
+            '<' => ScalaTokenType::Lt,
+            '>' => ScalaTokenType::Gt,
+            '!' => ScalaTokenType::Not,
+            '&' => ScalaTokenType::And,
+            '|' => ScalaTokenType::Or,
+            '^' => ScalaTokenType::Xor,
+            '~' => ScalaTokenType::Tilde,
+            '?' => ScalaTokenType::Question,
+            '@' => ScalaTokenType::At,
+            '#' => ScalaTokenType::Hash,
             _ => {
                 return false;
             }

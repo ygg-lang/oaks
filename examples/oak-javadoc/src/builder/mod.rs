@@ -1,3 +1,4 @@
+#![doc = include_str!("readme.md")]
 use crate::{ast::JavadocRoot, language::JavadocLanguage};
 use oak_core::builder::Builder;
 

@@ -10,7 +10,7 @@ def hello(x):
 ",
     );
     let config = PythonLanguage::default();
-    let builder = PythonBuilder::new(config);
+    let builder = PythonBuilder::new(&config);
     let mut session = ParseSession::<PythonLanguage>::default();
 
     // Test building the typed AST
@@ -32,7 +32,7 @@ z = add(x, y)
 ",
     );
     let config = PythonLanguage::default();
-    let builder = PythonBuilder::new(config);
+    let builder = PythonBuilder::new(&config);
     let mut session = ParseSession::<PythonLanguage>::default();
 
     let output = builder.build(&code, &[], &mut session);
@@ -46,7 +46,7 @@ z = add(x, y)
 
     let stmts = &root.program.statements;
     for (i, stmt) in stmts.iter().enumerate() {
-        println!("Stmt {}: {:?}", i, stmt);
+        println!("Stmt {}: {:?}", i, stmt)
     }
     assert!(stmts.len() >= 4, "Expected at least 4 statements, got {}", stmts.len());
 
@@ -55,7 +55,7 @@ z = add(x, y)
             assert_eq!(name, "add");
             assert_eq!(parameters.len(), 2);
             assert_eq!(parameters[0].name, "a");
-            assert_eq!(parameters[1].name, "b");
+            assert_eq!(parameters[1].name, "b")
         }
         _ => panic!("First statement should be FunctionDef"),
     }

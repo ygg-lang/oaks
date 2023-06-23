@@ -1,4 +1,8 @@
-use crate::{kind::SwiftSyntaxKind, language::SwiftLanguage};
+#![doc = include_str!("readme.md")]
+pub mod token_type;
+
+use crate::language::SwiftLanguage;
+pub use crate::lexer::token_type::SwiftTokenType;
 use oak_core::{Lexer, LexerCache, LexerState, OakError, TextEdit, lexer::LexOutput, source::Source};
 
 type State<'a, S> = LexerState<'a, S, SwiftLanguage>;
@@ -38,7 +42,7 @@ impl<'config> SwiftLexer<'config> {
         }
 
         if state.get_position() > start_pos {
-            state.add_token(SwiftSyntaxKind::Whitespace, start_pos, state.get_position());
+            state.add_token(SwiftTokenType::Whitespace, start_pos, state.get_position());
             true
         }
         else {
@@ -52,7 +56,7 @@ impl<'config> SwiftLexer<'config> {
 
         if let Some('\n') = state.peek() {
             state.advance(1);
-            state.add_token(SwiftSyntaxKind::Newline, start_pos, state.get_position());
+            state.add_token(SwiftTokenType::Newline, start_pos, state.get_position());
             true
         }
         else if let Some('\r') = state.peek() {
@@ -60,7 +64,7 @@ impl<'config> SwiftLexer<'config> {
             if let Some('\n') = state.peek() {
                 state.advance(1);
             }
-            state.add_token(SwiftSyntaxKind::Newline, start_pos, state.get_position());
+            state.add_token(SwiftTokenType::Newline, start_pos, state.get_position());
             true
         }
         else {
@@ -82,7 +86,7 @@ impl<'config> SwiftLexer<'config> {
                     }
                     state.advance(ch.len_utf8());
                 }
-                state.add_token(SwiftSyntaxKind::Comment, start_pos, state.get_position());
+                state.add_token(SwiftTokenType::Comment, start_pos, state.get_position());
                 true
             }
             else if let Some('*') = state.peek_next_n(1) {
@@ -109,7 +113,7 @@ impl<'config> SwiftLexer<'config> {
                         state.advance(ch.len_utf8());
                     }
                 }
-                state.add_token(SwiftSyntaxKind::Comment, start_pos, state.get_position());
+                state.add_token(SwiftTokenType::Comment, start_pos, state.get_position());
                 true
             }
             else {
@@ -152,7 +156,7 @@ impl<'config> SwiftLexer<'config> {
                     if let Some('`') = state.peek() {
                         state.advance(1);
                     }
-                    state.add_token(SwiftSyntaxKind::Identifier, start_pos, state.get_position());
+                    state.add_token(SwiftTokenType::Identifier, start_pos, state.get_position());
                     return true;
                 }
 
@@ -160,78 +164,78 @@ impl<'config> SwiftLexer<'config> {
                 let text = state.get_text_in(core::range::Range { start: start_pos, end: state.get_position() });
 
                 let token_kind = match text.as_ref() {
-                    "class" => SwiftSyntaxKind::Class,
-                    "struct" => SwiftSyntaxKind::Struct,
-                    "enum" => SwiftSyntaxKind::Enum,
-                    "protocol" => SwiftSyntaxKind::Protocol,
-                    "extension" => SwiftSyntaxKind::Extension,
-                    "func" => SwiftSyntaxKind::Func,
-                    "var" => SwiftSyntaxKind::Var,
-                    "let" => SwiftSyntaxKind::Let,
-                    "init" => SwiftSyntaxKind::Init,
-                    "deinit" => SwiftSyntaxKind::Deinit,
-                    "subscript" => SwiftSyntaxKind::Subscript,
-                    "typealias" => SwiftSyntaxKind::Typealias,
-                    "import" => SwiftSyntaxKind::Import,
-                    "if" => SwiftSyntaxKind::If,
-                    "else" => SwiftSyntaxKind::Else,
-                    "switch" => SwiftSyntaxKind::Switch,
-                    "case" => SwiftSyntaxKind::Case,
-                    "default" => SwiftSyntaxKind::Default,
-                    "for" => SwiftSyntaxKind::For,
-                    "while" => SwiftSyntaxKind::While,
-                    "repeat" => SwiftSyntaxKind::Repeat,
-                    "do" => SwiftSyntaxKind::Do,
-                    "break" => SwiftSyntaxKind::Break,
-                    "continue" => SwiftSyntaxKind::Continue,
-                    "fallthrough" => SwiftSyntaxKind::Fallthrough,
-                    "return" => SwiftSyntaxKind::Return,
-                    "throw" => SwiftSyntaxKind::Throw,
-                    "try" => SwiftSyntaxKind::Try,
-                    "catch" => SwiftSyntaxKind::Catch,
-                    "finally" => SwiftSyntaxKind::Finally,
-                    "guard" => SwiftSyntaxKind::Guard,
-                    "defer" => SwiftSyntaxKind::Defer,
-                    "public" => SwiftSyntaxKind::Public,
-                    "private" => SwiftSyntaxKind::Private,
-                    "internal" => SwiftSyntaxKind::Internal,
-                    "fileprivate" => SwiftSyntaxKind::Fileprivate,
-                    "open" => SwiftSyntaxKind::Open,
-                    "static" => SwiftSyntaxKind::Static,
-                    "final" => SwiftSyntaxKind::Final,
-                    "override" => SwiftSyntaxKind::Override,
-                    "mutating" => SwiftSyntaxKind::Mutating,
-                    "nonmutating" => SwiftSyntaxKind::Nonmutating,
-                    "lazy" => SwiftSyntaxKind::Lazy,
-                    "weak" => SwiftSyntaxKind::Weak,
-                    "unowned" => SwiftSyntaxKind::Unowned,
-                    "optional" => SwiftSyntaxKind::Optional,
-                    "required" => SwiftSyntaxKind::Required,
-                    "convenience" => SwiftSyntaxKind::Convenience,
-                    "dynamic" => SwiftSyntaxKind::Dynamic,
-                    "infix" => SwiftSyntaxKind::Infix,
-                    "prefix" => SwiftSyntaxKind::Prefix,
-                    "postfix" => SwiftSyntaxKind::Postfix,
-                    "Any" => SwiftSyntaxKind::Any,
-                    "AnyObject" => SwiftSyntaxKind::AnyObject,
-                    "Self" => SwiftSyntaxKind::Self_,
-                    "Type" => SwiftSyntaxKind::Type,
-                    "Protocol" => SwiftSyntaxKind::Protocol_,
-                    "true" => SwiftSyntaxKind::True,
-                    "false" => SwiftSyntaxKind::False,
-                    "nil" => SwiftSyntaxKind::Nil,
-                    "as" => SwiftSyntaxKind::As,
-                    "is" => SwiftSyntaxKind::Is,
-                    "in" => SwiftSyntaxKind::In,
-                    "where" => SwiftSyntaxKind::Where,
-                    "associatedtype" => SwiftSyntaxKind::Associatedtype,
-                    "operator" => SwiftSyntaxKind::Operator,
-                    "precedencegroup" => SwiftSyntaxKind::Precedencegroup,
-                    "indirect" => SwiftSyntaxKind::Indirect,
-                    "rethrows" => SwiftSyntaxKind::Rethrows,
-                    "throws" => SwiftSyntaxKind::Throws,
-                    "inout" => SwiftSyntaxKind::Inout,
-                    _ => SwiftSyntaxKind::Identifier,
+                    "class" => SwiftTokenType::Class,
+                    "struct" => SwiftTokenType::Struct,
+                    "enum" => SwiftTokenType::Enum,
+                    "protocol" => SwiftTokenType::Protocol,
+                    "extension" => SwiftTokenType::Extension,
+                    "func" => SwiftTokenType::Func,
+                    "var" => SwiftTokenType::Var,
+                    "let" => SwiftTokenType::Let,
+                    "init" => SwiftTokenType::Init,
+                    "deinit" => SwiftTokenType::Deinit,
+                    "subscript" => SwiftTokenType::Subscript,
+                    "typealias" => SwiftTokenType::Typealias,
+                    "import" => SwiftTokenType::Import,
+                    "if" => SwiftTokenType::If,
+                    "else" => SwiftTokenType::Else,
+                    "switch" => SwiftTokenType::Switch,
+                    "case" => SwiftTokenType::Case,
+                    "default" => SwiftTokenType::Default,
+                    "for" => SwiftTokenType::For,
+                    "while" => SwiftTokenType::While,
+                    "repeat" => SwiftTokenType::Repeat,
+                    "do" => SwiftTokenType::Do,
+                    "break" => SwiftTokenType::Break,
+                    "continue" => SwiftTokenType::Continue,
+                    "fallthrough" => SwiftTokenType::Fallthrough,
+                    "return" => SwiftTokenType::Return,
+                    "throw" => SwiftTokenType::Throw,
+                    "try" => SwiftTokenType::Try,
+                    "catch" => SwiftTokenType::Catch,
+                    "finally" => SwiftTokenType::Finally,
+                    "guard" => SwiftTokenType::Guard,
+                    "defer" => SwiftTokenType::Defer,
+                    "public" => SwiftTokenType::Public,
+                    "private" => SwiftTokenType::Private,
+                    "internal" => SwiftTokenType::Internal,
+                    "fileprivate" => SwiftTokenType::Fileprivate,
+                    "open" => SwiftTokenType::Open,
+                    "static" => SwiftTokenType::Static,
+                    "final" => SwiftTokenType::Final,
+                    "override" => SwiftTokenType::Override,
+                    "mutating" => SwiftTokenType::Mutating,
+                    "nonmutating" => SwiftTokenType::Nonmutating,
+                    "lazy" => SwiftTokenType::Lazy,
+                    "weak" => SwiftTokenType::Weak,
+                    "unowned" => SwiftTokenType::Unowned,
+                    "optional" => SwiftTokenType::Optional,
+                    "required" => SwiftTokenType::Required,
+                    "convenience" => SwiftTokenType::Convenience,
+                    "dynamic" => SwiftTokenType::Dynamic,
+                    "infix" => SwiftTokenType::Infix,
+                    "prefix" => SwiftTokenType::Prefix,
+                    "postfix" => SwiftTokenType::Postfix,
+                    "Any" => SwiftTokenType::Any,
+                    "AnyObject" => SwiftTokenType::AnyObject,
+                    "Self" => SwiftTokenType::Self_,
+                    "Type" => SwiftTokenType::Type,
+                    "Protocol" => SwiftTokenType::Protocol_,
+                    "true" => SwiftTokenType::True,
+                    "false" => SwiftTokenType::False,
+                    "nil" => SwiftTokenType::Nil,
+                    "as" => SwiftTokenType::As,
+                    "is" => SwiftTokenType::Is,
+                    "in" => SwiftTokenType::In,
+                    "where" => SwiftTokenType::Where,
+                    "associatedtype" => SwiftTokenType::Associatedtype,
+                    "operator" => SwiftTokenType::Operator,
+                    "precedencegroup" => SwiftTokenType::Precedencegroup,
+                    "indirect" => SwiftTokenType::Indirect,
+                    "rethrows" => SwiftTokenType::Rethrows,
+                    "throws" => SwiftTokenType::Throws,
+                    "inout" => SwiftTokenType::Inout,
+                    _ => SwiftTokenType::Identifier,
                 };
                 state.add_token(token_kind, start_pos, state.get_position());
                 true
@@ -322,14 +326,23 @@ impl<'config> SwiftLexer<'config> {
 
                 // 处理小数
                 if let Some('.') = state.peek() {
-                    state.advance(1);
-                    while let Some(ch) = state.peek() {
-                        if ch.is_ascii_digit() || ch == '_' {
+                    // 如果后面紧跟着另一个点，说明是范围操作符的一部分，不应该作为小数点处理
+                    if let Some(next) = state.peek_next_n(1) {
+                        if next != '.' {
                             state.advance(1);
+                            while let Some(ch) = state.peek() {
+                                if ch.is_ascii_digit() || ch == '_' {
+                                    state.advance(1);
+                                }
+                                else {
+                                    break;
+                                }
+                            }
                         }
-                        else {
-                            break;
-                        }
+                    }
+                    else {
+                        // 后面没字符了，1. 也可以是浮点数
+                        state.advance(1);
                     }
                 }
 
@@ -349,7 +362,7 @@ impl<'config> SwiftLexer<'config> {
                     }
                 }
 
-                state.add_token(SwiftSyntaxKind::NumberLiteral, start_pos, state.get_position());
+                state.add_token(SwiftTokenType::NumberLiteral, start_pos, state.get_position());
                 true
             }
             else {
@@ -382,7 +395,7 @@ impl<'config> SwiftLexer<'config> {
                         }
                         state.advance(ch.len_utf8());
                     }
-                    state.add_token(SwiftSyntaxKind::StringLiteral, start_pos, state.get_position());
+                    state.add_token(SwiftTokenType::StringLiteral, start_pos, state.get_position());
                     return true;
                 }
             }
@@ -407,7 +420,7 @@ impl<'config> SwiftLexer<'config> {
                     state.advance(ch.len_utf8());
                 }
             }
-            state.add_token(SwiftSyntaxKind::StringLiteral, start_pos, state.get_position());
+            state.add_token(SwiftTokenType::StringLiteral, start_pos, state.get_position());
             true
         }
         else {
@@ -425,10 +438,10 @@ impl<'config> SwiftLexer<'config> {
                     state.advance(1);
                     if let Some('=') = state.peek() {
                         state.advance(1);
-                        SwiftSyntaxKind::PlusAssign
+                        SwiftTokenType::PlusAssign
                     }
                     else {
-                        SwiftSyntaxKind::Plus
+                        SwiftTokenType::Plus
                     }
                 }
                 '-' => {
@@ -436,63 +449,63 @@ impl<'config> SwiftLexer<'config> {
                     match state.peek() {
                         Some('=') => {
                             state.advance(1);
-                            SwiftSyntaxKind::MinusAssign
+                            SwiftTokenType::MinusAssign
                         }
                         Some('>') => {
                             state.advance(1);
-                            SwiftSyntaxKind::Arrow
+                            SwiftTokenType::Arrow
                         }
-                        _ => SwiftSyntaxKind::Minus,
+                        _ => SwiftTokenType::Minus,
                     }
                 }
                 '*' => {
                     state.advance(1);
                     if let Some('=') = state.peek() {
                         state.advance(1);
-                        SwiftSyntaxKind::StarAssign
+                        SwiftTokenType::StarAssign
                     }
                     else {
-                        SwiftSyntaxKind::Star
+                        SwiftTokenType::Star
                     }
                 }
                 '/' => {
                     state.advance(1);
                     if let Some('=') = state.peek() {
                         state.advance(1);
-                        SwiftSyntaxKind::SlashAssign
+                        SwiftTokenType::SlashAssign
                     }
                     else {
-                        SwiftSyntaxKind::Slash
+                        SwiftTokenType::Slash
                     }
                 }
                 '%' => {
                     state.advance(1);
                     if let Some('=') = state.peek() {
                         state.advance(1);
-                        SwiftSyntaxKind::PercentAssign
+                        SwiftTokenType::PercentAssign
                     }
                     else {
-                        SwiftSyntaxKind::Percent
+                        SwiftTokenType::Percent
                     }
                 }
                 '=' => {
                     state.advance(1);
                     if let Some('=') = state.peek() {
                         state.advance(1);
-                        SwiftSyntaxKind::Equal
+                        SwiftTokenType::Equal
                     }
                     else {
-                        SwiftSyntaxKind::Assign
+                        SwiftTokenType::Assign
                     }
                 }
                 '!' => {
                     state.advance(1);
                     if let Some('=') = state.peek() {
                         state.advance(1);
-                        SwiftSyntaxKind::NotEqual
+                        SwiftTokenType::NotEqual
                     }
                     else {
-                        SwiftSyntaxKind::LogicalNot
+                        SwiftTokenType::LogicalNot
                     }
                 }
                 '<' => {
@@ -500,19 +513,19 @@ impl<'config> SwiftLexer<'config> {
                     match state.peek() {
                         Some('=') => {
                             state.advance(1);
-                            SwiftSyntaxKind::LessEqual
+                            SwiftTokenType::LessEqual
                         }
                         Some('<') => {
                             state.advance(1);
                             if let Some('=') = state.peek() {
                                 state.advance(1);
-                                SwiftSyntaxKind::LeftShiftAssign
+                                SwiftTokenType::LeftShiftAssign
                             }
                             else {
-                                SwiftSyntaxKind::LeftShift
+                                SwiftTokenType::LeftShift
                             }
                         }
-                        _ => SwiftSyntaxKind::Less,
+                        _ => SwiftTokenType::Less,
                     }
                 }
                 '>' => {
@@ -520,19 +533,19 @@ impl<'config> SwiftLexer<'config> {
                     match state.peek() {
                         Some('=') => {
                             state.advance(1);
-                            SwiftSyntaxKind::GreaterEqual
+                            SwiftTokenType::GreaterEqual
                         }
                         Some('>') => {
                             state.advance(1);
                             if let Some('=') = state.peek() {
                                 state.advance(1);
-                                SwiftSyntaxKind::RightShiftAssign
+                                SwiftTokenType::RightShiftAssign
                             }
                             else {
-                                SwiftSyntaxKind::RightShift
+                                SwiftTokenType::RightShift
                             }
                         }
-                        _ => SwiftSyntaxKind::Greater,
+                        _ => SwiftTokenType::Greater,
                     }
                 }
                 '&' => {
@@ -540,13 +553,13 @@ impl<'config> SwiftLexer<'config> {
                     match state.peek() {
                         Some('&') => {
                             state.advance(1);
-                            SwiftSyntaxKind::LogicalAnd
+                            SwiftTokenType::LogicalAnd
                         }
                         Some('=') => {
                             state.advance(1);
-                            SwiftSyntaxKind::AndAssign
+                            SwiftTokenType::AndAssign
                         }
-                        _ => SwiftSyntaxKind::BitAnd,
+                        _ => SwiftTokenType::BitAnd,
                     }
                 }
                 '|' => {
@@ -554,37 +567,37 @@ impl<'config> SwiftLexer<'config> {
                     match state.peek() {
                         Some('|') => {
                             state.advance(1);
-                            SwiftSyntaxKind::LogicalOr
+                            SwiftTokenType::LogicalOr
                         }
                         Some('=') => {
                             state.advance(1);
-                            SwiftSyntaxKind::OrAssign
+                            SwiftTokenType::OrAssign
                         }
-                        _ => SwiftSyntaxKind::BitOr,
+                        _ => SwiftTokenType::BitOr,
                     }
                 }
                 '^' => {
                     state.advance(1);
                     if let Some('=') = state.peek() {
                         state.advance(1);
-                        SwiftSyntaxKind::XorAssign
+                        SwiftTokenType::XorAssign
                     }
                     else {
-                        SwiftSyntaxKind::BitXor
+                        SwiftTokenType::BitXor
                     }
                 }
                 '~' => {
                     state.advance(1);
-                    SwiftSyntaxKind::BitNot
+                    SwiftTokenType::BitNot
                 }
                 '?' => {
                     state.advance(1);
                     if let Some('?') = state.peek() {
                         state.advance(1);
-                        SwiftSyntaxKind::QuestionQuestion
+                        SwiftTokenType::QuestionQuestion
                     }
                     else {
-                        SwiftSyntaxKind::Question
+                        SwiftTokenType::Question
                     }
                 }
                 '.' => {
@@ -592,15 +605,19 @@ impl<'config> SwiftLexer<'config> {
                     match state.peek() {
                         Some('.') => {
                             state.advance(1);
-                            if let Some('<') = state.peek() {
-                                state.advance(1);
-                                SwiftSyntaxKind::Range
-                            }
-                            else {
-                                SwiftSyntaxKind::ClosedRange
+                            match state.peek() {
+                                Some('.') => {
+                                    state.advance(1);
+                                    SwiftTokenType::ClosedRange
+                                }
+                                Some('<') => {
+                                    state.advance(1);
+                                    SwiftTokenType::Range
+                                }
+                                _ => SwiftTokenType::Dot, // Or error
                             }
                         }
-                        _ => SwiftSyntaxKind::Dot,
+                        _ => SwiftTokenType::Dot,
                     }
                 }
                 _ => return false,
@@ -620,20 +637,20 @@ impl<'config> SwiftLexer<'config> {
 
         if let Some(ch) = state.peek() {
             let token_kind = match ch {
-                '(' => SwiftSyntaxKind::LeftParen,
-                ')' => SwiftSyntaxKind::RightParen,
-                '[' => SwiftSyntaxKind::LeftBracket,
-                ']' => SwiftSyntaxKind::RightBracket,
-                '{' => SwiftSyntaxKind::LeftBrace,
-                '}' => SwiftSyntaxKind::RightBrace,
-                ',' => SwiftSyntaxKind::Comma,
-                ';' => SwiftSyntaxKind::Semicolon,
-                ':' => SwiftSyntaxKind::Colon,
-                '@' => SwiftSyntaxKind::At,
-                '#' => SwiftSyntaxKind::Hash,
-                '$' => SwiftSyntaxKind::Dollar,
-                '_' => SwiftSyntaxKind::Underscore,
-                '\\' => SwiftSyntaxKind::Backslash,
+                '(' => SwiftTokenType::LeftParen,
+                ')' => SwiftTokenType::RightParen,
+                '[' => SwiftTokenType::LeftBracket,
+                ']' => SwiftTokenType::RightBracket,
+                '{' => SwiftTokenType::LeftBrace,
+                '}' => SwiftTokenType::RightBrace,
+                ',' => SwiftTokenType::Comma,
+                ';' => SwiftTokenType::Semicolon,
+                ':' => SwiftTokenType::Colon,
+                '@' => SwiftTokenType::At,
+                '#' => SwiftTokenType::Hash,
+                '$' => SwiftTokenType::Dollar,
+                '_' => SwiftTokenType::Underscore,
+                '\\' => SwiftTokenType::Backslash,
                 _ => return false,
             };
 
@@ -689,10 +706,10 @@ impl<'config> SwiftLexer<'config> {
             let start_pos = state.get_position();
             if let Some(ch) = state.peek() {
                 state.advance(ch.len_utf8());
-                state.add_token(SwiftSyntaxKind::Error, start_pos, state.get_position());
+                state.add_token(SwiftTokenType::Error, start_pos, state.get_position());
             }
 
-            state.advance_if_dead_lock(safe_point);
+            state.advance_if_dead_lock(safe_point)
         }
 
         Ok(())

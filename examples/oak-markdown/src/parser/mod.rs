@@ -1,13 +1,17 @@
-use crate::{kind::MarkdownSyntaxKind, language::MarkdownLanguage};
+pub mod element_type;
+
+use crate::{language::MarkdownLanguage, lexer::token_type::MarkdownTokenType, parser::element_type::MarkdownElementType as ET};
 use oak_core::{GreenNode, OakError, Parser, ParserState, source::Source};
 
 pub(crate) type State<'a, S> = ParserState<'a, MarkdownLanguage, S>;
 
+/// Parser for Markdown language.
 pub struct MarkdownParser<'config> {
     pub(crate) config: &'config MarkdownLanguage,
 }
 
 impl<'config> MarkdownParser<'config> {
+    /// Creates a new MarkdownParser with the given configuration.
     pub fn new(config: &'config MarkdownLanguage) -> Self {
         Self { config }
     }
@@ -19,20 +23,69 @@ impl<'config> MarkdownParser<'config> {
             let item_checkpoint = state.checkpoint();
             if let Some(kind) = state.peek_kind() {
                 match kind {
-                    MarkdownSyntaxKind::Heading1 | MarkdownSyntaxKind::Heading2 | MarkdownSyntaxKind::Heading3 | MarkdownSyntaxKind::Heading4 | MarkdownSyntaxKind::Heading5 | MarkdownSyntaxKind::Heading6 => {
-                        // 消耗标记和后续所有内容直到换行
+                    MarkdownTokenType::FrontMatter => {
+                        if self.config.allow_front_matter {
+                            state.bump();
+                            state.finish_at(item_checkpoint, ET::FrontMatter);
+                        }
+                        else {
+                            state.bump(); // Treat as text if not allowed? Or let it be handled by default?
+                        }
+                    }
+                    MarkdownTokenType::MathBlock => {
+                        if self.config.allow_math {
+                            state.bump();
+                            state.finish_at(item_checkpoint, ET::MathBlock);
+                        }
+                        else {
+                            state.bump();
+                        }
+                    }
+                    MarkdownTokenType::HtmlTag | MarkdownTokenType::HtmlComment => {
+                        if self.config.allow_html {
+                            state.bump();
+                            state.finish_at(item_checkpoint, ET::from(kind));
+                        }
+                        else {
+                            state.bump();
+                        }
+                    }
+                    MarkdownTokenType::XmlTag | MarkdownTokenType::XmlComment => {
+                        if self.config.allow_xml {
+                            state.bump();
+                            state.finish_at(item_checkpoint, ET::from(kind));
+                        }
+                        else {
+                            state.bump();
+                        }
+                    }
+                    MarkdownTokenType::FootnoteDefinition => {
                         state.bump();
+                        // 消耗直到行尾
                         while state.not_at_end() {
                             if let Some(next_kind) = state.peek_kind() {
-                                if next_kind == MarkdownSyntaxKind::Newline {
+                                if next_kind == MarkdownTokenType::Newline {
                                     break;
                                 }
                             }
                             state.bump();
                         }
-                        state.finish_at(item_checkpoint, kind.into());
+                        state.finish_at(item_checkpoint, ET::FootnoteDefinition);
                     }
-                    MarkdownSyntaxKind::ListMarker => {
+                    MarkdownTokenType::Heading1 | MarkdownTokenType::Heading2 | MarkdownTokenType::Heading3 | MarkdownTokenType::Heading4 | MarkdownTokenType::Heading5 | MarkdownTokenType::Heading6 => {
+                        // 消耗标记和后续所有内容直到换行
+                        state.bump();
+                        while state.not_at_end() {
+                            if let Some(next_kind) = state.peek_kind() {
+                                if next_kind == MarkdownTokenType::Newline {
+                                    break;
+                                }
+                            }
+                            state.bump();
+                        }
+                        state.finish_at(item_checkpoint, ET::from(kind));
+                    }
+                    MarkdownTokenType::ListMarker => {
                         // 列表聚合逻辑：收集连续的列表项
                         let mut is_ordered = false;
                         if let Some(text) = state.peek_text() {
@@ -43,7 +96,7 @@ impl<'config> MarkdownParser<'config> {
 
                         let list_checkpoint = item_checkpoint;
                         while state.not_at_end() {
-                            if let Some(MarkdownSyntaxKind::ListMarker) = state.peek_kind() {
+                            if let Some(MarkdownTokenType::ListMarker) = state.peek_kind() {
                                 // 检查当前项是否与列表类型一致
                                 let current_is_ordered = if let Some(text) = state.peek_text() { text.chars().next().map(|c| c.is_ascii_digit()).unwrap_or(false) } else { false };
 
@@ -56,19 +109,19 @@ impl<'config> MarkdownParser<'config> {
                                 state.bump(); // 消耗标记并存入树
                                 while state.not_at_end() {
                                     if let Some(next_kind) = state.peek_kind() {
-                                        if next_kind == MarkdownSyntaxKind::Newline {
+                                        if next_kind == MarkdownTokenType::Newline {
                                             break;
                                         }
                                     }
                                     state.bump();
                                 }
-                                state.finish_at(li_checkpoint, MarkdownSyntaxKind::ListItem.into());
+                                state.finish_at(li_checkpoint, ET::ListItem);
 
                                 // 消耗可能的换行，准备看下一个是否还是列表项
-                                if let Some(MarkdownSyntaxKind::Newline) = state.peek_kind() {
+                                if let Some(MarkdownTokenType::Newline) = state.peek_kind() {
                                     let nl_checkpoint = state.checkpoint();
                                     state.bump();
-                                    if !matches!(state.peek_kind(), Some(MarkdownSyntaxKind::ListMarker)) {
+                                    if !matches!(state.peek_kind(), Some(MarkdownTokenType::ListMarker)) {
                                         // 如果下一行不是列表项，或者我们要结束列表，回退换行（除非它是列表的一部分）
                                         // 这里简单处理：如果下一行不是列表项，就结束
                                         break;
@@ -90,19 +143,18 @@ impl<'config> MarkdownParser<'config> {
                             }
                         }
 
-                        let list_kind = if is_ordered { MarkdownSyntaxKind::OrderedList } else { MarkdownSyntaxKind::UnorderedList };
-                        state.finish_at(list_checkpoint, list_kind.into());
+                        state.finish_at(list_checkpoint, ET::List);
                     }
-                    MarkdownSyntaxKind::BlockquoteMarker => {
+                    MarkdownTokenType::BlockquoteMarker => {
                         // 消耗 > 标记
                         state.bump();
                         // 收集引用内容直到遇到非引用的新行
                         while state.not_at_end() {
                             if let Some(next_kind) = state.peek_kind() {
-                                if next_kind == MarkdownSyntaxKind::Newline {
+                                if next_kind == MarkdownTokenType::Newline {
                                     state.bump();
                                     if let Some(after_nl) = state.peek_kind() {
-                                        if after_nl != MarkdownSyntaxKind::BlockquoteMarker && after_nl != MarkdownSyntaxKind::Whitespace {
+                                        if after_nl != MarkdownTokenType::BlockquoteMarker && after_nl != MarkdownTokenType::Whitespace {
                                             break;
                                         }
                                     }
@@ -110,52 +162,55 @@ impl<'config> MarkdownParser<'config> {
                                         break;
                                     }
                                 }
-                                else if next_kind == MarkdownSyntaxKind::Heading1
-                                    || next_kind == MarkdownSyntaxKind::Heading2
-                                    || next_kind == MarkdownSyntaxKind::Heading3
-                                    || next_kind == MarkdownSyntaxKind::Heading4
-                                    || next_kind == MarkdownSyntaxKind::Heading5
-                                    || next_kind == MarkdownSyntaxKind::Heading6
-                                    || next_kind == MarkdownSyntaxKind::HorizontalRule
-                                    || next_kind == MarkdownSyntaxKind::CodeFence
+                                else if next_kind == MarkdownTokenType::Heading1
+                                    || next_kind == MarkdownTokenType::Heading2
+                                    || next_kind == MarkdownTokenType::Heading3
+                                    || next_kind == MarkdownTokenType::Heading4
+                                    || next_kind == MarkdownTokenType::Heading5
+                                    || next_kind == MarkdownTokenType::Heading6
+                                    || next_kind == MarkdownTokenType::HorizontalRule
+                                    || next_kind == MarkdownTokenType::CodeFence
+                                    || next_kind == MarkdownTokenType::MathBlock
+                                    || next_kind == MarkdownTokenType::FrontMatter
+                                    || next_kind == MarkdownTokenType::FootnoteDefinition
                                 {
                                     break;
                                 }
                             }
                             state.bump();
                         }
-                        state.finish_at(item_checkpoint, MarkdownSyntaxKind::Blockquote.into());
+                        state.finish_at(item_checkpoint, ET::Blockquote);
                     }
-                    MarkdownSyntaxKind::CodeFence => {
+                    MarkdownTokenType::CodeFence => {
                         // 消耗开始围栏
                         state.bump();
                         // 消耗可能的语言标识
-                        if let Some(MarkdownSyntaxKind::CodeLanguage) = state.peek_kind() {
+                        if let Some(MarkdownTokenType::CodeLanguage) = state.peek_kind() {
                             state.bump();
                         }
                         // 收集代码内容直到遇到结束围栏
                         while state.not_at_end() {
                             if let Some(next_kind) = state.peek_kind() {
-                                if next_kind == MarkdownSyntaxKind::CodeFence {
+                                if next_kind == MarkdownTokenType::CodeFence {
                                     state.bump();
                                     break;
                                 }
                             }
                             state.bump();
                         }
-                        state.finish_at(item_checkpoint, MarkdownSyntaxKind::CodeBlock.into());
+                        state.finish_at(item_checkpoint, ET::CodeBlock);
                     }
-                    MarkdownSyntaxKind::HorizontalRule => {
+                    MarkdownTokenType::HorizontalRule => {
                         state.bump();
-                        state.finish_at(item_checkpoint, MarkdownSyntaxKind::HorizontalRule.into());
+                        state.finish_at(item_checkpoint, ET::HorizontalRule);
                     }
-                    MarkdownSyntaxKind::Pipe => {
+                    MarkdownTokenType::Pipe => {
                         // 表格聚合：消耗连续的包含 | 的行
                         while state.not_at_end() {
                             // 消耗当前行直到换行
                             while state.not_at_end() {
                                 if let Some(next_kind) = state.peek_kind() {
-                                    if next_kind == MarkdownSyntaxKind::Newline {
+                                    if next_kind == MarkdownTokenType::Newline {
                                         break;
                                     }
                                 }
@@ -163,7 +218,7 @@ impl<'config> MarkdownParser<'config> {
                             }
 
                             // 消耗换行并检查下一行
-                            if let Some(MarkdownSyntaxKind::Newline) = state.peek_kind() {
+                            if let Some(MarkdownTokenType::Newline) = state.peek_kind() {
                                 let checkpoint_before_nl = state.checkpoint();
                                 state.bump();
 
@@ -171,10 +226,10 @@ impl<'config> MarkdownParser<'config> {
                                 let mut is_table_line = false;
                                 while state.not_at_end() {
                                     if let Some(kind) = state.peek_kind() {
-                                        if kind == MarkdownSyntaxKind::Whitespace {
+                                        if kind == MarkdownTokenType::Whitespace {
                                             state.bump();
                                         }
-                                        else if kind == MarkdownSyntaxKind::Pipe {
+                                        else if kind == MarkdownTokenType::Pipe {
                                             is_table_line = true;
                                             break;
                                         }
@@ -201,37 +256,40 @@ impl<'config> MarkdownParser<'config> {
                                 break;
                             }
                         }
-                        state.finish_at(item_checkpoint, MarkdownSyntaxKind::Table.into());
+                        state.finish_at(item_checkpoint, ET::Table);
                     }
-                    MarkdownSyntaxKind::Newline | MarkdownSyntaxKind::Whitespace => {
+                    MarkdownTokenType::Newline | MarkdownTokenType::Whitespace => {
                         state.bump();
                     }
                     _ => {
                         // 收集段落内容：直到遇到两个换行或另一个块级元素
                         while state.not_at_end() {
                             if let Some(next_kind) = state.peek_kind() {
-                                if next_kind == MarkdownSyntaxKind::Newline {
+                                if next_kind == MarkdownTokenType::Newline {
                                     let _cp = state.checkpoint();
                                     state.bump();
                                     // 检查是否是连续换行
                                     if let Some(after_nl) = state.peek_kind() {
-                                        if after_nl == MarkdownSyntaxKind::Newline {
+                                        if after_nl == MarkdownTokenType::Newline {
                                             state.bump();
                                             break;
                                         }
                                         // 或者是块级元素
                                         if matches!(
                                             after_nl,
-                                            MarkdownSyntaxKind::Heading1
-                                                | MarkdownSyntaxKind::Heading2
-                                                | MarkdownSyntaxKind::Heading3
-                                                | MarkdownSyntaxKind::Heading4
-                                                | MarkdownSyntaxKind::Heading5
-                                                | MarkdownSyntaxKind::Heading6
-                                                | MarkdownSyntaxKind::BlockquoteMarker
-                                                | MarkdownSyntaxKind::CodeFence
-                                                | MarkdownSyntaxKind::ListMarker
-                                                | MarkdownSyntaxKind::HorizontalRule
+                                            MarkdownTokenType::Heading1
+                                                | MarkdownTokenType::Heading2
+                                                | MarkdownTokenType::Heading3
+                                                | MarkdownTokenType::Heading4
+                                                | MarkdownTokenType::Heading5
+                                                | MarkdownTokenType::Heading6
+                                                | MarkdownTokenType::BlockquoteMarker
+                                                | MarkdownTokenType::CodeFence
+                                                | MarkdownTokenType::ListMarker
+                                                | MarkdownTokenType::HorizontalRule
+                                                | MarkdownTokenType::MathBlock
+                                                | MarkdownTokenType::FrontMatter
+                                                | MarkdownTokenType::FootnoteDefinition
                                         ) {
                                             break;
                                         }
@@ -242,23 +300,26 @@ impl<'config> MarkdownParser<'config> {
                                 }
                                 else if matches!(
                                     next_kind,
-                                    MarkdownSyntaxKind::Heading1
-                                        | MarkdownSyntaxKind::Heading2
-                                        | MarkdownSyntaxKind::Heading3
-                                        | MarkdownSyntaxKind::Heading4
-                                        | MarkdownSyntaxKind::Heading5
-                                        | MarkdownSyntaxKind::Heading6
-                                        | MarkdownSyntaxKind::BlockquoteMarker
-                                        | MarkdownSyntaxKind::CodeFence
-                                        | MarkdownSyntaxKind::ListMarker
-                                        | MarkdownSyntaxKind::HorizontalRule
+                                    MarkdownTokenType::Heading1
+                                        | MarkdownTokenType::Heading2
+                                        | MarkdownTokenType::Heading3
+                                        | MarkdownTokenType::Heading4
+                                        | MarkdownTokenType::Heading5
+                                        | MarkdownTokenType::Heading6
+                                        | MarkdownTokenType::BlockquoteMarker
+                                        | MarkdownTokenType::CodeFence
+                                        | MarkdownTokenType::ListMarker
+                                        | MarkdownTokenType::HorizontalRule
+                                        | MarkdownTokenType::MathBlock
+                                        | MarkdownTokenType::FrontMatter
+                                        | MarkdownTokenType::FootnoteDefinition
                                 ) {
                                     break;
                                 }
                             }
                             state.bump();
                         }
-                        state.finish_at(item_checkpoint, MarkdownSyntaxKind::Paragraph.into());
+                        state.finish_at(item_checkpoint, ET::Paragraph);
                     }
                 }
             }
@@ -267,7 +328,7 @@ impl<'config> MarkdownParser<'config> {
             }
         }
 
-        let root = state.finish_at(checkpoint, MarkdownSyntaxKind::Root.into());
+        let root = state.finish_at(checkpoint, ET::Root);
         Ok(root)
     }
 }

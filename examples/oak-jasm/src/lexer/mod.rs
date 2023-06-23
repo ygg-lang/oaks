@@ -1,9 +1,11 @@
-use crate::{language::JasmLanguage, syntax::JasmSyntaxKind};
+#![doc = include_str!("readme.md")]
 use oak_core::{
-    Lexer, LexerCache, LexerState, OakError,
+    Lexer, LexerCache, LexerState, OakError, Source,
     lexer::{CommentConfig, LexOutput, StringConfig},
-    source::Source,
 };
+pub mod token_type;
+
+use crate::{language::JasmLanguage, lexer::token_type::JasmTokenType};
 use std::sync::LazyLock;
 
 type State<'a, S> = LexerState<'a, S, JasmLanguage>;
@@ -84,7 +86,7 @@ impl<'config> JasmLexer<'config> {
         }
 
         if state.get_position() > start {
-            state.add_token(JasmSyntaxKind::Whitespace, start, state.get_position());
+            state.add_token(JasmTokenType::Whitespace, start, state.get_position());
             return true;
         }
 
@@ -97,7 +99,7 @@ impl<'config> JasmLexer<'config> {
 
         if state.current() == Some('\n') {
             state.advance(1);
-            state.add_token(JasmSyntaxKind::Newline, start, state.get_position());
+            state.add_token(JasmTokenType::Newline, start, state.get_position());
             return true;
         }
         false
@@ -105,12 +107,12 @@ impl<'config> JasmLexer<'config> {
 
     /// 跳过注释
     fn skip_comment<S: Source + ?Sized>(&self, state: &mut State<'_, S>) -> bool {
-        JASM_COMMENT.scan(state, JasmSyntaxKind::Comment, JasmSyntaxKind::Comment)
+        JASM_COMMENT.scan(state, JasmTokenType::Comment, JasmTokenType::Comment)
     }
 
     /// 处理字符串字面量
     fn lex_string_literal<S: Source + ?Sized>(&self, state: &mut State<'_, S>) -> bool {
-        JASM_STRING.scan(state, JasmSyntaxKind::StringLiteral)
+        JASM_STRING.scan(state, JasmTokenType::StringLiteral)
     }
 
     /// 处理数字字面量
@@ -165,7 +167,7 @@ impl<'config> JasmLexer<'config> {
             }
         }
 
-        state.add_token(JasmSyntaxKind::Number, start, state.get_position());
+        state.add_token(JasmTokenType::Number, start, state.get_position());
         true
     }
 
@@ -202,72 +204,72 @@ impl<'config> JasmLexer<'config> {
     }
 
     /// 分类标识符为关键字、指令或普通标识符
-    fn classify_identifier(&self, text: &str) -> JasmSyntaxKind {
+    fn classify_identifier(&self, text: &str) -> JasmTokenType {
         match text {
             // 关键字
-            "class" => JasmSyntaxKind::ClassKw,
-            "version" => JasmSyntaxKind::VersionKw,
-            "method" => JasmSyntaxKind::MethodKw,
-            "field" => JasmSyntaxKind::FieldKw,
-            "string" => JasmSyntaxKind::StringKw,
-            "sourcefile" => JasmSyntaxKind::SourceFileKw,
-            "stack" => JasmSyntaxKind::StackKw,
-            "locals" => JasmSyntaxKind::LocalsKw,
-            "end" => JasmSyntaxKind::EndKw,
-            "compiled" => JasmSyntaxKind::CompiledKw,
-            "from" => JasmSyntaxKind::FromKw,
-            "innerclass" => JasmSyntaxKind::InnerClassKw,
-            "nestmembers" => JasmSyntaxKind::NestMembersKw,
-            "bootstrapmethod" => JasmSyntaxKind::BootstrapMethodKw,
+            "class" => JasmTokenType::ClassKw,
+            "version" => JasmTokenType::VersionKw,
+            "method" => JasmTokenType::MethodKw,
+            "field" => JasmTokenType::FieldKw,
+            "string" => JasmTokenType::StringKw,
+            "sourcefile" => JasmTokenType::SourceFileKw,
+            "stack" => JasmTokenType::StackKw,
+            "locals" => JasmTokenType::LocalsKw,
+            "end" => JasmTokenType::EndKw,
+            "compiled" => JasmTokenType::CompiledKw,
+            "from" => JasmTokenType::FromKw,
+            "innerclass" => JasmTokenType::InnerClassKw,
+            "nestmembers" => JasmTokenType::NestMembersKw,
+            "bootstrapmethod" => JasmTokenType::BootstrapMethodKw,
 
             // 访问修饰符
-            "public" => JasmSyntaxKind::Public,
-            "private" => JasmSyntaxKind::Private,
-            "protected" => JasmSyntaxKind::Protected,
-            "static" => JasmSyntaxKind::Static,
-            "super" => JasmSyntaxKind::Super,
-            "final" => JasmSyntaxKind::Final,
-            "abstract" => JasmSyntaxKind::Abstract,
-            "synchronized" => JasmSyntaxKind::Synchronized,
-            "native" => JasmSyntaxKind::Native,
-            "synthetic" => JasmSyntaxKind::Synthetic,
-            "deprecated" => JasmSyntaxKind::Deprecated,
-            "varargs" => JasmSyntaxKind::Varargs,
+            "public" => JasmTokenType::Public,
+            "private" => JasmTokenType::Private,
+            "protected" => JasmTokenType::Protected,
+            "static" => JasmTokenType::Static,
+            "super" => JasmTokenType::Super,
+            "final" => JasmTokenType::Final,
+            "abstract" => JasmTokenType::Abstract,
+            "synchronized" => JasmTokenType::Synchronized,
+            "native" => JasmTokenType::Native,
+            "synthetic" => JasmTokenType::Synthetic,
+            "deprecated" => JasmTokenType::Deprecated,
+            "varargs" => JasmTokenType::Varargs,
 
             // 字节码指令
-            "aload_0" => JasmSyntaxKind::ALoad0,
-            "aload_1" => JasmSyntaxKind::ALoad1,
-            "aload_2" => JasmSyntaxKind::ALoad2,
-            "aload_3" => JasmSyntaxKind::ALoad3,
-            "iload_0" => JasmSyntaxKind::ILoad0,
-            "iload_1" => JasmSyntaxKind::ILoad1,
-            "iload_2" => JasmSyntaxKind::ILoad2,
-            "iload_3" => JasmSyntaxKind::ILoad3,
-            "ldc" => JasmSyntaxKind::Ldc,
-            "ldc_w" => JasmSyntaxKind::LdcW,
-            "ldc2_w" => JasmSyntaxKind::Ldc2W,
-            "invokespecial" => JasmSyntaxKind::InvokeSpecial,
-            "invokevirtual" => JasmSyntaxKind::InvokeVirtual,
-            "invokestatic" => JasmSyntaxKind::InvokeStatic,
-            "invokeinterface" => JasmSyntaxKind::InvokeInterface,
-            "invokedynamic" => JasmSyntaxKind::InvokeDynamic,
-            "getstatic" => JasmSyntaxKind::GetStatic,
-            "putstatic" => JasmSyntaxKind::PutStatic,
-            "getfield" => JasmSyntaxKind::GetField,
-            "putfield" => JasmSyntaxKind::PutField,
-            "return" => JasmSyntaxKind::Return,
-            "ireturn" => JasmSyntaxKind::IReturn,
-            "areturn" => JasmSyntaxKind::AReturn,
-            "lreturn" => JasmSyntaxKind::LReturn,
-            "freturn" => JasmSyntaxKind::FReturn,
-            "dreturn" => JasmSyntaxKind::DReturn,
-            "nop" => JasmSyntaxKind::Nop,
-            "dup" => JasmSyntaxKind::Dup,
-            "pop" => JasmSyntaxKind::Pop,
-            "new" => JasmSyntaxKind::New,
+            "aload_0" => JasmTokenType::ALoad0,
+            "aload_1" => JasmTokenType::ALoad1,
+            "aload_2" => JasmTokenType::ALoad2,
+            "aload_3" => JasmTokenType::ALoad3,
+            "iload_0" => JasmTokenType::ILoad0,
+            "iload_1" => JasmTokenType::ILoad1,
+            "iload_2" => JasmTokenType::ILoad2,
+            "iload_3" => JasmTokenType::ILoad3,
+            "ldc" => JasmTokenType::Ldc,
+            "ldc_w" => JasmTokenType::LdcW,
+            "ldc2_w" => JasmTokenType::Ldc2W,
+            "invokespecial" => JasmTokenType::InvokeSpecial,
+            "invokevirtual" => JasmTokenType::InvokeVirtual,
+            "invokestatic" => JasmTokenType::InvokeStatic,
+            "invokeinterface" => JasmTokenType::InvokeInterface,
+            "invokedynamic" => JasmTokenType::InvokeDynamic,
+            "getstatic" => JasmTokenType::GetStatic,
+            "putstatic" => JasmTokenType::PutStatic,
+            "getfield" => JasmTokenType::GetField,
+            "putfield" => JasmTokenType::PutField,
+            "return" => JasmTokenType::Return,
+            "ireturn" => JasmTokenType::IReturn,
+            "areturn" => JasmTokenType::AReturn,
+            "lreturn" => JasmTokenType::LReturn,
+            "freturn" => JasmTokenType::FReturn,
+            "dreturn" => JasmTokenType::DReturn,
+            "nop" => JasmTokenType::Nop,
+            "dup" => JasmTokenType::Dup,
+            "pop" => JasmTokenType::Pop,
+            "new" => JasmTokenType::New,
 
             // 默认为标识符
-            _ => JasmSyntaxKind::IdentifierToken,
+            _ => JasmTokenType::IdentifierToken,
         }
     }
 
@@ -277,17 +279,17 @@ impl<'config> JasmLexer<'config> {
 
         if let Some(ch) = state.current() {
             let kind = match ch {
-                '{' => JasmSyntaxKind::LeftBrace,
-                '}' => JasmSyntaxKind::RightBrace,
-                '(' => JasmSyntaxKind::LeftParen,
-                ')' => JasmSyntaxKind::RightParen,
-                '[' => JasmSyntaxKind::LeftBracket,
-                ']' => JasmSyntaxKind::RightBracket,
-                ':' => JasmSyntaxKind::Colon,
-                ';' => JasmSyntaxKind::Semicolon,
-                '.' => JasmSyntaxKind::Dot,
-                ',' => JasmSyntaxKind::Comma,
-                '/' => JasmSyntaxKind::Slash,
+                '{' => JasmTokenType::LeftBrace,
+                '}' => JasmTokenType::RightBrace,
+                '(' => JasmTokenType::LeftParen,
+                ')' => JasmTokenType::RightParen,
+                '[' => JasmTokenType::LeftBracket,
+                ']' => JasmTokenType::RightBracket,
+                ':' => JasmTokenType::Colon,
+                ';' => JasmTokenType::Semicolon,
+                '.' => JasmTokenType::Dot,
+                ',' => JasmTokenType::Comma,
+                '/' => JasmTokenType::Slash,
                 _ => return false,
             };
 

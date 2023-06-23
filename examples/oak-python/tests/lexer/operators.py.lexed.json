@@ -1,13 +1,7 @@
 {
   "success": true,
-  "count": 100,
+  "count": 87,
   "tokens": [
-    {
-      "kind": "Newline",
-      "text": "\r\n",
-      "start": 22,
-      "end": 24
-    },
     {
       "kind": "Identifier",
       "text": "a",
@@ -75,12 +69,6 @@
       "end": 45
     },
     {
-      "kind": "Newline",
-      "text": "\r\n",
-      "start": 45,
-      "end": 47
-    },
-    {
       "kind": "Identifier",
       "text": "b",
       "start": 47,
@@ -109,12 +97,6 @@
       "text": "3",
       "start": 57,
       "end": 58
-    },
-    {
-      "kind": "Newline",
-      "text": "\r\n",
-      "start": 58,
-      "end": 60
     },
     {
       "kind": "Identifier",
@@ -147,12 +129,6 @@
       "end": 70
     },
     {
-      "kind": "Newline",
-      "text": "\r\n",
-      "start": 70,
-      "end": 72
-    },
-    {
       "kind": "Identifier",
       "text": "d",
       "start": 72,
@@ -183,24 +159,6 @@
       "end": 82
     },
     {
-      "kind": "Newline",
-      "text": "\r\n",
-      "start": 82,
-      "end": 84
-    },
-    {
-      "kind": "Newline",
-      "text": "\r\n",
-      "start": 84,
-      "end": 86
-    },
-    {
-      "kind": "Newline",
-      "text": "\r\n",
-      "start": 108,
-      "end": 110
-    },
-    {
       "kind": "Identifier",
       "text": "result1",
       "start": 110,
@@ -219,7 +177,7 @@
       "end": 121
     },
     {
-      "kind": "Eq",
+      "kind": "Equal",
       "text": "==",
       "start": 122,
       "end": 124
@@ -229,12 +187,6 @@
       "text": "b",
       "start": 125,
       "end": 126
-    },
-    {
-      "kind": "Newline",
-      "text": "\r\n",
-      "start": 126,
-      "end": 128
     },
     {
       "kind": "Identifier",
@@ -273,12 +225,6 @@
       "end": 144
     },
     {
-      "kind": "Newline",
-      "text": "\r\n",
-      "start": 144,
-      "end": 146
-    },
-    {
       "kind": "Identifier",
       "text": "result3",
       "start": 146,
@@ -307,12 +253,6 @@
       "text": "b",
       "start": 160,
       "end": 161
-    },
-    {
-      "kind": "Newline",
-      "text": "\r\n",
-      "start": 161,
-      "end": 163
     },
     {
       "kind": "Identifier",
@@ -345,12 +285,6 @@
       "end": 178
     },
     {
-      "kind": "Newline",
-      "text": "\r\n",
-      "start": 178,
-      "end": 180
-    },
-    {
       "kind": "Identifier",
       "text": "result5",
       "start": 180,
@@ -379,12 +313,6 @@
       "text": "b",
       "start": 195,
       "end": 196
-    },
-    {
-      "kind": "Newline",
-      "text": "\r\n",
-      "start": 196,
-      "end": 198
     },
     {
       "kind": "Identifier",
@@ -417,24 +345,6 @@
       "end": 214
     },
     {
-      "kind": "Newline",
-      "text": "\r\n",
-      "start": 214,
-      "end": 216
-    },
-    {
-      "kind": "Newline",
-      "text": "\r\n",
-      "start": 216,
-      "end": 218
-    },
-    {
-      "kind": "Newline",
-      "text": "\r\n",
-      "start": 237,
-      "end": 239
-    },
-    {
       "kind": "Identifier",
       "text": "flag1",
       "start": 239,
@@ -463,12 +373,6 @@
       "text": "False",
       "start": 256,
       "end": 261
-    },
-    {
-      "kind": "Newline",
-      "text": "\r\n",
-      "start": 261,
-      "end": 263
     },
     {
       "kind": "Identifier",
@@ -501,12 +405,6 @@
       "end": 284
     },
     {
-      "kind": "Newline",
-      "text": "\r\n",
-      "start": 284,
-      "end": 286
-    },
-    {
       "kind": "Identifier",
       "text": "flag3",
       "start": 286,
@@ -531,24 +429,6 @@
       "end": 302
     },
     {
-      "kind": "Newline",
-      "text": "\r\n",
-      "start": 302,
-      "end": 304
-    },
-    {
-      "kind": "Newline",
-      "text": "\r\n",
-      "start": 304,
-      "end": 306
-    },
-    {
-      "kind": "Newline",
-      "text": "\r\n",
-      "start": 328,
-      "end": 330
-    },
-    {
       "kind": "Identifier",
       "text": "x",
       "start": 330,
@@ -565,12 +445,6 @@
       "text": "10",
       "start": 334,
       "end": 336
-    },
-    {
-      "kind": "Newline",
-      "text": "\r\n",
-      "start": 336,
-      "end": 338
     },
     {
       "kind": "Identifier",
@@ -591,16 +465,64 @@
       "end": 344
     },
     {
-      "kind": "Newline",
-      "text": "\r\n",
-      "start": 344,
-      "end": 346
-    },
-    {
       "kind": "Identifier",
       "text": "x",
       "start": 346,
       "end": 347
+    },
+    {
+      "kind": "MinusAssign",
+      "text": "-=",
+      "start": 348,
+      "end": 350
+    },
+    {
+      "kind": "Number",
+      "text": "2",
+      "start": 351,
+      "end": 352
+    },
+    {
+      "kind": "Identifier",
+      "text": "x",
+      "start": 354,
+      "end": 355
+    },
+    {
+      "kind": "StarAssign",
+      "text": "*=",
+      "start": 356,
+      "end": 358
+    },
+    {
+      "kind": "Number",
+      "text": "3",
+      "start": 359,
+      "end": 360
+    },
+    {
+      "kind": "Identifier",
+      "text": "x",
+      "start": 362,
+      "end": 363
+    },
+    {
+      "kind": "SlashAssign",
+      "text": "/=",
+      "start": 364,
+      "end": 366
+    },
+    {
+      "kind": "Number",
+      "text": "2",
+      "start": 367,
+      "end": 368
+    },
+    {
+      "kind": "Eof",
+      "text": "",
+      "start": 368,
+      "end": 368
     }
   ],
   "errors": []

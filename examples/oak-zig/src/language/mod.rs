@@ -1,6 +1,11 @@
+#![doc = include_str!("readme.md")]
 use oak_core::{Language, LanguageCategory};
 
-#[derive(Debug, Default, Clone, Copy, PartialEq, Eq, Hash, serde::Serialize, serde::Deserialize)]
+#[cfg(feature = "serde")]
+use serde::{Deserialize, Serialize};
+
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[derive(Debug, Default, Clone, Copy, PartialEq, Eq, Hash)]
 pub struct ZigLanguage {}
 
 impl ZigLanguage {
@@ -13,7 +18,7 @@ impl Language for ZigLanguage {
     const NAME: &'static str = "zig";
     const CATEGORY: LanguageCategory = LanguageCategory::Programming;
 
-    type TokenType = crate::kind::ZigSyntaxKind;
-    type ElementType = crate::kind::ZigSyntaxKind;
+    type TokenType = crate::lexer::token_type::ZigTokenType;
+    type ElementType = crate::parser::element_type::ZigElementType;
     type TypedRoot = ();
 }

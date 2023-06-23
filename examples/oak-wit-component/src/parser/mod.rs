@@ -1,11 +1,17 @@
-use crate::{kind::WitSyntaxKind, language::WitLanguage, lexer::WitLexer};
+pub mod element_type;
+
+use crate::{
+    language::WitLanguage,
+    lexer::{WitLexer, token_type::WitTokenType},
+    parser::element_type::WitElementType,
+};
 use oak_core::{
     TextEdit,
     parser::{ParseCache, Parser},
     source::Source,
 };
 
-// type WitToken = Token<WitSyntaxKind>;
+// type WitToken = Token<WitTokenType>;
 
 /// WIT Parser
 pub struct WitParser<'config> {
@@ -30,7 +36,7 @@ impl<'config> Parser<WitLanguage> for WitParser<'config> {
                 // TODO: 完整的 WIT 解析逻辑
             }
 
-            Ok(state.finish_at(checkpoint, WitSyntaxKind::Root))
+            Ok(state.finish_at(checkpoint, crate::parser::element_type::WitElementType::Root))
         })
     }
 }

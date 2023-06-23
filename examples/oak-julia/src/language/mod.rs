@@ -1,8 +1,11 @@
+#![doc = include_str!("readme.md")]
 use oak_core::{Language, LanguageCategory};
+#[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
 
-/// Julia 语言实现
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
+/// Julia language implementation.
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub struct JuliaLanguage {
     pub allow_comment: bool,
 }
@@ -17,8 +20,8 @@ impl Language for JuliaLanguage {
     const NAME: &'static str = "julia";
     const CATEGORY: LanguageCategory = LanguageCategory::Programming;
 
-    type TokenType = crate::kind::JuliaSyntaxKind;
-    type ElementType = crate::kind::JuliaSyntaxKind;
+    type TokenType = crate::lexer::token_type::JuliaTokenType;
+    type ElementType = crate::parser::element_type::JuliaElementType;
     type TypedRoot = crate::ast::JuliaRoot;
 }
 

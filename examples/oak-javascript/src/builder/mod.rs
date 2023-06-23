@@ -1,9 +1,10 @@
+#![doc = include_str!("readme.md")]
 use crate::{ast::JavaScriptRoot, language::JavaScriptLanguage};
 use oak_core::{
     Builder, BuilderCache,
     builder::BuildOutput,
     source::{Source, TextEdit},
-};
+}
 
 pub struct JavaScriptBuilder;
 

@@ -1,3 +1,4 @@
+#![doc = include_str!("readme.md")]
 use oak_core::Range;
 
 /// Dockerfile AST root type

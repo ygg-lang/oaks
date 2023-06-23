@@ -1,155 +1,34 @@
-# Oak TOML Parser
+# 🚀 Oak TOML Parser
 
 [![Crates.io](https://img.shields.io/crates/v/oak-toml.svg)](https://crates.io/crates/oak-toml)
 [![Documentation](https://docs.rs/oak-toml/badge.svg)](https://docs.rs/oak-toml)
 
-High-performance incremental TOML parser for the oak ecosystem with flexible configuration, optimized for configuration file processing and data serialization.
+**Precision and Performance for Configuration** — A high-performance, incremental TOML parser built on the Oak framework. Optimized for Rust project management, configuration files, and high-fidelity document processing.
 
-## 🎯 Overview
+## 🎯 Project Vision
 
-Oak of toml is a robust parser for TOML, designed to handle complete TOML syntax including modern features. Built on the solid foundation of oak-core, it provides both high-level convenience and detailed AST generation for configuration processing and data serialization.
+TOML is the preferred configuration language for the Rust ecosystem, but its precise rules for strings, dates, and nested tables require a robust and accurate parser. `oak-toml` provides a high-performance, Rust-powered infrastructure for parsing TOML that is both standard-compliant and incredibly fast. By utilizing Oak's incremental parsing architecture, we enable the creation of highly responsive IDEs, configuration editors, and build tools that can handle large `Cargo.toml` files and complex configuration graphs in real-time.
 
-## ✨ Features
+## ✨ Core Features
 
-- **Complete TOML Syntax**: Supports all TOML features including modern specifications
-- **Full AST Generation**: Generates comprehensive Abstract Syntax Trees
-- **Lexer Support**: Built-in tokenization with proper span information
-- **Error Recovery**: Graceful handling of syntax errors with detailed diagnostics
+- **⚡ Blazing Fast**: Leverages Rust's zero-cost abstractions to deliver sub-millisecond parsing, essential for real-time validation and large-scale configuration analysis.
+- **🔄 Incremental by Design**: Built-in support for partial updates—re-parse only the sections of the TOML file that changed. Ideal for real-time editing of large project manifests.
+- **🌳 High-Fidelity AST**: Generates a comprehensive Abstract Syntax Tree capturing the full depth of TOML:
+    - **Tables & Arrays**: Precise mapping of standard tables, inline tables, and arrays of tables.
+    - **Keys & Values**: Detailed tracking of simple, quoted, and dotted keys, along with all TOML value types.
+    - **Dates & Times**: Native support for parsing RFC3339 date-time formats.
+    - **Comments & Whitespace**: Retains all trivia, enabling faithful round-trip processing and refactoring.
+- **🛡️ Industrial-Grade Fault Tolerance**: Engineered to recover from syntax errors gracefully, providing precise diagnostics—crucial for maintaining a smooth developer experience when editing project configurations.
+- **🧩 Deep Ecosystem Integration**: Seamlessly works with `oak-lsp` for full LSP support and `oak-mcp` for intelligent project metadata discovery.
 
-## 🚀 Quick Start
+## 🏗️ Architecture
 
-Basic example:
+The parser follows the **Green/Red Tree** architecture (inspired by Roslyn), which allows for:
+1. **Efficient Immutability**: Share nodes across different versions of the tree without copying.
+2. **Lossless Syntax Trees**: Retains all trivia (whitespace and comments), enabling faithful code formatting and refactoring.
+3. **Type Safety**: Strongly-typed "Red" nodes provide a convenient and safe API for tree traversal and analysis.
 
-```rust
-use oak_toml::TomlParser;
-
-fn main() -> Result<(), Box<dyn std::error::Error>> {
-    let parser = TomlParser::new();
-    let toml_content = r#"
-[package]
-name = "oak-toml"
-version = "0.1.0"
-authors = ["Oak Contributors"]
-
-
-    "#;
-    
-    let document = parser.parse_document(toml_content)?;
-    println!("Parsed TOML document successfully.");
-    Ok(())
-}
-```
-
-## 📋 Parsing Examples
-
-### Document Parsing
-```rust
-use oak_toml::{TomlParser, ast::Document};
-
-let parser = TomlParser::new();
-let toml_content = r#"
-[server]
-host = "localhost"
-port = 8080
-
-[database]
-url = "postgresql://localhost/mydb"
-pool_size = 10
-"#;
-
-let document = parser.parse_document(toml_content)?;
-println!("Server config: {:?}", document.get_table("server"));
-```
-
-### Table Parsing
-```rust
-use oak_toml::{TomlParser, ast::Table};
-
-let parser = TomlParser::new();
-let table_content = r#"
-[package]
-name = "my-project"
-version = "1.0.0"
-description = "A sample project"
-"#;
-
-let table = parser.parse_table(table_content)?;
-println!("Package name: {:?}", table.get_value("name"));
-```
-
-## 🔧 Advanced Features
-
-### Token-Level Parsing
-```rust
-use oak_toml::{TomlParser, lexer::Token};
-
-let parser = TomlParser::new();
-let tokens = parser.tokenize("key = 'value'\narray = [1, 2, 3]")?;
-for token in tokens {
-    println!("{:?}", token.kind);
-}
-```
-
-### Error Handling
-```rust
-use oak_toml::TomlParser;
-
-let parser = TomlParser::new();
-let invalid_toml = r#"
-[section
-key = "value"
-"#;
-
-match parser.parse_document(invalid_toml) {
-    Ok(document) => println!("Parsed TOML document successfully."),
-    Err(e) => {
-        println!("Parse error at line {} column {}: {}", 
-            e.line(), e.column(), e.message());
-        if let Some(context) = e.context() {
-            println!("Error context: {}", context);
-        }
-    }
-}
-```
-
-## 🏗️ AST Structure
-
-The parser generates a comprehensive AST with the following main structures:
-
-- **Document**: Root container for TOML documents
-- **Table**: TOML tables with key-value pairs
-- **Array**: TOML arrays of values
-- **Value**: Various value types (string, integer, float, boolean, datetime)
-- **Key**: Table and key names
-
-## 📊 Performance
-
-- **Streaming**: Parse large TOML files without loading entirely into memory
-- **Incremental**: Re-parse only changed sections
-- **Memory Efficient**: Smart AST node allocation
-- **Fast Recovery**: Quick error recovery for better IDE integration
-
-## 🔗 Integration
-
-Oak of toml integrates seamlessly with:
-
-- **Configuration Management**: Parse and validate application configurations
-- **Build Tools**: Process Cargo.toml and similar configuration files
-- **Data Serialization**: Serialize and deserialize TOML data
-- **IDE Support**: Language server protocol compatibility
-- **DevOps Tools**: Configuration validation and processing
-
-## 📚 Examples
-
-Check out the [examples](examples/) directory for comprehensive examples:
-
-- Complete TOML document parsing
-- Configuration file analysis
-- Data extraction and transformation
-- Integration with development workflows
 
 ## 🤝 Contributing
 
-Contributions are welcome! 
-
-Please feel free to submit pull requests at the [project repository](https://github.com/ygg-lang/oaks/tree/dev/examples/oak-toml) or open [issues](https://github.com/ygg-lang/oaks/issues).
+We welcome contributions of all kinds! If you find a bug, have a feature request, or want to contribute code, please check our [issues](https://github.com/ygg-lang/oaks/issues) or submit a pull request.

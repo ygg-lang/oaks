@@ -1,9 +1,12 @@
+#![doc = include_str!("readme.md")]
 use crate::ast::DRoot;
 use oak_core::{Language, LanguageCategory};
+#[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
 
 /// Language definition for D programming language
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub struct DLanguage {
     /// Whether to enable D2 features
     pub d2_features: bool,
@@ -40,7 +43,7 @@ impl Language for DLanguage {
     const NAME: &'static str = "d";
     const CATEGORY: LanguageCategory = LanguageCategory::Programming;
 
-    type TokenType = crate::kind::DSyntaxKind;
-    type ElementType = crate::kind::DSyntaxKind;
+    type TokenType = crate::lexer::token_type::DTokenType;
+    type ElementType = crate::parser::element_type::DElementType;
     type TypedRoot = DRoot;
 }

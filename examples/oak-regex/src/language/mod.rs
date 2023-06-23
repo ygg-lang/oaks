@@ -1,12 +1,15 @@
+#![doc = include_str!("readme.md")]
 use crate::ast::RegexRoot;
 use oak_core::{Language, LanguageCategory};
+#[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
 
 /// Configuration for the regular expression language.
 ///
 /// This structure defines the language configuration for the regex parser,
 /// including options such as whether to ignore whitespace characters.
-#[derive(Copy, Clone, Debug, PartialEq, Eq, Hash, Serialize, Deserialize)]
+#[derive(Copy, Clone, Debug, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct RegexLanguage {
     /// Whether to ignore whitespace characters
     pub ignore_whitespace: bool,
@@ -36,7 +39,7 @@ impl Language for RegexLanguage {
     const NAME: &'static str = "regex";
     const CATEGORY: LanguageCategory = LanguageCategory::Dsl;
 
-    type TokenType = crate::kind::RegexSyntaxKind;
-    type ElementType = crate::kind::RegexSyntaxKind;
+    type TokenType = crate::lexer::token_type::RegexTokenType;
+    type ElementType = crate::parser::element_type::RegexElementType;
     type TypedRoot = RegexRoot;
 }

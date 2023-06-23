@@ -15,7 +15,7 @@ fn parser_basic_class() {
     assert!(lex_output.result.is_ok());
 
     let parse_output = parser.parse(&source, &[], &mut session);
-    assert!(parse_output.result.is_ok());
+    assert!(parse_output.result.is_ok())
 }
 
 #[test]
@@ -26,7 +26,7 @@ fn parser_empty_input() {
 
     let mut session = ParseSession::<JasminLanguage>::new(16);
     let result = parser.parse(&source, &[], &mut session);
-    assert!(result.result.is_ok());
+    assert!(result.result.is_ok())
 }
 
 #[test]
@@ -34,7 +34,7 @@ fn parser_class_with_method() {
     let source = SourceText::new(
         r#"
 .class public HelloWorld
-.method public static main([Ljava/lang/String;)V
+.method public static main([Ljava/lang/String)V
     aload_0
     return
 .end method
@@ -49,7 +49,7 @@ fn parser_class_with_method() {
     assert!(lex_output.result.is_ok());
 
     let parse_output = parser.parse(&source, &[], &mut session);
-    assert!(parse_output.result.is_ok());
+    assert!(parse_output.result.is_ok())
 }
 
 #[test]
@@ -69,7 +69,7 @@ fn parser_class_with_field() {
     assert!(lex_output.result.is_ok());
 
     let parse_output = parser.parse(&source, &[], &mut session);
-    assert!(parse_output.result.is_ok());
+    assert!(parse_output.result.is_ok())
 }
 
 #[test]
@@ -86,7 +86,7 @@ fn parser_complex_class() {
     return
 .end method
 
-.method public static main([Ljava/lang/String;)V
+.method public static main([Ljava/lang/String)V
     ldc "Hello, World!"
     return
 .end method
@@ -101,5 +101,5 @@ fn parser_complex_class() {
     assert!(lex_output.result.is_ok());
 
     let parse_output = parser.parse(&source, &[], &mut session);
-    assert!(parse_output.result.is_ok());
+    assert!(parse_output.result.is_ok())
 }

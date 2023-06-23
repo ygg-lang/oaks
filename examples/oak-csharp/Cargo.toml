@@ -2,12 +2,29 @@
 name = "oak-csharp"
 version.workspace = true
 authors.workspace = true
+description = "C# frontend for Oak"
 edition.workspace = true
 license.workspace = true
+repository = "https://github.com/ygg-lang/oaks/tree/master/examples/oak-csharp"
 categories = ["compilers", "development-tools"]
 keywords = ["frontend", "language", "csharp"]
-description = "C# frontend for Oak"
 
 [dependencies]
 oak-core = { workspace = true }
-serde = { workspace = true }
+serde = { workspace = true, optional = true }
+
+oak-lsp = { workspace = true, optional = true }
+oak-hover = { workspace = true, optional = true }
+oak-vfs = { workspace = true, optional = true }
+oak-highlight = { workspace = true, optional = true }
+oak-pretty-print = { workspace = true, optional = true }
+oak-mcp = { workspace = true, optional = true }
+futures = { workspace = true, optional = true }
+
+[features]
+default = ["serde"]
+serde = ["dep:serde", "oak-core/serde"]
+oak-highlight = ["dep:oak-highlight"]
+oak-pretty-print = ["dep:oak-pretty-print"]
+lsp = ["dep:oak-lsp", "dep:oak-hover", "dep:oak-vfs", "oak-highlight", "oak-pretty-print", "dep:futures"]
+mcp = ["lsp", "oak-mcp/io-std"]

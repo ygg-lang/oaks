@@ -1,17 +1,22 @@
+#![doc = include_str!("readme.md")]
 use crate::{ast::TwigRoot, lexer::TwigLexer, parser::TwigParser};
 use oak_core::{Language, LanguageCategory};
+#[cfg(feature = "serde")]
+use serde::{Deserialize, Serialize};
 
-/// Twig 模板引擎配置
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Default, serde::Serialize, serde::Deserialize)]
+/// Twig template engine configuration.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Default)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub enum TwigMode {
     #[default]
     Template,
     Expression,
-    // 其他可能的模式
+    // Other possible modes
 }
 
-/// Twig 语言定义
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Default, serde::Serialize, serde::Deserialize)]
+/// Twig language definition.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Default)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct TwigLanguage {
     pub allow_raw_blocks: bool,
     pub allow_custom_tags: bool,
@@ -22,8 +27,8 @@ impl Language for TwigLanguage {
     const NAME: &'static str = "twig";
     const CATEGORY: LanguageCategory = LanguageCategory::Markup;
 
-    type TokenType = crate::kind::TwigSyntaxKind;
-    type ElementType = crate::kind::TwigSyntaxKind;
+    type TokenType = crate::lexer::token_type::TwigTokenType;
+    type ElementType = crate::parser::element_type::TwigElementType;
     type TypedRoot = TwigRoot;
 }
 

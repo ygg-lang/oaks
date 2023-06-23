@@ -1,4 +1,8 @@
-use crate::{ast::*, language::MsilLanguage, parser::MsilParser};
+use crate::{
+    ast::*,
+    language::MsilLanguage,
+    parser::{MsilParser, element_type::MsilElementType},
+};
 use oak_core::{Builder, BuilderCache, GreenNode, OakDiagnostics, Source, SourceText, TextEdit};
 
 #[derive(Clone)]
@@ -19,7 +23,7 @@ impl<'config> MsilBuilder<'config> {
         for child in red_root.children() {
             if let oak_core::RedTree::Node(node) = child {
                 if let Some(item) = self.build_item(&node, source) {
-                    items.push(item);
+                    items.push(item)
                 }
             }
         }
@@ -28,15 +32,13 @@ impl<'config> MsilBuilder<'config> {
     }
 
     fn build_item(&self, node: &oak_core::RedNode<MsilLanguage>, source: &SourceText) -> Option<Item> {
-        use crate::kind::MsilSyntaxKind::*;
-
         let kind = node.green.kind;
         match kind {
-            Assembly => {
+            MsilElementType::Assembly => {
                 let mut name = "unknown".to_string();
                 for child in node.children() {
                     if let oak_core::RedTree::Node(n) = child {
-                        if n.green.kind == Identifier {
+                        if n.green.kind == MsilElementType::Identifier {
                             name = source.get_text_in(n.span()).to_string();
                             break;
                         }
@@ -44,20 +46,67 @@ impl<'config> MsilBuilder<'config> {
                 }
                 Some(Item::Assembly(crate::ast::Assembly { name, span: node.span() }))
             }
-            Class => {
-                let mut name = "Unknown".to_string();
+            MsilElementType::AssemblyExtern => {
+                let mut name = "unknown".to_string();
                 for child in node.children() {
                     if let oak_core::RedTree::Node(n) = child {
-                        if n.green.kind == Identifier {
+                        if n.green.kind == MsilElementType::Identifier {
                             name = source.get_text_in(n.span()).to_string();
                             break;
                         }
                     }
                 }
-                Some(Item::Class(crate::ast::Class { name, methods: Vec::new(), span: node.span() }))
+                Some(Item::AssemblyExtern(name))
+            }
+            MsilElementType::Module => {
+                let mut name = "unknown".to_string();
+                for child in node.children() {
+                    if let oak_core::RedTree::Node(n) = child {
+                        if n.green.kind == MsilElementType::Identifier {
+                            name = source.get_text_in(n.span()).to_string();
+                            break;
+                        }
+                    }
+                }
+                Some(Item::Module(name))
+            }
+            MsilElementType::Class => {
+                let mut name = "Unknown".to_string();
+                let mut methods = Vec::new();
+                for child in node.children() {
+                    if let oak_core::RedTree::Node(n) = child {
+                        if n.green.kind == MsilElementType::Identifier {
+                            name = source.get_text_in(n.span()).to_string()
+                        }
+                        else if n.green.kind == MsilElementType::Method {
+                            if let Some(method) = self.build_method(&n, source) {
+                                methods.push(method)
+                            }
+                        }
+                    }
+                }
+                Some(Item::Class(crate::ast::Class { name, methods, span: node.span() }))
             }
             _ => None,
         }
+    }
+
+    fn build_method(&self, node: &oak_core::RedNode<MsilLanguage>, source: &SourceText) -> Option<crate::ast::Method> {
+        let mut name = "Unknown".to_string();
+        for child in node.children() {
+            if let oak_core::RedTree::Node(n) = child {
+                if n.green.kind == MsilElementType::Identifier {
+                    name = source.get_text_in(n.span()).to_string();
+                    break;
+                }
+            }
+        }
+
+        Some(crate::ast::Method {
+            name,
+            instructions: Vec::new(), // TODO: Parse instructions
+            span: node.span(),
+        })
     }
 }
 

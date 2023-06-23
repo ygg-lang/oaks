@@ -1,11 +1,15 @@
 use proc_macro::TokenStream;
 use quote::quote;
 use syn::{
-    Expr, Ident, Result, Token, braced,
+    Expr, Ident, Result, Token, braced, parenthesized,
     parse::{Parse, ParseStream},
     parse_macro_input,
 };
 
+/// Procedural macro for defining formatting rules.
+///
+/// This macro generates a `Vec<Box<dyn FormatRule<L>>>` containing rules for formatting nodes and tokens.
+/// Each rule can specify its name, priority, and handlers for nodes and tokens.
 pub fn define_rules(input: TokenStream) -> TokenStream {
     let input = parse_macro_input!(input as RulesInput);
     let mut expanded = quote! {
@@ -16,6 +20,7 @@ pub fn define_rules(input: TokenStream) -> TokenStream {
         let name = &rule.name;
         let priority = &rule.priority;
 
+        // Generate the `applies_to_node` implementation for this rule
         let applies_to_node = if let Some(node) = &rule.node {
             let arg = &node.node_arg;
             let cond = &node.cond;
@@ -34,6 +39,7 @@ pub fn define_rules(input: TokenStream) -> TokenStream {
             }
         };
 
+        // Generate the `apply_node` implementation for this rule
         let apply_node = if let Some(node) = &rule.node {
             let node_arg = &node.node_arg;
             let ctx_arg = &node.ctx_arg;
@@ -58,6 +64,7 @@ pub fn define_rules(input: TokenStream) -> TokenStream {
             }
         };
 
+        // Generate the `applies_to_token` implementation for this rule
         let applies_to_token = if let Some(token) = &rule.token {
             let arg = &token.token_arg;
             let cond = &token.cond;
@@ -76,6 +83,7 @@ pub fn define_rules(input: TokenStream) -> TokenStream {
             }
         };
 
+        // Generate the `apply_token` implementation for this rule
         let apply_token = if let Some(token) = &rule.token {
             let token_arg = &token.token_arg;
             let ctx_arg = &token.ctx_arg;
@@ -98,6 +106,7 @@ pub fn define_rules(input: TokenStream) -> TokenStream {
             }
         };
 
+        // Generate the rule struct and its implementation of `FormatRule`
         expanded.extend(quote! {
             {
                 #[allow(non_camel_case_types)]
@@ -124,10 +133,12 @@ pub fn define_rules(input: TokenStream) -> TokenStream {
     TokenStream::from(result)
 }
 
+/// Parsed input for the `define_rules!` macro.
 pub struct RulesInput {
     pub rules: Vec<RuleDefinition>,
 }
 
+/// Definition of a single formatting rule.
 pub struct RuleDefinition {
     pub name: Ident,
     pub priority: Expr,
@@ -135,6 +146,7 @@ pub struct RuleDefinition {
     pub token: Option<TokenHandler>,
 }
 
+/// Handler for formatting syntax nodes.
 pub struct NodeHandler {
     pub node_arg: Ident,
     pub ctx_arg: Ident,
@@ -144,6 +156,7 @@ pub struct NodeHandler {
     pub body: Expr,
 }
 
+/// Handler for formatting syntax tokens.
 pub struct TokenHandler {
     pub token_arg: Ident,
     pub ctx_arg: Ident,
@@ -184,7 +197,7 @@ impl Parse for RuleDefinition {
                 }
                 "node" => {
                     let args_content;
-                    syn::parenthesized!(args_content in content);
+                    parenthesized!(args_content in content);
                     let node_arg: Ident = args_content.parse()?;
                     args_content.parse::<Token![,]>()?;
                     let ctx_arg: Ident = args_content.parse()?;
@@ -205,7 +218,7 @@ impl Parse for RuleDefinition {
                 }
                 "token" => {
                     let args_content;
-                    syn::parenthesized!(args_content in content);
+                    parenthesized!(args_content in content);
                     let token_arg: Ident = args_content.parse()?;
                     args_content.parse::<Token![,]>()?;
                     let ctx_arg: Ident = args_content.parse()?;
@@ -222,10 +235,10 @@ impl Parse for RuleDefinition {
 
                     token = Some(TokenHandler { token_arg, ctx_arg, source_arg, cond, body });
                 }
-                _ => return Err(syn::Error::new(key.span(), "未知规则字段")),
+                _ => return Err(syn::Error::new(key.span(), "Unknown rule field")),
             }
         }
 
-        Ok(RuleDefinition { name, priority: priority.ok_or_else(|| content.error("缺少 priority 字段"))?, node, token })
+        Ok(RuleDefinition { name, priority: priority.ok_or_else(|| content.error("Missing priority field"))?, node, token })
     }
 }

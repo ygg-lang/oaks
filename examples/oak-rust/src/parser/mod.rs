@@ -1,13 +1,13 @@
 use crate::{RustLanguage, lexer::RustLexer};
 use oak_core::{
-    GreenNode, OakError,
+    GreenNode, OakError, TokenType,
     parser::{Associativity, ParseCache, ParseOutput, Parser, ParserState, Pratt, PrattParser, binary, parse_with_lexer, unary},
     source::{Source, TextEdit},
 };
 
-mod element_type;
-
-pub use self::element_type::{RustElement, RustElementType};
+/// Rust element type definitions.
+pub mod element_type;
+pub use self::element_type::RustElementType;
 
 /// A parser for the Rust programming language.
 #[derive(Clone)]
@@ -18,6 +18,7 @@ pub struct RustParser<'config> {
 }
 
 impl<'config> RustParser<'config> {
+    /// Creates a new Rust parser with the given language configuration.
     pub fn new(config: &'config RustLanguage) -> Self {
         Self { config }
     }
@@ -29,40 +30,40 @@ impl<'config> Pratt<RustLanguage> for RustParser<'config> {
         match state.peek_kind() {
             Some(crate::lexer::RustTokenType::Identifier) => {
                 state.bump();
-                state.finish_at(cp, RustElementType::IdentifierExpression.into())
+                state.finish_at(cp, crate::parser::element_type::RustElementType::IdentifierExpression)
             }
             Some(k) if k.is_literal() => {
                 state.bump();
-                state.finish_at(cp, RustElementType::LiteralExpression.into())
+                state.finish_at(cp, crate::parser::element_type::RustElementType::LiteralExpression)
             }
             Some(crate::lexer::RustTokenType::LeftParen) => {
                 state.bump();
                 PrattParser::parse(state, 0, self);
                 state.expect(crate::lexer::RustTokenType::RightParen).ok();
-                state.finish_at(cp, RustElementType::ParenthesizedExpression.into())
+                state.finish_at(cp, crate::parser::element_type::RustElementType::ParenthesizedExpression)
             }
             _ => {
                 state.bump();
-                state.finish_at(cp, RustElementType::Error.into())
+                state.finish_at(cp, crate::parser::element_type::RustElementType::Error)
             }
         }
     }
 
     fn prefix<'a, S: oak_core::source::Source + ?Sized>(&self, state: &mut ParserState<'a, RustLanguage, S>) -> &'a GreenNode<'a, RustLanguage> {
-        use crate::{lexer::RustTokenType::*, parser::RustElementType::*};
+        use crate::{lexer::RustTokenType::*, parser::RustElementType as RE};
         let kind = match state.peek_kind() {
             Some(k) => k,
             None => return self.primary(state),
         };
 
         match kind {
-            Minus | Bang | Ampersand | Star => unary(state, kind, 13, UnaryExpression.into(), |s, p| PrattParser::parse(s, p, self)),
+            Minus | Bang | Ampersand | Star => unary(state, kind, 13, RE::UnaryExpression.into(), |s, p| PrattParser::parse(s, p, self)),
             _ => self.primary(state),
         }
     }
 
     fn infix<'a, S: oak_core::source::Source + ?Sized>(&self, state: &mut ParserState<'a, RustLanguage, S>, left: &'a GreenNode<'a, RustLanguage>, min_precedence: u8) -> Option<&'a GreenNode<'a, RustLanguage>> {
-        use crate::{lexer::RustTokenType::*, parser::RustElementType::*};
+        use crate::{lexer::RustTokenType::*, parser::RustElementType as RE};
         let kind = state.peek_kind()?;
 
         let (prec, assoc) = match kind {
@@ -100,7 +101,7 @@ impl<'config> Pratt<RustLanguage> for RustParser<'config> {
                     }
                 }
                 state.expect(RightParen).ok();
-                Some(state.finish_at(cp, CallExpression.into()))
+                Some(state.finish_at(cp, RE::CallExpression))
             }
             LeftBracket => {
                 let cp = state.checkpoint();
@@ -108,16 +109,16 @@ impl<'config> Pratt<RustLanguage> for RustParser<'config> {
                 state.expect(LeftBracket).ok();
                 PrattParser::parse(state, 0, self);
                 state.expect(RightBracket).ok();
-                Some(state.finish_at(cp, IndexExpression.into()))
+                Some(state.finish_at(cp, RE::IndexExpression))
             }
             Dot => {
                 let cp = state.checkpoint();
                 state.push_child(left);
                 state.expect(Dot).ok();
-                state.expect(crate::lexer::RustTokenType::Identifier).ok();
-                Some(state.finish_at(cp, FieldExpression.into()))
+                state.expect(Identifier).ok();
+                Some(state.finish_at(cp, RE::MemberExpression))
             }
-            _ => Some(binary(state, left, kind, prec, assoc, BinaryExpression.into(), |s, p| PrattParser::parse(s, p, self))),
+            _ => Some(binary(state, left, kind, prec, assoc, RE::BinaryExpression.into(), |s, p| PrattParser::parse(s, p, self))),
         }
     }
 }
@@ -130,6 +131,7 @@ impl<'config> Parser<RustLanguage> for RustParser<'config> {
 }
 
 impl<'config> RustParser<'config> {
+    /// Parses a complete Rust source file.
     pub(crate) fn parse_source_file<'a, S: oak_core::source::Source + ?Sized>(&self, state: &mut ParserState<'a, RustLanguage, S>) -> Result<&'a GreenNode<'a, RustLanguage>, OakError> {
         let cp = state.checkpoint();
         while state.not_at_end() {
@@ -137,12 +139,13 @@ impl<'config> RustParser<'config> {
                 state.advance();
                 continue;
             }
-            self.parse_statement(state)?;
+            self.parse_statement(state)?
         }
-        let root = state.finish_at(cp, RustElementType::SourceFile.into());
+        let root = state.finish_at(cp, crate::parser::element_type::RustElementType::SourceFile);
         Ok(root)
     }
 
+    /// Parses a single Rust statement or item.
     fn parse_statement<'a, S: oak_core::source::Source + ?Sized>(&self, state: &mut ParserState<'a, RustLanguage, S>) -> Result<(), OakError> {
         use crate::{lexer::RustTokenType, parser::RustElementType::*};
 
@@ -234,19 +237,20 @@ impl<'config> RustParser<'config> {
         self.parse_block(state)
     }
 
+    /// Parses a function definition.
     fn parse_function<'a, S: oak_core::source::Source + ?Sized>(&self, state: &mut ParserState<'a, RustLanguage, S>) -> Result<(), OakError> {
-        use crate::lexer::RustTokenType;
+        use crate::lexer::token_type::RustTokenType;
         let cp = state.checkpoint();
         state.expect(RustTokenType::Fn).ok();
         state.expect(RustTokenType::Identifier).ok();
         self.parse_param_list(state)?;
         if state.eat(RustTokenType::Arrow) {
             while state.not_at_end() && !state.at(RustTokenType::LeftBrace) {
-                state.advance();
+                state.advance()
             }
         }
         self.parse_block(state)?;
-        state.finish_at(cp, RustElementType::Function.into());
+        state.finish_at(cp, crate::parser::element_type::RustElementType::Function);
         Ok(())
     }
 
@@ -255,77 +259,83 @@ impl<'config> RustParser<'config> {
         let cp = state.checkpoint();
         state.expect(LeftParen).ok();
         while state.not_at_end() && !state.at(RightParen) {
-            state.advance();
+            state.advance()
         }
         state.expect(RightParen).ok();
-        state.finish_at(cp, RustElementType::ParameterList.into());
+        state.finish_at(cp, crate::parser::element_type::RustElementType::ParameterList);
         Ok(())
     }
 
+    /// Parses a block of statements enclosed in braces.
     fn parse_block<'a, S: oak_core::source::Source + ?Sized>(&self, state: &mut ParserState<'a, RustLanguage, S>) -> Result<(), OakError> {
         use crate::lexer::RustTokenType::*;
         let cp = state.checkpoint();
         state.expect(LeftBrace).ok();
         while state.not_at_end() && !state.at(RightBrace) {
-            self.parse_statement(state)?;
+            self.parse_statement(state)?
         }
         state.expect(RightBrace).ok();
-        state.finish_at(cp, RustElementType::BlockExpression.into());
+        state.finish_at(cp, crate::parser::element_type::RustElementType::BlockExpression);
         Ok(())
     }
 
+    /// Parses a `use` declaration.
     fn parse_use_item<'a, S: oak_core::source::Source + ?Sized>(&self, state: &mut ParserState<'a, RustLanguage, S>) -> Result<(), OakError> {
         let cp = state.checkpoint();
         state.expect(crate::lexer::RustTokenType::Use).ok();
-        // 简化处理路径
+        // Simplified path handling
         while !state.at(crate::lexer::RustTokenType::Semicolon) && state.not_at_end() {
-            state.bump();
+            state.bump()
         }
         state.eat(crate::lexer::RustTokenType::Semicolon);
-        state.finish_at(cp, RustElementType::UseItem.into());
+        state.finish_at(cp, crate::parser::element_type::RustElementType::UseItem);
         Ok(())
     }
 
+    /// Parses a module declaration.
     fn parse_mod_item<'a, S: oak_core::source::Source + ?Sized>(&self, state: &mut ParserState<'a, RustLanguage, S>) -> Result<(), OakError> {
         let cp = state.checkpoint();
         state.bump(); // mod
         state.expect(crate::lexer::RustTokenType::Identifier).ok();
         if state.at(crate::lexer::RustTokenType::LeftBrace) {
-            self.parse_block(state)?;
+            self.parse_block(state)?
         }
         else {
             state.eat(crate::lexer::RustTokenType::Semicolon);
         }
-        state.finish_at(cp, RustElementType::ModuleItem.into());
+        state.finish_at(cp, crate::parser::element_type::RustElementType::ModuleItem);
         Ok(())
     }
 
+    /// Parses a struct definition.
     fn parse_struct_item<'a, S: oak_core::source::Source + ?Sized>(&self, state: &mut ParserState<'a, RustLanguage, S>) -> Result<(), OakError> {
         let cp = state.checkpoint();
         state.bump(); // struct
         state.expect(crate::lexer::RustTokenType::Identifier).ok();
         while state.not_at_end() && !state.at(crate::lexer::RustTokenType::LeftBrace) && !state.at(crate::lexer::RustTokenType::Semicolon) {
-            state.advance();
+            state.advance()
         }
         if state.at(crate::lexer::RustTokenType::LeftBrace) {
-            self.parse_block(state)?;
+            self.parse_block(state)?
         }
         else {
             state.eat(crate::lexer::RustTokenType::Semicolon);
         }
-        state.finish_at(cp, RustElementType::StructItem.into());
+        state.finish_at(cp, crate::parser::element_type::RustElementType::StructItem);
         Ok(())
     }
 
+    /// Parses an enum definition.
     fn parse_enum_item<'a, S: oak_core::source::Source + ?Sized>(&self, state: &mut ParserState<'a, RustLanguage, S>) -> Result<(), OakError> {
         let cp = state.checkpoint();
         state.bump(); // enum
         state.expect(crate::lexer::RustTokenType::Identifier).ok();
         self.parse_block(state)?;
-        state.finish_at(cp, RustElementType::EnumItem.into());
+        state.finish_at(cp, crate::parser::element_type::RustElementType::EnumItem);
         Ok(())
     }
 
+    /// Parses a `let` statement.
     fn parse_let_statement<'a, S: oak_core::source::Source + ?Sized>(&self, state: &mut ParserState<'a, RustLanguage, S>) -> Result<(), OakError> {
         let cp = state.checkpoint();
         state.bump(); // let
@@ -334,44 +344,43 @@ impl<'config> RustParser<'config> {
             PrattParser::parse(state, 0, self);
         }
         state.eat(crate::lexer::RustTokenType::Semicolon);
-        state.finish_at(cp, RustElementType::LetStatement.into());
+        state.finish_at(cp, crate::parser::element_type::RustElementType::LetStatement);
         Ok(())
     }
 
+    /// Parses an `if` expression.
     fn parse_if_expression<'a, S: oak_core::source::Source + ?Sized>(&self, state: &mut ParserState<'a, RustLanguage, S>) -> Result<(), OakError> {
         let cp = state.checkpoint();
         state.bump(); // if
         PrattParser::parse(state, 0, self);
         self.parse_block(state)?;
         if state.eat(crate::lexer::RustTokenType::Else) {
-            if state.at(crate::lexer::RustTokenType::If) {
-                self.parse_if_expression(state)?;
-            }
-            else {
-                self.parse_block(state)?;
-            }
+            if state.at(crate::lexer::RustTokenType::If) { self.parse_if_expression(state)? } else { self.parse_block(state)? }
         }
-        state.finish_at(cp, RustElementType::IfExpression.into());
+        state.finish_at(cp, crate::parser::element_type::RustElementType::IfExpression);
         Ok(())
     }
 
+    /// Parses a `while` loop.
     fn parse_while_expression<'a, S: oak_core::source::Source + ?Sized>(&self, state: &mut ParserState<'a, RustLanguage, S>) -> Result<(), OakError> {
         let cp = state.checkpoint();
         state.bump(); // while
         PrattParser::parse(state, 0, self);
         self.parse_block(state)?;
-        state.finish_at(cp, RustElementType::WhileExpression.into());
+        state.finish_at(cp, crate::parser::element_type::RustElementType::WhileExpression);
         Ok(())
     }
 
+    /// Parses a `loop` expression.
     fn parse_loop_expression<'a, S: oak_core::source::Source + ?Sized>(&self, state: &mut ParserState<'a, RustLanguage, S>) -> Result<(), OakError> {
         let cp = state.checkpoint();
         state.bump(); // loop
         self.parse_block(state)?;
-        state.finish_at(cp, RustElementType::LoopExpression.into());
+        state.finish_at(cp, crate::parser::element_type::RustElementType::LoopExpression);
         Ok(())
     }
 
+    /// Parses a `for` loop.
     fn parse_for_expression<'a, S: oak_core::source::Source + ?Sized>(&self, state: &mut ParserState<'a, RustLanguage, S>) -> Result<(), OakError> {
         let cp = state.checkpoint();
         state.bump(); // for
@@ -379,10 +388,11 @@ impl<'config> RustParser<'config> {
         state.expect(crate::lexer::RustTokenType::In).ok();
         PrattParser::parse(state, 0, self);
         self.parse_block(state)?;
-        state.finish_at(cp, RustElementType::ForExpression.into());
+        state.finish_at(cp, crate::parser::element_type::RustElementType::ForExpression);
         Ok(())
     }
 
+    /// Parses a `return` statement.
     fn parse_return_statement<'a, S: oak_core::source::Source + ?Sized>(&self, state: &mut ParserState<'a, RustLanguage, S>) -> Result<(), OakError> {
         let cp = state.checkpoint();
         state.bump(); // return
@@ -390,7 +400,7 @@ impl<'config> RustParser<'config> {
             PrattParser::parse(state, 0, self);
         }
         state.eat(crate::lexer::RustTokenType::Semicolon);
-        state.finish_at(cp, RustElementType::ReturnStatement.into());
+        state.finish_at(cp, crate::parser::element_type::RustElementType::ReturnStatement);
         Ok(())
     }
 }

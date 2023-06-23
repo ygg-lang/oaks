@@ -6,7 +6,7 @@ fn test_rust_highlighting() {
     let code = r#"
         fn main() {
             let x = 1;
-            println!("Hello, {}!", x);
+            println!("Hello, {}!", x)
         }
     "#;
 
@@ -20,7 +20,7 @@ fn test_rust_highlighting() {
 
     // Print segments for manual verification if needed
     for segment in &result.segments {
-        println!("{:?}: {:?}", segment.span, segment.text);
+        println!("{:?}: {:?}", segment.span, segment.text)
     }
 }
 
@@ -35,5 +35,5 @@ fn test_format_export() {
 
     let json = highlighter.highlight_format(code, "rust", Theme::OneLight, ExportFormat::Json).expect("Should export JSON");
     assert!(json.contains("\"source\""));
-    assert!(json.contains("segments"));
+    assert!(json.contains("segments"))
 }

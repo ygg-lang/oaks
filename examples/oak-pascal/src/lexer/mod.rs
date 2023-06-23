@@ -1,4 +1,7 @@
-use crate::{kind::PascalSyntaxKind, language::PascalLanguage};
+#![doc = include_str!("readme.md")]
+pub mod token_type;
+
+use crate::{language::PascalLanguage, lexer::token_type::PascalTokenType};
 use oak_core::{
     Lexer, LexerCache, LexerState, OakError,
     lexer::{CommentConfig, LexOutput, WhitespaceConfig},
@@ -22,7 +25,7 @@ impl<'config> PascalLexer<'config> {
     }
 
     fn skip_whitespace<'s, S: Source + ?Sized>(&self, state: &mut State<'s, S>) -> bool {
-        PASCAL_WHITESPACE.scan(state, PascalSyntaxKind::Whitespace)
+        PASCAL_WHITESPACE.scan(state, PascalTokenType::Whitespace)
     }
 
     fn skip_comment<'s, S: Source + ?Sized>(&self, state: &mut State<'s, S>) -> bool {
@@ -30,7 +33,7 @@ impl<'config> PascalLexer<'config> {
 
         // Line comment starting with //
         if state.rest().starts_with("//") {
-            return PASCAL_COMMENT.scan(state, PascalSyntaxKind::Comment, PascalSyntaxKind::Comment);
+            return PASCAL_COMMENT.scan(state, PascalTokenType::Comment, PascalTokenType::Comment);
         }
 
         // Block comment: { ... }
@@ -43,7 +46,7 @@ impl<'config> PascalLexer<'config> {
                 }
                 state.advance(ch.len_utf8());
             }
-            state.add_token(PascalSyntaxKind::Comment, start, state.get_position());
+            state.add_token(PascalTokenType::Comment, start, state.get_position());
             return true;
         }
 
@@ -57,7 +60,7 @@ impl<'config> PascalLexer<'config> {
                 }
                 state.advance(ch.len_utf8());
             }
-            state.add_token(PascalSyntaxKind::Comment, start, state.get_position());
+            state.add_token(PascalTokenType::Comment, start, state.get_position());
             return true;
         }
 
@@ -84,7 +87,7 @@ impl<'config> PascalLexer<'config> {
                 }
                 state.advance(ch.len_utf8());
             }
-            state.add_token(PascalSyntaxKind::StringLiteral, start, state.get_position());
+            state.add_token(PascalTokenType::StringLiteral, start, state.get_position());
             return true;
         }
         false
@@ -109,43 +112,43 @@ impl<'config> PascalLexer<'config> {
 
                 // 检查是否是关键字
                 let kind = match text.to_lowercase().as_str() {
-                    "program" => PascalSyntaxKind::Program,
-                    "var" => PascalSyntaxKind::Var,
-                    "const" => PascalSyntaxKind::Const,
-                    "type" => PascalSyntaxKind::Type,
-                    "procedure" => PascalSyntaxKind::Procedure,
-                    "function" => PascalSyntaxKind::Function,
-                    "begin" => PascalSyntaxKind::Begin,
-                    "end" => PascalSyntaxKind::End,
-                    "if" => PascalSyntaxKind::If,
-                    "then" => PascalSyntaxKind::Then,
-                    "else" => PascalSyntaxKind::Else,
-                    "while" => PascalSyntaxKind::While,
-                    "do" => PascalSyntaxKind::Do,
-                    "for" => PascalSyntaxKind::For,
-                    "to" => PascalSyntaxKind::To,
-                    "downto" => PascalSyntaxKind::Downto,
-                    "repeat" => PascalSyntaxKind::Repeat,
-                    "until" => PascalSyntaxKind::Until,
-                    "case" => PascalSyntaxKind::Case,
-                    "of" => PascalSyntaxKind::Of,
-                    "with" => PascalSyntaxKind::With,
-                    "record" => PascalSyntaxKind::Record,
-                    "array" => PascalSyntaxKind::Array,
-                    "set" => PascalSyntaxKind::Set,
-                    "file" => PascalSyntaxKind::File,
-                    "packed" => PascalSyntaxKind::Packed,
-                    "nil" => PascalSyntaxKind::Nil,
-                    "true" => PascalSyntaxKind::True,
-                    "false" => PascalSyntaxKind::False,
-                    "and" => PascalSyntaxKind::And,
-                    "or" => PascalSyntaxKind::Or,
-                    "not" => PascalSyntaxKind::Not,
-                    "div" => PascalSyntaxKind::Div,
-                    "mod" => PascalSyntaxKind::Mod,
-                    "in" => PascalSyntaxKind::In,
+                    "program" => PascalTokenType::Program,
+                    "var" => PascalTokenType::Var,
+                    "const" => PascalTokenType::Const,
+                    "type" => PascalTokenType::Type,
+                    "procedure" => PascalTokenType::Procedure,
+                    "function" => PascalTokenType::Function,
+                    "begin" => PascalTokenType::Begin,
+                    "end" => PascalTokenType::End,
+                    "if" => PascalTokenType::If,
+                    "then" => PascalTokenType::Then,
+                    "else" => PascalTokenType::Else,
+                    "while" => PascalTokenType::While,
+                    "do" => PascalTokenType::Do,
+                    "for" => PascalTokenType::For,
+                    "to" => PascalTokenType::To,
+                    "downto" => PascalTokenType::Downto,
+                    "repeat" => PascalTokenType::Repeat,
+                    "until" => PascalTokenType::Until,
+                    "case" => PascalTokenType::Case,
+                    "of" => PascalTokenType::Of,
+                    "with" => PascalTokenType::With,
+                    "record" => PascalTokenType::Record,
+                    "array" => PascalTokenType::Array,
+                    "set" => PascalTokenType::Set,
+                    "file" => PascalTokenType::File,
+                    "packed" => PascalTokenType::Packed,
+                    "nil" => PascalTokenType::Nil,
+                    "true" => PascalTokenType::True,
+                    "false" => PascalTokenType::False,
+                    "and" => PascalTokenType::And,
+                    "or" => PascalTokenType::Or,
+                    "not" => PascalTokenType::Not,
+                    "div" => PascalTokenType::Div,
+                    "mod" => PascalTokenType::Mod,
+                    "in" => PascalTokenType::In,
 
-                    _ => PascalSyntaxKind::Identifier,
+                    _ => PascalTokenType::Identifier,
                 };
 
                 state.add_token(kind, start_pos, state.get_position());
@@ -180,7 +183,7 @@ impl<'config> PascalLexer<'config> {
                     }
                 }
 
-                let kind = if has_dot { PascalSyntaxKind::RealLiteral } else { PascalSyntaxKind::IntegerLiteral };
+                let kind = if has_dot { PascalTokenType::RealLiteral } else { PascalTokenType::IntegerLiteral };
 
                 state.add_token(kind, start_pos, state.get_position());
                 true
@@ -201,103 +204,103 @@ impl<'config> PascalLexer<'config> {
             let kind = match ch {
                 '+' => {
                     state.advance(1);
-                    PascalSyntaxKind::Plus
+                    PascalTokenType::Plus
                 }
                 '-' => {
                     state.advance(1);
-                    PascalSyntaxKind::Minus
+                    PascalTokenType::Minus
                 }
                 '*' => {
                     state.advance(1);
-                    PascalSyntaxKind::Multiply
+                    PascalTokenType::Multiply
                 }
                 '/' => {
                     state.advance(1);
-                    PascalSyntaxKind::Divide
+                    PascalTokenType::Divide
                 }
                 '=' => {
                     state.advance(1);
-                    PascalSyntaxKind::Equal
+                    PascalTokenType::Equal
                 }
                 '<' => {
                     state.advance(1);
                     if let Some('=') = state.peek() {
                         state.advance(1);
-                        PascalSyntaxKind::LessEqual
+                        PascalTokenType::LessEqual
                     }
                     else if let Some('>') = state.peek() {
                         state.advance(1);
-                        PascalSyntaxKind::NotEqual
+                        PascalTokenType::NotEqual
                     }
                     else {
-                        PascalSyntaxKind::Less
+                        PascalTokenType::Less
                     }
                 }
                 '>' => {
                     state.advance(1);
                     if let Some('=') = state.peek() {
                         state.advance(1);
-                        PascalSyntaxKind::GreaterEqual
+                        PascalTokenType::GreaterEqual
                     }
                     else {
-                        PascalSyntaxKind::Greater
+                        PascalTokenType::Greater
                     }
                 }
                 ':' => {
                     state.advance(1);
                     if let Some('=') = state.peek() {
                         state.advance(1);
-                        PascalSyntaxKind::Assign
+                        PascalTokenType::Assign
                     }
                     else {
-                        PascalSyntaxKind::Colon
+                        PascalTokenType::Colon
                     }
                 }
                 ';' => {
                     state.advance(1);
-                    PascalSyntaxKind::Semicolon
+                    PascalTokenType::Semicolon
                 }
                 ',' => {
                     state.advance(1);
-                    PascalSyntaxKind::Comma
+                    PascalTokenType::Comma
                 }
                 '.' => {
                     state.advance(1);
                     if let Some('.') = state.peek() {
                         state.advance(1);
-                        PascalSyntaxKind::Range
+                        PascalTokenType::Range
                     }
                     else {
-                        PascalSyntaxKind::Dot
+                        PascalTokenType::Dot
                     }
                 }
                 '(' => {
                     state.advance(1);
-                    PascalSyntaxKind::LeftParen
+                    PascalTokenType::LeftParen
                 }
                 ')' => {
                     state.advance(1);
-                    PascalSyntaxKind::RightParen
+                    PascalTokenType::RightParen
                 }
                 '[' => {
                     state.advance(1);
-                    PascalSyntaxKind::LeftBracket
+                    PascalTokenType::LeftBracket
                 }
                 ']' => {
                     state.advance(1);
-                    PascalSyntaxKind::RightBracket
+                    PascalTokenType::RightBracket
                 }
                 '^' => {
                     state.advance(1);
-                    PascalSyntaxKind::Caret
+                    PascalTokenType::Caret
                 }
                 '\n' => {
                     state.advance(1);
-                    PascalSyntaxKind::Newline
+                    PascalTokenType::Newline
                 }
                 _ => {
                     state.advance(ch.len_utf8());
-                    PascalSyntaxKind::Error
+                    PascalTokenType::Error
                 }
             };
 
@@ -359,7 +362,7 @@ impl PascalLexer<'_> {
             let start_pos = state.get_position();
             if let Some(ch) = state.peek() {
                 state.advance(ch.len_utf8());
-                state.add_token(PascalSyntaxKind::Error, start_pos, state.get_position());
+                state.add_token(PascalTokenType::Error, start_pos, state.get_position());
             }
 
             state.advance_if_dead_lock(safe_point);

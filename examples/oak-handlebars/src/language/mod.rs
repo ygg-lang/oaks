@@ -1,7 +1,10 @@
+#![doc = include_str!("readme.md")]
 use oak_core::{Language, LanguageCategory};
+#[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
 
-#[derive(Debug, Default, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
+#[derive(Debug, Default, Clone, Copy, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct HandlebarsLanguage {}
 
 impl HandlebarsLanguage {
@@ -17,7 +20,7 @@ impl Language for HandlebarsLanguage {
     const NAME: &'static str = "handlebars";
     const CATEGORY: LanguageCategory = LanguageCategory::Markup;
 
-    type TokenType = crate::kind::HandlebarsSyntaxKind;
-    type ElementType = crate::kind::HandlebarsSyntaxKind;
+    type TokenType = crate::lexer::token_type::HandlebarsTokenType;
+    type ElementType = crate::parser::element_type::HandlebarsElementType;
     type TypedRoot = crate::ast::HandlebarsRoot;
 }

@@ -386,7 +386,7 @@ var
 begin
   Regex := TPerlRegEx.Create;
   try
-    Regex.RegEx := '^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$';
+    Regex.RegEx := '^[a-zA-Z0-9._%+-]+↯[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$';
     Regex.Subject := Email;
     Result := Regex.Match;
   finally

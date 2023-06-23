@@ -1,35 +1,39 @@
 [package]
 name = "oak-tex"
-description = "TeX/LaTeX document preparation system parser with support for typesetting commands and macros."
-categories = ["parsing"]
-keywords = ["parser", "tex", "latex", "typesetting"]
-documentation = "https://docs.rs/oak-tex"
-readme = "readme.md"
 version.workspace = true
 authors.workspace = true
-homepage.workspace = true
-repository.workspace = true
-license.workspace = true
+description = "TeX/LaTeX document preparation system parser with support for typesetting commands and macros."
 edition.workspace = true
+license.workspace = true
+readme = "readme.md"
+homepage.workspace = true
+repository = "https://github.com/ygg-lang/oaks/tree/master/examples/oak-tex"
+documentation = "https://docs.rs/oak-tex"
+categories = ["parsing"]
+keywords = ["parser", "tex", "latex", "typesetting"]
 
 [dependencies]
 oak-core = { workspace = true }
-oak-highlight = { workspace = true }
-oak-pretty-print = { workspace = true }
-oak-lsp = { workspace = true }
-oak-mcp = { workspace = true, features = ["io-std"] }
-oak-hover = { workspace = true }
-oak-vfs = { workspace = true }
-futures = { workspace = true }
-serde = { workspace = true, features = ["derive"] }
+oak-highlight = { workspace = true, optional = true }
+oak-pretty-print = { workspace = true, optional = true }
+oak-lsp = { workspace = true, optional = true }
+oak-mcp = { workspace = true, optional = true, features = ["io-std"] }
+oak-hover = { workspace = true, optional = true }
+oak-vfs = { workspace = true, optional = true }
+futures = { workspace = true, optional = true }
+serde = { workspace = true, features = ["derive"] , optional = true }
 tokio = { workspace = true, optional = true }
 
 [dev-dependencies]
 oak-testing = { workspace = true }
 
 [features]
-default = []
-std = []
+default = ["serde"]
+serde = ["dep:serde", "oak-core/serde"]
+oak-highlight = ["dep:oak-highlight"]
+oak-pretty-print = ["dep:oak-pretty-print"]
+lsp = ["dep:oak-lsp", "dep:oak-hover", "dep:oak-vfs", "oak-highlight", "oak-pretty-print", "dep:futures"]
+mcp = ["lsp", "oak-mcp/io-std"]
 
 [package.metadata.docs.rs]
 all-features = true

@@ -1,8 +1,9 @@
-use crate::{kind::TexSyntaxKind, language::TexLanguage};
+#![doc = include_str!("readme.md")]
+use crate::{language::TexLanguage, lexer::token_type::TexTokenType};
+pub mod token_type;
 use oak_core::{
-    Lexer, LexerCache, LexerState, OakError,
+    Lexer, LexerCache, LexerState, OakError, Source, TextEdit,
     lexer::{CommentConfig, LexOutput, WhitespaceConfig},
-    source::Source,
 };
 use std::sync::LazyLock;
 
@@ -17,11 +18,11 @@ pub struct TexLexer<'config> {
 }
 
 impl<'config> Lexer<TexLanguage> for TexLexer<'config> {
-    fn lex<'a, S: Source + ?Sized>(&self, source: &S, _edits: &[oak_core::source::TextEdit], cache: &'a mut impl LexerCache<TexLanguage>) -> LexOutput<TexLanguage> {
+    fn lex<'a, S: Source + ?Sized>(&self, source: &S, _edits: &[TextEdit], cache: &'a mut impl LexerCache<TexLanguage>) -> LexOutput<TexLanguage> {
         let mut state = State::new_with_cache(source, 0, cache);
         let result = self.run(&mut state);
         if result.is_ok() {
-            state.add_eof();
+            state.add_eof()
         }
         state.finish_with_cache(result, cache)
     }
@@ -68,18 +69,18 @@ impl<'config> TexLexer<'config> {
                 continue;
             }
 
-            state.advance_if_dead_lock(safe_point);
+            state.advance_if_dead_lock(safe_point)
         }
 
         Ok(())
     }
 
     fn skip_whitespace<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
-        TEX_WHITESPACE.scan(state, TexSyntaxKind::Whitespace)
+        TEX_WHITESPACE.scan(state, TexTokenType::Whitespace)
     }
 
     fn skip_comment<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
-        TEX_COMMENT.scan(state, TexSyntaxKind::Comment, TexSyntaxKind::Comment)
+        TEX_COMMENT.scan(state, TexTokenType::Comment, TexTokenType::Comment)
     }
 
     fn lex_command<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
@@ -98,7 +99,7 @@ impl<'config> TexLexer<'config> {
                 while let Some(ch) = state.peek() {
                     if ch.is_ascii_alphabetic() {
                         state.advance(ch.len_utf8());
-                        has_name = true;
+                        has_name = true
                     }
                     else {
                         break;
@@ -108,7 +109,7 @@ impl<'config> TexLexer<'config> {
             else {
                 // Single non-alphabetic character command (e.g., \\, \&, \$, \ )
                 state.advance(ch.len_utf8());
-                has_name = true;
+                has_name = true
             }
         }
 
@@ -117,76 +118,76 @@ impl<'config> TexLexer<'config> {
             let text = state.get_text_in((start + 1..end).into()); // 跳过反斜杠
 
             let kind = match text.as_ref() {
-                "begin" => TexSyntaxKind::BeginKeyword,
-                "end" => TexSyntaxKind::EndKeyword,
-                "documentclass" => TexSyntaxKind::DocumentclassKeyword,
-                "usepackage" => TexSyntaxKind::UsepackageKeyword,
-                "section" => TexSyntaxKind::SectionKeyword,
-                "subsection" => TexSyntaxKind::SubsectionKeyword,
-                "subsubsection" => TexSyntaxKind::SubsubsectionKeyword,
-                "chapter" => TexSyntaxKind::ChapterKeyword,
-                "part" => TexSyntaxKind::PartKeyword,
-                "title" => TexSyntaxKind::TitleKeyword,
-                "author" => TexSyntaxKind::AuthorKeyword,
-                "date" => TexSyntaxKind::DateKeyword,
-                "maketitle" => TexSyntaxKind::MaketitleKeyword,
-                "tableofcontents" => TexSyntaxKind::TableofcontentsKeyword,
-                "item" => TexSyntaxKind::ItemKeyword,
-                "label" => TexSyntaxKind::LabelKeyword,
-                "ref" => TexSyntaxKind::RefKeyword,
-                "cite" => TexSyntaxKind::CiteKeyword,
-                "includegraphics" => TexSyntaxKind::IncludegraphicsKeyword,
-                "textbf" => TexSyntaxKind::TextbfKeyword,
-                "textit" => TexSyntaxKind::TextitKeyword,
-                "emph" => TexSyntaxKind::EmphKeyword,
-                "frac" => TexSyntaxKind::Frac,
-                "sqrt" => TexSyntaxKind::Sqrt,
-                "sum" => TexSyntaxKind::Sum,
-                "int" => TexSyntaxKind::Int,
-                "lim" => TexSyntaxKind::Lim,
-                "alpha" => TexSyntaxKind::Alpha,
-                "beta" => TexSyntaxKind::Beta,
-                "gamma" => TexSyntaxKind::Gamma,
-                "delta" => TexSyntaxKind::Delta,
-                "epsilon" => TexSyntaxKind::Epsilon,
-                "zeta" => TexSyntaxKind::Zeta,
-                "eta" => TexSyntaxKind::Eta,
-                "theta" => TexSyntaxKind::Theta,
-                "iota" => TexSyntaxKind::Iota,
-                "kappa" => TexSyntaxKind::Kappa,
-                "lambda" => TexSyntaxKind::Lambda,
-                "mu" => TexSyntaxKind::Mu,
-                "nu" => TexSyntaxKind::Nu,
-                "xi" => TexSyntaxKind::Xi,
-                "omicron" => TexSyntaxKind::Omicron,
-                "pi" => TexSyntaxKind::Pi,
-                "rho" => TexSyntaxKind::Rho,
-                "sigma" => TexSyntaxKind::Sigma,
-                "tau" => TexSyntaxKind::Tau,
-                "upsilon" => TexSyntaxKind::Upsilon,
-                "phi" => TexSyntaxKind::Phi,
-                "chi" => TexSyntaxKind::Chi,
-                "psi" => TexSyntaxKind::Psi,
-                "omega" => TexSyntaxKind::Omega,
-                "varepsilon" => TexSyntaxKind::VarEpsilon,
-                "vartheta" => TexSyntaxKind::VarTheta,
-                "varkappa" => TexSyntaxKind::VarKappa,
-                "varpi" => TexSyntaxKind::VarPi,
-                "varrho" => TexSyntaxKind::VarRho,
-                "varsigma" => TexSyntaxKind::VarSigma,
-                "varphi" => TexSyntaxKind::VarPhi,
-                "Gamma" => TexSyntaxKind::UpperGamma,
-                "Delta" => TexSyntaxKind::UpperDelta,
-                "Theta" => TexSyntaxKind::UpperTheta,
-                "Lambda" => TexSyntaxKind::UpperLambda,
-                "Xi" => TexSyntaxKind::UpperXi,
-                "Pi" => TexSyntaxKind::UpperPi,
-                "Sigma" => TexSyntaxKind::UpperSigma,
-                "Upsilon" => TexSyntaxKind::UpperUpsilon,
-                "Phi" => TexSyntaxKind::UpperPhi,
-                "Psi" => TexSyntaxKind::UpperPsi,
-                "Omega" => TexSyntaxKind::UpperOmega,
-                _ => TexSyntaxKind::Command,
+                "begin" => TexTokenType::BeginKeyword,
+                "end" => TexTokenType::EndKeyword,
+                "documentclass" => TexTokenType::DocumentclassKeyword,
+                "usepackage" => TexTokenType::UsepackageKeyword,
+                "section" => TexTokenType::SectionKeyword,
+                "subsection" => TexTokenType::SubsectionKeyword,
+                "subsubsection" => TexTokenType::SubsubsectionKeyword,
+                "chapter" => TexTokenType::ChapterKeyword,
+                "part" => TexTokenType::PartKeyword,
+                "title" => TexTokenType::TitleKeyword,
+                "author" => TexTokenType::AuthorKeyword,
+                "date" => TexTokenType::DateKeyword,
+                "maketitle" => TexTokenType::MaketitleKeyword,
+                "tableofcontents" => TexTokenType::TableofcontentsKeyword,
+                "item" => TexTokenType::ItemKeyword,
+                "label" => TexTokenType::LabelKeyword,
+                "ref" => TexTokenType::RefKeyword,
+                "cite" => TexTokenType::CiteKeyword,
+                "includegraphics" => TexTokenType::IncludegraphicsKeyword,
+                "textbf" => TexTokenType::TextbfKeyword,
+                "textit" => TexTokenType::TextitKeyword,
+                "emph" => TexTokenType::EmphKeyword,
+                "frac" => TexTokenType::Frac,
+                "sqrt" => TexTokenType::Sqrt,
+                "sum" => TexTokenType::Sum,
+                "int" => TexTokenType::Int,
+                "lim" => TexTokenType::Lim,
+                "alpha" => TexTokenType::Alpha,
+                "beta" => TexTokenType::Beta,
+                "gamma" => TexTokenType::Gamma,
+                "delta" => TexTokenType::Delta,
+                "epsilon" => TexTokenType::Epsilon,
+                "zeta" => TexTokenType::Zeta,
+                "eta" => TexTokenType::Eta,
+                "theta" => TexTokenType::Theta,
+                "iota" => TexTokenType::Iota,
+                "kappa" => TexTokenType::Kappa,
+                "lambda" => TexTokenType::Lambda,
+                "mu" => TexTokenType::Mu,
+                "nu" => TexTokenType::Nu,
+                "xi" => TexTokenType::Xi,
+                "omicron" => TexTokenType::Omicron,
+                "pi" => TexTokenType::Pi,
+                "rho" => TexTokenType::Rho,
+                "sigma" => TexTokenType::Sigma,
+                "tau" => TexTokenType::Tau,
+                "upsilon" => TexTokenType::Upsilon,
+                "phi" => TexTokenType::Phi,
+                "chi" => TexTokenType::Chi,
+                "psi" => TexTokenType::Psi,
+                "omega" => TexTokenType::Omega,
+                "varepsilon" => TexTokenType::VarEpsilon,
+                "vartheta" => TexTokenType::VarTheta,
+                "varkappa" => TexTokenType::VarKappa,
+                "varpi" => TexTokenType::VarPi,
+                "varrho" => TexTokenType::VarRho,
+                "varsigma" => TexTokenType::VarSigma,
+                "varphi" => TexTokenType::VarPhi,
+                "Gamma" => TexTokenType::UpperGamma,
+                "Delta" => TexTokenType::UpperDelta,
+                "Theta" => TexTokenType::UpperTheta,
+                "Lambda" => TexTokenType::UpperLambda,
+                "Xi" => TexTokenType::UpperXi,
+                "Pi" => TexTokenType::UpperPi,
+                "Sigma" => TexTokenType::UpperSigma,
+                "Upsilon" => TexTokenType::UpperUpsilon,
+                "Phi" => TexTokenType::UpperPhi,
+                "Psi" => TexTokenType::UpperPsi,
+                "Omega" => TexTokenType::UpperOmega,
+                _ => TexTokenType::Command,
             };
 
             state.add_token(kind, start, state.get_position());
@@ -194,7 +195,7 @@ impl<'config> TexLexer<'config> {
         }
 
         // 如果没有命令名，只是一个反斜杠
-        state.add_token(TexSyntaxKind::Backslash, start, state.get_position());
+        state.add_token(TexTokenType::Backslash, start, state.get_position());
         true
     }
 
@@ -202,12 +203,12 @@ impl<'config> TexLexer<'config> {
         let start = state.get_position();
 
         if state.consume_if_starts_with("$$") {
-            state.add_token(TexSyntaxKind::DoubleDollar, start, state.get_position());
+            state.add_token(TexTokenType::DoubleDollar, start, state.get_position());
             return true;
         }
 
         if state.consume_if_starts_with("$") {
-            state.add_token(TexSyntaxKind::Dollar, start, state.get_position());
+            state.add_token(TexTokenType::Dollar, start, state.get_position());
             return true;
         }
 
@@ -219,12 +220,12 @@ impl<'config> TexLexer<'config> {
 
         if let Some(ch) = state.peek() {
             let kind = match ch {
-                '{' => TexSyntaxKind::LeftBrace,
-                '}' => TexSyntaxKind::RightBrace,
-                '[' => TexSyntaxKind::LeftBracket,
-                ']' => TexSyntaxKind::RightBracket,
-                '(' => TexSyntaxKind::LeftParen,
-                ')' => TexSyntaxKind::RightParen,
+                '{' => TexTokenType::LeftBrace,
+                '}' => TexTokenType::RightBrace,
+                '[' => TexTokenType::LeftBracket,
+                ']' => TexTokenType::RightBracket,
+                '(' => TexTokenType::LeftParen,
+                ')' => TexTokenType::RightParen,
                 _ => return false,
             };
 
@@ -241,26 +242,26 @@ impl<'config> TexLexer<'config> {
 
         if let Some(ch) = state.peek() {
             let kind = match ch {
-                '&' => TexSyntaxKind::Ampersand,
-                '#' => TexSyntaxKind::Hash,
-                '^' => TexSyntaxKind::Caret,
-                '_' => TexSyntaxKind::Underscore,
-                '~' => TexSyntaxKind::Tilde,
-                '=' => TexSyntaxKind::Equals,
-                '+' => TexSyntaxKind::Plus,
-                '-' => TexSyntaxKind::Minus,
-                '*' => TexSyntaxKind::Star,
-                '/' => TexSyntaxKind::Slash,
-                '|' => TexSyntaxKind::Pipe,
-                '<' => TexSyntaxKind::Less,
-                '>' => TexSyntaxKind::Greater,
-                '!' => TexSyntaxKind::Exclamation,
-                '?' => TexSyntaxKind::Question,
-                '@' => TexSyntaxKind::At,
-                ':' => TexSyntaxKind::Colon,
-                ';' => TexSyntaxKind::Semicolon,
-                ',' => TexSyntaxKind::Comma,
-                '.' => TexSyntaxKind::Dot,
+                '&' => TexTokenType::Ampersand,
+                '#' => TexTokenType::Hash,
+                '^' => TexTokenType::Caret,
+                '_' => TexTokenType::Underscore,
+                '~' => TexTokenType::Tilde,
+                '=' => TexTokenType::Equals,
+                '+' => TexTokenType::Plus,
+                '-' => TexTokenType::Minus,
+                '*' => TexTokenType::Star,
+                '/' => TexTokenType::Slash,
+                '|' => TexTokenType::Pipe,
+                '<' => TexTokenType::Less,
+                '>' => TexTokenType::Greater,
+                '!' => TexTokenType::Exclamation,
+                '?' => TexTokenType::Question,
+                '@' => TexTokenType::At,
+                ':' => TexTokenType::Colon,
+                ';' => TexTokenType::Semicolon,
+                ',' => TexTokenType::Comma,
+                '.' => TexTokenType::Dot,
                 _ => return false,
             };
 
@@ -293,7 +294,7 @@ impl<'config> TexLexer<'config> {
             }
         }
 
-        state.add_token(TexSyntaxKind::Number, start, state.get_position());
+        state.add_token(TexTokenType::Number, start, state.get_position());
         true
     }
 
@@ -311,7 +312,7 @@ impl<'config> TexLexer<'config> {
                         break;
                     }
                 }
-                state.add_token(TexSyntaxKind::Identifier, start, state.get_position());
+                state.add_token(TexTokenType::Identifier, start, state.get_position());
                 return true;
             }
         }

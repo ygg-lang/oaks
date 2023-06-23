@@ -1,171 +1,176 @@
-/// JASM 汇编语言Token 类型
-///
-/// 这个枚举定义JASM 汇编语言中所有可能的 tokens 类型
-/// 所有变体都不包含数据，使得该类型可以实Copy trait
+use oak_core::{Token, TokenType, UniversalTokenRole};
+#[cfg(feature = "serde")]
+use serde::{Deserialize, Serialize};
 
-#[derive(Copy, Clone, Debug, PartialEq, Eq)]
+pub type JasmToken = Token<JasmTokenType>;
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[repr(u16)]
 pub enum JasmTokenType {
-    // 关键
-    /// class 关键
-    Class,
-    /// version 关键
-    Version,
-    /// Method 关键
-    Method,
-    /// Field 关键
-    Field,
-    /// String 关键
-    String,
-    /// SourceFile 关键
-    SourceFile,
-    /// stack 关键
-    Stack,
-    /// locals 关键
-    Locals,
-    /// end 关键
-    End,
-    /// compiled 关键
-    Compiled,
-    /// from 关键
-    From,
-    /// InnerClass 关键
-    InnerClass,
-    /// NestMembers 关键
-    NestMembers,
-    /// BootstrapMethod 关键
-    BootstrapMethod,
+    Root,
+    // 关键字
+    ClassKw,
+    VersionKw,
+    MethodKw,
+    FieldKw,
+    StringKw,
+    SourceFileKw,
+    StackKw,
+    LocalsKw,
+    EndKw,
+    CompiledKw,
+    FromKw,
+    InnerClassKw,
+    NestMembersKw,
+    BootstrapMethodKw,
 
-    // 访问修饰
-    /// public 修饰
+    // 访问修饰符
     Public,
-    /// private 修饰
     Private,
-    /// protected 修饰
     Protected,
-    /// static 修饰
     Static,
-    /// super 修饰
     Super,
-    /// final 修饰
     Final,
-    /// abstract 修饰
     Abstract,
-    /// synchronized 修饰
     Synchronized,
-    /// native 修饰
     Native,
-    /// synthetic 修饰
     Synthetic,
-    /// deprecated 修饰
     Deprecated,
-    /// varargs 修饰
     Varargs,
 
-    // JVM 指令
-    /// aload_0 指令
+    // 字节码指令
     ALoad0,
-    /// aload_1 指令
     ALoad1,
-    /// aload_2 指令
     ALoad2,
-    /// aload_3 指令
     ALoad3,
-    /// iload_0 指令
     ILoad0,
-    /// iload_1 指令
     ILoad1,
-    /// iload_2 指令
     ILoad2,
-    /// iload_3 指令
     ILoad3,
-    /// ldc 指令
     Ldc,
-    /// ldc_w 指令
     LdcW,
-    /// ldc2_w 指令
     Ldc2W,
-    /// invokespecial 指令
     InvokeSpecial,
-    /// invokevirtual 指令
     InvokeVirtual,
-    /// invokestatic 指令
     InvokeStatic,
-    /// invokeinterface 指令
     InvokeInterface,
-    /// invokedynamic 指令
     InvokeDynamic,
-    /// getstatic 指令
     GetStatic,
-    /// putstatic 指令
     PutStatic,
-    /// getfield 指令
     GetField,
-    /// putfield 指令
     PutField,
-    /// return 指令
     Return,
-    /// ireturn 指令
     IReturn,
-    /// areturn 指令
     AReturn,
-    /// lreturn 指令
     LReturn,
-    /// freturn 指令
     FReturn,
-    /// dreturn 指令
     DReturn,
-    /// nop 指令
     Nop,
-    /// dup 指令
     Dup,
-    /// pop 指令
     Pop,
-    /// new 指令
     New,
 
-    // 符号
-    /// 左大括号 {
-    LeftBrace,
-    /// 右大括号 }
-    RightBrace,
-    /// 左小括号 (
-    LeftParen,
-    /// 右小括号 )
-    RightParen,
-    /// 左中括号 [
-    LeftBracket,
-    /// 右中括号 ]
-    RightBracket,
-    /// 冒号 :
-    Colon,
-    /// 分号 ;
-    Semicolon,
-    /// 点号 .
-    Dot,
-    /// 逗号 ,
-    Comma,
-    /// 斜杠 /
-    Slash,
-
-    // 字面
-    /// 字符串字面量
+    // 字面量
     StringLiteral,
-    /// 数字字面
     Number,
-    /// 类型描述
+    IdentifierToken,
     TypeDescriptor,
 
-    // 标识
-    /// 标识
-    Identifier,
+    // 标点符号
+    LeftBrace,
+    RightBrace,
+    LeftParen,
+    RightParen,
+    LeftBracket,
+    RightBracket,
+    Colon,
+    Semicolon,
+    Dot,
+    Comma,
+    Slash,
 
-    // 空白和注
-    /// 空白字符
+    // 其他
     Whitespace,
-    /// 注释
+    Newline,
     Comment,
-
-    // 特殊
-    /// 文件结束
+    Error,
     Eof,
+}
+
+impl TokenType for JasmTokenType {
+    type Role = UniversalTokenRole;
+    const END_OF_STREAM: Self = Self::Eof;
+
+    fn is_ignored(&self) -> bool {
+        matches!(self, Self::Whitespace | Self::Newline | Self::Comment)
+    }
+
+    fn role(&self) -> Self::Role {
+        use UniversalTokenRole::*;
+        match self {
+            Self::ClassKw
+            | Self::VersionKw
+            | Self::MethodKw
+            | Self::FieldKw
+            | Self::StringKw
+            | Self::SourceFileKw
+            | Self::StackKw
+            | Self::LocalsKw
+            | Self::EndKw
+            | Self::CompiledKw
+            | Self::FromKw
+            | Self::InnerClassKw
+            | Self::NestMembersKw
+            | Self::BootstrapMethodKw
+            | Self::Public
+            | Self::Private
+            | Self::Protected
+            | Self::Static
+            | Self::Super
+            | Self::Final
+            | Self::Abstract
+            | Self::Synchronized
+            | Self::Native
+            | Self::Synthetic
+            | Self::Deprecated
+            | Self::Varargs
+            | Self::ALoad0
+            | Self::ALoad1
+            | Self::ALoad2
+            | Self::ALoad3
+            | Self::ILoad0
+            | Self::ILoad1
+            | Self::ILoad2
+            | Self::ILoad3
+            | Self::Ldc
+            | Self::LdcW
+            | Self::Ldc2W
+            | Self::InvokeSpecial
+            | Self::InvokeVirtual
+            | Self::InvokeStatic
+            | Self::InvokeInterface
+            | Self::InvokeDynamic
+            | Self::GetStatic
+            | Self::PutStatic
+            | Self::GetField
+            | Self::PutField
+            | Self::Return
+            | Self::IReturn
+            | Self::AReturn
+            | Self::LReturn
+            | Self::FReturn
+            | Self::DReturn
+            | Self::Nop
+            | Self::Dup
+            | Self::Pop
+            | Self::New => Keyword,
+            Self::StringLiteral | Self::Number => Literal,
+            Self::IdentifierToken | Self::TypeDescriptor => Name,
+            Self::LeftBrace | Self::RightBrace | Self::LeftParen | Self::RightParen | Self::LeftBracket | Self::RightBracket | Self::Colon | Self::Semicolon | Self::Dot | Self::Comma | Self::Slash => Punctuation,
+            Self::Whitespace | Self::Newline => Whitespace,
+            Self::Comment => Comment,
+            _ => None,
+        }
+    }
 }

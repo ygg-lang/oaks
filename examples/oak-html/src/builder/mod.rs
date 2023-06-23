@@ -1,13 +1,14 @@
 use crate::{HtmlParser, ast::HtmlDocument, language::HtmlLanguage};
 use oak_core::{Builder, BuilderCache, GreenNode, OakDiagnostics, Parser, RedNode, SourceText, TextEdit, builder::BuildOutput, source::Source};
 
-/// HTML Builder
+/// A builder for HTML documents that coordinates parsing and AST construction.
 #[derive(Clone)]
 pub struct HtmlBuilder {
     config: HtmlLanguage,
 }
 
 impl HtmlBuilder {
+    /// Creates a new `HtmlBuilder` with the specified language configuration.
     pub fn new(config: HtmlLanguage) -> Self {
         Self { config }
     }

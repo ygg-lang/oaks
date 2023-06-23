@@ -1,4 +1,7 @@
-use crate::{kind::HtmlSyntaxKind, language::HtmlLanguage};
+#![doc = include_str!("readme.md")]
+pub mod token_type;
+
+use crate::{language::HtmlLanguage, lexer::token_type::HtmlTokenType};
 use oak_core::{
     Lexer, LexerCache, LexerState, OakError,
     lexer::{LexOutput, StringConfig},
@@ -8,16 +11,20 @@ use std::{simd::prelude::*, sync::LazyLock};
 
 type State<'a, S> = LexerState<'a, S, HtmlLanguage>;
 
-// HTML 静态配置
+// HTML static configuration
 
 static HTML_STRING: LazyLock<StringConfig> = LazyLock::new(|| StringConfig { quotes: &['"', '\''], escape: None });
 
+/// Lexer for the HTML language.
+///
+/// This lexer converts a raw string into a stream of HTML syntax tokens.
 #[derive(Clone, Debug)]
 pub struct HtmlLexer<'config> {
     _config: &'config HtmlLanguage,
 }
 
 impl<'config> Lexer<HtmlLanguage> for HtmlLexer<'config> {
+    /// Tokenizes the input source text using the provided cache.
     fn lex<'a, S: Source + ?Sized>(&self, source: &'a S, _edits: &[TextEdit], cache: &'a mut impl LexerCache<HtmlLanguage>) -> LexOutput<HtmlLanguage> {
         let mut state = State::new_with_cache(source, 0, cache);
         let result = self.run(&mut state);
@@ -29,11 +36,12 @@ impl<'config> Lexer<HtmlLanguage> for HtmlLexer<'config> {
 }
 
 impl<'config> HtmlLexer<'config> {
+    /// Creates a new `HtmlLexer` with the given configuration.
     pub fn new(config: &'config HtmlLanguage) -> Self {
         Self { _config: config }
     }
 
-    /// 主要的词法分析循环
+    /// The main lexing loop that iterates through the source text.
     fn run<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> Result<(), OakError> {
         while state.not_at_end() {
             let safe_point = state.get_position();
@@ -96,14 +104,14 @@ impl<'config> HtmlLexer<'config> {
                             continue;
                         }
 
-                        // 安全点检查，防止无限循环
+                        // Safety check to prevent infinite loop
                         state.advance(ch.len_utf8());
-                        state.add_token(HtmlSyntaxKind::Error, safe_point, state.get_position());
+                        state.add_token(HtmlTokenType::Error, safe_point, state.get_position());
                     }
                 }
             }
 
-            state.advance_if_dead_lock(safe_point);
+            state.advance_if_dead_lock(safe_point)
         }
 
         Ok(())
@@ -125,7 +133,7 @@ impl<'config> HtmlLexer<'config> {
                 let idx = not_space.first_set().unwrap();
                 i += idx;
                 state.advance(i);
-                state.add_token(HtmlSyntaxKind::Whitespace, start, state.get_position());
+                state.add_token(HtmlTokenType::Whitespace, start, state.get_position());
                 return true;
             }
             i += LANES;
@@ -140,7 +148,7 @@ impl<'config> HtmlLexer<'config> {
 
         if i > 0 {
             state.advance(i);
-            state.add_token(HtmlSyntaxKind::Whitespace, start, state.get_position());
+            state.add_token(HtmlTokenType::Whitespace, start, state.get_position());
             true
         }
         else {
@@ -162,7 +170,7 @@ impl<'config> HtmlLexer<'config> {
             }
         };
         state.advance(len);
-        state.add_token(HtmlSyntaxKind::Comment, start, state.get_position());
+        state.add_token(HtmlTokenType::Comment, start, state.get_position());
         true
     }
 
@@ -195,7 +203,7 @@ impl<'config> HtmlLexer<'config> {
                         while state.not_at_end() {
                             if let Some('>') = state.peek() {
                                 state.advance(1); // Skip >
-                                state.add_token(HtmlSyntaxKind::Doctype, start_pos, state.get_position());
+                                state.add_token(HtmlTokenType::Doctype, start_pos, state.get_position());
                                 return true;
                             }
                             if let Some(ch) = state.peek() {
@@ -207,7 +215,7 @@ impl<'config> HtmlLexer<'config> {
                         }
 
                         // Unclosed doctype
-                        state.add_token(HtmlSyntaxKind::Error, start_pos, state.get_position());
+                        state.add_token(HtmlTokenType::Error, start_pos, state.get_position());
                         return true;
                     }
                 }
@@ -248,7 +256,7 @@ impl<'config> HtmlLexer<'config> {
                                 if let Some(']') = state.peek_next_n(1) {
                                     if let Some('>') = state.peek_next_n(2) {
                                         state.advance(3); // Skip ]]>
-                                        state.add_token(HtmlSyntaxKind::CData, start_pos, state.get_position());
+                                        state.add_token(HtmlTokenType::CData, start_pos, state.get_position());
                                         return true;
                                     }
                                 }
@@ -262,7 +270,7 @@ impl<'config> HtmlLexer<'config> {
                         }
 
                         // Unclosed CDATA
-                        state.add_token(HtmlSyntaxKind::Error, start_pos, state.get_position());
+                        state.add_token(HtmlTokenType::Error, start_pos, state.get_position());
                         return true;
                     }
                 }
@@ -284,7 +292,7 @@ impl<'config> HtmlLexer<'config> {
                     if let Some('?') = state.peek() {
                         if let Some('>') = state.peek_next_n(1) {
                             state.advance(2); // Skip ?>
-                            state.add_token(HtmlSyntaxKind::ProcessingInstruction, start_pos, state.get_position());
+                            state.add_token(HtmlTokenType::ProcessingInstruction, start_pos, state.get_position());
                             return true;
                         }
                     }
@@ -297,7 +305,7 @@ impl<'config> HtmlLexer<'config> {
                 }
 
                 // Unclosed processing instruction
-                state.add_token(HtmlSyntaxKind::Error, start_pos, state.get_position());
+                state.add_token(HtmlTokenType::Error, start_pos, state.get_position());
                 return true;
             }
         }
@@ -312,19 +320,19 @@ impl<'config> HtmlLexer<'config> {
             Some('<') => {
                 if let Some('/') = state.peek_next_n(1) {
                     state.advance(2);
-                    state.add_token(HtmlSyntaxKind::TagSlashOpen, start_pos, state.get_position());
+                    state.add_token(HtmlTokenType::TagSlashOpen, start_pos, state.get_position());
                     true
                 }
                 else {
                     state.advance(1);
-                    state.add_token(HtmlSyntaxKind::TagOpen, start_pos, state.get_position());
+                    state.add_token(HtmlTokenType::TagOpen, start_pos, state.get_position());
                     true
                 }
             }
             Some('/') => {
                 if let Some('>') = state.peek_next_n(1) {
                     state.advance(2);
-                    state.add_token(HtmlSyntaxKind::TagSelfClose, start_pos, state.get_position());
+                    state.add_token(HtmlTokenType::TagSelfClose, start_pos, state.get_position());
                     true
                 }
                 else {
@@ -333,7 +341,7 @@ impl<'config> HtmlLexer<'config> {
             }
             Some('>') => {
                 state.advance(1);
-                state.add_token(HtmlSyntaxKind::TagClose, start_pos, state.get_position());
+                state.add_token(HtmlTokenType::TagClose, start_pos, state.get_position());
                 true
             }
             _ => false,
@@ -366,7 +374,7 @@ impl<'config> HtmlLexer<'config> {
 
                     if has_digits && state.peek() == Some(';') {
                         state.advance(1);
-                        state.add_token(HtmlSyntaxKind::CharRef, start_pos, state.get_position());
+                        state.add_token(HtmlTokenType::CharRef, start_pos, state.get_position());
                         return true;
                     }
                 }
@@ -385,7 +393,7 @@ impl<'config> HtmlLexer<'config> {
 
                     if has_digits && state.peek() == Some(';') {
                         state.advance(1);
-                        state.add_token(HtmlSyntaxKind::CharRef, start_pos, state.get_position());
+                        state.add_token(HtmlTokenType::CharRef, start_pos, state.get_position());
                         return true;
                     }
                 }
@@ -405,13 +413,13 @@ impl<'config> HtmlLexer<'config> {
 
                 if has_name && state.peek() == Some(';') {
                     state.advance(1);
-                    state.add_token(HtmlSyntaxKind::EntityRef, start_pos, state.get_position());
+                    state.add_token(HtmlTokenType::EntityRef, start_pos, state.get_position());
                     return true;
                 }
             }
 
             // Invalid entity reference
-            state.add_token(HtmlSyntaxKind::Error, start_pos, state.get_position());
+            state.add_token(HtmlTokenType::Error, start_pos, state.get_position());
             return true;
         }
 
@@ -419,7 +427,7 @@ impl<'config> HtmlLexer<'config> {
     }
 
     fn lex_string_literal<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
-        HTML_STRING.scan(state, HtmlSyntaxKind::AttributeValue)
+        HTML_STRING.scan(state, HtmlTokenType::AttributeValue)
     }
 
     fn lex_identifier<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
@@ -438,7 +446,7 @@ impl<'config> HtmlLexer<'config> {
                     }
                 }
 
-                state.add_token(HtmlSyntaxKind::TagName, start_pos, state.get_position());
+                state.add_token(HtmlTokenType::TagName, start_pos, state.get_position());
                 return true;
             }
         }
@@ -450,13 +458,13 @@ impl<'config> HtmlLexer<'config> {
         let start_pos = state.get_position();
 
         let kind = match state.peek() {
-            Some('=') => HtmlSyntaxKind::Equal,
-            Some('"') => HtmlSyntaxKind::Quote,
-            Some('\'') => HtmlSyntaxKind::Quote,
-            Some('!') => return false, // 已在其他地方处理
-            Some('?') => return false, // 已在其他地方处理
-            Some('&') => return false, // 已在其他地方处理
-            Some(';') => return false, // 已在其他地方处理
+            Some('=') => HtmlTokenType::Equal,
+            Some('"') => HtmlTokenType::Quote,
+            Some('\'') => HtmlTokenType::Quote,
+            Some('!') => return false, // Already handled elsewhere
+            Some('?') => return false, // Already handled elsewhere
+            Some('&') => return false, // Already handled elsewhere
+            Some(';') => return false, // Already handled elsewhere
             _ => return false,
         };
 
@@ -490,23 +498,22 @@ impl<'config> HtmlLexer<'config> {
                 let idx = stop.first_set().unwrap();
                 i += idx;
                 state.advance(i);
-                state.add_token(HtmlSyntaxKind::Text, start_pos, state.get_position());
+                state.add_token(HtmlTokenType::Text, start_pos, state.get_position());
                 return true;
             }
-            i += LANES;
+            i += LANES
         }
-
         while i < len {
             let ch = unsafe { *bytes.get_unchecked(i) };
-            if ch == b'<' || ch == b'&' || ch.is_ascii_whitespace() {
+            if ch == b'<' || ch == b'&' || ch <= 32 {
                 break;
             }
-            i += 1;
+            i += 1
         }
 
         if i > 0 {
             state.advance(i);
-            state.add_token(HtmlSyntaxKind::Text, start_pos, state.get_position());
+            state.add_token(HtmlTokenType::Text, start_pos, state.get_position());
             true
         }
         else {

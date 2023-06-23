@@ -520,7 +520,7 @@
         },
         {
             "kind": "StringLiteral",
-            "text": "\"john@example.com\"",
+            "text": "\"john↯example.com\"",
             "start": 689,
             "end": 707
         },

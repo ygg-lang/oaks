@@ -1,6 +1,6 @@
 #[test]
 fn ready() {
-    println!("oak-java tests ready!");
+    println!("oak-java tests ready!")
 }
 
 #[cfg(test)]

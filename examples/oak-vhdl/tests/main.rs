@@ -16,16 +16,16 @@ fn test_vhdl_lexer_simple() {
 
             // 打印前几个 tokens 用于调试
             for (i, token) in tokens.iter().take(5).enumerate() {
-                println!("Token {}: {:?}", i, token);
+                println!("Token {}: {:?}", i, token)
             }
         }
         Err(e) => {
-            panic!("Lexer failed with error: {}", e);
+            panic!("Lexer failed with error: {}", e)
         }
     }
 
     // 检查是否有诊断信息
     if !result.diagnostics.is_empty() {
-        println!("Diagnostics: {:?}", result.diagnostics);
+        println!("Diagnostics: {:?}", result.diagnostics)
     }
 }

@@ -1,4 +1,7 @@
-use crate::{kind::JavaSyntaxKind, language::JavaLanguage};
+#![doc = include_str!("readme.md")]
+pub mod token_type;
+
+use crate::{language::JavaLanguage, lexer::token_type::JavaTokenType};
 use oak_core::{Lexer, LexerCache, LexerState, OakError, lexer::LexOutput, source::Source};
 
 type State<'a, S> = LexerState<'a, S, JavaLanguage>;
@@ -65,7 +68,7 @@ impl<'config> JavaLexer<'config> {
             let start_pos = state.get_position();
             if let Some(ch) = state.peek() {
                 state.advance(ch.len_utf8());
-                state.add_token(JavaSyntaxKind::Error, start_pos, state.get_position());
+                state.add_token(JavaTokenType::Error, start_pos, state.get_position());
             }
 
             state.advance_if_dead_lock(safe_point);
@@ -88,7 +91,7 @@ impl<'config> JavaLexer<'config> {
         }
 
         if state.get_position() > start {
-            state.add_token(JavaSyntaxKind::Whitespace, start, state.get_position());
+            state.add_token(JavaTokenType::Whitespace, start, state.get_position());
             return true;
         }
         false
@@ -100,7 +103,7 @@ impl<'config> JavaLexer<'config> {
 
         if let Some('\n') = state.peek() {
             state.advance(1);
-            state.add_token(JavaSyntaxKind::Whitespace, start, state.get_position());
+            state.add_token(JavaTokenType::Whitespace, start, state.get_position());
             true
         }
         else {
@@ -121,12 +124,13 @@ impl<'config> JavaLexer<'config> {
                 }
                 state.advance(ch.len_utf8());
             }
-            state.add_token(JavaSyntaxKind::LineComment, start, state.get_position());
+            state.add_token(JavaTokenType::LineComment, start, state.get_position());
             return true;
         }
 
         // 多行注释 /* */
         if state.peek() == Some('/') && state.peek_next_n(1) == Some('*') {
+            let start = state.get_position();
             state.advance(2);
             while let Some(ch) = state.peek() {
                 if ch == '*' && state.peek_next_n(1) == Some('/') {
@@ -135,7 +139,7 @@ impl<'config> JavaLexer<'config> {
                 }
                 state.advance(ch.len_utf8());
             }
-            state.add_token(JavaSyntaxKind::BlockComment, start, state.get_position());
+            state.add_token(JavaTokenType::BlockComment, start, state.get_position());
             return true;
         }
 
@@ -161,7 +165,7 @@ impl<'config> JavaLexer<'config> {
                     }
                 }
                 else if ch == '\n' {
-                    // 未闭合的字符�?
+                    // 未闭合的字符串
                     break;
                 }
                 else {
@@ -169,7 +173,7 @@ impl<'config> JavaLexer<'config> {
                 }
             }
 
-            state.add_token(JavaSyntaxKind::StringLiteral, start, state.get_position());
+            state.add_token(JavaTokenType::StringLiteral, start, state.get_position());
             return true;
         }
 
@@ -199,7 +203,7 @@ impl<'config> JavaLexer<'config> {
                 state.advance(1);
             }
 
-            state.add_token(JavaSyntaxKind::CharacterLiteral, start, state.get_position());
+            state.add_token(JavaTokenType::CharacterLiteral, start, state.get_position());
             return true;
         }
 
@@ -262,11 +266,19 @@ impl<'config> JavaLexer<'config> {
                     }
                 }
 
-                state.add_token(JavaSyntaxKind::IntegerLiteral, start, state.get_position());
+                let text = state.get_text_in((start..state.get_position()).into());
+                let kind = if text.contains('.') || text.contains('e') || text.contains('E') || text.ends_with('f') || text.ends_with('F') || text.ends_with('d') || text.ends_with('D') {
+                    JavaTokenType::FloatingPointLiteral
+                }
+                else {
+                    JavaTokenType::IntegerLiteral
+                };
+
+                eprintln!("DEBUG: Lexer classified '{}' as {:?} at {}..{}", text, kind, start, state.get_position());
+                state.add_token(kind, start, state.get_position());
                 return true;
             }
         }
-
         false
     }
 
@@ -290,6 +302,7 @@ impl<'config> JavaLexer<'config> {
                 let text = state.get_text_in((start..state.get_position()).into());
                 let token_kind = self.classify_identifier(text.as_ref());
 
+                eprintln!("DEBUG: Lexer classified '{}' as {:?} at {}..{}", text, token_kind, start, state.get_position());
                 state.add_token(token_kind, start, state.get_position());
                 true
             }
@@ -303,64 +316,64 @@ impl<'config> JavaLexer<'config> {
     }
 
     /// 分类标识符为关键字或普通标识符
-    fn classify_identifier(&self, text: &str) -> JavaSyntaxKind {
-        let kind = match text {
-            "abstract" => JavaSyntaxKind::Abstract,
-            "assert" => JavaSyntaxKind::Assert,
-            "boolean" => JavaSyntaxKind::Boolean,
-            "break" => JavaSyntaxKind::Break,
-            "byte" => JavaSyntaxKind::Byte,
-            "case" => JavaSyntaxKind::Case,
-            "catch" => JavaSyntaxKind::Catch,
-            "char" => JavaSyntaxKind::Char,
-            "class" => JavaSyntaxKind::Class,
-            "const" => JavaSyntaxKind::Const,
-            "continue" => JavaSyntaxKind::Continue,
-            "default" => JavaSyntaxKind::Default,
-            "do" => JavaSyntaxKind::Do,
-            "double" => JavaSyntaxKind::Double,
-            "else" => JavaSyntaxKind::Else,
-            "enum" => JavaSyntaxKind::Enum,
-            "extends" => JavaSyntaxKind::Extends,
-            "final" => JavaSyntaxKind::Final,
-            "finally" => JavaSyntaxKind::Finally,
-            "float" => JavaSyntaxKind::Float,
-            "for" => JavaSyntaxKind::For,
-            "goto" => JavaSyntaxKind::Goto,
-            "if" => JavaSyntaxKind::If,
-            "implements" => JavaSyntaxKind::Implements,
-            "import" => JavaSyntaxKind::Import,
-            "instanceof" => JavaSyntaxKind::Instanceof,
-            "int" => JavaSyntaxKind::Int,
-            "interface" => JavaSyntaxKind::Interface,
-            "long" => JavaSyntaxKind::Long,
-            "native" => JavaSyntaxKind::Native,
-            "new" => JavaSyntaxKind::New,
-            "package" => JavaSyntaxKind::Package,
-            "private" => JavaSyntaxKind::Private,
-            "protected" => JavaSyntaxKind::Protected,
-            "public" => JavaSyntaxKind::Public,
-            "return" => JavaSyntaxKind::Return,
-            "short" => JavaSyntaxKind::Short,
-            "static" => JavaSyntaxKind::Static,
-            "strictfp" => JavaSyntaxKind::Strictfp,
-            "super" => JavaSyntaxKind::Super,
-            "switch" => JavaSyntaxKind::Switch,
-            "synchronized" => JavaSyntaxKind::Synchronized,
-            "this" => JavaSyntaxKind::This,
-            "throw" => JavaSyntaxKind::Throw,
-            "throws" => JavaSyntaxKind::Throws,
-            "transient" => JavaSyntaxKind::Transient,
-            "try" => JavaSyntaxKind::Try,
-            "void" => JavaSyntaxKind::Void,
-            "volatile" => JavaSyntaxKind::Volatile,
-            "while" => JavaSyntaxKind::While,
-            "true" | "false" => JavaSyntaxKind::BooleanLiteral,
-            "null" => JavaSyntaxKind::NullLiteral,
-            _ => JavaSyntaxKind::Identifier,
-        };
-        eprintln!("DEBUG: Lexer classified '{}' as {:?}", text, kind);
-        kind
+    fn classify_identifier(&self, text: &str) -> JavaTokenType {
+        match text {
+            "abstract" => JavaTokenType::Abstract,
+            "assert" => JavaTokenType::Assert,
+            "boolean" => JavaTokenType::Boolean,
+            "break" => JavaTokenType::Break,
+            "byte" => JavaTokenType::Byte,
+            "case" => JavaTokenType::Case,
+            "catch" => JavaTokenType::Catch,
+            "char" => JavaTokenType::Char,
+            "class" => JavaTokenType::Class,
+            "const" => JavaTokenType::Const,
+            "continue" => JavaTokenType::Continue,
+            "default" => JavaTokenType::Default,
+            "do" => JavaTokenType::Do,
+            "double" => JavaTokenType::Double,
+            "else" => JavaTokenType::Else,
+            "enum" => JavaTokenType::Enum,
+            "extends" => JavaTokenType::Extends,
+            "final" => JavaTokenType::Final,
+            "finally" => JavaTokenType::Finally,
+            "float" => JavaTokenType::Float,
+            "for" => JavaTokenType::For,
+            "goto" => JavaTokenType::Goto,
+            "if" => JavaTokenType::If,
+            "implements" => JavaTokenType::Implements,
+            "import" => JavaTokenType::Import,
+            "instanceof" => JavaTokenType::Instanceof,
+            "int" => JavaTokenType::Int,
+            "interface" => JavaTokenType::Interface,
+            "long" => JavaTokenType::Long,
+            "native" => JavaTokenType::Native,
+            "new" => JavaTokenType::New,
+            "package" => JavaTokenType::Package,
+            "private" => JavaTokenType::Private,
+            "protected" => JavaTokenType::Protected,
+            "public" => JavaTokenType::Public,
+            "record" => JavaTokenType::Record,
+            "return" => JavaTokenType::Return,
+            "short" => JavaTokenType::Short,
+            "static" => JavaTokenType::Static,
+            "strictfp" => JavaTokenType::Strictfp,
+            "struct" => JavaTokenType::Struct,
+            "super" => JavaTokenType::Super,
+            "switch" => JavaTokenType::Switch,
+            "synchronized" => JavaTokenType::Synchronized,
+            "this" => JavaTokenType::This,
+            "throw" => JavaTokenType::Throw,
+            "throws" => JavaTokenType::Throws,
+            "transient" => JavaTokenType::Transient,
+            "try" => JavaTokenType::Try,
+            "void" => JavaTokenType::Void,
+            "volatile" => JavaTokenType::Volatile,
+            "while" => JavaTokenType::While,
+            "true" | "false" => JavaTokenType::BooleanLiteral,
+            "null" => JavaTokenType::NullLiteral,
+            _ => JavaTokenType::Identifier,
+        }
     }
 
     /// 处理操作符和分隔�?
@@ -373,105 +386,105 @@ impl<'config> JavaLexer<'config> {
                     state.advance(1);
                     if state.peek() == Some('+') {
                         state.advance(1);
-                        JavaSyntaxKind::PlusPlus
+                        JavaTokenType::PlusPlus
                     }
                     else if state.peek() == Some('=') {
                         state.advance(1);
-                        JavaSyntaxKind::PlusEquals
+                        JavaTokenType::PlusEquals
                     }
                     else {
-                        JavaSyntaxKind::Plus
+                        JavaTokenType::Plus
                     }
                 }
                 '-' => {
                     state.advance(1);
                     if state.peek() == Some('-') {
                         state.advance(1);
-                        JavaSyntaxKind::MinusMinus
+                        JavaTokenType::MinusMinus
                     }
                     else if state.peek() == Some('=') {
                         state.advance(1);
-                        JavaSyntaxKind::MinusEquals
+                        JavaTokenType::MinusEquals
                     }
                     else {
-                        JavaSyntaxKind::Minus
+                        JavaTokenType::Minus
                     }
                 }
                 '*' => {
                     state.advance(1);
                     if state.peek() == Some('=') {
                         state.advance(1);
-                        JavaSyntaxKind::AsteriskEquals
+                        JavaTokenType::AsteriskEquals
                     }
                     else {
-                        JavaSyntaxKind::Asterisk
+                        JavaTokenType::Asterisk
                     }
                 }
                 '/' => {
                     state.advance(1);
                     if state.peek() == Some('=') {
                         state.advance(1);
-                        JavaSyntaxKind::SlashEquals
+                        JavaTokenType::SlashEquals
                     }
                     else {
-                        JavaSyntaxKind::Slash
+                        JavaTokenType::Slash
                     }
                 }
                 '%' => {
                     state.advance(1);
                     if state.peek() == Some('=') {
                         state.advance(1);
-                        JavaSyntaxKind::PercentEquals
+                        JavaTokenType::PercentEquals
                     }
                     else {
-                        JavaSyntaxKind::Percent
+                        JavaTokenType::Percent
                     }
                 }
                 '=' => {
                     state.advance(1);
                     if state.peek() == Some('=') {
                         state.advance(1);
-                        JavaSyntaxKind::Equals
+                        JavaTokenType::Equals
                     }
                     else {
-                        JavaSyntaxKind::Assign
+                        JavaTokenType::Assign
                     }
                 }
                 '!' => {
                     state.advance(1);
                     if state.peek() == Some('=') {
                         state.advance(1);
-                        JavaSyntaxKind::BangEquals
+                        JavaTokenType::BangEquals
                     }
                     else {
-                        JavaSyntaxKind::Bang
+                        JavaTokenType::Bang
                     }
                 }
                 '<' => {
                     state.advance(1);
                     if state.peek() == Some('=') {
                         state.advance(1);
-                        JavaSyntaxKind::LessThanEquals
+                        JavaTokenType::LessThanEquals
                     }
                     else if state.peek() == Some('<') {
                         state.advance(1);
                         if state.peek() == Some('=') {
                             state.advance(1);
-                            JavaSyntaxKind::LeftShiftEquals
+                            JavaTokenType::LeftShiftEquals
                         }
                         else {
-                            JavaSyntaxKind::LeftShift
+                            JavaTokenType::LeftShift
                         }
                     }
                     else {
-                        JavaSyntaxKind::LessThan
+                        JavaTokenType::LessThan
                     }
                 }
                 '>' => {
                     state.advance(1);
                     if state.peek() == Some('=') {
                         state.advance(1);
-                        JavaSyntaxKind::GreaterThanEquals
+                        JavaTokenType::GreaterThanEquals
                     }
                     else if state.peek() == Some('>') {
                         state.advance(1);
@@ -479,119 +492,119 @@ impl<'config> JavaLexer<'config> {
                             state.advance(1);
                             if state.peek() == Some('=') {
                                 state.advance(1);
-                                JavaSyntaxKind::UnsignedRightShiftEquals
+                                JavaTokenType::UnsignedRightShiftEquals
                             }
                             else {
-                                JavaSyntaxKind::UnsignedRightShift
+                                JavaTokenType::UnsignedRightShift
                             }
                         }
                         else if state.peek() == Some('=') {
                             state.advance(1);
-                            JavaSyntaxKind::RightShiftEquals
+                            JavaTokenType::RightShiftEquals
                         }
                         else {
-                            JavaSyntaxKind::RightShift
+                            JavaTokenType::RightShift
                         }
                     }
                     else {
-                        JavaSyntaxKind::GreaterThan
+                        JavaTokenType::GreaterThan
                     }
                 }
                 '&' => {
                     state.advance(1);
                     if state.peek() == Some('&') {
                         state.advance(1);
-                        JavaSyntaxKind::AmpersandAmpersand
+                        JavaTokenType::AmpersandAmpersand
                     }
                     else if state.peek() == Some('=') {
                         state.advance(1);
-                        JavaSyntaxKind::AmpersandEquals
+                        JavaTokenType::AmpersandEquals
                     }
                     else {
-                        JavaSyntaxKind::Ampersand
+                        JavaTokenType::Ampersand
                     }
                 }
                 '|' => {
                     state.advance(1);
                     if state.peek() == Some('|') {
                         state.advance(1);
-                        JavaSyntaxKind::PipePipe
+                        JavaTokenType::PipePipe
                     }
                     else if state.peek() == Some('=') {
                         state.advance(1);
-                        JavaSyntaxKind::PipeEquals
+                        JavaTokenType::PipeEquals
                     }
                     else {
-                        JavaSyntaxKind::Pipe
+                        JavaTokenType::Pipe
                     }
                 }
                 '^' => {
                     state.advance(1);
                     if state.peek() == Some('=') {
                         state.advance(1);
-                        JavaSyntaxKind::CaretEquals
+                        JavaTokenType::CaretEquals
                     }
                     else {
-                        JavaSyntaxKind::Caret
+                        JavaTokenType::Caret
                     }
                 }
                 '~' => {
                     state.advance(1);
-                    JavaSyntaxKind::Tilde
+                    JavaTokenType::Tilde
                 }
                 '?' => {
                     state.advance(1);
-                    JavaSyntaxKind::Question
+                    JavaTokenType::Question
                 }
                 ':' => {
                     state.advance(1);
-                    JavaSyntaxKind::Colon
+                    JavaTokenType::Colon
                 }
                 ';' => {
                     state.advance(1);
-                    JavaSyntaxKind::Semicolon
+                    JavaTokenType::Semicolon
                 }
                 ',' => {
                     state.advance(1);
-                    JavaSyntaxKind::Comma
+                    JavaTokenType::Comma
                 }
                 '.' => {
                     state.advance(1);
                     if state.peek() == Some('.') && state.peek_next_n(1) == Some('.') {
                         state.advance(2);
-                        JavaSyntaxKind::Ellipsis
+                        JavaTokenType::Ellipsis
                     }
                     else {
-                        JavaSyntaxKind::Dot
+                        JavaTokenType::Dot
                     }
                 }
                 '(' => {
                     state.advance(1);
-                    JavaSyntaxKind::LeftParen
+                    JavaTokenType::LeftParen
                 }
                 ')' => {
                     state.advance(1);
-                    JavaSyntaxKind::RightParen
+                    JavaTokenType::RightParen
                 }
                 '{' => {
                     state.advance(1);
-                    JavaSyntaxKind::LeftBrace
+                    JavaTokenType::LeftBrace
                 }
                 '}' => {
                     state.advance(1);
-                    JavaSyntaxKind::RightBrace
+                    JavaTokenType::RightBrace
                 }
                 '[' => {
                     state.advance(1);
-                    JavaSyntaxKind::LeftBracket
+                    JavaTokenType::LeftBracket
                 }
                 ']' => {
                     state.advance(1);
-                    JavaSyntaxKind::RightBracket
+                    JavaTokenType::RightBracket
                 }
                 '@' => {
                     state.advance(1);
-                    JavaSyntaxKind::At
+                    JavaTokenType::At
                 }
                 _ => return false,
             };

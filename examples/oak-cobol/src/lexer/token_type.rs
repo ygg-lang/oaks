@@ -1,7 +1,9 @@
 use oak_core::{TokenType, UniversalTokenRole};
+#[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
 
-#[derive(Debug, Copy, Clone, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Deserialize)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[derive(Debug, Copy, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[repr(u16)]
 pub enum CobolTokenType {
     // 基础 tokens
@@ -150,7 +152,7 @@ pub enum CobolTokenType {
     Apostrophe, // '
 
     // 特殊字符
-    At,        // @
+    At,        // ↯
     Hash,      // #
     Dollar,    // $
     Ampersand, // &

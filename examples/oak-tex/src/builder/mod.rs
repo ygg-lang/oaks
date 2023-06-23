@@ -1,4 +1,9 @@
-use crate::{ast::*, kind::TexSyntaxKind, language::TexLanguage, parser::TexParser};
+use crate::{
+    ast::*,
+    language::TexLanguage,
+    lexer::token_type::TexTokenType,
+    parser::{TexParser, element_type::TexElementType},
+};
 use oak_core::{Builder, BuilderCache, GreenNode, OakDiagnostics, OakError, Parser, RedNode, RedTree, TextEdit, source::Source};
 
 /// TeX 语言的 AST 构建器
@@ -50,15 +55,15 @@ impl<'config> TexBuilder<'config> {
             return Ok(TexRoot { span: node.span().into(), items });
         }
 
-        let first_kind = children.first().unwrap().kind::<TexSyntaxKind>();
-        let last_kind = children.last().unwrap().kind::<TexSyntaxKind>();
+        let first_kind: TexTokenType = children.first().unwrap().kind();
+        let last_kind: TexTokenType = children.last().unwrap().kind();
 
         let start = if is_delimiter(first_kind) { 1 } else { 0 };
         let end = if children.len() > start && is_delimiter(last_kind) { children.len() - 1 } else { children.len() };
 
         for i in start..end {
             if let Some(item) = self.build_item(children[i], source)? {
-                items.push(item);
+                items.push(item)
             }
         }
 
@@ -66,140 +71,140 @@ impl<'config> TexBuilder<'config> {
     }
 
     fn build_item<S: Source + ?Sized>(&self, tree: RedTree<TexLanguage>, source: &S) -> Result<Option<TexItem>, OakError> {
-        let kind: TexSyntaxKind = tree.kind();
+        let kind: TexTokenType = tree.kind();
         match kind {
-            TexSyntaxKind::Command
-            | TexSyntaxKind::BeginKeyword
-            | TexSyntaxKind::EndKeyword
-            | TexSyntaxKind::Frac
-            | TexSyntaxKind::Sqrt
-            | TexSyntaxKind::Sum
-            | TexSyntaxKind::Int
-            | TexSyntaxKind::Lim
-            | TexSyntaxKind::SectionKeyword
-            | TexSyntaxKind::SubsectionKeyword
-            | TexSyntaxKind::SubsubsectionKeyword
-            | TexSyntaxKind::ChapterKeyword
-            | TexSyntaxKind::PartKeyword
-            | TexSyntaxKind::TitleKeyword
-            | TexSyntaxKind::AuthorKeyword
-            | TexSyntaxKind::DateKeyword
-            | TexSyntaxKind::MaketitleKeyword
-            | TexSyntaxKind::TableofcontentsKeyword
-            | TexSyntaxKind::ItemKeyword
-            | TexSyntaxKind::LabelKeyword
-            | TexSyntaxKind::RefKeyword
-            | TexSyntaxKind::CiteKeyword
-            | TexSyntaxKind::IncludegraphicsKeyword
-            | TexSyntaxKind::TextbfKeyword
-            | TexSyntaxKind::TextitKeyword
-            | TexSyntaxKind::EmphKeyword
-            | TexSyntaxKind::Alpha
-            | TexSyntaxKind::Beta
-            | TexSyntaxKind::Gamma
-            | TexSyntaxKind::Delta
-            | TexSyntaxKind::Epsilon
-            | TexSyntaxKind::Zeta
-            | TexSyntaxKind::Eta
-            | TexSyntaxKind::Theta
-            | TexSyntaxKind::Iota
-            | TexSyntaxKind::Kappa
-            | TexSyntaxKind::Lambda
-            | TexSyntaxKind::Mu
-            | TexSyntaxKind::Nu
-            | TexSyntaxKind::Xi
-            | TexSyntaxKind::Omicron
-            | TexSyntaxKind::Pi
-            | TexSyntaxKind::Rho
-            | TexSyntaxKind::Sigma
-            | TexSyntaxKind::Tau
-            | TexSyntaxKind::Upsilon
-            | TexSyntaxKind::Phi
-            | TexSyntaxKind::Chi
-            | TexSyntaxKind::Psi
-            | TexSyntaxKind::Omega
-            | TexSyntaxKind::VarEpsilon
-            | TexSyntaxKind::VarTheta
-            | TexSyntaxKind::VarKappa
-            | TexSyntaxKind::VarPi
-            | TexSyntaxKind::VarRho
-            | TexSyntaxKind::VarSigma
-            | TexSyntaxKind::VarPhi
-            | TexSyntaxKind::UpperGamma
-            | TexSyntaxKind::UpperDelta
-            | TexSyntaxKind::UpperTheta
-            | TexSyntaxKind::UpperLambda
-            | TexSyntaxKind::UpperXi
-            | TexSyntaxKind::UpperPi
-            | TexSyntaxKind::UpperSigma
-            | TexSyntaxKind::UpperUpsilon
-            | TexSyntaxKind::UpperPhi
-            | TexSyntaxKind::UpperPsi
-            | TexSyntaxKind::UpperOmega => {
+            TexTokenType::Command
+            | TexTokenType::BeginKeyword
+            | TexTokenType::EndKeyword
+            | TexTokenType::Frac
+            | TexTokenType::Sqrt
+            | TexTokenType::Sum
+            | TexTokenType::Int
+            | TexTokenType::Lim
+            | TexTokenType::SectionKeyword
+            | TexTokenType::SubsectionKeyword
+            | TexTokenType::SubsubsectionKeyword
+            | TexTokenType::ChapterKeyword
+            | TexTokenType::PartKeyword
+            | TexTokenType::TitleKeyword
+            | TexTokenType::AuthorKeyword
+            | TexTokenType::DateKeyword
+            | TexTokenType::MaketitleKeyword
+            | TexTokenType::TableofcontentsKeyword
+            | TexTokenType::ItemKeyword
+            | TexTokenType::LabelKeyword
+            | TexTokenType::RefKeyword
+            | TexTokenType::CiteKeyword
+            | TexTokenType::IncludegraphicsKeyword
+            | TexTokenType::TextbfKeyword
+            | TexTokenType::TextitKeyword
+            | TexTokenType::EmphKeyword
+            | TexTokenType::Alpha
+            | TexTokenType::Beta
+            | TexTokenType::Gamma
+            | TexTokenType::Delta
+            | TexTokenType::Epsilon
+            | TexTokenType::Zeta
+            | TexTokenType::Eta
+            | TexTokenType::Theta
+            | TexTokenType::Iota
+            | TexTokenType::Kappa
+            | TexTokenType::Lambda
+            | TexTokenType::Mu
+            | TexTokenType::Nu
+            | TexTokenType::Xi
+            | TexTokenType::Omicron
+            | TexTokenType::Pi
+            | TexTokenType::Rho
+            | TexTokenType::Sigma
+            | TexTokenType::Tau
+            | TexTokenType::Upsilon
+            | TexTokenType::Phi
+            | TexTokenType::Chi
+            | TexTokenType::Psi
+            | TexTokenType::Omega
+            | TexTokenType::VarEpsilon
+            | TexTokenType::VarTheta
+            | TexTokenType::VarKappa
+            | TexTokenType::VarPi
+            | TexTokenType::VarRho
+            | TexTokenType::VarSigma
+            | TexTokenType::VarPhi
+            | TexTokenType::UpperGamma
+            | TexTokenType::UpperDelta
+            | TexTokenType::UpperTheta
+            | TexTokenType::UpperLambda
+            | TexTokenType::UpperXi
+            | TexTokenType::UpperPi
+            | TexTokenType::UpperSigma
+            | TexTokenType::UpperUpsilon
+            | TexTokenType::UpperPhi
+            | TexTokenType::UpperPsi
+            | TexTokenType::UpperOmega => {
                 if let Some(node) = tree.as_node() {
                     Ok(Some(TexItem::Command(self.build_command(node, source)?)))
                 }
                 else {
                     let name = match kind {
-                        TexSyntaxKind::Sum => "sum".to_string(),
-                        TexSyntaxKind::Int => "int".to_string(),
-                        TexSyntaxKind::Lim => "lim".to_string(),
-                        TexSyntaxKind::Frac => "frac".to_string(),
-                        TexSyntaxKind::Sqrt => "sqrt".to_string(),
-                        TexSyntaxKind::Alpha => "alpha".to_string(),
-                        TexSyntaxKind::Beta => "beta".to_string(),
-                        TexSyntaxKind::Gamma => "gamma".to_string(),
-                        TexSyntaxKind::Delta => "delta".to_string(),
-                        TexSyntaxKind::Epsilon => "epsilon".to_string(),
-                        TexSyntaxKind::Zeta => "zeta".to_string(),
-                        TexSyntaxKind::Eta => "eta".to_string(),
-                        TexSyntaxKind::Theta => "theta".to_string(),
-                        TexSyntaxKind::Iota => "iota".to_string(),
-                        TexSyntaxKind::Kappa => "kappa".to_string(),
-                        TexSyntaxKind::Lambda => "lambda".to_string(),
-                        TexSyntaxKind::Mu => "mu".to_string(),
-                        TexSyntaxKind::Nu => "nu".to_string(),
-                        TexSyntaxKind::Xi => "xi".to_string(),
-                        TexSyntaxKind::Omicron => "omicron".to_string(),
-                        TexSyntaxKind::Pi => "pi".to_string(),
-                        TexSyntaxKind::Rho => "rho".to_string(),
-                        TexSyntaxKind::Sigma => "sigma".to_string(),
-                        TexSyntaxKind::Tau => "tau".to_string(),
-                        TexSyntaxKind::Upsilon => "upsilon".to_string(),
-                        TexSyntaxKind::Phi => "phi".to_string(),
-                        TexSyntaxKind::Chi => "chi".to_string(),
-                        TexSyntaxKind::Psi => "psi".to_string(),
-                        TexSyntaxKind::Omega => "omega".to_string(),
-                        TexSyntaxKind::VarEpsilon => "varepsilon".to_string(),
-                        TexSyntaxKind::VarTheta => "vartheta".to_string(),
-                        TexSyntaxKind::VarKappa => "varkappa".to_string(),
-                        TexSyntaxKind::VarPi => "varpi".to_string(),
-                        TexSyntaxKind::VarRho => "varrho".to_string(),
-                        TexSyntaxKind::VarSigma => "varsigma".to_string(),
-                        TexSyntaxKind::VarPhi => "varphi".to_string(),
-                        TexSyntaxKind::UpperGamma => "Gamma".to_string(),
-                        TexSyntaxKind::UpperDelta => "Delta".to_string(),
-                        TexSyntaxKind::UpperTheta => "Theta".to_string(),
-                        TexSyntaxKind::UpperLambda => "Lambda".to_string(),
-                        TexSyntaxKind::UpperXi => "Xi".to_string(),
-                        TexSyntaxKind::UpperPi => "Pi".to_string(),
-                        TexSyntaxKind::UpperSigma => "Sigma".to_string(),
-                        TexSyntaxKind::UpperUpsilon => "Upsilon".to_string(),
-                        TexSyntaxKind::UpperPhi => "Phi".to_string(),
-                        TexSyntaxKind::UpperPsi => "Psi".to_string(),
-                        TexSyntaxKind::UpperOmega => "Omega".to_string(),
+                        TexTokenType::Sum => "sum".to_string(),
+                        TexTokenType::Int => "int".to_string(),
+                        TexTokenType::Lim => "lim".to_string(),
+                        TexTokenType::Frac => "frac".to_string(),
+                        TexTokenType::Sqrt => "sqrt".to_string(),
+                        TexTokenType::Alpha => "alpha".to_string(),
+                        TexTokenType::Beta => "beta".to_string(),
+                        TexTokenType::Gamma => "gamma".to_string(),
+                        TexTokenType::Delta => "delta".to_string(),
+                        TexTokenType::Epsilon => "epsilon".to_string(),
+                        TexTokenType::Zeta => "zeta".to_string(),
+                        TexTokenType::Eta => "eta".to_string(),
+                        TexTokenType::Theta => "theta".to_string(),
+                        TexTokenType::Iota => "iota".to_string(),
+                        TexTokenType::Kappa => "kappa".to_string(),
+                        TexTokenType::Lambda => "lambda".to_string(),
+                        TexTokenType::Mu => "mu".to_string(),
+                        TexTokenType::Nu => "nu".to_string(),
+                        TexTokenType::Xi => "xi".to_string(),
+                        TexTokenType::Omicron => "omicron".to_string(),
+                        TexTokenType::Pi => "pi".to_string(),
+                        TexTokenType::Rho => "rho".to_string(),
+                        TexTokenType::Sigma => "sigma".to_string(),
+                        TexTokenType::Tau => "tau".to_string(),
+                        TexTokenType::Upsilon => "upsilon".to_string(),
+                        TexTokenType::Phi => "phi".to_string(),
+                        TexTokenType::Chi => "chi".to_string(),
+                        TexTokenType::Psi => "psi".to_string(),
+                        TexTokenType::Omega => "omega".to_string(),
+                        TexTokenType::VarEpsilon => "varepsilon".to_string(),
+                        TexTokenType::VarTheta => "vartheta".to_string(),
+                        TexTokenType::VarKappa => "varkappa".to_string(),
+                        TexTokenType::VarPi => "varpi".to_string(),
+                        TexTokenType::VarRho => "varrho".to_string(),
+                        TexTokenType::VarSigma => "varsigma".to_string(),
+                        TexTokenType::VarPhi => "varphi".to_string(),
+                        TexTokenType::UpperGamma => "Gamma".to_string(),
+                        TexTokenType::UpperDelta => "Delta".to_string(),
+                        TexTokenType::UpperTheta => "Theta".to_string(),
+                        TexTokenType::UpperLambda => "Lambda".to_string(),
+                        TexTokenType::UpperXi => "Xi".to_string(),
+                        TexTokenType::UpperPi => "Pi".to_string(),
+                        TexTokenType::UpperSigma => "Sigma".to_string(),
+                        TexTokenType::UpperUpsilon => "Upsilon".to_string(),
+                        TexTokenType::UpperPhi => "Phi".to_string(),
+                        TexTokenType::UpperPsi => "Psi".to_string(),
+                        TexTokenType::UpperOmega => "Omega".to_string(),
                         _ => tree.text(source).trim_start_matches('\\').to_string(),
                     };
                     Ok(Some(TexItem::Command(TexCommand { span: tree.span().into(), name, arguments: Vec::new() })))
                 }
             }
-            TexSyntaxKind::Environment => Ok(Some(TexItem::Environment(self.build_environment(tree.as_node().unwrap(), source)?))),
-            TexSyntaxKind::Group => Ok(Some(TexItem::Group(self.build_group(tree.as_node().unwrap(), source)?))),
-            TexSyntaxKind::InlineMath | TexSyntaxKind::DisplayMath => Ok(Some(TexItem::Math(self.build_math(tree.as_node().unwrap(), source)?))),
-            TexSyntaxKind::Superscript => Ok(Some(TexItem::Superscript(self.build_superscript(tree.as_node().unwrap(), source)?))),
-            TexSyntaxKind::Subscript => Ok(Some(TexItem::Subscript(self.build_subscript(tree.as_node().unwrap(), source)?))),
-            TexSyntaxKind::Identifier | TexSyntaxKind::Number | TexSyntaxKind::Text => Ok(Some(TexItem::Text { span: tree.span().into(), content: tree.text(source).to_string() })),
-            TexSyntaxKind::Comment => Ok(Some(TexItem::Comment { span: tree.span().into(), content: tree.text(source).to_string() })),
+            TexTokenType::Environment => Ok(Some(TexItem::Environment(self.build_environment(tree.as_node().unwrap(), source)?))),
+            TexTokenType::Group => Ok(Some(TexItem::Group(self.build_group(tree.as_node().unwrap(), source)?))),
+            TexTokenType::InlineMath | TexTokenType::DisplayMath => Ok(Some(TexItem::Math(self.build_math(tree.as_node().unwrap(), source)?))),
+            TexTokenType::Superscript => Ok(Some(TexItem::Superscript(self.build_superscript(tree.as_node().unwrap(), source)?))),
+            TexTokenType::Subscript => Ok(Some(TexItem::Subscript(self.build_subscript(tree.as_node().unwrap(), source)?))),
+            TexTokenType::Identifier | TexTokenType::Number | TexTokenType::Text => Ok(Some(TexItem::Text { span: tree.span().into(), content: tree.text(source).to_string() })),
+            TexTokenType::Comment => Ok(Some(TexItem::Comment { span: tree.span().into(), content: tree.text(source).to_string() })),
             _ => {
                 if tree.as_leaf().is_some() {
                     Ok(Some(TexItem::Text { span: tree.span().into(), content: tree.text(source).to_string() }))
@@ -214,11 +219,12 @@ impl<'config> TexBuilder<'config> {
     fn build_superscript<S: Source + ?Sized>(&self, node: RedNode<TexLanguage>, source: &S) -> Result<TexSuperscript, OakError> {
         let mut content = TexRoot::new(node.span().into());
         for child in node.children() {
-            if child.kind::<TexSyntaxKind>() == TexSyntaxKind::Caret {
+            let kind: TexTokenType = child.kind();
+            if kind == TexTokenType::Caret {
                 continue;
             }
             if let Some(item) = self.build_item(child, source)? {
-                content.items.push(item);
+                content.items.push(item)
             }
         }
         Ok(TexSuperscript {
@@ -231,11 +237,12 @@ impl<'config> TexBuilder<'config> {
     fn build_subscript<S: Source + ?Sized>(&self, node: RedNode<TexLanguage>, source: &S) -> Result<TexSubscript, OakError> {
         let mut content = TexRoot::new(node.span().into());
         for child in node.children() {
-            if child.kind::<TexSyntaxKind>() == TexSyntaxKind::Underscore {
+            let kind: TexTokenType = child.kind();
+            if kind == TexTokenType::Underscore {
                 continue;
             }
             if let Some(item) = self.build_item(child, source)? {
-                content.items.push(item);
+                content.items.push(item)
             }
         }
         Ok(TexSubscript {
@@ -250,97 +257,88 @@ impl<'config> TexBuilder<'config> {
         let mut arguments = Vec::new();
 
         for child in node.children() {
-            let kind: TexSyntaxKind = child.kind();
+            let kind: TexTokenType = child.kind();
             match kind {
-                TexSyntaxKind::Backslash
-                | TexSyntaxKind::Command
-                | TexSyntaxKind::BeginKeyword
-                | TexSyntaxKind::EndKeyword
-                | TexSyntaxKind::Frac
-                | TexSyntaxKind::Sqrt
-                | TexSyntaxKind::Sum
-                | TexSyntaxKind::Int
-                | TexSyntaxKind::Lim
-                | TexSyntaxKind::SectionKeyword
-                | TexSyntaxKind::SubsectionKeyword
-                | TexSyntaxKind::SubsubsectionKeyword
-                | TexSyntaxKind::ChapterKeyword
-                | TexSyntaxKind::PartKeyword
-                | TexSyntaxKind::TitleKeyword
-                | TexSyntaxKind::AuthorKeyword
-                | TexSyntaxKind::DateKeyword
-                | TexSyntaxKind::MaketitleKeyword
-                | TexSyntaxKind::TableofcontentsKeyword
-                | TexSyntaxKind::ItemKeyword
-                | TexSyntaxKind::LabelKeyword
-                | TexSyntaxKind::RefKeyword
-                | TexSyntaxKind::CiteKeyword
-                | TexSyntaxKind::IncludegraphicsKeyword
-                | TexSyntaxKind::TextbfKeyword
-                | TexSyntaxKind::TextitKeyword
-                | TexSyntaxKind::EmphKeyword
-                | TexSyntaxKind::Alpha
-                | TexSyntaxKind::Beta
-                | TexSyntaxKind::Gamma
-                | TexSyntaxKind::Delta
-                | TexSyntaxKind::Epsilon
-                | TexSyntaxKind::Zeta
-                | TexSyntaxKind::Eta
-                | TexSyntaxKind::Theta
-                | TexSyntaxKind::Iota
-                | TexSyntaxKind::Kappa
-                | TexSyntaxKind::Lambda
-                | TexSyntaxKind::Mu
-                | TexSyntaxKind::Nu
-                | TexSyntaxKind::Xi
-                | TexSyntaxKind::Omicron
-                | TexSyntaxKind::Pi
-                | TexSyntaxKind::Rho
-                | TexSyntaxKind::Sigma
-                | TexSyntaxKind::Tau
-                | TexSyntaxKind::Upsilon
-                | TexSyntaxKind::Phi
-                | TexSyntaxKind::Chi
-                | TexSyntaxKind::Psi
-                | TexSyntaxKind::Omega
-                | TexSyntaxKind::VarEpsilon
-                | TexSyntaxKind::VarTheta
-                | TexSyntaxKind::VarKappa
-                | TexSyntaxKind::VarPi
-                | TexSyntaxKind::VarRho
-                | TexSyntaxKind::VarSigma
-                | TexSyntaxKind::VarPhi
-                | TexSyntaxKind::UpperGamma
-                | TexSyntaxKind::UpperDelta
-                | TexSyntaxKind::UpperTheta
-                | TexSyntaxKind::UpperLambda
-                | TexSyntaxKind::UpperXi
-                | TexSyntaxKind::UpperPi
-                | TexSyntaxKind::UpperSigma
-                | TexSyntaxKind::UpperUpsilon
-                | TexSyntaxKind::UpperPhi
-                | TexSyntaxKind::UpperPsi
-                | TexSyntaxKind::UpperOmega
-                | TexSyntaxKind::TextBf
-                | TexSyntaxKind::TextIt
-                | TexSyntaxKind::TextSc
-                | TexSyntaxKind::TextTt
-                | TexSyntaxKind::Emph
-                | TexSyntaxKind::Underline => {
+                TexTokenType::Backslash
+                | TexTokenType::Command
+                | TexTokenType::BeginKeyword
+                | TexTokenType::EndKeyword
+                | TexTokenType::Frac
+                | TexTokenType::Sqrt
+                | TexTokenType::Sum
+                | TexTokenType::Int
+                | TexTokenType::Lim
+                | TexTokenType::SectionKeyword
+                | TexTokenType::SubsectionKeyword
+                | TexTokenType::SubsubsectionKeyword
+                | TexTokenType::ChapterKeyword
+                | TexTokenType::PartKeyword
+                | TexTokenType::TitleKeyword
+                | TexTokenType::AuthorKeyword
+                | TexTokenType::DateKeyword
+                | TexTokenType::MaketitleKeyword
+                | TexTokenType::TableofcontentsKeyword
+                | TexTokenType::ItemKeyword
+                | TexTokenType::LabelKeyword
+                | TexTokenType::RefKeyword
+                | TexTokenType::CiteKeyword
+                | TexTokenType::IncludegraphicsKeyword
+                | TexTokenType::TextbfKeyword
+                | TexTokenType::TextitKeyword
+                | TexTokenType::EmphKeyword
+                | TexTokenType::Alpha
+                | TexTokenType::Beta
+                | TexTokenType::Gamma
+                | TexTokenType::Delta
+                | TexTokenType::Epsilon
+                | TexTokenType::Zeta
+                | TexTokenType::Eta
+                | TexTokenType::Theta
+                | TexTokenType::Iota
+                | TexTokenType::Kappa
+                | TexTokenType::Lambda
+                | TexTokenType::Mu
+                | TexTokenType::Nu
+                | TexTokenType::Xi
+                | TexTokenType::Omicron
+                | TexTokenType::Pi
+                | TexTokenType::Rho
+                | TexTokenType::Sigma
+                | TexTokenType::Tau
+                | TexTokenType::Upsilon
+                | TexTokenType::Phi
+                | TexTokenType::Chi
+                | TexTokenType::Psi
+                | TexTokenType::Omega
+                | TexTokenType::VarEpsilon
+                | TexTokenType::VarTheta
+                | TexTokenType::VarKappa
+                | TexTokenType::VarPi
+                | TexTokenType::VarRho
+                | TexTokenType::VarSigma
+                | TexTokenType::VarPhi
+                | TexTokenType::UpperGamma
+                | TexTokenType::UpperDelta
+                | TexTokenType::UpperTheta
+                | TexTokenType::UpperLambda
+                | TexTokenType::UpperXi
+                | TexTokenType::UpperPi
+                | TexTokenType::UpperSigma
+                | TexTokenType::UpperUpsilon
+                | TexTokenType::UpperPhi
+                | TexTokenType::UpperPsi
+                | TexTokenType::UpperOmega
+                | TexTokenType::TextBf
+                | TexTokenType::TextIt
+                | TexTokenType::TextSc
+                | TexTokenType::TextTt
+                | TexTokenType::Emph
+                | TexTokenType::Underline => {
                     let text = child.text(source);
-                    if text.starts_with('\\') {
-                        name = text[1..].to_string();
-                    }
-                    else {
-                        name = text.to_string();
-                    }
+                    if text.starts_with('\\') { name = text[1..].to_string() } else { name = text.to_string() }
                 }
-                TexSyntaxKind::OptionalArgument => {
-                    arguments.push(TexArgument::Optional(self.build_content(child.as_node().unwrap(), source)?));
-                }
-                TexSyntaxKind::MandatoryArgument => {
-                    arguments.push(TexArgument::Required(self.build_content(child.as_node().unwrap(), source)?));
-                }
+                TexTokenType::OptionalArgument => arguments.push(TexArgument::Optional(self.build_content(child.as_node().unwrap(), source)?)),
+                TexTokenType::MandatoryArgument => arguments.push(TexArgument::Required(self.build_content(child.as_node().unwrap(), source)?)),
                 _ => {}
             }
         }
@@ -353,8 +351,8 @@ impl<'config> TexBuilder<'config> {
     }
 
     fn build_math<S: Source + ?Sized>(&self, node: RedNode<TexLanguage>, source: &S) -> Result<TexMath, OakError> {
-        let kind: TexSyntaxKind = node.kind();
-        Ok(TexMath { span: node.span().into(), content: self.build_content(node, source)?, is_display: kind == TexSyntaxKind::DoubleDollar })
+        let kind: TexTokenType = node.kind();
+        Ok(TexMath { span: node.span().into(), content: self.build_content(node, source)?, is_display: kind == TexTokenType::DoubleDollar })
     }
 
     fn build_environment<S: Source + ?Sized>(&self, node: RedNode<TexLanguage>, source: &S) -> Result<TexEnvironment, OakError> {
@@ -363,36 +361,35 @@ impl<'config> TexBuilder<'config> {
         let mut content = TexRoot::new(node.span().into());
 
         for child in node.children() {
-            let kind: TexSyntaxKind = child.kind();
+            let kind: TexTokenType = child.kind();
             match kind {
-                TexSyntaxKind::BeginEnvironment => {
+                TexTokenType::BeginEnvironment => {
                     for sub_child in child.as_node().unwrap().children() {
-                        match sub_child.kind::<TexSyntaxKind>() {
-                            TexSyntaxKind::MandatoryArgument => {
+                        let sub_kind: TexTokenType = sub_child.kind();
+                        match sub_kind {
+                            TexTokenType::MandatoryArgument => {
                                 // The first mandatory argument is the environment name
                                 if name.is_empty() {
                                     let arg_root = self.build_content(sub_child.as_node().unwrap(), source)?;
                                     for item in arg_root.items {
                                         if let TexItem::Text { content, .. } = item {
-                                            name.push_str(&content);
+                                            name.push_str(&content)
                                         }
                                     }
                                 }
                                 else {
-                                    arguments.push(TexArgument::Required(self.build_content(sub_child.as_node().unwrap(), source)?));
+                                    arguments.push(TexArgument::Required(self.build_content(sub_child.as_node().unwrap(), source)?))
                                 }
                             }
-                            TexSyntaxKind::OptionalArgument => {
-                                arguments.push(TexArgument::Optional(self.build_content(sub_child.as_node().unwrap(), source)?));
-                            }
+                            TexTokenType::OptionalArgument => arguments.push(TexArgument::Optional(self.build_content(sub_child.as_node().unwrap(), source)?)),
                             _ => {}
                         }
                     }
                 }
-                TexSyntaxKind::EndEnvironment => {}
+                TexTokenType::EndEnvironment => {}
                 _ => {
                     if let Some(item) = self.build_item(child, source)? {
-                        content.items.push(item);
+                        content.items.push(item)
                     }
                 }
             }
@@ -402,6 +399,6 @@ impl<'config> TexBuilder<'config> {
     }
 }
 
-fn is_delimiter(kind: TexSyntaxKind) -> bool {
-    matches!(kind, TexSyntaxKind::LeftBrace | TexSyntaxKind::RightBrace | TexSyntaxKind::LeftBracket | TexSyntaxKind::RightBracket | TexSyntaxKind::Dollar | TexSyntaxKind::DoubleDollar)
+fn is_delimiter(kind: TexTokenType) -> bool {
+    matches!(kind, TexTokenType::LeftBrace | TexTokenType::RightBrace | TexTokenType::LeftBracket | TexTokenType::RightBracket | TexTokenType::Dollar | TexTokenType::DoubleDollar)
 }

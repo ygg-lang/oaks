@@ -1,8 +1,11 @@
-use crate::{kind::ValaSyntaxKind, language::ValaLanguage};
+#![doc = include_str!("readme.md")]
+use oak_core::Source;
+pub mod token_type;
+
+use crate::{language::ValaLanguage, lexer::token_type::ValaTokenType};
 use oak_core::{
     Lexer, LexerCache, LexerState, OakError,
     lexer::{CommentConfig, LexOutput, StringConfig, WhitespaceConfig},
-    source::Source,
 };
 use std::sync::LazyLock;
 
@@ -76,19 +79,19 @@ impl<'config> ValaLexer<'config> {
     }
 
     fn skip_whitespace<S: Source + ?Sized>(&self, state: &mut State<'_, S>) -> bool {
-        VALA_WHITESPACE.scan(state, ValaSyntaxKind::Whitespace)
+        VALA_WHITESPACE.scan(state, ValaTokenType::Whitespace)
     }
 
     fn skip_comment<S: Source + ?Sized>(&self, state: &mut State<'_, S>) -> bool {
-        VALA_COMMENT.scan(state, ValaSyntaxKind::LineComment, ValaSyntaxKind::BlockComment)
+        VALA_COMMENT.scan(state, ValaTokenType::LineComment, ValaTokenType::BlockComment)
     }
 
     fn lex_string_literal<S: Source + ?Sized>(&self, state: &mut State<'_, S>) -> bool {
-        VALA_STRING.scan(state, ValaSyntaxKind::StringLiteral)
+        VALA_STRING.scan(state, ValaTokenType::StringLiteral)
     }
 
     fn lex_char_literal<S: Source + ?Sized>(&self, state: &mut State<'_, S>) -> bool {
-        VALA_CHAR.scan(state, ValaSyntaxKind::CharLiteral)
+        VALA_CHAR.scan(state, ValaTokenType::CharLiteral)
     }
 
     fn lex_number_literal<S: Source + ?Sized>(&self, state: &mut State<'_, S>) -> bool {
@@ -217,7 +220,7 @@ impl<'config> ValaLexer<'config> {
         }
 
         let end = state.get_position();
-        state.add_token(if is_float { ValaSyntaxKind::FloatLiteral } else { ValaSyntaxKind::IntegerLiteral }, start, end);
+        state.add_token(if is_float { ValaTokenType::FloatLiteral } else { ValaTokenType::IntegerLiteral }, start, end);
         true
     }
 
@@ -245,91 +248,91 @@ impl<'config> ValaLexer<'config> {
         let end = state.get_position();
         let text = state.get_text_in(oak_core::Range { start, end });
         let kind = match text.as_ref() {
-            "abstract" => ValaSyntaxKind::AbstractKw,
-            "as" => ValaSyntaxKind::AsKw,
-            "base" => ValaSyntaxKind::BaseKw,
-            "break" => ValaSyntaxKind::BreakKw,
-            "case" => ValaSyntaxKind::CaseKw,
-            "catch" => ValaSyntaxKind::CatchKw,
-            "class" => ValaSyntaxKind::ClassKw,
-            "const" => ValaSyntaxKind::ConstKw,
-            "construct" => ValaSyntaxKind::ConstructKw,
-            "continue" => ValaSyntaxKind::ContinueKw,
-            "default" => ValaSyntaxKind::DefaultKw,
-            "delegate" => ValaSyntaxKind::DelegateKw,
-            "delete" => ValaSyntaxKind::DeleteKw,
-            "do" => ValaSyntaxKind::DoKw,
-            "else" => ValaSyntaxKind::ElseKw,
-            "enum" => ValaSyntaxKind::EnumKw,
-            "ensures" => ValaSyntaxKind::EnsuresKw,
-            "errordomain" => ValaSyntaxKind::ErrordomainKw,
-            "extern" => ValaSyntaxKind::ExternKw,
-            "false" => ValaSyntaxKind::FalseKw,
-            "finally" => ValaSyntaxKind::FinallyKw,
-            "for" => ValaSyntaxKind::ForKw,
-            "foreach" => ValaSyntaxKind::ForeachKw,
-            "get" => ValaSyntaxKind::GetKw,
-            "if" => ValaSyntaxKind::IfKw,
-            "in" => ValaSyntaxKind::InKw,
-            "inline" => ValaSyntaxKind::InlineKw,
-            "interface" => ValaSyntaxKind::InterfaceKw,
-            "internal" => ValaSyntaxKind::InternalKw,
-            "is" => ValaSyntaxKind::IsKw,
-            "lock" => ValaSyntaxKind::LockKw,
-            "namespace" => ValaSyntaxKind::NamespaceKw,
-            "new" => ValaSyntaxKind::NewKw,
-            "null" => ValaSyntaxKind::NullKw,
-            "out" => ValaSyntaxKind::OutKw,
-            "override" => ValaSyntaxKind::OverrideKw,
-            "owned" => ValaSyntaxKind::OwnedKw,
-            "private" => ValaSyntaxKind::PrivateKw,
-            "protected" => ValaSyntaxKind::ProtectedKw,
-            "public" => ValaSyntaxKind::PublicKw,
-            "ref" => ValaSyntaxKind::RefKw,
-            "requires" => ValaSyntaxKind::RequiresKw,
-            "return" => ValaSyntaxKind::ReturnKw,
-            "set" => ValaSyntaxKind::SetKw,
-            "sizeof" => ValaSyntaxKind::SizeofKw,
-            "static" => ValaSyntaxKind::StaticKw,
-            "struct" => ValaSyntaxKind::StructKw,
-            "switch" => ValaSyntaxKind::SwitchKw,
-            "this" => ValaSyntaxKind::ThisKw,
-            "throw" => ValaSyntaxKind::ThrowKw,
-            "throws" => ValaSyntaxKind::ThrowsKw,
-            "true" => ValaSyntaxKind::TrueKw,
-            "try" => ValaSyntaxKind::TryKw,
-            "typeof" => ValaSyntaxKind::TypeofKw,
-            "unowned" => ValaSyntaxKind::UnownedKw,
-            "using" => ValaSyntaxKind::UsingKw,
-            "var" => ValaSyntaxKind::VarKw,
-            "virtual" => ValaSyntaxKind::VirtualKw,
-            "void" => ValaSyntaxKind::VoidKw,
-            "volatile" => ValaSyntaxKind::VolatileKw,
-            "weak" => ValaSyntaxKind::WeakKw,
-            "while" => ValaSyntaxKind::WhileKw,
-            "yield" => ValaSyntaxKind::YieldKw,
+            "abstract" => ValaTokenType::AbstractKw,
+            "as" => ValaTokenType::AsKw,
+            "base" => ValaTokenType::BaseKw,
+            "break" => ValaTokenType::BreakKw,
+            "case" => ValaTokenType::CaseKw,
+            "catch" => ValaTokenType::CatchKw,
+            "class" => ValaTokenType::ClassKw,
+            "const" => ValaTokenType::ConstKw,
+            "construct" => ValaTokenType::ConstructKw,
+            "continue" => ValaTokenType::ContinueKw,
+            "default" => ValaTokenType::DefaultKw,
+            "delegate" => ValaTokenType::DelegateKw,
+            "delete" => ValaTokenType::DeleteKw,
+            "do" => ValaTokenType::DoKw,
+            "else" => ValaTokenType::ElseKw,
+            "enum" => ValaTokenType::EnumKw,
+            "ensures" => ValaTokenType::EnsuresKw,
+            "errordomain" => ValaTokenType::ErrordomainKw,
+            "extern" => ValaTokenType::ExternKw,
+            "false" => ValaTokenType::FalseKw,
+            "finally" => ValaTokenType::FinallyKw,
+            "for" => ValaTokenType::ForKw,
+            "foreach" => ValaTokenType::ForeachKw,
+            "get" => ValaTokenType::GetKw,
+            "if" => ValaTokenType::IfKw,
+            "in" => ValaTokenType::InKw,
+            "inline" => ValaTokenType::InlineKw,
+            "interface" => ValaTokenType::InterfaceKw,
+            "internal" => ValaTokenType::InternalKw,
+            "is" => ValaTokenType::IsKw,
+            "lock" => ValaTokenType::LockKw,
+            "namespace" => ValaTokenType::NamespaceKw,
+            "new" => ValaTokenType::NewKw,
+            "null" => ValaTokenType::NullKw,
+            "out" => ValaTokenType::OutKw,
+            "override" => ValaTokenType::OverrideKw,
+            "owned" => ValaTokenType::OwnedKw,
+            "private" => ValaTokenType::PrivateKw,
+            "protected" => ValaTokenType::ProtectedKw,
+            "public" => ValaTokenType::PublicKw,
+            "ref" => ValaTokenType::RefKw,
+            "requires" => ValaTokenType::RequiresKw,
+            "return" => ValaTokenType::ReturnKw,
+            "set" => ValaTokenType::SetKw,
+            "sizeof" => ValaTokenType::SizeofKw,
+            "static" => ValaTokenType::StaticKw,
+            "struct" => ValaTokenType::StructKw,
+            "switch" => ValaTokenType::SwitchKw,
+            "this" => ValaTokenType::ThisKw,
+            "throw" => ValaTokenType::ThrowKw,
+            "throws" => ValaTokenType::ThrowsKw,
+            "true" => ValaTokenType::TrueKw,
+            "try" => ValaTokenType::TryKw,
+            "typeof" => ValaTokenType::TypeofKw,
+            "unowned" => ValaTokenType::UnownedKw,
+            "using" => ValaTokenType::UsingKw,
+            "var" => ValaTokenType::VarKw,
+            "virtual" => ValaTokenType::VirtualKw,
+            "void" => ValaTokenType::VoidKw,
+            "volatile" => ValaTokenType::VolatileKw,
+            "weak" => ValaTokenType::WeakKw,
+            "while" => ValaTokenType::WhileKw,
+            "yield" => ValaTokenType::YieldKw,
             // 基本类型
-            "bool" => ValaSyntaxKind::BoolKw,
-            "char" => ValaSyntaxKind::CharKw,
-            "uchar" => ValaSyntaxKind::UcharKw,
-            "int" => ValaSyntaxKind::IntKw,
-            "uint" => ValaSyntaxKind::UintKw,
-            "short" => ValaSyntaxKind::ShortKw,
-            "ushort" => ValaSyntaxKind::UshortKw,
-            "long" => ValaSyntaxKind::LongKw,
-            "ulong" => ValaSyntaxKind::UlongKw,
-            "int8" => ValaSyntaxKind::Int8Kw,
-            "uint8" => ValaSyntaxKind::Uint8Kw,
-            "int16" => ValaSyntaxKind::Int16Kw,
-            "uint16" => ValaSyntaxKind::Uint16Kw,
-            "int32" => ValaSyntaxKind::Int32Kw,
-            "uint32" => ValaSyntaxKind::Uint32Kw,
-            "int64" => ValaSyntaxKind::Int64Kw,
-            "uint64" => ValaSyntaxKind::Uint64Kw,
-            "float" => ValaSyntaxKind::FloatKw,
-            "double" => ValaSyntaxKind::DoubleKw,
-            "string" => ValaSyntaxKind::StringKw,
-            _ => ValaSyntaxKind::Identifier,
+            "bool" => ValaTokenType::BoolKw,
+            "char" => ValaTokenType::CharKw,
+            "uchar" => ValaTokenType::UcharKw,
+            "int" => ValaTokenType::IntKw,
+            "uint" => ValaTokenType::UintKw,
+            "short" => ValaTokenType::ShortKw,
+            "ushort" => ValaTokenType::UshortKw,
+            "long" => ValaTokenType::LongKw,
+            "ulong" => ValaTokenType::UlongKw,
+            "int8" => ValaTokenType::Int8Kw,
+            "uint8" => ValaTokenType::Uint8Kw,
+            "int16" => ValaTokenType::Int16Kw,
+            "uint16" => ValaTokenType::Uint16Kw,
+            "int32" => ValaTokenType::Int32Kw,
+            "uint32" => ValaTokenType::Uint32Kw,
+            "int64" => ValaTokenType::Int64Kw,
+            "uint64" => ValaTokenType::Uint64Kw,
+            "float" => ValaTokenType::FloatKw,
+            "double" => ValaTokenType::DoubleKw,
+            "string" => ValaTokenType::StringKw,
+            _ => ValaTokenType::Identifier,
         };
 
         state.add_token(kind, start, state.get_position());
@@ -340,23 +343,23 @@ impl<'config> ValaLexer<'config> {
         let start = state.get_position();
 
         // 优先匹配较长的操作符
-        let patterns: &[(&str, ValaSyntaxKind)] = &[
-            ("<<", ValaSyntaxKind::LeftShift),
-            (">>", ValaSyntaxKind::RightShift),
-            ("==", ValaSyntaxKind::EqEq),
-            ("!=", ValaSyntaxKind::NotEq),
-            ("<=", ValaSyntaxKind::LessEq),
-            (">=", ValaSyntaxKind::GreaterEq),
-            ("&&", ValaSyntaxKind::AndAnd),
-            ("||", ValaSyntaxKind::OrOr),
-            ("++", ValaSyntaxKind::PlusPlus),
-            ("--", ValaSyntaxKind::MinusMinus),
-            ("+=", ValaSyntaxKind::PlusEq),
-            ("-=", ValaSyntaxKind::MinusEq),
-            ("*=", ValaSyntaxKind::StarEq),
-            ("/=", ValaSyntaxKind::SlashEq),
-            ("%=", ValaSyntaxKind::PercentEq),
-            ("->", ValaSyntaxKind::Arrow),
+        let patterns: &[(&str, ValaTokenType)] = &[
+            ("<<", ValaTokenType::LeftShift),
+            (">>", ValaTokenType::RightShift),
+            ("==", ValaTokenType::EqEq),
+            ("!=", ValaTokenType::NotEq),
+            ("<=", ValaTokenType::LessEq),
+            (">=", ValaTokenType::GreaterEq),
+            ("&&", ValaTokenType::AndAnd),
+            ("||", ValaTokenType::OrOr),
+            ("++", ValaTokenType::PlusPlus),
+            ("--", ValaTokenType::MinusMinus),
+            ("+=", ValaTokenType::PlusEq),
+            ("-=", ValaTokenType::MinusEq),
+            ("*=", ValaTokenType::StarEq),
+            ("/=", ValaTokenType::SlashEq),
+            ("%=", ValaTokenType::PercentEq),
+            ("->", ValaTokenType::Arrow),
         ];
 
         for (pat, kind) in patterns {
@@ -369,26 +372,26 @@ impl<'config> ValaLexer<'config> {
 
         if let Some(ch) = state.current() {
             let kind = match ch {
-                '+' => Some(ValaSyntaxKind::Plus),
-                '-' => Some(ValaSyntaxKind::Minus),
-                '*' => Some(ValaSyntaxKind::Star),
-                '/' => Some(ValaSyntaxKind::Slash),
-                '%' => Some(ValaSyntaxKind::Percent),
-                '^' => Some(ValaSyntaxKind::Caret),
-                '!' => Some(ValaSyntaxKind::Bang),
-                '&' => Some(ValaSyntaxKind::Ampersand),
-                '|' => Some(ValaSyntaxKind::Pipe),
-                '=' => Some(ValaSyntaxKind::Eq),
-                '>' => Some(ValaSyntaxKind::GreaterThan),
-                '<' => Some(ValaSyntaxKind::LessThan),
-                '.' => Some(ValaSyntaxKind::Dot),
-                ':' => Some(ValaSyntaxKind::Colon),
-                '?' => Some(ValaSyntaxKind::Question),
-                '~' => Some(ValaSyntaxKind::Tilde),
-                '\\' => Some(ValaSyntaxKind::Backslash),
-                '@' => Some(ValaSyntaxKind::At),
-                '#' => Some(ValaSyntaxKind::Hash),
-                '$' => Some(ValaSyntaxKind::Dollar),
+                '+' => Some(ValaTokenType::Plus),
+                '-' => Some(ValaTokenType::Minus),
+                '*' => Some(ValaTokenType::Star),
+                '/' => Some(ValaTokenType::Slash),
+                '%' => Some(ValaTokenType::Percent),
+                '^' => Some(ValaTokenType::Caret),
+                '!' => Some(ValaTokenType::Bang),
+                '&' => Some(ValaTokenType::Ampersand),
+                '|' => Some(ValaTokenType::Pipe),
+                '=' => Some(ValaTokenType::Eq),
+                '>' => Some(ValaTokenType::GreaterThan),
+                '<' => Some(ValaTokenType::LessThan),
+                '.' => Some(ValaTokenType::Dot),
+                ':' => Some(ValaTokenType::Colon),
+                '?' => Some(ValaTokenType::Question),
+                '~' => Some(ValaTokenType::Tilde),
+                '\\' => Some(ValaTokenType::Backslash),
+                '@' => Some(ValaTokenType::At),
+                '#' => Some(ValaTokenType::Hash),
+                '$' => Some(ValaTokenType::Dollar),
                 _ => None,
             };
 
@@ -406,14 +409,14 @@ impl<'config> ValaLexer<'config> {
         let start = state.get_position();
         if let Some(ch) = state.current() {
             let kind = match ch {
-                '(' => Some(ValaSyntaxKind::LeftParen),
-                ')' => Some(ValaSyntaxKind::RightParen),
-                '{' => Some(ValaSyntaxKind::LeftBrace),
-                '}' => Some(ValaSyntaxKind::RightBrace),
-                '[' => Some(ValaSyntaxKind::LeftBracket),
-                ']' => Some(ValaSyntaxKind::RightBracket),
-                ',' => Some(ValaSyntaxKind::Comma),
-                ';' => Some(ValaSyntaxKind::Semicolon),
+                '(' => Some(ValaTokenType::LeftParen),
+                ')' => Some(ValaTokenType::RightParen),
+                '{' => Some(ValaTokenType::LeftBrace),
+                '}' => Some(ValaTokenType::RightBrace),
+                '[' => Some(ValaTokenType::LeftBracket),
+                ']' => Some(ValaTokenType::RightBracket),
+                ',' => Some(ValaTokenType::Comma),
+                ';' => Some(ValaTokenType::Semicolon),
                 _ => None,
             };
 

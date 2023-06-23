@@ -9,7 +9,7 @@ exclude = [
 ]
 
 [workspace.package]
-version = "0.0.2"
+version = "0.0.3"
 authors = ["Yggdrasill Team <192607617@qq.com>"]
 edition = "2024"
 license = "MPL-2.0"
@@ -20,92 +20,119 @@ readme = "readme.md"
 [workspace.dependencies]
 # External dependencies removed to achieve architectural independence
 walkdir = { version = "2.5.0" }
-serde = { version = "1.0.227", features = ["derive"] }
-serde_json = { version = "1.0.145" }
-schemars = { version = "1.0.4", features = ["derive"] }
-tracing = { version = "0.1.41" }
-criterion = { version = "0.8.1" }
-unicode-ident = { version = "1.0" }
-url = { version = "2.5.7", features = ["serde"] }
+serde = { version = "1.0.228", features = ["derive"] }
+serde_json = { version = "1.0.149" }
+schemars = { version = "1.2.1", features = ["derive"] }
+tracing = { version = "0.1.44" }
+criterion = { version = "0.8.2" }
+unicode-ident = { version = "1.0.23" }
+url = { version = "2.5.8", features = ["serde"] }
 triomphe = { version = "0.1.15", default-features = false, features = ["serde"] }
-smallvec = { version = "1.13", features = ["union", "const_generics", "const_new"] }
-proc-macro2 = { version = "1.0" }
-quote = { version = "1.0" }
-syn = { version = "2.0", features = ["full"] }
-tokio = { version = "1.43.0", default-features = false }
-tracing-subscriber = { version = "0.3.19", features = ["env-filter"] }
+smallvec = { version = "1.15", features = ["union", "const_generics", "const_new"] }
+proc-macro2 = { version = "1.0.106" }
+quote = { version = "1.0.44" }
+syn = { version = "2.0.114", features = ["full"] }
+tokio = { version = "1.49.0", default-features = false }
+tracing-subscriber = { version = "0.3.22", features = ["env-filter"] }
 futures = { version = "0.3.31" }
 dashmap = { version = "6.1.0" }
-anyhow = "1.0.95"
-thiserror = "2.0.11"
+lazy_static = "1.5.0"
+anyhow = "1.0.101"
+thiserror = "2.0.18"
 itertools = "0.14.0"
-chrono = "0.4.39"
-ntest = "0.9.3"
-notify = "8.0.0"
+chrono = "0.4.43"
+ntest = "0.9.5"
+notify = "8.2.0"
 crossterm = "0.29.0"
 unicode-width = "0.2.2"
-clap = { version = "4.5", features = ["derive"] }
-axum = "0.8.1"
+clap = { version = "4.5.58", features = ["derive"] }
+axum = "0.8.8"
 
 # Internal project dependencies
-oak-json = { version = "0.0.2", path = "examples/oak-json" }
-oaks = { version = "0.0.2", path = "projects/oaks" }
-oak-lsp = { version = "0.0.2", path = "projects/oak-lsp" }
-oak-folding = { version = "0.0.2", path = "projects/oak-folding" }
-oak-hover = { version = "0.0.2", path = "projects/oak-hover" }
-oak-navigation = { version = "0.0.2", path = "projects/oak-navigation" }
-oak-repl = { version = "0.0.2", path = "projects/oak-repl" }
-oak-semantic-tokens = { version = "0.0.2", path = "projects/oak-semantic-tokens" }
-oak-structure = { version = "0.0.2", path = "projects/oak-structure" }
-oak-vfs = { version = "0.0.2", path = "projects/oak-vfs" }
-oak-symbols = { version = "0.0.2", path = "projects/oak-symbols" }
-oak-core = { version = "0.0.2", path = "projects/oak-core", features = ["serde"] }
-oak-macros = { version = "0.0.2", path = "projects/oak-macros" }
-oak-testing = { version = "0.0.2", path = "projects/oak-testing" }
-oak-diagnostic = { version = "0.0.2", path = "projects/oak-diagnostic" }
-oak-highlight = { version = "0.0.2", path = "projects/oak-highlight" }
-oak-pretty-print = { version = "0.0.2", path = "projects/oak-pretty-print" }
-oak-mcp = { version = "0.0.2", path = "projects/oak-mcp" }
-oak-semantic-search = { version = "0.0.2", path = "projects/oak-semantic-search" }
-oak-resolver = { version = "0.0.2", path = "projects/oak-resolver" }
-oak-visualize = { version = "0.0.2", path = "projects/oak-visualize" }
+oak-core = { version = "0.0.3", path = "projects/oak-core", features = ["serde"] }
+oak-macros = { version = "0.0.3", path = "projects/oak-macros" }
+oak-vfs = { version = "0.0.3", path = "projects/oak-vfs" }
+oak-symbols = { version = "0.0.3", path = "projects/oak-symbols" }
+oak-resolver = { version = "0.0.3", path = "projects/oak-resolver" }
+oak-diagnostic = { version = "0.0.3", path = "projects/oak-diagnostic" }
+oak-highlight = { version = "0.0.3", path = "projects/oak-highlight" }
+oak-pretty-print = { version = "0.0.3", path = "projects/oak-pretty-print" }
+oak-lsp = { version = "0.0.3", path = "projects/oak-lsp" }
+oak-folding = { version = "0.0.3", path = "projects/oak-folding" }
+oak-hover = { version = "0.0.3", path = "projects/oak-hover" }
+oak-navigation = { version = "0.0.3", path = "projects/oak-navigation" }
+oak-repl = { version = "0.0.3", path = "projects/oak-repl" }
+oak-semantic-tokens = { version = "0.0.3", path = "projects/oak-semantic-tokens" }
+oak-structural-view = { version = "0.0.3", path = "projects/oak-structural-view" }
+oak-semantic-search = { version = "0.0.3", path = "projects/oak-semantic-search" }
+oak-visualize = { version = "0.0.3", path = "projects/oak-visualize" }
+oak-testing = { version = "0.0.3", path = "projects/oak-testing" }
+oak-mcp = { version = "0.0.3", path = "projects/oak-mcp" }
+oaks = { version = "0.0.3", path = "projects/oaks" }
+
+# Language Concept
+oak-uml = { version = "0.0.3", path = "examples/oak-uml" }
+oak-c4 = { version = "0.0.3", path = "examples/oak-c4" }
+
+# Language examples
+oak-ada = { version = "0.0.3", path = "examples/oak-ada" }
+oak-ascii-doc = { version = "0.0.3", path = "examples/oak-ascii-doc" }
+oak-bash = { version = "0.0.3", path = "examples/oak-bash" }
+oak-bat = { version = "0.0.3", path = "examples/oak-bat" }
+oak-c = { version = "0.0.3", path = "examples/oak-c" }
+oak-clojure = { version = "0.0.3", path = "examples/oak-clojure" }
+oak-cmd = { version = "0.0.3", path = "examples/oak-cmd" }
+oak-cobol = { version = "0.0.3", path = "examples/oak-cobol" }
+oak-coq = { version = "0.0.3", path = "examples/oak-coq" }
+oak-cpp = { version = "0.0.3", path = "examples/oak-cpp" }
+oak-csharp = { version = "0.0.3", path = "examples/oak-csharp" }
+oak-css = { version = "0.0.3", path = "examples/oak-css" }
+oak-dejavu = { version = "0.0.3", path = "examples/oak-dejavu" }
+oak-elixir = { version = "0.0.3", path = "examples/oak-elixir" }
+oak-html = { version = "0.0.3", path = "examples/oak-html" }
+oak-java = { version = "0.0.3", path = "examples/oak-java" }
+oak-javadoc = { version = "0.0.3", path = "examples/oak-javadoc" }
+oak-javascript = { version = "0.0.3", path = "examples/oak-javascript" }
+oak-json = { version = "0.0.3", path = "examples/oak-json" }
+oak-lua = { version = "0.0.3", path = "examples/oak-lua" }
+oak-markdown = { version = "0.0.3", path = "examples/oak-markdown" }
+oak-mermaid = { version = "0.0.3", path = "examples/oak-mermaid" }
+oak-nginx = { version = "0.0.3", path = "examples/oak-nginx" }
+oak-objective-c = { version = "0.0.3", path = "examples/oak-objective-c" }
+oak-ocaml = { version = "0.0.3", path = "examples/oak-ocaml" }
+oak-org-mode = { version = "0.0.3", path = "examples/oak-org-mode" }
+oak-pascal = { version = "0.0.3", path = "examples/oak-pascal" }
+oak-perl = { version = "0.0.3", path = "examples/oak-perl" }
+oak-plantuml = { version = "0.0.3", path = "examples/oak-plantuml" }
+oak-python = { version = "0.0.3", path = "examples/oak-python" }
+oak-raku = { version = "0.0.3", path = "examples/oak-raku" }
+oak-regex = { version = "0.0.3", path = "examples/oak-regex" }
+oak-rust = { version = "0.0.3", path = "examples/oak-rust" }
+oak-sql = { version = "0.0.3", path = "examples/oak-sql" }
+oak-swift = { version = "0.0.3", path = "examples/oak-swift" }
+oak-tailwind = { version = "0.0.3", path = "examples/oak-tailwind" }
+oak-toml = { version = "0.0.3", path = "examples/oak-toml" }
+oak-twig = { version = "0.0.3", path = "examples/oak-twig" }
+oak-typescript = { version = "0.0.3", path = "examples/oak-typescript" }
+oak-valkyrie = { version = "0.0.3", path = "examples/oak-valkyrie" }
+oak-voc = { version = "0.0.3", path = "examples/oak-voc" }
+oak-yaml = { version = "0.0.3", path = "examples/oak-yaml" }
+oak-d2 = { version = "0.0.3", path = "examples/oak-d2" }
+oak-structurizr = { version = "0.0.3", path = "examples/oak-structurizr" }
 
 # Benchmark comparison crates
-# toml = "0.9.11+spec-1.1.0" # replaced by oak-toml
-toml_edit = "0.24.0"
-markdown = "1.0.0-alpha.18"
+toml = "1.0.0"
+toml_edit = "0.25.0"
+markdown = "1.0.0"
 pulldown-cmark = "0.13.0"
 simd-json = "0.17.0"
-json = "0.12"
-html5ever = "0.27"
-cssparser = "0.34"
-serde_yaml = "0.9"
-rustpython-parser = "0.4"
-swc_ecma_parser = "0.147"
-swc_common = "0.37"
-oxc_parser = "0.13"
-oxc_allocator = "0.13"
-oxc_span = "0.13"
-
-# langs
-oak-ada = { version = "0.0.2", path = "examples/oak-ada" }
-oak-ascii-doc = { version = "0.0.2", path = "examples/oak-ascii-doc" }
-oak-bash = { version = "0.0.2", path = "examples/oak-bash" }
-oak-c = { version = "0.0.2", path = "examples/oak-c" }
-oak-clojure = { version = "0.0.2", path = "examples/oak-clojure" }
-oak-cobol = { version = "0.0.2", path = "examples/oak-cobol" }
-oak-coq = { version = "0.0.2", path = "examples/oak-coq" }
-oak-cpp = { version = "0.0.2", path = "examples/oak-cpp" }
-oak-csharp = { version = "0.0.2", path = "examples/oak-csharp" }
-oak-rust = { version = "0.0.2", path = "examples/oak-rust" }
-oak-css = { version = "0.0.2", path = "examples/oak-css" }
-oak-html = { version = "0.0.2", path = "examples/oak-html" }
-oak-markdown = { version = "0.0.2", path = "examples/oak-markdown" }
-oak-sql = { version = "0.0.2", path = "examples/oak-sql" }
-oak-python = { version = "0.0.2", path = "examples/oak-python" }
-oak-toml = { version = "0.0.2", path = "examples/oak-toml" }
-oak-yaml = { version = "0.0.2", path = "examples/oak-yaml" }
-oak-twig = { version = "0.0.2", path = "examples/oak-twig" }
-oak-javadoc = { version = "0.0.2", path = "examples/oak-javadoc" }
-oak-typescript = { version = "0.0.2", path = "examples/oak-typescript" }
-oak-javascript = { version = "0.0.2", path = "examples/oak-javascript" }
+json = "0.12.4"
+html5ever = "0.38.0"
+cssparser = "0.36.0"
+serde_yaml = "0.9.34"
+rustpython-parser = "0.4.0"
+swc_ecma_parser = "33.0.1"
+swc_common = "18.0.1"
+oxc_parser = "0.113.0"
+oxc_allocator = "0.113.0"
+oxc_span = "0.113.0"

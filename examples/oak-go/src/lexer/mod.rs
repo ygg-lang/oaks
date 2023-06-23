@@ -1,4 +1,7 @@
-use crate::{kind::GoSyntaxKind, language::GoLanguage};
+#![doc = include_str!("readme.md")]
+pub mod token_type;
+
+use crate::{language::GoLanguage, lexer::token_type::GoTokenType};
 use oak_core::{Lexer, LexerCache, LexerState, OakError, lexer::LexOutput, source::Source};
 
 type State<'a, S> = LexerState<'a, S, GoLanguage>;
@@ -13,7 +16,7 @@ impl<'config> Lexer<GoLanguage> for GoLexer<'config> {
         let mut state = State::new_with_cache(source, 0, cache);
         let result = self.run(&mut state);
         if result.is_ok() {
-            state.add_eof();
+            state.add_eof()
         }
         state.finish_with_cache(result, cache)
     }
@@ -52,10 +55,10 @@ impl<'config> GoLexer<'config> {
             let start_pos = state.get_position();
             if let Some(ch) = state.peek() {
                 state.advance(ch.len_utf8());
-                state.add_token(GoSyntaxKind::Error, start_pos, state.get_position());
+                state.add_token(GoTokenType::Error, start_pos, state.get_position());
             }
 
-            state.advance_if_dead_lock(safe_point);
+            state.advance_if_dead_lock(safe_point)
         }
 
         Ok(())
@@ -72,7 +75,7 @@ impl<'config> GoLexer<'config> {
             }
         }
         if state.get_position() > start {
-            state.add_token(GoSyntaxKind::Whitespace, start, state.get_position());
+            state.add_token(GoTokenType::Whitespace, start, state.get_position());
             return true;
         }
         false
@@ -87,7 +90,7 @@ impl<'config> GoLexer<'config> {
                 }
                 state.advance(ch.len_utf8());
             }
-            state.add_token(GoSyntaxKind::Comment, start, state.get_position());
+            state.add_token(GoTokenType::Comment, start, state.get_position());
             return true;
         }
         if state.consume_if_starts_with("/*") {
@@ -97,7 +100,7 @@ impl<'config> GoLexer<'config> {
                 }
                 state.advance(ch.len_utf8());
             }
-            state.add_token(GoSyntaxKind::Comment, start, state.get_position());
+            state.add_token(GoTokenType::Comment, start, state.get_position());
             return true;
         }
         false
@@ -119,37 +122,36 @@ impl<'config> GoLexer<'config> {
 
                 let text = state.get_text_in(oak_core::Range { start, end: state.get_position() });
                 let kind = match text.as_ref() {
-                    "package" => GoSyntaxKind::Package,
-                    "import" => GoSyntaxKind::Import,
-                    "func" => GoSyntaxKind::Func,
-                    "var" => GoSyntaxKind::Var,
-                    "const" => GoSyntaxKind::Const,
-                    "type" => GoSyntaxKind::Type,
-                    "struct" => GoSyntaxKind::Struct,
-                    "interface" => GoSyntaxKind::Interface,
-                    "map" => GoSyntaxKind::Map,
-                    "chan" => GoSyntaxKind::Chan,
-                    "if" => GoSyntaxKind::If,
-                    "else" => GoSyntaxKind::Else,
-                    "for" => GoSyntaxKind::For,
-                    "range" => GoSyntaxKind::Range,
-                    "return" => GoSyntaxKind::Return,
-                    "break" => GoSyntaxKind::Break,
-                    "continue" => GoSyntaxKind::Continue,
-                    "goto" => GoSyntaxKind::Goto,
-                    "switch" => GoSyntaxKind::Switch,
-                    "case" => GoSyntaxKind::Case,
-                    "default" => GoSyntaxKind::Default,
-                    "defer" => GoSyntaxKind::Defer,
-                    "go" => GoSyntaxKind::Go,
-                    "select" => GoSyntaxKind::Select,
-                    "fallthrough" => GoSyntaxKind::Fallthrough,
-                    "true" => GoSyntaxKind::BoolLiteral,
-                    "false" => GoSyntaxKind::BoolLiteral,
-                    "nil" => GoSyntaxKind::NilLiteral,
-                    _ => GoSyntaxKind::Identifier,
+                    "package" => GoTokenType::Package,
+                    "import" => GoTokenType::Import,
+                    "func" => GoTokenType::Func,
+                    "var" => GoTokenType::Var,
+                    "const" => GoTokenType::Const,
+                    "type" => GoTokenType::Type,
+                    "struct" => GoTokenType::Struct,
+                    "interface" => GoTokenType::Interface,
+                    "map" => GoTokenType::Map,
+                    "chan" => GoTokenType::Chan,
+                    "if" => GoTokenType::If,
+                    "else" => GoTokenType::Else,
+                    "for" => GoTokenType::For,
+                    "range" => GoTokenType::Range,
+                    "return" => GoTokenType::Return,
+                    "break" => GoTokenType::Break,
+                    "continue" => GoTokenType::Continue,
+                    "goto" => GoTokenType::Goto,
+                    "switch" => GoTokenType::Switch,
+                    "case" => GoTokenType::Case,
+                    "default" => GoTokenType::Default,
+                    "defer" => GoTokenType::Defer,
+                    "go" => GoTokenType::Go,
+                    "select" => GoTokenType::Select,
+                    "fallthrough" => GoTokenType::Fallthrough,
+                    "true" => GoTokenType::BoolLiteral,
+                    "false" => GoTokenType::BoolLiteral,
+                    "nil" => GoTokenType::NilLiteral,
+                    _ => GoTokenType::Identifier,
                 };
-
                 state.add_token(kind, start, state.get_position());
                 return true;
             }
@@ -178,7 +180,7 @@ impl<'config> GoLexer<'config> {
                         state.advance(ch.len_utf8());
                     }
                 }
-                state.add_token(GoSyntaxKind::StringLiteral, start, state.get_position());
+                state.add_token(GoTokenType::StringLiteral, start, state.get_position());
                 return true;
             }
             // Raw string literal
@@ -191,7 +193,7 @@ impl<'config> GoLexer<'config> {
                     }
                     state.advance(ch.len_utf8());
                 }
-                state.add_token(GoSyntaxKind::StringLiteral, start, state.get_position());
+                state.add_token(GoTokenType::StringLiteral, start, state.get_position());
                 return true;
             }
             // Rune literal
@@ -212,7 +214,7 @@ impl<'config> GoLexer<'config> {
                         state.advance(ch.len_utf8());
                     }
                 }
-                state.add_token(GoSyntaxKind::RuneLiteral, start, state.get_position());
+                state.add_token(GoTokenType::RuneLiteral, start, state.get_position());
                 return true;
             }
             // Number literal
@@ -231,7 +233,7 @@ impl<'config> GoLexer<'config> {
                         break;
                     }
                 }
-                let kind = if has_dot { GoSyntaxKind::FloatLiteral } else { GoSyntaxKind::IntLiteral };
+                let kind = if has_dot { GoTokenType::FloatLiteral } else { GoTokenType::IntLiteral };
                 state.add_token(kind, start, state.get_position());
                 return true;
             }
@@ -242,145 +244,145 @@ impl<'config> GoLexer<'config> {
     fn lex_operator_or_delimiter<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start = state.get_position();
         let kind = if state.consume_if_starts_with(":=") {
-            GoSyntaxKind::ColonAssign
+            GoTokenType::ColonAssign
         }
         else if state.consume_if_starts_with("...") {
-            GoSyntaxKind::Ellipsis
+            GoTokenType::Ellipsis
         }
         else if state.consume_if_starts_with("<<=") {
-            GoSyntaxKind::LeftShiftAssign
+            GoTokenType::LeftShiftAssign
         }
         else if state.consume_if_starts_with(">>=") {
-            GoSyntaxKind::RightShiftAssign
+            GoTokenType::RightShiftAssign
         }
         else if state.consume_if_starts_with("&^=") {
-            GoSyntaxKind::AmpersandCaretAssign
+            GoTokenType::AmpersandCaretAssign
         }
         else if state.consume_if_starts_with("==") {
-            GoSyntaxKind::Equal
+            GoTokenType::Equal
         }
         else if state.consume_if_starts_with("!=") {
-            GoSyntaxKind::NotEqual
+            GoTokenType::NotEqual
         }
         else if state.consume_if_starts_with("<=") {
-            GoSyntaxKind::LessEqual
+            GoTokenType::LessEqual
         }
         else if state.consume_if_starts_with(">=") {
-            GoSyntaxKind::GreaterEqual
+            GoTokenType::GreaterEqual
         }
         else if state.consume_if_starts_with("&&") {
-            GoSyntaxKind::LogicalAnd
+            GoTokenType::LogicalAnd
         }
         else if state.consume_if_starts_with("||") {
-            GoSyntaxKind::LogicalOr
+            GoTokenType::LogicalOr
         }
         else if state.consume_if_starts_with("<<") {
-            GoSyntaxKind::LeftShift
+            GoTokenType::LeftShift
         }
         else if state.consume_if_starts_with(">>") {
-            GoSyntaxKind::RightShift
+            GoTokenType::RightShift
         }
         else if state.consume_if_starts_with("&^") {
-            GoSyntaxKind::AmpersandCaret
+            GoTokenType::AmpersandCaret
         }
         else if state.consume_if_starts_with("++") {
-            GoSyntaxKind::Increment
+            GoTokenType::Increment
         }
         else if state.consume_if_starts_with("--") {
-            GoSyntaxKind::Decrement
+            GoTokenType::Decrement
         }
         else if state.consume_if_starts_with("+=") {
-            GoSyntaxKind::PlusAssign
+            GoTokenType::PlusAssign
         }
         else if state.consume_if_starts_with("-=") {
-            GoSyntaxKind::MinusAssign
+            GoTokenType::MinusAssign
         }
         else if state.consume_if_starts_with("*=") {
-            GoSyntaxKind::StarAssign
+            GoTokenType::StarAssign
         }
         else if state.consume_if_starts_with("/=") {
-            GoSyntaxKind::SlashAssign
+            GoTokenType::SlashAssign
         }
         else if state.consume_if_starts_with("%=") {
-            GoSyntaxKind::PercentAssign
+            GoTokenType::PercentAssign
         }
         else if state.consume_if_starts_with("&=") {
-            GoSyntaxKind::AmpersandAssign
+            GoTokenType::AmpersandAssign
         }
         else if state.consume_if_starts_with("|=") {
-            GoSyntaxKind::PipeAssign
+            GoTokenType::PipeAssign
         }
         else if state.consume_if_starts_with("^=") {
-            GoSyntaxKind::CaretAssign
+            GoTokenType::CaretAssign
         }
         else if state.consume_if_starts_with("<-") {
-            GoSyntaxKind::Arrow
+            GoTokenType::Arrow
         }
         else if state.consume_if_starts_with("{") {
-            GoSyntaxKind::LeftBrace
+            GoTokenType::LeftBrace
         }
         else if state.consume_if_starts_with("}") {
-            GoSyntaxKind::RightBrace
+            GoTokenType::RightBrace
         }
         else if state.consume_if_starts_with("(") {
-            GoSyntaxKind::LeftParen
+            GoTokenType::LeftParen
         }
         else if state.consume_if_starts_with(")") {
-            GoSyntaxKind::RightParen
+            GoTokenType::RightParen
         }
         else if state.consume_if_starts_with("[") {
-            GoSyntaxKind::LeftBracket
+            GoTokenType::LeftBracket
         }
         else if state.consume_if_starts_with("]") {
-            GoSyntaxKind::RightBracket
+            GoTokenType::RightBracket
         }
         else if state.consume_if_starts_with(".") {
-            GoSyntaxKind::Dot
+            GoTokenType::Dot
         }
         else if state.consume_if_starts_with(",") {
-            GoSyntaxKind::Comma
+            GoTokenType::Comma
         }
         else if state.consume_if_starts_with(";") {
-            GoSyntaxKind::Semicolon
+            GoTokenType::Semicolon
         }
         else if state.consume_if_starts_with(":") {
-            GoSyntaxKind::Colon
+            GoTokenType::Colon
         }
         else if state.consume_if_starts_with("+") {
-            GoSyntaxKind::Plus
+            GoTokenType::Plus
         }
         else if state.consume_if_starts_with("-") {
-            GoSyntaxKind::Minus
+            GoTokenType::Minus
         }
         else if state.consume_if_starts_with("*") {
-            GoSyntaxKind::Star
+            GoTokenType::Star
         }
         else if state.consume_if_starts_with("/") {
-            GoSyntaxKind::Slash
+            GoTokenType::Slash
         }
         else if state.consume_if_starts_with("%") {
-            GoSyntaxKind::Percent
+            GoTokenType::Percent
         }
         else if state.consume_if_starts_with("&") {
-            GoSyntaxKind::Ampersand
+            GoTokenType::Ampersand
         }
         else if state.consume_if_starts_with("|") {
-            GoSyntaxKind::Pipe
+            GoTokenType::Pipe
         }
         else if state.consume_if_starts_with("^") {
-            GoSyntaxKind::Caret
+            GoTokenType::Caret
         }
         else if state.consume_if_starts_with("!") {
-            GoSyntaxKind::LogicalNot
+            GoTokenType::LogicalNot
         }
         else if state.consume_if_starts_with("<") {
-            GoSyntaxKind::Less
+            GoTokenType::Less
         }
         else if state.consume_if_starts_with(">") {
-            GoSyntaxKind::Greater
+            GoTokenType::Greater
         }
         else if state.consume_if_starts_with("=") {
-            GoSyntaxKind::Assign
+            GoTokenType::Assign
         }
         else {
             return false;

@@ -1,9 +1,9 @@
 #![feature(new_range_api)]
 
-use criterion::{Criterion, black_box, criterion_group, criterion_main};
-use json;
+use criterion::{Criterion, criterion_group, criterion_main};
 use oak_core::{Lexer, Parser, parser::ParseSession, source::SourceText};
 use oak_json::{language::JsonLanguage, lexer::JsonLexer, parser::JsonParser};
+use std::hint::black_box;
 
 fn small_json() -> String {
     include_str!("complex.json").to_string()
@@ -28,9 +28,9 @@ fn large_json(n: usize) -> String {
     s.push_str("{\"items\": [");
     for i in 0..n {
         if i > 0 {
-            s.push_str(",");
+            s.push_str(",")
         }
-        s.push_str(&format!("{{\"id\":{},\"name\":\"item-{}\",\"price\":{},\"tags\":[\"a\",\"b\",\"c\"],\"active\":{}}}", i, i, (i as f64) * 1.2345, if i % 3 == 0 { "true" } else { "false" }));
+        s.push_str(&format!("{{\"id\":{},\"name\":\"item-{}\",\"price\":{},\"tags\":[\"a\",\"b\",\"c\"],\"active\":{}}}", i, i, (i as f64) * 1.2345, if i % 3 == 0 { "true" } else { "false" }))
     }
     s.push_str("]}");
     s
@@ -45,7 +45,7 @@ fn bench_json_comparison(c: &mut Criterion) {
     {
         let mut group = c.benchmark_group("JSON_Small");
         let s = small_json();
-        let src = SourceText::new(&s);
+        let src = SourceText::new(s.as_str());
 
         group.bench_function("oak_json_lex", |b| {
             b.iter(|| {
@@ -88,14 +88,14 @@ fn bench_json_comparison(c: &mut Criterion) {
         // black_box(v);
         // })
         // });
-        group.finish();
+        group.finish()
     }
 
     // 2. Medium JSON
     {
         let mut group = c.benchmark_group("JSON_Medium");
         let m = medium_json();
-        let src = SourceText::new(&m);
+        let src = SourceText::new(m.as_str());
 
         group.bench_function("oak_json_lex", |b| {
             b.iter(|| {
@@ -138,14 +138,14 @@ fn bench_json_comparison(c: &mut Criterion) {
         // black_box(v);
         // })
         // });
-        group.finish();
+        group.finish()
     }
 
     // 3. Large JSON
     {
         let mut group = c.benchmark_group("JSON_Large_500");
         let l = large_json(500);
-        let src = SourceText::new(&l);
+        let src = SourceText::new(l.as_str());
 
         group.bench_function("oak_json_lex", |b| {
             b.iter(|| {
@@ -188,7 +188,7 @@ fn bench_json_comparison(c: &mut Criterion) {
         // black_box(v);
         // })
         // });
-        group.finish();
+        group.finish()
     }
 }
 

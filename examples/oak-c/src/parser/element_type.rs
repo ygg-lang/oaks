@@ -1,9 +1,11 @@
 use crate::lexer::CTokenType;
 use oak_core::{ElementType, UniversalElementRole};
+#[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
 
 /// Represents all possible element kinds in the C programming language.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Deserialize)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub enum CElementType {
     /// A wrapper for tokens
     Token(CTokenType),

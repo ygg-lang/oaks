@@ -1,4 +1,9 @@
-use crate::{ast::*, kind::DartSyntaxKind, language::DartLanguage, parser::DartParser};
+use crate::{
+    ast::*,
+    language::DartLanguage,
+    lexer::token_type::DartTokenType,
+    parser::{DartParser, element_type::DartElementType},
+};
 use oak_core::{Builder, BuilderCache, GreenNode, Parser, RedNode, RedTree, SourceText, TextEdit, source::Source};
 
 /// Dart 语言的 AST 构建器
@@ -12,24 +17,76 @@ impl<'config> DartBuilder<'config> {
         Self { config }
     }
 
-    pub(crate) fn build_root<'a>(&self, green_tree: &'a GreenNode<'a, DartLanguage>, _source: &SourceText) -> Result<DartRoot, oak_core::OakError> {
+    pub(crate) fn build_root<'a>(&self, green_tree: &'a GreenNode<'a, DartLanguage>, source: &SourceText) -> Result<DartRoot, oak_core::OakError> {
         let red_root = RedNode::new(green_tree, 0);
-        let items = Vec::new();
+        let mut items = Vec::new();
 
         for child in red_root.children() {
             if let RedTree::Node(n) = child {
                 match n.green.kind {
-                    DartSyntaxKind::ClassDeclaration => {
-                        // TODO: Implement build_class
+                    DartElementType::ClassDeclaration => {
+                        if let Some(item) = self.build_class(&n, source) {
+                            items.push(Item::Class(item))
+                        }
                     }
-                    DartSyntaxKind::FunctionDeclaration => {
-                        // TODO: Implement build_function
+                    DartElementType::FunctionDeclaration => {
+                        if let Some(item) = self.build_function(&n, source) {
+                            items.push(Item::Function(item))
+                        }
+                    }
+                    DartElementType::VariableDeclaration => {
+                        if let Some(item) = self.build_variable(&n, source) {
+                            items.push(Item::Variable(item))
+                        }
                     }
                     _ => {}
                 }
             }
         }
         Ok(DartRoot { items })
+    }
+
+    fn build_class(&self, node: &RedNode<DartLanguage>, source: &SourceText) -> Option<ClassDeclaration> {
+        let name = self.find_identifier(node, source)?;
+        Some(ClassDeclaration { name, span: node.span().into() })
+    }
+
+    fn build_function(&self, node: &RedNode<DartLanguage>, source: &SourceText) -> Option<FunctionDeclaration> {
+        let name = self.find_identifier(node, source)?;
+        Some(FunctionDeclaration { name, span: node.span().into() })
+    }
+
+    fn build_variable(&self, node: &RedNode<DartLanguage>, source: &SourceText) -> Option<VariableDeclaration> {
+        let name = self.find_identifier(node, source)?;
+        Some(VariableDeclaration { name, span: node.span().into() })
+    }
+
+    fn find_identifier(&self, node: &RedNode<DartLanguage>, source: &SourceText) -> Option<Identifier> {
+        for child in node.children() {
+            match child {
+                RedTree::Leaf(t) => {
+                    if t.kind == DartTokenType::Identifier {
+                        let range = t.span;
+                        let name = source.get_text_in(range.into()).to_string();
+                        if name.is_empty() {
+                            continue;
+                        }
+                        return Some(Identifier { name, span: range.into() });
+                    }
+                }
+                RedTree::Node(n) => {
+                    if n.green.kind == DartElementType::Identifier {
+                        let range = n.span();
+                        let name = source.get_text_in(range.into()).to_string();
+                        if name.is_empty() {
+                            continue;
+                        }
+                        return Some(Identifier { name, span: range.into() });
+                    }
+                }
+            }
+        }
+        None
     }
 }
 

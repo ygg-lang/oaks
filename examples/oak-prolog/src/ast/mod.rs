@@ -1,7 +1,8 @@
+#![doc = include_str!("readme.md")]
 #[derive(Debug, Clone)]
 pub struct PrologRoot;
 
-pub type PrologToken = crate::kind::PrologSyntaxKind;
+pub type PrologToken = crate::lexer::PrologTokenType;
 
 #[derive(Debug, Clone)]
 pub struct SourceFile {

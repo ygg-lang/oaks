@@ -1,3 +1,5 @@
+pub mod element_type;
+
 use crate::{language::SassLanguage, lexer::SassLexer};
 use oak_core::{
     TextEdit,
@@ -5,15 +7,17 @@ use oak_core::{
     source::Source,
 };
 
-mod parse;
+mod parse_top_level;
 
 pub(crate) type State<'a, S> = ParserState<'a, SassLanguage, S>;
 
+/// Parser for the Sass language.
 pub struct SassParser<'config> {
     pub(crate) config: &'config SassLanguage,
 }
 
 impl<'config> SassParser<'config> {
+    /// Creates a new Sass parser with the given configuration.
     pub fn new(config: &'config SassLanguage) -> Self {
         Self { config }
     }

@@ -1,15 +1,35 @@
-# oak-frontend-csharp
+# 🚀 Oak C# Parser
 
-Oak 项目的 C# 语言前端。
+[![Crates.io](https://img.shields.io/crates/v/oak-csharp.svg)](https://crates.io/crates/oak-csharp)
+[![Documentation](https://docs.rs/oak-csharp/badge.svg)](https://docs.rs/oak-csharp)
 
-## 功能介绍
+**Enterprise-Grade Power and Speed for .NET** — A high-performance, incremental C# parser built on the Oak framework. Optimized for modern C# (12.0+) features, Roslyn-inspired architecture, and high-responsiveness developer tools.
 
-负责将 C# 源代码解析并通过意图构造器直接归约为 Oak 的意图流。
+## 🎯 Project Vision
 
-## 模块结构
+C# is the cornerstone of the .NET ecosystem, and its rapid evolution brings complex syntax and powerful language features. `oak-csharp` aims to provide a robust, modern, Rust-powered infrastructure for parsing C# that is both accurate and incredibly fast. By utilizing Oak's incremental parsing architecture, we enable the creation of highly responsive IDEs, static analyzers, and refactoring tools that can handle massive C# solutions in real-time. Whether you are building custom linters, automated code generators, or sophisticated IDE extensions, `oak-csharp` provides the high-fidelity AST and efficiency needed to keep pace with C#'s continuous growth.
 
-- `lib.rs`: C# 语法解析逻辑。
+## ✨ Core Features
 
-## 维护指南
+- **⚡ Blazing Fast**: Leverages Rust's performance and memory safety to provide sub-millisecond parsing, essential for high-frequency developer tools and real-time analysis in large C# projects.
+- **🔄 Incremental by Nature**: Built-in support for partial updates—re-parse only what has changed. Ideal for large-scale C# solutions where maintainability and tool responsiveness are critical.
+- **🌳 High-Fidelity AST**: Generates a comprehensive and precise Abstract Syntax Tree capturing the full depth of modern C#:
+    - **Modern Features**: Full support for Records, Pattern Matching, Init-only properties, and Primary Constructors.
+    - **Asynchronous Programming**: Deep integration of `async`, `await`, and `IAsyncEnumerable` constructs.
+    - **LINQ**: Precise parsing of Query Expressions and method-based LINQ syntax.
+    - **Generics & Attributes**: Robust handling of complex generic constraints and attribute-based metadata.
+    - **Unsafe Code**: Support for parsing unsafe blocks and pointer operations where necessary.
+- **🛡️ Industrial-Grade Fault Tolerance**: Engineered to recover from syntax errors gracefully, providing precise diagnostics—crucial for maintaining a smooth developer experience during active coding.
+- **🧩 Deep Ecosystem Integration**: Seamlessly works with `oak-lsp` for full LSP support and `oak-mcp` for intelligent code discovery and analysis.
 
-1. **LINQ 支持**: 将 LINQ 查询直接映射到高性能的 UIR 意图序列。
+## 🏗️ Architecture
+
+The parser follows the **Green/Red Tree** architecture (inspired by Roslyn), which allows for:
+1. **Efficient Immutability**: Share nodes across different versions of the tree without copying.
+2. **Lossless Syntax Trees**: Retains all trivia (whitespace and comments), enabling faithful code formatting and refactoring.
+3. **Type Safety**: Strongly-typed "Red" nodes provide a convenient and safe API for tree traversal and analysis.
+
+
+## 🤝 Contributing
+
+We welcome contributions of all kinds! If you find a bug, have a feature request, or want to contribute code, please check our [issues](https://github.com/ygg-lang/oaks/issues) or submit a pull request.

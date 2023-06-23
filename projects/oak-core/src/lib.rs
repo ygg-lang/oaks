@@ -5,13 +5,13 @@
 #![feature(core_intrinsics)] // Used for `likely`/`unlikely` hints in performance-critical paths
 #![feature(lazy_type_alias)] // Allows more flexible type aliases for complex generic AST structures
 #![feature(new_range_api)] // Uses the modernized `core::range` API for precise source tracking
-// #![feature(nonnull_slice_from_raw_parts)] // Essential for creating raw slices in `SyntaxArena` without null checks
 #![feature(portable_simd)] // Enables SIMD acceleration for high-performance lexing and parsing
 #![feature(slice_ptr_get)] // Provides ergonomic access to raw pointers within slices
 #![feature(trusted_len)] // Optimizes iterator performance by trusting length hints in core structures
 #![warn(missing_docs)]
 #![doc(html_logo_url = "https://raw.githubusercontent.com/ygg-lang/oaks/refs/heads/dev/documents/logo.svg")]
 #![doc(html_favicon_url = "https://raw.githubusercontent.com/ygg-lang/oaks/refs/heads/dev/documents/logo.svg")]
+// #![feature(nonnull_slice_from_raw_parts)] // Essential for creating raw slices in `SyntaxArena` without null checks
 
 /// Incremental tree builder and cache management.
 pub mod builder;
@@ -25,7 +25,9 @@ pub mod lexer;
 pub mod memory;
 /// Parsing functionality for converting tokens to kind trees.
 pub mod parser;
+#[cfg(feature = "serde")]
 pub mod serde_arc_str;
+#[cfg(feature = "serde")]
 pub mod serde_range;
 /// Source text management and location tracking.
 pub mod source;

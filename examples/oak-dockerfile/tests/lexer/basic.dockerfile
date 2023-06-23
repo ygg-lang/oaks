@@ -31,7 +31,7 @@ RUN pip3 install -r requirements.txt
 # Install Node.js
 RUN curl -fsSL https://deb.nodesource.com/setup_18.x | bash - && \
     apt-get install -y nodejs && \
-    npm install -g npm@latest
+    npm install -g npm↯latest
 
 # Install Node.js dependencies
 RUN npm ci --only=production

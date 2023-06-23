@@ -1,4 +1,7 @@
-use crate::{kind::PowerShellSyntaxKind, language::PowerShellLanguage};
+#![doc = include_str!("readme.md")]
+pub mod token_type;
+
+use crate::{language::PowerShellLanguage, lexer::token_type::PowerShellTokenType};
 use oak_core::{
     Lexer, LexerCache, LexerState, OakError,
     lexer::LexOutput,
@@ -55,7 +58,7 @@ impl<'config> PowerShellLexer<'config> {
             if let Some(ch) = state.peek() {
                 let start_pos = state.get_position();
                 state.advance(ch.len_utf8());
-                state.add_token(PowerShellSyntaxKind::Error, start_pos, state.get_position());
+                state.add_token(PowerShellTokenType::Error, start_pos, state.get_position());
             }
             else {
                 // 如果已到达文件末尾，退出循环
@@ -65,7 +68,7 @@ impl<'config> PowerShellLexer<'config> {
 
         // Add EOF token
         let pos = state.get_position();
-        state.add_token(PowerShellSyntaxKind::Eof, pos, pos);
+        state.add_token(PowerShellTokenType::Eof, pos, pos);
 
         Ok(())
     }
@@ -83,7 +86,7 @@ impl<'config> PowerShellLexer<'config> {
         }
 
         if state.get_position() > start_pos {
-            state.add_token(PowerShellSyntaxKind::Whitespace, start_pos, state.get_position());
+            state.add_token(PowerShellTokenType::Whitespace, start_pos, state.get_position());
             true
         }
         else {
@@ -96,7 +99,7 @@ impl<'config> PowerShellLexer<'config> {
 
         if let Some('\n') = state.peek() {
             state.advance(1);
-            state.add_token(PowerShellSyntaxKind::Newline, start_pos, state.get_position());
+            state.add_token(PowerShellTokenType::Newline, start_pos, state.get_position());
             true
         }
         else if let Some('\r') = state.peek() {
@@ -104,7 +107,7 @@ impl<'config> PowerShellLexer<'config> {
             if let Some('\n') = state.peek() {
                 state.advance(1);
             }
-            state.add_token(PowerShellSyntaxKind::Newline, start_pos, state.get_position());
+            state.add_token(PowerShellTokenType::Newline, start_pos, state.get_position());
             true
         }
         else {
@@ -124,7 +127,7 @@ impl<'config> PowerShellLexer<'config> {
                 }
                 state.advance(ch.len_utf8());
             }
-            state.add_token(PowerShellSyntaxKind::Comment, start_pos, state.get_position());
+            state.add_token(PowerShellTokenType::Comment, start_pos, state.get_position());
             true
         }
         else if let Some('<') = state.peek() {
@@ -155,7 +158,7 @@ impl<'config> PowerShellLexer<'config> {
                         state.advance(ch.len_utf8());
                     }
                 }
-                state.add_token(PowerShellSyntaxKind::Comment, start_pos, state.get_position());
+                state.add_token(PowerShellTokenType::Comment, start_pos, state.get_position());
                 true
             }
             else {
@@ -200,7 +203,7 @@ impl<'config> PowerShellLexer<'config> {
                     }
                 }
 
-                state.add_token(PowerShellSyntaxKind::StringLiteral, start_pos, state.get_position());
+                state.add_token(PowerShellTokenType::StringLiteral, start_pos, state.get_position());
                 true
             }
             else {
@@ -261,7 +264,7 @@ impl<'config> PowerShellLexer<'config> {
                     }
                 }
 
-                state.add_token(PowerShellSyntaxKind::NumberLiteral, start_pos, state.get_position());
+                state.add_token(PowerShellTokenType::NumberLiteral, start_pos, state.get_position());
                 true
             }
             else {
@@ -294,17 +297,17 @@ impl<'config> PowerShellLexer<'config> {
                         }
                     }
 
-                    state.add_token(PowerShellSyntaxKind::Variable, start_pos, state.get_position());
+                    state.add_token(PowerShellTokenType::Variable, start_pos, state.get_position());
                     true
                 }
                 else {
                     // 只有 $ 符号，作为操作符处理
-                    state.add_token(PowerShellSyntaxKind::Dollar, start_pos, state.get_position());
+                    state.add_token(PowerShellTokenType::Dollar, start_pos, state.get_position());
                     true
                 }
             }
             else {
-                state.add_token(PowerShellSyntaxKind::Dollar, start_pos, state.get_position());
+                state.add_token(PowerShellTokenType::Dollar, start_pos, state.get_position());
                 true
             }
         }
@@ -332,43 +335,43 @@ impl<'config> PowerShellLexer<'config> {
 
                 // 检查是否是关键字
                 let kind = match text.as_str() {
-                    "begin" => PowerShellSyntaxKind::Begin,
-                    "break" => PowerShellSyntaxKind::Break,
-                    "catch" => PowerShellSyntaxKind::Catch,
-                    "class" => PowerShellSyntaxKind::Class,
-                    "continue" => PowerShellSyntaxKind::Continue,
-                    "data" => PowerShellSyntaxKind::Data,
-                    "define" => PowerShellSyntaxKind::Define,
-                    "do" => PowerShellSyntaxKind::Do,
-                    "dynamicparam" => PowerShellSyntaxKind::DynamicParam,
-                    "else" => PowerShellSyntaxKind::Else,
-                    "elseif" => PowerShellSyntaxKind::ElseIf,
-                    "end" => PowerShellSyntaxKind::End,
-                    "exit" => PowerShellSyntaxKind::Exit,
-                    "filter" => PowerShellSyntaxKind::Filter,
-                    "finally" => PowerShellSyntaxKind::Finally,
-                    "for" => PowerShellSyntaxKind::For,
-                    "foreach" => PowerShellSyntaxKind::ForEach,
-                    "from" => PowerShellSyntaxKind::From,
-                    "function" => PowerShellSyntaxKind::Function,
-                    "if" => PowerShellSyntaxKind::If,
-                    "in" => PowerShellSyntaxKind::In,
-                    "param" => PowerShellSyntaxKind::Param,
-                    "process" => PowerShellSyntaxKind::Process,
-                    "return" => PowerShellSyntaxKind::Return,
-                    "switch" => PowerShellSyntaxKind::Switch,
-                    "throw" => PowerShellSyntaxKind::Throw,
-                    "trap" => PowerShellSyntaxKind::Trap,
-                    "try" => PowerShellSyntaxKind::Try,
-                    "until" => PowerShellSyntaxKind::Until,
-                    "using" => PowerShellSyntaxKind::Using,
-                    "var" => PowerShellSyntaxKind::Var,
-                    "while" => PowerShellSyntaxKind::While,
-                    "workflow" => PowerShellSyntaxKind::Workflow,
-                    "true" => PowerShellSyntaxKind::BooleanLiteral,
-                    "false" => PowerShellSyntaxKind::BooleanLiteral,
-                    "null" => PowerShellSyntaxKind::NullLiteral,
-                    _ => PowerShellSyntaxKind::Identifier,
+                    "begin" => PowerShellTokenType::Begin,
+                    "break" => PowerShellTokenType::Break,
+                    "catch" => PowerShellTokenType::Catch,
+                    "class" => PowerShellTokenType::Class,
+                    "continue" => PowerShellTokenType::Continue,
+                    "data" => PowerShellTokenType::Data,
+                    "define" => PowerShellTokenType::Define,
+                    "do" => PowerShellTokenType::Do,
+                    "dynamicparam" => PowerShellTokenType::DynamicParam,
+                    "else" => PowerShellTokenType::Else,
+                    "elseif" => PowerShellTokenType::ElseIf,
+                    "end" => PowerShellTokenType::End,
+                    "exit" => PowerShellTokenType::Exit,
+                    "filter" => PowerShellTokenType::Filter,
+                    "finally" => PowerShellTokenType::Finally,
+                    "for" => PowerShellTokenType::For,
+                    "foreach" => PowerShellTokenType::ForEach,
+                    "from" => PowerShellTokenType::From,
+                    "function" => PowerShellTokenType::Function,
+                    "if" => PowerShellTokenType::If,
+                    "in" => PowerShellTokenType::In,
+                    "param" => PowerShellTokenType::Param,
+                    "process" => PowerShellTokenType::Process,
+                    "return" => PowerShellTokenType::Return,
+                    "switch" => PowerShellTokenType::Switch,
+                    "throw" => PowerShellTokenType::Throw,
+                    "trap" => PowerShellTokenType::Trap,
+                    "try" => PowerShellTokenType::Try,
+                    "until" => PowerShellTokenType::Until,
+                    "using" => PowerShellTokenType::Using,
+                    "var" => PowerShellTokenType::Var,
+                    "while" => PowerShellTokenType::While,
+                    "workflow" => PowerShellTokenType::Workflow,
+                    "true" => PowerShellTokenType::BooleanLiteral,
+                    "false" => PowerShellTokenType::BooleanLiteral,
+                    "null" => PowerShellTokenType::NullLiteral,
+                    _ => PowerShellTokenType::Identifier,
                 };
 
                 state.add_token(kind, start_pos, state.get_position());
@@ -392,191 +395,191 @@ impl<'config> PowerShellLexer<'config> {
                     state.advance(1);
                     if let Some('+') = state.peek() {
                         state.advance(1);
-                        PowerShellSyntaxKind::Plus
+                        PowerShellTokenType::Plus
                     }
                     else if let Some('=') = state.peek() {
                         state.advance(1);
-                        PowerShellSyntaxKind::Equal
+                        PowerShellTokenType::Equal
                     }
                     else {
-                        PowerShellSyntaxKind::Plus
+                        PowerShellTokenType::Plus
                     }
                 }
                 '-' => {
                     state.advance(1);
                     if let Some('-') = state.peek() {
                         state.advance(1);
-                        PowerShellSyntaxKind::Minus
+                        PowerShellTokenType::Minus
                     }
                     else if let Some('=') = state.peek() {
                         state.advance(1);
-                        PowerShellSyntaxKind::Equal
+                        PowerShellTokenType::Equal
                     }
                     else {
-                        PowerShellSyntaxKind::Minus
+                        PowerShellTokenType::Minus
                     }
                 }
                 '*' => {
                     state.advance(1);
                     if let Some('=') = state.peek() {
                         state.advance(1);
-                        PowerShellSyntaxKind::Equal
+                        PowerShellTokenType::Equal
                     }
                     else {
-                        PowerShellSyntaxKind::Multiply
+                        PowerShellTokenType::Multiply
                     }
                 }
                 '/' => {
                     state.advance(1);
                     if let Some('=') = state.peek() {
                         state.advance(1);
-                        PowerShellSyntaxKind::Equal
+                        PowerShellTokenType::Equal
                     }
                     else {
-                        PowerShellSyntaxKind::Divide
+                        PowerShellTokenType::Divide
                     }
                 }
                 '%' => {
                     state.advance(1);
                     if let Some('=') = state.peek() {
                         state.advance(1);
-                        PowerShellSyntaxKind::Equal
+                        PowerShellTokenType::Equal
                     }
                     else {
-                        PowerShellSyntaxKind::Modulo
+                        PowerShellTokenType::Modulo
                     }
                 }
                 '=' => {
                     state.advance(1);
                     if let Some('=') = state.peek() {
                         state.advance(1);
-                        PowerShellSyntaxKind::Equal
+                        PowerShellTokenType::Equal
                     }
                     else {
-                        PowerShellSyntaxKind::Equal
+                        PowerShellTokenType::Equal
                     }
                 }
                 '!' => {
                     state.advance(1);
                     if let Some('=') = state.peek() {
                         state.advance(1);
-                        PowerShellSyntaxKind::NotEqual
+                        PowerShellTokenType::NotEqual
                     }
                     else {
-                        PowerShellSyntaxKind::Exclamation
+                        PowerShellTokenType::Exclamation
                     }
                 }
                 '<' => {
                     state.advance(1);
                     if let Some('=') = state.peek() {
                         state.advance(1);
-                        PowerShellSyntaxKind::LessEqual
+                        PowerShellTokenType::LessEqual
                     }
                     else {
-                        PowerShellSyntaxKind::LessThan
+                        PowerShellTokenType::LessThan
                     }
                 }
                 '>' => {
                     state.advance(1);
                     if let Some('=') = state.peek() {
                         state.advance(1);
-                        PowerShellSyntaxKind::GreaterEqual
+                        PowerShellTokenType::GreaterEqual
                     }
                     else {
-                        PowerShellSyntaxKind::GreaterThan
+                        PowerShellTokenType::GreaterThan
                     }
                 }
                 '&' => {
                     state.advance(1);
                     if let Some('&') = state.peek() {
                         state.advance(1);
-                        PowerShellSyntaxKind::And
+                        PowerShellTokenType::And
                     }
                     else {
-                        PowerShellSyntaxKind::Ampersand
+                        PowerShellTokenType::Ampersand
                     }
                 }
                 '|' => {
                     state.advance(1);
                     if let Some('|') = state.peek() {
                         state.advance(1);
-                        PowerShellSyntaxKind::Or
+                        PowerShellTokenType::Or
                     }
                     else {
-                        PowerShellSyntaxKind::Pipe
+                        PowerShellTokenType::Pipe
                     }
                 }
                 '^' => {
                     state.advance(1);
-                    PowerShellSyntaxKind::Xor
+                    PowerShellTokenType::Xor
                 }
                 '~' => {
                     state.advance(1);
-                    PowerShellSyntaxKind::Not
+                    PowerShellTokenType::Not
                 }
                 '?' => {
                     state.advance(1);
-                    PowerShellSyntaxKind::Question
+                    PowerShellTokenType::Question
                 }
                 ':' => {
                     state.advance(1);
                     if let Some(':') = state.peek() {
                         state.advance(1);
-                        PowerShellSyntaxKind::DoubleColon
+                        PowerShellTokenType::DoubleColon
                     }
                     else {
-                        PowerShellSyntaxKind::Colon
+                        PowerShellTokenType::Colon
                     }
                 }
                 ';' => {
                     state.advance(1);
-                    PowerShellSyntaxKind::Semicolon
+                    PowerShellTokenType::Semicolon
                 }
                 ',' => {
                     state.advance(1);
-                    PowerShellSyntaxKind::Comma
+                    PowerShellTokenType::Comma
                 }
                 '.' => {
                     state.advance(1);
                     if let Some('.') = state.peek() {
                         state.advance(1);
-                        PowerShellSyntaxKind::DotDot
+                        PowerShellTokenType::DotDot
                     }
                     else {
-                        PowerShellSyntaxKind::Dot
+                        PowerShellTokenType::Dot
                     }
                 }
                 '(' => {
                     state.advance(1);
-                    PowerShellSyntaxKind::LeftParen
+                    PowerShellTokenType::LeftParen
                 }
                 ')' => {
                     state.advance(1);
-                    PowerShellSyntaxKind::RightParen
+                    PowerShellTokenType::RightParen
                 }
                 '[' => {
                     state.advance(1);
-                    PowerShellSyntaxKind::LeftBracket
+                    PowerShellTokenType::LeftBracket
                 }
                 ']' => {
                     state.advance(1);
-                    PowerShellSyntaxKind::RightBracket
+                    PowerShellTokenType::RightBracket
                 }
                 '{' => {
                     state.advance(1);
-                    PowerShellSyntaxKind::LeftBrace
+                    PowerShellTokenType::LeftBrace
                 }
                 '}' => {
                     state.advance(1);
-                    PowerShellSyntaxKind::RightBrace
+                    PowerShellTokenType::RightBrace
                 }
                 '@' => {
                     state.advance(1);
-                    PowerShellSyntaxKind::At
+                    PowerShellTokenType::At
                 }
                 '`' => {
                     state.advance(1);
-                    PowerShellSyntaxKind::Backtick
+                    PowerShellTokenType::Backtick
                 }
                 _ => return false,
             };

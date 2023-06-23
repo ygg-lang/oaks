@@ -1,25 +1,28 @@
-//! Lua 语言定义
+#![doc = include_str!("readme.md")]
+//! Lua language definition.
 //!
-//! 定义Lua 语言的核心结构体，实现了 oak-core Language trait
+//! Defines the core structure for the Lua language, implementing the oak-core Language trait.
 
 use oak_core::{Language, LanguageCategory};
+#[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
 
-/// Lua 语言定义
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
+/// Lua language definition.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct LuaLanguage {}
 
 impl Language for LuaLanguage {
     const NAME: &'static str = "lua";
     const CATEGORY: LanguageCategory = LanguageCategory::Programming;
 
-    type TokenType = crate::kind::LuaSyntaxKind;
-    type ElementType = crate::kind::LuaSyntaxKind;
+    type TokenType = crate::lexer::token_type::LuaTokenType;
+    type ElementType = crate::parser::element_type::LuaElementType;
     type TypedRoot = crate::ast::LuaRoot;
 }
 
 impl LuaLanguage {
-    /// 创建新的 Lua 语言实例
+    /// Creates a new Lua language instance.
     pub fn new() -> Self {
         Self {}
     }

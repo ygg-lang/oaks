@@ -19,7 +19,7 @@ impl SimdScanner {
             if let Some(idx) = mask.first_set() {
                 return Some(i + idx);
             }
-            i += LANES;
+            i += LANES
         }
 
         // Process remaining bytes
@@ -27,7 +27,7 @@ impl SimdScanner {
             if unsafe { *text.get_unchecked(i) } == needle {
                 return Some(i);
             }
-            i += 1;
+            i += 1
         }
         None
     }
@@ -50,14 +50,14 @@ impl SimdScanner {
                     return i + idx;
                 }
             }
-            i += LANES;
+            i += LANES
         }
 
         while i < len {
             if unsafe { *text.get_unchecked(i) } != byte {
                 break;
             }
-            i += 1;
+            i += 1
         }
         i
     }
@@ -80,7 +80,7 @@ impl SimdScanner {
                     return i + idx;
                 }
             }
-            i += LANES;
+            i += LANES
         }
 
         while i < len {
@@ -88,7 +88,7 @@ impl SimdScanner {
             if b != b1 && b != b2 {
                 break;
             }
-            i += 1;
+            i += 1
         }
         i
     }
@@ -112,14 +112,14 @@ impl SimdScanner {
                     return i + idx;
                 }
             }
-            i += LANES;
+            i += LANES
         }
         while i < len {
             let b = unsafe { *text.get_unchecked(i) };
             if b != b' ' && b != b'\t' && b != b'\n' && b != b'\r' {
                 break;
             }
-            i += 1;
+            i += 1
         }
         i
     }
@@ -141,14 +141,14 @@ impl SimdScanner {
                     return i + idx;
                 }
             }
-            i += LANES;
+            i += LANES
         }
         while i < len {
             let b = unsafe { *text.get_unchecked(i) };
             if !b.is_ascii_digit() {
                 break;
             }
-            i += 1;
+            i += 1
         }
         i
     }
@@ -172,14 +172,14 @@ impl SimdScanner {
                     return i + idx;
                 }
             }
-            i += LANES;
+            i += LANES
         }
         while i < len {
             let b = unsafe { *text.get_unchecked(i) };
             if !b.is_ascii_alphanumeric() && b != b'_' {
                 break;
             }
-            i += 1;
+            i += 1
         }
         i
     }
@@ -202,14 +202,14 @@ impl SimdScanner {
                     return i + idx;
                 }
             }
-            i += LANES;
+            i += LANES
         }
         while i < len {
             let b = unsafe { *text.get_unchecked(i) };
             if !b.is_ascii_hexdigit() {
                 break;
             }
-            i += 1;
+            i += 1
         }
         i
     }
@@ -233,7 +233,7 @@ impl SimdScanner {
                     return Some(i + idx);
                 }
             }
-            i += LANES;
+            i += LANES
         }
 
         while i < len {
@@ -241,7 +241,7 @@ impl SimdScanner {
             if byte == a || byte == b || byte == c || byte == d {
                 return Some(i);
             }
-            i += 1;
+            i += 1
         }
         None
     }
@@ -261,14 +261,14 @@ impl SimdScanner {
                     return i + idx;
                 }
             }
-            i += LANES;
+            i += LANES
         }
 
         while i < len {
             if unsafe { *text.get_unchecked(i) } == target {
                 break;
             }
-            i += 1;
+            i += 1
         }
         i
     }

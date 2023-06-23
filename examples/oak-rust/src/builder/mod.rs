@@ -1,85 +1,40 @@
 use crate::RustParser;
-#[doc = include_str!("readme.md")]
+
 use crate::{ast::*, language::RustLanguage, lexer::RustTokenType, parser::RustElementType};
 use core::range::Range;
 use oak_core::{Builder, BuilderCache, GreenNode, OakDiagnostics, OakError, Parser, RedNode, RedTree, SourceText, TextEdit, builder::BuildOutput, source::Source};
 
-/// Rust 语言的 AST 构建器
+/// AST builder for the Rust language.
 ///
-/// `RustBuilder` 负责解析 Rust 源代码并构建抽象语法树 (AST)。
-/// 它使用 Pratt 解析器处理表达式中的运算符优先级，并支持所有 Rust 语法特性。
-///
-/// # 示例
-///
-/// 基本用法:
-///
-/// ```rust,ignore
-/// use oak_core::Parser;
-/// use oak_rust::{RustBuilder, RustLanguage, SourceText};
-///
-/// let language = RustLanguage::default();
-/// let builder = RustBuilder::new(language);
-/// let source = SourceText::new("fn main() { let x = 42; }");
-/// let result = builder.build(source, 0);
-///
-/// // 结果包含解析后的 AST
-/// assert!(result.result.is_ok());
-/// ```
-///
-/// 解析更复杂的 Rust 结构:
-///
-/// ```rust,ignore
-/// use oak_core::Parser;
-/// use oak_rust::{RustBuilder, RustLanguage, SourceText};
-///
-/// let language = RustLanguage::default();
-/// let builder = RustBuilder::new(language);
-///
-/// let source = SourceText::new(
-///     r#"
-/// struct Point {
-///     x: f64,
-///     y: f64,
-/// }
-///
-/// impl Point {
-///     fn new(x: f64, y: f64) -> Self {
-///         Point { x, y }
-///     }
-/// }
-/// "#,
-/// );
-/// let result = builder.build(source, 0);
-///
-/// // 验证解析成功
-/// assert!(result.result.is_ok());
-/// ```
+/// `RustBuilder` is responsible for parsing Rust source code and constructing
+/// an Abstract Syntax Tree (AST). It uses a Pratt parser to handle operator
+/// precedence in expressions and supports all Rust syntax features.
 #[derive(Clone, Copy)]
 pub struct RustBuilder<'config> {
-    /// 语言配置
+    /// Language configuration
     config: &'config RustLanguage,
 }
 
 impl<'config> RustBuilder<'config> {
-    /// 创建新的 Rust 构建器
-    pub fn new(config: &'config RustLanguage) -> Self {
+    /// Creates a new `RustBuilder` with the given configuration.
+    pub const fn new(config: &'config RustLanguage) -> Self {
         Self { config }
     }
 }
 
 impl<'config> Builder<RustLanguage> for RustBuilder<'config> {
     fn build<'a, S: Source + ?Sized>(&self, source: &S, edits: &[TextEdit], _cache: &'a mut impl BuilderCache<RustLanguage>) -> BuildOutput<RustLanguage> {
-        // 解析源代码获得语法树
+        // Parse source code to get syntax tree
         let parser = RustParser::new(self.config);
 
-        // TODO: 真正的增量构建需要利用 BC
+        // TODO: True incremental building should utilize the cache
         let mut cache = oak_core::parser::session::ParseSession::<RustLanguage>::default();
         let parse_result = parser.parse(source, edits, &mut cache);
 
-        // 检查解析是否成功
+        // Check if parsing was successful
         match parse_result.result {
             Ok(green_tree) => {
-                // 构建 AST
+                // Build AST
                 let source_text = SourceText::new(source.get_text_in((0..source.length()).into()).into_owned());
                 match self.build_root(green_tree.clone(), &source_text) {
                     Ok(ast_root) => OakDiagnostics { result: Ok(ast_root), diagnostics: parse_result.diagnostics },
@@ -96,7 +51,7 @@ impl<'config> Builder<RustLanguage> for RustBuilder<'config> {
 }
 
 impl<'config> RustBuilder<'config> {
-    /// 构建根节点
+    /// Builds the root node.
     pub(crate) fn build_root(&self, green_tree: GreenNode<RustLanguage>, source: &SourceText) -> Result<RustRoot, OakError> {
         let red_root = RedNode::new(&green_tree, 0);
         let mut items = Vec::new();
@@ -145,18 +100,18 @@ impl<'config> RustBuilder<'config> {
                         items.push(Item::TypeAlias(type_alias));
                     }
                     _ => {
-                        // 忽略其他类型的节点
+                        // Ignore other node types
                     }
                 },
                 RedTree::Leaf(_) => {
-                    // 忽略顶级的 token（如空白符、注释等）
+                    // Ignore top-level tokens (whitespace, comments, etc.)
                 }
             }
         }
         Ok(RustRoot { items })
     }
 
-    /// 构建函数定义
+    /// Builds a function definition.
     pub(crate) fn build_function(&self, node: RedNode<RustLanguage>, source: &SourceText) -> Result<Function, OakError> {
         let span = node.span();
         let mut name = Identifier { name: String::new(), span: Range { start: 0, end: 0 } };
@@ -246,7 +201,7 @@ impl<'config> RustBuilder<'config> {
         Ok(Param { name, ty, is_mut: false, span: span.into() })
     }
 
-    /// 构建代码块
+    /// Builds a code block.
     fn build_block(&self, node: RedNode<RustLanguage>, source: &SourceText) -> Result<Block, OakError> {
         let span = node.span();
         let mut statements = Vec::new();
@@ -265,7 +220,7 @@ impl<'config> RustBuilder<'config> {
                         statements.push(Statement::Item(item));
                     }
                     _ => {
-                        // 可能是块表达式，将其作为表达式语句处理
+                        // Could be a block expression, treat it as an expression statement
                         let span = n.span();
                         if let Ok(block_expr) = self.build_expr(n, source) {
                             statements.push(Statement::ExprStmt { expr: block_expr, semi: false, span: span.into() });
@@ -273,7 +228,7 @@ impl<'config> RustBuilder<'config> {
                     }
                 },
                 RedTree::Leaf(_) => {
-                    // 忽略分隔符和空白符
+                    // Ignore separators and whitespace
                 }
             }
         }
@@ -281,7 +236,7 @@ impl<'config> RustBuilder<'config> {
         Ok(Block { statements, block_start: span.start, block_end: span.end, nested: 0, span: span.into() })
     }
 
-    /// 构建 let 语句
+    /// Builds a let statement.
     fn build_let_statement(&self, node: RedNode<RustLanguage>, source: &SourceText) -> Result<Statement, OakError> {
         let span = node.span();
         let mut name = Identifier { name: String::new(), span: Range { start: 0, end: 0 } };
@@ -294,7 +249,7 @@ impl<'config> RustBuilder<'config> {
                 RedTree::Node(n) => match n.green.kind {
                     RustElementType::Pattern => {
                         let pattern = self.build_pattern(n, source)?;
-                        // 从 Pattern 中提取 Identifier
+                        // Extract Identifier from Pattern
                         match pattern {
                             Pattern::Ident(ident) => name = ident,
                             _ => {
@@ -311,7 +266,7 @@ impl<'config> RustBuilder<'config> {
                     _ => {}
                 },
                 RedTree::Leaf(t) => {
-                    // 检查是否有 mut 关键字
+                    // Check for mut keyword
                     if t.kind == RustTokenType::Mut {
                         mutable = true;
                     }
@@ -322,7 +277,7 @@ impl<'config> RustBuilder<'config> {
         Ok(Statement::Let { name, ty, expr: init, mutable, span: span.into() })
     }
 
-    /// 构建表达式语句
+    /// Builds an expression statement.
     fn build_expr_statement(&self, node: RedNode<RustLanguage>, source: &SourceText) -> Result<Statement, OakError> {
         let span = node.span();
         let mut expr = Expr::Bool { value: false, span: span.clone().into() };
@@ -346,7 +301,7 @@ impl<'config> RustBuilder<'config> {
         Ok(Statement::ExprStmt { expr, semi: has_semicolon, span: span.into() })
     }
 
-    /// 构建表达式
+    /// Builds an expression.
     pub(crate) fn build_expr(&self, node: RedNode<RustLanguage>, source: &SourceText) -> Result<Expr, OakError> {
         let span = node.span();
 
@@ -355,7 +310,7 @@ impl<'config> RustBuilder<'config> {
                 for child in node.children() {
                     if let RedTree::Leaf(t) = child {
                         if t.kind == RustTokenType::Identifier {
-                            let ident = Identifier { name: source.get_text_in(t.span.clone().into()).to_string(), span: t.span.clone().into() };
+                            let ident = Identifier { name: text(source, t.span.clone().into()), span: t.span.clone().into() };
                             return Ok(Expr::Ident(ident));
                         }
                     }
@@ -365,7 +320,7 @@ impl<'config> RustBuilder<'config> {
             RustElementType::LiteralExpression => {
                 for child in node.children() {
                     if let RedTree::Leaf(t) = child {
-                        // 直接根据 token 文本内容推断字面量类型
+                        // Infer literal type directly from token text
                         let text = source.get_text_in(t.span.clone().into());
                         if text == "true" {
                             return Ok(Expr::Bool { value: true, span: span.into() });
@@ -374,7 +329,7 @@ impl<'config> RustBuilder<'config> {
                             return Ok(Expr::Bool { value: false, span: span.into() });
                         }
                         else {
-                            // 其他字面量类型（数字、字符串、字符等）
+                            // Other literal types (numbers, strings, characters, etc.)
                             return Ok(Expr::Literal { value: text.to_string(), span: span.into() });
                         }
                     }
@@ -398,7 +353,7 @@ impl<'config> RustBuilder<'config> {
                         }
                         RedTree::Leaf(t) => {
                             if op.is_none() {
-                                // 根据 token 文本内容推断操作符类型
+                                // Infer operator type from token text
                                 let text = source.get_text_in(t.span.clone().into());
                                 op = match text.as_ref() {
                                     "+" => Some(RustTokenType::Plus),
@@ -481,7 +436,7 @@ impl<'config> RustBuilder<'config> {
                         }
                         RedTree::Leaf(t) => {
                             if t.kind == RustTokenType::Identifier {
-                                field.name = source.get_text_in(t.span.clone().into()).to_string();
+                                field.name = text(source, t.span.clone().into());
                                 field.span = t.span.clone().into();
                             }
                         }
@@ -524,7 +479,7 @@ impl<'config> RustBuilder<'config> {
         }
     }
 
-    // 占位符方法 - 这些需要根据具体需求实现
+    // Placeholder methods - these need to be implemented based on specific requirements
     fn build_struct(&self, node: RedNode<RustLanguage>, source: &SourceText) -> Result<Struct, OakError> {
         let span = node.span();
         let mut name = Identifier { name: String::new(), span: Range { start: 0, end: 0 } };

@@ -1,11 +1,16 @@
-use crate::{kind::IniSyntaxKind, language::IniLanguage, lexer::IniLexer};
+pub mod element_type;
+
+use crate::{
+    language::IniLanguage,
+    lexer::{IniLexer, token_type::IniTokenType},
+};
 use oak_core::{
     GreenNode, OakError, TextEdit,
     parser::{ParseCache, ParseOutput, Parser, ParserState, parse_with_lexer},
     source::Source,
 };
 
-mod parse;
+mod parse_top_level;
 
 pub(crate) type State<'a, S> = ParserState<'a, IniLanguage, S>;
 
@@ -35,14 +40,9 @@ impl<'config> IniParser<'config> {
                 break;
             }
 
-            if state.at(IniSyntaxKind::LeftBracket) || state.at(IniSyntaxKind::DoubleLeftBracket) {
-                self.parse_table(state)?;
-            }
-            else {
-                self.parse_key_value(state)?;
-            }
+            if state.at(IniTokenType::LeftBracket) || state.at(IniTokenType::DoubleLeftBracket) { self.parse_table(state)? } else { self.parse_key_value(state)? }
         }
 
-        Ok(state.finish_at(checkpoint, IniSyntaxKind::Root.into()))
+        Ok(state.finish_at(checkpoint, crate::parser::element_type::IniElementType::Root))
     }
 }

@@ -1,12 +1,15 @@
-use crate::{kind::RbqSyntaxKind, language::RbqLanguage};
+#![doc = include_str!("readme.md")]
+use crate::{language::RbqLanguage, lexer::token_type::RbqTokenType};
 use core::range::Range;
 use oak_core::{
     TokenType,
     tree::{RedNode, RedTree},
 };
+#[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
 
-#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+#[derive(Clone, Debug, PartialEq)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct RbqRoot {
     pub items: Vec<RbqItem>,
 }
@@ -18,44 +21,36 @@ impl RbqRoot {
 
         for child in red.children() {
             match child {
-                RedTree::Node(node) => match node.kind::<RbqSyntaxKind>() {
-                    RbqSyntaxKind::Annotation => {
-                        pending_annotations.push(RbqAnnotation::lower(node, source));
-                    }
-                    RbqSyntaxKind::NamespaceDef => {
-                        items.push(RbqItem::Namespace(RbqNamespace::lower(node, source)));
-                    }
-                    RbqSyntaxKind::StructDef | RbqSyntaxKind::ClassDef => {
+                RedTree::Node(node) => match node.kind::<RbqTokenType>() {
+                    RbqTokenType::Annotation => pending_annotations.push(RbqAnnotation::lower(node, source)),
+                    RbqTokenType::NamespaceDef => items.push(RbqItem::Namespace(RbqNamespace::lower(node, source))),
+                    RbqTokenType::StructDef | RbqTokenType::ClassDef => {
                         let mut s = RbqStruct::lower(node, source);
                         s.annotations.extend(pending_annotations.drain(..));
-                        items.push(RbqItem::Struct(s));
+                        items.push(RbqItem::Struct(s))
                     }
-                    RbqSyntaxKind::EnumDef => {
+                    RbqTokenType::EnumDef => {
                         let mut e = RbqEnum::lower(node, source);
                         e.annotations.extend(pending_annotations.drain(..));
-                        items.push(RbqItem::Enum(e));
+                        items.push(RbqItem::Enum(e))
                     }
-                    RbqSyntaxKind::UnionDef => {
+                    RbqTokenType::UnionDef => {
                         let mut u = RbqUnion::lower(node, source);
                         u.annotations.extend(pending_annotations.drain(..));
-                        items.push(RbqItem::Union(u));
+                        items.push(RbqItem::Union(u))
                     }
-                    RbqSyntaxKind::TraitDef => {
+                    RbqTokenType::TraitDef => {
                         let mut t = RbqTrait::lower(node, source);
                         t.annotations.extend(pending_annotations.drain(..));
-                        items.push(RbqItem::Trait(t));
+                        items.push(RbqItem::Trait(t))
                     }
-                    RbqSyntaxKind::TypeDef => {
+                    RbqTokenType::TypeDef => {
                         let mut t = RbqTypeAlias::lower(node, source);
                         t.annotations.extend(pending_annotations.drain(..));
-                        items.push(RbqItem::TypeAlias(t));
+                        items.push(RbqItem::TypeAlias(t))
                     }
-                    RbqSyntaxKind::MicroDef => {
-                        items.push(RbqItem::Micro(RbqMicro::lower(node, source)));
-                    }
-                    RbqSyntaxKind::QueryPipeline | RbqSyntaxKind::Expression => {
-                        items.push(RbqItem::Query(RbqExpr::lower(node, source)));
-                    }
+                    RbqTokenType::MicroDef => items.push(RbqItem::Micro(RbqMicro::lower(node, source))),
+                    RbqTokenType::QueryPipeline | RbqTokenType::Expression => items.push(RbqItem::Query(RbqExpr::lower(node, source))),
                     _ => {}
                 },
                 RedTree::Leaf(_) => {}
@@ -65,7 +60,8 @@ impl RbqRoot {
     }
 }
 
-#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+#[derive(Clone, Debug, PartialEq)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub enum RbqItem {
     Struct(RbqStruct),
     Union(RbqUnion),
@@ -77,7 +73,8 @@ pub enum RbqItem {
     Query(RbqExpr),
 }
 
-#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+#[derive(Clone, Debug, PartialEq)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct RbqStruct {
     pub annotations: Vec<RbqAnnotation>,
     pub name: String,
@@ -94,19 +91,19 @@ impl RbqStruct {
 
         for child in red.children() {
             match child {
-                RedTree::Node(node) => match node.kind::<RbqSyntaxKind>() {
-                    RbqSyntaxKind::Annotation => annotations.push(RbqAnnotation::lower(node, source)),
-                    RbqSyntaxKind::UsingDef => {
-                        if let Some(path) = node.children().find(|c| c.kind::<RbqSyntaxKind>() == RbqSyntaxKind::Ident || c.kind::<RbqSyntaxKind>() == RbqSyntaxKind::Utf8Kw) {
-                            using.push(source[path.span()].to_string());
+                RedTree::Node(node) => match node.kind::<RbqTokenType>() {
+                    RbqTokenType::Annotation => annotations.push(RbqAnnotation::lower(node, source)),
+                    RbqTokenType::UsingDef => {
+                        if let Some(path) = node.children().find(|c| c.kind::<RbqTokenType>() == RbqTokenType::Ident || c.kind::<RbqTokenType>() == RbqTokenType::Utf8Kw) {
+                            using.push(source[path.span()].to_string())
                         }
                     }
-                    RbqSyntaxKind::FieldDef => fields.push(RbqField::lower(node, source)),
+                    RbqTokenType::FieldDef => fields.push(RbqField::lower(node, source)),
                     _ => {}
                 },
                 RedTree::Leaf(leaf) => {
-                    if leaf.kind == RbqSyntaxKind::Ident && name.is_empty() {
-                        name = source[leaf.span].trim().to_string();
+                    if leaf.kind == RbqTokenType::Ident && name.is_empty() {
+                        name = source[leaf.span].trim().to_string()
                     }
                 }
             }
@@ -116,7 +113,8 @@ impl RbqStruct {
     }
 }
 
-#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+#[derive(Clone, Debug, PartialEq)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct RbqNamespace {
     pub name: String,
     pub items: Vec<RbqItem>,
@@ -128,43 +126,41 @@ impl RbqNamespace {
         let mut items = Vec::new();
 
         for child in red.children() {
-            match child.kind::<RbqSyntaxKind>() {
-                RbqSyntaxKind::Ident if name.is_empty() => {
-                    name = source[child.span()].trim().to_string();
-                }
-                RbqSyntaxKind::StructDef | RbqSyntaxKind::ClassDef => {
+            match child.kind::<RbqTokenType>() {
+                RbqTokenType::Ident if name.is_empty() => name = source[child.span()].trim().to_string(),
+                RbqTokenType::StructDef | RbqTokenType::ClassDef => {
                     if let Some(node) = child.as_node() {
-                        items.push(RbqItem::Struct(RbqStruct::lower(node, source)));
+                        items.push(RbqItem::Struct(RbqStruct::lower(node, source)))
                     }
                 }
-                RbqSyntaxKind::UnionDef => {
+                RbqTokenType::UnionDef => {
                     if let Some(node) = child.as_node() {
-                        items.push(RbqItem::Union(RbqUnion::lower(node, source)));
+                        items.push(RbqItem::Union(RbqUnion::lower(node, source)))
                     }
                 }
-                RbqSyntaxKind::EnumDef => {
+                RbqTokenType::EnumDef => {
                     if let Some(node) = child.as_node() {
-                        items.push(RbqItem::Enum(RbqEnum::lower(node, source)));
+                        items.push(RbqItem::Enum(RbqEnum::lower(node, source)))
                     }
                 }
-                RbqSyntaxKind::TraitDef => {
+                RbqTokenType::TraitDef => {
                     if let Some(node) = child.as_node() {
-                        items.push(RbqItem::Trait(RbqTrait::lower(node, source)));
+                        items.push(RbqItem::Trait(RbqTrait::lower(node, source)))
                     }
                 }
-                RbqSyntaxKind::TypeDef => {
+                RbqTokenType::TypeDef => {
                     if let Some(node) = child.as_node() {
-                        items.push(RbqItem::TypeAlias(RbqTypeAlias::lower(node, source)));
+                        items.push(RbqItem::TypeAlias(RbqTypeAlias::lower(node, source)))
                     }
                 }
-                RbqSyntaxKind::MicroDef => {
+                RbqTokenType::MicroDef => {
                     if let Some(node) = child.as_node() {
-                        items.push(RbqItem::Micro(RbqMicro::lower(node, source)));
+                        items.push(RbqItem::Micro(RbqMicro::lower(node, source)))
                     }
                 }
-                RbqSyntaxKind::NamespaceDef => {
+                RbqTokenType::NamespaceDef => {
                     if let Some(node) = child.as_node() {
-                        items.push(RbqItem::Namespace(RbqNamespace::lower(node, source)));
+                        items.push(RbqItem::Namespace(RbqNamespace::lower(node, source)))
                     }
                 }
                 _ => {}
@@ -175,7 +171,8 @@ impl RbqNamespace {
     }
 }
 
-#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+#[derive(Clone, Debug, PartialEq)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct RbqUnion {
     pub annotations: Vec<RbqAnnotation>,
     pub name: String,
@@ -190,18 +187,14 @@ impl RbqUnion {
 
         for child in red.children() {
             match child {
-                RedTree::Node(node) => match node.kind::<RbqSyntaxKind>() {
-                    RbqSyntaxKind::Annotation => {
-                        annotations.push(RbqAnnotation::lower(node, source));
-                    }
-                    RbqSyntaxKind::UnionMember | RbqSyntaxKind::EnumMember => {
-                        members.push(RbqUnionMember::lower(node, source));
-                    }
+                RedTree::Node(node) => match node.kind::<RbqTokenType>() {
+                    RbqTokenType::Annotation => annotations.push(RbqAnnotation::lower(node, source)),
+                    RbqTokenType::UnionMember | RbqTokenType::EnumMember => members.push(RbqUnionMember::lower(node, source)),
                     _ => {}
                 },
                 RedTree::Leaf(leaf) => {
-                    if leaf.kind == RbqSyntaxKind::Ident && name.is_empty() {
-                        name = source[leaf.span].trim().to_string();
+                    if leaf.kind == RbqTokenType::Ident && name.is_empty() {
+                        name = source[leaf.span].trim().to_string()
                     }
                 }
             }
@@ -211,7 +204,8 @@ impl RbqUnion {
     }
 }
 
-#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+#[derive(Clone, Debug, PartialEq)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct RbqEnum {
     pub annotations: Vec<RbqAnnotation>,
     pub name: String,
@@ -226,18 +220,14 @@ impl RbqEnum {
 
         for child in red.children() {
             match child {
-                RedTree::Node(node) => match node.kind::<RbqSyntaxKind>() {
-                    RbqSyntaxKind::Annotation => {
-                        annotations.push(RbqAnnotation::lower(node, source));
-                    }
-                    RbqSyntaxKind::EnumMember => {
-                        variants.push(RbqEnumMember::lower(node, source));
-                    }
+                RedTree::Node(node) => match node.kind::<RbqTokenType>() {
+                    RbqTokenType::Annotation => annotations.push(RbqAnnotation::lower(node, source)),
+                    RbqTokenType::EnumMember => variants.push(RbqEnumMember::lower(node, source)),
                     _ => {}
                 },
                 RedTree::Leaf(leaf) => {
-                    if leaf.kind == RbqSyntaxKind::Ident && name.is_empty() {
-                        name = source[leaf.span].trim().to_string();
+                    if leaf.kind == RbqTokenType::Ident && name.is_empty() {
+                        name = source[leaf.span].trim().to_string()
                     }
                 }
             }
@@ -247,7 +237,8 @@ impl RbqEnum {
     }
 }
 
-#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+#[derive(Clone, Debug, PartialEq)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct RbqEnumMember {
     pub annotations: Vec<RbqAnnotation>,
     pub name: String,
@@ -261,16 +252,14 @@ impl RbqEnumMember {
         let mut value = None;
 
         for child in red.children() {
-            match child.kind::<RbqSyntaxKind>() {
-                RbqSyntaxKind::Annotation => {
+            match child.kind::<RbqTokenType>() {
+                RbqTokenType::Annotation => {
                     if let Some(node) = child.as_node() {
-                        annotations.push(RbqAnnotation::lower(node, source));
+                        annotations.push(RbqAnnotation::lower(node, source))
                     }
                 }
-                RbqSyntaxKind::Ident if name.is_empty() => name = source[child.span()].trim().to_string(),
-                RbqSyntaxKind::Literal => {
-                    value = Some(source[child.span()].trim().to_string());
-                }
+                RbqTokenType::Ident if name.is_empty() => name = source[child.span()].trim().to_string(),
+                RbqTokenType::Literal => value = Some(source[child.span()].trim().to_string()),
                 _ => {}
             }
         }
@@ -279,7 +268,8 @@ impl RbqEnumMember {
     }
 }
 
-#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+#[derive(Clone, Debug, PartialEq)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct RbqUnionMember {
     pub annotations: Vec<RbqAnnotation>,
     pub name: String,
@@ -295,26 +285,24 @@ impl RbqUnionMember {
         let mut value = None;
 
         for child in red.children() {
-            match child.kind::<RbqSyntaxKind>() {
-                RbqSyntaxKind::Annotation => {
+            match child.kind::<RbqTokenType>() {
+                RbqTokenType::Annotation => {
                     if let Some(node) = child.as_node() {
-                        annotations.push(RbqAnnotation::lower(node, source));
+                        annotations.push(RbqAnnotation::lower(node, source))
                     }
                 }
-                RbqSyntaxKind::Ident if name.is_empty() => name = source[child.span()].trim().to_string(),
-                RbqSyntaxKind::FieldDef => {
+                RbqTokenType::Ident if name.is_empty() => name = source[child.span()].trim().to_string(),
+                RbqTokenType::FieldDef => {
                     if let Some(node) = child.as_node() {
                         if payload.is_none() {
-                            payload = Some(RbqUnionPayload::Struct(Vec::new()));
+                            payload = Some(RbqUnionPayload::Struct(Vec::new()))
                         }
                         if let Some(RbqUnionPayload::Struct(fields)) = &mut payload {
-                            fields.push(RbqField::lower(node, source));
+                            fields.push(RbqField::lower(node, source))
                         }
                     }
                 }
-                RbqSyntaxKind::Literal => {
-                    value = Some(source[child.span()].trim().to_string());
-                }
+                RbqTokenType::Literal => value = Some(source[child.span()].trim().to_string()),
                 _ => {}
             }
         }
@@ -323,13 +311,15 @@ impl RbqUnionMember {
     }
 }
 
-#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+#[derive(Clone, Debug, PartialEq)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub enum RbqUnionPayload {
     Tuple(Vec<String>),
     Struct(Vec<RbqField>),
 }
 
-#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+#[derive(Clone, Debug, PartialEq)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct RbqTrait {
     pub annotations: Vec<RbqAnnotation>,
     pub name: String,
@@ -343,13 +333,13 @@ impl RbqTrait {
         let items = Vec::new();
 
         for child in red.children() {
-            match child.kind::<RbqSyntaxKind>() {
-                RbqSyntaxKind::Annotation => {
+            match child.kind::<RbqTokenType>() {
+                RbqTokenType::Annotation => {
                     if let Some(node) = child.as_node() {
-                        annotations.push(RbqAnnotation::lower(node, source));
+                        annotations.push(RbqAnnotation::lower(node, source))
                     }
                 }
-                RbqSyntaxKind::Ident if name.is_empty() => name = source[child.span()].trim().to_string(),
+                RbqTokenType::Ident if name.is_empty() => name = source[child.span()].trim().to_string(),
                 _ => {}
             }
         }
@@ -358,7 +348,8 @@ impl RbqTrait {
     }
 }
 
-#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+#[derive(Clone, Debug, PartialEq)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct RbqField {
     pub annotations: Vec<RbqAnnotation>,
     pub name: String,
@@ -374,17 +365,15 @@ impl RbqField {
         let mut default_value = None;
 
         for child in red.children() {
-            match child.kind::<RbqSyntaxKind>() {
-                RbqSyntaxKind::Annotation => {
+            match child.kind::<RbqTokenType>() {
+                RbqTokenType::Annotation => {
                     if let Some(node) = child.as_node() {
-                        annotations.push(RbqAnnotation::lower(node, source));
+                        annotations.push(RbqAnnotation::lower(node, source))
                     }
                 }
-                RbqSyntaxKind::Ident if name.is_empty() => name = source[child.span()].trim().to_string(),
-                RbqSyntaxKind::TypeRef => type_ref = source[child.span()].trim().to_string(),
-                RbqSyntaxKind::Literal => {
-                    default_value = Some(source[child.span()].trim().to_string());
-                }
+                RbqTokenType::Ident if name.is_empty() => name = source[child.span()].trim().to_string(),
+                RbqTokenType::TypeRef => type_ref = source[child.span()].trim().to_string(),
+                RbqTokenType::Literal => default_value = Some(source[child.span()].trim().to_string()),
                 _ => {}
             }
         }
@@ -393,7 +382,8 @@ impl RbqField {
     }
 }
 
-#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+#[derive(Clone, Debug, PartialEq)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct RbqTypeAlias {
     pub annotations: Vec<RbqAnnotation>,
     pub name: String,
@@ -407,14 +397,14 @@ impl RbqTypeAlias {
         let mut type_ref = String::new();
 
         for child in red.children() {
-            match child.kind::<RbqSyntaxKind>() {
-                RbqSyntaxKind::Annotation => {
+            match child.kind::<RbqTokenType>() {
+                RbqTokenType::Annotation => {
                     if let Some(node) = child.as_node() {
-                        annotations.push(RbqAnnotation::lower(node, source));
+                        annotations.push(RbqAnnotation::lower(node, source))
                     }
                 }
-                RbqSyntaxKind::Ident if name.is_empty() => name = source[child.span()].trim().to_string(),
-                RbqSyntaxKind::TypeRef => type_ref = source[child.span()].trim().to_string(),
+                RbqTokenType::Ident if name.is_empty() => name = source[child.span()].trim().to_string(),
+                RbqTokenType::TypeRef => type_ref = source[child.span()].trim().to_string(),
                 _ => {}
             }
         }
@@ -423,7 +413,8 @@ impl RbqTypeAlias {
     }
 }
 
-#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+#[derive(Clone, Debug, PartialEq)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct RbqAnnotation {
     pub name: String,
     pub args: Vec<String>,
@@ -435,15 +426,13 @@ impl RbqAnnotation {
         let mut args = Vec::new();
 
         for child in red.children() {
-            match child.kind::<RbqSyntaxKind>() {
-                RbqSyntaxKind::Ident if name.is_empty() => name = source[child.span()].trim().to_string(),
-                RbqSyntaxKind::AnnotationArgs => {
+            match child.kind::<RbqTokenType>() {
+                RbqTokenType::Ident if name.is_empty() => name = source[child.span()].trim().to_string(),
+                RbqTokenType::AnnotationArgs => {
                     if let Some(node) = child.as_node() {
                         for arg_child in node.children() {
-                            match arg_child.kind::<RbqSyntaxKind>() {
-                                RbqSyntaxKind::Literal | RbqSyntaxKind::MagicVar | RbqSyntaxKind::BinaryExpr | RbqSyntaxKind::MemberExpr | RbqSyntaxKind::CallExpr | RbqSyntaxKind::Ident => {
-                                    args.push(source[arg_child.span()].trim().to_string());
-                                }
+                            match arg_child.kind::<RbqTokenType>() {
+                                RbqTokenType::Literal | RbqTokenType::MagicVar | RbqTokenType::BinaryExpr | RbqTokenType::MemberExpr | RbqTokenType::CallExpr | RbqTokenType::Ident => args.push(source[arg_child.span()].trim().to_string()),
                                 _ => {}
                             }
                         }
@@ -457,11 +446,12 @@ impl RbqAnnotation {
     }
 }
 
-#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+#[derive(Clone, Debug, PartialEq)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct RbqMicro {
     pub name: String,
     pub args: Vec<(String, String)>,
-    #[serde(with = "oak_core::serde_range")]
+    #[cfg_attr(feature = "serde", serde(with = "oak_core::serde_range"))]
     pub span: Range<usize>,
 }
 
@@ -473,17 +463,15 @@ impl RbqMicro {
         let children: Vec<_> = red.children().collect();
         for i in 0..children.len() {
             let child = &children[i];
-            match child.kind::<RbqSyntaxKind>() {
-                RbqSyntaxKind::Ident if name.is_empty() => {
-                    name = source[child.span()].trim().to_string();
-                }
-                RbqSyntaxKind::TypeRef => {
+            match child.kind::<RbqTokenType>() {
+                RbqTokenType::Ident if name.is_empty() => name = source[child.span()].trim().to_string(),
+                RbqTokenType::TypeRef => {
                     if i >= 2 {
                         let prev_sibling = &children[i - 1];
-                        if prev_sibling.kind::<RbqSyntaxKind>() == RbqSyntaxKind::Colon {
+                        if prev_sibling.kind::<RbqTokenType>() == RbqTokenType::Colon {
                             let arg_name_node = &children[i - 2];
-                            if arg_name_node.kind::<RbqSyntaxKind>() == RbqSyntaxKind::Ident {
-                                args.push((source[arg_name_node.span()].trim().to_string(), source[child.span()].trim().to_string()));
+                            if arg_name_node.kind::<RbqTokenType>() == RbqTokenType::Ident {
+                                args.push((source[arg_name_node.span()].trim().to_string(), source[child.span()].trim().to_string()))
                             }
                         }
                     }
@@ -495,14 +483,16 @@ impl RbqMicro {
     }
 }
 
-#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+#[derive(Clone, Debug, PartialEq)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct RbqExpr {
     pub kind: RbqExprKind,
-    #[serde(with = "oak_core::serde_range")]
+    #[cfg_attr(feature = "serde", serde(with = "oak_core::serde_range"))]
     pub span: Range<usize>,
 }
 
-#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+#[derive(Clone, Debug, PartialEq)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub enum RbqExprKind {
     Literal(String),
     Identifier(String),
@@ -515,31 +505,32 @@ pub enum RbqExprKind {
     MagicVar(String), // $, $key, $group
 }
 
-#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+#[derive(Clone, Debug, PartialEq)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct RbqPipelineStep {
     pub name: String,
     pub args: Vec<RbqExpr>,
-    #[serde(with = "oak_core::serde_range")]
+    #[cfg_attr(feature = "serde", serde(with = "oak_core::serde_range"))]
     pub span: Range<usize>,
 }
 
 impl RbqExpr {
     pub fn lower(red: RedNode<RbqLanguage>, source: &str) -> Self {
         let span = red.span();
-        let kind = match red.kind::<RbqSyntaxKind>() {
-            RbqSyntaxKind::Literal => {
+        let kind = match red.kind::<RbqTokenType>() {
+            RbqTokenType::Literal => {
                 let text = source[span.clone()].trim().to_string();
                 RbqExprKind::Literal(text)
             }
-            RbqSyntaxKind::Ident => {
+            RbqTokenType::Ident => {
                 let text = source[span.clone()].trim().to_string();
                 RbqExprKind::Identifier(text)
             }
-            RbqSyntaxKind::MagicVar => {
+            RbqTokenType::MagicVar => {
                 let text = source[span.clone()].trim().to_string();
                 RbqExprKind::MagicVar(text)
             }
-            RbqSyntaxKind::BinaryExpr => {
+            RbqTokenType::BinaryExpr => {
                 let mut left = None;
                 let mut op = String::new();
                 let mut right = None;
@@ -547,51 +538,49 @@ impl RbqExpr {
                     match child {
                         RedTree::Node(node) => {
                             if left.is_none() {
-                                left = Some(Box::new(RbqExpr::lower(node, source)));
+                                left = Some(Box::new(RbqExpr::lower(node, source)))
                             }
                             else {
-                                right = Some(Box::new(RbqExpr::lower(node, source)));
+                                right = Some(Box::new(RbqExpr::lower(node, source)))
                             }
                         }
                         RedTree::Leaf(leaf) => {
                             let k = leaf.kind;
                             if TokenType::role(&k) == oak_core::UniversalTokenRole::Operator {
-                                op = source[leaf.span].trim().to_string();
+                                op = source[leaf.span].trim().to_string()
                             }
                         }
                     }
                 }
                 if let (Some(left), Some(right)) = (left, right) { RbqExprKind::Binary { left, op, right } } else { RbqExprKind::Identifier(source[span.clone()].to_string()) }
             }
-            RbqSyntaxKind::UnaryExpr => {
+            RbqTokenType::UnaryExpr => {
                 let mut op = String::new();
                 let mut expr = None;
                 for child in red.children() {
                     match child {
-                        RedTree::Node(node) => {
-                            expr = Some(Box::new(RbqExpr::lower(node, source)));
-                        }
+                        RedTree::Node(node) => expr = Some(Box::new(RbqExpr::lower(node, source))),
                         RedTree::Leaf(leaf) => {
                             let k = leaf.kind;
                             if TokenType::role(&k) == oak_core::UniversalTokenRole::Operator {
-                                op = source[leaf.span].trim().to_string();
+                                op = source[leaf.span].trim().to_string()
                             }
                         }
                     }
                 }
                 if let Some(expr) = expr { RbqExprKind::Unary { op, expr } } else { RbqExprKind::Identifier(source[span.clone()].to_string()) }
             }
-            RbqSyntaxKind::CallExpr => {
+            RbqTokenType::CallExpr => {
                 let mut callee = None;
                 let mut args = Vec::new();
                 for child in red.children() {
                     match child {
                         RedTree::Node(node) => {
                             if callee.is_none() {
-                                callee = Some(Box::new(RbqExpr::lower(node, source)));
+                                callee = Some(Box::new(RbqExpr::lower(node, source)))
                             }
                             else {
-                                args.push(RbqExpr::lower(node, source));
+                                args.push(RbqExpr::lower(node, source))
                             }
                         }
                         _ => {}
@@ -599,33 +588,29 @@ impl RbqExpr {
                 }
                 if let Some(callee) = callee { RbqExprKind::Call { callee, args } } else { RbqExprKind::Identifier(source[span.clone()].to_string()) }
             }
-            RbqSyntaxKind::MemberExpr => {
+            RbqTokenType::MemberExpr => {
                 let mut object = None;
                 let mut property = String::new();
                 for child in red.children() {
                     match child {
-                        RedTree::Node(node) => {
-                            object = Some(Box::new(RbqExpr::lower(node, source)));
-                        }
-                        RedTree::Leaf(leaf) if leaf.kind == RbqSyntaxKind::Ident => {
-                            property = source[leaf.span].to_string();
-                        }
+                        RedTree::Node(node) => object = Some(Box::new(RbqExpr::lower(node, source))),
+                        RedTree::Leaf(leaf) if leaf.kind == RbqTokenType::Ident => property = source[leaf.span].to_string(),
                         _ => {}
                     }
                 }
                 if let Some(object) = object { RbqExprKind::Member { object, property } } else { RbqExprKind::Identifier(source[span.clone()].to_string()) }
             }
-            RbqSyntaxKind::QueryPipeline => {
+            RbqTokenType::QueryPipeline => {
                 let mut base = None;
                 let mut steps = Vec::new();
                 for child in red.children() {
                     match child {
                         RedTree::Node(node) => {
-                            if node.kind::<RbqSyntaxKind>() == RbqSyntaxKind::PipelineStep {
-                                steps.push(RbqPipelineStep::lower(node, source));
+                            if node.kind::<RbqTokenType>() == RbqTokenType::PipelineStep {
+                                steps.push(RbqPipelineStep::lower(node, source))
                             }
                             else if base.is_none() {
-                                base = Some(Box::new(RbqExpr::lower(node, source)));
+                                base = Some(Box::new(RbqExpr::lower(node, source)))
                             }
                         }
                         _ => {}
@@ -633,17 +618,17 @@ impl RbqExpr {
                 }
                 if let Some(base) = base { RbqExprKind::Pipeline { base, steps } } else { RbqExprKind::Identifier(source[span.clone()].to_string()) }
             }
-            RbqSyntaxKind::Closure => {
+            RbqTokenType::Closure => {
                 let mut args = Vec::new();
                 let mut body = None;
                 for child in red.children() {
                     match child {
-                        RedTree::Node(node) => match node.kind::<RbqSyntaxKind>() {
-                            RbqSyntaxKind::ClosureArgs => {
+                        RedTree::Node(node) => match node.kind::<RbqTokenType>() {
+                            RbqTokenType::ClosureArgs => {
                                 for arg in node.children() {
                                     if let RedTree::Leaf(leaf) = arg {
-                                        if leaf.kind == RbqSyntaxKind::Ident {
-                                            args.push(source[leaf.span].to_string());
+                                        if leaf.kind == RbqTokenType::Ident {
+                                            args.push(source[leaf.span].to_string())
                                         }
                                     }
                                 }
@@ -655,14 +640,9 @@ impl RbqExpr {
                 }
                 if let Some(body) = body { RbqExprKind::Closure { args, body } } else { RbqExprKind::Identifier(source[span.clone()].to_string()) }
             }
-            RbqSyntaxKind::Expression => {
+            RbqTokenType::Expression => {
                 let first_node = red.children().find_map(|c| c.as_node());
-                if let Some(node) = first_node {
-                    return Self::lower(node, source);
-                }
-                else {
-                    RbqExprKind::Identifier(source[span.clone()].to_string())
-                }
+                if let Some(node) = first_node { return Self::lower(node, source) } else { RbqExprKind::Identifier(source[span.clone()].to_string()) }
             }
             _ => RbqExprKind::Identifier(source[span.clone()].to_string()),
         };
@@ -678,12 +658,8 @@ impl RbqPipelineStep {
         let mut args = Vec::new();
         for child in red.children() {
             match child {
-                RedTree::Node(node) => {
-                    args.push(RbqExpr::lower(node, source));
-                }
-                RedTree::Leaf(leaf) if leaf.kind == RbqSyntaxKind::Ident && name.is_empty() => {
-                    name = source[leaf.span].to_string();
-                }
+                RedTree::Node(node) => args.push(RbqExpr::lower(node, source)),
+                RedTree::Leaf(leaf) if leaf.kind == RbqTokenType::Ident && name.is_empty() => name = source[leaf.span].to_string(),
                 _ => {}
             }
         }

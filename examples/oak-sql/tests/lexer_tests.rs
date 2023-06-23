@@ -22,7 +22,7 @@ fn test_sql_lexer_basic_tokens() {
     assert!(token_kinds.contains(&SqlSyntaxKind::Where));
     assert!(token_kinds.contains(&SqlSyntaxKind::Equal));
     assert!(token_kinds.contains(&SqlSyntaxKind::NumberLiteral));
-    assert!(token_kinds.contains(&SqlSyntaxKind::Semicolon));
+    assert!(token_kinds.contains(&SqlSyntaxKind::Semicolon))
 }
 
 #[test]
@@ -42,7 +42,7 @@ fn test_sql_lexer_insert() {
     assert!(token_kinds.contains(&SqlSyntaxKind::Into));
     assert!(token_kinds.contains(&SqlSyntaxKind::Values));
     assert!(token_kinds.contains(&SqlSyntaxKind::LeftParen));
-    assert!(token_kinds.contains(&SqlSyntaxKind::RightParen));
+    assert!(token_kinds.contains(&SqlSyntaxKind::RightParen))
 }
 
 #[test]
@@ -62,7 +62,7 @@ fn test_sql_lexer_keywords() {
     assert!(token_kinds.contains(&SqlSyntaxKind::Table));
     assert!(token_kinds.contains(&SqlSyntaxKind::Int));
     assert!(token_kinds.contains(&SqlSyntaxKind::Primary));
-    assert!(token_kinds.contains(&SqlSyntaxKind::Key));
+    assert!(token_kinds.contains(&SqlSyntaxKind::Key))
 }
 
 #[test]
@@ -78,5 +78,5 @@ fn test_sql_lexer_strings() {
     let tokens = result.result.unwrap();
     let string_tokens: Vec<_> = tokens.iter().filter(|t| t.kind == SqlSyntaxKind::StringLiteral).collect();
 
-    assert_eq!(string_tokens.len(), 2);
+    assert_eq!(string_tokens.len(), 2)
 }

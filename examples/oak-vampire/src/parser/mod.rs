@@ -1,4 +1,10 @@
-use crate::{kind::VampireSyntaxKind, language::VampireLanguage, lexer::VampireLexer};
+pub mod element_type;
+
+use crate::{
+    language::VampireLanguage,
+    lexer::{VampireLexer, token_type::VampireTokenType},
+    parser::element_type::VampireElementType,
+};
 use oak_core::{
     GreenNode, OakError,
     parser::{ParseCache, ParseOutput, Parser, ParserState, parse_with_lexer},
@@ -20,10 +26,10 @@ impl<'config> VampireParser<'config> {
         let checkpoint = state.checkpoint();
 
         while state.not_at_end() {
-            state.bump();
+            state.bump()
         }
 
-        let root = state.finish_at(checkpoint, VampireSyntaxKind::Root.into());
+        let root = state.finish_at(checkpoint, crate::parser::element_type::VampireElementType::Root);
         Ok(root)
     }
 }

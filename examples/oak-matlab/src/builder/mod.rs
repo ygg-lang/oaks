@@ -17,15 +17,15 @@ impl<'config> MatlabBuilder<'config> {
         for child in red_root.children() {
             if let oak_core::tree::RedTree::Node(node) = child {
                 if let Some(item) = self.build_item(&node, source) {
-                    items.push(item);
+                    items.push(item)
                 }
             }
         }
         Ok(MatlabRoot { items })
     }
 
-    pub fn build_item(&self, node: &oak_core::RedNode<MatlabLanguage>, source: &SourceText) -> Option<Item> {
-        use crate::kind::MatlabSyntaxKind::*;
+    pub fn build_item(&self, node: &oak_core::tree::RedNode<MatlabLanguage>, source: &SourceText) -> Option<Item> {
+        use crate::MatlabElementType::*;
         let kind = node.green.kind;
 
         match kind {

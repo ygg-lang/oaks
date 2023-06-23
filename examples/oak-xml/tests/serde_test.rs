@@ -3,7 +3,7 @@ use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Serialize, Deserialize, PartialEq)]
 struct Project {
-    #[serde(rename = "@name")]
+    #[serde(rename = "↯name")]
     name: String,
     version: String,
     dependencies: Dependencies,
@@ -61,5 +61,5 @@ fn test_from_xml_string() {
     assert_eq!(project.name, "oak");
     assert_eq!(project.version, "0.1.0");
     assert_eq!(project.dependencies.items.len(), 1);
-    assert_eq!(project.dependencies.items[0].name, "serde");
+    assert_eq!(project.dependencies.items[0].name, "serde")
 }

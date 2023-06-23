@@ -18,7 +18,7 @@ fn test_rust_lexer() -> Result<(), oak_core::OakError> {
 fn test_rust_parser() -> Result<(), oak_core::OakError> {
     let here = Path::new(env!("CARGO_MANIFEST_DIR"));
     let language = RustLanguage::default();
-    let parser = RustParser::new(language);
+    let parser = RustParser::new(&language);
     // don't use `rs` here to avoid confusion with Rust source files
     let test_runner = ParserTester::new(here.join("tests/files")).with_extension("rust").with_timeout(Duration::from_secs(5));
     test_runner.run_tests(&parser)
@@ -28,7 +28,7 @@ fn test_rust_parser() -> Result<(), oak_core::OakError> {
 fn test_rust_builder() -> Result<(), oak_core::OakError> {
     let here = Path::new(env!("CARGO_MANIFEST_DIR"));
     let language = RustLanguage::default();
-    let builder = RustBuilder::new(language);
+    let builder = RustBuilder::new(&language);
     // don't use `rs` here to avoid confusion with Rust source files
     let test_runner = BuilderTester::new(here.join("tests/files")).with_extension("rust").with_timeout(Duration::from_secs(5));
     test_runner.run_tests(&builder)

@@ -88,7 +88,7 @@
         },
         {
             "kind": "GlobalVar",
-            "text": "@main",
+            "text": "↯main",
             "start": 277,
             "end": 282
         },

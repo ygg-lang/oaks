@@ -1,14 +1,17 @@
+#![doc = include_str!("readme.md")]
 use oak_core::language::{Language, LanguageCategory};
+#[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
 
-/// Scss 语言实现
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+/// Scss language implementation.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct ScssLanguage {
-    // Scss 语言特有的配置，目前为空
+    // Scss language-specific configuration, currently empty.
 }
 
 impl ScssLanguage {
-    /// 创建 Scss 语言实例
+    /// Creates a Scss language instance.
     pub fn new() -> Self {
         Self {}
     }
@@ -24,7 +27,7 @@ impl Language for ScssLanguage {
     const NAME: &'static str = "scss";
     const CATEGORY: LanguageCategory = LanguageCategory::Programming;
 
-    type TokenType = crate::kind::ScssSyntaxKind;
-    type ElementType = crate::kind::ScssSyntaxKind;
+    type TokenType = crate::lexer::token_type::ScssTokenType;
+    type ElementType = crate::parser::element_type::ScssElementType;
     type TypedRoot = ();
 }

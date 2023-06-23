@@ -1,0 +1,15 @@
+[package]
+name = "oak-c4"
+version.workspace = true
+authors.workspace = true
+description = "C4 Model semantic model for Oak"
+edition.workspace = true
+license.workspace = true
+
+[dependencies]
+oak-core = { workspace = true }
+serde = { workspace = true, optional = true }
+
+[features]
+default = ["serde"]
+serde = ["dep:serde", "oak-core/serde"]

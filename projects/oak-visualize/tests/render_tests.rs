@@ -36,6 +36,8 @@ fn test_render_simple_layout() {
     let svg = result.unwrap();
     assert!(svg.contains("rect"));
     assert!(svg.contains("test"));
+    assert!(svg.contains("x=\"10\""));
+    assert!(svg.contains("y=\"20\""));
 }
 
 #[test]

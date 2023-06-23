@@ -1,3 +1,4 @@
+#![doc = include_str!("readme.md")]
 pub mod token_type;
 use crate::language::CrystalLanguage;
 use oak_core::{Lexer, LexerCache, LexerState, OakError, TextEdit, lexer::LexOutput, source::Source};
@@ -17,7 +18,7 @@ impl<'config> Lexer<CrystalLanguage> for CrystalLexer<'config> {
         let mut state = LexerState::new(source);
         let result = self.run(&mut state);
         if result.is_ok() {
-            state.add_eof();
+            state.add_eof()
         }
         state.finish_with_cache(result, &mut cache)
     }
@@ -69,10 +70,10 @@ impl<'config> CrystalLexer<'config> {
             let start_pos = state.get_position();
             if let Some(ch) = state.peek() {
                 state.advance(ch.len_utf8());
-                state.add_token(CrystalTokenType::Error, start_pos, state.get_position());
+                state.add_token(CrystalTokenType::Error, start_pos, state.get_position())
             }
 
-            state.advance_if_dead_lock(safe_point);
+            state.advance_if_dead_lock(safe_point)
         }
 
         Ok(())
@@ -83,12 +84,7 @@ impl<'config> CrystalLexer<'config> {
         let start_pos = state.get_position();
 
         while let Some(ch) = state.peek() {
-            if ch == ' ' || ch == '\t' {
-                state.advance(ch.len_utf8());
-            }
-            else {
-                break;
-            }
+            if ch == ' ' || ch == '\t' { state.advance(ch.len_utf8()) } else { break }
         }
 
         if state.get_position() > start_pos {
@@ -112,7 +108,7 @@ impl<'config> CrystalLexer<'config> {
         else if let Some('\r') = state.peek() {
             state.advance(1);
             if let Some('\n') = state.peek() {
-                state.advance(1);
+                state.advance(1)
             }
             state.add_token(CrystalTokenType::Newline, start_pos, state.get_position());
             true
@@ -134,7 +130,7 @@ impl<'config> CrystalLexer<'config> {
                 if ch == '\n' || ch == '\r' {
                     break;
                 }
-                state.advance(ch.len_utf8());
+                state.advance(ch.len_utf8())
             }
 
             state.add_token(CrystalTokenType::Comment, start_pos, state.get_position());
@@ -161,11 +157,11 @@ impl<'config> CrystalLexer<'config> {
                     else if ch == '\\' {
                         state.advance(1);
                         if let Some(_) = state.peek() {
-                            state.advance(1);
+                            state.advance(1)
                         }
                     }
                     else {
-                        state.advance(ch.len_utf8());
+                        state.advance(ch.len_utf8())
                     }
                 }
 
@@ -190,12 +186,7 @@ impl<'config> CrystalLexer<'config> {
                 state.advance(1);
 
                 while let Some(ch) = state.peek() {
-                    if ch.is_ascii_digit() || ch == '.' || ch == '_' {
-                        state.advance(1);
-                    }
-                    else {
-                        break;
-                    }
+                    if ch.is_ascii_digit() || ch == '.' || ch == '_' { state.advance(1) } else { break }
                 }
 
                 state.add_token(CrystalTokenType::Number, start_pos, state.get_position());
@@ -219,12 +210,7 @@ impl<'config> CrystalLexer<'config> {
                 state.advance(ch.len_utf8());
 
                 while let Some(ch) = state.peek() {
-                    if ch.is_ascii_alphanumeric() || ch == '_' || ch == '?' || ch == '!' {
-                        state.advance(ch.len_utf8());
-                    }
-                    else {
-                        break;
-                    }
+                    if ch.is_ascii_alphanumeric() || ch == '_' || ch == '?' || ch == '!' { state.advance(ch.len_utf8()) } else { break }
                 }
 
                 let end_pos = state.get_position();

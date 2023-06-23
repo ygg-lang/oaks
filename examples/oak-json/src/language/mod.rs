@@ -1,40 +1,43 @@
+#![doc = include_str!("readme.md")]
 use oak_core::language::{Language, LanguageCategory};
+#[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
 
-/// JSON 语言实现
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
+/// JSON language implementation
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct JsonLanguage {
-    /// 是否允许尾随逗号
+    /// Whether to allow trailing commas in objects and arrays
     pub trailing_comma: bool,
-    /// 是否允许裸键（不带引号的键）
+    /// Whether to allow bare keys (unquoted keys) in objects
     pub bare_keys: bool,
-    /// 是否允许单引号字符串
+    /// Whether to allow single-quoted strings
     pub single_quotes: bool,
-    /// 是否允许注释
+    /// Whether to allow comments (both line and block)
     pub comments: bool,
-    /// 是否允许十六进制数字
+    /// Whether to allow hexadecimal numbers (e.g., 0xDEADBEEF)
     pub hex_numbers: bool,
-    /// 是否允许无穷大和 NaN
+    /// Whether to allow Infinity, -Infinity, and NaN
     pub infinity_and_nan: bool,
 }
 
 impl JsonLanguage {
-    /// 创建新的 JSON 语言实例
+    /// Creates a new JSON language instance with default settings.
     pub fn new() -> Self {
         Self::default()
     }
 
-    /// 创建标准 JSON 语言实例
+    /// Creates a standard JSON language instance (no extensions).
     pub fn standard() -> Self {
         Self::default()
     }
 
-    /// 创建 JSON5 语言实例
+    /// Creates a JSON5 language instance with all extensions enabled.
     pub fn json5() -> Self {
         Self { trailing_comma: true, bare_keys: true, single_quotes: true, comments: true, hex_numbers: true, infinity_and_nan: true }
     }
 
-    /// 创建宽松 JSON 语言实例
+    /// Creates a relaxed JSON language instance with all extensions enabled.
     pub fn relaxed() -> Self {
         Self { trailing_comma: true, bare_keys: true, single_quotes: true, comments: true, hex_numbers: true, infinity_and_nan: true }
     }
@@ -50,7 +53,7 @@ impl Language for JsonLanguage {
     const NAME: &'static str = "json";
     const CATEGORY: LanguageCategory = LanguageCategory::Config;
 
-    type TokenType = crate::kind::JsonSyntaxKind;
-    type ElementType = crate::kind::JsonSyntaxKind;
+    type TokenType = crate::lexer::token_type::JsonTokenType;
+    type ElementType = crate::parser::element_type::JsonElementType;
     type TypedRoot = crate::ast::JsonRoot;
 }

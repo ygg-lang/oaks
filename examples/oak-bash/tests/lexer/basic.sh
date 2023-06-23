@@ -15,7 +15,7 @@ readonly LOG_FILE="/tmp/test.log"
 
 # Arrays and loops
 fruits=("apple" "banana" "orange")
-for fruit in "${fruits[@]}"; do
+for fruit in "${fruits[↯]}"; do
     echo "Processing $fruit"
 done
 

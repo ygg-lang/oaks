@@ -1,4 +1,7 @@
-use crate::{kind::JavadocSyntaxKind, language::JavadocLanguage};
+#![doc = include_str!("readme.md")]
+pub mod token_type;
+
+use crate::{language::JavadocLanguage, lexer::token_type::JavadocTokenType};
 
 use oak_core::{Lexer, LexerCache, LexerState, lexer::LexOutput, source::Source};
 
@@ -21,16 +24,11 @@ impl<'config> JavadocLexer<'config> {
         let start_pos = state.get_position();
 
         while let Some(ch) = state.peek() {
-            if ch == ' ' || ch == '\t' {
-                state.advance(ch.len_utf8());
-            }
-            else {
-                break;
-            }
+            if ch == ' ' || ch == '\t' { state.advance(ch.len_utf8()) } else { break }
         }
 
         if state.get_position() > start_pos {
-            state.add_token(JavadocSyntaxKind::Whitespace, start_pos, state.get_position());
+            state.add_token(JavadocTokenType::Whitespace, start_pos, state.get_position());
             true
         }
         else {
@@ -44,15 +42,15 @@ impl<'config> JavadocLexer<'config> {
 
         if let Some('\n') = state.peek() {
             state.advance(1);
-            state.add_token(JavadocSyntaxKind::Newline, start_pos, state.get_position());
+            state.add_token(JavadocTokenType::Newline, start_pos, state.get_position());
             true
         }
         else if let Some('\r') = state.peek() {
             state.advance(1);
             if let Some('\n') = state.peek() {
-                state.advance(1);
+                state.advance(1)
             }
-            state.add_token(JavadocSyntaxKind::Newline, start_pos, state.get_position());
+            state.add_token(JavadocTokenType::Newline, start_pos, state.get_position());
             true
         }
         else {
@@ -70,7 +68,7 @@ impl<'config> JavadocLexer<'config> {
                 state.advance(1);
                 if let Some('*') = state.peek() {
                     state.advance(1);
-                    state.add_token(JavadocSyntaxKind::CommentStart, start_pos, state.get_position());
+                    state.add_token(JavadocTokenType::CommentStart, start_pos, state.get_position());
                     true
                 }
                 else {
@@ -98,7 +96,7 @@ impl<'config> JavadocLexer<'config> {
             state.advance(1);
             if let Some('/') = state.peek() {
                 state.advance(1);
-                state.add_token(JavadocSyntaxKind::CommentEnd, start_pos, state.get_position());
+                state.add_token(JavadocTokenType::CommentEnd, start_pos, state.get_position());
                 true
             }
             else {
@@ -123,7 +121,7 @@ impl<'config> JavadocLexer<'config> {
             while let Some(ch) = state.peek() {
                 if ch.is_alphabetic() || ch == '_' {
                     text.push(ch);
-                    state.advance(ch.len_utf8());
+                    state.advance(ch.len_utf8())
                 }
                 else {
                     break;
@@ -132,22 +130,22 @@ impl<'config> JavadocLexer<'config> {
 
             // 检查是否为已知 Javadoc 标签
             let kind = match text.as_str() {
-                "param" => JavadocSyntaxKind::ParamTag,
-                "return" => JavadocSyntaxKind::ReturnTag,
-                "throws" => JavadocSyntaxKind::ThrowsTag,
-                "exception" => JavadocSyntaxKind::ExceptionTag,
-                "see" => JavadocSyntaxKind::SeeTag,
-                "since" => JavadocSyntaxKind::SinceTag,
-                "version" => JavadocSyntaxKind::VersionTag,
-                "author" => JavadocSyntaxKind::AuthorTag,
-                "deprecated" => JavadocSyntaxKind::DeprecatedTag,
-                "link" => JavadocSyntaxKind::LinkTag,
-                "linkplain" => JavadocSyntaxKind::LinkPlainTag,
-                "code" => JavadocSyntaxKind::CodeTag,
-                "literal" => JavadocSyntaxKind::LiteralTag,
-                "value" => JavadocSyntaxKind::ValueTag,
-                "inheritDoc" => JavadocSyntaxKind::InheritDocTag,
-                _ => JavadocSyntaxKind::Tag,
+                "param" => JavadocTokenType::ParamTag,
+                "return" => JavadocTokenType::ReturnTag,
+                "throws" => JavadocTokenType::ThrowsTag,
+                "exception" => JavadocTokenType::ExceptionTag,
+                "see" => JavadocTokenType::SeeTag,
+                "since" => JavadocTokenType::SinceTag,
+                "version" => JavadocTokenType::VersionTag,
+                "author" => JavadocTokenType::AuthorTag,
+                "deprecated" => JavadocTokenType::DeprecatedTag,
+                "link" => JavadocTokenType::LinkTag,
+                "linkplain" => JavadocTokenType::LinkPlainTag,
+                "code" => JavadocTokenType::CodeTag,
+                "literal" => JavadocTokenType::LiteralTag,
+                "value" => JavadocTokenType::ValueTag,
+                "inheritDoc" => JavadocTokenType::InheritDocTag,
+                _ => JavadocTokenType::Tag,
             };
 
             state.add_token(kind, start_pos, state.get_position());
@@ -169,7 +167,7 @@ impl<'config> JavadocLexer<'config> {
             // 检查是否为闭合标签
             if let Some('/') = state.peek() {
                 is_closing = true;
-                state.advance(1);
+                state.advance(1)
             }
 
             // 读取标签
@@ -177,7 +175,7 @@ impl<'config> JavadocLexer<'config> {
             while let Some(ch) = state.peek() {
                 if ch.is_alphabetic() || ch.is_ascii_digit() || ch == '-' {
                     tag_name.push(ch);
-                    state.advance(ch.len_utf8());
+                    state.advance(ch.len_utf8())
                 }
                 else {
                     break;
@@ -196,27 +194,27 @@ impl<'config> JavadocLexer<'config> {
                     return false;
                 }
                 else {
-                    state.advance(ch.len_utf8());
+                    state.advance(ch.len_utf8())
                 }
             }
 
             let kind = if is_closing {
-                JavadocSyntaxKind::HtmlEndTag
+                JavadocTokenType::HtmlEndTag
             }
             else {
                 match tag_name.as_str() {
-                    "p" => JavadocSyntaxKind::HtmlPTag,
-                    "br" => JavadocSyntaxKind::HtmlBrTag,
-                    "code" => JavadocSyntaxKind::HtmlCodeTag,
-                    "pre" => JavadocSyntaxKind::HtmlPreTag,
-                    "b" => JavadocSyntaxKind::HtmlBTag,
-                    "i" => JavadocSyntaxKind::HtmlITag,
-                    "em" => JavadocSyntaxKind::HtmlEmTag,
-                    "strong" => JavadocSyntaxKind::HtmlStrongTag,
-                    "ul" => JavadocSyntaxKind::HtmlUlTag,
-                    "ol" => JavadocSyntaxKind::HtmlOlTag,
-                    "li" => JavadocSyntaxKind::HtmlLiTag,
-                    _ => JavadocSyntaxKind::HtmlTag,
+                    "p" => JavadocTokenType::HtmlPTag,
+                    "br" => JavadocTokenType::HtmlBrTag,
+                    "code" => JavadocTokenType::HtmlCodeTag,
+                    "pre" => JavadocTokenType::HtmlPreTag,
+                    "b" => JavadocTokenType::HtmlBTag,
+                    "i" => JavadocTokenType::HtmlITag,
+                    "em" => JavadocTokenType::HtmlEmTag,
+                    "strong" => JavadocTokenType::HtmlStrongTag,
+                    "ul" => JavadocTokenType::HtmlUlTag,
+                    "ol" => JavadocTokenType::HtmlOlTag,
+                    "li" => JavadocTokenType::HtmlLiTag,
+                    _ => JavadocTokenType::HtmlTag,
                 }
             };
 
@@ -236,11 +234,11 @@ impl<'config> JavadocLexer<'config> {
             if ch == '@' || ch == '<' || ch == '*' || ch == '/' || ch == '\n' || ch == '\r' || ch == ' ' || ch == '\t' {
                 break;
             }
-            state.advance(ch.len_utf8());
+            state.advance(ch.len_utf8())
         }
 
         if state.get_position() > start_pos {
-            state.add_token(JavadocSyntaxKind::Text, start_pos, state.get_position());
+            state.add_token(JavadocTokenType::Text, start_pos, state.get_position());
             true
         }
         else {
@@ -254,7 +252,7 @@ impl<'config> JavadocLexer<'config> {
 
         if let Some('*') = state.peek() {
             state.advance(1);
-            state.add_token(JavadocSyntaxKind::Asterisk, start_pos, state.get_position());
+            state.add_token(JavadocTokenType::Asterisk, start_pos, state.get_position());
             true
         }
         else {
@@ -268,7 +266,7 @@ impl<'config> Lexer<JavadocLanguage> for JavadocLexer<'config> {
         let mut state = State::new(source);
         let result = self.run(&mut state);
         if result.is_ok() {
-            state.add_eof();
+            state.add_eof()
         }
         state.finish_with_cache(result, cache)
     }
@@ -318,10 +316,10 @@ impl<'config> JavadocLexer<'config> {
                 // 跳过当前字符并标记为错误
                 let start_pos = state.get_position();
                 state.advance(ch.len_utf8());
-                state.add_token(JavadocSyntaxKind::Error, start_pos, state.get_position());
+                state.add_token(JavadocTokenType::Error, start_pos, state.get_position())
             }
 
-            state.advance_if_dead_lock(safe_point);
+            state.advance_if_dead_lock(safe_point)
         }
 
         Ok(())

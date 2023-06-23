@@ -1,8 +1,14 @@
-use crate::{kind::PhpSyntaxKind, language::PhpLanguage};
+#![doc = include_str!("readme.md")]
+pub mod token_type;
+use crate::language::PhpLanguage;
 use oak_core::{Lexer, LexerCache, LexerState, OakError, lexer::LexOutput, source::Source};
+pub use token_type::{PhpToken, PhpTokenType};
 
 type State<'s, S> = LexerState<'s, S, PhpLanguage>;
 
+/// Lexer for the PHP language.
+///
+/// This lexer transforms a source string into a stream of [`PhpTokenType`] tokens.
 #[derive(Clone, Debug)]
 pub struct PhpLexer<'config> {
     _config: &'config PhpLanguage,
@@ -20,6 +26,7 @@ impl<'config> Lexer<PhpLanguage> for PhpLexer<'config> {
 }
 
 impl<'config> PhpLexer<'config> {
+    /// Creates a new `PhpLexer` with the given language configuration.
     pub fn new(config: &'config PhpLanguage) -> Self {
         Self { _config: config }
     }
@@ -58,7 +65,7 @@ impl<'config> PhpLexer<'config> {
             if let Some(ch) = state.peek() {
                 let start_pos = state.get_position();
                 state.advance(ch.len_utf8());
-                state.add_token(PhpSyntaxKind::Error, start_pos, state.get_position());
+                state.add_token(PhpTokenType::Error, start_pos, state.get_position())
             }
             else {
                 // 如果已到达文件末尾，退出循环
@@ -74,7 +81,7 @@ impl<'config> PhpLexer<'config> {
 
         while let Some(ch) = state.peek() {
             if ch == ' ' || ch == '\t' {
-                state.advance(ch.len_utf8());
+                state.advance(ch.len_utf8())
             }
             else {
                 break;
@@ -82,7 +89,7 @@ impl<'config> PhpLexer<'config> {
         }
 
         if state.get_position() > start_pos {
-            state.add_token(PhpSyntaxKind::Whitespace, start_pos, state.get_position());
+            state.add_token(PhpTokenType::Whitespace, start_pos, state.get_position());
             true
         }
         else {
@@ -95,15 +102,15 @@ impl<'config> PhpLexer<'config> {
 
         if let Some('\n') = state.peek() {
             state.advance(1);
-            state.add_token(PhpSyntaxKind::Newline, start_pos, state.get_position());
+            state.add_token(PhpTokenType::Newline, start_pos, state.get_position());
             true
         }
         else if let Some('\r') = state.peek() {
             state.advance(1);
             if let Some('\n') = state.peek() {
-                state.advance(1);
+                state.advance(1)
             }
-            state.add_token(PhpSyntaxKind::Newline, start_pos, state.get_position());
+            state.add_token(PhpTokenType::Newline, start_pos, state.get_position());
             true
         }
         else {
@@ -123,9 +130,9 @@ impl<'config> PhpLexer<'config> {
                     if ch == '\n' || ch == '\r' {
                         break;
                     }
-                    state.advance(ch.len_utf8());
+                    state.advance(ch.len_utf8())
                 }
-                state.add_token(PhpSyntaxKind::Comment, start_pos, state.get_position());
+                state.add_token(PhpTokenType::Comment, start_pos, state.get_position());
                 return true;
             }
             else if let Some('*') = state.peek() {
@@ -140,10 +147,10 @@ impl<'config> PhpLexer<'config> {
                         }
                     }
                     else {
-                        state.advance(ch.len_utf8());
+                        state.advance(ch.len_utf8())
                     }
                 }
-                state.add_token(PhpSyntaxKind::Comment, start_pos, state.get_position());
+                state.add_token(PhpTokenType::Comment, start_pos, state.get_position());
                 return true;
             }
             else {
@@ -159,9 +166,9 @@ impl<'config> PhpLexer<'config> {
                 if ch == '\n' || ch == '\r' {
                     break;
                 }
-                state.advance(ch.len_utf8());
+                state.advance(ch.len_utf8())
             }
-            state.add_token(PhpSyntaxKind::Comment, start_pos, state.get_position());
+            state.add_token(PhpTokenType::Comment, start_pos, state.get_position());
             true
         }
         else {
@@ -180,11 +187,11 @@ impl<'config> PhpLexer<'config> {
                 while let Some(ch) = state.peek() {
                     if escaped {
                         escaped = false;
-                        state.advance(ch.len_utf8());
+                        state.advance(ch.len_utf8())
                     }
                     else if ch == '\\' {
                         escaped = true;
-                        state.advance(1);
+                        state.advance(1)
                     }
                     else if ch == quote_char {
                         state.advance(1); // 跳过结束引号
@@ -195,11 +202,11 @@ impl<'config> PhpLexer<'config> {
                         break;
                     }
                     else {
-                        state.advance(ch.len_utf8());
+                        state.advance(ch.len_utf8())
                     }
                 }
 
-                state.add_token(PhpSyntaxKind::StringLiteral, start_pos, state.get_position());
+                state.add_token(PhpTokenType::StringLiteral, start_pos, state.get_position());
                 true
             }
             else {
@@ -219,7 +226,7 @@ impl<'config> PhpLexer<'config> {
                 // 读取整数部分
                 while let Some(ch) = state.peek() {
                     if ch.is_ascii_digit() {
-                        state.advance(1);
+                        state.advance(1)
                     }
                     else {
                         break;
@@ -232,7 +239,7 @@ impl<'config> PhpLexer<'config> {
                     // 读取小数部分
                     while let Some(ch) = state.peek() {
                         if ch.is_ascii_digit() {
-                            state.advance(1);
+                            state.advance(1)
                         }
                         else {
                             break;
@@ -246,12 +253,12 @@ impl<'config> PhpLexer<'config> {
                         state.advance(1);
                         if let Some(ch) = state.peek() {
                             if ch == '+' || ch == '-' {
-                                state.advance(1);
+                                state.advance(1)
                             }
                         }
                         while let Some(ch) = state.peek() {
                             if ch.is_ascii_digit() {
-                                state.advance(1);
+                                state.advance(1)
                             }
                             else {
                                 break;
@@ -260,7 +267,7 @@ impl<'config> PhpLexer<'config> {
                     }
                 }
 
-                state.add_token(PhpSyntaxKind::NumberLiteral, start_pos, state.get_position());
+                state.add_token(PhpTokenType::NumberLiteral, start_pos, state.get_position());
                 true
             }
             else {
@@ -280,7 +287,7 @@ impl<'config> PhpLexer<'config> {
                 // 读取标识符
                 while let Some(ch) = state.peek() {
                     if ch.is_alphanumeric() || ch == '_' || ch == '$' {
-                        state.advance(ch.len_utf8());
+                        state.advance(ch.len_utf8())
                     }
                     else {
                         break;
@@ -292,76 +299,76 @@ impl<'config> PhpLexer<'config> {
 
                 // 检查是否是关键字
                 let kind = match text.as_ref() {
-                    "abstract" => PhpSyntaxKind::Abstract,
-                    "and" => PhpSyntaxKind::And,
-                    "array" => PhpSyntaxKind::Array,
-                    "as" => PhpSyntaxKind::As,
-                    "break" => PhpSyntaxKind::Break,
-                    "callable" => PhpSyntaxKind::Callable,
-                    "case" => PhpSyntaxKind::Case,
-                    "catch" => PhpSyntaxKind::Catch,
-                    "class" => PhpSyntaxKind::Class,
-                    "clone" => PhpSyntaxKind::Clone,
-                    "const" => PhpSyntaxKind::Const,
-                    "continue" => PhpSyntaxKind::Continue,
-                    "declare" => PhpSyntaxKind::Declare,
-                    "default" => PhpSyntaxKind::Default,
-                    "die" => PhpSyntaxKind::Exit,
-                    "do" => PhpSyntaxKind::Do,
-                    "echo" => PhpSyntaxKind::Echo,
-                    "else" => PhpSyntaxKind::Else,
-                    "elseif" => PhpSyntaxKind::Elseif,
-                    "empty" => PhpSyntaxKind::Empty,
-                    "enddeclare" => PhpSyntaxKind::Enddeclare,
-                    "endfor" => PhpSyntaxKind::Endfor,
-                    "endforeach" => PhpSyntaxKind::Endforeach,
-                    "endif" => PhpSyntaxKind::Endif,
-                    "endswitch" => PhpSyntaxKind::Endswitch,
-                    "endwhile" => PhpSyntaxKind::Endwhile,
-                    "eval" => PhpSyntaxKind::Eval,
-                    "exit" => PhpSyntaxKind::Exit,
-                    "extends" => PhpSyntaxKind::Extends,
-                    "final" => PhpSyntaxKind::Final,
-                    "finally" => PhpSyntaxKind::Finally,
-                    "for" => PhpSyntaxKind::For,
-                    "foreach" => PhpSyntaxKind::Foreach,
-                    "function" => PhpSyntaxKind::Function,
-                    "global" => PhpSyntaxKind::Global,
-                    "goto" => PhpSyntaxKind::Goto,
-                    "if" => PhpSyntaxKind::If,
-                    "implements" => PhpSyntaxKind::Implements,
-                    "include" => PhpSyntaxKind::Include,
-                    "include_once" => PhpSyntaxKind::IncludeOnce,
-                    "instanceof" => PhpSyntaxKind::Instanceof,
-                    "insteadof" => PhpSyntaxKind::Insteadof,
-                    "interface" => PhpSyntaxKind::Interface,
-                    "isset" => PhpSyntaxKind::Isset,
-                    "list" => PhpSyntaxKind::List,
-                    "namespace" => PhpSyntaxKind::Namespace,
-                    "new" => PhpSyntaxKind::New,
-                    "or" => PhpSyntaxKind::Or,
-                    "print" => PhpSyntaxKind::Print,
-                    "private" => PhpSyntaxKind::Private,
-                    "protected" => PhpSyntaxKind::Protected,
-                    "public" => PhpSyntaxKind::Public,
-                    "require" => PhpSyntaxKind::Require,
-                    "require_once" => PhpSyntaxKind::RequireOnce,
-                    "return" => PhpSyntaxKind::Return,
-                    "static" => PhpSyntaxKind::Static,
-                    "switch" => PhpSyntaxKind::Switch,
-                    "throw" => PhpSyntaxKind::Throw,
-                    "trait" => PhpSyntaxKind::Trait,
-                    "try" => PhpSyntaxKind::Try,
-                    "unset" => PhpSyntaxKind::Unset,
-                    "use" => PhpSyntaxKind::Use,
-                    "var" => PhpSyntaxKind::Var,
-                    "while" => PhpSyntaxKind::While,
-                    "xor" => PhpSyntaxKind::Xor,
-                    "yield" => PhpSyntaxKind::Yield,
-                    "true" => PhpSyntaxKind::BooleanLiteral,
-                    "false" => PhpSyntaxKind::BooleanLiteral,
-                    "null" => PhpSyntaxKind::NullLiteral,
-                    _ => PhpSyntaxKind::Identifier,
+                    "abstract" => PhpTokenType::Abstract,
+                    "and" => PhpTokenType::And,
+                    "array" => PhpTokenType::Array,
+                    "as" => PhpTokenType::As,
+                    "break" => PhpTokenType::Break,
+                    "callable" => PhpTokenType::Callable,
+                    "case" => PhpTokenType::Case,
+                    "catch" => PhpTokenType::Catch,
+                    "class" => PhpTokenType::Class,
+                    "clone" => PhpTokenType::Clone,
+                    "const" => PhpTokenType::Const,
+                    "continue" => PhpTokenType::Continue,
+                    "declare" => PhpTokenType::Declare,
+                    "default" => PhpTokenType::Default,
+                    "die" => PhpTokenType::Exit,
+                    "do" => PhpTokenType::Do,
+                    "echo" => PhpTokenType::Echo,
+                    "else" => PhpTokenType::Else,
+                    "elseif" => PhpTokenType::Elseif,
+                    "empty" => PhpTokenType::Empty,
+                    "enddeclare" => PhpTokenType::Enddeclare,
+                    "endfor" => PhpTokenType::Endfor,
+                    "endforeach" => PhpTokenType::Endforeach,
+                    "endif" => PhpTokenType::Endif,
+                    "endswitch" => PhpTokenType::Endswitch,
+                    "endwhile" => PhpTokenType::Endwhile,
+                    "eval" => PhpTokenType::Eval,
+                    "exit" => PhpTokenType::Exit,
+                    "extends" => PhpTokenType::Extends,
+                    "final" => PhpTokenType::Final,
+                    "finally" => PhpTokenType::Finally,
+                    "for" => PhpTokenType::For,
+                    "foreach" => PhpTokenType::Foreach,
+                    "function" => PhpTokenType::Function,
+                    "global" => PhpTokenType::Global,
+                    "goto" => PhpTokenType::Goto,
+                    "if" => PhpTokenType::If,
+                    "implements" => PhpTokenType::Implements,
+                    "include" => PhpTokenType::Include,
+                    "include_once" => PhpTokenType::IncludeOnce,
+                    "instanceof" => PhpTokenType::Instanceof,
+                    "insteadof" => PhpTokenType::Insteadof,
+                    "interface" => PhpTokenType::Interface,
+                    "isset" => PhpTokenType::Isset,
+                    "list" => PhpTokenType::List,
+                    "namespace" => PhpTokenType::Namespace,
+                    "new" => PhpTokenType::New,
+                    "or" => PhpTokenType::Or,
+                    "print" => PhpTokenType::Print,
+                    "private" => PhpTokenType::Private,
+                    "protected" => PhpTokenType::Protected,
+                    "public" => PhpTokenType::Public,
+                    "require" => PhpTokenType::Require,
+                    "require_once" => PhpTokenType::RequireOnce,
+                    "return" => PhpTokenType::Return,
+                    "static" => PhpTokenType::Static,
+                    "switch" => PhpTokenType::Switch,
+                    "throw" => PhpTokenType::Throw,
+                    "trait" => PhpTokenType::Trait,
+                    "try" => PhpTokenType::Try,
+                    "unset" => PhpTokenType::Unset,
+                    "use" => PhpTokenType::Use,
+                    "var" => PhpTokenType::Var,
+                    "while" => PhpTokenType::While,
+                    "xor" => PhpTokenType::Xor,
+                    "yield" => PhpTokenType::Yield,
+                    "true" => PhpTokenType::BooleanLiteral,
+                    "false" => PhpTokenType::BooleanLiteral,
+                    "null" => PhpTokenType::NullLiteral,
+                    _ => PhpTokenType::Identifier,
                 };
 
                 state.add_token(kind, start_pos, state.get_position());
@@ -385,66 +392,66 @@ impl<'config> PhpLexer<'config> {
                     state.advance(1);
                     if let Some('+') = state.peek() {
                         state.advance(1);
-                        PhpSyntaxKind::Increment
+                        PhpTokenType::Increment
                     }
                     else if let Some('=') = state.peek() {
                         state.advance(1);
-                        PhpSyntaxKind::PlusAssign
+                        PhpTokenType::PlusAssign
                     }
                     else {
-                        PhpSyntaxKind::Plus
+                        PhpTokenType::Plus
                     }
                 }
                 '-' => {
                     state.advance(1);
                     if let Some('-') = state.peek() {
                         state.advance(1);
-                        PhpSyntaxKind::Decrement
+                        PhpTokenType::Decrement
                     }
                     else if let Some('=') = state.peek() {
                         state.advance(1);
-                        PhpSyntaxKind::MinusAssign
+                        PhpTokenType::MinusAssign
                     }
                     else if let Some('>') = state.peek() {
                         state.advance(1);
-                        PhpSyntaxKind::Arrow
+                        PhpTokenType::Arrow
                     }
                     else {
-                        PhpSyntaxKind::Minus
+                        PhpTokenType::Minus
                     }
                 }
                 '*' => {
                     state.advance(1);
                     if let Some('*') = state.peek() {
                         state.advance(1);
-                        PhpSyntaxKind::Power
+                        PhpTokenType::Power
                     }
                     else if let Some('=') = state.peek() {
                         state.advance(1);
-                        PhpSyntaxKind::MultiplyAssign
+                        PhpTokenType::MultiplyAssign
                     }
                     else {
-                        PhpSyntaxKind::Multiply
+                        PhpTokenType::Multiply
                     }
                 }
                 '/' => {
                     state.advance(1);
                     if let Some('=') = state.peek() {
                         state.advance(1);
-                        PhpSyntaxKind::DivideAssign
+                        PhpTokenType::DivideAssign
                     }
                     else {
-                        PhpSyntaxKind::Divide
+                        PhpTokenType::Divide
                     }
                 }
                 '%' => {
                     state.advance(1);
                     if let Some('=') = state.peek() {
                         state.advance(1);
-                        PhpSyntaxKind::ModuloAssign
+                        PhpTokenType::ModuloAssign
                     }
                     else {
-                        PhpSyntaxKind::Modulo
+                        PhpTokenType::Modulo
                     }
                 }
                 '=' => {
@@ -453,18 +460,18 @@ impl<'config> PhpLexer<'config> {
                         state.advance(1);
                         if let Some('=') = state.peek() {
                             state.advance(1);
-                            PhpSyntaxKind::Identical
+                            PhpTokenType::Identical
                         }
                         else {
-                            PhpSyntaxKind::Equal
+                            PhpTokenType::Equal
                         }
                     }
                     else if let Some('>') = state.peek() {
                         state.advance(1);
-                        PhpSyntaxKind::DoubleArrow
+                        PhpTokenType::DoubleArrow
                     }
                     else {
-                        PhpSyntaxKind::Assign
+                        PhpTokenType::Assign
                     }
                 }
                 '!' => {
@@ -473,171 +480,171 @@ impl<'config> PhpLexer<'config> {
                         state.advance(1);
                         if let Some('=') = state.peek() {
                             state.advance(1);
-                            PhpSyntaxKind::NotIdentical
+                            PhpTokenType::NotIdentical
                         }
                         else {
-                            PhpSyntaxKind::NotEqual
+                            PhpTokenType::NotEqual
                         }
                     }
                     else {
-                        PhpSyntaxKind::LogicalNot
+                        PhpTokenType::LogicalNot
                     }
                 }
                 '<' => {
                     state.advance(1);
                     if let Some('=') = state.peek() {
                         state.advance(1);
-                        PhpSyntaxKind::LessEqual
+                        PhpTokenType::LessEqual
                     }
                     else if let Some('<') = state.peek() {
                         state.advance(1);
                         if let Some('=') = state.peek() {
                             state.advance(1);
-                            PhpSyntaxKind::LeftShiftAssign
+                            PhpTokenType::LeftShiftAssign
                         }
                         else {
-                            PhpSyntaxKind::LeftShift
+                            PhpTokenType::LeftShift
                         }
                     }
                     else if let Some('>') = state.peek() {
                         state.advance(1);
-                        PhpSyntaxKind::Spaceship
+                        PhpTokenType::Spaceship
                     }
                     else {
-                        PhpSyntaxKind::Less
+                        PhpTokenType::Less
                     }
                 }
                 '>' => {
                     state.advance(1);
                     if let Some('=') = state.peek() {
                         state.advance(1);
-                        PhpSyntaxKind::GreaterEqual
+                        PhpTokenType::GreaterEqual
                     }
                     else if let Some('>') = state.peek() {
                         state.advance(1);
                         if let Some('=') = state.peek() {
                             state.advance(1);
-                            PhpSyntaxKind::RightShiftAssign
+                            PhpTokenType::RightShiftAssign
                         }
                         else {
-                            PhpSyntaxKind::RightShift
+                            PhpTokenType::RightShift
                         }
                     }
                     else {
-                        PhpSyntaxKind::Greater
+                        PhpTokenType::Greater
                     }
                 }
                 '&' => {
                     state.advance(1);
                     if let Some('&') = state.peek() {
                         state.advance(1);
-                        PhpSyntaxKind::LogicalAnd
+                        PhpTokenType::LogicalAnd
                     }
                     else if let Some('=') = state.peek() {
                         state.advance(1);
-                        PhpSyntaxKind::BitwiseAndAssign
+                        PhpTokenType::BitwiseAndAssign
                     }
                     else {
-                        PhpSyntaxKind::BitwiseAnd
+                        PhpTokenType::BitwiseAnd
                     }
                 }
                 '|' => {
                     state.advance(1);
                     if let Some('|') = state.peek() {
                         state.advance(1);
-                        PhpSyntaxKind::LogicalOr
+                        PhpTokenType::LogicalOr
                     }
                     else if let Some('=') = state.peek() {
                         state.advance(1);
-                        PhpSyntaxKind::BitwiseOrAssign
+                        PhpTokenType::BitwiseOrAssign
                     }
                     else {
-                        PhpSyntaxKind::BitwiseOr
+                        PhpTokenType::BitwiseOr
                     }
                 }
                 '^' => {
                     state.advance(1);
                     if let Some('=') = state.peek() {
                         state.advance(1);
-                        PhpSyntaxKind::BitwiseXorAssign
+                        PhpTokenType::BitwiseXorAssign
                     }
                     else {
-                        PhpSyntaxKind::BitwiseXor
+                        PhpTokenType::BitwiseXor
                     }
                 }
                 '~' => {
                     state.advance(1);
-                    PhpSyntaxKind::BitwiseNot
+                    PhpTokenType::BitwiseNot
                 }
                 '?' => {
                     state.advance(1);
                     if let Some('?') = state.peek() {
                         state.advance(1);
-                        PhpSyntaxKind::NullCoalesce
+                        PhpTokenType::NullCoalesce
                     }
                     else {
-                        PhpSyntaxKind::Question
+                        PhpTokenType::Question
                     }
                 }
                 ':' => {
                     state.advance(1);
                     if let Some(':') = state.peek() {
                         state.advance(1);
-                        PhpSyntaxKind::DoubleColon
+                        PhpTokenType::DoubleColon
                     }
                     else {
-                        PhpSyntaxKind::Colon
+                        PhpTokenType::Colon
                     }
                 }
                 ';' => {
                     state.advance(1);
-                    PhpSyntaxKind::Semicolon
+                    PhpTokenType::Semicolon
                 }
                 ',' => {
                     state.advance(1);
-                    PhpSyntaxKind::Comma
+                    PhpTokenType::Comma
                 }
                 '.' => {
                     state.advance(1);
                     if let Some('=') = state.peek() {
                         state.advance(1);
-                        PhpSyntaxKind::ConcatAssign
+                        PhpTokenType::ConcatAssign
                     }
                     else {
-                        PhpSyntaxKind::Dot
+                        PhpTokenType::Dot
                     }
                 }
                 '(' => {
                     state.advance(1);
-                    PhpSyntaxKind::LeftParen
+                    PhpTokenType::LeftParen
                 }
                 ')' => {
                     state.advance(1);
-                    PhpSyntaxKind::RightParen
+                    PhpTokenType::RightParen
                 }
                 '[' => {
                     state.advance(1);
-                    PhpSyntaxKind::LeftBracket
+                    PhpTokenType::LeftBracket
                 }
                 ']' => {
                     state.advance(1);
-                    PhpSyntaxKind::RightBracket
+                    PhpTokenType::RightBracket
                 }
                 '{' => {
                     state.advance(1);
-                    PhpSyntaxKind::LeftBrace
+                    PhpTokenType::LeftBrace
                 }
                 '}' => {
                     state.advance(1);
-                    PhpSyntaxKind::RightBrace
+                    PhpTokenType::RightBrace
                 }
                 '$' => {
                     state.advance(1);
-                    PhpSyntaxKind::Dollar
+                    PhpTokenType::Dollar
                 }
                 '@' => {
                     state.advance(1);
-                    PhpSyntaxKind::At
+                    PhpTokenType::At
                 }
                 _ => return false,
             };

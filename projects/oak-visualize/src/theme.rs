@@ -1,104 +1,104 @@
 use serde::{Deserialize, Serialize};
 
-/// 可视化主题配置
+/// Visualization theme configuration
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct VisualizationTheme {
-    /// 主题名称
+    /// Theme name
     pub name: String,
-    /// 背景颜色
+    /// Background color
     pub background_color: String,
-    /// 节点样式
+    /// Node style
     pub node: NodeTheme,
-    /// 边样式
+    /// Edge style
     pub edge: EdgeTheme,
-    /// 文本样式
+    /// Text style
     pub text: TextTheme,
-    /// 高亮样式
+    /// Highlight style
     pub highlight: HighlightTheme,
 }
 
-/// 节点主题配置
+/// Node theme configuration
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct NodeTheme {
-    /// 默认填充颜色
+    /// Default fill color
     pub fill_color: String,
-    /// 默认边框颜色
+    /// Default stroke color
     pub stroke_color: String,
-    /// 边框宽度
+    /// Stroke width
     pub stroke_width: f32,
-    /// 圆角半径
+    /// Border radius
     pub border_radius: f32,
-    /// 阴影配置
+    /// Shadow configuration
     pub shadow: ShadowConfig,
 }
 
-/// 边主题配置
+/// Edge theme configuration
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct EdgeTheme {
-    /// 默认颜色
+    /// Default color
     pub color: String,
-    /// 线宽
+    /// Line width
     pub width: f32,
-    /// 线型 (solid, dashed, dotted)
+    /// Line style (solid, dashed, dotted)
     pub style: String,
-    /// 箭头样式
+    /// Arrow configuration
     pub arrow: ArrowConfig,
 }
 
-/// 文本主题配置
+/// Text theme configuration
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct TextTheme {
-    /// 字体族
+    /// Font family
     pub font_family: String,
-    /// 字体大小
+    /// Font size
     pub font_size: f32,
-    /// 字体颜色
+    /// Font color
     pub color: String,
-    /// 字体粗细
+    /// Font weight
     pub font_weight: String,
 }
 
-/// 高亮主题配置
+/// Highlight theme configuration
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct HighlightTheme {
-    /// 选中状态颜色
+    /// Selected state color
     pub selected_color: String,
-    /// 悬停状态颜色
+    /// Hover state color
     pub hover_color: String,
-    /// 错误状态颜色
+    /// Error state color
     pub error_color: String,
-    /// 警告状态颜色
+    /// Warning state color
     pub warning_color: String,
 }
 
-/// 阴影配置
+/// Shadow configuration
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct ShadowConfig {
-    /// 是否启用阴影
+    /// Whether to enable shadow
     pub enabled: bool,
-    /// 阴影颜色
+    /// Shadow color
     pub color: String,
-    /// 阴影偏移X
+    /// Shadow offset X
     pub offset_x: f32,
-    /// 阴影偏移Y
+    /// Shadow offset Y
     pub offset_y: f32,
-    /// 阴影模糊半径
+    /// Shadow blur radius
     pub blur_radius: f32,
 }
 
-/// 箭头配置
+/// Arrow configuration
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct ArrowConfig {
-    /// 是否显示箭头
+    /// Whether to show arrows
     pub enabled: bool,
-    /// 箭头大小
+    /// Arrow size
     pub size: f32,
-    /// 箭头类型 (triangle, circle, diamond)
+    /// Arrow type (triangle, circle, diamond)
     pub arrow_type: String,
 }
 
 impl VisualizationTheme {
-    /// 转换为渲染配置
+    /// Converts to render configuration
     pub fn to_render_config(&self) -> crate::render::RenderConfig {
         crate::render::RenderConfig {
             background_color: self.background_color.clone(),
@@ -124,7 +124,7 @@ impl Default for VisualizationTheme {
 }
 
 impl VisualizationTheme {
-    /// 浅色主题
+    /// Light theme
     pub fn light() -> Self {
         Self {
             name: "Light".to_string(),
@@ -142,7 +142,7 @@ impl VisualizationTheme {
         }
     }
 
-    /// 深色主题
+    /// Dark theme
     pub fn dark() -> Self {
         Self {
             name: "Dark".to_string(),
@@ -160,7 +160,7 @@ impl VisualizationTheme {
         }
     }
 
-    /// One Light 主题 - 基于 Atom One Light
+    /// One Light theme - based on Atom One Light
     pub fn one_light() -> Self {
         Self {
             name: "One Light".to_string(),
@@ -178,7 +178,7 @@ impl VisualizationTheme {
         }
     }
 
-    /// One Dark Pro 主题 - 基于 Atom One Dark Pro
+    /// One Dark Pro theme - based on Atom One Dark Pro
     pub fn one_dark_pro() -> Self {
         Self {
             name: "One Dark Pro".to_string(),
@@ -196,7 +196,7 @@ impl VisualizationTheme {
         }
     }
 
-    /// GitHub 主题
+    /// GitHub theme
     pub fn github() -> Self {
         Self {
             name: "GitHub".to_string(),

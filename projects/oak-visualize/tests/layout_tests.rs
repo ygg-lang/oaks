@@ -11,7 +11,7 @@ fn test_layout_config_default() {
     assert!(config.horizontal_spacing > 0.0);
     assert!(config.vertical_spacing > 0.0);
     assert!(config.margin >= 0.0);
-    assert!(config.padding >= 0.0);
+    assert!(config.padding >= 0.0)
 }
 
 #[test]
@@ -23,7 +23,7 @@ fn test_layout_creation() {
     let rect = oak_visualize::geometry::Rect::from_xywh(0.0, 0.0, 100.0, 60.0);
     layout.add_node("test".to_string(), rect);
     assert_eq!(layout.nodes.len(), 1);
-    assert!(layout.nodes.contains_key("test"));
+    assert!(layout.nodes.contains_key("test"))
 }
 
 #[test]
@@ -38,7 +38,7 @@ fn test_layout_node_creation() {
     assert_eq!(sized_node.size.height, 100.0);
 
     let typed_node = sized_node.with_type(NodeType::Function);
-    assert_eq!(typed_node.node_type, NodeType::Function);
+    assert_eq!(typed_node.node_type, NodeType::Function)
 }
 
 #[test]
@@ -53,7 +53,7 @@ fn test_layout_edge_creation() {
     assert_eq!(labeled_edge.label, Some("test label".to_string()));
 
     let typed_edge = labeled_edge.with_type(EdgeType::Dependency);
-    assert_eq!(typed_edge.edge_type, EdgeType::Dependency);
+    assert_eq!(typed_edge.edge_type, EdgeType::Dependency)
 }
 
 #[test]
@@ -72,7 +72,7 @@ fn test_hierarchical_layout() {
     assert_eq!(layout.nodes.len(), 3);
     assert!(layout.nodes.contains_key("root"));
     assert!(layout.nodes.contains_key("child1"));
-    assert!(layout.nodes.contains_key("child2"));
+    assert!(layout.nodes.contains_key("child2"))
 }
 
 #[test]
@@ -92,7 +92,7 @@ fn test_hierarchical_layout_directions() {
         assert!(result.is_ok(), "Layout failed for direction: {:?}", direction);
 
         let layout = result.unwrap();
-        assert_eq!(layout.nodes.len(), 2);
+        assert_eq!(layout.nodes.len(), 2)
     }
 }
 
@@ -112,7 +112,7 @@ fn test_force_directed_layout() {
     assert_eq!(layout.nodes.len(), 3);
     assert!(layout.nodes.contains_key("a"));
     assert!(layout.nodes.contains_key("b"));
-    assert!(layout.nodes.contains_key("c"));
+    assert!(layout.nodes.contains_key("c"))
 }
 
 #[test]
@@ -125,7 +125,7 @@ fn test_force_directed_layout_configuration() {
 
     let config = LayoutConfig::default();
     let result = layout_engine.layout(&nodes, &edges, &config);
-    assert!(result.is_ok());
+    assert!(result.is_ok())
 }
 
 #[test]
@@ -140,7 +140,7 @@ fn test_empty_layout() {
 
     let layout = result.unwrap();
     assert!(layout.nodes.is_empty());
-    assert!(layout.edges.is_empty());
+    assert!(layout.edges.is_empty())
 }
 
 #[test]
@@ -155,7 +155,7 @@ fn test_single_node_layout() {
 
     let layout = result.unwrap();
     assert_eq!(layout.nodes.len(), 1);
-    assert!(layout.nodes.contains_key("single"));
+    assert!(layout.nodes.contains_key("single"))
 }
 
 #[test]
@@ -164,7 +164,7 @@ fn test_node_types() {
 
     for (i, node_type) in node_types.iter().enumerate() {
         let node = LayoutNode::new(format!("node_{}", i), format!("Node {}", i)).with_type(*node_type);
-        assert_eq!(node.node_type, *node_type);
+        assert_eq!(node.node_type, *node_type)
     }
 }
 
@@ -174,6 +174,6 @@ fn test_edge_types() {
 
     for (i, edge_type) in edge_types.iter().enumerate() {
         let edge = LayoutEdge::new(format!("from_{}", i), format!("to_{}", i)).with_type(*edge_type);
-        assert_eq!(edge.edge_type, *edge_type);
+        assert_eq!(edge.edge_type, *edge_type)
     }
 }

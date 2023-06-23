@@ -40,13 +40,13 @@ app:
 users:
   - id: 1
     name: "John Doe"
-    email: "john@example.com"
+    email: "john↯example.com"
     roles: ["admin", "user"]
     active: true
     
   - id: 2
     name: "Jane Smith"
-    email: "jane@example.com"
+    email: "jane↯example.com"
     roles: ["user"]
     active: false
 

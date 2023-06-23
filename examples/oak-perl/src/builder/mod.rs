@@ -1,11 +1,15 @@
 use crate::{ast::PerlRoot, language::PerlLanguage, parser::PerlParser};
 use oak_core::{Builder, BuilderCache, OakDiagnostics, Parser, Source, SourceText, TextEdit, parser::session::ParseSession};
 
+/// A builder for Perl AST nodes.
+///
+/// This builder coordinates the lexing and parsing process to produce a `PerlRoot` AST.
 pub struct PerlBuilder<'config> {
     config: &'config PerlLanguage,
 }
 
 impl<'config> PerlBuilder<'config> {
+    /// Creates a new `PerlBuilder` with the given language configuration.
     pub fn new(config: &'config PerlLanguage) -> Self {
         Self { config }
     }

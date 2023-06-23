@@ -1,7 +1,13 @@
-use crate::{kind::ProtobufSyntaxKind, language::ProtobufLanguage, lexer::ProtobufLexer};
+pub mod element_type;
+
+use crate::{
+    language::ProtobufLanguage,
+    lexer::{ProtobufLexer, token_type::ProtobufTokenType},
+    parser::element_type::ProtobufElementType,
+};
 use oak_core::{
     errors::OakError,
-    parser::{ParseCache, ParseOutput, Parser, ParserState},
+    parser::{ParseCache, ParseOutput, Parser, ParserState, parse_with_lexer},
     source::{Source, TextEdit},
     tree::GreenNode,
 };
@@ -20,30 +26,30 @@ impl<'a> ProtobufParser<'a> {
     fn parse_root_internal<'b, S: Source + ?Sized>(&self, state: &mut State<'b, S>) -> Result<&'b GreenNode<'b, ProtobufLanguage>, OakError> {
         let checkpoint = state.checkpoint();
         self.parse_program(state);
-        Ok(state.finish_at(checkpoint, ProtobufSyntaxKind::Root))
+        Ok(state.finish_at(checkpoint, crate::parser::element_type::ProtobufElementType::Root))
     }
 
     fn parse_program<S: Source + ?Sized>(&self, state: &mut State<'_, S>) {
         while state.not_at_end() {
-            if state.at(ProtobufSyntaxKind::Syntax) {
+            if state.at(ProtobufTokenType::Syntax) {
                 self.parse_syntax(state);
             }
-            else if state.at(ProtobufSyntaxKind::Package) {
+            else if state.at(ProtobufTokenType::Package) {
                 self.parse_package(state);
             }
-            else if state.at(ProtobufSyntaxKind::Import) {
+            else if state.at(ProtobufTokenType::Import) {
                 self.parse_import(state);
             }
-            else if state.at(ProtobufSyntaxKind::Option) {
+            else if state.at(ProtobufTokenType::Option) {
                 self.parse_option(state);
             }
-            else if state.at(ProtobufSyntaxKind::Message) {
+            else if state.at(ProtobufTokenType::Message) {
                 self.parse_message(state);
             }
-            else if state.at(ProtobufSyntaxKind::Enum) {
+            else if state.at(ProtobufTokenType::Enum) {
                 self.parse_enum(state);
             }
-            else if state.at(ProtobufSyntaxKind::Service) {
+            else if state.at(ProtobufTokenType::Service) {
                 self.parse_service(state);
             }
             else {
@@ -54,82 +60,82 @@ impl<'a> ProtobufParser<'a> {
 
     fn parse_syntax<S: Source + ?Sized>(&self, state: &mut State<'_, S>) {
         let checkpoint = state.checkpoint();
-        state.expect(ProtobufSyntaxKind::Syntax).ok();
-        state.expect(ProtobufSyntaxKind::Assign).ok();
-        state.expect(ProtobufSyntaxKind::StringLiteral).ok();
-        state.expect(ProtobufSyntaxKind::Semicolon).ok();
-        state.finish_at(checkpoint, ProtobufSyntaxKind::SyntaxDef);
+        state.expect(ProtobufTokenType::Syntax).ok();
+        state.expect(ProtobufTokenType::Assign).ok();
+        state.expect(ProtobufTokenType::StringLiteral).ok();
+        state.expect(ProtobufTokenType::Semicolon).ok();
+        state.finish_at(checkpoint, crate::parser::element_type::ProtobufElementType::SyntaxDef);
     }
 
     fn parse_package<S: Source + ?Sized>(&self, state: &mut State<'_, S>) {
         let checkpoint = state.checkpoint();
-        state.expect(ProtobufSyntaxKind::Package).ok();
-        state.expect(ProtobufSyntaxKind::Identifier).ok();
-        state.expect(ProtobufSyntaxKind::Semicolon).ok();
-        state.finish_at(checkpoint, ProtobufSyntaxKind::PackageDef);
+        state.expect(ProtobufTokenType::Package).ok();
+        state.expect(ProtobufTokenType::Identifier).ok();
+        state.expect(ProtobufTokenType::Semicolon).ok();
+        state.finish_at(checkpoint, crate::parser::element_type::ProtobufElementType::PackageDef);
     }
 
     fn parse_import<S: Source + ?Sized>(&self, state: &mut State<'_, S>) {
         let checkpoint = state.checkpoint();
-        state.expect(ProtobufSyntaxKind::Import).ok();
-        if state.at(ProtobufSyntaxKind::Public) || state.at(ProtobufSyntaxKind::Weak) {
-            state.bump();
+        state.expect(ProtobufTokenType::Import).ok();
+        if state.at(ProtobufTokenType::Public) || state.at(ProtobufTokenType::Weak) {
+            state.bump()
         }
-        state.expect(ProtobufSyntaxKind::StringLiteral).ok();
-        state.expect(ProtobufSyntaxKind::Semicolon).ok();
-        state.finish_at(checkpoint, ProtobufSyntaxKind::ImportDef);
+        state.expect(ProtobufTokenType::StringLiteral).ok();
+        state.expect(ProtobufTokenType::Semicolon).ok();
+        state.finish_at(checkpoint, crate::parser::element_type::ProtobufElementType::ImportDef);
     }
 
     fn parse_option<S: Source + ?Sized>(&self, state: &mut State<'_, S>) {
         let checkpoint = state.checkpoint();
-        state.expect(ProtobufSyntaxKind::Option).ok();
-        state.expect(ProtobufSyntaxKind::Identifier).ok();
-        state.expect(ProtobufSyntaxKind::Assign).ok();
+        state.expect(ProtobufTokenType::Option).ok();
+        state.expect(ProtobufTokenType::Identifier).ok();
+        state.expect(ProtobufTokenType::Assign).ok();
         state.bump(); // value
-        state.expect(ProtobufSyntaxKind::Semicolon).ok();
-        state.finish_at(checkpoint, ProtobufSyntaxKind::OptionDef);
+        state.expect(ProtobufTokenType::Semicolon).ok();
+        state.finish_at(checkpoint, crate::parser::element_type::ProtobufElementType::OptionDef);
     }
 
     fn parse_message<S: Source + ?Sized>(&self, state: &mut State<'_, S>) {
         let checkpoint = state.checkpoint();
-        state.expect(ProtobufSyntaxKind::Message).ok();
-        state.expect(ProtobufSyntaxKind::Identifier).ok();
-        state.expect(ProtobufSyntaxKind::LeftBrace).ok();
-        while !state.at(ProtobufSyntaxKind::RightBrace) && state.not_at_end() {
-            state.bump();
+        state.expect(ProtobufTokenType::Message).ok();
+        state.expect(ProtobufTokenType::Identifier).ok();
+        state.expect(ProtobufTokenType::LeftBrace).ok();
+        while !state.at(ProtobufTokenType::RightBrace) && state.not_at_end() {
+            state.bump()
         }
-        state.expect(ProtobufSyntaxKind::RightBrace).ok();
-        state.finish_at(checkpoint, ProtobufSyntaxKind::MessageDef);
+        state.expect(ProtobufTokenType::RightBrace).ok();
+        state.finish_at(checkpoint, crate::parser::element_type::ProtobufElementType::MessageDef);
     }
 
     fn parse_enum<S: Source + ?Sized>(&self, state: &mut State<'_, S>) {
         let checkpoint = state.checkpoint();
-        state.expect(ProtobufSyntaxKind::Enum).ok();
-        state.expect(ProtobufSyntaxKind::Identifier).ok();
-        state.expect(ProtobufSyntaxKind::LeftBrace).ok();
-        while !state.at(ProtobufSyntaxKind::RightBrace) && state.not_at_end() {
-            state.bump();
+        state.expect(ProtobufTokenType::Enum).ok();
+        state.expect(ProtobufTokenType::Identifier).ok();
+        state.expect(ProtobufTokenType::LeftBrace).ok();
+        while !state.at(ProtobufTokenType::RightBrace) && state.not_at_end() {
+            state.bump()
         }
-        state.expect(ProtobufSyntaxKind::RightBrace).ok();
-        state.finish_at(checkpoint, ProtobufSyntaxKind::EnumDef);
+        state.expect(ProtobufTokenType::RightBrace).ok();
+        state.finish_at(checkpoint, crate::parser::element_type::ProtobufElementType::EnumDef);
     }
 
     fn parse_service<S: Source + ?Sized>(&self, state: &mut State<'_, S>) {
         let checkpoint = state.checkpoint();
-        state.expect(ProtobufSyntaxKind::Service).ok();
-        state.expect(ProtobufSyntaxKind::Identifier).ok();
-        state.expect(ProtobufSyntaxKind::LeftBrace).ok();
-        while !state.at(ProtobufSyntaxKind::RightBrace) && state.not_at_end() {
-            state.bump();
+        state.expect(ProtobufTokenType::Service).ok();
+        state.expect(ProtobufTokenType::Identifier).ok();
+        state.expect(ProtobufTokenType::LeftBrace).ok();
+        while !state.at(ProtobufTokenType::RightBrace) && state.not_at_end() {
+            state.bump()
         }
-        state.expect(ProtobufSyntaxKind::RightBrace).ok();
-        state.finish_at(checkpoint, ProtobufSyntaxKind::ServiceDef);
+        state.expect(ProtobufTokenType::RightBrace).ok();
+        state.finish_at(checkpoint, crate::parser::element_type::ProtobufElementType::ServiceDef);
     }
 }
 
-impl<'config> Parser<ProtobufLanguage> for ProtobufParser<'config> {
-    fn parse<'a, S: Source + ?Sized>(&self, text: &'a S, edits: &[TextEdit], cache: &'a mut impl ParseCache<ProtobufLanguage>) -> ParseOutput<'a, ProtobufLanguage> {
+impl<'a> Parser<ProtobufLanguage> for ProtobufParser<'a> {
+    fn parse<'b, S: Source + ?Sized>(&self, text: &'b S, edits: &[TextEdit], cache: &'b mut impl ParseCache<ProtobufLanguage>) -> ParseOutput<'b, ProtobufLanguage> {
         let lexer = ProtobufLexer::new(self.language);
-        oak_core::parser::parse_with_lexer(&lexer, text, edits, cache, |state| self.parse_root_internal(state))
+        parse_with_lexer(&lexer, text, edits, cache, |state| self.parse_root_internal(state))
     }
 }

@@ -1,205 +1,35 @@
-# Oak SCSS Parser
+# 🚀 Oak SCSS Parser
 
 [![Crates.io](https://img.shields.io/crates/v/oak-scss.svg)](https://crates.io/crates/oak-scss)
 [![Documentation](https://docs.rs/oak-scss/badge.svg)](https://docs.rs/oak-scss)
 
-A high-performance SCSS parser for Rust, built with the Oak parser combinator framework. Parse Sassy CSS stylesheets with comprehensive AST generation and error handling.
+**Modern Styling, Industrial Performance** — A high-performance, incremental SCSS parser built on the Oak framework. Designed for building next-generation CSS tools, IDEs, and static analyzers for the modern web.
 
-## Overview
+## 🎯 Project Vision
 
-Oak SCSS provides robust parsing capabilities for SCSS stylesheet files, supporting variables, mixins, functions, nesting, and all major SCSS constructs. Built on the Oak parser combinator framework, it delivers excellent performance and detailed error messages.
+SCSS is the cornerstone of modern web styling, enabling complex design systems through its powerful syntax. `oak-scss` aims to provide a robust, Rust-powered infrastructure for parsing SCSS that is both accurate and incredibly fast. By leveraging Oak's incremental parsing architecture, we enable the creation of highly responsive tools that can handle massive stylesheets with ease. Whether you are building a custom linter, a CSS-in-JS generator, or an advanced IDE extension, `oak-scss` provides the high-fidelity AST and sub-millisecond performance required to keep up with the evolving CSS ecosystem.
 
-## Features
+## ✨ Core Features
 
-- ✅ **Complete SCSS Support**: Parse variables, mixins, functions, nesting, and imports
-- ✅ **Modern Rust API**: Type-safe parsing with comprehensive error handling
-- ✅ **High Performance**: Built on the efficient Oak parser combinator framework
-- ✅ **Rich AST**: Detailed Abstract Syntax Tree with source location tracking
-- ✅ **Extensible**: Easy to extend for custom SCSS dialects
-- ✅ **Well Tested**: Comprehensive test suite with real-world examples
+- **⚡ Blazing Fast**: Engineered in Rust to deliver sub-millisecond parsing response times, even for complex SCSS files with deep nesting and multiple imports.
+- **🔄 Incremental by Design**: Built-in support for partial updates—re-parse only the sections of the stylesheet that changed. Essential for providing real-time feedback in large-scale styling projects.
+- **🌳 High-Fidelity AST**: Generates a comprehensive and precise Abstract Syntax Tree capturing the full depth of SCSS:
+    - **Variables & Interpolation**: Accurate mapping of variable declarations and their usage in selectors or values.
+    - **Mixins & Functions**: Deep support for mixin definitions, includes, and custom function logic.
+    - **Control Directives**: Precise tracking of `@if`, `@for`, `@each`, and `@while` blocks.
+    - **Nesting & Parent Selectors**: Robust handling of CSS nesting and the `&` operator.
+    - **Comments & Trivia**: Retains all trivia (whitespace and comments), enabling faithful round-trip processing and refactoring.
+- **🛡️ Industrial-Grade Fault Tolerance**: Gracefully recovers from syntax errors during active development, providing clear and actionable diagnostics.
+- **🧩 Deep Ecosystem Integration**: Seamlessly works with `oak-lsp` for full LSP support and `oak-mcp` for intelligent style discovery.
 
-## Quick Start
+## 🏗️ Architecture
+
+The parser follows the **Green/Red Tree** architecture (inspired by Roslyn), which allows for:
+1. **Efficient Immutability**: Share nodes across different versions of the tree without copying.
+2. **Lossless Syntax Trees**: Retains all trivia (whitespace and comments), enabling faithful code formatting and refactoring.
+3. **Type Safety**: Strongly-typed "Red" nodes provide a convenient and safe API for tree traversal and analysis.
 
 
-## Parsing Examples
+## 🛠️ Contributing
 
-### Basic SCSS Parsing
-
-```rust
-use oak::{Parser, Language};
-use oak_scss::SCSSLanguage;
-
-fn main() {
-    let source = r#"
-        $primary-color: #3498db;
-        $secondary-color: #2ecc71;
-        $font-size: 16px;
-        
-        .button {
-            background-color: $primary-color;
-            color: white;
-            padding: 10px 20px;
-            border-radius: 5px;
-            
-            &:hover {
-                background-color: darken($primary-color, 10%);
-            }
-            
-            &.large {
-                font-size: $font-size * 1.2;
-                padding: 15px 30px;
-            }
-        }
-    "#;
-    
-    let mut parser = Parser::<SCSSLanguage>::new();
-    match parser.parse(&source) {
-        Ok(ast) => {
-            println!("Parsed AST: {:#?}", ast);
-        }
-        Err(error) => {
-            eprintln!("Parse error: {}", error);
-        }
-    }
-}
-```
-
-### Advanced Mixins and Functions
-
-```rust
-use oak::{Parser, Language};
-use oak_scss::SCSSLanguage;
-
-fn main() {
-    let source = r#"
-        @mixin flex-center {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
-        
-        @function rem($pixels, $base: 16px) {
-            @return $pixels / $base * 1rem;
-        }
-        
-        @mixin responsive-font($min-size, $max-size, $min-width: 320px, $max-width: 1200px) {
-            font-size: $min-size;
-            
-            @media screen and (min-width: $min-width) {
-                font-size: calc(#{$min-size} + #{strip-unit($max-size - $min-size)} * 
-                    ((100vw - #{$min-width}) / #{strip-unit($max-width - $min-width)}));
-            }
-            
-            @media screen and (min-width: $max-width) {
-                font-size: $max-size;
-            }
-        }
-        
-        .container {
-            @include flex-center;
-            min-height: 100vh;
-            
-            .content {
-                @include responsive-font(14px, 24px);
-                padding: rem(20px);
-                max-width: rem(800px);
-            }
-        }
-    "#;
-    
-    let mut parser = Parser::<SCSSLanguage>::new();
-    match parser.parse(&source) {
-        Ok(ast) => {
-            println!("Advanced SCSS parsed successfully!");
-        }
-        Err(error) => {
-            eprintln!("Parse error: {}", error);
-        }
-    }
-}
-```
-
-## Advanced Features
-
-### Nested Imports
-
-Oak SCSS supports parsing nested imports:
-
-```rust
-let source = r#"
-    @import 'variables';
-    @import 'mixins';
-    
-    @import url('https://fonts.googleapis.com/css?family=Roboto');
-"#;
-```
-
-### Control Directives
-
-Parse control directives like @if, @for, @each, and @while:
-
-```rust
-let source = r#"
-    @for $i from 1 through 12 {
-        .col-#{$i} {
-            width: percentage($i / 12);
-        }
-    }
-    
-    @each $color in red, green, blue {
-        .bg-#{$color} {
-            background-color: $color;
-        }
-    }
-"#;
-```
-
-## AST Structure
-
-The parser generates a rich AST with the following main node types:
-
-- `SCSSFile` - Root node containing the entire file
-- `Variable` - Variable declarations and references
-- `Rule` - CSS rules with selectors and declarations
-- `Mixin` - Mixin definitions and includes
-- `Function` - Function definitions and calls
-- `Import` - Import statements
-- `Media` - Media queries and blocks
-- `Expression` - SCSS expressions and operations
-- `AtRule` - At-rules like @extend, @debug, @warn
-
-## Performance
-
-Oak SCSS is designed for high performance:
-
-- **Zero-copy parsing** where possible
-- **Streaming support** for large stylesheet files
-- **Efficient memory usage** with minimal allocations
-- **Fast error recovery** for better developer experience
-
-## Integration
-
-Oak SCSS integrates seamlessly with the Oak ecosystem:
-
-```rust
-use oak::{Parser, Language};
-use oak_scss::SCSSLanguage;
-
-// Use with other Oak parsers
-let mut parser = Parser::<SCSSLanguage>::new();
-let result = parser.parse(scss_source);
-```
-
-## Examples
-
-More examples can be found in the [examples directory](https://github.com/axodotdev/oak/tree/main/examples/oak-scss/examples):
-
-- [Basic SCSS parsing](examples/basic.rs)
-- [Variables and mixins](examples/variables_mixins.rs)
-- [Nested selectors](examples/nesting.rs)
-- [Functions and operations](examples/functions.rs)
-- [Error handling](examples/error_handling.rs)
-
-## Contributing
-
-We welcome contributions! Please see our [Contributing Guide](https://github.com/axodotdev/oak/blob/main/CONTRIBUTING.md) for details.
+Contributions are welcome! Please feel free to submit a Pull Request. For major changes, please open an issue first to discuss what you would like to change.

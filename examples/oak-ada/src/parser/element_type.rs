@@ -1,5 +1,6 @@
 use crate::lexer::AdaTokenType;
 use oak_core::{ElementType, GreenNode, UniversalElementRole};
+#[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
 use std::sync::Arc;
 
@@ -7,7 +8,8 @@ use std::sync::Arc;
 pub type AdaElement<'a> = Arc<GreenNode<'a, AdaElementType>>;
 
 /// Ada 语法树中所有可能的元素类型。
-#[derive(Copy, Clone, Debug, PartialEq, Eq, Hash, Serialize, Deserialize)]
+#[derive(Copy, Clone, Debug, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub enum AdaElementType {
     /// Root node
     Root,

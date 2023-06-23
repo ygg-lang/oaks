@@ -35,7 +35,7 @@ fn test_peek_behavior() {
     state.advance(1);
     println!("位置: {}", state.get_position());
     println!("current(): {:?}", state.current());
-    println!("peek(): {:?}", state.peek());
+    println!("peek(): {:?}", state.peek())
 }
 
 #[test]
@@ -63,5 +63,5 @@ fn test_character_class_parsing() {
     assert_eq!(first_token.span.start, 0, "标记应该从位置 0 开始");
     assert_eq!(first_token.span.end, 1, "标记应该在位置 1 结束");
 
-    println!("✅ 字符类解析测试通过！");
+    println!("✅ 字符类解析测试通过！")
 }

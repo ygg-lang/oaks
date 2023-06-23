@@ -5,7 +5,7 @@ use oak_core::{
 };
 
 pub mod element_type;
-mod parse;
+mod parse_top_level;
 
 pub use element_type::AsciiDocElementType;
 pub type State<'a, S> = ParserState<'a, AsciiDocLanguage, S>;

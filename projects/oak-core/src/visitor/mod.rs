@@ -28,6 +28,7 @@ pub trait Visitor<'a, L: Language> {
 
 /// A pre-order traversal iterator for red trees.
 pub struct PreOrder<'a, L: Language> {
+    /// The stack of nodes to visit.
     stack: Vec<RedTree<'a, L>>,
 }
 
@@ -52,12 +53,8 @@ impl<'a, L: Language> Iterator for PreOrder<'a, L> {
             for child in children.iter().rev() {
                 offset -= child.len() as usize;
                 match child {
-                    crate::GreenTree::Node(n) => {
-                        self.stack.push(RedTree::Node(RedNode::new(n, offset)));
-                    }
-                    crate::GreenTree::Leaf(t) => {
-                        self.stack.push(RedTree::Leaf(RedLeaf { kind: t.kind, span: core::range::Range { start: offset, end: offset + t.length as usize } }));
-                    }
+                    crate::GreenTree::Node(n) => self.stack.push(RedTree::Node(RedNode::new(n, offset))),
+                    crate::GreenTree::Leaf(t) => self.stack.push(RedTree::Leaf(RedLeaf { kind: t.kind, span: core::range::Range { start: offset, end: offset + t.length as usize } })),
                 }
             }
         }

@@ -1,27 +1,33 @@
-/// C 语言抽象语法
+#![doc = include_str!("readme.md")]
+/// C language abstract syntax.
 #[derive(Debug, Clone, PartialEq)]
 pub struct CRoot {
+    /// The translation unit containing the source code structure.
     pub translation_unit: TranslationUnit,
+    /// The source span of the root node.
     pub span: core::range::Range<usize>,
 }
 
-/// 翻译单元（C 程序的顶层结构）
+/// Translation unit (the top-level structure of a C program).
 #[derive(Debug, Clone, PartialEq)]
 pub struct TranslationUnit {
+    /// List of external declarations.
     pub external_declarations: Vec<ExternalDeclaration>,
+    /// The source span of the translation unit.
     pub span: core::range::Range<usize>,
 }
 
-/// 外部声明
+/// External declaration.
 #[derive(Debug, Clone, PartialEq)]
 pub enum ExternalDeclaration {
-    /// 函数定义
+    /// Function definition.
     FunctionDefinition(FunctionDefinition),
-    /// 声明
+    /// Declaration.
     Declaration(Declaration),
 }
 
 impl ExternalDeclaration {
+    /// Returns the source span of the external declaration.
     pub fn span(&self) -> core::range::Range<usize> {
         match self {
             Self::FunctionDefinition(n) => n.span.clone(),
@@ -30,37 +36,45 @@ impl ExternalDeclaration {
     }
 }
 
-/// 函数定义
+/// Function definition.
 #[derive(Debug, Clone, PartialEq)]
 pub struct FunctionDefinition {
+    /// Declaration specifiers (e.g., return type, storage class).
     pub declaration_specifiers: Vec<DeclarationSpecifier>,
+    /// The declarator for the function.
     pub declarator: Declarator,
+    /// The body of the function.
     pub compound_statement: CompoundStatement,
+    /// The source span of the function definition.
     pub span: core::range::Range<usize>,
 }
 
-/// 声明
+/// Declaration.
 #[derive(Debug, Clone, PartialEq)]
 pub struct Declaration {
+    /// Declaration specifiers.
     pub declaration_specifiers: Vec<DeclarationSpecifier>,
+    /// List of declarators being initialized.
     pub init_declarators: Vec<InitDeclarator>,
+    /// The source span of the declaration.
     pub span: core::range::Range<usize>,
 }
 
-/// 声明说明
+/// Declaration specifier.
 #[derive(Debug, Clone, PartialEq)]
 pub enum DeclarationSpecifier {
-    /// 存储类说明符
+    /// Storage class specifier (e.g., `static`, `extern`).
     StorageClassSpecifier(StorageClassSpecifier),
-    /// 类型说明
+    /// Type specifier (e.g., `int`, `char`).
     TypeSpecifier(TypeSpecifier),
-    /// 类型限定
+    /// Type qualifier (e.g., `const`, `volatile`).
     TypeQualifier(TypeQualifier),
-    /// 函数说明
+    /// Function specifier (e.g., `inline`).
     FunctionSpecifier(FunctionSpecifier),
 }
 
 impl DeclarationSpecifier {
+    /// Returns the source span of the declaration specifier.
     pub fn span(&self) -> core::range::Range<usize> {
         match self {
             Self::StorageClassSpecifier(n) => n.span(),
@@ -71,17 +85,38 @@ impl DeclarationSpecifier {
     }
 }
 
-/// 存储类说明符
+/// Storage class specifier.
 #[derive(Debug, Clone, PartialEq)]
 pub enum StorageClassSpecifier {
-    Typedef { span: core::range::Range<usize> },
-    Extern { span: core::range::Range<usize> },
-    Static { span: core::range::Range<usize> },
-    Auto { span: core::range::Range<usize> },
-    Register { span: core::range::Range<usize> },
+    /// `typedef`
+    Typedef {
+        /// Source span.
+        span: core::range::Range<usize>,
+    },
+    /// `extern`
+    Extern {
+        /// Source span.
+        span: core::range::Range<usize>,
+    },
+    /// `static`
+    Static {
+        /// Source span.
+        span: core::range::Range<usize>,
+    },
+    /// `auto`
+    Auto {
+        /// Source span.
+        span: core::range::Range<usize>,
+    },
+    /// `register`
+    Register {
+        /// Source span.
+        span: core::range::Range<usize>,
+    },
 }
 
 impl StorageClassSpecifier {
+    /// Returns the source span of the storage class specifier.
     pub fn span(&self) -> core::range::Range<usize> {
         match self {
             Self::Typedef { span } => span.clone(),
@@ -93,27 +128,56 @@ impl StorageClassSpecifier {
     }
 }
 
-/// 类型说明
+/// Type specifier.
 #[derive(Debug, Clone, PartialEq)]
 pub enum TypeSpecifier {
-    Void { span: core::range::Range<usize> },
-    Char { span: core::range::Range<usize> },
-    Short { span: core::range::Range<usize> },
-    Int { span: core::range::Range<usize> },
-    Long { span: core::range::Range<usize> },
-    Float { span: core::range::Range<usize> },
-    Double { span: core::range::Range<usize> },
-    Signed { span: core::range::Range<usize> },
-    Unsigned { span: core::range::Range<usize> },
-    Bool { span: core::range::Range<usize> },
-    Complex { span: core::range::Range<usize> },
-    Imaginary { span: core::range::Range<usize> },
+    /// `void`
+    Void {
+        /// Source span.
+        span: core::range::Range<usize>,
+    },
+    /// `char`
+    Char {
+        /// Source span.
+        span: core::range::Range<usize>,
+    },
+    Short {
+        span: core::range::Range<usize>,
+    },
+    Int {
+        span: core::range::Range<usize>,
+    },
+    Long {
+        span: core::range::Range<usize>,
+    },
+    Float {
+        span: core::range::Range<usize>,
+    },
+    Double {
+        span: core::range::Range<usize>,
+    },
+    Signed {
+        span: core::range::Range<usize>,
+    },
+    Unsigned {
+        span: core::range::Range<usize>,
+    },
+    Bool {
+        span: core::range::Range<usize>,
+    },
+    Complex {
+        span: core::range::Range<usize>,
+    },
+    Imaginary {
+        span: core::range::Range<usize>,
+    },
     StructOrUnion(StructOrUnionSpecifier),
     Enum(EnumSpecifier),
     TypedefName(String, core::range::Range<usize>),
 }
 
 impl TypeSpecifier {
+    /// Returns the source span of the type specifier.
     pub fn span(&self) -> core::range::Range<usize> {
         match self {
             Self::Void { span } => span.clone(),
@@ -135,15 +199,28 @@ impl TypeSpecifier {
     }
 }
 
-/// 类型限定
+/// Type qualifier.
 #[derive(Debug, Clone, PartialEq)]
 pub enum TypeQualifier {
-    Const { span: core::range::Range<usize> },
-    Restrict { span: core::range::Range<usize> },
-    Volatile { span: core::range::Range<usize> },
+    /// `const`
+    Const {
+        /// Source span.
+        span: core::range::Range<usize>,
+    },
+    /// `restrict`
+    Restrict {
+        /// Source span.
+        span: core::range::Range<usize>,
+    },
+    /// `volatile`
+    Volatile {
+        /// Source span.
+        span: core::range::Range<usize>,
+    },
 }
 
 impl TypeQualifier {
+    /// Returns the source span of the type qualifier.
     pub fn span(&self) -> core::range::Range<usize> {
         match self {
             Self::Const { span } => span.clone(),
@@ -153,36 +230,51 @@ impl TypeQualifier {
     }
 }
 
-/// 函数说明
+/// Function specifier.
 #[derive(Debug, Clone, PartialEq)]
 pub enum FunctionSpecifier {
-    Inline { span: core::range::Range<usize> },
-    Noreturn { span: core::range::Range<usize> },
+    /// `inline`
+    Inline {
+        /// Source span.
+        span: core::range::Range<usize>,
+    },
 }
 
 impl FunctionSpecifier {
+    /// Returns the source span of the function specifier.
     pub fn span(&self) -> core::range::Range<usize> {
         match self {
             Self::Inline { span } => span.clone(),
-            Self::Noreturn { span } => span.clone(),
         }
     }
 }
 
-/// 结构体或联合体说明符
+/// Struct or union specifier.
 #[derive(Debug, Clone, PartialEq)]
 pub struct StructOrUnionSpecifier {
-    pub struct_or_union: StructOrUnion,
+    /// Whether it's a struct or union.
+    pub kind: StructOrUnion,
+    /// Optional tag identifier.
     pub identifier: Option<String>,
-    pub struct_declarations: Option<Vec<StructDeclaration>>,
+    /// List of struct declarations.
+    pub struct_declarations: Vec<StructDeclaration>,
+    /// Source span.
     pub span: core::range::Range<usize>,
 }
 
-/// 结构体或联合
+/// Struct or union keyword.
 #[derive(Debug, Clone, PartialEq)]
 pub enum StructOrUnion {
-    Struct { span: core::range::Range<usize> },
-    Union { span: core::range::Range<usize> },
+    /// `struct`
+    Struct {
+        /// Source span.
+        span: core::range::Range<usize>,
+    },
+    /// `union`
+    Union {
+        /// Source span.
+        span: core::range::Range<usize>,
+    },
 }
 
 impl StructOrUnion {
@@ -194,18 +286,23 @@ impl StructOrUnion {
     }
 }
 
-/// 结构体声
+/// Struct declaration.
 #[derive(Debug, Clone, PartialEq)]
 pub struct StructDeclaration {
-    pub specifier_qualifiers: Vec<SpecifierQualifier>,
-    pub struct_declarators: Vec<StructDeclarator>,
+    /// List of specifiers and qualifiers.
+    pub specifier_qualifier_list: Vec<SpecifierQualifier>,
+    /// List of struct declarators.
+    pub struct_declarator_list: Vec<StructDeclarator>,
+    /// Source span.
     pub span: core::range::Range<usize>,
 }
 
-/// 说明符限定符
+/// Specifier or qualifier.
 #[derive(Debug, Clone, PartialEq)]
 pub enum SpecifierQualifier {
+    /// Type specifier.
     TypeSpecifier(TypeSpecifier),
+    /// Type qualifier.
     TypeQualifier(TypeQualifier),
 }
 
@@ -218,108 +315,175 @@ impl SpecifierQualifier {
     }
 }
 
-/// 结构体声明符
+/// Struct declarator.
 #[derive(Debug, Clone, PartialEq)]
 pub struct StructDeclarator {
+    /// The declarator.
     pub declarator: Option<Declarator>,
+    /// Optional bit-field width expression.
     pub constant_expression: Option<Expression>,
+    /// Source span.
     pub span: core::range::Range<usize>,
 }
 
-/// 枚举说明
+/// Enum specifier.
 #[derive(Debug, Clone, PartialEq)]
 pub struct EnumSpecifier {
+    /// Optional tag identifier.
     pub identifier: Option<String>,
-    pub enumerators: Option<Vec<Enumerator>>,
+    /// List of enumerators.
+    pub enumerators: Vec<Enumerator>,
+    /// Source span.
     pub span: core::range::Range<usize>,
 }
 
-/// 枚举
+/// Enumerator.
 #[derive(Debug, Clone, PartialEq)]
 pub struct Enumerator {
+    /// Enumerator identifier.
     pub identifier: String,
+    /// Optional constant expression value.
     pub constant_expression: Option<Expression>,
+    /// Source span.
     pub span: core::range::Range<usize>,
 }
 
-/// 初始化声明符
+/// Init declarator.
 #[derive(Debug, Clone, PartialEq)]
 pub struct InitDeclarator {
+    /// The declarator.
     pub declarator: Declarator,
+    /// Optional initializer.
     pub initializer: Option<Initializer>,
+    /// Source span.
     pub span: core::range::Range<usize>,
 }
 
-/// 声明
+/// Declarator.
 #[derive(Debug, Clone, PartialEq)]
 pub struct Declarator {
+    /// Optional pointer prefix.
     pub pointer: Option<Pointer>,
+    /// Direct declarator.
     pub direct_declarator: DirectDeclarator,
+    /// Source span.
     pub span: core::range::Range<usize>,
 }
 
-/// 指针
+/// Pointer.
 #[derive(Debug, Clone, PartialEq)]
 pub struct Pointer {
+    /// List of type qualifiers for this pointer level.
     pub type_qualifiers: Vec<TypeQualifier>,
+    /// Optional nested pointer (for `**`, etc.).
     pub pointer: Option<Box<Pointer>>,
+    /// Source span.
     pub span: core::range::Range<usize>,
 }
 
-/// 直接声明
+/// Direct declarator.
 #[derive(Debug, Clone, PartialEq)]
 pub enum DirectDeclarator {
+    /// Identifier.
     Identifier(String, core::range::Range<usize>),
-    Declarator(Box<Declarator>),
-    Array { declarator: Box<DirectDeclarator>, assignment_expression: Option<Expression>, span: core::range::Range<usize> },
-    Function { declarator: Box<DirectDeclarator>, parameter_type_list: Option<ParameterTypeList>, identifier_list: Option<Vec<String>>, span: core::range::Range<usize> },
+    /// Parenthesized declarator.
+    Declarator(Box<Declarator>, core::range::Range<usize>),
+    /// Array declarator.
+    Array {
+        /// The declarator being declared as an array.
+        direct_declarator: Box<DirectDeclarator>,
+        /// Type qualifiers inside `[]`.
+        type_qualifiers: Vec<TypeQualifier>,
+        /// Optional assignment expression for size.
+        assignment_expression: Option<Box<Expression>>,
+        /// Source span.
+        span: core::range::Range<usize>,
+    },
+    /// Function declarator.
+    Function {
+        /// The declarator being declared as a function.
+        direct_declarator: Box<DirectDeclarator>,
+        /// Parameter list.
+        parameter_list: ParameterList,
+        /// Source span.
+        span: core::range::Range<usize>,
+    },
 }
 
 impl DirectDeclarator {
+    /// Returns the source span of the direct declarator.
     pub fn span(&self) -> core::range::Range<usize> {
         match self {
             Self::Identifier(_, span) => span.clone(),
-            Self::Declarator(n) => n.span.clone(),
+            Self::Declarator(n, _) => n.span.clone(),
             Self::Array { span, .. } => span.clone(),
             Self::Function { span, .. } => span.clone(),
         }
     }
 }
 
-/// 参数类型列表
+/// Parameter list.
 #[derive(Debug, Clone, PartialEq)]
-pub struct ParameterTypeList {
-    pub parameter_list: Vec<ParameterDeclaration>,
+pub struct ParameterList {
+    /// List of parameter declarations.
+    pub parameter_declarations: Vec<ParameterDeclaration>,
+    /// Whether the function is variadic (ends with `...`).
     pub variadic: bool,
+    /// Source span.
     pub span: core::range::Range<usize>,
 }
 
-/// 参数声明
+/// Parameter declaration.
 #[derive(Debug, Clone, PartialEq)]
 pub struct ParameterDeclaration {
+    /// Declaration specifiers.
     pub declaration_specifiers: Vec<DeclarationSpecifier>,
+    /// Optional declarator.
     pub declarator: Option<Declarator>,
+    /// Optional abstract declarator.
     pub abstract_declarator: Option<AbstractDeclarator>,
+    /// Source span.
     pub span: core::range::Range<usize>,
 }
 
-/// 抽象声明
+/// Abstract declarator.
 #[derive(Debug, Clone, PartialEq)]
 pub struct AbstractDeclarator {
+    /// Optional pointer prefix.
     pub pointer: Option<Pointer>,
+    /// Direct abstract declarator.
     pub direct_abstract_declarator: Option<Box<DirectAbstractDeclarator>>,
+    /// Source span.
     pub span: core::range::Range<usize>,
 }
 
-/// 直接抽象声明
+/// Direct abstract declarator.
 #[derive(Debug, Clone, PartialEq)]
 pub enum DirectAbstractDeclarator {
+    /// Parenthesized abstract declarator.
     AbstractDeclarator(Box<AbstractDeclarator>),
-    Array { declarator: Option<Box<DirectAbstractDeclarator>>, assignment_expression: Option<Box<Expression>>, span: core::range::Range<usize> },
-    Function { declarator: Option<Box<DirectAbstractDeclarator>>, parameter_type_list: Option<ParameterTypeList>, span: core::range::Range<usize> },
+    /// Array abstract declarator.
+    Array {
+        /// Optional direct abstract declarator.
+        declarator: Option<Box<DirectAbstractDeclarator>>,
+        /// Optional size expression.
+        assignment_expression: Option<Box<Expression>>,
+        /// Source span.
+        span: core::range::Range<usize>,
+    },
+    /// Function abstract declarator.
+    Function {
+        /// Optional direct abstract declarator.
+        declarator: Option<Box<DirectAbstractDeclarator>>,
+        /// Parameter list.
+        parameter_list: Option<ParameterList>,
+        /// Source span.
+        span: core::range::Range<usize>,
+    },
 }
 
 impl DirectAbstractDeclarator {
+    /// Returns the source span of the direct abstract declarator.
     pub fn span(&self) -> core::range::Range<usize> {
         match self {
             Self::AbstractDeclarator(n) => n.span.clone(),
@@ -329,14 +493,17 @@ impl DirectAbstractDeclarator {
     }
 }
 
-/// 初始化器
+/// Initializer.
 #[derive(Debug, Clone, PartialEq)]
 pub enum Initializer {
+    /// Assignment expression.
     AssignmentExpression(Expression),
+    /// Initializer list `{ ... }`.
     InitializerList(Vec<Initializer>, core::range::Range<usize>),
 }
 
 impl Initializer {
+    /// Returns the source span of the initializer.
     pub fn span(&self) -> core::range::Range<usize> {
         match self {
             Self::AssignmentExpression(n) => n.span.clone(),
@@ -345,24 +512,25 @@ impl Initializer {
     }
 }
 
-/// 语句
+/// Statement.
 #[derive(Debug, Clone, PartialEq)]
 pub enum Statement {
-    /// 标号语句
+    /// Labeled statement.
     Labeled(LabeledStatement),
-    /// 复合语句
+    /// Compound statement.
     Compound(CompoundStatement),
-    /// 表达式语
+    /// Expression statement.
     Expression(ExpressionStatement),
-    /// 选择语句
+    /// Selection statement (if, switch).
     Selection(SelectionStatement),
-    /// 迭代语句
+    /// Iteration statement (while, do, for).
     Iteration(IterationStatement),
-    /// 跳转语句
+    /// Jump statement (goto, continue, break, return).
     Jump(JumpStatement),
 }
 
 impl Statement {
+    /// Returns the source span of the statement.
     pub fn span(&self) -> core::range::Range<usize> {
         match self {
             Self::Labeled(n) => n.span(),
@@ -375,15 +543,38 @@ impl Statement {
     }
 }
 
-/// 标号语句
+/// Labeled statement.
 #[derive(Debug, Clone, PartialEq)]
 pub enum LabeledStatement {
-    Label { identifier: String, statement: Box<Statement>, span: core::range::Range<usize> },
-    Case { constant_expression: Expression, statement: Box<Statement>, span: core::range::Range<usize> },
-    Default { statement: Box<Statement>, span: core::range::Range<usize> },
+    /// `identifier: statement`
+    Label {
+        /// Label name.
+        identifier: String,
+        /// Labeled statement.
+        statement: Box<Statement>,
+        /// Source span.
+        span: core::range::Range<usize>,
+    },
+    /// `case constant-expression: statement`
+    Case {
+        /// Case expression.
+        constant_expression: Expression,
+        /// Statement.
+        statement: Box<Statement>,
+        /// Source span.
+        span: core::range::Range<usize>,
+    },
+    /// `default: statement`
+    Default {
+        /// Statement.
+        statement: Box<Statement>,
+        /// Source span.
+        span: core::range::Range<usize>,
+    },
 }
 
 impl LabeledStatement {
+    /// Returns the source span of the labeled statement.
     pub fn span(&self) -> core::range::Range<usize> {
         match self {
             Self::Label { span, .. } => span.clone(),
@@ -393,21 +584,26 @@ impl LabeledStatement {
     }
 }
 
-/// 复合语句
+/// Compound statement (block).
 #[derive(Debug, Clone, PartialEq)]
 pub struct CompoundStatement {
+    /// List of block items (declarations or statements).
     pub block_items: Vec<BlockItem>,
+    /// Source span.
     pub span: core::range::Range<usize>,
 }
 
-/// 块项
+/// Block item.
 #[derive(Debug, Clone, PartialEq)]
 pub enum BlockItem {
+    /// Declaration.
     Declaration(Declaration),
+    /// Statement.
     Statement(Statement),
 }
 
 impl BlockItem {
+    /// Returns the source span of the block item.
     pub fn span(&self) -> core::range::Range<usize> {
         match self {
             Self::Declaration(n) => n.span.clone(),
@@ -416,21 +612,42 @@ impl BlockItem {
     }
 }
 
-/// 表达式语
+/// Expression statement.
 #[derive(Debug, Clone, PartialEq)]
 pub struct ExpressionStatement {
+    /// Optional expression.
     pub expression: Option<Expression>,
+    /// Source span.
     pub span: core::range::Range<usize>,
 }
 
-/// 选择语句
+/// Selection statement.
 #[derive(Debug, Clone, PartialEq)]
 pub enum SelectionStatement {
-    If { condition: Expression, then_statement: Box<Statement>, else_statement: Option<Box<Statement>>, span: core::range::Range<usize> },
-    Switch { expression: Expression, statement: Box<Statement>, span: core::range::Range<usize> },
+    /// `if (condition) then_statement else else_statement?`
+    If {
+        /// Condition.
+        condition: Expression,
+        /// Then branch.
+        then_statement: Box<Statement>,
+        /// Optional else branch.
+        else_statement: Option<Box<Statement>>,
+        /// Source span.
+        span: core::range::Range<usize>,
+    },
+    /// `switch (expression) statement`
+    Switch {
+        /// Switch expression.
+        expression: Expression,
+        /// Switch body.
+        statement: Box<Statement>,
+        /// Source span.
+        span: core::range::Range<usize>,
+    },
 }
 
 impl SelectionStatement {
+    /// Returns the source span of the selection statement.
     pub fn span(&self) -> core::range::Range<usize> {
         match self {
             Self::If { span, .. } => span.clone(),
@@ -439,15 +656,44 @@ impl SelectionStatement {
     }
 }
 
-/// 迭代语句
+/// Iteration statement.
 #[derive(Debug, Clone, PartialEq)]
 pub enum IterationStatement {
-    While { condition: Expression, statement: Box<Statement>, span: core::range::Range<usize> },
-    DoWhile { statement: Box<Statement>, condition: Expression, span: core::range::Range<usize> },
-    For { init: Option<Expression>, condition: Option<Expression>, update: Option<Expression>, statement: Box<Statement>, span: core::range::Range<usize> },
+    /// `while (condition) statement`
+    While {
+        /// Condition.
+        condition: Expression,
+        /// Loop body.
+        statement: Box<Statement>,
+        /// Source span.
+        span: core::range::Range<usize>,
+    },
+    /// `do statement while (condition);`
+    DoWhile {
+        /// Loop body.
+        statement: Box<Statement>,
+        /// Condition.
+        condition: Expression,
+        /// Source span.
+        span: core::range::Range<usize>,
+    },
+    /// `for (init; condition; update) statement`
+    For {
+        /// Optional initializer expression.
+        init: Option<Expression>,
+        /// Optional condition expression.
+        condition: Option<Expression>,
+        /// Optional update expression.
+        update: Option<Expression>,
+        /// Loop body.
+        statement: Box<Statement>,
+        /// Source span.
+        span: core::range::Range<usize>,
+    },
 }
 
 impl IterationStatement {
+    /// Returns the source span of the iteration statement.
     pub fn span(&self) -> core::range::Range<usize> {
         match self {
             Self::While { span, .. } => span.clone(),
@@ -457,16 +703,21 @@ impl IterationStatement {
     }
 }
 
-/// 跳转语句
+/// Jump statement.
 #[derive(Debug, Clone, PartialEq)]
 pub enum JumpStatement {
+    /// `goto identifier;`
     Goto(String, core::range::Range<usize>),
+    /// `continue;`
     Continue(core::range::Range<usize>),
+    /// `break;`
     Break(core::range::Range<usize>),
+    /// `return expression?;`
     Return(Option<Expression>, core::range::Range<usize>),
 }
 
 impl JumpStatement {
+    /// Returns the source span of the jump statement.
     pub fn span(&self) -> core::range::Range<usize> {
         match self {
             Self::Goto(_, span) => span.clone(),
@@ -477,52 +728,133 @@ impl JumpStatement {
     }
 }
 
-/// 表达
+/// Expression.
 #[derive(Debug, Clone, PartialEq)]
 pub struct Expression {
+    /// Expression kind.
     pub kind: Box<ExpressionKind>,
+    /// Source span.
     pub span: core::range::Range<usize>,
 }
 
-/// 表达式种
+/// Expression kind.
 #[derive(Debug, Clone, PartialEq)]
 pub enum ExpressionKind {
-    /// 标识
+    /// Identifier.
     Identifier(String, core::range::Range<usize>),
-    /// 常量
+    /// Constant (literal).
     Constant(Constant, core::range::Range<usize>),
-    /// 字符串字面量
+    /// String literal.
     StringLiteral(String, core::range::Range<usize>),
-    /// 数组下标
-    ArraySubscript { array: Box<Expression>, index: Box<Expression>, span: core::range::Range<usize> },
-    /// 函数调用
-    FunctionCall { function: Box<Expression>, arguments: Vec<Expression>, span: core::range::Range<usize> },
-    /// 成员访问
-    MemberAccess {
-        object: Box<Expression>,
-        member: String,
-        is_pointer: bool, // true for ->, false for .
+    /// Array subscript `array[index]`.
+    ArraySubscript {
+        /// The array expression.
+        array: Box<Expression>,
+        /// The index expression.
+        index: Box<Expression>,
+        /// Source span.
         span: core::range::Range<usize>,
     },
-    /// 后缀递增/递减
-    PostfixIncDec { operand: Box<Expression>, is_increment: bool, span: core::range::Range<usize> },
-    /// 前缀递增/递减
-    PrefixIncDec { operand: Box<Expression>, is_increment: bool, span: core::range::Range<usize> },
-    /// 一元操作符
-    Unary { operator: UnaryOperator, operand: Box<Expression>, span: core::range::Range<usize> },
-    /// 类型转换
-    Cast { type_name: Box<TypeName>, expression: Box<Expression>, span: core::range::Range<usize> },
-    /// 二元操作
-    Binary { left: Box<Expression>, operator: BinaryOperator, right: Box<Expression>, span: core::range::Range<usize> },
-    /// 条件表达
-    Conditional { condition: Box<Expression>, then_expr: Box<Expression>, else_expr: Box<Expression>, span: core::range::Range<usize> },
-    /// 赋值表达式
-    Assignment { left: Box<Expression>, operator: AssignmentOperator, right: Box<Expression>, span: core::range::Range<usize> },
-    /// 逗号表达
-    Comma { expressions: Vec<Expression>, span: core::range::Range<usize> },
+    /// Function call `function(arguments)`.
+    FunctionCall {
+        /// The function expression.
+        function: Box<Expression>,
+        /// List of arguments.
+        arguments: Vec<Expression>,
+        /// Source span.
+        span: core::range::Range<usize>,
+    },
+    /// Member access `object.member` or `object->member`.
+    MemberAccess {
+        /// The object expression.
+        object: Box<Expression>,
+        /// Member name.
+        member: String,
+        /// Whether it's a pointer access (`->`).
+        is_pointer: bool,
+        /// Source span.
+        span: core::range::Range<usize>,
+    },
+    /// Postfix increment or decrement (`++`, `--`).
+    PostfixIncDec {
+        /// The operand.
+        operand: Box<Expression>,
+        /// Whether it's an increment.
+        is_increment: bool,
+        /// Source span.
+        span: core::range::Range<usize>,
+    },
+    /// Prefix increment or decrement (`++`, `--`).
+    PrefixIncDec {
+        /// The operand.
+        operand: Box<Expression>,
+        /// Whether it's an increment.
+        is_increment: bool,
+        /// Source span.
+        span: core::range::Range<usize>,
+    },
+    /// Unary operation.
+    Unary {
+        /// Unary operator.
+        operator: UnaryOperator,
+        /// The operand.
+        operand: Box<Expression>,
+        /// Source span.
+        span: core::range::Range<usize>,
+    },
+    /// Type cast `(type_name) expression`.
+    Cast {
+        /// Target type.
+        type_name: Box<TypeName>,
+        /// The expression to cast.
+        expression: Box<Expression>,
+        /// Source span.
+        span: core::range::Range<usize>,
+    },
+    /// Binary operation.
+    Binary {
+        /// Left operand.
+        left: Box<Expression>,
+        /// Binary operator.
+        operator: BinaryOperator,
+        /// Right operand.
+        right: Box<Expression>,
+        /// Source span.
+        span: core::range::Range<usize>,
+    },
+    /// Conditional expression `condition ? then_expr : else_expr`.
+    Conditional {
+        /// Condition.
+        condition: Box<Expression>,
+        /// Then expression.
+        then_expr: Box<Expression>,
+        /// Else expression.
+        else_expr: Box<Expression>,
+        /// Source span.
+        span: core::range::Range<usize>,
+    },
+    /// Assignment expression.
+    Assignment {
+        /// Left side of assignment.
+        left: Box<Expression>,
+        /// Assignment operator.
+        operator: AssignmentOperator,
+        /// Right side of assignment.
+        right: Box<Expression>,
+        /// Source span.
+        span: core::range::Range<usize>,
+    },
+    /// Comma expression `expr1, expr2, ...`.
+    Comma {
+        /// List of expressions.
+        expressions: Vec<Expression>,
+        /// Source span.
+        span: core::range::Range<usize>,
+    },
 }
 
 impl ExpressionKind {
+    /// Returns the source span of the expression kind.
     pub fn span(&self) -> core::range::Range<usize> {
         match self {
             Self::Identifier(_, span) => span.clone(),
@@ -543,15 +875,19 @@ impl ExpressionKind {
     }
 }
 
-/// 常量
+/// Constant (literal).
 #[derive(Debug, Clone, PartialEq)]
 pub enum Constant {
+    /// Integer constant.
     Integer(i64, core::range::Range<usize>),
+    /// Floating-point constant.
     Float(f64, core::range::Range<usize>),
+    /// Character constant.
     Character(char, core::range::Range<usize>),
 }
 
 impl Constant {
+    /// Returns the source span of the constant.
     pub fn span(&self) -> core::range::Range<usize> {
         match self {
             Self::Integer(_, span) => span.clone(),
@@ -561,127 +897,109 @@ impl Constant {
     }
 }
 
-/// 一元操作符
-#[derive(Debug, Clone, PartialEq)]
+/// Unary operator.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum UnaryOperator {
-    AddressOf { span: core::range::Range<usize> },   // &
-    Dereference { span: core::range::Range<usize> }, // *
-    Plus { span: core::range::Range<usize> },        // +
-    Minus { span: core::range::Range<usize> },       // -
-    BitwiseNot { span: core::range::Range<usize> },  // ~
-    LogicalNot { span: core::range::Range<usize> },  // !
-    Sizeof { span: core::range::Range<usize> },      // sizeof
+    /// `&`
+    AddressOf,
+    /// `*`
+    Indirection,
+    /// `+`
+    Plus,
+    /// `-`
+    Minus,
+    /// `~`
+    BitNot,
+    /// `!`
+    LogicalNot,
+    /// `sizeof`
+    Sizeof,
 }
 
-impl UnaryOperator {
-    pub fn span(&self) -> core::range::Range<usize> {
-        match self {
-            Self::AddressOf { span } => span.clone(),
-            Self::Dereference { span } => span.clone(),
-            Self::Plus { span } => span.clone(),
-            Self::Minus { span } => span.clone(),
-            Self::BitwiseNot { span } => span.clone(),
-            Self::LogicalNot { span } => span.clone(),
-            Self::Sizeof { span } => span.clone(),
-        }
-    }
-}
-
-/// 二元操作
-#[derive(Debug, Clone, PartialEq)]
+/// Binary operator.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum BinaryOperator {
-    // 算术操作
-    Add { span: core::range::Range<usize> },      // +
-    Subtract { span: core::range::Range<usize> }, // -
-    Multiply { span: core::range::Range<usize> }, // *
-    Divide { span: core::range::Range<usize> },   // /
-    Modulo { span: core::range::Range<usize> },   // %
-
-    // 位操作符
-    BitwiseAnd { span: core::range::Range<usize> }, // &
-    BitwiseOr { span: core::range::Range<usize> },  // |
-    BitwiseXor { span: core::range::Range<usize> }, // ^
-    LeftShift { span: core::range::Range<usize> },  // <<
-    RightShift { span: core::range::Range<usize> }, // >>
-
-    // 比较操作
-    Equal { span: core::range::Range<usize> },        // ==
-    NotEqual { span: core::range::Range<usize> },     // !=
-    Less { span: core::range::Range<usize> },         // <
-    Greater { span: core::range::Range<usize> },      // >
-    LessEqual { span: core::range::Range<usize> },    // <=
-    GreaterEqual { span: core::range::Range<usize> }, // >=
-
-    // 逻辑操作
-    LogicalAnd { span: core::range::Range<usize> }, // &&
-    LogicalOr { span: core::range::Range<usize> },  // ||
+    /// `*`
+    Multiply,
+    /// `/`
+    Divide,
+    /// `%`
+    Modulo,
+    /// `+`
+    Add,
+    /// `-`
+    Subtract,
+    /// `<<`
+    ShiftLeft,
+    /// `>>`
+    ShiftRight,
+    /// `<`
+    Less,
+    /// `>`
+    Greater,
+    /// `<=`
+    LessEqual,
+    /// `>=`
+    GreaterEqual,
+    /// `==`
+    Equal,
+    /// `!=`
+    NotEqual,
+    /// `&`
+    BitAnd,
+    /// `^`
+    BitXor,
+    /// `|`
+    BitOr,
+    /// `&&`
+    LogicalAnd,
+    /// `||`
+    LogicalOr,
 }
 
-impl BinaryOperator {
-    pub fn span(&self) -> core::range::Range<usize> {
-        match self {
-            Self::Add { span } => span.clone(),
-            Self::Subtract { span } => span.clone(),
-            Self::Multiply { span } => span.clone(),
-            Self::Divide { span } => span.clone(),
-            Self::Modulo { span } => span.clone(),
-            Self::BitwiseAnd { span } => span.clone(),
-            Self::BitwiseOr { span } => span.clone(),
-            Self::BitwiseXor { span } => span.clone(),
-            Self::LeftShift { span } => span.clone(),
-            Self::RightShift { span } => span.clone(),
-            Self::Equal { span } => span.clone(),
-            Self::NotEqual { span } => span.clone(),
-            Self::Less { span } => span.clone(),
-            Self::Greater { span } => span.clone(),
-            Self::LessEqual { span } => span.clone(),
-            Self::GreaterEqual { span } => span.clone(),
-            Self::LogicalAnd { span } => span.clone(),
-            Self::LogicalOr { span } => span.clone(),
-        }
-    }
-}
-
-/// 赋值操作符
-#[derive(Debug, Clone, PartialEq)]
+/// Assignment operator.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum AssignmentOperator {
-    Assign { span: core::range::Range<usize> },           // =
-    AddAssign { span: core::range::Range<usize> },        // +=
-    SubAssign { span: core::range::Range<usize> },        // -=
-    MulAssign { span: core::range::Range<usize> },        // *=
-    DivAssign { span: core::range::Range<usize> },        // /=
-    ModAssign { span: core::range::Range<usize> },        // %=
-    AndAssign { span: core::range::Range<usize> },        // &=
-    OrAssign { span: core::range::Range<usize> },         // |=
-    XorAssign { span: core::range::Range<usize> },        // ^=
-    LeftShiftAssign { span: core::range::Range<usize> },  // <<=
-    RightShiftAssign { span: core::range::Range<usize> }, // >>=
+    /// `=`
+    Assign,
+    /// `*=`
+    MulAssign,
+    /// `/=`
+    DivAssign,
+    /// `%=`
+    ModAssign,
+    /// `+=`
+    AddAssign,
+    /// `-=`
+    SubAssign,
+    /// `<<=`
+    ShlAssign,
+    /// `>>=`
+    ShrAssign,
+    /// `&=`
+    AndAssign,
+    /// `^=`
+    XorAssign,
+    /// `|=`
+    OrAssign,
 }
 
-impl AssignmentOperator {
-    pub fn span(&self) -> core::range::Range<usize> {
-        match self {
-            Self::Assign { span } => span.clone(),
-            Self::AddAssign { span } => span.clone(),
-            Self::SubAssign { span } => span.clone(),
-            Self::MulAssign { span } => span.clone(),
-            Self::DivAssign { span } => span.clone(),
-            Self::ModAssign { span } => span.clone(),
-            Self::AndAssign { span } => span.clone(),
-            Self::OrAssign { span } => span.clone(),
-            Self::XorAssign { span } => span.clone(),
-            Self::LeftShiftAssign { span } => span.clone(),
-            Self::RightShiftAssign { span } => span.clone(),
-        }
-    }
-}
-
-/// 类型
+/// Type name.
 #[derive(Debug, Clone, PartialEq)]
 pub struct TypeName {
+    /// List of specifiers and qualifiers.
     pub specifier_qualifiers: Vec<SpecifierQualifier>,
+    /// Optional abstract declarator.
     pub abstract_declarator: Option<Box<AbstractDeclarator>>,
+    /// Source span.
     pub span: core::range::Range<usize>,
+}
+
+impl TypeName {
+    /// Returns the source span of the type name.
+    pub fn span(&self) -> core::range::Range<usize> {
+        self.span.clone()
+    }
 }
 
 impl CRoot {

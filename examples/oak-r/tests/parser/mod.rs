@@ -16,10 +16,10 @@ fn test_basic_expression() {
     match &parse_output.result {
         Ok(root) => {
             println!("Parse result: {:?}", root);
-            assert_eq!(root.kind, RSyntaxKind::Root);
+            assert_eq!(root.kind, RSyntaxKind::Root)
         }
         Err(e) => {
-            panic!("Parsing failed: {:?}", e);
+            panic!("Parsing failed: {:?}", e)
         }
     }
 }
@@ -37,7 +37,7 @@ fn test_control_flow() {
 
     match &parse_output.result {
         Ok(root) => {
-            assert_eq!(root.kind, RSyntaxKind::Root);
+            assert_eq!(root.kind, RSyntaxKind::Root)
         }
         Err(e) => panic!("Parsing failed: {:?}", e),
     }
@@ -56,7 +56,7 @@ fn test_function_definition() {
 
     match &parse_output.result {
         Ok(root) => {
-            assert_eq!(root.kind, RSyntaxKind::Root);
+            assert_eq!(root.kind, RSyntaxKind::Root)
         }
         Err(e) => panic!("Parsing failed: {:?}", e),
     }

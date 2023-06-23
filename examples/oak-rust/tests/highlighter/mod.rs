@@ -1,14 +1,12 @@
-use oak_rust::highlighter::Highlighter;
+use oak_rust::{Highlighter, RustHighlighter};
 
 #[test]
 fn test_rust_highlighter() -> Result<(), oak_core::OakError> {
-    use oak_rust::RustHighlighter;
-
     let highlighter = RustHighlighter::new();
     let source = r#"
 fn main() {
     let x = 42; // This is a comment
-    println!("Hello, {}", x);
+    println!("Hello, {}", x)
 }
 "#;
 
@@ -21,8 +19,6 @@ fn main() {
 
 #[test]
 fn test_rust_highlighter_with_parser() -> Result<(), oak_core::OakError> {
-    use oak_rust::RustHighlighter;
-
     let highlighter = RustHighlighter::new();
     let source = r#"
 struct Point {

@@ -11,6 +11,10 @@ type State<'s, S> = LexerState<'s, S, RustLanguage>;
 static RUST_STRING: LazyLock<StringConfig> = LazyLock::new(|| StringConfig { quotes: &['"'], escape: Some('\\') });
 static RUST_CHAR: LazyLock<StringConfig> = LazyLock::new(|| StringConfig { quotes: &['\''], escape: Some('\\') });
 
+/// Main entry point for the Rust lexer.
+///
+/// This function tokenizes the input source text using the provided lexer state.
+/// It handles whitespace, comments, literals, identifiers, and operators.
 pub(crate) fn run<'s, S: Source + ?Sized>(_lexer: &RustLexer, state: &mut State<'s, S>) -> Result<(), OakError> {
     while state.not_at_end() {
         let safe_point = state.get_position();
@@ -109,12 +113,15 @@ pub(crate) fn run<'s, S: Source + ?Sized>(_lexer: &RustLexer, state: &mut State<
             }
         }
 
-        state.advance_if_dead_lock(safe_point)
+        state.advance_if_dead_lock(safe_point);
     }
 
     Ok(())
 }
 
+/// Skips whitespace characters and adds a whitespace token.
+///
+/// Uses SIMD optimization for faster whitespace skipping on supported platforms.
 fn skip_whitespace<'s, S: Source + ?Sized>(state: &mut State<'s, S>) -> bool {
     let start = state.get_position();
     let bytes = state.rest_bytes();
@@ -154,6 +161,9 @@ fn skip_whitespace<'s, S: Source + ?Sized>(state: &mut State<'s, S>) -> bool {
     }
 }
 
+/// Skips single-line (//) and multi-line (/* ... */) comments.
+///
+/// Supports nested block comments as per Rust language specification.
 fn skip_comment<'s, S: Source + ?Sized>(state: &mut State<'s, S>) -> bool {
     // Line comments: //
     if state.starts_with("//") {
@@ -191,6 +201,9 @@ fn skip_comment<'s, S: Source + ?Sized>(state: &mut State<'s, S>) -> bool {
     false
 }
 
+/// Lexes regular and raw string literals.
+///
+/// Handles raw strings like r"..." and r#"..."# with matching hash counts.
 fn lex_string_literal<'s, S: Source + ?Sized>(state: &mut State<'s, S>) -> bool {
     // Handle raw strings r"..." or r#"..."#
     let start = state.get_position();
@@ -250,10 +263,15 @@ fn lex_string_literal<'s, S: Source + ?Sized>(state: &mut State<'s, S>) -> bool 
     false
 }
 
+/// Lexes character literals.
 fn lex_char_literal<'s, S: Source + ?Sized>(state: &mut State<'s, S>) -> bool {
     RUST_CHAR.scan(state, RustTokenType::CharLiteral)
 }
 
+/// Lexes integer and floating-point literals.
+///
+/// Supports binary (0b), octal (0o), hex (0x), and decimal literals with
+/// optional exponents and type suffixes.
 fn lex_number_literal<'s, S: Source + ?Sized>(state: &mut State<'s, S>) -> bool {
     let start = state.get_position();
     if let Some(ch) = state.current() {
@@ -306,8 +324,22 @@ fn lex_number_literal<'s, S: Source + ?Sized>(state: &mut State<'s, S>) -> bool 
     false
 }
 
+/// Lexes identifiers and determines if they are keywords.
+///
+/// Uses `unicode-ident` to correctly handle Unicode identifier characters
+/// according to the Unicode Standard Annex #31.
 fn lex_identifier_or_keyword<'s, S: Source + ?Sized>(state: &mut State<'s, S>) -> bool {
     let start = state.get_position();
+
+    // Handle raw identifiers: r#ident
+    let is_raw = if state.starts_with("r#") {
+        state.advance(2);
+        true
+    }
+    else {
+        false
+    };
+
     if let Some(ch) = state.current() {
         // Check if the first character is valid for an identifier
         if ch == '_' || is_xid_start(ch) {
@@ -317,65 +349,70 @@ fn lex_identifier_or_keyword<'s, S: Source + ?Sized>(state: &mut State<'s, S>) -
             state.take_while(|ch| is_xid_continue(ch));
 
             let text = state.get_text_in((start..state.get_position()).into());
-            let token_kind = match text.as_ref() {
-                // Strict keywords
-                "as" => RustTokenType::As,
-                "break" => RustTokenType::Break,
-                "const" => RustTokenType::Const,
-                "continue" => RustTokenType::Continue,
-                "crate" => RustTokenType::Crate,
-                "else" => RustTokenType::Else,
-                "enum" => RustTokenType::Enum,
-                "extern" => RustTokenType::Extern,
-                "false" => RustTokenType::False,
-                "fn" => RustTokenType::Fn,
-                "for" => RustTokenType::For,
-                "if" => RustTokenType::If,
-                "impl" => RustTokenType::Impl,
-                "in" => RustTokenType::In,
-                "let" => RustTokenType::Let,
-                "loop" => RustTokenType::Loop,
-                "match" => RustTokenType::Match,
-                "mod" => RustTokenType::Mod,
-                "move" => RustTokenType::Move,
-                "mut" => RustTokenType::Mut,
-                "pub" => RustTokenType::Pub,
-                "ref" => RustTokenType::Ref,
-                "return" => RustTokenType::Return,
-                "self" => RustTokenType::SelfLower,
-                "Self" => RustTokenType::SelfUpper,
-                "static" => RustTokenType::Static,
-                "struct" => RustTokenType::Struct,
-                "super" => RustTokenType::Super,
-                "trait" => RustTokenType::Trait,
-                "true" => RustTokenType::True,
-                "type" => RustTokenType::Type,
-                "unsafe" => RustTokenType::Unsafe,
-                "use" => RustTokenType::Use,
-                "where" => RustTokenType::Where,
-                "while" => RustTokenType::While,
-                // Reserved keywords
-                "abstract" => RustTokenType::Abstract,
-                "become" => RustTokenType::Become,
-                "box" => RustTokenType::Box,
-                "do" => RustTokenType::Do,
-                "final" => RustTokenType::Final,
-                "macro" => RustTokenType::Macro,
-                "override" => RustTokenType::Override,
-                "priv" => RustTokenType::Priv,
-                "typeof" => RustTokenType::Typeof,
-                "unsized" => RustTokenType::Unsized,
-                "virtual" => RustTokenType::Virtual,
-                "yield" => RustTokenType::Yield,
-                // Weak keywords
-                "async" => RustTokenType::Async,
-                "await" => RustTokenType::Await,
-                "dyn" => RustTokenType::Dyn,
-                "try" => RustTokenType::Try,
-                "union" => RustTokenType::Union,
-                // Edition-specific keywords
-                "raw" => RustTokenType::Raw,
-                _ => RustTokenType::Identifier,
+            let token_kind = if is_raw {
+                RustTokenType::Identifier
+            }
+            else {
+                match text.as_ref() {
+                    // Strict keywords
+                    "as" => RustTokenType::As,
+                    "break" => RustTokenType::Break,
+                    "const" => RustTokenType::Const,
+                    "continue" => RustTokenType::Continue,
+                    "crate" => RustTokenType::Crate,
+                    "else" => RustTokenType::Else,
+                    "enum" => RustTokenType::Enum,
+                    "extern" => RustTokenType::Extern,
+                    "false" => RustTokenType::False,
+                    "fn" => RustTokenType::Fn,
+                    "for" => RustTokenType::For,
+                    "if" => RustTokenType::If,
+                    "impl" => RustTokenType::Impl,
+                    "in" => RustTokenType::In,
+                    "let" => RustTokenType::Let,
+                    "loop" => RustTokenType::Loop,
+                    "match" => RustTokenType::Match,
+                    "mod" => RustTokenType::Mod,
+                    "move" => RustTokenType::Move,
+                    "mut" => RustTokenType::Mut,
+                    "pub" => RustTokenType::Pub,
+                    "ref" => RustTokenType::Ref,
+                    "return" => RustTokenType::Return,
+                    "self" => RustTokenType::SelfLower,
+                    "Self" => RustTokenType::SelfUpper,
+                    "static" => RustTokenType::Static,
+                    "struct" => RustTokenType::Struct,
+                    "super" => RustTokenType::Super,
+                    "trait" => RustTokenType::Trait,
+                    "true" => RustTokenType::True,
+                    "type" => RustTokenType::Type,
+                    "unsafe" => RustTokenType::Unsafe,
+                    "use" => RustTokenType::Use,
+                    "where" => RustTokenType::Where,
+                    "while" => RustTokenType::While,
+                    // Reserved keywords
+                    "abstract" => RustTokenType::Abstract,
+                    "become" => RustTokenType::Become,
+                    "box" => RustTokenType::Box,
+                    "do" => RustTokenType::Do,
+                    "final" => RustTokenType::Final,
+                    "macro" => RustTokenType::Macro,
+                    "override" => RustTokenType::Override,
+                    "priv" => RustTokenType::Priv,
+                    "typeof" => RustTokenType::Typeof,
+                    "unsized" => RustTokenType::Unsized,
+                    "virtual" => RustTokenType::Virtual,
+                    "yield" => RustTokenType::Yield,
+                    // Weak keywords
+                    "async" => RustTokenType::Async,
+                    "await" => RustTokenType::Await,
+                    "dyn" => RustTokenType::Dyn,
+                    "try" => RustTokenType::Try,
+                    "union" => RustTokenType::Union,
+                    // Edition-specific keywords
+                    "raw" => RustTokenType::Raw,
+                    _ => RustTokenType::Identifier,
+                }
             };
 
             state.add_token(token_kind, start, state.get_position());
@@ -385,6 +422,9 @@ fn lex_identifier_or_keyword<'s, S: Source + ?Sized>(state: &mut State<'s, S>) -
     false
 }
 
+/// Lexes multi-character operators and symbols.
+///
+/// Handles operators like `==`, `!=`, `<=`, `>=`, `=>`, `->`, `..`, `...`, etc.
 fn lex_operators<'s, S: Source + ?Sized>(state: &mut State<'s, S>) -> bool {
     let start = state.get_position();
     let Some(ch) = state.peek()

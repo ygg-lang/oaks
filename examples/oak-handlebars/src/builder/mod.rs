@@ -1,4 +1,9 @@
-use crate::{HandlebarsParser, ast::*, kind::HandlebarsSyntaxKind, language::HandlebarsLanguage};
+use crate::{
+    ast::*,
+    language::HandlebarsLanguage,
+    lexer::token_type::HandlebarsTokenType,
+    parser::{HandlebarsParser, element_type::HandlebarsElementType},
+};
 use core::range::Range;
 use oak_core::{Builder, BuilderCache, GreenNode, OakDiagnostics, OakError, Parser, RedNode, RedTree, SourceText, TextEdit, source::Source};
 
@@ -45,11 +50,11 @@ impl<'config> HandlebarsBuilder<'config> {
 
         for child in red_root.children() {
             if let RedTree::Node(n) = child {
-                nodes.push(self.build_node(n, source)?);
+                nodes.push(self.build_node(n, source)?)
             }
             else if let RedTree::Leaf(t) = child {
-                if t.kind == HandlebarsSyntaxKind::Content {
-                    nodes.push(TemplateNode::Content(Content { text: text(source, t.span.clone().into()), span: t.span.clone().into() }));
+                if t.kind == HandlebarsTokenType::Content {
+                    nodes.push(TemplateNode::Content(Content { text: text(source, t.span.clone().into()), span: t.span.clone().into() }))
                 }
             }
         }
@@ -58,12 +63,12 @@ impl<'config> HandlebarsBuilder<'config> {
 
     fn build_node(&self, node: RedNode<HandlebarsLanguage>, source: &SourceText) -> Result<TemplateNode, OakError> {
         match node.green.kind {
-            HandlebarsSyntaxKind::Mustache => {
+            HandlebarsElementType::Mustache => {
                 // Simplified Mustache building
                 Ok(TemplateNode::Mustache(Mustache { expression: Expression::Path(text(source, node.span())), is_unescaped: false, span: node.span() }))
             }
-            HandlebarsSyntaxKind::Block => Ok(TemplateNode::Block(Block { name: "todo".to_string(), params: Vec::new(), body: Vec::new(), inverse: None, span: node.span() })),
-            HandlebarsSyntaxKind::CommentNode => Ok(TemplateNode::Comment(Comment { text: text(source, node.span()), span: node.span() })),
+            HandlebarsElementType::Block => Ok(TemplateNode::Block(Block { name: "todo".to_string(), params: Vec::new(), body: Vec::new(), inverse: None, span: node.span() })),
+            HandlebarsElementType::CommentNode => Ok(TemplateNode::Comment(Comment { text: text(source, node.span()), span: node.span() })),
             _ => Ok(TemplateNode::Content(Content { text: text(source, node.span()), span: node.span() })),
         }
     }

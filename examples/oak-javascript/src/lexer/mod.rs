@@ -1,15 +1,21 @@
-use crate::{kind::JavaScriptSyntaxKind, language::JavaScriptLanguage};
+//! JavaScript lexer implementation.
+
+pub mod token_type;
+
+use crate::{language::JavaScriptLanguage, lexer::token_type::JavaScriptTokenType};
 use oak_core::{Lexer, LexerCache, LexerState, OakError, TextEdit, lexer::LexOutput, source::Source};
 use std::simd::prelude::*;
 
 type State<'a, S> = LexerState<'a, S, JavaScriptLanguage>;
 
+/// JavaScript lexer.
 #[derive(Clone, Debug)]
 pub struct JavaScriptLexer<'config> {
     _config: &'config JavaScriptLanguage,
 }
 
 impl<'config> JavaScriptLexer<'config> {
+    /// Creates a new JavaScript lexer.
     pub fn new(config: &'config JavaScriptLanguage) -> Self {
         Self { _config: config }
     }
@@ -18,7 +24,7 @@ impl<'config> JavaScriptLexer<'config> {
         if state.get_position() <= state.get_length() { Ok(()) } else { Err(OakError::custom_error(format!("Lexer out-of-bounds: pos={}, len={}", state.get_position(), state.get_length()))) }
     }
 
-    /// 主要的词法分析运行方法
+    /// Main lexer run method.
     fn run<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> Result<(), OakError> {
         while state.not_at_end() {
             let safe_point = state.get_position();
@@ -73,18 +79,18 @@ impl<'config> JavaScriptLexer<'config> {
                     _ => {
                         let start = state.get_position();
                         state.advance(ch.len_utf8());
-                        state.add_token(JavaScriptSyntaxKind::Error, start, state.get_position());
+                        state.add_token(JavaScriptTokenType::Error, start, state.get_position());
                     }
                 }
             }
 
-            state.advance_if_dead_lock(safe_point);
+            state.advance_if_dead_lock(safe_point)
         }
 
         Ok(())
     }
 
-    /// 跳过空白字符
+    /// Skips whitespace characters.
     fn skip_whitespace<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start = state.get_position();
         let bytes = state.rest_bytes();
@@ -103,10 +109,10 @@ impl<'config> JavaScriptLexer<'config> {
                 let idx = not_ws.first_set().unwrap();
                 i += idx;
                 state.advance(i);
-                state.add_token(JavaScriptSyntaxKind::Whitespace, start, state.get_position());
+                state.add_token(JavaScriptTokenType::Whitespace, start, state.get_position());
                 return true;
             }
-            i += LANES;
+            i += LANES
         }
 
         while i < len {
@@ -114,12 +120,12 @@ impl<'config> JavaScriptLexer<'config> {
             if ch != b' ' && ch != b'\t' {
                 break;
             }
-            i += 1;
+            i += 1
         }
 
         if i > 0 {
             state.advance(i);
-            state.add_token(JavaScriptSyntaxKind::Whitespace, start, state.get_position());
+            state.add_token(JavaScriptTokenType::Whitespace, start, state.get_position());
             true
         }
         else {
@@ -133,15 +139,15 @@ impl<'config> JavaScriptLexer<'config> {
 
         if let Some('\n') = state.peek() {
             state.advance(1);
-            state.add_token(JavaScriptSyntaxKind::Newline, start_pos, state.get_position());
+            state.add_token(JavaScriptTokenType::Newline, start_pos, state.get_position());
             true
         }
         else if let Some('\r') = state.peek() {
             state.advance(1);
             if let Some('\n') = state.peek() {
-                state.advance(1);
+                state.advance(1)
             }
-            state.add_token(JavaScriptSyntaxKind::Newline, start_pos, state.get_position());
+            state.add_token(JavaScriptTokenType::Newline, start_pos, state.get_position());
             true
         }
         else {
@@ -161,9 +167,9 @@ impl<'config> JavaScriptLexer<'config> {
                 if ch == '\n' || ch == '\r' {
                     break;
                 }
-                state.advance(ch.len_utf8());
+                state.advance(ch.len_utf8())
             }
-            state.add_token(JavaScriptSyntaxKind::LineComment, start, state.get_position());
+            state.add_token(JavaScriptTokenType::LineComment, start, state.get_position());
             return true;
         }
 
@@ -177,15 +183,15 @@ impl<'config> JavaScriptLexer<'config> {
                     found_end = true;
                     break;
                 }
-                state.advance(ch.len_utf8());
+                state.advance(ch.len_utf8())
             }
 
             if !found_end {
                 let error = OakError::syntax_error("Unterminated comment".to_string(), start, None);
-                state.add_error(error);
+                state.add_error(error)
             }
 
-            state.add_token(JavaScriptSyntaxKind::BlockComment, start, state.get_position());
+            state.add_token(JavaScriptTokenType::BlockComment, start, state.get_position());
             return true;
         }
 
@@ -212,20 +218,20 @@ impl<'config> JavaScriptLexer<'config> {
                         // Skip escaped character
                         state.advance(1);
                         if let Some(escaped) = state.peek() {
-                            state.advance(escaped.len_utf8());
+                            state.advance(escaped.len_utf8())
                         }
                     }
                     else {
-                        state.advance(ch.len_utf8());
+                        state.advance(ch.len_utf8())
                     }
                 }
 
                 if !found_end {
                     let error = OakError::syntax_error("Unterminated string literal".to_string(), start_pos, None);
-                    state.add_error(error);
+                    state.add_error(error)
                 }
 
-                state.add_token(JavaScriptSyntaxKind::StringLiteral, start_pos, state.get_position());
+                state.add_token(JavaScriptTokenType::StringLiteral, start_pos, state.get_position());
                 return true;
             }
         }
@@ -251,7 +257,7 @@ impl<'config> JavaScriptLexer<'config> {
                     // 处理转义字符
                     state.advance(1);
                     if let Some(escaped) = state.peek() {
-                        state.advance(escaped.len_utf8());
+                        state.advance(escaped.len_utf8())
                     }
                 }
                 else if ch == '$' {
@@ -261,7 +267,7 @@ impl<'config> JavaScriptLexer<'config> {
                         let mut brace_count = 1;
                         while let Some(inner_ch) = state.peek() {
                             if inner_ch == '{' {
-                                brace_count += 1;
+                                brace_count += 1
                             }
                             else if inner_ch == '}' {
                                 brace_count -= 1;
@@ -270,24 +276,24 @@ impl<'config> JavaScriptLexer<'config> {
                                     break;
                                 }
                             }
-                            state.advance(inner_ch.len_utf8());
+                            state.advance(inner_ch.len_utf8())
                         }
                     }
                     else {
-                        state.advance(ch.len_utf8());
+                        state.advance(ch.len_utf8())
                     }
                 }
                 else {
-                    state.advance(ch.len_utf8());
+                    state.advance(ch.len_utf8())
                 }
             }
 
             if !found_end {
                 let error = OakError::syntax_error("Unterminated template literal".to_string(), start_pos, None);
-                state.add_error(error);
+                state.add_error(error)
             }
 
-            state.add_token(JavaScriptSyntaxKind::TemplateString, start_pos, state.get_position());
+            state.add_token(JavaScriptTokenType::TemplateString, start_pos, state.get_position());
             true
         }
         else {
@@ -309,7 +315,7 @@ impl<'config> JavaScriptLexer<'config> {
                         while let Some(hex_ch) = state.peek() {
                             if hex_ch.is_ascii_hexdigit() {
                                 state.advance(1);
-                                has_digits = true;
+                                has_digits = true
                             }
                             else {
                                 break;
@@ -318,16 +324,16 @@ impl<'config> JavaScriptLexer<'config> {
 
                         if !has_digits {
                             let error = OakError::syntax_error("Invalid hexadecimal number".to_string(), start_pos, None);
-                            state.add_error(error);
+                            state.add_error(error)
                         }
 
                         // 检查 BigInt 后缀
                         if let Some('n') = state.peek() {
                             state.advance(1);
-                            state.add_token(JavaScriptSyntaxKind::BigIntLiteral, start_pos, state.get_position());
+                            state.add_token(JavaScriptTokenType::BigIntLiteral, start_pos, state.get_position())
                         }
                         else {
-                            state.add_token(JavaScriptSyntaxKind::NumericLiteral, start_pos, state.get_position());
+                            state.add_token(JavaScriptTokenType::NumericLiteral, start_pos, state.get_position())
                         }
                         return true;
                     }
@@ -339,12 +345,7 @@ impl<'config> JavaScriptLexer<'config> {
                 // 处理整数部分
                 if ch != '.' {
                     while let Some(digit) = state.peek() {
-                        if digit.is_ascii_digit() {
-                            state.advance(1);
-                        }
-                        else {
-                            break;
-                        }
+                        if digit.is_ascii_digit() { state.advance(1) } else { break }
                     }
                 }
 
@@ -352,12 +353,7 @@ impl<'config> JavaScriptLexer<'config> {
                 if let Some('.') = state.peek() {
                     state.advance(1);
                     while let Some(digit) = state.peek() {
-                        if digit.is_ascii_digit() {
-                            state.advance(1);
-                        }
-                        else {
-                            break;
-                        }
+                        if digit.is_ascii_digit() { state.advance(1) } else { break }
                     }
                 }
 
@@ -369,7 +365,7 @@ impl<'config> JavaScriptLexer<'config> {
                         // 可选的符号
                         if let Some(sign) = state.peek() {
                             if sign == '+' || sign == '-' {
-                                state.advance(1);
+                                state.advance(1)
                             }
                         }
 
@@ -378,7 +374,7 @@ impl<'config> JavaScriptLexer<'config> {
                         while let Some(digit) = state.peek() {
                             if digit.is_ascii_digit() {
                                 state.advance(1);
-                                has_exp_digits = true;
+                                has_exp_digits = true
                             }
                             else {
                                 break;
@@ -387,7 +383,7 @@ impl<'config> JavaScriptLexer<'config> {
 
                         if !has_exp_digits {
                             let error = OakError::syntax_error("Invalid number exponent".to_string(), start_pos, None);
-                            state.add_error(error);
+                            state.add_error(error)
                         }
                     }
                 }
@@ -395,10 +391,10 @@ impl<'config> JavaScriptLexer<'config> {
                 // 检查 BigInt 后缀
                 if let Some('n') = state.peek() {
                     state.advance(1);
-                    state.add_token(JavaScriptSyntaxKind::BigIntLiteral, start_pos, state.get_position());
+                    state.add_token(JavaScriptTokenType::BigIntLiteral, start_pos, state.get_position())
                 }
                 else {
-                    state.add_token(JavaScriptSyntaxKind::NumericLiteral, start_pos, state.get_position());
+                    state.add_token(JavaScriptTokenType::NumericLiteral, start_pos, state.get_position())
                 }
                 true
             }
@@ -425,12 +421,7 @@ impl<'config> JavaScriptLexer<'config> {
                 state.advance(ch.len_utf8());
 
                 while let Some(next_ch) = state.peek() {
-                    if next_ch.is_alphanumeric() || next_ch == '_' || next_ch == '$' {
-                        state.advance(next_ch.len_utf8());
-                    }
-                    else {
-                        break;
-                    }
+                    if next_ch.is_alphanumeric() || next_ch == '_' || next_ch == '$' { state.advance(next_ch.len_utf8()) } else { break }
                 }
 
                 let text = state.get_text_in((start_pos..state.get_position()).into());
@@ -448,8 +439,8 @@ impl<'config> JavaScriptLexer<'config> {
     }
 
     /// 判断是关键字还是标识
-    fn keyword_or_identifier(&self, text: &str) -> JavaScriptSyntaxKind {
-        JavaScriptSyntaxKind::from_keyword(text).unwrap_or(JavaScriptSyntaxKind::IdentifierName)
+    fn keyword_or_identifier(&self, text: &str) -> JavaScriptTokenType {
+        JavaScriptTokenType::from_keyword(text).unwrap_or(JavaScriptTokenType::IdentifierName)
     }
 
     /// 处理操作符和标点符号
@@ -463,13 +454,13 @@ impl<'config> JavaScriptLexer<'config> {
                     match state.peek() {
                         Some('+') => {
                             state.advance(1);
-                            JavaScriptSyntaxKind::PlusPlus
+                            JavaScriptTokenType::PlusPlus
                         }
                         Some('=') => {
                             state.advance(1);
-                            JavaScriptSyntaxKind::PlusEqual
+                            JavaScriptTokenType::PlusEqual
                         }
-                        _ => JavaScriptSyntaxKind::Plus,
+                        _ => JavaScriptTokenType::Plus,
                     }
                 }
                 '-' => {
@@ -477,13 +468,13 @@ impl<'config> JavaScriptLexer<'config> {
                     match state.peek() {
                         Some('-') => {
                             state.advance(1);
-                            JavaScriptSyntaxKind::MinusMinus
+                            JavaScriptTokenType::MinusMinus
                         }
                         Some('=') => {
                             state.advance(1);
-                            JavaScriptSyntaxKind::MinusEqual
+                            JavaScriptTokenType::MinusEqual
                         }
-                        _ => JavaScriptSyntaxKind::Minus,
+                        _ => JavaScriptTokenType::Minus,
                     }
                 }
                 '*' => {
@@ -493,17 +484,17 @@ impl<'config> JavaScriptLexer<'config> {
                             state.advance(1);
                             if let Some('=') = state.peek() {
                                 state.advance(1);
-                                JavaScriptSyntaxKind::StarStarEqual
+                                JavaScriptTokenType::StarStarEqual
                             }
                             else {
-                                JavaScriptSyntaxKind::StarStar
+                                JavaScriptTokenType::StarStar
                             }
                         }
                         Some('=') => {
                             state.advance(1);
-                            JavaScriptSyntaxKind::StarEqual
+                            JavaScriptTokenType::StarEqual
                         }
-                        _ => JavaScriptSyntaxKind::Star,
+                        _ => JavaScriptTokenType::Star,
                     }
                 }
                 '/' => {
@@ -516,20 +507,20 @@ impl<'config> JavaScriptLexer<'config> {
                     state.advance(1);
                     if let Some('=') = state.peek() {
                         state.advance(1);
-                        JavaScriptSyntaxKind::SlashEqual
+                        JavaScriptTokenType::SlashEqual
                     }
                     else {
-                        JavaScriptSyntaxKind::Slash
+                        JavaScriptTokenType::Slash
                     }
                 }
                 '%' => {
                     state.advance(1);
                     if let Some('=') = state.peek() {
                         state.advance(1);
-                        JavaScriptSyntaxKind::PercentEqual
+                        JavaScriptTokenType::PercentEqual
                     }
                     else {
-                        JavaScriptSyntaxKind::Percent
+                        JavaScriptTokenType::Percent
                     }
                 }
                 '<' => {
@@ -539,17 +530,17 @@ impl<'config> JavaScriptLexer<'config> {
                             state.advance(1);
                             if let Some('=') = state.peek() {
                                 state.advance(1);
-                                JavaScriptSyntaxKind::LeftShiftEqual
+                                JavaScriptTokenType::LeftShiftEqual
                             }
                             else {
-                                JavaScriptSyntaxKind::LeftShift
+                                JavaScriptTokenType::LeftShift
                             }
                         }
                         Some('=') => {
                             state.advance(1);
-                            JavaScriptSyntaxKind::LessEqual
+                            JavaScriptTokenType::LessEqual
                         }
-                        _ => JavaScriptSyntaxKind::Less,
+                        _ => JavaScriptTokenType::Less,
                     }
                 }
                 '>' => {
@@ -562,24 +553,24 @@ impl<'config> JavaScriptLexer<'config> {
                                     state.advance(1);
                                     if let Some('=') = state.peek() {
                                         state.advance(1);
-                                        JavaScriptSyntaxKind::UnsignedRightShiftEqual
+                                        JavaScriptTokenType::UnsignedRightShiftEqual
                                     }
                                     else {
-                                        JavaScriptSyntaxKind::UnsignedRightShift
+                                        JavaScriptTokenType::UnsignedRightShift
                                     }
                                 }
                                 Some('=') => {
                                     state.advance(1);
-                                    JavaScriptSyntaxKind::RightShiftEqual
+                                    JavaScriptTokenType::RightShiftEqual
                                 }
-                                _ => JavaScriptSyntaxKind::RightShift,
+                                _ => JavaScriptTokenType::RightShift,
                             }
                         }
                         Some('=') => {
                             state.advance(1);
-                            JavaScriptSyntaxKind::GreaterEqual
+                            JavaScriptTokenType::GreaterEqual
                         }
-                        _ => JavaScriptSyntaxKind::Greater,
+                        _ => JavaScriptTokenType::Greater,
                     }
                 }
                 '=' => {
@@ -589,17 +580,17 @@ impl<'config> JavaScriptLexer<'config> {
                             state.advance(1);
                             if let Some('=') = state.peek() {
                                 state.advance(1);
-                                JavaScriptSyntaxKind::EqualEqualEqual
+                                JavaScriptTokenType::EqualEqualEqual
                             }
                             else {
-                                JavaScriptSyntaxKind::EqualEqual
+                                JavaScriptTokenType::EqualEqual
                             }
                         }
                         Some('>') => {
                             state.advance(1);
-                            JavaScriptSyntaxKind::Arrow
+                            JavaScriptTokenType::Arrow
                         }
-                        _ => JavaScriptSyntaxKind::Equal,
+                        _ => JavaScriptTokenType::Equal,
                     }
                 }
                 '!' => {
@@ -609,13 +600,13 @@ impl<'config> JavaScriptLexer<'config> {
                             state.advance(1);
                             if let Some('=') = state.peek() {
                                 state.advance(1);
-                                JavaScriptSyntaxKind::NotEqualEqual
+                                JavaScriptTokenType::NotEqualEqual
                             }
                             else {
-                                JavaScriptSyntaxKind::NotEqual
+                                JavaScriptTokenType::NotEqual
                             }
                         }
-                        _ => JavaScriptSyntaxKind::Exclamation,
+                        _ => JavaScriptTokenType::Exclamation,
                     }
                 }
                 '&' => {
@@ -625,17 +616,17 @@ impl<'config> JavaScriptLexer<'config> {
                             state.advance(1);
                             if let Some('=') = state.peek() {
                                 state.advance(1);
-                                JavaScriptSyntaxKind::AmpersandAmpersandEqual
+                                JavaScriptTokenType::AmpersandAmpersandEqual
                             }
                             else {
-                                JavaScriptSyntaxKind::AmpersandAmpersand
+                                JavaScriptTokenType::AmpersandAmpersand
                             }
                         }
                         Some('=') => {
                             state.advance(1);
-                            JavaScriptSyntaxKind::AmpersandEqual
+                            JavaScriptTokenType::AmpersandEqual
                         }
-                        _ => JavaScriptSyntaxKind::Ampersand,
+                        _ => JavaScriptTokenType::Ampersand,
                     }
                 }
                 '|' => {
@@ -645,32 +636,32 @@ impl<'config> JavaScriptLexer<'config> {
                             state.advance(1);
                             if let Some('=') = state.peek() {
                                 state.advance(1);
-                                JavaScriptSyntaxKind::PipePipeEqual
+                                JavaScriptTokenType::PipePipeEqual
                             }
                             else {
-                                JavaScriptSyntaxKind::PipePipe
+                                JavaScriptTokenType::PipePipe
                             }
                         }
                         Some('=') => {
                             state.advance(1);
-                            JavaScriptSyntaxKind::PipeEqual
+                            JavaScriptTokenType::PipeEqual
                         }
-                        _ => JavaScriptSyntaxKind::Pipe,
+                        _ => JavaScriptTokenType::Pipe,
                     }
                 }
                 '^' => {
                     state.advance(1);
                     if let Some('=') = state.peek() {
                         state.advance(1);
-                        JavaScriptSyntaxKind::CaretEqual
+                        JavaScriptTokenType::CaretEqual
                     }
                     else {
-                        JavaScriptSyntaxKind::Caret
+                        JavaScriptTokenType::Caret
                     }
                 }
                 '~' => {
                     state.advance(1);
-                    JavaScriptSyntaxKind::Tilde
+                    JavaScriptTokenType::Tilde
                 }
                 '?' => {
                     state.advance(1);
@@ -679,69 +670,69 @@ impl<'config> JavaScriptLexer<'config> {
                             state.advance(1);
                             if let Some('=') = state.peek() {
                                 state.advance(1);
-                                JavaScriptSyntaxKind::QuestionQuestionEqual
+                                JavaScriptTokenType::QuestionQuestionEqual
                             }
                             else {
-                                JavaScriptSyntaxKind::QuestionQuestion
+                                JavaScriptTokenType::QuestionQuestion
                             }
                         }
                         Some('.') => {
                             state.advance(1);
-                            JavaScriptSyntaxKind::QuestionDot
+                            JavaScriptTokenType::QuestionDot
                         }
-                        _ => JavaScriptSyntaxKind::Question,
+                        _ => JavaScriptTokenType::Question,
                     }
                 }
                 '(' => {
                     state.advance(1);
-                    JavaScriptSyntaxKind::LeftParen
+                    JavaScriptTokenType::LeftParen
                 }
                 ')' => {
                     state.advance(1);
-                    JavaScriptSyntaxKind::RightParen
+                    JavaScriptTokenType::RightParen
                 }
                 '{' => {
                     state.advance(1);
-                    JavaScriptSyntaxKind::LeftBrace
+                    JavaScriptTokenType::LeftBrace
                 }
                 '}' => {
                     state.advance(1);
-                    JavaScriptSyntaxKind::RightBrace
+                    JavaScriptTokenType::RightBrace
                 }
                 '[' => {
                     state.advance(1);
-                    JavaScriptSyntaxKind::LeftBracket
+                    JavaScriptTokenType::LeftBracket
                 }
                 ']' => {
                     state.advance(1);
-                    JavaScriptSyntaxKind::RightBracket
+                    JavaScriptTokenType::RightBracket
                 }
                 ';' => {
                     state.advance(1);
-                    JavaScriptSyntaxKind::Semicolon
+                    JavaScriptTokenType::Semicolon
                 }
                 ',' => {
                     state.advance(1);
-                    JavaScriptSyntaxKind::Comma
+                    JavaScriptTokenType::Comma
                 }
                 '.' => {
                     state.advance(1);
                     if let Some('.') = state.peek() {
                         if let Some('.') = state.peek_next_n(1) {
                             state.advance(2);
-                            JavaScriptSyntaxKind::DotDotDot
+                            JavaScriptTokenType::DotDotDot
                         }
                         else {
-                            JavaScriptSyntaxKind::Dot
+                            JavaScriptTokenType::Dot
                         }
                     }
                     else {
-                        JavaScriptSyntaxKind::Dot
+                        JavaScriptTokenType::Dot
                     }
                 }
                 ':' => {
                     state.advance(1);
-                    JavaScriptSyntaxKind::Colon
+                    JavaScriptTokenType::Colon
                 }
                 _ => return false,
             };
@@ -760,7 +751,7 @@ impl<'config> Lexer<JavaScriptLanguage> for JavaScriptLexer<'config> {
         let mut state = LexerState::new(text);
         let result = self.run(&mut state);
         if result.is_ok() {
-            state.add_eof();
+            state.add_eof()
         }
         state.finish_with_cache(result, cache)
     }

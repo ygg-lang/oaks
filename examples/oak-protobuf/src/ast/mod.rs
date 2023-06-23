@@ -1,6 +1,7 @@
-use crate::kind::ProtobufSyntaxKind;
+#![doc = include_str!("readme.md")]
+use crate::ProtobufTokenType;
 
-pub type ProtobufToken = ProtobufSyntaxKind;
+pub type ProtobufToken = ProtobufTokenType;
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct ProtobufRoot {}

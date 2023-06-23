@@ -1,8 +1,11 @@
-use crate::{kind::NixSyntaxKind, language::NixLanguage};
+#![doc = include_str!("readme.md")]
+pub mod token_type;
+
+use crate::{language::NixLanguage, lexer::token_type::NixTokenType};
 use oak_core::{
-    Lexer, LexerCache, LexerState,
-    lexer::LexOutput,
-    source::{Source, TextEdit},
+    Source,
+    lexer::{LexOutput, Lexer, LexerCache, LexerState, Token},
+    source::TextEdit,
 };
 
 type State<'a, S> = LexerState<'a, S, NixLanguage>;
@@ -47,7 +50,7 @@ impl NixLexer<'_> {
             let start_pos = state.get_position();
             if let Some(ch) = state.peek() {
                 state.advance(ch.len_utf8());
-                state.add_token(NixSyntaxKind::Error, start_pos, state.get_position());
+                state.add_token(NixTokenType::Error, start_pos, state.get_position());
             }
         }
         Ok(())
@@ -80,7 +83,7 @@ impl NixLexer<'_> {
         }
 
         if state.get_position() > start_pos {
-            state.add_token(NixSyntaxKind::Whitespace, start_pos, state.get_position());
+            state.add_token(NixTokenType::Whitespace, start_pos, state.get_position());
             true
         }
         else {
@@ -94,7 +97,7 @@ impl NixLexer<'_> {
 
         if let Some('\n') = state.peek() {
             state.advance(1);
-            state.add_token(NixSyntaxKind::Newline, start_pos, state.get_position());
+            state.add_token(NixTokenType::Newline, start_pos, state.get_position());
             true
         }
         else if let Some('\r') = state.peek() {
@@ -102,7 +105,7 @@ impl NixLexer<'_> {
             if let Some('\n') = state.peek() {
                 state.advance(1);
             }
-            state.add_token(NixSyntaxKind::Newline, start_pos, state.get_position());
+            state.add_token(NixTokenType::Newline, start_pos, state.get_position());
             true
         }
         else {
@@ -125,7 +128,7 @@ impl NixLexer<'_> {
                 state.advance(ch.len_utf8());
             }
 
-            state.add_token(NixSyntaxKind::Comment, start_pos, state.get_position());
+            state.add_token(NixTokenType::Comment, start_pos, state.get_position());
             true
         }
         else {
@@ -156,7 +159,7 @@ impl NixLexer<'_> {
                 }
             }
 
-            state.add_token(NixSyntaxKind::String, start_pos, state.get_position());
+            state.add_token(NixTokenType::String, start_pos, state.get_position());
             true
         }
         else {
@@ -179,7 +182,7 @@ impl NixLexer<'_> {
                         break;
                     }
                 }
-                state.add_token(NixSyntaxKind::Number, start_pos, state.get_position());
+                state.add_token(NixTokenType::Number, start_pos, state.get_position());
                 return true;
             }
         }
@@ -204,18 +207,18 @@ impl NixLexer<'_> {
 
                 let text = state.get_text_in((start_pos..state.get_position()).into());
                 let kind = match &*text {
-                    "let" => NixSyntaxKind::Let,
-                    "in" => NixSyntaxKind::In,
-                    "if" => NixSyntaxKind::If,
-                    "then" => NixSyntaxKind::Then,
-                    "else" => NixSyntaxKind::Else,
-                    "with" => NixSyntaxKind::With,
-                    "inherit" => NixSyntaxKind::Inherit,
-                    "rec" => NixSyntaxKind::Rec,
-                    "import" => NixSyntaxKind::Import,
-                    "true" | "false" => NixSyntaxKind::Boolean,
-                    "null" => NixSyntaxKind::Null,
-                    _ => NixSyntaxKind::Identifier,
+                    "let" => NixTokenType::Let,
+                    "in" => NixTokenType::In,
+                    "if" => NixTokenType::If,
+                    "then" => NixTokenType::Then,
+                    "else" => NixTokenType::Else,
+                    "with" => NixTokenType::With,
+                    "inherit" => NixTokenType::Inherit,
+                    "rec" => NixTokenType::Rec,
+                    "import" => NixTokenType::Import,
+                    "true" | "false" => NixTokenType::Boolean,
+                    "null" => NixTokenType::Null,
+                    _ => NixTokenType::Identifier,
                 };
 
                 state.add_token(kind, start_pos, state.get_position());
@@ -240,55 +243,55 @@ impl NixLexer<'_> {
                     state.advance(1);
                     if let Some('+') = state.peek() {
                         state.advance(1);
-                        NixSyntaxKind::Concatenation
+                        NixTokenType::Concatenation
                     }
                     else {
-                        NixSyntaxKind::Plus
+                        NixTokenType::Plus
                     }
                 }
                 '-' => {
                     state.advance(1);
                     if let Some('>') = state.peek() {
                         state.advance(1);
-                        NixSyntaxKind::Implication
+                        NixTokenType::Implication
                     }
                     else {
-                        NixSyntaxKind::Minus
+                        NixTokenType::Minus
                     }
                 }
                 '*' => {
                     state.advance(1);
-                    NixSyntaxKind::Star
+                    NixTokenType::Star
                 }
                 '/' => {
                     state.advance(1);
                     if let Some('/') = state.peek() {
                         state.advance(1);
-                        NixSyntaxKind::Update
+                        NixTokenType::Update
                     }
                     else {
-                        NixSyntaxKind::Slash
+                        NixTokenType::Slash
                     }
                 }
                 '%' => {
                     state.advance(1);
-                    NixSyntaxKind::Percent
+                    NixTokenType::Percent
                 }
                 '=' => {
                     state.advance(1);
                     if let Some('=') = state.peek() {
                         state.advance(1);
-                        NixSyntaxKind::Equal
+                        NixTokenType::Equal
                     }
                     else {
-                        NixSyntaxKind::Assign
+                        NixTokenType::Assign
                     }
                 }
                 '!' => {
                     state.advance(1);
                     if let Some('=') = state.peek() {
                         state.advance(1);
-                        NixSyntaxKind::NotEqual
+                        NixTokenType::NotEqual
                     }
                     else {
                         return false;
@@ -298,27 +301,27 @@ impl NixLexer<'_> {
                     state.advance(1);
                     if let Some('=') = state.peek() {
                         state.advance(1);
-                        NixSyntaxKind::LessEqual
+                        NixTokenType::LessEqual
                     }
                     else {
-                        NixSyntaxKind::Less
+                        NixTokenType::Less
                     }
                 }
                 '>' => {
                     state.advance(1);
                     if let Some('=') = state.peek() {
                         state.advance(1);
-                        NixSyntaxKind::GreaterEqual
+                        NixTokenType::GreaterEqual
                     }
                     else {
-                        NixSyntaxKind::Greater
+                        NixTokenType::Greater
                     }
                 }
                 '&' => {
                     state.advance(1);
                     if let Some('&') = state.peek() {
                         state.advance(1);
-                        NixSyntaxKind::LogicalAnd
+                        NixTokenType::LogicalAnd
                     }
                     else {
                         return false;
@@ -328,7 +331,7 @@ impl NixLexer<'_> {
                     state.advance(1);
                     if let Some('|') = state.peek() {
                         state.advance(1);
-                        NixSyntaxKind::LogicalOr
+                        NixTokenType::LogicalOr
                     }
                     else {
                         return false;
@@ -336,59 +339,59 @@ impl NixLexer<'_> {
                 }
                 '?' => {
                     state.advance(1);
-                    NixSyntaxKind::Question
+                    NixTokenType::Question
                 }
                 '(' => {
                     state.advance(1);
-                    NixSyntaxKind::LeftParen
+                    NixTokenType::LeftParen
                 }
                 ')' => {
                     state.advance(1);
-                    NixSyntaxKind::RightParen
+                    NixTokenType::RightParen
                 }
                 '{' => {
                     state.advance(1);
-                    NixSyntaxKind::LeftBrace
+                    NixTokenType::LeftBrace
                 }
                 '}' => {
                     state.advance(1);
-                    NixSyntaxKind::RightBrace
+                    NixTokenType::RightBrace
                 }
                 '[' => {
                     state.advance(1);
-                    NixSyntaxKind::LeftBracket
+                    NixTokenType::LeftBracket
                 }
                 ']' => {
                     state.advance(1);
-                    NixSyntaxKind::RightBracket
+                    NixTokenType::RightBracket
                 }
                 ';' => {
                     state.advance(1);
-                    NixSyntaxKind::Semicolon
+                    NixTokenType::Semicolon
                 }
                 ':' => {
                     state.advance(1);
-                    NixSyntaxKind::Colon
+                    NixTokenType::Colon
                 }
                 ',' => {
                     state.advance(1);
-                    NixSyntaxKind::Comma
+                    NixTokenType::Comma
                 }
                 '.' => {
                     state.advance(1);
-                    NixSyntaxKind::Dot
+                    NixTokenType::Dot
                 }
                 '@' => {
                     state.advance(1);
-                    NixSyntaxKind::At
+                    NixTokenType::At
                 }
                 '$' => {
                     state.advance(1);
-                    NixSyntaxKind::Dollar
+                    NixTokenType::Dollar
                 }
                 '#' => {
                     state.advance(1);
-                    NixSyntaxKind::Hash
+                    NixTokenType::Hash
                 }
                 _ => return false,
             };
