@@ -6,6 +6,7 @@
 //! Handlebars support for the Oak language framework.
 
 pub mod ast;
+/// AST Builder
 pub mod builder;
 
 mod language;

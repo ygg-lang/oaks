@@ -1,14 +1,13 @@
 #![doc = include_str!("readme.md")]
-use crate::{lexer::AsciiDocTokenType, parser::AsciiDocElementType};
 use oak_core::{Language, LanguageCategory};
-#[cfg(feature = "serde")]
-use serde::{Deserialize, Serialize};
 
+/// AsciiDoc language definition.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Default)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct AsciiDocLanguage {}
 
 impl AsciiDocLanguage {
+    /// Creates a new `AsciiDocLanguage` instance.
     pub fn new() -> Self {
         Self {}
     }
@@ -20,5 +19,5 @@ impl Language for AsciiDocLanguage {
 
     type TokenType = crate::lexer::token_type::AsciiDocTokenType;
     type ElementType = crate::parser::element_type::AsciiDocElementType;
-    type TypedRoot = ();
+    type TypedRoot = crate::ast::AsciiDocRoot;
 }

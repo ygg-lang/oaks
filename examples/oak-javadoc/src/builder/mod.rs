@@ -2,7 +2,9 @@
 use crate::{ast::JavadocRoot, language::JavadocLanguage};
 use oak_core::builder::Builder;
 
+/// Javadoc syntax tree builder
 pub struct JavadocBuilder {
+    /// Javadoc language configuration
     pub config: JavadocLanguage,
 }
 

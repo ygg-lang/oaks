@@ -5,12 +5,18 @@
 #![warn(missing_docs)]
 //! Fortran support for the Oak language framework.
 
+/// AST module.
 pub mod ast;
+/// Builder module.
 pub mod builder;
+/// Language module.
 mod language;
+/// Lexer module.
 mod lexer;
+/// LSP module.
 #[cfg(any(feature = "lsp", feature = "oak-highlight", feature = "oak-pretty-print"))]
 pub mod lsp;
+/// Parser module.
 pub mod parser;
 
 pub use crate::{

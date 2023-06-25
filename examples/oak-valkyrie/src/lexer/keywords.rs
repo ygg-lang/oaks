@@ -1,10 +1,7 @@
-#[cfg(feature = "serde")]
-use serde::{Deserialize, Serialize};
 
-/// Keywords or soft keywords
+/// Keywords or soft keywords for the Valkyrie language.
 #[derive(Copy, Clone, Debug, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
-#[allow(missing_docs)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub enum ValkyrieKeywords {
     /// Declare a namespace in Valkyrie.
     ///

@@ -1,10 +1,8 @@
-use oak_core::{ElementType, Parser, UniversalElementRole};
-#[cfg(feature = "serde")]
-use serde::{Deserialize, Serialize};
+use oak_core::{ElementType, UniversalElementRole};
 
 /// LLVM IR element types for the parser.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 #[repr(u8)]
 pub enum LLvmElementType {
     /// Root node of the program.
@@ -25,6 +23,7 @@ pub enum LLvmElementType {
     Error,
     /// End of file.
     Eof,
+    // Added variants
     /// Local variable (starts with %).
     LocalVar,
     /// Global variable (starts with @).
@@ -66,6 +65,10 @@ pub enum LLvmElementType {
     Block,
     /// Instruction.
     Instruction,
+    /// Type annotation.
+    Type,
+    /// Operand.
+    Operand,
 }
 
 impl ElementType for LLvmElementType {
@@ -73,6 +76,12 @@ impl ElementType for LLvmElementType {
 
     fn role(&self) -> Self::Role {
         match self {
+            Self::Root => UniversalElementRole::Root,
+            Self::Function => UniversalElementRole::Container,
+            Self::Block => UniversalElementRole::Container,
+            Self::Instruction => UniversalElementRole::Statement,
+            Self::Global => UniversalElementRole::Binding,
+            Self::Error => UniversalElementRole::Error,
             _ => UniversalElementRole::None,
         }
     }

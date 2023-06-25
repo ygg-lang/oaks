@@ -1,91 +1,166 @@
 use crate::lexer::token_type::ElixirTokenType;
 use oak_core::{ElementType, UniversalElementRole};
-#[cfg(feature = "serde")]
-use serde::{Deserialize, Serialize};
 
+/// Element types for Elixir AST.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 #[repr(u16)]
 pub enum ElixirElementType {
+    /// Root element.
     Root,
+    /// Whitespace.
     Whitespace,
+    /// Newline.
     Newline,
+    /// Comment.
     Comment,
+    /// Identifier.
     Identifier,
+    /// Atom.
     Atom,
+    /// Variable.
     Variable,
+    /// Number.
     Number,
+    /// Float.
     Float,
+    /// String.
     String,
+    /// Character.
     Character,
+    /// Sigil.
     Sigil,
 
+    /// `after`
     After,
+    /// `and`
     And,
+    /// `case`
     Case,
+    /// `catch`
     Catch,
+    /// `cond`
     Cond,
+    /// `def`
     Def,
+    /// `defp`
     Defp,
+    /// `defmodule`
     Defmodule,
+    /// `defstruct`
     Defstruct,
+    /// `defprotocol`
     Defprotocol,
+    /// `defimpl`
     Defimpl,
+    /// `defmacro`
     Defmacro,
+    /// `defmacrop`
     Defmacrop,
+    /// `do`
     Do,
+    /// `else`
     Else,
+    /// `elsif`
     Elsif,
+    /// `end`
     End,
+    /// `false`
     False,
+    /// `fn`
     Fn,
+    /// `if`
     If,
+    /// `in`
     In,
+    /// `not`
     Not,
+    /// `or`
     Or,
+    /// `receive`
     Receive,
+    /// `rescue`
     Rescue,
+    /// `true`
     True,
+    /// `try`
     Try,
+    /// `unless`
     Unless,
+    /// `when`
     When,
+    /// `with`
     With,
 
+    /// `+`
     Plus,
+    /// `-`
     Minus,
+    /// `*`
     Mul,
+    /// `/`
     Div,
+    /// `.`
     Dot,
+    /// `,`
     Comma,
+    /// `;`
     Semicolon,
+    /// `:`
     Colon,
+    /// `(`
     LeftParen,
+    /// `)`
     RightParen,
+    /// `{`
     LeftBrace,
+    /// `}`
     RightBrace,
+    /// `[`
     LeftBracket,
+    /// `]`
     RightBracket,
+    /// `->`
     Arrow,
+    /// `|`
     Pipe,
 
+    /// Module definition.
     ModuleDefinition,
+    /// Function definition.
     FunctionDefinition,
+    /// Call expression.
     CallExpression,
+    /// Binary expression.
     BinaryExpression,
+    /// Unary expression.
     UnaryExpression,
+    /// Literal expression.
     LiteralExpression,
+    /// Identifier expression.
     IdentifierExpression,
+    /// Attribute expression.
     AttributeExpression,
+    /// Access expression.
     AccessExpression,
+    /// List literal.
     ListLiteral,
+    /// Tuple literal.
     TupleLiteral,
+    /// Map literal.
     MapLiteral,
+    /// Keyword literal.
     KeywordLiteral,
+    /// Block expression.
     BlockExpression,
+    /// Match expression.
     MatchExpression,
+    /// `@`
     At,
+    /// `%`
     Percent,
 
+    /// Error element.
     Error,
 }
 

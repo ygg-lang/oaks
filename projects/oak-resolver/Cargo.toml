@@ -12,7 +12,11 @@ repository = "https://github.com/ygg-lang/oaks/tree/master/projects/oak-resolver
 oak-core = { workspace = true }
 oak-vfs = { workspace = true }
 oak-symbols = { workspace = true }
-serde = { workspace = true }
+serde = { workspace = true, optional = true }
 dashmap = { workspace = true }
 url = { workspace = true }
 tracing = { workspace = true }
+
+[features]
+serde = ["dep:serde", "oak-core/serde"]
+default = ["serde"]

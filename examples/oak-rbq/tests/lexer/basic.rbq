@@ -8,10 +8,10 @@
 class User {
     @key
     id: u128;
-    # 唯一用户名
+    # Unique username
     @unique
     user_name: utf8;
-    # 昵称
+    # Nickname
     nick_name: utf8; 
     @unique
     email: utf8;
@@ -20,7 +20,7 @@ class User {
     age: u32?;
     tags: list<utf8>;
     
-    # 使用 @inline 将 profile 字段平铺到 users 表中
+    # Use @inline to flatten profile field into users table
     @inline
     profile: UserProfile;
     
@@ -38,7 +38,7 @@ union UserRole {
     Guest = 4,
 }
 
-# 自由对象 (Free Object)，语义等价于 JSON 存储在 User 表中
+# Free Object, semantically equivalent to JSON storage in User table
 class UserProfile {
     bio: utf8?;
     avatar_url: utf8?;

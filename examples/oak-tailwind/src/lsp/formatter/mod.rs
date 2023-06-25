@@ -1,12 +1,14 @@
-#![doc = include_str!("readme.md")]
+//! Formatter for the Tailwind language.
+
 use oak_core::SourceText;
 
-/// Tailwind 语言的格式化器
+/// Formatter for Tailwind language.
 pub struct TailwindFormatter;
 
 impl TailwindFormatter {
+    /// Formats the given source text.
     pub fn format(&self, source: &SourceText, _indent: usize) -> String {
-        // TODO: 实现 Tailwind 格式化逻辑
+        // TODO: Implement Tailwind formatting logic
         source.text().to_string()
     }
 }

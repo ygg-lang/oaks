@@ -4,12 +4,12 @@ pub mod token_type;
 use crate::{language::DLanguage, lexer::token_type::DTokenType};
 use oak_core::{Lexer, LexerCache, LexerState, TextEdit, lexer::LexOutput, source::Source};
 
-type State<'a, S> = LexerState<'a, S, DLanguage>;
+pub(crate) type State<'a, S> = LexerState<'a, S, DLanguage>;
 
 /// Lexer implementation for D programming language
 #[derive(Clone)]
 pub struct DLexer<'config> {
-    _config: &'config DLanguage,
+    config: &'config DLanguage,
 }
 
 impl<'config> Lexer<DLanguage> for DLexer<'config> {
@@ -24,15 +24,16 @@ impl<'config> Lexer<DLanguage> for DLexer<'config> {
 }
 
 impl<'config> DLexer<'config> {
+    /// Creates a new DLexer with the given configuration.
     pub fn new(config: &'config DLanguage) -> Self {
-        Self { _config: config }
+        Self { config }
     }
 
     fn run<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> Result<(), oak_core::OakError> {
         while state.not_at_end() {
             let start_pos = state.get_position();
 
-            // 尝试各种词法规则
+            // Try various lexical rules
             if self.skip_whitespace(state) {
                 continue;
             }
@@ -77,7 +78,7 @@ impl<'config> DLexer<'config> {
                 continue;
             }
 
-            // 如果没有匹配任何规则，添加错误token并强行推进，防止死循环
+            // If no rules matched, add error token and force advancement to prevent infinite loops
             state.advance_if_dead_lock(start_pos);
             if state.get_position() > start_pos {
                 state.add_token(DTokenType::Error, start_pos, state.get_position())
@@ -256,12 +257,12 @@ impl<'config> DLexer<'config> {
             if ch.is_ascii_digit() {
                 let start_pos = state.get_position();
 
-                // 处理数字
+                // Handle numbers
                 while let Some(ch) = state.peek() {
                     if ch.is_ascii_digit() || ch == '_' { state.advance(ch.len_utf8()) } else { break }
                 }
 
-                // 检查小数点
+                // Check for decimal point
                 if let Some('.') = state.peek() {
                     state.advance(1);
                     while let Some(ch) = state.peek() {
@@ -269,7 +270,7 @@ impl<'config> DLexer<'config> {
                     }
                 }
 
-                // 检查指数
+                // Check for exponent
                 if let Some(ch) = state.peek() {
                     if ch == 'e' || ch == 'E' {
                         state.advance(1);
@@ -284,7 +285,7 @@ impl<'config> DLexer<'config> {
                     }
                 }
 
-                // 检查后缀
+                // Check for suffix
                 if let Some(ch) = state.peek() {
                     if ch == 'f' || ch == 'F' || ch == 'L' || ch == 'u' || ch == 'U' {
                         state.advance(1)
@@ -479,7 +480,7 @@ impl<'config> DLexer<'config> {
                     return true;
                 }
                 '/' => {
-                    // 已在注释处理中处理
+                    // Handled in comment processing
                     return false;
                 }
                 '%' => {

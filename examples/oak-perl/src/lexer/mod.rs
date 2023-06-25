@@ -1,4 +1,5 @@
 #![doc = include_str!("readme.md")]
+/// Token type definitions for Perl.
 pub mod token_type;
 
 use crate::{language::PerlLanguage, lexer::token_type::PerlTokenType};
@@ -9,6 +10,7 @@ use oak_core::{
 };
 use std::sync::LazyLock;
 
+/// The lexer state type for Perl.
 type State<'s, S> = LexerState<'s, S, PerlLanguage>;
 
 static PERL_WHITESPACE: LazyLock<WhitespaceConfig> = LazyLock::new(|| WhitespaceConfig { unicode_whitespace: true });
@@ -16,16 +18,17 @@ static PERL_COMMENT: LazyLock<CommentConfig> = LazyLock::new(|| CommentConfig { 
 
 /// Lexer for the Perl language.
 ///
-/// This lexer transforms a source string into a stream of [`PerlTokenType`] tokens.
+/// This lexer converts a source string into a stream of [`PerlTokenType`] tokens.
 #[derive(Clone, Debug)]
 pub struct PerlLexer<'config> {
-    _config: &'config PerlLanguage,
+    /// The Perl language configuration.
+    pub config: &'config PerlLanguage,
 }
 
 impl<'config> PerlLexer<'config> {
     /// Creates a new `PerlLexer` with the given language configuration.
     pub fn new(config: &'config PerlLanguage) -> Self {
-        Self { _config: config }
+        Self { config }
     }
 
     /// Skips whitespace characters.
@@ -38,7 +41,7 @@ impl<'config> PerlLexer<'config> {
         PERL_COMMENT.scan(state, PerlTokenType::Comment, PerlTokenType::Comment)
     }
 
-    /// Lexes a string literal (single or double quoted).
+    /// Analyzes string literals (single or double quotes).
     fn lex_string<'s, S: Source + ?Sized>(&self, state: &mut State<'s, S>) -> bool {
         let start_pos = state.get_position();
 
@@ -81,7 +84,7 @@ impl<'config> PerlLexer<'config> {
         }
     }
 
-    /// Lexes a variable name (starting with $, @, or %).
+    /// Analyzes variable names (starting with $, @ or %).
     fn lex_variable<'s, S: Source + ?Sized>(&self, state: &mut State<'s, S>) -> bool {
         if let Some(ch) = state.peek() {
             let start_pos = state.get_position();
@@ -122,14 +125,14 @@ impl<'config> PerlLexer<'config> {
         }
     }
 
-    /// Lexes an identifier or a keyword.
+    /// Analyzes identifiers or keywords.
     fn lex_identifier_or_keyword<'s, S: Source + ?Sized>(&self, state: &mut State<'s, S>) -> bool {
         if let Some(ch) = state.peek() {
             if ch.is_alphabetic() || ch == '_' {
                 let start_pos = state.get_position();
                 let mut text = String::new();
 
-                // 读取标识符
+                // Read identifier
                 while let Some(ch) = state.peek() {
                     if ch.is_alphanumeric() || ch == '_' {
                         text.push(ch);
@@ -140,7 +143,7 @@ impl<'config> PerlLexer<'config> {
                     }
                 }
 
-                // 检查是否是关键字
+                // Check if it's a keyword
                 let kind = match text.as_str() {
                     "if" => PerlTokenType::If,
                     "else" => PerlTokenType::Else,
@@ -203,14 +206,14 @@ impl<'config> PerlLexer<'config> {
         }
     }
 
-    /// Lexes a number literal.
+    /// Analyzes number literals.
     fn lex_number<'s, S: Source + ?Sized>(&self, state: &mut State<'s, S>) -> bool {
         if let Some(ch) = state.peek() {
             if ch.is_ascii_digit() {
                 let start_pos = state.get_position();
                 let mut has_dot = false;
 
-                // 读取数字
+                // Read number
                 while let Some(ch) = state.peek() {
                     if ch.is_ascii_digit() {
                         state.advance(1)
@@ -238,7 +241,7 @@ impl<'config> PerlLexer<'config> {
         }
     }
 
-    /// Lexes operators and punctuation characters.
+    /// Analyzes operators and punctuation.
     fn lex_operators_and_punctuation<'s, S: Source + ?Sized>(&self, state: &mut State<'s, S>) -> bool {
         if let Some(ch) = state.peek() {
             let start_pos = state.get_position();
@@ -475,12 +478,12 @@ impl<'config> Lexer<PerlLanguage> for PerlLexer<'config> {
 }
 
 impl<'config> PerlLexer<'config> {
-    /// Runs the lexer on the given state until the end of the source is reached.
+    /// Runs the lexer on the given state until the end of the source.
     fn run<'s, S: Source + ?Sized>(&self, state: &mut State<'s, S>) -> Result<(), OakError> {
         while state.not_at_end() {
             let safe_point = state.get_position();
 
-            // Skip whitespace characters
+            // Skip whitespace
             if self.skip_whitespace(state) {
                 continue;
             }

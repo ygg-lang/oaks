@@ -5,11 +5,15 @@
 #![warn(missing_docs)]
 //! Stylus support for the Oak language framework.
 
+/// AST module.
 pub mod ast;
+/// Builder module.
 pub mod builder;
-pub mod errors;
+/// Language configuration module.
 pub mod language;
+/// Lexer module.
 pub mod lexer;
+/// LSP module.
 #[cfg(any(feature = "lsp", feature = "oak-highlight", feature = "oak-pretty-print"))]
 pub mod lsp;
 /// MCP module.

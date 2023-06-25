@@ -2,54 +2,54 @@
 
 # Class definition
 class Person
-  property name : String
-  property age : Int32
+    property name : String
+    property age : Int32
   
-  def initialize(↯name : String, ↯age : Int32)
-  end
+    def initialize(↯name : String, ↯age : Int32)
+    end
   
-  def greet
-    puts "Hello, I'm #{↯name} and I'm #{↯age} years old."
-  end
+    def greet
+        puts "Hello, I'm #{↯name} and I'm #{↯age} years old."
+    end
 end
 
 # Module definition
 module MathUtils
-  def self.factorial(n : Int32) : Int64
-    return 1 if n <= 1
-    n * factorial(n - 1)
-  end
+    def self.factorial(n : Int32) : Int64
+        return 1 if n <= 1
+        n * factorial(n - 1)
+    end
   
-  def self.fibonacci(n : Int32) : Int64
-    return n if n <= 1
-    fibonacci(n - 1) + fibonacci(n - 2)
-  end
+    def self.fibonacci(n : Int32) : Int64
+        return n if n <= 1
+        fibonacci(n - 1) + fibonacci(n - 2)
+    end
 end
 
 # Struct definition
 struct Point
-  getter x : Float64
-  getter y : Float64
+    getter x : Float64
+    getter y : Float64
   
-  def initialize(↯x : Float64, ↯y : Float64)
-  end
+    def initialize(↯x : Float64, ↯y : Float64)
+    end
   
-  def distance_to(other : Point) : Float64
-    Math.sqrt((↯x - other.x)**2 + (↯y - other.y)**2)
-  end
+    def distance_to(other : Point) : Float64
+        Math.sqrt((↯x - other.x)**2 + (↯y - other.y)**2)
+    end
 end
 
 # Enum definition
 enum Color
-  Red
-  Green
-  Blue
-  Yellow
+    Red
+    Green
+    Blue
+    Yellow
 end
 
 # Method with block
 [1, 2, 3, 4, 5].each do |number|
-  puts "Number: #{number}"
+    puts "Number: #{number}"
 end
 
 # Hash and array literals
@@ -62,9 +62,9 @@ result = calculator.call(10, 20)
 
 # Macro definition
 macro define_method(name, content)
-  def {{name.id}}
-    {{content}}
-  end
+    def {{name.id}}
+        {{content}}
+    end
 end
 
 define_method hello, puts "Hello from macro!"
@@ -78,11 +78,11 @@ end
 
 # Exception handling
 begin
-  raise "Something went wrong"
+    raise "Something went wrong"
 rescue exception
-  puts "Caught exception: #{exception.message}"
+    puts "Caught exception: #{exception.message}"
 ensure
-  puts "Cleanup code"
+    puts "Cleanup code"
 end
 
 # Type alias
@@ -91,14 +91,14 @@ alias Number = Int32 | Float64
 
 # Generic class
 class Container(T)
-  ↯value : T
+    ↯value : T
   
-  def initialize(↯value : T)
-  end
+    def initialize(↯value : T)
+    end
   
-  def get : T
-    ↯value
-  end
+    def get : T
+        ↯value
+    end
 end
 
 # Usage

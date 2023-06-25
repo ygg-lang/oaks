@@ -11,13 +11,14 @@ use oak_core::{
     tree::{GreenNode, GreenTree},
 };
 
-/// Lua AST 构建器
+/// Lua AST builder.
 #[derive(Clone)]
 pub struct LuaBuilder<'config> {
     config: &'config LuaLanguage,
 }
 
 impl<'config> LuaBuilder<'config> {
+    /// Creates a new `LuaBuilder` with the given language configuration.
     pub fn new(config: &'config LuaLanguage) -> Self {
         Self { config }
     }

@@ -1,13 +1,11 @@
 use oak_core::{Token, TokenType, UniversalTokenRole};
-#[cfg(feature = "serde")]
-use serde::{Deserialize, Serialize};
 
 pub type WitToken = Token<WitTokenType>;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub enum WitTokenType {
-    // 基础 kind
+    // Basic kind
     Root,
     Whitespace,
     Newline,
@@ -16,13 +14,13 @@ pub enum WitTokenType {
     Eof,
     Text,
 
-    // 字面量
+    // Literals
     IntegerLiteral,
     FloatLiteral,
     StringLiteral,
     Identifier,
 
-    // WIT Component 关键字 - 基本结构
+    // WIT Component keywords - Basic structure
     WorldKw,
     InterfaceKw,
     PackageKw,
@@ -43,19 +41,19 @@ pub enum WitTokenType {
     ResultKw,
     ResourceKw,
 
-    // 导入导出
+    // Import/Export
     ImportKw,
     ExportKw,
     UseKw,
     IncludeKw,
     WithKw,
 
-    // 类型相关
+    // Type related
     StaticKw,
     ConstructorKw,
     MethodKw,
 
-    // 基本类型
+    // Basic types
     BoolKw,
     U8Kw,
     U16Kw,
@@ -70,7 +68,7 @@ pub enum WitTokenType {
     CharKw,
     StringKw,
 
-    // 操作符
+    // Operators
     Arrow,     // ->
     FatArrow,  // =>
     Assign,    // =
@@ -95,7 +93,7 @@ pub enum WitTokenType {
     Tilde,     // ~
     Bang,      // !
 
-    // 标点符号
+    // Punctuation
     LeftParen,    // (
     RightParen,   // )
     LeftBrace,    // {

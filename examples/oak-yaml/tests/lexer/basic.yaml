@@ -1,85 +1,114 @@
-# YAML test file
----
-title: "Sample YAML Document"
-version: 1.0
-date: 2024-01-01
+# Comprehensive YAML Lexer Test
 
-# Configuration section
-config:
-  debug: true
-  timeout: 30
-  retries: 3
-  
-# Database settings
-database:
-  host: localhost
-  port: 5432
-  name: testdb
-  credentials:
-    username: admin
-    password: secret123
-
-# Application settings
-app:
-  name: "Test Application"
-  features:
-    - authentication
-    - logging
-    - monitoring
-    - caching
-  
-  environments:
-    development:
-      url: "http://localhost:3000"
-      debug: true
-    production:
-      url: "https://example.com"
-      debug: false
-
-# Users list
-users:
-  - id: 1
-    name: "John Doe"
-    email: "john↯example.com"
-    roles: ["admin", "user"]
-    active: true
-    
-  - id: 2
-    name: "Jane Smith"
-    email: "jane↯example.com"
-    roles: ["user"]
-    active: false
-
-# Multi-line strings
-description: |
-  This is a multi-line string
-  that preserves line breaks
-  and formatting.
-
-folded_description: >
-  This is a folded string
-  that will be converted to
-  a single line with spaces.
-
-# Special values
+# Scalars
+string: "Hello, World!"
+single_quoted: 'Single quoted string'
+unquoted: Unquoted string
+boolean: true
+integer: 123
+float: 3.14
+hex: 0xFF
+octal: 0o777
+infinity: .inf
+nan: .NaN
 null_value: null
-empty_string: ""
-boolean_true: true
-boolean_false: false
-integer: 42
-float: 3.14159
-scientific: 1.23e-4
+timestamp: 2023-10-27T10:00:00Z
 
-# Anchors and aliases
-default_settings: &defaults
-  timeout: 30
-  retries: 3
+# Sequences (Lists)
+list:
+    - item1
+    - item2
+    - item3
+    - "quoted item"
+    - { key: value }
 
-service_a:
-  <<: *defaults
-  name: "Service A"
-  
-service_b:
-  <<: *defaults
-  name: "Service B"
-  timeout: 60  # Override default
+inline_list: [1, 2, 3, 4]
+
+# Mappings (Dictionaries)
+person:
+    name: Alice
+    age: 30
+    active: yes
+    address:
+        street: "123 Main St"
+        city: "Wonderland"
+
+inline_map: { name: Bob, age: 25 }
+
+# Block Scalars
+literal_block: |
+    This is a literal block.
+    Newlines are preserved.
+    Indentation matters.
+
+folded_block: >
+    This is a folded block.
+    Newlines are converted to spaces.
+    Unless there is a blank line.
+
+    Like this one.
+
+# Anchors and Aliases
+defaults: &defaults
+    adapter: postgres
+    host: localhost
+
+development:
+    database: dev_db
+    <<: *defaults
+
+production:
+    database: prod_db
+    <<: *defaults
+
+# Complex Keys
+? [ complex, key ]
+: [ complex, value ]
+
+? |
+    multi-line
+    key
+: value
+
+# Tags
+explicit_string: !!str 123
+explicit_int: !!int "123"
+binary_data: !!binary |
+    R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7
+
+# Documents
+---
+# Document 1
+name: Document 1
+...
+---
+# Document 2
+name: Document 2
+...
+
+# Comments
+# This is a comment
+key: value # Inline comment
+
+# Flow Style
+flow_sequence: [
+    "one",
+    "two",
+]
+
+flow_mapping: {
+    key: value,
+    another: value
+}
+
+# Sets
+set:
+    ? item1
+    ? item2
+    ? item3
+
+# Ordered Maps
+ordered: !!omap
+    - one: 1
+    - two: 2
+    - three: 3

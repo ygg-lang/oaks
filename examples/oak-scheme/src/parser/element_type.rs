@@ -1,53 +1,100 @@
 use oak_core::{ElementType, UniversalElementRole};
-#[cfg(feature = "serde")]
-use serde::{Deserialize, Serialize};
 
+/// Element types for the Scheme language.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub enum SchemeElementType {
+    /// A source file.
     SourceFile,
+    /// Whitespace.
     Whitespace,
+    /// A newline.
     Newline,
+    /// A comment.
     Comment,
+    /// A line comment.
     LineComment,
+    /// A numeric literal.
     NumberLiteral,
+    /// A string literal.
     StringLiteral,
+    /// A character literal.
     CharacterLiteral,
+    /// A boolean literal.
     BooleanLiteral,
+    /// An identifier.
     Identifier,
+    /// A symbol.
     Symbol,
+    /// A keyword.
     Keyword,
+    /// `define` keyword.
     Define,
+    /// `lambda` keyword.
     Lambda,
+    /// `if` keyword.
     If,
+    /// `cond` keyword.
     Cond,
+    /// `case` keyword.
     Case,
+    /// `let` keyword.
     Let,
+    /// `let*` keyword.
     LetStar,
+    /// `letrec` keyword.
     Letrec,
+    /// `begin` keyword.
     Begin,
+    /// `do` keyword.
     Do,
+    /// `quote` keyword.
     Quote,
+    /// `quasiquote` keyword.
     Quasiquote,
+    /// `unquote` keyword.
     Unquote,
+    /// `unquote-splicing` keyword.
     UnquoteSplicing,
+    /// `and` keyword.
     And,
+    /// `or` keyword.
     Or,
+    /// `not` keyword.
     Not,
+    /// `set!` keyword.
     Set,
+    /// `(`.
     LeftParen,
+    /// `)`.
     RightParen,
+    /// `[`.
     LeftBracket,
+    /// `]`.
     RightBracket,
+    /// `{`.
     LeftBrace,
+    /// `}`.
     RightBrace,
+    /// `.`.
     Dot,
+    /// `#`.
     Hash,
+    /// `'`.
     Quote_,
+    /// `` ` ``.
     Quasiquote_,
+    /// `,`.
     Unquote_,
+    /// `,@`.
     UnquoteSplicing_,
+    /// A list.
+    List,
+    /// A quotation.
+    Quotation,
+    /// An error token.
     Error,
+    /// End of stream.
     Eof,
 }
 
@@ -58,6 +105,8 @@ impl ElementType for SchemeElementType {
         match self {
             Self::SourceFile => UniversalElementRole::Root,
             Self::Error => UniversalElementRole::Error,
+            Self::List => UniversalElementRole::Expression,
+            Self::Quotation => UniversalElementRole::Expression,
             _ => UniversalElementRole::None,
         }
     }

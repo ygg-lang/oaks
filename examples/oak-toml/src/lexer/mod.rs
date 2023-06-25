@@ -1,4 +1,5 @@
 #![doc = include_str!("readme.md")]
+/// Token types for the TOML language.
 pub mod token_type;
 pub use crate::lexer::token_type::TomlTokenType;
 
@@ -9,11 +10,15 @@ use oak_core::{
     source::Source,
 };
 
-type State<'a, S> = LexerState<'a, S, TomlLanguage>;
+pub(crate) type State<'a, S> = LexerState<'a, S, TomlLanguage>;
 
+/// TOML lexer implementation.
+///
+/// This struct implements the `Lexer` trait for the TOML language,
+/// converting source text into a stream of tokens.
 #[derive(Clone, Debug)]
 pub struct TomlLexer<'config> {
-    _config: &'config TomlLanguage,
+    config: &'config TomlLanguage,
 }
 
 impl<'config> Lexer<TomlLanguage> for TomlLexer<'config> {
@@ -28,11 +33,12 @@ impl<'config> Lexer<TomlLanguage> for TomlLexer<'config> {
 }
 
 impl<'config> TomlLexer<'config> {
+    /// Creates a new `TomlLexer` with the given language configuration.
     pub fn new(config: &'config TomlLanguage) -> Self {
-        Self { _config: config }
+        Self { config }
     }
 
-    /// 主要的词法分析循环
+    /// Main lexing loop that iterates through the source text.
     fn run<S: Source + ?Sized>(&self, state: &mut State<S>) -> Result<(), OakError> {
         while state.not_at_end() {
             if let Some(ch) = state.peek() {
@@ -60,7 +66,7 @@ impl<'config> TomlLexer<'config> {
                         if self.lex_punctuation(state) {
                             continue;
                         }
-                        // 如果没有匹配任何模式，跳过当前字符
+                        // Skip character if no pattern matches
                         state.advance(1);
                     }
                 }
@@ -72,7 +78,7 @@ impl<'config> TomlLexer<'config> {
         Ok(())
     }
 
-    /// 跳过空白字符
+    /// Lexes and skips whitespace characters.
     fn skip_whitespace<S: Source + ?Sized>(&self, state: &mut State<S>) -> bool {
         let start_pos = state.get_position();
 
@@ -94,13 +100,13 @@ impl<'config> TomlLexer<'config> {
         }
     }
 
-    /// 跳过注释
+    /// Lexes and skips TOML comments.
     fn skip_comment<S: Source + ?Sized>(&self, state: &mut State<S>) -> bool {
         if state.current() == Some('#') {
             let start_pos = state.get_position();
             state.advance(1);
 
-            // 读取到行尾
+            // Read until end of line
             while let Some(ch) = state.current() {
                 if ch == '\n' || ch == '\r' {
                     break;
@@ -116,21 +122,21 @@ impl<'config> TomlLexer<'config> {
         }
     }
 
-    /// 解析字符串
+    /// Lexes strings.
     fn lex_string<S: Source + ?Sized>(&self, state: &mut State<S>) -> bool {
         match state.current() {
             Some('"') => {
                 let start = state.get_position();
                 state.advance(1);
 
-                // 简单的字符串解析
+                // Simple string parsing
                 while let Some(ch) = state.current() {
                     if ch == '"' {
                         state.advance(1);
                         break;
                     }
                     if ch == '\\' {
-                        state.advance(1); // 跳过转义字符
+                        state.advance(1); // Skip escape character
                         if state.current().is_some() {
                             state.advance(1);
                         }
@@ -148,7 +154,7 @@ impl<'config> TomlLexer<'config> {
                 let start = state.get_position();
                 state.advance(1);
 
-                // 字面字符串解析
+                // Literal string parsing
                 while let Some(ch) = state.current() {
                     if ch == '\'' {
                         state.advance(1);
@@ -165,7 +171,7 @@ impl<'config> TomlLexer<'config> {
         }
     }
 
-    /// 解析数字
+    /// Lexes numbers.
     fn lex_number<S: Source + ?Sized>(&self, state: &mut State<S>) -> bool {
         if !state.current().map_or(false, |c| c.is_ascii_digit() || c == '-' || c == '+') {
             return false;
@@ -173,17 +179,17 @@ impl<'config> TomlLexer<'config> {
 
         let start = state.get_position();
 
-        // 跳过符号
+        // Skip sign
         if matches!(state.current(), Some('-') | Some('+')) {
             state.advance(1);
         }
 
-        // 解析数字
+        // Lex digits
         while state.current().map_or(false, |c| c.is_ascii_digit()) {
             state.advance(1);
         }
 
-        // 检查是否是浮点数
+        // Check if it's a float
         let mut is_float = false;
         if state.current() == Some('.') {
             is_float = true;
@@ -199,7 +205,7 @@ impl<'config> TomlLexer<'config> {
         true
     }
 
-    /// 解析标点符号
+    /// Lexes punctuation.
     fn lex_punctuation<S: Source + ?Sized>(&self, state: &mut State<S>) -> bool {
         let start = state.get_position();
 
@@ -264,7 +270,7 @@ impl<'config> TomlLexer<'config> {
         }
     }
 
-    /// 解析标识符和键
+    /// Lexes identifiers and keys.
     fn lex_identifier<S: Source + ?Sized>(&self, state: &mut State<S>) -> bool {
         if !state.current().map_or(false, |c| c.is_ascii_alphabetic() || c == '_') {
             return false;
@@ -278,7 +284,7 @@ impl<'config> TomlLexer<'config> {
 
         let end = state.get_position();
 
-        // 检查是否为关键字
+        // Check for keywords
         let text = state.get_text_in((start..end).into());
         let kind = match text.as_ref() {
             "true" | "false" => TomlSyntaxKind::Boolean,

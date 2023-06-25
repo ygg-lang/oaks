@@ -5,7 +5,7 @@ use oak_core::{RedNode, TextEdit};
 pub struct StylusFormatter;
 
 impl StylusFormatter {
-    pub fn new(_config: &StylusLanguage) -> Self {
+    pub fn new(config: &StylusLanguage) -> Self {
         Self
     }
 }

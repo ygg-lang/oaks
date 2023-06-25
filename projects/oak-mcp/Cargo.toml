@@ -13,8 +13,8 @@ keywords = ["mcp", "context-protocol", "ai"]
 
 [dependencies]
 tokio = { workspace = true, features = ["rt", "rt-multi-thread", "macros", "sync", "io-util", "time", "io-std"] }
-serde = { workspace = true }
-serde_json = { workspace = true }
+serde = { workspace = true , optional = true }
+serde_json = { workspace = true, optional = true }
 oak-core = { workspace = true }
 oak-lsp = { workspace = true }
 oak-vfs = { workspace = true }
@@ -31,6 +31,7 @@ oak-rust = { workspace = true }
 oak-json = { workspace = true }
 
 [features]
-default = []
+default = ["serde"]
+serde = ["dep:serde", "dep:serde_json", "oak-core/serde"]
 io-std = ["tokio/io-std"]
 axum = ["tokio/full"]

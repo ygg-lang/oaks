@@ -4,12 +4,10 @@
 //! Defines the core structure for the Lua language, implementing the oak-core Language trait.
 
 use oak_core::{Language, LanguageCategory};
-#[cfg(feature = "serde")]
-use serde::{Deserialize, Serialize};
 
 /// Lua language definition.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct LuaLanguage {}
 
 impl Language for LuaLanguage {

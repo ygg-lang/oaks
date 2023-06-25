@@ -1,4 +1,5 @@
 #![doc = include_str!("readme.md")]
+/// CSS element types and role definitions.
 pub mod element_type;
 use crate::{
     language::CssLanguage,
@@ -16,36 +17,33 @@ pub(crate) type State<'a, S> = ParserState<'a, CssLanguage, S>;
 /// Parser for the CSS language.
 pub struct CssParser<'config> {
     /// Language configuration.
-    pub(crate) _config: &'config CssLanguage,
+    pub(crate) config: &'config CssLanguage,
 }
 
 impl<'config> CssParser<'config> {
     /// Creates a new `CssParser` with the given language configuration.
     pub fn new(config: &'config CssLanguage) -> Self {
-        Self { _config: config }
+        Self { config }
     }
 }
 
 impl<'config> Parser<CssLanguage> for CssParser<'config> {
     /// Parses the CSS source code into a green tree.
     fn parse<'a, S: Source + ?Sized>(&self, text: &'a S, edits: &[TextEdit], cache: &'a mut impl ParseCache<CssLanguage>) -> ParseOutput<'a, CssLanguage> {
-        let lexer = CssLexer::new(self._config);
-        parse_with_lexer(&lexer, text, edits, cache, |state| self.parse_root_internal(state))
+        let lexer = CssLexer::new(self.config);
+        parse_with_lexer(&lexer, text, edits, cache, |state| {
+            let cp = state.checkpoint();
+
+            while state.not_at_end() {
+                if state.at(CssTokenType::AtRule) || state.at(CssTokenType::AtImport) || state.at(CssTokenType::AtMedia) { self.parse_at_rule(state)? } else { self.parse_ruleset(state)? }
+            }
+
+            Ok(state.finish_at(cp, CssElementType::SourceFile))
+        })
     }
 }
 
 impl<'config> CssParser<'config> {
-    /// Internal entry point for parsing the CSS root.
-    pub(crate) fn parse_root_internal<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> Result<&'a GreenNode<'a, CssLanguage>, OakError> {
-        let cp = state.checkpoint();
-
-        while state.not_at_end() {
-            if state.at(CssTokenType::AtRule) || state.at(CssTokenType::AtImport) || state.at(CssTokenType::AtMedia) { self.parse_at_rule(state)? } else { self.parse_ruleset(state)? }
-        }
-
-        Ok(state.finish_at(cp, CssElementType::SourceFile))
-    }
-
     /// Parses a CSS at-rule (e.g., `@import`, `@media`).
     fn parse_at_rule<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> Result<(), OakError> {
         let cp = state.checkpoint();

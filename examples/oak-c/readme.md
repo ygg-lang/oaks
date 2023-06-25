@@ -7,7 +7,7 @@
 
 ## 🎯 Project Vision
 
-C is the foundation of modern computing, but its aging syntax and complex preprocessor make it a challenge for modern developer tools. `oak-c` provides a robust, high-performance, Rust-powered infrastructure for parsing C that is both accurate and incredibly fast. By utilizing Oak's incremental parsing architecture, we enable the creation of highly responsive IDEs, security analyzers, and refactoring tools that can handle massive C codebases and complex header chains in real-time.
+C is the foundation of modern computing, but its aging syntax and complex preprocessor make it a challenge for modern developer tools. `oak-c` provides a robust, high-performance, Rust-powered infrastructure for parsing C that is both accurate and incredibly fast. By utilizing Oak's incremental parsing architecture, we enable the creation of highly responsive IDEs, refactoring tools, and static analysis infrastructure that can handle massive C codebases and complex header chains in real-time.
 
 ## ✨ Core Features
 

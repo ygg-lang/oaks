@@ -1,25 +1,40 @@
 use oak_core::{ElementType, Parser, UniversalElementRole};
-#[cfg(feature = "serde")]
-use serde::{Deserialize, Serialize};
 
+/// Element types for Pascal.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub enum PascalElementType {
+    /// The root node of the AST.
     Root,
+    /// A program node.
     Program,
+    /// A unit node.
     Unit,
+    /// An interface section.
     Interface,
+    /// An implementation section.
     Implementation,
+    /// An initialization section.
     Initialization,
+    /// A finalization section.
     Finalization,
+    /// A constant declaration section.
     ConstSection,
+    /// A type declaration section.
     TypeSection,
+    /// A variable declaration section.
     VarSection,
+    /// A procedure declaration.
     Procedure,
+    /// A function declaration.
     Function,
+    /// A code block.
     Block,
+    /// A statement.
     Statement,
+    /// An expression.
     Expression,
+    /// An error element.
     Error,
 }
 

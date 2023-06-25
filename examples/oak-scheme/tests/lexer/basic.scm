@@ -1,15 +1,15 @@
 ;; Scheme test file
 (define (factorial n)
-  (if (<= n 1)
-      1
-      (* n (factorial (- n 1)))))
+    (if (<= n 1)
+        1
+        (* n (factorial (- n 1)))))
 
 (define (fibonacci n)
-  (cond
-    ((= n 0) 0)
-    ((= n 1) 1)
-    (else (+ (fibonacci (- n 1))
-             (fibonacci (- n 2))))))
+    (cond
+        ((= n 0) 0)
+        ((= n 1) 1)
+        (else (+ (fibonacci (- n 1))
+                 (fibonacci (- n 2))))))
 
 ;; Lists
 (define numbers '(1 2 3 4 5))
@@ -17,7 +17,7 @@
 
 ;; Higher-order functions
 (define (apply-twice f x)
-  (f (f x)))
+    (f (f x)))
 
 (define (add-one x) (+ x 1))
 

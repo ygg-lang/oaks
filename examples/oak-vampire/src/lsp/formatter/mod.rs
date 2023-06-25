@@ -3,7 +3,7 @@ use crate::language::VampireLanguage;
 use oak_core::tree::RedNode;
 use oak_pretty_print::{FormatConfig, FormatOutput, FormatResult, Formatter};
 
-/// Vampire 语言的格式化器
+/// Vampire language formatter
 pub struct VampireFormatter {
     inner: Formatter<VampireLanguage>,
 }

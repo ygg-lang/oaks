@@ -1,8 +1,110 @@
 #![doc = include_str!("readme.md")]
 use crate::lexer::RustTokenType;
 use core::range::Range;
-#[cfg(feature = "serde")]
-use serde::{Deserialize, Serialize};
+
+use std::sync::Arc;
+
+/// Strongly-typed AST root node representing the entire Rust source file.
+///
+/// This is the top-level structure that contains all items (functions, statements, etc.)
+/// parsed from a Rust source file.
+#[derive(Clone, Debug, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+pub struct RustRoot {
+    /// Collection of top-level items in the Rust file
+    pub items: Vec<Item>,
+}
+
+/// Represents a generic parameter list and where clauses in Rust.
+#[derive(Clone, Debug, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+pub struct Generics {
+    /// List of generic parameters (lifetimes, types, constants)
+    pub params: Vec<GenericParam>,
+    /// Optional where clause
+    pub where_clause: Option<WhereClause>,
+    /// Source code span
+    #[cfg_attr(feature = "serde", serde(with = "oak_core::serde_range"))]
+    pub span: Range<usize>,
+}
+
+/// Represents a single generic parameter.
+#[derive(Clone, Debug, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+pub enum GenericParam {
+    /// A lifetime parameter (e.g., `'a`)
+    Lifetime(Lifetime),
+    /// A type parameter (e.g., `T: Display`)
+    Type {
+        /// The type parameter name
+        name: Identifier,
+        /// Optional bounds (e.g., `: Display + Clone`)
+        bounds: Vec<TypeParamBound>,
+        /// Optional default type (e.g., `= i32`)
+        default: Option<Type>,
+    },
+    /// A const parameter (e.g., `const N: usize`)
+    Const {
+        /// The const parameter name
+        name: Identifier,
+        /// The type of the constant
+        ty: Type,
+        /// Optional default value
+        default: Option<Expr>,
+    },
+}
+
+/// Represents a lifetime in Rust (e.g., `'a`, `'static`).
+#[derive(Clone, Debug, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+pub struct Lifetime {
+    /// The name of the lifetime (including the leading quote)
+    pub name: String,
+    /// Source code span
+    #[cfg_attr(feature = "serde", serde(with = "oak_core::serde_range"))]
+    pub span: Range<usize>,
+}
+
+/// Represents a bound on a type parameter.
+#[derive(Clone, Debug, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+pub enum TypeParamBound {
+    /// A trait bound (e.g., `Display`)
+    Trait(Type),
+    /// A lifetime bound (e.g., `'a`)
+    Lifetime(Lifetime),
+}
+
+/// Represents a where clause in Rust.
+#[derive(Clone, Debug, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+pub struct WhereClause {
+    /// List of where predicates
+    pub predicates: Vec<WherePredicate>,
+    /// Source code span
+    #[cfg_attr(feature = "serde", serde(with = "oak_core::serde_range"))]
+    pub span: Range<usize>,
+}
+
+/// Represents a single predicate in a where clause.
+#[derive(Clone, Debug, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+pub enum WherePredicate {
+    /// A type predicate (e.g., `T: Display`)
+    Type {
+        /// The type being bounded
+        bounded_ty: Type,
+        /// The bounds applied to the type
+        bounds: Vec<TypeParamBound>,
+    },
+    /// A lifetime predicate (e.g., `'a: 'b`)
+    Lifetime {
+        /// The lifetime being bounded
+        lifetime: Lifetime,
+        /// The bounds applied to the lifetime
+        bounds: Vec<Lifetime>,
+    },
+}
 
 /// Represents an identifier in Rust source code.
 ///
@@ -17,7 +119,7 @@ use serde::{Deserialize, Serialize};
 /// assert_eq!(ident.name, "main");
 /// ```
 #[derive(Clone, Debug, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct Identifier {
     /// The textual name of the identifier
     pub name: String,
@@ -26,46 +128,35 @@ pub struct Identifier {
     pub span: Range<usize>,
 }
 
-/// Strongly-typed AST root node representing the entire Rust source file.
-///
-/// This is the top-level structure that contains all items (functions, statements, etc.)
-/// parsed from a Rust source file.
-#[derive(Clone, Debug, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
-pub struct RustRoot {
-    /// Collection of top-level items in the Rust file
-    pub items: Vec<Item>,
-}
-
 /// Top-level items that can appear in a Rust source file.
 ///
 /// These represent the main constructs that can exist at the module level,
 /// such as function definitions, structs, enums, modules, and other declarations.
 #[derive(Clone, Debug, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub enum Item {
     /// A function definition
-    Function(Function),
+    Function(Arc<Function>),
     /// A struct definition
-    Struct(Struct),
+    Struct(Arc<Struct>),
     /// An enum definition
-    Enum(Enum),
+    Enum(Arc<Enum>),
     /// A module definition
-    Module(Module),
+    Module(Arc<Module>),
     /// A use statement
-    Use(UseItem),
+    Use(Arc<UseItem>),
     /// A trait definition
-    Trait(Trait),
+    Trait(Arc<Trait>),
     /// An impl block
-    Impl(Impl),
+    Impl(Arc<Impl>),
     /// A type alias
-    TypeAlias(TypeAlias),
+    TypeAlias(Arc<TypeAlias>),
     /// A constant definition
-    Const(Const),
+    Const(Arc<Const>),
     /// A static definition
-    Static(Static),
+    Static(Arc<Static>),
     /// An extern block
-    ExternBlock(ExternBlock),
+    ExternBlock(Arc<ExternBlock>),
 }
 
 /// Represents a function definition in Rust source code.
@@ -73,7 +164,7 @@ pub enum Item {
 /// Functions are fundamental building blocks in Rust that encapsulate reusable logic.
 /// They can have parameters, return types, and contain executable code blocks.
 #[derive(Clone, Debug, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct Function {
     /// The name identifier of the function
     pub name: Identifier,
@@ -83,8 +174,8 @@ pub struct Function {
     pub return_type: Option<Type>,
     /// The function body containing executable statements
     pub body: Block,
-    /// Generic parameters
-    pub generics: Vec<String>,
+    /// Generic parameters and where clauses
+    pub generics: Option<Generics>,
     /// Whether the function is async
     pub is_async: bool,
     /// Whether the function is unsafe
@@ -98,10 +189,12 @@ pub struct Function {
 
 /// Represents a struct definition in Rust source code.
 #[derive(Clone, Debug, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct Struct {
     /// The name identifier of the struct
     pub name: Identifier,
+    /// Generic parameters and where clauses
+    pub generics: Option<Generics>,
     /// List of struct fields
     pub fields: Vec<Field>,
     /// Source code span where this struct appears
@@ -111,7 +204,7 @@ pub struct Struct {
 
 /// Represents a field in a struct definition.
 #[derive(Clone, Debug, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct Field {
     /// The field name identifier
     pub name: Identifier,
@@ -124,10 +217,12 @@ pub struct Field {
 
 /// Represents an enum definition in Rust source code.
 #[derive(Clone, Debug, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct Enum {
     /// The name identifier of the enum
     pub name: Identifier,
+    /// Generic parameters and where clauses
+    pub generics: Option<Generics>,
     /// List of enum variants
     pub variants: Vec<Variant>,
     /// Source code span where this enum appears
@@ -137,7 +232,7 @@ pub struct Enum {
 
 /// Represents a variant in an enum definition.
 #[derive(Clone, Debug, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct Variant {
     /// The variant name identifier
     pub name: Identifier,
@@ -150,7 +245,7 @@ pub struct Variant {
 
 /// Represents a module definition in Rust source code.
 #[derive(Clone, Debug, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct Module {
     /// The name identifier of the module
     pub name: Identifier,
@@ -163,7 +258,7 @@ pub struct Module {
 
 /// Represents a use statement in Rust source code.
 #[derive(Clone, Debug, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct UseItem {
     /// The path being imported
     pub path: String,
@@ -174,10 +269,12 @@ pub struct UseItem {
 
 /// Represents a trait definition in Rust source code.
 #[derive(Clone, Debug, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct Trait {
     /// The name identifier of the trait
     pub name: Identifier,
+    /// Generic parameters and where clauses
+    pub generics: Option<Generics>,
     /// List of trait items (methods, associated types, etc.)
     pub items: Vec<TraitItem>,
     /// Source code span where this trait appears
@@ -187,7 +284,7 @@ pub struct Trait {
 
 /// Represents items within a trait definition.
 #[derive(Clone, Debug, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub enum TraitItem {
     /// A method signature
     Method(Function),
@@ -197,8 +294,10 @@ pub enum TraitItem {
 
 /// Represents an impl block in Rust source code.
 #[derive(Clone, Debug, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct Impl {
+    /// Generic parameters and where clauses
+    pub generics: Option<Generics>,
     /// The type being implemented for
     pub ty: Type,
     /// Optional trait being implemented
@@ -212,7 +311,7 @@ pub struct Impl {
 
 /// Represents items within an impl block.
 #[derive(Clone, Debug, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub enum ImplItem {
     /// A method implementation
     Method(Function),
@@ -224,10 +323,12 @@ pub enum ImplItem {
 
 /// Represents a type alias in Rust source code.
 #[derive(Clone, Debug, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct TypeAlias {
     /// The alias name identifier
     pub name: Identifier,
+    /// Generic parameters and where clauses
+    pub generics: Option<Generics>,
     /// The target type
     pub ty: Type,
     /// Source code span where this type alias appears
@@ -237,7 +338,7 @@ pub struct TypeAlias {
 
 /// Represents a constant definition in Rust source code.
 #[derive(Clone, Debug, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct Const {
     /// The constant name identifier
     pub name: Identifier,
@@ -252,7 +353,7 @@ pub struct Const {
 
 /// Represents a static definition in Rust source code.
 #[derive(Clone, Debug, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct Static {
     /// The static name identifier
     pub name: Identifier,
@@ -269,7 +370,7 @@ pub struct Static {
 
 /// Represents a type in Rust source code.
 #[derive(Clone, Debug, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub enum Type {
     /// A path type (e.g., std::vec::Vec)
     Path(String),
@@ -306,7 +407,7 @@ pub enum Type {
 ///
 /// Parameters define the inputs that a function can accept, with their respective types.
 #[derive(Clone, Debug, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct Param {
     /// The parameter name identifier
     pub name: Identifier,
@@ -323,7 +424,7 @@ pub struct Param {
 ///
 /// Blocks are used to group statements together and define scope boundaries.
 #[derive(Clone, Debug, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct Block {
     /// List of statements within the block
     pub statements: Vec<Statement>,
@@ -342,7 +443,7 @@ pub struct Block {
 ///
 /// Statements are executable units that raise actions or declare bindings.
 #[derive(Clone, Debug, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub enum Statement {
     /// A let binding statement
     Let {
@@ -398,7 +499,7 @@ pub enum Statement {
 ///
 /// Expressions are constructs that evaluate to values and can be used in various contexts.
 #[derive(Clone, Debug, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub enum Expr {
     /// An identifier expression
     Ident(Identifier),
@@ -562,7 +663,7 @@ pub enum Expr {
 
 /// Represents a match arm in a match expression.
 #[derive(Clone, Debug, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct MatchArm {
     /// The pattern to match
     pub pattern: Pattern,
@@ -577,7 +678,7 @@ pub struct MatchArm {
 
 /// Represents a pattern in pattern matching.
 #[derive(Clone, Debug, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub enum Pattern {
     /// A wildcard pattern (_)
     Wildcard,
@@ -598,7 +699,7 @@ pub enum Pattern {
 
 /// Represents a field pattern in a struct pattern.
 #[derive(Clone, Debug, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct FieldPattern {
     /// The field name
     pub name: Identifier,
@@ -611,7 +712,7 @@ pub struct FieldPattern {
 
 /// Represents a field initialization in a struct expression.
 #[derive(Clone, Debug, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct FieldInit {
     /// The field name
     pub name: Identifier,
@@ -624,7 +725,7 @@ pub struct FieldInit {
 
 /// Represents an extern block in Rust source code.
 #[derive(Clone, Debug, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct ExternBlock {
     /// The ABI string (e.g., "C", "system")
     pub abi: Option<String>,

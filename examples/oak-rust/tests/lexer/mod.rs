@@ -20,20 +20,20 @@ fn test_peek_behavior() {
     let source = SourceText::new("NESTED_CONSTANT");
     let mut state = LexerState::<SourceText, RustLanguage>::new(&source);
 
-    println!("初始状态:");
-    println!("位置: {}", state.get_position());
+    println!("Initial state:");
+    println!("Position: {}", state.get_position());
     println!("current(): {:?}", state.current());
     println!("peek(): {:?}", state.peek());
 
-    println!("\n前进 1 个字符后:");
+    println!("\nAfter advancing 1 char:");
     state.advance(1);
-    println!("位置: {}", state.get_position());
+    println!("Position: {}", state.get_position());
     println!("current(): {:?}", state.current());
     println!("peek(): {:?}", state.peek());
 
-    println!("\n前进 1 个字符后:");
+    println!("\nAfter advancing 1 char:");
     state.advance(1);
-    println!("位置: {}", state.get_position());
+    println!("Position: {}", state.get_position());
     println!("current(): {:?}", state.current());
     println!("peek(): {:?}", state.peek())
 }
@@ -50,25 +50,25 @@ fn test_nested_constant_parsing() {
     let mut cache = oak_core::parser::session::ParseSession::<RustLanguage>::default();
     let result = lexer.lex(&source, &[], &mut cache);
 
-    println!("测试 NESTED_CONSTANT 解析:");
-    println!("源代码: '{}'", (&source).get_text_from(0));
+    println!("Testing NESTED_CONSTANT parsing:");
+    println!("Source code: '{}'", (&source).get_text_from(0));
 
-    let tokens = result.result.expect("词法分析应该成功");
-    assert!(!tokens.is_empty(), "应该解析出至少一个标记");
+    let tokens = result.result.expect("Lexing should succeed");
+    assert!(!tokens.is_empty(), "Should parse at least one token");
 
     let first_token = &tokens[0];
     let source_ref = &source;
     let token_text = source_ref.get_text_in(first_token.span.clone());
 
-    println!("第一个标记: 类型={:?}, 文本='{}', 位置={}..{}", first_token.kind, token_text, first_token.span.start, first_token.span.end);
+    println!("First token: Kind={:?}, Text='{}', Position={}..{}", first_token.kind, token_text, first_token.span.start, first_token.span.end);
 
-    // 验证标识符类型
-    assert!(matches!(first_token.kind, RustTokenType::Identifier), "应该是标识符类型");
-    assert_eq!(token_text, "NESTED_CONSTANT", "标识符应该被完整解析为 NESTED_CONSTANT");
-    assert_eq!(first_token.span.start, 0, "标记应该从位置 0 开始");
-    assert_eq!(first_token.span.end, 15, "标记应该在位置 15 结束");
+    // Verify identifier type
+    assert!(matches!(first_token.kind, RustTokenType::Identifier), "Should be Identifier type");
+    assert_eq!(token_text, "NESTED_CONSTANT", "Identifier should be parsed as NESTED_CONSTANT");
+    assert_eq!(first_token.span.start, 0, "Token should start at position 0");
+    assert_eq!(first_token.span.end, 15, "Token should end at position 15");
 
-    println!("✅ NESTED_CONSTANT 解析测试通过！")
+    println!("✅ NESTED_CONSTANT parsing test passed!")
 }
 
 #[test]

@@ -17,7 +17,7 @@ static TYPST_STRING: LazyLock<StringConfig> = LazyLock::new(|| StringConfig { qu
 
 #[derive(Clone, Debug)]
 pub struct TypstLexer<'config> {
-    _config: &'config TypstLanguage,
+    config: &'config TypstLanguage,
 }
 
 impl<'config> Lexer<TypstLanguage> for TypstLexer<'config> {
@@ -33,7 +33,7 @@ impl<'config> Lexer<TypstLanguage> for TypstLexer<'config> {
 
 impl<'config> TypstLexer<'config> {
     pub fn new(config: &'config TypstLanguage) -> Self {
-        Self { _config: config }
+        Self { config }
     }
 
     fn run<'s, S: Source + ?Sized>(&self, state: &mut State<'s, S>) -> Result<(), OakError> {
@@ -56,6 +56,10 @@ impl<'config> TypstLexer<'config> {
                 continue;
             }
 
+            if self.lex_markup(state) {
+                continue;
+            }
+
             if self.lex_identifier_or_keyword(state) {
                 continue;
             }
@@ -65,6 +69,10 @@ impl<'config> TypstLexer<'config> {
             }
 
             if self.lex_single_char_tokens(state) {
+                continue;
+            }
+
+            if self.lex_text(state) {
                 continue;
             }
 
@@ -99,20 +107,20 @@ impl<'config> TypstLexer<'config> {
         let mut pos = 0;
         let chars: Vec<char> = text.chars().collect();
 
-        // 整数部分
+        // Integer part
         while pos < chars.len() && chars[pos].is_ascii_digit() {
             pos += 1;
         }
 
-        // 小数部分
+        // Fractional part
         if pos < chars.len() && chars[pos] == '.' && pos + 1 < chars.len() && chars[pos + 1].is_ascii_digit() {
-            pos += 1; // 跳过 '.'
+            pos += 1; // Skip '.'
             while pos < chars.len() && chars[pos].is_ascii_digit() {
                 pos += 1;
             }
         }
 
-        // 指数部分
+        // Exponent part
         if pos < chars.len() && (chars[pos] == 'e' || chars[pos] == 'E') {
             pos += 1;
             if pos < chars.len() && (chars[pos] == '+' || chars[pos] == '-') {
@@ -132,6 +140,75 @@ impl<'config> TypstLexer<'config> {
         false
     }
 
+    fn lex_markup<'s, S: Source + ?Sized>(&self, state: &mut State<'s, S>) -> bool {
+        let start = state.get_position();
+
+        // Check for the beginning of a line
+        let is_line_start = start == 0 || matches!(state.source().get_char_at(start - 1), Some('\n') | Some('\r'));
+
+        if let Some(ch) = state.peek() {
+            match ch {
+                '=' if is_line_start => {
+                    let mut count = 0;
+                    while state.peek() == Some('=') {
+                        count += 1;
+                        state.advance(1);
+                    }
+                    if state.peek() == Some(' ') || state.peek() == Some('\t') {
+                        state.add_token(TypstTokenType::Heading, start, state.get_position());
+                        return true;
+                    }
+                }
+                '-' | '+' if is_line_start => {
+                    state.advance(1);
+                    if state.peek() == Some(' ') || state.peek() == Some('\t') {
+                        state.add_token(TypstTokenType::ListItem, start, state.get_position());
+                        return true;
+                    }
+                }
+                '0'..='9' if is_line_start => {
+                    let mut pos = 0;
+                    while let Some(c) = state.peek_next_n(pos) {
+                        if c.is_ascii_digit() {
+                            pos += 1;
+                        }
+                        else {
+                            break;
+                        }
+                    }
+                    if pos > 0 && state.peek_next_n(pos) == Some('.') {
+                        pos += 1; // '.'
+                        if state.peek_next_n(pos) == Some(' ') || state.peek_next_n(pos) == Some('\t') {
+                            state.advance(pos);
+                            state.add_token(TypstTokenType::EnumItem, start, state.get_position());
+                            return true;
+                        }
+                    }
+                }
+                '*' => {
+                    let is_escaped = start > 0 && state.source().get_char_at(start - 1) == Some('\\');
+                    if !is_escaped {
+                        state.advance(1);
+                        state.add_token(TypstTokenType::Strong, start, state.get_position());
+                        return true;
+                    }
+                }
+                '_' => {
+                    let is_escaped = start > 0 && state.source().get_char_at(start - 1) == Some('\\');
+                    if !is_escaped {
+                        state.advance(1);
+                        state.add_token(TypstTokenType::Emphasis, start, state.get_position());
+                        return true;
+                    }
+                }
+                _ => {}
+            }
+        }
+
+        state.set_position(start);
+        false
+    }
+
     fn lex_identifier_or_keyword<'s, S: Source + ?Sized>(&self, state: &mut State<'s, S>) -> bool {
         let start = state.get_position();
         let text = state.rest();
@@ -147,10 +224,10 @@ impl<'config> TypstLexer<'config> {
         let mut pos = 0;
         let chars: Vec<char> = text.chars().collect();
 
-        // 第一个字符
+        // First character
         pos += 1;
 
-        // 后续字符
+        // Subsequent characters
         while pos < chars.len() && (chars[pos].is_ascii_alphanumeric()) {
             pos += 1;
         }
@@ -281,11 +358,66 @@ impl<'config> TypstLexer<'config> {
             '$' => TypstTokenType::Dollar,
             '_' => TypstTokenType::Underscore,
             '`' => TypstTokenType::Backtick,
-            _ => TypstTokenType::Error,
+            _ => return false,
         };
 
         state.advance(1);
         state.add_token(kind, start, state.get_position());
         true
+    }
+
+    fn lex_text<'s, S: Source + ?Sized>(&self, state: &mut State<'s, S>) -> bool {
+        let start = state.get_position();
+        let mut has_text = false;
+
+        while let Some(ch) = state.peek() {
+            // Text should also consume alphanumeric characters if they don't form identifiers
+            // But here we want to break on anything that could be a special token
+            if ch.is_whitespace()
+                || ch == '/'
+                || ch == '"'
+                || ch == '='
+                || ch == '-'
+                || ch == '+'
+                || ch == '!'
+                || ch == '<'
+                || ch == '>'
+                || ch == '&'
+                || ch == '|'
+                || ch == '('
+                || ch == ')'
+                || ch == '{'
+                || ch == '}'
+                || ch == '['
+                || ch == ']'
+                || ch == ';'
+                || ch == ','
+                || ch == '.'
+                || ch == ':'
+                || ch == '#'
+                || ch == '@'
+                || ch == '$'
+                || ch == '`'
+                || ch == '\\'
+            {
+                break;
+            }
+
+            // Special handling for markup chars that were not handled by lex_markup
+            if ch == '*' || ch == '_' {
+                break;
+            }
+
+            state.advance(ch.len_utf8());
+            has_text = true;
+        }
+
+        if has_text {
+            state.add_token(TypstTokenType::Text, start, state.get_position());
+            true
+        }
+        else {
+            false
+        }
     }
 }

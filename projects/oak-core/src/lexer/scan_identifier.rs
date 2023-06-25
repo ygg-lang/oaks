@@ -1,11 +1,13 @@
-/// Checks if a byte can start an ASCII identifier (a-z, A-Z, or _).
+/// Checks if the given byte is a valid start of an ASCII identifier ([a-zA-Z_]).
 #[inline]
+#[allow(dead_code)]
 pub fn is_ascii_ident_start(b: u8) -> bool {
-    b == b'_' || b.is_ascii_alphabetic()
+    b.is_ascii_alphabetic() || b == b'_'
 }
 
-/// Checks if a byte can continue an ASCII identifier (a-z, A-Z, 0-9, or _).
+/// Checks if the given byte is a valid continuation of an ASCII identifier ([a-zA-Z0-9_]).
 #[inline]
+#[allow(dead_code)]
 pub fn is_ascii_ident_continue(b: u8) -> bool {
-    is_ascii_ident_start(b) || b.is_ascii_digit()
+    b.is_ascii_alphanumeric() || b == b'_'
 }

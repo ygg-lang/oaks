@@ -1,15 +1,16 @@
+//! Abstract Syntax Tree for the JASM language.
+
 #![doc = include_str!("readme.md")]
 use oak_core::source::{SourceBuffer, ToSource};
 #[cfg(feature = "oak-pretty-print")]
 use oak_pretty_print::{AsDocument, Document};
-#[cfg(feature = "serde")]
-use serde::{Deserialize, Serialize};
 use std::{string::String, vec::Vec};
 
 /// JASM root node.
 #[derive(Clone, Debug)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct JasmRoot {
+    /// The class definition.
     pub class: JasmClass,
 }
 
@@ -28,7 +29,7 @@ impl AsDocument for JasmRoot {
 
 /// AST node for a JASM class declaration.
 #[derive(Clone, Debug)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct JasmClass {
     /// Access modifiers (public, private, etc.).
     pub modifiers: Vec<String>,
@@ -110,7 +111,7 @@ impl AsDocument for JasmClass {
 
 /// AST node for a JASM method declaration.
 #[derive(Clone, Debug)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct JasmMethod {
     /// Access modifiers (public, static, etc.).
     pub modifiers: Vec<String>,
@@ -185,7 +186,7 @@ impl AsDocument for JasmMethod {
 
 /// AST node for a JASM field declaration.
 #[derive(Clone, Debug)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct JasmField {
     /// Access modifiers (public, static, etc.).
     pub modifiers: Vec<String>,
@@ -219,16 +220,31 @@ impl AsDocument for JasmField {
 
 /// AST node for a JASM instruction.
 #[derive(Clone, Debug)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub enum JasmInstruction {
     /// Simple instruction (e.g., aload_0, return).
     Simple(String),
     /// Instruction with an argument (e.g., ldc "Hello").
-    WithArgument { instruction: String, argument: String },
+    WithArgument {
+        /// The instruction name.
+        instruction: String,
+        /// The instruction argument.
+        argument: String,
+    },
     /// Method call instruction (e.g., invokespecial Method java/lang/Object."<init>":"()V").
-    MethodCall { instruction: String, method_ref: String },
+    MethodCall {
+        /// The instruction name.
+        instruction: String,
+        /// The method reference.
+        method_ref: String,
+    },
     /// Field access instruction (e.g., getstatic Field java/lang/System.out:"Ljava/io/PrintStream;").
-    FieldAccess { instruction: String, field_ref: String },
+    FieldAccess {
+        /// The instruction name.
+        instruction: String,
+        /// The field reference.
+        field_ref: String,
+    },
 }
 
 impl ToSource for JasmInstruction {

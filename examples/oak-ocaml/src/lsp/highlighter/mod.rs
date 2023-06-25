@@ -1,21 +1,28 @@
 #![doc = include_str!("readme.md")]
+/// Kind of highlighting to apply.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum HighlightKind {
+    /// A keyword.
     Keyword,
+    /// A string literal.
     String,
+    /// A numeric literal.
     Number,
+    /// A comment.
     Comment,
+    /// An identifier.
     Identifier,
 }
 
-/// 高亮器 trait
+/// A highlighter trait.
 pub trait Highlighter {
-    /// 对给定的文本进行高亮处理
+    /// Highlights the given text.
     fn highlight(&self, text: &str) -> Vec<(usize, usize, HighlightKind)>;
 }
 
-/// OCaml 语法高亮器
+/// A highlighter for the OCaml language.
 pub struct OCamlHighlighter {
+    /// Whether to use the parser for highlighting.
     pub use_parser: bool,
 }
 
@@ -26,10 +33,12 @@ impl Default for OCamlHighlighter {
 }
 
 impl OCamlHighlighter {
+    /// Creates a new OCaml highlighter.
     pub fn new() -> Self {
         Self::default()
     }
 
+    /// Creates a new OCaml highlighter that uses the parser.
     pub fn with_parser() -> Self {
         Self { use_parser: true }
     }

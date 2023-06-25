@@ -14,3 +14,6 @@ unicode-width = { workspace = true }
 clap = { workspace = true }
 oak-highlight = { workspace = true }
 oak-core = { workspace = true }
+
+[features]
+default = []

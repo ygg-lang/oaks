@@ -10,7 +10,7 @@ fn test_cpp_lexer_basic() {
     let mut session = ParseSession::<CppLanguage>::new(16);
     let result = lexer.lex(&source, &[], &mut session);
     assert!(result.diagnostics.is_empty());
-    println!("✓ C++ 基本词法分析测试通过")
+    println!("✓ C++ basic lexer test passed")
 }
 
 #[test]
@@ -22,7 +22,7 @@ fn test_cpp_lexer_keywords() {
     let mut session = ParseSession::<CppLanguage>::new(16);
     let result = lexer.lex(&source, &[], &mut session);
     assert!(result.diagnostics.is_empty());
-    println!("✓ C++ 关键字词法分析测试通过")
+    println!("✓ C++ keyword lexer test passed")
 }
 
 #[test]
@@ -34,7 +34,7 @@ fn test_cpp_lexer_operators() {
     let mut session = ParseSession::<CppLanguage>::new(16);
     let result = lexer.lex(&source, &[], &mut session);
     assert!(result.diagnostics.is_empty());
-    println!("✓ C++ 操作符词法分析测试通过")
+    println!("✓ C++ operator lexer test passed")
 }
 
 #[test]
@@ -46,7 +46,7 @@ fn test_cpp_lexer_strings() {
     let mut session = ParseSession::<CppLanguage>::new(16);
     let result = lexer.lex(&source, &[], &mut session);
     assert!(result.diagnostics.is_empty());
-    println!("✓ C++ 字符串词法分析测试通过")
+    println!("✓ C++ string lexer test passed")
 }
 
 #[test]
@@ -58,5 +58,5 @@ fn test_cpp_lexer_comments() {
     let mut session = ParseSession::<CppLanguage>::new(16);
     let result = lexer.lex(&source, &[], &mut session);
     assert!(result.diagnostics.is_empty());
-    println!("✓ C++ 注释词法分析测试通过")
+    println!("✓ C++ comment lexer test passed")
 }

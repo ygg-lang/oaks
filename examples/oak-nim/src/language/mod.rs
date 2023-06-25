@@ -1,12 +1,11 @@
 #![doc = include_str!("readme.md")]
 use oak_core::{Language, LanguageCategory};
 
-#[cfg(feature = "serde")]
-use serde::{Deserialize, Serialize};
-
+/// Nim language definition.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct NimLanguage {
+    /// Whether to allow comments.
     pub allow_comment: bool,
 }
 
@@ -20,6 +19,7 @@ impl Language for NimLanguage {
 }
 
 impl NimLanguage {
+    /// Creates a new Nim language definition with default settings.
     pub fn new() -> Self {
         Self::default()
     }

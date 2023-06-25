@@ -7,10 +7,10 @@ fn test_dejavu_builder() -> Result<(), oak_core::OakError> {
     let language = DejavuLanguage::default();
     let builder = DejavuBuilder::new(&language);
 
-    // 创建 BuilderTester，指向测试文件目录
+    // Create BuilderTester pointing to test file directory
     let test_runner = BuilderTester::new("tests/builder/test_files").with_extension("dejavu").with_timeout(Duration::from_secs(5));
 
-    // 运行测试
+    // Run tests
     test_runner.run_tests::<DejavuLanguage, _>(&builder)
 }
 
@@ -21,7 +21,7 @@ fn test_flags_builder() {
     let language = DejavuLanguage::default();
     let builder = DejavuBuilder::new(&language);
 
-    // 测试 flags 声明
+    // Test flags declaration
     let source = SourceText::new("flags Permissions { Read, Write, Execute }");
 
     println!("Testing builder with flags");
@@ -31,7 +31,7 @@ fn test_flags_builder() {
     match diagnostics.result {
         Ok(typed_root) => {
             println!("Successfully built flags typed root: {:?}", typed_root);
-            // 验证是否生成了 Flags 项
+            // Verify if Flags item is generated
             let has_flags = typed_root.items.iter().any(|item| matches!(item, oak_dejavu::ast::Item::Flags(_)));
             assert!(has_flags, "Builder should have generated a Flags item")
         }
@@ -48,7 +48,7 @@ fn test_dejavu_builder_single_file() {
     let language = DejavuLanguage::default();
     let builder = DejavuBuilder::new(&language);
 
-    // 测试简单的 micro 函数
+    // Test simple micro function
     let source = SourceText::new("micro add(x: i32, y: i32) -> i32 { x + y }");
 
     println!("Testing builder with micro function");
@@ -67,7 +67,7 @@ fn test_dejavu_builder_single_file() {
         println!("Build diagnostics: {:?}", diagnostics.diagnostics)
     }
 
-    // 暂时总是通过测试，直到实现完成
+    // Temporarily pass test until implementation is complete
     assert!(true, "Single file builder test placeholder")
 }
 
@@ -78,7 +78,7 @@ fn test_dejavu_builder_namespace() {
     let language = DejavuLanguage::default();
     let builder = DejavuBuilder::new(&language);
 
-    // 测试 namespace 声明
+    // Test namespace declaration
     let source = SourceText::new("namespace Test { micro main() { let x = 42 } }");
 
     println!("Testing builder with namespace");

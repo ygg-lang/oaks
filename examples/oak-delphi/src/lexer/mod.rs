@@ -4,17 +4,18 @@ pub mod token_type;
 use crate::{language::DelphiLanguage, lexer::token_type::DelphiTokenType};
 use oak_core::{Lexer, LexerCache, LexerState, OakError, TextEdit, lexer::LexOutput, source::Source};
 
-type State<'a, S> = LexerState<'a, S, DelphiLanguage>;
+pub(crate) type State<'a, S> = LexerState<'a, S, DelphiLanguage>;
 
 /// Lexer implementation for Delphi programming language
 #[derive(Clone, Debug)]
 pub struct DelphiLexer<'config> {
-    _config: &'config DelphiLanguage,
+    config: &'config DelphiLanguage,
 }
 
 impl<'config> DelphiLexer<'config> {
+    /// Creates a new `DelphiLexer`.
     pub fn new(config: &'config DelphiLanguage) -> Self {
-        Self { _config: config }
+        Self { config }
     }
 
     fn run<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> Result<(), OakError> {
@@ -49,7 +50,7 @@ impl<'config> DelphiLexer<'config> {
                 continue;
             }
 
-            // 如果没有匹配任何规则，添加错误 token 并前进
+            // If no rules match, add an error token and advance.
             let start_pos = state.get_position();
             if let Some(ch) = state.peek() {
                 state.advance(ch.len_utf8());

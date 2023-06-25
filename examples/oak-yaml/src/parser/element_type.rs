@@ -1,14 +1,17 @@
 use oak_core::{ElementType, UniversalElementRole};
-#[cfg(feature = "serde")]
-use serde::{Deserialize, Serialize};
 
+/// Element types for the YAML language.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 #[repr(u16)]
 pub enum YamlElementType {
+    /// A leaf node containing a single token.
     Token(crate::lexer::token_type::YamlTokenType),
+    /// A YAML document.
     Document,
+    /// The root node of a YAML file.
     Root,
+    /// An error node.
     Error,
 }
 

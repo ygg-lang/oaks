@@ -3,7 +3,6 @@ use crate::language::HandlebarsLanguage;
 pub mod token_type;
 pub use token_type::HandlebarsTokenType;
 
-use crate::lexer::token_type::HandlebarsTokenType as T;
 use oak_core::{
     Lexer, LexerCache, LexerState, OakError, Range,
     lexer::{LexOutput, StringConfig, WhitespaceConfig},
@@ -11,16 +10,17 @@ use oak_core::{
 };
 use std::sync::LazyLock;
 
-type State<'a, S> = LexerState<'a, S, HandlebarsLanguage>;
+pub(crate) type State<'a, S> = LexerState<'a, S, HandlebarsLanguage>;
 
 // Scanner configurations
 static HB_WHITESPACE: LazyLock<WhitespaceConfig> = LazyLock::new(|| WhitespaceConfig { unicode_whitespace: true });
 static HB_STRING_DOUBLE: LazyLock<StringConfig> = LazyLock::new(|| StringConfig { quotes: &['"'], escape: Some('\\') });
 static HB_STRING_SINGLE: LazyLock<StringConfig> = LazyLock::new(|| StringConfig { quotes: &['\''], escape: Some('\\') });
 
+/// Handlebars lexer.
 #[derive(Clone)]
 pub struct HandlebarsLexer<'config> {
-    _config: &'config HandlebarsLanguage,
+    config: &'config HandlebarsLanguage,
 }
 
 impl<'config> Lexer<HandlebarsLanguage> for HandlebarsLexer<'config> {
@@ -35,8 +35,9 @@ impl<'config> Lexer<HandlebarsLanguage> for HandlebarsLexer<'config> {
 }
 
 impl<'config> HandlebarsLexer<'config> {
+    /// Creates a new `HandlebarsLexer`.
     pub fn new(config: &'config HandlebarsLanguage) -> Self {
-        Self { _config: config }
+        Self { config }
     }
 
     fn run<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> Result<(), OakError> {
@@ -106,13 +107,16 @@ impl<'config> HandlebarsLexer<'config> {
     }
 
     fn lex_comment<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
-        if state.current() == Some('{') && state.peek() == Some('{') {
-            if state.peek_next_n(2) == Some('!') && state.peek_next_n(3) == Some('-') && state.peek_next_n(4) == Some('-') {
+        let rest = state.rest();
+        if rest.starts_with(&self.config.variable_start) {
+            let comment_rest = &rest[self.config.variable_start.len()..];
+            if comment_rest.starts_with("!--") {
                 let start = state.get_position();
-                state.advance(5);
+                state.advance(self.config.variable_start.len() + 3);
                 while state.not_at_end() {
-                    if state.current() == Some('-') && state.peek() == Some('-') && state.peek_next_n(2) == Some('}') && state.peek_next_n(3) == Some('}') {
-                        state.advance(4);
+                    let current_rest = state.rest();
+                    if current_rest.starts_with("--") && current_rest[2..].starts_with(&self.config.variable_end) {
+                        state.advance(2 + self.config.variable_end.len());
                         let end = state.get_position();
                         state.add_token(HandlebarsTokenType::Comment, start, end);
                         return true;
@@ -121,12 +125,12 @@ impl<'config> HandlebarsLexer<'config> {
                 }
                 return true;
             }
-            else if state.peek_next_n(2) == Some('!') {
+            else if comment_rest.starts_with('!') {
                 let start = state.get_position();
-                state.advance(3);
+                state.advance(self.config.variable_start.len() + 1);
                 while state.not_at_end() {
-                    if state.current() == Some('}') && state.peek() == Some('}') {
-                        state.advance(2);
+                    if state.rest().starts_with(&self.config.variable_end) {
+                        state.advance(self.config.variable_end.len());
                         let end = state.get_position();
                         state.add_token(HandlebarsTokenType::Comment, start, end);
                         return true;
@@ -140,28 +144,27 @@ impl<'config> HandlebarsLexer<'config> {
     }
 
     fn lex_handlebars_expression<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
-        if state.current() == Some('{') && state.peek() == Some('{') {
-            let start = state.get_position();
-            if state.peek_next_n(2) == Some('{') {
-                state.advance(3);
-                state.add_token(HandlebarsTokenType::OpenUnescaped, start, state.get_position());
-            }
-            else {
-                state.advance(2);
-                state.add_token(HandlebarsTokenType::Open, start, state.get_position());
-            }
+        let start = state.get_position();
+        let rest = state.rest();
+
+        if rest.starts_with(&self.config.unescaped_start) {
+            state.advance(self.config.unescaped_start.len());
+            state.add_token(HandlebarsTokenType::OpenUnescaped, start, state.get_position());
             true
         }
-        else if state.current() == Some('}') && state.peek() == Some('}') {
-            let start = state.get_position();
-            if state.peek_next_n(2) == Some('}') {
-                state.advance(3);
-                state.add_token(HandlebarsTokenType::CloseUnescaped, start, state.get_position());
-            }
-            else {
-                state.advance(2);
-                state.add_token(HandlebarsTokenType::Close, start, state.get_position());
-            }
+        else if rest.starts_with(&self.config.variable_start) {
+            state.advance(self.config.variable_start.len());
+            state.add_token(HandlebarsTokenType::Open, start, state.get_position());
+            true
+        }
+        else if rest.starts_with(&self.config.unescaped_end) {
+            state.advance(self.config.unescaped_end.len());
+            state.add_token(HandlebarsTokenType::CloseUnescaped, start, state.get_position());
+            true
+        }
+        else if rest.starts_with(&self.config.variable_end) {
+            state.advance(self.config.variable_end.len());
+            state.add_token(HandlebarsTokenType::Close, start, state.get_position());
             true
         }
         else {
@@ -261,10 +264,11 @@ impl<'config> HandlebarsLexer<'config> {
         let mut count = 0;
 
         while let Some(c) = state.current() {
-            if c == '{' && state.peek() == Some('{') {
+            let rest = state.rest();
+            if rest.starts_with(&self.config.variable_start) || rest.starts_with(&self.config.unescaped_start) {
                 break;
             }
-            state.advance(1);
+            state.advance(c.len_utf8());
             count += 1
         }
 

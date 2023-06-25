@@ -1,5 +1,5 @@
 #![doc = include_str!("readme.md")]
-/// Twig 语言的高亮类型
+/// Highlight kinds for Twig language
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum HighlightKind {
     Keyword,
@@ -7,12 +7,12 @@ pub enum HighlightKind {
     Variable,
 }
 
-/// Twig 语言的高亮器
+/// Twig language highlighter
 #[derive(Debug, Default, Clone, Copy)]
 pub struct TwigHighlighter;
 
 impl TwigHighlighter {
-    /// 创建新的 Twig 高亮器
+    /// Creates a new Twig highlighter
     pub fn new() -> Self {
         Self
     }
@@ -20,13 +20,13 @@ impl TwigHighlighter {
     pub fn highlight(&self, text: &str) -> Vec<(usize, usize, HighlightKind)> {
         let mut highlights = Vec::new();
 
-        // 简单的关键字高亮
+        // Simple keyword highlighting
         let keywords = ["if", "else", "endif", "for", "in", "endfor", "set", "extends", "include", "block", "endblock"];
         for keyword in keywords {
             let mut start = 0;
             while let Some(pos) = text[start..].find(keyword) {
                 let actual_pos = start + pos;
-                // 检查是否是独立的单词
+                // Check if it is a standalone word
                 let is_start = actual_pos == 0 || !text.as_bytes()[actual_pos - 1].is_ascii_alphanumeric();
                 let is_end = actual_pos + keyword.len() == text.len() || !text.as_bytes()[actual_pos + keyword.len()].is_ascii_alphanumeric();
 
@@ -37,7 +37,7 @@ impl TwigHighlighter {
             }
         }
 
-        // 高亮注释 {# ... #}
+        // Highlight comments {# ... #}
         let mut start = 0;
         while let Some(pos) = text[start..].find("{#") {
             let actual_start = start + pos;
@@ -52,7 +52,7 @@ impl TwigHighlighter {
             }
         }
 
-        // 高亮变量 {{ ... }}
+        // Highlight variables {{ ... }}
         let mut start = 0;
         while let Some(pos) = text[start..].find("{{") {
             let actual_start = start + pos;

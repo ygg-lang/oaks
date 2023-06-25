@@ -7,15 +7,17 @@ pub mod token_type;
 
 use crate::{language::IniLanguage, lexer::token_type::IniTokenType};
 
-type State<'a, S> = LexerState<'a, S, IniLanguage>;
+pub(crate) type State<'a, S> = LexerState<'a, S, IniLanguage>;
 
 static _INI_WHITESPACE: WhitespaceConfig = WhitespaceConfig { unicode_whitespace: true };
 static _INI_COMMENT: CommentConfig = CommentConfig { line_marker: ";", block_start: "", block_end: "", nested_blocks: false };
 static _INI_STRING: StringConfig = StringConfig { quotes: &['"', '\''], escape: Some('\\') };
 
+/// INI lexer implementation.
 #[derive(Clone, Debug)]
 pub struct IniLexer<'config> {
-    _config: &'config IniLanguage,
+    /// The INI language configuration.
+    config: &'config IniLanguage,
 }
 
 impl<'config> Lexer<IniLanguage> for IniLexer<'config> {
@@ -30,11 +32,12 @@ impl<'config> Lexer<IniLanguage> for IniLexer<'config> {
 }
 
 impl<'config> IniLexer<'config> {
+    /// Creates a new `IniLexer` with the given configuration.
     pub fn new(config: &'config IniLanguage) -> Self {
-        Self { _config: config }
+        Self { config }
     }
 
-    /// 主要的词法分析循环
+    /// The main lexical analysis loop.
     fn run<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> Result<(), OakError> {
         while state.not_at_end() {
             let safe_point = state.get_position();
@@ -73,7 +76,7 @@ impl<'config> IniLexer<'config> {
         Ok(())
     }
 
-    /// 跳过空白字符（不包括换行符）
+    /// Skips whitespace characters (excluding newlines).
     fn skip_whitespace<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start = state.get_position();
 
@@ -93,7 +96,7 @@ impl<'config> IniLexer<'config> {
         false
     }
 
-    /// 处理换行
+    /// Handles newline characters.
     fn lex_newline<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start = state.get_position();
 
@@ -105,16 +108,16 @@ impl<'config> IniLexer<'config> {
         false
     }
 
-    /// 跳过注释
+    /// Skips comments.
     fn skip_comment<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start = state.get_position();
 
         if let Some(ch) = state.current() {
             if ch == ';' || ch == '#' {
-                // 跳过注释字符
+                // Skip comment character
                 state.advance(1);
 
-                // 读取到行尾
+                // Read until end of line
                 while let Some(ch) = state.peek() {
                     if ch != '\n' {
                         state.advance(ch.len_utf8());
@@ -131,21 +134,21 @@ impl<'config> IniLexer<'config> {
         false
     }
 
-    /// 处理字符串字面量
+    /// Handles string literals.
     fn lex_string_literal<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start = state.get_position();
 
         if let Some(quote_char) = state.current() {
             if quote_char == '"' || quote_char == '\'' {
-                // 跳过开始引号
+                // Skip opening quote
                 state.advance(1);
 
                 while let Some(ch) = state.peek() {
                     if ch != quote_char {
                         if ch == '\\' {
-                            state.advance(1); // 转义字符
+                            state.advance(1); // Escape character
                             if let Some(_) = state.peek() {
-                                state.advance(1); // 被转义的字符
+                                state.advance(1); // Escaped character
                             }
                         }
                         else {
@@ -153,7 +156,7 @@ impl<'config> IniLexer<'config> {
                         }
                     }
                     else {
-                        // 找到结束引号
+                        // Found closing quote
                         state.advance(1);
                         break;
                     }
@@ -166,7 +169,7 @@ impl<'config> IniLexer<'config> {
         false
     }
 
-    /// 处理数字字面量
+    /// Handles number literals.
     fn lex_number_literal<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start = state.get_position();
         let first = match state.current() {
@@ -174,12 +177,12 @@ impl<'config> IniLexer<'config> {
             None => return false,
         };
 
-        // 检查是否以数字或负号开始
+        // Check if starts with a digit or a sign
         if !first.is_ascii_digit() && first != '-' && first != '+' {
             return false;
         }
 
-        // 如果是符号，检查后面是否跟数字
+        // If it's a sign, check if followed by a digit
         if first == '-' || first == '+' {
             if let Some(next) = state.peek_next_n(1) {
                 if !next.is_ascii_digit() {
@@ -206,7 +209,7 @@ impl<'config> IniLexer<'config> {
             else if (ch == 'e' || ch == 'E') && !has_exp {
                 has_exp = true;
                 state.advance(1);
-                // 处理指数符号
+                // Handle exponent sign
                 if let Some(sign) = state.peek() {
                     if sign == '+' || sign == '-' {
                         state.advance(1);
@@ -218,25 +221,25 @@ impl<'config> IniLexer<'config> {
             }
         }
 
-        // 检查是否为有效数字
+        // Check if it's a valid number
         let end = state.get_position();
         let text = state.get_text_in((start..end).into());
 
-        // 简单验证：不能只是符号或只是点
+        // Simple validation: cannot be just a sign or just a dot
         if text.as_ref() == "-" || text.as_ref() == "+" || text.as_ref() == "." {
-            // 回退
+            // Backtrack
             state.set_position(start);
             return false;
         }
 
-        // 判断是整数还是浮点数
+        // Determine if it's an integer or a float
         let kind = if has_dot || has_exp { IniTokenType::Float } else { IniTokenType::Integer };
 
         state.add_token(kind, start, state.get_position());
         true
     }
 
-    /// 处理标识符
+    /// Handles identifiers
     fn lex_identifier<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start = state.get_position();
         let ch = match state.current() {
@@ -244,7 +247,7 @@ impl<'config> IniLexer<'config> {
             None => return false,
         };
 
-        // 标识符必须以字母或下划线开始
+        // Identifiers must start with a letter or underscore
         if !(ch.is_ascii_alphabetic() || ch == '_') {
             return false;
         }
@@ -262,7 +265,7 @@ impl<'config> IniLexer<'config> {
         let end = state.get_position();
         let text = state.get_text_in((start..end).into());
 
-        // 检查是否为布尔值或日期时间
+        // Check if it's a boolean or date-time
         let kind = match text.to_lowercase().as_str() {
             "true" | "false" => IniTokenType::Boolean,
             _ => {
@@ -279,11 +282,11 @@ impl<'config> IniLexer<'config> {
         true
     }
 
-    /// 处理标点符号
+    /// Handles punctuation
     fn lex_punctuation<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start = state.get_position();
 
-        // 优先匹配较长的符号
+        // Match longer symbols first
         if state.starts_with("[[") {
             state.advance(2);
             state.add_token(IniTokenType::DoubleLeftBracket, start, state.get_position());
@@ -317,7 +320,7 @@ impl<'config> IniLexer<'config> {
     }
 
     fn is_datetime_like(&self, text: &str) -> bool {
-        // 极简判断：包含 - 和 : 的可能是日期时间
+        // Minimal judgment: those containing - and : might be date-time
         text.contains('-') && text.contains(':')
     }
 }

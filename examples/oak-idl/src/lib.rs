@@ -36,3 +36,14 @@ pub use crate::lsp::highlighter::IdlHighlighter;
 pub use crate::lsp::IdlLanguageService;
 pub use lexer::token_type::IdlTokenType;
 pub use parser::element_type::IdlElementType;
+
+/// Parses an IDL string.
+pub fn parse(idl: &str) -> Result<crate::ast::IdlRoot, String> {
+    use oak_core::{Builder, parser::session::ParseSession, source::SourceText};
+    let language = IdlLanguage::default();
+    let builder = IdlBuilder::new(&language);
+    let source = SourceText::new(idl.to_string());
+    let mut cache = ParseSession::default();
+    let result = builder.build(&source, &[], &mut cache);
+    result.result.map_err(|e| format!("{:?}", e))
+}

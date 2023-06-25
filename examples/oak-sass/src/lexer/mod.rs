@@ -1,4 +1,5 @@
 #![doc = include_str!("readme.md")]
+/// Token types for the Sass language.
 pub mod token_type;
 
 use crate::{language::SassLanguage, lexer::token_type::SassTokenType};
@@ -16,12 +17,14 @@ static SASS_COMMENT: LazyLock<CommentConfig> = LazyLock::new(|| CommentConfig { 
 static SASS_STRING: LazyLock<StringConfig> = LazyLock::new(|| StringConfig { quotes: &['"'], escape: Some('\\') });
 static SASS_CHAR: LazyLock<StringConfig> = LazyLock::new(|| StringConfig { quotes: &['\''], escape: Some('\\') });
 
+/// Lexer for the Sass language.
 #[derive(Clone, Debug)]
 pub struct SassLexer<'config> {
-    _config: &'config SassLanguage,
+    config: &'config SassLanguage,
 }
 
 impl<'config> Lexer<SassLanguage> for SassLexer<'config> {
+    /// Tokenizes the source text into a sequence of Sass tokens.
     fn lex<'a, S: Source + ?Sized>(&self, source: &S, _edits: &[TextEdit], cache: &'a mut impl LexerCache<SassLanguage>) -> LexOutput<SassLanguage> {
         let mut state = LexerState::new(source);
         let result = self.run(&mut state);
@@ -33,8 +36,9 @@ impl<'config> Lexer<SassLanguage> for SassLexer<'config> {
 }
 
 impl<'config> SassLexer<'config> {
+    /// Creates a new `SassLexer` with the given configuration.
     pub fn new(config: &'config SassLanguage) -> Self {
-        Self { _config: config }
+        Self { config }
     }
 
     /// Main lexer loop that tokenizes the source text.

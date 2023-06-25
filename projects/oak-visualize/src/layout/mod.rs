@@ -1,17 +1,23 @@
 #![doc = "Layout algorithms for visualizing code structures"]
 
 use crate::geometry::{Point, Rect, Size};
-use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 
 /// Layout configuration
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct LayoutConfig {
+    /// Default width for nodes.
     pub node_width: f64,
+    /// Default height for nodes.
     pub node_height: f64,
+    /// Horizontal spacing between nodes.
     pub horizontal_spacing: f64,
+    /// Vertical spacing between nodes.
     pub vertical_spacing: f64,
+    /// Margin around the layout.
     pub margin: f64,
+    /// Padding inside the layout.
     pub padding: f64,
 }
 
@@ -24,36 +30,47 @@ impl Default for LayoutConfig {
 /// Positioned node in a layout
 #[derive(Debug, Clone)]
 pub struct PositionedNode {
+    /// Unique identifier for the node.
     pub id: String,
+    /// Display label for the node.
     pub label: String,
+    /// Rectangle representing the node's position and size.
     pub rect: Rect,
+    /// Type of the node for styling.
     pub node_type: NodeType,
 }
 
 /// Layout result containing positioned elements
 #[derive(Debug, Clone)]
 pub struct Layout {
+    /// Bounding box of all elements in the layout.
     pub bounds: Rect,
+    /// Map of node IDs to their positioned nodes.
     pub nodes: HashMap<String, PositionedNode>,
+    /// List of edges connecting the nodes.
     pub edges: Vec<Edge>,
 }
 
 impl Layout {
+    /// Creates a new empty layout.
     pub fn new() -> Self {
         Self { bounds: Rect::default(), nodes: HashMap::new(), edges: Vec::new() }
     }
 
+    /// Adds a node to the layout at the specified rectangle.
     pub fn add_node(&mut self, id: String, rect: Rect) {
         let label = id.clone();
         self.nodes.insert(id.clone(), PositionedNode { id, label, rect, node_type: NodeType::Default });
         self.update_bounds()
     }
 
+    /// Adds a node with explicit label and type.
     pub fn add_node_with_metadata(&mut self, id: String, label: String, rect: Rect, node_type: NodeType) {
         self.nodes.insert(id.clone(), PositionedNode { id, label, rect, node_type });
         self.update_bounds()
     }
 
+    /// Adds an edge to the layout.
     pub fn add_edge(&mut self, edge: Edge) {
         self.edges.push(edge)
     }
@@ -90,22 +107,29 @@ impl Default for Layout {
 /// Edge connecting two nodes
 #[derive(Debug, Clone)]
 pub struct Edge {
+    /// ID of the source node.
     pub from: String,
+    /// ID of the target node.
     pub to: String,
+    /// Control points for the edge path.
     pub points: Vec<Point>,
+    /// Optional label for the edge.
     pub label: Option<String>,
 }
 
 impl Edge {
+    /// Creates a new edge between two nodes.
     pub fn new(from: String, to: String) -> Self {
         Self { from, to, points: Vec::new(), label: None }
     }
 
+    /// Sets the label for the edge.
     pub fn with_label(mut self, label: String) -> Self {
         self.label = Some(label);
         self
     }
 
+    /// Sets the control points for the edge.
     pub fn with_points(mut self, points: Vec<Point>) -> Self {
         self.points = points;
         self
@@ -114,28 +138,36 @@ impl Edge {
 
 /// Layout engine trait
 pub trait LayoutEngine {
+    /// Computes the layout for a set of nodes and edges.
     fn layout(&self, nodes: &[LayoutNode], edges: &[LayoutEdge], config: &LayoutConfig) -> crate::Result<Layout>;
 }
 
 /// Node to be laid out
 #[derive(Debug, Clone)]
 pub struct LayoutNode {
+    /// Unique identifier for the node.
     pub id: String,
+    /// Preferred size of the node.
     pub size: Size,
+    /// Display label for the node.
     pub label: String,
+    /// Type of the node for styling.
     pub node_type: NodeType,
 }
 
 impl LayoutNode {
+    /// Creates a new layout node with ID and label.
     pub fn new(id: String, label: String) -> Self {
         Self { id, label, size: Size::default(), node_type: NodeType::Default }
     }
 
+    /// Sets the preferred size of the node.
     pub fn with_size(mut self, size: Size) -> Self {
         self.size = size;
         self
     }
 
+    /// Sets the type of the node.
     pub fn with_type(mut self, node_type: NodeType) -> Self {
         self.node_type = node_type;
         self
@@ -145,22 +177,29 @@ impl LayoutNode {
 /// Edge to be laid out
 #[derive(Debug, Clone)]
 pub struct LayoutEdge {
+    /// ID of the source node.
     pub from: String,
+    /// ID of the target node.
     pub to: String,
+    /// Optional label for the edge.
     pub label: Option<String>,
+    /// Type of the edge for styling.
     pub edge_type: EdgeType,
 }
 
 impl LayoutEdge {
+    /// Creates a new layout edge between two nodes.
     pub fn new(from: String, to: String) -> Self {
         Self { from, to, label: None, edge_type: EdgeType::Default }
     }
 
+    /// Sets the label for the edge.
     pub fn with_label(mut self, label: String) -> Self {
         self.label = Some(label);
         self
     }
 
+    /// Sets the type of the edge.
     pub fn with_type(mut self, edge_type: EdgeType) -> Self {
         self.edge_type = edge_type;
         self
@@ -170,23 +209,36 @@ impl LayoutEdge {
 /// Node type for styling
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum NodeType {
+    /// Default node type.
     Default,
+    /// Function or method.
     Function,
+    /// Struct or class.
     Struct,
+    /// Enum definition.
     Enum,
+    /// Variable or field.
     Variable,
+    /// Constant value.
     Constant,
+    /// Module or namespace.
     Module,
 }
 
 /// Edge type for styling
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum EdgeType {
+    /// Default edge type.
     Default,
+    /// General dependency.
     Dependency,
+    /// Inheritance or implementation.
     Inheritance,
+    /// Association between elements.
     Association,
+    /// Composition relationship.
     Composition,
+    /// Function or method call.
     Call,
 }
 
@@ -196,12 +248,14 @@ pub struct HierarchicalLayout {
 }
 
 impl HierarchicalLayout {
+    /// Creates a new hierarchical layout engine with the specified direction.
     pub fn new(direction: LayoutDirection) -> Self {
         Self { direction }
     }
 }
 
 impl LayoutEngine for HierarchicalLayout {
+    /// Lays out nodes hierarchically in the specified direction.
     fn layout(&self, nodes: &[LayoutNode], edges: &[LayoutEdge], config: &LayoutConfig) -> crate::Result<Layout> {
         let mut layout = Layout::new();
 
@@ -246,20 +300,24 @@ pub struct ForceDirectedLayout {
 }
 
 impl ForceDirectedLayout {
+    /// Creates a new force-directed layout engine with default parameters.
     pub fn new() -> Self {
         Self { iterations: 100, spring_strength: 0.1, repulsion_strength: 1000.0, damping: 0.9 }
     }
 
+    /// Sets the number of simulation iterations.
     pub fn with_iterations(mut self, iterations: usize) -> Self {
         self.iterations = iterations;
         self
     }
 
+    /// Sets the strength of the attractive spring forces.
     pub fn with_spring_strength(mut self, strength: f64) -> Self {
         self.spring_strength = strength;
         self
     }
 
+    /// Sets the strength of the repulsive forces between nodes.
     pub fn with_repulsion_strength(mut self, strength: f64) -> Self {
         self.repulsion_strength = strength;
         self
@@ -273,6 +331,7 @@ impl Default for ForceDirectedLayout {
 }
 
 impl LayoutEngine for ForceDirectedLayout {
+    /// Lays out nodes using a force-directed simulation.
     fn layout(&self, nodes: &[LayoutNode], edges: &[LayoutEdge], config: &LayoutConfig) -> crate::Result<Layout> {
         let mut layout = Layout::new();
 
@@ -366,9 +425,13 @@ impl LayoutEngine for ForceDirectedLayout {
 /// Layout direction
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum LayoutDirection {
+    /// Top to bottom.
     TopDown,
+    /// Bottom to top.
     BottomUp,
+    /// Left to right.
     LeftRight,
+    /// Right to left.
     RightLeft,
 }
 

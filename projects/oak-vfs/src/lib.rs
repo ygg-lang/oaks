@@ -1,6 +1,5 @@
 #![feature(new_range_api)]
 #![warn(missing_docs)]
-#![doc = "Virtual File System (VFS) for managing source files and their metadata."]
 //! Virtual File System (VFS) for the Oak language framework.
 //!
 //! This crate provides a unified interface for accessing source files,
@@ -11,15 +10,13 @@ use oak_core::{
     Arc,
     source::{Source, SourceId},
 };
-#[cfg(feature = "serde")]
-use serde::{Deserialize, Serialize};
 
 mod line_map;
 pub use line_map::LineMap;
 
 /// Type of a file in the VFS.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub enum FileType {
     /// A regular file.
     File,
@@ -31,7 +28,7 @@ pub enum FileType {
 
 /// Metadata for a file or directory in the VFS.
 #[derive(Debug, Clone)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct FileMetadata {
     /// The type of the file.
     pub file_type: FileType,
@@ -48,6 +45,18 @@ pub use vfs::MemoryVfs;
 pub use vfs::{DiskVfs, DiskWatcher, VfsEvent, VfsWatcher};
 
 /// A trait for a Virtual File System that can provide source content and location mapping.
+///
+/// The `Vfs` trait provides a unified abstraction for file system operations,
+/// allowing the core framework to work with files from disk, memory, or network
+/// without being tied to a specific storage backend.
+///
+/// # Usage Scenario
+///
+/// The `Vfs` is typically used to:
+/// 1. Resolve URIs to source content via [`get_source`].
+/// 2. Map between [`SourceId`] and URI strings.
+/// 3. Provide metadata and directory listing for code navigation and discovery.
+/// 4. Manage [`LineMap`]s for translating byte offsets to line/column positions.
 pub trait Vfs: Send + Sync {
     /// The type of source returned by this VFS.
     type Source: Source + 'static;

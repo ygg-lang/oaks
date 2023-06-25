@@ -1,4 +1,4 @@
-use oak_core::{Lexer, LexerCache, lexer::session::LexSession, source::SourceText};
+use oak_core::{Lexer, parser::ParseSession, source::SourceText};
 use oak_llvm_ir::{LLvmLanguage, LLvmLexer};
 use oak_testing::lexing::LexerTester;
 use std::{path::Path, time::Duration};
@@ -8,7 +8,7 @@ fn test_lexer_basic() {
     let language = &LLvmLanguage::default();
     let source = &SourceText::new(" %1 = add i32 %0, 1 ; comment\n @global = global i32 42 ".to_string());
     let lexer = LLvmLexer::new(language);
-    let mut cache = LexSession::<LLvmLanguage>::default();
+    let mut cache = ParseSession::<LLvmLanguage>::default();
     let _output = lexer.lex(source, &[], &mut cache);
 }
 

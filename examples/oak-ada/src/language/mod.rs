@@ -2,21 +2,19 @@
 #[doc = include_str!("../readme.md")]
 use crate::{ast::AdaRoot, lexer::AdaTokenType, parser::AdaElementType};
 use oak_core::{Language, LanguageCategory};
-#[cfg(feature = "serde")]
-use serde::{Deserialize, Serialize};
 
-/// Ada 语言配置和元数据。
+/// Ada language configuration and metadata.
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct AdaLanguage {
-    /// 是否启用 Ada 2022 特性
+    /// Whether to enable Ada 2022 features.
     pub allow_ada_2022: bool,
-    /// 是否启用严格模式
+    /// Whether to enable strict mode.
     pub strict_mode: bool,
 }
 
 impl AdaLanguage {
-    /// 创建新的 Ada 语言配置
+    /// Creates a new Ada language configuration.
     pub fn new() -> Self {
         Self { allow_ada_2022: true, strict_mode: false }
     }

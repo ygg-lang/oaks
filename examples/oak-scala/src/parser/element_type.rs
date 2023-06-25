@@ -1,9 +1,7 @@
 use oak_core::{ElementType, UniversalElementRole};
-#[cfg(feature = "serde")]
-use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub enum ScalaElementType {
     // Node kinds
     SourceFile,
@@ -116,7 +114,7 @@ pub enum ScalaElementType {
     At,           // @
     Hash,         // #
 
-    // 分隔符
+    // Separators
     LeftParen,    // (
     RightParen,   // )
     LeftBracket,  // [

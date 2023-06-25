@@ -1,10 +1,8 @@
 use oak_core::{TokenType, UniversalTokenRole};
-#[cfg(feature = "serde")]
-use serde::{Deserialize, Serialize};
 
 /// Raku token types.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub enum RakuTokenType {
     /// End of file.
     EndOfFile,
@@ -20,6 +18,72 @@ pub enum RakuTokenType {
     Number,
     /// String.
     String,
+    /// `(`
+    LeftParen,
+    /// `)`
+    RightParen,
+    /// `{`
+    LeftBrace,
+    /// `}`
+    RightBrace,
+    /// `[`
+    LeftBracket,
+    /// `]`
+    RightBracket,
+    /// `;`
+    Semicolon,
+    /// `,`
+    Comma,
+    /// `.`
+    Dot,
+    /// `:`
+    Colon,
+    /// `->`
+    Arrow,
+    /// `=>`
+    FatArrow,
+    /// Operator.
+    Operator,
+    /// Keyword.
+    Keyword,
+    /// `my`
+    My,
+    /// `our`
+    Our,
+    /// `has`
+    Has,
+    /// `sub`
+    Sub,
+    /// `method`
+    Method,
+    /// `class`
+    Class,
+    /// `module`
+    Module,
+    /// `use`
+    Use,
+    /// `if`
+    If,
+    /// `else`
+    Else,
+    /// `elsif`
+    Elsif,
+    /// `unless`
+    Unless,
+    /// `for`
+    For,
+    /// `while`
+    While,
+    /// `loop`
+    Loop,
+    /// `repeat`
+    Repeat,
+    /// `until`
+    Until,
+    /// `gather`
+    Gather,
+    /// `take`
+    Take,
 }
 
 impl TokenType for RakuTokenType {
@@ -35,6 +99,29 @@ impl TokenType for RakuTokenType {
             Self::Identifier => UniversalTokenRole::Name,
             Self::Number => UniversalTokenRole::Literal,
             Self::String => UniversalTokenRole::Literal,
+            Self::LeftParen | Self::RightParen | Self::LeftBrace | Self::RightBrace | Self::LeftBracket | Self::RightBracket => UniversalTokenRole::Punctuation,
+            Self::Semicolon | Self::Comma | Self::Dot | Self::Colon | Self::Arrow | Self::FatArrow => UniversalTokenRole::Punctuation,
+            Self::Operator => UniversalTokenRole::Operator,
+            Self::Keyword
+            | Self::My
+            | Self::Our
+            | Self::Has
+            | Self::Sub
+            | Self::Method
+            | Self::Class
+            | Self::Module
+            | Self::Use
+            | Self::If
+            | Self::Else
+            | Self::Elsif
+            | Self::Unless
+            | Self::For
+            | Self::While
+            | Self::Loop
+            | Self::Repeat
+            | Self::Until
+            | Self::Gather
+            | Self::Take => UniversalTokenRole::Keyword,
         }
     }
 }

@@ -24,6 +24,17 @@ pub mod parser;
 
 pub use crate::{ast::DHallRoot, builder::DHallBuilder, language::DHallLanguage, lexer::DHallLexer, parser::DHallParser};
 
+/// Parses a Dhall string.
+pub fn parse(dhall: &str) -> Result<crate::ast::DHallRoot, String> {
+    use oak_core::{Builder, parser::session::ParseSession, source::SourceText};
+    let language = DHallLanguage::default();
+    let builder = DHallBuilder::new(&language);
+    let source = SourceText::new(dhall.to_string());
+    let mut cache = ParseSession::default();
+    let result = builder.build(&source, &[], &mut cache);
+    result.result.map_err(|e| format!("{:?}", e))
+}
+
 /// Highlighter implementation.
 #[cfg(feature = "oak-highlight")]
 pub use crate::lsp::highlighter::DHallHighlighter;

@@ -1,6 +1,6 @@
 #![feature(new_range_api)]
 #![warn(missing_docs)]
-//! Document structural view (结构化视图) support for the Oak language framework.
+//! Document structural view support for the Oak language framework.
 //!
 //! This crate provides traits and structures for representing the hierarchical
 //! structural view of a document, such as for an outline view or breadcrumbs.
@@ -9,10 +9,10 @@ use oak_core::{
     language::{Language, UniversalElementRole},
     tree::RedNode,
 };
-use serde::{Deserialize, Serialize};
 
 /// Represents an item in the document structure (e.g., in an outline or breadcrumbs).
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct StructureItem {
     /// The name of this item (e.g., function name, class name).
     pub name: String,
@@ -21,11 +21,11 @@ pub struct StructureItem {
     /// The universal role of this element.
     pub role: UniversalElementRole,
     /// The range of the entire element in the source code.
-    #[serde(with = "oak_core::serde_range", bound(serialize = "", deserialize = ""))]
+    #[cfg_attr(feature = "serde", serde(with = "oak_core::serde_range", bound(serialize = "", deserialize = "")))]
     pub range: Range<usize>,
     /// The range that should be selected when clicking on this item.
     /// Usually the range of the identifier.
-    #[serde(with = "oak_core::serde_range", bound(serialize = "", deserialize = ""))]
+    #[cfg_attr(feature = "serde", serde(with = "oak_core::serde_range", bound(serialize = "", deserialize = "")))]
     pub selection_range: Range<usize>,
     /// Whether this item is deprecated.
     pub deprecated: bool,

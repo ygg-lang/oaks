@@ -6,11 +6,13 @@ use crate::{
 };
 use oak_core::{Builder, BuilderCache, GreenNode, GreenTree, OakDiagnostics, OakError, Parser, Source, SourceText, TextEdit, builder::BuildOutput};
 
+/// Builder for the Julia language.
 pub struct JuliaBuilder<'config> {
     config: &'config JuliaLanguage,
 }
 
 impl<'config> JuliaBuilder<'config> {
+    /// Creates a new `JuliaBuilder` with the given configuration.
     pub fn new(config: &'config JuliaLanguage) -> Self {
         Self { config }
     }
@@ -42,6 +44,7 @@ impl<'config> Builder<JuliaLanguage> for JuliaBuilder<'config> {
 }
 
 impl<'config> JuliaBuilder<'config> {
+    /// Builds a `JuliaRoot` from a green tree and source text.
     pub fn build_root(&self, green_tree: &GreenNode<JuliaLanguage>, source: &SourceText) -> Result<JuliaRoot, OakError> {
         let mut statements = Vec::new();
         let mut current_offset = 0;

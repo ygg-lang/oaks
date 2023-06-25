@@ -1,4 +1,5 @@
 #![doc = include_str!("readme.md")]
+/// Token types for Pascal.
 pub mod token_type;
 
 use crate::{language::PascalLanguage, lexer::token_type::PascalTokenType};
@@ -14,12 +15,14 @@ type State<'s, S> = LexerState<'s, S, PascalLanguage>;
 static PASCAL_WHITESPACE: LazyLock<WhitespaceConfig> = LazyLock::new(|| WhitespaceConfig { unicode_whitespace: true });
 static PASCAL_COMMENT: LazyLock<CommentConfig> = LazyLock::new(|| CommentConfig { line_marker: "//", block_start: "{", block_end: "}", nested_blocks: false });
 
+/// A lexer for Pascal source files.
 #[derive(Clone, Debug)]
 pub struct PascalLexer<'config> {
     _config: &'config PascalLanguage,
 }
 
 impl<'config> PascalLexer<'config> {
+    /// Creates a new `PascalLexer` with the given language configuration.
     pub fn new(config: &'config PascalLanguage) -> Self {
         Self { _config: config }
     }
@@ -70,18 +73,18 @@ impl<'config> PascalLexer<'config> {
     fn lex_string<'s, S: Source + ?Sized>(&self, state: &mut State<'s, S>) -> bool {
         let start = state.get_position();
 
-        // Pascal 字符串字面量：'...'
+        // Pascal string literal: '...'
         if state.current() == Some('\'') {
             state.advance(1);
             while let Some(ch) = state.peek() {
                 if ch == '\'' {
-                    // 检查是否是转义的单引号 ''
+                    // Check if it's an escaped single quote ''
                     if state.peek_next_n(1) == Some('\'') {
-                        state.advance(2); // 跳过 ''
+                        state.advance(2); // skip ''
                         continue;
                     }
                     else {
-                        state.advance(1); // 结束引号
+                        state.advance(1); // closing quote
                         break;
                     }
                 }
@@ -99,7 +102,7 @@ impl<'config> PascalLexer<'config> {
                 let start_pos = state.get_position();
                 let mut text = String::new();
 
-                // 读取标识符
+                // Read identifier
                 while let Some(ch) = state.peek() {
                     if ch.is_alphanumeric() || ch == '_' {
                         text.push(ch);
@@ -110,7 +113,7 @@ impl<'config> PascalLexer<'config> {
                     }
                 }
 
-                // 检查是否是关键字
+                // Check if it's a keyword
                 let kind = match text.to_lowercase().as_str() {
                     "program" => PascalTokenType::Program,
                     "var" => PascalTokenType::Var,
@@ -169,7 +172,7 @@ impl<'config> PascalLexer<'config> {
                 let start_pos = state.get_position();
                 let mut has_dot = false;
 
-                // 读取数字
+                // Read number
                 while let Some(ch) = state.peek() {
                     if ch.is_ascii_digit() {
                         state.advance(1);
@@ -328,37 +331,37 @@ impl PascalLexer<'_> {
     fn run<'s, S: Source + ?Sized>(&self, state: &mut State<'s, S>) -> Result<(), OakError> {
         let safe_point = state.get_position();
         while state.not_at_end() {
-            // 跳过空白字符
+            // Skip whitespace
             if self.skip_whitespace(state) {
                 continue;
             }
 
-            // 处理注释
+            // Handle comments
             if self.skip_comment(state) {
                 continue;
             }
 
-            // 处理字符串
+            // Handle strings
             if self.lex_string(state) {
                 continue;
             }
 
-            // 处理标识符和关键字
+            // Handle identifiers and keywords
             if self.lex_identifier_or_keyword(state) {
                 continue;
             }
 
-            // 处理数字
+            // Handle numbers
             if self.lex_number(state) {
                 continue;
             }
 
-            // 处理操作符和标点符号
+            // Handle operators and punctuation
             if self.lex_operators_and_punctuation(state) {
                 continue;
             }
 
-            // 如果没有匹配任何模式，创建错误 token
+            // If no pattern matches, create an error token
             let start_pos = state.get_position();
             if let Some(ch) = state.peek() {
                 state.advance(ch.len_utf8());
@@ -368,7 +371,7 @@ impl PascalLexer<'_> {
             state.advance_if_dead_lock(safe_point);
         }
 
-        // 添加 EOF token
+        // Add EOF token
         Ok(())
     }
 }

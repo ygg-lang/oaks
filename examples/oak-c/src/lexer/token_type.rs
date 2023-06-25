@@ -1,8 +1,7 @@
 use oak_core::{TokenType, UniversalTokenRole};
-#[cfg(feature = "serde")]
-use serde::{Deserialize, Serialize};
 
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+/// Represents different types of tokens in the C language.
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Default)]
 #[repr(u16)]
 pub enum CTokenType {
@@ -98,118 +97,121 @@ pub enum CTokenType {
     Arrow,
     /// `auto` keyword
     Auto,
-    /// `register` keyword
-    Register,
-    /// `static` keyword
-    Static,
-    /// `extern` keyword
-    Extern,
-    /// `typedef` keyword
-    Typedef,
-    /// `void` keyword
-    Void,
+    /// `break` keyword
+    Break,
+    /// `case` keyword
+    Case,
     /// `char` keyword
     Char,
-    /// `short` keyword
-    Short,
+    /// `const` keyword
+    Const,
+    /// `continue` keyword
+    Continue,
+    /// `default` keyword
+    Default,
+    /// `do` keyword
+    Do,
+    /// `double` keyword
+    Double,
+    /// `else` keyword
+    Else,
+    /// `enum` keyword
+    Enum,
+    /// `extern` keyword
+    Extern,
+    /// `float` keyword
+    Float,
+    /// `for` keyword
+    For,
+    /// `goto` keyword
+    Goto,
+    /// `if` keyword
+    If,
+    /// `inline` keyword
+    Inline,
     /// `int` keyword
     Int,
     /// `long` keyword
     Long,
-    /// `float` keyword
-    Float,
-    /// `double` keyword
-    Double,
-    /// `signed` keyword
-    Signed,
-    /// `unsigned` keyword
-    Unsigned,
-    /// `struct` keyword
-    Struct,
-    /// `union` keyword
-    Union,
-    /// `enum` keyword
-    Enum,
-    /// `const` keyword
-    Const,
-    /// `volatile` keyword
-    Volatile,
+    /// `register` keyword
+    Register,
     /// `restrict` keyword
     Restrict,
-    /// `if` keyword
-    If,
-    /// `else` keyword
-    Else,
-    /// `switch` keyword
-    Switch,
-    /// `case` keyword
-    Case,
-    /// `default` keyword
-    Default,
-    /// `for` keyword
-    For,
-    /// `while` keyword
-    While,
-    /// `do` keyword
-    Do,
-    /// `break` keyword
-    Break,
-    /// `continue` keyword
-    Continue,
-    /// `goto` keyword
-    Goto,
     /// `return` keyword
     Return,
+    /// `short` keyword
+    Short,
+    /// `signed` keyword
+    Signed,
     /// `sizeof` keyword
     Sizeof,
-    /// `inline` keyword
-    Inline,
-    /// `_Bool` keyword
-    Bool,
-    /// `_Complex` keyword
-    Complex,
-    /// `_Imaginary` keyword
-    Imaginary,
+    /// `static` keyword
+    Static,
+    /// `struct` keyword
+    Struct,
+    /// `switch` keyword
+    Switch,
+    /// `typedef` keyword
+    Typedef,
+    /// `union` keyword
+    Union,
+    /// `unsigned` keyword
+    Unsigned,
+    /// `void` keyword
+    Void,
+    /// `volatile` keyword
+    Volatile,
+    /// `while` keyword
+    While,
     /// `_Alignas` keyword
     Alignas,
     /// `_Alignof` keyword
     Alignof,
     /// `_Atomic` keyword
     Atomic,
+    /// `_Bool` keyword
+    Bool,
+    /// `_Complex` keyword
+    Complex,
+    /// `_Generic` keyword
+    Generic,
+    /// `_Imaginary` keyword
+    Imaginary,
+    /// `_Noreturn` keyword
+    Noreturn,
     /// `_Static_assert` keyword
     StaticAssert,
     /// `_Thread_local` keyword
     ThreadLocal,
-    /// `_Generic` keyword
-    Generic,
-    /// `_Noreturn` keyword
-    Noreturn,
-    /// Integer literal
-    IntegerLiteral,
-    /// Floating-point literal
-    FloatLiteral,
-    /// Character literal
-    CharLiteral,
-    /// String literal
-    StringLiteral,
     /// Identifier
     Identifier,
+    /// String literal
+    StringLiteral,
+    /// Character constant
+    CharConstant,
+    /// Integer constant
+    IntConstant,
+    /// Floating-point constant
+    FloatConstant,
     /// Whitespace
     Whitespace,
-    /// Comments
-    Comment,
-    /// Preprocessor directives
-    PreprocessorDirective,
-    /// Text
+    /// Single-line comment
+    LineComment,
+    /// Multi-line comment
+    BlockComment,
+    /// Preprocessor directive
+    Preprocessor,
+    /// Raw text or unrecognized sequence
     Text,
-    /// Error token
+    /// Invalid token
     #[default]
     Error,
-    /// End of file marker
+    /// End of stream
     Eof,
 }
 
 impl CTokenType {
+    /// Returns true if the token is a keyword.
     pub fn is_keyword(&self) -> bool {
         matches!(
             self,
@@ -262,27 +264,35 @@ impl CTokenType {
 }
 
 impl TokenType for CTokenType {
+    /// The end of stream token.
     const END_OF_STREAM: Self = Self::Eof;
+    /// The token role type.
     type Role = UniversalTokenRole;
 
+    /// Returns true if the token should be ignored during parsing.
     fn is_ignored(&self) -> bool {
-        matches!(self, Self::Whitespace | Self::Comment)
+        matches!(self, Self::Whitespace | Self::LineComment | Self::BlockComment)
     }
 
+    /// Returns true if the token is a comment.
     fn is_comment(&self) -> bool {
-        matches!(self, Self::Comment)
+        matches!(self, Self::LineComment | Self::BlockComment)
     }
 
+    /// Returns true if the token is whitespace.
     fn is_whitespace(&self) -> bool {
         matches!(self, Self::Whitespace)
     }
 
+    /// Returns the role of the token.
     fn role(&self) -> Self::Role {
         use UniversalTokenRole::*;
         match self {
             _ if self.is_keyword() => Keyword,
             Self::Identifier => Name,
-            Self::IntegerLiteral | Self::FloatLiteral | Self::CharLiteral | Self::StringLiteral => Literal,
+            Self::IntConstant | Self::FloatConstant | Self::CharConstant | Self::StringLiteral => Literal,
+            Self::Preprocessor => Keyword,
+            Self::Text => None,
             Self::LeftParen | Self::RightParen | Self::LeftBracket | Self::RightBracket | Self::LeftBrace | Self::RightBrace | Self::Comma | Self::Semicolon | Self::Colon | Self::Dot | Self::Question => Punctuation,
             Self::Plus
             | Self::Minus
@@ -318,7 +328,7 @@ impl TokenType for CTokenType {
             | Self::Increment
             | Self::Decrement
             | Self::Arrow => Operator,
-            Self::Comment => Comment,
+            Self::LineComment | Self::BlockComment => Comment,
             Self::Whitespace => Whitespace,
             Self::Error => Error,
             Self::Eof => Eof,

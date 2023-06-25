@@ -1,4 +1,5 @@
 #![doc = include_str!("readme.md")]
+/// Token type module for DHall.
 pub mod token_type;
 
 use crate::{language::DHallLanguage, lexer::token_type::DHallTokenType};
@@ -13,9 +14,10 @@ static DHALL_WHITESPACE: LazyLock<WhitespaceConfig> = LazyLock::new(|| Whitespac
 static DHALL_COMMENT: LazyLock<CommentConfig> = LazyLock::new(|| CommentConfig { line_marker: "--", block_start: "{-", block_end: "-}", nested_blocks: true });
 static DHALL_STRING: LazyLock<StringConfig> = LazyLock::new(|| StringConfig { quotes: &['"'], escape: Some('\\') });
 
+/// Lexer implementation for DHall.
 #[derive(Clone)]
 pub struct DHallLexer<'config> {
-    _config: &'config DHallLanguage,
+    config: &'config DHallLanguage,
 }
 
 impl<'config> Lexer<DHallLanguage> for DHallLexer<'config> {
@@ -27,8 +29,9 @@ impl<'config> Lexer<DHallLanguage> for DHallLexer<'config> {
 }
 
 impl<'config> DHallLexer<'config> {
+    /// Creates a new `DHallLexer`.
     pub fn new(config: &'config DHallLanguage) -> Self {
-        Self { _config: config }
+        Self { config }
     }
 
     fn run<'a, S: Source + ?Sized>(&self, state: &mut LexerState<'a, S, DHallLanguage>) -> Result<(), OakError> {

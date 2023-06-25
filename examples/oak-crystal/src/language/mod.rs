@@ -1,12 +1,14 @@
-#![doc = include_str!("readme.md")]
-use crate::{ast::CrystalRoot, lexer::CrystalTokenType, parser::CrystalElementType};
+//! Crystal language configuration.
+
+use crate::ast::CrystalRoot;
 use oak_core::{Language, LanguageCategory};
 
-/// Crystal 语言实现
+/// Crystal language implementation.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Default)]
 pub struct CrystalLanguage {}
 
 impl CrystalLanguage {
+    /// Creates a new `CrystalLanguage` instance.
     pub fn new() -> Self {
         Self {}
     }

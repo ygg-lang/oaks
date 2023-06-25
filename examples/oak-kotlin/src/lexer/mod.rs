@@ -1,4 +1,7 @@
 #![doc = include_str!("readme.md")]
+//! Lexer implementation for the Kotlin language.
+
+/// Token types for the Kotlin lexer.
 pub mod token_type;
 
 use crate::{language::KotlinLanguage, lexer::token_type::KotlinTokenType};
@@ -7,7 +10,7 @@ use oak_core::{
     lexer::{LexOutput, LexerCache},
 };
 
-type State<'a, S> = LexerState<'a, S, KotlinLanguage>;
+pub(crate) type State<'a, S> = LexerState<'a, S, KotlinLanguage>;
 
 trait LexerStateExt {
     fn eat(&mut self, ch: char) -> bool;
@@ -25,17 +28,19 @@ impl<'a, S: Source + ?Sized> LexerStateExt for State<'a, S> {
     }
 }
 
+/// A lexer for the Kotlin language.
 #[derive(Clone)]
 pub struct KotlinLexer<'config> {
-    _config: &'config KotlinLanguage,
+    config: &'config KotlinLanguage,
 }
 
 impl<'config> KotlinLexer<'config> {
+    /// Creates a new Kotlin lexer.
     pub fn new(config: &'config KotlinLanguage) -> Self {
-        Self { _config: config }
+        Self { config }
     }
 
-    /// 跳过空白字符
+    /// Skips whitespace characters.
     fn skip_whitespace<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start_pos = state.get_position();
 
@@ -52,7 +57,7 @@ impl<'config> KotlinLexer<'config> {
         }
     }
 
-    /// 处理换行
+    /// Handles newlines.
     fn lex_newline<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start_pos = state.get_position();
 
@@ -74,14 +79,14 @@ impl<'config> KotlinLexer<'config> {
         }
     }
 
-    /// 处理注释
+    /// Handles comments.
     fn lex_comment<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start_pos = state.get_position();
 
         if let Some('/') = state.peek() {
             state.advance(1);
             if let Some('/') = state.peek() {
-                // 单行注释
+                // Single-line comment
                 state.advance(1);
                 while let Some(ch) = state.peek() {
                     if ch == '\n' || ch == '\r' {
@@ -93,7 +98,7 @@ impl<'config> KotlinLexer<'config> {
                 true
             }
             else if let Some('*') = state.peek() {
-                // 多行注释
+                // Multi-line comment
                 state.advance(1);
                 let mut depth = 1;
                 while depth > 0 && state.not_at_end() {
@@ -122,7 +127,7 @@ impl<'config> KotlinLexer<'config> {
                 true
             }
             else {
-                // 回退，这是除法操作符
+                // Backtrack, this is a division operator
                 state.set_position(start_pos);
                 false
             }
@@ -132,18 +137,18 @@ impl<'config> KotlinLexer<'config> {
         }
     }
 
-    /// 处理字符串字面量
+    /// Handles string literals.
     fn lex_string<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start_pos = state.get_position();
 
         if let Some('"') = state.peek() {
             state.advance(1);
 
-            // 检查是否是三引号字符串
+            // Check if it's a triple-quoted string
             if let Some('"') = state.peek() {
                 state.advance(1);
                 if let Some('"') = state.peek() {
-                    // 三引号字符串
+                    // Triple-quoted string
                     state.advance(1);
                     while state.not_at_end() {
                         if let Some('"') = state.peek() {
@@ -167,13 +172,13 @@ impl<'config> KotlinLexer<'config> {
                     return true;
                 }
                 else {
-                    // 空字符串
+                    // Empty string
                     state.add_token(KotlinTokenType::StringLiteral, start_pos, state.get_position());
                     return true;
                 }
             }
 
-            // 普通字符串
+            // Normal string
             while let Some(ch) = state.peek() {
                 if ch == '"' {
                     state.advance(1);
@@ -186,7 +191,7 @@ impl<'config> KotlinLexer<'config> {
                     }
                 }
                 else if ch == '\n' || ch == '\r' {
-                    break; // 字符串不能跨行
+                    break; // String cannot span lines
                 }
                 else {
                     state.advance(ch.len_utf8())
@@ -196,7 +201,7 @@ impl<'config> KotlinLexer<'config> {
             true
         }
         else if let Some('\'') = state.peek() {
-            // 字符字面量
+            // Character literal
             state.advance(1);
             while let Some(ch) = state.peek() {
                 if ch == '\'' {
@@ -224,7 +229,7 @@ impl<'config> KotlinLexer<'config> {
         }
     }
 
-    /// 处理数字字面量
+    /// Handles number literals.
     fn lex_number<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start_pos = state.get_position();
 
@@ -240,9 +245,9 @@ impl<'config> KotlinLexer<'config> {
                     }
                 }
 
-                // 处理小数点
+                // Handle fractional part
                 if let Some('.') = state.peek() {
-                    // 预判下一个字符，如果是数字则是浮点数，如果是其他（如调用方法）则不是
+                    // Lookahead to check if the next character is a digit (float) or something else (method call)
                     if let Some(next) = state.peek_next_n(1) {
                         if next.is_ascii_digit() {
                             state.advance(1);
@@ -258,7 +263,7 @@ impl<'config> KotlinLexer<'config> {
                     }
                 }
 
-                // 处理指数部分
+                // Handle exponent part
                 if let Some('e') | Some('E') = state.peek() {
                     state.advance(1);
                     if let Some('+') | Some('-') = state.peek() {
@@ -281,7 +286,7 @@ impl<'config> KotlinLexer<'config> {
         false
     }
 
-    /// 处理标识符和关键字
+    /// Handles identifiers and keywords.
     fn lex_identifier_or_keyword<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start_pos = state.get_position();
 
@@ -366,7 +371,7 @@ impl<'config> KotlinLexer<'config> {
         }
     }
 
-    /// 处理特殊字符和操作符
+    /// Handles special characters and operators.
     fn lex_special_char<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start_pos = state.get_position();
 
@@ -544,7 +549,7 @@ impl<'config> KotlinLexer<'config> {
                 continue;
             }
 
-            // 如果所有规则都不匹配，跳过当前字符并标记为错误
+            // If no rules match, skip current character and mark as error.
             let start_pos = state.get_position();
             if let Some(ch) = state.peek() {
                 state.advance(ch.len_utf8());

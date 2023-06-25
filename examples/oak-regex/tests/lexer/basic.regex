@@ -1,5 +1,128 @@
-[a-z]+
-\d{1,3}
-([a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,})
-(?:https?://)?(?:www\.)?[a-zA-Z0-9-]+\.[a-zA-Z]{2,}(?:/[^\s]*)?
-^([0-9]{1,3}\.){3}[0-9]{1,3}$
+# Comprehensive Regular Expression Test File
+
+# Basic characters and anchors
+^Start of string
+End of string$
+. # Any character
+\d # Digit
+\D # Non-digit
+\w # Word character
+\W # Non-word character
+\s # Whitespace
+\S # Non-whitespace
+\b # Word boundary
+\B # Non-word boundary
+
+# Character classes
+[abc]       # a, b, or c
+[^abc]      # Any char except a, b, or c
+[a-z]       # Range a-z
+[A-Z0-9]    # Multiple ranges
+[\-\]\\]    # Escaped characters inside class
+[[:alnum:]] # POSIX alnum
+[[:alpha:]] # POSIX alpha
+[[:digit:]] # POSIX digit
+[[:punct:]] # POSIX punctuation
+[[:space:]] # POSIX space
+\p{Greek}   # Unicode property
+\P{Han}     # Negated Unicode property
+
+# Quantifiers
+a*          # 0 or more
+a+          # 1 or more
+a?          # 0 or 1
+a{3}        # Exactly 3
+a{3,}       # 3 or more
+a{3,5}      # 3 to 5
+a*?         # Lazy 0 or more
+a+?         # Lazy 1 or more
+a??         # Lazy 0 or 1
+a{3,5}?     # Lazy range
+
+# Groups and Alternation
+(abc)       # Capturing group
+(?:abc)     # Non-capturing group
+(?<name>abc) # Named capturing group
+(?'name'abc) # Named capturing group (alternative syntax)
+a|b         # Alternation
+(a|b)+      # Grouped alternation
+
+# Lookaround assertions
+(?=abc)     # Positive lookahead
+(?!abc)     # Negative lookahead
+(?<=abc)    # Positive lookbehind
+(?<!abc)    # Negative lookbehind
+
+# Escape sequences
+\n          # Newline
+\t          # Tab
+\r          # Carriage return
+\f          # Form feed
+\v          # Vertical tab
+\0          # Null character
+\077        # Octal
+\xAF        # Hex character
+\u1234      # Unicode character
+\U0001F600  # Extended Unicode
+\cZ         # Control character
+\\          # Backslash
+\.          # Dot literal
+\*          # Star literal
+\+          # Plus literal
+\?          # Question literal
+
+# Flags (often language specific, but syntax usually looks like this)
+/regex/gimuy
+
+# Comments inside regex (extended mode)
+(?# This is a comment)
+(
+    [0-9]+ # Match numbers
+    \s+    # Match whitespace
+    [a-z]+ # Match words
+)
+
+# Backreferences
+\1          # Backreference to group 1
+\g<1>       # Backreference to group 1
+\k<name>    # Backreference to named group
+\g{name}    # Backreference to named group
+
+# Conditional
+(?(1)yes|no)
+(?(name)yes|no)
+
+# Atomic grouping
+(?>abc)
+
+# Complex Examples
+
+# Email Address
+^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$
+
+# URL
+^(https?:\/\/)?([\da-z\.-]+)\.([a-z\.]{2,6})([\/\w \.-]*)*\/?$
+
+# IPv4 Address
+^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$
+
+# IPv6 Address (simplified)
+^([0-9a-fA-F]{1,4}:){7}[0-9a-fA-F]{1,4}$
+
+# Date YYYY-MM-DD
+^\d{4}-(?:0[1-9]|1[0-2])-(?:0[1-9]|[12]\d|3[01])$
+
+# Time HH:MM:SS
+^(?:[01]\d|2[0-3]):[0-5]\d:[0-5]\d$
+
+# Hex Color
+^#?([a-fA-F0-9]{6}|[a-fA-F0-9]{3})$
+
+# Password (min 8 chars, at least 1 letter and 1 number)
+^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}$
+
+# Floating point number
+^[+-]?(\d+(\.\d*)?|\.\d+)([eE][+-]?\d+)?$
+
+# HTML Tag
+<([a-z]+)([^<]+)*(?:>(.*)<\/\1>|\s+\/>)

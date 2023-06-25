@@ -1,100 +1,217 @@
-use oak_core::{ElementType, Parser, UniversalElementRole};
-#[cfg(feature = "serde")]
-use serde::{Deserialize, Serialize};
+use oak_core::{ElementType, UniversalElementRole};
 
+/// Represents an element type in a Haskell source file.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub enum HaskellElementType {
+    /// Whitespace characters.
     Whitespace,
+    /// A newline character.
     Newline,
+    /// A comment.
     Comment,
+    /// 'case' keyword.
     Case,
+    /// 'class' keyword.
     Class,
+    /// 'data' keyword.
     Data,
+    /// 'default' keyword.
     Default,
+    /// 'deriving' keyword.
     Deriving,
+    /// 'do' keyword.
     Do,
+    /// 'else' keyword.
     Else,
+    /// 'foreign' keyword.
     Foreign,
+    /// 'if' keyword.
     If,
+    /// 'import' keyword.
     Import,
+    /// 'in' keyword.
     In,
+    /// 'infix' keyword.
     Infix,
+    /// 'infixl' keyword.
     Infixl,
+    /// 'infixr' keyword.
     Infixr,
+    /// 'instance' keyword.
     Instance,
+    /// 'let' keyword.
     Let,
+    /// 'module' keyword.
     Module,
+    /// 'newtype' keyword.
     Newtype,
+    /// 'of' keyword.
     Of,
+    /// 'then' keyword.
     Then,
+    /// 'type' keyword.
     Type,
+    /// 'where' keyword.
     Where,
+    /// Underscore character (_).
     Underscore,
+    /// 'as' keyword.
     As,
+    /// 'qualified' keyword.
     Qualified,
+    /// 'hiding' keyword.
     Hiding,
+    /// An identifier.
     Identifier,
+    /// A constructor identifier.
     Constructor,
+    /// A numeric literal.
     Number,
+    /// An integer literal.
     Integer,
+    /// A floating-point literal.
     Float,
+    /// A string literal.
     String,
+    /// A string literal.
     StringLiteral,
+    /// A character literal.
     Char,
+    /// A character literal.
     CharLiteral,
+    /// Plus operator (+).
     Plus,
+    /// Minus operator (-).
     Minus,
+    /// Multiplication operator (*).
     Star,
+    /// Division operator (/).
     Slash,
+    /// Modulo operator (%).
     Percent,
+    /// Assignment operator (=).
     Assign,
+    /// Equality operator (==).
     Equal,
+    /// Inequality operator (/=).
     NotEqual,
+    /// Less than operator (<).
     Less,
+    /// Greater than operator (>).
     Greater,
+    /// Less than or equal to operator (<=).
     LessEqual,
+    /// Greater than or equal to operator (>=).
     GreaterEqual,
+    /// Logical AND operator (&&).
     And,
+    /// Logical OR operator (||).
     Or,
+    /// Function arrow operator (->).
     Arrow,
+    /// Left arrow operator (<-).
     LeftArrow,
+    /// Double arrow operator (=>).
     DoubleArrow,
+    /// Pipe character (|).
     Pipe,
+    /// Ampersand character (&).
     Ampersand,
+    /// Bang operator (!).
     Bang,
+    /// Exclamation mark (!).
     Exclamation,
+    /// Question mark (?).
     Question,
+    /// Colon character (:).
     Colon,
+    /// Double colon character (::).
     DoubleColon,
+    /// Semicolon character (;).
     Semicolon,
+    /// Comma character (,).
     Comma,
+    /// Dot character (.).
     Dot,
+    /// Double dot character (..).
     DoubleDot,
+    /// Range operator (..).
     DotDot,
+    /// Dollar sign ($).
     Dollar,
+    /// At sign (@).
     At,
+    /// Tilde character (~).
     Tilde,
+    /// Backslash character (\).
     Backslash,
+    /// Append operator (++).
     Append,
+    /// Left parenthesis (().
     LeftParen,
+    /// Right parenthesis ()).
     RightParen,
+    /// Left bracket ([).
     LeftBracket,
+    /// Right bracket (]).
     RightBracket,
+    /// Left brace ({).
     LeftBrace,
+    /// Right brace (}).
     RightBrace,
+    /// Single quote (').
     Quote,
+    /// Backquote (`).
     Backquote,
+    /// Backtick (`).
     Backtick,
+    /// A function definition.
     Function,
+    /// A data declaration.
     DataDeclaration,
+    /// A module declaration.
     ModuleDeclaration,
+    /// An import declaration.
+    ImportDeclaration,
+    /// A type alias declaration.
+    TypeAliasDeclaration,
+    /// A type signature.
+    TypeSignature,
+    /// A function equation.
+    Equation,
+    /// A pattern.
+    Pattern,
+    /// A literal expression.
+    LiteralExpression,
+    /// An identifier expression.
+    IdentifierExpression,
+    /// A prefix expression.
+    PrefixExpression,
+    /// An infix expression.
+    InfixExpression,
+    /// A function application.
+    ApplicationExpression,
+    /// A lambda expression.
+    LambdaExpression,
+    /// A let expression.
+    LetExpression,
+    /// A case expression.
+    CaseExpression,
+    /// A case arm.
+    CaseArm,
+    /// A type expression.
+    TypeExpr,
+    /// Root node of the AST.
     Root,
+    /// Error node.
     Error,
+    /// End of file marker.
     Eof,
 }
 
 impl HaskellElementType {
+    /// Returns true if the element type is a Haskell keyword.
     pub fn is_keyword(&self) -> bool {
         matches!(
             self,

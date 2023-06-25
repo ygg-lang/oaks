@@ -1,11 +1,13 @@
 use crate::{ast::RubyRoot, language::RubyLanguage, parser::RubyParser};
 use oak_core::{Builder, BuilderCache, Lexer, OakDiagnostics, Parser, TextEdit, source::Source};
 
+/// A builder for Ruby AST and diagnostic results.
 pub struct RubyBuilder<'config> {
     config: &'config RubyLanguage,
 }
 
 impl<'config> RubyBuilder<'config> {
+    /// Creates a new `RubyBuilder` with the given configuration.
     pub fn new(config: &'config RubyLanguage) -> Self {
         Self { config }
     }

@@ -2,7 +2,7 @@
 use oak_core::errors::ParseResult;
 use oak_highlight::{HighlightResult, Highlighter, OakHighlighter, themes::Theme};
 
-/// Vala 语法高亮器
+/// Vala syntax highlighter.
 pub struct ValaHighlighter;
 
 impl Highlighter for ValaHighlighter {

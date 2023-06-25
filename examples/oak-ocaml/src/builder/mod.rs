@@ -1,12 +1,15 @@
 use crate::{ast::OCamlRoot, language::OCamlLanguage, parser::OCamlParser};
 use oak_core::{Builder, BuilderCache, Lexer, OakDiagnostics, Parser, TextEdit, source::Source};
 
+/// A builder for OCaml.
 #[derive(Clone)]
 pub struct OCamlBuilder<'config> {
-    config: &'config OCamlLanguage,
+    /// The language configuration.
+    pub config: &'config OCamlLanguage,
 }
 
 impl<'config> OCamlBuilder<'config> {
+    /// Creates a new OCaml builder.
     pub fn new(config: &'config OCamlLanguage) -> Self {
         Self { config }
     }

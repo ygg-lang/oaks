@@ -6,22 +6,23 @@
 
 //! Actionscript support for the Oak language framework.
 
-extern crate oak_core;
-#[cfg(feature = "serde")]
-extern crate serde;
-
+/// Abstract Syntax Tree (AST) definitions for ActionScript.
 pub mod ast;
 mod builder;
 
 mod language;
+/// Lexer for ActionScript.
 pub mod lexer;
+/// Language Server Protocol (LSP) and editor integration for ActionScript.
 #[cfg(any(feature = "lsp", feature = "oak-highlight", feature = "oak-pretty-print"))]
 pub mod lsp;
 
+/// Parser for ActionScript.
 pub mod parser;
 
 #[cfg(feature = "lsp")]
 #[cfg(feature = "mcp")]
+/// Model Context Protocol (MCP) support for ActionScript.
 pub mod mcp;
 
 // Re-export main types

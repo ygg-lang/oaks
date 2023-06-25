@@ -14,7 +14,7 @@ keywords = ["parser", "cpp", "cplusplus", "syntax-analysis"]
 
 [dependencies]
 oak-core = { workspace = true }
-serde = { workspace = true, features = ["derive"] , optional = true }
+serde = { workspace = true, optional = true }
 oak-highlight = { workspace = true, optional = true }
 oak-pretty-print = { workspace = true, optional = true }
 

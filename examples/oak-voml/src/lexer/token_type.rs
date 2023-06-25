@@ -1,135 +1,255 @@
-use oak_core::{Token, TokenType, UniversalTokenRole};
-#[cfg(feature = "serde")]
-use serde::{Deserialize, Serialize};
+//! Voml token types.
 
+use oak_core::{Token, TokenType, UniversalTokenRole};
+
+/// A token in the Voml language.
 pub type VomlToken = Token<VomlTokenType>;
 
+/// Enum representing all possible token types in Voml.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+#[repr(u16)]
 pub enum VomlTokenType {
     // Keywords
+    /// `module` keyword.
     ModuleKw,
+    /// `import` keyword.
     ImportKw,
+    /// `pub` keyword.
     PubKw,
+    /// `fn` keyword.
     FnKw,
+    /// `struct` keyword.
     StructKw,
+    /// `interface` keyword.
     InterfaceKw,
+    /// `enum` keyword.
     EnumKw,
+    /// `type` keyword.
     TypeKw,
+    /// `const` keyword.
     ConstKw,
+    /// `mut` keyword.
     MutKw,
+    /// `shared` keyword.
     SharedKw,
+    /// `volatile` keyword.
     VolatileKw,
+    /// `unsafe` keyword.
     UnsafeKw,
+    /// `if` keyword.
     IfKw,
+    /// `else` keyword.
     ElseKw,
+    /// `for` keyword.
     ForKw,
+    /// `in` keyword.
     InKw,
+    /// `match` keyword.
     MatchKw,
+    /// `or` keyword.
     OrKw,
+    /// `return` keyword.
     ReturnKw,
+    /// `break` keyword.
     BreakKw,
+    /// `continue` keyword.
     ContinueKw,
+    /// `goto` keyword.
     GotoKw,
+    /// `defer` keyword.
     DeferKw,
+    /// `go` keyword.
     GoKw,
+    /// `select` keyword.
     SelectKw,
+    /// `lock` keyword.
     LockKw,
+    /// `rlock` keyword.
     RlockKw,
+    /// `as` keyword.
     AsKw,
+    /// `is` keyword.
     IsKw,
+    /// `sizeof` keyword.
     SizeofKw,
+    /// `typeof` keyword.
     TypeofKw,
+    /// `offsetof` keyword.
     OffsetofKw,
+    /// `assert` keyword.
     AssertKw,
+    /// `panic` keyword.
     PanicKw,
+    /// `eprintln` keyword.
     EprintlnKw,
+    /// `println` keyword.
     PrintlnKw,
+    /// `print` keyword.
     PrintKw,
+    /// `eprint` keyword.
     EprintKw,
+    /// `bool` keyword.
     BoolKw,
+    /// `i8` keyword.
     I8Kw,
+    /// `i16` keyword.
     I16Kw,
+    /// `i32` keyword.
     I32Kw,
+    /// `i64` keyword.
     I64Kw,
+    /// `u8` keyword.
     U8Kw,
+    /// `u16` keyword.
     U16Kw,
+    /// `u32` keyword.
     U32Kw,
+    /// `u64` keyword.
     U64Kw,
+    /// `int` keyword.
     IntKw,
+    /// `uint` keyword.
     UintKw,
+    /// `f32` keyword.
     F32Kw,
+    /// `f64` keyword.
     F64Kw,
+    /// `string` keyword.
     StringKw,
+    /// `rune` keyword.
     RuneKw,
+    /// `byte` keyword.
     ByteKw,
+    /// `voidptr` keyword.
     VoidptrKw,
+    /// `char` keyword.
     CharKw,
+    /// Boolean literal.
     BoolLiteral,
 
     // Basic kinds
+    /// Identifier.
     Identifier,
+    /// Numeric literal.
     Number,
+    /// String literal.
     String,
+    /// Whitespace.
     Whitespace,
+    /// Comment.
     Comment,
+    /// Error token.
     Error,
+    /// End of stream.
     Eof,
 
     // Literals used by the lexer
+    /// String literal.
     StringLiteral,
+    /// Character literal.
     CharLiteral,
+    /// Floating point literal.
     FloatLiteral,
+    /// Integer literal.
     IntegerLiteral,
 
     // Operators and punctuation
+    /// `+` operator.
     Plus,
+    /// `+=` operator.
     PlusEq,
+    /// `++` operator.
     PlusPlus,
+    /// `-` operator.
     Minus,
+    /// `-=` operator.
     MinusEq,
+    /// `--` operator.
     MinusMinus,
+    /// `->` operator.
     Arrow,
+    /// `*` operator.
     Star,
+    /// `*=` operator.
     StarEq,
+    /// `/` operator.
     Slash,
+    /// `/=` operator.
     SlashEq,
+    /// `%` operator.
     Percent,
+    /// `%=` operator.
     PercentEq,
+    /// `&` operator.
     Ampersand,
+    /// `&=` operator.
     AmpersandEq,
+    /// `&&` operator.
     AndAnd,
+    /// `|` operator.
     Pipe,
+    /// `|=` operator.
     PipeEq,
+    /// `||` operator.
     OrOr,
+    /// `^` operator.
     Caret,
+    /// `^=` operator.
     CaretEq,
+    /// `=` operator.
     Eq,
+    /// `==` operator.
     EqEq,
+    /// `=>` operator.
     FatArrow,
+    /// `!` operator.
     Bang,
+    /// `!=` operator.
     Ne,
+    /// `<` operator.
     LessThan,
+    /// `<=` operator.
     Le,
+    /// `<<` operator.
     LeftShift,
+    /// `<<=` operator.
     LeftShiftEq,
+    /// `>` operator.
     GreaterThan,
+    /// `>=` operator.
     Ge,
+    /// `>>` operator.
     RightShift,
+    /// `>>=` operator.
     RightShiftEq,
+    /// `.` symbol.
     Dot,
+    /// `..` symbol.
     DotDot,
+    /// `...` symbol.
     DotDotDot,
+    /// `,` symbol.
     Comma,
+    /// `:` symbol.
     Colon,
+    /// `;` symbol.
     Semicolon,
+    /// `(` symbol.
     LeftParen,
+    /// `)` symbol.
     RightParen,
+    /// `[` symbol.
     LeftBracket,
+    /// `]` symbol.
     RightBracket,
+    /// `{` symbol.
     LeftBrace,
+    /// `}` symbol.
     RightBrace,
+    /// `?` symbol.
     Question,
+    /// `~` symbol.
     Tilde,
 }
 

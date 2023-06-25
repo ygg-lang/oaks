@@ -1,99 +1,104 @@
-use serde::{Deserialize, Serialize};
-
-/// Visualization theme configuration
-#[derive(Debug, Clone, Serialize, Deserialize)]
+/// Visualization theme configuration.
+#[derive(Debug, Clone)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct VisualizationTheme {
-    /// Theme name
+    /// The name of the theme.
     pub name: String,
-    /// Background color
+    /// The background color of the visualization (hex string).
     pub background_color: String,
-    /// Node style
+    /// The style configuration for nodes.
     pub node: NodeTheme,
-    /// Edge style
+    /// The style configuration for edges.
     pub edge: EdgeTheme,
-    /// Text style
+    /// The style configuration for text.
     pub text: TextTheme,
-    /// Highlight style
+    /// The style configuration for highlighted states.
     pub highlight: HighlightTheme,
 }
 
-/// Node theme configuration
-#[derive(Debug, Clone, Serialize, Deserialize)]
+/// Node theme configuration.
+#[derive(Debug, Clone)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct NodeTheme {
-    /// Default fill color
+    /// The default fill color for nodes (hex string).
     pub fill_color: String,
-    /// Default stroke color
+    /// The default stroke color for nodes (hex string).
     pub stroke_color: String,
-    /// Stroke width
+    /// The width of the node's stroke.
     pub stroke_width: f32,
-    /// Border radius
+    /// The border radius for rounded node corners.
     pub border_radius: f32,
-    /// Shadow configuration
+    /// The shadow configuration for nodes.
     pub shadow: ShadowConfig,
 }
 
-/// Edge theme configuration
-#[derive(Debug, Clone, Serialize, Deserialize)]
+/// Edge theme configuration.
+#[derive(Debug, Clone)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct EdgeTheme {
-    /// Default color
+    /// The default color for edges (hex string).
     pub color: String,
-    /// Line width
+    /// The width of the edge line.
     pub width: f32,
-    /// Line style (solid, dashed, dotted)
+    /// The line style (e.g., "solid", "dashed", "dotted").
     pub style: String,
-    /// Arrow configuration
+    /// The arrowhead configuration for directed edges.
     pub arrow: ArrowConfig,
 }
 
-/// Text theme configuration
-#[derive(Debug, Clone, Serialize, Deserialize)]
+/// Text theme configuration.
+#[derive(Debug, Clone)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct TextTheme {
-    /// Font family
+    /// The font family for text elements.
     pub font_family: String,
-    /// Font size
+    /// The font size in pixels.
     pub font_size: f32,
-    /// Font color
+    /// The default color for text (hex string).
     pub color: String,
-    /// Font weight
+    /// The font weight (e.g., "normal", "bold").
     pub font_weight: String,
 }
 
-/// Highlight theme configuration
-#[derive(Debug, Clone, Serialize, Deserialize)]
+/// Highlight theme configuration.
+#[derive(Debug, Clone)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct HighlightTheme {
-    /// Selected state color
+    /// The color used for selected elements (hex string).
     pub selected_color: String,
-    /// Hover state color
+    /// The color used for elements on hover (hex string).
     pub hover_color: String,
-    /// Error state color
+    /// The color used for elements in an error state (hex string).
     pub error_color: String,
-    /// Warning state color
+    /// The color used for elements in a warning state (hex string).
     pub warning_color: String,
 }
 
-/// Shadow configuration
-#[derive(Debug, Clone, Serialize, Deserialize)]
+/// Shadow configuration.
+#[derive(Debug, Clone)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct ShadowConfig {
-    /// Whether to enable shadow
+    /// Whether to enable shadow effects.
     pub enabled: bool,
-    /// Shadow color
+    /// The color of the shadow (hex string).
     pub color: String,
-    /// Shadow offset X
+    /// The horizontal offset of the shadow.
     pub offset_x: f32,
-    /// Shadow offset Y
+    /// The vertical offset of the shadow.
     pub offset_y: f32,
-    /// Shadow blur radius
+    /// The blur radius of the shadow.
     pub blur_radius: f32,
 }
 
-/// Arrow configuration
-#[derive(Debug, Clone, Serialize, Deserialize)]
+/// Arrow configuration for directed edges.
+#[derive(Debug, Clone)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct ArrowConfig {
-    /// Whether to show arrows
+    /// Whether to show arrowheads.
     pub enabled: bool,
-    /// Arrow size
+    /// The size of the arrowhead.
     pub size: f32,
-    /// Arrow type (triangle, circle, diamond)
+    /// The type of arrowhead (e.g., "triangle", "circle", "diamond").
     pub arrow_type: String,
 }
 

@@ -26,6 +26,7 @@ pub trait Highlighter {
 pub struct JsonHighlighter;
 
 impl JsonHighlighter {
+    /// Creates a new instance of `JsonHighlighter`.
     pub fn new() -> Self {
         Self
     }

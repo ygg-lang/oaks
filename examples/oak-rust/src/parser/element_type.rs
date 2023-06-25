@@ -1,11 +1,8 @@
 use oak_core::{ElementType, UniversalElementRole};
 
-#[cfg(feature = "serde")]
-use serde::{Deserialize, Serialize};
-
 /// Rust element types.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub enum RustElementType {
     /// `as`
     As,
@@ -365,6 +362,38 @@ pub enum RustElementType {
     TypeAlias,
     /// Member expression
     MemberExpression,
+    /// Struct body
+    StructBody,
+    /// Enum body
+    EnumBody,
+    /// Trait body
+    TraitBody,
+    /// Impl body
+    ImplBody,
+    /// Module body
+    ModuleBody,
+    /// Variant
+    Variant,
+    /// Trait item
+    TraitItem,
+    /// Impl item
+    ImplItem,
+    /// Trait reference
+    TraitRef,
+    /// Tuple body
+    TupleBody,
+    /// Reference type
+    ReferenceType,
+    /// Tuple type
+    TupleType,
+    /// Array type
+    ArrayType,
+    /// Tuple pattern
+    TuplePattern,
+    /// Use path
+    UsePath,
+    /// Field
+    Field,
 }
 
 impl ElementType for RustElementType {

@@ -6,26 +6,29 @@ use oak_core::{
     tree::red_tree::{RedNode, RedTree},
 };
 
+/// Fortran AST builder.
 pub struct FortranBuilder<'config> {
     language: &'config FortranLanguage,
 }
 
 impl<'config> FortranBuilder<'config> {
+    /// Create a new Fortran builder.
     pub fn new(language: &'config FortranLanguage) -> Self {
         Self { language }
     }
 
+    /// Build the root node of the AST.
     pub fn build_root(&self, green: &GreenNode<FortranLanguage>, _source: &str) -> FortranRoot {
         let red = RedNode::new(green, 0);
         let units = Vec::new();
 
         for child in red.children() {
             if let RedTree::Node(_node) = child {
-                // TODO: 实现真正的 AST 构建逻辑
+                // TODO: Implement real AST building logic
             }
         }
 
-        FortranRoot { name: None, units, span: Range::from(0..green.text_len as usize) }
+        FortranRoot { name: None, units, span: Range::from(0..green.byte_length as usize) }
     }
 }
 

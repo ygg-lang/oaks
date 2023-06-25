@@ -1,10 +1,8 @@
 #![doc = include_str!("readme.md")]
-#[cfg(feature = "serde")]
-use serde::{Deserialize, Serialize};
 
 /// PHP AST root node.
 #[derive(Debug, Clone, PartialEq)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct PhpRoot {
     /// Top-level items in the PHP file.
     pub items: Vec<PhpItem>,
@@ -12,7 +10,7 @@ pub struct PhpRoot {
 
 /// PHP top-level items.
 #[derive(Debug, Clone, PartialEq)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub enum PhpItem {
     /// Opening tag (`<?php`).
     OpenTag,
@@ -36,7 +34,7 @@ pub enum PhpItem {
 
 /// PHP statements.
 #[derive(Debug, Clone, PartialEq)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub enum PhpStatement {
     /// An expression statement.
     Expression(PhpExpression),
@@ -76,7 +74,7 @@ pub enum PhpStatement {
 
 /// PHP expressions.
 #[derive(Debug, Clone, PartialEq)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub enum PhpExpression {
     /// A literal value.
     Literal(PhpLiteral),
@@ -128,7 +126,7 @@ pub enum PhpExpression {
 
 /// PHP literals.
 #[derive(Debug, Clone, PartialEq)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub enum PhpLiteral {
     /// A string literal.
     String(String),
@@ -142,7 +140,7 @@ pub enum PhpLiteral {
 
 /// PHP variables.
 #[derive(Debug, Clone, PartialEq)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct PhpVariable {
     /// The name of the variable (including the `$` prefix).
     pub name: String,
@@ -150,7 +148,7 @@ pub struct PhpVariable {
 
 /// PHP array elements.
 #[derive(Debug, Clone, PartialEq)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct PhpArrayElement {
     /// Optional key for the array element.
     pub key: Option<PhpExpression>,
@@ -160,49 +158,61 @@ pub struct PhpArrayElement {
 
 /// PHP function call
 #[derive(Debug, Clone, PartialEq)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct PhpFunctionCall {
+    /// Function name or expression.
     pub name: Box<PhpExpression>,
+    /// Function arguments.
     pub arguments: Vec<PhpExpression>,
 }
 
 /// PHP method call
 #[derive(Debug, Clone, PartialEq)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct PhpMethodCall {
+    /// Object expression.
     pub object: Box<PhpExpression>,
+    /// Method name.
     pub method: String,
+    /// Method arguments.
     pub arguments: Vec<PhpExpression>,
 }
 
 /// PHP property access
 #[derive(Debug, Clone, PartialEq)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct PhpPropertyAccess {
+    /// Object expression.
     pub object: Box<PhpExpression>,
+    /// Property name.
     pub property: String,
 }
 
 /// PHP array access
 #[derive(Debug, Clone, PartialEq)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct PhpArrayAccess {
+    /// Array expression.
     pub array: Box<PhpExpression>,
+    /// Index expression.
     pub index: Box<PhpExpression>,
 }
 
 /// PHP assignment
 #[derive(Debug, Clone, PartialEq)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct PhpAssignment {
+    /// Left-hand side expression.
     pub left: Box<PhpExpression>,
+    /// Assignment operator.
     pub operator: PhpAssignmentOp,
+    /// Right-hand side expression.
     pub right: Box<PhpExpression>,
 }
 
 /// PHP assignment operators.
 #[derive(Debug, Clone, PartialEq)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub enum PhpAssignmentOp {
     /// Standard assignment (`=`).
     Assign,
@@ -236,7 +246,7 @@ pub enum PhpAssignmentOp {
 
 /// PHP binary operations.
 #[derive(Debug, Clone, PartialEq)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct PhpBinaryOp {
     /// Left operand.
     pub left: Box<PhpExpression>,
@@ -248,7 +258,7 @@ pub struct PhpBinaryOp {
 
 /// PHP binary operators.
 #[derive(Debug, Clone, PartialEq)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub enum PhpBinaryOperator {
     /// Addition (`+`).
     Plus,
@@ -304,7 +314,7 @@ pub enum PhpBinaryOperator {
 
 /// PHP unary operations.
 #[derive(Debug, Clone, PartialEq)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct PhpUnaryOp {
     /// Unary operator.
     pub operator: PhpUnaryOperator,
@@ -314,7 +324,7 @@ pub struct PhpUnaryOp {
 
 /// PHP unary operators.
 #[derive(Debug, Clone, PartialEq)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub enum PhpUnaryOperator {
     /// Unary plus (`+`).
     Plus,
@@ -338,7 +348,7 @@ pub enum PhpUnaryOperator {
 
 /// PHP ternary operations.
 #[derive(Debug, Clone, PartialEq)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct PhpTernaryOp {
     /// Condition expression.
     pub condition: Box<PhpExpression>,
@@ -350,7 +360,7 @@ pub struct PhpTernaryOp {
 
 /// PHP type casts.
 #[derive(Debug, Clone, PartialEq)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct PhpCast {
     /// Target type for the cast.
     pub cast_type: PhpCastType,
@@ -360,7 +370,7 @@ pub struct PhpCast {
 
 /// PHP cast types.
 #[derive(Debug, Clone, PartialEq)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub enum PhpCastType {
     /// Cast to integer (`(int)`).
     Int,
@@ -380,7 +390,7 @@ pub enum PhpCastType {
 
 /// PHP `new` expression.
 #[derive(Debug, Clone, PartialEq)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct PhpNew {
     /// Class name or expression.
     pub class: Box<PhpExpression>,
@@ -390,7 +400,7 @@ pub struct PhpNew {
 
 /// PHP `instanceof` expression.
 #[derive(Debug, Clone, PartialEq)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct PhpInstanceof {
     /// Expression to check.
     pub expression: Box<PhpExpression>,
@@ -400,7 +410,7 @@ pub struct PhpInstanceof {
 
 /// PHP `include` expression.
 #[derive(Debug, Clone, PartialEq)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct PhpInclude {
     /// Whether it is `include_once`.
     pub once: bool,
@@ -410,7 +420,7 @@ pub struct PhpInclude {
 
 /// PHP `require` expression.
 #[derive(Debug, Clone, PartialEq)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct PhpRequire {
     /// Whether it is `require_once`.
     pub once: bool,
@@ -420,7 +430,7 @@ pub struct PhpRequire {
 
 /// PHP `yield` expression.
 #[derive(Debug, Clone, PartialEq)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct PhpYield {
     /// Optional key for yield (e.g., `yield $key => $value`).
     pub key: Option<Box<PhpExpression>>,
@@ -432,7 +442,7 @@ pub struct PhpYield {
 
 /// PHP `if` statement.
 #[derive(Debug, Clone, PartialEq)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct PhpIf {
     /// Condition expression.
     pub condition: Box<PhpExpression>,
@@ -446,7 +456,7 @@ pub struct PhpIf {
 
 /// PHP `elseif` statement.
 #[derive(Debug, Clone, PartialEq)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct PhpElseif {
     /// Condition expression.
     pub condition: Box<PhpExpression>,
@@ -456,7 +466,7 @@ pub struct PhpElseif {
 
 /// PHP `while` loop.
 #[derive(Debug, Clone, PartialEq)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct PhpWhile {
     /// Loop condition.
     pub condition: Box<PhpExpression>,
@@ -466,7 +476,7 @@ pub struct PhpWhile {
 
 /// PHP `for` loop.
 #[derive(Debug, Clone, PartialEq)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct PhpFor {
     /// Loop initialization expressions.
     pub init: Vec<PhpExpression>,
@@ -480,7 +490,7 @@ pub struct PhpFor {
 
 /// PHP `foreach` loop.
 #[derive(Debug, Clone, PartialEq)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct PhpForeach {
     /// Iterable expression.
     pub iterable: Box<PhpExpression>,
@@ -494,7 +504,7 @@ pub struct PhpForeach {
 
 /// PHP `switch` statement.
 #[derive(Debug, Clone, PartialEq)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct PhpSwitch {
     /// Expression to switch on.
     pub expression: Box<PhpExpression>,
@@ -504,7 +514,7 @@ pub struct PhpSwitch {
 
 /// PHP `case` statement.
 #[derive(Debug, Clone, PartialEq)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct PhpCase {
     /// Case value (None for the `default` case).
     pub value: Option<Box<PhpExpression>>,
@@ -514,7 +524,7 @@ pub struct PhpCase {
 
 /// PHP `try-catch-finally` block.
 #[derive(Debug, Clone, PartialEq)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct PhpTry {
     /// The `try` block.
     pub statement: Box<PhpStatement>,
@@ -526,7 +536,7 @@ pub struct PhpTry {
 
 /// PHP `catch` clause.
 #[derive(Debug, Clone, PartialEq)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct PhpCatch {
     /// Exception types to catch.
     pub types: Vec<String>,
@@ -538,7 +548,7 @@ pub struct PhpCatch {
 
 /// PHP `declare` item.
 #[derive(Debug, Clone, PartialEq)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct PhpDeclareItem {
     /// Directive name.
     pub name: String,
@@ -548,7 +558,7 @@ pub struct PhpDeclareItem {
 
 /// PHP function declaration.
 #[derive(Debug, Clone, PartialEq)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct PhpFunction {
     /// Function name.
     pub name: String,
@@ -564,7 +574,7 @@ pub struct PhpFunction {
 
 /// PHP function parameter.
 #[derive(Debug, Clone, PartialEq)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct PhpParameter {
     /// Parameter name.
     pub name: String,
@@ -580,7 +590,7 @@ pub struct PhpParameter {
 
 /// PHP type specification.
 #[derive(Debug, Clone, PartialEq)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub enum PhpType {
     /// A simple named type.
     Named(String),
@@ -592,7 +602,7 @@ pub enum PhpType {
 
 /// PHP class declaration.
 #[derive(Debug, Clone, PartialEq)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct PhpClass {
     /// Class name.
     pub name: String,
@@ -608,7 +618,7 @@ pub struct PhpClass {
 
 /// PHP class members.
 #[derive(Debug, Clone, PartialEq)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub enum PhpClassMember {
     /// A class property.
     Property(PhpProperty),
@@ -622,7 +632,7 @@ pub enum PhpClassMember {
 
 /// PHP class property.
 #[derive(Debug, Clone, PartialEq)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct PhpProperty {
     /// Property name.
     pub name: String,
@@ -636,7 +646,7 @@ pub struct PhpProperty {
 
 /// PHP class method.
 #[derive(Debug, Clone, PartialEq)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct PhpMethod {
     /// Method name.
     pub name: String,
@@ -654,7 +664,7 @@ pub struct PhpMethod {
 
 /// PHP constant declaration.
 #[derive(Debug, Clone, PartialEq)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct PhpConstant {
     /// Constant name.
     pub name: String,
@@ -666,7 +676,7 @@ pub struct PhpConstant {
 
 /// PHP trait use statement.
 #[derive(Debug, Clone, PartialEq)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct PhpTraitUse {
     /// Traits being used.
     pub traits: Vec<String>,
@@ -676,7 +686,7 @@ pub struct PhpTraitUse {
 
 /// PHP trait adaptation rule.
 #[derive(Debug, Clone, PartialEq)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub enum PhpTraitAdaptation {
     /// Precedence rule (`insteadof`).
     Precedence {
@@ -702,7 +712,7 @@ pub enum PhpTraitAdaptation {
 
 /// PHP access and behavior modifiers.
 #[derive(Debug, Clone, PartialEq)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub enum PhpModifier {
     /// Public visibility.
     Public,
@@ -720,7 +730,7 @@ pub enum PhpModifier {
 
 /// PHP interface declaration.
 #[derive(Debug, Clone, PartialEq)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct PhpInterface {
     /// Interface name.
     pub name: String,
@@ -732,7 +742,7 @@ pub struct PhpInterface {
 
 /// PHP interface members.
 #[derive(Debug, Clone, PartialEq)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub enum PhpInterfaceMember {
     /// An interface method.
     Method(PhpMethod),
@@ -742,7 +752,7 @@ pub enum PhpInterfaceMember {
 
 /// PHP trait declaration.
 #[derive(Debug, Clone, PartialEq)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct PhpTrait {
     /// Trait name.
     pub name: String,
@@ -752,7 +762,7 @@ pub struct PhpTrait {
 
 /// PHP namespace declaration.
 #[derive(Debug, Clone, PartialEq)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct PhpNamespace {
     /// Optional namespace name (None for global namespace).
     pub name: Option<String>,
@@ -762,7 +772,7 @@ pub struct PhpNamespace {
 
 /// PHP `use` statement.
 #[derive(Debug, Clone, PartialEq)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct PhpUse {
     /// List of symbols being imported.
     pub uses: Vec<PhpUseItem>,
@@ -772,7 +782,7 @@ pub struct PhpUse {
 
 /// PHP `use` item.
 #[derive(Debug, Clone, PartialEq)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct PhpUseItem {
     /// Fully qualified name of the symbol.
     pub name: String,
@@ -782,11 +792,12 @@ pub struct PhpUseItem {
 
 /// PHP `use` types.
 #[derive(Debug, Clone, PartialEq)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub enum PhpUseType {
     /// Normal import (class, interface, trait, or namespace).
     Normal,
     /// Function import (`use function`).
     Function,
+    /// Constant import (`use const`).
     Const,
 }

@@ -1,17 +1,19 @@
-#![doc = include_str!("readme.md")]
+//! XML lexer implementation.
+
+/// XML token types.
 pub mod token_type;
 
 use crate::{language::XmlLanguage, lexer::token_type::XmlTokenType};
 use oak_core::{
-    Lexer, LexerCache, LexerState, OakError, TextEdit,
+    Lexer, LexerCache, LexerState, OakError,
     lexer::{CommentConfig, LexOutput, StringConfig, WhitespaceConfig},
     source::Source,
 };
 use std::sync::LazyLock;
 
-type State<'a, S> = LexerState<'a, S, XmlLanguage>;
+pub(crate) type State<'a, S> = LexerState<'a, S, XmlLanguage>;
 
-// XML 静态配置
+// XML static configuration
 static XML_WHITESPACE: LazyLock<WhitespaceConfig> = LazyLock::new(|| WhitespaceConfig { unicode_whitespace: true });
 
 static XML_COMMENT: LazyLock<CommentConfig> = LazyLock::new(|| CommentConfig { line_marker: "", block_start: "<!--", block_end: "-->", nested_blocks: false });
@@ -29,18 +31,20 @@ impl<'config> Lexer<XmlLanguage> for XmlLexer<'config> {
     }
 }
 
+/// XML lexer.
 #[derive(Clone)]
 pub struct XmlLexer<'config> {
-    _config: &'config XmlLanguage,
+    config: &'config XmlLanguage,
 }
 
 impl<'config> XmlLexer<'config> {
+    /// Creates a new `XmlLexer`.
     pub fn new(config: &'config XmlLanguage) -> Self {
-        Self { _config: config }
+        Self { config }
     }
 
-    /// 主要的词法分析循环
-    fn run<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> Result<(), OakError> {
+    /// Main lexer loop.
+    fn run<S: Source + ?Sized>(&self, state: &mut State<'_, S>) -> Result<(), OakError> {
         while state.not_at_end() {
             let safe_point = state.get_position();
 

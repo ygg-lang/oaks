@@ -1,22 +1,26 @@
+/// Objective-C element types.
 pub mod element_type;
 
 use crate::{
     language::ObjectiveCLanguage,
     lexer::{ObjectiveCLexer, token_type::ObjectiveCTokenType},
-    parser::element_type::ObjectiveCElementType,
 };
 use oak_core::{
     parser::{ParseCache, ParseOutput, Parser, ParserState, parse_with_lexer},
     source::{Source, TextEdit},
 };
 
+/// Parser state type alias.
 pub(crate) type State<'a, S> = ParserState<'a, ObjectiveCLanguage, S>;
 
+/// Objective-C parser.
 pub struct ObjectiveCParser<'config> {
+    /// Language definition.
     pub language: &'config ObjectiveCLanguage,
 }
 
 impl<'config> ObjectiveCParser<'config> {
+    /// Creates a new Objective-C parser.
     pub fn new(language: &'config ObjectiveCLanguage) -> Self {
         Self { language }
     }

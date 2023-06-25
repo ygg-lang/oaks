@@ -5,11 +5,14 @@ use oak_core::tree::RedNode;
 #[cfg(feature = "lsp")]
 use {futures::Future, oak_lsp::service::LanguageService, oak_lsp::types::Hover as LspHover, oak_vfs::Vfs};
 #[cfg(feature = "lsp")]
+/// Voc language service implementation.
 pub struct VocLanguageService<V: Vfs> {
     vfs: V,
     workspace: oak_lsp::workspace::WorkspaceManager,
 }
+#[cfg(feature = "lsp")]
 impl<V: Vfs> VocLanguageService<V> {
+    /// Creates a new `VocLanguageService`.
     pub fn new(vfs: V) -> Self {
         Self { vfs, workspace: oak_lsp::workspace::WorkspaceManager::new() }
     }

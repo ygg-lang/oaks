@@ -1,18 +1,17 @@
 #![doc = include_str!("readme.md")]
+/// Token types for the C language.
 pub mod token_type;
 
 pub use token_type::CTokenType;
 
 use crate::language::CLanguage;
 use oak_core::{Lexer, LexerCache, LexerState, OakError, lexer::LexOutput, source::Source};
-#[cfg(feature = "serde")]
-use serde::Serialize;
 use std::sync::LazyLock;
 
-type State<'a, S> = LexerState<'a, S, CLanguage>;
+pub(crate) type State<'a, S> = LexerState<'a, S, CLanguage>;
 
 /// Lexer for the C language.
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize))]
 #[derive(Clone, Copy, Debug)]
 pub struct CLexer<'config> {
     /// Language configuration.
@@ -117,7 +116,7 @@ impl<'config> CLexer<'config> {
                 }
                 state.advance(ch.len_utf8())
             }
-            state.add_token(CTokenType::Comment, start, state.get_position());
+            state.add_token(CTokenType::LineComment, start, state.get_position());
             return true;
         }
         else if state.consume_if_starts_with("/*") {
@@ -127,7 +126,7 @@ impl<'config> CLexer<'config> {
                 }
                 if let Some(ch) = state.peek() { state.advance(ch.len_utf8()) } else { break }
             }
-            state.add_token(CTokenType::Comment, start, state.get_position());
+            state.add_token(CTokenType::BlockComment, start, state.get_position());
             return true;
         }
         false
@@ -200,7 +199,7 @@ impl<'config> CLexer<'config> {
                     state.advance(ch.len_utf8())
                 }
             }
-            state.add_token(CTokenType::CharLiteral, start, state.get_position());
+            state.add_token(CTokenType::CharConstant, start, state.get_position());
             return true;
         }
         false
@@ -217,7 +216,7 @@ impl<'config> CLexer<'config> {
                 }
 
                 let text = state.get_text_in((start..state.get_position()).into());
-                let kind = if text.contains('.') || text.contains('e') || text.contains('E') { CTokenType::FloatLiteral } else { CTokenType::IntegerLiteral };
+                let kind = if text.contains('.') || text.contains('e') || text.contains('E') { CTokenType::FloatConstant } else { CTokenType::IntConstant };
                 state.add_token(kind, start, state.get_position());
                 return true;
             }
@@ -303,7 +302,7 @@ impl<'config> CLexer<'config> {
 
             let two_char = if let Some(next_ch) = state.peek_next_n(1) { format!("{}{}", ch, next_ch) } else { String::new() };
 
-            // 检查三字符操作符
+            // Check three-character operators
             if let Some(ref three) = three_char {
                 if let Some(&kind) = C_THREE_CHAR_OPERATORS.get(three.as_str()) {
                     state.advance(3);
@@ -312,14 +311,14 @@ impl<'config> CLexer<'config> {
                 }
             }
 
-            // 检查双字符操作符
+            // Check two-character operators
             if let Some(&kind) = C_TWO_CHAR_OPERATORS.get(two_char.as_str()) {
                 state.advance(2);
                 state.add_token(kind, start, state.get_position());
                 return true;
             }
 
-            // 检查单字符操作符 and 分隔符
+            // Check single-character operators and delimiters
             let kind = match ch {
                 '(' => CTokenType::LeftParen,
                 ')' => CTokenType::RightParen,
@@ -364,7 +363,7 @@ impl<'config> CLexer<'config> {
                 }
                 state.advance(ch.len_utf8())
             }
-            state.add_token(CTokenType::PreprocessorDirective, start, state.get_position());
+            state.add_token(CTokenType::Preprocessor, start, state.get_position());
             return true;
         }
         false

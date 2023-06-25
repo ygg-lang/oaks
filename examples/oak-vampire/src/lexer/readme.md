@@ -24,7 +24,7 @@ Vampire Lexer for tokenizing Vampire logic problems.
 
 ## Usage Example
 
-```rust,no_run
+```rust
 use oak_vampire::{VampireLexer, VampireLanguage};
 use oak_core::{Lexer, source::SourceText, parser::session::ParseSession};
 

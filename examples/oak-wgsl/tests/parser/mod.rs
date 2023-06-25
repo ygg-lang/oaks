@@ -5,7 +5,7 @@ use oak_wgsl::{WgslLanguage, WgslLexer, WgslParser};
 fn test_parser_basic() {
     let input = "fn main() {}";
     let source = SourceText::new(input.to_string());
-    let language = WgslLanguage;
+    let language = WgslLanguage {};
     let lexer = WgslLexer::new(&language);
     let mut session = ParseSession::<WgslLanguage>::default();
     let _lex_output = lexer.lex(&source, &[], &mut session);

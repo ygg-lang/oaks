@@ -1,4 +1,5 @@
 #![doc = include_str!("readme.md")]
+/// Element types for the C AST.
 pub mod element_type;
 pub use element_type::CElementType;
 
@@ -47,7 +48,7 @@ impl<'config> CParser<'config> {
     /// Skips trivia tokens (whitespace and comments).
     fn skip_trivia<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) {
         while let Some(kind) = state.peek_kind() {
-            if matches!(kind, CTokenType::Whitespace | CTokenType::Comment) {
+            if matches!(kind, CTokenType::Whitespace | CTokenType::LineComment | CTokenType::BlockComment) {
                 state.bump();
             }
             else {
@@ -202,10 +203,9 @@ impl<'config> Pratt<CLanguage> for CParser<'config> {
                 state.bump();
                 state.finish_at(cp, CElementType::Token(Identifier))
             }
-            Some(IntegerLiteral) | Some(FloatLiteral) | Some(CharLiteral) | Some(StringLiteral) => {
-                let _kind = state.peek_kind().unwrap();
+            Some(IntConstant) | Some(FloatConstant) | Some(CharConstant) | Some(StringLiteral) => {
                 state.bump();
-                state.finish_at(cp, CElementType::ExpressionStatement) // 简化处理
+                state.finish_at(cp, CElementType::ExpressionStatement) // Simplified processing
             }
             Some(LeftParen) => {
                 state.bump();

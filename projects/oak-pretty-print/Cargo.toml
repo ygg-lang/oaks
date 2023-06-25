@@ -13,15 +13,16 @@ categories = ["text-processing"]
 keywords = ["syntax-highlighting", "code", "highlighting", "multi-language"]
 
 [dependencies]
-oak-core = { workspace = true, features = ["serde"] }
+oak-core = { workspace = true }
 oak-macros = { workspace = true }
-serde = { workspace = true, features = ["derive"] }
+serde = { workspace = true, optional = true }
 
 [dev-dependencies]
 oak-testing = { workspace = true }
 
 [features]
-default = []
+default = ["serde"]
+serde = ["dep:serde", "oak-core/serde"]
 
 [package.metadata.docs.rs]
 all-features = true

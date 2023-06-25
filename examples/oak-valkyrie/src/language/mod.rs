@@ -1,28 +1,24 @@
-#![doc = include_str!("readme.md")]
-use crate::{ast::ValkyrieRoot, lexer::token_type::ValkyrieSyntaxKind};
+use crate::{ast::ValkyrieRoot, lexer::ValkyrieTokenType, parser::ValkyrieElementType};
 use oak_core::{Language, LanguageCategory};
-#[cfg(feature = "serde")]
-use serde::{Deserialize, Serialize};
 
+/// Valkyrie language configuration and metadata.
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
-/// Syntax modes for Valkyrie parser.
-pub enum SyntaxMode {
-    /// Programming mode: Standard .vk file
-    Programming,
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+pub struct ValkyrieLanguage {
+    /// Whether to enable strict mode
+    pub strict_mode: bool,
 }
 
-#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
-/// The Valkyrie programming language definition.
-pub struct ValkyrieLanguage {
-    /// Current syntax mode
-    pub syntax_mode: SyntaxMode,
+impl ValkyrieLanguage {
+    /// Creates a new Valkyrie language configuration.
+    pub fn new() -> Self {
+        Self { strict_mode: false }
+    }
 }
 
 impl Default for ValkyrieLanguage {
     fn default() -> Self {
-        Self { syntax_mode: SyntaxMode::Programming }
+        Self::new()
     }
 }
 
@@ -30,7 +26,7 @@ impl Language for ValkyrieLanguage {
     const NAME: &'static str = "valkyrie";
     const CATEGORY: LanguageCategory = LanguageCategory::Programming;
 
-    type TokenType = ValkyrieSyntaxKind;
-    type ElementType = ValkyrieSyntaxKind;
+    type TokenType = ValkyrieTokenType;
+    type ElementType = ValkyrieElementType;
     type TypedRoot = ValkyrieRoot;
 }

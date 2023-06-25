@@ -1,99 +1,197 @@
-use oak_core::{ElementType, Parser, UniversalElementRole};
-#[cfg(feature = "serde")]
-use serde::{Deserialize, Serialize};
+use oak_core::{ElementType, UniversalElementRole};
 
+/// Jasmin element types for the green tree.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub enum JasminElementType {
+    /// Root node.
     Root,
+    /// Class definition.
     Class,
+    /// Method definition.
     Method,
+    /// Field definition.
     Field,
+    /// Instruction.
     Instruction,
+    /// Identifier node.
     IdentifierNode,
+    /// String node.
     StringNode,
+    /// Number node.
     NumberNode,
+    /// Error node.
     ErrorNode,
 
+    /// `.class` keyword.
     ClassKw,
+    /// `.version` keyword.
     VersionKw,
+    /// `.method` keyword.
     MethodKw,
+    /// `.field` keyword.
     FieldKw,
+    /// `.string` keyword.
     StringKw,
+    /// `.source` keyword.
     SourceFileKw,
+    /// `.stack` keyword.
     StackKw,
+    /// `.limit locals` keyword.
     LocalsKw,
+    /// `.end` keyword.
     EndKw,
+    /// `compiled` keyword.
     CompiledKw,
+    /// `from` keyword.
     FromKw,
+    /// `.inner` keyword.
     InnerClassKw,
+    /// `.nest` keyword.
     NestMembersKw,
+    /// `.bootstrap` keyword.
     BootstrapMethodKw,
 
+    /// `public` access flag.
     Public,
+    /// `private` access flag.
     Private,
+    /// `protected` access flag.
     Protected,
+    /// `static` access flag.
     Static,
+    /// `super` access flag.
     Super,
+    /// `final` access flag.
     Final,
+    /// `abstract` access flag.
     Abstract,
+    /// `synchronized` access flag.
     Synchronized,
+    /// `native` access flag.
     Native,
+    /// `synthetic` access flag.
     Synthetic,
+    /// `deprecated` access flag.
     Deprecated,
+    /// `varargs` access flag.
     Varargs,
+    /// `bridge` access flag.
+    Bridge,
+    /// `enum` keyword.
+    Enum,
+    /// `annotation` keyword.
+    Annotation,
+    /// `strictfp` access flag.
+    Strictfp,
+    /// `interface` keyword.
+    Interface,
+    /// `volatile` access flag.
+    Volatile,
+    /// `transient` access flag.
+    Transient,
 
+    /// `aload_0` instruction.
     ALoad0,
+    /// `aload_1` instruction.
     ALoad1,
+    /// `aload_2` instruction.
     ALoad2,
+    /// `aload_3` instruction.
     ALoad3,
+    /// `iload_0` instruction.
     ILoad0,
+    /// `iload_1` instruction.
     ILoad1,
+    /// `iload_2` instruction.
     ILoad2,
+    /// `iload_3` instruction.
     ILoad3,
+    /// `ldc` instruction.
     Ldc,
+    /// `ldc_w` instruction.
     LdcW,
+    /// `ldc2_w` instruction.
     Ldc2W,
+    /// `invokespecial` instruction.
     InvokeSpecial,
+    /// `invokevirtual` instruction.
     InvokeVirtual,
+    /// `invokestatic` instruction.
     InvokeStatic,
+    /// `invokeinterface` instruction.
     InvokeInterface,
+    /// `invokedynamic` instruction.
     InvokeDynamic,
+    /// `getstatic` instruction.
     GetStatic,
+    /// `putstatic` instruction.
     PutStatic,
+    /// `getfield` instruction.
     GetField,
+    /// `putfield` instruction.
     PutField,
+    /// `return` instruction.
     Return,
+    /// `ireturn` instruction.
     IReturn,
+    /// `areturn` instruction.
     AReturn,
+    /// `lreturn` instruction.
     LReturn,
+    /// `freturn` instruction.
     FReturn,
+    /// `dreturn` instruction.
     DReturn,
+    /// `nop` instruction.
     Nop,
+    /// `dup` instruction.
     Dup,
+    /// `pop` instruction.
     Pop,
+    /// `new` instruction.
     New,
 
+    /// `{` token.
     LeftBrace,
+    /// `}` token.
     RightBrace,
+    /// `(` token.
     LeftParen,
+    /// `)` token.
     RightParen,
+    /// `[` token.
     LeftBracket,
+    /// `]` token.
     RightBracket,
+    /// `:` token.
     Colon,
+    /// `;` token.
     Semicolon,
+    /// `.` token.
     Dot,
+    /// `,` token.
     Comma,
+    /// `/` token.
     Slash,
 
+    /// String literal token.
     StringLiteral,
+    /// Number token.
     Number,
+    /// Type descriptor token.
     TypeDescriptor,
+    /// Identifier token.
     IdentifierToken,
+    /// Whitespace token.
     Whitespace,
+    /// Newline token.
     Newline,
+    /// Comment token.
     Comment,
+    /// EOF token.
     Eof,
+    /// Error token.
     Error,
 }
 
@@ -147,6 +245,13 @@ impl From<crate::lexer::token_type::JasminTokenType> for JasminElementType {
             crate::lexer::token_type::JasminTokenType::Synthetic => JasminElementType::Synthetic,
             crate::lexer::token_type::JasminTokenType::Deprecated => JasminElementType::Deprecated,
             crate::lexer::token_type::JasminTokenType::Varargs => JasminElementType::Varargs,
+            crate::lexer::token_type::JasminTokenType::Bridge => JasminElementType::Bridge,
+            crate::lexer::token_type::JasminTokenType::Enum => JasminElementType::Enum,
+            crate::lexer::token_type::JasminTokenType::Annotation => JasminElementType::Annotation,
+            crate::lexer::token_type::JasminTokenType::Strictfp => JasminElementType::Strictfp,
+            crate::lexer::token_type::JasminTokenType::Interface => JasminElementType::Interface,
+            crate::lexer::token_type::JasminTokenType::Volatile => JasminElementType::Volatile,
+            crate::lexer::token_type::JasminTokenType::Transient => JasminElementType::Transient,
 
             crate::lexer::token_type::JasminTokenType::ALoad0 => JasminElementType::ALoad0,
             crate::lexer::token_type::JasminTokenType::ALoad1 => JasminElementType::ALoad1,

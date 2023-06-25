@@ -1,4 +1,5 @@
 #![doc = include_str!("readme.md")]
+/// Element type definitions.
 pub mod element_type;
 
 pub use element_type::AplElementType;
@@ -12,20 +13,23 @@ use oak_core::{
 
 pub(crate) type State<'a, S> = ParserState<'a, AplLanguage, S>;
 
+/// Parser for the APL language.
 pub struct AplParser<'config> {
+    /// The language configuration.
     pub(crate) config: &'config AplLanguage,
 }
 
 impl<'config> AplParser<'config> {
+    /// Creates a new `AplParser`.
     pub fn new(config: &'config AplLanguage) -> Self {
         Self { config }
     }
 
-    /// 解析 APL 语句
+    /// Parses an APL statement.
     pub(crate) fn parse_statement<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> Result<(), OakError> {
         let cp = state.checkpoint();
 
-        // 尝试解析赋值语句: ID ← Expression
+        // Try parsing assignment: ID ← Expression
         if state.at(AplTokenType::Identifier) && state.peek_kind_at(1) == Some(AplTokenType::LeftArrow) {
             state.advance(); // ID
             state.advance(); // ←
@@ -40,7 +44,7 @@ impl<'config> AplParser<'config> {
         Ok(())
     }
 
-    /// 解析 APL 表达式（简化版）
+    /// Parses an APL expression (simplified).
     pub(crate) fn parse_expression<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> Result<(), OakError> {
         let cp = state.checkpoint();
 
@@ -68,7 +72,7 @@ impl<'config> AplParser<'config> {
                 state.expect(AplTokenType::RightBrace).ok();
             }
             else {
-                // 可能是原始函数或运算符
+                // Possibly a primitive function or operator
                 state.advance();
             }
         }

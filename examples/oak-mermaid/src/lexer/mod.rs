@@ -1,3 +1,4 @@
+/// Token types for the Mermaid language.
 pub mod token_type;
 
 use crate::{language::MermaidLanguage, lexer::token_type::MermaidTokenType};
@@ -9,9 +10,10 @@ use oak_core::{
 
 type State<'s, S> = LexerState<'s, S, MermaidLanguage>;
 
+/// A lexer for the Mermaid language.
 #[derive(Clone)]
 pub struct MermaidLexer<'config> {
-    _config: &'config MermaidLanguage,
+    config: &'config MermaidLanguage,
 }
 
 impl<'config> Lexer<MermaidLanguage> for MermaidLexer<'config> {
@@ -26,8 +28,9 @@ impl<'config> Lexer<MermaidLanguage> for MermaidLexer<'config> {
 }
 
 impl<'config> MermaidLexer<'config> {
+    /// Creates a new Mermaid lexer with the given configuration.
     pub fn new(config: &'config MermaidLanguage) -> Self {
-        Self { _config: config }
+        Self { config }
     }
 
     fn run<'s, S: Source + ?Sized>(&self, state: &mut State<'s, S>) -> Result<(), oak_core::OakError> {
@@ -38,7 +41,7 @@ impl<'config> MermaidLexer<'config> {
                 continue;
             }
 
-            // 基础 Lexer 逻辑示例
+            // Base Lexer logic example
             let start_pos = state.get_position();
             if let Some(ch) = state.peek() {
                 state.advance(ch.len_utf8());

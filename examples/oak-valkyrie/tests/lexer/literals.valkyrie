@@ -1,9 +1,0 @@
-42 3.14 "hello world" true false
-"""multiline
-string with "quotes"
-"""
-"interpolation {name} test"
-"nested { "quotes" } is illegal but lexer sees it as two strings and {}"
-""
-""""
-"escape \n \t is just text"

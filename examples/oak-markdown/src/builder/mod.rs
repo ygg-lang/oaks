@@ -1,5 +1,9 @@
-use crate::{ast::*, language::MarkdownLanguage, parser::MarkdownParser};
-use oak_core::{Builder, BuilderCache, GreenNode, OakError, Parser, RedNode, RedTree, SourceText, TextEdit, source::Source};
+use crate::{
+    ast::*,
+    language::MarkdownLanguage,
+    parser::{MarkdownParser, element_type::MarkdownElementType},
+};
+use oak_core::{Builder, BuilderCache, ElementType, GreenNode, OakError, Parser, RedNode, RedTree, SourceText, TextEdit, UniversalElementRole, source::Source};
 
 /// AST builder for the Markdown language.
 #[derive(Clone)]
@@ -8,6 +12,7 @@ pub struct MarkdownBuilder<'config> {
     config: &'config MarkdownLanguage,
 }
 
+#[allow(unused)]
 impl<'config> MarkdownBuilder<'config> {
     /// Creates a new MarkdownBuilder with the given configuration.
     pub fn new(config: &'config MarkdownLanguage) -> Self {
@@ -30,129 +35,25 @@ impl<'config> MarkdownBuilder<'config> {
         Ok(MarkdownRoot { blocks })
     }
 
-    /// 构建块级元素
+    /// Builds block-level elements.
     fn build_block(&self, node: RedNode<MarkdownLanguage>, source: &SourceText) -> Option<Block> {
-        use crate::{lexer::token_type::MarkdownTokenType as TT, parser::element_type::MarkdownElementType as ET};
-
-        let kind = node.green.kind;
-        match kind {
-            ET::Heading1 | ET::Heading2 | ET::Heading3 | ET::Heading4 | ET::Heading5 | ET::Heading6 => {
-                let level = match kind {
-                    ET::Heading1 => 1,
-                    ET::Heading2 => 2,
-                    ET::Heading3 => 3,
-                    ET::Heading4 => 4,
-                    ET::Heading5 => 5,
-                    ET::Heading6 => 6,
-                    _ => unreachable!(),
-                };
-                let text = source.get_text_in(node.span());
-                let content = text.trim_start_matches('#').trim_start().to_string();
-                Some(Block::Heading(crate::ast::Heading { level, content, span: node.span() }))
+        let role = node.kind::<MarkdownElementType>().role();
+        match role {
+            UniversalElementRole::Container => {
+                // Determine if it's a list, quote, or other container
+                None
             }
-            ET::Paragraph => Some(Block::Paragraph(crate::ast::Paragraph { content: source.get_text_in(node.span()).to_string(), span: node.span() })),
-            ET::CodeBlock => {
-                let mut language = None;
-                let mut content = String::new();
-
-                for child in node.children() {
-                    match child {
-                        RedTree::Leaf(leaf) => {
-                            if leaf.kind == TT::CodeLanguage {
-                                language = Some(source.get_text_in(leaf.span).trim().to_string());
-                            }
-                            else if leaf.kind != TT::CodeFence {
-                                content.push_str(&source.get_text_in(leaf.span));
-                            }
-                        }
-                        RedTree::Node(child_node) => {
-                            // 检查子节点是否包含语言标识
-                            for sub_child in child_node.children() {
-                                if let RedTree::Leaf(sub_leaf) = sub_child {
-                                    if sub_leaf.kind == TT::CodeLanguage {
-                                        language = Some(source.get_text_in(sub_leaf.span).trim().to_string());
-                                    }
-                                    else if sub_leaf.kind != TT::CodeFence {
-                                        content.push_str(&source.get_text_in(sub_leaf.span));
-                                    }
-                                }
-                                else if let RedTree::Node(sub_node) = sub_child {
-                                    content.push_str(&source.get_text_in(sub_node.span()));
-                                }
-                            }
-                        }
-                    }
-                }
-
-                Some(Block::CodeBlock(crate::ast::CodeBlock { language, content: content.trim().to_string(), span: node.span() }))
-            }
-            ET::UnorderedList | ET::OrderedList => {
-                let mut items = Vec::new();
-                for child in node.children() {
-                    if let RedTree::Node(child_node) = child {
-                        if child_node.green.kind == ET::ListItem {
-                            items.push(self.build_list_item(child_node, source));
-                        }
-                    }
-                }
-                Some(Block::List(crate::ast::List { is_ordered: kind == ET::OrderedList, items, span: node.span() }))
-            }
-            ET::Blockquote => {
-                let mut content_text = String::new();
-                for child in node.children() {
-                    match child {
-                        RedTree::Leaf(leaf) => {
-                            if leaf.kind != TT::BlockquoteMarker {
-                                content_text.push_str(&source.get_text_in(leaf.span))
-                            }
-                        }
-                        RedTree::Node(child_node) => content_text.push_str(&source.get_text_in(child_node.span())),
-                    }
-                }
-
-                // 简单的引用处理：将其内容作为段落
-                Some(Block::Blockquote(crate::ast::Blockquote { content: vec![Block::Paragraph(crate::ast::Paragraph { content: content_text.trim().to_string(), span: node.span() })], span: node.span() }))
-            }
-            ET::HorizontalRule => Some(Block::HorizontalRule(crate::ast::HorizontalRule { span: node.span() })),
-            ET::Table => {
-                let text = source.get_text_in(node.span());
-                let lines: Vec<&str> = text.lines().collect();
-                if lines.is_empty() {
-                    return None;
-                }
-
-                let parse_row = |line: &str| -> crate::ast::TableRow {
-                    let cells = line
-                        .split('|')
-                        .filter(|s| !s.trim().is_empty())
-                        .map(|s| crate::ast::TableCell {
-                            content: s.trim().to_string(),
-                            span: node.span(), // 简化处理
-                        })
-                        .collect();
-                    crate::ast::TableRow { cells, span: node.span() }
-                };
-
-                let header = parse_row(lines[0]);
-                let mut rows = Vec::new();
-                for line in lines.iter().skip(1) {
-                    if line.contains("---") {
-                        continue;
-                    }
-                    if line.trim().is_empty() {
-                        continue;
-                    }
-                    rows.push(parse_row(line))
-                }
-
-                Some(Block::Table(crate::ast::Table { header, rows, span: node.span() }))
-            }
-            ET::HtmlTag => {
-                // TODO: 实现 HTML 构建
+            UniversalElementRole::Statement => {
+                // Handle paragraphs, headings, etc.
                 None
             }
             _ => None,
         }
+    }
+
+    /// Builds inline-level elements.
+    fn build_inline(&self, node: RedNode<MarkdownLanguage>, source: &SourceText) -> Option<Inline> {
+        None
     }
 
     fn build_list_item(&self, node: RedNode<MarkdownLanguage>, source: &SourceText) -> crate::ast::ListItem {
@@ -165,16 +66,16 @@ impl<'config> MarkdownBuilder<'config> {
             }
         }
 
-        // 如果没有嵌套块，但有文本内容，将其包装为段落
+        // If no nested blocks but has text content, wrap it as a paragraph
         if content.is_empty() {
             let text = source.get_text_in(node.span()).to_string();
             if !text.trim().is_empty() {
-                // 简单的清理：移除可能的列表标记前缀
+                // Simple cleanup: remove possible list marker prefixes
                 let display_text = if text.starts_with("- ") || text.starts_with("* ") {
                     text[2..].to_string()
                 }
                 else if text.len() > 3 && text.chars().next().unwrap().is_ascii_digit() && text.contains(". ") {
-                    // 处理有序列表标记，如 "1. "
+                    // Handle ordered list markers like "1. "
                     if let Some(pos) = text.find(". ") { text[pos + 2..].to_string() } else { text }
                 }
                 else {

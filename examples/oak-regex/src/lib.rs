@@ -1,4 +1,4 @@
-#![doc = include_str!("readme.md")]
+#![doc = include_str!("../readme.md")]
 #![feature(new_range_api)]
 #![warn(missing_docs)]
 #![doc(html_logo_url = "https://raw.githubusercontent.com/ygg-lang/oaks/refs/heads/dev/documents/logo.svg")]
@@ -9,13 +9,7 @@
 pub mod ast;
 /// Builder module.
 pub mod builder;
-/// Formatter module.
-#[cfg(feature = "lsp")]
-pub use crate::lsp::formatter;
-/// Highlighter module.
-#[cfg(feature = "lsp")]
-pub use crate::lsp::highlighter;
-/// Type definitions module.
+
 /// Language configuration module.
 pub mod language;
 /// Lexer module.
@@ -30,16 +24,18 @@ pub mod mcp;
 /// Parser module.
 pub mod parser;
 
-pub use crate::{ast::RegexRoot, builder::RegexBuilder, language::RegexLanguage, lexer::RegexLexer, parser::RegexParser};
+pub use crate::{ast::RegexRoot, language::RegexLanguage, lexer::RegexLexer, parser::RegexParser};
+
+pub use oak_core::{ElementType, TokenType};
 
 /// Highlighter implementation.
 #[cfg(feature = "oak-highlight")]
 pub use crate::lsp::highlighter::RegexHighlighter;
 
-/// LSP implementation.
 #[cfg(feature = "lsp")]
 pub use crate::lsp::RegexLanguageService;
-#[cfg(feature = "oak-pretty-print")]
+/// LSP implementation.
+#[cfg(feature = "lsp")]
 pub use crate::lsp::formatter::RegexFormatter;
 
 /// MCP service implementation.

@@ -1,19 +1,22 @@
 use crate::{ast::*, language::MermaidLanguage, parser::MermaidParser};
 use oak_core::{Builder, BuilderCache, GreenNode, OakDiagnostics, Source, SourceText, TextEdit};
 
+/// A builder for Mermaid Abstract Syntax Trees.
 #[derive(Clone)]
 pub struct MermaidBuilder<'config> {
     config: &'config MermaidLanguage,
 }
 
 impl<'config> MermaidBuilder<'config> {
+    /// Creates a new Mermaid builder with the given configuration.
     pub fn new(config: &'config MermaidLanguage) -> Self {
         Self { config }
     }
 
+    /// Builds a Mermaid root from a green tree and source text.
     pub fn build_root(&self, green_tree: &GreenNode<MermaidLanguage>, _source: &SourceText) -> Result<MermaidRoot, oak_core::OakError> {
-        // 简化实现，实际逻辑需要根据 GreenTree 节点类型递归构建 AST
-        Ok(MermaidRoot { elements: Vec::new(), span: (0..green_tree.text_len as usize).into() })
+        // Simplified implementation, actual logic needs to recursively build AST based on GreenTree node types
+        Ok(MermaidRoot { diagrams: Vec::new(), span: (0..green_tree.byte_length as usize).into() })
     }
 }
 

@@ -2,7 +2,7 @@
 use oak_core::errors::ParseResult;
 use oak_highlight::{HighlightResult, Highlighter, Theme};
 
-/// Typst 语法高亮器
+/// Typst syntax highlighter
 pub struct TypstHighlighter;
 
 impl Highlighter for TypstHighlighter {

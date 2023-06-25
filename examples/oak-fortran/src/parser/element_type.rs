@@ -1,17 +1,15 @@
-use oak_core::{ElementType, Parser, UniversalElementRole};
-#[cfg(feature = "serde")]
-use serde::{Deserialize, Serialize};
+use oak_core::{ElementType, UniversalElementRole};
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 #[repr(u8)]
 pub enum FortranElementType {
-    // 基本 kind
+    // Basic kinds
     Whitespace,
     Newline,
     Comment,
 
-    // 标识符和字面量
+    // Identifiers and literals
     Identifier,
     IntegerLiteral,
     Number,
@@ -27,7 +25,7 @@ pub enum FortranElementType {
     True,
     False,
 
-    // Fortran 关键字
+    // Fortran keywords
     Program,
     EndProgram,
     Subroutine,
@@ -129,7 +127,7 @@ pub enum FortranElementType {
     Double,
     Precision,
 
-    // 数据类型
+    // Data types
     Integer,
     Real,
     DoublePrecision,
@@ -137,7 +135,7 @@ pub enum FortranElementType {
     Character,
     Logical,
 
-    // 操作符
+    // Operators
     Plus,          // +
     Minus,         // -
     Star,          // *
@@ -171,7 +169,7 @@ pub enum FortranElementType {
     Gt,            // .gt.
     Ge,            // .ge.
 
-    // 分隔符
+    // Delimiters
     LeftParen,    // (
     RightParen,   // )
     LeftBracket,  // [
@@ -185,10 +183,10 @@ pub enum FortranElementType {
     Ampersand,    // &
     Dot,          // .
 
-    // 语法节点类型
+    // Syntax node types
     Root,
 
-    // 特殊
+    // Special
     Error,
     Eof,
     EndFile,

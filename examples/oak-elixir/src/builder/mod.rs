@@ -7,15 +7,15 @@ use crate::{
 use core::range::Range;
 use oak_core::{Builder, BuilderCache, GreenNode, OakDiagnostics, OakError, Parser, RedNode, RedTree, SourceText, TextEdit, builder::BuildOutput, source::Source};
 
-/// Elixir 语言的 AST 构建器
+/// Elixir AST builder.
 #[derive(Clone, Copy)]
 pub struct ElixirBuilder<'config> {
-    /// 语言配置
+    /// Language configuration.
     config: &'config ElixirLanguage,
 }
 
 impl<'config> ElixirBuilder<'config> {
-    /// 创建新的 Elixir 构建器
+    /// Creates a new Elixir builder.
     pub fn new(config: &'config ElixirLanguage) -> Self {
         Self { config }
     }
@@ -46,7 +46,7 @@ impl<'config> Builder<ElixirLanguage> for ElixirBuilder<'config> {
 }
 
 impl<'config> ElixirBuilder<'config> {
-    /// 构建根节点
+    /// Builds root node
     pub(crate) fn build_root(&self, green_tree: GreenNode<ElixirLanguage>, source: &SourceText) -> Result<ElixirRoot, OakError> {
         let red_root = RedNode::new(&green_tree, 0);
         let mut items = Vec::new();

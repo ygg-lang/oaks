@@ -5,16 +5,17 @@
 #![doc(html_favicon_url = "https://raw.githubusercontent.com/ygg-lang/oaks/refs/heads/dev/documents/logo.svg")]
 //! Cpp support for the Oak language framework.
 
-/// AST 模块。
+/// AST module.
 pub mod ast;
-/// 类型定义模块。
-/// 语言配置模块。
+/// Builder module.
+pub mod builder;
+/// Language configuration module.
 pub mod language;
-/// 词法分析器模块。
+/// Lexer module.
 pub mod lexer;
-/// 语法分析器模块。
+/// Parser module.
 pub mod parser;
 
-pub use crate::{ast::CppRoot, language::CppLanguage, lexer::CppLexer, parser::CppParser};
+pub use crate::{ast::CppRoot, builder::CppBuilder, language::CppLanguage, lexer::CppLexer, parser::CppParser};
 pub use lexer::token_type::CppTokenType;
 pub use parser::element_type::CppElementType;

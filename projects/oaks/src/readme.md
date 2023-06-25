@@ -1,26 +1,44 @@
-# 🛠️ Developer Guide
+# 🌳 Oaks: The Oak Language Framework Facade
 
-This directory contains the core logic implementation of the project. Below are instructions for a quick start.
+`oaks` is the main entry point and facade for the Oak language framework. it provides a unified and simplified API by re-exporting the most commonly used components from across the Oak ecosystem.
+
+## 🚀 Overview
+
+The Oak framework is designed for building high-performance language services (like LSPs) and compilers. This crate aggregates the following capabilities:
+
+- **Core Parsing**: Re-exports from `oak-core` for syntax tree management.
+- **Virtual File System**: Integrated VFS from `oak-vfs` for file management.
+- **Language Services**: High-level providers for IDE features like Hover, Folding, Symbols, and Semantic Tokens.
+- **LSP Integration**: Ready-to-use types and servers for the Language Server Protocol.
 
 ## 🚦 Quick Start
 
-### Core API Usage
+Using `oaks` to build a simple language tool:
+
 ```rust
-// Example: Basic calling workflow
-fn main() {
-    // 1. Initialization
-    // 2. Execute core logic
-    // 3. Handle returned results
-}
+use oaks::{Language, Parser, Vfs, MemoryVfs, LanguageService};
+
+// 1. Setup VFS
+let vfs = MemoryVfs::new();
+vfs.set_file_content("test.oak", "fn main() { }");
+
+// 2. Access language features through the facade
+let service = LanguageService::new(Arc::new(vfs));
+let hover_info = service.hover("test.oak", Position::new(0, 5));
 ```
 
-## 🔍 Module Description
-- **lib.rs**: Exports public interfaces and core traits.
-- **parser/ (if exists)**: Implements specific syntax parsing logic.
-- **ast/ (if exists)**: Defines the syntax tree structure.
+## 🏗️ Re-exported Modules
 
-## 🏗️ Architecture Design
-The project follows the general architectural specifications of the Oak ecosystem, emphasizing:
-1. **Immutability**: Uses the Green/Red Tree structure to ensure efficient sharing of syntax trees.
-2. **Fault Tolerance**: Core logic is highly inclusive of erroneous input.
-3. **Scalability**: Convenient for downstream tools to perform secondary development.
+`oaks` re-exports key components from these crates:
+
+- **[oak-core](file:///e:/yydb%20%E6%95%B0%E6%8D%AE%E5%BA%93/oaks/projects/oak-core)**: The foundation of the framework (Trees, Lexer, Parser).
+- **[oak-vfs](file:///e:/yydb%20%E6%95%B0%E6%8D%AE%E5%BA%93/oaks/projects/oak-vfs)**: Virtual File System and line mapping.
+- **[oak-lsp](file:///e:/yydb%20%E6%95%B0%E6%8D%AE%E5%BA%93/oaks/projects/oak-lsp)**: LSP server and protocol types.
+- **[oak-hover](file:///e:/yydb%20%E6%95%B0%E6%8D%AE%E5%BA%93/oaks/projects/oak-hover)**: Hover information provider.
+- **[oak-folding](file:///e:/yydb%20%E6%95%B0%E6%8D%AE%E5%BA%93/oaks/projects/oak-folding)**: Folding range calculation.
+- **[oak-symbols](file:///e:/yydb%20%E6%95%B0%E6%8D%AE%E5%BA%93/oaks/projects/oak-symbols)**: Document and workspace symbols.
+
+## 🛠️ Architecture
+
+`oaks` follows the "Facade Pattern" to hide the complexity of the underlying modular system while still allowing advanced users to access specific crates directly if needed. It ensures that the most common workflows are ergonomic and well-documented.
+

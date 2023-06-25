@@ -5,18 +5,18 @@ use crate::{
 };
 use oak_core::{GreenNode, GreenTree, OakError, Source, source::SourceText};
 
-/// Mojo 语法树构建器
+/// Mojo AST builder.
 pub struct MojoBuilder<'a> {
     source: &'a SourceText,
 }
 
 impl<'a> MojoBuilder<'a> {
-    /// 创建新的构建器
+    /// Creates a new builder
     pub fn new(source: &'a SourceText) -> Self {
         Self { source }
     }
 
-    /// 从 GreenNode 构建 AST
+    /// Builds AST from GreenNode
     pub fn build_root(&self, green: &GreenNode<MojoLanguage>) -> Result<Vec<MojoStatement>, OakError> {
         let mut statements = Vec::new();
         let mut offset = 0;

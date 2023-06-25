@@ -1,7 +1,7 @@
 #![doc = include_str!("readme.md")]
 #![feature(new_range_api)]
 #![feature(portable_simd)]
-#![allow(missing_docs)]
+#![warn(missing_docs)]
 #![doc(html_logo_url = "https://raw.githubusercontent.com/ygg-lang/oaks/refs/heads/dev/documents/logo.svg")]
 #![doc(html_favicon_url = "https://raw.githubusercontent.com/ygg-lang/oaks/refs/heads/dev/documents/logo.svg")]
 //! Json support for the Oak language framework.
@@ -27,9 +27,6 @@ pub mod mcp;
 
 /// Parser module.
 pub mod parser;
-/// Serde support module.
-#[cfg(feature = "serde")]
-pub mod serde;
 
 pub use crate::{
     ast::{JsonRoot, JsonValue},
@@ -44,20 +41,23 @@ pub use crate::{
 pub use crate::lsp::highlighter::JsonHighlighter;
 
 #[cfg(feature = "serde")]
-pub use crate::serde::{from_value, to_value};
+pub use crate::language::serde_impl::{from_value, to_value};
 
 #[cfg(feature = "serde")]
+/// Serializes the given value to a JSON string.
 pub fn to_string<T: ::serde::Serialize>(value: &T) -> Result<String, String> {
     let json_value = to_value(value).map_err(|e| e.to_string())?;
     Ok(json_value.to_string())
 }
 
 #[cfg(feature = "serde")]
+/// Deserializes a value of type `T` from a JSON string.
 pub fn from_str<T: ::serde::de::DeserializeOwned>(s: &str) -> Result<T, String> {
     let json_value = parse(s)?;
     from_value(json_value).map_err(|e| e.to_string())
 }
 
+/// Parses a JSON string into a `JsonValue` AST.
 pub fn parse(json: &str) -> Result<crate::ast::JsonValue, String> {
     use oak_core::{Builder, parser::session::ParseSession, source::SourceText};
     let language = JsonLanguage::default();

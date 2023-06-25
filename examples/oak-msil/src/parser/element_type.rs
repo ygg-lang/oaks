@@ -1,60 +1,98 @@
-use oak_core::{ElementType, Parser, UniversalElementRole};
-#[cfg(feature = "serde")]
-use serde::{Deserialize, Serialize};
+use oak_core::{ElementType, UniversalElementRole};
 
+/// Element types for the MSIL (CIL) language.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub enum MsilElementType {
-    // 节点种类
+    /// The root node of the AST.
     Root,
+    /// An assembly directive.
     Assembly,
+    /// An external assembly directive.
     AssemblyExtern,
+    /// A module directive.
     Module,
+    /// A class definition.
     Class,
+    /// A method definition.
     Method,
+    /// An instruction.
     Instruction,
+    /// A label.
     Label,
+    /// A generic directive.
     Directive,
+    /// A type reference or definition.
     Type,
+    /// An identifier.
     Identifier,
+    /// A number literal.
     Number,
+    /// A string literal.
     String,
+    /// A comment.
     Comment,
+    /// An error node in the AST.
     ErrorNode,
 
-    // 词法种类 - 关键
-    AssemblyKeyword, // .assembly
-    ExternKeyword,   // extern
-    ModuleKeyword,   // .module
-    ClassKeyword,    // .class
-    MethodKeyword,   // .method
-    PublicKeyword,   // public
-    PrivateKeyword,  // private
-    StaticKeyword,   // static
-    Keyword,         // other keywords
-    // 词法种类 - 符号
-    LeftBrace,    // {
-    RightBrace,   // }
-    LeftParen,    // (
-    RightParen,   // )
-    LeftBracket,  // [
-    RightBracket, // ]
-    Dot,          // .
-    Colon,        // :
-    Semicolon,    // ;
-    Comma,        // ,
-    Equal,        // =
-    Slash,        // /
+    /// `.assembly` keyword.
+    AssemblyKeyword,
+    /// `extern` keyword.
+    ExternKeyword,
+    /// `.module` keyword.
+    ModuleKeyword,
+    /// `.class` keyword.
+    ClassKeyword,
+    /// `.method` keyword.
+    MethodKeyword,
+    /// `public` keyword.
+    PublicKeyword,
+    /// `private` keyword.
+    PrivateKeyword,
+    /// `static` keyword.
+    StaticKeyword,
+    /// Other keyword.
+    Keyword,
 
-    // 词法种类 - 字面
+    /// `{`.
+    LeftBrace,
+    /// `}`.
+    RightBrace,
+    /// `(`.
+    LeftParen,
+    /// `)`.
+    RightParen,
+    /// `[`.
+    LeftBracket,
+    /// `]`.
+    RightBracket,
+    /// `.`.
+    Dot,
+    /// `:`.
+    Colon,
+    /// `;`.
+    Semicolon,
+    /// `,`.
+    Comma,
+    /// `=`.
+    Equal,
+    /// `/`.
+    Slash,
+
+    /// Identifier token.
     IdentifierToken,
+    /// Number token.
     NumberToken,
+    /// String token.
     StringToken,
 
-    // 词法种类 - 其他
+    /// Whitespace.
     Whitespace,
+    /// Comment token.
     CommentToken,
+    /// End of stream.
     Eof,
+    /// Error token.
     Error,
 }
 
@@ -63,6 +101,13 @@ impl ElementType for MsilElementType {
 
     fn role(&self) -> Self::Role {
         match self {
+            Self::Root => UniversalElementRole::Root,
+            Self::Assembly | Self::AssemblyExtern | Self::Module | Self::Class | Self::Method | Self::Directive => UniversalElementRole::Definition,
+            Self::Instruction => UniversalElementRole::Statement,
+            Self::Type | Self::Identifier => UniversalElementRole::Typing,
+            Self::Number | Self::String => UniversalElementRole::Value,
+            Self::Comment => UniversalElementRole::Documentation,
+            Self::Error | Self::ErrorNode => UniversalElementRole::Error,
             _ => UniversalElementRole::None,
         }
     }

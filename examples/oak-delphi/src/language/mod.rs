@@ -1,12 +1,10 @@
 #![doc = include_str!("readme.md")]
 use crate::ast::DelphiRoot;
 use oak_core::{Language, LanguageCategory};
-#[cfg(feature = "serde")]
-use serde::{Deserialize, Serialize};
 
 /// Language definition for Delphi programming language
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct DelphiLanguage {
     /// Whether to enable strict syntax checking
     pub strict_syntax: bool,
@@ -15,6 +13,7 @@ pub struct DelphiLanguage {
 }
 
 impl DelphiLanguage {
+    /// Creates a new `DelphiLanguage` configuration.
     pub fn new() -> Self {
         Self::default()
     }

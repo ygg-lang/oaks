@@ -1,11 +1,14 @@
 use crate::{IniParser, ast::*, language::IniLanguage, lexer::token_type::IniTokenType, parser::element_type::IniElementType};
 use oak_core::{Builder, BuilderCache, GreenNode, OakDiagnostics, OakError, Parser, RedNode, RedTree, SourceText, TextEdit, source::Source};
 
+/// INI AST builder implementation.
 pub struct IniBuilder<'config> {
+    /// The INI language configuration.
     config: &'config IniLanguage,
 }
 
 impl<'config> IniBuilder<'config> {
+    /// Creates a new `IniBuilder` with the given configuration.
     pub fn new(config: &'config IniLanguage) -> Self {
         Self { config }
     }
@@ -35,6 +38,7 @@ impl<'config> Builder<IniLanguage> for IniBuilder<'config> {
 }
 
 impl<'config> IniBuilder<'config> {
+    /// Builds the AST root from a green tree.
     pub(crate) fn build_root<'a>(&self, green_tree: &'a GreenNode<'a, IniLanguage>, source: &SourceText) -> Result<IniRoot, OakError> {
         let red_root = RedNode::new(green_tree, 0);
         let mut sections = Vec::new();
@@ -53,6 +57,7 @@ impl<'config> IniBuilder<'config> {
         Ok(IniRoot { sections, properties })
     }
 
+    /// Builds a section from a red node.
     fn build_section(&self, node: RedNode<IniLanguage>, source: &SourceText) -> Result<Section, OakError> {
         let span = node.span();
         let mut name = String::new();
@@ -68,6 +73,7 @@ impl<'config> IniBuilder<'config> {
         Ok(Section { name, properties, span })
     }
 
+    /// Builds a property from a red node.
     fn build_property(&self, node: RedNode<IniLanguage>, source: &SourceText) -> Result<Property, OakError> {
         let span = node.span();
         let mut key = String::new();

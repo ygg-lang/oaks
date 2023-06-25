@@ -1,22 +1,22 @@
 use crate::{CoqParser, ast::*, language::CoqLanguage};
 use oak_core::{Builder, BuilderCache, GreenNode, OakDiagnostics, SourceText, TextEdit, source::Source};
 
-/// Coq 语言的 AST 构建器
+/// AST builder for the Coq language.
 #[derive(Clone)]
 pub struct CoqBuilder<'config> {
-    /// 语言配置
+    /// Language configuration.
     config: &'config CoqLanguage,
 }
 
 impl<'config> CoqBuilder<'config> {
-    /// 创建新的 Coq 构建器
+    /// Creates a new Coq builder.
     pub fn new(config: &'config CoqLanguage) -> Self {
         Self { config }
     }
 
-    /// 从语法树构建 AST 根节点
+    /// Builds the AST root from the green tree.
     pub fn build_root(&self, _green: &GreenNode<CoqLanguage>, _source: &SourceText) -> Result<CoqRoot, oak_core::OakError> {
-        // 简化的 AST 构建逻辑
+        // Simplified AST building logic
         Ok(CoqRoot::new())
     }
 }

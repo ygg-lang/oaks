@@ -22,20 +22,20 @@ fn test_peek_behavior() {
     let mut cache = oak_core::parser::session::ParseSession::<ElixirLanguage>::default();
     let mut state = LexerState::<SourceText, ElixirLanguage>::new_with_cache(&source, 0, &mut cache);
 
-    println!("初始状态:");
-    println!("位置: {}", state.get_position());
+    println!("Initial state:");
+    println!("Position: {}", state.get_position());
     println!("current(): {:?}", state.current());
     println!("peek(): {:?}", state.peek());
 
-    println!("\n前进 1 个字符后:");
+    println!("\nAfter advancing 1 char:");
     state.advance(1);
-    println!("位置: {}", state.get_position());
+    println!("Position: {}", state.get_position());
     println!("current(): {:?}", state.current());
     println!("peek(): {:?}", state.peek());
 
-    println!("\n前进 1 个字符后:");
+    println!("\nAfter advancing 1 char:");
     state.advance(1);
-    println!("位置: {}", state.get_position());
+    println!("Position: {}", state.get_position());
     println!("current(): {:?}", state.current());
     println!("peek(): {:?}", state.peek())
 }
@@ -51,18 +51,18 @@ fn test_elixir_module_parsing() -> Result<(), OakError> {
     let mut cache = oak_core::parser::session::ParseSession::<ElixirLanguage>::default();
     let result = lexer.lex(&source, &[], &mut cache);
 
-    println!("测试 Elixir 模块解析:");
-    println!("源代码: '{}'", (&source).get_text_from(0));
+    println!("Testing Elixir module parsing:");
+    println!("Source code: '{}'", (&source).get_text_from(0));
 
     let tokens = result.result?;
-    assert!(!tokens.is_empty(), "应该解析出至少一个标记");
+    assert!(!tokens.is_empty(), "Should parse at least one token");
 
     let first_token = &tokens[0];
     let source_ref = &source;
     let token_text = source_ref.get_text_in(first_token.span.clone());
 
-    println!("第一个标记: 类型={:?}, 文本='{}'", first_token.kind, token_text);
+    println!("First token: Kind={:?}, Text='{}'", first_token.kind, token_text);
 
-    println!("✅ Elixir 模块解析测试通过！");
+    println!("✅ Elixir module parsing test passed!");
     Ok(())
 }

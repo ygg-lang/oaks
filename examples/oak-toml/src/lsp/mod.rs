@@ -30,6 +30,10 @@ impl HoverProvider<TomlLanguage> for TomlHoverProvider {
         Some(ProviderHover { contents: contents.to_string(), range: Some(node.span()) })
     }
 }
+/// Language service implementation for TOML.
+///
+/// Provides IDE features such as hover and workspace management
+/// by integrating with the `oak-lsp` framework and `Vfs`.
 #[cfg(feature = "lsp")]
 pub struct TomlLanguageService<V: Vfs> {
     vfs: V,
@@ -37,6 +41,7 @@ pub struct TomlLanguageService<V: Vfs> {
     hover_provider: TomlHoverProvider,
 }
 impl<V: Vfs> TomlLanguageService<V> {
+    /// Creates a new `TomlLanguageService` with the given virtual file system.
     pub fn new(vfs: V) -> Self {
         Self { vfs, workspace: oak_lsp::workspace::WorkspaceManager::default(), hover_provider: TomlHoverProvider }
     }

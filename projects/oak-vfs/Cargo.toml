@@ -18,6 +18,6 @@ oak-core = { workspace = true }
 notify = { workspace = true, optional = true }
 
 [features]
-default = ["disk"]
+default = ["disk", "serde"]
 disk = ["dep:walkdir", "dep:notify"]
 serde = ["dep:serde", "oak-core/serde"]

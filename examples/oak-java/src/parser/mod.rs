@@ -1,4 +1,6 @@
 use oak_core::TokenType;
+
+/// Java element types.
 pub mod element_type;
 
 use crate::{
@@ -17,7 +19,9 @@ use oak_core::{
 
 pub(crate) type State<'a, S> = ParserState<'a, JavaLanguage, S>;
 
+/// Java parser.
 pub struct JavaParser<'config> {
+    /// Parser configuration.
     pub(crate) config: &'config JavaLanguage,
 }
 
@@ -212,6 +216,7 @@ impl<'config> Pratt<JavaLanguage> for JavaParser<'config> {
 }
 
 impl<'config> JavaParser<'config> {
+    /// Creates a new `JavaParser`.
     pub fn new(config: &'config JavaLanguage) -> Self {
         Self { config }
     }
@@ -417,11 +422,41 @@ impl<'config> JavaParser<'config> {
         Ok(())
     }
 
+    fn parse_annotation<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> Result<(), OakError> {
+        use crate::lexer::token_type::JavaTokenType::*;
+        let cp = state.checkpoint();
+        state.expect(At).ok();
+        self.skip_trivia(state);
+        self.parse_type(state).ok(); // Annotation name (can be a path)
+        self.skip_trivia(state);
+        if state.eat(LeftParen) {
+            self.skip_trivia(state);
+            while state.not_at_end() && !state.at(RightParen) {
+                PrattParser::parse(state, 0, self);
+                self.skip_trivia(state);
+                if !state.eat(Comma) {
+                    break;
+                }
+                self.skip_trivia(state);
+            }
+            state.expect(RightParen).ok();
+        }
+        state.finish_at(cp, JavaElementType::Annotation);
+        Ok(())
+    }
+
     fn parse_declaration<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> Result<(), OakError> {
         use crate::lexer::token_type::JavaTokenType::*;
         let cp = state.checkpoint();
         self.skip_trivia(state);
-        // 处理修饰符
+
+        // Parse annotations
+        while state.at(At) {
+            self.parse_annotation(state)?;
+            self.skip_trivia(state);
+        }
+
+        // Handle modifiers
         while state.not_at_end() && matches!(state.peek_kind(), Some(Public) | Some(Private) | Some(Protected) | Some(Static) | Some(Final) | Some(Abstract)) {
             state.bump();
             self.skip_trivia(state)
@@ -481,22 +516,22 @@ impl<'config> JavaParser<'config> {
                 state.finish_at(cp, JavaElementType::RecordDeclaration);
             }
             _ => {
-                // 可能是方法或字段
-                // 此时已经消耗了修饰符，当前应该是类型
+                // Possibly a method or field
+                // Modifiers have been consumed, current should be the type
                 self.parse_type(state).ok();
                 self.skip_trivia(state);
-                // 消耗名称并包装为 Identifier 节点
+                // Consume name and wrap as Identifier node
                 let name_cp = state.checkpoint();
                 state.expect(Identifier).ok();
                 state.finish_at(name_cp, JavaElementType::Identifier);
                 self.skip_trivia(state);
 
                 if state.at(LeftParen) {
-                    // 方法声明
+                    // Method declaration
                     state.bump(); // (
                     self.skip_trivia(state);
                     while state.not_at_end() && !state.at(RightParen) {
-                        // 简单的参数解析：Type Name
+                        // Simple parameter parsing: Type Name
                         let p_cp = state.checkpoint();
                         self.parse_type(state).ok();
                         self.skip_trivia(state);
@@ -504,7 +539,7 @@ impl<'config> JavaParser<'config> {
                         state.expect(Identifier).ok(); // Name
                         state.finish_at(pn_cp, JavaElementType::Identifier);
                         self.skip_trivia(state);
-                        // 处理数组类型 []
+                        // Handle array types []
                         while state.at(LeftBracket) {
                             state.bump();
                             self.skip_trivia(state);
@@ -542,7 +577,7 @@ impl<'config> JavaParser<'config> {
                     state.finish_at(cp, JavaElementType::MethodDeclaration);
                 }
                 else {
-                    // 字段声明
+                    // Field declaration
                     if state.eat(Assign) {
                         self.skip_trivia(state);
                         PrattParser::parse(state, 0, self);
@@ -788,19 +823,15 @@ impl<'config> JavaParser<'config> {
     }
 }
 
-impl<'config> JavaParser<'config> {
-    fn parse_root<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> Result<&'a GreenNode<'a, JavaLanguage>, OakError> {
-        let checkpoint = state.checkpoint();
-        while state.not_at_end() {
-            self.parse_item(state).ok();
-        }
-        Ok(state.finish_at(checkpoint, JavaElementType::CompilationUnit))
-    }
-}
-
 impl<'config> Parser<JavaLanguage> for JavaParser<'config> {
     fn parse<'a, S: Source + ?Sized>(&self, text: &'a S, edits: &[TextEdit], cache: &'a mut impl ParseCache<JavaLanguage>) -> oak_core::parser::ParseOutput<'a, JavaLanguage> {
         let lexer = JavaLexer::new(self.config);
-        oak_core::parser::parse_with_lexer(&lexer, text, edits, cache, |state| self.parse_root(state))
+        oak_core::parser::parse_with_lexer(&lexer, text, edits, cache, |state| {
+            let checkpoint = state.checkpoint();
+            while state.not_at_end() {
+                self.parse_item(state).ok();
+            }
+            Ok(state.finish_at(checkpoint, JavaElementType::CompilationUnit))
+        })
     }
 }

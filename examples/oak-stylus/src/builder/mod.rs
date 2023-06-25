@@ -2,12 +2,14 @@
 use crate::language::StylusLanguage;
 use oak_core::{Builder, BuilderCache, OakDiagnostics, TextEdit, source::Source};
 
+/// AST builder for the Stylus language.
 #[derive(Clone)]
 pub struct StylusBuilder<'config> {
     config: &'config StylusLanguage,
 }
 
 impl<'config> StylusBuilder<'config> {
+    /// Create a new Stylus builder.
     pub fn new(config: &'config StylusLanguage) -> Self {
         Self { config }
     }

@@ -1,9 +1,10 @@
 #![doc = include_str!("readme.md")]
-use crate::{lexer::token_type::NoteTokenType, parser::element_type::NoteElementType};
 use oak_core::{Language, LanguageCategory};
 
+/// Notedown language definition
 #[derive(Debug)]
 pub struct NotedownLanguage {
+    /// Whether to support XML calls
     pub xml_call: bool,
 }
 

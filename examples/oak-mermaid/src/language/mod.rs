@@ -1,12 +1,12 @@
 use oak_core::{Language, LanguageCategory};
-#[cfg(feature = "serde")]
-use serde::{Deserialize, Serialize};
 
+/// Configuration for the Mermaid language.
 #[derive(Debug, Clone, Copy, Default)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct MermaidLanguage {}
 
 impl MermaidLanguage {
+    /// Creates a new Mermaid language configuration.
     pub fn new() -> Self {
         Self::default()
     }

@@ -38,6 +38,13 @@ impl<'config> TypeScriptBuilder<'config> {
         }
         else {
             if let Some(stmt) = self.build_statement(node, source)? {
+                // If erase_types is true, we skip type-only statements.
+                if self.erase_types {
+                    match &stmt {
+                        Statement::Interface(_) | Statement::TypeAlias(_) => return Ok(()),
+                        _ => {}
+                    }
+                }
                 statements.push(stmt)
             }
         }

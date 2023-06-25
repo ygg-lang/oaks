@@ -30,7 +30,9 @@ impl<'config> TypeScriptBuilder<'config> {
                                 name = source.get_text_in(child_node.span().into()).to_string()
                             }
                             else if child_kind == TypeScriptElementType::TypeAnnotation {
-                                ty = self.build_type_annotation(&child_node, source)?
+                                if !self.erase_types {
+                                    ty = self.build_type_annotation(&child_node, source)?
+                                }
                             }
                             else if value.is_none() {
                                 if let Some(expr) = self.build_expression(&child_node, source)? {
@@ -67,8 +69,10 @@ impl<'config> TypeScriptBuilder<'config> {
                                     }
                                 }
                                 TypeScriptElementType::TypeParameter => {
-                                    if let Some(tp) = self.build_type_parameter(&child_node, source)? {
-                                        type_params.push(tp)
+                                    if !self.erase_types {
+                                        if let Some(tp) = self.build_type_parameter(&child_node, source)? {
+                                            type_params.push(tp)
+                                        }
                                     }
                                 }
                                 TypeScriptElementType::Parameter => {
@@ -76,7 +80,11 @@ impl<'config> TypeScriptBuilder<'config> {
                                         params.push(p)
                                     }
                                 }
-                                TypeScriptElementType::TypeAnnotation => return_type = self.build_type_annotation(&child_node, source)?,
+                                TypeScriptElementType::TypeAnnotation => {
+                                    if !self.erase_types {
+                                        return_type = self.build_type_annotation(&child_node, source)?
+                                    }
+                                }
                                 TypeScriptElementType::BlockStatement => {
                                     if let Some(Statement::BlockStatement(block)) = self.build_statement(&child_node, source)? {
                                         body = block.statements
@@ -124,8 +132,10 @@ impl<'config> TypeScriptBuilder<'config> {
                                     }
                                 }
                                 TypeScriptElementType::TypeParameter => {
-                                    if let Some(tp) = self.build_type_parameter(&child_node, source)? {
-                                        type_params.push(tp)
+                                    if !self.erase_types {
+                                        if let Some(tp) = self.build_type_parameter(&child_node, source)? {
+                                            type_params.push(tp)
+                                        }
                                     }
                                 }
                                 TypeScriptElementType::ClassBody => {
@@ -149,7 +159,14 @@ impl<'config> TypeScriptBuilder<'config> {
                                             RedTree::Node(heritage_node) => {
                                                 if heritage_node.green.kind == TypeScriptElementType::TypeReference {
                                                     if let Some(ty) = self.build_type_annotation(&heritage_node, source)? {
-                                                        if is_implements { implements.push(ty) } else { extends = Some(ty) }
+                                                        if is_implements {
+                                                            if !self.erase_types {
+                                                                implements.push(ty)
+                                                            }
+                                                        }
+                                                        else {
+                                                            extends = Some(ty)
+                                                        }
                                                     }
                                                 }
                                             }
@@ -179,6 +196,9 @@ impl<'config> TypeScriptBuilder<'config> {
                 Ok(Some(Statement::ClassDeclaration(ClassDeclaration { decorators, is_declare, name, type_params, extends, implements, is_abstract, body, span: span.into() })))
             }
             TypeScriptElementType::InterfaceDeclaration => {
+                if self.erase_types {
+                    return Ok(None);
+                }
                 let mut name = String::new();
                 let mut type_params = Vec::new();
                 let mut extends = Vec::new();
@@ -240,6 +260,9 @@ impl<'config> TypeScriptBuilder<'config> {
                 Ok(Some(Statement::Interface(InterfaceDeclaration { decorators, is_declare, name, type_params, extends, body, span: span.into() })))
             }
             TypeScriptElementType::TypeAliasDeclaration => {
+                if self.erase_types {
+                    return Ok(None);
+                }
                 let mut name = String::new();
                 let mut type_params = Vec::new();
                 let mut ty = None;

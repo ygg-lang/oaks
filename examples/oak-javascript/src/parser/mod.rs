@@ -241,19 +241,15 @@ impl<'config> Pratt<JavaScriptLanguage> for JavaScriptParser<'config> {
     }
 }
 
-impl<'config> JavaScriptParser<'config> {
-    fn parse_root_internal<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> Result<&'a GreenNode<'a, JavaScriptLanguage>, OakError> {
-        let cp = state.checkpoint();
-        while state.not_at_end() {
-            self.parse_statement(state).ok();
-        }
-        Ok(state.finish_at(cp, crate::parser::element_type::JavaScriptElementType::Root))
-    }
-}
-
 impl<'config> Parser<JavaScriptLanguage> for JavaScriptParser<'config> {
     fn parse<'a, S: Source + ?Sized>(&self, text: &'a S, edits: &[TextEdit], cache: &'a mut impl ParseCache<JavaScriptLanguage>) -> oak_core::parser::ParseOutput<'a, JavaScriptLanguage> {
         let lexer = crate::lexer::JavaScriptLexer::new(&self.config);
-        oak_core::parser::parse_with_lexer(&lexer, text, edits, cache, |state| self.parse_root_internal(state))
+        oak_core::parser::parse_with_lexer(&lexer, text, edits, cache, |state| {
+            let cp = state.checkpoint();
+            while state.not_at_end() {
+                self.parse_statement(state).ok();
+            }
+            Ok(state.finish_at(cp, crate::parser::element_type::JavaScriptElementType::Root))
+        })
     }
 }

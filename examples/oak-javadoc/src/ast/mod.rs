@@ -1,9 +1,7 @@
 #![doc = include_str!("readme.md")]
-#[cfg(feature = "serde")]
-use serde::{Deserialize, Serialize};
 
 /// Javadoc root node.
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 #[derive(Clone, Debug)]
 pub struct JavadocRoot {
     /// Description items
@@ -13,7 +11,7 @@ pub struct JavadocRoot {
 }
 
 /// Javadoc content item (text or inline tag).
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 #[derive(Clone, Debug)]
 pub enum JavadocItem {
     /// Raw text
@@ -23,7 +21,7 @@ pub enum JavadocItem {
 }
 
 /// Javadoc inline tag (e.g., {@link ...}).
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 #[derive(Clone, Debug)]
 pub struct JavadocInlineTag {
     /// Tag name
@@ -33,7 +31,7 @@ pub struct JavadocInlineTag {
 }
 
 /// Javadoc block tag (e.g., @param, @return).
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 #[derive(Clone, Debug)]
 pub struct JavadocBlockTag {
     /// Tag name

@@ -1,19 +1,22 @@
 #![doc = include_str!("readme.md")]
+/// Token type definitions for the Notedown lexer.
 pub mod token_type;
 
 use crate::{language::NotedownLanguage, lexer::token_type::NoteTokenType};
 use oak_core::{Lexer, LexerCache, LexerState, lexer::LexOutput, source::Source};
 
-type State<'a, S> = LexerState<'a, S, NotedownLanguage>;
+pub(crate) type State<'a, S> = LexerState<'a, S, NotedownLanguage>;
 
+/// Notedown lexer implementation
 #[derive(Clone, Debug)]
 pub struct NotedownLexer<'config> {
-    _config: &'config NotedownLanguage,
+    config: &'config NotedownLanguage,
 }
 
 impl<'config> NotedownLexer<'config> {
+    /// Create a new lexer with the given language configuration
     pub fn new(config: &'config NotedownLanguage) -> Self {
-        Self { _config: config }
+        Self { config }
     }
 }
 
@@ -31,7 +34,7 @@ impl<'config> Lexer<NotedownLanguage> for NotedownLexer<'config> {
 impl<'config> NotedownLexer<'config> {
     fn run<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> Result<(), oak_core::OakError> {
         while state.not_at_end() {
-            // 尝试各种词法规则
+            // Try various lexical rules
             if self.skip_whitespace(state) {
                 continue;
             }
@@ -88,7 +91,7 @@ impl<'config> NotedownLexer<'config> {
                 continue;
             }
 
-            // 如果没有匹配任何规则，跳过当前字符
+            // If no rules match, skip the current character
             if let Some(ch) = state.peek() {
                 state.advance(ch.len_utf8());
             }
@@ -96,7 +99,7 @@ impl<'config> NotedownLexer<'config> {
         Ok(())
     }
 
-    /// 跳过空白字符
+    /// Skips whitespace
     fn skip_whitespace<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start_pos = state.get_position();
 
@@ -118,7 +121,7 @@ impl<'config> NotedownLexer<'config> {
         }
     }
 
-    /// 处理换行
+    /// Handles newlines
     fn lex_newline<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start_pos = state.get_position();
 
@@ -140,11 +143,11 @@ impl<'config> NotedownLexer<'config> {
         }
     }
 
-    /// 处理标题
+    /// Handles headings
     fn lex_heading<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start_pos = state.get_position();
 
-        // 检查是否在行首
+        // Check if at the beginning of a line
         if start_pos > 0 {
             if let Some(prev_char) = state.get_char_at(start_pos - 1) {
                 if prev_char != '\n' && prev_char != '\r' {
@@ -157,16 +160,16 @@ impl<'config> NotedownLexer<'config> {
             let mut level = 0;
             let mut pos = start_pos;
 
-            // 计算 # 的数
+            // Count the number of #
             while let Some('#') = state.get_char_at(pos) {
                 level += 1;
                 pos += 1;
                 if level > 6 {
-                    return false; // 超过6级标题，不是有效标题
+                    return false; // More than 6 levels of heading is not a valid heading
                 }
             }
 
-            // 检查 # 后面是否有空格
+            // Check if there is a space after #
             if let Some(ch) = state.get_char_at(pos) {
                 if ch != ' ' && ch != '\t' && ch != '\n' && ch != '\r' {
                     return false;
@@ -193,7 +196,7 @@ impl<'config> NotedownLexer<'config> {
         }
     }
 
-    /// 处理行内代码
+    /// Handles inline code
     fn lex_inline_code<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start_pos = state.get_position();
 
@@ -208,7 +211,7 @@ impl<'config> NotedownLexer<'config> {
                     break;
                 }
                 else if ch == '\n' || ch == '\r' {
-                    break; // 内联代码不能跨行
+                    break; // Inline code cannot span multiple lines
                 }
                 else {
                     state.advance(ch.len_utf8());
@@ -220,7 +223,7 @@ impl<'config> NotedownLexer<'config> {
                 true
             }
             else {
-                // 回退到开始位
+                // Backtrack to start position
                 state.set_position(start_pos);
                 false
             }
@@ -230,11 +233,11 @@ impl<'config> NotedownLexer<'config> {
         }
     }
 
-    /// 处理代码块
+    /// Handles code blocks
     fn lex_code_block<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start_pos = state.get_position();
 
-        // 检查是否在行首
+        // Check if at the beginning of a line
         if start_pos > 0 {
             if let Some(prev_char) = state.get_char_at(start_pos - 1) {
                 if prev_char != '\n' && prev_char != '\r' {
@@ -243,7 +246,7 @@ impl<'config> NotedownLexer<'config> {
             }
         }
 
-        // 检查是否是 ``` ~~~
+        // Check if it's a fence like ``` or ~~~
         let fence_char = if let Some('`') = state.peek() {
             '`'
         }
@@ -257,7 +260,7 @@ impl<'config> NotedownLexer<'config> {
         let mut fence_count = 0;
         let mut pos = start_pos;
 
-        // 计算围栏字符数量
+        // Count fence characters
         while let Some(ch) = state.get_char_at(pos) {
             if ch == fence_char {
                 fence_count += 1;
@@ -269,13 +272,13 @@ impl<'config> NotedownLexer<'config> {
         }
 
         if fence_count < 3 {
-            return false; // 至少需要3个围栏字符
+            return false; // At least 3 fence characters are required
         }
 
         state.advance(fence_count);
         state.add_token(NoteTokenType::CodeFence, start_pos, state.get_position());
 
-        // 处理语言标识
+        // Handle language identifier
         let lang_start = state.get_position();
         while let Some(ch) = state.peek() {
             if ch == '\n' || ch == '\r' {
@@ -296,7 +299,7 @@ impl<'config> NotedownLexer<'config> {
         true
     }
 
-    /// 处理加粗和倾斜
+    /// Handles bold and italic (emphasis)
     fn lex_emphasis<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start_pos = state.get_position();
 
@@ -313,7 +316,7 @@ impl<'config> NotedownLexer<'config> {
         let mut marker_count = 0;
         let mut pos = start_pos;
 
-        // 计算标记字符数量
+        // Count marker characters
         while let Some(ch) = state.get_char_at(pos) {
             if ch == marker_char {
                 marker_count += 1;
@@ -336,7 +339,7 @@ impl<'config> NotedownLexer<'config> {
         true
     }
 
-    /// 处理删除
+    /// Handles strikethrough
     fn lex_strikethrough<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start_pos = state.get_position();
 
@@ -355,11 +358,11 @@ impl<'config> NotedownLexer<'config> {
         }
     }
 
-    /// 处理链接和图片
+    /// Handles links and images
     fn lex_link_or_image<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start_pos = state.get_position();
 
-        // 检查是否是图片 ![
+        // Check if it's an image ![
         let is_image = if let Some('!') = state.peek() {
             state.advance(1);
             true
@@ -378,18 +381,18 @@ impl<'config> NotedownLexer<'config> {
         }
         else {
             if is_image {
-                // 回退感叹
+                // Backtrack exclamation mark
                 state.set_position(start_pos);
             }
             false
         }
     }
 
-    /// 处理列表标记
+    /// Handles list markers
     fn lex_list_marker<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start_pos = state.get_position();
 
-        // 检查是否在行首或前面只有空
+        // Check if at the beginning of a line or only whitespace before
         let mut check_pos = start_pos;
         while check_pos > 0 {
             check_pos -= 1;
@@ -398,7 +401,7 @@ impl<'config> NotedownLexer<'config> {
                     break;
                 }
                 else if ch != ' ' && ch != '\t' {
-                    return false; // 前面有非空白字符
+                    return false; // Non-whitespace characters before
                 }
             }
         }
@@ -406,7 +409,7 @@ impl<'config> NotedownLexer<'config> {
         if let Some(ch) = state.peek() {
             match ch {
                 '-' | '*' | '+' => {
-                    // 无序列表
+                    // Unordered list
                     state.advance(1);
                     if let Some(next_ch) = state.peek() {
                         if next_ch == ' ' || next_ch == '\t' {
@@ -418,7 +421,7 @@ impl<'config> NotedownLexer<'config> {
                     false
                 }
                 '0'..='9' => {
-                    // 有序列表
+                    // Ordered list
                     while let Some(digit) = state.peek() {
                         if digit.is_ascii_digit() {
                             state.advance(1);
@@ -449,8 +452,7 @@ impl<'config> NotedownLexer<'config> {
         }
     }
 
-    /// 处理任务列表
-    /// 处理任务列表标记
+    /// Handles task list markers
     fn lex_task_marker<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start_pos = state.get_position();
 
@@ -471,11 +473,11 @@ impl<'config> NotedownLexer<'config> {
         false
     }
 
-    /// 处理引用
+    /// Handles blockquotes
     fn lex_blockquote<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start_pos = state.get_position();
 
-        // 检查是否在行首或前面只有空
+        // Check if at the beginning of a line or only whitespace before
         let mut check_pos = start_pos;
         while check_pos > 0 {
             check_pos -= 1;
@@ -499,11 +501,11 @@ impl<'config> NotedownLexer<'config> {
         }
     }
 
-    /// 处理水平分隔线
+    /// Handles horizontal rules
     fn lex_horizontal_rule<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start_pos = state.get_position();
 
-        // 检查是否在行首或前面只有空
+        // Check if at the beginning of a line or only whitespace before
         let mut check_pos = start_pos;
         while check_pos > 0 {
             check_pos -= 1;
@@ -523,14 +525,14 @@ impl<'config> NotedownLexer<'config> {
                 let mut count = 0;
                 let mut pos = start_pos;
 
-                // 计算连续的分隔符数量
+                // Count the number of consecutive rule characters
                 while let Some(current_ch) = state.get_char_at(pos) {
                     if current_ch == rule_char {
                         count += 1;
                         pos += 1;
                     }
                     else if current_ch == ' ' || current_ch == '\t' {
-                        pos += 1; // 允许空格
+                        pos += 1; // Allow spaces
                     }
                     else {
                         break;
@@ -538,7 +540,7 @@ impl<'config> NotedownLexer<'config> {
                 }
 
                 if count >= 3 {
-                    // 检查到行尾
+                    // Check until the end of line
                     while let Some(current_ch) = state.get_char_at(pos) {
                         if current_ch == '\n' || current_ch == '\r' {
                             break;
@@ -547,7 +549,7 @@ impl<'config> NotedownLexer<'config> {
                             pos += 1;
                         }
                         else {
-                            return false; // 行尾有其他字符
+                            return false; // Other characters at the end of line
                         }
                     }
 
@@ -560,7 +562,7 @@ impl<'config> NotedownLexer<'config> {
         false
     }
 
-    /// 处理特殊字符
+    /// Handles special characters
     fn lex_special_char<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start_pos = state.get_position();
 
@@ -596,12 +598,12 @@ impl<'config> NotedownLexer<'config> {
         }
     }
 
-    /// 处理普通文本
+    /// Handles normal text
     fn lex_text<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start_pos = state.get_position();
 
         while let Some(ch) = state.peek() {
-            // 遇到特殊字符时停
+            // Stop when special characters are encountered
             match ch {
                 ' ' | '\t' | '\n' | '\r' | '#' | '*' | '_' | '`' | '~' | '[' | ']' | '(' | ')' | '<' | '>' | '|' | '-' | '+' | '.' | ':' | '!' | '\\' => break,
                 _ => state.advance(ch.len_utf8()),

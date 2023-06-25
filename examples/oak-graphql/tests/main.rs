@@ -51,7 +51,7 @@ fn test_lexer() {
         Ok(tokens) => {
             println!("Lexed {} tokens", tokens.len());
 
-            // 检查是否有 EOF token
+            // Check for EOF token
             if let Some(last_token) = tokens.last() {
                 if last_token.kind == GraphQLSyntaxKind::Eof {
                     println!("✓ Found EOF token");
@@ -82,7 +82,7 @@ fn test_parser() {
 
         match test_suite.read_file_content(&file_path) {
             Ok(content) => {
-                // 首先进行词法分析
+                // Perform lexical analysis first
                 let language = GraphQLLanguage {};
                 let lexer = GraphQLLexer::new(&language);
                 let source = SourceText::new(&content);
@@ -94,7 +94,7 @@ fn test_parser() {
                         println!("  Lexing completed successfully");
                         println!("  Tokens found: {}", tokens.len());
 
-                        // TODO: 添加 GraphQL 解析器实现
+                        // TODO: Add GraphQL parser implementation
                         // let mut files = GraphQLParser::new(tokens);
                         // match files.parse() {
                         //     Ok(ast) => {

@@ -1,0 +1,53 @@
+# TSV test file for lexer testing
+# Tab-Separated Values format
+
+# Basic TSV with header
+Name	Age	City	Country	Email
+John Doe	30	New York	USA	john.doe@example.com
+Jane Smith	25	London	UK	jane.smith@example.com
+Bob Johnson	35	Toronto	Canada	bob.johnson@example.com
+Alice Brown	28	Sydney	Australia	alice.brown@example.com
+
+# TSV with quoted fields containing tabs
+Product	Category	Price	Description	Tags
+"iPhone 14"	"Electronics"	999.99	"Latest Apple smartphone, 128GB storage"	"mobile	apple	smartphone"
+"Samsung Galaxy S23"	"Electronics"	899.99	"Android flagship phone, excellent camera"	"mobile	samsung	android"
+"MacBook Pro 16"	"Computers"	2499.99	"Professional laptop, M2 Pro chip"	"laptop	apple	professional"
+
+# TSV with quoted fields containing quotes (RFC 4180 style escaping)
+Title	Author	Year	Description
+"The ""Great"" Gatsby"	"F. Scott Fitzgerald"	1925	"A classic American novel about the Jazz Age"
+"To Kill a ""Mockingbird"""	"Harper Lee"	1960	"Story of racial injustice and childhood innocence"
+"1984"	"George Orwell"	1949	"Dystopian novel about surveillance and totalitarianism"
+
+# TSV with empty fields
+ID	Name	Department	Salary	Manager
+1	Alice Johnson	Engineering	120000	
+2	Bob Smith	Sales	95000	Alice Johnson
+3	Carol White	Marketing	85000	Bob Smith
+4	David Brown		75000	Carol White
+5	Eve Davis	HR	80000	Bob Smith
+
+# TSV with different newline characters (if supported)
+Field1	Field2
+Val1	Val2
+Val3	Val4
+
+# TSV with special characters
+Symbol	Name	Unicode
+$	Dollar	U+0024
+€	Euro	U+20AC
+¥	Yen	U+00A5
+£	Pound	U+00A3
+©	Copyright	U+00A9
+®	Registered	U+00AE
+
+# TSV with very long fields
+LongField	ShortField
+"This is a very long field that contains a lot of text to test if the lexer can handle large tokens efficiently without crashing or truncation."	"Short"
+
+# Edge cases
+""	"Empty Quoted"
+"	"	"Tab in Quotes"
+"
+"	"Newline in Quotes"

@@ -1,12 +1,12 @@
 use oak_core::{Language, LanguageCategory};
-#[cfg(feature = "serde")]
-use serde::{Deserialize, Serialize};
 
+/// Implementation of the D2 language for the Oak framework.
 #[derive(Debug, Clone, Copy, Default)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct D2Language {}
 
 impl D2Language {
+    /// Creates a new `D2Language` instance.
     pub fn new() -> Self {
         Self::default()
     }

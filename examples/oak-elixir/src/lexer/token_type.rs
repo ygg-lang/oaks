@@ -1,95 +1,172 @@
 use oak_core::{Token, TokenType, UniversalTokenRole};
-#[cfg(feature = "serde")]
-use serde::{Deserialize, Serialize};
 
+/// Token types for Elixir.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub enum ElixirTokenType {
+    /// Root node.
     Root,
+    /// Whitespace.
     Whitespace,
+    /// Newline.
     Newline,
+    /// Comment.
     Comment,
+    /// Identifier.
     Identifier,
+    /// Atom.
     Atom,
+    /// Variable.
     Variable,
+    /// Integer number.
     Number,
+    /// Floating point number.
     Float,
+    /// String literal.
     String,
+    /// Character literal.
     Character,
+    /// Sigil.
     Sigil,
 
+    /// `after`
     After,
+    /// `and`
     And,
+    /// `case`
     Case,
+    /// `catch`
     Catch,
+    /// `cond`
     Cond,
+    /// `def`
     Def,
+    /// `defp`
     Defp,
+    /// `defmodule`
     Defmodule,
+    /// `defstruct`
     Defstruct,
+    /// `defprotocol`
     Defprotocol,
+    /// `defimpl`
     Defimpl,
+    /// `defmacro`
     Defmacro,
+    /// `defmacrop`
     Defmacrop,
+    /// `do`
     Do,
+    /// `else`
     Else,
+    /// `elsif`
     Elsif,
+    /// `end`
     End,
+    /// `false`
     False,
+    /// `fn`
     Fn,
+    /// `if`
     If,
+    /// `in`
     In,
+    /// `not`
     Not,
+    /// `or`
     Or,
+    /// `receive`
     Receive,
+    /// `rescue`
     Rescue,
+    /// `true`
     True,
+    /// `try`
     Try,
+    /// `unless`
     Unless,
+    /// `when`
     When,
+    /// `with`
     With,
 
     // Operators
+    /// `+`
     Plus,
+    /// `-`
     Minus,
+    /// `*`
     Mul,
+    /// `/`
     Div,
+    /// `.`
     Dot,
+    /// `,`
     Comma,
+    /// `;`
     Semicolon,
+    /// `:`
     Colon,
+    /// `(`
     LeftParen,
+    /// `)`
     RightParen,
+    /// `{`
     LeftBrace,
+    /// `}`
     RightBrace,
+    /// `[`
     LeftBracket,
+    /// `]`
     RightBracket,
+    /// `->`
     Arrow,
+    /// `|`
     Pipe,
 
     // More operators
+    /// `=`
     Eq,
+    /// `==`
     EqEq,
+    /// `!=`
     Ne,
+    /// `<`
     Lt,
+    /// `<=`
     Le,
+    /// `>`
     Gt,
+    /// `>=`
     Ge,
+    /// `&&`
     AndAnd,
+    /// `||`
     OrOr,
+    /// `!`
     Bang,
+    /// `<>`
     Concat,
+    /// `++`
     PlusPlus,
+    /// `--`
     MinusMinus,
+    /// `|>`
     Pipeline,
+    /// `<<`
     LeftDoubleBracket,
+    /// `>>`
     RightDoubleBracket,
+    /// `@`
     At,
+    /// `%`
     Percent,
 
+    /// Error token.
     Error,
 }
 
+/// Type alias for an Elixir token.
 pub type ElixirToken = Token<ElixirTokenType>;
 
 impl ElixirTokenType {

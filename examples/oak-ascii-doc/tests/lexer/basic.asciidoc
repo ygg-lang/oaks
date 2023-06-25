@@ -1,45 +1,111 @@
-= Document Title
-:author: Test Author
-:email: test↯example.com
-:toc:
+= Comprehensive AsciiDoc Test
+Author Name <author@example.com>
+v1.0, 2023-10-27: Draft
+:toc: left
+:icons: font
+:source-highlighter: highlightjs
+:sectnums:
+:experimental:
 
-== Introduction
+== Formatting Basics
 
-This is a test document for AsciiDoc lexer testing.
+Bold *text*, italic _text_, monospace `text`.
+Curved quotes: "`double`" and '`single`'.
+Replacements: (C) (R) (TM) -- ... -> <- => <=
 
-=== Features
+== Lists
 
-* Bullet point 1
-* Bullet point 2
-* Bullet point 3
+.Unordered
+* Level 1
+** Level 2
+*** Level 3
+* Level 1 again
 
-== Code Example
+.Ordered
+. Step 1
+. Step 2
+.. Step 2a
+.. Step 2b
+. Step 3
 
-[source,rust]
+.Checklist
+- [*] Checked
+- [x] Also checked
+- [ ] Not checked
+
+.Description List
+Term:: Definition
+Term 2::
+Definition 2
+
+== Blocks
+
+.Source Code
+[source,rust,linenums]
 ----
 fn main() {
     println!("Hello, World!");
 }
 ----
 
-== Table Example
+.Admonitions
+NOTE: This is a note.
 
+TIP: Pro tip here.
+
+IMPORTANT: Do not forget this.
+
+WARNING: Watch out!
+
+CAUTION: Handle with care.
+
+.Sidebar
+****
+This is a sidebar block.
+It stands out from the rest.
+****
+
+.Quote
+[quote, Einstein, Relativity]
+____
+Time is relative.
+____
+
+== Tables
+
+.Table with formatting
 |===
-| Column 1 | Column 2 | Column 3
+|Name |Description |Value
 
-| Cell 1
-| Cell 2
-| Cell 3
+|Item 1
+|Description of *Item 1*
+|100
+
+|Item 2
+|Description of _Item 2_
+|200
 |===
 
-== Links and References
+[cols="1,2,1"]
+|===
+|Cell 1.1 |Cell 1.2 |Cell 1.3
+|Cell 2.1 |Cell 2.2 |Cell 2.3
+|===
 
-* https://example.com[External Link]
-* <<introduction,Internal Reference>>
+== UI Macros
 
-// This is a comment
+Press kbd:[Ctrl+C] to copy.
+Select menu:File[Save] to save.
+Click btn:[OK] to confirm.
 
-[#custom-id]
-== Custom ID Section
+== Attributes and Includes
 
-This section has a custom ID.
+:my-var: custom value
+
+The value is {my-var}.
+
+ifdef::env-github[]
+This is GitHub.
+endif::[]
+
+include::footer.adoc[]

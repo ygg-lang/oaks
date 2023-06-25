@@ -9,12 +9,14 @@ use oak_core::{
     source::{Source, TextEdit},
 };
 
-type State<'a, S> = LexerState<'a, S, PythonLanguage>;
+/// Python lexer state.
+pub(crate) type State<'a, S> = LexerState<'a, S, PythonLanguage>;
 
 /// Python lexer implementation.
 #[derive(Clone)]
 pub struct PythonLexer<'config> {
-    _config: &'config PythonLanguage,
+    /// The Python language configuration.
+    config: &'config PythonLanguage,
 }
 
 impl<'config> Lexer<PythonLanguage> for PythonLexer<'config> {
@@ -31,7 +33,7 @@ impl<'config> Lexer<PythonLanguage> for PythonLexer<'config> {
 impl<'config> PythonLexer<'config> {
     /// Creates a new Python lexer.
     pub fn new(config: &'config PythonLanguage) -> Self {
-        Self { _config: config }
+        Self { config }
     }
 
     /// Skips whitespace characters.

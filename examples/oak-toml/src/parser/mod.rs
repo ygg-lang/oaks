@@ -1,16 +1,21 @@
 #![doc = include_str!("readme.md")]
+/// Element types for the TOML parser.
 pub mod element_type;
 
 use crate::{language::TomlLanguage, lexer::token_type::TomlTokenKind as TomlSyntaxKind};
 use oak_core::{Parser, source::Source};
 
-/// TOML 语言解析器
+/// TOML language parser.
+///
+/// Implements the `Parser` trait for the TOML language, providing
+/// basic parsing functionality by leveraging the Oak core's lexer-based parsing.
 pub struct TomlParser<'config> {
-    /// 语言配置
+    /// Language configuration.
     pub(crate) config: &'config TomlLanguage,
 }
 
 impl<'config> TomlParser<'config> {
+    /// Creates a new `TomlParser` with the given configuration.
     pub fn new(config: &'config TomlLanguage) -> Self {
         Self { config }
     }
@@ -22,7 +27,7 @@ impl<'config> Parser<TomlLanguage> for TomlParser<'config> {
         oak_core::parser::parse_with_lexer(&lexer, text, edits, cache, |state| {
             let checkpoint = state.checkpoint();
 
-            // 简单的解析逻辑：消耗所有 token 并放入 Root 节点
+            // Simple parsing logic: consume all tokens and put into Root node
             while state.current().is_some() {
                 state.bump()
             }

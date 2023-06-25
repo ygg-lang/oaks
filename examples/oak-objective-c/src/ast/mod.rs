@@ -1,27 +1,27 @@
 #![doc = include_str!("readme.md")]
-//! Objective-C AST 定义
+//! Objective-C AST definitions.
 
-/// Objective-C 语法树的根节点
+/// Root node of the Objective-C syntax tree.
 #[derive(Debug, Clone, PartialEq)]
 pub struct ObjectiveCRoot {
-    /// 源文件中的所有顶级项目
+    /// All top-level items in the source file.
     pub items: Vec<ObjectiveCItem>,
 }
 
-/// Objective-C 顶级项目
+/// Objective-C top-level item.
 #[derive(Debug, Clone, PartialEq)]
 pub enum ObjectiveCItem {
-    /// 接口定义 (@interface)
+    /// Interface definition (@interface).
     Interface,
-    /// 实现定义 (@implementation)
+    /// Implementation definition (@implementation).
     Implementation,
-    /// 协议定义 (@protocol)
+    /// Protocol definition (@protocol).
     Protocol,
-    /// 函数定义
+    /// Function definition.
     Function,
-    /// 变量声明
+    /// Variable declaration.
     Variable,
-    /// 导入语句 (#import/#include)
+    /// Import statement (#import/#include).
     Import,
 }
 

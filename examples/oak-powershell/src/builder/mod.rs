@@ -3,15 +3,19 @@
 use crate::{ast::*, language::PowerShellLanguage, parser::PowerShellParser};
 use oak_core::{Builder, BuilderCache, GreenNode, OakDiagnostics, Parser, RedNode, SourceText, TextEdit, source::Source};
 
+/// Builder for the PowerShell language.
 pub struct PowerShellBuilder<'config> {
-    config: &'config PowerShellLanguage,
+    /// The language configuration.
+    pub config: &'config PowerShellLanguage,
 }
 
 impl<'config> PowerShellBuilder<'config> {
+    /// Creates a new `PowerShellBuilder`.
     pub fn new(config: &'config PowerShellLanguage) -> Self {
         Self { config }
     }
 
+    /// Builds the root node of the AST.
     pub(crate) fn build_root<'a>(&self, green_tree: &'a GreenNode<'a, PowerShellLanguage>, _source: &SourceText) -> Result<PowerShellRoot, oak_core::OakError> {
         let _red_root = RedNode::new(green_tree, 0);
         // Minimal implementation

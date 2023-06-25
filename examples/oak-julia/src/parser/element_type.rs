@@ -1,97 +1,174 @@
 use oak_core::{ElementType, UniversalElementRole};
-#[cfg(feature = "serde")]
-use serde::{Deserialize, Serialize};
 use std::{fmt, str::FromStr};
 
+/// Element types for the Julia language.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub enum JuliaElementType {
+    /// Root node of the parse tree.
     Root,
-    // 关键字
+    // Keywords
+    /// `if` keyword.
     If,
+    /// `elseif` keyword.
     ElseIf,
+    /// `else` keyword.
     Else,
+    /// `for` keyword.
     For,
+    /// `while` keyword.
     While,
+    /// `break` keyword.
     Break,
+    /// `continue` keyword.
     Continue,
+    /// `function` keyword.
     Function,
+    /// `end` keyword.
     End,
+    /// `begin` keyword.
     Begin,
+    /// `module` keyword.
     Module,
+    /// `using` keyword.
     Using,
+    /// `import` keyword.
     Import,
+    /// `export` keyword.
     Export,
+    /// `const` keyword.
     Const,
+    /// `local` keyword.
     Local,
+    /// `global` keyword.
     Global,
+    /// `true` keyword.
     True,
+    /// `false` keyword.
     False,
+    /// `nothing` keyword.
     Nothing,
+    /// `return` keyword.
     Return,
 
-    // 操作符
+    // Operators
+    /// `+` operator.
     Plus,
+    /// `-` operator.
     Minus,
+    /// `*` operator.
     Star,
+    /// `/` operator.
     Slash,
+    /// `%` operator.
     Percent,
+    /// `^` operator.
     Caret,
+    /// `==` operator.
     Equal,
+    /// `!=` operator.
     NotEqual,
+    /// `<` operator.
     LessThan,
+    /// `>` operator.
     GreaterThan,
+    /// `<=` operator.
     LessEqual,
+    /// `>=` operator.
     GreaterEqual,
+    /// `=` operator.
     Assign,
+    /// `+=` operator.
     PlusAssign,
+    /// `-=` operator.
     MinusAssign,
+    /// `*=` operator.
     StarAssign,
+    /// `/=` operator.
     SlashAssign,
+    /// `%=` operator.
     PercentAssign,
+    /// `^=` operator.
     CaretAssign,
+    /// `&&` operator.
     And,
+    /// `||` operator.
     Or,
+    /// `!` operator.
     Not,
+    /// `:` operator.
     Colon,
+    /// `.` operator.
     Dot,
+    /// `:` operator (range).
     Range,
+    /// `->` operator.
     Arrow,
+    /// `=>` operator.
     FatArrow,
+    /// `&` operator.
     BitAnd,
+    /// `|` operator.
     BitOr,
+    /// `xor` or `⊻` operator.
     BitXor,
+    /// `~` operator.
     BitNot,
+    /// `<<` operator.
     LeftShift,
+    /// `>>` operator.
     RightShift,
 
-    // 分隔符
+    // Delimiters
+    /// `(` delimiter.
     LeftParen,
+    /// `)` delimiter.
     RightParen,
+    /// `[` delimiter.
     LeftBracket,
+    /// `]` delimiter.
     RightBracket,
+    /// `{` delimiter.
     LeftBrace,
+    /// `}` delimiter.
     RightBrace,
+    /// `,` delimiter.
     Comma,
+    /// `;` delimiter.
     Semicolon,
 
-    // 字面量
+    // Literals
+    /// Integer literal.
     IntegerLiteral,
+    /// Floating-point literal.
     FloatLiteral,
+    /// String literal.
     StringLiteral,
+    /// Character literal.
     CharLiteral,
+    /// Boolean literal.
     BooleanLiteral,
+    /// Nothing literal.
     NothingLiteral,
 
-    // 其他
+    // Other
+    /// Identifier.
     Identifier,
+    /// Function call.
     Call,
+    /// List of arguments.
     ArgumentList,
+    /// Comment.
     Comment,
+    /// Whitespace.
     Whitespace,
+    /// Newline.
     Newline,
+    /// End of file.
     Eof,
+    /// Error element.
     Error,
+    /// Invalid element.
     Invalid,
 }
 
@@ -127,6 +204,7 @@ impl FromStr for JuliaElementType {
 }
 
 impl JuliaElementType {
+    /// Returns the string representation of the element type.
     pub fn as_str(&self) -> &'static str {
         match self {
             JuliaElementType::Root => "root",
@@ -210,6 +288,7 @@ impl JuliaElementType {
         }
     }
 
+    /// Returns true if the element is a trivia element (whitespace, comment, or newline).
     pub fn is_trivia(&self) -> bool {
         matches!(self, Self::Whitespace | Self::Newline | Self::Comment)
     }

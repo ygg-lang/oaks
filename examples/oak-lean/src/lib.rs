@@ -34,13 +34,13 @@ pub use crate::{
 };
 
 // Highlighter implementation.
-// #[cfg(feature = "oak-highlight")]
-// pub use crate::lsp::highlighter::LeanHighlighter;
-//
+#[cfg(feature = "oak-highlight")]
+pub use crate::lsp::highlighter::LeanHighlighter;
+
 // LSP implementation.
-// #[cfg(feature = "lsp")]
-// pub use crate::{ lsp::LeanLanguageService};
-//
+#[cfg(feature = "lsp")]
+pub use crate::lsp::LeanLanguageService;
+
 // MCP service implementation.
-// #[cfg(feature = "mcp")]
-// pub use crate::mcp::serve_lean_mcp;
+#[cfg(feature = "mcp")]
+pub use crate::mcp::serve_lean_mcp;

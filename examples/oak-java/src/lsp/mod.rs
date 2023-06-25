@@ -1,4 +1,5 @@
-#![doc = include_str!("readme.md")]
+//! Java Language Server Protocol (LSP) support.
+
 #[cfg(feature = "oak-highlight")]
 pub mod highlighter;
 
@@ -6,12 +7,15 @@ use crate::language::JavaLanguage;
 use oak_core::tree::RedNode;
 #[cfg(feature = "lsp")]
 use {oak_lsp::LanguageService, oak_vfs::Vfs, std::future::Future};
+
+/// Language service for Java.
 #[cfg(feature = "lsp")]
 pub struct JavaLanguageService<V: Vfs> {
     vfs: V,
     workspace: oak_lsp::workspace::WorkspaceManager,
 }
 impl<V: Vfs> JavaLanguageService<V> {
+    /// Creates a new `JavaLanguageService`.
     pub fn new(vfs: V, _language: JavaLanguage) -> Self {
         Self { vfs, workspace: oak_lsp::workspace::WorkspaceManager::default() }
     }

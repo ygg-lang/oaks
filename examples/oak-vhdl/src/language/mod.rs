@@ -1,11 +1,9 @@
 #![doc = include_str!("readme.md")]
 use oak_core::{Language, LanguageCategory};
-#[cfg(feature = "serde")]
-use serde::{Deserialize, Serialize};
 
 /// VHDL language definition.
 #[derive(Debug, Default, Clone, Copy, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct VhdlLanguage {}
 
 impl VhdlLanguage {
@@ -21,5 +19,5 @@ impl Language for VhdlLanguage {
 
     type TokenType = crate::lexer::token_type::VhdlTokenType;
     type ElementType = crate::parser::element_type::VhdlElementType;
-    type TypedRoot = ();
+    type TypedRoot = crate::ast::VhdlRoot;
 }

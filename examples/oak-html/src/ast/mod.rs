@@ -1,10 +1,8 @@
 #![doc = include_str!("readme.md")]
 use core::range::Range;
-#[cfg(feature = "serde")]
-use serde::{Deserialize, Serialize};
 
 /// HTML attribute consisting of a name, an optional value, and its source span.
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 #[derive(Clone, Debug, PartialEq, Eq, Hash)]
 pub struct Attribute {
     /// The name of the attribute (e.g., "class").
@@ -17,7 +15,7 @@ pub struct Attribute {
 }
 
 /// Represents different types of nodes in an HTML document.
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 #[derive(Clone, Debug, PartialEq, Eq, Hash)]
 pub enum HtmlNode {
     /// An HTML element with a tag, attributes, and children.
@@ -29,7 +27,7 @@ pub enum HtmlNode {
 }
 
 /// An HTML element consisting of a tag name, attributes, children nodes, and its source span.
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 #[derive(Clone, Debug, PartialEq, Eq, Hash)]
 pub struct Element {
     /// The name of the HTML tag (e.g., "div").
@@ -44,7 +42,7 @@ pub struct Element {
 }
 
 /// Represents plain text content within an HTML document.
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 #[derive(Clone, Debug, PartialEq, Eq, Hash)]
 pub struct Text {
     /// The text content.
@@ -55,7 +53,7 @@ pub struct Text {
 }
 
 /// The root node of an HTML document, containing a sequence of top-level nodes.
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 #[derive(Clone, Debug, PartialEq, Eq, Hash)]
 pub struct HtmlDocument {
     /// The top-level nodes in the document.

@@ -1,4 +1,5 @@
 #![doc = include_str!("readme.md")]
+/// Token types for GraphQL.
 pub mod token_type;
 
 use crate::{language::GraphQLLanguage, lexer::token_type::GraphQLTokenType};
@@ -9,15 +10,16 @@ use oak_core::{
 };
 use std::sync::LazyLock;
 
-type State<'a, S> = LexerState<'a, S, GraphQLLanguage>;
+pub(crate) type State<'a, S> = LexerState<'a, S, GraphQLLanguage>;
 
 static GRAPHQL_WHITESPACE: LazyLock<WhitespaceConfig> = LazyLock::new(|| WhitespaceConfig { unicode_whitespace: true });
 static GRAPHQL_COMMENT: LazyLock<CommentConfig> = LazyLock::new(|| CommentConfig { line_marker: "#", block_start: "", block_end: "", nested_blocks: false });
 static GRAPHQL_STRING: LazyLock<StringConfig> = LazyLock::new(|| StringConfig { quotes: &['"'], escape: Some('\\') });
 
+/// A lexer for GraphQL source files.
 #[derive(Clone, Debug)]
 pub struct GraphQLLexer<'config> {
-    _config: &'config GraphQLLanguage,
+    config: &'config GraphQLLanguage,
 }
 
 impl<'config> Lexer<GraphQLLanguage> for GraphQLLexer<'config> {
@@ -32,8 +34,9 @@ impl<'config> Lexer<GraphQLLanguage> for GraphQLLexer<'config> {
 }
 
 impl<'config> GraphQLLexer<'config> {
+    /// Creates a new GraphQL lexer.
     pub fn new(config: &'config GraphQLLanguage) -> Self {
-        Self { _config: config }
+        Self { config }
     }
 
     fn run<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> Result<(), OakError> {
@@ -74,31 +77,31 @@ impl<'config> GraphQLLexer<'config> {
         Ok(())
     }
 
-    /// 跳过空白字符
+    /// Skips whitespace characters.
     fn skip_whitespace<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         GRAPHQL_WHITESPACE.scan(state, GraphQLTokenType::Whitespace)
     }
 
-    /// 跳过注释
+    /// Skips comments.
     fn skip_comment<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         GRAPHQL_COMMENT.scan(state, GraphQLTokenType::Comment, GraphQLTokenType::Comment)
     }
 
-    /// 词法分析字符串字面量
+    /// Lexes string literals.
     fn lex_string_literal<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
-        // 普通字符串 "..."
+        // Normal string "..."
         if GRAPHQL_STRING.scan(state, GraphQLTokenType::StringLiteral) {
             return true;
         }
 
-        // 多行字符串 """..."""
+        // Multiline string """..."""
         if state.starts_with("\"\"\"") {
             let start = state.get_position();
-            state.advance(3); // 跳过开始的 """
+            state.advance(3); // Skip opening """
 
             while state.not_at_end() {
                 if state.starts_with("\"\"\"") {
-                    state.advance(3); // 跳过结束的 """
+                    state.advance(3); // Skip closing """
                     break;
                 }
                 if let Some(ch) = state.peek() {
@@ -114,25 +117,25 @@ impl<'config> GraphQLLexer<'config> {
         false
     }
 
-    /// 词法分析数字字面量
+    /// Lexes number literals.
     fn lex_number_literal<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start = state.get_position();
         let mut has_digits = false;
         let mut is_float = false;
 
-        // 处理负号
+        // Handle negative sign
         if state.starts_with("-") {
             state.advance(1);
         }
 
-        // 处理整数部分
+        // Handle integer part
         if state.starts_with("0") {
-            // 单独的 0
+            // Single zero
             state.advance(1);
             has_digits = true;
         }
         else {
-            // 非零开头的数字
+            // Digits not starting with zero
             while let Some(ch) = state.peek() {
                 if ch.is_ascii_digit() {
                     state.advance(ch.len_utf8());
@@ -144,11 +147,11 @@ impl<'config> GraphQLLexer<'config> {
             }
         }
 
-        // 处理小数部分
+        // Handle fractional part
         if state.starts_with(".") && has_digits {
             if let Some(next_ch) = state.peek_next_n(1) {
                 if next_ch.is_ascii_digit() {
-                    state.advance(1); // 跳过 .
+                    state.advance(1); // Skip .
                     is_float = true;
 
                     while let Some(ch) = state.peek() {
@@ -163,17 +166,17 @@ impl<'config> GraphQLLexer<'config> {
             }
         }
 
-        // 处理指数部分
+        // Handle exponent part
         if (state.starts_with("e") || state.starts_with("E")) && has_digits {
             state.advance(1);
             is_float = true;
 
-            // 处理指数符号
+            // Handle exponent sign
             if state.starts_with("+") || state.starts_with("-") {
                 state.advance(1);
             }
 
-            // 处理指数数字
+            // Handle exponent digits
             let mut exp_digits = false;
             while let Some(ch) = state.peek() {
                 if ch.is_ascii_digit() {
@@ -198,11 +201,11 @@ impl<'config> GraphQLLexer<'config> {
         true
     }
 
-    /// 词法分析标识符或关键字
+    /// Lexes identifiers or keywords.
     fn lex_identifier_or_keyword<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start = state.get_position();
 
-        // 标识符必须以字母或下划线开始
+        // Identifier must start with a letter or underscore
         if let Some(first_ch) = state.peek() {
             if !first_ch.is_alphabetic() && first_ch != '_' {
                 return false;
@@ -210,7 +213,7 @@ impl<'config> GraphQLLexer<'config> {
 
             state.advance(first_ch.len_utf8());
 
-            // 后续字符可以是字母、数字或下划线
+            // Subsequent characters can be alphanumeric or underscore
             while let Some(ch) = state.peek() {
                 if ch.is_alphanumeric() || ch == '_' {
                     state.advance(ch.len_utf8());
@@ -231,10 +234,10 @@ impl<'config> GraphQLLexer<'config> {
         }
     }
 
-    /// 判断是关键字还是标识符
+    /// Determines if the text is a keyword or identifier.
     fn keyword_or_identifier(&self, text: &str) -> GraphQLTokenType {
         match text {
-            // 关键字
+            // Keywords
             "query" => GraphQLTokenType::QueryKeyword,
             "mutation" => GraphQLTokenType::MutationKeyword,
             "subscription" => GraphQLTokenType::SubscriptionKeyword,
@@ -252,20 +255,20 @@ impl<'config> GraphQLLexer<'config> {
             "implements" => GraphQLTokenType::ImplementsKeyword,
             "repeats" => GraphQLTokenType::RepeatsKeyword,
 
-            // 特殊字面量
+            // Special literals
             "true" | "false" => GraphQLTokenType::BooleanLiteral,
             "null" => GraphQLTokenType::NullLiteral,
 
-            // 默认为名称
+            // Defaults to Name
             _ => GraphQLTokenType::Name,
         }
     }
 
-    /// 词法分析操作符
+    /// Lexes operators.
     fn lex_operators<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start = state.get_position();
 
-        // 三字符操作符
+        // Triple-character operators
         if state.starts_with("...") {
             state.advance(3);
             state.add_token(GraphQLTokenType::Spread, start, state.get_position());
@@ -275,7 +278,7 @@ impl<'config> GraphQLLexer<'config> {
         false
     }
 
-    /// 词法分析单字符 token
+    /// Lexes single-character tokens.
     fn lex_single_char_tokens<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         if let Some(ch) = state.peek() {
             let start = state.get_position();

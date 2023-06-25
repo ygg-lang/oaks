@@ -1,7 +1,10 @@
+//! MCP service implementation for the JASM language.
+
 #![doc = include_str!("readme.md")]
 use crate::lsp::JasmLanguageService;
 use oak_vfs::MemoryVfs;
 
+/// Serves the Jasm MCP service.
 pub async fn serve_jasm_mcp(vfs: MemoryVfs) {
     let service = JasmLanguageService::new(vfs);
     let server = oak_mcp::McpServer::new(service);

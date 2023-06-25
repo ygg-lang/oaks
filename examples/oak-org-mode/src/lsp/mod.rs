@@ -35,6 +35,7 @@ pub struct OrgModeLanguageService<V: Vfs> {
     hover_provider: OrgModeHoverProvider,
 }
 impl<V: Vfs> OrgModeLanguageService<V> {
+    /// Creates a new `OrgModeLanguageService`.
     pub fn new(vfs: V) -> Self {
         Self { vfs, workspace: oak_lsp::workspace::WorkspaceManager::default(), hover_provider: OrgModeHoverProvider }
     }

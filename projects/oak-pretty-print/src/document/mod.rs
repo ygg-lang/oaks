@@ -6,8 +6,9 @@ use core::fmt;
 pub mod printer;
 
 /// Document abstraction for describing layout logic
-#[derive(Clone, serde::Serialize)]
-#[serde(tag = "kind", content = "value", rename_all = "camelCase")]
+#[derive(Clone)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize))]
+#[cfg_attr(feature = "serde", serde(tag = "kind", content = "value", rename_all = "camelCase"))]
 pub enum Document<'a> {
     /// Empty document
     Nil,

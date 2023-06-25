@@ -1,4 +1,5 @@
 #![doc = include_str!("readme.md")]
+/// Token type definitions.
 pub mod token_type;
 
 use crate::{language::PowerShellLanguage, lexer::token_type::PowerShellTokenType};
@@ -8,16 +9,19 @@ use oak_core::{
     source::{Source, TextEdit},
 };
 
-type State<'a, S> = LexerState<'a, S, PowerShellLanguage>;
+pub(crate) type State<'a, S> = LexerState<'a, S, PowerShellLanguage>;
 
+/// Lexer for the PowerShell language.
 #[derive(Clone)]
 pub struct PowerShellLexer<'config> {
-    _config: &'config PowerShellLanguage,
+    /// The language configuration.
+    pub config: &'config PowerShellLanguage,
 }
 
 impl<'config> PowerShellLexer<'config> {
+    /// Creates a new `PowerShellLexer`.
     pub fn new(config: &'config PowerShellLanguage) -> Self {
-        Self { _config: config }
+        Self { config }
     }
 
     fn run<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> Result<(), OakError> {
@@ -54,14 +58,14 @@ impl<'config> PowerShellLexer<'config> {
                 continue;
             }
 
-            // 如果没有匹配任何规则，跳过当前字符
+            // If no rules match, skip the current character
             if let Some(ch) = state.peek() {
                 let start_pos = state.get_position();
                 state.advance(ch.len_utf8());
                 state.add_token(PowerShellTokenType::Error, start_pos, state.get_position());
             }
             else {
-                // 如果已到达文件末尾，退出循环
+                // Exit loop if at the end of the file
                 break;
             }
         }
@@ -120,7 +124,7 @@ impl<'config> PowerShellLexer<'config> {
 
         if let Some('#') = state.peek() {
             state.advance(1);
-            // 单行注释
+            // Single-line comment
             while let Some(ch) = state.peek() {
                 if ch == '\n' || ch == '\r' {
                     break;
@@ -134,7 +138,7 @@ impl<'config> PowerShellLexer<'config> {
             state.advance(1);
             if let Some('#') = state.peek() {
                 state.advance(1);
-                // 多行注释 <# ... #>
+                // Multi-line comment <# ... #>
                 let mut depth = 1;
                 while let Some(ch) = state.peek() {
                     if depth == 0 {
@@ -162,7 +166,7 @@ impl<'config> PowerShellLexer<'config> {
                 true
             }
             else {
-                // 回退，这不是注释
+                // Backtrack, not a comment
                 state.set_position(start_pos);
                 false
             }
@@ -177,7 +181,7 @@ impl<'config> PowerShellLexer<'config> {
 
         if let Some(quote_char) = state.peek() {
             if quote_char == '"' || quote_char == '\'' {
-                state.advance(1); // 跳过开始引号
+                state.advance(1); // Skip opening quote
 
                 let mut escaped = false;
                 while let Some(ch) = state.peek() {
@@ -186,16 +190,16 @@ impl<'config> PowerShellLexer<'config> {
                         state.advance(ch.len_utf8());
                     }
                     else if ch == '`' {
-                        // PowerShell 使用反引号作为转义字符
+                        // PowerShell uses backtick as escape character
                         escaped = true;
                         state.advance(1);
                     }
                     else if ch == quote_char {
-                        state.advance(1); // 跳过结束引号
+                        state.advance(1); // Skip closing quote
                         break;
                     }
                     else if ch == '\n' || ch == '\r' {
-                        // 字符串可以跨行
+                        // Strings can span multiple lines
                         state.advance(ch.len_utf8());
                     }
                     else {
@@ -220,7 +224,7 @@ impl<'config> PowerShellLexer<'config> {
             if ch.is_ascii_digit() {
                 let start_pos = state.get_position();
 
-                // 读取整数部分
+                // Read integer part
                 while let Some(ch) = state.peek() {
                     if ch.is_ascii_digit() {
                         state.advance(1);
@@ -230,10 +234,10 @@ impl<'config> PowerShellLexer<'config> {
                     }
                 }
 
-                // 检查小数点
+                // Check for decimal point
                 if let Some('.') = state.peek() {
                     state.advance(1);
-                    // 读取小数部分
+                    // Read fractional part
                     while let Some(ch) = state.peek() {
                         if ch.is_ascii_digit() {
                             state.advance(1);
@@ -244,7 +248,7 @@ impl<'config> PowerShellLexer<'config> {
                     }
                 }
 
-                // 检查科学记数法
+                // Check for scientific notation
                 if let Some(ch) = state.peek() {
                     if ch == 'e' || ch == 'E' {
                         state.advance(1);
@@ -282,12 +286,12 @@ impl<'config> PowerShellLexer<'config> {
         if let Some('$') = state.peek() {
             state.advance(1);
 
-            // 变量名必须以字母或下划线开头
+            // Variable name must start with letter or underscore
             if let Some(ch) = state.peek() {
                 if ch.is_alphabetic() || ch == '_' {
                     state.advance(ch.len_utf8());
 
-                    // 后续字符可以是字母、数字或下划线
+                    // Subsequent characters can be alphanumeric or underscore
                     while let Some(ch) = state.peek() {
                         if ch.is_alphanumeric() || ch == '_' {
                             state.advance(ch.len_utf8());
@@ -301,7 +305,7 @@ impl<'config> PowerShellLexer<'config> {
                     true
                 }
                 else {
-                    // 只有 $ 符号，作为操作符处理
+                    // Only $ sign, treat as operator
                     state.add_token(PowerShellTokenType::Dollar, start_pos, state.get_position());
                     true
                 }
@@ -322,7 +326,7 @@ impl<'config> PowerShellLexer<'config> {
                 let start_pos = state.get_position();
                 let mut text = String::new();
 
-                // 读取标识符
+                // Read identifier
                 while let Some(ch) = state.peek() {
                     if ch.is_alphanumeric() || ch == '_' || ch == '-' {
                         text.push(ch);
@@ -333,7 +337,7 @@ impl<'config> PowerShellLexer<'config> {
                     }
                 }
 
-                // 检查是否是关键字
+                // Check for keywords
                 let kind = match text.as_str() {
                     "begin" => PowerShellTokenType::Begin,
                     "break" => PowerShellTokenType::Break,

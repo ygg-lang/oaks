@@ -15,6 +15,7 @@ mod language;
 mod lexer;
 #[cfg(any(feature = "lsp", feature = "oak-highlight", feature = "oak-pretty-print"))]
 pub mod lsp;
+/// Delphi parser implementation.
 pub mod parser;
 
 // Re-export main types

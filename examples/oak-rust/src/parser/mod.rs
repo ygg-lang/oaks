@@ -126,27 +126,24 @@ impl<'config> Pratt<RustLanguage> for RustParser<'config> {
 impl<'config> Parser<RustLanguage> for RustParser<'config> {
     fn parse<'a, S: Source + ?Sized>(&self, text: &'a S, edits: &[TextEdit], cache: &'a mut impl ParseCache<RustLanguage>) -> ParseOutput<'a, RustLanguage> {
         let lexer = RustLexer::new(self.config);
-        parse_with_lexer(&lexer, text, edits, cache, |state| self.parse_source_file(state))
+        parse_with_lexer(&lexer, text, edits, cache, |state| {
+            let cp = state.checkpoint();
+            while state.not_at_end() {
+                if state.current().map(|t| t.kind.is_ignored()).unwrap_or(false) {
+                    state.advance();
+                    continue;
+                }
+                self.parse_statement(state)?
+            }
+            let root = state.finish_at(cp, crate::parser::element_type::RustElementType::SourceFile);
+            Ok(root)
+        })
     }
 }
 
 impl<'config> RustParser<'config> {
-    /// Parses a complete Rust source file.
-    pub(crate) fn parse_source_file<'a, S: oak_core::source::Source + ?Sized>(&self, state: &mut ParserState<'a, RustLanguage, S>) -> Result<&'a GreenNode<'a, RustLanguage>, OakError> {
-        let cp = state.checkpoint();
-        while state.not_at_end() {
-            if state.current().map(|t| t.kind.is_ignored()).unwrap_or(false) {
-                state.advance();
-                continue;
-            }
-            self.parse_statement(state)?
-        }
-        let root = state.finish_at(cp, crate::parser::element_type::RustElementType::SourceFile);
-        Ok(root)
-    }
-
     /// Parses a single Rust statement or item.
-    fn parse_statement<'a, S: oak_core::source::Source + ?Sized>(&self, state: &mut ParserState<'a, RustLanguage, S>) -> Result<(), OakError> {
+    fn parse_statement<'a, S: Source + ?Sized>(&self, state: &mut ParserState<'a, RustLanguage, S>) -> Result<(), OakError> {
         use crate::{lexer::RustTokenType, parser::RustElementType::*};
 
         let kind = match state.peek_kind() {

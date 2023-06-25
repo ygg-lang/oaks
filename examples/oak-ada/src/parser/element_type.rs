@@ -1,80 +1,78 @@
 use crate::lexer::AdaTokenType;
 use oak_core::{ElementType, GreenNode, UniversalElementRole};
-#[cfg(feature = "serde")]
-use serde::{Deserialize, Serialize};
 use std::sync::Arc;
 
-/// Ada 语法树元素的类型别名
+/// Type alias for Ada syntax tree elements
 pub type AdaElement<'a> = Arc<GreenNode<'a, AdaElementType>>;
 
-/// Ada 语法树中所有可能的元素类型。
+/// Ada parser element types.
 #[derive(Copy, Clone, Debug, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub enum AdaElementType {
-    /// Root node
+    /// Root node of the parse tree.
     Root,
-    /// Compilation unit
+    /// Compilation unit node.
     CompilationUnit,
-    /// Context clause (with, use)
+    /// Context clause node (e.g., `with`, `use`).
     ContextClause,
-    /// Pragma
+    /// Pragma node.
     Pragma,
-    /// Subprogram declaration
+    /// Subprogram declaration node.
     SubprogramDeclaration,
-    /// Package declaration
+    /// Package declaration node.
     PackageDeclaration,
-    /// Type declaration
+    /// Type declaration node.
     TypeDeclaration,
-    /// Object declaration
+    /// Object declaration node.
     ObjectDeclaration,
-    /// Statement
+    /// Statement node.
     Statement,
-    /// Expression
+    /// Expression node.
     Expression,
-    /// Error node
+    /// Error node in the parse tree.
     Error,
 
-    /// Identifier
+    /// Identifier node.
     Identifier,
-    /// Literal
+    /// Literal expression node.
     LiteralExpression,
-    /// Identifier expression
+    /// Identifier expression node.
     IdentifierExpression,
-    /// Parenthesized expression
+    /// Parenthesized expression node.
     ParenthesizedExpression,
-    /// Source file
+    /// Source file node.
     SourceFile,
-    /// Parameter list
+    /// Parameter list node.
     ParameterList,
-    /// Block expression
+    /// Block expression node.
     BlockExpression,
-    /// Use item
+    /// Use item node.
     UseItem,
-    /// Module item
+    /// Module item node.
     ModuleItem,
-    /// Struct item
+    /// Struct item node.
     StructItem,
-    /// Enum item
+    /// Enum item node.
     EnumItem,
-    /// Let statement
+    /// Let statement node.
     LetStatement,
-    /// If expression
+    /// If expression node.
     IfExpression,
-    /// While expression
+    /// While expression node.
     WhileExpression,
-    /// Loop expression
+    /// Loop expression node.
     LoopExpression,
-    /// For expression
+    /// For expression node.
     ForExpression,
-    /// Call expression
+    /// Call expression node.
     CallExpression,
-    /// Index expression
+    /// Index expression node.
     IndexExpression,
-    /// Field expression
+    /// Field expression node.
     FieldExpression,
-    /// Binary expression
+    /// Binary expression node.
     BinaryExpression,
-    /// Unary expression
+    /// Unary expression node.
     UnaryExpression,
 }
 

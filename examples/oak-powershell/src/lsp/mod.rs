@@ -7,7 +7,6 @@ use core::range::Range;
 use oak_core::tree::RedNode;
 #[cfg(feature = "lsp")]
 use {
-    futures::Future,
     oak_hover::{Hover as ProviderHover, HoverProvider},
     oak_lsp::{service::LanguageService, types::Hover as LspHover},
     oak_vfs::Vfs,
@@ -31,11 +30,17 @@ impl HoverProvider<PowerShellLanguage> for PowerShellHoverProvider {
 /// Language service implementation for PowerShell.
 #[cfg(feature = "lsp")]
 pub struct PowerShellLanguageService<V: Vfs> {
-    vfs: V,
-    workspace: oak_lsp::workspace::WorkspaceManager,
-    hover_provider: PowerShellHoverProvider,
+    /// The virtual file system.
+    pub vfs: V,
+    /// The workspace manager.
+    pub workspace: oak_lsp::workspace::WorkspaceManager,
+    /// The hover provider.
+    pub hover_provider: PowerShellHoverProvider,
 }
+
+#[cfg(feature = "lsp")]
 impl<V: Vfs> PowerShellLanguageService<V> {
+    /// Creates a new `PowerShellLanguageService`.
     pub fn new(vfs: V) -> Self {
         Self { vfs, workspace: oak_lsp::workspace::WorkspaceManager::default(), hover_provider: PowerShellHoverProvider }
     }

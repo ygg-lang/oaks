@@ -22,11 +22,11 @@ use crate::{
 /// // Output: "fn main() {\n    let x = 42;\n}"
 /// ```
 pub struct RustFormatter {
-    /// 缩进级别
+    /// Indentation level
     indent_level: usize,
-    /// 缩进字符串（通常是 4 个空格）
+    /// Indentation string (usually 4 spaces)
     indent_str: String,
-    /// 最大行长度
+    /// Maximum line length
     max_line_length: usize,
 }
 
@@ -297,7 +297,7 @@ impl RustFormatter {
         match expr {
             Expr::Literal { value, .. } => value.clone(),
             Expr::Bool { value, .. } => value.to_string(),
-            _ => "".to_string(), // 对于非字面量表达式返回空字符串
+            _ => "".to_string(), // Returns empty string for non-literal expressions
         }
     }
 
@@ -334,7 +334,7 @@ impl RustFormatter {
         source.replace("{", " {\n").replace("}", "\n}").replace(";", ";\n").lines().map(|line| line.trim()).filter(|line| !line.is_empty()).collect::<Vec<_>>().join("\n")
     }
 
-    // 占位符方法 - 这些需要根据具体需求实现
+    // Placeholder methods - these need to be implemented based on specific requirements
     fn format_struct(&self, _struct_def: &Struct) -> String {
         "/* struct formatting not implemented */".to_string()
     }
@@ -377,7 +377,7 @@ impl RustFormatter {
     }
 
     fn format_extern_block(&self, _extern_block: &ExternBlock) -> String {
-        // 暂时返回占位实现，避免编译错误
+        // Temporarily return placeholder implementation to avoid compilation errors
         "extern {}".to_string()
     }
 

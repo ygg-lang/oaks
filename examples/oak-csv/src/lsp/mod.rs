@@ -5,11 +5,15 @@ use oak_core::tree::RedNode;
 #[cfg(feature = "lsp")]
 use {futures::Future, oak_lsp::service::LanguageService, oak_lsp::types::Hover as LspHover, oak_vfs::Vfs};
 #[cfg(feature = "lsp")]
+/// Language service implementation for CSV.
 pub struct CsvLanguageService<V: Vfs> {
+    /// The virtual file system.
     vfs: V,
+    /// The workspace manager.
     workspace: oak_lsp::workspace::WorkspaceManager,
 }
 impl<V: Vfs> CsvLanguageService<V> {
+    /// Creates a new `CsvLanguageService`.
     pub fn new(vfs: V) -> Self {
         Self { vfs, workspace: oak_lsp::workspace::WorkspaceManager::new() }
     }

@@ -12,11 +12,14 @@ use oak_core::{
 
 pub(crate) type State<'a, S> = ParserState<'a, OrgModeLanguage, S>;
 
+/// Org-mode parser.
 pub struct OrgModeParser<'a> {
+    /// Language definition.
     pub language: &'a OrgModeLanguage,
 }
 
 impl<'a> OrgModeParser<'a> {
+    /// Creates a new `OrgModeParser`.
     pub fn new(language: &'a OrgModeLanguage) -> Self {
         Self { language }
     }
@@ -35,7 +38,7 @@ impl<'a> OrgModeParser<'a> {
         match kind {
             Some(OrgModeTokenType::Star) => {
                 if self.is_at_start_of_line(state) {
-                    // 只有 * 后面跟着空格或者是行尾，才认为是标题
+                    // Only * followed by whitespace or end of line is considered a heading
                     let mut is_heading = false;
                     let next_kind = state.peek_kind_at(1);
                     if next_kind == Some(OrgModeTokenType::Whitespace) || next_kind == Some(OrgModeTokenType::Newline) || next_kind.is_none() {
@@ -69,6 +72,22 @@ impl<'a> OrgModeParser<'a> {
                     self.parse_paragraph(state);
                 }
             }
+            Some(OrgModeTokenType::Pipe) => {
+                if self.is_at_start_of_line(state) {
+                    self.parse_table(state);
+                }
+                else {
+                    self.parse_paragraph(state);
+                }
+            }
+            Some(OrgModeTokenType::Colon) => {
+                if self.is_at_start_of_line(state) {
+                    self.parse_drawer(state);
+                }
+                else {
+                    self.parse_paragraph(state);
+                }
+            }
             Some(OrgModeTokenType::Newline) | Some(OrgModeTokenType::Whitespace) => {
                 state.bump();
             }
@@ -78,74 +97,48 @@ impl<'a> OrgModeParser<'a> {
         }
     }
 
-    fn parse_list<'b, S: Source + ?Sized>(&self, state: &mut State<'b, S>) {
-        let checkpoint = state.checkpoint();
-        while state.at(OrgModeTokenType::Minus) || state.at(OrgModeTokenType::Plus) {
-            self.parse_list_item(state);
-            // Handle optional newline/whitespace between items
-            while state.at(OrgModeTokenType::Newline) || state.at(OrgModeTokenType::Whitespace) {
-                state.bump();
-            }
-        }
-        state.finish_at(checkpoint, OrgModeElementType::List);
-    }
-
-    fn parse_inline_content<'b, S: Source + ?Sized>(&self, state: &mut State<'b, S>) {
-        while state.not_at_end() && !state.at(OrgModeTokenType::Newline) {
-            let next_kind = state.peek_kind();
-            match next_kind {
-                Some(OrgModeTokenType::Star) => {
-                    self.parse_bold(state);
-                }
-                Some(OrgModeTokenType::Slash) => {
-                    self.parse_italic(state);
-                }
-                Some(OrgModeTokenType::Underscore) => {
-                    self.parse_underline(state);
-                }
-                Some(OrgModeTokenType::LeftBracket) => {
-                    self.parse_link(state);
-                }
-                Some(OrgModeTokenType::Tilde) => {
-                    self.parse_inline_code(state);
-                }
-                Some(OrgModeTokenType::Equal) => {
-                    self.parse_verbatim(state);
-                }
-                Some(OrgModeTokenType::Plus) => {
-                    self.parse_strikethrough(state);
-                }
-                _ => {
-                    state.bump();
-                }
-            }
-        }
-    }
-
-    fn parse_list_item<'b, S: Source + ?Sized>(&self, state: &mut State<'b, S>) {
-        let checkpoint = state.checkpoint();
-        state.bump(); // - or +
-        self.parse_inline_content(state);
-        state.finish_at(checkpoint, OrgModeElementType::ListItem);
-    }
-
     fn parse_heading<'b, S: Source + ?Sized>(&self, state: &mut State<'b, S>) {
         let checkpoint = state.checkpoint();
+
+        // Parse stars
         while state.at(OrgModeTokenType::Star) {
             state.bump();
         }
 
+        // Parse whitespace
+        if state.at(OrgModeTokenType::Whitespace) {
+            state.bump();
+        }
+
+        // Parse title (inline content)
         self.parse_inline_content(state);
+
+        // Consume newline
+        if state.at(OrgModeTokenType::Newline) {
+            state.bump();
+        }
+
         state.finish_at(checkpoint, OrgModeElementType::Heading);
     }
 
     fn parse_block<'b, S: Source + ?Sized>(&self, state: &mut State<'b, S>) {
         let checkpoint = state.checkpoint();
         state.bump(); // #
-        while state.not_at_end() && !state.at(OrgModeTokenType::Newline) {
+        self.parse_inline_content(state);
+        if state.at(OrgModeTokenType::Newline) {
             state.bump();
         }
         state.finish_at(checkpoint, OrgModeElementType::Block);
+    }
+
+    fn parse_list<'b, S: Source + ?Sized>(&self, state: &mut State<'b, S>) {
+        let checkpoint = state.checkpoint();
+        state.bump(); // - or +
+        self.parse_inline_content(state);
+        if state.at(OrgModeTokenType::Newline) {
+            state.bump();
+        }
+        state.finish_at(checkpoint, OrgModeElementType::List);
     }
 
     fn parse_paragraph<'b, S: Source + ?Sized>(&self, state: &mut State<'b, S>) {
@@ -157,13 +150,76 @@ impl<'a> OrgModeParser<'a> {
         state.finish_at(checkpoint, OrgModeElementType::Paragraph);
     }
 
-    fn parse_bold<'b, S: Source + ?Sized>(&self, state: &mut State<'b, S>) {
+    fn parse_table<'b, S: Source + ?Sized>(&self, state: &mut State<'b, S>) {
         let checkpoint = state.checkpoint();
-        state.bump(); // *
-        while state.not_at_end() && !state.at(OrgModeTokenType::Star) && !state.at(OrgModeTokenType::Newline) {
+        while state.at(OrgModeTokenType::Pipe) {
+            self.parse_table_row(state);
+            // Check if next line is also a table row
+            while state.at(OrgModeTokenType::Newline) || state.at(OrgModeTokenType::Whitespace) {
+                state.bump();
+            }
+        }
+        state.finish_at(checkpoint, OrgModeElementType::Table);
+    }
+
+    fn parse_table_row<'b, S: Source + ?Sized>(&self, state: &mut State<'b, S>) {
+        let checkpoint = state.checkpoint();
+        while state.at(OrgModeTokenType::Pipe) {
+            self.parse_table_cell(state);
+        }
+        if state.at(OrgModeTokenType::Newline) {
             state.bump();
         }
-        if state.at(OrgModeTokenType::Star) {
+        state.finish_at(checkpoint, OrgModeElementType::TableRow);
+    }
+
+    fn parse_table_cell<'b, S: Source + ?Sized>(&self, state: &mut State<'b, S>) {
+        let checkpoint = state.checkpoint();
+        state.bump(); // |
+        while state.not_at_end() && !state.at(OrgModeTokenType::Pipe) && !state.at(OrgModeTokenType::Newline) {
+            self.parse_inline_content(state);
+        }
+        state.finish_at(checkpoint, OrgModeElementType::TableCell);
+    }
+
+    fn parse_drawer<'b, S: Source + ?Sized>(&self, state: &mut State<'b, S>) {
+        let checkpoint = state.checkpoint();
+        state.bump(); // :
+        while state.not_at_end() && !state.at(OrgModeTokenType::Newline) {
+            state.bump();
+        }
+        if state.at(OrgModeTokenType::Newline) {
+            state.bump();
+        }
+        state.finish_at(checkpoint, OrgModeElementType::DrawerBlock);
+    }
+
+    fn parse_inline_content<'b, S: Source + ?Sized>(&self, state: &mut State<'b, S>) {
+        while state.not_at_end() && !state.at(OrgModeTokenType::Newline) {
+            let next_kind = state.peek_kind();
+            match next_kind {
+                Some(OrgModeTokenType::Star) => self.parse_bold(state),
+                Some(OrgModeTokenType::Slash) => self.parse_italic(state),
+                Some(OrgModeTokenType::Underscore) => self.parse_underline(state),
+                Some(OrgModeTokenType::LeftBracket) => self.parse_link(state),
+                Some(OrgModeTokenType::Tilde) => self.parse_inline_code(state),
+                Some(OrgModeTokenType::Equal) => self.parse_verbatim(state),
+                Some(OrgModeTokenType::Plus) => self.parse_strikethrough(state),
+                _ => {
+                    state.bump();
+                }
+            }
+        }
+    }
+
+    fn parse_bold<'b, S: Source + ?Sized>(&self, state: &mut State<'b, S>) {
+        let checkpoint = state.checkpoint();
+        let marker = OrgModeTokenType::Star;
+        state.bump(); // *
+        while state.not_at_end() && !state.at(marker) && !state.at(OrgModeTokenType::Newline) {
+            self.parse_inline_content(state);
+        }
+        if state.at(marker) {
             state.bump();
         }
         state.finish_at(checkpoint, OrgModeElementType::Bold);
@@ -171,11 +227,12 @@ impl<'a> OrgModeParser<'a> {
 
     fn parse_italic<'b, S: Source + ?Sized>(&self, state: &mut State<'b, S>) {
         let checkpoint = state.checkpoint();
+        let marker = OrgModeTokenType::Slash;
         state.bump(); // /
-        while state.not_at_end() && !state.at(OrgModeTokenType::Slash) && !state.at(OrgModeTokenType::Newline) {
-            state.bump();
+        while state.not_at_end() && !state.at(marker) && !state.at(OrgModeTokenType::Newline) {
+            self.parse_inline_content(state);
         }
-        if state.at(OrgModeTokenType::Slash) {
+        if state.at(marker) {
             state.bump();
         }
         state.finish_at(checkpoint, OrgModeElementType::Italic);
@@ -183,11 +240,12 @@ impl<'a> OrgModeParser<'a> {
 
     fn parse_underline<'b, S: Source + ?Sized>(&self, state: &mut State<'b, S>) {
         let checkpoint = state.checkpoint();
+        let marker = OrgModeTokenType::Underscore;
         state.bump(); // _
-        while state.not_at_end() && !state.at(OrgModeTokenType::Underscore) && !state.at(OrgModeTokenType::Newline) {
-            state.bump();
+        while state.not_at_end() && !state.at(marker) && !state.at(OrgModeTokenType::Newline) {
+            self.parse_inline_content(state);
         }
-        if state.at(OrgModeTokenType::Underscore) {
+        if state.at(marker) {
             state.bump();
         }
         state.finish_at(checkpoint, OrgModeElementType::Underline);

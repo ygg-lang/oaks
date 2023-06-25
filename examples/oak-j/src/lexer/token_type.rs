@@ -1,71 +1,103 @@
 use oak_core::{TokenType, UniversalTokenRole};
-#[cfg(feature = "serde")]
-use serde::{Deserialize, Serialize};
 
-/// J 词法单元类型
+/// J token type
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub enum JTokenType {
+    /// Whitespace
     Whitespace,
+    /// Newline
     Newline,
+    /// Comment
     Comment,
 
+    /// String literal
     StringLiteral,
+    /// Number literal
     NumberLiteral,
+    /// Identifier
     Identifier,
 
-    // J 原始操作符 (Verbs, Adverbs, Conjunctions)
-    // 基础符号
-    Equal, // =
-    Dot,   // .
-    Colon, // :
+    // J primitives (Verbs, Adverbs, Conjunctions)
+    // Basic symbols
+    /// Equal (=)
+    Equal,
+    /// Dot (.)
+    Dot,
+    /// Colon (:)
+    Colon,
 
-    // 赋值
-    IsGlobal, // =:
-    IsLocal,  // =.
+    // Assignment
+    /// Global assignment (=:)
+    IsGlobal,
+    /// Local assignment (=.)
+    IsLocal,
 
-    // 常用动词
-    Plus,      // +
-    Minus,     // -
-    Star,      // *
-    Percent,   // %
-    Dollar,    // $
-    Comma,     // ,
-    Hash,      // #
-    Slash,     // /
-    Backslash, // \
-    Pipe,      // |
-    Ampersand, // &
-    Caret,     // ^
-    Tilde,     // ~
-    Less,      // <
-    Greater,   // >
+    // Common verbs
+    /// Plus (+)
+    Plus,
+    /// Minus (-)
+    Minus,
+    /// Star (*)
+    Star,
+    /// Percent (%)
+    Percent,
+    /// Dollar ($)
+    Dollar,
+    /// Comma (,)
+    Comma,
+    /// Hash (#)
+    Hash,
+    /// Slash (/)
+    Slash,
+    /// Backslash (\)
+    Backslash,
+    /// Pipe (|)
+    Pipe,
+    /// Ampersand (&)
+    Ampersand,
+    /// Caret (^)
+    Caret,
+    /// Tilde (~)
+    Tilde,
+    /// Less (<)
+    Less,
+    /// Greater (>)
+    Greater,
 
-    // 括号
-    LeftParen,    // (
-    RightParen,   // )
-    LeftBracket,  // [
-    RightBracket, // ]
-    LeftBrace,    // {
-    RightBrace,   // }
+    // Parentheses
+    /// Left parenthesis (()
+    LeftParen,
+    /// Right parenthesis ())
+    RightParen,
+    /// Left bracket ([)
+    LeftBracket,
+    /// Right bracket (])
+    RightBracket,
+    /// Left brace ({)
+    LeftBrace,
+    /// Right brace (})
+    RightBrace,
 
-    // 特殊
+    // Special
+    /// End of file
     Eof,
+    /// Error unit
     Error,
 }
 
 impl JTokenType {
-    /// 是否为关键字 (J 中更多是原始操作符)
+    /// Is keyword (J mostly uses primitives)
     pub fn is_keyword(&self) -> bool {
         false
     }
 
-    /// 是否为标点符号
+    /// Is punctuation
     pub fn is_punctuation(&self) -> bool {
         matches!(self, Self::LeftParen | Self::RightParen | Self::LeftBracket | Self::RightBracket | Self::LeftBrace | Self::RightBrace)
     }
 
-    /// 是否为忽略的单元 (空白或注释)
+    /// Is ignored token (whitespace or comment)
     pub fn is_ignored(&self) -> bool {
         matches!(self, Self::Whitespace | Self::Newline | Self::Comment)
     }

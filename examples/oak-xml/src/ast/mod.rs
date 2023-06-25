@@ -1,60 +1,82 @@
-#![doc = include_str!("readme.md")]
+//! XML Abstract Syntax Tree (AST) nodes.
+
 use crate::{XmlElementType, XmlLanguage, XmlTokenType};
 use core::range::Range;
 use oak_core::{source::Source, tree::RedNode};
-#[cfg(feature = "serde")]
-use serde::{Deserialize, Serialize};
 use std::borrow::Cow;
 
-/// XML AST 根节点
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+/// Root node of the XML AST.
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 #[derive(Clone, Debug, PartialEq)]
 pub struct XmlRoot {
+    /// The root value.
     pub value: XmlValue,
 }
 
+/// A node in the XML red tree.
 pub type XmlNode<'a> = RedNode<'a, XmlLanguage>;
 
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+/// Represents a value in XML.
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 #[derive(Clone, Debug, PartialEq)]
 pub enum XmlValue {
+    /// An XML element.
     Element(XmlElement),
+    /// Text content.
     Text(String),
+    /// A comment.
     Comment(String),
+    /// CDATA section.
     CData(String),
+    /// Processing instruction.
     ProcessingInstruction(XmlPI),
+    /// A fragment of multiple values.
     Fragment(Vec<XmlValue>),
 }
 
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+/// Represents an XML element.
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 #[derive(Clone, Debug, PartialEq)]
 pub struct XmlElement {
+    /// The tag name.
     pub name: String,
+    /// Attributes of the element.
     pub attributes: Vec<XmlAttribute>,
+    /// Children of the element.
     pub children: Vec<XmlValue>,
+    /// Source range of the element.
     #[cfg_attr(feature = "serde", serde(with = "oak_core::serde_range"))]
     pub span: Range<usize>,
 }
 
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+/// Represents an XML attribute.
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 #[derive(Clone, Debug, PartialEq)]
 pub struct XmlAttribute {
+    /// The attribute name.
     pub name: String,
+    /// The attribute value.
     pub value: String,
+    /// Source range of the attribute.
     #[cfg_attr(feature = "serde", serde(with = "oak_core::serde_range"))]
     pub span: Range<usize>,
 }
 
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+/// Represents an XML processing instruction.
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 #[derive(Clone, Debug, PartialEq)]
 pub struct XmlPI {
+    /// The PI target.
     pub target: String,
+    /// The PI data.
     pub data: Option<String>,
+    /// Source range of the PI.
     #[cfg_attr(feature = "serde", serde(with = "oak_core::serde_range"))]
     pub span: Range<usize>,
 }
 
 impl XmlValue {
+    /// Returns the element if the value is an element.
     pub fn as_element(&self) -> Option<&XmlElement> {
         match self {
             XmlValue::Element(e) => Some(e),
@@ -62,6 +84,7 @@ impl XmlValue {
         }
     }
 
+    /// Returns the text if the value is text.
     pub fn as_str(&self) -> Option<&str> {
         match self {
             XmlValue::Text(s) => Some(s),
@@ -69,6 +92,7 @@ impl XmlValue {
         }
     }
 
+    /// Converts the value to an XML string representation.
     pub fn to_string(&self) -> String {
         match self {
             XmlValue::Text(t) => t.clone(),
@@ -110,12 +134,19 @@ impl XmlValue {
     }
 }
 
+/// Extension trait for XML red nodes.
 pub trait XmlNodeExt<'a> {
+    /// Returns the tag name of the element.
     fn tag_name<'s, S: Source + ?Sized>(&self, source: &'s S) -> Option<Cow<'s, str>>;
+    /// Returns the attributes of the element.
     fn attributes<S: Source + ?Sized>(&self, source: &S) -> Vec<(String, String)>;
+    /// Returns an iterator over the element's children that are elements.
     fn xml_children(&self) -> impl Iterator<Item = RedNode<'a, XmlLanguage>>;
+    /// Returns a recursive iterator over all element descendants.
     fn xml_children_recursive(&self) -> impl Iterator<Item = RedNode<'a, XmlLanguage>>;
+    /// Returns the text content of the node.
     fn text<S: Source + ?Sized>(&self, source: &S) -> String;
+    /// Reads an attribute value by name.
     fn read_attr<S: Source + ?Sized>(&self, source: &S, name: &str) -> Option<String>;
 }
 
@@ -128,7 +159,7 @@ impl<'a> XmlNodeExt<'a> for RedNode<'a, XmlLanguage> {
             if let Some(node) = child.as_node() {
                 if node.green.kind == XmlElementType::StartTag || node.green.kind == XmlElementType::SelfClosingTag {
                     for gc in node.children() {
-                        if let Some(leaf) = gc.as_leaf() {
+                        if let Some(leaf) = gc.as_token() {
                             if leaf.kind == XmlTokenType::Identifier {
                                 return Some(source.get_text_in(leaf.span));
                             }
@@ -154,7 +185,7 @@ impl<'a> XmlNodeExt<'a> for RedNode<'a, XmlLanguage> {
                                 let mut name = String::new();
                                 let mut value = String::new();
                                 for ggc in n.children() {
-                                    if let Some(leaf) = ggc.as_leaf() {
+                                    if let Some(leaf) = ggc.as_token() {
                                         if leaf.kind == XmlTokenType::Identifier {
                                             name = source.get_text_in(leaf.span).into_owned();
                                         }
@@ -199,7 +230,7 @@ impl<'a> XmlNodeExt<'a> for RedNode<'a, XmlLanguage> {
     fn text<S: Source + ?Sized>(&self, source: &S) -> String {
         let mut text = String::new();
         for child in self.children() {
-            if let Some(leaf) = child.as_leaf() {
+            if let Some(leaf) = child.as_token() {
                 if leaf.kind == XmlTokenType::Text {
                     text.push_str(&source.get_text_in(leaf.span));
                 }

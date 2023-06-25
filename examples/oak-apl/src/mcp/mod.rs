@@ -2,7 +2,7 @@
 use crate::lsp::AplLanguageService;
 use oak_vfs::MemoryVfs;
 
-/// 为 APL 语言启动 MCP 服务
+/// Serves the APL MCP (Model Context Protocol) server.
 pub async fn serve_apl_mcp(vfs: MemoryVfs) {
     let service = AplLanguageService::new(vfs);
     let server = oak_mcp::McpServer::new(service);

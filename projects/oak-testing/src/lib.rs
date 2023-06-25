@@ -1,13 +1,16 @@
 #![feature(new_range_api)]
-#![allow(missing_docs)]
+#![warn(missing_docs)]
 //! Testing utilities for the Oak ecosystem.
 //!
-//! This module provides comprehensive testing infrastructure for lexers, parsers,
+//! This crate provides comprehensive testing infrastructure for lexers, parsers,
 //! and builders, including file-based testing, expected output comparison,
 //! timeout handling, and test result serialization.
 
+/// Testing utilities for tree building.
 pub mod building;
+/// Testing utilities for lexing.
 pub mod lexing;
+/// Testing utilities for parsing.
 pub mod parsing;
 
 use oak_core::{errors::OakError, source::SourceText};
@@ -22,6 +25,7 @@ pub fn source_from_path(path: &Path) -> Result<SourceText, OakError> {
 }
 
 /// Reads JSON data from a file path.
+#[cfg(feature = "serde")]
 pub fn json_from_path(path: &Path) -> Result<serde_json::Value, OakError> {
     let content = std::fs::read_to_string(path).map_err(|e| OakError::io_error(e, 0))?;
     serde_json::from_str(&content).map_err(|e| OakError::custom_error(e.to_string()))

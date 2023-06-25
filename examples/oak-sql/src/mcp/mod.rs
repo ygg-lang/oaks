@@ -2,6 +2,7 @@
 use crate::lsp::SqlLanguageService;
 use oak_vfs::MemoryVfs;
 
+/// Starts an MCP (Model Context Protocol) server for SQL.
 pub async fn serve_sql_mcp(vfs: MemoryVfs) {
     let service = SqlLanguageService::new(vfs);
     let server = oak_mcp::McpServer::new(service);

@@ -13,7 +13,7 @@ categories = ["parsing"]
 keywords = ["parser", "stylus", "css", "preprocessor"]
 
 [dependencies]
-oak-core = { workspace = true, features = ["serde", "testing"] }
+oak-core = { workspace = true }
 oak-highlight = { workspace = true, optional = true }
 oak-pretty-print = { workspace = true, optional = true }
 oak-lsp = { workspace = true, optional = true }
@@ -30,11 +30,9 @@ oak-testing = { workspace = true }
 
 [features]
 default = ["serde"]
-serde = ["dep:serde", "oak-core/serde"]
-oak-highlight = ["dep:oak-highlight"]
-oak-pretty-print = ["dep:oak-pretty-print"]
 lsp = ["dep:oak-lsp", "dep:oak-hover", "dep:oak-vfs", "oak-highlight", "oak-pretty-print", "dep:futures"]
 mcp = ["lsp", "oak-mcp/io-std"]
+serde = ["dep:serde", "oak-core/serde"]
 
 [package.metadata.docs.rs]
 all-features = true

@@ -4,29 +4,29 @@ pub mod token_type;
 use crate::{language::HlslLanguage, lexer::token_type::HlslTokenType};
 use oak_core::{Lexer, LexerCache, LexerState, OakError, lexer::LexOutput, source::Source};
 
-type State<'a, S> = LexerState<'a, S, HlslLanguage>;
+pub(crate) type State<'a, S> = LexerState<'a, S, HlslLanguage>;
 
 pub struct HlslLexer<'config> {
-    _config: &'config HlslLanguage,
+    config: &'config HlslLanguage,
 }
 
 impl<'config> Clone for HlslLexer<'config> {
     fn clone(&self) -> Self {
-        Self { _config: self._config }
+        Self { config: self.config }
     }
 }
 
 impl<'config> HlslLexer<'config> {
     pub fn new(config: &'config HlslLanguage) -> Self {
-        Self { _config: config }
+        Self { config }
     }
 
-    /// 主要的词法分析循环
+    /// Main lexical analysis loop
     fn run<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> Result<(), OakError> {
         while state.not_at_end() {
             let safe_point = state.get_position();
 
-            // 尝试各种词法规则
+            // Try various lexical rules
             if self.skip_whitespace(state) {
                 continue;
             }
@@ -59,7 +59,7 @@ impl<'config> HlslLexer<'config> {
                 continue;
             }
 
-            // 如果所有规则都不匹配，跳过当前字符并标记为错误
+            // If no rules match, skip current character and mark as error
             let start_pos = state.get_position();
             if let Some(ch) = state.peek() {
                 state.advance(ch.len_utf8());
@@ -72,7 +72,7 @@ impl<'config> HlslLexer<'config> {
         Ok(())
     }
 
-    /// 跳过空白字符
+    /// Skip whitespace characters
     fn skip_whitespace<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start_pos = state.get_position();
 
@@ -94,7 +94,7 @@ impl<'config> HlslLexer<'config> {
         }
     }
 
-    /// 处理换行
+    /// Handle newline
     fn lex_newline<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start_pos = state.get_position();
 
@@ -116,11 +116,11 @@ impl<'config> HlslLexer<'config> {
         }
     }
 
-    /// 处理注释
+    /// Handle comments
     fn lex_comment<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start_pos = state.get_position();
 
-        // 单行注释 //
+        // Line comment //
         if let Some('/') = state.peek() {
             if let Some('/') = state.peek_next_n(1) {
                 state.advance(2);
@@ -135,7 +135,7 @@ impl<'config> HlslLexer<'config> {
             }
         }
 
-        // 多行注释 /* ... */
+        // Block comment /* ... */
         if let Some('/') = state.peek() {
             if let Some('*') = state.peek_next_n(1) {
                 state.advance(2);
@@ -158,19 +158,19 @@ impl<'config> HlslLexer<'config> {
         false
     }
 
-    /// 处理预处理器指令
+    /// Handle preprocessor directives
     fn lex_preprocessor<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start_pos = state.get_position();
 
         if let Some('#') = state.peek() {
             state.advance(1);
 
-            // 跳过空白
+            // Skip whitespace
             while let Some(ch) = state.peek() {
                 if ch == ' ' || ch == '\t' { state.advance(1) } else { break }
             }
 
-            // 读取指令名称
+            // Read directive name
             let directive_start = state.get_position();
             while let Some(ch) = state.peek() {
                 if ch.is_ascii_alphabetic() || ch == '_' { state.advance(1) } else { break }
@@ -179,7 +179,7 @@ impl<'config> HlslLexer<'config> {
             if state.get_position() > directive_start {
                 let directive = state.get_text_in((directive_start..state.get_position()).into()).to_string();
 
-                // 读取指令的其余部分直到行尾
+                // Read the rest of the directive until end of line
                 while let Some(ch) = state.peek() {
                     if ch == '\n' || ch == '\r' {
                         break;
@@ -207,7 +207,7 @@ impl<'config> HlslLexer<'config> {
                 return true;
             }
             else {
-                // 只是一个 # 符号
+                // Just a # symbol
                 state.add_token(HlslTokenType::Hash, start_pos, state.get_position());
                 return true;
             }
@@ -216,7 +216,7 @@ impl<'config> HlslLexer<'config> {
         false
     }
 
-    /// 处理字符串字面量
+    /// Handle string literals
     fn lex_string<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start_pos = state.get_position();
 
@@ -236,7 +236,7 @@ impl<'config> HlslLexer<'config> {
                     break;
                 }
                 else if ch == '\n' || ch == '\r' {
-                    break; // 字符串不能跨行
+                    break; // Strings cannot span multiple lines
                 }
                 state.advance(ch.len_utf8());
             }
@@ -248,13 +248,13 @@ impl<'config> HlslLexer<'config> {
         false
     }
 
-    /// 处理数字字面量
+    /// Handle number literals
     fn lex_number<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start_pos = state.get_position();
 
         if let Some(ch) = state.peek() {
             if ch.is_ascii_digit() || (ch == '.' && state.peek_next_n(1).map_or(false, |c| c.is_ascii_digit())) {
-                // 处理十六进制数
+                // Handle hexadecimal numbers
                 if ch == '0' && state.peek_next_n(1) == Some('x') {
                     state.advance(2);
                     while let Some(ch) = state.peek() {
@@ -267,7 +267,7 @@ impl<'config> HlslLexer<'config> {
                     }
                 }
                 else {
-                    // 整数部分
+                    // Integer part
                     while let Some(ch) = state.peek() {
                         if ch.is_ascii_digit() {
                             state.advance(1);
@@ -277,7 +277,7 @@ impl<'config> HlslLexer<'config> {
                         }
                     }
 
-                    // 小数点和小数部分
+                    // Decimal point and fractional part
                     if let Some('.') = state.peek() {
                         if state.peek_next_n(1).map_or(false, |c| c.is_ascii_digit()) {
                             state.advance(1);
@@ -292,34 +292,34 @@ impl<'config> HlslLexer<'config> {
                         }
                     }
 
-                    // 指数部分
+                    // Exponent part
                     if let Some(e_char) = state.peek() {
                         if e_char == 'e' || e_char == 'E' {
                             let saved_pos = state.get_position();
                             state.advance(1);
 
-                            // 可选的符号
+                            // Optional sign
                             if let Some(sign) = state.peek() {
                                 if sign == '+' || sign == '-' {
                                     state.advance(1)
                                 }
                             }
 
-                            // 指数数字
+                            // Exponent digits
                             let exp_start = state.get_position();
                             while let Some(ch) = state.peek() {
                                 if ch.is_ascii_digit() { state.advance(1) } else { break }
                             }
 
                             if state.get_position() == exp_start {
-                                // 没有有效的指数，回退
+                                // No valid exponent, backtrack
                                 state.set_position(saved_pos);
                             }
                         }
                     }
                 }
 
-                // 处理后缀 (f, h, l, u 等)
+                // Handle suffixes (f, h, l, u, etc.)
                 if let Some(suffix) = state.peek() {
                     if suffix == 'f' || suffix == 'F' || suffix == 'h' || suffix == 'H' || suffix == 'l' || suffix == 'L' || suffix == 'u' || suffix == 'U' {
                         state.advance(1);
@@ -334,7 +334,7 @@ impl<'config> HlslLexer<'config> {
         false
     }
 
-    /// 处理标识符和关键字
+    /// Handle identifiers and keywords
     fn lex_identifier_or_keyword<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start_pos = state.get_position();
 
@@ -351,7 +351,7 @@ impl<'config> HlslLexer<'config> {
 
                 let text = state.get_text_in((start_pos..state.get_position()).into());
                 let token_kind = match text.as_ref() {
-                    // 基本数据类型
+                    // Basic data types
                     "bool" => HlslTokenType::Bool,
                     "int" => HlslTokenType::Int,
                     "uint" => HlslTokenType::Uint,
@@ -364,7 +364,7 @@ impl<'config> HlslLexer<'config> {
                     "min12int" => HlslTokenType::Min12int,
                     "min16uint" => HlslTokenType::Min16uint,
 
-                    // 向量类型
+                    // Vector types
                     "bool2" => HlslTokenType::Bool2,
                     "bool3" => HlslTokenType::Bool3,
                     "bool4" => HlslTokenType::Bool4,
@@ -384,7 +384,7 @@ impl<'config> HlslLexer<'config> {
                     "double3" => HlslTokenType::Double3,
                     "double4" => HlslTokenType::Double4,
 
-                    // 矩阵类型
+                    // Matrix types
                     "float2x2" => HlslTokenType::Float2x2,
                     "float2x3" => HlslTokenType::Float2x3,
                     "float2x4" => HlslTokenType::Float2x4,
@@ -404,7 +404,7 @@ impl<'config> HlslLexer<'config> {
                     "double4x3" => HlslTokenType::Double4x3,
                     "double4x4" => HlslTokenType::Double4x4,
 
-                    // 纹理类型
+                    // Texture types
                     "Texture1D" => HlslTokenType::Texture1D,
                     "Texture1DArray" => HlslTokenType::Texture1DArray,
                     "Texture2D" => HlslTokenType::Texture2D,
@@ -415,12 +415,12 @@ impl<'config> HlslLexer<'config> {
                     "TextureCube" => HlslTokenType::TextureCube,
                     "TextureCubeArray" => HlslTokenType::TextureCubeArray,
 
-                    // 采样器类型
+                    // Sampler types
                     "sampler" => HlslTokenType::Sampler,
                     "SamplerState" => HlslTokenType::SamplerState,
                     "SamplerComparisonState" => HlslTokenType::SamplerComparisonState,
 
-                    // 缓冲区类型
+                    // Buffer types
                     "Buffer" => HlslTokenType::Buffer,
                     "StructuredBuffer" => HlslTokenType::StructuredBuffer,
                     "ByteAddressBuffer" => HlslTokenType::ByteAddressBuffer,
@@ -430,7 +430,7 @@ impl<'config> HlslLexer<'config> {
                     "AppendStructuredBuffer" => HlslTokenType::AppendStructuredBuffer,
                     "ConsumeStructuredBuffer" => HlslTokenType::ConsumeStructuredBuffer,
 
-                    // 控制流关键字
+                    // Control flow keywords
                     "if" => HlslTokenType::If,
                     "else" => HlslTokenType::Else,
                     "for" => HlslTokenType::For,
@@ -444,7 +444,7 @@ impl<'config> HlslLexer<'config> {
                     "return" => HlslTokenType::Return,
                     "discard" => HlslTokenType::Discard,
 
-                    // 函数和变量修饰符
+                    // Function and variable modifiers
                     "static" => HlslTokenType::Static,
                     "const" => HlslTokenType::Const,
                     "volatile" => HlslTokenType::Volatile,
@@ -458,18 +458,18 @@ impl<'config> HlslLexer<'config> {
                     "inline" => HlslTokenType::Inline,
                     "target" => HlslTokenType::Target,
 
-                    // 语义修饰符
+                    // Semantic modifiers
                     "register" => HlslTokenType::Register,
                     "packoffset" => HlslTokenType::Packoffset,
 
-                    // 着色器类型
+                    // Shader types
                     "struct" => HlslTokenType::Struct,
                     "cbuffer" => HlslTokenType::Cbuffer,
                     "tbuffer" => HlslTokenType::Tbuffer,
                     "interface" => HlslTokenType::Interface,
                     "class" => HlslTokenType::Class,
 
-                    // 布尔字面量
+                    // Boolean literals
                     "true" | "false" => HlslTokenType::BooleanLiteral,
 
                     _ => HlslTokenType::Identifier,
@@ -483,7 +483,7 @@ impl<'config> HlslLexer<'config> {
         false
     }
 
-    /// 处理运算符和分隔符
+    /// Handle operators and delimiters
     fn lex_operator_or_delimiter<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start_pos = state.get_position();
 

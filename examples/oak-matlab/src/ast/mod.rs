@@ -1,123 +1,141 @@
 #![doc = include_str!("readme.md")]
 use core::range::Range;
-#[cfg(feature = "serde")]
-use serde::{Deserialize, Serialize};
 
-/// MATLAB 抽象语法树的根节点
+/// MATLAB Abstract Syntax Tree Root Node
 #[derive(Clone, Debug, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct MatlabRoot {
-    /// 脚本或函数中的项目列表
+    /// List of items in script or function
     pub items: Vec<Item>,
 }
 
-/// MATLAB 中的顶级项目
+/// Top-level items in MATLAB
 #[derive(Clone, Debug, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub enum Item {
-    /// 函数定义
+    /// Function definition
     Function(Function),
-    /// 类定义
+    /// Class definition
     Class(Class),
-    /// 语句
+    /// Statement
     Statement(Statement),
 }
 
-/// 函数定义
+/// Function definition
 #[derive(Clone, Debug, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct Function {
-    /// 函数名
+    /// Function name
     pub name: String,
-    /// 输入参数
+    /// Input parameters
     pub inputs: Vec<String>,
-    /// 输出参数
+    /// Output parameters
     pub outputs: Vec<String>,
-    /// 函数体
+    /// Function body
     pub body: Vec<Statement>,
-    /// 源代码范围
+    /// Source code span
     #[cfg_attr(feature = "serde", serde(with = "oak_core::serde_range"))]
     pub span: Range<usize>,
 }
 
-/// 类定义
+/// Class definition
 #[derive(Clone, Debug, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct Class {
-    /// 类名
+    /// Class name
     pub name: String,
-    /// 基类
+    /// Base classes
     pub superclasses: Vec<String>,
-    /// 属性块
+    /// Property block
     pub properties: Vec<Property>,
-    /// 方法块
+    /// Method block
     pub methods: Vec<Function>,
-    /// 源代码范围
+    /// Source code span
     #[cfg_attr(feature = "serde", serde(with = "oak_core::serde_range"))]
     pub span: Range<usize>,
 }
 
-/// 属性
+/// Property
 #[derive(Clone, Debug, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct Property {
-    /// 属性名
+    /// Property name
     pub name: String,
-    /// 默认值
+    /// Default value
     pub default_value: Option<String>,
-    /// 源代码范围
+    /// Source code span
     #[cfg_attr(feature = "serde", serde(with = "oak_core::serde_range"))]
     pub span: Range<usize>,
 }
 
-/// 语句
+/// Statement
 #[derive(Clone, Debug, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub enum Statement {
-    /// 赋值语句
+    /// Assignment statement
     Assignment {
+        /// Target of the assignment.
         target: String,
+        /// Value assigned.
         value: String,
+        /// Source range.
         #[cfg_attr(feature = "serde", serde(with = "oak_core::serde_range"))]
         span: Range<usize>,
     },
-    /// 表达式语句
+    /// Expression statement
     Expression {
+        /// Expression value.
         value: String,
+        /// Source range.
         #[cfg_attr(feature = "serde", serde(with = "oak_core::serde_range"))]
         span: Range<usize>,
     },
-    /// If 语句
+    /// If statement
     If {
+        /// Condition.
         condition: String,
+        /// Body of the if branch.
         body: Vec<Statement>,
+        /// Else-if branches.
         else_ifs: Vec<(String, Vec<Statement>)>,
+        /// Else branch body.
         else_body: Option<Vec<Statement>>,
+        /// Source range.
         #[cfg_attr(feature = "serde", serde(with = "oak_core::serde_range"))]
         span: Range<usize>,
     },
-    /// For 循环
+    /// For loop
     For {
+        /// Loop variable.
         variable: String,
+        /// Range of the loop.
         range: String,
+        /// Body of the loop.
         body: Vec<Statement>,
+        /// Source range.
         #[cfg_attr(feature = "serde", serde(with = "oak_core::serde_range"))]
         span: Range<usize>,
     },
-    /// While 循环
+    /// While loop
     While {
+        /// Loop condition.
         condition: String,
+        /// Body of the loop.
         body: Vec<Statement>,
+        /// Source range.
         #[cfg_attr(feature = "serde", serde(with = "oak_core::serde_range"))]
         span: Range<usize>,
     },
 }
 
+/// Matlab script.
 pub struct MatlabScript {
+    /// Items in the script.
     pub items: Vec<Item>,
 }
 
 impl MatlabScript {
+    /// Creates a new `MatlabScript` with the given items.
     pub fn new(items: Vec<Item>) -> Self {
         Self { items }
     }

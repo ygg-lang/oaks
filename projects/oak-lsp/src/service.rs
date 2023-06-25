@@ -1,4 +1,4 @@
-use crate::types::{CodeAction, CompletionItem, Diagnostic, DocumentHighlight, FoldingRange, Hover, InitializeParams, InlayHint, LocationRange, SelectionRange, SemanticTokens, SignatureHelp, StructureItem, TextEdit, WorkspaceEdit, WorkspaceSymbol};
+use crate::types::{CodeAction, CompletionItem, Diagnostic, DocumentHighlight, FoldingRange, Hover, InitializeParams, InlayHint, LocationRange, SemanticTokens, SignatureHelp, StructureItem, TextEdit, WorkspaceEdit, WorkspaceSymbol};
 use core::range::Range;
 use oak_core::{
     language::{ElementRole, ElementType, Language},
@@ -228,23 +228,27 @@ pub trait LanguageService: Send + Sync {
         async { None }
     }
 
-    /// Provides inlay hints for a file.
-    fn inlay_hint<'a>(&'a self, _uri: &'a str, _range: Range<usize>) -> impl Future<Output = Vec<InlayHint>> + Send + 'a {
+    /// Provides completion items for a file at the specified position.
+    ///
+    /// Implementations should use the syntax tree and symbol index to suggest
+    /// relevant keywords, identifiers, and snippets based on the cursor context.
+    fn completion<'a>(&'a self, _uri: &'a str, _offset: usize) -> impl Future<Output = Vec<CompletionItem>> + Send + 'a {
         async { vec![] }
     }
 
-    /// Provides selection ranges for a file.
-    fn selection_range<'a>(&'a self, _uri: &'a str, _positions: Vec<usize>) -> impl Future<Output = Vec<SelectionRange>> + Send + 'a {
-        async { vec![] }
-    }
-
-    /// Provides signature help for a file.
+    /// Provides signature help for a symbol at the specified range.
+    ///
+    /// Typically used for function or method calls to show parameter information
+    /// and documentation as the user types.
     fn signature_help<'a>(&'a self, _uri: &'a str, _range: Range<usize>) -> impl Future<Output = Option<SignatureHelp>> + Send + 'a {
         async { None }
     }
 
-    /// Provides completion items for a file at the specified position.
-    fn completion<'a>(&'a self, _uri: &'a str, _offset: usize) -> impl Future<Output = Vec<CompletionItem>> + Send + 'a {
+    /// Provides inlay hints for a file.
+    ///
+    /// Inlay hints are small pieces of information shown inline with the code,
+    /// such as parameter names or inferred types.
+    fn inlay_hint<'a>(&'a self, _uri: &'a str, _range: Range<usize>) -> impl Future<Output = Vec<InlayHint>> + Send + 'a {
         async { vec![] }
     }
 

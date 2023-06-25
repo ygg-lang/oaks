@@ -1,3 +1,8 @@
+//! Exporters for converting highlighted segments to different formats.
+//!
+//! This module provides various implementations of the [`Exporter`] trait
+//! to transform highlighted code into formats like HTML, ANSI, and JSON.
+
 use crate::highlighter::{HighlightResult, HighlightSegment};
 use std::{
     format,
@@ -25,6 +30,7 @@ fn json_escape(s: &str) -> String {
 
 /// Supported export formats for highlighted code.
 #[derive(Debug, Clone, Copy, PartialEq)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub enum ExportFormat {
     /// HTML with optional CSS classes or inline styles.
     Html,

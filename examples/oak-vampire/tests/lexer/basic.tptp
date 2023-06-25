@@ -1,50 +1,128 @@
-% Vampire/TPTP test file
-% This is a comment
+% Vampire/TPTP Comprehensive Lexer Test
+% Supports FOF, CNF, TFF, THF, and TPI syntaxes
 
-% Axioms
-fof(axiom1, axiom, 
+% --- Comments ---
+% This is a single line comment
+/* This is a 
+   block comment */
+
+% --- Includes ---
+include('Axioms/general.ax').
+
+% --- FOF (First-Order Form) ---
+fof(axiom_1, axiom, 
     ![X]: (human(X) => mortal(X))
 ).
 
-fof(axiom2, axiom,
-    human(socrates)
-).
-
-% Conjecture
-fof(conjecture, conjecture,
+fof(conjecture_1, conjecture,
     mortal(socrates)
 ).
 
-% More complex formulas
-fof(axiom3, axiom,
-    ![X, Y]: (parent(X, Y) => ancestor(X, Y))
+% Complex FOF with logical operators
+fof(complex_logic, axiom,
+    ![X, Y]: (
+        (p(X) & q(Y)) | 
+        (r(X) <=> ~s(Y)) |
+        (t(X) <~> u(Y))
+    )
 ).
 
-fof(axiom4, axiom,
-    ![X, Y, Z]: ((ancestor(X, Y) & ancestor(Y, Z)) => ancestor(X, Z))
+% --- CNF (Clause Normal Form) ---
+cnf(clause_1, axiom,
+    ( p(X) | ~q(X) | r(f(X)) )
 ).
 
-% Predicate definitions
-fof(definition1, axiom,
-    ![X]: (person(X) <=> (human(X) | robot(X)))
+cnf(clause_2, negated_conjecture,
+    ( ~p(a) )
 ).
 
-% Equality
-fof(equality_axiom, axiom,
-    ![X]: (X = X)
+% --- TFF (Typed First-order Form) ---
+tff(type_decl_1, type,
+    human: $tType
 ).
 
-% Existential quantification
-fof(existence, axiom,
-    ?[X]: (wise(X) & human(X))
+tff(type_decl_2, type,
+    socrates: human
 ).
 
-% Negation
-fof(negation_example, axiom,
-    ![X]: (~dead(X) => alive(X))
+tff(func_decl, type,
+    father: human > human
 ).
 
-% Disjunction and conjunction
-fof(logical_ops, axiom,
-    ![X]: ((happy(X) | sad(X)) & ~(happy(X) & sad(X)))
+tff(pred_decl, type,
+    loves: (human * human) > $o
+).
+
+tff(typed_formula, axiom,
+    ![X: human]: (loves(X, X))
+).
+
+% Arithmetic in TFF
+tff(arithmetic_spec, type,
+    n: $int
+).
+
+tff(greater_than, axiom,
+    $greater(n, 0)
+).
+
+% --- THF (Typed Higher-order Form) ---
+thf(function_type, type,
+    apply: (human > human) > human > human
+).
+
+thf(higher_order_formula, axiom,
+    ^ [F: human > human, X: human]: (apply @ F @ X) = (F @ X)
+).
+
+% --- TPI (TPTP Process Instruction) ---
+tpi(group_1, start_group,
+    ( file('Axioms/group.ax') )
+).
+
+% --- Various Roles ---
+fof(h1, hypothesis, p).
+fof(l1, lemma, p => q).
+fof(t1, theorem, q).
+fof(a1, assumption, r).
+fof(d1, definition, s <=> r).
+fof(u1, unknown, t).
+
+% --- Numbers and Strings ---
+fof(data, axiom,
+    value(123) & cost(12.34) & name('Object Name') &
+    scientific(1.23E-4)
+).
+
+% --- System Types ---
+tff(sys_types, type,
+    (
+    i: $int,
+    r: $real,
+    q: $rat
+    )
+).
+
+% --- Distinct Object ---
+fof(distinct, axiom,
+    "Apple" != "Orange"
+).
+
+% --- Logical Connectives ---
+% & : AND
+% | : OR
+% ~ : NOT
+% => : IMPLIES
+% <= : REVERSE IMPLIES
+% <=> : IFF
+% <~> : XOR
+% ~| : NOR
+% ~& : NAND
+% ! : FORALL
+% ? : EXISTS
+% @ : APPLICATION (THF)
+% ^ : LAMBDA (THF)
+
+fof(all_connectives, axiom,
+    (p & q) | (~r => s) <= (t <=> u) <~> (v ~| w) ~& z
 ).

@@ -3,13 +3,14 @@ use crate::parser::DHallParser;
 use crate::{ast::*, language::DHallLanguage};
 use oak_core::{Builder, BuilderCache, GreenNode, OakDiagnostics, OakError, Parser, RedNode, SourceText, TextEdit, builder::BuildOutput, source::Source};
 
-/// DHall AST 构建器
+/// DHall AST builder.
 #[derive(Clone)]
 pub struct DHallBuilder<'config> {
     config: &'config DHallLanguage,
 }
 
 impl<'config> DHallBuilder<'config> {
+    /// Creates a new `DHallBuilder`.
     pub fn new(config: &'config DHallLanguage) -> Self {
         Self { config }
     }
@@ -39,9 +40,48 @@ impl<'config> Builder<DHallLanguage> for DHallBuilder<'config> {
 }
 
 impl<'config> DHallBuilder<'config> {
-    pub(crate) fn build_root(&self, green_tree: GreenNode<DHallLanguage>, _source: &SourceText) -> Result<DHallRoot, OakError> {
-        let _red_root = RedNode::new(&green_tree, 0);
-        // TODO: 实现真正的构建逻辑
-        Ok(DHallRoot { expressions: Vec::new() })
+    pub(crate) fn build_root(&self, green_tree: GreenNode<DHallLanguage>, source: &SourceText) -> Result<DHallRoot, OakError> {
+        let mut expressions = Vec::new();
+        let mut current_offset = 0;
+
+        for child in green_tree.children {
+            match child {
+                oak_core::GreenTree::Node(n) => {
+                    expressions.push(self.build_expr(n, current_offset, source)?);
+                    current_offset += n.byte_length as usize;
+                }
+                oak_core::GreenTree::Leaf(l) => {
+                    current_offset += l.length as usize;
+                }
+            }
+        }
+
+        Ok(DHallRoot { expressions })
+    }
+
+    fn build_expr(&self, node: &GreenNode<DHallLanguage>, offset: usize, source: &SourceText) -> Result<DHallExpr, OakError> {
+        let span = core::range::Range { start: offset, end: offset + node.byte_length as usize };
+
+        match node.kind {
+            crate::parser::element_type::DHallElementType::Identifier => {
+                let name = source.get_text_in(span.clone()).to_string();
+                Ok(DHallExpr::Identifier { name, span })
+            }
+            crate::parser::element_type::DHallElementType::Number | crate::parser::element_type::DHallElementType::String | crate::parser::element_type::DHallElementType::True | crate::parser::element_type::DHallElementType::False => {
+                let value = source.get_text_in(span.clone()).to_string();
+                Ok(DHallExpr::Literal { value, span })
+            }
+            _ => {
+                // For other types, try to find a child node that is an expression
+                for child in node.children {
+                    if let oak_core::GreenTree::Node(n) = child {
+                        return self.build_expr(n, offset, source);
+                    }
+                }
+                // Fallback
+                let name = source.get_text_in(span.clone()).to_string();
+                Ok(DHallExpr::Identifier { name, span })
+            }
+        }
     }
 }

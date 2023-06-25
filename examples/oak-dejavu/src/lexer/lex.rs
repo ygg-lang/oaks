@@ -10,7 +10,7 @@ use oak_core::{
 use std::sync::LazyLock;
 use unicode_ident::{is_xid_continue, is_xid_start};
 
-type State<'a, S> = LexerState<'a, S, DejavuLanguage>;
+pub(crate) type State<'a, S> = LexerState<'a, S, DejavuLanguage>;
 
 static VK_WHITESPACE: LazyLock<WhitespaceConfig> = LazyLock::new(|| WhitespaceConfig { unicode_whitespace: true });
 static VK_COMMENT: LazyLock<CommentConfig> = LazyLock::new(|| CommentConfig { line_marker: "#", block_start: "/*", block_end: "*/", nested_blocks: true });
@@ -18,9 +18,17 @@ static VK_COMMENT: LazyLock<CommentConfig> = LazyLock::new(|| CommentConfig { li
 impl crate::lexer::DejavuLexer<'_> {
     /// Runs the lexer on the given state.
     pub(crate) fn run<S: Source + ?Sized>(&self, state: &mut State<'_, S>) -> Result<(), OakError> {
-        match self._config.syntax_mode {
+        match self.config.syntax_mode {
             crate::language::SyntaxMode::Programming => self.run_programming(state),
+            crate::language::SyntaxMode::Template => self.run_template(state),
         }
+    }
+
+    fn run_template<S: Source + ?Sized>(&self, state: &mut State<'_, S>) -> Result<(), OakError> {
+        let start = state.get_position();
+        let end = state.get_length();
+        self.lex_interpolation(state, start, end, true);
+        Ok(())
     }
 
     fn run_programming<S: Source + ?Sized>(&self, state: &mut State<'_, S>) -> Result<(), OakError> {
@@ -161,36 +169,26 @@ impl crate::lexer::DejavuLexer<'_> {
     }
 
     fn lex_interpolation<S: Source + ?Sized>(&self, state: &mut State<'_, S>, start: usize, end: usize, interpolation_enabled: bool) {
-        let mut current = start;
         let original_pos = state.get_position();
-
         state.set_position(start);
+        let mut current = start;
+        let template = &self.config.template;
 
         while state.get_position() < end {
-            if interpolation_enabled && (state.starts_with("\\{") || state.starts_with("\\}")) {
-                state.advance(2);
-                continue;
-            }
-            if interpolation_enabled && (state.starts_with("\\<") || state.starts_with("\\%") || state.starts_with("\\#")) {
-                state.advance(2);
-                continue;
-            }
-
-            if interpolation_enabled && state.starts_with("<#") {
+            if interpolation_enabled && state.starts_with(&template.comment_start) {
                 let part_end = state.get_position();
                 if current < part_end {
                     state.add_token(DejavuSyntaxKind::StringPart, current, part_end)
                 }
 
                 let comment_start = state.get_position();
-                state.advance(2); // skip <#
+                state.advance(template.comment_start.len());
                 state.add_token(DejavuSyntaxKind::TemplateCommentStart, comment_start, state.get_position());
 
-                // Find matching #>
                 while state.get_position() < end {
-                    if state.starts_with("#>") {
+                    if state.starts_with(&template.comment_end) {
                         let comment_end = state.get_position();
-                        state.advance(2);
+                        state.advance(template.comment_end.len());
                         state.add_token(DejavuSyntaxKind::TemplateCommentEnd, comment_end, state.get_position());
                         break;
                     }
@@ -200,61 +198,86 @@ impl crate::lexer::DejavuLexer<'_> {
                 continue;
             }
 
-            if interpolation_enabled && state.starts_with("<%") {
+            if interpolation_enabled && state.starts_with(&template.control_start) {
                 let part_end = state.get_position();
                 if current < part_end {
                     state.add_token(DejavuSyntaxKind::StringPart, current, part_end)
                 }
 
                 let control_start = state.get_position();
-                state.advance(2); // skip <%
+                state.advance(template.control_start.len());
                 state.add_token(DejavuSyntaxKind::TemplateControlStart, control_start, state.get_position());
 
-                // Find matching %>
+                let content_start = state.get_position();
+                // Find matching control_end
                 while state.get_position() < end {
-                    if state.starts_with("%>") {
-                        let control_end = state.get_position();
-                        state.advance(2);
-                        state.add_token(DejavuSyntaxKind::TemplateControlEnd, control_end, state.get_position());
+                    if state.starts_with(&template.control_end) {
                         break;
                     }
                     if let Some(c) = state.current() { state.advance(c.len_utf8()) } else { break }
+                }
+                let content_end = state.get_position();
+
+                if content_start < content_end {
+                    // let mut sub_state = state.sub_state(content_start, content_end);
+                    // let _ = self.run_programming(&mut sub_state);
+                }
+
+                if state.starts_with(&template.control_end) {
+                    let control_end = state.get_position();
+                    state.advance(template.control_end.len());
+                    state.add_token(DejavuSyntaxKind::TemplateControlEnd, control_end, state.get_position());
                 }
                 current = state.get_position();
                 continue;
             }
 
-            if interpolation_enabled && state.starts_with("{") {
+            if interpolation_enabled && state.starts_with(&template.interpolation_start) {
                 let part_end = state.get_position();
                 if current < part_end {
                     state.add_token(DejavuSyntaxKind::StringPart, current, part_end)
                 }
 
                 let interp_start = state.get_position();
-                state.advance(1); // skip {
+                state.advance(template.interpolation_start.len());
                 state.add_token(DejavuSyntaxKind::InterpolationStart, interp_start, state.get_position());
 
-                // Find matching }
+                let content_start = state.get_position();
+                // Find matching interpolation_end
                 let mut depth = 1;
+                let _start_char = template.interpolation_start.chars().next().unwrap_or('{');
+                let _end_char = template.interpolation_end.chars().next().unwrap_or('}');
+
                 while depth > 0 && state.get_position() < end {
-                    if let Some(c) = state.current() {
-                        if c == '{' {
-                            depth += 1;
+                    if state.starts_with(&template.interpolation_start) {
+                        depth += 1;
+                        state.advance(template.interpolation_start.len());
+                    }
+                    else if state.starts_with(&template.interpolation_end) {
+                        depth -= 1;
+                        if depth == 0 {
+                            break;
                         }
-                        else if c == '}' {
-                            depth -= 1;
-                            if depth == 0 {
-                                let interp_end = state.get_position();
-                                state.advance(1);
-                                state.add_token(DejavuSyntaxKind::InterpolationEnd, interp_end, state.get_position());
-                                break;
-                            }
-                        }
+                        state.advance(template.interpolation_end.len());
+                    }
+                    else if let Some(c) = state.current() {
                         state.advance(c.len_utf8());
                     }
                     else {
                         break;
                     }
+                }
+                let content_end = state.get_position();
+
+                if content_start < content_end {
+                    let mut sub_state = state.sub_state(content_start, content_end);
+                    let _ = self.run_programming(&mut sub_state);
+                }
+
+                if state.starts_with(&template.interpolation_end) {
+                    let interp_end = state.get_position();
+                    state.advance(template.interpolation_end.len());
+                    state.add_token(DejavuSyntaxKind::InterpolationEnd, interp_end, state.get_position());
                 }
                 current = state.get_position();
             }
@@ -279,7 +302,7 @@ impl crate::lexer::DejavuLexer<'_> {
             if ch.is_ascii_digit() {
                 state.advance(ch.len_utf8());
 
-                // 继续读取数字
+                // Continue reading digits
                 while let Some(ch) = state.current() {
                     if ch.is_ascii_digit() || ch == '.' || ch == '_' { state.advance(ch.len_utf8()) } else { break }
                 }
@@ -554,7 +577,7 @@ impl crate::lexer::DejavuLexer<'_> {
                     state.add_token(DejavuSyntaxKind::At, start, state.get_position());
                     return true;
                 }
-                '↯' => {
+                '\u{21AF}' => {
                     state.advance(ch.len_utf8());
                     state.add_token(DejavuSyntaxKind::Bolt, start, state.get_position());
                     return true;

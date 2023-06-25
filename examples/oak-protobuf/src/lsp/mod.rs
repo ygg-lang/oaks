@@ -34,7 +34,9 @@ pub struct ProtobufLanguageService<V: Vfs> {
     workspace: oak_lsp::workspace::WorkspaceManager,
     hover_provider: ProtobufHoverProvider,
 }
+
 impl<V: Vfs> ProtobufLanguageService<V> {
+    /// Creates a new `ProtobufLanguageService` with the given VFS.
     pub fn new(vfs: V) -> Self {
         Self { vfs, workspace: oak_lsp::workspace::WorkspaceManager::default(), hover_provider: ProtobufHoverProvider }
     }

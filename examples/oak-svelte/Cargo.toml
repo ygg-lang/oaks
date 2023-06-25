@@ -2,7 +2,7 @@
 name = "oak-svelte"
 version.workspace = true
 authors.workspace = true
-description = "High-performance incremental Svelte component parser for the oak ecosystem."
+description = "High-performance incremental Svelte parser for the oak ecosystem."
 edition.workspace = true
 license.workspace = true
 readme = "readme.md"
@@ -22,14 +22,8 @@ oak-pretty-print = { workspace = true, optional = true }
 oak-mcp = { workspace = true, optional = true }
 futures = { workspace = true, optional = true }
 
-[dev-dependencies]
-oak-testing = { workspace = true }
-# serde_json = { workspace = true } # replaced by oak-json
-
 [features]
 default = ["serde"]
 serde = ["dep:serde", "oak-core/serde"]
-oak-highlight = ["dep:oak-highlight"]
-oak-pretty-print = ["dep:oak-pretty-print"]
 lsp = ["dep:oak-lsp", "dep:oak-hover", "dep:oak-vfs", "oak-highlight", "oak-pretty-print", "dep:futures"]
 mcp = ["lsp", "oak-mcp/io-std"]

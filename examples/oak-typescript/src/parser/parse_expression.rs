@@ -182,7 +182,7 @@ impl<'config> TypeScriptParser<'config> {
             As => {
                 let cp = state.checkpoint_before(left);
                 self.expect(state, As).ok();
-                // 简单处理类型：跳过接下来的标识符或基本类型
+                // Simple type handling: skip next identifier or basic type
                 self.skip_trivia(state);
                 if state.at(IdentifierName.into()) {
                     self.expect(state, IdentifierName).ok();

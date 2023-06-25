@@ -5,11 +5,16 @@ use oak_highlight::{
     themes::Theme,
 };
 
+/// Highlighter implementation for INI.
 pub struct IniHighlighter {
     use_parser: bool,
 }
 
 impl IniHighlighter {
+    /// Creates a new `IniHighlighter`.
+    ///
+    /// If `use_parser` is true, it will use the INI parser for highlighting.
+    /// Otherwise, it will use the default language highlighter.
     pub fn new(use_parser: bool) -> Self {
         Self { use_parser }
     }

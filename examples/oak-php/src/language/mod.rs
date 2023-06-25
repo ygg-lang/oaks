@@ -1,7 +1,5 @@
 #![doc = include_str!("readme.md")]
 use oak_core::{Language, LanguageCategory};
-#[cfg(feature = "serde")]
-use serde::{Deserialize, Serialize};
 
 /// The type of the root node for PHP AST.
 pub type TypedRoot = crate::ast::PhpRoot;
@@ -9,14 +7,29 @@ pub type TypedRoot = crate::ast::PhpRoot;
 /// PHP language implementation.
 ///
 /// This struct implements the [`Language`] trait for the PHP language.
-#[derive(Debug, Default, Clone, Copy, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
-pub struct PhpLanguage {}
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+pub struct PhpLanguage {
+    /// Start tag, e.g., "<?php"
+    pub tag_start: String,
+    /// End tag, e.g., "?>"
+    pub tag_end: String,
+    /// Short start tag, e.g., "<?"
+    pub short_tag_start: String,
+    /// Echo tag start, e.g., "<?="
+    pub echo_tag_start: String,
+}
+
+impl Default for PhpLanguage {
+    fn default() -> Self {
+        Self { tag_start: "<?php".to_string(), tag_end: "?>".to_string(), short_tag_start: "<?".to_string(), echo_tag_start: "<?=".to_string() }
+    }
+}
 
 impl PhpLanguage {
     /// Creates a new `PhpLanguage` instance.
     pub fn new() -> Self {
-        Self {}
+        Self::default()
     }
 }
 

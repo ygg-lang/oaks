@@ -13,5 +13,9 @@ keywords = ["search", "semantic", "fuzzy", "indexing"]
 [dependencies]
 oak-core = { workspace = true }
 tokio = { workspace = true, features = ["rt", "macros", "sync"] }
-serde = { workspace = true }
+serde = { workspace = true, optional = true }
 # oak-json = { workspace = true }
+
+[features]
+default = ["serde"]
+serde = ["dep:serde", "oak-core/serde"]

@@ -1,9 +1,9 @@
 pub mod element_type;
+pub use element_type::VampireElementType;
 
 use crate::{
     language::VampireLanguage,
-    lexer::{VampireLexer, token_type::VampireTokenType},
-    parser::element_type::VampireElementType,
+    lexer::{VampireLexer, VampireTokenType},
 };
 use oak_core::{
     GreenNode, OakError,
@@ -21,22 +21,17 @@ impl<'config> VampireParser<'config> {
     pub fn new(config: &'config VampireLanguage) -> Self {
         Self { config }
     }
-
-    pub(crate) fn parse_root_internal<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> Result<&'a GreenNode<'a, VampireLanguage>, OakError> {
-        let checkpoint = state.checkpoint();
-
-        while state.not_at_end() {
-            state.bump()
-        }
-
-        let root = state.finish_at(checkpoint, crate::parser::element_type::VampireElementType::Root);
-        Ok(root)
-    }
 }
 
 impl<'config> Parser<VampireLanguage> for VampireParser<'config> {
     fn parse<'a, S: Source + ?Sized>(&self, text: &'a S, edits: &[TextEdit], cache: &'a mut impl ParseCache<VampireLanguage>) -> ParseOutput<'a, VampireLanguage> {
         let lexer = VampireLexer::new(&self.config);
-        parse_with_lexer(&lexer, text, edits, cache, |state| self.parse_root_internal(state))
+        parse_with_lexer(&lexer, text, edits, cache, |state| {
+            let checkpoint = state.checkpoint();
+            while state.not_at_end() {
+                state.bump()
+            }
+            Ok(state.finish_at(checkpoint, VampireElementType::Root))
+        })
     }
 }

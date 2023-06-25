@@ -1,12 +1,27 @@
 #![doc = include_str!("readme.md")]
+use crate::{FortranLanguage, parser::element_type::FortranElementType};
 use core::range::Range;
-#[cfg(feature = "serde")]
-use serde::{Deserialize, Serialize};
+use oak_core::{GreenNode, RedNode};
 use std::{boxed::Box, string::String, vec::Vec};
+type SyntaxKind = FortranElementType;
+type SyntaxNode<'a> = RedNode<'a, FortranLanguage>;
+type FortranKind = FortranElementType;
 
-/// 程序节点
-#[derive(Debug, Clone, PartialEq)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[derive(Debug, PartialEq, Clone)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+pub struct Statement {
+    // Placeholder fields
+}
+
+impl Statement {
+    pub fn cast<'a>(_node: SyntaxNode<'a>) -> Option<Self> {
+        Some(Statement {})
+    }
+}
+
+/// The root node of the Fortran AST.
+#[derive(Debug, PartialEq, Clone)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct FortranRoot {
     pub name: Option<String>,
     pub units: Vec<ProgramUnitKind>,
@@ -14,27 +29,48 @@ pub struct FortranRoot {
     pub span: Range<usize>,
 }
 
-/// Fortran 程序单元种类
+impl FortranRoot {
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == FortranKind::Program
+    }
+
+    fn cast(syntax: SyntaxNode<'_>) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            // TODO: Implement casting for units
+            Some(Self { name: None, units: Vec::new(), span: syntax.span() })
+        }
+        else {
+            None
+        }
+    }
+
+    fn syntax(&self) -> &SyntaxNode<'_> {
+        // Implementation requires holding the SyntaxNode. Omitted for simplicity.
+        unimplemented!("FortranRoot::syntax")
+    }
+}
+
+/// Fortran program unit kinds
 #[derive(Debug, Clone, PartialEq)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub enum ProgramUnitKind {
-    /// 主程序
+    /// Main program
     MainProgram(MainProgramNode),
-    /// 子程序
+    /// Subroutine
     Subroutine(SubroutineNode),
-    /// 函数
+    /// Function
     Function(FunctionNode),
-    /// 模块
+    /// Module
     Module(ModuleNode),
-    /// 子模块
+    /// Submodule
     Submodule(SubmoduleNode),
-    /// 块数据
+    /// Block data
     BlockData(BlockDataNode),
 }
 
-/// 主程序节点
+/// Main program node
 #[derive(Debug, Clone, PartialEq)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct MainProgramNode {
     pub name: Option<String>,
     pub specification_part: Vec<SpecificationStmt>,
@@ -44,9 +80,9 @@ pub struct MainProgramNode {
     pub span: Range<usize>,
 }
 
-/// 子程序节点
+/// Subroutine node
 #[derive(Debug, Clone, PartialEq)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct SubroutineNode {
     pub name: String,
     pub parameters: Vec<String>,
@@ -57,9 +93,9 @@ pub struct SubroutineNode {
     pub span: Range<usize>,
 }
 
-/// 函数节点
+/// Function node
 #[derive(Debug, Clone, PartialEq)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct FunctionNode {
     pub name: String,
     pub parameters: Vec<String>,
@@ -72,9 +108,9 @@ pub struct FunctionNode {
     pub span: Range<usize>,
 }
 
-/// 模块节点
+/// Module node
 #[derive(Debug, Clone, PartialEq)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct ModuleNode {
     pub name: String,
     pub specification_part: Vec<SpecificationStmt>,
@@ -83,9 +119,9 @@ pub struct ModuleNode {
     pub span: Range<usize>,
 }
 
-/// 子模块节点
+/// Submodule node
 #[derive(Debug, Clone, PartialEq)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct SubmoduleNode {
     pub parent_name: String,
     pub name: String,
@@ -95,9 +131,9 @@ pub struct SubmoduleNode {
     pub span: Range<usize>,
 }
 
-/// 块数据节点
+/// Block data node
 #[derive(Debug, Clone, PartialEq)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct BlockDataNode {
     pub name: Option<String>,
     pub specification_part: Vec<SpecificationStmt>,
@@ -105,121 +141,121 @@ pub struct BlockDataNode {
     pub span: Range<usize>,
 }
 
-/// 规范语句
+/// Specification statement
 #[derive(Debug, Clone, PartialEq)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub enum SpecificationStmt {
-    /// 类型声明
+    /// Type declaration
     TypeDeclaration(TypeDeclarationNode),
-    /// 参数声明
+    /// Parameter declaration
     Parameter(ParameterNode),
-    /// 隐式声明
+    /// Implicit declaration
     Implicit(ImplicitNode),
-    /// 使用语句
+    /// Use statement
     Use(UseNode),
-    /// 导入语句
+    /// Import statement
     Import(ImportNode),
-    /// 接口声明
+    /// Interface declaration
     Interface(InterfaceNode),
-    /// 过程声明
+    /// Procedure declaration
     Procedure(ProcedureNode),
-    /// 泛型声明
+    /// Generic declaration
     Generic(GenericNode),
 }
 
-/// 可执行语句
+/// Executable statement
 #[derive(Debug, Clone, PartialEq)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub enum ExecutableStmt {
-    /// 赋值语句
+    /// Assignment statement
     Assignment(AssignmentNode),
-    /// 调用语句
+    /// Call statement
     Call(CallNode),
-    /// If 构造
+    /// If construct
     IfConstruct(IfConstructNode),
-    /// Do 循环
+    /// Do construct
     DoConstruct(DoConstructNode),
     /// Select Case
     SelectCase(SelectCaseNode),
-    /// Where 构造
+    /// Where construct
     WhereConstruct(WhereConstructNode),
-    /// Forall 构造
+    /// Forall construct
     ForallConstruct(ForallConstructNode),
-    /// Associate 构造
+    /// Associate construct
     AssociateConstruct(AssociateConstructNode),
-    /// Block 构造
+    /// Block construct
     BlockConstruct(BlockConstructNode),
-    /// Critical 构造
+    /// Critical construct
     CriticalConstruct(CriticalConstructNode),
-    /// 分配语句
+    /// Allocate statement
     Allocate(AllocateNode),
-    /// 释放语句
+    /// Deallocate statement
     Deallocate(DeallocateNode),
-    /// 空化语句
+    /// Nullify statement
     Nullify(NullifyNode),
-    /// 停止语句
+    /// Stop statement
     Stop(StopNode),
-    /// 返回语句
+    /// Return statement
     Return(ReturnNode),
-    /// 继续语句
+    /// Continue statement
     Continue,
-    /// 循环语句
+    /// Cycle statement
     Cycle(Option<String>),
-    /// 退出语句
+    /// Exit statement
     Exit(Option<String>),
-    /// 读语句
+    /// Read statement
     Read(ReadNode),
-    /// 写语句
+    /// Write statement
     Write(WriteNode),
-    /// 打印语句
+    /// Print statement
     Print(PrintNode),
 }
 
-/// 类型规范
+/// Type specification
 #[derive(Debug, Clone, PartialEq)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub enum TypeSpec {
-    /// 整数类型
+    /// Integer type
     Integer(Option<KindSelector>),
-    /// 实数类型
+    /// Real type
     Real(Option<KindSelector>),
-    /// 双精度类型
+    /// Double precision type
     DoublePrecision,
-    /// 复数类型
+    /// Complex type
     Complex(Option<KindSelector>),
-    /// 字符类型
+    /// Character type
     Character(Option<CharacterSelector>),
-    /// 逻辑类型
+    /// Logical type
     Logical(Option<KindSelector>),
-    /// 派生类型
+    /// Derived type
     Derived(String),
-    /// 类类型
+    /// Class type
     Class(String),
-    /// 类型星号
+    /// Type star
     TypeStar,
 }
 
-/// 种类选择器
+/// Kind selector
 #[derive(Debug, Clone, PartialEq)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub enum KindSelector {
-    /// 表达式
+    /// Expression
     Expression(Box<ExprNode>),
 }
 
-/// 字符选择器
+/// Character selector
 #[derive(Debug, Clone, PartialEq)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub enum CharacterSelector {
-    /// 长度
+    /// Length
     Length(Box<ExprNode>),
-    /// 长度和种类
+    /// Length and kind
     LengthAndKind(Box<ExprNode>, Box<ExprNode>),
 }
 
-/// 类型声明节点
+/// Type declaration node
 #[derive(Debug, Clone, PartialEq)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct TypeDeclarationNode {
     pub type_spec: TypeSpec,
     pub attributes: Vec<Attribute>,
@@ -228,77 +264,77 @@ pub struct TypeDeclarationNode {
     pub span: Range<usize>,
 }
 
-/// 属性
+/// Attribute
 #[derive(Debug, Clone, PartialEq)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub enum Attribute {
-    /// 可选
+    /// Allocatable
     Allocatable,
-    /// 异步
+    /// Asynchronous
     Asynchronous,
-    /// 绑定
+    /// Bind
     Bind(String),
-    /// 维度
+    /// Dimension
     Dimension(Vec<Dimension>),
-    /// 外部
+    /// External
     External,
-    /// 意图
+    /// Intent
     Intent(Intent),
-    /// 内部
+    /// Intrinsic
     Intrinsic,
-    /// 可选
+    /// Optional
     Optional,
-    /// 参数
+    /// Parameter
     Parameter,
-    /// 指针
+    /// Pointer
     Pointer,
-    /// 保护
+    /// Protected
     Protected,
-    /// 私有
+    /// Private
     Private,
-    /// 公有
+    /// Public
     Public,
-    /// 保存
+    /// Save
     Save,
-    /// 目标
+    /// Target
     Target,
-    /// 易变
+    /// Value
     Value,
-    /// 易变
+    /// Volatile
     Volatile,
 }
 
-/// 意图
+/// Intent
 #[derive(Debug, Clone, PartialEq)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub enum Intent {
-    /// 输入
+    /// In
     In,
-    /// 输出
+    /// Out
     Out,
-    /// 输入输出
+    /// InOut
     InOut,
 }
 
-/// 维度
+/// Dimension
 #[derive(Debug, Clone, PartialEq)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub enum Dimension {
-    /// 显式形状
+    /// Explicit shape
     Explicit(Box<ExprNode>, Box<ExprNode>),
-    /// 假定形状
+    /// Assumed shape
     Assumed(Option<Box<ExprNode>>),
-    /// 延迟形状
+    /// Deferred shape
     Deferred,
-    /// 假定大小
+    /// Assumed size
     AssumedSize(Option<Box<ExprNode>>),
-    /// 假定等级
+    /// Assumed rank
     AssumedRank,
 }
 
-/// 实体声明
+/// Entity declaration
 #[derive(Debug, Clone, PartialEq)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct EntityDecl {
     pub name: String,
     pub array_spec: Option<Vec<Dimension>>,
@@ -308,44 +344,44 @@ pub struct EntityDecl {
     pub span: Range<usize>,
 }
 
-/// 参数节点
+/// Parameter node
 #[derive(Debug, Clone, PartialEq)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct ParameterNode {
     pub entities: Vec<EntityDecl>,
     #[cfg_attr(feature = "serde", serde(with = "oak_core::serde_range"))]
     pub span: Range<usize>,
 }
 
-/// 隐式节点
+/// Implicit node
 #[derive(Debug, Clone, PartialEq)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub enum ImplicitNode {
     /// None
     None,
-    /// 规范
+    /// Spec
     Spec(Vec<ImplicitSpec>),
 }
 
-/// 隐式规范
+/// Implicit specification
 #[derive(Debug, Clone, PartialEq)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct ImplicitSpec {
     pub type_spec: TypeSpec,
     pub letter_ranges: Vec<LetterRange>,
 }
 
-/// 字母范围
+/// Letter range
 #[derive(Debug, Clone, PartialEq)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct LetterRange {
     pub start: char,
     pub end: Option<char>,
 }
 
-/// 使用节点
+/// Use node
 #[derive(Debug, Clone, PartialEq)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct UseNode {
     pub module_name: String,
     pub nature: Option<ModuleNature>,
@@ -355,46 +391,46 @@ pub struct UseNode {
     pub span: Range<usize>,
 }
 
-/// 模块性质
+/// Module nature
 #[derive(Debug, Clone, PartialEq)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub enum ModuleNature {
-    /// 内部
+    /// Intrinsic
     Intrinsic,
-    /// 非内部
+    /// Non-intrinsic
     NonIntrinsic,
 }
 
-/// 重命名
+/// Rename
 #[derive(Debug, Clone, PartialEq)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct Rename {
     pub local_name: String,
     pub use_name: String,
 }
 
-/// 仅
+/// Only
 #[derive(Debug, Clone, PartialEq)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub enum Only {
-    /// 泛型
+    /// Generic
     Generic(String),
-    /// 重命名
+    /// Rename
     Rename(Rename),
 }
 
-/// 导入节点
+/// Import node
 #[derive(Debug, Clone, PartialEq)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct ImportNode {
     pub import_names: Vec<String>,
     #[cfg_attr(feature = "serde", serde(with = "oak_core::serde_range"))]
     pub span: Range<usize>,
 }
 
-/// 接口节点
+/// Interface node
 #[derive(Debug, Clone, PartialEq)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct InterfaceNode {
     pub generic_spec: Option<GenericSpec>,
     pub interface_bodies: Vec<ProgramUnitKind>,
@@ -402,25 +438,25 @@ pub struct InterfaceNode {
     pub span: Range<usize>,
 }
 
-/// 泛型规范
+/// Generic specification
 #[derive(Debug, Clone, PartialEq)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub enum GenericSpec {
-    /// 泛型名称
+    /// Generic name
     GenericName(String),
-    /// 运算符
+    /// Operator
     Operator(String),
-    /// 赋值
+    /// Assignment
     Assignment,
-    /// 读取定义
+    /// Read defined
     ReadDefined,
-    /// 写入定义
+    /// Write defined
     WriteDefined,
 }
 
-/// 过程节点
+/// Procedure node
 #[derive(Debug, Clone, PartialEq)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct ProcedureNode {
     pub interface_name: Option<String>,
     pub attributes: Vec<Attribute>,
@@ -429,17 +465,17 @@ pub struct ProcedureNode {
     pub span: Range<usize>,
 }
 
-/// 过程实体
+/// Procedure entity
 #[derive(Debug, Clone, PartialEq)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct ProcedureEntity {
     pub name: String,
     pub binding_name: Option<String>,
 }
 
-/// 泛型节点
+/// Generic node
 #[derive(Debug, Clone, PartialEq)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GenericNode {
     pub generic_spec: GenericSpec,
     pub access_spec: Option<Attribute>,
@@ -448,9 +484,9 @@ pub struct GenericNode {
     pub span: Range<usize>,
 }
 
-/// 赋值节点
+/// Assignment node
 #[derive(Debug, Clone, PartialEq)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct AssignmentNode {
     pub variable: Box<ExprNode>,
     pub expression: Box<ExprNode>,
@@ -458,9 +494,9 @@ pub struct AssignmentNode {
     pub span: Range<usize>,
 }
 
-/// 调用节点
+/// Call node
 #[derive(Debug, Clone, PartialEq)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct CallNode {
     pub procedure_name: String,
     pub arguments: Vec<Box<ExprNode>>,
@@ -468,9 +504,9 @@ pub struct CallNode {
     pub span: Range<usize>,
 }
 
-/// If 构造节点
+/// If construct node
 #[derive(Debug, Clone, PartialEq)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct IfConstructNode {
     pub condition: Box<ExprNode>,
     pub then_part: Vec<ExecutableStmt>,
@@ -481,9 +517,9 @@ pub struct IfConstructNode {
     pub span: Range<usize>,
 }
 
-/// Do 构造节点
+/// Do construct node
 #[derive(Debug, Clone, PartialEq)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct DoConstructNode {
     pub name: Option<String>,
     pub control: Option<DoControl>,
@@ -492,29 +528,29 @@ pub struct DoConstructNode {
     pub span: Range<usize>,
 }
 
-/// Do 控制
+/// Do control
 #[derive(Debug, Clone, PartialEq)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub enum DoControl {
-    /// 迭代
+    /// Iterative
     Iterative { variable: String, start: Box<ExprNode>, end: Box<ExprNode>, step: Option<Box<ExprNode>> },
     /// While
     While(Box<ExprNode>),
-    /// 并发
+    /// Concurrent
     Concurrent { header: ConcurrentHeader, locality: Vec<LocalitySpec> },
 }
 
-/// 并发头
+/// Concurrent header
 #[derive(Debug, Clone, PartialEq)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct ConcurrentHeader {
     pub control_list: Vec<ConcurrentControl>,
     pub mask: Option<Box<ExprNode>>,
 }
 
-/// 并发控制
+/// Concurrent control
 #[derive(Debug, Clone, PartialEq)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct ConcurrentControl {
     pub name: String,
     pub start: Box<ExprNode>,
@@ -522,23 +558,23 @@ pub struct ConcurrentControl {
     pub step: Option<Box<ExprNode>>,
 }
 
-/// 局部性规范
+/// Locality specification
 #[derive(Debug, Clone, PartialEq)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub enum LocalitySpec {
-    /// 本地
+    /// Local
     Local(Vec<String>),
-    /// 本地初始化
+    /// Local init
     LocalInit(Vec<String>),
-    /// 共享
+    /// Shared
     Shared(Vec<String>),
-    /// 默认无
+    /// Default none
     DefaultNone,
 }
 
-/// Select Case 节点
+/// Select Case node
 #[derive(Debug, Clone, PartialEq)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct SelectCaseNode {
     pub expression: Box<ExprNode>,
     pub cases: Vec<CaseConstruct>,
@@ -547,17 +583,17 @@ pub struct SelectCaseNode {
     pub span: Range<usize>,
 }
 
-/// Case 构造
+/// Case construct
 #[derive(Debug, Clone, PartialEq)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct CaseConstruct {
     pub selector: CaseSelector,
     pub body: Vec<ExecutableStmt>,
 }
 
-/// Case 选择器
+/// Case selector
 #[derive(Debug, Clone, PartialEq)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub enum CaseSelector {
     /// Case
     Case(Vec<CaseValue>),
@@ -565,19 +601,19 @@ pub enum CaseSelector {
     Default,
 }
 
-/// Case 值
+/// Case value
 #[derive(Debug, Clone, PartialEq)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub enum CaseValue {
-    /// 单个值
+    /// Single value
     Single(Box<ExprNode>),
-    /// 范围
+    /// Range
     Range(Option<Box<ExprNode>>, Option<Box<ExprNode>>),
 }
 
-/// Where 构造节点
+/// Where construct node
 #[derive(Debug, Clone, PartialEq)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct WhereConstructNode {
     pub mask: Box<ExprNode>,
     pub where_body: Vec<ExecutableStmt>,
@@ -587,9 +623,9 @@ pub struct WhereConstructNode {
     pub span: Range<usize>,
 }
 
-/// Forall 构造节点
+/// Forall construct node
 #[derive(Debug, Clone, PartialEq)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct ForallConstructNode {
     pub header: ConcurrentHeader,
     pub body: Vec<ExecutableStmt>,
@@ -598,9 +634,9 @@ pub struct ForallConstructNode {
     pub span: Range<usize>,
 }
 
-/// Associate 构造节点
+/// Associate construct node
 #[derive(Debug, Clone, PartialEq)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct AssociateConstructNode {
     pub associates: Vec<Associate>,
     pub body: Vec<ExecutableStmt>,
@@ -609,17 +645,17 @@ pub struct AssociateConstructNode {
     pub span: Range<usize>,
 }
 
-/// 关联
+/// Associate
 #[derive(Debug, Clone, PartialEq)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct Associate {
     pub name: String,
     pub expression: Box<ExprNode>,
 }
 
-/// Block 构造节点
+/// Block construct node
 #[derive(Debug, Clone, PartialEq)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct BlockConstructNode {
     pub specification_part: Vec<SpecificationStmt>,
     pub execution_part: Vec<ExecutableStmt>,
@@ -628,9 +664,9 @@ pub struct BlockConstructNode {
     pub span: Range<usize>,
 }
 
-/// Critical 构造节点
+/// Critical construct node
 #[derive(Debug, Clone, PartialEq)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct CriticalConstructNode {
     pub body: Vec<ExecutableStmt>,
     pub name: Option<String>,
@@ -638,9 +674,9 @@ pub struct CriticalConstructNode {
     pub span: Range<usize>,
 }
 
-/// 分配节点
+/// Allocate node
 #[derive(Debug, Clone, PartialEq)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct AllocateNode {
     pub objects: Vec<Allocation>,
     pub options: Vec<AllocOpt>,
@@ -648,31 +684,31 @@ pub struct AllocateNode {
     pub span: Range<usize>,
 }
 
-/// 分配
+/// Allocation
 #[derive(Debug, Clone, PartialEq)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct Allocation {
     pub variable: Box<ExprNode>,
     pub array_spec: Option<Vec<Dimension>>,
 }
 
-/// 分配选项
+/// Allocation option
 #[derive(Debug, Clone, PartialEq)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub enum AllocOpt {
-    /// 统计
+    /// Stat
     Stat(Box<ExprNode>),
-    /// 错误消息
+    /// Error message
     Errmsg(Box<ExprNode>),
-    /// 源
+    /// Source
     Source(Box<ExprNode>),
-    /// 模子
+    /// Mold
     Mold(Box<ExprNode>),
 }
 
-/// 释放节点
+/// Deallocate node
 #[derive(Debug, Clone, PartialEq)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct DeallocateNode {
     pub objects: Vec<Box<ExprNode>>,
     pub options: Vec<DeallocOpt>,
@@ -680,28 +716,28 @@ pub struct DeallocateNode {
     pub span: Range<usize>,
 }
 
-/// 释放选项
+/// Deallocation option
 #[derive(Debug, Clone, PartialEq)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub enum DeallocOpt {
-    /// 统计
+    /// Stat
     Stat(Box<ExprNode>),
-    /// 错误消息
+    /// Error message
     Errmsg(Box<ExprNode>),
 }
 
-/// 空化节点
+/// Nullify node
 #[derive(Debug, Clone, PartialEq)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct NullifyNode {
     pub pointers: Vec<Box<ExprNode>>,
     #[cfg_attr(feature = "serde", serde(with = "oak_core::serde_range"))]
     pub span: Range<usize>,
 }
 
-/// 停止节点
+/// Stop node
 #[derive(Debug, Clone, PartialEq)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct StopNode {
     pub stop_code: Option<Box<ExprNode>>,
     pub quiet: Option<Box<ExprNode>>,
@@ -709,169 +745,210 @@ pub struct StopNode {
     pub span: Range<usize>,
 }
 
-/// 返回节点
+/// Return node
 #[derive(Debug, Clone, PartialEq)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct ReturnNode {
     pub expression: Option<Box<ExprNode>>,
     #[cfg_attr(feature = "serde", serde(with = "oak_core::serde_range"))]
     pub span: Range<usize>,
 }
 
-/// 读节点
+/// Read node
 #[derive(Debug, Clone, PartialEq)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct ReadNode {
-    pub control_list: Vec<IoControl>,
+    pub io_control_spec: Vec<IoControlSpec>,
     pub input_items: Vec<Box<ExprNode>>,
     #[cfg_attr(feature = "serde", serde(with = "oak_core::serde_range"))]
     pub span: Range<usize>,
 }
 
-/// 写节点
+/// Write node
 #[derive(Debug, Clone, PartialEq)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct WriteNode {
-    pub control_list: Vec<IoControl>,
+    pub io_control_spec: Vec<IoControlSpec>,
     pub output_items: Vec<Box<ExprNode>>,
     #[cfg_attr(feature = "serde", serde(with = "oak_core::serde_range"))]
     pub span: Range<usize>,
 }
 
-/// 打印节点
+/// Print node
 #[derive(Debug, Clone, PartialEq)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct PrintNode {
-    pub format: Box<ExprNode>,
+    pub format: Option<Box<ExprNode>>,
     pub output_items: Vec<Box<ExprNode>>,
     #[cfg_attr(feature = "serde", serde(with = "oak_core::serde_range"))]
     pub span: Range<usize>,
 }
 
-/// IO 控制
+/// IO control specification
 #[derive(Debug, Clone, PartialEq)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
-pub enum IoControl {
-    /// 单元
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+pub enum IoControlSpec {
+    /// Unit
     Unit(Box<ExprNode>),
-    /// 格式
-    Fmt(Box<ExprNode>),
-    /// 记录
-    Rec(Box<ExprNode>),
-    /// 统计
-    Stat(Box<ExprNode>),
-    /// 错误
-    Err(String),
-    /// 结束
-    End(String),
-    /// 错误消息
-    Errmsg(Box<ExprNode>),
-    /// 单元
+    /// Format
+    Format(Box<ExprNode>),
+    /// Nml
+    Nml(Box<ExprNode>),
+    /// Iomsg
+    Iomsg(Box<ExprNode>),
+    /// Iostat
     Iostat(Box<ExprNode>),
+    /// Advance
+    Advance(Box<ExprNode>),
+    /// Other
+    Other(String, Box<ExprNode>),
 }
 
-/// 表达式节点
+/// Expression node
 #[derive(Debug, Clone, PartialEq)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub enum ExprNode {
-    /// 字面量
-    Literal(Literal),
-    /// 变量
-    Variable(Variable),
-    /// 一元运算
-    Unary(UnaryOp, Box<ExprNode>),
-    /// 二元运算
-    Binary(Box<ExprNode>, BinaryOp, Box<ExprNode>),
-    /// 函数调用
-    Call(String, Vec<Box<ExprNode>>),
-    /// 数组构造器
-    ArrayConstructor(Vec<Box<ExprNode>>),
-    /// 括号
-    Paren(Box<ExprNode>),
+    /// Literal
+    Literal(LiteralNode),
+    /// Name
+    Name(String),
+    /// Array element
+    ArrayElement(ArrayElementNode),
+    /// Function reference
+    FunctionReference(FunctionReferenceNode),
+    /// Unary operation
+    UnaryOp(UnaryOpNode),
+    /// Binary operation
+    BinaryOp(BinaryOpNode),
+    /// Parenthesized expression
+    ParenExpr(Box<ExprNode>),
+    /// Structure constructor
+    StructureConstructor(StructureConstructorNode),
 }
 
-/// 字面量
+/// Literal node
 #[derive(Debug, Clone, PartialEq)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
-pub enum Literal {
-    /// 整数
-    Integer(String),
-    /// 实数
-    Real(String),
-    /// 复数
-    Complex(String, String),
-    /// 字符
-    Character(String),
-    /// 逻辑
-    Logical(bool),
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+pub struct LiteralNode {
+    pub value: String,
+    pub kind: LiteralKind,
+    #[cfg_attr(feature = "serde", serde(with = "oak_core::serde_range"))]
+    pub span: Range<usize>,
 }
 
-/// 变量
+/// Literal kind
 #[derive(Debug, Clone, PartialEq)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
-pub struct Variable {
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+pub enum LiteralKind {
+    /// Integer
+    Integer,
+    /// Real
+    Real,
+    /// Complex
+    Complex,
+    /// Character
+    Character,
+    /// Logical
+    Logical,
+}
+
+/// Array element node
+#[derive(Debug, Clone, PartialEq)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+pub struct ArrayElementNode {
     pub name: String,
-    pub selectors: Vec<VariableSelector>,
+    pub subscripts: Vec<Box<ExprNode>>,
+    #[cfg_attr(feature = "serde", serde(with = "oak_core::serde_range"))]
+    pub span: Range<usize>,
 }
 
-/// 变量选择器
+/// Function reference node
 #[derive(Debug, Clone, PartialEq)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
-pub enum VariableSelector {
-    /// 数组下标
-    ArraySubscript(Vec<Box<ExprNode>>),
-    /// 组件访问
-    Component(String),
-    /// 子串
-    Substring(Option<Box<ExprNode>>, Option<Box<ExprNode>>),
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+pub struct FunctionReferenceNode {
+    pub name: String,
+    pub arguments: Vec<Box<ExprNode>>,
+    #[cfg_attr(feature = "serde", serde(with = "oak_core::serde_range"))]
+    pub span: Range<usize>,
 }
 
-/// 一元运算符
+/// Unary operation node
 #[derive(Debug, Clone, PartialEq)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
-pub enum UnaryOp {
-    /// 正
-    Plus,
-    /// 负
-    Minus,
-    /// 非
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+pub struct UnaryOpNode {
+    pub operator: UnaryOperator,
+    pub operand: Box<ExprNode>,
+    #[cfg_attr(feature = "serde", serde(with = "oak_core::serde_range"))]
+    pub span: Range<usize>,
+}
+
+/// Unary operator
+#[derive(Debug, Clone, PartialEq)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+pub enum UnaryOperator {
+    /// Not
     Not,
+    /// Plus
+    Plus,
+    /// Minus
+    Minus,
 }
 
-/// 二元运算符
+/// Binary operation node
 #[derive(Debug, Clone, PartialEq)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
-pub enum BinaryOp {
-    /// 加
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+pub struct BinaryOpNode {
+    pub operator: BinaryOperator,
+    pub left: Box<ExprNode>,
+    pub right: Box<ExprNode>,
+    #[cfg_attr(feature = "serde", serde(with = "oak_core::serde_range"))]
+    pub span: Range<usize>,
+}
+
+/// Binary operator
+#[derive(Debug, Clone, PartialEq)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+pub enum BinaryOperator {
+    /// Add
     Add,
-    /// 减
-    Sub,
-    /// 乘
-    Mul,
-    /// 除
-    Div,
-    /// 幂
-    Pow,
-    /// 等于
-    Eq,
-    /// 不等于
-    Ne,
-    /// 小于
-    Lt,
-    /// 小于等于
-    Le,
-    /// 大于
-    Gt,
-    /// 大于等于
-    Ge,
-    /// 且
-    And,
-    /// 或
-    Or,
-    /// 等价
-    Eqv,
-    /// 不等价
-    Neqv,
-    /// 连接
+    /// Subtract
+    Subtract,
+    /// Multiply
+    Multiply,
+    /// Divide
+    Divide,
+    /// Power
+    Power,
+    /// Concat
     Concat,
+    /// Equal
+    Equal,
+    /// Not equal
+    NotEqual,
+    /// Less than
+    LessThan,
+    /// Less than or equal
+    LessThanOrEqual,
+    /// Greater than
+    GreaterThan,
+    /// Greater than or equal
+    GreaterThanOrEqual,
+    /// And
+    And,
+    /// Or
+    Or,
+    /// Eqv
+    Eqv,
+    /// Neqv
+    Neqv,
+}
+
+/// Structure constructor node
+#[derive(Debug, Clone, PartialEq)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+pub struct StructureConstructorNode {
+    pub type_name: String,
+    pub args: Vec<(Option<String>, Box<ExprNode>)>,
+    #[cfg_attr(feature = "serde", serde(with = "oak_core::serde_range"))]
+    pub span: Range<usize>,
 }

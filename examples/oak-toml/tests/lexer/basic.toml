@@ -16,8 +16,8 @@ literal_string = 'C:\Users\nodejs\templates'
 multiline_literal_string = '''
 The first newline is
 trimmed in raw strings.
-   All other whitespace
-   is preserved.
+      All other whitespace
+      is preserved.
 '''
 
 # Integers
@@ -80,8 +80,8 @@ string_array = [ "all", 'strings', """are the same""", '''type''' ]
 # Mixed-type arrays are allowed
 numbers = [ 0.1, 0.2, 0.5, 1, 2, 5 ]
 contributors = [
-  "Foo Bar <foo@example.com>",
-  { name = "Baz Qux", email = "bazqux@example.com", url = "https://example.com/bazqux" }
+    "Foo Bar <foo@example.com>",
+    { name = "Baz Qux", email = "bazqux@example.com", url = "https://example.com/bazqux" }
 ]
 
 # Tables

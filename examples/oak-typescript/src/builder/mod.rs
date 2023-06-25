@@ -9,15 +9,24 @@ mod build_root;
 mod build_statement;
 mod build_type;
 
-/// TypeScript 语言的 AST 构建器
+/// AST builder for the TypeScript language.
 #[derive(Clone)]
 pub struct TypeScriptBuilder<'config> {
     config: &'config TypeScriptLanguage,
+    /// Whether to erase types and generate a pure JS AST.
+    pub erase_types: bool,
 }
 
 impl<'config> TypeScriptBuilder<'config> {
+    /// Creates a new `TypeScriptBuilder`.
     pub fn new(config: &'config TypeScriptLanguage) -> Self {
-        Self { config }
+        Self { config, erase_types: false }
+    }
+
+    /// Sets whether to erase types.
+    pub fn with_type_erasure(mut self, erase_types: bool) -> Self {
+        self.erase_types = erase_types;
+        self
     }
 }
 

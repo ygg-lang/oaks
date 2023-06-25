@@ -13,7 +13,9 @@ use {
     oak_vfs::Vfs,
 };
 #[cfg(feature = "lsp")]
+/// INI hover provider.
 pub struct IniHoverProvider;
+
 #[cfg(feature = "lsp")]
 impl HoverProvider<IniLanguage> for IniHoverProvider {
     fn hover(&self, node: &RedNode<IniLanguage>, _range: Range<usize>) -> Option<Hover> {
@@ -26,13 +28,18 @@ impl HoverProvider<IniLanguage> for IniHoverProvider {
         Some(Hover { contents: contents.to_string(), range: Some(node.span()) })
     }
 }
+/// INI language service.
 #[cfg(feature = "lsp")]
 pub struct IniLanguageService<V: Vfs> {
+    /// Virtual file system.
     vfs: V,
+    /// Workspace manager.
     workspace: oak_lsp::workspace::WorkspaceManager,
+    /// Hover provider.
     hover_provider: IniHoverProvider,
 }
 impl<V: Vfs> IniLanguageService<V> {
+    /// Creates a new `IniLanguageService` with the given VFS.
     pub fn new(vfs: V) -> Self {
         Self { vfs, workspace: oak_lsp::workspace::WorkspaceManager::default(), hover_provider: IniHoverProvider }
     }

@@ -1,10 +1,8 @@
 #![doc = include_str!("readme.md")]
 use core::range::Range;
-#[cfg(feature = "serde")]
-use serde::{Deserialize, Serialize};
 
 /// Root node of a Python source file.
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 #[derive(Debug, Clone, PartialEq)]
 pub struct PythonRoot {
     /// The program structure
@@ -15,7 +13,7 @@ pub struct PythonRoot {
 }
 
 /// A Python program consisting of a list of statements.
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 #[derive(Debug, Clone, PartialEq)]
 pub struct Program {
     /// List of statements in the program
@@ -23,7 +21,7 @@ pub struct Program {
 }
 
 /// Represents a Python statement.
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 #[derive(Debug, Clone, PartialEq)]
 pub enum Statement {
     /// Function definition
@@ -197,10 +195,15 @@ pub enum Statement {
         /// Match cases
         cases: Vec<MatchCase>,
     },
+    /// Delete statement
+    Delete {
+        /// Targets to delete
+        targets: Vec<Expression>,
+    },
 }
 
 /// Represents a case in a match statement.
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 #[derive(Debug, Clone, PartialEq)]
 pub struct MatchCase {
     /// Pattern to match
@@ -212,7 +215,7 @@ pub struct MatchCase {
 }
 
 /// Represents a pattern in a match case.
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 #[derive(Debug, Clone, PartialEq)]
 pub enum Pattern {
     /// Value pattern
@@ -251,7 +254,7 @@ pub enum Pattern {
 }
 
 /// Represents a Python expression.
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 #[derive(Debug, Clone, PartialEq)]
 pub enum Expression {
     /// Literal value
@@ -420,7 +423,7 @@ pub enum Expression {
 }
 
 /// Represents a literal value.
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 #[derive(Debug, Clone, PartialEq)]
 pub enum Literal {
     /// Integer literal
@@ -437,88 +440,8 @@ pub enum Literal {
     None,
 }
 
-/// Represents binary operators.
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
-#[derive(Debug, Clone, PartialEq)]
-pub enum BinaryOperator {
-    /// `+`
-    Add,
-    /// `-`
-    Sub,
-    /// `*`
-    Mult,
-    /// `/`
-    Div,
-    /// `//`
-    FloorDiv,
-    /// `%`
-    Mod,
-    /// `**`
-    Pow,
-    /// `<<`
-    LShift,
-    /// `>>`
-    RShift,
-    /// `|`
-    BitOr,
-    /// `^`
-    BitXor,
-    /// `&`
-    BitAnd,
-}
-
-/// Represents unary operators.
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
-#[derive(Debug, Clone, PartialEq)]
-pub enum UnaryOperator {
-    /// `~`
-    Invert,
-    /// `not`
-    Not,
-    /// `+`
-    UAdd,
-    /// `-`
-    USub,
-}
-
-/// Represents boolean operators.
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
-#[derive(Debug, Clone, PartialEq)]
-pub enum BoolOperator {
-    /// `and`
-    And,
-    /// `or`
-    Or,
-}
-
-/// Represents comparison operators.
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
-#[derive(Debug, Clone, PartialEq)]
-pub enum CompareOperator {
-    /// `==`
-    Eq,
-    /// `!=`
-    NotEq,
-    /// `<`
-    Lt,
-    /// `<=`
-    LtE,
-    /// `>`
-    Gt,
-    /// `>=`
-    GtE,
-    /// `is`
-    Is,
-    /// `is not`
-    IsNot,
-    /// `in`
-    In,
-    /// `not in`
-    NotIn,
-}
-
-/// Represents augmented assignment operators.
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+/// Represents an augmented assignment operator.
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 #[derive(Debug, Clone, PartialEq)]
 pub enum AugmentedOperator {
     /// `+=`
@@ -547,8 +470,88 @@ pub enum AugmentedOperator {
     BitAnd,
 }
 
+/// Represents a binary operator.
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+#[derive(Debug, Clone, PartialEq)]
+pub enum BinaryOperator {
+    /// `+`
+    Add,
+    /// `-`
+    Sub,
+    /// `*`
+    Mult,
+    /// `/`
+    Div,
+    /// `//`
+    FloorDiv,
+    /// `%`
+    Mod,
+    /// `**`
+    Pow,
+    /// `<<`
+    LShift,
+    /// `>>`
+    RShift,
+    /// `|`
+    BitOr,
+    /// `^`
+    BitXor,
+    /// `&`
+    BitAnd,
+}
+
+/// Represents a unary operator.
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+#[derive(Debug, Clone, PartialEq)]
+pub enum UnaryOperator {
+    /// `~`
+    Invert,
+    /// `not`
+    Not,
+    /// `+`
+    UAdd,
+    /// `-`
+    USub,
+}
+
+/// Represents a boolean operator.
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+#[derive(Debug, Clone, PartialEq)]
+pub enum BoolOperator {
+    /// `and`
+    And,
+    /// `or`
+    Or,
+}
+
+/// Represents a comparison operator.
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+#[derive(Debug, Clone, PartialEq)]
+pub enum CompareOperator {
+    /// `==`
+    Eq,
+    /// `!=`
+    NotEq,
+    /// `<`
+    Lt,
+    /// `<=`
+    LtE,
+    /// `>`
+    Gt,
+    /// `>=`
+    GtE,
+    /// `is`
+    Is,
+    /// `is not`
+    IsNot,
+    /// `in`
+    In,
+    /// `not in`
+    NotIn,
+}
+
 /// Represents a function parameter.
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 #[derive(Debug, Clone, PartialEq)]
 pub struct Parameter {
     /// Parameter name
@@ -564,7 +567,7 @@ pub struct Parameter {
 }
 
 /// Represents a type annotation.
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 #[derive(Debug, Clone, PartialEq)]
 pub enum Type {
     /// Basic type name
@@ -583,7 +586,7 @@ pub enum Type {
 }
 
 /// Represents a keyword argument.
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 #[derive(Debug, Clone, PartialEq)]
 pub struct Keyword {
     /// Optional argument name
@@ -593,7 +596,7 @@ pub struct Keyword {
 }
 
 /// Represents a comprehension in a list/dict/set/generator.
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 #[derive(Debug, Clone, PartialEq)]
 pub struct Comprehension {
     /// Target expression
@@ -607,7 +610,7 @@ pub struct Comprehension {
 }
 
 /// Represents a name in an import statement.
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 #[derive(Debug, Clone, PartialEq)]
 pub struct ImportName {
     /// Name being imported
@@ -617,7 +620,7 @@ pub struct ImportName {
 }
 
 /// Represents an exception handler in a try statement.
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 #[derive(Debug, Clone, PartialEq)]
 pub struct ExceptHandler {
     /// Optional exception type
@@ -629,7 +632,7 @@ pub struct ExceptHandler {
 }
 
 /// Represents an item in a with statement.
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 #[derive(Debug, Clone, PartialEq)]
 pub struct WithItem {
     /// Context manager expression
@@ -651,7 +654,6 @@ impl Program {
 }
 
 impl Default for Program {
-    /// Returns a default empty program.
     fn default() -> Self {
         Self::new()
     }

@@ -4,11 +4,11 @@ pub mod token_type;
 use crate::{language::GoLanguage, lexer::token_type::GoTokenType};
 use oak_core::{Lexer, LexerCache, LexerState, OakError, lexer::LexOutput, source::Source};
 
-type State<'a, S> = LexerState<'a, S, GoLanguage>;
+pub(crate) type State<'a, S> = LexerState<'a, S, GoLanguage>;
 
 #[derive(Clone)]
 pub struct GoLexer<'config> {
-    _config: &'config GoLanguage,
+    config: &'config GoLanguage,
 }
 
 impl<'config> Lexer<GoLanguage> for GoLexer<'config> {
@@ -24,7 +24,7 @@ impl<'config> Lexer<GoLanguage> for GoLexer<'config> {
 
 impl<'config> GoLexer<'config> {
     pub fn new(config: &'config GoLanguage) -> Self {
-        Self { _config: config }
+        Self { config }
     }
 
     fn run<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> Result<(), OakError> {

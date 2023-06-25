@@ -29,6 +29,17 @@ pub mod parser;
 
 pub use crate::{ast::NixRoot, builder::NixBuilder, language::NixLanguage, lexer::NixLexer, parser::NixParser};
 
+/// Parses a Nix string.
+pub fn parse(nix: &str) -> Result<NixRoot, String> {
+    use oak_core::{Builder, parser::session::ParseSession, source::SourceText};
+    let language = NixLanguage::default();
+    let builder = NixBuilder::new(&language);
+    let source = SourceText::new(nix.to_string());
+    let mut cache = ParseSession::default();
+    let result = builder.build(&source, &[], &mut cache);
+    result.result.map_err(|e| format!("{:?}", e))
+}
+
 /// Highlighter implementation.
 #[cfg(feature = "oak-highlight")]
 pub use crate::lsp::highlighter::NixHighlighter;

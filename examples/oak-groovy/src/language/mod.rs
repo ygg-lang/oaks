@@ -1,12 +1,9 @@
 #![doc = include_str!("readme.md")]
 use oak_core::{Language, LanguageCategory};
-#[cfg(feature = "serde")]
-#[cfg(feature = "serde")]
-use serde::{Deserialize, Serialize};
 
 /// Groovy language configuration.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GroovyLanguage {}
 
 impl Default for GroovyLanguage {
@@ -21,7 +18,7 @@ impl Language for GroovyLanguage {
 
     type TokenType = crate::lexer::token_type::GroovyTokenType;
     type ElementType = crate::parser::element_type::GroovyElementType;
-    type TypedRoot = ();
+    type TypedRoot = crate::ast::GroovyRoot;
 }
 
 impl GroovyLanguage {

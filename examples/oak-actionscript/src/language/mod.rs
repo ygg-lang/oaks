@@ -1,12 +1,10 @@
 #![doc = include_str!("readme.md")]
-use crate::{ast::ActionScriptRoot, lexer::ActionScriptTokenType, parser::ActionScriptElementType};
+use crate::ast::ActionScriptRoot;
 use oak_core::{Language, LanguageCategory};
-#[cfg(feature = "serde")]
-use serde::{Deserialize, Serialize};
 
-/// ActionScript 语言配置和元数据。
+/// ActionScript language configuration and metadata.
 #[derive(Clone, Debug, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct ActionScriptLanguage {
     /// Enable strict mode
     pub strict_mode: bool,

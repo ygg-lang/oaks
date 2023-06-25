@@ -2,19 +2,23 @@
 use crate::{ast::*, language::CmdLanguage, parser::CmdParser};
 use oak_core::{Builder, BuilderCache, GreenNode, OakDiagnostics, Parser, SourceText, TextEdit, source::Source};
 
-/// Windows Command (CMD) 语言的 AST 构建器
+/// Windows Command (CMD) language AST builder
 #[derive(Clone)]
 pub struct CmdBuilder<'config> {
     config: &'config CmdLanguage,
 }
 
 impl<'config> CmdBuilder<'config> {
+    /// Creates a new `CmdBuilder` with the given configuration.
     pub fn new(config: &'config CmdLanguage) -> Self {
         Self { config }
     }
 
+    /// Builds the root AST node from the given green node.
     pub fn build_root(&self, _green: &GreenNode<CmdLanguage>, _source: &SourceText) -> Result<CmdRoot, oak_core::OakError> {
-        // 简化的 AST 构建逻辑
+        // Simplified AST building logic
+        // This should build the tree according to actual CMD syntax rules
+        // Currently just as an example
         Ok(CmdRoot { elements: vec![] })
     }
 }

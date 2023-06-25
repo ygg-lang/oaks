@@ -1,3 +1,4 @@
+/// Element type definitions for the Notedown parser.
 pub mod element_type;
 
 use crate::{
@@ -13,13 +14,16 @@ use oak_core::{
     tree::GreenNode,
 };
 
-type State<'a, S> = ParserState<'a, NotedownLanguage, S>;
+pub(crate) type State<'a, S> = ParserState<'a, NotedownLanguage, S>;
 
+/// Notedown parser implementation
 pub struct NoteParser<'a> {
+    /// Reference to the language configuration
     pub language: &'a NotedownLanguage,
 }
 
 impl<'a> NoteParser<'a> {
+    /// Create a new parser with the given language configuration
     pub fn new(language: &'a NotedownLanguage) -> Self {
         Self { language }
     }
@@ -28,20 +32,18 @@ impl<'a> NoteParser<'a> {
 impl<'p> Parser<NotedownLanguage> for NoteParser<'p> {
     fn parse<'a, S: Source + ?Sized>(&self, source: &'a S, edits: &[TextEdit], cache: &'a mut impl ParseCache<NotedownLanguage>) -> ParseOutput<'a, NotedownLanguage> {
         let lexer = NotedownLexer::new(self.language);
-        oak_core::parser::parse_with_lexer(&lexer, source, edits, cache, |state| self.parse_root_internal(state))
+        oak_core::parser::parse_with_lexer(&lexer, source, edits, cache, |state| {
+            let checkpoint = state.checkpoint();
+            while state.not_at_end() {
+                self.parse_block(state);
+            }
+
+            Ok(state.finish_at(checkpoint, NoteElementType::Root))
+        })
     }
 }
 
 impl<'p> NoteParser<'p> {
-    fn parse_root_internal<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> Result<&'a GreenNode<'a, NotedownLanguage>, OakError> {
-        let checkpoint = state.checkpoint();
-        while state.not_at_end() {
-            self.parse_block(state);
-        }
-
-        Ok(state.finish_at(checkpoint, NoteElementType::Root))
-    }
-
     fn parse_block<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) {
         let kind = state.peek_kind();
         match kind {
@@ -61,17 +63,10 @@ impl<'p> NoteParser<'p> {
             level += 1;
         }
 
-        while state.not_at_end() && !state.at(NoteTokenType::Newline) {
-            state.bump();
-        }
+        self.parse_inline_content(state);
 
         let kind = match level {
-            1 => NoteElementType::Heading,
-            2 => NoteElementType::Heading,
-            3 => NoteElementType::Heading,
-            4 => NoteElementType::Heading,
-            5 => NoteElementType::Heading,
-            6 => NoteElementType::Heading,
+            1..=6 => NoteElementType::Heading,
             _ => NoteElementType::Paragraph,
         };
         state.finish_at(checkpoint, kind);
@@ -80,9 +75,7 @@ impl<'p> NoteParser<'p> {
     fn parse_list_item<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) {
         let checkpoint = state.checkpoint();
         state.bump(); // marker
-        while state.not_at_end() && !state.at(NoteTokenType::Newline) {
-            state.bump();
-        }
+        self.parse_inline_content(state);
         state.finish_at(checkpoint, NoteElementType::ListItem);
     }
 
@@ -90,53 +83,85 @@ impl<'p> NoteParser<'p> {
         let checkpoint = state.checkpoint();
         while state.not_at_end() && state.at(NoteTokenType::Pipe) {
             self.parse_table_row(state);
+            while state.at(NoteTokenType::Newline) || state.at(NoteTokenType::Whitespace) {
+                state.bump();
+            }
         }
         state.finish_at(checkpoint, NoteElementType::Table);
     }
 
     fn parse_table_row<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) {
         let checkpoint = state.checkpoint();
-        while state.not_at_end() && !state.at(NoteTokenType::Newline) {
-            if state.at(NoteTokenType::Pipe) {
-                let cell_checkpoint = state.checkpoint();
-                state.bump(); // |
-                while state.not_at_end() && !state.at(NoteTokenType::Pipe) && !state.at(NoteTokenType::Newline) {
-                    state.bump();
-                }
-                state.finish_at(cell_checkpoint, NoteElementType::Token(NoteTokenType::TableCell));
-            }
-            else {
-                state.bump();
-            }
+        while state.at(NoteTokenType::Pipe) {
+            self.parse_table_cell(state);
         }
         if state.at(NoteTokenType::Newline) {
             state.bump();
         }
-        state.finish_at(checkpoint, crate::parser::element_type::NoteElementType::TableRow);
+        state.finish_at(checkpoint, NoteElementType::TableRow);
     }
 
-    fn parse_code_block<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) {
+    fn parse_table_cell<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) {
         let checkpoint = state.checkpoint();
-        // Simplified code block parsing
-        state.bump(); // ```
-        while state.not_at_end() {
-            if state.at(NoteTokenType::Backtick) {
-                state.bump();
-                break;
-            }
-            state.bump();
+        state.bump(); // |
+        while state.not_at_end() && !state.at(NoteTokenType::Pipe) && !state.at(NoteTokenType::Newline) {
+            self.parse_inline_content(state);
         }
-        state.finish_at(checkpoint, crate::parser::element_type::NoteElementType::CodeBlock);
+        // ElementType for cell is not explicitly in NoteElementType, using Token(Pipe) as placeholder or just Root
+        state.finish_at(checkpoint, NoteElementType::Root);
     }
 
     fn parse_paragraph<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) {
         let checkpoint = state.checkpoint();
-        while state.not_at_end() && !state.at(NoteTokenType::Newline) {
-            state.bump();
-        }
+        self.parse_inline_content(state);
         if state.at(NoteTokenType::Newline) {
             state.bump();
         }
-        state.finish_at(checkpoint, crate::parser::element_type::NoteElementType::Paragraph);
+        state.finish_at(checkpoint, NoteElementType::Paragraph);
+    }
+
+    fn parse_inline_content<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) {
+        while state.not_at_end() && !state.at(NoteTokenType::Newline) {
+            let checkpoint = state.checkpoint();
+            let kind = state.peek_kind();
+            match kind {
+                Some(NoteTokenType::Asterisk) | Some(NoteTokenType::Underscore) => {
+                    let marker = kind.unwrap();
+                    state.bump();
+                    while state.not_at_end() && !state.at(marker) && !state.at(NoteTokenType::Newline) {
+                        self.parse_inline_content(state);
+                    }
+                    if state.at(marker) {
+                        state.bump();
+                    }
+                    state.finish_at(checkpoint, NoteElementType::Root);
+                }
+                Some(NoteTokenType::LeftBracket) => {
+                    state.bump(); // [
+                    while state.not_at_end() && !state.at(NoteTokenType::RightBracket) && !state.at(NoteTokenType::Newline) {
+                        self.parse_inline_content(state);
+                    }
+                    if state.at(NoteTokenType::RightBracket) {
+                        state.bump();
+                    }
+                    state.finish_at(checkpoint, NoteElementType::Link);
+                }
+                _ => {
+                    state.bump();
+                }
+            }
+        }
+    }
+
+    fn parse_code_block<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) {
+        let checkpoint = state.checkpoint();
+        state.bump(); // ```
+        while state.not_at_end() && !state.at(NoteTokenType::Backtick) {
+            state.bump();
+        }
+        if state.at(NoteTokenType::Backtick) {
+            state.bump();
+        }
+        state.finish_at(checkpoint, NoteElementType::CodeBlock);
     }
 }

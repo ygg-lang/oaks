@@ -1,31 +1,41 @@
 use oak_core::{ElementType, UniversalElementRole};
-#[cfg(feature = "serde")]
-use serde::{Deserialize, Serialize};
 use std::fmt;
 
+/// Element types for the Wolfram language.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub enum WolframElementType {
+    /// Root node of the tree.
     Root,
-    // 表达式
+    // Expressions
+    /// A general expression.
     Expression,
-    // 函数调用 f[x]
+    // Function call f[x]
+    /// A function call, e.g., `f[x]`.
     Call,
-    // 参数列表 [x, y]
+    // Argument list [x, y]
+    /// A list of arguments, e.g., `[x, y]`.
     Arguments,
-    // 列表 {a, b}
+    // List {a, b}
+    /// A list, e.g., `{a, b}`.
     List,
-    // 符号/标识符
+    // Symbol/Identifier
+    /// A symbol or identifier.
     Symbol,
-    // 字面量
+    // Literals
+    /// A literal value.
     Literal,
-    // 二元表达式 x + y
+    // Binary expression x + y
+    /// A binary expression, e.g., `x + y`.
     BinaryExpr,
-    // 前缀表达式 !x
+    // Prefix expression !x
+    /// A prefix expression, e.g., `!x`.
     PrefixExpr,
-    // 后缀表达式 x!
+    // Postfix expression x!
+    /// A postfix expression, e.g., `x!`.
     PostfixExpr,
-    // 错误
+    // Errors
+    /// An error element.
     Error,
 }
 

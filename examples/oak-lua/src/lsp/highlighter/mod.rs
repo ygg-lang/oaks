@@ -1,33 +1,34 @@
 #![doc = include_str!("readme.md")]
-/// 高亮类型的本地定义
+/// Local definition of highlight kinds
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum HighlightKind {
-    /// 关键字
+    /// Keyword
     Keyword,
-    /// 字符串
+    /// String
     String,
-    /// 数字
+    /// Number
     Number,
-    /// 注释
+    /// Comment
     Comment,
-    /// 宏
+    /// Macro
     Macro,
-    /// 标识符
+    /// Identifier
     Identifier,
-    /// 运算符
+    /// Operator
     Operator,
 }
 
-/// 高亮器 trait
+/// Highlighter trait
 pub trait Highlighter {
-    /// 对给定的文本进行高亮处理
+    /// Highlight the given text
     fn highlight(&self, text: &str) -> Vec<(usize, usize, HighlightKind)>;
 }
 
-/// Lua 语法高亮器
+/// Lua syntax highlighter
 pub struct LuaHighlighter;
 
 impl LuaHighlighter {
+    /// Creates a new `LuaHighlighter`.
     pub fn new() -> Self {
         Self
     }
@@ -37,8 +38,8 @@ impl Highlighter for LuaHighlighter {
     fn highlight(&self, text: &str) -> Vec<(usize, usize, HighlightKind)> {
         let mut highlights = Vec::new();
 
-        // 简单的正则表达式或基于词法分析的高亮实现
-        // 这里我们可以复用 LuaLexer 来获取 Token
+        // Simple regex or lexer-based highlighting implementation
+        // Here we can reuse LuaLexer to get Tokens
         use crate::lexer::{LuaLexer, token_type::LuaTokenType};
         use oak_core::{LexOutput, Lexer, LexerCache, SourceText, Token};
 

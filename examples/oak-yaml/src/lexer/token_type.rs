@@ -1,7 +1,6 @@
 use oak_core::{Token, TokenType, UniversalTokenRole};
-#[cfg(feature = "serde")]
-use serde::{Deserialize, Serialize};
 
+/// Alias for `Token<YamlTokenType>`.
 pub type YamlToken = Token<YamlTokenType>;
 
 impl TokenType for YamlTokenType {
@@ -26,54 +25,84 @@ impl TokenType for YamlTokenType {
     }
 }
 
+/// Token types for the YAML language.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 #[repr(u16)]
 pub enum YamlTokenType {
     // Trivia
+    /// Whitespace.
     Whitespace,
+    /// A comment.
     Comment,
 
     // Literals
+    /// A string literal.
     StringLiteral,
+    /// A number literal.
     NumberLiteral,
+    /// A boolean literal.
     BooleanLiteral,
+    /// A null literal.
     NullLiteral,
 
     // Identifiers
+    /// An identifier.
     Identifier,
 
     // Operators and punctuation
-    Colon,       // :
-    Dash,        // -
-    Pipe,        // |
+    /// Colon `:`.
+    Colon, // :
+    /// Dash `-`.
+    Dash, // -
+    /// Pipe `|` for block scalars.
+    Pipe, // |
+    /// Greater than `>` for folded scalars.
     GreaterThan, // >
-    Question,    // ?
-    Ampersand,   // &
-    Asterisk,    // *
+    /// Question mark `?` for explicit keys.
+    Question, // ?
+    /// Ampersand `&` for anchors.
+    Ampersand, // &
+    /// Asterisk `*` for aliases.
+    Asterisk, // *
+    /// Exclamation mark `!` for tags.
     Exclamation, // !
 
     // Brackets
-    LeftBracket,  // [
+    /// Left bracket `[`.
+    LeftBracket, // [
+    /// Right bracket `]`.
     RightBracket, // ]
-    LeftBrace,    // {
-    RightBrace,   // }
+    /// Left brace `{`.
+    LeftBrace, // {
+    /// Right brace `}`.
+    RightBrace, // }
 
     // Special
+    /// An anchor `&anchor`.
     Anchor, // &anchor
-    Alias,  // *alias
-    Tag,    // !tag
+    /// An alias `*alias`.
+    Alias, // *alias
+    /// A tag `!tag`.
+    Tag, // !tag
 
     // Document markers
+    /// Document start `---`.
     DocumentStart, // ---
-    DocumentEnd,   // ...
+    /// Document end `...`.
+    DocumentEnd, // ...
+    /// A document.
     Document,
+    /// Root node.
     Root,
 
     // Newlines and indentation
+    /// A newline.
     Newline,
 
-    // Error and EOF
+    // Errors and EOF
+    /// Lexing error.
     Error,
+    /// End of stream.
     Eof,
 }

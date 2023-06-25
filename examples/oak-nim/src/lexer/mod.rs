@@ -1,4 +1,5 @@
 #![doc = include_str!("readme.md")]
+/// Token types for the Nim language.
 pub mod token_type;
 
 use crate::{language::NimLanguage, lexer::token_type::NimTokenType};
@@ -7,17 +8,19 @@ use std::borrow::Cow;
 
 type State<'s, S> = LexerState<'s, S, NimLanguage>;
 
+/// A lexer for the Nim language.
 #[derive(Clone, Debug)]
 pub struct NimLexer<'config> {
-    _config: &'config NimLanguage,
+    config: &'config NimLanguage,
 }
 
 impl<'config> NimLexer<'config> {
+    /// Creates a new Nim lexer.
     pub fn new(config: &'config NimLanguage) -> Self {
-        Self { _config: config }
+        Self { config }
     }
 
-    /// 跳过空白字符
+    /// Skips whitespace
     fn skip_whitespace<'s, S: Source + ?Sized>(&self, state: &mut State<'s, S>) -> bool {
         let start_pos = state.get_position();
 
@@ -39,7 +42,7 @@ impl<'config> NimLexer<'config> {
         }
     }
 
-    /// 处理换行
+    /// Handles newlines
     fn lex_newline<'s, S: Source + ?Sized>(&self, state: &mut State<'s, S>) -> bool {
         let start_pos = state.get_position();
 
@@ -61,19 +64,19 @@ impl<'config> NimLexer<'config> {
         }
     }
 
-    /// 处理注释
+    /// Handles comments
     fn lex_comment<'s, S: Source + ?Sized>(&self, state: &mut State<'s, S>) -> bool {
         let start_pos = state.get_position();
 
         if let Some('#') = state.peek() {
             state.advance(1);
 
-            // 检查是否是文档注释 ##
+            // Check if it's a doc comment ##
             if let Some('#') = state.peek() {
                 state.advance(1);
             }
 
-            // 读取到行
+            // Read until the end of the line
             while let Some(ch) = state.peek() {
                 if ch == '\n' || ch == '\r' {
                     break;
@@ -91,7 +94,7 @@ impl<'config> NimLexer<'config> {
         }
     }
 
-    /// 处理字符串字面量
+    /// Handles string literals
     fn lex_string<'s, S: Source + ?Sized>(&self, state: &mut State<'s, S>) -> bool {
         let start_pos = state.get_position();
 
@@ -122,7 +125,7 @@ impl<'config> NimLexer<'config> {
         }
     }
 
-    /// 处理字符字面量
+    /// Handles character literals
     fn lex_char<'s, S: Source + ?Sized>(&self, state: &mut State<'s, S>) -> bool {
         let start_pos = state.get_position();
 
@@ -153,7 +156,7 @@ impl<'config> NimLexer<'config> {
         }
     }
 
-    /// 处理数字
+    /// Handles numbers
     fn lex_number<'s, S: Source + ?Sized>(&self, state: &mut State<'s, S>) -> bool {
         let start_pos = state.get_position();
 
@@ -170,7 +173,7 @@ impl<'config> NimLexer<'config> {
                     }
                 }
 
-                // 简单的浮点数处理
+                // Simple float handling
                 let mut is_float = false;
                 if let Some('.') = state.peek() {
                     state.advance(1);
@@ -198,7 +201,7 @@ impl<'config> NimLexer<'config> {
         }
     }
 
-    /// 处理标识符和关键字
+    /// Handles identifiers and keywords
     fn lex_identifier<'s, S: Source + ?Sized>(&self, state: &mut State<'s, S>) -> bool {
         let start_pos = state.get_position();
 
@@ -263,7 +266,7 @@ impl<'config> NimLexer<'config> {
         }
     }
 
-    /// 处理操作符
+    /// Handles operators
     fn lex_operator<'s, S: Source + ?Sized>(&self, state: &mut State<'s, S>) -> bool {
         if let Some(ch) = state.peek() {
             let start_pos = state.get_position();
@@ -399,13 +402,14 @@ impl<'config> NimLexer<'config> {
         }
     }
 
+    /// Runs the lexer on the given state.
     pub fn run<'s, S: Source + ?Sized>(&self, state: &mut State<'s, S>) -> Result<(), oak_core::OakError> {
         while state.not_at_end() {
             if self.skip_whitespace(state) || self.lex_newline(state) || self.lex_comment(state) || self.lex_string(state) || self.lex_char(state) || self.lex_number(state) || self.lex_identifier(state) || self.lex_operator(state) {
                 continue;
             }
 
-            // 如果没有匹配到任何模式，添加错误 kind
+            // If no patterns match, add an error token
             let start_pos = state.get_position();
             if let Some(ch) = state.peek() {
                 state.advance(ch.len_utf8());

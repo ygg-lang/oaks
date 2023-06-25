@@ -8,13 +8,14 @@ use oak_core::{
 };
 use std::sync::LazyLock;
 
-type State<'a, S> = LexerState<'a, S, DockerfileLanguage>;
+pub(crate) type State<'a, S> = LexerState<'a, S, DockerfileLanguage>;
 
 static DOCKERFILE_WHITESPACE: LazyLock<WhitespaceConfig> = LazyLock::new(|| WhitespaceConfig { unicode_whitespace: true });
 
+/// Lexer for Dockerfile files.
 #[derive(Clone)]
 pub struct DockerfileLexer<'config> {
-    _config: &'config DockerfileLanguage,
+    config: &'config DockerfileLanguage,
 }
 
 impl<'config> Lexer<DockerfileLanguage> for DockerfileLexer<'config> {
@@ -29,8 +30,9 @@ impl<'config> Lexer<DockerfileLanguage> for DockerfileLexer<'config> {
 }
 
 impl<'config> DockerfileLexer<'config> {
+    /// Creates a new `DockerfileLexer` with the given configuration.
     pub fn new(config: &'config DockerfileLanguage) -> Self {
-        Self { _config: config }
+        Self { config }
     }
 
     fn run<'s, S: Source + ?Sized>(&self, state: &mut State<'s, S>) -> Result<(), OakError> {
@@ -79,12 +81,12 @@ impl<'config> DockerfileLexer<'config> {
         Ok(())
     }
 
-    /// 跳过空白字符
+    /// Skips whitespace characters.
     fn skip_whitespace<'s, S: Source + ?Sized>(&self, state: &mut State<'s, S>) -> bool {
         DOCKERFILE_WHITESPACE.scan(state, DockerfileTokenType::Whitespace)
     }
 
-    /// 处理换行符
+    /// Handles newline characters.
     fn lex_newline<'s, S: Source + ?Sized>(&self, state: &mut State<'s, S>) -> bool {
         let start = state.get_position();
         if let Some(ch) = state.peek() {
@@ -105,7 +107,7 @@ impl<'config> DockerfileLexer<'config> {
         false
     }
 
-    /// 处理注释
+    /// Handles comments
     fn lex_comment<'s, S: Source + ?Sized>(&self, state: &mut State<'s, S>) -> bool {
         let start = state.get_position();
         if state.peek() == Some('#') {
@@ -122,7 +124,7 @@ impl<'config> DockerfileLexer<'config> {
         false
     }
 
-    /// 处理标识符或指令
+    /// Handles identifiers or instructions
     fn lex_identifier_or_instruction<'s, S: Source + ?Sized>(&self, state: &mut State<'s, S>) -> bool {
         let start = state.get_position();
         if let Some(ch) = state.peek() {
@@ -134,9 +136,9 @@ impl<'config> DockerfileLexer<'config> {
                 }
 
                 let end_pos = state.get_position();
-                let text = state.get_text_in((start..end_pos).into());
+                let text = state.get_source().get_text_in((start..end_pos).into());
 
-                // 检查是否是 Dockerfile 指令
+                // Check if it's a Dockerfile instruction
                 let kind = match text.to_uppercase().as_str() {
                     "FROM" => DockerfileTokenType::From,
                     "RUN" => DockerfileTokenType::Run,
@@ -172,7 +174,7 @@ impl<'config> DockerfileLexer<'config> {
         false
     }
 
-    /// 处理数字
+    /// Handles numbers
     fn lex_number<'s, S: Source + ?Sized>(&self, state: &mut State<'s, S>) -> bool {
         let start = state.get_position();
         if let Some(ch) = state.peek() {
@@ -190,7 +192,7 @@ impl<'config> DockerfileLexer<'config> {
         false
     }
 
-    /// 处理字符串
+    /// Handles strings
     fn lex_string<'s, S: Source + ?Sized>(&self, state: &mut State<'s, S>) -> bool {
         let start = state.get_position();
         if let Some(quote) = state.peek() {
@@ -220,7 +222,7 @@ impl<'config> DockerfileLexer<'config> {
         false
     }
 
-    /// 处理路径
+    /// Lexes paths.
     fn lex_path<'s, S: Source + ?Sized>(&self, state: &mut State<'s, S>) -> bool {
         let start = state.get_position();
         if let Some(ch) = state.peek() {
@@ -238,7 +240,7 @@ impl<'config> DockerfileLexer<'config> {
         false
     }
 
-    /// 处理运算符和分隔符
+    /// Lexes operators and delimiters.
     fn lex_operators_and_delimiters<'s, S: Source + ?Sized>(&self, state: &mut State<'s, S>) -> bool {
         let start = state.get_position();
         if let Some(ch) = state.peek() {
@@ -264,7 +266,7 @@ impl<'config> DockerfileLexer<'config> {
         false
     }
 
-    /// 处理其他字符
+    /// Lexes other characters.
     fn lex_other<'s, S: Source + ?Sized>(&self, state: &mut State<'s, S>) -> bool {
         let start = state.get_position();
         if let Some(ch) = state.peek() {

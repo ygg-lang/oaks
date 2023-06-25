@@ -5,12 +5,12 @@
 //! compatible with the LSP Semantic Tokens specification.
 use oak_core::{language::Language, source::Source, tree::RedNode};
 use oak_vfs::LineMap;
-use serde::{Deserialize, Serialize};
 
 /// Represents a semantic token for syntax highlighting.
 ///
 /// Benchmarked against LSP's Semantic Tokens.
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct SemanticToken {
     /// The delta line from the previous token.
     pub delta_line: u32,

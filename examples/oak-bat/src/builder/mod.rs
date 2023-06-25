@@ -2,7 +2,7 @@
 use crate::{ast::*, language::BatLanguage, parser::BatParser};
 use oak_core::{Builder, BuilderCache, GreenNode, OakDiagnostics, Parser, SourceText, TextEdit, source::Source};
 
-/// Windows Batch (BAT) 语言的 AST 构建器
+/// Windows Batch (BAT) AST builder.
 #[derive(Clone)]
 pub struct BatBuilder<'config> {
     config: &'config BatLanguage,
@@ -14,7 +14,7 @@ impl<'config> BatBuilder<'config> {
     }
 
     pub fn build_root(&self, _green: &GreenNode<BatLanguage>, _source: &SourceText) -> Result<BatRoot, oak_core::OakError> {
-        // 简化的 AST 构建逻辑
+        // Simplified AST construction logic.
         Ok(BatRoot { elements: vec![] })
     }
 }

@@ -1,196 +1,384 @@
-use oak_core::{ElementType, Parser, UniversalElementRole};
-#[cfg(feature = "serde")]
-use serde::{Deserialize, Serialize};
+//! Crystal element types.
+
+use oak_core::{ElementType, UniversalElementRole};
 use std::fmt::{Display, Formatter};
 
+/// Enum representing all possible element types in Crystal.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+#[repr(u16)]
 pub enum CrystalElementType {
+    /// Whitespace characters.
     Whitespace,
+    /// Comments.
     Comment,
+    /// Identifiers.
     Identifier,
+    /// Numeric literals.
     Number,
+    /// String literals.
     String,
+    /// Character literals.
     Character,
+    /// Symbol literals.
     Symbol,
+    /// `class` keyword.
     ClassKeyword,
+    /// `module` keyword.
     ModuleKeyword,
+    /// `def` keyword.
     DefKeyword,
+    /// `end` keyword.
     EndKeyword,
+    /// `if` keyword.
     IfKeyword,
+    /// `else` keyword.
     ElseKeyword,
+    /// `elsif` keyword.
     ElsifKeyword,
+    /// `unless` keyword.
     UnlessKeyword,
+    /// `case` keyword.
     CaseKeyword,
+    /// `when` keyword.
     WhenKeyword,
+    /// `then` keyword.
     ThenKeyword,
+    /// `while` keyword.
     WhileKeyword,
+    /// `until` keyword.
     UntilKeyword,
+    /// `for` keyword.
     ForKeyword,
+    /// `in` keyword.
     InKeyword,
+    /// `do` keyword.
     DoKeyword,
+    /// `begin` keyword.
     BeginKeyword,
+    /// `rescue` keyword.
     RescueKeyword,
+    /// `ensure` keyword.
     EnsureKeyword,
+    /// `break` keyword.
     BreakKeyword,
+    /// `next` keyword.
     NextKeyword,
+    /// `return` keyword.
     ReturnKeyword,
+    /// `yield` keyword.
     YieldKeyword,
+    /// `super` keyword.
     SuperKeyword,
+    /// `self` keyword.
     SelfKeyword,
+    /// `true` keyword.
     TrueKeyword,
+    /// `false` keyword.
     FalseKeyword,
+    /// `nil` keyword.
     NilKeyword,
+    /// `and` keyword.
     AndKeyword,
+    /// `or` keyword.
     OrKeyword,
+    /// `not` keyword.
     NotKeyword,
+    /// `+` operator.
     Plus,
+    /// `-` operator.
     Minus,
+    /// `*` operator.
     Star,
+    /// `/` operator.
     Slash,
+    /// `%` operator.
     Percent,
+    /// `**` operator.
     StarStar,
+    /// `=` operator.
     Equal,
+    /// `==` operator.
     EqualEqual,
+    /// `!=` operator.
     NotEqual,
+    /// `<` operator.
     Less,
+    /// `<=` operator.
     LessEqual,
+    /// `>` operator.
     Greater,
+    /// `>=` operator.
     GreaterEqual,
+    /// `<=>` operator.
     Spaceship,
+    /// `=~` operator.
     Match,
+    /// `!~` operator.
     NotMatch,
+    /// `&` operator.
     And,
+    /// `|` operator.
     Or,
+    /// `!` operator.
     Not,
+    /// `&` bitwise operator.
     BitwiseAnd,
+    /// `|` bitwise operator.
     BitwiseOr,
+    /// `^` bitwise operator.
     BitwiseXor,
+    /// `~` bitwise operator.
     BitwiseNot,
+    /// `<<` operator.
     LeftShift,
+    /// `>>` operator.
     RightShift,
+    /// `&&` operator.
     LogicalAnd,
+    /// `||` operator.
     LogicalOr,
+    /// `+=` operator.
     PlusEqual,
+    /// `-=` operator.
     MinusEqual,
+    /// `*=` operator.
     StarEqual,
+    /// `/=` operator.
     SlashEqual,
+    /// `%=` operator.
     PercentEqual,
+    /// `**=` operator.
     StarStarEqual,
+    /// `&=` operator.
     AndEqual,
+    /// `|=` operator.
     OrEqual,
+    /// `^=` operator.
     XorEqual,
+    /// `<<=` operator.
     LeftShiftEqual,
+    /// `>>=` operator.
     RightShiftEqual,
+    /// `&&=` operator.
     LogicalAndEqual,
+    /// `||=` operator.
     LogicalOrEqual,
+    /// `(` symbol.
     LeftParen,
+    /// `)` symbol.
     RightParen,
+    /// `{` symbol.
     LeftBrace,
+    /// `}` symbol.
     RightBrace,
+    /// `[` symbol.
     LeftBracket,
+    /// `]` symbol.
     RightBracket,
+    /// `,` symbol.
     Comma,
+    /// `;` symbol.
     Semicolon,
+    /// `.` symbol.
     Dot,
+    /// `..` symbol.
     DotDot,
+    /// `...` symbol.
     DotDotDot,
+    /// `:` symbol.
     Colon,
+    /// `::` symbol.
     DoubleColon,
+    /// `->` symbol.
     Arrow,
+    /// `=>` symbol.
     FatArrow,
+    /// `?` symbol.
     Question,
+    /// `@` symbol.
     At,
+    /// `@@` symbol.
     DoubleAt,
+    /// `$` symbol.
     Dollar,
+    /// Newline character.
     Newline,
+    /// End of file.
     Eof,
+    /// Error element.
     Error,
+    /// Root node.
     Root,
+    /// Program node.
     Program,
+    /// Source file node.
     SourceFile,
+    /// Class definition.
     ClassDef,
+    /// Module definition.
     ModuleDef,
+    /// Method definition.
     MethodDef,
+    /// Block node.
     Block,
+    /// `if` expression.
     IfExpr,
+    /// `unless` expression.
     UnlessExpr,
+    /// `case` expression.
     CaseExpr,
+    /// `when` clause.
     WhenClause,
+    /// `while` expression.
     WhileExpr,
+    /// `until` expression.
     UntilExpr,
+    /// `for` expression.
     ForExpr,
+    /// `begin` expression.
     BeginExpr,
+    /// `rescue` clause.
     RescueClause,
+    /// `ensure` clause.
     EnsureClause,
+    /// Call expression.
     CallExpr,
+    /// Index expression.
     IndexExpr,
+    /// Member expression.
     MemberExpr,
+    /// Binary expression.
     BinaryExpr,
+    /// Unary expression.
     UnaryExpr,
+    /// Assignment expression.
     AssignExpr,
+    /// Literal expression.
     LiteralExpr,
+    /// Identifier expression.
     IdentifierExpr,
+    /// Array expression.
     ArrayExpr,
+    /// Hash expression.
     HashExpr,
+    /// Hash pair.
     HashPair,
+    /// Block expression.
     BlockExpr,
+    /// Lambda expression.
     LambdaExpr,
+    /// `yield` expression.
     YieldExpr,
+    /// `return` expression.
     ReturnExpr,
+    /// `break` expression.
     BreakExpr,
+    /// `next` expression.
     NextExpr,
+    /// `super` expression.
     SuperExpr,
+    /// `self` expression.
     SelfExpr,
+    /// Parenthesized expression.
     ParenExpr,
+    /// Type expression.
     TypeExpr,
+    /// Generic type.
     GenericType,
+    /// Union type.
     UnionType,
+    /// Tuple type.
     TupleType,
+    /// Named tuple type.
     NamedTupleType,
+    /// Proc type.
     ProcType,
+    /// Pattern node.
     Pattern,
+    /// Identifier pattern.
     IdentifierPattern,
+    /// Literal pattern.
     LiteralPattern,
+    /// Array pattern.
     ArrayPattern,
+    /// Hash pattern.
     HashPattern,
+    /// Tuple pattern.
     TuplePattern,
+    /// Parameter list.
     ParamList,
+    /// Parameter node.
     Param,
+    /// Splat parameter.
     SplatParam,
+    /// Double splat parameter.
     DoubleSplatParam,
+    /// Block parameter.
     BlockParam,
+    /// Annotation node.
     Annotation,
+    /// Macro definition.
     MacroDef,
+    /// Macro call.
     MacroCall,
+    /// Macro expression.
     MacroExpr,
+    /// Alias definition.
     Alias,
+    /// `include` statement.
     Include,
+    /// `extend` statement.
     Extend,
+    /// `require` statement.
     Require,
+    /// `private` visibility.
     Private,
+    /// `protected` visibility.
     Protected,
+    /// `public` visibility.
     Public,
+    /// `abstract` modifier.
     Abstract,
+    /// `virtual` modifier.
     Virtual,
+    /// `override` modifier.
     Override,
+    /// Struct definition.
     StructDef,
+    /// Enum definition.
     EnumDef,
+    /// Union definition.
     UnionDef,
+    /// Lib definition.
     LibDef,
+    /// `raise` expression.
     RaiseExpr,
+    /// Range expression.
     RangeExpr,
+    /// Exclusive range expression.
     ExclusiveRangeExpr,
+    /// Regex literal.
     RegexLiteral,
+    /// String interpolation.
     StringInterpolation,
+    /// Interpolation expression.
     InterpolationExpr,
+    /// Symbol literal.
     SymbolLiteral,
+    /// Constant reference.
     ConstantRef,
+    /// Instance variable.
     InstanceVar,
+    /// Class variable.
     ClassVar,
+    /// Global variable.
     GlobalVar,
+    /// Getter method.
     Getter,
+    /// Setter method.
     Setter,
+    /// Operator definition.
     OperatorDef,
 }
 

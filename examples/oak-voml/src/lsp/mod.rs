@@ -1,15 +1,20 @@
-#![doc = include_str!("readme.md")]
+//! Voml Language Server Protocol (LSP) support.
+
 use crate::language::VomlLanguage;
 use core::range::Range;
 use oak_core::tree::RedNode;
 #[cfg(feature = "lsp")]
 use {futures::Future, oak_lsp::service::LanguageService, oak_lsp::types::Hover as LspHover, oak_vfs::Vfs};
+
+/// Language service for Voml.
 #[cfg(feature = "lsp")]
 pub struct VomlLanguageService<V: Vfs> {
     vfs: V,
     workspace: oak_lsp::workspace::WorkspaceManager,
 }
+
 impl<V: Vfs> VomlLanguageService<V> {
+    /// Creates a new `VomlLanguageService`.
     pub fn new(vfs: V) -> Self {
         Self { vfs, workspace: oak_lsp::workspace::WorkspaceManager::new() }
     }

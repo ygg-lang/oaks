@@ -1,16 +1,19 @@
 use crate::{ast::*, language::MatlabLanguage, parser::MatlabParser};
 use oak_core::{Builder, BuilderCache, GreenNode, OakDiagnostics, Source, SourceText, TextEdit};
 
+/// Matlab AST builder
 #[derive(Clone)]
 pub struct MatlabBuilder<'config> {
     config: &'config MatlabLanguage,
 }
 
 impl<'config> MatlabBuilder<'config> {
+    /// Creates a new Matlab builder
     pub fn new(config: &'config MatlabLanguage) -> Self {
         Self { config }
     }
 
+    /// Builds the root node
     pub fn build_root(&self, green_tree: &GreenNode<MatlabLanguage>, source: &SourceText) -> Result<MatlabRoot, oak_core::OakError> {
         let red_root = oak_core::tree::RedNode::new(green_tree, 0);
         let mut items = Vec::new();
@@ -24,6 +27,7 @@ impl<'config> MatlabBuilder<'config> {
         Ok(MatlabRoot { items })
     }
 
+    /// Builds a single item (function, class, or statement)
     pub fn build_item(&self, node: &oak_core::tree::RedNode<MatlabLanguage>, source: &SourceText) -> Option<Item> {
         use crate::MatlabElementType::*;
         let kind = node.green.kind;

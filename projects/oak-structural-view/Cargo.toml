@@ -2,7 +2,7 @@
 name = "oak-structural-view"
 version.workspace = true
 authors.workspace = true
-description = "AST-based document structure and symbol tree generation for the Oak framework."
+description = "AST-based document structure and structure generation for the Oak framework."
 edition.workspace = true
 license.workspace = true
 repository = "https://github.com/ygg-lang/oaks/tree/master/projects/oak-structural-view"
@@ -10,5 +10,9 @@ categories = ["development-tools"]
 keywords = ["structure", "outline", "ast", "symbols"]
 
 [dependencies]
-oak-core = { workspace = true, features = ["serde"] }
-serde = { workspace = true }
+oak-core = { workspace = true }
+serde = { workspace = true, optional = true }
+
+[features]
+default = ["serde"]
+serde = ["dep:serde", "oak-core/serde"]

@@ -1,5 +1,8 @@
 #![doc = include_str!("readme.md")]
+//! Lexer implementation for the Elm language.
+
 use oak_core::Source;
+/// Token types for Elm.
 pub mod token_type;
 
 use crate::{language::ElmLanguage, lexer::token_type::ElmTokenType};
@@ -17,6 +20,7 @@ static ELM_COMMENT: LazyLock<CommentConfig> = LazyLock::new(|| CommentConfig { l
 static ELM_STRING: LazyLock<StringConfig> = LazyLock::new(|| StringConfig { quotes: &['"'], escape: Some('\\') });
 static ELM_CHAR: LazyLock<StringConfig> = LazyLock::new(|| StringConfig { quotes: &['\''], escape: Some('\\') });
 
+/// A lexer for Elm source files.
 #[derive(Clone, Debug)]
 pub struct ElmLexer<'config> {
     config: &'config ElmLanguage,
@@ -34,6 +38,7 @@ impl<'config> Lexer<ElmLanguage> for ElmLexer<'config> {
 }
 
 impl<'config> ElmLexer<'config> {
+    /// Creates a new instance of the Elm lexer.
     pub fn new(config: &'config ElmLanguage) -> Self {
         Self { config }
     }
@@ -76,7 +81,7 @@ impl<'config> ElmLexer<'config> {
         Ok(())
     }
 
-    /// 跳过空白字符
+    /// Skips whitespace characters.
     fn skip_whitespace<'s, S: Source + ?Sized>(&self, state: &mut State<'s, S>) -> bool {
         ELM_WHITESPACE.scan(state, ElmTokenType::Whitespace)
     }
@@ -176,7 +181,7 @@ impl<'config> ElmLexer<'config> {
     fn lex_operators<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start = state.get_position();
 
-        // 多字符操作符
+        // Multi-character operators
         let ops = [
             ("==", ElmTokenType::EqualEqual),
             ("/=", ElmTokenType::NotEqual),
@@ -201,7 +206,7 @@ impl<'config> ElmLexer<'config> {
             }
         }
 
-        // 单字符操作符
+        // Single-character operators
         if let Some(ch) = state.peek() {
             let kind = match ch {
                 '+' => ElmTokenType::Plus,

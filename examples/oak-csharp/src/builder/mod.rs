@@ -1,21 +1,30 @@
+//! Builder implementation for C# that converts the green tree into a high-level AST.
+
 use crate::{ast::*, language::CSharpLanguage, lexer::token_type::CSharpTokenType, parser::CSharpElementType};
 use core::range::Range;
 use oak_core::{
-    GreenNode, Parser, TokenType,
+    GreenNode, Parser,
     builder::{BuildOutput, Builder, BuilderCache},
     source::{Source, TextEdit},
     tree::red_tree::{RedNode, RedTree},
 };
 
+/// A builder that constructs a C# high-level AST from a green tree.
+///
+/// The `CSharpBuilder` traverses the red tree (which provides absolute spans)
+/// and maps its nodes to structured `ast` types.
 pub struct CSharpBuilder<'config> {
+    /// The language configuration.
     language: &'config CSharpLanguage,
 }
 
 impl<'config> CSharpBuilder<'config> {
+    /// Creates a new `CSharpBuilder` with the given language configuration.
     pub fn new(language: &'config CSharpLanguage) -> Self {
         Self { language }
     }
 
+    /// Builds a `CSharpRoot` from a green node.
     fn build_root(&self, green: &GreenNode<CSharpLanguage>, source: &str) -> CSharpRoot {
         let red = RedNode::new(green, 0);
         let mut items = Vec::new();
@@ -31,6 +40,7 @@ impl<'config> CSharpBuilder<'config> {
         CSharpRoot { items }
     }
 
+    /// Builds a top-level `Item` from a red node.
     fn build_item(&self, node: RedNode<CSharpLanguage>, source: &str) -> Option<Item> {
         match node.green.kind {
             CSharpElementType::NamespaceDeclaration => Some(Item::Namespace(self.build_namespace(node, source))),
@@ -45,6 +55,7 @@ impl<'config> CSharpBuilder<'config> {
         }
     }
 
+    /// Gets a substring from the source text safely.
     fn get_text<'a>(&self, span: Range<usize>, source: &'a str) -> &'a str {
         let start = span.start;
         let end = span.end;
@@ -54,6 +65,7 @@ impl<'config> CSharpBuilder<'config> {
         &source[start..end]
     }
 
+    /// Extracts an identifier string from a red node.
     fn extract_identifier(&self, node: RedNode<CSharpLanguage>, source: &str) -> String {
         for child in node.children() {
             match child {
@@ -76,27 +88,23 @@ impl<'config> CSharpBuilder<'config> {
         String::new()
     }
 
+    /// Extracts a list of attributes from a red node.
     fn extract_attributes(&self, node: RedNode<CSharpLanguage>, source: &str) -> Vec<Attribute> {
         let mut attributes = Vec::new();
         for child in node.children() {
-            if let RedTree::Node(sub_node) = child {
-                if sub_node.green.kind == CSharpElementType::AttributeList {
-                    for attr_child in sub_node.children() {
-                        if let RedTree::Node(attr_node) = attr_child {
-                            if attr_node.green.kind == CSharpElementType::Attribute {
-                                let name = self.extract_identifier(attr_node.clone(), source);
-                                let mut arguments = Vec::new();
-                                // TODO: Extract arguments
-                                attributes.push(Attribute { name, arguments })
-                            }
-                        }
-                    }
+            if let RedTree::Node(attr_node) = child {
+                if attr_node.green.kind == CSharpElementType::Attribute {
+                    let name = self.extract_identifier(attr_node.clone(), source);
+                    let span = attr_node.span();
+                    // TODO: Extract arguments
+                    attributes.push(Attribute { name, arguments: Vec::new(), span })
                 }
             }
         }
         attributes
     }
 
+    /// Builds a `NamespaceDeclaration` from a red node.
     fn build_namespace(&self, node: RedNode<CSharpLanguage>, source: &str) -> NamespaceDeclaration {
         let name = self.extract_identifier(node.clone(), source);
         let attributes = self.extract_attributes(node.clone(), source);
@@ -172,7 +180,7 @@ impl<'config> CSharpBuilder<'config> {
         let modifiers = self.extract_modifiers(node.clone(), source);
         let attributes = self.extract_attributes(node.clone(), source);
         let mut members = Vec::new();
-        // 处理枚举成员
+        // Handle enum members
         for child in node.children() {
             if let RedTree::Node(sub_node) = child {
                 if sub_node.kind::<CSharpElementType>() == CSharpElementType::IdentifierName {
@@ -405,7 +413,7 @@ impl<'config> CSharpBuilder<'config> {
 }
 
 impl<'config> Builder<CSharpLanguage> for CSharpBuilder<'config> {
-    fn build<'a, S: Source + ?Sized>(&self, source: &'a S, edits: &[TextEdit], cache: &'a mut impl BuilderCache<CSharpLanguage>) -> BuildOutput<CSharpLanguage> {
+    fn build<'a, S: Source + ?Sized>(&self, source: &'a S, edits: &[TextEdit], _cache: &'a mut impl BuilderCache<CSharpLanguage>) -> BuildOutput<CSharpLanguage> {
         let mut session = oak_core::parser::ParseSession::<CSharpLanguage>::default();
         let parser = crate::parser::CSharpParser::new(self.language);
         let output = parser.parse(source, edits, &mut session);

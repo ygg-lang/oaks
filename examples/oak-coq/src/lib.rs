@@ -5,22 +5,21 @@
 #![doc(html_favicon_url = "https://raw.githubusercontent.com/ygg-lang/oaks/refs/heads/dev/documents/logo.svg")]
 //! Coq support for the Oak language framework.
 
-/// AST 模块。
+/// AST module.
 pub mod ast;
-/// 构建器模块。
+/// Builder module.
 pub mod builder;
-/// 类型定义模块。
-/// 语言配置模块。
+/// Language configuration module.
 pub mod language;
-/// 词法分析器模块。
+/// Lexer module.
 pub mod lexer;
-/// LSP 模块。
+/// LSP module.
 #[cfg(feature = "lsp")]
 pub mod lsp;
-/// MCP 模块。
+/// MCP module.
 #[cfg(feature = "mcp")]
 pub mod mcp;
-/// 语法分析器模块。
+/// Parser module.
 pub mod parser;
 
 pub use crate::{

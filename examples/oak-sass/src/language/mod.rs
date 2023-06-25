@@ -1,12 +1,10 @@
 #![doc = include_str!("readme.md")]
 use crate::ast::SassRoot;
 use oak_core::language::{Language, LanguageCategory};
-#[cfg(feature = "serde")]
-use serde::{Deserialize, Serialize};
 
 /// Implementation of the Sass language.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct SassLanguage {
     // Sass-specific configuration, currently empty
 }

@@ -1,42 +1,72 @@
 use oak_core::{Source, Token, TokenType, UniversalElementRole, UniversalTokenRole};
-#[cfg(feature = "serde")]
-use serde::{Deserialize, Serialize};
 
+/// Type alias for a Clojure token.
 pub type ClojureToken = Token<ClojureTokenType>;
 
+/// Token types for Clojure.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub enum ClojureTokenType {
+    /// Generic token.
     Token,
+    /// List node.
     List,
+    /// Vector node.
     Vector,
+    /// Map node.
     Map,
+    /// Set node.
     Set,
+    /// Anonymous function node.
     AnonFn,
+    /// Root node.
     Root,
+    /// Source file node.
     SourceFile,
+    /// Error token.
     Error,
     // Lexer tokens
+    /// `(`
     ListStart,
+    /// `)`
     ListEnd,
+    /// `[`
     VectorStart,
+    /// `]`
     VectorEnd,
+    /// `{`
     MapStart,
+    /// `}`
     MapEnd,
+    /// `#{`
     SetStart,
+    /// `#(`
     AnonFnStart,
+    /// `'`
     Quote,
+    /// `~`
     Unquote,
+    /// `~@`
     UnquoteSplice,
+    /// `^`
     Meta,
+    /// Whitespace.
     Whitespace,
+    /// Comment.
     Comment,
+    /// String literal.
     StringLiteral,
+    /// Character literal.
     CharacterLiteral,
+    /// Number literal.
     NumberLiteral,
+    /// Keyword literal.
     KeywordLiteral,
+    /// `#`
     Dispatch,
+    /// Regex literal.
     RegexLiteral,
+    /// Symbol.
     Symbol,
 }
 

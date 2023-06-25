@@ -1,12 +1,9 @@
 #![doc = include_str!("readme.md")]
-use crate::{lexer::token_type::CoqTokenType, parser::element_type::CoqElementType};
 use oak_core::{Language, LanguageCategory};
-#[cfg(feature = "serde")]
-use serde::{Deserialize, Serialize};
 
 /// Implementation of the Coq language for the OAK parsing framework.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Default)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct CoqLanguage {}
 
 impl CoqLanguage {

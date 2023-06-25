@@ -1,12 +1,13 @@
 use crate::lexer::token_type::VLangTokenType;
 use oak_core::{ElementType, UniversalElementRole};
-#[cfg(feature = "serde")]
-use serde::{Deserialize, Serialize};
 
+/// Element types for the V language.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub enum VLangElementType {
+    /// The root source file.
     SourceFile,
+    /// A token element.
     Token(VLangTokenType),
 }
 

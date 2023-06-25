@@ -7,9 +7,10 @@
 
 /// AST module.
 pub mod ast;
+/// Builder module.
+pub mod builder;
 
-/// Kind definition module.
-/// Language configuration module.
+/// Language definition.
 pub mod language;
 /// Lexer module.
 pub mod lexer;
@@ -19,7 +20,7 @@ pub mod lsp;
 /// Parser module.
 pub mod parser;
 
-pub use crate::{ast::WgslRoot, language::WgslLanguage, lexer::WgslLexer, parser::WgslParser};
+pub use crate::{ast::WgslRoot, builder::WgslBuilder, language::WgslLanguage, lexer::WgslLexer, parser::WgslParser};
 
 /// LSP implementation.
 #[cfg(feature = "lsp")]

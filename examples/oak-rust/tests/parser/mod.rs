@@ -9,36 +9,36 @@ fn test_simple_function_parsing() -> Result<(), oak_core::OakError> {
     let language = RustLanguage::default();
     let parser = RustParser::new(&language);
 
-    // 先测试词法分析器
-    println!("测试词法分析器:");
+    // First test the lexer.
+    println!("Testing lexer:");
     let lexer = RustLexer::new(&language);
     let mut cache = oak_core::parser::session::ParseSession::<RustLanguage>::default();
     let lex_output = lexer.lex(&source, &[], &mut cache);
     match &lex_output.result {
         Ok(tokens) => {
-            println!("生成的 tokens: {:?}", tokens);
-            println!("token 数量: {}", tokens.len());
+            println!("Generated tokens: {:?}", tokens);
+            println!("Token count: {}", tokens.len());
 
             cache.set_lex_output(lex_output.clone());
 
-            // 使用带有 token 的缓存进行解析
+            // Parse using cache with tokens.
             let parse_output = parser.parse(&source, &[], &mut cache);
 
-            println!("测试简单函数解析:");
-            println!("源代码: '{}'", (&source).get_text_from(0));
+            println!("Testing simple function parsing:");
+            println!("Source code: '{}'", (&source).get_text_from(0));
             match &parse_output.result {
                 Ok(root) => {
-                    println!("解析结果: {:?}", root);
-                    println!("✅ 简单函数解析测试通过！")
+                    println!("Parse result: {:?}", root);
+                    println!("✅ Simple function parsing test passed!")
                 }
                 Err(e) => {
-                    println!("❌ 解析失败: {:?}", e);
+                    println!("❌ Parsing failed: {:?}", e);
                     return Err(e.clone());
                 }
             }
         }
         Err(e) => {
-            println!("❌ 词法分析失败: {:?}", e);
+            println!("❌ Lexing failed: {:?}", e);
             return Err(e.clone());
         }
     }

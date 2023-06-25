@@ -1,15 +1,20 @@
-#![doc = include_str!("readme.md")]
+//! Language Server Protocol (LSP) support for Crystal.
+
 use crate::language::CrystalLanguage;
 use core::range::Range;
 use oak_core::tree::RedNode;
 #[cfg(feature = "lsp")]
 use {futures::Future, oak_lsp::service::LanguageService, oak_lsp::types::Hover as LspHover, oak_vfs::Vfs};
+
+/// Language service for Crystal.
 #[cfg(feature = "lsp")]
 pub struct CrystalLanguageService<V: Vfs> {
     vfs: V,
     workspace: oak_lsp::workspace::WorkspaceManager,
 }
+
 impl<V: Vfs> CrystalLanguageService<V> {
+    /// Creates a new `CrystalLanguageService` with the given VFS.
     pub fn new(vfs: V) -> Self {
         Self { vfs, workspace: oak_lsp::workspace::WorkspaceManager::new() }
     }

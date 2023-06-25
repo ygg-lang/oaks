@@ -1,21 +1,28 @@
 #![doc = include_str!("readme.md")]
+/// Types of elements that can be highlighted.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum HighlightKind {
+    /// A keyword.
     Keyword,
+    /// A string literal.
     String,
+    /// A number literal.
     Number,
+    /// A comment.
     Comment,
+    /// An identifier.
     Identifier,
 }
 
-/// 高亮器 trait
+/// A trait for highlighting text.
 pub trait Highlighter {
-    /// 对给定的文本进行高亮处理
+    /// Highlights the given text.
     fn highlight(&self, text: &str) -> Vec<(usize, usize, HighlightKind)>;
 }
 
-/// Pascal 语法高亮器
+/// Syntax highlighter for Pascal.
 pub struct PascalHighlighter {
+    /// Whether to use the parser for highlighting.
     pub use_parser: bool,
 }
 
@@ -26,10 +33,12 @@ impl Default for PascalHighlighter {
 }
 
 impl PascalHighlighter {
+    /// Creates a new Pascal highlighter.
     pub fn new() -> Self {
         Self::default()
     }
 
+    /// Creates a new Pascal highlighter that uses the parser.
     pub fn with_parser() -> Self {
         Self { use_parser: true }
     }

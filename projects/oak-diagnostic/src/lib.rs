@@ -11,10 +11,10 @@ use oak_core::{
     source::Source,
 };
 use oak_vfs::LineMap;
-use serde::{Deserialize, Serialize};
 
 /// Severity of a diagnostic.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub enum Severity {
     /// An error that must be fixed.
     Error,
@@ -25,19 +25,21 @@ pub enum Severity {
 }
 
 /// A labeled region in the source code.
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct Label {
     /// The message associated with the label.
     pub message: Option<String>,
     /// The byte range within the resource.
-    #[serde(with = "oak_core::serde_range")]
+    #[cfg_attr(feature = "serde", serde(with = "oak_core::serde_range"))]
     pub span: core::range::Range<usize>,
     /// The color of the label (optional).
     pub color: Option<String>,
 }
 
 /// A diagnostic message.
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct Diagnostic {
     /// The diagnostic code.
     pub code: Option<String>,
@@ -565,8 +567,10 @@ fn html_escape(s: &str) -> String {
 }
 
 /// Emitter for LSP (Language Server Protocol) diagnostics.
+#[cfg(feature = "serde")]
 pub struct LspEmitter;
 
+#[cfg(feature = "serde")]
 impl Emitter for LspEmitter {
     fn render_localized<S: Source + ?Sized, L: Localizer + ?Sized>(&self, source: &S, diagnostic: &Diagnostic, localizer: Option<&L>, uri: Option<&str>) -> String {
         let line_map = LineMap::from_source(source);

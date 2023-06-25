@@ -2,13 +2,15 @@
 use crate::{ast::NoteDocument, language::NotedownLanguage};
 use oak_core::{Builder, BuilderCache, TextEdit, source::Source};
 
+/// Notedown AST builder
 pub struct NoteBuilder<'config> {
-    pub(crate) _config: &'config NotedownLanguage,
+    pub(crate) config: &'config NotedownLanguage,
 }
 
 impl<'config> NoteBuilder<'config> {
+    /// Create a new builder with the given language configuration
     pub fn new(config: &'config NotedownLanguage) -> Self {
-        Self { _config: config }
+        Self { config }
     }
 }
 

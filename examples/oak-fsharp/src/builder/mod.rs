@@ -7,11 +7,13 @@ use oak_core::{
     tree::red_tree::{RedNode, RedTree},
 };
 
+/// F# builder
 pub struct FSharpBuilder<'config> {
     language: &'config FSharpLanguage,
 }
 
 impl<'config> FSharpBuilder<'config> {
+    /// Creates a new FSharpBuilder
     pub fn new(language: &'config FSharpLanguage) -> Self {
         Self { language }
     }

@@ -1,4 +1,7 @@
+//! Parser implementation for the C# language.
+
 use crate::language::CSharpLanguage;
+/// Element types for the C# parser.
 pub mod element_type;
 pub use element_type::CSharpElementType;
 use oak_core::{
@@ -12,6 +15,10 @@ use oak_core::{
 
 pub(crate) type State<'a, S> = ParserState<'a, CSharpLanguage, S>;
 
+/// A parser for the C# language.
+///
+/// Implements the `Pratt` and `Parser` traits to provide a full C# parser
+/// capable of handling expressions, statements, and declarations.
 pub struct CSharpParser<'config> {
     pub(crate) _language: &'config CSharpLanguage,
 }
@@ -39,7 +46,7 @@ impl<'config> Pratt<CSharpLanguage> for CSharpParser<'config> {
                 state.bump();
                 PrattParser::parse(state, 0, self);
                 state.expect(CSharpTokenType::RightParen).ok();
-                state.finish_at(cp, crate::parser::element_type::CSharpElementType::BinaryExpression) // 简化处理
+                state.finish_at(cp, crate::parser::element_type::CSharpElementType::BinaryExpression) // simplified processing
             }
             _ => {
                 state.bump();
@@ -130,12 +137,17 @@ impl<'config> Pratt<CSharpLanguage> for CSharpParser<'config> {
 }
 
 impl<'config> CSharpParser<'config> {
+    /// Creates a new C# parser.
     pub fn new(language: &'config CSharpLanguage) -> Self {
         Self { _language: language }
     }
 
+    /// Parses a C# statement or declaration.
+    ///
+    /// This is the main dispatch method for the parser, routing to specific
+    /// methods based on the next token in the stream.
     fn parse_statement<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> Result<(), OakError> {
-        use crate::{lexer::token_type::CSharpTokenType, parser::CSharpElementType::*};
+        use crate::lexer::token_type::CSharpTokenType;
         match state.peek_kind() {
             Some(CSharpTokenType::Namespace) => self.parse_namespace_declaration(state)?,
             Some(CSharpTokenType::Using) => self.parse_using_directive(state)?,
@@ -182,6 +194,9 @@ impl<'config> CSharpParser<'config> {
         Ok(())
     }
 
+    /// Parses a `foreach` statement.
+    ///
+    /// Format: `foreach (Type var in collection) statement`
     fn parse_foreach_statement<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> Result<(), OakError> {
         use crate::lexer::token_type::CSharpTokenType;
         let cp = state.checkpoint();
@@ -197,6 +212,7 @@ impl<'config> CSharpParser<'config> {
         Ok(())
     }
 
+    /// Parses a `namespace` declaration.
     fn parse_namespace_declaration<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> Result<(), OakError> {
         use crate::lexer::token_type::CSharpTokenType;
         let cp = state.checkpoint();
@@ -209,6 +225,7 @@ impl<'config> CSharpParser<'config> {
         Ok(())
     }
 
+    /// Parses a `using` directive.
     fn parse_using_directive<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> Result<(), OakError> {
         use crate::lexer::token_type::CSharpTokenType;
         let cp = state.checkpoint();
@@ -221,6 +238,7 @@ impl<'config> CSharpParser<'config> {
         Ok(())
     }
 
+    /// Parses an accessor block (e.g., `{ get; set; }` for properties).
     fn parse_accessor_block<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> Result<(), OakError> {
         use crate::lexer::token_type::CSharpTokenType;
         state.expect(CSharpTokenType::LeftBrace).ok();
@@ -244,8 +262,9 @@ impl<'config> CSharpParser<'config> {
         Ok(())
     }
 
+    /// Parses a declaration (class, interface, struct, enum, record, delegate, event, field, property, or method).
     fn parse_declaration<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> Result<(), OakError> {
-        use crate::{lexer::token_type::CSharpTokenType, parser::CSharpElementType::*};
+        use crate::lexer::token_type::CSharpTokenType;
         let cp = state.checkpoint();
 
         // Handle modifiers
@@ -341,7 +360,7 @@ impl<'config> CSharpParser<'config> {
             }
             _ => {
                 // Property, Method, or Field
-                // 简化处理
+                // Simplified processing
                 state.bump(); // Type
                 while state.not_at_end() && !state.at(CSharpTokenType::Semicolon) && !state.at(CSharpTokenType::LeftBrace) && !state.at(CSharpTokenType::LeftParen) {
                     state.bump();
@@ -390,6 +409,7 @@ impl<'config> CSharpParser<'config> {
         Ok(())
     }
 
+    /// Parses an `if` statement.
     fn parse_if_statement<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> Result<(), OakError> {
         use crate::lexer::token_type::CSharpTokenType;
         let cp = state.checkpoint();
@@ -405,6 +425,7 @@ impl<'config> CSharpParser<'config> {
         Ok(())
     }
 
+    /// Parses a `while` statement.
     fn parse_while_statement<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> Result<(), OakError> {
         use crate::lexer::token_type::CSharpTokenType;
         let cp = state.checkpoint();
@@ -417,6 +438,7 @@ impl<'config> CSharpParser<'config> {
         Ok(())
     }
 
+    /// Parses a `for` statement.
     fn parse_for_statement<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> Result<(), OakError> {
         use crate::lexer::token_type::CSharpTokenType;
         let cp = state.checkpoint();
@@ -429,6 +451,7 @@ impl<'config> CSharpParser<'config> {
         Ok(())
     }
 
+    /// Parses a block statement enclosed in braces `{ ... }`.
     fn parse_block<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> Result<(), OakError> {
         use crate::lexer::token_type::CSharpTokenType;
         let cp = state.checkpoint();
@@ -441,11 +464,12 @@ impl<'config> CSharpParser<'config> {
         Ok(())
     }
 
+    /// Parses a `return` statement.
     fn parse_return_statement<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> Result<(), OakError> {
         use crate::lexer::token_type::CSharpTokenType;
         let cp = state.checkpoint();
         state.bump(); // return
-        if !state.at(CSharpTokenType::Semicolon) && !state.at(CSharpTokenType::RightBrace) {
+        if !state.at(CSharpTokenType::Semicolon) {
             PrattParser::parse(state, 0, self);
         }
         state.eat(CSharpTokenType::Semicolon);

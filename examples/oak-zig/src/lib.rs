@@ -7,14 +7,9 @@
 //! Zig support for the Oak language framework.
 
 /// AST module.
-// pub mod ast;
+pub mod ast;
 /// Builder module.
-// // pub mod builder;
-// /// Formatter module.
-// // pub mod formatter;
-// /// Highlighter module.
-// #[cfg(feature = "oak-highlight")]
-// pub mod highlighter;
+pub mod builder;
 /// Kind definition module.
 /// Language configuration module.
 pub mod language;
@@ -26,7 +21,7 @@ pub mod lsp;
 /// Parser module.
 pub mod parser;
 
-pub use crate::{language::ZigLanguage, lexer::ZigLexer, parser::ZigParser};
+pub use crate::{ast::ZigRoot, builder::ZigBuilder, language::ZigLanguage, lexer::ZigLexer, parser::ZigParser};
 pub use oak_core::{ElementType, TokenType};
 
 /// LSP implementation.

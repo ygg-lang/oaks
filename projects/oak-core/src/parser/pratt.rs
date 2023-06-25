@@ -45,37 +45,62 @@ impl OperatorInfo {
 /// # Example
 ///
 /// ```rust
-/// # use oak_core::{Language, ParserState, Pratt, binary, unary, OperatorInfo, Associativity};
+/// # use oak_core::{Language, ParserState, Pratt, binary, unary, OperatorInfo, Associativity, TokenType, ElementType, UniversalTokenRole, UniversalElementRole};
 /// # use oak_core::tree::GreenNode;
 /// # use oak_core::source::Source;
+/// #
+/// # #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+/// # #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+/// # enum MyToken { End, Plus, Star, Int }
+/// # impl TokenType for MyToken {
+/// #     const END_OF_STREAM: Self = MyToken::End;
+/// #     type Role = UniversalTokenRole;
+/// #     fn role(&self) -> Self::Role { UniversalTokenRole::None }
+/// # }
+/// #
+/// # #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+/// # #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+/// # enum MyElement { Root }
+/// # impl ElementType for MyElement {
+/// #     type Role = UniversalElementRole;
+/// #     fn role(&self) -> Self::Role { UniversalElementRole::None }
+/// # }
+/// # impl From<MyToken> for MyElement {
+/// #     fn from(_: MyToken) -> Self { MyElement::Root }
+/// # }
+/// #
 /// # struct MyLanguage;
 /// # impl Language for MyLanguage {
-/// #     type TokenType = u16;
-/// #     type ElementType = u16;
+/// #     const NAME: &'static str = "test";
+/// #     type TokenType = MyToken;
+/// #     type ElementType = MyElement;
+/// #     type TypedRoot = ();
 /// # }
+/// # #[derive(Clone, Copy)]
 /// # struct MyPratt;
 /// # impl Pratt<MyLanguage> for MyPratt {
 /// #     fn primary<'a, S: Source + ?Sized>(&self, state: &mut ParserState<'a, MyLanguage, S>) -> &'a GreenNode<'a, MyLanguage> {
 /// #         // Parse literals, identifiers, or parenthesized expressions
-/// #         state.checkpoint().finish(1)
+/// #         let cp = state.checkpoint();
+/// #         state.finish_at(cp, MyElement::Root)
 /// #     }
 /// #
 /// #     fn infix<'a, S: Source + ?Sized>(&self, state: &mut ParserState<'a, MyLanguage, S>, left: &'a GreenNode<'a, MyLanguage>, min_precedence: u8) -> Option<&'a GreenNode<'a, MyLanguage>> {
-/// #         let token = state.peek()?;
+/// #         let token = state.peek_at(0)?;
 /// #         let info = match token.kind {
-/// #             1 => Some(OperatorInfo::left(10)), // '+'
-/// #             2 => Some(OperatorInfo::left(20)), // '*'
+/// #             MyToken::Plus => Some(OperatorInfo::left(10)), // '+'
+/// #             MyToken::Star => Some(OperatorInfo::left(20)), // '*'
 /// #             _ => None,
 /// #         }?;
 /// #
 /// #         if info.precedence < min_precedence { return None }
 /// #
-/// #         Some(binary(state, left, token.kind, info.precedence, info.associativity, 100, |s, p| self.parse(s, p)))
+/// #         Some(binary(state, left, token.kind, info.precedence, info.associativity, MyElement::Root, |s, p| self.parse(s, p)))
 /// #     }
 /// # }
 /// # impl MyPratt {
 /// #     fn parse<'a, S: Source + ?Sized>(&self, state: &mut ParserState<'a, MyLanguage, S>, min_precedence: u8) -> &'a GreenNode<'a, MyLanguage> {
-/// #         oak_core::parser::PrattParser::new(self).parse(state, min_precedence)
+/// #         oak_core::parser::PrattParser::new(*self).parse_expr(state, min_precedence)
 /// #     }
 /// # }
 /// ```
@@ -156,6 +181,7 @@ where
 /// # use triomphe::Arc;
 /// #
 /// #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
+/// #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 /// enum Token { Number, Plus, Minus, Star, Slash, Eof }
 /// impl TokenType for Token {
 ///     const END_OF_STREAM: Self = Token::Eof;
@@ -164,6 +190,7 @@ where
 /// }
 ///
 /// #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
+/// #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 /// enum Element { Expr, Number, Plus, Minus, Star, Slash }
 /// impl ElementType for Element {
 ///     type Role = UniversalElementRole;
@@ -205,7 +232,7 @@ where
 ///             Token::Plus | Token::Minus => (1, oak_core::Associativity::Left),
 ///             Token::Star | Token::Slash => (2, oak_core::Associativity::Left),
 ///             _ => return None,
-///         }
+///         };
 ///         if prec < min_prec { return None }
 ///         Some(binary(state, left, kind, prec, assoc, Element::Expr, |s, p| self.parse_expr(s, p)))
 ///     }

@@ -1,15 +1,11 @@
 #![doc = include_str!("readme.md")]
 use oak_core::Range;
 
-#[cfg(feature = "serde")]
-#[cfg(feature = "serde")]
-use serde::{Deserialize, Serialize};
-
 /// Root node of the Coq AST (Abstract Syntax Tree).
 ///
 /// This structure represents the top-level node of a Coq document,
 /// containing a sequence of vernacular statements.
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 #[derive(Debug, PartialEq, Clone)]
 pub struct CoqRoot {
     /// A vector of vernacular statements that make up the Coq document.
@@ -20,7 +16,7 @@ pub struct CoqRoot {
 ///
 /// Vernaculars are top-level commands in Coq, such as definitions,
 /// theorems, inductive types, etc.
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 #[derive(Debug, PartialEq, Clone)]
 pub enum Vernacular {
     /// A definition statement with a name, body, and source span.

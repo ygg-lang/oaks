@@ -4,26 +4,41 @@ use crate::{
     geometry::{Point, Rect, Size},
     layout::{Edge, Layout},
 };
-use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 
 /// Rendering configuration
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct RenderConfig {
+    /// Width of the rendering canvas.
     pub canvas_width: f64,
+    /// Height of the rendering canvas.
     pub canvas_height: f64,
+    /// Background color of the canvas (hex string).
     pub background_color: String,
+    /// Default fill color for nodes (hex string).
     pub node_fill_color: String,
+    /// Default stroke color for nodes (hex string).
     pub node_stroke_color: String,
+    /// Default stroke width for nodes.
     pub node_stroke_width: f64,
+    /// Default color for edges (hex string).
     pub edge_color: String,
+    /// Default width for edges.
     pub edge_width: f64,
+    /// Default color for text (hex string).
     pub text_color: String,
+    /// Default font size for text.
     pub text_size: f64,
+    /// Font family for text.
     pub font_family: String,
+    /// Padding around the visualization.
     pub padding: f64,
+    /// Whether to show node and edge labels.
     pub show_labels: bool,
+    /// Whether to show arrowheads on directed edges.
     pub show_arrows: bool,
+    /// Size of the arrowheads.
     pub arrow_size: f64,
 }
 
@@ -50,15 +65,23 @@ impl Default for RenderConfig {
 }
 
 /// Style information for rendering elements
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct ElementStyle {
+    /// Optional override for the fill color.
     pub fill_color: Option<String>,
+    /// Optional override for the stroke color.
     pub stroke_color: Option<String>,
+    /// Optional override for the stroke width.
     pub stroke_width: Option<f64>,
+    /// Optional override for the text color.
     pub text_color: Option<String>,
+    /// Optional override for the text size.
     pub text_size: Option<f64>,
+    /// Optional override for the element opacity (0.0 to 1.0).
     pub opacity: Option<f64>,
+    /// Optional CSS class name for the element.
     pub class_name: Option<String>,
+    /// Custom attributes to be added to the SVG element.
     pub attributes: HashMap<String, String>,
 }
 
@@ -69,37 +92,44 @@ impl Default for ElementStyle {
 }
 
 impl ElementStyle {
+    /// Creates a new default element style.
     pub fn new() -> Self {
         Self::default()
     }
 
+    /// Sets the fill color.
     pub fn with_fill(mut self, color: String) -> Self {
         self.fill_color = Some(color);
         self
     }
 
+    /// Sets the stroke color and width.
     pub fn with_stroke(mut self, color: String, width: f64) -> Self {
         self.stroke_color = Some(color);
         self.stroke_width = Some(width);
         self
     }
 
+    /// Sets the text color and size.
     pub fn with_text(mut self, color: String, size: f64) -> Self {
         self.text_color = Some(color);
         self.text_size = Some(size);
         self
     }
 
+    /// Sets the element opacity.
     pub fn with_opacity(mut self, opacity: f64) -> Self {
         self.opacity = Some(opacity);
         self
     }
 
+    /// Sets the CSS class name.
     pub fn with_class(mut self, class_name: String) -> Self {
         self.class_name = Some(class_name);
         self
     }
 
+    /// Adds a custom attribute.
     pub fn with_attribute(mut self, key: String, value: String) -> Self {
         self.attributes.insert(key, value);
         self
@@ -114,27 +144,33 @@ pub struct SvgRenderer {
 }
 
 impl SvgRenderer {
+    /// Creates a new SVG renderer with default configuration.
     pub fn new() -> Self {
         Self { config: RenderConfig::default(), node_styles: HashMap::new(), edge_styles: HashMap::new() }
     }
 
+    /// Sets the rendering configuration.
     pub fn with_config(mut self, config: RenderConfig) -> Self {
         self.config = config;
         self
     }
 
+    /// Returns the current rendering configuration.
     pub fn config(&self) -> &RenderConfig {
         &self.config
     }
 
+    /// Sets the style for a specific node.
     pub fn set_node_style(&mut self, node_id: String, style: ElementStyle) {
         self.node_styles.insert(node_id, style);
     }
 
+    /// Sets the style for a specific edge.
     pub fn set_edge_style(&mut self, edge_id: String, style: ElementStyle) {
         self.edge_styles.insert(edge_id, style);
     }
 
+    /// Renders a layout as an SVG string.
     pub fn render_layout(&self, layout: &Layout) -> crate::Result<String> {
         let mut svg = String::new();
 
@@ -343,8 +379,11 @@ impl Default for SvgRenderer {
 /// Export formats for rendered layouts
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum ExportFormat {
+    /// Scalable Vector Graphics format.
     Svg,
+    /// HTML document with embedded SVG.
     Html,
+    /// JSON representation of the layout.
     Json,
 }
 
@@ -355,15 +394,18 @@ pub struct LayoutExporter {
 }
 
 impl LayoutExporter {
+    /// Creates a new layout exporter for the specified format.
     pub fn new(format: ExportFormat) -> Self {
         Self { format, config: RenderConfig::default() }
     }
 
+    /// Sets the rendering configuration for the export.
     pub fn with_config(mut self, config: RenderConfig) -> Self {
         self.config = config;
         self
     }
 
+    /// Exports a layout to a string in the configured format.
     pub fn export(&self, layout: &Layout) -> crate::Result<String> {
         match self.format {
             ExportFormat::Svg => {
@@ -371,6 +413,7 @@ impl LayoutExporter {
                 renderer.render_layout(layout)
             }
             ExportFormat::Html => self.export_html(layout),
+            #[cfg(feature = "serde")]
             ExportFormat::Json => self.export_json(layout),
         }
     }
@@ -422,6 +465,7 @@ impl LayoutExporter {
         Ok(html)
     }
 
+    #[cfg(feature = "serde")]
     fn export_json(&self, layout: &Layout) -> crate::Result<String> {
         let mut nodes = std::collections::HashMap::new();
         for (id, node) in &layout.nodes {

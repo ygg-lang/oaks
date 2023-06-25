@@ -32,11 +32,15 @@ impl HoverProvider<ObjectiveCLanguage> for ObjectiveCHoverProvider {
 /// Language service implementation for Objective-C.
 #[cfg(feature = "lsp")]
 pub struct ObjectiveCLanguageService<V: Vfs> {
+    /// Virtual file system.
     vfs: V,
+    /// Workspace manager.
     workspace: oak_lsp::workspace::WorkspaceManager,
+    /// Hover provider.
     hover_provider: ObjectiveCHoverProvider,
 }
 impl<V: Vfs> ObjectiveCLanguageService<V> {
+    /// Creates a new Objective-C language service.
     pub fn new(vfs: V) -> Self {
         Self { vfs, workspace: oak_lsp::workspace::WorkspaceManager::default(), hover_provider: ObjectiveCHoverProvider }
     }

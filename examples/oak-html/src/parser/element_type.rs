@@ -1,32 +1,54 @@
 use oak_core::{ElementType, UniversalElementRole};
-#[cfg(feature = "serde")]
-use serde::{Deserialize, Serialize};
 
+/// HTML element types.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub enum HtmlElementType {
+    /// Opening tag bracket `<`.
     TagOpen,
+    /// Closing tag bracket `>`.
     TagClose,
+    /// Opening tag with slash `</`.
     TagSlashOpen,
+    /// Self-closing tag slash `/>`.
     TagSelfClose,
+    /// Tag name.
     TagName,
+    /// Attribute name.
     AttributeName,
+    /// Attribute value.
     AttributeValue,
+    /// Attribute node.
     Attribute,
+    /// Text content.
     Text,
+    /// Comment node.
     Comment,
+    /// Equal sign.
     Equal,
+    /// Quote.
     Quote,
+    /// Doctype declaration.
     Doctype,
+    /// CDATA section.
     CData,
+    /// Processing instruction.
     ProcessingInstruction,
+    /// Entity reference.
     EntityRef,
+    /// Character reference.
     CharRef,
+    /// Whitespace.
     Whitespace,
+    /// Newline.
     Newline,
+    /// Document root.
     Document,
+    /// HTML element.
     Element,
+    /// End of file.
     Eof,
+    /// Error node.
     Error,
 }
 

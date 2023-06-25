@@ -1,8 +1,6 @@
 use oak_core::{Token, TokenType, UniversalTokenRole};
-#[cfg(feature = "serde")]
-use serde::{Deserialize, Serialize};
 
-pub type DelphiToken = Token<DelphiTokenType>;
+pub type _DelphiToken = Token<DelphiTokenType>;
 
 impl From<crate::parser::element_type::DelphiElementType> for DelphiTokenType {
     fn from(element: crate::parser::element_type::DelphiElementType) -> Self {
@@ -187,105 +185,193 @@ impl TokenType for DelphiTokenType {
     }
 }
 
+/// Represents the different types of tokens in the Delphi language.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub enum DelphiTokenType {
+    /// Root node.
     Root,
     // Basic tokens
+    /// Identifier.
     Identifier,
+    /// String literal.
     String,
+    /// Number literal.
     Number,
+    /// Floating point literal.
     Float,
+    /// Whitespace.
     Whitespace,
+    /// Newline.
     Newline,
 
     // Delphi keywords
+    /// `program` keyword.
     Program,
+    /// `unit` keyword.
     Unit,
+    /// `interface` keyword.
     Interface,
+    /// `implementation` keyword.
     Implementation,
+    /// `uses` keyword.
     Uses,
+    /// `type` keyword.
     Type,
+    /// `var` keyword.
     Var,
+    /// `const` keyword.
     Const,
+    /// `function` keyword.
     Function,
+    /// `procedure` keyword.
     Procedure,
+    /// `begin` keyword.
     Begin,
+    /// `end` keyword.
     End,
+    /// `if` keyword.
     If,
+    /// `then` keyword.
     Then,
+    /// `else` keyword.
     Else,
+    /// `while` keyword.
     While,
+    /// `do` keyword.
     Do,
+    /// `for` keyword.
     For,
+    /// `to` keyword.
     To,
+    /// `downto` keyword.
     Downto,
+    /// `repeat` keyword.
     Repeat,
+    /// `until` keyword.
     Until,
+    /// `case` keyword.
     Case,
+    /// `of` keyword.
     Of,
+    /// `with` keyword.
     With,
+    /// `try` keyword.
     Try,
+    /// `except` keyword.
     Except,
+    /// `finally` keyword.
     Finally,
+    /// `raise` keyword.
     Raise,
+    /// `class` keyword.
     Class,
+    /// `object` keyword.
     Object,
+    /// `record` keyword.
     Record,
+    /// `array` keyword.
     Array,
+    /// `set` keyword.
     Set,
+    /// `file` keyword.
     File,
+    /// `packed` keyword.
     Packed,
+    /// `string` keyword/type.
     String_,
+    /// `integer` keyword/type.
     Integer,
+    /// `real` keyword/type.
     Real,
+    /// `boolean` keyword/type.
     Boolean,
+    /// `char` keyword/type.
     Char,
+    /// `pointer` keyword/type.
     Pointer,
+    /// `nil` keyword.
     Nil,
+    /// `true` literal.
     True_,
+    /// `false` literal.
     False_,
+    /// `and` keyword/operator.
     And_,
+    /// `or` keyword/operator.
     Or_,
+    /// `not` keyword/operator.
     Not_,
+    /// `div` keyword/operator.
     Div,
+    /// `mod` keyword/operator.
     Mod,
+    /// `in` keyword/operator.
     In_,
+    /// `is` keyword/operator.
     Is_,
+    /// `as` keyword/operator.
     As_,
 
     // Operators
+    /// Plus `+`.
     Plus,
+    /// Minus `-`.
     Minus,
+    /// Star `*`.
     Star,
+    /// Slash `/`.
     Slash,
+    /// Equal `=`.
     Equal,
+    /// Not equal `<>`.
     NotEqual,
+    /// Less than `<`.
     Less,
+    /// Greater than `>`.
     Greater,
+    /// Less than or equal `<=`.
     LessEqual,
+    /// Greater than or equal `>=`.
     GreaterEqual,
+    /// Assignment `:=`.
     Assign,
+    /// Dot `.`.
     Dot,
+    /// Range `..`.
     DotDot,
+    /// Caret `^`.
     Caret,
+    /// At symbol `@`.
     At,
 
     // Separators
+    /// Left parenthesis `(`.
     LeftParen,
+    /// Right parenthesis `)`.
     RightParen,
+    /// Left bracket `[`.
     LeftBracket,
+    /// Right bracket `]`.
     RightBracket,
+    /// Semicolon `;`.
     Semicolon,
+    /// Comma `,`.
     Comma,
+    /// Colon `:`.
     Colon,
 
     // Comments
+    /// Comment.
     Comment,
+    /// Line comment `//`.
     LineComment,
+    /// Block comment `{ ... }` or `(* ... *)`.
     BlockComment,
 
     // Special
+    /// Error node.
     Error,
+    /// End of file.
     Eof,
 }

@@ -1,21 +1,25 @@
+//! Lexer implementation for the JASM language.
+
 #![doc = include_str!("readme.md")]
 use oak_core::{
     Lexer, LexerCache, LexerState, OakError, Source,
     lexer::{CommentConfig, LexOutput, StringConfig},
 };
+/// Token types for the JASM language.
 pub mod token_type;
 
 use crate::{language::JasmLanguage, lexer::token_type::JasmTokenType};
 use std::sync::LazyLock;
 
-type State<'a, S> = LexerState<'a, S, JasmLanguage>;
+pub(crate) type State<'a, S> = LexerState<'a, S, JasmLanguage>;
 
 static JASM_COMMENT: LazyLock<CommentConfig> = LazyLock::new(|| CommentConfig { line_marker: "//", block_start: "", block_end: "", nested_blocks: false });
 static JASM_STRING: LazyLock<StringConfig> = LazyLock::new(|| StringConfig { quotes: &['"'], escape: Some('\\') });
 
+/// Lexer for the JASM language.
 #[derive(Clone, Debug)]
 pub struct JasmLexer<'config> {
-    _config: &'config JasmLanguage,
+    config: &'config JasmLanguage,
 }
 
 impl<'config> Lexer<JasmLanguage> for JasmLexer<'config> {
@@ -27,11 +31,12 @@ impl<'config> Lexer<JasmLanguage> for JasmLexer<'config> {
 }
 
 impl<'config> JasmLexer<'config> {
+    /// Creates a new `JasmLexer`.
     pub fn new(config: &'config JasmLanguage) -> Self {
-        Self { _config: config }
+        Self { config }
     }
 
-    /// 主要的词法分析循环
+    /// Main lexing loop.
     fn run<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> Result<(), OakError> {
         while state.not_at_end() {
             let safe_point = state.get_position();
@@ -67,12 +72,12 @@ impl<'config> JasmLexer<'config> {
             state.advance_if_dead_lock(safe_point);
         }
 
-        // 添加 EOF token
+        // Add EOF token
         state.add_eof();
         Ok(())
     }
 
-    /// 跳过空白字符（不包括换行符）
+    /// Skips whitespace characters (excluding newlines).
     fn skip_whitespace<S: Source + ?Sized>(&self, state: &mut State<'_, S>) -> bool {
         let start = state.get_position();
 
@@ -93,7 +98,7 @@ impl<'config> JasmLexer<'config> {
         false
     }
 
-    /// 处理换行
+    /// Handles newlines.
     fn lex_newline<S: Source + ?Sized>(&self, state: &mut State<'_, S>) -> bool {
         let start = state.get_position();
 
@@ -105,17 +110,17 @@ impl<'config> JasmLexer<'config> {
         false
     }
 
-    /// 跳过注释
+    /// Skips comments.
     fn skip_comment<S: Source + ?Sized>(&self, state: &mut State<'_, S>) -> bool {
         JASM_COMMENT.scan(state, JasmTokenType::Comment, JasmTokenType::Comment)
     }
 
-    /// 处理字符串字面量
+    /// Handles string literals.
     fn lex_string_literal<S: Source + ?Sized>(&self, state: &mut State<'_, S>) -> bool {
-        JASM_STRING.scan(state, JasmTokenType::StringLiteral)
+        JASM_STRING.scan(state, JasmTokenType::String)
     }
 
-    /// 处理数字字面量
+    /// Handles number literals.
     fn lex_number_literal<S: Source + ?Sized>(&self, state: &mut State<'_, S>) -> bool {
         let start = state.get_position();
         let first = match state.peek() {
@@ -123,12 +128,12 @@ impl<'config> JasmLexer<'config> {
             None => return false,
         };
 
-        // 检查是否以数字或负号开始
+        // Check if starts with a digit or sign
         if !first.is_ascii_digit() && first != '-' && first != '+' {
             return false;
         }
 
-        // 如果是符号，检查后面是否跟数字
+        // If sign, check if followed by a digit
         if first == '-' || first == '+' {
             if let Some(next) = state.peek_next_n(1) {
                 if !next.is_ascii_digit() {
@@ -155,7 +160,7 @@ impl<'config> JasmLexer<'config> {
             else if (ch == 'e' || ch == 'E') && !has_exp {
                 has_exp = true;
                 state.advance(1);
-                // 处理指数符号
+                // Handle exponent sign
                 if let Some(sign) = state.peek() {
                     if sign == '+' || sign == '-' {
                         state.advance(1);
@@ -171,7 +176,7 @@ impl<'config> JasmLexer<'config> {
         true
     }
 
-    /// 处理标识符或关键字
+    /// Handles identifiers or keywords.
     fn lex_identifier_or_keyword<S: Source + ?Sized>(&self, state: &mut State<'_, S>) -> bool {
         let start = state.get_position();
         let ch = match state.peek() {
@@ -179,7 +184,7 @@ impl<'config> JasmLexer<'config> {
             None => return false,
         };
 
-        // 标识符必须以字母或下划线开始
+        // Identifier must start with a letter or underscore
         if !(ch.is_ascii_alphabetic() || ch == '_') {
             return false;
         }
@@ -197,16 +202,16 @@ impl<'config> JasmLexer<'config> {
         let end = state.get_position();
         let text = state.get_text_in((start..end).into());
 
-        // 检查是否为关键字或指令
+        // Check if keyword or instruction
         let kind = self.classify_identifier(&text);
         state.add_token(kind, start, state.get_position());
         true
     }
 
-    /// 分类标识符为关键字、指令或普通标识符
+    /// Classifies an identifier as a keyword, instruction, or identifier.
     fn classify_identifier(&self, text: &str) -> JasmTokenType {
         match text {
-            // 关键字
+            // Keywords
             "class" => JasmTokenType::ClassKw,
             "version" => JasmTokenType::VersionKw,
             "method" => JasmTokenType::MethodKw,
@@ -222,7 +227,7 @@ impl<'config> JasmLexer<'config> {
             "nestmembers" => JasmTokenType::NestMembersKw,
             "bootstrapmethod" => JasmTokenType::BootstrapMethodKw,
 
-            // 访问修饰符
+            // Access modifiers
             "public" => JasmTokenType::Public,
             "private" => JasmTokenType::Private,
             "protected" => JasmTokenType::Protected,
@@ -236,7 +241,7 @@ impl<'config> JasmLexer<'config> {
             "deprecated" => JasmTokenType::Deprecated,
             "varargs" => JasmTokenType::Varargs,
 
-            // 字节码指令
+            // Bytecode instructions
             "aload_0" => JasmTokenType::ALoad0,
             "aload_1" => JasmTokenType::ALoad1,
             "aload_2" => JasmTokenType::ALoad2,
@@ -268,12 +273,12 @@ impl<'config> JasmLexer<'config> {
             "pop" => JasmTokenType::Pop,
             "new" => JasmTokenType::New,
 
-            // 默认为标识符
-            _ => JasmTokenType::IdentifierToken,
+            // Default to identifier
+            _ => JasmTokenType::Identifier,
         }
     }
 
-    /// 处理标点符号
+    /// Handles punctuation marks.
     fn lex_punctuation<S: Source + ?Sized>(&self, state: &mut State<'_, S>) -> bool {
         let start = state.get_position();
 

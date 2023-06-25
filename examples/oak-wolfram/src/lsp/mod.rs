@@ -1,15 +1,25 @@
-#![doc = include_str!("readme.md")]
+//! Wolfram Language Server Protocol (LSP) support.
+
+/// Wolfram syntax highlighter.
+pub mod highlighter;
+
 use crate::language::WolframLanguage;
 use core::range::Range;
 use oak_core::tree::RedNode;
 #[cfg(feature = "lsp")]
 use {futures::Future, oak_lsp::service::LanguageService, oak_lsp::types::Hover as LspHover, oak_vfs::Vfs};
+
+/// Language service for Wolfram.
 #[cfg(feature = "lsp")]
 pub struct WolframLanguageService<V: Vfs> {
+    /// The virtual file system.
     vfs: V,
+    /// The workspace manager for managing document state.
     workspace: oak_lsp::workspace::WorkspaceManager,
 }
+
 impl<V: Vfs> WolframLanguageService<V> {
+    /// Creates a new `WolframLanguageService`.
     pub fn new(vfs: V) -> Self {
         Self { vfs, workspace: oak_lsp::workspace::WorkspaceManager::new() }
     }

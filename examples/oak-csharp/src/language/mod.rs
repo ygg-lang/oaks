@@ -1,15 +1,13 @@
 #![doc = include_str!("readme.md")]
-use crate::{lexer::CSharpTokenType, parser::CSharpElementType};
 use oak_core::{Language, LanguageCategory};
-#[cfg(feature = "serde")]
-use serde::{Deserialize, Serialize};
 
-/// C# 语言实现
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+/// C# language implementation.
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Default)]
 pub struct CSharpLanguage {}
 
 impl CSharpLanguage {
+    /// Creates a new `CSharpLanguage` instance.
     pub fn new() -> Self {
         Self {}
     }

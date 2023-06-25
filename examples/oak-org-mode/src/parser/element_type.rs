@@ -1,39 +1,68 @@
-use oak_core::{ElementType, Parser, UniversalElementRole};
-#[cfg(feature = "serde")]
-use serde::{Deserialize, Serialize};
+use oak_core::{ElementType, UniversalElementRole};
 
+/// Org-mode element types.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub enum OrgModeElementType {
+    /// Document.
     Document,
+    /// Heading.
     Heading,
+    /// Section.
     Section,
+    /// Paragraph.
     Paragraph,
+    /// List.
     List,
+    /// List item.
     ListItem,
+    /// Table.
     Table,
+    /// Table row.
     TableRow,
+    /// Table cell.
     TableCell,
+    /// Block.
     Block,
+    /// Code block.
     CodeBlock,
+    /// Quote block.
     QuoteBlock,
+    /// Example block.
     ExampleBlock,
+    /// Verse block.
     VerseBlock,
+    /// Comment block.
     CommentBlock,
+    /// Drawer block.
     DrawerBlock,
+    /// Property drawer.
     PropertyDrawer,
+    /// Logbook drawer.
     LogbookDrawer,
+    /// Link.
     Link,
+    /// Inline code.
     InlineCode,
+    /// Bold.
     Bold,
+    /// Italic.
     Italic,
+    /// Underline.
     Underline,
+    /// Strikethrough.
     Strikethrough,
+    /// Verbatim.
     Verbatim,
+    /// Timestamp.
     Timestamp,
+    /// Tag.
     Tag,
+    /// Priority.
     Priority,
+    /// TODO keyword.
     TodoKeyword,
+    /// DONE keyword.
     DoneKeyword,
 }
 

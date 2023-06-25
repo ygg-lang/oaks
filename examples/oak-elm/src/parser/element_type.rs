@@ -1,29 +1,55 @@
 use oak_core::{ElementType, UniversalElementRole};
-#[cfg(feature = "serde")]
-use serde::{Deserialize, Serialize};
 
+/// Element types for Elm.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub enum ElmElementType {
+    /// The root node of the AST.
     Root,
+    /// A module declaration.
     Module,
+    /// An import statement.
     Import,
+    /// A custom type declaration.
     TypeDeclaration,
+    /// A type alias declaration.
     TypeAlias,
+    /// A function declaration.
     FunctionDeclaration,
+    /// A generic expression.
     Expression,
+    /// A literal value.
     Literal,
+    /// An identifier.
     Identifier,
+    /// A binary expression.
     BinaryExpression,
+    /// A unary expression.
     UnaryExpression,
+    /// An `if` expression.
     IfExpression,
+    /// A `case` expression.
     CaseExpression,
+    /// A `let` expression.
     LetExpression,
+    /// A tuple expression.
     TupleExpression,
+    /// A list expression.
     ListExpression,
+    /// A record expression.
     RecordExpression,
+    /// A field access expression.
     FieldExpression,
+    /// A lambda expression.
     LambdaExpression,
+    /// A type signature.
+    TypeSignature,
+    /// A value declaration.
+    ValueDeclaration,
+    /// A pattern.
+    Pattern,
+    /// An error element.
+    Error,
 }
 
 impl ElementType for ElmElementType {

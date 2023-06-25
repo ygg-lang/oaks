@@ -1,16 +1,13 @@
 #![doc = include_str!("readme.md")]
 use core::range::Range;
 use oak_core::source::{SourceBuffer, ToSource};
-#[cfg(feature = "serde")]
-use serde::{Deserialize, Serialize};
 
 #[cfg(feature = "oak-pretty-print")]
 use oak_pretty_print::{AsDocument, doc as pp_doc};
 
 /// The root node of a JSON AST.
 #[derive(Clone, Debug, PartialEq)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
-#[cfg_attr(feature = "oak-pretty-print", derive(AsDocument))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct JsonRoot {
     /// The top-level value of the JSON document.
     pub value: JsonValue,
@@ -24,7 +21,7 @@ impl ToSource for JsonRoot {
 
 /// Represents any valid JSON value.
 #[derive(Clone, Debug, PartialEq)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 #[cfg_attr(feature = "oak-pretty-print", derive(AsDocument))]
 pub enum JsonValue {
     /// A JSON object (collection of key-value pairs).
@@ -42,6 +39,7 @@ pub enum JsonValue {
 }
 
 impl JsonValue {
+    /// Returns the value as a string slice, if it is a string.
     pub fn as_str(&self) -> Option<&str> {
         match self {
             JsonValue::String(s) => Some(&s.value),
@@ -49,6 +47,7 @@ impl JsonValue {
         }
     }
 
+    /// Returns the value as an `f64`, if it is a number.
     pub fn as_f64(&self) -> Option<f64> {
         match self {
             JsonValue::Number(n) => Some(n.value),
@@ -56,6 +55,7 @@ impl JsonValue {
         }
     }
 
+    /// Returns the value as a `bool`, if it is a boolean.
     pub fn as_bool(&self) -> Option<bool> {
         match self {
             JsonValue::Boolean(b) => Some(b.value),
@@ -63,10 +63,12 @@ impl JsonValue {
         }
     }
 
+    /// Returns the value as a `u64`, if it is a number.
     pub fn as_u64(&self) -> Option<u64> {
         self.as_f64().map(|f| f as u64)
     }
 
+    /// Returns the value as a reference to a `JsonArray`, if it is an array.
     pub fn as_array(&self) -> Option<&JsonArray> {
         match self {
             JsonValue::Array(a) => Some(a),
@@ -74,6 +76,7 @@ impl JsonValue {
         }
     }
 
+    /// Returns the value as a reference to a `JsonObject`, if it is an object.
     pub fn as_object(&self) -> Option<&JsonObject> {
         match self {
             JsonValue::Object(o) => Some(o),
@@ -81,6 +84,7 @@ impl JsonValue {
         }
     }
 
+    /// Gets a value from the object by key, if this value is an object.
     pub fn get(&self, key: &str) -> Option<&JsonValue> {
         match self {
             JsonValue::Object(o) => o.get(key),
@@ -88,6 +92,7 @@ impl JsonValue {
         }
     }
 
+    /// Converts the JSON value to its string representation.
     pub fn to_string(&self) -> String {
         match self {
             JsonValue::Null(_) => "null".to_string(),
@@ -187,12 +192,6 @@ impl From<()> for JsonValue {
     }
 }
 
-impl From<[JsonValue; 0]> for JsonValue {
-    fn from(_: [JsonValue; 0]) -> Self {
-        JsonValue::Array(JsonArray { elements: vec![], span: (0..0).into() })
-    }
-}
-
 impl From<Vec<JsonValue>> for JsonValue {
     fn from(elements: Vec<JsonValue>) -> Self {
         JsonValue::Array(JsonArray { elements, span: (0..0).into() })
@@ -229,7 +228,7 @@ impl ToSource for JsonValue {
 
 /// Represents a JSON object.
 #[derive(Clone, Debug, PartialEq)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 #[cfg_attr(feature = "oak-pretty-print", derive(AsDocument))]
 #[cfg_attr(feature = "oak-pretty-print", oak(doc = 
     if _self.fields.is_empty() {
@@ -273,7 +272,7 @@ impl ToSource for JsonObject {
 
 /// Represents a single field (key-value pair) in a JSON object.
 #[derive(Clone, Debug, PartialEq)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 #[cfg_attr(feature = "oak-pretty-print", derive(AsDocument))]
 #[cfg_attr(feature = "oak-pretty-print", oak(doc = [self.name.as_document(), ": ", self.value.as_document()]))]
 pub struct JsonField {
@@ -296,7 +295,7 @@ impl ToSource for JsonField {
 
 /// Represents a JSON array.
 #[derive(Clone, Debug, PartialEq)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 #[cfg_attr(feature = "oak-pretty-print", derive(AsDocument))]
 #[cfg_attr(feature = "oak-pretty-print", oak(doc = 
     if _self.elements.is_empty() {
@@ -333,7 +332,7 @@ impl ToSource for JsonArray {
 
 /// Represents a JSON string literal.
 #[derive(Clone, Debug, PartialEq)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 #[cfg_attr(feature = "oak-pretty-print", derive(AsDocument))]
 #[cfg_attr(feature = "oak-pretty-print", oak(doc = format!("\"{}\"", self.value)))]
 pub struct JsonString {
@@ -354,7 +353,7 @@ impl ToSource for JsonString {
 
 /// Represents a JSON number literal.
 #[derive(Clone, Debug, PartialEq)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 #[cfg_attr(feature = "oak-pretty-print", derive(AsDocument))]
 #[cfg_attr(feature = "oak-pretty-print", oak(doc = self.value.to_string()))]
 pub struct JsonNumber {
@@ -373,7 +372,7 @@ impl ToSource for JsonNumber {
 
 /// Represents a JSON boolean literal.
 #[derive(Clone, Debug, PartialEq)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 #[cfg_attr(feature = "oak-pretty-print", derive(AsDocument))]
 #[cfg_attr(feature = "oak-pretty-print", oak(doc = if self.value { "true" } else { "false" }))]
 pub struct JsonBoolean {
@@ -392,7 +391,7 @@ impl ToSource for JsonBoolean {
 
 /// Represents a JSON null literal.
 #[derive(Clone, Debug, PartialEq)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 #[cfg_attr(feature = "oak-pretty-print", derive(AsDocument))]
 #[cfg_attr(feature = "oak-pretty-print", oak(doc = "null"))]
 pub struct JsonNull {

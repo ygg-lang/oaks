@@ -1,4 +1,5 @@
 #![doc = include_str!("readme.md")]
+/// Element type definition.
 pub mod element_type;
 pub use element_type::CppElementType;
 

@@ -1,11 +1,13 @@
 use crate::language::ObjectiveCLanguage;
 use oak_core::{Builder, BuilderCache, OakDiagnostics, TextEdit, lexer::Lexer, parser::Parser, source::Source};
 
+/// Objective-C syntax tree builder.
 pub struct ObjectiveCBuilder<'config> {
     config: &'config ObjectiveCLanguage,
 }
 
 impl<'config> ObjectiveCBuilder<'config> {
+    /// Creates a new Objective-C builder.
     pub fn new(config: &'config ObjectiveCLanguage) -> Self {
         Self { config }
     }

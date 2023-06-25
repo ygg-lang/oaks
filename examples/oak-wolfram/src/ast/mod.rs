@@ -2,9 +2,10 @@
 use crate::{language::WolframLanguage, parser::element_type::WolframElementType};
 use oak_core::tree::{GreenNode, RedNode, TypedNode};
 
-/// Wolfram 根节点
+/// Wolfram root node.
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub struct WolframRoot<'a> {
+    /// The underlying green node.
     green: GreenNode<'a, WolframLanguage>,
 }
 
@@ -20,9 +21,10 @@ impl<'a> TypedNode<'a> for WolframRoot<'a> {
     }
 }
 
-/// Wolfram 函数调用 (e.g., f[x, y])
+/// Wolfram function call (e.g., f[x, y]).
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub struct WolframCall<'a> {
+    /// The underlying green node.
     green: GreenNode<'a, WolframLanguage>,
 }
 
@@ -38,9 +40,10 @@ impl<'a> TypedNode<'a> for WolframCall<'a> {
     }
 }
 
-/// Wolfram 符号
+/// Wolfram symbol.
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub struct WolframSymbol<'a> {
+    /// The underlying green node.
     green: GreenNode<'a, WolframLanguage>,
 }
 
@@ -56,9 +59,10 @@ impl<'a> TypedNode<'a> for WolframSymbol<'a> {
     }
 }
 
-/// Wolfram 字面量 (Integer, Real, String)
+/// Wolfram literal (Integer, Real, String).
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub struct WolframLiteral<'a> {
+    /// The underlying green node.
     green: GreenNode<'a, WolframLanguage>,
 }
 
@@ -74,9 +78,10 @@ impl<'a> TypedNode<'a> for WolframLiteral<'a> {
     }
 }
 
-/// Wolfram 列表 {a, b, c}
+/// Wolfram list {a, b, c}.
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub struct WolframList<'a> {
+    /// The underlying green node.
     green: GreenNode<'a, WolframLanguage>,
 }
 
@@ -92,9 +97,10 @@ impl<'a> TypedNode<'a> for WolframList<'a> {
     }
 }
 
-/// Wolfram 参数列表 [x, y]
+/// Wolfram argument list [x, y].
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub struct WolframArguments<'a> {
+    /// The underlying green node.
     green: GreenNode<'a, WolframLanguage>,
 }
 
@@ -110,9 +116,10 @@ impl<'a> TypedNode<'a> for WolframArguments<'a> {
     }
 }
 
-/// Wolfram 二元表达式
+/// Wolfram binary expression.
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub struct WolframBinaryExpr<'a> {
+    /// The underlying green node.
     green: GreenNode<'a, WolframLanguage>,
 }
 
@@ -128,9 +135,10 @@ impl<'a> TypedNode<'a> for WolframBinaryExpr<'a> {
     }
 }
 
-/// Wolfram 前缀表达式
+/// Wolfram prefix expression.
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub struct WolframPrefixExpr<'a> {
+    /// The underlying green node.
     green: GreenNode<'a, WolframLanguage>,
 }
 
@@ -146,9 +154,10 @@ impl<'a> TypedNode<'a> for WolframPrefixExpr<'a> {
     }
 }
 
-/// Wolfram 后缀表达式
+/// Wolfram postfix expression.
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub struct WolframPostfixExpr<'a> {
+    /// The underlying green node.
     green: GreenNode<'a, WolframLanguage>,
 }
 
@@ -164,9 +173,10 @@ impl<'a> TypedNode<'a> for WolframPostfixExpr<'a> {
     }
 }
 
-/// Wolfram 括号表达式 (expr)
+/// Wolfram parenthesized expression (expr).
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub struct WolframExpression<'a> {
+    /// The underlying green node.
     green: GreenNode<'a, WolframLanguage>,
 }
 

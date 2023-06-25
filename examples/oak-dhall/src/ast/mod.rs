@@ -1,43 +1,51 @@
 #![doc = include_str!("readme.md")]
 use core::range::Range;
-#[cfg(feature = "serde")]
-#[cfg(feature = "serde")]
-use serde::{Deserialize, Serialize};
 
-/// DHall AST 根节点
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+/// DHall AST root node.
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 #[derive(Debug, PartialEq, Clone)]
 pub struct DHallRoot {
+    /// List of expressions in the root.
     pub expressions: Vec<DHallExpr>,
 }
 
-/// DHall 表达式
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+/// DHall expression.
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 #[derive(Debug, PartialEq, Clone)]
 pub enum DHallExpr {
-    /// 标识符
+    /// Identifier.
     Identifier {
+        /// Name of the identifier.
         name: String,
+        /// Source range of the identifier.
         #[cfg_attr(feature = "serde", serde(with = "oak_core::serde_range"))]
         span: Range<usize>,
     },
-    /// 字面量
+    /// Literal.
     Literal {
+        /// Value of the literal.
         value: String,
+        /// Source range of the literal.
         #[cfg_attr(feature = "serde", serde(with = "oak_core::serde_range"))]
         span: Range<usize>,
     },
-    /// 函数应用
+    /// Function application.
     Application {
+        /// Function being applied.
         func: Box<DHallExpr>,
+        /// Argument being applied to the function.
         arg: Box<DHallExpr>,
+        /// Source range of the application.
         #[cfg_attr(feature = "serde", serde(with = "oak_core::serde_range"))]
         span: Range<usize>,
     },
-    /// Lambda 表达式
+    /// Lambda expression.
     Lambda {
+        /// Parameter name.
         param: String,
+        /// Body of the lambda.
         body: Box<DHallExpr>,
+        /// Source range of the lambda.
         #[cfg_attr(feature = "serde", serde(with = "oak_core::serde_range"))]
         span: Range<usize>,
     },

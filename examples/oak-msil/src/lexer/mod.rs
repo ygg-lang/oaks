@@ -1,24 +1,28 @@
 #![doc = include_str!("readme.md")]
+/// MSIL token type definition.
 pub mod token_type;
 pub use token_type::MsilTokenType;
 
 use crate::language::MsilLanguage;
 use oak_core::{Lexer, LexerCache, LexerState, lexer::LexOutput, source::Source};
 
-type State<'a, S> = LexerState<'a, S, MsilLanguage>;
+pub(crate) type State<'a, S> = LexerState<'a, S, MsilLanguage>;
 
+/// MSIL lexer.
 #[derive(Clone, Debug)]
 pub struct MsilLexer<'config> {
-    _config: &'config MsilLanguage,
+    config: &'config MsilLanguage,
 }
 
 impl<'config> MsilLexer<'config> {
+    /// Creates a new MSIL lexer.
     pub fn new(config: &'config MsilLanguage) -> Self {
-        Self { _config: config }
+        Self { config }
     }
 }
 
 impl MsilLexer<'_> {
+    /// Runs the lexer.
     pub fn run<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> Result<(), oak_core::OakError> {
         let safe_point = state.get_position();
         while state.not_at_end() {
@@ -50,7 +54,7 @@ impl MsilLexer<'_> {
                 continue;
             }
 
-            // 如果没有匹配任何规则，跳过当前字符
+            // If no rules matched, skip current character
             if let Some(ch) = state.peek() {
                 let start_pos = state.get_position();
                 state.advance(ch.len_utf8());
@@ -64,7 +68,7 @@ impl MsilLexer<'_> {
         Ok(())
     }
 
-    /// 跳过空白字符
+    /// Skips whitespace characters.
     fn skip_whitespace<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start_pos = state.get_position();
 
@@ -81,7 +85,7 @@ impl MsilLexer<'_> {
         }
     }
 
-    /// 处理换行
+    /// Lexes a newline.
     fn lex_newline<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start_pos = state.get_position();
 
@@ -103,29 +107,38 @@ impl MsilLexer<'_> {
         }
     }
 
-    /// 处理注释
+    /// Lexes a comment.
     fn lex_comment<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start_pos = state.get_position();
 
-        if let Some('/') = state.peek() {
-            if let Some('/') = state.peek_next_n(1) {
-                // 行注释
-                state.advance(2);
-                while let Some(ch) = state.peek() {
-                    if ch == '\n' || ch == '\r' {
-                        break;
-                    }
-                    state.advance(ch.len_utf8())
+        if state.starts_with("//") {
+            while let Some(ch) = state.peek() {
+                if ch == '\n' || ch == '\r' {
+                    break;
                 }
-                state.add_token(MsilTokenType::CommentToken, start_pos, state.get_position());
-                return true;
+                state.advance(ch.len_utf8())
             }
+            state.add_token(MsilTokenType::CommentToken, start_pos, state.get_position());
+            true
         }
-
-        false
+        else if state.starts_with("/*") {
+            state.advance(2);
+            while let Some(ch) = state.peek() {
+                if state.starts_with("*/") {
+                    state.advance(2);
+                    break;
+                }
+                state.advance(ch.len_utf8())
+            }
+            state.add_token(MsilTokenType::CommentToken, start_pos, state.get_position());
+            true
+        }
+        else {
+            false
+        }
     }
 
-    /// 处理标识符和关键字
+    /// Lexes identifiers and keywords.
     fn lex_identifier<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start_pos = state.get_position();
 
@@ -134,12 +147,12 @@ impl MsilLexer<'_> {
                 return false;
             }
 
-            // 收集标识符字符
+            // Collect identifier characters
             while let Some(ch) = state.peek() {
                 if ch.is_ascii_alphanumeric() || ch == '_' || ch == '.' { state.advance(ch.len_utf8()) } else { break }
             }
 
-            // 检查是否是关键字
+            // Check if it's a keyword
             let text = state.get_text_in((start_pos..state.get_position()).into());
             let token_kind = match text {
                 std::borrow::Cow::Borrowed(".assembly") => MsilTokenType::AssemblyKeyword,
@@ -195,7 +208,7 @@ impl MsilLexer<'_> {
         }
     }
 
-    /// 处理数字
+    /// Lexes numbers.
     fn lex_number<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start_pos = state.get_position();
 
@@ -204,16 +217,16 @@ impl MsilLexer<'_> {
                 return false;
             }
 
-            // 处理整数部分
+            // Handle integer part
             while let Some(ch) = state.peek() {
                 if ch.is_ascii_digit() { state.advance(ch.len_utf8()) } else { break }
             }
 
-            // 处理小数点
+            // Handle decimal point
             if let Some('.') = state.peek() {
                 if let Some(next_ch) = state.peek_next_n(1) {
                     if next_ch.is_ascii_digit() {
-                        state.advance(1); // 跳过小数点
+                        state.advance(1); // Skip decimal point
                         while let Some(ch) = state.peek() {
                             if ch.is_ascii_digit() { state.advance(ch.len_utf8()) } else { break }
                         }
@@ -229,7 +242,7 @@ impl MsilLexer<'_> {
         }
     }
 
-    /// 处理字符串
+    /// Lexes strings.
     fn lex_string<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start_pos = state.get_position();
 
@@ -260,7 +273,7 @@ impl MsilLexer<'_> {
         }
     }
 
-    /// 处理分隔符
+    /// Lexes delimiters.
     fn lex_delimiter<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start_pos = state.get_position();
 
@@ -300,11 +313,12 @@ impl Lexer<MsilLanguage> for MsilLexer<'_> {
 }
 
 impl MsilLexer<'_> {
+    /// Tokenizes the text into a list of tokens
     pub fn tokenize<'a>(&self, text: &'a str) -> Vec<oak_core::Token<<MsilLanguage as oak_core::Language>::TokenType>> {
         let source = oak_core::SourceText::new(text);
         let mut cache = oak_core::parser::session::ParseSession::<MsilLanguage>::default();
         let mut state = State::new_with_cache(&source, 0, &mut cache);
         let result = self.run(&mut state);
-        state.finish_with_cache(result, &mut cache).result.unwrap().to_vec()
+        state.finish_with_cache(result, &mut cache).result.unwrap().0.to_vec()
     }
 }

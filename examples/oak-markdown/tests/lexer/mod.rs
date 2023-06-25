@@ -7,7 +7,7 @@ fn test_markdown_lexer() -> Result<(), oak_core::OakError> {
     let here = Path::new(env!("CARGO_MANIFEST_DIR"));
     let tests = here.join("tests/lexer");
 
-    // 使用 Box::leak 来满足 LexerTester 对 'static 的潜在要求
+    // Use Box::leak to satisfy potential 'static requirement of LexerTester
     let language = Box::leak(Box::new(MarkdownLanguage::default()));
     let lexer = MarkdownLexer::new(language);
 

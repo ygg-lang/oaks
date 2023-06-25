@@ -1,204 +1,369 @@
-use oak_core::{ElementType, Parser, UniversalElementRole};
-#[cfg(feature = "serde")]
-use serde::{Deserialize, Serialize};
+use oak_core::{ElementType, UniversalElementRole};
 
+/// Element type for PHP AST
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub enum PhpElementType {
-    // Whitespace and newlines
+    /// Whitespace characters
     Whitespace,
+    /// Newline characters
     Newline,
 
-    // Comments
+    /// Comment
     Comment,
 
-    // Literals
+    /// String literal
     StringLiteral,
+    /// Number literal
     NumberLiteral,
+    /// Boolean literal (true, false)
     BooleanLiteral,
+    /// Null literal
     NullLiteral,
 
-    // Identifiers and keywords
+    /// Identifier
     Identifier,
+    /// Variable identifier (starting with $)
     Variable,
+    /// 'abstract' keyword
     Abstract,
+    /// 'and' operator
     And,
+    /// 'array' keyword/type
     Array,
+    /// 'as' keyword
     As,
+    /// 'break' keyword
     Break,
+    /// 'callable' type
     Callable,
+    /// 'case' keyword
     Case,
+    /// 'catch' keyword
     Catch,
+    /// 'class' keyword
     Class,
+    /// 'clone' keyword
     Clone,
+    /// 'const' keyword
     Const,
+    /// 'continue' keyword
     Continue,
+    /// 'declare' keyword
     Declare,
+    /// 'default' keyword
     Default,
+    /// 'do' keyword
     Do,
+    /// 'echo' keyword
     Echo,
+    /// 'else' keyword
     Else,
+    /// 'elseif' keyword
     Elseif,
+    /// 'empty' keyword
     Empty,
+    /// 'enddeclare' keyword
     Enddeclare,
+    /// 'endfor' keyword
     Endfor,
+    /// 'endforeach' keyword
     Endforeach,
+    /// 'endif' keyword
     Endif,
+    /// 'endswitch' keyword
     Endswitch,
+    /// 'endwhile' keyword
     Endwhile,
+    /// 'eval' keyword
     Eval,
+    /// 'exit' keyword
     Exit,
+    /// 'extends' keyword
     Extends,
+    /// 'final' keyword
     Final,
+    /// 'finally' keyword
     Finally,
+    /// 'for' keyword
     For,
+    /// 'foreach' keyword
     Foreach,
+    /// 'function' keyword
     Function,
+    /// 'global' keyword
     Global,
+    /// 'goto' keyword
     Goto,
+    /// 'if' keyword
     If,
+    /// 'implements' keyword
     Implements,
+    /// 'include' keyword
     Include,
+    /// 'include_once' keyword
     IncludeOnce,
+    /// 'instanceof' operator
     Instanceof,
+    /// 'insteadof' keyword
     Insteadof,
+    /// 'interface' keyword
     Interface,
+    /// 'isset' keyword
     Isset,
+    /// 'list' keyword
     List,
+    /// 'namespace' keyword
     Namespace,
+    /// 'new' keyword
     New,
+    /// 'or' operator
     Or,
+    /// 'print' keyword
     Print,
+    /// 'private' keyword
     Private,
+    /// 'protected' keyword
     Protected,
+    /// 'public' keyword
     Public,
+    /// 'require' keyword
     Require,
+    /// 'require_once' keyword
     RequireOnce,
+    /// 'return' keyword
     Return,
+    /// 'static' keyword
     Static,
+    /// 'switch' keyword
     Switch,
+    /// 'throw' keyword
     Throw,
+    /// 'trait' keyword
     Trait,
+    /// 'try' keyword
     Try,
+    /// 'unset' keyword
     Unset,
+    /// 'use' keyword
     Use,
+    /// 'var' keyword
     Var,
+    /// 'while' keyword
     While,
+    /// 'xor' operator
     Xor,
+    /// 'yield' keyword
     Yield,
+    /// 'yield from' keyword
     YieldFrom,
 
-    // Operators
+    /// Plus operator (+)
     Plus,
+    /// Minus operator (-)
     Minus,
+    /// Multiply operator (*)
     Multiply,
+    /// Divide operator (/)
     Divide,
+    /// Modulo operator (%)
     Modulo,
+    /// Power operator (**)
     Power,
+    /// Concatenation operator (.)
     Concat,
+    /// Equality operator (==)
     Equal,
+    /// Identity operator (===)
     Identical,
+    /// Inequality operator (!= or <>)
     NotEqual,
+    /// Non-identity operator (!==)
     NotIdentical,
+    /// Less than operator (<)
     Less,
+    /// Greater than operator (>)
     Greater,
+    /// Less than or equal operator (<=)
     LessEqual,
+    /// Greater than or equal operator (>=)
     GreaterEqual,
+    /// Spaceship operator (<=>)
     Spaceship,
+    /// Logical AND operator (&&)
     LogicalAnd,
+    /// Logical OR operator (||)
     LogicalOr,
+    /// Logical XOR operator
     LogicalXor,
+    /// Logical NOT operator (!)
     LogicalNot,
+    /// Bitwise AND operator (&)
     BitwiseAnd,
+    /// Bitwise OR operator (|)
     BitwiseOr,
+    /// Bitwise XOR operator (^)
     BitwiseXor,
+    /// Bitwise NOT operator (~)
     BitwiseNot,
+    /// Left shift operator (<<)
     LeftShift,
+    /// Right shift operator (>>)
     RightShift,
+    /// Assignment operator (=)
     Assign,
+    /// Plus assignment operator (+=)
     PlusAssign,
+    /// Minus assignment operator (-=)
     MinusAssign,
+    /// Multiply assignment operator (*=)
     MultiplyAssign,
+    /// Divide assignment operator (/=)
     DivideAssign,
+    /// Modulo assignment operator (%=)
     ModuloAssign,
+    /// Power assignment operator (**=)
     PowerAssign,
+    /// Concatenation assignment operator (.=)
     ConcatAssign,
+    /// Bitwise AND assignment operator (&=)
     BitwiseAndAssign,
+    /// Bitwise OR assignment operator (|=)
     BitwiseOrAssign,
+    /// Bitwise XOR assignment operator (^=)
     BitwiseXorAssign,
+    /// Left shift assignment operator (<<=)
     LeftShiftAssign,
+    /// Right shift assignment operator (>>=)
     RightShiftAssign,
+    /// Increment operator (++)
     Increment,
+    /// Decrement operator (--)
     Decrement,
+    /// Object member access operator (->)
     Arrow,
+    /// Array element arrow (=>)
     DoubleArrow,
+    /// Null coalescing operator (??)
     NullCoalesce,
+    /// Null coalescing assignment operator (??=)
     NullCoalesceAssign,
+    /// Ellipsis operator (...)
     Ellipsis,
 
-    // Punctuations
+    /// Left parenthesis (()
     LeftParen,
+    /// Right parenthesis ())
     RightParen,
+    /// Left bracket ([)
     LeftBracket,
+    /// Right bracket (])
     RightBracket,
+    /// Left brace ({)
     LeftBrace,
+    /// Right brace (})
     RightBrace,
+    /// Semicolon (;)
     Semicolon,
+    /// Comma (,)
     Comma,
+    /// Dot operator (.)
     Dot,
+    /// Question mark (?)
     Question,
+    /// Colon operator (:)
     Colon,
+    /// Scope resolution operator (::)
     DoubleColon,
+    /// Backslash (\)
     Backslash,
+    /// Error suppression operator (@)
     At,
+    /// Dollar sign ($)
     Dollar,
 
-    // PHP special tags
+    /// PHP opening tag (<?php)
     OpenTag,
+    /// PHP closing tag (?>)
     CloseTag,
+    /// PHP echo tag (<?=)
     EchoTag,
 
-    // Special
+    /// End of file
     Eof,
+    /// Error node
     Error,
 
-    // Element types
+    /// Root node of the document
     Root,
+    /// Class definition
     ClassDef,
+    /// Function definition
     FunctionDef,
+    /// Method definition
     MethodDef,
+    /// Property definition
     PropertyDef,
+    /// Constant definition
     ConstDef,
+    /// Trait definition
     TraitDef,
+    /// Interface definition
     InterfaceDef,
+    /// Namespace definition
     NamespaceDef,
+    /// Use statement
     UseStatement,
+    /// If statement
     IfStatement,
+    /// While statement
     WhileStatement,
+    /// Do-while statement
     DoWhileStatement,
+    /// For statement
     ForStatement,
+    /// Foreach statement
     ForeachStatement,
+    /// Switch statement
     SwitchStatement,
+    /// Try statement
     TryStatement,
+    /// Catch block
     CatchBlock,
+    /// Finally block
     FinallyBlock,
+    /// Expression statement
     ExpressionStatement,
+    /// Return statement
     ReturnStatement,
+    /// Throw statement
     ThrowStatement,
+    /// Break statement
     BreakStatement,
+    /// Continue statement
     ContinueStatement,
+    /// Echo statement
     EchoStatement,
+    /// Global statement
     GlobalStatement,
+    /// Static statement
     StaticStatement,
+    /// Unset statement
     UnsetStatement,
+    /// Compound statement (block)
     CompoundStatement,
 
-    // Expressions
+    /// Literal expression
     Literal,
+    /// Parenthesized expression
     ParenthesizedExpression,
+    /// Function or method call
     CallExpression,
+    /// Array access expression
     ArrayAccessExpression,
+    /// Member access expression
     MemberAccessExpression,
+    /// Binary expression
     BinaryExpression,
 }
 

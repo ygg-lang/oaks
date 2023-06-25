@@ -1,101 +1,180 @@
 use core::{fmt, str::FromStr};
 use oak_core::{Token, TokenType, UniversalTokenRole};
-#[cfg(feature = "serde")]
-use serde::{Deserialize, Serialize};
 
+/// A token in the Julia language.
 pub type JuliaToken = Token<JuliaTokenType>;
 
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+/// Token types for the Julia language.
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 #[derive(Debug, Clone, PartialEq, Eq, Copy, Hash)]
 #[repr(u8)]
 pub enum JuliaTokenType {
+    /// Root node.
     Root,
-    // 关键字
+    // Keywords
+    /// `if` keyword.
     If,
+    /// `elseif` keyword.
     ElseIf,
+    /// `else` keyword.
     Else,
+    /// `for` keyword.
     For,
+    /// `while` keyword.
     While,
+    /// `in` keyword.
     In,
+    /// `break` keyword.
     Break,
+    /// `continue` keyword.
     Continue,
+    /// `function` keyword.
     Function,
+    /// `end` keyword.
     End,
+    /// `begin` keyword.
     Begin,
+    /// `module` keyword.
     Module,
+    /// `using` keyword.
     Using,
+    /// `import` keyword.
     Import,
+    /// `export` keyword.
     Export,
+    /// `const` keyword.
     Const,
+    /// `local` keyword.
     Local,
+    /// `global` keyword.
     Global,
+    /// `true` keyword.
     True,
+    /// `false` keyword.
     False,
+    /// `nothing` keyword.
     Nothing,
+    /// `return` keyword.
     Return,
 
-    // 操作符
+    // Operators
+    /// `+`.
     Plus,
+    /// `-`.
     Minus,
+    /// `*`.
     Star,
+    /// `/`.
     Slash,
+    /// `%`.
     Percent,
+    /// `^`.
     Caret,
+    /// `==`.
     Equal,
+    /// `!=`.
     NotEqual,
+    /// `<`.
     LessThan,
+    /// `>`.
     GreaterThan,
+    /// `<=`.
     LessEqual,
+    /// `>=`.
     GreaterEqual,
+    /// `=`.
     Assign,
+    /// `+=`.
     PlusAssign,
+    /// `-=`.
     MinusAssign,
+    /// `*=`.
     StarAssign,
+    /// `/=`.
     SlashAssign,
+    /// `%=`.
     PercentAssign,
+    /// `^=`.
     CaretAssign,
+    /// `&&`.
     And,
+    /// `||`.
     Or,
+    /// `!`.
     Not,
+    /// `:`.
     Colon,
+    /// `.`.
     Dot,
+    /// `..`.
     Range,
+    /// `->`.
     Arrow,
+    /// `=>`.
     FatArrow,
+    /// `&`.
     BitAnd,
+    /// `|`.
     BitOr,
+    /// `⊻`.
     BitXor,
+    /// `~`.
     BitNot,
+    /// `<<`.
     LeftShift,
+    /// `>>`.
     RightShift,
 
-    // 分隔符
+    // Punctuations
+    /// `(`.
     LeftParen,
+    /// `)`.
     RightParen,
+    /// `[`.
     LeftBracket,
+    /// `]`.
     RightBracket,
+    /// `{`.
     LeftBrace,
+    /// `}`.
     RightBrace,
+    /// `,`.
     Comma,
+    /// `;`.
     Semicolon,
 
-    // 字面量
+    // Literals
+    /// Integer literal.
     IntegerLiteral,
+    /// Floating-point literal.
     FloatLiteral,
+    /// String literal.
     StringLiteral,
+    /// Character literal.
     CharLiteral,
+    /// Boolean literal.
     BooleanLiteral,
+    /// Nothing literal.
     NothingLiteral,
 
-    // 其他
+    // Others
+    /// Identifier.
     Identifier,
+    /// Function call.
     Call,
+    /// Argument list.
     ArgumentList,
+    /// Comment.
     Comment,
+    /// Whitespace.
     Whitespace,
+    /// Newline.
     Newline,
+    /// End of stream.
     Eof,
+    /// Error token.
     Error,
+    /// Invalid token.
     Invalid,
 }
 
@@ -132,6 +211,7 @@ impl FromStr for JuliaTokenType {
 }
 
 impl JuliaTokenType {
+    /// Returns the string representation of the token type.
     pub fn as_str(&self) -> &'static str {
         match self {
             JuliaTokenType::Root => "root",
@@ -216,6 +296,7 @@ impl JuliaTokenType {
         }
     }
 
+    /// Returns true if the token is a trivia token (whitespace, newline, or comment).
     pub fn is_trivia(&self) -> bool {
         matches!(self, Self::Whitespace | Self::Newline | Self::Comment)
     }

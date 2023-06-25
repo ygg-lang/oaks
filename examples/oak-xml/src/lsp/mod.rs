@@ -1,15 +1,20 @@
-#![doc = include_str!("readme.md")]
+//! XML Language Server Protocol (LSP) support.
+
 use crate::language::XmlLanguage;
 use core::range::Range;
 use oak_core::tree::RedNode;
 #[cfg(feature = "lsp")]
 use {futures::Future, oak_lsp::service::LanguageService, oak_lsp::types::Hover as LspHover, oak_vfs::Vfs};
+
+/// Language service for XML.
 #[cfg(feature = "lsp")]
 pub struct XmlLanguageService<V: Vfs> {
     vfs: V,
     workspace: oak_lsp::workspace::WorkspaceManager,
 }
+
 impl<V: Vfs> XmlLanguageService<V> {
+    /// Creates a new `XmlLanguageService`.
     pub fn new(vfs: V) -> Self {
         Self { vfs, workspace: oak_lsp::workspace::WorkspaceManager::new() }
     }

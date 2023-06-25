@@ -2,480 +2,735 @@
 //! C# AST definitions
 
 use core::range::Range;
-#[cfg(feature = "serde")]
-use serde::{Deserialize, Serialize};
 
-/// C# 程序的根节点
+/// Root node of the C# AST.
 #[derive(Debug, Clone, PartialEq)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct CSharpRoot {
-    /// 编译单元中的项目
+    /// Items in the compilation unit.
     pub items: Vec<Item>,
 }
 
-/// C# 程序中的顶级项目
+/// Top-level items in a C# program.
 #[derive(Debug, Clone, PartialEq)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub enum Item {
-    /// 命名空间声明
+    /// Namespace declaration.
     Namespace(NamespaceDeclaration),
-    /// Using 指令
+    /// Using directive.
     Using(UsingDirective),
-    /// 类声明
+    /// Class declaration.
     Class(ClassDeclaration),
-    /// 接口声明
+    /// Interface declaration.
     Interface(InterfaceDeclaration),
-    /// 结构体声明
+    /// Struct declaration.
     Struct(StructDeclaration),
-    /// 枚举声明
+    /// Enum declaration.
     Enum(EnumDeclaration),
-    /// 记录声明
+    /// Record declaration.
     Record(RecordDeclaration),
-    /// 委托声明
+    /// Delegate declaration.
     Delegate(DelegateDeclaration),
 }
 
-/// 命名空间声明
+/// Namespace declaration.
+///
+/// Represents a `namespace` block in C#, which groups related classes and other types.
+/// Supports both block-scoped and file-scoped namespaces (C# 10+).
 #[derive(Debug, Clone, PartialEq)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct NamespaceDeclaration {
-    /// 命名空间名
+    /// The fully qualified name of the namespace (e.g., "System.Collections.Generic").
     pub name: String,
-    /// 特性
+    /// Attributes applied to the namespace declaration.
     pub attributes: Vec<Attribute>,
-    /// 成员
+    /// Types and nested namespaces defined within this namespace.
     pub items: Vec<Item>,
-    /// 源码位置
+    /// Source location of the entire namespace declaration.
     #[cfg_attr(feature = "serde", serde(with = "oak_core::serde_range"))]
     pub span: Range<usize>,
 }
 
-/// Using 指令
+/// Using directive.
+///
+/// Represents a `using` statement used to import types from a namespace or to create aliases.
+/// Supports `using`, `using static`, and `global using`.
 #[derive(Debug, Clone, PartialEq)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct UsingDirective {
-    /// 导入路径
+    /// The namespace or type path being imported.
     pub path: String,
-    /// 是否为静态导入
+    /// Indicates if this is a `using static` directive.
     pub is_static: bool,
-    /// 别名
+    /// An optional alias for the namespace or type (e.g., `using Project = MyCompany.Project;`).
     pub alias: Option<String>,
-    /// 全局
+    /// Indicates if this is a `global using` directive (C# 10+).
     pub is_global: bool,
-    /// 源码位置
+    /// Source location of the using directive.
     #[cfg_attr(feature = "serde", serde(with = "oak_core::serde_range"))]
     pub span: Range<usize>,
 }
 
-/// 类声明
+/// Class declaration.
+///
+/// Represents a `class` definition in C#. Classes are the primary reference types
+/// in C# and support inheritance, interfaces, and generics.
 #[derive(Debug, Clone, PartialEq)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct ClassDeclaration {
-    /// 类名
+    /// The name of the class.
     pub name: String,
-    /// 特性
+    /// Attributes applied to the class.
     pub attributes: Vec<Attribute>,
-    /// 修饰符
+    /// Modifiers like `public`, `private`, `static`, `abstract`, `sealed`, `partial`.
     pub modifiers: Vec<String>,
-    /// 基类和接口
+    /// The base class and any implemented interfaces.
     pub base_types: Vec<String>,
-    /// 泛型参数
+    /// Generic type parameters (e.g., `T` in `List<T>`).
     pub type_parameters: Vec<TypeParameter>,
-    /// 泛型约束
+    /// Constraints on generic type parameters (e.g., `where T : class`).
     pub constraints: Vec<TypeParameterConstraint>,
-    /// 成员
+    /// Members of the class, including fields, properties, methods, and nested types.
     pub members: Vec<Member>,
-    /// 源码位置
+    /// Source location of the class declaration.
     #[cfg_attr(feature = "serde", serde(with = "oak_core::serde_range"))]
     pub span: Range<usize>,
 }
 
-/// 结构体声明
+/// Struct declaration.
+///
+/// Represents a `struct` definition in C#. Structs are value types
+/// and are typically used for small, data-centric structures.
 #[derive(Debug, Clone, PartialEq)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct StructDeclaration {
+    /// The name of the struct.
     pub name: String,
+    /// Attributes applied to the struct.
     pub attributes: Vec<Attribute>,
+    /// Modifiers like `public`, `private`, `readonly`, `ref`, `partial`.
     pub modifiers: Vec<String>,
+    /// Members of the struct.
     pub members: Vec<Member>,
+    /// Generic type parameters.
     pub type_parameters: Vec<TypeParameter>,
+    /// Source location of the struct declaration.
     #[cfg_attr(feature = "serde", serde(with = "oak_core::serde_range"))]
     pub span: Range<usize>,
 }
 
-/// 接口声明
+/// Interface declaration.
+///
+/// Represents an `interface` definition in C#. Interfaces define a contract
+/// that classes or structs must implement.
 #[derive(Debug, Clone, PartialEq)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct InterfaceDeclaration {
+    /// The name of the interface.
     pub name: String,
+    /// Attributes applied to the interface.
     pub attributes: Vec<Attribute>,
+    /// Modifiers like `public`, `internal`, `partial`.
     pub modifiers: Vec<String>,
+    /// Members defined in the interface (methods, properties, etc.).
     pub members: Vec<Member>,
+    /// Generic type parameters.
     pub type_parameters: Vec<TypeParameter>,
+    /// Source location of the interface declaration.
     #[cfg_attr(feature = "serde", serde(with = "oak_core::serde_range"))]
     pub span: Range<usize>,
 }
 
-/// 枚举声明
+/// Enum declaration.
+///
+/// Represents an `enum` definition in C#. Enums are value types that
+/// consist of a set of named constants.
 #[derive(Debug, Clone, PartialEq)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct EnumDeclaration {
+    /// The name of the enum.
     pub name: String,
+    /// Attributes applied to the enum.
     pub attributes: Vec<Attribute>,
+    /// Modifiers like `public`, `internal`.
     pub modifiers: Vec<String>,
+    /// The individual members (constants) of the enum.
     pub members: Vec<EnumMember>,
+    /// Source location of the enum declaration.
     #[cfg_attr(feature = "serde", serde(with = "oak_core::serde_range"))]
     pub span: Range<usize>,
 }
 
-/// 枚举成员
+/// Enum member.
 #[derive(Debug, Clone, PartialEq)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct EnumMember {
+    /// Member name.
     pub name: String,
+    /// Attributes.
     pub attributes: Vec<Attribute>,
+    /// Member value.
     pub value: Option<Expression>,
 }
 
-/// 记录声明
+/// Record declaration.
+///
+/// Represents a `record` definition in C# (C# 9+). Records provide built-in
+/// functionality for encapsulating data and supporting value-based equality.
 #[derive(Debug, Clone, PartialEq)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct RecordDeclaration {
+    /// The name of the record.
     pub name: String,
+    /// Attributes applied to the record.
     pub attributes: Vec<Attribute>,
+    /// Modifiers like `public`, `private`, `sealed`, `partial`.
     pub modifiers: Vec<String>,
+    /// Members of the record.
     pub members: Vec<Member>,
+    /// Generic type parameters.
     pub type_parameters: Vec<TypeParameter>,
+    /// Source location of the record declaration.
     #[cfg_attr(feature = "serde", serde(with = "oak_core::serde_range"))]
     pub span: Range<usize>,
 }
 
-/// 委托声明
+/// Delegate declaration.
+///
+/// Represents a `delegate` definition in C#. Delegates are reference types
+/// that represent a method with a particular parameter list and return type.
 #[derive(Debug, Clone, PartialEq)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct DelegateDeclaration {
+    /// The name of the delegate.
     pub name: String,
+    /// Attributes applied to the delegate.
     pub attributes: Vec<Attribute>,
+    /// Modifiers like `public`, `internal`.
     pub modifiers: Vec<String>,
+    /// The return type of the method signature.
     pub return_type: String,
+    /// Generic type parameters.
     pub type_parameters: Vec<TypeParameter>,
+    /// The parameters of the delegate method signature.
     pub parameters: Vec<Parameter>,
+    /// Source location of the delegate declaration.
     #[cfg_attr(feature = "serde", serde(with = "oak_core::serde_range"))]
     pub span: Range<usize>,
 }
 
-/// 成员
+/// Member declaration.
+///
+/// Represents various members that can be declared within a class, struct,
+/// or interface.
 #[derive(Debug, Clone, PartialEq)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub enum Member {
-    /// 方法声明
+    /// Method declaration.
     Method(MethodDeclaration),
-    /// 字段声明
+    /// Field declaration.
     Field(FieldDeclaration),
-    /// 属性声明
+    /// Property declaration.
     Property(PropertyDeclaration),
-    /// 索引器声明
+    /// Indexer declaration.
     Indexer(IndexerDeclaration),
-    /// 构造函数
+    /// Constructor declaration.
     Constructor(MethodDeclaration),
-    /// 事件声明
+    /// Event declaration.
     Event(EventDeclaration),
 }
 
-/// 方法声明
+/// Method declaration.
+///
+/// Represents a method or constructor declaration, including its signature,
+/// modifiers, and optional body.
 #[derive(Debug, Clone, PartialEq)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct MethodDeclaration {
-    /// 方法名
+    /// Method name.
     pub name: String,
-    /// 特性
+    /// Attributes.
     pub attributes: Vec<Attribute>,
-    /// 修饰符
+    /// Modifiers.
     pub modifiers: Vec<String>,
-    /// 返回类型
+    /// Return type.
     pub return_type: String,
-    /// 泛型参数
+    /// Type parameters.
     pub type_parameters: Vec<TypeParameter>,
-    /// 参数列表
+    /// Parameters.
     pub parameters: Vec<Parameter>,
-    /// 方法体
+    /// Method body.
     pub body: Option<Vec<Statement>>,
-    /// 是否为异步
+    /// Whether it's an async method.
     pub is_async: bool,
-    /// 源码位置
+    /// Source location.
     #[cfg_attr(feature = "serde", serde(with = "oak_core::serde_range"))]
     pub span: Range<usize>,
 }
 
-/// 属性声明
+/// Property declaration.
+///
+/// Represents a C# property with optional get and set accessors.
 #[derive(Debug, Clone, PartialEq)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct PropertyDeclaration {
+    /// Property name.
     pub name: String,
+    /// Attributes.
     pub attributes: Vec<Attribute>,
+    /// Property type.
     pub r#type: String,
+    /// Modifiers.
     pub modifiers: Vec<String>,
+    /// Get accessor.
     pub get_accessor: Option<Accessor>,
+    /// Set accessor.
     pub set_accessor: Option<Accessor>,
+    /// Source location.
     #[cfg_attr(feature = "serde", serde(with = "oak_core::serde_range"))]
     pub span: Range<usize>,
 }
 
-/// 访问器 (get/set)
+/// Accessor (get/set).
+///
+/// Represents a property or indexer accessor, which can contain a body
+/// of statements or be auto-implemented.
 #[derive(Debug, Clone, PartialEq)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct Accessor {
+    /// Attributes.
     pub attributes: Vec<Attribute>,
+    /// Accessor body.
     pub body: Option<Vec<Statement>>,
+    /// Modifiers.
     pub modifiers: Vec<String>,
 }
 
-/// 索引器声明
+/// Indexer declaration.
+///
+/// Represents a C# indexer (`this[...]`), which allows objects to be indexed
+/// like arrays.
 #[derive(Debug, Clone, PartialEq)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct IndexerDeclaration {
+    /// Attributes.
     pub attributes: Vec<Attribute>,
+    /// Indexer type.
     pub r#type: String,
+    /// Parameters.
     pub parameters: Vec<Parameter>,
+    /// Get accessor.
     pub get_accessor: Option<Accessor>,
+    /// Set accessor.
     pub set_accessor: Option<Accessor>,
+    /// Source location.
     #[cfg_attr(feature = "serde", serde(with = "oak_core::serde_range"))]
     pub span: Range<usize>,
 }
 
-/// 事件声明
+/// Event declaration.
+///
+/// Represents a C# `event` member, which provides a way for a class to notify
+/// other classes when something of interest occurs.
 #[derive(Debug, Clone, PartialEq)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct EventDeclaration {
+    /// Event name.
     pub name: String,
+    /// Attributes.
     pub attributes: Vec<Attribute>,
+    /// Event type.
     pub r#type: String,
+    /// Modifiers.
     pub modifiers: Vec<String>,
+    /// Source location.
     #[cfg_attr(feature = "serde", serde(with = "oak_core::serde_range"))]
     pub span: Range<usize>,
 }
 
-/// 参数
+/// Parameter.
+///
+/// Represents a parameter in a method, constructor, or delegate signature.
 #[derive(Debug, Clone, PartialEq)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct Parameter {
-    /// 特性
+    /// Attributes.
     pub attributes: Vec<Attribute>,
-    /// 参数名
+    /// Parameter name.
     pub name: String,
-    /// 参数类型
+    /// Parameter type.
     pub r#type: String,
-    /// 修饰符 (ref, out, params)
+    /// Modifiers (ref, out, params).
     pub modifiers: Vec<String>,
-    /// 默认值
+    /// Default value.
     pub default_value: Option<Expression>,
 }
 
-/// 字段声明
+/// Field declaration.
+///
+/// Represents a field within a class or struct.
 #[derive(Debug, Clone, PartialEq)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct FieldDeclaration {
+    /// Field name.
     pub name: String,
+    /// Attributes.
     pub attributes: Vec<Attribute>,
+    /// Field type.
     pub r#type: String,
+    /// Modifiers.
     pub modifiers: Vec<String>,
+    /// Initializer.
     pub initializer: Option<Expression>,
+    /// Source location.
     #[cfg_attr(feature = "serde", serde(with = "oak_core::serde_range"))]
     pub span: Range<usize>,
 }
 
-/// 特性
+/// Attribute.
+///
+/// Represents a C# attribute applied to a program element (class, method, etc.).
 #[derive(Debug, Clone, PartialEq)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct Attribute {
+    /// Attribute name.
     pub name: String,
+    /// Argument list.
     pub arguments: Vec<Expression>,
+    /// Source location.
+    #[cfg_attr(feature = "serde", serde(with = "oak_core::serde_range"))]
+    pub span: Range<usize>,
 }
 
-/// 泛型参数
+/// Type parameter.
+///
+/// Represents a generic type parameter (e.g., `T` in `List<T>`).
 #[derive(Debug, Clone, PartialEq)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct TypeParameter {
+    /// Parameter name.
     pub name: String,
+    /// Attributes.
     pub attributes: Vec<Attribute>,
-    pub variance: Option<String>, // in, out
+    /// Variance (in, out).
+    pub variance: Option<String>,
 }
 
-/// 泛型约束
+/// Type parameter constraint.
+///
+/// Represents a constraint on a generic type parameter (e.g., `where T : class`).
 #[derive(Debug, Clone, PartialEq)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct TypeParameterConstraint {
+    /// Type parameter name.
     pub parameter_name: String,
+    /// Constraints.
     pub constraints: Vec<String>,
 }
 
-/// 语句
+/// Statement.
+///
+/// Represents various C# statements that can appear within a method body or block.
 #[derive(Debug, Clone, PartialEq)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub enum Statement {
-    /// 表达式语句
+    /// Expression statement.
     Expression(Expression),
-    /// 返回语句
+    /// Return statement.
     Return(Option<Expression>),
-    /// 块语句
+    /// Block statement.
     Block(Vec<Statement>),
-    /// 条件判断
-    If { condition: Expression, then_branch: Box<Statement>, else_branch: Option<Box<Statement>> },
-    /// While 循环
-    While { condition: Expression, body: Box<Statement> },
-    /// For 循环
-    For { init: Option<Box<Statement>>, condition: Option<Expression>, update: Option<Expression>, body: Box<Statement> },
-    /// Foreach 循环
-    Foreach { item_type: String, item_name: String, iterable: Expression, body: Box<Statement> },
-    /// 变量声明语句
-    LocalVariable { r#type: String, name: String, initializer: Option<Expression> },
-    /// Break
+    /// If statement.
+    If {
+        /// The condition expression.
+        condition: Expression,
+        /// The then branch statement.
+        then_branch: Box<Statement>,
+        /// The optional else branch statement.
+        else_branch: Option<Box<Statement>>,
+    },
+    /// While loop.
+    While {
+        /// The condition expression.
+        condition: Expression,
+        /// The loop body.
+        body: Box<Statement>,
+    },
+    /// For loop.
+    For {
+        /// The initializer statement.
+        init: Option<Box<Statement>>,
+        /// The condition expression.
+        condition: Option<Expression>,
+        /// The update expression.
+        update: Option<Expression>,
+        /// The loop body.
+        body: Box<Statement>,
+    },
+    /// Foreach loop.
+    Foreach {
+        /// The item type name.
+        item_type: String,
+        /// The item variable name.
+        item_name: String,
+        /// The iterable expression.
+        iterable: Expression,
+        /// The loop body.
+        body: Box<Statement>,
+    },
+    /// Local variable declaration.
+    LocalVariable {
+        /// The variable type name.
+        r#type: String,
+        /// The variable name.
+        name: String,
+        /// The optional initializer expression.
+        initializer: Option<Expression>,
+    },
+    /// Break.
     Break,
-    /// Continue
+    /// Continue.
     Continue,
 }
 
-/// 表达式
+/// Expression.
+///
+/// Represents various C# expressions that can be evaluated to a value.
 #[derive(Debug, Clone, PartialEq)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub enum Expression {
-    /// 字面量
+    /// Literal.
     Literal(Literal),
-    /// 变量引用
+    /// Identifier.
     Identifier(String),
-    /// 方法调用
+    /// Method call.
     MethodCall(MethodCall),
-    /// 字段/属性访问
+    /// Member access.
     MemberAccess(MemberAccess),
-    /// 索引访问
+    /// Element access.
     ElementAccess(ElementAccess),
-    /// New 表达式
+    /// New expression.
     New(NewExpression),
-    /// This 表达式
+    /// This expression.
     This,
-    /// Base 表达式
+    /// Base expression.
     Base,
-    /// 二元运算
-    Binary { left: Box<Expression>, op: String, right: Box<Expression> },
-    /// 一元运算
-    Unary { op: String, expression: Box<Expression> },
-    /// 赋值运算
-    Assignment { left: Box<Expression>, op: String, right: Box<Expression> },
-    /// Await 表达式
+    /// Binary expression.
+    Binary {
+        /// The left operand.
+        left: Box<Expression>,
+        /// The operator string.
+        op: String,
+        /// The right operand.
+        right: Box<Expression>,
+    },
+    /// Unary expression.
+    Unary {
+        /// The operator string.
+        op: String,
+        /// The operand expression.
+        expression: Box<Expression>,
+    },
+    /// Assignment expression.
+    Assignment {
+        /// The left-hand side expression.
+        left: Box<Expression>,
+        /// The operator string.
+        op: String,
+        /// The right-hand side expression.
+        right: Box<Expression>,
+    },
+    /// Await expression.
     Await(Box<Expression>),
-    /// LINQ 查询表达式
+    /// LINQ query expression.
     Query(Box<QueryExpression>),
 }
 
-/// LINQ 查询表达式
+/// LINQ query expression.
+///
+/// Represents a LINQ query (e.g., `from x in items where x > 0 select x`).
 #[derive(Debug, Clone, PartialEq)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct QueryExpression {
+    /// From clause.
     pub from_clause: FromClause,
+    /// Query body.
     pub body: QueryBody,
 }
 
+/// From clause.
+///
+/// Represents a `from` clause in a LINQ query.
 #[derive(Debug, Clone, PartialEq)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct FromClause {
+    /// Identifier.
     pub identifier: String,
+    /// Expression.
     pub expression: Box<Expression>,
 }
 
+/// Query body.
+///
+/// Represents the body of a LINQ query, containing clauses and a select/group clause.
 #[derive(Debug, Clone, PartialEq)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct QueryBody {
+    /// Query clauses.
     pub clauses: Vec<QueryClause>,
+    /// Select or group clause.
     pub select_or_group: SelectOrGroupClause,
+    /// Continuation (into).
     pub continuation: Option<String>,
 }
 
+/// Query clause.
+///
+/// Represents a clause within a LINQ query body.
 #[derive(Debug, Clone, PartialEq)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub enum QueryClause {
+    /// From clause.
     From(FromClause),
+    /// Let clause.
     Let(LetClause),
+    /// Where clause.
     Where(Expression),
+    /// Join clause.
     Join(JoinClause),
+    /// OrderBy clause.
     OrderBy(Vec<Ordering>),
 }
 
+/// Query clause extension.
 #[derive(Debug, Clone, PartialEq)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub enum QueryClauseExt {
+    /// GroupBy clause.
     GroupBy(Expression),
 }
 
+/// Let clause.
+///
+/// Represents a `let` clause in a LINQ query, used to store sub-expression results.
 #[derive(Debug, Clone, PartialEq)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct LetClause {
+    /// Identifier.
     pub identifier: String,
+    /// Expression.
     pub expression: Expression,
 }
 
+/// Join clause.
+///
+/// Represents a `join` clause in a LINQ query.
 #[derive(Debug, Clone, PartialEq)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct JoinClause {
+    /// Identifier.
     pub identifier: String,
+    /// In expression.
     pub in_expression: Expression,
+    /// On expression.
     pub on_expression: Expression,
+    /// Equals expression.
     pub equals_expression: Expression,
+    /// Into identifier.
     pub into_identifier: Option<String>,
 }
 
+/// Ordering.
+///
+/// Represents an `orderby` criterion in a LINQ query.
 #[derive(Debug, Clone, PartialEq)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct Ordering {
+    /// Expression.
     pub expression: Expression,
+    /// Whether it's ascending.
     pub ascending: bool,
 }
 
+/// Select or group clause.
+///
+/// Represents the final `select` or `group` clause of a LINQ query.
 #[derive(Debug, Clone, PartialEq)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub enum SelectOrGroupClause {
+    /// Select clause.
     Select(Expression),
-    Group { expression: Expression, by_expression: Expression },
+    /// Group clause.
+    Group {
+        /// Expression.
+        expression: Expression,
+        /// By expression.
+        by_expression: Expression,
+    },
 }
 
-/// New 表达式
+/// New expression.
+///
+/// Represents an object creation expression (e.g., `new MyClass(args)`).
 #[derive(Debug, Clone, PartialEq)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct NewExpression {
+    /// Type name.
     pub r#type: String,
+    /// Argument list.
     pub arguments: Vec<Expression>,
 }
 
-/// 字面量
+/// Literal.
+///
+/// Represents a constant value of a primitive type.
 #[derive(Debug, Clone, PartialEq)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub enum Literal {
+    /// Integer.
     Integer(i64),
+    /// String.
     String(String),
+    /// Boolean.
     Boolean(bool),
+    /// Null.
     Null,
 }
 
-/// 成员访问
+/// Member access.
+///
+/// Represents accessing a member of an object (e.g., `obj.Member`).
 #[derive(Debug, Clone, PartialEq)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct MemberAccess {
+    /// Target expression.
     pub target: Box<Expression>,
+    /// Member name.
     pub name: String,
 }
 
-/// 方法调用
+/// Method call.
+///
+/// Represents a method invocation (e.g., `target.Method(args)` or `Method(args)`).
 #[derive(Debug, Clone, PartialEq)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct MethodCall {
+    /// Target expression.
     pub target: Option<Box<Expression>>,
+    /// Method name.
     pub name: String,
+    /// Argument list.
     pub arguments: Vec<Expression>,
 }
 
-/// 元素访问 (索引器)
+/// Element access (indexer).
+///
+/// Represents an element access via indexers (e.g., `array[index]`).
 #[derive(Debug, Clone, PartialEq)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct ElementAccess {
+    /// Target expression.
     pub target: Box<Expression>,
+    /// Argument list.
     pub arguments: Vec<Expression>,
 }

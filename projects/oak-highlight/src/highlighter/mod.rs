@@ -1,12 +1,16 @@
+//! Core highlighting logic and structures.
+//!
+//! This module contains the main highlighting engine, style definitions,
+//! and theme resolution logic for the Oak language framework.
+
 use crate::exporters::Exporter;
 use core::range::Range;
 use oak_core::{
     TokenType,
     language::{ElementRole, Language, TokenRole, UniversalElementRole, UniversalTokenRole},
-    tree::{RedLeaf, RedNode, RedTree},
+    tree::{RedNode, RedTree},
     visitor::Visitor,
 };
-use serde::{Deserialize, Serialize};
 use std::{
     borrow::Cow,
     collections::HashMap,
@@ -18,7 +22,8 @@ use std::{
 ///
 /// This struct defines the visual appearance of highlighted text segments,
 /// including colors, font weight, and text decorations.
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct HighlightStyle {
     /// Foreground text color in hex format (e.g., "#FF0000" for red)
     pub color: Option<String>,
@@ -39,7 +44,8 @@ impl Default for HighlightStyle {
 }
 
 /// Highlight theme configuration containing style definitions for different roles.
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct HighlightTheme {
     /// Theme name identifier
     pub name: String,
@@ -125,11 +131,13 @@ impl HighlightTheme {
         best_style.unwrap_or_else(|| self.styles.get("none").cloned().unwrap_or_default())
     }
 
+    /// Gets the highlight style for a given token role.
     pub fn get_token_style(&self, role: oak_core::UniversalTokenRole) -> HighlightStyle {
         use oak_core::TokenRole;
         self.resolve_style(role.name())
     }
 
+    /// Gets the highlight style for a given element role.
     pub fn get_element_style(&self, role: oak_core::UniversalElementRole) -> HighlightStyle {
         use oak_core::ElementRole;
         self.resolve_style(role.name())
@@ -208,6 +216,7 @@ fn get_element_scopes<R: ElementRole>(role: R, language: &str, category: oak_cor
 
 /// Trait for providing scopes for highlighting.
 pub trait ScopeProvider {
+    /// Returns the scopes associated with this provider for a given language and category.
     fn scopes(&self, language: &str, category: oak_core::language::LanguageCategory) -> Vec<String>;
 }
 
@@ -224,9 +233,12 @@ impl ScopeProvider for UniversalElementRole {
 }
 
 /// A serializable span representing a range in the source text.
-#[derive(Debug, Clone, Copy, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, Clone, Copy, PartialEq)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct HighlightSpan {
+    /// Starting byte offset of the span.
     pub start: usize,
+    /// Ending byte offset of the span.
     pub end: usize,
 }
 
@@ -239,7 +251,8 @@ impl From<Range<usize>> for HighlightSpan {
 /// A segment of highlighted text with associated style and content.
 ///
 /// Represents a contiguous range of text that shares the same highlighting style.
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct HighlightSegment<'a> {
     /// Byte range in the source text that this segment covers
     pub span: HighlightSpan,
@@ -250,7 +263,8 @@ pub struct HighlightSegment<'a> {
 }
 
 /// Result of token highlighting containing styled text segments.
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct HighlightResult<'a> {
     /// The collection of styled text segments.
     pub segments: Vec<HighlightSegment<'a>>,
@@ -280,7 +294,7 @@ impl<'a, 't, 'tree, L: Language> Visitor<'tree, L> for HighlightVisitor<'a, 't> 
         }
     }
 
-    fn visit_token(&mut self, token: RedLeaf<L>) {
+    fn visit_token(&mut self, token: oak_core::tree::RedLeaf<L>) {
         // Use scopes for highlighting
         let scopes = get_token_scopes(token.kind.role(), L::NAME, L::CATEGORY);
         let style = self.theme.resolve_styles(&scopes);
@@ -297,11 +311,11 @@ impl<'a, 't, 'tree, L: Language> Visitor<'tree, L> for HighlightVisitor<'a, 't> 
 /// that can analyze source code and produce styled text segments.
 pub trait Highlighter {
     /// Highlight the given source code for a specific language and theme.
-    fn highlight<'a>(&self, source: &'a str, language: &str, theme: crate::themes::Theme) -> oak_core::errors::ParseResult<HighlightResult<'a>>;
+    fn highlight<'a>(&self, source: &'a str, language: &str, theme: crate::themes::Theme) -> Result<HighlightResult<'a>, oak_core::errors::OakError>;
 }
 
 impl Highlighter for OakHighlighter {
-    fn highlight<'a>(&self, source: &'a str, language: &str, theme: crate::themes::Theme) -> oak_core::errors::ParseResult<HighlightResult<'a>> {
+    fn highlight<'a>(&self, source: &'a str, language: &str, theme: crate::themes::Theme) -> Result<HighlightResult<'a>, oak_core::errors::OakError> {
         self.highlight(source, language, theme)
     }
 }
@@ -318,6 +332,7 @@ impl Highlighter for OakHighlighter {
 /// assert!(!result.segments.is_empty());
 /// ```
 pub struct OakHighlighter {
+    /// The theme used for highlighting.
     pub theme: HighlightTheme,
 }
 
@@ -328,10 +343,12 @@ impl Default for OakHighlighter {
 }
 
 impl OakHighlighter {
+    /// Creates a new `OakHighlighter` with the default theme.
     pub fn new() -> Self {
         Self::default()
     }
 
+    /// Sets the theme for the highlighter.
     pub fn with_theme(mut self, theme: HighlightTheme) -> Self {
         self.theme = theme;
         self
@@ -344,7 +361,7 @@ impl OakHighlighter {
     }
 
     /// Main highlight method matching README API.
-    pub fn highlight<'a>(&self, source: &'a str, _language: &str, theme: crate::themes::Theme) -> oak_core::errors::ParseResult<HighlightResult<'a>> {
+    pub fn highlight<'a>(&self, source: &'a str, _language: &str, theme: crate::themes::Theme) -> Result<HighlightResult<'a>, oak_core::errors::OakError> {
         let theme_config = theme.get_theme();
 
         // Default implementation just treats everything as a single segment for now
@@ -355,7 +372,8 @@ impl OakHighlighter {
         Ok(HighlightResult { segments, source: Cow::Borrowed(source) })
     }
 
-    pub fn highlight_with_language<'a, L, P, LX>(&self, source: &'a str, theme: crate::themes::Theme, parser: &P, _lexer: &LX) -> oak_core::errors::ParseResult<HighlightResult<'a>>
+    /// Highlights the source text using a specific language implementation.
+    pub fn highlight_with_language<'a, L, P, LX>(&self, source: &'a str, theme: crate::themes::Theme, parser: &P, _lexer: &LX) -> Result<HighlightResult<'a>, oak_core::errors::OakError>
     where
         L: Language + Send + Sync + 'static,
         P: oak_core::parser::Parser<L>,
@@ -378,7 +396,7 @@ impl OakHighlighter {
     }
 
     /// Highlight and format to a string directly.
-    pub fn highlight_format(&self, source: &str, language: &str, theme: crate::themes::Theme, format: crate::exporters::ExportFormat) -> oak_core::errors::ParseResult<String> {
+    pub fn highlight_format(&self, source: &str, language: &str, theme: crate::themes::Theme, format: crate::exporters::ExportFormat) -> Result<String, oak_core::errors::OakError> {
         let result = self.highlight(source, language, theme)?;
 
         let content = match format {

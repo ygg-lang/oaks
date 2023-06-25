@@ -28,6 +28,7 @@ impl WhitespaceConfig {
 
 /// Counts how many spaces or tabs are at the start of the byte slice.
 #[inline]
+#[allow(dead_code)]
 pub fn count_space_tab_prefix(bytes: &[u8]) -> usize {
     SimdScanner::skip_two_bytes(bytes, b' ', b'\t')
 }

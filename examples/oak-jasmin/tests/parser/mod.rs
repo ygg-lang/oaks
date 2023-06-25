@@ -10,7 +10,7 @@ fn parser_basic_class() {
 
     let mut session = ParseSession::<JasminLanguage>::new(16);
 
-    // 使用新的 API
+    // Use new API
     let lex_output = lexer.lex(&source, &[], &mut session);
     assert!(lex_output.result.is_ok());
 

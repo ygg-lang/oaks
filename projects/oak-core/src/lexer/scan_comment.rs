@@ -21,7 +21,7 @@ impl CommentConfig {
         // Try line comment
         if !self.line_marker.is_empty() && state.starts_with(self.line_marker) {
             state.advance(self.line_marker.len());
-            state.take_while_byte(|b| b != b'\n');
+            state.skip_until(b'\n');
             state.add_token(line_kind, start, state.get_position());
             return true;
         }
@@ -53,12 +53,14 @@ impl CommentConfig {
 
 /// Checks if the given byte slice starts with a line comment marker ("//").
 #[inline]
+#[allow(dead_code)]
 pub fn starts_with_line_comment(bytes: &[u8]) -> bool {
     bytes.starts_with(b"//")
 }
 
 /// Checks if the given byte slice starts with a block comment marker ("/*").
 #[inline]
+#[allow(dead_code)]
 pub fn starts_with_block_comment(bytes: &[u8]) -> bool {
     bytes.starts_with(b"/*")
 }
