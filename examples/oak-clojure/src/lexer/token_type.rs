@@ -1,3 +1,4 @@
+/// Token type definitions for Clojure lexer.
 use oak_core::{Source, Token, TokenType, UniversalElementRole, UniversalTokenRole};
 
 /// Type alias for a Clojure token.

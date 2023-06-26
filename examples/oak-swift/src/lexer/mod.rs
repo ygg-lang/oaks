@@ -1,4 +1,5 @@
 #![doc = include_str!("readme.md")]
+/// Token type definitions for Swift lexer.
 pub mod token_type;
 
 use crate::language::SwiftLanguage;
@@ -7,6 +8,7 @@ use oak_core::{Lexer, LexerCache, LexerState, OakError, TextEdit, lexer::LexOutp
 
 pub(crate) type State<'a, S> = LexerState<'a, S, SwiftLanguage>;
 
+/// Lexer for Swift source code.
 #[derive(Clone, Debug)]
 pub struct SwiftLexer<'config> {
     config: &'config SwiftLanguage,
@@ -24,6 +26,7 @@ impl<'config> Lexer<SwiftLanguage> for SwiftLexer<'config> {
 }
 
 impl<'config> SwiftLexer<'config> {
+    /// Creates a new SwiftLexer with the given language configuration.
     pub fn new(config: &'config SwiftLanguage) -> Self {
         Self { config }
     }

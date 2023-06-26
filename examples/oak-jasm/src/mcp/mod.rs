@@ -1,5 +1,3 @@
-//! MCP service implementation for the JASM language.
-
 #![doc = include_str!("readme.md")]
 use crate::lsp::JasmLanguageService;
 use oak_vfs::MemoryVfs;

@@ -124,6 +124,9 @@ impl AsDocument for Expression {
                 doc!(expr.as_document(), if *negated { doc!(soft_space, "NOT") } else { nil }, soft_space, "IN", soft_space, "(", subquery.as_document(), ")")
             }
             Expression::Error { .. } => nil,
+            Expression::Vector { elements, .. } => {
+                doc!("[", Document::join(elements.iter().map(|it| it.as_document()), doc!(",", soft_space)), "]")
+            }
         }
     }
 }
@@ -314,7 +317,8 @@ impl AsDocument for CreateStatement {
 #[cfg(feature = "oak-pretty-print")]
 impl AsDocument for ColumnDefinition {
     fn as_document(&self) -> Document<'_> {
-        doc!(self.name.as_document(), soft_space, self.data_type.clone(), Document::join(self.constraints.iter().map(|it| doc!(soft_space, it.as_document())), nil))
+        let data_type_str = self.data_type.to_string();
+        doc!(self.name.as_document(), soft_space, data_type_str, Document::join(self.constraints.iter().map(|it| doc!(soft_space, it.as_document())), nil))
     }
 }
 
@@ -457,7 +461,8 @@ impl AsDocument for AlterAction {
             AlterAction::AddColumn { name, data_type, .. } => {
                 let mut d = doc!("ADD COLUMN", soft_space, name.as_document());
                 if let Some(dt) = data_type {
-                    d = doc!(d, soft_space, dt.clone());
+                    let dt_str = dt.to_string();
+                    d = doc!(d, soft_space, dt_str);
                 }
                 d
             }

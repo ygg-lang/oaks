@@ -16,6 +16,7 @@ pub struct TypstBuilder<'config> {
 }
 
 impl<'config> TypstBuilder<'config> {
+    /// Creates a new TypstBuilder with the given language configuration.
     pub fn new(config: &'config TypstLanguage) -> Self {
         Self { config }
     }

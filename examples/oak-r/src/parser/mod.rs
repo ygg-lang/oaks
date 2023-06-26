@@ -1,3 +1,4 @@
+/// Element type definitions for the R parser.
 pub mod element_type;
 
 use crate::{
@@ -13,11 +14,13 @@ use oak_core::{
 
 pub(crate) type State<'a, S> = ParserState<'a, RLanguage, S>;
 
+/// Parser for the R programming language.
 pub struct RParser<'config> {
     pub(crate) config: &'config RLanguage,
 }
 
 impl<'config> RParser<'config> {
+    /// Creates a new RParser with the given language configuration.
     pub fn new(config: &'config RLanguage) -> Self {
         Self { config }
     }

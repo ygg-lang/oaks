@@ -50,7 +50,7 @@ impl<'config> Parser<VueLanguage> for VueParser<'config> {
 impl<'config> VueParser<'config> {
     /// Creates a new Vue parser with the given configuration.
     pub fn new(config: &'config VueLanguage) -> Self {
-        Self { config: config }
+        Self { config }
     }
 
     /// Parses an expression.

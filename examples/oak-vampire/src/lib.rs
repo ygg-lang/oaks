@@ -1,9 +1,8 @@
-#![doc = include_str!("../readme.md")]
+#![doc = include_str!("readme.md")]
 #![feature(new_range_api)]
 #![warn(missing_docs)]
 #![doc(html_logo_url = "https://raw.githubusercontent.com/ygg-lang/oaks/refs/heads/dev/documents/logo.svg")]
 #![doc(html_favicon_url = "https://raw.githubusercontent.com/ygg-lang/oaks/refs/heads/dev/documents/logo.svg")]
-//! Vampire support for the Oak language framework.
 
 /// AST module.
 pub mod ast;
@@ -24,14 +23,17 @@ pub mod mcp;
 /// Parser module.
 pub mod parser;
 
+/// Core exports for the Vampire language.
 pub use crate::{ast::VampireRoot, language::VampireLanguage, lexer::VampireLexer, parser::VampireParser};
 
+/// Core trait exports from oak_core.
 pub use oak_core::{ElementType, TokenType};
 
 /// Highlighter implementation.
 #[cfg(feature = "oak-highlight")]
 pub use crate::lsp::highlighter::VampireHighlighter;
 
+/// Language Server Protocol service for Vampire.
 #[cfg(feature = "lsp")]
 pub use crate::lsp::VampireLanguageService;
 /// LSP implementation.
@@ -41,5 +43,7 @@ pub use crate::lsp::formatter::VampireFormatter;
 /// MCP service implementation.
 #[cfg(feature = "mcp")]
 pub use crate::mcp::serve_vampire_mcp;
+/// Token type enumeration for Vampire lexer.
 pub use lexer::token_type::VampireTokenType;
+/// Element type enumeration for Vampire parser.
 pub use parser::element_type::VampireElementType;

@@ -22,7 +22,7 @@ static AS_CHAR: LazyLock<StringConfig> = LazyLock::new(|| StringConfig { quotes:
 /// A lexer for the ActionScript language.
 #[derive(Clone)]
 pub struct ActionScriptLexer<'config> {
-    _config: &'config ActionScriptLanguage,
+    config: &'config ActionScriptLanguage,
 }
 
 impl<'config> Lexer<ActionScriptLanguage> for ActionScriptLexer<'config> {
@@ -39,7 +39,7 @@ impl<'config> Lexer<ActionScriptLanguage> for ActionScriptLexer<'config> {
 impl<'config> ActionScriptLexer<'config> {
     /// Creates a new ActionScript lexer with the given configuration.
     pub fn new(config: &'config ActionScriptLanguage) -> Self {
-        Self { _config: config }
+        Self { config }
     }
 
     /// Main lexical analysis logic

@@ -1,5 +1,3 @@
-//! Highlighter implementation for the JASM language.
-
 #![doc = include_str!("readme.md")]
 use oak_core::{Language, errors::ParseResult};
 use oak_highlight::{

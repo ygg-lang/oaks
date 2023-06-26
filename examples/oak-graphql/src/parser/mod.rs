@@ -4,11 +4,9 @@ pub mod element_type;
 use crate::{language::GraphQLLanguage, lexer::GraphQLLexer, parser::element_type::GraphQLElementType};
 use oak_core::{
     GreenNode, OakError,
-    parser::{ParseCache, ParseOutput, Parser, ParserState, parse_with_lexer},
+    parser::{ParseCache, ParseOutput, Parser, parse_with_lexer},
     source::{Source, TextEdit},
 };
-
-pub(crate) type State<'a, S> = ParserState<'a, GraphQLLanguage, S>;
 
 /// A parser for GraphQL source files.
 pub struct GraphQLParser<'config> {

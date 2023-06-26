@@ -29,6 +29,21 @@ pub enum Block {
     Table(Table),
     /// HTML block.
     Html(Html),
+    /// Abbreviation definition.
+    AbbreviationDefinition(AbbreviationDefinition),
+}
+
+/// Abbreviation definition element.
+#[derive(Clone, Debug, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+pub struct AbbreviationDefinition {
+    /// Abbreviation key.
+    pub key: String,
+    /// Abbreviation definition.
+    pub definition: String,
+    /// Source code range.
+    #[cfg_attr(feature = "serde", serde(with = "oak_core::serde_range"))]
+    pub span: Range<usize>,
 }
 
 /// Heading element.
@@ -191,5 +206,12 @@ pub enum Inline {
         url: String,
         /// Image title (optional).
         title: Option<String>,
+    },
+    /// Abbreviation usage.
+    Abbreviation {
+        /// Abbreviation key.
+        key: String,
+        /// Abbreviation definition.
+        definition: String,
     },
 }

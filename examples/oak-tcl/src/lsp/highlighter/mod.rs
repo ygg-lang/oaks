@@ -1,5 +1,4 @@
 #![doc = include_str!("readme.md")]
-//! Tcl syntax highlighter
 
 /// Local definition of highlight kinds
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]

@@ -3,7 +3,6 @@
 #![doc(html_logo_url = "https://raw.githubusercontent.com/ygg-lang/oaks/refs/heads/dev/documents/logo.svg")]
 #![doc(html_favicon_url = "https://raw.githubusercontent.com/ygg-lang/oaks/refs/heads/dev/documents/logo.svg")]
 #![warn(missing_docs)]
-//! Dockerfile support for the Oak language framework.
 
 /// Root node of the Dockerfile AST.
 pub mod ast;

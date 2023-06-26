@@ -1,3 +1,4 @@
+/// Element type definitions for Typst parser.
 pub mod element_type;
 
 use crate::{
@@ -13,11 +14,13 @@ use oak_core::{
 
 pub(crate) type State<'a, S> = ParserState<'a, TypstLanguage, S>;
 
+/// Parser for Typst source code.
 pub struct TypstParser<'config> {
     pub(crate) config: &'config TypstLanguage,
 }
 
 impl<'config> TypstParser<'config> {
+    /// Creates a new TypstParser with the given language configuration.
     pub fn new(config: &'config TypstLanguage) -> Self {
         Self { config }
     }

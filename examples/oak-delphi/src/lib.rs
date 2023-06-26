@@ -3,10 +3,6 @@
 #![doc(html_logo_url = "https://raw.githubusercontent.com/ygg-lang/oaks/refs/heads/dev/documents/logo.svg")]
 #![doc(html_favicon_url = "https://raw.githubusercontent.com/ygg-lang/oaks/refs/heads/dev/documents/logo.svg")]
 #![warn(missing_docs)]
-//! Delphi programming language parser implementation
-//!
-//! This module provides a complete parser for the Delphi programming language,
-//! including lexersyntax definitionsand language configuration.
 
 pub mod ast;
 mod builder;

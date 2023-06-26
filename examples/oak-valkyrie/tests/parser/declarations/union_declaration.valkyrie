@@ -1,4 +1,4 @@
-union Option<T> {
+union Option⟨T⟩ {
     Some {
         value: T
     },

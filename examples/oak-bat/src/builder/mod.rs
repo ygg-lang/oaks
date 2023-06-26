@@ -9,10 +9,25 @@ pub struct BatBuilder<'config> {
 }
 
 impl<'config> BatBuilder<'config> {
+    /// Creates a new `BatBuilder` instance with the specified language configuration.
+    ///
+    /// # Arguments
+    ///
+    /// * `config` - A reference to the `BatLanguage` configuration.
     pub fn new(config: &'config BatLanguage) -> Self {
         Self { config }
     }
 
+    /// Builds a `BatRoot` AST from the parsed green tree and source text.
+    ///
+    /// # Arguments
+    ///
+    /// * `_green` - The parsed green tree from the parser.
+    /// * `_source` - The source text for reference.
+    ///
+    /// # Returns
+    ///
+    /// A `Result` containing the `BatRoot` AST or an `OakError`.
     pub fn build_root(&self, _green: &GreenNode<BatLanguage>, _source: &SourceText) -> Result<BatRoot, oak_core::OakError> {
         // Simplified AST construction logic.
         Ok(BatRoot { elements: vec![] })

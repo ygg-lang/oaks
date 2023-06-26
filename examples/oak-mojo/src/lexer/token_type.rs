@@ -1,70 +1,123 @@
 use oak_core::UniversalTokenRole;
 
+/// Token types for the Mojo language lexer.
+///
+/// This enum represents all possible token types in Mojo,
+/// including keywords, identifiers, literals, operators, and delimiters.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub enum MojoTokenType {
-    // Keywords
+    /// Function keyword `fn`.
     Fn,
+    /// Struct keyword `struct`.
     Struct,
+    /// Variable keyword `var`.
     Var,
+    /// Let keyword `let`.
     Let,
+    /// If keyword `if`.
     If,
+    /// Else keyword `else`.
     Else,
+    /// While keyword `while`.
     While,
+    /// For keyword `for`.
     For,
+    /// In keyword `in`.
     In,
+    /// Return keyword `return`.
     Return,
+    /// Break keyword `break`.
     Break,
+    /// Continue keyword `continue`.
     Continue,
+    /// Import keyword `import`.
     Import,
+    /// From keyword `from`.
     From,
+    /// Boolean literal `True`.
     True,
+    /// Boolean literal `False`.
     False,
+    /// None literal.
     None,
 
-    // Identifiers and Literals
+    /// Identifier token.
     Identifier,
+    /// Integer literal token.
     Integer,
+    /// Float literal token.
     Float,
+    /// String literal token.
     String,
 
-    // Operators and Delimiters
+    /// Plus operator `+`.
     Plus,
+    /// Minus operator `-`.
     Minus,
+    /// Star operator `*`.
     Star,
+    /// Slash operator `/`.
     Slash,
+    /// Percent operator `%`.
     Percent,
+    /// Assignment operator `=`.
     Equal,
+    /// Equality operator `==`.
     EqualEqual,
+    /// Inequality operator `!=`.
     NotEqual,
+    /// Less than operator `<`.
     Less,
+    /// Less than or equal operator `<=`.
     LessEqual,
+    /// Greater than operator `>`.
     Greater,
+    /// Greater than or equal operator `>=`.
     GreaterEqual,
+    /// Logical and operator `and`.
     And,
+    /// Logical or operator `or`.
     Or,
+    /// Logical not operator `not`.
     Not,
+    /// Left parenthesis `(`.
     LeftParen,
+    /// Right parenthesis `)`.
     RightParen,
+    /// Left bracket `[`.
     LeftBracket,
+    /// Right bracket `]`.
     RightBracket,
+    /// Left brace `{`.
     LeftBrace,
+    /// Right brace `}`.
     RightBrace,
+    /// Comma `,`.
     Comma,
+    /// Dot `.`.
     Dot,
+    /// Colon `:`.
     Colon,
+    /// Semicolon `;`.
     Semicolon,
+    /// Arrow operator `->`.
     Arrow,
 
-    // Trivia
+    /// Whitespace token.
     Whitespace,
+    /// Newline token.
     Newline,
+    /// Comment token.
     Comment,
+    /// Indent token for significant whitespace.
     Indent,
+    /// Dedent token for significant whitespace.
     Dedent,
 
-    // Special
+    /// End of stream marker.
     EndOfStream,
+    /// Error token.
     Error,
 }
 

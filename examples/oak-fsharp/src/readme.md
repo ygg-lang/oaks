@@ -1,5 +1,7 @@
 # 🛠️ oak-fsharp Developer Guide
 
+Fsharp support for the Oak language framework.
+
 Welcome to the internal implementation of the F# parser. This module provides the core logic for tokenizing and parsing F# source code into a high-fidelity syntax tree.
 
 ## 📦 Core Components

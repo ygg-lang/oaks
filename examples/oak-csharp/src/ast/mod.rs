@@ -1,5 +1,4 @@
 #![doc = include_str!("readme.md")]
-//! C# AST definitions
 
 use core::range::Range;
 

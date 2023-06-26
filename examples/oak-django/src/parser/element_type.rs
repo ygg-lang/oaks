@@ -106,11 +106,17 @@ pub enum DjangoElementType {
     Equal,
 
     // Grammar constructs
+    /// If statement node.
     IfStatement,
+    /// For statement node.
     ForStatement,
+    /// Block statement node.
     BlockStatement,
+    /// Filter expression node.
     FilterExpression,
+    /// Binary expression node.
     BinaryExpression,
+    /// Literal node.
     Literal,
 
     /// Whitespace.

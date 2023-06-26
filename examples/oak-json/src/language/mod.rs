@@ -1,6 +1,11 @@
 #![doc = include_str!("readme.md")]
 use oak_core::language::{Language, LanguageCategory};
 #[cfg(feature = "serde")]
+/// Serde serialization and deserialization implementations for JSON values.
+///
+/// This module provides the [`to_value`] function for converting serializable Rust types
+/// into [`JsonValue`] AST nodes, and [`from_value`] for deserializing [`JsonValue`] nodes
+/// back into Rust types.
 pub mod serde_impl;
 #[cfg(feature = "serde")]
 pub use serde_impl::{from_value, to_value};

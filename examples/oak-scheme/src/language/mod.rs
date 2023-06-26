@@ -6,6 +6,7 @@ use oak_core::{Language, LanguageCategory};
 pub struct SchemeLanguage {}
 
 impl SchemeLanguage {
+    /// Creates a new SchemeLanguage instance.
     pub fn new() -> Self {
         Self {}
     }

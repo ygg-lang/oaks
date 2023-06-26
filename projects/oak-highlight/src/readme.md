@@ -1,5 +1,10 @@
 # 🛠️ Developer Guide
 
+Syntax highlighting for the Oak language framework.
+
+This crate provides a flexible syntax highlighting system with support
+for various exporters (HTML, ANSI, JSON, etc.) and themes.
+
 This directory contains the core logic implementation of the project. Below are instructions for a quick start.
 
 ## 🚦 Quick Start

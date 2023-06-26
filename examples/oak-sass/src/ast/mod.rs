@@ -32,7 +32,9 @@ pub enum SassStatement {
 #[derive(Debug, Clone)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct ErrorNode {
+    /// The error message describing what went wrong during parsing.
     pub message: String,
+    /// Source code span where the error occurred.
     #[cfg_attr(feature = "serde", serde(with = "oak_core::serde_range"))]
     pub span: Range<usize>,
 }
@@ -41,10 +43,13 @@ pub struct ErrorNode {
 #[derive(Debug, Clone)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct VariableDefinition {
+    /// Source code span of the variable name (without the `$` prefix).
     #[cfg_attr(feature = "serde", serde(with = "oak_core::serde_range"))]
     pub name: Range<usize>,
+    /// Source code span of the variable value expression.
     #[cfg_attr(feature = "serde", serde(with = "oak_core::serde_range"))]
     pub value: Range<usize>,
+    /// Source code span of the entire variable definition.
     #[cfg_attr(feature = "serde", serde(with = "oak_core::serde_range"))]
     pub span: Range<usize>,
 }
@@ -53,10 +58,14 @@ pub struct VariableDefinition {
 #[derive(Debug, Clone)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct RuleSet {
+    /// Source code span of the CSS selector.
     #[cfg_attr(feature = "serde", serde(with = "oak_core::serde_range"))]
     pub selector: Range<usize>,
+    /// Nested child statements within this rule set.
     pub children: Vec<SassStatement>,
+    /// CSS properties defined directly in this rule set.
     pub properties: Vec<Property>,
+    /// Source code span of the entire rule set including selector and braces.
     #[cfg_attr(feature = "serde", serde(with = "oak_core::serde_range"))]
     pub span: Range<usize>,
 }
@@ -65,10 +74,13 @@ pub struct RuleSet {
 #[derive(Debug, Clone)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct Property {
+    /// Source code span of the property name.
     #[cfg_attr(feature = "serde", serde(with = "oak_core::serde_range"))]
     pub name: Range<usize>,
+    /// Source code span of the property value.
     #[cfg_attr(feature = "serde", serde(with = "oak_core::serde_range"))]
     pub value: Range<usize>,
+    /// Source code span of the entire property declaration including the semicolon.
     #[cfg_attr(feature = "serde", serde(with = "oak_core::serde_range"))]
     pub span: Range<usize>,
 }
@@ -77,11 +89,15 @@ pub struct Property {
 #[derive(Debug, Clone)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct AtRule {
+    /// Source code span of the at-rule name (without the `@` prefix).
     #[cfg_attr(feature = "serde", serde(with = "oak_core::serde_range"))]
     pub name: Range<usize>,
+    /// Optional source code span of the at-rule parameters.
     #[cfg_attr(feature = "serde", serde(with = "serde_range_opt"))]
     pub params: Option<Range<usize>>,
+    /// Optional body containing nested statements for at-rules with braces.
     pub body: Option<Vec<SassStatement>>,
+    /// Source code span of the entire at-rule.
     #[cfg_attr(feature = "serde", serde(with = "oak_core::serde_range"))]
     pub span: Range<usize>,
 }

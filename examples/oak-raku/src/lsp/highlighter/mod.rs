@@ -1,5 +1,4 @@
 #![doc = include_str!("readme.md")]
-//! Raku syntax highlighter
 
 use crate::ast::RakuRoot;
 

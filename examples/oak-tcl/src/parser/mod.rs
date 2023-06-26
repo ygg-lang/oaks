@@ -1,3 +1,4 @@
+/// Element type definitions for the Tcl parser.
 pub mod element_type;
 
 use crate::{
@@ -13,11 +14,16 @@ use oak_core::{
 
 pub(crate) type State<'a, S> = ParserState<'a, TclLanguage, S>;
 
+/// A parser for the Tcl programming language.
+///
+/// This parser processes tokens produced by the lexer and constructs
+/// an abstract syntax tree (AST) for Tcl source code.
 pub struct TclParser<'config> {
     pub(crate) config: &'config TclLanguage,
 }
 
 impl<'config> TclParser<'config> {
+    /// Creates a new TclParser with the given configuration.
     pub fn new(config: &'config TclLanguage) -> Self {
         Self { config }
     }

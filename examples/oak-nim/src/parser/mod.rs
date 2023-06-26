@@ -4,11 +4,9 @@ pub use element_type::NimElementType;
 
 use crate::{language::NimLanguage, lexer::NimLexer};
 use oak_core::{
-    parser::{ParseCache, ParseOutput, Parser, ParserState, parse_with_lexer},
+    parser::{ParseCache, ParseOutput, Parser, parse_with_lexer},
     source::{Source, TextEdit},
 };
-
-pub(crate) type State<'a, S> = ParserState<'a, NimLanguage, S>;
 
 /// A parser for the Nim language.
 pub struct NimParser<'config> {

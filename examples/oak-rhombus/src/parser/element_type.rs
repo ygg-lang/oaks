@@ -61,8 +61,8 @@ impl From<crate::lexer::token_type::RhombusTokenType> for RhombusElementType {
             T::StringLiteral => RhombusElementType::StringLiteral,
             T::BooleanLiteral => RhombusElementType::BooleanLiteral,
             T::Identifier => RhombusElementType::Identifier,
-            T::Fun | T::Val | T::Var | T::Let | T::If | T::Else | T::Match | T::Case | T::Block | T::Module | T::Import | T::Export => RhombusElementType::Identifier, // Keywords are identifiers for now
-            T::LeftParen | T::RightParen | T::LeftBracket | T::RightBracket | T::LeftBrace | T::RightBrace | T::Dot | T::Comma | T::Colon | T::Semicolon => RhombusElementType::Identifier, // Punctuation
+            T::Fun | T::Val | T::Var | T::Let | T::If | T::Else | T::Match | T::Case | T::Block | T::Module | T::Import | T::Export | T::Require | T::Provide => RhombusElementType::Identifier, // Keywords are identifiers for now
+            T::LeftParen | T::RightParen | T::LeftBracket | T::RightBracket | T::LeftBrace | T::RightBrace | T::Dot | T::Comma | T::Colon | T::Semicolon => RhombusElementType::Identifier,      // Punctuation
             T::Error => RhombusElementType::Error,
             T::Eof => RhombusElementType::Eof,
             _ => RhombusElementType::Error,

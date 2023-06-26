@@ -5,6 +5,7 @@ use crate::{language::TwigLanguage, lexer::token_type::TwigTokenType};
 use oak_core::{Lexer, LexerCache, LexerState, OakError, lexer::LexOutput, source::Source};
 
 #[derive(Clone, Debug)]
+/// Lexer for Twig templates.
 pub struct TwigLexer<'config> {
     /// Language configuration
     config: &'config TwigLanguage,
@@ -25,6 +26,7 @@ impl<'config> Lexer<TwigLanguage> for TwigLexer<'config> {
 
 impl<'config> TwigLexer<'config> {
     /// Creates a new Twig lexer
+    /// Creates a new TwigLexer with the given language configuration.
     pub fn new(config: &'config TwigLanguage) -> Self {
         Self { config }
     }

@@ -1,7 +1,6 @@
 #![doc = include_str!("readme.md")]
 #![feature(new_range_api)]
 #![warn(missing_docs)]
-//! Koka support for the Oak language framework.
 
 pub mod ast;
 pub mod builder;

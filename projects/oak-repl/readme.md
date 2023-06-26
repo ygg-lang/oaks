@@ -3,16 +3,35 @@
 [![Crates.io](https://img.shields.io/crates/v/oak-repl.svg)](https://crates.io/crates/oak-repl)
 [![Documentation](https://docs.rs/oak-repl/badge.svg)](https://docs.rs/oak-repl)
 
-**Core component of the Oak ecosystem** — Providing a solid foundation for building modern programming language toolchains.
+**Interactive REPL Framework for Oak Languages** — A terminal-based Read-Eval-Print Loop framework with multi-line support and real-time syntax highlighting.
 
-## 🎯 Project Vision
+## 🎯 Why oak-repl?
 
-`oak-repl` is a key module in the Oak ecosystem, focusing on providing efficient and scalable low-level functionality to help developers quickly build robust programming language-related tools.
+REPLs are essential for interactive development, experimentation, and learning. `oak-repl` provides a complete, terminal-based REPL framework that integrates deeply with Oak language features.
 
-## ✨ Core Features
+## ✨ Key Features
 
-- **⚡ Blazing Fast**: Fully utilizes Rust's performance advantages to achieve sub-millisecond parsing response times.
-- **🔄 Incremental Parsing**: Built-in support for partial updates, demonstrating extremely high efficiency when processing large files.
-- **🌳 Structured Output**: Provides a clear, easy-to-traverse syntax tree or data structure.
-- **🛡️ Robustness**: Features a comprehensive error recovery mechanism, ensuring normal operation even when input is incomplete.
-- **🧩 Easy Integration**: Designed with high cohesion and low coupling, allowing for quick integration into existing Rust projects.
+- **🖥️ Terminal Integration** — Cross-platform terminal handling with raw mode support
+- **📝 Multi-Line Input** — Automatic detection of incomplete statements
+- **🎨 Syntax Highlighting** — Real-time highlighting via `oak-highlight` integration
+- **⌨️ Rich Editing** — Cursor movement, backspace, and auto-indentation
+- **🔌 Customizable Handlers** — `ReplHandler` trait for language-specific behavior
+- **🛡️ Error Recovery** — Graceful handling with continuation support
+
+## 🏗️ Architecture
+
+- `ReplHandler` — Trait for implementing language-specific REPL behavior
+- `OakRepl` — Main REPL engine managing terminal interaction
+- `LineBuffer` — Multi-line text input with cursor positioning
+
+## 🔗 Ecosystem Integration
+
+Integrates with `oak-highlight` for syntax highlighting and any language parser implementing `ReplHandler`.
+
+## 📖 Documentation
+
+For usage examples and API details, see the [API documentation](https://docs.rs/oak-repl).
+
+## 🤝 Contributing
+
+Contributions are welcome! Please feel free to submit a Pull Request.

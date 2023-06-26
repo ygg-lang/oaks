@@ -1,4 +1,10 @@
 #![doc = include_str!("readme.md")]
+
+/// Token type definitions for COBOL lexical analysis.
+///
+/// This module provides [`CobolTokenType`] which defines all token types
+/// recognized by the COBOL lexer, including keywords, literals, identifiers,
+/// and structural tokens.
 pub mod token_type;
 
 pub use token_type::CobolTokenType;

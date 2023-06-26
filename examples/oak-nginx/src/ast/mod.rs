@@ -28,8 +28,11 @@ pub enum NginxItem {
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 #[derive(Debug, Clone)]
 pub struct Directive {
+    /// The name of the directive.
     pub name: String,
+    /// The parameters of the directive.
     pub parameters: Vec<String>,
+    /// The source range of the directive.
     #[cfg_attr(feature = "serde", serde(with = "oak_core::serde_range"))]
     pub range: Range<usize>,
 }
@@ -38,9 +41,13 @@ pub struct Directive {
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 #[derive(Debug, Clone)]
 pub struct Block {
+    /// The name of the block.
     pub name: String,
+    /// The parameters of the block.
     pub parameters: Vec<String>,
+    /// The items inside the block.
     pub items: Vec<NginxItem>,
+    /// The source range of the block.
     #[cfg_attr(feature = "serde", serde(with = "oak_core::serde_range"))]
     pub range: Range<usize>,
 }
@@ -49,7 +56,9 @@ pub struct Block {
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 #[derive(Debug, Clone)]
 pub struct Comment {
+    /// The text content.
     pub text: String,
+    /// The source range of the text.
     #[cfg_attr(feature = "serde", serde(with = "oak_core::serde_range"))]
     pub range: Range<usize>,
 }

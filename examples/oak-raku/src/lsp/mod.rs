@@ -1,5 +1,4 @@
 #![doc = include_str!("readme.md")]
-//! Raku language service implementation
 
 pub mod formatter;
 #[cfg(feature = "oak-highlight")]

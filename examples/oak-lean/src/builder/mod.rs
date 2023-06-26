@@ -1,11 +1,13 @@
 use crate::{ast::LeanRoot, language::LeanLanguage};
 use oak_core::{Builder, BuilderCache, GreenNode, OakDiagnostics, Parser, RedNode, TextEdit, source::Source};
 
+/// Builder for constructing Lean AST from source text.
 pub struct LeanBuilder<'config> {
     config: &'config LeanLanguage,
 }
 
 impl<'config> LeanBuilder<'config> {
+    /// Creates a new Lean builder with the given language configuration.
     pub fn new(config: &'config LeanLanguage) -> Self {
         Self { config }
     }

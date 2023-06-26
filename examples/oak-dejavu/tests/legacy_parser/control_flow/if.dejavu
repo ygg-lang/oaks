@@ -1,0 +1,28 @@
+{% if i %}
+    then body
+{% if end %}
+
+
+{% if i == true != false %}
+    then body
+{% else %}
+    else body
+{% end if %}
+
+{% "{inline}" %}
+
+{% if i %}
+    then body
+{% else if x %}
+    else body
+{% end if %}
+
+
+
+{% if i %}
+    then body
+{% else if x %}
+    else if body
+{% else %}
+    else body
+{% end if %}

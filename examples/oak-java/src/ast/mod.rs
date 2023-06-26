@@ -1,5 +1,4 @@
 #![doc = include_str!("readme.md")]
-//! Java AST definitions
 
 use core::range::Range;
 
@@ -20,7 +19,7 @@ pub struct Annotation {
     /// Arguments (if any)
     pub arguments: Vec<Expression>,
     /// Source span
-    #[serde(with = "oak_core::serde_range")]
+    #[cfg_attr(feature = "serde", serde(with = "oak_core::serde_range"))]
     pub span: Range<usize>,
 }
 
@@ -38,6 +37,8 @@ pub enum Item {
     Enum(EnumDeclaration),
     /// Record declaration
     Record(RecordDeclaration),
+    /// Annotation type declaration
+    AnnotationType(AnnotationTypeDeclaration),
     /// Package declaration
     Package(PackageDeclaration),
     /// Import declaration
@@ -50,6 +51,8 @@ pub enum Item {
 pub struct ClassDeclaration {
     /// Class name
     pub name: String,
+    /// Type parameters
+    pub type_parameters: Vec<TypeParameter>,
     /// Modifiers
     pub modifiers: Vec<String>,
     /// Annotations
@@ -61,7 +64,7 @@ pub struct ClassDeclaration {
     /// Members
     pub members: Vec<Member>,
     /// Source span
-    #[serde(with = "oak_core::serde_range")]
+    #[cfg_attr(feature = "serde", serde(with = "oak_core::serde_range"))]
     pub span: Range<usize>,
 }
 
@@ -75,6 +78,8 @@ pub enum Member {
     Field(FieldDeclaration),
     /// Constructor declaration
     Constructor(ConstructorDeclaration),
+    /// Inner class declaration
+    InnerClass(ClassDeclaration),
 }
 
 /// Constructor declaration
@@ -92,7 +97,7 @@ pub struct ConstructorDeclaration {
     /// Method body
     pub body: Vec<Statement>,
     /// Source span
-    #[serde(with = "oak_core::serde_range")]
+    #[cfg_attr(feature = "serde", serde(with = "oak_core::serde_range"))]
     pub span: Range<usize>,
 }
 
@@ -102,6 +107,8 @@ pub struct ConstructorDeclaration {
 pub struct MethodDeclaration {
     /// Method name
     pub name: String,
+    /// Type parameters
+    pub type_parameters: Vec<TypeParameter>,
     /// Modifiers
     pub modifiers: Vec<String>,
     /// Annotations
@@ -117,7 +124,7 @@ pub struct MethodDeclaration {
     /// Whether it is static
     pub is_static: bool,
     /// Source span
-    #[serde(with = "oak_core::serde_range")]
+    #[cfg_attr(feature = "serde", serde(with = "oak_core::serde_range"))]
     pub span: Range<usize>,
 }
 
@@ -129,6 +136,34 @@ pub struct Parameter {
     pub name: String,
     /// Parameter type
     pub r#type: String,
+}
+
+/// Type parameter for generics
+#[derive(Debug, Clone, PartialEq)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+pub struct TypeParameter {
+    /// Type parameter name
+    pub name: String,
+    /// Type parameter constraints
+    pub constraints: Vec<TypeParameterConstraint>,
+}
+
+/// Type parameter constraint
+#[derive(Debug, Clone, PartialEq)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+pub struct TypeParameterConstraint {
+    /// Constraint type (class or interface)
+    pub constraint_type: String,
+}
+
+/// Generic type reference
+#[derive(Debug, Clone, PartialEq)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+pub struct GenericType {
+    /// Base type name
+    pub base_type: String,
+    /// Type arguments
+    pub type_arguments: Vec<String>,
 }
 
 /// Field declaration.
@@ -144,7 +179,7 @@ pub struct FieldDeclaration {
     /// Annotations
     pub annotations: Vec<Annotation>,
     /// The span of the field declaration in the source file.
-    #[serde(with = "oak_core::serde_range")]
+    #[cfg_attr(feature = "serde", serde(with = "oak_core::serde_range"))]
     pub span: Range<usize>,
 }
 
@@ -281,6 +316,8 @@ pub enum Expression {
     ArrayCreation(ArrayCreation),
     /// New expression (object creation).
     New(NewExpression),
+    /// Anonymous class creation expression.
+    AnonymousClass(AnonymousClassExpression),
     /// This expression.
     This,
     /// Super expression.
@@ -335,6 +372,28 @@ pub enum Expression {
         /// Operand expression.
         expression: Box<Expression>,
     },
+    /// Lambda expression
+    Lambda(LambdaExpression),
+}
+
+/// Lambda body (either an expression or a block)
+#[derive(Debug, Clone, PartialEq)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+pub enum LambdaBody {
+    /// Expression body
+    Expression(Box<Expression>),
+    /// Block body
+    Block(Vec<Statement>),
+}
+
+/// Lambda expression
+#[derive(Debug, Clone, PartialEq)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+pub struct LambdaExpression {
+    /// Parameters
+    pub parameters: Vec<Parameter>,
+    /// Body (either an expression or a block)
+    pub body: LambdaBody,
 }
 
 /// New expression.
@@ -345,6 +404,18 @@ pub struct NewExpression {
     pub r#type: String,
     /// Constructor arguments.
     pub arguments: Vec<Expression>,
+}
+
+/// Anonymous class creation expression.
+#[derive(Debug, Clone, PartialEq)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+pub struct AnonymousClassExpression {
+    /// Supertype (class or interface).
+    pub super_type: String,
+    /// Constructor arguments.
+    pub arguments: Vec<Expression>,
+    /// Class body members.
+    pub members: Vec<Member>,
 }
 
 /// Literal.
@@ -409,6 +480,8 @@ pub struct ArrayCreation {
 pub struct InterfaceDeclaration {
     /// Interface name.
     pub name: String,
+    /// Type parameters
+    pub type_parameters: Vec<TypeParameter>,
     /// Modifiers.
     pub modifiers: Vec<String>,
     /// Annotations
@@ -418,7 +491,7 @@ pub struct InterfaceDeclaration {
     /// Interface members.
     pub members: Vec<Member>,
     /// The span of the interface declaration in the source file.
-    #[serde(with = "oak_core::serde_range")]
+    #[cfg_attr(feature = "serde", serde(with = "oak_core::serde_range"))]
     pub span: Range<usize>,
 }
 
@@ -437,7 +510,7 @@ pub struct StructDeclaration {
     /// Struct members.
     pub members: Vec<Member>,
     /// The span of the struct declaration in the source file.
-    #[serde(with = "oak_core::serde_range")]
+    #[cfg_attr(feature = "serde", serde(with = "oak_core::serde_range"))]
     pub span: Range<usize>,
 }
 
@@ -453,12 +526,29 @@ pub struct EnumDeclaration {
     pub annotations: Vec<Annotation>,
     /// Implemented interfaces
     pub implements: Vec<String>,
-    /// Enum variants
-    pub variants: Vec<String>,
+    /// Enum constants
+    pub constants: Vec<EnumConstant>,
     /// Members
     pub members: Vec<Member>,
     /// Source span
-    #[serde(with = "oak_core::serde_range")]
+    #[cfg_attr(feature = "serde", serde(with = "oak_core::serde_range"))]
+    pub span: Range<usize>,
+}
+
+/// Enum constant
+#[derive(Debug, Clone, PartialEq)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+pub struct EnumConstant {
+    /// Constant name
+    pub name: String,
+    /// Annotations
+    pub annotations: Vec<Annotation>,
+    /// Constructor arguments (optional)
+    pub arguments: Vec<Expression>,
+    /// Class body (optional)
+    pub body: Option<Vec<Member>>,
+    /// Source span
+    #[cfg_attr(feature = "serde", serde(with = "oak_core::serde_range"))]
     pub span: Range<usize>,
 }
 
@@ -479,7 +569,39 @@ pub struct RecordDeclaration {
     /// Record members.
     pub members: Vec<Member>,
     /// The span of the record declaration in the source file.
-    #[serde(with = "oak_core::serde_range")]
+    #[cfg_attr(feature = "serde", serde(with = "oak_core::serde_range"))]
+    pub span: Range<usize>,
+}
+
+/// Annotation type declaration
+#[derive(Debug, Clone, PartialEq)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+pub struct AnnotationTypeDeclaration {
+    /// Annotation name
+    pub name: String,
+    /// Modifiers
+    pub modifiers: Vec<String>,
+    /// Annotations
+    pub annotations: Vec<Annotation>,
+    /// Annotation elements
+    pub elements: Vec<AnnotationElement>,
+    /// Source span
+    #[cfg_attr(feature = "serde", serde(with = "oak_core::serde_range"))]
+    pub span: Range<usize>,
+}
+
+/// Annotation element
+#[derive(Debug, Clone, PartialEq)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+pub struct AnnotationElement {
+    /// Element name
+    pub name: String,
+    /// Element type
+    pub r#type: String,
+    /// Default value (optional)
+    pub default_value: Option<Expression>,
+    /// Source span
+    #[cfg_attr(feature = "serde", serde(with = "oak_core::serde_range"))]
     pub span: Range<usize>,
 }
 
@@ -490,7 +612,7 @@ pub struct PackageDeclaration {
     /// Package name.
     pub name: String,
     /// The span of the package declaration in the source file.
-    #[serde(with = "oak_core::serde_range")]
+    #[cfg_attr(feature = "serde", serde(with = "oak_core::serde_range"))]
     pub span: Range<usize>,
 }
 
@@ -503,6 +625,6 @@ pub struct ImportDeclaration {
     /// Whether it's a static import.
     pub is_static: bool,
     /// The span of the import declaration in the source file.
-    #[serde(with = "oak_core::serde_range")]
+    #[cfg_attr(feature = "serde", serde(with = "oak_core::serde_range"))]
     pub span: Range<usize>,
 }

@@ -4,12 +4,9 @@ pub mod element_type;
 use crate::{language::ValaLanguage, lexer::ValaLexer, parser::element_type::ValaElementType};
 use oak_core::{
     TextEdit,
-    parser::{ParseCache, ParseOutput, Parser, ParserState, parse_with_lexer},
+    parser::{ParseCache, ParseOutput, Parser, parse_with_lexer},
     source::Source,
 };
-
-/// Vala parser state.
-pub(crate) type State<'a, S> = ParserState<'a, ValaLanguage, S>;
 
 /// Vala language parser.
 pub struct ValaParser<'config> {

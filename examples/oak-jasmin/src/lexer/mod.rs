@@ -10,13 +10,13 @@ pub(crate) type State<'a, S> = LexerState<'a, S, JasminLanguage>;
 /// Jasmin lexer.
 #[derive(Clone)]
 pub struct JasminLexer<'config> {
-    _config: &'config JasminLanguage,
+    config: &'config JasminLanguage,
 }
 
 impl<'config> JasminLexer<'config> {
     /// Creates a new `JasminLexer` with the given configuration.
     pub fn new(config: &'config JasminLanguage) -> Self {
-        Self { _config: config }
+        Self { config }
     }
 
     /// Determines whether the given text is a keyword or an identifier.

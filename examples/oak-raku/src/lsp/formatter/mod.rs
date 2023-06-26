@@ -1,5 +1,4 @@
 #![doc = include_str!("readme.md")]
-//! Raku code formatter
 
 use crate::ast::RakuRoot;
 

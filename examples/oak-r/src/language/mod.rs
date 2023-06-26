@@ -7,6 +7,7 @@ use oak_core::{Language, LanguageCategory};
 pub struct RLanguage {}
 
 impl RLanguage {
+    /// Creates a new RLanguage instance.
     pub fn new() -> Self {
         Self {}
     }

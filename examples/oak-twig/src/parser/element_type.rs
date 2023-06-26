@@ -3,6 +3,7 @@ use oak_core::{ElementType, Parser, UniversalElementRole};
 /// Element types for the Twig parser.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+/// Element types for Twig syntax nodes.
 pub enum TwigElementType {
     /// The root node of the parse tree.
     Root,

@@ -1,148 +1,286 @@
 use oak_core::{ElementType, UniversalElementRole};
 
+/// Element types for the Dart language.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub enum DartElementType {
+    /// Root element.
     Root,
+    /// Class declaration.
     ClassDeclaration,
+    /// Function declaration.
     FunctionDeclaration,
+    /// Whitespace.
     Whitespace,
+    /// Newline.
     Newline,
+    /// Identifier token.
     Identifier,
+    /// Integer literal token.
     IntegerLiteral,
+    /// Double literal token.
     DoubleLiteral,
+    /// String literal token.
     StringLiteral,
+    /// Boolean literal token.
     BooleanLiteral,
+    /// Null literal token.
     NullLiteral,
+    /// `abstract` keyword.
     Abstract,
+    /// `as` keyword.
     As,
+    /// `assert` keyword.
     Assert,
+    /// `async` keyword.
     Async,
+    /// `await` keyword.
     Await,
+    /// `break` keyword.
     Break,
+    /// `case` keyword.
     Case,
+    /// `catch` keyword.
     Catch,
+    /// `class` keyword.
     Class,
+    /// `const` keyword.
     Const,
+    /// `continue` keyword.
     Continue,
+    /// `covariant` keyword.
     Covariant,
+    /// `default` keyword.
     Default,
+    /// `deferred` keyword.
     Deferred,
+    /// `do` keyword.
     Do,
+    /// `dynamic` keyword.
     Dynamic,
+    /// `else` keyword.
     Else,
+    /// `enum` keyword.
     Enum,
+    /// `export` keyword.
     Export,
+    /// `extends` keyword.
     Extends,
+    /// `extension` keyword.
     Extension,
+    /// `external` keyword.
     External,
+    /// `factory` keyword.
     Factory,
+    /// `false` keyword.
     False,
+    /// `final` keyword.
     Final,
+    /// `finally` keyword.
     Finally,
+    /// `for` keyword.
     For,
+    /// `function` keyword.
     Function,
+    /// `get` keyword.
     Get,
+    /// `hide` keyword.
     Hide,
+    /// `if` keyword.
     If,
+    /// `implements` keyword.
     Implements,
+    /// `import` keyword.
     Import,
+    /// `in` keyword.
     In,
+    /// `interface` keyword.
     Interface,
+    /// `int` keyword.
     Int,
+    /// `is` keyword.
     Is,
+    /// `late` keyword.
     Late,
+    /// `library` keyword.
     Library,
+    /// `mixin` keyword.
     Mixin,
+    /// `new` keyword.
     New,
+    /// `null` keyword.
     Null,
+    /// `on` keyword.
     On,
+    /// `operator` keyword.
     Operator,
+    /// `part` keyword.
     Part,
+    /// `required` keyword.
     Required,
+    /// `rethrow` keyword.
     Rethrow,
+    /// `return` keyword.
     Return,
+    /// `set` keyword.
     Set,
+    /// `show` keyword.
     Show,
+    /// `static` keyword.
     Static,
+    /// `super` keyword.
     Super,
+    /// `switch` keyword.
     Switch,
+    /// `sync` keyword.
     Sync,
+    /// `this` keyword.
     This,
+    /// `throw` keyword.
     Throw,
+    /// `true` keyword.
     True,
+    /// `try` keyword.
     Try,
+    /// `typedef` keyword.
     Typedef,
+    /// `var` keyword.
     Var,
+    /// `void` keyword.
     Void,
+    /// `while` keyword.
     While,
+    /// `with` keyword.
     With,
+    /// `yield` keyword.
     Yield,
+    /// Plus operator `+`.
     Plus,
+    /// Minus operator `-`.
     Minus,
+    /// Star operator `*`.
     Star,
+    /// Slash operator `/`.
     Slash,
+    /// Percent operator `%`.
     Percent,
+    /// Tilde-slash operator `~/`.
     TildeSlash,
+    /// Equal operator `=`.
     Equal,
+    /// Equality operator `==`.
     EqualEqual,
+    /// Inequality operator `!=`.
     BangEqual,
+    /// Less-than operator `<`.
     Less,
+    /// Greater-than operator `>`.
     Greater,
+    /// Less-than-or-equal operator `<=`.
     LessEqual,
+    /// Greater-than-or-equal operator `>=`.
     GreaterEqual,
+    /// Left shift operator `<<`.
     LeftShift,
+    /// Right shift operator `>>`.
     RightShift,
+    /// Bitwise AND operator `&`.
     Ampersand,
+    /// Bitwise OR operator `|`.
     Pipe,
+    /// Bitwise XOR operator `^`.
     Caret,
+    /// Bitwise NOT operator `~`.
     Tilde,
+    /// Logical NOT operator `!`.
     Bang,
+    /// Logical AND operator `&&`.
     AmpersandAmpersand,
+    /// Logical OR operator `||`.
     PipePipe,
+    /// Question mark operator `?`.
     Question,
+    /// Null-aware operator `??`.
     QuestionQuestion,
+    /// Increment operator `++`.
     PlusPlus,
+    /// Decrement operator `--`.
     MinusMinus,
+    /// Addition assignment operator `+=`.
     PlusEqual,
+    /// Subtraction assignment operator `-=`.
     MinusEqual,
+    /// Multiplication assignment operator `*=`.
     StarEqual,
+    /// Division assignment operator `/=`.
     SlashEqual,
+    /// Modulo assignment operator `%=`.
     PercentEqual,
+    /// Integer division assignment operator `~/=`.
     TildeSlashEqual,
+    /// Left shift assignment operator `<<=`.
     LeftShiftEqual,
+    /// Right shift assignment operator `>>=`.
     RightShiftEqual,
+    /// Bitwise AND assignment operator `&=`.
     AmpersandEqual,
+    /// Bitwise OR assignment operator `|=`.
     PipeEqual,
+    /// Bitwise XOR assignment operator `^=`.
     CaretEqual,
+    /// Null-aware assignment operator `??=`.
     QuestionQuestionEqual,
+    /// Arrow operator `=>`.
     Arrow,
+    /// Dot operator `.`.
     Dot,
+    /// Cascade operator `..`.
     DotDot,
+    /// Spread operator `...`.
     DotDotDot,
+    /// Null-aware access operator `?.`.
     QuestionDot,
+    /// Left parenthesis `(`.
     LeftParen,
+    /// Right parenthesis `)`.
     RightParen,
+    /// Left bracket `[`.
     LeftBracket,
+    /// Right bracket `]`.
     RightBracket,
+    /// Left brace `{`.
     LeftBrace,
+    /// Right brace `}`.
     RightBrace,
+    /// Semicolon `;`.
     Semicolon,
+    /// Comma `,`.
     Comma,
+    /// Colon `:`.
     Colon,
+    /// At symbol `@`.
     At,
+    /// Hash symbol `#`.
     Hash,
+    /// Line comment.
     LineComment,
+    /// Block comment.
     BlockComment,
+    /// Documentation comment.
     DocComment,
+    /// Error token.
     Error,
+    /// End of file token.
     Eof,
+    /// Variable declaration.
     VariableDeclaration,
 }
 
+/// Implementation of ElementType trait for DartElementType.
 impl ElementType for DartElementType {
     type Role = UniversalElementRole;
 
+    /// Returns the role of this element type.
     fn role(&self) -> Self::Role {
         match self {
             _ => UniversalElementRole::None,
@@ -150,7 +288,9 @@ impl ElementType for DartElementType {
     }
 }
 
+/// Converts a DartTokenType to a DartElementType.
 impl From<crate::lexer::token_type::DartTokenType> for DartElementType {
+    /// Converts the given token type to its corresponding element type.
     fn from(token: crate::lexer::token_type::DartTokenType) -> Self {
         match token {
             crate::lexer::token_type::DartTokenType::Root => DartElementType::Root,

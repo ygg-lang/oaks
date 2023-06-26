@@ -1,4 +1,5 @@
 #![doc = include_str!("readme.md")]
+/// Token type definitions for the HLSL lexer.
 pub mod token_type;
 
 use crate::{language::HlslLanguage, lexer::token_type::HlslTokenType};
@@ -6,7 +7,9 @@ use oak_core::{Lexer, LexerCache, LexerState, OakError, lexer::LexOutput, source
 
 pub(crate) type State<'a, S> = LexerState<'a, S, HlslLanguage>;
 
+/// HLSL lexer for tokenizing source code.
 pub struct HlslLexer<'config> {
+    /// Language configuration.
     config: &'config HlslLanguage,
 }
 
@@ -17,6 +20,7 @@ impl<'config> Clone for HlslLexer<'config> {
 }
 
 impl<'config> HlslLexer<'config> {
+    /// Creates a new HLSL lexer with the given language configuration.
     pub fn new(config: &'config HlslLanguage) -> Self {
         Self { config }
     }

@@ -6,6 +6,7 @@ use oak_core::{Language, LanguageCategory};
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Default)]
 pub enum DateTimeFormat {
     #[default]
+    /// RFC 3339 date-time format.
     Rfc3339,
     // Other possible date time formats
 }
@@ -13,8 +14,11 @@ pub enum DateTimeFormat {
 /// Stylus language definition
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub struct StylusLanguage {
+    /// Whether multiline strings are allowed.
     pub allow_multiline_strings: bool,
+    /// Whether hexadecimal numbers are allowed.
     pub allow_hex_numbers: bool,
+    /// The date-time format to use.
     pub datetime_format: DateTimeFormat,
 }
 

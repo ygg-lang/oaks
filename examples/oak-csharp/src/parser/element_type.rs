@@ -579,6 +579,20 @@ pub enum CSharpElementType {
     EventDeclaration,
     /// An `await` expression.
     AwaitExpression,
+    /// A parenthesized expression.
+    ParenthesizedExpression,
+    /// A `this` expression.
+    ThisExpression,
+    /// A `base` expression.
+    BaseExpression,
+    /// An object creation expression.
+    ObjectCreationExpression,
+    /// A lambda expression.
+    LambdaExpression,
+    /// A `switch` statement.
+    SwitchStatement,
+    /// A `try` statement.
+    TryStatement,
     /// An attribute list.
     AttributeList,
     /// An attribute.

@@ -1,7 +1,4 @@
 #![doc = include_str!("readme.md")]
-//! Ruby syntax highlighter
-//!
-//! This module provides syntax highlighting for Ruby source code.
 
 /// Ruby syntax highlighter
 pub struct RubyHighlighter {

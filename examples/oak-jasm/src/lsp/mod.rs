@@ -1,6 +1,8 @@
-//! LSP service implementation for the JASM language.
-
 #![doc = include_str!("readme.md")]
+
+/// Formatter module.
+#[cfg(feature = "oak-pretty-print")]
+pub mod formatter;
 #[cfg(feature = "oak-highlight")]
 pub mod highlighter;
 

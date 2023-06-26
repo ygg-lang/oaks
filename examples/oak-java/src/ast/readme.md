@@ -1,5 +1,7 @@
 # Java Abstract Syntax Tree (AST) Module
 
+Java AST definitions
+
 This module defines the Abstract Syntax Tree (AST) structure for the [Java programming language](https://www.oracle.com/java/). It provides a strongly-typed and comprehensive representation of Java source code, strictly adhering to the Java Language Specification (JLS).
 
 ## Purpose
@@ -25,7 +27,7 @@ The Java AST is the central data structure used by the compiler, static analysis
 - **`FieldDeclaration`**: Field definition with modifiers and initializers.
 - **`ConstructorDeclaration`**: Class constructor definition.
 - **`EnumConstant`**: Individual constant in an enum.
-- **`Annotation`**: Represents an annotation usage (e.g., `↯Override`).
+- **`Annotation`**: Represents an annotation usage (e.g., `@Override`).
 
 ### Statements and Expressions
 - **`Statement`**: Represents various Java statements (local variables, blocks, control flow, etc.).

@@ -121,6 +121,8 @@ pub enum MarkdownElementType {
     XmlTag,
     /// An XML comment.
     XmlComment,
+    /// An automatic link (HTTP/HTTPS URL).
+    AutoLink,
     /// An error element.
     Error,
 }
@@ -193,6 +195,7 @@ impl From<crate::lexer::token_type::MarkdownTokenType> for MarkdownElementType {
             crate::lexer::token_type::MarkdownTokenType::HtmlComment => MarkdownElementType::HtmlComment,
             crate::lexer::token_type::MarkdownTokenType::XmlTag => MarkdownElementType::XmlTag,
             crate::lexer::token_type::MarkdownTokenType::XmlComment => MarkdownElementType::XmlComment,
+            crate::lexer::token_type::MarkdownTokenType::AutoLink => MarkdownElementType::AutoLink,
             crate::lexer::token_type::MarkdownTokenType::Error => MarkdownElementType::Error,
             _ => MarkdownElementType::Error,
         }

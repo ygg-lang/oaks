@@ -1,5 +1,4 @@
 #![doc = include_str!("readme.md")]
-//! JavaScript formatter
 use crate::{ast::JavaScriptRoot, language::JavaScriptLanguage};
 use oak_core::{BuilderCache, OakDiagnostics, source::Source};
 use oak_pretty_print::FormatConfig;

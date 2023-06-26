@@ -3,16 +3,32 @@
 [![Crates.io](https://img.shields.io/crates/v/oak-resolver.svg)](https://crates.io/crates/oak-resolver)
 [![Documentation](https://docs.rs/oak-resolver/badge.svg)](https://docs.rs/oak-resolver)
 
-**Core component of the Oak ecosystem** — Providing a solid foundation for building modern programming language toolchains.
+**Symbol Resolution for Oak Languages** — Cross-file symbol resolution and import handling for language analysis.
 
-## 🎯 Project Vision
+## 🎯 Why oak-resolver?
 
-`oak-resolver` is a key module in the Oak ecosystem, focusing on providing efficient and scalable low-level functionality to help developers quickly build robust programming language-related tools.
+Modern codebases span multiple files and modules. `oak-resolver` provides the infrastructure for resolving symbol references across file boundaries, handling imports, and building symbol indexes.
 
-## ✨ Core Features
+## ✨ Key Features
 
-- **⚡ Blazing Fast**: Fully utilizes Rust's performance advantages to achieve sub-millisecond parsing response times.
-- **🔄 Incremental Parsing**: Built-in support for partial updates, demonstrating extremely high efficiency when processing large files.
-- **🌳 Structured Output**: Provides a clear, easy-to-traverse syntax tree or data structure.
-- **🛡️ Robustness**: Features a comprehensive error recovery mechanism, ensuring normal operation even when input is incomplete.
-- **🧩 Easy Integration**: Designed with high cohesion and low coupling, allowing for quick integration into existing Rust projects.
+- **🔍 Cross-File Resolution** — Resolve symbols across multiple source files
+- **📦 Import Handling** — Process import statements and module dependencies
+- **📊 Symbol Indexing** — Build and query symbol indexes for fast lookups
+- **🌐 Workspace Support** — Scale from single files to large projects
+- **🔄 Incremental Updates** — Efficiently update resolution on file changes
+
+## 🏗️ Architecture
+
+Resolution process: Parse → Collect → Index → Resolve
+
+## 🔗 Ecosystem Integration
+
+Integrates with `oak-vfs` for file access, `oak-navigation` for definition/reference providers, and `oak-lsp` for workspace symbol support.
+
+## 📖 Documentation
+
+For usage examples and API details, see the [API documentation](https://docs.rs/oak-resolver).
+
+## 🤝 Contributing
+
+Contributions are welcome! Please feel free to submit a Pull Request.

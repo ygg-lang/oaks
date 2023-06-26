@@ -31,6 +31,7 @@ impl<'config> Lexer<FSharpLanguage> for FSharpLexer<'config> {
 
 impl<'config> FSharpLexer<'config> {
     /// Creates a new `FSharpLexer`
+    /// Creates a new FSharpLexer with the given language configuration.
     pub fn new(config: &'config FSharpLanguage) -> Self {
         Self { config }
     }

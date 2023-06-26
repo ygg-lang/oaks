@@ -1,26 +1,26 @@
 use oak_core::{errors::OakError, source::Source};
-use oak_elixir::{ElixirLanguage, ElixirLexer};
+use oak_elm::{ElmLanguage, ElmLexer};
 use oak_testing::lexing::LexerTester;
 use std::{path::Path, time::Duration};
 
 #[test]
-fn test_elixir_lexer() -> Result<(), OakError> {
+fn test_elm_lexer() -> Result<(), OakError> {
     let here = Path::new(env!("CARGO_MANIFEST_DIR"));
-    let language = Box::leak(Box::new(ElixirLanguage::default()));
-    let lexer = ElixirLexer::new(language);
-    let test_runner = LexerTester::new(here.join("tests/lexer")).with_extension("ex").with_timeout(Duration::from_secs(5));
-    test_runner.run_tests::<ElixirLanguage, _>(&lexer)?;
+    let language = Box::leak(Box::new(ElmLanguage::default()));
+    let lexer = ElmLexer::new(language);
+    let test_runner = LexerTester::new(here.join("tests/lexer")).with_extension("elm").with_timeout(Duration::from_secs(5));
+    test_runner.run_tests::<ElmLanguage, _>(&lexer)?;
     Ok(())
 }
 
 #[test]
 fn test_peek_behavior() {
     use oak_core::{LexerState, SourceText};
-    use oak_elixir::ElixirLanguage;
+    use oak_elm::ElmLanguage;
 
-    let source = SourceText::new("NESTED_CONSTANT");
-    let mut cache = oak_core::parser::session::ParseSession::<ElixirLanguage>::default();
-    let mut state = LexerState::<SourceText, ElixirLanguage>::new_with_cache(&source, 0, &mut cache);
+    let source = SourceText::new("module Main exposing (main)");
+    let mut cache = oak_core::parser::session::ParseSession::<ElmLanguage>::default();
+    let mut state = LexerState::<SourceText, ElmLanguage>::new_with_cache(&source, 0, &mut cache);
 
     println!("Initial state:");
     println!("Position: {}", state.get_position());
@@ -41,17 +41,17 @@ fn test_peek_behavior() {
 }
 
 #[test]
-fn test_elixir_module_parsing() -> Result<(), OakError> {
+fn test_elm_module_parsing() -> Result<(), OakError> {
     use oak_core::{Lexer, SourceText};
 
-    let source = SourceText::new("defmodule MyModule do\n  def hello do\n    :world\n  end\nend");
-    let language = Box::leak(Box::new(ElixirLanguage::default()));
-    let lexer = ElixirLexer::new(language);
+    let source = SourceText::new("module Main exposing (main)\n\nmain = text \"Hello, World!\"");
+    let language = Box::leak(Box::new(ElmLanguage::default()));
+    let lexer = ElmLexer::new(language);
 
-    let mut cache = oak_core::parser::session::ParseSession::<ElixirLanguage>::default();
+    let mut cache = oak_core::parser::session::ParseSession::<ElmLanguage>::default();
     let result = lexer.lex(&source, &[], &mut cache);
 
-    println!("Testing Elixir module parsing:");
+    println!("Testing Elm module parsing:");
     println!("Source code: '{}'", (&source).get_text_from(0));
 
     let tokens = result.result?;
@@ -63,6 +63,6 @@ fn test_elixir_module_parsing() -> Result<(), OakError> {
 
     println!("First token: Kind={:?}, Text='{}'", first_token.kind, token_text);
 
-    println!("✅ Elixir module parsing test passed!");
+    println!("✅ Elm module parsing test passed!");
     Ok(())
 }

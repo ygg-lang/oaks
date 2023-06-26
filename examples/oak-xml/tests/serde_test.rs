@@ -3,7 +3,7 @@ use oak_xml::{from_str, to_string};
 
 #[derive(Debug, serde::Serialize, serde::Deserialize, PartialEq)]
 struct Project {
-    #[serde(rename = "↯name")]
+    #[serde(rename = "@name")]
     name: String,
     #[serde(rename = "version")]
     version: String,
@@ -13,7 +13,7 @@ struct Project {
 
 #[derive(Debug, serde::Serialize, serde::Deserialize, PartialEq)]
 struct Dependency {
-    #[serde(rename = "↯name")]
+    #[serde(rename = "@name")]
     name: String,
     #[serde(rename = "version")]
     version: String,

@@ -10,13 +10,13 @@ pub(crate) type State<'a, S> = LexerState<'a, S, WgslLanguage>;
 /// A lexer for the WGSL language.
 #[derive(Clone)]
 pub struct WgslLexer<'config> {
-    _config: &'config WgslLanguage,
+    config: &'config WgslLanguage,
 }
 
 impl<'config> WgslLexer<'config> {
     /// Creates a new WGSL lexer.
     pub fn new(config: &'config WgslLanguage) -> Self {
-        Self { _config: config }
+        Self { config }
     }
 
     /// Skips whitespace.

@@ -1,10 +1,16 @@
-use crate::{DejavuLanguage, DejavuParser, ast::*, builder::text, lexer::token_type::DejavuSyntaxKind};
-use oak_core::{OakError, RedNode, RedTree, source::SourceText};
+use crate::{
+    DejavuLanguage,
+    ast::{IdentifierNode, MicroDefinition, ParameterNode, TypeFunctionDefinition},
+    builder::{DejavuBuilder, text},
+    lexer::token_type::DejavuTokenType,
+    parser::element_type::DejavuElementType,
+};
+use oak_core::{OakError, RedNode, RedTree, Source};
 
-impl<'config> DejavuParser<'config> {
-    pub(crate) fn build_mezzo(&self, node: RedNode<DejavuLanguage>, source: &SourceText) -> Result<TypeFunction, OakError> {
+impl<'config> DejavuBuilder<'config> {
+    pub(crate) fn build_mezzo<S: Source + ?Sized>(&self, node: RedNode<DejavuLanguage>, source: &S) -> Result<TypeFunctionDefinition, OakError> {
         let span = node.span();
-        let mut name = Identifier { name: String::new(), span: Default::default() };
+        let mut name = IdentifierNode { name: String::new(), span: Default::default() };
         let mut annotations = Vec::new();
         let mut params = Vec::new();
         let mut body = None;
@@ -12,21 +18,22 @@ impl<'config> DejavuParser<'config> {
         for child in node.children() {
             match child {
                 RedTree::Leaf(t) => match t.kind {
-                    DejavuSyntaxKind::Whitespace | DejavuSyntaxKind::Newline | DejavuSyntaxKind::LineComment | DejavuSyntaxKind::BlockComment => continue,
-                    DejavuSyntaxKind::Identifier => {
+                    DejavuTokenType::Whitespace | DejavuTokenType::LineComment | DejavuTokenType::BlockComment => continue,
+                    DejavuTokenType::Identifier => {
                         name.name = text(source, t.span.clone().into());
                         name.span = t.span.clone();
                     }
                     _ => {}
                 },
                 RedTree::Node(n) => match n.green.kind {
-                    DejavuSyntaxKind::Attribute => {
+                    DejavuElementType::Whitespace | DejavuElementType::LineComment | DejavuElementType::BlockComment => continue,
+                    DejavuElementType::Attribute => {
                         annotations.push(self.build_attribute(n, source)?);
                     }
-                    DejavuSyntaxKind::ParameterList => {
+                    DejavuElementType::ParameterList => {
                         params = self.build_params(n, source)?;
                     }
-                    DejavuSyntaxKind::BlockExpression => {
+                    DejavuElementType::BlockExpression => {
                         body = Some(self.build_block(n, source)?);
                     }
                     _ => {
@@ -38,12 +45,12 @@ impl<'config> DejavuParser<'config> {
 
         let body = body.ok_or_else(|| source.syntax_error(format!("Missing mezzo body at {:?}", span), span.start))?;
 
-        Ok(TypeFunction { name, annotations, params, body, span })
+        Ok(TypeFunctionDefinition { name, annotations, params, return_type: None, body, span })
     }
 
-    pub(crate) fn build_micro(&self, node: RedNode<DejavuLanguage>, source: &SourceText) -> Result<MicroDefinition, OakError> {
+    pub(crate) fn build_micro<S: Source + ?Sized>(&self, node: RedNode<DejavuLanguage>, source: &S) -> Result<MicroDefinition, OakError> {
         let span = node.span();
-        let mut name = Identifier { name: String::new(), span: Default::default() };
+        let mut name = IdentifierNode { name: String::new(), span: Default::default() };
         let mut annotations = Vec::new();
         let mut params = Vec::new();
         let mut return_type = None;
@@ -52,8 +59,8 @@ impl<'config> DejavuParser<'config> {
         for child in node.children() {
             match child {
                 RedTree::Leaf(t) => match t.kind {
-                    DejavuSyntaxKind::Whitespace | DejavuSyntaxKind::Newline | DejavuSyntaxKind::LineComment | DejavuSyntaxKind::BlockComment => continue,
-                    DejavuSyntaxKind::Identifier => {
+                    DejavuTokenType::Whitespace | DejavuTokenType::LineComment | DejavuTokenType::BlockComment => continue,
+                    DejavuTokenType::Identifier => {
                         if name.name.is_empty() {
                             name.name = text(source, t.span.clone().into());
                             name.span = t.span.clone();
@@ -62,17 +69,17 @@ impl<'config> DejavuParser<'config> {
                     _ => {}
                 },
                 RedTree::Node(n) => match n.green.kind {
-                    DejavuSyntaxKind::Whitespace | DejavuSyntaxKind::Newline | DejavuSyntaxKind::LineComment | DejavuSyntaxKind::BlockComment => continue,
-                    DejavuSyntaxKind::Attribute => {
+                    DejavuElementType::Whitespace | DejavuElementType::LineComment | DejavuElementType::BlockComment => continue,
+                    DejavuElementType::Attribute => {
                         annotations.push(self.build_attribute(n, source)?);
                     }
-                    DejavuSyntaxKind::ParameterList => {
+                    DejavuElementType::ParameterList => {
                         params = self.build_params(n, source)?;
                     }
-                    DejavuSyntaxKind::Type => {
+                    DejavuElementType::Type => {
                         return_type = Some(text(source, n.span().into()).trim().to_string());
                     }
-                    DejavuSyntaxKind::BlockExpression => {
+                    DejavuElementType::BlockExpression => {
                         body = Some(self.build_block(n, source)?);
                     }
                     _ => {
@@ -87,44 +94,17 @@ impl<'config> DejavuParser<'config> {
         Ok(MicroDefinition { name, annotations, params, return_type, body, span })
     }
 
-    pub(crate) fn build_lambda_expr(&self, node: RedNode<DejavuLanguage>, source: &SourceText) -> Result<Lambda, OakError> {
-        let span = node.span();
-        let mut params = Vec::new();
-        let mut return_type = None;
-        let mut body = None;
-
-        for child in node.children() {
-            match child {
-                RedTree::Leaf(t) => match t.kind {
-                    DejavuSyntaxKind::Whitespace | DejavuSyntaxKind::Newline | DejavuSyntaxKind::LineComment | DejavuSyntaxKind::BlockComment => continue,
-                    _ => {}
-                },
-                RedTree::Node(n) => match n.green.kind {
-                    DejavuSyntaxKind::Whitespace | DejavuSyntaxKind::Newline | DejavuSyntaxKind::LineComment | DejavuSyntaxKind::BlockComment => continue,
-                    DejavuSyntaxKind::ParameterList => params = self.build_params(n, source)?,
-                    DejavuSyntaxKind::Type => return_type = Some(text(source, n.span().into()).trim().to_string()),
-                    DejavuSyntaxKind::BlockExpression => body = Some(self.build_block(n, source)?),
-                    _ => {}
-                },
-            }
-        }
-
-        let body = body.ok_or_else(|| source.syntax_error(format!("Missing lambda body at {:?}", span), span.start))?;
-
-        Ok(Lambda { params, return_type, body, span })
-    }
-
-    pub(crate) fn build_params(&self, node: RedNode<DejavuLanguage>, source: &SourceText) -> Result<Vec<Param>, OakError> {
+    pub(crate) fn build_params<S: Source + ?Sized>(&self, node: RedNode<DejavuLanguage>, source: &S) -> Result<Vec<ParameterNode>, OakError> {
         let mut params = Vec::new();
         for child in node.children() {
             match child {
                 RedTree::Leaf(t) => match t.kind {
-                    DejavuSyntaxKind::Whitespace | DejavuSyntaxKind::Newline | DejavuSyntaxKind::LineComment | DejavuSyntaxKind::BlockComment => continue,
+                    DejavuTokenType::Whitespace | DejavuTokenType::LineComment | DejavuTokenType::BlockComment => continue,
                     _ => {}
                 },
                 RedTree::Node(n) => match n.green.kind {
-                    DejavuSyntaxKind::Whitespace | DejavuSyntaxKind::Newline | DejavuSyntaxKind::LineComment | DejavuSyntaxKind::BlockComment => continue,
-                    DejavuSyntaxKind::Parameter => params.push(self.build_param(n, source)?),
+                    DejavuElementType::Whitespace | DejavuElementType::LineComment | DejavuElementType::BlockComment => continue,
+                    DejavuElementType::Parameter => params.push(self.build_param(n, source)?),
                     _ => {}
                 },
             }
@@ -132,31 +112,31 @@ impl<'config> DejavuParser<'config> {
         Ok(params)
     }
 
-    pub(crate) fn build_param(&self, node: RedNode<DejavuLanguage>, source: &SourceText) -> Result<Param, OakError> {
+    pub(crate) fn build_param<S: Source + ?Sized>(&self, node: RedNode<DejavuLanguage>, source: &S) -> Result<ParameterNode, OakError> {
         let span = node.span();
         let mut annotations = Vec::new();
-        let mut name: Option<Identifier> = None;
+        let mut name: Option<IdentifierNode> = None;
         let mut ty = None;
         for child in node.children() {
             match child {
                 RedTree::Leaf(t) => match t.kind {
-                    DejavuSyntaxKind::Whitespace | DejavuSyntaxKind::Newline | DejavuSyntaxKind::LineComment | DejavuSyntaxKind::BlockComment => continue,
-                    DejavuSyntaxKind::Identifier => {
+                    DejavuTokenType::Whitespace | DejavuTokenType::LineComment | DejavuTokenType::BlockComment => continue,
+                    DejavuTokenType::Identifier => {
                         if name.is_none() {
-                            name = Some(Identifier { name: text(source, t.span.clone().into()), span: t.span.clone() });
+                            name = Some(IdentifierNode { name: text(source, t.span.clone().into()), span: t.span.clone() });
                         }
                     }
-                    DejavuSyntaxKind::Colon => continue,
+                    DejavuTokenType::Colon => continue,
                     _ => return Err(source.syntax_error(format!("Unexpected token in parameter definition: {:?}", t.kind), t.span.start)),
                 },
                 RedTree::Node(n) => match n.green.kind {
-                    DejavuSyntaxKind::Whitespace | DejavuSyntaxKind::Newline | DejavuSyntaxKind::LineComment | DejavuSyntaxKind::BlockComment => continue,
-                    DejavuSyntaxKind::Attribute => annotations.push(self.build_attribute(n, source)?),
-                    DejavuSyntaxKind::Type => ty = Some(text(source, n.span().into()).trim().to_string()),
+                    DejavuElementType::Whitespace | DejavuElementType::LineComment | DejavuElementType::BlockComment => continue,
+                    DejavuElementType::Attribute => annotations.push(self.build_attribute(n, source)?),
+                    DejavuElementType::Type => ty = Some(text(source, n.span().into()).trim().to_string()),
                     _ => return Err(source.syntax_error(format!("Unexpected node in parameter definition: {:?}", n.green.kind), n.span().start)),
                 },
             }
         }
-        if let Some(name) = name { Ok(Param { annotations, name, ty, span }) } else { Err(source.syntax_error(format!("Missing name in parameter at {:?}", span), span.start)) }
+        if let Some(name) = name { Ok(ParameterNode { annotations, name, ty, span }) } else { Err(source.syntax_error(format!("Missing name in parameter at {:?}", span), span.start)) }
     }
 }

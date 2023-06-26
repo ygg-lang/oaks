@@ -1,5 +1,4 @@
 #![doc = include_str!("readme.md")]
-//! Nim syntax highlighter
 
 /// Local definition of highlight types
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]

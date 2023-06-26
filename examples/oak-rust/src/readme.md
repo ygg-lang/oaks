@@ -1,8 +1,10 @@
-# 🛠️ Rust Parser Developer Guide
+# 📖 Rust Parser User Guide
 
-This guide is designed to help you quickly get started with developing and integrating `oak-rust`.
+Rust support for the Oak language framework.
 
-## 🚦 Quick Start
+This guide helps you integrate `oak-rust` into your project and perform common parsing tasks efficiently.
+
+## 🚀 Quick Start
 
 ### Basic Parsing Example
 
@@ -47,34 +49,30 @@ fn main() {
 }
 ```
 
-## 🔍 Core API Usage
+## 🔍 Core Functionality
 
 ### 1. Syntax Tree Traversal
-After a successful parse, you can use the built-in visitor pattern or manually traverse the Green/Red Tree to extract Rust constructs like trait definitions, struct fields, or async blocks.
+After a successful parse, use the built-in visitor pattern or manually traverse the Green/Red Tree to extract Rust constructs like trait definitions, struct fields, or async blocks.
 
 ### 2. Incremental Parsing
-No need to re-parse the entire crate when small changes occur in a file:
+Optimize performance by only re-parsing changed sections:
 ```rust
 // Assuming you have an old parse result 'old_result' and new source text 'new_source'
 let new_result = parser.reparse(&new_source, &old_result);
 ```
 
-### 3. Diagnostics
-`oak-rust` provides rich error contexts specifically tailored for Rust developers, handling complex scenarios like lifetime mismatches or macro expansion errors:
+### 3. Diagnostics & Error Recovery
+`oak-rust` provides detailed error contexts tailored for Rust developers:
 ```rust
 for diag in result.diagnostics() {
     println!("[{}:{}] {}", diag.line, diag.column, diag.message);
 }
 ```
 
-## 🏗️ Architecture Overview
+## 🛠️ Performance & Reliability
 
-- **Lexer**: Tokenizes Rust source text into a stream of tokens, handling keywords, operators, literals, and raw strings.
-- **Parser**: Syntax analyzer based on the Pratt parsing algorithm to handle Rust's expression precedence, complex generic syntax, and macro invocations.
-- **AST**: A strongly-typed syntax abstraction layer designed for high-performance Rust analysis tools, linters, and IDEs.
+- **High-Fidelity AST**: Retains all trivia (whitespace and comments), making it ideal for code formatting and refactoring tools.
+- **Fault Tolerance**: Automatically recovers from syntax errors to provide as much information as possible from the rest of the file.
+- **Memory Efficiency**: Leverages immutable data structures (Green Trees) for low-overhead tree management.
 
-## 🔗 Advanced Resources
 
-- **Full Examples**: Check the [examples/](examples/) folder in the project root.
-- **API Documentation**: Run `cargo doc --open` for detailed type definitions.
-- **Test Cases**: See [tests/](tests/) for handling of various Rust edge cases and compiler versions.

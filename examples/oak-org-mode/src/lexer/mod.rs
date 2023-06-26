@@ -24,6 +24,7 @@ pub struct OrgModeLexer<'config> {
 
 impl<'config> OrgModeLexer<'config> {
     /// Creates a new `OrgModeLexer`.
+    /// Creates a new OrgModeLexer with the given language configuration.
     pub fn new(config: &'config OrgModeLanguage) -> Self {
         Self { config }
     }

@@ -47,3 +47,13 @@ impl Language for KotlinLanguage {
     type ElementType = crate::parser::element_type::KotlinElementType;
     type TypedRoot = crate::ast::KotlinRoot;
 }
+
+/// Kotlin language marker for Oak framework.
+pub struct Kotlin;
+
+impl Language for Kotlin {
+    const NAME: &'static str = "Kotlin";
+    type TokenType = crate::lexer::token_type::KotlinTokenType;
+    type ElementType = crate::parser::element_type::KotlinElementType;
+    type TypedRoot = ();
+}

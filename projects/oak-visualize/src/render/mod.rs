@@ -413,8 +413,16 @@ impl LayoutExporter {
                 renderer.render_layout(layout)
             }
             ExportFormat::Html => self.export_html(layout),
-            #[cfg(feature = "serde")]
-            ExportFormat::Json => self.export_json(layout),
+            ExportFormat::Json => {
+                #[cfg(feature = "serde")]
+                {
+                    self.export_json(layout)
+                }
+                #[cfg(not(feature = "serde"))]
+                {
+                    Err(crate::Error::msg("JSON export requires 'serde' feature"))
+                }
+            }
         }
     }
 

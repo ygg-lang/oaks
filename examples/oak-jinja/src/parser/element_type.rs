@@ -1,34 +1,41 @@
-use crate::lexer::token_type::JinjaTokenType;
+/// Jinja Element Type module
+///
+/// This module defines the element types for Jinja templates.
 use oak_core::{ElementType, UniversalElementRole};
 
+/// Element types for Jinja templates
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub enum JinjaElementType {
+    /// Root element
     Root,
-    HtmlContent,
-    Comment,
+    /// Text content
+    Text,
+    /// Variable expression
     Variable,
-    Tag,
+    /// Block statement
     Block,
+    /// Comment
+    Comment,
+    /// If statement
     IfStatement,
+    /// For loop
     ForStatement,
+    /// Macro definition
     MacroDefinition,
-    CallBlock,
-    FilterBlock,
-    SetStatement,
-    WithBlock,
-    AutoescapeBlock,
-    ImportStatement,
-    FromStatement,
+    /// Tag statement
+    Tag,
+    /// Filter expression
+    Filter,
+    /// Expression
     Expression,
+    /// Identifier
     Identifier,
+    /// Literal
     Literal,
-    UnaryExpression,
-    BinaryExpression,
-    MemberExpression,
-    CallExpression,
-    FilterExpression,
-    TestExpression,
+    /// Function call
+    Function,
+    /// Error
     Error,
 }
 
@@ -37,25 +44,29 @@ impl ElementType for JinjaElementType {
 
     fn role(&self) -> Self::Role {
         match self {
-            Self::Root => UniversalElementRole::Root,
-            Self::Identifier => UniversalElementRole::Reference,
-            Self::Literal => UniversalElementRole::Value,
-            Self::Expression | Self::UnaryExpression | Self::BinaryExpression | Self::MemberExpression | Self::CallExpression | Self::FilterExpression | Self::TestExpression => UniversalElementRole::Expression,
-            Self::IfStatement | Self::ForStatement | Self::SetStatement | Self::ImportStatement | Self::FromStatement => UniversalElementRole::Statement,
-            Self::MacroDefinition => UniversalElementRole::Definition,
-            Self::Block | Self::CallBlock | Self::FilterBlock | Self::WithBlock | Self::AutoescapeBlock => UniversalElementRole::Container,
-            Self::Comment => UniversalElementRole::Documentation,
             Self::Error => UniversalElementRole::Error,
             _ => UniversalElementRole::None,
         }
     }
 }
 
-impl From<JinjaTokenType> for JinjaElementType {
-    fn from(token: JinjaTokenType) -> Self {
-        match token {
-            JinjaTokenType::Error => Self::Error,
-            _ => Self::Error, // Default fallback for tokens that don't map directly to element types
+impl From<crate::lexer::token_type::JinjaTokenType> for JinjaElementType {
+    fn from(token_type: crate::lexer::token_type::JinjaTokenType) -> Self {
+        match token_type {
+            crate::lexer::token_type::JinjaTokenType::Text => Self::Text,
+            crate::lexer::token_type::JinjaTokenType::DoubleLeftBrace => Self::Variable,
+            crate::lexer::token_type::JinjaTokenType::DoubleRightBrace => Self::Variable,
+            crate::lexer::token_type::JinjaTokenType::LeftBracePercent => Self::Tag,
+            crate::lexer::token_type::JinjaTokenType::PercentRightBrace => Self::Tag,
+            crate::lexer::token_type::JinjaTokenType::Identifier => Self::Identifier,
+            crate::lexer::token_type::JinjaTokenType::String => Self::Literal,
+            crate::lexer::token_type::JinjaTokenType::Number => Self::Literal,
+            crate::lexer::token_type::JinjaTokenType::Boolean => Self::Literal,
+            crate::lexer::token_type::JinjaTokenType::Whitespace => Self::Text,
+            crate::lexer::token_type::JinjaTokenType::Comment => Self::Comment,
+            crate::lexer::token_type::JinjaTokenType::Eof => Self::Text,
+            crate::lexer::token_type::JinjaTokenType::Error => Self::Error,
+            _ => Self::Expression,
         }
     }
 }

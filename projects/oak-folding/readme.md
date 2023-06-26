@@ -3,16 +3,33 @@
 [![Crates.io](https://img.shields.io/crates/v/oak-folding.svg)](https://crates.io/crates/oak-folding)
 [![Documentation](https://docs.rs/oak-folding/badge.svg)](https://docs.rs/oak-folding)
 
-**Core component of the Oak ecosystem** — Providing a solid foundation for building modern programming language toolchains.
+**Code Folding Support for Oak Languages** — Identify collapsible regions in source code for IDE outline views and editor folding.
 
-## 🎯 Project Vision
+## 🎯 Why oak-folding?
 
-`oak-folding` is a key module in the Oak ecosystem, focusing on providing efficient and scalable low-level functionality to help developers quickly build robust programming language-related tools.
+Code folding helps developers manage large files by collapsing sections of code. `oak-folding` provides a trait-based interface for identifying foldable regions in any Oak-supported language.
 
-## ✨ Core Features
+## ✨ Key Features
 
-- **⚡ Blazing Fast**: Fully utilizes Rust's performance advantages to achieve sub-millisecond parsing response times.
-- **🔄 Incremental Parsing**: Built-in support for partial updates, demonstrating extremely high efficiency when processing large files.
-- **🌳 Structured Output**: Provides a clear, easy-to-traverse syntax tree or data structure.
-- **🛡️ Robustness**: Features a comprehensive error recovery mechanism, ensuring normal operation even when input is incomplete.
-- **🧩 Easy Integration**: Designed with high cohesion and low coupling, allowing for quick integration into existing Rust projects.
+- **📁 Folding Provider Trait** — `FoldingProvider` for language-specific folding logic
+- **🎯 Folding Range Types** — Comments, imports, and custom regions
+- **📍 Precise Ranges** — Byte-offset based for accurate folding
+- **🔄 Serde Support** — Optional serialization for LSP integration
+
+## 🏗️ Architecture
+
+- `FoldingRange` — Represents a foldable region with optional kind
+- `FoldingRangeKind` — Comment, Imports, or Region
+- `FoldingProvider<L>` — Trait for providing folding ranges
+
+## 🔗 Ecosystem Integration
+
+Used by `oak-lsp` for `textDocument/foldingRange` support, IDE extensions for code outline views, and code formatters.
+
+## 📖 Documentation
+
+For usage examples and API details, see the [API documentation](https://docs.rs/oak-folding).
+
+## 🤝 Contributing
+
+Contributions are welcome! Please feel free to submit a Pull Request.

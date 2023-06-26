@@ -1,4 +1,5 @@
 #![doc = include_str!("readme.md")]
+/// Element type definitions for Scala parser.
 pub mod element_type;
 
 use crate::{
@@ -14,11 +15,13 @@ use oak_core::{
 
 pub(crate) type State<'a, S> = ParserState<'a, ScalaLanguage, S>;
 
+/// Parser for Scala source code.
 pub struct ScalaParser<'config> {
     pub(crate) config: &'config ScalaLanguage,
 }
 
 impl<'config> ScalaParser<'config> {
+    /// Creates a new ScalaParser with the given language configuration.
     pub fn new(config: &'config ScalaLanguage) -> Self {
         Self { config }
     }

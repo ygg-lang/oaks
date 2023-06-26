@@ -1,5 +1,7 @@
 # 🛠️ Koka Parser Developer Guide
 
+Koka support for the Oak language framework.
+
 This guide is designed to help you quickly get started with developing and integrating `oak-koka`.
 
 ## 🚦 Quick Start

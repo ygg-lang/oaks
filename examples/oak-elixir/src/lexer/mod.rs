@@ -34,6 +34,7 @@ impl<'config> Lexer<ElixirLanguage> for ElixirLexer<'config> {
 }
 
 impl<'config> ElixirLexer<'config> {
+    /// Creates a new ElixirLexer with the given language configuration.
     pub fn new(config: &'config ElixirLanguage) -> Self {
         Self { config }
     }

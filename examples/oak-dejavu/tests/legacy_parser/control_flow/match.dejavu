@@ -1,0 +1,26 @@
+{% match i %}
+
+{% match end %}
+
+
+{% match i %}
+{% case i %}
+    branch A
+{% end match %}
+
+{% match i %}
+{% else %}
+    branch _
+{% match end %}
+
+
+{% match i %}
+    {%- case a if c -%}
+    {%- case a, b if c -%}
+    {%- case (a, b) if c -%}
+    {%- case Some(a, b) if c -%}
+    {%- case _ if c -%}
+    {%- else -%}
+{% match end %}
+
+

@@ -1,14 +1,16 @@
 #![doc = include_str!("readme.md")]
 #![feature(new_range_api)]
 #![warn(missing_docs)]
-//! Wit-component support for the Oak language framework.
 
+/// AST module.
 pub mod ast;
+/// Builder for constructing WIT AST from source text.
 pub mod builder;
 pub mod language;
 pub mod lexer;
 #[cfg(any(feature = "lsp", feature = "oak-highlight", feature = "oak-pretty-print"))]
 pub mod lsp;
+/// Parser for WIT (WebAssembly Interface Types) files.
 pub mod parser;
 
 pub use crate::{ast::WitRoot, builder::WitBuilder, language::WitLanguage, lexer::WitLexer, parser::WitParser};

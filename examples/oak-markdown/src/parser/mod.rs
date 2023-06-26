@@ -67,6 +67,28 @@ impl<'config> Parser<MarkdownLanguage> for MarkdownParser<'config> {
                             self.parse_inlines_until_newline(state);
                             state.finish_at(item_checkpoint, ET::FootnoteDefinition);
                         }
+                        MarkdownTokenType::DefinitionDescription => {
+                            if self.config.allow_definition_lists {
+                                let dl_checkpoint = item_checkpoint;
+                                // Parse definition description
+                                state.bump();
+                                self.parse_inlines_until_newline(state);
+                                state.finish_at(dl_checkpoint, ET::DefinitionList);
+                            }
+                            else {
+                                self.parse_paragraph(state);
+                            }
+                        }
+                        MarkdownTokenType::Abbreviation => {
+                            if self.config.allow_abbreviations {
+                                state.bump();
+                                self.parse_inlines_until_newline(state);
+                                state.finish_at(item_checkpoint, ET::Abbreviation);
+                            }
+                            else {
+                                self.parse_paragraph(state);
+                            }
+                        }
                         MarkdownTokenType::Heading1 | MarkdownTokenType::Heading2 | MarkdownTokenType::Heading3 | MarkdownTokenType::Heading4 | MarkdownTokenType::Heading5 | MarkdownTokenType::Heading6 => {
                             state.bump();
                             self.parse_inlines_until_newline(state);
@@ -91,7 +113,76 @@ impl<'config> Parser<MarkdownLanguage> for MarkdownParser<'config> {
 
                                     let li_checkpoint = state.checkpoint();
                                     state.bump(); // Marker
+
+                                    // 解析列表项内容
                                     self.parse_inlines_until_newline(state);
+
+                                    // 检查是否有嵌套列表
+                                    if let Some(MarkdownTokenType::Newline) = state.peek_kind() {
+                                        let nl_checkpoint = state.checkpoint();
+                                        state.bump();
+
+                                        // 检查是否有缩进的嵌套列表
+                                        let mut indent_level = 0;
+                                        while state.not_at_end() {
+                                            if let Some(MarkdownTokenType::Whitespace) = state.peek_kind() {
+                                                state.bump();
+                                                indent_level += 1;
+                                            }
+                                            else if let Some(MarkdownTokenType::ListMarker) = state.peek_kind() {
+                                                // 递归解析嵌套列表
+                                                let nested_list_checkpoint = state.checkpoint();
+                                                let nested_is_ordered = if let Some(text) = state.peek_text() { text.chars().next().map(|c| c.is_ascii_digit()).unwrap_or(false) } else { false };
+
+                                                while state.not_at_end() {
+                                                    if let Some(MarkdownTokenType::ListMarker) = state.peek_kind() {
+                                                        let nested_current_is_ordered = if let Some(text) = state.peek_text() { text.chars().next().map(|c| c.is_ascii_digit()).unwrap_or(false) } else { false };
+
+                                                        if nested_current_is_ordered != nested_is_ordered && state.checkpoint() != nested_list_checkpoint {
+                                                            break;
+                                                        }
+
+                                                        let nested_li_checkpoint = state.checkpoint();
+                                                        state.bump(); // Marker
+                                                        self.parse_inlines_until_newline(state);
+                                                        state.finish_at(nested_li_checkpoint, ET::ListItem);
+
+                                                        if let Some(MarkdownTokenType::Newline) = state.peek_kind() {
+                                                            let nested_nl_checkpoint = state.checkpoint();
+                                                            state.bump();
+                                                            let mut nested_indent_level = 0;
+                                                            while state.not_at_end() {
+                                                                if let Some(MarkdownTokenType::Whitespace) = state.peek_kind() {
+                                                                    state.bump();
+                                                                    nested_indent_level += 1;
+                                                                }
+                                                                else {
+                                                                    break;
+                                                                }
+                                                            }
+                                                            if nested_indent_level <= indent_level || !matches!(state.peek_kind(), Some(MarkdownTokenType::ListMarker)) {
+                                                                state.restore(nested_nl_checkpoint);
+                                                                break;
+                                                            }
+                                                        }
+                                                        else {
+                                                            break;
+                                                        }
+                                                    }
+                                                    else {
+                                                        break;
+                                                    }
+                                                }
+                                                state.finish_at(nested_list_checkpoint, ET::List);
+                                                break;
+                                            }
+                                            else {
+                                                state.restore(nl_checkpoint);
+                                                break;
+                                            }
+                                        }
+                                    }
+
                                     state.finish_at(li_checkpoint, ET::ListItem);
 
                                     if let Some(MarkdownTokenType::Newline) = state.peek_kind() {
@@ -118,14 +209,72 @@ impl<'config> Parser<MarkdownLanguage> for MarkdownParser<'config> {
                             state.finish_at(list_checkpoint, ET::List);
                         }
                         MarkdownTokenType::BlockquoteMarker => {
+                            let blockquote_checkpoint = item_checkpoint;
                             state.bump();
+
                             while state.not_at_end() {
                                 if let Some(next_kind) = state.peek_kind() {
                                     if next_kind == MarkdownTokenType::Newline {
                                         state.bump();
                                         if let Some(after_nl) = state.peek_kind() {
                                             if after_nl == MarkdownTokenType::BlockquoteMarker {
+                                                // 处理嵌套引用
+                                                let nested_quote_checkpoint = state.checkpoint();
                                                 state.bump();
+
+                                                while state.not_at_end() {
+                                                    if let Some(nested_next_kind) = state.peek_kind() {
+                                                        if nested_next_kind == MarkdownTokenType::Newline {
+                                                            state.bump();
+                                                            if let Some(nested_after_nl) = state.peek_kind() {
+                                                                if nested_after_nl == MarkdownTokenType::BlockquoteMarker {
+                                                                    // 递归处理更深层的嵌套引用
+                                                                    let deeper_nested_quote_checkpoint = state.checkpoint();
+                                                                    state.bump();
+
+                                                                    while state.not_at_end() {
+                                                                        if let Some(deeper_nested_next_kind) = state.peek_kind() {
+                                                                            if deeper_nested_next_kind == MarkdownTokenType::Newline {
+                                                                                state.bump();
+                                                                                if let Some(deeper_nested_after_nl) = state.peek_kind() {
+                                                                                    if deeper_nested_after_nl == MarkdownTokenType::BlockquoteMarker {
+                                                                                        state.bump();
+                                                                                        continue;
+                                                                                    }
+                                                                                    if deeper_nested_after_nl != MarkdownTokenType::Whitespace && deeper_nested_after_nl != MarkdownTokenType::Text {
+                                                                                        break;
+                                                                                    }
+                                                                                }
+                                                                                else {
+                                                                                    break;
+                                                                                }
+                                                                            }
+                                                                            else if self.is_block_start(deeper_nested_next_kind) && deeper_nested_next_kind != MarkdownTokenType::BlockquoteMarker {
+                                                                                break;
+                                                                            }
+                                                                        }
+                                                                        self.parse_inline(state);
+                                                                    }
+
+                                                                    state.finish_at(deeper_nested_quote_checkpoint, ET::Blockquote);
+                                                                    continue;
+                                                                }
+                                                                if nested_after_nl != MarkdownTokenType::Whitespace && nested_after_nl != MarkdownTokenType::Text {
+                                                                    break;
+                                                                }
+                                                            }
+                                                            else {
+                                                                break;
+                                                            }
+                                                        }
+                                                        else if self.is_block_start(nested_next_kind) && nested_next_kind != MarkdownTokenType::BlockquoteMarker {
+                                                            break;
+                                                        }
+                                                    }
+                                                    self.parse_inline(state);
+                                                }
+
+                                                state.finish_at(nested_quote_checkpoint, ET::Blockquote);
                                                 continue;
                                             }
                                             if after_nl != MarkdownTokenType::Whitespace && after_nl != MarkdownTokenType::Text {
@@ -142,7 +291,8 @@ impl<'config> Parser<MarkdownLanguage> for MarkdownParser<'config> {
                                 }
                                 self.parse_inline(state);
                             }
-                            state.finish_at(item_checkpoint, ET::Blockquote);
+
+                            state.finish_at(blockquote_checkpoint, ET::Blockquote);
                         }
                         MarkdownTokenType::CodeFence => {
                             state.bump();
@@ -165,15 +315,35 @@ impl<'config> Parser<MarkdownLanguage> for MarkdownParser<'config> {
                             state.finish_at(item_checkpoint, ET::HorizontalRule);
                         }
                         MarkdownTokenType::Pipe => {
+                            let table_checkpoint = item_checkpoint;
+                            state.bump(); // 跳过第一个管道
+                            // 解析表格行
                             while state.not_at_end() {
+                                let row_checkpoint = state.checkpoint();
+                                // 解析行内容和单元格
                                 while state.not_at_end() {
                                     if let Some(next_kind) = state.peek_kind() {
                                         if next_kind == MarkdownTokenType::Newline {
                                             break;
                                         }
+                                        else if next_kind == MarkdownTokenType::Pipe {
+                                            state.bump(); // 跳过管道
+                                        }
                                     }
-                                    state.bump();
+                                    let cell_checkpoint = state.checkpoint();
+                                    // 解析单元格内容
+                                    while state.not_at_end() {
+                                        if let Some(next_kind) = state.peek_kind() {
+                                            if next_kind == MarkdownTokenType::Pipe || next_kind == MarkdownTokenType::Newline {
+                                                break;
+                                            }
+                                        }
+                                        self.parse_inline(state);
+                                    }
+                                    state.finish_at(cell_checkpoint, ET::TableCell);
                                 }
+                                state.finish_at(row_checkpoint, ET::TableRow);
+
                                 if let Some(MarkdownTokenType::Newline) = state.peek_kind() {
                                     let checkpoint_before_nl = state.checkpoint();
                                     state.bump();
@@ -187,6 +357,20 @@ impl<'config> Parser<MarkdownLanguage> for MarkdownParser<'config> {
                                                 is_table_line = true;
                                                 break;
                                             }
+                                            else if kind == MarkdownTokenType::Dash || kind == MarkdownTokenType::Colon {
+                                                // 处理表格分隔线
+                                                let separator_checkpoint = state.checkpoint();
+                                                while state.not_at_end() {
+                                                    if let Some(sep_kind) = state.peek_kind() {
+                                                        if sep_kind == MarkdownTokenType::Newline {
+                                                            break;
+                                                        }
+                                                    }
+                                                    state.bump();
+                                                }
+                                                state.finish_at(separator_checkpoint, ET::TableSeparator);
+                                                break;
+                                            }
                                             else {
                                                 break;
                                             }
@@ -196,6 +380,7 @@ impl<'config> Parser<MarkdownLanguage> for MarkdownParser<'config> {
                                         }
                                     }
                                     if is_table_line {
+                                        state.bump(); // 跳过新行的管道
                                         continue;
                                     }
                                     else {
@@ -207,7 +392,7 @@ impl<'config> Parser<MarkdownLanguage> for MarkdownParser<'config> {
                                     break;
                                 }
                             }
-                            state.finish_at(item_checkpoint, ET::Table);
+                            state.finish_at(table_checkpoint, ET::Table);
                         }
                         MarkdownTokenType::Newline | MarkdownTokenType::Whitespace => {
                             state.bump();
@@ -245,6 +430,8 @@ impl<'config> MarkdownParser<'config> {
                 | MarkdownTokenType::MathBlock
                 | MarkdownTokenType::FrontMatter
                 | MarkdownTokenType::FootnoteDefinition
+                | MarkdownTokenType::DefinitionDescription
+                | MarkdownTokenType::Abbreviation
         )
     }
 
@@ -322,9 +509,54 @@ impl<'config> MarkdownParser<'config> {
                     }
                     state.finish_at(checkpoint, if is_image { ET::Image } else { ET::Link });
                 }
-                MarkdownTokenType::InlineCode | MarkdownTokenType::MathInline | MarkdownTokenType::Superscript | MarkdownTokenType::Subscript | MarkdownTokenType::FootnoteReference => {
+                MarkdownTokenType::InlineCode => {
+                    state.bump(); // Start backtick
+                    while state.not_at_end() && state.peek_kind() != Some(MarkdownTokenType::InlineCode) && state.peek_kind() != Some(MarkdownTokenType::Newline) {
+                        self.parse_inline(state);
+                    }
+                    if state.peek_kind() == Some(MarkdownTokenType::InlineCode) {
+                        state.bump(); // End backtick
+                    }
+                    state.finish_at(checkpoint, ET::InlineCode);
+                }
+                MarkdownTokenType::MathInline => {
+                    state.bump(); // Start $
+                    while state.not_at_end() && state.peek_kind() != Some(MarkdownTokenType::MathInline) && state.peek_kind() != Some(MarkdownTokenType::Newline) {
+                        self.parse_inline(state);
+                    }
+                    if state.peek_kind() == Some(MarkdownTokenType::MathInline) {
+                        state.bump(); // End $
+                    }
+                    state.finish_at(checkpoint, ET::MathInline);
+                }
+                MarkdownTokenType::Superscript | MarkdownTokenType::Subscript => {
+                    let marker_kind = kind;
+                    state.bump(); // Start marker
+                    while state.not_at_end() && state.peek_kind() != Some(marker_kind) && state.peek_kind() != Some(MarkdownTokenType::Newline) {
+                        self.parse_inline(state);
+                    }
+                    if state.peek_kind() == Some(marker_kind) {
+                        state.bump(); // End marker
+                    }
+                    state.finish_at(checkpoint, ET::from(marker_kind));
+                }
+                MarkdownTokenType::FootnoteReference => {
+                    state.bump(); // Start [^...]
+                    while state.not_at_end() && state.peek_text().as_deref() != Some("]") && state.peek_kind() != Some(MarkdownTokenType::Newline) {
+                        state.bump();
+                    }
+                    if state.peek_text().as_deref() == Some("]") {
+                        state.bump(); // End ]
+                    }
+                    state.finish_at(checkpoint, ET::FootnoteReference);
+                }
+                MarkdownTokenType::TaskMarker => {
+                    state.bump(); // [ ] or [x]
+                    state.finish_at(checkpoint, ET::TaskMarker);
+                }
+                MarkdownTokenType::AutoLink => {
                     state.bump();
-                    state.finish_at(checkpoint, ET::from(kind));
+                    state.finish_at(checkpoint, ET::AutoLink);
                 }
                 _ => {
                     state.bump();

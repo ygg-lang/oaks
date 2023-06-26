@@ -1,21 +1,17 @@
-use crate::{language::CobolLanguage, parser::CobolElementType};
+use crate::language::CobolLanguage;
+use core::range::Range;
 use oak_core::tree::{RedLeaf, RedNode};
 
+/// A node in the COBOL red tree.
 pub type CobolNode<'a> = RedNode<'a, CobolLanguage>;
+/// A token in the COBOL red tree.
 pub type CobolToken = RedLeaf<CobolLanguage>;
 
-/// COBOL root node.
-#[derive(Debug, Clone, Copy)]
-pub struct CobolRoot<'a> {
-    syntax: CobolNode<'a>,
-}
-
-impl<'a> CobolRoot<'a> {
-    pub fn cast(node: CobolNode<'a>) -> Option<Self> {
-        if node.green.kind == CobolElementType::Root { Some(CobolRoot { syntax: node }) } else { None }
-    }
-
-    pub fn syntax(&self) -> &CobolNode<'a> {
-        &self.syntax
-    }
+/// The root node of the COBOL AST.
+#[derive(Debug, Clone, PartialEq)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+pub struct CobolRoot {
+    /// The source range of this root node.
+    #[cfg_attr(feature = "serde", serde(with = "oak_core::serde_range"))]
+    pub span: Range<usize>,
 }

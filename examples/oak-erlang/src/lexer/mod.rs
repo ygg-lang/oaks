@@ -30,6 +30,7 @@ impl<'config> Lexer<ErlangLanguage> for ErlangLexer<'config> {
 
 impl<'config> ErlangLexer<'config> {
     /// Creates a new `ErlangLexer` with the given configuration.
+    /// Creates a new ErlangLexer with the given language configuration.
     pub fn new(config: &'config ErlangLanguage) -> Self {
         Self { config }
     }

@@ -3,16 +3,37 @@
 [![Crates.io](https://img.shields.io/crates/v/oak-semantic-tokens.svg)](https://crates.io/crates/oak-semantic-tokens)
 [![Documentation](https://docs.rs/oak-semantic-tokens/badge.svg)](https://docs.rs/oak-semantic-tokens)
 
-**Core component of the Oak ecosystem** — Providing a solid foundation for building modern programming language toolchains.
+**Semantic Tokens for Oak Languages** — LSP-compatible semantic syntax highlighting for precise code coloring.
 
-## 🎯 Project Vision
+## 🎯 Why oak-semantic-tokens?
 
-`oak-semantic-tokens` is a key module in the Oak ecosystem, focusing on providing efficient and scalable low-level functionality to help developers quickly build robust programming language-related tools.
+Semantic tokens go beyond syntax highlighting by understanding the meaning of identifiers — distinguishing between function calls, variable references, type names, and more.
 
-## ✨ Core Features
+## ✨ Key Features
 
-- **⚡ Blazing Fast**: Fully utilizes Rust's performance advantages to achieve sub-millisecond parsing response times.
-- **🔄 Incremental Parsing**: Built-in support for partial updates, demonstrating extremely high efficiency when processing large files.
-- **🌳 Structured Output**: Provides a clear, easy-to-traverse syntax tree or data structure.
-- **🛡️ Robustness**: Features a comprehensive error recovery mechanism, ensuring normal operation even when input is incomplete.
-- **🧩 Easy Integration**: Designed with high cohesion and low coupling, allowing for quick integration into existing Rust projects.
+- **🎨 Semantic Token Type** — LSP-compatible with delta encoding
+- **📊 Provider Trait** — `SemanticTokensProvider` for language-specific highlighting
+- **🔧 Line Map Integration** — Works with `oak-vfs::LineMap` for position conversion
+- **⚡ Efficient Encoding** — Delta-based encoding minimizes data transfer
+- **🔄 Serde Support** — Optional serialization for LSP integration
+
+## 🏗️ Architecture
+
+- `SemanticToken` — LSP-compatible token with delta encoding
+- `SemanticTokensProvider<L>` — Trait for providing semantic tokens
+
+### LSP Compatibility
+
+Matches LSP's `SemanticTokens` specification with delta encoding, token types, and modifiers via legend indices.
+
+## 🔗 Ecosystem Integration
+
+Used by `oak-lsp` for `textDocument/semanticTokens` support, IDE extensions for enhanced highlighting, and code analysis tools.
+
+## 📖 Documentation
+
+For usage examples and API details, see the [API documentation](https://docs.rs/oak-semantic-tokens).
+
+## 🤝 Contributing
+
+Contributions are welcome! Please feel free to submit a Pull Request.

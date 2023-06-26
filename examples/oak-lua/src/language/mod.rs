@@ -1,7 +1,4 @@
 #![doc = include_str!("readme.md")]
-//! Lua language definition.
-//!
-//! Defines the core structure for the Lua language, implementing the oak-core Language trait.
 
 use oak_core::{Language, LanguageCategory};
 

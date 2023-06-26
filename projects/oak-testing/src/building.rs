@@ -4,8 +4,13 @@
 //! including file-based testing, expected output comparison, timeout handling,
 //! and test result serialization for typed root structures.
 
-use crate::{create_file, json_from_path, source_from_path};
+use crate::{create_file, source_from_path};
 use oak_core::{Builder, Language, errors::OakError};
+
+#[cfg(feature = "serde")]
+use crate::json_from_path;
+#[cfg(feature = "serde")]
+use serde::Serialize;
 
 #[cfg(feature = "serde")]
 use serde_json::Value as JsonValue;
@@ -151,13 +156,14 @@ impl BuilderTester {
         let source = source_from_path(file_path)?;
 
         // Perform build in a thread and construct test results, with main thread handling timeout control
-        use std::sync::mpsc;
-        let (tx, rx) = mpsc::channel();
+        use std::sync::{Arc, Mutex};
+        let result: Arc<Mutex<Option<Result<BuilderTestExpected, OakError>>>> = Arc::new(Mutex::new(None));
+        let result_clone = Arc::clone(&result);
         let timeout = self.timeout;
         let file_path_string = file_path.display().to_string();
 
         std::thread::scope(|s| {
-            s.spawn(move || {
+            let handle = s.spawn(move || {
                 let mut cache = oak_core::parser::ParseSession::<L>::new(1024);
                 let build_out = builder.build(&source, &[], &mut cache);
 
@@ -187,41 +193,71 @@ impl BuilderTester {
 
                 let test_result = BuilderTestExpected { success, typed_root, errors: error_messages };
 
-                let _ = tx.send(Ok::<BuilderTestExpected, OakError>(test_result));
+                let mut result = result_clone.lock().unwrap();
+                *result = Some(Ok(test_result));
             });
 
-            let mut regenerated = false;
-            match rx.recv_timeout(timeout) {
-                Ok(Ok(test_result)) => {
-                    let expected_file = file_path.with_extension(format!("{}.built.json", file_path.extension().unwrap_or_default().to_str().unwrap_or("")));
-
-                    // Migration: If the new naming convention file doesn't exist, but the old one does, rename it
-                    if !expected_file.exists() {
-                        let legacy_file = file_path.with_extension("expected.json");
-                        if legacy_file.exists() {
-                            let _ = std::fs::rename(&legacy_file, &expected_file);
-                        }
-                    }
-
-                    if expected_file.exists() && !force_regenerated {
-                        let expected_json = json_from_path(&expected_file)?;
-                        let expected: BuilderTestExpected = serde_json::from_value(expected_json).map_err(|e| OakError::custom_error(e.to_string()))?;
-                        if test_result != expected {
-                            return Err(OakError::test_failure(file_path.to_path_buf(), format!("{:#?}", expected), format!("{:#?}", test_result)));
-                        }
-                    }
-                    else {
-                        use std::io::Write;
-                        let mut file = create_file(&expected_file)?;
-                        let json_val = serde_json::to_string_pretty(&test_result).map_err(|e| OakError::custom_error(e.to_string()))?;
-                        file.write_all(json_val.as_bytes()).map_err(|e| OakError::custom_error(e.to_string()))?;
-                        regenerated = true;
-                    }
+            // Wait for thread completion or timeout
+            let start_time = std::time::Instant::now();
+            let timeout_occurred = loop {
+                // Check if thread has finished
+                if handle.is_finished() {
+                    break false;
                 }
-                Ok(Err(e)) => return Err(e),
-                Err(mpsc::RecvTimeoutError::Timeout) => return Err(OakError::custom_error(format!("Builder test timed out after {:?} for file: {}", timeout, file_path_string))),
-                Err(mpsc::RecvTimeoutError::Disconnected) => return Err(OakError::custom_error("Builder thread disconnected unexpectedly")),
+
+                // Check for timeout
+                if start_time.elapsed() > timeout {
+                    break true;
+                }
+
+                // Sleep briefly to avoid busy waiting
+                std::thread::sleep(std::time::Duration::from_millis(10));
+            };
+
+            // Return error if timed out
+            if timeout_occurred {
+                return Err(OakError::custom_error(format!("Builder test timed out after {:?} for file: {}", timeout, file_path_string)));
             }
+
+            // Get build result
+            let test_result = {
+                let result_guard = result.lock().unwrap();
+                match result_guard.as_ref() {
+                    Some(Ok(test_result)) => test_result.clone(),
+                    Some(Err(e)) => return Err(e.clone()),
+                    None => return Err(OakError::custom_error("Builder thread disconnected unexpectedly")),
+                }
+            };
+
+            let mut regenerated = false;
+            let expected_file = file_path.with_extension(format!("{}.built.json", file_path.extension().unwrap_or_default().to_str().unwrap_or("")));
+
+            // Migration: If the new naming convention file doesn't exist, but the old one does, rename it
+            if !expected_file.exists() {
+                let legacy_file = file_path.with_extension("expected.json");
+                if legacy_file.exists() {
+                    let _ = std::fs::rename(&legacy_file, &expected_file);
+                }
+            }
+
+            if expected_file.exists() && !force_regenerated {
+                let expected_json = json_from_path(&expected_file)?;
+                let expected: BuilderTestExpected = serde_json::from_value(expected_json).map_err(|e| OakError::custom_error(e.to_string()))?;
+                if test_result != expected {
+                    return Err(OakError::test_failure(file_path.to_path_buf(), format!("{:#?}", expected), format!("{:#?}", test_result)));
+                }
+            }
+            else {
+                use std::io::Write;
+                let mut file = create_file(&expected_file)?;
+                let mut buf = Vec::new();
+                let formatter = serde_json::ser::PrettyFormatter::with_indent(b"    "); // 4 spaces indentation
+                let mut ser = serde_json::Serializer::with_formatter(&mut buf, formatter);
+                test_result.serialize(&mut ser).map_err(|e| OakError::custom_error(e.to_string()))?;
+                file.write_all(&buf).map_err(|e| OakError::custom_error(e.to_string()))?;
+                regenerated = true;
+            }
+
             Ok(regenerated)
         })
     }

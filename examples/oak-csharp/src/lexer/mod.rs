@@ -1,5 +1,4 @@
 #![doc = include_str!("readme.md")]
-//! Lexer implementation for the C# language.
 
 use crate::language::CSharpLanguage;
 

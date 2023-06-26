@@ -1,5 +1,4 @@
 #![doc = include_str!("readme.md")]
-//! Org-mode syntax highlighter.
 
 /// Highlight kind.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]

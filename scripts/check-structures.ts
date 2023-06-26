@@ -1,7 +1,11 @@
 import * as fs from 'fs';
 import * as path from 'path';
+import { fileURLToPath } from 'url';
 
-const EXAMPLES_DIR = path.join(__dirname, '..', 'examples');
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const ROOT_DIR = path.join(__dirname, '..');
+const EXAMPLES_DIR = path.join(ROOT_DIR, 'examples');
+const LOG_FILE = path.join(ROOT_DIR, 'check-structures.log');
 const MAX_LINES = 1000;
 const ALLOWED_SRC_DIRS = ['ast', 'builder', 'parser', 'lexer', 'language', 'lsp', 'mcp'];
 const ALLOWED_SRC_FILES = ['lib.rs', 'main.rs', 'mod.rs'];
@@ -14,6 +18,12 @@ interface Violation {
 }
 
 const violations: Violation[] = [];
+const logLines: string[] = [];
+
+function log(message: string = '') {
+    console.log(message);
+    logLines.push(message);
+}
 
 function checkFile(filePath: string) {
     const relativePath = path.relative(EXAMPLES_DIR, filePath);
@@ -24,7 +34,6 @@ function checkFile(filePath: string) {
     const lines = content.split('\n');
     const parts = relativePath.split(path.sep);
 
-    // 1. Check directory structure under src
     const srcIndex = parts.indexOf('src');
     if (srcIndex !== -1 && srcIndex < parts.length - 1) {
         const itemAfterSrc = parts[srcIndex + 1];
@@ -41,7 +50,6 @@ function checkFile(filePath: string) {
                 });
             }
         } else {
-            // It's a file directly under src/
             if (!ALLOWED_SRC_FILES.includes(itemAfterSrc) && !itemAfterSrc.endsWith('.md')) {
                 violations.push({
                     file: relativePath,
@@ -53,7 +61,6 @@ function checkFile(filePath: string) {
         }
     }
 
-    // 2. Check size
     if (lines.length > MAX_LINES) {
         violations.push({
             file: relativePath,
@@ -70,7 +77,6 @@ function checkFile(filePath: string) {
     const fileName = path.basename(filePath);
     const isTestFile = filePath.includes(path.sep + 'tests' + path.sep) || fileName.startsWith('test_') || fileName === 'test.rs';
 
-    // 5. Check File naming (Priority)
     if (!isTestFile && fileName !== 'mod.rs' && fileName !== 'lib.rs' && fileName !== 'element_type.rs' && !fileName.endsWith('.md')) {
         if (isAstFile && !fileName.endsWith('_nodes.rs')) {
             violations.push({
@@ -81,7 +87,6 @@ function checkFile(filePath: string) {
             });
         }
         if (isParserFile && !fileName.startsWith('parse_') && !fileName.endsWith('_parser.rs')) {
-            // Note: user requested "parser should have parse_xxx", so prefix parse_ is likely what they want for files too
             violations.push({
                 file: relativePath,
                 line: 0,
@@ -113,15 +118,14 @@ function walkDir(dir: string) {
     }
 }
 
-console.log(`Checking directory: ${EXAMPLES_DIR} ...`);
+log(`Checking directory: ${EXAMPLES_DIR} ...`);
 walkDir(EXAMPLES_DIR);
 
 if (violations.length === 0) {
-    console.log('No structural issues found! ✨');
+    log('No structural issues found!');
 } else {
-    console.log(`Found ${violations.length} structural issues:\n`);
-    
-    // Group by file
+    log(`Found ${violations.length} structural issues:\n`);
+
     const grouped = violations.reduce((acc, v) => {
         if (!acc[v.file]) acc[v.file] = [];
         acc[v.file].push(v);
@@ -129,10 +133,13 @@ if (violations.length === 0) {
     }, {} as Record<string, Violation[]>);
 
     for (const [file, fileViolations] of Object.entries(grouped)) {
-        console.log(`File: ${file}`);
+        log(`File: ${file}`);
         fileViolations.sort((a, b) => a.line - b.line).forEach(v => {
-            console.log(`  [L${v.line}] [${v.type}] ${v.message}`);
+            log(`  [L${v.line}] [${v.type}] ${v.message}`);
         });
-        console.log('');
+        log('');
     }
 }
+
+fs.writeFileSync(LOG_FILE, logLines.join('\n'), 'utf-8');
+console.log(`\nLog saved to: ${LOG_FILE}`);

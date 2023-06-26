@@ -3,6 +3,7 @@
 use oak_core::{Language, LanguageCategory};
 
 #[cfg(feature = "serde")]
+/// Serialization and deserialization utilities for XML.
 pub mod serde;
 #[cfg(feature = "serde")]
 pub use serde::{from_value, to_value};

@@ -1,5 +1,6 @@
 use oak_core::{Source, Token, TokenType, UniversalElementRole, UniversalTokenRole};
 
+/// Type alias for a Twig token.
 pub type TwigToken = Token<TwigTokenType>;
 
 /// Token types for the Twig lexer.

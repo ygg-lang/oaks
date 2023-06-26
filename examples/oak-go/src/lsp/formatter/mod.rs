@@ -1,5 +1,4 @@
 #![doc = include_str!("readme.md")]
-//! Go formatter.
 
 use oak_pretty_print::Document;
 

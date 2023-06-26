@@ -1,165 +1,102 @@
-use oak_core::{ElementType, UniversalElementRole};
+use crate::lexer::TokenType;
+use oak_core::language::UniversalElementRole;
 
-/// Element types for the Racket language.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+/// Element types for the Racket language parser.
+///
+/// This enum represents all possible element types in Racket,
+/// including expressions, statements, and special constructs.
+#[derive(Debug, PartialEq, Eq, Clone, Copy, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub enum RacketElementType {
-    /// A source file.
-    SourceFile,
-    /// Whitespace.
-    Whitespace,
-    /// A newline.
-    Newline,
-    /// A comment.
-    Comment,
-    /// A line comment.
-    LineComment,
-    /// A numeric literal.
-    NumberLiteral,
-    /// A string literal.
-    StringLiteral,
-    /// A character literal.
-    CharacterLiteral,
-    /// A boolean literal.
-    BooleanLiteral,
-    /// An identifier.
+pub enum ElementType {
+    /// Expression element.
+    Expression,
+
+    /// Statement element.
+    Statement,
+
+    /// For loop construct.
+    For,
+
+    /// List comprehension construct.
+    ListComprehension,
+
+    /// Block element.
+    Block,
+    /// Identifier element.
     Identifier,
-    /// A symbol.
-    Symbol,
-    /// A keyword.
-    Keyword,
-    /// `define` keyword.
-    Define,
-    /// `lambda` keyword.
-    Lambda,
-    /// `if` keyword.
-    If,
-    /// `cond` keyword.
-    Cond,
-    /// `case` keyword.
-    Case,
-    /// `let` keyword.
-    Let,
-    /// `let*` keyword.
-    LetStar,
-    /// `letrec` keyword.
-    Letrec,
-    /// `begin` keyword.
-    Begin,
-    /// `do` keyword.
-    Do,
-    /// `quote` keyword.
-    Quote,
-    /// `quasiquote` keyword.
-    Quasiquote,
-    /// `unquote` keyword.
-    Unquote,
-    /// `unquote-splicing` keyword.
-    UnquoteSplicing,
-    /// `and` keyword.
-    And,
-    /// `or` keyword.
-    Or,
-    /// `not` keyword.
-    Not,
-    /// `set!` keyword.
-    Set,
-    /// `(`.
-    LeftParen,
-    /// `)`.
-    RightParen,
-    /// `[`.
-    LeftBracket,
-    /// `]`.
-    RightBracket,
-    /// `{`.
-    LeftBrace,
-    /// `}`.
-    RightBrace,
-    /// `.`.
-    Dot,
-    /// `#`.
-    Hash,
-    /// `'`.
-    Quote_,
-    /// `` ` ``.
-    Quasiquote_,
-    /// `,`.
-    Unquote_,
-    /// `,@`.
-    UnquoteSplicing_,
-    /// A list.
+    /// Number literal element.
+    Number,
+    /// String literal element.
+    String,
+    /// Boolean literal element.
+    Boolean,
+    /// Binary expression element.
+    BinaryExpression,
+    /// Unary expression element.
+    UnaryExpression,
+    /// Function call element.
+    Call,
+    /// Index access element.
+    Index,
+    /// Tuple element.
+    Tuple,
+    /// List element.
     List,
-    /// A quotation.
-    Quotation,
-    /// An error token.
-    Error,
-    /// End of stream.
+    /// Map/dictionary element.
+    Map,
+
+    /// End of file marker.
     Eof,
 }
 
-impl ElementType for RacketElementType {
+impl oak_core::language::ElementType for ElementType {
     type Role = UniversalElementRole;
 
     fn role(&self) -> Self::Role {
         match self {
-            Self::SourceFile => UniversalElementRole::Root,
-            Self::Error => UniversalElementRole::Error,
-            Self::List => UniversalElementRole::Expression,
-            Self::Quotation => UniversalElementRole::Expression,
-            _ => UniversalElementRole::None,
+            ElementType::Expression => UniversalElementRole::Expression,
+            ElementType::Statement => UniversalElementRole::Statement,
+            ElementType::For => UniversalElementRole::Statement,
+            ElementType::ListComprehension => UniversalElementRole::Expression,
+            ElementType::Block => UniversalElementRole::Container,
+            ElementType::Identifier => UniversalElementRole::Reference,
+            ElementType::Number | ElementType::String | ElementType::Boolean => UniversalElementRole::Value,
+            ElementType::BinaryExpression | ElementType::UnaryExpression => UniversalElementRole::Expression,
+            ElementType::Call => UniversalElementRole::Call,
+            ElementType::Index => UniversalElementRole::Expression,
+            ElementType::Tuple | ElementType::List | ElementType::Map => UniversalElementRole::Container,
+            ElementType::Eof => UniversalElementRole::None,
         }
     }
 }
 
-impl From<crate::lexer::token_type::RacketTokenType> for RacketElementType {
-    fn from(token: crate::lexer::token_type::RacketTokenType) -> Self {
-        use crate::lexer::token_type::RacketTokenType as T;
-        match token {
-            T::SourceFile => RacketElementType::SourceFile,
-            T::Whitespace => RacketElementType::Whitespace,
-            T::Newline => RacketElementType::Newline,
-            T::Comment => RacketElementType::Comment,
-            T::LineComment => RacketElementType::LineComment,
-            T::NumberLiteral => RacketElementType::NumberLiteral,
-            T::StringLiteral => RacketElementType::StringLiteral,
-            T::CharacterLiteral => RacketElementType::CharacterLiteral,
-            T::BooleanLiteral => RacketElementType::BooleanLiteral,
-            T::Identifier => RacketElementType::Identifier,
-            T::Symbol => RacketElementType::Symbol,
-            T::Keyword => RacketElementType::Keyword,
-            T::Define => RacketElementType::Define,
-            T::Lambda => RacketElementType::Lambda,
-            T::If => RacketElementType::If,
-            T::Cond => RacketElementType::Cond,
-            T::Case => RacketElementType::Case,
-            T::Let => RacketElementType::Let,
-            T::LetStar => RacketElementType::LetStar,
-            T::Letrec => RacketElementType::Letrec,
-            T::Begin => RacketElementType::Begin,
-            T::Do => RacketElementType::Do,
-            T::Quote => RacketElementType::Quote,
-            T::Quasiquote => RacketElementType::Quasiquote,
-            T::Unquote => RacketElementType::Unquote,
-            T::UnquoteSplicing => RacketElementType::UnquoteSplicing,
-            T::And => RacketElementType::And,
-            T::Or => RacketElementType::Or,
-            T::Not => RacketElementType::Not,
-            T::Set => RacketElementType::Set,
-            T::LeftParen => RacketElementType::LeftParen,
-            T::RightParen => RacketElementType::RightParen,
-            T::LeftBracket => RacketElementType::LeftBracket,
-            T::RightBracket => RacketElementType::RightBracket,
-            T::LeftBrace => RacketElementType::LeftBrace,
-            T::RightBrace => RacketElementType::RightBrace,
-            T::Dot => RacketElementType::Dot,
-            T::Hash => RacketElementType::Hash,
-            T::Quote_ => RacketElementType::Quote_,
-            T::Quasiquote_ => RacketElementType::Quasiquote_,
-            T::Unquote_ => RacketElementType::Unquote_,
-            T::UnquoteSplicing_ => RacketElementType::UnquoteSplicing_,
-            T::Error => RacketElementType::Error,
-            T::Eof => RacketElementType::Eof,
+impl From<TokenType> for ElementType {
+    fn from(token_type: TokenType) -> Self {
+        match token_type {
+            TokenType::For => ElementType::For,
+            TokenType::In => ElementType::Expression,
+            TokenType::Identifier => ElementType::Identifier,
+            TokenType::Number => ElementType::Number,
+            TokenType::String => ElementType::String,
+            TokenType::Boolean => ElementType::Boolean,
+            TokenType::LParen | TokenType::RParen | TokenType::LBracket | TokenType::RBracket | TokenType::LBrace | TokenType::RBrace | TokenType::Comma | TokenType::Dot | TokenType::Colon | TokenType::Semicolon => ElementType::Expression,
+            TokenType::Plus
+            | TokenType::Minus
+            | TokenType::Multiply
+            | TokenType::Divide
+            | TokenType::Modulo
+            | TokenType::Equals
+            | TokenType::NotEquals
+            | TokenType::LessThan
+            | TokenType::LessThanOrEqual
+            | TokenType::GreaterThan
+            | TokenType::GreaterThanOrEqual
+            | TokenType::And
+            | TokenType::Or
+            | TokenType::Not => ElementType::Expression,
+            TokenType::Comment | TokenType::Whitespace => ElementType::Expression,
+            TokenType::Require | TokenType::Provide | TokenType::Struct | TokenType::Class | TokenType::Match | TokenType::WithHandlers | TokenType::Raise => ElementType::Expression,
+            TokenType::Eof => ElementType::Eof,
         }
     }
 }

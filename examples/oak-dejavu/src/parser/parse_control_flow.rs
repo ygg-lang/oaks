@@ -1,13 +1,16 @@
 use crate::{
-    language::DejavuLanguage,
-    lexer::{DejavuKeywords, token_type::DejavuSyntaxKind::*},
+    lexer::{
+        DejavuKeywords,
+        token_type::DejavuTokenType::{self, *},
+    },
+    parser::element_type::DejavuElementType::*,
 };
 use oak_core::{GreenNode, OakError, source::Source};
 
-pub(crate) type State<'a, S> = crate::parser::ParserState<'a, DejavuLanguage, S>;
+use super::State;
 
-impl<'config> super::DejavuParser<'config> {
-    pub(crate) fn parse_if<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> Result<&'a GreenNode<'a, DejavuLanguage>, OakError> {
+impl super::DejavuParser {
+    pub(crate) fn parse_if<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> Result<&'a GreenNode<'a, crate::DejavuLanguage>, OakError> {
         let cp = state.checkpoint();
         state.expect(Keyword(DejavuKeywords::If))?;
         self.skip_trivia(state);
@@ -19,10 +22,10 @@ impl<'config> super::DejavuParser<'config> {
             self.skip_trivia(state);
             state.expect(Eq)?;
             self.skip_trivia(state);
-            self.parse_expression_internal(state, 8);
+            let _ = self.parse_expression_internal(state, 8);
         }
         else {
-            self.parse_expression_internal(state, 8);
+            let _ = self.parse_expression_internal(state, 8);
             self.skip_trivia(state);
             if state.at(Keyword(DejavuKeywords::Is)) {
                 let cp_is = state.checkpoint();
@@ -49,16 +52,16 @@ impl<'config> super::DejavuParser<'config> {
         Ok(state.finish_at(cp, IfExpression))
     }
 
-    pub(crate) fn parse_match<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> Result<&'a GreenNode<'a, DejavuLanguage>, OakError> {
+    pub(crate) fn parse_match<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> Result<&'a GreenNode<'a, crate::DejavuLanguage>, OakError> {
         let cp = state.checkpoint();
         state.expect(Keyword(DejavuKeywords::Match))?;
         self.skip_trivia(state);
-        self.parse_expression_internal(state, 8);
+        let _ = self.parse_expression_internal(state, 8);
         self.skip_trivia(state);
 
         state.expect(LeftBrace)?;
         self.skip_trivia(state);
-        while state.not_at_end() && !state.at(RightBrace) && !state.at(Eof) {
+        while state.not_at_end() && !state.at(RightBrace) && !state.at(DejavuTokenType::Eof) {
             self.parse_match_arm(state)?;
             self.skip_trivia(state);
         }
@@ -66,7 +69,7 @@ impl<'config> super::DejavuParser<'config> {
         Ok(state.finish_at(cp, MatchExpression))
     }
 
-    pub(crate) fn parse_match_arm<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> Result<&'a GreenNode<'a, DejavuLanguage>, OakError> {
+    pub(crate) fn parse_match_arm<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> Result<&'a GreenNode<'a, crate::DejavuLanguage>, OakError> {
         let cp = state.checkpoint();
 
         if state.at(Keyword(DejavuKeywords::Case)) {
@@ -82,7 +85,7 @@ impl<'config> super::DejavuParser<'config> {
         else if state.at(Keyword(DejavuKeywords::When)) {
             state.bump();
             self.skip_trivia(state);
-            self.parse_expression_internal(state, 10);
+            let _ = self.parse_expression_internal(state, 10);
         }
         else if state.at(Keyword(DejavuKeywords::Else)) {
             state.bump();
@@ -95,14 +98,14 @@ impl<'config> super::DejavuParser<'config> {
         if state.at(Keyword(DejavuKeywords::When)) {
             state.bump();
             self.skip_trivia(state);
-            self.parse_expression_internal(state, 10);
+            let _ = self.parse_expression_internal(state, 10);
             self.skip_trivia(state);
         }
 
         if state.at(Arrow) || state.at(Colon) {
             state.bump();
             self.skip_trivia(state);
-            self.parse_expression_internal(state, 0);
+            let _ = self.parse_expression_internal(state, 0);
         }
         else if state.at(LeftBrace) {
             self.parse_block_expr_node(state)?;
@@ -117,7 +120,7 @@ impl<'config> super::DejavuParser<'config> {
         Ok(state.finish_at(cp, MatchArm))
     }
 
-    pub(crate) fn parse_pattern<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> Result<&'a GreenNode<'a, DejavuLanguage>, OakError> {
+    pub(crate) fn parse_pattern<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> Result<&'a GreenNode<'a, crate::DejavuLanguage>, OakError> {
         let cp = state.checkpoint();
         if state.at(Keyword(DejavuKeywords::Is)) {
             state.bump();
@@ -133,7 +136,7 @@ impl<'config> super::DejavuParser<'config> {
             if state.at(LeftBrace) {
                 state.bump();
                 self.skip_trivia(state);
-                while state.not_at_end() && !state.at(RightBrace) {
+                while state.not_at_end() && !state.at(RightBrace) && !state.at(DejavuTokenType::Eof) {
                     state.expect(Identifier)?;
                     self.skip_trivia(state);
                     if state.at(Eq) {
@@ -162,42 +165,40 @@ impl<'config> super::DejavuParser<'config> {
         Ok(state.finish_at(cp, Pattern))
     }
 
-    pub(crate) fn parse_loop<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> Result<&'a GreenNode<'a, DejavuLanguage>, OakError> {
+    pub(crate) fn parse_loop<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> Result<&'a GreenNode<'a, crate::DejavuLanguage>, OakError> {
         let cp = state.checkpoint();
         let is_while = state.at(Keyword(DejavuKeywords::While));
         let is_for = state.at(Keyword(DejavuKeywords::For));
         let is_loop = state.at(Keyword(DejavuKeywords::Loop));
-        state.bump(); // while, for or loop
+        state.bump();
         self.skip_trivia(state);
 
         if is_while && state.at(Keyword(DejavuKeywords::Let)) {
-            state.bump(); // let
+            state.bump();
             self.skip_trivia(state);
             self.parse_pattern(state)?;
             self.skip_trivia(state);
             state.expect(Eq)?;
             self.skip_trivia(state);
-            self.parse_expression_internal(state, 8);
+            let _ = self.parse_expression_internal(state, 8);
         }
         else if is_for {
             self.parse_pattern(state)?;
             self.skip_trivia(state);
             state.expect(Keyword(DejavuKeywords::In))?;
             self.skip_trivia(state);
-            self.parse_expression_internal(state, 8);
+            let _ = self.parse_expression_internal(state, 8);
         }
         else if is_loop {
-            // Check if it's "loop pattern in expression"
             let pattern_cp = state.checkpoint();
             if self.parse_pattern(state).is_ok() {
                 self.skip_trivia(state);
                 if state.at(Keyword(DejavuKeywords::In)) {
-                    state.bump(); // in
+                    state.bump();
                     self.skip_trivia(state);
-                    self.parse_expression_internal(state, 8);
+                    let _ = self.parse_expression_internal(state, 8);
                 }
                 else {
-                    // Not a for-style loop, backtrack pattern if possible
                     state.restore(pattern_cp);
                 }
             }
@@ -206,7 +207,7 @@ impl<'config> super::DejavuParser<'config> {
             }
         }
         else {
-            self.parse_expression_internal(state, 8);
+            let _ = self.parse_expression_internal(state, 8);
         }
 
         self.skip_trivia(state);
@@ -214,17 +215,17 @@ impl<'config> super::DejavuParser<'config> {
         Ok(state.finish_at(cp, LoopExpression))
     }
 
-    pub(crate) fn parse_return<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> Result<&'a GreenNode<'a, DejavuLanguage>, OakError> {
+    pub(crate) fn parse_return<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> Result<&'a GreenNode<'a, crate::DejavuLanguage>, OakError> {
         let cp = state.checkpoint();
         state.expect(Keyword(DejavuKeywords::Return))?;
         self.skip_trivia(state);
         if state.not_at_end() && !state.at(Semicolon) && !state.at(RightBrace) {
-            self.parse_expression_internal(state, 0);
+            let _ = self.parse_expression_internal(state, 0);
         }
         Ok(state.finish_at(cp, ReturnExpression))
     }
 
-    pub(crate) fn parse_break<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> Result<&'a GreenNode<'a, DejavuLanguage>, OakError> {
+    pub(crate) fn parse_break<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> Result<&'a GreenNode<'a, crate::DejavuLanguage>, OakError> {
         let cp = state.checkpoint();
         state.expect(Keyword(DejavuKeywords::Break))?;
         self.skip_trivia(state);
@@ -234,13 +235,13 @@ impl<'config> super::DejavuParser<'config> {
             self.skip_trivia(state);
         }
         if state.not_at_end() && !state.at(Semicolon) && !state.at(RightBrace) {
-            self.parse_expression_internal(state, 0);
+            let _ = self.parse_expression_internal(state, 0);
         }
 
         Ok(state.finish_at(cp, BreakExpression))
     }
 
-    pub(crate) fn parse_continue<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> Result<&'a GreenNode<'a, DejavuLanguage>, OakError> {
+    pub(crate) fn parse_continue<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> Result<&'a GreenNode<'a, crate::DejavuLanguage>, OakError> {
         let cp = state.checkpoint();
         state.expect(Keyword(DejavuKeywords::Continue))?;
         self.skip_trivia(state);
@@ -252,7 +253,7 @@ impl<'config> super::DejavuParser<'config> {
         Ok(state.finish_at(cp, ContinueExpression))
     }
 
-    pub(crate) fn parse_yield<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> Result<&'a GreenNode<'a, DejavuLanguage>, OakError> {
+    pub(crate) fn parse_yield<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> Result<&'a GreenNode<'a, crate::DejavuLanguage>, OakError> {
         let cp = state.checkpoint();
         state.expect(Keyword(DejavuKeywords::Yield))?;
         self.skip_trivia(state);
@@ -262,36 +263,34 @@ impl<'config> super::DejavuParser<'config> {
         }
 
         if state.not_at_end() && !state.at(Semicolon) && !state.at(RightBrace) {
-            self.parse_expression_internal(state, 0);
+            let _ = self.parse_expression_internal(state, 0);
         }
         Ok(state.finish_at(cp, YieldExpression))
     }
 
-    pub(crate) fn parse_raise<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> Result<&'a GreenNode<'a, DejavuLanguage>, OakError> {
+    pub(crate) fn parse_raise<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> Result<&'a GreenNode<'a, crate::DejavuLanguage>, OakError> {
         let cp = state.checkpoint();
         state.expect(Keyword(DejavuKeywords::Raise))?;
         self.skip_trivia(state);
-        self.parse_expression_internal(state, 0);
+        let _ = self.parse_expression_internal(state, 0)?;
         Ok(state.finish_at(cp, RaiseExpression))
     }
 
-    pub(crate) fn parse_resume<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> Result<&'a GreenNode<'a, DejavuLanguage>, OakError> {
+    pub(crate) fn parse_resume<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> Result<&'a GreenNode<'a, crate::DejavuLanguage>, OakError> {
         let cp = state.checkpoint();
         state.expect(Keyword(DejavuKeywords::Resume))?;
         self.skip_trivia(state);
         if state.not_at_end() && !state.at(Semicolon) && !state.at(RightBrace) {
-            self.parse_expression_internal(state, 0);
+            let _ = self.parse_expression_internal(state, 0);
         }
         Ok(state.finish_at(cp, ResumeExpression))
     }
 
-    pub(crate) fn parse_catch<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> Result<&'a GreenNode<'a, DejavuLanguage>, OakError> {
+    pub(crate) fn parse_catch<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> Result<&'a GreenNode<'a, crate::DejavuLanguage>, OakError> {
         let cp = state.checkpoint();
         state.expect(Keyword(DejavuKeywords::Try))?;
         self.skip_trivia(state);
 
-        // try Result<T, E> { ... }
-        // check if we have a type inline expression before the block
         if state.at(Identifier) {
             let cp_type = state.checkpoint();
             self.parse_name_path(state)?;
@@ -302,7 +301,6 @@ impl<'config> super::DejavuParser<'config> {
             self.skip_trivia(state);
         }
 
-        // try must be followed by a block
         self.parse_block_expr_node(state)?;
         self.skip_trivia(state);
 
@@ -316,7 +314,7 @@ impl<'config> super::DejavuParser<'config> {
                 self.skip_trivia(state);
                 state.expect(LeftBrace)?;
                 self.skip_trivia(state);
-                while state.not_at_end() && !state.at(RightBrace) && !state.at(Eof) {
+                while state.not_at_end() && !state.at(RightBrace) && !state.at(DejavuTokenType::Eof) {
                     self.parse_match_arm(state)?;
                     self.skip_trivia(state);
                 }
@@ -331,7 +329,7 @@ impl<'config> super::DejavuParser<'config> {
         Ok(state.finish_at(cp, CatchExpression))
     }
 
-    pub(crate) fn parse_block_expr_node<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> Result<&'a GreenNode<'a, DejavuLanguage>, OakError> {
+    pub(crate) fn parse_block_expr_node<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> Result<&'a GreenNode<'a, crate::DejavuLanguage>, OakError> {
         let cp = state.checkpoint();
         if !state.at(LeftBrace) {
             return Err(OakError::custom_error(format!("expected token 'LeftBrace' at {:?}", state.current().map(|t| t.span.start))));
@@ -340,7 +338,7 @@ impl<'config> super::DejavuParser<'config> {
         self.skip_trivia(state);
 
         while let Some(t) = state.current() {
-            if t.kind == RightBrace || t.kind == Eof {
+            if t.kind == RightBrace || t.kind == DejavuTokenType::Eof {
                 break;
             }
             let start_index = state.tokens.index();
@@ -363,7 +361,21 @@ impl<'config> super::DejavuParser<'config> {
         Ok(state.finish_at(cp, BlockExpression))
     }
 
-    pub(crate) fn parse_statement<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> Result<&'a GreenNode<'a, DejavuLanguage>, OakError> {
+    pub(crate) fn peek_after_attributes<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> Option<DejavuTokenType> {
+        let cp = state.checkpoint();
+        while state.at(At) || state.at(Bolt) {
+            if self.parse_attribute(state).is_err() {
+                state.restore(cp);
+                return None;
+            }
+            self.skip_trivia(state);
+        }
+        let kind = state.current().map(|t| t.kind);
+        state.restore(cp);
+        kind
+    }
+
+    pub(crate) fn parse_statement<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> Result<&'a GreenNode<'a, crate::DejavuLanguage>, OakError> {
         self.skip_trivia(state);
         if let Some(t) = state.current() {
             match t.kind {
@@ -404,7 +416,7 @@ impl<'config> super::DejavuParser<'config> {
         }
     }
 
-    pub(crate) fn parse_let_statement<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> Result<&'a GreenNode<'a, DejavuLanguage>, OakError> {
+    pub(crate) fn parse_let_statement<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> Result<&'a GreenNode<'a, crate::DejavuLanguage>, OakError> {
         let cp = state.checkpoint();
 
         while state.at(At) || state.at(Bolt) {
@@ -428,7 +440,7 @@ impl<'config> super::DejavuParser<'config> {
         if state.at(Eq) {
             state.bump();
             self.skip_trivia(state);
-            self.parse_expression_internal(state, 0);
+            let _ = self.parse_expression_internal(state, 0);
             self.skip_trivia(state);
         }
 
@@ -439,17 +451,17 @@ impl<'config> super::DejavuParser<'config> {
         Ok(state.finish_at(cp, LetStatement))
     }
 
-    pub(crate) fn parse_expression_statement<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> Result<&'a GreenNode<'a, DejavuLanguage>, OakError> {
+    pub(crate) fn parse_expression_statement<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> Result<&'a GreenNode<'a, crate::DejavuLanguage>, OakError> {
         let cp = state.checkpoint();
-        self.parse_expression_internal(state, 0);
+        let _ = self.parse_expression_internal(state, 0);
         self.skip_trivia(state);
         if state.at(Semicolon) {
             state.bump();
         }
-        Ok(state.finish_at(cp, ExpressionStatement))
+        Ok(state.finish_at(cp, ExprStatement))
     }
 
-    pub(crate) fn parse_using_statement<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> Result<&'a GreenNode<'a, DejavuLanguage>, OakError> {
+    pub(crate) fn parse_using_statement<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> Result<&'a GreenNode<'a, crate::DejavuLanguage>, OakError> {
         let cp = state.checkpoint();
 
         state.expect(Keyword(DejavuKeywords::Using))?;
@@ -463,7 +475,7 @@ impl<'config> super::DejavuParser<'config> {
         Ok(state.finish_at(cp, UsingStatement))
     }
 
-    pub(crate) fn parse_primary<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> Result<&'a GreenNode<'a, DejavuLanguage>, OakError> {
+    pub(crate) fn parse_primary<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> Result<&'a GreenNode<'a, crate::DejavuLanguage>, OakError> {
         let cp = state.checkpoint();
         let t = state.current().ok_or_else(|| OakError::custom_error("Unexpected end of file"))?;
 
@@ -494,7 +506,7 @@ impl<'config> super::DejavuParser<'config> {
             StringLiteral | CharLiteral => self.parse_string_literal(state),
             LeftParen => {
                 state.bump();
-                self.parse_expression_internal(state, 0);
+                let _ = self.parse_expression_internal(state, 0);
                 state.expect(RightParen)?;
                 Ok(state.finish_at(cp, ParenthesizedExpression))
             }
@@ -502,7 +514,7 @@ impl<'config> super::DejavuParser<'config> {
                 state.bump();
                 self.skip_trivia(state);
                 while state.not_at_end() && !state.at(RightBracket) {
-                    self.parse_expression_internal(state, 0);
+                    let _ = self.parse_expression_internal(state, 0);
                     self.skip_trivia(state);
                     if state.at(Comma) {
                         state.bump();
@@ -543,7 +555,6 @@ impl<'config> super::DejavuParser<'config> {
                 state.bump();
                 state.expect(Identifier)?;
                 self.skip_trivia(state);
-                // After @assert or ↯assert, we expect a parameter list which makes it a CallExpression
                 if state.at(LeftParen) {
                     let cp_call = cp;
                     state.finish_at(cp, IdentifierExpression);
@@ -551,7 +562,7 @@ impl<'config> super::DejavuParser<'config> {
                     state.expect(LeftParen)?;
                     self.skip_trivia(state);
                     while state.not_at_end() && !state.at(RightParen) {
-                        self.parse_expression_internal(state, 0);
+                        let _ = self.parse_expression_internal(state, 0);
                         self.skip_trivia(state);
                         if state.at(Comma) {
                             state.bump();
@@ -576,12 +587,10 @@ impl<'config> super::DejavuParser<'config> {
         }
     }
 
-    pub(crate) fn parse_string_literal<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> Result<&'a GreenNode<'a, DejavuLanguage>, OakError> {
+    pub(crate) fn parse_string_literal<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> Result<&'a GreenNode<'a, crate::DejavuLanguage>, OakError> {
         let cp = state.checkpoint();
-        state.bump(); // consume StringLiteral or CharLiteral
+        state.bump();
 
-        // Now handle interleaved StringPart, InterpolationStart, InterpolationEnd
-        // They appear after StringLiteral because of lexer's add_token order.
         while let Some(t) = state.current() {
             match t.kind {
                 StringPart => {
@@ -605,7 +614,7 @@ impl<'config> super::DejavuParser<'config> {
         Ok(state.finish_at(cp, LiteralExpression))
     }
 
-    pub(crate) fn parse_name_path<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> Result<&'a GreenNode<'a, DejavuLanguage>, OakError> {
+    pub(crate) fn parse_name_path<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> Result<&'a GreenNode<'a, crate::DejavuLanguage>, OakError> {
         let cp = state.checkpoint();
 
         if state.at(Identifier) || matches!(state.current().map(|t| t.kind), Some(Keyword(_))) {

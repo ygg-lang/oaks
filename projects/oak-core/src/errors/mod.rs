@@ -1,7 +1,11 @@
 use crate::source::SourceId;
 
+/// Result type for parsing operations.
 pub type ParseResult<T> = Result<T, OakError>;
 
+/// Diagnostic information for parsing operations.
+///
+/// Contains both the primary result and any non-fatal errors or warnings.
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 #[cfg_attr(feature = "serde", serde(bound(serialize = "T: serde::Serialize", deserialize = "T: serde::Deserialize<'de>")))]
 pub struct OakDiagnostics<T> {
@@ -332,7 +336,117 @@ impl OakErrorKind {
 
 impl std::fmt::Display for OakErrorKind {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{:?}", self)
+        match self {
+            OakErrorKind::IoError { error, source_id } => {
+                if let Some(id) = source_id {
+                    write!(f, "I/O error in {}: {}", id, error)
+                }
+                else {
+                    write!(f, "I/O error: {}", error)
+                }
+            }
+            OakErrorKind::SyntaxError { message, offset, source_id } => {
+                if let Some(id) = source_id {
+                    write!(f, "Syntax error in {} at offset {}: {}", id, offset, message)
+                }
+                else {
+                    write!(f, "Syntax error at offset {}: {}", offset, message)
+                }
+            }
+            OakErrorKind::UnexpectedCharacter { character, offset, source_id } => {
+                if let Some(id) = source_id {
+                    write!(f, "Unexpected character '{}' in {} at offset {}", character, id, offset)
+                }
+                else {
+                    write!(f, "Unexpected character '{}' at offset {}", character, offset)
+                }
+            }
+            OakErrorKind::UnexpectedToken { token, offset, source_id } => {
+                if let Some(id) = source_id {
+                    write!(f, "Unexpected token '{}' in {} at offset {}", token, id, offset)
+                }
+                else {
+                    write!(f, "Unexpected token '{}' at offset {}", token, offset)
+                }
+            }
+            OakErrorKind::UnexpectedEof { offset, source_id } => {
+                if let Some(id) = source_id {
+                    write!(f, "Unexpected end of file in {} at offset {}", id, offset)
+                }
+                else {
+                    write!(f, "Unexpected end of file at offset {}", offset)
+                }
+            }
+            OakErrorKind::ExpectedToken { expected, offset, source_id } => {
+                if let Some(id) = source_id {
+                    write!(f, "Expected token '{}' in {} at offset {}", expected, id, offset)
+                }
+                else {
+                    write!(f, "Expected token '{}' at offset {}", expected, offset)
+                }
+            }
+            OakErrorKind::ExpectedName { name_kind, offset, source_id } => {
+                if let Some(id) = source_id {
+                    write!(f, "Expected {} in {} at offset {}", name_kind, id, offset)
+                }
+                else {
+                    write!(f, "Expected {} at offset {}", name_kind, offset)
+                }
+            }
+            OakErrorKind::TrailingCommaNotAllowed { offset, source_id } => {
+                if let Some(id) = source_id {
+                    write!(f, "Trailing comma not allowed in {} at offset {}", id, offset)
+                }
+                else {
+                    write!(f, "Trailing comma not allowed at offset {}", offset)
+                }
+            }
+            OakErrorKind::CustomError { message } => {
+                write!(f, "Custom error: {}", message)
+            }
+            OakErrorKind::InvalidTheme { message } => {
+                write!(f, "Invalid theme: {}", message)
+            }
+            OakErrorKind::UnsupportedFormat { format } => {
+                write!(f, "Unsupported format: {}", format)
+            }
+            OakErrorKind::ColorParseError { color } => {
+                write!(f, "Invalid color: {}", color)
+            }
+            OakErrorKind::FormatError { message } => {
+                write!(f, "Format error: {}", message)
+            }
+            OakErrorKind::SemanticError { message } => {
+                write!(f, "Semantic error: {}", message)
+            }
+            OakErrorKind::ProtocolError { message } => {
+                write!(f, "Protocol error: {}", message)
+            }
+            OakErrorKind::TestFailure { path, expected, actual } => {
+                write!(f, "Test failed for {}: expected '{}', got '{}'", path.display(), expected, actual)
+            }
+            OakErrorKind::TestRegenerated { path } => {
+                write!(f, "Test regenerated for {}", path.display())
+            }
+            OakErrorKind::SerdeError { message } => {
+                write!(f, "Serialization error: {}", message)
+            }
+            OakErrorKind::DeserializeError { message } => {
+                write!(f, "Deserialization error: {}", message)
+            }
+            OakErrorKind::XmlError { message } => {
+                write!(f, "XML error: {}", message)
+            }
+            OakErrorKind::ZipError { message } => {
+                write!(f, "ZIP error: {}", message)
+            }
+            OakErrorKind::ParseError { message } => {
+                write!(f, "Parse error: {}", message)
+            }
+            OakErrorKind::InternalError { message } => {
+                write!(f, "Internal error: {}", message)
+            }
+        }
     }
 }
 

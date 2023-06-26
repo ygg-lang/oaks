@@ -2,6 +2,7 @@
     "private": true,
     "type": "module",
     "scripts": {
+        "check:struct": "npx ts-node scripts/check-structures.ts",
         "check": "cargo cry",
         "regenerate": "$env:REGENERATE_TESTS=1; cargo test --release --all-features",
         "test": "cargo test --release",

@@ -344,6 +344,7 @@ impl GsglTokenType {
 }
 
 impl GsglTokenType {
+    /// Returns the string representation of this token type.
     pub fn as_str(&self) -> &'static str {
         match self {
             Self::Root => "ROOT",

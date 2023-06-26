@@ -111,21 +111,81 @@ impl<'config> CBuilder<'config> {
     fn build_compound_statement(&self, node: RedNode<CLanguage>, source: &SourceText) -> Result<CompoundStatement, OakError> {
         let mut block_items = Vec::new();
 
+        self.collect_block_items(node, source, &mut block_items)?;
+
+        Ok(CompoundStatement { block_items, span: node.span() })
+    }
+
+    fn collect_block_items(&self, node: RedNode<CLanguage>, source: &SourceText, out: &mut Vec<BlockItem>) -> Result<(), OakError> {
         for child in node.children() {
             if let RedTree::Node(n) = child {
                 match n.green.kind {
-                    CElementType::ReturnStatement => block_items.push(BlockItem::Statement(Statement::Jump(self.build_return_statement(n, source)?))),
+                    CElementType::ReturnStatement => out.push(BlockItem::Statement(Statement::Jump(self.build_return_statement(n, source)?))),
+                    CElementType::IfStatement => out.push(BlockItem::Statement(Statement::Selection(self.build_if_statement(n, source)?))),
+                    CElementType::CompoundStatement => out.push(BlockItem::Statement(Statement::Compound(self.build_compound_statement(n, source)?))),
                     CElementType::ExpressionStatement => {
                         if let Some(expr) = self.build_expression(n, source)? {
-                            block_items.push(BlockItem::Statement(Statement::Expression(ExpressionStatement { expression: Some(expr), span: n.span() })))
+                            out.push(BlockItem::Statement(Statement::Expression(ExpressionStatement { expression: Some(expr), span: n.span() })))
                         }
                     }
-                    _ => {}
+                    _ => self.collect_block_items(n, source, out)?,
                 }
             }
         }
+        Ok(())
+    }
 
-        Ok(CompoundStatement { block_items, span: node.span() })
+    fn build_if_statement(&self, node: RedNode<CLanguage>, source: &SourceText) -> Result<SelectionStatement, OakError> {
+        let mut condition = None;
+        let mut then_statement = None;
+        let mut else_statement = None;
+
+        fn scan<'config>(builder: &CBuilder<'config>, node: &RedNode<CLanguage>, source: &SourceText, condition: &mut Option<Expression>, then_statement: &mut Option<Statement>, else_statement: &mut Option<Statement>) -> Result<(), OakError> {
+            for child in node.children() {
+                if let RedTree::Node(n) = child {
+                    match n.green.kind {
+                        CElementType::ExpressionStatement => {
+                            if condition.is_none() {
+                                *condition = builder.build_expression(n.clone(), source)?;
+                            }
+                        }
+                        CElementType::CompoundStatement => {
+                            let stmt = Statement::Compound(builder.build_compound_statement(n.clone(), source)?);
+                            if then_statement.is_none() {
+                                *then_statement = Some(stmt);
+                            }
+                            else if else_statement.is_none() {
+                                *else_statement = Some(stmt);
+                            }
+                        }
+                        CElementType::IfStatement => {
+                            let stmt = Statement::Selection(builder.build_if_statement(n.clone(), source)?);
+                            if then_statement.is_none() {
+                                *then_statement = Some(stmt);
+                            }
+                            else if else_statement.is_none() {
+                                *else_statement = Some(stmt);
+                            }
+                        }
+                        _ => {}
+                    }
+                    if condition.is_none() {
+                        *condition = builder.build_expression(n.clone(), source)?;
+                    }
+                    scan(builder, &n, source, condition, then_statement, else_statement)?;
+                }
+            }
+            Ok(())
+        }
+
+        scan(self, &node, source, &mut condition, &mut then_statement, &mut else_statement)?;
+
+        Ok(SelectionStatement::If {
+            condition: condition.unwrap_or(Expression { kind: Box::new(ExpressionKind::Constant(Constant::Integer(0, node.span()), node.span())), span: node.span() }),
+            then_statement: Box::new(then_statement.unwrap_or_else(|| Statement::Compound(CompoundStatement { block_items: vec![], span: node.span() }))),
+            else_statement: else_statement.map(Box::new),
+            span: node.span(),
+        })
     }
 
     fn build_return_statement(&self, node: RedNode<CLanguage>, source: &SourceText) -> Result<JumpStatement, OakError> {
@@ -133,7 +193,7 @@ impl<'config> CBuilder<'config> {
         for child in node.children() {
             match child {
                 RedTree::Node(n) => {
-                    if n.green.kind == CElementType::ExpressionStatement {
+                    if expression.is_none() {
                         expression = self.build_expression(n, source)?
                     }
                 }

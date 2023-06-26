@@ -3,11 +3,6 @@
 #![doc = include_str!("readme.md")]
 #![doc(html_logo_url = "https://raw.githubusercontent.com/ygg-lang/oaks/refs/heads/dev/documents/logo.svg")]
 #![doc(html_favicon_url = "https://raw.githubusercontent.com/ygg-lang/oaks/refs/heads/dev/documents/logo.svg")]
-//! The main facade for the Oak language framework.
-//!
-//! This crate re-exports the most commonly used types and traits from the
-//! various sub-crates in the Oak ecosystem, providing a single entry point
-//! for building language services and tools.
 
 /// Re-export of the core parsing and tree structures.
 pub use oak_core::*;

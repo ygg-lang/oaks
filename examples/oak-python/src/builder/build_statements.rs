@@ -390,6 +390,10 @@ impl<'config> super::PythonBuilder<'config> {
             match child {
                 GreenTree::Node(node) => {
                     if !node.kind.is_trivia() {
+                        if node.kind == PythonElementType::Error {
+                            pending_decorators.clear();
+                            continue;
+                        }
                         if node.kind == PythonElementType::Decorator {
                             // Collect decorator expression
                             let mut decorator_offset = current_offset;

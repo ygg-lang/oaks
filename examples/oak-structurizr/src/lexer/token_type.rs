@@ -11,7 +11,6 @@ pub enum StructurizrTokenType {
     Newline,
     /// Comment lines or blocks.
     Comment,
-
     /// The 'workspace' keyword.
     Workspace,
     /// The 'model' keyword.
@@ -32,7 +31,6 @@ pub enum StructurizrTokenType {
     LeftBrace,
     /// Right brace '}'.
     RightBrace,
-
     /// Error or unknown token.
     Error,
 }

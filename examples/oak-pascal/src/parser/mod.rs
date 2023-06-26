@@ -13,7 +13,7 @@ pub struct PascalParser;
 
 impl PascalParser {
     /// Creates a new Pascal parser.
-    pub fn new(_config: &PascalLanguage) -> Self {
+    pub fn new(config: &PascalLanguage) -> Self {
         Self
     }
 }

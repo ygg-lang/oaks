@@ -13,6 +13,7 @@ pub struct DartBuilder<'config> {
 }
 
 impl<'config> DartBuilder<'config> {
+    /// Creates a new DartBuilder with the given language configuration.
     pub fn new(config: &'config DartLanguage) -> Self {
         Self { config }
     }

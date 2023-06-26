@@ -6,6 +6,7 @@ use oak_core::{Lexer, LexerCache, LexerState, OakError, lexer::LexOutput, source
 
 pub(crate) type State<'a, S> = LexerState<'a, S, FortranLanguage>;
 
+/// Lexer for Fortran source code.
 #[derive(Clone)]
 pub struct FortranLexer<'config> {
     config: &'config FortranLanguage,
@@ -23,6 +24,7 @@ impl<'config> Lexer<FortranLanguage> for FortranLexer<'config> {
 }
 
 impl<'config> FortranLexer<'config> {
+    /// Creates a new FortranLexer with the given language configuration.
     pub fn new(config: &'config FortranLanguage) -> Self {
         Self { config }
     }

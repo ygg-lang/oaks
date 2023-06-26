@@ -66,6 +66,7 @@ impl<'config> KotlinParser<'config> {
         state.expect(Identifier).ok();
         self.skip_trivia(state);
         if state.eat(LParen) {
+            let mut last_pos = state.current_offset();
             while state.not_at_end() && !state.at(RParen) {
                 let p_cp = state.checkpoint();
                 self.skip_trivia(state);
@@ -81,6 +82,11 @@ impl<'config> KotlinParser<'config> {
                 state.finish_at(p_cp, crate::parser::element_type::KotlinElementType::Parameter);
                 self.skip_trivia(state);
                 state.eat(Comma);
+                let current_pos = state.current_offset();
+                if current_pos == last_pos {
+                    state.bump();
+                }
+                last_pos = current_pos;
             }
             self.skip_trivia(state);
             state.expect(RParen).ok();
@@ -101,6 +107,7 @@ impl<'config> KotlinParser<'config> {
         state.expect(Identifier).ok();
         self.skip_trivia(state);
         if state.eat(LParen) {
+            let mut last_pos = state.current_offset();
             while state.not_at_end() && !state.at(RParen) {
                 let p_cp = state.checkpoint();
                 self.skip_trivia(state);
@@ -113,6 +120,11 @@ impl<'config> KotlinParser<'config> {
                 state.finish_at(p_cp, crate::parser::element_type::KotlinElementType::Parameter);
                 self.skip_trivia(state);
                 state.eat(Comma);
+                let current_pos = state.current_offset();
+                if current_pos == last_pos {
+                    state.bump();
+                }
+                last_pos = current_pos;
             }
             self.skip_trivia(state);
             state.expect(RParen).ok();
@@ -205,12 +217,18 @@ impl<'config> KotlinParser<'config> {
         use crate::lexer::token_type::KotlinTokenType::*;
         let cp = state.checkpoint();
         state.expect(LBrace).ok();
+        let mut last_pos = state.current_offset();
         while state.not_at_end() && !state.at(RBrace) {
             self.skip_trivia(state);
             if state.at(RBrace) {
                 break;
             }
             self.parse_statement(state)?;
+            let current_pos = state.current_offset();
+            if current_pos == last_pos {
+                state.bump();
+            }
+            last_pos = current_pos;
         }
         self.skip_trivia(state);
         state.expect(RBrace).ok();
@@ -299,6 +317,7 @@ impl<'config> Pratt<KotlinLanguage> for KotlinParser<'config> {
                 let cp = state.checkpoint();
                 state.push_child(left);
                 state.bump();
+                let mut last_pos = state.current_offset();
                 while state.not_at_end() && !state.at(RParen) {
                     self.skip_trivia(state);
                     PrattParser::parse(state, 0, self);
@@ -306,6 +325,11 @@ impl<'config> Pratt<KotlinLanguage> for KotlinParser<'config> {
                     if !state.eat(Comma) {
                         break;
                     }
+                    let current_pos = state.current_offset();
+                    if current_pos == last_pos {
+                        state.bump();
+                    }
+                    last_pos = current_pos;
                 }
                 self.skip_trivia(state);
                 state.expect(RParen).ok();
@@ -338,12 +362,18 @@ impl<'config> Parser<KotlinLanguage> for KotlinParser<'config> {
         let lexer = KotlinLexer::new(&self.config);
         parse_with_lexer(&lexer, text, edits, cache, |state| {
             let checkpoint = state.checkpoint();
+            let mut last_pos = state.current_offset();
 
             while state.not_at_end() {
                 self.skip_trivia(state);
                 if state.not_at_end() {
                     self.parse_statement(state).ok();
                 }
+                let current_pos = state.current_offset();
+                if current_pos == last_pos {
+                    state.bump();
+                }
+                last_pos = current_pos;
             }
 
             Ok(state.finish_at(checkpoint, crate::parser::element_type::KotlinElementType::SourceFile))

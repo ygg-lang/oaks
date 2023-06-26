@@ -1,3 +1,7 @@
+/// Element type definitions for Raku AST nodes.
+/// This module provides the [`RakuElementType`] enum which identifies different
+/// node kinds in the parsed Abstract Syntax Tree, such as statements, expressions,
+/// declarations, and other syntactic constructs.
 pub mod element_type;
 
 use crate::{

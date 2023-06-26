@@ -1,4 +1,5 @@
 #![doc = include_str!("readme.md")]
+/// Token type definitions for Stylus lexer.
 pub mod token_type;
 
 use crate::{language::StylusLanguage, lexer::token_type::StylusTokenType};

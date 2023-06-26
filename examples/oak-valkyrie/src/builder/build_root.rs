@@ -1,14 +1,15 @@
 use crate::{
-    ValkyrieLanguage, ValkyrieParser,
+    ValkyrieLanguage,
     ast::{Item, ValkyrieRoot},
-    lexer::token_type::ValkyrieSyntaxKind,
+    builder::ValkyrieBuilder,
+    lexer::token_type::ValkyrieTokenType,
+    parser::element_type::ValkyrieElementType,
 };
-use oak_core::{GreenNode, OakError, RedNode, RedTree, source::SourceText};
+use oak_core::{GreenNode, OakError, RedNode, RedTree, Source};
 
-impl<'config> ValkyrieParser<'config> {
+impl<'config> ValkyrieBuilder<'config> {
     /// Builds a strongly-typed AST from a green tree.
-    pub fn build_root(&self, green_tree: &GreenNode<ValkyrieLanguage>, source: &SourceText) -> Result<ValkyrieRoot, OakError> {
-        println!("Building root from green tree: {:?}", green_tree.kind);
+    pub fn build_root<S: Source + ?Sized>(&self, green_tree: &GreenNode<ValkyrieLanguage>, source: &S) -> Result<ValkyrieRoot, OakError> {
         let red_root = RedNode::<ValkyrieLanguage>::new(green_tree, 0);
         let mut items = Vec::new();
         for child in red_root.children() {
@@ -16,15 +17,13 @@ impl<'config> ValkyrieParser<'config> {
                 RedTree::Node(n) => match self.build_item(n, source) {
                     Ok(item) => items.push(item),
                     Err(err) => {
-                        println!("Failed to build item in root: {:?} at {:?}: {:?}", n.green.kind, n.span(), err);
                         return Err(err);
                     }
                 },
                 RedTree::Leaf(t) => match t.kind {
-                    ValkyrieSyntaxKind::Whitespace | ValkyrieSyntaxKind::Newline | ValkyrieSyntaxKind::LineComment | ValkyrieSyntaxKind::BlockComment => continue,
-                    ValkyrieSyntaxKind::Eof => continue,
+                    ValkyrieTokenType::Whitespace | ValkyrieTokenType::Newline | ValkyrieTokenType::LineComment | ValkyrieTokenType::BlockComment => continue,
+                    ValkyrieTokenType::Eof => continue,
                     _ => {
-                        println!("Unexpected token in root: {:?} at {:?}", t.kind, t.span);
                         return Err(source.syntax_error(format!("Unexpected token in root: {:?}", t.kind), t.span.start));
                     }
                 },
@@ -33,71 +32,70 @@ impl<'config> ValkyrieParser<'config> {
         Ok(ValkyrieRoot { items })
     }
 
-    pub(crate) fn build_item(&self, n: RedNode<ValkyrieLanguage>, source: &SourceText) -> Result<Item, OakError> {
-        use crate::ast::{Expr, Identifier, Statement};
+    pub(crate) fn build_item<S: Source + ?Sized>(&self, n: RedNode<ValkyrieLanguage>, source: &S) -> Result<Item, OakError> {
         match n.green.kind {
-            ValkyrieSyntaxKind::Namespace => {
+            ValkyrieElementType::Namespace => {
                 let ns = self.build_namespace(n, source)?;
                 Ok(Item::Namespace(ns))
             }
-            ValkyrieSyntaxKind::Class => {
+            ValkyrieElementType::Class => {
                 let class = self.build_class(n, source)?;
                 Ok(Item::Class(class))
             }
-            ValkyrieSyntaxKind::Flags => {
+            ValkyrieElementType::Flags => {
                 let flags = self.build_flags(n, source)?;
                 Ok(Item::Flags(flags))
             }
-            ValkyrieSyntaxKind::Enums => {
+            ValkyrieElementType::Enums => {
                 let enums = self.build_enums(n, source)?;
                 Ok(Item::Enums(enums))
             }
-            ValkyrieSyntaxKind::Trait => {
+            ValkyrieElementType::Trait => {
                 let trait_node = self.build_trait(n, source)?;
                 Ok(Item::Trait(trait_node))
             }
-            ValkyrieSyntaxKind::Widget => {
+            ValkyrieElementType::Widget => {
                 let widget = self.build_widget(n, source)?;
                 Ok(Item::Widget(widget))
             }
-            ValkyrieSyntaxKind::UsingStatement => {
+            ValkyrieElementType::Singleton => {
+                let singleton = self.build_singleton(n, source)?;
+                Ok(Item::Singleton(singleton))
+            }
+            ValkyrieElementType::UsingStatement => {
                 let us = self.build_using(n, source)?;
                 Ok(Item::Using(us))
             }
-            ValkyrieSyntaxKind::Micro => {
+            ValkyrieElementType::Micro => {
                 let micro = self.build_micro(n, source)?;
                 Ok(Item::Micro(micro))
             }
-            ValkyrieSyntaxKind::Mezzo => {
+            ValkyrieElementType::Mezzo => {
                 let mezzo = self.build_mezzo(n, source)?;
                 Ok(Item::TypeFunction(mezzo))
             }
-            ValkyrieSyntaxKind::LetStatement => {
+            ValkyrieElementType::LetStatement => {
                 let stmt = self.build_let(n, source)?;
                 Ok(Item::Statement(stmt))
             }
-            ValkyrieSyntaxKind::ExpressionStatement => {
+            ValkyrieElementType::ExprStatement => {
                 let stmt = self.build_expr_stmt(n, source)?;
                 Ok(Item::Statement(stmt))
             }
-            ValkyrieSyntaxKind::Variant => {
-                let variant = self.build_variant(n, source)?;
+            ValkyrieElementType::Variant => {
+                let variant = self.build_variant_decl(n, source)?;
                 Ok(Item::Variant(variant))
             }
-            ValkyrieSyntaxKind::EffectDefinition => {
+            ValkyrieElementType::EffectDefinition => {
                 let effect = self.build_effect(n, source)?;
                 Ok(Item::Effect(effect))
             }
-            ValkyrieSyntaxKind::Attribute => {
-                let attr = self.build_attribute(n, source)?;
-                Ok(Item::Statement(Statement::ExprStmt { annotations: vec![attr], expr: Expr::Ident(Identifier { name: "".to_string(), span: (0..0).into() }), semi: false, span: (0..0).into() }))
-            }
-            ValkyrieSyntaxKind::TemplateText => {
+            ValkyrieElementType::TemplateText => {
                 let span = n.span();
-                let content = source.slice(span.clone()).to_string();
+                let content = source.get_text_in(span.clone()).to_string();
                 Ok(Item::TemplateText { content, span })
             }
-            ValkyrieSyntaxKind::TemplateControl => {
+            ValkyrieElementType::TemplateControl => {
                 let span = n.span();
                 let mut items = Vec::new();
                 for child in n.children() {
@@ -107,7 +105,7 @@ impl<'config> ValkyrieParser<'config> {
                 }
                 Ok(Item::TemplateControl { items, span })
             }
-            ValkyrieSyntaxKind::Interpolation => {
+            ValkyrieElementType::Interpolation => {
                 let span = n.span();
                 let mut expr = None;
                 for child in n.children() {
@@ -115,7 +113,7 @@ impl<'config> ValkyrieParser<'config> {
                         expr = Some(self.build_expr(child_node, source)?);
                     }
                 }
-                let expr = expr.ok_or_else(|| source.syntax_error("Empty interpolation", span.start))?;
+                let expr = expr.ok_or_else(|| source.syntax_error("Empty interpolation".to_string(), span.start))?;
                 Ok(Item::TemplateInterpolation { expr, span })
             }
             _ => Err(source.syntax_error(format!("Unexpected item: {:?}", n.green.kind), n.span().start)),

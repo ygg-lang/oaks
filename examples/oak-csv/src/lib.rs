@@ -1,7 +1,6 @@
 #![doc = include_str!("readme.md")]
 #![feature(new_range_api)]
 #![warn(missing_docs)]
-//! Csv support for the Oak language framework.
 
 /// The AST nodes for CSV.
 pub mod ast;

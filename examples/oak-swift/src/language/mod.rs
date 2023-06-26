@@ -1,11 +1,13 @@
 #![doc = include_str!("readme.md")]
 use oak_core::{Language, LanguageCategory};
 
+/// Swift language configuration and metadata.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Default)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct SwiftLanguage {}
 
 impl SwiftLanguage {
+    /// Creates a new SwiftLanguage instance.
     pub fn new() -> Self {
         Self {}
     }

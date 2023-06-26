@@ -1,5 +1,6 @@
 use oak_core::{Token, TokenType, UniversalTokenRole};
 
+/// Token type for Stylus lexer output.
 pub type StylusToken = Token<StylusTokenType>;
 
 impl TokenType for StylusTokenType {

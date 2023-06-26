@@ -1,5 +1,5 @@
 use crate::{
-    ast::{BinaryOperator, Expression, Keyword, Literal, Parameter},
+    ast::{BinaryOperator, CompareOperator, Expression, Keyword, Literal, Parameter},
     language::PythonLanguage,
     lexer::token_type::PythonTokenType,
     parser::PythonElementType,
@@ -109,6 +109,51 @@ impl<'config> super::PythonBuilder<'config> {
                 }
 
                 if let (Some(l), Some(op), Some(r)) = (left, operator, right) { Ok(Expression::BinaryOp { left: l, operator: op, right: r }) } else { Ok(Expression::Name(format!("invalid_binop_at_{}", offset))) }
+            }
+            PythonElementType::Compare => {
+                let mut left = None;
+                let mut ops = Vec::new();
+                let mut comparators = Vec::new();
+                let mut pending_op: Option<CompareOperator> = None;
+                let mut current_offset = offset;
+
+                for child in node.children() {
+                    let child_len = child.len() as usize;
+                    match child {
+                        GreenTree::Node(n) => {
+                            if !n.kind.is_trivia() {
+                                let expr = self.build_expression(n, current_offset, source)?;
+                                if left.is_none() {
+                                    left = Some(Box::new(expr));
+                                }
+                                else {
+                                    if let Some(op) = pending_op.take() {
+                                        ops.push(op);
+                                    }
+                                    comparators.push(expr);
+                                }
+                            }
+                        }
+                        GreenTree::Leaf(leaf) => {
+                            if !leaf.kind.is_trivia() {
+                                pending_op = match leaf.kind {
+                                    PythonTokenType::Equal => Some(CompareOperator::Eq),
+                                    PythonTokenType::NotEqual => Some(CompareOperator::NotEq),
+                                    PythonTokenType::Less => Some(CompareOperator::Lt),
+                                    PythonTokenType::LessEqual => Some(CompareOperator::LtE),
+                                    PythonTokenType::Greater => Some(CompareOperator::Gt),
+                                    PythonTokenType::GreaterEqual => Some(CompareOperator::GtE),
+                                    PythonTokenType::IsKeyword => Some(CompareOperator::Is),
+                                    PythonTokenType::InKeyword => Some(CompareOperator::In),
+                                    _ => pending_op,
+                                };
+                            }
+                        }
+                    }
+                    current_offset += child_len;
+                }
+
+                if let Some(l) = left { Ok(Expression::Compare { left: l, ops, comparators }) } else { Ok(Expression::Name(format!("invalid_compare_at_{}", offset))) }
             }
             PythonElementType::Call => {
                 let mut func = None;

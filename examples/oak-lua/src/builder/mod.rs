@@ -73,7 +73,7 @@ impl<'config> LuaBuilder<'config> {
                 let mut child_offset = offset;
                 for child in node.children() {
                     match child {
-                        GreenTree::Leaf(leaf) if leaf.kind == LuaTokenType::Identifier => names.push(source.get_text_in(oak_core::Range { start: child_offset, end: child_offset + leaf.length as usize }).to_string()),
+                        GreenTree::Leaf(leaf) if leaf.kind == LuaTokenType::Identifier => names.push(source.get_text_in(oak_core::Range { start: child_offset, end: child_offset + leaf.length as usize }).trim().to_string()),
                         GreenTree::Node(child_node) => {
                             if let Some(expr) = self.build_expression(child_node, source, child_offset)? {
                                 values.push(expr)
@@ -136,7 +136,7 @@ impl<'config> LuaBuilder<'config> {
                     if let GreenTree::Leaf(leaf) = child {
                         if leaf.kind == LuaTokenType::Identifier {
                             let text = source.get_text_in(oak_core::Range { start: child_offset, end: child_offset + leaf.length as usize });
-                            return Ok(Some(LuaStatement::Goto(text.to_string())));
+                            return Ok(Some(LuaStatement::Goto(text.trim().to_string())));
                         }
                     }
                     child_offset += child.len() as usize
@@ -149,7 +149,7 @@ impl<'config> LuaBuilder<'config> {
                     if let GreenTree::Leaf(leaf) = child {
                         if leaf.kind == LuaTokenType::Identifier {
                             let text = source.get_text_in(oak_core::Range { start: child_offset, end: child_offset + leaf.length as usize });
-                            return Ok(Some(LuaStatement::Label(text.to_string())));
+                            return Ok(Some(LuaStatement::Label(text.trim().to_string())));
                         }
                     }
                     child_offset += child.len() as usize
@@ -261,7 +261,7 @@ impl<'config> LuaBuilder<'config> {
                 for child in node.children() {
                     match child {
                         GreenTree::Leaf(leaf) => match leaf.kind {
-                            LuaTokenType::Identifier => variables.push(source.get_text_in(oak_core::Range { start: child_offset, end: child_offset + leaf.length as usize }).to_string()),
+                            LuaTokenType::Identifier => variables.push(source.get_text_in(oak_core::Range { start: child_offset, end: child_offset + leaf.length as usize }).trim().to_string()),
                             LuaTokenType::Eq => after_eq = true,
                             LuaTokenType::In => after_in = true,
                             LuaTokenType::Do => in_block = true,
@@ -444,7 +444,7 @@ impl<'config> LuaBuilder<'config> {
                 for child in node.children() {
                     if let GreenTree::Leaf(leaf) = child {
                         if leaf.kind == LuaTokenType::Identifier {
-                            let name = source.get_text_in(oak_core::Range { start: offset, end: offset + leaf.length as usize }).to_string();
+                            let name = source.get_text_in(oak_core::Range { start: offset, end: offset + leaf.length as usize }).trim().to_string();
                             return Ok(Some(LuaExpression::Identifier(name)));
                         }
                     }
@@ -599,7 +599,7 @@ impl<'config> LuaBuilder<'config> {
                 for child in node.children() {
                     match child {
                         GreenTree::Leaf(leaf) => match leaf.kind {
-                            LuaTokenType::Identifier if state == 0 => parameters.push(source.get_text_in(oak_core::Range { start: child_offset, end: child_offset + leaf.length as usize }).to_string()),
+                            LuaTokenType::Identifier if state == 0 => parameters.push(source.get_text_in(oak_core::Range { start: child_offset, end: child_offset + leaf.length as usize }).trim().to_string()),
                             LuaTokenType::DotDotDot => is_vararg = true,
                             LuaTokenType::RightParen => state = 1,
                             _ => {}

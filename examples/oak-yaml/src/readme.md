@@ -1,5 +1,7 @@
 # 🛠️ YAML Parser Developer Guide
 
+Yaml support for the Oak language framework.
+
 This guide is designed to help you quickly get started with developing and integrating `oak-yaml`.
 
 ## 🚦 Quick Start

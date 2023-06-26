@@ -14,6 +14,8 @@ pub mod parser;
 pub use crate::{
     ast::StructurizrRoot,
     language::StructurizrLanguage,
-    lexer::{StructurizrLexer, token_type::StructurizrTokenType},
+    lexer::StructurizrLexer,
     parser::{StructurizrParser, element_type::StructurizrElementType},
 };
+
+pub use lexer::token_type::StructurizrTokenType;

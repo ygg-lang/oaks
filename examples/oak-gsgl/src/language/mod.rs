@@ -1,7 +1,4 @@
 #![doc = include_str!("readme.md")]
-//! GSGL language definition.
-//!
-//! Defines the core structure for GSGL language, implementing oak-core's Language trait.
 use oak_core::{Language, LanguageCategory};
 
 /// GSGL language definition.

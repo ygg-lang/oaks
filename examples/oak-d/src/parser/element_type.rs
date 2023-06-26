@@ -22,6 +22,32 @@ pub enum DElementType {
     Aggregate,
     /// An import declaration.
     Import,
+    /// A class definition.
+    Class,
+    /// A struct definition.
+    Struct,
+    /// An interface definition.
+    Interface,
+    /// A function definition.
+    Function,
+    /// A block statement.
+    Block,
+    /// An if statement.
+    IfStatement,
+    /// A while statement.
+    WhileStatement,
+    /// A for statement.
+    ForStatement,
+    /// A return statement.
+    ReturnStatement,
+    /// An expression statement.
+    ExpressionStatement,
+    /// A literal value.
+    Literal,
+    /// A parenthesized expression.
+    ParenthesizedExpression,
+    /// A binary expression.
+    BinaryExpression,
     /// The `module` keyword.
     ModuleKeyword,
     /// The `import` keyword.

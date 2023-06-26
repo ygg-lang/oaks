@@ -108,6 +108,7 @@ pub enum Expression {
 }
 
 impl Expression {
+    /// Returns the source span of this expression.
     pub fn span(&self) -> Range<usize> {
         match self {
             Expression::Identifier(id) => id.span.clone(),
@@ -301,6 +302,7 @@ pub enum Literal {
 }
 
 impl Literal {
+    /// Returns the source span of this literal.
     pub fn span(&self) -> Range<usize> {
         match self {
             Literal::Number(_, span) => span.clone(),

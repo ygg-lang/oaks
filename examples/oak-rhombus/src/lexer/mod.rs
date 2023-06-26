@@ -1,5 +1,6 @@
 #![doc = include_str!("readme.md")]
 use crate::{language::RhombusLanguage, lexer::token_type::RhombusTokenType};
+/// Token type definitions for Rhombus lexer.
 pub mod token_type;
 use oak_core::{
     Lexer, LexerCache, LexerState, OakError, Source, TextEdit,
@@ -13,6 +14,7 @@ static RHOMBUS_WHITESPACE: LazyLock<WhitespaceConfig> = LazyLock::new(|| Whitesp
 static RHOMBUS_COMMENT: LazyLock<CommentConfig> = LazyLock::new(|| CommentConfig { line_marker: "//", block_start: "/*", block_end: "*/", nested_blocks: true });
 static RHOMBUS_STRING: LazyLock<StringConfig> = LazyLock::new(|| StringConfig { quotes: &['"'], escape: Some('\\') });
 
+/// Lexer for Rhombus source code.
 #[derive(Clone, Debug)]
 pub struct RhombusLexer<'config> {
     config: &'config RhombusLanguage,
@@ -27,6 +29,7 @@ impl<'config> Lexer<RhombusLanguage> for RhombusLexer<'config> {
 }
 
 impl<'config> RhombusLexer<'config> {
+    /// Creates a new RhombusLexer with the given language configuration.
     pub fn new(config: &'config RhombusLanguage) -> Self {
         Self { config }
     }
@@ -198,6 +201,8 @@ impl<'config> RhombusLexer<'config> {
             "module" => RhombusTokenType::Module,
             "import" => RhombusTokenType::Import,
             "export" => RhombusTokenType::Export,
+            "require" => RhombusTokenType::Require,
+            "provide" => RhombusTokenType::Provide,
             "true" | "false" => RhombusTokenType::BooleanLiteral,
             _ => RhombusTokenType::Identifier,
         };

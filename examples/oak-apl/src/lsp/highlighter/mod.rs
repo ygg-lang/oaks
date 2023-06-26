@@ -1,5 +1,4 @@
 #![doc = include_str!("readme.md")]
-//! APL syntax highlighter.
 
 /// Represents the kind of highlighting for a syntax element.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]

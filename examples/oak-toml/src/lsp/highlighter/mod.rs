@@ -1,5 +1,4 @@
 #![doc = include_str!("readme.md")]
-//! TOML syntax highlighter
 
 /// Type of highlighting to apply for TOML code.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]

@@ -16,6 +16,7 @@ pub(crate) type State<'a, S> = LexerState<'a, S, VerilogLanguage>;
 static VL_WHITESPACE: LazyLock<WhitespaceConfig> = LazyLock::new(|| WhitespaceConfig { unicode_whitespace: true });
 
 #[derive(Clone, Debug)]
+/// Lexer for Verilog source code.
 pub struct VerilogLexer<'config> {
     config: &'config VerilogLanguage,
 }
@@ -30,6 +31,7 @@ impl<'config> Lexer<VerilogLanguage> for VerilogLexer<'config> {
 
 impl<'config> VerilogLexer<'config> {
     /// Creates a new VerilogLexer with the given configuration.
+    /// Creates a new VerilogLexer with the given language configuration.
     pub fn new(config: &'config VerilogLanguage) -> Self {
         Self { config }
     }

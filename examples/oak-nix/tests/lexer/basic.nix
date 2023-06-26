@@ -67,7 +67,7 @@ let
     functionWithEllipsis = { x, y, ... }: x + y;
   
     # Pattern matching in functions
-    destructuringFunction = { name, age, ... }↯person: 
+    destructuringFunction = { name, age, ... }@person: 
         "Person ${name} is ${toString age} years old";
   
     # List pattern matching

@@ -16,7 +16,7 @@ fn test_simple_function_parsing() -> Result<(), oak_core::OakError> {
     let lex_output = lexer.lex(&source, &[], &mut cache);
     match &lex_output.result {
         Ok(tokens) => {
-            println!("Generated tokens: {:?}", tokens);
+            // println!("Generated tokens: {:?}", tokens);
             println!("Token count: {}", tokens.len());
 
             cache.set_lex_output(lex_output.clone());

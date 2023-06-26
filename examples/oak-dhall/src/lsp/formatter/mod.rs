@@ -1,5 +1,4 @@
 #![doc = include_str!("readme.md")]
-//! DHall Code Formatter
 
 /// Formatter implementation for DHall.
 pub struct DHallFormatter {

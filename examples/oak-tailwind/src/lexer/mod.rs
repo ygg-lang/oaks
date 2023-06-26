@@ -1,5 +1,4 @@
 #![doc = include_str!("readme.md")]
-//! Lexer implementation for Tailwind DSL.
 /// Token types for the Tailwind language.
 pub mod token_type;
 

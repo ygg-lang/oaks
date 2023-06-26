@@ -28,5 +28,5 @@ impl Language for CobolLanguage {
 
     type TokenType = CobolTokenType;
     type ElementType = CobolElementType;
-    type TypedRoot = ();
+    type TypedRoot = crate::ast::CobolRoot;
 }

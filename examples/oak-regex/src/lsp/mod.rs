@@ -52,11 +52,9 @@ impl<V: Vfs + Send + Sync + 'static + oak_vfs::WritableVfs> LanguageService for 
         let source = self.vfs().get_source(uri);
         async move {
             let source = source?;
-            let language = RegexLanguage::default();
-            let parser = crate::parser::RegexParser::new(&language);
-            let lexer = crate::lexer::RegexLexer::new(&language);
-            let mut cache = oak_core::parser::session::ParseSession::<RegexLanguage>::default();
-            let _output = oak_core::parser::parse(&parser, &lexer, &source, &[], &mut cache);
+            let _parser = crate::parser::RegexParser::new();
+            let _lexer = crate::lexer::RegexLexer::new();
+            let _cache = oak_core::parser::session::ParseSession::<RegexLanguage>::default();
             None
         }
     }

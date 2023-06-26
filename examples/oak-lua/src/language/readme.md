@@ -1,5 +1,9 @@
 # Lua Language Definition
 
+Lua language definition.
+
+Defines the core structure for the Lua language, implementing the oak-core Language trait.
+
 This module contains the metadata and configuration options for the Lua language within the Oak framework.
 
 ## ⚙️ Configuration

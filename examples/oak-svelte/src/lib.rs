@@ -1,4 +1,4 @@
-#![doc = include_str!("../readme.md")]
+#![doc = include_str!("readme.md")]
 #![feature(new_range_api)]
 #![warn(missing_docs)]
 

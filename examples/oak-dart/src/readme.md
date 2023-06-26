@@ -1,5 +1,7 @@
 # 🛠️ oak-dart Developer Guide
 
+Dart support for the Oak language framework.
+
 Welcome to the internal implementation of the Dart parser. This module provides the core logic for tokenizing and parsing Dart source code into a high-fidelity syntax tree.
 
 ## 📦 Core Components

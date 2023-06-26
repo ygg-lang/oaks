@@ -6,7 +6,7 @@ use crate::{
     lexer::{MsilLexer, token_type::MsilTokenType},
 };
 use oak_core::{
-    GreenNode, OakError, TextEdit,
+    TextEdit,
     parser::{ParseCache, Parser, ParserState, parse_with_lexer},
     source::Source,
 };
@@ -147,12 +147,41 @@ impl<'config> MsilParser<'config> {
         state.bump(); // .method
         self.skip_trivia(state);
 
+        // Parse method modifiers
         while state.not_at_end() && !state.at(MsilTokenType::LeftBrace) {
-            if state.at(MsilTokenType::IdentifierToken) {
+            if state.at(MsilTokenType::PublicKeyword) || state.at(MsilTokenType::PrivateKeyword) || state.at(MsilTokenType::StaticKeyword) || state.at(MsilTokenType::Keyword) {
+                state.bump();
+                self.skip_trivia(state);
+            }
+            else if state.at(MsilTokenType::IdentifierToken) {
                 let id_cp = state.checkpoint();
                 state.bump();
                 state.finish_at(id_cp, crate::parser::element_type::MsilElementType::Identifier);
                 self.skip_trivia(state);
+            }
+            else if state.at(MsilTokenType::LeftParen) {
+                // Parse method parameters
+                state.bump();
+                self.skip_trivia(state);
+                while state.not_at_end() && !state.at(MsilTokenType::RightParen) {
+                    if state.at(MsilTokenType::IdentifierToken) {
+                        let id_cp = state.checkpoint();
+                        state.bump();
+                        state.finish_at(id_cp, crate::parser::element_type::MsilElementType::Identifier);
+                        self.skip_trivia(state);
+                    }
+                    else if state.at(MsilTokenType::Comma) {
+                        state.bump();
+                        self.skip_trivia(state);
+                    }
+                    else {
+                        state.bump();
+                    }
+                }
+                if state.at(MsilTokenType::RightParen) {
+                    state.bump();
+                    self.skip_trivia(state);
+                }
             }
             else {
                 state.bump();
@@ -162,7 +191,58 @@ impl<'config> MsilParser<'config> {
         if state.at(MsilTokenType::LeftBrace) {
             state.bump();
             while state.not_at_end() && !state.at(MsilTokenType::RightBrace) {
-                state.bump();
+                self.skip_trivia(state);
+                if !state.not_at_end() || state.at(MsilTokenType::RightBrace) {
+                    break;
+                }
+
+                // Parse method body elements
+                if state.at(MsilTokenType::IdentifierToken) {
+                    let peeked = state.peek_text();
+                    let text = peeked.as_deref().unwrap_or("");
+                    if text.starts_with(".") {
+                        // Parse directives like .maxstack, .locals, etc.
+                        let dir_cp = state.checkpoint();
+                        state.bump();
+                        self.skip_trivia(state);
+                        while state.not_at_end() && !state.at(MsilTokenType::Semicolon) && !state.at(MsilTokenType::LeftBrace) && !state.at(MsilTokenType::RightBrace) {
+                            state.bump();
+                        }
+                        if state.at(MsilTokenType::Semicolon) {
+                            state.bump();
+                        }
+                        state.finish_at(dir_cp, crate::parser::element_type::MsilElementType::Directive);
+                    }
+                    else if text.starts_with("IL_") {
+                        // Parse instruction labels
+                        let label_cp = state.checkpoint();
+                        state.bump();
+                        if state.at(MsilTokenType::Colon) {
+                            state.bump();
+                        }
+                        state.finish_at(label_cp, crate::parser::element_type::MsilElementType::Label);
+                    }
+                    else {
+                        // Parse instructions
+                        let inst_cp = state.checkpoint();
+                        state.bump();
+                        self.skip_trivia(state);
+                        // Parse instruction operands
+                        while state.not_at_end() && !state.at(MsilTokenType::Semicolon) && !state.at(MsilTokenType::RightBrace) {
+                            if state.at(MsilTokenType::IdentifierToken) || state.at(MsilTokenType::NumberToken) || state.at(MsilTokenType::StringToken) || state.at(MsilTokenType::LeftBracket) {
+                                state.bump();
+                            }
+                            else {
+                                break;
+                            }
+                            self.skip_trivia(state);
+                        }
+                        state.finish_at(inst_cp, crate::parser::element_type::MsilElementType::Instruction);
+                    }
+                }
+                else {
+                    state.bump();
+                }
             }
             if state.at(MsilTokenType::RightBrace) {
                 state.bump();

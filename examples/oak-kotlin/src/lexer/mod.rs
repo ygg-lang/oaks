@@ -1,5 +1,4 @@
 #![doc = include_str!("readme.md")]
-//! Lexer implementation for the Kotlin language.
 
 /// Token types for the Kotlin lexer.
 pub mod token_type;

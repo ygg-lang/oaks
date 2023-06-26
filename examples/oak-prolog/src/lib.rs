@@ -3,7 +3,6 @@
 #![warn(missing_docs)]
 #![doc(html_logo_url = "https://raw.githubusercontent.com/ygg-lang/oaks/refs/heads/dev/documents/logo.svg")]
 #![doc(html_favicon_url = "https://raw.githubusercontent.com/ygg-lang/oaks/refs/heads/dev/documents/logo.svg")]
-//! Prolog support for the Oak language framework.
 
 /// AST module.
 pub mod ast;
@@ -27,7 +26,7 @@ pub mod parser;
 pub use crate::{ast::PrologRoot, builder::PrologBuilder, language::PrologLanguage, lexer::token_type::PrologTokenType, parser::PrologParser};
 
 #[cfg(feature = "lsp")]
-pub use crate::lsp::highlighter::{HighlightKind, Highlighter, PrologHighlighter};
+pub use crate::lsp::highlighter::PrologHighlighter;
 
 #[cfg(feature = "lsp")]
 pub use crate::lsp::PrologLanguageService;

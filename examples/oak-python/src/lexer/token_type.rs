@@ -61,7 +61,7 @@ impl TokenType for PythonTokenType {
     const END_OF_STREAM: Self = Self::Error;
 
     fn is_ignored(&self) -> bool {
-        false
+        self.is_trivia()
     }
 
     fn role(&self) -> Self::Role {

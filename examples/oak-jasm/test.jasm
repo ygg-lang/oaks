@@ -1,0 +1,14 @@
+.source Test.java
+.class public Test
+.version 65:0
+
+.field public static value:I
+
+.method public static main:"([Ljava/lang/String;)V"
+    .limit stack 2
+    .limit locals 1
+    getstatic Field java/lang/System.out:"Ljava/io/PrintStream;"
+    ldc "Hello, JASM!"
+    invokevirtual Method java/io/PrintStream.println:"(Ljava/lang/String;)V"
+    return
+.end method

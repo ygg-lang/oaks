@@ -18,13 +18,13 @@ static PASCAL_COMMENT: LazyLock<CommentConfig> = LazyLock::new(|| CommentConfig 
 /// A lexer for Pascal source files.
 #[derive(Clone, Debug)]
 pub struct PascalLexer<'config> {
-    _config: &'config PascalLanguage,
+    config: &'config PascalLanguage,
 }
 
 impl<'config> PascalLexer<'config> {
     /// Creates a new `PascalLexer` with the given language configuration.
     pub fn new(config: &'config PascalLanguage) -> Self {
-        Self { _config: config }
+        Self { config }
     }
 
     fn skip_whitespace<'s, S: Source + ?Sized>(&self, state: &mut State<'s, S>) -> bool {

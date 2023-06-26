@@ -3,14 +3,13 @@
 #![warn(missing_docs)]
 #![doc(html_logo_url = "https://raw.githubusercontent.com/ygg-lang/oaks/refs/heads/dev/documents/logo.svg")]
 #![doc(html_favicon_url = "https://raw.githubusercontent.com/ygg-lang/oaks/refs/heads/dev/documents/logo.svg")]
-//! VLang support for the Oak language framework.
 
 extern crate alloc;
 
 /// AST module.
 pub mod ast;
-// pub mod builder;
-//
+/// Builder module for constructing V language AST from syntax trees.
+pub mod builder;
 // pub mod formatter;
 //
 // pub mod highlighter;
@@ -26,7 +25,7 @@ pub mod lsp;
 /// Parser module.
 pub mod parser;
 
-pub use crate::{language::VLangLanguage, lexer::VLangLexer, parser::VLangParser};
+pub use crate::{ast::*, builder::VLangBuilder, language::VLangLanguage, lexer::VLangLexer, parser::VLangParser};
 pub use oak_core::{ElementType, TokenType};
 
 // #[cfg(feature = "oak-highlight")]

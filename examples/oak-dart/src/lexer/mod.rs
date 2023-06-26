@@ -1,4 +1,5 @@
 #![doc = include_str!("readme.md")]
+/// Token type definitions for Dart lexer.
 pub mod token_type;
 
 use crate::{language::DartLanguage, lexer::token_type::DartTokenType};
@@ -24,6 +25,7 @@ impl<'config> Lexer<DartLanguage> for DartLexer<'config> {
 }
 
 impl<'config> DartLexer<'config> {
+    /// Creates a new DartLexer with the given language configuration.
     pub fn new(config: &'config DartLanguage) -> Self {
         Self { config }
     }

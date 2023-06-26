@@ -1,4 +1,3 @@
-
 /// Keywords or soft keywords for the Valkyrie language.
 #[derive(Copy, Clone, Debug, PartialEq, Eq, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -21,6 +20,47 @@ pub enum ValkyrieKeywords {
     /// class Point { x: f64, y: f64 }
     /// ```
     Class,
+    /// Declare an abstract class or abstract method.
+    ///
+    /// ```v
+    /// abstract class Shape { ... }
+    /// ```
+    ///
+    /// ```v
+    /// abstract micro method()
+    /// ```
+    Abstract,
+    /// Declare a sealed class (restricted inheritance).
+    ///
+    /// Sealed classes restrict which classes can inherit from them.
+    /// All subclasses must be declared in the same file as the sealed class.
+    ///
+    /// ```v
+    /// sealed class Shape { ... }
+    /// ```
+    Sealed,
+    /// Declare a final class or final method that cannot be inherited or overridden.
+    ///
+    /// ```v
+    /// final class Constants { ... }
+    /// ```
+    ///
+    /// ```v
+    /// final micro get_value() -> i32 { ... }
+    /// ```
+    Final,
+    /// Declare a structure (deprecated, use `structure` instead).
+    ///
+    /// ```v
+    /// struct Point { x: f64, y: f64 }
+    /// ```
+    Struct,
+    /// Declare a value type (immutable structure).
+    ///
+    /// ```v
+    /// structure Point { x: f64, y: f64 }
+    /// ```
+    Structure,
     /// Declare a singleton.
     ///
     /// ```v
@@ -45,6 +85,18 @@ pub enum ValkyrieKeywords {
     /// enums Priority { High = 3, Normal = 2, Low = 1 }
     /// ```
     Enums,
+    /// Declare an enum (deprecated, use `unity` instead).
+    ///
+    /// ```v
+    /// enum Priority { High, Normal, Low }
+    /// ```
+    Enum,
+    /// Declare a unity (preferred alternative to enum).
+    ///
+    /// ```v
+    /// unity Option<T> { Some(T), None }
+    /// ```
+    Unity,
     /// Declare a union.
     ///
     /// ```v
@@ -224,4 +276,45 @@ pub enum ValkyrieKeywords {
     /// x as T
     /// ```
     As,
+    /// Getter property.
+    ///
+    /// ```v
+    /// get area(self) -> f64 { self.width * self.height }
+    /// ```
+    Get,
+    /// Setter property.
+    ///
+    /// ```v
+    /// set width(mut self, value: f64) { self.width = value }
+    /// ```
+    Set,
+    /// Self type reference.
+    ///
+    /// Used in trait implementations and associated type paths.
+    ///
+    /// ```v
+    /// trait Iterator {
+    ///     type Item
+    ///     micro next(self) -> Self::Item?
+    /// }
+    /// ```
+    SelfType,
+    /// Type alias declaration.
+    ///
+    /// ```v
+    /// type Point = (f64, f64)
+    /// ```
+    TypeAlias,
+    /// Implement a trait for a type.
+    ///
+    /// ```v
+    /// impl Show for Point { ... }
+    /// ```
+    Impl,
+    /// Where clause for generic constraints.
+    ///
+    /// ```v
+    /// micro foo<T>(x: T) where T: Clone { ... }
+    /// ```
+    Where,
 }

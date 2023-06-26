@@ -28,6 +28,9 @@ impl<'config> TypeScriptBuilder<'config> {
                     if leaf.kind == TypeScriptTokenType::Question {
                         optional = true
                     }
+                    else if leaf.kind == TypeScriptTokenType::IdentifierName {
+                        name = source.get_text_in(leaf.span.into()).to_string();
+                    }
                 }
             }
         }

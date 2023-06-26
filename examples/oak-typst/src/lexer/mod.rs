@@ -1,4 +1,5 @@
 #![doc = include_str!("readme.md")]
+/// Token type definitions for Typst lexer.
 pub mod token_type;
 
 use crate::{language::TypstLanguage, lexer::token_type::TypstTokenType};
@@ -16,6 +17,7 @@ static TYPST_COMMENT: LazyLock<CommentConfig> = LazyLock::new(|| CommentConfig {
 static TYPST_STRING: LazyLock<StringConfig> = LazyLock::new(|| StringConfig { quotes: &['"'], escape: Some('\\') });
 
 #[derive(Clone, Debug)]
+/// Lexer for Typst source code.
 pub struct TypstLexer<'config> {
     config: &'config TypstLanguage,
 }
@@ -32,6 +34,7 @@ impl<'config> Lexer<TypstLanguage> for TypstLexer<'config> {
 }
 
 impl<'config> TypstLexer<'config> {
+    /// Creates a new TypstLexer with the given language configuration.
     pub fn new(config: &'config TypstLanguage) -> Self {
         Self { config }
     }

@@ -42,8 +42,6 @@ impl<'config> super::PythonParser<'config> {
         use PythonTokenType::*;
         self.skip_trivia(state);
 
-        println!("primary at {}: {:?}", state.current_offset(), state.peek_kind());
-
         let cp = state.checkpoint();
         let kind = state.peek_kind();
         match kind {

@@ -1,4 +1,4 @@
-use oak_c::{CLanguage, CLexer};
+use oak_c::{language::CLanguage, lexer::CLexer};
 use oak_testing::lexing::LexerTester;
 use std::{path::Path, time::Duration};
 

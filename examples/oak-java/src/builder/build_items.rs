@@ -74,7 +74,8 @@ impl<'config> JavaBuilder<'config> {
             }
         }
 
-        let class = ClassDeclaration { modifiers, annotations, name, extends, implements, members, span: node.span() };
+        let type_parameters = Vec::new(); // TODO: Extract type parameters
+        let class = ClassDeclaration { type_parameters, modifiers, annotations, name, extends, implements, members, span: node.span() };
 
         class
     }
@@ -97,7 +98,8 @@ impl<'config> JavaBuilder<'config> {
             }
         }
 
-        let interface = InterfaceDeclaration { modifiers, annotations, name, extends, members, span: node.span() };
+        let type_parameters = Vec::new(); // TODO: Extract type parameters
+        let interface = InterfaceDeclaration { type_parameters, modifiers, annotations, name, extends, members, span: node.span() };
 
         interface
     }
@@ -109,12 +111,16 @@ impl<'config> JavaBuilder<'config> {
         let annotations = self.extract_annotations(node.clone(), source);
         let (_, implements) = self.extract_inheritance(node.clone(), source, &name, &modifiers);
 
-        let mut variants = Vec::new();
+        let mut constants = Vec::new();
 
         for child in node.children() {
             if let RedTree::Node(sub_node) = child {
                 match sub_node.green.kind {
-                    JavaElementType::Identifier => variants.push(self.get_text(sub_node.span(), source).trim().to_string()),
+                    JavaElementType::Identifier => {
+                        let name = self.get_text(sub_node.span(), source).trim().to_string();
+                        let enum_const = EnumConstant { name, annotations: Vec::new(), arguments: Vec::new(), body: None, span: sub_node.span() };
+                        constants.push(enum_const);
+                    }
                     JavaElementType::MethodDeclaration => members.push(Member::Method(self.build_method(sub_node, source))),
                     JavaElementType::FieldDeclaration => members.push(Member::Field(self.build_field(sub_node, source))),
                     _ => self.collect_members(sub_node, source, &mut members),
@@ -122,7 +128,7 @@ impl<'config> JavaBuilder<'config> {
             }
         }
 
-        let enum_decl = EnumDeclaration { modifiers, annotations, name, variants, members, implements, span: node.span() };
+        let enum_decl = EnumDeclaration { modifiers, annotations, name, constants, members, implements, span: node.span() };
 
         enum_decl
     }

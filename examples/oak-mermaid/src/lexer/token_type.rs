@@ -2,7 +2,6 @@ use oak_core::{TokenType, UniversalTokenRole};
 
 /// Token types for the Mermaid language.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 #[repr(u8)]
 pub enum MermaidTokenType {
     /// Whitespace characters.
@@ -25,6 +24,27 @@ pub enum MermaidTokenType {
 
     /// Lexing error.
     Error,
+}
+
+#[cfg(feature = "serde")]
+impl serde::Serialize for MermaidTokenType {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: serde::Serializer,
+    {
+        serializer.serialize_u8(*self as u8)
+    }
+}
+
+#[cfg(feature = "serde")]
+impl<'de> serde::Deserialize<'de> for MermaidTokenType {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: serde::Deserializer<'de>,
+    {
+        let value = u8::deserialize(deserializer)?;
+        Ok(unsafe { std::mem::transmute(value) })
+    }
 }
 
 impl TokenType for MermaidTokenType {

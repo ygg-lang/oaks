@@ -31,7 +31,7 @@ impl<'config> Parser<PythonLanguage> for PythonParser<'config> {
         let lexer = PythonLexer::new(self.config);
         parse_with_lexer(&lexer, text, edits, cache, |state| {
             let cp = state.checkpoint();
-            while !state.at(crate::lexer::PythonTokenType::Eof) {
+            while !state.at(crate::lexer::PythonTokenType::Eof) && state.peek_kind().is_some() {
                 self.parse_statement(state);
                 self.skip_trivia(state);
             }

@@ -1,7 +1,4 @@
 #![doc = include_str!("readme.md")]
-//! Rust syntax highlighter
-//!
-//! This module provides syntax highlighting for Rust source code, supporting keywords, strings, numbers, comments, etc.
 
 /// Local definition of highlight kinds
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]

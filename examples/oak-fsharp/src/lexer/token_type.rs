@@ -283,6 +283,10 @@ pub enum FSharpTokenType {
     ComposeBack,
     /// The '$' operator
     Dollar,
+    /// The '|>' operator
+    PipeForward,
+    /// The '<|' operator
+    PipeBackward,
 
     /// The '&&' logical operator
     LogicalAnd,

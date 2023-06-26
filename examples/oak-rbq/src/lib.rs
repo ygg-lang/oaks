@@ -3,9 +3,6 @@
 #![warn(missing_docs)]
 #![doc(html_logo_url = "https://raw.githubusercontent.com/ygg-lang/oaks/refs/heads/dev/documents/logo.svg")]
 #![doc(html_favicon_url = "https://raw.githubusercontent.com/ygg-lang/oaks/refs/heads/dev/documents/logo.svg")]
-//! Rbq support for the Oak language framework.
-//!
-//! This crate provides lexing, parsing, AST generation, and LSP support for the RBQ language.
 
 /// AST module containing node definitions for the RBQ language.
 pub mod ast;

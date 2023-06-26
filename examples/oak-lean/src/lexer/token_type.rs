@@ -15,6 +15,7 @@ impl TokenType for LeanTokenType {
     }
 }
 
+/// A token produced by the Lean lexer, combining a token type with its source location.
 pub type LeanToken = Token<LeanTokenType>;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]

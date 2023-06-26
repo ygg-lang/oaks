@@ -1,5 +1,7 @@
 # VON Lexer Module
 
+Lexer implementation for the VON language.
+
 The VON Lexer module provides lexical analysis for the VON (V-Object-Notation) language. It transforms VON source code into a stream of tokens, enabling efficient data parsing and structure analysis.
 
 ## Purpose

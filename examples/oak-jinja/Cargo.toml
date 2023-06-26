@@ -2,15 +2,15 @@
 name = "oak-jinja"
 version.workspace = true
 authors.workspace = true
-description = "Jinja2 template parser with support for Jinja2 template language and web development."
+description = "High-performance incremental Jinja2 parser for the oak ecosystem with flexible configuration, supporting template rendering and syntax analysis."
 edition.workspace = true
 license.workspace = true
 readme = "readme.md"
 homepage.workspace = true
 repository = "https://github.com/ygg-lang/oaks/tree/master/examples/oak-jinja"
 documentation = "https://docs.rs/oak-jinja"
-categories = ["parsing"]
-keywords = ["parser", "jinja2", "template", "web"]
+categories = ["parsing", "template-engine"]
+keywords = ["parser", "jinja", "template", "syntax-analysis"]
 
 [dependencies]
 oak-core = { workspace = true }

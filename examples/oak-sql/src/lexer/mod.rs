@@ -464,6 +464,8 @@ impl<'config> SqlLexer<'config> {
             ';' => SqlTokenType::Semicolon,
             '.' => SqlTokenType::Dot,
             ':' => SqlTokenType::Colon,
+            '[' => SqlTokenType::LeftBracket,
+            ']' => SqlTokenType::RightBracket,
             _ => return false,
         };
 

@@ -1,4 +1,4 @@
-use oak_c::{CLanguage, CParser};
+use oak_c::{CParser, language::CLanguage};
 use oak_testing::parsing::ParserTester;
 use std::{path::Path, time::Duration};
 

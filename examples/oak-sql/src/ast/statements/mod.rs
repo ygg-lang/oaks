@@ -1,5 +1,8 @@
+/// DDL (Data Definition Language) node types.
 pub mod ddl_nodes;
+/// DML (Data Manipulation Language) node types.
 pub mod dml_nodes;
+/// Query node types.
 pub mod query_nodes;
 
 pub use ddl_nodes as ddl;

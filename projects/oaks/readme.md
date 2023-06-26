@@ -1,15 +1,47 @@
 # 🚀 oaks
 
-**Core component of the Oak ecosystem** — Providing a solid foundation for building modern programming language toolchains.
+[![Crates.io](https://img.shields.io/crates/v/oaks.svg)](https://crates.io/crates/oaks)
+[![Documentation](https://docs.rs/oaks/badge.svg)](https://docs.rs/oaks)
 
-## 🎯 Project Vision
+**The Unified Oak Library** — A single crate that re-exports all Oak components for convenient access.
 
-`oaks` is a key module in the Oak ecosystem, focusing on providing efficient and scalable low-level functionality to help developers quickly build robust programming language-related tools.
+## 🎯 Why oaks?
 
-## ✨ Core Features
+While Oak is designed as a modular ecosystem, sometimes you need everything in one place. `oaks` is the unified library that re-exports all core Oak crates, providing a single dependency for the complete Oak experience.
 
-- **⚡ Blazing Fast**: Fully utilizes Rust's performance advantages to achieve sub-millisecond parsing response times.
-- **🔄 Incremental Parsing**: Built-in support for partial updates, demonstrating extremely high efficiency when processing large files.
-- **🌳 Structured Output**: Provides a clear, easy-to-traverse syntax tree or data structure.
-- **🛡️ Robustness**: Features a comprehensive error recovery mechanism, ensuring normal operation even when input is incomplete.
-- **🧩 Easy Integration**: Designed with high cohesion and low coupling, allowing for quick integration into existing Rust projects.
+## ✨ Key Features
+
+- **📦 Single Dependency** — One crate for all Oak components
+- **🔄 Re-exports** — Direct access to all modules
+- **🎯 Convenience** — No need to manage multiple crate versions
+- **🧩 Feature Flags** — Optional features for smaller compile times
+
+## 🏗️ Architecture
+
+### Re-exported Crates
+
+| Crate | Purpose |
+|-------|---------|
+| `oak-core` | Core parsing infrastructure |
+| `oak-lsp` | Language Server Protocol support |
+| `oak-vfs` | Virtual File System |
+| `oak-hover` | Hover information providers |
+| `oak-navigation` | Code navigation features |
+| `oak-folding` | Code folding support |
+| `oak-symbols` | Symbol management |
+| `oak-semantic-tokens` | Semantic highlighting |
+| `oak-structural-view` | Document structure views |
+
+## 🔗 When to Use
+
+Use `oaks` when you need the complete Oak toolkit, simplified dependency management, or quick prototyping.
+
+Use individual crates when you need minimal dependencies, faster compile times, or specific functionality only.
+
+## 📖 Documentation
+
+For usage examples and API details, see the [API documentation](https://docs.rs/oaks).
+
+## 🤝 Contributing
+
+Contributions are welcome! Please feel free to submit a Pull Request.
