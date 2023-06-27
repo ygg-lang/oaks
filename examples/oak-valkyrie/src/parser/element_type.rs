@@ -168,6 +168,8 @@ pub enum ValkyrieElementType {
     AnonymousClass,
     /// Generic parameter node.
     GenericParameter,
+    /// Super call expression node.
+    SuperCallExpression,
 }
 
 impl ElementType for ValkyrieElementType {

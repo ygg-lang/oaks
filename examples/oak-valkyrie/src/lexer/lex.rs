@@ -226,6 +226,11 @@ impl crate::lexer::ValkyrieLexer<'_> {
                     "Self" => ValkyrieTokenType::Keyword(ValkyrieKeywords::SelfType),
                     "impl" => ValkyrieTokenType::Keyword(ValkyrieKeywords::Impl),
                     "where" => ValkyrieTokenType::Keyword(ValkyrieKeywords::Where),
+                    "super" => ValkyrieTokenType::Keyword(ValkyrieKeywords::Super),
+                    "override" => ValkyrieTokenType::Keyword(ValkyrieKeywords::Override),
+                    "virtual" => ValkyrieTokenType::Keyword(ValkyrieKeywords::Virtual),
+                    "readonly" => ValkyrieTokenType::Keyword(ValkyrieKeywords::Readonly),
+                    "initiate" => ValkyrieTokenType::Keyword(ValkyrieKeywords::Initiate),
                     "_" => ValkyrieTokenType::Underscore,
                     _ => ValkyrieTokenType::Identifier,
                 };

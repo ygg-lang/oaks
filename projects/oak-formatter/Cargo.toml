@@ -1,0 +1,23 @@
+[package]
+name = "oak-formatter"
+version.workspace = true
+edition.workspace = true
+description = "High-level formatting library for the Oak language framework"
+homepage.workspace = true
+repository.workspace = true
+license.workspace = true
+
+[lib]
+crate-type = ["lib"]
+path = "src/lib.rs"
+
+[dependencies]
+oak-core = { workspace = true }
+serde = { workspace = true, optional = true, features = ["derive"] }
+serde_json = { workspace = true, optional = true }
+regex = { workspace = true, optional = true }
+
+[features]
+default = ["serde"]
+serde = ["dep:serde", "dep:serde_json"]
+regex = ["dep:regex"]

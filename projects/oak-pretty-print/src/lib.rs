@@ -1,6 +1,7 @@
 #![doc(html_logo_url = "https://raw.githubusercontent.com/ygg-lang/oaks/refs/heads/dev/documents/logo.svg")]
 #![doc(html_favicon_url = "https://raw.githubusercontent.com/ygg-lang/oaks/refs/heads/dev/documents/logo.svg")]
 #![feature(new_range_api)]
+#![feature(associated_type_defaults)]
 #![warn(missing_docs)]
 //! Pretty-printing framework for the Oak language framework.
 //!
@@ -15,36 +16,30 @@ pub mod __private {
 }
 
 // Public modules
-/// Built-in formatting rules
-pub mod builtin_rules;
 /// Comment handling and processing
 pub mod comment;
-/// Formatting configuration
-pub mod config;
 /// Document abstraction and printer
 pub mod document;
 /// Error types for formatting
 pub mod errors;
-/// Generic formatter implementation
-pub mod formatter;
-/// Formatting rule traits and sets
-pub mod rules;
+/// Formatting state
+pub mod state;
+/// Whitespace handling and processing
+pub mod whitespace;
 /// Traits for converting types to documents
 pub mod to_doc;
 
 // Re-export commonly used types
 pub use crate::{
-    builtin_rules::create_builtin_rules,
     comment::{Comment, CommentCollector, CommentKind, CommentProcessor},
-    config::{FormatConfig, IndentStyle, LineEnding},
+    document::{Document, IndentStyle, LineEnding, Printer, PrinterConfig},
     errors::FormatResult,
-    formatter::{FormatContext, FormatOutput, Formatter},
-    rules::{FormatRule, RuleSet},
+    state::DefaultFormatState,
+    whitespace::WhitespaceProcessor,
     to_doc::{AsDocument, ToDocument},
 };
 pub use oak_core::language::Language;
 
-pub use crate::document::Document;
 /// Type alias for Document
 pub type Doc<'a> = Document<'a>;
 

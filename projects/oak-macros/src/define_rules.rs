@@ -8,12 +8,12 @@ use syn::{
 
 /// Procedural macro for defining formatting rules.
 ///
-/// This macro generates a `Vec<Box<dyn FormatRule<L>>>` containing rules for formatting nodes and tokens.
+/// This macro generates a `Vec<Box<dyn FormatRule<L, P>>>` containing rules for formatting nodes and tokens.
 /// Each rule can specify its name, priority, and handlers for nodes and tokens.
 pub fn define_rules(input: TokenStream) -> TokenStream {
     let input = parse_macro_input!(input as RulesInput);
     let mut expanded = quote! {
-        let mut rules: Vec<Box<dyn FormatRule<L>>> = Vec::new();
+        let mut rules: Vec<Box<dyn FormatRule<L, P>>> = Vec::new();
     };
 
     for rule in input.rules {
@@ -47,7 +47,7 @@ pub fn define_rules(input: TokenStream) -> TokenStream {
             let children_arg = &node.children_arg;
             let body = &node.body;
             quote! {
-                fn apply_node<'a>(&self, _node: &oak_core::tree::RedNode<L>, _context: &FormatContext<L>, _source: &'a str, _format_children: &dyn Fn(&oak_core::tree::RedNode<L>) -> FormatResult<Doc<'a>>) -> FormatResult<Option<Doc<'a>>> {
+                fn apply_node<'a>(&self, _node: &oak_core::tree::RedNode<L>, _context: &FormatContext<L, P>, _source: &'a str, _format_children: &dyn Fn(&oak_core::tree::RedNode<L>) -> FormatResult<Doc<'a>>) -> FormatResult<Option<Doc<'a>>> {
                     let #node_arg = _node;
                     let #ctx_arg = _context;
                     let #source_arg = _source;
@@ -58,7 +58,7 @@ pub fn define_rules(input: TokenStream) -> TokenStream {
         }
         else {
             quote! {
-                fn apply_node<'a>(&self, _node: &oak_core::tree::RedNode<L>, _context: &FormatContext<L>, _source: &'a str, _format_children: &dyn Fn(&oak_core::tree::RedNode<L>) -> FormatResult<Doc<'a>>) -> FormatResult<Option<Doc<'a>>> {
+                fn apply_node<'a>(&self, _node: &oak_core::tree::RedNode<L>, _context: &FormatContext<L, P>, _source: &'a str, _format_children: &dyn Fn(&oak_core::tree::RedNode<L>) -> FormatResult<Doc<'a>>) -> FormatResult<Option<Doc<'a>>> {
                     Ok(None)
                 }
             }
@@ -90,7 +90,7 @@ pub fn define_rules(input: TokenStream) -> TokenStream {
             let source_arg = &token.source_arg;
             let body = &token.body;
             quote! {
-                fn apply_token<'a>(&self, _token: &oak_core::tree::RedLeaf<L>, _context: &FormatContext<L>, _source: &'a str) -> FormatResult<Option<Doc<'a>>> {
+                fn apply_token<'a>(&self, _token: &oak_core::tree::RedLeaf<L>, _context: &FormatContext<L, P>, _source: &'a str) -> FormatResult<Option<Doc<'a>>> {
                     let #token_arg = _token;
                     let #ctx_arg = _context;
                     let #source_arg = _source;
@@ -100,7 +100,7 @@ pub fn define_rules(input: TokenStream) -> TokenStream {
         }
         else {
             quote! {
-                fn apply_token<'a>(&self, _token: &oak_core::tree::RedLeaf<L>, _context: &FormatContext<L>, _source: &'a str) -> FormatResult<Option<Doc<'a>>> {
+                fn apply_token<'a>(&self, _token: &oak_core::tree::RedLeaf<L>, _context: &FormatContext<L, P>, _source: &'a str) -> FormatResult<Option<Doc<'a>>> {
                     Ok(None)
                 }
             }
@@ -110,8 +110,8 @@ pub fn define_rules(input: TokenStream) -> TokenStream {
         expanded.extend(quote! {
             {
                 #[allow(non_camel_case_types)]
-                struct #name<L: oak_core::language::Language>(core::marker::PhantomData<L>);
-                impl<L: oak_core::language::Language> FormatRule<L> for #name<L> {
+                struct #name<L: oak_core::language::Language, P>(core::marker::PhantomData<(L, P)>);
+                impl<L: oak_core::language::Language, P> FormatRule<L, P> for #name<L, P> {
                     fn name(&self) -> &str { stringify!(#name) }
                     fn priority(&self) -> u8 { #priority }
                     #applies_to_node

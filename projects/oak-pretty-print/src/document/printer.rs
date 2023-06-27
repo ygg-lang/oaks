@@ -1,9 +1,130 @@
-use crate::{config::FormatConfig, document::Document};
+use crate::document::Document;
+use alloc::borrow::Cow;
 use alloc::string::String;
+
+/// Indent style
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+#[cfg_attr(feature = "serde", serde(tag = "type", content = "value"))]
+pub enum IndentStyle {
+    /// Use spaces
+    Spaces(u8),
+    /// Use tabs
+    Tabs,
+}
+
+impl Default for IndentStyle {
+    fn default() -> Self {
+        IndentStyle::Spaces(4)
+    }
+}
+
+/// Line ending
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+#[cfg_attr(feature = "serde", serde(rename_all = "camelCase"))]
+pub enum LineEnding {
+    /// Unix style (\n)
+    Unix,
+    /// Windows style (\r\n)
+    Windows,
+    /// Auto detect
+    Auto,
+}
+
+impl Default for LineEnding {
+    fn default() -> Self {
+        LineEnding::Auto
+    }
+}
+
+/// Printer configuration
+#[derive(Debug, Clone)]
+pub struct PrinterConfig {
+    /// Indent style
+    pub indent_style: IndentStyle,
+    /// Indent text (cached single-level indent string)
+    pub indent_text: Cow<'static, str>,
+    /// Line ending
+    pub line_ending: LineEnding,
+    /// Maximum line length
+    pub max_width: usize,
+    /// Whether to insert a final newline at the end of the file
+    pub insert_final_newline: bool,
+    /// Whether to trim trailing whitespace
+    pub trim_trailing_whitespace: bool,
+    /// Indent size (used for column calculation)
+    pub indent_size: usize,
+}
+
+impl Default for PrinterConfig {
+    fn default() -> Self {
+        let indent_style = IndentStyle::default();
+        let (indent_text, indent_size) = match indent_style {
+            IndentStyle::Spaces(count) => (" ".repeat(count as usize).into(), count as usize),
+            IndentStyle::Tabs => ("\t".into(), 4),
+        };
+
+        Self {
+            indent_style,
+            indent_text,
+            line_ending: LineEnding::default(),
+            max_width: 100,
+            insert_final_newline: true,
+            trim_trailing_whitespace: true,
+            indent_size,
+        }
+    }
+}
+
+impl PrinterConfig {
+    /// Creates a new default configuration
+    pub fn new() -> Self {
+        Self::default()
+    }
+
+    /// Gets the line ending string
+    pub fn line_ending_string(&self) -> &'static str {
+        match self.line_ending {
+            LineEnding::Unix => "\n",
+            LineEnding::Windows => "\r\n",
+            LineEnding::Auto => {
+                #[cfg(windows)]
+                return "\r\n";
+                #[cfg(not(windows))]
+                return "\n";
+            }
+        }
+    }
+
+    /// Sets the indent style
+    pub fn with_indent_style(mut self, style: IndentStyle) -> Self {
+        self.indent_style = style;
+        let (indent_text, indent_size) = match style {
+            IndentStyle::Spaces(count) => (" ".repeat(count as usize).into(), count as usize),
+            IndentStyle::Tabs => ("\t".into(), 4),
+        };
+        self.indent_text = indent_text;
+        self.indent_size = indent_size;
+        self
+    }
+
+    /// Sets the line ending
+    pub fn with_line_ending(mut self, ending: LineEnding) -> Self {
+        self.line_ending = ending;
+        self
+    }
+
+    /// Sets the maximum line length
+    pub fn with_max_width(mut self, length: usize) -> Self {
+        self.max_width = length;
+        self
+    }
+}
 
 /// Responsible for rendering a Document into a string
 pub struct Printer {
-    config: FormatConfig,
+    config: PrinterConfig,
     output: String,
     indent_level: usize,
     column: usize,
@@ -11,7 +132,7 @@ pub struct Printer {
 
 impl Printer {
     /// Creates a new printer with the given configuration
-    pub fn new(config: FormatConfig) -> Self {
+    pub fn new(config: PrinterConfig) -> Self {
         Self { config, output: String::new(), indent_level: 0, column: 0 }
     }
 
@@ -44,8 +165,6 @@ impl Printer {
                 }
             }
             Document::Group(d) => {
-                // No longer forcibly inherit the broken state from the parent, but decide based on whether the current content overflows
-                // This allows for more granular layout: when the parent is expanded, the child can still remain on a single line if it fits
                 let should_break = self.will_break(d);
                 self.render(d, should_break)
             }
@@ -126,20 +245,15 @@ impl Printer {
             Document::Group(d) => self.check_width(d, width),
             Document::Indent(d) => self.check_width(d, width),
             Document::Line => {
-                // In non-expanded mode, Line behaves as a space
                 *width += 1;
                 *width > self.config.max_width
             }
-            Document::SoftLine => {
-                // In non-expanded mode, SoftLine takes no space
-                false
-            }
+            Document::SoftLine => false,
             Document::SoftLineSpace => {
-                // In non-expanded mode, SoftLineSpace behaves as a space
                 *width += 1;
                 *width > self.config.max_width
             }
-            Document::HardLine => true, // HardLine means it must be expanded
+            Document::HardLine => true,
         }
     }
 }

@@ -26,6 +26,7 @@ pub fn derive_as_document(input: TokenStream) -> TokenStream {
             if let Some(expr) = custom_doc {
                 quote! {
                     let _self = self;
+                    let _params = params;
                     #expr
                 }
             }
@@ -41,7 +42,7 @@ pub fn derive_as_document(input: TokenStream) -> TokenStream {
                     {
                         #[allow(unused_imports)]
                         use ::oak_pretty_print::AsDocument;
-                        #field_name.as_document()
+                        #field_name.as_document(&())
                     }
                 }
             }
@@ -74,6 +75,7 @@ pub fn derive_as_document(input: TokenStream) -> TokenStream {
                             quote! {
                                 #name::#variant_name { #ident, .. } => {
                                     let _self = #ident;
+                                    let _params = params;
                                     #expr
                                 },
                             }
@@ -82,6 +84,7 @@ pub fn derive_as_document(input: TokenStream) -> TokenStream {
                             quote! {
                                 #name::#variant_name(_v) => {
                                     let _self = _v;
+                                    let _params = params;
                                     #expr
                                 },
                             }
@@ -89,7 +92,10 @@ pub fn derive_as_document(input: TokenStream) -> TokenStream {
                     }
                     else {
                         quote! {
-                            #name::#variant_name { .. } => #expr,
+                            #name::#variant_name { .. } => {
+                                let _params = params;
+                                #expr
+                            },
                         }
                     }
                 }
@@ -98,7 +104,7 @@ pub fn derive_as_document(input: TokenStream) -> TokenStream {
                         #name::#variant_name(v) => {
                             #[allow(unused_imports)]
                             use ::oak_pretty_print::AsDocument;
-                            v.as_document()
+                            v.as_document(&())
                         },
                     }
                 }
@@ -124,7 +130,7 @@ pub fn derive_as_document(input: TokenStream) -> TokenStream {
 
     let expanded = quote! {
         impl #impl_generics ::oak_pretty_print::AsDocument for #name #ty_generics {
-            fn as_document(&self) -> ::oak_pretty_print::Doc<'_> {
+            fn as_document(&self, params: &Self::Params) -> ::oak_pretty_print::Doc<'_> {
                 #body
             }
         }

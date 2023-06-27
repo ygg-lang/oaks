@@ -1,9 +1,10 @@
-use crate::{config::FormatConfig, document::printer::Printer};
 use alloc::{borrow::Cow, boxed::Box, string::String, vec::Vec};
 use core::fmt;
 
 /// Document printer implementation
 pub mod printer;
+
+pub use self::printer::{IndentStyle, LineEnding, Printer, PrinterConfig};
 
 /// Document abstraction for describing layout logic
 #[derive(Clone)]
@@ -64,20 +65,36 @@ impl<'a> fmt::Debug for Document<'a> {
 }
 
 impl<'a> Document<'a> {
+    /// Renders the document into a string using default configuration
+    ///
+    /// # Examples
+    ///
+    /// ```rust
+    /// # use oak_pretty_print::Document;
+    /// let doc =
+    ///     Document::concat(vec![Document::text("hello"), Document::HardLine, Document::text("world")]);
+    /// let output = doc.render();
+    /// assert_eq!(output, "hello\nworld");
+    /// ```
+    pub fn render(&self) -> String {
+        let config = self::printer::PrinterConfig::default();
+        self::printer::Printer::new(config).print(self)
+    }
+
     /// Renders the document into a string using the provided configuration
     ///
     /// # Examples
     ///
     /// ```rust
-    /// # use oak_pretty_print::{Document, FormatConfig};
+    /// # use oak_pretty_print::{Document, document::printer::PrinterConfig};
     /// let doc =
-    ///     Document::concat(vec![Document::text("hello"), Document::Line, Document::text("world")]);
-    /// let config = FormatConfig::default();
-    /// let output = doc.render(config);
+    ///     Document::concat(vec![Document::text("hello"), Document::HardLine, Document::text("world")]);
+    /// let config = PrinterConfig::default();
+    /// let output = doc.render_with_config(config);
     /// assert_eq!(output, "hello\nworld");
     /// ```
-    pub fn render(&self, config: FormatConfig) -> String {
-        Printer::new(config).print(self)
+    pub fn render_with_config(&self, config: self::printer::PrinterConfig) -> String {
+        self::printer::Printer::new(config).print(self)
     }
 
     /// Creates a text document

@@ -42,12 +42,30 @@ pub struct Comment {
     pub is_trailing: bool,
     /// Indentation level
     pub indent_level: usize,
+    /// Whether the comment is attached to a node
+    pub is_attached: bool,
+    /// The node type the comment is attached to
+    pub attached_node_type: Option<String>,
+    /// Whether the comment is a leading comment
+    pub is_leading: bool,
+    /// Whether the comment is a block comment that should be preserved as-is
+    pub preserve_format: bool,
 }
 
 impl Comment {
     /// Creates a new comment
     pub fn new(kind: CommentKind, content: String, span: SourceSpan) -> Self {
-        Self { kind, content, span, is_trailing: false, indent_level: 0 }
+        Self {
+            kind,
+            content,
+            span,
+            is_trailing: false,
+            indent_level: 0,
+            is_attached: false,
+            attached_node_type: None,
+            is_leading: false,
+            preserve_format: false,
+        }
     }
 
     /// Creates a new line comment
@@ -77,8 +95,37 @@ impl Comment {
         self
     }
 
+    /// Sets whether the comment is attached to a node
+    pub fn with_attached(mut self, is_attached: bool) -> Self {
+        self.is_attached = is_attached;
+        self
+    }
+
+    /// Sets the node type the comment is attached to
+    pub fn with_attached_node_type(mut self, node_type: Option<String>) -> Self {
+        self.attached_node_type = node_type;
+        self
+    }
+
+    /// Sets whether the comment is a leading comment
+    pub fn with_leading(mut self, is_leading: bool) -> Self {
+        self.is_leading = is_leading;
+        self
+    }
+
+    /// Sets whether the comment's format should be preserved
+    pub fn with_preserve_format(mut self, preserve: bool) -> Self {
+        self.preserve_format = preserve;
+        self
+    }
+
     /// Gets the formatted comment text
     pub fn formatted_text(&self, indent: &str) -> String {
+        // If preserve_format is true, return the original content
+        if self.preserve_format {
+            return self.content.clone();
+        }
+
         let prefix = match self.kind {
             CommentKind::Line => "//",
             CommentKind::Block => "/*",
@@ -171,6 +218,26 @@ impl CommentCollector {
         self.comments.iter().filter(|comment| comment.is_trailing).collect()
     }
 
+    /// Gets leading comments
+    pub fn leading_comments(&self) -> Vec<&Comment> {
+        self.comments.iter().filter(|comment| comment.is_leading).collect()
+    }
+
+    /// Gets attached comments
+    pub fn attached_comments(&self) -> Vec<&Comment> {
+        self.comments.iter().filter(|comment| comment.is_attached).collect()
+    }
+
+    /// Gets comments by kind
+    pub fn comments_by_kind(&self, kind: CommentKind) -> Vec<&Comment> {
+        self.comments.iter().filter(|comment| comment.kind == kind).collect()
+    }
+
+    /// Gets comments attached to a specific node type
+    pub fn comments_attached_to(&self, node_type: &str) -> Vec<&Comment> {
+        self.comments.iter().filter(|comment| comment.attached_node_type.as_ref().map(|s| s.as_str()) == Some(node_type)).collect()
+    }
+
     /// Clears all comments
     pub fn clear(&mut self) {
         self.comments.clear()
@@ -179,6 +246,26 @@ impl CommentCollector {
     /// Sorts comments by position
     pub fn sort_by_position(&mut self) {
         self.comments.sort_by(|a, b| a.span.start.offset.cmp(&b.span.start.offset))
+    }
+
+    /// Sorts comments by line and column
+    pub fn sort_by_line_column(&mut self) {
+        self.comments.sort_by(|a, b| {
+            if a.span.start.line == b.span.start.line {
+                a.span.start.column.cmp(&b.span.start.column)
+            } else {
+                a.span.start.line.cmp(&b.span.start.line)
+            }
+        })
+    }
+
+    /// Groups comments by line
+    pub fn group_by_line(&self) -> std::collections::HashMap<usize, Vec<&Comment>> {
+        let mut groups = std::collections::HashMap::new();
+        for comment in &self.comments {
+            groups.entry(comment.span.start.line).or_insert_with(Vec::new).push(comment);
+        }
+        groups
     }
 }
 
@@ -264,6 +351,58 @@ impl CommentProcessor {
                 output.push(' ');
                 output.push_str(&comment.formatted_text(""));
                 break; // Only process the first trailing comment
+            }
+        }
+    }
+
+    /// Inserts leading comments for a node
+    pub fn insert_leading_comments(&self, output: &mut String, node_type: &str, indent: &str) {
+        let comments = self.collector.comments_attached_to(node_type);
+        for comment in comments {
+            if comment.is_leading {
+                output.push_str(indent);
+                output.push_str(&comment.formatted_text(indent));
+                output.push('\n');
+            }
+        }
+    }
+
+    /// Inserts attached comments for a node
+    pub fn insert_attached_comments(&self, output: &mut String, node_type: &str, indent: &str) {
+        let comments = self.collector.comments_attached_to(node_type);
+        for comment in comments {
+            if comment.is_attached && !comment.is_leading && !comment.is_trailing {
+                output.push_str(indent);
+                output.push_str(&comment.formatted_text(indent));
+                output.push('\n');
+            }
+        }
+    }
+
+    /// Groups comments by their position relative to nodes
+    pub fn group_comments_by_position(&mut self) {
+        // Sort comments by position
+        self.collector.sort_by_position();
+
+        // TODO: Implement grouping logic based on node positions
+        // This would require access to the AST nodes
+    }
+
+    /// Detects and marks comment types based on context
+    pub fn detect_comment_types(&mut self) {
+        // Sort comments by line and column
+        self.collector.sort_by_line_column();
+
+        // Group comments by line
+        let line_groups = self.collector.group_by_line();
+
+        // Process each line's comments
+        for (line, comments) in line_groups {
+            // If there's only one comment on the line, check if it's trailing
+            if comments.len() == 1 {
+                let comment = &comments[0];
+                // TODO: Check if the comment is at the end of a line with code
+                // This would require access to the source code
             }
         }
     }

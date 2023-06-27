@@ -55,10 +55,12 @@ impl<'config> ValkyrieBuilder<'config> {
             ValkyrieElementType::ContinueExpression => self.build_continue(node, source),
             ValkyrieElementType::YieldExpression => self.build_yield(node, source),
             ValkyrieElementType::RaiseExpression => self.build_raise(node, source),
+            ValkyrieElementType::ResumeExpression => self.build_resume(node, source),
             ValkyrieElementType::CatchExpression => self.build_catch(node, source),
             ValkyrieElementType::IdentifierExpression => self.build_identifier_expr(node, source),
             ValkyrieElementType::PathExpression => self.build_path_expr(node, source),
             ValkyrieElementType::AnonymousClass => self.build_anonymous_class(node, source),
+            ValkyrieElementType::SuperCallExpression => self.build_super_call(node, source),
             _ => Err(source.syntax_error(format!("Unexpected expression kind: {:?}", node.green.kind), span.start)),
         }
     }
@@ -484,10 +486,7 @@ impl<'config> ValkyrieBuilder<'config> {
 
         if uses_deprecated_syntax {
             if let Some(ref name) = field_name {
-                eprintln!(
-                    "Warning: Use of deprecated '=' syntax in object field at offset {}. Use ':' instead. Field: '{}'",
-                    name.span.start, name.name
-                );
+                eprintln!("Warning: Use of deprecated '=' syntax in object field at offset {}. Use ':' instead. Field: '{}'", name.span.start, name.name);
             }
         }
 
@@ -755,10 +754,7 @@ impl<'config> ValkyrieBuilder<'config> {
 
         if uses_deprecated_syntax {
             if let Some(ref name) = field_name {
-                eprintln!(
-                    "Warning: Use of deprecated '=' syntax in pattern field at offset {}. Use ':' instead. Field: '{}'",
-                    name.span.start, name.name
-                );
+                eprintln!("Warning: Use of deprecated '=' syntax in pattern field at offset {}. Use ':' instead. Field: '{}'", name.span.start, name.name);
             }
         }
 
@@ -932,6 +928,32 @@ impl<'config> ValkyrieBuilder<'config> {
         Ok(Expr::Raise { expr, span })
     }
 
+    pub(crate) fn build_resume<S: Source + ?Sized>(&self, node: RedNode<ValkyrieLanguage>, source: &S) -> Result<Expr, OakError> {
+        let span = node.span();
+        let mut expr = None;
+
+        for child in node.children() {
+            match child {
+                RedTree::Leaf(t) => match t.kind {
+                    ValkyrieTokenType::Whitespace | ValkyrieTokenType::Newline | ValkyrieTokenType::LineComment | ValkyrieTokenType::BlockComment => continue,
+                    _ => {}
+                },
+                RedTree::Node(n) => match n.green.kind {
+                    ValkyrieElementType::Whitespace | ValkyrieElementType::Newline | ValkyrieElementType::LineComment | ValkyrieElementType::BlockComment => continue,
+                    _ => {
+                        if expr.is_none() {
+                            expr = Some(Box::new(self.build_expr(n, source)?));
+                        }
+                    }
+                },
+            }
+        }
+
+        let expr = expr.ok_or_else(|| source.syntax_error("Missing resume expression".to_string(), span.start))?;
+
+        Ok(Expr::Resume { expr, span })
+    }
+
     pub(crate) fn build_catch<S: Source + ?Sized>(&self, node: RedNode<ValkyrieLanguage>, source: &S) -> Result<Expr, OakError> {
         let span = node.span();
         let mut expr = None;
@@ -1029,5 +1051,65 @@ impl<'config> ValkyrieBuilder<'config> {
         }
 
         Ok(Expr::AnonymousClass { parents, items, captures, span })
+    }
+
+    /// Builds a super call expression for constructor chaining.
+    ///
+    /// Syntax: `super.initiate(args)` or `super.alias.initiate(args)`
+    ///
+    /// ```v
+    /// class Derived(Base) {
+    ///     initiate(mut self, x: i32) {
+    ///         super.initiate(x)  // Call parent constructor
+    ///     }
+    /// }
+    ///
+    /// class Child(primary: ParentA, secondary: ParentB) {
+    ///     initiate(mut self) {
+    ///         super.primary.initiate()  // Call specific parent
+    ///         super.secondary.initiate()
+    ///     }
+    /// }
+    /// ```
+    pub(crate) fn build_super_call<S: Source + ?Sized>(&self, node: RedNode<ValkyrieLanguage>, source: &S) -> Result<Expr, OakError> {
+        let span = node.span();
+        let mut parent_alias = None;
+        let mut method = None;
+        let mut args = Vec::new();
+
+        for child in node.children() {
+            match child {
+                RedTree::Leaf(t) => match t.kind {
+                    ValkyrieTokenType::Whitespace | ValkyrieTokenType::Newline | ValkyrieTokenType::LineComment | ValkyrieTokenType::BlockComment => continue,
+                    ValkyrieTokenType::Identifier => {
+                        if method.is_none() {
+                            method = Some(Identifier { name: text(source, t.span), span: t.span });
+                        }
+                        else if parent_alias.is_none() {
+                            parent_alias = method.take();
+                            method = Some(Identifier { name: text(source, t.span), span: t.span });
+                        }
+                    }
+                    _ => {}
+                },
+                RedTree::Node(n) => match n.green.kind {
+                    ValkyrieElementType::Whitespace | ValkyrieElementType::Newline | ValkyrieElementType::LineComment | ValkyrieElementType::BlockComment => continue,
+                    ValkyrieElementType::ArgList => {
+                        for arg_child in n.children() {
+                            if let RedTree::Node(arg_n) = arg_child {
+                                if let Ok(arg) = self.build_expr(arg_n, source) {
+                                    args.push(arg);
+                                }
+                            }
+                        }
+                    }
+                    _ => {}
+                },
+            }
+        }
+
+        let method = method.ok_or_else(|| source.syntax_error("Missing method name in super call".to_string(), span.start))?;
+
+        Ok(Expr::SuperCall { parent_alias, method, args, span })
     }
 }
