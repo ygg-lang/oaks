@@ -285,7 +285,13 @@ impl RbqExpr {
             }
             RbqElementType::Expression => {
                 let first_node = red.children().find_map(|c| c.as_node());
-                if let Some(node) = first_node { return Self::lower(node, source) } else { RbqExprKind::Identifier(source[span.clone()].to_string()) }
+                if let Some(node) = first_node {
+                    let node_kind = node.kind::<RbqElementType>();
+                    if node_kind != RbqElementType::Expression {
+                        return Self::lower(node, source);
+                    }
+                }
+                RbqExprKind::Identifier(source[span.clone()].to_string())
             }
             _ => RbqExprKind::Identifier(source[span.clone()].to_string()),
         };

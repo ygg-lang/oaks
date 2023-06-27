@@ -1,6 +1,9 @@
+#[cfg(feature = "oak-pretty-print")]
 use crate::ast::*;
-use oak_pretty_print::{AsDocument, Document, LINE as line, NIL as nil, SOFT_LINE_SPACE as soft_space, doc};
+#[cfg(feature = "oak-pretty-print")]
+use oak_pretty_print::{AsDocument, Document, LINE as line, NIL as nil, SOFT_LINE_SPACE as soft_space, doc, indent};
 
+#[cfg(feature = "oak-pretty-print")]
 impl AsDocument for RbqRoot {
     type Params = ();
 
@@ -9,6 +12,7 @@ impl AsDocument for RbqRoot {
     }
 }
 
+#[cfg(feature = "oak-pretty-print")]
 impl AsDocument for RbqItem {
     type Params = ();
 
@@ -26,11 +30,12 @@ impl AsDocument for RbqItem {
     }
 }
 
+#[cfg(feature = "oak-pretty-print")]
 impl AsDocument for RbqStruct {
     type Params = ();
 
     fn as_document(&self, params: &Self::Params) -> Document<'_> {
-        let header = doc!(Document::join(self.annotations.iter().map(|it| it.as_document(params)), line), if !self.annotations.is_empty() { line } else { nil }, "struct", soft_space, self.name.as_str(), soft_space, "{");
+        let header = doc!(Document::join(self.annotations.iter().map(|it| it.as_document(params)), line), if !self.annotations.is_empty() { line } else { nil }, "model", soft_space, self.name.as_str(), soft_space, "{");
 
         let body = doc!(Document::join(self.fields.iter().map(|it| it.as_document(params)), line),);
 
@@ -38,6 +43,7 @@ impl AsDocument for RbqStruct {
     }
 }
 
+#[cfg(feature = "oak-pretty-print")]
 impl AsDocument for RbqNamespace {
     type Params = ();
 
@@ -46,6 +52,7 @@ impl AsDocument for RbqNamespace {
     }
 }
 
+#[cfg(feature = "oak-pretty-print")]
 impl AsDocument for RbqUnion {
     type Params = ();
 
@@ -56,6 +63,7 @@ impl AsDocument for RbqUnion {
     }
 }
 
+#[cfg(feature = "oak-pretty-print")]
 impl AsDocument for RbqEnum {
     type Params = ();
 
@@ -66,6 +74,7 @@ impl AsDocument for RbqEnum {
     }
 }
 
+#[cfg(feature = "oak-pretty-print")]
 impl AsDocument for RbqUnionMember {
     type Params = ();
 
@@ -81,6 +90,7 @@ impl AsDocument for RbqUnionMember {
     }
 }
 
+#[cfg(feature = "oak-pretty-print")]
 impl AsDocument for RbqUnionPayload {
     type Params = ();
 
@@ -92,6 +102,7 @@ impl AsDocument for RbqUnionPayload {
     }
 }
 
+#[cfg(feature = "oak-pretty-print")]
 impl AsDocument for RbqTrait {
     type Params = ();
 
@@ -111,6 +122,7 @@ impl AsDocument for RbqTrait {
     }
 }
 
+#[cfg(feature = "oak-pretty-print")]
 impl AsDocument for RbqTraitItem {
     type Params = ();
 
@@ -122,6 +134,7 @@ impl AsDocument for RbqTraitItem {
     }
 }
 
+#[cfg(feature = "oak-pretty-print")]
 impl AsDocument for RbqField {
     type Params = ();
 
@@ -139,6 +152,7 @@ impl AsDocument for RbqField {
     }
 }
 
+#[cfg(feature = "oak-pretty-print")]
 impl AsDocument for RbqTypeAlias {
     type Params = ();
 
@@ -147,6 +161,7 @@ impl AsDocument for RbqTypeAlias {
     }
 }
 
+#[cfg(feature = "oak-pretty-print")]
 impl AsDocument for RbqAnnotation {
     type Params = ();
 
@@ -155,6 +170,7 @@ impl AsDocument for RbqAnnotation {
     }
 }
 
+#[cfg(feature = "oak-pretty-print")]
 impl AsDocument for RbqMicro {
     type Params = ();
 
@@ -163,6 +179,7 @@ impl AsDocument for RbqMicro {
     }
 }
 
+#[cfg(feature = "oak-pretty-print")]
 impl AsDocument for RbqImport {
     type Params = ();
 
@@ -171,6 +188,7 @@ impl AsDocument for RbqImport {
     }
 }
 
+#[cfg(feature = "oak-pretty-print")]
 impl AsDocument for RbqType {
     type Params = ();
 
@@ -198,6 +216,7 @@ impl AsDocument for RbqType {
     }
 }
 
+#[cfg(feature = "oak-pretty-print")]
 impl AsDocument for RbqLiteral {
     type Params = ();
 
@@ -210,6 +229,7 @@ impl AsDocument for RbqLiteral {
     }
 }
 
+#[cfg(feature = "oak-pretty-print")]
 impl AsDocument for RbqExpr {
     type Params = ();
 
@@ -243,6 +263,7 @@ impl AsDocument for RbqExpr {
     }
 }
 
+#[cfg(feature = "oak-pretty-print")]
 impl AsDocument for RbqPipelineStep {
     type Params = ();
 

@@ -37,63 +37,37 @@ impl RbqType {
         let mut is_optional = false;
         let mut is_ref = false;
         let mut path = String::new();
-        let mut generic_args = Vec::new();
-        let mut inline_fields = Vec::new();
-        let mut literal = None;
 
+        // 简单处理类型，避免递归
         for child in red.children() {
             match child.kind::<RbqElementType>() {
                 RbqElementType::Question => is_optional = true,
                 RbqElementType::Ampersand => is_ref = true,
-                RbqElementType::Ident | RbqElementType::Utf8Kw => {
-                    if path.is_empty() {
-                        path = source[child.span()].trim().to_string();
-                    }
-                    else {
-                        path.push('.');
-                        path.push_str(source[child.span()].trim());
-                    }
+                RbqElementType::Ident => {
+                    path = source[child.span()].trim().to_string();
                 }
-                RbqElementType::Dot => {}
-                RbqElementType::GenericArgs => {
-                    if let Some(node) = child.as_node() {
-                        for arg_child in node.children() {
-                            if let Some(arg_node) = arg_child.as_node() {
-                                generic_args.push(RbqType::lower(arg_node, source));
-                            }
-                            else if arg_child.kind::<RbqElementType>() == RbqElementType::NumberLiteral || arg_child.kind::<RbqElementType>() == RbqElementType::StringLiteral {
-                                generic_args.push(RbqType::Literal(source[arg_child.span()].trim().to_string(), arg_child.span()));
-                            }
-                        }
-                    }
-                }
-                RbqElementType::FieldDef => {
-                    if let Some(node) = child.as_node() {
-                        inline_fields.push(RbqField::lower(node, source));
-                    }
-                }
-                RbqElementType::Literal => {
-                    literal = Some((source[child.span()].trim().to_string(), child.span()));
+                RbqElementType::Utf8Kw => {
+                    path = "utf8".to_string();
                 }
                 _ => {}
             }
         }
 
-        if !inline_fields.is_empty() {
-            return RbqType::InlineStruct(inline_fields, span);
+        // 如果没有找到路径，使用默认值
+        if path.is_empty() {
+            path = "any".to_string();
         }
 
-        if let Some((lit, lit_span)) = literal {
-            return RbqType::Literal(lit, lit_span);
-        }
+        let mut t = RbqType::Named { path, generic_args: Vec::new(), is_physical_ptr: is_ref, is_optional, span: span.clone() };
 
-        let mut t = RbqType::Named { path, generic_args, is_physical_ptr: is_ref, is_optional, span: span.clone() };
         if is_ref {
             t = RbqType::PhysicalRef(Box::new(t), span.clone());
         }
+
         if is_optional {
             t = RbqType::Optional(Box::new(t), span);
         }
+
         t
     }
 }

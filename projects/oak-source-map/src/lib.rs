@@ -16,7 +16,7 @@ pub use decoder::SourceMapDecoder;
 pub use error::{Result, SourceMapError};
 pub use mapping::{BoundedMapping, Mapping, Segment};
 pub use source_map::{SourceMap, SourceMapMetadata};
-pub use vlq::{vlq_decode, vlq_encode, vlq_decode_many, vlq_encode_many};
+pub use vlq::{vlq_decode, vlq_decode_many, vlq_encode, vlq_encode_many};
 
 pub use source_map::SourceMapInput;
 

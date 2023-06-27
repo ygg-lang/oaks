@@ -71,8 +71,11 @@ impl<'a> Document<'a> {
     ///
     /// ```rust
     /// # use oak_pretty_print::Document;
-    /// let doc =
-    ///     Document::concat(vec![Document::text("hello"), Document::HardLine, Document::text("world")]);
+    /// let doc = Document::concat(vec![
+    ///     Document::text("hello"),
+    ///     Document::HardLine,
+    ///     Document::text("world"),
+    /// ]);
     /// let output = doc.render();
     /// assert_eq!(output, "hello\nworld");
     /// ```
@@ -87,8 +90,11 @@ impl<'a> Document<'a> {
     ///
     /// ```rust
     /// # use oak_pretty_print::{Document, document::printer::PrinterConfig};
-    /// let doc =
-    ///     Document::concat(vec![Document::text("hello"), Document::HardLine, Document::text("world")]);
+    /// let doc = Document::concat(vec![
+    ///     Document::text("hello"),
+    ///     Document::HardLine,
+    ///     Document::text("world"),
+    /// ]);
     /// let config = PrinterConfig::default();
     /// let output = doc.render_with_config(config);
     /// assert_eq!(output, "hello\nworld");

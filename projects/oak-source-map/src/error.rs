@@ -59,17 +59,9 @@ impl PartialEq for SourceMapError {
         match (self, other) {
             (SourceMapError::InvalidVersion(a), SourceMapError::InvalidVersion(b)) => a == b,
             (SourceMapError::MissingField(a), SourceMapError::MissingField(b)) => a == b,
-            (
-                SourceMapError::InvalidVlq { position: pos_a, message: msg_a },
-                SourceMapError::InvalidVlq { position: pos_b, message: msg_b },
-            ) => pos_a == pos_b && msg_a == msg_b,
-            (
-                SourceMapError::InvalidMapping { line: line_a, column: col_a, message: msg_a },
-                SourceMapError::InvalidMapping { line: line_b, column: col_b, message: msg_b },
-            ) => line_a == line_b && col_a == col_b && msg_a == msg_b,
-            (SourceMapError::IndexOutOfBounds { index: idx_a, length: len_a }, SourceMapError::IndexOutOfBounds { index: idx_b, length: len_b }) => {
-                idx_a == idx_b && len_a == len_b
-            }
+            (SourceMapError::InvalidVlq { position: pos_a, message: msg_a }, SourceMapError::InvalidVlq { position: pos_b, message: msg_b }) => pos_a == pos_b && msg_a == msg_b,
+            (SourceMapError::InvalidMapping { line: line_a, column: col_a, message: msg_a }, SourceMapError::InvalidMapping { line: line_b, column: col_b, message: msg_b }) => line_a == line_b && col_a == col_b && msg_a == msg_b,
+            (SourceMapError::IndexOutOfBounds { index: idx_a, length: len_a }, SourceMapError::IndexOutOfBounds { index: idx_b, length: len_b }) => idx_a == idx_b && len_a == len_b,
             (SourceMapError::InvalidSourceIndex(a), SourceMapError::InvalidSourceIndex(b)) => a == b,
             (SourceMapError::InvalidNameIndex(a), SourceMapError::InvalidNameIndex(b)) => a == b,
             (SourceMapError::CompositionError(a), SourceMapError::CompositionError(b)) => a == b,

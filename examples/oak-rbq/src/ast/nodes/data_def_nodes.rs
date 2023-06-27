@@ -19,7 +19,7 @@ pub struct RbqStruct {
 
 impl RbqStruct {
     /// Lowers a red node into an `RbqStruct` AST node.
-    pub fn lower(red: RedNode<RbqLanguage>, source: &str) -> Self {
+    pub fn lower(red: oak_core::tree::RedNode<RbqLanguage>, source: &str) -> Self {
         let span = red.span();
         let mut annotations = Vec::new();
         let mut name = String::new();
@@ -234,7 +234,21 @@ impl RbqField {
                 RbqElementType::Ident if name.is_empty() => name = source[child.span()].trim().to_string(),
                 RbqElementType::TypeDef | RbqElementType::TypeRef => {
                     if let Some(node) = child.as_node() {
-                        type_ref = Some(RbqType::lower(node, source))
+                        // 避免无限递归，只处理简单类型
+                        let node_kind = node.kind::<RbqElementType>();
+                        if node_kind == RbqElementType::TypeRef || node_kind == RbqElementType::TypeDef {
+                            let mut path = String::new();
+                            for type_child in node.children() {
+                                if type_child.kind::<RbqElementType>() == RbqElementType::Ident {
+                                    path = source[type_child.span()].trim().to_string();
+                                    break;
+                                }
+                            }
+                            type_ref = Some(RbqType::Named { path: path, generic_args: Vec::new(), is_physical_ptr: false, is_optional: false, span: node.span() });
+                        }
+                        else {
+                            type_ref = Some(RbqType::lower(node, source));
+                        }
                     }
                 }
                 _ => {

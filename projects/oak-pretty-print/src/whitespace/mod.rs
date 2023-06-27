@@ -1,8 +1,7 @@
-use alloc::string::String;
-use alloc::vec::Vec;
+use alloc::{string::String, vec::Vec};
 
 /// Whitespace processor
-/// 
+///
 /// This struct is responsible for handling whitespace and blank lines during formatting.
 pub struct WhitespaceProcessor {
     /// Whether to preserve blank lines
@@ -16,11 +15,7 @@ pub struct WhitespaceProcessor {
 impl WhitespaceProcessor {
     /// Creates a new whitespace processor
     pub fn new() -> Self {
-        Self {
-            preserve_blank_lines: true,
-            max_blank_lines: 2,
-            trim_trailing_whitespace: true,
-        }
+        Self { preserve_blank_lines: true, max_blank_lines: 2, trim_trailing_whitespace: true }
     }
 
     /// Sets whether to preserve blank lines
@@ -44,10 +39,10 @@ impl WhitespaceProcessor {
     /// Processes whitespace in the formatted content
     pub fn process(&self, content: &str) -> String {
         let mut lines = content.lines().collect::<Vec<_>>();
-        
+
         // Process each line
         let processed_lines = self.process_lines(&lines);
-        
+
         // Join the lines back together
         processed_lines.join("\n")
     }
@@ -59,11 +54,7 @@ impl WhitespaceProcessor {
 
         for line in lines {
             // Trim trailing whitespace if enabled
-            let processed_line = if self.trim_trailing_whitespace {
-                line.trim_end()
-            } else {
-                line
-            };
+            let processed_line = if self.trim_trailing_whitespace { line.trim_end() } else { line };
 
             // Handle blank lines
             if processed_line.is_empty() {
@@ -73,7 +64,8 @@ impl WhitespaceProcessor {
                         processed_lines.push(String::new());
                     }
                 }
-            } else {
+            }
+            else {
                 // Reset blank line count
                 blank_line_count = 0;
                 processed_lines.push(processed_line.to_string());
@@ -91,14 +83,15 @@ impl WhitespaceProcessor {
         for line in lines {
             // Remove existing indentation
             let trimmed_line = line.trim_start();
-            
+
             // Add new indentation if the line is not empty
             if !trimmed_line.is_empty() {
                 let mut new_line = String::new();
                 new_line.push_str(indent);
                 new_line.push_str(trimmed_line);
                 processed_lines.push(new_line);
-            } else {
+            }
+            else {
                 processed_lines.push(String::new());
             }
         }
@@ -131,14 +124,7 @@ impl WhitespaceProcessor {
     pub fn remove_unnecessary_spacing(&self, content: &str) -> String {
         // Simple implementation for demonstration
         // In a real implementation, this would be more sophisticated
-        content
-            .replace("  ", " ")
-            .replace(" (", "(")
-            .replace(") ", ")")
-            .replace(" [", "[")
-            .replace("] ", "]")
-            .replace(" {", "{")
-            .replace("} ", "}")
+        content.replace("  ", " ").replace(" (", "(").replace(") ", ")").replace(" [", "[").replace("] ", "]").replace(" {", "{").replace("} ", "}")
     }
 }
 

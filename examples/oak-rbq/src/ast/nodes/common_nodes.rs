@@ -28,7 +28,7 @@ impl RbqAnnotation {
                     if let Some(node) = child.as_node() {
                         for arg_child in node.children() {
                             match arg_child.kind::<RbqElementType>() {
-                                RbqElementType::Literal | RbqElementType::MagicVar | RbqElementType::BinaryExpr | RbqElementType::MemberExpr | RbqElementType::CallExpr | RbqElementType::Ident => args.push(source[arg_child.span()].trim().to_string()),
+                                RbqElementType::Literal | RbqElementType::Ident => args.push(source[arg_child.span()].trim().to_string()),
                                 _ => {}
                             }
                         }

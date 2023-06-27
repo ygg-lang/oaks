@@ -1,11 +1,10 @@
-use alloc::string::String;
-use alloc::vec::Vec;
+use alloc::{string::String, vec::Vec};
 
 #[cfg(feature = "serde")]
 use serde_json;
 
 /// Format annotation
-/// 
+///
 /// This struct represents a formatting annotation extracted from the code.
 #[derive(Debug, Clone)]
 pub struct FormatAnnotation {
@@ -18,7 +17,7 @@ pub struct FormatAnnotation {
 }
 
 /// Annotation parameter
-/// 
+///
 /// This struct represents a parameter of a formatting annotation.
 #[derive(Debug, Clone)]
 pub struct AnnotationParam {
@@ -29,7 +28,7 @@ pub struct AnnotationParam {
 }
 
 /// Annotation value
-/// 
+///
 /// This enum represents the value of an annotation parameter.
 #[derive(Debug, Clone)]
 pub enum AnnotationValue {
@@ -48,21 +47,21 @@ pub enum AnnotationValue {
 }
 
 /// Annotation parser
-/// 
+///
 /// This trait defines the interface for parsing annotations from different languages.
 pub trait AnnotationParser {
     /// Parses annotations from the source code
-    /// 
+    ///
     /// # Parameters
     /// - `source`: The source code string
-    /// 
+    ///
     /// # Returns
     /// A vector of `FormatAnnotation` objects
     fn parse(&self, source: &str) -> Vec<FormatAnnotation>;
 }
 
 /// Annotation processor
-/// 
+///
 /// This struct processes annotations and applies them to the formatting state.
 pub struct AnnotationProcessor<P: AnnotationParser> {
     /// The annotation parser to use
@@ -71,7 +70,7 @@ pub struct AnnotationProcessor<P: AnnotationParser> {
 
 impl<P: AnnotationParser> AnnotationProcessor<P> {
     /// Creates a new annotation processor
-    /// 
+    ///
     /// # Parameters
     /// - `parser`: The annotation parser to use
     pub fn new(parser: P) -> Self {
@@ -79,10 +78,10 @@ impl<P: AnnotationParser> AnnotationProcessor<P> {
     }
 
     /// Processes annotations from the source code
-    /// 
+    ///
     /// # Parameters
     /// - `source`: The source code string
-    /// 
+    ///
     /// # Returns
     /// A vector of `FormatAnnotation` objects
     pub fn process(&self, source: &str) -> Vec<FormatAnnotation> {
@@ -100,18 +99,15 @@ impl AnnotationValue {
             AnnotationValue::Float(v) => {
                 if v.is_finite() {
                     serde_json::Value::Number(serde_json::Number::from_f64(*v).unwrap_or(serde_json::Number::from(0)))
-                } else {
+                }
+                else {
                     serde_json::Value::Null
                 }
             }
             AnnotationValue::String(v) => serde_json::Value::String(v.clone()),
-            AnnotationValue::List(values) => {
-                serde_json::Value::Array(values.iter().map(|v| v.to_json()).collect())
-            }
+            AnnotationValue::List(values) => serde_json::Value::Array(values.iter().map(|v| v.to_json()).collect()),
             AnnotationValue::Map(pairs) => {
-                let json_map: serde_json::Map<String, serde_json::Value> = pairs.iter()
-                    .map(|(k, v)| (k.clone(), v.to_json()))
-                    .collect();
+                let json_map: serde_json::Map<String, serde_json::Value> = pairs.iter().map(|(k, v)| (k.clone(), v.to_json())).collect();
                 serde_json::Value::Object(json_map)
             }
         }
