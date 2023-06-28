@@ -1,10 +1,11 @@
+use serde::Deserialize;
 use std::collections::HashMap;
 
 /// TOML value representation.
 ///
 /// This represents the pure value of a TOML element without any source code location information.
-#[derive(Debug, Clone, PartialEq)]
-pub enum Value {
+#[derive(Debug, Clone, PartialEq, Deserialize)]
+pub enum TomlValue {
     /// String value.
     String(String),
     /// Integer value.
@@ -16,16 +17,28 @@ pub enum Value {
     /// Date-time value as a string.
     DateTime(String),
     /// Array value.
-    Array(Vec<Value>),
+    Array(TomlArray),
     /// Table value.
-    Table(HashMap<String, Value>),
+    Table(TomlTable),
 }
 
-impl Value {
+/// Array wrapper of toml
+#[derive(Debug, Clone, PartialEq, Deserialize)]
+pub struct TomlArray {
+    pub list: Vec<TomlValue>,
+}
+
+/// Table wrapper of toml
+#[derive(Debug, Clone, PartialEq, Deserialize)]
+pub struct TomlTable {
+    pub dict: HashMap<String, TomlValue>,
+}
+
+impl TomlValue {
     /// Returns the string slice if the value is a string.
     pub fn as_str(&self) -> Option<&str> {
         match self {
-            Value::String(s) => Some(s),
+            TomlValue::String(s) => Some(s),
             _ => None,
         }
     }
@@ -33,7 +46,7 @@ impl Value {
     /// Returns the integer value if the value is an integer.
     pub fn as_integer(&self) -> Option<i64> {
         match self {
-            Value::Integer(i) => Some(*i),
+            TomlValue::Integer(i) => Some(*i),
             _ => None,
         }
     }
@@ -41,45 +54,45 @@ impl Value {
     /// Returns the boolean value if the value is a boolean.
     pub fn as_bool(&self) -> Option<bool> {
         match self {
-            Value::Boolean(b) => Some(*b),
+            TomlValue::Boolean(b) => Some(*b),
             _ => None,
         }
     }
 
     /// Returns a reference to the array if the value is an array.
-    pub fn as_array(&self) -> Option<&Vec<Value>> {
+    pub fn as_array(&self) -> Option<&Vec<TomlValue>> {
         match self {
-            Value::Array(a) => Some(a),
+            TomlValue::Array(TomlArray { list: a }) => Some(a),
             _ => None,
         }
     }
 
     /// Returns a reference to the table if the value is a table.
-    pub fn as_table(&self) -> Option<&HashMap<String, Value>> {
+    pub fn as_table(&self) -> Option<&HashMap<String, TomlValue>> {
         match self {
-            Value::Table(t) => Some(t),
+            TomlValue::Table(TomlTable { dict: t }) => Some(t),
             _ => None,
         }
     }
 
     /// Gets a value from the table by key name.
-    pub fn get(&self, key: &str) -> Option<&Value> {
+    pub fn get(&self, key: &str) -> Option<&TomlValue> {
         match self {
-            Value::Table(t) => t.get(key),
+            TomlValue::Table(TomlTable { dict: t }) => t.get(key),
             _ => None,
         }
     }
 }
 
-impl std::fmt::Display for Value {
+impl std::fmt::Display for TomlValue {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            Value::String(s) => write!(f, "\"{}\"", s),
-            Value::Integer(i) => write!(f, "{}", i),
-            Value::Float(fl) => write!(f, "{}", fl),
-            Value::Boolean(b) => write!(f, "{}", b),
-            Value::DateTime(dt) => write!(f, "{}", dt),
-            Value::Array(a) => {
+            TomlValue::String(s) => write!(f, "\"{}\"", s),
+            TomlValue::Integer(i) => write!(f, "{}", i),
+            TomlValue::Float(fl) => write!(f, "{}", fl),
+            TomlValue::Boolean(b) => write!(f, "{}", b),
+            TomlValue::DateTime(dt) => write!(f, "{}", dt),
+            TomlValue::Array(TomlArray { list: a }) => {
                 write!(f, "[")?;
                 for (i, item) in a.iter().enumerate() {
                     if i > 0 {
@@ -89,7 +102,7 @@ impl std::fmt::Display for Value {
                 }
                 write!(f, "]")
             }
-            Value::Table(t) => {
+            TomlValue::Table(TomlTable { dict: t }) => {
                 write!(f, "{{")?;
                 for (i, (key, value)) in t.iter().enumerate() {
                     if i > 0 {

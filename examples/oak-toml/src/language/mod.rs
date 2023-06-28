@@ -5,8 +5,12 @@ mod de;
 mod ser;
 #[cfg(feature = "serde")]
 mod value;
-pub use self::value::Value;
-pub use self::{de::deserialize, de::from_str, ser::serialize, ser::to_string};
+pub use self::{
+    de::{deserialize, from_str},
+    ser::{serialize, to_string},
+    value::{TomlArray, TomlTable, TomlValue},
+};
+use crate::{ast::TomlRoot, lexer::token_type::TomlTokenKind, parser::element_type::TomlElementType};
 use oak_core::{Language, LanguageCategory};
 
 /// The TOML language definition.
@@ -14,26 +18,21 @@ use oak_core::{Language, LanguageCategory};
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct TomlLanguage {
     /// Whether to allow braces to be on new lines.
-    /// 
+    ///
     /// Standard TOML requires braces to be on the same line as the key,
     /// but some extensions allow braces to be on new lines.
-    pub allow_braces_on_new_line: bool,
+    pub multiline_inline_table: bool,
 }
 
 impl TomlLanguage {
     /// Create a new instance of the TOML language.
     pub fn new() -> Self {
-        Self {
-            allow_braces_on_new_line: false,
-        }
+        Self { multiline_inline_table: false }
     }
 
     /// Create a new instance of the TOML language with custom settings.
-    pub fn allow_braces_on_new_line(self) -> Self {
-        Self {
-            allow_braces_on_new_line: true,
-            ..self
-        }
+    pub fn with_multiline_inline_table(self, enable: bool) -> Self {
+        Self { multiline_inline_table: enable, ..self }
     }
 }
 
@@ -41,7 +40,7 @@ impl Language for TomlLanguage {
     const NAME: &'static str = "toml";
     const CATEGORY: LanguageCategory = LanguageCategory::Config;
 
-    type TokenType = crate::lexer::token_type::TomlTokenKind;
-    type ElementType = crate::parser::element_type::TomlElementType;
-    type TypedRoot = crate::ast::TomlRoot;
+    type TokenType = TomlTokenKind;
+    type ElementType = TomlElementType;
+    type TypedRoot = TomlRoot;
 }

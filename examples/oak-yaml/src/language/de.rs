@@ -198,17 +198,17 @@ where
 {
     // 由于 oak-yaml 的 parser 还在开发中，这里使用一个简单的实现来处理基本类型和简单结构
     // 对于复杂类型，我们将在 parser 完成后更新此实现
-    
+
     // 移除首尾空白
     let yaml = yaml.trim();
-    
+
     // 处理 null
     if yaml == "null" || yaml == "Null" || yaml == "NULL" || yaml == "~" {
         let value = YamlValueNode::Scalar(YamlScalar { span: (0..yaml.len()).into(), value: "null".to_string() });
         let deserializer = YamlValueDeserializer::new(value);
         return T::deserialize(deserializer);
     }
-    
+
     // 处理布尔值
     if yaml == "true" || yaml == "True" || yaml == "TRUE" {
         let value = YamlValueNode::Scalar(YamlScalar { span: (0..yaml.len()).into(), value: "true".to_string() });
@@ -220,52 +220,52 @@ where
         let deserializer = YamlValueDeserializer::new(value);
         return T::deserialize(deserializer);
     }
-    
+
     // 处理数字
     if yaml.parse::<i64>().is_ok() || yaml.parse::<f64>().is_ok() {
         let value = YamlValueNode::Scalar(YamlScalar { span: (0..yaml.len()).into(), value: yaml.to_string() });
         let deserializer = YamlValueDeserializer::new(value);
         return T::deserialize(deserializer);
     }
-    
+
     // 处理字符串
     if (yaml.starts_with('"') && yaml.ends_with('"')) || (yaml.starts_with('\'') && yaml.ends_with('\'')) {
         let value = YamlValueNode::Scalar(YamlScalar { span: (0..yaml.len()).into(), value: yaml.to_string() });
         let deserializer = YamlValueDeserializer::new(value);
         return T::deserialize(deserializer);
     }
-    
+
     // 处理简单的 YAML 映射（仅支持一级映射）
     if yaml.contains(':') && !yaml.starts_with('[') && !yaml.starts_with('{') {
         let mut entries = Vec::new();
         let lines = yaml.lines();
-        
+
         for line in lines {
             let line = line.trim();
             if line.is_empty() || line.starts_with('#') {
                 continue;
             }
-            
+
             if let Some(colon_idx) = line.find(':') {
                 let key_str = line[..colon_idx].trim();
                 let value_str = line[colon_idx + 1..].trim();
-                
+
                 // 简单处理键值对
                 let key = YamlValueNode::Scalar(YamlScalar { span: (0..key_str.len()).into(), value: key_str.to_string() });
-                
+
                 // 简单处理值
                 let value = YamlValueNode::Scalar(YamlScalar { span: (0..value_str.len()).into(), value: value_str.to_string() });
                 entries.push(YamlMappingEntry { span: (0..line.len()).into(), key, value });
             }
         }
-        
+
         if !entries.is_empty() {
             let value = YamlValueNode::Mapping(YamlMapping { span: (0..yaml.len()).into(), entries });
             let deserializer = YamlValueDeserializer::new(value);
             return T::deserialize(deserializer);
         }
     }
-    
+
     // 对于其他复杂类型，暂时使用一个简单的占位符实现
     // 注意：这只是一个临时解决方案，当 parser 完成后会更新
     let value = YamlValueNode::Scalar(YamlScalar { span: (0..yaml.len()).into(), value: yaml.to_string() });

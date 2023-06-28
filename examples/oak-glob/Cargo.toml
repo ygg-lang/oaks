@@ -1,0 +1,19 @@
+[package]
+name = "oak-glob"
+description = "Glob pattern language support for Oaks"
+version = { workspace = true }
+edition = { workspace = true }
+authors = [""]
+license = "MIT"
+
+[features]
+default = []
+lsp = ["oak-lsp"]
+oak-highlight = []
+oak-pretty-print = []
+mcp = ["oak-mcp"]
+
+[dependencies]
+oak-core = { workspace = true }
+oak-lsp = { workspace = true, optional = true }
+oak-mcp = { workspace = true, optional = true }

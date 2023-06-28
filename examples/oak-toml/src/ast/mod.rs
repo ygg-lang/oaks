@@ -7,11 +7,11 @@ use core::range::Range;
 #[derive(Debug, Clone)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct TomlRoot {
+    /// The items in the TOML document.
+    pub items: Vec<TomlItem>,
     /// Range of the node in the source code.
     #[cfg_attr(feature = "serde", serde(with = "oak_core::serde_range"))]
     pub span: Range<usize>,
-    /// The items in the TOML document.
-    pub items: Vec<TomlItem>,
 }
 
 /// TOML top-level item.
@@ -32,13 +32,13 @@ pub enum TomlItem {
 #[derive(Debug, Clone)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct TomlKeyValue {
-    /// Range of the key-value pair in the source code.
-    #[cfg_attr(feature = "serde", serde(with = "oak_core::serde_range"))]
-    pub span: Range<usize>,
     /// The key part.
     pub key: TomlKey,
     /// The value part.
     pub value: TomlValueNode,
+    /// Range of the key-value pair in the source code.
+    #[cfg_attr(feature = "serde", serde(with = "oak_core::serde_range"))]
+    pub span: Range<usize>,
 }
 
 /// TOML table `[table]`.
@@ -373,17 +373,14 @@ impl TomlRoot {
     /// Converts the TomlRoot into a TomlValueNode (inline table).
     pub fn into_value(self) -> TomlValueNode {
         let mut items = Vec::new();
-        
+
         // Only include key-value pairs in the root
         for item in self.items {
             if let TomlItem::KeyValue(kv) = item {
                 items.push(kv);
             }
         }
-        
-        TomlValueNode::InlineTable(TomlInlineTable {
-            span: self.span,
-            items,
-        })
+
+        TomlValueNode::InlineTable(TomlInlineTable { span: self.span, items })
     }
 }

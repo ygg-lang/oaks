@@ -76,7 +76,7 @@ oak-visualize = { version = "0.0.8", path = "projects/oak-visualize" }
 oak-testing = { version = "0.0.8", path = "projects/oak-testing" }
 oak-mcp = { version = "0.0.8", path = "projects/oak-mcp" }
 oak-source-map = { version = "0.0.8", path = "projects/oak-source-map" }
-oaks = { version = "0.0.3", path = "projects/oaks" }
+oaks = { version = "0.0.8", path = "projects/oaks" }
 
 # Language examples
 oak-actionscript = { version = "0.0.8", path = "examples/oak-actionscript" }

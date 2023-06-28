@@ -2,7 +2,7 @@
 pub mod element_type;
 
 use crate::{language::RstLanguage, lexer::token_type::RstTokenType, parser::element_type::RstElementType as ET};
-use oak_core::{Parser, ParserState, GreenNode, OakError, source::Source};
+use oak_core::{GreenNode, OakError, Parser, ParserState, source::Source};
 
 /// Parser for reStructuredText language.
 pub struct RstParser<'config> {
