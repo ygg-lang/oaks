@@ -32,8 +32,8 @@ impl ToSource for LLirRoot {
 
 #[cfg(feature = "oak-pretty-print")]
 impl AsDocument for LLirRoot {
-    fn as_document(&self) -> Document<'_> {
-        Document::join(self.items.iter().map(|i| i.as_document()), Document::Line)
+    fn as_document(&self, params: &Self::Params) -> Document<'_> {
+        Document::join(self.items.iter().map(|i| i.as_document(params)), Document::Line)
     }
 }
 
@@ -58,10 +58,10 @@ impl ToSource for LLirItem {
 
 #[cfg(feature = "oak-pretty-print")]
 impl AsDocument for LLirItem {
-    fn as_document(&self) -> Document<'_> {
+    fn as_document(&self, params: &Self::Params) -> Document<'_> {
         match self {
-            Self::Function(f) => f.as_document(),
-            Self::Global(g) => g.as_document(),
+            Self::Function(f) => f.as_document(params),
+            Self::Global(g) => g.as_document(params),
         }
     }
 }
@@ -106,14 +106,14 @@ impl ToSource for LLirFunction {
 
 #[cfg(feature = "oak-pretty-print")]
 impl AsDocument for LLirFunction {
-    fn as_document(&self) -> Document<'_> {
+    fn as_document(&self, params: &Self::Params) -> Document<'_> {
         let mut parts = vec![Document::text("define "), Document::text(&self.return_type), Document::text(" @"), Document::text(&self.name), Document::text("(")];
 
-        let params = Document::join(self.parameters.iter().map(|p| p.as_document()), Document::text(", "));
-        parts.push(params);
+        let params_docs = Document::join(self.parameters.iter().map(|p| p.as_document(params)), Document::text(", "));
+        parts.push(params_docs);
         parts.push(Document::text(") {"));
 
-        let blocks = Document::join(self.blocks.iter().map(|b| b.as_document()), Document::Line);
+        let blocks = Document::join(self.blocks.iter().map(|b| b.as_document(params)), Document::Line);
         parts.push(Document::indent(Document::concat(vec![Document::Line, blocks])));
         parts.push(Document::Line);
         parts.push(Document::text("}"));
@@ -142,7 +142,7 @@ impl ToSource for LLirParameter {
 
 #[cfg(feature = "oak-pretty-print")]
 impl AsDocument for LLirParameter {
-    fn as_document(&self) -> Document<'_> {
+    fn as_document(&self, _params: &Self::Params) -> Document<'_> {
         Document::concat(vec![Document::text(&self.ty), Document::text(" %"), Document::text(&self.name)])
     }
 }
@@ -173,14 +173,14 @@ impl ToSource for LLirBlock {
 
 #[cfg(feature = "oak-pretty-print")]
 impl AsDocument for LLirBlock {
-    fn as_document(&self) -> Document<'_> {
+    fn as_document(&self, params: &Self::Params) -> Document<'_> {
         let mut parts = Vec::new();
         if let Some(label) = &self.label {
             parts.push(Document::text(label));
             parts.push(Document::text(":"));
             parts.push(Document::Line);
         }
-        let insts = Document::join(self.instructions.iter().map(|i| i.as_document()), Document::Line);
+        let insts = Document::join(self.instructions.iter().map(|i| i.as_document(params)), Document::Line);
         parts.push(Document::indent(insts));
         Document::concat(parts)
     }
@@ -218,7 +218,7 @@ impl ToSource for LLirInstruction {
 
 #[cfg(feature = "oak-pretty-print")]
 impl AsDocument for LLirInstruction {
-    fn as_document(&self) -> Document<'_> {
+    fn as_document(&self, _params: &Self::Params) -> Document<'_> {
         let mut parts = Vec::new();
         if let Some(res) = &self.result {
             parts.push(Document::text("%"));
@@ -266,7 +266,7 @@ impl ToSource for LLirGlobal {
 
 #[cfg(feature = "oak-pretty-print")]
 impl AsDocument for LLirGlobal {
-    fn as_document(&self) -> Document<'_> {
+    fn as_document(&self, _params: &Self::Params) -> Document<'_> {
         let mut parts = vec![Document::text("@"), Document::text(&self.name), Document::text(" = ")];
         if self.is_constant {
             parts.push(Document::text("constant "));

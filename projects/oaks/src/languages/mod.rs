@@ -20,5 +20,7 @@ pub mod prolog;
 pub mod r;
 /// Raku language support.
 pub mod raku;
+/// Stylus language support.
+pub mod stylus;
 /// Wolfram language support.
 pub mod wolfram;

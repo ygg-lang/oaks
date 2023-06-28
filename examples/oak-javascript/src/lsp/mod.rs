@@ -1,4 +1,4 @@
-//! JavaScript language service implementation.
+#![doc = include_str!("readme.md")]
 
 #[cfg(feature = "oak-highlight")]
 pub mod highlighter;

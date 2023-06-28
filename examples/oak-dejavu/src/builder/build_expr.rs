@@ -15,6 +15,14 @@ impl<'config> DejavuBuilder<'config> {
             return Err(source.syntax_error("Syntax error in expression".to_string(), node_span.start));
         }
         match node_kind {
+            DejavuElementType::Expression => {
+                for child in node.children() {
+                    if let RedTree::Node(n) = child {
+                        return self.build_expr(n, source);
+                    }
+                }
+                Err(source.syntax_error(format!("Empty expression at {:?}", node_span), node_span.start))
+            }
             DejavuElementType::IdentifierExpression => {
                 let span = node.span();
                 let mut ident: Option<IdentifierNode> = None;

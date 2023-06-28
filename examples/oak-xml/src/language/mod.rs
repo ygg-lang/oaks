@@ -1,4 +1,4 @@
-//! XML language definition.
+#![doc = include_str!("readme.md")]
 
 use oak_core::{Language, LanguageCategory};
 

@@ -9,7 +9,7 @@ use oak_core::{GreenNode, OakError, source::Source};
 
 use super::State;
 
-impl super::DejavuParser {
+impl<'config> super::DejavuParser<'config> {
     pub(crate) fn parse_if<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> Result<&'a GreenNode<'a, crate::DejavuLanguage>, OakError> {
         let cp = state.checkpoint();
         state.expect(Keyword(DejavuKeywords::If))?;
@@ -393,6 +393,7 @@ impl super::DejavuParser {
                         Some(Keyword(DejavuKeywords::Namespace)) => self.parse_namespace(state),
                         Some(Keyword(DejavuKeywords::Singleton)) => self.parse_singleton(state),
                         Some(Keyword(DejavuKeywords::Let)) => self.parse_let_statement(state),
+                        Some(Keyword(DejavuKeywords::Include)) => self.parse_include(state),
                         _ => self.parse_expression_statement(state),
                     }
                 }
@@ -408,6 +409,7 @@ impl super::DejavuParser {
                 Keyword(DejavuKeywords::Namespace) => self.parse_namespace(state),
                 Keyword(DejavuKeywords::Singleton) => self.parse_singleton(state),
                 Keyword(DejavuKeywords::Using) => self.parse_using_statement(state),
+                Keyword(DejavuKeywords::Include) => self.parse_include(state),
                 _ => self.parse_expression_statement(state),
             }
         }
@@ -473,6 +475,24 @@ impl super::DejavuParser {
         state.expect(Semicolon)?;
 
         Ok(state.finish_at(cp, UsingStatement))
+    }
+
+    pub(crate) fn parse_include<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> Result<&'a GreenNode<'a, crate::DejavuLanguage>, OakError> {
+        let cp = state.checkpoint();
+
+        state.expect(Keyword(DejavuKeywords::Include))?;
+        self.skip_trivia(state);
+
+        if state.at(StringLiteral) {
+            state.bump();
+        }
+        else {
+            return Err(OakError::custom_error(format!("Expected string literal for template name, found {:?}", state.current().map(|t| t.kind))));
+        }
+
+        self.skip_trivia(state);
+
+        Ok(state.finish_at(cp, IncludeDirective))
     }
 
     pub(crate) fn parse_primary<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> Result<&'a GreenNode<'a, crate::DejavuLanguage>, OakError> {
@@ -551,6 +571,7 @@ impl super::DejavuParser {
             Keyword(DejavuKeywords::Raise) => self.parse_raise(state),
             Keyword(DejavuKeywords::Resume) => self.parse_resume(state),
             Keyword(DejavuKeywords::Try) => self.parse_catch(state),
+            Keyword(DejavuKeywords::Include) => self.parse_include(state),
             At | Bolt => {
                 state.bump();
                 state.expect(Identifier)?;
@@ -598,11 +619,8 @@ impl super::DejavuParser {
                     state.bump();
                     state.finish_at(text_cp, TemplateText);
                 }
-                InterpolationStart => {
-                    self.parse_template_interpolation(state)?;
-                }
-                TemplateControlStart => {
-                    self.parse_template_control(state)?;
+                CodeStart => {
+                    self.parse_template_code(state)?;
                 }
                 TemplateCommentStart => {
                     self.parse_template_comment(state)?;

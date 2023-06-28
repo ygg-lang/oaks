@@ -1,4 +1,4 @@
-//! Parser implementation for the JASM language.
+#![doc = include_str!("readme.md")]
 
 /// Element types for the JASM language.
 pub mod element_type;

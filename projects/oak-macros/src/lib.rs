@@ -1,8 +1,5 @@
 #![warn(missing_docs)]
-//! Procedural macros for the Oak language framework.
-//!
-//! This crate provides various macros for testing, deriving traits,
-//! and defining language rules.
+#![doc = include_str!("readme.md")]
 
 extern crate proc_macro;
 

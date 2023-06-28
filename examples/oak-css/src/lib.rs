@@ -26,6 +26,8 @@ pub mod parser;
 // pub use oak_core::{TokenType, ElementType};
 
 pub use crate::{
+    ast::{AtRule, CssNode, CssRoot, Declaration, RuleSet, Selector, Value},
+    builder::CssBuilder,
     language::CssLanguage,
     lexer::{CssLexer, CssTokenType},
     parser::{CssElementType, CssParser},

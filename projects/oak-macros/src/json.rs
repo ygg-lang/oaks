@@ -100,27 +100,27 @@ impl ToTokens for JsonExpr {
         match self {
             JsonExpr::Null => {
                 tokens.extend(quote! {
-                    ::oak_json::ast::JsonValue::Null(::oak_json::ast::JsonNull { span: (0..0).into() })
+                    ::oak_json::ast::JsonValueNode::Null(::oak_json::ast::JsonNull { span: (0..0).into() })
                 });
             }
             JsonExpr::Bool(b) => {
                 tokens.extend(quote! {
-                    ::oak_json::ast::JsonValue::Boolean(::oak_json::ast::JsonBoolean { value: #b, span: (0..0).into() })
+                    ::oak_json::ast::JsonValueNode::Boolean(::oak_json::ast::JsonBoolean { value: #b, span: (0..0).into() })
                 });
             }
             JsonExpr::Number(expr) => {
                 tokens.extend(quote! {
-                    ::oak_json::ast::JsonValue::from(#expr)
+                    ::oak_json::ast::JsonValueNode::from(#expr)
                 });
             }
             JsonExpr::String(lit) => {
                 tokens.extend(quote! {
-                    ::oak_json::ast::JsonValue::from(#lit.to_string())
+                    ::oak_json::ast::JsonValueNode::from(#lit.to_string())
                 });
             }
             JsonExpr::Array(elements) => {
                 tokens.extend(quote! {
-                    ::oak_json::ast::JsonValue::Array(::oak_json::ast::JsonArray {
+                    ::oak_json::ast::JsonValueNode::Array(::oak_json::ast::JsonArray {
                         elements: vec![#(#elements),*],
                         span: (0..0).into(),
                     })
@@ -137,7 +137,7 @@ impl ToTokens for JsonExpr {
                     }
                 });
                 tokens.extend(quote! {
-                    ::oak_json::ast::JsonValue::Object(::oak_json::ast::JsonObject {
+                    ::oak_json::ast::JsonValueNode::Object(::oak_json::ast::JsonObject {
                         fields: vec![#(#fields),*],
                         span: (0..0).into(),
                     })
@@ -145,7 +145,7 @@ impl ToTokens for JsonExpr {
             }
             JsonExpr::Expr(expr) => {
                 tokens.extend(quote! {
-                    ::oak_json::ast::JsonValue::from(#expr)
+                    ::oak_json::ast::JsonValueNode::from(#expr)
                 });
             }
         }

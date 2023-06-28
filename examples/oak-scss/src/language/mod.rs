@@ -27,5 +27,5 @@ impl Language for ScssLanguage {
 
     type TokenType = crate::lexer::token_type::ScssTokenType;
     type ElementType = crate::parser::element_type::ScssElementType;
-    type TypedRoot = ();
+    type TypedRoot = crate::ast::ScssRoot;
 }

@@ -1,4 +1,4 @@
-//! D language AST builder
+#![doc = include_str!("readme.md")]
 use crate::language::DLanguage;
 use oak_core::{Builder, BuilderCache, GreenNode, OakError, Parser, RedNode, SourceText, TextEdit, source::Source};
 

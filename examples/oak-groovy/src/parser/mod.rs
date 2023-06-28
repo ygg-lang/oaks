@@ -1,4 +1,4 @@
-//! Parser for the Groovy language.
+#![doc = include_str!("readme.md")]
 
 pub mod element_type;
 

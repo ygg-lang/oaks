@@ -1,4 +1,4 @@
-//! Svelte parser implementation.
+#![doc = include_str!("readme.md")]
 
 pub mod element_type;
 use crate::{language::SvelteLanguage, lexer::token_type::SvelteTokenType};

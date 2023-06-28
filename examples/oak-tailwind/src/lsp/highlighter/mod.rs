@@ -1,4 +1,4 @@
-//! Highlighter for the Tailwind language.
+#![doc = include_str!("readme.md")]
 
 /// Highlight types for Tailwind language.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]

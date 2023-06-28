@@ -1,4 +1,4 @@
-//! Voml lexer implementation.
+#![doc = include_str!("readme.md")]
 
 use crate::{language::VomlLanguage, lexer::token_type::VomlTokenType};
 pub mod token_type;

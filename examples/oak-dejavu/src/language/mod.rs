@@ -25,23 +25,21 @@ pub enum SyntaxMode {
 #[derive(Clone, Debug, PartialEq, Eq, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct TemplateConfig {
-    /// Control flow start delimiter.
-    pub control_start: String,
-    /// Control flow end delimiter.
-    pub control_end: String,
-    /// Interpolation start delimiter.
-    pub interpolation_start: String,
-    /// Interpolation end delimiter.
-    pub interpolation_end: String,
+    /// Code start delimiter.
+    pub code_start: String,
+    /// Code end delimiter.
+    pub code_end: String,
     /// Comment start delimiter.
     pub comment_start: String,
     /// Comment end delimiter.
     pub comment_end: String,
+    /// Whether to support filter pipe syntax `a |> b |> c`.
+    pub support_filter_pipe: bool,
 }
 
 impl Default for TemplateConfig {
     fn default() -> Self {
-        Self { control_start: "<%".to_string(), control_end: "%>".to_string(), interpolation_start: "<%".to_string(), interpolation_end: "%>".to_string(), comment_start: "<*".to_string(), comment_end: "*>".to_string() }
+        Self { code_start: "<$".to_string(), code_end: "$>".to_string(), comment_start: "<#".to_string(), comment_end: "#>".to_string(), support_filter_pipe: false }
     }
 }
 

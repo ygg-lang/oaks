@@ -1,10 +1,6 @@
 #![feature(new_range_api)]
 #![warn(missing_docs)]
-//! Virtual File System (VFS) for the Oak language framework.
-//!
-//! This crate provides a unified interface for accessing source files,
-//! whether they are stored on disk or in memory, and provides
-//! mapping between line/column positions and byte offsets.
+#![doc = include_str!("readme.md")]
 
 use oak_core::{
     Arc,

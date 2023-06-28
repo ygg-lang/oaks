@@ -5,7 +5,6 @@ authors.workspace = true
 description = "Testing utilities for the Oak language toolchain."
 edition.workspace = true
 license.workspace = true
-readme.workspace = true
 homepage.workspace = true
 repository = "https://github.com/ygg-lang/oaks/tree/master/projects/oak-testing"
 

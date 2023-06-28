@@ -1,4 +1,4 @@
-//! Parser implementation for the Kotlin language.
+#![doc = include_str!("readme.md")]
 
 /// Element types for the Kotlin parser.
 pub mod element_type;

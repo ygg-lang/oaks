@@ -1,4 +1,4 @@
-//! AST builder for Tailwind DSL.
+#![doc = include_str!("readme.md")]
 
 use crate::{ast::TailwindRoot, language::TailwindLanguage, lexer::TailwindLexer, parser::TailwindParser};
 use oak_core::{Builder, BuilderCache, GreenNode, OakDiagnostics, OakError, RedNode, SourceText, TextEdit, source::Source};

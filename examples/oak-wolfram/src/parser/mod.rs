@@ -1,4 +1,4 @@
-//! Parser implementation for the Wolfram language.
+#![doc = include_str!("readme.md")]
 
 /// Wolfram element types.
 pub mod element_type;

@@ -1,4 +1,4 @@
-//! Parser for Windows Command (CMD) language.
+#![doc = include_str!("readme.md")]
 
 /// Element types for command-line arguments.
 pub mod element_type;

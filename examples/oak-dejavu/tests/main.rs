@@ -29,6 +29,30 @@ fn test_dejavu_integration() {
 }
 
 #[test]
+fn test_template_parsing() {
+    use oak_core::{Builder, SourceText, parser::ParseSession};
+    use oak_dejavu::{DejavuBuilder, DejavuLanguage};
+
+    let language = DejavuLanguage::default();
+    let builder = DejavuBuilder::new(&language);
+    let source = SourceText::new("Hello, <$ name $>!\n\n<$ for item in items $>\n- <$ item $>\n<$ end for $>\n\n<$ if show_extra $>\nThis is extra content!\n<$ end if $>");
+
+    let mut session = ParseSession::new(1024);
+    let built = builder.build(&source, &[], &mut session);
+
+    if built.has_errors() {
+        panic!("Build diagnostic: {:?}", built.diagnostics)
+    }
+
+    let ast = built.result.unwrap();
+    println!("=== Template AST ===");
+    println!("Number of items: {}", ast.items.len());
+    for (i, item) in ast.items.iter().enumerate() {
+        println!("Item {}: {:?}", i, item);
+    }
+}
+
+#[test]
 fn test_error_handling_parsing() {
     use oak_core::{Builder, Parser, SourceText, parser::ParseSession};
     use oak_dejavu::{DejavuBuilder, DejavuLanguage, DejavuParser};

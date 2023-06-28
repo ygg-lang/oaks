@@ -1,4 +1,4 @@
-//! JavaScript language implementation.
+#![doc = include_str!("readme.md")]
 
 use oak_core::language::{Language, LanguageCategory};
 

@@ -9,7 +9,7 @@ use oak_core::{GreenNode, OakError};
 
 use super::State;
 
-impl super::DejavuParser {
+impl<'config> super::DejavuParser<'config> {
     pub(crate) fn parse_namespace<'a, S: oak_core::source::Source + ?Sized>(&self, state: &mut State<'a, S>) -> Result<&'a GreenNode<'a, crate::DejavuLanguage>, OakError> {
         let cp = state.checkpoint();
 

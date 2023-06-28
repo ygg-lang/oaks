@@ -1,4 +1,4 @@
-//! Lexer for Windows Command (CMD) language.
+#![doc = include_str!("readme.md")]
 
 /// Token types for command-line arguments.
 pub mod token_type;

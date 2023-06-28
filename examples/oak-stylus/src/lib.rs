@@ -1,8 +1,8 @@
 #![doc = include_str!("readme.md")]
 #![feature(new_range_api)]
+#![warn(missing_docs)]
 #![doc(html_logo_url = "https://raw.githubusercontent.com/ygg-lang/oaks/refs/heads/dev/documents/logo.svg")]
 #![doc(html_favicon_url = "https://raw.githubusercontent.com/ygg-lang/oaks/refs/heads/dev/documents/logo.svg")]
-#![warn(missing_docs)]
 
 /// AST module.
 pub mod ast;
@@ -18,26 +18,13 @@ pub mod lsp;
 /// MCP module.
 #[cfg(feature = "mcp")]
 pub mod mcp;
+/// Parser module.
+pub mod parser;
 
-mod parser;
-
-pub use crate::{builder::StylusBuilder, language::StylusLanguage, lexer::StylusLexer, parser::StylusParser};
-
-/// Highlighter implementation.
-#[cfg(all(feature = "lsp", feature = "oak-highlight"))]
-#[cfg(feature = "lsp")]
-pub use crate::lsp::highlighter::StylusHighlighter;
-
-/// Formatter implementation.
-#[cfg(feature = "lsp")]
-pub use crate::lsp::formatter::StylusFormatter;
-
-/// LSP implementation.
-#[cfg(feature = "lsp")]
-pub use crate::lsp::StylusLanguageService;
-
-/// MCP service implementation.
-#[cfg(all(feature = "lsp", feature = "mcp"))]
-#[cfg(feature = "lsp")]
-pub use crate::mcp::serve_stylus_mcp;
-pub use crate::{lexer::token_type::StylusTokenType as TokenType, parser::element_type::StylusElementType as ElementType};
+pub use crate::{
+    ast::StylusRoot,
+    builder::StylusBuilder,
+    language::StylusLanguage,
+    lexer::{StylusLexer, token_type::StylusTokenType},
+    parser::StylusParser,
+};

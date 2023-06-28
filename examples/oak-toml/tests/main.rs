@@ -1,12 +1,13 @@
 mod lexer;
+mod serde;
 
 use oak_core::{Lexer, SourceText};
-use oak_toml::{TomlLanguage, TomlSyntaxKind};
+use oak_toml::{TomlLanguage, TomlLexer, TomlParser, TomlSyntaxKind};
 
 #[test]
 fn test_lexer_basic() {
     let language = TomlLanguage::new();
-    let lexer = language.lexer();
+    let lexer = TomlLexer::new(&language);
     let source = SourceText::new(r#"key = "value""#);
     let mut cache = oak_core::ParseSession::<TomlLanguage>::default();
 
@@ -21,8 +22,8 @@ fn test_lexer_basic() {
 #[test]
 fn test_parser_basic() {
     let language = TomlLanguage::new();
-    let parser = language.parser();
-    let lexer = language.lexer();
+    let parser = TomlParser::new(&language);
+    let lexer = TomlLexer::new(&language);
     let source = SourceText::new(r#"key = "value""#);
     let mut cache = oak_core::ParseSession::<TomlLanguage>::default();
 
@@ -37,7 +38,7 @@ fn test_parser_basic() {
 #[test]
 fn test_lexer_string() {
     let language = TomlLanguage::new();
-    let lexer = language.lexer();
+    let lexer = TomlLexer::new(&language);
     let source = SourceText::new(r#""hello world""#);
     let mut cache = oak_core::ParseSession::<TomlLanguage>::default();
 
@@ -55,7 +56,7 @@ fn test_lexer_string() {
 #[test]
 fn test_lexer_number() {
     let language = TomlLanguage::new();
-    let lexer = language.lexer();
+    let lexer = TomlLexer::new(&language);
     let source = SourceText::new("123");
     let mut cache = oak_core::ParseSession::<TomlLanguage>::default();
 
@@ -73,7 +74,7 @@ fn test_lexer_number() {
 #[test]
 fn test_lexer_boolean() {
     let language = TomlLanguage::new();
-    let lexer = language.lexer();
+    let lexer = TomlLexer::new(&language);
     let source = SourceText::new("true");
     let mut cache = oak_core::ParseSession::<TomlLanguage>::default();
 
@@ -91,8 +92,8 @@ fn test_lexer_boolean() {
 #[test]
 fn test_parser_key_value() {
     let language = TomlLanguage::new();
-    let parser = language.parser();
-    let lexer = language.lexer();
+    let parser = TomlParser::new(&language);
+    let lexer = TomlLexer::new(&language);
     let source = SourceText::new(r#"name = "John""#);
     let mut cache = oak_core::ParseSession::<TomlLanguage>::default();
 
@@ -106,8 +107,8 @@ fn test_parser_key_value() {
 #[test]
 fn test_parser_table() {
     let language = TomlLanguage::new();
-    let parser = language.parser();
-    let lexer = language.lexer();
+    let parser = TomlParser::new(&language);
+    let lexer = TomlLexer::new(&language);
     let source = SourceText::new(
         r#"[section]
 name = "value"
@@ -125,8 +126,8 @@ name = "value"
 #[test]
 fn test_empty_input() {
     let language = TomlLanguage::new();
-    let lexer = language.lexer();
-    let parser = language.parser();
+    let lexer = TomlLexer::new(&language);
+    let parser = TomlParser::new(&language);
     let source = SourceText::new("");
     let mut cache = oak_core::ParseSession::<TomlLanguage>::default();
 

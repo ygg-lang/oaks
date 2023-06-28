@@ -1,9 +1,6 @@
 #![feature(new_range_api)]
 #![warn(missing_docs)]
-//! Code folding support for the Oak language framework.
-//!
-//! This crate provides traits and structures for identifying collapsible
-//! regions in source code, such as functions, comments, or imports.
+#![doc = include_str!("readme.md")]
 use core::range::Range;
 use oak_core::{language::Language, tree::RedNode};
 

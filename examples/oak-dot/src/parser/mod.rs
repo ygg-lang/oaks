@@ -1,4 +1,4 @@
-//! Parser implementation for the DOT language.
+#![doc = include_str!("readme.md")]
 
 /// Element types for the DOT language syntax tree.
 pub mod element_type;

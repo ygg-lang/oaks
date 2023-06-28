@@ -1,6 +1,6 @@
 use crate::{
     JsonLanguage,
-    ast::{JsonArray, JsonBoolean, JsonField, JsonNull, JsonNumber, JsonObject, JsonRoot, JsonString, JsonValue},
+    ast::{JsonArray, JsonBoolean, JsonField, JsonNull, JsonNumber, JsonObject, JsonRoot, JsonString, JsonValueNode},
     lexer::JsonLexer,
     parser::JsonParser,
 };
@@ -58,7 +58,7 @@ impl<'config> JsonBuilder<'config> {
         Ok(JsonRoot { value })
     }
 
-    fn build_value<'a>(&self, node: &GreenNode<'a, JsonLanguage>, offset: usize, source: &SourceText) -> Result<JsonValue, OakError> {
+    fn build_value<'a>(&self, node: &GreenNode<'a, JsonLanguage>, offset: usize, source: &SourceText) -> Result<JsonValueNode, OakError> {
         use crate::parser::element_type::JsonElementType;
         let span: oak_core::Range<usize> = (offset..offset + node.byte_length as usize).into();
 
@@ -79,7 +79,7 @@ impl<'config> JsonBuilder<'config> {
                         }
                     }
                 }
-                Ok(JsonValue::Object(JsonObject { fields, span }))
+                Ok(JsonValueNode::Object(JsonObject { fields, span }))
             }
             JsonElementType::Array => {
                 let mut elements = Vec::new();
@@ -100,24 +100,24 @@ impl<'config> JsonBuilder<'config> {
                         }
                     }
                 }
-                Ok(JsonValue::Array(JsonArray { elements, span }))
+                Ok(JsonValueNode::Array(JsonArray { elements, span }))
             }
             JsonElementType::String => {
                 let text = source.get_text_in(span.clone());
                 let value = text.trim_matches('"').to_string();
-                Ok(JsonValue::String(JsonString { value, span }))
+                Ok(JsonValueNode::String(JsonString { value, span }))
             }
             JsonElementType::Number => {
                 let text = source.get_text_in(span.clone());
                 let value = text.parse::<f64>().map_err(|_| OakError::syntax_error(format!("Invalid number: {}", text), span.start, None))?;
-                Ok(JsonValue::Number(JsonNumber { value, span }))
+                Ok(JsonValueNode::Number(JsonNumber { value, span }))
             }
             JsonElementType::Boolean => {
                 let text = source.get_text_in(span.clone());
                 let value = text == "true";
-                Ok(JsonValue::Boolean(JsonBoolean { value, span }))
+                Ok(JsonValueNode::Boolean(JsonBoolean { value, span }))
             }
-            JsonElementType::Null => Ok(JsonValue::Null(JsonNull { span })),
+            JsonElementType::Null => Ok(JsonValueNode::Null(JsonNull { span })),
             JsonElementType::Value | JsonElementType::ArrayElement | JsonElementType::Root => {
                 let mut current_offset = offset;
                 for child in node.children {

@@ -1,0 +1,24 @@
+{
+  "success": true,
+  "node_count": 10,
+  "ast_structure": {
+    "kind": "DejavuRoot",
+    "children": [
+      {
+        "kind": "RawBlockNode",
+        "children": [],
+        "text_length": 100,
+        "is_leaf": false
+      },
+      {
+        "kind": "RawBlockNode",
+        "children": [],
+        "text_length": 30,
+        "is_leaf": false
+      }
+    ],
+    "text_length": 130,
+    "is_leaf": false
+  },
+  "errors": []
+}

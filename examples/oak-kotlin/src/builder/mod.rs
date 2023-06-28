@@ -1,4 +1,4 @@
-//! Builder implementation for the Kotlin language.
+#![doc = include_str!("readme.md")]
 
 use crate::{ast::KotlinRoot, language::KotlinLanguage, lexer::KotlinLexer, parser::KotlinParser};
 use oak_core::{Builder, BuilderCache, GreenNode, Lexer, OakDiagnostics, OakError, Parser, SourceText, TextEdit, source::Source};

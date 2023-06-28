@@ -1,8 +1,0 @@
-
-
-# invoke upper(self).nice().x()
-
-{% invoke upper %}
-    loop body
-{% end invoke %}
-

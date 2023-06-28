@@ -1,4 +1,4 @@
-//! XML lexer implementation.
+#![doc = include_str!("readme.md")]
 
 /// XML token types.
 pub mod token_type;

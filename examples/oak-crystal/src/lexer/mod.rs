@@ -1,4 +1,4 @@
-//! Lexer for the Crystal language.
+#![doc = include_str!("readme.md")]
 
 pub mod token_type;
 use crate::language::CrystalLanguage;

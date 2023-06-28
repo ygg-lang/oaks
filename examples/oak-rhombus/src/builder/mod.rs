@@ -1,4 +1,4 @@
-//! Builder implementation for the Rhombus language.
+#![doc = include_str!("readme.md")]
 
 use crate::{
     ast::{Expression, Provide, Require, RhombusRoot},

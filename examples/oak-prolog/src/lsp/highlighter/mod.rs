@@ -1,6 +1,4 @@
-//! Prolog syntax highlighter.
-//!
-//! This module provides syntax highlighting for Prolog source code, supporting keywords, atoms, variables, comments, etc.
+#![doc = include_str!("readme.md")]
 
 /// Highlight kind enumeration
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]

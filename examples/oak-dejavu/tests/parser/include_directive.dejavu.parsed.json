@@ -1,0 +1,30 @@
+{
+  "success": true,
+  "node_count": 8,
+  "ast_structure": {
+    "kind": "DejavuRoot",
+    "children": [
+      {
+        "kind": "IncludeDirective",
+        "children": [],
+        "text_length": 20,
+        "is_leaf": false
+      },
+      {
+        "kind": "IncludeDirective",
+        "children": [],
+        "text_length": 18,
+        "is_leaf": false
+      },
+      {
+        "kind": "IncludeDirective",
+        "children": [],
+        "text_length": 24,
+        "is_leaf": false
+      }
+    ],
+    "text_length": 62,
+    "is_leaf": false
+  },
+  "errors": []
+}

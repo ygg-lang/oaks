@@ -1,4 +1,4 @@
-//! PowerShell AST builder
+#![doc = include_str!("readme.md")]
 
 use crate::{ast::*, language::PowerShellLanguage, parser::PowerShellParser};
 use oak_core::{Builder, BuilderCache, GreenNode, OakDiagnostics, Parser, RedNode, SourceText, TextEdit, source::Source};

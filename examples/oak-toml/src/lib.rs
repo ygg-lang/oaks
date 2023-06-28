@@ -57,9 +57,11 @@ pub use crate::lsp::formatter::TomlFormatter;
 #[cfg(feature = "mcp")]
 // pub use crate::mcp::serve_toml_mcp;
 
-/// Deserializes from a string.
+/// Serializes a Rust type into a TOML string.
 #[cfg(feature = "serde")]
-pub fn from_str<T: serde::de::DeserializeOwned>(s: &str) -> Result<T, toml::de::Error> {
-    toml::from_str(s)
-}
+pub use crate::language::to_string;
+
+/// Deserializes a TOML string into a Rust type.
+#[cfg(feature = "serde")]
+pub use crate::language::from_str;
 pub use crate::parser::element_type::TomlElementType as ElementType;

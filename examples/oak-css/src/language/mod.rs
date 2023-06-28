@@ -18,5 +18,5 @@ impl Language for CssLanguage {
     const CATEGORY: LanguageCategory = LanguageCategory::StyleSheet;
     type TokenType = crate::lexer::CssTokenType;
     type ElementType = crate::parser::element_type::CssElementType;
-    type TypedRoot = ();
+    type TypedRoot = crate::ast::CssRoot;
 }

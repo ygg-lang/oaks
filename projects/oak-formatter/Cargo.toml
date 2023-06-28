@@ -1,6 +1,7 @@
 [package]
 name = "oak-formatter"
 version.workspace = true
+authors.workspace = true
 edition.workspace = true
 description = "High-level formatting library for the Oak language framework"
 homepage.workspace = true

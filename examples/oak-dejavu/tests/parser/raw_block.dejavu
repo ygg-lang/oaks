@@ -1,0 +1,11 @@
+# Raw block test
+
+<$ raw $>This is raw text that should not be parsed.
+It can contain any characters, including: 
+- Dejavu syntax like: let x = 10;
+- Special characters: <$ $>
+- Multi-line content
+</$ end raw $>
+
+# Another raw block with different content
+<$raw$>No whitespace version</$end raw$>

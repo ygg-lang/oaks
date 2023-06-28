@@ -1,4 +1,4 @@
-//! Builder implementation for the Koka language.
+#![doc = include_str!("readme.md")]
 
 use crate::{ast::KokaRoot, language::KokaLanguage, lexer::KokaLexer, parser::KokaParser};
 use oak_core::{Builder, BuilderCache, GreenNode, Lexer, OakDiagnostics, OakError, Parser, SourceText, TextEdit, source::Source};

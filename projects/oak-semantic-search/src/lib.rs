@@ -1,10 +1,7 @@
 #![feature(new_range_api)]
 #![allow(async_fn_in_trait)]
 #![warn(missing_docs)]
-//! Semantic search support for the Oak language framework.
-//!
-//! This crate provides traits and structures for performing semantic search
-//! on source code, including code chunking and indexing.
+#![doc = include_str!("readme.md")]
 use oak_core::{
     errors::OakError,
     language::{ElementRole, ElementType, Language, UniversalElementRole},

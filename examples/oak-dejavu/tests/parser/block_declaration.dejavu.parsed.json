@@ -1,0 +1,30 @@
+{
+  "success": true,
+  "node_count": 10,
+  "ast_structure": {
+    "kind": "DejavuRoot",
+    "children": [
+      {
+        "kind": "BlockDeclaration",
+        "children": [],
+        "text_length": 60,
+        "is_leaf": false
+      },
+      {
+        "kind": "BlockDeclaration",
+        "children": [],
+        "text_length": 35,
+        "is_leaf": false
+      },
+      {
+        "kind": "BlockDeclaration",
+        "children": [],
+        "text_length": 65,
+        "is_leaf": false
+      }
+    ],
+    "text_length": 160,
+    "is_leaf": false
+  },
+  "errors": []
+}

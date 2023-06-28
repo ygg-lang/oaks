@@ -1,4 +1,4 @@
-//! Builder implementation for the MSIL language.
+#![doc = include_str!("readme.md")]
 
 use crate::{
     ast::*,

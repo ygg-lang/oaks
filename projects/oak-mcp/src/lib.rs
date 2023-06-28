@@ -5,7 +5,7 @@
 use oak_core::Range;
 use oak_lsp::service::LanguageService;
 #[cfg(feature = "serde")]
-use serde_json::Value as JsonValue;
+use serde_json::Value as JsonValueNode;
 #[cfg(feature = "serde")]
 use serde_json::json;
 use std::sync::Arc;
@@ -24,11 +24,11 @@ pub struct JsonRpcRequest {
     /// The JSON-RPC version (must be "2.0").
     pub jsonrpc: String,
     /// The unique identifier for the request, used to match responses.
-    pub id: JsonValue,
+    pub id: JsonValueNode,
     /// The method name to be invoked on the server.
     pub method: String,
     /// The parameters for the method, if any, as a JSON object or array.
-    pub params: Option<JsonValue>,
+    pub params: Option<JsonValueNode>,
 }
 
 #[cfg(feature = "serde")]
@@ -55,10 +55,10 @@ pub struct JsonRpcResponse {
     /// The JSON-RPC version (must be "2.0").
     pub jsonrpc: String,
     /// The unique identifier corresponding to the original request.
-    pub id: JsonValue,
+    pub id: JsonValueNode,
     /// The successful result of the request, if any.
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub result: Option<JsonValue>,
+    pub result: Option<JsonValueNode>,
     /// The error details if the request failed.
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
     pub error: Option<JsonRpcError>,
@@ -88,7 +88,7 @@ pub struct JsonRpcError {
     pub message: String,
     /// Additional error data, if any, providing more context.
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub data: Option<JsonValue>,
+    pub data: Option<JsonValueNode>,
 }
 
 /// Represents a JSON-RPC 2.0 notification.
@@ -104,7 +104,7 @@ pub struct JsonRpcNotification {
     /// The method name to be invoked.
     pub method: String,
     /// The parameters for the method, if any.
-    pub params: Option<JsonValue>,
+    pub params: Option<JsonValueNode>,
 }
 
 #[cfg(feature = "serde")]
@@ -241,7 +241,7 @@ where
             },
             "tools/list" => {
                 let tools_str = include_str!("tools.json");
-                let tools: JsonValue = serde_json::from_str(tools_str).unwrap();
+                let tools: JsonValueNode = serde_json::from_str(tools_str).unwrap();
                 JsonRpcResponse {
                     jsonrpc: "2.0".to_string(),
                     id: request.id,
@@ -313,7 +313,7 @@ where
     /// - `completion`: Provides code completion suggestions for the current cursor position.
     /// - `symbols`: Lists all document symbols (classes, functions, etc.) in a file.
     /// - `semantic_search`: Performs a vector-based search over the indexed codebase.
-    pub async fn handle_tool_call(&self, name: &str, args: JsonValue) -> Result<JsonValue, String> {
+    pub async fn handle_tool_call(&self, name: &str, args: JsonValueNode) -> Result<JsonValueNode, String> {
         match name {
             "hover" => {
                 let uri = args.get("uri").and_then(|v| v.as_str()).ok_or("Missing uri")?;

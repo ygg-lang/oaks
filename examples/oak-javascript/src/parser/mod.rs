@@ -1,4 +1,4 @@
-//! JavaScript parser implementation.
+#![doc = include_str!("readme.md")]
 
 pub mod element_type;
 

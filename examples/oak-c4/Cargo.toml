@@ -5,6 +5,10 @@ authors.workspace = true
 description = "C4 Model semantic model for Oak"
 edition.workspace = true
 license.workspace = true
+readme = "readme.md"
+homepage.workspace = true
+repository = "https://github.com/ygg-lang/oaks/tree/master/examples/oak-c4"
+documentation = "https://docs.rs/oak-c4"
 
 [dependencies]
 oak-core = { workspace = true }

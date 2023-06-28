@@ -34,7 +34,7 @@ impl Language for StylusLanguage {
 
     type TokenType = crate::lexer::token_type::StylusTokenType;
     type ElementType = crate::parser::element_type::StylusElementType;
-    type TypedRoot = ();
+    type TypedRoot = crate::ast::StylusRoot;
 }
 
 impl StylusLanguage {

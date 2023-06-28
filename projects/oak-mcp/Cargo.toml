@@ -34,4 +34,3 @@ oak-json = { workspace = true }
 default = ["serde"]
 serde = ["dep:serde", "dep:serde_json", "oak-core/serde"]
 io-std = ["tokio/io-std"]
-axum = ["tokio/full"]

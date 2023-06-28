@@ -1,4 +1,4 @@
-//! Language Server Protocol (LSP) support for Groovy.
+#![doc = include_str!("readme.md")]
 
 use crate::language::GroovyLanguage;
 use core::range::Range;

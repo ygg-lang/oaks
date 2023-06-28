@@ -1,4 +1,4 @@
-//! Parser implementation for the D language.
+#![doc = include_str!("readme.md")]
 
 pub mod element_type;
 

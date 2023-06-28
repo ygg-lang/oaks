@@ -1,4 +1,4 @@
-//! Wolfram lexer implementation.
+#![doc = include_str!("readme.md")]
 
 /// Wolfram token types.
 pub mod token_type;

@@ -14,4 +14,4 @@ serde_json = { workspace = true }
 base64 = { workspace = true }
 
 [dev-dependencies]
-criterion = { workspace = true }
+criterion = { version = "0.8.2" }

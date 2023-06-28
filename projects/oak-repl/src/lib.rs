@@ -1,8 +1,5 @@
 #![warn(missing_docs)]
-//! Oak REPL (Read-Eval-Print Loop) framework.
-//!
-//! A REPL framework deeply integrated with Oak language features.
-//! Supports multi-line input, syntax integrity checking, and custom highlighting.
+#![doc = include_str!("readme.md")]
 
 use crossterm::{
     cursor::MoveToColumn,
