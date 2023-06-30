@@ -26,9 +26,7 @@ tracing = { workspace = true }
 tracing-subscriber = { workspace = true }
 futures = { workspace = true }
 
-[dev-dependencies]
-oak-rust = { workspace = true }
-oak-json = { workspace = true }
+
 
 [features]
 default = ["serde"]

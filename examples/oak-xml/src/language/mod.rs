@@ -2,6 +2,10 @@
 
 use oak_core::{Language, LanguageCategory};
 
+/// XML value representation.
+pub mod value;
+pub use value::XmlValue;
+
 #[cfg(feature = "serde")]
 /// Serialization and deserialization utilities for XML.
 pub mod serde;

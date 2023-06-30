@@ -88,6 +88,12 @@ pub enum DejavuKeywords {
     If,
     /// Else clause.
     Else,
+    /// Else if clause.
+    ///
+    /// ```v
+    /// if condition { ... } elif other { ... } else { ... }
+    /// ```
+    Elif,
     /// Match expression.
     ///
     /// ```v
@@ -250,9 +256,9 @@ pub enum DejavuKeywords {
     /// End block (alternative syntax).
     ///
     /// ```v
-    /// <$ block "content" $>
+    /// <% block "content" %>
     /// content
-    /// <$ endblock $>
+    /// <% endblock %>
     /// ```
     EndBlock,
 }

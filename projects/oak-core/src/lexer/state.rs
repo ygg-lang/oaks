@@ -18,6 +18,7 @@ pub struct LexerState<'s, S: Source + ?Sized, L: Language> {
     pub(crate) cursor: SourceCursor<'s, S>,
     pub(crate) tokens: Vec<Token<L::TokenType>>,
     pub(crate) errors: Vec<OakError>,
+    pub(crate) end_limit: Option<usize>,
 }
 
 impl<'s, S: Source + ?Sized, L: Language> LexerState<'s, S, L> {
@@ -31,7 +32,7 @@ impl<'s, S: Source + ?Sized, L: Language> LexerState<'s, S, L> {
     ///
     /// A new `LexerState` initialized at the beginning of the source
     pub fn new(source: &'s S) -> Self {
-        Self { cursor: SourceCursor::new(source), tokens: vec![], errors: vec![] }
+        Self { cursor: SourceCursor::new(source), tokens: vec![], errors: vec![], end_limit: None }
     }
 
     /// Creates a new lexer state with the given source text and incremental cache.
@@ -48,7 +49,7 @@ impl<'s, S: Source + ?Sized, L: Language> LexerState<'s, S, L> {
     /// A new `LexerState` initialized at the beginning of the source with cache support
     pub fn new_with_cache(source: &'s S, relex_from: usize, cache: &impl LexerCache<L>) -> Self {
         if !cache.has_tokens() {
-            return Self { cursor: SourceCursor::new(source), tokens: vec![], errors: vec![] };
+            return Self { cursor: SourceCursor::new(source), tokens: vec![], errors: vec![], end_limit: None };
         }
 
         let len = source.length();
@@ -69,11 +70,11 @@ impl<'s, S: Source + ?Sized, L: Language> LexerState<'s, S, L> {
                 }
             }
             let offset = tokens.last().map(|t| t.span.end).unwrap_or(0).min(len);
-            return Self { cursor: SourceCursor::new_at(source, offset), tokens, errors: vec![] };
+            return Self { cursor: SourceCursor::new_at(source, offset), tokens, errors: vec![], end_limit: None };
         }
 
         if relex_from == 0 {
-            return Self { cursor: SourceCursor::new(source), tokens: vec![], errors: vec![] };
+            return Self { cursor: SourceCursor::new(source), tokens: vec![], errors: vec![], end_limit: None };
         }
 
         let mut reused_tokens = Vec::new();
@@ -105,12 +106,12 @@ impl<'s, S: Source + ?Sized, L: Language> LexerState<'s, S, L> {
         }
 
         let stable_offset = reused_tokens.last().map(|t| t.span.end).unwrap_or(0);
-        Self { cursor: SourceCursor::new_at(source, stable_offset), tokens: reused_tokens, errors: vec![] }
+        Self { cursor: SourceCursor::new_at(source, stable_offset), tokens: reused_tokens, errors: vec![], end_limit: None }
     }
 
     /// Creates a sub-state for scanning a sub-range of the source.
-    pub fn sub_state(&mut self, start: usize, _end: usize) -> Self {
-        Self { cursor: SourceCursor::new_at(self.cursor.source(), start), tokens: vec![], errors: vec![] }
+    pub fn sub_state(&mut self, start: usize, end: usize) -> Self {
+        Self { cursor: SourceCursor::new_at(self.cursor.source(), start), tokens: vec![], errors: vec![], end_limit: Some(end) }
     }
 
     /// Returns the source text provider.
@@ -189,7 +190,7 @@ impl<'s, S: Source + ?Sized, L: Language> LexerState<'s, S, L> {
     /// Gets the total length of the source text in bytes.
     #[inline]
     pub fn get_length(&self) -> usize {
-        self.cursor.source().length()
+        self.end_limit.unwrap_or_else(|| self.cursor.source().length())
     }
 
     /// Gets a single character at the specified absolute byte offset.

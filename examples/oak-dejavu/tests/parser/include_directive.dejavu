@@ -1,7 +1,7 @@
 # Include directive test
 
-<$ include "header.tpl" $>
+<% include "header.tpl" %>
 
-<$include "footer.tpl"$>
+<%include "footer.tpl"%>
 
-<$ include   "sidebar.tpl"   $>
+<% include   "sidebar.tpl"   %>

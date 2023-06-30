@@ -1,4 +1,9 @@
 #![doc = include_str!("readme.md")]
+
+/// JSON value representation.
+pub mod value;
+pub use value::JsonValue;
+
 #[cfg(feature = "serde")]
 mod de;
 #[cfg(feature = "serde")]

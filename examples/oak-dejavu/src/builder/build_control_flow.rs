@@ -290,4 +290,254 @@ impl<'config> DejavuBuilder<'config> {
 
         Ok(ExpressionNode::Resume(ResumeExpressionNode { expr, span }))
     }
+
+    /// Builds a ForControlNode from a ForControl red node.
+    pub(crate) fn build_for_control<S: Source + ?Sized>(&self, n: RedNode<DejavuLanguage>, source: &S) -> Result<ForControlNode, OakError> {
+        let span = n.span();
+        let mut pattern = None;
+        let mut iterable = None;
+        let mut body = Vec::new();
+        let mut else_body = None;
+        let mut in_else = false;
+
+        for child in n.children() {
+            match child {
+                RedTree::Node(child_node) => match child_node.green.kind {
+                    DejavuElementType::Whitespace | DejavuElementType::LineComment | DejavuElementType::BlockComment => continue,
+                    DejavuElementType::Pattern => {
+                        pattern = Some(self.build_pattern(child_node, source)?);
+                    }
+                    DejavuElementType::Expression => {
+                        if iterable.is_none() {
+                            iterable = Some(self.build_expr(child_node, source)?);
+                        }
+                    }
+                    DejavuElementType::ElseBranch => {
+                        let mut else_items = Vec::new();
+                        for else_child in child_node.children() {
+                            if let RedTree::Node(else_n) = else_child {
+                                if let Ok(item) = self.build_item(else_n, source) {
+                                    else_items.push(item);
+                                }
+                            }
+                        }
+                        else_body = Some(else_items);
+                    }
+                    _ => {
+                        if in_else {
+                            if else_body.is_none() {
+                                else_body = Some(Vec::new());
+                            }
+                            if let Ok(item) = self.build_item(child_node, source) {
+                                if let Some(ref mut else_items) = else_body {
+                                    else_items.push(item);
+                                }
+                            }
+                        }
+                        else {
+                            if let Ok(item) = self.build_item(child_node, source) {
+                                body.push(item);
+                            }
+                        }
+                    }
+                },
+                RedTree::Leaf(t) => match t.kind {
+                    DejavuTokenType::Whitespace | DejavuTokenType::LineComment | DejavuTokenType::BlockComment => continue,
+                    DejavuTokenType::Keyword(crate::lexer::DejavuKeywords::Else) => {
+                        in_else = true;
+                    }
+                    _ => {}
+                },
+            }
+        }
+
+        let default_pattern = PatternNode::Variable(VariablePatternNode { name: IdentifierNode { name: "_".to_string(), span: span.clone() }, span: span.clone() });
+        let default_iterable = ExpressionNode::Ident(IdentifierNode { name: "[]".to_string(), span: span.clone() });
+
+        Ok(ForControlNode { pattern: pattern.unwrap_or(default_pattern), iterable: iterable.unwrap_or(default_iterable), body, else_body, span })
+    }
+
+    /// Builds an IfControlNode from an IfControl red node.
+    pub(crate) fn build_if_control<S: Source + ?Sized>(&self, n: RedNode<DejavuLanguage>, source: &S) -> Result<IfControlNode, OakError> {
+        let span = n.span();
+        let mut condition = None;
+        let mut then_body = Vec::new();
+        let mut else_branch = None;
+        let mut in_else = false;
+
+        for child in n.children() {
+            match child {
+                RedTree::Node(child_node) => match child_node.green.kind {
+                    DejavuElementType::Whitespace | DejavuElementType::LineComment | DejavuElementType::BlockComment => continue,
+                    DejavuElementType::Expression => {
+                        if condition.is_none() {
+                            condition = Some(self.build_expr(child_node, source)?);
+                        }
+                    }
+                    DejavuElementType::ElseBranch => {
+                        else_branch = Some(self.build_else_branch(child_node, source)?);
+                    }
+                    DejavuElementType::IfControl => {
+                        if in_else {
+                            let nested_if = self.build_if_control(child_node, source)?;
+                            else_branch = Some(ElseBranchNode::Elif { condition: nested_if.condition, body: nested_if.then_body, else_branch: nested_if.else_branch.map(Box::new) });
+                        }
+                    }
+                    _ => {
+                        if in_else {
+                            if else_branch.is_none() {
+                                else_branch = Some(ElseBranchNode::Else { body: Vec::new() });
+                            }
+                            if let Ok(item) = self.build_item(child_node, source) {
+                                if let Some(ElseBranchNode::Else { ref mut body }) = else_branch {
+                                    body.push(item);
+                                }
+                            }
+                        }
+                        else {
+                            if let Ok(item) = self.build_item(child_node, source) {
+                                then_body.push(item);
+                            }
+                        }
+                    }
+                },
+                RedTree::Leaf(t) => match t.kind {
+                    DejavuTokenType::Whitespace | DejavuTokenType::LineComment | DejavuTokenType::BlockComment => continue,
+                    DejavuTokenType::Keyword(crate::lexer::DejavuKeywords::Else) => {
+                        in_else = true;
+                    }
+                    _ => {}
+                },
+            }
+        }
+
+        let default_condition = ExpressionNode::Bool(BooleanLiteralNode { value: false, span: span.clone() });
+
+        Ok(IfControlNode { condition: condition.unwrap_or(default_condition), then_body, else_branch, span })
+    }
+
+    /// Builds a WhileControlNode from a WhileControl red node.
+    pub(crate) fn build_while_control<S: Source + ?Sized>(&self, n: RedNode<DejavuLanguage>, source: &S) -> Result<WhileControlNode, OakError> {
+        let span = n.span();
+        let mut condition = None;
+        let mut body = Vec::new();
+
+        for child in n.children() {
+            match child {
+                RedTree::Node(child_node) => match child_node.green.kind {
+                    DejavuElementType::Whitespace | DejavuElementType::LineComment | DejavuElementType::BlockComment => continue,
+                    DejavuElementType::Expression => {
+                        if condition.is_none() {
+                            condition = Some(self.build_expr(child_node, source)?);
+                        }
+                    }
+                    _ => {
+                        if let Ok(item) = self.build_item(child_node, source) {
+                            body.push(item);
+                        }
+                    }
+                },
+                RedTree::Leaf(t) => match t.kind {
+                    DejavuTokenType::Whitespace | DejavuTokenType::LineComment | DejavuTokenType::BlockComment => continue,
+                    _ => {}
+                },
+            }
+        }
+
+        let default_condition = ExpressionNode::Bool(BooleanLiteralNode { value: false, span: span.clone() });
+
+        Ok(WhileControlNode { condition: condition.unwrap_or(default_condition), body, span })
+    }
+
+    /// Builds a LoopControlNode from a LoopControl red node.
+    pub(crate) fn build_loop_control<S: Source + ?Sized>(&self, n: RedNode<DejavuLanguage>, source: &S) -> Result<LoopControlNode, OakError> {
+        let span = n.span();
+        let mut pattern = None;
+        let mut iterable = None;
+        let mut body = Vec::new();
+
+        for child in n.children() {
+            match child {
+                RedTree::Node(child_node) => match child_node.green.kind {
+                    DejavuElementType::Whitespace | DejavuElementType::LineComment | DejavuElementType::BlockComment => continue,
+                    DejavuElementType::Pattern => {
+                        if pattern.is_none() {
+                            pattern = Some(self.build_pattern(child_node, source)?);
+                        }
+                    }
+                    DejavuElementType::Expression => {
+                        if iterable.is_none() {
+                            iterable = Some(self.build_expr(child_node, source)?);
+                        }
+                    }
+                    _ => {
+                        if let Ok(item) = self.build_item(child_node, source) {
+                            body.push(item);
+                        }
+                    }
+                },
+                RedTree::Leaf(t) => match t.kind {
+                    DejavuTokenType::Whitespace | DejavuTokenType::LineComment | DejavuTokenType::BlockComment => continue,
+                    _ => {}
+                },
+            }
+        }
+
+        let default_pattern = PatternNode::Variable(VariablePatternNode { name: IdentifierNode { name: "_".to_string(), span: span.clone() }, span: span.clone() });
+        let default_iterable = ExpressionNode::Ident(IdentifierNode { name: "[]".to_string(), span: span.clone() });
+
+        Ok(LoopControlNode { pattern: pattern.unwrap_or(default_pattern), iterable: iterable.unwrap_or(default_iterable), body, span })
+    }
+
+    /// Builds an ElseBranchNode from an ElseBranch red node.
+    pub(crate) fn build_else_branch<S: Source + ?Sized>(&self, n: RedNode<DejavuLanguage>, source: &S) -> Result<ElseBranchNode, OakError> {
+        let span = n.span();
+        let mut is_elif = false;
+        let mut condition = None;
+        let mut body = Vec::new();
+        let mut nested_else = None;
+
+        for child in n.children() {
+            match child {
+                RedTree::Node(child_node) => match child_node.green.kind {
+                    DejavuElementType::Whitespace | DejavuElementType::LineComment | DejavuElementType::BlockComment => continue,
+                    DejavuElementType::Expression => {
+                        if condition.is_none() {
+                            condition = Some(self.build_expr(child_node, source)?);
+                        }
+                    }
+                    DejavuElementType::IfControl => {
+                        let nested_if = self.build_if_control(child_node, source)?;
+                        condition = Some(nested_if.condition);
+                        body = nested_if.then_body;
+                        nested_else = nested_if.else_branch.map(Box::new);
+                        is_elif = true;
+                    }
+                    DejavuElementType::ElseBranch => {
+                        nested_else = Some(Box::new(self.build_else_branch(child_node, source)?));
+                    }
+                    _ => {
+                        if let Ok(item) = self.build_item(child_node, source) {
+                            body.push(item);
+                        }
+                    }
+                },
+                RedTree::Leaf(t) => match t.kind {
+                    DejavuTokenType::Whitespace | DejavuTokenType::LineComment | DejavuTokenType::BlockComment => continue,
+                    DejavuTokenType::Keyword(crate::lexer::DejavuKeywords::If) => {
+                        is_elif = true;
+                    }
+                    _ => {}
+                },
+            }
+        }
+
+        if is_elif {
+            let default_condition = ExpressionNode::Bool(BooleanLiteralNode { value: false, span: span.clone() });
+            Ok(ElseBranchNode::Elif { condition: condition.unwrap_or(default_condition), body, else_branch: nested_else })
+        }
+        else {
+            Ok(ElseBranchNode::Else { body })
+        }
+    }
 }

@@ -77,10 +77,44 @@ pub enum StatementNode {
         #[serde(with = "oak_core::serde_range")]
         span: Range<usize>,
     },
+    /// Until loop statement
+    Until {
+        /// Condition expression
+        condition: ExpressionNode,
+        /// Loop body
+        body: Vec<StatementNode>,
+        /// Source code span
+        #[serde(with = "oak_core::serde_range")]
+        span: Range<usize>,
+    },
+    /// Case statement
+    Case {
+        /// Value expression
+        value: ExpressionNode,
+        /// When clauses
+        when_clauses: Vec<(ExpressionNode, Vec<StatementNode>)>,
+        /// Else clause
+        else_clause: Option<Vec<StatementNode>>,
+        /// Source code span
+        #[serde(with = "oak_core::serde_range")]
+        span: Range<usize>,
+    },
     /// Return statement
     Return {
         /// Return value
         value: Option<ExpressionNode>,
+        /// Source code span
+        #[serde(with = "oak_core::serde_range")]
+        span: Range<usize>,
+    },
+    /// Next statement
+    Next {
+        /// Source code span
+        #[serde(with = "oak_core::serde_range")]
+        span: Range<usize>,
+    },
+    /// Redo statement
+    Redo {
         /// Source code span
         #[serde(with = "oak_core::serde_range")]
         span: Range<usize>,

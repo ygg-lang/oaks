@@ -183,6 +183,9 @@ impl<'config> super::DejavuParser<'config> {
             let _ = self.parse_expression_internal(state, 8);
         }
         else if is_for {
+            if !self.config.template.legacy_for {
+                return Err(OakError::custom_error("Legacy 'for' syntax is not supported. Use 'loop' instead."));
+            }
             self.parse_pattern(state)?;
             self.skip_trivia(state);
             state.expect(Keyword(DejavuKeywords::In))?;
