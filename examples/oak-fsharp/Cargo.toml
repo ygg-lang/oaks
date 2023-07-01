@@ -5,7 +5,6 @@ authors.workspace = true
 description = "High-performance incremental F# (F Sharp) parser for the oak ecosystem with flexible configuration, supporting functional programming and .NET ecosystem integration."
 edition.workspace = true
 license.workspace = true
-readme = "readme.md"
 homepage.workspace = true
 repository = "https://github.com/ygg-lang/oaks/tree/master/examples/oak-fsharp"
 documentation = "https://docs.rs/oak-fsharp"

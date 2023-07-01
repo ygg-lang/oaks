@@ -5,7 +5,6 @@ authors.workspace = true
 description = "Perl scripting language parser with support for text processing, system administration, and modern Perl features."
 edition.workspace = true
 license.workspace = true
-readme = "readme.md"
 homepage.workspace = true
 repository = "https://github.com/ygg-lang/oaks/tree/master/examples/oak-perl"
 documentation = "https://docs.rs/oak-perl"

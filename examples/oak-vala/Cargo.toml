@@ -5,7 +5,6 @@ authors.workspace = true
 description = "Vala object-oriented programming language parser with support for GObject-based programming and modern syntax features."
 edition.workspace = true
 license.workspace = true
-readme = "readme.md"
 homepage.workspace = true
 repository = "https://github.com/ygg-lang/oaks/tree/master/examples/oak-vala"
 documentation = "https://docs.rs/oak-vala"

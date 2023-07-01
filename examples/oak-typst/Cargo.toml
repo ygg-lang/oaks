@@ -5,7 +5,6 @@ authors.workspace = true
 description = "Typst document typesetting language parser with support for modern document typesetting and markup processing."
 edition.workspace = true
 license.workspace = true
-readme = "readme.md"
 homepage.workspace = true
 repository = "https://github.com/ygg-lang/oaks/tree/master/examples/oak-typst"
 documentation = "https://docs.rs/oak-typst"

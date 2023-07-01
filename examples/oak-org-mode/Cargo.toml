@@ -5,7 +5,6 @@ authors.workspace = true
 description = "Org-mode parser with support for Emacs org-mode syntax and features."
 edition.workspace = true
 license.workspace = true
-readme = "readme.md"
 homepage.workspace = true
 repository = "https://github.com/ygg-lang/oaks/tree/master/examples/oak-org-mode"
 documentation = "https://docs.rs/oak-org-mode"

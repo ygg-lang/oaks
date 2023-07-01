@@ -1,42 +1,33 @@
-# 🧪 TypeScript Parser Test Suite & Quality Assurance
+# 🧪 TypeScript Parser Test Suite
 
-`oak-typescript` features a comprehensive test suite to ensure stability across TypeScript's complex type system and evolving syntax, from small utilities to massive React/TSX applications.
+> ⚠️ **Tests No Longer Maintained**
+> 
+> This test directory is no longer maintained. All TypeScript parser test cases are now maintained downstream:
+> https://github.com/nyar-vm/rusty-typescript/tree/dev
 
-## 📊 Test Coverage
+## 📝 Frequently Asked Questions
 
-Our test suite is organized into several core levels to ensure full language compliance and structural accuracy:
+### Why aren't these tests maintained here anymore?
 
-### 1. Lexer Tests
-Validates the correct identification of all TypeScript keywords, operators, and literals, including support for type-only keywords, decorators, and TSX-specific tokens.
-- **Directory**: `tests/lexer/`
-- **Mechanism**: Snapshot-based verification comparing against expected token streams.
+**Complexity challenges made maintenance difficult:**
 
-### 2. Parser Tests
-Verifies the structural correctness of the Abstract Syntax Tree (AST), covering:
-- **Type System**: Interfaces, type aliases, enums, generics, and union/intersection types.
-- **TSX**: Correct parsing of TSX elements, attributes, and type-aware embedded expressions.
-- **Decorators**: Validation of both legacy and modern decorator syntax.
-- **Modern Features**: `satisfies` operator, `const` type parameters, and `as const` assertions.
-- **Modules**: Proper handling of ESM (`import type`, `export type`) and namespaces.
-- **Expressions**: Correct precedence and associativity for all TS/JS operators.
+- **Evolving TypeScript Syntax**: TypeScript's language specification changes frequently with new features, making it hard to maintain comprehensive test coverage across versions
+- **Cross-Platform Compatibility**: Ensuring tests work consistently across different environments adds significant complexity
+- **Integration Requirements**: Testing TypeScript parsing requires integration with multiple toolchains and frameworks
+- **Scalability**: As the test suite grows, maintaining and running tests becomes increasingly resource-intensive
+- **Focus Dilution**: Maintaining extensive tests alongside core parser development impacts the iteration speed of core features
 
-### 3. Error Recovery
-Specifically tests the parser's robustness when facing malformed TypeScript code (e.g., incomplete type declarations, unmatched angle brackets in generics, or syntax errors in TSX), ensuring it can continue parsing subsequent code and produce useful diagnostics.
+### Why is downstream maintenance better?
 
-### 4. Version & Feature Compliance
-Validation against various TypeScript versions and feature sets (e.g., with or without TSX enabled) to ensure the parser correctly handles environment-specific syntax.
+**Benefits of the new approach:**
 
-## 🚀 Running Tests
+- **Specialized Focus**: The `rusty-typescript` repository is dedicated to TypeScript parsing, allowing for more focused and comprehensive test coverage
+- **Unified Ecosystem**: All test cases are centralized in one location, providing a consistent testing environment and reducing duplication
+- **Better Integration**: Tests are directly integrated with the parser implementation, enabling more efficient feedback loops
+- **Community Collaboration**: A dedicated repository fosters community contributions and shared maintenance efforts
+- **Scalable Infrastructure**: Purpose-built testing infrastructure better handles the growing complexity of TypeScript's feature set
 
-You can run the full test suite using:
+### Where can I find the current tests?
 
-```bash
-# Run standard Rust tests using cargo
-cargo test -p oak-typescript
-
-# Or use the project-wide task runner
-wee test
-```
-
-## 📈 Contributing Tests
-If you discover a TypeScript edge case that doesn't parse correctly, we welcome contributions! Please add a new `.ts` or `.tsx` file to the `tests/` directory representing the case and submit a PR.
+All TypeScript parser test cases are now maintained at:
+https://github.com/nyar-vm/rusty-typescript/tree/dev

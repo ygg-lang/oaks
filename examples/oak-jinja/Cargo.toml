@@ -5,7 +5,6 @@ authors.workspace = true
 description = "High-performance incremental Jinja2 parser for the oak ecosystem with flexible configuration, supporting template rendering and syntax analysis."
 edition.workspace = true
 license.workspace = true
-readme = "readme.md"
 homepage.workspace = true
 repository = "https://github.com/ygg-lang/oaks/tree/master/examples/oak-jinja"
 documentation = "https://docs.rs/oak-jinja"

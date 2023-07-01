@@ -5,7 +5,6 @@ authors.workspace = true
 description = "Oak MCP server with support for compact code structures and fuzzy semantic search."
 edition.workspace = true
 license.workspace = true
-readme = "readme.md"
 homepage.workspace = true
 repository = "https://github.com/ygg-lang/oaks/tree/master/projects/oak-mcp"
 categories = ["development-tools"]

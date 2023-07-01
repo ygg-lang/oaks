@@ -5,7 +5,6 @@ authors.workspace = true
 description = "WebAssembly Interface Types (WIT) component parser with support for interface definitions and component model."
 edition.workspace = true
 license.workspace = true
-readme = "readme.md"
 homepage.workspace = true
 repository = "https://github.com/ygg-lang/oaks/tree/master/examples/oak-wit"
 documentation = "https://docs.rs/oak-wit"

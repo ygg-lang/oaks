@@ -5,7 +5,6 @@ authors.workspace = true
 description = "C++ systems programming language parser with support for modern C++ features and object-oriented programming."
 edition.workspace = true
 license.workspace = true
-readme = "readme.md"
 homepage.workspace = true
 repository = "https://github.com/ygg-lang/oaks/tree/master/examples/oak-cpp"
 documentation = "https://docs.rs/oak-cpp"

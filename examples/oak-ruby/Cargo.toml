@@ -5,7 +5,6 @@ authors.workspace = true
 description = "Ruby dynamic programming language parser with support for object-oriented programming and modern Ruby features."
 edition.workspace = true
 license.workspace = true
-readme = "readme.md"
 homepage.workspace = true
 repository = "https://github.com/ygg-lang/oaks/tree/master/examples/oak-ruby"
 documentation = "https://docs.rs/oak-ruby"

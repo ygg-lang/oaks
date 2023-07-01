@@ -1,10 +1,10 @@
 [package]
 name = "oak-glob"
 description = "Glob pattern language support for Oaks"
-version = "0.0.9"
+version = { workspace = true }
 edition = { workspace = true }
-authors = [""]
-license = "MIT"
+authors = { workspace = true }
+license = { workspace = true }
 
 [features]
 default = []

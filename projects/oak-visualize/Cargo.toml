@@ -5,7 +5,6 @@ authors.workspace = true
 description = "High-performance visualization and layout algorithms for the oak ecosystem with flexible configuration, emphasizing tree and graph visualization."
 edition.workspace = true
 license.workspace = true
-readme = "readme.md"
 homepage.workspace = true
 repository = "https://github.com/ygg-lang/oaks/tree/master/projects/oak-visualize"
 documentation = "https://docs.rs/oak-visualize"

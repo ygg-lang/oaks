@@ -5,7 +5,6 @@ authors.workspace = true
 description = "Microsoft Intermediate Language (MSIL) parser with support for .NET Common Language Infrastructure and bytecode analysis."
 edition.workspace = true
 license.workspace = true
-readme = "readme.md"
 homepage.workspace = true
 repository = "https://github.com/ygg-lang/oaks/tree/master/examples/oak-msil"
 documentation = "https://docs.rs/oak-msil"

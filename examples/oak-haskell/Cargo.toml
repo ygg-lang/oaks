@@ -5,7 +5,6 @@ authors.workspace = true
 description = "Haskell functional programming language parser with support for pure functional programming and advanced type systems."
 edition.workspace = true
 license.workspace = true
-readme = "readme.md"
 homepage.workspace = true
 repository = "https://github.com/ygg-lang/oaks/tree/master/examples/oak-haskell"
 documentation = "https://docs.rs/oak-haskell"

@@ -1,6 +1,6 @@
 [package]
 name = "oak-fluent"
-version = "0.0.9"
+version = { workspace = true }
 edition = { workspace = true }
 authors = { workspace = true }
 description = "Fluent internationalization support for oak framework"

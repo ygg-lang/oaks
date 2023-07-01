@@ -8,8 +8,8 @@
         "regenerate": "$env:REGENERATE_TESTS=1; cargo test --release --all-features",
         "test": "cargo test --release",
         "fmt": "cargo fmt --all",
-        "p": "cargo workspace publish --resume",
-        "u": "cargo upgrade --incompatible"
+        "p": "cargo workspace publish --resume --allow-dirty",
+        "u": "cargo upgrade --pinned"
     },
     "packageManager": "pnpm@10.18.3"
 }

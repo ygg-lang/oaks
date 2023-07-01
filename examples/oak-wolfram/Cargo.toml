@@ -5,7 +5,6 @@ authors.workspace = true
 description = "Wolfram Language parser with support for Mathematica syntax and symbolic computation."
 edition.workspace = true
 license.workspace = true
-readme = "readme.md"
 homepage.workspace = true
 repository = "https://github.com/ygg-lang/oaks/tree/master/examples/oak-wolfram"
 documentation = "https://docs.rs/oak-wolfram"

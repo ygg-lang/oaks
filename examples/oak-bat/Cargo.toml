@@ -5,7 +5,6 @@ authors.workspace = true
 description = "High-performance incremental Windows Batch (BAT) parser for the oak ecosystem with flexible configuration, supporting shell scripting and automation workflows."
 edition.workspace = true
 license.workspace = true
-readme = "readme.md"
 homepage.workspace = true
 repository = "https://github.com/ygg-lang/oaks/tree/master/examples/oak-bat"
 documentation = "https://docs.rs/oak-bat"

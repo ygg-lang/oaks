@@ -351,6 +351,19 @@ pub struct WhileControlNode {
     pub span: Range<usize>,
 }
 
+/// Loop control node for general loops.
+#[derive(Debug, Clone, PartialEq)]
+pub struct LoopControlNode {
+    /// Loop variable pattern.
+    pub pattern: PatternNode,
+    /// Iterable expression.
+    pub iterable: ExpressionNode,
+    /// Loop body.
+    pub body: Vec<ItemNode>,
+    /// Source span.
+    pub span: Range<usize>,
+}
+
 /// Template interpolation node for embedded expressions.
 #[derive(Debug, Clone, PartialEq)]
 pub struct TemplateInterpolationNode {

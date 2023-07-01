@@ -5,7 +5,6 @@ authors.workspace = true
 description = "Raku (formerly Perl 6) language parser with support for advanced concurrency, grammar, and multi-paradigm programming."
 edition.workspace = true
 license.workspace = true
-readme = "readme.md"
 homepage.workspace = true
 repository = "https://github.com/ygg-lang/oaks/tree/master/examples/oak-raku"
 documentation = "https://docs.rs/oak-raku"

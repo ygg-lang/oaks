@@ -239,6 +239,9 @@ where
     if yaml.contains(':') && !yaml.starts_with('[') && !yaml.starts_with('{') {
         let mut entries = Vec::new();
         let lines = yaml.lines();
+        let mut current_key: Option<String> = None;
+        let mut current_value = String::new();
+        let mut in_array = false;
 
         for line in lines {
             let line = line.trim();
@@ -246,17 +249,66 @@ where
                 continue;
             }
 
-            if let Some(colon_idx) = line.find(':') {
-                let key_str = line[..colon_idx].trim();
-                let value_str = line[colon_idx + 1..].trim();
+            // 检查是否是新的键值对
+            if line.contains(':') && !line.starts_with('-') && !in_array {
+                // 处理之前的键值对
+                if let Some(key) = current_key.take() {
+                    let value = if current_value.is_empty() {
+                        YamlValueNode::Scalar(YamlScalar { span: (0..0).into(), value: "".to_string() })
+                    } else if current_value.starts_with('-') {
+                        // 处理数组
+                        let mut items = Vec::new();
+                        for item_line in current_value.lines() {
+                            let item_line = item_line.trim();
+                            if item_line.starts_with('-') {
+                                let item_value = item_line[1..].trim();
+                                items.push(YamlValueNode::Scalar(YamlScalar { span: (0..item_value.len()).into(), value: item_value.to_string() }));
+                            }
+                        }
+                        YamlValueNode::Sequence(YamlSequence { span: (0..current_value.len()).into(), items })
+                    } else {
+                        YamlValueNode::Scalar(YamlScalar { span: (0..current_value.len()).into(), value: current_value.trim().to_string() })
+                    };
+                    entries.push(YamlMappingEntry { span: (0..key.len() + current_value.len()).into(), key: YamlValueNode::Scalar(YamlScalar { span: (0..key.len()).into(), value: key }), value });
+                    current_value.clear();
+                }
 
-                // 简单处理键值对
-                let key = YamlValueNode::Scalar(YamlScalar { span: (0..key_str.len()).into(), value: key_str.to_string() });
+                // 开始新的键值对
+                if let Some(colon_idx) = line.find(':') {
+                    let key_str = line[..colon_idx].trim();
+                    let value_str = line[colon_idx + 1..].trim();
 
-                // 简单处理值
-                let value = YamlValueNode::Scalar(YamlScalar { span: (0..value_str.len()).into(), value: value_str.to_string() });
-                entries.push(YamlMappingEntry { span: (0..line.len()).into(), key, value });
+                    current_key = Some(key_str.to_string());
+                    current_value = value_str.to_string();
+                    in_array = value_str.is_empty();
+                }
+            } else if current_key.is_some() {
+                // 处理多行值或数组
+                current_value.push_str(line);
+                current_value.push('\n');
+                in_array = in_array || line.starts_with('-');
             }
+        }
+
+        // 处理最后一个键值对
+        if let Some(key) = current_key {
+            let value = if current_value.is_empty() {
+                YamlValueNode::Scalar(YamlScalar { span: (0..0).into(), value: "".to_string() })
+            } else if current_value.starts_with('-') {
+                // 处理数组
+                let mut items = Vec::new();
+                for item_line in current_value.lines() {
+                    let item_line = item_line.trim();
+                    if item_line.starts_with('-') {
+                        let item_value = item_line[1..].trim();
+                        items.push(YamlValueNode::Scalar(YamlScalar { span: (0..item_value.len()).into(), value: item_value.to_string() }));
+                    }
+                }
+                YamlValueNode::Sequence(YamlSequence { span: (0..current_value.len()).into(), items })
+            } else {
+                YamlValueNode::Scalar(YamlScalar { span: (0..current_value.len()).into(), value: current_value.trim().to_string() })
+            };
+            entries.push(YamlMappingEntry { span: (0..key.len() + current_value.len()).into(), key: YamlValueNode::Scalar(YamlScalar { span: (0..key.len()).into(), value: key }), value });
         }
 
         if !entries.is_empty() {

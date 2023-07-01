@@ -5,7 +5,6 @@ authors.workspace = true
 description = "WGSL language parser with support for modern shader programming and WebGPU features."
 edition.workspace = true
 license.workspace = true
-readme = "readme.md"
 homepage.workspace = true
 repository = "https://github.com/ygg-lang/oaks/tree/master/examples/oak-wgsl"
 documentation = "https://docs.rs/oak-wgsl"

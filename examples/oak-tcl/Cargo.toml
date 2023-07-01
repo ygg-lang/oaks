@@ -5,7 +5,6 @@ authors.workspace = true
 description = "Tcl language parser with support for scripting, command substitution, and procedural programming features."
 edition.workspace = true
 license.workspace = true
-readme = "readme.md"
 homepage.workspace = true
 repository = "https://github.com/ygg-lang/oaks/tree/master/examples/oak-tcl"
 documentation = "https://docs.rs/oak-tcl"
