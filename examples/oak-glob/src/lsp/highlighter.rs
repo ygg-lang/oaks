@@ -1,6 +1,7 @@
-use oak_core::{highlight::Highlighter as HighlighterTrait, lexer::Token};
+use oak_highlighter::Highlighter as HighlighterTrait;
+use oak_core::lexer::Token;
 
-use crate::lexer::GlobTokenType;
+use crate::lexer::token_type::GlobTokenType;
 
 /// Highlighter for glob pattern syntax.
 pub struct GlobHighlighter;

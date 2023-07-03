@@ -1,10 +1,12 @@
+#[cfg(feature = "serde")]
 use serde::Deserialize;
 use std::collections::HashMap;
 
 /// XML value representation.
 ///
 /// This represents the pure value of an XML element without any source code location information.
-#[derive(Debug, Clone, PartialEq, Deserialize)]
+#[derive(Debug, Clone, PartialEq)]
+#[cfg_attr(feature = "serde", derive(Deserialize))]
 pub enum XmlValue {
     /// String value.
     String(String),
@@ -23,13 +25,15 @@ pub enum XmlValue {
 }
 
 /// Array wrapper of XML
-#[derive(Debug, Clone, PartialEq, Deserialize)]
+#[derive(Debug, Clone, PartialEq)]
+#[cfg_attr(feature = "serde", derive(Deserialize))]
 pub struct XmlArray {
     pub list: Vec<XmlValue>,
 }
 
 /// Object wrapper of XML
-#[derive(Debug, Clone, PartialEq, Deserialize)]
+#[derive(Debug, Clone, PartialEq)]
+#[cfg_attr(feature = "serde", derive(Deserialize))]
 pub struct XmlObject {
     pub dict: HashMap<String, XmlValue>,
 }

@@ -6,6 +6,17 @@ use alloc::{
 };
 use oak_core::{Language, LanguageCategory};
 
+/// VON value representation.
+pub mod value;
+pub use value::VonValue;
+
+#[cfg(feature = "serde")]
+mod de;
+#[cfg(feature = "serde")]
+mod ser;
+#[cfg(feature = "serde")]
+pub use self::{de::deserialize, de::from_str, ser::serialize, ser::to_string};
+
 /// Configuration for comments in VON.
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]

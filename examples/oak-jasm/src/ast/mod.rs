@@ -1,7 +1,9 @@
 #![doc = include_str!("readme.md")]
 use oak_core::source::{SourceBuffer, ToSource};
 #[cfg(feature = "oak-pretty-print")]
-use oak_pretty_print::{AsDocument, Document};
+use oak_pretty_print::Document;
+#[cfg(feature = "oak-pretty-print")]
+use oak_pretty_print::to_doc::AsDocument;
 use std::{string::String, vec::Vec};
 
 /// JASM root node.
@@ -20,8 +22,10 @@ impl ToSource for JasmRoot {
 
 #[cfg(feature = "oak-pretty-print")]
 impl AsDocument for JasmRoot {
-    fn as_document(&self) -> Document<'_> {
-        self.class.as_document()
+    type Params = ();
+    
+    fn as_document(&self, params: &Self::Params) -> Document<'_> {
+        self.class.as_document(params)
     }
 }
 
@@ -102,7 +106,9 @@ impl ToSource for JasmClass {
 
 #[cfg(feature = "oak-pretty-print")]
 impl AsDocument for JasmClass {
-    fn as_document(&self) -> Document<'_> {
+    type Params = ();
+    
+    fn as_document(&self, params: &Self::Params) -> Document<'_> {
         let mut docs = Vec::new();
         if let Some(source) = &self.source_file {
             docs.push(Document::Text(format!(".source {}\n", source).into()))
@@ -134,11 +140,11 @@ impl AsDocument for JasmClass {
         docs.push(Document::Line);
 
         for field in &self.fields {
-            docs.push(field.as_document());
+            docs.push(field.as_document(params));
             docs.push(Document::Line)
         }
         for method in &self.methods {
-            docs.push(method.as_document());
+            docs.push(method.as_document(params));
             docs.push(Document::Line)
         }
         Document::Concat(docs)
@@ -212,7 +218,9 @@ impl ToSource for JasmMethod {
 
 #[cfg(feature = "oak-pretty-print")]
 impl AsDocument for JasmMethod {
-    fn as_document(&self) -> Document<'_> {
+    type Params = ();
+    
+    fn as_document(&self, params: &Self::Params) -> Document<'_> {
         let mut docs = Vec::new();
         let mut method_line = vec![Document::Text(".method ".into())];
         for modifier in &self.modifiers {
@@ -240,7 +248,7 @@ impl AsDocument for JasmMethod {
             body.push(Document::Text(format!("{}\n", exception_handler).into()))
         }
         for inst in &self.instructions {
-            body.push(inst.as_document());
+            body.push(inst.as_document(params));
             body.push(Document::Line)
         }
 
@@ -287,7 +295,9 @@ impl ToSource for JasmField {
 
 #[cfg(feature = "oak-pretty-print")]
 impl AsDocument for JasmField {
-    fn as_document(&self) -> Document<'_> {
+    type Params = ();
+    
+    fn as_document(&self, _params: &Self::Params) -> Document<'_> {
         let mut docs = Vec::new();
         for annotation in &self.annotations {
             docs.push(Document::Text(format!("{}\n", annotation).into()));
@@ -361,7 +371,9 @@ impl ToSource for JasmInstruction {
 
 #[cfg(feature = "oak-pretty-print")]
 impl AsDocument for JasmInstruction {
-    fn as_document(&self) -> Document<'_> {
+    type Params = ();
+    
+    fn as_document(&self, _params: &Self::Params) -> Document<'_> {
         match self {
             JasmInstruction::Simple(s) => Document::Text(s.clone().into()),
             JasmInstruction::WithArgument { instruction, argument } => Document::Concat(vec![Document::Text(instruction.clone().into()), Document::Text(" ".into()), Document::Text(argument.clone().into())]),

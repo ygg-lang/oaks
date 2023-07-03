@@ -75,6 +75,10 @@ pub enum IdlElementType {
     Const,
     /// An exception member.
     ExceptionMember,
+    /// A field member.
+    Field,
+    /// A parameter.
+    Param,
 
     /// A module declaration.
     ModuleDeclaration,
@@ -103,6 +107,36 @@ pub enum IdlElementType {
     Error,
     /// End of file.
     Eof,
+    
+    /// An identifier.
+    Identifier,
+    /// A string literal.
+    StringLiteral,
+    /// A numeric literal.
+    NumberLiteral,
+    /// A boolean literal.
+    BooleanLiteral,
+    /// The `readonly` keyword.
+    Readonly,
+    /// The `in` keyword.
+    In,
+    /// The `out` keyword.
+    Out,
+    /// The `inout` keyword.
+    Inout,
+}
+
+impl IdlElementType {
+    /// Returns true if this is a basic type.
+    pub fn is_basic_type(&self) -> bool {
+        matches!(self, 
+            Self::Void | Self::Boolean | Self::Byte | Self::Octet | 
+            Self::Short | Self::UnsignedShort | Self::Long | Self::UnsignedLong |
+            Self::LongLong | Self::UnsignedLongLong | Self::Float | Self::Double |
+            Self::LongDouble | Self::Char | Self::WChar | Self::String | 
+            Self::WString | Self::Any | Self::Object | Self::ValueBase
+        )
+    }
 }
 
 impl ElementType for IdlElementType {
@@ -155,6 +189,14 @@ impl From<crate::lexer::token_type::IdlTokenType> for IdlElementType {
             crate::lexer::token_type::IdlTokenType::Fixed => Self::Fixed,
             crate::lexer::token_type::IdlTokenType::Const => Self::Const,
             crate::lexer::token_type::IdlTokenType::Attribute => Self::Attribute,
+            crate::lexer::token_type::IdlTokenType::Readonly => Self::Readonly,
+            crate::lexer::token_type::IdlTokenType::In => Self::In,
+            crate::lexer::token_type::IdlTokenType::Out => Self::Out,
+            crate::lexer::token_type::IdlTokenType::Inout => Self::Inout,
+            crate::lexer::token_type::IdlTokenType::Identifier => Self::Identifier,
+            crate::lexer::token_type::IdlTokenType::StringLiteral => Self::StringLiteral,
+            crate::lexer::token_type::IdlTokenType::NumberLiteral => Self::NumberLiteral,
+            crate::lexer::token_type::IdlTokenType::BooleanLiteral => Self::BooleanLiteral,
             crate::lexer::token_type::IdlTokenType::Error => Self::Error,
             crate::lexer::token_type::IdlTokenType::Eof => Self::Eof,
             _ => Self::Error,

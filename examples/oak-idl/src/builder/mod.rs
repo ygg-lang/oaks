@@ -1,4 +1,4 @@
-use crate::{IdlLanguage, IdlParser, ast::*, parser::element_type::IdlElementType};
+use crate::{IdlLanguage, IdlParser, ast::*, parser::element_type::IdlElementType, lexer::token_type::IdlTokenType};
 use oak_core::{Builder, BuilderCache, GreenNode, GreenTree, OakDiagnostics, OakError, Parser, SourceText, TextEdit, source::Source};
 
 /// A builder for IDL language structures.
@@ -21,7 +21,7 @@ impl<'config> IdlBuilder<'config> {
         fn find_items<'a>(node: &GreenNode<IdlLanguage>, offset: &mut usize, source: &SourceText, builder: &IdlBuilder, items: &mut Vec<IdlItem>) -> Result<(), OakError> {
             // 对于 SourceFile 节点，直接遍历其子节点
             if node.kind == crate::parser::element_type::IdlElementType::SourceFile {
-                for child in &node.children {
+                for child in node.children {
                     match child {
                         GreenTree::Node(n) => {
                             find_items(n, offset, source, builder, items)?;
@@ -41,7 +41,7 @@ impl<'config> IdlBuilder<'config> {
             }
 
             // 递归处理子节点
-            for child in &node.children {
+            for child in node.children {
                 match child {
                     GreenTree::Node(n) => {
                         find_items(n, offset, source, builder, items)?;
@@ -66,11 +66,11 @@ impl<'config> IdlBuilder<'config> {
         match node.kind {
             IdlElementType::Module => {
                 // Parse module name and items
-                let mut module_name = "";
+                let mut module_name = String::new();
                 let mut module_items = Vec::new();
                 let mut current_offset = offset;
 
-                for child in &node.children {
+                for child in node.children {
                     match child {
                         GreenTree::Node(n) => {
                             if module_name.is_empty() && n.kind == IdlElementType::Identifier {
@@ -82,21 +82,24 @@ impl<'config> IdlBuilder<'config> {
                             }
                             current_offset += n.byte_length as usize;
                         }
-                        GreenTree::Leaf(_) => {
-                            current_offset += child.length() as usize;
+                        GreenTree::Leaf(l) => {
+                            if module_name.is_empty() && l.kind == IdlTokenType::Identifier {
+                                module_name = source.get_text_in(core::range::Range { start: current_offset, end: current_offset + l.length as usize }).to_string();
+                            }
+                            current_offset += l.length as usize;
                         }
                     }
                 }
 
-                Ok(Some(IdlItem::Module(Module { name: module_name.to_string(), items: module_items, span: span.into() })))
+                Ok(Some(IdlItem::Module(Module { name: module_name, items: module_items, span: span.into() })))
             }
             IdlElementType::Interface => {
                 // Parse interface name and members
-                let mut interface_name = "";
+                let mut interface_name = String::new();
                 let mut interface_members = Vec::new();
                 let mut current_offset = offset;
 
-                for child in &node.children {
+                for child in node.children {
                     match child {
                         GreenTree::Node(n) => {
                             if interface_name.is_empty() && n.kind == IdlElementType::Identifier {
@@ -108,21 +111,24 @@ impl<'config> IdlBuilder<'config> {
                             }
                             current_offset += n.byte_length as usize;
                         }
-                        GreenTree::Leaf(_) => {
-                            current_offset += child.length() as usize;
+                        GreenTree::Leaf(l) => {
+                            if interface_name.is_empty() && l.kind == IdlTokenType::Identifier {
+                                interface_name = source.get_text_in(core::range::Range { start: current_offset, end: current_offset + l.length as usize }).to_string();
+                            }
+                            current_offset += l.length as usize;
                         }
                     }
                 }
 
-                Ok(Some(IdlItem::Interface(Interface { name: interface_name.to_string(), members: interface_members, span: span.into() })))
+                Ok(Some(IdlItem::Interface(Interface { name: interface_name, members: interface_members, span: span.into() })))
             }
             IdlElementType::Struct => {
                 // Parse struct name and fields
-                let mut struct_name = "";
+                let mut struct_name = String::new();
                 let mut struct_fields = Vec::new();
                 let mut current_offset = offset;
 
-                for child in &node.children {
+                for child in node.children {
                     match child {
                         GreenTree::Node(n) => {
                             if struct_name.is_empty() && n.kind == IdlElementType::Identifier {
@@ -134,21 +140,24 @@ impl<'config> IdlBuilder<'config> {
                             }
                             current_offset += n.byte_length as usize;
                         }
-                        GreenTree::Leaf(_) => {
-                            current_offset += child.length() as usize;
+                        GreenTree::Leaf(l) => {
+                            if struct_name.is_empty() && l.kind == IdlTokenType::Identifier {
+                                struct_name = source.get_text_in(core::range::Range { start: current_offset, end: current_offset + l.length as usize }).to_string();
+                            }
+                            current_offset += l.length as usize;
                         }
                     }
                 }
 
-                Ok(Some(IdlItem::Struct(Struct { name: struct_name.to_string(), fields: struct_fields, span: span.into() })))
+                Ok(Some(IdlItem::Struct(Struct { name: struct_name, fields: struct_fields, span: span.into() })))
             }
             IdlElementType::Enum => {
                 // Parse enum name and variants
-                let mut enum_name = "";
+                let mut enum_name = String::new();
                 let mut enum_variants = Vec::new();
                 let mut current_offset = offset;
 
-                for child in &node.children {
+                for child in node.children {
                     match child {
                         GreenTree::Node(n) => {
                             if enum_name.is_empty() && n.kind == IdlElementType::Identifier {
@@ -160,21 +169,28 @@ impl<'config> IdlBuilder<'config> {
                             }
                             current_offset += n.byte_length as usize;
                         }
-                        GreenTree::Leaf(_) => {
-                            current_offset += child.length() as usize;
+                        GreenTree::Leaf(l) => {
+                            if enum_name.is_empty() && l.kind == IdlTokenType::Identifier {
+                                enum_name = source.get_text_in(core::range::Range { start: current_offset, end: current_offset + l.length as usize }).to_string();
+                            } else if l.kind == IdlTokenType::StringLiteral {
+                                let variant = source.get_text_in(core::range::Range { start: current_offset, end: current_offset + l.length as usize }).to_string();
+                                let variant = variant.trim_matches('"').to_string();
+                                enum_variants.push(variant);
+                            }
+                            current_offset += l.length as usize;
                         }
                     }
                 }
 
-                Ok(Some(IdlItem::Enum(Enum { name: enum_name.to_string(), variants: enum_variants })))
+                Ok(Some(IdlItem::Enum(Enum { name: enum_name, variants: enum_variants })))
             }
             IdlElementType::Typedef => {
                 // Parse typedef
-                let mut type_name = "";
-                let mut new_name = "";
+                let mut type_name = String::new();
+                let mut new_name = String::new();
                 let mut current_offset = offset;
 
-                for child in &node.children {
+                for child in node.children {
                     match child {
                         GreenTree::Node(n) => {
                             if type_name.is_empty() && (n.kind == IdlElementType::Identifier || n.kind.is_basic_type()) {
@@ -184,22 +200,27 @@ impl<'config> IdlBuilder<'config> {
                             }
                             current_offset += n.byte_length as usize;
                         }
-                        GreenTree::Leaf(_) => {
-                            current_offset += child.length() as usize;
+                        GreenTree::Leaf(l) => {
+                            if type_name.is_empty() && l.kind == IdlTokenType::Identifier {
+                                type_name = source.get_text_in(core::range::Range { start: current_offset, end: current_offset + l.length as usize }).to_string();
+                            } else if !type_name.is_empty() && new_name.is_empty() && l.kind == IdlTokenType::Identifier {
+                                new_name = source.get_text_in(core::range::Range { start: current_offset, end: current_offset + l.length as usize }).to_string();
+                            }
+                            current_offset += l.length as usize;
                         }
                     }
                 }
 
-                Ok(Some(IdlItem::Typedef(Typedef { name: new_name.to_string(), type_name: type_name.to_string() })))
+                Ok(Some(IdlItem::Typedef(Typedef { name: new_name, type_name })))
             }
             IdlElementType::Const => {
                 // Parse const
-                let mut type_name = "";
-                let mut const_name = "";
-                let mut const_value = "";
+                let mut type_name = String::new();
+                let mut const_name = String::new();
+                let mut const_value = String::new();
                 let mut current_offset = offset;
 
-                for child in &node.children {
+                for child in node.children {
                     match child {
                         GreenTree::Node(n) => {
                             if type_name.is_empty() && (n.kind == IdlElementType::Identifier || n.kind.is_basic_type()) {
@@ -211,17 +232,24 @@ impl<'config> IdlBuilder<'config> {
                             }
                             current_offset += n.byte_length as usize;
                         }
-                        GreenTree::Leaf(_) => {
-                            current_offset += child.length() as usize;
+                        GreenTree::Leaf(l) => {
+                            if type_name.is_empty() && l.kind == IdlTokenType::Identifier {
+                                type_name = source.get_text_in(core::range::Range { start: current_offset, end: current_offset + l.length as usize }).to_string();
+                            } else if !type_name.is_empty() && const_name.is_empty() && l.kind == IdlTokenType::Identifier {
+                                const_name = source.get_text_in(core::range::Range { start: current_offset, end: current_offset + l.length as usize }).to_string();
+                            } else if !const_name.is_empty() && const_value.is_empty() && (l.kind == IdlTokenType::StringLiteral || l.kind == IdlTokenType::NumberLiteral || l.kind == IdlTokenType::BooleanLiteral) {
+                                const_value = source.get_text_in(core::range::Range { start: current_offset, end: current_offset + l.length as usize }).to_string();
+                            }
+                            current_offset += l.length as usize;
                         }
                     }
                 }
 
-                Ok(Some(IdlItem::Const(Const { name: const_name.to_string(), type_name: type_name.to_string(), value: const_value.to_string() })))
+                Ok(Some(IdlItem::Const(Const { name: const_name, type_name, value: const_value })))
             }
             _ => {
                 // For other types, try to find a child node that is an item
-                for child in &node.children {
+                for child in node.children {
                     if let GreenTree::Node(n) = child {
                         if let Some(item) = self.build_item(n, offset, source)? {
                             return Ok(Some(item));
@@ -237,12 +265,12 @@ impl<'config> IdlBuilder<'config> {
     fn build_member(&self, node: &GreenNode<IdlLanguage>, offset: usize, source: &SourceText) -> Result<Option<IdlMember>, OakError> {
         match node.kind {
             IdlElementType::Attribute => {
-                let mut name = "";
-                let mut type_name = "";
+                let mut name = String::new();
+                let mut type_name = String::new();
                 let mut readonly = false;
                 let mut current_offset = offset;
 
-                for child in &node.children {
+                for child in node.children {
                     match child {
                         GreenTree::Node(n) => {
                             if n.kind == IdlElementType::Readonly {
@@ -254,21 +282,28 @@ impl<'config> IdlBuilder<'config> {
                             }
                             current_offset += n.byte_length as usize;
                         }
-                        GreenTree::Leaf(_) => {
-                            current_offset += child.length() as usize;
+                        GreenTree::Leaf(l) => {
+                            if l.kind == IdlTokenType::Readonly {
+                                readonly = true;
+                            } else if type_name.is_empty() && l.kind == IdlTokenType::Identifier {
+                                type_name = source.get_text_in(core::range::Range { start: current_offset, end: current_offset + l.length as usize }).to_string();
+                            } else if !type_name.is_empty() && name.is_empty() && l.kind == IdlTokenType::Identifier {
+                                name = source.get_text_in(core::range::Range { start: current_offset, end: current_offset + l.length as usize }).to_string();
+                            }
+                            current_offset += l.length as usize;
                         }
                     }
                 }
 
-                Ok(Some(IdlMember::Attribute(Attribute { name: name.to_string(), type_name: type_name.to_string(), readonly })))
+                Ok(Some(IdlMember::Attribute(Attribute { name, type_name, readonly })))
             }
             IdlElementType::Operation => {
-                let mut name = "";
-                let mut return_type = "";
+                let mut name = String::new();
+                let mut return_type = String::new();
                 let mut params = Vec::new();
                 let mut current_offset = offset;
 
-                for child in &node.children {
+                for child in node.children {
                     match child {
                         GreenTree::Node(n) => {
                             if return_type.is_empty() && (n.kind == IdlElementType::Identifier || n.kind.is_basic_type() || n.kind == IdlElementType::Void) {
@@ -282,13 +317,18 @@ impl<'config> IdlBuilder<'config> {
                             }
                             current_offset += n.byte_length as usize;
                         }
-                        GreenTree::Leaf(_) => {
-                            current_offset += child.length() as usize;
+                        GreenTree::Leaf(l) => {
+                            if return_type.is_empty() && l.kind == IdlTokenType::Identifier {
+                                return_type = source.get_text_in(core::range::Range { start: current_offset, end: current_offset + l.length as usize }).to_string();
+                            } else if !return_type.is_empty() && name.is_empty() && l.kind == IdlTokenType::Identifier {
+                                name = source.get_text_in(core::range::Range { start: current_offset, end: current_offset + l.length as usize }).to_string();
+                            }
+                            current_offset += l.length as usize;
                         }
                     }
                 }
 
-                Ok(Some(IdlMember::Operation(Operation { name: name.to_string(), return_type: return_type.to_string(), params })))
+                Ok(Some(IdlMember::Operation(Operation { name, return_type, params })))
             }
             _ => Ok(None),
         }
@@ -296,11 +336,11 @@ impl<'config> IdlBuilder<'config> {
 
     /// Build a field from a green node
     fn build_field(&self, node: &GreenNode<IdlLanguage>, offset: usize, source: &SourceText) -> Result<Option<Field>, OakError> {
-        let mut name = "";
-        let mut type_name = "";
+        let mut name = String::new();
+        let mut type_name = String::new();
         let mut current_offset = offset;
 
-        for child in &node.children {
+        for child in node.children {
             match child {
                 GreenTree::Node(n) => {
                     if type_name.is_empty() && (n.kind == IdlElementType::Identifier || n.kind.is_basic_type()) {
@@ -310,23 +350,28 @@ impl<'config> IdlBuilder<'config> {
                     }
                     current_offset += n.byte_length as usize;
                 }
-                GreenTree::Leaf(_) => {
-                    current_offset += child.length() as usize;
+                GreenTree::Leaf(l) => {
+                    if type_name.is_empty() && l.kind == IdlTokenType::Identifier {
+                        type_name = source.get_text_in(core::range::Range { start: current_offset, end: current_offset + l.length as usize }).to_string();
+                    } else if !type_name.is_empty() && name.is_empty() && l.kind == IdlTokenType::Identifier {
+                        name = source.get_text_in(core::range::Range { start: current_offset, end: current_offset + l.length as usize }).to_string();
+                    }
+                    current_offset += l.length as usize;
                 }
             }
         }
 
-        Ok(Some(Field { name: name.to_string(), type_name: type_name.to_string() }))
+        Ok(Some(Field { name, type_name }))
     }
 
     /// Build a parameter from a green node
     fn build_param(&self, node: &GreenNode<IdlLanguage>, offset: usize, source: &SourceText) -> Result<Option<Param>, OakError> {
-        let mut name = "";
-        let mut type_name = "";
+        let mut name = String::new();
+        let mut type_name = String::new();
         let mut direction = ParamDirection::In;
         let mut current_offset = offset;
 
-        for child in &node.children {
+        for child in node.children {
             match child {
                 GreenTree::Node(n) => {
                     if n.kind == IdlElementType::In {
@@ -342,13 +387,24 @@ impl<'config> IdlBuilder<'config> {
                     }
                     current_offset += n.byte_length as usize;
                 }
-                GreenTree::Leaf(_) => {
-                    current_offset += child.length() as usize;
+                GreenTree::Leaf(l) => {
+                    if l.kind == IdlTokenType::In {
+                        direction = ParamDirection::In;
+                    } else if l.kind == IdlTokenType::Out {
+                        direction = ParamDirection::Out;
+                    } else if l.kind == IdlTokenType::Inout {
+                        direction = ParamDirection::Inout;
+                    } else if type_name.is_empty() && l.kind == IdlTokenType::Identifier {
+                        type_name = source.get_text_in(core::range::Range { start: current_offset, end: current_offset + l.length as usize }).to_string();
+                    } else if !type_name.is_empty() && name.is_empty() && l.kind == IdlTokenType::Identifier {
+                        name = source.get_text_in(core::range::Range { start: current_offset, end: current_offset + l.length as usize }).to_string();
+                    }
+                    current_offset += l.length as usize;
                 }
             }
         }
 
-        Ok(Some(Param { name: name.to_string(), type_name: type_name.to_string(), direction }))
+        Ok(Some(Param { name, type_name, direction }))
     }
 }
 

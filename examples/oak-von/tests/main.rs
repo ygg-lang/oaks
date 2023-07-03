@@ -36,7 +36,7 @@ fn test_von_parsing() {
 
     // Verify fields
     match val {
-        oak_von::VonValue::Object(obj) => {
+        oak_von::VonValueNode::Object(obj) => {
             assert_eq!(obj.fields.len(), 8);
             assert_eq!(obj.fields[0].name, "name");
             assert_eq!(obj.fields[1].name, "version");
@@ -47,7 +47,7 @@ fn test_von_parsing() {
             assert_eq!(obj.fields[6].name, "status");
             assert_eq!(obj.fields[7].name, "raw_path");
 
-            if let oak_von::VonValue::Enum(e) = &obj.fields[6].value {
+            if let oak_von::VonValueNode::Enum(e) = &obj.fields[6].value {
                 assert_eq!(e.variant, "Success");
                 assert!(e.payload.is_some())
             }
@@ -55,7 +55,7 @@ fn test_von_parsing() {
                 panic!("Expected an enum, got {:?}", obj.fields[6].value)
             }
 
-            if let oak_von::VonValue::String(s) = &obj.fields[7].value { assert_eq!(s.value, r#"C:\Users\Admin"#) } else { panic!("Expected a string, got {:?}", obj.fields[7].value) }
+            if let oak_von::VonValueNode::String(s) = &obj.fields[7].value { assert_eq!(s.value, r#"C:\Users\Admin"#) } else { panic!("Expected a string, got {:?}", obj.fields[7].value) }
         }
         _ => panic!("Expected an object, got {:?}", val),
     }

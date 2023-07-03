@@ -10,22 +10,23 @@ const MAX_LINES = 1000;
 const ALLOWED_SRC_DIRS = ['ast', 'builder', 'parser', 'lexer', 'language', 'lsp', 'mcp'];
 const ALLOWED_SRC_FILES = ['lib.rs', 'main.rs', 'mod.rs'];
 
-interface Violation {
-    file: string;
-    line: number;
-    message: string;
-    type: 'size' | 'naming' | 'structure' | 'directory';
-}
+// Violation object structure:
+// {
+//     file: string,
+//     line: number,
+//     message: string,
+//     type: 'size' | 'naming' | 'structure' | 'directory'
+// }
 
-const violations: Violation[] = [];
-const logLines: string[] = [];
+const violations = [];
+const logLines = [];
 
-function log(message: string = '') {
+function log(message = '') {
     console.log(message);
     logLines.push(message);
 }
 
-function checkFile(filePath: string) {
+function checkFile(filePath) {
     const relativePath = path.relative(EXAMPLES_DIR, filePath);
     if (relativePath.startsWith('oak-c4' + path.sep) || relativePath.startsWith('oak-uml' + path.sep)) {
         return;
@@ -105,7 +106,7 @@ function checkFile(filePath: string) {
     }
 }
 
-function walkDir(dir: string) {
+function walkDir(dir) {
     const files = fs.readdirSync(dir);
     for (const file of files) {
         const fullPath = path.join(dir, file);
@@ -130,7 +131,7 @@ if (violations.length === 0) {
         if (!acc[v.file]) acc[v.file] = [];
         acc[v.file].push(v);
         return acc;
-    }, {} as Record<string, Violation[]>);
+    }, {});
 
     for (const [file, fileViolations] of Object.entries(grouped)) {
         log(`File: ${file}`);

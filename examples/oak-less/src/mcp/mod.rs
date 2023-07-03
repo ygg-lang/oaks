@@ -3,12 +3,12 @@ use oak_lsp::service::LanguageService;
 use oak_mcp::McpServer;
 use oak_vfs::Vfs;
 
-/// Serves CSS MCP.
-pub async fn serve_css_mcp<V: Vfs + Send + Sync + 'static + oak_vfs::WritableVfs>(vfs: V) -> Result<(), Box<dyn std::error::Error + Send + Sync>>
+/// Serves Less MCP.
+pub async fn serve_less_mcp<V: Vfs + Send + Sync + 'static + oak_vfs::WritableVfs>(vfs: V) -> Result<(), Box<dyn std::error::Error + Send + Sync>>
 where
-    crate::lsp::CssLanguageService<V>: LanguageService,
+    crate::lsp::LessLanguageService<V>: LanguageService,
 {
-    let service = crate::lsp::CssLanguageService::new(vfs);
+    let service = crate::lsp::LessLanguageService::new(vfs);
     let server = McpServer::new(service);
     let reader = tokio::io::BufReader::new(tokio::io::stdin());
     let writer = tokio::io::BufWriter::new(tokio::io::stdout());

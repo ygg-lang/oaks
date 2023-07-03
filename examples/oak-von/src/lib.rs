@@ -24,10 +24,13 @@ pub mod lsp;
 /// Parser module.
 pub mod parser;
 
-pub use crate::{ast::VonValue, builder::VonBuilder, language::VonLanguage, lexer::VonLexer, parser::VonParser};
+pub use crate::{ast::VonValue as VonValueNode, builder::VonBuilder, language::{VonLanguage, VonValue}, lexer::VonLexer, parser::VonParser};
 
-/// Parses a Von string into a `VonValue`.
-pub fn parse(von: &str) -> Result<crate::ast::VonValue, String> {
+#[cfg(feature = "serde")]
+pub use crate::language::{from_str, to_string};
+
+/// Parses a Von string into a `VonValueNode`.
+pub fn parse(von: &str) -> Result<VonValueNode, String> {
     use oak_core::{Builder, parser::session::ParseSession, source::SourceText};
     let language = VonLanguage::default();
     let builder = VonBuilder::new(&language);
