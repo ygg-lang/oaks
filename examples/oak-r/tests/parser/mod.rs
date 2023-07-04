@@ -1,5 +1,5 @@
 use oak_core::{Lexer, ParseSession, Parser, source::SourceText};
-use oak_r::{RLanguage, RLexer, RParser, RSyntaxKind};
+use oak_r::{RLanguage, RLexer, RParser, RElementType};
 
 #[test]
 fn test_basic_expression() {
@@ -16,7 +16,7 @@ fn test_basic_expression() {
     match &parse_output.result {
         Ok(root) => {
             println!("Parse result: {:?}", root);
-            assert_eq!(root.kind, RSyntaxKind::Root)
+            assert_eq!(root.kind, RElementType::Root)
         }
         Err(e) => {
             panic!("Parsing failed: {:?}", e)
@@ -37,7 +37,7 @@ fn test_control_flow() {
 
     match &parse_output.result {
         Ok(root) => {
-            assert_eq!(root.kind, RSyntaxKind::Root)
+            assert_eq!(root.kind, RElementType::Root)
         }
         Err(e) => panic!("Parsing failed: {:?}", e),
     }
@@ -56,7 +56,7 @@ fn test_function_definition() {
 
     match &parse_output.result {
         Ok(root) => {
-            assert_eq!(root.kind, RSyntaxKind::Root)
+            assert_eq!(root.kind, RElementType::Root)
         }
         Err(e) => panic!("Parsing failed: {:?}", e),
     }

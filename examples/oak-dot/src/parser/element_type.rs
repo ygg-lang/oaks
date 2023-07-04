@@ -83,6 +83,34 @@ impl ElementType for DotElementType {
 
 impl From<crate::lexer::token_type::DotTokenType> for DotElementType {
     fn from(token: crate::lexer::token_type::DotTokenType) -> Self {
-        unsafe { std::mem::transmute(token) }
+                match token {
+            crate::lexer::token_type::DotTokenType::Identifier => Self::Identifier,
+            crate::lexer::token_type::DotTokenType::String => Self::String,
+            crate::lexer::token_type::DotTokenType::Number => Self::Number,
+            crate::lexer::token_type::DotTokenType::Whitespace => Self::Whitespace,
+            crate::lexer::token_type::DotTokenType::Newline => Self::Newline,
+            crate::lexer::token_type::DotTokenType::Graph => Self::Graph,
+            crate::lexer::token_type::DotTokenType::Digraph => Self::Digraph,
+            crate::lexer::token_type::DotTokenType::Subgraph => Self::Subgraph,
+            crate::lexer::token_type::DotTokenType::Node => Self::Node,
+            crate::lexer::token_type::DotTokenType::Edge => Self::Edge,
+            crate::lexer::token_type::DotTokenType::Strict => Self::Strict,
+            crate::lexer::token_type::DotTokenType::Arrow => Self::Arrow,
+            crate::lexer::token_type::DotTokenType::Line => Self::Line,
+            crate::lexer::token_type::DotTokenType::Equal => Self::Equal,
+            crate::lexer::token_type::DotTokenType::Semicolon => Self::Semicolon,
+            crate::lexer::token_type::DotTokenType::Comma => Self::Comma,
+            crate::lexer::token_type::DotTokenType::LeftBrace => Self::LeftBrace,
+            crate::lexer::token_type::DotTokenType::RightBrace => Self::RightBrace,
+            crate::lexer::token_type::DotTokenType::LeftBracket => Self::LeftBracket,
+            crate::lexer::token_type::DotTokenType::RightBracket => Self::RightBracket,
+            crate::lexer::token_type::DotTokenType::LeftParen => Self::LeftParen,
+            crate::lexer::token_type::DotTokenType::RightParen => Self::RightParen,
+            crate::lexer::token_type::DotTokenType::Comment => Self::Comment,
+            crate::lexer::token_type::DotTokenType::Root => Self::Root,
+            crate::lexer::token_type::DotTokenType::Error => Self::Error,
+            crate::lexer::token_type::DotTokenType::Eof => Self::Eof,
+            _ => Self::Error,
+        }
     }
 }

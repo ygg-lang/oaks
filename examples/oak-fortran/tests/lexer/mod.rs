@@ -20,27 +20,27 @@ fn test_peek_behavior() {
     let _cache = ParseSession::<FortranLanguage>::default();
     let mut state = LexerState::<SourceText, FortranLanguage>::new(&source);
 
-    println!("Initial state:");
-    println!("Position: {}", state.get_position());
+    println!("初始状态:");
+    println!("位置: {}", state.get_position());
     println!("current(): {:?}", state.current());
     println!("peek(): {:?}", state.peek());
 
-    println!("\nAfter advancing 1 char:");
+    println!("\n前进 1 个字符后:");
     state.advance(1);
-    println!("Position: {}", state.get_position());
+    println!("位置: {}", state.get_position());
     println!("current(): {:?}", state.current());
     println!("peek(): {:?}", state.peek());
 
-    println!("\nAfter advancing 1 char:");
+    println!("\n前进 1 个字符后:");
     state.advance(1);
-    println!("Position: {}", state.get_position());
+    println!("位置: {}", state.get_position());
     println!("current(): {:?}", state.current());
     println!("peek(): {:?}", state.peek())
 }
 
 #[test]
 fn test_fortran_program_parsing() {
-    use oak_core::{Lexer, SourceText, parser::session::ParseSession};
+    use oak_core::{Lexer, SourceText, source::Source, parser::session::ParseSession};
     use oak_fortran::{FortranLanguage, FortranLexer};
 
     let source = SourceText::new("program hello\n  print *, 'Hello, World!'\nend program hello");
@@ -50,17 +50,16 @@ fn test_fortran_program_parsing() {
     let mut cache = ParseSession::<FortranLanguage>::default();
     let result = lexer.lex(&source, &[], &mut cache);
 
-    println!("Testing Fortran program parsing:");
-    println!("Source code: '{}'", (&source).get_text_from(0));
+    println!("测试 Fortran 程序解析:");
+    println!("源代码: '{}'", source.get_text_in((0..source.len()).into()));
 
-    let tokens = result.result.expect("Lexing should succeed");
-    assert!(!tokens.is_empty(), "Should parse at least one token");
+    let tokens = result.result.expect("词法分析应该成功");
+    assert!(!tokens.is_empty(), "应该解析出至少一个标记");
 
     let first_token = &tokens[0];
-    let source_ref = &source;
-    let token_text = source_ref.get_text_in(first_token.span.clone());
+    let token_text = source.get_text_in(first_token.span.clone());
 
-    println!("First token: Kind={:?}, Text='{}'", first_token.kind, token_text);
+    println!("第一个标记: 类型={:?}, 文本='{}'", first_token.kind, token_text);
 
-    println!("✅ Fortran program parsing test passed!")
+    println!("✅ Fortran 程序解析测试通过！")
 }

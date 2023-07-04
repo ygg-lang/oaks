@@ -18,7 +18,7 @@ fn test_peek_behavior() {
     use oak_core::{LexerState, SourceText};
 
     let source = SourceText::new(r"[a-z]+");
-    let mut state = LexerState::<&SourceText, RegexLanguage>::new(&source);
+    let mut state = LexerState::<SourceText, RegexLanguage>::new(&source);
 
     println!("Initial state:");
     println!("Position: {}", state.get_position());

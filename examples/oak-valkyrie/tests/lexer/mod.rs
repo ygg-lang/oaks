@@ -6,8 +6,8 @@ use std::time::Duration;
 fn test_valkyrie_lexer() -> Result<(), oak_core::OakError> {
     let here = std::path::Path::new(env!("CARGO_MANIFEST_DIR"));
     let tests = here.join("tests/lexer");
-    let config = Box::leak(Box::new(ValkyrieLanguage::default()));
-    let lexer = ValkyrieLexer::new(config);
+    let config = ValkyrieLanguage::default();
+    let lexer = ValkyrieLexer::new(&config);
     let tester = LexerTester::new(tests).with_extension("valkyrie").with_timeout(Duration::from_secs(5));
     tester.run_tests(&lexer)
 }

@@ -12,6 +12,7 @@ pub mod builder;
 pub mod language;
 /// Lexer module.
 pub mod lexer;
+pub use lexer::token_type::VueLanguage;
 
 /// Parser module.
 pub mod parser;

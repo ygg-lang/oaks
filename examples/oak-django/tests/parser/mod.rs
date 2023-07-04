@@ -4,8 +4,8 @@ use oak_django::{DjangoLanguage, DjangoParser};
 #[test]
 fn test_parse_django_variable() {
     let source = SourceText::new("{{ user.name }}");
-    let language = Box::leak(Box::new(DjangoLanguage::default()));
-    let parser = DjangoParser::new(language);
+    let language = DjangoLanguage::default();
+    let parser = DjangoParser::new(&language);
     let mut cache = ParseSession::<DjangoLanguage>::default();
     let result = parser.parse(&source, &[], &mut cache);
 
@@ -17,8 +17,8 @@ fn test_parse_django_variable() {
 #[test]
 fn test_parse_django_tag() {
     let source = SourceText::new("{% if user.is_authenticated %}");
-    let language = Box::leak(Box::new(DjangoLanguage::default()));
-    let parser = DjangoParser::new(language);
+    let language = DjangoLanguage::default();
+    let parser = DjangoParser::new(&language);
     let mut cache = ParseSession::<DjangoLanguage>::default();
     let result = parser.parse(&source, &[], &mut cache);
 
@@ -28,8 +28,8 @@ fn test_parse_django_tag() {
 #[test]
 fn test_parse_django_comment() {
     let source = SourceText::new("{# This is a comment #}");
-    let language = Box::leak(Box::new(DjangoLanguage::default()));
-    let parser = DjangoParser::new(language);
+    let language = DjangoLanguage::default();
+    let parser = DjangoParser::new(&language);
     let mut cache = ParseSession::<DjangoLanguage>::default();
     let result = parser.parse(&source, &[], &mut cache);
 
@@ -40,8 +40,8 @@ fn test_parse_django_comment() {
 #[test]
 fn test_parse_django_filter() {
     let source = SourceText::new("{{ name|lower }}");
-    let language = Box::leak(Box::new(DjangoLanguage::default()));
-    let parser = DjangoParser::new(language);
+    let language = DjangoLanguage::default();
+    let parser = DjangoParser::new(&language);
     let mut cache = ParseSession::<DjangoLanguage>::default();
     let result = parser.parse(&source, &[], &mut cache);
 
@@ -51,8 +51,8 @@ fn test_parse_django_filter() {
 #[test]
 fn test_parse_invalid_syntax() {
     let source = SourceText::new("{{ unclosed_variable");
-    let language = Box::leak(Box::new(DjangoLanguage::default()));
-    let parser = DjangoParser::new(language);
+    let language = DjangoLanguage::default();
+    let parser = DjangoParser::new(&language);
     let mut cache = ParseSession::<DjangoLanguage>::default();
     let result = parser.parse(&source, &[], &mut cache);
 

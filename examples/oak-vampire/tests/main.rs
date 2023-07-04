@@ -6,7 +6,7 @@ fn ready() {
 #[cfg(test)]
 mod tests {
     use oak_core::{ParseSession, SourceText, lexer::Lexer};
-    use oak_vampire::{VampireLanguage, VampireLexer, kind::VampireSyntaxKind};
+    use oak_vampire::{VampireLanguage, VampireLexer, VampireTokenType};
 
     #[test]
     fn test_vampire_lexer_basic_tokens() {
@@ -21,14 +21,14 @@ mod tests {
         let tokens = result.result.unwrap();
         assert!(!tokens.is_empty());
 
-        // Print all token kinds for debugging
+        // 打印所有 token 类型以便调试
         let token_kinds: Vec<_> = tokens.iter().map(|t| t.kind).collect();
         println!("Token kinds: {:?}", token_kinds);
 
-        // Check if basic token kinds are included
-        assert!(token_kinds.iter().any(|&k| k == VampireSyntaxKind::CnfKw));
-        assert!(token_kinds.iter().any(|&k| k == VampireSyntaxKind::LeftParen));
-        assert!(token_kinds.iter().any(|&k| k == VampireSyntaxKind::RightParen))
+        // 检查是否包含基本的 token 类型
+        assert!(token_kinds.iter().any(|&k| k == VampireTokenType::CnfKw));
+        assert!(token_kinds.iter().any(|&k| k == VampireTokenType::LeftParen));
+        assert!(token_kinds.iter().any(|&k| k == VampireTokenType::RightParen))
     }
 
     #[test]
@@ -44,7 +44,7 @@ mod tests {
         let tokens = result.result.unwrap();
         let token_kinds: Vec<_> = tokens.iter().map(|t| t.kind).collect();
         println!("Identifier test token kinds: {:?}", token_kinds);
-        assert!(token_kinds.iter().any(|&k| k == VampireSyntaxKind::Identifier))
+        assert!(token_kinds.iter().any(|&k| k == VampireTokenType::Identifier))
     }
 
     #[test]
@@ -60,9 +60,9 @@ mod tests {
         let tokens = result.result.unwrap();
         let token_kinds: Vec<_> = tokens.iter().map(|t| t.kind).collect();
         println!("Operator test token kinds: {:?}", token_kinds);
-        assert!(token_kinds.iter().any(|&k| k == VampireSyntaxKind::Pipe));
-        assert!(token_kinds.iter().any(|&k| k == VampireSyntaxKind::Tilde));
-        assert!(token_kinds.iter().any(|&k| k == VampireSyntaxKind::Ampersand))
+        assert!(token_kinds.iter().any(|&k| k == VampireTokenType::Pipe));
+        assert!(token_kinds.iter().any(|&k| k == VampireTokenType::Tilde));
+        assert!(token_kinds.iter().any(|&k| k == VampireTokenType::Ampersand))
     }
 
     #[test]
@@ -78,8 +78,8 @@ mod tests {
         let tokens = result.result.unwrap();
         let token_kinds: Vec<_> = tokens.iter().map(|t| t.kind).collect();
         println!("Comment test token kinds: {:?}", token_kinds);
-        assert!(token_kinds.iter().any(|&k| k == VampireSyntaxKind::LineComment));
-        assert!(token_kinds.iter().any(|&k| k == VampireSyntaxKind::CnfKw))
+        assert!(token_kinds.iter().any(|&k| k == VampireTokenType::LineComment));
+        assert!(token_kinds.iter().any(|&k| k == VampireTokenType::CnfKw))
     }
 
     #[test]
@@ -95,7 +95,7 @@ mod tests {
         let tokens = result.result.unwrap();
         let token_kinds: Vec<_> = tokens.iter().map(|t| t.kind).collect();
         println!("Whitespace test token kinds: {:?}", token_kinds);
-        assert!(token_kinds.iter().any(|&k| k == VampireSyntaxKind::Whitespace));
-        assert!(token_kinds.iter().any(|&k| k == VampireSyntaxKind::CnfKw))
+        assert!(token_kinds.iter().any(|&k| k == VampireTokenType::Whitespace));
+        assert!(token_kinds.iter().any(|&k| k == VampireTokenType::CnfKw))
     }
 }

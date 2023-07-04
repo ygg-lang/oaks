@@ -18,6 +18,7 @@ pub mod lsp;
 /// Parser module.
 pub mod parser;
 
-pub use lexer::token_type::CTokenType;
+pub use language::CLanguage;
+pub use lexer::{CLexer, token_type::CTokenType};
 pub use oak_core::{ElementType, Language, LanguageCategory, TokenType};
 pub use parser::{CParser, element_type::CElementType};

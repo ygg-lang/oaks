@@ -1,5 +1,5 @@
 use oak_testing::lexing::LexerTester;
-use oak_voml::{language::VLangLanguage as VomlLanguage, lexer::VLangLexer as VomlLexer};
+use oak_voml::{VomlLanguage, VomlLexer};
 use std::{path::Path, time::Duration};
 
 #[test]

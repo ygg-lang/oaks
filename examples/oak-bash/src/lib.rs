@@ -22,6 +22,7 @@ pub use crate::{
     ast::BashRoot,
     builder::BashBuilder,
     language::BashLanguage,
+    lexer::BashLexer,
     lexer::token_type::BashTokenType,
     parser::{BashParser, element_type::BashElementType},
 };
