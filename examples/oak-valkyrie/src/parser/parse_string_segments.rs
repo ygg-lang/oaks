@@ -1,4 +1,4 @@
-use crate::ast::{Expr, Identifier, Span, StringSegment};
+use crate::ast::{Identifier, InterpolationSegment, NamePath, Span, StringSegment, TermExpression, TextSegment};
 
 /// Fluent 变量标记字符 (Gwot, U+07DF)
 const FLUENT_MARKER: char = '\u{07DF}';
@@ -6,7 +6,7 @@ const FLUENT_MARKER: char = '\u{07DF}';
 /// 解析字符串内容为片段列表。
 ///
 /// 该函数处理以下功能：
-/// - 插值解析：解析 `{expr}` 格式的插值表达式
+/// - 插值解析：解析 `{terms}` 格式的插值表达式
 /// - 转义处理：处理 `\{` 和 `\}` 转义序列
 /// - Fluent 标记：识别 `߷` (Gwot, U+07DF) 符号标记的 Fluent 变量
 /// - Raw String 处理：前缀为 `r` 时不解析插值
@@ -40,7 +40,7 @@ const FLUENT_MARKER: char = '\u{07DF}';
 /// ```
 pub fn parse_string_segments(content: &str, span_start: usize, is_raw: bool) -> Vec<StringSegment> {
     if is_raw {
-        return vec![StringSegment::Text { content: content.to_string(), span: Span { start: span_start, end: span_start + content.len() } }];
+        return vec![StringSegment::Text(Box::new(TextSegment { content: content.to_string(), span: Span { start: span_start, end: span_start + content.len() } }))];
     }
 
     let mut segments = Vec::new();
@@ -63,7 +63,7 @@ pub fn parse_string_segments(content: &str, span_start: usize, is_raw: bool) -> 
             }
             '{' => {
                 if !current_text.is_empty() {
-                    segments.push(StringSegment::Text { content: current_text.clone(), span: Span { start: text_start, end: span_start + idx } });
+                    segments.push(StringSegment::Text(Box::new(TextSegment { content: current_text.clone(), span: Span { start: text_start, end: span_start + idx } })));
                     current_text.clear();
                 }
 
@@ -99,7 +99,11 @@ pub fn parse_string_segments(content: &str, span_start: usize, is_raw: bool) -> 
                 }
 
                 let trimmed_expr = expr_content.trim();
-                segments.push(StringSegment::Interpolation { expr: Box::new(Expr::Ident(Identifier { name: trimmed_expr.to_string(), span: Span { start: expr_start, end: expr_end } })), is_fluent, span: Span { start: expr_start, end: expr_end + 1 } });
+                segments.push(StringSegment::Interpolation(Box::new(InterpolationSegment {
+                    expr: TermExpression::NamePath(Box::new(NamePath { parts: vec![Identifier { name: trimmed_expr.to_string(), span: Span { start: expr_start, end: expr_end } }], span: Span { start: expr_start, end: expr_end } })),
+                    is_fluent,
+                    span: Span { start: expr_start, end: expr_end + 1 },
+                })));
 
                 text_start = expr_end + 1;
             }
@@ -110,7 +114,7 @@ pub fn parse_string_segments(content: &str, span_start: usize, is_raw: bool) -> 
     }
 
     if !current_text.is_empty() {
-        segments.push(StringSegment::Text { content: current_text, span: Span { start: text_start, end: span_start + content_len } });
+        segments.push(StringSegment::Text(Box::new(TextSegment { content: current_text, span: Span { start: text_start, end: span_start + content_len } })));
     }
 
     segments

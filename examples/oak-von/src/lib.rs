@@ -17,14 +17,16 @@ pub mod builder;
 pub mod language;
 /// Lexer module.
 pub mod lexer;
-// /// LSP module.
-#[cfg(any(feature = "lsp", feature = "oak-highlight", feature = "oak-pretty-print"))]
-pub mod lsp;
-// pub mod mcp;
-/// Parser module.
+
 pub mod parser;
 
-pub use crate::{ast::VonValue as VonValueNode, builder::VonBuilder, language::{VonLanguage, VonValue}, lexer::VonLexer, parser::VonParser};
+pub use crate::{
+    ast::VonValue as VonValueNode,
+    builder::VonBuilder,
+    language::{VonLanguage, VonValue},
+    lexer::VonLexer,
+    parser::VonParser,
+};
 
 #[cfg(feature = "serde")]
 pub use crate::language::{from_str, to_string};
@@ -40,8 +42,5 @@ pub fn parse(von: &str) -> Result<VonValueNode, String> {
     result.result.map(|root| root.value).map_err(|e| format!("{:?}", e))
 }
 
-// /// LSP implementation.
-#[cfg(feature = "lsp")]
-pub use crate::lsp::VonLanguageService;
 pub use lexer::token_type::VonTokenType;
 pub use parser::element_type::VonElementType;

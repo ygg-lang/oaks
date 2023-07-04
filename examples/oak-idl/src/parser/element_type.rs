@@ -107,7 +107,7 @@ pub enum IdlElementType {
     Error,
     /// End of file.
     Eof,
-    
+
     /// An identifier.
     Identifier,
     /// A string literal.
@@ -129,12 +129,28 @@ pub enum IdlElementType {
 impl IdlElementType {
     /// Returns true if this is a basic type.
     pub fn is_basic_type(&self) -> bool {
-        matches!(self, 
-            Self::Void | Self::Boolean | Self::Byte | Self::Octet | 
-            Self::Short | Self::UnsignedShort | Self::Long | Self::UnsignedLong |
-            Self::LongLong | Self::UnsignedLongLong | Self::Float | Self::Double |
-            Self::LongDouble | Self::Char | Self::WChar | Self::String | 
-            Self::WString | Self::Any | Self::Object | Self::ValueBase
+        matches!(
+            self,
+            Self::Void
+                | Self::Boolean
+                | Self::Byte
+                | Self::Octet
+                | Self::Short
+                | Self::UnsignedShort
+                | Self::Long
+                | Self::UnsignedLong
+                | Self::LongLong
+                | Self::UnsignedLongLong
+                | Self::Float
+                | Self::Double
+                | Self::LongDouble
+                | Self::Char
+                | Self::WChar
+                | Self::String
+                | Self::WString
+                | Self::Any
+                | Self::Object
+                | Self::ValueBase
         )
     }
 }

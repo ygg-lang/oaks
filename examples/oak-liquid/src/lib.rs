@@ -1,4 +1,5 @@
 #![doc = include_str!("readme.md")]
+#![feature(new_range_api)]
 #![warn(missing_docs)]
 #![doc(html_logo_url = "https://raw.githubusercontent.com/ygg-lang/oaks/refs/heads/dev/documents/logo.svg")]
 #![doc(html_favicon_url = "https://raw.githubusercontent.com/ygg-lang/oaks/refs/heads/dev/documents/logo.svg")]
@@ -15,7 +16,7 @@ pub mod lsp;
 /// Parser module
 pub mod parser;
 
-pub use ast::LiquidRoot;
+pub use ast::{LiquidNode, LiquidRoot};
 pub use builder::LiquidBuilder;
 pub use language::LiquidLanguage;
 pub use lexer::{LiquidLexer, token_type::LiquidTokenType};

@@ -23,8 +23,8 @@ fn test_syntax_unification() {
     let ast1 = built1.result.unwrap();
 
     // Check if it's an Object in AST
-    if let Item::Statement(Statement::ExprStmt { expr: Expr::Object { callee, fields, .. }, .. }) = &ast1.items[0] {
-        if let Expr::Ident(ident) = callee.as_ref() {
+    if let Item::Statement(Statement::ExprStmt { expr: TermExpression::Object { callee, fields, .. }, .. }) = &ast1.items[0] {
+        if let TermExpression::Identifier(ident) = callee.as_ref() {
             assert_eq!(ident.name, "Point")
         }
         else {
@@ -46,8 +46,8 @@ fn test_syntax_unification() {
     assert!(built2.result.is_ok(), "Failed to build trailing closure: {:?}", built2.diagnostics);
     let ast2 = built2.result.unwrap();
 
-    if let Item::Statement(Statement::ExprStmt { expr: Expr::Object { callee, fields, .. }, .. }) = &ast2.items[0] {
-        if let Expr::Ident(ident) = callee.as_ref() {
+    if let Item::Statement(Statement::ExprStmt { expr: TermExpression::Object { callee, fields, .. }, .. }) = &ast2.items[0] {
+        if let TermExpression::Identifier(ident) = callee.as_ref() {
             assert_eq!(ident.name, "run_task")
         }
         else {

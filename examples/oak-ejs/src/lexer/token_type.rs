@@ -1,409 +1,111 @@
-//! JavaScript token types.
+/// EJS Token Type module
+///
+/// This module defines the token types for EJS (Embedded JavaScript) templates.
+use oak_core::{TokenType, UniversalTokenRole};
 
-use oak_core::{Token, TokenType, UniversalTokenRole};
-
-/// Type alias for JavaScript tokens.
-pub type JavaScriptToken = Token<JavaScriptTokenType>;
-
-/// JavaScript token types.
+/// Token types for EJS templates
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-#[repr(u8)]
-pub enum JavaScriptTokenType {
-    // Keywords
-    /// `abstract`
-    Abstract,
-    /// `as`
-    As,
-    /// `async`
-    Async,
-    /// `await`
-    Await,
-    /// `break`
-    Break,
-    /// `case`
-    Case,
-    /// `catch`
-    Catch,
-    /// `class`
-    Class,
-    /// `const`
-    Const,
-    /// `continue`
-    Continue,
-    /// `debugger`
-    Debugger,
-    /// `default`
-    Default,
-    /// `delete`
-    Delete,
-    /// `do`
-    Do,
-    /// `else`
-    Else,
-    /// `enum`
-    Enum,
-    /// `export`
-    Export,
-    /// `extends`
-    Extends,
-    /// `false`
-    False,
-    /// `finally`
-    Finally,
-    /// `for`
-    For,
-    /// `function`
-    Function,
-    /// `if`
-    If,
-    /// `implements`
-    Implements,
-    /// `import`
-    Import,
-    /// `in`
-    In,
-    /// `instanceof`
-    Instanceof,
-    /// `interface`
-    Interface,
-    /// `let`
-    Let,
-    /// `new`
-    New,
-    /// `null`
-    Null,
-    /// `package`
-    Package,
-    /// `private`
-    Private,
-    /// `protected`
-    Protected,
-    /// `public`
-    Public,
-    /// `return`
-    Return,
-    /// `static`
-    Static,
-    /// `super`
-    Super,
-    /// `switch`
-    Switch,
-    /// `this`
-    This,
-    /// `throw`
-    Throw,
-    /// `true`
-    True,
-    /// `try`
-    Try,
-    /// `typeof`
-    Typeof,
-    /// `undefined`
-    Undefined,
-    /// `var`
-    Var,
-    /// `void`
-    Void,
-    /// `while`
-    While,
-    /// `with`
-    With,
-    /// `yield`
-    Yield,
-
-    // Operators
-    /// `+`
-    Plus,
-    /// `-`
-    Minus,
-    /// `*`
-    Star,
-    /// `/`
-    Slash,
-    /// `%`
-    Percent,
-    /// `**`
-    StarStar,
-    /// `++`
-    PlusPlus,
-    /// `--`
-    MinusMinus,
-    /// `<<`
-    LeftShift,
-    /// `>>`
-    RightShift,
-    /// `>>>`
-    UnsignedRightShift,
-    /// `<`
-    Less,
-    /// `>`
-    Greater,
-    /// `<=`
-    LessEqual,
-    /// `>=`
-    GreaterEqual,
-    /// `==`
-    EqualEqual,
-    /// `!=`
-    NotEqual,
-    /// `===`
-    EqualEqualEqual,
-    /// `!==`
-    NotEqualEqual,
-    /// `&`
-    Ampersand,
-    /// `|`
-    Pipe,
-    /// `^`
-    Caret,
-    /// `!`
-    Exclamation,
-    /// `~`
-    Tilde,
-    /// `&&`
-    AmpersandAmpersand,
-    /// `||`
-    PipePipe,
-    /// `?`
-    Question,
-    /// `??`
-    QuestionQuestion,
-    /// `?.`
-    QuestionDot,
-
-    // Assignment operators
-    /// `=`
-    Equal,
-    /// `+=`
-    PlusEqual,
-    /// `-=`
-    MinusEqual,
-    /// `*=`
-    StarEqual,
-    /// `/=`
-    SlashEqual,
-    /// `%=`
-    PercentEqual,
-    /// `**=`
-    StarStarEqual,
-    /// `<<=`
-    LeftShiftEqual,
-    /// `>>=`
-    RightShiftEqual,
-    /// `>>>=`
-    UnsignedRightShiftEqual,
-    /// `&=`
-    AmpersandEqual,
-    /// `|=`
-    PipeEqual,
-    /// `^=`
-    CaretEqual,
-    /// `&&=`
-    AmpersandAmpersandEqual,
-    /// `||=`
-    PipePipeEqual,
-    /// `??=`
-    QuestionQuestionEqual,
-
-    // Punctuation
-    /// `(`
-    LeftParen,
-    /// `)`
-    RightParen,
-    /// `{`
-    LeftBrace,
-    /// `}`
-    RightBrace,
-    /// `[`
-    LeftBracket,
-    /// `]`
-    RightBracket,
-    /// `;`
-    Semicolon,
-    /// `,`
-    Comma,
-    /// `.`
-    Dot,
-    /// `...`
-    DotDotDot,
-    /// `:`
-    Colon,
-    /// `=>`
-    Arrow,
-
-    // Literals
-    /// String literal
-    StringLiteral,
-    /// Numeric literal
-    NumericLiteral,
-    /// BigInt literal
-    BigIntLiteral,
-    /// Regex literal
-    RegexLiteral,
-    /// Template string
-    TemplateString,
-    /// Template head
-    TemplateHead,
-    /// Template middle
-    TemplateMiddle,
-    /// Template tail
-    TemplateTail,
-
-    // Identifiers
+pub enum EjsTokenType {
+    /// Plain text content outside of EJS tags
+    Text,
+    /// Opening tag: `<%`
+    OpenTag,
+    /// Escaped output opening tag: `<%=`
+    OpenTagOutputEscape,
+    /// Raw output opening tag: `%-`
+    OpenTagOutputRaw,
+    /// Comment opening tag: `<%#`
+    OpenTagComment,
+    /// Escaped opening tag: `<%%`
+    EscapedOpenTag,
+    /// Closing tag: `%>`
+    CloseTag,
+    /// Trim mode closing tag: `-%>`
+    CloseTagTrim,
     /// Identifier
-    IdentifierName,
-
-    // Comments and whitespace
-    /// Line comment
-    LineComment,
-    /// Block comment
-    BlockComment,
-    /// Whitespace
+    Identifier,
+    /// String literal
+    String,
+    /// Number literal
+    Number,
+    /// Boolean literal
+    Boolean,
+    /// Whitespace characters
     Whitespace,
-    /// Newline
+    /// Newline character
     Newline,
-
-    // Special tokens
-    /// End of stream
+    /// Comment content
+    Comment,
+    /// Left parenthesis: `(`
+    LeftParen,
+    /// Right parenthesis: `)`
+    RightParen,
+    /// Left brace: `{`
+    LeftBrace,
+    /// Right brace: `}`
+    RightBrace,
+    /// Left bracket: `[`
+    LeftBracket,
+    /// Right bracket: `]`
+    RightBracket,
+    /// Comma: `,`
+    Comma,
+    /// Dot: `.`
+    Dot,
+    /// Colon: `:`
+    Colon,
+    /// Semicolon: `;`
+    Semicolon,
+    /// Equals: `=`
+    Eq,
+    /// Plus: `+`
+    Plus,
+    /// Minus: `-`
+    Minus,
+    /// Star: `*`
+    Star,
+    /// Slash: `/`
+    Slash,
+    /// Percent: `%`
+    Percent,
+    /// Bang: `!`
+    Bang,
+    /// Question: `?`
+    Question,
+    /// Less than: `<`
+    Lt,
+    /// Greater than: `>`
+    Gt,
+    /// Ampersand: `&`
+    Amp,
+    /// Pipe: `|`
+    Pipe,
+    /// Caret: `^`
+    Caret,
+    /// Tilde: `~`
+    Tilde,
+    /// End of file
     Eof,
     /// Error token
     Error,
 }
 
-impl JavaScriptTokenType {
-    /// Returns true if the token type is a keyword.
-    pub fn is_keyword(&self) -> bool {
-        matches!(
-            self,
-            Self::Abstract
-                | Self::As
-                | Self::Async
-                | Self::Await
-                | Self::Break
-                | Self::Case
-                | Self::Catch
-                | Self::Class
-                | Self::Const
-                | Self::Continue
-                | Self::Debugger
-                | Self::Default
-                | Self::Delete
-                | Self::Do
-                | Self::Else
-                | Self::Enum
-                | Self::Export
-                | Self::Extends
-                | Self::False
-                | Self::Finally
-                | Self::For
-                | Self::Function
-                | Self::If
-                | Self::Implements
-                | Self::Import
-                | Self::In
-                | Self::Instanceof
-                | Self::Interface
-                | Self::Let
-                | Self::New
-                | Self::Null
-                | Self::Package
-                | Self::Private
-                | Self::Protected
-                | Self::Public
-                | Self::Return
-                | Self::Static
-                | Self::Super
-                | Self::Switch
-                | Self::This
-                | Self::Throw
-                | Self::True
-                | Self::Try
-                | Self::Typeof
-                | Self::Undefined
-                | Self::Var
-                | Self::Void
-                | Self::While
-                | Self::With
-                | Self::Yield
-        )
-    }
-
-    /// Returns the token type for the given keyword string.
-    pub fn from_keyword(s: &str) -> Option<Self> {
-        match s {
-            "abstract" => Some(Self::Abstract),
-            "as" => Some(Self::As),
-            "async" => Some(Self::Async),
-            "await" => Some(Self::Await),
-            "break" => Some(Self::Break),
-            "case" => Some(Self::Case),
-            "catch" => Some(Self::Catch),
-            "class" => Some(Self::Class),
-            "const" => Some(Self::Const),
-            "continue" => Some(Self::Continue),
-            "debugger" => Some(Self::Debugger),
-            "default" => Some(Self::Default),
-            "delete" => Some(Self::Delete),
-            "do" => Some(Self::Do),
-            "else" => Some(Self::Else),
-            "enum" => Some(Self::Enum),
-            "export" => Some(Self::Export),
-            "extends" => Some(Self::Extends),
-            "false" => Some(Self::False),
-            "finally" => Some(Self::Finally),
-            "for" => Some(Self::For),
-            "function" => Some(Self::Function),
-            "if" => Some(Self::If),
-            "implements" => Some(Self::Implements),
-            "import" => Some(Self::Import),
-            "in" => Some(Self::In),
-            "instanceof" => Some(Self::Instanceof),
-            "interface" => Some(Self::Interface),
-            "let" => Some(Self::Let),
-            "new" => Some(Self::New),
-            "null" => Some(Self::Null),
-            "package" => Some(Self::Package),
-            "private" => Some(Self::Private),
-            "protected" => Some(Self::Protected),
-            "public" => Some(Self::Public),
-            "return" => Some(Self::Return),
-            "static" => Some(Self::Static),
-            "super" => Some(Self::Super),
-            "switch" => Some(Self::Switch),
-            "this" => Some(Self::This),
-            "throw" => Some(Self::Throw),
-            "true" => Some(Self::True),
-            "try" => Some(Self::Try),
-            "typeof" => Some(Self::Typeof),
-            "undefined" => Some(Self::Undefined),
-            "var" => Some(Self::Var),
-            "void" => Some(Self::Void),
-            "while" => Some(Self::While),
-            "with" => Some(Self::With),
-            "yield" => Some(Self::Yield),
-            _ => None,
-        }
-    }
-}
-
-impl JavaScriptTokenType {
-    /// Returns true if the token type is a trivia (whitespace or comment).
-    pub fn is_trivia(&self) -> bool {
-        matches!(self, Self::Whitespace | Self::Newline | Self::LineComment | Self::BlockComment)
-    }
-}
-
-impl TokenType for JavaScriptTokenType {
+impl TokenType for EjsTokenType {
     type Role = UniversalTokenRole;
-    const END_OF_STREAM: Self = Self::Error;
+    const END_OF_STREAM: Self = Self::Eof;
 
     fn is_ignored(&self) -> bool {
-        false
+        matches!(self, Self::Whitespace)
     }
 
     fn role(&self) -> Self::Role {
         match self {
+            Self::Whitespace => UniversalTokenRole::Whitespace,
+            Self::Newline => UniversalTokenRole::Whitespace,
+            Self::Comment => UniversalTokenRole::Comment,
+            Self::Eof => UniversalTokenRole::Eof,
+            Self::Error => UniversalTokenRole::Error,
             _ => UniversalTokenRole::None,
         }
     }

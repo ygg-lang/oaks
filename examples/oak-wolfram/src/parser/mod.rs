@@ -173,8 +173,8 @@ impl<'config> Pratt<WolframLanguage> for WolframParser<'config> {
             WolframTokenType::Times | WolframTokenType::Divide => Some(OperatorInfo::left(90)),
             WolframTokenType::At => Some(OperatorInfo::right(100)),                 // f @ x
             WolframTokenType::MapOperator => Some(OperatorInfo::right(110)),        // f /@ list
-            WolframTokenType::ApplyOperator => Some(OperatorInfo::right(110)),      // f @@ expr
-            WolframTokenType::ApplyLevelOperator => Some(OperatorInfo::right(110)), // f @@@ expr
+            WolframTokenType::ApplyOperator => Some(OperatorInfo::right(110)),      // f @@ terms
+            WolframTokenType::ApplyLevelOperator => Some(OperatorInfo::right(110)), // f @@@ terms
             WolframTokenType::MapAllOperator => Some(OperatorInfo::right(110)),     // f //@ list
             WolframTokenType::Power => Some(OperatorInfo::right(120)),
             _ => None,

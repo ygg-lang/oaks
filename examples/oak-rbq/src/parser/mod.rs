@@ -859,7 +859,7 @@ impl<'config> RbqParser<'config> {
             Ok(())
         }
         else {
-            // It's a regular closure: { expr; expr; }
+            // It's a regular closure: { terms; terms; }
             if state.eat(RbqTokenType::Semicolon) {
                 self.skip_trivia(state);
                 while state.not_at_end() && !state.at(RbqTokenType::RightBrace) {

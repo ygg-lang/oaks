@@ -1,35 +1,45 @@
-use super::{Attribute, Expr, Pattern, Span, Type};
+use super::{Attribute, Pattern, Span, TermExpression, TypeExpression};
+
+/// A let binding statement.
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+pub struct Let {
+    /// Whether the binding is mutable.
+    pub is_mutable: bool,
+    /// The pattern to bind to.
+    pub pattern: Pattern,
+    /// The expression being bound.
+    pub expr: TermExpression,
+    /// Optional type annotation.
+    pub ty: Option<TypeExpression>,
+    /// Annotations applied to the statement.
+    pub annotations: Vec<Attribute>,
+    /// The source code span.
+    #[cfg_attr(feature = "serde", serde(with = "oak_core::serde_range"))]
+    pub span: Span,
+}
+
+/// An expression statement.
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+pub struct ExprStmt {
+    /// The expression.
+    pub expr: TermExpression,
+    /// Whether the statement ends with a semicolon.
+    pub semi: bool,
+    /// Annotations applied to the statement.
+    pub annotations: Vec<Attribute>,
+    /// The source code span.
+    #[cfg_attr(feature = "serde", serde(with = "oak_core::serde_range"))]
+    pub span: Span,
+}
 
 /// A statement
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub enum Statement {
     /// A let binding statement.
-    Let {
-        /// Whether the binding is mutable.
-        is_mutable: bool,
-        /// The pattern to bind to.
-        pattern: Pattern,
-        /// The expression being bound.
-        expr: Expr,
-        /// Optional type annotation.
-        ty: Option<Type>,
-        /// Annotations applied to the statement.
-        annotations: Vec<Attribute>,
-        /// The source code span.
-        #[cfg_attr(feature = "serde", serde(with = "oak_core::serde_range"))]
-        span: Span,
-    },
+    Let(Let),
     /// An expression statement.
-    ExprStmt {
-        /// The expression.
-        expr: Expr,
-        /// Whether the statement ends with a semicolon.
-        semi: bool,
-        /// Annotations applied to the statement.
-        annotations: Vec<Attribute>,
-        /// The source code span.
-        #[cfg_attr(feature = "serde", serde(with = "oak_core::serde_range"))]
-        span: Span,
-    },
+    ExprStmt(ExprStmt),
 }

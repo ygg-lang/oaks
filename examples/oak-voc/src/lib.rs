@@ -23,9 +23,26 @@ pub mod mcp;
 /// Parser module.
 pub mod parser;
 
-pub use crate::{ast::VocRoot, language::VocLanguage, lexer::VocLexer, parser::VocParser};
+pub use crate::{
+    ast::{Attribute, ScriptAst, StyleAst, StyleRule, TemplateNode, VxDocument, VxParseError},
+    builder::VocBuilder,
+    language::VocLanguage,
+    lexer::VocLexer,
+    parser::VocParser,
+};
 
-pub use oak_core::{ElementType, TokenType};
+pub use oak_core::{Builder, ElementType, TokenType};
+
+/// Parses a VX document from source text.
+pub fn parse_vx(source: &str) -> Result<VxDocument, VxParseError> {
+    use oak_core::Builder;
+    let language = VocLanguage::new();
+    let builder = VocBuilder::new(&language);
+    let source_text = oak_core::SourceText::new(source.to_string());
+    let mut cache = oak_core::parser::session::ParseSession::<VocLanguage>::default();
+    let result = builder.build(&source_text, &[], &mut cache);
+    result.result.map_err(|e| VxParseError { message: format!("{:?}", e), line: 1, column: 1 })
+}
 
 /// Highlighter implementation.
 #[cfg(feature = "oak-highlight")]

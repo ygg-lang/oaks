@@ -42,7 +42,7 @@ impl ToSource for MsilRoot {
 #[cfg(feature = "oak-pretty-print")]
 impl AsDocument for MsilRoot {
     type Params = ();
-    
+
     fn as_document(&self, _params: &Self::Params) -> Document<'_> {
         Document::join(self.items.iter().map(|i| i.as_document(&())), Document::Line)
     }
@@ -83,7 +83,7 @@ impl ToSource for Item {
 #[cfg(feature = "oak-pretty-print")]
 impl AsDocument for Item {
     type Params = ();
-    
+
     fn as_document(&self, _params: &Self::Params) -> Document<'_> {
         match self {
             Item::Assembly(a) => a.as_document(&()),
@@ -116,7 +116,7 @@ impl ToSource for Assembly {
 #[cfg(feature = "oak-pretty-print")]
 impl AsDocument for Assembly {
     type Params = ();
-    
+
     fn as_document(&self, _params: &Self::Params) -> Document<'_> {
         Document::Text(format!(".assembly {} {{}}", self.name).into())
     }
@@ -151,7 +151,7 @@ impl ToSource for Class {
 #[cfg(feature = "oak-pretty-print")]
 impl AsDocument for Class {
     type Params = ();
-    
+
     fn as_document(&self, _params: &Self::Params) -> Document<'_> {
         Document::Concat(vec![
             Document::Text(format!(".class public auto ansi beforefieldinit {}", self.name).into()),
@@ -195,7 +195,7 @@ impl ToSource for Method {
 #[cfg(feature = "oak-pretty-print")]
 impl AsDocument for Method {
     type Params = ();
-    
+
     fn as_document(&self, _params: &Self::Params) -> Document<'_> {
         let mut body = vec![Document::Text(".entrypoint".into()), Document::Line];
         body.extend(self.instructions.iter().map(|i| i.as_document(&())));
@@ -242,7 +242,7 @@ impl ToSource for Instruction {
 #[cfg(feature = "oak-pretty-print")]
 impl AsDocument for Instruction {
     type Params = ();
-    
+
     fn as_document(&self, _params: &Self::Params) -> Document<'_> {
         match self {
             Instruction::Simple(s) => Document::Text(s.clone().into()),

@@ -43,18 +43,18 @@ proc greet {name} {
 }
 
 proc add {a b} {
-    return [expr {$a + $b}]
+    return [terms {$a + $b}]
 }
 
 proc multiply {a b} {
-    return [expr {$a * $b}]
+    return [terms {$a * $b}]
 }
 
 proc factorial {n} {
     if {$n <= 1} {
         return 1
     } else {
-        return [expr {$n * [factorial [expr {$n - 1}]]}]
+        return [terms {$n * [factorial [terms {$n - 1}]]}]
     }
 }
 
@@ -62,14 +62,14 @@ proc fibonacci {n} {
     if {$n <= 1} {
         return $n
     } else {
-        return [expr {[fibonacci [expr {$n - 1}]] + [fibonacci [expr {$n - 2}]]}]
+        return [terms {[fibonacci [terms {$n - 1}]] + [fibonacci [terms {$n - 2}]]}]
     }
 }
 
 proc sum_list {lst} {
     set total 0
     foreach item $lst {
-        set total [expr {$total + $item}]
+        set total [terms {$total + $item}]
     }
     return $total
 }
@@ -104,7 +104,7 @@ proc is_prime {n} {
 
 proc reverse_string {str} {
     set result ""
-    for {set i [expr {[string length $str] - 1}]} {$i >= 0} {incr i -1} {
+    for {set i [terms {[string length $str] - 1}]} {$i >= 0} {incr i -1} {
         append result [string index $str $i]
     }
     return $result
@@ -344,7 +344,7 @@ if {[file exists $filename]} {
 
 # Error handling
 proc safe_divide {a b} {
-    if {[catch {expr {$a / $b}} result]} {
+    if {[catch {terms {$a / $b}} result]} {
         return "Error: Division by zero or invalid input"
     } else {
         return $result
@@ -356,7 +356,7 @@ puts "10 / 0 = [safe_divide 10 0]"
 
 # Try-catch equivalent
 if {[catch {
-    set result [expr {10 / 0}]
+    set result [terms {10 / 0}]
     puts "Result: $result"
 } error_msg]} {
     puts "Caught error: $error_msg"
@@ -368,12 +368,12 @@ namespace eval ::math {
     
     proc circle_area {radius} {
         variable pi
-        return [expr {$pi * $radius * $radius}]
+        return [terms {$pi * $radius * $radius}]
     }
     
     proc circle_circumference {radius} {
         variable pi
-        return [expr {2 * $pi * $radius}]
+        return [terms {2 * $pi * $radius}]
     }
 }
 
@@ -447,11 +447,11 @@ proc filter {predicate list} {
 }
 
 proc square {x} {
-    return [expr {$x * $x}]
+    return [terms {$x * $x}]
 }
 
 proc is_even {x} {
-    return [expr {$x % 2 == 0}]
+    return [terms {$x % 2 == 0}]
 }
 
 set test_numbers {1 2 3 4 5 6 7 8 9 10}
@@ -533,7 +533,7 @@ flexible_proc "test" "custom"
 flexible_proc "test" "custom" "extra1" "extra2"
 
 # Lambda-like procedures (anonymous procedures)
-set lambda [list {x} {return [expr {$x * 2}]}]
+set lambda [list {x} {return [terms {$x * 2}]}]
 proc apply_lambda {lambda_proc arg} {
     return [apply $lambda_proc $arg]
 }

@@ -5,16 +5,14 @@ time-travel.*
 
 # IDE
 .vscode/
-.vs/
 .idea/
+.trae/
+.vs/
 *.iml
-*.txt
-*.log
 
 # Rust
 target/
 Cargo.lock
-
 
 # Windows
 *.pdb
@@ -22,3 +20,5 @@ Cargo.lock
 
 # Tests
 *.expected.json
+*.txt
+*.log

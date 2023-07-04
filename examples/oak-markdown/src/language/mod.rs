@@ -104,6 +104,14 @@ pub struct MarkdownLanguage {
     ///
     /// Example: `<Component />`
     pub allow_xml: bool,
+    /// Enable MDX syntax (Markdown + JSX).
+    ///
+    /// This enables:
+    /// - JSX components: `<Component prop="value" />`
+    /// - Import statements: `import { Component } from 'module'`
+    /// - Export statements: `export default Component`
+    /// - JSX expressions: `{variable}`
+    pub allow_mdx: bool,
 }
 
 impl MarkdownLanguage {
@@ -147,6 +155,7 @@ impl Default for MarkdownLanguage {
             allow_setext_headings: true,
             allow_html_tagfilter: false,
             allow_xml: false,
+            allow_mdx: false,
         }
     }
 }

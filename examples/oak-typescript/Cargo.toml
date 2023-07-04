@@ -12,13 +12,8 @@ keywords = ["frontend", "language", "typescript"]
 [dependencies]
 oak-core = { workspace = true }
 serde = { workspace = true, optional = true }
-# serde_json = { workspace = true } # replaced by oak-json
-oak-json = { workspace = true }
 
 [features]
 default = ["serde"]
 serde = ["dep:serde", "oak-core/serde"]
 
-[dev-dependencies]
-oak-testing = { workspace = true }
-lazy_static = { workspace = true }

@@ -1,78 +1,55 @@
-use super::{Attribute, Block, EnumVariant, EnumsKind, Expr, Function, GenericParam, Identifier, NamePath, Param, Span, Statement, StructureKind, Type, VariantCase};
+use super::*;
+use crate::ast::{
+    ecs_nodes::{ComponentDeclaration, SystemDeclaration},
+    statement_nodes::{ExprStmt, Let},
+    structure_nodes::SingletonDeclaration,
+};
 
-/// An item in a Valkyrie module
+/// A root node item in a Valkyrie module
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub enum Item {
+pub enum StatementNode {
     /// A namespace declaration.
-    Namespace(Namespace),
-    /// A class declaration.
-    Class(Class),
-    /// A value type structure (immutable, copied on assignment).
-    Structure(Class),
-    /// A singleton declaration.
-    Singleton(Singleton),
-    /// A flags (bitflags) declaration.
-    Flags(Flags),
-    /// An enum declaration.
-    Enums(Enums),
-    /// A trait declaration.
-    Trait(Trait),
-    /// A widget declaration.
-    Widget(Widget),
+    Namespace(Box<NamespaceDeclaration>),
     /// A using (import) statement.
-    Using(Using),
+    Using(Box<UsingDeclaration>),
+    /// A class declaration.
+    Class(Box<ClassDeclaration>),
+    /// A value type structure (immutable, copied on assignment).
+    Structure(Box<StructureDeclaration>),
+    /// A singleton declaration.
+    Singleton(Box<SingletonDeclaration>),
+    /// A flags (bitflags) declaration.
+    Flags(Box<Flags>),
+    /// An enum declaration.
+    Enums(Box<Enums>),
+    /// A trait declaration.
+    Trait(Box<Trait>),
+    /// A widget declaration.
+    Widget(Box<WidgetDeclaration>),
     /// A micro (small function) declaration.
-    Micro(MicroDefinition),
+    Micro(Box<MicroDeclaration>),
     /// A type function declaration.
-    TypeFunction(TypeFunction),
+    TypeFunction(Box<TypeFunction>),
     /// A statement at module level.
-    Statement(Statement),
+    Statement(Box<StatementNode>),
     /// A variant declaration.
-    Variant(Variant),
+    Variant(Box<Variant>),
     /// An effect declaration.
-    Effect(Effect),
+    Effect(Box<Effect>),
     /// A property declaration (getter or setter).
-    Property(Property),
-    /// Template text content.
-    TemplateText {
-        /// The text content.
-        content: String,
-        /// The source code span.
-        #[cfg_attr(feature = "serde", serde(with = "oak_core::serde_range"))]
-        span: Span,
-    },
-    /// Template control structure.
-    TemplateControl {
-        /// The items within the control structure.
-        items: Vec<Item>,
-        /// The source code span.
-        #[cfg_attr(feature = "serde", serde(with = "oak_core::serde_range"))]
-        span: Span,
-    },
-    /// Template interpolation expression.
-    TemplateInterpolation {
-        /// The interpolated expression.
-        expr: Expr,
-        /// The source code span.
-        #[cfg_attr(feature = "serde", serde(with = "oak_core::serde_range"))]
-        span: Span,
-    },
-}
+    Property(Box<Property>),
+    /// A shader declaration.
+    Shader(Box<ShaderDeclaration>),
+    /// A component declaration for ECS.
+    Component(Box<ComponentDeclaration>),
+    /// A system declaration for ECS.
+    System(Box<SystemDeclaration>),
 
-/// A namespace declaration
-#[derive(Debug, Clone, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub struct Namespace {
-    /// The name path of the namespace.
-    pub name: NamePath,
-    /// Annotations applied to the namespace.
-    pub annotations: Vec<Attribute>,
-    /// Items declared within the namespace.
-    pub items: Vec<Item>,
-    /// The source code span.
-    #[cfg_attr(feature = "serde", serde(with = "oak_core::serde_range"))]
-    pub span: Span,
+    /// A let binding statement.
+    Let(Box<Let>),
+    /// An expression statement.
+    ExprStmt(Box<ExprStmt>),
 }
 
 /// A parent class with optional alias for renamed inheritance.
@@ -86,33 +63,6 @@ pub struct Parent {
     /// Source span.
     #[cfg_attr(feature = "serde", serde(with = "oak_core::serde_range"))]
     pub span: Span,
-}
-
-/// A class declaration
-#[derive(Debug, Clone, PartialEq, Eq, Hash, Default)]
-#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub struct Class {
-    /// The keyword kind used for this class (class, struct, structure, widget, trait).
-    pub kind: StructureKind,
-    /// The class name.
-    pub name: Identifier,
-    /// Generic parameters for the class.
-    pub generics: Vec<GenericParam>,
-    /// Parent classes or traits this class inherits from.
-    pub parents: Vec<Parent>,
-    /// Items (fields, methods) declared within the class.
-    pub items: Vec<Item>,
-    /// Annotations applied to the class.
-    pub annotations: Vec<Attribute>,
-    /// The source code span.
-    #[cfg_attr(feature = "serde", serde(with = "oak_core::serde_range"))]
-    pub span: Span,
-    /// Whether this class is abstract (cannot be instantiated directly).
-    pub is_abstract: bool,
-    /// Whether this class is sealed (restricted inheritance).
-    pub is_sealed: bool,
-    /// Whether this class is final (cannot be inherited).
-    pub is_final: bool,
 }
 
 /// A flags (bitflags) declaration
@@ -158,7 +108,7 @@ pub struct Trait {
     /// Generic parameters for the trait.
     pub generics: Vec<GenericParam>,
     /// Methods declared in the trait.
-    pub methods: Vec<Function>,
+    pub methods: Vec<MethodDeclaration>,
     /// Associated types declared in the trait.
     pub associated_types: Vec<AssociatedType>,
     /// Annotations applied to the trait.
@@ -175,9 +125,9 @@ pub struct AssociatedType {
     /// The associated type name.
     pub name: Identifier,
     /// Type bounds that the associated type must satisfy.
-    pub bounds: Vec<Type>,
+    pub bounds: Vec<TypeExpression>,
     /// Default type for the associated type, if any.
-    pub default: Option<Type>,
+    pub default: Option<TypeExpression>,
     /// Annotations applied to the associated type.
     pub annotations: Vec<Attribute>,
     /// The source code span.
@@ -188,72 +138,15 @@ pub struct AssociatedType {
 /// A widget declaration
 #[derive(Debug, Clone, PartialEq, Eq, Hash, Default)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub struct Widget {
+pub struct WidgetDeclaration {
     /// The widget name.
     pub name: Identifier,
     /// Generic parameters for the widget.
     pub generics: Vec<GenericParam>,
     /// Items (properties, methods) declared within the widget.
-    pub items: Vec<Item>,
+    pub items: Vec<StatementNode>,
     /// Annotations applied to the widget.
     pub annotations: Vec<Attribute>,
-    /// The source code span.
-    #[cfg_attr(feature = "serde", serde(with = "oak_core::serde_range"))]
-    pub span: Span,
-}
-
-/// A singleton declaration.
-///
-/// Singletons are classes that have exactly one instance globally.
-/// They are useful for managing global state, configuration, or resources.
-///
-/// # Example
-///
-/// ```v
-/// singleton GlobalConfig {
-///     host: String = "localhost"
-///     port: i32 = 8080
-///
-///     micro get_url(self) -> String {
-///         f"{self.host}:{self.port}"
-///     }
-/// }
-/// ```
-///
-/// # Semantics
-///
-/// - A singleton has exactly one global instance
-/// - The instance is lazily initialized on first access
-/// - Singleton members are accessed through the singleton name directly
-/// - Singletons cannot be instantiated with constructors
-#[derive(Debug, Clone, PartialEq, Eq, Hash, Default)]
-#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub struct Singleton {
-    /// The singleton name.
-    pub name: Identifier,
-    /// Generic parameters for the singleton.
-    pub generics: Vec<GenericParam>,
-    /// Parent traits this singleton implements.
-    pub parents: Vec<Parent>,
-    /// Items (fields, methods) declared within the singleton.
-    pub items: Vec<Item>,
-    /// Annotations applied to the singleton.
-    pub annotations: Vec<Attribute>,
-    /// The source code span.
-    #[cfg_attr(feature = "serde", serde(with = "oak_core::serde_range"))]
-    pub span: Span,
-}
-
-/// A using (import) statement
-#[derive(Debug, Clone, PartialEq, Eq, Hash, Default)]
-#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub struct Using {
-    /// The path to import.
-    pub path: NamePath,
-    /// Optional alias for the import.
-    pub alias: Option<Identifier>,
-    /// Selective import list (e.g., `{Never, Unit}` in `using core::primitive.{Never, Unit}`)
-    pub imports: Vec<Identifier>,
     /// The source code span.
     #[cfg_attr(feature = "serde", serde(with = "oak_core::serde_range"))]
     pub span: Span,
@@ -262,7 +155,7 @@ pub struct Using {
 /// A micro (small function) declaration
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub struct MicroDefinition {
+pub struct MicroDeclaration {
     /// The micro name.
     pub name: Identifier,
     /// Generic parameters for the micro.
@@ -270,7 +163,7 @@ pub struct MicroDefinition {
     /// Parameters for the micro.
     pub params: Vec<Param>,
     /// Return type annotation, if any.
-    pub return_type: Option<Type>,
+    pub return_type: Option<TypeExpression>,
     /// The body of the micro.
     pub body: Block,
     /// Annotations applied to the micro.
@@ -295,7 +188,7 @@ pub struct TypeFunction {
     /// Parameters for the type function.
     pub params: Vec<Param>,
     /// Return type annotation, if any.
-    pub return_type: Option<Type>,
+    pub return_type: Option<TypeExpression>,
     /// The body of the type function.
     pub body: Block,
     /// Annotations applied to the type function.
@@ -329,7 +222,7 @@ pub struct Effect {
     /// The effect name.
     pub name: Identifier,
     /// Operations defined by the effect.
-    pub operations: Vec<Function>,
+    pub operations: Vec<MethodDeclaration>,
     /// Annotations applied to the effect.
     pub annotations: Vec<Attribute>,
     /// The source code span.
@@ -362,7 +255,7 @@ pub struct Property {
     /// Parameters for the property (self for getter, self + value for setter).
     pub params: Vec<Param>,
     /// Return type for getter, None for setter.
-    pub return_type: Option<Type>,
+    pub return_type: Option<TypeExpression>,
     /// The body of the property.
     pub body: Block,
     /// Source span.

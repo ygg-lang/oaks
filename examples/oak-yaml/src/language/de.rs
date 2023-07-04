@@ -255,7 +255,8 @@ where
                 if let Some(key) = current_key.take() {
                     let value = if current_value.is_empty() {
                         YamlValueNode::Scalar(YamlScalar { span: (0..0).into(), value: "".to_string() })
-                    } else if current_value.starts_with('-') {
+                    }
+                    else if current_value.starts_with('-') {
                         // 处理数组
                         let mut items = Vec::new();
                         for item_line in current_value.lines() {
@@ -266,7 +267,8 @@ where
                             }
                         }
                         YamlValueNode::Sequence(YamlSequence { span: (0..current_value.len()).into(), items })
-                    } else {
+                    }
+                    else {
                         YamlValueNode::Scalar(YamlScalar { span: (0..current_value.len()).into(), value: current_value.trim().to_string() })
                     };
                     entries.push(YamlMappingEntry { span: (0..key.len() + current_value.len()).into(), key: YamlValueNode::Scalar(YamlScalar { span: (0..key.len()).into(), value: key }), value });
@@ -282,7 +284,8 @@ where
                     current_value = value_str.to_string();
                     in_array = value_str.is_empty();
                 }
-            } else if current_key.is_some() {
+            }
+            else if current_key.is_some() {
                 // 处理多行值或数组
                 current_value.push_str(line);
                 current_value.push('\n');
@@ -294,7 +297,8 @@ where
         if let Some(key) = current_key {
             let value = if current_value.is_empty() {
                 YamlValueNode::Scalar(YamlScalar { span: (0..0).into(), value: "".to_string() })
-            } else if current_value.starts_with('-') {
+            }
+            else if current_value.starts_with('-') {
                 // 处理数组
                 let mut items = Vec::new();
                 for item_line in current_value.lines() {
@@ -305,7 +309,8 @@ where
                     }
                 }
                 YamlValueNode::Sequence(YamlSequence { span: (0..current_value.len()).into(), items })
-            } else {
+            }
+            else {
                 YamlValueNode::Scalar(YamlScalar { span: (0..current_value.len()).into(), value: current_value.trim().to_string() })
             };
             entries.push(YamlMappingEntry { span: (0..key.len() + current_value.len()).into(), key: YamlValueNode::Scalar(YamlScalar { span: (0..key.len()).into(), value: key }), value });

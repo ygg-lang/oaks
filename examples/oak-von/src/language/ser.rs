@@ -1,6 +1,6 @@
 use serde::ser::{self, Serialize, Serializer};
 
-use crate::language::value::{to_ast, VonValue};
+use crate::language::value::{VonValue, to_ast};
 use oak_core::OakError;
 
 /// VON 序列化实现
@@ -105,10 +105,7 @@ impl serde::ser::Serializer for VonValueSerializer {
     }
 
     fn serialize_none(self) -> Result<Self::Ok, Self::Error> {
-        Ok(VonValue::Enum(crate::language::value::VonEnum { 
-            variant: "None".to_string(), 
-            payload: None 
-        }))
+        Ok(VonValue::Enum(crate::language::value::VonEnum { variant: "None".to_string(), payload: None }))
     }
 
     fn serialize_some<T>(self, value: &T) -> Result<Self::Ok, Self::Error>
@@ -116,10 +113,7 @@ impl serde::ser::Serializer for VonValueSerializer {
         T: ?Sized + Serialize,
     {
         let payload = value.serialize(VonValueSerializer {})?;
-        Ok(VonValue::Enum(crate::language::value::VonEnum { 
-            variant: "Some".to_string(), 
-            payload: Some(Box::new(payload)) 
-        }))
+        Ok(VonValue::Enum(crate::language::value::VonEnum { variant: "Some".to_string(), payload: Some(Box::new(payload)) }))
     }
 
     fn serialize_unit(self) -> Result<Self::Ok, Self::Error> {
@@ -131,10 +125,7 @@ impl serde::ser::Serializer for VonValueSerializer {
     }
 
     fn serialize_unit_variant(self, _name: &'static str, _variant_index: u32, variant: &'static str) -> Result<Self::Ok, Self::Error> {
-        Ok(VonValue::Enum(crate::language::value::VonEnum { 
-            variant: variant.to_string(), 
-            payload: None 
-        }))
+        Ok(VonValue::Enum(crate::language::value::VonEnum { variant: variant.to_string(), payload: None }))
     }
 
     fn serialize_newtype_struct<T>(self, _name: &'static str, value: &T) -> Result<Self::Ok, Self::Error>
@@ -149,10 +140,7 @@ impl serde::ser::Serializer for VonValueSerializer {
         T: ?Sized + Serialize,
     {
         let payload = value.serialize(VonValueSerializer {})?;
-        Ok(VonValue::Enum(crate::language::value::VonEnum { 
-            variant: variant.to_string(), 
-            payload: Some(Box::new(payload)) 
-        }))
+        Ok(VonValue::Enum(crate::language::value::VonEnum { variant: variant.to_string(), payload: Some(Box::new(payload)) }))
     }
 
     fn serialize_seq(self, len: Option<usize>) -> Result<Self::SerializeSeq, Self::Error> {
@@ -297,10 +285,7 @@ impl serde::ser::SerializeMap for VonMapSerializer {
                 VonValue::Boolean(b) => b.to_string(),
                 _ => return Err(OakError::custom_error("VON keys must be strings, numbers, or booleans")),
             };
-            self.fields.push(crate::language::value::VonField { 
-                name: key_str, 
-                value: value_value 
-            });
+            self.fields.push(crate::language::value::VonField { name: key_str, value: value_value });
         }
         Ok(())
     }
@@ -320,10 +305,7 @@ impl serde::ser::SerializeStruct for VonMapSerializer {
     {
         let serializer = VonValueSerializer {};
         let value_value = value.serialize(serializer)?;
-        self.fields.push(crate::language::value::VonField { 
-            name: key.to_string(), 
-            value: value_value 
-        });
+        self.fields.push(crate::language::value::VonField { name: key.to_string(), value: value_value });
         Ok(())
     }
 
@@ -342,10 +324,7 @@ impl serde::ser::SerializeStructVariant for VonMapSerializer {
     {
         let serializer = VonValueSerializer {};
         let value_value = value.serialize(serializer)?;
-        self.fields.push(crate::language::value::VonField { 
-            name: key.to_string(), 
-            value: value_value 
-        });
+        self.fields.push(crate::language::value::VonField { name: key.to_string(), value: value_value });
         Ok(())
     }
 
@@ -355,22 +334,19 @@ impl serde::ser::SerializeStructVariant for VonMapSerializer {
                 // If there's only one field, use it as the payload
                 if self.fields.len() == 1 {
                     let field = self.fields[0].clone();
-                    Ok(VonValue::Enum(crate::language::value::VonEnum { 
-                        variant, 
-                        payload: Some(Box::new(field.value)) 
-                    }))
-                } else {
+                    Ok(VonValue::Enum(crate::language::value::VonEnum { variant, payload: Some(Box::new(field.value)) }))
+                }
+                else {
                     // Otherwise, use all fields as the payload
                     let payload = VonValue::Object(crate::language::value::VonObject { fields: self.fields });
-                    Ok(VonValue::Enum(crate::language::value::VonEnum { 
-                        variant, 
-                        payload: Some(Box::new(payload)) 
-                    }))
+                    Ok(VonValue::Enum(crate::language::value::VonEnum { variant, payload: Some(Box::new(payload)) }))
                 }
-            } else {
+            }
+            else {
                 Ok(VonValue::Object(crate::language::value::VonObject { fields: self.fields }))
             }
-        } else {
+        }
+        else {
             Ok(VonValue::Object(crate::language::value::VonObject { fields: self.fields }))
         }
     }

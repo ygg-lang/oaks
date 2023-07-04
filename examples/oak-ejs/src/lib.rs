@@ -9,10 +9,14 @@ pub mod lsp;
 #[cfg(feature = "mcp")]
 pub mod mcp;
 
+/// AST module for EJS templates
 pub mod ast;
+/// Language configuration for EJS templates
 pub mod language;
+/// Lexer module for EJS templates
 pub mod lexer;
+/// Parser module for EJS templates
 pub mod parser;
 
-pub use lexer::token_type::JavaScriptTokenType;
-pub use parser::element_type::JavaScriptElementType;
+pub use lexer::token_type::EjsTokenType;
+pub use parser::element_type::EjsElementType;

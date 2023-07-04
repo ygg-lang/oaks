@@ -1,8 +1,10 @@
 use core::range::Range;
 use oak_core::tree::{GreenNode, RedNode, TypedNode};
 
-use super::nodes::*;
-use super::visitor::{AcceptVisitor, StylusVisitor, VisitResult};
+use super::{
+    nodes::*,
+    visitor::{AcceptVisitor, StylusVisitor, VisitResult},
+};
 
 impl StylusRoot {
     /// Creates a new StylusRoot with the given span.

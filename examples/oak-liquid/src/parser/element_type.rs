@@ -23,6 +23,28 @@ pub enum LiquidElementType {
     ForStatement,
     /// Macro definition
     MacroDefinition,
+    /// Assign statement for variable assignment
+    Assign,
+    /// Capture block for capturing output into a variable
+    Capture,
+    /// Case statement for switch-like conditional
+    Case,
+    /// Include statement for template inclusion
+    Include,
+    /// Render statement for rendering a snippet (Liquid 5)
+    Render,
+    /// Unless statement for negated conditional
+    Unless,
+    /// Raw block for unprocessed content
+    Raw,
+    /// Break statement for loop control
+    Break,
+    /// Continue statement for loop control
+    Continue,
+    /// Tablerow statement for table iteration
+    Tablerow,
+    /// Cycle statement for cycling through values
+    Cycle,
     /// Tag statement
     Tag,
     /// Filter expression
@@ -64,8 +86,17 @@ impl From<crate::lexer::token_type::LiquidTokenType> for LiquidElementType {
             crate::lexer::token_type::LiquidTokenType::Boolean => Self::Literal,
             crate::lexer::token_type::LiquidTokenType::Whitespace => Self::Text,
             crate::lexer::token_type::LiquidTokenType::Comment => Self::Comment,
-            crate::lexer::token_type::LiquidTokenType::Eof => Self::Text,
+            crate::lexer::token_type::LiquidTokenType::Eof => Self::Error,
             crate::lexer::token_type::LiquidTokenType::Error => Self::Error,
+            crate::lexer::token_type::LiquidTokenType::EqEq => Self::Expression,
+            crate::lexer::token_type::LiquidTokenType::Neq => Self::Expression,
+            crate::lexer::token_type::LiquidTokenType::LtEq => Self::Expression,
+            crate::lexer::token_type::LiquidTokenType::GtEq => Self::Expression,
+            crate::lexer::token_type::LiquidTokenType::DotDot => Self::Expression,
+            crate::lexer::token_type::LiquidTokenType::And => Self::Expression,
+            crate::lexer::token_type::LiquidTokenType::Or => Self::Expression,
+            crate::lexer::token_type::LiquidTokenType::Not => Self::Expression,
+            crate::lexer::token_type::LiquidTokenType::TrimMark => Self::Tag,
             _ => Self::Expression,
         }
     }

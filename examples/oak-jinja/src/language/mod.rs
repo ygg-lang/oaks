@@ -3,7 +3,7 @@
 /// This module defines the language characteristics and configuration for Jinja templates.
 use oak_core::language::{Language, LanguageCategory};
 
-use crate::{ast::JinjaRoot, lexer::token_type::JinjaTokenType, parser::element_type::JinjaElementType};
+use crate::{lexer::token_type::JinjaTokenType, parser::element_type::JinjaElementType};
 
 /// Language definition for Jinja templates
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
@@ -50,7 +50,7 @@ impl Language for JinjaLanguage {
 
     type TokenType = JinjaTokenType;
     type ElementType = JinjaElementType;
-    type TypedRoot = JinjaRoot<'static>;
+    type TypedRoot = crate::ast::JinjaRoot;
 }
 
 impl JinjaLanguage {

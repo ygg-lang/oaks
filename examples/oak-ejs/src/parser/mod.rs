@@ -1,255 +1,195 @@
-#![doc = include_str!("readme.md")]
-
+/// EJS Parser module
+///
+/// This module defines the parser for EJS templates, responsible for
+/// constructing an abstract syntax tree from the token stream.
 pub mod element_type;
 
-use crate::{language::JavaScriptLanguage, parser::element_type::JavaScriptElementType};
+use crate::{language::EjsLanguage, lexer::token_type::EjsTokenType, parser::element_type::EjsElementType};
 use oak_core::{
-    GreenNode, OakError, ParseCache, TextEdit,
-    parser::{Associativity, Parser, ParserState, Pratt, PrattParser, binary},
+    OakError, ParseCache, TextEdit,
+    parser::{Parser, ParserState},
     source::Source,
 };
 
-pub(crate) type State<'a, S> = ParserState<'a, JavaScriptLanguage, S>;
+pub(crate) type State<'a, S> = ParserState<'a, EjsLanguage, S>;
 
-/// JavaScript parser.
-pub struct JavaScriptParser<'config> {
-    /// Configuration for the JavaScript language.
-    pub(crate) config: &'config JavaScriptLanguage,
+/// EJS template parser
+///
+/// This parser processes EJS templates and constructs a syntax tree
+/// representing the template structure including text content, code blocks,
+/// and output expressions.
+pub struct EjsParser<'config> {
+    /// Configuration for the EJS language
+    pub(crate) config: &'config EjsLanguage,
 }
 
-impl<'config> JavaScriptParser<'config> {
-    /// Creates a new JavaScript parser.
-    pub fn new(config: &'config JavaScriptLanguage) -> Self {
+impl<'config> EjsParser<'config> {
+    /// Creates a new EJS parser with the given configuration
+    ///
+    /// # Arguments
+    ///
+    /// * `config` - Reference to the EJS language configuration
+    ///
+    /// # Returns
+    ///
+    /// A new `EjsParser` instance
+    pub fn new(config: &'config EjsLanguage) -> Self {
         Self { config }
     }
 
-    fn parse_statement<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> Result<(), OakError> {
-        use crate::lexer::token_type::JavaScriptTokenType::*;
-        match state.peek_kind() {
-            Some(Function) => self.parse_function_declaration(state)?,
-            Some(Var) | Some(Let) | Some(Const) => self.parse_variable_declaration(state)?,
-            Some(If) => self.parse_if_statement(state)?,
-            Some(While) => self.parse_while_statement(state)?,
-            Some(For) => self.parse_for_statement(state)?,
-            Some(Return) => self.parse_return_statement(state)?,
-            Some(LeftBrace) => self.parse_block_statement(state)?,
-            _ => {
-                PrattParser::parse(state, 0, self);
-                state.eat(Semicolon);
-            }
-        }
-        Ok(())
-    }
-
-    fn parse_function_declaration<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> Result<(), OakError> {
-        use crate::lexer::token_type::JavaScriptTokenType::*;
-        let cp = state.checkpoint();
-        state.expect(Function).ok();
-        state.eat(IdentifierName);
-        state.expect(LeftParen).ok();
-        while state.not_at_end() && !state.at(RightParen) {
-            state.advance()
-        }
-        state.expect(RightParen).ok();
-        self.parse_block_statement(state)?;
-        state.finish_at(cp, crate::parser::element_type::JavaScriptElementType::FunctionDeclaration);
-        Ok(())
-    }
-
-    fn parse_variable_declaration<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> Result<(), OakError> {
-        use crate::lexer::token_type::JavaScriptTokenType::*;
-        let cp = state.checkpoint();
-        state.bump(); // var/let/const
-        state.expect(IdentifierName).ok();
-        if state.eat(Equal) {
-            PrattParser::parse(state, 0, self);
-        }
-        state.eat(Semicolon);
-        state.finish_at(cp, crate::parser::element_type::JavaScriptElementType::VariableDeclaration);
-        Ok(())
-    }
-
-    fn parse_if_statement<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> Result<(), OakError> {
-        use crate::lexer::token_type::JavaScriptTokenType::*;
-        let cp = state.checkpoint();
-        state.expect(If).ok();
-        state.expect(LeftParen).ok();
-        PrattParser::parse(state, 0, self);
-        state.expect(RightParen).ok();
-        self.parse_statement(state)?;
-        if state.eat(Else) {
-            self.parse_statement(state)?
-        }
-        state.finish_at(cp, crate::parser::element_type::JavaScriptElementType::IfStatement);
-        Ok(())
-    }
-
-    fn parse_while_statement<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> Result<(), OakError> {
-        use crate::lexer::token_type::JavaScriptTokenType::*;
-        let cp = state.checkpoint();
-        state.expect(While).ok();
-        state.expect(LeftParen).ok();
-        PrattParser::parse(state, 0, self);
-        state.expect(RightParen).ok();
-        self.parse_statement(state)?;
-        state.finish_at(cp, crate::parser::element_type::JavaScriptElementType::WhileStatement);
-        Ok(())
-    }
-
-    fn parse_for_statement<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> Result<(), OakError> {
-        use crate::lexer::token_type::JavaScriptTokenType::*;
-        let cp = state.checkpoint();
-        state.expect(For).ok();
-        state.expect(LeftParen).ok();
-        // Simplified handling
-        while state.not_at_end() && !state.at(RightParen) {
-            state.advance()
-        }
-        state.expect(RightParen).ok();
-        self.parse_statement(state)?;
-        state.finish_at(cp, crate::parser::element_type::JavaScriptElementType::ForStatement);
-        Ok(())
-    }
-
-    fn parse_return_statement<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> Result<(), OakError> {
-        use crate::lexer::token_type::JavaScriptTokenType::*;
-        let cp = state.checkpoint();
-        state.expect(Return).ok();
-        if !state.at(Semicolon) {
-            PrattParser::parse(state, 0, self);
-        }
-        state.eat(Semicolon);
-        state.finish_at(cp, crate::parser::element_type::JavaScriptElementType::ReturnStatement);
-        Ok(())
-    }
-
-    fn parse_block_statement<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> Result<(), OakError> {
-        use crate::lexer::token_type::JavaScriptTokenType::*;
-        let cp = state.checkpoint();
-        state.expect(LeftBrace).ok();
-        while state.not_at_end() && !state.at(RightBrace) {
-            self.parse_statement(state)?
-        }
-        state.expect(RightBrace).ok();
-        state.finish_at(cp, crate::parser::element_type::JavaScriptElementType::BlockStatement);
-        Ok(())
-    }
-}
-
-impl<'config> Pratt<JavaScriptLanguage> for JavaScriptParser<'config> {
-    fn primary<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> &'a GreenNode<'a, JavaScriptLanguage> {
-        use crate::lexer::token_type::JavaScriptTokenType::*;
-        let cp = state.checkpoint();
-        match state.peek_kind() {
-            Some(IdentifierName) => {
-                state.bump();
-                state.finish_at(cp, crate::parser::element_type::JavaScriptElementType::Identifier)
-            }
-            Some(NumericLiteral) | Some(StringLiteral) | Some(True) | Some(False) | Some(Null) => {
-                state.bump();
-                state.finish_at(cp, crate::parser::element_type::JavaScriptElementType::Literal)
-            }
-            Some(LeftParen) => {
-                state.bump();
-                PrattParser::parse(state, 0, self);
-                state.expect(RightParen).ok();
-                state.finish_at(cp, crate::parser::element_type::JavaScriptElementType::Expression)
-            }
-            _ => {
-                state.bump();
-                state.finish_at(cp, crate::parser::element_type::JavaScriptElementType::Error)
-            }
-        }
-    }
-
-    fn infix<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>, left: &'a GreenNode<'a, JavaScriptLanguage>, min_precedence: u8) -> Option<&'a GreenNode<'a, JavaScriptLanguage>> {
-        use crate::lexer::token_type::JavaScriptTokenType::*;
-        let kind = state.peek_kind()?;
-
-        let (prec, assoc) = match kind {
-            Equal
-            | PlusEqual
-            | MinusEqual
-            | StarEqual
-            | SlashEqual
-            | PercentEqual
-            | StarStarEqual
-            | LeftShiftEqual
-            | RightShiftEqual
-            | UnsignedRightShiftEqual
-            | AmpersandEqual
-            | PipeEqual
-            | CaretEqual
-            | AmpersandAmpersandEqual
-            | PipePipeEqual
-            | QuestionQuestionEqual => (1, Associativity::Right),
-            PipePipe => (2, Associativity::Left),
-            AmpersandAmpersand => (3, Associativity::Left),
-            EqualEqual | NotEqual | EqualEqualEqual | NotEqualEqual => (4, Associativity::Left),
-            Plus | Minus => (10, Associativity::Left),
-            Star | Slash | Percent => (11, Associativity::Left),
-            LeftParen | Dot => (15, Associativity::Left),
-            _ => return None,
-        };
-
-        if prec < min_precedence {
-            return None;
-        }
-
-        match kind {
-            LeftParen => {
-                let cp = state.checkpoint();
-                state.push_child(left);
-                state.expect(LeftParen).ok();
-                while state.not_at_end() && !state.at(RightParen) {
-                    state.advance()
+    /// Parses the template content
+    ///
+    /// This method handles the main parsing loop, processing text content
+    /// and EJS tags until the end of the source is reached.
+    fn parse_template<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> Result<(), OakError> {
+        while state.not_at_end() {
+            match state.peek_kind() {
+                Some(EjsTokenType::Text) => {
+                    self.parse_text(state);
                 }
-                state.expect(RightParen).ok();
-                Some(state.finish_at(cp, crate::parser::element_type::JavaScriptElementType::CallExpression))
-            }
-            Dot => {
-                let cp = state.checkpoint();
-                state.push_child(left);
-                state.expect(Dot).ok();
-                state.expect(IdentifierName).ok();
-                Some(state.finish_at(cp, crate::parser::element_type::JavaScriptElementType::MemberExpression))
-            }
-            _ => {
-                let result_kind = match kind {
-                    Equal
-                    | PlusEqual
-                    | MinusEqual
-                    | StarEqual
-                    | SlashEqual
-                    | PercentEqual
-                    | StarStarEqual
-                    | LeftShiftEqual
-                    | RightShiftEqual
-                    | UnsignedRightShiftEqual
-                    | AmpersandEqual
-                    | PipeEqual
-                    | CaretEqual
-                    | AmpersandAmpersandEqual
-                    | PipePipeEqual
-                    | QuestionQuestionEqual => JavaScriptElementType::AssignmentExpression,
-                    PipePipe | AmpersandAmpersand => JavaScriptElementType::LogicalExpression,
-                    _ => JavaScriptElementType::BinaryExpression,
-                };
-                Some(binary(state, left, kind, prec, assoc, result_kind.into(), |s, p| PrattParser::parse(s, p, self)))
+                Some(EjsTokenType::OpenTag) => {
+                    self.parse_code_block(state)?;
+                }
+                Some(EjsTokenType::OpenTagOutputEscape) => {
+                    self.parse_output_escape(state)?;
+                }
+                Some(EjsTokenType::OpenTagOutputRaw) => {
+                    self.parse_output_raw(state)?;
+                }
+                Some(EjsTokenType::OpenTagComment) => {
+                    self.parse_comment(state)?;
+                }
+                Some(EjsTokenType::EscapedOpenTag) => {
+                    self.parse_escaped_tag(state)?;
+                }
+                _ => {
+                    state.advance();
+                }
             }
         }
+
+        Ok(())
+    }
+
+    /// Parses plain text content
+    ///
+    /// Text content is any content outside of EJS tags.
+    fn parse_text<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) {
+        let cp = state.checkpoint();
+        state.bump();
+        state.finish_at(cp, EjsElementType::Text);
+    }
+
+    /// Parses a code block `<% ... %>`
+    ///
+    /// Code blocks contain JavaScript code that is executed but not output.
+    fn parse_code_block<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> Result<(), OakError> {
+        let cp = state.checkpoint();
+        state.bump();
+
+        while state.not_at_end() {
+            match state.peek_kind() {
+                Some(EjsTokenType::CloseTag) | Some(EjsTokenType::CloseTagTrim) => {
+                    state.bump();
+                    break;
+                }
+                _ => {
+                    state.advance();
+                }
+            }
+        }
+
+        state.finish_at(cp, EjsElementType::Code);
+        Ok(())
+    }
+
+    /// Parses an escaped output expression `<%= ... %>`
+    ///
+    /// The expression is evaluated and the result is HTML-escaped before output.
+    fn parse_output_escape<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> Result<(), OakError> {
+        let cp = state.checkpoint();
+        state.bump();
+
+        while state.not_at_end() {
+            match state.peek_kind() {
+                Some(EjsTokenType::CloseTag) | Some(EjsTokenType::CloseTagTrim) => {
+                    state.bump();
+                    break;
+                }
+                _ => {
+                    state.advance();
+                }
+            }
+        }
+
+        state.finish_at(cp, EjsElementType::OutputEscape);
+        Ok(())
+    }
+
+    /// Parses a raw output expression `<%- ... %>`
+    ///
+    /// The expression is evaluated and the result is output without escaping.
+    fn parse_output_raw<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> Result<(), OakError> {
+        let cp = state.checkpoint();
+        state.bump();
+
+        while state.not_at_end() {
+            match state.peek_kind() {
+                Some(EjsTokenType::CloseTag) | Some(EjsTokenType::CloseTagTrim) => {
+                    state.bump();
+                    break;
+                }
+                _ => {
+                    state.advance();
+                }
+            }
+        }
+
+        state.finish_at(cp, EjsElementType::OutputRaw);
+        Ok(())
+    }
+
+    /// Parses a comment `<%# ... %>`
+    ///
+    /// Comments are not rendered in the output.
+    fn parse_comment<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> Result<(), OakError> {
+        let cp = state.checkpoint();
+        state.bump();
+
+        while state.not_at_end() {
+            match state.peek_kind() {
+                Some(EjsTokenType::CloseTag) | Some(EjsTokenType::CloseTagTrim) => {
+                    state.bump();
+                    break;
+                }
+                _ => {
+                    state.advance();
+                }
+            }
+        }
+
+        state.finish_at(cp, EjsElementType::Comment);
+        Ok(())
+    }
+
+    /// Parses an escaped tag `<%%`
+    ///
+    /// Escaped tags are rendered as literal `<%` in the output.
+    fn parse_escaped_tag<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> Result<(), OakError> {
+        let cp = state.checkpoint();
+        state.bump();
+        state.finish_at(cp, EjsElementType::EscapedTag);
+        Ok(())
     }
 }
 
-impl<'config> Parser<JavaScriptLanguage> for JavaScriptParser<'config> {
-    fn parse<'a, S: Source + ?Sized>(&self, text: &'a S, edits: &[TextEdit], cache: &'a mut impl ParseCache<JavaScriptLanguage>) -> oak_core::parser::ParseOutput<'a, JavaScriptLanguage> {
-        let lexer = crate::lexer::JavaScriptLexer::new(&self.config);
+impl<'config> Parser<EjsLanguage> for EjsParser<'config> {
+    fn parse<'a, S: Source + ?Sized>(&self, text: &'a S, edits: &[TextEdit], cache: &'a mut impl ParseCache<EjsLanguage>) -> oak_core::parser::ParseOutput<'a, EjsLanguage> {
+        let lexer = crate::lexer::EjsLexer::new(&self.config);
         oak_core::parser::parse_with_lexer(&lexer, text, edits, cache, |state| {
             let cp = state.checkpoint();
-            while state.not_at_end() {
-                self.parse_statement(state).ok();
-            }
-            Ok(state.finish_at(cp, crate::parser::element_type::JavaScriptElementType::Root))
+            self.parse_template(state)?;
+            Ok(state.finish_at(cp, EjsElementType::Root))
         })
     }
 }

@@ -136,10 +136,18 @@ pub enum ValkyrieElementType {
     Widget,
     /// Singleton definition node.
     Singleton,
+    /// Shader definition node.
+    Shader,
     /// Effect definition node.
     EffectDefinition,
     /// Using statement node.
     UsingStatement,
+    /// Component definition node.
+    Component,
+    /// System definition node.
+    System,
+    /// Event definition node.
+    Event,
 
     // Template
     /// Template text node.

@@ -73,7 +73,7 @@ impl<'config> LiquidLexer<'config> {
             state.advance(ch.len_utf8());
         }
         if state.get_position() > start {
-            state.add_token(LiquidTokenType::Identifier, start, state.get_position());
+            state.add_token(LiquidTokenType::Text, start, state.get_position());
             return true;
         }
         false
@@ -156,7 +156,14 @@ impl<'config> LiquidLexer<'config> {
                 state.advance(1);
 
                 while let Some(ch) = state.peek() {
-                    if ch.is_ascii_digit() || ch == '.' {
+                    if ch.is_ascii_digit() {
+                        state.advance(1);
+                    }
+                    else if ch == '.' {
+                        let rest = state.rest();
+                        if rest.starts_with("..") {
+                            break;
+                        }
                         state.advance(1);
                     }
                     else {
@@ -190,11 +197,51 @@ impl<'config> LiquidLexer<'config> {
         if rest.starts_with(&self.config.tag_start) {
             state.advance(self.config.tag_start.len());
             state.add_token(LiquidTokenType::LeftBracePercent, start, state.get_position());
+            if let Some('-') = state.peek() {
+                let trim_start = state.get_position();
+                state.advance(1);
+                state.add_token(LiquidTokenType::TrimMark, trim_start, state.get_position());
+            }
+            return true;
+        }
+        let trim_tag_end = format!("-{}", &self.config.tag_end);
+        if rest.starts_with(&trim_tag_end) {
+            let trim_start = state.get_position();
+            state.advance(1);
+            state.add_token(LiquidTokenType::TrimMark, trim_start, state.get_position());
+            state.advance(self.config.tag_end.len());
+            state.add_token(LiquidTokenType::PercentRightBrace, start, state.get_position());
             return true;
         }
         if rest.starts_with(&self.config.tag_end) {
             state.advance(self.config.tag_end.len());
             state.add_token(LiquidTokenType::PercentRightBrace, start, state.get_position());
+            return true;
+        }
+
+        if rest.starts_with("==") {
+            state.advance(2);
+            state.add_token(LiquidTokenType::EqEq, start, state.get_position());
+            return true;
+        }
+        if rest.starts_with("!=") {
+            state.advance(2);
+            state.add_token(LiquidTokenType::Neq, start, state.get_position());
+            return true;
+        }
+        if rest.starts_with("<=") {
+            state.advance(2);
+            state.add_token(LiquidTokenType::LtEq, start, state.get_position());
+            return true;
+        }
+        if rest.starts_with(">=") {
+            state.advance(2);
+            state.add_token(LiquidTokenType::GtEq, start, state.get_position());
+            return true;
+        }
+        if rest.starts_with("..") {
+            state.advance(2);
+            state.add_token(LiquidTokenType::DotDot, start, state.get_position());
             return true;
         }
 
@@ -258,6 +305,9 @@ impl<'config> LiquidLexer<'config> {
                 // Check if it is a boolean keyword
                 let kind = match text.as_ref() {
                     "true" | "false" => LiquidTokenType::Boolean,
+                    "and" => LiquidTokenType::And,
+                    "or" => LiquidTokenType::Or,
+                    "not" => LiquidTokenType::Not,
                     _ => LiquidTokenType::Identifier,
                 };
                 state.add_token(kind, start, end);

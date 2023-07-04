@@ -1,10 +1,10 @@
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 
 /// TOML value representation.
 ///
 /// This represents the pure value of a TOML element without any source code location information.
-#[derive(Debug, Clone, PartialEq, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Deserialize, Serialize)]
 pub enum TomlValue {
     /// String value.
     String(String),
@@ -23,13 +23,13 @@ pub enum TomlValue {
 }
 
 /// Array wrapper of toml
-#[derive(Debug, Clone, PartialEq, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Deserialize, Serialize)]
 pub struct TomlArray {
     pub list: Vec<TomlValue>,
 }
 
 /// Table wrapper of toml
-#[derive(Debug, Clone, PartialEq, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Deserialize, Serialize)]
 pub struct TomlTable {
     pub dict: HashMap<String, TomlValue>,
 }
@@ -67,8 +67,24 @@ impl TomlValue {
         }
     }
 
+    /// Returns a mutable reference to the array if the value is an array.
+    pub fn as_array_mut(&mut self) -> Option<&mut Vec<TomlValue>> {
+        match self {
+            TomlValue::Array(TomlArray { list: a }) => Some(a),
+            _ => None,
+        }
+    }
+
     /// Returns a reference to the table if the value is a table.
     pub fn as_table(&self) -> Option<&HashMap<String, TomlValue>> {
+        match self {
+            TomlValue::Table(TomlTable { dict: t }) => Some(t),
+            _ => None,
+        }
+    }
+
+    /// Returns a mutable reference to the table if the value is a table.
+    pub fn as_table_mut(&mut self) -> Option<&mut HashMap<String, TomlValue>> {
         match self {
             TomlValue::Table(TomlTable { dict: t }) => Some(t),
             _ => None,
@@ -79,6 +95,14 @@ impl TomlValue {
     pub fn get(&self, key: &str) -> Option<&TomlValue> {
         match self {
             TomlValue::Table(TomlTable { dict: t }) => t.get(key),
+            _ => None,
+        }
+    }
+
+    /// Gets a mutable value from the table by key name.
+    pub fn get_mut(&mut self, key: &str) -> Option<&mut TomlValue> {
+        match self {
+            TomlValue::Table(TomlTable { dict: t }) => t.get_mut(key),
             _ => None,
         }
     }
