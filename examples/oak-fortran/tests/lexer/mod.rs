@@ -40,7 +40,7 @@ fn test_peek_behavior() {
 
 #[test]
 fn test_fortran_program_parsing() {
-    use oak_core::{Lexer, SourceText, source::Source, parser::session::ParseSession};
+    use oak_core::{Lexer, SourceText, parser::session::ParseSession, source::Source};
     use oak_fortran::{FortranLanguage, FortranLexer};
 
     let source = SourceText::new("program hello\n  print *, 'Hello, World!'\nend program hello");

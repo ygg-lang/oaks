@@ -1,6 +1,6 @@
 #[test]
 fn ready() {
-    println!("oak-svelte tests ready!")
+    println!("oak-astro tests ready!")
 }
 
 #[cfg(test)]

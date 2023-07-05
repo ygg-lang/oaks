@@ -29,4 +29,11 @@ impl LanguageService for VampireLanguageService {
     fn workspace(&self) -> &oak_lsp::workspace::WorkspaceManager {
         &self.workspace
     }
+    fn with_root<R, F>(&self, _uri: &str, _f: F) -> impl std::future::Future<Output = Option<R>> + Send
+    where
+        R: Send,
+        F: FnOnce(oak_core::tree::RedNode<'_, Self::Lang>) -> R + Send,
+    {
+        async { None }
+    }
 }

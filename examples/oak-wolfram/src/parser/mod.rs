@@ -36,7 +36,7 @@ impl<'config> Parser<WolframLanguage> for WolframParser<'config> {
         parse_with_lexer(&lexer, text, edits, cache, |state| {
             let checkpoint = state.checkpoint();
 
-            while state.not_at_end() {
+            while state.not_at_end() && state.not_at(WolframTokenType::Eof) {
                 self.parse_expression(state);
             }
 
@@ -71,7 +71,7 @@ impl<'config> WolframParser<'config> {
         state.finish_at(checkpoint, WolframElementType::Arguments);
     }
 
-    fn parse_list<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) {
+    fn parse_list<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> &'a GreenNode<'a, WolframLanguage> {
         let checkpoint = state.checkpoint();
         state.bump(); // {
 
@@ -85,7 +85,7 @@ impl<'config> WolframParser<'config> {
         if state.at(WolframTokenType::RightBrace) {
             state.bump();
         }
-        state.finish_at(checkpoint, WolframElementType::List);
+        state.finish_at(checkpoint, WolframElementType::List)
     }
 }
 
@@ -95,20 +95,23 @@ impl<'config> Pratt<WolframLanguage> for WolframParser<'config> {
 
         if state.at(WolframTokenType::Identifier) {
             state.bump();
-            // Check if it's a function call f[...]
-            while state.at(WolframTokenType::LeftBracket) {
-                self.parse_arguments(state);
-                state.finish_at(checkpoint, WolframElementType::Call);
+            // f[…] / f[…][…] — finish once after all bracket groups.
+            if state.at(WolframTokenType::LeftBracket) {
+                while state.at(WolframTokenType::LeftBracket) {
+                    self.parse_arguments(state);
+                }
+                state.finish_at(checkpoint, WolframElementType::Call)
             }
-            if state.checkpoint() == checkpoint { state.finish_at(checkpoint, WolframElementType::Symbol) } else { state.finish_at(checkpoint, WolframElementType::Call) }
+            else {
+                state.finish_at(checkpoint, WolframElementType::Symbol)
+            }
         }
         else if state.at(WolframTokenType::Integer) || state.at(WolframTokenType::Real) || state.at(WolframTokenType::String) {
             state.bump();
             state.finish_at(checkpoint, WolframElementType::Literal)
         }
         else if state.at(WolframTokenType::LeftBrace) {
-            self.parse_list(state);
-            state.finish_at(checkpoint, WolframElementType::List)
+            self.parse_list(state)
         }
         else if state.at(WolframTokenType::Slot) || state.at(WolframTokenType::SlotSequence) {
             state.bump();

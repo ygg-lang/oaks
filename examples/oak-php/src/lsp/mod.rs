@@ -52,12 +52,21 @@ impl<V: WritableVfs + Send + Sync + 'static> LanguageService for PhpLanguageServ
     fn workspace(&self) -> &oak_lsp::workspace::WorkspaceManager {
         &self.workspace
     }
-    fn get_root(&self, uri: &str) -> impl Future<Output = Option<RedNode<'_, PhpLanguage>>> + Send + '_ {
-        let source = self.get_source(uri);
+    fn with_root<R, F>(&self, uri: &str, f: F) -> impl Future<Output = Option<R>> + Send
+    where
+        R: Send,
+        F: FnOnce(RedNode<'_, Self::Lang>) -> R + Send,
+    {
+        let source = self.vfs().get_source(uri);
         async move {
-            let _source = source?;
-            // TODO: Implement proper caching and conversion to RedNode
-            None
+            let source = source?;
+            let language = PhpLanguage::default();
+            let parser = crate::parser::PhpParser::new(&language);
+            let lexer = crate::lexer::PhpLexer::new(&language);
+            let mut cache = oak_core::parser::session::ParseSession::<Self::Lang>::default();
+            let parse_out = oak_core::parser::parse(&parser, &lexer, &source, &[], &mut cache);
+            let green = parse_out.result.ok()?;
+            Some(f(RedNode::new(green, 0)))
         }
     }
     fn hover(&self, uri: &str, range: Range<usize>) -> impl Future<Output = Option<Hover>> + Send + '_ {

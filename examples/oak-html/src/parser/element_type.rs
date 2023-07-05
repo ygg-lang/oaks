@@ -67,31 +67,6 @@ impl ElementType for HtmlElementType {
 
 impl From<crate::lexer::token_type::HtmlTokenType> for HtmlElementType {
     fn from(token: crate::lexer::token_type::HtmlTokenType) -> Self {
-                match token {
-            crate::lexer::token_type::HtmlTokenType::TagOpen => Self::TagOpen,
-            crate::lexer::token_type::HtmlTokenType::TagClose => Self::TagClose,
-            crate::lexer::token_type::HtmlTokenType::TagSlashOpen => Self::TagSlashOpen,
-            crate::lexer::token_type::HtmlTokenType::TagSelfClose => Self::TagSelfClose,
-            crate::lexer::token_type::HtmlTokenType::TagName => Self::TagName,
-            crate::lexer::token_type::HtmlTokenType::AttributeName => Self::AttributeName,
-            crate::lexer::token_type::HtmlTokenType::AttributeValue => Self::AttributeValue,
-            crate::lexer::token_type::HtmlTokenType::Attribute => Self::Attribute,
-            crate::lexer::token_type::HtmlTokenType::Text => Self::Text,
-            crate::lexer::token_type::HtmlTokenType::Comment => Self::Comment,
-            crate::lexer::token_type::HtmlTokenType::Equal => Self::Equal,
-            crate::lexer::token_type::HtmlTokenType::Quote => Self::Quote,
-            crate::lexer::token_type::HtmlTokenType::Doctype => Self::Doctype,
-            crate::lexer::token_type::HtmlTokenType::CData => Self::CData,
-            crate::lexer::token_type::HtmlTokenType::ProcessingInstruction => Self::ProcessingInstruction,
-            crate::lexer::token_type::HtmlTokenType::EntityRef => Self::EntityRef,
-            crate::lexer::token_type::HtmlTokenType::CharRef => Self::CharRef,
-            crate::lexer::token_type::HtmlTokenType::Whitespace => Self::Whitespace,
-            crate::lexer::token_type::HtmlTokenType::Newline => Self::Newline,
-            crate::lexer::token_type::HtmlTokenType::Document => Self::Document,
-            crate::lexer::token_type::HtmlTokenType::Element => Self::Element,
-            crate::lexer::token_type::HtmlTokenType::Eof => Self::Eof,
-            crate::lexer::token_type::HtmlTokenType::Error => Self::Error,
-            _ => Self::Error,
-        }
+        unsafe { std::mem::transmute(token) }
     }
 }

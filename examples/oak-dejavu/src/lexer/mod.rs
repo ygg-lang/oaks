@@ -7,6 +7,7 @@ use oak_core::{
 pub use token_type::DejavuTokenType;
 
 /// Dejavu lexer.
+#[derive(Clone)]
 pub struct DejavuLexer<'config> {
     config: &'config DejavuLanguage,
 }

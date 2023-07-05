@@ -1,7 +1,7 @@
 mod lexer;
 
 use oak_core::{Lexer, ParseSession, Parser, SourceText};
-use oak_twig::{TwigLanguage, TwigTokenType, TwigLexer, TwigParser};
+use oak_twig::{TwigLanguage, TwigLexer, TwigParser, TwigTokenType};
 
 #[test]
 fn test_lexer_basic() {

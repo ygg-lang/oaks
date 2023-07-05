@@ -3,6 +3,7 @@ use oak_core::language::{Language, LanguageCategory};
 use crate::{lexer::TokenType, parser::ElementType};
 
 /// Racket language definition.
+#[derive(Debug, Default, Clone, Copy)]
 pub struct RacketLanguage;
 
 impl Language for RacketLanguage {

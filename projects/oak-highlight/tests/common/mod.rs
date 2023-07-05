@@ -1,11 +1,10 @@
 use oak_core::{
-    Arc, Range,
-    errors::{OakDiagnostics, OakError},
-    language::{ElementRole, ElementType, Language, TokenRole, TokenType, UniversalElementRole, UniversalTokenRole},
+    Range,
+    errors::OakDiagnostics,
+    language::{ElementType, Language, TokenType, UniversalElementRole, UniversalTokenRole},
     lexer::{LexOutput, Lexer, LexerCache, Token, Tokens},
     parser::{ParseCache, ParseOutput, Parser},
     source::{Source, TextEdit},
-    tree::{GreenLeaf, GreenNode, GreenTree},
 };
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
@@ -21,6 +20,8 @@ pub enum MockTokenType {
 
 impl TokenType for MockTokenType {
     type Role = UniversalTokenRole;
+    const END_OF_STREAM: Self = MockTokenType::Eof;
+
     fn role(&self) -> Self::Role {
         match self {
             MockTokenType::Keyword => UniversalTokenRole::Keyword,
@@ -97,19 +98,12 @@ pub struct MockParser;
 impl Parser<MockLanguage> for MockParser {
     fn parse<'a, S: Source + ?Sized>(&self, text: &'a S, edits: &[TextEdit], cache: &'a mut impl ParseCache<MockLanguage>) -> ParseOutput<'a, MockLanguage> {
         let lexer = MockLexer;
-        let output = lexer.lex(text, edits, cache);
-        let tokens = output.result.as_ref().unwrap();
-
-        let mut leaves = Vec::new();
-        for token in tokens.iter() {
-            let leaf = GreenLeaf::new(token.kind, (token.span.end - token.span.start) as u32);
-            leaves.push(GreenTree::Leaf(leaf));
-        }
-
-        let children = cache.arena().alloc_slice_copy(&leaves);
-        let root = GreenNode::new(MockElementType::Root, children);
-        let root_ref = cache.arena().alloc(root);
-
-        OakDiagnostics::new(Ok(root_ref))
+        oak_core::parser::parse_with_lexer(&lexer, text, edits, cache, |state| {
+            let checkpoint = state.checkpoint();
+            while state.not_at_end() {
+                state.bump();
+            }
+            Ok(state.finish_at(checkpoint, MockElementType::Root))
+        })
     }
 }

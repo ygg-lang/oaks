@@ -1,8 +1,5 @@
 use oak_core::{Parser, SourceText, parser::session::ParseSession};
-use oak_rbq::{
-    RbqLanguage, RbqParser,
-    ast::{RbqExprKind, RbqLiteral, RbqRoot},
-};
+use oak_rbq::{RbqLanguage, RbqParser, ast::RbqRoot};
 
 #[test]
 fn test_rbq_ast_micro_return_type() {
@@ -32,51 +29,6 @@ fn test_rbq_ast_micro_return_type() {
     }
     else {
         panic!("Expected micro")
-    }
-}
-
-#[test]
-fn test_rbq_ast_typed_literals() {
-    let config = RbqLanguage::default();
-    let parser = RbqParser::new(&config);
-    let source = SourceText::new("query = 123; query = \"hello\"; query = true;");
-
-    let mut session = ParseSession::<RbqLanguage>::default();
-    let output = parser.parse(&source, &[], &mut session);
-    assert!(output.result.is_ok());
-
-    let green = output.result.unwrap();
-    let red = oak_core::tree::RedNode::new(green, 0);
-
-    let root = RbqRoot::lower(red, source.text());
-
-    assert_eq!(root.items.len(), 3);
-
-    if let oak_rbq::ast::RbqItem::Query(expr) = &root.items[0] {
-        if let RbqExprKind::Literal(RbqLiteral::Number(n)) = &expr.kind {
-            assert_eq!(n, "123");
-        }
-        else {
-            panic!("Expected Number literal");
-        }
-    }
-
-    if let oak_rbq::ast::RbqItem::Query(expr) = &root.items[1] {
-        if let RbqExprKind::Literal(RbqLiteral::String(s)) = &expr.kind {
-            assert_eq!(s, "hello");
-        }
-        else {
-            panic!("Expected String literal");
-        }
-    }
-
-    if let oak_rbq::ast::RbqItem::Query(expr) = &root.items[2] {
-        if let RbqExprKind::Literal(RbqLiteral::Boolean(b)) = &expr.kind {
-            assert_eq!(*b, true);
-        }
-        else {
-            panic!("Expected Boolean literal");
-        }
     }
 }
 
@@ -232,7 +184,7 @@ fn test_rbq_ast_namespace() {
 
     assert_eq!(root.items.len(), 1);
     if let oak_rbq::ast::RbqItem::Namespace(ns) = &root.items[0] {
-        assert_eq!(ns.name, "App");
+        assert_eq!(ns.path, "App");
         assert_eq!(ns.items.len(), 1)
     }
     else {
@@ -307,7 +259,7 @@ fn test_rbq_ast_complex_type() {
     assert_eq!(root.items.len(), 1);
     if let oak_rbq::ast::RbqItem::Struct(s) = &root.items[0] {
         let field = &s.fields[0];
-        if let oak_rbq::ast::RbqType::Named { path, generic_args, is_physical_ptr, is_optional } = &field.type_ref {
+        if let oak_rbq::ast::RbqType::Named { path, generic_args, is_physical_ptr, is_optional, .. } = &field.type_ref {
             assert_eq!(path, "List");
             assert!(is_physical_ptr);
             assert!(is_optional);

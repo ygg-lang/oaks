@@ -35,47 +35,30 @@ pub trait LanguageService: Send + Sync {
     fn get_source(&self, uri: &str) -> Option<<Self::Vfs as Vfs>::Source> {
         self.vfs().get_source(uri)
     }
-
-    /// Retrieves the root red node of a file for the given URI.
-    ///
-    /// This method is responsible for parsing the source and providing a position-aware
-    /// syntax tree. Implementations should typically use a cache to avoid re-parsing
-    /// unchanged files.
-    fn get_root(&self, _uri: &str) -> impl Future<Output = Option<RedNode<'_, Self::Lang>>> + Send + '_ {
-        async { None }
-    }
-
     /// Executes a closure with the root red node of a file.
     ///
     /// This is a convenience helper for running logic that requires the syntax tree.
-    fn with_root<'a, R, F>(&'a self, uri: &'a str, f: F) -> impl Future<Output = Option<R>> + Send + 'a
+    fn with_root<R, F>(&self, uri: &str, f: F) -> impl Future<Output = Option<R>> + Send
     where
         R: Send,
-        F: FnOnce(RedNode<'a, Self::Lang>) -> R + Send + 'a,
-    {
-        async move {
-            let root = self.get_root(uri).await?;
-            Some(f(root))
-        }
-    }
-
-    /// Executes a closure with multiple root nodes in parallel.
-    ///
-    /// Useful for cross-file operations like workspace symbol search or global rename.
+        F: FnOnce(RedNode<'_, Self::Lang>) -> R + Send;
+    /// Executes a closure with multiple root nodes.
     fn with_roots<'a, R, F>(&'a self, uris: Vec<String>, f: F) -> impl Future<Output = Vec<R>> + Send + 'a
     where
         R: Send + 'static,
-        F: Fn(RedNode<'a, Self::Lang>) -> R + Send + Sync + 'a,
+        F: Fn(RedNode<'_, Self::Lang>) -> R + Send + Sync + 'a,
     {
-        let mut futures = Vec::new();
         let f = std::sync::Arc::new(f);
-
-        for uri in uris {
-            let f = f.clone();
-            futures.push(async move { if let Some(root) = self.get_root(&uri).await { Some(f(root)) } else { None } })
+        async move {
+            let mut results = Vec::new();
+            for uri in uris {
+                let f_clone = f.clone();
+                if let Some(r) = self.with_root(&uri, move |node| f_clone(node)).await {
+                    results.push(r);
+                }
+            }
+            results
         }
-
-        async move { futures::future::join_all(futures).await.into_iter().flatten().collect() }
     }
 
     /// Provides hover information for a specific range in a file.
@@ -100,14 +83,7 @@ pub trait LanguageService: Send + Sync {
     fn document_symbols<'a>(&'a self, uri: &'a str) -> impl Future<Output = Vec<StructureItem>> + Send + 'a {
         let uri = uri.to_string();
         async move {
-            let _source = match self.get_source(&uri) {
-                Some(s) => s,
-                None => return vec![],
-            };
-            let _root = match self.get_root(&uri).await {
-                Some(r) => r,
-                None => return vec![],
-            };
+            let _ = self.with_root(&uri, |_| {}).await;
             let symbols = self.workspace().symbols.query_file(&uri);
             if !symbols.is_empty() {
                 return symbols.into_iter().map(StructureItem::from).collect();
@@ -157,44 +133,32 @@ pub trait LanguageService: Send + Sync {
     fn definition<'a>(&'a self, uri: &'a str, range: Range<usize>) -> impl Future<Output = Vec<LocationRange>> + Send + 'a {
         let uri = uri.to_string();
         async move {
-            let root = match self.get_root(&uri).await {
-                Some(r) => r,
-                None => return vec![],
-            };
-            let source = match self.get_source(&uri) {
-                Some(s) => s,
-                None => return vec![],
-            };
-
-            // 1. Identify token at range
-            use oak_core::tree::RedTree;
-            let node = match root.child_at_offset(range.start) {
-                Some(RedTree::Node(n)) => n,
-                Some(RedTree::Leaf(l)) => return vec![LocationRange { uri: uri.clone().into(), range: l.span }],
-                None => root,
-            };
-
-            // 2. If it's a reference, try to resolve it
-            let role = node.green.kind.role();
-            if role.universal() == oak_core::language::UniversalElementRole::Reference {
-                let name = &source.get_text_in(node.span());
-
-                // Try local symbols first (not implemented here, should be done by lang-specific logic)
-
-                // Try global symbols
-                if let Some(sym) = self.workspace().symbols.lookup(name) {
-                    return vec![LocationRange { uri: sym.uri, range: sym.range }];
+            let uri_clone = uri.clone();
+            self.with_root(&uri, move |root| {
+                let source = match self.get_source(&uri_clone) {
+                    Some(s) => s,
+                    None => return vec![],
+                };
+                use oak_core::tree::RedTree;
+                let node = match root.child_at_offset(range.start) {
+                    Some(RedTree::Node(n)) => n,
+                    Some(RedTree::Leaf(l)) => return vec![LocationRange { uri: uri_clone.clone().into(), range: l.span }],
+                    None => root,
+                };
+                let role = node.green.kind.role();
+                if role.universal() == oak_core::language::UniversalElementRole::Reference {
+                    let name = &source.get_text_in(node.span());
+                    if let Some(sym) = self.workspace().symbols.lookup(name) {
+                        return vec![LocationRange { uri: sym.uri, range: sym.range }];
+                    }
+                    if let Some(resolved_uri) = self.workspace().resolver.resolve(&uri_clone, name) {
+                        return vec![LocationRange { uri: resolved_uri.into(), range: (0..0).into() }];
+                    }
                 }
-
-                // Try as a module import
-                if let Some(resolved_uri) = self.workspace().resolver.resolve(&uri, name) {
-                    return vec![LocationRange { uri: resolved_uri.into(), range: (0..0).into() }];
-                }
-
-                // Try local symbols (TODO)
-            }
-
-            vec![]
+                vec![]
+            })
+            .await
+            .unwrap_or_default()
         }
     }
 

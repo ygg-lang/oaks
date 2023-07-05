@@ -17,13 +17,13 @@ pub(crate) type State<'a, S> = ParserState<'a, HtmlLanguage, S>;
 /// Parser for the HTML language.
 ///
 /// This parser transforms a stream of tokens into a green tree of HTML syntax nodes.
-pub struct HtmlParser {
-    pub(crate) config: HtmlLanguage,
+pub struct HtmlParser<'config> {
+    pub(crate) config: &'config HtmlLanguage,
 }
 
-impl HtmlParser {
+impl<'config> HtmlParser<'config> {
     /// Creates a new `HtmlParser` with the given configuration.
-    pub fn new(config: HtmlLanguage) -> Self {
+    pub fn new(config: &'config HtmlLanguage) -> Self {
         Self { config }
     }
 
@@ -78,9 +78,9 @@ impl HtmlParser {
     }
 }
 
-impl Parser<HtmlLanguage> for HtmlParser {
+impl<'config> Parser<HtmlLanguage> for HtmlParser<'config> {
     fn parse<'a, S: Source + ?Sized>(&self, text: &'a S, edits: &[TextEdit], cache: &'a mut impl ParseCache<HtmlLanguage>) -> ParseOutput<'a, HtmlLanguage> {
-        let lexer = HtmlLexer::new(&self.config);
+        let lexer = HtmlLexer::new(self.config);
         parse_with_lexer(&lexer, text, edits, cache, |state| {
             let checkpoint = state.checkpoint();
 

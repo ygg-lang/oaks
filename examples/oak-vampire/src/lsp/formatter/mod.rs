@@ -15,7 +15,7 @@ impl VampireFormatter {
         Self { indent_level: 0, indent_str: "    ".to_string() }
     }
 
-    pub fn format(&self, root: &RedNode<VampireLanguage>, source: &str) -> String {
+    pub fn format(&self, _root: &RedNode<'_, VampireLanguage>, source: &str) -> String {
         // Simple formatting implementation
         source.to_string()
     }

@@ -15,7 +15,6 @@ use crate::language::SolidityLanguage;
 use core::range::Range;
 use oak_core::tree::RedNode;
 #[cfg(feature = "lsp")]
-/// Solidity hover provider.
 pub struct SolidityHoverProvider;
 #[cfg(feature = "lsp")]
 impl HoverProvider<SolidityLanguage> for SolidityHoverProvider {
@@ -26,14 +25,12 @@ impl HoverProvider<SolidityLanguage> for SolidityHoverProvider {
     }
 }
 #[cfg(feature = "lsp")]
-/// Solidity language service.
 pub struct SolidityLanguageService<V: Vfs> {
     vfs: V,
     workspace: oak_lsp::workspace::WorkspaceManager,
     hover_provider: SolidityHoverProvider,
 }
 impl<V: Vfs> SolidityLanguageService<V> {
-    /// Creates a new Solidity language service.
     pub fn new(vfs: V) -> Self {
         Self { vfs, workspace: oak_lsp::workspace::WorkspaceManager::default(), hover_provider: SolidityHoverProvider }
     }
@@ -47,15 +44,13 @@ impl<V: Vfs + Send + Sync + 'static + oak_vfs::WritableVfs> LanguageService for 
     fn workspace(&self) -> &oak_lsp::workspace::WorkspaceManager {
         &self.workspace
     }
-    fn get_root(&self, uri: &str) -> impl Future<Output = Option<RedNode<'_, SolidityLanguage>>> + Send + '_ {
-        let source = self.vfs().get_source(uri);
-        async move {
-            let source = source?;
-            let _parser = crate::parser::SolidityParser::new();
-            let _lexer = crate::lexer::SolidityLexer::new();
-            let _cache = oak_core::parser::session::ParseSession::<SolidityLanguage>::default();
-            None
-        }
+    fn with_root<R, F>(&self, _uri: &str, _f: F) -> impl Future<Output = Option<R>> + Send
+    where
+        R: Send,
+        F: FnOnce(RedNode<'_, Self::Lang>) -> R + Send,
+    {
+        // Solidity lexer/parser traits are not wired yet.
+        async { None }
     }
     fn hover(&self, uri: &str, range: Range<usize>) -> impl Future<Output = Option<oak_lsp::Hover>> + Send + '_ {
         let uri = uri.to_string();

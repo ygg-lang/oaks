@@ -8,7 +8,7 @@ fn test_raku_parser() {
     let source = "sub hello() { say \"Hello\" }\nhello();";
     let mut session = ParseSession::<RakuLanguage>::new(16);
     let output = parser.parse(source, &[], &mut session);
-    assert!(output.is_ok());
-    let green = output.into_result().unwrap();
-    assert!(green.children.len() > 0);
+    assert!(output.result.is_ok());
+    let green = output.result.unwrap();
+    assert!(!green.children.is_empty());
 }

@@ -1,6 +1,5 @@
 #![doc = include_str!("readme.md")]
 #[cfg(feature = "oak-highlight")]
-/// Highlighter for regular expressions.
 pub mod highlighter;
 
 #[cfg(feature = "lsp")]
@@ -11,7 +10,6 @@ use {
     oak_vfs::Vfs,
 };
 #[cfg(feature = "oak-pretty-print")]
-/// Formatter for regular expressions.
 pub mod formatter;
 use crate::language::RegexLanguage;
 use core::range::Range;
@@ -48,15 +46,12 @@ impl<V: Vfs + Send + Sync + 'static + oak_vfs::WritableVfs> LanguageService for 
     fn workspace(&self) -> &oak_lsp::workspace::WorkspaceManager {
         &self.workspace
     }
-    fn get_root(&self, uri: &str) -> impl Future<Output = Option<RedNode<'_, RegexLanguage>>> + Send + '_ {
-        let source = self.vfs().get_source(uri);
-        async move {
-            let source = source?;
-            let _parser = crate::parser::RegexParser::new();
-            let _lexer = crate::lexer::RegexLexer::new();
-            let _cache = oak_core::parser::session::ParseSession::<RegexLanguage>::default();
-            None
-        }
+    fn with_root<R, F>(&self, _uri: &str, _f: F) -> impl Future<Output = Option<R>> + Send
+    where
+        R: Send,
+        F: FnOnce(RedNode<'_, Self::Lang>) -> R + Send,
+    {
+        async { None }
     }
     fn hover(&self, uri: &str, range: Range<usize>) -> impl Future<Output = Option<oak_lsp::Hover>> + Send + '_ {
         let uri = uri.to_string();

@@ -15,7 +15,7 @@ fn test_elixir_parser_basic() {
     let output = parser.parse(source, &[], &mut session);
     assert!(output.result.is_ok());
     let green = output.result.unwrap();
-    assert!(green.children.len() > 0);
+    assert!(!green.children.is_empty());
 }
 
 #[test]

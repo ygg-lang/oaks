@@ -1,11 +1,11 @@
 use oak_core::{parser::Parser, source::SourceText};
-use oak_wit::{WitLanguage, WitParser};
+use oak_wit_component::{WitLanguage, WitParser};
 
 #[test]
 fn test_parser_basic() {
     let input = "package example:test; world my-world {}";
     let source = SourceText::new(input);
-    let language = WitLanguage {};
+    let language = WitLanguage::default();
     let parser = WitParser::new(&language);
 
     let mut session = oak_core::parser::session::ParseSession::<WitLanguage>::default();

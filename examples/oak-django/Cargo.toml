@@ -24,6 +24,9 @@ oak-vfs = { workspace = true, optional = true }
 oak-mcp = { workspace = true, optional = true }
 futures = { workspace = true, optional = true }
 
+[dev-dependencies]
+oak-testing = { workspace = true }
+
 [features]
 default = ["serde"]
 serde = ["dep:serde", "oak-core/serde"]
@@ -32,3 +35,7 @@ mcp = ["lsp", "oak-mcp/io-std"]
 
 [package.metadata.docs.rs]
 all-features = true
+
+[[test]]
+name = "main"
+required-features = ["serde"]

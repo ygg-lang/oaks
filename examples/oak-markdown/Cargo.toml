@@ -38,3 +38,7 @@ io-std = ["dep:tokio"]
 
 [package.metadata.docs.rs]
 all-features = true
+
+[[test]]
+name = "main"
+required-features = ["serde"]

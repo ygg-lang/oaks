@@ -7,7 +7,7 @@ use core::range::Range;
 use oak_core::{ElementRole, ElementType, Source, TokenType, tree::RedNode};
 #[cfg(feature = "lsp")]
 use {
-    futures::{Future, FutureExt},
+    futures::Future,
     oak_hover::{Hover as HoverInfo, HoverProvider},
     oak_lsp::{service::LanguageService, types::Hover as LspHover},
     oak_vfs::Vfs,
@@ -74,51 +74,81 @@ impl<V: Vfs + Send + Sync + 'static + oak_vfs::WritableVfs> LanguageService for 
     fn workspace(&self) -> &oak_lsp::workspace::WorkspaceManager {
         &self.workspace
     }
-    fn get_root(&self, _uri: &str) -> impl Future<Output = Option<RedNode<'_, MarkdownLanguage>>> + Send + '_ {
-        async move { None }
+    fn with_root<R, F>(&self, uri: &str, f: F) -> impl Future<Output = Option<R>> + Send
+    where
+        R: Send,
+        F: FnOnce(RedNode<'_, Self::Lang>) -> R + Send,
+    {
+        let source = self.vfs().get_source(uri);
+        async move {
+            let source = source?;
+            let language = MarkdownLanguage::default();
+            let parser = crate::parser::MarkdownParser::new(&language);
+            let lexer = crate::lexer::MarkdownLexer::new(&language);
+            let mut cache = oak_core::parser::session::ParseSession::<Self::Lang>::default();
+            let parse_out = oak_core::parser::parse(&parser, &lexer, &source, &[], &mut cache);
+            let green = parse_out.result.ok()?;
+            Some(f(RedNode::new(green, 0)))
+        }
     }
     fn definition<'a>(&'a self, uri: &'a str, range: Range<usize>) -> impl Future<Output = Vec<oak_lsp::LocationRange>> + Send + 'a {
         let uri = uri.to_string();
         async move {
-            let root = self.get_root(&uri).await?;
-            let source = self.vfs().get_source(&uri)?;
-            let leaf = root.leaf_at_offset(range.start)?;
-            if !TokenType::is_universal(&leaf.kind, oak_core::language::UniversalTokenRole::Name) {
-                return None;
-            }
-            let name = source.get_text_in(leaf.span.clone());
-            let mut definitions = Vec::new();
-            let full_text = source.get_text_in(Range { start: 0, end: source.length() });
-            self.collect_definitions(&root, &name, &full_text, &uri, &mut definitions);
-            Some(definitions)
+            self.with_root(&uri, |root| {
+                let source = self.vfs().get_source(&uri)?;
+                let leaf = root.leaf_at_offset(range.start)?;
+                if !TokenType::is_universal(&leaf.kind, oak_core::language::UniversalTokenRole::Name) {
+                    return None;
+                }
+                let name = source.get_text_in(leaf.span.clone());
+                let mut definitions = Vec::new();
+                let full_text = source.get_text_in(Range { start: 0, end: source.length() });
+                self.collect_definitions(&root, &name, &full_text, &uri, &mut definitions);
+                Some(definitions)
+            })
+            .await
+            .flatten()
+            .unwrap_or_default()
         }
-        .map(|opt| opt.unwrap_or_default())
     }
     fn references<'a>(&'a self, uri: &'a str, range: Range<usize>) -> impl Future<Output = Vec<oak_lsp::LocationRange>> + Send + 'a {
         let uri = uri.to_string();
         async move {
-            let root = self.get_root(&uri).await?;
-            let source = self.vfs().get_source(&uri)?;
-            let leaf = root.leaf_at_offset(range.start)?;
-            if !TokenType::is_universal(&leaf.kind, oak_core::language::UniversalTokenRole::Name) {
-                return None;
-            }
-            let name = source.get_text_in(leaf.span.clone());
-            let name = name.to_string();
+            let name = self
+                .with_root(&uri, |root| {
+                    let source = self.vfs().get_source(&uri)?;
+                    let leaf = root.leaf_at_offset(range.start)?;
+                    if !TokenType::is_universal(&leaf.kind, oak_core::language::UniversalTokenRole::Name) {
+                        return None;
+                    }
+                    Some(source.get_text_in(leaf.span.clone()).to_string())
+                })
+                .await
+                .flatten();
+            let Some(name) = name
+            else {
+                return vec![];
+            };
             let mut all_refs = Vec::new();
             let files = self.list_all_files(&uri).await;
             for file_uri in files {
-                if let Some(file_root) = self.get_root(&file_uri).await {
-                    if let Some(file_source) = self.vfs().get_source(&file_uri) {
-                        let full_text = file_source.get_text_in(Range { start: 0, end: file_source.length() });
-                        let refs = oak_navigation::SimpleReferenceFinder::find(&file_root, &name, &full_text, file_uri.clone());
-                        all_refs.extend(refs.into_iter().map(|l| oak_lsp::LocationRange { uri: l.uri, range: l.range }));
-                    }
+                if let Some(refs) = self
+                    .with_root(&file_uri, |file_root| {
+                        let mut refs = Vec::new();
+                        if let Some(file_source) = self.vfs().get_source(&file_uri) {
+                            let full_text = file_source.get_text_in(Range { start: 0, end: file_source.length() });
+                            let found = oak_navigation::SimpleReferenceFinder::find(&file_root, &name, &full_text, file_uri.clone());
+                            refs.extend(found.into_iter().map(|l| oak_lsp::LocationRange { uri: l.uri, range: l.range }));
+                        }
+                        refs
+                    })
+                    .await
+                {
+                    all_refs.extend(refs);
                 }
             }
-            Some(all_refs)
+            all_refs
         }
-        .map(|opt| opt.unwrap_or_default())
     }
     fn rename<'a>(&'a self, uri: &'a str, range: Range<usize>, new_name: String) -> impl Future<Output = Option<oak_lsp::WorkspaceEdit>> + Send + 'a {
         let uri = uri.to_string();

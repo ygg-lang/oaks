@@ -1,10 +1,12 @@
+#[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 
 /// JSON value representation.
 ///
 /// This represents the pure value of a JSON element without any source code location information.
-#[derive(Debug, Clone, PartialEq, Deserialize, Serialize)]
+#[derive(Debug, Clone, PartialEq)]
+#[cfg_attr(feature = "serde", derive(Deserialize, Serialize))]
 pub enum JsonValue {
     /// String value.
     String(String),
@@ -23,13 +25,15 @@ pub enum JsonValue {
 }
 
 /// Array wrapper of JSON
-#[derive(Debug, Clone, PartialEq, Deserialize, Serialize)]
+#[derive(Debug, Clone, PartialEq)]
+#[cfg_attr(feature = "serde", derive(Deserialize, Serialize))]
 pub struct JsonArray {
     pub list: Vec<JsonValue>,
 }
 
 /// Object wrapper of JSON
-#[derive(Debug, Clone, PartialEq, Deserialize, Serialize)]
+#[derive(Debug, Clone, PartialEq)]
+#[cfg_attr(feature = "serde", derive(Deserialize, Serialize))]
 pub struct JsonObject {
     pub dict: HashMap<String, JsonValue>,
 }

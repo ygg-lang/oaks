@@ -62,8 +62,12 @@ impl<V: Vfs + Send + Sync + 'static + oak_vfs::WritableVfs> LanguageService for 
         &self.workspace
     }
 
-    fn get_root(&self, _uri: &str) -> impl Future<Output = Option<RedNode<'_, RakuLanguage>>> + Send + '_ {
-        async move { None }
+    fn with_root<R, F>(&self, _uri: &str, _f: F) -> impl Future<Output = Option<R>> + Send
+    where
+        R: Send,
+        F: FnOnce(RedNode<'_, Self::Lang>) -> R + Send,
+    {
+        async { None }
     }
 
     fn hover(&self, uri: &str, range: Range<usize>) -> impl Future<Output = Option<oak_lsp::Hover>> + Send + '_ {

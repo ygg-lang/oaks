@@ -1,25 +1,13 @@
-use oak_core::lexer::Token;
-use oak_highlighter::Highlighter as HighlighterTrait;
-
-use crate::lexer::token_type::GlobTokenType;
+use oak_core::errors::ParseResult;
+use oak_highlight::{HighlightResult, Highlighter, themes::Theme};
+use std::borrow::Cow;
 
 /// Highlighter for glob pattern syntax.
+#[derive(Default, Clone)]
 pub struct GlobHighlighter;
 
-impl HighlighterTrait for GlobHighlighter {
-    type TokenType = GlobTokenType;
-
-    fn highlight(&self, token: &Token<Self::TokenType>) -> Option<&'static str> {
-        match token.token_type {
-            GlobTokenType::Comment => Some("comment"),
-            GlobTokenType::Rule => Some("string"),
-            _ => None,
-        }
-    }
-}
-
-impl Default for GlobHighlighter {
-    fn default() -> Self {
-        Self
+impl Highlighter for GlobHighlighter {
+    fn highlight<'a>(&self, source: &'a str, _language: &str, _theme: Theme) -> ParseResult<HighlightResult<'a>> {
+        Ok(HighlightResult { source: Cow::Borrowed(source), segments: Vec::new() })
     }
 }

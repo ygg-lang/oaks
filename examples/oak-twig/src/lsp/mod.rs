@@ -3,7 +3,12 @@
 pub mod highlighter;
 
 #[cfg(feature = "lsp")]
-use {oak_lsp::LanguageService, oak_vfs::MemoryVfs};
+use {
+    futures::Future,
+    oak_core::tree::RedNode,
+    oak_lsp::LanguageService,
+    oak_vfs::{MemoryVfs, Vfs},
+};
 #[cfg(feature = "oak-pretty-print")]
 pub mod formatter;
 use crate::language::TwigLanguage;
@@ -30,7 +35,21 @@ impl LanguageService for TwigLanguageService {
     fn workspace(&self) -> &oak_lsp::workspace::WorkspaceManager {
         &self.workspace
     }
-    fn get_root(&self, _uri: &str) -> impl std::future::Future<Output = Option<oak_core::tree::RedNode<'_, TwigLanguage>>> + Send + '_ {
-        async move { None }
+    fn with_root<R, F>(&self, uri: &str, f: F) -> impl Future<Output = Option<R>> + Send
+    where
+        R: Send,
+        F: FnOnce(RedNode<'_, Self::Lang>) -> R + Send,
+    {
+        let source = self.vfs().get_source(uri);
+        async move {
+            let source = source?;
+            let language = TwigLanguage::default();
+            let parser = crate::parser::TwigParser::new(&language);
+            let lexer = crate::lexer::TwigLexer::new(&language);
+            let mut cache = oak_core::parser::session::ParseSession::<Self::Lang>::default();
+            let parse_out = oak_core::parser::parse(&parser, &lexer, &source, &[], &mut cache);
+            let green = parse_out.result.ok()?;
+            Some(f(RedNode::new(green, 0)))
+        }
     }
 }

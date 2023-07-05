@@ -30,3 +30,7 @@ default = ["serde"]
 serde = ["dep:serde", "oak-core/serde"]
 lsp = ["dep:oak-lsp", "dep:oak-hover", "dep:oak-vfs", "oak-highlight", "oak-pretty-print", "dep:futures"]
 mcp = ["lsp", "oak-mcp/io-std", "dep:tokio"]
+
+[[test]]
+name = "main"
+required-features = ["serde"]

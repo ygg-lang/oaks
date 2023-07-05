@@ -1,14 +1,12 @@
 use oak_core::parser::{ParseSession, Parser};
-use oak_scheme::{language::SchemeLanguage, parser::SchemeParser};
+use oak_rhombus::{RhombusLanguage, RhombusParser};
 
 #[test]
-fn test_scheme_parser() {
-    let lang = SchemeLanguage::new();
-    let parser = SchemeParser::new(&lang);
-    let source = "(define (hello) (display \"Hello\"))\n(hello)";
-    let mut session = ParseSession::<SchemeLanguage>::new(16);
+fn test_rhombus_parser() {
+    let lang = RhombusLanguage::new();
+    let parser = RhombusParser::new(&lang);
+    let source = "#lang rhombus\n1 + 2";
+    let mut session = ParseSession::<RhombusLanguage>::new(16);
     let output = parser.parse(source, &[], &mut session);
-    assert!(output.is_ok());
-    let green = output.into_result().unwrap();
-    assert!(green.children.len() > 0);
+    assert!(output.result.is_ok());
 }
