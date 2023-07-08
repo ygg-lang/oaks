@@ -3,7 +3,7 @@
     "count": 13,
     "tokens": [
         {
-            "kind": "Keyword(Fn)",
+            "kind": "Fn",
             "text": "fn",
             "start": 0,
             "end": 2
@@ -33,52 +33,52 @@
             "end": 11
         },
         {
-            "kind": "Keyword(If)",
+            "kind": "If",
             "text": "if",
-            "start": 17,
-            "end": 19
+            "start": 16,
+            "end": 18
         },
         {
-            "kind": "Keyword(True)",
+            "kind": "True",
             "text": "true",
-            "start": 20,
-            "end": 24
+            "start": 19,
+            "end": 23
         },
         {
             "kind": "LeftBrace",
             "text": "{",
-            "start": 25,
-            "end": 26
+            "start": 24,
+            "end": 25
         },
         {
             "kind": "IntegerLiteral",
             "text": "1",
-            "start": 36,
-            "end": 37
+            "start": 34,
+            "end": 35
         },
         {
             "kind": "Semicolon",
             "text": ";",
-            "start": 37,
-            "end": 38
+            "start": 35,
+            "end": 36
         },
         {
             "kind": "RightBrace",
             "text": "}",
-            "start": 44,
-            "end": 45
+            "start": 41,
+            "end": 42
         },
         {
             "kind": "RightBrace",
             "text": "}",
-            "start": 47,
-            "end": 48
+            "start": 43,
+            "end": 44
         },
         {
             "kind": "Eof",
             "text": "",
-            "start": 48,
-            "end": 48
+            "start": 44,
+            "end": 44
         }
     ],
     "errors": []

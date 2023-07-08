@@ -10,11 +10,11 @@
                     {
                         "kind": "Leaves(5)",
                         "children": [],
-                        "text_length": 8,
+                        "text_length": 7,
                         "is_leaf": true
                     }
                 ],
-                "text_length": 8,
+                "text_length": 7,
                 "is_leaf": false
             },
             {
@@ -55,11 +55,11 @@
                                     {
                                         "kind": "Leaves(8)",
                                         "children": [],
-                                        "text_length": 18,
+                                        "text_length": 17,
                                         "is_leaf": true
                                     }
                                 ],
-                                "text_length": 22,
+                                "text_length": 21,
                                 "is_leaf": false
                             },
                             {
@@ -68,11 +68,11 @@
                                     {
                                         "kind": "Leaves(6)",
                                         "children": [],
-                                        "text_length": 14,
+                                        "text_length": 13,
                                         "is_leaf": true
                                     }
                                 ],
-                                "text_length": 14,
+                                "text_length": 13,
                                 "is_leaf": false
                             },
                             {
@@ -81,128 +81,11 @@
                                     {
                                         "kind": "Leaves(6)",
                                         "children": [],
-                                        "text_length": 19,
-                                        "is_leaf": true
-                                    }
-                                ],
-                                "text_length": 19,
-                                "is_leaf": false
-                            },
-                            {
-                                "kind": "StructMember",
-                                "children": [
-                                    {
-                                        "kind": "Leaves(5)",
-                                        "children": [],
-                                        "text_length": 16,
-                                        "is_leaf": true
-                                    }
-                                ],
-                                "text_length": 16,
-                                "is_leaf": false
-                            },
-                            {
-                                "kind": "Leaves(8)",
-                                "children": [],
-                                "text_length": 22,
-                                "is_leaf": true
-                            }
-                        ],
-                        "text_length": 93,
-                        "is_leaf": false
-                    },
-                    {
-                        "kind": "Leaves(5)",
-                        "children": [],
-                        "text_length": 23,
-                        "is_leaf": true
-                    }
-                ],
-                "text_length": 116,
-                "is_leaf": false
-            },
-            {
-                "kind": "DeclarationStatement",
-                "children": [
-                    {
-                        "kind": "StructDefinition",
-                        "children": [
-                            {
-                                "kind": "StructMember",
-                                "children": [
-                                    {
-                                        "kind": "ExpressionStatement",
-                                        "children": [
-                                            {
-                                                "kind": "Leaves(1)",
-                                                "children": [],
-                                                "text_length": 3,
-                                                "is_leaf": true
-                                            }
-                                        ],
-                                        "text_length": 3,
-                                        "is_leaf": false
-                                    },
-                                    {
-                                        "kind": "ExpressionStatement",
-                                        "children": [
-                                            {
-                                                "kind": "Leaves(1)",
-                                                "children": [],
-                                                "text_length": 3,
-                                                "is_leaf": true
-                                            }
-                                        ],
-                                        "text_length": 3,
-                                        "is_leaf": false
-                                    },
-                                    {
-                                        "kind": "Leaves(8)",
-                                        "children": [],
-                                        "text_length": 20,
-                                        "is_leaf": true
-                                    }
-                                ],
-                                "text_length": 26,
-                                "is_leaf": false
-                            },
-                            {
-                                "kind": "StructMember",
-                                "children": [
-                                    {
-                                        "kind": "ExpressionStatement",
-                                        "children": [
-                                            {
-                                                "kind": "Leaves(1)",
-                                                "children": [],
-                                                "text_length": 2,
-                                                "is_leaf": true
-                                            }
-                                        ],
-                                        "text_length": 2,
-                                        "is_leaf": false
-                                    },
-                                    {
-                                        "kind": "ExpressionStatement",
-                                        "children": [
-                                            {
-                                                "kind": "Leaves(1)",
-                                                "children": [],
-                                                "text_length": 2,
-                                                "is_leaf": true
-                                            }
-                                        ],
-                                        "text_length": 2,
-                                        "is_leaf": false
-                                    },
-                                    {
-                                        "kind": "Leaves(8)",
-                                        "children": [],
                                         "text_length": 18,
                                         "is_leaf": true
                                     }
                                 ],
-                                "text_length": 22,
+                                "text_length": 18,
                                 "is_leaf": false
                             },
                             {
@@ -221,21 +104,138 @@
                             {
                                 "kind": "Leaves(8)",
                                 "children": [],
-                                "text_length": 23,
+                                "text_length": 21,
                                 "is_leaf": true
                             }
                         ],
-                        "text_length": 86,
+                        "text_length": 88,
+                        "is_leaf": false
+                    },
+                    {
+                        "kind": "Leaves(5)",
+                        "children": [],
+                        "text_length": 20,
+                        "is_leaf": true
+                    }
+                ],
+                "text_length": 108,
+                "is_leaf": false
+            },
+            {
+                "kind": "DeclarationStatement",
+                "children": [
+                    {
+                        "kind": "StructDefinition",
+                        "children": [
+                            {
+                                "kind": "StructMember",
+                                "children": [
+                                    {
+                                        "kind": "ExpressionStatement",
+                                        "children": [
+                                            {
+                                                "kind": "Leaves(1)",
+                                                "children": [],
+                                                "text_length": 3,
+                                                "is_leaf": true
+                                            }
+                                        ],
+                                        "text_length": 3,
+                                        "is_leaf": false
+                                    },
+                                    {
+                                        "kind": "ExpressionStatement",
+                                        "children": [
+                                            {
+                                                "kind": "Leaves(1)",
+                                                "children": [],
+                                                "text_length": 3,
+                                                "is_leaf": true
+                                            }
+                                        ],
+                                        "text_length": 3,
+                                        "is_leaf": false
+                                    },
+                                    {
+                                        "kind": "Leaves(8)",
+                                        "children": [],
+                                        "text_length": 19,
+                                        "is_leaf": true
+                                    }
+                                ],
+                                "text_length": 25,
+                                "is_leaf": false
+                            },
+                            {
+                                "kind": "StructMember",
+                                "children": [
+                                    {
+                                        "kind": "ExpressionStatement",
+                                        "children": [
+                                            {
+                                                "kind": "Leaves(1)",
+                                                "children": [],
+                                                "text_length": 2,
+                                                "is_leaf": true
+                                            }
+                                        ],
+                                        "text_length": 2,
+                                        "is_leaf": false
+                                    },
+                                    {
+                                        "kind": "ExpressionStatement",
+                                        "children": [
+                                            {
+                                                "kind": "Leaves(1)",
+                                                "children": [],
+                                                "text_length": 2,
+                                                "is_leaf": true
+                                            }
+                                        ],
+                                        "text_length": 2,
+                                        "is_leaf": false
+                                    },
+                                    {
+                                        "kind": "Leaves(8)",
+                                        "children": [],
+                                        "text_length": 17,
+                                        "is_leaf": true
+                                    }
+                                ],
+                                "text_length": 21,
+                                "is_leaf": false
+                            },
+                            {
+                                "kind": "StructMember",
+                                "children": [
+                                    {
+                                        "kind": "Leaves(5)",
+                                        "children": [],
+                                        "text_length": 14,
+                                        "is_leaf": true
+                                    }
+                                ],
+                                "text_length": 14,
+                                "is_leaf": false
+                            },
+                            {
+                                "kind": "Leaves(8)",
+                                "children": [],
+                                "text_length": 22,
+                                "is_leaf": true
+                            }
+                        ],
+                        "text_length": 82,
                         "is_leaf": false
                     },
                     {
                         "kind": "Leaves(3)",
                         "children": [],
-                        "text_length": 5,
+                        "text_length": 3,
                         "is_leaf": true
                     }
                 ],
-                "text_length": 91,
+                "text_length": 85,
                 "is_leaf": false
             },
             {
@@ -263,11 +263,11 @@
                                     {
                                         "kind": "Leaves(4)",
                                         "children": [],
-                                        "text_length": 11,
+                                        "text_length": 10,
                                         "is_leaf": true
                                     }
                                 ],
-                                "text_length": 25,
+                                "text_length": 24,
                                 "is_leaf": false
                             },
                             {
@@ -289,11 +289,11 @@
                                     {
                                         "kind": "Leaves(4)",
                                         "children": [],
-                                        "text_length": 14,
+                                        "text_length": 13,
                                         "is_leaf": true
                                     }
                                 ],
-                                "text_length": 29,
+                                "text_length": 28,
                                 "is_leaf": false
                             },
                             {
@@ -302,11 +302,11 @@
                                     {
                                         "kind": "Leaves(6)",
                                         "children": [],
-                                        "text_length": 22,
+                                        "text_length": 21,
                                         "is_leaf": true
                                     }
                                 ],
-                                "text_length": 22,
+                                "text_length": 21,
                                 "is_leaf": false
                             },
                             {
@@ -315,31 +315,31 @@
                                     {
                                         "kind": "Leaves(5)",
                                         "children": [],
-                                        "text_length": 15,
+                                        "text_length": 14,
                                         "is_leaf": true
                                     }
                                 ],
-                                "text_length": 15,
+                                "text_length": 14,
                                 "is_leaf": false
                             },
                             {
                                 "kind": "Leaves(8)",
                                 "children": [],
-                                "text_length": 24,
+                                "text_length": 23,
                                 "is_leaf": true
                             }
                         ],
-                        "text_length": 115,
+                        "text_length": 110,
                         "is_leaf": false
                     },
                     {
                         "kind": "Leaves(5)",
                         "children": [],
-                        "text_length": 15,
+                        "text_length": 12,
                         "is_leaf": true
                     }
                 ],
-                "text_length": 130,
+                "text_length": 122,
                 "is_leaf": false
             },
             {
@@ -354,11 +354,11 @@
                                     {
                                         "kind": "Leaves(6)",
                                         "children": [],
-                                        "text_length": 12,
+                                        "text_length": 11,
                                         "is_leaf": true
                                     }
                                 ],
-                                "text_length": 12,
+                                "text_length": 11,
                                 "is_leaf": false
                             },
                             {
@@ -367,11 +367,11 @@
                                     {
                                         "kind": "Leaves(6)",
                                         "children": [],
-                                        "text_length": 14,
+                                        "text_length": 13,
                                         "is_leaf": true
                                     }
                                 ],
-                                "text_length": 14,
+                                "text_length": 13,
                                 "is_leaf": false
                             },
                             {
@@ -406,31 +406,31 @@
                                     {
                                         "kind": "Leaves(7)",
                                         "children": [],
-                                        "text_length": 13,
+                                        "text_length": 12,
                                         "is_leaf": true
                                     }
                                 ],
-                                "text_length": 17,
+                                "text_length": 16,
                                 "is_leaf": false
                             },
                             {
                                 "kind": "Leaves(8)",
                                 "children": [],
-                                "text_length": 19,
+                                "text_length": 18,
                                 "is_leaf": true
                             }
                         ],
-                        "text_length": 62,
+                        "text_length": 58,
                         "is_leaf": false
                     },
                     {
                         "kind": "Leaves(5)",
                         "children": [],
-                        "text_length": 14,
+                        "text_length": 11,
                         "is_leaf": true
                     }
                 ],
-                "text_length": 76,
+                "text_length": 69,
                 "is_leaf": false
             },
             {
@@ -523,31 +523,31 @@
                                     {
                                         "kind": "Leaves(2)",
                                         "children": [],
-                                        "text_length": 8,
+                                        "text_length": 7,
                                         "is_leaf": true
                                     }
                                 ],
-                                "text_length": 8,
+                                "text_length": 7,
                                 "is_leaf": false
                             },
                             {
                                 "kind": "Leaves(20)",
                                 "children": [],
-                                "text_length": 47,
+                                "text_length": 42,
                                 "is_leaf": true
                             }
                         ],
-                        "text_length": 80,
+                        "text_length": 74,
                         "is_leaf": false
                     },
                     {
                         "kind": "Leaves(5)",
                         "children": [],
-                        "text_length": 17,
+                        "text_length": 14,
                         "is_leaf": true
                     }
                 ],
-                "text_length": 97,
+                "text_length": 88,
                 "is_leaf": false
             },
             {
@@ -562,11 +562,11 @@
                                     {
                                         "kind": "Leaves(6)",
                                         "children": [],
-                                        "text_length": 16,
+                                        "text_length": 15,
                                         "is_leaf": true
                                     }
                                 ],
-                                "text_length": 16,
+                                "text_length": 15,
                                 "is_leaf": false
                             },
                             {
@@ -575,31 +575,31 @@
                                     {
                                         "kind": "Leaves(5)",
                                         "children": [],
-                                        "text_length": 13,
+                                        "text_length": 12,
                                         "is_leaf": true
                                     }
                                 ],
-                                "text_length": 13,
+                                "text_length": 12,
                                 "is_leaf": false
                             },
                             {
                                 "kind": "Leaves(7)",
                                 "children": [],
-                                "text_length": 16,
+                                "text_length": 15,
                                 "is_leaf": true
                             }
                         ],
-                        "text_length": 45,
+                        "text_length": 42,
                         "is_leaf": false
                     },
                     {
                         "kind": "Leaves(6)",
                         "children": [],
-                        "text_length": 22,
+                        "text_length": 20,
                         "is_leaf": true
                     }
                 ],
-                "text_length": 67,
+                "text_length": 62,
                 "is_leaf": false
             },
             {
@@ -692,31 +692,31 @@
                                     {
                                         "kind": "Leaves(2)",
                                         "children": [],
-                                        "text_length": 8,
+                                        "text_length": 7,
                                         "is_leaf": true
                                     }
                                 ],
-                                "text_length": 8,
+                                "text_length": 7,
                                 "is_leaf": false
                             },
                             {
                                 "kind": "Leaves(25)",
                                 "children": [],
-                                "text_length": 56,
+                                "text_length": 49,
                                 "is_leaf": true
                             }
                         ],
-                        "text_length": 108,
+                        "text_length": 100,
                         "is_leaf": false
                     },
                     {
                         "kind": "Leaves(6)",
                         "children": [],
-                        "text_length": 20,
+                        "text_length": 18,
                         "is_leaf": true
                     }
                 ],
-                "text_length": 128,
+                "text_length": 118,
                 "is_leaf": false
             },
             {
@@ -1108,11 +1108,11 @@
                                     {
                                         "kind": "Leaves(4)",
                                         "children": [],
-                                        "text_length": 13,
+                                        "text_length": 12,
                                         "is_leaf": true
                                     }
                                 ],
-                                "text_length": 27,
+                                "text_length": 26,
                                 "is_leaf": false
                             },
                             {
@@ -1446,11 +1446,11 @@
                                     {
                                         "kind": "Leaves(4)",
                                         "children": [],
-                                        "text_length": 11,
+                                        "text_length": 10,
                                         "is_leaf": true
                                     }
                                 ],
-                                "text_length": 22,
+                                "text_length": 21,
                                 "is_leaf": false
                             },
                             {
@@ -1940,11 +1940,11 @@
                                     {
                                         "kind": "Leaves(7)",
                                         "children": [],
-                                        "text_length": 24,
+                                        "text_length": 23,
                                         "is_leaf": true
                                     }
                                 ],
-                                "text_length": 43,
+                                "text_length": 42,
                                 "is_leaf": false
                             },
                             {
@@ -2106,11 +2106,11 @@
                             {
                                 "kind": "Leaves(217)",
                                 "children": [],
-                                "text_length": 647,
+                                "text_length": 615,
                                 "is_leaf": true
                             }
                         ],
-                        "text_length": 1590,
+                        "text_length": 1555,
                         "is_leaf": false
                     },
                     {
@@ -2120,7 +2120,7 @@
                         "is_leaf": true
                     }
                 ],
-                "text_length": 1601,
+                "text_length": 1566,
                 "is_leaf": false
             },
             {
@@ -2389,34 +2389,34 @@
                     {
                         "kind": "Leaves(4)",
                         "children": [],
-                        "text_length": 10,
+                        "text_length": 9,
                         "is_leaf": true
                     }
                 ],
-                "text_length": 12,
+                "text_length": 11,
                 "is_leaf": false
             },
             {
                 "kind": "Leaves(63)",
                 "children": [],
-                "text_length": 226,
+                "text_length": 211,
                 "is_leaf": true
             }
         ],
-        "text_length": 2788,
+        "text_length": 2683,
         "is_leaf": false
     },
     "errors": [
-        "ExpectedToken { expected: \"RightParen\", offset: 1016, source_id: None }",
-        "ExpectedToken { expected: \"RightParen\", offset: 1064, source_id: None }",
-        "ExpectedToken { expected: \"RightParen\", offset: 1163, source_id: None }",
-        "ExpectedToken { expected: \"RightParen\", offset: 1323, source_id: None }",
-        "ExpectedToken { expected: \"RightParen\", offset: 1486, source_id: None }",
-        "ExpectedToken { expected: \"RightParen\", offset: 1554, source_id: None }",
-        "ExpectedToken { expected: \"RightParen\", offset: 1591, source_id: None }",
-        "ExpectedToken { expected: \"RightParen\", offset: 1640, source_id: None }",
-        "ExpectedToken { expected: \"RightParen\", offset: 1751, source_id: None }",
-        "ExpectedToken { expected: \"RightParen\", offset: 1864, source_id: None }",
-        "ExpectedToken { expected: \"RightParen\", offset: 1970, source_id: None }"
+        "ExpectedToken { expected: \"RightParen\", offset: 947, source_id: None }",
+        "ExpectedToken { expected: \"RightParen\", offset: 994, source_id: None }",
+        "ExpectedToken { expected: \"RightParen\", offset: 1089, source_id: None }",
+        "ExpectedToken { expected: \"RightParen\", offset: 1244, source_id: None }",
+        "ExpectedToken { expected: \"RightParen\", offset: 1401, source_id: None }",
+        "ExpectedToken { expected: \"RightParen\", offset: 1466, source_id: None }",
+        "ExpectedToken { expected: \"RightParen\", offset: 1501, source_id: None }",
+        "ExpectedToken { expected: \"RightParen\", offset: 1549, source_id: None }",
+        "ExpectedToken { expected: \"RightParen\", offset: 1656, source_id: None }",
+        "ExpectedToken { expected: \"RightParen\", offset: 1765, source_id: None }",
+        "ExpectedToken { expected: \"RightParen\", offset: 1868, source_id: None }"
     ]
 }

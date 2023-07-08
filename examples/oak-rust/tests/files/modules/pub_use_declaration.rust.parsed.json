@@ -8,13 +8,13 @@
                 "kind": "Error",
                 "children": [
                     {
-                        "kind": "Leaves(1)",
+                        "kind": "Leaves(2)",
                         "children": [],
-                        "text_length": 3,
+                        "text_length": 4,
                         "is_leaf": true
                     }
                 ],
-                "text_length": 3,
+                "text_length": 4,
                 "is_leaf": false
             },
             {
@@ -51,7 +51,7 @@
                 "is_leaf": false
             }
         ],
-        "text_length": 25,
+        "text_length": 26,
         "is_leaf": false
     },
     "errors": []

@@ -3,7 +3,7 @@
     "count": 13,
     "tokens": [
         {
-            "kind": "Keyword(Fn)",
+            "kind": "Fn",
             "text": "fn",
             "start": 0,
             "end": 2
@@ -35,50 +35,50 @@
         {
             "kind": "CharLiteral",
             "text": "'A'",
-            "start": 17,
-            "end": 20
+            "start": 16,
+            "end": 19
         },
         {
             "kind": "Semicolon",
             "text": ";",
-            "start": 20,
-            "end": 21
+            "start": 19,
+            "end": 20
         },
         {
             "kind": "CharLiteral",
             "text": "'B'",
-            "start": 27,
-            "end": 30
+            "start": 25,
+            "end": 28
         },
         {
             "kind": "Semicolon",
             "text": ";",
-            "start": 30,
-            "end": 31
+            "start": 28,
+            "end": 29
         },
         {
             "kind": "CharLiteral",
             "text": "'\\n'",
-            "start": 37,
-            "end": 41
+            "start": 34,
+            "end": 38
         },
         {
             "kind": "Semicolon",
             "text": ";",
-            "start": 41,
-            "end": 42
+            "start": 38,
+            "end": 39
         },
         {
             "kind": "RightBrace",
             "text": "}",
-            "start": 44,
-            "end": 45
+            "start": 40,
+            "end": 41
         },
         {
             "kind": "Eof",
             "text": "",
-            "start": 45,
-            "end": 45
+            "start": 41,
+            "end": 41
         }
     ],
     "errors": []

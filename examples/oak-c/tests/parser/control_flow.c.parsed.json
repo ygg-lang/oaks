@@ -169,11 +169,11 @@
                             {
                                 "kind": "Leaves(9)",
                                 "children": [],
-                                "text_length": 26,
+                                "text_length": 24,
                                 "is_leaf": true
                             }
                         ],
-                        "text_length": 78,
+                        "text_length": 76,
                         "is_leaf": false
                     },
                     {
@@ -341,11 +341,11 @@
                                     {
                                         "kind": "Leaves(9)",
                                         "children": [],
-                                        "text_length": 26,
+                                        "text_length": 24,
                                         "is_leaf": true
                                     }
                                 ],
-                                "text_length": 78,
+                                "text_length": 76,
                                 "is_leaf": false
                             },
                             {
@@ -432,11 +432,11 @@
                                     {
                                         "kind": "Leaves(15)",
                                         "children": [],
-                                        "text_length": 62,
+                                        "text_length": 57,
                                         "is_leaf": true
                                     }
                                 ],
-                                "text_length": 98,
+                                "text_length": 93,
                                 "is_leaf": false
                             },
                             {
@@ -446,7 +446,7 @@
                                 "is_leaf": true
                             }
                         ],
-                        "text_length": 197,
+                        "text_length": 190,
                         "is_leaf": false
                     },
                     {
@@ -456,7 +456,7 @@
                         "is_leaf": true
                     }
                 ],
-                "text_length": 296,
+                "text_length": 287,
                 "is_leaf": false
             },
             {
@@ -465,11 +465,11 @@
                     {
                         "kind": "Leaves(77)",
                         "children": [],
-                        "text_length": 337,
+                        "text_length": 321,
                         "is_leaf": true
                     }
                 ],
-                "text_length": 337,
+                "text_length": 321,
                 "is_leaf": false
             },
             {
@@ -777,11 +777,11 @@
                     {
                         "kind": "Leaves(14)",
                         "children": [],
-                        "text_length": 35,
+                        "text_length": 32,
                         "is_leaf": true
                     }
                 ],
-                "text_length": 57,
+                "text_length": 54,
                 "is_leaf": false
             },
             {
@@ -894,11 +894,11 @@
                     {
                         "kind": "Leaves(9)",
                         "children": [],
-                        "text_length": 15,
+                        "text_length": 14,
                         "is_leaf": true
                     }
                 ],
-                "text_length": 17,
+                "text_length": 16,
                 "is_leaf": false
             },
             {
@@ -1092,11 +1092,11 @@
                             {
                                 "kind": "Leaves(23)",
                                 "children": [],
-                                "text_length": 75,
+                                "text_length": 69,
                                 "is_leaf": true
                             }
                         ],
-                        "text_length": 121,
+                        "text_length": 115,
                         "is_leaf": false
                     },
                     {
@@ -1106,7 +1106,7 @@
                         "is_leaf": true
                     }
                 ],
-                "text_length": 140,
+                "text_length": 134,
                 "is_leaf": false
             },
             {
@@ -1141,11 +1141,11 @@
                     {
                         "kind": "Leaves(9)",
                         "children": [],
-                        "text_length": 15,
+                        "text_length": 14,
                         "is_leaf": true
                     }
                 ],
-                "text_length": 17,
+                "text_length": 16,
                 "is_leaf": false
             },
             {
@@ -1258,11 +1258,11 @@
                     {
                         "kind": "Leaves(17)",
                         "children": [],
-                        "text_length": 42,
+                        "text_length": 39,
                         "is_leaf": true
                     }
                 ],
-                "text_length": 88,
+                "text_length": 85,
                 "is_leaf": false
             },
             {
@@ -1349,11 +1349,11 @@
                     {
                         "kind": "Leaves(12)",
                         "children": [],
-                        "text_length": 44,
+                        "text_length": 41,
                         "is_leaf": true
                     }
                 ],
-                "text_length": 54,
+                "text_length": 51,
                 "is_leaf": false
             },
             {
@@ -1443,11 +1443,11 @@
                             {
                                 "kind": "Leaves(14)",
                                 "children": [],
-                                "text_length": 39,
+                                "text_length": 35,
                                 "is_leaf": true
                             }
                         ],
-                        "text_length": 39,
+                        "text_length": 35,
                         "is_leaf": false
                     },
                     {
@@ -1457,7 +1457,7 @@
                         "is_leaf": true
                     }
                 ],
-                "text_length": 59,
+                "text_length": 55,
                 "is_leaf": false
             },
             {
@@ -1544,11 +1544,11 @@
                     {
                         "kind": "Leaves(4)",
                         "children": [],
-                        "text_length": 10,
+                        "text_length": 9,
                         "is_leaf": true
                     }
                 ],
-                "text_length": 10,
+                "text_length": 9,
                 "is_leaf": false
             },
             {
@@ -1661,28 +1661,28 @@
                     {
                         "kind": "Leaves(4)",
                         "children": [],
-                        "text_length": 10,
+                        "text_length": 9,
                         "is_leaf": true
                     }
                 ],
-                "text_length": 12,
+                "text_length": 11,
                 "is_leaf": false
             },
             {
                 "kind": "Leaves(62)",
                 "children": [],
-                "text_length": 177,
+                "text_length": 165,
                 "is_leaf": true
             }
         ],
-        "text_length": 1505,
+        "text_length": 1445,
         "is_leaf": false
     },
     "errors": [
-        "ExpectedToken { expected: \"Semicolon\", offset: 634, source_id: None }",
-        "ExpectedToken { expected: \"RightParen\", offset: 646, source_id: None }",
-        "ExpectedToken { expected: \"RightParen\", offset: 676, source_id: None }",
-        "ExpectedToken { expected: \"RightParen\", offset: 796, source_id: None }",
-        "ExpectedToken { expected: \"RightParen\", offset: 903, source_id: None }"
+        "ExpectedToken { expected: \"Semicolon\", offset: 603, source_id: None }",
+        "ExpectedToken { expected: \"RightParen\", offset: 615, source_id: None }",
+        "ExpectedToken { expected: \"RightParen\", offset: 644, source_id: None }",
+        "ExpectedToken { expected: \"RightParen\", offset: 757, source_id: None }",
+        "ExpectedToken { expected: \"RightParen\", offset: 857, source_id: None }"
     ]
 }

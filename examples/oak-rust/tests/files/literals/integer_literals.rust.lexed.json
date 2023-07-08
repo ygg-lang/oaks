@@ -3,7 +3,7 @@
     "count": 15,
     "tokens": [
         {
-            "kind": "Keyword(Fn)",
+            "kind": "Fn",
             "text": "fn",
             "start": 0,
             "end": 2
@@ -35,62 +35,62 @@
         {
             "kind": "IntegerLiteral",
             "text": "42",
-            "start": 17,
-            "end": 19
+            "start": 16,
+            "end": 18
         },
         {
             "kind": "Semicolon",
             "text": ";",
-            "start": 19,
-            "end": 20
+            "start": 18,
+            "end": 19
         },
         {
             "kind": "IntegerLiteral",
             "text": "0xff",
-            "start": 26,
-            "end": 30
+            "start": 24,
+            "end": 28
         },
         {
             "kind": "Semicolon",
             "text": ";",
-            "start": 30,
-            "end": 31
+            "start": 28,
+            "end": 29
         },
         {
             "kind": "IntegerLiteral",
             "text": "0o77",
-            "start": 37,
-            "end": 41
+            "start": 34,
+            "end": 38
         },
         {
             "kind": "Semicolon",
             "text": ";",
-            "start": 41,
-            "end": 42
+            "start": 38,
+            "end": 39
         },
         {
             "kind": "IntegerLiteral",
             "text": "0b1010",
-            "start": 48,
-            "end": 54
+            "start": 44,
+            "end": 50
         },
         {
             "kind": "Semicolon",
             "text": ";",
-            "start": 54,
-            "end": 55
+            "start": 50,
+            "end": 51
         },
         {
             "kind": "RightBrace",
             "text": "}",
-            "start": 57,
-            "end": 58
+            "start": 52,
+            "end": 53
         },
         {
             "kind": "Eof",
             "text": "",
-            "start": 58,
-            "end": 58
+            "start": 53,
+            "end": 53
         }
     ],
     "errors": []

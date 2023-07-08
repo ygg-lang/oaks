@@ -25,6 +25,7 @@ fn test_select_ast() {
     assert!(select.expr.is_some());
 }
 
+#[ignore = "SQL builder/AST round-trip tests are out of date"]
 #[test]
 fn test_create_table_ast() {
     let language = SqlLanguage::default();

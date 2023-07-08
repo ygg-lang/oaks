@@ -1,606 +1,1164 @@
 {
     "success": true,
-    "count": 100,
+    "count": 193,
     "tokens": [
         {
-            "kind": "Vertex",
+            "kind": "shader",
+            "text": "shader",
+            "start": 0,
+            "end": 6
+        },
+        {
+            "kind": "vertex",
             "text": "vertex",
-            "start": 89,
-            "end": 95
+            "start": 7,
+            "end": 13
         },
         {
-            "kind": "Identifier",
+            "kind": "IDENTIFIER",
             "text": "main",
-            "start": 96,
-            "end": 100
+            "start": 14,
+            "end": 18
         },
         {
-            "kind": "LeftBrace",
+            "kind": "{",
             "text": "{",
-            "start": 101,
-            "end": 102
+            "start": 19,
+            "end": 20
         },
         {
-            "kind": "Identifier",
-            "text": "input",
-            "start": 108,
-            "end": 113
+            "kind": "in",
+            "text": "in",
+            "start": 25,
+            "end": 27
         },
         {
-            "kind": "Vec3",
+            "kind": "vec3",
             "text": "vec3",
-            "start": 114,
-            "end": 118
+            "start": 28,
+            "end": 32
         },
         {
-            "kind": "Identifier",
+            "kind": "IDENTIFIER",
             "text": "position",
-            "start": 119,
+            "start": 33,
+            "end": 41
+        },
+        {
+            "kind": ";",
+            "text": ";",
+            "start": 41,
+            "end": 42
+        },
+        {
+            "kind": "in",
+            "text": "in",
+            "start": 47,
+            "end": 49
+        },
+        {
+            "kind": "vec2",
+            "text": "vec2",
+            "start": 50,
+            "end": 54
+        },
+        {
+            "kind": "IDENTIFIER",
+            "text": "texCoord",
+            "start": 55,
+            "end": 63
+        },
+        {
+            "kind": ";",
+            "text": ";",
+            "start": 63,
+            "end": 64
+        },
+        {
+            "kind": "out",
+            "text": "out",
+            "start": 69,
+            "end": 72
+        },
+        {
+            "kind": "vec2",
+            "text": "vec2",
+            "start": 73,
+            "end": 77
+        },
+        {
+            "kind": "IDENTIFIER",
+            "text": "v_texCoord",
+            "start": 78,
+            "end": 88
+        },
+        {
+            "kind": ";",
+            "text": ";",
+            "start": 88,
+            "end": 89
+        },
+        {
+            "kind": "uniform",
+            "text": "uniform",
+            "start": 94,
+            "end": 101
+        },
+        {
+            "kind": "mat4",
+            "text": "mat4",
+            "start": 102,
+            "end": 106
+        },
+        {
+            "kind": "IDENTIFIER",
+            "text": "modelViewProjection",
+            "start": 107,
+            "end": 126
+        },
+        {
+            "kind": ";",
+            "text": ";",
+            "start": 126,
             "end": 127
         },
         {
-            "kind": "Semicolon",
-            "text": ";",
-            "start": 127,
-            "end": 128
+            "kind": "void",
+            "text": "void",
+            "start": 133,
+            "end": 137
         },
         {
-            "kind": "Identifier",
-            "text": "input",
-            "start": 134,
-            "end": 139
+            "kind": "IDENTIFIER",
+            "text": "main",
+            "start": 138,
+            "end": 142
         },
         {
-            "kind": "Vec2",
-            "text": "vec2",
-            "start": 140,
+            "kind": "(",
+            "text": "(",
+            "start": 142,
+            "end": 143
+        },
+        {
+            "kind": ")",
+            "text": ")",
+            "start": 143,
             "end": 144
         },
         {
-            "kind": "Identifier",
-            "text": "texCoord",
+            "kind": "{",
+            "text": "{",
             "start": 145,
-            "end": 153
+            "end": 146
         },
         {
-            "kind": "Semicolon",
-            "text": ";",
-            "start": 153,
-            "end": 154
+            "kind": "IDENTIFIER",
+            "text": "gl_Position",
+            "start": 155,
+            "end": 166
         },
         {
-            "kind": "Identifier",
-            "text": "output",
-            "start": 166,
-            "end": 172
+            "kind": "=",
+            "text": "=",
+            "start": 167,
+            "end": 168
         },
         {
-            "kind": "Vec2",
-            "text": "vec2",
-            "start": 173,
-            "end": 177
+            "kind": "IDENTIFIER",
+            "text": "modelViewProjection",
+            "start": 169,
+            "end": 188
         },
         {
-            "kind": "Identifier",
-            "text": "fragTexCoord",
-            "start": 178,
+            "kind": "*",
+            "text": "*",
+            "start": 189,
             "end": 190
         },
         {
-            "kind": "Semicolon",
-            "text": ";",
-            "start": 190,
-            "end": 191
+            "kind": "vec4",
+            "text": "vec4",
+            "start": 191,
+            "end": 195
         },
         {
-            "kind": "Uniform",
-            "text": "uniform",
-            "start": 203,
+            "kind": "(",
+            "text": "(",
+            "start": 195,
+            "end": 196
+        },
+        {
+            "kind": "IDENTIFIER",
+            "text": "position",
+            "start": 196,
+            "end": 204
+        },
+        {
+            "kind": ",",
+            "text": ",",
+            "start": 204,
+            "end": 205
+        },
+        {
+            "kind": "NUMBER",
+            "text": "1.0",
+            "start": 206,
+            "end": 209
+        },
+        {
+            "kind": ")",
+            "text": ")",
+            "start": 209,
             "end": 210
         },
         {
-            "kind": "Mat4",
-            "text": "mat4",
-            "start": 211,
-            "end": 215
-        },
-        {
-            "kind": "Identifier",
-            "text": "modelMatrix",
-            "start": 216,
-            "end": 227
-        },
-        {
-            "kind": "Semicolon",
+            "kind": ";",
             "text": ";",
-            "start": 227,
-            "end": 228
+            "start": 210,
+            "end": 211
         },
         {
-            "kind": "Uniform",
-            "text": "uniform",
-            "start": 234,
+            "kind": "IDENTIFIER",
+            "text": "v_texCoord",
+            "start": 220,
+            "end": 230
+        },
+        {
+            "kind": "=",
+            "text": "=",
+            "start": 231,
+            "end": 232
+        },
+        {
+            "kind": "IDENTIFIER",
+            "text": "texCoord",
+            "start": 233,
             "end": 241
         },
         {
-            "kind": "Mat4",
-            "text": "mat4",
-            "start": 242,
-            "end": 246
-        },
-        {
-            "kind": "Identifier",
-            "text": "viewMatrix",
-            "start": 247,
-            "end": 257
-        },
-        {
-            "kind": "Semicolon",
+            "kind": ";",
             "text": ";",
-            "start": 257,
+            "start": 241,
+            "end": 242
+        },
+        {
+            "kind": "}",
+            "text": "}",
+            "start": 247,
+            "end": 248
+        },
+        {
+            "kind": "}",
+            "text": "}",
+            "start": 249,
+            "end": 250
+        },
+        {
+            "kind": "shader",
+            "text": "shader",
+            "start": 252,
             "end": 258
         },
         {
-            "kind": "Uniform",
-            "text": "uniform",
-            "start": 264,
-            "end": 271
+            "kind": "fragment",
+            "text": "fragment",
+            "start": 259,
+            "end": 267
         },
         {
-            "kind": "Mat4",
-            "text": "mat4",
-            "start": 272,
-            "end": 276
-        },
-        {
-            "kind": "Identifier",
-            "text": "projectionMatrix",
-            "start": 277,
-            "end": 293
-        },
-        {
-            "kind": "Semicolon",
-            "text": ";",
-            "start": 293,
-            "end": 294
-        },
-        {
-            "kind": "Void",
-            "text": "void",
-            "start": 306,
-            "end": 310
-        },
-        {
-            "kind": "Identifier",
+            "kind": "IDENTIFIER",
             "text": "main",
-            "start": 311,
-            "end": 315
+            "start": 268,
+            "end": 272
         },
         {
-            "kind": "LeftParen",
-            "text": "(",
-            "start": 315,
-            "end": 316
-        },
-        {
-            "kind": "RightParen",
-            "text": ")",
-            "start": 316,
-            "end": 317
-        },
-        {
-            "kind": "LeftBrace",
+            "kind": "{",
             "text": "{",
-            "start": 318,
-            "end": 319
+            "start": 273,
+            "end": 274
         },
         {
-            "kind": "Identifier",
-            "text": "fragTexCoord",
-            "start": 329,
-            "end": 341
+            "kind": "in",
+            "text": "in",
+            "start": 279,
+            "end": 281
         },
         {
-            "kind": "Assign",
-            "text": "=",
-            "start": 342,
-            "end": 343
+            "kind": "vec2",
+            "text": "vec2",
+            "start": 282,
+            "end": 286
         },
         {
-            "kind": "Identifier",
-            "text": "texCoord",
-            "start": 344,
+            "kind": "IDENTIFIER",
+            "text": "v_texCoord",
+            "start": 287,
+            "end": 297
+        },
+        {
+            "kind": ";",
+            "text": ";",
+            "start": 297,
+            "end": 298
+        },
+        {
+            "kind": "out",
+            "text": "out",
+            "start": 303,
+            "end": 306
+        },
+        {
+            "kind": "vec4",
+            "text": "vec4",
+            "start": 307,
+            "end": 311
+        },
+        {
+            "kind": "IDENTIFIER",
+            "text": "fragColor",
+            "start": 312,
+            "end": 321
+        },
+        {
+            "kind": ";",
+            "text": ";",
+            "start": 321,
+            "end": 322
+        },
+        {
+            "kind": "uniform",
+            "text": "uniform",
+            "start": 327,
+            "end": 334
+        },
+        {
+            "kind": "sampler2D",
+            "text": "sampler2D",
+            "start": 335,
+            "end": 344
+        },
+        {
+            "kind": "IDENTIFIER",
+            "text": "texture",
+            "start": 345,
             "end": 352
         },
         {
-            "kind": "Semicolon",
+            "kind": ";",
             "text": ";",
             "start": 352,
             "end": 353
         },
         {
-            "kind": "Identifier",
-            "text": "gl_Position",
-            "start": 363,
-            "end": 374
+            "kind": "void",
+            "text": "void",
+            "start": 359,
+            "end": 363
         },
         {
-            "kind": "Assign",
+            "kind": "IDENTIFIER",
+            "text": "main",
+            "start": 364,
+            "end": 368
+        },
+        {
+            "kind": "(",
+            "text": "(",
+            "start": 368,
+            "end": 369
+        },
+        {
+            "kind": ")",
+            "text": ")",
+            "start": 369,
+            "end": 370
+        },
+        {
+            "kind": "{",
+            "text": "{",
+            "start": 371,
+            "end": 372
+        },
+        {
+            "kind": "vec4",
+            "text": "vec4",
+            "start": 381,
+            "end": 385
+        },
+        {
+            "kind": "IDENTIFIER",
+            "text": "color",
+            "start": 386,
+            "end": 391
+        },
+        {
+            "kind": "=",
             "text": "=",
-            "start": 375,
-            "end": 376
-        },
-        {
-            "kind": "Identifier",
-            "text": "projectionMatrix",
-            "start": 377,
+            "start": 392,
             "end": 393
         },
         {
-            "kind": "Star",
-            "text": "*",
+            "kind": "IDENTIFIER",
+            "text": "texture",
             "start": 394,
-            "end": 395
+            "end": 401
         },
         {
-            "kind": "Identifier",
-            "text": "viewMatrix",
-            "start": 396,
-            "end": 406
+            "kind": "(",
+            "text": "(",
+            "start": 401,
+            "end": 402
         },
         {
-            "kind": "Star",
-            "text": "*",
-            "start": 407,
-            "end": 408
+            "kind": "IDENTIFIER",
+            "text": "texture",
+            "start": 402,
+            "end": 409
         },
         {
-            "kind": "Identifier",
-            "text": "modelMatrix",
+            "kind": ",",
+            "text": ",",
             "start": 409,
-            "end": 420
+            "end": 410
         },
         {
-            "kind": "Star",
-            "text": "*",
+            "kind": "IDENTIFIER",
+            "text": "v_texCoord",
+            "start": 411,
+            "end": 421
+        },
+        {
+            "kind": ")",
+            "text": ")",
             "start": 421,
             "end": 422
         },
         {
-            "kind": "Vec4",
-            "text": "vec4",
-            "start": 423,
-            "end": 427
+            "kind": ";",
+            "text": ";",
+            "start": 422,
+            "end": 423
         },
         {
-            "kind": "LeftParen",
+            "kind": "if",
+            "text": "if",
+            "start": 432,
+            "end": 434
+        },
+        {
+            "kind": "(",
             "text": "(",
-            "start": 427,
-            "end": 428
-        },
-        {
-            "kind": "Identifier",
-            "text": "position",
-            "start": 428,
+            "start": 435,
             "end": 436
         },
         {
-            "kind": "Comma",
-            "text": ",",
+            "kind": "IDENTIFIER",
+            "text": "color",
             "start": 436,
-            "end": 437
-        },
-        {
-            "kind": "Number",
-            "text": "1.0",
-            "start": 438,
             "end": 441
         },
         {
-            "kind": "RightParen",
-            "text": ")",
+            "kind": ".",
+            "text": ".",
             "start": 441,
             "end": 442
         },
         {
-            "kind": "Semicolon",
-            "text": ";",
+            "kind": "IDENTIFIER",
+            "text": "a",
             "start": 442,
             "end": 443
         },
         {
-            "kind": "RightBrace",
-            "text": "}",
+            "kind": "<",
+            "text": "<",
+            "start": 444,
+            "end": 445
+        },
+        {
+            "kind": "NUMBER",
+            "text": "0.1",
+            "start": 446,
+            "end": 449
+        },
+        {
+            "kind": ")",
+            "text": ")",
             "start": 449,
             "end": 450
         },
         {
-            "kind": "RightBrace",
-            "text": "}",
-            "start": 452,
-            "end": 453
-        },
-        {
-            "kind": "Fragment",
-            "text": "fragment",
-            "start": 477,
-            "end": 485
-        },
-        {
-            "kind": "Identifier",
-            "text": "main",
-            "start": 486,
-            "end": 490
-        },
-        {
-            "kind": "LeftBrace",
+            "kind": "{",
             "text": "{",
-            "start": 491,
-            "end": 492
+            "start": 451,
+            "end": 452
         },
         {
-            "kind": "Identifier",
-            "text": "input",
-            "start": 498,
+            "kind": "discard",
+            "text": "discard",
+            "start": 465,
+            "end": 472
+        },
+        {
+            "kind": ";",
+            "text": ";",
+            "start": 472,
+            "end": 473
+        },
+        {
+            "kind": "}",
+            "text": "}",
+            "start": 482,
+            "end": 483
+        },
+        {
+            "kind": "IDENTIFIER",
+            "text": "fragColor",
+            "start": 492,
+            "end": 501
+        },
+        {
+            "kind": "=",
+            "text": "=",
+            "start": 502,
             "end": 503
         },
         {
-            "kind": "Vec2",
-            "text": "vec2",
+            "kind": "IDENTIFIER",
+            "text": "color",
             "start": 504,
-            "end": 508
+            "end": 509
         },
         {
-            "kind": "Identifier",
-            "text": "fragTexCoord",
+            "kind": ";",
+            "text": ";",
             "start": 509,
-            "end": 521
+            "end": 510
         },
         {
-            "kind": "Semicolon",
+            "kind": "}",
+            "text": "}",
+            "start": 515,
+            "end": 516
+        },
+        {
+            "kind": "}",
+            "text": "}",
+            "start": 517,
+            "end": 518
+        },
+        {
+            "kind": "struct",
+            "text": "struct",
+            "start": 520,
+            "end": 526
+        },
+        {
+            "kind": "IDENTIFIER",
+            "text": "Light",
+            "start": 527,
+            "end": 532
+        },
+        {
+            "kind": "{",
+            "text": "{",
+            "start": 533,
+            "end": 534
+        },
+        {
+            "kind": "vec3",
+            "text": "vec3",
+            "start": 539,
+            "end": 543
+        },
+        {
+            "kind": "IDENTIFIER",
+            "text": "position",
+            "start": 544,
+            "end": 552
+        },
+        {
+            "kind": ";",
             "text": ";",
-            "start": 521,
-            "end": 522
+            "start": 552,
+            "end": 553
         },
         {
-            "kind": "Identifier",
-            "text": "output",
-            "start": 534,
-            "end": 540
+            "kind": "vec3",
+            "text": "vec3",
+            "start": 558,
+            "end": 562
         },
         {
-            "kind": "Vec4",
-            "text": "vec4",
-            "start": 541,
-            "end": 545
+            "kind": "IDENTIFIER",
+            "text": "color",
+            "start": 563,
+            "end": 568
         },
         {
-            "kind": "Identifier",
-            "text": "fragColor",
-            "start": 546,
-            "end": 555
-        },
-        {
-            "kind": "Semicolon",
+            "kind": ";",
             "text": ";",
-            "start": 555,
-            "end": 556
-        },
-        {
-            "kind": "Uniform",
-            "text": "uniform",
             "start": 568,
-            "end": 575
+            "end": 569
         },
         {
-            "kind": "Sampler2D",
-            "text": "sampler2D",
-            "start": 576,
-            "end": 585
+            "kind": "float",
+            "text": "float",
+            "start": 574,
+            "end": 579
         },
         {
-            "kind": "Identifier",
-            "text": "textureSampler",
-            "start": 586,
-            "end": 600
+            "kind": "IDENTIFIER",
+            "text": "intensity",
+            "start": 580,
+            "end": 589
         },
         {
-            "kind": "Semicolon",
+            "kind": ";",
             "text": ";",
-            "start": 600,
-            "end": 601
+            "start": 589,
+            "end": 590
         },
         {
-            "kind": "Uniform",
+            "kind": "}",
+            "text": "}",
+            "start": 591,
+            "end": 592
+        },
+        {
+            "kind": ";",
+            "text": ";",
+            "start": 592,
+            "end": 593
+        },
+        {
+            "kind": "uniform",
             "text": "uniform",
-            "start": 607,
+            "start": 595,
+            "end": 602
+        },
+        {
+            "kind": "IDENTIFIER",
+            "text": "Light",
+            "start": 603,
+            "end": 608
+        },
+        {
+            "kind": "IDENTIFIER",
+            "text": "light",
+            "start": 609,
             "end": 614
         },
         {
-            "kind": "Vec3",
-            "text": "vec3",
-            "start": 615,
-            "end": 619
-        },
-        {
-            "kind": "Identifier",
-            "text": "lightColor",
-            "start": 620,
-            "end": 630
-        },
-        {
-            "kind": "Semicolon",
+            "kind": ";",
             "text": ";",
-            "start": 630,
-            "end": 631
+            "start": 614,
+            "end": 615
         },
         {
-            "kind": "Uniform",
-            "text": "uniform",
-            "start": 637,
-            "end": 644
-        },
-        {
-            "kind": "Float",
-            "text": "float",
-            "start": 645,
-            "end": 650
-        },
-        {
-            "kind": "Identifier",
-            "text": "ambientStrength",
-            "start": 651,
-            "end": 666
-        },
-        {
-            "kind": "Semicolon",
-            "text": ";",
-            "start": 666,
-            "end": 667
-        },
-        {
-            "kind": "Void",
+            "kind": "void",
             "text": "void",
+            "start": 638,
+            "end": 642
+        },
+        {
+            "kind": "IDENTIFIER",
+            "text": "lighting",
+            "start": 643,
+            "end": 651
+        },
+        {
+            "kind": "(",
+            "text": "(",
+            "start": 651,
+            "end": 652
+        },
+        {
+            "kind": ")",
+            "text": ")",
+            "start": 652,
+            "end": 653
+        },
+        {
+            "kind": "{",
+            "text": "{",
+            "start": 654,
+            "end": 655
+        },
+        {
+            "kind": "vec3",
+            "text": "vec3",
+            "start": 660,
+            "end": 664
+        },
+        {
+            "kind": "IDENTIFIER",
+            "text": "normal",
+            "start": 665,
+            "end": 671
+        },
+        {
+            "kind": "=",
+            "text": "=",
+            "start": 672,
+            "end": 673
+        },
+        {
+            "kind": "vec3",
+            "text": "vec3",
+            "start": 674,
+            "end": 678
+        },
+        {
+            "kind": "(",
+            "text": "(",
+            "start": 678,
+            "end": 679
+        },
+        {
+            "kind": "NUMBER",
+            "text": "0.0",
             "start": 679,
+            "end": 682
+        },
+        {
+            "kind": ",",
+            "text": ",",
+            "start": 682,
             "end": 683
         },
         {
-            "kind": "Identifier",
-            "text": "main",
+            "kind": "NUMBER",
+            "text": "1.0",
             "start": 684,
+            "end": 687
+        },
+        {
+            "kind": ",",
+            "text": ",",
+            "start": 687,
             "end": 688
         },
         {
-            "kind": "LeftParen",
-            "text": "(",
-            "start": 688,
-            "end": 689
-        },
-        {
-            "kind": "RightParen",
-            "text": ")",
+            "kind": "NUMBER",
+            "text": "0.0",
             "start": 689,
-            "end": 690
-        },
-        {
-            "kind": "LeftBrace",
-            "text": "{",
-            "start": 691,
             "end": 692
         },
         {
-            "kind": "Vec4",
-            "text": "vec4",
-            "start": 702,
-            "end": 706
+            "kind": ")",
+            "text": ")",
+            "start": 692,
+            "end": 693
         },
         {
-            "kind": "Identifier",
-            "text": "texColor",
-            "start": 707,
+            "kind": ";",
+            "text": ";",
+            "start": 693,
+            "end": 694
+        },
+        {
+            "kind": "float",
+            "text": "float",
+            "start": 699,
+            "end": 704
+        },
+        {
+            "kind": "IDENTIFIER",
+            "text": "diff",
+            "start": 705,
+            "end": 709
+        },
+        {
+            "kind": "=",
+            "text": "=",
+            "start": 710,
+            "end": 711
+        },
+        {
+            "kind": "IDENTIFIER",
+            "text": "max",
+            "start": 712,
             "end": 715
         },
         {
-            "kind": "Assign",
-            "text": "=",
-            "start": 716,
-            "end": 717
-        },
-        {
-            "kind": "Identifier",
-            "text": "texture",
-            "start": 718,
-            "end": 725
-        },
-        {
-            "kind": "LeftParen",
+            "kind": "(",
             "text": "(",
-            "start": 725,
+            "start": 715,
+            "end": 716
+        },
+        {
+            "kind": "IDENTIFIER",
+            "text": "dot",
+            "start": 716,
+            "end": 719
+        },
+        {
+            "kind": "(",
+            "text": "(",
+            "start": 719,
+            "end": 720
+        },
+        {
+            "kind": "IDENTIFIER",
+            "text": "normal",
+            "start": 720,
             "end": 726
         },
         {
-            "kind": "Identifier",
-            "text": "textureSampler",
-            "start": 726,
-            "end": 740
-        },
-        {
-            "kind": "Comma",
+            "kind": ",",
             "text": ",",
-            "start": 740,
-            "end": 741
+            "start": 726,
+            "end": 727
         },
         {
-            "kind": "Identifier",
-            "text": "fragTexCoord",
-            "start": 742,
-            "end": 754
+            "kind": "IDENTIFIER",
+            "text": "light",
+            "start": 728,
+            "end": 733
         },
         {
-            "kind": "RightParen",
+            "kind": ".",
+            "text": ".",
+            "start": 733,
+            "end": 734
+        },
+        {
+            "kind": "IDENTIFIER",
+            "text": "position",
+            "start": 734,
+            "end": 742
+        },
+        {
+            "kind": ")",
             "text": ")",
-            "start": 754,
-            "end": 755
+            "start": 742,
+            "end": 743
         },
         {
-            "kind": "Semicolon",
+            "kind": ",",
+            "text": ",",
+            "start": 743,
+            "end": 744
+        },
+        {
+            "kind": "NUMBER",
+            "text": "0.0",
+            "start": 745,
+            "end": 748
+        },
+        {
+            "kind": ")",
+            "text": ")",
+            "start": 748,
+            "end": 749
+        },
+        {
+            "kind": ";",
             "text": ";",
-            "start": 755,
-            "end": 756
+            "start": 749,
+            "end": 750
         },
         {
-            "kind": "Vec3",
-            "text": "vec3",
-            "start": 766,
+            "kind": "if",
+            "text": "if",
+            "start": 760,
+            "end": 762
+        },
+        {
+            "kind": "(",
+            "text": "(",
+            "start": 763,
+            "end": 764
+        },
+        {
+            "kind": "IDENTIFIER",
+            "text": "diff",
+            "start": 764,
+            "end": 768
+        },
+        {
+            "kind": ">",
+            "text": ">",
+            "start": 769,
             "end": 770
         },
         {
-            "kind": "Identifier",
-            "text": "ambient",
+            "kind": "NUMBER",
+            "text": "0.5",
             "start": 771,
-            "end": 778
+            "end": 774
         },
         {
-            "kind": "Assign",
-            "text": "=",
-            "start": 779,
-            "end": 780
+            "kind": ")",
+            "text": ")",
+            "start": 774,
+            "end": 775
         },
         {
-            "kind": "Identifier",
-            "text": "ambientStrength",
-            "start": 781,
-            "end": 796
+            "kind": "{",
+            "text": "{",
+            "start": 776,
+            "end": 777
         },
         {
-            "kind": "Star",
-            "text": "*",
-            "start": 797,
-            "end": 798
+            "kind": "return",
+            "text": "return",
+            "start": 786,
+            "end": 792
         },
         {
-            "kind": "Identifier",
-            "text": "lightColor",
-            "start": 799,
-            "end": 809
-        },
-        {
-            "kind": "Semicolon",
+            "kind": ";",
             "text": ";",
-            "start": 809,
-            "end": 810
+            "start": 792,
+            "end": 793
         },
         {
-            "kind": "Identifier",
-            "text": "fragColor",
-            "start": 820,
-            "end": 829
+            "kind": "}",
+            "text": "}",
+            "start": 798,
+            "end": 799
         },
         {
-            "kind": "Assign",
+            "kind": "else",
+            "text": "else",
+            "start": 800,
+            "end": 804
+        },
+        {
+            "kind": "{",
+            "text": "{",
+            "start": 805,
+            "end": 806
+        },
+        {
+            "kind": "continue",
+            "text": "continue",
+            "start": 815,
+            "end": 823
+        },
+        {
+            "kind": ";",
+            "text": ";",
+            "start": 823,
+            "end": 824
+        },
+        {
+            "kind": "}",
+            "text": "}",
+            "start": 867,
+            "end": 868
+        },
+        {
+            "kind": "for",
+            "text": "for",
+            "start": 874,
+            "end": 877
+        },
+        {
+            "kind": "(",
+            "text": "(",
+            "start": 878,
+            "end": 879
+        },
+        {
+            "kind": "int",
+            "text": "int",
+            "start": 879,
+            "end": 882
+        },
+        {
+            "kind": "IDENTIFIER",
+            "text": "i",
+            "start": 883,
+            "end": 884
+        },
+        {
+            "kind": "=",
             "text": "=",
-            "start": 830,
-            "end": 831
+            "start": 885,
+            "end": 886
+        },
+        {
+            "kind": "NUMBER",
+            "text": "0",
+            "start": 887,
+            "end": 888
+        },
+        {
+            "kind": ";",
+            "text": ";",
+            "start": 888,
+            "end": 889
+        },
+        {
+            "kind": "IDENTIFIER",
+            "text": "i",
+            "start": 890,
+            "end": 891
+        },
+        {
+            "kind": "<",
+            "text": "<",
+            "start": 892,
+            "end": 893
+        },
+        {
+            "kind": "NUMBER",
+            "text": "10",
+            "start": 894,
+            "end": 896
+        },
+        {
+            "kind": ";",
+            "text": ";",
+            "start": 896,
+            "end": 897
+        },
+        {
+            "kind": "IDENTIFIER",
+            "text": "i",
+            "start": 898,
+            "end": 899
+        },
+        {
+            "kind": "+",
+            "text": "+",
+            "start": 899,
+            "end": 900
+        },
+        {
+            "kind": "+",
+            "text": "+",
+            "start": 900,
+            "end": 901
+        },
+        {
+            "kind": ")",
+            "text": ")",
+            "start": 901,
+            "end": 902
+        },
+        {
+            "kind": "{",
+            "text": "{",
+            "start": 903,
+            "end": 904
+        },
+        {
+            "kind": "break",
+            "text": "break",
+            "start": 913,
+            "end": 918
+        },
+        {
+            "kind": ";",
+            "text": ";",
+            "start": 918,
+            "end": 919
+        },
+        {
+            "kind": "}",
+            "text": "}",
+            "start": 924,
+            "end": 925
+        },
+        {
+            "kind": "while",
+            "text": "while",
+            "start": 931,
+            "end": 936
+        },
+        {
+            "kind": "(",
+            "text": "(",
+            "start": 937,
+            "end": 938
+        },
+        {
+            "kind": "true",
+            "text": "true",
+            "start": 938,
+            "end": 942
+        },
+        {
+            "kind": ")",
+            "text": ")",
+            "start": 942,
+            "end": 943
+        },
+        {
+            "kind": "{",
+            "text": "{",
+            "start": 944,
+            "end": 945
+        },
+        {
+            "kind": "do",
+            "text": "do",
+            "start": 954,
+            "end": 956
+        },
+        {
+            "kind": "{",
+            "text": "{",
+            "start": 957,
+            "end": 958
+        },
+        {
+            "kind": "}",
+            "text": "}",
+            "start": 992,
+            "end": 993
+        },
+        {
+            "kind": "while",
+            "text": "while",
+            "start": 994,
+            "end": 999
+        },
+        {
+            "kind": "(",
+            "text": "(",
+            "start": 999,
+            "end": 1000
+        },
+        {
+            "kind": "false",
+            "text": "false",
+            "start": 1000,
+            "end": 1005
+        },
+        {
+            "kind": ")",
+            "text": ")",
+            "start": 1005,
+            "end": 1006
+        },
+        {
+            "kind": ";",
+            "text": ";",
+            "start": 1006,
+            "end": 1007
+        },
+        {
+            "kind": "}",
+            "text": "}",
+            "start": 1012,
+            "end": 1013
+        },
+        {
+            "kind": "}",
+            "text": "}",
+            "start": 1014,
+            "end": 1015
+        },
+        {
+            "kind": "EOF",
+            "text": "",
+            "start": 1016,
+            "end": 1016
         }
     ],
     "errors": []

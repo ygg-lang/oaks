@@ -3,7 +3,7 @@
     "count": 15,
     "tokens": [
         {
-            "kind": "Keyword(Fn)",
+            "kind": "Fn",
             "text": "fn",
             "start": 0,
             "end": 2
@@ -33,64 +33,64 @@
             "end": 11
         },
         {
-            "kind": "Keyword(For)",
+            "kind": "For",
             "text": "for",
-            "start": 17,
-            "end": 20
+            "start": 16,
+            "end": 19
         },
         {
             "kind": "Identifier",
             "text": "i",
-            "start": 21,
-            "end": 22
+            "start": 20,
+            "end": 21
         },
         {
-            "kind": "Keyword(In)",
+            "kind": "In",
             "text": "in",
-            "start": 23,
-            "end": 25
+            "start": 22,
+            "end": 24
         },
         {
             "kind": "IntegerLiteral",
             "text": "0..10",
-            "start": 26,
-            "end": 31
+            "start": 25,
+            "end": 30
         },
         {
             "kind": "LeftBrace",
             "text": "{",
-            "start": 32,
-            "end": 33
+            "start": 31,
+            "end": 32
         },
         {
             "kind": "Identifier",
             "text": "i",
-            "start": 43,
-            "end": 44
+            "start": 41,
+            "end": 42
         },
         {
             "kind": "Semicolon",
             "text": ";",
-            "start": 44,
-            "end": 45
+            "start": 42,
+            "end": 43
         },
         {
             "kind": "RightBrace",
             "text": "}",
-            "start": 51,
-            "end": 52
+            "start": 48,
+            "end": 49
         },
         {
             "kind": "RightBrace",
             "text": "}",
-            "start": 54,
-            "end": 55
+            "start": 50,
+            "end": 51
         },
         {
             "kind": "Eof",
             "text": "",
-            "start": 55,
-            "end": 55
+            "start": 51,
+            "end": 51
         }
     ],
     "errors": []

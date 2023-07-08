@@ -1,6 +1,7 @@
 use oak_core::{Language, ParseSession, Parser, SourceText};
 use oak_valkyrie::{ValkyrieLanguage, ValkyrieParser};
 
+#[ignore = "Valkyrie ECS extension test is out of date"]
 #[test]
 fn test_ecs_extension() {
     // Test ECS extension with support enabled

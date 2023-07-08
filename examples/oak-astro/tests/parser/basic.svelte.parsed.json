@@ -1,254 +1,350 @@
 {
-  "success": true,
-  "node_count": 38,
-  "ast_structure": {
-    "kind": "Root",
-    "children": [
-      {
-        "kind": "Element",
+    "success": true,
+    "node_count": 53,
+    "ast_structure": {
+        "kind": "Root",
         "children": [
-          {
-            "kind": "StartTag",
-            "children": [
-              {
-                "kind": "Leaves(4)",
-                "children": [],
-                "text_length": 11,
-                "is_leaf": true
-              }
-            ],
-            "text_length": 11,
-            "is_leaf": false
-          },
-          {
-            "kind": "Text",
-            "children": [
-              {
-                "kind": "Leaves(13)",
-                "children": [],
-                "text_length": 26,
-                "is_leaf": true
-              }
-            ],
-            "text_length": 26,
-            "is_leaf": false
-          },
-          {
-            "kind": "Element",
-            "children": [
-              {
-                "kind": "StartTag",
-                "children": [
-                  {
-                    "kind": "Directive",
-                    "children": [
-                      {
-                        "kind": "Interpolation",
-                        "children": [
-                          {
-                            "kind": "Leaves(14)",
-                            "children": [],
-                            "text_length": 18,
-                            "is_leaf": true
-                          }
-                        ],
-                        "text_length": 18,
-                        "is_leaf": false
-                      },
-                      {
-                        "kind": "Leaves(2)",
-                        "children": [],
-                        "text_length": 9,
-                        "is_leaf": true
-                      }
-                    ],
-                    "text_length": 27,
-                    "is_leaf": false
-                  },
-                  {
-                    "kind": "Leaves(5)",
-                    "children": [],
-                    "text_length": 12,
-                    "is_leaf": true
-                  }
-                ],
-                "text_length": 39,
-                "is_leaf": false
-              },
-              {
-                "kind": "Text",
-                "children": [
-                  {
-                    "kind": "Leaves(2)",
-                    "children": [],
-                    "text_length": 8,
-                    "is_leaf": true
-                  }
-                ],
-                "text_length": 8,
-                "is_leaf": false
-              },
-              {
-                "kind": "Interpolation",
-                "children": [
-                  {
-                    "kind": "Leaves(4)",
-                    "children": [],
-                    "text_length": 8,
-                    "is_leaf": true
-                  }
-                ],
-                "text_length": 8,
-                "is_leaf": false
-              },
-              {
-                "kind": "Interpolation",
-                "children": [
-                  {
-                    "kind": "Leaves(18)",
-                    "children": [],
-                    "text_length": 33,
-                    "is_leaf": true
-                  }
-                ],
-                "text_length": 33,
-                "is_leaf": false
-              },
-              {
-                "kind": "EndTag",
-                "children": [
-                  {
-                    "kind": "Leaves(4)",
-                    "children": [],
-                    "text_length": 11,
-                    "is_leaf": true
-                  }
-                ],
-                "text_length": 11,
-                "is_leaf": false
-              }
-            ],
-            "text_length": 99,
-            "is_leaf": false
-          },
-          {
-            "kind": "Snippet",
-            "children": [
-              {
+            {
                 "kind": "Element",
                 "children": [
-                  {
-                    "kind": "StartTag",
-                    "children": [
-                      {
-                        "kind": "Leaves(3)",
-                        "children": [],
+                    {
+                        "kind": "Tag",
+                        "children": [
+                            {
+                                "kind": "Leaves(4)",
+                                "children": [],
+                                "text_length": 11,
+                                "is_leaf": true
+                            }
+                        ],
+                        "text_length": 11,
+                        "is_leaf": false
+                    },
+                    {
+                        "kind": "TextNode",
+                        "children": [
+                            {
+                                "kind": "Leaves(1)",
+                                "children": [],
+                                "text_length": 1,
+                                "is_leaf": true
+                            }
+                        ],
+                        "text_length": 1,
+                        "is_leaf": false
+                    },
+                    {
+                        "kind": "TextNode",
+                        "children": [
+                            {
+                                "kind": "Leaves(1)",
+                                "children": [],
+                                "text_length": 1,
+                                "is_leaf": true
+                            }
+                        ],
+                        "text_length": 1,
+                        "is_leaf": false
+                    },
+                    {
+                        "kind": "TextNode",
+                        "children": [
+                            {
+                                "kind": "Leaves(1)",
+                                "children": [],
+                                "text_length": 1,
+                                "is_leaf": true
+                            }
+                        ],
+                        "text_length": 1,
+                        "is_leaf": false
+                    },
+                    {
+                        "kind": "TextNode",
+                        "children": [
+                            {
+                                "kind": "Leaves(1)",
+                                "children": [],
+                                "text_length": 1,
+                                "is_leaf": true
+                            }
+                        ],
+                        "text_length": 1,
+                        "is_leaf": false
+                    },
+                    {
+                        "kind": "CloseTag",
+                        "children": [
+                            {
+                                "kind": "Leaves(4)",
+                                "children": [],
+                                "text_length": 11,
+                                "is_leaf": true
+                            }
+                        ],
+                        "text_length": 11,
+                        "is_leaf": false
+                    }
+                ],
+                "text_length": 26,
+                "is_leaf": false
+            },
+            {
+                "kind": "Element",
+                "children": [
+                    {
+                        "kind": "Tag",
+                        "children": [
+                            {
+                                "kind": "Attribute",
+                                "children": [
+                                    {
+                                        "kind": "Expression",
+                                        "children": [
+                                            {
+                                                "kind": "Leaves(6)",
+                                                "children": [],
+                                                "text_length": 6,
+                                                "is_leaf": true
+                                            }
+                                        ],
+                                        "text_length": 6,
+                                        "is_leaf": false
+                                    },
+                                    {
+                                        "kind": "Leaves(4)",
+                                        "children": [],
+                                        "text_length": 9,
+                                        "is_leaf": true
+                                    }
+                                ],
+                                "text_length": 15,
+                                "is_leaf": false
+                            },
+                            {
+                                "kind": "Leaves(5)",
+                                "children": [],
+                                "text_length": 12,
+                                "is_leaf": true
+                            }
+                        ],
+                        "text_length": 27,
+                        "is_leaf": false
+                    },
+                    {
+                        "kind": "TextNode",
+                        "children": [
+                            {
+                                "kind": "Leaves(1)",
+                                "children": [],
+                                "text_length": 1,
+                                "is_leaf": true
+                            }
+                        ],
+                        "text_length": 1,
+                        "is_leaf": false
+                    },
+                    {
+                        "kind": "Expression",
+                        "children": [
+                            {
+                                "kind": "Leaves(3)",
+                                "children": [],
+                                "text_length": 3,
+                                "is_leaf": true
+                            }
+                        ],
                         "text_length": 3,
-                        "is_leaf": true
-                      }
-                    ],
-                    "text_length": 3,
-                    "is_leaf": false
-                  },
-                  {
-                    "kind": "Text",
-                    "children": [
-                      {
-                        "kind": "Leaves(2)",
-                        "children": [],
-                        "text_length": 6,
-                        "is_leaf": true
-                      }
-                    ],
-                    "text_length": 6,
-                    "is_leaf": false
-                  },
-                  {
-                    "kind": "Interpolation",
-                    "children": [
-                      {
-                        "kind": "Leaves(3)",
-                        "children": [],
-                        "text_length": 6,
-                        "is_leaf": true
-                      }
-                    ],
-                    "text_length": 6,
-                    "is_leaf": false
-                  },
-                  {
-                    "kind": "Text",
-                    "children": [
-                      {
-                        "kind": "Leaves(5)",
-                        "children": [],
-                        "text_length": 6,
-                        "is_leaf": true
-                      }
-                    ],
-                    "text_length": 6,
-                    "is_leaf": false
-                  },
-                  {
-                    "kind": "ControlBlock",
-                    "children": [
-                      {
-                        "kind": "Leaves(5)",
-                        "children": [],
+                        "is_leaf": false
+                    },
+                    {
+                        "kind": "Expression",
+                        "children": [
+                            {
+                                "kind": "Leaves(9)",
+                                "children": [],
+                                "text_length": 9,
+                                "is_leaf": true
+                            }
+                        ],
+                        "text_length": 9,
+                        "is_leaf": false
+                    },
+                    {
+                        "kind": "CloseTag",
+                        "children": [
+                            {
+                                "kind": "Leaves(4)",
+                                "children": [],
+                                "text_length": 11,
+                                "is_leaf": true
+                            }
+                        ],
+                        "text_length": 11,
+                        "is_leaf": false
+                    }
+                ],
+                "text_length": 51,
+                "is_leaf": false
+            },
+            {
+                "kind": "Block",
+                "children": [
+                    {
+                        "kind": "BlockHeader",
+                        "children": [
+                            {
+                                "kind": "Leaves(5)",
+                                "children": [],
+                                "text_length": 14,
+                                "is_leaf": true
+                            }
+                        ],
+                        "text_length": 14,
+                        "is_leaf": false
+                    },
+                    {
+                        "kind": "BlockContent",
+                        "children": [
+                            {
+                                "kind": "Element",
+                                "children": [
+                                    {
+                                        "kind": "Tag",
+                                        "children": [
+                                            {
+                                                "kind": "Leaves(3)",
+                                                "children": [],
+                                                "text_length": 3,
+                                                "is_leaf": true
+                                            }
+                                        ],
+                                        "text_length": 3,
+                                        "is_leaf": false
+                                    },
+                                    {
+                                        "kind": "TextNode",
+                                        "children": [
+                                            {
+                                                "kind": "Leaves(1)",
+                                                "children": [],
+                                                "text_length": 1,
+                                                "is_leaf": true
+                                            }
+                                        ],
+                                        "text_length": 1,
+                                        "is_leaf": false
+                                    },
+                                    {
+                                        "kind": "Expression",
+                                        "children": [
+                                            {
+                                                "kind": "Leaves(2)",
+                                                "children": [],
+                                                "text_length": 2,
+                                                "is_leaf": true
+                                            }
+                                        ],
+                                        "text_length": 2,
+                                        "is_leaf": false
+                                    },
+                                    {
+                                        "kind": "TextNode",
+                                        "children": [],
+                                        "text_length": 0,
+                                        "is_leaf": false
+                                    },
+                                    {
+                                        "kind": "CloseTag",
+                                        "children": [
+                                            {
+                                                "kind": "Leaves(4)",
+                                                "children": [],
+                                                "text_length": 5,
+                                                "is_leaf": true
+                                            }
+                                        ],
+                                        "text_length": 5,
+                                        "is_leaf": false
+                                    }
+                                ],
+                                "text_length": 11,
+                                "is_leaf": false
+                            }
+                        ],
+                        "text_length": 11,
+                        "is_leaf": false
+                    },
+                    {
+                        "kind": "BlockFooter",
+                        "children": [
+                            {
+                                "kind": "Leaves(4)",
+                                "children": [],
+                                "text_length": 12,
+                                "is_leaf": true
+                            }
+                        ],
                         "text_length": 12,
-                        "is_leaf": true
-                      }
-                    ],
-                    "text_length": 12,
-                    "is_leaf": false
-                  },
-                  {
-                    "kind": "ControlBlock",
-                    "children": [
-                      {
-                        "kind": "Leaves(10)",
-                        "children": [],
-                        "text_length": 26,
-                        "is_leaf": true
-                      }
-                    ],
-                    "text_length": 26,
-                    "is_leaf": false
-                  },
-                  {
-                    "kind": "Text",
-                    "children": [
-                      {
+                        "is_leaf": false
+                    }
+                ],
+                "text_length": 37,
+                "is_leaf": false
+            },
+            {
+                "kind": "TextNode",
+                "children": [],
+                "text_length": 0,
+                "is_leaf": false
+            },
+            {
+                "kind": "TextNode",
+                "children": [
+                    {
                         "kind": "Leaves(1)",
                         "children": [],
-                        "text_length": 0,
+                        "text_length": 1,
                         "is_leaf": true
-                      }
-                    ],
-                    "text_length": 0,
-                    "is_leaf": false
-                  }
+                    }
                 ],
-                "text_length": 59,
+                "text_length": 1,
                 "is_leaf": false
-              },
-              {
-                "kind": "Leaves(10)",
+            },
+            {
+                "kind": "TextNode",
                 "children": [],
-                "text_length": 25,
-                "is_leaf": true
-              }
-            ],
-            "text_length": 84,
-            "is_leaf": false
-          }
+                "text_length": 0,
+                "is_leaf": false
+            },
+            {
+                "kind": "TextNode",
+                "children": [],
+                "text_length": 0,
+                "is_leaf": false
+            },
+            {
+                "kind": "TextNode",
+                "children": [
+                    {
+                        "kind": "Leaves(1)",
+                        "children": [],
+                        "text_length": 1,
+                        "is_leaf": true
+                    }
+                ],
+                "text_length": 1,
+                "is_leaf": false
+            },
+            {
+                "kind": "TextNode",
+                "children": [],
+                "text_length": 0,
+                "is_leaf": false
+            }
         ],
-        "text_length": 220,
+        "text_length": 116,
         "is_leaf": false
-      }
-    ],
-    "text_length": 220,
-    "is_leaf": false
-  },
-  "errors": []
+    },
+    "errors": []
 }

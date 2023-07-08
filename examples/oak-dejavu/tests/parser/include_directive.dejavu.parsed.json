@@ -1,30 +1,90 @@
 {
-  "success": true,
-  "node_count": 8,
-  "ast_structure": {
-    "kind": "DejavuRoot",
-    "children": [
-      {
-        "kind": "IncludeDirective",
-        "children": [],
-        "text_length": 20,
+    "success": true,
+    "node_count": 13,
+    "ast_structure": {
+        "kind": "Root",
+        "children": [
+            {
+                "kind": "TemplateText",
+                "children": [
+                    {
+                        "kind": "Leaves(1)",
+                        "children": [],
+                        "text_length": 26,
+                        "is_leaf": true
+                    }
+                ],
+                "text_length": 26,
+                "is_leaf": false
+            },
+            {
+                "kind": "TemplateControl",
+                "children": [
+                    {
+                        "kind": "Leaves(7)",
+                        "children": [],
+                        "text_length": 26,
+                        "is_leaf": true
+                    }
+                ],
+                "text_length": 26,
+                "is_leaf": false
+            },
+            {
+                "kind": "TemplateText",
+                "children": [
+                    {
+                        "kind": "Leaves(1)",
+                        "children": [],
+                        "text_length": 2,
+                        "is_leaf": true
+                    }
+                ],
+                "text_length": 2,
+                "is_leaf": false
+            },
+            {
+                "kind": "TemplateControl",
+                "children": [
+                    {
+                        "kind": "Leaves(5)",
+                        "children": [],
+                        "text_length": 24,
+                        "is_leaf": true
+                    }
+                ],
+                "text_length": 24,
+                "is_leaf": false
+            },
+            {
+                "kind": "TemplateText",
+                "children": [
+                    {
+                        "kind": "Leaves(1)",
+                        "children": [],
+                        "text_length": 2,
+                        "is_leaf": true
+                    }
+                ],
+                "text_length": 2,
+                "is_leaf": false
+            },
+            {
+                "kind": "TemplateControl",
+                "children": [
+                    {
+                        "kind": "Leaves(7)",
+                        "children": [],
+                        "text_length": 31,
+                        "is_leaf": true
+                    }
+                ],
+                "text_length": 31,
+                "is_leaf": false
+            }
+        ],
+        "text_length": 111,
         "is_leaf": false
-      },
-      {
-        "kind": "IncludeDirective",
-        "children": [],
-        "text_length": 18,
-        "is_leaf": false
-      },
-      {
-        "kind": "IncludeDirective",
-        "children": [],
-        "text_length": 24,
-        "is_leaf": false
-      }
-    ],
-    "text_length": 62,
-    "is_leaf": false
-  },
-  "errors": []
+    },
+    "errors": []
 }

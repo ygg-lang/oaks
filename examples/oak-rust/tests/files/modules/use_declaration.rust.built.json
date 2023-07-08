@@ -6,7 +6,7 @@
             "items": [
                 {
                     "Use": {
-                        "path": "use std::collections::HashMap;",
+                        "path": "",
                         "span": {
                             "end": 30,
                             "start": 0

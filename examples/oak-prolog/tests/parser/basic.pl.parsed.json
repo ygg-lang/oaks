@@ -1,0 +1,2757 @@
+{
+    "success": true,
+    "node_count": 423,
+    "ast_structure": {
+        "kind": "Root",
+        "children": [
+            {
+                "kind": "Clause",
+                "children": [
+                    {
+                        "kind": "Leaves(138)",
+                        "children": [],
+                        "text_length": 533,
+                        "is_leaf": true
+                    }
+                ],
+                "text_length": 533,
+                "is_leaf": false
+            },
+            {
+                "kind": "Clause",
+                "children": [
+                    {
+                        "kind": "Leaves(14)",
+                        "children": [],
+                        "text_length": 57,
+                        "is_leaf": true
+                    }
+                ],
+                "text_length": 57,
+                "is_leaf": false
+            },
+            {
+                "kind": "Clause",
+                "children": [
+                    {
+                        "kind": "Leaves(11)",
+                        "children": [],
+                        "text_length": 31,
+                        "is_leaf": true
+                    }
+                ],
+                "text_length": 31,
+                "is_leaf": false
+            },
+            {
+                "kind": "Clause",
+                "children": [
+                    {
+                        "kind": "Leaves(13)",
+                        "children": [],
+                        "text_length": 36,
+                        "is_leaf": true
+                    }
+                ],
+                "text_length": 36,
+                "is_leaf": false
+            },
+            {
+                "kind": "Clause",
+                "children": [
+                    {
+                        "kind": "Leaves(11)",
+                        "children": [],
+                        "text_length": 31,
+                        "is_leaf": true
+                    }
+                ],
+                "text_length": 31,
+                "is_leaf": false
+            },
+            {
+                "kind": "Clause",
+                "children": [
+                    {
+                        "kind": "Leaves(11)",
+                        "children": [],
+                        "text_length": 35,
+                        "is_leaf": true
+                    }
+                ],
+                "text_length": 35,
+                "is_leaf": false
+            },
+            {
+                "kind": "Clause",
+                "children": [
+                    {
+                        "kind": "Leaves(11)",
+                        "children": [],
+                        "text_length": 21,
+                        "is_leaf": true
+                    }
+                ],
+                "text_length": 21,
+                "is_leaf": false
+            },
+            {
+                "kind": "Clause",
+                "children": [
+                    {
+                        "kind": "Leaves(10)",
+                        "children": [],
+                        "text_length": 24,
+                        "is_leaf": true
+                    }
+                ],
+                "text_length": 24,
+                "is_leaf": false
+            },
+            {
+                "kind": "Clause",
+                "children": [
+                    {
+                        "kind": "Leaves(10)",
+                        "children": [],
+                        "text_length": 31,
+                        "is_leaf": true
+                    }
+                ],
+                "text_length": 31,
+                "is_leaf": false
+            },
+            {
+                "kind": "Clause",
+                "children": [
+                    {
+                        "kind": "Leaves(17)",
+                        "children": [],
+                        "text_length": 37,
+                        "is_leaf": true
+                    }
+                ],
+                "text_length": 37,
+                "is_leaf": false
+            },
+            {
+                "kind": "Clause",
+                "children": [
+                    {
+                        "kind": "Leaves(14)",
+                        "children": [],
+                        "text_length": 24,
+                        "is_leaf": true
+                    }
+                ],
+                "text_length": 24,
+                "is_leaf": false
+            },
+            {
+                "kind": "Clause",
+                "children": [
+                    {
+                        "kind": "Leaves(14)",
+                        "children": [],
+                        "text_length": 29,
+                        "is_leaf": true
+                    }
+                ],
+                "text_length": 29,
+                "is_leaf": false
+            },
+            {
+                "kind": "Clause",
+                "children": [
+                    {
+                        "kind": "Leaves(15)",
+                        "children": [],
+                        "text_length": 49,
+                        "is_leaf": true
+                    }
+                ],
+                "text_length": 49,
+                "is_leaf": false
+            },
+            {
+                "kind": "Clause",
+                "children": [
+                    {
+                        "kind": "Leaves(12)",
+                        "children": [],
+                        "text_length": 25,
+                        "is_leaf": true
+                    }
+                ],
+                "text_length": 25,
+                "is_leaf": false
+            },
+            {
+                "kind": "Clause",
+                "children": [
+                    {
+                        "kind": "Leaves(12)",
+                        "children": [],
+                        "text_length": 26,
+                        "is_leaf": true
+                    }
+                ],
+                "text_length": 26,
+                "is_leaf": false
+            },
+            {
+                "kind": "Clause",
+                "children": [
+                    {
+                        "kind": "Leaves(12)",
+                        "children": [],
+                        "text_length": 26,
+                        "is_leaf": true
+                    }
+                ],
+                "text_length": 26,
+                "is_leaf": false
+            },
+            {
+                "kind": "Clause",
+                "children": [
+                    {
+                        "kind": "Leaves(12)",
+                        "children": [],
+                        "text_length": 28,
+                        "is_leaf": true
+                    }
+                ],
+                "text_length": 28,
+                "is_leaf": false
+            },
+            {
+                "kind": "Clause",
+                "children": [
+                    {
+                        "kind": "Leaves(12)",
+                        "children": [],
+                        "text_length": 27,
+                        "is_leaf": true
+                    }
+                ],
+                "text_length": 27,
+                "is_leaf": false
+            },
+            {
+                "kind": "Clause",
+                "children": [
+                    {
+                        "kind": "Leaves(12)",
+                        "children": [],
+                        "text_length": 25,
+                        "is_leaf": true
+                    }
+                ],
+                "text_length": 25,
+                "is_leaf": false
+            },
+            {
+                "kind": "Clause",
+                "children": [
+                    {
+                        "kind": "Leaves(12)",
+                        "children": [],
+                        "text_length": 27,
+                        "is_leaf": true
+                    }
+                ],
+                "text_length": 27,
+                "is_leaf": false
+            },
+            {
+                "kind": "Clause",
+                "children": [
+                    {
+                        "kind": "Leaves(12)",
+                        "children": [],
+                        "text_length": 47,
+                        "is_leaf": true
+                    }
+                ],
+                "text_length": 47,
+                "is_leaf": false
+            },
+            {
+                "kind": "Clause",
+                "children": [
+                    {
+                        "kind": "Leaves(9)",
+                        "children": [],
+                        "text_length": 15,
+                        "is_leaf": true
+                    }
+                ],
+                "text_length": 15,
+                "is_leaf": false
+            },
+            {
+                "kind": "Clause",
+                "children": [
+                    {
+                        "kind": "Leaves(9)",
+                        "children": [],
+                        "text_length": 14,
+                        "is_leaf": true
+                    }
+                ],
+                "text_length": 14,
+                "is_leaf": false
+            },
+            {
+                "kind": "Clause",
+                "children": [
+                    {
+                        "kind": "Leaves(9)",
+                        "children": [],
+                        "text_length": 16,
+                        "is_leaf": true
+                    }
+                ],
+                "text_length": 16,
+                "is_leaf": false
+            },
+            {
+                "kind": "Clause",
+                "children": [
+                    {
+                        "kind": "Leaves(9)",
+                        "children": [],
+                        "text_length": 28,
+                        "is_leaf": true
+                    }
+                ],
+                "text_length": 28,
+                "is_leaf": false
+            },
+            {
+                "kind": "Clause",
+                "children": [
+                    {
+                        "kind": "Leaves(6)",
+                        "children": [],
+                        "text_length": 11,
+                        "is_leaf": true
+                    }
+                ],
+                "text_length": 11,
+                "is_leaf": false
+            },
+            {
+                "kind": "Clause",
+                "children": [
+                    {
+                        "kind": "Leaves(6)",
+                        "children": [],
+                        "text_length": 15,
+                        "is_leaf": true
+                    }
+                ],
+                "text_length": 15,
+                "is_leaf": false
+            },
+            {
+                "kind": "Clause",
+                "children": [
+                    {
+                        "kind": "Leaves(6)",
+                        "children": [],
+                        "text_length": 13,
+                        "is_leaf": true
+                    }
+                ],
+                "text_length": 13,
+                "is_leaf": false
+            },
+            {
+                "kind": "Clause",
+                "children": [
+                    {
+                        "kind": "Leaves(7)",
+                        "children": [],
+                        "text_length": 15,
+                        "is_leaf": true
+                    }
+                ],
+                "text_length": 15,
+                "is_leaf": false
+            },
+            {
+                "kind": "Clause",
+                "children": [
+                    {
+                        "kind": "Leaves(6)",
+                        "children": [],
+                        "text_length": 15,
+                        "is_leaf": true
+                    }
+                ],
+                "text_length": 15,
+                "is_leaf": false
+            },
+            {
+                "kind": "Clause",
+                "children": [
+                    {
+                        "kind": "Leaves(6)",
+                        "children": [],
+                        "text_length": 15,
+                        "is_leaf": true
+                    }
+                ],
+                "text_length": 15,
+                "is_leaf": false
+            },
+            {
+                "kind": "Clause",
+                "children": [
+                    {
+                        "kind": "Leaves(6)",
+                        "children": [],
+                        "text_length": 13,
+                        "is_leaf": true
+                    }
+                ],
+                "text_length": 13,
+                "is_leaf": false
+            },
+            {
+                "kind": "Clause",
+                "children": [
+                    {
+                        "kind": "Leaves(12)",
+                        "children": [],
+                        "text_length": 45,
+                        "is_leaf": true
+                    }
+                ],
+                "text_length": 45,
+                "is_leaf": false
+            },
+            {
+                "kind": "Clause",
+                "children": [
+                    {
+                        "kind": "Leaves(9)",
+                        "children": [],
+                        "text_length": 21,
+                        "is_leaf": true
+                    }
+                ],
+                "text_length": 21,
+                "is_leaf": false
+            },
+            {
+                "kind": "Clause",
+                "children": [
+                    {
+                        "kind": "Leaves(9)",
+                        "children": [],
+                        "text_length": 22,
+                        "is_leaf": true
+                    }
+                ],
+                "text_length": 22,
+                "is_leaf": false
+            },
+            {
+                "kind": "Clause",
+                "children": [
+                    {
+                        "kind": "Leaves(9)",
+                        "children": [],
+                        "text_length": 22,
+                        "is_leaf": true
+                    }
+                ],
+                "text_length": 22,
+                "is_leaf": false
+            },
+            {
+                "kind": "Clause",
+                "children": [
+                    {
+                        "kind": "Leaves(9)",
+                        "children": [],
+                        "text_length": 22,
+                        "is_leaf": true
+                    }
+                ],
+                "text_length": 22,
+                "is_leaf": false
+            },
+            {
+                "kind": "Clause",
+                "children": [
+                    {
+                        "kind": "Leaves(9)",
+                        "children": [],
+                        "text_length": 22,
+                        "is_leaf": true
+                    }
+                ],
+                "text_length": 22,
+                "is_leaf": false
+            },
+            {
+                "kind": "Clause",
+                "children": [
+                    {
+                        "kind": "Leaves(12)",
+                        "children": [],
+                        "text_length": 47,
+                        "is_leaf": true
+                    }
+                ],
+                "text_length": 47,
+                "is_leaf": false
+            },
+            {
+                "kind": "Clause",
+                "children": [
+                    {
+                        "kind": "Leaves(9)",
+                        "children": [],
+                        "text_length": 21,
+                        "is_leaf": true
+                    }
+                ],
+                "text_length": 21,
+                "is_leaf": false
+            },
+            {
+                "kind": "Clause",
+                "children": [
+                    {
+                        "kind": "Leaves(9)",
+                        "children": [],
+                        "text_length": 25,
+                        "is_leaf": true
+                    }
+                ],
+                "text_length": 25,
+                "is_leaf": false
+            },
+            {
+                "kind": "Clause",
+                "children": [
+                    {
+                        "kind": "Leaves(10)",
+                        "children": [],
+                        "text_length": 51,
+                        "is_leaf": true
+                    }
+                ],
+                "text_length": 51,
+                "is_leaf": false
+            },
+            {
+                "kind": "Clause",
+                "children": [
+                    {
+                        "kind": "Leaves(7)",
+                        "children": [],
+                        "text_length": 18,
+                        "is_leaf": true
+                    }
+                ],
+                "text_length": 18,
+                "is_leaf": false
+            },
+            {
+                "kind": "Clause",
+                "children": [
+                    {
+                        "kind": "Leaves(7)",
+                        "children": [],
+                        "text_length": 19,
+                        "is_leaf": true
+                    }
+                ],
+                "text_length": 19,
+                "is_leaf": false
+            },
+            {
+                "kind": "Clause",
+                "children": [
+                    {
+                        "kind": "Leaves(7)",
+                        "children": [],
+                        "text_length": 19,
+                        "is_leaf": true
+                    }
+                ],
+                "text_length": 19,
+                "is_leaf": false
+            },
+            {
+                "kind": "Clause",
+                "children": [
+                    {
+                        "kind": "Leaves(8)",
+                        "children": [],
+                        "text_length": 18,
+                        "is_leaf": true
+                    }
+                ],
+                "text_length": 18,
+                "is_leaf": false
+            },
+            {
+                "kind": "Clause",
+                "children": [
+                    {
+                        "kind": "Leaves(7)",
+                        "children": [],
+                        "text_length": 17,
+                        "is_leaf": true
+                    }
+                ],
+                "text_length": 17,
+                "is_leaf": false
+            },
+            {
+                "kind": "Clause",
+                "children": [
+                    {
+                        "kind": "Leaves(7)",
+                        "children": [],
+                        "text_length": 21,
+                        "is_leaf": true
+                    }
+                ],
+                "text_length": 21,
+                "is_leaf": false
+            },
+            {
+                "kind": "Clause",
+                "children": [
+                    {
+                        "kind": "Leaves(8)",
+                        "children": [],
+                        "text_length": 23,
+                        "is_leaf": true
+                    }
+                ],
+                "text_length": 23,
+                "is_leaf": false
+            },
+            {
+                "kind": "Clause",
+                "children": [
+                    {
+                        "kind": "Leaves(7)",
+                        "children": [],
+                        "text_length": 22,
+                        "is_leaf": true
+                    }
+                ],
+                "text_length": 22,
+                "is_leaf": false
+            },
+            {
+                "kind": "Clause",
+                "children": [
+                    {
+                        "kind": "Leaves(7)",
+                        "children": [],
+                        "text_length": 26,
+                        "is_leaf": true
+                    }
+                ],
+                "text_length": 26,
+                "is_leaf": false
+            },
+            {
+                "kind": "Clause",
+                "children": [
+                    {
+                        "kind": "Leaves(12)",
+                        "children": [],
+                        "text_length": 44,
+                        "is_leaf": true
+                    }
+                ],
+                "text_length": 44,
+                "is_leaf": false
+            },
+            {
+                "kind": "Clause",
+                "children": [
+                    {
+                        "kind": "Leaves(9)",
+                        "children": [],
+                        "text_length": 26,
+                        "is_leaf": true
+                    }
+                ],
+                "text_length": 26,
+                "is_leaf": false
+            },
+            {
+                "kind": "Clause",
+                "children": [
+                    {
+                        "kind": "Leaves(9)",
+                        "children": [],
+                        "text_length": 23,
+                        "is_leaf": true
+                    }
+                ],
+                "text_length": 23,
+                "is_leaf": false
+            },
+            {
+                "kind": "Clause",
+                "children": [
+                    {
+                        "kind": "Leaves(9)",
+                        "children": [],
+                        "text_length": 25,
+                        "is_leaf": true
+                    }
+                ],
+                "text_length": 25,
+                "is_leaf": false
+            },
+            {
+                "kind": "Clause",
+                "children": [
+                    {
+                        "kind": "Leaves(9)",
+                        "children": [],
+                        "text_length": 26,
+                        "is_leaf": true
+                    }
+                ],
+                "text_length": 26,
+                "is_leaf": false
+            },
+            {
+                "kind": "Clause",
+                "children": [
+                    {
+                        "kind": "Leaves(9)",
+                        "children": [],
+                        "text_length": 24,
+                        "is_leaf": true
+                    }
+                ],
+                "text_length": 24,
+                "is_leaf": false
+            },
+            {
+                "kind": "Clause",
+                "children": [
+                    {
+                        "kind": "Leaves(12)",
+                        "children": [],
+                        "text_length": 46,
+                        "is_leaf": true
+                    }
+                ],
+                "text_length": 46,
+                "is_leaf": false
+            },
+            {
+                "kind": "Clause",
+                "children": [
+                    {
+                        "kind": "Leaves(9)",
+                        "children": [],
+                        "text_length": 24,
+                        "is_leaf": true
+                    }
+                ],
+                "text_length": 24,
+                "is_leaf": false
+            },
+            {
+                "kind": "Clause",
+                "children": [
+                    {
+                        "kind": "Leaves(9)",
+                        "children": [],
+                        "text_length": 24,
+                        "is_leaf": true
+                    }
+                ],
+                "text_length": 24,
+                "is_leaf": false
+            },
+            {
+                "kind": "Clause",
+                "children": [
+                    {
+                        "kind": "Leaves(9)",
+                        "children": [],
+                        "text_length": 25,
+                        "is_leaf": true
+                    }
+                ],
+                "text_length": 25,
+                "is_leaf": false
+            },
+            {
+                "kind": "Clause",
+                "children": [
+                    {
+                        "kind": "Leaves(9)",
+                        "children": [],
+                        "text_length": 27,
+                        "is_leaf": true
+                    }
+                ],
+                "text_length": 27,
+                "is_leaf": false
+            },
+            {
+                "kind": "Clause",
+                "children": [
+                    {
+                        "kind": "Leaves(9)",
+                        "children": [],
+                        "text_length": 28,
+                        "is_leaf": true
+                    }
+                ],
+                "text_length": 28,
+                "is_leaf": false
+            },
+            {
+                "kind": "Clause",
+                "children": [
+                    {
+                        "kind": "Leaves(36)",
+                        "children": [],
+                        "text_length": 124,
+                        "is_leaf": true
+                    }
+                ],
+                "text_length": 124,
+                "is_leaf": false
+            },
+            {
+                "kind": "Clause",
+                "children": [
+                    {
+                        "kind": "Leaves(23)",
+                        "children": [],
+                        "text_length": 73,
+                        "is_leaf": true
+                    }
+                ],
+                "text_length": 73,
+                "is_leaf": false
+            },
+            {
+                "kind": "Clause",
+                "children": [
+                    {
+                        "kind": "Leaves(30)",
+                        "children": [],
+                        "text_length": 56,
+                        "is_leaf": true
+                    }
+                ],
+                "text_length": 56,
+                "is_leaf": false
+            },
+            {
+                "kind": "Clause",
+                "children": [
+                    {
+                        "kind": "Leaves(41)",
+                        "children": [],
+                        "text_length": 89,
+                        "is_leaf": true
+                    }
+                ],
+                "text_length": 89,
+                "is_leaf": false
+            },
+            {
+                "kind": "Clause",
+                "children": [
+                    {
+                        "kind": "Leaves(40)",
+                        "children": [],
+                        "text_length": 92,
+                        "is_leaf": true
+                    }
+                ],
+                "text_length": 92,
+                "is_leaf": false
+            },
+            {
+                "kind": "Clause",
+                "children": [
+                    {
+                        "kind": "Leaves(38)",
+                        "children": [],
+                        "text_length": 67,
+                        "is_leaf": true
+                    }
+                ],
+                "text_length": 67,
+                "is_leaf": false
+            },
+            {
+                "kind": "Clause",
+                "children": [
+                    {
+                        "kind": "Leaves(43)",
+                        "children": [],
+                        "text_length": 94,
+                        "is_leaf": true
+                    }
+                ],
+                "text_length": 94,
+                "is_leaf": false
+            },
+            {
+                "kind": "Clause",
+                "children": [
+                    {
+                        "kind": "Leaves(73)",
+                        "children": [],
+                        "text_length": 144,
+                        "is_leaf": true
+                    }
+                ],
+                "text_length": 144,
+                "is_leaf": false
+            },
+            {
+                "kind": "Clause",
+                "children": [
+                    {
+                        "kind": "Leaves(19)",
+                        "children": [],
+                        "text_length": 62,
+                        "is_leaf": true
+                    }
+                ],
+                "text_length": 62,
+                "is_leaf": false
+            },
+            {
+                "kind": "Clause",
+                "children": [
+                    {
+                        "kind": "Leaves(52)",
+                        "children": [],
+                        "text_length": 87,
+                        "is_leaf": true
+                    }
+                ],
+                "text_length": 87,
+                "is_leaf": false
+            },
+            {
+                "kind": "Clause",
+                "children": [
+                    {
+                        "kind": "Leaves(16)",
+                        "children": [],
+                        "text_length": 44,
+                        "is_leaf": true
+                    }
+                ],
+                "text_length": 44,
+                "is_leaf": false
+            },
+            {
+                "kind": "Clause",
+                "children": [
+                    {
+                        "kind": "Leaves(13)",
+                        "children": [],
+                        "text_length": 22,
+                        "is_leaf": true
+                    }
+                ],
+                "text_length": 22,
+                "is_leaf": false
+            },
+            {
+                "kind": "Clause",
+                "children": [
+                    {
+                        "kind": "Leaves(74)",
+                        "children": [],
+                        "text_length": 128,
+                        "is_leaf": true
+                    }
+                ],
+                "text_length": 128,
+                "is_leaf": false
+            },
+            {
+                "kind": "Clause",
+                "children": [
+                    {
+                        "kind": "Leaves(26)",
+                        "children": [],
+                        "text_length": 53,
+                        "is_leaf": true
+                    }
+                ],
+                "text_length": 53,
+                "is_leaf": false
+            },
+            {
+                "kind": "Clause",
+                "children": [
+                    {
+                        "kind": "Leaves(46)",
+                        "children": [],
+                        "text_length": 63,
+                        "is_leaf": true
+                    }
+                ],
+                "text_length": 63,
+                "is_leaf": false
+            },
+            {
+                "kind": "Clause",
+                "children": [
+                    {
+                        "kind": "Leaves(13)",
+                        "children": [],
+                        "text_length": 40,
+                        "is_leaf": true
+                    }
+                ],
+                "text_length": 40,
+                "is_leaf": false
+            },
+            {
+                "kind": "Clause",
+                "children": [
+                    {
+                        "kind": "Leaves(40)",
+                        "children": [],
+                        "text_length": 70,
+                        "is_leaf": true
+                    }
+                ],
+                "text_length": 70,
+                "is_leaf": false
+            },
+            {
+                "kind": "Clause",
+                "children": [
+                    {
+                        "kind": "Leaves(78)",
+                        "children": [],
+                        "text_length": 131,
+                        "is_leaf": true
+                    }
+                ],
+                "text_length": 131,
+                "is_leaf": false
+            },
+            {
+                "kind": "Clause",
+                "children": [
+                    {
+                        "kind": "Leaves(19)",
+                        "children": [],
+                        "text_length": 58,
+                        "is_leaf": true
+                    }
+                ],
+                "text_length": 58,
+                "is_leaf": false
+            },
+            {
+                "kind": "Clause",
+                "children": [
+                    {
+                        "kind": "Leaves(34)",
+                        "children": [],
+                        "text_length": 58,
+                        "is_leaf": true
+                    }
+                ],
+                "text_length": 58,
+                "is_leaf": false
+            },
+            {
+                "kind": "Clause",
+                "children": [
+                    {
+                        "kind": "Leaves(27)",
+                        "children": [],
+                        "text_length": 86,
+                        "is_leaf": true
+                    }
+                ],
+                "text_length": 86,
+                "is_leaf": false
+            },
+            {
+                "kind": "Clause",
+                "children": [
+                    {
+                        "kind": "Leaves(14)",
+                        "children": [],
+                        "text_length": 29,
+                        "is_leaf": true
+                    }
+                ],
+                "text_length": 29,
+                "is_leaf": false
+            },
+            {
+                "kind": "Clause",
+                "children": [
+                    {
+                        "kind": "Leaves(34)",
+                        "children": [],
+                        "text_length": 78,
+                        "is_leaf": true
+                    }
+                ],
+                "text_length": 78,
+                "is_leaf": false
+            },
+            {
+                "kind": "Clause",
+                "children": [
+                    {
+                        "kind": "Leaves(16)",
+                        "children": [],
+                        "text_length": 40,
+                        "is_leaf": true
+                    }
+                ],
+                "text_length": 40,
+                "is_leaf": false
+            },
+            {
+                "kind": "Clause",
+                "children": [
+                    {
+                        "kind": "Leaves(24)",
+                        "children": [],
+                        "text_length": 50,
+                        "is_leaf": true
+                    }
+                ],
+                "text_length": 50,
+                "is_leaf": false
+            },
+            {
+                "kind": "Clause",
+                "children": [
+                    {
+                        "kind": "Leaves(13)",
+                        "children": [],
+                        "text_length": 38,
+                        "is_leaf": true
+                    }
+                ],
+                "text_length": 38,
+                "is_leaf": false
+            },
+            {
+                "kind": "Clause",
+                "children": [
+                    {
+                        "kind": "Leaves(48)",
+                        "children": [],
+                        "text_length": 107,
+                        "is_leaf": true
+                    }
+                ],
+                "text_length": 107,
+                "is_leaf": false
+            },
+            {
+                "kind": "Clause",
+                "children": [
+                    {
+                        "kind": "Leaves(36)",
+                        "children": [],
+                        "text_length": 74,
+                        "is_leaf": true
+                    }
+                ],
+                "text_length": 74,
+                "is_leaf": false
+            },
+            {
+                "kind": "Clause",
+                "children": [
+                    {
+                        "kind": "Leaves(14)",
+                        "children": [],
+                        "text_length": 45,
+                        "is_leaf": true
+                    }
+                ],
+                "text_length": 45,
+                "is_leaf": false
+            },
+            {
+                "kind": "Clause",
+                "children": [
+                    {
+                        "kind": "Leaves(38)",
+                        "children": [],
+                        "text_length": 78,
+                        "is_leaf": true
+                    }
+                ],
+                "text_length": 78,
+                "is_leaf": false
+            },
+            {
+                "kind": "Clause",
+                "children": [
+                    {
+                        "kind": "Leaves(14)",
+                        "children": [],
+                        "text_length": 45,
+                        "is_leaf": true
+                    }
+                ],
+                "text_length": 45,
+                "is_leaf": false
+            },
+            {
+                "kind": "Clause",
+                "children": [
+                    {
+                        "kind": "Leaves(38)",
+                        "children": [],
+                        "text_length": 78,
+                        "is_leaf": true
+                    }
+                ],
+                "text_length": 78,
+                "is_leaf": false
+            },
+            {
+                "kind": "Clause",
+                "children": [
+                    {
+                        "kind": "Leaves(14)",
+                        "children": [],
+                        "text_length": 49,
+                        "is_leaf": true
+                    }
+                ],
+                "text_length": 49,
+                "is_leaf": false
+            },
+            {
+                "kind": "Clause",
+                "children": [
+                    {
+                        "kind": "Leaves(37)",
+                        "children": [],
+                        "text_length": 100,
+                        "is_leaf": true
+                    }
+                ],
+                "text_length": 100,
+                "is_leaf": false
+            },
+            {
+                "kind": "Clause",
+                "children": [
+                    {
+                        "kind": "Leaves(16)",
+                        "children": [],
+                        "text_length": 28,
+                        "is_leaf": true
+                    }
+                ],
+                "text_length": 28,
+                "is_leaf": false
+            },
+            {
+                "kind": "Clause",
+                "children": [
+                    {
+                        "kind": "Leaves(34)",
+                        "children": [],
+                        "text_length": 51,
+                        "is_leaf": true
+                    }
+                ],
+                "text_length": 51,
+                "is_leaf": false
+            },
+            {
+                "kind": "Clause",
+                "children": [
+                    {
+                        "kind": "Leaves(42)",
+                        "children": [],
+                        "text_length": 83,
+                        "is_leaf": true
+                    }
+                ],
+                "text_length": 83,
+                "is_leaf": false
+            },
+            {
+                "kind": "Clause",
+                "children": [
+                    {
+                        "kind": "Leaves(14)",
+                        "children": [],
+                        "text_length": 32,
+                        "is_leaf": true
+                    }
+                ],
+                "text_length": 32,
+                "is_leaf": false
+            },
+            {
+                "kind": "Clause",
+                "children": [
+                    {
+                        "kind": "Leaves(67)",
+                        "children": [],
+                        "text_length": 192,
+                        "is_leaf": true
+                    }
+                ],
+                "text_length": 192,
+                "is_leaf": false
+            },
+            {
+                "kind": "Clause",
+                "children": [
+                    {
+                        "kind": "Leaves(19)",
+                        "children": [],
+                        "text_length": 27,
+                        "is_leaf": true
+                    }
+                ],
+                "text_length": 27,
+                "is_leaf": false
+            },
+            {
+                "kind": "Clause",
+                "children": [
+                    {
+                        "kind": "Leaves(51)",
+                        "children": [],
+                        "text_length": 105,
+                        "is_leaf": true
+                    }
+                ],
+                "text_length": 105,
+                "is_leaf": false
+            },
+            {
+                "kind": "Clause",
+                "children": [
+                    {
+                        "kind": "Leaves(48)",
+                        "children": [],
+                        "text_length": 101,
+                        "is_leaf": true
+                    }
+                ],
+                "text_length": 101,
+                "is_leaf": false
+            },
+            {
+                "kind": "Clause",
+                "children": [
+                    {
+                        "kind": "Leaves(14)",
+                        "children": [],
+                        "text_length": 48,
+                        "is_leaf": true
+                    }
+                ],
+                "text_length": 48,
+                "is_leaf": false
+            },
+            {
+                "kind": "Clause",
+                "children": [
+                    {
+                        "kind": "Leaves(44)",
+                        "children": [],
+                        "text_length": 104,
+                        "is_leaf": true
+                    }
+                ],
+                "text_length": 104,
+                "is_leaf": false
+            },
+            {
+                "kind": "Clause",
+                "children": [
+                    {
+                        "kind": "Leaves(34)",
+                        "children": [],
+                        "text_length": 94,
+                        "is_leaf": true
+                    }
+                ],
+                "text_length": 94,
+                "is_leaf": false
+            },
+            {
+                "kind": "Clause",
+                "children": [
+                    {
+                        "kind": "Leaves(14)",
+                        "children": [],
+                        "text_length": 45,
+                        "is_leaf": true
+                    }
+                ],
+                "text_length": 45,
+                "is_leaf": false
+            },
+            {
+                "kind": "Clause",
+                "children": [
+                    {
+                        "kind": "Leaves(57)",
+                        "children": [],
+                        "text_length": 151,
+                        "is_leaf": true
+                    }
+                ],
+                "text_length": 151,
+                "is_leaf": false
+            },
+            {
+                "kind": "Clause",
+                "children": [
+                    {
+                        "kind": "Leaves(38)",
+                        "children": [],
+                        "text_length": 81,
+                        "is_leaf": true
+                    }
+                ],
+                "text_length": 81,
+                "is_leaf": false
+            },
+            {
+                "kind": "Clause",
+                "children": [
+                    {
+                        "kind": "Leaves(12)",
+                        "children": [],
+                        "text_length": 106,
+                        "is_leaf": true
+                    }
+                ],
+                "text_length": 106,
+                "is_leaf": false
+            },
+            {
+                "kind": "Clause",
+                "children": [
+                    {
+                        "kind": "Leaves(30)",
+                        "children": [],
+                        "text_length": 84,
+                        "is_leaf": true
+                    }
+                ],
+                "text_length": 84,
+                "is_leaf": false
+            },
+            {
+                "kind": "Clause",
+                "children": [
+                    {
+                        "kind": "Leaves(21)",
+                        "children": [],
+                        "text_length": 50,
+                        "is_leaf": true
+                    }
+                ],
+                "text_length": 50,
+                "is_leaf": false
+            },
+            {
+                "kind": "Clause",
+                "children": [
+                    {
+                        "kind": "Leaves(29)",
+                        "children": [],
+                        "text_length": 62,
+                        "is_leaf": true
+                    }
+                ],
+                "text_length": 62,
+                "is_leaf": false
+            },
+            {
+                "kind": "Clause",
+                "children": [
+                    {
+                        "kind": "Leaves(29)",
+                        "children": [],
+                        "text_length": 64,
+                        "is_leaf": true
+                    }
+                ],
+                "text_length": 64,
+                "is_leaf": false
+            },
+            {
+                "kind": "Clause",
+                "children": [
+                    {
+                        "kind": "Leaves(24)",
+                        "children": [],
+                        "text_length": 85,
+                        "is_leaf": true
+                    }
+                ],
+                "text_length": 85,
+                "is_leaf": false
+            },
+            {
+                "kind": "Clause",
+                "children": [
+                    {
+                        "kind": "Leaves(52)",
+                        "children": [],
+                        "text_length": 111,
+                        "is_leaf": true
+                    }
+                ],
+                "text_length": 111,
+                "is_leaf": false
+            },
+            {
+                "kind": "Clause",
+                "children": [
+                    {
+                        "kind": "Leaves(52)",
+                        "children": [],
+                        "text_length": 113,
+                        "is_leaf": true
+                    }
+                ],
+                "text_length": 113,
+                "is_leaf": false
+            },
+            {
+                "kind": "Clause",
+                "children": [
+                    {
+                        "kind": "Leaves(30)",
+                        "children": [],
+                        "text_length": 60,
+                        "is_leaf": true
+                    }
+                ],
+                "text_length": 60,
+                "is_leaf": false
+            },
+            {
+                "kind": "Clause",
+                "children": [
+                    {
+                        "kind": "Leaves(13)",
+                        "children": [],
+                        "text_length": 38,
+                        "is_leaf": true
+                    }
+                ],
+                "text_length": 38,
+                "is_leaf": false
+            },
+            {
+                "kind": "Clause",
+                "children": [
+                    {
+                        "kind": "Leaves(56)",
+                        "children": [],
+                        "text_length": 177,
+                        "is_leaf": true
+                    }
+                ],
+                "text_length": 177,
+                "is_leaf": false
+            },
+            {
+                "kind": "Clause",
+                "children": [
+                    {
+                        "kind": "Leaves(11)",
+                        "children": [],
+                        "text_length": 22,
+                        "is_leaf": true
+                    }
+                ],
+                "text_length": 22,
+                "is_leaf": false
+            },
+            {
+                "kind": "Clause",
+                "children": [
+                    {
+                        "kind": "Leaves(56)",
+                        "children": [],
+                        "text_length": 180,
+                        "is_leaf": true
+                    }
+                ],
+                "text_length": 180,
+                "is_leaf": false
+            },
+            {
+                "kind": "Clause",
+                "children": [
+                    {
+                        "kind": "Leaves(11)",
+                        "children": [],
+                        "text_length": 23,
+                        "is_leaf": true
+                    }
+                ],
+                "text_length": 23,
+                "is_leaf": false
+            },
+            {
+                "kind": "Clause",
+                "children": [
+                    {
+                        "kind": "Leaves(67)",
+                        "children": [],
+                        "text_length": 231,
+                        "is_leaf": true
+                    }
+                ],
+                "text_length": 231,
+                "is_leaf": false
+            },
+            {
+                "kind": "Clause",
+                "children": [
+                    {
+                        "kind": "Leaves(15)",
+                        "children": [],
+                        "text_length": 53,
+                        "is_leaf": true
+                    }
+                ],
+                "text_length": 53,
+                "is_leaf": false
+            },
+            {
+                "kind": "Clause",
+                "children": [
+                    {
+                        "kind": "Leaves(9)",
+                        "children": [],
+                        "text_length": 18,
+                        "is_leaf": true
+                    }
+                ],
+                "text_length": 18,
+                "is_leaf": false
+            },
+            {
+                "kind": "Clause",
+                "children": [
+                    {
+                        "kind": "Leaves(9)",
+                        "children": [],
+                        "text_length": 18,
+                        "is_leaf": true
+                    }
+                ],
+                "text_length": 18,
+                "is_leaf": false
+            },
+            {
+                "kind": "Clause",
+                "children": [
+                    {
+                        "kind": "Leaves(9)",
+                        "children": [],
+                        "text_length": 18,
+                        "is_leaf": true
+                    }
+                ],
+                "text_length": 18,
+                "is_leaf": false
+            },
+            {
+                "kind": "Clause",
+                "children": [
+                    {
+                        "kind": "Leaves(9)",
+                        "children": [],
+                        "text_length": 18,
+                        "is_leaf": true
+                    }
+                ],
+                "text_length": 18,
+                "is_leaf": false
+            },
+            {
+                "kind": "Clause",
+                "children": [
+                    {
+                        "kind": "Leaves(9)",
+                        "children": [],
+                        "text_length": 18,
+                        "is_leaf": true
+                    }
+                ],
+                "text_length": 18,
+                "is_leaf": false
+            },
+            {
+                "kind": "Clause",
+                "children": [
+                    {
+                        "kind": "Leaves(9)",
+                        "children": [],
+                        "text_length": 18,
+                        "is_leaf": true
+                    }
+                ],
+                "text_length": 18,
+                "is_leaf": false
+            },
+            {
+                "kind": "Clause",
+                "children": [
+                    {
+                        "kind": "Leaves(9)",
+                        "children": [],
+                        "text_length": 18,
+                        "is_leaf": true
+                    }
+                ],
+                "text_length": 18,
+                "is_leaf": false
+            },
+            {
+                "kind": "Clause",
+                "children": [
+                    {
+                        "kind": "Leaves(9)",
+                        "children": [],
+                        "text_length": 18,
+                        "is_leaf": true
+                    }
+                ],
+                "text_length": 18,
+                "is_leaf": false
+            },
+            {
+                "kind": "Clause",
+                "children": [
+                    {
+                        "kind": "Leaves(31)",
+                        "children": [],
+                        "text_length": 60,
+                        "is_leaf": true
+                    }
+                ],
+                "text_length": 60,
+                "is_leaf": false
+            },
+            {
+                "kind": "Clause",
+                "children": [
+                    {
+                        "kind": "Leaves(40)",
+                        "children": [],
+                        "text_length": 68,
+                        "is_leaf": true
+                    }
+                ],
+                "text_length": 68,
+                "is_leaf": false
+            },
+            {
+                "kind": "Clause",
+                "children": [
+                    {
+                        "kind": "Leaves(26)",
+                        "children": [],
+                        "text_length": 62,
+                        "is_leaf": true
+                    }
+                ],
+                "text_length": 62,
+                "is_leaf": false
+            },
+            {
+                "kind": "Clause",
+                "children": [
+                    {
+                        "kind": "Leaves(23)",
+                        "children": [],
+                        "text_length": 38,
+                        "is_leaf": true
+                    }
+                ],
+                "text_length": 38,
+                "is_leaf": false
+            },
+            {
+                "kind": "Clause",
+                "children": [
+                    {
+                        "kind": "Leaves(33)",
+                        "children": [],
+                        "text_length": 106,
+                        "is_leaf": true
+                    }
+                ],
+                "text_length": 106,
+                "is_leaf": false
+            },
+            {
+                "kind": "Clause",
+                "children": [
+                    {
+                        "kind": "Leaves(25)",
+                        "children": [],
+                        "text_length": 39,
+                        "is_leaf": true
+                    }
+                ],
+                "text_length": 39,
+                "is_leaf": false
+            },
+            {
+                "kind": "Clause",
+                "children": [
+                    {
+                        "kind": "Leaves(53)",
+                        "children": [],
+                        "text_length": 155,
+                        "is_leaf": true
+                    }
+                ],
+                "text_length": 155,
+                "is_leaf": false
+            },
+            {
+                "kind": "Clause",
+                "children": [
+                    {
+                        "kind": "Leaves(61)",
+                        "children": [],
+                        "text_length": 176,
+                        "is_leaf": true
+                    }
+                ],
+                "text_length": 176,
+                "is_leaf": false
+            },
+            {
+                "kind": "Clause",
+                "children": [
+                    {
+                        "kind": "Leaves(34)",
+                        "children": [],
+                        "text_length": 123,
+                        "is_leaf": true
+                    }
+                ],
+                "text_length": 123,
+                "is_leaf": false
+            },
+            {
+                "kind": "Clause",
+                "children": [
+                    {
+                        "kind": "Leaves(9)",
+                        "children": [],
+                        "text_length": 27,
+                        "is_leaf": true
+                    }
+                ],
+                "text_length": 27,
+                "is_leaf": false
+            },
+            {
+                "kind": "Clause",
+                "children": [
+                    {
+                        "kind": "Leaves(8)",
+                        "children": [],
+                        "text_length": 18,
+                        "is_leaf": true
+                    }
+                ],
+                "text_length": 18,
+                "is_leaf": false
+            },
+            {
+                "kind": "Clause",
+                "children": [
+                    {
+                        "kind": "Leaves(31)",
+                        "children": [],
+                        "text_length": 69,
+                        "is_leaf": true
+                    }
+                ],
+                "text_length": 69,
+                "is_leaf": false
+            },
+            {
+                "kind": "Clause",
+                "children": [
+                    {
+                        "kind": "Leaves(14)",
+                        "children": [],
+                        "text_length": 22,
+                        "is_leaf": true
+                    }
+                ],
+                "text_length": 22,
+                "is_leaf": false
+            },
+            {
+                "kind": "Clause",
+                "children": [
+                    {
+                        "kind": "Leaves(67)",
+                        "children": [],
+                        "text_length": 123,
+                        "is_leaf": true
+                    }
+                ],
+                "text_length": 123,
+                "is_leaf": false
+            },
+            {
+                "kind": "Clause",
+                "children": [
+                    {
+                        "kind": "Leaves(76)",
+                        "children": [],
+                        "text_length": 212,
+                        "is_leaf": true
+                    }
+                ],
+                "text_length": 212,
+                "is_leaf": false
+            },
+            {
+                "kind": "Clause",
+                "children": [
+                    {
+                        "kind": "Leaves(242)",
+                        "children": [],
+                        "text_length": 602,
+                        "is_leaf": true
+                    }
+                ],
+                "text_length": 602,
+                "is_leaf": false
+            },
+            {
+                "kind": "Clause",
+                "children": [
+                    {
+                        "kind": "Leaves(18)",
+                        "children": [],
+                        "text_length": 99,
+                        "is_leaf": true
+                    }
+                ],
+                "text_length": 99,
+                "is_leaf": false
+            },
+            {
+                "kind": "Clause",
+                "children": [
+                    {
+                        "kind": "Leaves(12)",
+                        "children": [],
+                        "text_length": 34,
+                        "is_leaf": true
+                    }
+                ],
+                "text_length": 34,
+                "is_leaf": false
+            },
+            {
+                "kind": "Clause",
+                "children": [
+                    {
+                        "kind": "Leaves(9)",
+                        "children": [],
+                        "text_length": 22,
+                        "is_leaf": true
+                    }
+                ],
+                "text_length": 22,
+                "is_leaf": false
+            },
+            {
+                "kind": "Clause",
+                "children": [
+                    {
+                        "kind": "Leaves(12)",
+                        "children": [],
+                        "text_length": 35,
+                        "is_leaf": true
+                    }
+                ],
+                "text_length": 35,
+                "is_leaf": false
+            },
+            {
+                "kind": "Clause",
+                "children": [
+                    {
+                        "kind": "Leaves(9)",
+                        "children": [],
+                        "text_length": 22,
+                        "is_leaf": true
+                    }
+                ],
+                "text_length": 22,
+                "is_leaf": false
+            },
+            {
+                "kind": "Clause",
+                "children": [
+                    {
+                        "kind": "Leaves(12)",
+                        "children": [],
+                        "text_length": 23,
+                        "is_leaf": true
+                    }
+                ],
+                "text_length": 23,
+                "is_leaf": false
+            },
+            {
+                "kind": "Clause",
+                "children": [
+                    {
+                        "kind": "Leaves(11)",
+                        "children": [],
+                        "text_length": 20,
+                        "is_leaf": true
+                    }
+                ],
+                "text_length": 20,
+                "is_leaf": false
+            },
+            {
+                "kind": "Clause",
+                "children": [
+                    {
+                        "kind": "Leaves(11)",
+                        "children": [],
+                        "text_length": 21,
+                        "is_leaf": true
+                    }
+                ],
+                "text_length": 21,
+                "is_leaf": false
+            },
+            {
+                "kind": "Clause",
+                "children": [
+                    {
+                        "kind": "Leaves(12)",
+                        "children": [],
+                        "text_length": 17,
+                        "is_leaf": true
+                    }
+                ],
+                "text_length": 17,
+                "is_leaf": false
+            },
+            {
+                "kind": "Clause",
+                "children": [
+                    {
+                        "kind": "Leaves(11)",
+                        "children": [],
+                        "text_length": 16,
+                        "is_leaf": true
+                    }
+                ],
+                "text_length": 16,
+                "is_leaf": false
+            },
+            {
+                "kind": "Clause",
+                "children": [
+                    {
+                        "kind": "Leaves(11)",
+                        "children": [],
+                        "text_length": 18,
+                        "is_leaf": true
+                    }
+                ],
+                "text_length": 18,
+                "is_leaf": false
+            },
+            {
+                "kind": "Clause",
+                "children": [
+                    {
+                        "kind": "Leaves(11)",
+                        "children": [],
+                        "text_length": 19,
+                        "is_leaf": true
+                    }
+                ],
+                "text_length": 19,
+                "is_leaf": false
+            },
+            {
+                "kind": "Clause",
+                "children": [
+                    {
+                        "kind": "Leaves(12)",
+                        "children": [],
+                        "text_length": 20,
+                        "is_leaf": true
+                    }
+                ],
+                "text_length": 20,
+                "is_leaf": false
+            },
+            {
+                "kind": "Clause",
+                "children": [
+                    {
+                        "kind": "Leaves(11)",
+                        "children": [],
+                        "text_length": 17,
+                        "is_leaf": true
+                    }
+                ],
+                "text_length": 17,
+                "is_leaf": false
+            },
+            {
+                "kind": "Clause",
+                "children": [
+                    {
+                        "kind": "Leaves(11)",
+                        "children": [],
+                        "text_length": 17,
+                        "is_leaf": true
+                    }
+                ],
+                "text_length": 17,
+                "is_leaf": false
+            },
+            {
+                "kind": "Clause",
+                "children": [
+                    {
+                        "kind": "Leaves(27)",
+                        "children": [],
+                        "text_length": 51,
+                        "is_leaf": true
+                    }
+                ],
+                "text_length": 51,
+                "is_leaf": false
+            },
+            {
+                "kind": "Clause",
+                "children": [
+                    {
+                        "kind": "Leaves(18)",
+                        "children": [],
+                        "text_length": 42,
+                        "is_leaf": true
+                    }
+                ],
+                "text_length": 42,
+                "is_leaf": false
+            },
+            {
+                "kind": "Clause",
+                "children": [
+                    {
+                        "kind": "Leaves(41)",
+                        "children": [],
+                        "text_length": 51,
+                        "is_leaf": true
+                    }
+                ],
+                "text_length": 51,
+                "is_leaf": false
+            },
+            {
+                "kind": "Clause",
+                "children": [
+                    {
+                        "kind": "Leaves(41)",
+                        "children": [],
+                        "text_length": 51,
+                        "is_leaf": true
+                    }
+                ],
+                "text_length": 51,
+                "is_leaf": false
+            },
+            {
+                "kind": "Clause",
+                "children": [
+                    {
+                        "kind": "Leaves(16)",
+                        "children": [],
+                        "text_length": 24,
+                        "is_leaf": true
+                    }
+                ],
+                "text_length": 24,
+                "is_leaf": false
+            },
+            {
+                "kind": "Clause",
+                "children": [
+                    {
+                        "kind": "Leaves(41)",
+                        "children": [],
+                        "text_length": 53,
+                        "is_leaf": true
+                    }
+                ],
+                "text_length": 53,
+                "is_leaf": false
+            },
+            {
+                "kind": "Clause",
+                "children": [
+                    {
+                        "kind": "Leaves(41)",
+                        "children": [],
+                        "text_length": 53,
+                        "is_leaf": true
+                    }
+                ],
+                "text_length": 53,
+                "is_leaf": false
+            },
+            {
+                "kind": "Clause",
+                "children": [
+                    {
+                        "kind": "Leaves(16)",
+                        "children": [],
+                        "text_length": 26,
+                        "is_leaf": true
+                    }
+                ],
+                "text_length": 26,
+                "is_leaf": false
+            },
+            {
+                "kind": "Clause",
+                "children": [
+                    {
+                        "kind": "Leaves(25)",
+                        "children": [],
+                        "text_length": 37,
+                        "is_leaf": true
+                    }
+                ],
+                "text_length": 37,
+                "is_leaf": false
+            },
+            {
+                "kind": "Clause",
+                "children": [
+                    {
+                        "kind": "Leaves(20)",
+                        "children": [],
+                        "text_length": 96,
+                        "is_leaf": true
+                    }
+                ],
+                "text_length": 96,
+                "is_leaf": false
+            },
+            {
+                "kind": "Clause",
+                "children": [
+                    {
+                        "kind": "Leaves(47)",
+                        "children": [],
+                        "text_length": 84,
+                        "is_leaf": true
+                    }
+                ],
+                "text_length": 84,
+                "is_leaf": false
+            },
+            {
+                "kind": "Clause",
+                "children": [
+                    {
+                        "kind": "Leaves(17)",
+                        "children": [],
+                        "text_length": 48,
+                        "is_leaf": true
+                    }
+                ],
+                "text_length": 48,
+                "is_leaf": false
+            },
+            {
+                "kind": "Clause",
+                "children": [
+                    {
+                        "kind": "Leaves(47)",
+                        "children": [],
+                        "text_length": 88,
+                        "is_leaf": true
+                    }
+                ],
+                "text_length": 88,
+                "is_leaf": false
+            },
+            {
+                "kind": "Clause",
+                "children": [
+                    {
+                        "kind": "Leaves(30)",
+                        "children": [],
+                        "text_length": 62,
+                        "is_leaf": true
+                    }
+                ],
+                "text_length": 62,
+                "is_leaf": false
+            },
+            {
+                "kind": "Clause",
+                "children": [
+                    {
+                        "kind": "Leaves(19)",
+                        "children": [],
+                        "text_length": 50,
+                        "is_leaf": true
+                    }
+                ],
+                "text_length": 50,
+                "is_leaf": false
+            },
+            {
+                "kind": "Clause",
+                "children": [
+                    {
+                        "kind": "Leaves(52)",
+                        "children": [],
+                        "text_length": 111,
+                        "is_leaf": true
+                    }
+                ],
+                "text_length": 111,
+                "is_leaf": false
+            },
+            {
+                "kind": "Clause",
+                "children": [
+                    {
+                        "kind": "Leaves(44)",
+                        "children": [],
+                        "text_length": 106,
+                        "is_leaf": true
+                    }
+                ],
+                "text_length": 106,
+                "is_leaf": false
+            },
+            {
+                "kind": "Clause",
+                "children": [
+                    {
+                        "kind": "Leaves(41)",
+                        "children": [],
+                        "text_length": 57,
+                        "is_leaf": true
+                    }
+                ],
+                "text_length": 57,
+                "is_leaf": false
+            },
+            {
+                "kind": "Clause",
+                "children": [
+                    {
+                        "kind": "Leaves(23)",
+                        "children": [],
+                        "text_length": 108,
+                        "is_leaf": true
+                    }
+                ],
+                "text_length": 108,
+                "is_leaf": false
+            },
+            {
+                "kind": "Clause",
+                "children": [
+                    {
+                        "kind": "Leaves(18)",
+                        "children": [],
+                        "text_length": 47,
+                        "is_leaf": true
+                    }
+                ],
+                "text_length": 47,
+                "is_leaf": false
+            },
+            {
+                "kind": "Clause",
+                "children": [
+                    {
+                        "kind": "Leaves(24)",
+                        "children": [],
+                        "text_length": 54,
+                        "is_leaf": true
+                    }
+                ],
+                "text_length": 54,
+                "is_leaf": false
+            },
+            {
+                "kind": "Clause",
+                "children": [
+                    {
+                        "kind": "Leaves(37)",
+                        "children": [],
+                        "text_length": 106,
+                        "is_leaf": true
+                    }
+                ],
+                "text_length": 106,
+                "is_leaf": false
+            },
+            {
+                "kind": "Clause",
+                "children": [
+                    {
+                        "kind": "Leaves(84)",
+                        "children": [],
+                        "text_length": 120,
+                        "is_leaf": true
+                    }
+                ],
+                "text_length": 120,
+                "is_leaf": false
+            },
+            {
+                "kind": "Clause",
+                "children": [
+                    {
+                        "kind": "Leaves(49)",
+                        "children": [],
+                        "text_length": 158,
+                        "is_leaf": true
+                    }
+                ],
+                "text_length": 158,
+                "is_leaf": false
+            },
+            {
+                "kind": "Clause",
+                "children": [
+                    {
+                        "kind": "Leaves(16)",
+                        "children": [],
+                        "text_length": 37,
+                        "is_leaf": true
+                    }
+                ],
+                "text_length": 37,
+                "is_leaf": false
+            },
+            {
+                "kind": "Clause",
+                "children": [
+                    {
+                        "kind": "Leaves(59)",
+                        "children": [],
+                        "text_length": 178,
+                        "is_leaf": true
+                    }
+                ],
+                "text_length": 178,
+                "is_leaf": false
+            },
+            {
+                "kind": "Clause",
+                "children": [
+                    {
+                        "kind": "Leaves(87)",
+                        "children": [],
+                        "text_length": 187,
+                        "is_leaf": true
+                    }
+                ],
+                "text_length": 187,
+                "is_leaf": false
+            },
+            {
+                "kind": "Clause",
+                "children": [
+                    {
+                        "kind": "Leaves(87)",
+                        "children": [],
+                        "text_length": 187,
+                        "is_leaf": true
+                    }
+                ],
+                "text_length": 187,
+                "is_leaf": false
+            },
+            {
+                "kind": "Clause",
+                "children": [
+                    {
+                        "kind": "Leaves(10)",
+                        "children": [],
+                        "text_length": 20,
+                        "is_leaf": true
+                    }
+                ],
+                "text_length": 20,
+                "is_leaf": false
+            },
+            {
+                "kind": "Clause",
+                "children": [
+                    {
+                        "kind": "Leaves(9)",
+                        "children": [],
+                        "text_length": 19,
+                        "is_leaf": true
+                    }
+                ],
+                "text_length": 19,
+                "is_leaf": false
+            },
+            {
+                "kind": "Clause",
+                "children": [
+                    {
+                        "kind": "Leaves(9)",
+                        "children": [],
+                        "text_length": 19,
+                        "is_leaf": true
+                    }
+                ],
+                "text_length": 19,
+                "is_leaf": false
+            },
+            {
+                "kind": "Clause",
+                "children": [
+                    {
+                        "kind": "Leaves(9)",
+                        "children": [],
+                        "text_length": 19,
+                        "is_leaf": true
+                    }
+                ],
+                "text_length": 19,
+                "is_leaf": false
+            },
+            {
+                "kind": "Clause",
+                "children": [
+                    {
+                        "kind": "Leaves(9)",
+                        "children": [],
+                        "text_length": 19,
+                        "is_leaf": true
+                    }
+                ],
+                "text_length": 19,
+                "is_leaf": false
+            },
+            {
+                "kind": "Clause",
+                "children": [
+                    {
+                        "kind": "Leaves(105)",
+                        "children": [],
+                        "text_length": 145,
+                        "is_leaf": true
+                    }
+                ],
+                "text_length": 145,
+                "is_leaf": false
+            },
+            {
+                "kind": "Clause",
+                "children": [
+                    {
+                        "kind": "Leaves(44)",
+                        "children": [],
+                        "text_length": 126,
+                        "is_leaf": true
+                    }
+                ],
+                "text_length": 126,
+                "is_leaf": false
+            },
+            {
+                "kind": "Clause",
+                "children": [
+                    {
+                        "kind": "Leaves(41)",
+                        "children": [],
+                        "text_length": 92,
+                        "is_leaf": true
+                    }
+                ],
+                "text_length": 92,
+                "is_leaf": false
+            },
+            {
+                "kind": "Clause",
+                "children": [
+                    {
+                        "kind": "Leaves(86)",
+                        "children": [],
+                        "text_length": 146,
+                        "is_leaf": true
+                    }
+                ],
+                "text_length": 146,
+                "is_leaf": false
+            },
+            {
+                "kind": "Clause",
+                "children": [
+                    {
+                        "kind": "Leaves(41)",
+                        "children": [],
+                        "text_length": 116,
+                        "is_leaf": true
+                    }
+                ],
+                "text_length": 116,
+                "is_leaf": false
+            },
+            {
+                "kind": "Clause",
+                "children": [
+                    {
+                        "kind": "Leaves(44)",
+                        "children": [],
+                        "text_length": 147,
+                        "is_leaf": true
+                    }
+                ],
+                "text_length": 147,
+                "is_leaf": false
+            },
+            {
+                "kind": "Clause",
+                "children": [
+                    {
+                        "kind": "Leaves(3)",
+                        "children": [],
+                        "text_length": 11,
+                        "is_leaf": true
+                    }
+                ],
+                "text_length": 11,
+                "is_leaf": false
+            },
+            {
+                "kind": "Clause",
+                "children": [
+                    {
+                        "kind": "Leaves(8)",
+                        "children": [],
+                        "text_length": 20,
+                        "is_leaf": true
+                    }
+                ],
+                "text_length": 20,
+                "is_leaf": false
+            },
+            {
+                "kind": "Clause",
+                "children": [
+                    {
+                        "kind": "Leaves(56)",
+                        "children": [],
+                        "text_length": 161,
+                        "is_leaf": true
+                    }
+                ],
+                "text_length": 161,
+                "is_leaf": false
+            },
+            {
+                "kind": "Clause",
+                "children": [
+                    {
+                        "kind": "Leaves(596)",
+                        "children": [],
+                        "text_length": 2234,
+                        "is_leaf": true
+                    }
+                ],
+                "text_length": 2234,
+                "is_leaf": false
+            },
+            {
+                "kind": "Clause",
+                "children": [
+                    {
+                        "kind": "Leaves(11)",
+                        "children": [],
+                        "text_length": 66,
+                        "is_leaf": true
+                    }
+                ],
+                "text_length": 66,
+                "is_leaf": false
+            },
+            {
+                "kind": "Clause",
+                "children": [
+                    {
+                        "kind": "Leaves(1)",
+                        "children": [],
+                        "text_length": 0,
+                        "is_leaf": true
+                    }
+                ],
+                "text_length": 0,
+                "is_leaf": false
+            }
+        ],
+        "text_length": 15291,
+        "is_leaf": false
+    },
+    "errors": [
+        "ExpectedToken { expected: \"Dot\", offset: 15291, source_id: None }"
+    ]
+}

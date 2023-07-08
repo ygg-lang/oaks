@@ -1,395 +1,425 @@
 {
     "success": true,
-    "count": 100,
+    "count": 1133,
     "tokens": [
         {
             "kind": "Minus",
             "text": "-",
-            "start": 120,
-            "end": 121
+            "start": 116,
+            "end": 117
         },
         {
             "kind": "Atom",
             "text": "module",
-            "start": 121,
-            "end": 127
+            "start": 117,
+            "end": 123
         },
         {
             "kind": "LeftParen",
             "text": "(",
-            "start": 127,
-            "end": 128
+            "start": 123,
+            "end": 124
         },
         {
             "kind": "Atom",
             "text": "math_operations",
-            "start": 128,
-            "end": 143
+            "start": 124,
+            "end": 139
         },
         {
             "kind": "RightParen",
             "text": ")",
-            "start": 143,
-            "end": 144
+            "start": 139,
+            "end": 140
         },
         {
             "kind": "Dot",
             "text": ".",
-            "start": 144,
-            "end": 145
+            "start": 140,
+            "end": 141
         },
         {
             "kind": "Minus",
             "text": "-",
-            "start": 147,
-            "end": 148
+            "start": 142,
+            "end": 143
         },
         {
             "kind": "Atom",
             "text": "author",
-            "start": 148,
-            "end": 154
+            "start": 143,
+            "end": 149
         },
         {
             "kind": "LeftParen",
             "text": "(",
-            "start": 154,
-            "end": 155
+            "start": 149,
+            "end": 150
         },
         {
             "kind": "Atom",
             "text": "'Test Author'",
-            "start": 155,
-            "end": 168
+            "start": 150,
+            "end": 163
         },
         {
             "kind": "RightParen",
             "text": ")",
-            "start": 168,
-            "end": 169
+            "start": 163,
+            "end": 164
         },
         {
             "kind": "Dot",
             "text": ".",
-            "start": 169,
-            "end": 170
+            "start": 164,
+            "end": 165
         },
         {
             "kind": "Minus",
             "text": "-",
-            "start": 172,
-            "end": 173
+            "start": 166,
+            "end": 167
         },
         {
             "kind": "Atom",
             "text": "version",
-            "start": 173,
-            "end": 180
+            "start": 167,
+            "end": 174
         },
         {
             "kind": "LeftParen",
             "text": "(",
-            "start": 180,
-            "end": 181
+            "start": 174,
+            "end": 175
         },
         {
             "kind": "Atom",
             "text": "'1.0'",
-            "start": 181,
-            "end": 186
+            "start": 175,
+            "end": 180
         },
         {
             "kind": "RightParen",
             "text": ")",
-            "start": 186,
-            "end": 187
+            "start": 180,
+            "end": 181
         },
         {
             "kind": "Dot",
             "text": ".",
-            "start": 187,
-            "end": 188
+            "start": 181,
+            "end": 182
         },
         {
             "kind": "Minus",
             "text": "-",
-            "start": 213,
-            "end": 214
+            "start": 204,
+            "end": 205
         },
         {
             "kind": "Atom",
             "text": "export",
-            "start": 214,
-            "end": 220
+            "start": 205,
+            "end": 211
         },
         {
             "kind": "LeftParen",
             "text": "(",
-            "start": 220,
-            "end": 221
+            "start": 211,
+            "end": 212
         },
         {
             "kind": "LeftBracket",
             "text": "[",
-            "start": 221,
-            "end": 222
+            "start": 212,
+            "end": 213
         },
         {
             "kind": "Atom",
             "text": "factorial",
-            "start": 222,
-            "end": 231
+            "start": 213,
+            "end": 222
         },
         {
             "kind": "Slash",
             "text": "/",
-            "start": 231,
-            "end": 232
+            "start": 222,
+            "end": 223
         },
         {
             "kind": "Number",
             "text": "1",
-            "start": 232,
-            "end": 233
+            "start": 223,
+            "end": 224
         },
         {
             "kind": "Comma",
             "text": ",",
-            "start": 233,
-            "end": 234
+            "start": 224,
+            "end": 225
         },
         {
             "kind": "Atom",
             "text": "fibonacci",
-            "start": 235,
-            "end": 244
+            "start": 226,
+            "end": 235
         },
         {
             "kind": "Slash",
             "text": "/",
-            "start": 244,
-            "end": 245
+            "start": 235,
+            "end": 236
         },
         {
             "kind": "Number",
             "text": "1",
-            "start": 245,
-            "end": 246
+            "start": 236,
+            "end": 237
         },
         {
             "kind": "Comma",
             "text": ",",
-            "start": 246,
-            "end": 247
+            "start": 237,
+            "end": 238
         },
         {
             "kind": "Atom",
             "text": "list_sum",
-            "start": 248,
-            "end": 256
+            "start": 239,
+            "end": 247
         },
         {
             "kind": "Slash",
             "text": "/",
-            "start": 256,
-            "end": 257
+            "start": 247,
+            "end": 248
         },
         {
             "kind": "Number",
             "text": "1",
-            "start": 257,
-            "end": 258
+            "start": 248,
+            "end": 249
         },
         {
             "kind": "Comma",
             "text": ",",
-            "start": 258,
-            "end": 259
+            "start": 249,
+            "end": 250
         },
         {
             "kind": "Atom",
             "text": "map",
-            "start": 260,
-            "end": 263
+            "start": 251,
+            "end": 254
         },
         {
             "kind": "Slash",
             "text": "/",
-            "start": 263,
-            "end": 264
+            "start": 254,
+            "end": 255
         },
         {
             "kind": "Number",
             "text": "2",
-            "start": 264,
-            "end": 265
+            "start": 255,
+            "end": 256
         },
         {
             "kind": "Comma",
             "text": ",",
-            "start": 265,
-            "end": 266
+            "start": 256,
+            "end": 257
         },
         {
             "kind": "Atom",
             "text": "filter",
-            "start": 267,
-            "end": 273
+            "start": 258,
+            "end": 264
         },
         {
             "kind": "Slash",
             "text": "/",
-            "start": 273,
-            "end": 274
+            "start": 264,
+            "end": 265
         },
         {
             "kind": "Number",
             "text": "2",
-            "start": 274,
-            "end": 275
+            "start": 265,
+            "end": 266
         },
         {
             "kind": "RightBracket",
             "text": "]",
-            "start": 275,
-            "end": 276
+            "start": 266,
+            "end": 267
         },
         {
             "kind": "RightParen",
             "text": ")",
-            "start": 276,
-            "end": 277
+            "start": 267,
+            "end": 268
         },
         {
             "kind": "Dot",
             "text": ".",
-            "start": 277,
-            "end": 278
+            "start": 268,
+            "end": 269
         },
         {
             "kind": "Minus",
             "text": "-",
-            "start": 280,
-            "end": 281
+            "start": 270,
+            "end": 271
         },
         {
             "kind": "Atom",
             "text": "export",
-            "start": 281,
-            "end": 287
+            "start": 271,
+            "end": 277
         },
         {
             "kind": "LeftParen",
             "text": "(",
-            "start": 287,
-            "end": 288
+            "start": 277,
+            "end": 278
         },
         {
             "kind": "LeftBracket",
             "text": "[",
-            "start": 288,
-            "end": 289
+            "start": 278,
+            "end": 279
         },
         {
             "kind": "Atom",
             "text": "start",
-            "start": 289,
-            "end": 294
+            "start": 279,
+            "end": 284
         },
         {
             "kind": "Slash",
             "text": "/",
-            "start": 294,
-            "end": 295
+            "start": 284,
+            "end": 285
         },
         {
             "kind": "Number",
             "text": "0",
-            "start": 295,
-            "end": 296
+            "start": 285,
+            "end": 286
         },
         {
             "kind": "Comma",
             "text": ",",
-            "start": 296,
-            "end": 297
+            "start": 286,
+            "end": 287
         },
         {
             "kind": "Atom",
             "text": "stop",
-            "start": 298,
-            "end": 302
+            "start": 288,
+            "end": 292
         },
         {
             "kind": "Slash",
             "text": "/",
-            "start": 302,
-            "end": 303
+            "start": 292,
+            "end": 293
         },
         {
             "kind": "Number",
             "text": "0",
-            "start": 303,
-            "end": 304
+            "start": 293,
+            "end": 294
         },
         {
             "kind": "Comma",
             "text": ",",
-            "start": 304,
-            "end": 305
+            "start": 294,
+            "end": 295
         },
         {
             "kind": "Atom",
             "text": "process_message",
-            "start": 306,
-            "end": 321
+            "start": 296,
+            "end": 311
         },
         {
             "kind": "Slash",
             "text": "/",
-            "start": 321,
-            "end": 322
+            "start": 311,
+            "end": 312
         },
         {
             "kind": "Number",
             "text": "1",
-            "start": 322,
-            "end": 323
+            "start": 312,
+            "end": 313
         },
         {
             "kind": "RightBracket",
             "text": "]",
-            "start": 323,
-            "end": 324
+            "start": 313,
+            "end": 314
         },
         {
             "kind": "RightParen",
             "text": ")",
-            "start": 324,
-            "end": 325
+            "start": 314,
+            "end": 315
         },
         {
             "kind": "Dot",
             "text": ".",
-            "start": 325,
-            "end": 326
+            "start": 315,
+            "end": 316
         },
         {
             "kind": "Minus",
             "text": "-",
-            "start": 354,
-            "end": 355
+            "start": 341,
+            "end": 342
         },
         {
             "kind": "Atom",
             "text": "type",
-            "start": 355,
-            "end": 359
+            "start": 342,
+            "end": 346
         },
         {
             "kind": "Atom",
             "text": "number",
-            "start": 360,
+            "start": 347,
+            "end": 353
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 353,
+            "end": 354
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 354,
+            "end": 355
+        },
+        {
+            "kind": "Colon",
+            "text": ":",
+            "start": 356,
+            "end": 357
+        },
+        {
+            "kind": "Colon",
+            "text": ":",
+            "start": 357,
+            "end": 358
+        },
+        {
+            "kind": "Atom",
+            "text": "integer",
+            "start": 359,
             "end": 366
         },
         {
@@ -405,202 +435,6370 @@
             "end": 368
         },
         {
-            "kind": "Colon",
-            "text": ":",
+            "kind": "Pipe",
+            "text": "|",
             "start": 369,
             "end": 370
         },
         {
-            "kind": "Colon",
-            "text": ":",
-            "start": 370,
-            "end": 371
-        },
-        {
             "kind": "Atom",
-            "text": "integer",
-            "start": 372,
-            "end": 379
+            "text": "float",
+            "start": 371,
+            "end": 376
         },
         {
             "kind": "LeftParen",
             "text": "(",
-            "start": 379,
-            "end": 380
+            "start": 376,
+            "end": 377
         },
         {
             "kind": "RightParen",
             "text": ")",
+            "start": 377,
+            "end": 378
+        },
+        {
+            "kind": "Dot",
+            "text": ".",
+            "start": 378,
+            "end": 379
+        },
+        {
+            "kind": "Minus",
+            "text": "-",
             "start": 380,
             "end": 381
         },
         {
-            "kind": "Pipe",
-            "text": "|",
-            "start": 382,
-            "end": 383
-        },
-        {
-            "kind": "Atom",
-            "text": "float",
-            "start": 384,
-            "end": 389
-        },
-        {
-            "kind": "LeftParen",
-            "text": "(",
-            "start": 389,
-            "end": 390
-        },
-        {
-            "kind": "RightParen",
-            "text": ")",
-            "start": 390,
-            "end": 391
-        },
-        {
-            "kind": "Dot",
-            "text": ".",
-            "start": 391,
-            "end": 392
-        },
-        {
-            "kind": "Minus",
-            "text": "-",
-            "start": 394,
-            "end": 395
-        },
-        {
             "kind": "Atom",
             "text": "type",
-            "start": 395,
-            "end": 399
+            "start": 381,
+            "end": 385
         },
         {
             "kind": "Atom",
             "text": "list_of",
-            "start": 400,
-            "end": 407
+            "start": 386,
+            "end": 393
         },
         {
             "kind": "LeftParen",
             "text": "(",
-            "start": 407,
-            "end": 408
+            "start": 393,
+            "end": 394
         },
         {
             "kind": "Variable",
             "text": "T",
-            "start": 408,
-            "end": 409
+            "start": 394,
+            "end": 395
         },
         {
             "kind": "RightParen",
             "text": ")",
-            "start": 409,
-            "end": 410
+            "start": 395,
+            "end": 396
         },
         {
             "kind": "Colon",
             "text": ":",
-            "start": 411,
-            "end": 412
+            "start": 397,
+            "end": 398
         },
         {
             "kind": "Colon",
             "text": ":",
-            "start": 412,
-            "end": 413
+            "start": 398,
+            "end": 399
         },
         {
             "kind": "LeftBracket",
             "text": "[",
-            "start": 414,
-            "end": 415
+            "start": 400,
+            "end": 401
         },
         {
             "kind": "Variable",
             "text": "T",
-            "start": 415,
-            "end": 416
+            "start": 401,
+            "end": 402
         },
         {
             "kind": "RightBracket",
             "text": "]",
-            "start": 416,
-            "end": 417
+            "start": 402,
+            "end": 403
         },
         {
             "kind": "Dot",
             "text": ".",
-            "start": 417,
-            "end": 418
+            "start": 403,
+            "end": 404
         },
         {
             "kind": "Minus",
             "text": "-",
-            "start": 436,
-            "end": 437
+            "start": 419,
+            "end": 420
         },
         {
             "kind": "Atom",
             "text": "define",
-            "start": 437,
-            "end": 443
+            "start": 420,
+            "end": 426
         },
         {
             "kind": "LeftParen",
             "text": "(",
-            "start": 443,
-            "end": 444
+            "start": 426,
+            "end": 427
         },
         {
             "kind": "Variable",
             "text": "PI",
-            "start": 444,
-            "end": 446
+            "start": 427,
+            "end": 429
         },
         {
             "kind": "Comma",
             "text": ",",
-            "start": 446,
-            "end": 447
+            "start": 429,
+            "end": 430
         },
         {
             "kind": "Number",
             "text": "3",
-            "start": 448,
-            "end": 449
+            "start": 431,
+            "end": 432
         },
         {
             "kind": "Dot",
             "text": ".",
-            "start": 449,
-            "end": 450
+            "start": 432,
+            "end": 433
         },
         {
             "kind": "Number",
             "text": "14159265359",
-            "start": 450,
-            "end": 461
+            "start": 433,
+            "end": 444
         },
         {
             "kind": "RightParen",
             "text": ")",
-            "start": 461,
-            "end": 462
+            "start": 444,
+            "end": 445
         },
         {
             "kind": "Dot",
             "text": ".",
-            "start": 462,
-            "end": 463
+            "start": 445,
+            "end": 446
         },
         {
             "kind": "Minus",
             "text": "-",
-            "start": 465,
-            "end": 466
+            "start": 447,
+            "end": 448
+        },
+        {
+            "kind": "Atom",
+            "text": "define",
+            "start": 448,
+            "end": 454
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 454,
+            "end": 455
+        },
+        {
+            "kind": "Variable",
+            "text": "MAX_VALUE",
+            "start": 455,
+            "end": 464
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 464,
+            "end": 465
+        },
+        {
+            "kind": "Number",
+            "text": "1000",
+            "start": 466,
+            "end": 470
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 470,
+            "end": 471
+        },
+        {
+            "kind": "Dot",
+            "text": ".",
+            "start": 471,
+            "end": 472
+        },
+        {
+            "kind": "Minus",
+            "text": "-",
+            "start": 496,
+            "end": 497
+        },
+        {
+            "kind": "Atom",
+            "text": "record",
+            "start": 497,
+            "end": 503
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 503,
+            "end": 504
+        },
+        {
+            "kind": "Atom",
+            "text": "person",
+            "start": 504,
+            "end": 510
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 510,
+            "end": 511
+        },
+        {
+            "kind": "LeftBrace",
+            "text": "{",
+            "start": 512,
+            "end": 513
+        },
+        {
+            "kind": "Atom",
+            "text": "name",
+            "start": 518,
+            "end": 522
+        },
+        {
+            "kind": "Colon",
+            "text": ":",
+            "start": 523,
+            "end": 524
+        },
+        {
+            "kind": "Colon",
+            "text": ":",
+            "start": 524,
+            "end": 525
+        },
+        {
+            "kind": "Atom",
+            "text": "string",
+            "start": 526,
+            "end": 532
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 532,
+            "end": 533
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 533,
+            "end": 534
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 534,
+            "end": 535
+        },
+        {
+            "kind": "Atom",
+            "text": "age",
+            "start": 540,
+            "end": 543
+        },
+        {
+            "kind": "Colon",
+            "text": ":",
+            "start": 544,
+            "end": 545
+        },
+        {
+            "kind": "Colon",
+            "text": ":",
+            "start": 545,
+            "end": 546
+        },
+        {
+            "kind": "Atom",
+            "text": "integer",
+            "start": 547,
+            "end": 554
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 554,
+            "end": 555
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 555,
+            "end": 556
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 556,
+            "end": 557
+        },
+        {
+            "kind": "Atom",
+            "text": "email",
+            "start": 562,
+            "end": 567
+        },
+        {
+            "kind": "Colon",
+            "text": ":",
+            "start": 568,
+            "end": 569
+        },
+        {
+            "kind": "Colon",
+            "text": ":",
+            "start": 569,
+            "end": 570
+        },
+        {
+            "kind": "Atom",
+            "text": "string",
+            "start": 571,
+            "end": 577
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 577,
+            "end": 578
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 578,
+            "end": 579
+        },
+        {
+            "kind": "Pipe",
+            "text": "|",
+            "start": 580,
+            "end": 581
+        },
+        {
+            "kind": "Atom",
+            "text": "undefined",
+            "start": 582,
+            "end": 591
+        },
+        {
+            "kind": "RightBrace",
+            "text": "}",
+            "start": 592,
+            "end": 593
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 593,
+            "end": 594
+        },
+        {
+            "kind": "Dot",
+            "text": ".",
+            "start": 594,
+            "end": 595
+        },
+        {
+            "kind": "Minus",
+            "text": "-",
+            "start": 597,
+            "end": 598
+        },
+        {
+            "kind": "Atom",
+            "text": "record",
+            "start": 598,
+            "end": 604
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 604,
+            "end": 605
+        },
+        {
+            "kind": "Atom",
+            "text": "car",
+            "start": 605,
+            "end": 608
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 608,
+            "end": 609
+        },
+        {
+            "kind": "LeftBrace",
+            "text": "{",
+            "start": 610,
+            "end": 611
+        },
+        {
+            "kind": "Atom",
+            "text": "make",
+            "start": 616,
+            "end": 620
+        },
+        {
+            "kind": "Colon",
+            "text": ":",
+            "start": 621,
+            "end": 622
+        },
+        {
+            "kind": "Colon",
+            "text": ":",
+            "start": 622,
+            "end": 623
+        },
+        {
+            "kind": "Atom",
+            "text": "string",
+            "start": 624,
+            "end": 630
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 630,
+            "end": 631
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 631,
+            "end": 632
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 632,
+            "end": 633
+        },
+        {
+            "kind": "Atom",
+            "text": "model",
+            "start": 638,
+            "end": 643
+        },
+        {
+            "kind": "Colon",
+            "text": ":",
+            "start": 644,
+            "end": 645
+        },
+        {
+            "kind": "Colon",
+            "text": ":",
+            "start": 645,
+            "end": 646
+        },
+        {
+            "kind": "Atom",
+            "text": "string",
+            "start": 647,
+            "end": 653
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 653,
+            "end": 654
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 654,
+            "end": 655
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 655,
+            "end": 656
+        },
+        {
+            "kind": "Atom",
+            "text": "year",
+            "start": 661,
+            "end": 665
+        },
+        {
+            "kind": "Colon",
+            "text": ":",
+            "start": 666,
+            "end": 667
+        },
+        {
+            "kind": "Colon",
+            "text": ":",
+            "start": 667,
+            "end": 668
+        },
+        {
+            "kind": "Atom",
+            "text": "integer",
+            "start": 669,
+            "end": 676
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 676,
+            "end": 677
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 677,
+            "end": 678
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 678,
+            "end": 679
+        },
+        {
+            "kind": "Atom",
+            "text": "color",
+            "start": 684,
+            "end": 689
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 690,
+            "end": 691
+        },
+        {
+            "kind": "String",
+            "text": "\"red\"",
+            "start": 692,
+            "end": 697
+        },
+        {
+            "kind": "Colon",
+            "text": ":",
+            "start": 698,
+            "end": 699
+        },
+        {
+            "kind": "Colon",
+            "text": ":",
+            "start": 699,
+            "end": 700
+        },
+        {
+            "kind": "Atom",
+            "text": "string",
+            "start": 701,
+            "end": 707
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 707,
+            "end": 708
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 708,
+            "end": 709
+        },
+        {
+            "kind": "RightBrace",
+            "text": "}",
+            "start": 710,
+            "end": 711
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 711,
+            "end": 712
+        },
+        {
+            "kind": "Dot",
+            "text": ".",
+            "start": 712,
+            "end": 713
+        },
+        {
+            "kind": "Atom",
+            "text": "factorial",
+            "start": 779,
+            "end": 788
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 788,
+            "end": 789
+        },
+        {
+            "kind": "Number",
+            "text": "0",
+            "start": 789,
+            "end": 790
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 790,
+            "end": 791
+        },
+        {
+            "kind": "Arrow",
+            "text": "->",
+            "start": 792,
+            "end": 794
+        },
+        {
+            "kind": "Number",
+            "text": "1",
+            "start": 795,
+            "end": 796
+        },
+        {
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 796,
+            "end": 797
+        },
+        {
+            "kind": "Atom",
+            "text": "factorial",
+            "start": 798,
+            "end": 807
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 807,
+            "end": 808
+        },
+        {
+            "kind": "Variable",
+            "text": "N",
+            "start": 808,
+            "end": 809
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 809,
+            "end": 810
+        },
+        {
+            "kind": "When",
+            "text": "when",
+            "start": 811,
+            "end": 815
+        },
+        {
+            "kind": "Variable",
+            "text": "N",
+            "start": 816,
+            "end": 817
+        },
+        {
+            "kind": "Greater",
+            "text": ">",
+            "start": 818,
+            "end": 819
+        },
+        {
+            "kind": "Number",
+            "text": "0",
+            "start": 820,
+            "end": 821
+        },
+        {
+            "kind": "Arrow",
+            "text": "->",
+            "start": 822,
+            "end": 824
+        },
+        {
+            "kind": "Variable",
+            "text": "N",
+            "start": 825,
+            "end": 826
+        },
+        {
+            "kind": "Star",
+            "text": "*",
+            "start": 827,
+            "end": 828
+        },
+        {
+            "kind": "Atom",
+            "text": "factorial",
+            "start": 829,
+            "end": 838
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 838,
+            "end": 839
+        },
+        {
+            "kind": "Variable",
+            "text": "N",
+            "start": 839,
+            "end": 840
+        },
+        {
+            "kind": "Minus",
+            "text": "-",
+            "start": 841,
+            "end": 842
+        },
+        {
+            "kind": "Number",
+            "text": "1",
+            "start": 843,
+            "end": 844
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 844,
+            "end": 845
+        },
+        {
+            "kind": "Dot",
+            "text": ".",
+            "start": 845,
+            "end": 846
+        },
+        {
+            "kind": "Atom",
+            "text": "fibonacci",
+            "start": 869,
+            "end": 878
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 878,
+            "end": 879
+        },
+        {
+            "kind": "Number",
+            "text": "0",
+            "start": 879,
+            "end": 880
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 880,
+            "end": 881
+        },
+        {
+            "kind": "Arrow",
+            "text": "->",
+            "start": 882,
+            "end": 884
+        },
+        {
+            "kind": "Number",
+            "text": "0",
+            "start": 885,
+            "end": 886
+        },
+        {
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 886,
+            "end": 887
+        },
+        {
+            "kind": "Atom",
+            "text": "fibonacci",
+            "start": 888,
+            "end": 897
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 897,
+            "end": 898
+        },
+        {
+            "kind": "Number",
+            "text": "1",
+            "start": 898,
+            "end": 899
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 899,
+            "end": 900
+        },
+        {
+            "kind": "Arrow",
+            "text": "->",
+            "start": 901,
+            "end": 903
+        },
+        {
+            "kind": "Number",
+            "text": "1",
+            "start": 904,
+            "end": 905
+        },
+        {
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 905,
+            "end": 906
+        },
+        {
+            "kind": "Atom",
+            "text": "fibonacci",
+            "start": 907,
+            "end": 916
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 916,
+            "end": 917
+        },
+        {
+            "kind": "Variable",
+            "text": "N",
+            "start": 917,
+            "end": 918
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 918,
+            "end": 919
+        },
+        {
+            "kind": "When",
+            "text": "when",
+            "start": 920,
+            "end": 924
+        },
+        {
+            "kind": "Variable",
+            "text": "N",
+            "start": 925,
+            "end": 926
+        },
+        {
+            "kind": "Greater",
+            "text": ">",
+            "start": 927,
+            "end": 928
+        },
+        {
+            "kind": "Number",
+            "text": "1",
+            "start": 929,
+            "end": 930
+        },
+        {
+            "kind": "Arrow",
+            "text": "->",
+            "start": 931,
+            "end": 933
+        },
+        {
+            "kind": "Atom",
+            "text": "fibonacci",
+            "start": 934,
+            "end": 943
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 943,
+            "end": 944
+        },
+        {
+            "kind": "Variable",
+            "text": "N",
+            "start": 944,
+            "end": 945
+        },
+        {
+            "kind": "Minus",
+            "text": "-",
+            "start": 946,
+            "end": 947
+        },
+        {
+            "kind": "Number",
+            "text": "1",
+            "start": 948,
+            "end": 949
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 949,
+            "end": 950
+        },
+        {
+            "kind": "Plus",
+            "text": "+",
+            "start": 951,
+            "end": 952
+        },
+        {
+            "kind": "Atom",
+            "text": "fibonacci",
+            "start": 953,
+            "end": 962
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 962,
+            "end": 963
+        },
+        {
+            "kind": "Variable",
+            "text": "N",
+            "start": 963,
+            "end": 964
+        },
+        {
+            "kind": "Minus",
+            "text": "-",
+            "start": 965,
+            "end": 966
+        },
+        {
+            "kind": "Number",
+            "text": "2",
+            "start": 967,
+            "end": 968
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 968,
+            "end": 969
+        },
+        {
+            "kind": "Dot",
+            "text": ".",
+            "start": 969,
+            "end": 970
+        },
+        {
+            "kind": "Atom",
+            "text": "list_sum",
+            "start": 1012,
+            "end": 1020
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 1020,
+            "end": 1021
+        },
+        {
+            "kind": "LeftBracket",
+            "text": "[",
+            "start": 1021,
+            "end": 1022
+        },
+        {
+            "kind": "RightBracket",
+            "text": "]",
+            "start": 1022,
+            "end": 1023
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 1023,
+            "end": 1024
+        },
+        {
+            "kind": "Arrow",
+            "text": "->",
+            "start": 1025,
+            "end": 1027
+        },
+        {
+            "kind": "Number",
+            "text": "0",
+            "start": 1028,
+            "end": 1029
+        },
+        {
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 1029,
+            "end": 1030
+        },
+        {
+            "kind": "Atom",
+            "text": "list_sum",
+            "start": 1031,
+            "end": 1039
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 1039,
+            "end": 1040
+        },
+        {
+            "kind": "LeftBracket",
+            "text": "[",
+            "start": 1040,
+            "end": 1041
+        },
+        {
+            "kind": "Variable",
+            "text": "Head",
+            "start": 1041,
+            "end": 1045
+        },
+        {
+            "kind": "Pipe",
+            "text": "|",
+            "start": 1046,
+            "end": 1047
+        },
+        {
+            "kind": "Variable",
+            "text": "Tail",
+            "start": 1048,
+            "end": 1052
+        },
+        {
+            "kind": "RightBracket",
+            "text": "]",
+            "start": 1052,
+            "end": 1053
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 1053,
+            "end": 1054
+        },
+        {
+            "kind": "Arrow",
+            "text": "->",
+            "start": 1055,
+            "end": 1057
+        },
+        {
+            "kind": "Variable",
+            "text": "Head",
+            "start": 1058,
+            "end": 1062
+        },
+        {
+            "kind": "Plus",
+            "text": "+",
+            "start": 1063,
+            "end": 1064
+        },
+        {
+            "kind": "Atom",
+            "text": "list_sum",
+            "start": 1065,
+            "end": 1073
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 1073,
+            "end": 1074
+        },
+        {
+            "kind": "Variable",
+            "text": "Tail",
+            "start": 1074,
+            "end": 1078
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 1078,
+            "end": 1079
+        },
+        {
+            "kind": "Dot",
+            "text": ".",
+            "start": 1079,
+            "end": 1080
+        },
+        {
+            "kind": "Atom",
+            "text": "map",
+            "start": 1112,
+            "end": 1115
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 1115,
+            "end": 1116
+        },
+        {
+            "kind": "Variable",
+            "text": "_",
+            "start": 1116,
+            "end": 1117
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 1117,
+            "end": 1118
+        },
+        {
+            "kind": "LeftBracket",
+            "text": "[",
+            "start": 1119,
+            "end": 1120
+        },
+        {
+            "kind": "RightBracket",
+            "text": "]",
+            "start": 1120,
+            "end": 1121
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 1121,
+            "end": 1122
+        },
+        {
+            "kind": "Arrow",
+            "text": "->",
+            "start": 1123,
+            "end": 1125
+        },
+        {
+            "kind": "LeftBracket",
+            "text": "[",
+            "start": 1126,
+            "end": 1127
+        },
+        {
+            "kind": "RightBracket",
+            "text": "]",
+            "start": 1127,
+            "end": 1128
+        },
+        {
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 1128,
+            "end": 1129
+        },
+        {
+            "kind": "Atom",
+            "text": "map",
+            "start": 1130,
+            "end": 1133
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 1133,
+            "end": 1134
+        },
+        {
+            "kind": "Variable",
+            "text": "Function",
+            "start": 1134,
+            "end": 1142
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 1142,
+            "end": 1143
+        },
+        {
+            "kind": "LeftBracket",
+            "text": "[",
+            "start": 1144,
+            "end": 1145
+        },
+        {
+            "kind": "Variable",
+            "text": "Head",
+            "start": 1145,
+            "end": 1149
+        },
+        {
+            "kind": "Pipe",
+            "text": "|",
+            "start": 1150,
+            "end": 1151
+        },
+        {
+            "kind": "Variable",
+            "text": "Tail",
+            "start": 1152,
+            "end": 1156
+        },
+        {
+            "kind": "RightBracket",
+            "text": "]",
+            "start": 1156,
+            "end": 1157
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 1157,
+            "end": 1158
+        },
+        {
+            "kind": "Arrow",
+            "text": "->",
+            "start": 1159,
+            "end": 1161
+        },
+        {
+            "kind": "LeftBracket",
+            "text": "[",
+            "start": 1162,
+            "end": 1163
+        },
+        {
+            "kind": "Variable",
+            "text": "Function",
+            "start": 1163,
+            "end": 1171
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 1171,
+            "end": 1172
+        },
+        {
+            "kind": "Variable",
+            "text": "Head",
+            "start": 1172,
+            "end": 1176
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 1176,
+            "end": 1177
+        },
+        {
+            "kind": "Pipe",
+            "text": "|",
+            "start": 1178,
+            "end": 1179
+        },
+        {
+            "kind": "Atom",
+            "text": "map",
+            "start": 1180,
+            "end": 1183
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 1183,
+            "end": 1184
+        },
+        {
+            "kind": "Variable",
+            "text": "Function",
+            "start": 1184,
+            "end": 1192
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 1192,
+            "end": 1193
+        },
+        {
+            "kind": "Variable",
+            "text": "Tail",
+            "start": 1194,
+            "end": 1198
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 1198,
+            "end": 1199
+        },
+        {
+            "kind": "RightBracket",
+            "text": "]",
+            "start": 1199,
+            "end": 1200
+        },
+        {
+            "kind": "Dot",
+            "text": ".",
+            "start": 1200,
+            "end": 1201
+        },
+        {
+            "kind": "Atom",
+            "text": "filter",
+            "start": 1236,
+            "end": 1242
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 1242,
+            "end": 1243
+        },
+        {
+            "kind": "Variable",
+            "text": "_",
+            "start": 1243,
+            "end": 1244
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 1244,
+            "end": 1245
+        },
+        {
+            "kind": "LeftBracket",
+            "text": "[",
+            "start": 1246,
+            "end": 1247
+        },
+        {
+            "kind": "RightBracket",
+            "text": "]",
+            "start": 1247,
+            "end": 1248
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 1248,
+            "end": 1249
+        },
+        {
+            "kind": "Arrow",
+            "text": "->",
+            "start": 1250,
+            "end": 1252
+        },
+        {
+            "kind": "LeftBracket",
+            "text": "[",
+            "start": 1253,
+            "end": 1254
+        },
+        {
+            "kind": "RightBracket",
+            "text": "]",
+            "start": 1254,
+            "end": 1255
+        },
+        {
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 1255,
+            "end": 1256
+        },
+        {
+            "kind": "Atom",
+            "text": "filter",
+            "start": 1257,
+            "end": 1263
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 1263,
+            "end": 1264
+        },
+        {
+            "kind": "Variable",
+            "text": "Predicate",
+            "start": 1264,
+            "end": 1273
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 1273,
+            "end": 1274
+        },
+        {
+            "kind": "LeftBracket",
+            "text": "[",
+            "start": 1275,
+            "end": 1276
+        },
+        {
+            "kind": "Variable",
+            "text": "Head",
+            "start": 1276,
+            "end": 1280
+        },
+        {
+            "kind": "Pipe",
+            "text": "|",
+            "start": 1281,
+            "end": 1282
+        },
+        {
+            "kind": "Variable",
+            "text": "Tail",
+            "start": 1283,
+            "end": 1287
+        },
+        {
+            "kind": "RightBracket",
+            "text": "]",
+            "start": 1287,
+            "end": 1288
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 1288,
+            "end": 1289
+        },
+        {
+            "kind": "Arrow",
+            "text": "->",
+            "start": 1290,
+            "end": 1292
+        },
+        {
+            "kind": "Case",
+            "text": "case",
+            "start": 1297,
+            "end": 1301
+        },
+        {
+            "kind": "Variable",
+            "text": "Predicate",
+            "start": 1302,
+            "end": 1311
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 1311,
+            "end": 1312
+        },
+        {
+            "kind": "Variable",
+            "text": "Head",
+            "start": 1312,
+            "end": 1316
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 1316,
+            "end": 1317
+        },
+        {
+            "kind": "Of",
+            "text": "of",
+            "start": 1318,
+            "end": 1320
+        },
+        {
+            "kind": "Atom",
+            "text": "true",
+            "start": 1329,
+            "end": 1333
+        },
+        {
+            "kind": "Arrow",
+            "text": "->",
+            "start": 1334,
+            "end": 1336
+        },
+        {
+            "kind": "LeftBracket",
+            "text": "[",
+            "start": 1337,
+            "end": 1338
+        },
+        {
+            "kind": "Variable",
+            "text": "Head",
+            "start": 1338,
+            "end": 1342
+        },
+        {
+            "kind": "Pipe",
+            "text": "|",
+            "start": 1343,
+            "end": 1344
+        },
+        {
+            "kind": "Atom",
+            "text": "filter",
+            "start": 1345,
+            "end": 1351
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 1351,
+            "end": 1352
+        },
+        {
+            "kind": "Variable",
+            "text": "Predicate",
+            "start": 1352,
+            "end": 1361
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 1361,
+            "end": 1362
+        },
+        {
+            "kind": "Variable",
+            "text": "Tail",
+            "start": 1363,
+            "end": 1367
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 1367,
+            "end": 1368
+        },
+        {
+            "kind": "RightBracket",
+            "text": "]",
+            "start": 1368,
+            "end": 1369
+        },
+        {
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 1369,
+            "end": 1370
+        },
+        {
+            "kind": "Atom",
+            "text": "false",
+            "start": 1379,
+            "end": 1384
+        },
+        {
+            "kind": "Arrow",
+            "text": "->",
+            "start": 1385,
+            "end": 1387
+        },
+        {
+            "kind": "Atom",
+            "text": "filter",
+            "start": 1388,
+            "end": 1394
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 1394,
+            "end": 1395
+        },
+        {
+            "kind": "Variable",
+            "text": "Predicate",
+            "start": 1395,
+            "end": 1404
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 1404,
+            "end": 1405
+        },
+        {
+            "kind": "Variable",
+            "text": "Tail",
+            "start": 1406,
+            "end": 1410
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 1410,
+            "end": 1411
+        },
+        {
+            "kind": "End",
+            "text": "end",
+            "start": 1416,
+            "end": 1419
+        },
+        {
+            "kind": "Dot",
+            "text": ".",
+            "start": 1419,
+            "end": 1420
+        },
+        {
+            "kind": "Atom",
+            "text": "absolute_value",
+            "start": 1466,
+            "end": 1480
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 1480,
+            "end": 1481
+        },
+        {
+            "kind": "Variable",
+            "text": "X",
+            "start": 1481,
+            "end": 1482
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 1482,
+            "end": 1483
+        },
+        {
+            "kind": "When",
+            "text": "when",
+            "start": 1484,
+            "end": 1488
+        },
+        {
+            "kind": "Variable",
+            "text": "X",
+            "start": 1489,
+            "end": 1490
+        },
+        {
+            "kind": "GreaterEqual",
+            "text": ">=",
+            "start": 1491,
+            "end": 1493
+        },
+        {
+            "kind": "Number",
+            "text": "0",
+            "start": 1494,
+            "end": 1495
+        },
+        {
+            "kind": "Arrow",
+            "text": "->",
+            "start": 1496,
+            "end": 1498
+        },
+        {
+            "kind": "Variable",
+            "text": "X",
+            "start": 1499,
+            "end": 1500
+        },
+        {
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 1500,
+            "end": 1501
+        },
+        {
+            "kind": "Atom",
+            "text": "absolute_value",
+            "start": 1502,
+            "end": 1516
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 1516,
+            "end": 1517
+        },
+        {
+            "kind": "Variable",
+            "text": "X",
+            "start": 1517,
+            "end": 1518
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 1518,
+            "end": 1519
+        },
+        {
+            "kind": "When",
+            "text": "when",
+            "start": 1520,
+            "end": 1524
+        },
+        {
+            "kind": "Variable",
+            "text": "X",
+            "start": 1525,
+            "end": 1526
+        },
+        {
+            "kind": "Less",
+            "text": "<",
+            "start": 1527,
+            "end": 1528
+        },
+        {
+            "kind": "Number",
+            "text": "0",
+            "start": 1529,
+            "end": 1530
+        },
+        {
+            "kind": "Arrow",
+            "text": "->",
+            "start": 1531,
+            "end": 1533
+        },
+        {
+            "kind": "Minus",
+            "text": "-",
+            "start": 1534,
+            "end": 1535
+        },
+        {
+            "kind": "Variable",
+            "text": "X",
+            "start": 1535,
+            "end": 1536
+        },
+        {
+            "kind": "Dot",
+            "text": ".",
+            "start": 1536,
+            "end": 1537
+        },
+        {
+            "kind": "Atom",
+            "text": "double_numbers",
+            "start": 1561,
+            "end": 1575
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 1575,
+            "end": 1576
+        },
+        {
+            "kind": "Variable",
+            "text": "List",
+            "start": 1576,
+            "end": 1580
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 1580,
+            "end": 1581
+        },
+        {
+            "kind": "Arrow",
+            "text": "->",
+            "start": 1582,
+            "end": 1584
+        },
+        {
+            "kind": "LeftBracket",
+            "text": "[",
+            "start": 1585,
+            "end": 1586
+        },
+        {
+            "kind": "Variable",
+            "text": "X",
+            "start": 1586,
+            "end": 1587
+        },
+        {
+            "kind": "Star",
+            "text": "*",
+            "start": 1588,
+            "end": 1589
+        },
+        {
+            "kind": "Number",
+            "text": "2",
+            "start": 1590,
+            "end": 1591
+        },
+        {
+            "kind": "PipePipe",
+            "text": "||",
+            "start": 1592,
+            "end": 1594
+        },
+        {
+            "kind": "Variable",
+            "text": "X",
+            "start": 1595,
+            "end": 1596
+        },
+        {
+            "kind": "Less",
+            "text": "<",
+            "start": 1597,
+            "end": 1598
+        },
+        {
+            "kind": "Minus",
+            "text": "-",
+            "start": 1598,
+            "end": 1599
+        },
+        {
+            "kind": "Variable",
+            "text": "List",
+            "start": 1600,
+            "end": 1604
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 1604,
+            "end": 1605
+        },
+        {
+            "kind": "Variable",
+            "text": "X",
+            "start": 1606,
+            "end": 1607
+        },
+        {
+            "kind": "Greater",
+            "text": ">",
+            "start": 1608,
+            "end": 1609
+        },
+        {
+            "kind": "Number",
+            "text": "0",
+            "start": 1610,
+            "end": 1611
+        },
+        {
+            "kind": "RightBracket",
+            "text": "]",
+            "start": 1611,
+            "end": 1612
+        },
+        {
+            "kind": "Dot",
+            "text": ".",
+            "start": 1612,
+            "end": 1613
+        },
+        {
+            "kind": "Atom",
+            "text": "square_numbers",
+            "start": 1615,
+            "end": 1629
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 1629,
+            "end": 1630
+        },
+        {
+            "kind": "Variable",
+            "text": "List",
+            "start": 1630,
+            "end": 1634
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 1634,
+            "end": 1635
+        },
+        {
+            "kind": "Arrow",
+            "text": "->",
+            "start": 1636,
+            "end": 1638
+        },
+        {
+            "kind": "LeftBracket",
+            "text": "[",
+            "start": 1639,
+            "end": 1640
+        },
+        {
+            "kind": "Variable",
+            "text": "X",
+            "start": 1640,
+            "end": 1641
+        },
+        {
+            "kind": "Star",
+            "text": "*",
+            "start": 1642,
+            "end": 1643
+        },
+        {
+            "kind": "Variable",
+            "text": "X",
+            "start": 1644,
+            "end": 1645
+        },
+        {
+            "kind": "PipePipe",
+            "text": "||",
+            "start": 1646,
+            "end": 1648
+        },
+        {
+            "kind": "Variable",
+            "text": "X",
+            "start": 1649,
+            "end": 1650
+        },
+        {
+            "kind": "Less",
+            "text": "<",
+            "start": 1651,
+            "end": 1652
+        },
+        {
+            "kind": "Minus",
+            "text": "-",
+            "start": 1652,
+            "end": 1653
+        },
+        {
+            "kind": "Variable",
+            "text": "List",
+            "start": 1654,
+            "end": 1658
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 1658,
+            "end": 1659
+        },
+        {
+            "kind": "Atom",
+            "text": "is_integer",
+            "start": 1660,
+            "end": 1670
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 1670,
+            "end": 1671
+        },
+        {
+            "kind": "Variable",
+            "text": "X",
+            "start": 1671,
+            "end": 1672
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 1672,
+            "end": 1673
+        },
+        {
+            "kind": "RightBracket",
+            "text": "]",
+            "start": 1673,
+            "end": 1674
+        },
+        {
+            "kind": "Dot",
+            "text": ".",
+            "start": 1674,
+            "end": 1675
+        },
+        {
+            "kind": "Atom",
+            "text": "binary_to_list",
+            "start": 1701,
+            "end": 1715
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 1715,
+            "end": 1716
+        },
+        {
+            "kind": "Variable",
+            "text": "Binary",
+            "start": 1716,
+            "end": 1722
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 1722,
+            "end": 1723
+        },
+        {
+            "kind": "Arrow",
+            "text": "->",
+            "start": 1724,
+            "end": 1726
+        },
+        {
+            "kind": "LeftBracket",
+            "text": "[",
+            "start": 1727,
+            "end": 1728
+        },
+        {
+            "kind": "Variable",
+            "text": "X",
+            "start": 1728,
+            "end": 1729
+        },
+        {
+            "kind": "PipePipe",
+            "text": "||",
+            "start": 1730,
+            "end": 1732
+        },
+        {
+            "kind": "Less",
+            "text": "<",
+            "start": 1733,
+            "end": 1734
+        },
+        {
+            "kind": "Less",
+            "text": "<",
+            "start": 1734,
+            "end": 1735
+        },
+        {
+            "kind": "Variable",
+            "text": "X",
+            "start": 1735,
+            "end": 1736
+        },
+        {
+            "kind": "Colon",
+            "text": ":",
+            "start": 1736,
+            "end": 1737
+        },
+        {
+            "kind": "Number",
+            "text": "8",
+            "start": 1737,
+            "end": 1738
+        },
+        {
+            "kind": "Greater",
+            "text": ">",
+            "start": 1738,
+            "end": 1739
+        },
+        {
+            "kind": "Greater",
+            "text": ">",
+            "start": 1739,
+            "end": 1740
+        },
+        {
+            "kind": "Less",
+            "text": "<",
+            "start": 1741,
+            "end": 1742
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 1742,
+            "end": 1743
+        },
+        {
+            "kind": "Variable",
+            "text": "Binary",
+            "start": 1744,
+            "end": 1750
+        },
+        {
+            "kind": "RightBracket",
+            "text": "]",
+            "start": 1750,
+            "end": 1751
+        },
+        {
+            "kind": "Dot",
+            "text": ".",
+            "start": 1751,
+            "end": 1752
+        },
+        {
+            "kind": "Atom",
+            "text": "process_value",
+            "start": 1772,
+            "end": 1785
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 1785,
+            "end": 1786
+        },
+        {
+            "kind": "Variable",
+            "text": "Value",
+            "start": 1786,
+            "end": 1791
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 1791,
+            "end": 1792
+        },
+        {
+            "kind": "Arrow",
+            "text": "->",
+            "start": 1793,
+            "end": 1795
+        },
+        {
+            "kind": "Case",
+            "text": "case",
+            "start": 1800,
+            "end": 1804
+        },
+        {
+            "kind": "Variable",
+            "text": "Value",
+            "start": 1805,
+            "end": 1810
+        },
+        {
+            "kind": "Of",
+            "text": "of",
+            "start": 1811,
+            "end": 1813
+        },
+        {
+            "kind": "Number",
+            "text": "0",
+            "start": 1822,
+            "end": 1823
+        },
+        {
+            "kind": "Arrow",
+            "text": "->",
+            "start": 1824,
+            "end": 1826
+        },
+        {
+            "kind": "Atom",
+            "text": "zero",
+            "start": 1827,
+            "end": 1831
+        },
+        {
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 1831,
+            "end": 1832
+        },
+        {
+            "kind": "Variable",
+            "text": "N",
+            "start": 1841,
+            "end": 1842
+        },
+        {
+            "kind": "When",
+            "text": "when",
+            "start": 1843,
+            "end": 1847
+        },
+        {
+            "kind": "Variable",
+            "text": "N",
+            "start": 1848,
+            "end": 1849
+        },
+        {
+            "kind": "Greater",
+            "text": ">",
+            "start": 1850,
+            "end": 1851
+        },
+        {
+            "kind": "Number",
+            "text": "0",
+            "start": 1852,
+            "end": 1853
+        },
+        {
+            "kind": "Arrow",
+            "text": "->",
+            "start": 1854,
+            "end": 1856
+        },
+        {
+            "kind": "Atom",
+            "text": "positive",
+            "start": 1857,
+            "end": 1865
+        },
+        {
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 1865,
+            "end": 1866
+        },
+        {
+            "kind": "Variable",
+            "text": "N",
+            "start": 1875,
+            "end": 1876
+        },
+        {
+            "kind": "When",
+            "text": "when",
+            "start": 1877,
+            "end": 1881
+        },
+        {
+            "kind": "Variable",
+            "text": "N",
+            "start": 1882,
+            "end": 1883
+        },
+        {
+            "kind": "Less",
+            "text": "<",
+            "start": 1884,
+            "end": 1885
+        },
+        {
+            "kind": "Number",
+            "text": "0",
+            "start": 1886,
+            "end": 1887
+        },
+        {
+            "kind": "Arrow",
+            "text": "->",
+            "start": 1888,
+            "end": 1890
+        },
+        {
+            "kind": "Atom",
+            "text": "negative",
+            "start": 1891,
+            "end": 1899
+        },
+        {
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 1899,
+            "end": 1900
+        },
+        {
+            "kind": "Variable",
+            "text": "_",
+            "start": 1909,
+            "end": 1910
+        },
+        {
+            "kind": "Arrow",
+            "text": "->",
+            "start": 1911,
+            "end": 1913
+        },
+        {
+            "kind": "Atom",
+            "text": "unknown",
+            "start": 1914,
+            "end": 1921
+        },
+        {
+            "kind": "End",
+            "text": "end",
+            "start": 1926,
+            "end": 1929
+        },
+        {
+            "kind": "Dot",
+            "text": ".",
+            "start": 1929,
+            "end": 1930
+        },
+        {
+            "kind": "Atom",
+            "text": "get_grade",
+            "start": 1948,
+            "end": 1957
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 1957,
+            "end": 1958
+        },
+        {
+            "kind": "Variable",
+            "text": "Score",
+            "start": 1958,
+            "end": 1963
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 1963,
+            "end": 1964
+        },
+        {
+            "kind": "Arrow",
+            "text": "->",
+            "start": 1965,
+            "end": 1967
+        },
+        {
+            "kind": "If",
+            "text": "if",
+            "start": 1972,
+            "end": 1974
+        },
+        {
+            "kind": "Variable",
+            "text": "Score",
+            "start": 1983,
+            "end": 1988
+        },
+        {
+            "kind": "GreaterEqual",
+            "text": ">=",
+            "start": 1989,
+            "end": 1991
+        },
+        {
+            "kind": "Number",
+            "text": "90",
+            "start": 1992,
+            "end": 1994
+        },
+        {
+            "kind": "Arrow",
+            "text": "->",
+            "start": 1995,
+            "end": 1997
+        },
+        {
+            "kind": "Atom",
+            "text": "'A'",
+            "start": 1998,
+            "end": 2001
+        },
+        {
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 2001,
+            "end": 2002
+        },
+        {
+            "kind": "Variable",
+            "text": "Score",
+            "start": 2011,
+            "end": 2016
+        },
+        {
+            "kind": "GreaterEqual",
+            "text": ">=",
+            "start": 2017,
+            "end": 2019
+        },
+        {
+            "kind": "Number",
+            "text": "80",
+            "start": 2020,
+            "end": 2022
+        },
+        {
+            "kind": "Arrow",
+            "text": "->",
+            "start": 2023,
+            "end": 2025
+        },
+        {
+            "kind": "Atom",
+            "text": "'B'",
+            "start": 2026,
+            "end": 2029
+        },
+        {
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 2029,
+            "end": 2030
+        },
+        {
+            "kind": "Variable",
+            "text": "Score",
+            "start": 2039,
+            "end": 2044
+        },
+        {
+            "kind": "GreaterEqual",
+            "text": ">=",
+            "start": 2045,
+            "end": 2047
+        },
+        {
+            "kind": "Number",
+            "text": "70",
+            "start": 2048,
+            "end": 2050
+        },
+        {
+            "kind": "Arrow",
+            "text": "->",
+            "start": 2051,
+            "end": 2053
+        },
+        {
+            "kind": "Atom",
+            "text": "'C'",
+            "start": 2054,
+            "end": 2057
+        },
+        {
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 2057,
+            "end": 2058
+        },
+        {
+            "kind": "Variable",
+            "text": "Score",
+            "start": 2067,
+            "end": 2072
+        },
+        {
+            "kind": "GreaterEqual",
+            "text": ">=",
+            "start": 2073,
+            "end": 2075
+        },
+        {
+            "kind": "Number",
+            "text": "60",
+            "start": 2076,
+            "end": 2078
+        },
+        {
+            "kind": "Arrow",
+            "text": "->",
+            "start": 2079,
+            "end": 2081
+        },
+        {
+            "kind": "Atom",
+            "text": "'D'",
+            "start": 2082,
+            "end": 2085
+        },
+        {
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 2085,
+            "end": 2086
+        },
+        {
+            "kind": "Atom",
+            "text": "true",
+            "start": 2095,
+            "end": 2099
+        },
+        {
+            "kind": "Arrow",
+            "text": "->",
+            "start": 2100,
+            "end": 2102
+        },
+        {
+            "kind": "Atom",
+            "text": "'F'",
+            "start": 2103,
+            "end": 2106
+        },
+        {
+            "kind": "End",
+            "text": "end",
+            "start": 2111,
+            "end": 2114
+        },
+        {
+            "kind": "Dot",
+            "text": ".",
+            "start": 2114,
+            "end": 2115
+        },
+        {
+            "kind": "Atom",
+            "text": "safe_divide",
+            "start": 2140,
+            "end": 2151
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 2151,
+            "end": 2152
+        },
+        {
+            "kind": "Variable",
+            "text": "A",
+            "start": 2152,
+            "end": 2153
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 2153,
+            "end": 2154
+        },
+        {
+            "kind": "Variable",
+            "text": "B",
+            "start": 2155,
+            "end": 2156
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 2156,
+            "end": 2157
+        },
+        {
+            "kind": "Arrow",
+            "text": "->",
+            "start": 2158,
+            "end": 2160
+        },
+        {
+            "kind": "Try",
+            "text": "try",
+            "start": 2165,
+            "end": 2168
+        },
+        {
+            "kind": "Variable",
+            "text": "A",
+            "start": 2169,
+            "end": 2170
+        },
+        {
+            "kind": "Slash",
+            "text": "/",
+            "start": 2171,
+            "end": 2172
+        },
+        {
+            "kind": "Variable",
+            "text": "B",
+            "start": 2173,
+            "end": 2174
+        },
+        {
+            "kind": "Of",
+            "text": "of",
+            "start": 2175,
+            "end": 2177
+        },
+        {
+            "kind": "Variable",
+            "text": "Result",
+            "start": 2186,
+            "end": 2192
+        },
+        {
+            "kind": "Arrow",
+            "text": "->",
+            "start": 2193,
+            "end": 2195
+        },
+        {
+            "kind": "LeftBrace",
+            "text": "{",
+            "start": 2196,
+            "end": 2197
+        },
+        {
+            "kind": "Atom",
+            "text": "ok",
+            "start": 2197,
+            "end": 2199
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 2199,
+            "end": 2200
+        },
+        {
+            "kind": "Variable",
+            "text": "Result",
+            "start": 2201,
+            "end": 2207
+        },
+        {
+            "kind": "RightBrace",
+            "text": "}",
+            "start": 2207,
+            "end": 2208
+        },
+        {
+            "kind": "Catch",
+            "text": "catch",
+            "start": 2213,
+            "end": 2218
+        },
+        {
+            "kind": "Atom",
+            "text": "error",
+            "start": 2227,
+            "end": 2232
+        },
+        {
+            "kind": "Colon",
+            "text": ":",
+            "start": 2232,
+            "end": 2233
+        },
+        {
+            "kind": "Atom",
+            "text": "badarith",
+            "start": 2233,
+            "end": 2241
+        },
+        {
+            "kind": "Arrow",
+            "text": "->",
+            "start": 2242,
+            "end": 2244
+        },
+        {
+            "kind": "LeftBrace",
+            "text": "{",
+            "start": 2245,
+            "end": 2246
+        },
+        {
+            "kind": "Atom",
+            "text": "error",
+            "start": 2246,
+            "end": 2251
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 2251,
+            "end": 2252
+        },
+        {
+            "kind": "Atom",
+            "text": "division_by_zero",
+            "start": 2253,
+            "end": 2269
+        },
+        {
+            "kind": "RightBrace",
+            "text": "}",
+            "start": 2269,
+            "end": 2270
+        },
+        {
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 2270,
+            "end": 2271
+        },
+        {
+            "kind": "Atom",
+            "text": "error",
+            "start": 2280,
+            "end": 2285
+        },
+        {
+            "kind": "Colon",
+            "text": ":",
+            "start": 2285,
+            "end": 2286
+        },
+        {
+            "kind": "Variable",
+            "text": "Error",
+            "start": 2286,
+            "end": 2291
+        },
+        {
+            "kind": "Arrow",
+            "text": "->",
+            "start": 2292,
+            "end": 2294
+        },
+        {
+            "kind": "LeftBrace",
+            "text": "{",
+            "start": 2295,
+            "end": 2296
+        },
+        {
+            "kind": "Atom",
+            "text": "error",
+            "start": 2296,
+            "end": 2301
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 2301,
+            "end": 2302
+        },
+        {
+            "kind": "Variable",
+            "text": "Error",
+            "start": 2303,
+            "end": 2308
+        },
+        {
+            "kind": "RightBrace",
+            "text": "}",
+            "start": 2308,
+            "end": 2309
+        },
+        {
+            "kind": "After",
+            "text": "after",
+            "start": 2314,
+            "end": 2319
+        },
+        {
+            "kind": "Atom",
+            "text": "io",
+            "start": 2328,
+            "end": 2330
+        },
+        {
+            "kind": "Colon",
+            "text": ":",
+            "start": 2330,
+            "end": 2331
+        },
+        {
+            "kind": "Atom",
+            "text": "format",
+            "start": 2331,
+            "end": 2337
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 2337,
+            "end": 2338
+        },
+        {
+            "kind": "String",
+            "text": "\"Division attempted with ~p and ~p~n\"",
+            "start": 2338,
+            "end": 2375
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 2375,
+            "end": 2376
+        },
+        {
+            "kind": "LeftBracket",
+            "text": "[",
+            "start": 2377,
+            "end": 2378
+        },
+        {
+            "kind": "Variable",
+            "text": "A",
+            "start": 2378,
+            "end": 2379
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 2379,
+            "end": 2380
+        },
+        {
+            "kind": "Variable",
+            "text": "B",
+            "start": 2381,
+            "end": 2382
+        },
+        {
+            "kind": "RightBracket",
+            "text": "]",
+            "start": 2382,
+            "end": 2383
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 2383,
+            "end": 2384
+        },
+        {
+            "kind": "End",
+            "text": "end",
+            "start": 2389,
+            "end": 2392
+        },
+        {
+            "kind": "Dot",
+            "text": ".",
+            "start": 2392,
+            "end": 2393
+        },
+        {
+            "kind": "Atom",
+            "text": "message_loop",
+            "start": 2438,
+            "end": 2450
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 2450,
+            "end": 2451
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 2451,
+            "end": 2452
+        },
+        {
+            "kind": "Arrow",
+            "text": "->",
+            "start": 2453,
+            "end": 2455
+        },
+        {
+            "kind": "Receive",
+            "text": "receive",
+            "start": 2460,
+            "end": 2467
+        },
+        {
+            "kind": "LeftBrace",
+            "text": "{",
+            "start": 2476,
+            "end": 2477
+        },
+        {
+            "kind": "Atom",
+            "text": "sender",
+            "start": 2477,
+            "end": 2483
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 2483,
+            "end": 2484
+        },
+        {
+            "kind": "Atom",
+            "text": "hello",
+            "start": 2485,
+            "end": 2490
+        },
+        {
+            "kind": "RightBrace",
+            "text": "}",
+            "start": 2490,
+            "end": 2491
+        },
+        {
+            "kind": "Arrow",
+            "text": "->",
+            "start": 2492,
+            "end": 2494
+        },
+        {
+            "kind": "Atom",
+            "text": "sender",
+            "start": 2507,
+            "end": 2513
+        },
+        {
+            "kind": "Exclamation",
+            "text": "!",
+            "start": 2514,
+            "end": 2515
+        },
+        {
+            "kind": "LeftBrace",
+            "text": "{",
+            "start": 2516,
+            "end": 2517
+        },
+        {
+            "kind": "Atom",
+            "text": "self",
+            "start": 2517,
+            "end": 2521
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 2521,
+            "end": 2522
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 2522,
+            "end": 2523
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 2523,
+            "end": 2524
+        },
+        {
+            "kind": "Atom",
+            "text": "hi",
+            "start": 2525,
+            "end": 2527
+        },
+        {
+            "kind": "RightBrace",
+            "text": "}",
+            "start": 2527,
+            "end": 2528
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 2528,
+            "end": 2529
+        },
+        {
+            "kind": "Atom",
+            "text": "message_loop",
+            "start": 2542,
+            "end": 2554
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 2554,
+            "end": 2555
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 2555,
+            "end": 2556
+        },
+        {
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 2556,
+            "end": 2557
+        },
+        {
+            "kind": "LeftBrace",
+            "text": "{",
+            "start": 2566,
+            "end": 2567
+        },
+        {
+            "kind": "Atom",
+            "text": "sender",
+            "start": 2567,
+            "end": 2573
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 2573,
+            "end": 2574
+        },
+        {
+            "kind": "Atom",
+            "text": "goodbye",
+            "start": 2575,
+            "end": 2582
+        },
+        {
+            "kind": "RightBrace",
+            "text": "}",
+            "start": 2582,
+            "end": 2583
+        },
+        {
+            "kind": "Arrow",
+            "text": "->",
+            "start": 2584,
+            "end": 2586
+        },
+        {
+            "kind": "Atom",
+            "text": "sender",
+            "start": 2599,
+            "end": 2605
+        },
+        {
+            "kind": "Exclamation",
+            "text": "!",
+            "start": 2606,
+            "end": 2607
+        },
+        {
+            "kind": "LeftBrace",
+            "text": "{",
+            "start": 2608,
+            "end": 2609
+        },
+        {
+            "kind": "Atom",
+            "text": "self",
+            "start": 2609,
+            "end": 2613
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 2613,
+            "end": 2614
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 2614,
+            "end": 2615
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 2615,
+            "end": 2616
+        },
+        {
+            "kind": "Atom",
+            "text": "bye",
+            "start": 2617,
+            "end": 2620
+        },
+        {
+            "kind": "RightBrace",
+            "text": "}",
+            "start": 2620,
+            "end": 2621
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 2621,
+            "end": 2622
+        },
+        {
+            "kind": "Atom",
+            "text": "message_loop",
+            "start": 2635,
+            "end": 2647
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 2647,
+            "end": 2648
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 2648,
+            "end": 2649
+        },
+        {
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 2649,
+            "end": 2650
+        },
+        {
+            "kind": "Atom",
+            "text": "stop",
+            "start": 2659,
+            "end": 2663
+        },
+        {
+            "kind": "Arrow",
+            "text": "->",
+            "start": 2664,
+            "end": 2666
+        },
+        {
+            "kind": "Atom",
+            "text": "io",
+            "start": 2679,
+            "end": 2681
+        },
+        {
+            "kind": "Colon",
+            "text": ":",
+            "start": 2681,
+            "end": 2682
+        },
+        {
+            "kind": "Atom",
+            "text": "format",
+            "start": 2682,
+            "end": 2688
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 2688,
+            "end": 2689
+        },
+        {
+            "kind": "String",
+            "text": "\"Stopping message loop~n\"",
+            "start": 2689,
+            "end": 2714
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 2714,
+            "end": 2715
+        },
+        {
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 2715,
+            "end": 2716
+        },
+        {
+            "kind": "Variable",
+            "text": "Unknown",
+            "start": 2725,
+            "end": 2732
+        },
+        {
+            "kind": "Arrow",
+            "text": "->",
+            "start": 2733,
+            "end": 2735
+        },
+        {
+            "kind": "Atom",
+            "text": "io",
+            "start": 2748,
+            "end": 2750
+        },
+        {
+            "kind": "Colon",
+            "text": ":",
+            "start": 2750,
+            "end": 2751
+        },
+        {
+            "kind": "Atom",
+            "text": "format",
+            "start": 2751,
+            "end": 2757
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 2757,
+            "end": 2758
+        },
+        {
+            "kind": "String",
+            "text": "\"Unknown message: ~p~n\"",
+            "start": 2758,
+            "end": 2781
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 2781,
+            "end": 2782
+        },
+        {
+            "kind": "LeftBracket",
+            "text": "[",
+            "start": 2783,
+            "end": 2784
+        },
+        {
+            "kind": "Variable",
+            "text": "Unknown",
+            "start": 2784,
+            "end": 2791
+        },
+        {
+            "kind": "RightBracket",
+            "text": "]",
+            "start": 2791,
+            "end": 2792
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 2792,
+            "end": 2793
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 2793,
+            "end": 2794
+        },
+        {
+            "kind": "Atom",
+            "text": "message_loop",
+            "start": 2807,
+            "end": 2819
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 2819,
+            "end": 2820
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 2820,
+            "end": 2821
+        },
+        {
+            "kind": "After",
+            "text": "after",
+            "start": 2826,
+            "end": 2831
+        },
+        {
+            "kind": "Number",
+            "text": "5000",
+            "start": 2840,
+            "end": 2844
+        },
+        {
+            "kind": "Arrow",
+            "text": "->",
+            "start": 2845,
+            "end": 2847
+        },
+        {
+            "kind": "Atom",
+            "text": "io",
+            "start": 2860,
+            "end": 2862
+        },
+        {
+            "kind": "Colon",
+            "text": ":",
+            "start": 2862,
+            "end": 2863
+        },
+        {
+            "kind": "Atom",
+            "text": "format",
+            "start": 2863,
+            "end": 2869
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 2869,
+            "end": 2870
+        },
+        {
+            "kind": "String",
+            "text": "\"Timeout occurred~n\"",
+            "start": 2870,
+            "end": 2890
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 2890,
+            "end": 2891
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 2891,
+            "end": 2892
+        },
+        {
+            "kind": "Atom",
+            "text": "message_loop",
+            "start": 2905,
+            "end": 2917
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 2917,
+            "end": 2918
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 2918,
+            "end": 2919
+        },
+        {
+            "kind": "End",
+            "text": "end",
+            "start": 2924,
+            "end": 2927
+        },
+        {
+            "kind": "Dot",
+            "text": ".",
+            "start": 2927,
+            "end": 2928
+        },
+        {
+            "kind": "Atom",
+            "text": "start",
+            "start": 2955,
+            "end": 2960
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 2960,
+            "end": 2961
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 2961,
+            "end": 2962
+        },
+        {
+            "kind": "Arrow",
+            "text": "->",
+            "start": 2963,
+            "end": 2965
+        },
+        {
+            "kind": "Atom",
+            "text": "spawn",
+            "start": 2970,
+            "end": 2975
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 2975,
+            "end": 2976
+        },
+        {
+            "kind": "Fun",
+            "text": "fun",
+            "start": 2976,
+            "end": 2979
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 2979,
+            "end": 2980
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 2980,
+            "end": 2981
+        },
+        {
+            "kind": "Arrow",
+            "text": "->",
+            "start": 2982,
+            "end": 2984
+        },
+        {
+            "kind": "Atom",
+            "text": "init_process",
+            "start": 2985,
+            "end": 2997
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 2997,
+            "end": 2998
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 2998,
+            "end": 2999
+        },
+        {
+            "kind": "End",
+            "text": "end",
+            "start": 3000,
+            "end": 3003
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 3003,
+            "end": 3004
+        },
+        {
+            "kind": "Dot",
+            "text": ".",
+            "start": 3004,
+            "end": 3005
+        },
+        {
+            "kind": "Atom",
+            "text": "stop",
+            "start": 3007,
+            "end": 3011
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 3011,
+            "end": 3012
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 3012,
+            "end": 3013
+        },
+        {
+            "kind": "Arrow",
+            "text": "->",
+            "start": 3014,
+            "end": 3016
+        },
+        {
+            "kind": "Atom",
+            "text": "exit",
+            "start": 3021,
+            "end": 3025
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 3025,
+            "end": 3026
+        },
+        {
+            "kind": "Atom",
+            "text": "normal",
+            "start": 3026,
+            "end": 3032
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 3032,
+            "end": 3033
+        },
+        {
+            "kind": "Dot",
+            "text": ".",
+            "start": 3033,
+            "end": 3034
+        },
+        {
+            "kind": "Atom",
+            "text": "init_process",
+            "start": 3036,
+            "end": 3048
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 3048,
+            "end": 3049
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 3049,
+            "end": 3050
+        },
+        {
+            "kind": "Arrow",
+            "text": "->",
+            "start": 3051,
+            "end": 3053
+        },
+        {
+            "kind": "Atom",
+            "text": "process_flag",
+            "start": 3058,
+            "end": 3070
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 3070,
+            "end": 3071
+        },
+        {
+            "kind": "Atom",
+            "text": "trap_exit",
+            "start": 3071,
+            "end": 3080
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 3080,
+            "end": 3081
+        },
+        {
+            "kind": "Atom",
+            "text": "true",
+            "start": 3082,
+            "end": 3086
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 3086,
+            "end": 3087
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 3087,
+            "end": 3088
+        },
+        {
+            "kind": "Atom",
+            "text": "loop",
+            "start": 3093,
+            "end": 3097
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 3097,
+            "end": 3098
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 3098,
+            "end": 3099
+        },
+        {
+            "kind": "Dot",
+            "text": ".",
+            "start": 3099,
+            "end": 3100
+        },
+        {
+            "kind": "Atom",
+            "text": "loop",
+            "start": 3102,
+            "end": 3106
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 3106,
+            "end": 3107
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 3107,
+            "end": 3108
+        },
+        {
+            "kind": "Arrow",
+            "text": "->",
+            "start": 3109,
+            "end": 3111
+        },
+        {
+            "kind": "Receive",
+            "text": "receive",
+            "start": 3116,
+            "end": 3123
+        },
+        {
+            "kind": "LeftBrace",
+            "text": "{",
+            "start": 3132,
+            "end": 3133
+        },
+        {
+            "kind": "Atom",
+            "text": "'EXIT'",
+            "start": 3133,
+            "end": 3139
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 3139,
+            "end": 3140
+        },
+        {
+            "kind": "Variable",
+            "text": "Pid",
+            "start": 3141,
+            "end": 3144
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 3144,
+            "end": 3145
+        },
+        {
+            "kind": "Variable",
+            "text": "Reason",
+            "start": 3146,
+            "end": 3152
+        },
+        {
+            "kind": "RightBrace",
+            "text": "}",
+            "start": 3152,
+            "end": 3153
+        },
+        {
+            "kind": "Arrow",
+            "text": "->",
+            "start": 3154,
+            "end": 3156
+        },
+        {
+            "kind": "Atom",
+            "text": "io",
+            "start": 3169,
+            "end": 3171
+        },
+        {
+            "kind": "Colon",
+            "text": ":",
+            "start": 3171,
+            "end": 3172
+        },
+        {
+            "kind": "Atom",
+            "text": "format",
+            "start": 3172,
+            "end": 3178
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 3178,
+            "end": 3179
+        },
+        {
+            "kind": "String",
+            "text": "\"Process ~p exited with reason ~p~n\"",
+            "start": 3179,
+            "end": 3215
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 3215,
+            "end": 3216
+        },
+        {
+            "kind": "LeftBracket",
+            "text": "[",
+            "start": 3217,
+            "end": 3218
+        },
+        {
+            "kind": "Variable",
+            "text": "Pid",
+            "start": 3218,
+            "end": 3221
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 3221,
+            "end": 3222
+        },
+        {
+            "kind": "Variable",
+            "text": "Reason",
+            "start": 3223,
+            "end": 3229
+        },
+        {
+            "kind": "RightBracket",
+            "text": "]",
+            "start": 3229,
+            "end": 3230
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 3230,
+            "end": 3231
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 3231,
+            "end": 3232
+        },
+        {
+            "kind": "Atom",
+            "text": "loop",
+            "start": 3245,
+            "end": 3249
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 3249,
+            "end": 3250
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 3250,
+            "end": 3251
+        },
+        {
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 3251,
+            "end": 3252
+        },
+        {
+            "kind": "Variable",
+            "text": "Message",
+            "start": 3261,
+            "end": 3268
+        },
+        {
+            "kind": "Arrow",
+            "text": "->",
+            "start": 3269,
+            "end": 3271
+        },
+        {
+            "kind": "Atom",
+            "text": "process_message",
+            "start": 3284,
+            "end": 3299
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 3299,
+            "end": 3300
+        },
+        {
+            "kind": "Variable",
+            "text": "Message",
+            "start": 3300,
+            "end": 3307
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 3307,
+            "end": 3308
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 3308,
+            "end": 3309
+        },
+        {
+            "kind": "Atom",
+            "text": "loop",
+            "start": 3322,
+            "end": 3326
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 3326,
+            "end": 3327
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 3327,
+            "end": 3328
+        },
+        {
+            "kind": "End",
+            "text": "end",
+            "start": 3333,
+            "end": 3336
+        },
+        {
+            "kind": "Dot",
+            "text": ".",
+            "start": 3336,
+            "end": 3337
+        },
+        {
+            "kind": "Atom",
+            "text": "process_message",
+            "start": 3339,
+            "end": 3354
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 3354,
+            "end": 3355
+        },
+        {
+            "kind": "LeftBrace",
+            "text": "{",
+            "start": 3355,
+            "end": 3356
+        },
+        {
+            "kind": "Variable",
+            "text": "From",
+            "start": 3356,
+            "end": 3360
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 3360,
+            "end": 3361
+        },
+        {
+            "kind": "Variable",
+            "text": "Data",
+            "start": 3362,
+            "end": 3366
+        },
+        {
+            "kind": "RightBrace",
+            "text": "}",
+            "start": 3366,
+            "end": 3367
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 3367,
+            "end": 3368
+        },
+        {
+            "kind": "Arrow",
+            "text": "->",
+            "start": 3369,
+            "end": 3371
+        },
+        {
+            "kind": "Variable",
+            "text": "From",
+            "start": 3376,
+            "end": 3380
+        },
+        {
+            "kind": "Exclamation",
+            "text": "!",
+            "start": 3381,
+            "end": 3382
+        },
+        {
+            "kind": "LeftBrace",
+            "text": "{",
+            "start": 3383,
+            "end": 3384
+        },
+        {
+            "kind": "Atom",
+            "text": "self",
+            "start": 3384,
+            "end": 3388
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 3388,
+            "end": 3389
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 3389,
+            "end": 3390
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 3390,
+            "end": 3391
+        },
+        {
+            "kind": "Atom",
+            "text": "processed",
+            "start": 3392,
+            "end": 3401
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 3401,
+            "end": 3402
+        },
+        {
+            "kind": "Variable",
+            "text": "Data",
+            "start": 3403,
+            "end": 3407
+        },
+        {
+            "kind": "RightBrace",
+            "text": "}",
+            "start": 3407,
+            "end": 3408
+        },
+        {
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 3408,
+            "end": 3409
+        },
+        {
+            "kind": "Atom",
+            "text": "process_message",
+            "start": 3410,
+            "end": 3425
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 3425,
+            "end": 3426
+        },
+        {
+            "kind": "Variable",
+            "text": "Unknown",
+            "start": 3426,
+            "end": 3433
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 3433,
+            "end": 3434
+        },
+        {
+            "kind": "Arrow",
+            "text": "->",
+            "start": 3435,
+            "end": 3437
+        },
+        {
+            "kind": "Atom",
+            "text": "io",
+            "start": 3442,
+            "end": 3444
+        },
+        {
+            "kind": "Colon",
+            "text": ":",
+            "start": 3444,
+            "end": 3445
+        },
+        {
+            "kind": "Atom",
+            "text": "format",
+            "start": 3445,
+            "end": 3451
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 3451,
+            "end": 3452
+        },
+        {
+            "kind": "String",
+            "text": "\"Unknown message format: ~p~n\"",
+            "start": 3452,
+            "end": 3482
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 3482,
+            "end": 3483
+        },
+        {
+            "kind": "LeftBracket",
+            "text": "[",
+            "start": 3484,
+            "end": 3485
+        },
+        {
+            "kind": "Variable",
+            "text": "Unknown",
+            "start": 3485,
+            "end": 3492
+        },
+        {
+            "kind": "RightBracket",
+            "text": "]",
+            "start": 3492,
+            "end": 3493
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 3493,
+            "end": 3494
+        },
+        {
+            "kind": "Dot",
+            "text": ".",
+            "start": 3494,
+            "end": 3495
+        },
+        {
+            "kind": "Atom",
+            "text": "create_person",
+            "start": 3520,
+            "end": 3533
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 3533,
+            "end": 3534
+        },
+        {
+            "kind": "Variable",
+            "text": "Name",
+            "start": 3534,
+            "end": 3538
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 3538,
+            "end": 3539
+        },
+        {
+            "kind": "Variable",
+            "text": "Age",
+            "start": 3540,
+            "end": 3543
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 3543,
+            "end": 3544
+        },
+        {
+            "kind": "Arrow",
+            "text": "->",
+            "start": 3545,
+            "end": 3547
+        },
+        {
+            "kind": "Hash",
+            "text": "#",
+            "start": 3552,
+            "end": 3553
+        },
+        {
+            "kind": "Atom",
+            "text": "person",
+            "start": 3553,
+            "end": 3559
+        },
+        {
+            "kind": "LeftBrace",
+            "text": "{",
+            "start": 3559,
+            "end": 3560
+        },
+        {
+            "kind": "Atom",
+            "text": "name",
+            "start": 3560,
+            "end": 3564
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 3565,
+            "end": 3566
+        },
+        {
+            "kind": "Variable",
+            "text": "Name",
+            "start": 3567,
+            "end": 3571
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 3571,
+            "end": 3572
+        },
+        {
+            "kind": "Atom",
+            "text": "age",
+            "start": 3573,
+            "end": 3576
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 3577,
+            "end": 3578
+        },
+        {
+            "kind": "Variable",
+            "text": "Age",
+            "start": 3579,
+            "end": 3582
+        },
+        {
+            "kind": "RightBrace",
+            "text": "}",
+            "start": 3582,
+            "end": 3583
+        },
+        {
+            "kind": "Dot",
+            "text": ".",
+            "start": 3583,
+            "end": 3584
+        },
+        {
+            "kind": "Atom",
+            "text": "update_person_email",
+            "start": 3586,
+            "end": 3605
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 3605,
+            "end": 3606
+        },
+        {
+            "kind": "Variable",
+            "text": "Person",
+            "start": 3606,
+            "end": 3612
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 3612,
+            "end": 3613
+        },
+        {
+            "kind": "Variable",
+            "text": "Email",
+            "start": 3614,
+            "end": 3619
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 3619,
+            "end": 3620
+        },
+        {
+            "kind": "Arrow",
+            "text": "->",
+            "start": 3621,
+            "end": 3623
+        },
+        {
+            "kind": "Variable",
+            "text": "Person",
+            "start": 3628,
+            "end": 3634
+        },
+        {
+            "kind": "Hash",
+            "text": "#",
+            "start": 3634,
+            "end": 3635
+        },
+        {
+            "kind": "Atom",
+            "text": "person",
+            "start": 3635,
+            "end": 3641
+        },
+        {
+            "kind": "LeftBrace",
+            "text": "{",
+            "start": 3641,
+            "end": 3642
+        },
+        {
+            "kind": "Atom",
+            "text": "email",
+            "start": 3642,
+            "end": 3647
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 3648,
+            "end": 3649
+        },
+        {
+            "kind": "Variable",
+            "text": "Email",
+            "start": 3650,
+            "end": 3655
+        },
+        {
+            "kind": "RightBrace",
+            "text": "}",
+            "start": 3655,
+            "end": 3656
+        },
+        {
+            "kind": "Dot",
+            "text": ".",
+            "start": 3656,
+            "end": 3657
+        },
+        {
+            "kind": "Atom",
+            "text": "get_person_name",
+            "start": 3659,
+            "end": 3674
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 3674,
+            "end": 3675
+        },
+        {
+            "kind": "Hash",
+            "text": "#",
+            "start": 3675,
+            "end": 3676
+        },
+        {
+            "kind": "Atom",
+            "text": "person",
+            "start": 3676,
+            "end": 3682
+        },
+        {
+            "kind": "LeftBrace",
+            "text": "{",
+            "start": 3682,
+            "end": 3683
+        },
+        {
+            "kind": "Atom",
+            "text": "name",
+            "start": 3683,
+            "end": 3687
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 3688,
+            "end": 3689
+        },
+        {
+            "kind": "Variable",
+            "text": "Name",
+            "start": 3690,
+            "end": 3694
+        },
+        {
+            "kind": "RightBrace",
+            "text": "}",
+            "start": 3694,
+            "end": 3695
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 3695,
+            "end": 3696
+        },
+        {
+            "kind": "Arrow",
+            "text": "->",
+            "start": 3697,
+            "end": 3699
+        },
+        {
+            "kind": "Variable",
+            "text": "Name",
+            "start": 3700,
+            "end": 3704
+        },
+        {
+            "kind": "Dot",
+            "text": ".",
+            "start": 3704,
+            "end": 3705
+        },
+        {
+            "kind": "Atom",
+            "text": "parse_binary",
+            "start": 3733,
+            "end": 3745
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 3745,
+            "end": 3746
+        },
+        {
+            "kind": "Less",
+            "text": "<",
+            "start": 3746,
+            "end": 3747
+        },
+        {
+            "kind": "Less",
+            "text": "<",
+            "start": 3747,
+            "end": 3748
+        },
+        {
+            "kind": "Variable",
+            "text": "A",
+            "start": 3748,
+            "end": 3749
+        },
+        {
+            "kind": "Colon",
+            "text": ":",
+            "start": 3749,
+            "end": 3750
+        },
+        {
+            "kind": "Number",
+            "text": "8",
+            "start": 3750,
+            "end": 3751
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 3751,
+            "end": 3752
+        },
+        {
+            "kind": "Variable",
+            "text": "B",
+            "start": 3753,
+            "end": 3754
+        },
+        {
+            "kind": "Colon",
+            "text": ":",
+            "start": 3754,
+            "end": 3755
+        },
+        {
+            "kind": "Number",
+            "text": "8",
+            "start": 3755,
+            "end": 3756
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 3756,
+            "end": 3757
+        },
+        {
+            "kind": "Variable",
+            "text": "Rest",
+            "start": 3758,
+            "end": 3762
+        },
+        {
+            "kind": "Slash",
+            "text": "/",
+            "start": 3762,
+            "end": 3763
+        },
+        {
+            "kind": "Atom",
+            "text": "binary",
+            "start": 3763,
+            "end": 3769
+        },
+        {
+            "kind": "Greater",
+            "text": ">",
+            "start": 3769,
+            "end": 3770
+        },
+        {
+            "kind": "Greater",
+            "text": ">",
+            "start": 3770,
+            "end": 3771
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 3771,
+            "end": 3772
+        },
+        {
+            "kind": "Arrow",
+            "text": "->",
+            "start": 3773,
+            "end": 3775
+        },
+        {
+            "kind": "LeftBrace",
+            "text": "{",
+            "start": 3780,
+            "end": 3781
+        },
+        {
+            "kind": "Variable",
+            "text": "A",
+            "start": 3781,
+            "end": 3782
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 3782,
+            "end": 3783
+        },
+        {
+            "kind": "Variable",
+            "text": "B",
+            "start": 3784,
+            "end": 3785
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 3785,
+            "end": 3786
+        },
+        {
+            "kind": "Variable",
+            "text": "Rest",
+            "start": 3787,
+            "end": 3791
+        },
+        {
+            "kind": "RightBrace",
+            "text": "}",
+            "start": 3791,
+            "end": 3792
+        },
+        {
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 3792,
+            "end": 3793
+        },
+        {
+            "kind": "Atom",
+            "text": "parse_binary",
+            "start": 3794,
+            "end": 3806
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 3806,
+            "end": 3807
+        },
+        {
+            "kind": "Less",
+            "text": "<",
+            "start": 3807,
+            "end": 3808
+        },
+        {
+            "kind": "Less",
+            "text": "<",
+            "start": 3808,
+            "end": 3809
+        },
+        {
+            "kind": "Variable",
+            "text": "A",
+            "start": 3809,
+            "end": 3810
+        },
+        {
+            "kind": "Colon",
+            "text": ":",
+            "start": 3810,
+            "end": 3811
+        },
+        {
+            "kind": "Number",
+            "text": "16",
+            "start": 3811,
+            "end": 3813
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 3813,
+            "end": 3814
+        },
+        {
+            "kind": "Variable",
+            "text": "Rest",
+            "start": 3815,
+            "end": 3819
+        },
+        {
+            "kind": "Slash",
+            "text": "/",
+            "start": 3819,
+            "end": 3820
+        },
+        {
+            "kind": "Atom",
+            "text": "binary",
+            "start": 3820,
+            "end": 3826
+        },
+        {
+            "kind": "Greater",
+            "text": ">",
+            "start": 3826,
+            "end": 3827
+        },
+        {
+            "kind": "Greater",
+            "text": ">",
+            "start": 3827,
+            "end": 3828
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 3828,
+            "end": 3829
+        },
+        {
+            "kind": "Arrow",
+            "text": "->",
+            "start": 3830,
+            "end": 3832
+        },
+        {
+            "kind": "LeftBrace",
+            "text": "{",
+            "start": 3837,
+            "end": 3838
+        },
+        {
+            "kind": "Variable",
+            "text": "A",
+            "start": 3838,
+            "end": 3839
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 3839,
+            "end": 3840
+        },
+        {
+            "kind": "Variable",
+            "text": "Rest",
+            "start": 3841,
+            "end": 3845
+        },
+        {
+            "kind": "RightBrace",
+            "text": "}",
+            "start": 3845,
+            "end": 3846
+        },
+        {
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 3846,
+            "end": 3847
+        },
+        {
+            "kind": "Atom",
+            "text": "parse_binary",
+            "start": 3848,
+            "end": 3860
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 3860,
+            "end": 3861
+        },
+        {
+            "kind": "Variable",
+            "text": "_",
+            "start": 3861,
+            "end": 3862
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 3862,
+            "end": 3863
+        },
+        {
+            "kind": "Arrow",
+            "text": "->",
+            "start": 3864,
+            "end": 3866
+        },
+        {
+            "kind": "LeftBrace",
+            "text": "{",
+            "start": 3871,
+            "end": 3872
+        },
+        {
+            "kind": "Atom",
+            "text": "error",
+            "start": 3872,
+            "end": 3877
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 3877,
+            "end": 3878
+        },
+        {
+            "kind": "Atom",
+            "text": "invalid_format",
+            "start": 3879,
+            "end": 3893
+        },
+        {
+            "kind": "RightBrace",
+            "text": "}",
+            "start": 3893,
+            "end": 3894
+        },
+        {
+            "kind": "Dot",
+            "text": ".",
+            "start": 3894,
+            "end": 3895
+        },
+        {
+            "kind": "Atom",
+            "text": "extract_bits",
+            "start": 3910,
+            "end": 3922
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 3922,
+            "end": 3923
+        },
+        {
+            "kind": "Less",
+            "text": "<",
+            "start": 3923,
+            "end": 3924
+        },
+        {
+            "kind": "Less",
+            "text": "<",
+            "start": 3924,
+            "end": 3925
+        },
+        {
+            "kind": "Variable",
+            "text": "Header",
+            "start": 3925,
+            "end": 3931
+        },
+        {
+            "kind": "Colon",
+            "text": ":",
+            "start": 3931,
+            "end": 3932
+        },
+        {
+            "kind": "Number",
+            "text": "4",
+            "start": 3932,
+            "end": 3933
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 3933,
+            "end": 3934
+        },
+        {
+            "kind": "Variable",
+            "text": "Type",
+            "start": 3935,
+            "end": 3939
+        },
+        {
+            "kind": "Colon",
+            "text": ":",
+            "start": 3939,
+            "end": 3940
+        },
+        {
+            "kind": "Number",
+            "text": "2",
+            "start": 3940,
+            "end": 3941
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 3941,
+            "end": 3942
+        },
+        {
+            "kind": "Variable",
+            "text": "Flags",
+            "start": 3943,
+            "end": 3948
+        },
+        {
+            "kind": "Colon",
+            "text": ":",
+            "start": 3948,
+            "end": 3949
+        },
+        {
+            "kind": "Number",
+            "text": "2",
+            "start": 3949,
+            "end": 3950
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 3950,
+            "end": 3951
+        },
+        {
+            "kind": "Variable",
+            "text": "Data",
+            "start": 3952,
+            "end": 3956
+        },
+        {
+            "kind": "Slash",
+            "text": "/",
+            "start": 3956,
+            "end": 3957
+        },
+        {
+            "kind": "Atom",
+            "text": "binary",
+            "start": 3957,
+            "end": 3963
+        },
+        {
+            "kind": "Greater",
+            "text": ">",
+            "start": 3963,
+            "end": 3964
+        },
+        {
+            "kind": "Greater",
+            "text": ">",
+            "start": 3964,
+            "end": 3965
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 3965,
+            "end": 3966
+        },
+        {
+            "kind": "Arrow",
+            "text": "->",
+            "start": 3967,
+            "end": 3969
+        },
+        {
+            "kind": "LeftBrace",
+            "text": "{",
+            "start": 3974,
+            "end": 3975
+        },
+        {
+            "kind": "Variable",
+            "text": "Header",
+            "start": 3975,
+            "end": 3981
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 3981,
+            "end": 3982
+        },
+        {
+            "kind": "Variable",
+            "text": "Type",
+            "start": 3983,
+            "end": 3987
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 3987,
+            "end": 3988
+        },
+        {
+            "kind": "Variable",
+            "text": "Flags",
+            "start": 3989,
+            "end": 3994
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 3994,
+            "end": 3995
+        },
+        {
+            "kind": "Variable",
+            "text": "Data",
+            "start": 3996,
+            "end": 4000
+        },
+        {
+            "kind": "RightBrace",
+            "text": "}",
+            "start": 4000,
+            "end": 4001
+        },
+        {
+            "kind": "Dot",
+            "text": ".",
+            "start": 4001,
+            "end": 4002
+        },
+        {
+            "kind": "Atom",
+            "text": "square",
+            "start": 4044,
+            "end": 4050
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 4051,
+            "end": 4052
+        },
+        {
+            "kind": "Fun",
+            "text": "fun",
+            "start": 4053,
+            "end": 4056
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 4056,
+            "end": 4057
+        },
+        {
+            "kind": "Variable",
+            "text": "X",
+            "start": 4057,
+            "end": 4058
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 4058,
+            "end": 4059
+        },
+        {
+            "kind": "Arrow",
+            "text": "->",
+            "start": 4060,
+            "end": 4062
+        },
+        {
+            "kind": "Variable",
+            "text": "X",
+            "start": 4063,
+            "end": 4064
+        },
+        {
+            "kind": "Star",
+            "text": "*",
+            "start": 4065,
+            "end": 4066
+        },
+        {
+            "kind": "Variable",
+            "text": "X",
+            "start": 4067,
+            "end": 4068
+        },
+        {
+            "kind": "End",
+            "text": "end",
+            "start": 4069,
+            "end": 4072
+        },
+        {
+            "kind": "Dot",
+            "text": ".",
+            "start": 4072,
+            "end": 4073
+        },
+        {
+            "kind": "Atom",
+            "text": "double",
+            "start": 4074,
+            "end": 4080
+        },
+        {
+            "kind": "Equal",
+            "text": "=",
+            "start": 4081,
+            "end": 4082
+        },
+        {
+            "kind": "Fun",
+            "text": "fun",
+            "start": 4083,
+            "end": 4086
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 4086,
+            "end": 4087
+        },
+        {
+            "kind": "Variable",
+            "text": "X",
+            "start": 4087,
+            "end": 4088
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 4088,
+            "end": 4089
+        },
+        {
+            "kind": "Arrow",
+            "text": "->",
+            "start": 4090,
+            "end": 4092
+        },
+        {
+            "kind": "Variable",
+            "text": "X",
+            "start": 4093,
+            "end": 4094
+        },
+        {
+            "kind": "Star",
+            "text": "*",
+            "start": 4095,
+            "end": 4096
+        },
+        {
+            "kind": "Variable",
+            "text": "X",
+            "start": 4097,
+            "end": 4098
+        },
+        {
+            "kind": "Star",
+            "text": "*",
+            "start": 4099,
+            "end": 4100
+        },
+        {
+            "kind": "Number",
+            "text": "2",
+            "start": 4101,
+            "end": 4102
+        },
+        {
+            "kind": "End",
+            "text": "end",
+            "start": 4103,
+            "end": 4106
+        },
+        {
+            "kind": "Dot",
+            "text": ".",
+            "start": 4106,
+            "end": 4107
+        },
+        {
+            "kind": "Atom",
+            "text": "apply_twice",
+            "start": 4134,
+            "end": 4145
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 4145,
+            "end": 4146
+        },
+        {
+            "kind": "Variable",
+            "text": "Fun",
+            "start": 4146,
+            "end": 4149
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 4149,
+            "end": 4150
+        },
+        {
+            "kind": "Variable",
+            "text": "Value",
+            "start": 4151,
+            "end": 4156
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 4156,
+            "end": 4157
+        },
+        {
+            "kind": "Arrow",
+            "text": "->",
+            "start": 4158,
+            "end": 4160
+        },
+        {
+            "kind": "Variable",
+            "text": "Fun",
+            "start": 4161,
+            "end": 4164
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 4164,
+            "end": 4165
+        },
+        {
+            "kind": "Variable",
+            "text": "Fun",
+            "start": 4165,
+            "end": 4168
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 4168,
+            "end": 4169
+        },
+        {
+            "kind": "Variable",
+            "text": "Value",
+            "start": 4169,
+            "end": 4174
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 4174,
+            "end": 4175
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 4175,
+            "end": 4176
+        },
+        {
+            "kind": "Dot",
+            "text": ".",
+            "start": 4176,
+            "end": 4177
+        },
+        {
+            "kind": "Atom",
+            "text": "compose",
+            "start": 4179,
+            "end": 4186
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 4186,
+            "end": 4187
+        },
+        {
+            "kind": "Variable",
+            "text": "F",
+            "start": 4187,
+            "end": 4188
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 4188,
+            "end": 4189
+        },
+        {
+            "kind": "Variable",
+            "text": "G",
+            "start": 4190,
+            "end": 4191
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 4191,
+            "end": 4192
+        },
+        {
+            "kind": "Arrow",
+            "text": "->",
+            "start": 4193,
+            "end": 4195
+        },
+        {
+            "kind": "Fun",
+            "text": "fun",
+            "start": 4196,
+            "end": 4199
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 4199,
+            "end": 4200
+        },
+        {
+            "kind": "Variable",
+            "text": "X",
+            "start": 4200,
+            "end": 4201
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 4201,
+            "end": 4202
+        },
+        {
+            "kind": "Arrow",
+            "text": "->",
+            "start": 4203,
+            "end": 4205
+        },
+        {
+            "kind": "Variable",
+            "text": "F",
+            "start": 4206,
+            "end": 4207
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 4207,
+            "end": 4208
+        },
+        {
+            "kind": "Variable",
+            "text": "G",
+            "start": 4208,
+            "end": 4209
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 4209,
+            "end": 4210
+        },
+        {
+            "kind": "Variable",
+            "text": "X",
+            "start": 4210,
+            "end": 4211
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 4211,
+            "end": 4212
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 4212,
+            "end": 4213
+        },
+        {
+            "kind": "End",
+            "text": "end",
+            "start": 4214,
+            "end": 4217
+        },
+        {
+            "kind": "Dot",
+            "text": ".",
+            "start": 4217,
+            "end": 4218
+        },
+        {
+            "kind": "Minus",
+            "text": "-",
+            "start": 4244,
+            "end": 4245
+        },
+        {
+            "kind": "Atom",
+            "text": "module",
+            "start": 4245,
+            "end": 4251
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 4251,
+            "end": 4252
+        },
+        {
+            "kind": "Atom",
+            "text": "my_behavior",
+            "start": 4252,
+            "end": 4263
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 4263,
+            "end": 4264
+        },
+        {
+            "kind": "Dot",
+            "text": ".",
+            "start": 4264,
+            "end": 4265
+        },
+        {
+            "kind": "Minus",
+            "text": "-",
+            "start": 4266,
+            "end": 4267
+        },
+        {
+            "kind": "Atom",
+            "text": "callback",
+            "start": 4267,
+            "end": 4275
+        },
+        {
+            "kind": "Atom",
+            "text": "init",
+            "start": 4276,
+            "end": 4280
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 4280,
+            "end": 4281
+        },
+        {
+            "kind": "Variable",
+            "text": "Args",
+            "start": 4281,
+            "end": 4285
+        },
+        {
+            "kind": "Colon",
+            "text": ":",
+            "start": 4286,
+            "end": 4287
+        },
+        {
+            "kind": "Colon",
+            "text": ":",
+            "start": 4287,
+            "end": 4288
+        },
+        {
+            "kind": "Atom",
+            "text": "term",
+            "start": 4289,
+            "end": 4293
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 4293,
+            "end": 4294
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 4294,
+            "end": 4295
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 4295,
+            "end": 4296
+        },
+        {
+            "kind": "Arrow",
+            "text": "->",
+            "start": 4297,
+            "end": 4299
+        },
+        {
+            "kind": "LeftBrace",
+            "text": "{",
+            "start": 4300,
+            "end": 4301
+        },
+        {
+            "kind": "Atom",
+            "text": "ok",
+            "start": 4301,
+            "end": 4303
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 4303,
+            "end": 4304
+        },
+        {
+            "kind": "Variable",
+            "text": "State",
+            "start": 4305,
+            "end": 4310
+        },
+        {
+            "kind": "Colon",
+            "text": ":",
+            "start": 4311,
+            "end": 4312
+        },
+        {
+            "kind": "Colon",
+            "text": ":",
+            "start": 4312,
+            "end": 4313
+        },
+        {
+            "kind": "Atom",
+            "text": "term",
+            "start": 4314,
+            "end": 4318
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 4318,
+            "end": 4319
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 4319,
+            "end": 4320
+        },
+        {
+            "kind": "RightBrace",
+            "text": "}",
+            "start": 4320,
+            "end": 4321
+        },
+        {
+            "kind": "Pipe",
+            "text": "|",
+            "start": 4322,
+            "end": 4323
+        },
+        {
+            "kind": "LeftBrace",
+            "text": "{",
+            "start": 4324,
+            "end": 4325
+        },
+        {
+            "kind": "Atom",
+            "text": "error",
+            "start": 4325,
+            "end": 4330
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 4330,
+            "end": 4331
+        },
+        {
+            "kind": "Variable",
+            "text": "Reason",
+            "start": 4332,
+            "end": 4338
+        },
+        {
+            "kind": "Colon",
+            "text": ":",
+            "start": 4339,
+            "end": 4340
+        },
+        {
+            "kind": "Colon",
+            "text": ":",
+            "start": 4340,
+            "end": 4341
+        },
+        {
+            "kind": "Atom",
+            "text": "term",
+            "start": 4342,
+            "end": 4346
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 4346,
+            "end": 4347
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 4347,
+            "end": 4348
+        },
+        {
+            "kind": "RightBrace",
+            "text": "}",
+            "start": 4348,
+            "end": 4349
+        },
+        {
+            "kind": "Dot",
+            "text": ".",
+            "start": 4349,
+            "end": 4350
+        },
+        {
+            "kind": "Minus",
+            "text": "-",
+            "start": 4351,
+            "end": 4352
+        },
+        {
+            "kind": "Atom",
+            "text": "callback",
+            "start": 4352,
+            "end": 4360
+        },
+        {
+            "kind": "Atom",
+            "text": "handle_call",
+            "start": 4361,
+            "end": 4372
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 4372,
+            "end": 4373
+        },
+        {
+            "kind": "Variable",
+            "text": "Request",
+            "start": 4373,
+            "end": 4380
+        },
+        {
+            "kind": "Colon",
+            "text": ":",
+            "start": 4381,
+            "end": 4382
+        },
+        {
+            "kind": "Colon",
+            "text": ":",
+            "start": 4382,
+            "end": 4383
+        },
+        {
+            "kind": "Atom",
+            "text": "term",
+            "start": 4384,
+            "end": 4388
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 4388,
+            "end": 4389
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 4389,
+            "end": 4390
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 4390,
+            "end": 4391
+        },
+        {
+            "kind": "Variable",
+            "text": "From",
+            "start": 4392,
+            "end": 4396
+        },
+        {
+            "kind": "Colon",
+            "text": ":",
+            "start": 4397,
+            "end": 4398
+        },
+        {
+            "kind": "Colon",
+            "text": ":",
+            "start": 4398,
+            "end": 4399
+        },
+        {
+            "kind": "Atom",
+            "text": "term",
+            "start": 4400,
+            "end": 4404
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 4404,
+            "end": 4405
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 4405,
+            "end": 4406
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 4406,
+            "end": 4407
+        },
+        {
+            "kind": "Variable",
+            "text": "State",
+            "start": 4408,
+            "end": 4413
+        },
+        {
+            "kind": "Colon",
+            "text": ":",
+            "start": 4414,
+            "end": 4415
+        },
+        {
+            "kind": "Colon",
+            "text": ":",
+            "start": 4415,
+            "end": 4416
+        },
+        {
+            "kind": "Atom",
+            "text": "term",
+            "start": 4417,
+            "end": 4421
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 4421,
+            "end": 4422
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 4422,
+            "end": 4423
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 4423,
+            "end": 4424
+        },
+        {
+            "kind": "Arrow",
+            "text": "->",
+            "start": 4425,
+            "end": 4427
+        },
+        {
+            "kind": "LeftBrace",
+            "text": "{",
+            "start": 4432,
+            "end": 4433
+        },
+        {
+            "kind": "Atom",
+            "text": "reply",
+            "start": 4433,
+            "end": 4438
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 4438,
+            "end": 4439
+        },
+        {
+            "kind": "Variable",
+            "text": "Reply",
+            "start": 4440,
+            "end": 4445
+        },
+        {
+            "kind": "Colon",
+            "text": ":",
+            "start": 4446,
+            "end": 4447
+        },
+        {
+            "kind": "Colon",
+            "text": ":",
+            "start": 4447,
+            "end": 4448
+        },
+        {
+            "kind": "Atom",
+            "text": "term",
+            "start": 4449,
+            "end": 4453
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 4453,
+            "end": 4454
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 4454,
+            "end": 4455
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 4455,
+            "end": 4456
+        },
+        {
+            "kind": "Variable",
+            "text": "NewState",
+            "start": 4457,
+            "end": 4465
+        },
+        {
+            "kind": "Colon",
+            "text": ":",
+            "start": 4466,
+            "end": 4467
+        },
+        {
+            "kind": "Colon",
+            "text": ":",
+            "start": 4467,
+            "end": 4468
+        },
+        {
+            "kind": "Atom",
+            "text": "term",
+            "start": 4469,
+            "end": 4473
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 4473,
+            "end": 4474
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 4474,
+            "end": 4475
+        },
+        {
+            "kind": "RightBrace",
+            "text": "}",
+            "start": 4475,
+            "end": 4476
+        },
+        {
+            "kind": "Pipe",
+            "text": "|",
+            "start": 4477,
+            "end": 4478
+        },
+        {
+            "kind": "LeftBrace",
+            "text": "{",
+            "start": 4483,
+            "end": 4484
+        },
+        {
+            "kind": "Atom",
+            "text": "noreply",
+            "start": 4484,
+            "end": 4491
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 4491,
+            "end": 4492
+        },
+        {
+            "kind": "Variable",
+            "text": "NewState",
+            "start": 4493,
+            "end": 4501
+        },
+        {
+            "kind": "Colon",
+            "text": ":",
+            "start": 4502,
+            "end": 4503
+        },
+        {
+            "kind": "Colon",
+            "text": ":",
+            "start": 4503,
+            "end": 4504
+        },
+        {
+            "kind": "Atom",
+            "text": "term",
+            "start": 4505,
+            "end": 4509
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 4509,
+            "end": 4510
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 4510,
+            "end": 4511
+        },
+        {
+            "kind": "RightBrace",
+            "text": "}",
+            "start": 4511,
+            "end": 4512
+        },
+        {
+            "kind": "Pipe",
+            "text": "|",
+            "start": 4513,
+            "end": 4514
+        },
+        {
+            "kind": "LeftBrace",
+            "text": "{",
+            "start": 4519,
+            "end": 4520
+        },
+        {
+            "kind": "Atom",
+            "text": "stop",
+            "start": 4520,
+            "end": 4524
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 4524,
+            "end": 4525
+        },
+        {
+            "kind": "Variable",
+            "text": "Reason",
+            "start": 4526,
+            "end": 4532
+        },
+        {
+            "kind": "Colon",
+            "text": ":",
+            "start": 4533,
+            "end": 4534
+        },
+        {
+            "kind": "Colon",
+            "text": ":",
+            "start": 4534,
+            "end": 4535
+        },
+        {
+            "kind": "Atom",
+            "text": "term",
+            "start": 4536,
+            "end": 4540
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 4540,
+            "end": 4541
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 4541,
+            "end": 4542
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 4542,
+            "end": 4543
+        },
+        {
+            "kind": "Variable",
+            "text": "NewState",
+            "start": 4544,
+            "end": 4552
+        },
+        {
+            "kind": "Colon",
+            "text": ":",
+            "start": 4553,
+            "end": 4554
+        },
+        {
+            "kind": "Colon",
+            "text": ":",
+            "start": 4554,
+            "end": 4555
+        },
+        {
+            "kind": "Atom",
+            "text": "term",
+            "start": 4556,
+            "end": 4560
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 4560,
+            "end": 4561
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 4561,
+            "end": 4562
+        },
+        {
+            "kind": "RightBrace",
+            "text": "}",
+            "start": 4562,
+            "end": 4563
+        },
+        {
+            "kind": "Dot",
+            "text": ".",
+            "start": 4563,
+            "end": 4564
+        },
+        {
+            "kind": "Minus",
+            "text": "-",
+            "start": 4584,
+            "end": 4585
+        },
+        {
+            "kind": "Atom",
+            "text": "module",
+            "start": 4585,
+            "end": 4591
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 4591,
+            "end": 4592
+        },
+        {
+            "kind": "Atom",
+            "text": "my_app",
+            "start": 4592,
+            "end": 4598
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 4598,
+            "end": 4599
+        },
+        {
+            "kind": "Dot",
+            "text": ".",
+            "start": 4599,
+            "end": 4600
+        },
+        {
+            "kind": "Minus",
+            "text": "-",
+            "start": 4601,
+            "end": 4602
+        },
+        {
+            "kind": "Atom",
+            "text": "behaviour",
+            "start": 4602,
+            "end": 4611
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 4611,
+            "end": 4612
+        },
+        {
+            "kind": "Atom",
+            "text": "application",
+            "start": 4612,
+            "end": 4623
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 4623,
+            "end": 4624
+        },
+        {
+            "kind": "Dot",
+            "text": ".",
+            "start": 4624,
+            "end": 4625
+        },
+        {
+            "kind": "Minus",
+            "text": "-",
+            "start": 4627,
+            "end": 4628
+        },
+        {
+            "kind": "Atom",
+            "text": "export",
+            "start": 4628,
+            "end": 4634
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 4634,
+            "end": 4635
+        },
+        {
+            "kind": "LeftBracket",
+            "text": "[",
+            "start": 4635,
+            "end": 4636
+        },
+        {
+            "kind": "Atom",
+            "text": "start",
+            "start": 4636,
+            "end": 4641
+        },
+        {
+            "kind": "Slash",
+            "text": "/",
+            "start": 4641,
+            "end": 4642
+        },
+        {
+            "kind": "Number",
+            "text": "2",
+            "start": 4642,
+            "end": 4643
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 4643,
+            "end": 4644
+        },
+        {
+            "kind": "Atom",
+            "text": "stop",
+            "start": 4645,
+            "end": 4649
+        },
+        {
+            "kind": "Slash",
+            "text": "/",
+            "start": 4649,
+            "end": 4650
+        },
+        {
+            "kind": "Number",
+            "text": "1",
+            "start": 4650,
+            "end": 4651
+        },
+        {
+            "kind": "RightBracket",
+            "text": "]",
+            "start": 4651,
+            "end": 4652
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 4652,
+            "end": 4653
+        },
+        {
+            "kind": "Dot",
+            "text": ".",
+            "start": 4653,
+            "end": 4654
+        },
+        {
+            "kind": "Atom",
+            "text": "start",
+            "start": 4656,
+            "end": 4661
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 4661,
+            "end": 4662
+        },
+        {
+            "kind": "Variable",
+            "text": "_StartType",
+            "start": 4662,
+            "end": 4672
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 4672,
+            "end": 4673
+        },
+        {
+            "kind": "Variable",
+            "text": "_StartArgs",
+            "start": 4674,
+            "end": 4684
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 4684,
+            "end": 4685
+        },
+        {
+            "kind": "Arrow",
+            "text": "->",
+            "start": 4686,
+            "end": 4688
+        },
+        {
+            "kind": "Atom",
+            "text": "my_sup",
+            "start": 4693,
+            "end": 4699
+        },
+        {
+            "kind": "Colon",
+            "text": ":",
+            "start": 4699,
+            "end": 4700
+        },
+        {
+            "kind": "Atom",
+            "text": "start_link",
+            "start": 4700,
+            "end": 4710
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 4710,
+            "end": 4711
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 4711,
+            "end": 4712
+        },
+        {
+            "kind": "Dot",
+            "text": ".",
+            "start": 4712,
+            "end": 4713
+        },
+        {
+            "kind": "Atom",
+            "text": "stop",
+            "start": 4715,
+            "end": 4719
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 4719,
+            "end": 4720
+        },
+        {
+            "kind": "Variable",
+            "text": "_State",
+            "start": 4720,
+            "end": 4726
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 4726,
+            "end": 4727
+        },
+        {
+            "kind": "Arrow",
+            "text": "->",
+            "start": 4728,
+            "end": 4730
+        },
+        {
+            "kind": "Atom",
+            "text": "ok",
+            "start": 4735,
+            "end": 4737
+        },
+        {
+            "kind": "Dot",
+            "text": ".",
+            "start": 4737,
+            "end": 4738
+        },
+        {
+            "kind": "Minus",
+            "text": "-",
+            "start": 4756,
+            "end": 4757
+        },
+        {
+            "kind": "Atom",
+            "text": "include",
+            "start": 4757,
+            "end": 4764
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 4764,
+            "end": 4765
+        },
+        {
+            "kind": "String",
+            "text": "\"header.hrl\"",
+            "start": 4765,
+            "end": 4777
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 4777,
+            "end": 4778
+        },
+        {
+            "kind": "Dot",
+            "text": ".",
+            "start": 4778,
+            "end": 4779
+        },
+        {
+            "kind": "Minus",
+            "text": "-",
+            "start": 4780,
+            "end": 4781
+        },
+        {
+            "kind": "Atom",
+            "text": "include_lib",
+            "start": 4781,
+            "end": 4792
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 4792,
+            "end": 4793
+        },
+        {
+            "kind": "String",
+            "text": "\"kernel/include/file.hrl\"",
+            "start": 4793,
+            "end": 4818
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 4818,
+            "end": 4819
+        },
+        {
+            "kind": "Dot",
+            "text": ".",
+            "start": 4819,
+            "end": 4820
+        },
+        {
+            "kind": "Eof",
+            "text": "",
+            "start": 4820,
+            "end": 4820
         }
     ],
     "errors": []
