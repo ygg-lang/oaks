@@ -68,12 +68,12 @@ jobs:
 
             - name: Run tests (no-default features)
               if: matrix.feature == 'no-default'
-              run: cargo test --workspace --no-default-features
+              run: cargo test --workspace --no-default-features --no-fail-fast
 
             - name: Run tests (default features)
               if: matrix.feature == 'default'
-              run: cargo test --workspace
+              run: cargo test --workspace --no-fail-fast
 
             - name: Run tests (all features)
               if: matrix.feature == 'all'
-              run: cargo test --workspace --all-features
+              run: cargo test --workspace --all-features --no-fail-fast
