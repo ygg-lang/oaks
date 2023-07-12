@@ -50,6 +50,7 @@ fn test_element_style() {
     assert_eq!(style.opacity, Some(0.8));
 }
 
+#[cfg(feature = "serde")]
 #[test]
 fn test_layout_exporter() {
     let exporter = LayoutExporter::new(ExportFormat::Json);
@@ -120,10 +121,13 @@ fn test_layout_exporter_formats() {
     assert!(html.contains("<svg"));
 
     // Test JSON export
-    let json_exporter = LayoutExporter::new(ExportFormat::Json);
-    let json_result = json_exporter.export(&layout);
-    assert!(json_result.is_ok());
-    let json = json_result.unwrap();
-    assert!(json.contains("nodes"));
-    assert!(json.contains("edges"));
+    #[cfg(feature = "serde")]
+    {
+        let json_exporter = LayoutExporter::new(ExportFormat::Json);
+        let json_result = json_exporter.export(&layout);
+        assert!(json_result.is_ok());
+        let json = json_result.unwrap();
+        assert!(json.contains("nodes"));
+        assert!(json.contains("edges"));
+    }
 }

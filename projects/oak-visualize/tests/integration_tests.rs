@@ -107,7 +107,10 @@ fn test_multi_format_export_integration() {
     layout.add_node("export_test".to_string(), Rect::new(Point::new(0.0, 0.0), Size::new(80.0, 40.0)));
 
     // 2. Test multiple export formats
+    #[cfg(feature = "serde")]
     let formats = vec![ExportFormat::Svg, ExportFormat::Html, ExportFormat::Json];
+    #[cfg(not(feature = "serde"))]
+    let formats = vec![ExportFormat::Svg, ExportFormat::Html];
 
     for format in formats {
         let exporter = LayoutExporter::new(format);
@@ -125,11 +128,14 @@ fn test_multi_format_export_integration() {
                 assert!(content.contains("<svg"));
                 assert!(content.contains("export_test"))
             }
+            #[cfg(feature = "serde")]
             ExportFormat::Json => {
                 assert!(content.contains("nodes"));
                 assert!(content.contains("edges"));
                 assert!(content.contains("export_test"))
             }
+            #[cfg(not(feature = "serde"))]
+            ExportFormat::Json => unreachable!("JSON export requires serde"),
         }
     }
 }
