@@ -5,16 +5,17 @@ use oak_wolfram::{WolframLanguage, WolframLexer};
 use std::{path::Path, time::Duration};
 
 #[test]
+#[ignore = "manual baseline regeneration helper; do not run in CI"]
 #[cfg(feature = "serde")]
 fn generate_baseline() {
-    use oak_core::{Lexer, ParseSession, SourceText, source::Source};
+    use oak_core::{Lexer, ParseSession, SourceText, TokenType, source::Source};
     use oak_wolfram::{WolframLanguage, WolframLexer};
     use serde_json::json;
     use std::{fs, path::Path};
 
     let here = Path::new(env!("CARGO_MANIFEST_DIR"));
     let source_path = here.join("tests/lexer/basic.wl");
-    let source_text = fs::read_to_string(source_path).expect("Failed to read source");
+    let source_text = fs::read_to_string(source_path).expect("Failed to read source").replace("\r\n", "\n").replace('\r', "\n");
     let source = SourceText::new(source_text);
     let language = WolframLanguage::default();
     let lexer = WolframLexer::new(&language);
@@ -22,8 +23,10 @@ fn generate_baseline() {
     let result = lexer.lex(&source, &[], &mut cache);
 
     let tokens = result.result.expect("Lexing failed");
+    // Match `LexerTester`: omit ignored trivia so the golden stays comparable.
     let token_data: Vec<_> = tokens
         .iter()
+        .filter(|t| !t.kind.is_ignored())
         .map(|t| {
             let text = source.get_text_in(t.span.clone()).to_string();
             json!({
@@ -37,7 +40,7 @@ fn generate_baseline() {
 
     let output = json!({
         "success": true,
-        "count": tokens.len(),
+        "count": token_data.len(),
         "tokens": token_data,
         "errors": []
     });

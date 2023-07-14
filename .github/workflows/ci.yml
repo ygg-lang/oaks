@@ -66,14 +66,15 @@ jobs:
                   restore-keys: |
                       ${{ runner.os }}-cargo-
 
+            # `--lib --tests` skips included-readme doctests (stale API snippets).
             - name: Run tests (no-default features)
               if: matrix.feature == 'no-default'
-              run: cargo test --workspace --no-default-features --no-fail-fast
+              run: cargo test --workspace --lib --tests --no-default-features --no-fail-fast
 
             - name: Run tests (default features)
               if: matrix.feature == 'default'
-              run: cargo test --workspace --no-fail-fast
+              run: cargo test --workspace --lib --tests --no-fail-fast
 
             - name: Run tests (all features)
               if: matrix.feature == 'all'
-              run: cargo test --workspace --all-features --no-fail-fast
+              run: cargo test --workspace --lib --tests --all-features --no-fail-fast
