@@ -25,5 +25,5 @@ impl Language for MatlabLanguage {
 
     type TokenType = crate::lexer::token_type::MatlabTokenType;
     type ElementType = crate::parser::element_type::MatlabElementType;
-    type TypedRoot = crate::ast::MatlabRoot;
+    type TypedRoot = ();
 }

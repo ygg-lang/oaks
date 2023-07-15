@@ -166,6 +166,7 @@ impl<'config> Pratt<WolframLanguage> for WolframParser<'config> {
 
         // Binary/Infix operators
         let info = match kind {
+            WolframTokenType::Semicolon => Some(OperatorInfo::left(5)), // a;b CompoundExpression
             WolframTokenType::Assign | WolframTokenType::Set | WolframTokenType::SetDelayed => Some(OperatorInfo::right(20)),
             WolframTokenType::Rule | WolframTokenType::RuleDelayed | WolframTokenType::Arrow => Some(OperatorInfo::right(30)),
             WolframTokenType::SlashSlash => Some(OperatorInfo::left(40)), // x // f

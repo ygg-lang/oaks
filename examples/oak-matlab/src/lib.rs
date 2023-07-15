@@ -20,6 +20,7 @@ pub mod mcp;
 pub mod parser;
 
 pub use crate::{
+    builder::MatlabBuilder,
     language::MatlabLanguage,
     lexer::{MatlabLexer, token_type::MatlabTokenType},
     parser::{MatlabParser, element_type::MatlabElementType},

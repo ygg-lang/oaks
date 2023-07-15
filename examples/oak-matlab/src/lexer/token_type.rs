@@ -17,14 +17,20 @@ impl MatlabTokenType {
 
 impl TokenType for MatlabTokenType {
     type Role = UniversalTokenRole;
-    const END_OF_STREAM: Self = Self::Error;
+    const END_OF_STREAM: Self = Self::Eof;
 
     fn is_ignored(&self) -> bool {
-        false
+        matches!(self, Self::Whitespace | Self::Newline | Self::Comment | Self::BlockComment)
     }
 
     fn role(&self) -> Self::Role {
         match self {
+            Self::Whitespace | Self::Newline => UniversalTokenRole::Whitespace,
+            Self::Comment | Self::BlockComment => UniversalTokenRole::Comment,
+            Self::Identifier => UniversalTokenRole::Name,
+            Self::Number | Self::String | Self::Character => UniversalTokenRole::Literal,
+            Self::Eof => UniversalTokenRole::Eof,
+            Self::Error => UniversalTokenRole::Error,
             _ => UniversalTokenRole::None,
         }
     }

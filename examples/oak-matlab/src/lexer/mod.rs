@@ -248,22 +248,49 @@ impl<'config> MatlabLexer<'config> {
 
     fn lex_operator<'s, S: Source + ?Sized>(&self, state: &mut State<'s, S>) -> bool {
         let start_pos = state.get_position();
-        let ops = [".*", "./", ".^", ".\\", "==", "~=", "<=", ">=", "&&", "||", "++", "--", ".'"];
-        for op in ops {
-            if state.consume_if_starts_with(op) {
-                state.add_token(MatlabTokenType::Operator, start_pos, state.get_position());
+        let patterns: &[(&str, MatlabTokenType)] = &[
+            (".*", MatlabTokenType::DotTimes),
+            ("./", MatlabTokenType::DotDivide),
+            (".^", MatlabTokenType::DotPower),
+            (".\\", MatlabTokenType::DotLeftDivide),
+            (".'", MatlabTokenType::DotTranspose),
+            ("==", MatlabTokenType::Equal),
+            ("~=", MatlabTokenType::NotEqual),
+            ("<=", MatlabTokenType::LessEqual),
+            (">=", MatlabTokenType::GreaterEqual),
+            ("&&", MatlabTokenType::AndAnd),
+            ("||", MatlabTokenType::OrOr),
+        ];
+        for (pat, kind) in patterns {
+            if state.starts_with(pat) {
+                state.advance(pat.len());
+                state.add_token(*kind, start_pos, state.get_position());
                 return true;
             }
         }
 
         if let Some(ch) = state.peek() {
             let kind = match ch {
-                '+' | '-' | '*' | '/' | '\\' | '^' | '<' | '>' | '=' | '~' | '&' | '|' | '\'' => MatlabTokenType::Operator,
-                _ => return false,
+                '+' => Some(MatlabTokenType::Plus),
+                '-' => Some(MatlabTokenType::Minus),
+                '*' => Some(MatlabTokenType::Times),
+                '/' => Some(MatlabTokenType::Divide),
+                '\\' => Some(MatlabTokenType::LeftDivide),
+                '^' => Some(MatlabTokenType::Power),
+                '<' => Some(MatlabTokenType::Less),
+                '>' => Some(MatlabTokenType::Greater),
+                '=' => Some(MatlabTokenType::Assign),
+                '~' => Some(MatlabTokenType::Not),
+                '&' => Some(MatlabTokenType::And),
+                '|' => Some(MatlabTokenType::Or),
+                '\'' => Some(MatlabTokenType::Transpose),
+                _ => None,
             };
-            state.advance(1);
-            state.add_token(kind, start_pos, state.get_position());
-            return true;
+            if let Some(k) = kind {
+                state.advance(ch.len_utf8());
+                state.add_token(k, start_pos, state.get_position());
+                return true;
+            }
         }
         false
     }
@@ -272,10 +299,21 @@ impl<'config> MatlabLexer<'config> {
         let start_pos = state.get_position();
         if let Some(ch) = state.peek() {
             let kind = match ch {
-                '(' | ')' | '[' | ']' | '{' | '}' | ';' | ',' | ':' | '?' | '@' | '.' => MatlabTokenType::Delimiter,
+                '(' => MatlabTokenType::LeftParen,
+                ')' => MatlabTokenType::RightParen,
+                '[' => MatlabTokenType::LeftBracket,
+                ']' => MatlabTokenType::RightBracket,
+                '{' => MatlabTokenType::LeftBrace,
+                '}' => MatlabTokenType::RightBrace,
+                ';' => MatlabTokenType::Semicolon,
+                ',' => MatlabTokenType::Comma,
+                ':' => MatlabTokenType::Colon,
+                '?' => MatlabTokenType::Question,
+                '@' => MatlabTokenType::At,
+                '.' => MatlabTokenType::Dot,
                 _ => return false,
             };
-            state.advance(1);
+            state.advance(ch.len_utf8());
             state.add_token(kind, start_pos, state.get_position());
             true
         }

@@ -15,9 +15,12 @@ impl HoverProvider<MatlabLanguage> for MatlabHoverProvider {
     fn hover(&self, node: &RedNode<MatlabLanguage>, _range: Range<usize>) -> Option<oak_hover::Hover> {
         let kind = node.green.kind;
         let contents = match kind {
-            MatlabElementType::FunctionDef => "### MATLAB Function\nDefines a reusable function block.",
-            MatlabElementType::ClassDef => "### MATLAB Class\nDefines a class for object-oriented programming.",
-            MatlabElementType::Script => "### MATLAB Script\nA file containing a sequence of MATLAB commands.",
+            MatlabElementType::Root => "### MATLAB Root\nTop-level expression container.",
+            MatlabElementType::Call => "### MATLAB Call\nFunction or indexing call `f(…)`.",
+            MatlabElementType::Array => "### MATLAB Array\nMatrix / row literal `[…]`.",
+            MatlabElementType::BinaryExpr => "### MATLAB BinaryExpr\nBinary operator application.",
+            MatlabElementType::Symbol => "### MATLAB Symbol\nIdentifier / name.",
+            MatlabElementType::Literal => "### MATLAB Literal\nNumber or string literal.",
             _ => return None,
         };
         Some(oak_hover::Hover { contents: contents.to_string(), range: Some(node.span()) })

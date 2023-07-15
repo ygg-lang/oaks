@@ -1,142 +1,193 @@
 #![doc = include_str!("readme.md")]
-use core::range::Range;
+use crate::{language::MatlabLanguage, parser::element_type::MatlabElementType};
+use oak_core::tree::{GreenNode, RedNode, TypedNode};
 
-/// MATLAB Abstract Syntax Tree Root Node
-#[derive(Clone, Debug, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub struct MatlabRoot {
-    /// List of items in script or function
-    pub items: Vec<Item>,
+/// Matlab root node.
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+pub struct MatlabRoot<'a> {
+    /// The underlying green node.
+    green: GreenNode<'a, MatlabLanguage>,
 }
 
-/// Top-level items in MATLAB
-#[derive(Clone, Debug, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub enum Item {
-    /// Function definition
-    Function(Function),
-    /// Class definition
-    Class(Class),
-    /// Statement
-    Statement(Statement),
+impl<'a> TypedNode<'a> for MatlabRoot<'a> {
+    type Language = MatlabLanguage;
+
+    fn cast(node: RedNode<'a, Self::Language>) -> Option<Self> {
+        if node.element_type() == MatlabElementType::Root { Some(Self { green: node.green().clone() }) } else { None }
+    }
+
+    fn green(&self) -> &GreenNode<'a, MatlabLanguage> {
+        &self.green
+    }
 }
 
-/// Function definition
-#[derive(Clone, Debug, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub struct Function {
-    /// Function name
-    pub name: String,
-    /// Input parameters
-    pub inputs: Vec<String>,
-    /// Output parameters
-    pub outputs: Vec<String>,
-    /// Function body
-    pub body: Vec<Statement>,
-    /// Source code span
-    #[cfg_attr(feature = "serde", serde(with = "oak_core::serde_range"))]
-    pub span: Range<usize>,
+/// Matlab function call (e.g. `f(x, y)`).
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+pub struct MatlabCall<'a> {
+    /// The underlying green node.
+    green: GreenNode<'a, MatlabLanguage>,
 }
 
-/// Class definition
-#[derive(Clone, Debug, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub struct Class {
-    /// Class name
-    pub name: String,
-    /// Base classes
-    pub superclasses: Vec<String>,
-    /// Property block
-    pub properties: Vec<Property>,
-    /// Method block
-    pub methods: Vec<Function>,
-    /// Source code span
-    #[cfg_attr(feature = "serde", serde(with = "oak_core::serde_range"))]
-    pub span: Range<usize>,
+impl<'a> TypedNode<'a> for MatlabCall<'a> {
+    type Language = MatlabLanguage;
+
+    fn cast(node: RedNode<'a, Self::Language>) -> Option<Self> {
+        if node.element_type() == MatlabElementType::Call { Some(Self { green: node.green().clone() }) } else { None }
+    }
+
+    fn green(&self) -> &GreenNode<'a, MatlabLanguage> {
+        &self.green
+    }
 }
 
-/// Property
-#[derive(Clone, Debug, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub struct Property {
-    /// Property name
-    pub name: String,
-    /// Default value
-    pub default_value: Option<String>,
-    /// Source code span
-    #[cfg_attr(feature = "serde", serde(with = "oak_core::serde_range"))]
-    pub span: Range<usize>,
+/// Matlab symbol / identifier.
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+pub struct MatlabSymbol<'a> {
+    /// The underlying green node.
+    green: GreenNode<'a, MatlabLanguage>,
 }
 
-/// Statement
-#[derive(Clone, Debug, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub enum Statement {
-    /// Assignment statement
-    Assignment {
-        /// Target of the assignment.
-        target: String,
-        /// Value assigned.
-        value: String,
-        /// Source range.
-        #[cfg_attr(feature = "serde", serde(with = "oak_core::serde_range"))]
-        span: Range<usize>,
-    },
-    /// Expression statement
-    Expression {
-        /// Expression value.
-        value: String,
-        /// Source range.
-        #[cfg_attr(feature = "serde", serde(with = "oak_core::serde_range"))]
-        span: Range<usize>,
-    },
-    /// If statement
-    If {
-        /// Condition.
-        condition: String,
-        /// Body of the if branch.
-        body: Vec<Statement>,
-        /// Else-if branches.
-        else_ifs: Vec<(String, Vec<Statement>)>,
-        /// Else branch body.
-        else_body: Option<Vec<Statement>>,
-        /// Source range.
-        #[cfg_attr(feature = "serde", serde(with = "oak_core::serde_range"))]
-        span: Range<usize>,
-    },
-    /// For loop
-    For {
-        /// Loop variable.
-        variable: String,
-        /// Range of the loop.
-        range: String,
-        /// Body of the loop.
-        body: Vec<Statement>,
-        /// Source range.
-        #[cfg_attr(feature = "serde", serde(with = "oak_core::serde_range"))]
-        span: Range<usize>,
-    },
-    /// While loop
-    While {
-        /// Loop condition.
-        condition: String,
-        /// Body of the loop.
-        body: Vec<Statement>,
-        /// Source range.
-        #[cfg_attr(feature = "serde", serde(with = "oak_core::serde_range"))]
-        span: Range<usize>,
-    },
+impl<'a> TypedNode<'a> for MatlabSymbol<'a> {
+    type Language = MatlabLanguage;
+
+    fn cast(node: RedNode<'a, Self::Language>) -> Option<Self> {
+        if node.element_type() == MatlabElementType::Symbol { Some(Self { green: node.green().clone() }) } else { None }
+    }
+
+    fn green(&self) -> &GreenNode<'a, MatlabLanguage> {
+        &self.green
+    }
 }
 
-/// Matlab script.
-pub struct MatlabScript {
-    /// Items in the script.
-    pub items: Vec<Item>,
+/// Matlab literal (number / string / character).
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+pub struct MatlabLiteral<'a> {
+    /// The underlying green node.
+    green: GreenNode<'a, MatlabLanguage>,
 }
 
-impl MatlabScript {
-    /// Creates a new `MatlabScript` with the given items.
-    pub fn new(items: Vec<Item>) -> Self {
-        Self { items }
+impl<'a> TypedNode<'a> for MatlabLiteral<'a> {
+    type Language = MatlabLanguage;
+
+    fn cast(node: RedNode<'a, Self::Language>) -> Option<Self> {
+        if node.element_type() == MatlabElementType::Literal { Some(Self { green: node.green().clone() }) } else { None }
+    }
+
+    fn green(&self) -> &GreenNode<'a, MatlabLanguage> {
+        &self.green
+    }
+}
+
+/// Matlab array `[a, b; c]`.
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+pub struct MatlabArray<'a> {
+    /// The underlying green node.
+    green: GreenNode<'a, MatlabLanguage>,
+}
+
+impl<'a> TypedNode<'a> for MatlabArray<'a> {
+    type Language = MatlabLanguage;
+
+    fn cast(node: RedNode<'a, Self::Language>) -> Option<Self> {
+        if node.element_type() == MatlabElementType::Array { Some(Self { green: node.green().clone() }) } else { None }
+    }
+
+    fn green(&self) -> &GreenNode<'a, MatlabLanguage> {
+        &self.green
+    }
+}
+
+/// Matlab argument list `(…)`.
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+pub struct MatlabArguments<'a> {
+    /// The underlying green node.
+    green: GreenNode<'a, MatlabLanguage>,
+}
+
+impl<'a> TypedNode<'a> for MatlabArguments<'a> {
+    type Language = MatlabLanguage;
+
+    fn cast(node: RedNode<'a, Self::Language>) -> Option<Self> {
+        if node.element_type() == MatlabElementType::Arguments { Some(Self { green: node.green().clone() }) } else { None }
+    }
+
+    fn green(&self) -> &GreenNode<'a, MatlabLanguage> {
+        &self.green
+    }
+}
+
+/// Matlab binary expression.
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+pub struct MatlabBinaryExpr<'a> {
+    /// The underlying green node.
+    green: GreenNode<'a, MatlabLanguage>,
+}
+
+impl<'a> TypedNode<'a> for MatlabBinaryExpr<'a> {
+    type Language = MatlabLanguage;
+
+    fn cast(node: RedNode<'a, Self::Language>) -> Option<Self> {
+        if node.element_type() == MatlabElementType::BinaryExpr { Some(Self { green: node.green().clone() }) } else { None }
+    }
+
+    fn green(&self) -> &GreenNode<'a, MatlabLanguage> {
+        &self.green
+    }
+}
+
+/// Matlab prefix expression.
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+pub struct MatlabPrefixExpr<'a> {
+    /// The underlying green node.
+    green: GreenNode<'a, MatlabLanguage>,
+}
+
+impl<'a> TypedNode<'a> for MatlabPrefixExpr<'a> {
+    type Language = MatlabLanguage;
+
+    fn cast(node: RedNode<'a, Self::Language>) -> Option<Self> {
+        if node.element_type() == MatlabElementType::PrefixExpr { Some(Self { green: node.green().clone() }) } else { None }
+    }
+
+    fn green(&self) -> &GreenNode<'a, MatlabLanguage> {
+        &self.green
+    }
+}
+
+/// Matlab postfix expression.
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+pub struct MatlabPostfixExpr<'a> {
+    /// The underlying green node.
+    green: GreenNode<'a, MatlabLanguage>,
+}
+
+impl<'a> TypedNode<'a> for MatlabPostfixExpr<'a> {
+    type Language = MatlabLanguage;
+
+    fn cast(node: RedNode<'a, Self::Language>) -> Option<Self> {
+        if node.element_type() == MatlabElementType::PostfixExpr { Some(Self { green: node.green().clone() }) } else { None }
+    }
+
+    fn green(&self) -> &GreenNode<'a, MatlabLanguage> {
+        &self.green
+    }
+}
+
+/// Matlab parenthesized expression.
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+pub struct MatlabExpression<'a> {
+    /// The underlying green node.
+    green: GreenNode<'a, MatlabLanguage>,
+}
+
+impl<'a> TypedNode<'a> for MatlabExpression<'a> {
+    type Language = MatlabLanguage;
+
+    fn cast(node: RedNode<'a, Self::Language>) -> Option<Self> {
+        if node.element_type() == MatlabElementType::Expression { Some(Self { green: node.green().clone() }) } else { None }
+    }
+
+    fn green(&self) -> &GreenNode<'a, MatlabLanguage> {
+        &self.green
     }
 }
