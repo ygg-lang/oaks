@@ -51,6 +51,17 @@ fn test_parser_compound_expression() {
 }
 
 #[test]
+fn test_parser_root_semicolon() {
+    let input = "1 + 2; 3 * 4";
+    let source = SourceText::new(input.to_string());
+    let language = WolframLanguage::default();
+    let mut cache = oak_core::ParseSession::<WolframLanguage>::default();
+    let parser = WolframParser::new(&language);
+    let output = parser.parse(&source, &[], &mut cache);
+    assert!(output.result.is_ok());
+}
+
+#[test]
 fn test_parser_nested_list_call() {
     let input = "f[{1, 2}, g[x]]";
     let source = SourceText::new(input.to_string());

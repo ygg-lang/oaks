@@ -38,6 +38,9 @@ impl<'config> Parser<WolframLanguage> for WolframParser<'config> {
 
             while state.not_at_end() && state.not_at(WolframTokenType::Eof) {
                 self.parse_expression(state);
+                if state.at(WolframTokenType::Semicolon) {
+                    state.bump();
+                }
             }
 
             Ok(state.finish_at(checkpoint, WolframElementType::Root))
