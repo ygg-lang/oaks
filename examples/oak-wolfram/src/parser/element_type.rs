@@ -34,6 +34,8 @@ pub enum WolframElementType {
     // Postfix expression x!
     /// A postfix expression, e.g., `x!`.
     PostfixExpr,
+    /// Part access, e.g., `list[[1]]`.
+    Part,
     // Errors
     /// An error element.
     Error,

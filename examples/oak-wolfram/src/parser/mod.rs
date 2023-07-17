@@ -90,45 +90,130 @@ impl<'config> WolframParser<'config> {
         }
         state.finish_at(checkpoint, WolframElementType::List)
     }
+
+    /// Keyword heads that are still ordinary Wolfram symbols (`If[…]`, `Import[…]`, `True`, …).
+    fn is_symbol_token(kind: WolframTokenType) -> bool {
+        matches!(
+            kind,
+            WolframTokenType::Identifier
+                | WolframTokenType::If
+                | WolframTokenType::Then
+                | WolframTokenType::Else
+                | WolframTokenType::While
+                | WolframTokenType::For
+                | WolframTokenType::Do
+                | WolframTokenType::Function
+                | WolframTokenType::Module
+                | WolframTokenType::Block
+                | WolframTokenType::With
+                | WolframTokenType::Table
+                | WolframTokenType::Map
+                | WolframTokenType::Apply
+                | WolframTokenType::Select
+                | WolframTokenType::Cases
+                | WolframTokenType::Rule
+                | WolframTokenType::RuleDelayed
+                | WolframTokenType::Set
+                | WolframTokenType::SetDelayed
+                | WolframTokenType::Unset
+                | WolframTokenType::Clear
+                | WolframTokenType::ClearAll
+                | WolframTokenType::Return
+                | WolframTokenType::Break
+                | WolframTokenType::Continue
+                | WolframTokenType::True
+                | WolframTokenType::False
+                | WolframTokenType::Null
+                | WolframTokenType::Export
+                | WolframTokenType::Import
+        )
+    }
+
+    /// `expr[[…]]` Part, or `expr[…]` Call on a non-primary head (e.g. list apply).
+    fn parse_bracket_postfix<'a, S: Source + ?Sized>(
+        &self,
+        state: &mut State<'a, S>,
+        left: &'a GreenNode<'a, WolframLanguage>,
+    ) -> &'a GreenNode<'a, WolframLanguage> {
+        let checkpoint = state.checkpoint_before(left);
+        // Distinguish Part `[[` from Call `[`.
+        state.bump(); // first [
+        let is_part = state.at(WolframTokenType::LeftBracket);
+        if is_part {
+            state.bump(); // second [
+        }
+
+        // Reuse argument-list body without consuming an extra opening bracket.
+        let args_checkpoint = state.checkpoint();
+        while state.not_at(WolframTokenType::RightBracket) && state.not_at_end() {
+            self.parse_expression(state);
+            if state.at(WolframTokenType::Comma) {
+                state.bump();
+            }
+        }
+        if state.at(WolframTokenType::RightBracket) {
+            state.bump();
+        }
+        if is_part && state.at(WolframTokenType::RightBracket) {
+            state.bump();
+        }
+        state.finish_at(args_checkpoint, WolframElementType::Arguments);
+
+        if is_part {
+            state.finish_at(checkpoint, WolframElementType::Part)
+        } else {
+            state.finish_at(checkpoint, WolframElementType::Call)
+        }
+    }
 }
 
 impl<'config> Pratt<WolframLanguage> for WolframParser<'config> {
     fn primary<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> &'a GreenNode<'a, WolframLanguage> {
         let checkpoint = state.checkpoint();
+        let kind = state.peek_kind();
 
-        if state.at(WolframTokenType::Identifier) {
+        if kind.is_some_and(Self::is_symbol_token) {
             state.bump();
-            // f[…] / f[…][…] — finish once after all bracket groups.
-            if state.at(WolframTokenType::LeftBracket) {
+            if state.at(WolframTokenType::LeftBracket)
+                && state.peek_non_trivia_kind_at(1) == Some(WolframTokenType::LeftBracket)
+            {
+                // `sym[[…]]` — finish symbol, then Part postfix (may repeat).
+                let mut node = state.finish_at(checkpoint, WolframElementType::Symbol);
                 while state.at(WolframTokenType::LeftBracket) {
+                    node = self.parse_bracket_postfix(state, node);
+                }
+                node
+            } else if state.at(WolframTokenType::LeftBracket) {
+                // `sym[…]` / `sym[…][…]` Call groups (single brackets only).
+                while state.at(WolframTokenType::LeftBracket)
+                    && state.peek_non_trivia_kind_at(1) != Some(WolframTokenType::LeftBracket)
+                {
                     self.parse_arguments(state);
                 }
-                state.finish_at(checkpoint, WolframElementType::Call)
-            }
-            else {
+                let mut node = state.finish_at(checkpoint, WolframElementType::Call);
+                while state.at(WolframTokenType::LeftBracket) {
+                    node = self.parse_bracket_postfix(state, node);
+                }
+                node
+            } else {
                 state.finish_at(checkpoint, WolframElementType::Symbol)
             }
-        }
-        else if state.at(WolframTokenType::Integer) || state.at(WolframTokenType::Real) || state.at(WolframTokenType::String) {
+        } else if state.at(WolframTokenType::Integer) || state.at(WolframTokenType::Real) || state.at(WolframTokenType::String) {
             state.bump();
             state.finish_at(checkpoint, WolframElementType::Literal)
-        }
-        else if state.at(WolframTokenType::LeftBrace) {
+        } else if state.at(WolframTokenType::LeftBrace) {
             self.parse_list(state)
-        }
-        else if state.at(WolframTokenType::Slot) || state.at(WolframTokenType::SlotSequence) {
+        } else if state.at(WolframTokenType::Slot) || state.at(WolframTokenType::SlotSequence) {
             state.bump();
             state.finish_at(checkpoint, WolframElementType::Symbol)
-        }
-        else if state.at(WolframTokenType::LeftParen) {
+        } else if state.at(WolframTokenType::LeftParen) {
             state.bump();
             self.parse_expression(state);
             if state.at(WolframTokenType::RightParen) {
                 state.bump();
             }
             state.finish_at(checkpoint, WolframElementType::Expression)
-        }
-        else {
+        } else {
             // Error handling
             state.bump();
             state.finish_at(checkpoint, WolframElementType::Error)
@@ -147,11 +232,29 @@ impl<'config> Pratt<WolframLanguage> for WolframParser<'config> {
             _ => None,
         };
 
-        if let Some(info) = info { unary(state, kind, info.precedence, WolframElementType::PrefixExpr, |s, p| self.parse_pratt(s, p)) } else { self.primary(state) }
+        if let Some(info) = info {
+            unary(state, kind, info.precedence, WolframElementType::PrefixExpr, |s, p| self.parse_pratt(s, p))
+        } else {
+            self.primary(state)
+        }
     }
 
-    fn infix<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>, left: &'a GreenNode<'a, WolframLanguage>, min_precedence: u8) -> Option<&'a GreenNode<'a, WolframLanguage>> {
+    fn infix<'a, S: Source + ?Sized>(
+        &self,
+        state: &mut State<'a, S>,
+        left: &'a GreenNode<'a, WolframLanguage>,
+        min_precedence: u8,
+    ) -> Option<&'a GreenNode<'a, WolframLanguage>> {
         let kind = state.peek_kind()?;
+
+        // Part `expr[[…]]` / Call `expr[…]` (high precedence postfix-like)
+        if kind == WolframTokenType::LeftBracket {
+            const BRACKET_PREC: u8 = 170;
+            if BRACKET_PREC < min_precedence {
+                return None;
+            }
+            return Some(self.parse_bracket_postfix(state, left));
+        }
 
         // Postfix operators
         let postfix_info = match kind {
@@ -175,7 +278,12 @@ impl<'config> Pratt<WolframLanguage> for WolframParser<'config> {
             WolframTokenType::SlashSlash => Some(OperatorInfo::left(40)), // x // f
             WolframTokenType::Or => Some(OperatorInfo::left(50)),
             WolframTokenType::And => Some(OperatorInfo::left(60)),
-            WolframTokenType::Equal | WolframTokenType::NotEqual | WolframTokenType::Less | WolframTokenType::Greater | WolframTokenType::LessEqual | WolframTokenType::GreaterEqual => Some(OperatorInfo::none(70)),
+            WolframTokenType::Equal
+            | WolframTokenType::NotEqual
+            | WolframTokenType::Less
+            | WolframTokenType::Greater
+            | WolframTokenType::LessEqual
+            | WolframTokenType::GreaterEqual => Some(OperatorInfo::none(70)),
             WolframTokenType::Plus | WolframTokenType::Minus => Some(OperatorInfo::left(80)),
             WolframTokenType::Times | WolframTokenType::Divide => Some(OperatorInfo::left(90)),
             WolframTokenType::At => Some(OperatorInfo::right(100)),                 // f @ x
@@ -191,6 +299,14 @@ impl<'config> Pratt<WolframLanguage> for WolframParser<'config> {
             return None;
         }
 
-        Some(binary(state, left, kind, info.precedence, info.associativity, WolframElementType::BinaryExpr, |s, p| self.parse_pratt(s, p)))
+        Some(binary(
+            state,
+            left,
+            kind,
+            info.precedence,
+            info.associativity,
+            WolframElementType::BinaryExpr,
+            |s, p| self.parse_pratt(s, p),
+        ))
     }
 }

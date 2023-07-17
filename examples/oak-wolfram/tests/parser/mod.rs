@@ -62,12 +62,51 @@ fn test_parser_root_semicolon() {
 }
 
 #[test]
-fn test_parser_nested_list_call() {
-    let input = "f[{1, 2}, g[x]]";
+fn test_parser_keyword_call_if() {
+    let input = "If[1 == 1, 7, 8]";
     let source = SourceText::new(input.to_string());
     let language = WolframLanguage::default();
     let mut cache = oak_core::ParseSession::<WolframLanguage>::default();
     let parser = WolframParser::new(&language);
     let output = parser.parse(&source, &[], &mut cache);
-    assert!(output.result.is_ok());
+    let root = output.result.expect("parse If call");
+    let calls = count_kind(&root, oak_wolfram::parser::element_type::WolframElementType::Call);
+    assert!(calls >= 1, "expected Call node for If[…], got root={root:?}");
+}
+
+#[test]
+fn test_parser_keyword_call_import() {
+    let input = "Import[\"x.csv\"]";
+    let source = SourceText::new(input.to_string());
+    let language = WolframLanguage::default();
+    let mut cache = oak_core::ParseSession::<WolframLanguage>::default();
+    let parser = WolframParser::new(&language);
+    let output = parser.parse(&source, &[], &mut cache);
+    let root = output.result.expect("parse Import call");
+    let calls = count_kind(&root, oak_wolfram::parser::element_type::WolframElementType::Call);
+    assert!(calls >= 1, "expected Call node for Import[…], got root={root:?}");
+}
+
+#[test]
+fn test_parser_part_double_bracket() {
+    let input = "{1, 2, 3}[[0]]";
+    let source = SourceText::new(input.to_string());
+    let language = WolframLanguage::default();
+    let mut cache = oak_core::ParseSession::<WolframLanguage>::default();
+    let parser = WolframParser::new(&language);
+    let output = parser.parse(&source, &[], &mut cache);
+    let root = output.result.expect("parse Part");
+    let parts = count_kind(&root, oak_wolfram::parser::element_type::WolframElementType::Part);
+    assert!(parts >= 1, "expected Part node for list[[0]], got root={root:?}");
+}
+
+fn count_kind(node: &oak_core::tree::GreenNode<'_, oak_wolfram::WolframLanguage>, kind: oak_wolfram::parser::element_type::WolframElementType) -> usize {
+    use oak_core::tree::GreenTree;
+    let mut n = if node.kind == kind { 1 } else { 0 };
+    for child in node.children {
+        if let GreenTree::Node(c) = child {
+            n += count_kind(c, kind);
+        }
+    }
+    n
 }
