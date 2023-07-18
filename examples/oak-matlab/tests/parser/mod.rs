@@ -1,6 +1,5 @@
 use oak_core::{Parser, source::SourceText};
-use oak_matlab::parser::element_type::MatlabElementType;
-use oak_matlab::{MatlabLanguage, MatlabParser};
+use oak_matlab::{MatlabLanguage, MatlabParser, parser::element_type::MatlabElementType};
 
 fn count_kind(node: &oak_core::tree::GreenNode<'_, oak_matlab::MatlabLanguage>, kind: MatlabElementType) -> usize {
     use oak_core::tree::GreenTree;
@@ -75,4 +74,14 @@ fn test_parser_while_end() {
 #[test]
 fn test_parser_for_end() {
     assert_has_kind("for i=1:3, i, end", MatlabElementType::ForStmt);
+}
+
+#[test]
+fn test_parser_end_index() {
+    assert_has_kind("[1, 2, 3](end)", MatlabElementType::Call);
+}
+
+#[test]
+fn test_parser_colon_all_index() {
+    parse_ok("A(1,:)");
 }
