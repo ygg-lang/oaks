@@ -27,6 +27,12 @@ pub enum MatlabElementType {
     PrefixExpr,
     /// Postfix operator application.
     PostfixExpr,
+    /// `if … end` statement.
+    IfStmt,
+    /// `while … end` statement.
+    WhileStmt,
+    /// `for … end` statement.
+    ForStmt,
     /// Error node.
     Error,
 }

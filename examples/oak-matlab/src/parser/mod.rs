@@ -1,4 +1,4 @@
-//! Matlab Pratt expression parser (arithmetic / calls / arrays).
+//! Matlab Pratt expression parser (arithmetic / calls / arrays / control).
 
 /// Element kinds.
 pub mod element_type;
@@ -36,10 +36,8 @@ impl<'config> Parser<MatlabLanguage> for MatlabParser<'config> {
         parse_with_lexer(&lexer, text, edits, cache, |state| {
             let checkpoint = state.checkpoint();
             while state.not_at_end() && state.not_at(MatlabTokenType::Eof) {
-                self.parse_expression(state);
-                if state.at(MatlabTokenType::Semicolon) {
-                    state.bump();
-                }
+                self.parse_statement(state);
+                self.skip_statement_separators(state);
             }
             Ok(state.finish_at(checkpoint, MatlabElementType::Root))
         })
@@ -47,12 +45,88 @@ impl<'config> Parser<MatlabLanguage> for MatlabParser<'config> {
 }
 
 impl<'config> MatlabParser<'config> {
-    fn parse_expression<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) {
-        self.parse_pratt(state, 0);
+    fn parse_statement<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> &'a GreenNode<'a, MatlabLanguage> {
+        match state.peek_kind() {
+            Some(MatlabTokenType::If) => self.parse_if(state),
+            Some(MatlabTokenType::While) => self.parse_while(state),
+            Some(MatlabTokenType::For) => self.parse_for(state),
+            _ => self.parse_expression(state),
+        }
+    }
+
+    fn parse_expression<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> &'a GreenNode<'a, MatlabLanguage> {
+        self.parse_pratt(state, 0)
     }
 
     fn parse_pratt<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>, min_precedence: u8) -> &'a GreenNode<'a, MatlabLanguage> {
         PrattParser::new(self.clone()).parse_expr(state, min_precedence)
+    }
+
+    fn skip_statement_separators<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) {
+        while state.at(MatlabTokenType::Semicolon) || state.at(MatlabTokenType::Comma) {
+            state.bump();
+        }
+    }
+
+    fn at_block_terminator(state: &State<'_, impl Source + ?Sized>) -> bool {
+        state.at(MatlabTokenType::End)
+            || state.at(MatlabTokenType::Else)
+            || state.at(MatlabTokenType::Elseif)
+            || state.at(MatlabTokenType::Eof)
+            || !state.not_at_end()
+    }
+
+    fn parse_block_body<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) {
+        self.skip_statement_separators(state);
+        while !Self::at_block_terminator(state) {
+            self.parse_statement(state);
+            self.skip_statement_separators(state);
+        }
+    }
+
+    fn parse_if<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> &'a GreenNode<'a, MatlabLanguage> {
+        let checkpoint = state.checkpoint();
+        state.bump(); // if
+        self.parse_expression(state); // condition
+        self.parse_block_body(state); // then
+        if state.at(MatlabTokenType::Elseif) {
+            // Keep elseif chain as nested IfStmt children for now.
+            while state.at(MatlabTokenType::Elseif) {
+                state.bump();
+                self.parse_expression(state);
+                self.parse_block_body(state);
+            }
+        }
+        if state.at(MatlabTokenType::Else) {
+            state.bump();
+            self.parse_block_body(state);
+        }
+        if state.at(MatlabTokenType::End) {
+            state.bump();
+        }
+        state.finish_at(checkpoint, MatlabElementType::IfStmt)
+    }
+
+    fn parse_while<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> &'a GreenNode<'a, MatlabLanguage> {
+        let checkpoint = state.checkpoint();
+        state.bump(); // while
+        self.parse_expression(state);
+        self.parse_block_body(state);
+        if state.at(MatlabTokenType::End) {
+            state.bump();
+        }
+        state.finish_at(checkpoint, MatlabElementType::WhileStmt)
+    }
+
+    fn parse_for<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> &'a GreenNode<'a, MatlabLanguage> {
+        let checkpoint = state.checkpoint();
+        state.bump(); // for
+        self.parse_expression(state); // usually `i = 1:n`
+        self.parse_block_body(state);
+        if state.at(MatlabTokenType::End) {
+            state.bump();
+        }
+        state.finish_at(checkpoint, MatlabElementType::ForStmt)
     }
 
     fn parse_call_args<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) {
@@ -68,6 +142,17 @@ impl<'config> MatlabParser<'config> {
             state.bump();
         }
         state.finish_at(checkpoint, MatlabElementType::Arguments);
+    }
+
+    /// `expr(…)` call / indexing postfix.
+    fn parse_paren_postfix<'a, S: Source + ?Sized>(
+        &self,
+        state: &mut State<'a, S>,
+        left: &'a GreenNode<'a, MatlabLanguage>,
+    ) -> &'a GreenNode<'a, MatlabLanguage> {
+        let checkpoint = state.checkpoint_before(left);
+        self.parse_call_args(state);
+        state.finish_at(checkpoint, MatlabElementType::Call)
     }
 
     fn parse_array<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> &'a GreenNode<'a, MatlabLanguage> {
@@ -96,7 +181,11 @@ impl<'config> Pratt<MatlabLanguage> for MatlabParser<'config> {
                 while state.at(MatlabTokenType::LeftParen) {
                     self.parse_call_args(state);
                 }
-                state.finish_at(checkpoint, MatlabElementType::Call)
+                let mut node = state.finish_at(checkpoint, MatlabElementType::Call);
+                while state.at(MatlabTokenType::LeftParen) {
+                    node = self.parse_paren_postfix(state, node);
+                }
+                node
             }
             else {
                 state.finish_at(checkpoint, MatlabElementType::Symbol)
@@ -107,7 +196,11 @@ impl<'config> Pratt<MatlabLanguage> for MatlabParser<'config> {
             state.finish_at(checkpoint, MatlabElementType::Literal)
         }
         else if state.at(MatlabTokenType::LeftBracket) {
-            self.parse_array(state)
+            let mut node = self.parse_array(state);
+            while state.at(MatlabTokenType::LeftParen) {
+                node = self.parse_paren_postfix(state, node);
+            }
+            node
         }
         else if state.at(MatlabTokenType::LeftParen) {
             state.bump();
@@ -132,11 +225,30 @@ impl<'config> Pratt<MatlabLanguage> for MatlabParser<'config> {
             MatlabTokenType::Minus | MatlabTokenType::Plus | MatlabTokenType::Not => Some(OperatorInfo::right(150)),
             _ => None,
         };
-        if let Some(info) = info { unary(state, kind, info.precedence, MatlabElementType::PrefixExpr, |s, p| self.parse_pratt(s, p)) } else { self.primary(state) }
+        if let Some(info) = info {
+            unary(state, kind, info.precedence, MatlabElementType::PrefixExpr, |s, p| self.parse_pratt(s, p))
+        }
+        else {
+            self.primary(state)
+        }
     }
 
-    fn infix<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>, left: &'a GreenNode<'a, MatlabLanguage>, min_precedence: u8) -> Option<&'a GreenNode<'a, MatlabLanguage>> {
+    fn infix<'a, S: Source + ?Sized>(
+        &self,
+        state: &mut State<'a, S>,
+        left: &'a GreenNode<'a, MatlabLanguage>,
+        min_precedence: u8,
+    ) -> Option<&'a GreenNode<'a, MatlabLanguage>> {
         let kind = state.peek_kind()?;
+
+        // Indexing / call `expr(…)` (high precedence)
+        if kind == MatlabTokenType::LeftParen {
+            const PAREN_PREC: u8 = 170;
+            if PAREN_PREC < min_precedence {
+                return None;
+            }
+            return Some(self.parse_paren_postfix(state, left));
+        }
 
         let postfix_info = match kind {
             MatlabTokenType::Transpose | MatlabTokenType::DotTranspose => Some(OperatorInfo::left(160)),
@@ -153,10 +265,21 @@ impl<'config> Pratt<MatlabLanguage> for MatlabParser<'config> {
             MatlabTokenType::Assign => Some(OperatorInfo::right(20)),
             MatlabTokenType::OrOr => Some(OperatorInfo::left(40)),
             MatlabTokenType::AndAnd => Some(OperatorInfo::left(50)),
-            MatlabTokenType::Equal | MatlabTokenType::NotEqual | MatlabTokenType::Less | MatlabTokenType::Greater | MatlabTokenType::LessEqual | MatlabTokenType::GreaterEqual => Some(OperatorInfo::none(60)),
+            MatlabTokenType::Equal
+            | MatlabTokenType::NotEqual
+            | MatlabTokenType::Less
+            | MatlabTokenType::Greater
+            | MatlabTokenType::LessEqual
+            | MatlabTokenType::GreaterEqual => Some(OperatorInfo::none(60)),
+            // MATLAB `a:b:c` is right-associative enough that left-assoc nesting is fixed in lowering.
             MatlabTokenType::Colon => Some(OperatorInfo::left(70)),
             MatlabTokenType::Plus | MatlabTokenType::Minus => Some(OperatorInfo::left(80)),
-            MatlabTokenType::Times | MatlabTokenType::Divide | MatlabTokenType::LeftDivide | MatlabTokenType::DotTimes | MatlabTokenType::DotDivide | MatlabTokenType::DotLeftDivide => Some(OperatorInfo::left(90)),
+            MatlabTokenType::Times
+            | MatlabTokenType::Divide
+            | MatlabTokenType::LeftDivide
+            | MatlabTokenType::DotTimes
+            | MatlabTokenType::DotDivide
+            | MatlabTokenType::DotLeftDivide => Some(OperatorInfo::left(90)),
             MatlabTokenType::Power | MatlabTokenType::DotPower => Some(OperatorInfo::right(120)),
             _ => None,
         }?;
@@ -165,6 +288,8 @@ impl<'config> Pratt<MatlabLanguage> for MatlabParser<'config> {
             return None;
         }
 
-        Some(binary(state, left, kind, info.precedence, info.associativity, MatlabElementType::BinaryExpr, |s, p| self.parse_pratt(s, p)))
+        Some(binary(state, left, kind, info.precedence, info.associativity, MatlabElementType::BinaryExpr, |s, p| {
+            self.parse_pratt(s, p)
+        }))
     }
 }
