@@ -36,6 +36,10 @@ pub enum WolframElementType {
     PostfixExpr,
     /// Part access, e.g., `list[[1]]`.
     Part,
+    /// Blank pattern `_` / `_h` / `__` / `___`.
+    Blank,
+    /// Named pattern `x_`, e.g. Pattern[x, Blank[]].
+    Pattern,
     // Errors
     /// An error element.
     Error,
