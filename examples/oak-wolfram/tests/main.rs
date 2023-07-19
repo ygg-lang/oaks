@@ -1,5 +1,6 @@
 #![feature(new_range_api)]
 
+mod ast;
 mod lexer;
 mod parser;
 
