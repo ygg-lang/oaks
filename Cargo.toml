@@ -140,6 +140,7 @@ oak-lua = { path = "examples/oak-lua", version = "0.0.12" }
 oak-markdown = { path = "examples/oak-markdown", version = "0.0.12" }
 oak-matlab = { path = "examples/oak-matlab", version = "0.0.12" }
 oak-mermaid = { path = "examples/oak-mermaid", version = "0.0.12" }
+oak-metis = { path = "examples/oak-metis", version = "0.0.12" }
 oak-mojo = { path = "examples/oak-mojo", version = "0.0.12" }
 oak-msil = { path = "examples/oak-msil", version = "0.0.12" }
 oak-nginx = { path = "examples/oak-nginx", version = "0.0.12" }
