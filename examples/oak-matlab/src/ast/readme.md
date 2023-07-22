@@ -1,3 +1,3 @@
-# Matlab Ast
+# Matlab AST
 
-Thin `TypedNode` wrappers over green-tree element kinds (expression Pratt subset).
+Owned MATLAB AST (`String` + `Span` nodes). Built by `MatlabBuilder` from the CST.

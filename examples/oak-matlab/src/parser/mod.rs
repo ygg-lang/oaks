@@ -50,6 +50,7 @@ impl<'config> MatlabParser<'config> {
             Some(MatlabTokenType::If) => self.parse_if(state),
             Some(MatlabTokenType::While) => self.parse_while(state),
             Some(MatlabTokenType::For) => self.parse_for(state),
+            Some(MatlabTokenType::Try) => self.parse_try(state),
             _ => self.parse_expression(state),
         }
     }
@@ -69,7 +70,12 @@ impl<'config> MatlabParser<'config> {
     }
 
     fn at_block_terminator(state: &State<'_, impl Source + ?Sized>) -> bool {
-        state.at(MatlabTokenType::End) || state.at(MatlabTokenType::Else) || state.at(MatlabTokenType::Elseif) || state.at(MatlabTokenType::Eof) || !state.not_at_end()
+        state.at(MatlabTokenType::End)
+            || state.at(MatlabTokenType::Else)
+            || state.at(MatlabTokenType::Elseif)
+            || state.at(MatlabTokenType::Catch)
+            || state.at(MatlabTokenType::Eof)
+            || !state.not_at_end()
     }
 
     fn parse_block_body<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) {
@@ -123,6 +129,24 @@ impl<'config> MatlabParser<'config> {
             state.bump();
         }
         state.finish_at(checkpoint, MatlabElementType::ForStmt)
+    }
+
+    fn parse_try<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> &'a GreenNode<'a, MatlabLanguage> {
+        let checkpoint = state.checkpoint();
+        state.bump(); // try
+        self.parse_block_body(state);
+        if state.at(MatlabTokenType::Catch) {
+            state.bump();
+            // Optional catch identifier (`catch ME`) before catch body.
+            if state.at(MatlabTokenType::Identifier) {
+                self.parse_expression(state);
+            }
+            self.parse_block_body(state);
+        }
+        if state.at(MatlabTokenType::End) {
+            state.bump();
+        }
+        state.finish_at(checkpoint, MatlabElementType::TryStmt)
     }
 
     fn parse_call_args<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) {
@@ -255,8 +279,11 @@ impl<'config> Pratt<MatlabLanguage> for MatlabParser<'config> {
 
         let info = match kind {
             MatlabTokenType::Assign => Some(OperatorInfo::right(20)),
+            // MATLAB: `|`/`||` below `&`/`&&`; both elementwise and short-circuit forms are infix.
             MatlabTokenType::OrOr => Some(OperatorInfo::left(40)),
+            MatlabTokenType::Or => Some(OperatorInfo::left(45)),
             MatlabTokenType::AndAnd => Some(OperatorInfo::left(50)),
+            MatlabTokenType::And => Some(OperatorInfo::left(55)),
             MatlabTokenType::Equal | MatlabTokenType::NotEqual | MatlabTokenType::Less | MatlabTokenType::Greater | MatlabTokenType::LessEqual | MatlabTokenType::GreaterEqual => Some(OperatorInfo::none(60)),
             // MATLAB `a:b:c` is right-associative enough that left-assoc nesting is fixed in lowering.
             MatlabTokenType::Colon => Some(OperatorInfo::left(70)),

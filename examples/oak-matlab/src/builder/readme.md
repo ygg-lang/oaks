@@ -1,3 +1,3 @@
 # Matlab Builder
 
-This module provides matlab builder functionality for the Oaks project.
+Builds the owned [`MatlabRoot`](crate::ast::MatlabRoot) from the MATLAB CST.

@@ -19,5 +19,5 @@ impl Language for WolframLanguage {
 
     type TokenType = crate::lexer::token_type::WolframTokenType;
     type ElementType = crate::parser::element_type::WolframElementType;
-    type TypedRoot = ();
+    type TypedRoot = crate::ast::WolframRoot;
 }

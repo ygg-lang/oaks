@@ -37,6 +37,13 @@ fn test_parser_binary_expr() {
 }
 
 #[test]
+fn test_parser_and_or_infix() {
+    assert_has_kind("1 & 0", MatlabElementType::BinaryExpr);
+    assert_has_kind("1 | 0", MatlabElementType::BinaryExpr);
+    assert_has_kind("true & false", MatlabElementType::BinaryExpr);
+}
+
+#[test]
 fn test_parser_call() {
     parse_ok("f(x,y)");
 }
@@ -74,6 +81,12 @@ fn test_parser_while_end() {
 #[test]
 fn test_parser_for_end() {
     assert_has_kind("for i=1:3, i, end", MatlabElementType::ForStmt);
+}
+
+#[test]
+fn test_parser_try_catch_end() {
+    assert_has_kind("try, 2, catch, 3, end", MatlabElementType::TryStmt);
+    assert_has_kind("try, error('e'), catch, 1, end", MatlabElementType::TryStmt);
 }
 
 #[test]
