@@ -1,9 +1,4 @@
-use crate::{
-    WolframLanguage,
-    ast::WolframRoot,
-    builder::WolframBuilder,
-    lexer::token_type::WolframTokenType,
-};
+use crate::{WolframLanguage, ast::WolframRoot, builder::WolframBuilder, lexer::token_type::WolframTokenType};
 use oak_core::{GreenNode, OakError, RedNode, RedTree, Source, TokenType};
 
 impl<'config> WolframBuilder<'config> {

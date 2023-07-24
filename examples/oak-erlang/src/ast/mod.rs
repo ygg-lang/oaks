@@ -174,7 +174,7 @@ pub enum Expr {
     /// String expression.
     String(String),
     /// Binary expression.
-    Binary(BinaryExpr),
+    Binary(Box<BinaryExpression>),
     /// List expression.
     List(Vec<Expr>),
     /// Tuple expression.
@@ -182,7 +182,7 @@ pub enum Expr {
     /// Record expression.
     Record(RecordExpr),
     /// Function call expression.
-    Call(CallExpr),
+    Call(CallExpression),
     /// Fun expression.
     Fun(FunExpr),
     /// Case expression.
@@ -198,13 +198,13 @@ pub enum Expr {
 /// A binary expression.
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 #[derive(Debug, PartialEq, Clone)]
-pub struct BinaryExpr {
-    /// Left-hand side expression.
-    pub left: Box<Expr>,
+pub struct BinaryExpression {
     /// Operator.
-    pub op: ErlangTokenType,
+    pub operator: ErlangTokenType,
+    /// Left-hand side expression.
+    pub lhs: Expr,
     /// Right-hand side expression.
-    pub right: Box<Expr>,
+    pub rhs: Expr,
     /// Source span of the binary expression.
     #[cfg_attr(feature = "serde", serde(with = "oak_core::serde_range"))]
     pub span: Range<usize>,
@@ -213,7 +213,7 @@ pub struct BinaryExpr {
 /// A function call expression.
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 #[derive(Debug, PartialEq, Clone)]
-pub struct CallExpr {
+pub struct CallExpression {
     /// Callee expression.
     pub callee: Box<Expr>,
     /// Arguments for the call.

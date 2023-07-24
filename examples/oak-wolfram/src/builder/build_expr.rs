@@ -1,7 +1,7 @@
 use crate::{
     WolframLanguage,
     ast::{BinaryExpr, Expression, Identifier, UnaryExpr},
-    builder::{text, utils, WolframBuilder},
+    builder::{WolframBuilder, text, utils},
     lexer::token_type::WolframTokenType,
     parser::element_type::WolframElementType,
 };
@@ -187,16 +187,7 @@ impl<'config> WolframBuilder<'config> {
                 continue;
             }
             match child {
-                RedTree::Leaf(t)
-                    if matches!(
-                        t.kind(),
-                        WolframTokenType::Ampersand
-                            | WolframTokenType::Factorial
-                            | WolframTokenType::Underscore
-                            | WolframTokenType::DoubleUnderscore
-                            | WolframTokenType::TripleUnderscore
-                    ) =>
-                {
+                RedTree::Leaf(t) if matches!(t.kind(), WolframTokenType::Ampersand | WolframTokenType::Factorial | WolframTokenType::Underscore | WolframTokenType::DoubleUnderscore | WolframTokenType::TripleUnderscore) => {
                     operator = Some(t.kind());
                 }
                 RedTree::Node(n) => operand = Some(self.build_expr(n, source)?),
@@ -243,12 +234,7 @@ impl<'config> WolframBuilder<'config> {
                 continue;
             }
             match child {
-                RedTree::Leaf(t)
-                    if matches!(
-                        t.kind(),
-                        WolframTokenType::Underscore | WolframTokenType::DoubleUnderscore | WolframTokenType::TripleUnderscore
-                    ) =>
-                {
+                RedTree::Leaf(t) if matches!(t.kind(), WolframTokenType::Underscore | WolframTokenType::DoubleUnderscore | WolframTokenType::TripleUnderscore) => {
                     blank = t.kind();
                 }
                 RedTree::Node(n) => name = Some(self.build_expr(n, source)?),

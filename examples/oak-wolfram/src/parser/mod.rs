@@ -274,7 +274,7 @@ impl<'config> Pratt<WolframLanguage> for WolframParser<'config> {
         let info = match kind {
             WolframTokenType::Semicolon => Some(OperatorInfo::left(5)), // a;b CompoundExpression
             WolframTokenType::Assign | WolframTokenType::Set | WolframTokenType::SetDelayed => Some(OperatorInfo::right(20)),
-            WolframTokenType::Rule | WolframTokenType::RuleDelayed | WolframTokenType::Arrow => Some(OperatorInfo::right(30)),
+            WolframTokenType::Rule | WolframTokenType::RuleDelayed | WolframTokenType::Arrow | WolframTokenType::RuleDelayedOp => Some(OperatorInfo::right(30)),
             WolframTokenType::SlashSlash => Some(OperatorInfo::left(40)), // x // f
             WolframTokenType::Or => Some(OperatorInfo::left(50)),
             WolframTokenType::And => Some(OperatorInfo::left(60)),

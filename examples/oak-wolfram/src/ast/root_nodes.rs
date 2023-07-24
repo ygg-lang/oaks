@@ -32,3 +32,18 @@ pub struct WolframRoot {
     #[cfg_attr(feature = "serde", serde(with = "oak_core::serde_range"))]
     pub span: Span,
 }
+
+impl WolframRoot {
+    /// Top-level expressions in source order.
+    pub fn expressions(&self) -> &[Expression] {
+        self.expressions.as_slice()
+    }
+
+    /// Sole top-level expression when the unit has exactly one.
+    pub fn primary(&self) -> Option<&Expression> {
+        match self.expressions.as_slice() {
+            [expr] => Some(expr),
+            _ => None,
+        }
+    }
+}

@@ -1,7 +1,7 @@
 use oak_core::{Builder, SourceText, parser::ParseSession};
 use oak_wolfram::{
     WolframBuilder, WolframLanguage,
-    ast::{Expression, WolframRoot},
+    ast::{AssignmentTiming, Expression, WolframRoot},
     lexer::token_type::WolframTokenType,
 };
 
@@ -151,4 +151,58 @@ fn ast_full_form_pattern_and_if_call() {
         }
         other => panic!("expected If call, got {other:?}"),
     }
+}
+
+#[test]
+fn ast_typed_accessors_call_part_pattern() {
+    let call_root = build("If[1, 2, 3]");
+    let call = call_root.primary().expect("primary");
+    let (head, args) = call.as_call().expect("as_call");
+    assert_eq!(head.as_symbol().map(|s| s.name.as_str()), Some("If"));
+    assert_eq!(args.len(), 3);
+    assert_eq!(args[0].as_literal().map(|(t, _)| t), Some("1"));
+
+    let part_root = build("{1, 2}[[1]]");
+    let part = part_root.primary().expect("primary");
+    let (expr, indices) = part.as_part().expect("as_part");
+    assert!(expr.as_list().is_some());
+    assert_eq!(indices.len(), 1);
+
+    let pat_root = build("x_");
+    let pat = pat_root.primary().expect("primary");
+    let (name, blank) = pat.as_pattern().expect("as_pattern");
+    assert_eq!(name.as_symbol().map(|s| s.name.as_str()), Some("x"));
+    assert_eq!(blank, WolframTokenType::Underscore);
+}
+
+#[test]
+fn ast_typed_accessors_assignment_rule_compound() {
+    let set_root = build("x = 1");
+    let set = set_root.primary().expect("primary");
+    let assign = set.as_assignment().expect("as_assignment");
+    assert_eq!(assign.timing, AssignmentTiming::Immediate);
+    assert_eq!(assign.lhs.as_symbol().map(|s| s.name.as_str()), Some("x"));
+    assert_eq!(assign.rhs.as_literal().map(|(t, _)| t), Some("1"));
+
+    let delayed_root = build("x := 1 + 1");
+    let delayed = delayed_root.primary().expect("primary");
+    let assign = delayed.as_assignment().expect("deferred assignment");
+    assert_eq!(assign.timing, AssignmentTiming::Deferred);
+
+    let rule_root = build("a -> b");
+    let rule = rule_root.primary().expect("primary");
+    let view = rule.as_rule().expect("as_rule");
+    assert!(!view.delayed);
+    assert_eq!(view.lhs.as_symbol().map(|s| s.name.as_str()), Some("a"));
+
+    let delayed_rule_root = build("a :> b");
+    let delayed_rule = delayed_rule_root.primary().expect("primary");
+    let view = delayed_rule.as_rule().expect("delayed rule");
+    assert!(view.delayed);
+
+    let compound_root = build("1; 2");
+    let compound = compound_root.primary().expect("primary");
+    let (lhs, rhs) = compound.as_compound().expect("as_compound");
+    assert_eq!(lhs.as_literal().map(|(t, _)| t), Some("1"));
+    assert_eq!(rhs.as_literal().map(|(t, _)| t), Some("2"));
 }

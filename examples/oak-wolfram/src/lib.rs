@@ -15,8 +15,7 @@ pub mod lsp;
 pub mod mcp;
 pub mod parser;
 
-pub use crate::{builder::WolframBuilder, language::WolframLanguage, lexer::WolframLexer, parser::WolframParser};
-pub use crate::ast::WolframRoot;
+pub use crate::{ast::WolframRoot, builder::WolframBuilder, language::WolframLanguage, lexer::WolframLexer, parser::WolframParser};
 
 /// Highlighter implementation.
 #[cfg(feature = "oak-highlight")]

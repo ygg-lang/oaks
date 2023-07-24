@@ -1,8 +1,4 @@
-use crate::{
-    WolframLanguage,
-    lexer::token_type::WolframTokenType,
-    parser::element_type::WolframElementType,
-};
+use crate::{WolframLanguage, lexer::token_type::WolframTokenType, parser::element_type::WolframElementType};
 use oak_core::{RedNode, RedTree, TokenType};
 
 /// Whether a red tree child is trivia / ignored.
