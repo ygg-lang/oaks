@@ -1,9 +1,4 @@
-use crate::{
-    MatlabLanguage,
-    ast::MatlabRoot,
-    builder::MatlabBuilder,
-    lexer::token_type::MatlabTokenType,
-};
+use crate::{MatlabLanguage, ast::MatlabRoot, builder::MatlabBuilder, lexer::token_type::MatlabTokenType};
 use oak_core::{GreenNode, OakError, RedNode, RedTree, Source, TokenType};
 
 impl<'config> MatlabBuilder<'config> {
@@ -15,9 +10,7 @@ impl<'config> MatlabBuilder<'config> {
             match child {
                 RedTree::Node(n) => items.push(self.build_stmt(n, source)?),
                 RedTree::Leaf(t) => {
-                    if t.kind().is_ignored()
-                        || matches!(t.kind(), MatlabTokenType::Eof | MatlabTokenType::Semicolon | MatlabTokenType::Comma)
-                    {
+                    if t.kind().is_ignored() || matches!(t.kind(), MatlabTokenType::Eof | MatlabTokenType::Semicolon | MatlabTokenType::Comma) {
                         continue;
                     }
                     return Err(source.syntax_error(format!("Unexpected token in MATLAB root: {:?}", t.kind()), t.span.start));

@@ -7,5 +7,5 @@ pub mod statement_nodes;
 pub use self::{
     expression_nodes::{BinaryExpr, Expression, UnaryExpr},
     root_nodes::{Identifier, MatlabRoot, Span},
-    statement_nodes::Statement,
+    statement_nodes::{IfView, Statement, TryView},
 };

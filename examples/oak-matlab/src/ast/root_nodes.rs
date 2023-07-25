@@ -32,3 +32,18 @@ pub struct MatlabRoot {
     #[cfg_attr(feature = "serde", serde(with = "oak_core::serde_range"))]
     pub span: Span,
 }
+
+impl MatlabRoot {
+    /// Top-level statements in source order.
+    pub fn items(&self) -> &[Statement] {
+        self.items.as_slice()
+    }
+
+    /// Sole top-level statement when the unit has exactly one.
+    pub fn primary(&self) -> Option<&Statement> {
+        match self.items.as_slice() {
+            [item] => Some(item),
+            _ => None,
+        }
+    }
+}

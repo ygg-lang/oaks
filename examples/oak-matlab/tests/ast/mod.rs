@@ -105,3 +105,72 @@ fn ast_try_owned() {
         other => panic!("expected Try, got {other:?}"),
     }
 }
+
+#[test]
+fn ast_typed_accessors_call_array_assign_colon() {
+    let call_root = build("sin(x, y)");
+    let call = call_root.primary().expect("primary").as_expr().expect("expr");
+    let (head, args) = call.as_call().expect("as_call");
+    assert_eq!(head.as_symbol().map(|s| s.name.as_str()), Some("sin"));
+    assert_eq!(args.len(), 2);
+
+    let array_root = build("[1, 2; 3]");
+    let array = array_root.primary().expect("primary").as_expr().expect("expr");
+    let rows = array.as_array().expect("as_array");
+    assert_eq!(rows.len(), 2);
+
+    let assign_root = build("x = 1");
+    let assign = assign_root.primary().expect("primary").as_expr().expect("expr");
+    let (lhs, rhs) = assign.as_assignment().expect("as_assignment");
+    assert_eq!(lhs.as_symbol().map(|s| s.name.as_str()), Some("x"));
+    assert_eq!(rhs.as_literal().map(|(t, _)| t), Some("1"));
+
+    let colon_root = build("1:3");
+    let colon = colon_root.primary().expect("primary").as_expr().expect("expr");
+    let (lhs, rhs) = colon.as_colon().expect("as_colon");
+    assert_eq!(lhs.as_literal().map(|(t, _)| t), Some("1"));
+    assert_eq!(rhs.as_literal().map(|(t, _)| t), Some("3"));
+}
+
+#[test]
+fn ast_typed_accessors_statements() {
+    let if_root = build("if 1, 2, else, 3, end");
+    let view = if_root.primary().expect("primary").as_if().expect("as_if");
+    assert!(view.condition.as_literal().is_some());
+    assert_eq!(view.then_body.len(), 1);
+    assert_eq!(view.else_body.len(), 1);
+
+    let for_root = build("for i=1:3, i, end");
+    let (header, body) = for_root.primary().expect("primary").as_for().expect("as_for");
+    assert!(header.as_assignment().is_some() || header.as_binary().is_some());
+    assert_eq!(body.len(), 1);
+
+    let try_root = build("try, 2, catch, 3, end");
+    let view = try_root.primary().expect("primary").as_try().expect("as_try");
+    assert_eq!(view.body.len(), 1);
+    assert!(view.catch_name.is_none());
+    assert_eq!(view.catch_body.len(), 1);
+}
+
+#[test]
+fn ast_typed_accessors_matrix_ops() {
+    let ld_root = build("A \\ b");
+    let ld = ld_root.primary().expect("primary").as_expr().expect("expr");
+    let (a, b) = ld.as_left_divide().expect("as_left_divide");
+    assert_eq!(a.as_symbol().map(|s| s.name.as_str()), Some("A"));
+    assert_eq!(b.as_symbol().map(|s| s.name.as_str()), Some("b"));
+
+    let ew_root = build("A .* B");
+    let ew = ew_root.primary().expect("primary").as_expr().expect("expr");
+    let bin = ew.as_elementwise().expect("as_elementwise");
+    assert_eq!(bin.operator, MatlabTokenType::DotTimes);
+
+    let power_root = build("A .^ 2");
+    let power = power_root.primary().expect("primary").as_expr().expect("expr");
+    assert_eq!(power.as_elementwise().map(|b| b.operator), Some(MatlabTokenType::DotPower));
+
+    let tr_root = build("A'");
+    let tr = tr_root.primary().expect("primary").as_expr().expect("expr");
+    let u = tr.as_transpose().expect("as_transpose");
+    assert_eq!(u.operator, MatlabTokenType::Transpose);
+}

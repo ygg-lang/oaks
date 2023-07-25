@@ -70,12 +70,7 @@ impl<'config> MatlabParser<'config> {
     }
 
     fn at_block_terminator(state: &State<'_, impl Source + ?Sized>) -> bool {
-        state.at(MatlabTokenType::End)
-            || state.at(MatlabTokenType::Else)
-            || state.at(MatlabTokenType::Elseif)
-            || state.at(MatlabTokenType::Catch)
-            || state.at(MatlabTokenType::Eof)
-            || !state.not_at_end()
+        state.at(MatlabTokenType::End) || state.at(MatlabTokenType::Else) || state.at(MatlabTokenType::Elseif) || state.at(MatlabTokenType::Catch) || state.at(MatlabTokenType::Eof) || !state.not_at_end()
     }
 
     fn parse_block_body<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) {

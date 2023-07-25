@@ -56,6 +56,8 @@ fn test_parser_array() {
 #[test]
 fn test_parser_prefix_postfix() {
     parse_ok("-a'");
+    assert_has_kind("A'", MatlabElementType::PostfixExpr);
+    assert_has_kind("-a'", MatlabElementType::PostfixExpr);
 }
 
 #[test]

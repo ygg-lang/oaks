@@ -4,7 +4,7 @@ pub mod token_type;
 
 use crate::{language::MatlabLanguage, lexer::token_type::MatlabTokenType};
 use oak_core::{
-    Lexer, LexerState,
+    Lexer, LexerState, TokenType,
     lexer::{LexOutput, LexerCache},
     source::{Source, TextEdit},
 };
@@ -188,6 +188,11 @@ impl<'config> MatlabLexer<'config> {
     fn lex_string<'s, S: Source + ?Sized>(&self, state: &mut State<'s, S>) -> bool {
         let start_pos = state.get_position();
         if let Some(quote) = state.peek() {
+            // MATLAB: after an expression primary, `'` is transpose (handled by `lex_operator`),
+            // not the start of a character vector.
+            if quote == '\'' && Self::apostrophe_is_transpose(state) {
+                return false;
+            }
             if quote == '\'' || quote == '"' {
                 state.advance(1);
                 while let Some(ch) = state.peek() {
@@ -215,6 +220,12 @@ impl<'config> MatlabLexer<'config> {
             }
         }
         false
+    }
+
+    /// `'` is transpose when the preceding non-trivia token ends an expression primary.
+    fn apostrophe_is_transpose(state: &State<'_, impl Source + ?Sized>) -> bool {
+        let prev = state.get_tokens().iter().rev().find(|t| !t.kind.is_ignored()).map(|t| t.kind);
+        matches!(prev, Some(MatlabTokenType::Identifier | MatlabTokenType::Number | MatlabTokenType::RightParen | MatlabTokenType::RightBracket | MatlabTokenType::RightBrace | MatlabTokenType::Transpose | MatlabTokenType::DotTranspose))
     }
 
     fn lex_comment<'s, S: Source + ?Sized>(&self, state: &mut State<'s, S>) -> bool {

@@ -1,6 +1,6 @@
 {
     "success": true,
-    "count": 1559,
+    "count": 2471,
     "tokens": [
         {
             "kind": "Identifier",
@@ -3069,244 +3069,1084 @@
             "end": 2346
         },
         {
-            "kind": "Character",
-            "text": "';\nmat_inverse = inv(mat1);\nmat_determinant = det(mat1);\n\n%% Logical Operations\n% Logical operators\nand_result = true && false;\nor_result = true || false;\nnot_result = ~true;\n\n% Element-wise logical operations\nlogical_vec1 = [true, false, true];\nlogical_vec2 = [false, true, true];\nelem_and = logical_vec1 & logical_vec2;\nelem_or = logical_vec1 | logical_vec2;\nelem_not = ~logical_vec1;\n\n% Comparison operations\ncomp1 = a > b;\ncomp2 = a < b;\ncomp3 = a >= b;\ncomp4 = a <= b;\ncomp5 = a == b;\ncomp6 = a ~= b;\n\n%% Control Flow Structures\n\n% If-else statements\nif a > b\n    disp('",
+            "kind": "Transpose",
+            "text": "'",
             "start": 2346,
-            "end": 2921
+            "end": 2347
+        },
+        {
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 2347,
+            "end": 2348
         },
         {
             "kind": "Identifier",
-            "text": "a",
-            "start": 2921,
-            "end": 2922
+            "text": "mat_inverse",
+            "start": 2349,
+            "end": 2360
+        },
+        {
+            "kind": "Assign",
+            "text": "=",
+            "start": 2361,
+            "end": 2362
         },
         {
             "kind": "Identifier",
-            "text": "is",
-            "start": 2923,
-            "end": 2925
+            "text": "inv",
+            "start": 2363,
+            "end": 2366
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 2366,
+            "end": 2367
         },
         {
             "kind": "Identifier",
-            "text": "greater",
-            "start": 2926,
-            "end": 2933
+            "text": "mat1",
+            "start": 2367,
+            "end": 2371
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 2371,
+            "end": 2372
+        },
+        {
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 2372,
+            "end": 2373
         },
         {
             "kind": "Identifier",
-            "text": "than",
-            "start": 2934,
-            "end": 2938
+            "text": "mat_determinant",
+            "start": 2374,
+            "end": 2389
+        },
+        {
+            "kind": "Assign",
+            "text": "=",
+            "start": 2390,
+            "end": 2391
         },
         {
             "kind": "Identifier",
-            "text": "b",
-            "start": 2939,
-            "end": 2940
+            "text": "det",
+            "start": 2392,
+            "end": 2395
         },
         {
-            "kind": "Character",
-            "text": "');\nelseif a < b\n    disp('",
-            "start": 2940,
-            "end": 2967
-        },
-        {
-            "kind": "Identifier",
-            "text": "a",
-            "start": 2967,
-            "end": 2968
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 2395,
+            "end": 2396
         },
         {
             "kind": "Identifier",
-            "text": "is",
-            "start": 2969,
-            "end": 2971
+            "text": "mat1",
+            "start": 2396,
+            "end": 2400
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 2400,
+            "end": 2401
+        },
+        {
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 2401,
+            "end": 2402
         },
         {
             "kind": "Identifier",
-            "text": "less",
-            "start": 2972,
-            "end": 2976
+            "text": "and_result",
+            "start": 2446,
+            "end": 2456
+        },
+        {
+            "kind": "Assign",
+            "text": "=",
+            "start": 2457,
+            "end": 2458
         },
         {
             "kind": "Identifier",
-            "text": "than",
-            "start": 2977,
-            "end": 2981
+            "text": "true",
+            "start": 2459,
+            "end": 2463
+        },
+        {
+            "kind": "AndAnd",
+            "text": "&&",
+            "start": 2464,
+            "end": 2466
         },
         {
             "kind": "Identifier",
-            "text": "b",
-            "start": 2982,
-            "end": 2983
+            "text": "false",
+            "start": 2467,
+            "end": 2472
         },
         {
-            "kind": "Character",
-            "text": "');\nelse\n    disp('",
-            "start": 2983,
-            "end": 3002
-        },
-        {
-            "kind": "Identifier",
-            "text": "a",
-            "start": 3002,
-            "end": 3003
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 2472,
+            "end": 2473
         },
         {
             "kind": "Identifier",
-            "text": "equals",
-            "start": 3004,
-            "end": 3010
+            "text": "or_result",
+            "start": 2474,
+            "end": 2483
+        },
+        {
+            "kind": "Assign",
+            "text": "=",
+            "start": 2484,
+            "end": 2485
         },
         {
             "kind": "Identifier",
-            "text": "b",
-            "start": 3011,
-            "end": 3012
+            "text": "true",
+            "start": 2486,
+            "end": 2490
         },
         {
-            "kind": "Character",
-            "text": "');\nend\n\n% Switch statement\nswitch a\n    case 1\n        disp('",
-            "start": 3012,
-            "end": 3074
-        },
-        {
-            "kind": "Identifier",
-            "text": "a",
-            "start": 3074,
-            "end": 3075
+            "kind": "OrOr",
+            "text": "||",
+            "start": 2491,
+            "end": 2493
         },
         {
             "kind": "Identifier",
-            "text": "is",
-            "start": 3076,
-            "end": 3078
+            "text": "false",
+            "start": 2494,
+            "end": 2499
         },
         {
-            "kind": "Number",
-            "text": "1",
-            "start": 3079,
-            "end": 3080
-        },
-        {
-            "kind": "Character",
-            "text": "');\n    case {2, 3, 4}\n        disp('",
-            "start": 3080,
-            "end": 3117
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 2499,
+            "end": 2500
         },
         {
             "kind": "Identifier",
-            "text": "a",
-            "start": 3117,
-            "end": 3118
+            "text": "not_result",
+            "start": 2501,
+            "end": 2511
+        },
+        {
+            "kind": "Assign",
+            "text": "=",
+            "start": 2512,
+            "end": 2513
+        },
+        {
+            "kind": "Not",
+            "text": "~",
+            "start": 2514,
+            "end": 2515
         },
         {
             "kind": "Identifier",
-            "text": "is",
-            "start": 3119,
-            "end": 3121
+            "text": "true",
+            "start": 2515,
+            "end": 2519
         },
         {
-            "kind": "Number",
-            "text": "2",
-            "start": 3122,
-            "end": 3123
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 2519,
+            "end": 2520
+        },
+        {
+            "kind": "Identifier",
+            "text": "logical_vec1",
+            "start": 2556,
+            "end": 2568
+        },
+        {
+            "kind": "Assign",
+            "text": "=",
+            "start": 2569,
+            "end": 2570
+        },
+        {
+            "kind": "LeftBracket",
+            "text": "[",
+            "start": 2571,
+            "end": 2572
+        },
+        {
+            "kind": "Identifier",
+            "text": "true",
+            "start": 2572,
+            "end": 2576
         },
         {
             "kind": "Comma",
             "text": ",",
-            "start": 3123,
-            "end": 3124
+            "start": 2576,
+            "end": 2577
         },
         {
-            "kind": "Number",
-            "text": "3",
-            "start": 3125,
-            "end": 3126
+            "kind": "Identifier",
+            "text": "false",
+            "start": 2578,
+            "end": 2583
         },
         {
             "kind": "Comma",
             "text": ",",
-            "start": 3126,
-            "end": 3127
+            "start": 2583,
+            "end": 2584
         },
         {
             "kind": "Identifier",
-            "text": "or",
-            "start": 3128,
-            "end": 3130
+            "text": "true",
+            "start": 2585,
+            "end": 2589
         },
         {
-            "kind": "Number",
-            "text": "4",
-            "start": 3131,
-            "end": 3132
+            "kind": "RightBracket",
+            "text": "]",
+            "start": 2589,
+            "end": 2590
         },
         {
-            "kind": "Character",
-            "text": "');\n    case 5\n        disp('",
-            "start": 3132,
-            "end": 3161
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 2590,
+            "end": 2591
+        },
+        {
+            "kind": "Identifier",
+            "text": "logical_vec2",
+            "start": 2592,
+            "end": 2604
+        },
+        {
+            "kind": "Assign",
+            "text": "=",
+            "start": 2605,
+            "end": 2606
+        },
+        {
+            "kind": "LeftBracket",
+            "text": "[",
+            "start": 2607,
+            "end": 2608
+        },
+        {
+            "kind": "Identifier",
+            "text": "false",
+            "start": 2608,
+            "end": 2613
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 2613,
+            "end": 2614
+        },
+        {
+            "kind": "Identifier",
+            "text": "true",
+            "start": 2615,
+            "end": 2619
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 2619,
+            "end": 2620
+        },
+        {
+            "kind": "Identifier",
+            "text": "true",
+            "start": 2621,
+            "end": 2625
+        },
+        {
+            "kind": "RightBracket",
+            "text": "]",
+            "start": 2625,
+            "end": 2626
+        },
+        {
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 2626,
+            "end": 2627
+        },
+        {
+            "kind": "Identifier",
+            "text": "elem_and",
+            "start": 2628,
+            "end": 2636
+        },
+        {
+            "kind": "Assign",
+            "text": "=",
+            "start": 2637,
+            "end": 2638
+        },
+        {
+            "kind": "Identifier",
+            "text": "logical_vec1",
+            "start": 2639,
+            "end": 2651
+        },
+        {
+            "kind": "And",
+            "text": "&",
+            "start": 2652,
+            "end": 2653
+        },
+        {
+            "kind": "Identifier",
+            "text": "logical_vec2",
+            "start": 2654,
+            "end": 2666
+        },
+        {
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 2666,
+            "end": 2667
+        },
+        {
+            "kind": "Identifier",
+            "text": "elem_or",
+            "start": 2668,
+            "end": 2675
+        },
+        {
+            "kind": "Assign",
+            "text": "=",
+            "start": 2676,
+            "end": 2677
+        },
+        {
+            "kind": "Identifier",
+            "text": "logical_vec1",
+            "start": 2678,
+            "end": 2690
+        },
+        {
+            "kind": "Or",
+            "text": "|",
+            "start": 2691,
+            "end": 2692
+        },
+        {
+            "kind": "Identifier",
+            "text": "logical_vec2",
+            "start": 2693,
+            "end": 2705
+        },
+        {
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 2705,
+            "end": 2706
+        },
+        {
+            "kind": "Identifier",
+            "text": "elem_not",
+            "start": 2707,
+            "end": 2715
+        },
+        {
+            "kind": "Assign",
+            "text": "=",
+            "start": 2716,
+            "end": 2717
+        },
+        {
+            "kind": "Not",
+            "text": "~",
+            "start": 2718,
+            "end": 2719
+        },
+        {
+            "kind": "Identifier",
+            "text": "logical_vec1",
+            "start": 2719,
+            "end": 2731
+        },
+        {
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 2731,
+            "end": 2732
+        },
+        {
+            "kind": "Identifier",
+            "text": "comp1",
+            "start": 2758,
+            "end": 2763
+        },
+        {
+            "kind": "Assign",
+            "text": "=",
+            "start": 2764,
+            "end": 2765
         },
         {
             "kind": "Identifier",
             "text": "a",
-            "start": 3161,
-            "end": 3162
+            "start": 2766,
+            "end": 2767
+        },
+        {
+            "kind": "Greater",
+            "text": ">",
+            "start": 2768,
+            "end": 2769
         },
         {
             "kind": "Identifier",
-            "text": "is",
-            "start": 3163,
-            "end": 3165
+            "text": "b",
+            "start": 2770,
+            "end": 2771
         },
         {
-            "kind": "Number",
-            "text": "5",
-            "start": 3166,
-            "end": 3167
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 2771,
+            "end": 2772
         },
         {
-            "kind": "Character",
-            "text": "');\n    otherwise\n        disp('",
-            "start": 3167,
-            "end": 3199
+            "kind": "Identifier",
+            "text": "comp2",
+            "start": 2773,
+            "end": 2778
+        },
+        {
+            "kind": "Assign",
+            "text": "=",
+            "start": 2779,
+            "end": 2780
         },
         {
             "kind": "Identifier",
             "text": "a",
-            "start": 3199,
-            "end": 3200
+            "start": 2781,
+            "end": 2782
+        },
+        {
+            "kind": "Less",
+            "text": "<",
+            "start": 2783,
+            "end": 2784
         },
         {
             "kind": "Identifier",
-            "text": "is",
-            "start": 3201,
-            "end": 3203
+            "text": "b",
+            "start": 2785,
+            "end": 2786
+        },
+        {
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 2786,
+            "end": 2787
         },
         {
             "kind": "Identifier",
-            "text": "something",
-            "start": 3204,
-            "end": 3213
+            "text": "comp3",
+            "start": 2788,
+            "end": 2793
+        },
+        {
+            "kind": "Assign",
+            "text": "=",
+            "start": 2794,
+            "end": 2795
+        },
+        {
+            "kind": "Identifier",
+            "text": "a",
+            "start": 2796,
+            "end": 2797
+        },
+        {
+            "kind": "GreaterEqual",
+            "text": ">=",
+            "start": 2798,
+            "end": 2800
+        },
+        {
+            "kind": "Identifier",
+            "text": "b",
+            "start": 2801,
+            "end": 2802
+        },
+        {
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 2802,
+            "end": 2803
+        },
+        {
+            "kind": "Identifier",
+            "text": "comp4",
+            "start": 2804,
+            "end": 2809
+        },
+        {
+            "kind": "Assign",
+            "text": "=",
+            "start": 2810,
+            "end": 2811
+        },
+        {
+            "kind": "Identifier",
+            "text": "a",
+            "start": 2812,
+            "end": 2813
+        },
+        {
+            "kind": "LessEqual",
+            "text": "<=",
+            "start": 2814,
+            "end": 2816
+        },
+        {
+            "kind": "Identifier",
+            "text": "b",
+            "start": 2817,
+            "end": 2818
+        },
+        {
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 2818,
+            "end": 2819
+        },
+        {
+            "kind": "Identifier",
+            "text": "comp5",
+            "start": 2820,
+            "end": 2825
+        },
+        {
+            "kind": "Assign",
+            "text": "=",
+            "start": 2826,
+            "end": 2827
+        },
+        {
+            "kind": "Identifier",
+            "text": "a",
+            "start": 2828,
+            "end": 2829
+        },
+        {
+            "kind": "Equal",
+            "text": "==",
+            "start": 2830,
+            "end": 2832
+        },
+        {
+            "kind": "Identifier",
+            "text": "b",
+            "start": 2833,
+            "end": 2834
+        },
+        {
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 2834,
+            "end": 2835
+        },
+        {
+            "kind": "Identifier",
+            "text": "comp6",
+            "start": 2836,
+            "end": 2841
+        },
+        {
+            "kind": "Assign",
+            "text": "=",
+            "start": 2842,
+            "end": 2843
+        },
+        {
+            "kind": "Identifier",
+            "text": "a",
+            "start": 2844,
+            "end": 2845
+        },
+        {
+            "kind": "NotEqual",
+            "text": "~=",
+            "start": 2846,
+            "end": 2848
+        },
+        {
+            "kind": "Identifier",
+            "text": "b",
+            "start": 2849,
+            "end": 2850
+        },
+        {
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 2850,
+            "end": 2851
+        },
+        {
+            "kind": "If",
+            "text": "if",
+            "start": 2902,
+            "end": 2904
+        },
+        {
+            "kind": "Identifier",
+            "text": "a",
+            "start": 2905,
+            "end": 2906
+        },
+        {
+            "kind": "Greater",
+            "text": ">",
+            "start": 2907,
+            "end": 2908
+        },
+        {
+            "kind": "Identifier",
+            "text": "b",
+            "start": 2909,
+            "end": 2910
+        },
+        {
+            "kind": "Identifier",
+            "text": "disp",
+            "start": 2915,
+            "end": 2919
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 2919,
+            "end": 2920
+        },
+        {
+            "kind": "Character",
+            "text": "'a is greater than b'",
+            "start": 2920,
+            "end": 2941
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 2941,
+            "end": 2942
+        },
+        {
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 2942,
+            "end": 2943
+        },
+        {
+            "kind": "Elseif",
+            "text": "elseif",
+            "start": 2944,
+            "end": 2950
+        },
+        {
+            "kind": "Identifier",
+            "text": "a",
+            "start": 2951,
+            "end": 2952
+        },
+        {
+            "kind": "Less",
+            "text": "<",
+            "start": 2953,
+            "end": 2954
+        },
+        {
+            "kind": "Identifier",
+            "text": "b",
+            "start": 2955,
+            "end": 2956
+        },
+        {
+            "kind": "Identifier",
+            "text": "disp",
+            "start": 2961,
+            "end": 2965
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 2965,
+            "end": 2966
+        },
+        {
+            "kind": "Character",
+            "text": "'a is less than b'",
+            "start": 2966,
+            "end": 2984
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 2984,
+            "end": 2985
+        },
+        {
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 2985,
+            "end": 2986
         },
         {
             "kind": "Else",
             "text": "else",
-            "start": 3214,
-            "end": 3218
-        },
-        {
-            "kind": "Character",
-            "text": "');\nend\n\n% For loops\nfor i = 1:10\n    fprintf('",
-            "start": 3218,
-            "end": 3265
+            "start": 2987,
+            "end": 2991
         },
         {
             "kind": "Identifier",
-            "text": "Iteration",
-            "start": 3265,
-            "end": 3274
+            "text": "disp",
+            "start": 2996,
+            "end": 3000
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 3000,
+            "end": 3001
+        },
+        {
+            "kind": "Character",
+            "text": "'a equals b'",
+            "start": 3001,
+            "end": 3013
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 3013,
+            "end": 3014
+        },
+        {
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 3014,
+            "end": 3015
+        },
+        {
+            "kind": "End",
+            "text": "end",
+            "start": 3016,
+            "end": 3019
+        },
+        {
+            "kind": "Switch",
+            "text": "switch",
+            "start": 3040,
+            "end": 3046
+        },
+        {
+            "kind": "Identifier",
+            "text": "a",
+            "start": 3047,
+            "end": 3048
+        },
+        {
+            "kind": "Case",
+            "text": "case",
+            "start": 3053,
+            "end": 3057
+        },
+        {
+            "kind": "Number",
+            "text": "1",
+            "start": 3058,
+            "end": 3059
+        },
+        {
+            "kind": "Identifier",
+            "text": "disp",
+            "start": 3068,
+            "end": 3072
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 3072,
+            "end": 3073
+        },
+        {
+            "kind": "Character",
+            "text": "'a is 1'",
+            "start": 3073,
+            "end": 3081
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 3081,
+            "end": 3082
+        },
+        {
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 3082,
+            "end": 3083
+        },
+        {
+            "kind": "Case",
+            "text": "case",
+            "start": 3088,
+            "end": 3092
+        },
+        {
+            "kind": "LeftBrace",
+            "text": "{",
+            "start": 3093,
+            "end": 3094
+        },
+        {
+            "kind": "Number",
+            "text": "2",
+            "start": 3094,
+            "end": 3095
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 3095,
+            "end": 3096
+        },
+        {
+            "kind": "Number",
+            "text": "3",
+            "start": 3097,
+            "end": 3098
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 3098,
+            "end": 3099
+        },
+        {
+            "kind": "Number",
+            "text": "4",
+            "start": 3100,
+            "end": 3101
+        },
+        {
+            "kind": "RightBrace",
+            "text": "}",
+            "start": 3101,
+            "end": 3102
+        },
+        {
+            "kind": "Identifier",
+            "text": "disp",
+            "start": 3111,
+            "end": 3115
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 3115,
+            "end": 3116
+        },
+        {
+            "kind": "Character",
+            "text": "'a is 2, 3, or 4'",
+            "start": 3116,
+            "end": 3133
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 3133,
+            "end": 3134
+        },
+        {
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 3134,
+            "end": 3135
+        },
+        {
+            "kind": "Case",
+            "text": "case",
+            "start": 3140,
+            "end": 3144
+        },
+        {
+            "kind": "Number",
+            "text": "5",
+            "start": 3145,
+            "end": 3146
+        },
+        {
+            "kind": "Identifier",
+            "text": "disp",
+            "start": 3155,
+            "end": 3159
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 3159,
+            "end": 3160
+        },
+        {
+            "kind": "Character",
+            "text": "'a is 5'",
+            "start": 3160,
+            "end": 3168
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 3168,
+            "end": 3169
+        },
+        {
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 3169,
+            "end": 3170
+        },
+        {
+            "kind": "Otherwise",
+            "text": "otherwise",
+            "start": 3175,
+            "end": 3184
+        },
+        {
+            "kind": "Identifier",
+            "text": "disp",
+            "start": 3193,
+            "end": 3197
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 3197,
+            "end": 3198
+        },
+        {
+            "kind": "Character",
+            "text": "'a is something else'",
+            "start": 3198,
+            "end": 3219
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 3219,
+            "end": 3220
+        },
+        {
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 3220,
+            "end": 3221
+        },
+        {
+            "kind": "End",
+            "text": "end",
+            "start": 3222,
+            "end": 3225
+        },
+        {
+            "kind": "For",
+            "text": "for",
+            "start": 3239,
+            "end": 3242
+        },
+        {
+            "kind": "Identifier",
+            "text": "i",
+            "start": 3243,
+            "end": 3244
+        },
+        {
+            "kind": "Assign",
+            "text": "=",
+            "start": 3245,
+            "end": 3246
+        },
+        {
+            "kind": "Number",
+            "text": "1",
+            "start": 3247,
+            "end": 3248
+        },
+        {
+            "kind": "Colon",
+            "text": ":",
+            "start": 3248,
+            "end": 3249
+        },
+        {
+            "kind": "Number",
+            "text": "10",
+            "start": 3249,
+            "end": 3251
+        },
+        {
+            "kind": "Identifier",
+            "text": "fprintf",
+            "start": 3256,
+            "end": 3263
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 3263,
+            "end": 3264
+        },
+        {
+            "kind": "Character",
+            "text": "'Iteration %d\\n'",
+            "start": 3264,
+            "end": 3280
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 3280,
+            "end": 3281
+        },
+        {
+            "kind": "Identifier",
+            "text": "i",
+            "start": 3282,
+            "end": 3283
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 3283,
+            "end": 3284
+        },
+        {
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 3284,
+            "end": 3285
         },
         {
             "kind": "End",
@@ -6681,550 +7521,5182 @@
             "end": 5977
         },
         {
-            "kind": "Character",
-            "text": "';\n        fclose(fid);\n        disp('",
+            "kind": "Transpose",
+            "text": "'",
             "start": 5977,
-            "end": 6015
+            "end": 5978
+        },
+        {
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 5978,
+            "end": 5979
         },
         {
             "kind": "Identifier",
-            "text": "File",
-            "start": 6015,
-            "end": 6019
-        },
-        {
-            "kind": "Identifier",
-            "text": "content",
-            "start": 6020,
-            "end": 6027
-        },
-        {
-            "kind": "Colon",
-            "text": ":",
-            "start": 6027,
-            "end": 6028
-        },
-        {
-            "kind": "Character",
-            "text": "');\n        disp(file_content);\n    end\nend\n\n% CSV operations\ndata_matrix = [1, 2, 3; 4, 5, 6; 7, 8, 9];\ncsvwrite('",
-            "start": 6028,
-            "end": 6143
-        },
-        {
-            "kind": "Identifier",
-            "text": "data",
-            "start": 6143,
-            "end": 6147
-        },
-        {
-            "kind": "Dot",
-            "text": ".",
-            "start": 6147,
-            "end": 6148
-        },
-        {
-            "kind": "Identifier",
-            "text": "csv",
-            "start": 6148,
-            "end": 6151
-        },
-        {
-            "kind": "Character",
-            "text": "', data_matrix);\nloaded_data = csvread('",
-            "start": 6151,
-            "end": 6191
-        },
-        {
-            "kind": "Identifier",
-            "text": "data",
-            "start": 6191,
-            "end": 6195
-        },
-        {
-            "kind": "Dot",
-            "text": ".",
-            "start": 6195,
-            "end": 6196
-        },
-        {
-            "kind": "Identifier",
-            "text": "csv",
-            "start": 6196,
-            "end": 6199
-        },
-        {
-            "kind": "Character",
-            "text": "');\n\n%% Plotting and Graphics\n% Basic 2D plot\nx = linspace(0, 2*pi, 100);\ny1 = sin(x);\ny2 = cos(x);\n\nfigure(1);\nplot(x, y1, '",
-            "start": 6199,
-            "end": 6324
-        },
-        {
-            "kind": "Identifier",
-            "text": "r",
-            "start": 6324,
-            "end": 6325
-        },
-        {
-            "kind": "Minus",
-            "text": "-",
-            "start": 6325,
-            "end": 6326
-        },
-        {
-            "kind": "Character",
-            "text": "', x, y2, '",
-            "start": 6326,
-            "end": 6337
-        },
-        {
-            "kind": "Identifier",
-            "text": "b",
-            "start": 6337,
-            "end": 6338
-        },
-        {
-            "kind": "Minus",
-            "text": "-",
-            "start": 6338,
-            "end": 6339
-        },
-        {
-            "kind": "Minus",
-            "text": "-",
-            "start": 6339,
-            "end": 6340
-        },
-        {
-            "kind": "Character",
-            "text": "');\nxlabel('",
-            "start": 6340,
-            "end": 6352
-        },
-        {
-            "kind": "Identifier",
-            "text": "x",
-            "start": 6352,
-            "end": 6353
-        },
-        {
-            "kind": "Character",
-            "text": "');\nylabel('",
-            "start": 6353,
-            "end": 6365
-        },
-        {
-            "kind": "Identifier",
-            "text": "y",
-            "start": 6365,
-            "end": 6366
-        },
-        {
-            "kind": "Character",
-            "text": "');\ntitle('",
-            "start": 6366,
-            "end": 6377
-        },
-        {
-            "kind": "Identifier",
-            "text": "Sine",
-            "start": 6377,
-            "end": 6381
-        },
-        {
-            "kind": "Identifier",
-            "text": "and",
-            "start": 6382,
-            "end": 6385
-        },
-        {
-            "kind": "Identifier",
-            "text": "Cosine",
-            "start": 6386,
-            "end": 6392
-        },
-        {
-            "kind": "Identifier",
-            "text": "Functions",
-            "start": 6393,
-            "end": 6402
-        },
-        {
-            "kind": "Character",
-            "text": "');\nlegend('",
-            "start": 6402,
-            "end": 6414
-        },
-        {
-            "kind": "Identifier",
-            "text": "sin",
-            "start": 6414,
-            "end": 6417
+            "text": "fclose",
+            "start": 5988,
+            "end": 5994
         },
         {
             "kind": "LeftParen",
             "text": "(",
-            "start": 6417,
-            "end": 6418
+            "start": 5994,
+            "end": 5995
         },
         {
             "kind": "Identifier",
-            "text": "x",
-            "start": 6418,
-            "end": 6419
+            "text": "fid",
+            "start": 5995,
+            "end": 5998
         },
         {
             "kind": "RightParen",
             "text": ")",
-            "start": 6419,
-            "end": 6420
+            "start": 5998,
+            "end": 5999
         },
         {
-            "kind": "Character",
-            "text": "', '",
-            "start": 6420,
-            "end": 6424
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 5999,
+            "end": 6000
         },
         {
             "kind": "Identifier",
-            "text": "cos",
-            "start": 6424,
-            "end": 6427
+            "text": "disp",
+            "start": 6009,
+            "end": 6013
         },
         {
             "kind": "LeftParen",
             "text": "(",
-            "start": 6427,
-            "end": 6428
+            "start": 6013,
+            "end": 6014
         },
         {
-            "kind": "Identifier",
-            "text": "x",
-            "start": 6428,
-            "end": 6429
+            "kind": "Character",
+            "text": "'File content:'",
+            "start": 6014,
+            "end": 6029
         },
         {
             "kind": "RightParen",
             "text": ")",
-            "start": 6429,
-            "end": 6430
+            "start": 6029,
+            "end": 6030
         },
         {
-            "kind": "Character",
-            "text": "');\ngrid on;\n\n% Subplot\nfigure(2);\nsubplot(2, 2, 1);\nplot(x, y1);\ntitle('",
-            "start": 6430,
-            "end": 6503
-        },
-        {
-            "kind": "Identifier",
-            "text": "Sine",
-            "start": 6503,
-            "end": 6507
-        },
-        {
-            "kind": "Character",
-            "text": "');\n\nsubplot(2, 2, 2);\nplot(x, y2);\ntitle('",
-            "start": 6507,
-            "end": 6550
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 6030,
+            "end": 6031
         },
         {
             "kind": "Identifier",
-            "text": "Cosine",
-            "start": 6550,
-            "end": 6556
+            "text": "disp",
+            "start": 6040,
+            "end": 6044
         },
         {
-            "kind": "Character",
-            "text": "');\n\nsubplot(2, 2, 3);\nplot(x, tan(x));\ntitle('",
-            "start": 6556,
-            "end": 6603
-        },
-        {
-            "kind": "Identifier",
-            "text": "Tangent",
-            "start": 6603,
-            "end": 6610
-        },
-        {
-            "kind": "Character",
-            "text": "');\nylim([-5, 5]);\n\nsubplot(2, 2, 4);\nplot(x, exp(-x/2) .* sin(x));\ntitle('",
-            "start": 6610,
-            "end": 6685
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 6044,
+            "end": 6045
         },
         {
             "kind": "Identifier",
-            "text": "Damped",
-            "start": 6685,
-            "end": 6691
+            "text": "file_content",
+            "start": 6045,
+            "end": 6057
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 6057,
+            "end": 6058
+        },
+        {
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 6058,
+            "end": 6059
+        },
+        {
+            "kind": "End",
+            "text": "end",
+            "start": 6064,
+            "end": 6067
+        },
+        {
+            "kind": "End",
+            "text": "end",
+            "start": 6068,
+            "end": 6071
         },
         {
             "kind": "Identifier",
-            "text": "Sine",
-            "start": 6692,
-            "end": 6696
+            "text": "data_matrix",
+            "start": 6090,
+            "end": 6101
         },
         {
-            "kind": "Character",
-            "text": "');\n\n% 3D plotting\n[X, Y] = meshgrid(-2:0.1:2, -2:0.1:2);\nZ = X.^2 + Y.^2;\n\nfigure(3);\nsurf(X, Y, Z);\nxlabel('",
-            "start": 6696,
-            "end": 6806
+            "kind": "Assign",
+            "text": "=",
+            "start": 6102,
+            "end": 6103
         },
         {
-            "kind": "Identifier",
-            "text": "X",
-            "start": 6806,
-            "end": 6807
+            "kind": "LeftBracket",
+            "text": "[",
+            "start": 6104,
+            "end": 6105
         },
         {
-            "kind": "Character",
-            "text": "');\nylabel('",
-            "start": 6807,
-            "end": 6819
+            "kind": "Number",
+            "text": "1",
+            "start": 6105,
+            "end": 6106
         },
         {
-            "kind": "Identifier",
-            "text": "Y",
-            "start": 6819,
-            "end": 6820
+            "kind": "Comma",
+            "text": ",",
+            "start": 6106,
+            "end": 6107
         },
         {
-            "kind": "Character",
-            "text": "');\nzlabel('",
-            "start": 6820,
-            "end": 6832
+            "kind": "Number",
+            "text": "2",
+            "start": 6108,
+            "end": 6109
         },
         {
-            "kind": "Identifier",
-            "text": "Z",
-            "start": 6832,
-            "end": 6833
-        },
-        {
-            "kind": "Character",
-            "text": "');\ntitle('",
-            "start": 6833,
-            "end": 6844
+            "kind": "Comma",
+            "text": ",",
+            "start": 6109,
+            "end": 6110
         },
         {
             "kind": "Number",
             "text": "3",
-            "start": 6844,
-            "end": 6845
+            "start": 6111,
+            "end": 6112
+        },
+        {
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 6112,
+            "end": 6113
+        },
+        {
+            "kind": "Number",
+            "text": "4",
+            "start": 6114,
+            "end": 6115
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 6115,
+            "end": 6116
+        },
+        {
+            "kind": "Number",
+            "text": "5",
+            "start": 6117,
+            "end": 6118
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 6118,
+            "end": 6119
+        },
+        {
+            "kind": "Number",
+            "text": "6",
+            "start": 6120,
+            "end": 6121
+        },
+        {
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 6121,
+            "end": 6122
+        },
+        {
+            "kind": "Number",
+            "text": "7",
+            "start": 6123,
+            "end": 6124
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 6124,
+            "end": 6125
+        },
+        {
+            "kind": "Number",
+            "text": "8",
+            "start": 6126,
+            "end": 6127
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 6127,
+            "end": 6128
+        },
+        {
+            "kind": "Number",
+            "text": "9",
+            "start": 6129,
+            "end": 6130
+        },
+        {
+            "kind": "RightBracket",
+            "text": "]",
+            "start": 6130,
+            "end": 6131
+        },
+        {
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 6131,
+            "end": 6132
         },
         {
             "kind": "Identifier",
-            "text": "D",
-            "start": 6845,
-            "end": 6846
-        },
-        {
-            "kind": "Identifier",
-            "text": "Surface",
-            "start": 6847,
-            "end": 6854
-        },
-        {
-            "kind": "Identifier",
-            "text": "Plot",
-            "start": 6855,
-            "end": 6859
-        },
-        {
-            "kind": "Character",
-            "text": "');\ncolorbar;\n\n% Histogram\nrandom_data = randn(1000, 1);\nfigure(4);\nhistogram(random_data, 30);\ntitle('",
-            "start": 6859,
-            "end": 6962
-        },
-        {
-            "kind": "Identifier",
-            "text": "Histogram",
-            "start": 6962,
-            "end": 6971
-        },
-        {
-            "kind": "Identifier",
-            "text": "of",
-            "start": 6972,
-            "end": 6974
-        },
-        {
-            "kind": "Identifier",
-            "text": "Random",
-            "start": 6975,
-            "end": 6981
-        },
-        {
-            "kind": "Identifier",
-            "text": "Data",
-            "start": 6982,
-            "end": 6986
-        },
-        {
-            "kind": "Character",
-            "text": "');\nxlabel('",
-            "start": 6986,
-            "end": 6998
-        },
-        {
-            "kind": "Identifier",
-            "text": "Value",
-            "start": 6998,
-            "end": 7003
-        },
-        {
-            "kind": "Character",
-            "text": "');\nylabel('",
-            "start": 7003,
-            "end": 7015
-        },
-        {
-            "kind": "Identifier",
-            "text": "Frequency",
-            "start": 7015,
-            "end": 7024
-        },
-        {
-            "kind": "Character",
-            "text": "');\n\n%% Signal Processing\n% Generate signals\nfs = 1000;  % Sampling frequency\nt = 0:1/fs:1-1/fs;  % Time vector\nf1 = 50;  % Frequency 1\nf2 = 120; % Frequency 2\n\nsignal = sin(2*pi*f1*t) + 0.5*sin(2*pi*f2*t) + 0.1*randn(size(t));\n\n% FFT analysis\nY = fft(signal);\nP2 = abs(Y/length(signal));\nP1 = P2(1:length(signal)/2+1);\nP1(2:end-1) = 2*P1(2:end-1);\nf = fs*(0:(length(signal)/2))/length(signal);\n\nfigure(5);\nsubplot(2, 1, 1);\nplot(t(1:100), signal(1:100));\ntitle('",
-            "start": 7024,
-            "end": 7487
-        },
-        {
-            "kind": "Identifier",
-            "text": "Time",
-            "start": 7487,
-            "end": 7491
-        },
-        {
-            "kind": "Identifier",
-            "text": "Domain",
-            "start": 7492,
-            "end": 7498
-        },
-        {
-            "kind": "Identifier",
-            "text": "Signal",
-            "start": 7499,
-            "end": 7505
-        },
-        {
-            "kind": "Character",
-            "text": "');\nxlabel('",
-            "start": 7505,
-            "end": 7517
-        },
-        {
-            "kind": "Identifier",
-            "text": "Time",
-            "start": 7517,
-            "end": 7521
+            "text": "csvwrite",
+            "start": 6133,
+            "end": 6141
         },
         {
             "kind": "LeftParen",
             "text": "(",
-            "start": 7522,
-            "end": 7523
+            "start": 6141,
+            "end": 6142
+        },
+        {
+            "kind": "Character",
+            "text": "'data.csv'",
+            "start": 6142,
+            "end": 6152
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 6152,
+            "end": 6153
         },
         {
             "kind": "Identifier",
-            "text": "s",
-            "start": 7523,
-            "end": 7524
+            "text": "data_matrix",
+            "start": 6154,
+            "end": 6165
         },
         {
             "kind": "RightParen",
             "text": ")",
-            "start": 7524,
-            "end": 7525
+            "start": 6165,
+            "end": 6166
         },
         {
-            "kind": "Character",
-            "text": "');\nylabel('",
-            "start": 7525,
-            "end": 7537
-        },
-        {
-            "kind": "Identifier",
-            "text": "Amplitude",
-            "start": 7537,
-            "end": 7546
-        },
-        {
-            "kind": "Character",
-            "text": "');\n\nsubplot(2, 1, 2);\nplot(f, P1);\ntitle('",
-            "start": 7546,
-            "end": 7589
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 6166,
+            "end": 6167
         },
         {
             "kind": "Identifier",
-            "text": "Frequency",
-            "start": 7589,
-            "end": 7598
+            "text": "loaded_data",
+            "start": 6168,
+            "end": 6179
+        },
+        {
+            "kind": "Assign",
+            "text": "=",
+            "start": 6180,
+            "end": 6181
         },
         {
             "kind": "Identifier",
-            "text": "Domain",
-            "start": 7599,
-            "end": 7605
-        },
-        {
-            "kind": "Character",
-            "text": "');\nxlabel('",
-            "start": 7605,
-            "end": 7617
-        },
-        {
-            "kind": "Identifier",
-            "text": "Frequency",
-            "start": 7617,
-            "end": 7626
+            "text": "csvread",
+            "start": 6182,
+            "end": 6189
         },
         {
             "kind": "LeftParen",
             "text": "(",
-            "start": 7627,
-            "end": 7628
+            "start": 6189,
+            "end": 6190
         },
         {
-            "kind": "Identifier",
-            "text": "Hz",
-            "start": 7628,
-            "end": 7630
+            "kind": "Character",
+            "text": "'data.csv'",
+            "start": 6190,
+            "end": 6200
         },
         {
             "kind": "RightParen",
             "text": ")",
-            "start": 7630,
-            "end": 7631
+            "start": 6200,
+            "end": 6201
         },
         {
-            "kind": "Character",
-            "text": "');\nylabel('",
-            "start": 7631,
-            "end": 7643
-        },
-        {
-            "kind": "Identifier",
-            "text": "Magnitude",
-            "start": 7643,
-            "end": 7652
-        },
-        {
-            "kind": "Character",
-            "text": "');\n\n%% Linear Algebra Operations\n% Matrix operations\nA = [1, 2, 3; 4, 5, 6; 7, 8, 10];\nb = [1; 2; 3];\n\n% Solve linear system Ax = b\nx_solution = A \\ b;\n\n% Eigenvalues and eigenvectors\n[eigenvectors, eigenvalues] = eig(A);\n\n% Singular Value Decomposition\n[U, S, V] = svd(A);\n\n% QR decomposition\n[Q, R] = qr(A);\n\n% LU decomposition\n[L, U_lu, P] = lu(A);\n\n%% Statistics and Probability\n% Basic statistics\ndata = randn(100, 1);\nmean_val = mean(data);\nmedian_val = median(data);\nstd_val = std(data);\nvar_val = var(data);\nmin_val = min(data);\nmax_val = max(data);\n\n% Correlation and covariance\ndata2 = randn(100, 1);\ncorrelation = corrcoef(data, data2);\ncovariance = cov(data, data2);\n\n% Probability distributions\nnormal_samples = normrnd(0, 1, [100, 1]);\nuniform_samples = unifrnd(0, 1, [100, 1]);\nexponential_samples = exprnd(1, [100, 1]);\n\n%% Object-Oriented Programming\n% Class definition (would typically be in separate file)\nclassdef SimpleClass < handle\n    properties\n        value\n        name\n    end\n    \n    properties (Access = private)\n        private_data\n    end\n    \n    methods\n        function obj = SimpleClass(initial_value, initial_name)\n            if nargin > 0\n                obj.value = initial_value;\n            end\n            if nargin > 1\n                obj.name = initial_name;\n            end\n        end\n        \n        function result = getValue(obj)\n            result = obj.value;\n        end\n        \n        function setValue(obj, new_value)\n            obj.value = new_value;\n        end\n        \n        function display_info(obj)\n            fprintf('",
-            "start": 7652,
-            "end": 9243
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 6201,
+            "end": 6202
         },
         {
             "kind": "Identifier",
-            "text": "Name",
-            "start": 9243,
-            "end": 9247
+            "text": "x",
+            "start": 6245,
+            "end": 6246
+        },
+        {
+            "kind": "Assign",
+            "text": "=",
+            "start": 6247,
+            "end": 6248
+        },
+        {
+            "kind": "Identifier",
+            "text": "linspace",
+            "start": 6249,
+            "end": 6257
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 6257,
+            "end": 6258
+        },
+        {
+            "kind": "Number",
+            "text": "0",
+            "start": 6258,
+            "end": 6259
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 6259,
+            "end": 6260
+        },
+        {
+            "kind": "Number",
+            "text": "2",
+            "start": 6261,
+            "end": 6262
+        },
+        {
+            "kind": "Times",
+            "text": "*",
+            "start": 6262,
+            "end": 6263
+        },
+        {
+            "kind": "Identifier",
+            "text": "pi",
+            "start": 6263,
+            "end": 6265
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 6265,
+            "end": 6266
+        },
+        {
+            "kind": "Number",
+            "text": "100",
+            "start": 6267,
+            "end": 6270
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 6270,
+            "end": 6271
+        },
+        {
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 6271,
+            "end": 6272
+        },
+        {
+            "kind": "Identifier",
+            "text": "y1",
+            "start": 6273,
+            "end": 6275
+        },
+        {
+            "kind": "Assign",
+            "text": "=",
+            "start": 6276,
+            "end": 6277
+        },
+        {
+            "kind": "Identifier",
+            "text": "sin",
+            "start": 6278,
+            "end": 6281
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 6281,
+            "end": 6282
+        },
+        {
+            "kind": "Identifier",
+            "text": "x",
+            "start": 6282,
+            "end": 6283
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 6283,
+            "end": 6284
+        },
+        {
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 6284,
+            "end": 6285
+        },
+        {
+            "kind": "Identifier",
+            "text": "y2",
+            "start": 6286,
+            "end": 6288
+        },
+        {
+            "kind": "Assign",
+            "text": "=",
+            "start": 6289,
+            "end": 6290
+        },
+        {
+            "kind": "Identifier",
+            "text": "cos",
+            "start": 6291,
+            "end": 6294
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 6294,
+            "end": 6295
+        },
+        {
+            "kind": "Identifier",
+            "text": "x",
+            "start": 6295,
+            "end": 6296
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 6296,
+            "end": 6297
+        },
+        {
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 6297,
+            "end": 6298
+        },
+        {
+            "kind": "Identifier",
+            "text": "figure",
+            "start": 6300,
+            "end": 6306
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 6306,
+            "end": 6307
+        },
+        {
+            "kind": "Number",
+            "text": "1",
+            "start": 6307,
+            "end": 6308
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 6308,
+            "end": 6309
+        },
+        {
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 6309,
+            "end": 6310
+        },
+        {
+            "kind": "Identifier",
+            "text": "plot",
+            "start": 6311,
+            "end": 6315
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 6315,
+            "end": 6316
+        },
+        {
+            "kind": "Identifier",
+            "text": "x",
+            "start": 6316,
+            "end": 6317
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 6317,
+            "end": 6318
+        },
+        {
+            "kind": "Identifier",
+            "text": "y1",
+            "start": 6319,
+            "end": 6321
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 6321,
+            "end": 6322
+        },
+        {
+            "kind": "Character",
+            "text": "'r-'",
+            "start": 6323,
+            "end": 6327
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 6327,
+            "end": 6328
+        },
+        {
+            "kind": "Identifier",
+            "text": "x",
+            "start": 6329,
+            "end": 6330
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 6330,
+            "end": 6331
+        },
+        {
+            "kind": "Identifier",
+            "text": "y2",
+            "start": 6332,
+            "end": 6334
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 6334,
+            "end": 6335
+        },
+        {
+            "kind": "Character",
+            "text": "'b--'",
+            "start": 6336,
+            "end": 6341
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 6341,
+            "end": 6342
+        },
+        {
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 6342,
+            "end": 6343
+        },
+        {
+            "kind": "Identifier",
+            "text": "xlabel",
+            "start": 6344,
+            "end": 6350
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 6350,
+            "end": 6351
+        },
+        {
+            "kind": "Character",
+            "text": "'x'",
+            "start": 6351,
+            "end": 6354
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 6354,
+            "end": 6355
+        },
+        {
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 6355,
+            "end": 6356
+        },
+        {
+            "kind": "Identifier",
+            "text": "ylabel",
+            "start": 6357,
+            "end": 6363
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 6363,
+            "end": 6364
+        },
+        {
+            "kind": "Character",
+            "text": "'y'",
+            "start": 6364,
+            "end": 6367
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 6367,
+            "end": 6368
+        },
+        {
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 6368,
+            "end": 6369
+        },
+        {
+            "kind": "Identifier",
+            "text": "title",
+            "start": 6370,
+            "end": 6375
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 6375,
+            "end": 6376
+        },
+        {
+            "kind": "Character",
+            "text": "'Sine and Cosine Functions'",
+            "start": 6376,
+            "end": 6403
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 6403,
+            "end": 6404
+        },
+        {
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 6404,
+            "end": 6405
+        },
+        {
+            "kind": "Identifier",
+            "text": "legend",
+            "start": 6406,
+            "end": 6412
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 6412,
+            "end": 6413
+        },
+        {
+            "kind": "Character",
+            "text": "'sin(x)'",
+            "start": 6413,
+            "end": 6421
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 6421,
+            "end": 6422
+        },
+        {
+            "kind": "Character",
+            "text": "'cos(x)'",
+            "start": 6423,
+            "end": 6431
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 6431,
+            "end": 6432
+        },
+        {
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 6432,
+            "end": 6433
+        },
+        {
+            "kind": "Identifier",
+            "text": "grid",
+            "start": 6434,
+            "end": 6438
+        },
+        {
+            "kind": "Identifier",
+            "text": "on",
+            "start": 6439,
+            "end": 6441
+        },
+        {
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 6441,
+            "end": 6442
+        },
+        {
+            "kind": "Identifier",
+            "text": "figure",
+            "start": 6454,
+            "end": 6460
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 6460,
+            "end": 6461
+        },
+        {
+            "kind": "Number",
+            "text": "2",
+            "start": 6461,
+            "end": 6462
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 6462,
+            "end": 6463
+        },
+        {
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 6463,
+            "end": 6464
+        },
+        {
+            "kind": "Identifier",
+            "text": "subplot",
+            "start": 6465,
+            "end": 6472
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 6472,
+            "end": 6473
+        },
+        {
+            "kind": "Number",
+            "text": "2",
+            "start": 6473,
+            "end": 6474
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 6474,
+            "end": 6475
+        },
+        {
+            "kind": "Number",
+            "text": "2",
+            "start": 6476,
+            "end": 6477
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 6477,
+            "end": 6478
+        },
+        {
+            "kind": "Number",
+            "text": "1",
+            "start": 6479,
+            "end": 6480
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 6480,
+            "end": 6481
+        },
+        {
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 6481,
+            "end": 6482
+        },
+        {
+            "kind": "Identifier",
+            "text": "plot",
+            "start": 6483,
+            "end": 6487
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 6487,
+            "end": 6488
+        },
+        {
+            "kind": "Identifier",
+            "text": "x",
+            "start": 6488,
+            "end": 6489
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 6489,
+            "end": 6490
+        },
+        {
+            "kind": "Identifier",
+            "text": "y1",
+            "start": 6491,
+            "end": 6493
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 6493,
+            "end": 6494
+        },
+        {
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 6494,
+            "end": 6495
+        },
+        {
+            "kind": "Identifier",
+            "text": "title",
+            "start": 6496,
+            "end": 6501
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 6501,
+            "end": 6502
+        },
+        {
+            "kind": "Character",
+            "text": "'Sine'",
+            "start": 6502,
+            "end": 6508
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 6508,
+            "end": 6509
+        },
+        {
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 6509,
+            "end": 6510
+        },
+        {
+            "kind": "Identifier",
+            "text": "subplot",
+            "start": 6512,
+            "end": 6519
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 6519,
+            "end": 6520
+        },
+        {
+            "kind": "Number",
+            "text": "2",
+            "start": 6520,
+            "end": 6521
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 6521,
+            "end": 6522
+        },
+        {
+            "kind": "Number",
+            "text": "2",
+            "start": 6523,
+            "end": 6524
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 6524,
+            "end": 6525
+        },
+        {
+            "kind": "Number",
+            "text": "2",
+            "start": 6526,
+            "end": 6527
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 6527,
+            "end": 6528
+        },
+        {
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 6528,
+            "end": 6529
+        },
+        {
+            "kind": "Identifier",
+            "text": "plot",
+            "start": 6530,
+            "end": 6534
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 6534,
+            "end": 6535
+        },
+        {
+            "kind": "Identifier",
+            "text": "x",
+            "start": 6535,
+            "end": 6536
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 6536,
+            "end": 6537
+        },
+        {
+            "kind": "Identifier",
+            "text": "y2",
+            "start": 6538,
+            "end": 6540
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 6540,
+            "end": 6541
+        },
+        {
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 6541,
+            "end": 6542
+        },
+        {
+            "kind": "Identifier",
+            "text": "title",
+            "start": 6543,
+            "end": 6548
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 6548,
+            "end": 6549
+        },
+        {
+            "kind": "Character",
+            "text": "'Cosine'",
+            "start": 6549,
+            "end": 6557
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 6557,
+            "end": 6558
+        },
+        {
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 6558,
+            "end": 6559
+        },
+        {
+            "kind": "Identifier",
+            "text": "subplot",
+            "start": 6561,
+            "end": 6568
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 6568,
+            "end": 6569
+        },
+        {
+            "kind": "Number",
+            "text": "2",
+            "start": 6569,
+            "end": 6570
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 6570,
+            "end": 6571
+        },
+        {
+            "kind": "Number",
+            "text": "2",
+            "start": 6572,
+            "end": 6573
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 6573,
+            "end": 6574
+        },
+        {
+            "kind": "Number",
+            "text": "3",
+            "start": 6575,
+            "end": 6576
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 6576,
+            "end": 6577
+        },
+        {
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 6577,
+            "end": 6578
+        },
+        {
+            "kind": "Identifier",
+            "text": "plot",
+            "start": 6579,
+            "end": 6583
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 6583,
+            "end": 6584
+        },
+        {
+            "kind": "Identifier",
+            "text": "x",
+            "start": 6584,
+            "end": 6585
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 6585,
+            "end": 6586
+        },
+        {
+            "kind": "Identifier",
+            "text": "tan",
+            "start": 6587,
+            "end": 6590
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 6590,
+            "end": 6591
+        },
+        {
+            "kind": "Identifier",
+            "text": "x",
+            "start": 6591,
+            "end": 6592
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 6592,
+            "end": 6593
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 6593,
+            "end": 6594
+        },
+        {
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 6594,
+            "end": 6595
+        },
+        {
+            "kind": "Identifier",
+            "text": "title",
+            "start": 6596,
+            "end": 6601
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 6601,
+            "end": 6602
+        },
+        {
+            "kind": "Character",
+            "text": "'Tangent'",
+            "start": 6602,
+            "end": 6611
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 6611,
+            "end": 6612
+        },
+        {
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 6612,
+            "end": 6613
+        },
+        {
+            "kind": "Identifier",
+            "text": "ylim",
+            "start": 6614,
+            "end": 6618
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 6618,
+            "end": 6619
+        },
+        {
+            "kind": "LeftBracket",
+            "text": "[",
+            "start": 6619,
+            "end": 6620
+        },
+        {
+            "kind": "Minus",
+            "text": "-",
+            "start": 6620,
+            "end": 6621
+        },
+        {
+            "kind": "Number",
+            "text": "5",
+            "start": 6621,
+            "end": 6622
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 6622,
+            "end": 6623
+        },
+        {
+            "kind": "Number",
+            "text": "5",
+            "start": 6624,
+            "end": 6625
+        },
+        {
+            "kind": "RightBracket",
+            "text": "]",
+            "start": 6625,
+            "end": 6626
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 6626,
+            "end": 6627
+        },
+        {
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 6627,
+            "end": 6628
+        },
+        {
+            "kind": "Identifier",
+            "text": "subplot",
+            "start": 6630,
+            "end": 6637
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 6637,
+            "end": 6638
+        },
+        {
+            "kind": "Number",
+            "text": "2",
+            "start": 6638,
+            "end": 6639
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 6639,
+            "end": 6640
+        },
+        {
+            "kind": "Number",
+            "text": "2",
+            "start": 6641,
+            "end": 6642
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 6642,
+            "end": 6643
+        },
+        {
+            "kind": "Number",
+            "text": "4",
+            "start": 6644,
+            "end": 6645
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 6645,
+            "end": 6646
+        },
+        {
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 6646,
+            "end": 6647
+        },
+        {
+            "kind": "Identifier",
+            "text": "plot",
+            "start": 6648,
+            "end": 6652
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 6652,
+            "end": 6653
+        },
+        {
+            "kind": "Identifier",
+            "text": "x",
+            "start": 6653,
+            "end": 6654
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 6654,
+            "end": 6655
+        },
+        {
+            "kind": "Identifier",
+            "text": "exp",
+            "start": 6656,
+            "end": 6659
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 6659,
+            "end": 6660
+        },
+        {
+            "kind": "Minus",
+            "text": "-",
+            "start": 6660,
+            "end": 6661
+        },
+        {
+            "kind": "Identifier",
+            "text": "x",
+            "start": 6661,
+            "end": 6662
+        },
+        {
+            "kind": "Divide",
+            "text": "/",
+            "start": 6662,
+            "end": 6663
+        },
+        {
+            "kind": "Number",
+            "text": "2",
+            "start": 6663,
+            "end": 6664
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 6664,
+            "end": 6665
+        },
+        {
+            "kind": "DotTimes",
+            "text": ".*",
+            "start": 6666,
+            "end": 6668
+        },
+        {
+            "kind": "Identifier",
+            "text": "sin",
+            "start": 6669,
+            "end": 6672
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 6672,
+            "end": 6673
+        },
+        {
+            "kind": "Identifier",
+            "text": "x",
+            "start": 6673,
+            "end": 6674
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 6674,
+            "end": 6675
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 6675,
+            "end": 6676
+        },
+        {
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 6676,
+            "end": 6677
+        },
+        {
+            "kind": "Identifier",
+            "text": "title",
+            "start": 6678,
+            "end": 6683
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 6683,
+            "end": 6684
+        },
+        {
+            "kind": "Character",
+            "text": "'Damped Sine'",
+            "start": 6684,
+            "end": 6697
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 6697,
+            "end": 6698
+        },
+        {
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 6698,
+            "end": 6699
+        },
+        {
+            "kind": "LeftBracket",
+            "text": "[",
+            "start": 6715,
+            "end": 6716
+        },
+        {
+            "kind": "Identifier",
+            "text": "X",
+            "start": 6716,
+            "end": 6717
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 6717,
+            "end": 6718
+        },
+        {
+            "kind": "Identifier",
+            "text": "Y",
+            "start": 6719,
+            "end": 6720
+        },
+        {
+            "kind": "RightBracket",
+            "text": "]",
+            "start": 6720,
+            "end": 6721
+        },
+        {
+            "kind": "Assign",
+            "text": "=",
+            "start": 6722,
+            "end": 6723
+        },
+        {
+            "kind": "Identifier",
+            "text": "meshgrid",
+            "start": 6724,
+            "end": 6732
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 6732,
+            "end": 6733
+        },
+        {
+            "kind": "Minus",
+            "text": "-",
+            "start": 6733,
+            "end": 6734
+        },
+        {
+            "kind": "Number",
+            "text": "2",
+            "start": 6734,
+            "end": 6735
         },
         {
             "kind": "Colon",
             "text": ":",
-            "start": 9247,
-            "end": 9248
+            "start": 6735,
+            "end": 6736
+        },
+        {
+            "kind": "Number",
+            "text": "0.1",
+            "start": 6736,
+            "end": 6739
+        },
+        {
+            "kind": "Colon",
+            "text": ":",
+            "start": 6739,
+            "end": 6740
+        },
+        {
+            "kind": "Number",
+            "text": "2",
+            "start": 6740,
+            "end": 6741
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 6741,
+            "end": 6742
+        },
+        {
+            "kind": "Minus",
+            "text": "-",
+            "start": 6743,
+            "end": 6744
+        },
+        {
+            "kind": "Number",
+            "text": "2",
+            "start": 6744,
+            "end": 6745
+        },
+        {
+            "kind": "Colon",
+            "text": ":",
+            "start": 6745,
+            "end": 6746
+        },
+        {
+            "kind": "Number",
+            "text": "0.1",
+            "start": 6746,
+            "end": 6749
+        },
+        {
+            "kind": "Colon",
+            "text": ":",
+            "start": 6749,
+            "end": 6750
+        },
+        {
+            "kind": "Number",
+            "text": "2",
+            "start": 6750,
+            "end": 6751
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 6751,
+            "end": 6752
+        },
+        {
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 6752,
+            "end": 6753
+        },
+        {
+            "kind": "Identifier",
+            "text": "Z",
+            "start": 6754,
+            "end": 6755
+        },
+        {
+            "kind": "Assign",
+            "text": "=",
+            "start": 6756,
+            "end": 6757
+        },
+        {
+            "kind": "Identifier",
+            "text": "X",
+            "start": 6758,
+            "end": 6759
+        },
+        {
+            "kind": "DotPower",
+            "text": ".^",
+            "start": 6759,
+            "end": 6761
+        },
+        {
+            "kind": "Number",
+            "text": "2",
+            "start": 6761,
+            "end": 6762
+        },
+        {
+            "kind": "Plus",
+            "text": "+",
+            "start": 6763,
+            "end": 6764
+        },
+        {
+            "kind": "Identifier",
+            "text": "Y",
+            "start": 6765,
+            "end": 6766
+        },
+        {
+            "kind": "DotPower",
+            "text": ".^",
+            "start": 6766,
+            "end": 6768
+        },
+        {
+            "kind": "Number",
+            "text": "2",
+            "start": 6768,
+            "end": 6769
+        },
+        {
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 6769,
+            "end": 6770
+        },
+        {
+            "kind": "Identifier",
+            "text": "figure",
+            "start": 6772,
+            "end": 6778
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 6778,
+            "end": 6779
+        },
+        {
+            "kind": "Number",
+            "text": "3",
+            "start": 6779,
+            "end": 6780
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 6780,
+            "end": 6781
+        },
+        {
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 6781,
+            "end": 6782
+        },
+        {
+            "kind": "Identifier",
+            "text": "surf",
+            "start": 6783,
+            "end": 6787
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 6787,
+            "end": 6788
+        },
+        {
+            "kind": "Identifier",
+            "text": "X",
+            "start": 6788,
+            "end": 6789
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 6789,
+            "end": 6790
+        },
+        {
+            "kind": "Identifier",
+            "text": "Y",
+            "start": 6791,
+            "end": 6792
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 6792,
+            "end": 6793
+        },
+        {
+            "kind": "Identifier",
+            "text": "Z",
+            "start": 6794,
+            "end": 6795
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 6795,
+            "end": 6796
+        },
+        {
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 6796,
+            "end": 6797
+        },
+        {
+            "kind": "Identifier",
+            "text": "xlabel",
+            "start": 6798,
+            "end": 6804
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 6804,
+            "end": 6805
+        },
+        {
+            "kind": "Character",
+            "text": "'X'",
+            "start": 6805,
+            "end": 6808
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 6808,
+            "end": 6809
+        },
+        {
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 6809,
+            "end": 6810
+        },
+        {
+            "kind": "Identifier",
+            "text": "ylabel",
+            "start": 6811,
+            "end": 6817
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 6817,
+            "end": 6818
+        },
+        {
+            "kind": "Character",
+            "text": "'Y'",
+            "start": 6818,
+            "end": 6821
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 6821,
+            "end": 6822
+        },
+        {
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 6822,
+            "end": 6823
+        },
+        {
+            "kind": "Identifier",
+            "text": "zlabel",
+            "start": 6824,
+            "end": 6830
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 6830,
+            "end": 6831
+        },
+        {
+            "kind": "Character",
+            "text": "'Z'",
+            "start": 6831,
+            "end": 6834
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 6834,
+            "end": 6835
+        },
+        {
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 6835,
+            "end": 6836
+        },
+        {
+            "kind": "Identifier",
+            "text": "title",
+            "start": 6837,
+            "end": 6842
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 6842,
+            "end": 6843
+        },
+        {
+            "kind": "Character",
+            "text": "'3D Surface Plot'",
+            "start": 6843,
+            "end": 6860
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 6860,
+            "end": 6861
+        },
+        {
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 6861,
+            "end": 6862
+        },
+        {
+            "kind": "Identifier",
+            "text": "colorbar",
+            "start": 6863,
+            "end": 6871
+        },
+        {
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 6871,
+            "end": 6872
+        },
+        {
+            "kind": "Identifier",
+            "text": "random_data",
+            "start": 6886,
+            "end": 6897
+        },
+        {
+            "kind": "Assign",
+            "text": "=",
+            "start": 6898,
+            "end": 6899
+        },
+        {
+            "kind": "Identifier",
+            "text": "randn",
+            "start": 6900,
+            "end": 6905
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 6905,
+            "end": 6906
+        },
+        {
+            "kind": "Number",
+            "text": "1000",
+            "start": 6906,
+            "end": 6910
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 6910,
+            "end": 6911
+        },
+        {
+            "kind": "Number",
+            "text": "1",
+            "start": 6912,
+            "end": 6913
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 6913,
+            "end": 6914
+        },
+        {
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 6914,
+            "end": 6915
+        },
+        {
+            "kind": "Identifier",
+            "text": "figure",
+            "start": 6916,
+            "end": 6922
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 6922,
+            "end": 6923
+        },
+        {
+            "kind": "Number",
+            "text": "4",
+            "start": 6923,
+            "end": 6924
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 6924,
+            "end": 6925
+        },
+        {
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 6925,
+            "end": 6926
+        },
+        {
+            "kind": "Identifier",
+            "text": "histogram",
+            "start": 6927,
+            "end": 6936
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 6936,
+            "end": 6937
+        },
+        {
+            "kind": "Identifier",
+            "text": "random_data",
+            "start": 6937,
+            "end": 6948
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 6948,
+            "end": 6949
+        },
+        {
+            "kind": "Number",
+            "text": "30",
+            "start": 6950,
+            "end": 6952
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 6952,
+            "end": 6953
+        },
+        {
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 6953,
+            "end": 6954
+        },
+        {
+            "kind": "Identifier",
+            "text": "title",
+            "start": 6955,
+            "end": 6960
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 6960,
+            "end": 6961
+        },
+        {
+            "kind": "Character",
+            "text": "'Histogram of Random Data'",
+            "start": 6961,
+            "end": 6987
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 6987,
+            "end": 6988
+        },
+        {
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 6988,
+            "end": 6989
+        },
+        {
+            "kind": "Identifier",
+            "text": "xlabel",
+            "start": 6990,
+            "end": 6996
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 6996,
+            "end": 6997
+        },
+        {
+            "kind": "Character",
+            "text": "'Value'",
+            "start": 6997,
+            "end": 7004
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 7004,
+            "end": 7005
+        },
+        {
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 7005,
+            "end": 7006
+        },
+        {
+            "kind": "Identifier",
+            "text": "ylabel",
+            "start": 7007,
+            "end": 7013
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 7013,
+            "end": 7014
+        },
+        {
+            "kind": "Character",
+            "text": "'Frequency'",
+            "start": 7014,
+            "end": 7025
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 7025,
+            "end": 7026
+        },
+        {
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 7026,
+            "end": 7027
+        },
+        {
+            "kind": "Identifier",
+            "text": "fs",
+            "start": 7069,
+            "end": 7071
+        },
+        {
+            "kind": "Assign",
+            "text": "=",
+            "start": 7072,
+            "end": 7073
+        },
+        {
+            "kind": "Number",
+            "text": "1000",
+            "start": 7074,
+            "end": 7078
+        },
+        {
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 7078,
+            "end": 7079
+        },
+        {
+            "kind": "Identifier",
+            "text": "t",
+            "start": 7102,
+            "end": 7103
+        },
+        {
+            "kind": "Assign",
+            "text": "=",
+            "start": 7104,
+            "end": 7105
+        },
+        {
+            "kind": "Number",
+            "text": "0",
+            "start": 7106,
+            "end": 7107
+        },
+        {
+            "kind": "Colon",
+            "text": ":",
+            "start": 7107,
+            "end": 7108
+        },
+        {
+            "kind": "Number",
+            "text": "1",
+            "start": 7108,
+            "end": 7109
+        },
+        {
+            "kind": "Divide",
+            "text": "/",
+            "start": 7109,
+            "end": 7110
+        },
+        {
+            "kind": "Identifier",
+            "text": "fs",
+            "start": 7110,
+            "end": 7112
+        },
+        {
+            "kind": "Colon",
+            "text": ":",
+            "start": 7112,
+            "end": 7113
+        },
+        {
+            "kind": "Number",
+            "text": "1",
+            "start": 7113,
+            "end": 7114
+        },
+        {
+            "kind": "Minus",
+            "text": "-",
+            "start": 7114,
+            "end": 7115
+        },
+        {
+            "kind": "Number",
+            "text": "1",
+            "start": 7115,
+            "end": 7116
+        },
+        {
+            "kind": "Divide",
+            "text": "/",
+            "start": 7116,
+            "end": 7117
+        },
+        {
+            "kind": "Identifier",
+            "text": "fs",
+            "start": 7117,
+            "end": 7119
+        },
+        {
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 7119,
+            "end": 7120
+        },
+        {
+            "kind": "Identifier",
+            "text": "f1",
+            "start": 7136,
+            "end": 7138
+        },
+        {
+            "kind": "Assign",
+            "text": "=",
+            "start": 7139,
+            "end": 7140
+        },
+        {
+            "kind": "Number",
+            "text": "50",
+            "start": 7141,
+            "end": 7143
+        },
+        {
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 7143,
+            "end": 7144
+        },
+        {
+            "kind": "Identifier",
+            "text": "f2",
+            "start": 7160,
+            "end": 7162
+        },
+        {
+            "kind": "Assign",
+            "text": "=",
+            "start": 7163,
+            "end": 7164
+        },
+        {
+            "kind": "Number",
+            "text": "120",
+            "start": 7165,
+            "end": 7168
+        },
+        {
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 7168,
+            "end": 7169
+        },
+        {
+            "kind": "Identifier",
+            "text": "signal",
+            "start": 7185,
+            "end": 7191
+        },
+        {
+            "kind": "Assign",
+            "text": "=",
+            "start": 7192,
+            "end": 7193
+        },
+        {
+            "kind": "Identifier",
+            "text": "sin",
+            "start": 7194,
+            "end": 7197
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 7197,
+            "end": 7198
+        },
+        {
+            "kind": "Number",
+            "text": "2",
+            "start": 7198,
+            "end": 7199
+        },
+        {
+            "kind": "Times",
+            "text": "*",
+            "start": 7199,
+            "end": 7200
+        },
+        {
+            "kind": "Identifier",
+            "text": "pi",
+            "start": 7200,
+            "end": 7202
+        },
+        {
+            "kind": "Times",
+            "text": "*",
+            "start": 7202,
+            "end": 7203
+        },
+        {
+            "kind": "Identifier",
+            "text": "f1",
+            "start": 7203,
+            "end": 7205
+        },
+        {
+            "kind": "Times",
+            "text": "*",
+            "start": 7205,
+            "end": 7206
+        },
+        {
+            "kind": "Identifier",
+            "text": "t",
+            "start": 7206,
+            "end": 7207
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 7207,
+            "end": 7208
+        },
+        {
+            "kind": "Plus",
+            "text": "+",
+            "start": 7209,
+            "end": 7210
+        },
+        {
+            "kind": "Number",
+            "text": "0.5",
+            "start": 7211,
+            "end": 7214
+        },
+        {
+            "kind": "Times",
+            "text": "*",
+            "start": 7214,
+            "end": 7215
+        },
+        {
+            "kind": "Identifier",
+            "text": "sin",
+            "start": 7215,
+            "end": 7218
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 7218,
+            "end": 7219
+        },
+        {
+            "kind": "Number",
+            "text": "2",
+            "start": 7219,
+            "end": 7220
+        },
+        {
+            "kind": "Times",
+            "text": "*",
+            "start": 7220,
+            "end": 7221
+        },
+        {
+            "kind": "Identifier",
+            "text": "pi",
+            "start": 7221,
+            "end": 7223
+        },
+        {
+            "kind": "Times",
+            "text": "*",
+            "start": 7223,
+            "end": 7224
+        },
+        {
+            "kind": "Identifier",
+            "text": "f2",
+            "start": 7224,
+            "end": 7226
+        },
+        {
+            "kind": "Times",
+            "text": "*",
+            "start": 7226,
+            "end": 7227
+        },
+        {
+            "kind": "Identifier",
+            "text": "t",
+            "start": 7227,
+            "end": 7228
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 7228,
+            "end": 7229
+        },
+        {
+            "kind": "Plus",
+            "text": "+",
+            "start": 7230,
+            "end": 7231
+        },
+        {
+            "kind": "Number",
+            "text": "0.1",
+            "start": 7232,
+            "end": 7235
+        },
+        {
+            "kind": "Times",
+            "text": "*",
+            "start": 7235,
+            "end": 7236
+        },
+        {
+            "kind": "Identifier",
+            "text": "randn",
+            "start": 7236,
+            "end": 7241
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 7241,
+            "end": 7242
+        },
+        {
+            "kind": "Identifier",
+            "text": "size",
+            "start": 7242,
+            "end": 7246
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 7246,
+            "end": 7247
+        },
+        {
+            "kind": "Identifier",
+            "text": "t",
+            "start": 7247,
+            "end": 7248
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 7248,
+            "end": 7249
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 7249,
+            "end": 7250
+        },
+        {
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 7250,
+            "end": 7251
+        },
+        {
+            "kind": "Identifier",
+            "text": "Y",
+            "start": 7268,
+            "end": 7269
+        },
+        {
+            "kind": "Assign",
+            "text": "=",
+            "start": 7270,
+            "end": 7271
+        },
+        {
+            "kind": "Identifier",
+            "text": "fft",
+            "start": 7272,
+            "end": 7275
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 7275,
+            "end": 7276
+        },
+        {
+            "kind": "Identifier",
+            "text": "signal",
+            "start": 7276,
+            "end": 7282
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 7282,
+            "end": 7283
+        },
+        {
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 7283,
+            "end": 7284
+        },
+        {
+            "kind": "Identifier",
+            "text": "P2",
+            "start": 7285,
+            "end": 7287
+        },
+        {
+            "kind": "Assign",
+            "text": "=",
+            "start": 7288,
+            "end": 7289
+        },
+        {
+            "kind": "Identifier",
+            "text": "abs",
+            "start": 7290,
+            "end": 7293
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 7293,
+            "end": 7294
+        },
+        {
+            "kind": "Identifier",
+            "text": "Y",
+            "start": 7294,
+            "end": 7295
+        },
+        {
+            "kind": "Divide",
+            "text": "/",
+            "start": 7295,
+            "end": 7296
+        },
+        {
+            "kind": "Identifier",
+            "text": "length",
+            "start": 7296,
+            "end": 7302
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 7302,
+            "end": 7303
+        },
+        {
+            "kind": "Identifier",
+            "text": "signal",
+            "start": 7303,
+            "end": 7309
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 7309,
+            "end": 7310
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 7310,
+            "end": 7311
+        },
+        {
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 7311,
+            "end": 7312
+        },
+        {
+            "kind": "Identifier",
+            "text": "P1",
+            "start": 7313,
+            "end": 7315
+        },
+        {
+            "kind": "Assign",
+            "text": "=",
+            "start": 7316,
+            "end": 7317
+        },
+        {
+            "kind": "Identifier",
+            "text": "P2",
+            "start": 7318,
+            "end": 7320
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 7320,
+            "end": 7321
+        },
+        {
+            "kind": "Number",
+            "text": "1",
+            "start": 7321,
+            "end": 7322
+        },
+        {
+            "kind": "Colon",
+            "text": ":",
+            "start": 7322,
+            "end": 7323
+        },
+        {
+            "kind": "Identifier",
+            "text": "length",
+            "start": 7323,
+            "end": 7329
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 7329,
+            "end": 7330
+        },
+        {
+            "kind": "Identifier",
+            "text": "signal",
+            "start": 7330,
+            "end": 7336
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 7336,
+            "end": 7337
+        },
+        {
+            "kind": "Divide",
+            "text": "/",
+            "start": 7337,
+            "end": 7338
+        },
+        {
+            "kind": "Number",
+            "text": "2",
+            "start": 7338,
+            "end": 7339
+        },
+        {
+            "kind": "Plus",
+            "text": "+",
+            "start": 7339,
+            "end": 7340
+        },
+        {
+            "kind": "Number",
+            "text": "1",
+            "start": 7340,
+            "end": 7341
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 7341,
+            "end": 7342
+        },
+        {
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 7342,
+            "end": 7343
+        },
+        {
+            "kind": "Identifier",
+            "text": "P1",
+            "start": 7344,
+            "end": 7346
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 7346,
+            "end": 7347
+        },
+        {
+            "kind": "Number",
+            "text": "2",
+            "start": 7347,
+            "end": 7348
+        },
+        {
+            "kind": "Colon",
+            "text": ":",
+            "start": 7348,
+            "end": 7349
+        },
+        {
+            "kind": "End",
+            "text": "end",
+            "start": 7349,
+            "end": 7352
+        },
+        {
+            "kind": "Minus",
+            "text": "-",
+            "start": 7352,
+            "end": 7353
+        },
+        {
+            "kind": "Number",
+            "text": "1",
+            "start": 7353,
+            "end": 7354
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 7354,
+            "end": 7355
+        },
+        {
+            "kind": "Assign",
+            "text": "=",
+            "start": 7356,
+            "end": 7357
+        },
+        {
+            "kind": "Number",
+            "text": "2",
+            "start": 7358,
+            "end": 7359
+        },
+        {
+            "kind": "Times",
+            "text": "*",
+            "start": 7359,
+            "end": 7360
+        },
+        {
+            "kind": "Identifier",
+            "text": "P1",
+            "start": 7360,
+            "end": 7362
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 7362,
+            "end": 7363
+        },
+        {
+            "kind": "Number",
+            "text": "2",
+            "start": 7363,
+            "end": 7364
+        },
+        {
+            "kind": "Colon",
+            "text": ":",
+            "start": 7364,
+            "end": 7365
+        },
+        {
+            "kind": "End",
+            "text": "end",
+            "start": 7365,
+            "end": 7368
+        },
+        {
+            "kind": "Minus",
+            "text": "-",
+            "start": 7368,
+            "end": 7369
+        },
+        {
+            "kind": "Number",
+            "text": "1",
+            "start": 7369,
+            "end": 7370
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 7370,
+            "end": 7371
+        },
+        {
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 7371,
+            "end": 7372
+        },
+        {
+            "kind": "Identifier",
+            "text": "f",
+            "start": 7373,
+            "end": 7374
+        },
+        {
+            "kind": "Assign",
+            "text": "=",
+            "start": 7375,
+            "end": 7376
+        },
+        {
+            "kind": "Identifier",
+            "text": "fs",
+            "start": 7377,
+            "end": 7379
+        },
+        {
+            "kind": "Times",
+            "text": "*",
+            "start": 7379,
+            "end": 7380
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 7380,
+            "end": 7381
+        },
+        {
+            "kind": "Number",
+            "text": "0",
+            "start": 7381,
+            "end": 7382
+        },
+        {
+            "kind": "Colon",
+            "text": ":",
+            "start": 7382,
+            "end": 7383
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 7383,
+            "end": 7384
+        },
+        {
+            "kind": "Identifier",
+            "text": "length",
+            "start": 7384,
+            "end": 7390
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 7390,
+            "end": 7391
+        },
+        {
+            "kind": "Identifier",
+            "text": "signal",
+            "start": 7391,
+            "end": 7397
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 7397,
+            "end": 7398
+        },
+        {
+            "kind": "Divide",
+            "text": "/",
+            "start": 7398,
+            "end": 7399
+        },
+        {
+            "kind": "Number",
+            "text": "2",
+            "start": 7399,
+            "end": 7400
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 7400,
+            "end": 7401
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 7401,
+            "end": 7402
+        },
+        {
+            "kind": "Divide",
+            "text": "/",
+            "start": 7402,
+            "end": 7403
+        },
+        {
+            "kind": "Identifier",
+            "text": "length",
+            "start": 7403,
+            "end": 7409
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 7409,
+            "end": 7410
+        },
+        {
+            "kind": "Identifier",
+            "text": "signal",
+            "start": 7410,
+            "end": 7416
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 7416,
+            "end": 7417
+        },
+        {
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 7417,
+            "end": 7418
+        },
+        {
+            "kind": "Identifier",
+            "text": "figure",
+            "start": 7420,
+            "end": 7426
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 7426,
+            "end": 7427
+        },
+        {
+            "kind": "Number",
+            "text": "5",
+            "start": 7427,
+            "end": 7428
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 7428,
+            "end": 7429
+        },
+        {
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 7429,
+            "end": 7430
+        },
+        {
+            "kind": "Identifier",
+            "text": "subplot",
+            "start": 7431,
+            "end": 7438
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 7438,
+            "end": 7439
+        },
+        {
+            "kind": "Number",
+            "text": "2",
+            "start": 7439,
+            "end": 7440
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 7440,
+            "end": 7441
+        },
+        {
+            "kind": "Number",
+            "text": "1",
+            "start": 7442,
+            "end": 7443
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 7443,
+            "end": 7444
+        },
+        {
+            "kind": "Number",
+            "text": "1",
+            "start": 7445,
+            "end": 7446
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 7446,
+            "end": 7447
+        },
+        {
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 7447,
+            "end": 7448
+        },
+        {
+            "kind": "Identifier",
+            "text": "plot",
+            "start": 7449,
+            "end": 7453
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 7453,
+            "end": 7454
+        },
+        {
+            "kind": "Identifier",
+            "text": "t",
+            "start": 7454,
+            "end": 7455
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 7455,
+            "end": 7456
+        },
+        {
+            "kind": "Number",
+            "text": "1",
+            "start": 7456,
+            "end": 7457
+        },
+        {
+            "kind": "Colon",
+            "text": ":",
+            "start": 7457,
+            "end": 7458
+        },
+        {
+            "kind": "Number",
+            "text": "100",
+            "start": 7458,
+            "end": 7461
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 7461,
+            "end": 7462
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 7462,
+            "end": 7463
+        },
+        {
+            "kind": "Identifier",
+            "text": "signal",
+            "start": 7464,
+            "end": 7470
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 7470,
+            "end": 7471
+        },
+        {
+            "kind": "Number",
+            "text": "1",
+            "start": 7471,
+            "end": 7472
+        },
+        {
+            "kind": "Colon",
+            "text": ":",
+            "start": 7472,
+            "end": 7473
+        },
+        {
+            "kind": "Number",
+            "text": "100",
+            "start": 7473,
+            "end": 7476
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 7476,
+            "end": 7477
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 7477,
+            "end": 7478
+        },
+        {
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 7478,
+            "end": 7479
+        },
+        {
+            "kind": "Identifier",
+            "text": "title",
+            "start": 7480,
+            "end": 7485
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 7485,
+            "end": 7486
+        },
+        {
+            "kind": "Character",
+            "text": "'Time Domain Signal'",
+            "start": 7486,
+            "end": 7506
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 7506,
+            "end": 7507
+        },
+        {
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 7507,
+            "end": 7508
+        },
+        {
+            "kind": "Identifier",
+            "text": "xlabel",
+            "start": 7509,
+            "end": 7515
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 7515,
+            "end": 7516
+        },
+        {
+            "kind": "Character",
+            "text": "'Time (s)'",
+            "start": 7516,
+            "end": 7526
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 7526,
+            "end": 7527
+        },
+        {
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 7527,
+            "end": 7528
+        },
+        {
+            "kind": "Identifier",
+            "text": "ylabel",
+            "start": 7529,
+            "end": 7535
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 7535,
+            "end": 7536
+        },
+        {
+            "kind": "Character",
+            "text": "'Amplitude'",
+            "start": 7536,
+            "end": 7547
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 7547,
+            "end": 7548
+        },
+        {
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 7548,
+            "end": 7549
+        },
+        {
+            "kind": "Identifier",
+            "text": "subplot",
+            "start": 7551,
+            "end": 7558
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 7558,
+            "end": 7559
+        },
+        {
+            "kind": "Number",
+            "text": "2",
+            "start": 7559,
+            "end": 7560
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 7560,
+            "end": 7561
+        },
+        {
+            "kind": "Number",
+            "text": "1",
+            "start": 7562,
+            "end": 7563
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 7563,
+            "end": 7564
+        },
+        {
+            "kind": "Number",
+            "text": "2",
+            "start": 7565,
+            "end": 7566
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 7566,
+            "end": 7567
+        },
+        {
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 7567,
+            "end": 7568
+        },
+        {
+            "kind": "Identifier",
+            "text": "plot",
+            "start": 7569,
+            "end": 7573
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 7573,
+            "end": 7574
+        },
+        {
+            "kind": "Identifier",
+            "text": "f",
+            "start": 7574,
+            "end": 7575
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 7575,
+            "end": 7576
+        },
+        {
+            "kind": "Identifier",
+            "text": "P1",
+            "start": 7577,
+            "end": 7579
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 7579,
+            "end": 7580
+        },
+        {
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 7580,
+            "end": 7581
+        },
+        {
+            "kind": "Identifier",
+            "text": "title",
+            "start": 7582,
+            "end": 7587
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 7587,
+            "end": 7588
+        },
+        {
+            "kind": "Character",
+            "text": "'Frequency Domain'",
+            "start": 7588,
+            "end": 7606
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 7606,
+            "end": 7607
+        },
+        {
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 7607,
+            "end": 7608
+        },
+        {
+            "kind": "Identifier",
+            "text": "xlabel",
+            "start": 7609,
+            "end": 7615
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 7615,
+            "end": 7616
+        },
+        {
+            "kind": "Character",
+            "text": "'Frequency (Hz)'",
+            "start": 7616,
+            "end": 7632
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 7632,
+            "end": 7633
+        },
+        {
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 7633,
+            "end": 7634
+        },
+        {
+            "kind": "Identifier",
+            "text": "ylabel",
+            "start": 7635,
+            "end": 7641
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 7641,
+            "end": 7642
+        },
+        {
+            "kind": "Character",
+            "text": "'Magnitude'",
+            "start": 7642,
+            "end": 7653
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 7653,
+            "end": 7654
+        },
+        {
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 7654,
+            "end": 7655
+        },
+        {
+            "kind": "Identifier",
+            "text": "A",
+            "start": 7706,
+            "end": 7707
+        },
+        {
+            "kind": "Assign",
+            "text": "=",
+            "start": 7708,
+            "end": 7709
+        },
+        {
+            "kind": "LeftBracket",
+            "text": "[",
+            "start": 7710,
+            "end": 7711
+        },
+        {
+            "kind": "Number",
+            "text": "1",
+            "start": 7711,
+            "end": 7712
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 7712,
+            "end": 7713
+        },
+        {
+            "kind": "Number",
+            "text": "2",
+            "start": 7714,
+            "end": 7715
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 7715,
+            "end": 7716
+        },
+        {
+            "kind": "Number",
+            "text": "3",
+            "start": 7717,
+            "end": 7718
+        },
+        {
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 7718,
+            "end": 7719
+        },
+        {
+            "kind": "Number",
+            "text": "4",
+            "start": 7720,
+            "end": 7721
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 7721,
+            "end": 7722
+        },
+        {
+            "kind": "Number",
+            "text": "5",
+            "start": 7723,
+            "end": 7724
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 7724,
+            "end": 7725
+        },
+        {
+            "kind": "Number",
+            "text": "6",
+            "start": 7726,
+            "end": 7727
+        },
+        {
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 7727,
+            "end": 7728
+        },
+        {
+            "kind": "Number",
+            "text": "7",
+            "start": 7729,
+            "end": 7730
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 7730,
+            "end": 7731
+        },
+        {
+            "kind": "Number",
+            "text": "8",
+            "start": 7732,
+            "end": 7733
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 7733,
+            "end": 7734
+        },
+        {
+            "kind": "Number",
+            "text": "10",
+            "start": 7735,
+            "end": 7737
+        },
+        {
+            "kind": "RightBracket",
+            "text": "]",
+            "start": 7737,
+            "end": 7738
+        },
+        {
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 7738,
+            "end": 7739
+        },
+        {
+            "kind": "Identifier",
+            "text": "b",
+            "start": 7740,
+            "end": 7741
+        },
+        {
+            "kind": "Assign",
+            "text": "=",
+            "start": 7742,
+            "end": 7743
+        },
+        {
+            "kind": "LeftBracket",
+            "text": "[",
+            "start": 7744,
+            "end": 7745
+        },
+        {
+            "kind": "Number",
+            "text": "1",
+            "start": 7745,
+            "end": 7746
+        },
+        {
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 7746,
+            "end": 7747
+        },
+        {
+            "kind": "Number",
+            "text": "2",
+            "start": 7748,
+            "end": 7749
+        },
+        {
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 7749,
+            "end": 7750
+        },
+        {
+            "kind": "Number",
+            "text": "3",
+            "start": 7751,
+            "end": 7752
+        },
+        {
+            "kind": "RightBracket",
+            "text": "]",
+            "start": 7752,
+            "end": 7753
+        },
+        {
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 7753,
+            "end": 7754
+        },
+        {
+            "kind": "Identifier",
+            "text": "x_solution",
+            "start": 7785,
+            "end": 7795
+        },
+        {
+            "kind": "Assign",
+            "text": "=",
+            "start": 7796,
+            "end": 7797
+        },
+        {
+            "kind": "Identifier",
+            "text": "A",
+            "start": 7798,
+            "end": 7799
+        },
+        {
+            "kind": "LeftDivide",
+            "text": "\\",
+            "start": 7800,
+            "end": 7801
+        },
+        {
+            "kind": "Identifier",
+            "text": "b",
+            "start": 7802,
+            "end": 7803
+        },
+        {
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 7803,
+            "end": 7804
+        },
+        {
+            "kind": "LeftBracket",
+            "text": "[",
+            "start": 7837,
+            "end": 7838
+        },
+        {
+            "kind": "Identifier",
+            "text": "eigenvectors",
+            "start": 7838,
+            "end": 7850
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 7850,
+            "end": 7851
+        },
+        {
+            "kind": "Identifier",
+            "text": "eigenvalues",
+            "start": 7852,
+            "end": 7863
+        },
+        {
+            "kind": "RightBracket",
+            "text": "]",
+            "start": 7863,
+            "end": 7864
+        },
+        {
+            "kind": "Assign",
+            "text": "=",
+            "start": 7865,
+            "end": 7866
+        },
+        {
+            "kind": "Identifier",
+            "text": "eig",
+            "start": 7867,
+            "end": 7870
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 7870,
+            "end": 7871
+        },
+        {
+            "kind": "Identifier",
+            "text": "A",
+            "start": 7871,
+            "end": 7872
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 7872,
+            "end": 7873
+        },
+        {
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 7873,
+            "end": 7874
+        },
+        {
+            "kind": "LeftBracket",
+            "text": "[",
+            "start": 7907,
+            "end": 7908
+        },
+        {
+            "kind": "Identifier",
+            "text": "U",
+            "start": 7908,
+            "end": 7909
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 7909,
+            "end": 7910
+        },
+        {
+            "kind": "Identifier",
+            "text": "S",
+            "start": 7911,
+            "end": 7912
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 7912,
+            "end": 7913
+        },
+        {
+            "kind": "Identifier",
+            "text": "V",
+            "start": 7914,
+            "end": 7915
+        },
+        {
+            "kind": "RightBracket",
+            "text": "]",
+            "start": 7915,
+            "end": 7916
+        },
+        {
+            "kind": "Assign",
+            "text": "=",
+            "start": 7917,
+            "end": 7918
+        },
+        {
+            "kind": "Identifier",
+            "text": "svd",
+            "start": 7919,
+            "end": 7922
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 7922,
+            "end": 7923
+        },
+        {
+            "kind": "Identifier",
+            "text": "A",
+            "start": 7923,
+            "end": 7924
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 7924,
+            "end": 7925
+        },
+        {
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 7925,
+            "end": 7926
+        },
+        {
+            "kind": "LeftBracket",
+            "text": "[",
+            "start": 7947,
+            "end": 7948
+        },
+        {
+            "kind": "Identifier",
+            "text": "Q",
+            "start": 7948,
+            "end": 7949
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 7949,
+            "end": 7950
+        },
+        {
+            "kind": "Identifier",
+            "text": "R",
+            "start": 7951,
+            "end": 7952
+        },
+        {
+            "kind": "RightBracket",
+            "text": "]",
+            "start": 7952,
+            "end": 7953
+        },
+        {
+            "kind": "Assign",
+            "text": "=",
+            "start": 7954,
+            "end": 7955
+        },
+        {
+            "kind": "Identifier",
+            "text": "qr",
+            "start": 7956,
+            "end": 7958
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 7958,
+            "end": 7959
+        },
+        {
+            "kind": "Identifier",
+            "text": "A",
+            "start": 7959,
+            "end": 7960
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 7960,
+            "end": 7961
+        },
+        {
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 7961,
+            "end": 7962
+        },
+        {
+            "kind": "LeftBracket",
+            "text": "[",
+            "start": 7983,
+            "end": 7984
+        },
+        {
+            "kind": "Identifier",
+            "text": "L",
+            "start": 7984,
+            "end": 7985
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 7985,
+            "end": 7986
+        },
+        {
+            "kind": "Identifier",
+            "text": "U_lu",
+            "start": 7987,
+            "end": 7991
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 7991,
+            "end": 7992
+        },
+        {
+            "kind": "Identifier",
+            "text": "P",
+            "start": 7993,
+            "end": 7994
+        },
+        {
+            "kind": "RightBracket",
+            "text": "]",
+            "start": 7994,
+            "end": 7995
+        },
+        {
+            "kind": "Assign",
+            "text": "=",
+            "start": 7996,
+            "end": 7997
+        },
+        {
+            "kind": "Identifier",
+            "text": "lu",
+            "start": 7998,
+            "end": 8000
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 8000,
+            "end": 8001
+        },
+        {
+            "kind": "Identifier",
+            "text": "A",
+            "start": 8001,
+            "end": 8002
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 8002,
+            "end": 8003
+        },
+        {
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 8003,
+            "end": 8004
+        },
+        {
+            "kind": "Identifier",
+            "text": "data",
+            "start": 8055,
+            "end": 8059
+        },
+        {
+            "kind": "Assign",
+            "text": "=",
+            "start": 8060,
+            "end": 8061
+        },
+        {
+            "kind": "Identifier",
+            "text": "randn",
+            "start": 8062,
+            "end": 8067
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 8067,
+            "end": 8068
+        },
+        {
+            "kind": "Number",
+            "text": "100",
+            "start": 8068,
+            "end": 8071
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 8071,
+            "end": 8072
+        },
+        {
+            "kind": "Number",
+            "text": "1",
+            "start": 8073,
+            "end": 8074
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 8074,
+            "end": 8075
+        },
+        {
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 8075,
+            "end": 8076
+        },
+        {
+            "kind": "Identifier",
+            "text": "mean_val",
+            "start": 8077,
+            "end": 8085
+        },
+        {
+            "kind": "Assign",
+            "text": "=",
+            "start": 8086,
+            "end": 8087
+        },
+        {
+            "kind": "Identifier",
+            "text": "mean",
+            "start": 8088,
+            "end": 8092
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 8092,
+            "end": 8093
+        },
+        {
+            "kind": "Identifier",
+            "text": "data",
+            "start": 8093,
+            "end": 8097
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 8097,
+            "end": 8098
+        },
+        {
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 8098,
+            "end": 8099
+        },
+        {
+            "kind": "Identifier",
+            "text": "median_val",
+            "start": 8100,
+            "end": 8110
+        },
+        {
+            "kind": "Assign",
+            "text": "=",
+            "start": 8111,
+            "end": 8112
+        },
+        {
+            "kind": "Identifier",
+            "text": "median",
+            "start": 8113,
+            "end": 8119
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 8119,
+            "end": 8120
+        },
+        {
+            "kind": "Identifier",
+            "text": "data",
+            "start": 8120,
+            "end": 8124
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 8124,
+            "end": 8125
+        },
+        {
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 8125,
+            "end": 8126
+        },
+        {
+            "kind": "Identifier",
+            "text": "std_val",
+            "start": 8127,
+            "end": 8134
+        },
+        {
+            "kind": "Assign",
+            "text": "=",
+            "start": 8135,
+            "end": 8136
+        },
+        {
+            "kind": "Identifier",
+            "text": "std",
+            "start": 8137,
+            "end": 8140
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 8140,
+            "end": 8141
+        },
+        {
+            "kind": "Identifier",
+            "text": "data",
+            "start": 8141,
+            "end": 8145
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 8145,
+            "end": 8146
+        },
+        {
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 8146,
+            "end": 8147
+        },
+        {
+            "kind": "Identifier",
+            "text": "var_val",
+            "start": 8148,
+            "end": 8155
+        },
+        {
+            "kind": "Assign",
+            "text": "=",
+            "start": 8156,
+            "end": 8157
+        },
+        {
+            "kind": "Identifier",
+            "text": "var",
+            "start": 8158,
+            "end": 8161
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 8161,
+            "end": 8162
+        },
+        {
+            "kind": "Identifier",
+            "text": "data",
+            "start": 8162,
+            "end": 8166
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 8166,
+            "end": 8167
+        },
+        {
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 8167,
+            "end": 8168
+        },
+        {
+            "kind": "Identifier",
+            "text": "min_val",
+            "start": 8169,
+            "end": 8176
+        },
+        {
+            "kind": "Assign",
+            "text": "=",
+            "start": 8177,
+            "end": 8178
+        },
+        {
+            "kind": "Identifier",
+            "text": "min",
+            "start": 8179,
+            "end": 8182
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 8182,
+            "end": 8183
+        },
+        {
+            "kind": "Identifier",
+            "text": "data",
+            "start": 8183,
+            "end": 8187
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 8187,
+            "end": 8188
+        },
+        {
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 8188,
+            "end": 8189
+        },
+        {
+            "kind": "Identifier",
+            "text": "max_val",
+            "start": 8190,
+            "end": 8197
+        },
+        {
+            "kind": "Assign",
+            "text": "=",
+            "start": 8198,
+            "end": 8199
+        },
+        {
+            "kind": "Identifier",
+            "text": "max",
+            "start": 8200,
+            "end": 8203
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 8203,
+            "end": 8204
+        },
+        {
+            "kind": "Identifier",
+            "text": "data",
+            "start": 8204,
+            "end": 8208
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 8208,
+            "end": 8209
+        },
+        {
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 8209,
+            "end": 8210
+        },
+        {
+            "kind": "Identifier",
+            "text": "data2",
+            "start": 8241,
+            "end": 8246
+        },
+        {
+            "kind": "Assign",
+            "text": "=",
+            "start": 8247,
+            "end": 8248
+        },
+        {
+            "kind": "Identifier",
+            "text": "randn",
+            "start": 8249,
+            "end": 8254
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 8254,
+            "end": 8255
+        },
+        {
+            "kind": "Number",
+            "text": "100",
+            "start": 8255,
+            "end": 8258
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 8258,
+            "end": 8259
+        },
+        {
+            "kind": "Number",
+            "text": "1",
+            "start": 8260,
+            "end": 8261
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 8261,
+            "end": 8262
+        },
+        {
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 8262,
+            "end": 8263
+        },
+        {
+            "kind": "Identifier",
+            "text": "correlation",
+            "start": 8264,
+            "end": 8275
+        },
+        {
+            "kind": "Assign",
+            "text": "=",
+            "start": 8276,
+            "end": 8277
+        },
+        {
+            "kind": "Identifier",
+            "text": "corrcoef",
+            "start": 8278,
+            "end": 8286
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 8286,
+            "end": 8287
+        },
+        {
+            "kind": "Identifier",
+            "text": "data",
+            "start": 8287,
+            "end": 8291
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 8291,
+            "end": 8292
+        },
+        {
+            "kind": "Identifier",
+            "text": "data2",
+            "start": 8293,
+            "end": 8298
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 8298,
+            "end": 8299
+        },
+        {
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 8299,
+            "end": 8300
+        },
+        {
+            "kind": "Identifier",
+            "text": "covariance",
+            "start": 8301,
+            "end": 8311
+        },
+        {
+            "kind": "Assign",
+            "text": "=",
+            "start": 8312,
+            "end": 8313
+        },
+        {
+            "kind": "Identifier",
+            "text": "cov",
+            "start": 8314,
+            "end": 8317
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 8317,
+            "end": 8318
+        },
+        {
+            "kind": "Identifier",
+            "text": "data",
+            "start": 8318,
+            "end": 8322
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 8322,
+            "end": 8323
+        },
+        {
+            "kind": "Identifier",
+            "text": "data2",
+            "start": 8324,
+            "end": 8329
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 8329,
+            "end": 8330
+        },
+        {
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 8330,
+            "end": 8331
+        },
+        {
+            "kind": "Identifier",
+            "text": "normal_samples",
+            "start": 8361,
+            "end": 8375
+        },
+        {
+            "kind": "Assign",
+            "text": "=",
+            "start": 8376,
+            "end": 8377
+        },
+        {
+            "kind": "Identifier",
+            "text": "normrnd",
+            "start": 8378,
+            "end": 8385
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 8385,
+            "end": 8386
+        },
+        {
+            "kind": "Number",
+            "text": "0",
+            "start": 8386,
+            "end": 8387
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 8387,
+            "end": 8388
+        },
+        {
+            "kind": "Number",
+            "text": "1",
+            "start": 8389,
+            "end": 8390
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 8390,
+            "end": 8391
+        },
+        {
+            "kind": "LeftBracket",
+            "text": "[",
+            "start": 8392,
+            "end": 8393
+        },
+        {
+            "kind": "Number",
+            "text": "100",
+            "start": 8393,
+            "end": 8396
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 8396,
+            "end": 8397
+        },
+        {
+            "kind": "Number",
+            "text": "1",
+            "start": 8398,
+            "end": 8399
+        },
+        {
+            "kind": "RightBracket",
+            "text": "]",
+            "start": 8399,
+            "end": 8400
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 8400,
+            "end": 8401
+        },
+        {
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 8401,
+            "end": 8402
+        },
+        {
+            "kind": "Identifier",
+            "text": "uniform_samples",
+            "start": 8403,
+            "end": 8418
+        },
+        {
+            "kind": "Assign",
+            "text": "=",
+            "start": 8419,
+            "end": 8420
+        },
+        {
+            "kind": "Identifier",
+            "text": "unifrnd",
+            "start": 8421,
+            "end": 8428
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 8428,
+            "end": 8429
+        },
+        {
+            "kind": "Number",
+            "text": "0",
+            "start": 8429,
+            "end": 8430
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 8430,
+            "end": 8431
+        },
+        {
+            "kind": "Number",
+            "text": "1",
+            "start": 8432,
+            "end": 8433
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 8433,
+            "end": 8434
+        },
+        {
+            "kind": "LeftBracket",
+            "text": "[",
+            "start": 8435,
+            "end": 8436
+        },
+        {
+            "kind": "Number",
+            "text": "100",
+            "start": 8436,
+            "end": 8439
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 8439,
+            "end": 8440
+        },
+        {
+            "kind": "Number",
+            "text": "1",
+            "start": 8441,
+            "end": 8442
+        },
+        {
+            "kind": "RightBracket",
+            "text": "]",
+            "start": 8442,
+            "end": 8443
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 8443,
+            "end": 8444
+        },
+        {
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 8444,
+            "end": 8445
+        },
+        {
+            "kind": "Identifier",
+            "text": "exponential_samples",
+            "start": 8446,
+            "end": 8465
+        },
+        {
+            "kind": "Assign",
+            "text": "=",
+            "start": 8466,
+            "end": 8467
+        },
+        {
+            "kind": "Identifier",
+            "text": "exprnd",
+            "start": 8468,
+            "end": 8474
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 8474,
+            "end": 8475
+        },
+        {
+            "kind": "Number",
+            "text": "1",
+            "start": 8475,
+            "end": 8476
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 8476,
+            "end": 8477
+        },
+        {
+            "kind": "LeftBracket",
+            "text": "[",
+            "start": 8478,
+            "end": 8479
+        },
+        {
+            "kind": "Number",
+            "text": "100",
+            "start": 8479,
+            "end": 8482
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 8482,
+            "end": 8483
+        },
+        {
+            "kind": "Number",
+            "text": "1",
+            "start": 8484,
+            "end": 8485
+        },
+        {
+            "kind": "RightBracket",
+            "text": "]",
+            "start": 8485,
+            "end": 8486
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 8486,
+            "end": 8487
+        },
+        {
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 8487,
+            "end": 8488
+        },
+        {
+            "kind": "Classdef",
+            "text": "classdef",
+            "start": 8578,
+            "end": 8586
+        },
+        {
+            "kind": "Identifier",
+            "text": "SimpleClass",
+            "start": 8587,
+            "end": 8598
+        },
+        {
+            "kind": "Less",
+            "text": "<",
+            "start": 8599,
+            "end": 8600
+        },
+        {
+            "kind": "Identifier",
+            "text": "handle",
+            "start": 8601,
+            "end": 8607
+        },
+        {
+            "kind": "Properties",
+            "text": "properties",
+            "start": 8612,
+            "end": 8622
+        },
+        {
+            "kind": "Identifier",
+            "text": "value",
+            "start": 8631,
+            "end": 8636
+        },
+        {
+            "kind": "Identifier",
+            "text": "name",
+            "start": 8645,
+            "end": 8649
+        },
+        {
+            "kind": "End",
+            "text": "end",
+            "start": 8654,
+            "end": 8657
+        },
+        {
+            "kind": "Properties",
+            "text": "properties",
+            "start": 8667,
+            "end": 8677
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 8678,
+            "end": 8679
+        },
+        {
+            "kind": "Identifier",
+            "text": "Access",
+            "start": 8679,
+            "end": 8685
+        },
+        {
+            "kind": "Assign",
+            "text": "=",
+            "start": 8686,
+            "end": 8687
+        },
+        {
+            "kind": "Identifier",
+            "text": "private",
+            "start": 8688,
+            "end": 8695
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 8695,
+            "end": 8696
+        },
+        {
+            "kind": "Identifier",
+            "text": "private_data",
+            "start": 8705,
+            "end": 8717
+        },
+        {
+            "kind": "End",
+            "text": "end",
+            "start": 8722,
+            "end": 8725
+        },
+        {
+            "kind": "Methods",
+            "text": "methods",
+            "start": 8735,
+            "end": 8742
+        },
+        {
+            "kind": "Function",
+            "text": "function",
+            "start": 8751,
+            "end": 8759
+        },
+        {
+            "kind": "Identifier",
+            "text": "obj",
+            "start": 8760,
+            "end": 8763
+        },
+        {
+            "kind": "Assign",
+            "text": "=",
+            "start": 8764,
+            "end": 8765
+        },
+        {
+            "kind": "Identifier",
+            "text": "SimpleClass",
+            "start": 8766,
+            "end": 8777
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 8777,
+            "end": 8778
+        },
+        {
+            "kind": "Identifier",
+            "text": "initial_value",
+            "start": 8778,
+            "end": 8791
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 8791,
+            "end": 8792
+        },
+        {
+            "kind": "Identifier",
+            "text": "initial_name",
+            "start": 8793,
+            "end": 8805
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 8805,
+            "end": 8806
+        },
+        {
+            "kind": "If",
+            "text": "if",
+            "start": 8819,
+            "end": 8821
+        },
+        {
+            "kind": "Identifier",
+            "text": "nargin",
+            "start": 8822,
+            "end": 8828
+        },
+        {
+            "kind": "Greater",
+            "text": ">",
+            "start": 8829,
+            "end": 8830
+        },
+        {
+            "kind": "Number",
+            "text": "0",
+            "start": 8831,
+            "end": 8832
+        },
+        {
+            "kind": "Identifier",
+            "text": "obj",
+            "start": 8849,
+            "end": 8852
+        },
+        {
+            "kind": "Dot",
+            "text": ".",
+            "start": 8852,
+            "end": 8853
+        },
+        {
+            "kind": "Identifier",
+            "text": "value",
+            "start": 8853,
+            "end": 8858
+        },
+        {
+            "kind": "Assign",
+            "text": "=",
+            "start": 8859,
+            "end": 8860
+        },
+        {
+            "kind": "Identifier",
+            "text": "initial_value",
+            "start": 8861,
+            "end": 8874
+        },
+        {
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 8874,
+            "end": 8875
+        },
+        {
+            "kind": "End",
+            "text": "end",
+            "start": 8888,
+            "end": 8891
+        },
+        {
+            "kind": "If",
+            "text": "if",
+            "start": 8904,
+            "end": 8906
+        },
+        {
+            "kind": "Identifier",
+            "text": "nargin",
+            "start": 8907,
+            "end": 8913
+        },
+        {
+            "kind": "Greater",
+            "text": ">",
+            "start": 8914,
+            "end": 8915
+        },
+        {
+            "kind": "Number",
+            "text": "1",
+            "start": 8916,
+            "end": 8917
+        },
+        {
+            "kind": "Identifier",
+            "text": "obj",
+            "start": 8934,
+            "end": 8937
+        },
+        {
+            "kind": "Dot",
+            "text": ".",
+            "start": 8937,
+            "end": 8938
+        },
+        {
+            "kind": "Identifier",
+            "text": "name",
+            "start": 8938,
+            "end": 8942
+        },
+        {
+            "kind": "Assign",
+            "text": "=",
+            "start": 8943,
+            "end": 8944
+        },
+        {
+            "kind": "Identifier",
+            "text": "initial_name",
+            "start": 8945,
+            "end": 8957
+        },
+        {
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 8957,
+            "end": 8958
+        },
+        {
+            "kind": "End",
+            "text": "end",
+            "start": 8971,
+            "end": 8974
+        },
+        {
+            "kind": "End",
+            "text": "end",
+            "start": 8983,
+            "end": 8986
+        },
+        {
+            "kind": "Function",
+            "text": "function",
+            "start": 9004,
+            "end": 9012
+        },
+        {
+            "kind": "Identifier",
+            "text": "result",
+            "start": 9013,
+            "end": 9019
+        },
+        {
+            "kind": "Assign",
+            "text": "=",
+            "start": 9020,
+            "end": 9021
+        },
+        {
+            "kind": "Identifier",
+            "text": "getValue",
+            "start": 9022,
+            "end": 9030
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 9030,
+            "end": 9031
+        },
+        {
+            "kind": "Identifier",
+            "text": "obj",
+            "start": 9031,
+            "end": 9034
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 9034,
+            "end": 9035
+        },
+        {
+            "kind": "Identifier",
+            "text": "result",
+            "start": 9048,
+            "end": 9054
+        },
+        {
+            "kind": "Assign",
+            "text": "=",
+            "start": 9055,
+            "end": 9056
+        },
+        {
+            "kind": "Identifier",
+            "text": "obj",
+            "start": 9057,
+            "end": 9060
+        },
+        {
+            "kind": "Dot",
+            "text": ".",
+            "start": 9060,
+            "end": 9061
+        },
+        {
+            "kind": "Identifier",
+            "text": "value",
+            "start": 9061,
+            "end": 9066
+        },
+        {
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 9066,
+            "end": 9067
+        },
+        {
+            "kind": "End",
+            "text": "end",
+            "start": 9076,
+            "end": 9079
+        },
+        {
+            "kind": "Function",
+            "text": "function",
+            "start": 9097,
+            "end": 9105
+        },
+        {
+            "kind": "Identifier",
+            "text": "setValue",
+            "start": 9106,
+            "end": 9114
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 9114,
+            "end": 9115
+        },
+        {
+            "kind": "Identifier",
+            "text": "obj",
+            "start": 9115,
+            "end": 9118
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 9118,
+            "end": 9119
+        },
+        {
+            "kind": "Identifier",
+            "text": "new_value",
+            "start": 9120,
+            "end": 9129
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 9129,
+            "end": 9130
+        },
+        {
+            "kind": "Identifier",
+            "text": "obj",
+            "start": 9143,
+            "end": 9146
+        },
+        {
+            "kind": "Dot",
+            "text": ".",
+            "start": 9146,
+            "end": 9147
+        },
+        {
+            "kind": "Identifier",
+            "text": "value",
+            "start": 9147,
+            "end": 9152
+        },
+        {
+            "kind": "Assign",
+            "text": "=",
+            "start": 9153,
+            "end": 9154
+        },
+        {
+            "kind": "Identifier",
+            "text": "new_value",
+            "start": 9155,
+            "end": 9164
+        },
+        {
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 9164,
+            "end": 9165
+        },
+        {
+            "kind": "End",
+            "text": "end",
+            "start": 9174,
+            "end": 9177
+        },
+        {
+            "kind": "Function",
+            "text": "function",
+            "start": 9195,
+            "end": 9203
+        },
+        {
+            "kind": "Identifier",
+            "text": "display_info",
+            "start": 9204,
+            "end": 9216
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 9216,
+            "end": 9217
+        },
+        {
+            "kind": "Identifier",
+            "text": "obj",
+            "start": 9217,
+            "end": 9220
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 9220,
+            "end": 9221
+        },
+        {
+            "kind": "Identifier",
+            "text": "fprintf",
+            "start": 9234,
+            "end": 9241
+        },
+        {
+            "kind": "LeftParen",
+            "text": "(",
+            "start": 9241,
+            "end": 9242
+        },
+        {
+            "kind": "Character",
+            "text": "'Name: %s, Value: %g\\n'",
+            "start": 9242,
+            "end": 9265
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 9265,
+            "end": 9266
+        },
+        {
+            "kind": "Identifier",
+            "text": "obj",
+            "start": 9267,
+            "end": 9270
+        },
+        {
+            "kind": "Dot",
+            "text": ".",
+            "start": 9270,
+            "end": 9271
+        },
+        {
+            "kind": "Identifier",
+            "text": "name",
+            "start": 9271,
+            "end": 9275
+        },
+        {
+            "kind": "Comma",
+            "text": ",",
+            "start": 9275,
+            "end": 9276
+        },
+        {
+            "kind": "Identifier",
+            "text": "obj",
+            "start": 9277,
+            "end": 9280
+        },
+        {
+            "kind": "Dot",
+            "text": ".",
+            "start": 9280,
+            "end": 9281
+        },
+        {
+            "kind": "Identifier",
+            "text": "value",
+            "start": 9281,
+            "end": 9286
+        },
+        {
+            "kind": "RightParen",
+            "text": ")",
+            "start": 9286,
+            "end": 9287
+        },
+        {
+            "kind": "Semicolon",
+            "text": ";",
+            "start": 9287,
+            "end": 9288
         },
         {
             "kind": "End",

@@ -1,7 +1,7 @@
 use crate::{
     MatlabLanguage,
     ast::{BinaryExpr, Expression, Identifier, UnaryExpr},
-    builder::{text, utils, MatlabBuilder},
+    builder::{MatlabBuilder, text, utils},
     lexer::token_type::MatlabTokenType,
     parser::element_type::MatlabElementType,
 };

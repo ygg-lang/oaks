@@ -67,11 +67,76 @@ impl Statement {
     pub fn span(&self) -> Span {
         match self {
             Self::Expr(e) => e.span(),
-            Self::If { span, .. }
-            | Self::While { span, .. }
-            | Self::For { span, .. }
-            | Self::Try { span, .. }
-            | Self::Error { span } => span.clone(),
+            Self::If { span, .. } | Self::While { span, .. } | Self::For { span, .. } | Self::Try { span, .. } | Self::Error { span } => span.clone(),
         }
     }
+
+    /// Expression statement.
+    pub fn as_expr(&self) -> Option<&Expression> {
+        match self {
+            Self::Expr(e) => Some(e),
+            _ => None,
+        }
+    }
+
+    /// `if` statement parts.
+    pub fn as_if(&self) -> Option<IfView<'_>> {
+        match self {
+            Self::If { condition, then_body, elseifs, else_body, .. } => Some(IfView { condition, then_body: then_body.as_slice(), elseifs: elseifs.as_slice(), else_body: else_body.as_slice() }),
+            _ => None,
+        }
+    }
+
+    /// `while` statement parts.
+    pub fn as_while(&self) -> Option<(&Expression, &[Statement])> {
+        match self {
+            Self::While { condition, body, .. } => Some((condition, body.as_slice())),
+            _ => None,
+        }
+    }
+
+    /// `for` statement parts.
+    pub fn as_for(&self) -> Option<(&Expression, &[Statement])> {
+        match self {
+            Self::For { header, body, .. } => Some((header, body.as_slice())),
+            _ => None,
+        }
+    }
+
+    /// `try` / `catch` statement parts.
+    pub fn as_try(&self) -> Option<TryView<'_>> {
+        match self {
+            Self::Try { body, catch_name, catch_body, .. } => Some(TryView { body: body.as_slice(), catch_name: catch_name.as_ref(), catch_body: catch_body.as_slice() }),
+            _ => None,
+        }
+    }
+
+    /// Recovery / error node.
+    pub fn is_error(&self) -> bool {
+        matches!(self, Self::Error { .. })
+    }
+}
+
+/// Typed view over an `if` statement.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+pub struct IfView<'a> {
+    /// Condition expression.
+    pub condition: &'a Expression,
+    /// Then body.
+    pub then_body: &'a [Statement],
+    /// `elseif` arms.
+    pub elseifs: &'a [(Expression, Vec<Statement>)],
+    /// Else body.
+    pub else_body: &'a [Statement],
+}
+
+/// Typed view over a `try` statement.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+pub struct TryView<'a> {
+    /// Protected body.
+    pub body: &'a [Statement],
+    /// Optional catch identifier.
+    pub catch_name: Option<&'a Expression>,
+    /// Catch body.
+    pub catch_body: &'a [Statement],
 }
