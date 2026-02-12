@@ -84,13 +84,16 @@ impl<'config> MsilParser<'config> {
         let cp = state.checkpoint();
         state.bump(); // .module
         self.skip_trivia(state);
-
-        if state.at(MsilTokenType::IdentifierToken) {
-            let id_cp = state.checkpoint();
-            state.bump();
-            state.finish_at(id_cp, crate::parser::element_type::MsilElementType::Identifier);
+        while state.not_at_end() && !state.at(MsilTokenType::Semicolon) && !state.at(MsilTokenType::Eof) {
+            if state.at(MsilTokenType::IdentifierToken) {
+                let id_cp = state.checkpoint();
+                state.bump();
+                state.finish_at(id_cp, crate::parser::element_type::MsilElementType::Identifier);
+                self.skip_trivia(state);
+            } else {
+                state.bump();
+            }
         }
-
         state.finish_at(cp, crate::parser::element_type::MsilElementType::Module);
     }
 
