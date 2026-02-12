@@ -17,8 +17,8 @@ use std::fmt;
 pub enum RedTree<'a, L: Language> {
     /// A red node with child elements.
     Node(RedNode<'a, L>),
-    /// A red leaf (token).
-    Leaf(RedLeaf<L>),
+    /// A red token.
+    Token(RedLeaf<L>),
 }
 
 // Manually implement Clone/Copy to avoid L: Copy bound
@@ -34,7 +34,7 @@ impl<'a, L: Language> fmt::Debug for RedTree<'a, L> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
             Self::Node(node) => fmt::Debug::fmt(node, f),
-            Self::Leaf(leaf) => fmt::Debug::fmt(leaf, f),
+            Self::Token(leaf) => fmt::Debug::fmt(leaf, f),
         }
     }
 }
@@ -43,7 +43,7 @@ impl<'a, L: Language> PartialEq for RedTree<'a, L> {
     fn eq(&self, other: &Self) -> bool {
         match (self, other) {
             (Self::Node(l0), Self::Node(r0)) => l0 == r0,
-            (Self::Leaf(l0), Self::Leaf(r0)) => l0 == r0,
+            (Self::Token(l0), Self::Token(r0)) => l0 == r0,
             _ => false,
         }
     }
@@ -59,7 +59,7 @@ impl<'a, L: Language> RedTree<'a, L> {
     pub fn span(&self) -> Range<usize> {
         match self {
             RedTree::Node(n) => n.span(),
-            RedTree::Leaf(t) => t.span,
+            RedTree::Token(t) => t.span,
         }
     }
 
@@ -74,7 +74,7 @@ impl<'a, L: Language> RedTree<'a, L> {
     {
         match self {
             RedTree::Node(n) => T::from(n.green.kind),
-            RedTree::Leaf(l) => T::from(l.kind),
+            RedTree::Token(l) => T::from(l.kind),
         }
     }
 
@@ -89,11 +89,11 @@ impl<'a, L: Language> RedTree<'a, L> {
 
     /// Returns an iterator over the child elements if this is a node.
     ///
-    /// Returns an empty iterator if this is a leaf.
+    /// Returns an empty iterator if this is a token.
     pub fn children(&self) -> RedChildren<'a, L> {
         match self {
             RedTree::Node(n) => n.children(),
-            RedTree::Leaf(_) => RedChildren::empty(),
+            RedTree::Token(_) => RedChildren::empty(),
         }
     }
 
@@ -101,16 +101,22 @@ impl<'a, L: Language> RedTree<'a, L> {
     pub fn as_node(&self) -> Option<RedNode<'a, L>> {
         match self {
             RedTree::Node(n) => Some(*n),
-            RedTree::Leaf(_) => None,
+            RedTree::Token(_) => None,
         }
     }
 
-    /// Returns this element as a leaf if it is one.
-    pub fn as_leaf(&self) -> Option<RedLeaf<L>> {
+    /// Returns this element as a token if it is one.
+    pub fn as_token(&self) -> Option<RedLeaf<L>> {
         match self {
             RedTree::Node(_) => None,
-            RedTree::Leaf(l) => Some(*l),
+            RedTree::Token(l) => Some(*l),
         }
+    }
+
+    /// Alias for `as_token`.
+    #[deprecated(note = "Use `as_token` instead")]
+    pub fn as_leaf(&self) -> Option<RedLeaf<L>> {
+        self.as_token()
     }
 }
 
@@ -203,6 +209,11 @@ impl<'a, L: Language> RedChildren<'a, L> {
 }
 
 impl<'a, L: Language> RedNode<'a, L> {
+    /// Returns the text content of this red node from the source.
+    pub fn text<'s, S: crate::source::Source + ?Sized>(&self, source: &'s S) -> std::borrow::Cow<'s, str> {
+        source.get_text_in(self.span())
+    }
+
     /// Creates a new red node from a green node and absolute offset.
     #[inline]
     pub fn new(green: &'a GreenNode<'a, L>, offset: usize) -> Self {
@@ -256,7 +267,7 @@ impl<'a, L: Language> RedNode<'a, L> {
 
         match green_child {
             GreenTree::Node(n) => RedTree::Node(RedNode::new(n, offset)),
-            GreenTree::Leaf(t) => RedTree::Leaf(RedLeaf { kind: t.kind, span: Range { start: offset, end: offset + t.length as usize } }),
+            GreenTree::Leaf(t) => RedTree::Token(RedLeaf { kind: t.kind, span: Range { start: offset, end: offset + t.length as usize } }),
         }
     }
 
@@ -310,7 +321,7 @@ impl<'a, L: Language> RedNode<'a, L> {
         loop {
             match current.child_at_offset(offset)? {
                 RedTree::Node(n) => current = n,
-                RedTree::Leaf(l) => return Some(l),
+                RedTree::Token(l) => return Some(l),
             }
         }
     }
@@ -330,7 +341,7 @@ impl<'a, L: Language> Iterator for RedChildren<'a, L> {
         let offset = self.offset;
         let elem = match ch {
             GreenTree::Node(n) => RedTree::Node(RedNode::new(n, offset)),
-            GreenTree::Leaf(t) => RedTree::Leaf(RedLeaf { kind: t.kind, span: Range { start: offset, end: offset + t.length as usize } }),
+            GreenTree::Leaf(t) => RedTree::Token(RedLeaf { kind: t.kind, span: Range { start: offset, end: offset + t.length as usize } }),
         };
 
         self.offset += ch.len() as usize;
