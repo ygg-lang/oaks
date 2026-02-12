@@ -1,3 +1,4 @@
+#![warn(missing_docs)]
 //! Raku support for the Oak language framework.
 
 #![feature(new_range_api)]
