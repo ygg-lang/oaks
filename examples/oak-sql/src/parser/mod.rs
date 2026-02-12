@@ -261,8 +261,39 @@ impl<'config> SqlParser<'config> {
     fn parse_create<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> Result<(), OakError> {
         use crate::lexer::SqlTokenType::*;
         let cp = state.checkpoint();
-        state.bump(); // create
-        state.advance_until(Semicolon);
+        state.expect(Create).ok();
+        
+        if state.eat(Table) {
+            state.expect(Identifier_).ok(); // TableName
+            if state.eat(LeftParen) {
+                while state.not_at_end() && state.peek_kind() != Some(RightParen) {
+                    state.expect(Identifier_).ok(); // Column Name
+                    // Skip type and constraints for now
+                    while state.not_at_end() && state.peek_kind() != Some(Comma) && state.peek_kind() != Some(RightParen) {
+                        state.bump();
+                    }
+                    state.eat(Comma);
+                }
+                state.expect(RightParen).ok();
+            }
+        } else if state.eat(View) {
+            state.expect(Identifier_).ok();
+            state.expect(As).ok();
+            self.parse_select(state)?;
+        } else if state.eat(Index) {
+            state.eat(Unique);
+            state.expect(Identifier_).ok(); // Index Name
+            state.expect(On).ok();
+            state.expect(Identifier_).ok(); // Table Name
+            if state.eat(LeftParen) {
+                while state.not_at_end() && state.peek_kind() != Some(RightParen) {
+                    state.expect(Identifier_).ok();
+                    state.eat(Comma);
+                }
+                state.expect(RightParen).ok();
+            }
+        }
+
         state.eat(Semicolon);
         state.finish_at(cp, SqlElementType::CreateStatement);
         Ok(())

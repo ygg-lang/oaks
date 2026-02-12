@@ -339,7 +339,7 @@ impl<'config> SqlLexer<'config> {
             "FLOAT" => SqlTokenType::Float,
             "DOUBLE" => SqlTokenType::Double,
             "BOOLEAN" => SqlTokenType::Boolean,
-            _ => SqlTokenType::Identifier,
+            _ => SqlTokenType::Identifier_,
         };
 
         state.add_token(kind, start, end);
