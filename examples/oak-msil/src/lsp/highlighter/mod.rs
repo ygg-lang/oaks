@@ -1,43 +1,43 @@
 #![doc = include_str!("readme.md")]
-//! MSIL 语法高亮器
+//! MSIL syntax highlighter.
 //!
-//! 这个模块提供了 MSIL 源代码的语法高亮功能，支持关键字、指令、指令码、注释等的高亮显示。
+//! This module provides syntax highlighting for MSIL source code, supporting keywords, directives, opcodes, comments, etc.
 
-/// 高亮类型的本地定义
+/// Local definition of highlight kinds.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum HighlightKind {
-    /// 关键字 (如 public, private, static)
+    /// Keywords (e.g., public, private, static).
     Keyword,
-    /// 指令 (以 . 开头的，如 .assembly, .class, .method)
+    /// Directives (starting with ., e.g., .assembly, .class, .method).
     Directive,
-    /// 指令码 (如 ldstr, call, ret)
+    /// Opcodes (e.g., ldstr, call, ret).
     Instruction,
-    /// 字符串
+    /// Strings.
     String,
-    /// 数字
+    /// Numbers.
     Number,
-    /// 注释
+    /// Comments.
     Comment,
-    /// 标识符
+    /// Identifiers.
     Identifier,
 }
 
-/// 高亮器 trait
+/// Highlighter trait.
 pub trait Highlighter {
-    /// 对给定的文本进行高亮处理
+    /// Highlights the given text.
     fn highlight(&self, text: &str) -> Vec<(usize, usize, HighlightKind)>;
 }
 
-/// MSIL 语法高亮器
+/// MSIL syntax highlighter.
 pub struct MsilHighlighter;
 
 impl MsilHighlighter {
-    /// 创建一个新的 MSIL 高亮器实例
+    /// Creates a new MSIL highlighter instance.
     pub fn new() -> Self {
         Self
     }
 
-    /// 高亮 MSIL 关键字
+    /// Highlights MSIL keywords.
     fn highlight_keywords(&self, text: &str) -> Vec<(usize, usize, HighlightKind)> {
         let mut highlights = Vec::new();
         let keywords = ["public", "private", "static", "hidebysig", "cil", "managed", "instance", "void", "extends", "implements"];
@@ -60,7 +60,7 @@ impl MsilHighlighter {
         highlights
     }
 
-    /// 高亮指令 (以 . 开头)
+    /// Highlights directives (starting with .).
     fn highlight_directives(&self, text: &str) -> Vec<(usize, usize, HighlightKind)> {
         let mut highlights = Vec::new();
         let mut chars = text.char_indices().peekable();
@@ -98,7 +98,7 @@ impl Highlighter for MsilHighlighter {
         highlights.extend(self.highlight_keywords(text));
         highlights.extend(self.highlight_directives(text));
 
-        // 按位置排序
+        // Sort by position
         highlights.sort_by_key(|&(start, _, _)| start);
         highlights
     }

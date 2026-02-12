@@ -2,9 +2,11 @@
 use crate::language::PascalLanguage;
 use oak_core::{Builder, BuilderCache, TextEdit, source::Source};
 
+/// A builder for Pascal source files.
 pub struct PascalBuilder;
 
 impl PascalBuilder {
+    /// Creates a new `PascalBuilder` with the given language configuration.
     pub fn new(_language: &PascalLanguage) -> Self {
         Self
     }

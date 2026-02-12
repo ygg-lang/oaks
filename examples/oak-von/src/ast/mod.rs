@@ -1,13 +1,12 @@
 #![doc = include_str!("readme.md")]
 use core::range::Range;
 use oak_core::source::{SourceBuffer, ToSource};
-#[cfg(feature = "serde")]
-use serde::{Deserialize, Serialize};
 
-/// VON AST 根节点
+/// Root node of the VON AST.
 #[derive(Clone, Debug, PartialEq)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct VonRoot {
+    /// The root value.
     pub value: VonValue,
 }
 
@@ -17,31 +16,47 @@ impl ToSource for VonRoot {
     }
 }
 
+/// A value in VON.
 #[derive(Clone, Debug, PartialEq)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub enum VonValue {
+    /// An object value.
     Object(VonObject),
+    /// An array value.
     Array(VonArray),
+    /// A tuple value.
     Tuple(VonTuple),
+    /// A string value.
     String(VonString),
+    /// A number value.
     Number(VonNumber),
+    /// A boolean value.
     Boolean(VonBoolean),
+    /// A null value.
     Null(VonNull),
+    /// An undefined value.
     Undefined(VonUndefined),
+    /// An infinity value.
     Inf(VonInf),
+    /// A NaN value.
     Nan(VonNan),
+    /// An enum value.
     Enum(VonEnum),
 }
 
+/// A tuple value in VON.
 #[derive(Clone, Debug, PartialEq)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct VonTuple {
+    /// The elements of the tuple.
     pub elements: Vec<VonValue>,
+    /// The source span of the tuple.
     #[cfg_attr(feature = "serde", serde(with = "oak_core::serde_range"))]
     pub span: Range<usize>,
 }
 
 impl VonValue {
+    /// Converts the value to a string representation.
     pub fn to_string(&self) -> String {
         match self {
             VonValue::Boolean(b) => b.value.to_string(),
@@ -106,11 +121,15 @@ impl ToSource for VonTuple {
     }
 }
 
+/// An enum value in VON.
 #[derive(Clone, Debug, PartialEq)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct VonEnum {
+    /// The variant name.
     pub variant: String,
+    /// The optional payload.
     pub payload: Option<Box<VonValue>>,
+    /// The source span of the enum value.
     #[cfg_attr(feature = "serde", serde(with = "oak_core::serde_range"))]
     pub span: Range<usize>,
 }
@@ -125,10 +144,13 @@ impl ToSource for VonEnum {
     }
 }
 
+/// An object value in VON.
 #[derive(Clone, Debug, PartialEq)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct VonObject {
+    /// The fields of the object.
     pub fields: Vec<VonField>,
+    /// The source span of the object.
     #[cfg_attr(feature = "serde", serde(with = "oak_core::serde_range"))]
     pub span: Range<usize>,
 }
@@ -146,11 +168,15 @@ impl ToSource for VonObject {
     }
 }
 
+/// A field in a VON object.
 #[derive(Clone, Debug, PartialEq)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct VonField {
+    /// The name of the field.
     pub name: String,
+    /// The value of the field.
     pub value: VonValue,
+    /// The source span of the field.
     #[cfg_attr(feature = "serde", serde(with = "oak_core::serde_range"))]
     pub span: Range<usize>,
 }
@@ -163,10 +189,13 @@ impl ToSource for VonField {
     }
 }
 
+/// An array value in VON.
 #[derive(Clone, Debug, PartialEq)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct VonArray {
+    /// The elements of the array.
     pub elements: Vec<VonValue>,
+    /// The source span of the array.
     #[cfg_attr(feature = "serde", serde(with = "oak_core::serde_range"))]
     pub span: Range<usize>,
 }
@@ -184,10 +213,13 @@ impl ToSource for VonArray {
     }
 }
 
+/// A string value in VON.
 #[derive(Clone, Debug, PartialEq)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct VonString {
+    /// The string content.
     pub value: String,
+    /// The source span of the string.
     #[cfg_attr(feature = "serde", serde(with = "oak_core::serde_range"))]
     pub span: Range<usize>,
 }
@@ -200,10 +232,13 @@ impl ToSource for VonString {
     }
 }
 
+/// A number value in VON.
 #[derive(Clone, Debug, PartialEq)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct VonNumber {
+    /// The numeric value.
     pub value: f64,
+    /// The source span of the number.
     #[cfg_attr(feature = "serde", serde(with = "oak_core::serde_range"))]
     pub span: Range<usize>,
 }
@@ -214,10 +249,13 @@ impl ToSource for VonNumber {
     }
 }
 
+/// A boolean value in VON.
 #[derive(Clone, Debug, PartialEq)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct VonBoolean {
+    /// The boolean value.
     pub value: bool,
+    /// The source span of the boolean.
     #[cfg_attr(feature = "serde", serde(with = "oak_core::serde_range"))]
     pub span: Range<usize>,
 }
@@ -228,9 +266,11 @@ impl ToSource for VonBoolean {
     }
 }
 
+/// A null value in VON.
 #[derive(Clone, Debug, PartialEq)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct VonNull {
+    /// The source span of the null literal.
     #[cfg_attr(feature = "serde", serde(with = "oak_core::serde_range"))]
     pub span: Range<usize>,
 }
@@ -241,9 +281,11 @@ impl ToSource for VonNull {
     }
 }
 
+/// An undefined value in VON.
 #[derive(Clone, Debug, PartialEq)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct VonUndefined {
+    /// The source span of the undefined literal.
     #[cfg_attr(feature = "serde", serde(with = "oak_core::serde_range"))]
     pub span: Range<usize>,
 }
@@ -254,9 +296,11 @@ impl ToSource for VonUndefined {
     }
 }
 
+/// An infinity value in VON.
 #[derive(Clone, Debug, PartialEq)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct VonInf {
+    /// The source span of the infinity literal.
     #[cfg_attr(feature = "serde", serde(with = "oak_core::serde_range"))]
     pub span: Range<usize>,
 }
@@ -267,9 +311,11 @@ impl ToSource for VonInf {
     }
 }
 
+/// A NaN (Not a Number) value in VON.
 #[derive(Clone, Debug, PartialEq)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct VonNan {
+    /// The source span of the NaN literal.
     #[cfg_attr(feature = "serde", serde(with = "oak_core::serde_range"))]
     pub span: Range<usize>,
 }

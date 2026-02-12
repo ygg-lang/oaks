@@ -1,139 +1,265 @@
 use oak_core::{ElementType, UniversalElementRole};
-#[cfg(feature = "serde")]
-use serde::{Deserialize, Serialize};
 
+/// Element types for the Kotlin parser.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub enum KotlinElementType {
     // Structural nodes
+    /// A source file node.
     SourceFile,
+    /// A class declaration.
     ClassDeclaration,
+    /// A function declaration.
     FunctionDeclaration,
+    /// A variable declaration.
     VariableDeclaration,
+    /// An `if` statement.
     IfStatement,
+    /// A `while` statement.
     WhileStatement,
+    /// A `return` statement.
     ReturnStatement,
+    /// A block of statements.
     Block,
+    /// A parameter in a function or constructor.
     Parameter,
+    /// An identifier.
     Identifier,
+    /// An integer literal.
     IntLiteral,
+    /// A prefix expression (e.g., `-x`, `++x`).
     PrefixExpression,
+    /// A member access expression (e.g., `obj.prop`).
     MemberAccessExpression,
+    /// A function call expression.
     CallExpression,
+    /// An assignment expression.
     AssignmentExpression,
+    /// A binary expression (e.g., `x + y`).
     BinaryExpression,
+    /// An error node in the parse tree.
     Error,
 
     // Mirrored token kinds (for leaf elements and completeness)
+    /// The root of the parse tree.
     Root,
+    /// End of stream.
     EndOfStream,
+    /// A unary expression.
     UnaryExpression,
+    /// A literal expression.
     LiteralExpression,
+    /// An identifier expression.
     IdentifierExpression,
+    /// A type reference.
     TypeReference,
+    /// The `class` keyword.
     Class,
+    /// The `fun` keyword.
     Fun,
+    /// The `val` keyword.
     Val,
+    /// The `var` keyword.
     Var,
+    /// The `if` keyword.
     If,
+    /// The `else` keyword.
     Else,
+    /// The `when` keyword.
     When,
+    /// The `for` keyword.
     For,
+    /// The `while` keyword.
     While,
+    /// The `return` keyword.
     Return,
+    /// The `break` keyword.
     Break,
+    /// The `continue` keyword.
     Continue,
+    /// The `try` keyword.
     Try,
+    /// The `catch` keyword.
     Catch,
+    /// The `finally` keyword.
     Finally,
+    /// The `throw` keyword.
     Throw,
+    /// The `import` keyword.
     Import,
+    /// The `package` keyword.
     Package,
+    /// The `public` visibility modifier.
     Public,
+    /// The `private` visibility modifier.
     Private,
+    /// The `protected` visibility modifier.
     Protected,
+    /// The `internal` visibility modifier.
     Internal,
+    /// The `abstract` modifier.
     Abstract,
+    /// The `final` modifier.
     Final,
+    /// The `open` modifier.
     Open,
+    /// The `override` modifier.
     Override,
+    /// The `companion` keyword.
     Companion,
+    /// The `object` keyword.
     Object,
+    /// The `interface` keyword.
     Interface,
+    /// The `enum` keyword.
     Enum,
+    /// The `data` modifier.
     Data,
+    /// The `sealed` modifier.
     Sealed,
+    /// The `inline` modifier.
     Inline,
+    /// The `suspend` modifier.
     Suspend,
+    /// The `operator` modifier.
     Operator,
+    /// The `infix` modifier.
     Infix,
+    /// The `tailrec` modifier.
     Tailrec,
+    /// The `external` modifier.
     External,
+    /// The `annotation` keyword.
     Annotation,
+    /// The `crossinline` modifier.
     Crossinline,
+    /// The `noinline` modifier.
     Noinline,
+    /// The `reified` modifier.
     Reified,
+    /// The `vararg` modifier.
     Vararg,
+    /// The `out` variance modifier.
     Out,
+    /// The `in` variance modifier.
     In,
+    /// The `is` keyword.
     Is,
+    /// The `as` keyword.
     As,
+    /// The `this` keyword.
     This,
+    /// The `super` keyword.
     Super,
+    /// The `null` literal.
     Null,
+    /// The `true` literal.
     True,
+    /// The `false` literal.
     False,
+    /// A keyword (generic).
     Keyword,
+    /// A string literal.
     StringLiteral,
+    /// A character literal.
     CharLiteral,
+    /// A numeric literal (generic).
     NumberLiteral,
+    /// A floating-point literal.
     FloatLiteral,
+    /// A boolean literal.
     BooleanLiteral,
+    /// The `+` operator.
     Plus,
+    /// The `-` operator.
     Minus,
+    /// The `*` operator.
     Star,
+    /// The `/` operator.
     Slash,
+    /// The `%` operator.
     Percent,
+    /// The `==` operator.
     Equals,
+    /// The `<` operator.
     Less,
+    /// The `>` operator.
     Greater,
+    /// The `&` operator.
     Ampersand,
+    /// The `|` operator.
     Pipe,
+    /// The `^` operator.
     Caret,
+    /// The `~` operator.
     Tilde,
+    /// The `!` operator.
     Exclamation,
+    /// The `=` operator.
     Assign,
+    /// The `+=` operator.
     PlusAssign,
+    /// The `-=` operator.
     MinusAssign,
+    /// The `*=` operator.
     StarAssign,
+    /// The `/=` operator.
     SlashAssign,
+    /// The `%=` operator.
     PercentAssign,
+    /// The `==` operator.
     EqEq,
+    /// The `!=` operator.
     NotEq,
+    /// The `<` operator.
     Lt,
+    /// The `>` operator.
     Gt,
+    /// The `<=` operator.
     LtEq,
+    /// The `>=` operator.
     GtEq,
+    /// The `&&` operator.
     AndAnd,
+    /// The `||` operator.
     OrOr,
+    /// The `.` operator.
     Dot,
+    /// The `,` operator.
     Comma,
+    /// The `:` operator.
     Colon,
+    /// The `;` operator.
     Semi,
+    /// The `->` operator.
     Arrow,
+    /// The `::` operator.
     DoubleColon,
+    /// The `..` operator.
     Range,
+    /// The `?` operator.
     Question,
+    /// The `!!` operator.
     ExclamationExclamation,
+    /// The `@` operator.
     At,
+    /// Opening parenthesis (`(`).
     LParen,
+    /// Closing parenthesis (`)`).
     RParen,
+    /// Opening bracket (`[`).
     LBracket,
+    /// Closing bracket (`]`).
     RBracket,
+    /// Opening brace (`{`).
     LBrace,
+    /// Closing brace (`}`).
     RBrace,
+    /// A comment.
     Comment,
+    /// Whitespace characters.
     Whitespace,
+    /// A newline character.
     Newline,
 }
 

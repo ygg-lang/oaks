@@ -1,66 +1,107 @@
-use oak_core::{ElementType, Parser, UniversalElementRole};
-#[cfg(feature = "serde")]
-use serde::{Deserialize, Serialize};
+use oak_core::{ElementType, UniversalElementRole};
 
+/// Element types for the IDL parser.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 #[repr(u8)]
 pub enum IdlElementType {
-    // Basic types
+    /// The `void` type.
     Void,
+    /// The `boolean` type.
     Boolean,
+    /// The `byte` type.
     Byte,
+    /// The `octet` type.
     Octet,
+    /// The `short` type.
     Short,
+    /// The `unsigned short` type.
     UnsignedShort,
+    /// The `long` type.
     Long,
+    /// The `unsigned long` type.
     UnsignedLong,
+    /// The `long long` type.
     LongLong,
+    /// The `unsigned long long` type.
     UnsignedLongLong,
+    /// The `float` type.
     Float,
+    /// The `double` type.
     Double,
+    /// The `long double` type.
     LongDouble,
+    /// The `char` type.
     Char,
+    /// The `wchar` type.
     WChar,
+    /// The `string` type.
     String,
+    /// The `wstring` type.
     WString,
+    /// The `any` type.
     Any,
+    /// The `Object` type.
     Object,
+    /// The `ValueBase` type.
     ValueBase,
 
-    // Composite types
+    /// A struct type.
     Struct,
+    /// A union type.
     Union,
+    /// An enum type.
     Enum,
+    /// An interface type.
     Interface,
+    /// A module type.
     Module,
+    /// An exception type.
     Exception,
+    /// A typedef.
     Typedef,
+    /// A sequence type.
     Sequence,
+    /// An array type.
     Array,
+    /// A fixed-point type.
     Fixed,
 
-    // Members
+    /// An attribute member.
     Attribute,
+    /// An operation member.
     Operation,
+    /// A constant member.
     Const,
+    /// An exception member.
     ExceptionMember,
 
-    // Declarations
+    /// A module declaration.
     ModuleDeclaration,
+    /// An interface declaration.
     InterfaceDeclaration,
+    /// A struct declaration.
     StructDeclaration,
+    /// A union declaration.
     UnionDeclaration,
+    /// An enum declaration.
     EnumDeclaration,
+    /// A typedef declaration.
     TypedefDeclaration,
+    /// A constant declaration.
     ConstDeclaration,
+    /// An exception declaration.
     ExceptionDeclaration,
 
-    // Misc
+    /// The entire source file.
     SourceFile,
+    /// An include directive.
     Include,
+    /// A pragma directive.
     Pragma,
+    /// An error element.
     Error,
+    /// End of file.
     Eof,
 }
 

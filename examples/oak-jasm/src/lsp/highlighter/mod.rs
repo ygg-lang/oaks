@@ -1,3 +1,5 @@
+//! Highlighter implementation for the JASM language.
+
 #![doc = include_str!("readme.md")]
 use oak_core::{Language, errors::ParseResult};
 use oak_highlight::{
@@ -5,12 +7,13 @@ use oak_highlight::{
     themes::Theme,
 };
 
-/// JASM 高亮器
+/// JASM syntax highlighter.
 pub struct JasmHighlighter {
     use_parser: bool,
 }
 
 impl JasmHighlighter {
+    /// Creates a new instance of `JasmHighlighter`.
     pub fn new(use_parser: bool) -> Self {
         Self { use_parser }
     }

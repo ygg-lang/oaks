@@ -4,9 +4,9 @@ use crate::ast::{ActionScriptItem, ActionScriptRoot};
 
 /// ActionScript Code Formatter
 pub struct ActionScriptFormatter {
-    /// 缩进级别
+    /// Indentation level
     _indent_level: usize,
-    /// 缩进字符串
+    /// Indentation string
     _indent_str: String,
 }
 

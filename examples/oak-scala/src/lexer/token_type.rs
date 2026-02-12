@@ -1,11 +1,9 @@
 use oak_core::{Token, TokenType, UniversalTokenRole};
-#[cfg(feature = "serde")]
-use serde::{Deserialize, Serialize};
 
 pub type ScalaToken = Token<ScalaTokenType>;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub enum ScalaTokenType {
     // Node kinds
     SourceFile,
@@ -118,7 +116,7 @@ pub enum ScalaTokenType {
     At,           // @
     Hash,         // #
 
-    // 分隔符
+    // Separators
     LeftParen,    // (
     RightParen,   // )
     LeftBracket,  // [

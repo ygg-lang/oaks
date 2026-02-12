@@ -10,14 +10,14 @@ fn ready() {
 
 #[test]
 fn test_purescript_lexer_basic() {
-    // 简单测试：创建词法分析器并验证它可以正常工作
+    // Simple test: create lexer and verify it works.
     let language = PurescriptLanguage::default();
     let _lexer = PurescriptLexer::new(&language);
 
-    // 测试一个简单的 PureScript 代码片段
+    // Test a simple PureScript code snippet.
     let test_code = "module Main where\n\nmain :: IO ()\nmain = log \"Hello, World!\"";
 
-    // 这里只是验证词法分析器可以创建，不进行复杂的测试
+    // Just verify lexer creation, no complex tests.
     println!("PureScript lexer created successfully");
     println!("Test code: {}", test_code)
 }

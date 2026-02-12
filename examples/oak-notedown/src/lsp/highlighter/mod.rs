@@ -1,25 +1,36 @@
 #![doc = include_str!("readme.md")]
 //! Notedown syntax highlighter
 
+/// Kind of highlight
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum HighlightKind {
+    /// Keywords
     Keyword,
+    /// String literals
     String,
+    /// Number literals
     Number,
+    /// Comments
     Comment,
+    /// Identifiers
     Identifier,
+    /// Headings
     Heading,
+    /// Code blocks
     CodeBlock,
 }
 
-/// 高亮器 trait
+/// Highlighter trait for processing text highlights
 pub trait Highlighter {
-    /// 对给定的文本进行高亮处理
+    /// Highlight the given text and return a vector of spans with highlight kinds
     fn highlight(&self, text: &str) -> Vec<(usize, usize, HighlightKind)>;
+    /// Highlight the given text into an existing vector
     fn highlight_into(&self, text: &str, output: &mut Vec<(usize, usize, HighlightKind)>);
 }
 
+/// Notedown specific highlighter
 pub struct NoteHighlighter {
+    /// Whether to use the parser for highlighting
     pub use_parser: bool,
 }
 
@@ -30,10 +41,12 @@ impl Default for NoteHighlighter {
 }
 
 impl NoteHighlighter {
+    /// Create a new highlighter with default settings
     pub fn new() -> Self {
         Self::default()
     }
 
+    /// Create a new highlighter that uses the parser
     pub fn with_parser() -> Self {
         Self { use_parser: true }
     }

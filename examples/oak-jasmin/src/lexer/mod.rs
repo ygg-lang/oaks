@@ -1,23 +1,25 @@
 #![doc = include_str!("readme.md")]
+/// Jasmin token types.
 pub mod token_type;
 
 use crate::{language::JasminLanguage, lexer::token_type::JasminTokenType};
 use oak_core::{Lexer, LexerCache, LexerState, OakError, TextEdit, lexer::LexOutput, source::Source};
 
-type State<'a, S> = LexerState<'a, S, JasminLanguage>;
+pub(crate) type State<'a, S> = LexerState<'a, S, JasminLanguage>;
 
-/// Jasmin 词法分析器
+/// Jasmin lexer.
 #[derive(Clone)]
 pub struct JasminLexer<'config> {
     _config: &'config JasminLanguage,
 }
 
 impl<'config> JasminLexer<'config> {
+    /// Creates a new `JasminLexer` with the given configuration.
     pub fn new(config: &'config JasminLanguage) -> Self {
         Self { _config: config }
     }
 
-    /// 判断是关键字还是标识符
+    /// Determines whether the given text is a keyword or an identifier.
     fn keyword_or_identifier(&self, text: &str) -> JasminTokenType {
         match text {
             ".class" => JasminTokenType::ClassKw,
@@ -75,29 +77,29 @@ impl<'config> JasminLexer<'config> {
             "new" => JasminTokenType::New,
 
             _ => {
-                // 检查是否是类型描述符
+                // Check if it's a type descriptor
                 if self.is_type_descriptor(text) { JasminTokenType::TypeDescriptor } else { JasminTokenType::IdentifierToken }
             }
         }
     }
 
-    /// 检查是否是类型描述符
+    /// Checks if the given text is a type descriptor.
     fn is_type_descriptor(&self, text: &str) -> bool {
         if text.is_empty() {
             return false;
         }
 
-        // 基本类型
+        // Primitive types
         if matches!(text, "B" | "C" | "D" | "F" | "I" | "J" | "S" | "Z" | "V") {
             return true;
         }
 
-        // 数组类型
+        // Array types
         if text.starts_with('[') {
             return true;
         }
 
-        // 对象类型
+        // Object types
         if text.starts_with('L') && text.ends_with(';') {
             return true;
         }
@@ -105,7 +107,7 @@ impl<'config> JasminLexer<'config> {
         false
     }
 
-    /// 跳过空白字符
+    /// Skips whitespace characters.
     fn skip_whitespace<S: Source + ?Sized>(&self, state: &mut State<'_, S>) -> bool {
         let start_pos = state.get_position();
         let mut consumed = false;
@@ -129,12 +131,12 @@ impl<'config> JasminLexer<'config> {
         }
     }
 
-    /// 跳过注释
+    /// Skips comments.
     fn skip_comment<S: Source + ?Sized>(&self, state: &mut State<'_, S>) -> bool {
         if let Some(ch) = state.peek() {
             if ch == ';' {
                 let start_pos = state.get_position();
-                // 跳过到行尾
+                // Skip to the end of the line
                 while let Some(ch) = state.peek() {
                     state.advance(ch.len_utf8());
                     if ch == '\n' {
@@ -148,22 +150,22 @@ impl<'config> JasminLexer<'config> {
         false
     }
 
-    /// 处理字符串字面量
+    /// Lexes a string literal.
     fn lex_string<S: Source + ?Sized>(&self, state: &mut State<'_, S>) -> bool {
         if let Some(ch) = state.peek() {
             if ch == '"' {
                 let start_pos = state.get_position();
-                state.advance(1); // 跳过开始的引号
+                state.advance(1); // Skip the starting quote
 
                 while let Some(ch) = state.peek() {
                     if ch == '"' {
-                        state.advance(1); // 跳过结束的引号
+                        state.advance(1); // Skip the ending quote
                         break;
                     }
                     else if ch == '\\' {
-                        state.advance(1); // 跳过转义字符
+                        state.advance(1); // Skip the escape character
                         if state.peek().is_some() {
-                            state.advance(1); // 跳过被转义的字符
+                            state.advance(1); // Skip the escaped character
                         }
                     }
                     else {
@@ -178,23 +180,23 @@ impl<'config> JasminLexer<'config> {
         false
     }
 
-    /// 处理数字字面量
+    /// Lexes a number literal.
     fn lex_number<S: Source + ?Sized>(&self, state: &mut State<'_, S>) -> bool {
         let start_pos = state.get_position();
 
         if let Some(first) = state.peek() {
-            // 只处理以数字开头的情况，简化逻辑
+            // Simplified logic: only handle numbers starting with a digit
             if !first.is_ascii_digit() {
                 return false;
             }
 
-            // 消费数字
+            // Consume digits
             while let Some(ch) = state.peek() {
                 if ch.is_ascii_digit() {
                     state.advance(ch.len_utf8());
                 }
                 else if ch == '.' {
-                    // 浮点数
+                    // Floating point number
                     state.advance(1);
                     while let Some(ch) = state.peek() {
                         if ch.is_ascii_digit() {
@@ -218,7 +220,7 @@ impl<'config> JasminLexer<'config> {
         false
     }
 
-    /// 处理标识符或关键字
+    /// Lexes an identifier or keyword.
     fn lex_identifier_or_keyword<S: Source + ?Sized>(&self, state: &mut State<'_, S>) -> bool {
         let start = state.get_position();
         let first = match state.peek() {
@@ -226,15 +228,15 @@ impl<'config> JasminLexer<'config> {
             None => return false,
         };
 
-        // 标识符必须以字母、下划线或点开始
+        // Identifiers must start with an alphabetic character, underscore, or dot
         if !first.is_ascii_alphabetic() && first != '_' && first != '.' {
             return false;
         }
 
-        // 消费第一个字符
+        // Consume the first character
         state.advance(first.len_utf8());
 
-        // 消费后续字符
+        // Consume subsequent characters
         while let Some(ch) = state.peek() {
             if ch.is_ascii_alphanumeric() || ch == '_' || ch == '/' || ch == '$' || ch == '<' || ch == '>' {
                 state.advance(ch.len_utf8());
@@ -251,7 +253,7 @@ impl<'config> JasminLexer<'config> {
         true
     }
 
-    /// 处理操作符和分隔符
+    /// Lexes an operator or delimiter.
     fn lex_operator_or_delimiter<S: Source + ?Sized>(&self, state: &mut State<'_, S>) -> bool {
         let start = state.get_position();
         let ch = match state.peek() {
@@ -279,12 +281,12 @@ impl<'config> JasminLexer<'config> {
         true
     }
 
-    /// 主要的词法分析循环
+    /// Main lexer run method.
     fn run<S: Source + ?Sized>(&self, state: &mut State<'_, S>) -> Result<(), OakError> {
         while state.not_at_end() {
             let safe_point = state.get_position();
 
-            // 尝试各种词法规则
+            // Try various lexing rules
             if self.skip_whitespace(state) {
                 continue;
             }
@@ -309,7 +311,7 @@ impl<'config> JasminLexer<'config> {
                 continue;
             }
 
-            // 如果所有规则都不匹配，跳过当前字符并标记为错误
+            // If no rule matches, skip current character and mark as error
             let start_pos = state.get_position();
             if let Some(ch) = state.peek() {
                 state.advance(ch.len_utf8());

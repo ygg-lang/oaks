@@ -4,12 +4,12 @@ pub mod token_type;
 use crate::{language::DartLanguage, lexer::token_type::DartTokenType};
 use oak_core::{Lexer, LexerCache, LexerState, OakError, lexer::LexOutput, source::Source};
 
-type State<'a, S> = LexerState<'a, S, DartLanguage>;
+pub(crate) type State<'a, S> = LexerState<'a, S, DartLanguage>;
 
 /// Lexer implementation for Dart language
 #[derive(Clone)]
 pub struct DartLexer<'config> {
-    _config: &'config DartLanguage,
+    config: &'config DartLanguage,
 }
 
 impl<'config> Lexer<DartLanguage> for DartLexer<'config> {
@@ -25,7 +25,7 @@ impl<'config> Lexer<DartLanguage> for DartLexer<'config> {
 
 impl<'config> DartLexer<'config> {
     pub fn new(config: &'config DartLanguage) -> Self {
-        Self { _config: config }
+        Self { config }
     }
 
     fn run<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> Result<(), OakError> {

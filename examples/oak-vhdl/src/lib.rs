@@ -8,7 +8,8 @@
 /// AST module.
 pub mod ast;
 
-// pub mod builder;
+/// Builder module.
+pub mod builder;
 
 /// Type definitions module.
 /// Language configuration module.
@@ -20,7 +21,7 @@ pub mod lexer;
 /// Parser module.
 pub mod parser;
 
-pub use crate::{language::VhdlLanguage, lexer::VhdlLexer, parser::VhdlParser};
+pub use crate::{ast::VhdlRoot, builder::VhdlBuilder, language::VhdlLanguage, lexer::VhdlLexer, parser::VhdlParser};
 pub use oak_core::{ElementType, TokenType};
 
 // #[cfg(feature = "oak-highlight")]

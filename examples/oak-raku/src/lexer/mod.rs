@@ -1,3 +1,4 @@
+/// Token types and definitions for Raku.
 pub mod token_type;
 
 use crate::language::RakuLanguage;

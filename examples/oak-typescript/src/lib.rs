@@ -1,19 +1,25 @@
 #![doc = include_str!("readme.md")]
 #![feature(new_range_api)]
-#![allow(missing_docs)]
+#![warn(missing_docs)]
 //! Typescript support for the Oak language framework.
 
+/// AST module for TypeScript.
 pub mod ast;
+/// Builder module for TypeScript.
 pub mod builder;
 
+/// Language definition for TypeScript.
 pub mod language;
+/// Lexer for TypeScript.
 pub mod lexer;
+/// LSP-related functionality for TypeScript.
 #[cfg(any(feature = "lsp", feature = "oak-highlight", feature = "oak-pretty-print"))]
 pub mod lsp;
 /// MCP module.
 #[cfg(feature = "mcp")]
 pub mod mcp;
 
+/// Parser for TypeScript.
 pub mod parser;
 
 // Re-exports

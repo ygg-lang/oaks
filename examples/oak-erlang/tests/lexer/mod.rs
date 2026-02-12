@@ -22,14 +22,14 @@ fn test_peek_behavior() {
     let source = SourceText::new("hello world");
     let mut state = LexerState::<SourceText, ErlangLanguage>::new(&source);
 
-    println!("初始状态:");
-    println!("位置: {}", state.get_position());
+    println!("Initial state:");
+    println!("Position: {}", state.get_position());
     println!("current(): {:?}", state.current());
     println!("peek(): {:?}", state.peek());
 
-    println!("\n前进 1 个字符后:");
+    println!("\nAfter advancing 1 character:");
     state.advance(1);
-    println!("位置: {}", state.get_position());
+    println!("Position: {}", state.get_position());
     println!("current(): {:?}", state.current());
     println!("peek(): {:?}", state.peek())
 }
@@ -54,8 +54,8 @@ hello() ->
     let mut cache = oak_core::parser::session::ParseSession::<ErlangLanguage>::default();
     let result = lexer.lex(&source, &[], &mut cache);
 
-    // 验证包含模块声明的 token
-    let tokens = result.result.expect("词法分析应该成功");
+    // Verify tokens containing module declarations
+    let tokens = result.result.expect("Lexical analysis should succeed");
     assert!(!tokens.is_empty());
 
     println!("Parsed {} tokens:", tokens.len());
@@ -63,10 +63,10 @@ hello() ->
         println!("  {}: {:?} at {:?}", i, token.kind, token.span)
     }
 
-    // 检查是否有 EOF token
+    // Check if there is an EOF token
     assert_eq!(tokens.last().unwrap().kind, ErlangSyntaxKind::Eof);
 
-    // 验证包含预期的 token 类型
+    // Verify expected token types are present
     let token_kinds: Vec<_> = tokens.iter().map(|t| t.kind).collect();
     assert!(token_kinds.contains(&ErlangSyntaxKind::Minus));
     assert!(token_kinds.contains(&ErlangSyntaxKind::Atom))

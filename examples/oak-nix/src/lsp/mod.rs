@@ -32,6 +32,7 @@ pub struct NixLanguageService<V: Vfs> {
     hover_provider: NixHoverProvider,
 }
 impl<V: Vfs> NixLanguageService<V> {
+    /// Creates a new Nix language service with the given VFS.
     pub fn new(vfs: V) -> Self {
         Self { vfs, workspace: oak_lsp::workspace::WorkspaceManager::default(), hover_provider: NixHoverProvider }
     }

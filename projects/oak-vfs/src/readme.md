@@ -1,26 +1,51 @@
-# 🛠️ Developer Guide
+# 📂 Oak VFS: Virtual File System
 
-This directory contains the core logic implementation of the project. Below are instructions for a quick start.
+`oak-vfs` provides a unified Virtual File System (VFS) abstraction for the Oak language framework. It manages source files, metadata, and coordinate mapping (line/column to byte offset).
+
+## 🚀 Features
+
+- **Abstraction**: Unified interface for memory-based and disk-based storage.
+- **Coordinate Mapping**: Efficiently convert between byte offsets and LSP-compatible line/column positions.
+- **Metadata**: Access file types, lengths, and modification timestamps.
+- **Change Tracking**: Watch for file system changes (disk-based VFS).
+- **WASM Compatible**: Works in browser environments via `MemoryVfs`.
 
 ## 🚦 Quick Start
 
-### Core API Usage
+### Using Memory Vfs
+
 ```rust
-// Example: Basic calling workflow
-fn main() {
-    // 1. Initialization
-    // 2. Execute core logic
-    // 3. Handle returned results
+use oak_vfs::{MemoryVfs, Vfs, WritableVfs};
+
+let vfs = MemoryVfs::new();
+vfs.write_file("file:///test.txt", "line 1\nline 2");
+
+if let Some(source) = vfs.get_source("file:///test.txt") {
+    println!("Content: {}", source.get_text());
 }
 ```
 
-## 🔍 Module Description
-- **lib.rs**: Exports public interfaces and core traits.
-- **parser/ (if exists)**: Implements specific syntax parsing logic.
-- **ast/ (if exists)**: Defines the syntax tree structure.
+### Coordinate Conversion
 
-## 🏗️ Architecture Design
-The project follows the general architectural specifications of the Oak ecosystem, emphasizing:
-1. **Immutability**: Uses the Green/Red Tree structure to ensure efficient sharing of syntax trees.
-2. **Fault Tolerance**: Core logic is highly inclusive of erroneous input.
-3. **Scalability**: Convenient for downstream tools to perform secondary development.
+```rust
+use oak_vfs::LineMap;
+use oak_core::source::SourceText;
+
+let source = SourceText::new("first line\nsecond line");
+let line_map = LineMap::from_source(&source);
+
+// Convert byte offset to (line, col)
+let (line, col) = line_map.offset_to_line_col_utf16(&source, 15);
+println!("Position: {}:{}", line, col);
+```
+
+## 🏗️ Core Components
+
+- **[Vfs](file:///e:/yydb%20%E6%95%B0%E6%8D%AE%E5%BA%93/oaks/projects/oak-vfs/src/lib.rs)**: The primary trait for file access.
+- **[MemoryVfs](file:///e:/yydb%20%E6%95%B0%E6%8D%AE%E5%BA%93/oaks/projects/oak-vfs/src/vfs/memory.rs)**: Thread-safe, in-memory implementation.
+- **[DiskVfs](file:///e:/yydb%20%E6%95%B0%E6%8D%AE%E5%BA%93/oaks/projects/oak-vfs/src/vfs/disk.rs)**: Physical file system access.
+- **[LineMap](file:///e:/yydb%20%E6%95%B0%E6%8D%AE%E5%BA%93/oaks/projects/oak-vfs/src/line_map.rs)**: Fast lookup table for line starts.
+
+## 🛠️ Architecture
+
+The VFS layer sits between the raw source text and higher-level language services. It ensures that components like the Lexer and Parser can work with `Source` abstractions without worrying about where the data originates.

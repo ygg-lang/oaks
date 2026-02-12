@@ -1,4 +1,5 @@
 #![doc = include_str!("readme.md")]
+/// Token type module for HTML.
 pub mod token_type;
 
 use crate::{language::HtmlLanguage, lexer::token_type::HtmlTokenType};
@@ -9,7 +10,7 @@ use oak_core::{
 };
 use std::{simd::prelude::*, sync::LazyLock};
 
-type State<'a, S> = LexerState<'a, S, HtmlLanguage>;
+pub(crate) type State<'a, S> = LexerState<'a, S, HtmlLanguage>;
 
 // HTML static configuration
 
@@ -20,7 +21,7 @@ static HTML_STRING: LazyLock<StringConfig> = LazyLock::new(|| StringConfig { quo
 /// This lexer converts a raw string into a stream of HTML syntax tokens.
 #[derive(Clone, Debug)]
 pub struct HtmlLexer<'config> {
-    _config: &'config HtmlLanguage,
+    config: &'config HtmlLanguage,
 }
 
 impl<'config> Lexer<HtmlLanguage> for HtmlLexer<'config> {
@@ -38,7 +39,7 @@ impl<'config> Lexer<HtmlLanguage> for HtmlLexer<'config> {
 impl<'config> HtmlLexer<'config> {
     /// Creates a new `HtmlLexer` with the given configuration.
     pub fn new(config: &'config HtmlLanguage) -> Self {
-        Self { _config: config }
+        Self { config }
     }
 
     /// The main lexing loop that iterates through the source text.

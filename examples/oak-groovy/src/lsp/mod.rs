@@ -1,15 +1,20 @@
-#![doc = include_str!("readme.md")]
+//! Language Server Protocol (LSP) support for Groovy.
+
 use crate::language::GroovyLanguage;
 use core::range::Range;
 use oak_core::tree::RedNode;
 #[cfg(feature = "lsp")]
 use {futures::Future, oak_lsp::service::LanguageService, oak_lsp::types::Hover as LspHover, oak_vfs::Vfs};
+
+/// Language service for Groovy.
 #[cfg(feature = "lsp")]
 pub struct GroovyLanguageService<V: Vfs> {
     vfs: V,
     workspace: oak_lsp::workspace::WorkspaceManager,
 }
+
 impl<V: Vfs> GroovyLanguageService<V> {
+    /// Creates a new `GroovyLanguageService` with the given VFS.
     pub fn new(vfs: V) -> Self {
         Self { vfs, workspace: oak_lsp::workspace::WorkspaceManager::new() }
     }

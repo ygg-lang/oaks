@@ -24,9 +24,6 @@ pub mod lsp;
 // pub mod mcp;
 /// Parser module.
 pub mod parser;
-/// Serde serialization module.
-#[cfg(feature = "serde")]
-pub mod serde;
 
 pub use crate::{
     ast::{XmlNode, XmlValue},
@@ -45,20 +42,23 @@ pub use crate::lsp::XmlLanguageService;
 // pub use crate::lsp::formatter::XmlFormatter;
 
 #[cfg(feature = "serde")]
-pub use crate::serde::{from_value, to_value};
+pub use crate::language::serde::{from_value, to_value};
 
+/// Serializes a value to an XML string.
 #[cfg(feature = "serde")]
 pub fn to_string<T: ::serde::Serialize>(value: &T) -> Result<String, String> {
     let xml_value = to_value(value).map_err(String::from)?;
     Ok(xml_value.to_string())
 }
 
+/// Deserializes a value from an XML string.
 #[cfg(feature = "serde")]
 pub fn from_str<T: ::serde::de::DeserializeOwned>(s: &str) -> Result<T, String> {
     let xml_value = parse(s)?;
     from_value(xml_value).map_err(String::from)
 }
 
+/// Parses an XML string into an `XmlValue`.
 pub fn parse(xml: &str) -> Result<XmlValue, String> {
     use crate::builder::XmlBuilder;
     use oak_core::{Builder, parser::session::ParseSession, source::SourceText};

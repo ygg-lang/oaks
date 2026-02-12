@@ -1,0 +1,152 @@
+! Comprehensive DejaVu Font Syntax Test
+! Includes Lisp-like configuration and OpenType Feature File syntax
+
+(font
+    (name "DejaVu Sans Extended")
+    (version "2.38")
+    (copyright "Copyright (c) 2003 by Bitstream, Inc.")
+    (license "Bitstream Vera Fonts Copyright")
+    (vendor "PfEd")
+    (designer "Bitstream")
+)
+
+# Global Glyph Classes
+@uppercase = [A-Z];
+@lowercase = [a-z];
+@digits    = [0-9];
+@punct     = [. , : ; ! ?];
+@marks     = [acute grave circumflex dieresis tilde];
+
+# Language Systems
+languagesystem DFLT dflt;
+languagesystem latn ROM;
+languagesystem cyrl dflt;
+languagesystem grek dflt;
+
+# Feature: Standard Ligatures
+feature liga {
+    script latn;
+    language dflt;
+    sub f i by fi;
+    sub f l by fl;
+    sub f f by ff;
+    sub f f i by ffi;
+    sub f f l by ffl;
+    
+    script cyrl;
+    language dflt;
+    sub uni0438 uni0439 by uni0439;
+} liga;
+
+# Feature: Kerning
+feature kern {
+    # Latin Kerning
+    pos A V -50;
+    pos T o -20;
+    pos P A -30;
+    pos V A -50;
+    
+    # Class Kerning
+    pos @uppercase @lowercase -10;
+    pos @digits @punct -5;
+    
+    # Contextual Kerning
+    pos L' -20 V' 10;
+} kern;
+
+# Feature: Small Capitals
+feature smcp {
+    sub @lowercase by @uppercase;
+} smcp;
+
+# Feature: Fractions
+feature frac {
+    sub one slash two by onehalf;
+    sub one slash four by onequarter;
+    sub three slash four by threequarters;
+} frac;
+
+# Anchor Points Definition
+anchor top <250 800>;
+anchor bottom <250 0>;
+anchor center <250 400>;
+
+# Mark Positioning
+lookup mark_positioning {
+    pos base [a e o u] <anchor 300 500> mark @marks;
+    pos base [i] <anchor 300 600> mark @marks;
+} mark_positioning;
+
+# Contextual Chaining Substitution
+lookup contextual_sub {
+    sub [a e i o u] f' i' by f_i;
+    ignore sub f' i' [a e i o u];
+} contextual_sub;
+
+# Variable Font Axes
+axis Weight 100 900 400;
+axis Width 50 200 100;
+axis Slant 0 20 0;
+
+# Named Instances
+instance "Thin" {
+    Weight 100;
+    Width 100;
+};
+
+instance "Regular" {
+    Weight 400;
+    Width 100;
+};
+
+instance "Bold" {
+    Weight 700;
+    Width 100;
+};
+
+instance "Condensed" {
+    Weight 400;
+    Width 75;
+};
+
+# Metadata Table
+table name {
+    nameid 0 "Copyright (c) 2003 by Bitstream, Inc.";
+    nameid 1 "DejaVu Sans";
+    nameid 2 "Book";
+    nameid 3 "Unique Font Identifier";
+    nameid 4 "Full Font Name";
+    nameid 5 "Version 2.37";
+    nameid 6 "PostScript Name";
+} name;
+
+# OS/2 Table Configuration
+table OS/2 {
+    TypoAscender 800;
+    TypoDescender -200;
+    TypoLineGap 200;
+    WinAscent 1000;
+    WinDescent 300;
+    XHeight 500;
+    CapHeight 700;
+    WeightClass 400;
+    WidthClass 5;
+} OS/2;
+
+# Glyph Definition Block (Hypothetical)
+glyph A {
+    unicode 0041;
+    width 600;
+    contours {
+        moveTo 0 0;
+        lineTo 300 800;
+        lineTo 600 0;
+        lineTo 500 200;
+        lineTo 100 200;
+        close;
+    }
+    hints {
+        vstem 0 100;
+        vstem 500 100;
+    }
+}

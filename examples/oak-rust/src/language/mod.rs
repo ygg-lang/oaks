@@ -1,12 +1,10 @@
 #![doc = include_str!("readme.md")]
 use crate::ast::RustRoot;
 use oak_core::{Language, LanguageCategory};
-#[cfg(feature = "serde")]
-use serde::{Deserialize, Serialize};
 
 /// Configuration and metadata for the Rust language.
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct RustLanguage {
     /// Allow using `unsafe` blocks and functions
     pub allow_unsafe: bool,

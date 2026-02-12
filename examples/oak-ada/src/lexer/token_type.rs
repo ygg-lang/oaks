@@ -1,136 +1,249 @@
 use oak_core::{TokenType, UniversalTokenRole};
-#[cfg(feature = "serde")]
-use serde::{Deserialize, Serialize};
 
-/// Ada 词法单元类型
+/// Ada token types.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub enum AdaTokenType {
+    /// Whitespace characters.
     Whitespace,
+    /// Newline characters.
     Newline,
+    /// Comments.
     Comment,
 
+    /// String literals.
     StringLiteral,
+    /// Character literals.
     CharacterLiteral,
+    /// Number literals.
     NumberLiteral,
+    /// Identifiers.
     Identifier,
 
+    /// `abort` keyword.
     Abort,
+    /// `abs` keyword.
     Abs,
+    /// `abstract` keyword.
     Abstract,
+    /// `accept` keyword.
     Accept,
+    /// `access` keyword.
     Access,
+    /// `aliased` keyword.
     Aliased,
+    /// `all` keyword.
     All,
+    /// `and` keyword.
     And,
+    /// `array` keyword.
     Array,
+    /// `at` keyword.
     At,
+    /// `begin` keyword.
     Begin,
+    /// `body` keyword.
     Body,
+    /// `case` keyword.
     Case,
+    /// `constant` keyword.
     Constant,
+    /// `declare` keyword.
     Declare,
+    /// `delay` keyword.
     Delay,
+    /// `delta` keyword.
     Delta,
+    /// `digits` keyword.
     Digits,
+    /// `do` keyword.
     Do,
+    /// `else` keyword.
     Else,
+    /// `elsif` keyword.
     Elsif,
+    /// `end` keyword.
     End,
+    /// `entry` keyword.
     Entry,
+    /// `exception` keyword.
     Exception,
+    /// `exit` keyword.
     Exit,
+    /// `for` keyword.
     For,
+    /// `function` keyword.
     Function,
+    /// `generic` keyword.
     Generic,
+    /// `goto` keyword.
     Goto,
+    /// `if` keyword.
     If,
+    /// `in` keyword.
     In,
+    /// `interface` keyword.
     Interface,
+    /// `is` keyword.
     Is,
+    /// `limited` keyword.
     Limited,
+    /// `loop` keyword.
     Loop,
+    /// `mod` keyword.
     Mod,
+    /// `new` keyword.
     New,
+    /// `not` keyword.
     Not,
+    /// The `null` keyword.
     Null,
+    /// The `of` keyword.
     Of,
+    /// The `or` keyword.
     Or,
+    /// The `others` keyword.
     Others,
+    /// The `out` keyword.
     Out,
+    /// The `overriding` keyword.
     Overriding,
+    /// The `package` keyword.
     Package,
+    /// The `pragma` keyword.
     Pragma,
+    /// The `private` keyword.
     Private,
+    /// The `procedure` keyword.
     Procedure,
+    /// The `protected` keyword.
     Protected,
+    /// The `raise` keyword.
     Raise,
+    /// The `range` keyword.
     Range,
+    /// The `record` keyword.
     Record,
+    /// The `rem` keyword.
     Rem,
+    /// The `renames` keyword.
     Renames,
+    /// The `requeue` keyword.
     Requeue,
+    /// The `return` keyword.
     Return,
+    /// The `reverse` keyword.
     Reverse,
+    /// The `select` keyword.
     Select,
+    /// The `separate` keyword.
     Separate,
+    /// The `some` keyword.
     Some,
+    /// The `subtype` keyword.
     Subtype,
+    /// The `synchronized` keyword.
     Synchronized,
+    /// The `tagged` keyword.
     Tagged,
+    /// The `task` keyword.
     Task,
+    /// The `terminate` keyword.
     Terminate,
+    /// The `then` keyword.
     Then,
+    /// The `type` keyword.
     Type,
+    /// The `until` keyword.
     Until,
+    /// The `use` keyword.
     Use,
+    /// The `when` keyword.
     When,
+    /// The `while` keyword.
     While,
+    /// The `with` keyword.
     With,
+    /// The `xor` keyword.
     Xor,
 
-    // 符号
-    Plus,         // +
-    Minus,        // -
-    Star,         // *
-    Slash,        // /
-    Ampersand,    // &
-    Eq,           // =
-    Ne,           // /=
-    Lt,           // <
-    Le,           // <=
-    Gt,           // >
-    Ge,           // >=
-    Assign,       // :=
-    ColonEq,      // := (alias)
-    Arrow,        // =>
-    Dot,          // .
-    DotDot,       // ..
-    Comma,        // ,
-    Colon,        // :
-    Semicolon,    // ;
-    Bar,          // |
-    Pipe,         // | (alias)
-    Apostrophe,   // '
-    Tick,         // ' (alias)
-    LeftParen,    // (
-    RightParen,   // )
-    Box,          // <>
-    DoubleStar,   // **
-    StarStar,     // ** (alias)
-    LtLt,         // <<
-    GtGt,         // >>
-    LeftBracket,  // [
-    RightBracket, // ]
-    LeftBrace,    // {
-    RightBrace,   // }
+    /// Plus (`+`).
+    Plus,
+    /// Minus (`-`).
+    Minus,
+    /// Star (`*`).
+    Star,
+    /// Slash (`/`).
+    Slash,
+    /// Ampersand (`&`).
+    Ampersand,
+    /// Equal (`=`).
+    Eq,
+    /// Not equal (`/=`).
+    Ne,
+    /// Less than (`<`).
+    Lt,
+    /// Less than or equal (`<=`).
+    Le,
+    /// Greater than (`>`).
+    Gt,
+    /// Greater than or equal (`>=`).
+    Ge,
+    /// Assignment (`:=`).
+    Assign,
+    /// Colon equal (`:=`).
+    ColonEq,
+    /// Arrow (`=>`).
+    Arrow,
+    /// Dot (`.`).
+    Dot,
+    /// DotDot (`..`).
+    DotDot,
+    /// Comma (`,`).
+    Comma,
+    /// Colon (`:`).
+    Colon,
+    /// Semicolon (`;`).
+    Semicolon,
+    /// Bar (`|`).
+    Bar,
+    /// Pipe (`|`).
+    Pipe,
+    /// Apostrophe (`'`).
+    Apostrophe,
+    /// Tick (`'`).
+    Tick,
+    /// Left parenthesis (`(`).
+    LeftParen,
+    /// Right parenthesis (`)`).
+    RightParen,
+    /// Box (`<>`).
+    Box,
+    /// Double star (`**`).
+    DoubleStar,
+    /// Star star (`**`).
+    StarStar,
+    /// Left label delimiter (`<<`).
+    LtLt,
+    /// Right label delimiter (`>>`).
+    GtGt,
+    /// Left bracket (`[`).
+    LeftBracket,
+    /// Right bracket (`]`).
+    RightBracket,
+    /// Left brace (`{`).
+    LeftBrace,
+    /// Right brace (`}`).
+    RightBrace,
 
+    /// End of stream.
     Eof,
+    /// Error token.
     Error,
 }
 
 impl AdaTokenType {
-    /// 是否为关键字
+    /// Checks if it is a keyword.
     pub fn is_keyword(&self) -> bool {
         matches!(
             self,
@@ -210,12 +323,12 @@ impl AdaTokenType {
         )
     }
 
-    /// 是否为标识符
+    /// Checks if it is an identifier.
     pub fn is_identifier(&self) -> bool {
         matches!(self, Self::Identifier)
     }
 
-    /// 是否为字面量
+    /// Checks if it is a literal.
     pub fn is_literal(&self) -> bool {
         matches!(self, Self::StringLiteral | Self::CharacterLiteral | Self::NumberLiteral)
     }

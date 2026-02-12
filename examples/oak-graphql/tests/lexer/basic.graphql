@@ -6,51 +6,51 @@
 
 # 2. Query Operations
 query HeroAndFriends($episode: Episode, $withFriends: Boolean!) {
-  hero(episode: $episode) {
-    name
-    ...HeroDetails
-    friends @include(if: $withFriends) {
-      name
-      ...FriendDetails
+    hero(episode: $episode) {
+        name
+        ...HeroDetails
+        friends @include(if: $withFriends) {
+            name
+            ...FriendDetails
+        }
     }
-  }
 }
 
 query HumanQuery($id: String!) {
-  human(id: $id) {
-    name
-    height(unit: FOOT)
-    mass
-    starships {
-      name
+    human(id: $id) {
+        name
+        height(unit: FOOT)
+        mass
+        starships {
+            name
+        }
     }
-  }
 }
 
 # 3. Mutation Operations
 mutation CreateReviewForEpisode($ep: Episode!, $review: ReviewInput!) {
-  createReview(episode: $ep, review: $review) {
-    stars
-    commentary
-  }
+    createReview(episode: $ep, review: $review) {
+        stars
+        commentary
+    }
 }
 
 # 4. Subscription Operations
 subscription OnReview($episode: Episode!) {
-  reviewAdded(episode: $episode) {
-    stars
-    commentary
-  }
+    reviewAdded(episode: $episode) {
+        stars
+        commentary
+    }
 }
 
 # 5. Fragments
 fragment HeroDetails on Character {
-  primaryFunction
-  appearsIn
+    primaryFunction
+    appearsIn
 }
 
 fragment FriendDetails on Character {
-  homePlanet
+    homePlanet
 }
 
 # 6. Directives
@@ -59,71 +59,71 @@ directive @specifiedBy(url: String!) on SCALAR
 
 # 7. Schema Definition Language (SDL)
 schema {
-  query: Query
-  mutation: Mutation
-  subscription: Subscription
+    query: Query
+    mutation: Mutation
+    subscription: Subscription
 }
 
 # 8. Type Definitions
 type Query {
-  hero(episode: Episode): Character
-  human(id: String!): Human
-  droid(id: String!): Droid
-  reviews(episode: Episode!): [Review]
+    hero(episode: Episode): Character
+    human(id: String!): Human
+    droid(id: String!): Droid
+    reviews(episode: Episode!): [Review]
 }
 
 type Mutation {
-  createReview(episode: Episode!, review: ReviewInput!): Review
+    createReview(episode: Episode!, review: ReviewInput!): Review
 }
 
 type Subscription {
-  reviewAdded(episode: Episode!): Review
+    reviewAdded(episode: Episode!): Review
 }
 
 type Human implements Character {
-  id: String!
-  name: String!
-  friends: [Character]
-  appearsIn: [Episode]
-  starships: [Starship]
-  totalCredits: Int
+    id: String!
+    name: String!
+    friends: [Character]
+    appearsIn: [Episode]
+    starships: [Starship]
+    totalCredits: Int
 }
 
 type Droid implements Character {
-  id: String!
-  name: String!
-  friends: [Character]
-  appearsIn: [Episode]
-  primaryFunction: String
+    id: String!
+    name: String!
+    friends: [Character]
+    appearsIn: [Episode]
+    primaryFunction: String
 }
 
 type Starship {
-  id: String!
-  name: String!
-  length(unit: LengthUnit = METER): Float
+    id: String!
+    name: String!
+    length(unit: LengthUnit = METER): Float
 }
 
 type Review {
-  stars: Int!
-  commentary: String
+    stars: Int!
+    commentary: String
 }
 
 # 9. Input Types
 input ReviewInput {
-  stars: Int!
-  commentary: String
+    stars: Int!
+    commentary: String
 }
 
 # 10. Enums
 enum Episode {
-  NEWHOPE
-  EMPIRE
-  JEDI
+    NEWHOPE
+    EMPIRE
+    JEDI
 }
 
 enum LengthUnit {
-  METER
-  FOOT
+    METER
+    FOOT
 }
 
 # 11. Scalar Types
@@ -132,10 +132,10 @@ scalar JSON
 
 # 12. Interface Types
 interface Character {
-  id: String!
-  name: String!
-  friends: [Character]
-  appearsIn: [Episode]
+    id: String!
+    name: String!
+    friends: [Character]
+    appearsIn: [Episode]
 }
 
 # 13. Union Types
@@ -143,108 +143,108 @@ union SearchResult = Human | Droid | Starship
 
 # 14. Arguments and Variables
 query WithArguments($limit: Int = 10, $offset: Int = 0) {
-  posts(limit: $limit, offset: $offset) {
-    id
-    title
-  }
+    posts(limit: $limit, offset: $offset) {
+        id
+        title
+    }
 }
 
 # 15. Aliases
 query HeroNameAndFriends {
-  hero {
-    heroName: name
-    heroFriends: friends {
-      friendName: name
+    hero {
+        heroName: name
+        heroFriends: friends {
+            friendName: name
+        }
     }
-  }
 }
 
 # 16. Introspection (example)
 query IntrospectionQuery {
-  __schema {
-    types {
-      name
-      kind
+    __schema {
+        types {
+            name
+            kind
+        }
     }
-  }
 }
 
 # 17. Multi-line strings
 query MultiLineString {
-  product(id: "123") {
-    description
-    """
-    This is a multi-line
-    description for the product.
-    It can span several lines
-    and include special characters like " and \n.
-    """
-  }
+    product(id: "123") {
+        description
+        """
+        This is a multi-line
+        description for the product.
+        It can span several lines
+        and include special characters like " and \n.
+        """
+    }
 }
 
 # 18. Block strings
 query BlockString {
-  book(id: "456") {
-    summary
-    """A very long summary
-       that might contain newlines
-       and other formatting.
-    """
-  }
+    book(id: "456") {
+        summary
+        """A very long summary
+              that might contain newlines
+              and other formatting.
+        """
+    }
 }
 
 # 19. Numbers (Int, Float)
 query Numbers {
-  data {
-    intField: 123
-    floatField: 123.45
-    negativeInt: -10
-    negativeFloat: -5.5
-    exponentFloat: 1.2e-3
-  }
+    data {
+        intField: 123
+        floatField: 123.45
+        negativeInt: -10
+        negativeFloat: -5.5
+        exponentFloat: 1.2e-3
+    }
 }
 
 # 20. Boolean values
 query Booleans {
-  settings {
-    notifications: true
-    darkMode: false
-  }
+    settings {
+        notifications: true
+        darkMode: false
+    }
 }
 
 # 21. Null value
 query NullValue {
-  user(id: "789") {
-    lastLogin: null
-  }
+    user(id: "789") {
+        lastLogin: null
+    }
 }
 
 # 22. List values
 query ListValues {
-  products(ids: ["prod1", "prod2", "prod3"]) {
-    name
-  }
+    products(ids: ["prod1", "prod2", "prod3"]) {
+        name
+    }
 }
 
 # 23. Object values
 query ObjectValues {
-  updateUser(input: { id: "user1", name: "New Name", email: "new@example.com" }) {
-    id
-    name
-  }
+    updateUser(input: { id: "user1", name: "New Name", email: "new@example.com" }) {
+        id
+        name
+    }
 }
 
 # 24. Variable definitions with default values
 query Products($category: String = "Electronics", $limit: Int = 5) {
-  products(category: $category, limit: $limit) {
-    name
-    price
-  }
+    products(category: $category, limit: $limit) {
+        name
+        price
+    }
 }
 
 # 25. Extensions (example, not standard lexer token but good for context)
 extend type Query {
-  newField: String
+    newField: String
 }
 
 extend schema @directive
@@ -253,66 +253,66 @@ extend schema @directive
 directive @tag(name: String!) repeatable on FIELD | FRAGMENT_DEFINITION
 
 query ProductTags {
-  product(id: "123") {
-    name @tag(name: "electronics") @tag(name: "gadget")
-  }
+    product(id: "123") {
+        name @tag(name: "electronics") @tag(name: "gadget")
+    }
 }
 
 # 27. Type System Extensions
 extend type User {
-  age: Int
+    age: Int
 }
 
 extend interface Character {
-  species: String
+    species: String
 }
 
 extend union SearchResult = Vehicle
 
 extend enum Episode {
-  ROGUEONE
+    ROGUEONE
 }
 
 extend scalar DateTime
 
 extend input ReviewInput {
-  rating: Int
+    rating: Int
 }
 
 # 28. Description strings for SDL
 """A human-like creature in the Star Wars saga."""
 type Human {
-  id: ID!
-  name: String!
+    id: ID!
+    name: String!
 }
 
 # 29. Deprecated fields and enum values
 type OldProduct {
-  name: String!
-  price: Float @deprecated(reason: "Use `cost` field instead")
+    name: String!
+    price: Float @deprecated(reason: "Use `cost` field instead")
 }
 
 enum OldStatus {
-  ACTIVE
-  INACTIVE @deprecated(reason: "Use `DISABLED` instead")
-  DISABLED
+    ACTIVE
+    INACTIVE @deprecated(reason: "Use `DISABLED` instead")
+    DISABLED
 }
 
 # 30. Root operation type definitions
 type MyQuery {
-  hello: String
+    hello: String
 }
 
 type MyMutation {
-  addTodo(text: String!): Todo
+    addTodo(text: String!): Todo
 }
 
 type MySubscription {
-  newTodo: Todo
+    newTodo: Todo
 }
 
 schema {
-  query: MyQuery
-  mutation: MyMutation
-  subscription: MySubscription
+    query: MyQuery
+    mutation: MyMutation
+    subscription: MySubscription
 }

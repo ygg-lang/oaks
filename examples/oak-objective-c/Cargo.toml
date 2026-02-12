@@ -27,13 +27,11 @@ futures = { workspace = true, optional = true }
 
 [dev-dependencies]
 oak-testing = { workspace = true }
-# serde_json = { workspace = true } # replaced by oak-json
+serde_json = { workspace = true }
 
 [features]
 default = ["serde"]
 serde = ["dep:serde", "oak-core/serde"]
-oak-highlight = ["dep:oak-highlight"]
-oak-pretty-print = ["dep:oak-pretty-print"]
 lsp = ["dep:oak-lsp", "dep:oak-hover", "dep:oak-vfs", "oak-highlight", "oak-pretty-print", "dep:futures"]
 mcp = ["lsp", "oak-mcp/io-std"]
 

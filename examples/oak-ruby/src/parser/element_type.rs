@@ -1,157 +1,308 @@
 use oak_core::{ElementType, UniversalElementRole};
-#[cfg(feature = "serde")]
-use serde::{Deserialize, Serialize};
 use std::fmt;
 
+/// Element types for Ruby.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 #[repr(u8)]
 pub enum RubyElementType {
+    /// An identifier.
     Identifier,
+    /// A global variable (e.g., `$stdout`).
     GlobalVariable,
+    /// An instance variable (e.g., `@name`).
     InstanceVariable,
+    /// A class variable (e.g., `@@name`).
     ClassVariable,
+    /// A constant (e.g., `MATH`).
     Constant,
+    /// An integer literal.
     IntegerLiteral,
+    /// A float literal.
     FloatLiteral,
+    /// A string literal.
     StringLiteral,
+    /// A general literal.
     Literal,
+    /// A symbol (e.g., `:name`).
     Symbol,
+    /// A regular expression literal.
     RegexLiteral,
 
+    /// The `if` keyword.
     If,
+    /// The `unless` keyword.
     Unless,
+    /// The `elsif` keyword.
     Elsif,
+    /// The `else` keyword.
     Else,
+    /// The `case` keyword.
     Case,
+    /// The `when` keyword.
     When,
+    /// The `then` keyword.
     Then,
+    /// The `for` keyword.
     For,
+    /// The `while` keyword.
     While,
+    /// The `until` keyword.
     Until,
+    /// The `break` keyword.
     Break,
+    /// The `next` keyword.
     Next,
+    /// The `redo` keyword.
     Redo,
+    /// The `retry` keyword.
     Retry,
+    /// The `return` keyword.
     Return,
+    /// The `yield` keyword.
     Yield,
+    /// The `def` keyword.
     Def,
+    /// The `class` keyword.
     Class,
+    /// The `module` keyword.
     Module,
+    /// The `end` keyword.
     End,
+    /// The `lambda` keyword.
     Lambda,
+    /// The `proc` keyword.
     Proc,
+    /// The `begin` keyword.
     Begin,
+    /// The `rescue` keyword.
     Rescue,
+    /// The `ensure` keyword.
     Ensure,
+    /// The `raise` keyword.
     Raise,
+    /// The `require` keyword.
     Require,
+    /// The `load` keyword.
     Load,
+    /// The `include` keyword.
     Include,
+    /// The `extend` keyword.
     Extend,
+    /// The `prepend` keyword.
     Prepend,
+    /// The `and` keyword.
     And,
+    /// The `or` keyword.
     Or,
+    /// The `not` keyword.
     Not,
+    /// The `in` keyword.
     In,
+    /// The `true` keyword.
     True,
+    /// The `false` keyword.
     False,
+    /// The `nil` keyword.
     Nil,
+    /// The `super` keyword.
     Super,
+    /// The `self` keyword.
     Self_,
+    /// The `alias` keyword.
     Alias,
+    /// The `undef` keyword.
     Undef,
+    /// The `defined?` keyword.
     Defined,
+    /// The `do` keyword.
     Do,
 
+    /// Plus operator `+`.
     Plus,
+    /// Minus operator `-`.
     Minus,
+    /// Multiply operator `*`.
     Multiply,
+    /// Divide operator `/`.
     Divide,
+    /// Modulo operator `%`.
     Modulo,
+    /// Power operator `**`.
     Power,
+    /// Equality operator `==`.
     EqualEqual,
+    /// Inequality operator `!=`.
     NotEqual,
+    /// Less than operator `<`.
     Less,
+    /// Greater than operator `>`.
     Greater,
+    /// Less than or equal operator `<=`.
     LessEqual,
+    /// Greater than or equal operator `>=`.
     GreaterEqual,
+    /// Case equality operator `===`.
     EqualEqualEqual,
+    /// Spaceship operator `<=>`.
     Spaceship,
+    /// Assignment operator `=`.
     Assign,
+    /// Plus assignment operator `+=`.
     PlusAssign,
+    /// Minus assignment operator `-=`.
     MinusAssign,
+    /// Multiply assignment operator `*=`.
     MultiplyAssign,
+    /// Divide assignment operator `/=`.
     DivideAssign,
+    /// Modulo assignment operator `%=`.
     ModuloAssign,
+    /// Power assignment operator `**=`.
     PowerAssign,
+    /// Bitwise AND operator `&`.
     BitAnd,
+    /// Bitwise OR operator `|`.
     BitOr,
+    /// Bitwise XOR operator `^`.
     Xor,
+    /// Logical NOT operator `!`.
     LogicalNot,
+    /// Bitwise NOT operator `~`.
     Tilde,
+    /// Left shift operator `<<`.
     LeftShift,
+    /// Right shift operator `>>`.
     RightShift,
+    /// AND assignment operator `&=`.
     AndAssign,
+    /// OR assignment operator `|=`.
     OrAssign,
+    /// XOR assignment operator `^=`.
     XorAssign,
+    /// Left shift assignment operator `<<=`.
     LeftShiftAssign,
+    /// Right shift assignment operator `>>=`.
     RightShiftAssign,
+    /// Logical AND operator `&&`.
     AndAnd,
+    /// Logical OR operator `||`.
     OrOr,
+    /// OR OR assignment operator `||=`.
     OrOrAssign,
+    /// AND AND assignment operator `&&=`.
     AndAndAssign,
+    /// Question mark `?`.
     Question,
+    /// Range operator `..`.
     DotDot,
+    /// Range operator `...`.
     DotDotDot,
+    /// Match operator `=~`.
     Match,
+    /// Not match operator `!~`.
     NotMatch,
 
+    /// Left parenthesis `(`.
     LeftParen,
+    /// Right parenthesis `)`.
     RightParen,
+    /// Left bracket `[`.
     LeftBracket,
+    /// Right bracket `]`.
     RightBracket,
+    /// Left brace `{`.
     LeftBrace,
+    /// Right brace `}`.
     RightBrace,
+    /// Comma `,`.
     Comma,
+    /// Colon `:`.
     Colon,
+    /// Semicolon `;`.
     Semicolon,
+    /// Dot `.`.
     Dot,
+    /// Double colon `::`.
     DoubleColon,
+    /// At symbol `@`.
     At,
+    /// Dollar sign `$`.
     Dollar,
 
+    /// Whitespace.
     Whitespace,
+    /// Newline.
     Newline,
+    /// Comment.
     Comment,
+    /// End of file.
     Eof,
+    /// Invalid token.
     Invalid,
+    /// Root element.
     Root,
+    /// A binary expression.
     BinaryExpression,
+    /// A unary expression.
     UnaryExpression,
+    /// A literal expression.
     LiteralExpression,
+    /// A parenthesized expression.
     ParenExpression,
+    /// A parenthesized expression (alternative).
     ParenthesizedExpression,
+    /// A method definition.
     MethodDefinition,
+    /// A class definition.
     ClassDefinition,
+    /// A module definition.
     ModuleDefinition,
+    /// An if statement.
     IfStatement,
+    /// A while statement.
     WhileStatement,
+    /// An unless statement.
+    UnlessStatement,
+    /// An until statement.
+    UntilStatement,
+    /// A for statement.
+    ForStatement,
+    /// A case statement.
+    CaseStatement,
+    /// A when clause.
+    WhenClause,
+    /// A begin statement.
+    BeginStatement,
+    /// A rescue clause.
+    RescueClause,
+    /// An ensure clause.
+    EnsureClause,
+    /// A return statement.
     ReturnStatement,
+    /// An if expression.
     IfExpression,
+    /// A call expression.
     CallExpression,
+    /// A member access expression.
     MemberAccess,
+    /// A parameter list.
     ParameterList,
+    /// An argument list.
     ArgumentList,
+    /// An error element.
     Error,
+    /// Equal operator `=`.
     Equal,
 }
 
 impl RubyElementType {
+    /// Returns true if the element is ignored (whitespace, newline, or comment).
     pub fn is_ignored(&self) -> bool {
         matches!(self, Self::Whitespace | Self::Newline | Self::Comment)
     }
 
+    /// Returns true if the element is a keyword.
     pub fn is_keyword(&self) -> bool {
         matches!(
             self,
@@ -336,6 +487,14 @@ impl fmt::Display for RubyElementType {
             Self::ModuleDefinition => "ModuleDefinition",
             Self::IfStatement => "IfStatement",
             Self::WhileStatement => "WhileStatement",
+            Self::UnlessStatement => "UnlessStatement",
+            Self::UntilStatement => "UntilStatement",
+            Self::ForStatement => "ForStatement",
+            Self::CaseStatement => "CaseStatement",
+            Self::WhenClause => "WhenClause",
+            Self::BeginStatement => "BeginStatement",
+            Self::RescueClause => "RescueClause",
+            Self::EnsureClause => "EnsureClause",
             Self::ReturnStatement => "ReturnStatement",
             Self::IfExpression => "IfExpression",
             Self::CallExpression => "CallExpression",

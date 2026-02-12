@@ -10,7 +10,7 @@ use oak_core::{
 
 pub(crate) type State<'a, S> = ParserState<'a, GoLanguage, S>;
 
-/// Go 语言解析器
+/// Go language parser
 pub struct GoParser<'config> {
     pub(crate) config: &'config GoLanguage,
 }
@@ -66,7 +66,7 @@ impl<'config> GoParser<'config> {
                         state.finish_at(cp, E::ShortVarDecl);
                     }
                     _ => {
-                        // 纯表达式语句
+                        // Pure expression statement
                     }
                 }
                 self.skip_trivia(state);
@@ -110,20 +110,82 @@ impl<'config> GoParser<'config> {
         state.expect(T::Func).ok();
         self.skip_trivia(state);
 
-        // 解析函数名
+        // Parse receiver if present
+        if state.at(T::LeftParen) {
+            let rcp = state.checkpoint();
+            self.parse_parameter_list(state)?;
+            state.finish_at(rcp, E::Receiver);
+            self.skip_trivia(state);
+        }
+
+        // Parse function name
         if state.at(T::Identifier) {
             state.bump();
             self.skip_trivia(state);
         }
 
-        // 解析参数列表和返回值 (简单跳过直到 {)
-        while state.not_at_end() && !state.at(T::LeftBrace) {
-            state.bump();
+        // Parse parameters
+        self.parse_parameter_list(state)?;
+        self.skip_trivia(state);
+
+        // Parse return types
+        if state.at(T::LeftParen) {
+            self.parse_parameter_list(state)?;
+            self.skip_trivia(state);
+        }
+        else if state.at(T::Identifier) || state.at(T::Star) {
+            // Single return type
+            let rtcp = state.checkpoint();
+            if state.eat(T::Star) {
+                self.skip_trivia(state);
+            }
+            state.expect(T::Identifier).ok();
+            state.finish_at(rtcp, E::Identifier); // Simplified
             self.skip_trivia(state);
         }
 
-        self.parse_block(state)?;
+        if state.at(T::LeftBrace) {
+            self.parse_block(state)?;
+        }
         state.finish_at(cp, E::FunctionDeclaration);
+        Ok(())
+    }
+
+    fn parse_parameter_list<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> Result<(), OakError> {
+        use crate::{GoElementType as E, GoTokenType as T};
+        let cp = state.checkpoint();
+        state.expect(T::LeftParen).ok();
+        self.skip_trivia(state);
+        while state.not_at_end() && !state.at(T::RightParen) {
+            let pcp = state.checkpoint();
+            // Parse identifier(s)
+            while state.at(T::Identifier) {
+                state.bump();
+                self.skip_trivia(state);
+                if !state.eat(T::Comma) {
+                    break;
+                }
+                self.skip_trivia(state);
+            }
+            // Parse type
+            if state.not_at_end() && !state.at(T::Comma) && !state.at(T::RightParen) {
+                if state.eat(T::Star) {
+                    self.skip_trivia(state);
+                }
+                if state.at(T::Identifier) {
+                    state.bump();
+                    self.skip_trivia(state);
+                }
+            }
+            state.finish_at(pcp, E::ParameterDecl);
+            self.skip_trivia(state);
+            if !state.eat(T::Comma) {
+                break;
+            }
+            self.skip_trivia(state);
+        }
+        state.expect(T::RightParen).ok();
+        state.finish_at(cp, E::ParameterList);
         Ok(())
     }
 
@@ -138,13 +200,13 @@ impl<'config> GoParser<'config> {
             state.bump(); // name
             self.skip_trivia(state);
 
-            // 可选类型
+            // Optional type
             if state.at(T::Identifier) {
                 state.bump();
                 self.skip_trivia(state);
             }
 
-            // 可选赋值
+            // Optional assignment
             if state.eat(T::Assign) {
                 self.skip_trivia(state);
                 PrattParser::parse(state, 0, self);
@@ -200,7 +262,7 @@ impl<'config> GoParser<'config> {
         state.expect(T::If).ok();
         self.skip_trivia(state);
 
-        // 解析条件
+        // Parse condition
         if !state.at(T::LeftBrace) {
             PrattParser::parse(state, 0, self);
             self.skip_trivia(state);
@@ -229,9 +291,9 @@ impl<'config> GoParser<'config> {
         state.expect(T::For).ok();
         self.skip_trivia(state);
 
-        // 尝试解析 init; condition; post
+        // Try to parse init; condition; post
         if !state.at(T::LeftBrace) {
-            // 至少解析一个表达式/语句
+            // Parse at least one expression/statement
             PrattParser::parse(state, 0, self);
             self.skip_trivia(state);
 
@@ -325,7 +387,7 @@ impl<'config> Pratt<GoLanguage> for GoParser<'config> {
                 PrattParser::parse(state, 0, self);
                 self.skip_trivia(state);
                 state.expect(T::RightParen).ok();
-                state.finish_at(cp, E::BinaryExpression) // 或者 ParenExpression
+                state.finish_at(cp, E::BinaryExpression) // Or ParenExpression
             }
             _ => {
                 state.bump();

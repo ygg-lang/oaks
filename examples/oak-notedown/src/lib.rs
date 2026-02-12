@@ -16,6 +16,7 @@ pub mod lsp;
 #[cfg(feature = "mcp")]
 pub mod mcp;
 
+/// Parser functionality for Notedown.
 pub mod parser;
 
 pub use crate::{

@@ -1,69 +1,156 @@
--- Basic Haskell syntax test file
+-- Comprehensive Haskell Lexer Test
+module Main where
 
--- Function definitions with type signatures
+import Data.List (sort, group)
+import qualified Data.Map as Map
+import Control.Monad (when, forM_)
+
+-- Basic Types
+i :: Int
+i = 42
+
+d :: Double
+d = 3.14
+
+c :: Char
+c = 'A'
+
+s :: String
+s = "Hello, Haskell!"
+
+b :: Bool
+b = True
+
+-- Lists and Tuples
+list :: [Int]
+list = [1, 2, 3, 4, 5]
+
+tuple :: (Int, String)
+tuple = (1, "One")
+
+-- Algebraic Data Types
+data Color
+    = Red
+    | Green
+    | Blue
+    | RGB Int Int Int
+    deriving (Show, Eq)
+
+data Maybe a
+    = Nothing
+    | Just a
+
+-- Record Syntax
+data Person = Person
+    { name :: String
+    , age :: Int
+    , active :: Bool
+    } deriving (Show)
+
+-- Type Classes
+class Describable a where
+    describe :: a -> String
+
+instance Describable Color where
+    describe Red = "Red color"
+    describe Green = "Green color"
+    describe Blue = "Blue color"
+    describe (RGB r g b) = "RGB(" ++ show r ++ "," ++ show g ++ "," ++ show b ++ ")"
+
+-- Functions
 factorial :: Integer -> Integer
 factorial 0 = 1
 factorial n = n * factorial (n - 1)
 
--- List operations
-quickSort :: (Ord a) => [a] -> [a]
-quickSort [] = []
-quickSort (x:xs) = 
-    quickSort [y | y <- xs, y <= x] ++ [x] ++ quickSort [y | y <- xs, y > x]
+-- Pattern Matching
+analyzeList :: [a] -> String
+analyzeList [] = "Empty list"
+analyzeList [x] = "Singleton list"
+analyzeList (x:xs) = "List with head and tail"
 
--- Data type definitions
-data Tree a = Empty | Node a (Tree a) (Tree a) deriving (Show, Eq)
+-- Guards
+grade :: Int -> String
+grade score
+    | score >= 90 = "A"
+    | score >= 80 = "B"
+    | score >= 70 = "C"
+    | otherwise   = "F"
 
--- Type classes
-class Describable a where
-    describe :: a -> String
+-- Case Expressions
+checkZero :: Int -> String
+checkZero x = case x of
+    0 -> "It's zero"
+    _ -> "Not zero"
 
-instance Describable Bool where
-    describe True = "A true value"
-    describe False = "A false value"
+-- Where Clause
+circleArea :: Double -> Double
+circleArea r = pi * r ^ 2
+    where
+        pi = 3.14159
 
--- Higher-order functions
-map' :: (a -> b) -> [a] -> [b]
-map' _ [] = []
-map' f (x:xs) = f x : map' f xs
+-- Let Expression
+cylinderVolume :: Double -> Double -> Double
+cylinderVolume r h =
+    let area = circleArea r
+    in area * h
 
--- Pattern matching
-guardExample :: Int -> String
-guardExample x
-    | x < 0     = "Negative"
-    | x == 0    = "Zero"
-    | otherwise = "Positive"
+-- Higher Order Functions
+squares :: [Int]
+squares = map (\x -> x * x) [1..10]
 
--- List comprehensions
-pythagoreanTriples :: [(Int, Int, Int)]
-pythagoreanTriples = [(a, b, c) | c <- [1..100], b <- [1..c], a <- [1..b], a^2 + b^2 == c^2]
+filtered :: [Int]
+filtered = filter (> 5) squares
 
--- Monadic operations
-maybeExample :: Maybe Int -> Maybe Int
-maybeExample mx = do
-    x <- mx
-    return (x * 2)
+-- List Comprehensions
+pairs :: [(Int, Int)]
+pairs = [(x, y) | x <- [1..3], y <- [1..3], x /= y]
 
--- Record syntax
-data Person = Person {
-    name :: String,
-    age :: Int,
-    email :: String
-} deriving (Show)
+-- Operator Sections
+increment :: Int -> Int
+increment = (+ 1)
 
--- Lambda expressions
-filterEven :: [Int] -> [Int]
-filterEven = filter (\x -> x `mod` 2 == 0)
+half :: Double -> Double
+half = (/ 2)
 
--- String operations
-reverseWords :: String -> String
-reverseWords = unwords . reverse . words
+-- Infix Operators
+customOp :: Int -> Int -> Int
+customOp x y = x + y * 2
 
--- Main function
+result = 5 `customOp` 3
+
+-- Monads and Do Notation
 main :: IO ()
 main = do
-    putStrLn "Hello, Haskell!"
-    print $ factorial 5
-    print $ quickSort [3, 1, 4, 1, 5, 9, 2, 6]
-    let person = Person "Alice" 30 "alice@example.com"
-    print person
+    putStrLn "What is your name?"
+    name <- getLine
+    putStrLn $ "Hello, " ++ name
+    
+    when (length name > 5) $ do
+        putStrLn "That's a long name!"
+
+-- Newtype
+newtype UserId = UserId Int
+
+-- Type Synonyms
+type Username = String
+
+-- Comments
+-- Single line comment
+{- Multi-line
+   comment -}
+{- Nested {- comments -} -}
+
+-- Pragma
+{-# LANGUAGE OverloadedStrings #-}
+{-# OPTIONS_GHC -Wall #-}
+
+-- Foreign Function Interface
+foreign import ccall "math.h sin" c_sin :: Double -> Double
+
+-- GADTs
+data Expr a where
+    I   :: Int  -> Expr Int
+    B   :: Bool -> Expr Bool
+    Add :: Expr Int -> Expr Int -> Expr Int
+    Mul :: Expr Int -> Expr Int -> Expr Int
+    Eq  :: Eq a => Expr a -> Expr a -> Expr Bool

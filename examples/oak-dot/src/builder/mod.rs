@@ -2,9 +2,11 @@
 use crate::language::DotLanguage;
 use oak_core::{Builder, BuilderCache, Source, TextEdit, builder::BuildOutput};
 
+/// A builder for DOT language structures.
 pub struct DotBuilder {}
 
 impl DotBuilder {
+    /// Creates a new instance of the DOT builder.
     pub fn new(_lang: &DotLanguage) -> Self {
         Self {}
     }

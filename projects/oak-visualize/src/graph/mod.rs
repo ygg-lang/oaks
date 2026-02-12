@@ -4,40 +4,51 @@ use crate::{
     geometry::{Point, Rect, Size},
     layout::{Edge, Layout},
 };
-use serde::{Deserialize, Serialize};
 use std::collections::{HashMap, HashSet};
 
 /// Graph node for visualization
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GraphNode {
+    /// Unique identifier for the node.
     pub id: String,
+    /// Human-readable label for the node.
     pub label: String,
+    /// Type of the node (e.g., "function", "struct").
     pub node_type: String,
+    /// Optional size of the node.
     pub size: Option<Size>,
+    /// Additional attributes for the node.
     pub attributes: HashMap<String, String>,
+    /// Weight of the node for layout algorithms.
     pub weight: f64,
 }
 
 impl GraphNode {
+    /// Creates a new `GraphNode`.
     pub fn new(id: String, label: String) -> Self {
         Self { id, label, node_type: "default".to_string(), size: None, attributes: HashMap::new(), weight: 1.0 }
     }
 
+    /// Sets the type of the node.
     pub fn with_type(mut self, node_type: String) -> Self {
         self.node_type = node_type;
         self
     }
 
+    /// Sets the size of the node.
     pub fn with_size(mut self, size: Size) -> Self {
         self.size = Some(size);
         self
     }
 
+    /// Adds an attribute to the node.
     pub fn with_attribute(mut self, key: String, value: String) -> Self {
         self.attributes.insert(key, value);
         self
     }
 
+    /// Sets the weight of the node.
     pub fn with_weight(mut self, weight: f64) -> Self {
         self.weight = weight;
         self
@@ -45,42 +56,56 @@ impl GraphNode {
 }
 
 /// Graph edge for visualization
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GraphEdge {
+    /// Source node ID.
     pub from: String,
+    /// Target node ID.
     pub to: String,
+    /// Optional label for the edge.
     pub label: Option<String>,
+    /// Type of the edge.
     pub edge_type: String,
+    /// Weight of the edge for layout algorithms.
     pub weight: f64,
+    /// Whether the edge is directed.
     pub directed: bool,
+    /// Additional attributes for the edge.
     pub attributes: HashMap<String, String>,
 }
 
 impl GraphEdge {
+    /// Creates a new `GraphEdge`.
     pub fn new(from: String, to: String) -> Self {
         Self { from, to, label: None, edge_type: "default".to_string(), weight: 1.0, directed: true, attributes: HashMap::new() }
     }
 
+    /// Sets the label of the edge.
     pub fn with_label(mut self, label: String) -> Self {
         self.label = Some(label);
         self
     }
 
+    /// Sets the type of the edge.
     pub fn with_type(mut self, edge_type: String) -> Self {
         self.edge_type = edge_type;
         self
     }
 
+    /// Sets the weight of the edge.
     pub fn with_weight(mut self, weight: f64) -> Self {
         self.weight = weight;
         self
     }
 
+    /// Makes the edge undirected.
     pub fn undirected(mut self) -> Self {
         self.directed = false;
         self
     }
 
+    /// Adds an attribute to the edge.
     pub fn with_attribute(mut self, key: String, value: String) -> Self {
         self.attributes.insert(key, value);
         self
@@ -90,24 +115,31 @@ impl GraphEdge {
 /// Graph representation
 #[derive(Debug, Clone)]
 pub struct Graph {
+    /// Nodes in the graph.
     pub nodes: HashMap<String, GraphNode>,
+    /// Edges in the graph.
     pub edges: Vec<GraphEdge>,
+    /// Whether the graph is directed.
     pub directed: bool,
 }
 
 impl Graph {
+    /// Creates a new `Graph`.
     pub fn new(directed: bool) -> Self {
         Self { nodes: HashMap::new(), edges: Vec::new(), directed }
     }
 
+    /// Adds a node to the graph.
     pub fn add_node(&mut self, node: GraphNode) {
         self.nodes.insert(node.id.clone(), node);
     }
 
+    /// Adds an edge to the graph.
     pub fn add_edge(&mut self, edge: GraphEdge) {
         self.edges.push(edge);
     }
 
+    /// Gets the neighbors of a node.
     pub fn get_neighbors(&self, node_id: &str) -> Vec<&str> {
         let mut neighbors = Vec::new();
 
@@ -123,10 +155,12 @@ impl Graph {
         neighbors
     }
 
+    /// Gets the degree of a node.
     pub fn get_degree(&self, node_id: &str) -> usize {
         self.get_neighbors(node_id).len()
     }
 
+    /// Checks if the graph is connected.
     pub fn is_connected(&self) -> bool {
         if self.nodes.is_empty() {
             return true;
@@ -153,6 +187,7 @@ impl Graph {
         visited.len() == self.nodes.len()
     }
 
+    /// Finds all cycles in the graph.
     pub fn find_cycles(&self) -> Vec<Vec<String>> {
         let mut cycles = Vec::new();
         let mut visited = HashSet::new();
@@ -209,48 +244,58 @@ impl Default for GraphLayout {
 }
 
 impl GraphLayout {
+    /// Creates a new `GraphLayout` with default settings.
     pub fn new() -> Self {
         Self::default()
     }
 
+    /// Creates a new `GraphLayout` using the force-directed algorithm.
     pub fn force_directed() -> Self {
         Self::new().with_algorithm(GraphLayoutAlgorithm::ForceDirected)
     }
 
+    /// Creates a new `GraphLayout` using the circular algorithm.
     pub fn circular() -> Self {
         Self::new().with_algorithm(GraphLayoutAlgorithm::Circular)
     }
 
+    /// Sets the algorithm for the layout.
     pub fn with_algorithm(mut self, algorithm: GraphLayoutAlgorithm) -> Self {
         self.algorithm = algorithm;
         self
     }
 
+    /// Sets the configuration for the layout.
     pub fn with_config(mut self, config: GraphLayoutConfig) -> Self {
         self.config = config;
         self
     }
 
+    /// Sets the repulsion strength for the force-directed layout.
     pub fn with_repulsion(mut self, repulsion: f64) -> Self {
         self.config.repulsion_strength = repulsion;
         self
     }
 
+    /// Sets the spring strength for the force-directed layout.
     pub fn with_attraction(mut self, attraction: f64) -> Self {
         self.config.spring_strength = attraction;
         self
     }
 
+    /// Sets the number of iterations for the force-directed layout.
     pub fn with_iterations(mut self, iterations: usize) -> Self {
         self.config.iterations = iterations;
         self
     }
 
+    /// Visualizes the graph as an SVG string.
     pub fn visualize(&self, graph: &Graph) -> crate::Result<String> {
         let layout = self.layout_graph(graph)?;
         crate::render::SvgRenderer::new().render_layout(&layout)
     }
 
+    /// Computes the layout for the given graph.
     pub fn layout_graph(&self, graph: &Graph) -> crate::Result<Layout> {
         match self.algorithm {
             GraphLayoutAlgorithm::ForceDirected => self.force_directed_layout(graph),
@@ -559,16 +604,27 @@ impl GraphLayout {
 /// Graph layout configuration
 #[derive(Debug, Clone)]
 pub struct GraphLayoutConfig {
+    /// Width of a node.
     pub node_width: f64,
+    /// Height of a node.
     pub node_height: f64,
+    /// Spacing between nodes.
     pub node_spacing: f64,
+    /// Distance between layers in hierarchical layout.
     pub layer_distance: f64,
+    /// Radius of the circle in circular layout.
     pub circle_radius: f64,
+    /// Number of iterations for force-directed layout.
     pub iterations: usize,
+    /// Strength of the spring force between connected nodes.
     pub spring_strength: f64,
+    /// Strength of the repulsion force between all nodes.
     pub repulsion_strength: f64,
+    /// Damping factor for node movement.
     pub damping: f64,
+    /// Maximum velocity of a node per iteration.
     pub max_velocity: f64,
+    /// Ideal length of an edge.
     pub ideal_edge_length: f64,
 }
 
@@ -581,9 +637,14 @@ impl Default for GraphLayoutConfig {
 /// Graph layout algorithms
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum GraphLayoutAlgorithm {
-    ForceDirected, // Spring-mass model
-    Circular,      // Circular arrangement
-    Hierarchical,  // Layered arrangement
-    Grid,          // Regular grid
-    Organic,       // Natural-looking
+    /// Spring-mass model layout.
+    ForceDirected,
+    /// Arrange nodes in a circle.
+    Circular,
+    /// Layered arrangement for directed acyclic graphs.
+    Hierarchical,
+    /// Arrange nodes in a regular grid.
+    Grid,
+    /// Natural-looking organic arrangement.
+    Organic,
 }

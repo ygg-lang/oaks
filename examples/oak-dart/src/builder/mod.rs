@@ -6,7 +6,7 @@ use crate::{
 };
 use oak_core::{Builder, BuilderCache, GreenNode, Parser, RedNode, RedTree, SourceText, TextEdit, source::Source};
 
-/// Dart 语言的 AST 构建器
+/// AST builder for the Dart language.
 #[derive(Clone)]
 pub struct DartBuilder<'config> {
     config: &'config DartLanguage,
@@ -48,17 +48,67 @@ impl<'config> DartBuilder<'config> {
 
     fn build_class(&self, node: &RedNode<DartLanguage>, source: &SourceText) -> Option<ClassDeclaration> {
         let name = self.find_identifier(node, source)?;
-        Some(ClassDeclaration { name, span: node.span().into() })
+        let mut body = Vec::new();
+        for child in node.children() {
+            if let RedTree::Node(n) = child {
+                match n.green.kind {
+                    DartElementType::FunctionDeclaration => {
+                        if let Some(f) = self.build_function(&n, source) {
+                            body.push(Item::Function(f));
+                        }
+                    }
+                    DartElementType::VariableDeclaration => {
+                        if let Some(v) = self.build_variable(&n, source) {
+                            body.push(Item::Variable(v));
+                        }
+                    }
+                    _ => {}
+                }
+            }
+        }
+        Some(ClassDeclaration { name, body, span: node.span().into() })
     }
 
     fn build_function(&self, node: &RedNode<DartLanguage>, source: &SourceText) -> Option<FunctionDeclaration> {
         let name = self.find_identifier(node, source)?;
-        Some(FunctionDeclaration { name, span: node.span().into() })
+        let mut parameters = Vec::new();
+        let mut body = Vec::new();
+
+        for child in node.children() {
+            if let RedTree::Node(n) = child {
+                match n.green.kind {
+                    DartElementType::VariableDeclaration => {
+                        // Dart functions might have variable declarations in parameters or body
+                        // This is a simplified approach
+                    }
+                    _ => {}
+                }
+            }
+        }
+
+        Some(FunctionDeclaration { name, parameters, body, span: node.span().into() })
     }
 
     fn build_variable(&self, node: &RedNode<DartLanguage>, source: &SourceText) -> Option<VariableDeclaration> {
         let name = self.find_identifier(node, source)?;
-        Some(VariableDeclaration { name, span: node.span().into() })
+        let mut type_annotation = None;
+        let mut value = None;
+
+        let mut found_colon = false;
+        for child in node.children() {
+            match child {
+                RedTree::Leaf(t) if t.kind == DartTokenType::Colon => found_colon = true,
+                RedTree::Leaf(t) if t.kind == DartTokenType::Identifier && found_colon && type_annotation.is_none() => {
+                    type_annotation = Some(Identifier { name: source.get_text_in(t.span.into()).to_string(), span: t.span.into() });
+                }
+                RedTree::Node(n) if n.green.kind == DartElementType::IntegerLiteral || n.green.kind == DartElementType::StringLiteral => {
+                    value = Some(Expression::Literal(source.get_text_in(n.span().into()).to_string()));
+                }
+                _ => {}
+            }
+        }
+
+        Some(VariableDeclaration { name, type_annotation, value, span: node.span().into() })
     }
 
     fn find_identifier(&self, node: &RedNode<DartLanguage>, source: &SourceText) -> Option<Identifier> {

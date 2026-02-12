@@ -8,7 +8,6 @@ use crate::{
     tree::{Cursor, GreenLeaf, GreenNode, GreenTree, TokenProvenance},
 };
 use core::range::Range;
-use triomphe::Arc;
 
 /// Helper function to raise deep clone of a node into an arena.
 ///
@@ -27,7 +26,9 @@ pub fn deep_clone_node<'a, L: Language>(node: &GreenNode<'_, L>, arena: &'a Synt
 
 /// Provides tokens to the parser.
 pub struct TokenSource<L: Language> {
+    /// The tokens being consumed.
     tokens: Tokens<L>,
+    /// The current index into the tokens.
     index: usize,
 }
 
@@ -82,7 +83,9 @@ impl<L: Language> TokenSource<L> {
 
 /// Collects the results of the parsing process.
 pub struct TreeSink<'a, L: Language> {
+    /// The arena to allocate syntax nodes in.
     arena: &'a SyntaxArena,
+    /// The list of children for the current node being constructed.
     children: Vec<GreenTree<'a, L>>,
 }
 
@@ -136,6 +139,7 @@ impl<'a, L: Language> TreeSink<'a, L> {
 
 /// Encapsulates incremental parsing logic.
 pub struct IncrementalContext<'a, L: Language> {
+    /// A cursor over the previous syntax tree.
     cursor: Cursor<'a, L>,
     /// Sorted list of edits with their accumulated deltas.
     /// Each entry contains the old range and the cumulative delta *after* this edit.
@@ -196,7 +200,7 @@ impl<'a, L: Language> IncrementalContext<'a, L> {
 
 /// High-level API for parsers, coordinating token supply and tree construction.
 pub struct ParserState<'a, L: Language, S: Source + ?Sized = crate::source::SourceText> {
-    /// The token stream being parsed.
+    /// The token source providing tokens to the parser.
     pub tokens: TokenSource<L>,
 
     /// The sink where the syntax tree is constructed.
@@ -232,7 +236,7 @@ impl<'a, L: Language, S: Source + ?Sized> ParserState<'a, L, S> {
     pub fn new(arena: &'a SyntaxArena, lex_output: LexOutput<L>, source: &'a S, capacity_hint: usize) -> Self {
         let (tokens, mut errors) = match lex_output.result {
             Ok(tokens) => (tokens, Vec::new()),
-            Err(e) => (Arc::from(Vec::new()), vec![e]),
+            Err(e) => (Tokens::default(), vec![e]),
         };
         errors.extend(lex_output.diagnostics);
 

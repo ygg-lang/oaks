@@ -12,6 +12,7 @@ use oak_core::tree::RedNode;
 #[cfg(feature = "lsp")]
 use {futures::Future, oak_lsp::service::LanguageService, oak_lsp::types::Hover as LspHover, oak_vfs::Vfs};
 
+/// Language service implementation for Dejavu.
 #[cfg(feature = "lsp")]
 pub struct DejavuLanguageService<V: Vfs> {
     vfs: V,
@@ -20,6 +21,7 @@ pub struct DejavuLanguageService<V: Vfs> {
 
 #[cfg(feature = "lsp")]
 impl<V: Vfs> DejavuLanguageService<V> {
+    /// Creates a new `DejavuLanguageService` with the given VFS.
     pub fn new(vfs: V) -> Self {
         Self { vfs, workspace: oak_lsp::workspace::WorkspaceManager::new() }
     }

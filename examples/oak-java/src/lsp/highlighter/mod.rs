@@ -1,30 +1,33 @@
-#![doc = include_str!("readme.md")]
+//! Syntax highlighting for Java.
+
 use crate::JavaTokenType;
 
-/// 高亮类型的本地定义
+/// Types of syntax elements that can be highlighted.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum HighlightKind {
-    /// 关键字
+    /// Keywords.
     Keyword,
-    /// 字面量
+    /// Literals.
     Literal,
-    /// 标识符
+    /// Identifiers.
     Identifier,
-    /// 注释
+    /// Comments.
     Comment,
-    /// 运算符
+    /// Operators.
     Operator,
-    /// 标点符号
+    /// Punctuation.
     Punctuation,
-    /// 函数/方法
+    /// Functions and methods.
     Function,
-    /// 类型/类
+    /// Types and classes.
     Type,
 }
 
+/// A highlighter for Java code.
 pub struct JavaHighlighter;
 
 impl JavaHighlighter {
+    /// Returns the highlight kind for a given Java token type.
     pub fn highlight(&self, kind: JavaTokenType) -> Option<HighlightKind> {
         match kind {
             JavaTokenType::Abstract

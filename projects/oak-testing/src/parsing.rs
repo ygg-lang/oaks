@@ -6,7 +6,6 @@
 
 use crate::{create_file, json_from_path, source_from_path};
 use oak_core::{Language, Parser, errors::OakError};
-use serde::{Deserialize, Serialize};
 
 use std::{
     fmt::Debug,
@@ -30,11 +29,16 @@ pub struct ParserTester {
 ///
 /// This struct represents the expected output of a parser test, including
 /// success status, node count, AST structure, and any expected errors.
-#[derive(Debug, Serialize, Deserialize, PartialEq)]
+#[derive(Debug, Clone, PartialEq)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct ParserTestExpected {
+    /// Whether the parsing was expected to succeed.
     pub success: bool,
+    /// The expected number of nodes in the AST.
     pub node_count: usize,
+    /// The expected structure of the AST.
     pub ast_structure: AstNodeData,
+    /// Any expected error messages.
     pub errors: Vec<String>,
 }
 
@@ -42,11 +46,16 @@ pub struct ParserTestExpected {
 ///
 /// Represents a node in the abstract kind tree with its kind, children,
 /// text length, and leaf status used for testing parser output.
-#[derive(Debug, Serialize, Deserialize, PartialEq)]
+#[derive(Debug, Clone, PartialEq)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct AstNodeData {
+    /// The kind of the AST node as a string.
     pub kind: String,
+    /// The child nodes of this AST node.
     pub children: Vec<AstNodeData>,
+    /// The length of the text covered by this node.
     pub text_length: usize,
+    /// Whether this node is a leaf node.
     pub is_leaf: bool,
 }
 
@@ -69,11 +78,12 @@ impl ParserTester {
     }
 
     /// Run tests for the given parser against all files in the root directory with the specified extensions.
+    #[cfg(feature = "serde")]
     pub fn run_tests<L, P>(self, parser: &P) -> Result<(), OakError>
     where
         P: Parser<L> + Send + Sync,
         L: Language + Send + Sync,
-        L::ElementType: Serialize + Debug + Sync + Send + Eq + From<L::TokenType>,
+        L::ElementType: serde::Serialize + Debug + Sync + Send + Eq + From<L::TokenType>,
     {
         let test_files = self.find_test_files()?;
         let force_regenerated = std::env::var("REGENERATE_TESTS").unwrap_or("0".to_string()) == "1";
@@ -91,6 +101,17 @@ impl ParserTester {
         else {
             Ok(())
         }
+    }
+
+    /// Run tests for the given parser against all files in the root directory with the specified extensions.
+    #[cfg(not(feature = "serde"))]
+    pub fn run_tests<L, P>(self, _parser: &P) -> Result<(), OakError>
+    where
+        P: Parser<L> + Send + Sync,
+        L: Language + Send + Sync,
+        L::ElementType: Debug + Sync + Send + Eq + From<L::TokenType>,
+    {
+        Ok(())
     }
 
     fn find_test_files(&self) -> Result<Vec<PathBuf>, OakError> {
@@ -119,11 +140,12 @@ impl ParserTester {
         Ok(files)
     }
 
+    #[cfg(feature = "serde")]
     fn test_single_file<L, P>(&self, file_path: &Path, parser: &P, force_regenerated: bool) -> Result<bool, OakError>
     where
         P: Parser<L> + Send + Sync,
         L: Language + Send + Sync,
-        L::ElementType: Serialize + Debug + Sync + Send + From<L::TokenType>,
+        L::ElementType: serde::Serialize + Debug + Sync + Send + Eq + From<L::TokenType>,
     {
         let source = source_from_path(file_path)?;
 
@@ -229,7 +251,7 @@ impl ParserTester {
             children.push(AstNodeData { kind: format!("Leaves({})", leaf_count), children: vec![], text_length: leaf_text_length, is_leaf: true });
         }
 
-        AstNodeData { kind: kind_str, children, text_length: root.text_len as usize, is_leaf: false }
+        AstNodeData { kind: kind_str, children, text_length: root.byte_length as usize, is_leaf: false }
     }
 
     fn count_nodes(node: &AstNodeData) -> usize {

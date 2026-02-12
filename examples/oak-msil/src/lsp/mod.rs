@@ -38,6 +38,7 @@ pub struct MsilLanguageService<V: Vfs> {
 }
 #[cfg(feature = "lsp")]
 impl<V: Vfs> MsilLanguageService<V> {
+    /// Create new MSIL language service
     pub fn new(vfs: V) -> Self {
         Self { vfs, workspace: oak_lsp::workspace::WorkspaceManager::default(), hover_provider: MsilHoverProvider }
     }

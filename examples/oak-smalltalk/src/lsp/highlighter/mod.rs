@@ -1,13 +1,13 @@
 #![doc = include_str!("readme.md")]
-//! Smalltalk 语法高亮器
+//! Smalltalk syntax highlighter
 use oak_core::errors::ParseResult;
 use oak_highlight::{HighlightResult, Highlighter, themes::Theme};
 
-/// Smalltalk 语法高亮器
+/// Smalltalk syntax highlighter
 pub struct SmalltalkHighlighter;
 
 impl SmalltalkHighlighter {
-    /// 创建一个新的 Smalltalk 高亮器实例
+    /// Creates a new Smalltalk highlighter instance
     pub fn new() -> Self {
         Self
     }
@@ -21,7 +21,7 @@ impl Default for SmalltalkHighlighter {
 
 impl Highlighter for SmalltalkHighlighter {
     fn highlight<'a>(&self, source: &'a str, _language: &str, _theme: Theme) -> ParseResult<HighlightResult<'a>> {
-        // TODO: 实现真正的 Smalltalk 高亮逻辑
+        // TODO: Implement real Smalltalk highlighting logic
         Ok(HighlightResult { segments: Vec::new(), source: std::borrow::Cow::Borrowed(source) })
     }
 }

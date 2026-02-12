@@ -35,10 +35,12 @@ impl Default for PythonHighlighter {
 }
 
 impl PythonHighlighter {
+    /// Creates a new instance of `PythonHighlighter`.
     pub fn new() -> Self {
         Self::default()
     }
 
+    /// Creates a new instance of `PythonHighlighter` that uses the parser.
     pub fn with_parser() -> Self {
         Self { use_parser: true }
     }

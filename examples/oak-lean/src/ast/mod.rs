@@ -1,11 +1,9 @@
 #![doc = include_str!("readme.md")]
 use core::range::Range;
-#[cfg(feature = "serde")]
-use serde::{Deserialize, Serialize};
 
-/// Lean 根节点
+/// Lean root node.
 #[derive(Debug, Clone, PartialEq)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct LeanRoot {
     #[cfg_attr(feature = "serde", serde(with = "oak_core::serde_range"))]
     pub range: Range<usize>,

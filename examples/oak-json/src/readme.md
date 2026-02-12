@@ -8,7 +8,7 @@ This guide is designed to help you quickly get started with developing and integ
 
 The following is a standard workflow for parsing a JSON object:
 
-```rust,no_run
+```rust
 use oak_json::{JsonParser, JsonLanguage};
 use oak_core::{SourceText, Parser, parser::ParseSession};
 
@@ -47,7 +47,7 @@ After a successful parse, you can use the built-in visitor pattern or manually t
 
 ### 2. Incremental Parsing
 No need to re-parse massive JSON data when small changes occur:
-```rust,no_run
+```rust
 use oak_json::{JsonParser, JsonLanguage};
 use oak_core::{SourceText, Parser, parser::ParseSession};
 
@@ -61,7 +61,7 @@ let new_result = parser.parse(&new_source, &[], &mut session);
 
 ### 3. Diagnostics
 `oak-json` provides precise error feedback for malformed JSON, such as missing colons, unmatched braces, or invalid escape sequences:
-```rust,no_run
+```rust
 # use oak_json::{JsonParser, JsonLanguage};
 # use oak_core::{SourceText, Parser, parser::ParseSession};
 # let config = JsonLanguage::standard();

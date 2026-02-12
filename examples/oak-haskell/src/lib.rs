@@ -5,14 +5,17 @@
 #![warn(missing_docs)]
 //! Haskell support for the Oak language framework.
 
+/// Abstract Syntax Tree (AST) definitions for Haskell.
 pub mod ast;
+/// Incremental tree builder for Haskell.
 pub mod builder;
 
 mod language;
 mod lexer;
+/// Language Server Protocol (LSP) and editor integration for Haskell.
 #[cfg(any(feature = "lsp", feature = "oak-highlight", feature = "oak-pretty-print"))]
 pub mod lsp;
-/// MCP module.
+/// Model Context Protocol (MCP) support for Haskell.
 #[cfg(feature = "mcp")]
 pub mod mcp;
 
@@ -28,5 +31,7 @@ pub use crate::lsp::HaskellLanguageService;
 
 #[cfg(feature = "mcp")]
 pub use crate::mcp::serve_haskell_mcp;
-pub use lexer::token_type::HaskellTokenType;
+/// Haskell token types.
+pub use lexer::token_type::{HaskellToken, HaskellTokenType};
+/// Haskell element types.
 pub use parser::element_type::HaskellElementType;

@@ -1,3 +1,4 @@
+/// Element type module for HTML.
 pub mod element_type;
 
 use crate::{
@@ -17,35 +18,13 @@ pub(crate) type State<'a, S> = ParserState<'a, HtmlLanguage, S>;
 ///
 /// This parser transforms a stream of tokens into a green tree of HTML syntax nodes.
 pub struct HtmlParser {
-    pub(crate) _config: HtmlLanguage,
+    pub(crate) config: HtmlLanguage,
 }
 
 impl HtmlParser {
     /// Creates a new `HtmlParser` with the given configuration.
     pub fn new(config: HtmlLanguage) -> Self {
-        Self { _config: config }
-    }
-
-    /// The internal entry point for parsing the root of an HTML document.
-    pub(crate) fn parse_root_internal<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> Result<&'a GreenNode<'a, HtmlLanguage>, OakError> {
-        let checkpoint = state.checkpoint();
-
-        while state.not_at_end() {
-            match state.peek_kind() {
-                Some(HtmlTokenType::TagOpen) => self.parse_tag(state)?,
-                Some(HtmlTokenType::Doctype) => {
-                    state.bump();
-                }
-                Some(HtmlTokenType::Comment) => {
-                    state.bump();
-                }
-                _ => {
-                    state.bump();
-                }
-            }
-        }
-
-        Ok(state.finish_at(checkpoint, crate::parser::element_type::HtmlElementType::Document))
+        Self { config }
     }
 
     /// Parses an HTML tag, including its attributes and potentially its children.
@@ -101,7 +80,26 @@ impl HtmlParser {
 
 impl Parser<HtmlLanguage> for HtmlParser {
     fn parse<'a, S: Source + ?Sized>(&self, text: &'a S, edits: &[TextEdit], cache: &'a mut impl ParseCache<HtmlLanguage>) -> ParseOutput<'a, HtmlLanguage> {
-        let lexer = HtmlLexer::new(&self._config);
-        parse_with_lexer(&lexer, text, edits, cache, |state| self.parse_root_internal(state))
+        let lexer = HtmlLexer::new(&self.config);
+        parse_with_lexer(&lexer, text, edits, cache, |state| {
+            let checkpoint = state.checkpoint();
+
+            while state.not_at_end() {
+                match state.peek_kind() {
+                    Some(HtmlTokenType::TagOpen) => self.parse_tag(state)?,
+                    Some(HtmlTokenType::Doctype) => {
+                        state.bump();
+                    }
+                    Some(HtmlTokenType::Comment) => {
+                        state.bump();
+                    }
+                    _ => {
+                        state.bump();
+                    }
+                }
+            }
+
+            Ok(state.finish_at(checkpoint, crate::parser::element_type::HtmlElementType::Document))
+        })
     }
 }

@@ -45,6 +45,15 @@ impl SourceBuffer {
         }
     }
 
+    /// Pushes a character to the buffer, automatically adding a space if necessary to prevent token merging.
+    pub fn push_char(&mut self, c: char) {
+        if self.is_word_char(self.last_char) && self.is_word_char(Some(c)) {
+            self.inner.push(' ')
+        }
+        self.inner.push(c);
+        self.last_char = Some(c);
+    }
+
     /// Returns the accumulated source code as a string.
     pub fn finish(self) -> String {
         self.inner

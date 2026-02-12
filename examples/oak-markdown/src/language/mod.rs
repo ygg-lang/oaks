@@ -1,11 +1,9 @@
 #![doc = include_str!("readme.md")]
 use oak_core::{Language, LanguageCategory};
-#[cfg(feature = "serde")]
-use serde::{Deserialize, Serialize};
 
 /// Configuration for the Markdown language features.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct MarkdownLanguage {
     /// Enable math formulas.
     ///
@@ -106,6 +104,13 @@ pub struct MarkdownLanguage {
     ///
     /// Example: `<Component />`
     pub allow_xml: bool,
+}
+
+impl MarkdownLanguage {
+    /// Creates a new Markdown language configuration with default settings.
+    pub fn new() -> Self {
+        Self::default()
+    }
 }
 
 impl Language for MarkdownLanguage {

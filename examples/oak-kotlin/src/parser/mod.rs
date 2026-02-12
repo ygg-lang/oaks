@@ -1,10 +1,9 @@
+//! Parser implementation for the Kotlin language.
+
+/// Element types for the Kotlin parser.
 pub mod element_type;
 
-use crate::{
-    language::KotlinLanguage,
-    lexer::{KotlinLexer, token_type::KotlinTokenType},
-    parser::element_type::KotlinElementType,
-};
+use crate::{language::KotlinLanguage, lexer::KotlinLexer};
 use oak_core::{
     GreenNode, OakError, TextEdit,
     parser::{
@@ -16,26 +15,15 @@ use oak_core::{
 
 pub(crate) type State<'a, S> = ParserState<'a, KotlinLanguage, S>;
 
+/// A parser for the Kotlin language.
 pub struct KotlinParser<'config> {
     pub(crate) config: &'config KotlinLanguage,
 }
 
 impl<'config> KotlinParser<'config> {
+    /// Creates a new Kotlin parser.
     pub fn new(config: &'config KotlinLanguage) -> Self {
         Self { config }
-    }
-
-    pub(crate) fn parse_root_internal<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> Result<&'a GreenNode<'a, KotlinLanguage>, OakError> {
-        let checkpoint = state.checkpoint();
-
-        while state.not_at_end() {
-            self.skip_trivia(state);
-            if state.not_at_end() {
-                self.parse_statement(state).ok();
-            }
-        }
-
-        Ok(state.finish_at(checkpoint, crate::parser::element_type::KotlinElementType::SourceFile))
     }
 
     fn skip_trivia<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) {
@@ -348,6 +336,17 @@ impl<'config> Pratt<KotlinLanguage> for KotlinParser<'config> {
 impl<'config> Parser<KotlinLanguage> for KotlinParser<'config> {
     fn parse<'a, S: Source + ?Sized>(&self, text: &'a S, edits: &[TextEdit], cache: &'a mut impl ParseCache<KotlinLanguage>) -> ParseOutput<'a, KotlinLanguage> {
         let lexer = KotlinLexer::new(&self.config);
-        parse_with_lexer(&lexer, text, edits, cache, |state| self.parse_root_internal(state))
+        parse_with_lexer(&lexer, text, edits, cache, |state| {
+            let checkpoint = state.checkpoint();
+
+            while state.not_at_end() {
+                self.skip_trivia(state);
+                if state.not_at_end() {
+                    self.parse_statement(state).ok();
+                }
+            }
+
+            Ok(state.finish_at(checkpoint, crate::parser::element_type::KotlinElementType::SourceFile))
+        })
     }
 }

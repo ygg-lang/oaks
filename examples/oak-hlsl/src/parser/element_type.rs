@@ -1,27 +1,25 @@
 use oak_core::{ElementType, Parser, UniversalElementRole};
-#[cfg(feature = "serde")]
-use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 #[repr(u8)]
 pub enum HlslElementType {
-    // 空白字符和换行
+    // Whitespace and newline
     Whitespace,
     Newline,
 
-    // 注释
+    // Comment
     Comment,
 
-    // 字面量
+    // Literals
     StringLiteral,
     NumberLiteral,
     BooleanLiteral,
 
-    // 标识符和关键字
+    // Identifiers and keywords
     Identifier,
 
-    // 数据类型
+    // Data types
     Bool,
     Int,
     Uint,
@@ -34,7 +32,7 @@ pub enum HlslElementType {
     Min12int,
     Min16uint,
 
-    // 向量类型
+    // Vector types
     Bool2,
     Bool3,
     Bool4,
@@ -54,7 +52,7 @@ pub enum HlslElementType {
     Double3,
     Double4,
 
-    // 矩阵类型
+    // Matrix types
     Float2x2,
     Float2x3,
     Float2x4,
@@ -74,7 +72,7 @@ pub enum HlslElementType {
     Double4x3,
     Double4x4,
 
-    // 纹理类型
+    // Texture types
     Texture1D,
     Texture2D,
     Texture3D,
@@ -85,12 +83,12 @@ pub enum HlslElementType {
     Texture2DMS,
     Texture2DMSArray,
 
-    // 采样器类型
+    // Sampler types
     Sampler,
     SamplerState,
     SamplerComparisonState,
 
-    // 缓冲区类型
+    // Buffer types
     Buffer,
     StructuredBuffer,
     ByteAddressBuffer,
@@ -100,7 +98,7 @@ pub enum HlslElementType {
     AppendStructuredBuffer,
     ConsumeStructuredBuffer,
 
-    // 控制流关键字
+    // Control flow keywords
     If,
     Else,
     For,
@@ -114,7 +112,7 @@ pub enum HlslElementType {
     Return,
     Discard,
 
-    // 函数和变量修饰符
+    // Function and variable modifiers
     Static,
     Const,
     Uniform,
@@ -135,11 +133,11 @@ pub enum HlslElementType {
     Noperspective,
     Target,
 
-    // 语义修饰符
+    // Semantic modifiers
     Register,
     Packoffset,
 
-    // 特殊关键字
+    // Special keywords
     Struct,
     Cbuffer,
     Tbuffer,
@@ -155,7 +153,7 @@ pub enum HlslElementType {
     Sizeof,
     Undef,
 
-    // 预处理器指令
+    // Preprocessor directives
     Include,
     Define,
     If_,
@@ -167,7 +165,7 @@ pub enum HlslElementType {
     Line,
     Pragma,
 
-    // 运算符
+    // Operators
     Plus,
     Minus,
     Multiply,
@@ -205,7 +203,7 @@ pub enum HlslElementType {
     Arrow,
     Conditional,
 
-    // 分隔符
+    // Separators
     LeftParen,
     RightParen,
     LeftBracket,
@@ -221,9 +219,17 @@ pub enum HlslElementType {
     At,
     Backslash,
 
-    // 特殊标记
+    // Special tokens
     Eof,
     Root,
+    FunctionDeclaration,
+    StructDeclaration,
+    VariableDeclaration,
+    ParameterList,
+    Parameter,
+    Block,
+    Statement,
+    Expression,
     Error,
 }
 

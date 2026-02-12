@@ -31,7 +31,7 @@ fn test_lexer_identifiers() {
     let tokens = result.result.unwrap();
     assert!(!tokens.is_empty());
 
-    // 应该包含标识符 token
+    // Should contain identifier token
     let has_identifier = tokens.iter().any(|t| t.kind == StylusSyntaxKind::Identifier);
     assert!(has_identifier)
 }
@@ -49,7 +49,7 @@ fn test_lexer_numbers() {
     let tokens = result.result.unwrap();
     assert!(!tokens.is_empty());
 
-    // 应该包含数字 token
+    // Should contain number token
     let has_number = tokens.iter().any(|t| t.kind == StylusSyntaxKind::Number);
     assert!(has_number)
 }
@@ -65,7 +65,7 @@ fn test_empty_input() {
     assert!(result.result.is_ok());
 
     let tokens = result.result.unwrap();
-    // 空输入应该只有 EOF token
+    // Empty input should only have EOF token
     assert_eq!(tokens.len(), 1);
     assert_eq!(tokens[0].kind, StylusSyntaxKind::Eof)
 }

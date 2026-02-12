@@ -1,13 +1,13 @@
 #![doc = include_str!("readme.md")]
 use oak_core::{Language, LanguageCategory};
-#[cfg(feature = "serde")]
-use serde::{Deserialize, Serialize};
 
+/// Configuration for the IDL language.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Default)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct IdlLanguage {}
 
 impl IdlLanguage {
+    /// Creates a new instance of the IDL language configuration.
     pub fn new() -> Self {
         Self {}
     }

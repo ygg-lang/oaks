@@ -1,91 +1,160 @@
 use oak_core::{ElementType, UniversalElementRole};
-#[cfg(feature = "serde")]
-use serde::{Deserialize, Serialize};
 
+/// Element types for DHall AST.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 #[repr(u8)]
 pub enum DHallElementType {
+    /// Whitespace.
     Whitespace,
+    /// Newline.
     Newline,
+    /// Comment.
     Comment,
+    /// Identifier.
     Identifier,
+    /// Number.
     Number,
+    /// String literal.
     String,
 
     // Keywords
+    /// `if`
     If,
+    /// `then`
     Then,
+    /// `else`
     Else,
+    /// `let`
     Let,
+    /// `in`
     In,
+    /// `using`
     Using,
+    /// `as`
     As,
+    /// `merge`
     Merge,
+    /// `Some`
     Some,
+    /// `None`
     None,
+    /// `NaN`
     NaN,
+    /// `Infinity`
     Infinity,
+    /// `Type`
     Type,
+    /// `Kind`
     Kind,
+    /// `Sort`
     Sort,
+    /// `Bool`
     Bool,
+    /// `Natural`
     Natural,
+    /// `Integer`
     Integer,
+    /// `Double`
     Double,
+    /// `Text`
     Text,
+    /// `List`
     List,
+    /// `Optional`
     Optional,
+    /// `True`
     True,
+    /// `False`
     False,
+    /// `with`
     With,
+    /// `forall` or `∀`
     Forall,
+    /// `assert`
     Assert,
 
     // Operators
+    /// `->` or `→`
     Arrow,
+    /// `=>` or `⇒`
     FatArrow,
+    /// `==`
     EqualEqual,
+    /// `!=`
     NotEqual,
+    /// `&&`
     And,
+    /// `||`
     Or,
+    /// `++`
     Append,
+    /// `//`
     Combine,
+    /// `//\\`
     CombineTypes,
+    /// `///`
     Prefer,
+    /// `\` or `λ`
     Lambda,
 
     // Punctuation
+    /// `(`
     LeftParen,
+    /// `)`
     RightParen,
+    /// `{`
     LeftBrace,
+    /// `}`
     RightBrace,
+    /// `[`
     LeftBracket,
+    /// `]`
     RightBracket,
+    /// `,`
     Comma,
+    /// `;`
     Semicolon,
+    /// `.`
     Dot,
+    /// `:`
     Colon,
+    /// `=`
     Equal,
+    /// `<`
     Less,
+    /// `>`
     Greater,
+    /// `+`
     Plus,
+    /// `-`
     Minus,
+    /// `*`
     Star,
+    /// `/`
     Slash,
+    /// `|`
     Pipe,
+    /// `@`
     At,
+    /// `#`
     Hash,
+    /// `?`
     Question,
+    /// Error element.
     Error,
+    /// End of file.
     Eof,
 
     // Special
+    /// Root node.
     Root,
+    /// Source file node.
     SourceFile,
 }
 
 impl DHallElementType {
+    /// Returns `true` if the element type is a keyword.
     pub fn is_keyword(&self) -> bool {
         matches!(
             self,

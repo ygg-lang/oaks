@@ -1,73 +1,118 @@
 use oak_core::{ElementType, UniversalElementRole};
-#[cfg(feature = "serde")]
-use serde::{Deserialize, Serialize};
 
+/// Handlebars element type definition.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub enum HandlebarsElementType {
-    // --- 词法标记 (Tokens) ---
-    // 空白和换行
+    // --- Tokens ---
+    /// Whitespace.
     Whitespace,
+    /// Newline.
     Newline,
 
-    // 注释
+    /// Comment.
     Comment,
 
-    // Handlebars 特殊标记
-    Open,              // {{
-    Close,             // }}
-    OpenUnescaped,     // {{{
-    CloseUnescaped,    // }}}
-    OpenRawBlock,      // {{{{
-    CloseRawBlock,     // }}}}
-    OpenEndRawBlock,   // {{{{/
-    OpenBlock,         // {{#
-    OpenInverseBlock,  // {{^
-    CloseBlock,        // {{/
-    OpenPartial,       // {{>
-    OpenComment,       // {{!
-    OpenCommentBlock,  // {{!--
-    CloseCommentBlock, // --}}
+    // Handlebars specific tokens
+    /// `{{`.
+    Open,
+    /// `}}`.
+    Close,
+    /// `{{{`.
+    OpenUnescaped,
+    /// `}}}`.
+    CloseUnescaped,
+    /// `{{{{`.
+    OpenRawBlock,
+    /// `}}}}`.
+    CloseRawBlock,
+    /// `{{{{/`.
+    OpenEndRawBlock,
+    /// `{{#`.
+    OpenBlock,
+    /// `{{^`.
+    OpenInverseBlock,
+    /// `{{/`.
+    CloseBlock,
+    /// `{{>`.
+    OpenPartial,
+    /// `{{!`.
+    OpenComment,
+    /// `{{!--`.
+    OpenCommentBlock,
+    /// `--}}`.
+    CloseCommentBlock,
 
-    // 关键字
-    Else, // else
+    // Keywords
+    /// `else` keyword.
+    Else,
 
-    // 标识符和字面量
+    // Identifiers and literals
+    /// Identifier.
     Identifier,
+    /// String literal.
     StringLiteral,
+    /// Number literal.
     NumberLiteral,
+    /// Boolean literal.
     BooleanLiteral,
-    Dot,          // .
-    Slash,        // /
-    Hash,         // #
-    At,           // @
-    Pipe,         // |
-    Equal,        // =
-    LeftParen,    // (
-    RightParen,   // )
-    LeftBracket,  // [
-    RightBracket, // ]
-    Caret,        // ^
+    /// `.` symbol.
+    Dot,
+    /// `/` symbol.
+    Slash,
+    /// `#` symbol.
+    Hash,
+    /// `@` symbol.
+    At,
+    /// `|` symbol.
+    Pipe,
+    /// `=` symbol.
+    Equal,
+    /// `(` symbol.
+    LeftParen,
+    /// `)` symbol.
+    RightParen,
+    /// `[` symbol.
+    LeftBracket,
+    /// `]` symbol.
+    RightBracket,
+    /// `^` symbol.
+    Caret,
 
-    // 内容
-    Content, // HTML/text content outside of handlebars expressions
+    // Content
+    /// HTML/text content.
+    Content,
 
-    // --- 节点种类 (Elements) ---
+    // --- Elements ---
+    /// Root node.
     Root,
+    /// Mustache expression.
     Mustache,
+    /// Block expression.
     Block,
+    /// Inverse block expression.
     InverseBlock,
+    /// Partial template reference.
     Partial,
-    CommentNode, // Avoid conflict with Comment token
-    ContentNode, // Avoid conflict with Content token
+    /// Comment node.
+    CommentNode,
+    /// Content node.
+    ContentNode,
+    /// Expression node.
     Expression,
+    /// Sub-expression node.
     SubExpression,
+    /// Path node.
     Path,
+    /// Parameter node.
     Parameter,
+    /// Else block.
     ElseBlock,
 
-    // 特殊
+    // --- Special ---
+    /// Error node.
     Error,
+    /// End of stream.
     Eof,
 }
 

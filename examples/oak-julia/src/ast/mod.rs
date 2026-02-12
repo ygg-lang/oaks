@@ -1,39 +1,75 @@
 #![doc = include_str!("readme.md")]
-#[cfg(feature = "serde")]
-use serde::{Deserialize, Serialize};
 
-/// Julia 根节点
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+/// Root node of the Julia AST.
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 #[derive(Debug, Clone, PartialEq)]
 pub struct JuliaRoot {
+    /// The statements in the root.
     pub statements: Vec<JuliaStatement>,
 }
 
-/// Julia 语句
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+/// A Julia statement.
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 #[derive(Debug, Clone, PartialEq)]
 pub enum JuliaStatement {
+    /// A function definition.
     Function(JuliaFunction),
-    If { condition: JuliaExpression, then_body: Vec<JuliaStatement>, else_body: Option<Vec<JuliaStatement>> },
-    For { variable: String, iterable: JuliaExpression, body: Vec<JuliaStatement> },
+    /// An if statement.
+    If {
+        /// The condition expression.
+        condition: JuliaExpression,
+        /// The then branch body.
+        then_body: Vec<JuliaStatement>,
+        /// The optional else branch body.
+        else_body: Option<Vec<JuliaStatement>>,
+    },
+    /// A for loop.
+    For {
+        /// The loop variable name.
+        variable: String,
+        /// The iterable expression.
+        iterable: JuliaExpression,
+        /// The loop body.
+        body: Vec<JuliaStatement>,
+    },
+    /// An expression statement.
     Expression(JuliaExpression),
+    /// An error statement.
     Error,
 }
 
-/// Julia 函数定义
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+/// A Julia function definition.
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 #[derive(Debug, Clone, PartialEq)]
 pub struct JuliaFunction {
+    /// The function name.
     pub name: String,
+    /// The function body.
     pub body: Vec<JuliaStatement>,
 }
 
-/// Julia 表达式
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+/// A Julia expression.
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 #[derive(Debug, Clone, PartialEq)]
 pub enum JuliaExpression {
+    /// An identifier.
     Identifier(String),
+    /// A literal value.
     Literal(String),
-    Binary { left: Box<JuliaExpression>, op: String, right: Box<JuliaExpression> },
-    Call { callee: Box<JuliaExpression>, arguments: Vec<JuliaExpression> },
+    /// A binary operation.
+    Binary {
+        /// The left operand.
+        left: Box<JuliaExpression>,
+        /// The operator.
+        op: String,
+        /// The right operand.
+        right: Box<JuliaExpression>,
+    },
+    /// A function call.
+    Call {
+        /// The callee expression.
+        callee: Box<JuliaExpression>,
+        /// The arguments to the call.
+        arguments: Vec<JuliaExpression>,
+    },
 }

@@ -15,6 +15,7 @@ pub struct ValaLanguageService {
 }
 #[cfg(feature = "lsp")]
 impl ValaLanguageService {
+    /// Creates a new Vala language service.
     pub fn new(vfs: MemoryVfs) -> Self {
         Self { vfs, workspace: oak_lsp::workspace::WorkspaceManager::default() }
     }

@@ -4,16 +4,19 @@ pub mod token_type;
 use crate::{language::HaskellLanguage, lexer::token_type::HaskellTokenType};
 use oak_core::{Lexer, LexerCache, LexerState, TextEdit, lexer::LexOutput, source::Source};
 
-type State<'a, S> = LexerState<'a, S, HaskellLanguage>;
+pub(crate) type State<'a, S> = LexerState<'a, S, HaskellLanguage>;
 
+/// Lexer for the Haskell language.
 #[derive(Clone)]
 pub struct HaskellLexer<'config> {
-    _config: &'config HaskellLanguage,
+    /// Language configuration.
+    config: &'config HaskellLanguage,
 }
 
 impl<'config> HaskellLexer<'config> {
+    /// Creates a new Haskell lexer with the given configuration.
     pub fn new(config: &'config HaskellLanguage) -> Self {
-        Self { _config: config }
+        Self { config }
     }
 
     fn skip_whitespace<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
@@ -508,7 +511,7 @@ impl<'config> Lexer<HaskellLanguage> for HaskellLexer<'config> {
                 continue;
             }
 
-            // 如果没有匹配到任何模式，跳过当前字符并标记为错误
+            // If no pattern matches, skip the current character and mark as error
             let start_pos = state.get_position();
             if state.peek().is_some() {
                 state.advance(1);
@@ -518,7 +521,7 @@ impl<'config> Lexer<HaskellLanguage> for HaskellLexer<'config> {
             state.advance_if_dead_lock(safe_point)
         }
 
-        // 添加 EOF token
+        // Add EOF token
         let pos = state.get_position();
         state.add_token(HaskellTokenType::Eof, pos, pos);
 

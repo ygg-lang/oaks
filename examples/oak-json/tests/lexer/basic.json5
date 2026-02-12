@@ -1,0 +1,123 @@
+{
+    // Comments are allowed in JSON5
+    /* Multi-line comments too */
+    
+    // Unquoted keys
+    unquotedKey: "value",
+    
+    // Single quotes
+    'singleQuotes': 'are supported',
+    
+    // Trailing commas
+    "trailingComma": [
+        1,
+        2,
+        3,
+    ],
+    
+    "objectTrailingComma": {
+        "a": 1,
+        "b": 2,
+    },
+
+    // Numbers
+    "hexadecimal": 0xDEADBEEF,
+    "leadingDecimalPoint": .8675309,
+    "trailingDecimalPoint": 8675309.,
+    "positiveSign": +1,
+    "explicitPlus": +1.23,
+    "infinity": Infinity,
+    "negativeInfinity": -Infinity,
+    "nan": NaN,
+    "negativeNan": -NaN,
+
+    // Strings
+    "lineContinuation": "This string \
+continues on the next line",
+    "escapes": "\0 \x12",
+    
+    // Standard JSON features still work
+    "standard": {
+        "bool": true,
+        "null": null,
+        "float": 3.14159e+10
+    },
+
+    "mixedArray": [
+        "string",
+        123,
+        true,
+        null,
+        { nested: "obj" },
+        [ "nested", "array" ],
+        Infinity,
+        NaN,
+    ],
+
+    // More complex nested structures
+    "complex": {
+        "users": [
+            {
+                id: 1,
+                name: "Alice",
+                roles: ["admin", "editor"],
+                active: true,
+                metadata: {
+                    lastLogin: "2023-01-01T12:00:00Z",
+                    preferences: {
+                        theme: "dark",
+                        notifications: true
+                    }
+                }
+            },
+            {
+                id: 2,
+                name: 'Bob',
+                roles: ['viewer'],
+                active: false,
+                metadata: null
+            }
+        ],
+        "settings": {
+            debug: true,
+            maxRetries: 5,
+            timeout: 30.5,
+            features: {
+                newUI: true,
+                betaAccess: false
+            }
+        }
+    },
+
+    // Edge cases and stress testing
+    "stress": [
+        // Empty object
+        {},
+        // Empty array
+        [],
+        // Deeply nested
+        [[[[["deep"]]]]],
+        // Unicode keys and values
+        {
+            "中文键": "中文值",
+            "emoji": "🚀",
+            "escapedUnicode": "\u00A9"
+        },
+        // Various number formats
+        [
+            0,
+            -0,
+            1,
+            -1,
+            1.5,
+            -1.5,
+            1.5e3,
+            -1.5e3,
+            1.5e-3,
+            -1.5E-3
+        ]
+    ],
+
+    // Final comment
+    "footer": "End of test"
+}

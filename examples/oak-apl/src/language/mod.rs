@@ -1,22 +1,20 @@
 #![doc = include_str!("readme.md")]
 #[doc = include_str!("../readme.md")]
-use crate::{ast::AplRoot, lexer::AplTokenType, parser::AplElementType};
+use crate::ast::AplRoot;
 use oak_core::{Language, LanguageCategory};
-#[cfg(feature = "serde")]
-use serde::{Deserialize, Serialize};
 
-/// APL 语言配置和元数据。
+/// APL language configuration and metadata.
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct AplLanguage {
-    /// 是否启用 APL 扩展特性
+    /// Whether to enable APL extension features.
     pub allow_extensions: bool,
-    /// 是否启用严格模式
+    /// Whether to enable strict mode.
     pub strict_mode: bool,
 }
 
 impl AplLanguage {
-    /// 创建新的 APL 语言配置
+    /// Creates a new APL language configuration.
     pub fn new() -> Self {
         Self { allow_extensions: true, strict_mode: false }
     }

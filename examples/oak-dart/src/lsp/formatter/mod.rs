@@ -1,9 +1,9 @@
 #![doc = include_str!("readme.md")]
 use crate::ast::DartRoot;
-use serde::{Deserialize, Serialize};
 
 /// Dart Code Formatter
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+#[derive(Debug, Clone)]
 pub struct DartFormatter {
     pub indent_size: usize,
 }

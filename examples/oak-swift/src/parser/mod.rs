@@ -21,19 +21,6 @@ impl<'config> SwiftParser<'config> {
         Self { config }
     }
 
-    pub(crate) fn parse_root_internal<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> Result<&'a GreenNode<'a, SwiftLanguage>, OakError> {
-        use crate::lexer::SwiftTokenType::*;
-        let checkpoint = (0, 0);
-
-        while state.not_at_end() && !state.at(Eof) {
-            self.parse_statement(state)?
-        }
-
-        state.eat(Eof);
-
-        Ok(state.finish_at(checkpoint, crate::parser::element_type::SwiftElementType::SourceFile))
-    }
-
     fn parse_statement<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> Result<(), OakError> {
         use crate::lexer::SwiftTokenType::*;
         let kind = state.peek_kind();
@@ -264,6 +251,17 @@ impl<'config> Pratt<SwiftLanguage> for SwiftParser<'config> {
 impl<'config> Parser<SwiftLanguage> for SwiftParser<'config> {
     fn parse<'a, S: Source + ?Sized>(&self, text: &'a S, edits: &[TextEdit], cache: &'a mut impl ParseCache<SwiftLanguage>) -> ParseOutput<'a, SwiftLanguage> {
         let lexer = crate::lexer::SwiftLexer::new(self.config);
-        parse_with_lexer(&lexer, text, edits, cache, |state| self.parse_root_internal(state))
+        parse_with_lexer(&lexer, text, edits, cache, |state| {
+            use crate::lexer::SwiftTokenType::*;
+            let checkpoint = (0, 0);
+
+            while state.not_at_end() && !state.at(Eof) {
+                self.parse_statement(state)?
+            }
+
+            state.eat(Eof);
+
+            Ok(state.finish_at(checkpoint, crate::parser::element_type::SwiftElementType::SourceFile))
+        })
     }
 }

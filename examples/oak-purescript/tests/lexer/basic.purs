@@ -1,33 +1,86 @@
+-- Comprehensive PureScript Lexer Test
+
 module Main where
 
 import Prelude
+import Effect (Effect)
+import Effect.Console (log)
+import Data.Maybe (Maybe(..))
+import Data.List (List(..), (:))
+import Data.Tuple (Tuple(..))
+import Data.Either (Either(..))
+import Control.Monad.Eff (Eff)
 
--- 基本函数定义
-add :: Int -> Int -> Int
-add x y = x + y
+-- Basic Types
+i :: Int
+i = 42
 
--- 字符串字面量
-greeting :: String
-greeting = "Hello, PureScript!"
+n :: Number
+n = 3.14
 
--- 数字字面量
-numbers :: Array Number
-numbers = [1.0, 2.5, 3.14]
+s :: String
+s = "Hello, world!"
 
--- 布尔值
-isTrue :: Boolean
-isTrue = true
+b :: Boolean
+b = true
 
--- 字符字面量
-char :: Char
-char = 'a'
+c :: Char
+c = 'A'
 
--- 操作符
-result :: Int
-result = 10 + 20 * 30 / 5 - 2
+-- Arrays and Records
+arr :: Array Int
+arr = [1, 2, 3, 4]
 
--- 注释测试
-{- 多行注释
-   可以跨行 -}
+rec :: { name :: String, age :: Int }
+rec = { name: "Alice", age: 30 }
+
+-- Row Polymorphism
+showPerson :: forall r. { name :: String | r } -> String
+showPerson p = "Name: " <> p.name
+
+-- Algebraic Data Types
+data Shape
+    = Circle Number
+    | Rectangle Number Number
+    | Point
+
+-- Pattern Matching
+area :: Shape -> Number
+area (Circle r) = 3.14159 * r * r
+area (Rectangle w h) = w * h
+area Point = 0.0
+
+-- Newtypes
+newtype Email = Email String
+
+-- Type Classes
+class Show a where
+    show :: a -> String
+
+instance showShape :: Show Shape where
+    show (Circle r) = "Circle " <> show r
+    show (Rectangle w h) = "Rectangle " <> show w <> " " <> show h
+    show Point = "Point"
+
+-- Functional Dependencies
+class Collection c e | c -> e where
+    insert :: e -> c -> c
+    member :: e -> c -> Boolean
+
+-- Kind Signatures
+data Proxy (a :: Type) = Proxy
+
+-- Foreign Imports
+foreign import logMessage :: String -> Effect Unit
+
+-- Do Notation
 main :: Effect Unit
-main = log greeting
+main = do
+    log "Starting..."
+    let result = area (Circle 10.0)
+    log $ "Area: " <> show result
+    pure unit
+
+-- Operators
+infixl 4 add as +
+infixr 5 append as <>

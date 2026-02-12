@@ -1,159 +1,297 @@
 use oak_core::{Source, Token, TokenType, UniversalElementRole, UniversalTokenRole};
-#[cfg(feature = "serde")]
-use serde::{Deserialize, Serialize};
 use std::fmt;
 
+/// Represents a token in a Ruby source file.
 pub type RubyToken = Token<RubyTokenType>;
 
+/// Token types for Ruby.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 #[repr(u8)]
 pub enum RubyTokenType {
+    /// An identifier.
     Identifier,
+    /// A global variable (e.g., `$global`).
     GlobalVariable,
+    /// An instance variable (e.g., `@instance`).
     InstanceVariable,
+    /// A class variable (e.g., `@@class`).
     ClassVariable,
+    /// A constant (e.g., `CONSTANT`).
     Constant,
+    /// An integer literal.
     IntegerLiteral,
+    /// A float literal.
     FloatLiteral,
+    /// A string literal.
     StringLiteral,
+    /// A literal value.
     Literal,
+    /// A symbol (e.g., `:symbol`).
     Symbol,
+    /// A regular expression literal.
     RegexLiteral,
 
+    /// The `if` keyword.
     If,
+    /// The `unless` keyword.
     Unless,
+    /// The `elsif` keyword.
     Elsif,
+    /// The `else` keyword.
     Else,
+    /// The `case` keyword.
     Case,
+    /// The `when` keyword.
     When,
+    /// The `then` keyword.
     Then,
+    /// The `for` keyword.
     For,
+    /// The `while` keyword.
     While,
+    /// The `until` keyword.
     Until,
+    /// The `break` keyword.
     Break,
+    /// The `next` keyword.
     Next,
+    /// The `redo` keyword.
     Redo,
+    /// The `retry` keyword.
     Retry,
+    /// The `return` keyword.
     Return,
+    /// The `yield` keyword.
     Yield,
+    /// The `def` keyword.
     Def,
+    /// The `class` keyword.
     Class,
+    /// The `module` keyword.
     Module,
+    /// The `end` keyword.
     End,
+    /// The `lambda` keyword.
     Lambda,
+    /// The `proc` keyword.
     Proc,
+    /// The `begin` keyword.
     Begin,
+    /// The `rescue` keyword.
     Rescue,
+    /// The `ensure` keyword.
     Ensure,
+    /// The `raise` keyword.
     Raise,
+    /// The `require` keyword.
     Require,
+    /// The `load` keyword.
     Load,
+    /// The `include` keyword.
     Include,
+    /// The `extend` keyword.
     Extend,
+    /// The `prepend` keyword.
     Prepend,
+    /// The `and` keyword.
     And,
+    /// The `or` keyword.
     Or,
+    /// The `=>` operator.
+    EqualGreater,
+    /// The `not` keyword.
     Not,
+    /// The `in` keyword.
     In,
+    /// The `true` keyword.
     True,
+    /// The `false` keyword.
     False,
+    /// The `nil` keyword.
     Nil,
+    /// The `super` keyword.
     Super,
+    /// The `self` keyword.
     Self_,
+    /// The `alias` keyword.
     Alias,
+    /// The `undef` keyword.
     Undef,
+    /// The `defined?` keyword.
     Defined,
+    /// The `do` keyword.
     Do,
 
+    /// Plus operator `+`.
     Plus,
+    /// Minus operator `-`.
     Minus,
+    /// Multiply operator `*`.
     Multiply,
+    /// Divide operator `/`.
     Divide,
+    /// Modulo operator `%`.
     Modulo,
+    /// Power operator `**`.
     Power,
+    /// Equality operator `==`.
     EqualEqual,
+    /// Inequality operator `!=`.
     NotEqual,
+    /// Less than operator `<`.
     Less,
+    /// Greater than operator `>`.
     Greater,
+    /// Less than or equal operator `<=`.
     LessEqual,
+    /// Greater than or equal operator `>=`.
     GreaterEqual,
+    /// Case equality operator `===`.
     EqualEqualEqual,
+    /// Spaceship operator `<=>`.
     Spaceship,
+    /// Assignment operator `=`.
     Assign,
+    /// Addition assignment operator `+=`.
     PlusAssign,
+    /// Subtraction assignment operator `-=`.
     MinusAssign,
+    /// Multiplication assignment operator `*=`.
     MultiplyAssign,
+    /// Division assignment operator `/=`.
     DivideAssign,
+    /// Modulo assignment operator `%=`.
     ModuloAssign,
+    /// Power assignment operator `**=`.
     PowerAssign,
+    /// Bitwise AND operator `&`.
     BitAnd,
+    /// Bitwise OR operator `|`.
     BitOr,
+    /// Bitwise XOR operator `^`.
     Xor,
+    /// Logical NOT operator `!`.
     LogicalNot,
+    /// Bitwise NOT operator `~`.
     Tilde,
+    /// Left shift operator `<<`.
     LeftShift,
+    /// Right shift operator `>>`.
     RightShift,
+    /// Bitwise AND assignment operator `&=`.
     AndAssign,
+    /// Bitwise OR assignment operator `|=`.
     OrAssign,
+    /// Bitwise XOR assignment operator `^=`.
     XorAssign,
+    /// Left shift assignment operator `<<=`.
     LeftShiftAssign,
+    /// Right shift assignment operator `>>=`.
     RightShiftAssign,
+    /// Logical AND operator `&&`.
     AndAnd,
+    /// Logical OR operator `||`.
     OrOr,
+    /// Logical OR assignment operator `||=`.
     OrOrAssign,
+    /// Logical AND assignment operator `&&=`.
     AndAndAssign,
+    /// Ternary operator `?`.
     Question,
+    /// Range operator `..`.
     DotDot,
+    /// Exclusive range operator `...`.
     DotDotDot,
+    /// Match operator `=~`.
     Match,
+    /// Not match operator `!~`.
     NotMatch,
 
+    /// Left parenthesis `(`.
     LeftParen,
+    /// Right parenthesis `)`.
     RightParen,
+    /// Left bracket `[`.
     LeftBracket,
+    /// Right bracket `]`.
     RightBracket,
+    /// Left brace `{`.
     LeftBrace,
+    /// Right brace `}`.
     RightBrace,
+    /// Comma `,`.
     Comma,
+    /// Colon `:`.
     Colon,
+    /// Semicolon `;`.
     Semicolon,
+    /// Dot `.`.
     Dot,
+    /// Double colon `::`.
     DoubleColon,
+    /// At symbol `@`.
     At,
+    /// Dollar symbol `$`.
     Dollar,
 
+    /// Whitespace.
     Whitespace,
+    /// Newline.
     Newline,
+    /// A comment.
     Comment,
+    /// End of file.
     Eof,
+    /// An invalid token.
     Invalid,
+    /// The root of the syntax tree.
     Root,
+    /// A binary expression.
     BinaryExpression,
+    /// A unary expression.
     UnaryExpression,
+    /// A literal expression.
     LiteralExpression,
+    /// A parenthesized expression.
     ParenExpression,
+    /// A parenthesized expression (alias).
     ParenthesizedExpression,
+    /// A method definition.
     MethodDefinition,
+    /// A class definition.
     ClassDefinition,
+    /// A module definition.
     ModuleDefinition,
+    /// An if statement.
     IfStatement,
+    /// A while statement.
     WhileStatement,
+    /// A return statement.
     ReturnStatement,
+    /// An if expression.
     IfExpression,
+    /// A method call expression.
     CallExpression,
+    /// A member access expression.
     MemberAccess,
+    /// A list of parameters.
     ParameterList,
+    /// A list of arguments.
     ArgumentList,
+    /// An error element.
     Error,
+    /// Equality operator (alias).
     Equal,
 }
 
 impl RubyTokenType {
+    /// Returns true if the token is ignored (whitespace, newline, or comment).
     pub fn is_ignored(&self) -> bool {
         matches!(self, Self::Whitespace | Self::Newline | Self::Comment)
     }
 
+    /// Returns true if the token type is a keyword.
     pub fn is_keyword(&self) -> bool {
         matches!(
             self,
@@ -272,6 +410,7 @@ impl fmt::Display for RubyTokenType {
             Self::Modulo => "Modulo",
             Self::Power => "Power",
             Self::EqualEqual => "EqualEqual",
+            Self::EqualGreater => "EqualGreater",
             Self::NotEqual => "NotEqual",
             Self::Less => "Less",
             Self::Greater => "Greater",

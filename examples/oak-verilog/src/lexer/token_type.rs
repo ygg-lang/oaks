@@ -1,85 +1,167 @@
 use oak_core::{TokenType, UniversalTokenRole};
-#[cfg(feature = "serde")]
-use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub enum VerilogKind {
-    // Tokens
+    /// Whitespace token.
     Whitespace,
+    /// Comment token.
     Comment,
+    /// String literal.
     String,
+    /// Number literal.
     Number,
+    /// Identifier.
     Identifier,
 
     // Keywords
+    /// 'module' keyword.
     ModuleKw,
+    /// 'endmodule' keyword.
     EndmoduleKw,
+    /// 'wire' keyword.
     WireKw,
+    /// 'reg' keyword.
     RegKw,
+    /// 'input' keyword.
     InputKw,
+    /// 'output' keyword.
     OutputKw,
+    /// 'always' keyword.
     AlwaysKw,
+    /// 'begin' keyword.
     BeginKw,
+    /// 'end' keyword.
     EndKw,
+    /// 'if' keyword.
     IfKw,
+    /// 'else' keyword.
     ElseKw,
+    /// 'assign' keyword.
     AssignKw,
+    /// 'posedge' keyword.
     PosedgeKw,
+    /// 'negedge' keyword.
     NegedgeKw,
+    /// 'case' keyword.
     CaseKw,
+    /// 'endcase' keyword.
     EndcaseKw,
+    /// 'default' keyword.
     DefaultKw,
+    /// 'initial' keyword.
     InitialKw,
+    /// 'inout' keyword.
     InoutKw,
+    /// 'parameter' keyword.
     ParameterKw,
 
     // Operators
+    /// '==' operator.
     EqualEqual,
+    /// '!=' operator.
     NotEqual,
+    /// '<=' operator.
     LessEqual,
+    /// '>=' operator.
     GreaterEqual,
+    /// '<<' operator.
     LeftShift,
+    /// '>>' operator.
     RightShift,
+    /// '&&' operator.
     AndAnd,
+    /// '||' operator.
     OrOr,
+    /// '+' operator.
     Plus,
+    /// '-' operator.
     Minus,
+    /// '*' operator.
     Star,
+    /// '/' operator.
     Slash,
+    /// '%' operator.
     Percent,
+    /// '=' operator.
     Equal,
+    /// '!' operator.
     Bang,
+    /// '<' operator.
     Less,
+    /// '>' operator.
     Greater,
+    /// '&' operator.
     Ampersand,
+    /// '|' operator.
     Pipe,
+    /// '^' operator.
     Caret,
+    /// '~' operator.
     Tilde,
 
     // Punctuation
+    /// '(' punctuation.
     LeftParen,
+    /// ')' punctuation.
     RightParen,
+    /// '[' punctuation.
     LeftBracket,
+    /// ']' punctuation.
     RightBracket,
+    /// '{' punctuation.
     LeftBrace,
+    /// '}' punctuation.
     RightBrace,
+    /// ';' punctuation.
     Semicolon,
+    /// ',' punctuation.
     Comma,
+    /// '.' punctuation.
     Dot,
+    /// ':' punctuation.
     Colon,
+    /// '#' punctuation.
     Hash,
+    /// '@' punctuation.
     At,
+    /// '?' punctuation.
     Question,
 
     // Elements
+    /// Root element.
+    Root,
+    /// Module element.
     Module,
+    /// Port list element.
+    PortList,
+    /// Port element.
+    Port,
+    /// Module item element.
+    ModuleItem,
+    /// Assign element.
+    Assign,
+    /// Declaration element.
+    Declaration,
+    /// Always block element.
+    Always,
+    /// Initial block element.
+    Initial,
+    /// Block element.
+    Block,
+    /// Expression element.
+    Expression,
+    /// Statement element.
+    Statement,
 
     // Internal
+    /// Error token.
     Error,
+    /// End of file token.
     Eof,
 }
 
+/// Verilog token type.
 pub type VerilogTokenType = VerilogKind;
 
 impl TokenType for VerilogKind {

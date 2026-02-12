@@ -1,12 +1,10 @@
 #![doc = include_str!("readme.md")]
 use crate::ast::ScalaRoot;
 use oak_core::{Language, LanguageCategory};
-#[cfg(feature = "serde")]
-use serde::{Deserialize, Serialize};
 
 /// Scala language implementation.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct ScalaLanguage {
     // Scala language-specific configuration, currently empty.
 }

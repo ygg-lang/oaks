@@ -1,20 +1,10 @@
 #![doc = include_str!("readme.md")]
-//! PureScript syntax highlighter
+//! Purescript syntax highlighter.
+//!
+//! This module provides syntax highlighting for Purescript source code, supporting keywords, types, comments, etc.
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub enum HighlightKind {
-    Keyword,
-    String,
-    Number,
-    Comment,
-    Identifier,
-}
-
-/// 高亮器 trait
-pub trait Highlighter {
-    /// 对给定的文本进行高亮处理
-    fn highlight(&self, text: &str) -> Vec<(usize, usize, HighlightKind)>;
-}
+use crate::token_type::TokenType;
+use oak_lsp::highlighter::{HighlightKind, Highlighter};
 
 pub struct PurescriptHighlighter {
     pub use_parser: bool,
@@ -127,7 +117,7 @@ impl PurescriptHighlighter {
             highlights.push((absolute_pos, end_pos, HighlightKind::Comment));
             start = end_pos
         }
-        // 块注释
+        // Block comments
         let mut start = 0;
         while let Some(pos) = text[start..].find("{-") {
             let absolute_pos = start + pos;

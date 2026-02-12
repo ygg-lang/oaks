@@ -11,10 +11,10 @@ use oak_core::{
 
 #[derive(Clone, Debug)]
 pub struct ClojureLexer<'config> {
-    _config: &'config ClojureLanguage,
+    pub(crate) _config: &'config ClojureLanguage,
 }
 
-type State<'a, S> = LexerState<'a, S, ClojureLanguage>;
+pub(crate) type State<'a, S> = LexerState<'a, S, ClojureLanguage>;
 
 impl<'config> Lexer<ClojureLanguage> for ClojureLexer<'config> {
     fn lex<'a, S: Source + ?Sized>(&self, text: &S, _edits: &[TextEdit], cache: &'a mut impl LexerCache<ClojureLanguage>) -> LexOutput<ClojureLanguage> {
@@ -74,7 +74,7 @@ impl<'config> ClojureLexer<'config> {
                 }
                 Some('~') => {
                     state.advance(1);
-                    if state.peek() == Some('↯') {
+                    if state.peek() == Some('@') {
                         state.advance(1);
                         state.add_token(ClojureTokenType::UnquoteSplice, start, state.get_position())
                     }

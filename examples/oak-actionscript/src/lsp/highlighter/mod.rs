@@ -1,23 +1,23 @@
 #![doc = include_str!("readme.md")]
 
-/// 高亮类型的本地定义
+/// Local definition of highlight types.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum HighlightKind {
-    /// 关键字
+    /// Keyword.
     Keyword,
-    /// 字符串
+    /// String.
     String,
-    /// 数字
+    /// Number.
     Number,
-    /// 注释
+    /// Comment.
     Comment,
-    /// 标识符
+    /// Identifier.
     Identifier,
 }
 
-/// ActionScript 语法高亮器
+/// ActionScript syntax highlighter.
 pub struct ActionScriptHighlighter {
-    /// 是否使用基于解析器的高亮
+    /// Whether to use parser-based highlighting.
     pub use_parser: bool,
 }
 
@@ -28,12 +28,12 @@ impl Default for ActionScriptHighlighter {
 }
 
 impl ActionScriptHighlighter {
-    /// 创建一个新的 ActionScript 高亮器实例
+    /// Creates a new ActionScript highlighter instance.
     pub fn new() -> Self {
         Self::default()
     }
 
-    /// 对给定的文本进行高亮处理
+    /// Highlights the given text.
     pub fn highlight(&self, text: &str) -> Vec<(usize, usize, HighlightKind)> {
         let mut highlights = Vec::new();
         highlights.extend(self.highlight_keywords(text));

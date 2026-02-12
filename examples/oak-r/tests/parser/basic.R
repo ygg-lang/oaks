@@ -1,21 +1,21 @@
-# 基础表达式
+# Basic expressions
 1 + 2 * 3
 (1 + 2) * 3
 -5 + 10
 TRUE && FALSE || TRUE
 
-# 赋值
+# Assignment
 x <- 42
 y = "hello"
 z <<- 100
 10 -> a
 
-# 函数调用
+# Function calls
 print("Hello, R!")
 sum(1, 2, 3)
 plot(x, y, main="Plot")
 
-# 控制流
+# Control flow
 if (x > 0) {
   print("Positive")
 } else {
@@ -30,7 +30,7 @@ for (i in 1:10) {
   print(i)
 }
 
-# 函数定义
+# Function definition
 my_func <- function(a, b) {
   return(a + b)
 }

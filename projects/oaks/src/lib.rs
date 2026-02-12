@@ -12,11 +12,11 @@
 /// Re-export of the core parsing and tree structures.
 pub use oak_core::*;
 /// Re-export of the folding range provider.
-pub use oak_folding::{FoldingProvider, FoldingRange};
+pub use oak_folding::{FoldingProvider, FoldingRange, FoldingRangeKind};
 /// Re-export of the hover information provider.
 pub use oak_hover::{Hover, HoverProvider};
 /// Re-export of the Language Server Protocol types and service.
-pub use oak_lsp::{FoldingRangeKind, LanguageService, Location, LspRange, Position, Range};
+pub use oak_lsp::{LanguageService, Location, LspRange};
 /// Re-export of the definition and reference providers.
 pub use oak_navigation::{DefinitionProvider, ReferencesProvider};
 /// Re-export of the semantic tokens provider.

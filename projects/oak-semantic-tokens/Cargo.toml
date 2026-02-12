@@ -12,4 +12,8 @@ keywords = ["semantic-tokens", "highlighting", "lsp"]
 [dependencies]
 oak-core = { workspace = true }
 oak-vfs = { workspace = true }
-serde = { workspace = true }
+serde = { workspace = true, optional = true }
+
+[features]
+serde = ["dep:serde", "oak-core/serde"]
+default = ["serde"]

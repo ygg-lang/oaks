@@ -1,28 +1,21 @@
-#![doc = include_str!("readme.md")]
-use crate::{ast::DejavuRoot, lexer::token_type::DejavuSyntaxKind};
+use crate::{ast::DejavuRoot, lexer::DejavuTokenType, parser::DejavuElementType};
 use oak_core::{Language, LanguageCategory};
-#[cfg(feature = "serde")]
-use serde::{Deserialize, Serialize};
 
+/// Dejavu language configuration and metadata.
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
-/// Syntax modes for Dejavu parser.
-pub enum SyntaxMode {
-    /// Programming mode: Standard .vk file
-    Programming,
-}
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+pub struct DejavuLanguage;
 
-#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
-/// The Dejavu programming language definition.
-pub struct DejavuLanguage {
-    /// Current syntax mode
-    pub syntax_mode: SyntaxMode,
+impl DejavuLanguage {
+    /// Creates a new Dejavu language configuration.
+    pub fn new() -> Self {
+        Self
+    }
 }
 
 impl Default for DejavuLanguage {
     fn default() -> Self {
-        Self { syntax_mode: SyntaxMode::Programming }
+        Self::new()
     }
 }
 
@@ -30,7 +23,7 @@ impl Language for DejavuLanguage {
     const NAME: &'static str = "dejavu";
     const CATEGORY: LanguageCategory = LanguageCategory::Programming;
 
-    type TokenType = DejavuSyntaxKind;
-    type ElementType = DejavuSyntaxKind;
+    type TokenType = DejavuTokenType;
+    type ElementType = DejavuElementType;
     type TypedRoot = DejavuRoot;
 }

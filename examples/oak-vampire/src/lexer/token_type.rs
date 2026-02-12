@@ -1,145 +1,86 @@
-use oak_core::{Source, Token, TokenType, UniversalElementRole, UniversalTokenRole};
-#[cfg(feature = "serde")]
-use serde::{Deserialize, Serialize};
+use oak_core::TokenType;
 
-pub type VampireToken = Token<VampireTokenType>;
-
-impl TokenType for VampireTokenType {
-    type Role = UniversalTokenRole;
-    const END_OF_STREAM: Self = Self::Eof;
-
-    fn is_ignored(&self) -> bool {
-        matches!(self, Self::Whitespace | Self::Newline | Self::LineComment | Self::BlockComment)
-    }
-
-    fn role(&self) -> Self::Role {
-        match self {
-            Self::Root => UniversalTokenRole::None,
-            Self::Text => UniversalTokenRole::None,
-            Self::Whitespace => UniversalTokenRole::Whitespace,
-            Self::Newline => UniversalTokenRole::Whitespace,
-            Self::Error => UniversalTokenRole::None,
-            Self::Eof => UniversalTokenRole::None,
-
-            // 标点符号
-            Self::LeftParen
-            | Self::RightParen
-            | Self::LeftBracket
-            | Self::RightBracket
-            | Self::LeftBrace
-            | Self::RightBrace
-            | Self::Colon
-            | Self::Semicolon
-            | Self::Dot
-            | Self::Comma
-            | Self::Question
-            | Self::Bang
-            | Self::At
-            | Self::Hash
-            | Self::Dollar
-            | Self::Percent
-            | Self::Caret
-            | Self::Ampersand
-            | Self::Star
-            | Self::Plus
-            | Self::Minus
-            | Self::Eq
-            | Self::LessThan
-            | Self::GreaterThan
-            | Self::Slash
-            | Self::Backslash
-            | Self::Pipe
-            | Self::Tilde => UniversalTokenRole::Punctuation,
-
-            // 复合操作符
-            Self::DoubleEq
-            | Self::NotEq
-            | Self::LessEq
-            | Self::GreaterEq
-            | Self::AndAnd
-            | Self::OrOr
-            | Self::PlusPlus
-            | Self::MinusMinus
-            | Self::PlusEq
-            | Self::MinusEq
-            | Self::StarEq
-            | Self::SlashEq
-            | Self::PercentEq
-            | Self::LeftShift
-            | Self::RightShift
-            | Self::Arrow => UniversalTokenRole::Operator,
-
-            // 关键字
-            Self::FofKw
-            | Self::CnfKw
-            | Self::TffKw
-            | Self::ThfKw
-            | Self::TpiKw
-            | Self::IncludeKw
-            | Self::AxiomKw
-            | Self::HypothesisKw
-            | Self::DefinitionKw
-            | Self::AssumptionKw
-            | Self::LemmaKw
-            | Self::TheoremKw
-            | Self::ConjectureKw
-            | Self::NegatedConjectureKw
-            | Self::PlainKw
-            | Self::TypeKw
-            | Self::FiDomainKw
-            | Self::FiFunctorsKw
-            | Self::FiPredicatesKw
-            | Self::UnknownKw
-            | Self::ForallKw
-            | Self::ExistsKw
-            | Self::AndKw
-            | Self::OrKw
-            | Self::NotKw
-            | Self::ImpliesKw
-            | Self::IffKw
-            | Self::XorKw
-            | Self::NorKw
-            | Self::NandKw
-            | Self::BoolKw
-            | Self::IntKw
-            | Self::RealKw
-            | Self::RatKw
-            | Self::IndividualKw
-            | Self::OTypeKw
-            | Self::ITypeKw
-            | Self::TTypeKw => UniversalTokenRole::Keyword,
-
-            // 字面量
-            Self::IntegerLiteral | Self::RealLiteral | Self::StringLiteral | Self::BoolLiteral => {
-                        UniversalTokenRole::Literal
-                    }
-                    Self::Identifier => UniversalTokenRole::Name,
-
-                    // 注释
-            Self::LineComment | Self::BlockComment => UniversalTokenRole::Comment,
-        }
-    }
-}
-
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
-#[repr(u8)]
+/// Vampire token types.
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub enum VampireTokenType {
-    // 根节点
-    Root,
-
-    // 基础文本
-    Text,
-    Whitespace,
-    Newline,
-
-    // 错误处理
-    Error,
-
-    // EOF
+    /// End of file.
     Eof,
+    /// Whitespace.
+    Whitespace,
+    /// Line comment.
+    LineComment,
+    /// Block comment.
+    BlockComment,
+    /// String literal.
+    StringLiteral,
+    /// Integer literal.
+    IntegerLiteral,
+    /// Real literal.
+    RealLiteral,
+    /// Identifier.
+    Identifier,
 
-    // 标点符号
+    // Keywords
+    FofKw,
+    CnfKw,
+    TffKw,
+    ThfKw,
+    TpiKw,
+    IncludeKw,
+    AxiomKw,
+    HypothesisKw,
+    DefinitionKw,
+    AssumptionKw,
+    LemmaKw,
+    TheoremKw,
+    ConjectureKw,
+    NegatedConjectureKw,
+    PlainKw,
+    TypeKw,
+    FiDomainKw,
+    FiFunctorsKw,
+    FiPredicatesKw,
+    UnknownKw,
+    ForallKw,
+    ExistsKw,
+    AndKw,
+    OrKw,
+    NotKw,
+    ImpliesKw,
+    IffKw,
+    XorKw,
+    NorKw,
+    NandKw,
+    BoolKw,
+    IndividualKw,
+    IntKw,
+    RealKw,
+    RatKw,
+    TTypeKw,
+    OTypeKw,
+    ITypeKw,
+    BoolLiteral,
+
+    // Operators
+    DoubleEq,
+    NotEq,
+    LessEq,
+    GreaterEq,
+    AndAnd,
+    OrOr,
+    PlusPlus,
+    MinusMinus,
+    PlusEq,
+    MinusEq,
+    StarEq,
+    SlashEq,
+    PercentEq,
+    LeftShift,
+    RightShift,
+    Arrow,
+
+    // Single char tokens
     LeftParen,
     RightParen,
     LeftBracket,
@@ -168,77 +109,74 @@ pub enum VampireTokenType {
     Backslash,
     Pipe,
     Tilde,
+}
 
-    // 复合操作符
-    DoubleEq,
-    NotEq,
-    LessEq,
-    GreaterEq,
-    AndAnd,
-    OrOr,
-    PlusPlus,
-    MinusMinus,
-    PlusEq,
-    MinusEq,
-    StarEq,
-    SlashEq,
-    PercentEq,
-    LeftShift,
-    RightShift,
-    Arrow,
+impl TokenType for VampireTokenType {
+    const END_OF_STREAM: Self = VampireTokenType::Eof;
+    type Role = oak_core::UniversalTokenRole;
 
-    // Vampire 关键字
-    FofKw,
-    CnfKw,
-    TffKw,
-    ThfKw,
-    TpiKw,
-    IncludeKw,
-    AxiomKw,
-    HypothesisKw,
-    DefinitionKw,
-    AssumptionKw,
-    LemmaKw,
-    TheoremKw,
-    ConjectureKw,
-    NegatedConjectureKw,
-    PlainKw,
-    TypeKw,
-    FiDomainKw,
-    FiFunctorsKw,
-    FiPredicatesKw,
-    UnknownKw,
+    fn role(&self) -> Self::Role {
+        match self {
+            VampireTokenType::Eof => oak_core::UniversalTokenRole::Eof,
+            VampireTokenType::Whitespace => oak_core::UniversalTokenRole::Whitespace,
+            VampireTokenType::LineComment | VampireTokenType::BlockComment => oak_core::UniversalTokenRole::Comment,
+            VampireTokenType::StringLiteral => oak_core::UniversalTokenRole::Literal,
+            VampireTokenType::IntegerLiteral | VampireTokenType::RealLiteral => oak_core::UniversalTokenRole::Literal,
+            VampireTokenType::Identifier => oak_core::UniversalTokenRole::Name,
 
-    // 逻辑操作符
-    ForallKw,
-    ExistsKw,
-    AndKw,
-    OrKw,
-    NotKw,
-    ImpliesKw,
-    IffKw,
-    XorKw,
-    NorKw,
-    NandKw,
+            VampireTokenType::FofKw
+            | VampireTokenType::CnfKw
+            | VampireTokenType::TffKw
+            | VampireTokenType::ThfKw
+            | VampireTokenType::TpiKw
+            | VampireTokenType::IncludeKw
+            | VampireTokenType::AxiomKw
+            | VampireTokenType::HypothesisKw
+            | VampireTokenType::DefinitionKw
+            | VampireTokenType::AssumptionKw
+            | VampireTokenType::LemmaKw
+            | VampireTokenType::TheoremKw
+            | VampireTokenType::ConjectureKw
+            | VampireTokenType::NegatedConjectureKw
+            | VampireTokenType::PlainKw
+            | VampireTokenType::TypeKw
+            | VampireTokenType::FiDomainKw
+            | VampireTokenType::FiFunctorsKw
+            | VampireTokenType::FiPredicatesKw
+            | VampireTokenType::UnknownKw
+            | VampireTokenType::ForallKw
+            | VampireTokenType::ExistsKw
+            | VampireTokenType::AndKw
+            | VampireTokenType::OrKw
+            | VampireTokenType::NotKw
+            | VampireTokenType::ImpliesKw
+            | VampireTokenType::IffKw
+            | VampireTokenType::XorKw
+            | VampireTokenType::NorKw
+            | VampireTokenType::NandKw
+            | VampireTokenType::BoolKw
+            | VampireTokenType::IndividualKw
+            | VampireTokenType::IntKw
+            | VampireTokenType::RealKw
+            | VampireTokenType::RatKw
+            | VampireTokenType::TTypeKw
+            | VampireTokenType::OTypeKw
+            | VampireTokenType::ITypeKw
+            | VampireTokenType::BoolLiteral => oak_core::UniversalTokenRole::Keyword,
 
-    // 基本类型
-    BoolKw,
-    IntKw,
-    RealKw,
-    RatKw,
-    IndividualKw,
-    OTypeKw,
-    ITypeKw,
-    TTypeKw,
+            _ => oak_core::UniversalTokenRole::Operator,
+        }
+    }
+}
 
-    // 字面量
-    IntegerLiteral,
-    RealLiteral,
-    StringLiteral,
-    BoolLiteral,
-    Identifier,
+impl From<VampireTokenType> for u16 {
+    fn from(t: VampireTokenType) -> u16 {
+        t as u16
+    }
+}
 
-    // 注释
-    LineComment,
-    BlockComment,
+impl From<u16> for VampireTokenType {
+    fn from(i: u16) -> Self {
+        unsafe { std::mem::transmute(i as u8) }
+    }
 }

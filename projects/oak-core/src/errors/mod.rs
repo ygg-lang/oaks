@@ -1,37 +1,21 @@
 use crate::source::SourceId;
 
-mod display;
-mod from_std;
-mod source;
-
-/// Result type for lexical analysis operations.
-///
-/// This type alias represents the result of tokenization operations,
-/// where successful operations return a value of type `T` and failed
-/// operations return an [`OakError`].
-pub type LexResult<T> = Result<T, OakError>;
-
-/// Result type for parsing operations.
-///
-/// This type alias represents the result of parsing operations,
-/// where successful operations return a value of type `T` and failed
-/// operations return an [`OakError`].
 pub type ParseResult<T> = Result<T, OakError>;
 
-/// Container for parsing results with associated diagnostics.
-///
-/// This struct holds both the primary result of a parsing operation
-/// and any diagnostic language that were encountered during parsing.
-/// This allows for error recovery where parsing can continue even
-/// after encountering language, collecting all issues for later analysis.
-
-#[derive(Debug, Clone)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+#[cfg_attr(feature = "serde", serde(bound(serialize = "T: serde::Serialize", deserialize = "T: serde::Deserialize<'de>")))]
 pub struct OakDiagnostics<T> {
     /// The primary result of the parsing operation.
     /// May contain either a successful value or a fatal error.
     pub result: Result<T, OakError>,
     /// A collection of non-fatal errors or warnings encountered during the operation.
     pub diagnostics: Vec<OakError>,
+}
+
+impl<T: Clone> Clone for OakDiagnostics<T> {
+    fn clone(&self) -> Self {
+        Self { result: self.result.clone(), diagnostics: self.diagnostics.clone() }
+    }
 }
 
 impl<T> OakDiagnostics<T> {
@@ -56,12 +40,20 @@ impl<T> OakDiagnostics<T> {
     }
 }
 
+impl<'a, L: crate::Language> OakDiagnostics<&'a crate::tree::GreenNode<'a, L>> {
+    /// Returns the successful green node result, panicking on error.
+    pub fn green(&self) -> &'a crate::tree::GreenNode<'a, L> {
+        self.result.as_ref().expect("Failed to get green node from parse output")
+    }
+}
+
 /// The main error type for the Oak Core parsing framework.
 ///
 /// `OakError` represents all possible language that can occur during
 /// lexical analysis and parsing operations. It provides detailed
 /// error information including error kind and precise source location.
 #[derive(Clone)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct OakError {
     /// The specific kind of error.
     kind: Box<OakErrorKind>,
@@ -79,11 +71,25 @@ impl OakError {
     }
 }
 
+impl From<OakErrorKind> for OakError {
+    fn from(kind: OakErrorKind) -> Self {
+        Self { kind: Box::new(kind) }
+    }
+}
+
 impl std::fmt::Debug for OakError {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self, f)
     }
 }
+
+impl std::fmt::Display for OakError {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{:?}", self.kind)
+    }
+}
+
+impl std::error::Error for OakError {}
 
 #[cfg(feature = "serde")]
 impl serde::ser::Error for OakError {
@@ -99,16 +105,36 @@ impl serde::de::Error for OakError {
     }
 }
 
+#[cfg(feature = "serde")]
+mod serde_io_error {
+    pub fn serialize<S>(error: &std::io::Error, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: serde::Serializer,
+    {
+        serde::Serialize::serialize(&error.to_string(), serializer)
+    }
+
+    pub fn deserialize<'de, D>(deserializer: D) -> Result<std::io::Error, D::Error>
+    where
+        D: serde::Deserializer<'de>,
+    {
+        let s = <String as serde::Deserialize>::deserialize(deserializer)?;
+        Ok(std::io::Error::new(std::io::ErrorKind::Other, s))
+    }
+}
+
 /// Enumeration of all possible error kinds in the Oak Core framework.
 ///
 /// This enum categorizes different types of language that can occur
 /// during parsing operations, each with specific associated data
 /// relevant to that error type.
 #[derive(Debug)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub enum OakErrorKind {
     /// I/O error that occurred while reading source files.
     IoError {
         /// The underlying I/O error.
+        #[cfg_attr(feature = "serde", serde(with = "crate::errors::serde_io_error"))]
         error: std::io::Error,
         /// Optional source ID of the file that caused the error.
         source_id: Option<SourceId>,
@@ -304,6 +330,12 @@ impl OakErrorKind {
     }
 }
 
+impl std::fmt::Display for OakErrorKind {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{:?}", self)
+    }
+}
+
 impl OakError {
     /// Gets the kind of this error.
     pub fn kind(&self) -> &OakErrorKind {
@@ -321,60 +353,16 @@ impl OakError {
     }
 
     /// Creates an I/O error with optional Source ID.
-    ///
-    /// # Arguments
-    ///
-    /// * `error` - The underlying I/O error
-    /// * `source_id` - Source ID of the file that caused the error
-    ///
-    /// # Examples
-    ///
-    /// ```rust
-    /// # use oak_core::OakError;
-    /// # use std::io;
-    ///
-    /// let io_err = io::Error::new(io::ErrorKind::NotFound, "File not found");
-    /// let error = OakError::io_error(io_err, 1);
-    /// ```
-
     pub fn io_error(error: std::io::Error, source_id: SourceId) -> Self {
         OakErrorKind::IoError { error, source_id: Some(source_id) }.into()
     }
 
-    /// Creates a kind error with a message and location.
-    ///
-    /// # Arguments
-    ///
-    /// * `message` - Description of the kind error
-    /// * `offset` - The byte offset where the error occurred
-    /// * `source_id` - Optional source ID of the file that caused the error
-    ///
-    /// # Examples
-    ///
-    /// ```rust
-    /// # use oak_core::OakError;
-    ///
-    /// let error = OakError::syntax_error("Unexpected token", 5, None);
-    /// ```
+    /// Creates a syntax error with a message and location.
     pub fn syntax_error(message: impl Into<String>, offset: usize, source_id: Option<SourceId>) -> Self {
         OakErrorKind::SyntaxError { message: message.into(), offset, source_id }.into()
     }
 
     /// Creates an unexpected character error.
-    ///
-    /// # Arguments
-    ///
-    /// * `character` - The unexpected character
-    /// * `offset` - The byte offset where the character was found
-    /// * `source_id` - Optional source ID of the file that caused the error
-    ///
-    /// # Examples
-    ///
-    /// ```rust
-    /// # use oak_core::OakError;
-    ///
-    /// let error = OakError::unexpected_character('$', 0, None);
-    /// ```
     pub fn unexpected_character(character: char, offset: usize, source_id: Option<SourceId>) -> Self {
         OakErrorKind::UnexpectedCharacter { character, offset, source_id }.into()
     }

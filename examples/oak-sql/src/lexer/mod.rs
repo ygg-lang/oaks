@@ -1,5 +1,6 @@
 #![doc = include_str!("readme.md")]
 use oak_core::Source;
+/// Token types for SQL.
 pub mod token_type;
 pub use token_type::SqlTokenType;
 
@@ -10,17 +11,29 @@ use oak_core::{
 };
 use std::sync::LazyLock;
 
-type State<'a, S> = LexerState<'a, S, SqlLanguage>;
+pub(crate) type State<'a, S> = LexerState<'a, S, SqlLanguage>;
 
 static SQL_WHITESPACE: LazyLock<WhitespaceConfig> = LazyLock::new(|| WhitespaceConfig { unicode_whitespace: true });
 
+/// Lexer for SQL.
+///
+/// This lexer is responsible for breaking down SQL source text into a stream of
+/// tokens. it handles different SQL dialects and supports incremental lexing
+/// through the [`Lexer`] trait.
+///
+/// # Supported Features
+///
+/// - Case-insensitive keywords
+/// - Multiple identifier quoting styles (double quotes, backticks, brackets)
+/// - Various literal types (strings, numbers, booleans)
+/// - Comments (line and block)
 #[derive(Clone, Debug)]
 pub struct SqlLexer<'config> {
-    _config: &'config SqlLanguage,
+    config: &'config SqlLanguage,
 }
 
 impl<'config> Lexer<SqlLanguage> for SqlLexer<'config> {
-    fn lex<'a, S: Source + ?Sized>(&self, text: &'a S, _edits: &[TextEdit], cache: &'a mut impl LexerCache<SqlLanguage>) -> LexOutput<SqlLanguage> {
+    fn lex<'a, S: Source + ?Sized>(&self, text: &S, _edits: &[TextEdit], cache: &'a mut impl LexerCache<SqlLanguage>) -> LexOutput<SqlLanguage> {
         let mut state = State::new(text);
         let result = self.run(&mut state);
         if result.is_ok() {
@@ -31,8 +44,9 @@ impl<'config> Lexer<SqlLanguage> for SqlLexer<'config> {
 }
 
 impl<'config> SqlLexer<'config> {
+    /// Creates a new `SqlLexer` with the given configuration.
     pub fn new(config: &'config SqlLanguage) -> Self {
-        Self { _config: config }
+        Self { config }
     }
 
     fn run<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> Result<(), OakError> {
@@ -66,6 +80,12 @@ impl<'config> SqlLexer<'config> {
                     '\'' | '"' => {
                         self.lex_string_literal(state);
                     }
+                    '`' if self.config.backtick_identifiers => {
+                        self.lex_quoted_identifier(state, '`');
+                    }
+                    '[' if self.config.bracket_identifiers => {
+                        self.lex_bracket_identifier(state);
+                    }
                     '0'..='9' => {
                         self.lex_number_literal(state);
                     }
@@ -75,11 +95,11 @@ impl<'config> SqlLexer<'config> {
                     '<' | '>' | '!' | '=' | '+' | '*' | '%' => {
                         self.lex_operators(state);
                     }
-                    '(' | ')' | ',' | ';' | '.' => {
+                    '(' | ')' | ',' | ';' | '.' | ':' | '[' | ']' => {
                         self.lex_single_char_tokens(state);
                     }
                     _ => {
-                        // 如果没有匹配任何模式，跳过当前字符并添加错误 token
+                        // If no patterns match, skip current character and add error token
                         state.advance(ch.len_utf8());
                         state.add_token(SqlTokenType::Error, safe_point, state.get_position());
                     }
@@ -91,7 +111,7 @@ impl<'config> SqlLexer<'config> {
         Ok(())
     }
 
-    /// 处理换行
+    /// Handles newlines
     fn lex_newline<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start_pos = state.get_position();
 
@@ -121,7 +141,7 @@ impl<'config> SqlLexer<'config> {
     fn skip_comment<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start = state.get_position();
 
-        // 行注释: -- ... 直到换行
+        // Line comment: -- ... until newline
         if state.starts_with("--") {
             state.advance(2);
             state.take_while(|ch| ch != '\n' && ch != '\r');
@@ -129,7 +149,7 @@ impl<'config> SqlLexer<'config> {
             return true;
         }
 
-        // 块注释: /* ... */
+        // Block comment: /* ... */
         if state.starts_with("/*") {
             state.advance(2);
             while state.not_at_end() {
@@ -150,41 +170,61 @@ impl<'config> SqlLexer<'config> {
 
     fn lex_string_literal<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start = state.get_position();
-        if let Some(quote) = state.current() {
-            if quote != '\'' && quote != '"' {
-                return false;
+        let quote = match state.current() {
+            Some(c) if c == '\'' || c == '"' => {
+                state.advance(c.len_utf8());
+                c
             }
-            state.advance(1);
-            let mut escaped = false;
-            while state.not_at_end() {
-                let ch = match state.peek() {
-                    Some(c) => c,
-                    None => break,
-                };
+            _ => return false,
+        };
 
-                if ch == quote && !escaped {
-                    state.advance(1); // 消费结束引号
-                    break;
-                }
+        while let Some(ch) = state.current() {
+            if ch == quote {
                 state.advance(ch.len_utf8());
-                if escaped {
-                    escaped = false;
+                // Handle escaped quotes if necessary (e.g. '' in SQL)
+                if state.peek() == Some(quote) {
+                    state.advance(quote.len_utf8());
                     continue;
                 }
-                if ch == '\\' {
-                    escaped = true;
-                    continue;
-                }
-                if ch == '\n' || ch == '\r' {
-                    break;
-                }
+                break;
             }
-            state.add_token(SqlTokenType::StringLiteral, start, state.get_position());
-            true
+            state.advance(ch.len_utf8());
         }
-        else {
-            false
+
+        state.add_token(SqlTokenType::StringLiteral, start, state.get_position());
+        true
+    }
+
+    fn lex_quoted_identifier<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>, quote: char) -> bool {
+        let start = state.get_position();
+        state.advance(quote.len_utf8());
+
+        while let Some(ch) = state.current() {
+            if ch == quote {
+                state.advance(ch.len_utf8());
+                break;
+            }
+            state.advance(ch.len_utf8());
         }
+
+        state.add_token(SqlTokenType::Identifier_, start, state.get_position());
+        true
+    }
+
+    fn lex_bracket_identifier<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
+        let start = state.get_position();
+        state.advance(1); // '['
+
+        while let Some(ch) = state.current() {
+            if ch == ']' {
+                state.advance(1);
+                break;
+            }
+            state.advance(ch.len_utf8());
+        }
+
+        state.add_token(SqlTokenType::Identifier_, start, state.get_position());
+        true
     }
 
     fn lex_number_literal<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
@@ -201,7 +241,7 @@ impl<'config> SqlLexer<'config> {
         let mut is_float = false;
         state.advance(1);
 
-        // 整数部分
+        // Integer part
         while let Some(c) = state.peek() {
             if c.is_ascii_digit() || c == '_' {
                 state.advance(1);
@@ -211,12 +251,12 @@ impl<'config> SqlLexer<'config> {
             }
         }
 
-        // 小数部分
+        // Decimal part
         if state.peek() == Some('.') {
             let next = state.peek_next_n(1);
             if next.map(|c| c.is_ascii_digit()).unwrap_or(false) {
                 is_float = true;
-                state.advance(1); // 消费 '.'
+                state.advance(1); // consume '.'
                 while let Some(c) = state.peek() {
                     if c.is_ascii_digit() || c == '_' {
                         state.advance(1);
@@ -228,7 +268,7 @@ impl<'config> SqlLexer<'config> {
             }
         }
 
-        // 指数部分
+        // Exponent part
         if let Some(c) = state.peek() {
             if c == 'e' || c == 'E' {
                 let next = state.peek_next_n(1);
@@ -290,7 +330,10 @@ impl<'config> SqlLexer<'config> {
             "CREATE" => SqlTokenType::Create,
             "DROP" => SqlTokenType::Drop,
             "ALTER" => SqlTokenType::Alter,
+            "ADD" => SqlTokenType::Add,
+            "COLUMN" => SqlTokenType::Column,
             "TABLE" => SqlTokenType::Table,
+            "VIEW" => SqlTokenType::View,
             "INDEX" => SqlTokenType::Index,
             "INTO" => SqlTokenType::Into,
             "VALUES" => SqlTokenType::Values,
@@ -308,6 +351,19 @@ impl<'config> SqlLexer<'config> {
             "NULL" => SqlTokenType::Null,
             "TRUE" => SqlTokenType::True,
             "FALSE" => SqlTokenType::False,
+            "TRIGGER" => SqlTokenType::Trigger,
+            "AFTER" => SqlTokenType::After,
+            "DELIMITER" => SqlTokenType::Delimiter,
+            "FOR" => SqlTokenType::For,
+            "EACH" => SqlTokenType::Each,
+            "ROW" => SqlTokenType::Row,
+            "CHECK" => SqlTokenType::Check,
+            "BEGIN" => SqlTokenType::Begin,
+            "END" => SqlTokenType::End,
+            "IF" => SqlTokenType::If,
+            "EXISTS" => SqlTokenType::Exists,
+            "RENAME" => SqlTokenType::Rename,
+            "TO" => SqlTokenType::To,
             "AS" => SqlTokenType::As,
             "BY" => SqlTokenType::By,
             "ORDER" => SqlTokenType::Order,
@@ -326,7 +382,7 @@ impl<'config> SqlLexer<'config> {
             "REFERENCES" => SqlTokenType::References,
             "DEFAULT" => SqlTokenType::Default,
             "UNIQUE" => SqlTokenType::Unique,
-            "AUTO_INCREMENT" => SqlTokenType::AutoIncrement,
+            "AUTO_INCREMENT" | "AUTOINCREMENT" => SqlTokenType::AutoIncrement,
             "INT" => SqlTokenType::Int,
             "INTEGER" => SqlTokenType::Integer,
             "VARCHAR" => SqlTokenType::Varchar,
@@ -339,7 +395,24 @@ impl<'config> SqlLexer<'config> {
             "FLOAT" => SqlTokenType::Float,
             "DOUBLE" => SqlTokenType::Double,
             "BOOLEAN" => SqlTokenType::Boolean,
-            _ => SqlTokenType::Identifier,
+            "SERIAL" => SqlTokenType::Serial,
+            "BIGSERIAL" => SqlTokenType::BigSerial,
+            "CONFLICT" => SqlTokenType::Conflict,
+            "DO" => SqlTokenType::Do,
+            "NOTHING" => SqlTokenType::Nothing,
+            "RETURNING" => SqlTokenType::Returning,
+            "ILIKE" => SqlTokenType::Ilike,
+            "STRICT" => SqlTokenType::Strict,
+            "WITHOUT" => SqlTokenType::Without,
+            "ROWID" => SqlTokenType::Rowid,
+            "MAX" => SqlTokenType::Max,
+            "EXPLAIN" => SqlTokenType::Explain,
+            "PRAGMA" => SqlTokenType::Pragma,
+            "SHOW" => SqlTokenType::Show,
+            "DATABASE" => SqlTokenType::Database,
+            "SCHEMA" => SqlTokenType::Schema,
+            "VECTOR" => SqlTokenType::Vector,
+            _ => SqlTokenType::Identifier_,
         };
 
         state.add_token(kind, start, end);
@@ -350,6 +423,8 @@ impl<'config> SqlLexer<'config> {
         let start = state.get_position();
 
         let ops = [
+            ("::", SqlTokenType::DoubleColon),
+            ("||", SqlTokenType::Concat),
             ("<=", SqlTokenType::LessEqual),
             (">=", SqlTokenType::GreaterEqual),
             ("<>", SqlTokenType::NotEqual),
@@ -388,6 +463,7 @@ impl<'config> SqlLexer<'config> {
             ',' => SqlTokenType::Comma,
             ';' => SqlTokenType::Semicolon,
             '.' => SqlTokenType::Dot,
+            ':' => SqlTokenType::Colon,
             _ => return false,
         };
 

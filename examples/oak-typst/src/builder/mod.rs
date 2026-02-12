@@ -9,7 +9,7 @@ use oak_core::{
     source::{Source, TextEdit},
 };
 
-/// Typst 语言的 AST 构建器
+/// AST builder for Typst language
 #[derive(Clone)]
 pub struct TypstBuilder<'config> {
     config: &'config TypstLanguage,
@@ -103,7 +103,7 @@ impl<'config> TypstBuilder<'config> {
                 Ok(Some(TypstItem::Strong(root)))
             }
             TypstElementType::Emphasis => {
-                let mut root = TypstRoot::new(node.span());
+                let mut root = TypstRoot::new(node.span().into());
                 for child in node.children() {
                     if let Some(item) = self.build_tree(child, source)? {
                         root.items.push(item);
@@ -112,7 +112,7 @@ impl<'config> TypstBuilder<'config> {
                 Ok(Some(TypstItem::Emphasis(root)))
             }
             TypstElementType::Quote => {
-                let mut root = TypstRoot::new(node.span());
+                let mut root = TypstRoot::new(node.span().into());
                 for child in node.children() {
                     if let Some(item) = self.build_tree(child, source)? {
                         root.items.push(item);
@@ -121,7 +121,7 @@ impl<'config> TypstBuilder<'config> {
                 Ok(Some(TypstItem::Quote(root)))
             }
             TypstElementType::ListItem => {
-                let mut root = TypstRoot::new(node.span());
+                let mut root = TypstRoot::new(node.span().into());
                 for child in node.children() {
                     if let Some(item) = self.build_tree(child, source)? {
                         root.items.push(item);
@@ -130,7 +130,7 @@ impl<'config> TypstBuilder<'config> {
                 Ok(Some(TypstItem::ListItem(root)))
             }
             TypstElementType::EnumItem => {
-                let mut root = TypstRoot::new(node.span());
+                let mut root = TypstRoot::new(node.span().into());
                 for child in node.children() {
                     if let Some(item) = self.build_tree(child, source)? {
                         root.items.push(item);

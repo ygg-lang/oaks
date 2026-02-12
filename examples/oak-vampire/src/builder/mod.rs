@@ -1,7 +1,7 @@
 use crate::{ast::*, language::VampireLanguage, parser::VampireParser};
 use oak_core::{Builder, BuilderCache, GreenNode, OakDiagnostics, OakError, Parser, RedNode, TextEdit, source::Source};
 
-/// Vampire 语言的 AST 构建器
+/// AST builder for Vampire language
 #[derive(Clone)]
 pub struct VampireBuilder<'config> {
     config: &'config VampireLanguage,
@@ -37,6 +37,6 @@ impl<'config> VampireBuilder<'config> {
     pub(crate) fn build_root(&self, green_tree: &GreenNode<VampireLanguage>) -> Result<VampireRoot, OakError> {
         let red_root = RedNode::new(green_tree, 0);
         let span = red_root.span();
-        Ok(VampireRoot { span: span.into(), formulas: Vec::new() })
+        Ok(VampireRoot { span, formulas: Vec::new() })
     }
 }

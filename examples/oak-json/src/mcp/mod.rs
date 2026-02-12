@@ -2,7 +2,7 @@
 use crate::lsp::JsonLanguageService;
 use oak_vfs::MemoryVfs;
 
-/// 为 JSON 语义启动 MCP 服务器 (Stdio)。
+/// Starts the MCP server for JSON semantics (Stdio).
 #[cfg(feature = "mcp")]
 pub async fn serve_json_mcp(vfs: MemoryVfs) {
     let service = JsonLanguageService::new(vfs);

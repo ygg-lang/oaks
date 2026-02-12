@@ -1,54 +1,91 @@
-use oak_core::{ElementType, UniversalElementRole};
-#[cfg(feature = "serde")]
-use serde::{Deserialize, Serialize};
+//! Voml element types.
 
+use oak_core::{ElementType, UniversalElementRole};
+
+/// Enum representing all possible element types in Voml.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+#[repr(u16)]
 pub enum VomlElementType {
+    /// Root node of the AST.
     Root,
+    /// A source file containing VOML content.
     SourceFile,
+    /// A module definition.
     Module,
+    /// A function definition.
     Function,
+    /// A memory allocation.
     Memory,
+    /// An export declaration.
     Export,
+    /// An import declaration.
     Import,
+    /// A function parameter.
     Param,
+    /// A function result.
     Result,
+    /// A local variable.
     Local,
+    /// A single instruction.
     Instruction,
 
-    // Basic types
+    /// Integer type (int).
     Int,
+    /// Unsigned integer type (uint).
     Uint,
+    /// 32-bit floating point type (f32).
     F32,
+    /// 64-bit floating point type (f64).
     F64,
+    /// String type.
     String,
+    /// Rune (Unicode character) type.
     Rune,
+    /// Byte type.
     Byte,
+    /// Void pointer type.
     Voidptr,
+    /// Character type.
     Char,
+    /// Boolean type.
     Bool,
 
-    // Values
+    /// An identifier.
     Identifier,
+    /// A numeric literal.
     Number,
+    /// A boolean literal (true/false).
     Boolean,
 
-    // Punctuation and symbols
+    /// Left parenthesis (().
     LeftParen,
+    /// Right parenthesis ()).
     RightParen,
+    /// Left bracket ([).
     LeftBracket,
+    /// Right bracket (]).
     RightBracket,
+    /// Left brace ({).
     LeftBrace,
+    /// Right brace (}).
     RightBrace,
+    /// Dot separator (.).
     Dot,
+    /// Comma separator (,).
     Comma,
+    /// Colon separator (:).
     Colon,
+    /// Semicolon separator (;).
     Semicolon,
 
+    /// Whitespace characters.
     Whitespace,
+    /// A comment.
     Comment,
+    /// An error node representing a syntax error.
     Error,
+    /// End of file marker.
     Eof,
 }
 
@@ -70,36 +107,6 @@ impl ElementType for VomlElementType {
 
 impl From<crate::lexer::token_type::VomlTokenType> for VomlElementType {
     fn from(token: crate::lexer::token_type::VomlTokenType) -> Self {
-        use crate::lexer::token_type::VomlTokenType as T;
-        match token {
-            T::IntKw => VomlElementType::Int,
-            T::UintKw => VomlElementType::Uint,
-            T::F32Kw => VomlElementType::F32,
-            T::F64Kw => VomlElementType::F64,
-            T::StringKw => VomlElementType::String,
-            T::RuneKw => VomlElementType::Rune,
-            T::ByteKw => VomlElementType::Byte,
-            T::VoidptrKw => VomlElementType::Voidptr,
-            T::CharKw => VomlElementType::Char,
-            T::BoolLiteral => VomlElementType::Boolean,
-            T::Identifier => VomlElementType::Identifier,
-            T::Number => VomlElementType::Number,
-            T::String => VomlElementType::String,
-            T::Whitespace => VomlElementType::Whitespace,
-            T::Comment => VomlElementType::Comment,
-            T::LeftParen => VomlElementType::LeftParen,
-            T::RightParen => VomlElementType::RightParen,
-            T::LeftBracket => VomlElementType::LeftBracket,
-            T::RightBracket => VomlElementType::RightBracket,
-            T::LeftBrace => VomlElementType::LeftBrace,
-            T::RightBrace => VomlElementType::RightBrace,
-            T::Dot => VomlElementType::Dot,
-            T::Comma => VomlElementType::Comma,
-            T::Colon => VomlElementType::Colon,
-            T::Semicolon => VomlElementType::Semicolon,
-            T::Error => VomlElementType::Error,
-            T::Eof => VomlElementType::Eof,
-            _ => VomlElementType::Error,
-        }
+        unsafe { std::mem::transmute(token) }
     }
 }

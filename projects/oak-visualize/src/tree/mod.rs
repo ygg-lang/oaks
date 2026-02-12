@@ -4,7 +4,6 @@ use crate::{
     geometry::{Point, Rect, Size},
     layout::{Edge, Layout},
 };
-use serde::{Deserialize, Serialize};
 use std::{
     collections::HashMap,
     sync::atomic::{AtomicUsize, Ordering},
@@ -16,54 +15,70 @@ fn next_node_id() -> String {
     format!("node_{}", NODE_ID_COUNTER.fetch_add(1, Ordering::SeqCst))
 }
 
-/// Tree node for visualization
-#[derive(Debug, Clone, Serialize, Deserialize)]
+/// Tree node for visualization.
+#[derive(Debug, Clone)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct TreeNode {
+    /// Unique identifier for the node.
     pub id: String,
+    /// Display label for the node.
     pub label: String,
+    /// Type of the node (e.g., "node", "leaf", "function", "struct").
     pub node_type: String,
+    /// Child nodes of this node.
     pub children: Vec<TreeNode>,
+    /// Additional metadata associated with the node.
     pub attributes: HashMap<String, String>,
+    /// Optional explicit size for the node.
     pub size: Option<Size>,
 }
 
 impl TreeNode {
+    /// Creates a new tree node.
     pub fn new(id: String, label: String, node_type: String) -> Self {
         Self { id, label, node_type, children: Vec::new(), attributes: HashMap::new(), size: None }
     }
 
+    /// Adds a child to the node and returns the modified node.
     pub fn with_child(mut self, child: TreeNode) -> Self {
         self.children.push(child);
         self
     }
 
+    /// Sets the children of the node and returns the modified node.
     pub fn with_children(mut self, children: Vec<TreeNode>) -> Self {
         self.children = children;
         self
     }
 
+    /// Adds an attribute to the node and returns the modified node.
     pub fn with_attribute(mut self, key: String, value: String) -> Self {
         self.attributes.insert(key, value);
         self
     }
 
+    /// Sets the size of the node and returns the modified node.
     pub fn with_size(mut self, size: Size) -> Self {
         self.size = Some(size);
         self
     }
 
+    /// Returns true if the node has no children.
     pub fn is_leaf(&self) -> bool {
         self.children.is_empty()
     }
 
+    /// Calculates the maximum depth of the tree rooted at this node.
     pub fn depth(&self) -> usize {
         if self.children.is_empty() { 1 } else { 1 + self.children.iter().map(|child| child.depth()).max().unwrap_or(0) }
     }
 
+    /// Calculates the total number of nodes in the tree rooted at this node.
     pub fn node_count(&self) -> usize {
         1 + self.children.iter().map(|child| child.node_count()).sum::<usize>()
     }
 
+    /// Calculates the total number of leaf nodes in the tree rooted at this node.
     pub fn leaf_count(&self) -> usize {
         if self.children.is_empty() { 1 } else { self.children.iter().map(|child| child.leaf_count()).sum() }
     }
@@ -130,7 +145,7 @@ impl<'a, L: oak_core::Language> crate::Visualize for oak_core::RedTree<'a, L> {
     }
 }
 
-/// Tree layout engine
+/// Tree layout engine.
 pub struct TreeLayout {
     algorithm: TreeLayoutAlgorithm,
     config: TreeLayoutConfig,
@@ -143,25 +158,30 @@ impl Default for TreeLayout {
 }
 
 impl TreeLayout {
+    /// Creates a new tree layout engine with default settings.
     pub fn new() -> Self {
         Self::default()
     }
 
+    /// Sets the layout algorithm and returns the modified engine.
     pub fn with_algorithm(mut self, algorithm: TreeLayoutAlgorithm) -> Self {
         self.algorithm = algorithm;
         self
     }
 
+    /// Sets the layout configuration and returns the modified engine.
     pub fn with_config(mut self, config: TreeLayoutConfig) -> Self {
         self.config = config;
         self
     }
 
+    /// Visualizes the tree as an SVG string.
     pub fn visualize(&self, tree: &TreeNode) -> crate::Result<String> {
         let layout = self.layout_tree(tree)?;
         crate::render::SvgRenderer::new().render_layout(&layout)
     }
 
+    /// Calculates the layout for the given tree.
     pub fn layout_tree(&self, tree: &TreeNode) -> crate::Result<Layout> {
         match self.algorithm {
             TreeLayoutAlgorithm::Layered => self.layered_layout(tree),
@@ -421,13 +441,18 @@ impl TreeLayout {
     }
 }
 
-/// Tree layout configuration
+/// Tree layout configuration.
 #[derive(Debug, Clone)]
 pub struct TreeLayoutConfig {
+    /// Default width for nodes.
     pub node_width: f64,
+    /// Default height for nodes.
     pub node_height: f64,
+    /// Distance between levels of the tree.
     pub level_distance: f64,
+    /// Distance between sibling nodes.
     pub sibling_distance: f64,
+    /// Distance between subtrees.
     pub subtree_distance: f64,
 }
 
@@ -437,13 +462,17 @@ impl Default for TreeLayoutConfig {
     }
 }
 
-/// Tree layout algorithms
+/// Tree layout algorithms.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum TreeLayoutAlgorithm {
-    Layered, // Traditional hierarchical layout
-    Radial,  // Radial/circular layout
-    Compact, // Space-efficient layout
-    Balloon, // Balloon-style clustering
+    /// Traditional hierarchical layout (top-down or left-right).
+    Layered,
+    /// Radial/circular layout with the root at the center.
+    Radial,
+    /// Space-efficient layout that minimizes tree width.
+    Compact,
+    /// Balloon-style clustering layout.
+    Balloon,
 }
 
 /// Positioned tree node (internal representation)
@@ -458,16 +487,18 @@ struct PositionedTreeNode {
     children: Vec<PositionedTreeNode>,
 }
 
-/// Tree renderer for generating visual output
+/// Tree renderer for generating visual output.
 pub struct TreeRenderer {
     config: TreeRenderConfig,
 }
 
 impl TreeRenderer {
+    /// Creates a new tree renderer with default settings.
     pub fn new() -> Self {
         Self { config: TreeRenderConfig::default() }
     }
 
+    /// Sets the rendering configuration and returns the modified renderer.
     pub fn with_config(mut self, config: TreeRenderConfig) -> Self {
         self.config = config;
         self
@@ -555,16 +586,24 @@ impl Default for TreeRenderer {
     }
 }
 
-/// Tree rendering configuration
+/// Tree rendering configuration.
 #[derive(Debug, Clone)]
 pub struct TreeRenderConfig {
+    /// Fill color for node rectangles (hex string).
     pub node_fill_color: String,
+    /// Stroke color for node rectangles (hex string).
     pub node_stroke_color: String,
+    /// Width of the node rectangle stroke.
     pub node_stroke_width: f64,
+    /// Color for tree edges (hex string).
     pub edge_color: String,
+    /// Width of the tree edges.
     pub edge_width: f64,
+    /// Color for node text (hex string).
     pub text_color: String,
+    /// Font family for node labels.
     pub font_family: String,
+    /// Font size for node labels.
     pub font_size: f64,
 }
 

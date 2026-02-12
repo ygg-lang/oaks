@@ -1,51 +1,54 @@
 #![doc = include_str!("readme.md")]
 use core::range::Range;
-#[cfg(feature = "serde")]
-use serde::{Deserialize, Serialize};
 
-/// Stylus 文档根节点
+/// Stylus document root node
 #[derive(Debug, Clone)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct StylusRoot {
     #[cfg_attr(feature = "serde", serde(with = "oak_core::serde_range"))]
     pub span: Range<usize>,
     pub items: Vec<StylusItem>,
 }
 
-/// Stylus 顶级项目
+/// Stylus top-level item
 #[derive(Debug, Clone)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub enum StylusItem {
     Rule(StylusRule),
     Comment(StylusComment),
 }
 
-/// Stylus 规则
+/// Stylus rule
 #[derive(Debug, Clone)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct StylusRule {
     #[cfg_attr(feature = "serde", serde(with = "oak_core::serde_range"))]
     pub span: Range<usize>,
+    /// Selector of the rule.
     pub selector: String,
+    /// Properties of the rule.
     pub properties: Vec<StylusProperty>,
 }
 
-/// Stylus 注释
+/// Stylus comment
 #[derive(Debug, Clone)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct StylusComment {
     #[cfg_attr(feature = "serde", serde(with = "oak_core::serde_range"))]
     pub span: Range<usize>,
+    /// Text of the comment.
     pub text: String,
 }
 
-/// Stylus 属性
+/// Stylus property
 #[derive(Debug, Clone)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct StylusProperty {
     #[cfg_attr(feature = "serde", serde(with = "oak_core::serde_range"))]
     pub span: Range<usize>,
+    /// Name of the property.
     pub name: String,
+    /// Value of the property.
     pub value: String,
 }
 

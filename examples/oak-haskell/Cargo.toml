@@ -24,11 +24,12 @@ serde = { workspace = true, optional = true }
 futures = { workspace = true, optional = true }
 tokio = { workspace = true, optional = true }
 
+[dev-dependencies]
+oak-testing = { workspace = true }
+
 [features]
 default = ["serde"]
 serde = ["dep:serde", "oak-core/serde"]
-oak-highlight = ["dep:oak-highlight"]
-oak-pretty-print = ["dep:oak-pretty-print"]
 lsp = ["dep:oak-lsp", "dep:oak-hover", "dep:oak-vfs", "oak-highlight", "oak-pretty-print", "dep:futures"]
 mcp = ["lsp", "oak-mcp/io-std"]
 

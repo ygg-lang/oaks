@@ -1,10 +1,7 @@
+/// Element type definitions for the PHP parser.
 pub mod element_type;
 
-use crate::{
-    language::PhpLanguage,
-    lexer::{PhpLexer, PhpTokenType},
-    parser::element_type::PhpElementType,
-};
+use crate::{language::PhpLanguage, parser::element_type::PhpElementType};
 use oak_core::{
     GreenNode, OakError,
     parser::{

@@ -1,3 +1,4 @@
+/// Element types for Lua.
 pub mod element_type;
 pub use element_type::LuaElementType;
 
@@ -13,24 +14,15 @@ use oak_core::{
 
 pub(crate) type State<'a, S> = ParserState<'a, LuaLanguage, S>;
 
+/// A parser for Lua source files.
 pub struct LuaParser<'config> {
     pub(crate) config: &'config LuaLanguage,
 }
 
 impl<'config> LuaParser<'config> {
+    /// Creates a new `LuaParser` with the given language configuration.
     pub fn new(config: &'config LuaLanguage) -> Self {
         Self { config }
-    }
-
-    pub(crate) fn parse_root_internal<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> Result<&'a GreenNode<'a, LuaLanguage>, OakError> {
-        use crate::lexer::LuaTokenType::*;
-        let checkpoint = state.checkpoint();
-
-        while state.not_at_end() {
-            self.parse_statement(state).ok();
-        }
-
-        Ok(state.finish_at(checkpoint, crate::parser::element_type::LuaElementType::SourceFile))
     }
 
     fn parse_statement<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> Result<(), OakError> {
@@ -436,6 +428,15 @@ impl<'config> Pratt<LuaLanguage> for LuaParser<'config> {
 impl<'config> Parser<LuaLanguage> for LuaParser<'config> {
     fn parse<'a, S: Source + ?Sized>(&self, text: &'a S, edits: &[TextEdit], cache: &'a mut impl ParseCache<LuaLanguage>) -> ParseOutput<'a, LuaLanguage> {
         let lexer = LuaLexer::new(self.config);
-        parse_with_lexer(&lexer, text, edits, cache, |state| self.parse_root_internal(state))
+        parse_with_lexer(&lexer, text, edits, cache, |state| {
+            use crate::lexer::LuaTokenType::*;
+            let checkpoint = state.checkpoint();
+
+            while state.not_at_end() {
+                self.parse_statement(state).ok();
+            }
+
+            Ok(state.finish_at(checkpoint, crate::parser::element_type::LuaElementType::SourceFile))
+        })
     }
 }

@@ -10,7 +10,7 @@ This module defines the abstract syntax tree structure for the Vampire theorem p
 
 ## Usage Example
 
-```rust,no_run
+```rust
 #![feature(new_range_api)]
 use oak_vampire::ast::*;
 use core::range::Range;

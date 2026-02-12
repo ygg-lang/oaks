@@ -1,215 +1,387 @@
 use oak_core::{ElementType, UniversalElementRole};
-#[cfg(feature = "serde")]
-use serde::{Deserialize, Serialize};
 
+/// Zig element types.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub enum ZigElementType {
+    /// Root element.
     Root,
-    // 基础 kind
+    /// Whitespace characters.
     Whitespace,
+    /// Newline character.
     Newline,
+    /// Comment.
     Comment,
+    /// Documentation comment.
     DocComment,
+    /// Error token.
     Error,
+    /// End of file.
     Eof,
 
-    // 字面量
+    /// Identifier.
     Identifier,
+    /// String literal.
     StringLiteral,
+    /// Character literal.
     CharLiteral,
+    /// Integer literal.
     IntegerLiteral,
+    /// Floating-point literal.
     FloatLiteral,
+    /// Boolean literal.
     BooleanLiteral,
-    Literal, // Added
+    /// Generic literal.
+    Literal,
 
-    // Zig 关键字 - 基本结构
+    /// `const` keyword.
     Const,
+    /// `var` keyword.
     Var,
+    /// `fn` keyword.
     Fn,
+    /// `struct` keyword.
     Struct,
+    /// `union` keyword.
     Union,
+    /// `enum` keyword.
     Enum,
+    /// `opaque` keyword.
     Opaque,
+    /// `type` keyword.
     Type,
+    /// `comptime` keyword.
     Comptime,
+    /// `inline` keyword.
     Inline,
+    /// `noinline` keyword.
     NoInline,
+    /// `pub` keyword.
     Pub,
+    /// `export` keyword.
     Export,
+    /// `extern` keyword.
     Extern,
+    /// `packed` keyword.
     Packed,
+    /// `align` keyword.
     Align,
+    /// `callconv` keyword.
     CallConv,
+    /// `linksection` keyword.
     LinkSection,
 
-    // Zig 关键字 - 控制流
+    /// `if` keyword.
     If,
+    /// `else` keyword.
     Else,
+    /// `switch` keyword.
     Switch,
+    /// `while` keyword.
     While,
+    /// `for` keyword.
     For,
+    /// `break` keyword.
     Break,
+    /// `continue` keyword.
     Continue,
+    /// `return` keyword.
     Return,
+    /// `defer` keyword.
     Defer,
+    /// `errdefer` keyword.
     ErrDefer,
+    /// `unreachable` keyword.
     Unreachable,
+    /// `noreturn` keyword.
     NoReturn,
 
-    // Zig 关键字 - 错误处理
+    /// `error` keyword.
     ErrorKeyword,
 
-    // Zig 关键字 - 测试和异步
+    /// `test` keyword.
     Test,
+    /// `async` keyword.
     Async,
+    /// `await` keyword.
     Await,
+    /// `suspend` keyword.
     Suspend,
+    /// `resume` keyword.
     Resume,
+    /// `cancel` keyword.
     Cancel,
 
-    // Zig 关键字 - 内存管理
+    /// `undefined` keyword.
     Undefined,
+    /// `null` keyword.
     Null,
+    /// `volatile` keyword.
     Volatile,
+    /// `allowzero` keyword.
     AllowZero,
+    /// `noalias` keyword.
     NoAlias,
 
-    // Zig 关键字 - 其他
+    /// `and` keyword.
     And,
+    /// `or` keyword.
     Or,
+    /// `anyframe` keyword.
     AnyFrame,
+    /// `anytype` keyword.
     AnyType,
+    /// `threadlocal` keyword.
     ThreadLocal,
 
-    // 基本类型
+    /// `bool` type.
     Bool,
+    /// `i8` type.
     I8,
+    /// `i16` type.
     I16,
+    /// `i32` type.
     I32,
+    /// `i64` type.
     I64,
+    /// `i128` type.
     I128,
+    /// `isize` type.
     Isize,
+    /// `u8` type.
     U8,
+    /// `u16` type.
     U16,
+    /// `u32` type.
     U32,
+    /// `u64` type.
     U64,
+    /// `u128` type.
     U128,
+    /// `usize` type.
     Usize,
+    /// `f16` type.
     F16,
+    /// `f32` type.
     F32,
+    /// `f64` type.
     F64,
+    /// `f80` type.
     F80,
+    /// `f128` type.
     F128,
+    /// `c_short` type.
     CShort,
+    /// `c_ushort` type.
     CUshort,
+    /// `c_int` type.
     CInt,
+    /// `c_uint` type.
     CUint,
+    /// `c_long` type.
     CLong,
+    /// `c_ulong` type.
     CUlong,
+    /// `c_longlong` type.
     CLongLong,
+    /// `c_ulonglong` type.
     CUlongLong,
+    /// `c_longdouble` type.
     CLongDouble,
+    /// `c_void` type.
     CVoid,
+    /// `void` type.
     Void,
+    /// `comptime_int` type.
     ComptimeInt,
+    /// `comptime_float` type.
     ComptimeFloat,
 
-    // 操作符
+    /// `+` operator.
     Plus,
+    /// `-` operator.
     Minus,
+    /// `*` operator.
     Star,
+    /// `/` operator.
     Slash,
+    /// `%` operator.
     Percent,
+    /// `**` operator.
     StarStar,
+    /// `+%` operator.
     PlusPercent,
+    /// `-%` operator.
     MinusPercent,
+    /// `*%` operator.
     StarPercent,
+    /// `++` operator.
     PlusPlus,
+    /// `--` operator.
     MinusMinus,
 
-    // 位操作符
+    /// `&` operator.
     Ampersand,
+    /// `|` operator.
     Pipe,
+    /// `^` operator.
     Caret,
+    /// `~` operator.
     Tilde,
+    /// `<<` operator.
     LessLess,
+    /// `>>` operator.
     GreaterGreater,
 
-    // 比较操作符
+    /// `==` operator.
     Equal,
+    /// `!=` operator.
     NotEqual,
+    /// `<` operator.
     Less,
+    /// `>` operator.
     Greater,
+    /// `<=` operator.
     LessEqual,
+    /// `>=` operator.
     GreaterEqual,
 
-    // 逻辑操作符
+    /// `and` logical operator.
     AndAnd,
+    /// `or` logical operator.
     OrOr,
 
-    // 赋值操作符
+    /// `=` operator.
     Assign,
+    /// `+=` operator.
     PlusAssign,
+    /// `-=` operator.
     MinusAssign,
+    /// `*=` operator.
     StarAssign,
+    /// `/=` operator.
     SlashAssign,
+    /// `%=` operator.
     PercentAssign,
+    /// `&=` operator.
     AmpersandAssign,
+    /// `|=` operator.
     PipeAssign,
+    /// `^=` operator.
     CaretAssign,
+    /// `<<=` operator.
     LessLessAssign,
+    /// `>>=` operator.
     GreaterGreaterAssign,
 
-    // 标点符号
+    /// `(` symbol.
     LeftParen,
+    /// `)` symbol.
     RightParen,
+    /// `{` symbol.
     LeftBrace,
+    /// `}` symbol.
     RightBrace,
+    /// `[` symbol.
     LeftBracket,
+    /// `]` symbol.
     RightBracket,
+    /// `;` symbol.
     Semicolon,
+    /// `,` symbol.
     Comma,
+    /// `.` symbol.
     Dot,
+    /// `..` symbol.
     DotDot,
+    /// `...` symbol.
     DotDotDot,
+    /// `.?` operator.
     DotQuestion,
+    /// `.*` operator.
     DotStar,
+    /// `:` symbol.
     Colon,
+    /// `?` symbol.
     Question,
+    /// `!` symbol.
     Exclamation,
+    /// `->` operator.
     Arrow,
+    /// `=>` operator.
     FatArrow,
+
+    /// `orelse` operator.
     OrElse,
+    /// `catch` operator.
     CatchKeyword,
+    /// `try` operator.
     TryKeyword,
+    /// `await` operator.
     AwaitKeyword,
+
+    /// `@` symbol.
     At,
+    /// Built-in identifier.
     BuiltinIdentifier,
+
+    /// Start of a string literal.
     StringStart,
+    /// End of a string literal.
     StringEnd,
+    /// Content of a string literal.
     StringContent,
+    /// Start of string interpolation.
     InterpolationStart,
+    /// End of string interpolation.
     InterpolationEnd,
+
+    /// Start of a multiline string.
     MultilineStringStart,
+    /// End of a multiline string.
     MultilineStringEnd,
+    /// Content of a multiline string.
     MultilineStringContent,
+
+    /// Compile-time directive.
     CompileDirective,
+
+    /// Text content.
     Text,
 
-    // 语法结构
+    /// Function declaration.
     FnDeclaration,
+    /// Variable declaration.
     VarDeclaration,
+    /// Struct declaration.
     StructDeclaration,
+    /// Enum declaration.
     EnumDeclaration,
+    /// Union declaration.
     UnionDeclaration,
+    /// If statement.
     IfStatement,
+    /// While statement.
     WhileStatement,
+    /// For statement.
     ForStatement,
+    /// Return statement.
     ReturnStatement,
+    /// Block of code.
     Block,
+    /// Binary expression.
     BinaryExpr,
+    /// Unary expression.
     UnaryExpr,
+
+    /// Container field.
+    ContainerField,
+    /// Break statement.
+    BreakStatement,
+    /// Continue statement.
+    ContinueStatement,
+    /// Defer statement.
+    DeferStatement,
 }
 
 impl ElementType for ZigElementType {

@@ -1,11 +1,11 @@
 #![doc = include_str!("readme.md")]
-//! Go 语言语法高亮器
+//! Go syntax highlighter.
 
 use oak_highlight::HighlightSegment;
 
 use crate::ast::GoRoot;
 
-/// Go 语言语法高亮器
+/// Go syntax highlighter.
 pub struct GoHighlighter;
 
 impl GoHighlighter {

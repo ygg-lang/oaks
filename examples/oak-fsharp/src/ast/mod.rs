@@ -2,93 +2,98 @@
 //! F# AST definitions
 
 use core::range::Range;
-#[cfg(feature = "serde")]
-use serde::{Deserialize, Serialize};
 
-/// F# 程序的根节点
+/// The root node of an F# program
 #[derive(Debug, Clone, PartialEq)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct FSharpRoot {
-    /// 编译单元中的项目
+    /// Items in the compilation unit
     pub items: Vec<Item>,
 }
 
-/// F# 程序中的顶级项目
+/// Top-level items in an F# program
 #[derive(Debug, Clone, PartialEq)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub enum Item {
-    /// 命名空间声明
+    /// Namespace declaration
     Namespace(NamespaceDeclaration),
-    /// 模块声明
+    /// Module declaration
     Module(ModuleDeclaration),
-    /// 开放指令 (open)
+    /// Open directive (open)
     Open(OpenDirective),
-    /// 绑定 (let)
+    /// Binding (let)
     Binding(Binding),
 }
 
-/// 命名空间声明
+/// Namespace declaration
 #[derive(Debug, Clone, PartialEq)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct NamespaceDeclaration {
-    /// 命名空间名
+    /// Namespace name
     pub name: String,
-    /// 成员
+    /// Members
     pub items: Vec<Item>,
-    /// 源码位置
+    /// Source span
     #[cfg_attr(feature = "serde", serde(with = "oak_core::serde_range"))]
     pub span: Range<usize>,
 }
 
-/// 模块声明
+/// Module declaration
 #[derive(Debug, Clone, PartialEq)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct ModuleDeclaration {
-    /// 模块名
+    /// Module name
     pub name: String,
-    /// 是否为顶级模块
+    /// Whether it is a top-level module
     pub is_top_level: bool,
-    /// 成员
+    /// Members
     pub items: Vec<Item>,
-    /// 源码位置
+    /// Source span
     #[cfg_attr(feature = "serde", serde(with = "oak_core::serde_range"))]
     pub span: Range<usize>,
 }
 
-/// 开放指令 (open)
+/// Open directive (open)
 #[derive(Debug, Clone, PartialEq)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct OpenDirective {
-    /// 导入路径
+    /// Import path
     pub path: String,
-    /// 源码位置
+    /// Source span
     #[cfg_attr(feature = "serde", serde(with = "oak_core::serde_range"))]
     pub span: Range<usize>,
 }
 
-/// 绑定 (let)
+/// Binding (let)
 #[derive(Debug, Clone, PartialEq)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct Binding {
-    /// 绑定名
+    /// Binding name
     pub name: String,
-    /// 是否为递归绑定 (rec)
+    /// Whether it is a recursive binding (rec)
     pub is_rec: bool,
-    /// 参数列表
+    /// Parameter list
     pub parameters: Vec<String>,
-    /// 绑定的表达式
+    /// Bound expression
     pub expression: Expression,
-    /// 源码位置
+    /// Source span
     #[cfg_attr(feature = "serde", serde(with = "oak_core::serde_range"))]
     pub span: Range<usize>,
 }
 
-/// F# 表达式
+/// F# expression
 #[derive(Debug, Clone, PartialEq)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub enum Expression {
-    /// 字面量或标识符
+    /// Literal or identifier
     Simple(String),
-    /// If 表达式
-    If { condition: Box<Expression>, then_branch: Box<Expression>, else_branch: Option<Box<Expression>> },
+    /// If expression
+    If {
+        /// Condition expression
+        condition: Box<Expression>,
+        /// Then branch
+        then_branch: Box<Expression>,
+        /// Else branch
+        else_branch: Option<Box<Expression>>,
+    },
 }

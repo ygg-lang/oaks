@@ -3,22 +3,26 @@
 #![warn(missing_docs)]
 #![doc(html_logo_url = "https://raw.githubusercontent.com/ygg-lang/oaks/refs/heads/dev/documents/logo.svg")]
 #![doc(html_favicon_url = "https://raw.githubusercontent.com/ygg-lang/oaks/refs/heads/dev/documents/logo.svg")]
+//! C# support for the Oak language framework.
+//!
+//! This crate provides lexing, parsing, and AST building for the C# language,
+//! integrated into the Oak ecosystem. It supports modern C# features including
+//! namespaces, classes, structs, records, and more.
+
 use oak_core::Builder;
 
-// Csharp support for the Oak language framework.
-
-/// AST module.
+/// AST module containing high-level C# syntax tree definitions.
 pub mod ast;
-/// Builder module.
+/// Builder module for converting green trees into high-level AST nodes.
 pub mod builder;
-/// Syntax kind definitions.
-/// Language definition.
+/// Language definition and configuration for C#.
 pub mod language;
-/// Lexer.
+/// Lexer implementation for C#.
 pub mod lexer;
+/// LSP-related functionality (hover, completion, highlighting) for C#.
 #[cfg(any(feature = "lsp", feature = "oak-highlight", feature = "oak-pretty-print"))]
 pub mod lsp;
-/// Parser.
+/// Parser implementation for C#.
 pub mod parser;
 
 pub use ast::CSharpRoot;
@@ -27,7 +31,14 @@ pub use language::CSharpLanguage;
 pub use lexer::{CSharpLexer, token_type::CSharpTokenType};
 pub use parser::CSharpParser;
 
-/// Parse C# source code into CSharpRoot AST
+/// Parses C# source code into a [CSharpRoot] AST.
+///
+/// This is a convenience function that initializes the language, builder,
+/// and parser to process the source text.
+///
+/// # Errors
+///
+/// Returns an [oak_core::OakError] if parsing fails.
 pub fn parse(source: &str) -> Result<CSharpRoot, oak_core::OakError> {
     let language = CSharpLanguage::new();
     let builder = CSharpBuilder::new(&language);

@@ -1,18 +1,21 @@
 use crate::language::RbqLanguage;
 use oak_core::{Builder, BuilderCache, Lexer, Parser, TextEdit, source::Source, tree::RedNode};
 
+/// RBQ syntax tree builder.
 #[derive(Clone)]
 pub struct RbqBuilder<'config> {
     config: &'config RbqLanguage,
 }
 
 impl<'config> RbqBuilder<'config> {
+    /// Creates a new RBQ builder.
     pub fn new(config: &'config RbqLanguage) -> Self {
         Self { config }
     }
 }
 
 impl<'config> Builder<RbqLanguage> for RbqBuilder<'config> {
+    /// Builds the RBQ AST from the source text and edits.
     fn build<'a, S: Source + ?Sized>(&self, source: &S, edits: &[TextEdit], _cache: &'a mut impl BuilderCache<RbqLanguage>) -> oak_core::builder::BuildOutput<RbqLanguage> {
         let parser = crate::parser::RbqParser::new(self.config);
         let lexer = crate::lexer::RbqLexer::new(&self.config);

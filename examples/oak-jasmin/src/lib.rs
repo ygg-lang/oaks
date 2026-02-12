@@ -5,18 +5,24 @@
 #![warn(missing_docs)]
 //! Jasmin support for the Oak language framework.
 
+/// AST module.
 pub mod ast;
+/// Builder module.
 pub mod builder;
 
-mod language;
-mod lexer;
+/// Language configuration module.
+pub mod language;
+/// Lexer module.
+pub mod lexer;
+/// LSP module.
 #[cfg(any(feature = "lsp", feature = "oak-highlight", feature = "oak-pretty-print"))]
 pub mod lsp;
 /// MCP module.
 #[cfg(feature = "mcp")]
 pub mod mcp;
 
-mod parser;
+/// Parser module.
+pub mod parser;
 
 pub use crate::{ast::JasminRoot, builder::JasminBuilder, language::JasminLanguage, lexer::JasminLexer, parser::JasminParser};
 

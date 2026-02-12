@@ -1,35 +1,60 @@
 use oak_core::{ElementType, UniversalElementRole};
-#[cfg(feature = "serde")]
-use serde::{Deserialize, Serialize};
 
+/// Element types for the JSON parser.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub enum JsonElementType {
+    /// Root node of the JSON document.
     Root,
+    /// A JSON value.
     Value,
+    /// A JSON object.
     Object,
+    /// A JSON array.
     Array,
+    /// A JSON string.
     String,
+    /// A JSON number.
     Number,
+    /// A JSON boolean.
     Boolean,
+    /// A JSON null value.
     Null,
+    /// An entry in a JSON object.
     ObjectEntry,
+    /// An element in a JSON array.
     ArrayElement,
+    /// An error node in the parse tree.
     ErrorNode,
+    /// Left brace `{`.
     LeftBrace,
+    /// Right brace `}`.
     RightBrace,
+    /// Left bracket `[`.
     LeftBracket,
+    /// Right bracket `]`.
     RightBracket,
+    /// Comma `,`.
     Comma,
+    /// Colon `:`.
     Colon,
+    /// A string literal.
     StringLiteral,
+    /// A number literal.
     NumberLiteral,
+    /// A boolean literal (`true` or `false`).
     BooleanLiteral,
+    /// A null literal (`null`).
     NullLiteral,
+    /// A bare key (used in some JSON variants).
     BareKey,
+    /// Whitespace (spaces, tabs, newlines).
     Whitespace,
+    /// A comment.
     Comment,
+    /// End of stream.
     Eof,
+    /// An error element.
     Error,
 }
 

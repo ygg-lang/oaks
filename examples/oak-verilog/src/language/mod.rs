@@ -2,6 +2,7 @@
 use oak_core::language::{Language, LanguageCategory};
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Default)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct VerilogLanguage {}
 
 impl VerilogLanguage {
@@ -10,11 +11,11 @@ impl VerilogLanguage {
     }
 }
 
-// 定义 Verilog 的根节点类型
+// Define Verilog root node type
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct VerilogRoot {
-    // 这里可以包含 Verilog 模块的顶层结构
-    // 暂时使用简单的占位符
+    // Here can contain the top-level structure of Verilog modules
+    // Temporarily use a simple placeholder
 }
 
 impl Language for VerilogLanguage {
@@ -23,5 +24,5 @@ impl Language for VerilogLanguage {
 
     type TokenType = crate::lexer::token_type::VerilogTokenType;
     type ElementType = crate::parser::element_type::VerilogElementType;
-    type TypedRoot = ();
+    type TypedRoot = crate::ast::VerilogRoot;
 }

@@ -1,11 +1,11 @@
+//! Language definition for the JASM language.
+
 #![doc = include_str!("readme.md")]
 use oak_core::language::{Language, LanguageCategory};
-#[cfg(feature = "serde")]
-use serde::{Deserialize, Serialize};
 
 /// JASM language binding and configuration.
 #[derive(Clone, Copy, Debug, Default, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct JasmLanguage {
     /// Whether to enable extended instructions (e.g., invokedynamic, etc.).
     pub extended: bool,

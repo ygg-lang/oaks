@@ -6,98 +6,87 @@ use crate::{
     source::{Source, SourceCursor},
 };
 pub use core::range::Range;
-#[cfg(feature = "serde")]
-use serde::{Deserialize, Serialize};
-use std::borrow::Cow;
-use triomphe::Arc;
+use std::{borrow::Cow, sync::Arc};
 
-/// Utilities for scanning comments.
-pub mod scan_comment;
-/// Utilities for scanning identifiers.
-pub mod scan_identifier;
-/// Utilities for scanning numbers.
-pub mod scan_number;
-/// Utilities for scanning string literals.
-pub mod scan_string;
-/// Utilities for scanning whitespace.
-pub mod scan_white_space;
+mod scan_comment;
+mod scan_identifier;
+mod scan_number;
+mod scan_string;
+mod scan_white_space;
 
-pub use scan_comment::CommentConfig;
-pub use scan_string::StringConfig;
-pub use scan_white_space::WhitespaceConfig;
+pub use scan_comment::*;
+pub use scan_identifier::*;
+pub use scan_number::*;
+pub use scan_string::*;
+pub use scan_white_space::*;
 
-/// Output type for lexical analysis operations.
-///
-/// This type alias represents the result of tokenization, containing
-/// a vector of tokens and any diagnostic language that occurred during
-/// the lexing process.
-pub type Tokens<L: Language> = Arc<[Token<L::TokenType>]>;
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+#[cfg_attr(feature = "serde", serde(transparent, bound(serialize = "L::TokenType: serde::Serialize", deserialize = "L::TokenType: serde::Deserialize<'de>")))]
+pub struct Tokens<L: Language>(#[cfg_attr(feature = "serde", serde(with = "arc_slice_serde"))] pub Arc<[Token<L::TokenType>]>);
+
+impl<L: Language> Clone for Tokens<L> {
+    fn clone(&self) -> Self {
+        Self(self.0.clone())
+    }
+}
+
+impl<L: Language> Default for Tokens<L> {
+    fn default() -> Self {
+        Self(Arc::from_iter(std::iter::empty()))
+    }
+}
+
+impl<L: Language> core::ops::Deref for Tokens<L> {
+    type Target = [Token<L::TokenType>];
+
+    fn deref(&self) -> &Self::Target {
+        &self.0
+    }
+}
+
+impl<L: Language> From<Arc<[Token<L::TokenType>]>> for Tokens<L> {
+    fn from(arc: Arc<[Token<L::TokenType>]>) -> Self {
+        Self(arc)
+    }
+}
+
+impl<L: Language> From<Vec<Token<L::TokenType>>> for Tokens<L> {
+    fn from(vec: Vec<Token<L::TokenType>>) -> Self {
+        Self(Arc::from_iter(vec))
+    }
+}
 
 /// Output type for lexical analysis operations, including diagnostics.
 pub type LexOutput<L: Language> = OakDiagnostics<Tokens<L>>;
 
-/// Trait for tokenizing source code into sequences of tokens.
+/// Trait for tokenizing source code into a sequence of tokens.
 ///
-/// This trait defines the interface for converting source text into a sequence of
-/// tokens that can be consumed by the parser. Implementations should handle
-/// the specific lexical rules of their target language.
+/// This trait defines the interface for converting raw source text into a stream of
+/// atomic units ([`Token`s]) that the parser can consume.
 ///
-/// # Examples
+/// # Usage Scenario
 ///
-/// ```ignore
-/// struct MyLexer;
-///
-/// #[derive(Debug, Clone, PartialEq, Eq, Copy)]
-/// enum MyToken {
-///     Number,
-///     Identifier,
-///     End,
-/// }
-///
-/// impl TokenType for MyToken {
-///     const END_OF_STREAM: Self = MyToken::End;
-///     type Role = UniversalTokenRole;
-///     fn role(&self) -> Self::Role { UniversalTokenRole::None }
-/// }
-///
-/// #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
-/// enum MyElement {}
-///
-/// impl ElementType for MyElement {
-///     type Role = UniversalElementRole;
-///     fn role(&self) -> Self::Role { UniversalElementRole::None }
-/// }
-///
-/// struct MyLanguage;
-///
-/// impl Language for MyLanguage {
-///     const NAME: &'static str = "my-language";
-///     type TokenType = MyToken;
-///     type ElementType = MyElement;
-///     type TypedRoot = ();
-/// }
-///
-/// impl Lexer<MyLanguage> for MyLexer {
-///     fn lex<'a, S: Source + ?Sized>(&self, text: &S, edits: &[TextEdit], cache: &'a mut impl LexerCache<MyLanguage>) -> LexOutput<MyLanguage> {
-///         // Tokenization logic here
-///         todo!()
-///     }
-/// }
-/// ```
+/// A `Lexer` implementation typically:
+/// 1. Scans the source text using a [`SourceCursor`].
+/// 2. Identifies token boundaries and kinds (e.g., Keywords, Identifiers, Punctuation).
+/// 3. Returns a [`Tokens`] collection that supports efficient random access.
+/// 4. Handles incremental lexing by using the provided [`LexerCache`] and [`TextEdit`]s.
 pub trait Lexer<L: Language + Send + Sync> {
-    /// Tokenizes the given source text into a sequence of tokens.
+    /// Tokenizes the source text into a sequence of tokens.
     ///
-    /// This method performs a full lexical analysis of the source text,
-    /// creating a new sequence of tokens from scratch. It uses a default
-    /// cache configuration.
+    /// This method performs lexical analysis, converting raw source text into
+    /// a sequence of [`Token`]s. It supports incremental lexing if edits and
+    /// a cache are provided.
     ///
     /// # Arguments
     ///
-    /// * `source` - The source text to tokenize
+    /// * `text` - The source text to tokenize.
+    /// * `edits` - A slice of [`TextEdit`]s representing changes since the last lexing.
+    /// * `cache` - A [`LexerCache`] for storing and retrieving lexical results.
     ///
     /// # Returns
     ///
-    /// A [`LexOutput`] containing the tokens and any diagnostic messages
+    /// A [`LexOutput`] containing the tokens and any diagnostic messages.
     fn lex<'a, S: Source + ?Sized>(&self, text: &S, edits: &[TextEdit], cache: &'a mut impl LexerCache<L>) -> LexOutput<L>;
 }
 
@@ -173,12 +162,32 @@ impl<'a, L: Language, C: LexerCache<L> + ?Sized> LexerCache<L> for &'a mut C {
     }
 }
 
+/// A no-op implementation of `LexerCache`.
+#[derive(Debug, Clone, Copy, Default)]
+pub struct NoLexerCache;
+
+impl<L: Language> LexerCache<L> for NoLexerCache {
+    fn set_lex_output(&mut self, _output: LexOutput<L>) {}
+
+    fn get_token(&self, _index: usize) -> Option<Token<L::TokenType>> {
+        None
+    }
+
+    fn count_tokens(&self) -> usize {
+        0
+    }
+
+    fn has_tokens(&self) -> bool {
+        false
+    }
+}
+
 /// Represents a single kind in the source code.
 ///
 /// Tokens are the fundamental units of lexical analysis, representing
 /// categorized pieces of source text with their position information.
 #[derive(Debug, Clone, PartialEq, Eq, Copy)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct Token<K> {
     /// The kind/category of this kind (e.g., keyword, identifier, number)
     pub kind: K,
@@ -211,8 +220,8 @@ impl<K> Token<K> {
 
 /// A stream of tokens with associated source text.
 #[derive(Debug, Clone)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
-#[cfg_attr(feature = "serde", serde(bound(serialize = "K: Serialize", deserialize = "K: Deserialize<'de>")))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+#[cfg_attr(feature = "serde", serde(bound(serialize = "K: serde::Serialize", deserialize = "K: serde::Deserialize<'de>")))]
 pub struct TokenStream<K: Copy> {
     /// The raw source text.
     pub raw: String,
@@ -224,30 +233,31 @@ pub struct TokenStream<K: Copy> {
 #[cfg(feature = "serde")]
 mod arc_slice_serde {
     use super::*;
-    use serde::{Deserialize, Deserializer, Serialize, Serializer};
 
     pub fn serialize<K, S>(arc: &Arc<[Token<K>]>, serializer: S) -> Result<S::Ok, S::Error>
     where
-        K: Serialize,
-        S: Serializer,
+        K: serde::Serialize,
+        S: serde::Serializer,
     {
-        arc.as_ref().serialize(serializer)
+        serde::Serialize::serialize(arc.as_ref(), serializer)
     }
 
     pub fn deserialize<'de, K, D>(deserializer: D) -> Result<Arc<[Token<K>]>, D::Error>
     where
-        K: Deserialize<'de>,
-        D: Deserializer<'de>,
+        K: serde::Deserialize<'de>,
+        D: serde::Deserializer<'de>,
     {
-        let vec = Vec::<Token<K>>::deserialize(deserializer)?;
+        let vec = <Vec<Token<K>> as serde::Deserialize>::deserialize(deserializer)?;
         Ok(Arc::from_iter(vec))
     }
 }
 
-/// State information for incremental lexical analysis.
+/// Represents the state of the lexer during a tokenization session.
 ///
 /// This struct maintains the current position and context during
 /// tokenization, enabling incremental and resumable lexing operations.
+/// It tracks the current position in the source text, collected tokens,
+/// and any errors encountered.
 #[derive(Debug)]
 pub struct LexerState<'s, S: Source + ?Sized, L: Language> {
     pub(crate) cursor: SourceCursor<'s, S>,
@@ -344,6 +354,16 @@ impl<'s, S: Source + ?Sized, L: Language> LexerState<'s, S, L> {
 
         let stable_offset = reused_tokens.last().map(|t| t.span.end).unwrap_or(0);
         Self { cursor: SourceCursor::new_at(source, stable_offset), tokens: reused_tokens, errors: vec![] }
+    }
+
+    /// Creates a sub-state for scanning a sub-range of the source.
+    pub fn sub_state(&mut self, start: usize, _end: usize) -> Self {
+        Self { cursor: SourceCursor::new_at(self.cursor.source(), start), tokens: vec![], errors: vec![] }
+    }
+
+    /// Returns the source text provider.
+    pub fn get_source(&self) -> &'s S {
+        self.cursor.source()
     }
 
     /// Gets the remaining text from the current position to the end of the source.
@@ -556,13 +576,13 @@ impl<'s, S: Source + ?Sized, L: Language> LexerState<'s, S, L> {
         false
     }
 
-    /// Gets a reference to the tokens collected so far.
+    /// Gets the tokens collected so far in the lexer state.
     ///
     /// # Returns
     ///
-    /// A slice of tokens collected during the lexing process.
+    /// A slice of tokens collected during lexing.
     #[inline]
-    pub fn tokens(&self) -> &[Token<L::TokenType>] {
+    pub fn get_tokens(&self) -> &[Token<L::TokenType>] {
         &self.tokens
     }
 
@@ -605,16 +625,6 @@ impl<'s, S: Source + ?Sized, L: Language> LexerState<'s, S, L> {
     /// Returns `true` if the pattern was found and consumed, advancing the cursor.
     pub fn consume_if_starts_with(&mut self, pattern: &str) -> bool {
         self.cursor.consume_if_starts_with(pattern)
-    }
-
-    /// Gets the tokens collected so far in the lexer state.
-    ///
-    /// # Returns
-    ///
-    /// A slice of tokens collected during lexing.
-    #[inline]
-    pub fn get_tokens(&self) -> &[Token<L::TokenType>] {
-        &self.tokens
     }
 
     /// Adds an error to the lexer state's diagnostics.
@@ -686,8 +696,8 @@ impl<'s, S: Source + ?Sized, L: Language> LexerState<'s, S, L> {
     /// state.take_while(|_| true); // Advance to end
     /// state.add_eof();
     ///
-    /// assert_eq!(state.tokens().len(), 1);
-    /// assert_eq!(state.tokens()[0].span, Range { start: 4, end: 4 });
+    /// assert_eq!(state.get_tokens().len(), 1);
+    /// assert_eq!(state.get_tokens()[0].span, Range { start: 4, end: 4 });
     /// ```
     #[inline]
     pub fn add_eof(&mut self) {
@@ -738,8 +748,9 @@ impl<'s, S: Source + ?Sized, L: Language> LexerState<'s, S, L> {
     /// # use core::range::Range;
     /// # use oak_core::lexer::{LexerState, Token};
     /// # use oak_core::{Language, TokenType, SourceText, UniversalTokenRole, TokenRole, UniversalElementRole, ElementRole, ElementType};
-    /// #     /// #
+    /// #
     /// # #[derive(Debug, PartialEq, Clone, Copy, Eq, Hash)]
+    /// # #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
     /// # enum SimpleToken { Identifier, End }
     /// #
     /// # impl TokenType for SimpleToken {
@@ -749,6 +760,7 @@ impl<'s, S: Source + ?Sized, L: Language> LexerState<'s, S, L> {
     /// # }
     /// #
     /// # #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+    /// # #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
     /// # enum SimpleElement {}
     /// #
     /// # impl ElementType for SimpleElement {
@@ -820,8 +832,9 @@ impl<'s, S: Source + ?Sized, L: Language> LexerState<'s, S, L> {
     /// # use core::range::Range;
     /// # use oak_core::lexer::{LexerState, Token};
     /// # use oak_core::{Language, TokenType, SourceText, UniversalTokenRole, TokenRole, UniversalElementRole, ElementRole, ElementType};
-    /// #     /// #
+    /// #
     /// # #[derive(Debug, PartialEq, Clone, Copy, Eq, Hash)]
+    /// # #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
     /// # enum SimpleToken { End }
     /// #
     /// # impl TokenType for SimpleToken {
@@ -831,6 +844,7 @@ impl<'s, S: Source + ?Sized, L: Language> LexerState<'s, S, L> {
     /// # }
     /// #
     /// # #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+    /// # #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
     /// # enum SimpleElement {}
     /// #
     /// # impl ElementType for SimpleElement {
@@ -871,12 +885,8 @@ impl<'s, S: Source + ?Sized, L: Language> LexerState<'s, S, L> {
     /// This method operates on a character-by-character basis, which means it
     /// correctly handles multi-byte UTF-8 characters. For performance-critical
     /// code, consider using byte-based methods when working with ASCII-only text.
-    pub fn take_while(&mut self, mut pred: impl FnMut(char) -> bool) -> Range<usize> {
-        let start = self.cursor.position();
-        while let Some(ch) = self.peek() {
-            if pred(ch) { self.advance(ch.len_utf8()) } else { break }
-        }
-        Range { start, end: self.cursor.position() }
+    pub fn take_while(&mut self, pred: impl FnMut(char) -> bool) -> Range<usize> {
+        self.cursor.take_while(pred)
     }
 
     /// Performs a safety check to prevent infinite loops during lexing.
@@ -900,7 +910,7 @@ impl<'s, S: Source + ?Sized, L: Language> LexerState<'s, S, L> {
     /// #![feature(new_range_api)]
     /// # use oak_core::lexer::{LexerState, Token};
     /// # use oak_core::{Language, TokenType, SourceText, UniversalTokenRole, TokenRole, UniversalElementRole, ElementRole, ElementType};
-    /// #     /// #
+    /// #
     /// # #[derive(Debug, PartialEq, Clone, Copy, Eq, Hash)]
     /// # enum SimpleToken { End }
     /// #
@@ -971,7 +981,7 @@ impl<'s, S: Source + ?Sized, L: Language> LexerState<'s, S, L> {
     pub fn advance_if_dead_lock(&mut self, safe_point: usize) {
         // Force advance if no progress was made
         if self.cursor.position() == safe_point {
-            if let Some(ch) = self.current() {
+            if let Some(ch) = self.peek() {
                 // Skip current character
                 self.advance(ch.len_utf8())
             }
@@ -1007,8 +1017,9 @@ impl<'s, S: Source + ?Sized, L: Language> LexerState<'s, S, L> {
     /// #![feature(new_range_api)]
     /// # use oak_core::lexer::{LexerState, Token};
     /// # use oak_core::{Language, TokenType, SourceText, OakError, OakDiagnostics, UniversalTokenRole, UniversalElementRole, ElementType};
-    /// #     /// #
+    /// #
     /// # #[derive(Debug, PartialEq, Clone, Copy, Eq, Hash)]
+    /// # #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
     /// # enum SimpleToken { Identifier, End }
     /// #
     /// # impl TokenType for SimpleToken {
@@ -1018,6 +1029,7 @@ impl<'s, S: Source + ?Sized, L: Language> LexerState<'s, S, L> {
     /// # }
     /// #
     /// # #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+    /// # #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
     /// # enum SimpleElement {}
     /// #
     /// # impl ElementType for SimpleElement {
@@ -1098,6 +1110,7 @@ impl<'s, S: Source + ?Sized, L: Language> LexerState<'s, S, L> {
     /// # use oak_core::parser::session::ParseSession;
     /// #
     /// # #[derive(Debug, PartialEq, Clone, Copy, Eq, Hash)]
+    /// # #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
     /// # enum SimpleToken { Identifier, End }
     /// #
     /// # impl TokenType for SimpleToken {
@@ -1107,6 +1120,7 @@ impl<'s, S: Source + ?Sized, L: Language> LexerState<'s, S, L> {
     /// # }
     /// #
     /// # #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+    /// # #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
     /// # enum SimpleElement {}
     /// #
     /// # impl ElementType for SimpleElement {

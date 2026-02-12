@@ -1,0 +1,757 @@
+{
+  "success": true,
+  "count": 125,
+  "tokens": [
+    {
+      "kind": "Field",
+      "text": "# TSV test file for lexer testing",
+      "start": 0,
+      "end": 33
+    },
+    {
+      "kind": "Newline",
+      "text": "\r\n",
+      "start": 33,
+      "end": 35
+    },
+    {
+      "kind": "Field",
+      "text": "# Tab-Separated Values format",
+      "start": 35,
+      "end": 64
+    },
+    {
+      "kind": "Newline",
+      "text": "\r\n",
+      "start": 64,
+      "end": 66
+    },
+    {
+      "kind": "Newline",
+      "text": "\r\n",
+      "start": 66,
+      "end": 68
+    },
+    {
+      "kind": "Field",
+      "text": "# Basic TSV with header",
+      "start": 68,
+      "end": 91
+    },
+    {
+      "kind": "Newline",
+      "text": "\r\n",
+      "start": 91,
+      "end": 93
+    },
+    {
+      "kind": "Field",
+      "text": "Name",
+      "start": 93,
+      "end": 97
+    },
+    {
+      "kind": "Field",
+      "text": "Age",
+      "start": 98,
+      "end": 101
+    },
+    {
+      "kind": "Field",
+      "text": "City",
+      "start": 102,
+      "end": 106
+    },
+    {
+      "kind": "Field",
+      "text": "Country",
+      "start": 107,
+      "end": 114
+    },
+    {
+      "kind": "Field",
+      "text": "Email",
+      "start": 115,
+      "end": 120
+    },
+    {
+      "kind": "Newline",
+      "text": "\r\n",
+      "start": 120,
+      "end": 122
+    },
+    {
+      "kind": "Field",
+      "text": "John Doe",
+      "start": 122,
+      "end": 130
+    },
+    {
+      "kind": "Field",
+      "text": "30",
+      "start": 131,
+      "end": 133
+    },
+    {
+      "kind": "Field",
+      "text": "New York",
+      "start": 134,
+      "end": 142
+    },
+    {
+      "kind": "Field",
+      "text": "USA",
+      "start": 143,
+      "end": 146
+    },
+    {
+      "kind": "Field",
+      "text": "john.doe@example.com",
+      "start": 147,
+      "end": 167
+    },
+    {
+      "kind": "Newline",
+      "text": "\r\n",
+      "start": 167,
+      "end": 169
+    },
+    {
+      "kind": "Field",
+      "text": "Jane Smith",
+      "start": 169,
+      "end": 179
+    },
+    {
+      "kind": "Field",
+      "text": "25",
+      "start": 180,
+      "end": 182
+    },
+    {
+      "kind": "Field",
+      "text": "London",
+      "start": 183,
+      "end": 189
+    },
+    {
+      "kind": "Field",
+      "text": "UK",
+      "start": 190,
+      "end": 192
+    },
+    {
+      "kind": "Field",
+      "text": "jane.smith@example.com",
+      "start": 193,
+      "end": 215
+    },
+    {
+      "kind": "Newline",
+      "text": "\r\n",
+      "start": 215,
+      "end": 217
+    },
+    {
+      "kind": "Field",
+      "text": "Bob Johnson",
+      "start": 217,
+      "end": 228
+    },
+    {
+      "kind": "Field",
+      "text": "35",
+      "start": 229,
+      "end": 231
+    },
+    {
+      "kind": "Field",
+      "text": "Toronto",
+      "start": 232,
+      "end": 239
+    },
+    {
+      "kind": "Field",
+      "text": "Canada",
+      "start": 240,
+      "end": 246
+    },
+    {
+      "kind": "Field",
+      "text": "bob.johnson@example.com",
+      "start": 247,
+      "end": 270
+    },
+    {
+      "kind": "Newline",
+      "text": "\r\n",
+      "start": 270,
+      "end": 272
+    },
+    {
+      "kind": "Field",
+      "text": "Alice Brown",
+      "start": 272,
+      "end": 283
+    },
+    {
+      "kind": "Field",
+      "text": "28",
+      "start": 284,
+      "end": 286
+    },
+    {
+      "kind": "Field",
+      "text": "Sydney",
+      "start": 287,
+      "end": 293
+    },
+    {
+      "kind": "Field",
+      "text": "Australia",
+      "start": 294,
+      "end": 303
+    },
+    {
+      "kind": "Field",
+      "text": "alice.brown@example.com",
+      "start": 304,
+      "end": 327
+    },
+    {
+      "kind": "Newline",
+      "text": "\r\n",
+      "start": 327,
+      "end": 329
+    },
+    {
+      "kind": "Newline",
+      "text": "\r\n",
+      "start": 329,
+      "end": 331
+    },
+    {
+      "kind": "Field",
+      "text": "# TSV with quoted fields containing tabs",
+      "start": 331,
+      "end": 371
+    },
+    {
+      "kind": "Newline",
+      "text": "\r\n",
+      "start": 371,
+      "end": 373
+    },
+    {
+      "kind": "Field",
+      "text": "Product",
+      "start": 373,
+      "end": 380
+    },
+    {
+      "kind": "Field",
+      "text": "Category",
+      "start": 381,
+      "end": 389
+    },
+    {
+      "kind": "Field",
+      "text": "Price",
+      "start": 390,
+      "end": 395
+    },
+    {
+      "kind": "Field",
+      "text": "Description",
+      "start": 396,
+      "end": 407
+    },
+    {
+      "kind": "Field",
+      "text": "Tags",
+      "start": 408,
+      "end": 412
+    },
+    {
+      "kind": "Newline",
+      "text": "\r\n",
+      "start": 412,
+      "end": 414
+    },
+    {
+      "kind": "Field",
+      "text": "\"iPhone 14\"",
+      "start": 414,
+      "end": 425
+    },
+    {
+      "kind": "Field",
+      "text": "\"Electronics\"",
+      "start": 426,
+      "end": 439
+    },
+    {
+      "kind": "Field",
+      "text": "999.99",
+      "start": 440,
+      "end": 446
+    },
+    {
+      "kind": "Field",
+      "text": "\"Latest Apple smartphone, 128GB storage\"",
+      "start": 447,
+      "end": 487
+    },
+    {
+      "kind": "Field",
+      "text": "\"mobile\tapple\tsmartphone\"",
+      "start": 488,
+      "end": 513
+    },
+    {
+      "kind": "Newline",
+      "text": "\r\n",
+      "start": 513,
+      "end": 515
+    },
+    {
+      "kind": "Field",
+      "text": "\"Samsung Galaxy S23\"",
+      "start": 515,
+      "end": 535
+    },
+    {
+      "kind": "Field",
+      "text": "\"Electronics\"",
+      "start": 536,
+      "end": 549
+    },
+    {
+      "kind": "Field",
+      "text": "899.99",
+      "start": 550,
+      "end": 556
+    },
+    {
+      "kind": "Field",
+      "text": "\"Android flagship phone, excellent camera\"",
+      "start": 557,
+      "end": 599
+    },
+    {
+      "kind": "Field",
+      "text": "\"mobile\tsamsung\tandroid\"",
+      "start": 600,
+      "end": 624
+    },
+    {
+      "kind": "Newline",
+      "text": "\r\n",
+      "start": 624,
+      "end": 626
+    },
+    {
+      "kind": "Field",
+      "text": "\"MacBook Pro 16\"",
+      "start": 626,
+      "end": 642
+    },
+    {
+      "kind": "Field",
+      "text": "\"Computers\"",
+      "start": 643,
+      "end": 654
+    },
+    {
+      "kind": "Field",
+      "text": "2499.99",
+      "start": 655,
+      "end": 662
+    },
+    {
+      "kind": "Field",
+      "text": "\"Professional laptop, M2 Pro chip\"",
+      "start": 663,
+      "end": 697
+    },
+    {
+      "kind": "Field",
+      "text": "\"laptop\tapple\tprofessional\"",
+      "start": 698,
+      "end": 725
+    },
+    {
+      "kind": "Newline",
+      "text": "\r\n",
+      "start": 725,
+      "end": 727
+    },
+    {
+      "kind": "Newline",
+      "text": "\r\n",
+      "start": 727,
+      "end": 729
+    },
+    {
+      "kind": "Field",
+      "text": "# TSV with quoted fields containing quotes",
+      "start": 729,
+      "end": 771
+    },
+    {
+      "kind": "Newline",
+      "text": "\r\n",
+      "start": 771,
+      "end": 773
+    },
+    {
+      "kind": "Field",
+      "text": "Title",
+      "start": 773,
+      "end": 778
+    },
+    {
+      "kind": "Field",
+      "text": "Author",
+      "start": 779,
+      "end": 785
+    },
+    {
+      "kind": "Field",
+      "text": "Year",
+      "start": 786,
+      "end": 790
+    },
+    {
+      "kind": "Field",
+      "text": "Description",
+      "start": 791,
+      "end": 802
+    },
+    {
+      "kind": "Newline",
+      "text": "\r\n",
+      "start": 802,
+      "end": 804
+    },
+    {
+      "kind": "Field",
+      "text": "\"The \"\"Great\"\" Gatsby\"",
+      "start": 804,
+      "end": 826
+    },
+    {
+      "kind": "Field",
+      "text": "\"F. Scott Fitzgerald\"",
+      "start": 827,
+      "end": 848
+    },
+    {
+      "kind": "Field",
+      "text": "1925",
+      "start": 849,
+      "end": 853
+    },
+    {
+      "kind": "Field",
+      "text": "\"A classic American novel about the Jazz Age\"",
+      "start": 854,
+      "end": 899
+    },
+    {
+      "kind": "Newline",
+      "text": "\r\n",
+      "start": 899,
+      "end": 901
+    },
+    {
+      "kind": "Field",
+      "text": "\"To Kill a \"\"Mockingbird\"\"\"",
+      "start": 901,
+      "end": 928
+    },
+    {
+      "kind": "Field",
+      "text": "\"Harper Lee\"",
+      "start": 929,
+      "end": 941
+    },
+    {
+      "kind": "Field",
+      "text": "1960",
+      "start": 942,
+      "end": 946
+    },
+    {
+      "kind": "Field",
+      "text": "\"Story of racial injustice and childhood innocence\"",
+      "start": 947,
+      "end": 998
+    },
+    {
+      "kind": "Newline",
+      "text": "\r\n",
+      "start": 998,
+      "end": 1000
+    },
+    {
+      "kind": "Field",
+      "text": "\"1984\"",
+      "start": 1000,
+      "end": 1006
+    },
+    {
+      "kind": "Field",
+      "text": "\"George Orwell\"",
+      "start": 1007,
+      "end": 1022
+    },
+    {
+      "kind": "Field",
+      "text": "1949",
+      "start": 1023,
+      "end": 1027
+    },
+    {
+      "kind": "Field",
+      "text": "\"Dystopian novel about surveillance and totalitarianism\"",
+      "start": 1028,
+      "end": 1084
+    },
+    {
+      "kind": "Newline",
+      "text": "\r\n",
+      "start": 1084,
+      "end": 1086
+    },
+    {
+      "kind": "Newline",
+      "text": "\r\n",
+      "start": 1086,
+      "end": 1088
+    },
+    {
+      "kind": "Field",
+      "text": "# TSV with empty fields",
+      "start": 1088,
+      "end": 1111
+    },
+    {
+      "kind": "Newline",
+      "text": "\r\n",
+      "start": 1111,
+      "end": 1113
+    },
+    {
+      "kind": "Field",
+      "text": "ID",
+      "start": 1113,
+      "end": 1115
+    },
+    {
+      "kind": "Field",
+      "text": "Name",
+      "start": 1116,
+      "end": 1120
+    },
+    {
+      "kind": "Field",
+      "text": "Department",
+      "start": 1121,
+      "end": 1131
+    },
+    {
+      "kind": "Field",
+      "text": "Salary",
+      "start": 1132,
+      "end": 1138
+    },
+    {
+      "kind": "Field",
+      "text": "Manager",
+      "start": 1139,
+      "end": 1146
+    },
+    {
+      "kind": "Newline",
+      "text": "\r\n",
+      "start": 1146,
+      "end": 1148
+    },
+    {
+      "kind": "Field",
+      "text": "1",
+      "start": 1148,
+      "end": 1149
+    },
+    {
+      "kind": "Field",
+      "text": "Alice Johnson",
+      "start": 1150,
+      "end": 1163
+    },
+    {
+      "kind": "Field",
+      "text": "Engineering",
+      "start": 1164,
+      "end": 1175
+    },
+    {
+      "kind": "Field",
+      "text": "120000",
+      "start": 1176,
+      "end": 1182
+    },
+    {
+      "kind": "Newline",
+      "text": "\r\n",
+      "start": 1183,
+      "end": 1185
+    },
+    {
+      "kind": "Field",
+      "text": "2",
+      "start": 1185,
+      "end": 1186
+    },
+    {
+      "kind": "Field",
+      "text": "Bob Smith",
+      "start": 1187,
+      "end": 1196
+    },
+    {
+      "kind": "Field",
+      "text": "Sales",
+      "start": 1197,
+      "end": 1202
+    },
+    {
+      "kind": "Field",
+      "text": "95000",
+      "start": 1203,
+      "end": 1208
+    },
+    {
+      "kind": "Field",
+      "text": "Alice Johnson",
+      "start": 1209,
+      "end": 1222
+    },
+    {
+      "kind": "Newline",
+      "text": "\r\n",
+      "start": 1222,
+      "end": 1224
+    },
+    {
+      "kind": "Field",
+      "text": "3",
+      "start": 1224,
+      "end": 1225
+    },
+    {
+      "kind": "Field",
+      "text": "Carol White",
+      "start": 1226,
+      "end": 1237
+    },
+    {
+      "kind": "Field",
+      "text": "Marketing",
+      "start": 1238,
+      "end": 1247
+    },
+    {
+      "kind": "Field",
+      "text": "85000",
+      "start": 1248,
+      "end": 1253
+    },
+    {
+      "kind": "Field",
+      "text": "Bob Smith",
+      "start": 1254,
+      "end": 1263
+    },
+    {
+      "kind": "Newline",
+      "text": "\r\n",
+      "start": 1263,
+      "end": 1265
+    },
+    {
+      "kind": "Field",
+      "text": "4",
+      "start": 1265,
+      "end": 1266
+    },
+    {
+      "kind": "Field",
+      "text": "David Brown",
+      "start": 1267,
+      "end": 1278
+    },
+    {
+      "kind": "Field",
+      "text": "75000",
+      "start": 1280,
+      "end": 1285
+    },
+    {
+      "kind": "Field",
+      "text": "Carol White",
+      "start": 1286,
+      "end": 1297
+    },
+    {
+      "kind": "Newline",
+      "text": "\r\n",
+      "start": 1297,
+      "end": 1299
+    },
+    {
+      "kind": "Field",
+      "text": "5",
+      "start": 1299,
+      "end": 1300
+    },
+    {
+      "kind": "Field",
+      "text": "Eve Davis",
+      "start": 1301,
+      "end": 1310
+    },
+    {
+      "kind": "Field",
+      "text": "HR",
+      "start": 1311,
+      "end": 1313
+    },
+    {
+      "kind": "Field",
+      "text": "80000",
+      "start": 1314,
+      "end": 1319
+    },
+    {
+      "kind": "Field",
+      "text": "Bob Smith",
+      "start": 1320,
+      "end": 1329
+    },
+    {
+      "kind": "Newline",
+      "text": "\r\n",
+      "start": 1329,
+      "end": 1331
+    },
+    {
+      "kind": "Eof",
+      "text": "",
+      "start": 1331,
+      "end": 1331
+    }
+  ],
+  "errors": []
+}

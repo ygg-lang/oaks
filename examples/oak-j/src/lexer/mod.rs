@@ -1,4 +1,5 @@
 #![doc = include_str!("readme.md")]
+/// J token type definitions
 pub mod token_type;
 
 pub use token_type::JTokenType;
@@ -11,13 +12,14 @@ use oak_core::{
 };
 use std::sync::LazyLock;
 
-type State<'a, S> = LexerState<'a, S, JLanguage>;
+pub(crate) type State<'a, S> = LexerState<'a, S, JLanguage>;
 
 static J_WHITESPACE: LazyLock<WhitespaceConfig> = LazyLock::new(|| WhitespaceConfig { unicode_whitespace: true });
 
+/// J language lexer
 #[derive(Clone, Debug)]
 pub struct JLexer<'config> {
-    config: &'config JLanguage,
+    _config: &'config JLanguage,
 }
 
 impl<'config> Lexer<JLanguage> for JLexer<'config> {
@@ -32,11 +34,12 @@ impl<'config> Lexer<JLanguage> for JLexer<'config> {
 }
 
 impl<'config> JLexer<'config> {
+    /// Creates a new J lexer.
     pub fn new(config: &'config JLanguage) -> Self {
-        Self { config }
+        Self { _config: config }
     }
 
-    /// 主要词法分析逻辑
+    /// Main lexing logic.
     fn run<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> Result<(), OakError> {
         while state.not_at_end() {
             let safe_point = state.get_position();
@@ -65,7 +68,7 @@ impl<'config> JLexer<'config> {
                 continue;
             }
 
-            // 如果没有匹配任何模式，跳过当前字符并生成 Error token
+            // If no rules matched, skip current character and add error token
             if let Some(ch) = state.peek() {
                 state.advance(ch.len_utf8());
                 state.add_token(JTokenType::Error, safe_point, state.get_position());
@@ -75,12 +78,12 @@ impl<'config> JLexer<'config> {
         Ok(())
     }
 
-    /// 跳过空白字符
+    /// Skips whitespace characters.
     fn skip_whitespace<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         J_WHITESPACE.scan(state, JTokenType::Whitespace)
     }
 
-    /// J 语言的注释以 NB. 开头
+    /// J language comments start with `NB.`
     fn skip_comment<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start = state.get_position();
         if state.consume_if_starts_with("NB.") {
@@ -96,14 +99,14 @@ impl<'config> JLexer<'config> {
         false
     }
 
-    /// 字符串字面量
+    /// String literal.
     fn lex_string_literal<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start = state.get_position();
         if state.consume_if_starts_with("'") {
             while let Some(ch) = state.peek() {
                 if ch == '\'' {
                     state.advance(ch.len_utf8());
-                    // 处理转义的单引号 ''
+                    // Handle escaped single quote ''
                     if state.consume_if_starts_with("'") {
                         continue;
                     }
@@ -112,19 +115,19 @@ impl<'config> JLexer<'config> {
                 }
                 state.advance(ch.len_utf8());
             }
-            // 未闭合的字符串
+            // Unclosed string.
             state.add_token(JTokenType::Error, start, state.get_position());
             return true;
         }
         false
     }
 
-    /// 数字字面量
+    /// Number literal.
     fn lex_number_literal<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start = state.get_position();
         if let Some(ch) = state.peek() {
             if ch.is_ascii_digit() || ch == '_' {
-                // J 使用 _ 表示负号
+                // J uses _ for negative sign.
                 state.advance(ch.len_utf8());
                 while let Some(ch) = state.peek() {
                     if ch.is_ascii_digit() || ch == '.' || ch == 'e' || ch == 'E' || ch == 'j' || ch == 'r' {
@@ -141,7 +144,7 @@ impl<'config> JLexer<'config> {
         false
     }
 
-    /// 标识符
+    /// Identifier.
     fn lex_identifier<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start = state.get_position();
         if let Some(ch) = state.peek() {
@@ -162,11 +165,11 @@ impl<'config> JLexer<'config> {
         false
     }
 
-    /// 操作符和特殊符号
+    /// Operators and special symbols.
     fn lex_operators<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start = state.get_position();
 
-        // 尝试匹配长的操作符
+        // Try to match long operators.
         for (op, token) in [("=:", JTokenType::IsGlobal), ("=.", JTokenType::IsLocal)] {
             if state.consume_if_starts_with(op) {
                 state.add_token(token, start, state.get_position());
@@ -174,7 +177,7 @@ impl<'config> JLexer<'config> {
             }
         }
 
-        // 匹配单个字符操作符
+        // Match single character operators.
         if let Some(ch) = state.peek() {
             let token = match ch {
                 '=' => Some(JTokenType::Equal),

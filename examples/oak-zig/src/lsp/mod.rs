@@ -4,12 +4,14 @@ use core::range::Range;
 use oak_core::tree::RedNode;
 #[cfg(feature = "lsp")]
 use {futures::Future, oak_lsp::service::LanguageService, oak_lsp::types::Hover as LspHover, oak_vfs::Vfs};
+/// Language service implementation for Zig.
 #[cfg(feature = "lsp")]
 pub struct ZigLanguageService<V: Vfs> {
     vfs: V,
     workspace: oak_lsp::workspace::WorkspaceManager,
 }
 impl<V: Vfs> ZigLanguageService<V> {
+    /// Creates a new Zig language service.
     pub fn new(vfs: V) -> Self {
         Self { vfs, workspace: oak_lsp::workspace::WorkspaceManager::new() }
     }

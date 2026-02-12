@@ -1,232 +1,381 @@
 use oak_core::{Source, Token, TokenType, UniversalElementRole, UniversalTokenRole};
-#[cfg(feature = "serde")]
-use serde::{Deserialize, Serialize};
 
 pub type FSharpToken = Token<FSharpTokenType>;
 
+/// F# token types
 #[derive(Copy, Clone, Debug, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub enum FSharpTokenType {
-    // Basic tokens
+    /// Root node
     Root,
+    /// Expression
     Expression,
+    /// Whitespace
     Whitespace,
+    /// Newline
     Newline,
 
-    // Identifiers and literals
+    /// Identifier
     Identifier,
+    /// Integer literal
     IntegerLiteral,
+    /// Float literal
     FloatLiteral,
+    /// String literal
     StringLiteral,
+    /// Character literal
     CharLiteral,
+    /// Boolean literal
     BooleanLiteral,
+    /// Unit literal
     UnitLiteral,
 
-    // Keywords - Basic
+    /// The 'let' keyword
     Let,
+    /// The 'rec' keyword
     Rec,
+    /// The 'and' keyword
     And,
+    /// The 'in' keyword
     In,
+    /// The 'if' keyword
     If,
+    /// The 'then' keyword
     Then,
+    /// The 'else' keyword
     Else,
+    /// The 'elif' keyword
     Elif,
+    /// The 'match' keyword
     Match,
+    /// The 'with' keyword
     With,
+    /// The 'when' keyword
     When,
+    /// The 'function' keyword
     Function,
+    /// The 'fun' keyword
     Fun,
 
-    // Keywords - Type
+    /// The 'type' keyword
     Type,
+    /// The 'val' keyword
     Val,
+    /// The 'mutable' keyword
     Mutable,
+    /// The 'of' keyword
     Of,
+    /// The 'as' keyword
     As,
 
-    // Keywords - Modules and Namespaces
+    /// The 'module' keyword
     Module,
+    /// The 'namespace' keyword
     Namespace,
+    /// The 'open' keyword
     Open,
 
-    // Keywords - Exception Handling
+    /// The 'try' keyword
     Try,
+    /// The 'finally' keyword
     Finally,
+    /// The 'exception' keyword
     Exception,
+    /// The 'raise' keyword
     Raise,
+    /// The 'failwith' keyword
     Failwith,
 
-    // Keywords - Loops and Control Flow
+    /// The 'for' keyword
     For,
+    /// The 'to' keyword
     To,
+    /// The 'downto' keyword
     Downto,
+    /// The 'do' keyword
     Do,
+    /// The 'done' keyword
     Done,
+    /// The 'while' keyword
     While,
+    /// The 'yield' keyword
     Yield,
+    /// The 'return' keyword
     Return,
 
-    // Keywords - Object Oriented
+    /// The 'class' keyword
     Class,
+    /// The 'interface' keyword
     Interface,
+    /// The 'inherit' keyword
     Inherit,
+    /// The 'abstract' keyword
     Abstract,
+    /// The 'override' keyword
     Override,
+    /// The 'default' keyword
     Default,
+    /// The 'member' keyword
     Member,
+    /// The 'static' keyword
     Static,
+    /// The 'new' keyword
     New,
 
-    // Keywords - Other
+    /// The 'lazy' keyword
     Lazy,
+    /// The 'async' keyword
     Async,
+    /// The 'seq' keyword
     Seq,
+    /// The 'use' keyword
     Use,
+    /// The 'begin' keyword
     Begin,
+    /// The 'end' keyword
     End,
+    /// The 'struct' keyword
     Struct,
+    /// The 'sig' keyword
     Sig,
 
-    // Keywords - Boolean and Special Values
+    /// The 'true' keyword
     True,
+    /// The 'false' keyword
     False,
+    /// The 'null' keyword
     Null,
+    /// The 'or' keyword
     Or,
 
-    // Keywords - Access Modifiers
+    /// The 'public' keyword
     Public,
+    /// The 'private' keyword
     Private,
+    /// The 'internal' keyword
     Internal,
 
-    // Keywords - Other
+    /// The 'inline' keyword
     Inline,
+    /// The 'extern' keyword
     Extern,
+    /// The 'upcast' keyword
     Upcast,
+    /// The 'downcast' keyword
     Downcast,
+    /// The 'assert' keyword
     Assert,
+    /// The 'global' keyword
     Global,
+    /// The 'base' keyword
     Base,
+    /// The 'this' keyword
     This,
+    /// The 'void' keyword
     Void,
+    /// The 'delegate' keyword
     Delegate,
+    /// The 'select' keyword
     Select,
 
-    // Type keywords
+    /// The 'obj' keyword
     Obj,
+    /// The 'unit' keyword
     Unit,
+    /// The 'int' keyword
     Int,
+    /// The 'float' keyword
     Float,
+    /// The 'string' keyword
     String,
+    /// The 'bool' keyword
     Bool,
+    /// The 'char' keyword
     Char,
+    /// The 'byte' keyword
     Byte,
+    /// The 'sbyte' keyword
     SByte,
+    /// The 'int16' keyword
     Int16,
+    /// The 'uint16' keyword
     UInt16,
+    /// The 'int32' keyword
     Int32,
+    /// The 'uint32' keyword
     UInt32,
+    /// The 'int64' keyword
     Int64,
+    /// The 'uint64' keyword
     UInt64,
+    /// The 'nativeint' keyword
     NativeInt,
+    /// The 'unativeint' keyword
     UNativeInt,
+    /// The 'decimal' keyword
     Decimal,
+    /// The 'bigint' keyword
     BigInt,
 
-    // Operations - Arithmetic
-    Plus,     // +
-    Minus,    // -
-    Star,     // *
-    Slash,    // /
-    Percent,  // %
-    StarStar, // **
+    /// The '+' operator
+    Plus,
+    /// The '-' operator
+    Minus,
+    /// The '*' operator
+    Star,
+    /// The '/' operator
+    Slash,
+    /// The '%' operator
+    Percent,
+    /// The '**' operator
+    StarStar,
 
-    // Operations - Comparison
-    Equal,        // =
-    NotEqual,     // <>
-    LessThan,     // <
-    LessEqual,    // <=
-    GreaterThan,  // >
-    GreaterEqual, // >=
+    /// The '=' operator
+    Equal,
+    /// The '<>' operator
+    NotEqual,
+    /// The '<' operator
+    LessThan,
+    /// The '<=' operator
+    LessEqual,
+    /// The '>' operator
+    GreaterThan,
+    /// The '>=' operator
+    GreaterEqual,
 
-    // Operations - Logic
-    AndAnd, // &&
-    OrOr,   // ||
-    Not,    // not
+    /// The '&&' operator
+    AndAnd,
+    /// The '||' operator
+    OrOr,
+    /// The 'not' operator
+    Not,
 
-    // Operations - Bitwise
-    BitwiseAnd, // &&&
-    BitwiseOr,  // |||
-    BitwiseXor, // ^^^
-    BitwiseNot, // ~~~
-    LeftShift,  // <<<
-    RightShift, // >>>
+    /// The '&&&' operator
+    BitwiseAnd,
+    /// The '|||' operator
+    BitwiseOr,
+    /// The '^^^' operator
+    BitwiseXor,
+    /// The '~~~' operator
+    BitwiseNot,
+    /// The '<<<' operator
+    LeftShift,
+    /// The '>>>' operator
+    RightShift,
 
-    // Operations - Special
-    Arrow,       // ->
-    DoubleArrow, // =>
-    Pipe,        // |
-    PipeRight,   // |>
-    DoublePipe,  // ||
-    Cons,        // ::
-    At,          // @
-    Compose,     // >>
-    ComposeBack, // <<
-    Dollar,      // $
+    /// The '->' operator
+    Arrow,
+    /// The '=>' operator
+    DoubleArrow,
+    /// The '|' operator
+    Pipe,
+    /// The '|>' operator
+    PipeRight,
+    /// The '||' operator
+    DoublePipe,
+    /// The '::' operator
+    Cons,
+    /// The '@' operator
+    At,
+    /// The '>>' operator
+    Compose,
+    /// The '<<' operator
+    ComposeBack,
+    /// The '$' operator
+    Dollar,
 
-    // Operators - Other
-    LogicalAnd,  // &&
-    LogicalOr,   // ||
-    Ampersand,   // &
-    Caret,       // ^
-    Tilde,       // ~
-    Less,        // <
-    Greater,     // >
-    PipeGreater, // |>
-    Exclamation, // !
-    ColonEqual,  // :=
-    LArrow,      // <-
-    PlusPlus,    // ++
-    MinusMinus,  // --
+    /// The '&&' logical operator
+    LogicalAnd,
+    /// The '||' logical operator
+    LogicalOr,
+    /// The '&' operator
+    Ampersand,
+    /// The '^' operator
+    Caret,
+    /// The '~' operator
+    Tilde,
+    /// The '<' operator
+    Less,
+    /// The '>' operator
+    Greater,
+    /// The '|>' operator
+    PipeGreater,
+    /// The '!' operator
+    Exclamation,
+    /// The ':=' operator
+    ColonEqual,
+    /// The '<-' operator
+    LArrow,
+    /// The '++' operator
+    PlusPlus,
+    /// The '--' operator
+    MinusMinus,
 
-    // Delimiters
-    LeftParen,         // (
-    RightParen,        // )
-    LeftBracket,       // [
-    RightBracket,      // ]
-    LeftArrayBracket,  // [|
-    RightArrayBracket, // |]
-    LeftBracketBar,    // [<
-    RightBracketBar,   // >]
-    LeftBracketAngle,  // [ <
-    RightBracketAngle, // > ]
-    LeftBrace,         // {
-    RightBrace,        // }
-    LeftAngle,         // <
-    RightAngle,        // >
+    /// The '(' delimiter
+    LeftParen,
+    /// The ')' delimiter
+    RightParen,
+    /// The '[' delimiter
+    LeftBracket,
+    /// The ']' delimiter
+    RightBracket,
+    /// The '[|' delimiter
+    LeftArrayBracket,
+    /// The '|]' delimiter
+    RightArrayBracket,
+    /// The '[<' delimiter
+    LeftBracketBar,
+    /// The '>]' delimiter
+    RightBracketBar,
+    /// The '[ <' delimiter
+    LeftBracketAngle,
+    /// The '> ]' delimiter
+    RightBracketAngle,
+    /// The '{' delimiter
+    LeftBrace,
+    /// The '}' delimiter
+    RightBrace,
+    /// The '<' delimiter
+    LeftAngle,
+    /// The '>' delimiter
+    RightAngle,
 
-    // Punctuation
-    Comma,       // ,
-    Semicolon,   // ;
-    Colon,       // :
-    DoubleColon, // ::
-    Dot,         // .
-    DotDot,      // ..
-    Question,    // ?
-    Underscore,  // _
-    Apostrophe,  // '
-    Backtick,    // `
-    Hash,        // #
+    /// The ',' punctuation
+    Comma,
+    /// The ';' punctuation
+    Semicolon,
+    /// The ':' punctuation
+    Colon,
+    /// The '::' punctuation
+    DoubleColon,
+    /// The '.' punctuation
+    Dot,
+    /// The '..' punctuation
+    DotDot,
+    /// The '?' punctuation
+    Question,
+    /// The '_' punctuation
+    Underscore,
+    /// The ''' punctuation
+    Apostrophe,
+    /// The '`' punctuation
+    Backtick,
+    /// The '#' punctuation
+    Hash,
 
-    // Comments
-    LineComment,  // //
-    BlockComment, // (* *)
+    /// Line comment
+    LineComment,
+    /// Block comment
+    BlockComment,
 
-    // Special
+    /// Error
     Error,
+    /// End of file
     Eof,
 }
 
 impl FSharpTokenType {
+    /// Checks if it is a keyword
     pub fn is_keyword(&self) -> bool {
         matches!(
             self,

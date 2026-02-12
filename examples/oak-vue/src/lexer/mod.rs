@@ -1,23 +1,26 @@
 #![doc = include_str!("readme.md")]
+/// Token types for the Vue language.
 pub mod token_type;
 
-use crate::lexer::token_type::{VueLanguage, VueTokenType};
+use crate::{language::VueLanguage, lexer::token_type::VueTokenType};
 use oak_core::{
     Lexer, LexerState,
     lexer::{LexOutput, LexerCache},
     source::Source,
 };
 
+/// A lexer for the Vue language.
 #[derive(Clone, Debug)]
 pub struct VueLexer<'config> {
     _config: &'config VueLanguage,
 }
 
-type State<'a, S> = LexerState<'a, S, VueLanguage>;
+pub(crate) type State<'a, S> = LexerState<'a, S, VueLanguage>;
 
 impl<'config> VueLexer<'config> {
-    pub fn new(config: &'config VueLanguage) -> Self {
-        Self { _config: config }
+    /// Creates a new `VueLexer`.
+    pub fn new(_config: &'config VueLanguage) -> Self {
+        Self { _config }
     }
 
     fn lex_token<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) {
@@ -29,6 +32,19 @@ impl<'config> VueLexer<'config> {
         }
 
         let start_pos = state.get_position();
+        let rest = state.rest();
+
+        if rest.starts_with(&self._config.interpolation_start) {
+            state.advance(self._config.interpolation_start.len());
+            state.add_token(VueTokenType::InterpolationStart, start_pos, state.get_position());
+            return;
+        }
+        if rest.starts_with(&self._config.interpolation_end) {
+            state.advance(self._config.interpolation_end.len());
+            state.add_token(VueTokenType::InterpolationEnd, start_pos, state.get_position());
+            return;
+        }
+
         let ch = match state.peek() {
             Some(c) => c,
             None => {
@@ -163,24 +179,12 @@ impl<'config> VueLexer<'config> {
                 }
             }
             '{' => {
-                if state.peek_next_n(1) == Some('{') {
-                    state.advance(2);
-                    state.add_token(VueTokenType::InterpolationStart, start_pos, start_pos + 2);
-                }
-                else {
-                    state.advance(1);
-                    state.add_token(VueTokenType::LeftBrace, start_pos, start_pos + 1);
-                }
+                state.advance(1);
+                state.add_token(VueTokenType::LeftBrace, start_pos, start_pos + 1);
             }
             '}' => {
-                if state.peek_next_n(1) == Some('}') {
-                    state.advance(2);
-                    state.add_token(VueTokenType::InterpolationEnd, start_pos, start_pos + 2);
-                }
-                else {
-                    state.advance(1);
-                    state.add_token(VueTokenType::RightBrace, start_pos, start_pos + 1);
-                }
+                state.advance(1);
+                state.add_token(VueTokenType::RightBrace, start_pos, start_pos + 1);
             }
             '(' => {
                 state.advance(1);
@@ -240,7 +244,8 @@ impl<'config> VueLexer<'config> {
     fn lex_text<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) {
         let start_pos = state.get_position();
         while let Some(ch) = state.peek() {
-            if ch == '<' || ch == '{' || ch.is_whitespace() {
+            let rest = state.rest();
+            if ch == '<' || rest.starts_with(&self._config.interpolation_start) || ch.is_whitespace() {
                 break;
             }
             state.advance(ch.len_utf8())

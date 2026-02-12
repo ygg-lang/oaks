@@ -64,6 +64,7 @@ impl<V: Vfs + Send + Sync + 'static + oak_vfs::WritableVfs> LanguageService for 
         async move { self.with_root(&uri, |root| self.hover_provider.hover(&root, range).map(|h| oak_lsp::Hover { contents: h.contents, range: h.range })).await.flatten() }
     }
 }
+/// Language service implementation for LLVM IR (Legacy name).
 #[cfg(feature = "lsp")]
 pub struct LLvmLanguageService<V: Vfs> {
     vfs: V,
@@ -71,6 +72,7 @@ pub struct LLvmLanguageService<V: Vfs> {
 }
 #[cfg(feature = "lsp")]
 impl<V: Vfs> LLvmLanguageService<V> {
+    /// Creates a new `LLvmLanguageService`.
     pub fn new(vfs: V) -> Self {
         Self { vfs, workspace: oak_lsp::workspace::WorkspaceManager::new() }
     }

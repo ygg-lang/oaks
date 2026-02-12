@@ -1,4 +1,5 @@
-#![doc = include_str!("readme.md")]
+//! Voml lexer implementation.
+
 use crate::{language::VomlLanguage, lexer::token_type::VomlTokenType};
 pub mod token_type;
 use oak_core::{
@@ -6,16 +7,19 @@ use oak_core::{
     lexer::{LexOutput, LexerCache},
 };
 
-type State<'a, S> = LexerState<'a, S, VomlLanguage>;
+pub(crate) type State<'a, S> = LexerState<'a, S, VomlLanguage>;
 
+/// A lexer for the Voml language.
 #[derive(Clone, Debug)]
 pub struct VomlLexer<'config> {
-    _config: &'config VomlLanguage,
+    /// The Voml language configuration.
+    config: &'config VomlLanguage,
 }
 
 impl<'config> VomlLexer<'config> {
+    /// Creates a new `VomlLexer` with the given configuration.
     pub fn new(config: &'config VomlLanguage) -> Self {
-        Self { _config: config }
+        Self { config }
     }
 
     /// Skips whitespace characters.
@@ -599,7 +603,7 @@ impl<'config> Lexer<VomlLanguage> for VomlLexer<'config> {
                 continue;
             }
 
-            // 如果都没有匹配，则跳过当前字符并标记为错误
+            // If no rules match, skip the current character and mark as error
             let start_pos = state.get_position();
             if let Some(ch) = state.peek() {
                 state.advance(ch.len_utf8());

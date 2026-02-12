@@ -12,13 +12,12 @@ keywords = ["lsp", "language-server", "types"]
 
 [dependencies]
 axum = { workspace = true, optional = true }
-anyhow = { workspace = true }
-serde = { workspace = true }
-serde_json = { workspace = true }
+serde = { workspace = true, optional = true }
+serde_json = { workspace = true, optional = true }
 futures = { workspace = true }
 dashmap = { workspace = true }
 url = { workspace = true }
-oak-core = { workspace = true, features = ["serde"] }
+oak-core = { workspace = true }
 oak-vfs = { workspace = true, features = ["serde"] }
 oak-symbols = { workspace = true }
 oak-navigation = { workspace = true }
@@ -27,4 +26,5 @@ oak-folding = { workspace = true }
 tokio = { workspace = true, features = ["io-util", "macros", "sync"] }
 
 [features]
-default = []
+default = [ "serde"]
+serde = ["dep:serde", "dep:serde_json", "oak-core/serde", "oak-vfs/serde"]

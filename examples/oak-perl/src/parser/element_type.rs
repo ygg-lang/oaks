@@ -1,47 +1,78 @@
 use oak_core::{ElementType, UniversalElementRole};
-#[cfg(feature = "serde")]
-use serde::{Deserialize, Serialize};
 
+/// Element type for the Perl language.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub enum PerlElementType {
+    /// Root node.
     Root,
+    /// Program.
     Program,
+    /// Statement.
     Statement,
+    /// Expression.
     Expression,
+    /// Block.
     Block,
+    /// Subroutine declaration.
     SubroutineDeclaration,
+    /// Package declaration.
     PackageDeclaration,
+    /// Use statement.
     UseStatement,
+    /// Variable declaration.
     VariableDeclaration,
+    /// Assignment.
     Assignment,
+    /// Function call.
     FunctionCall,
+    /// Method call.
     MethodCall,
+    /// Array access.
     ArrayAccess,
+    /// Hash access.
     HashAccess,
+    /// Reference.
     Reference,
+    /// Dereference.
     Dereference,
+    /// Conditional expression.
     ConditionalExpression,
+    /// Loop statement.
     LoopStatement,
+    /// If statement.
     IfStatement,
+    /// Unless statement.
     UnlessStatement,
+    /// While statement.
     WhileStatement,
+    /// Until statement.
     UntilStatement,
+    /// For statement.
     ForStatement,
+    /// Foreach statement.
     ForeachStatement,
+    /// Do statement.
     DoStatement,
+    /// Eval statement.
     EvalStatement,
+    /// Regex match.
     RegexMatch,
+    /// Regex substitution.
     RegexSubstitution,
+    /// Regex transliteration.
     RegexTransliteration,
+    /// Error.
     Error,
 }
 
 impl PerlElementType {
+    /// Returns `true` if this element type is a token.
     pub fn is_token(&self) -> bool {
         false
     }
 
+    /// Returns `true` if this element type is an element.
     pub fn is_element(&self) -> bool {
         true
     }

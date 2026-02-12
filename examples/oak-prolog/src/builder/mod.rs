@@ -1,12 +1,14 @@
 use crate::{ast::PrologRoot, language::PrologLanguage, parser::PrologParser};
 use oak_core::{Builder, BuilderCache, OakDiagnostics, TextEdit, parser::Parser, source::Source};
 
+/// Prolog builder.
 #[derive(Clone)]
 pub struct PrologBuilder {
     config: PrologLanguage,
 }
 
 impl PrologBuilder {
+    /// Create a new `PrologBuilder`.
     pub fn new(config: PrologLanguage) -> Self {
         Self { config }
     }

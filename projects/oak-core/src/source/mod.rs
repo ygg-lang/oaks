@@ -68,7 +68,7 @@ impl<'a> TextChunk<'a> {
 /// let edit = TextEdit {
 ///     span: Range { start: 4, end: 9 }, // Replace characters at positions 4-8
 ///     text: "world".into(),             // With the text "world"
-/// }
+/// };
 /// ```
 pub struct TextEdit {
     /// The byte range in the original text to be replaced (start..end)

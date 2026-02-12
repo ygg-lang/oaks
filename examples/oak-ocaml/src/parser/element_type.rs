@@ -1,17 +1,34 @@
-use oak_core::{ElementType, Parser, UniversalElementRole};
-#[cfg(feature = "serde")]
-use serde::{Deserialize, Serialize};
+use oak_core::{ElementType, UniversalElementRole};
 
+/// Element types for the OCaml parser.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub enum OCamlElementType {
+    /// Root node of the OCaml AST.
     Root,
+    /// A module definition.
     ModuleDef,
+    /// A let binding.
     LetBinding,
+    /// A match expression.
     MatchExpr,
+    /// A function definition.
     FunctionDef,
+    /// A type definition.
     TypeDefinition,
+    /// An expression.
     Expression,
+    /// A binary expression.
+    BinaryExpr,
+    /// A unary expression.
+    UnaryExpr,
+    /// A function call.
+    CallExpr,
+    /// A literal expression.
+    LiteralExpr,
+    /// An identifier expression.
+    IdentifierExpr,
+    /// An error element.
     Error,
 }
 
@@ -36,6 +53,11 @@ impl From<crate::lexer::token_type::OCamlTokenType> for OCamlElementType {
             OCamlTokenType::FunctionDef => OCamlElementType::FunctionDef,
             OCamlTokenType::TypeDefinition => OCamlElementType::TypeDefinition,
             OCamlTokenType::Expression => OCamlElementType::Expression,
+            OCamlTokenType::BinaryExpr => OCamlElementType::BinaryExpr,
+            OCamlTokenType::UnaryExpr => OCamlElementType::UnaryExpr,
+            OCamlTokenType::CallExpr => OCamlElementType::CallExpr,
+            OCamlTokenType::LiteralExpr => OCamlElementType::LiteralExpr,
+            OCamlTokenType::IdentifierExpr => OCamlElementType::IdentifierExpr,
             _ => OCamlElementType::Error,
         }
     }

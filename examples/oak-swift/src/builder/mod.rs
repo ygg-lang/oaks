@@ -70,15 +70,26 @@ impl<'config> SwiftBuilder<'config> {
                 let mut name = String::new();
                 let mut parameters = Vec::new();
                 let mut body = Vec::new();
+                let mut return_type = None;
                 let mut current_offset = offset;
+                let mut found_arrow = false;
 
                 for child in node.children() {
                     let child_len = child.len() as usize;
                     match child {
-                        GreenTree::Leaf(leaf) if leaf.kind == SwiftTokenType::Identifier => {
-                            if name.is_empty() {
-                                name = source.get_text_in((current_offset..current_offset + leaf.length as usize).into()).trim().to_string();
-                                eprintln!("Found identifier: '{}' at {}", name, current_offset);
+                        GreenTree::Leaf(leaf) => {
+                            if leaf.kind == SwiftTokenType::Identifier {
+                                if name.is_empty() {
+                                    name = source.get_text_in((current_offset..current_offset + leaf.length as usize).into()).trim().to_string();
+                                    eprintln!("Found identifier: '{}' at {}", name, current_offset);
+                                }
+                                else if found_arrow && return_type.is_none() {
+                                    let t = source.get_text_in((current_offset..current_offset + leaf.length as usize).into()).trim().to_string();
+                                    return_type = Some(Type { name: t });
+                                }
+                            }
+                            else if leaf.kind == SwiftTokenType::Arrow {
+                                found_arrow = true;
                             }
                         }
                         GreenTree::Node(n) if n.kind == SwiftElementType::ParameterList => {
@@ -91,13 +102,15 @@ impl<'config> SwiftBuilder<'config> {
                     }
                     current_offset += child_len;
                 }
-                Ok(Some(Statement::FunctionDef { name, parameters, return_type: None, body }))
+                Ok(Some(Statement::FunctionDef { name, parameters, return_type, body }))
             }
             SwiftElementType::VariableDeclaration => {
                 let mut name = String::new();
                 let mut value = None;
                 let mut is_mutable = true;
+                let mut type_annotation = None;
                 let mut current_offset = offset;
+                let mut found_colon = false;
 
                 for child in node.children() {
                     let child_len = child.len() as usize;
@@ -106,8 +119,15 @@ impl<'config> SwiftBuilder<'config> {
                             SwiftTokenType::Let => is_mutable = false,
                             SwiftTokenType::Var => is_mutable = true,
                             SwiftTokenType::Identifier => {
-                                name = source.get_text_in((current_offset..current_offset + leaf.length as usize).into()).trim().to_string();
+                                if name.is_empty() {
+                                    name = source.get_text_in((current_offset..current_offset + leaf.length as usize).into()).trim().to_string();
+                                }
+                                else if found_colon && type_annotation.is_none() {
+                                    let t = source.get_text_in((current_offset..current_offset + leaf.length as usize).into()).trim().to_string();
+                                    type_annotation = Some(Type { name: t });
+                                }
                             }
+                            SwiftTokenType::Colon => found_colon = true,
                             _ => {}
                         },
                         GreenTree::Node(n) => {
@@ -118,7 +138,7 @@ impl<'config> SwiftBuilder<'config> {
                     }
                     current_offset += child_len;
                 }
-                Ok(Some(Statement::VariableDecl { is_mutable, name, type_annotation: None, value }))
+                Ok(Some(Statement::VariableDecl { is_mutable, name, type_annotation, value }))
             }
             SwiftElementType::ReturnStatement => {
                 let mut value = None;

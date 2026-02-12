@@ -1,7 +1,8 @@
 #![doc = include_str!("readme.md")]
 pub mod token_type;
+pub use token_type::VampireTokenType;
 
-use crate::{language::VampireLanguage, lexer::token_type::VampireTokenType};
+use crate::language::VampireLanguage;
 use oak_core::{
     Lexer, LexerCache, LexerState, OakError, TextEdit,
     lexer::{CommentConfig, LexOutput, StringConfig, WhitespaceConfig},
@@ -17,7 +18,7 @@ static VAMPIRE_STRING: LazyLock<StringConfig> = LazyLock::new(|| StringConfig { 
 
 #[derive(Clone)]
 pub struct VampireLexer<'config> {
-    _config: &'config VampireLanguage,
+    config: &'config VampireLanguage,
 }
 
 impl<'config> Lexer<VampireLanguage> for VampireLexer<'config> {
@@ -32,7 +33,7 @@ impl<'config> Lexer<VampireLanguage> for VampireLexer<'config> {
 }
 impl<'config> VampireLexer<'config> {
     pub fn new(config: &'config VampireLanguage) -> Self {
-        Self { _config: config }
+        Self { config }
     }
 
     /// Main lexing loop

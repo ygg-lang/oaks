@@ -11,7 +11,6 @@ pub mod ast;
 /// Builder module.
 pub mod builder;
 
-/// Type definitions module.
 /// Language configuration module.
 pub mod language;
 /// Lexer module.

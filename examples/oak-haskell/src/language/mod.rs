@@ -1,10 +1,12 @@
 #![doc = include_str!("readme.md")]
 use oak_core::{Language, LanguageCategory};
 
+/// Haskell language definition.
 #[derive(Debug, Clone, Default)]
 pub struct HaskellLanguage {}
 
 impl HaskellLanguage {
+    /// Creates a new Haskell language definition.
     pub fn new() -> Self {
         Self {}
     }

@@ -1,38 +1,46 @@
-use oak_core::{ElementType, UniversalElementRole};
-#[cfg(feature = "serde")]
-use serde::{Deserialize, Serialize};
+//! Svelte element types.
 
-/// Element types for the Svelte language.
+use oak_core::{ElementType, UniversalElementRole};
+
+/// Svelte element type.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub enum SvelteElementType {
-    /// The root of a Svelte component.
+    /// Root node.
     Root,
-    /// An HTML or Svelte element.
+    /// Element node.
     Element,
-    /// An opening tag of an element.
-    StartTag,
-    /// A closing tag of an element.
-    EndTag,
-    /// An attribute of an element.
+    /// Tag node.
+    Tag,
+    /// Closing tag node.
+    CloseTag,
+    /// Attribute node.
     Attribute,
-    /// A Svelte directive (e.g., `on:click`, `bind:value`).
-    Directive,
-    /// A JavaScript expression.
+    /// Attribute name.
+    AttributeName,
+    /// Attribute value.
+    AttributeValue,
+    /// Expression node (interpolation).
     Expression,
-    /// A Svelte interpolation `{...}`.
-    Interpolation,
-    /// A Svelte control block (e.g., `{#if}`, `{#each}`).
-    ControlBlock,
-    /// A middle part of a control block (e.g., `{:else}`).
-    MiddleBlock,
-    /// A Svelte 5 snippet.
-    Snippet,
-    /// A Svelte or HTML comment.
-    Comment,
-    /// Plain text content.
-    Text,
-    /// An error element.
+    /// Svelte block (if, each, await).
+    Block,
+    /// Block header (e.g., {#if expression}).
+    BlockHeader,
+    /// Block footer (e.g., {/if}).
+    BlockFooter,
+    /// Block content.
+    BlockContent,
+    /// Block branch (e.g., {:else}).
+    BlockBranch,
+    /// Text node.
+    TextNode,
+    /// Comment node.
+    CommentNode,
+    /// Identifier node.
+    Identifier,
+    /// Whitespace.
+    Whitespace,
+    /// Error node.
     Error,
 }
 
@@ -43,19 +51,32 @@ impl ElementType for SvelteElementType {
         match self {
             Self::Root => UniversalElementRole::Root,
             Self::Element => UniversalElementRole::Container,
-            Self::StartTag | Self::EndTag => UniversalElementRole::Detail,
-            Self::Attribute | Self::Directive => UniversalElementRole::Attribute,
-            Self::Expression | Self::Interpolation => UniversalElementRole::Value,
-            Self::ControlBlock | Self::MiddleBlock | Self::Snippet => UniversalElementRole::Container,
-            Self::Comment => UniversalElementRole::Documentation,
-            Self::Text => UniversalElementRole::Value,
-            Self::Error => UniversalElementRole::Error,
+            Self::Tag | Self::CloseTag => UniversalElementRole::Name,
+            Self::Attribute => UniversalElementRole::Attribute,
+            Self::Expression => UniversalElementRole::Expression,
+            Self::Block => UniversalElementRole::Container,
+            Self::TextNode => UniversalElementRole::Value,
+            Self::CommentNode => UniversalElementRole::None,
+            Self::Identifier => UniversalElementRole::Name,
+            _ => UniversalElementRole::None,
         }
     }
 }
 
 impl From<crate::lexer::token_type::SvelteTokenType> for SvelteElementType {
-    fn from(_token: crate::lexer::token_type::SvelteTokenType) -> Self {
-        Self::Text // Placeholder
+    fn from(token: crate::lexer::token_type::SvelteTokenType) -> Self {
+        use crate::lexer::token_type::SvelteTokenType as T;
+        match token {
+            T::Root => Self::Root,
+            T::Element => Self::Element,
+            T::Attribute => Self::Attribute,
+            T::Expression => Self::Expression,
+            T::Block => Self::Block,
+            T::Identifier => Self::Identifier,
+            T::Whitespace => Self::Whitespace,
+            T::Comment => Self::CommentNode,
+            T::Error => Self::Error,
+            _ => Self::Error,
+        }
     }
 }

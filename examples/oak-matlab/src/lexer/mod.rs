@@ -1,4 +1,5 @@
 #![doc = include_str!("readme.md")]
+/// Token types for the Matlab language.
 pub mod token_type;
 
 use crate::{language::MatlabLanguage, lexer::token_type::MatlabTokenType};
@@ -10,9 +11,10 @@ use oak_core::{
 
 type State<'s, S> = LexerState<'s, S, MatlabLanguage>;
 
+/// Lexer for the Matlab language.
 #[derive(Clone)]
 pub struct MatlabLexer<'config> {
-    _config: &'config MatlabLanguage,
+    config: &'config MatlabLanguage,
 }
 
 impl<'config> Lexer<MatlabLanguage> for MatlabLexer<'config> {
@@ -27,8 +29,9 @@ impl<'config> Lexer<MatlabLanguage> for MatlabLexer<'config> {
 }
 
 impl<'config> MatlabLexer<'config> {
+    /// Creates a new `MatlabLexer` with the given configuration.
     pub fn new(config: &'config MatlabLanguage) -> Self {
-        Self { _config: config }
+        Self { config }
     }
 
     fn run<'s, S: Source + ?Sized>(&self, state: &mut State<'s, S>) -> Result<(), oak_core::OakError> {

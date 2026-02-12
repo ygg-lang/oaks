@@ -10,11 +10,13 @@ use crate::language::DelphiLanguage;
 use core::range::Range;
 use oak_core::tree::RedNode;
 #[cfg(feature = "lsp")]
+/// Delphi language service implementation.
 pub struct DelphiLanguageService<V: Vfs> {
     vfs: V,
     workspace: oak_lsp::workspace::WorkspaceManager,
 }
 impl<V: Vfs> DelphiLanguageService<V> {
+    /// Creates a new `DelphiLanguageService`.
     pub fn new(vfs: V) -> Self {
         Self { vfs, workspace: oak_lsp::workspace::WorkspaceManager::new() }
     }

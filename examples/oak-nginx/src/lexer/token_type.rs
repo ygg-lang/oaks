@@ -1,57 +1,83 @@
-use oak_core::{Token, TokenRole, TokenType, UniversalTokenRole};
-#[cfg(feature = "serde")]
-use serde::{Deserialize, Serialize};
+use oak_core::{Token, TokenType, UniversalTokenRole};
 
+/// Represents a token in an Nginx configuration file.
 pub type NginxToken = Token<NginxTokenType>;
 
+/// Token types for Nginx configuration.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub enum NginxTokenType {
-    // 节点种类
+    /// The root of the configuration.
     Root,
+    /// A configuration directive (e.g., `worker_processes 1;`).
     Directive,
+    /// A configuration block (e.g., `server { ... }`).
     Block,
+    /// A parameter within a directive.
     Parameter,
+    /// A value within a directive or parameter.
     Value,
+    /// A comment.
     Comment,
 
-    // 词法种类 - 关键字
-    ServerKeyword,     // server
-    LocationKeyword,   // location
-    UpstreamKeyword,   // upstream
-    HttpKeyword,       // http
-    EventsKeyword,     // events
-    ListenKeyword,     // listen
+    /// The `server` keyword.
+    ServerKeyword, // server
+    /// The `location` keyword.
+    LocationKeyword, // location
+    /// The `upstream` keyword.
+    UpstreamKeyword, // upstream
+    /// The `http` keyword.
+    HttpKeyword, // http
+    /// The `events` keyword.
+    EventsKeyword, // events
+    /// The `listen` keyword.
+    ListenKeyword, // listen
+    /// The `server_name` keyword.
     ServerNameKeyword, // server_name
-    RootKeyword,       // root
-    IndexKeyword,      // index
-    ProxyPassKeyword,  // proxy_pass
+    /// The `root` keyword.
+    RootKeyword, // root
+    /// The `index` keyword.
+    IndexKeyword, // index
+    /// The `proxy_pass` keyword.
+    ProxyPassKeyword, // proxy_pass
 
-    // 词法种类 - 符号
-    LeftBrace,  // {
+    /// Left brace `{`.
+    LeftBrace, // {
+    /// Right brace `}`.
     RightBrace, // }
-    Semicolon,  // ;
+    /// Semicolon `;`.
+    Semicolon, // ;
 
-    // 词法种类 - 字面量
+    /// An identifier.
     Identifier,
+    /// A string literal.
     String,
+    /// A numeric literal.
     Number,
+    /// A file path.
     Path,
+    /// A URL.
     Url,
 
-    // 词法种类 - 其他
+    /// Whitespace characters.
     Whitespace,
+    /// Newline characters.
     Newline,
+    /// A comment token.
     CommentToken,
+    /// End of stream.
     Eof,
+    /// An error token.
     Error,
 }
 
 impl NginxTokenType {
+    /// Returns true if the token type represents a structural element.
     pub fn is_element(&self) -> bool {
         matches!(self, Self::Root | Self::Directive | Self::Block | Self::Parameter | Self::Value | Self::Comment)
     }
 
+    /// Returns true if the token type represents a lexical token.
     pub fn is_token(&self) -> bool {
         !self.is_element()
     }

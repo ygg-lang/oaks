@@ -1,14 +1,13 @@
 #![doc = include_str!("readme.md")]
 use oak_core::{Language, LanguageCategory};
-#[cfg(feature = "serde")]
-use serde::{Deserialize, Serialize};
 
-/// Vala 语言定义
+/// Vala language definition.
 #[derive(Debug, Default, Clone, Copy, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct ValaLanguage {}
 
 impl ValaLanguage {
+    /// Creates a new `ValaLanguage` instance.
     pub fn new() -> Self {
         Self {}
     }

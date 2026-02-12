@@ -5,11 +5,11 @@ use crate::language::SwiftLanguage;
 pub use crate::lexer::token_type::SwiftTokenType;
 use oak_core::{Lexer, LexerCache, LexerState, OakError, TextEdit, lexer::LexOutput, source::Source};
 
-type State<'a, S> = LexerState<'a, S, SwiftLanguage>;
+pub(crate) type State<'a, S> = LexerState<'a, S, SwiftLanguage>;
 
 #[derive(Clone, Debug)]
 pub struct SwiftLexer<'config> {
-    _config: &'config SwiftLanguage,
+    config: &'config SwiftLanguage,
 }
 
 impl<'config> Lexer<SwiftLanguage> for SwiftLexer<'config> {
@@ -25,10 +25,10 @@ impl<'config> Lexer<SwiftLanguage> for SwiftLexer<'config> {
 
 impl<'config> SwiftLexer<'config> {
     pub fn new(config: &'config SwiftLanguage) -> Self {
-        Self { _config: config }
+        Self { config }
     }
 
-    /// 跳过空白字符
+    /// Skip whitespace
     fn skip_whitespace<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start_pos = state.get_position();
 
@@ -50,7 +50,7 @@ impl<'config> SwiftLexer<'config> {
         }
     }
 
-    /// 处理换行
+    /// Handles newlines
     fn lex_newline<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start_pos = state.get_position();
 
@@ -72,13 +72,13 @@ impl<'config> SwiftLexer<'config> {
         }
     }
 
-    /// 处理注释
+    /// Handles comments
     fn lex_comment<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start_pos = state.get_position();
 
         if let Some('/') = state.peek() {
             if let Some('/') = state.peek_next_n(1) {
-                // 单行注释
+                // Single-line comment
                 state.advance(2);
                 while let Some(ch) = state.peek() {
                     if ch == '\n' || ch == '\r' {
@@ -90,7 +90,7 @@ impl<'config> SwiftLexer<'config> {
                 true
             }
             else if let Some('*') = state.peek_next_n(1) {
-                // 多行注释
+                // Multi-line comment
                 state.advance(2);
                 let mut depth = 1;
                 while let Some(ch) = state.peek() {
@@ -125,11 +125,11 @@ impl<'config> SwiftLexer<'config> {
         }
     }
 
-    /// 处理标识符或关键
+    /// Handles identifiers or keywords
     fn lex_identifier_or_keyword<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start_pos = state.get_position();
 
-        // 处理反引号标识符 `identifier`
+        // Handle backtick identifier `identifier`
         let is_escaped = if let Some('`') = state.peek() {
             state.advance(1);
             true
@@ -151,7 +151,7 @@ impl<'config> SwiftLexer<'config> {
                     }
                 }
 
-                // 如果是转义标识符，需要匹配结束的反引
+                // If it's an escaped identifier, need to match the closing backtick
                 if is_escaped {
                     if let Some('`') = state.peek() {
                         state.advance(1);
@@ -160,7 +160,7 @@ impl<'config> SwiftLexer<'config> {
                     return true;
                 }
 
-                // 检查是否为关键
+                // Check if it's a keyword
                 let text = state.get_text_in(core::range::Range { start: start_pos, end: state.get_position() });
 
                 let token_kind = match text.as_ref() {
@@ -242,7 +242,7 @@ impl<'config> SwiftLexer<'config> {
             }
             else {
                 if is_escaped {
-                    // 回退反引
+                    // Backtrack backtick
                     state.set_position(start_pos);
                 }
                 false
@@ -250,14 +250,14 @@ impl<'config> SwiftLexer<'config> {
         }
         else {
             if is_escaped {
-                // 回退反引
+                // Backtrack backtick
                 state.set_position(start_pos);
             }
             false
         }
     }
 
-    /// 处理数字字面
+    /// Handles number literals
     fn lex_number_literal<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start_pos = state.get_position();
 
@@ -265,7 +265,7 @@ impl<'config> SwiftLexer<'config> {
             if ch.is_ascii_digit() {
                 state.advance(1);
 
-                // 处理二进制、八进制、十六进制
+                // Handle binary, octal, hexadecimal
                 if ch == '0' {
                     if let Some('b') | Some('B') = state.peek() {
                         state.advance(1);
@@ -301,7 +301,7 @@ impl<'config> SwiftLexer<'config> {
                         }
                     }
                     else {
-                        // 普通十进制数字
+                        // Regular decimal numbers
                         while let Some(ch) = state.peek() {
                             if ch.is_ascii_digit() || ch == '_' {
                                 state.advance(1);
@@ -313,7 +313,7 @@ impl<'config> SwiftLexer<'config> {
                     }
                 }
                 else {
-                    // 十进制数
+                    // Decimal number
                     while let Some(ch) = state.peek() {
                         if ch.is_ascii_digit() || ch == '_' {
                             state.advance(1);
@@ -324,9 +324,9 @@ impl<'config> SwiftLexer<'config> {
                     }
                 }
 
-                // 处理小数
+                // Handle decimals
                 if let Some('.') = state.peek() {
-                    // 如果后面紧跟着另一个点，说明是范围操作符的一部分，不应该作为小数点处理
+                    // If followed immediately by another dot, it's part of a range operator, not a decimal point
                     if let Some(next) = state.peek_next_n(1) {
                         if next != '.' {
                             state.advance(1);
@@ -341,12 +341,12 @@ impl<'config> SwiftLexer<'config> {
                         }
                     }
                     else {
-                        // 后面没字符了，1. 也可以是浮点数
+                        // No characters left, 1. can also be a floating point
                         state.advance(1);
                     }
                 }
 
-                // 处理指数
+                // Handle exponents
                 if let Some('e') | Some('E') = state.peek() {
                     state.advance(1);
                     if let Some('+') | Some('-') = state.peek() {
@@ -374,15 +374,15 @@ impl<'config> SwiftLexer<'config> {
         }
     }
 
-    /// 处理字符串字面量
+    /// Handles string literals
     fn lex_string_literal<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start_pos = state.get_position();
 
-        // 处理多行字符"""..."""
+        // Handles multi-line strings """..."""
         if let Some('"') = state.peek() {
             if let Some('"') = state.peek_next_n(1) {
                 if let Some('"') = state.peek_next_n(2) {
-                    // 多行字符
+                    // Multi-line string
                     state.advance(3);
                     while let Some(ch) = state.peek() {
                         if ch == '"' {
@@ -400,7 +400,7 @@ impl<'config> SwiftLexer<'config> {
                 }
             }
 
-            // 普通字符串
+            // Normal string
             state.advance(1);
             while let Some(ch) = state.peek() {
                 if ch == '"' {
@@ -414,7 +414,7 @@ impl<'config> SwiftLexer<'config> {
                     }
                 }
                 else if ch == '\n' || ch == '\r' {
-                    break; // 普通字符串不能跨行
+                    break; // Normal strings cannot span multiple lines
                 }
                 else {
                     state.advance(ch.len_utf8());
@@ -428,7 +428,7 @@ impl<'config> SwiftLexer<'config> {
         }
     }
 
-    /// 处理操作
+    /// Handles operators
     fn lex_operator<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start_pos = state.get_position();
 
@@ -631,7 +631,7 @@ impl<'config> SwiftLexer<'config> {
         }
     }
 
-    /// 处理分隔
+    /// Handles delimiters
     fn lex_delimiter<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start_pos = state.get_position();
 
@@ -669,7 +669,7 @@ impl<'config> SwiftLexer<'config> {
         while state.not_at_end() {
             let safe_point = state.get_position();
 
-            // 尝试各种词法规则
+            // Try various lexical rules
             if self.skip_whitespace(state) {
                 continue;
             }
@@ -702,7 +702,7 @@ impl<'config> SwiftLexer<'config> {
                 continue;
             }
 
-            // 如果所有规则都不匹配，跳过当前字符并标记为错误
+            // If no rules match, skip current character and mark as error
             let start_pos = state.get_position();
             if let Some(ch) = state.peek() {
                 state.advance(ch.len_utf8());

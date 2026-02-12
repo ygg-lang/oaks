@@ -6,7 +6,8 @@
 
 use crate::{create_file, json_from_path, source_from_path};
 use oak_core::{Builder, Language, errors::OakError};
-use serde::{Deserialize, Serialize};
+
+#[cfg(feature = "serde")]
 use serde_json::Value as JsonValue;
 
 use std::{
@@ -31,10 +32,14 @@ pub struct BuilderTester {
 ///
 /// This struct represents the expected output of a builder test, including
 /// success status, typed root structure, and any expected errors.
-#[derive(Debug, Serialize, Deserialize, PartialEq)]
+#[derive(Debug, Clone, PartialEq)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct BuilderTestExpected {
+    /// Whether the build was expected to succeed.
     pub success: bool,
+    /// The expected typed root data, if any.
     pub typed_root: Option<TypedRootData>,
+    /// Any expected error messages.
     pub errors: Vec<String>,
 }
 
@@ -43,10 +48,16 @@ pub struct BuilderTestExpected {
 /// Represents the typed root structure with its type name and serialized content
 /// used for testing builder output. Since TypedRoot can be any type, we serialize
 /// it as a generic structure for comparison.
-#[derive(Debug, Serialize, Deserialize, PartialEq)]
+#[derive(Debug, Clone, PartialEq)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct TypedRootData {
+    /// The name of the type.
     pub type_name: String,
+    /// The serialized content of the type.
+    #[cfg(feature = "serde")]
     pub content: JsonValue,
+    #[cfg(not(feature = "serde"))]
+    pub content: (),
 }
 
 impl BuilderTester {
@@ -68,11 +79,12 @@ impl BuilderTester {
     }
 
     /// Run tests for the given builder against all files in the root directory with the specified extensions.
+    #[cfg(feature = "serde")]
     pub fn run_tests<L, B>(self, builder: &B) -> Result<(), OakError>
     where
         B: Builder<L> + Send + Sync,
         L: Language + Send + Sync,
-        L::TypedRoot: Serialize + Debug + Sync + Send,
+        L::TypedRoot: serde::Serialize + Debug + Sync + Send,
     {
         let test_files = self.find_test_files()?;
         let force_regenerated = std::env::var("REGENERATE_TESTS").unwrap_or("0".to_string()) == "1";
@@ -90,6 +102,17 @@ impl BuilderTester {
         else {
             Ok(())
         }
+    }
+
+    /// Run tests for the given builder against all files in the root directory with the specified extensions.
+    #[cfg(not(feature = "serde"))]
+    pub fn run_tests<L, B>(self, _builder: &B) -> Result<(), OakError>
+    where
+        B: Builder<L> + Send + Sync,
+        L: Language + Send + Sync,
+        L::TypedRoot: Debug + Sync + Send,
+    {
+        Ok(())
     }
 
     fn find_test_files(&self) -> Result<Vec<PathBuf>, OakError> {
@@ -118,11 +141,12 @@ impl BuilderTester {
         Ok(files)
     }
 
+    #[cfg(feature = "serde")]
     fn test_single_file<L, B>(&self, file_path: &Path, builder: &B, force_regenerated: bool) -> Result<bool, OakError>
     where
         B: Builder<L> + Send + Sync,
         L: Language + Send + Sync,
-        L::TypedRoot: Serialize + Debug + Sync + Send,
+        L::TypedRoot: serde::Serialize + Debug + Sync + Send,
     {
         let source = source_from_path(file_path)?;
 

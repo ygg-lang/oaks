@@ -1,18 +1,26 @@
-use oak_core::{ElementType, Parser, UniversalElementRole};
-#[cfg(feature = "serde")]
-use serde::{Deserialize, Serialize};
+use oak_core::{ElementType, UniversalElementRole};
 
+/// Objective-C element types.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub enum ObjectiveCElementType {
+    /// Root node.
     Root,
+    /// Interface declaration.
     InterfaceDeclaration,
+    /// Implementation declaration.
     ImplementationDeclaration,
+    /// Protocol declaration.
     ProtocolDeclaration,
+    /// Property declaration.
     PropertyDeclaration,
+    /// Method declaration.
     MethodDeclaration,
+    /// Category declaration.
     CategoryDeclaration,
+    /// Class extension.
     ClassExtension,
+    /// Error node.
     Error,
 }
 
@@ -22,6 +30,8 @@ impl ElementType for ObjectiveCElementType {
     fn role(&self) -> Self::Role {
         match self {
             Self::Root => UniversalElementRole::Root,
+            Self::InterfaceDeclaration | Self::ProtocolDeclaration | Self::ImplementationDeclaration | Self::CategoryDeclaration | Self::ClassExtension => UniversalElementRole::Definition, // Best fit for declarations
+            Self::PropertyDeclaration | Self::MethodDeclaration => UniversalElementRole::Definition,                                                                                         // Best fit for members
             _ => UniversalElementRole::None,
         }
     }

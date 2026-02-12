@@ -32,8 +32,11 @@ impl HoverProvider<HaskellLanguage> for HaskellHoverProvider {
 /// Language service implementation for Haskell.
 #[cfg(feature = "lsp")]
 pub struct HaskellLanguageService<V: Vfs> {
+    /// The virtual file system.
     vfs: V,
+    /// The workspace manager.
     workspace: oak_lsp::workspace::WorkspaceManager,
+    /// The hover provider.
     hover_provider: HaskellHoverProvider,
 }
 impl<V: Vfs> HaskellLanguageService<V> {

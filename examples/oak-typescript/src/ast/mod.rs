@@ -1,16 +1,23 @@
 #![doc = include_str!("readme.md")]
-pub mod class_node;
-pub mod expression_node;
-pub mod jsx_node;
-pub mod misc_node;
-pub mod root_node;
-pub mod statement_node;
-pub mod type_node;
+/// Class-related AST nodes.
+pub mod class_nodes;
+/// Expression-related AST nodes.
+pub mod expression_nodes;
+/// JSX-related AST nodes.
+pub mod jsx_nodes;
+/// Miscellaneous AST nodes.
+pub mod misc_nodes;
+/// Root AST nodes.
+pub mod root_nodes;
+/// Statement-related AST nodes.
+pub mod statement_nodes;
+/// Type-related AST nodes.
+pub mod type_nodes;
 
-pub use class_node::*;
-pub use expression_node::*;
-pub use jsx_node::*;
-pub use misc_node::*;
-pub use root_node::*;
-pub use statement_node::*;
-pub use type_node::*;
+pub use class_nodes::*;
+pub use expression_nodes::*;
+pub use jsx_nodes::*;
+pub use misc_nodes::*;
+pub use root_nodes::*;
+pub use statement_nodes::*;
+pub use type_nodes::*;

@@ -6,6 +6,7 @@
 //! Ocaml support for the Oak language framework.
 
 pub mod ast;
+/// Builder module for OCaml.
 pub mod builder;
 pub mod language;
 pub mod lexer;
@@ -15,6 +16,7 @@ pub mod lsp;
 #[cfg(feature = "mcp")]
 pub mod mcp;
 
+/// Parser module for OCaml.
 pub mod parser;
 
 pub use builder::OCamlBuilder;

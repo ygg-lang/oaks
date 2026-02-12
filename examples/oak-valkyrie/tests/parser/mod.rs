@@ -18,7 +18,7 @@ fn test_flags_parser() -> Result<(), oak_core::OakError> {
     let parser = ValkyrieParser::new(lang);
     let test_runner = ParserTester::new(here.join("tests").join("parser").join("flags")).with_extension("valkyrie").with_timeout(Duration::from_secs(5));
 
-    // 仅运行 flags 相关的测试
+    // Only run flags related tests
     test_runner.run_tests::<ValkyrieLanguage, _>(&parser)
 }
 
@@ -33,11 +33,11 @@ fn test_valkyrie_namespace_parsing() {
     // Test simple namespace
     let source = SourceText::new("namespace Test {}");
 
-    // 注意：这个测试目前会失败，因为 parse_incremental 返回 todo!()
-    // 当实现完成后，这个测试应该能够正常工作
+    // Note: This test currently fails because parse_incremental returns todo!()
+    // When implemented, this test should work correctly
     println!("Testing Valkyrie namespace parsing with: {}", source.text());
 
-    // 暂时跳过实际的解析测试，直到实现完成
+    // Temporarily skip actual parsing test until implementation is complete
     assert!(true, "Namespace parsing test placeholder - parser implementation needed")
 }
 
@@ -54,7 +54,7 @@ fn test_valkyrie_micro_function_parsing() {
 
     println!("Testing Valkyrie micro function parsing with: {}", source.text());
 
-    // 暂时跳过实际的解析测试，直到实现完成
+    // Temporarily skip actual parsing test until implementation is complete
     assert!(true, "Micro function parsing test placeholder - parser implementation needed")
 }
 
@@ -71,7 +71,7 @@ fn test_valkyrie_micro_parsing() {
 
     println!("Testing Valkyrie micro parsing with: {}", source.text());
 
-    // 暂时跳过实际的解析测试，直到实现完成
+    // Temporarily skip actual parsing test until implementation is complete
     assert!(true, "Micro parsing test placeholder - parser implementation needed")
 }
 
@@ -99,6 +99,6 @@ fn test_valkyrie_complex_parsing() {
 
     println!("Testing Valkyrie complex parsing with: {}", source.text());
 
-    // 暂时跳过实际的解析测试，直到实现完成
+    // Temporarily skip actual parsing test until implementation is complete
     assert!(true, "Complex parsing test placeholder - parser implementation needed")
 }

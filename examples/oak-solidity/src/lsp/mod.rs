@@ -15,6 +15,7 @@ use crate::language::SolidityLanguage;
 use core::range::Range;
 use oak_core::tree::RedNode;
 #[cfg(feature = "lsp")]
+/// Solidity hover provider.
 pub struct SolidityHoverProvider;
 #[cfg(feature = "lsp")]
 impl HoverProvider<SolidityLanguage> for SolidityHoverProvider {
@@ -25,12 +26,14 @@ impl HoverProvider<SolidityLanguage> for SolidityHoverProvider {
     }
 }
 #[cfg(feature = "lsp")]
+/// Solidity language service.
 pub struct SolidityLanguageService<V: Vfs> {
     vfs: V,
     workspace: oak_lsp::workspace::WorkspaceManager,
     hover_provider: SolidityHoverProvider,
 }
 impl<V: Vfs> SolidityLanguageService<V> {
+    /// Creates a new Solidity language service.
     pub fn new(vfs: V) -> Self {
         Self { vfs, workspace: oak_lsp::workspace::WorkspaceManager::default(), hover_provider: SolidityHoverProvider }
     }

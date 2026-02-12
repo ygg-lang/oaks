@@ -1,67 +1,114 @@
 use oak_core::{Source, Token, TokenType, UniversalElementRole, UniversalTokenRole};
-#[cfg(feature = "serde")]
-use serde::{Deserialize, Serialize};
 
 pub type TwigToken = Token<TwigTokenType>;
 
+/// Token types for the Twig lexer.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub enum TwigTokenType {
-    // 节点种类
+    /// The root node of the parse tree.
     Root,
+    /// A document node.
     Document,
+    /// A template node.
     Template,
+    /// A block node (`{% block %}`).
     Block,
+    /// A variable node (`{{ var }}`).
     Variable,
+    /// A filter node (`| filter`).
     Filter,
+    /// A function node (`func()`).
     Function,
+    /// A tag node (`{% tag %}`).
     Tag,
+    /// A comment node (`{# comment #}`).
     Comment,
+    /// Plain text content.
     Text,
+    /// An expression node.
     Expression,
 
-    // 细分字面量类
+    /// A string literal.
     String,
+    /// A numeric literal.
     Number,
+    /// A boolean literal.
     Boolean,
+    /// A null literal.
     Null,
+    /// An array literal.
     Array,
+    /// An object literal.
     Object,
+    /// An identifier.
     Identifier,
+    /// An operator.
     Operator,
+    /// An error node in the parse tree.
     ErrorNode,
 
-    // 词法种类
-    LeftBrace,         // {
-    RightBrace,        // }
-    LeftBracket,       // [
-    RightBracket,      // ]
-    DoubleLeftBrace,   // {{
-    DoubleRightBrace,  // }}
-    LeftBracePercent,  // {%
-    PercentRightBrace, // %}
-    LeftParen,         // (
-    RightParen,        // )
-    Pipe,              // |
-    Comma,             // ,
-    Dot,               // .
-    Colon,             // :
-    Semicolon,         // ;
-    Eq,                // =
-    Plus,              // +
-    Minus,             // -
-    Star,              // *
-    Slash,             // /
-    Percent,           // %
-    Bang,              // !
-    Question,          // ?
-    Lt,                // <
-    Gt,                // >
-    Amp,               // &
-    Caret,             // ^
-    Tilde,             // ~
+    /// An opening brace (`{`).
+    LeftBrace,
+    /// A closing brace (`}`).
+    RightBrace,
+    /// An opening bracket (`[`).
+    LeftBracket,
+    /// A closing bracket (`]`).
+    RightBracket,
+    /// Double opening braces (`{{`).
+    DoubleLeftBrace,
+    /// Double closing braces (`}}`).
+    DoubleRightBrace,
+    /// Opening brace and percent (`{%`).
+    LeftBracePercent,
+    /// Percent and closing brace (`%}`).
+    PercentRightBrace,
+    /// An opening parenthesis (`(`).
+    LeftParen,
+    /// A closing parenthesis (`)`).
+    RightParen,
+    /// A pipe character (`|`).
+    Pipe,
+    /// A comma (`,`).
+    Comma,
+    /// A dot character (`.`).
+    Dot,
+    /// A colon character (`:`).
+    Colon,
+    /// A semicolon character (`;`).
+    Semicolon,
+    /// An equal sign (`=`).
+    Eq,
+    /// A plus sign (`+`).
+    Plus,
+    /// A minus sign (`-`).
+    Minus,
+    /// A star sign (`*`).
+    Star,
+    /// A slash sign (`/`).
+    Slash,
+    /// A percent sign (`%`).
+    Percent,
+    /// An exclamation mark (`!`).
+    Bang,
+    /// A question mark (`?`).
+    Question,
+    /// A less-than sign (`<`).
+    Lt,
+    /// A greater-than sign (`>`).
+    Gt,
+    /// An ampersand character (`&`).
+    Amp,
+    /// A caret character (`^`).
+    Caret,
+    /// A tilde character (`~`).
+    Tilde,
+    /// Whitespace characters.
     Whitespace,
+    /// End of stream.
     Eof,
+    /// An error token.
     Error,
 }
 

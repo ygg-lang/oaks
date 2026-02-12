@@ -1,8 +1,9 @@
 #![doc = include_str!("readme.md")]
 use oak_core::language::{Language, LanguageCategory};
 
+/// Represents the LLVM IR language implementation within the Oak framework.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Default)]
-pub struct LLvmLanguage {}
+pub struct LLvmLanguage;
 
 impl Language for LLvmLanguage {
     const NAME: &'static str = "llvm-ir";

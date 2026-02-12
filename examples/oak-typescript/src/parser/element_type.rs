@@ -1,261 +1,504 @@
 use oak_core::{ElementType, UniversalElementRole};
-#[cfg(feature = "serde")]
-use serde::{Deserialize, Serialize};
 
+/// Element types for TypeScript.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 #[repr(u16)]
 pub enum TypeScriptElementType {
+    /// Named imports.
     NamedImports,
+    /// A decorator.
     Decorator,
+    /// An arrow function.
     ArrowFunction,
+    /// A predefined type.
     PredefinedType,
+    /// `abstract` keyword.
     Abstract,
+    /// `any` keyword.
     Any,
+    /// `as` keyword.
     As,
+    /// `asserts` keyword.
     Asserts,
+    /// `async` keyword.
     Async,
+    /// `await` keyword.
     Await,
+    /// `boolean` keyword.
     Boolean,
+    /// `break` keyword.
     Break,
+    /// `case` keyword.
     Case,
+    /// `catch` keyword.
     Catch,
+    /// `class` keyword.
     Class,
+    /// `const` keyword.
     Const,
+    /// `constructor` keyword.
     Constructor,
+    /// `continue` keyword.
     Continue,
+    /// `debugger` keyword.
     Debugger,
+    /// `declare` keyword.
     Declare,
+    /// `default` keyword.
     Default,
+    /// `delete` keyword.
     Delete,
+    /// `do` keyword.
     Do,
+    /// `else` keyword.
     Else,
+    /// `enum` keyword.
     Enum,
+    /// `export` keyword.
     Export,
+    /// `extends` keyword.
     Extends,
+    /// `false` keyword.
     False,
+    /// `finally` keyword.
     Finally,
+    /// `for` keyword.
     For,
+    /// `from` keyword.
     From,
+    /// `function` keyword.
     Function,
+    /// `get` keyword.
     Get,
+    /// `global` keyword.
     Global,
+    /// `if` keyword.
     If,
+    /// `implements` keyword.
     Implements,
+    /// `import` keyword.
     Import,
+    /// `in` keyword.
     In,
+    /// `infer` keyword.
     Infer,
+    /// `instanceof` keyword.
     Instanceof,
+    /// `interface` keyword.
     Interface,
+    /// `is` keyword.
     Is,
+    /// `keyof` keyword.
     Keyof,
+    /// `let` keyword.
     Let,
+    /// `namespace` keyword.
     Namespace,
+    /// `never` keyword.
     Never,
+    /// `new` keyword.
     New,
+    /// `null` keyword.
     Null,
+    /// `number` keyword.
     Number,
+    /// `object` keyword.
     Object,
+    /// `of` keyword.
     Of,
+    /// `override` keyword.
     Override,
+    /// `package` keyword.
     Package,
+    /// `private` keyword.
     Private,
+    /// `protected` keyword.
     Protected,
+    /// `public` keyword.
     Public,
+    /// `readonly` keyword.
     Readonly,
+    /// `require` keyword.
     Require,
+    /// `return` keyword.
     Return,
+    /// `set` keyword.
     Set,
+    /// `static` keyword.
     Static,
+    /// `string` keyword.
     String,
+    /// `super` keyword.
     Super,
+    /// `switch` keyword.
     Switch,
+    /// `symbol` keyword.
     Symbol,
+    /// `this` keyword.
     This,
+    /// `throw` keyword.
     Throw,
+    /// `true` keyword.
     True,
+    /// `try` keyword.
     Try,
+    /// `type` keyword.
     Type,
+    /// `typeof` keyword.
     Typeof,
+    /// `undefined` keyword.
     Undefined,
+    /// `unique` keyword.
     Unique,
+    /// `unknown` keyword.
     Unknown,
+    /// `var` keyword.
     Var,
+    /// `void` keyword.
     Void,
+    /// `while` keyword.
     While,
+    /// `with` keyword.
     With,
+    /// `yield` keyword.
     Yield,
+    /// `+`.
     Plus,
+    /// `-`.
     Minus,
+    /// `*`.
     Star,
+    /// `/`.
     Slash,
+    /// `%`.
     Percent,
+    /// `**`.
     StarStar,
+    /// `?`.
     Question,
+    /// `...`.
     DotDotDot,
+    /// `<`.
     Less,
+    /// `>`.
     Greater,
+    /// `<=`.
     LessEqual,
+    /// `>=`.
     GreaterEqual,
+    /// `==`.
     EqualEqual,
+    /// `!=`.
     NotEqual,
+    /// `===`.
     EqualEqualEqual,
+    /// `!==`.
     NotEqualEqual,
-    AmpersandAmpersand,
-    PipePipe,
+    /// `&&`.
+    AndAnd,
+    /// `||`.
+    OrOr,
+    /// `!`.
     Exclamation,
-    Ampersand,
-    Pipe,
-    Caret,
+    /// `~`.
     Tilde,
-    LeftShift,
-    RightShift,
-    UnsignedRightShift,
-    Equal,
-    PlusEqual,
-    MinusEqual,
-    StarEqual,
-    SlashEqual,
-    PercentEqual,
-    StarStarEqual,
-    LeftShiftEqual,
-    RightShiftEqual,
-    UnsignedRightShiftEqual,
-    AmpersandEqual,
-    PipeEqual,
-    CaretEqual,
-    AmpersandAmpersandEqual,
-    PipePipeEqual,
-    QuestionQuestionEqual,
-    PlusPlus,
-    MinusMinus,
+    /// `&`.
+    Ampersand,
+    /// `|`.
+    Bar,
+    /// `^`.
+    Caret,
+    /// `<<`.
+    LessLess,
+    /// `>>`.
+    GreaterGreater,
+    /// `>>>`.
+    GreaterGreaterGreater,
+    /// `??`.
     QuestionQuestion,
+    /// `?.`.
     QuestionDot,
-    Arrow,
-    LeftParen,
-    RightParen,
-    LeftBrace,
-    RightBrace,
-    LeftBracket,
-    RightBracket,
-    Semicolon,
+    /// `=`.
+    Equal,
+    /// `+=`.
+    PlusEqual,
+    /// `-=`.
+    MinusEqual,
+    /// `*=`.
+    StarEqual,
+    /// `/=`.
+    SlashEqual,
+    /// `%=`.
+    PercentEqual,
+    /// `**=`.
+    StarStarEqual,
+    /// `&=`.
+    AmpersandEqual,
+    /// `|=`.
+    BarEqual,
+    /// `^=`.
+    CaretEqual,
+    /// `<<=`.
+    LessLessEqual,
+    /// `>>=`.
+    GreaterGreaterEqual,
+    /// `>>>=`.
+    GreaterGreaterGreaterEqual,
+    /// `??=`.
+    QuestionQuestionEqual,
+    /// `++`.
+    PlusPlus,
+    /// `--`.
+    MinusMinus,
+    /// `(`.
+    OpenParen,
+    /// `)`.
+    CloseParen,
+    /// `[`.
+    OpenBracket,
+    /// `]`.
+    CloseBracket,
+    /// `{`.
+    OpenBrace,
+    /// `}`.
+    CloseBrace,
+    /// `,`.
     Comma,
+    /// `.`.
     Dot,
+    /// `;`.
+    Semicolon,
+    /// `:`.
     Colon,
+    /// `@`.
     At,
+    /// `=>`.
+    EqualsGreater,
+    /// String literal.
     StringLiteral,
+    /// Numeric literal.
     NumericLiteral,
+    /// BigInt literal.
     BigIntLiteral,
+    /// Boolean literal.
     BooleanLiteral,
+    /// Template string.
     TemplateString,
+    /// Regular expression literal.
     RegexLiteral,
+    /// Identifier name.
     IdentifierName,
+    /// Line comment `//`.
     LineComment,
+    /// Block comment `/* */`.
     BlockComment,
+    /// Whitespace.
     Whitespace,
+    /// Newline.
     Newline,
+    /// End of stream.
     Eof,
+    /// Root node.
     Root,
+    /// Source file.
     SourceFile,
+    /// Module.
     Module,
+    /// Variable declaration.
     VariableDeclaration,
+    /// Function declaration.
     FunctionDeclaration,
+    /// Class declaration.
     ClassDeclaration,
+    /// Interface declaration.
     InterfaceDeclaration,
+    /// Type alias declaration.
     TypeAliasDeclaration,
+    /// Enum declaration.
     EnumDeclaration,
+    /// Namespace declaration.
     NamespaceDeclaration,
+    /// Class body.
     ClassBody,
+    /// Import declaration.
     ImportDeclaration,
+    /// Export declaration.
     ExportDeclaration,
+    /// Import clause.
     ImportClause,
+    /// Import specifier.
     ImportSpecifier,
+    /// Namespace import.
     NamespaceImport,
+    /// Named exports.
     NamedExports,
+    /// Export specifier.
     ExportSpecifier,
+    /// Parameter.
     Parameter,
+    /// Call argument.
     CallArgument,
+    /// Property declaration.
     PropertyDeclaration,
+    /// Method declaration.
     MethodDeclaration,
+    /// Constructor declaration.
     ConstructorDeclaration,
+    /// Property assignment.
     PropertyAssignment,
+    /// Shorthand property assignment.
     ShorthandPropertyAssignment,
+    /// Spread element.
     SpreadElement,
+    /// Error token.
     Error,
+    /// JSX element.
     JsxElement,
+    /// JSX self-closing element.
     JsxSelfClosingElement,
+    /// JSX opening element.
     JsxOpeningElement,
+    /// JSX closing element.
     JsxClosingElement,
+    /// JSX fragment.
     JsxFragment,
+    /// JSX opening fragment.
     JsxOpeningFragment,
+    /// JSX closing fragment.
     JsxClosingFragment,
+    /// JSX attribute.
     JsxAttribute,
+    /// JSX attributes.
     JsxAttributes,
+    /// JSX expression container.
     JsxExpressionContainer,
+    /// JSX spread attribute.
     JsxSpreadAttribute,
+    /// JSX text.
     JsxText,
+    /// Binary expression.
     BinaryExpression,
+    /// Unary expression.
     UnaryExpression,
+    /// Conditional expression `a ? b : c`.
     ConditionalExpression,
+    /// Call expression `f()`.
     CallExpression,
+    /// New expression `new C()`.
     NewExpression,
+    /// Member expression `a.b` or `a[b]`.
     MemberExpression,
+    /// Array expression `[a, b]`.
     ArrayExpression,
+    /// Object expression `{a: b}`.
     ObjectExpression,
+    /// Function expression `function() {}`.
     FunctionExpression,
+    /// Template expression `` `...` ``.
     TemplateExpression,
+    /// Tagged template expression `f` `...` ``.
     TaggedTemplateExpression,
+    /// As expression `a as T`.
     AsExpression,
+    /// Type assertion expression `<T>a`.
     TypeAssertionExpression,
+    /// Non-null expression `a!`.
     NonNullExpression,
+    /// Update expression `++a` or `a--`.
     UpdateExpression,
+    /// Expression statement.
     ExpressionStatement,
+    /// Block statement.
     BlockStatement,
+    /// If statement.
     IfStatement,
+    /// While statement.
     WhileStatement,
+    /// For statement.
     ForStatement,
+    /// For-in statement.
     ForInStatement,
+    /// For-of statement.
     ForOfStatement,
+    /// Do-while statement.
     DoWhileStatement,
+    /// Switch statement.
     SwitchStatement,
+    /// Case clause.
     CaseClause,
+    /// Default clause.
     DefaultClause,
+    /// Try statement.
     TryStatement,
+    /// Catch clause.
     CatchClause,
+    /// Finally clause.
     FinallyClause,
+    /// Throw statement.
     ThrowStatement,
+    /// Return statement.
     ReturnStatement,
+    /// Break statement.
     BreakStatement,
+    /// Continue statement.
     ContinueStatement,
+    /// Debugger statement.
     DebuggerStatement,
+    /// With statement.
     WithStatement,
+    /// Binding pattern.
     BindingPattern,
+    /// Array binding pattern.
     ArrayBindingPattern,
+    /// Object binding pattern.
     ObjectBindingPattern,
+    /// Binding element.
     BindingElement,
+    /// Type reference.
     TypeReference,
+    /// Type literal.
     TypeLiteral,
+    /// Function type.
     FunctionType,
+    /// Constructor type.
     ConstructorType,
+    /// Array type.
     ArrayType,
+    /// Tuple type.
     TupleType,
+    /// Union type.
     UnionType,
+    /// Intersection type.
     IntersectionType,
+    /// Conditional type.
     ConditionalType,
+    /// Mapped type.
     MappedType,
+    /// Indexed access type.
     IndexedAccessType,
+    /// Property signature.
     PropertySignature,
+    /// Method signature.
     MethodSignature,
+    /// Literal type.
     LiteralType,
+    /// Type query.
     TypeQuery,
+    /// Type predicate.
     TypePredicate,
+    /// Type annotation.
     TypeAnnotation,
+    /// Type parameter.
     TypeParameter,
+    /// Heritage clause.
     HeritageClause,
+    /// Enum member.
     EnumMember,
 }
 
 impl TypeScriptElementType {
+    /// Returns the element type for the given keyword.
     pub fn from_keyword(text: &str) -> Option<Self> {
         match text {
             "abstract" => Some(Self::Abstract),

@@ -9,29 +9,29 @@ use oak_core::{
 
 pub(crate) type State<'a, S> = ParserState<'a, FortranLanguage, S>;
 
+/// Fortran parser implementation.
 pub struct FortranParser<'config> {
-    pub(crate) _config: &'config FortranLanguage,
+    pub(crate) config: &'config FortranLanguage,
 }
 
 impl<'config> FortranParser<'config> {
+    /// Create a new Fortran parser.
     pub fn new(config: &'config FortranLanguage) -> Self {
-        Self { _config: config }
-    }
-
-    pub(crate) fn parse_root_internal<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> Result<&'a GreenNode<'a, FortranLanguage>, OakError> {
-        let checkpoint = state.checkpoint();
-
-        while state.not_at_end() {
-            state.advance()
-        }
-
-        Ok(state.finish_at(checkpoint, crate::parser::element_type::FortranElementType::Root))
+        Self { config }
     }
 }
 
 impl<'config> Parser<FortranLanguage> for FortranParser<'config> {
     fn parse<'a, S: Source + ?Sized>(&self, text: &'a S, edits: &[TextEdit], cache: &'a mut impl ParseCache<FortranLanguage>) -> ParseOutput<'a, FortranLanguage> {
-        let lexer = crate::lexer::FortranLexer::new(self._config);
-        parse_with_lexer(&lexer, text, edits, cache, |state| self.parse_root_internal(state))
+        let lexer = crate::lexer::FortranLexer::new(self.config);
+        parse_with_lexer(&lexer, text, edits, cache, |state| {
+            let checkpoint = state.checkpoint();
+
+            while state.not_at_end() {
+                state.advance()
+            }
+
+            Ok(state.finish_at(checkpoint, crate::parser::element_type::FortranElementType::Root))
+        })
     }
 }

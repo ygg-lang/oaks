@@ -1,47 +1,73 @@
-use oak_core::{ElementType, Parser, UniversalElementRole};
-#[cfg(feature = "serde")]
-use serde::{Deserialize, Serialize};
+//! Element types for the DOT language.
+use oak_core::{ElementType, UniversalElementRole};
 
+/// Element types for the DOT language.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 #[repr(u8)]
 pub enum DotElementType {
-    // 基本 kind
+    // Basic kind
+    /// An identifier.
     Identifier,
+    /// A string literal.
     String,
+    /// A number literal.
     Number,
+    /// Whitespace.
     Whitespace,
+    /// A newline.
     Newline,
 
-    // DOT 关键字
+    // DOT keywords
+    /// The `graph` keyword.
     Graph,
+    /// The `digraph` keyword.
     Digraph,
+    /// The `subgraph` keyword.
     Subgraph,
+    /// The `node` keyword.
     Node,
+    /// The `edge` keyword.
     Edge,
+    /// The `strict` keyword.
     Strict,
 
-    // 操作符
-    Arrow,     // ->
-    Line,      // --
-    Equal,     // =
+    // Operators
+    /// The `->` arrow operator.
+    Arrow, // ->
+    /// The `--` line operator.
+    Line, // --
+    /// The `=` equal operator.
+    Equal, // =
+    /// The `;` semicolon.
     Semicolon, // ;
-    Comma,     // ,
+    /// The `,` comma.
+    Comma, // ,
 
-    // 分隔符
-    LeftBrace,    // {
-    RightBrace,   // }
-    LeftBracket,  // [
+    // Delimiters
+    /// The `{` left brace.
+    LeftBrace, // {
+    /// The `}` right brace.
+    RightBrace, // }
+    /// The `[` left bracket.
+    LeftBracket, // [
+    /// The `]` right bracket.
     RightBracket, // ]
-    LeftParen,    // (
-    RightParen,   // )
+    /// The `(` left paren.
+    LeftParen, // (
+    /// The `)` right paren.
+    RightParen, // )
 
-    // 注释
+    // Comments
+    /// A comment.
     Comment,
 
-    // 特殊
+    // Special
+    /// The root element.
     Root,
+    /// An error element.
     Error,
+    /// End of stream marker.
     Eof,
 }
 

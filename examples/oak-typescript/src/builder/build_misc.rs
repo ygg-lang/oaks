@@ -12,7 +12,11 @@ impl<'config> TypeScriptBuilder<'config> {
             match child {
                 RedTree::Node(child_node) => match child_node.green.kind {
                     TypeScriptElementType::IdentifierName => name = source.get_text_in(child_node.span().into()).to_string(),
-                    TypeScriptElementType::TypeAnnotation => ty = self.build_type_annotation(&child_node, source)?,
+                    TypeScriptElementType::TypeAnnotation => {
+                        if !self.erase_types {
+                            ty = self.build_type_annotation(&child_node, source)?
+                        }
+                    }
                     TypeScriptElementType::Decorator => {
                         if let Some(d) = self.build_decorator(&child_node, source)? {
                             decorators.push(d)

@@ -1,0 +1,37 @@
+#lang rhombus
+
+// Basic syntax test for Rhombus
+
+fun factorial(n):
+    if n <= 1
+    | 1
+    | n * factorial(n - 1)
+
+fun fibonacci(n):
+    match n
+    | 0: 0
+    | 1: 1
+    | _: fibonacci(n - 1) + fibonacci(n - 2)
+
+// Lists and iteration
+val numbers = [1, 2, 3, 4, 5]
+for (x: numbers):
+    println("Square: " +& (x * x))
+
+// Classes and objects
+class Point(x, y):
+    method distance_to_origin():
+        math.sqrt(x * x + y * y)
+
+val p = Point(3, 4)
+println("Distance: " +& p.distance_to_origin())
+
+// Pattern matching
+fun describe(v):
+    match v
+    | 0: "Zero"
+    | 1: "One"
+    | _: "Other"
+
+println(describe(0))
+println(describe(5))

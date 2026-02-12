@@ -8,7 +8,7 @@ mod tests {
 
     #[test]
     fn test_basic_functionality() {
-        // 基础功能测试
+        // Basic functionality test
         assert!(true)
     }
 }

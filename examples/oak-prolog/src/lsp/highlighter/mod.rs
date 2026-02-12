@@ -1,18 +1,9 @@
-#![doc = include_str!("readme.md")]
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub enum HighlightKind {
-    Keyword,
-    String,
-    Number,
-    Comment,
-    Identifier,
-}
+//! Prolog syntax highlighter.
+//!
+//! This module provides syntax highlighting for Prolog source code, supporting keywords, atoms, variables, comments, etc.
 
-/// 高亮器 trait
-pub trait Highlighter {
-    /// 对给定的文本进行高亮处理
-    fn highlight(&self, text: &str) -> Vec<(usize, usize, HighlightKind)>;
-}
+use crate::token_type::TokenType;
+use oak_lsp::highlighter::{HighlightKind, Highlighter};
 
 pub struct PrologHighlighter {
     pub use_parser: bool,

@@ -2,7 +2,7 @@
 use crate::lsp::JLanguageService;
 use oak_vfs::MemoryVfs;
 
-/// 为 J 语言启动 MCP 服务
+/// Starts the MCP server for the J language.
 pub async fn serve_j_mcp(vfs: MemoryVfs) {
     let service = JLanguageService::new(vfs);
     let server = oak_mcp::McpServer::new(service);

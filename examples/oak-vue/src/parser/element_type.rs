@@ -1,66 +1,117 @@
-use oak_core::{ElementType, Parser, UniversalElementRole};
-#[cfg(feature = "serde")]
-use serde::{Deserialize, Serialize};
+use oak_core::{ElementType, UniversalElementRole};
 
+/// Vue element type.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub enum VueElementType {
+    /// Root node.
     Root,
+    /// Program node.
     Program,
+    /// Template element.
     TemplateElement,
+    /// Element node.
     Element,
+    /// Tag node.
     Tag,
+    /// Closing tag node.
     CloseTag,
+    /// Doctype node.
     DocType,
+    /// Attribute node.
     Attribute,
+    /// Attribute name.
     AttributeName,
+    /// Attribute value.
     AttributeValue,
+    /// Directive node.
     Directive,
+    /// Modifier node.
     Modifier,
+    /// Interpolation node.
     Interpolation,
+    /// Text node.
     TextNode,
+    /// Comment node.
     CommentNode,
+    /// Identifier node.
     Identifier,
 
     // JS/Expression Elements
+    /// Expression node.
     Expression,
+    /// Literal node.
     Literal,
+    /// Binary expression.
     BinaryExpr,
+    /// Unary expression.
     UnaryExpr,
+    /// Call expression.
     CallExpr,
+    /// Member expression.
     MemberExpr,
+    /// Array expression.
     ArrayExpr,
+    /// Object expression.
     ObjectExpr,
+    /// Object property.
     ObjectProperty,
+    /// Arrow function.
     ArrowFunction,
+    /// Conditional expression.
     ConditionalExpr,
+    /// Template string literal.
     TemplateLiteral,
+    /// For expression.
     ForExpr,
+    /// For-in expression.
     ForInExpr,
+    /// For-of expression.
     ForOfExpr,
+    /// Pattern node.
     Pattern,
 
     // Statements & Declarations
+    /// Import statement.
     ImportStmt,
+    /// Import specifier.
     ImportSpecifier,
+    /// Export statement.
     ExportStmt,
+    /// Variable declaration.
     VariableDecl,
+    /// Variable declarator.
     VariableDeclarator,
+    /// Function declaration.
     FunctionDecl,
+    /// Expression statement.
     ExpressionStmt,
+    /// Return statement.
     ReturnStmt,
+    /// If statement.
     IfStmt,
+    /// While statement.
     WhileStmt,
+    /// For statement.
     ForStmt,
+    /// Block statement.
     BlockStmt,
+    /// Break statement.
     BreakStmt,
+    /// Continue statement.
     ContinueStmt,
+    /// TSE element.
     TseElement,
+    /// TSE attribute.
     TseAttribute,
 
+    /// Whitespace.
     Whitespace,
+    /// Newline.
     Newline,
+    /// Comment.
     Comment,
+    /// Error node.
     Error,
 }
 

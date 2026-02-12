@@ -1,20 +1,23 @@
 #![doc = include_str!("readme.md")]
+/// Token type definitions.
 pub mod token_type;
 
 use crate::{language::GsglLanguage, lexer::token_type::GsglTokenType};
 use oak_core::{Lexer, LexerCache, LexerState, OakError, TextEdit, lexer::LexOutput, source::Source};
 
-type State<'a, S> = LexerState<'a, S, GsglLanguage>;
+pub(crate) type State<'a, S> = LexerState<'a, S, GsglLanguage>;
 
 /// GSGL lexer.
 #[derive(Clone, Debug)]
 pub struct GsglLexer<'config> {
-    _config: &'config GsglLanguage,
+    /// The language configuration.
+    pub config: &'config GsglLanguage,
 }
 
 impl<'config> GsglLexer<'config> {
+    /// Creates a new `GsglLexer`.
     pub fn new(config: &'config GsglLanguage) -> Self {
-        Self { _config: config }
+        Self { config }
     }
 
     fn run<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> Result<(), OakError> {

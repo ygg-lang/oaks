@@ -1,130 +1,42 @@
-use oak_core::{ElementType, Parser, UniversalElementRole};
-#[cfg(feature = "serde")]
-use serde::{Deserialize, Serialize};
+//! Element types for the Tailwind AST.
+use oak_core::{ElementType, UniversalElementRole};
 
+/// Element types for the Tailwind AST.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub enum TailwindElementType {
+    /// Root node.
     Root,
-    Document,
-    Template,
-    Block,
-    Variable,
-    Filter,
-    Function,
-    Tag,
+    /// A Tailwind class (e.g., `hover:bg-red-500`).
+    Class,
+    /// A modifier part (e.g., `hover:`).
+    Modifier,
+    /// A utility part (e.g., `bg-red-500`).
+    Utility,
+    /// An arbitrary value part (e.g., `[100px]`).
+    ArbitraryValue,
+    /// A directive (e.g., `@tailwind base`).
+    Directive,
+    /// A CSS declaration.
+    Declaration,
+    /// A comment.
     Comment,
-    Text,
-    Expression,
-    String,
-    Number,
-    Boolean,
-    Null,
-    Array,
-    Object,
-    Identifier,
-    Operator,
+    /// Error node.
     ErrorNode,
-    LeftBrace,
-    RightBrace,
-    LeftBracket,
-    RightBracket,
-    DoubleLeftBrace,
-    DoubleRightBrace,
-    LeftBracePercent,
-    PercentRightBrace,
-    LeftParen,
-    RightParen,
-    Pipe,
-    Comma,
-    Dot,
-    Colon,
-    Semicolon,
-    Eq,
-    Plus,
-    Minus,
-    Star,
-    Slash,
-    Percent,
-    Bang,
-    Question,
-    Lt,
-    Gt,
-    Amp,
-    Caret,
-    Tilde,
-    Whitespace,
-    Eof,
-    Error,
-}
-
-impl oak_core::TokenType for TailwindElementType {
-    type Role = oak_core::UniversalTokenRole;
-    const END_OF_STREAM: Self = TailwindElementType::Eof;
-
-    fn role(&self) -> Self::Role {
-        match self {
-            Self::Whitespace => oak_core::UniversalTokenRole::Whitespace,
-            Self::Comment => oak_core::UniversalTokenRole::Comment,
-            _ => oak_core::UniversalTokenRole::None,
-        }
-    }
 }
 
 impl core::fmt::Display for TailwindElementType {
     fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         match self {
-            TailwindElementType::Root => f.write_str("Root"),
-            TailwindElementType::Document => f.write_str("Document"),
-            TailwindElementType::Template => f.write_str("Template"),
-            TailwindElementType::Block => f.write_str("Block"),
-            TailwindElementType::Variable => f.write_str("Variable"),
-            TailwindElementType::Filter => f.write_str("Filter"),
-            TailwindElementType::Function => f.write_str("Function"),
-            TailwindElementType::Tag => f.write_str("Tag"),
-            TailwindElementType::Comment => f.write_str("Comment"),
-            TailwindElementType::Text => f.write_str("Text"),
-            TailwindElementType::Expression => f.write_str("Expression"),
-            TailwindElementType::String => f.write_str("String"),
-            TailwindElementType::Number => f.write_str("Number"),
-            TailwindElementType::Boolean => f.write_str("Boolean"),
-            TailwindElementType::Null => f.write_str("Null"),
-            TailwindElementType::Array => f.write_str("Array"),
-            TailwindElementType::Object => f.write_str("Object"),
-            TailwindElementType::Identifier => f.write_str("Identifier"),
-            TailwindElementType::Operator => f.write_str("Operator"),
-            TailwindElementType::ErrorNode => f.write_str("ErrorNode"),
-            TailwindElementType::LeftBrace => f.write_str("{"),
-            TailwindElementType::RightBrace => f.write_str("}"),
-            TailwindElementType::LeftBracket => f.write_str("["),
-            TailwindElementType::RightBracket => f.write_str("]"),
-            TailwindElementType::DoubleLeftBrace => f.write_str("{{"),
-            TailwindElementType::DoubleRightBrace => f.write_str("}}"),
-            TailwindElementType::LeftBracePercent => f.write_str("{%"),
-            TailwindElementType::PercentRightBrace => f.write_str("%}"),
-            TailwindElementType::LeftParen => f.write_str("("),
-            TailwindElementType::RightParen => f.write_str(")"),
-            TailwindElementType::Pipe => f.write_str("|"),
-            TailwindElementType::Comma => f.write_str(","),
-            TailwindElementType::Dot => f.write_str("."),
-            TailwindElementType::Colon => f.write_str(":"),
-            TailwindElementType::Semicolon => f.write_str(";"),
-            TailwindElementType::Eq => f.write_str("="),
-            TailwindElementType::Plus => f.write_str("+"),
-            TailwindElementType::Minus => f.write_str("-"),
-            TailwindElementType::Star => f.write_str("*"),
-            TailwindElementType::Slash => f.write_str("/"),
-            TailwindElementType::Percent => f.write_str("%"),
-            TailwindElementType::Bang => f.write_str("!"),
-            TailwindElementType::Question => f.write_str("?"),
-            TailwindElementType::Lt => f.write_str("<"),
-            TailwindElementType::Gt => f.write_str(">"),
-            TailwindElementType::Amp => f.write_str("&"),
-            TailwindElementType::Caret => f.write_str("^"),
-            TailwindElementType::Tilde => f.write_str("~"),
-            TailwindElementType::Whitespace => f.write_str("Whitespace"),
-            TailwindElementType::Eof => f.write_str("Eof"),
-            TailwindElementType::Error => f.write_str("Error"),
+            Self::Root => f.write_str("Root"),
+            Self::Class => f.write_str("Class"),
+            Self::Modifier => f.write_str("Modifier"),
+            Self::Utility => f.write_str("Utility"),
+            Self::ArbitraryValue => f.write_str("ArbitraryValue"),
+            Self::Directive => f.write_str("Directive"),
+            Self::Declaration => f.write_str("Declaration"),
+            Self::Comment => f.write_str("Comment"),
+            Self::ErrorNode => f.write_str("ErrorNode"),
         }
     }
 }
@@ -135,15 +47,28 @@ impl ElementType for TailwindElementType {
     fn role(&self) -> Self::Role {
         match self {
             Self::Root => UniversalElementRole::Root,
-
-            Self::Error => UniversalElementRole::Error,
-            _ => UniversalElementRole::None,
+            Self::Class => UniversalElementRole::Attribute,
+            Self::Modifier => UniversalElementRole::AttributeKey,
+            Self::Utility => UniversalElementRole::Name,
+            Self::ArbitraryValue => UniversalElementRole::Value,
+            Self::Directive => UniversalElementRole::Metadata,
+            Self::Declaration => UniversalElementRole::Metadata,
+            Self::Comment => UniversalElementRole::Documentation,
+            Self::ErrorNode => UniversalElementRole::Error,
         }
     }
 }
 
 impl From<crate::lexer::token_type::TailwindTokenType> for TailwindElementType {
     fn from(token: crate::lexer::token_type::TailwindTokenType) -> Self {
-        unsafe { std::mem::transmute(token) }
+        match token {
+            crate::lexer::token_type::TailwindTokenType::Root => Self::Root,
+            crate::lexer::token_type::TailwindTokenType::Directive => Self::Directive,
+            crate::lexer::token_type::TailwindTokenType::Modifier => Self::Modifier,
+            crate::lexer::token_type::TailwindTokenType::Utility => Self::Utility,
+            crate::lexer::token_type::TailwindTokenType::ArbitraryValue => Self::ArbitraryValue,
+            crate::lexer::token_type::TailwindTokenType::Comment => Self::Comment,
+            _ => Self::ErrorNode,
+        }
     }
 }

@@ -1,3 +1,5 @@
+//! Builder implementation for the MSIL language.
+
 use crate::{
     ast::*,
     language::MsilLanguage,
@@ -5,6 +7,7 @@ use crate::{
 };
 use oak_core::{Builder, BuilderCache, GreenNode, OakDiagnostics, Source, SourceText, TextEdit};
 
+/// Builder for the MSIL language.
 #[derive(Clone)]
 pub struct MsilBuilder<'config> {
     #[allow(dead_code)]
@@ -12,11 +15,13 @@ pub struct MsilBuilder<'config> {
 }
 
 impl<'config> MsilBuilder<'config> {
+    /// Creates a new `MsilBuilder` with the given configuration.
     pub fn new(config: &'config MsilLanguage) -> Self {
         Self { config }
     }
 
-    fn build_root(&self, green_tree: &GreenNode<MsilLanguage>, source: &SourceText) -> Result<MsilRoot, oak_core::OakError> {
+    /// Builds the root AST node from a green tree.
+    pub fn build_root(&self, green_tree: &GreenNode<MsilLanguage>, source: &SourceText) -> Result<MsilRoot, oak_core::OakError> {
         let red_root = oak_core::RedNode::new(green_tree, 0);
 
         let mut items = Vec::new();
@@ -93,20 +98,58 @@ impl<'config> MsilBuilder<'config> {
 
     fn build_method(&self, node: &oak_core::RedNode<MsilLanguage>, source: &SourceText) -> Option<crate::ast::Method> {
         let mut name = "Unknown".to_string();
+        let mut instructions = Vec::new();
         for child in node.children() {
             if let oak_core::RedTree::Node(n) = child {
                 if n.green.kind == MsilElementType::Identifier {
                     name = source.get_text_in(n.span()).to_string();
-                    break;
+                }
+                else if n.green.kind == MsilElementType::Instruction {
+                    if let Some(inst) = self.build_instruction(&n, source) {
+                        instructions.push(inst);
+                    }
                 }
             }
         }
 
-        Some(crate::ast::Method {
-            name,
-            instructions: Vec::new(), // TODO: Parse instructions
-            span: node.span(),
-        })
+        Some(crate::ast::Method { name, instructions, span: node.span() })
+    }
+
+    fn build_instruction(&self, node: &oak_core::RedNode<MsilLanguage>, source: &SourceText) -> Option<Instruction> {
+        let mut opcode = String::new();
+        let mut operand = None;
+
+        for child in node.children() {
+            if let oak_core::RedTree::Node(n) = child {
+                match n.green.kind {
+                    MsilElementType::Identifier => {
+                        if opcode.is_empty() {
+                            opcode = source.get_text_in(n.span()).to_string();
+                        }
+                        else {
+                            operand = Some(source.get_text_in(n.span()).to_string());
+                        }
+                    }
+                    MsilElementType::String => {
+                        operand = Some(source.get_text_in(n.span()).to_string());
+                    }
+                    _ => {}
+                }
+            }
+        }
+
+        if opcode == "ldstr" {
+            Some(Instruction::String(operand.unwrap_or_default()))
+        }
+        else if opcode == "call" {
+            Some(Instruction::Call(operand.unwrap_or_default()))
+        }
+        else if !opcode.is_empty() {
+            Some(Instruction::Simple(opcode))
+        }
+        else {
+            None
+        }
     }
 }
 

@@ -1,16 +1,16 @@
 #![doc = include_str!("readme.md")]
 use oak_core::{Language, LanguageCategory};
-#[cfg(feature = "serde")]
-use serde::{Deserialize, Serialize};
 
 /// Julia language implementation.
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub struct JuliaLanguage {
+    /// Whether to allow comments in the source code.
     pub allow_comment: bool,
 }
 
 impl JuliaLanguage {
+    /// Creates a new instance of the Julia language configuration.
     pub fn new() -> Self {
         Self::default()
     }

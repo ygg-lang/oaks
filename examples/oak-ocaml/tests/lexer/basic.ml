@@ -1,26 +1,49 @@
-(* Basic OCaml test file *)
+(* Comprehensive OCaml Lexer Test *)
 
+(* Basic Types and Literals *)
+let int_val = 42
+let float_val = 3.14
+let string_val = "Hello, world!"
+let char_val = 'a'
+let bool_val = true
+
+(* Lists and Arrays *)
+let list = [1; 2; 3; 4]
+let array = [| 1; 2; 3; 4 |]
+
+(* Functions *)
 let rec factorial n =
-  if n <= 1 then 1
-  else n * factorial (n - 1)
+    if n = 0 then 1 else n * factorial (n - 1)
 
-let main () =
-  let result = factorial 5 in
-  Printf.printf "Factorial of 5 is %d\n" result
+let add x y = x + y
+let result = add 5 10
 
-type 'a tree =
-  | Leaf of 'a
-  | Node of 'a tree * 'a * 'a tree
+(* Pattern Matching *)
+let describe_list l =
+    match l with
+    | [] -> "Empty"
+    | [x] -> "Singleton"
+    | x :: xs -> "Multiple elements"
 
-let rec insert x = function
-  | Leaf y -> if x <= y then Node (Leaf x, y, Leaf y) else Node (Leaf y, y, Leaf x)
-  | Node (l, v, r) -> if x <= v then Node (insert x l, v, r) else Node (l, v, insert x r)
+(* Records *)
+type person = {
+    name : string;
+    age : int;
+    mutable active : bool;
+}
 
-module StringSet = Set.Make(String)
+let alice = { name = "Alice"; age = 30; active = true }
+let name = alice.name
+let () = alice.active <- false
 
-class counter =
-  object
-    val mutable count = 0
-    method get = count
-    method incr = count <- count + 1
-  end
+(* Variants and Algebraic Data Types *)
+type shape =
+    | Circle of float
+    | Rectangle of float * float
+    | Point
+
+let area s =
+    match s with
+    | Circle r -> 3.14159 *. r *. r
+    | Rectangle (w, h) -> w *. h
+    | Point -> 0.0

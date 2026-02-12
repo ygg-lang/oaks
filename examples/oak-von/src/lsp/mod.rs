@@ -5,11 +5,13 @@ use oak_core::tree::RedNode;
 #[cfg(feature = "lsp")]
 use {futures::Future, oak_lsp::service::LanguageService, oak_lsp::types::Hover as LspHover, oak_vfs::Vfs};
 #[cfg(feature = "lsp")]
+/// Language service implementation for VON.
 pub struct VonLanguageService<V: Vfs> {
     vfs: V,
     workspace: oak_lsp::workspace::WorkspaceManager,
 }
 impl<V: Vfs> VonLanguageService<V> {
+    /// Creates a new VON language service.
     pub fn new(vfs: V) -> Self {
         Self { vfs, workspace: oak_lsp::workspace::WorkspaceManager::new() }
     }

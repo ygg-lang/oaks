@@ -1,93 +1,179 @@
-use oak_core::{Source, Token, TokenType, UniversalElementRole, UniversalTokenRole};
-#[cfg(feature = "serde")]
-use serde::{Deserialize, Serialize};
+use oak_core::{Token, TokenType, UniversalTokenRole};
 
+/// RBQ token.
 pub type RbqToken = Token<RbqTokenType>;
 
+/// RBQ token type.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub enum RbqTokenType {
+    /// Root node.
     Root,
+    /// Namespace definition.
     NamespaceDef,
+    /// Import definition.
     ImportDef,
+    /// Struct definition.
     StructDef,
+    /// Class definition.
     ClassDef,
+    /// Enum definition.
     EnumDef,
+    /// Union definition.
     UnionDef,
+    /// Trait definition.
     TraitDef,
+    /// Type definition.
     TypeDef,
+    /// Micro definition.
     MicroDef,
+    /// Field definition.
     FieldDef,
+    /// Using definition.
     UsingDef,
+    /// Enum member.
     EnumMember,
+    /// Union member.
     UnionMember,
+    /// Type reference.
     TypeRef,
+    /// Generic arguments.
     GenericArgs,
+    /// Annotation.
     Annotation,
+    /// Annotation arguments.
     AnnotationArgs,
+    /// Query pipeline.
     QueryPipeline,
+    /// Pipeline step.
     PipelineStep,
+    /// Closure.
     Closure,
+    /// Closure arguments.
     ClosureArgs,
+    /// Block.
+    Block,
+    /// Expression.
     Expression,
+    /// Literal.
     Literal,
+    /// Magic variable.
     MagicVar,
+    /// Binary expression.
     BinaryExpr,
+    /// Unary expression.
     UnaryExpr,
+    /// Call expression.
     CallExpr,
+    /// Member access expression.
     MemberExpr,
+    /// Error node.
     ErrorNode,
+    /// `struct` keyword.
     StructKw,
+    /// `class` keyword.
     ClassKw,
+    /// `enum` keyword.
     EnumKw,
+    /// `union` keyword.
     UnionKw,
+    /// `trait` keyword.
     TraitKw,
+    /// `using` keyword.
     UsingKw,
+    /// `namespace` keyword.
     NamespaceKw,
+    /// `use` keyword.
     UseKw,
+    /// `type` keyword.
     TypeKw,
+    /// `micro` keyword.
     MicroKw,
+    /// `utf8` keyword.
     Utf8Kw,
+    /// `true` keyword.
     TrueKw,
+    /// `false` keyword.
     FalseKw,
+    /// Left brace `{`.
     LeftBrace,
+    /// Right brace `}`.
     RightBrace,
+    /// Left bracket `[`.
     LeftBracket,
+    /// Right bracket `]`.
     RightBracket,
+    /// Left parenthesis `(`.
     LeftParen,
+    /// Right parenthesis `)`.
     RightParen,
+    /// Colon `:`.
     Colon,
+    /// Semicolon `;`.
     Semicolon,
+    /// Comma `,`.
     Comma,
+    /// Dot `.`.
     Dot,
+    /// Question mark `?`.
     Question,
+    /// At symbol `@`.
     At,
+    /// Hash symbol `#`.
     Hash,
+    /// Dollar symbol `$`.
     Dollar,
+    /// Ampersand `&`.
     Ampersand,
+    /// Arrow `->`.
     Arrow,
+    /// Equal `=`.
     Eq,
+    /// Double equal `==`.
     EqEq,
+    /// Not equal `!=`.
     NotEq,
+    /// Greater than `>`.
     Gt,
+    /// Less than `<`.
     Lt,
+    /// Greater than or equal to `>=`.
     GtEq,
+    /// Less than or equal to `<=`.
     LtEq,
+    /// Double ampersand `&&`.
     AndAnd,
+    /// Double pipe `||`.
     OrOr,
+    /// Bang `!`.
     Not,
+    /// Plus `+`.
     Plus,
+    /// Minus `-`.
     Minus,
+    /// Star `*`.
     Star,
+    /// Slash `/`.
     Slash,
+    /// Pipe `|`.
+    Pipe,
+    /// Identifier.
     Ident,
+    /// String literal.
     StringLiteral,
+    /// Number literal.
     NumberLiteral,
+    /// Whitespace.
     Whitespace,
+    /// Newline.
     Newline,
+    /// Comment.
     Comment,
+    /// Block comment.
     BlockComment,
+    /// End of file.
     Eof,
+    /// Error.
     Error,
 }
 
@@ -116,11 +202,10 @@ impl RbqTokenType {
         match self {
             Self::OrOr => 1,
             Self::AndAnd => 2,
-            Self::Eq => 3,
-            Self::EqEq | Self::NotEq => 4,
-            Self::Lt | Self::Gt | Self::LtEq | Self::GtEq => 5,
-            Self::Plus | Self::Minus => 6,
-            Self::Star | Self::Slash => 7,
+            Self::EqEq | Self::NotEq => 3,
+            Self::Lt | Self::Gt | Self::LtEq | Self::GtEq => 4,
+            Self::Plus | Self::Minus => 5,
+            Self::Star | Self::Slash => 6,
             _ => 0,
         }
     }
@@ -151,6 +236,7 @@ impl From<crate::parser::element_type::RbqElementType> for RbqTokenType {
             crate::parser::element_type::RbqElementType::PipelineStep => Self::PipelineStep,
             crate::parser::element_type::RbqElementType::Closure => Self::Closure,
             crate::parser::element_type::RbqElementType::ClosureArgs => Self::ClosureArgs,
+            crate::parser::element_type::RbqElementType::Block => Self::Block,
             crate::parser::element_type::RbqElementType::Expression => Self::Expression,
             crate::parser::element_type::RbqElementType::Literal => Self::Literal,
             crate::parser::element_type::RbqElementType::MagicVar => Self::MagicVar,
@@ -202,6 +288,7 @@ impl From<crate::parser::element_type::RbqElementType> for RbqTokenType {
             crate::parser::element_type::RbqElementType::Minus => Self::Minus,
             crate::parser::element_type::RbqElementType::Star => Self::Star,
             crate::parser::element_type::RbqElementType::Slash => Self::Slash,
+            crate::parser::element_type::RbqElementType::Pipe => Self::Pipe,
             crate::parser::element_type::RbqElementType::Ident => Self::Ident,
             crate::parser::element_type::RbqElementType::StringLiteral => Self::StringLiteral,
             crate::parser::element_type::RbqElementType::NumberLiteral => Self::NumberLiteral,

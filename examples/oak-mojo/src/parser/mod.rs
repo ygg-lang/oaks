@@ -18,36 +18,35 @@ use oak_core::{
 
 pub(crate) type State<'a, S> = ParserState<'a, MojoLanguage, S>;
 
-/// Mojo 语法解析器
-#[derive(Default)]
-pub struct MojoParser {}
+/// Mojo syntax parser
+pub struct MojoParser<'config> {
+    config: &'config MojoLanguage,
+}
 
-impl Parser<MojoLanguage> for MojoParser {
+impl<'config> Parser<MojoLanguage> for MojoParser<'config> {
     fn parse<'a, S: Source + ?Sized>(&self, source: &'a S, edits: &[TextEdit], cache: &'a mut impl ParseCache<MojoLanguage>) -> ParseOutput<'a, MojoLanguage> {
-        let lexer = MojoLexer::new();
-        parse_with_lexer(&lexer, source, edits, cache, |state| self.parse_root(state))
+        let lexer = MojoLexer::new(self.config);
+        parse_with_lexer(&lexer, source, edits, cache, |state| {
+            let cp = state.checkpoint();
+            while state.not_at_end() {
+                self.skip_trivia(state);
+                if !state.not_at_end() {
+                    break;
+                }
+                if state.at(MojoTokenType::Newline) {
+                    state.bump();
+                    continue;
+                }
+                self.parse_statement(state)?;
+            }
+            Ok(state.finish_at(cp, MojoElementType::Root.into()))
+        })
     }
 }
 
-impl MojoParser {
-    pub fn new() -> Self {
-        Self::default()
-    }
-
-    pub(crate) fn parse_root<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> Result<&'a GreenNode<'a, MojoLanguage>, OakError> {
-        let cp = state.checkpoint();
-        while state.not_at_end() {
-            self.skip_trivia(state);
-            if !state.not_at_end() {
-                break;
-            }
-            if state.at(MojoTokenType::Newline) {
-                state.bump();
-                continue;
-            }
-            self.parse_statement(state)?;
-        }
-        Ok(state.finish_at(cp, MojoElementType::Root.into()))
+impl<'config> MojoParser<'config> {
+    pub fn new(config: &'config MojoLanguage) -> Self {
+        Self { config }
     }
 
     fn skip_trivia<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) {
@@ -185,15 +184,15 @@ impl MojoParser {
 
     fn parse_block<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> Result<(), OakError> {
         state.incremental_node(MojoElementType::Block.into(), |state| {
-            // 跳过冒号后的空格
+            // Skip spaces after colon
             self.skip_trivia(state);
-            // 必须有一个换行符
+            // Must have a newline
             state.expect(MojoTokenType::Newline)?;
-            // 之后可能有多个空行
+            // Multiple empty lines may follow
             while state.eat(MojoTokenType::Newline) {
                 self.skip_trivia(state);
             }
-            // 缩进开始
+            // Indent starts
             state.expect(MojoTokenType::Indent)?;
             while state.not_at_end() && !state.at(MojoTokenType::Dedent) {
                 self.skip_trivia(state);
@@ -211,7 +210,7 @@ impl MojoParser {
     }
 }
 
-impl Pratt<MojoLanguage> for MojoParser {
+impl<'config> Pratt<MojoLanguage> for MojoParser<'config> {
     fn primary<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> &'a GreenNode<'a, MojoLanguage> {
         self.skip_trivia(state);
         let cp = state.checkpoint();

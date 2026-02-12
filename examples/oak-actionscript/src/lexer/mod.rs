@@ -1,5 +1,6 @@
 #![doc = include_str!("readme.md")]
 use oak_core::Source;
+/// Token types for the ActionScript language.
 pub mod token_type;
 
 pub use token_type::ActionScriptTokenType;
@@ -11,13 +12,14 @@ use oak_core::{
 };
 use std::sync::LazyLock;
 
-type State<'a, S> = LexerState<'a, S, ActionScriptLanguage>;
+pub(crate) type State<'a, S> = LexerState<'a, S, ActionScriptLanguage>;
 
 static AS_WHITESPACE: LazyLock<WhitespaceConfig> = LazyLock::new(|| WhitespaceConfig { unicode_whitespace: true });
 static AS_COMMENT: LazyLock<CommentConfig> = LazyLock::new(|| CommentConfig { line_marker: "//", block_start: "/*", block_end: "*/", nested_blocks: true });
 static AS_STRING: LazyLock<StringConfig> = LazyLock::new(|| StringConfig { quotes: &['"'], escape: Some('\\') });
 static AS_CHAR: LazyLock<StringConfig> = LazyLock::new(|| StringConfig { quotes: &['\''], escape: Some('\\') });
 
+/// A lexer for the ActionScript language.
 #[derive(Clone)]
 pub struct ActionScriptLexer<'config> {
     _config: &'config ActionScriptLanguage,
@@ -35,11 +37,12 @@ impl<'config> Lexer<ActionScriptLanguage> for ActionScriptLexer<'config> {
 }
 
 impl<'config> ActionScriptLexer<'config> {
+    /// Creates a new ActionScript lexer with the given configuration.
     pub fn new(config: &'config ActionScriptLanguage) -> Self {
         Self { _config: config }
     }
 
-    /// 主要词法分析逻辑
+    /// Main lexical analysis logic
     fn run<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> Result<(), OakError> {
         while state.not_at_end() {
             let safe_point = state.get_position();
@@ -77,7 +80,7 @@ impl<'config> ActionScriptLexer<'config> {
         Ok(())
     }
 
-    /// 跳过空白字符
+    /// Skips whitespace characters
     fn skip_whitespace<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         AS_WHITESPACE.scan(state, ActionScriptTokenType::Whitespace)
     }

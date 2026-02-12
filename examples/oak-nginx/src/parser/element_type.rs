@@ -1,24 +1,32 @@
-use oak_core::{ElementType, Parser, UniversalElementRole};
-#[cfg(feature = "serde")]
-use serde::{Deserialize, Serialize};
+use oak_core::{ElementType, UniversalElementRole};
 
+/// Element types for Nginx configuration.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub enum NginxElementType {
+    /// The root of the configuration.
     Root,
+    /// A configuration directive.
     Directive,
+    /// A configuration block.
     Block,
+    /// A parameter within a directive.
     Parameter,
+    /// A value within a directive or parameter.
     Value,
+    /// A comment.
     Comment,
+    /// An error element.
     Error,
 }
 
 impl NginxElementType {
+    /// Returns true if the element type represents a structural element.
     pub fn is_element(&self) -> bool {
         matches!(self, Self::Root | Self::Directive | Self::Block | Self::Parameter | Self::Value | Self::Comment)
     }
 
+    /// Returns true if the element type represents a lexical token.
     pub fn is_token(&self) -> bool {
         !self.is_element()
     }

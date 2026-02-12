@@ -1,100 +1,219 @@
+//! Token types for the JASM language.
 use oak_core::{Token, TokenType, UniversalTokenRole};
-#[cfg(feature = "serde")]
-use serde::{Deserialize, Serialize};
 
+/// Type alias for a JASM token.
 pub type JasmToken = Token<JasmTokenType>;
 
+/// Token types for the JASM language.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 #[repr(u16)]
 pub enum JasmTokenType {
+    /// Root node.
     Root,
-    // 关键字
+    /// `class` keyword.
     ClassKw,
+    /// `version` keyword.
     VersionKw,
+    /// `method` keyword.
     MethodKw,
+    /// `field` keyword.
     FieldKw,
+    /// `string` keyword.
     StringKw,
+    /// `source_file` keyword.
     SourceFileKw,
+    /// `stack` keyword.
     StackKw,
+    /// `locals` keyword.
     LocalsKw,
+    /// `end` keyword.
     EndKw,
+    /// `compiled` keyword.
     CompiledKw,
+    /// `from` keyword.
     FromKw,
+    /// `inner_class` keyword.
     InnerClassKw,
+    /// `nest_members` keyword.
     NestMembersKw,
+    /// `bootstrap_method` keyword.
     BootstrapMethodKw,
 
-    // 访问修饰符
+    /// `public` access modifier.
     Public,
+    /// `private` access modifier.
     Private,
+    /// `protected` access modifier.
     Protected,
+    /// `static` modifier.
     Static,
+    /// `super` modifier.
     Super,
+    /// `final` modifier.
     Final,
+    /// `abstract` modifier.
     Abstract,
+    /// `synchronized` modifier.
     Synchronized,
+    /// `native` modifier.
     Native,
+    /// `synthetic` modifier.
     Synthetic,
+    /// `deprecated` modifier.
     Deprecated,
+    /// `varargs` modifier.
     Varargs,
 
-    // 字节码指令
+    /// `aload_0` instruction.
     ALoad0,
+    /// `aload_1` instruction.
     ALoad1,
+    /// `aload_2` instruction.
     ALoad2,
+    /// `aload_3` instruction.
     ALoad3,
+    /// `iload_0` instruction.
     ILoad0,
+    /// `iload_1` instruction.
     ILoad1,
+    /// `iload_2` instruction.
     ILoad2,
+    /// `iload_3` instruction.
     ILoad3,
+    /// `ldc` instruction.
     Ldc,
+    /// `ldc_w` instruction.
     LdcW,
+    /// `ldc2_w` instruction.
     Ldc2W,
+    /// `invokespecial` instruction.
     InvokeSpecial,
+    /// `invokevirtual` instruction.
     InvokeVirtual,
+    /// `invokestatic` instruction.
     InvokeStatic,
+    /// `invokeinterface` instruction.
     InvokeInterface,
+    /// `invokedynamic` instruction.
     InvokeDynamic,
+    /// `getstatic` instruction.
     GetStatic,
+    /// `putstatic` instruction.
     PutStatic,
+    /// `getfield` instruction.
     GetField,
+    /// `putfield` instruction.
     PutField,
-    Return,
-    IReturn,
-    AReturn,
-    LReturn,
-    FReturn,
-    DReturn,
-    Nop,
-    Dup,
-    Pop,
+    /// `new` instruction.
     New,
+    /// `checkcast` instruction.
+    CheckCast,
+    /// `instanceof` instruction.
+    InstanceOf,
+    /// `newarray` instruction.
+    NewArray,
+    /// `anewarray` instruction.
+    ANewArray,
+    /// `arraylength` instruction.
+    ArrayLength,
+    /// `athrow` instruction.
+    AThrow,
+    /// `monitorenter` instruction.
+    MonitorEnter,
+    /// `monitorexit` instruction.
+    MonitorExit,
+    /// `multianewarray` instruction.
+    MultiANewArray,
+    /// `ifnull` instruction.
+    IfNull,
+    /// `ifnonnull` instruction.
+    IfNonNull,
+    /// `goto` instruction.
+    Goto,
+    /// `goto_w` instruction.
+    GotoW,
+    /// `jsr` instruction.
+    Jsr,
+    /// `jsr_w` instruction.
+    JsrW,
+    /// `ret` instruction.
+    Ret,
+    /// `tableswitch` instruction.
+    TableSwitch,
+    /// `lookupswitch` instruction.
+    LookupSwitch,
+    /// `ireturn` instruction.
+    IReturn,
+    /// `lreturn` instruction.
+    LReturn,
+    /// `freturn` instruction.
+    FReturn,
+    /// `dreturn` instruction.
+    DReturn,
+    /// `areturn` instruction.
+    AReturn,
+    /// `return` instruction.
+    Return,
+    /// `bipush` instruction.
+    BiPush,
+    /// `sipush` instruction.
+    SiPush,
+    /// `iinc` instruction.
+    IInc,
+    /// `wide` instruction.
+    Wide,
+    /// `breakpoint` instruction.
+    BreakPoint,
+    /// `impdep1` instruction.
+    ImpDep1,
+    /// `impdep2` instruction.
+    ImpDep2,
+    /// `nop` instruction.
+    Nop,
+    /// `dup` instruction.
+    Dup,
+    /// `pop` instruction.
+    Pop,
 
-    // 字面量
-    StringLiteral,
-    Number,
-    IdentifierToken,
-    TypeDescriptor,
-
-    // 标点符号
+    /// Left brace `{`.
     LeftBrace,
+    /// Right brace `}`.
     RightBrace,
-    LeftParen,
-    RightParen,
+    /// Left bracket `[`.
     LeftBracket,
+    /// Right bracket `]`.
     RightBracket,
-    Colon,
-    Semicolon,
-    Dot,
+    /// Left parenthesis `(`.
+    LeftParen,
+    /// Right parenthesis `)`.
+    RightParen,
+    /// Comma `,`.
     Comma,
+    /// Colon `:`.
+    Colon,
+    /// Semicolon `;`.
+    Semicolon,
+    /// Equals `=`.
+    Eq,
+    /// Dot `.`.
+    Dot,
+    /// Slash `/`.
     Slash,
 
-    // 其他
-    Whitespace,
-    Newline,
+    /// Identifier.
+    Identifier,
+    /// String literal.
+    String,
+    /// Number literal.
+    Number,
+    /// Comment.
     Comment,
-    Error,
+    /// Whitespace.
+    Whitespace,
+    /// Newline.
+    Newline,
+    /// End of file.
     Eof,
 }
 
@@ -165,8 +284,8 @@ impl TokenType for JasmTokenType {
             | Self::Dup
             | Self::Pop
             | Self::New => Keyword,
-            Self::StringLiteral | Self::Number => Literal,
-            Self::IdentifierToken | Self::TypeDescriptor => Name,
+            Self::String | Self::Number => Literal,
+            Self::Identifier => Name,
             Self::LeftBrace | Self::RightBrace | Self::LeftParen | Self::RightParen | Self::LeftBracket | Self::RightBracket | Self::Colon | Self::Semicolon | Self::Dot | Self::Comma | Self::Slash => Punctuation,
             Self::Whitespace | Self::Newline => Whitespace,
             Self::Comment => Comment,

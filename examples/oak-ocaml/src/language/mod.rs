@@ -1,14 +1,14 @@
 #![doc = include_str!("readme.md")]
 use crate::ast::OCamlRoot;
 use oak_core::{Language, LanguageCategory};
-#[cfg(feature = "serde")]
-use serde::{Deserialize, Serialize};
 
+/// The OCaml language definition.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Default)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct OCamlLanguage {}
 
 impl OCamlLanguage {
+    /// Create a new OCaml language definition.
     pub fn new() -> Self {
         Self {}
     }

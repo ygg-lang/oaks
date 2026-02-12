@@ -1,12 +1,10 @@
 use core::range::Range;
-#[cfg(feature = "serde")]
-use serde::{Deserialize, Serialize};
 
 /// Represents the provenance of a token, describing how its text was composed.
 ///
 /// This is used for advanced IDE features like renaming synthetic identifiers.
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct TokenProvenance {
     /// The parts that compose this token's text.
     pub parts: Vec<ProvenancePart>,
@@ -14,7 +12,7 @@ pub struct TokenProvenance {
 
 /// A single component of a token's provenance.
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub enum ProvenancePart {
     /// Part of the text comes directly from a source range.
     Source(#[cfg_attr(feature = "serde", serde(with = "crate::serde_range"))] Range<usize>),

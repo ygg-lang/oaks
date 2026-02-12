@@ -4,13 +4,16 @@ use crate::{
     lexer::token_type::LLvmTokenType,
     parser::{LLirParser, element_type::LLvmElementType},
 };
-use oak_core::{Builder, BuilderCache, GreenNode, GreenTree, OakDiagnostics, OakError, Parser, TextEdit, source::Source};
+use oak_core::{Builder, BuilderCache, OakDiagnostics, OakError, Parser, RedNode, RedTree, SourceText, TextEdit, source::Source};
 
+/// A builder for converting LLVM IR green trees into an AST.
 pub struct LLirBuilder<'config> {
-    config: &'config LLvmLanguage,
+    /// Language configuration.
+    pub config: &'config LLvmLanguage,
 }
 
 impl<'config> LLirBuilder<'config> {
+    /// Creates a new `LLirBuilder` with the given configuration.
     pub fn new(config: &'config LLvmLanguage) -> Self {
         Self { config }
     }
@@ -22,89 +25,79 @@ impl<'config> Builder<LLvmLanguage> for LLirBuilder<'config> {
         let parse_result = parser.parse(source, edits, cache);
 
         match parse_result.result {
-            Ok(green_tree) => match self.build_root(green_tree, source) {
-                Ok(ast_root) => OakDiagnostics { result: Ok(ast_root), diagnostics: parse_result.diagnostics },
-                Err(build_error) => {
-                    let mut diagnostics = parse_result.diagnostics;
-                    diagnostics.push(build_error.clone());
-                    OakDiagnostics { result: Err(build_error), diagnostics }
+            Ok(green_tree) => {
+                let source_text = SourceText::new(source.get_text_in((0..source.length()).into()).into_owned());
+                match self.build_root(RedNode::new(&green_tree, 0), &source_text) {
+                    Ok(ast_root) => OakDiagnostics { result: Ok(ast_root), diagnostics: parse_result.diagnostics },
+                    Err(build_error) => {
+                        let mut diagnostics = parse_result.diagnostics;
+                        diagnostics.push(build_error.clone());
+                        OakDiagnostics { result: Err(build_error), diagnostics }
+                    }
                 }
-            },
+            }
             Err(parse_error) => OakDiagnostics { result: Err(parse_error), diagnostics: parse_result.diagnostics },
         }
     }
 }
 
 impl<'config> LLirBuilder<'config> {
-    fn build_root<S: Source + ?Sized>(&self, green_tree: &GreenNode<LLvmLanguage>, source: &S) -> Result<LLirRoot, OakError> {
+    fn build_root(&self, node: RedNode<LLvmLanguage>, source: &SourceText) -> Result<LLirRoot, OakError> {
         let mut items = vec![];
-        let mut offset = 0;
-        for child in green_tree.children() {
-            let len = child.len() as usize;
-            if let GreenTree::Node(node) = child {
-                if node.kind() == LLvmElementType::Item {
-                    let mut item_offset = offset;
+        for child in node.children() {
+            if let RedTree::Node(node) = child {
+                if node.kind::<LLvmElementType>() == LLvmElementType::Item {
                     for item_child in node.children() {
-                        let item_len = item_child.len() as usize;
-                        if let GreenTree::Node(item_node) = item_child {
-                            match item_node.kind() {
+                        if let RedTree::Node(item_node) = item_child {
+                            match item_node.kind::<LLvmElementType>() {
                                 LLvmElementType::Global => {
-                                    items.push(LLirItem::Global(self.build_global(item_node, source, item_offset)?));
+                                    items.push(LLirItem::Global(self.build_global(item_node, source)?));
                                 }
                                 LLvmElementType::Function => {
-                                    items.push(LLirItem::Function(self.build_function(item_node, source, item_offset)?));
+                                    items.push(LLirItem::Function(self.build_function(item_node, source)?));
                                 }
                                 _ => {}
                             }
                         }
-                        item_offset += item_len;
                     }
                 }
             }
-            offset += len;
         }
 
-        Ok(LLirRoot { items, span: (0..green_tree.text_len() as usize).into() })
+        Ok(LLirRoot { items, span: node.span() })
     }
 
-    fn build_global<S: Source + ?Sized>(&self, green_node: &GreenNode<LLvmLanguage>, source: &S, mut offset: usize) -> Result<LLirGlobal, OakError> {
+    fn build_global(&self, node: RedNode<LLvmLanguage>, source: &SourceText) -> Result<LLirGlobal, OakError> {
         let mut name = String::new();
         let mut ty = String::new();
         let mut value = String::new();
         let mut is_constant = false;
 
-        for child in green_node.children() {
-            let len = child.len() as usize;
+        for child in node.children() {
             match child {
-                GreenTree::Leaf(leaf) => {
-                    let text = source.get_text_in((offset..offset + len).into());
-                    match leaf.kind() {
+                RedTree::Leaf(leaf) => {
+                    let text = source.get_text_in(leaf.span());
+                    match leaf.kind {
                         LLvmTokenType::GlobalVar => {
                             name = text.trim_start_matches('@').to_string();
                         }
                         LLvmTokenType::Keyword => {
-                            if text == "constant" {
-                                is_constant = true;
+                            if text == "global" || text == "constant" {
+                                is_constant = text == "constant";
                             }
                         }
                         _ => {}
                     }
                 }
-                GreenTree::Node(node) => {
-                    if node.kind() == LLvmElementType::Identifier {
-                        let text = source.get_text_in((offset..offset + len).into());
-                        // Simple split by space to get type and value
-                        let parts: Vec<&str> = text.split_whitespace().collect();
-                        if parts.len() >= 1 {
-                            ty = parts[0].to_string();
-                        }
-                        if parts.len() >= 2 {
-                            value = parts[1..].join(" ");
-                        }
+                RedTree::Node(node) => {
+                    if node.kind::<LLvmElementType>() == LLvmElementType::Type {
+                        ty = source.get_text_in(node.span()).trim().to_string();
+                    }
+                    else if node.kind::<LLvmElementType>() == LLvmElementType::Identifier {
+                        value = source.get_text_in(node.span()).trim().to_string();
                     }
                 }
             }
-            offset += len;
         }
 
         if name.is_empty() {
@@ -114,110 +107,126 @@ impl<'config> LLirBuilder<'config> {
         Ok(LLirGlobal { name, ty, value, is_constant })
     }
 
-    fn build_function<S: Source + ?Sized>(&self, green_node: &GreenNode<LLvmLanguage>, source: &S, mut offset: usize) -> Result<LLirFunction, OakError> {
+    fn build_function(&self, node: RedNode<LLvmLanguage>, source: &SourceText) -> Result<LLirFunction, OakError> {
         let mut name = String::new();
         let mut return_type = String::new();
         let mut parameters = vec![];
         let mut blocks = vec![];
 
-        for child in green_node.children() {
-            let len = child.len() as usize;
+        for child in node.children() {
             match child {
-                GreenTree::Leaf(leaf) => {
-                    let text = source.get_text_in((offset..offset + len).into());
-                    match leaf.kind() {
+                RedTree::Leaf(leaf) => {
+                    let text = source.get_text_in(leaf.span());
+                    match leaf.kind {
                         LLvmTokenType::GlobalVar => {
                             name = text.trim_start_matches('@').to_string();
                         }
                         _ => {}
                     }
                 }
-                GreenTree::Node(node) => {
-                    match node.kind() {
-                        LLvmElementType::Identifier if return_type.is_empty() => {
-                            return_type = source.get_text_in((offset..offset + len).into()).trim().to_string();
-                        }
-                        LLvmElementType::Parameter => {
-                            let mut p_offset = offset;
-                            for p_child in node.children() {
-                                let p_len = p_child.len() as usize;
-                                if let GreenTree::Node(p_node) = p_child {
-                                    if p_node.kind() == LLvmElementType::Parameter {
-                                        let p_text = source.get_text_in((p_offset..p_offset + p_len).into()).trim().to_string();
-                                        if !p_text.is_empty() {
-                                            // Split parameter into type and name
-                                            let parts: Vec<&str> = p_text.split_whitespace().collect();
-                                            if parts.len() >= 2 {
-                                                parameters.push(LLirParameter { ty: parts[0].to_string(), name: parts[1].trim_start_matches('%').to_string() });
-                                            }
-                                            else {
-                                                parameters.push(LLirParameter { ty: p_text.clone(), name: "".to_string() });
-                                            }
-                                        }
-                                    }
-                                }
-                                p_offset += p_len;
-                            }
-                        }
-                        LLvmElementType::Block => {
-                            let mut b_offset = offset;
-                            let mut instructions = vec![];
-                            let mut label = None;
+                RedTree::Node(node) => match node.kind::<LLvmElementType>() {
+                    LLvmElementType::Type if return_type.is_empty() => {
+                        return_type = source.get_text_in(node.span()).trim().to_string();
+                    }
+                    LLvmElementType::Parameter => {
+                        let mut p_ty = String::new();
+                        let mut p_name = String::new();
 
-                            for b_child in node.children() {
-                                let b_len = b_child.len() as usize;
-                                match b_child {
-                                    GreenTree::Leaf(leaf) => {
-                                        let text = source.get_text_in((b_offset..b_offset + b_len).into());
-                                        match leaf.kind() {
-                                            LLvmTokenType::Keyword if label.is_none() => {
-                                                label = Some(text.to_string());
+                        for inner_child in node.children() {
+                            match inner_child {
+                                RedTree::Node(inner_node) if inner_node.kind::<LLvmElementType>() == LLvmElementType::Type => {
+                                    p_ty = source.get_text_in(inner_node.span()).trim().to_string();
+                                }
+                                RedTree::Leaf(inner_leaf) if inner_leaf.kind == LLvmTokenType::LocalVar => {
+                                    p_name = source.get_text_in(inner_leaf.span()).trim_start_matches('%').to_string();
+                                }
+                                _ => {}
+                            }
+                        }
+
+                        if !p_ty.is_empty() {
+                            parameters.push(LLirParameter { ty: p_ty, name: p_name });
+                        }
+                    }
+                    LLvmElementType::Block => {
+                        let mut instructions = vec![];
+                        let mut label = None;
+
+                        for b_child in node.children() {
+                            match b_child {
+                                RedTree::Leaf(leaf) => {
+                                    let text = source.get_text_in(leaf.span());
+                                    if (leaf.kind == LLvmTokenType::Identifier || leaf.kind == LLvmTokenType::LocalVar || leaf.kind == LLvmTokenType::Number || leaf.kind == LLvmTokenType::Keyword) && label.is_none() {
+                                        // Check if the next token is a colon to be sure it's a label
+                                        let mut is_label = false;
+                                        let mut children = node.children();
+                                        while let Some(c) = children.next() {
+                                            if let RedTree::Leaf(l) = c {
+                                                if l.span == leaf.span {
+                                                    if let Some(RedTree::Leaf(next_l)) = children.next() {
+                                                        if next_l.kind == LLvmTokenType::Colon {
+                                                            is_label = true;
+                                                        }
+                                                    }
+                                                    break;
+                                                }
                                             }
-                                            LLvmTokenType::Colon => {
-                                                // Keep the label if we found it
-                                            }
-                                            _ => {}
                                         }
-                                    }
-                                    GreenTree::Node(b_node) => {
-                                        if b_node.kind() == LLvmElementType::Instruction {
-                                            let inst_text = source.get_text_in((b_offset..b_offset + b_len).into()).trim().to_string();
-                                            if !inst_text.is_empty() {
-                                                // Simple instruction parsing: result = opcode operands
-                                                if inst_text.contains('=') {
-                                                    let parts: Vec<&str> = inst_text.splitn(2, '=').collect();
-                                                    let result = Some(parts[0].trim().trim_start_matches('%').to_string());
-                                                    let rest = parts[1].trim();
-                                                    let rest_parts: Vec<&str> = rest.split_whitespace().collect();
-                                                    if !rest_parts.is_empty() {
-                                                        let opcode = rest_parts[0].to_string();
-                                                        let operands = rest_parts[1..].iter().map(|s| s.trim_matches(',').to_string()).collect();
-                                                        instructions.push(LLirInstruction { result, opcode, operands });
-                                                    }
-                                                }
-                                                else {
-                                                    let parts: Vec<&str> = inst_text.split_whitespace().collect();
-                                                    if !parts.is_empty() {
-                                                        let opcode = parts[0].to_string();
-                                                        let operands = parts[1..].iter().map(|s| s.trim_matches(',').to_string()).collect();
-                                                        instructions.push(LLirInstruction { result: None, opcode, operands });
-                                                    }
-                                                }
-                                            }
+
+                                        if is_label {
+                                            label = Some(text.trim_end_matches(':').to_string());
                                         }
                                     }
                                 }
-                                b_offset += b_len;
+                                RedTree::Node(b_node) => {
+                                    if b_node.kind::<LLvmElementType>() == LLvmElementType::Instruction {
+                                        instructions.push(self.build_instruction(b_node, source)?);
+                                    }
+                                }
                             }
-                            blocks.push(LLirBlock { label, instructions });
                         }
-                        _ => {}
+                        blocks.push(LLirBlock { label, instructions });
+                    }
+                    _ => {}
+                },
+            }
+        }
+
+        Ok(LLirFunction { name, return_type, parameters, blocks, span: node.span() })
+    }
+
+    fn build_instruction(&self, node: RedNode<LLvmLanguage>, source: &SourceText) -> Result<LLirInstruction, OakError> {
+        let mut result = None;
+        let mut opcode = String::new();
+        let mut operands = vec![];
+
+        for i_child in node.children() {
+            if let RedTree::Leaf(leaf) = i_child {
+                let text = source.get_text_in(leaf.span()).trim().to_string();
+                if !text.is_empty() {
+                    match leaf.kind {
+                        LLvmTokenType::LocalVar if result.is_none() && opcode.is_empty() => {
+                            result = Some(text.trim_start_matches('%').to_string());
+                        }
+                        LLvmTokenType::Keyword | LLvmTokenType::Identifier if opcode.is_empty() => {
+                            opcode = text;
+                        }
+                        LLvmTokenType::Equal | LLvmTokenType::Comma => {}
+                        _ => {
+                            if !opcode.is_empty() {
+                                operands.push(text);
+                            }
+                        }
                     }
                 }
             }
-            offset += len;
         }
 
-        Ok(LLirFunction { name, return_type, parameters, blocks, span: (0..green_node.text_len() as usize).into() })
+        if opcode.is_empty() {
+            // Fallback for metadata or other weird instructions
+            opcode = source.get_text_in(node.span()).trim().to_string();
+        }
+
+        Ok(LLirInstruction { result, opcode, operands })
     }
 }

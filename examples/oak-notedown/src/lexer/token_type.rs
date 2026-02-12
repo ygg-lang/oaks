@@ -1,121 +1,176 @@
-use oak_core::{Source, Token, TokenType, UniversalElementRole, UniversalTokenRole};
-#[cfg(feature = "serde")]
-use serde::{Deserialize, Serialize};
+use oak_core::{Token, TokenType, UniversalTokenRole};
 
+/// Token type for Notedown
 pub type NoteToken = Token<NoteTokenType>;
 
 impl TokenType for NoteTokenType {
     type Role = UniversalTokenRole;
-    const END_OF_STREAM: Self = Self::Error;
+    const END_OF_STREAM: Self = Self::Eof;
 
     fn is_ignored(&self) -> bool {
-        false
+        matches!(self, Self::Whitespace)
     }
 
     fn role(&self) -> Self::Role {
         match self {
+            Self::Whitespace | Self::Newline => UniversalTokenRole::Whitespace,
+            Self::Text => UniversalTokenRole::None,
+            Self::Eof => UniversalTokenRole::Eof,
+            Self::Error => UniversalTokenRole::Error,
             _ => UniversalTokenRole::None,
         }
     }
 }
 
+/// Enum representing all possible token types in Notedown
 #[derive(Copy, Clone, Debug, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 #[repr(u8)]
 pub enum NoteTokenType {
-    // 基础文本
+    /// Plain text
     Text,
+    /// Whitespace characters
     Whitespace,
+    /// Newline characters
     Newline,
 
-    // 标题
+    /// Level 1 heading marker (#)
     Heading1,
+    /// Level 2 heading marker (##)
     Heading2,
+    /// Level 3 heading marker (###)
     Heading3,
+    /// Level 4 heading marker (####)
     Heading4,
+    /// Level 5 heading marker (#####)
     Heading5,
+    /// Level 6 heading marker (######)
     Heading6,
+    /// Text content within a heading
     HeadingText,
 
-    // 强调和加
-    Emphasis,      // *text* or _text_
-    Strong,        // **text** or __text__
-    Strikethrough, // ~~text~~
+    /// Emphasized text marker (* or _)
+    Emphasis,
+    /// Strong text marker (** or __)
+    Strong,
+    /// Strikethrough text marker (~~)
+    Strikethrough,
 
-    // 代码
-    InlineCode,   // `code`
-    CodeBlock,    // ```code```
-    CodeFence,    // ``` or ~~~
-    CodeLanguage, // language identifier in code block
+    /// Inline code marker (`)
+    InlineCode,
+    /// Entire code block
+    CodeBlock,
+    /// Code block fence (``` or ~~~)
+    CodeFence,
+    /// Language identifier in a code block
+    CodeLanguage,
 
-    // 链接和图
+    /// Link marker ([)
     Link,
+    /// Text within a link
     LinkText,
+    /// URL of a link
     LinkUrl,
+    /// Title attribute of a link
     LinkTitle,
+    /// Image marker (![)
     Image,
+    /// Alt text of an image
     ImageAlt,
+    /// URL of an image
     ImageUrl,
+    /// Title attribute of an image
     ImageTitle,
 
-    // 列表
+    /// Unordered list container
     UnorderedList,
+    /// Ordered list container
     OrderedList,
+    /// Single list item
     ListItem,
-    ListMarker, // -, *, +, 1., 2., etc.
+    /// List marker (-, *, +, 1., etc.)
+    ListMarker,
+    /// Task list container
     TaskList,
-    TaskMarker, // [x] or [ ]
+    /// Task list marker ([ ] or [x])
+    TaskMarker,
 
-    // 引用
+    /// Blockquote container
     Blockquote,
-    BlockquoteMarker, // >
+    /// Blockquote marker (>)
+    BlockquoteMarker,
 
-    // 分隔
-    HorizontalRule, // --- or *** or ___
+    /// Horizontal rule (---, ***, ___)
+    HorizontalRule,
 
-    // 表格
+    /// Table container
     Table,
+    /// Table row
     TableRow,
+    /// Table cell
     TableCell,
+    /// Table header cell
     TableHeader,
-    TableSeparator, // |
-    TableAlignment, // :---, :---:, ---:
+    /// Table separator (|)
+    TableSeparator,
+    /// Table alignment marker (:---, :---:, ---:)
+    TableAlignment,
 
-    // HTML
+    /// HTML tag
     HtmlTag,
+    /// HTML comment
     HtmlComment,
 
-    // 转义字符
-    Escape, // \
+    /// Escape character (\)
+    Escape,
 
-    // 特殊字符
-    LeftBracket,  // [
-    RightBracket, // ]
-    LeftParen,    // (
-    RightParen,   // )
-    LeftAngle,    // <
-    RightAngle,   // >
-    Asterisk,     // *
-    Underscore,   // _
-    Backtick,     // `
-    Tilde,        // ~
-    Hash,         // #
-    Pipe,         // |
-    Dash,         // -
-    Plus,         // +
-    Dot,          // .
-    Colon,        // :
-    Exclamation,  // !
+    /// Left bracket ([)
+    LeftBracket,
+    /// Right bracket (])
+    RightBracket,
+    /// Left parenthesis (()
+    LeftParen,
+    /// Right parenthesis ())
+    RightParen,
+    /// Left angle bracket (<)
+    LeftAngle,
+    /// Right angle bracket (>)
+    RightAngle,
+    /// Asterisk (*)
+    Asterisk,
+    /// Underscore (_)
+    Underscore,
+    /// Backtick (`)
+    Backtick,
+    /// Tilde (~)
+    Tilde,
+    /// Hash marker (#)
+    Hash,
+    /// Pipe separator (|)
+    Pipe,
+    /// Dash or hyphen (-)
+    Dash,
+    /// Plus sign (+)
+    Plus,
+    /// Dot or period (.)
+    Dot,
+    /// Colon (:)
+    Colon,
+    /// Exclamation mark (!)
+    Exclamation,
 
-    // 错误处理
+    /// Error token
     Error,
 
-    // 文档结构
+    /// Root node
     Root,
+    /// Document node
     Document,
+    /// Paragraph node
     Paragraph,
+    /// Metadata section
     Metadata,
 
-    // EOF
+    /// End of file
     Eof,
 }

@@ -35,6 +35,7 @@ pub struct NginxLanguageService<V: Vfs> {
     hover_provider: NginxHoverProvider,
 }
 impl<V: Vfs> NginxLanguageService<V> {
+    /// Creates a new Nginx language service with the given VFS.
     pub fn new(vfs: V) -> Self {
         Self { vfs, workspace: oak_lsp::workspace::WorkspaceManager::default(), hover_provider: NginxHoverProvider }
     }

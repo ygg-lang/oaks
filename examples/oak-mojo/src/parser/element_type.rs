@@ -1,10 +1,8 @@
 use crate::lexer::MojoTokenType;
 use oak_core::UniversalElementRole;
-#[cfg(feature = "serde")]
-use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub enum MojoElementType {
     // Tokens (mapped from MojoTokenType)
     Fn,
@@ -93,7 +91,7 @@ pub enum MojoElementType {
 }
 
 impl MojoElementType {
-    /// 是否为琐碎节点（空白、注释等）
+    /// Checks if the node is trivia (whitespace, comments, etc.).
     pub fn is_trivia(&self) -> bool {
         matches!(self, MojoElementType::Whitespace | MojoElementType::Newline | MojoElementType::Comment)
     }

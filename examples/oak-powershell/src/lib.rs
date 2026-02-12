@@ -16,6 +16,7 @@ pub mod lsp;
 #[cfg(feature = "mcp")]
 pub mod mcp;
 
+/// Parser module.
 pub mod parser;
 
 pub use crate::{ast::PowerShellRoot, builder::PowerShellBuilder, language::PowerShellLanguage, lexer::token_type::PowerShellTokenType, parser::PowerShellParser};

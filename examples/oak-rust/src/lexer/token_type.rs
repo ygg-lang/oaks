@@ -1,13 +1,11 @@
 use oak_core::{Token, TokenType, UniversalTokenRole};
-#[cfg(feature = "serde")]
-use serde::{Deserialize, Serialize};
 
 /// A token in the Rust programming language.
 pub type RustToken = Token<RustTokenType>;
 
 /// Rust token types.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub enum RustTokenType {
     /// `as`
     As,
@@ -251,6 +249,8 @@ pub enum RustTokenType {
     LeftShiftEq,
     /// `>>=`
     RightShiftEq,
+    /// `_`
+    Underscore,
     /// `=`
     Assign,
     /// `+=`
@@ -295,7 +295,7 @@ pub enum RustTokenType {
     MinusMinus,
     /// End of stream
     Eof,
-    /// Error token
+    /// Error
     Error,
 }
 

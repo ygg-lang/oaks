@@ -2,7 +2,7 @@
 name = "oak-cobol"
 version.workspace = true
 authors.workspace = true
-description = "High-performance incremental COBOL parser for the oak ecosystem with flexible configuration, supporting legacy and modern COBOL features."
+description = "High-performance incremental COBOL parser for the oak ecosystem with flexible configuration."
 edition.workspace = true
 license.workspace = true
 readme = "readme.md"
@@ -10,19 +10,20 @@ homepage.workspace = true
 repository = "https://github.com/ygg-lang/oaks/tree/master/examples/oak-cobol"
 documentation = "https://docs.rs/oak-cobol"
 categories = ["parsing"]
-keywords = ["parser", "cobol", "mainframe", "syntax-analysis"]
+keywords = ["parser", "cobol", "classic", "legacy"]
 
 [dependencies]
 oak-core = { workspace = true }
-serde = { workspace = true, optional = true }
 oak-highlight = { workspace = true, optional = true }
 oak-pretty-print = { workspace = true, optional = true }
-
 oak-lsp = { workspace = true, optional = true }
 oak-hover = { workspace = true, optional = true }
 oak-vfs = { workspace = true, optional = true }
 oak-mcp = { workspace = true, optional = true }
+serde = { workspace = true, optional = true }
 futures = { workspace = true, optional = true }
+tracing = { workspace = true }
+tokio = { workspace = true, optional = true }
 
 [dev-dependencies]
 oak-testing = { workspace = true }
@@ -30,8 +31,6 @@ oak-testing = { workspace = true }
 [features]
 default = ["serde"]
 serde = ["dep:serde", "oak-core/serde"]
-oak-highlight = ["dep:oak-highlight"]
-oak-pretty-print = ["dep:oak-pretty-print"]
 lsp = ["dep:oak-lsp", "dep:oak-hover", "dep:oak-vfs", "oak-highlight", "oak-pretty-print", "dep:futures"]
 mcp = ["lsp", "oak-mcp/io-std"]
 

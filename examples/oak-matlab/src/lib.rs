@@ -6,6 +6,7 @@
 //! Matlab support for the Oak language framework.
 
 pub mod ast;
+/// Matlab AST building module
 pub mod builder;
 
 pub mod language;
@@ -16,6 +17,7 @@ pub mod lsp;
 #[cfg(feature = "mcp")]
 pub mod mcp;
 
+/// Matlab parsing module
 pub mod parser;
 
 pub use crate::{

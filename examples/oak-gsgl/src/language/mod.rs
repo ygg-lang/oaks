@@ -3,16 +3,14 @@
 //!
 //! Defines the core structure for GSGL language, implementing oak-core's Language trait.
 use oak_core::{Language, LanguageCategory};
-#[cfg(feature = "serde")]
-#[cfg(feature = "serde")]
-use serde::{Deserialize, Serialize};
 
 /// GSGL language definition.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Default)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GsglLanguage {}
 
 impl GsglLanguage {
+    /// Creates a new `GsglLanguage`.
     pub fn new() -> Self {
         Self {}
     }
@@ -24,5 +22,5 @@ impl Language for GsglLanguage {
 
     type TokenType = crate::lexer::token_type::GsglTokenType;
     type ElementType = crate::parser::element_type::GsglElementType;
-    type TypedRoot = ();
+    type TypedRoot = crate::ast::GsglRoot;
 }

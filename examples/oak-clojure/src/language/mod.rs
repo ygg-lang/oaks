@@ -1,5 +1,4 @@
 #![doc = include_str!("readme.md")]
-use crate::{lexer::ClojureTokenType, parser::ClojureElementType};
 use oak_core::{Language, LanguageCategory};
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Default)]

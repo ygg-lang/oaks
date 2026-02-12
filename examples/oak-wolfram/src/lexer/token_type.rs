@@ -1,8 +1,7 @@
 use oak_core::{Token, TokenType, UniversalTokenRole};
-#[cfg(feature = "serde")]
-use serde::{Deserialize, Serialize};
 use std::fmt;
 
+/// A token in the Wolfram language.
 pub type WolframToken = Token<WolframTokenType>;
 
 impl fmt::Display for WolframTokenType {
@@ -24,134 +23,222 @@ impl TokenType for WolframTokenType {
     }
 }
 
+/// Token types for the Wolfram language.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub enum WolframTokenType {
+    /// The root token.
     Root,
 
-    // 基础 tokens
+    // Base tokens
+    /// Whitespace.
     Whitespace,
+    /// A newline character.
     Newline,
 
-    // 标识符和字面量
+    // Identifiers and literals
+    /// An identifier.
     Identifier,
+    /// An integer literal.
     Integer,
+    /// A real number literal.
     Real,
+    /// A string literal.
     String,
 
-    // 关键字
+    // Keywords
+    /// `If` keyword.
     If,
+    /// `Then` keyword.
     Then,
+    /// `Else` keyword.
     Else,
+    /// `While` keyword.
     While,
+    /// `For` keyword.
     For,
+    /// `Do` keyword.
     Do,
+    /// `Function` keyword.
     Function,
+    /// `Module` keyword.
     Module,
+    /// `Block` keyword.
     Block,
+    /// `With` keyword.
     With,
+    /// `Table` keyword.
     Table,
+    /// `Map` keyword.
     Map,
+    /// `Apply` keyword.
     Apply,
+    /// `Select` keyword.
     Select,
+    /// `Cases` keyword.
     Cases,
+    /// `Rule` keyword.
     Rule,
+    /// `RuleDelayed` keyword.
     RuleDelayed,
+    /// `Set` keyword.
     Set,
+    /// `SetDelayed` keyword.
     SetDelayed,
+    /// `Unset` keyword.
     Unset,
+    /// `Clear` keyword.
     Clear,
+    /// `ClearAll` keyword.
     ClearAll,
+    /// `Return` keyword.
     Return,
+    /// `Break` keyword.
     Break,
+    /// `Continue` keyword.
     Continue,
+    /// `True` keyword.
     True,
+    /// `False` keyword.
     False,
+    /// `Null` keyword.
     Null,
+    /// `Export` keyword.
     Export,
+    /// `Import` keyword.
     Import,
 
-    // 运算符
-    Plus,         // +
-    Minus,        // -
-    Times,        // *
-    Divide,       // /
-    Power,        // ^
-    Equal,        // ==
-    NotEqual,     // !=
-    Less,         // <
-    Greater,      // >
-    LessEqual,    // <=
-    GreaterEqual, // >=
-    And,          // &&
-    Or,           // ||
-    Not,          // !
+    // Operators
+    /// `+`.
+    Plus,
+    /// `-`.
+    Minus,
+    /// `*`.
+    Times,
+    /// `/`.
+    Divide,
+    /// `^`.
+    Power,
+    /// `==`.
+    Equal,
+    /// `!=`.
+    NotEqual,
+    /// `<`.
+    Less,
+    /// `>`.
+    Greater,
+    /// `<=`.
+    LessEqual,
+    /// `>=`.
+    GreaterEqual,
+    /// `&&`.
+    And,
+    /// `||`.
+    Or,
+    /// `!`.
+    Not,
 
-    // 函数式运算符
-    At,                 // @
-    SlashSlash,         // //
-    MapOperator,        // /@
-    ApplyOperator,      // @@
-    ApplyLevelOperator, // @@@
-    MapAllOperator,     // //@
-    Ampersand,          // &
-    AtStar,             // @*
-    StarSlash,          // /*
-    StringJoin,         // <>
-    RuleDelayedOp,      // :>
+    // Functional operators
+    /// `@`.
+    At,
+    /// `//`.
+    SlashSlash,
+    /// `/@`.
+    MapOperator,
+    /// `@@`.
+    ApplyOperator,
+    /// `@@@`.
+    ApplyLevelOperator,
+    /// `//@`.
+    MapAllOperator,
+    /// `&`.
+    Ampersand,
+    /// `@*`.
+    AtStar,
+    /// `/*`.
+    StarSlash,
+    /// `<>`.
+    StringJoin,
+    /// `:>`.
+    RuleDelayedOp,
 
-    // 赋值运算符
-    Assign,       // =
-    AddTo,        // +=
-    SubtractFrom, // -=
-    TimesBy,      // *=
-    DivideBy,     // /=
+    // Assignment operators
+    /// `=`.
+    Assign,
+    /// `+=`.
+    AddTo,
+    /// `-=`.
+    SubtractFrom,
+    /// `*=`.
+    TimesBy,
+    /// `/=`.
+    DivideBy,
 
-    // 分隔符
-    LeftParen,    // (
-    RightParen,   // )
-    LeftBracket,  // [
-    RightBracket, // ]
-    LeftBrace,    // {
-    RightBrace,   // }
-    Comma,        // ,
-    Semicolon,    // ;
-    Colon,        // :
-    Dot,          // .
+    // Delimiters
+    /// `(`.
+    LeftParen,
+    /// `)`.
+    RightParen,
+    /// `[`.
+    LeftBracket,
+    /// `]`.
+    RightBracket,
+    /// `{`.
+    LeftBrace,
+    /// `}`.
+    RightBrace,
+    /// `,`.
+    Comma,
+    /// `;`.
+    Semicolon,
+    /// `:`.
+    Colon,
+    /// `.`.
+    Dot,
 
-    // 特殊符号
-    Arrow,            // ->
-    DoubleArrow,      // =>
-    Question,         // ?
-    Underscore,       // _
-    DoubleUnderscore, // __
-    TripleUnderscore, // ___
-    Slot,             // #
-    SlotSequence,     // ##
-    Factorial,        // ! (postfix)
+    // Special symbols
+    /// `->`.
+    Arrow,
+    /// `=>`.
+    DoubleArrow,
+    /// `?`.
+    Question,
+    /// `_`.
+    Underscore,
+    /// `__`.
+    DoubleUnderscore,
+    /// `___`.
+    TripleUnderscore,
+    /// `#`.
+    Slot,
+    /// `##`.
+    SlotSequence,
+    /// `!`.
+    Factorial,
 
-    // 注释
+    // Comments
+    /// A comment.
     Comment,
 
-    // 文本
+    // Text
+    /// Plain text.
     Text,
 
-    // 错误处理
+    /// An error token.
     Error,
-
-    // EOF
+    /// End of stream.
     Eof,
 }
 
 impl WolframTokenType {
+    /// Returns the universal token role for this token type.
     pub fn role(&self) -> UniversalTokenRole {
         match self {
-            Self::Whitespace => UniversalTokenRole::Whitespace,
-            Self::Newline => UniversalTokenRole::Whitespace, // Map Newline to Whitespace as it's not in UniversalTokenRole
+            Self::Whitespace | Self::Newline => UniversalTokenRole::Whitespace,
             Self::Comment => UniversalTokenRole::Comment,
-            Self::Identifier => UniversalTokenRole::Name, // Use Name instead of Identifier
+            Self::Identifier => UniversalTokenRole::Name,
             Self::Integer | Self::Real => UniversalTokenRole::Literal,
-            Self::String => UniversalTokenRole::Literal, // Map String to Literal as String is not in UniversalTokenRole
+            Self::String => UniversalTokenRole::Literal,
             Self::LeftParen | Self::LeftBracket | Self::LeftBrace => UniversalTokenRole::Punctuation,
             Self::RightParen | Self::RightBracket | Self::RightBrace => UniversalTokenRole::Punctuation,
             Self::Comma | Self::Semicolon | Self::Colon | Self::Dot => UniversalTokenRole::Punctuation,
@@ -225,6 +312,7 @@ impl WolframTokenType {
             | Self::Export
             | Self::Import => UniversalTokenRole::Keyword,
             Self::Eof => UniversalTokenRole::Eof,
+            Self::Error => UniversalTokenRole::Error,
             _ => UniversalTokenRole::None,
         }
     }

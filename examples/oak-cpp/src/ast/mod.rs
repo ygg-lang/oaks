@@ -1,14 +1,12 @@
 #![doc = include_str!("readme.md")]
 use core::range::Range;
-#[cfg(feature = "serde")]
-use serde::{Deserialize, Serialize};
 
 /// Type alias for source span.
 type SourceSpan = Range<usize>;
 
 /// C++ language abstract syntax tree root.
 #[derive(Debug, Clone, PartialEq)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct CppRoot {
     /// Translation unit.
     pub translation_unit: TranslationUnit,
@@ -16,7 +14,7 @@ pub struct CppRoot {
 
 /// Translation unit (top-level structure of a C++ program).
 #[derive(Debug, Clone, PartialEq)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct TranslationUnit {
     /// List of external declarations.
     pub external_declarations: Vec<ExternalDeclaration>,
@@ -27,7 +25,7 @@ pub struct TranslationUnit {
 
 /// External declaration.
 #[derive(Debug, Clone, PartialEq)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub enum ExternalDeclaration {
     /// Function definition.
     FunctionDefinition(FunctionDefinition),
@@ -37,7 +35,7 @@ pub enum ExternalDeclaration {
 
 /// Function definition.
 #[derive(Debug, Clone, PartialEq)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct FunctionDefinition {
     /// Declaration specifiers.
     pub declaration_specifiers: Vec<DeclarationSpecifier>,
@@ -52,7 +50,7 @@ pub struct FunctionDefinition {
 
 /// Declaration.
 #[derive(Debug, Clone, PartialEq)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct Declaration {
     /// Declaration specifiers.
     pub declaration_specifiers: Vec<DeclarationSpecifier>,
@@ -65,7 +63,7 @@ pub struct Declaration {
 
 /// Declaration specifier.
 #[derive(Debug, Clone, PartialEq)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub enum DeclarationSpecifier {
     /// Storage class specifier.
     StorageClassSpecifier(StorageClassSpecifier),
@@ -79,7 +77,7 @@ pub enum DeclarationSpecifier {
 
 /// Storage class specifier.
 #[derive(Debug, Clone, PartialEq)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub enum StorageClassSpecifier {
     /// typedef
     Typedef,
@@ -95,7 +93,7 @@ pub enum StorageClassSpecifier {
 
 /// Type specifier.
 #[derive(Debug, Clone, PartialEq)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub enum TypeSpecifier {
     /// void
     Void,
@@ -131,81 +129,103 @@ pub enum TypeSpecifier {
 
 /// Type qualifier
 #[derive(Debug, Clone, PartialEq)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub enum TypeQualifier {
+    /// const
     Const,
+    /// restrict
     Restrict,
+    /// volatile
     Volatile,
 }
 
 /// Function specifier
 #[derive(Debug, Clone, PartialEq)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub enum FunctionSpecifier {
+    /// inline
     Inline,
+    /// _Noreturn
     Noreturn,
 }
 
 /// Struct or union specifier
 #[derive(Debug, Clone, PartialEq)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct StructOrUnionSpecifier {
+    /// Struct or union.
     pub struct_or_union: StructOrUnion,
+    /// Identifier.
     pub identifier: Option<String>,
+    /// List of struct declarations.
     pub struct_declarations: Option<Vec<StructDeclaration>>,
+    /// Source span.
     #[cfg_attr(feature = "serde", serde(with = "oak_core::serde_range"))]
     pub span: SourceSpan,
 }
 
 /// Struct or union
 #[derive(Debug, Clone, PartialEq)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub enum StructOrUnion {
+    /// struct
     Struct,
+    /// union
     Union,
 }
 
 /// Struct declaration
 #[derive(Debug, Clone, PartialEq)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct StructDeclaration {
+    /// List of specifier qualifiers.
     pub specifier_qualifiers: Vec<SpecifierQualifier>,
+    /// List of struct declarators.
     pub struct_declarators: Vec<StructDeclarator>,
+    /// Source span.
     #[cfg_attr(feature = "serde", serde(with = "oak_core::serde_range"))]
     pub span: SourceSpan,
 }
 
 /// Specifier qualifier
 #[derive(Debug, Clone, PartialEq)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub enum SpecifierQualifier {
+    /// Type specifier.
     TypeSpecifier(TypeSpecifier),
+    /// Type qualifier.
     TypeQualifier(TypeQualifier),
 }
 
 /// Struct declarator
 #[derive(Debug, Clone, PartialEq)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct StructDeclarator {
+    /// Declarator.
     pub declarator: Option<Declarator>,
+    /// Constant expression.
     pub constant_expression: Option<Expression>,
+    /// Source span.
     #[cfg_attr(feature = "serde", serde(with = "oak_core::serde_range"))]
     pub span: SourceSpan,
 }
 
 /// Enum specifier
 #[derive(Debug, Clone, PartialEq)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct EnumSpecifier {
+    /// Identifier.
     pub identifier: Option<String>,
+    /// List of enumerators.
     pub enumerators: Option<Vec<Enumerator>>,
+    /// Source span.
     #[cfg_attr(feature = "serde", serde(with = "oak_core::serde_range"))]
     pub span: SourceSpan,
 }
 
 /// Enumerator
 #[derive(Debug, Clone, PartialEq)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct Enumerator {
     /// Enumerator identifier.
     pub identifier: String,
@@ -218,7 +238,7 @@ pub struct Enumerator {
 
 /// Init declarator
 #[derive(Debug, Clone, PartialEq)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct InitDeclarator {
     /// Declarator.
     pub declarator: Declarator,
@@ -231,7 +251,7 @@ pub struct InitDeclarator {
 
 /// Declarator
 #[derive(Debug, Clone, PartialEq)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct Declarator {
     /// Pointer.
     pub pointer: Option<Pointer>,
@@ -244,7 +264,7 @@ pub struct Declarator {
 
 /// Pointer
 #[derive(Debug, Clone, PartialEq)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct Pointer {
     /// Type qualifiers.
     pub type_qualifiers: Vec<TypeQualifier>,
@@ -257,7 +277,7 @@ pub struct Pointer {
 
 /// Direct declarator
 #[derive(Debug, Clone, PartialEq)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub enum DirectDeclarator {
     /// Identifier.
     Identifier(String),
@@ -283,7 +303,7 @@ pub enum DirectDeclarator {
 
 /// Parameter type list
 #[derive(Debug, Clone, PartialEq)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct ParameterTypeList {
     /// Parameter list.
     pub parameter_list: Vec<ParameterDeclaration>,
@@ -296,7 +316,7 @@ pub struct ParameterTypeList {
 
 /// Parameter declaration
 #[derive(Debug, Clone, PartialEq)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct ParameterDeclaration {
     /// Declaration specifiers.
     pub declaration_specifiers: Vec<DeclarationSpecifier>,
@@ -311,7 +331,7 @@ pub struct ParameterDeclaration {
 
 /// Abstract declarator
 #[derive(Debug, Clone, PartialEq)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct AbstractDeclarator {
     /// Pointer.
     pub pointer: Option<Pointer>,
@@ -324,7 +344,7 @@ pub struct AbstractDeclarator {
 
 /// Direct abstract declarator
 #[derive(Debug, Clone, PartialEq)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub enum DirectAbstractDeclarator {
     /// Abstract declarator.
     AbstractDeclarator(Box<AbstractDeclarator>),
@@ -346,7 +366,7 @@ pub enum DirectAbstractDeclarator {
 
 /// Initializer
 #[derive(Debug, Clone, PartialEq)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub enum Initializer {
     /// Assignment expression.
     AssignmentExpression(Expression),
@@ -356,7 +376,7 @@ pub enum Initializer {
 
 /// Statement
 #[derive(Debug, Clone, PartialEq)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub enum Statement {
     /// Labeled statement
     Labeled(LabeledStatement),
@@ -374,7 +394,7 @@ pub enum Statement {
 
 /// Labeled statement
 #[derive(Debug, Clone, PartialEq)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub enum LabeledStatement {
     /// Label.
     Label {
@@ -399,7 +419,7 @@ pub enum LabeledStatement {
 
 /// Compound statement
 #[derive(Debug, Clone, PartialEq)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct CompoundStatement {
     /// Block items.
     pub block_items: Vec<BlockItem>,
@@ -410,7 +430,7 @@ pub struct CompoundStatement {
 
 /// Block item
 #[derive(Debug, Clone, PartialEq)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub enum BlockItem {
     /// Declaration.
     Declaration(Declaration),
@@ -420,7 +440,7 @@ pub enum BlockItem {
 
 /// Expression statement
 #[derive(Debug, Clone, PartialEq)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct ExpressionStatement {
     /// Expression.
     pub expression: Option<Expression>,
@@ -431,7 +451,7 @@ pub struct ExpressionStatement {
 
 /// Selection statement
 #[derive(Debug, Clone, PartialEq)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub enum SelectionStatement {
     /// If statement.
     If {
@@ -453,7 +473,7 @@ pub enum SelectionStatement {
 
 /// Iteration statement
 #[derive(Debug, Clone, PartialEq)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub enum IterationStatement {
     /// While loop.
     While {
@@ -484,7 +504,7 @@ pub enum IterationStatement {
 
 /// For initializer
 #[derive(Debug, Clone, PartialEq)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub enum ForInitializer {
     /// Expression.
     Expression(Expression),
@@ -494,7 +514,7 @@ pub enum ForInitializer {
 
 /// Jump statement
 #[derive(Debug, Clone, PartialEq)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub enum JumpStatement {
     /// Goto.
     Goto(String),
@@ -508,7 +528,7 @@ pub enum JumpStatement {
 
 /// Expression
 #[derive(Debug, Clone, PartialEq)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct Expression {
     /// Expression kind.
     pub kind: ExpressionKind,
@@ -519,7 +539,7 @@ pub struct Expression {
 
 /// Expression kind
 #[derive(Debug, Clone, PartialEq)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub enum ExpressionKind {
     /// Identifier
     Identifier(String),
@@ -592,7 +612,7 @@ pub enum ExpressionKind {
 
 /// Unary operator
 #[derive(Debug, Clone, Copy, PartialEq)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub enum UnaryOperator {
     /// Post-increment (x++)
     PostIncrement,
@@ -622,7 +642,7 @@ pub enum UnaryOperator {
 
 /// Binary operator
 #[derive(Debug, Clone, Copy, PartialEq)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub enum BinaryOperator {
     /// Addition (+)
     Add,
@@ -664,7 +684,7 @@ pub enum BinaryOperator {
 
 /// Assignment operator
 #[derive(Debug, Clone, Copy, PartialEq)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub enum AssignmentOperator {
     /// Assignment (=)
     Assign,
@@ -692,10 +712,13 @@ pub enum AssignmentOperator {
 
 /// Type name
 #[derive(Debug, Clone, PartialEq)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct TypeName {
+    /// List of specifier qualifiers.
     pub specifier_qualifiers: Vec<SpecifierQualifier>,
+    /// Abstract declarator.
     pub abstract_declarator: Option<Box<AbstractDeclarator>>,
+    /// Source span.
     #[cfg_attr(feature = "serde", serde(with = "oak_core::serde_range"))]
     pub span: Range<usize>,
 }

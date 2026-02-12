@@ -4,12 +4,14 @@ use core::range::Range;
 use oak_core::tree::RedNode;
 #[cfg(feature = "lsp")]
 use {futures::Future, oak_lsp::service::LanguageService, oak_lsp::types::Hover as LspHover, oak_vfs::Vfs};
+/// Wat language service.
 #[cfg(feature = "lsp")]
 pub struct WatLanguageService<V: Vfs> {
     vfs: V,
     workspace: oak_lsp::workspace::WorkspaceManager,
 }
 impl<V: Vfs> WatLanguageService<V> {
+    /// Creates a new Wat language service.
     pub fn new(vfs: V) -> Self {
         Self { vfs, workspace: oak_lsp::workspace::WorkspaceManager::new() }
     }

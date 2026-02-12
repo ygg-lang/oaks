@@ -1,67 +1,65 @@
 #![doc = include_str!("readme.md")]
 use core::range::Range;
-#[cfg(feature = "serde")]
-use serde::{Deserialize, Serialize};
 
-/// Swift 源文件的根节点
+/// Swift source file root node
 #[derive(Debug, Clone, PartialEq)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct SwiftRoot {
     pub program: Program,
-    #[cfg_attr(feature = "serde", serde(with = "oak_core::serde_range"))]
+    #[serde(with = "oak_core::serde_range")]
     pub span: Range<usize>,
 }
 
-/// Swift 程序
+/// Swift program
 #[derive(Debug, Clone, PartialEq)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct Program {
     pub statements: Vec<Statement>,
 }
 
-/// 语句
+/// Statement
 #[derive(Debug, Clone, PartialEq)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub enum Statement {
-    /// 函数定义
+    /// Function definition
     FunctionDef { name: String, parameters: Vec<Parameter>, return_type: Option<Type>, body: Vec<Statement> },
-    /// 变量声明
+    /// Variable declaration
     VariableDecl { is_mutable: bool, name: String, type_annotation: Option<Type>, value: Option<Expression> },
-    /// 表达式语句
+    /// Expression statement
     Expression(Expression),
-    /// 返回语句
+    /// Return statement
     Return(Option<Expression>),
-    /// 条件语句
+    /// Conditional statement
     If { test: Expression, body: Vec<Statement>, orelse: Option<Vec<Statement>> },
-    /// While 循环
+    /// While loop
     While { test: Expression, body: Vec<Statement> },
-    /// For 循环
+    /// For loop
     For { variable: String, iterable: Expression, body: Vec<Statement> },
-    /// 代码块
+    /// Block
     Block(Vec<Statement>),
 }
 
-/// 表达式
+/// Expression
 #[derive(Debug, Clone, PartialEq)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub enum Expression {
-    /// 二元运算
+    /// Binary operation
     Binary { left: Box<Expression>, operator: String, right: Box<Expression> },
-    /// 一元运算
+    /// Unary operation
     Unary { operator: String, operand: Box<Expression> },
-    /// 函数调用
+    /// Function call
     Call { callee: Box<Expression>, arguments: Vec<Expression> },
-    /// 成员访问
+    /// Member access
     Member { object: Box<Expression>, member: String },
-    /// 标识符
+    /// Identifier
     Identifier(String),
-    /// 字面量
+    /// Literal
     Literal(Literal),
 }
 
-/// 字面量
+/// Literal
 #[derive(Debug, Clone, PartialEq)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub enum Literal {
     Number(String),
     String(String),
@@ -69,17 +67,17 @@ pub enum Literal {
     Nil,
 }
 
-/// 参数
+/// Parameter
 #[derive(Debug, Clone, PartialEq)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct Parameter {
     pub name: String,
     pub type_annotation: Type,
 }
 
-/// 类型
+/// Type
 #[derive(Debug, Clone, PartialEq)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct Type {
     pub name: String,
 }

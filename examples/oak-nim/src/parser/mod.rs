@@ -1,4 +1,6 @@
+/// Element types for the Nim language.
 pub mod element_type;
+pub use element_type::NimElementType;
 
 use crate::{language::NimLanguage, lexer::NimLexer};
 use oak_core::{
@@ -6,15 +8,15 @@ use oak_core::{
     source::{Source, TextEdit},
 };
 
-mod parse_top_level;
-
 pub(crate) type State<'a, S> = ParserState<'a, NimLanguage, S>;
 
+/// A parser for the Nim language.
 pub struct NimParser<'config> {
     pub(crate) config: &'config NimLanguage,
 }
 
 impl<'config> NimParser<'config> {
+    /// Creates a new Nim parser.
     pub fn new(config: &'config NimLanguage) -> Self {
         Self { config }
     }
@@ -23,6 +25,12 @@ impl<'config> NimParser<'config> {
 impl<'config> Parser<NimLanguage> for NimParser<'config> {
     fn parse<'a, S: Source + ?Sized>(&self, text: &'a S, edits: &[TextEdit], cache: &'a mut impl ParseCache<NimLanguage>) -> ParseOutput<'a, NimLanguage> {
         let lexer = NimLexer::new(&self.config);
-        parse_with_lexer(&lexer, text, edits, cache, |state| self.parse_root_internal(state))
+        parse_with_lexer(&lexer, text, edits, cache, |state| {
+            let checkpoint = state.checkpoint();
+            while state.not_at_end() {
+                state.advance()
+            }
+            Ok(state.finish_at(checkpoint, NimElementType::Root))
+        })
     }
 }

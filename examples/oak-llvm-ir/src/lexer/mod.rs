@@ -1,14 +1,20 @@
 #![doc = include_str!("readme.md")]
+/// Token type definitions for LLVM IR.
 pub mod token_type;
 
 use crate::{language::LLvmLanguage, lexer::token_type::LLvmTokenType};
 use oak_core::{Lexer, LexerCache, LexerState, TextEdit, lexer::LexOutput, source::Source};
 
-type State<'a, S> = LexerState<'a, S, LLvmLanguage>;
+pub(crate) type State<'a, S> = LexerState<'a, S, LLvmLanguage>;
 
+/// A lexer for LLVM IR.
+///
+/// Converts LLVM IR source text into a stream of tokens such as keywords,
+/// identifiers, variables (local/global), and symbols.
 #[derive(Clone, Debug)]
 pub struct LLvmLexer<'config> {
-    _config: &'config LLvmLanguage,
+    /// Language configuration.
+    pub config: &'config LLvmLanguage,
 }
 
 impl<'config> Lexer<LLvmLanguage> for LLvmLexer<'config> {
@@ -23,8 +29,9 @@ impl<'config> Lexer<LLvmLanguage> for LLvmLexer<'config> {
 }
 
 impl<'config> LLvmLexer<'config> {
+    /// Creates a new `LLvmLexer` with the given configuration.
     pub fn new(config: &'config LLvmLanguage) -> Self {
-        Self { _config: config }
+        Self { config }
     }
     fn run<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> Result<(), oak_core::OakError> {
         while state.not_at_end() {

@@ -1,12 +1,11 @@
 #![doc = include_str!("readme.md")]
 use core::range::Range;
-#[cfg(feature = "serde")]
-use serde::{Deserialize, Serialize};
+
 use std::{boxed::Box, string::String, vec::Vec};
 
-/// Go 语言强类型 AST 根
+/// Strongly typed AST root for the Go language
 #[derive(Debug, PartialEq, Clone)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GoRoot {
     pub package: Option<String>,
     pub imports: Vec<Import>,
@@ -14,7 +13,7 @@ pub struct GoRoot {
 }
 
 #[derive(Debug, PartialEq, Clone)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct Import {
     pub path: String,
     pub alias: Option<String>,
@@ -23,7 +22,7 @@ pub struct Import {
 }
 
 #[derive(Debug, PartialEq, Clone)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub enum Declaration {
     Function(Function),
     Variable(Variable),
@@ -32,9 +31,10 @@ pub enum Declaration {
 }
 
 #[derive(Debug, PartialEq, Clone)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct Function {
     pub name: String,
+    pub receiver: Option<Parameter>,
     pub params: Vec<Parameter>,
     pub return_types: Vec<String>,
     pub body: Block,
@@ -43,7 +43,7 @@ pub struct Function {
 }
 
 #[derive(Debug, PartialEq, Clone)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct Parameter {
     pub name: String,
     pub param_type: String,
@@ -52,7 +52,7 @@ pub struct Parameter {
 }
 
 #[derive(Debug, PartialEq, Clone)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct Block {
     pub statements: Vec<Statement>,
     #[cfg_attr(feature = "serde", serde(with = "oak_core::serde_range"))]
@@ -60,7 +60,7 @@ pub struct Block {
 }
 
 #[derive(Debug, PartialEq, Clone)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub enum Statement {
     Expression(Expression),
     Assignment {
@@ -92,7 +92,7 @@ pub enum Statement {
 }
 
 #[derive(Debug, PartialEq, Clone)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub enum Expression {
     Identifier {
         name: String,
@@ -120,7 +120,7 @@ pub enum Expression {
 }
 
 #[derive(Debug, PartialEq, Clone)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct Variable {
     pub name: String,
     pub var_type: Option<String>,
@@ -130,7 +130,7 @@ pub struct Variable {
 }
 
 #[derive(Debug, PartialEq, Clone)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct TypeDecl {
     pub name: String,
     pub definition: String,
@@ -139,7 +139,7 @@ pub struct TypeDecl {
 }
 
 #[derive(Debug, PartialEq, Clone)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct Const {
     pub name: String,
     pub const_type: Option<String>,

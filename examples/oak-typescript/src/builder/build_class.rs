@@ -26,7 +26,9 @@ impl<'config> TypeScriptBuilder<'config> {
                                     name = source.get_text_in(child_node.span().into()).to_string();
                                 }
                                 TypeScriptElementType::TypeAnnotation => {
-                                    ty = self.build_type_annotation(&child_node, source)?;
+                                    if !self.erase_types {
+                                        ty = self.build_type_annotation(&child_node, source)?;
+                                    }
                                 }
                                 TypeScriptElementType::Decorator => {
                                     if let Some(d) = self.build_decorator(&child_node, source)? {
@@ -78,8 +80,10 @@ impl<'config> TypeScriptBuilder<'config> {
                                     }
                                 }
                                 TypeScriptElementType::TypeParameter => {
-                                    if let Some(tp) = self.build_type_parameter(&child_node, source)? {
-                                        type_params.push(tp);
+                                    if !self.erase_types {
+                                        if let Some(tp) = self.build_type_parameter(&child_node, source)? {
+                                            type_params.push(tp);
+                                        }
                                     }
                                 }
                                 TypeScriptElementType::Parameter => {
@@ -88,7 +92,9 @@ impl<'config> TypeScriptBuilder<'config> {
                                     }
                                 }
                                 TypeScriptElementType::TypeAnnotation => {
-                                    return_type = self.build_type_annotation(&child_node, source)?;
+                                    if !self.erase_types {
+                                        return_type = self.build_type_annotation(&child_node, source)?;
+                                    }
                                 }
                                 TypeScriptElementType::BlockStatement => {
                                     if let Some(Statement::BlockStatement(block)) = self.build_statement(&child_node, source)? {

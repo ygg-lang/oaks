@@ -1,26 +1,40 @@
-use oak_core::{ElementType, Parser, UniversalElementRole};
-#[cfg(feature = "serde")]
-use serde::{Deserialize, Serialize};
+use oak_core::ElementType;
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
-#[repr(u8)]
+/// Vampire element types.
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub enum VampireElementType {
+    /// Root element.
     Root,
 }
 
 impl ElementType for VampireElementType {
-    type Role = UniversalElementRole;
+    type Role = oak_core::UniversalElementRole;
 
     fn role(&self) -> Self::Role {
         match self {
-            Self::Root => UniversalElementRole::Root,
+            VampireElementType::Root => oak_core::UniversalElementRole::Root,
         }
     }
 }
 
 impl From<crate::lexer::token_type::VampireTokenType> for VampireElementType {
-    fn from(_token: crate::lexer::token_type::VampireTokenType) -> Self {
-        Self::Root
+    fn from(_: crate::lexer::token_type::VampireTokenType) -> Self {
+        VampireElementType::Root
+    }
+}
+
+impl From<VampireElementType> for u16 {
+    fn from(t: VampireElementType) -> u16 {
+        t as u16
+    }
+}
+
+impl From<u16> for VampireElementType {
+    fn from(i: u16) -> Self {
+        match i {
+            0 => VampireElementType::Root,
+            _ => VampireElementType::Root, // Fallback
+        }
     }
 }

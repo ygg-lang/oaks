@@ -2,19 +2,17 @@
 #[doc = include_str!("../readme.md")]
 use crate::ast::JRoot;
 use oak_core::{Language, LanguageCategory};
-#[cfg(feature = "serde")]
-use serde::{Deserialize, Serialize};
 
-/// J 语言配置和元数据
+/// J language configuration and metadata.
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct JLanguage {
-    /// 是否启用严格模式
+    /// Whether to enable strict mode.
     pub strict_mode: bool,
 }
 
 impl JLanguage {
-    /// 鍒涘缓鏂扮殑 J 璇█閰嶇疆
+    /// Creates a new J language configuration.
     pub fn new() -> Self {
         Self { strict_mode: false }
     }

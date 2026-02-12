@@ -1,5 +1,6 @@
 #![doc = include_str!("readme.md")]
 use crate::{language::TexLanguage, lexer::token_type::TexTokenType};
+/// Token types for the TeX lexer.
 pub mod token_type;
 use oak_core::{
     Lexer, LexerCache, LexerState, OakError, Source, TextEdit,
@@ -7,17 +8,20 @@ use oak_core::{
 };
 use std::sync::LazyLock;
 
-type State<'a, S> = LexerState<'a, S, TexLanguage>;
+pub(crate) type State<'a, S> = LexerState<'a, S, TexLanguage>;
 
 static TEX_WHITESPACE: LazyLock<WhitespaceConfig> = LazyLock::new(|| WhitespaceConfig { unicode_whitespace: true });
 static TEX_COMMENT: LazyLock<CommentConfig> = LazyLock::new(|| CommentConfig { line_marker: "%", block_start: "", block_end: "", nested_blocks: false });
 
+/// A lexer for TeX source files.
 #[derive(Clone, Debug)]
 pub struct TexLexer<'config> {
-    _config: &'config TexLanguage,
+    /// The language configuration.
+    config: &'config TexLanguage,
 }
 
 impl<'config> Lexer<TexLanguage> for TexLexer<'config> {
+    /// Lexes the source text into tokens.
     fn lex<'a, S: Source + ?Sized>(&self, source: &S, _edits: &[TextEdit], cache: &'a mut impl LexerCache<TexLanguage>) -> LexOutput<TexLanguage> {
         let mut state = State::new_with_cache(source, 0, cache);
         let result = self.run(&mut state);
@@ -29,10 +33,12 @@ impl<'config> Lexer<TexLanguage> for TexLexer<'config> {
 }
 
 impl<'config> TexLexer<'config> {
+    /// Creates a new TeX lexer with the given language configuration.
     pub fn new(config: &'config TexLanguage) -> Self {
-        Self { _config: config }
+        Self { config }
     }
 
+    /// Runs the lexer on the current state.
     fn run<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> Result<(), OakError> {
         while state.not_at_end() {
             let safe_point = state.get_position();
@@ -75,14 +81,17 @@ impl<'config> TexLexer<'config> {
         Ok(())
     }
 
+    /// Skips whitespace characters based on the TeX whitespace configuration.
     fn skip_whitespace<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         TEX_WHITESPACE.scan(state, TexTokenType::Whitespace)
     }
 
+    /// Skips comments based on the TeX comment configuration.
     fn skip_comment<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         TEX_COMMENT.scan(state, TexTokenType::Comment, TexTokenType::Comment)
     }
 
+    /// Lexes a TeX command (e.g., `\section`).
     fn lex_command<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start = state.get_position();
 
@@ -92,7 +101,7 @@ impl<'config> TexLexer<'config> {
 
         state.advance(1); // consume '\'
 
-        // 读取命令名
+        // Read the command name
         let mut has_name = false;
         if let Some(ch) = state.peek() {
             if ch.is_ascii_alphabetic() {
@@ -115,11 +124,15 @@ impl<'config> TexLexer<'config> {
 
         if has_name {
             let end = state.get_position();
-            let text = state.get_text_in((start + 1..end).into()); // 跳过反斜杠
+            let text = state.get_text_in((start + 1..end).into()); // Skip the backslash
 
             let kind = match text.as_ref() {
                 "begin" => TexTokenType::BeginKeyword,
                 "end" => TexTokenType::EndKeyword,
+                "(" => TexTokenType::Dollar, // Shorthand for inline math
+                ")" => TexTokenType::Dollar,
+                "[" => TexTokenType::DoubleDollar, // Shorthand for display math
+                "]" => TexTokenType::DoubleDollar,
                 "documentclass" => TexTokenType::DocumentclassKeyword,
                 "usepackage" => TexTokenType::UsepackageKeyword,
                 "section" => TexTokenType::SectionKeyword,
@@ -139,7 +152,10 @@ impl<'config> TexLexer<'config> {
                 "includegraphics" => TexTokenType::IncludegraphicsKeyword,
                 "textbf" => TexTokenType::TextbfKeyword,
                 "textit" => TexTokenType::TextitKeyword,
+                "texttt" => TexTokenType::TextTt,
+                "textsc" => TexTokenType::TextSc,
                 "emph" => TexTokenType::EmphKeyword,
+                "underline" => TexTokenType::Underline,
                 "frac" => TexTokenType::Frac,
                 "sqrt" => TexTokenType::Sqrt,
                 "sum" => TexTokenType::Sum,
@@ -169,13 +185,6 @@ impl<'config> TexLexer<'config> {
                 "chi" => TexTokenType::Chi,
                 "psi" => TexTokenType::Psi,
                 "omega" => TexTokenType::Omega,
-                "varepsilon" => TexTokenType::VarEpsilon,
-                "vartheta" => TexTokenType::VarTheta,
-                "varkappa" => TexTokenType::VarKappa,
-                "varpi" => TexTokenType::VarPi,
-                "varrho" => TexTokenType::VarRho,
-                "varsigma" => TexTokenType::VarSigma,
-                "varphi" => TexTokenType::VarPhi,
                 "Gamma" => TexTokenType::UpperGamma,
                 "Delta" => TexTokenType::UpperDelta,
                 "Theta" => TexTokenType::UpperTheta,
@@ -190,133 +199,126 @@ impl<'config> TexLexer<'config> {
                 _ => TexTokenType::Command,
             };
 
-            state.add_token(kind, start, state.get_position());
-            return true;
+            state.add_token(kind, start, end);
+            true
         }
-
-        // 如果没有命令名，只是一个反斜杠
-        state.add_token(TexTokenType::Backslash, start, state.get_position());
-        true
+        else {
+            false
+        }
     }
 
     fn lex_math_delimiters<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start = state.get_position();
-
-        if state.consume_if_starts_with("$$") {
-            state.add_token(TexTokenType::DoubleDollar, start, state.get_position());
-            return true;
+        if let Some('$') = state.peek() {
+            state.advance(1);
+            if let Some('$') = state.peek() {
+                state.advance(1);
+                state.add_token(TexTokenType::DoubleDollar, start, state.get_position());
+            }
+            else {
+                state.add_token(TexTokenType::Dollar, start, state.get_position());
+            }
+            true
         }
-
-        if state.consume_if_starts_with("$") {
-            state.add_token(TexTokenType::Dollar, start, state.get_position());
-            return true;
+        else {
+            false
         }
-
-        false
     }
 
     fn lex_braces_and_brackets<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start = state.get_position();
-
         if let Some(ch) = state.peek() {
             let kind = match ch {
-                '{' => TexTokenType::LeftBrace,
-                '}' => TexTokenType::RightBrace,
-                '[' => TexTokenType::LeftBracket,
-                ']' => TexTokenType::RightBracket,
-                '(' => TexTokenType::LeftParen,
-                ')' => TexTokenType::RightParen,
-                _ => return false,
+                '{' => Some(TexTokenType::LeftBrace),
+                '}' => Some(TexTokenType::RightBrace),
+                '[' => Some(TexTokenType::LeftBracket),
+                ']' => Some(TexTokenType::RightBracket),
+                _ => None,
             };
 
-            state.advance(ch.len_utf8());
-            state.add_token(kind, start, state.get_position());
-            return true;
+            if let Some(kind) = kind {
+                state.advance(ch.len_utf8());
+                state.add_token(kind, start, state.get_position());
+                return true;
+            }
         }
-
         false
     }
 
     fn lex_special_chars<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start = state.get_position();
-
         if let Some(ch) = state.peek() {
             let kind = match ch {
-                '&' => TexTokenType::Ampersand,
-                '#' => TexTokenType::Hash,
-                '^' => TexTokenType::Caret,
-                '_' => TexTokenType::Underscore,
-                '~' => TexTokenType::Tilde,
-                '=' => TexTokenType::Equals,
-                '+' => TexTokenType::Plus,
-                '-' => TexTokenType::Minus,
-                '*' => TexTokenType::Star,
-                '/' => TexTokenType::Slash,
-                '|' => TexTokenType::Pipe,
-                '<' => TexTokenType::Less,
-                '>' => TexTokenType::Greater,
-                '!' => TexTokenType::Exclamation,
-                '?' => TexTokenType::Question,
-                '@' => TexTokenType::At,
-                ':' => TexTokenType::Colon,
-                ';' => TexTokenType::Semicolon,
-                ',' => TexTokenType::Comma,
-                '.' => TexTokenType::Dot,
-                _ => return false,
+                '&' => Some(TexTokenType::Ampersand),
+                '_' => Some(TexTokenType::Underscore),
+                '^' => Some(TexTokenType::Caret),
+                '~' => Some(TexTokenType::Tilde),
+                '#' => Some(TexTokenType::Hash),
+                '%' => Some(TexTokenType::Percent),
+                _ => None,
             };
 
-            state.advance(ch.len_utf8());
-            state.add_token(kind, start, state.get_position());
-            return true;
+            if let Some(kind) = kind {
+                state.advance(ch.len_utf8());
+                state.add_token(kind, start, state.get_position());
+                return true;
+            }
         }
-
         false
     }
 
     fn lex_number<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start = state.get_position();
-        let first = match state.peek() {
-            Some(c) => c,
-            None => return false,
-        };
+        let mut has_digits = false;
 
-        if !first.is_ascii_digit() {
-            return false;
-        }
-
-        state.advance(1);
-        while let Some(c) = state.peek() {
-            if c.is_ascii_digit() || c == '.' {
+        while let Some(ch) = state.peek() {
+            if ch.is_ascii_digit() {
                 state.advance(1);
+                has_digits = true;
             }
             else {
                 break;
             }
         }
 
-        state.add_token(TexTokenType::Number, start, state.get_position());
-        true
-    }
-
-    fn lex_text<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
-        let start = state.get_position();
-
-        if let Some(ch) = state.peek() {
-            if ch.is_alphabetic() {
-                state.advance(ch.len_utf8());
-                while let Some(c) = state.peek() {
-                    if c.is_alphanumeric() {
-                        state.advance(c.len_utf8());
+        if has_digits {
+            if let Some('.') = state.peek() {
+                state.advance(1);
+                while let Some(ch) = state.peek() {
+                    if ch.is_ascii_digit() {
+                        state.advance(1);
                     }
                     else {
                         break;
                     }
                 }
-                state.add_token(TexTokenType::Identifier, start, state.get_position());
-                return true;
             }
+            state.add_token(TexTokenType::Number, start, state.get_position());
+            true
+        }
+        else {
+            false
+        }
+    }
+
+    fn lex_text<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
+        let start = state.get_position();
+        let mut has_text = false;
+
+        while let Some(ch) = state.peek() {
+            if ch.is_whitespace() || ch == '\\' || ch == '%' || ch == '$' || ch == '{' || ch == '}' || ch == '[' || ch == ']' || ch == '&' || ch == '_' || ch == '^' || ch == '~' || ch == '#' || ch.is_ascii_digit() {
+                break;
+            }
+            state.advance(ch.len_utf8());
+            has_text = true;
         }
 
-        false
+        if has_text {
+            state.add_token(TexTokenType::Text, start, state.get_position());
+            true
+        }
+        else {
+            false
+        }
     }
 }

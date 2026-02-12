@@ -1,20 +1,28 @@
 #![doc = include_str!("readme.md")]
+/// Represents the type of a highlighted segment in the source code.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum HighlightKind {
+    /// A language keyword.
     Keyword,
+    /// A string literal.
     String,
+    /// A numeric literal.
     Number,
+    /// A source code comment.
     Comment,
+    /// A name identifier.
     Identifier,
 }
 
-/// 高亮器 trait
+/// A trait for highlighting source code.
 pub trait Highlighter {
-    /// 对给定的文本进行高亮处理
+    /// Performs highlighting on the given text and returns a list of highlighted segments.
     fn highlight(&self, text: &str) -> Vec<(usize, usize, HighlightKind)>;
 }
 
+/// Highlighter implementation for the Protobuf language.
 pub struct ProtobufHighlighter {
+    /// Whether to use the parser for more accurate highlighting.
     pub use_parser: bool,
 }
 
@@ -25,10 +33,12 @@ impl Default for ProtobufHighlighter {
 }
 
 impl ProtobufHighlighter {
+    /// Creates a new `ProtobufHighlighter` with default settings.
     pub fn new() -> Self {
         Self::default()
     }
 
+    /// Creates a new `ProtobufHighlighter` that uses the parser for highlighting.
     pub fn with_parser() -> Self {
         Self { use_parser: true }
     }

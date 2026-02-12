@@ -1,12 +1,9 @@
 #![doc = include_str!("readme.md")]
-use core::range::Range;
-#[cfg(feature = "serde")]
-#[cfg(feature = "serde")]
-use serde::{Deserialize, Serialize};
+use oak_core::Range;
 
-/// Typst AST 根节点
+/// Typst AST root node
 #[derive(Debug, Clone)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct TypstRoot {
     #[cfg_attr(feature = "serde", serde(with = "oak_core::serde_range"))]
     pub span: Range<usize>,
@@ -20,7 +17,7 @@ impl TypstRoot {
 }
 
 #[derive(Debug, Clone)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub enum TypstItem {
     Text(String),
     Space,
@@ -38,14 +35,14 @@ pub enum TypstItem {
 }
 
 #[derive(Debug, Clone)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct TypstHeading {
     pub level: usize,
     pub content: TypstRoot,
 }
 
 #[derive(Debug, Clone)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct TypstLink {
     pub url: String,
     pub content: Option<TypstRoot>,

@@ -4,18 +4,22 @@ pub mod highlighter;
 
 #[cfg(feature = "lsp")]
 use {
+    crate::language::SqlLanguage,
+    core::range::Range,
     futures::Future,
+    oak_core::tree::RedNode,
     oak_hover::{Hover, HoverProvider},
     oak_lsp::service::LanguageService,
     oak_vfs::Vfs,
 };
+
 #[cfg(feature = "oak-pretty-print")]
 pub mod formatter;
-use crate::language::SqlLanguage;
-use core::range::Range;
-use oak_core::tree::RedNode;
+
 #[cfg(feature = "lsp")]
+/// A hover provider for SQL.
 pub struct SqlHoverProvider;
+
 #[cfg(feature = "lsp")]
 impl HoverProvider<SqlLanguage> for SqlHoverProvider {
     fn hover(&self, node: &RedNode<SqlLanguage>, _range: Range<usize>) -> Option<Hover> {
@@ -23,17 +27,23 @@ impl HoverProvider<SqlLanguage> for SqlHoverProvider {
         None
     }
 }
+
 #[cfg(feature = "lsp")]
+/// Language service implementation for SQL.
 pub struct SqlLanguageService<V: Vfs> {
     vfs: V,
     workspace: oak_lsp::workspace::WorkspaceManager,
     hover_provider: SqlHoverProvider,
 }
+
+#[cfg(feature = "lsp")]
 impl<V: Vfs> SqlLanguageService<V> {
+    /// Creates a new SQL language service.
     pub fn new(vfs: V) -> Self {
         Self { vfs, workspace: oak_lsp::workspace::WorkspaceManager::default(), hover_provider: SqlHoverProvider }
     }
 }
+#[cfg(feature = "lsp")]
 impl<V: Vfs + Send + Sync + 'static + oak_vfs::WritableVfs> LanguageService for SqlLanguageService<V> {
     type Lang = SqlLanguage;
     type Vfs = V;

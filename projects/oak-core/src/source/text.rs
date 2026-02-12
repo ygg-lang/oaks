@@ -61,6 +61,11 @@ impl SourceText {
         &self.raw
     }
 
+    /// Returns a slice of the source text in the given range.
+    pub fn slice(&self, range: Range<usize>) -> Cow<'_, str> {
+        self.get_text_in(range)
+    }
+
     /// Applies multiple text edits to the source text and returns the affected range.
     pub fn apply_edits_range(&mut self, edits: &[TextEdit]) -> Range<usize> {
         let old_len = self.raw.len();

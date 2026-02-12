@@ -1,65 +1,128 @@
 use oak_core::{ElementType, UniversalElementRole};
-#[cfg(feature = "serde")]
-use serde::{Deserialize, Serialize};
 
+/// Element types for Django templates.
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub enum DjangoElementType {
+    /// The root element.
     Root,
+    /// An identifier.
+    Identifier,
+    /// A variable expression: `{{ ... }}`.
     Variable,
+    /// A tag: `{% ... %}`.
     Tag,
+    /// A comment: `{# ... #}`.
     Comment,
+    /// Plain HTML content.
     HtmlContent,
 
-    // Django 标签关键字
+    /// `if` keyword.
     If,
+    /// `elif` keyword.
     Elif,
+    /// `else` keyword.
     Else,
+    /// `endif` keyword.
     Endif,
+    /// `for` keyword.
     For,
+    /// `empty` keyword.
     Empty,
+    /// `endfor` keyword.
     Endfor,
+    /// `block` keyword.
     Block,
+    /// `endblock` keyword.
     Endblock,
+    /// `extends` keyword.
     Extends,
+    /// `include` keyword.
     Include,
+    /// `load` keyword.
     Load,
+    /// `with` keyword.
     With,
+    /// `endwith` keyword.
     Endwith,
+    /// `autoescape` keyword.
     Autoescape,
+    /// `endautoescape` keyword.
     Endautoescape,
+    /// `csrf_token` keyword.
     Csrf,
+    /// `url` keyword.
     Url,
+    /// `static` keyword.
     Static,
+    /// `now` keyword.
     Now,
+    /// `cycle` keyword.
     Cycle,
+    /// `filter` keyword.
     Filter,
+    /// `endfilter` keyword.
     Endfilter,
+    /// `spaceless` keyword.
     Spaceless,
+    /// `endspaceless` keyword.
     Endspaceless,
+    /// `verbatim` keyword.
     Verbatim,
+    /// `endverbatim` keyword.
     Endverbatim,
+    /// `and` operator.
     And,
+    /// `or` operator.
     Or,
+    /// `not` operator.
     Not,
+    /// `in` operator.
     In,
 
+    /// `+`.
     Plus,
+    /// `-`.
     Minus,
+    /// `*`.
     Star,
+    /// `/`.
     Slash,
+    /// `(`.
     LeftParen,
+    /// `)`.
     RightParen,
+    /// `[`.
     LeftBracket,
+    /// `]`.
     RightBracket,
+    /// `;`.
     Semicolon,
+    /// `.`.
+    Dot,
+    /// `,`.
+    Comma,
+    /// `=`.
+    Equal,
 
+    // Grammar constructs
+    IfStatement,
+    ForStatement,
+    BlockStatement,
+    FilterExpression,
+    BinaryExpression,
+    Literal,
+
+    /// Whitespace.
     Whitespace,
+    /// Newline.
     Newline,
+    /// Error token.
     Error,
 }
 
 impl DjangoElementType {
+    /// Returns true if the element type is a keyword.
     pub fn is_keyword(&self) -> bool {
         matches!(
             self,
@@ -97,6 +160,7 @@ impl DjangoElementType {
         )
     }
 
+    /// Returns true if the element type is trivia (whitespace, newline, or comment).
     pub fn is_trivia(&self) -> bool {
         matches!(self, Self::Whitespace | Self::Newline | Self::Comment)
     }

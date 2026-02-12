@@ -1,22 +1,31 @@
 use oak_core::{TokenType, UniversalTokenRole};
-#[cfg(feature = "serde")]
-use serde::{Deserialize, Serialize};
 
+/// Token types for PlantUML.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 #[repr(u8)]
 pub enum PlantUmlTokenType {
+    /// Whitespace characters.
     Whitespace,
+    /// Newline characters.
     Newline,
+    /// Comment lines or blocks.
     Comment,
 
+    /// '@startuml' marker.
     StartUml,
+    /// '@enduml' marker.
     EndUml,
+    /// 'class' keyword.
     Class,
+    /// 'interface' keyword.
     Interface,
+    /// An identifier.
     Id,
+    /// A label or description.
     Label,
 
+    /// Error or unknown token.
     Error,
 }
 

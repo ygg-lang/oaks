@@ -56,6 +56,6 @@ fn test_parse_invalid_syntax() {
     let mut cache = ParseSession::<DjangoLanguage>::default();
     let result = parser.parse(&source, &[], &mut cache);
 
-    // 当前的简单实现总是成功解析，只是创建一个基本的语法树
+    // Current simple implementation always parses successfully, creating a basic syntax tree.
     assert!(result.result.is_ok())
 }

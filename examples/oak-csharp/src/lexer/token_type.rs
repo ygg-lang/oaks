@@ -1,10 +1,538 @@
-use oak_core::{Source, Token, TokenType, UniversalElementRole, UniversalTokenRole};
-#[cfg(feature = "serde")]
-use serde::{Deserialize, Serialize};
+use oak_core::{Token, TokenType, UniversalTokenRole};
 
+/// Token type for the C# language.
 pub type CSharpToken = Token<CSharpTokenType>;
 
+/// Token types for the C# language.
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
+pub enum CSharpTokenType {
+    /// Whitespace characters.
+    Whitespace,
+    /// Line breaks.
+    Newline,
+    /// Comments.
+    Comment,
+    /// An identifier.
+    Identifier,
+
+    // Literals
+    /// A numeric literal.
+    Number,
+    /// A string literal.
+    String,
+    /// A character literal.
+    Character,
+    /// A verbatim string literal.
+    VerbatimString,
+    /// An interpolated string literal.
+    InterpolatedString,
+    /// A number literal (generic).
+    NumberLiteral,
+    /// A string literal (generic).
+    StringLiteral,
+    /// A character literal (generic).
+    CharLiteral,
+
+    // Keywords
+    /// The `abstract` keyword.
+    Abstract,
+    /// The `as` keyword.
+    As,
+    /// The `async` keyword.
+    Async,
+    /// The `await` keyword.
+    Await,
+    /// The `base` keyword.
+    Base,
+    /// The `bool` keyword.
+    Bool,
+    /// The `break` keyword.
+    Break,
+    /// The `byte` keyword.
+    Byte,
+    /// The `case` keyword.
+    Case,
+    /// The `catch` keyword.
+    Catch,
+    /// The `char` keyword.
+    Char,
+    /// The `checked` keyword.
+    Checked,
+    /// The `class` keyword.
+    Class,
+    /// The `const` keyword.
+    Const,
+    /// The `continue` keyword.
+    Continue,
+    /// The `decimal` keyword.
+    Decimal,
+    /// The `default` keyword.
+    Default,
+    /// The `delegate` keyword.
+    Delegate,
+    /// The `do` keyword.
+    Do,
+    /// The `double` keyword.
+    Double,
+    /// The `else` keyword.
+    Else,
+    /// The `enum` keyword.
+    Enum,
+    /// The `event` keyword.
+    Event,
+    /// The `explicit` keyword.
+    Explicit,
+    /// The `extern` keyword.
+    Extern,
+    /// The `false` keyword.
+    False,
+    /// The `finally` keyword.
+    Finally,
+    /// The `fixed` keyword.
+    Fixed,
+    /// The `float` keyword.
+    Float,
+    /// The `for` keyword.
+    For,
+    /// The `foreach` keyword.
+    Foreach,
+    /// The `goto` keyword.
+    Goto,
+    /// The `if` keyword.
+    If,
+    /// The `implicit` keyword.
+    Implicit,
+    /// The `in` keyword.
+    In,
+    /// The `int` keyword.
+    Int,
+    /// The `interface` keyword.
+    Interface,
+    /// The `internal` keyword.
+    Internal,
+    /// The `is` keyword.
+    Is,
+    /// The `lock` keyword.
+    Lock,
+    /// The `long` keyword.
+    Long,
+    /// The `namespace` keyword.
+    Namespace,
+    /// The `new` keyword.
+    New,
+    /// The `null` keyword.
+    Null,
+    /// The `object` keyword.
+    Object,
+    /// The `operator` keyword.
+    Operator,
+    /// The `out` keyword.
+    Out,
+    /// The `override` keyword.
+    Override,
+    /// The `params` keyword.
+    Params,
+    /// The `private` keyword.
+    Private,
+    /// The `protected` keyword.
+    Protected,
+    /// The `public` keyword.
+    Public,
+    /// The `readonly` keyword.
+    Readonly,
+    /// The `record` keyword.
+    Record,
+    /// The `ref` keyword.
+    Ref,
+    /// The `return` keyword.
+    Return,
+    /// The `sbyte` keyword.
+    Sbyte,
+    /// The `sealed` keyword.
+    Sealed,
+    /// The `short` keyword.
+    Short,
+    /// The `sizeof` keyword.
+    Sizeof,
+    /// The `stackalloc` keyword.
+    Stackalloc,
+    /// The `static` keyword.
+    Static,
+    /// The `struct` keyword.
+    Struct,
+    /// The `switch` keyword.
+    Switch,
+    /// The `this` keyword.
+    This,
+    /// The `throw` keyword.
+    Throw,
+    /// The `true` keyword.
+    True,
+    /// The `try` keyword.
+    Try,
+    /// The `typeof` keyword.
+    Typeof,
+    /// The `uint` keyword.
+    Uint,
+    /// The `ulong` keyword.
+    Ulong,
+    /// The `unchecked` keyword.
+    Unchecked,
+    /// The `unsafe` keyword.
+    Unsafe,
+    /// The `ushort` keyword.
+    Ushort,
+    /// The `using` keyword.
+    Using,
+    /// The `virtual` keyword.
+    Virtual,
+    /// The `void` keyword.
+    Void,
+    /// The `volatile` keyword.
+    Volatile,
+    /// The `while` keyword.
+    While,
+
+    // Long keyword variants
+    /// Variant of `abstract` keyword.
+    AbstractKeyword,
+    /// Variant of `as` keyword.
+    AsKeyword,
+    /// Variant of `async` keyword.
+    AsyncKeyword,
+    /// Variant of `await` keyword.
+    AwaitKeyword,
+    /// Variant of `base` keyword.
+    BaseKeyword,
+    /// Variant of `bool` keyword.
+    BoolKeyword,
+    /// Variant of `break` keyword.
+    BreakKeyword,
+    /// Variant of `byte` keyword.
+    ByteKeyword,
+    /// Variant of `case` keyword.
+    CaseKeyword,
+    /// Variant of `catch` keyword.
+    CatchKeyword,
+    /// Variant of `char` keyword.
+    CharKeyword,
+    /// Variant of `checked` keyword.
+    CheckedKeyword,
+    /// Variant of `class` keyword.
+    ClassKeyword,
+    /// Variant of `const` keyword.
+    ConstKeyword,
+    /// Variant of `continue` keyword.
+    ContinueKeyword,
+    /// Variant of `decimal` keyword.
+    DecimalKeyword,
+    /// Variant of `default` keyword.
+    DefaultKeyword,
+    /// Variant of `delegate` keyword.
+    DelegateKeyword,
+    /// Variant of `do` keyword.
+    DoKeyword,
+    /// Variant of `double` keyword.
+    DoubleKeyword,
+    /// Variant of `else` keyword.
+    ElseKeyword,
+    /// Variant of `enum` keyword.
+    EnumKeyword,
+    /// Variant of `event` keyword.
+    EventKeyword,
+    /// Variant of `explicit` keyword.
+    ExplicitKeyword,
+    /// Variant of `extern` keyword.
+    ExternKeyword,
+    /// Variant of `false` keyword.
+    FalseKeyword,
+    /// Variant of `finally` keyword.
+    FinallyKeyword,
+    /// Variant of `fixed` keyword.
+    FixedKeyword,
+    /// Variant of `float` keyword.
+    FloatKeyword,
+    /// Variant of `for` keyword.
+    ForKeyword,
+    /// Variant of `foreach` keyword.
+    ForeachKeyword,
+    /// Variant of `goto` keyword.
+    GotoKeyword,
+    /// Variant of `if` keyword.
+    IfKeyword,
+    /// Variant of `implicit` keyword.
+    ImplicitKeyword,
+    /// Variant of `in` keyword.
+    InKeyword,
+    /// Variant of `int` keyword.
+    IntKeyword,
+    /// Variant of `interface` keyword.
+    InterfaceKeyword,
+    /// Variant of `internal` keyword.
+    InternalKeyword,
+    /// Variant of `is` keyword.
+    IsKeyword,
+    /// Variant of `lock` keyword.
+    LockKeyword,
+    /// Variant of `long` keyword.
+    LongKeyword,
+    /// Variant of `namespace` keyword.
+    NamespaceKeyword,
+    /// Variant of `new` keyword.
+    NewKeyword,
+    /// Variant of `null` keyword.
+    NullKeyword,
+    /// Variant of `object` keyword.
+    ObjectKeyword,
+    /// Variant of `operator` keyword.
+    OperatorKeyword,
+    /// Variant of `out` keyword.
+    OutKeyword,
+    /// Variant of `override` keyword.
+    OverrideKeyword,
+    /// Variant of `params` keyword.
+    ParamsKeyword,
+    /// Variant of `private` keyword.
+    PrivateKeyword,
+    /// Variant of `protected` keyword.
+    ProtectedKeyword,
+    /// Variant of `public` keyword.
+    PublicKeyword,
+    /// Variant of `readonly` keyword.
+    ReadonlyKeyword,
+    /// Variant of `ref` keyword.
+    RefKeyword,
+    /// Variant of `return` keyword.
+    ReturnKeyword,
+    /// Variant of `sbyte` keyword.
+    SbyteKeyword,
+    /// Variant of `sealed` keyword.
+    SealedKeyword,
+    /// Variant of `short` keyword.
+    ShortKeyword,
+    /// Variant of `sizeof` keyword.
+    SizeofKeyword,
+    /// Variant of `stackalloc` keyword.
+    StackallocKeyword,
+    /// Variant of `static` keyword.
+    StaticKeyword,
+    /// Variant of `string` keyword.
+    StringKeyword,
+    /// Variant of `struct` keyword.
+    StructKeyword,
+    /// Variant of `switch` keyword.
+    SwitchKeyword,
+    /// Variant of `this` keyword.
+    ThisKeyword,
+    /// Variant of `throw` keyword.
+    ThrowKeyword,
+    /// Variant of `true` keyword.
+    TrueKeyword,
+    /// Variant of `try` keyword.
+    TryKeyword,
+    /// Variant of `typeof` keyword.
+    TypeofKeyword,
+    /// Variant of `uint` keyword.
+    UintKeyword,
+    /// Variant of `ulong` keyword.
+    UlongKeyword,
+    /// Variant of `unchecked` keyword.
+    UncheckedKeyword,
+    /// Variant of `unsafe` keyword.
+    UnsafeKeyword,
+    /// Variant of `ushort` keyword.
+    UshortKeyword,
+    /// Variant of `using` keyword.
+    UsingKeyword,
+    /// Variant of `virtual` keyword.
+    VirtualKeyword,
+    /// Variant of `void` keyword.
+    VoidKeyword,
+    /// Variant of `volatile` keyword.
+    VolatileKeyword,
+    /// Variant of `while` keyword.
+    WhileKeyword,
+
+    // Contextual keywords
+    /// The `add` keyword (contextual).
+    AddKeyword,
+    /// The `alias` keyword (contextual).
+    AliasKeyword,
+    /// The `ascending` keyword (contextual).
+    AscendingKeyword,
+    /// The `by` keyword (contextual).
+    ByKeyword,
+    /// The `descending` keyword (contextual).
+    DescendingKeyword,
+    /// The `from` keyword (contextual).
+    FromKeyword,
+    /// The `get` keyword (contextual).
+    GetKeyword,
+    /// The `global` keyword (contextual).
+    GlobalKeyword,
+    /// The `group` keyword (contextual).
+    GroupKeyword,
+    /// The `into` keyword (contextual).
+    IntoKeyword,
+    /// The `join` keyword (contextual).
+    JoinKeyword,
+    /// The `let` keyword (contextual).
+    LetKeyword,
+    /// The `orderby` keyword (contextual).
+    OrderbyKeyword,
+    /// The `partial` keyword (contextual).
+    PartialKeyword,
+    /// The `remove` keyword (contextual).
+    RemoveKeyword,
+    /// The `select` keyword (contextual).
+    SelectKeyword,
+    /// The `set` keyword (contextual).
+    SetKeyword,
+    /// The `value` keyword (contextual).
+    ValueKeyword,
+    /// The `var` keyword (contextual).
+    VarKeyword,
+    /// The `where` keyword (contextual).
+    WhereKeyword,
+    /// The `yield` keyword (contextual).
+    YieldKeyword,
+
+    // Operators
+    /// The `+` operator.
+    Plus,
+    /// The `-` operator.
+    Minus,
+    /// The `*` operator.
+    Star,
+    /// The `/` operator.
+    Slash,
+    /// The `%` operator.
+    Percent,
+    /// The `&` operator.
+    Ampersand,
+    /// The `|` operator.
+    Pipe,
+    /// The `^` operator.
+    Caret,
+    /// The `~` operator.
+    Tilde,
+    /// Bitwise AND operator.
+    BitAnd,
+    /// Bitwise OR operator.
+    BitOr,
+    /// Bitwise XOR operator.
+    BitXor,
+    /// Bitwise NOT operator.
+    BitNot,
+    /// Left shift operator (`<<`).
+    LeftShift,
+    /// Right shift operator (`>>`).
+    RightShift,
+    /// Equality operator (`==`).
+    Equal,
+    /// Inequality operator (`!=`).
+    NotEqual,
+    /// Less than operator (`<`).
+    Less,
+    /// Less than or equal operator (`<=`).
+    LessEqual,
+    /// Greater than operator (`>`).
+    Greater,
+    /// Greater than or equal operator (`>=`).
+    GreaterEqual,
+    /// Logical AND operator (`&&`).
+    LogicalAnd,
+    /// Logical OR operator (`||`).
+    LogicalOr,
+    /// Logical NOT operator (`!`).
+    LogicalNot,
+    /// Question mark (`?`).
+    Question,
+    /// Null-coalescing operator (`??`).
+    QuestionQuestion,
+    /// Increment operator (`++`).
+    Increment,
+    /// Decrement operator (`--`).
+    Decrement,
+    /// Arrow operator (`->`).
+    Arrow,
+    /// Lambda operator (`=>`).
+    Lambda,
+
+    // Assignment operators
+    /// Simple assignment operator (`=`).
+    Assign,
+    /// Addition assignment operator (`+=`).
+    PlusAssign,
+    /// Subtraction assignment operator (`-=`).
+    MinusAssign,
+    /// Multiplication assignment operator (`*=`).
+    StarAssign,
+    /// Division assignment operator (`/=`).
+    SlashAssign,
+    /// Modulo assignment operator (`%=`).
+    PercentAssign,
+    /// Bitwise AND assignment operator (`&=`).
+    AmpersandAssign,
+    /// Bitwise OR assignment operator (`|=`).
+    PipeAssign,
+    /// Bitwise XOR assignment operator (`^=`).
+    CaretAssign,
+    /// Left shift assignment operator (`<<=`).
+    LeftShiftAssign,
+    /// Right shift assignment operator (`>>=`).
+    RightShiftAssign,
+    /// Null-coalescing assignment operator (`??=`).
+    QuestionQuestionAssign,
+    /// Logical AND assignment operator (`&&=`).
+    AndAssign,
+    /// Logical OR assignment operator (`||=`).
+    OrAssign,
+    /// Logical XOR assignment operator (`^=`).
+    XorAssign,
+
+    // Delimiters
+    /// Opening parenthesis (`(`).
+    LeftParen,
+    /// Closing parenthesis (`)`).
+    RightParen,
+    /// Opening bracket (`[`).
+    LeftBracket,
+    /// Closing bracket (`]`).
+    RightBracket,
+    /// Opening brace (`{`).
+    LeftBrace,
+    /// Closing brace (`}`).
+    RightBrace,
+    /// Comma (`,`).
+    Comma,
+    /// Semicolon (`;`).
+    Semicolon,
+    /// Colon (`:`).
+    Colon,
+    /// Double colon (`::`).
+    ColonColon,
+    /// Dot (`.`).
+    Dot,
+    /// Null-conditional operator (`?.`).
+    QuestionDot,
+    /// At sign (`@`).
+    At,
+    /// Hash sign (`#`).
+    Hash,
+    /// Dollar sign (`$`).
+    Dollar,
+
+    /// End of file.
+    Eof,
+
+    /// An error token.
+    Error,
+}
+
 impl CSharpTokenType {
+    /// Returns true if the token type is a keyword.
     pub fn is_keyword(&self) -> bool {
         matches!(
             self,
@@ -61,6 +589,7 @@ impl CSharpTokenType {
                 | Self::Protected
                 | Self::Public
                 | Self::Readonly
+                | Self::Record
                 | Self::Ref
                 | Self::Return
                 | Self::Sbyte
@@ -190,300 +719,26 @@ impl CSharpTokenType {
     }
 }
 
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
-#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
-pub enum CSharpTokenType {
-    Whitespace,
-
-    Newline,
-
-    Comment,
-
-    Identifier,
-
-    // Literals
-    Number,
-
-    String,
-
-    Character,
-
-    VerbatimString,
-
-    InterpolatedString,
-
-    NumberLiteral,
-
-    StringLiteral,
-
-    CharLiteral,
-
-    // Keywords
-    Abstract,
-    As,
-    Async,
-    Await,
-    Base,
-    Bool,
-    Break,
-    Byte,
-    Case,
-    Catch,
-    Char,
-    Checked,
-    Class,
-    Const,
-    Continue,
-    Decimal,
-    Default,
-    Delegate,
-    Do,
-    Double,
-    Else,
-    Enum,
-    Event,
-    Explicit,
-    Extern,
-    False,
-    Finally,
-    Fixed,
-    Float,
-    For,
-    Foreach,
-    Goto,
-    If,
-    Implicit,
-    In,
-    Int,
-    Interface,
-    Internal,
-    Is,
-    Lock,
-    Long,
-    Namespace,
-    New,
-    Null,
-    Object,
-    Operator,
-    Out,
-    Override,
-    Params,
-    Private,
-    Protected,
-    Public,
-    Readonly,
-    Record,
-    Ref,
-    Return,
-    Sbyte,
-    Sealed,
-    Short,
-    Sizeof,
-    Stackalloc,
-    Static,
-    Struct,
-    Switch,
-    This,
-    Throw,
-    True,
-    Try,
-    Typeof,
-    Uint,
-    Ulong,
-    Unchecked,
-    Unsafe,
-    Ushort,
-    Using,
-    Virtual,
-    Void,
-    Volatile,
-    While,
-
-    // Long keyword variants
-    AbstractKeyword,
-    AsKeyword,
-    AsyncKeyword,
-    AwaitKeyword,
-    BaseKeyword,
-    BoolKeyword,
-    BreakKeyword,
-    ByteKeyword,
-    CaseKeyword,
-    CatchKeyword,
-    CharKeyword,
-    CheckedKeyword,
-    ClassKeyword,
-    ConstKeyword,
-    ContinueKeyword,
-    DecimalKeyword,
-    DefaultKeyword,
-    DelegateKeyword,
-    DoKeyword,
-    DoubleKeyword,
-    ElseKeyword,
-    EnumKeyword,
-    EventKeyword,
-    ExplicitKeyword,
-    ExternKeyword,
-    FalseKeyword,
-    FinallyKeyword,
-    FixedKeyword,
-    FloatKeyword,
-    ForKeyword,
-    ForeachKeyword,
-    GotoKeyword,
-    IfKeyword,
-    ImplicitKeyword,
-    InKeyword,
-    IntKeyword,
-    InterfaceKeyword,
-    InternalKeyword,
-    IsKeyword,
-    LockKeyword,
-    LongKeyword,
-    NamespaceKeyword,
-    NewKeyword,
-    NullKeyword,
-    ObjectKeyword,
-    OperatorKeyword,
-    OutKeyword,
-    OverrideKeyword,
-    ParamsKeyword,
-    PrivateKeyword,
-    ProtectedKeyword,
-    PublicKeyword,
-    ReadonlyKeyword,
-    RefKeyword,
-    ReturnKeyword,
-    SbyteKeyword,
-    SealedKeyword,
-    ShortKeyword,
-    SizeofKeyword,
-    StackallocKeyword,
-    StaticKeyword,
-    StringKeyword,
-    StructKeyword,
-    SwitchKeyword,
-    ThisKeyword,
-    ThrowKeyword,
-    TrueKeyword,
-    TryKeyword,
-    TypeofKeyword,
-    UintKeyword,
-    UlongKeyword,
-    UncheckedKeyword,
-    UnsafeKeyword,
-    UshortKeyword,
-    UsingKeyword,
-    VirtualKeyword,
-    VoidKeyword,
-    VolatileKeyword,
-    WhileKeyword,
-
-    // Contextual keywords
-    AddKeyword,
-    AliasKeyword,
-    AscendingKeyword,
-    ByKeyword,
-    DescendingKeyword,
-    FromKeyword,
-    GetKeyword,
-    GlobalKeyword,
-    GroupKeyword,
-    IntoKeyword,
-    JoinKeyword,
-    LetKeyword,
-    OrderbyKeyword,
-    PartialKeyword,
-    RemoveKeyword,
-    SelectKeyword,
-    SetKeyword,
-    ValueKeyword,
-    VarKeyword,
-    WhereKeyword,
-    YieldKeyword,
-
-    // Operators
-    Plus,
-    Minus,
-    Star,
-    Slash,
-    Percent,
-    Ampersand,
-    Pipe,
-    Caret,
-    Tilde,
-    BitAnd,
-    BitOr,
-    BitXor,
-    BitNot,
-    LeftShift,
-    RightShift,
-    Equal,
-    NotEqual,
-    Less,
-    LessEqual,
-    Greater,
-    GreaterEqual,
-    LogicalAnd,
-    LogicalOr,
-    LogicalNot,
-    Question,
-    QuestionQuestion,
-    Increment,
-    Decrement,
-    Arrow,
-    Lambda,
-
-    // Assignment operators
-    Assign,
-    PlusAssign,
-    MinusAssign,
-    StarAssign,
-    SlashAssign,
-    PercentAssign,
-    AmpersandAssign,
-    PipeAssign,
-    CaretAssign,
-    LeftShiftAssign,
-    RightShiftAssign,
-    QuestionQuestionAssign,
-    AndAssign,
-    OrAssign,
-    XorAssign,
-
-    // Delimiters
-    LeftParen,
-    RightParen,
-    LeftBracket,
-    RightBracket,
-    LeftBrace,
-    RightBrace,
-    Comma,
-    Semicolon,
-    Colon,
-    ColonColon,
-    Dot,
-    QuestionDot,
-    At,
-    Hash,
-    Dollar,
-
-    Eof,
-
-    Error,
-}
-
 impl TokenType for CSharpTokenType {
     type Role = UniversalTokenRole;
-    const END_OF_STREAM: Self = Self::Error;
+    const END_OF_STREAM: Self = Self::Eof;
 
     fn is_ignored(&self) -> bool {
-        false
+        matches!(self, Self::Whitespace | Self::Comment | Self::Newline)
     }
 
     fn role(&self) -> Self::Role {
         match self {
+            Self::Whitespace | Self::Newline => UniversalTokenRole::Whitespace,
+            Self::Comment => UniversalTokenRole::Comment,
+            Self::Identifier => UniversalTokenRole::Name,
+            Self::Number | Self::NumberLiteral => UniversalTokenRole::Literal,
+            Self::String | Self::StringLiteral | Self::VerbatimString | Self::InterpolatedString => UniversalTokenRole::Literal,
+            Self::Character | Self::CharLiteral => UniversalTokenRole::Literal,
+            Self::True | Self::False | Self::Null => UniversalTokenRole::Literal,
+            Self::Eof => UniversalTokenRole::Eof,
+            Self::Error => UniversalTokenRole::Error,
+            _ if self.is_keyword() => UniversalTokenRole::Keyword,
             _ => UniversalTokenRole::None,
         }
     }

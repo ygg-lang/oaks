@@ -1,95 +1,179 @@
 use oak_core::{Token, TokenType, UniversalTokenRole};
-#[cfg(feature = "serde")]
-use serde::{Deserialize, Serialize};
 
+/// Type alias for a PureScript token.
 pub type PurescriptToken = Token<PurescriptTokenType>;
 
+/// Token types for PureScript.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub enum PurescriptTokenType {
+    /// Whitespace.
     Whitespace,
+    /// Newline.
     Newline,
+    /// Comment.
     Comment,
+    /// `ado`
     Ado,
+    /// `case`
     Case,
+    /// `class`
     Class,
+    /// `data`
     Data,
+    /// `derive`
     Derive,
+    /// `do`
     Do,
+    /// `else`
     Else,
+    /// `false`
     False,
+    /// `forall`
     Forall,
+    /// `foreign`
     Foreign,
+    /// `if`
     If,
+    /// `import`
     Import,
+    /// `in`
     In,
+    /// `infix`
     Infix,
+    /// `infixl`
     Infixl,
+    /// `infixr`
     Infixr,
+    /// `instance`
     Instance,
+    /// `let`
     Let,
+    /// `module`
     Module,
+    /// `newtype`
     Newtype,
+    /// `of`
     Of,
+    /// `then`
     Then,
+    /// `true`
     True,
+    /// `type`
     Type,
+    /// `where`
     Where,
+    /// `->`
     Arrow,
+    /// `=>`
     FatArrow,
+    /// `\`
     Backslash,
+    /// `|`
     Pipe,
+    /// `=`
     Equal,
+    /// `::`
     ColonColon,
+    /// `.`
     Dot,
+    /// `..`
     DotDot,
+    /// `+`
     Plus,
+    /// `-`
     Minus,
+    /// `*`
     Star,
+    /// `/`
     Slash,
+    /// `%`
     Percent,
+    /// `^`
     Caret,
+    /// `==`
     EqualEqual,
+    /// `/=`
     NotEqual,
+    /// `<`
     Less,
+    /// `>`
     Greater,
+    /// `<=`
     LessEqual,
+    /// `>=`
     GreaterEqual,
+    /// `&&`
     And,
+    /// `||`
     Or,
+    /// `<>`
     Append,
+    /// `<<<`
     Compose,
+    /// `>>>`
     ComposeFlipped,
+    /// `$`
     Apply,
+    /// `#`
     ApplyFlipped,
+    /// `>>=`
     Bind,
+    /// `=<<`
     BindFlipped,
+    /// `(`
     LeftParen,
+    /// `)`
     RightParen,
+    /// `{`
     LeftBrace,
+    /// `}`
     RightBrace,
+    /// `[`
     LeftBracket,
+    /// `]`
     RightBracket,
+    /// `,`
     Comma,
+    /// `;`
     Semicolon,
+    /// `:`
     Colon,
+    /// `?`
     Question,
+    /// `!`
     Exclamation,
+    /// `@`
     At,
+    /// `_`
     Underscore,
+    /// `` ` ``
     Tick,
+    /// Integer literal.
     IntLiteral,
+    /// Floating point literal.
     NumberLiteral,
+    /// String literal.
     StringLiteral,
+    /// Character literal.
     CharLiteral,
+    /// Boolean literal.
     BooleanLiteral,
+    /// Lowercase identifier.
     Identifier,
+    /// Uppercase identifier.
     UpperIdentifier,
+    /// Operator.
     Operator,
+    /// Qualified identifier.
     QualifiedIdentifier,
+    /// Root node.
     Root,
+    /// Source file node.
     SourceFile,
+    /// Error token.
     Error,
+    /// End of file.
     Eof,
 }
 
@@ -181,6 +265,7 @@ impl From<crate::parser::element_type::PurescriptElementType> for PurescriptToke
             E::SourceFile => Self::SourceFile,
             E::Error => Self::Error,
             E::Eof => Self::Eof,
+            _ => Self::Error,
         }
     }
 }

@@ -1,3 +1,4 @@
+/// Element types for JSON.
 pub mod element_type;
 
 use crate::{language::JsonLanguage, lexer::token_type::JsonTokenType, parser::element_type::JsonElementType};
@@ -5,13 +6,14 @@ use oak_core::{OakError, Parser, ParserState, Source, TextEdit, TokenType};
 
 pub(crate) type State<'a, S> = ParserState<'a, JsonLanguage, S>;
 
-/// JSON 语言解析器
+/// Parser for JSON.
 pub struct JsonParser<'config> {
-    /// 语言配置
+    /// Language configuration.
     pub(crate) config: &'config JsonLanguage,
 }
 
 impl<'config> JsonParser<'config> {
+    /// Creates a new `JsonParser` with the given language configuration.
     pub fn new(config: &'config JsonLanguage) -> Self {
         Self { config }
     }

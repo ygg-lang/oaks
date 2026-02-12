@@ -1,4 +1,4 @@
-//! Go 语言构建器
+//! Go language builder
 
 use crate::{
     ast::{self, Declaration, GoRoot},
@@ -13,9 +13,24 @@ use oak_core::{
     tree::{RedNode, RedTree},
 };
 
-/// Go 语言构建器
+mod build_signatures;
+
+/// Go language builder
 pub struct GoBuilder<'config> {
     pub(crate) config: &'config GoLanguage,
+}
+
+impl<'config> Builder<GoLanguage> for GoBuilder<'config> {
+    fn build<'a, S: Source + ?Sized>(&self, text: &S, edits: &[TextEdit], cache: &'a mut impl BuilderCache<GoLanguage>) -> BuildOutput<GoLanguage> {
+        let parser = GoParser::new(self.config);
+        let cache_ptr = cache as *mut _;
+        let output = parser.parse(text, edits, unsafe { &mut *cache_ptr });
+        let result = output.result.map(|green| {
+            let source = SourceText::new(text.get_text_in((0..text.length()).into()).into_owned());
+            self.build_root(green, &source, unsafe { &mut *cache_ptr })
+        });
+        OakDiagnostics { result, diagnostics: output.diagnostics }
+    }
 }
 
 impl<'config> GoBuilder<'config> {
@@ -23,7 +38,11 @@ impl<'config> GoBuilder<'config> {
         Self { config }
     }
 
-    fn build_root<'a>(&self, green: &'a GreenNode<'a, GoLanguage>, source: &SourceText) -> Result<GoRoot, OakError> {
+    fn build_root<'a>(&self, green: &'a GreenNode<'a, GoLanguage>, source: &SourceText, cache: &mut impl BuilderCache<GoLanguage>) -> GoRoot {
+        if let Some(cached) = cache.get_typed_node::<std::sync::Arc<GoRoot>>(green) {
+            return (*cached).clone();
+        }
+
         let red = RedNode::new(green, 0);
         let mut package = None;
         let mut imports = vec![];
@@ -39,23 +58,33 @@ impl<'config> GoBuilder<'config> {
                         imports.extend(self.extract_imports(node, source));
                     }
                     GoElementType::FunctionDeclaration => {
-                        declarations.push(Declaration::Function(self.extract_function(node, source)?));
+                        if let Ok(func) = self.extract_function(node, source, cache) {
+                            declarations.push(Declaration::Function(func));
+                        }
                     }
                     GoElementType::VariableDeclaration => {
-                        declarations.extend(self.extract_variables(node, source)?);
+                        if let Ok(vars) = self.extract_variables(node, source, cache) {
+                            declarations.extend(vars);
+                        }
                     }
                     GoElementType::ConstDeclaration => {
-                        declarations.extend(self.extract_consts(node, source)?);
+                        if let Ok(consts) = self.extract_consts(node, source, cache) {
+                            declarations.extend(consts);
+                        }
                     }
                     GoElementType::TypeDeclaration => {
-                        declarations.extend(self.extract_types(node, source)?);
+                        if let Ok(types) = self.extract_types(node, source, cache) {
+                            declarations.extend(types);
+                        }
                     }
                     _ => {}
                 }
             }
         }
 
-        Ok(GoRoot { package, imports, declarations })
+        let root = GoRoot { package, imports, declarations };
+        // cache.set_typed_node(green, std::sync::Arc::new(root.clone()));
+        root
     }
 
     fn extract_package(&self, node: RedNode<GoLanguage>, source: &SourceText) -> Option<String> {
@@ -91,65 +120,13 @@ impl<'config> GoBuilder<'config> {
                         imports.push(ast::Import { path, alias, span: n.span() });
                     }
                     _ => {
-                        // 处理 import ( ... )
+                        // Handle import ( ... )
                         imports.extend(self.extract_imports(n, source));
                     }
                 }
             }
         }
         imports
-    }
-
-    fn extract_function(&self, node: RedNode<GoLanguage>, source: &SourceText) -> Result<ast::Function, OakError> {
-        let mut name = String::new();
-        let mut params = vec![];
-        let mut return_types = vec![];
-        let mut body = ast::Block { statements: vec![], span: (0..0).into() };
-        let span = node.span();
-
-        for child in node.children() {
-            match child {
-                RedTree::Leaf(leaf) if leaf.kind == GoTokenType::Identifier => {
-                    name = source.get_text_in(leaf.span).trim().to_string();
-                }
-                RedTree::Node(n) => match n.green.kind {
-                    GoElementType::ParameterList => {
-                        for p_child in n.children() {
-                            if let RedTree::Node(pn) = p_child {
-                                if pn.green.kind == GoElementType::ParameterDecl {
-                                    let mut p_name = String::new();
-                                    let mut p_type = String::new();
-                                    for pd_child in pn.children() {
-                                        match pd_child {
-                                            RedTree::Leaf(leaf) if leaf.kind == GoTokenType::Identifier => {
-                                                if p_name.is_empty() {
-                                                    p_name = source.get_text_in(leaf.span).trim().to_string();
-                                                }
-                                                else {
-                                                    p_type = source.get_text_in(leaf.span).trim().to_string();
-                                                }
-                                            }
-                                            _ => {}
-                                        }
-                                    }
-                                    params.push(ast::Parameter { name: p_name, param_type: p_type, span: pn.span() });
-                                }
-                            }
-                        }
-                    }
-                    GoElementType::Block => {
-                        body = self.extract_block(n, source)?;
-                    }
-                    _ if n.green.kind.is_keyword() || n.green.kind == GoElementType::Identifier => {
-                        return_types.push(source.get_text_in(n.span()).to_string());
-                    }
-                    _ => {}
-                },
-                _ => {}
-            }
-        }
-
-        Ok(ast::Function { name, params, return_types, body, span })
     }
 
     fn extract_block(&self, node: RedNode<GoLanguage>, source: &SourceText) -> Result<ast::Block, OakError> {
@@ -198,7 +175,7 @@ impl<'config> GoBuilder<'config> {
                                 }
                             }
                             GoElementType::IfStatement => {
-                                // 处理 else if
+                                // Handle else if
                                 let inner_if = self.extract_statement(n, source)?;
                                 if let Some(ast::Statement::If { condition, then_block, else_block: inner_else, span }) = inner_if {
                                     else_block = Some(ast::Block { statements: vec![ast::Statement::If { condition, then_block, else_block: inner_else, span }], span });
@@ -240,7 +217,7 @@ impl<'config> GoBuilder<'config> {
                 Ok(Some(ast::Statement::For { init, condition, post, body, span: node.span() }))
             }
             GoElementType::AssignmentStatement | GoElementType::ShortVarDecl | GoElementType::VariableDeclaration | GoElementType::VariableSpec => {
-                // 支持多重赋值
+                // Support multiple assignment
                 let mut targets = vec![];
                 let mut values = vec![];
 
@@ -251,7 +228,7 @@ impl<'config> GoBuilder<'config> {
                         }
                         RedTree::Node(n) => {
                             if n.green.kind == GoElementType::VariableSpec || n.green.kind == GoElementType::VariableDeclaration {
-                                // 递归提取
+                                // Recursive extraction
                                 if let Some(ast::Statement::Assignment { targets: t, values: v, .. }) = self.extract_statement(n, source)? {
                                     targets.extend(t);
                                     values.extend(v);
@@ -272,7 +249,7 @@ impl<'config> GoBuilder<'config> {
                     return Ok(None);
                 }
 
-                // 如果没有值（如变量声明），填充默认值
+                // If no value (e.g., variable declaration), fill with default value
                 if values.is_empty() {
                     for _ in &targets {
                         values.push(ast::Expression::Literal { value: "0".to_string(), span: node.span() });
@@ -282,7 +259,7 @@ impl<'config> GoBuilder<'config> {
                 Ok(Some(ast::Statement::Assignment { targets, values, span: node.span() }))
             }
             _ => {
-                // 可能是表达式语句
+                // Could be an expression statement
                 if let Ok(expr) = self.extract_expression(node, source) { Ok(Some(ast::Statement::Expression(expr))) } else { Ok(None) }
             }
         }
@@ -423,7 +400,10 @@ impl<'config> GoBuilder<'config> {
         }
     }
 
-    fn extract_variables(&self, node: RedNode<GoLanguage>, source: &SourceText) -> Result<Vec<Declaration>, OakError> {
+    fn extract_variables(&self, node: RedNode<GoLanguage>, source: &SourceText, cache: &mut impl BuilderCache<GoLanguage>) -> Result<Vec<Declaration>, OakError> {
+        if let Some(cached) = cache.get_typed_node::<Vec<Declaration>>(&node.green) {
+            return Ok(cached);
+        }
         let mut vars = vec![];
         for child in node.children() {
             if let RedTree::Node(n) = child {
@@ -451,16 +431,20 @@ impl<'config> GoBuilder<'config> {
                         vars.push(Declaration::Variable(ast::Variable { name, var_type, value, span: n.span() }));
                     }
                     _ => {
-                        // 处理 var ( ... )
-                        vars.extend(self.extract_variables(n, source)?);
+                        // Handle var ( ... )
+                        vars.extend(self.extract_variables(n, source, cache)?);
                     }
                 }
             }
         }
+        cache.set_typed_node(&node.green, std::sync::Arc::new(vars.clone()));
         Ok(vars)
     }
 
-    fn extract_consts(&self, node: RedNode<GoLanguage>, source: &SourceText) -> Result<Vec<Declaration>, OakError> {
+    fn extract_consts(&self, node: RedNode<GoLanguage>, source: &SourceText, cache: &mut impl BuilderCache<GoLanguage>) -> Result<Vec<Declaration>, OakError> {
+        if let Some(cached) = cache.get_typed_node::<Vec<Declaration>>(&node.green) {
+            return Ok(cached);
+        }
         let mut consts = vec![];
         for child in node.children() {
             if let RedTree::Node(n) = child {
@@ -488,16 +472,20 @@ impl<'config> GoBuilder<'config> {
                         consts.push(Declaration::Const(ast::Const { name, const_type, value, span: n.span() }));
                     }
                     _ => {
-                        // 处理 const ( ... )
-                        consts.extend(self.extract_consts(n, source)?);
+                        // Handle const ( ... )
+                        consts.extend(self.extract_consts(n, source, cache)?);
                     }
                 }
             }
         }
+        cache.set_typed_node(&node.green, std::sync::Arc::new(consts.clone()));
         Ok(consts)
     }
 
-    fn extract_types(&self, node: RedNode<GoLanguage>, source: &SourceText) -> Result<Vec<Declaration>, OakError> {
+    fn extract_types(&self, node: RedNode<GoLanguage>, source: &SourceText, cache: &mut impl BuilderCache<GoLanguage>) -> Result<Vec<Declaration>, OakError> {
+        if let Some(cached) = cache.get_typed_node::<Vec<Declaration>>(&node.green) {
+            return Ok(cached);
+        }
         let mut types = vec![];
         for child in node.children() {
             if let RedTree::Node(n) = child {
@@ -524,38 +512,13 @@ impl<'config> GoBuilder<'config> {
                         types.push(Declaration::Type(ast::TypeDecl { name, definition, span: n.span() }));
                     }
                     _ => {
-                        // 处理 type ( ... )
-                        types.extend(self.extract_types(n, source)?);
+                        // Handle type ( ... )
+                        types.extend(self.extract_types(n, source, cache)?);
                     }
                 }
             }
         }
+        cache.set_typed_node(&node.green, std::sync::Arc::new(types.clone()));
         Ok(types)
-    }
-}
-
-impl<'config> Builder<GoLanguage> for GoBuilder<'config> {
-    fn build<'a, S: Source + ?Sized>(&self, source: &S, edits: &[TextEdit], _cache: &'a mut impl BuilderCache<GoLanguage>) -> BuildOutput<GoLanguage> {
-        let parser = GoParser::new(self.config);
-        let lexer = GoLexer::new(self.config);
-
-        let mut session = ParseSession::<GoLanguage>::default();
-        lexer.lex(source, edits, &mut session);
-        let parse_result = parser.parse(source, edits, &mut session);
-
-        match parse_result.result {
-            Ok(green_tree) => {
-                let source_text = SourceText::new(source.get_text_in((0..source.length()).into()).into_owned());
-                match self.build_root(green_tree, &source_text) {
-                    Ok(ast_root) => OakDiagnostics { result: Ok(ast_root), diagnostics: parse_result.diagnostics },
-                    Err(build_error) => {
-                        let mut diagnostics = parse_result.diagnostics;
-                        diagnostics.push(build_error.clone());
-                        OakDiagnostics { result: Err(build_error), diagnostics }
-                    }
-                }
-            }
-            Err(parse_error) => OakDiagnostics { result: Err(parse_error), diagnostics: parse_result.diagnostics },
-        }
     }
 }

@@ -1,32 +1,32 @@
 #![doc = include_str!("readme.md")]
-//! Dart 语法高亮器
+//! Dart syntax highlighter
 
-/// 高亮类型的本地定义
+/// Local definition of highlight kinds
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum HighlightKind {
-    /// 关键字
+    /// Keyword
     Keyword,
-    /// 字符串
+    /// String
     String,
-    /// 数字
+    /// Number
     Number,
-    /// 注释
+    /// Comment
     Comment,
-    /// 宏/注解
+    /// Macro/Annotation
     Annotation,
-    /// 标识符
+    /// Identifier
     Identifier,
 }
 
-/// 高亮器 trait
+/// Highlighter trait
 pub trait Highlighter {
-    /// 对给定的文本进行高亮处理
+    /// Highlights the given text
     fn highlight(&self, text: &str) -> Vec<(usize, usize, HighlightKind)>;
 }
 
-/// Dart 语法高亮器
+/// Dart syntax highlighter
 pub struct DartHighlighter {
-    /// 是否使用基于解析器的高亮
+    /// Whether to use parser-based highlighting
     pub use_parser: bool,
 }
 
@@ -43,7 +43,7 @@ impl DartHighlighter {
 
     pub fn highlight(&self, text: &str) -> Vec<(usize, usize, HighlightKind)> {
         let mut highlights = Vec::new();
-        // 简单的基于关键字的高亮实现
+        // Simple keyword-based highlighting implementation
         let keywords = [
             "abstract",
             "as",

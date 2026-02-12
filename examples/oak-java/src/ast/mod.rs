@@ -2,370 +2,507 @@
 //! Java AST definitions
 
 use core::range::Range;
-#[cfg(feature = "serde")]
-use serde::{Deserialize, Serialize};
 
-/// Java 程序的根节点
+/// Root node of a Java program
 #[derive(Debug, Clone, PartialEq)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct JavaRoot {
-    /// 编译单元中的项目
+    /// Items in the compilation unit
     pub items: Vec<Item>,
 }
 
-/// Java 程序中的顶级项目
+/// Annotation/Attribute
 #[derive(Debug, Clone, PartialEq)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+pub struct Annotation {
+    /// Annotation name
+    pub name: String,
+    /// Arguments (if any)
+    pub arguments: Vec<Expression>,
+    /// Source span
+    #[serde(with = "oak_core::serde_range")]
+    pub span: Range<usize>,
+}
+
+/// Top-level items in a Java program
+#[derive(Debug, Clone, PartialEq)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub enum Item {
-    /// 类声明
+    /// Class declaration
     Class(ClassDeclaration),
-    /// 接口声明
+    /// Interface declaration
     Interface(InterfaceDeclaration),
-    /// 结构体声明
+    /// Struct declaration
     Struct(StructDeclaration),
-    /// 枚举声明
+    /// Enum declaration
     Enum(EnumDeclaration),
-    /// 记录声明
+    /// Record declaration
     Record(RecordDeclaration),
-    /// 包声明
+    /// Package declaration
     Package(PackageDeclaration),
-    /// 导入声明
+    /// Import declaration
     Import(ImportDeclaration),
 }
 
-/// 类声明
+/// Class declaration
 #[derive(Debug, Clone, PartialEq)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct ClassDeclaration {
-    /// 类名
+    /// Class name
     pub name: String,
-    /// 修饰符
+    /// Modifiers
     pub modifiers: Vec<String>,
-    /// 父类
+    /// Annotations
+    pub annotations: Vec<Annotation>,
+    /// Superclass
     pub extends: Option<String>,
-    /// 实现的接口
+    /// Implemented interfaces
     pub implements: Vec<String>,
-    /// 成员
+    /// Members
     pub members: Vec<Member>,
-    /// 源码位置
-    #[cfg_attr(feature = "serde", serde(with = "oak_core::serde_range"))]
+    /// Source span
+    #[serde(with = "oak_core::serde_range")]
     pub span: Range<usize>,
 }
 
-/// 类成员
+/// Class members
 #[derive(Debug, Clone, PartialEq)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub enum Member {
-    /// 方法声明
+    /// Method declaration
     Method(MethodDeclaration),
-    /// 字段声明
+    /// Field declaration
     Field(FieldDeclaration),
-    /// 构造函数
+    /// Constructor declaration
     Constructor(ConstructorDeclaration),
 }
 
-/// 构造函数声明
+/// Constructor declaration
 #[derive(Debug, Clone, PartialEq)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct ConstructorDeclaration {
-    /// 修饰符
+    /// Modifiers
     pub modifiers: Vec<String>,
-    /// 名称 (应与类名一致)
+    /// Annotations
+    pub annotations: Vec<Annotation>,
+    /// Name (should match class name)
     pub name: String,
-    /// 参数列表
+    /// Parameter list
     pub parameters: Vec<Parameter>,
-    /// 方法体
+    /// Method body
     pub body: Vec<Statement>,
-    /// 源码位置
-    #[cfg_attr(feature = "serde", serde(with = "oak_core::serde_range"))]
+    /// Source span
+    #[serde(with = "oak_core::serde_range")]
     pub span: Range<usize>,
 }
 
-/// 方法声明
+/// Method declaration
 #[derive(Debug, Clone, PartialEq)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct MethodDeclaration {
-    /// 方法名
+    /// Method name
     pub name: String,
-    /// 修饰符
+    /// Modifiers
     pub modifiers: Vec<String>,
-    /// 返回类型
+    /// Annotations
+    pub annotations: Vec<Annotation>,
+    /// Return type
     pub return_type: String,
-    /// 参数列表
+    /// Parameter list
     pub parameters: Vec<Parameter>,
-    /// 方法体
+    /// Method body
     pub body: Vec<Statement>,
-    /// 抛出的异常
+    /// Thrown exceptions
     pub throws: Vec<String>,
-    /// 是否为静态
+    /// Whether it is static
     pub is_static: bool,
-    /// 源码位置
-    #[cfg_attr(feature = "serde", serde(with = "oak_core::serde_range"))]
+    /// Source span
+    #[serde(with = "oak_core::serde_range")]
     pub span: Range<usize>,
 }
 
-/// 参数
+/// Parameter
 #[derive(Debug, Clone, PartialEq)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct Parameter {
-    /// 参数名
+    /// Parameter name
     pub name: String,
-    /// 参数类型
+    /// Parameter type
     pub r#type: String,
 }
 
-/// 字段声明
+/// Field declaration.
 #[derive(Debug, Clone, PartialEq)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct FieldDeclaration {
+    /// Field name.
     pub name: String,
+    /// Field type.
     pub r#type: String,
+    /// Field modifiers (e.g., public, static).
     pub modifiers: Vec<String>,
-    #[cfg_attr(feature = "serde", serde(with = "oak_core::serde_range"))]
+    /// Annotations
+    pub annotations: Vec<Annotation>,
+    /// The span of the field declaration in the source file.
+    #[serde(with = "oak_core::serde_range")]
     pub span: Range<usize>,
 }
 
-/// 语句
+/// Statement.
 #[derive(Debug, Clone, PartialEq)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub enum Statement {
-    /// 表达式语句
+    /// Expression statement.
     Expression(Expression),
-    /// 返回语句
+    /// Return statement.
     Return(Option<Expression>),
-    /// 块语句
+    /// Block statement.
     Block(Vec<Statement>),
-    /// Try 语句
+    /// Try statement.
     Try(TryStatement),
-    /// Throw 语句
+    /// Throw statement.
     Throw(Expression),
-    /// 条件判断
-    If { condition: Expression, then_branch: Box<Statement>, else_branch: Option<Box<Statement>> },
-    /// While 循环
-    While { condition: Expression, body: Box<Statement> },
-    /// Do-While 循环
-    DoWhile { condition: Expression, body: Box<Statement> },
-    /// For 循环
-    For { init: Option<Box<Statement>>, condition: Option<Expression>, update: Option<Expression>, body: Box<Statement> },
-    /// For-Each 循环
-    ForEach { item_type: String, item_name: String, iterable: Expression, body: Box<Statement> },
-    /// Switch 语句
-    Switch { selector: Expression, cases: Vec<SwitchCase>, default: Option<Vec<Statement>> },
-    /// Break 语句
+    /// If statement.
+    If {
+        /// Condition expression.
+        condition: Expression,
+        /// Then branch statement.
+        then_branch: Box<Statement>,
+        /// Optional else branch statement.
+        else_branch: Option<Box<Statement>>,
+    },
+    /// While loop.
+    While {
+        /// Condition expression.
+        condition: Expression,
+        /// Loop body.
+        body: Box<Statement>,
+    },
+    /// Do-while loop.
+    DoWhile {
+        /// Condition expression.
+        condition: Expression,
+        /// Loop body.
+        body: Box<Statement>,
+    },
+    /// For loop.
+    For {
+        /// Initializer statement.
+        init: Option<Box<Statement>>,
+        /// Condition expression.
+        condition: Option<Expression>,
+        /// Update expression.
+        update: Option<Expression>,
+        /// Loop body.
+        body: Box<Statement>,
+    },
+    /// For-each loop.
+    ForEach {
+        /// Item type.
+        item_type: String,
+        /// Item name.
+        item_name: String,
+        /// Iterable expression.
+        iterable: Expression,
+        /// Loop body.
+        body: Box<Statement>,
+    },
+    /// Switch statement.
+    Switch {
+        /// Selector expression.
+        selector: Expression,
+        /// Switch cases.
+        cases: Vec<SwitchCase>,
+        /// Optional default case statements.
+        default: Option<Vec<Statement>>,
+    },
+    /// Break statement.
     Break,
-    /// Continue 语句
+    /// Continue statement.
     Continue,
-    /// 变量声明语句
-    LocalVariable { r#type: String, name: String, initializer: Option<Expression> },
+    /// Local variable declaration statement.
+    LocalVariable {
+        /// Variable type.
+        r#type: String,
+        /// Variable name.
+        name: String,
+        /// Optional initializer expression.
+        initializer: Option<Expression>,
+    },
 }
 
-/// Switch 分支
+/// Switch case.
 #[derive(Debug, Clone, PartialEq)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct SwitchCase {
+    /// Case label expression.
     pub label: Expression,
+    /// Case body statements.
     pub body: Vec<Statement>,
 }
 
-/// Try 语句
+/// Try statement.
 #[derive(Debug, Clone, PartialEq)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct TryStatement {
+    /// Try block.
     pub block: Vec<Statement>,
+    /// Catch clauses.
     pub catches: Vec<CatchClause>,
+    /// Optional finally block.
     pub finally: Option<Vec<Statement>>,
 }
 
-/// Catch 子句
+/// Catch clause.
 #[derive(Debug, Clone, PartialEq)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct CatchClause {
+    /// Catch parameter.
     pub parameter: Parameter,
+    /// Catch block.
     pub block: Vec<Statement>,
 }
 
-/// 表达式
+/// Expression.
 #[derive(Debug, Clone, PartialEq)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub enum Expression {
-    /// 字面量
+    /// Literal expression.
     Literal(Literal),
-    /// 变量引用
+    /// Identifier expression (e.g., variable reference).
     Identifier(String),
-    /// 方法调用
+    /// Method call expression.
     MethodCall(MethodCall),
-    /// 字段访问
+    /// Field access expression.
     FieldAccess(FieldAccess),
-    /// 数组访问
+    /// Array access expression.
     ArrayAccess(ArrayAccess),
-    /// 数组创建
+    /// Array creation expression.
     ArrayCreation(ArrayCreation),
-    /// New 表达式
+    /// New expression (object creation).
     New(NewExpression),
-    /// This 表达式
+    /// This expression.
     This,
-    /// Super 表达式
+    /// Super expression.
     Super,
-    /// 二元运算
-    Binary { left: Box<Expression>, op: String, right: Box<Expression> },
-    /// 一元运算
-    Unary { op: String, expression: Box<Expression> },
-    /// 赋值运算
-    Assignment { left: Box<Expression>, op: String, right: Box<Expression> },
-    /// 自增自减运算
-    Update { expression: Box<Expression>, op: String, is_prefix: bool },
-    /// 三元运算
-    Ternary { condition: Box<Expression>, then_branch: Box<Expression>, else_branch: Box<Expression> },
-    /// 类型转换
-    Cast { target_type: String, expression: Box<Expression> },
+    /// Binary operation.
+    Binary {
+        /// Left operand.
+        left: Box<Expression>,
+        /// Operator.
+        op: String,
+        /// Right operand.
+        right: Box<Expression>,
+    },
+    /// Unary operation.
+    Unary {
+        /// Operator.
+        op: String,
+        /// Operand expression.
+        expression: Box<Expression>,
+    },
+    /// Assignment operation.
+    Assignment {
+        /// Left operand.
+        left: Box<Expression>,
+        /// Operator.
+        op: String,
+        /// Right operand.
+        right: Box<Expression>,
+    },
+    /// Update operation (increment/decrement).
+    Update {
+        /// Operand expression.
+        expression: Box<Expression>,
+        /// Operator.
+        op: String,
+        /// Whether the operator is a prefix.
+        is_prefix: bool,
+    },
+    /// Ternary operation.
+    Ternary {
+        /// Condition expression.
+        condition: Box<Expression>,
+        /// Then branch expression.
+        then_branch: Box<Expression>,
+        /// Else branch expression.
+        else_branch: Box<Expression>,
+    },
+    /// Cast operation.
+    Cast {
+        /// Target type.
+        target_type: String,
+        /// Operand expression.
+        expression: Box<Expression>,
+    },
 }
 
-/// New 表达式
+/// New expression.
 #[derive(Debug, Clone, PartialEq)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct NewExpression {
+    /// Object type.
     pub r#type: String,
+    /// Constructor arguments.
     pub arguments: Vec<Expression>,
 }
 
-/// 字面量
+/// Literal.
 #[derive(Debug, Clone, PartialEq)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub enum Literal {
+    /// Integer literal.
     Integer(i64),
+    /// Float literal.
     Float(f64),
+    /// String literal.
     String(String),
+    /// Boolean literal.
     Boolean(bool),
 }
 
-/// 字段访问
+/// Field access.
 #[derive(Debug, Clone, PartialEq)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct FieldAccess {
-    /// 访问目标
+    /// Target expression.
     pub target: Box<Expression>,
-    /// 字段名
+    /// Field name.
     pub name: String,
 }
 
-/// 方法调用
+/// Method call.
 #[derive(Debug, Clone, PartialEq)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct MethodCall {
-    /// 调用目标 (可选，如 System.out)
+    /// Call target (optional, e.g., System.out).
     pub target: Option<Box<Expression>>,
-    /// 方法名
+    /// Method name.
     pub name: String,
-    /// 参数
+    /// Arguments.
     pub arguments: Vec<Expression>,
 }
 
-/// 数组访问
+/// Array access.
 #[derive(Debug, Clone, PartialEq)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct ArrayAccess {
+    /// Target array expression.
     pub target: Box<Expression>,
+    /// Index expression.
     pub index: Box<Expression>,
 }
 
-/// 数组创建
+/// Array creation.
 #[derive(Debug, Clone, PartialEq)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct ArrayCreation {
+    /// Element type.
     pub element_type: String,
+    /// Array dimensions.
     pub dimensions: Vec<Expression>,
 }
 
-/// 接口声明
+/// Interface declaration.
 #[derive(Debug, Clone, PartialEq)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct InterfaceDeclaration {
-    /// 接口名
+    /// Interface name.
     pub name: String,
-    /// 修饰符
+    /// Modifiers.
     pub modifiers: Vec<String>,
-    /// 继承的接口
+    /// Annotations
+    pub annotations: Vec<Annotation>,
+    /// Extended interfaces.
     pub extends: Vec<String>,
-    /// 成员
+    /// Interface members.
     pub members: Vec<Member>,
-    /// 源码位置
-    #[cfg_attr(feature = "serde", serde(with = "oak_core::serde_range"))]
+    /// The span of the interface declaration in the source file.
+    #[serde(with = "oak_core::serde_range")]
     pub span: Range<usize>,
 }
 
-/// 结构体声明
+/// Struct declaration.
 #[derive(Debug, Clone, PartialEq)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct StructDeclaration {
-    /// 结构体名
+    /// Struct name.
     pub name: String,
-    /// 修饰符
+    /// Modifiers.
     pub modifiers: Vec<String>,
-    /// 实现的接口
+    /// Annotations
+    pub annotations: Vec<Annotation>,
+    /// Implemented interfaces.
     pub implements: Vec<String>,
-    /// 成员
+    /// Struct members.
     pub members: Vec<Member>,
-    /// 源码位置
-    #[cfg_attr(feature = "serde", serde(with = "oak_core::serde_range"))]
+    /// The span of the struct declaration in the source file.
+    #[serde(with = "oak_core::serde_range")]
     pub span: Range<usize>,
 }
 
-/// 枚举声明
+/// Enum declaration
 #[derive(Debug, Clone, PartialEq)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct EnumDeclaration {
-    /// 枚举名
+    /// Enum name
     pub name: String,
-    /// 修饰符
+    /// Modifiers
     pub modifiers: Vec<String>,
-    /// 枚举项
-    pub variants: Vec<String>,
-    /// 成员
-    pub members: Vec<Member>,
-    /// 源码位置
-    #[cfg_attr(feature = "serde", serde(with = "oak_core::serde_range"))]
-    pub span: Range<usize>,
-}
-
-/// 记录声明
-#[derive(Debug, Clone, PartialEq)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
-pub struct RecordDeclaration {
-    /// 记录名
-    pub name: String,
-    /// 修饰符
-    pub modifiers: Vec<String>,
-    /// 参数列表 (C# record 有主构造函数)
-    pub parameters: Vec<Parameter>,
-    /// 实现的接口
+    /// Annotations
+    pub annotations: Vec<Annotation>,
+    /// Implemented interfaces
     pub implements: Vec<String>,
-    /// 成员
+    /// Enum variants
+    pub variants: Vec<String>,
+    /// Members
     pub members: Vec<Member>,
-    /// 源码位置
-    #[cfg_attr(feature = "serde", serde(with = "oak_core::serde_range"))]
+    /// Source span
+    #[serde(with = "oak_core::serde_range")]
     pub span: Range<usize>,
 }
 
-/// 包声明
+/// Record declaration.
 #[derive(Debug, Clone, PartialEq)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
-pub struct PackageDeclaration {
-    /// 包名
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+pub struct RecordDeclaration {
+    /// Record name.
     pub name: String,
-    /// 源码位置
-    #[cfg_attr(feature = "serde", serde(with = "oak_core::serde_range"))]
+    /// Modifiers.
+    pub modifiers: Vec<String>,
+    /// Annotations
+    pub annotations: Vec<Annotation>,
+    /// Record parameters (e.g., primary constructor parameters).
+    pub parameters: Vec<Parameter>,
+    /// Implemented interfaces.
+    pub implements: Vec<String>,
+    /// Record members.
+    pub members: Vec<Member>,
+    /// The span of the record declaration in the source file.
+    #[serde(with = "oak_core::serde_range")]
     pub span: Range<usize>,
 }
 
-/// 导入声明
+/// Package declaration.
 #[derive(Debug, Clone, PartialEq)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+pub struct PackageDeclaration {
+    /// Package name.
+    pub name: String,
+    /// The span of the package declaration in the source file.
+    #[serde(with = "oak_core::serde_range")]
+    pub span: Range<usize>,
+}
+
+/// Import declaration.
+#[derive(Debug, Clone, PartialEq)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct ImportDeclaration {
-    /// 导入路径
+    /// Import path.
     pub path: String,
-    /// 是否为静态导入
+    /// Whether it's a static import.
     pub is_static: bool,
-    /// 源码位置
-    #[cfg_attr(feature = "serde", serde(with = "oak_core::serde_range"))]
+    /// The span of the import declaration in the source file.
+    #[serde(with = "oak_core::serde_range")]
     pub span: Range<usize>,
 }

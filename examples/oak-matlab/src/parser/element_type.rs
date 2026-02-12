@@ -1,118 +1,194 @@
-use oak_core::{ElementType, Parser, UniversalElementRole};
-#[cfg(feature = "serde")]
-use serde::{Deserialize, Serialize};
+use oak_core::{ElementType, UniversalElementRole};
 
+/// Element types for the Matlab language.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 #[repr(u8)]
 pub enum MatlabElementType {
-    // 基础标记 (与 MatlabTokenType 保持一致)
+    // Basic tokens (consistent with MatlabTokenType)
+    /// Whitespace.
     Whitespace,
+    /// Newline.
     Newline,
+    /// Line comment.
     Comment,
+    /// Block comment.
     BlockComment,
 
-    // 标识符和字面量
+    // Identifiers and literals
+    /// Identifier.
     Identifier,
+    /// Number literal.
     Number,
+    /// String literal.
     String,
+    /// Character literal.
     Character,
 
-    // 关键字
+    // Keywords
+    /// `function` keyword.
     Function,
+    /// `end` keyword.
     End,
+    /// `if` keyword.
     If,
+    /// `else` keyword.
     Else,
+    /// `elseif` keyword.
     Elseif,
+    /// `while` keyword.
     While,
+    /// `for` keyword.
     For,
+    /// `break` keyword.
     Break,
+    /// `continue` keyword.
     Continue,
+    /// `return` keyword.
     Return,
+    /// `switch` keyword.
     Switch,
+    /// `case` keyword.
     Case,
+    /// `otherwise` keyword.
     Otherwise,
+    /// `try` keyword.
     Try,
+    /// `catch` keyword.
     Catch,
+    /// `global` keyword.
     Global,
+    /// `persistent` keyword.
     Persistent,
+    /// `classdef` keyword.
     Classdef,
+    /// `properties` keyword.
     Properties,
+    /// `methods` keyword.
     Methods,
+    /// `events` keyword.
     Events,
 
-    // 运算符
-    Plus,          // +
-    Minus,         // -
-    Times,         // *
-    Divide,        // /
-    Power,         // ^
-    LeftDivide,    // \
-    DotTimes,      // .*
-    DotDivide,     // ./
-    DotPower,      // .^
+    // Operators
+    /// `+` operator.
+    Plus, // +
+    /// `-` operator.
+    Minus, // -
+    /// `*` operator.
+    Times, // *
+    /// `/` operator.
+    Divide, // /
+    /// `^` operator.
+    Power, // ^
+    /// `\` operator.
+    LeftDivide, // \
+    /// `.*` operator.
+    DotTimes, // .*
+    /// `./` operator.
+    DotDivide, // ./
+    /// `.^` operator.
+    DotPower, // .^
+    /// `.\` operator.
     DotLeftDivide, // .\
 
-    // 比较运算符
-    Equal,        // ==
-    NotEqual,     // ~=
-    Less,         // <
-    Greater,      // >
-    LessEqual,    // <=
+    // Comparison operators
+    /// `==` operator.
+    Equal, // ==
+    /// `~=` operator.
+    NotEqual, // ~=
+    /// `<` operator.
+    Less, // <
+    /// `>` operator.
+    Greater, // >
+    /// `<=` operator.
+    LessEqual, // <=
+    /// `>=` operator.
     GreaterEqual, // >=
 
-    // 逻辑运算符
-    And,    // &
-    Or,     // |
-    Not,    // ~
+    // Logical operators
+    /// `&` operator.
+    And, // &
+    /// `|` operator.
+    Or, // |
+    /// `~` operator.
+    Not, // ~
+    /// `&&` operator.
     AndAnd, // &&
-    OrOr,   // ||
+    /// `||` operator.
+    OrOr, // ||
 
-    // 赋值运算符
+    // Assignment operators
+    /// `=` operator.
     Assign, // =
 
-    // 分隔符
-    LeftParen,    // (
-    RightParen,   // )
-    LeftBracket,  // [
+    // Delimiters
+    /// `(` delimiter.
+    LeftParen, // (
+    /// `)` delimiter.
+    RightParen, // )
+    /// `[` delimiter.
+    LeftBracket, // [
+    /// `]` delimiter.
     RightBracket, // ]
-    LeftBrace,    // {
-    RightBrace,   // }
-    Semicolon,    // ;
-    Comma,        // ,
-    Dot,          // .
-    Colon,        // :
-    Question,     // ?
-    At,           // @
+    /// `{` delimiter.
+    LeftBrace, // {
+    /// `}` delimiter.
+    RightBrace, // }
+    /// `;` delimiter.
+    Semicolon, // ;
+    /// `,` delimiter.
+    Comma, // ,
+    /// `.` delimiter.
+    Dot, // .
+    /// `:` delimiter.
+    Colon, // :
+    /// `?` delimiter.
+    Question, // ?
+    /// `@` delimiter.
+    At, // @
 
-    // 特殊运算符
-    Transpose,    // '
+    // Special operators
+    /// `'` operator.
+    Transpose, // '
+    /// `.'` operator.
     DotTranspose, // .'
 
-    // 泛化类型
+    // Generalized types
+    /// General operator.
     Operator,
+    /// General delimiter.
     Delimiter,
 
-    // 错误处理
+    // Error handling
+    /// Error element.
     Error,
 
-    // 文档结构 (Element)
+    // Document structure (Element)
+    /// Script element.
     Script,
+    /// Function definition element.
     FunctionDef,
+    /// Class definition element.
     ClassDef,
+    /// Block element.
     Block,
+    /// Expression element.
     Expression,
+    /// Statement element.
     Statement,
 
     // EOF
+    /// End of stream.
     Eof,
 }
 
 impl MatlabElementType {
+    /// Returns true if the element type is a token.
     pub fn is_token(&self) -> bool {
         (*self as u8) <= (Self::Eof as u8) && !self.is_element()
     }
 
+    /// Returns true if the element type is an element.
     pub fn is_element(&self) -> bool {
         matches!(self, Self::Script | Self::FunctionDef | Self::ClassDef | Self::Block | Self::Expression | Self::Statement)
     }

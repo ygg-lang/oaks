@@ -7,8 +7,8 @@
 
 /// AST module.
 pub mod ast;
-// pub mod builder;
-//
+/// Builder module.
+pub mod builder;
 // pub mod formatter;
 //
 // pub mod highlighter;
@@ -24,9 +24,10 @@ pub mod lsp;
 /// Parser module.
 pub mod parser;
 
-pub use crate::{ast::WatRoot, language::WatLanguage, lexer::WatLexer, parser::WatParser};
+pub use crate::{ast::WatRoot, builder::WatBuilder, language::WatLanguage, lexer::WatLexer, parser::WatParser};
 
 //
+/// Dummy highlighter for Wat.
 #[cfg(feature = "oak-highlight")]
 pub mod dummy_highlighter {}
 

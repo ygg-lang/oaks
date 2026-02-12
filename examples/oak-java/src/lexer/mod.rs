@@ -1,11 +1,14 @@
-#![doc = include_str!("readme.md")]
+//! Java lexer implementation.
+
+/// Java token types.
 pub mod token_type;
 
 use crate::{language::JavaLanguage, lexer::token_type::JavaTokenType};
 use oak_core::{Lexer, LexerCache, LexerState, OakError, lexer::LexOutput, source::Source};
 
-type State<'a, S> = LexerState<'a, S, JavaLanguage>;
+pub(crate) type State<'a, S> = LexerState<'a, S, JavaLanguage>;
 
+/// Java lexer.
 #[derive(Clone, Debug)]
 pub struct JavaLexer<'config> {
     _config: &'config JavaLanguage,
@@ -23,11 +26,12 @@ impl<'config> Lexer<JavaLanguage> for JavaLexer<'config> {
 }
 
 impl<'config> JavaLexer<'config> {
+    /// Create a new Java lexer.
     pub fn new(config: &'config JavaLanguage) -> Self {
         Self { _config: config }
     }
 
-    /// 主要的词法分析循环
+    /// Main lexing loop
     fn run<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> Result<(), OakError> {
         while state.not_at_end() {
             let safe_point = state.get_position();
@@ -64,7 +68,7 @@ impl<'config> JavaLexer<'config> {
                 continue;
             }
 
-            // 如果没有匹配到任何规则，前进一个字符并标记为错误
+            // If no rule matches, advance one character and mark as error
             let start_pos = state.get_position();
             if let Some(ch) = state.peek() {
                 state.advance(ch.len_utf8());
@@ -77,7 +81,7 @@ impl<'config> JavaLexer<'config> {
         Ok(())
     }
 
-    /// 跳过空白字符（不包括换行符）
+    /// Skip whitespace characters (excluding newlines)
     fn skip_whitespace<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start = state.get_position();
 
@@ -97,7 +101,7 @@ impl<'config> JavaLexer<'config> {
         false
     }
 
-    /// 处理换行
+    /// Handle newline
     fn lex_newline<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start = state.get_position();
 
@@ -111,11 +115,11 @@ impl<'config> JavaLexer<'config> {
         }
     }
 
-    /// 跳过注释
+    /// Skip comments
     fn skip_comment<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start = state.get_position();
 
-        // 单行注释 //
+        // Single-line comment //
         if state.peek() == Some('/') && state.peek_next_n(1) == Some('/') {
             state.advance(2);
             while let Some(ch) = state.peek() {
@@ -128,7 +132,7 @@ impl<'config> JavaLexer<'config> {
             return true;
         }
 
-        // 多行注释 /* */
+        // Multi-line comment /* */
         if state.peek() == Some('/') && state.peek_next_n(1) == Some('*') {
             let start = state.get_position();
             state.advance(2);
@@ -146,7 +150,7 @@ impl<'config> JavaLexer<'config> {
         false
     }
 
-    /// 处理字符串字面量
+    /// Handle string literal
     fn lex_string_literal<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start = state.get_position();
 
@@ -165,7 +169,7 @@ impl<'config> JavaLexer<'config> {
                     }
                 }
                 else if ch == '\n' {
-                    // 未闭合的字符串
+                    // Unclosed string
                     break;
                 }
                 else {
@@ -180,7 +184,7 @@ impl<'config> JavaLexer<'config> {
         false
     }
 
-    /// 处理字符字面�?
+    /// Handle character literal
     fn lex_char_literal<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start = state.get_position();
 
@@ -210,13 +214,13 @@ impl<'config> JavaLexer<'config> {
         false
     }
 
-    /// 处理数字字面�?
+    /// Handle number literal
     fn lex_number_literal<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start = state.get_position();
 
         if let Some(ch) = state.peek() {
             if ch.is_ascii_digit() {
-                // 处理整数部分
+                // Handle integer part
                 while let Some(ch) = state.peek() {
                     if ch.is_ascii_digit() {
                         state.advance(ch.len_utf8());
@@ -226,7 +230,7 @@ impl<'config> JavaLexer<'config> {
                     }
                 }
 
-                // 处理小数部分
+                // Handle fractional part
                 if state.peek() == Some('.') && state.peek_next_n(1).map_or(false, |c| c.is_ascii_digit()) {
                     state.advance(1); // '.'
                     while let Some(ch) = state.peek() {
@@ -239,7 +243,7 @@ impl<'config> JavaLexer<'config> {
                     }
                 }
 
-                // 处理指数部分
+                // Handle exponent part
                 if let Some(ch) = state.peek() {
                     if ch == 'e' || ch == 'E' {
                         state.advance(1);
@@ -259,7 +263,7 @@ impl<'config> JavaLexer<'config> {
                     }
                 }
 
-                // 处理后缀
+                // Handle suffix
                 if let Some(suffix) = state.peek() {
                     if suffix == 'f' || suffix == 'F' || suffix == 'd' || suffix == 'D' || suffix == 'l' || suffix == 'L' {
                         state.advance(1);
@@ -282,7 +286,7 @@ impl<'config> JavaLexer<'config> {
         false
     }
 
-    /// 处理标识符或关键�?
+    /// Handle identifier or keyword
     fn lex_identifier_or_keyword<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start = state.get_position();
 
@@ -315,7 +319,7 @@ impl<'config> JavaLexer<'config> {
         }
     }
 
-    /// 分类标识符为关键字或普通标识符
+    /// Classify identifier as keyword or plain identifier
     fn classify_identifier(&self, text: &str) -> JavaTokenType {
         match text {
             "abstract" => JavaTokenType::Abstract,
@@ -376,7 +380,7 @@ impl<'config> JavaLexer<'config> {
         }
     }
 
-    /// 处理操作符和分隔�?
+    /// Handle operator and delimiter
     fn lex_operator_or_delimiter<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start = state.get_position();
 

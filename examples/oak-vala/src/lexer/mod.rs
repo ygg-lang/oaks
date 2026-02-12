@@ -1,5 +1,6 @@
 #![doc = include_str!("readme.md")]
 use oak_core::Source;
+/// Vala token types.
 pub mod token_type;
 
 use crate::{language::ValaLanguage, lexer::token_type::ValaTokenType};
@@ -9,16 +10,17 @@ use oak_core::{
 };
 use std::sync::LazyLock;
 
-type State<'a, S> = LexerState<'a, S, ValaLanguage>;
+pub(crate) type State<'a, S> = LexerState<'a, S, ValaLanguage>;
 
 static VALA_WHITESPACE: LazyLock<WhitespaceConfig> = LazyLock::new(|| WhitespaceConfig { unicode_whitespace: true });
 static VALA_COMMENT: LazyLock<CommentConfig> = LazyLock::new(|| CommentConfig { line_marker: "//", block_start: "/*", block_end: "*/", nested_blocks: true });
 static VALA_STRING: LazyLock<StringConfig> = LazyLock::new(|| StringConfig { quotes: &['"'], escape: Some('\\') });
 static VALA_CHAR: LazyLock<StringConfig> = LazyLock::new(|| StringConfig { quotes: &['\''], escape: Some('\\') });
 
+/// Lexer for the Vala language.
 #[derive(Clone, Debug)]
 pub struct ValaLexer<'config> {
-    _config: &'config ValaLanguage,
+    config: &'config ValaLanguage,
 }
 
 impl<'config> Lexer<ValaLanguage> for ValaLexer<'config> {
@@ -30,8 +32,9 @@ impl<'config> Lexer<ValaLanguage> for ValaLexer<'config> {
 }
 
 impl<'config> ValaLexer<'config> {
+    /// Creates a new `ValaLexer` with the given language configuration.
     pub fn new(config: &'config ValaLanguage) -> Self {
-        Self { _config: config }
+        Self { config }
     }
 
     fn run<S: Source + ?Sized>(&self, state: &mut State<'_, S>) -> Result<(), OakError> {
@@ -73,7 +76,7 @@ impl<'config> ValaLexer<'config> {
             state.advance_if_dead_lock(safe_point);
         }
 
-        // 添加 EOF token
+        // Add EOF token
         state.add_eof();
         Ok(())
     }
@@ -107,7 +110,7 @@ impl<'config> ValaLexer<'config> {
 
         let mut is_float = false;
 
-        // 处理十六进制、八进制、二进制
+        // Handle hex, octal, binary
         if first == '0' {
             match state.peek_next_n(1) {
                 Some('x') | Some('X') => {
@@ -168,7 +171,7 @@ impl<'config> ValaLexer<'config> {
             }
         }
 
-        // 小数部分
+        // Fractional part
         if state.peek() == Some('.') {
             let n1 = state.peek_next_n(1);
             if n1.map(|c| c.is_ascii_digit()).unwrap_or(false) {
@@ -185,7 +188,7 @@ impl<'config> ValaLexer<'config> {
             }
         }
 
-        // 指数部分
+        // Exponent part
         if let Some(c) = state.peek() {
             if c == 'e' || c == 'E' {
                 let n1 = state.peek_next_n(1);
@@ -209,7 +212,7 @@ impl<'config> ValaLexer<'config> {
             }
         }
 
-        // 后缀字母 (e.g., f, d, l)
+        // Suffix letters (e.g., f, d, l)
         while let Some(c) = state.peek() {
             if c.is_ascii_alphabetic() {
                 state.advance(1);
@@ -311,7 +314,7 @@ impl<'config> ValaLexer<'config> {
             "weak" => ValaTokenType::WeakKw,
             "while" => ValaTokenType::WhileKw,
             "yield" => ValaTokenType::YieldKw,
-            // 基本类型
+            // Basic types
             "bool" => ValaTokenType::BoolKw,
             "char" => ValaTokenType::CharKw,
             "uchar" => ValaTokenType::UcharKw,
@@ -342,7 +345,7 @@ impl<'config> ValaLexer<'config> {
     fn lex_operators<S: Source + ?Sized>(&self, state: &mut State<'_, S>) -> bool {
         let start = state.get_position();
 
-        // 优先匹配较长的操作符
+        // Prefer longer operators
         let patterns: &[(&str, ValaTokenType)] = &[
             ("<<", ValaTokenType::LeftShift),
             (">>", ValaTokenType::RightShift),

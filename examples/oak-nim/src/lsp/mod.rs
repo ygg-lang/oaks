@@ -38,6 +38,7 @@ pub struct NimLanguageService<V: Vfs> {
     _cache: Arc<DashMap<String, ParseSession<NimLanguage>>>,
 }
 impl<V: Vfs> NimLanguageService<V> {
+    /// Creates a new Nim language service
     pub fn new(vfs: V) -> Self {
         Self { vfs, workspace: oak_lsp::workspace::WorkspaceManager::default(), hover_provider: NimHoverProvider, _cache: Arc::new(DashMap::new()) }
     }

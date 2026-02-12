@@ -1,38 +1,49 @@
 use oak_core::{ElementType, UniversalElementRole};
-#[cfg(feature = "serde")]
-use serde::{Deserialize, Serialize};
 
+/// Element types for the Mermaid AST.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 #[repr(u8)]
 pub enum MermaidElementType {
-    // 基础标记 (与 MermaidTokenType 保持一致)
+    /// Whitespace characters.
     Whitespace,
+    /// Newline character.
     Newline,
+    /// Comment.
     Comment,
 
+    /// `graph` keyword.
     Graph,
+    /// Direction (e.g., LR, TD).
     Direction,
+    /// Identifier.
     Id,
+    /// Node label.
     Label,
+    /// Connection arrow (e.g., `-->`).
     Arrow,
 
+    /// Lexing or parsing error.
     Error,
 
-    // 文档结构 (Element)
+    /// Root node of the diagram.
     Root,
+    /// Node in the diagram.
     Node,
+    /// Edge between nodes.
     Edge,
 
-    // EOF
+    /// End of stream.
     Eof,
 }
 
 impl MermaidElementType {
+    /// Returns `true` if this element type represents a token.
     pub fn is_token(&self) -> bool {
         (*self as u8) <= (Self::Eof as u8) && !self.is_element()
     }
 
+    /// Returns `true` if this element type represents a composite element.
     pub fn is_element(&self) -> bool {
         matches!(self, Self::Root | Self::Node | Self::Edge)
     }

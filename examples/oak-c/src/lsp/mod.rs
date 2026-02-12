@@ -4,12 +4,14 @@ use core::range::Range;
 use oak_core::tree::RedNode;
 #[cfg(feature = "lsp")]
 use {futures::Future, oak_lsp::service::LanguageService, oak_lsp::types::Hover as LspHover, oak_vfs::Vfs};
+/// C language LSP service implementation.
 #[cfg(feature = "lsp")]
 pub struct CLanguageService<V: Vfs> {
     vfs: V,
     workspace: oak_lsp::workspace::WorkspaceManager,
 }
 impl<V: Vfs> CLanguageService<V> {
+    /// Creates a new `CLanguageService`.
     pub fn new(vfs: V) -> Self {
         Self { vfs, workspace: oak_lsp::workspace::WorkspaceManager::new() }
     }

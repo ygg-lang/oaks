@@ -1,18 +1,18 @@
 #![doc = include_str!("readme.md")]
 pub mod token_type;
 
-/// Lean 语言词法分析器
+/// Lean language lexer
 ///
-/// 提供 Lean 语言的词法分析功能，将源代码文本转换为标记流
+/// Provides lexical analysis for the Lean language, converting source text into a token stream
 use crate::{language::LeanLanguage, lexer::token_type::LeanTokenType};
 use oak_core::{Lexer, LexerCache, LexerState, OakError, TextEdit, lexer::LexOutput, source::Source};
 
-type State<'a, S> = LexerState<'a, S, LeanLanguage>;
+pub(crate) type State<'a, S> = LexerState<'a, S, LeanLanguage>;
 
-/// Lean 词法分析器
+/// Lean lexer
 #[derive(Debug, Clone)]
 pub struct LeanLexer<'config> {
-    _config: &'config LeanLanguage,
+    config: &'config LeanLanguage,
 }
 
 impl<'config> Lexer<LeanLanguage> for LeanLexer<'config> {
@@ -27,12 +27,12 @@ impl<'config> Lexer<LeanLanguage> for LeanLexer<'config> {
 }
 
 impl<'config> LeanLexer<'config> {
-    /// 创建新的 Lean 词法分析器
+    /// Creates a new Lean lexer
     pub fn new(config: &'config LeanLanguage) -> Self {
-        Self { _config: config }
+        Self { config }
     }
 
-    /// 跳过空白字符
+    /// Skips whitespace
     fn skip_whitespace<S: Source + ?Sized>(&self, state: &mut State<'_, S>) -> bool {
         let start_pos = state.get_position();
 
@@ -49,7 +49,7 @@ impl<'config> LeanLexer<'config> {
         }
     }
 
-    /// 处理换行
+    /// Handles newlines
     fn lex_newline<S: Source + ?Sized>(&self, state: &mut State<'_, S>) -> bool {
         let start_pos = state.get_position();
 
@@ -71,14 +71,14 @@ impl<'config> LeanLexer<'config> {
         }
     }
 
-    /// 处理注释
+    /// Handles comments
     fn lex_comment<S: Source + ?Sized>(&self, state: &mut State<'_, S>) -> bool {
         let start_pos = state.get_position();
 
         if let Some('-') = state.peek() {
             state.advance(1);
             if let Some('-') = state.peek() {
-                // 单行注释
+                // Single-line comment
                 state.advance(1);
                 while let Some(ch) = state.peek() {
                     if ch == '\n' || ch == '\r' {
@@ -90,7 +90,7 @@ impl<'config> LeanLexer<'config> {
                 true
             }
             else {
-                // 回退，这是减号操作符
+                // Backtrack, this is a minus operator
                 state.set_position(start_pos);
                 false
             }
@@ -98,7 +98,7 @@ impl<'config> LeanLexer<'config> {
         else if let Some('/') = state.peek() {
             state.advance(1);
             if let Some('-') = state.peek() {
-                // 块注释开始
+                // Block comment start
                 state.advance(1);
                 let mut depth = 1;
                 while depth > 0 && state.not_at_end() {
@@ -127,7 +127,7 @@ impl<'config> LeanLexer<'config> {
                 true
             }
             else {
-                // 回退，这是除法操作符
+                // Backtrack, this is a division operator
                 state.set_position(start_pos);
                 false
             }
@@ -137,7 +137,7 @@ impl<'config> LeanLexer<'config> {
         }
     }
 
-    /// 处理字符串字面量
+    /// Handles string literals
     fn lex_string<S: Source + ?Sized>(&self, state: &mut State<'_, S>) -> bool {
         let start_pos = state.get_position();
 
@@ -156,7 +156,7 @@ impl<'config> LeanLexer<'config> {
                     }
                 }
                 else if ch == '\n' || ch == '\r' {
-                    break; // 字符串不能跨行
+                    break; // String cannot span lines
                 }
                 else {
                     state.advance(ch.len_utf8())
@@ -170,7 +170,7 @@ impl<'config> LeanLexer<'config> {
         }
     }
 
-    /// 处理字符字面量
+    /// Handles character literals
     fn lex_char<S: Source + ?Sized>(&self, state: &mut State<'_, S>) -> bool {
         let start_pos = state.get_position();
 
@@ -203,20 +203,20 @@ impl<'config> LeanLexer<'config> {
         }
     }
 
-    /// 处理数字字面量
+    /// Handles number literals.
     fn lex_number<S: Source + ?Sized>(&self, state: &mut State<'_, S>) -> bool {
         let start_pos = state.get_position();
 
         if let Some(ch) = state.peek() {
             if ch.is_ascii_digit() {
-                // 扫描数字
+                // Scan digits
                 while let Some(ch) = state.peek() {
                     if ch.is_ascii_digit() { state.advance(ch.len_utf8()) } else { break }
                 }
 
-                // 检查小数点
+                // Check decimal point
                 if let Some('.') = state.peek() {
-                    state.advance(1); // 跳过小数点
+                    state.advance(1); // Skip decimal point
                     if let Some(next_char) = state.peek() {
                         if next_char.is_ascii_digit() {
                             while let Some(ch) = state.peek() {
@@ -226,7 +226,7 @@ impl<'config> LeanLexer<'config> {
                     }
                 }
 
-                // 检查指数部分
+                // Check exponent part
                 if let Some(ch) = state.peek() {
                     if ch == 'e' || ch == 'E' {
                         state.advance(1);
@@ -253,7 +253,7 @@ impl<'config> LeanLexer<'config> {
         }
     }
 
-    /// 处理标识符和关键字
+    /// Handles identifiers and keywords.
     fn lex_identifier_or_keyword<S: Source + ?Sized>(&self, state: &mut State<'_, S>) -> bool {
         let start_pos = state.get_position();
 
@@ -328,7 +328,7 @@ impl<'config> LeanLexer<'config> {
         }
     }
 
-    /// 处理操作符和分隔符
+    /// Handles operators and delimiters.
     fn lex_operator_or_delimiter<S: Source + ?Sized>(&self, state: &mut State<'_, S>) -> bool {
         let start_pos = state.get_position();
 
@@ -376,7 +376,7 @@ impl<'config> LeanLexer<'config> {
                 continue;
             }
 
-            // 如果所有规则都不匹配，跳过当前字符并标记为错误
+            // If no rules match, skip current character and mark as error.
             let start_pos = state.get_position();
             if let Some(ch) = state.peek() {
                 state.advance(ch.len_utf8());

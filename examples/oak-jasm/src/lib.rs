@@ -42,5 +42,7 @@ pub use crate::lsp::JasmLanguageService;
 /// MCP service implementation.
 #[cfg(feature = "mcp")]
 pub use crate::mcp::serve_jasm_mcp;
+/// Jasm token type.
 pub use lexer::token_type::JasmTokenType;
+/// Jasm element type.
 pub use parser::element_type::JasmElementType;

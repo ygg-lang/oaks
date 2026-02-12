@@ -1,3 +1,4 @@
+/// Zig element types and roles.
 pub mod element_type;
 
 use crate::{
@@ -16,11 +17,13 @@ use oak_core::{
 
 pub(crate) type State<'a, S> = ParserState<'a, ZigLanguage, S>;
 
+/// Parser for the Zig language.
 pub struct ZigParser<'config> {
     pub(crate) config: &'config ZigLanguage,
 }
 
 impl<'config> ZigParser<'config> {
+    /// Creates a new Zig parser with the given configuration.
     pub fn new(config: &'config ZigLanguage) -> Self {
         Self { config }
     }
@@ -132,21 +135,19 @@ impl<'config> Pratt<ZigLanguage> for ZigParser<'config> {
 impl<'config> Parser<ZigLanguage> for ZigParser<'config> {
     fn parse<'a, S: Source + ?Sized>(&self, source: &'a S, edits: &[TextEdit], cache: &'a mut impl ParseCache<ZigLanguage>) -> ParseOutput<'a, ZigLanguage> {
         let lexer = ZigLexer::new(self.config);
-        parse_with_lexer(&lexer, source, edits, cache, |state| self.parse_root_internal(state))
+        parse_with_lexer(&lexer, source, edits, cache, |state| {
+            let checkpoint = state.checkpoint();
+
+            while state.not_at_end() {
+                self.parse_statement(state)?;
+            }
+
+            Ok(state.finish_at(checkpoint, ZigElementType::Root))
+        })
     }
 }
 
 impl<'p> ZigParser<'p> {
-    pub(crate) fn parse_root_internal<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> Result<&'a GreenNode<'a, ZigLanguage>, OakError> {
-        let checkpoint = state.checkpoint();
-
-        while state.not_at_end() {
-            self.parse_statement(state)?;
-        }
-
-        Ok(state.finish_at(checkpoint, ZigElementType::Root))
-    }
-
     fn parse_statement<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> Result<(), OakError> {
         match state.peek_kind() {
             Some(ZigTokenType::Fn) => self.parse_function_declaration(state)?,

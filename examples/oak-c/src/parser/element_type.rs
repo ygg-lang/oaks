@@ -1,35 +1,35 @@
 use crate::lexer::CTokenType;
 use oak_core::{ElementType, UniversalElementRole};
-#[cfg(feature = "serde")]
-use serde::{Deserialize, Serialize};
 
 /// Represents all possible element kinds in the C programming language.
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub enum CElementType {
-    /// A wrapper for tokens
+    /// A wrapper for tokens.
     Token(CTokenType),
-    /// Root node representing the entire source file
+    /// Root node representing the entire source file.
     Root,
-    /// Function definition
+    /// A function definition.
     FunctionDefinition,
-    /// Parameter list
+    /// A list of parameters in a function declaration or definition.
     ParameterList,
-    /// Compound statement (block)
+    /// A compound statement (a block of code enclosed in braces).
     CompoundStatement,
-    /// Expression statement
+    /// An expression statement.
     ExpressionStatement,
-    /// Declaration statement
+    /// A declaration statement.
     DeclarationStatement,
-    /// If statement
+    /// A declarator.
+    Declarator,
+    /// An `if` statement.
     IfStatement,
-    /// While statement
+    /// A `while` statement.
     WhileStatement,
-    /// For statement
+    /// A `for` statement.
     ForStatement,
-    /// Return statement
+    /// A `return` statement.
     ReturnStatement,
-    /// Error element
+    /// An error element used for recovery.
     Error,
 }
 

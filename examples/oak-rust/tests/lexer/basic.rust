@@ -1,3 +1,138 @@
-fn main() {
-    println!("Hello, world!");
+// Comprehensive Rust Lexer Test
+#![allow(unused)]
+
+use std::collections::HashMap;
+use std::fmt::{self, Display, Formatter};
+use std::sync::Arc;
+
+/// A simple enum
+#[derive(Debug, Clone, PartialEq)]
+enum Status {
+    Active,
+    Inactive,
+    Pending(u32),
 }
+
+/// A struct with lifetime
+struct User<'a> {
+    username: &'a str,
+    email: String,
+    age: u8,
+    active: bool,
+}
+
+// Trait definition
+trait Summary {
+    fn summarize(&self) -> String;
+}
+
+impl<'a> Summary for User<'a> {
+    fn summarize(&self) -> String {
+        format!("User: {}, Email: {}", self.username, self.email)
+    }
+}
+
+// Macro usage
+macro_rules! say_hello {
+    () => {
+        println!("Hello!");
+    };
+}
+
+fn main() {
+    // Variables and Types
+    let x: i32 = 42;
+    let y = 3.14;
+    let is_valid = true;
+    let c = 'z';
+    let s = "String literal";
+    let raw_s = r#"Raw string literal"#;
+    let byte_s = b"Byte string";
+
+    // Mutability
+    let mut count = 0;
+    count += 1;
+
+    // Tuples and Arrays
+    let tuple = (1, "hello", 3.5);
+    let array = [1, 2, 3, 4, 5];
+    let slice = &array[1..3];
+
+    // Control Flow
+    if x > 10 {
+        println!("Big");
+    } else if x == 10 {
+        println!("Ten");
+    } else {
+        println!("Small");
+    }
+
+    let number = if true { 5 } else { 6 };
+
+    // Loops
+    loop {
+        if count > 5 { break; }
+        count += 1;
+    }
+
+    while count > 0 {
+        count -= 1;
+    }
+
+    for i in 0..5 {
+        println!("{}", i);
+    }
+
+    // Pattern Matching
+    let status = Status::Pending(10);
+    match status {
+        Status::Active => println!("Active"),
+        Status::Inactive => println!("Inactive"),
+        Status::Pending(val) => println!("Pending: {}", val),
+    }
+
+    if let Status::Active = status {
+        println!("Is active");
+    }
+
+    // Closures
+    let add_one = |x: i32| x + 1;
+    println!("Add one: {}", add_one(5));
+
+    // Error Handling
+    let result: Result<i32, &str> = Ok(10);
+    match result {
+        Ok(val) => println!("Success: {}", val),
+        Err(e) => println!("Error: {}", e),
+    }
+
+    // Ranges
+    let range = 1..=10;
+    
+    // Async/Await (syntax check)
+    async fn do_something() {
+        // ...
+    }
+    
+    // Lifetimes usage
+    let string1 = String::from("long string");
+    let result;
+    {
+        let string2 = String::from("xyz");
+        result = longest(string1.as_str(), string2.as_str());
+        println!("The longest string is {}", result);
+    }
+}
+
+fn longest<'a>(x: &'a str, y: &'a str) -> &'a str {
+    if x.len() > y.len() {
+        x
+    } else {
+        y
+    }
+}
+
+/* 
+   Block comment
+   spanning multiple lines
+*/

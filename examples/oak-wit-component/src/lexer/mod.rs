@@ -9,7 +9,7 @@ use oak_core::{
 };
 use std::sync::LazyLock;
 
-type State<'a, S> = LexerState<'a, S, WitLanguage>;
+pub(crate) type State<'a, S> = LexerState<'a, S, WitLanguage>;
 
 static WIT_WHITESPACE: LazyLock<WhitespaceConfig> = LazyLock::new(|| WhitespaceConfig { unicode_whitespace: true });
 static WIT_COMMENT: LazyLock<CommentConfig> = LazyLock::new(|| CommentConfig { line_marker: "//", block_start: "/*", block_end: "*/", nested_blocks: true });
@@ -63,7 +63,7 @@ impl<'config> WitLexer<'config> {
                 continue;
             }
 
-            // 如果所有规则都不匹配，跳过当前字符并标记为错误
+            // If no rules match, skip the current character and mark it as an error
             let start_pos = state.get_position();
             if let Some(ch) = state.peek() {
                 state.advance(ch.len_utf8());
@@ -71,7 +71,7 @@ impl<'config> WitLexer<'config> {
             }
         }
 
-        // 添加 EOF token
+        // Add EOF token
         let eof_pos = state.get_position();
         state.add_token(WitTokenType::Eof, eof_pos, eof_pos);
         Ok(())
@@ -93,7 +93,7 @@ impl<'config> WitLexer<'config> {
         let start_pos = state.get_position();
         let mut has_digits = false;
 
-        // 处理数字
+        // Handle digits
         while let Some(ch) = state.peek() {
             if ch.is_ascii_digit() {
                 state.advance(1);
@@ -119,7 +119,7 @@ impl<'config> WitLexer<'config> {
             if ch.is_ascii_alphabetic() || ch == '_' || ch == '%' {
                 state.advance(ch.len_utf8());
 
-                // 继续读取标识符字符
+                // Continue reading identifier characters
                 while let Some(ch) = state.peek() {
                     if ch.is_ascii_alphanumeric() || ch == '_' || ch == '-' {
                         state.advance(ch.len_utf8());
@@ -131,7 +131,7 @@ impl<'config> WitLexer<'config> {
 
                 let text = state.get_text_from(start_pos);
                 let token_kind = match text.as_ref() {
-                    // WIT 关键字
+                    // WIT keywords
                     "world" => WitTokenType::WorldKw,
                     "interface" => WitTokenType::InterfaceKw,
                     "package" => WitTokenType::PackageKw,

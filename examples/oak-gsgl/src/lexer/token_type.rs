@@ -1,162 +1,275 @@
 use core::fmt;
 use oak_core::{Token, TokenType, UniversalTokenRole};
 
-#[cfg(feature = "serde")]
-use serde::{Deserialize, Serialize};
-
+/// A token for the GSGL language.
 pub type GsglToken = Token<GsglTokenType>;
 
+/// Token types for the GSGL (Game Shader Graphics Language) language.
 #[derive(Clone, Copy, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub enum GsglTokenType {
-    // Non-terminal nodes
+    /// Root node of the AST.
     Root,
+    /// A source file.
     SourceFile,
+    /// A function definition.
     FunctionDefinition,
+    /// A variable declaration.
     VariableDeclaration,
+    /// A struct definition.
     StructDefinition,
+    /// A block of code.
     Block,
+    /// An `if` statement.
     IfStatement,
+    /// A `for` statement.
     ForStatement,
+    /// A `while` statement.
     WhileStatement,
+    /// A `return` statement.
     ReturnStatement,
 
-    // Keywords
+    /// `shader` keyword.
     Shader,
+    /// `vertex` keyword.
     Vertex,
+    /// `fragment` keyword.
     Fragment,
+    /// `geometry` keyword.
     Geometry,
+    /// `compute` keyword.
     Compute,
+    /// `uniform` keyword.
     Uniform,
+    /// `attribute` keyword.
     Attribute,
+    /// `varying` keyword.
     Varying,
+    /// `in` keyword.
     In,
+    /// `out` keyword.
     Out,
+    /// `inout` keyword.
     Inout,
+    /// `const` keyword.
     Const,
+    /// `struct` keyword.
     Struct,
+    /// `if` keyword.
     If,
+    /// `else` keyword.
     Else,
+    /// `for` keyword.
     For,
+    /// `while` keyword.
     While,
+    /// `do` keyword.
     Do,
+    /// `break` keyword.
     Break,
+    /// `continue` keyword.
     Continue,
+    /// `return` keyword.
     Return,
+    /// `discard` keyword.
     Discard,
+    /// `true` keyword.
     True,
+    /// `false` keyword.
     False,
 
-    // Data types
+    /// `float` type.
     Float,
+    /// `int` type.
     Int,
+    /// `bool` type.
     Bool,
+    /// `vec2` type.
     Vec2,
+    /// `vec3` type.
     Vec3,
+    /// `vec4` type.
     Vec4,
+    /// `mat2` type.
     Mat2,
+    /// `mat3` type.
     Mat3,
+    /// `mat4` type.
     Mat4,
+    /// `sampler2D` type.
     Sampler2D,
+    /// `samplerCube` type.
     SamplerCube,
+    /// `void` type.
     Void,
 
-    // Identifiers and literals
+    /// An identifier.
     Identifier,
+    /// A number literal.
     Number,
+    /// A string literal.
     String,
 
-    // Operators
+    /// `+`.
     Plus,
+    /// `-`.
     Minus,
+    /// `*`.
     Star,
+    /// `/`.
     Slash,
+    /// `%`.
     Percent,
+    /// `=`.
     Assign,
+    /// `+=`.
     PlusAssign,
+    /// `-=`.
     MinusAssign,
+    /// `*=`.
     StarAssign,
+    /// `/=`.
     SlashAssign,
 
-    // Comparison operators
+    /// `==`.
     Eq,
+    /// `!=`.
     Ne,
+    /// `<`.
     Lt,
+    /// `<=`.
     Le,
+    /// `>`.
     Gt,
+    /// `>=`.
     Ge,
 
-    // Logical operators
+    /// `&&`.
     And,
+    /// `||`.
     Or,
+    /// `!`.
     Not,
 
-    // Bitwise operators
+    /// `&`.
     BitAnd,
+    /// `|`.
     BitOr,
+    /// `^`.
     BitXor,
+    /// `~`.
     BitNot,
+    /// `<<`.
     LeftShift,
+    /// `>>`.
     RightShift,
 
-    // Punctuations
+    /// `(`.
     LeftParen,
+    /// `)`.
     RightParen,
+    /// `{`.
     LeftBrace,
+    /// `}`.
     RightBrace,
+    /// `[`.
     LeftBracket,
+    /// `]`.
     RightBracket,
+    /// `;`.
     Semicolon,
+    /// `,`.
     Comma,
+    /// `.`.
     Dot,
+    /// `:`.
     Colon,
+    /// `?`.
     Question,
+    /// `#`.
     Hash,
+    /// `@`.
     At,
 
-    // Preprocessors
+    /// Preprocessor directive.
     Preprocessor,
+    /// `#include`.
     Include,
+    /// `#define`.
     Define,
+    /// `#ifdef`.
     Ifdef,
+    /// `#ifndef`.
     Ifndef,
+    /// `#endif`.
     Endif,
+    /// `#version`.
     Version,
 
-    // Builtin functions
+    /// `sin` function.
     Sin,
+    /// `cos` function.
     Cos,
+    /// `tan` function.
     Tan,
+    /// `sqrt` function.
     Sqrt,
+    /// `pow` function.
     Pow,
+    /// `exp` function.
     Exp,
+    /// `log` function.
     Log,
+    /// `abs` function.
     Abs,
+    /// `sign` function.
     Sign,
+    /// `floor` function.
     Floor,
+    /// `ceil` function.
     Ceil,
+    /// `fract` function.
     Fract,
+    /// `mod` function.
     Mod,
+    /// `min` function.
     Min,
+    /// `max` function.
     Max,
+    /// `clamp` function.
     Clamp,
+    /// `mix` function.
     Mix,
+    /// `step` function.
     Step,
+    /// `smoothstep` function.
     Smoothstep,
+    /// `length` function.
     Length,
+    /// `distance` function.
     Distance,
+    /// `dot` function.
     DotProduct,
+    /// `cross` function.
     Cross,
+    /// `normalize` function.
     Normalize,
+    /// `faceforward` function.
     Faceforward,
+    /// `reflect` function.
     Reflect,
+    /// `refract` function.
     Refract,
 
-    // Special tokens
+    /// Whitespace.
     Whitespace,
+    /// A comment.
     Comment,
+    /// A newline.
     Newline,
+    /// End of stream.
     Eof,
+    /// An error token.
     Error,
 }
 
@@ -230,9 +343,9 @@ impl GsglTokenType {
     }
 }
 
-impl fmt::Display for GsglTokenType {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        let name = match self {
+impl GsglTokenType {
+    pub fn as_str(&self) -> &'static str {
+        match self {
             Self::Root => "ROOT",
             Self::SourceFile => "SOURCE_FILE",
             Self::Shader => "shader",
@@ -350,8 +463,13 @@ impl fmt::Display for GsglTokenType {
             Self::Eof => "EOF",
             Self::Error => "ERROR",
             _ => "UNKNOWN",
-        };
-        write!(f, "{}", name)
+        }
+    }
+}
+
+impl fmt::Display for GsglTokenType {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "{}", self.as_str())
     }
 }
 

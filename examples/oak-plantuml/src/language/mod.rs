@@ -1,12 +1,12 @@
 use oak_core::{Language, LanguageCategory};
-#[cfg(feature = "serde")]
-use serde::{Deserialize, Serialize};
 
+/// Represents the PlantUML language configuration.
 #[derive(Debug, Clone, Copy, Default)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct PlantUmlLanguage {}
 
 impl PlantUmlLanguage {
+    /// Create a new `PlantUmlLanguage` instance.
     pub fn new() -> Self {
         Self::default()
     }

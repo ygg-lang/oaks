@@ -8,26 +8,86 @@ use oak_core::{
     source::{Source, TextEdit},
 };
 
+/// Element type module for Elixir.
 pub mod element_type;
-mod parse_top_level;
 pub use self::element_type::ElixirElementType;
 
 pub(crate) type State<'a, S> = ParserState<'a, ElixirLanguage, S>;
 
+/// Elixir parser implementation.
 pub struct ElixirParser<'config> {
-    pub(crate) _config: &'config ElixirLanguage,
+    pub(crate) config: &'config ElixirLanguage,
 }
 
 impl<'config> Parser<ElixirLanguage> for ElixirParser<'config> {
     fn parse<'a, S: Source + ?Sized>(&self, text: &'a S, edits: &[TextEdit], cache: &'a mut impl ParseCache<ElixirLanguage>) -> ParseOutput<'a, ElixirLanguage> {
-        let lexer = ElixirLexer::new(self._config);
-        parse_with_lexer(&lexer, text, edits, cache, |state| self.parse_root_internal(state))
+        let lexer = ElixirLexer::new(self.config);
+        parse_with_lexer(&lexer, text, edits, cache, |state| {
+            let checkpoint = state.checkpoint();
+
+            while state.not_at_end() {
+                match state.peek_kind() {
+                    Some(ElixirTokenType::Defmodule) => {
+                        self.parse_module(state);
+                    }
+                    Some(ElixirTokenType::Def) | Some(ElixirTokenType::Defp) => {
+                        self.parse_function(state);
+                    }
+                    Some(_) => {
+                        PrattParser::parse(state, 0, self);
+                    }
+                    None => break,
+                }
+                state.eat(ElixirTokenType::Semicolon);
+                state.eat(ElixirTokenType::Newline);
+            }
+
+            Ok(state.finish_at(checkpoint, ElixirElementType::Root))
+        })
     }
 }
 
 impl<'config> ElixirParser<'config> {
+    /// Creates a new `ElixirParser`.
     pub fn new(config: &'config ElixirLanguage) -> Self {
-        Self { _config: config }
+        Self { config }
+    }
+
+    fn parse_module<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> &'a GreenNode<'a, ElixirLanguage> {
+        let cp = state.checkpoint();
+        state.expect(ElixirTokenType::Defmodule).ok();
+        PrattParser::parse(state, 0, self); // Module name
+        state.expect(ElixirTokenType::Do).ok();
+        while state.not_at_end() && !state.at(ElixirTokenType::End) {
+            match state.peek_kind() {
+                Some(ElixirTokenType::Def) | Some(ElixirTokenType::Defp) => {
+                    self.parse_function(state);
+                }
+                Some(_) => {
+                    PrattParser::parse(state, 0, self);
+                }
+                None => break,
+            }
+            state.eat(ElixirTokenType::Semicolon);
+            state.eat(ElixirTokenType::Newline);
+        }
+        state.expect(ElixirTokenType::End).ok();
+        state.finish_at(cp, ElixirElementType::ModuleDefinition)
+    }
+
+    fn parse_function<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> &'a GreenNode<'a, ElixirLanguage> {
+        let cp = state.checkpoint();
+        state.bump(); // def or defp
+        PrattParser::parse(state, 0, self); // Function name and params
+        if state.eat(ElixirTokenType::Do) {
+            while state.not_at_end() && !state.at(ElixirTokenType::End) {
+                PrattParser::parse(state, 0, self);
+                state.eat(ElixirTokenType::Semicolon);
+                state.eat(ElixirTokenType::Newline);
+            }
+            state.expect(ElixirTokenType::End).ok();
+        }
+        state.finish_at(cp, ElixirElementType::FunctionDefinition)
     }
 }
 

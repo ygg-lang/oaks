@@ -1,4 +1,4 @@
-# 🚀 oak-structural-view (结构化视图)
+# 🚀 oak-structural-view
 
 [![Crates.io](https://img.shields.io/crates/v/oak-structural-view.svg)](https://crates.io/crates/oak-structural-view)
 [![Documentation](https://docs.rs/oak-structural-view/badge.svg)](https://docs.rs/oak-structural-view)

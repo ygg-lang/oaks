@@ -14,14 +14,14 @@ fn run_compliance_tests() -> Result<(), oak_core::OakError> {
 
     let tester = ParserTester::new(root).with_extension("json").with_timeout(std::time::Duration::from_secs(5));
 
-    // 运行所有测试
-    // 注意：如果是 invalid 目录下的文件，ParserTester 会预期解析失败或生成 Error 节点
+    // Run all tests.
+    // Note: For files in the invalid directory, ParserTester expects parsing failure or Error nodes.
     let _ = tester.run_tests(&parser);
     Ok(())
 }
 
 fn fingerprint(node: &GreenNode<JsonLanguage>, out: &mut Vec<(JsonSyntaxKind, usize, usize)>) {
-    out.push((node.kind, node.text_len as usize, node.children.len()));
+    out.push((node.kind, node.byte_length as usize, node.children.len()));
     for child in node.children {
         match child {
             GreenTree::Node(n) => fingerprint(n, out),

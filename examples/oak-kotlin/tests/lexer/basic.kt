@@ -1,55 +1,171 @@
-package com.example
+/*
+ * Comprehensive Kotlin Lexer Test
+ * Package and Imports
+ */
+package com.example.oak.test
 
-import kotlin.math.*
+import java.util.Date
+import kotlin.collections.*
+import kotlin.text.Regex as KRegex
 
-// 基本类定义
-class Person(val name: String, var age: Int) {
-    // 方法定义
-    fun greet(): String {
-        return "Hello, my name is $name and I'm $age years old"
-    }
+// Top-level constants and variables
+const val PI = 3.14159
+var globalCounter = 0
+val immutableList = listOf("a", "b", "c")
+
+// Type Aliases
+typealias Name = String
+typealias Handler = (Int) -> Unit
+
+// Enumerations
+enum class Direction(val angle: Int) {
+    NORTH(0), SOUTH(180), WEST(270), EAST(90);
     
-    // 属性
-    val isAdult: Boolean
-        get() = age >= 18
+    fun description() = "Direction: $name ($angle)"
 }
 
-// 函数定义
-fun add(x: Int, y: Int): Int = x + y
+// Sealed Classes
+sealed class Result
+data class Success(val data: String) : Result()
+data class Error(val exception: Exception) : Result()
+object Loading : Result()
 
-// 变量声明
-val pi = 3.14159
-var counter = 0
+// Interfaces
+interface Printable {
+    fun printMe()
+    val format: String
+        get() = "Default"
+}
 
-// 字符串字面量
-val greeting = "Hello, Kotlin!"
-val multiline = """
-    This is a
-    multiline string
-""".trimIndent()
+// Classes with primary constructor
+open class Person(val name: String, var age: Int) : Printable {
+    // Secondary constructor
+    constructor(name: String) : this(name, 0)
+    
+    // Properties with custom accessors
+    var isAdult: Boolean
+        get() = age >= 18
+        set(value) {
+            if (value) age = 18 else age = 0
+        }
+        
+    // Initializer block
+    init {
+        println("Person initialized: $name")
+    }
+    
+    override fun printMe() {
+        println("Person: $name, Age: $age")
+    }
+    
+    // Infix function
+    infix fun likes(other: Person): Boolean {
+        return true
+    }
+    
+    // Companion Object
+    companion object Factory {
+        fun create(): Person = Person("Unknown")
+    }
+}
 
-// 字符字面量
-val char = 'K'
+// Data Class
+data class Point(val x: Int, val y: Int)
 
-// 数字字面量
-val integer = 42
-val long = 42L
-val float = 3.14f
-val double = 3.14159
+// Extension Functions
+fun String.toSlug(): String = this.lowercase().replace(" ", "-")
 
-// 布尔值
-val isTrue = true
-val isFalse = false
+// Higher-Order Functions and Lambdas
+fun operate(a: Int, b: Int, operation: (Int, Int) -> Int): Int {
+    return operation(a, b)
+}
 
-// 空值
-val nullable: String? = null
+// Main Function
+fun main(args: Array<String>) {
+    // Variables
+    val x: Int = 10
+    var y = 20
+    
+    // String Templates
+    println("Sum: ${x + y}")
+    println("""
+        Multi-line string
+        with trimMargin
+    """.trimIndent())
+    
+    // Control Flow
+    val max = if (x > y) x else y
+    
+    when (x) {
+        1 -> println("One")
+        in 2..10 -> println("Between 2 and 10")
+        else -> println("Other")
+    }
+    
+    // Loops
+    for (i in 1..5) println(i)
+    for (i in 10 downTo 1 step 2) println(i)
+    
+    var index = 0
+    while (index < 5) {
+        index++
+    }
+    
+    // Ranges
+    val range = 1..10
+    
+    // Null Safety
+    var nullable: String? = "Hello"
+    nullable = null
+    val length = nullable?.length ?: 0
+    
+    // Safe Cast
+    val num = "123" as? Int
+    
+    // Collections
+    val map = mapOf("key" to "value", "a" to 1)
+    val list = mutableListOf<Int>()
+    list.add(1)
+    
+    // Lambdas
+    val sum = operate(10, 20) { a, b -> a + b }
+    val product = operate(5, 5) { a, b -> 
+        a * b 
+    }
+    
+    // Destructuring Declaration
+    val (px, py) = Point(10, 20)
+    
+    // Exception Handling
+    try {
+        throw IllegalArgumentException("Error")
+    } catch (e: Exception) {
+        println("Caught: ${e.message}")
+    } finally {
+        println("Finally")
+    }
+    
+    // Annotations
+    @Deprecated("Use newMethod instead")
+    fun oldMethod() {}
+    
+    // Delegated Properties
+    val lazyValue: String by lazy {
+        println("Computed!")
+        "Hello"
+    }
+}
 
-// 操作符
-val result = 10 + 20 * 30 / 5 - 2
+// Generics
+class Box<T>(t: T) {
+    var value = t
+}
 
-// 注释测试
-/* 多行注释
-   可以跨行 */
-fun main() {
-    println(greeting)
+fun <T> singletonList(item: T): List<T> {
+    return listOf(item)
+}
+
+// Coroutines (Syntax only)
+suspend fun doSomethingAsync() {
+    // ...
 }

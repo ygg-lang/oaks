@@ -2,7 +2,7 @@
 use crate::lsp::TomlLanguageService;
 use oak_vfs::MemoryVfs;
 
-/// 为 TOML 语义启动 MCP 服务器 (Stdio)。
+/// Starts the MCP server (Stdio) for TOML semantics.
 #[cfg(feature = "mcp")]
 pub async fn serve_toml_mcp(vfs: MemoryVfs) {
     let service = TomlLanguageService::new(vfs);

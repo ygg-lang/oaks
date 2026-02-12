@@ -1,3 +1,4 @@
+/// Element types for the Nix language syntax tree.
 pub mod element_type;
 
 use crate::{
@@ -11,11 +12,14 @@ use oak_core::{
 
 pub(crate) type State<'a, S> = ParserState<'a, NixLanguage, S>;
 
+/// Parser for the Nix language.
 pub struct NixParser<'a> {
+    /// The language configuration for this parser.
     pub language: &'a NixLanguage,
 }
 
 impl<'a> NixParser<'a> {
+    /// Creates a new `NixParser` with the given configuration.
     pub fn new(language: &'a NixLanguage) -> Self {
         Self { language }
     }

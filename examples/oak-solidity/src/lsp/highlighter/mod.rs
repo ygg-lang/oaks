@@ -6,6 +6,7 @@ use oak_highlight::{
     themes::Theme,
 };
 
+/// Solidity syntax highlighter.
 pub struct SolidityHighlighter;
 
 impl Highlighter for SolidityHighlighter {

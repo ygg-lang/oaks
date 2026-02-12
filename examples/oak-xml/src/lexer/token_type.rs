@@ -1,7 +1,6 @@
-use oak_core::{Source, Token, TokenType, UniversalElementRole, UniversalTokenRole};
-#[cfg(feature = "serde")]
-use serde::{Deserialize, Serialize};
+use oak_core::{Token, TokenType, UniversalTokenRole};
 
+/// A token in the XML language.
 pub type XmlToken = Token<XmlTokenType>;
 
 impl TokenType for XmlTokenType {
@@ -19,59 +18,88 @@ impl TokenType for XmlTokenType {
     }
 }
 
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+/// XML token types.
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 #[derive(Copy, Clone, Debug, PartialEq, Eq, Hash)]
 pub enum XmlTokenType {
-    // 基本 kind
+    /// Root element.
     Root,
+    /// Whitespace characters.
     Whitespace,
+    /// Newline character.
     Newline,
+    /// Comment.
     Comment,
+    /// Text content.
     Text,
+    /// Error token.
     Error,
+    /// End of file.
     Eof,
 
-    // XML 特定
+    /// XML declaration.
     XmlDeclaration,
+    /// Document type declaration.
     DoctypeDeclaration,
+    /// Processing instruction.
     ProcessingInstruction,
+    /// CDATA section.
     CData,
 
-    // 标签
+    /// Start tag.
     StartTag,
+    /// End tag.
     EndTag,
+    /// Self-closing tag.
     SelfClosingTag,
+    /// Tag name.
     TagName,
 
+    /// Attribute name.
     AttributeName,
+    /// Attribute value.
     AttributeValue,
 
-    // 字面量
+    /// String literal.
     StringLiteral,
 
-    // 标点符号
-    LeftAngle,       // <
-    RightAngle,      // >
-    LeftAngleSlash,  // </
-    SlashRightAngle, // />
-    Equals,          // =
-    Quote,           // "
-    SingleQuote,     // '
-    Exclamation,     // !
-    Question,        // ?
-    Ampersand,       // &
-    Semicolon,       // ;
+    /// `<` operator.
+    LeftAngle,
+    /// `>` operator.
+    RightAngle,
+    /// `</` operator.
+    LeftAngleSlash,
+    /// `/>` operator.
+    SlashRightAngle,
+    /// `=` operator.
+    Equals,
+    /// `"` quote.
+    Quote,
+    /// `'` single quote.
+    SingleQuote,
+    /// `!` exclamation.
+    Exclamation,
+    /// `?` question.
+    Question,
+    /// `&` ampersand.
+    Ampersand,
+    /// `;` semicolon.
+    Semicolon,
 
-    // 实体引用
+    /// Entity reference.
     EntityReference,
+    /// Character reference.
     CharacterReference,
 
-    // 标识符
+    /// Identifier.
     Identifier,
 
-    // 非终结符
+    /// Source file non-terminal.
     SourceFile,
+    /// Element non-terminal.
     Element,
+    /// Attribute non-terminal.
     Attribute,
+    /// Prolog non-terminal.
     Prolog,
 }

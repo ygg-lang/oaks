@@ -1,10 +1,12 @@
-#[cfg(feature = "serde")]
-use serde::{Deserialize, Serialize};
 use std::{fmt::Debug, hash::Hash};
 
 /// Represents the broad category a language belongs to.
+///
+/// Categories are used by the framework to apply default behaviors,
+/// such as choosing appropriate lexer/parser strategies or selecting
+/// default themes for syntax highlighting.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub enum LanguageCategory {
     /// General-purpose programming languages (e.g., Rust, C, Java).
     Programming,
@@ -24,63 +26,9 @@ pub enum LanguageCategory {
 
 /// Language definition trait that coordinates all language-related types and behaviors.
 ///
-/// This trait serves as the foundation for defining programming languages within the
-/// incremental parsing system. It acts as a marker trait that ties together various
-/// language-specific components like lexers, parsers, and rebuilders.
-///
-/// # Overview
-///
-/// The Language trait is the central abstraction that enables the parsing framework
-/// to be language-agnostic while still providing language-specific functionality.
-/// Each language implementation must define its own types for tokens, elements,
-/// and the root structure of the parsed tree.
-///
-/// # Design Philosophy
-///
-/// The trait follows a compositional design where:
-/// - `TokenType` defines the atomic units of the language (tokens)
-/// - `ElementType` defines the composite structures (nodes)
-/// - `TypedRoot` defines the top-level structure of the parsed document
-///
-/// This separation allows for maximum flexibility while maintaining type safety
-/// and performance characteristics required for incremental parsing.
-///
-/// # Examples
-///
-/// ```rust
-/// # use oak_core::{Language, TokenType, ElementType, UniversalTokenRole, UniversalElementRole};
-/// // Define a simple language
-/// #[derive(Clone)]
-/// struct MyLanguage;
-///
-/// impl Language for MyLanguage {
-///     const NAME: &'static str = "my-language";
-///     type TokenType = MyToken;
-///     type ElementType = MyElement;
-///     type TypedRoot = ();
-/// }
-///
-/// // With corresponding type definitions
-/// #[derive(Copy, Clone, Debug, PartialEq, Eq, Hash)]
-/// enum MyToken {
-///     Identifier,
-///     EndOfStream,
-/// }
-///
-/// impl TokenType for MyToken {
-///     const END_OF_STREAM: Self = MyToken::EndOfStream;
-///     type Role = UniversalTokenRole;
-///     fn role(&self) -> Self::Role { UniversalTokenRole::None }
-/// }
-///
-/// #[derive(Copy, Clone, Debug, PartialEq, Eq, Hash)]
-/// enum MyElement {}
-///
-/// impl ElementType for MyElement {
-///     type Role = UniversalElementRole;
-///     fn role(&self) -> Self::Role { UniversalElementRole::None }
-/// }
-/// ```
+/// This trait ties together language-specific components like lexers, parsers, and ASTs.
+/// It enables the framework to be language-agnostic while providing type-safe
+/// language-specific functionality.
 pub trait Language: Send + Sync {
     /// The name of the language (e.g., "rust", "sql").
     const NAME: &'static str;
@@ -162,161 +110,69 @@ pub trait Language: Send + Sync {
 
 /// Token type definitions for tokens in the parsing system.
 ///
-/// This module provides the [`TokenType`] trait which serves as the foundation
-/// for defining different types of tokens in the parsing system.
-/// It enables categorization of token elements and provides methods for
-/// identifying their roles in the language grammar.
-///
-/// # Universal Grammar Philosophy
-///
-/// The role mechanism in Oak is inspired by the concept of "Universal Grammar".
-/// While every language has its own unique "Surface Structure" (its specific token kinds),
-/// most share a common "Deep Structure" (syntactic roles).
-///
-/// By mapping language-specific kinds to [`UniversalTokenRole`], we enable generic tools
-/// like highlighters and formatters to work across 100+ languages without deep
-/// knowledge of each one's specific grammar.
-///
-/// # Implementation Guidelines
-///
-/// When implementing this trait for a specific language:
-/// - Use an enum with discriminant values for efficient matching
-/// - Ensure all variants are Copy and Eq for performance
-/// - Include an END_OF_STREAM variant to signal input termination
-/// - Define a `Role` associated type and implement the `role()` method to provide
-///   syntactic context.
-///
-/// # Examples
-///
-/// ```ignore
-/// #[derive(Copy, Clone, Debug, PartialEq, Eq, Hash)]
-/// enum SimpleToken {
-///     Identifier,
-///     Number,
-///     Plus,
-///     EndOfStream,
-/// }
-///
-/// impl TokenType for SimpleToken {
-///     const END_OF_STREAM: Self = SimpleToken::EndOfStream;
-///     type Role = UniversalTokenRole; // Or a custom Role type
-///
-///     fn role(&self) -> Self::Role {
-///         match self {
-///             SimpleToken::Identifier => UniversalTokenRole::Name,
-///             SimpleToken::Number => UniversalTokenRole::Literal,
-///             SimpleToken::Plus => UniversalTokenRole::Operator,
-///             _ => UniversalTokenRole::None,
-///         }
-///     }
-///
-///     // ... other methods
-/// }
-/// ```
-pub trait TokenType: Copy + Eq + Hash + Send + Sync + std::fmt::Debug {
-    /// The associated role type for this token kind.
-    type Role: TokenRole;
+/// This trait serves as the foundation for defining different types of tokens.
+/// By mapping language-specific kinds to [`UniversalTokenRole`], generic tools
+/// like highlighters and formatters can work across many languages.
+macro_rules! define_token_type {
+    ($($bound:tt)*) => {
+        /// A trait for types that represent a token's kind in a specific language.
+        pub trait TokenType: Copy + Eq + Hash + Send + Sync + std::fmt::Debug $($bound)* {
+            /// The associated role type for this token kind.
+            type Role: TokenRole;
 
-    /// A constant representing the end of the input stream.
-    ///
-    /// This special token type is used to signal that there are no more tokens
-    /// to process in the input. It's essential for parsers to recognize when
-    /// they've reached the end of the source code.
-    ///
-    /// # Implementation Notes
-    ///
-    /// This should be a specific variant of your token enum that represents
-    /// the end-of-stream condition. It's used throughout the parsing framework
-    /// to handle boundary conditions and termination logic.
-    const END_OF_STREAM: Self;
+            /// A constant representing the end of the input stream.
+            const END_OF_STREAM: Self;
 
-    /// Returns the general syntactic role of this token.
+            /// Returns the general syntactic role of this token.
     ///
-    /// This provides a language-agnostic way for tools to understand the purpose
-    /// of a token (e.g., is it a name, a literal, or a keyword) across diverse
-    /// languages like SQL, ASM, YAML, or Rust.
+    /// The role determines how the token is treated by generic language tools.
+    /// For example, tokens with [`UniversalTokenRole::Keyword`] are typically
+    /// highlighted using a specific theme color, regardless of the language.
     fn role(&self) -> Self::Role;
 
-    /// Returns true if this token matches the specified language-specific role.
-    fn is_role(&self, role: Self::Role) -> bool {
-        self.role() == role
-    }
+            /// Returns true if this token matches the specified language-specific role.
+            fn is_role(&self, role: Self::Role) -> bool {
+                self.role() == role
+            }
 
-    /// Returns true if this token matches the specified universal role.
-    fn is_universal(&self, role: UniversalTokenRole) -> bool {
-        self.role().universal() == role
-    }
+            /// Returns true if this token matches the specified universal role.
+            fn is_universal(&self, role: UniversalTokenRole) -> bool {
+                self.role().universal() == role
+            }
 
-    /// Returns true if this token represents a comment.
-    ///
-    /// # Default Implementation
-    ///
-    /// Based on [`UniversalTokenRole::Comment`].
-    fn is_comment(&self) -> bool {
-        self.is_universal(UniversalTokenRole::Comment)
-    }
+            /// Returns true if this token represents a comment.
+            fn is_comment(&self) -> bool {
+                self.is_universal(UniversalTokenRole::Comment)
+            }
 
-    /// Returns true if this token represents whitespace.
-    ///
-    /// # Default Implementation
-    ///
-    /// Based on [`UniversalTokenRole::Whitespace`].
-    fn is_whitespace(&self) -> bool {
-        self.is_universal(UniversalTokenRole::Whitespace)
-    }
+            /// Returns true if this token represents whitespace.
+            fn is_whitespace(&self) -> bool {
+                self.is_universal(UniversalTokenRole::Whitespace)
+            }
 
-    /// Returns true if this token represents an error condition.
-    ///
-    /// # Default Implementation
-    ///
-    /// Based on [`UniversalTokenRole::Error`].
-    fn is_error(&self) -> bool {
-        self.is_universal(UniversalTokenRole::Error)
-    }
+            /// Returns true if this token represents an error condition.
+            fn is_error(&self) -> bool {
+                self.is_universal(UniversalTokenRole::Error)
+            }
 
-    /// Returns true if this token represents trivia (whitespace, comments, etc.).
-    ///
-    /// Trivia tokens are typically ignored during parsing but preserved for
-    /// formatting and tooling purposes. They don't contribute to the syntactic
-    /// structure of the language but are important for maintaining the original
-    /// source code formatting.
-    ///
-    /// # Default Implementation
-    ///
-    /// The default implementation considers a token as trivia if it is either
-    /// whitespace or a comment. Language implementations can override this
-    /// method if they have additional trivia categories.
-    ///
-    /// # Examples
-    ///
-    /// ```ignore
-    /// // Skip over trivia tokens during parsing
-    /// while current_token.is_ignored() {
-    ///     advance_to_next_token();
-    /// }
-    /// ```
-    fn is_ignored(&self) -> bool {
-        self.is_whitespace() || self.is_comment()
-    }
+            /// Returns true if this token represents trivia (whitespace, comments, etc.).
+            fn is_ignored(&self) -> bool {
+                self.is_whitespace() || self.is_comment()
+            }
 
-    /// Returns true if this token represents the end of the input stream.
-    ///
-    /// This method provides a convenient way to check if a token is the
-    /// special END_OF_STREAM token without directly comparing with the constant.
-    ///
-    /// # Examples
-    ///
-    /// ```ignore
-    /// // Loop until we reach the end of the input
-    /// while !current_token.is_end_of_stream() {
-    ///     process_token(current_token);
-    ///     current_token = next_token();
-    /// }
-    /// ```
-    fn is_end_of_stream(&self) -> bool {
-        *self == Self::END_OF_STREAM
-    }
+            /// Returns true if this token represents the end of the input stream.
+            fn is_end_of_stream(&self) -> bool {
+                *self == Self::END_OF_STREAM
+            }
+        }
+    };
 }
+
+#[cfg(feature = "serde")]
+define_token_type!(+ serde::Serialize + for<'de> serde::Deserialize<'de>);
+
+#[cfg(not(feature = "serde"))]
+define_token_type!();
 
 /// A trait for types that can represent a token's syntactic role.
 pub trait TokenRole: Copy + Eq + Send {
@@ -332,20 +188,10 @@ pub trait TokenRole: Copy + Eq + Send {
 
 /// Represents the general syntactic role of a token across diverse languages.
 ///
-/// # Universal Grammar
-///
-/// This mechanism is inspired by Noam Chomsky's Universal Grammar theory.
-/// It posits that while the "Surface Structure" (specific token kinds) of languages
-/// may vary wildly, they share a common "Deep Structure" (syntactic roles).
-///
-/// In the Oak framework:
-/// - **Surface Structure**: Refers to specific token kinds defined by a language (e.g., Rust's `PubKeyword`).
-/// - **Deep Structure**: Refers to the universal roles defined in this enum (e.g., [`UniversalTokenRole::Keyword`]).
-///
 /// By mapping to these roles, generic tools can identify names, literals, or operators
 /// across 100+ languages without needing to learn the specifics of each grammar.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 #[cfg_attr(feature = "serde", serde(rename_all = "snake_case"))]
 pub enum UniversalTokenRole {
     /// Language reserved words or built-in commands (e.g., 'SELECT', 'let', 'MOV').
@@ -400,15 +246,6 @@ impl TokenRole for UniversalTokenRole {
 /// composite structures formed by combining tokens according to grammar rules.
 /// This includes expressions, statements, declarations, and other syntactic constructs.
 ///
-/// # Universal Grammar Philosophy
-///
-/// Just like tokens, syntax tree elements are mapped from their "Surface Structure"
-/// (language-specific nodes) to a "Deep Structure" via [`UniversalElementRole`].
-///
-/// This allows structural analysis tools (like symbol outline extractors) to
-/// identify [`UniversalElementRole::Binding`] (definitions) or [`UniversalElementRole::Container`]
-/// (scopes/blocks) uniformly across different language families.
-///
 /// # Implementation Guidelines
 ///
 /// When implementing this trait for a specific language:
@@ -449,44 +286,48 @@ impl TokenRole for UniversalTokenRole {
 ///     }
 /// }
 /// ```
-pub trait ElementType: Copy + Eq + Hash + Send + Sync + std::fmt::Debug {
-    /// The associated role type for this element kind.
-    type Role: ElementRole;
+macro_rules! define_element_type {
+    ($($bound:tt)*) => {
+        /// A trait for types that represent an element's kind in a syntax tree.
+        pub trait ElementType: Copy + Eq + Hash + Send + Sync + std::fmt::Debug $($bound)* {
+            /// The associated role type for this element kind.
+            type Role: ElementRole;
 
-    /// Returns the general syntactic role of this element.
+            /// Returns the general syntactic role of this element.
     ///
-    /// This helps external tools understand the structural purpose of a node
-    /// (e.g., is it a container, a binding, or a value) without deep language knowledge.
+    /// The role enables structural analysis without knowing the specific grammar.
+    /// For example, a tool can find all [`UniversalElementRole::Definition`] nodes
+    /// to build a symbol outline for any supported language.
     fn role(&self) -> Self::Role;
 
-    /// Returns true if this element matches the specified language-specific role.
-    fn is_role(&self, role: Self::Role) -> bool {
-        self.role() == role
-    }
+            /// Returns true if this element matches the specified language-specific role.
+            fn is_role(&self, role: Self::Role) -> bool {
+                self.role() == role
+            }
 
-    /// Returns true if this element matches the specified universal role.
-    fn is_universal(&self, role: UniversalElementRole) -> bool {
-        self.role().universal() == role
-    }
+            /// Returns true if this element matches the specified universal role.
+            fn is_universal(&self, role: UniversalElementRole) -> bool {
+                self.role().universal() == role
+            }
 
-    /// Returns true if this element represents the root of the parsed tree.
-    ///
-    /// # Default Implementation
-    ///
-    /// Based on [`UniversalElementRole::Root`].
-    fn is_root(&self) -> bool {
-        self.is_universal(UniversalElementRole::Root)
-    }
+            /// Returns true if this element represents the root of the parsed tree.
+            fn is_root(&self) -> bool {
+                self.is_universal(UniversalElementRole::Root)
+            }
 
-    /// Returns true if this element represents an error condition.
-    ///
-    /// # Default Implementation
-    ///
-    /// Based on [`UniversalElementRole::Error`].
-    fn is_error(&self) -> bool {
-        self.is_universal(UniversalElementRole::Error)
-    }
+            /// Returns true if this element represents an error condition.
+            fn is_error(&self) -> bool {
+                self.is_universal(UniversalElementRole::Error)
+            }
+        }
+    };
 }
+
+#[cfg(feature = "serde")]
+define_element_type!(+ serde::Serialize + for<'de> serde::Deserialize<'de>);
+
+#[cfg(not(feature = "serde"))]
+define_element_type!();
 
 /// A trait for types that can represent an element's structural role.
 pub trait ElementRole: Copy + Eq + Send {
@@ -499,65 +340,22 @@ pub trait ElementRole: Copy + Eq + Send {
 
 /// Represents the general structural role of a syntax tree element.
 ///
-/// # Universal Grammar
+/// Elements are categorized by their role to enable generic analysis across diverse
+/// language families. For example, highlighters and symbol extractors can use these
+/// roles to identify definitions, references, or containers without knowing the
+/// specific grammar of each language.
 ///
-/// This mechanism is inspired by Noam Chomsky's Universal Grammar theory, applied
-/// here to the structural hierarchy of syntax trees. It posits that while the
-/// "Surface Structure" (the specific production rules of a grammar) varies across
-/// languages, they share a common "Deep Structure" (structural intent).
+/// # Structural Groups
 ///
-/// In the Oak framework, syntax tree elements are categorized by their role:
-/// - **Surface Structure**: Refers to specific node kinds defined by a language
-///   (e.g., Rust's `FnDeclaration`, SQL's `SelectStatement`, or YAML's `Mapping`).
-/// - **Deep Structure**: Refers to the universal structural patterns defined in this enum.
-///
-/// By mapping to these roles, we can raise sophisticated analysis across diverse
-/// language families:
-/// - **Containers & Statements**: Identify hierarchical scopes and their constituents
-///   (e.g., a SQL table is a container, its clauses are statements).
-/// - **Bindings & References**: Identify the flow of information and identifiers
-///   (e.g., an ASM label is a binding, a jump instruction is a reference).
-/// - **Values**: Identify the atomic data payload or expression results.
-///
-/// # Design Philosophy: The 99% Rule
-///
-/// This enum is designed to provide a "sufficiently complete" abstraction for common tool
-/// requirements (Highlighting, Outline, Navigation, and Refactoring) while maintaining
-/// language-agnostic simplicity.
-///
-/// ### 1. Structural Identity (The "What")
-/// Roles describe a node's primary structural responsibility in the tree, not its
-/// domain-specific semantic meaning. For example:
-/// - A "Class" or "Function" is structurally a [`UniversalElementRole::Definition`] and often a [`UniversalElementRole::Container`].
-/// - An "Import" is structurally a [`UniversalElementRole::Statement`] that contains a [`UniversalElementRole::Reference`].
-///
-/// ### 2. Broad Categories (The "How")
-/// We categorize elements into four major structural groups:
-/// - **Flow Control & logic**: [`UniversalElementRole::Statement`], [`UniversalElementRole::Expression`], [`UniversalElementRole::Call`], and [`UniversalElementRole::Root`].
+/// - **Flow Control**: [`UniversalElementRole::Statement`], [`UniversalElementRole::Expression`], [`UniversalElementRole::Call`], and [`UniversalElementRole::Root`].
 /// - **Symbol Management**: [`UniversalElementRole::Definition`], [`UniversalElementRole::Binding`], and [`UniversalElementRole::Reference`].
-/// - **Hierarchy & Scoping**: [`UniversalElementRole::Container`].
-/// - **Metadata & Auxiliaries**: [`UniversalElementRole::Typing`], [`UniversalElementRole::Metadata`], [`UniversalElementRole::Attribute`], [`UniversalElementRole::Documentation`], etc.
+/// - **Hierarchy**: [`UniversalElementRole::Container`].
+/// - **Metadata**: [`UniversalElementRole::Typing`], [`UniversalElementRole::Metadata`], [`UniversalElementRole::Attribute`], [`UniversalElementRole::Documentation`].
 ///
-/// ### 3. Intent-Based Selection
 /// When a node could fit multiple roles, choose the one that represents its **primary
 /// structural intent**.
-/// - **Example**: In Rust, an `if` expression is both an `Expression` and a `Container`.
-///   However, its primary role in the tree is as an [`UniversalElementRole::Expression`] (producing a value),
-///   whereas its children (the blocks) are [`UniversalElementRole::Container`]s.
-/// - **Example**: In Markdown, a "List" is a [`UniversalElementRole::Container`], while each "ListItem" is a
-///   [`UniversalElementRole::Statement`] within that container.
-///
-/// ### 4. Intentional Exclusions
-/// We intentionally exclude roles that can be represented by combining existing roles or
-/// that require deep semantic analysis:
-/// - **Keyword-specific roles**: Roles like "Loop", "Conditional", or "Module" are excluded.
-///   These are surface-level distinctions. In the Deep Structure, they are all [`UniversalElementRole::Container`]s
-///   or [`UniversalElementRole::Statement`]s.
-/// - **Semantic Relationships**: Roles like "Inheritance", "Implementation", or "Dependency"
-///   are excluded. These are better handled by semantic graph analysis rather than
-///   syntactic tree roles.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 #[cfg_attr(feature = "serde", serde(rename_all = "snake_case"))]
 #[non_exhaustive]
 pub enum UniversalElementRole {
@@ -637,8 +435,8 @@ pub enum UniversalElementRole {
     /// # Examples
     /// - **Rust**: `Attribute` (e.g., `#[derive(...)]`) or `MacroCall`.
     /// - **Markdown**: `Frontmatter` (YAML/TOML header).
-    /// - **Java/TS**: `↯Decorator` or `↯Annotation`.
-    /// - **Python**: `↯decorator` syntax.
+    /// - **Java/TS**: `@Decorator` or `@Annotation`.
+    /// - **Python**: `@decorator` syntax.
     Metadata,
 
     /// A specific property, flag, or attribute-value pair.

@@ -8,14 +8,14 @@ use oak_core::{
 };
 use std::sync::LazyLock;
 
-type State<'a, S> = LexerState<'a, S, FSharpLanguage>;
+pub(crate) type State<'a, S> = LexerState<'a, S, FSharpLanguage>;
 
 static FS_WHITESPACE: LazyLock<WhitespaceConfig> = LazyLock::new(|| WhitespaceConfig { unicode_whitespace: true });
 
-/// F# 词法分析器
+/// F# lexer
 #[derive(Clone)]
 pub struct FSharpLexer<'config> {
-    _config: &'config FSharpLanguage,
+    config: &'config FSharpLanguage,
 }
 
 impl<'config> Lexer<FSharpLanguage> for FSharpLexer<'config> {
@@ -30,48 +30,49 @@ impl<'config> Lexer<FSharpLanguage> for FSharpLexer<'config> {
 }
 
 impl<'config> FSharpLexer<'config> {
+    /// Creates a new `FSharpLexer`
     pub fn new(config: &'config FSharpLanguage) -> Self {
-        Self { _config: config }
+        Self { config }
     }
 
     fn run<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> Result<(), OakError> {
         while state.not_at_end() {
-            // 跳过空白字符
+            // Skip whitespace characters
             if self.skip_whitespace(state) {
                 continue;
             }
 
-            // 处理注释
+            // Handle comments
             if self.skip_comment(state) {
                 continue;
             }
 
-            // 处理字符串字面量
+            // Handle string literals
             if self.lex_string_literal(state) {
                 continue;
             }
 
-            // 处理字符字面量
+            // Handle character literals
             if self.lex_char_literal(state) {
                 continue;
             }
 
-            // 处理数字字面量
+            // Handle number literals
             if self.lex_number(state) {
                 continue;
             }
 
-            // 处理标识符和关键字
+            // Handle identifiers and keywords
             if self.lex_identifier_or_keyword(state) {
                 continue;
             }
 
-            // 处理操作符和标点符号
+            // Handle operators and punctuation
             if self.lex_operator_or_punctuation(state) {
                 continue;
             }
 
-            // 如果没有匹配任何模式，跳过当前字符
+            // If no match, skip current character
             let start = state.get_position();
             if let Some(ch) = state.peek() {
                 state.advance(ch.len_utf8());
@@ -82,7 +83,7 @@ impl<'config> FSharpLexer<'config> {
         Ok(())
     }
 
-    /// 跳过空白字符
+    /// Skips whitespace characters
     fn skip_whitespace<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start = state.get_position();
         if let Some(ch) = state.peek() {
@@ -110,7 +111,7 @@ impl<'config> FSharpLexer<'config> {
         let start = state.get_position();
         let rest = state.rest();
 
-        // 行注释: // ... 直到换行
+        // Line comment: // ... until newline
         if rest.starts_with("//") {
             state.advance(2);
             while let Some(ch) = state.peek() {
@@ -123,7 +124,7 @@ impl<'config> FSharpLexer<'config> {
             return true;
         }
 
-        // 块注释: (* ... *) 支持嵌套
+        // Block comment: (* ... *) supporting nesting
         if rest.starts_with("(*") {
             state.advance(2);
             let mut depth = 1usize;
@@ -152,9 +153,9 @@ impl<'config> FSharpLexer<'config> {
     fn lex_string_literal<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start = state.get_position();
 
-        // 原始字符串: @"..."
+        // Verbatim string: @"..."
         if state.peek() == Some('@') && state.peek_next_n(1) == Some('"') {
-            state.advance(2); // 跳过 @"
+            state.advance(2); // Skip @"
             while let Some(ch) = state.peek() {
                 if ch == '"' {
                     state.advance(1);
@@ -166,16 +167,16 @@ impl<'config> FSharpLexer<'config> {
             return true;
         }
 
-        // 普通字符串: "..."
+        // Normal string: "..."
         if state.peek() == Some('"') {
-            state.advance(1); // 跳过 "
+            state.advance(1); // Skip "
             while let Some(ch) = state.peek() {
                 if ch == '"' {
                     state.advance(1);
                     break;
                 }
                 if ch == '\\' {
-                    state.advance(1); // 跳过转义字符
+                    state.advance(1); // Skip escape character
                     if let Some(escaped) = state.peek() {
                         state.advance(escaped.len_utf8());
                     }
@@ -194,10 +195,10 @@ impl<'config> FSharpLexer<'config> {
         let start = state.get_position();
 
         if state.peek() == Some('\'') {
-            state.advance(1); // 跳过 '
+            state.advance(1); // Skip '
             if let Some(ch) = state.peek() {
                 if ch == '\\' {
-                    state.advance(1); // 跳过转义字符
+                    state.advance(1); // Skip escape character
                     if let Some(escaped) = state.peek() {
                         state.advance(escaped.len_utf8());
                     }
@@ -207,7 +208,7 @@ impl<'config> FSharpLexer<'config> {
                 }
             }
             if state.peek() == Some('\'') {
-                state.advance(1); // 跳过结束的 '
+                state.advance(1); // Skip closing '
             }
             state.add_token(FSharpTokenType::CharLiteral, start, state.get_position());
             return true;
@@ -222,21 +223,21 @@ impl<'config> FSharpLexer<'config> {
 
         let start = state.get_position();
 
-        // 处理整数部分
+        // Handle integer part
         while state.current().map_or(false, |c| c.is_ascii_digit()) {
             state.advance(1);
         }
 
-        // 处理小数点
+        // Handle decimal point
         if state.current() == Some('.') && state.peek().map_or(false, |c| c.is_ascii_digit()) {
-            state.advance(1); // 跳过 '.'
+            state.advance(1); // Skip '.'
             while state.current().map_or(false, |c| c.is_ascii_digit()) {
                 state.advance(1);
             }
             state.add_token(FSharpTokenType::FloatLiteral, start, state.get_position());
         }
         else {
-            // 处理科学计数法
+            // Handle scientific notation
             if matches!(state.current(), Some('e') | Some('E')) {
                 state.advance(1);
                 if matches!(state.current(), Some('+') | Some('-')) {
@@ -248,7 +249,7 @@ impl<'config> FSharpLexer<'config> {
                 state.add_token(FSharpTokenType::FloatLiteral, start, state.get_position());
             }
             else {
-                // 处理数字后缀
+                // Handle numeric suffixes
                 if state.current().map_or(false, |c| c.is_ascii_alphabetic()) {
                     while state.current().map_or(false, |c| c.is_ascii_alphanumeric()) {
                         state.advance(1);
@@ -353,7 +354,7 @@ impl<'config> FSharpLexer<'config> {
         let c = current.unwrap();
         let next = state.peek();
 
-        // 双字符操作符
+        // Two-character operators
         match (c, next) {
             ('-', Some('>')) => {
                 state.advance(2);
@@ -393,7 +394,7 @@ impl<'config> FSharpLexer<'config> {
             _ => {}
         }
 
-        // 单字符操作符和标点符号
+        // Single-character operators and punctuation
         let kind = match c {
             '+' => FSharpTokenType::Plus,
             '-' => FSharpTokenType::Minus,

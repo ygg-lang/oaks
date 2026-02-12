@@ -1,71 +1,55 @@
-// GSGL (Graphics Shader Generator Language) basic syntax test file
+shader vertex main {
+    in vec3 position;
+    in vec2 texCoord;
+    out vec2 v_texCoord;
+    uniform mat4 modelViewProjection;
 
-// Vertex shader
-vertex main {
-    input vec3 position;
-    input vec2 texCoord;
-    
-    output vec2 fragTexCoord;
-    
-    uniform mat4 modelMatrix;
-    uniform mat4 viewMatrix;
-    uniform mat4 projectionMatrix;
-    
     void main() {
-        fragTexCoord = texCoord;
-        gl_Position = projectionMatrix * viewMatrix * modelMatrix * vec4(position, 1.0);
+        gl_Position = modelViewProjection * vec4(position, 1.0);
+        v_texCoord = texCoord;
     }
 }
 
-// Fragment shader
-fragment main {
-    input vec2 fragTexCoord;
-    
-    output vec4 fragColor;
-    
-    uniform sampler2D textureSampler;
-    uniform vec3 lightColor;
-    uniform float ambientStrength;
-    
-    void main() {
-        vec4 texColor = texture(textureSampler, fragTexCoord);
-        vec3 ambient = ambientStrength * lightColor;
-        fragColor = vec4(ambient, 1.0) * texColor;
-    }
-}
+shader fragment main {
+    in vec2 v_texCoord;
+    out vec4 fragColor;
+    uniform sampler2D texture;
 
-// Geometry shader (optional)
-geometry main {
-    layout(triangles) in;
-    layout(triangle_strip, max_vertices = 3) out;
-    
-    uniform float time;
-    
     void main() {
-        for(int i = 0; i < 3; i++) {
-            gl_Position = gl_in[i].gl_Position + vec4(sin(time), cos(time), 0.0, 0.0);
-            EmitVertex();
+        vec4 color = texture(texture, v_texCoord);
+        if (color.a < 0.1) {
+            discard;
         }
-        EndPrimitive();
+        fragColor = color;
     }
 }
 
-// Compute shader
-compute main {
-    layout(local_size_x = 64, local_size_y = 1, local_size_z = 1) in;
+struct Light {
+    vec3 position;
+    vec3 color;
+    float intensity;
+};
+
+uniform Light light;
+
+// Control flow test
+void lighting() {
+    vec3 normal = vec3(0.0, 1.0, 0.0);
+    float diff = max(dot(normal, light.position), 0.0);
     
-    layout(std430, binding = 0) buffer InputBuffer {
-        float data[];
-    } inputBuffer;
-    
-    layout(std430, binding = 1) buffer OutputBuffer {
-        float result[];
-    } outputBuffer;
-    
-    void main() {
-        uint index = gl_GlobalInvocationID.x;
-        if (index < inputBuffer.data.length()) {
-            outputBuffer.result[index] = inputBuffer.data[index] * 2.0;
-        }
+    if (diff > 0.5) {
+        return;
+    } else {
+        continue; // Not valid here but testing keyword
+    }
+
+    for (int i = 0; i < 10; i++) {
+        break;
+    }
+
+    while (true) {
+        do {
+            // something
+        } while(false);
     }
 }

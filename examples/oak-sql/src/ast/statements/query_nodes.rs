@@ -1,0 +1,281 @@
+use crate::ast::expr::{Expression, Identifier, TableName};
+use core::range::Range;
+use oak_core::source::{SourceBuffer, ToSource};
+
+/// Represents a SELECT statement.
+#[derive(Debug, Clone)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+pub struct SelectStatement {
+    /// The items to select (columns, expressions, or `*`).
+    pub items: Vec<SelectItem>,
+    /// The table to select from.
+    pub from: Option<TableName>,
+    /// Any JOIN clauses.
+    pub joins: Vec<JoinClause>,
+    /// The WHERE clause selection expression.
+    pub expr: Option<Expression>, // WHERE clause
+    /// The GROUP BY clause.
+    pub group_by: Option<GroupByClause>,
+    /// The HAVING clause.
+    pub having: Option<HavingClause>,
+    /// The ORDER BY clause.
+    pub order_by: Option<OrderByClause>,
+    /// The LIMIT clause.
+    pub limit: Option<LimitClause>,
+    /// The span of the SELECT statement.
+    #[serde(with = "oak_core::serde_range")]
+    pub span: Range<usize>,
+}
+
+impl ToSource for SelectStatement {
+    fn to_source(&self, buffer: &mut SourceBuffer) {
+        buffer.push("SELECT");
+        for (i, item) in self.items.iter().enumerate() {
+            if i > 0 {
+                buffer.push(",");
+            }
+            item.to_source(buffer);
+        }
+        if let Some(from) = &self.from {
+            buffer.push("FROM");
+            from.to_source(buffer);
+        }
+        for join in &self.joins {
+            join.to_source(buffer);
+        }
+        if let Some(expr) = &self.expr {
+            buffer.push("WHERE");
+            expr.to_source(buffer);
+        }
+        if let Some(group_by) = &self.group_by {
+            group_by.to_source(buffer);
+        }
+        if let Some(having) = &self.having {
+            having.to_source(buffer);
+        }
+        if let Some(order_by) = &self.order_by {
+            order_by.to_source(buffer);
+        }
+        if let Some(limit) = &self.limit {
+            limit.to_source(buffer);
+        }
+    }
+}
+
+/// Represents an item in a SELECT list.
+#[derive(Debug, Clone)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+pub enum SelectItem {
+    /// Select all columns (`*`).
+    Star {
+        /// The span of the `*`.
+        #[serde(with = "oak_core::serde_range")]
+        span: Range<usize>,
+    },
+    /// Select an expression with an optional alias.
+    Expression {
+        /// The expression to select.
+        expr: Expression,
+        /// The optional alias for the expression.
+        alias: Option<Identifier>,
+        /// The span of the select item.
+        #[serde(with = "oak_core::serde_range")]
+        span: Range<usize>,
+    },
+}
+
+impl ToSource for SelectItem {
+    fn to_source(&self, buffer: &mut SourceBuffer) {
+        match self {
+            SelectItem::Star { .. } => buffer.push("*"),
+            SelectItem::Expression { expr, alias, .. } => {
+                expr.to_source(buffer);
+                if let Some(alias) = alias {
+                    buffer.push("AS");
+                    alias.to_source(buffer);
+                }
+            }
+        }
+    }
+}
+
+/// JOIN clause.
+#[derive(Debug, Clone)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+pub struct JoinClause {
+    /// The type of join (e.g., INNER, LEFT).
+    pub join_type: JoinType,
+    /// The table being joined.
+    pub table: TableName,
+    /// The join condition (ON clause).
+    pub on: Option<Expression>,
+    /// The span of the JOIN clause.
+    #[serde(with = "oak_core::serde_range")]
+    pub span: Range<usize>,
+}
+
+impl ToSource for JoinClause {
+    fn to_source(&self, buffer: &mut SourceBuffer) {
+        self.join_type.to_source(buffer);
+        buffer.push("JOIN");
+        self.table.to_source(buffer);
+        if let Some(on) = &self.on {
+            buffer.push("ON");
+            on.to_source(buffer);
+        }
+    }
+}
+
+/// Type of SQL join.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+pub enum JoinType {
+    /// INNER JOIN.
+    Inner,
+    /// LEFT JOIN.
+    Left,
+    /// RIGHT JOIN.
+    Right,
+    /// FULL JOIN.
+    Full,
+}
+
+impl ToSource for JoinType {
+    fn to_source(&self, buffer: &mut SourceBuffer) {
+        match self {
+            JoinType::Inner => buffer.push("INNER"),
+            JoinType::Left => buffer.push("LEFT"),
+            JoinType::Right => buffer.push("RIGHT"),
+            JoinType::Full => buffer.push("FULL"),
+        }
+    }
+}
+
+/// GROUP BY clause.
+#[derive(Debug, Clone)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+pub struct GroupByClause {
+    /// The columns to group by.
+    pub columns: Vec<Expression>,
+    /// The span of the GROUP BY clause.
+    #[serde(with = "oak_core::serde_range")]
+    pub span: Range<usize>,
+}
+
+impl ToSource for GroupByClause {
+    fn to_source(&self, buffer: &mut SourceBuffer) {
+        buffer.push("GROUP");
+        buffer.push("BY");
+        for (i, col) in self.columns.iter().enumerate() {
+            if i > 0 {
+                buffer.push(",");
+            }
+            col.to_source(buffer);
+        }
+    }
+}
+
+/// HAVING clause.
+#[derive(Debug, Clone)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+pub struct HavingClause {
+    /// The condition for the HAVING clause.
+    pub condition: Expression,
+    /// The span of the HAVING clause.
+    #[serde(with = "oak_core::serde_range")]
+    pub span: Range<usize>,
+}
+
+impl ToSource for HavingClause {
+    fn to_source(&self, buffer: &mut SourceBuffer) {
+        buffer.push("HAVING");
+        self.condition.to_source(buffer);
+    }
+}
+
+/// ORDER BY clause.
+#[derive(Debug, Clone)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+pub struct OrderByClause {
+    /// The items to order by.
+    pub items: Vec<OrderByItem>,
+    /// The span of the ORDER BY clause.
+    #[serde(with = "oak_core::serde_range")]
+    pub span: Range<usize>,
+}
+
+impl ToSource for OrderByClause {
+    fn to_source(&self, buffer: &mut SourceBuffer) {
+        buffer.push("ORDER");
+        buffer.push("BY");
+        for (i, item) in self.items.iter().enumerate() {
+            if i > 0 {
+                buffer.push(",");
+            }
+            item.to_source(buffer);
+        }
+    }
+}
+
+/// An item in an ORDER BY clause.
+#[derive(Debug, Clone)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+pub struct OrderByItem {
+    /// The expression to order by.
+    pub expr: Expression,
+    /// The direction of the ordering.
+    pub direction: OrderDirection,
+    /// The span of the ORDER BY item.
+    #[serde(with = "oak_core::serde_range")]
+    pub span: Range<usize>,
+}
+
+impl ToSource for OrderByItem {
+    fn to_source(&self, buffer: &mut SourceBuffer) {
+        self.expr.to_source(buffer);
+        self.direction.to_source(buffer);
+    }
+}
+
+/// Direction of ordering.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+pub enum OrderDirection {
+    /// Ascending order.
+    Asc,
+    /// Descending order.
+    Desc,
+}
+
+impl ToSource for OrderDirection {
+    fn to_source(&self, buffer: &mut SourceBuffer) {
+        match self {
+            OrderDirection::Asc => buffer.push("ASC"),
+            OrderDirection::Desc => buffer.push("DESC"),
+        }
+    }
+}
+
+/// LIMIT clause.
+#[derive(Debug, Clone)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+pub struct LimitClause {
+    /// The limit value.
+    pub limit: Expression,
+    /// The optional offset value.
+    pub offset: Option<Expression>,
+    /// The span of the LIMIT clause.
+    #[serde(with = "oak_core::serde_range")]
+    pub span: Range<usize>,
+}
+
+impl ToSource for LimitClause {
+    fn to_source(&self, buffer: &mut SourceBuffer) {
+        buffer.push("LIMIT");
+        self.limit.to_source(buffer);
+        if let Some(offset) = &self.offset {
+            buffer.push("OFFSET");
+            offset.to_source(buffer);
+        }
+    }
+}

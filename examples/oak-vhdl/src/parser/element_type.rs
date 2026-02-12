@@ -1,182 +1,352 @@
-use oak_core::{ElementType, Parser, UniversalElementRole};
-#[cfg(feature = "serde")]
-use serde::{Deserialize, Serialize};
+use oak_core::{ElementType, UniversalElementRole};
 
+/// Represents the different types of elements in a VHDL source file.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub enum VhdlElementType {
-    // Tokens (mapped from VhdlTokenType)
+    /// Error token
     Error,
+    /// End of file token
     Eof,
+    /// Whitespace token
     Whitespace,
+    /// Comment token
     Comment,
+    /// Identifier token
     Identifier,
+    /// String literal token
     StringLiteral,
+    /// Character literal token
     CharLiteral,
+    /// Bit string literal token
     BitStringLiteral,
+    /// Based literal token
     BasedLiteral,
+    /// Real literal token
     RealLiteral,
+    /// Integer literal token
     IntegerLiteral,
+    /// `entity` keyword
     EntityKw,
+    /// `architecture` keyword
     ArchitectureKw,
+    /// `begin` keyword
     BeginKw,
+    /// `end` keyword
     EndKw,
+    /// `process` keyword
     ProcessKw,
+    /// `signal` keyword
     SignalKw,
+    /// `variable` keyword
     VariableKw,
+    /// `constant` keyword
     ConstantKw,
+    /// `component` keyword
     ComponentKw,
+    /// `port` keyword
     PortKw,
+    /// `map` keyword
     MapKw,
+    /// `generic` keyword
     GenericKw,
+    /// `library` keyword
     LibraryKw,
+    /// `use` keyword
     UseKw,
+    /// `package` keyword
     PackageKw,
+    /// `body` keyword
     BodyKw,
+    /// `function` keyword
     FunctionKw,
+    /// `procedure` keyword
     ProcedureKw,
+    /// `type` keyword
     TypeKw,
+    /// `subtype` keyword
     SubtypeKw,
+    /// `record` keyword
     RecordKw,
+    /// `array` keyword
     ArrayKw,
+    /// `if` keyword
     IfKw,
+    /// `then` keyword
     ThenKw,
+    /// `else` keyword
     ElseKw,
+    /// `elsif` keyword
     ElsifKw,
+    /// `case` keyword
     CaseKw,
+    /// `when` keyword
     WhenKw,
+    /// `loop` keyword
     LoopKw,
+    /// `for` keyword
     ForKw,
+    /// `while` keyword
     WhileKw,
+    /// `exit` keyword
     ExitKw,
+    /// `next` keyword
     NextKw,
+    /// `return` keyword
     ReturnKw,
+    /// `wait` keyword
     WaitKw,
+    /// `until` keyword
     UntilKw,
+    /// `in` keyword
     InKw,
+    /// `out` keyword
     OutKw,
+    /// `inout` keyword
     InoutKw,
+    /// `buffer` keyword
     BufferKw,
+    /// `linkage` keyword
     LinkageKw,
+    /// `downto` keyword
     DowntoKw,
+    /// `to` keyword
     ToKw,
+    /// `generate` keyword
     GenerateKw,
+    /// `with` keyword
     WithKw,
+    /// `select` keyword
     SelectKw,
+    /// `all` keyword
     AllKw,
+    /// `others` keyword
     OthersKw,
+    /// `null` keyword
     NullKw,
+    /// `open` keyword
     OpenKw,
+    /// `is` keyword
     IsKw,
+    /// `of` keyword
     OfKw,
+    /// `range` keyword
     RangeKw,
+    /// `reverse_range` keyword
     ReverseRangeKw,
+    /// `attribute` keyword
     AttributeKw,
+    /// `alias` keyword
     AliasKw,
+    /// `file` keyword
     FileKw,
+    /// `access` keyword
     AccessKw,
+    /// `after` keyword
     AfterKw,
+    /// `assert` keyword
     AssertKw,
+    /// `report` keyword
     ReportKw,
+    /// `severity` keyword
     SeverityKw,
+    /// `bit` keyword
     BitKw,
+    /// `bit_vector` keyword
     BitVectorKw,
+    /// `boolean` keyword
     BooleanKw,
+    /// `character` keyword
     CharacterKw,
+    /// `integer` keyword
     IntegerKw,
+    /// `natural` keyword
     NaturalKw,
+    /// `positive` keyword
     PositiveKw,
+    /// `real` keyword
     RealKw,
+    /// `string` keyword
     StringKw,
+    /// `time` keyword
     TimeKw,
+    /// `std_logic` keyword
     StdLogicKw,
+    /// `std_logic_vector` keyword
     StdLogicVectorKw,
+    /// `unsigned` keyword
     UnsignedKw,
+    /// `signed` keyword
     SignedKw,
+    /// `and` operator
     And,
+    /// `or` operator
     Or,
+    /// `nand` operator
     Nand,
+    /// `nor` operator
     Nor,
+    /// `xor` operator
     Xor,
+    /// `xnor` operator
     Xnor,
+    /// `not` operator
     Not,
+    /// `sll` operator
     Sll,
+    /// `srl` operator
     Srl,
+    /// `sla` operator
     Sla,
+    /// `sra` operator
     Sra,
+    /// `rol` operator
     Rol,
+    /// `ror` operator
     Ror,
+    /// `mod` operator
     Mod,
+    /// `rem` operator
     Rem,
+    /// `abs` operator
     Abs,
+    /// `=>` arrow
     Arrow,
+    /// `=` equals
     Eq,
+    /// `/=` not equals
     Ne,
+    /// `/` slash
     Slash,
+    /// `<=` less than or equal
     Le,
+    /// `<` less than
     Lt,
+    /// `>=` greater than or equal
     Ge,
+    /// `>` greater than
     Gt,
+    /// `<<` shift left
     ShiftLeft,
+    /// `>>` shift right
     ShiftRight,
+    /// `+` plus
     Plus,
+    /// `-` minus
     Minus,
+    /// `*` star
     Star,
+    /// `**` power
     Pow,
+    /// `:=` assignment
     Assign,
+    /// `:` colon
     Colon,
+    /// `&` ampersand
     Ampersand,
+    /// `(` left parenthesis
     LeftParen,
+    /// `)` right parenthesis
     RightParen,
+    /// `[` left bracket
     LeftBracket,
+    /// `]` right bracket
     RightBracket,
+    /// `;` semicolon
     Semicolon,
+    /// `,` comma
     Comma,
+    /// `.` dot
     Dot,
+    /// `|` pipe
     Pipe,
+    /// `#` hash
     Hash,
+    /// `@` at
     At,
+    /// `?` question mark
     Question,
+    /// `$` dollar sign
     Dollar,
+    /// `%` percent sign
     Percent,
+    /// `^` caret
     Caret,
+    /// `~` tilde
     Tilde,
+    /// `\` backslash
     Backslash,
+    /// `!` exclamation mark
     Exclamation,
 
     // Composite Elements
+    /// Root node
     Root,
+    /// Entity declaration
     EntityDeclaration,
+    /// Architecture body
     ArchitectureBody,
+    /// Package declaration
     PackageDeclaration,
+    /// Package body
     PackageBody,
+    /// Configuration declaration
     ConfigurationDeclaration,
+    /// Library clause
     LibraryClause,
+    /// Use clause
     UseClause,
+    /// Generic clause
     GenericClause,
+    /// Port clause
     PortClause,
+    /// Port declaration
+    PortDeclaration,
+    /// Signal declaration
     SignalDeclaration,
+    /// Variable declaration
     VariableDeclaration,
+    /// Constant declaration
     ConstantDeclaration,
+    /// Process statement
     ProcessStatement,
+    /// Component declaration
     ComponentDeclaration,
+    /// Function declaration
     FunctionDeclaration,
+    /// Procedure declaration
     ProcedureDeclaration,
+    /// Type declaration
     TypeDeclaration,
+    /// Subtype declaration
     SubtypeDeclaration,
+    /// If statement
     IfStatement,
+    /// Case statement
     CaseStatement,
+    /// Loop statement
     LoopStatement,
+    /// Assignment statement
     AssignmentStatement,
+    /// Wait statement
     WaitStatement,
+    /// Assert statement
     AssertStatement,
+    /// Report statement
     ReportStatement,
+    /// Attribute declaration
     AttributeDeclaration,
+    /// Alias declaration
     AliasDeclaration,
+    /// File declaration
     FileDeclaration,
+    /// Access declaration
     AccessDeclaration,
+    /// Generate statement
     GenerateStatement,
+    /// Block statement
     BlockStatement,
+    /// Component instantiation
     ComponentInstantiation,
 }
 

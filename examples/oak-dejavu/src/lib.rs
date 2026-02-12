@@ -1,18 +1,18 @@
-#![doc = include_str!("readme.md")]
-#![feature(new_range_api)]
 #![doc = include_str!("../readme.md")]
+#![feature(new_range_api)]
+#![warn(missing_docs)]
 #![doc(html_logo_url = "https://raw.githubusercontent.com/ygg-lang/oaks/refs/heads/dev/documents/logo.svg")]
 #![doc(html_favicon_url = "https://raw.githubusercontent.com/ygg-lang/oaks/refs/heads/dev/documents/logo.svg")]
-#![warn(missing_docs)]
 //! Dejavu support for the Oak language framework.
 
-/// AST definitions for Dejavu.
+/// AST module.
 pub mod ast;
-/// Builder implementation for Dejavu.
+/// Builder module.
 pub mod builder;
-/// Language definition for Dejavu.
+
+/// Language configuration module.
 pub mod language;
-/// Lexer implementation for Dejavu.
+/// Lexer module.
 pub mod lexer;
 /// LSP module.
 #[cfg(any(feature = "lsp", feature = "oak-highlight", feature = "oak-pretty-print"))]
@@ -20,29 +20,26 @@ pub mod lsp;
 /// MCP module.
 #[cfg(feature = "mcp")]
 pub mod mcp;
-/// Parser implementation for Dejavu.
+
+/// Parser module.
 pub mod parser;
 
-// Re-export main types for convenience
-pub use crate::{builder::DejavuBuilder, language::DejavuLanguage, lexer::DejavuLexer, parser::DejavuParser};
+pub use crate::{ast::DejavuRoot, language::DejavuLanguage, lexer::DejavuLexer, parser::DejavuParser};
 
-/// LSP implementation.
+pub use oak_core::{ElementType, TokenType};
+
+/// Highlighter implementation.
+#[cfg(feature = "oak-highlight")]
+pub use crate::lsp::highlighter::DejavuHighlighter;
+
 #[cfg(feature = "lsp")]
 pub use crate::lsp::DejavuLanguageService;
-#[cfg(feature = "oak-pretty-print")]
+/// LSP implementation.
+#[cfg(feature = "lsp")]
 pub use crate::lsp::formatter::DejavuFormatter;
-
-/// Re-export lexer types
-pub mod lexer_types {
-    pub use crate::lexer::DejavuKeywords;
-}
-pub use lexer_types::*;
-
-#[cfg(feature = "oak-highlight")]
-/// Highlighter implementation.
-pub use crate::lsp::highlighter::DejavuHighlighter;
 
 /// MCP service implementation.
 #[cfg(feature = "mcp")]
 pub use crate::mcp::serve_dejavu_mcp;
-pub use crate::{lexer::token_type::DejavuSyntaxKind as TokenType, parser::element_type::DejavuElementType as ElementType};
+pub use lexer::token_type::DejavuTokenType;
+pub use parser::element_type::DejavuElementType;

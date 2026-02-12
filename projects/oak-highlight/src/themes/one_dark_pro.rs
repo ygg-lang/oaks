@@ -1,3 +1,5 @@
+//! One Dark Pro theme implementation.
+
 use crate::highlighter::{HighlightStyle, HighlightTheme};
 use std::{collections::HashMap, string::ToString};
 

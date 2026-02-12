@@ -1,199 +1,346 @@
 use crate::lexer::token_type::WgslTokenType;
 use oak_core::{ElementType, UniversalElementRole};
-#[cfg(feature = "serde")]
-use serde::{Deserialize, Serialize};
 
+/// WGSL element types.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub enum WgslElementType {
-    // Tokens (mapped from WgslTokenType)
+    /// Whitespace.
     Whitespace,
+    /// Newline.
     Newline,
+    /// Comment.
     Comment,
+    /// Error.
     Error,
+    /// End of file.
     Eof,
+    /// Text.
     Text,
 
-    // Literals
+    /// Integer literal.
     IntegerLiteral,
+    /// Float literal.
     FloatLiteral,
+    /// String literal.
     StringLiteral,
+    /// Boolean literal.
     BoolLiteral,
+    /// Identifier.
     Identifier,
 
-    // Keywords - Types
+    /// `bool` keyword.
     BoolKw,
+    /// `i32` keyword.
     I32Kw,
+    /// `u32` keyword.
     U32Kw,
+    /// `f32` keyword.
     F32Kw,
+    /// `f16` keyword.
     F16Kw,
+    /// `vec2` keyword.
     Vec2Kw,
+    /// `vec3` keyword.
     Vec3Kw,
+    /// `vec4` keyword.
     Vec4Kw,
+    /// `mat2x2` keyword.
     Mat2x2Kw,
+    /// `mat2x3` keyword.
     Mat2x3Kw,
+    /// `mat2x4` keyword.
     Mat2x4Kw,
+    /// `mat3x2` keyword.
     Mat3x2Kw,
+    /// `mat3x3` keyword.
     Mat3x3Kw,
+    /// `mat3x4` keyword.
     Mat3x4Kw,
+    /// `mat4x2` keyword.
     Mat4x2Kw,
+    /// `mat4x3` keyword.
     Mat4x3Kw,
+    /// `mat4x4` keyword.
     Mat4x4Kw,
+    /// `array` keyword.
     ArrayKw,
+    /// `ptr` keyword.
     PtrKw,
+    /// `atomic` keyword.
     AtomicKw,
+    /// `sampler` keyword.
     SamplerKw,
+    /// `sampler_comparison` keyword.
     SamplerComparisonKw,
+    /// `texture_1d` keyword.
     Texture1dKw,
+    /// `texture_2d` keyword.
     Texture2dKw,
+    /// `texture_2d_array` keyword.
     Texture2dArrayKw,
+    /// `texture_3d` keyword.
     Texture3dKw,
+    /// `texture_cube` keyword.
     TextureCubeKw,
+    /// `texture_cube_array` keyword.
     TextureCubeArrayKw,
+    /// `texture_multisampled_2d` keyword.
     TextureMultisampled2dKw,
+    /// `texture_depth_2d` keyword.
     TextureDepth2dKw,
+    /// `texture_depth_cube` keyword.
     TextureDepthCubeKw,
+    /// `texture_depth_multisampled_2d` keyword.
     TextureDepthMultisampled2dKw,
+    /// `texture_storage_1d` keyword.
     TextureStorage1dKw,
+    /// `texture_storage_2d` keyword.
     TextureStorage2dKw,
+    /// `texture_storage_2d_array` keyword.
     TextureStorage2dArrayKw,
+    /// `texture_storage_3d` keyword.
     TextureStorage3dKw,
 
-    // Keywords - Control flow
+    /// `fn` keyword.
     FnKw,
+    /// `var` keyword.
     VarKw,
+    /// `let` keyword.
     LetKw,
+    /// `const` keyword.
     ConstKw,
+    /// `if` keyword.
     IfKw,
+    /// `else` keyword.
     ElseKw,
+    /// `switch` keyword.
     SwitchKw,
+    /// `case` keyword.
     CaseKw,
+    /// `default` keyword.
     DefaultKw,
+    /// `loop` keyword.
     LoopKw,
+    /// `for` keyword.
     ForKw,
+    /// `while` keyword.
     WhileKw,
+    /// `break` keyword.
     BreakKw,
+    /// `continue` keyword.
     ContinueKw,
+    /// `return` keyword.
     ReturnKw,
+    /// `discard` keyword.
     DiscardKw,
 
-    // Keywords - Storage
+    /// `function` keyword.
     FunctionKw,
+    /// `private` keyword.
     PrivateKw,
+    /// `workgroup` keyword.
     WorkgroupKw,
+    /// `uniform` keyword.
     UniformKw,
+    /// `storage` keyword.
     StorageKw,
 
-    // Access modes
+    /// `read` keyword.
     ReadKw,
+    /// `write` keyword.
     WriteKw,
+    /// `read_write` keyword.
     ReadWriteKw,
 
-    // Keywords - Shader stages & Attributes
+    /// `vertex` keyword.
     VertexKw,
+    /// `fragment` keyword.
     FragmentKw,
+    /// `compute` keyword.
     ComputeKw,
+    /// `binding` keyword.
     BindingKw,
+    /// `group` keyword.
     GroupKw,
+    /// `location` keyword.
     LocationKw,
+    /// `builtin` keyword.
     BuiltinKw,
+    /// `interpolate` keyword.
     InterpolateKw,
+    /// `invariant` keyword.
     InvariantKw,
+    /// `size` keyword.
     SizeKw,
+    /// `align` keyword.
     AlignKw,
+    /// `workgroup_size` keyword.
     WorkgroupSizeKw,
 
-    // Keywords - Builtins
+    /// `position` keyword.
     PositionKw,
+    /// `vertex_index` keyword.
     VertexIndexKw,
+    /// `instance_index` keyword.
     InstanceIndexKw,
+    /// `front_facing` keyword.
     FrontFacingKw,
+    /// `frag_depth` keyword.
     FragDepthKw,
+    /// `local_invocation_id` keyword.
     LocalInvocationIdKw,
+    /// `local_invocation_index` keyword.
     LocalInvocationIndexKw,
+    /// `global_invocation_id` keyword.
     GlobalInvocationIdKw,
+    /// `workgroup_id` keyword.
     WorkgroupIdKw,
+    /// `num_workgroups` keyword.
     NumWorkgroupsKw,
+    /// `sample_index` keyword.
     SampleIndexKw,
+    /// `sample_mask` keyword.
     SampleMaskKw,
 
-    // Keywords - Others
+    /// `struct` keyword.
     StructKw,
+    /// `type` keyword.
     TypeKw,
+    /// `alias` keyword.
     AliasKw,
+    /// `enable` keyword.
     EnableKw,
+    /// `requires` keyword.
     RequiresKw,
+    /// `override` keyword.
     OverrideKw,
 
-    // Operators
+    /// Plus `+`.
     Plus,
+    /// Minus `-`.
     Minus,
+    /// Star `*`.
     Star,
+    /// Slash `/`.
     Slash,
+    /// Percent `%`.
     Percent,
+    /// Ampersand `&`.
     Ampersand,
+    /// Pipe `|`.
     Pipe,
+    /// Caret `^`.
     Caret,
+    /// Tilde `~`.
     Tilde,
+    /// Left shift `<<`.
     LeftShift,
+    /// Right shift `>>`.
     RightShift,
+    /// Plus assign `+=`.
     PlusAssign,
+    /// Minus assign `-=`.
     MinusAssign,
+    /// Star assign `*=`.
     StarAssign,
+    /// Slash assign `/=`.
     SlashAssign,
+    /// Percent assign `%=`.
     PercentAssign,
+    /// Ampersand assign `&=`.
     AmpersandAssign,
+    /// Pipe assign `|=`.
     PipeAssign,
+    /// Caret assign `^=`.
     CaretAssign,
+    /// Left shift assign `<<=`.
     LeftShiftAssign,
+    /// Right shift assign `>>=`.
     RightShiftAssign,
+    /// Increment `++`.
     Increment,
+    /// Decrement `--`.
     Decrement,
 
-    // Comparison
+    /// Equal `=`.
     Eq,
+    /// Not equal `!=`.
     Ne,
+    /// Less than `<`.
     Lt,
+    /// Less than or equal to `<=`.
     Le,
+    /// Greater than `>`.
     Gt,
+    /// Greater than or equal to `>=`.
     Ge,
+    /// Double equal `==`.
     EqEq,
+    /// Bang equal `!=`.
     BangEq,
+    /// Less less `<<`.
     LtLt,
+    /// Greater greater `>>`.
     GtGt,
 
-    // Logical
+    /// Double ampersand `&&`.
     AmpersandAmpersand,
+    /// Double pipe `||`.
     PipePipe,
+    /// Bang `!`.
     Bang,
 
-    // Assignment
+    /// Assign `=`.
     Assign,
+    /// Arrow `->`.
     Arrow,
 
-    // Punctuation
+    /// Left parenthesis `(`.
     LeftParen,
+    /// Right parenthesis `)`.
     RightParen,
+    /// Left brace `{`.
     LeftBrace,
+    /// Right brace `}`.
     RightBrace,
+    /// Left bracket `[`.
     LeftBracket,
+    /// Right bracket `]`.
     RightBracket,
+    /// Semicolon `;`.
     Semicolon,
+    /// Comma `,`.
     Comma,
+    /// Dot `.`.
     Dot,
+    /// Colon `:`.
     Colon,
+    /// Question mark `?`.
     Question,
+    /// At symbol `@`.
     At,
+    /// Hash symbol `#`.
     Hash,
+    /// Dollar symbol `$`.
     Dollar,
 
-    // Grammar nodes
+    /// Root node.
     Root,
+    /// Function node.
     Function,
+    /// Struct node.
     Struct,
+    /// Variable node.
     Variable,
+    /// Block node.
     Block,
+    /// Type alias node.
     TypeAlias,
+    /// Parameter node.
+    Param,
+    /// Struct member node.
+    StructMember,
 }
 
 impl ElementType for WgslElementType {
@@ -201,6 +348,12 @@ impl ElementType for WgslElementType {
 
     fn role(&self) -> Self::Role {
         match self {
+            Self::Root => UniversalElementRole::Root,
+            Self::Function => UniversalElementRole::Definition,
+            Self::Struct => UniversalElementRole::Definition,
+            Self::Variable => UniversalElementRole::Definition,
+            Self::Block => UniversalElementRole::Container,
+            Self::TypeAlias => UniversalElementRole::Definition,
             _ => UniversalElementRole::None,
         }
     }

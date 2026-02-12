@@ -12,7 +12,7 @@ impl AdaRoot {
         Self { items }
     }
 
-    /// Gets all top-level items in this Ada file.
+    /// Returns all top-level items in this Ada file.
     pub fn items(&self) -> &[AdaItem] {
         &self.items
     }
@@ -123,6 +123,7 @@ pub struct AdaVariableDeclaration {
 }
 
 impl AdaVariableDeclaration {
+    /// Creates a new variable declaration.
     pub fn new(name: String, var_type: String) -> Self {
         Self { name, var_type }
     }

@@ -1,32 +1,34 @@
 #![doc = include_str!("readme.md")]
-//! MATLAB 语法高亮器
+//! Matlab syntax highlighter.
 //!
-//! 这个模块提供了 MATLAB 源代码的语法高亮功能，支持关键字、字符串、数字、注释等的高亮显示。
+//! This module provides syntax highlighting for Matlab source code, supporting keywords, comments, strings, etc.
 
-/// 高亮类型的本地定义
+use oak_highlight::highlighter::{HighlightKind, Highlighter};
+
+/// Local definition of highlight kinds
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum HighlightKind {
-    /// 关键字
+    /// Keyword
     Keyword,
-    /// 字符串
+    /// String
     String,
-    /// 数字
+    /// Number
     Number,
-    /// 注释
+    /// Comment
     Comment,
-    /// 标识符
+    /// Identifier
     Identifier,
 }
 
-/// 高亮器 trait
+/// Highlighter trait
 pub trait Highlighter {
-    /// 对给定的文本进行高亮处理
+    /// Highlights the given text
     fn highlight(&self, text: &str) -> Vec<(usize, usize, HighlightKind)>;
 }
 
-/// MATLAB 语法高亮器
+/// MATLAB syntax highlighter
 ///
-/// `MatlabHighlighter` 实现了 `Highlighter` trait，为 MATLAB 代码提供语法高亮功能。
+/// `MatlabHighlighter` implements `Highlighter` trait, providing syntax highlighting for MATLAB code.
 pub struct MatlabHighlighter;
 
 impl Default for MatlabHighlighter {
@@ -36,12 +38,12 @@ impl Default for MatlabHighlighter {
 }
 
 impl MatlabHighlighter {
-    /// 创建一个新的 MATLAB 高亮器实例
+    /// Creates a new MATLAB highlighter instance
     pub fn new() -> Self {
         Self::default()
     }
 
-    /// 高亮 MATLAB 关键字
+    /// Highlights MATLAB keywords
     fn highlight_keywords(&self, text: &str) -> Vec<(usize, usize, HighlightKind)> {
         let mut highlights = Vec::new();
         let keywords = ["break", "case", "catch", "classdef", "continue", "else", "elseif", "end", "for", "function", "global", "if", "otherwise", "parfor", "persistent", "return", "spmd", "switch", "try", "while"];
@@ -64,7 +66,7 @@ impl MatlabHighlighter {
         highlights
     }
 
-    /// 高亮字符串字面量
+    /// Highlights string literals
     fn highlight_strings(&self, text: &str) -> Vec<(usize, usize, HighlightKind)> {
         let mut highlights = Vec::new();
         let mut chars = text.char_indices().peekable();
@@ -76,7 +78,7 @@ impl MatlabHighlighter {
                 while let Some((j, next_ch)) = chars.next() {
                     end = j + next_ch.len_utf8();
                     if next_ch == '\'' {
-                        // 检查是否是双引号转义
+                        // Check for double quote escape
                         if let Some(&(_, peek_ch)) = chars.peek() {
                             if peek_ch == '\'' {
                                 chars.next();
@@ -100,7 +102,7 @@ impl Highlighter for MatlabHighlighter {
         highlights.extend(self.highlight_keywords(text));
         highlights.extend(self.highlight_strings(text));
 
-        // 按位置排序
+        // Sort by position
         highlights.sort_by_key(|&(start, _, _)| start);
         highlights
     }

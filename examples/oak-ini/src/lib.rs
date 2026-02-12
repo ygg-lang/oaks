@@ -27,6 +27,17 @@ pub mod parser;
 
 pub use crate::{ast::IniRoot, builder::IniBuilder, language::IniLanguage, lexer::IniLexer, parser::IniParser};
 
+/// Parses an INI string.
+pub fn parse(ini: &str) -> Result<crate::ast::IniRoot, String> {
+    use oak_core::{Builder, parser::session::ParseSession, source::SourceText};
+    let language = IniLanguage::default();
+    let builder = IniBuilder::new(&language);
+    let source = SourceText::new(ini.to_string());
+    let mut cache = ParseSession::default();
+    let result = builder.build(&source, &[], &mut cache);
+    result.result.map_err(|e| format!("{:?}", e))
+}
+
 /// Highlighter implementation.
 #[cfg(feature = "oak-highlight")]
 pub use crate::lsp::highlighter::IniHighlighter;

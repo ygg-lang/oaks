@@ -17,7 +17,7 @@ use std::fmt;
 pub enum RedTree<'a, L: Language> {
     /// A red node with child elements.
     Node(RedNode<'a, L>),
-    /// A red leaf (token).
+    /// A red leaf.
     Leaf(RedLeaf<L>),
 }
 
@@ -52,6 +52,11 @@ impl<'a, L: Language> PartialEq for RedTree<'a, L> {
 impl<'a, L: Language> Eq for RedTree<'a, L> {}
 
 impl<'a, L: Language> RedTree<'a, L> {
+    /// Creates a new red tree from a green tree root, starting at offset 0.
+    pub fn new(root: &'a GreenNode<'a, L>) -> Self {
+        Self::Node(RedNode { green: root, offset: 0 })
+    }
+
     /// Returns the absolute byte span of this red tree element.
     ///
     /// The span includes the start and end offsets in the source text.
@@ -89,7 +94,7 @@ impl<'a, L: Language> RedTree<'a, L> {
 
     /// Returns an iterator over the child elements if this is a node.
     ///
-    /// Returns an empty iterator if this is a leaf.
+    /// Returns an empty iterator if this is a token.
     pub fn children(&self) -> RedChildren<'a, L> {
         match self {
             RedTree::Node(n) => n.children(),
@@ -105,12 +110,18 @@ impl<'a, L: Language> RedTree<'a, L> {
         }
     }
 
-    /// Returns this element as a leaf if it is one.
-    pub fn as_leaf(&self) -> Option<RedLeaf<L>> {
+    /// Returns this element as a token if it is one.
+    pub fn as_token(&self) -> Option<RedLeaf<L>> {
         match self {
             RedTree::Node(_) => None,
             RedTree::Leaf(l) => Some(*l),
         }
+    }
+
+    /// Alias for `as_token`.
+    #[deprecated(note = "Use `as_token` instead")]
+    pub fn as_leaf(&self) -> Option<RedLeaf<L>> {
+        self.as_token()
     }
 }
 
@@ -119,6 +130,11 @@ impl<'a, L: Language> RedTree<'a, L> {
 /// Red nodes are position-aware views into the immutable green tree structure.
 /// They are small, copyable handles that can be used for traversal and
 /// analysis.
+///
+/// # Design Note: Reference vs Owned
+/// We store `&'a GreenNode<'a, L>` here instead of `GreenNode<'a, L>` to keep
+/// `RedNode` as small as possible (16 bytes: 8 for pointer + 8 for offset).
+/// This makes it efficient to pass `RedNode` by value during tree traversal.
 pub struct RedNode<'a, L: Language> {
     /// The underlying green node that contains the structural information.
     pub green: &'a GreenNode<'a, L>,
@@ -168,6 +184,25 @@ impl<L: Language> Clone for RedLeaf<L> {
 
 impl<L: Language> Copy for RedLeaf<L> {}
 
+impl<L: Language> RedLeaf<L> {
+    /// Returns the kind of this red leaf.
+    #[inline]
+    pub fn kind(&self) -> L::TokenType {
+        self.kind
+    }
+
+    /// Returns the absolute byte span of this red leaf.
+    #[inline]
+    pub fn span(&self) -> Range<usize> {
+        self.span.clone()
+    }
+
+    /// Returns the text content of this red leaf from the source.
+    pub fn text<'s, S: crate::source::Source + ?Sized>(&self, source: &'s S) -> std::borrow::Cow<'s, str> {
+        source.get_text_in(self.span())
+    }
+}
+
 impl<L: Language> PartialEq for RedLeaf<L> {
     fn eq(&self, other: &Self) -> bool {
         self.kind == other.kind && self.span == other.span
@@ -203,6 +238,11 @@ impl<'a, L: Language> RedChildren<'a, L> {
 }
 
 impl<'a, L: Language> RedNode<'a, L> {
+    /// Returns the text content of this red node from the source.
+    pub fn text<'s, S: crate::source::Source + ?Sized>(&self, source: &'s S) -> std::borrow::Cow<'s, str> {
+        source.get_text_in(self.span())
+    }
+
     /// Creates a new red node from a green node and absolute offset.
     #[inline]
     pub fn new(green: &'a GreenNode<'a, L>, offset: usize) -> Self {
@@ -313,6 +353,17 @@ impl<'a, L: Language> RedNode<'a, L> {
                 RedTree::Leaf(l) => return Some(l),
             }
         }
+    }
+
+    /// Returns the first child token if any.
+    pub fn first_token(&self) -> Option<RedLeaf<L>> {
+        for child in self.children() {
+            match child {
+                RedTree::Node(_) => continue,
+                RedTree::Leaf(l) => return Some(l),
+            }
+        }
+        None
     }
 }
 

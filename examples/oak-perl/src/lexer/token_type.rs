@@ -1,14 +1,15 @@
 use oak_core::{Token, TokenType, UniversalTokenRole};
-#[cfg(feature = "serde")]
-use serde::{Deserialize, Serialize};
 
+/// Perl token type.
 pub type PerlToken = Token<PerlTokenType>;
 
 impl PerlTokenType {
+    /// Returns `true` if this token type is a regular token.
     pub fn is_token(&self) -> bool {
         !self.is_element()
     }
 
+    /// Returns `true` if this token type is an internal element (used for incremental parsing).
     pub fn is_element(&self) -> bool {
         matches!(
             self,
@@ -116,7 +117,7 @@ impl TokenType for PerlTokenType {
             | Self::Seek
             | Self::Tell
             | Self::Binmode
-            | Self::Chodir
+            | Self::Chdir
             | Self::Mkdir
             | Self::Rmdir
             | Self::Opendir
@@ -228,395 +229,425 @@ impl TokenType for PerlTokenType {
     }
 }
 
+/// Perl token type.
 #[derive(Copy, Clone, Debug, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub enum PerlTokenType {
-    // Basic tokens
+    /// Whitespace.
     Whitespace,
-
+    /// Newline.
     Newline,
 
-    // Comments
+    /// Comment.
     Comment,
 
-    // Literals
+    /// String literal.
     StringLiteral,
-
+    /// Number literal.
     NumberLiteral,
-
+    /// Regex literal.
     RegexLiteral,
 
-    // Identifiers and keywords
+    /// Identifier.
     Identifier,
-
+    /// `package` keyword.
     Package,
-
+    /// `use` keyword.
     Use,
-
+    /// `sub` keyword.
     Sub,
-
+    /// `my` keyword.
     My,
-
+    /// `our` keyword.
     Our,
-
+    /// `local` keyword.
     Local,
-
+    /// `if` keyword.
     If,
-
+    /// `elsif` keyword.
     Elsif,
-
+    /// `else` keyword.
     Else,
-
+    /// `unless` keyword.
     Unless,
-
+    /// `while` keyword.
     While,
-
+    /// `until` keyword.
     Until,
-
+    /// `for` keyword.
     For,
-
+    /// `foreach` keyword.
     Foreach,
-
+    /// `do` keyword.
     Do,
-
+    /// `last` keyword.
     Last,
-
+    /// `next` keyword.
     Next,
-
+    /// `redo` keyword.
     Redo,
-
+    /// `return` keyword.
     Return,
-
+    /// `die` keyword.
     Die,
-
+    /// `warn` keyword.
     Warn,
-
+    /// `print` keyword.
     Print,
-
+    /// `printf` keyword.
     Printf,
-
+    /// `chomp` keyword.
     Chomp,
-
+    /// `chop` keyword.
     Chop,
-
+    /// `length` keyword.
     Length,
-
+    /// `substr` keyword.
     Substr,
-
+    /// `index` keyword.
     Index,
-
+    /// `rindex` keyword.
     Rindex,
-
+    /// `split` keyword.
     Split,
-
+    /// `join` keyword.
     Join,
-
+    /// `push` keyword.
     Push,
-
+    /// `pop` keyword.
     Pop,
-
+    /// `shift` keyword.
     Shift,
-
+    /// `unshift` keyword.
     Unshift,
-
+    /// `sort` keyword.
     Sort,
-
+    /// `reverse` keyword.
     Reverse,
-
+    /// `keys` keyword.
     Keys,
-
+    /// `values` keyword.
     Values,
-
+    /// `each` keyword.
     Each,
-
+    /// `exists` keyword.
     Exists,
-
+    /// `delete` keyword.
     Delete,
-
+    /// `defined` keyword.
     Defined,
-
+    /// `undef` keyword.
     Undef,
-
+    /// `ref` keyword.
     Ref,
-
+    /// `bless` keyword.
     Bless,
-
+    /// `new` keyword.
     New,
-
+    /// `can` keyword.
     Can,
-
+    /// `isa` keyword.
     Isa,
-
+    /// `scalar` keyword.
     Scalar,
-
+    /// `array` keyword.
     Array,
-
+    /// `hash` keyword.
     Hash,
-
+    /// `code` keyword.
     Code,
-
+    /// `glob` keyword.
     Glob,
-
+    /// `open` keyword.
     Open,
-
+    /// `close` keyword.
     Close,
-
+    /// `read` keyword.
     Read,
-
+    /// `write` keyword.
     Write,
-
+    /// `seek` keyword.
     Seek,
-
+    /// `tell` keyword.
     Tell,
-
+    /// `binmode` keyword.
     Binmode,
-
-    Chodir,
-
+    /// `chdir` keyword.
+    Chdir,
+    /// `mkdir` keyword.
     Mkdir,
-
+    /// `rmdir` keyword.
     Rmdir,
-
+    /// `opendir` keyword.
     Opendir,
-
+    /// `readdir` keyword.
     Readdir,
-
+    /// `closedir` keyword.
     Closedir,
-
+    /// `stat` keyword.
     Stat,
-
+    /// `lstat` keyword.
     Lstat,
-
+    /// `chmod` keyword.
     Chmod,
-
+    /// `chown` keyword.
     Chown,
-
+    /// `link` keyword.
     Link,
-
+    /// `unlink` keyword.
     Unlink,
-
+    /// `rename` keyword.
     Rename,
-
+    /// `symlink` keyword.
     Symlink,
-
+    /// `readlink` keyword.
     Readlink,
-
+    /// `eval` keyword.
     Eval,
-
+    /// `require` keyword.
     Require,
-
+    /// `import` keyword.
     Import,
-
+    /// `no` keyword.
     No,
-
+    /// `strict` keyword.
     Strict,
-
+    /// `warnings` keyword.
     Warnings,
-
+    /// `vars` keyword.
     Vars,
-
+    /// `subs` keyword.
     Subs,
-
+    /// `refs` keyword.
     Refs,
 
-    // Operators
+    /// Plus `+`.
     Plus,
-
+    /// Minus `-`.
     Minus,
-
+    /// Increment `++`.
     Increment,
-
+    /// Decrement `--`.
     Decrement,
-
+    /// Multiplication `*`.
     Star,
-
+    /// Division `/`.
     Slash,
-
+    /// Modulo `%`.
     Percent,
-
+    /// Exponentiation `**`.
     Power,
-
+    /// String concatenation `.`.
     Concat,
-
+    /// String repetition `x`.
     Repeat,
-
+    /// Regex match `=~`.
     Match,
-
+    /// Regex not match `!~`.
     NotMatch,
-
+    /// Regex substitution `s///`.
     Substitute,
-
+    /// Character transliteration `tr///`.
     Transliterate,
-
+    /// Equal `==`.
     Equal,
-
+    /// Not equal `!=`.
     NotEqual,
-
+    /// Less than `<`.
     LessThan,
-
+    /// Less than or equal `<=`.
     LessEqual,
-
+    /// Greater than `>`.
     GreaterThan,
-
+    /// Greater than or equal `>=`.
     GreaterEqual,
-
+    /// Spaceship operator `<=>`.
     Spaceship,
-
+    /// String equal `eq`.
     StringEqual,
-
+    /// String not equal `ne`.
     StringNotEqual,
-
+    /// String less than `lt`.
     StringLess,
-
+    /// String less than or equal `le`.
     StringLessEqual,
-
+    /// String greater than `gt`.
     StringGreater,
-
+    /// String greater than or equal `ge`.
     StringGreaterEqual,
-
+    /// String comparison `cmp`.
     StringCompare,
-
+    /// Logical AND `and`.
     And,
-
+    /// Logical OR `or`.
     Or,
-
+    /// Logical NOT `not`.
     Not,
-
+    /// Logical XOR `xor`.
     Xor,
-
+    /// Logical AND `&&`.
     LogicalAnd,
-
+    /// Logical OR `||`.
     LogicalOr,
-
+    /// Logical NOT `!`.
     LogicalNot,
-
+    /// Logical XOR.
     LogicalXor,
-
+    /// Bitwise AND `&`.
     BitwiseAnd,
-
+    /// Bitwise OR `|`.
     BitwiseOr,
-
+    /// Bitwise XOR `^`.
     BitwiseXor,
-
+    /// Bitwise NOT `~`.
     BitwiseNot,
-
+    /// Left shift `<<`.
     LeftShift,
-
+    /// Right shift `>>`.
     RightShift,
-
+    /// Assignment `=`.
     Assign,
-
+    /// Plus assignment `+=`.
     PlusAssign,
-
+    /// Minus assignment `-=`.
     MinusAssign,
-
+    /// Multiplication assignment `*=`.
     MultiplyAssign,
-
+    /// Division assignment `/=`.
     DivideAssign,
-
+    /// Modulo assignment `%=`.
     ModuloAssign,
-
+    /// Exponentiation assignment `**=`.
     PowerAssign,
-
+    /// Concatenation assignment `.=`.
     ConcatAssign,
-
+    /// Logical AND assignment `&&=`.
     LogicalAndAssign,
-
+    /// Logical OR assignment `||=`.
     LogicalOrAssign,
-
+    /// Bitwise AND assignment `&=`.
     BitwiseAndAssign,
-
+    /// Bitwise OR assignment `|=`.
     BitwiseOrAssign,
-
+    /// Bitwise XOR assignment `^=`.
     BitwiseXorAssign,
-
+    /// Left shift assignment `<<=`.
     LeftShiftAssign,
-
+    /// Right shift assignment `>>=`.
     RightShiftAssign,
 
-    // Delimiters
+    /// Left parenthesis `(`.
     LeftParen,
-
+    /// Right parenthesis `)`.
     RightParen,
-
+    /// Left brace `{`.
     LeftBrace,
-
+    /// Right brace `}`.
     RightBrace,
-
+    /// Left bracket `[`.
     LeftBracket,
-
+    /// Right bracket `]`.
     RightBracket,
-
+    /// Semicolon `;`.
     Semicolon,
-
+    /// Comma `,`.
     Comma,
-
+    /// Arrow `->`.
     Arrow,
-
+    /// Fat arrow `=>`.
     FatArrow,
-
+    /// Dot `.`.
     Dot,
-
+    /// Range operator `..`.
     Range,
-
+    /// Ellipsis `...`.
     Ellipsis,
 
-    // Special characters
+    /// Dollar sign `$`.
     Dollar,
-
+    /// At sign `@`.
     At,
-
+    /// Percent sign `%`.
     Percent_,
-
+    /// Ampersand `&`.
     Ampersand,
-
+    /// Backslash `\`.
     Backslash,
-
+    /// Question mark `?`.
     Question,
-
+    /// Colon `:`.
     Colon,
-
+    /// Double colon `::`.
     DoubleColon,
-
+    /// Single quote `'`.
     Quote,
-
+    /// Double quote `"`.
     DoubleQuote,
-
+    /// Backtick `` ` ``.
     Backtick,
 
-    // Composite nodes (Internal use)
+    /// Internal program node.
     InternalProgram,
+    /// Internal statement node.
     InternalStatement,
+    /// Internal expression node.
     InternalExpression,
+    /// Internal block node.
     InternalBlock,
+    /// Internal subroutine declaration node.
     InternalSubroutineDeclaration,
+    /// Internal package declaration node.
     InternalPackageDeclaration,
+    /// Internal use statement node.
     InternalUseStatement,
+    /// Internal variable declaration node.
     InternalVariableDeclaration,
+    /// Internal assignment node.
     InternalAssignment,
+    /// Internal function call node.
     InternalFunctionCall,
+    /// Internal method call node.
     InternalMethodCall,
+    /// Internal array access node.
     InternalArrayAccess,
+    /// Internal hash access node.
     InternalHashAccess,
+    /// Internal reference node.
     InternalReference,
+    /// Internal dereference node.
     InternalDereference,
+    /// Internal conditional expression node.
     InternalConditionalExpression,
+    /// Internal loop statement node.
     InternalLoopStatement,
+    /// Internal if statement node.
     InternalIfStatement,
+    /// Internal unless statement node.
     InternalUnlessStatement,
+    /// Internal while statement node.
     InternalWhileStatement,
+    /// Internal until statement node.
     InternalUntilStatement,
+    /// Internal for statement node.
     InternalForStatement,
+    /// Internal foreach statement node.
     InternalForeachStatement,
+    /// Internal do statement node.
     InternalDoStatement,
+    /// Internal eval statement node.
     InternalEvalStatement,
+    /// Internal regex match node.
     InternalRegexMatch,
+    /// Internal regex substitution node.
     InternalRegexSubstitution,
+    /// Internal regex transliteration node.
     InternalRegexTransliteration,
 
-    // Error and EOF
+    /// Error.
     Error,
+    /// End of stream.
     Eof,
 }
 
+/// Perl syntax node.
 pub type PerlNode<'a> = oak_core::tree::RedNode<'a, crate::PerlLanguage>;

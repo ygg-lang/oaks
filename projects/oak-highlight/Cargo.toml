@@ -14,14 +14,14 @@ keywords = ["syntax-highlighting", "code-highlighting", "multi-language", "rust"
 
 [dependencies]
 oak-core = { workspace = true }
-serde = { workspace = true }
+serde = { workspace = true, optional = true }
 
 [dev-dependencies]
 oak-testing = { workspace = true }
-oak-rust = { workspace = true }
 
 [features]
-default = []
+default = ["serde"]
+serde = ["dep:serde", "oak-core/serde"]
 
 [package.metadata.docs.rs]
 all-features = true

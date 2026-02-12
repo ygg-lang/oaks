@@ -1,3 +1,4 @@
+/// Matlab element type definitions
 pub mod element_type;
 
 use crate::{
@@ -11,14 +12,15 @@ use oak_core::{
     source::Source,
 };
 
-type State<'a, S> = ParserState<'a, MatlabLanguage, S>;
+pub(crate) type State<'a, S> = ParserState<'a, MatlabLanguage, S>;
 
-/// MATLAB parser implementation.
+/// MATLAB parser implementation
 pub struct MatlabParser<'a> {
     pub(crate) _language: &'a MatlabLanguage,
 }
 
 impl<'a> MatlabParser<'a> {
+    /// Creates a new Matlab parser
     pub fn new(language: &'a MatlabLanguage) -> Self {
         Self { _language: language }
     }
@@ -27,21 +29,19 @@ impl<'a> MatlabParser<'a> {
 impl<'p> Parser<MatlabLanguage> for MatlabParser<'p> {
     fn parse<'a, S: Source + ?Sized>(&self, text: &'a S, edits: &[TextEdit], cache: &'a mut impl ParseCache<MatlabLanguage>) -> ParseOutput<'a, MatlabLanguage> {
         let lexer = MatlabLexer::new(self._language);
-        oak_core::parser::parse_with_lexer(&lexer, text, edits, cache, |state| self.parse_root_internal(state))
+        oak_core::parser::parse_with_lexer(&lexer, text, edits, cache, |state| {
+            let cp = state.checkpoint();
+
+            while state.not_at_end() {
+                self.parse_statement(state)
+            }
+
+            Ok(state.finish_at(cp, MatlabElementType::Script))
+        })
     }
 }
 
 impl<'p> MatlabParser<'p> {
-    fn parse_root_internal<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> Result<&'a GreenNode<'a, MatlabLanguage>, OakError> {
-        let cp = state.checkpoint();
-
-        while state.not_at_end() {
-            self.parse_statement(state)
-        }
-
-        Ok(state.finish_at(cp, MatlabElementType::Script))
-    }
-
     fn parse_statement<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) {
         let checkpoint = state.checkpoint();
 

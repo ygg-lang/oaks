@@ -6,18 +6,18 @@ use crate::{language::JavaScriptLanguage, lexer::token_type::JavaScriptTokenType
 use oak_core::{Lexer, LexerCache, LexerState, OakError, TextEdit, lexer::LexOutput, source::Source};
 use std::simd::prelude::*;
 
-type State<'a, S> = LexerState<'a, S, JavaScriptLanguage>;
+pub(crate) type State<'a, S> = LexerState<'a, S, JavaScriptLanguage>;
 
 /// JavaScript lexer.
 #[derive(Clone, Debug)]
 pub struct JavaScriptLexer<'config> {
-    _config: &'config JavaScriptLanguage,
+    config: &'config JavaScriptLanguage,
 }
 
 impl<'config> JavaScriptLexer<'config> {
     /// Creates a new JavaScript lexer.
     pub fn new(config: &'config JavaScriptLanguage) -> Self {
-        Self { _config: config }
+        Self { config }
     }
 
     fn safe_check<'a, S: Source + ?Sized>(&self, state: &State<'a, S>) -> Result<(), OakError> {
@@ -133,7 +133,7 @@ impl<'config> JavaScriptLexer<'config> {
         }
     }
 
-    /// 处理换行
+    /// Handles newline characters.
     fn lex_newline<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start_pos = state.get_position();
 
@@ -155,12 +155,12 @@ impl<'config> JavaScriptLexer<'config> {
         }
     }
 
-    /// 处理注释（行注释和块注释）
+    /// Handles comments (line and block comments).
     fn lex_comment<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start = state.get_position();
         let rest = state.rest();
 
-        // 行注释: // ... 直到换行
+        // Line comment: // ... until newline
         if rest.starts_with("//") {
             state.advance(2);
             while let Some(ch) = state.peek() {
@@ -173,7 +173,7 @@ impl<'config> JavaScriptLexer<'config> {
             return true;
         }
 
-        // 块注释: /* ... */
+        // Block comment: /* ... */
         if rest.starts_with("/*") {
             state.advance(2);
             let mut found_end = false;
@@ -198,7 +198,7 @@ impl<'config> JavaScriptLexer<'config> {
         false
     }
 
-    /// 处理字符串字面量
+    /// Handles string literals.
     fn lex_string_literal<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start_pos = state.get_position();
 
@@ -239,7 +239,7 @@ impl<'config> JavaScriptLexer<'config> {
         false
     }
 
-    /// 处理模板字符串
+    /// Handles template literals.
     fn lex_template_literal<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start_pos = state.get_position();
 
@@ -254,7 +254,7 @@ impl<'config> JavaScriptLexer<'config> {
                     break;
                 }
                 else if ch == '\\' {
-                    // 处理转义字符
+                    // Handle escaped characters
                     state.advance(1);
                     if let Some(escaped) = state.peek() {
                         state.advance(escaped.len_utf8())
@@ -262,7 +262,7 @@ impl<'config> JavaScriptLexer<'config> {
                 }
                 else if ch == '$' {
                     if let Some('{') = state.peek_next_n(1) {
-                        // 模板表达式，暂时跳过
+                        // Template expression, skip for now
                         state.advance(2);
                         let mut brace_count = 1;
                         while let Some(inner_ch) = state.peek() {
@@ -301,16 +301,16 @@ impl<'config> JavaScriptLexer<'config> {
         }
     }
 
-    /// 处理数字字面量
+    /// Handles numeric literals.
     fn lex_numeric_literal<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start_pos = state.get_position();
 
         if let Some(ch) = state.peek() {
-            // 十六进制数字 (0x 或 0X)
+            // Hexadecimal number (0x or 0X)
             if ch == '0' {
                 if let Some(next) = state.peek_next_n(1) {
                     if next == 'x' || next == 'X' {
-                        state.advance(2); // 跳过 '0x'
+                        state.advance(2); // Skip '0x'
                         let mut has_digits = false;
                         while let Some(hex_ch) = state.peek() {
                             if hex_ch.is_ascii_hexdigit() {
@@ -327,7 +327,7 @@ impl<'config> JavaScriptLexer<'config> {
                             state.add_error(error)
                         }
 
-                        // 检查 BigInt 后缀
+                        // Check for BigInt suffix
                         if let Some('n') = state.peek() {
                             state.advance(1);
                             state.add_token(JavaScriptTokenType::BigIntLiteral, start_pos, state.get_position())
@@ -340,16 +340,16 @@ impl<'config> JavaScriptLexer<'config> {
                 }
             }
 
-            // 普通数字或小数
+            // Normal number or decimal
             if ch.is_ascii_digit() || (ch == '.' && self.is_next_digit(state)) {
-                // 处理整数部分
+                // Handle integer part
                 if ch != '.' {
                     while let Some(digit) = state.peek() {
                         if digit.is_ascii_digit() { state.advance(1) } else { break }
                     }
                 }
 
-                // 处理小数部分
+                // Handle decimal part
                 if let Some('.') = state.peek() {
                     state.advance(1);
                     while let Some(digit) = state.peek() {
@@ -357,19 +357,19 @@ impl<'config> JavaScriptLexer<'config> {
                     }
                 }
 
-                // 处理指数部分
+                // Handle exponent part
                 if let Some(exp) = state.peek() {
                     if exp == 'e' || exp == 'E' {
                         state.advance(1);
 
-                        // 可选的符号
+                        // Optional sign
                         if let Some(sign) = state.peek() {
                             if sign == '+' || sign == '-' {
                                 state.advance(1)
                             }
                         }
 
-                        // 必须有数字
+                        // Must have digits
                         let mut has_exp_digits = false;
                         while let Some(digit) = state.peek() {
                             if digit.is_ascii_digit() {
@@ -388,7 +388,7 @@ impl<'config> JavaScriptLexer<'config> {
                     }
                 }
 
-                // 检查 BigInt 后缀
+                // Check for BigInt suffix
                 if let Some('n') = state.peek() {
                     state.advance(1);
                     state.add_token(JavaScriptTokenType::BigIntLiteral, start_pos, state.get_position())
@@ -407,12 +407,12 @@ impl<'config> JavaScriptLexer<'config> {
         }
     }
 
-    /// 检查下一个字符是否是数字
+    /// Checks if the next character is a digit.
     fn is_next_digit<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         if let Some(next_ch) = state.peek_next_n(1) { next_ch.is_ascii_digit() } else { false }
     }
 
-    /// 处理标识符或关键字
+    /// Handles identifiers or keywords.
     fn lex_identifier_or_keyword<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start_pos = state.get_position();
 
@@ -438,12 +438,12 @@ impl<'config> JavaScriptLexer<'config> {
         }
     }
 
-    /// 判断是关键字还是标识
+    /// Determines if it's a keyword or an identifier.
     fn keyword_or_identifier(&self, text: &str) -> JavaScriptTokenType {
         JavaScriptTokenType::from_keyword(text).unwrap_or(JavaScriptTokenType::IdentifierName)
     }
 
-    /// 处理操作符和标点符号
+    /// Handles operators and punctuation.
     fn lex_operator_or_punctuation<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start_pos = state.get_position();
 
@@ -498,10 +498,10 @@ impl<'config> JavaScriptLexer<'config> {
                     }
                 }
                 '/' => {
-                    // 检查是否是注释
+                    // Check if it's a comment
                     if let Some(next) = state.peek_next_n(1) {
                         if next == '/' || next == '*' {
-                            return false; // 让注释处理函数处理                        
+                            return false; // Let the comment handler process it
                         }
                     }
                     state.advance(1);

@@ -1,21 +1,32 @@
 pub mod token_type;
 
-use crate::lexer::token_type::D2TokenType;
-use core::range::Range;
-use oak_core::Token;
+use crate::language::D2Language;
+use oak_core::{
+    Lexer, LexerCache, LexerState,
+    lexer::LexOutput,
+    source::{Source, TextEdit},
+};
 
-pub type D2Token = Token<D2TokenType>;
-
-pub struct D2Lexer<'a> {
-    _input: &'a str,
+pub struct D2Lexer<'config> {
+    config: &'config D2Language,
 }
 
-impl<'a> D2Lexer<'a> {
-    pub fn new(input: &'a str) -> Self {
-        Self { _input: input }
+impl<'config> D2Lexer<'config> {
+    pub fn new(config: &'config D2Language) -> Self {
+        Self { config }
     }
+}
 
-    pub fn next_token(&mut self) -> D2Token {
-        D2Token { kind: D2TokenType::Error, span: Range { start: 0, end: 0 } }
+impl<'config> Lexer<D2Language> for D2Lexer<'config> {
+    fn lex<'a, S: Source + ?Sized>(&self, source: &S, _edits: &[TextEdit], cache: &'a mut impl LexerCache<D2Language>) -> LexOutput<D2Language> {
+        let mut state = LexerState::new(source);
+        // Minimal lexing implementation
+        while state.not_at_end() {
+            if let Some(ch) = state.peek() {
+                state.advance(ch.len_utf8());
+            }
+        }
+        state.add_eof();
+        state.finish_with_cache(Ok(()), cache)
     }
 }

@@ -3,6 +3,7 @@ use oak_core::{
     parser::{ParseCache, Parser, ParserState},
 };
 
+/// Element types for the VON parser.
 pub mod element_type;
 use crate::{
     language::VonLanguage,
@@ -12,15 +13,20 @@ pub use element_type::VonElementType;
 
 pub(crate) type State<'a, S> = ParserState<'a, VonLanguage, S>;
 
+/// Parser for VON (Value-Oriented Notation).
 pub struct VonParser<'config> {
     pub(crate) config: &'config VonLanguage,
 }
 
 impl<'config> VonParser<'config> {
+    /// Creates a new VON parser.
     pub fn new(config: &'config VonLanguage) -> Self {
         Self { config }
     }
 
+    /// Parses a value in VON.
+    ///
+    /// Values can be objects, arrays, enums, strings, numbers, booleans, or null.
     pub(crate) fn parse_value<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> Result<(), OakError> {
         self.skip_trivia(state);
         state.incremental_node(VonElementType::Value, |state| {
@@ -50,6 +56,7 @@ impl<'config> VonParser<'config> {
         })
     }
 
+    /// Parses an enum variant in VON.
     fn parse_enum<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> Result<(), OakError> {
         state.incremental_node(VonElementType::Enum, |state| {
             if !state.eat(VonTokenType::Identifier) {
@@ -65,6 +72,7 @@ impl<'config> VonParser<'config> {
         })
     }
 
+    /// Parses the content of an object in VON.
     pub(crate) fn parse_object_inner<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> Result<(), OakError> {
         let mut first = true;
         while state.not_at_end() {
@@ -78,7 +86,7 @@ impl<'config> VonParser<'config> {
             }
 
             if !first {
-                // 逗号是可选的，但如果存在则吃掉它
+                // Comma is optional, but consume it if it exists
                 if state.eat(VonTokenType::Comma) {
                     self.skip_trivia(state);
                     if state.at(VonTokenType::RightBrace) || state.at(VonTokenType::Eof) {
@@ -88,7 +96,7 @@ impl<'config> VonParser<'config> {
             }
             first = false;
 
-            // 检查是否真的是一个 ObjectEntry (以 Identifier 或 StringLiteral 开始)
+            // Check if it's actually an ObjectEntry (starts with Identifier or StringLiteral)
             if !state.at(VonTokenType::Identifier) && !state.at(VonTokenType::StringLiteral) {
                 break;
             }
@@ -99,6 +107,7 @@ impl<'config> VonParser<'config> {
         Ok(())
     }
 
+    /// Parses an object in VON.
     fn parse_object<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> Result<(), OakError> {
         state.incremental_node(VonElementType::Object, |state| {
             if !state.eat(VonTokenType::LeftBrace) {
@@ -118,6 +127,7 @@ impl<'config> VonParser<'config> {
         })
     }
 
+    /// Parses an entry in an object in VON.
     fn parse_object_entry<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> Result<(), OakError> {
         state.incremental_node(VonElementType::ObjectEntry, |state| {
             if state.at(VonTokenType::Identifier) || state.at(VonTokenType::StringLiteral) {
@@ -136,7 +146,7 @@ impl<'config> VonParser<'config> {
                 state.record_expected("=");
             }
             self.skip_trivia(state);
-            // 确保在尝试解析值之前没有到达 EOF 或 }
+            // Ensure we haven't reached EOF or } before trying to parse a value
             if state.at(VonTokenType::RightBrace) || state.at(VonTokenType::Eof) {
                 state.record_expected("value");
                 return Err(state.errors.last().cloned().expect("Error should have been recorded"));
@@ -146,6 +156,7 @@ impl<'config> VonParser<'config> {
         })
     }
 
+    /// Parses an array in VON.
     fn parse_array<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> Result<(), OakError> {
         state.incremental_node(VonElementType::Array, |state| {
             if !state.eat(VonTokenType::LeftBracket) {
@@ -165,7 +176,7 @@ impl<'config> VonParser<'config> {
                 }
 
                 if !first {
-                    // 逗号是可选的
+                    // Comma is optional
                     if state.eat(VonTokenType::Comma) {
                         self.skip_trivia(state);
                         if state.at(VonTokenType::RightBracket) {
@@ -189,6 +200,7 @@ impl<'config> VonParser<'config> {
         })
     }
 
+    /// Skips whitespace and comments.
     fn skip_trivia<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) {
         while let Some(token) = state.current() {
             if token.kind.is_ignored() {
@@ -208,20 +220,20 @@ impl<'config> Parser<VonLanguage> for VonParser<'config> {
             let checkpoint = state.checkpoint();
             self.skip_trivia(state);
 
-            // 检查是否是隐式根对象（不以 { 或 [ 开始）
+            // Check if it is an implicit root object (does not start with { or [)
             if state.at(VonTokenType::LeftBrace) || state.at(VonTokenType::LeftBracket) {
                 let _ = self.parse_value(state);
             }
             else if state.at(VonTokenType::Identifier) {
-                // 如果以标识符开始，可能是隐式对象或 Enum
-                // 我们先尝试解析为隐式对象，如果失败则回退（这里简单处理为隐式对象）
+                // If it starts with an identifier, it might be an implicit object or Enum
+                // We first try to parse as an implicit object, if it fails then backtrack (here simply handled as an implicit object)
                 let _ = state.incremental_node(VonElementType::Object, |state| self.parse_object_inner(state));
             }
             else if state.at(VonTokenType::Eof) {
-                // 空文件
+                // Empty file
             }
             else {
-                // 其他情况，尝试作为普通值解析
+                // Otherwise, try to parse as a normal value
                 let _ = self.parse_value(state);
             }
 

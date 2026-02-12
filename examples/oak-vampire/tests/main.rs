@@ -21,11 +21,11 @@ mod tests {
         let tokens = result.result.unwrap();
         assert!(!tokens.is_empty());
 
-        // 打印所有 token 类型以便调试
+        // Print all token kinds for debugging
         let token_kinds: Vec<_> = tokens.iter().map(|t| t.kind).collect();
         println!("Token kinds: {:?}", token_kinds);
 
-        // 检查是否包含基本的 token 类型
+        // Check if basic token kinds are included
         assert!(token_kinds.iter().any(|&k| k == VampireSyntaxKind::CnfKw));
         assert!(token_kinds.iter().any(|&k| k == VampireSyntaxKind::LeftParen));
         assert!(token_kinds.iter().any(|&k| k == VampireSyntaxKind::RightParen))

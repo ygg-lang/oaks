@@ -5,17 +5,23 @@
 #![warn(missing_docs)]
 //! Pascal support for the Oak language framework.
 
+/// AST module for Pascal.
 pub mod ast;
+/// Builder module for Pascal.
 pub mod builder;
 
+/// Language configuration module for Pascal.
 pub mod language;
+/// Lexer module for Pascal tokenization.
 pub mod lexer;
+/// LSP and IDE support module for Pascal.
 #[cfg(any(feature = "lsp", feature = "oak-highlight", feature = "oak-pretty-print"))]
 pub mod lsp;
 /// MCP module.
 #[cfg(feature = "mcp")]
 pub mod mcp;
 
+/// Parser module for Pascal syntax analysis.
 pub mod parser;
 
 pub use crate::{ast::PascalRoot, builder::PascalBuilder, language::PascalLanguage, lexer::PascalLexer, parser::PascalParser};

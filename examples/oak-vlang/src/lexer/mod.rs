@@ -1,4 +1,5 @@
 #![doc = include_str!("readme.md")]
+/// Token types for the VLang language.
 pub mod token_type;
 
 use crate::{language::VLangLanguage, lexer::token_type::VLangTokenType};
@@ -8,19 +9,21 @@ use oak_core::{
     source::Source,
 };
 
-type State<'a, S> = LexerState<'a, S, VLangLanguage>;
+pub(crate) type State<'a, S> = LexerState<'a, S, VLangLanguage>;
 
+/// VLang lexer implementation.
 #[derive(Clone, Debug)]
 pub struct VLangLexer<'config> {
     _config: &'config VLangLanguage,
 }
 
 impl<'config> VLangLexer<'config> {
+    /// Creates a new `VLangLexer` instance.
     pub fn new(config: &'config VLangLanguage) -> Self {
         Self { _config: config }
     }
 
-    /// 跳过空白字符
+    /// Skips whitespace characters.
     fn skip_whitespace<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start_pos = state.get_position();
 
@@ -42,7 +45,7 @@ impl<'config> VLangLexer<'config> {
         }
     }
 
-    /// 处理换行
+    /// Lexes a newline.
     fn lex_newline<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start_pos = state.get_position();
 
@@ -64,16 +67,16 @@ impl<'config> VLangLexer<'config> {
         }
     }
 
-    /// 处理注释
+    /// Lexes a comment.
     fn lex_comment<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start_pos = state.get_position();
 
-        // 单行注释 //
+        // Single-line comment //
         if let Some('/') = state.peek() {
             if let Some('/') = state.peek_next_n(1) {
                 state.advance(2);
 
-                // 读取到行尾
+                // Read until end of line
                 while let Some(ch) = state.peek() {
                     if ch == '\n' || ch == '\r' {
                         break;
@@ -84,7 +87,7 @@ impl<'config> VLangLexer<'config> {
                 state.add_token(VLangTokenType::Comment, start_pos, state.get_position());
                 return true;
             }
-            // 多行注释 /* */
+            // Multi-line comment /* */
             else if let Some('*') = state.peek_next_n(1) {
                 state.advance(2);
 
@@ -105,7 +108,7 @@ impl<'config> VLangLexer<'config> {
         false
     }
 
-    /// 处理字符串字面量
+    /// Lexes a string literal.
     fn lex_string<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start_pos = state.get_position();
 
@@ -128,7 +131,7 @@ impl<'config> VLangLexer<'config> {
                         break;
                     }
                     else if ch == '\n' || ch == '\r' {
-                        break; // 字符串不能跨行
+                        break; // Strings cannot span multiple lines
                     }
                     else {
                         state.advance(ch.len_utf8());
@@ -148,13 +151,13 @@ impl<'config> VLangLexer<'config> {
         }
     }
 
-    /// 处理数字字面量
+    /// Lexes a number literal.
     fn lex_number<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start_pos = state.get_position();
 
         if let Some(ch) = state.peek() {
             if ch.is_ascii_digit() {
-                // 整数部分
+                // Integer part
                 while let Some(digit) = state.peek() {
                     if digit.is_ascii_digit() {
                         state.advance(1);
@@ -164,15 +167,15 @@ impl<'config> VLangLexer<'config> {
                     }
                 }
 
-                // 检查小数点
+                // Check for decimal point
                 let mut is_float = false;
                 if let Some('.') = state.peek() {
                     if let Some(next_ch) = state.peek_next_n(1) {
                         if next_ch.is_ascii_digit() {
                             is_float = true;
-                            state.advance(1); // 跳过小数点
+                            state.advance(1); // Skip dot
 
-                            // 小数部分
+                            // Fractional part
                             while let Some(digit) = state.peek() {
                                 if digit.is_ascii_digit() {
                                     state.advance(1);
@@ -185,20 +188,20 @@ impl<'config> VLangLexer<'config> {
                     }
                 }
 
-                // 检查指数
+                // Check for exponent
                 if let Some(e) = state.peek() {
                     if e == 'e' || e == 'E' {
                         let exp_start = state.get_position();
                         state.advance(1);
 
-                        // 可选的符号
+                        // Optional sign
                         if let Some(sign) = state.peek() {
                             if sign == '+' || sign == '-' {
                                 state.advance(1);
                             }
                         }
 
-                        // 指数数字
+                        // Exponent digits
                         let mut has_exp_digits = false;
                         while let Some(digit) = state.peek() {
                             if digit.is_ascii_digit() {
@@ -214,7 +217,7 @@ impl<'config> VLangLexer<'config> {
                             is_float = true;
                         }
                         else {
-                            // 回退到指数开始位置
+                            // Backtrack to exponent start position
                             state.set_position(exp_start);
                         }
                     }
@@ -233,7 +236,7 @@ impl<'config> VLangLexer<'config> {
         }
     }
 
-    /// 处理标识符和关键字
+    /// Lexes identifiers and keywords.
     fn lex_identifier_or_keyword<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start_pos = state.get_position();
 
@@ -323,7 +326,7 @@ impl<'config> VLangLexer<'config> {
         }
     }
 
-    /// 处理操作符和标点符号
+    /// Lexes operators and punctuation.
     fn lex_operator<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start_pos = state.get_position();
 
@@ -601,7 +604,7 @@ impl<'config> Lexer<VLangLanguage> for VLangLexer<'config> {
                 continue;
             }
 
-            // 如果都没有匹配，则跳过当前字符并标记为错误
+            // If no rules match, skip the current character and mark it as an error
             let start_pos = state.get_position();
             if let Some(ch) = state.peek() {
                 state.advance(ch.len_utf8());

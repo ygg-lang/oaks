@@ -1,12 +1,10 @@
 //! JavaScript language implementation.
 
 use oak_core::language::{Language, LanguageCategory};
-#[cfg(feature = "serde")]
-use serde::{Deserialize, Serialize};
 
 /// JavaScript language implementation.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct JavaScriptLanguage {
     /// Whether to allow JSX syntax.
     pub jsx: bool,
@@ -22,7 +20,7 @@ pub struct JavaScriptLanguage {
 
 /// ECMAScript version.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub enum EcmaVersion {
     /// ES3
     ES3,

@@ -13,6 +13,7 @@ use oak_core::tree::RedNode;
 use {futures::Future, oak_lsp::service::LanguageService, oak_lsp::types::Hover as LspHover, oak_vfs::Vfs};
 
 #[cfg(feature = "lsp")]
+/// Language service implementation for Valkyrie.
 pub struct ValkyrieLanguageService<V: Vfs> {
     vfs: V,
     workspace: oak_lsp::workspace::WorkspaceManager,
@@ -20,6 +21,7 @@ pub struct ValkyrieLanguageService<V: Vfs> {
 
 #[cfg(feature = "lsp")]
 impl<V: Vfs> ValkyrieLanguageService<V> {
+    /// Creates a new `ValkyrieLanguageService` with the given VFS.
     pub fn new(vfs: V) -> Self {
         Self { vfs, workspace: oak_lsp::workspace::WorkspaceManager::new() }
     }

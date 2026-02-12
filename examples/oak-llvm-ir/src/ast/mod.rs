@@ -7,15 +7,14 @@ use oak_core::{
 use oak_pretty_print::document::Document;
 #[cfg(feature = "oak-pretty-print")]
 use oak_pretty_print::to_doc::AsDocument;
-#[cfg(feature = "serde")]
-use serde::{Deserialize, Serialize};
 
-/// LLIR 根节点
+/// Root node of an LLVM IR module.
 #[derive(Debug, Clone, Default)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct LLirRoot {
-    /// Items in the module
+    /// Items in the module (functions, globals, etc.).
     pub items: Vec<LLirItem>,
+    /// The span of the root node in the source text.
     #[cfg_attr(feature = "serde", serde(with = "oak_core::serde_range"))]
     pub span: Range<usize>,
 }
@@ -38,13 +37,13 @@ impl AsDocument for LLirRoot {
     }
 }
 
-/// LLIR Item
+/// Represents a top-level item in an LLVM IR module.
 #[derive(Debug, Clone)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub enum LLirItem {
-    /// Function definition
+    /// A function definition or declaration.
     Function(LLirFunction),
-    /// Global variable
+    /// A global variable definition.
     Global(LLirGlobal),
 }
 
@@ -67,14 +66,19 @@ impl AsDocument for LLirItem {
     }
 }
 
-/// LLIR Function
+/// Represents an LLVM IR function.
 #[derive(Debug, Clone)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct LLirFunction {
+    /// The name of the function.
     pub name: String,
+    /// The return type of the function.
     pub return_type: String,
+    /// The parameters of the function.
     pub parameters: Vec<LLirParameter>,
+    /// The basic blocks that make up the function body.
     pub blocks: Vec<LLirBlock>,
+    /// The span of the function in the source text.
     #[cfg_attr(feature = "serde", serde(with = "oak_core::serde_range"))]
     pub span: Range<usize>,
 }
@@ -118,11 +122,13 @@ impl AsDocument for LLirFunction {
     }
 }
 
-/// LLIR Parameter
+/// Represents a parameter in an LLVM IR function.
 #[derive(Debug, Clone)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct LLirParameter {
+    /// The type of the parameter.
     pub ty: String,
+    /// The name of the parameter.
     pub name: String,
 }
 
@@ -141,11 +147,13 @@ impl AsDocument for LLirParameter {
     }
 }
 
-/// LLIR Block
+/// Represents a basic block in an LLVM IR function.
 #[derive(Debug, Clone)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct LLirBlock {
+    /// The optional label for the block.
     pub label: Option<String>,
+    /// The instructions contained in the block.
     pub instructions: Vec<LLirInstruction>,
 }
 
@@ -178,12 +186,15 @@ impl AsDocument for LLirBlock {
     }
 }
 
-/// LLIR Instruction
+/// Represents an LLVM IR instruction.
 #[derive(Debug, Clone)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct LLirInstruction {
+    /// The optional result register name.
     pub result: Option<String>,
+    /// The instruction opcode.
     pub opcode: String,
+    /// The operands for the instruction.
     pub operands: Vec<String>,
 }
 
@@ -222,13 +233,17 @@ impl AsDocument for LLirInstruction {
     }
 }
 
-/// LLIR Global Variable
+/// Represents an LLVM IR global variable.
 #[derive(Debug, Clone)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct LLirGlobal {
+    /// The name of the global variable.
     pub name: String,
+    /// The type of the global variable.
     pub ty: String,
+    /// The initial value of the global variable.
     pub value: String,
+    /// Whether the global variable is constant.
     pub is_constant: bool,
 }
 

@@ -1,11 +1,9 @@
 #![doc = include_str!("readme.md")]
 use oak_core::{Language, LanguageCategory};
-#[cfg(feature = "serde")]
-use serde::{Deserialize, Serialize};
 
 /// SQL language implementation.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct SqlLanguage {
     /// Whether it is case sensitive.
     pub case_sensitive: bool,
@@ -38,6 +36,16 @@ impl SqlLanguage {
         Self { case_sensitive: false, quoted_identifiers: true, backtick_identifiers: false, bracket_identifiers: false }
     }
 
+    /// SQLite configuration.
+    pub fn sqlite() -> Self {
+        Self {
+            case_sensitive: false,
+            quoted_identifiers: true,
+            backtick_identifiers: true, // SQLite supports backticks
+            bracket_identifiers: true,  // SQLite supports [bracket] identifiers
+        }
+    }
+
     /// Creates a SQL Server-style SQL language instance.
     pub fn sqlserver() -> Self {
         Self { case_sensitive: false, quoted_identifiers: true, backtick_identifiers: false, bracket_identifiers: true }
@@ -56,5 +64,5 @@ impl Language for SqlLanguage {
 
     type TokenType = crate::lexer::token_type::SqlTokenType;
     type ElementType = crate::parser::element_type::SqlElementType;
-    type TypedRoot = ();
+    type TypedRoot = crate::ast::SqlRoot;
 }

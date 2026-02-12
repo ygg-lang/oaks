@@ -1,6 +1,6 @@
 #![doc = include_str!("readme.md")]
 #![feature(new_range_api)]
-#![allow(missing_docs)]
+#![warn(missing_docs)]
 #![doc(html_logo_url = "https://raw.githubusercontent.com/ygg-lang/oaks/refs/heads/dev/documents/logo.svg")]
 #![doc(html_favicon_url = "https://raw.githubusercontent.com/ygg-lang/oaks/refs/heads/dev/documents/logo.svg")]
 
@@ -10,9 +10,6 @@
 pub mod ast;
 /// Builder module.
 pub mod builder;
-/// Error handling module.
-pub mod errors;
-
 /// Syntax kind module.
 /// Language configuration module.
 pub mod language;

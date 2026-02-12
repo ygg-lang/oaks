@@ -1,12 +1,10 @@
 #![doc = include_str!("readme.md")]
-use crate::lexer::CppLexer;
+use crate::{ast::CppRoot, lexer::CppLexer};
 use oak_core::{Language, LanguageCategory};
-#[cfg(feature = "serde")]
-use serde::{Deserialize, Serialize};
 
-/// Oaks 框架的 C++ 语言实现。
+/// C++ language implementation for the Oaks framework.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct CppLanguage {}
 
 impl Language for CppLanguage {
@@ -15,16 +13,16 @@ impl Language for CppLanguage {
 
     type TokenType = crate::lexer::CppTokenType;
     type ElementType = crate::parser::CppElementType;
-    type TypedRoot = ();
+    type TypedRoot = CppRoot;
 }
 
 impl CppLanguage {
-    /// 创建一个新的 `CppLanguage` 实例。
+    /// Creates a new `CppLanguage` instance.
     pub fn new() -> Self {
         Self {}
     }
 
-    /// 使用该语言配置创建一个 C++ 词法分析器。
+    /// Creates a C++ lexer using this language configuration.
     pub fn lexer(&self) -> CppLexer<'_> {
         CppLexer::new(self)
     }

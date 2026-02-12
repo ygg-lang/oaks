@@ -8,12 +8,14 @@ use oak_core::tree::RedNode;
 #[cfg(feature = "lsp")]
 use {futures::Future, oak_lsp::service::LanguageService, oak_vfs::Vfs};
 #[cfg(feature = "lsp")]
+/// Jasmin language service implementation.
 pub struct JasminLanguageService<V: Vfs> {
     vfs: V,
     workspace: oak_lsp::workspace::WorkspaceManager,
 }
 #[cfg(feature = "lsp")]
 impl<V: Vfs> JasminLanguageService<V> {
+    /// Creates a new `JasminLanguageService`.
     pub fn new(vfs: V) -> Self {
         Self { vfs, workspace: oak_lsp::workspace::WorkspaceManager::default() }
     }

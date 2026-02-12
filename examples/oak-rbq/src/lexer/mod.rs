@@ -1,4 +1,5 @@
 #![doc = include_str!("readme.md")]
+/// RBQ token type definitions.
 pub mod token_type;
 
 use crate::{language::RbqLanguage, lexer::token_type::RbqTokenType};
@@ -9,14 +10,14 @@ use oak_core::{
 };
 use std::sync::LazyLock;
 
-type State<'a, S> = LexerState<'a, S, RbqLanguage>;
+pub(crate) type State<'a, S> = LexerState<'a, S, RbqLanguage>;
 
 static RBQ_COMMENT: LazyLock<CommentConfig> = LazyLock::new(|| CommentConfig { line_marker: "#", block_start: "", block_end: "", nested_blocks: false });
 
 /// Lexer for the RBQ language.
 #[derive(Clone, Debug)]
 pub struct RbqLexer<'config> {
-    _config: &'config RbqLanguage,
+    config: &'config RbqLanguage,
 }
 
 impl<'config> Lexer<RbqLanguage> for RbqLexer<'config> {
@@ -34,7 +35,7 @@ impl<'config> Lexer<RbqLanguage> for RbqLexer<'config> {
 impl<'config> RbqLexer<'config> {
     /// Creates a new `RbqLexer` with the given configuration.
     pub fn new(config: &'config RbqLanguage) -> Self {
-        Self { _config: config }
+        Self { config }
     }
 
     /// Runs the main lexing loop.
@@ -58,7 +59,8 @@ impl<'config> RbqLexer<'config> {
                 '"' => self.lex_string(state),
                 '0'..='9' => self.lex_number(state),
                 '{' | '}' | '[' | ']' | '(' | ')' | ':' | ';' | ',' | '.' | '?' | '@' | '$' => self.lex_punctuation(state),
-                '=' | '!' | '>' | '<' | '&' | '|' | '+' | '-' | '*' | '/' => self.lex_operator(state),
+                '=' | '!' | '>' | '<' | '&' | '+' | '-' | '*' | '/' => self.lex_operator(state),
+                '|' => self.lex_pipe(state),
                 _ if ch.is_alphabetic() || ch == '_' => self.lex_ident_or_keyword(state),
                 _ => {
                     state.advance(ch.len_utf8());
@@ -132,9 +134,6 @@ impl<'config> RbqLexer<'config> {
         else if state.consume_if_starts_with("&&") {
             state.add_token(RbqTokenType::AndAnd, start, state.get_position())
         }
-        else if state.consume_if_starts_with("||") {
-            state.add_token(RbqTokenType::OrOr, start, state.get_position())
-        }
         else if state.consume_if_starts_with("->") {
             state.add_token(RbqTokenType::Arrow, start, state.get_position())
         }
@@ -164,6 +163,16 @@ impl<'config> RbqLexer<'config> {
         }
         else if state.consume_if_starts_with("&") {
             state.add_token(RbqTokenType::Ampersand, start, state.get_position())
+        }
+    }
+
+    fn lex_pipe<S: Source + ?Sized>(&self, state: &mut State<'_, S>) {
+        let start = state.get_position();
+        if state.consume_if_starts_with("||") {
+            state.add_token(RbqTokenType::OrOr, start, state.get_position())
+        }
+        else if state.consume_if_starts_with("|") {
+            state.add_token(RbqTokenType::Pipe, start, state.get_position())
         }
     }
 

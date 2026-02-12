@@ -1,133 +1,227 @@
 use oak_core::{Token, TokenType, UniversalTokenRole};
-#[cfg(feature = "serde")]
-use serde::{Deserialize, Serialize};
 
+/// Token types for the IDL lexer.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub enum IdlTokenType {
-    // 空白和换行
+    /// Whitespace characters.
     Whitespace = 0,
+    /// Line breaks.
     Newline,
+    /// Comments.
     Comment,
 
-    // 字面量
+    /// A string literal.
     StringLiteral,
+    /// A numeric literal.
     NumberLiteral,
+    /// A boolean literal.
     BooleanLiteral,
+    /// A character literal.
     CharLiteral,
 
-    // 标识符
+    /// An identifier.
     Identifier,
 
-    // 基本数据类型
+    /// The `void` keyword.
     Void,
+    /// The `boolean` keyword.
     Boolean,
+    /// The `byte` keyword.
     Byte,
+    /// The `octet` keyword.
     Octet,
+    /// The `short` keyword.
     Short,
+    /// The `unsigned short` keyword.
     UnsignedShort,
+    /// The `long` keyword.
     Long,
+    /// The `unsigned long` keyword.
     UnsignedLong,
+    /// The `long long` keyword.
     LongLong,
+    /// The `unsigned long long` keyword.
     UnsignedLongLong,
+    /// The `float` keyword.
     Float,
+    /// The `double` keyword.
     Double,
+    /// The `long double` keyword.
     LongDouble,
+    /// The `char` keyword.
     Char,
+    /// The `wchar` keyword.
     WChar,
+    /// The `string` keyword.
     String,
+    /// The `wstring` keyword.
     WString,
+    /// The `any` keyword.
     Any,
+    /// The `Object` keyword.
     Object,
+    /// The `ValueBase` keyword.
     ValueBase,
 
-    // 复合类型关键字
+    /// The `struct` keyword.
     Struct,
+    /// The `union` keyword.
     Union,
+    /// The `enum` keyword.
     Enum,
+    /// The `interface` keyword.
     Interface,
+    /// The `module` keyword.
     Module,
+    /// The `exception` keyword.
     Exception,
+    /// The `typedef` keyword.
     Typedef,
+    /// The `sequence` keyword.
     Sequence,
+    /// The `array` keyword.
     Array,
+    /// The `fixed` keyword.
     Fixed,
 
-    // 修饰符
+    /// The `const` keyword.
     Const,
+    /// The `readonly` keyword.
     Readonly,
+    /// The `attribute` keyword.
     Attribute,
+    /// The `oneway` keyword.
     Oneway,
+    /// The `in` keyword.
     In,
+    /// The `out` keyword.
     Out,
+    /// The `inout` keyword.
     Inout,
+    /// The `raises` keyword.
     Raises,
+    /// The `context` keyword.
     Context,
+    /// The `local` keyword.
     Local,
+    /// The `abstract` keyword.
     Abstract,
+    /// The `custom` keyword.
     Custom,
+    /// The `private` keyword.
     Private,
+    /// The `public` keyword.
     Public,
+    /// The `truncatable` keyword.
     Truncatable,
+    /// The `supports` keyword.
     Supports,
+    /// The `valuetype` keyword.
     ValueType,
+    /// The `native` keyword.
     Native,
+    /// The `factory` keyword.
     Factory,
 
-    // 预处理器指令
+    /// An `#include` directive.
     Include,
+    /// A `#pragma` directive.
     Pragma,
+    /// A `#define` directive.
     Define,
+    /// An `#ifdef` directive.
     Ifdef,
+    /// An `#ifndef` directive.
     Ifndef,
+    /// An `#endif` directive.
     Endif,
+    /// An `#else` directive.
     Else,
+    /// An `#elif` directive.
     Elif,
+    /// An `#undef` directive.
     Undef,
+    /// A hash sign (`#`).
     Hash,
 
-    // 分隔符
+    /// An opening parenthesis (`(`).
     LeftParen,
+    /// A closing parenthesis (`)`).
     RightParen,
+    /// An opening brace (`{`).
     LeftBrace,
+    /// A closing brace (`}`).
     RightBrace,
+    /// An opening bracket (`[`).
     LeftBracket,
+    /// A closing bracket (`]`).
     RightBracket,
+    /// A left angle bracket (`<`).
     LeftAngle,
+    /// A right angle bracket (`>`).
     RightAngle,
+    /// A comma (`,`).
     Comma,
+    /// A semicolon (`;`).
     Semicolon,
+    /// A colon (`:`).
     Colon,
+    /// A double colon (`::`).
     DoubleColon,
+    /// A dot (`.`).
     Dot,
+    /// An arrow (`->`).
     Arrow,
 
-    // 操作符
+    /// An assignment operator (`=`).
     Assign,
+    /// A plus sign (`+`).
     Plus,
+    /// A minus sign (`-`).
     Minus,
+    /// A multiplication operator (`*`).
     Multiply,
+    /// A division operator (`/`).
     Divide,
+    /// A modulo operator (`%`).
     Modulo,
+    /// A bitwise AND operator (`&`).
     BitwiseAnd,
+    /// A bitwise OR operator (`|`).
     BitwiseOr,
+    /// A bitwise XOR operator (`^`).
     BitwiseXor,
+    /// A bitwise NOT operator (`~`).
     BitwiseNot,
+    /// A logical AND operator (`&&`).
     LogicalAnd,
+    /// A logical OR operator (`||`).
     LogicalOr,
+    /// A logical NOT operator (`!`).
     LogicalNot,
+    /// A less-than operator (`<`).
     Less,
+    /// A greater-than operator (`>`).
     Greater,
+    /// A less-than-or-equal-to operator (`<=`).
     LessEqual,
+    /// A greater-than-or-equal-to operator (`>=`).
     GreaterEqual,
+    /// An equality operator (`==`).
     Equal,
+    /// A not-equal operator (`!=`).
     NotEqual,
+    /// A left shift operator (`<<`).
     LeftShift,
+    /// A right shift operator (`>>`).
     RightShift,
 
-    // 复合节点
+    /// Source file node.
     SourceFile,
+    /// An error token.
     Error,
+    /// End of file.
     Eof,
 }
 
@@ -237,4 +331,5 @@ impl TokenType for IdlTokenType {
     }
 }
 
+/// A token in the IDL language.
 pub type IdlToken = Token<IdlTokenType>;

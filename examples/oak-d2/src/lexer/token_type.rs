@@ -1,22 +1,31 @@
 use oak_core::{TokenType, UniversalTokenRole};
-#[cfg(feature = "serde")]
-use serde::{Deserialize, Serialize};
 
+/// Token types for the D2 language.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 #[repr(u8)]
 pub enum D2TokenType {
+    /// Whitespace.
     Whitespace,
+    /// Newline.
     Newline,
+    /// Comment.
     Comment,
 
+    /// Identifier.
     Id,
+    /// Label.
     Label,
+    /// Colon `:`.
     Colon,
+    /// Arrow `->`.
     Arrow,
+    /// Left brace `{`.
     LeftBrace,
+    /// Right brace `}`.
     RightBrace,
 
+    /// Lexing error.
     Error,
 }
 

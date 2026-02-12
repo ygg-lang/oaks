@@ -1,21 +1,22 @@
 #![doc = include_str!("readme.md")]
+/// Token types for the Markdown language.
 pub mod token_type;
 
 use crate::{language::MarkdownLanguage, lexer::token_type::MarkdownTokenType};
 use oak_core::{Lexer, LexerCache, LexerState, TextEdit, errors::OakError, lexer::LexOutput, source::Source};
 
-type State<'a, S> = LexerState<'a, S, MarkdownLanguage>;
+pub(crate) type State<'a, S> = LexerState<'a, S, MarkdownLanguage>;
 
 /// Lexer for Markdown language.
 #[derive(Clone, Debug)]
 pub struct MarkdownLexer<'config> {
-    _config: &'config MarkdownLanguage,
+    config: &'config MarkdownLanguage,
 }
 
 impl<'config> MarkdownLexer<'config> {
     /// Creates a new MarkdownLexer with the given configuration.
     pub fn new(config: &'config MarkdownLanguage) -> Self {
-        Self { _config: config }
+        Self { config }
     }
 
     fn run<S: Source + ?Sized>(&self, state: &mut State<S>) -> Result<(), OakError> {
@@ -25,7 +26,7 @@ impl<'config> MarkdownLexer<'config> {
             if let Some(ch) = state.peek() {
                 match ch {
                     ' ' | '\t' => {
-                        if self._config.allow_indented_code_blocks && self.lex_indented_code_block(state) {
+                        if self.config.allow_indented_code_blocks && self.lex_indented_code_block(state) {
                             continue;
                         }
                         self.skip_whitespace(state);
@@ -33,29 +34,29 @@ impl<'config> MarkdownLexer<'config> {
                     '\n' | '\r' => {
                         self.lex_newline(state);
                     }
-                    '$' if self._config.allow_math => {
+                    '$' if self.config.allow_math => {
                         if self.lex_math(state) {
                             continue;
                         }
                         self.lex_special_char(state);
                     }
-                    '^' if self._config.allow_sub_superscript || self._config.allow_footnotes => {
-                        if self._config.allow_footnotes && self.lex_footnote(state) {
+                    '^' if self.config.allow_sub_superscript || self.config.allow_footnotes => {
+                        if self.config.allow_footnotes && self.lex_footnote(state) {
                             continue;
                         }
-                        if self._config.allow_sub_superscript && self.lex_sub_superscript(state) {
+                        if self.config.allow_sub_superscript && self.lex_sub_superscript(state) {
                             continue;
                         }
                         self.lex_special_char(state);
                     }
                     '#' => {
-                        if self._config.allow_headings && self.lex_heading(state) {
+                        if self.config.allow_headings && self.lex_heading(state) {
                             continue;
                         }
                         self.lex_special_char(state);
                     }
                     '`' => {
-                        if self._config.allow_fenced_code_blocks && self.lex_code_block(state) {
+                        if self.config.allow_fenced_code_blocks && self.lex_code_block(state) {
                             continue;
                         }
                         if self.lex_inline_code(state) {
@@ -67,19 +68,19 @@ impl<'config> MarkdownLexer<'config> {
                         if self.lex_code_block(state) {
                             continue;
                         }
-                        if self._config.allow_strikethrough && self.lex_strikethrough(state) {
+                        if self.config.allow_strikethrough && self.lex_strikethrough(state) {
                             continue;
                         }
-                        if self._config.allow_sub_superscript && self.lex_sub_superscript(state) {
+                        if self.config.allow_sub_superscript && self.lex_sub_superscript(state) {
                             continue;
                         }
                         self.lex_special_char(state);
                     }
                     '*' | '_' => {
-                        if self._config.allow_horizontal_rules && self.lex_horizontal_rule(state) {
+                        if self.config.allow_horizontal_rules && self.lex_horizontal_rule(state) {
                             continue;
                         }
-                        if self._config.allow_lists && self.lex_list_marker(state) {
+                        if self.config.allow_lists && self.lex_list_marker(state) {
                             continue;
                         }
                         if self.lex_emphasis(state) {
@@ -88,19 +89,19 @@ impl<'config> MarkdownLexer<'config> {
                         self.lex_special_char(state);
                     }
                     '-' => {
-                        if self._config.allow_front_matter && self.lex_front_matter(state) {
+                        if self.config.allow_front_matter && self.lex_front_matter(state) {
                             continue;
                         }
-                        if self._config.allow_horizontal_rules && self.lex_horizontal_rule(state) {
+                        if self.config.allow_horizontal_rules && self.lex_horizontal_rule(state) {
                             continue;
                         }
-                        if self._config.allow_lists && self.lex_list_marker(state) {
+                        if self.config.allow_lists && self.lex_list_marker(state) {
                             continue;
                         }
                         self.lex_special_char(state);
                     }
                     '+' => {
-                        if self._config.allow_lists && self.lex_list_marker(state) {
+                        if self.config.allow_lists && self.lex_list_marker(state) {
                             continue;
                         }
                         self.lex_special_char(state);
@@ -112,7 +113,7 @@ impl<'config> MarkdownLexer<'config> {
                         self.lex_special_char(state);
                     }
                     '[' => {
-                        if self._config.allow_task_lists && self.lex_task_marker(state) {
+                        if self.config.allow_task_lists && self.lex_task_marker(state) {
                             continue;
                         }
                         if self.lex_link_or_image(state) {
@@ -121,12 +122,12 @@ impl<'config> MarkdownLexer<'config> {
                         self.lex_special_char(state);
                     }
                     '>' => {
-                        if self._config.allow_blockquotes && self.lex_blockquote(state) {
+                        if self.config.allow_blockquotes && self.lex_blockquote(state) {
                             continue;
                         }
                         self.lex_special_char(state);
                     }
-                    '|' if self._config.allow_tables => {
+                    '|' if self.config.allow_tables => {
                         self.lex_special_char(state);
                     }
                     '0'..='9' => {
@@ -136,10 +137,10 @@ impl<'config> MarkdownLexer<'config> {
                         self.lex_text(state);
                     }
                     '<' => {
-                        if self._config.allow_html && self.lex_html_tag(state) {
+                        if self.config.allow_html && self.lex_html_tag(state) {
                             continue;
                         }
-                        if self._config.allow_xml && self.lex_xml_tag(state) {
+                        if self.config.allow_xml && self.lex_xml_tag(state) {
                             continue;
                         }
                         self.lex_special_char(state);
@@ -151,7 +152,7 @@ impl<'config> MarkdownLexer<'config> {
                         if self.lex_text(state) {
                             continue;
                         }
-                        // 如果所有规则都不匹配，跳过当前字符并标记为错误
+                        // If no rules match, skip current character and mark as error
                         let start_pos = state.get_position();
                         state.advance(ch.len_utf8());
                         state.add_token(MarkdownTokenType::Error, start_pos, state.get_position());
@@ -164,7 +165,7 @@ impl<'config> MarkdownLexer<'config> {
         Ok(())
     }
 
-    /// 跳过空白字符
+    /// Skips whitespace
     fn skip_whitespace<S: Source + ?Sized>(&self, state: &mut State<S>) -> bool {
         let start_pos = state.get_position();
 
@@ -186,7 +187,7 @@ impl<'config> MarkdownLexer<'config> {
         }
     }
 
-    /// 处理换行
+    /// Handles newlines
     fn lex_newline<S: Source + ?Sized>(&self, state: &mut State<S>) -> bool {
         let start_pos = state.get_position();
 
@@ -208,11 +209,11 @@ impl<'config> MarkdownLexer<'config> {
         }
     }
 
-    /// 处理标题
+    /// Handles headings.
     fn lex_heading<S: Source + ?Sized>(&self, state: &mut State<S>) -> bool {
         let start_pos = state.get_position();
 
-        // 检查是否在行首
+        // Check if at the beginning of a line.
         if start_pos > 0 {
             if let Some(prev_char) = state.source().get_char_at(start_pos - 1) {
                 if prev_char != '\n' && prev_char != '\r' {
@@ -225,16 +226,16 @@ impl<'config> MarkdownLexer<'config> {
             let mut level = 0;
             let mut pos = start_pos;
 
-            // 计算 # 的数量
+            // Count the number of '#'.
             while let Some('#') = state.source().get_char_at(pos) {
                 level += 1;
                 pos += 1;
                 if level > 6 {
-                    return false; // 超过6级标题，不是有效标题
+                    return false; // More than 6 levels, not a valid heading.
                 }
             }
 
-            // 检查 # 后面是否有空白
+            // Check if there is whitespace after '#'.
             if let Some(ch) = state.source().get_char_at(pos) {
                 if ch != ' ' && ch != '\t' && ch != '\n' && ch != '\r' {
                     return false;
@@ -261,7 +262,7 @@ impl<'config> MarkdownLexer<'config> {
         }
     }
 
-    /// 处理内联代码
+    /// Handles inline code.
     fn lex_inline_code<S: Source + ?Sized>(&self, state: &mut State<S>) -> bool {
         let start_pos = state.get_position();
 
@@ -276,7 +277,7 @@ impl<'config> MarkdownLexer<'config> {
                     break;
                 }
                 else if ch == '\n' || ch == '\r' {
-                    break; // 内联代码不能跨行
+                    break; // Inline code cannot span lines.
                 }
                 else {
                     state.advance(ch.len_utf8());
@@ -288,7 +289,7 @@ impl<'config> MarkdownLexer<'config> {
                 true
             }
             else {
-                // 回退到开始位
+                // Backtrack to start position.
                 state.set_position(start_pos);
                 false
             }
@@ -298,11 +299,11 @@ impl<'config> MarkdownLexer<'config> {
         }
     }
 
-    /// 处理代码
+    /// Handles code blocks.
     fn lex_code_block<S: Source + ?Sized>(&self, state: &mut State<S>) -> bool {
         let start_pos = state.get_position();
 
-        // 检查是否在行首
+        // Check if at the beginning of a line.
         if start_pos > 0 {
             if let Some(prev_char) = state.source().get_char_at(start_pos - 1) {
                 if prev_char != '\n' && prev_char != '\r' {
@@ -311,7 +312,7 @@ impl<'config> MarkdownLexer<'config> {
             }
         }
 
-        // 检查是否是 ``` ~~~
+        // Check if it is ``` or ~~~.
         let fence_char = if let Some('`') = state.peek() {
             '`'
         }
@@ -325,7 +326,7 @@ impl<'config> MarkdownLexer<'config> {
         let mut fence_count = 0;
         let mut pos = start_pos;
 
-        // 计算围栏字符数量
+        // Count fence characters.
         while let Some(ch) = state.source().get_char_at(pos) {
             if ch == fence_char {
                 fence_count += 1;
@@ -337,13 +338,13 @@ impl<'config> MarkdownLexer<'config> {
         }
 
         if fence_count < 3 {
-            return false; // 至少需要3个围栏字符
+            return false; // At least 3 fence characters are required.
         }
 
         state.advance(fence_count);
         state.add_token(MarkdownTokenType::CodeFence, start_pos, state.get_position());
 
-        // 处理语言标识
+        // Handle language identifier.
         let lang_start = state.get_position();
         while let Some(ch) = state.peek() {
             if ch == '\n' || ch == '\r' {
@@ -364,7 +365,7 @@ impl<'config> MarkdownLexer<'config> {
         true
     }
 
-    /// 处理强调和加
+    /// Handles emphasis and strong.
     fn lex_emphasis<S: Source + ?Sized>(&self, state: &mut State<S>) -> bool {
         let start_pos = state.get_position();
 
@@ -381,7 +382,7 @@ impl<'config> MarkdownLexer<'config> {
         let mut marker_count = 0;
         let mut pos = start_pos;
 
-        // 计算标记字符数量
+        // Count marker characters.
         while let Some(ch) = state.source().get_char_at(pos) {
             if ch == marker_char {
                 marker_count += 1;
@@ -404,7 +405,7 @@ impl<'config> MarkdownLexer<'config> {
         true
     }
 
-    /// 处理删除
+    /// Handles strikethrough.
     fn lex_strikethrough<S: Source + ?Sized>(&self, state: &mut State<S>) -> bool {
         let start_pos = state.get_position();
 
@@ -423,11 +424,11 @@ impl<'config> MarkdownLexer<'config> {
         }
     }
 
-    /// 处理链接和图
+    /// Handles links and images.
     fn lex_link_or_image<S: Source + ?Sized>(&self, state: &mut State<S>) -> bool {
         let start_pos = state.get_position();
 
-        // 检查是否是图片 ![
+        // Check if it is an image ![.
         let is_image = if let Some('!') = state.peek() {
             state.advance(1);
             true
@@ -446,18 +447,18 @@ impl<'config> MarkdownLexer<'config> {
         }
         else {
             if is_image {
-                // 回退感叹
+                // Backtrack exclamation.
                 state.set_position(start_pos);
             }
             false
         }
     }
 
-    /// 处理列表标记
+    /// Handles list markers.
     fn lex_list_marker<S: Source + ?Sized>(&self, state: &mut State<S>) -> bool {
         let start_pos = state.get_position();
 
-        // 检查是否在行首或前面只有空
+        // Check if at the beginning of a line or only whitespace before.
         let mut check_pos = start_pos;
         while check_pos > 0 {
             check_pos -= 1;
@@ -466,7 +467,7 @@ impl<'config> MarkdownLexer<'config> {
                     break;
                 }
                 else if ch != ' ' && ch != '\t' {
-                    return false; // 前面有非空白字符
+                    return false; // Non-whitespace characters before.
                 }
             }
         }
@@ -474,7 +475,7 @@ impl<'config> MarkdownLexer<'config> {
         if let Some(ch) = state.peek() {
             match ch {
                 '-' | '*' | '+' => {
-                    // 无序列表
+                    // Unordered list.
                     state.advance(1);
                     if let Some(next_ch) = state.peek() {
                         if next_ch == ' ' || next_ch == '\t' {
@@ -486,7 +487,7 @@ impl<'config> MarkdownLexer<'config> {
                     false
                 }
                 '0'..='9' => {
-                    // 有序列表
+                    // Ordered list.
                     while let Some(digit) = state.peek() {
                         if digit.is_ascii_digit() { state.advance(1) } else { break }
                     }
@@ -512,7 +513,7 @@ impl<'config> MarkdownLexer<'config> {
         }
     }
 
-    /// 处理任务列表
+    /// Handles task markers.
     fn lex_task_marker<S: Source + ?Sized>(&self, state: &mut State<S>) -> bool {
         let start_pos = state.get_position();
 
@@ -533,24 +534,24 @@ impl<'config> MarkdownLexer<'config> {
         false
     }
 
-    /// 处理 HTML 标签或注释
+    /// Handles HTML tags or comments.
     fn lex_html_tag<S: Source + ?Sized>(&self, state: &mut State<S>) -> bool {
         self.lex_any_tag(state, MarkdownTokenType::HtmlTag, MarkdownTokenType::HtmlComment)
     }
 
-    /// 处理 XML 标签或注释
+    /// Handles XML tags or comments.
     fn lex_xml_tag<S: Source + ?Sized>(&self, state: &mut State<S>) -> bool {
         self.lex_any_tag(state, MarkdownTokenType::XmlTag, MarkdownTokenType::XmlComment)
     }
 
-    /// 通用的标签处理逻辑
+    /// Common tag handling logic.
     fn lex_any_tag<S: Source + ?Sized>(&self, state: &mut State<S>, tag_kind: MarkdownTokenType, comment_kind: MarkdownTokenType) -> bool {
         let start_pos = state.get_position();
 
         if let Some('<') = state.peek() {
             state.advance(1);
 
-            // 检查是否是注释 <!-- -->
+            // Check if it is a comment <!-- -->.
             if let Some('!') = state.peek() {
                 if state.source().get_char_at(state.get_position() + 1) == Some('-') && state.source().get_char_at(state.get_position() + 2) == Some('-') {
                     state.advance(3);
@@ -570,9 +571,9 @@ impl<'config> MarkdownLexer<'config> {
                 }
             }
 
-            // 正常的标签解析
+            // Normal tag parsing.
             let mut found_end = false;
-            let mut in_string = None; // 记录是否在引号内
+            let mut in_string = None; // Track if inside quotes.
 
             while let Some(ch) = state.peek() {
                 if let Some(quote) = in_string {
@@ -607,11 +608,11 @@ impl<'config> MarkdownLexer<'config> {
         }
     }
 
-    /// 处理引用
+    /// Lexes blockquotes.
     fn lex_blockquote<S: Source + ?Sized>(&self, state: &mut State<S>) -> bool {
         let start_pos = state.get_position();
 
-        // 检查是否在行首或前面只有空
+        // Check if we are at the start of a line or only preceded by whitespace.
         let mut check_pos = start_pos;
         while check_pos > 0 {
             check_pos -= 1;
@@ -635,11 +636,11 @@ impl<'config> MarkdownLexer<'config> {
         }
     }
 
-    /// 处理水平分隔
+    /// Lexes horizontal rules.
     fn lex_horizontal_rule<S: Source + ?Sized>(&self, state: &mut State<S>) -> bool {
         let start_pos = state.get_position();
 
-        // 检查是否在行首或前面只有空
+        // Check if we are at the start of a line or only preceded by whitespace.
         let mut check_pos = start_pos;
         while check_pos > 0 {
             check_pos -= 1;
@@ -659,14 +660,14 @@ impl<'config> MarkdownLexer<'config> {
                 let mut count = 0;
                 let mut pos = start_pos;
 
-                // 计算连续的分隔符数量
+                // Count consecutive separators.
                 while let Some(current_ch) = state.source().get_char_at(pos) {
                     if current_ch == rule_char {
                         count += 1;
                         pos += 1
                     }
                     else if current_ch == ' ' || current_ch == '\t' {
-                        pos += 1; // 允许空格
+                        pos += 1; // Allow spaces.
                     }
                     else {
                         break;
@@ -674,7 +675,7 @@ impl<'config> MarkdownLexer<'config> {
                 }
 
                 if count >= 3 {
-                    // 检查到行尾
+                    // Check until the end of the line.
                     while let Some(current_ch) = state.source().get_char_at(pos) {
                         if current_ch == '\n' || current_ch == '\r' {
                             break;
@@ -683,7 +684,7 @@ impl<'config> MarkdownLexer<'config> {
                             pos += 1
                         }
                         else {
-                            return false; // 行尾有其他字
+                            return false; // Other characters found at the end of the line.
                         }
                     }
 
@@ -696,7 +697,7 @@ impl<'config> MarkdownLexer<'config> {
         false
     }
 
-    /// 处理数学公式
+    /// Lexes math formulas.
     fn lex_math<S: Source + ?Sized>(&self, state: &mut State<S>) -> bool {
         let start_pos = state.get_position();
 
@@ -743,18 +744,18 @@ impl<'config> MarkdownLexer<'config> {
         }
     }
 
-    /// 处理前置数据
+    /// Lexes front matter.
     fn lex_front_matter<S: Source + ?Sized>(&self, state: &mut State<S>) -> bool {
         let start_pos = state.get_position();
 
-        // 必须在文件开头
+        // Must be at the start of the file.
         if start_pos != 0 {
             return false;
         }
 
         if state.peek() == Some('-') && state.source().get_char_at(1) == Some('-') && state.source().get_char_at(2) == Some('-') {
             state.advance(3);
-            // 寻找结束标记 ---
+            // Look for the end marker ---
             let mut found_end = false;
             while state.not_at_end() {
                 if state.peek() == Some('\n') || state.peek() == Some('\r') {
@@ -787,19 +788,19 @@ impl<'config> MarkdownLexer<'config> {
         }
     }
 
-    /// 处理脚注
+    /// Lexes footnotes.
     fn lex_footnote<S: Source + ?Sized>(&self, state: &mut State<S>) -> bool {
         let start_pos = state.get_position();
 
         if let Some('^') = state.peek() {
-            // 检查是否是 [^...
+            // Check if it's [^...
             let check_pos = start_pos;
             if check_pos > 0 && state.source().get_char_at(check_pos - 1) == Some('[') {
                 state.advance(1);
                 while let Some(ch) = state.peek() {
                     if ch == ']' {
                         state.advance(1);
-                        // 检查是否是定义 [^...]:
+                        // Check if it's a definition [^...]:
                         if state.peek() == Some(':') {
                             state.advance(1);
                             state.add_token(MarkdownTokenType::FootnoteDefinition, start_pos - 1, state.get_position())
@@ -820,7 +821,7 @@ impl<'config> MarkdownLexer<'config> {
         false
     }
 
-    /// 处理上标和下标
+    /// Lexes superscripts and subscripts.
     fn lex_sub_superscript<S: Source + ?Sized>(&self, state: &mut State<S>) -> bool {
         let start_pos = state.get_position();
 
@@ -860,11 +861,11 @@ impl<'config> MarkdownLexer<'config> {
         }
     }
 
-    /// 处理缩进代码块
+    /// Handles indented code blocks.
     fn lex_indented_code_block<S: Source + ?Sized>(&self, state: &mut State<S>) -> bool {
         let start_pos = state.get_position();
 
-        // 必须在行首
+        // Must be at the beginning of a line.
         if start_pos > 0 {
             if let Some(prev_char) = state.source().get_char_at(start_pos - 1) {
                 if prev_char != '\n' && prev_char != '\r' {
@@ -873,14 +874,14 @@ impl<'config> MarkdownLexer<'config> {
             }
         }
 
-        // 检查缩进（4个空格或1个制表符）
+        // Check indentation (4 spaces or 1 tab).
         let mut indent_count = 0;
         let mut pos = start_pos;
         while let Some(ch) = state.source().get_char_at(pos) {
             if ch == ' ' {
                 indent_count += 1;
                 pos += 1;
-                if indent_count >= 4 {
+                if indent_count == 4 {
                     break;
                 }
             }
@@ -904,7 +905,7 @@ impl<'config> MarkdownLexer<'config> {
         }
     }
 
-    /// 处理特殊字符
+    /// Lexes special characters.
     fn lex_special_char<S: Source + ?Sized>(&self, state: &mut State<S>) -> bool {
         let start_pos = state.get_position();
 
@@ -942,12 +943,12 @@ impl<'config> MarkdownLexer<'config> {
         }
     }
 
-    /// 处理普通文
+    /// Lexes plain text.
     fn lex_text<S: Source + ?Sized>(&self, state: &mut State<S>) -> bool {
         let start_pos = state.get_position();
 
         while let Some(ch) = state.peek() {
-            // 遇到特殊字符时停止
+            // Stop when encountering a special character.
             match ch {
                 ' ' | '\t' | '\n' | '\r' | '#' | '*' | '_' | '`' | '~' | '[' | ']' | '(' | ')' | '<' | '>' | '|' | '-' | '+' | '.' | ':' | '!' | '\\' | '$' | '^' => break,
                 _ => {

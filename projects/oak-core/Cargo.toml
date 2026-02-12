@@ -23,7 +23,6 @@ tracing = { workspace = true }
 [features]
 default = []
 serde = ["dep:serde"]
-testing = []
 
 [package.metadata.docs.rs]
 all-features = true

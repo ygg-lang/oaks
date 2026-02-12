@@ -32,6 +32,7 @@ pub struct NoteLanguageService<V: Vfs> {
     hover_provider: NoteHoverProvider,
 }
 impl<V: Vfs> NoteLanguageService<V> {
+    /// Create a new language service instance
     pub fn new(vfs: V) -> Self {
         Self { vfs, workspace: oak_lsp::workspace::WorkspaceManager::default(), hover_provider: NoteHoverProvider }
     }

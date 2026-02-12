@@ -1,40 +1,73 @@
-use oak_core::{Source, Token, TokenType, UniversalElementRole, UniversalTokenRole};
-#[cfg(feature = "serde")]
-use serde::{Deserialize, Serialize};
+use oak_core::{Token, TokenType, UniversalTokenRole};
 
+/// Type alias for an AsciiDoc token.
 pub type AsciiDocToken = Token<AsciiDocTokenType>;
 
+/// Token types for the AsciiDoc language.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub enum AsciiDocTokenType {
+    /// Whitespace characters.
     Whitespace,
+    /// Newline character.
     Newline,
+    /// Level 1 header (`=`).
     Header1,
+    /// Level 2 header (`==`).
     Header2,
+    /// Level 3 header (`===`).
     Header3,
+    /// Level 4 header (`====`).
     Header4,
+    /// Level 5 header (`=====`).
     Header5,
+    /// Level 6 header (`======`).
     Header6,
+    /// Bold text marker (`*`).
     BoldMarker,
+    /// Italic text marker (`_`).
     ItalicMarker,
+    /// Monospace text marker (`` ` ``).
     MonospaceMarker,
+    /// Code block marker (`----`).
     CodeBlockMarker,
+    /// Link marker (`http`, `https`, `mailto`).
     LinkMarker,
+    /// List item marker (`*`, `-`, `.`).
     ListMarker,
+    /// Table cell delimiter (`|`).
     TableDelimiter,
+    /// Comment (`//`).
     Comment,
+    /// Plain text.
     Text,
+    /// Hard line break (` +`).
     LineBreak,
+    /// Page break marker (`<<<`).
     PageBreak,
+    /// Attribute marker (`:name:`).
+    AttributeMarker,
+    /// Admonition marker (`NOTE:`, `TIP:`, etc.).
+    AdmonitionMarker,
+    /// Generic delimiter.
     Delimiter,
+    /// Left bracket `[`.
     LeftBracket,
+    /// Right bracket `]`.
     RightBracket,
+    /// Left parenthesis `(`.
     LeftParen,
+    /// Right parenthesis `)`.
     RightParen,
+    /// Colon `:`.
     Colon,
+    /// Comma `,`.
     Comma,
+    /// Dot `.`.
     Dot,
+    /// End of stream.
     Eof,
+    /// Lexing error.
     Error,
 }
 

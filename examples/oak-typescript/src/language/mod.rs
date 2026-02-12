@@ -1,12 +1,10 @@
 #![doc = include_str!("readme.md")]
 use crate::ast::TypeScriptRoot;
 use oak_core::{Language, LanguageCategory};
-#[cfg(feature = "serde")]
-use serde::{Deserialize, Serialize};
 
 /// TypeScript language configuration.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct TypeScriptLanguage {
     /// Whether to support JSX syntax.
     pub jsx: bool,
@@ -28,18 +26,29 @@ impl Default for TypeScriptLanguage {
 
 /// ECMAScript version.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub enum EcmaVersion {
+    /// ECMAScript 3 (1999).
     ES3,
+    /// ECMAScript 5 (2009).
     ES5,
+    /// ECMAScript 2015 (ES6).
     ES2015,
+    /// ECMAScript 2016.
     ES2016,
+    /// ECMAScript 2017.
     ES2017,
+    /// ECMAScript 2018.
     ES2018,
+    /// ECMAScript 2019.
     ES2019,
+    /// ECMAScript 2020.
     ES2020,
+    /// ECMAScript 2021.
     ES2021,
+    /// ECMAScript 2022.
     ES2022,
+    /// Latest ECMAScript version.
     ESNext,
 }
 

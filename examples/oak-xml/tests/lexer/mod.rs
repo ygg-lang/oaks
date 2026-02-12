@@ -23,20 +23,20 @@ fn test_peek_behavior() {
     let source = SourceText::new("<tag>");
     let mut state: LexerState<'_, SourceText, XmlLanguage> = LexerState::new(&source);
 
-    println!("初始状态:");
-    println!("位置: {}", state.get_position());
+    println!("Initial state:");
+    println!("Position: {}", state.get_position());
     println!("current(): {:?}", state.current());
     println!("peek(): {:?}", state.peek());
 
-    println!("\n前进 1 个字符后:");
+    println!("\nAfter advancing 1 char:");
     state.advance(1);
-    println!("位置: {}", state.get_position());
+    println!("Position: {}", state.get_position());
     println!("current(): {:?}", state.current());
     println!("peek(): {:?}", state.peek());
 
-    println!("\n前进 1 个字符后:");
+    println!("\nAfter advancing 1 char:");
     state.advance(1);
-    println!("位置: {}", state.get_position());
+    println!("Position: {}", state.get_position());
     println!("current(): {:?}", state.current());
     println!("peek(): {:?}", state.peek())
 }
@@ -53,7 +53,7 @@ fn test_xml_comment_parsing() {
     let result = lexer.lex(&source, &[], &mut session);
 
     println!("Result: {:?}", result);
-    let tokens = result.result.expect("词法分析应该成功");
+    let tokens = result.result.expect("Lexing should succeed");
     assert!(!tokens.is_empty())
 }
 
@@ -69,7 +69,7 @@ fn test_xml_tag_parsing() {
     let result = lexer.lex(&source, &[], &mut session);
 
     println!("Result: {:?}", result);
-    let tokens = result.result.expect("词法分析应该成功");
+    let tokens = result.result.expect("Lexing should succeed");
     assert!(!tokens.is_empty())
 }
 
@@ -85,7 +85,7 @@ fn test_xml_cdata_parsing() {
     let result = lexer.lex(&source, &[], &mut session);
 
     println!("Result: {:?}", result);
-    let tokens = result.result.expect("词法分析应该成功");
+    let tokens = result.result.expect("Lexing should succeed");
     assert!(!tokens.is_empty())
 }
 
@@ -101,6 +101,6 @@ fn test_xml_processing_instruction_parsing() {
     let result = lexer.lex(&source, &[], &mut session);
 
     println!("Result: {:?}", result);
-    let tokens = result.result.expect("词法分析应该成功");
+    let tokens = result.result.expect("Lexing should succeed");
     assert!(!tokens.is_empty())
 }

@@ -6,11 +6,11 @@ pub use token_type::BatTokenType;
 use crate::language::BatLanguage;
 use oak_core::{Lexer, LexerCache, LexerState, OakError, lexer::LexOutput, source::Source};
 
-type State<'a, S> = LexerState<'a, S, BatLanguage>;
+pub(crate) type State<'a, S> = LexerState<'a, S, BatLanguage>;
 
 #[derive(Clone)]
 pub struct BatLexer<'config> {
-    _config: &'config BatLanguage,
+    config: &'config BatLanguage,
 }
 
 impl<'config> Lexer<BatLanguage> for BatLexer<'config> {
@@ -26,7 +26,7 @@ impl<'config> Lexer<BatLanguage> for BatLexer<'config> {
 
 impl<'config> BatLexer<'config> {
     pub fn new(config: &'config BatLanguage) -> Self {
-        Self { _config: config }
+        Self { config }
     }
 
     fn run<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> Result<(), OakError> {

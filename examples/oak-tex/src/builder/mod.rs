@@ -1,20 +1,15 @@
-use crate::{
-    ast::*,
-    language::TexLanguage,
-    lexer::token_type::TexTokenType,
-    parser::{TexParser, element_type::TexElementType},
-};
+use crate::{ast::*, language::TexLanguage, lexer::token_type::TexTokenType, parser::TexParser};
 use oak_core::{Builder, BuilderCache, GreenNode, OakDiagnostics, OakError, Parser, RedNode, RedTree, TextEdit, source::Source};
 
-/// TeX 语言的 AST 构建器
+/// An AST builder for the TeX language.
 #[derive(Clone)]
 pub struct TexBuilder<'config> {
-    /// 语言配置
+    /// The language configuration.
     config: &'config TexLanguage,
 }
 
 impl<'config> TexBuilder<'config> {
-    /// 创建新的 TeX 构建器
+    /// Creates a new TeX builder.
     pub fn new(config: &'config TexLanguage) -> Self {
         Self { config }
     }
@@ -41,12 +36,13 @@ impl<'config> Builder<TexLanguage> for TexBuilder<'config> {
 }
 
 impl<'config> TexBuilder<'config> {
-    /// 构建根节点
+    /// Builds the root node of the TeX AST.
     fn build_root_internal<S: Source + ?Sized>(&self, green_tree: &GreenNode<TexLanguage>, source: &S) -> Result<TexRoot, OakError> {
         let red_root = RedNode::new(green_tree, 0);
         self.build_content(red_root, source)
     }
 
+    /// Builds the content of a node into a `TexRoot`.
     fn build_content<S: Source + ?Sized>(&self, node: RedNode<TexLanguage>, source: &S) -> Result<TexRoot, OakError> {
         let mut items = Vec::new();
         let children: Vec<_> = node.children().collect();
@@ -206,7 +202,7 @@ impl<'config> TexBuilder<'config> {
             TexTokenType::Identifier | TexTokenType::Number | TexTokenType::Text => Ok(Some(TexItem::Text { span: tree.span().into(), content: tree.text(source).to_string() })),
             TexTokenType::Comment => Ok(Some(TexItem::Comment { span: tree.span().into(), content: tree.text(source).to_string() })),
             _ => {
-                if tree.as_leaf().is_some() {
+                if tree.as_token().is_some() {
                     Ok(Some(TexItem::Text { span: tree.span().into(), content: tree.text(source).to_string() }))
                 }
                 else {

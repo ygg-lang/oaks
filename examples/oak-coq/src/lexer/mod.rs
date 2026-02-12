@@ -1,4 +1,5 @@
 #![doc = include_str!("readme.md")]
+/// Token type definitions.
 pub mod token_type;
 
 use crate::{language::CoqLanguage, lexer::token_type::CoqTokenType};
@@ -7,25 +8,25 @@ use oak_core::{
     lexer::{LexOutput, LexerCache},
 };
 
-/// A lexer for the Coq programming language.
+/// Lexer for the Coq programming language.
 #[derive(Clone, Debug)]
 pub struct CoqLexer<'config> {
     #[allow(dead_code)]
     config: &'config CoqLanguage,
 }
 
-type State<'a, S> = LexerState<'a, S, CoqLanguage>;
+pub(crate) type State<'a, S> = LexerState<'a, S, CoqLanguage>;
 
 impl<'config> CoqLexer<'config> {
-    /// Creates a new CoqLexer with the given configuration.
+    /// Creates a new `CoqLexer` with the given configuration.
     ///
-    /// # Arguments
+    /// # Parameters
     ///
-    /// * `config` - A reference to the CoqLanguage configuration
+    /// * `config` - Reference to the `CoqLanguage` configuration.
     ///
     /// # Returns
     ///
-    /// A new CoqLexer instance
+    /// A new `CoqLexer` instance.
     pub fn new(config: &'config CoqLanguage) -> Self {
         Self { config }
     }

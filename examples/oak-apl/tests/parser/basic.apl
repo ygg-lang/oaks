@@ -1,4 +1,4 @@
-⍝ APL 解析测试
+⍝ APL parsing test
 x ← 10
 y ← 20
 z ← x + y
