@@ -36,6 +36,11 @@ pub use crate::{
     parser::{SqlParser, element_type::SqlElementType},
 };
 
+/// Re-export SqlSyntaxKind in a kind module for backward compatibility
+pub mod kind {
+    pub use crate::lexer::token_type::SqlTokenType as SqlSyntaxKind;
+}
+
 /// Highlighter implementation.
 #[cfg(feature = "oak-highlight")]
 pub use crate::lsp::highlighter::SqlHighlighter;

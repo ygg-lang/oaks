@@ -118,7 +118,7 @@ impl oak_core::TokenType for SqlTokenType {
             | Self::Gt
             | Self::Ge
             | Self::Concat => Operator,
-            Self::LeftParen | Self::RightParen | Self::LeftBracket | Self::RightBracket | Self::LeftBrace | Self::RightBrace | Self::Comma | Self::Semicolon | Self::Dot | Self::Colon | Self::Question => Punctuation,
+            Self::LeftParen | Self::RightParen | Self::LParen | Self::RParen | Self::LeftBracket | Self::RightBracket | Self::LeftBrace | Self::RightBrace | Self::Comma | Self::Semicolon | Self::Dot | Self::Colon | Self::Question => Punctuation,
             Self::Error => Error,
             _ => UniversalTokenRole::None,
         }
@@ -276,9 +276,11 @@ pub enum SqlTokenType {
     Ge,
     Concat,
 
-    // 分隔符
+    // 标点符号
     LeftParen,
     RightParen,
+    LParen,
+    RParen,
     LeftBracket,
     RightBracket,
     LeftBrace,
@@ -292,4 +294,27 @@ pub enum SqlTokenType {
     // 错误和结
     Error,
     Eof,
+}
+
+impl From<crate::parser::element_type::SqlElementType> for SqlTokenType {
+    fn from(element: crate::parser::element_type::SqlElementType) -> Self {
+        match element {
+            crate::parser::element_type::SqlElementType::Root => Self::Root,
+            crate::parser::element_type::SqlElementType::Identifier => Self::Identifier,
+            crate::parser::element_type::SqlElementType::Expression => Self::Expression,
+            crate::parser::element_type::SqlElementType::ErrorNode => Self::ErrorNode,
+            crate::parser::element_type::SqlElementType::SelectStatement => Self::SelectStatement,
+            crate::parser::element_type::SqlElementType::InsertStatement => Self::InsertStatement,
+            crate::parser::element_type::SqlElementType::UpdateStatement => Self::UpdateStatement,
+            crate::parser::element_type::SqlElementType::DeleteStatement => Self::DeleteStatement,
+            crate::parser::element_type::SqlElementType::CreateStatement => Self::CreateStatement,
+            crate::parser::element_type::SqlElementType::DropStatement => Self::DropStatement,
+            crate::parser::element_type::SqlElementType::AlterStatement => Self::AlterStatement,
+            crate::parser::element_type::SqlElementType::JoinClause => Self::JoinClause,
+            crate::parser::element_type::SqlElementType::GroupByClause => Self::GroupByClause,
+            crate::parser::element_type::SqlElementType::HavingClause => Self::HavingClause,
+            crate::parser::element_type::SqlElementType::OrderByClause => Self::OrderByClause,
+            crate::parser::element_type::SqlElementType::LimitClause => Self::LimitClause,
+        }
+    }
 }

@@ -174,6 +174,25 @@ impl<L: Language> Clone for RedLeaf<L> {
 
 impl<L: Language> Copy for RedLeaf<L> {}
 
+impl<L: Language> RedLeaf<L> {
+    /// Returns the kind of this red leaf.
+    #[inline]
+    pub fn kind(&self) -> L::TokenType {
+        self.kind
+    }
+
+    /// Returns the absolute byte span of this red leaf.
+    #[inline]
+    pub fn span(&self) -> Range<usize> {
+        self.span.clone()
+    }
+
+    /// Returns the text content of this red leaf from the source.
+    pub fn text<'s, S: crate::source::Source + ?Sized>(&self, source: &'s S) -> std::borrow::Cow<'s, str> {
+        source.get_text_in(self.span())
+    }
+}
+
 impl<L: Language> PartialEq for RedLeaf<L> {
     fn eq(&self, other: &Self) -> bool {
         self.kind == other.kind && self.span == other.span

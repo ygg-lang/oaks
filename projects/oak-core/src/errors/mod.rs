@@ -56,6 +56,13 @@ impl<T> OakDiagnostics<T> {
     }
 }
 
+impl<'a, L: crate::Language> OakDiagnostics<&'a crate::tree::GreenNode<'a, L>> {
+    /// Returns the successful green node result, panicking on error.
+    pub fn green(&self) -> &'a crate::tree::GreenNode<'a, L> {
+        self.result.as_ref().expect("Failed to get green node from parse output")
+    }
+}
+
 /// The main error type for the Oak Core parsing framework.
 ///
 /// `OakError` represents all possible language that can occur during
