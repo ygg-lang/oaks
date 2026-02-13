@@ -121,7 +121,11 @@ fn test_rbq_ast_complex_trait() {
         // Second item is a method (micro)
         if let oak_rbq::ast::RbqTraitItem::Method(m) = &t.items[1] {
             assert_eq!(m.name, "login");
-            assert_eq!(m.return_type.as_deref(), Some("bool"));
+            if let Some(oak_rbq::ast::RbqType::Named { path, .. }) = &m.return_type {
+                assert_eq!(path, "bool");
+            } else {
+                panic!("Expected named return type");
+            }
         } else { panic!("Expected method"); }
     }
 }
@@ -146,7 +150,11 @@ fn test_rbq_ast_lowering() {
         assert_eq!(s.name, "User");
         assert_eq!(s.fields.len(), 1);
         assert_eq!(s.fields[0].name, "id");
-        assert_eq!(s.fields[0].type_ref.path, "i32")
+        if let oak_rbq::ast::RbqType::Named { path, .. } = &s.fields[0].type_ref {
+            assert_eq!(path, "i32");
+        } else {
+            panic!("Expected named type");
+        }
     }
     else {
         panic!("Expected struct")
@@ -173,7 +181,11 @@ fn test_rbq_ast_utf8() {
         assert_eq!(s.name, "User");
         assert_eq!(s.fields.len(), 1);
         assert_eq!(s.fields[0].name, "name");
-        assert_eq!(s.fields[0].type_ref.path, "utf8")
+        if let oak_rbq::ast::RbqType::Named { path, .. } = &s.fields[0].type_ref {
+            assert_eq!(path, "utf8");
+        } else {
+            panic!("Expected named type");
+        }
     }
     else {
         panic!("Expected struct")
@@ -272,11 +284,19 @@ fn test_rbq_ast_complex_type() {
     assert_eq!(root.items.len(), 1);
     if let oak_rbq::ast::RbqItem::Struct(s) = &root.items[0] {
         let field = &s.fields[0];
-        assert_eq!(field.type_ref.path, "List");
-        assert!(field.type_ref.is_physical_ptr);
-        assert!(field.type_ref.is_optional);
-        assert_eq!(field.type_ref.generic_args.len(), 1);
-        assert_eq!(field.type_ref.generic_args[0].path, "i32");
+        if let oak_rbq::ast::RbqType::Named { path, generic_args, is_physical_ptr, is_optional } = &field.type_ref {
+            assert_eq!(path, "List");
+            assert!(is_physical_ptr);
+            assert!(is_optional);
+            assert_eq!(generic_args.len(), 1);
+            if let oak_rbq::ast::RbqType::Named { path: arg_path, .. } = &generic_args[0] {
+                assert_eq!(arg_path, "i32");
+            } else {
+                panic!("Expected named generic arg");
+            }
+        } else {
+            panic!("Expected named type");
+        }
     }
     else {
         panic!("Expected struct")

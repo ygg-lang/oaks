@@ -77,7 +77,7 @@ impl<'config> SqlBuilder<'config> {
         })
     }
 
-    fn build_select_statement(&self, node: RedNode<SqlLanguage>, source: &SourceText) -> Result<SelectStatement, OakError> {
+    fn build_select_statement<'a>(&self, node: RedNode<'a, SqlLanguage>, source: &SourceText) -> Result<SelectStatement, OakError> {
         let mut items = Vec::new();
         let mut from = None;
         let mut joins = Vec::new();
@@ -98,9 +98,11 @@ impl<'config> SqlBuilder<'config> {
                     SqlElementType::OrderByClause => order_by = Some(self.build_order_by_clause(n, source)?),
                     SqlElementType::LimitClause => limit = Some(self.build_limit_clause(n, source)?),
                     SqlElementType::Expression => {
-                        if from.is_some() && selection.is_none() {
-                            selection = Some(self.build_expression(n, source)?);
-                        }
+                        // The parser doesn't wrap WHERE expression in a special node,
+                        // it just sits in the SelectStatement node.
+                        // However, we need to distinguish it from other expressions.
+                        // In parse_select, WHERE comes after FROM/JOIN and before GROUP BY.
+                        selection = Some(self.build_expression(n, source)?);
                     }
                     _ => {}
                 }
@@ -120,7 +122,7 @@ impl<'config> SqlBuilder<'config> {
         })
     }
 
-    fn build_select_item(&self, node: RedNode<SqlLanguage>, source: &SourceText) -> Result<SelectItem, OakError> {
+    fn build_select_item<'a>(&self, node: RedNode<'a, SqlLanguage>, source: &SourceText) -> Result<SelectItem, OakError> {
         let mut expr = None;
         let mut alias = None;
         let mut is_star = false;
@@ -174,7 +176,7 @@ impl<'config> SqlBuilder<'config> {
         }
     }
 
-    fn build_insert_statement(&self, node: RedNode<SqlLanguage>, source: &SourceText) -> Result<InsertStatement, OakError> {
+    fn build_insert_statement<'a>(&self, node: RedNode<'a, SqlLanguage>, source: &SourceText) -> Result<InsertStatement, OakError> {
         let mut table_name = None;
         let mut columns = Vec::new();
         let mut values = Vec::new();
@@ -183,15 +185,25 @@ impl<'config> SqlBuilder<'config> {
             if let RedTree::Node(n) = child {
                 match n.green.kind {
                     SqlElementType::TableName => table_name = Some(self.build_table_name(n, source)?),
-                    SqlElementType::ColumnName => columns.push(self.build_identifier(n, source)?),
-                    SqlElementType::ValueList => {
-                        for sub_child in n.children() {
-                            if let RedTree::Node(sn) = sub_child {
-                                if sn.green.kind == SqlElementType::Expression {
-                                    values.push(self.build_expression(sn, source)?);
+                    SqlElementType::ColumnName => {
+                        // In INSERT, ColumnName might contain Identifier node or Identifier_ token
+                        for sub in n.children() {
+                            match sub {
+                                RedTree::Node(sn) if sn.green.kind == SqlElementType::Identifier => {
+                                    columns.push(self.build_identifier(sn, source)?);
                                 }
+                                RedTree::Token(st) if st.kind == SqlTokenType::Identifier_ => {
+                                    columns.push(Identifier {
+                                        name: self.get_text(st.span.clone(), source),
+                                        span: st.span.clone(),
+                                    });
+                                }
+                                _ => {}
                             }
                         }
+                    }
+                    SqlElementType::ValueList => {
+                        self.collect_expressions(n, source, &mut values)?;
                     }
                     _ => {}
                 }
@@ -206,7 +218,21 @@ impl<'config> SqlBuilder<'config> {
         })
     }
 
-    fn build_update_statement(&self, node: RedNode<SqlLanguage>, source: &SourceText) -> Result<UpdateStatement, OakError> {
+    fn collect_expressions<'a>(&self, node: RedNode<'a, SqlLanguage>, source: &SourceText, out: &mut Vec<Expression>) -> Result<(), OakError> {
+        for child in node.children() {
+            if let RedTree::Node(n) = child {
+                match n.green.kind {
+                    SqlElementType::Expression => out.push(self.build_expression(n, source)?),
+                    SqlElementType::Identifier => out.push(Expression::Identifier(self.build_identifier(n, source)?)),
+                    SqlElementType::ValueList => self.collect_expressions(n, source, out)?,
+                    _ => {}
+                }
+            }
+        }
+        Ok(())
+    }
+
+    fn build_update_statement<'a>(&self, node: RedNode<'a, SqlLanguage>, source: &SourceText) -> Result<UpdateStatement, OakError> {
         let mut table_name = None;
         let mut assignments = Vec::new();
         let mut selection = None;
@@ -230,7 +256,7 @@ impl<'config> SqlBuilder<'config> {
         })
     }
 
-    fn build_assignment(&self, node: RedNode<SqlLanguage>, source: &SourceText) -> Result<Assignment, OakError> {
+    fn build_assignment<'a>(&self, node: RedNode<'a, SqlLanguage>, source: &SourceText) -> Result<Assignment, OakError> {
         let mut column = None;
         let mut value = None;
 
@@ -251,7 +277,7 @@ impl<'config> SqlBuilder<'config> {
         })
     }
 
-    fn build_delete_statement(&self, node: RedNode<SqlLanguage>, source: &SourceText) -> Result<DeleteStatement, OakError> {
+    fn build_delete_statement<'a>(&self, node: RedNode<'a, SqlLanguage>, source: &SourceText) -> Result<DeleteStatement, OakError> {
         let mut table_name = None;
         let mut selection = None;
 
@@ -272,7 +298,7 @@ impl<'config> SqlBuilder<'config> {
         })
     }
 
-    fn build_create_statement(&self, node: RedNode<SqlLanguage>, source: &SourceText) -> Result<CreateStatement, OakError> {
+    fn build_create_statement<'a>(&self, node: RedNode<'a, SqlLanguage>, source: &SourceText) -> Result<CreateStatement, OakError> {
         let mut object_type = CreateObjectType::Table;
         let mut name = None;
         let mut if_not_exists = false;
@@ -306,29 +332,75 @@ impl<'config> SqlBuilder<'config> {
         })
     }
 
-    fn build_column_definition(&self, node: RedNode<SqlLanguage>, source: &SourceText) -> Result<ColumnDefinition, OakError> {
+    fn build_column_definition<'a>(&self, node: RedNode<'a, SqlLanguage>, source: &SourceText) -> Result<ColumnDefinition, OakError> {
         let mut name = None;
         let mut data_type = String::new();
         let mut constraints = Vec::new();
 
         for child in node.children() {
             if let RedTree::Node(n) = child {
-                if n.green.kind == SqlElementType::ColumnName || n.green.kind == SqlElementType::Identifier {
-                    name = Some(self.build_identifier(n, source)?);
+                match n.green.kind {
+                    SqlElementType::ColumnName | SqlElementType::Identifier => {
+                        if name.is_none() {
+                            name = Some(self.build_identifier(n, source)?);
+                        } else {
+                            // This is likely the data type name if it's an identifier after the column name
+                            if !data_type.is_empty() {
+                                data_type.push(' ');
+                            }
+                            data_type.push_str(&self.get_text(n.span(), source).trim());
+                        }
+                    }
+                    SqlElementType::Expression => {
+                        // This might be a default value or check constraint expression
+                        // But we need to know which constraint it belongs to.
+                    }
+                    _ => {}
                 }
             } else if let RedTree::Token(t) = child {
                 match t.kind {
-                    SqlTokenType::Primary => constraints.push(ColumnConstraint::PrimaryKey),
-                    SqlTokenType::Not => constraints.push(ColumnConstraint::NotNull),
-                    SqlTokenType::Null => constraints.push(ColumnConstraint::Nullable),
+                    SqlTokenType::Primary => {
+                        constraints.push(ColumnConstraint::PrimaryKey);
+                    }
+                    SqlTokenType::Not => {
+                        // Peek next to see if it's NULL
+                        constraints.push(ColumnConstraint::NotNull);
+                    }
+                    SqlTokenType::Null => {
+                        // Only add Nullable if NOT wasn't just added
+                        if !matches!(constraints.last(), Some(ColumnConstraint::NotNull)) {
+                            constraints.push(ColumnConstraint::Nullable);
+                        }
+                    }
                     SqlTokenType::Unique => constraints.push(ColumnConstraint::Unique),
                     SqlTokenType::AutoIncrement => constraints.push(ColumnConstraint::AutoIncrement),
-                    _ if t.kind.role() == oak_core::UniversalTokenRole::Keyword => {
-                        // Only add to data_type if it's not a constraint keyword we just handled
-                        if !data_type.is_empty() {
-                            data_type.push(' ');
+                    SqlTokenType::Default => {
+                        if let Some(expr_node) = self.find_next_node(node.clone(), SqlElementType::Expression, t.span.end) {
+                            constraints.push(ColumnConstraint::Default(self.build_expression(expr_node, source)?));
                         }
-                        data_type.push_str(&self.get_text(t.span.clone(), source).trim());
+                    }
+                    SqlTokenType::Check => {
+                        if let Some(expr_node) = self.find_next_node(node.clone(), SqlElementType::Expression, t.span.end) {
+                            constraints.push(ColumnConstraint::Check(self.build_expression(expr_node, source)?));
+                        }
+                    }
+                    SqlTokenType::NumberLiteral => {
+                        // Part of data type precision e.g. VARCHAR(255)
+                        if !data_type.is_empty() {
+                            data_type.push('(');
+                            data_type.push_str(&self.get_text(t.span.clone(), source));
+                            data_type.push(')');
+                        }
+                    }
+                    _ if t.kind.role() == oak_core::UniversalTokenRole::Keyword => {
+                        let keyword = self.get_text(t.span.clone(), source).to_uppercase();
+                        // Ignore constraint keywords that are handled specifically
+                        if !matches!(keyword.as_str(), "PRIMARY" | "KEY" | "NOT" | "NULL" | "UNIQUE" | "AUTOINCREMENT" | "DEFAULT" | "CHECK" | "IF" | "EXISTS") {
+                            if !data_type.is_empty() {
+                                data_type.push(' ');
+                            }
+                            data_type.push_str(&keyword);
+                        }
                     }
                     _ => {}
                 }
@@ -337,13 +409,24 @@ impl<'config> SqlBuilder<'config> {
 
         Ok(ColumnDefinition {
             name: name.ok_or_else(|| OakError::custom_error("Missing column name"))?,
-            data_type,
+            data_type: data_type.trim().to_string(),
             constraints,
             span: node.span(),
         })
     }
 
-    fn build_drop_statement(&self, node: RedNode<SqlLanguage>, source: &SourceText) -> Result<DropStatement, OakError> {
+    fn find_next_node<'a>(&self, parent: RedNode<'a, SqlLanguage>, kind: SqlElementType, after_pos: usize) -> Option<RedNode<'a, SqlLanguage>> {
+        for child in parent.children() {
+            if let RedTree::Node(n) = child {
+                if n.green.kind == kind && n.span().start >= after_pos {
+                    return Some(n);
+                }
+            }
+        }
+        None
+    }
+
+    fn build_drop_statement<'a>(&self, node: RedNode<'a, SqlLanguage>, source: &SourceText) -> Result<DropStatement, OakError> {
         let mut object_type = DropObjectType::Table;
         let mut name = None;
         let mut if_exists = false;
@@ -371,7 +454,7 @@ impl<'config> SqlBuilder<'config> {
         })
     }
 
-    fn build_alter_statement(&self, node: RedNode<SqlLanguage>, source: &SourceText) -> Result<AlterStatement, OakError> {
+    fn build_alter_statement<'a>(&self, node: RedNode<'a, SqlLanguage>, source: &SourceText) -> Result<AlterStatement, OakError> {
         let mut table_name = None;
 
         for child in node.children() {
@@ -388,40 +471,87 @@ impl<'config> SqlBuilder<'config> {
         })
     }
 
-    fn build_expression(&self, node: RedNode<SqlLanguage>, source: &SourceText) -> Result<Expression, OakError> {
+    fn build_expression<'a>(&self, node: RedNode<'a, SqlLanguage>, source: &SourceText) -> Result<Expression, OakError> {
         let mut left = None;
         let mut op_token = None;
         let mut right = None;
+
+        // Special case for expression wrapped in another expression (e.g. from parentheses or Pratt recursion)
+        if node.children().count() == 1 {
+            if let Some(RedTree::Node(n)) = node.children().next() {
+                if n.green.kind == SqlElementType::Expression || n.green.kind == SqlElementType::Identifier {
+                    return self.build_expression(n, source);
+                }
+            }
+        }
 
         for child in node.children() {
             match child {
                 RedTree::Token(t) => {
                     match t.kind {
-                        SqlTokenType::NumberLiteral => return Ok(Expression::Literal(Literal::Number(self.get_text(t.span.clone(), source), t.span.clone()))),
-                        SqlTokenType::StringLiteral => return Ok(Expression::Literal(Literal::String(self.get_text(t.span.clone(), source), t.span.clone()))),
-                        SqlTokenType::BooleanLiteral | SqlTokenType::True | SqlTokenType::False => return Ok(Expression::Literal(Literal::Boolean(self.get_text(t.span.clone(), source).to_uppercase() == "TRUE", t.span.clone()))),
-                        SqlTokenType::NullLiteral | SqlTokenType::Null => return Ok(Expression::Literal(Literal::Null(t.span.clone()))),
-                        SqlTokenType::Identifier_ => return Ok(Expression::Identifier(Identifier { name: self.get_text(t.span.clone(), source), span: t.span.clone() })),
+                        SqlTokenType::NumberLiteral => {
+                            let expr = Expression::Literal(Literal::Number(self.get_text(t.span.clone(), source).trim().to_string(), t.span.clone()));
+                            if left.is_none() {
+                                left = Some(expr);
+                            } else {
+                                right = Some(expr);
+                            }
+                        }
+                        SqlTokenType::StringLiteral => {
+                            let expr = Expression::Literal(Literal::String(self.get_text(t.span.clone(), source).trim().to_string(), t.span.clone()));
+                            if left.is_none() {
+                                left = Some(expr);
+                            } else {
+                                right = Some(expr);
+                            }
+                        }
+                        SqlTokenType::BooleanLiteral | SqlTokenType::True | SqlTokenType::False => {
+                            let expr = Expression::Literal(Literal::Boolean(self.get_text(t.span.clone(), source).to_uppercase().trim() == "TRUE", t.span.clone()));
+                            if left.is_none() {
+                                left = Some(expr);
+                            } else {
+                                right = Some(expr);
+                            }
+                        }
+                        SqlTokenType::NullLiteral | SqlTokenType::Null => {
+                            let expr = Expression::Literal(Literal::Null(t.span.clone()));
+                            if left.is_none() {
+                                left = Some(expr);
+                            } else {
+                                right = Some(expr);
+                            }
+                        }
+                        SqlTokenType::Identifier_ => {
+                            let expr = Expression::Identifier(Identifier { name: self.get_text(t.span.clone(), source).trim().to_string(), span: t.span.clone() });
+                            if left.is_none() {
+                                left = Some(expr);
+                            } else {
+                                right = Some(expr);
+                            }
+                        }
                         k if self.is_binary_op(k) => op_token = Some(t),
                         _ => {}
                     }
                 }
                 RedTree::Node(n) => {
-                    if n.green.kind == SqlElementType::Identifier {
-                        return Ok(Expression::Identifier(self.build_identifier(n, source)?));
+                    let expr = if n.green.kind == SqlElementType::Identifier {
+                        Expression::Identifier(self.build_identifier(n, source)?)
                     } else if n.green.kind == SqlElementType::Expression {
-                        let expr = self.build_expression(n, source)?;
-                        if left.is_none() {
-                            left = Some(expr);
-                        } else {
-                            right = Some(expr);
-                        }
+                        self.build_expression(n, source)?
+                    } else {
+                        continue;
+                    };
+                    
+                    if left.is_none() {
+                        left = Some(expr);
+                    } else {
+                        right = Some(expr);
                     }
                 }
             }
         }
 
-        if let (Some(l), Some(op), Some(r)) = (left, op_token, right) {
+        if let (Some(l), Some(op), Some(r)) = (left.clone(), op_token, right) {
             if let Some(binary_op) = self.map_binary_op(op.kind) {
                 return Ok(Expression::Binary {
                     left: Box::new(l),
@@ -432,16 +562,23 @@ impl<'config> SqlBuilder<'config> {
             }
         }
 
-        Ok(Expression::Literal(Literal::String(self.get_text(node.span(), source), node.span())))
+        left.ok_or_else(|| OakError::custom_error("Empty expression"))
     }
 
-    fn build_table_name(&self, node: RedNode<SqlLanguage>, source: &SourceText) -> Result<TableName, OakError> {
+    fn build_table_name<'a>(&self, node: RedNode<'a, SqlLanguage>, source: &SourceText) -> Result<TableName, OakError> {
         let mut name = None;
         for child in node.children() {
-            if let RedTree::Node(n) = child {
-                if n.green.kind == SqlElementType::Identifier {
+            match child {
+                RedTree::Node(n) if n.green.kind == SqlElementType::Identifier => {
                     name = Some(self.build_identifier(n, source)?);
                 }
+                RedTree::Token(t) if t.kind == SqlTokenType::Identifier_ => {
+                    name = Some(Identifier {
+                        name: self.get_text(t.span.clone(), source),
+                        span: t.span.clone(),
+                    });
+                }
+                _ => {}
             }
         }
         Ok(TableName {
@@ -450,14 +587,14 @@ impl<'config> SqlBuilder<'config> {
         })
     }
 
-    fn build_identifier(&self, node: RedNode<SqlLanguage>, source: &SourceText) -> Result<Identifier, OakError> {
+    fn build_identifier<'a>(&self, node: RedNode<'a, SqlLanguage>, source: &SourceText) -> Result<Identifier, OakError> {
         Ok(Identifier {
             name: self.get_text(node.span(), source).trim().to_string(),
             span: node.span(),
         })
     }
 
-    fn build_join_clause(&self, node: RedNode<SqlLanguage>, source: &SourceText) -> Result<JoinClause, OakError> {
+    fn build_join_clause<'a>(&self, node: RedNode<'a, SqlLanguage>, source: &SourceText) -> Result<JoinClause, OakError> {
         let mut join_type = JoinType::Inner;
         let mut table = None;
         let mut on = None;
@@ -487,7 +624,7 @@ impl<'config> SqlBuilder<'config> {
         })
     }
 
-    fn build_group_by_clause(&self, node: RedNode<SqlLanguage>, source: &SourceText) -> Result<GroupByClause, OakError> {
+    fn build_group_by_clause<'a>(&self, node: RedNode<'a, SqlLanguage>, source: &SourceText) -> Result<GroupByClause, OakError> {
         let mut columns = Vec::new();
         for child in node.children() {
             if let RedTree::Node(n) = child {
@@ -499,7 +636,7 @@ impl<'config> SqlBuilder<'config> {
         Ok(GroupByClause { columns, span: node.span() })
     }
 
-    fn build_having_clause(&self, node: RedNode<SqlLanguage>, source: &SourceText) -> Result<HavingClause, OakError> {
+    fn build_having_clause<'a>(&self, node: RedNode<'a, SqlLanguage>, source: &SourceText) -> Result<HavingClause, OakError> {
         let mut condition = None;
         for child in node.children() {
             if let RedTree::Node(n) = child {
@@ -514,7 +651,7 @@ impl<'config> SqlBuilder<'config> {
         })
     }
 
-    fn build_order_by_clause(&self, node: RedNode<SqlLanguage>, source: &SourceText) -> Result<OrderByClause, OakError> {
+    fn build_order_by_clause<'a>(&self, node: RedNode<'a, SqlLanguage>, source: &SourceText) -> Result<OrderByClause, OakError> {
         let mut items = Vec::new();
         for child in node.children() {
             if let RedTree::Node(n) = child {
@@ -529,7 +666,7 @@ impl<'config> SqlBuilder<'config> {
         Ok(OrderByClause { items, span: node.span() })
     }
 
-    fn build_limit_clause(&self, node: RedNode<SqlLanguage>, source: &SourceText) -> Result<LimitClause, OakError> {
+    fn build_limit_clause<'a>(&self, node: RedNode<'a, SqlLanguage>, source: &SourceText) -> Result<LimitClause, OakError> {
         let mut limit = None;
         let mut offset = None;
 

@@ -275,12 +275,12 @@ impl<'a, 't, 'tree, L: Language> Visitor<'tree, L> for HighlightVisitor<'a, 't> 
         for child in node.children() {
             match child {
                 RedTree::Node(n) => <Self as Visitor<L>>::visit_node(self, n),
-                RedTree::Leaf(t) => <Self as Visitor<L>>::visit_token(self, t),
+                RedTree::Token(t) => <Self as Visitor<L>>::visit_token(self, t),
             }
         }
     }
 
-    fn visit_token(&mut self, token: RedLeaf<L>) {
+    fn visit_token(&mut self, token: oak_core::tree::RedLeaf<L>) {
         // Use scopes for highlighting
         let scopes = get_token_scopes(token.kind.role(), L::NAME, L::CATEGORY);
         let style = self.theme.resolve_styles(&scopes);

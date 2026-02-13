@@ -29,11 +29,13 @@ pub struct SqlLanguageService<V: Vfs> {
     workspace: oak_lsp::workspace::WorkspaceManager,
     hover_provider: SqlHoverProvider,
 }
+#[cfg(feature = "lsp")]
 impl<V: Vfs> SqlLanguageService<V> {
     pub fn new(vfs: V) -> Self {
         Self { vfs, workspace: oak_lsp::workspace::WorkspaceManager::default(), hover_provider: SqlHoverProvider }
     }
 }
+#[cfg(feature = "lsp")]
 impl<V: Vfs + Send + Sync + 'static + oak_vfs::WritableVfs> LanguageService for SqlLanguageService<V> {
     type Lang = SqlLanguage;
     type Vfs = V;

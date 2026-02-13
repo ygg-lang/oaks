@@ -326,7 +326,7 @@ impl<'config> SqlLexer<'config> {
             "REFERENCES" => SqlTokenType::References,
             "DEFAULT" => SqlTokenType::Default,
             "UNIQUE" => SqlTokenType::Unique,
-            "AUTO_INCREMENT" => SqlTokenType::AutoIncrement,
+            "AUTO_INCREMENT" | "AUTOINCREMENT" => SqlTokenType::AutoIncrement,
             "INT" => SqlTokenType::Int,
             "INTEGER" => SqlTokenType::Integer,
             "VARCHAR" => SqlTokenType::Varchar,

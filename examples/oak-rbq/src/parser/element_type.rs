@@ -80,7 +80,6 @@ pub enum RbqElementType {
     Star,
     Slash,
     Pipe,
-    Block,
     Ident,
     StringLiteral,
     NumberLiteral,

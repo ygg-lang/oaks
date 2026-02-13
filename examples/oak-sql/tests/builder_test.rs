@@ -44,7 +44,7 @@ fn test_create_table_ast() {
         assert_eq!(create.columns[0].name.name, "id");
         assert_eq!(create.columns[0].data_type, "INT");
         assert_eq!(create.columns[1].name.name, "name");
-        assert_eq!(create.columns[1].data_type, "VARCHAR");
+        assert_eq!(create.columns[1].data_type, "VARCHAR(255)");
     } else {
         panic!("Expected Create statement");
     }

@@ -92,6 +92,32 @@ impl<'config> ValkyrieParser<'config> {
                 let attr = self.build_attribute(n, source)?;
                 Ok(Item::Statement(Statement::ExprStmt { annotations: vec![attr], expr: Expr::Ident(Identifier { name: "".to_string(), span: (0..0).into() }), semi: false, span: (0..0).into() }))
             }
+            ValkyrieSyntaxKind::TemplateText => {
+                let span = n.span();
+                let content = source.slice(span.clone()).to_string();
+                Ok(Item::TemplateText { content, span })
+            }
+            ValkyrieSyntaxKind::TemplateControl => {
+                let span = n.span();
+                let mut items = Vec::new();
+                for child in n.children() {
+                    if let RedTree::Node(child_node) = child {
+                        items.push(self.build_item(child_node, source)?);
+                    }
+                }
+                Ok(Item::TemplateControl { items, span })
+            }
+            ValkyrieSyntaxKind::Interpolation => {
+                let span = n.span();
+                let mut expr = None;
+                for child in n.children() {
+                    if let RedTree::Node(child_node) = child {
+                        expr = Some(self.build_expr(child_node, source)?);
+                    }
+                }
+                let expr = expr.ok_or_else(|| source.syntax_error("Empty interpolation", span.start))?;
+                Ok(Item::TemplateInterpolation { expr, span })
+            }
             _ => Err(source.syntax_error(format!("Unexpected item: {:?}", n.green.kind), n.span().start)),
         }
     }

@@ -637,6 +637,18 @@ pub struct JoinClause {
     pub span: Range<usize>,
 }
 
+impl ToSource for JoinClause {
+    fn to_source(&self, buffer: &mut SourceBuffer) {
+        self.join_type.to_source(buffer);
+        buffer.push("JOIN");
+        self.table.to_source(buffer);
+        if let Some(on) = &self.on {
+            buffer.push("ON");
+            on.to_source(buffer);
+        }
+    }
+}
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub enum JoinType {
@@ -644,6 +656,17 @@ pub enum JoinType {
     Left,
     Right,
     Full,
+}
+
+impl ToSource for JoinType {
+    fn to_source(&self, buffer: &mut SourceBuffer) {
+        match self {
+            JoinType::Inner => buffer.push("INNER"),
+            JoinType::Left => buffer.push("LEFT"),
+            JoinType::Right => buffer.push("RIGHT"),
+            JoinType::Full => buffer.push("FULL"),
+        }
+    }
 }
 
 /// GROUP BY 子句
@@ -655,6 +678,19 @@ pub struct GroupByClause {
     pub span: Range<usize>,
 }
 
+impl ToSource for GroupByClause {
+    fn to_source(&self, buffer: &mut SourceBuffer) {
+        buffer.push("GROUP");
+        buffer.push("BY");
+        for (i, col) in self.columns.iter().enumerate() {
+            if i > 0 {
+                buffer.push(",");
+            }
+            col.to_source(buffer);
+        }
+    }
+}
+
 /// HAVING 子句
 #[derive(Debug, Clone)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
@@ -662,6 +698,13 @@ pub struct HavingClause {
     pub condition: Expression,
     #[cfg_attr(feature = "serde", serde(with = "oak_core::serde_range"))]
     pub span: Range<usize>,
+}
+
+impl ToSource for HavingClause {
+    fn to_source(&self, buffer: &mut SourceBuffer) {
+        buffer.push("HAVING");
+        self.condition.to_source(buffer);
+    }
 }
 
 /// ORDER BY 子句
@@ -673,6 +716,19 @@ pub struct OrderByClause {
     pub span: Range<usize>,
 }
 
+impl ToSource for OrderByClause {
+    fn to_source(&self, buffer: &mut SourceBuffer) {
+        buffer.push("ORDER");
+        buffer.push("BY");
+        for (i, item) in self.items.iter().enumerate() {
+            if i > 0 {
+                buffer.push(",");
+            }
+            item.to_source(buffer);
+        }
+    }
+}
+
 #[derive(Debug, Clone)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct OrderByItem {
@@ -680,11 +736,27 @@ pub struct OrderByItem {
     pub direction: OrderDirection,
 }
 
+impl ToSource for OrderByItem {
+    fn to_source(&self, buffer: &mut SourceBuffer) {
+        self.expr.to_source(buffer);
+        self.direction.to_source(buffer);
+    }
+}
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub enum OrderDirection {
     Asc,
     Desc,
+}
+
+impl ToSource for OrderDirection {
+    fn to_source(&self, buffer: &mut SourceBuffer) {
+        match self {
+            OrderDirection::Asc => buffer.push("ASC"),
+            OrderDirection::Desc => buffer.push("DESC"),
+        }
+    }
 }
 
 /// LIMIT 子句
@@ -695,4 +767,17 @@ pub struct LimitClause {
     pub offset: Option<Expression>,
     #[cfg_attr(feature = "serde", serde(with = "oak_core::serde_range"))]
     pub span: Range<usize>,
+}
+
+mod pretty;
+
+impl ToSource for LimitClause {
+    fn to_source(&self, buffer: &mut SourceBuffer) {
+        buffer.push("LIMIT");
+        self.limit.to_source(buffer);
+        if let Some(offset) = &self.offset {
+            buffer.push("OFFSET");
+            offset.to_source(buffer);
+        }
+    }
 }

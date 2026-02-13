@@ -73,7 +73,7 @@ impl UniversalSymbolProvider {
             let mut name = None;
             for child in node.children() {
                 match child {
-                    RedTree::Leaf(leaf) => {
+                    RedTree::Token(leaf) => {
                         // In many languages, the first name identifier in a definition is its name
                         if leaf.kind.is_universal(UniversalTokenRole::Name) {
                             name = Some(source.get_text_in(leaf.span).to_string());

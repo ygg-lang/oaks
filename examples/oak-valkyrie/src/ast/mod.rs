@@ -96,6 +96,30 @@ pub enum Item {
     Effect(EffectDefinition),
     /// A variant definition (for enums and flags)
     Variant(Variant),
+    /// A template text block
+    TemplateText {
+        /// The text content
+        content: String,
+        /// Source code span where this text appears
+        #[cfg_attr(feature = "serde", serde(with = "oak_core::serde_range"))]
+        span: Range<usize>,
+    },
+    /// A template control block (<% ... %>)
+    TemplateControl {
+        /// The items within the control block
+        items: Vec<Item>,
+        /// Source code span where this control block appears
+        #[cfg_attr(feature = "serde", serde(with = "oak_core::serde_range"))]
+        span: Range<usize>,
+    },
+    /// A template interpolation block ({ ... })
+    TemplateInterpolation {
+        /// The expression to interpolate
+        expr: Expr,
+        /// Source code span where this interpolation block appears
+        #[cfg_attr(feature = "serde", serde(with = "oak_core::serde_range"))]
+        span: Range<usize>,
+    },
 }
 
 impl Item {
@@ -114,6 +138,9 @@ impl Item {
             Item::Micro(m) => m.span,
             Item::Effect(e) => e.span,
             Item::Variant(v) => v.span,
+            Item::TemplateText { span, .. } => *span,
+            Item::TemplateControl { span, .. } => *span,
+            Item::TemplateInterpolation { span, .. } => *span,
         }
     }
 }
