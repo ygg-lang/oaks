@@ -34,7 +34,6 @@ fn test_rbq_ast_closure_simple() {
 
 fn unwrap_query(expr: &oak_rbq::ast::RbqExpr) -> &oak_rbq::ast::RbqExpr {
     match &expr.kind {
-        RbqExprKind::Pipeline { base, .. } => unwrap_query(base),
         RbqExprKind::Binary { right, op, .. } if op == "=" => unwrap_query(right),
         _ => expr,
     }

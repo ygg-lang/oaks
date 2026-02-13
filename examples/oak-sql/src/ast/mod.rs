@@ -656,6 +656,21 @@ impl ToSource for TableName {
     }
 }
 
+/// 列名
+#[derive(Debug, Clone)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+pub struct ColumnName {
+    pub name: Identifier,
+    #[cfg_attr(feature = "serde", serde(with = "oak_core::serde_range"))]
+    pub span: Range<usize>,
+}
+
+impl ToSource for ColumnName {
+    fn to_source(&self, buffer: &mut SourceBuffer) {
+        self.name.to_source(buffer);
+    }
+}
+
 /// JOIN 子句
 #[derive(Debug, Clone)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
