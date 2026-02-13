@@ -105,18 +105,12 @@ impl<'a, L: Language> RedTree<'a, L> {
         }
     }
 
-    /// Returns this element as a token if it is one.
-    pub fn as_token(&self) -> Option<RedLeaf<L>> {
+    /// Returns this element as a leaf if it is one.
+    pub fn as_leaf(&self) -> Option<RedLeaf<L>> {
         match self {
             RedTree::Node(_) => None,
             RedTree::Leaf(l) => Some(*l),
         }
-    }
-
-    /// Alias for `as_token`.
-    #[deprecated(note = "Use `as_token` instead")]
-    pub fn as_leaf(&self) -> Option<RedLeaf<L>> {
-        self.as_token()
     }
 }
 
@@ -350,8 +344,8 @@ impl<'a, L: Language> RedNode<'a, L> {
         }
     }
 
-    /// Returns the first child token if any.
-    pub fn first_token(&self) -> Option<RedLeaf<L>> {
+    /// Returns the first child leaf if any.
+    pub fn first_leaf(&self) -> Option<RedLeaf<L>> {
         for child in self.children() {
             match child {
                 RedTree::Node(_) => continue,

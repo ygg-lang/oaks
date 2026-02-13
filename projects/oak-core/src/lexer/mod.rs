@@ -973,7 +973,7 @@ impl<'s, S: Source + ?Sized, L: Language> LexerState<'s, S, L> {
     pub fn advance_if_dead_lock(&mut self, safe_point: usize) {
         // Force advance if no progress was made
         if self.cursor.position() == safe_point {
-            if let Some(ch) = self.current() {
+            if let Some(ch) = self.peek() {
                 // Skip current character
                 self.advance(ch.len_utf8())
             }

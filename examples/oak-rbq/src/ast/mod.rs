@@ -807,22 +807,9 @@ impl RbqExpr {
                         right = Some(Box::new(RbqExpr::lower(node, source)))
                     }
                 }
-                RedTree::Token(leaf) => {
+                RedTree::Leaf(leaf) => {
                     let k = leaf.kind();
-                    if k == RbqTokenType::Plus
-                        || k == RbqTokenType::Minus
-                        || k == RbqTokenType::Star
-                        || k == RbqTokenType::Slash
-                        || k == RbqTokenType::EqEq
-                        || k == RbqTokenType::NotEq
-                        || k == RbqTokenType::Lt
-                        || k == RbqTokenType::Gt
-                        || k == RbqTokenType::LtEq
-                        || k == RbqTokenType::GtEq
-                        || k == RbqTokenType::AndAnd
-                        || k == RbqTokenType::OrOr
-                        || k == RbqTokenType::Eq
-                    {
+                    if k == RbqTokenType::Plus || k == RbqTokenType::Minus || k == RbqTokenType::Star || k == RbqTokenType::Slash || k == RbqTokenType::EqEq || k == RbqTokenType::NotEq || k == RbqTokenType::Lt || k == RbqTokenType::Gt || k == RbqTokenType::LtEq || k == RbqTokenType::GtEq || k == RbqTokenType::AndAnd || k == RbqTokenType::OrOr || k == RbqTokenType::Eq {
                         op = source[leaf.span()].trim().to_string()
                     }
                 }
