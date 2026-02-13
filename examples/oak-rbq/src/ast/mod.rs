@@ -24,10 +24,7 @@ impl RbqRoot {
                 RedTree::Node(node) => match node.kind::<RbqTokenType>() {
                     RbqTokenType::Annotation => pending_annotations.push(RbqAnnotation::lower(node, source)),
                     RbqTokenType::NamespaceDef => {
-                        let ns = RbqNamespace::lower(node, source);
-                        // If annotations were before a namespace, they should probably be ignored or handled if supported.
-                        // For now we clear them to avoid applying them to the next item.
-                        pending_annotations.clear();
+                        let ns = RbqNamespace::lower(node, source, pending_annotations.drain(..).collect());
                         items.push(RbqItem::Namespace(ns))
                     }
                     RbqTokenType::ImportDef => {
@@ -64,7 +61,7 @@ impl RbqRoot {
                         m.annotations.extend(pending_annotations.drain(..));
                         items.push(RbqItem::Micro(m))
                     }
-                    RbqTokenType::QueryPipeline | RbqTokenType::Expression => items.push(RbqItem::Query(RbqExpr::lower(node, source))),
+                    RbqTokenType::QueryPipeline | RbqTokenType::Closure | RbqTokenType::BinaryExpr | RbqTokenType::Expression => items.push(RbqItem::Query(RbqExpr::lower(node, source))),
                     _ => {}
                 },
                 RedTree::Token(_) => {}
@@ -211,7 +208,9 @@ impl RbqNamespace {
                 }
                 RbqTokenType::NamespaceDef => {
                     if let Some(node) = child.as_node() {
-                        items.push(RbqItem::Namespace(RbqNamespace::lower(node, source)))
+                        let mut ns = RbqNamespace::lower(node, source);
+                        ns.annotations.extend(pending_annotations.drain(..));
+                        items.push(RbqItem::Namespace(ns))
                     }
                 }
                 RbqTokenType::ImportDef => {
@@ -840,10 +839,13 @@ impl RbqExpr {
                 for child in red.children() {
                     match child {
                         RedTree::Node(node) => {
-                            if node.kind::<RbqTokenType>() == RbqTokenType::PipelineStep {
+                            let k = node.kind::<RbqTokenType>();
+                            if k == RbqTokenType::PipelineStep {
                                 steps.push(RbqPipelineStep::lower(node, source))
                             }
                             else if base.is_none() {
+                                // Ignore symbols like { and | that might be nodes if not careful
+                                // But usually they are tokens.
                                 base = Some(Box::new(RbqExpr::lower(node, source)))
                             }
                         }
@@ -856,8 +858,8 @@ impl RbqExpr {
                 let mut args = Vec::new();
                 let mut body = None;
                 for child in red.children() {
-            match child {
-                RedTree::Node(node) => match node.kind::<RbqTokenType>() {
+                    match child {
+                        RedTree::Node(node) => match node.kind::<RbqTokenType>() {
                             RbqTokenType::ClosureArgs => {
                                 for arg in node.children() {
                                     if let RedTree::Token(leaf) = arg {
@@ -867,7 +869,12 @@ impl RbqExpr {
                                     }
                                 }
                             }
-                            _ => body = Some(Box::new(RbqExpr::lower(node, source))),
+                            _ => {
+                                // For closures, we might have multiple expressions.
+                                // If we already have a body, we might want to wrap it in a Block
+                                // or just take the last one.
+                                body = Some(Box::new(RbqExpr::lower(node, source)));
+                            }
                         },
                         _ => {}
                     }

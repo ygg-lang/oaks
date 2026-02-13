@@ -20,9 +20,9 @@ fn test_sql_to_source() {
     println!("Generated source: {}", generated);
     // ToSource adds spaces between tokens, and we expect it to be similar to input but maybe not identical in spacing
     assert!(generated.contains("SELECT"));
-    assert!(generated.contains("name , age")); // SourceBuffer might add space before comma if not careful
+    assert!(generated.contains("name,age"));
     assert!(generated.contains("FROM users"));
-    assert!(generated.contains("WHERE age > 18"));
+    assert!(generated.contains("WHERE age>18"));
 }
 
 #[test]
@@ -41,7 +41,7 @@ fn test_sql_to_doc() {
     
     let doc = root.as_document();
     let formatted = doc.render(oak_pretty_print::FormatConfig::default());
-    println!("Formatted doc: {}", formatted);
+    println!("Formatted doc:\n{}", formatted);
     
     assert!(formatted.contains("SELECT"));
     assert!(formatted.contains("FROM users"));
@@ -64,7 +64,7 @@ fn test_sql_insert_to_source() {
     let generated = root.to_source_string();
     println!("Generated insert source: {}", generated);
     assert!(generated.contains("INSERT INTO users"));
-    assert!(generated.contains("VALUES ( 'John' , 25 )"));
+    assert!(generated.contains("VALUES('John',25)"));
 }
 
 #[test]

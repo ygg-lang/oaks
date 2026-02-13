@@ -26,7 +26,7 @@ impl<'config> Pratt<SqlLanguage> for SqlParser<'config> {
                 state.bump();
                 state.finish_at(cp, SqlElementType::Identifier)
             }
-            Some(NumberLiteral) | Some(StringLiteral) | Some(BooleanLiteral) | Some(NullLiteral) => {
+            Some(NumberLiteral) | Some(FloatLiteral) | Some(StringLiteral) | Some(BooleanLiteral) | Some(NullLiteral) | Some(True) | Some(False) | Some(Null) => {
                 state.bump();
                 state.finish_at(cp, SqlElementType::Expression)
             }
@@ -361,10 +361,14 @@ impl<'config> SqlParser<'config> {
                         } else if state.eat(Null) {
                         } else if state.eat(Unique) {
                         } else if state.eat(Default) {
+                            let expr_cp = state.checkpoint();
                             PrattParser::parse(state, 0, self);
+                            state.finish_at(expr_cp, SqlElementType::Expression);
                         } else if state.eat(Check) {
                             if state.eat(LeftParen) {
+                                let expr_cp = state.checkpoint();
                                 PrattParser::parse(state, 0, self);
+                                state.finish_at(expr_cp, SqlElementType::Expression);
                                 state.expect(RightParen).ok();
                             }
                         } else if state.eat(AutoIncrement) {

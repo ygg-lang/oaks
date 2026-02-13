@@ -87,7 +87,8 @@ impl<'config> SqlBuilder<'config> {
         let mut order_by = None;
         let mut limit = None;
 
-        // Debug: iterate through children and see what we have
+        let mut where_found = false;
+
         for child in node.children() {
             match child {
                 RedTree::Node(n) => {
@@ -100,9 +101,7 @@ impl<'config> SqlBuilder<'config> {
                         SqlElementType::OrderByClause => order_by = Some(self.build_order_by_clause(n, source)?),
                         SqlElementType::LimitClause => limit = Some(self.build_limit_clause(n, source)?),
                         SqlElementType::Expression => {
-                            // In parse_select, the WHERE clause's PrattParser call attaches an Expression node
-                            // directly to the SelectStatement. We use it as the selection.
-                            if selection.is_none() {
+                            if where_found && selection.is_none() {
                                 selection = Some(self.build_expression(n, source)?);
                             }
                         }
@@ -110,7 +109,9 @@ impl<'config> SqlBuilder<'config> {
                     }
                 }
                 RedTree::Token(t) => {
-                    // WHERE keyword might be here
+                    if t.kind == SqlTokenType::Where {
+                        where_found = true;
+                    }
                 }
             }
         }
@@ -343,17 +344,22 @@ impl<'config> SqlBuilder<'config> {
         let mut data_type = String::new();
         let mut constraints = Vec::new();
 
-        // Debug output for investigation
-        // println!("Building column definition for node: {:?}", node);
+        // Use a flag to track if we are currently parsing the data type
+        let mut parsing_data_type = false;
+
+        println!("DEBUG: Building column definition for node span: {:?}", node.span());
 
         for child in node.children() {
             match child {
                 RedTree::Node(n) => {
+                    println!("DEBUG: Found Node: {:?} span: {:?}", n.green.kind, n.span());
                     match n.green.kind {
                         SqlElementType::ColumnName | SqlElementType::Identifier => {
                             if name.is_none() {
                                 name = Some(self.build_identifier(n, source)?);
-                            } else {
+                                println!("DEBUG: Column Name: {:?}", name);
+                                parsing_data_type = true;
+                            } else if parsing_data_type {
                                 if !data_type.is_empty() {
                                     data_type.push(' ');
                                 }
@@ -364,51 +370,79 @@ impl<'config> SqlBuilder<'config> {
                     }
                 }
                 RedTree::Token(t) => {
+                    let text = self.get_text(t.span.clone(), source).to_uppercase();
+                    println!("DEBUG: Found Token: {:?} text: {:?} span: {:?}", t.kind, text, t.span);
+
                     match t.kind {
                         SqlTokenType::Primary => {
+                            println!("DEBUG: Adding PrimaryKey constraint");
                             constraints.push(ColumnConstraint::PrimaryKey);
+                            parsing_data_type = false;
+                        }
+                        SqlTokenType::Key => {
+                            // Part of PRIMARY KEY, stop parsing data type if we haven't already
+                            parsing_data_type = false;
                         }
                         SqlTokenType::Not => {
+                            println!("DEBUG: Adding NotNull constraint");
                             constraints.push(ColumnConstraint::NotNull);
+                            parsing_data_type = false;
                         }
                         SqlTokenType::Null => {
-                            if !matches!(constraints.last(), Some(ColumnConstraint::NotNull)) {
+                            // Check if NOT NULL was just added
+                            let mut is_not_null = false;
+                            if let Some(ColumnConstraint::NotNull) = constraints.last() {
+                                is_not_null = true;
+                            }
+                            
+                            if !is_not_null {
+                                println!("DEBUG: Adding Nullable constraint");
                                 constraints.push(ColumnConstraint::Nullable);
                             }
+                            parsing_data_type = false;
                         }
-                        SqlTokenType::Unique => constraints.push(ColumnConstraint::Unique),
-                        SqlTokenType::AutoIncrement => constraints.push(ColumnConstraint::AutoIncrement),
+                        SqlTokenType::Unique => {
+                            println!("DEBUG: Adding Unique constraint");
+                            constraints.push(ColumnConstraint::Unique);
+                            parsing_data_type = false;
+                        }
+                        SqlTokenType::AutoIncrement => {
+                            println!("DEBUG: Adding AutoIncrement constraint");
+                            constraints.push(ColumnConstraint::AutoIncrement);
+                            parsing_data_type = false;
+                        }
                         SqlTokenType::Default => {
-                            if let Some(expr_node) = self.find_next_node(node.clone(), SqlElementType::Expression, t.span.end) {
+                            parsing_data_type = false;
+                            // The expression follows Default token in column definition
+                            // In RedNode, we can iterate over siblings or children
+                            // find_next_node_in_parent will search children of the ColumnDefinition node
+                            if let Some(expr_node) = self.find_next_node_in_parent(node.clone(), SqlElementType::Expression, t.span.end) {
+                                println!("DEBUG: Found Default expression node");
                                 constraints.push(ColumnConstraint::Default(self.build_expression(expr_node, source)?));
                             }
                         }
                         SqlTokenType::Check => {
-                            if let Some(expr_node) = self.find_next_node(node.clone(), SqlElementType::Expression, t.span.end) {
+                            parsing_data_type = false;
+                            // The expression follows Check token in column definition
+                            if let Some(expr_node) = self.find_next_node_in_parent(node.clone(), SqlElementType::Expression, t.span.end) {
+                                println!("DEBUG: Found Check expression node");
                                 constraints.push(ColumnConstraint::Check(self.build_expression(expr_node, source)?));
                             }
                         }
-                        SqlTokenType::NumberLiteral => {
-                            data_type.push_str(self.get_text(t.span.clone(), source).trim());
-                        }
-                        SqlTokenType::LeftParen => data_type.push('('),
-                        SqlTokenType::RightParen => data_type.push(')'),
-                        SqlTokenType::Comma => data_type.push(','),
-                        _ if t.kind.role() == oak_core::UniversalTokenRole::Keyword => {
-                            let keyword = self.get_text(t.span.clone(), source).to_uppercase();
-                            if !matches!(keyword.as_str(), "PRIMARY" | "KEY" | "NOT" | "NULL" | "UNIQUE" | "AUTOINCREMENT" | "AUTO_INCREMENT" | "DEFAULT" | "CHECK" | "IF" | "EXISTS") {
-                                if !data_type.is_empty() && !data_type.ends_with('(') && !data_type.ends_with(',') {
-                                    data_type.push(' ');
+                        _ if parsing_data_type => {
+                            match t.kind {
+                                SqlTokenType::NumberLiteral => data_type.push_str(&text),
+                                SqlTokenType::LeftParen => data_type.push('('),
+                                SqlTokenType::RightParen => data_type.push(')'),
+                                SqlTokenType::Comma => data_type.push(','),
+                                _ if t.kind.role() == oak_core::UniversalTokenRole::Keyword || t.kind == SqlTokenType::Identifier_ => {
+                                    if !data_type.is_empty() && !data_type.ends_with('(') && !data_type.ends_with(',') {
+                                        data_type.push(' ');
+                                    }
+                                    data_type.push_str(&text);
                                 }
-                                data_type.push_str(&keyword);
+                                _ => {}
                             }
-                        }
-                        SqlTokenType::Identifier_ => {
-                            let text = self.get_text(t.span.clone(), source);
-                            if !data_type.is_empty() && !data_type.ends_with('(') && !data_type.ends_with(',') {
-                                data_type.push(' ');
-                            }
-                            data_type.push_str(&text);
                         }
                         _ => {}
                     }
@@ -416,15 +450,18 @@ impl<'config> SqlBuilder<'config> {
             }
         }
 
+        println!("DEBUG: Column data_type: {:?}, constraints count: {}", data_type, constraints.len());
+
         Ok(ColumnDefinition {
             name: name.ok_or_else(|| OakError::custom_error("Missing column name"))?,
-            data_type: data_type.trim().to_string(),
+            data_type: data_type.trim().to_uppercase(),
             constraints,
             span: node.span(),
         })
     }
 
-    fn find_next_node<'a>(&self, parent: RedNode<'a, SqlLanguage>, kind: SqlElementType, after_pos: usize) -> Option<RedNode<'a, SqlLanguage>> {
+    /// Helper to find the next node of a specific kind after a certain position
+    fn find_next_node_in_parent<'a>(&self, parent: RedNode<'a, SqlLanguage>, kind: SqlElementType, after_pos: usize) -> Option<RedNode<'a, SqlLanguage>> {
         for child in parent.children() {
             if let RedTree::Node(n) = child {
                 if n.green.kind == kind && n.span().start >= after_pos {
@@ -500,7 +537,7 @@ impl<'config> SqlBuilder<'config> {
             match child {
                 RedTree::Token(t) => {
                     match t.kind {
-                        SqlTokenType::NumberLiteral => {
+                        SqlTokenType::NumberLiteral | SqlTokenType::FloatLiteral => {
                             let expr = Expression::Literal(Literal::Number(self.get_text(t.span.clone(), source).trim().to_string(), t.span.clone()));
                             if left.is_none() {
                                 left = Some(expr);

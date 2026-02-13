@@ -1,5 +1,5 @@
 use oak_sql::{SqlBuilder, SqlLanguage};
-use oak_core::{Builder, BuilderCache};
+use oak_core::Builder;
 
 #[test]
 fn test_select_ast() {

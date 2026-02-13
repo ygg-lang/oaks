@@ -84,6 +84,7 @@ fn test_rbq_ast_namespace_annotations() {
 
     assert_eq!(root.items.len(), 1);
     if let oak_rbq::ast::RbqItem::Namespace(ns) = &root.items[0] {
+        let _ = &ns.annotations; // Force check
         assert_eq!(ns.annotations.len(), 1);
         assert_eq!(ns.annotations[0].name, "meta");
         
