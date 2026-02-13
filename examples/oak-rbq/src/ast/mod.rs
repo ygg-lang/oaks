@@ -857,7 +857,13 @@ impl RbqExpr {
                     match leaf.kind() {
                         RbqTokenType::StringLiteral => {
                             // Strip quotes
-                            let s = if text.starts_with('"') && text.ends_with('"') { text[1..text.len() - 1].to_string() } else { text };
+                            let s = if text.starts_with('"') && text.ends_with('"') {
+                                text[1..text.len() - 1].to_string()
+                            } else if text.starts_with('\'') && text.ends_with('\'') {
+                                text[1..text.len() - 1].to_string()
+                            } else {
+                                text
+                            };
                             RbqExprKind::Literal(RbqLiteral::String(s))
                         }
                         RbqTokenType::NumberLiteral => RbqExprKind::Literal(RbqLiteral::Number(text)),
