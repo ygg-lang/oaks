@@ -331,7 +331,7 @@ impl RbqEnum {
                     _ => {}
                 },
                 RedTree::Leaf(leaf) if leaf.kind() == RbqTokenType::Ident && name.is_empty() => name = source[leaf.span()].trim().to_string(),
-                RedTree::Leaf(_) | RedTree::Token(_) => {}
+                RedTree::Leaf(_) => {}
             }
         }
 
@@ -906,7 +906,7 @@ impl RbqExpr {
                             RbqElementType::ClosureArgs => {
                                 for arg in node.children() {
                                     match arg {
-                                        RedTree::Leaf(leaf) | RedTree::Token(leaf) => {
+                                        RedTree::Leaf(leaf) => {
                                             if leaf.kind() == RbqTokenType::Ident {
                                                 args.push(source[leaf.span()].trim().to_string())
                                             }
@@ -952,7 +952,7 @@ impl RbqPipelineStep {
         for child in red.children() {
             match child {
                 RedTree::Node(node) => args.push(RbqExpr::lower(node, source)),
-                RedTree::Leaf(leaf) | RedTree::Token(leaf) if leaf.kind() == RbqTokenType::Ident && name.is_empty() => name = source[leaf.span()].trim().to_string(),
+                RedTree::Leaf(leaf) if leaf.kind() == RbqTokenType::Ident && name.is_empty() => name = source[leaf.span()].trim().to_string(),
                 _ => {}
             }
         }

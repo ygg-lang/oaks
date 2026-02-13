@@ -20,7 +20,7 @@ pub trait Visitor<'a, L: Language> {
         for child in node.children() {
             match child {
                 RedTree::Node(n) => self.visit_node(n),
-                RedTree::Leaf(t) => self.visit_token(t),
+                RedTree::Token(t) => self.visit_token(t),
             }
         }
     }
@@ -54,7 +54,7 @@ impl<'a, L: Language> Iterator for PreOrder<'a, L> {
                 offset -= child.len() as usize;
                 match child {
                     crate::GreenTree::Node(n) => self.stack.push(RedTree::Node(RedNode::new(n, offset))),
-                    crate::GreenTree::Leaf(t) => self.stack.push(RedTree::Leaf(RedLeaf { kind: t.kind, span: core::range::Range { start: offset, end: offset + t.length as usize } })),
+                    crate::GreenTree::Leaf(t) => self.stack.push(RedTree::Token(RedLeaf { kind: t.kind, span: core::range::Range { start: offset, end: offset + t.length as usize } })),
                 }
             }
         }
