@@ -597,16 +597,35 @@ impl<'config> SqlBuilder<'config> {
         let mut name = None;
         for child in node.children() {
             match child {
-                RedTree::Node(n) if n.green.kind == SqlElementType::Identifier => {
-                    name = Some(self.build_identifier(n, source)?);
-                }
                 RedTree::Leaf(t) if t.kind == SqlTokenType::Identifier_ => {
                     name = Some(Identifier { name: self.get_text(t.span.clone(), source), span: t.span.clone() });
+                }
+                RedTree::Node(n) if n.green.kind == SqlElementType::Identifier => {
+                    name = Some(self.build_identifier(n, source)?);
                 }
                 _ => {}
             }
         }
         Ok(TableName { name: name.ok_or_else(|| OakError::custom_error("Missing table name"))?, span: node.span() })
+    }
+
+    fn build_column_name<'a>(&self, node: RedNode<'a, SqlLanguage>, source: &SourceText) -> Result<ColumnName, OakError> {
+        let mut name = None;
+        for child in node.children() {
+            match child {
+                RedTree::Leaf(t) => match t.kind {
+                    SqlTokenType::Identifier_ => {
+                        name = Some(Identifier { name: self.get_text(t.span.clone(), source), span: t.span.clone() });
+                    }
+                    _ => {}
+                },
+                RedTree::Node(n) if n.green.kind == SqlElementType::Identifier => {
+                    name = Some(self.build_identifier(n, source)?);
+                }
+                _ => {}
+            }
+        }
+        Ok(ColumnName { name: name.ok_or_else(|| OakError::custom_error("Missing column name"))?, span: node.span() })
     }
 
     fn build_identifier<'a>(&self, node: RedNode<'a, SqlLanguage>, source: &SourceText) -> Result<Identifier, OakError> {

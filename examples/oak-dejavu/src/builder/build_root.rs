@@ -20,7 +20,7 @@ impl<'config> DejavuParser<'config> {
                         return Err(err);
                     }
                 },
-                RedTree::Token(t) => match t.kind {
+                RedTree::Leaf(t) => match t.kind {
                     DejavuSyntaxKind::Whitespace | DejavuSyntaxKind::Newline | DejavuSyntaxKind::LineComment | DejavuSyntaxKind::BlockComment => continue,
                     DejavuSyntaxKind::Eof => continue,
                     _ => {

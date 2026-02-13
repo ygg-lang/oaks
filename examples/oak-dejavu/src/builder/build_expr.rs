@@ -14,7 +14,7 @@ impl<'config> DejavuParser<'config> {
                 let mut ident: Option<Identifier> = None;
                 for child in node.children() {
                     match child {
-                        RedTree::Token(t) => match t.kind {
+                        RedTree::Leaf(t) => match t.kind {
                             DejavuSyntaxKind::Whitespace | DejavuSyntaxKind::Newline | DejavuSyntaxKind::LineComment | DejavuSyntaxKind::BlockComment => continue,
                             DejavuSyntaxKind::Identifier => {
                                 let t_text = text(source, t.span.clone().into());
@@ -41,7 +41,7 @@ impl<'config> DejavuParser<'config> {
                 else {
                     for child in node.children() {
                         match child {
-                            RedTree::Token(t) => match t.kind {
+                            RedTree::Leaf(t) => match t.kind {
                                 DejavuSyntaxKind::Whitespace | DejavuSyntaxKind::Newline | DejavuSyntaxKind::LineComment | DejavuSyntaxKind::BlockComment => continue,
                                 _ => {}
                             },

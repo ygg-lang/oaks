@@ -291,7 +291,7 @@ impl<'a, L: Language> RedNode<'a, L> {
 
         match green_child {
             GreenTree::Node(n) => RedTree::Node(RedNode::new(n, offset)),
-            GreenTree::Leaf(t) => RedTree::Token(RedLeaf { kind: t.kind, span: Range { start: offset, end: offset + t.length as usize } }),
+            GreenTree::Leaf(t) => RedTree::Leaf(RedLeaf { kind: t.kind, span: Range { start: offset, end: offset + t.length as usize } }),
         }
     }
 
@@ -345,9 +345,20 @@ impl<'a, L: Language> RedNode<'a, L> {
         loop {
             match current.child_at_offset(offset)? {
                 RedTree::Node(n) => current = n,
-                RedTree::Token(l) => return Some(l),
+                RedTree::Leaf(l) => return Some(l),
             }
         }
+    }
+
+    /// Returns the first child token if any.
+    pub fn first_token(&self) -> Option<RedLeaf<L>> {
+        for child in self.children() {
+            match child {
+                RedTree::Node(_) => continue,
+                RedTree::Leaf(l) => return Some(l),
+            }
+        }
+        None
     }
 }
 

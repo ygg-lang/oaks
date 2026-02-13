@@ -807,7 +807,7 @@ impl RbqExpr {
                         right = Some(Box::new(RbqExpr::lower(node, source)))
                     }
                 }
-                RedTree::Leaf(leaf) => {
+                RedTree::Token(leaf) => {
                     let k = leaf.kind();
                     if k == RbqTokenType::Plus
                         || k == RbqTokenType::Minus
