@@ -153,6 +153,7 @@ pub enum SqlTokenType {
     ColumnDefinition,
     ValueList,
     Assignment,
+    AlterAction,
     ErrorNode,
 
     // 空白字符和换
@@ -236,6 +237,9 @@ pub enum SqlTokenType {
     True,
     False,
     Exists,
+    Trigger,
+    After,
+    Delimiter,
     Check,
     Rename,
     To,
@@ -331,6 +335,7 @@ impl From<crate::parser::element_type::SqlElementType> for SqlTokenType {
             crate::parser::element_type::SqlElementType::ColumnDefinition => Self::ColumnDefinition,
             crate::parser::element_type::SqlElementType::ValueList => Self::ValueList,
             crate::parser::element_type::SqlElementType::Assignment => Self::Assignment,
+            crate::parser::element_type::SqlElementType::AlterAction => Self::AlterAction,
         }
     }
 }

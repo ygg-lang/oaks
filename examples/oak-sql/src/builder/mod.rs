@@ -347,17 +347,13 @@ impl<'config> SqlBuilder<'config> {
         // Use a flag to track if we are currently parsing the data type
         let mut parsing_data_type = false;
 
-        println!("DEBUG: Building column definition for node span: {:?}", node.span());
-
         for child in node.children() {
             match child {
                 RedTree::Node(n) => {
-                    println!("DEBUG: Found Node: {:?} span: {:?}", n.green.kind, n.span());
                     match n.green.kind {
                         SqlElementType::ColumnName | SqlElementType::Identifier => {
                             if name.is_none() {
                                 name = Some(self.build_identifier(n, source)?);
-                                println!("DEBUG: Column Name: {:?}", name);
                                 parsing_data_type = true;
                             } else if parsing_data_type {
                                 if !data_type.is_empty() {
@@ -371,11 +367,9 @@ impl<'config> SqlBuilder<'config> {
                 }
                 RedTree::Token(t) => {
                     let text = self.get_text(t.span.clone(), source).to_uppercase();
-                    println!("DEBUG: Found Token: {:?} text: {:?} span: {:?}", t.kind, text, t.span);
 
                     match t.kind {
                         SqlTokenType::Primary => {
-                            println!("DEBUG: Adding PrimaryKey constraint");
                             constraints.push(ColumnConstraint::PrimaryKey);
                             parsing_data_type = false;
                         }
@@ -384,7 +378,6 @@ impl<'config> SqlBuilder<'config> {
                             parsing_data_type = false;
                         }
                         SqlTokenType::Not => {
-                            println!("DEBUG: Adding NotNull constraint");
                             constraints.push(ColumnConstraint::NotNull);
                             parsing_data_type = false;
                         }
@@ -396,28 +389,22 @@ impl<'config> SqlBuilder<'config> {
                             }
                             
                             if !is_not_null {
-                                println!("DEBUG: Adding Nullable constraint");
                                 constraints.push(ColumnConstraint::Nullable);
                             }
                             parsing_data_type = false;
                         }
                         SqlTokenType::Unique => {
-                            println!("DEBUG: Adding Unique constraint");
                             constraints.push(ColumnConstraint::Unique);
                             parsing_data_type = false;
                         }
                         SqlTokenType::AutoIncrement => {
-                            println!("DEBUG: Adding AutoIncrement constraint");
                             constraints.push(ColumnConstraint::AutoIncrement);
                             parsing_data_type = false;
                         }
                         SqlTokenType::Default => {
                             parsing_data_type = false;
                             // The expression follows Default token in column definition
-                            // In RedNode, we can iterate over siblings or children
-                            // find_next_node_in_parent will search children of the ColumnDefinition node
                             if let Some(expr_node) = self.find_next_node_in_parent(node.clone(), SqlElementType::Expression, t.span.end) {
-                                println!("DEBUG: Found Default expression node");
                                 constraints.push(ColumnConstraint::Default(self.build_expression(expr_node, source)?));
                             }
                         }
@@ -425,13 +412,12 @@ impl<'config> SqlBuilder<'config> {
                             parsing_data_type = false;
                             // The expression follows Check token in column definition
                             if let Some(expr_node) = self.find_next_node_in_parent(node.clone(), SqlElementType::Expression, t.span.end) {
-                                println!("DEBUG: Found Check expression node");
                                 constraints.push(ColumnConstraint::Check(self.build_expression(expr_node, source)?));
                             }
                         }
                         _ if parsing_data_type => {
                             match t.kind {
-                                SqlTokenType::NumberLiteral => data_type.push_str(&text),
+                                SqlTokenType::NumberLiteral | SqlTokenType::FloatLiteral => data_type.push_str(&text),
                                 SqlTokenType::LeftParen => data_type.push('('),
                                 SqlTokenType::RightParen => data_type.push(')'),
                                 SqlTokenType::Comma => data_type.push(','),
@@ -449,8 +435,6 @@ impl<'config> SqlBuilder<'config> {
                 }
             }
         }
-
-        println!("DEBUG: Column data_type: {:?}, constraints count: {}", data_type, constraints.len());
 
         Ok(ColumnDefinition {
             name: name.ok_or_else(|| OakError::custom_error("Missing column name"))?,
@@ -502,19 +486,64 @@ impl<'config> SqlBuilder<'config> {
 
     fn build_alter_statement<'a>(&self, node: RedNode<'a, SqlLanguage>, source: &SourceText) -> Result<AlterStatement, OakError> {
         let mut table_name = None;
+        let mut action = None;
 
         for child in node.children() {
             if let RedTree::Node(n) = child {
                 if n.green.kind == SqlElementType::TableName {
                     table_name = Some(self.build_table_name(n, source)?);
+                } else if n.green.kind == SqlElementType::AlterAction {
+                    action = Some(self.build_alter_action(n, source)?);
                 }
             }
         }
 
         Ok(AlterStatement {
             table_name: table_name.ok_or_else(|| OakError::custom_error("Missing table name in ALTER"))?,
+            action,
             span: node.span(),
         })
+    }
+
+    fn build_alter_action<'a>(&self, node: RedNode<'a, SqlLanguage>, source: &SourceText) -> Result<AlterAction, OakError> {
+        use crate::lexer::SqlTokenType::*;
+        let mut is_add = false;
+        let mut is_drop = false;
+        let mut is_rename = false;
+        let mut identifier = None;
+
+        for child in node.children() {
+            match child {
+                RedTree::Token(t) => match t.kind {
+                    Add => is_add = true,
+                    Drop => is_drop = true,
+                    Rename => is_rename = true,
+                    Identifier_ => identifier = Some(ast::Identifier { name: self.get_text(t.span.clone(), source), span: t.span.clone() }),
+                    _ => {}
+                },
+                RedTree::Node(n) if n.green.kind == SqlElementType::Identifier => {
+                    identifier = Some(self.build_identifier(n, source)?);
+                }
+                _ => {}
+            }
+        }
+
+        if is_add {
+            Ok(AlterAction::AddColumn {
+                name: identifier.ok_or_else(|| OakError::custom_error("Missing column name in ALTER TABLE ADD"))?,
+                data_type: None, // Simplified for now
+            })
+        } else if is_drop {
+            Ok(AlterAction::DropColumn {
+                name: identifier.ok_or_else(|| OakError::custom_error("Missing column name in ALTER TABLE DROP"))?,
+            })
+        } else if is_rename {
+            Ok(AlterAction::RenameTo {
+                new_name: identifier.ok_or_else(|| OakError::custom_error("Missing new name in ALTER TABLE RENAME"))?,
+            })
+        } else {
+            Err(OakError::custom_error("Unknown ALTER action"))
+        }
     }
 
     fn build_expression<'a>(&self, node: RedNode<'a, SqlLanguage>, source: &SourceText) -> Result<Expression, OakError> {
@@ -546,7 +575,17 @@ impl<'config> SqlBuilder<'config> {
                             }
                         }
                         SqlTokenType::StringLiteral => {
-                            let expr = Expression::Literal(Literal::String(self.get_text(t.span.clone(), source).trim().to_string(), t.span.clone()));
+                            let text = self.get_text(t.span.clone(), source).trim().to_string();
+                            let content = if (text.starts_with('\'') && text.ends_with('\'')) || (text.starts_with('"') && text.ends_with('"')) {
+                                if text.len() >= 2 {
+                                    &text[1..text.len() - 1]
+                                } else {
+                                    ""
+                                }
+                            } else {
+                                &text
+                            };
+                            let expr = Expression::Literal(Literal::String(content.to_string(), t.span.clone()));
                             if left.is_none() {
                                 left = Some(expr);
                             } else {

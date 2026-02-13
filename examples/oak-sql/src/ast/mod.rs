@@ -405,8 +405,24 @@ impl ToSource for DropObjectType {
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct AlterStatement {
     pub table_name: TableName,
+    pub action: Option<AlterAction>,
     #[cfg_attr(feature = "serde", serde(with = "oak_core::serde_range"))]
     pub span: Range<usize>,
+}
+
+#[derive(Debug, Clone)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+pub enum AlterAction {
+    AddColumn {
+        name: Identifier,
+        data_type: Option<String>,
+    },
+    DropColumn {
+        name: Identifier,
+    },
+    RenameTo {
+        new_name: Identifier,
+    },
 }
 
 impl ToSource for AlterStatement {
@@ -414,7 +430,28 @@ impl ToSource for AlterStatement {
         buffer.push("ALTER");
         buffer.push("TABLE");
         self.table_name.to_source(buffer);
-        // TODO: Add alter actions (add column, rename, etc.)
+        if let Some(action) = &self.action {
+            match action {
+                AlterAction::AddColumn { name, data_type } => {
+                    buffer.push("ADD");
+                    buffer.push("COLUMN");
+                    name.to_source(buffer);
+                    if let Some(dt) = data_type {
+                        buffer.push(dt);
+                    }
+                }
+                AlterAction::DropColumn { name } => {
+                    buffer.push("DROP");
+                    buffer.push("COLUMN");
+                    name.to_source(buffer);
+                }
+                AlterAction::RenameTo { new_name } => {
+                    buffer.push("RENAME");
+                    buffer.push("TO");
+                    new_name.to_source(buffer);
+                }
+            }
+        }
     }
 }
 

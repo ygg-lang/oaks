@@ -436,18 +436,19 @@ impl<'config> SqlParser<'config> {
             state.finish_at(table_cp, SqlElementType::TableName);
             
             // Simplified ALTER TABLE actions
-            if state.eat(Add) {
-                if state.eat(Column) {
+            if state.peek_kind() == Some(Add) || state.peek_kind() == Some(Drop) || state.peek_kind() == Some(Rename) {
+                let action_cp = state.checkpoint();
+                if state.eat(Add) {
+                    state.eat(Column);
                     state.expect(Identifier_).ok();
-                } else {
+                } else if state.eat(Drop) {
+                    state.eat(Column);
+                    state.expect(Identifier_).ok();
+                } else if state.eat(Rename) {
+                    state.eat(To);
                     state.expect(Identifier_).ok();
                 }
-            } else if state.eat(Drop) {
-                state.eat(Column);
-                state.expect(Identifier_).ok();
-            } else if state.eat(Rename) {
-                state.eat(To);
-                state.expect(Identifier_).ok();
+                state.finish_at(action_cp, SqlElementType::AlterAction);
             }
         }
 

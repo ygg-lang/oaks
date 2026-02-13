@@ -60,9 +60,7 @@ fn test_sql_builder_create_table() {
     let mut session = ParseSession::<SqlLanguage>::default();
     let result = builder.build(&source, &[], &mut session);
     
-    if let Err(e) = &result.result {
-        panic!("Build failed: {:?}", e);
-    }
+    assert!(result.result.is_ok());
     let root = result.result.unwrap();
     assert_eq!(root.statements.len(), 1);
     
@@ -90,9 +88,7 @@ fn test_sql_builder_complex_create() {
     let mut session = ParseSession::<SqlLanguage>::default();
     let result = builder.build(&source, &[], &mut session);
     
-    if let Err(e) = &result.result {
-        panic!("Build failed: {:?}", e);
-    }
+    assert!(result.result.is_ok());
     let root = result.result.unwrap();
     
     if let SqlStatement::Create(create) = &root.statements[0] {

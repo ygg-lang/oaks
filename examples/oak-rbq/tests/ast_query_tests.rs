@@ -14,7 +14,7 @@ fn test_rbq_ast_closure_simple() {
     let green = output.result.unwrap();
     let red = oak_core::tree::RedNode::new(green, 0);
     let root = RbqRoot::lower(red, source.text());
-
+    println!("Items: {:#?}", root.items);
     assert_eq!(root.items.len(), 1);
     if let RbqItem::Query(expr) = &root.items[0] {
         if let RbqExprKind::Closure { args, body } = &expr.kind {

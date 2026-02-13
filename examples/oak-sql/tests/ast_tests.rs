@@ -85,3 +85,22 @@ fn test_sql_create_to_source() {
     assert!(generated.contains("id INT PRIMARY KEY"));
     assert!(generated.contains("name TEXT"));
 }
+
+#[test]
+fn test_sql_alter_to_source() {
+    let config = SqlLanguage::default();
+    let builder = SqlBuilder::new(&config);
+    let input = "ALTER TABLE users ADD COLUMN age;";
+    let source = SourceText::new(input);
+
+    let mut session = ParseSession::<SqlLanguage>::default();
+    let result = builder.build(&source, &[], &mut session);
+    
+    assert!(result.result.is_ok());
+    let root = result.result.unwrap();
+    
+    let generated = root.to_source_string();
+    println!("Generated alter source: {}", generated);
+    assert!(generated.contains("ALTER TABLE users"));
+    assert!(generated.contains("ADD COLUMN age"));
+}

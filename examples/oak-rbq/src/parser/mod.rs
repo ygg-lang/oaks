@@ -451,12 +451,17 @@ impl<'config> RbqParser<'config> {
             if state.eat(RbqTokenType::LeftParen) {
                 while state.not_at_end() && !state.at(RbqTokenType::RightParen) {
                     let checkpoint = state.checkpoint();
-                    state.eat(RbqTokenType::Ident); // arg name
-                    self.skip_trivia(state);
-                    if state.eat(RbqTokenType::Colon) {
+                    state.incremental_node(RbqElementType::FieldDef, |state| {
+                        if !state.eat(RbqTokenType::Ident) { // arg name
+                            state.record_expected("argument name");
+                        }
                         self.skip_trivia(state);
-                        self.parse_type_ref(state)?;
-                    }
+                        if state.eat(RbqTokenType::Colon) {
+                            self.skip_trivia(state);
+                            self.parse_type_ref(state)?;
+                        }
+                        Ok(())
+                    })?;
                     self.skip_trivia(state);
                     if !state.at(RbqTokenType::RightParen) && !state.eat(RbqTokenType::Comma) {
                         if state.checkpoint() == checkpoint && state.not_at_end() {

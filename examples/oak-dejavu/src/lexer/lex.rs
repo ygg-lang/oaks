@@ -26,7 +26,7 @@ impl crate::lexer::DejavuLexer<'_> {
 
     fn run_template<S: Source + ?Sized>(&self, state: &mut State<'_, S>) -> Result<(), OakError> {
         let start = state.get_position();
-        let end = state.get_source().len();
+        let end = state.get_length();
         self.lex_interpolation(state, start, end, true);
         Ok(())
     }
@@ -224,8 +224,8 @@ impl crate::lexer::DejavuLexer<'_> {
                 let content_end = state.get_position();
 
                 if content_start < content_end {
-                    let mut sub_state = state.sub_state(content_start, content_end);
-                    let _ = self.run_programming(&mut sub_state);
+                    // let mut sub_state = state.sub_state(content_start, content_end);
+                    // let _ = self.run_programming(&mut sub_state);
                 }
 
                 if state.starts_with(&template.control_end) {

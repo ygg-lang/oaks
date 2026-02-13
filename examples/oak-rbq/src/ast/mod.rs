@@ -24,7 +24,8 @@ impl RbqRoot {
                 RedTree::Node(node) => match node.kind::<RbqTokenType>() {
                     RbqTokenType::Annotation => pending_annotations.push(RbqAnnotation::lower(node, source)),
                     RbqTokenType::NamespaceDef => {
-                        let ns = RbqNamespace::lower(node, source, pending_annotations.drain(..).collect());
+                        let mut ns = RbqNamespace::lower(node, source);
+                        ns.annotations.extend(pending_annotations.drain(..));
                         items.push(RbqItem::Namespace(ns))
                     }
                     RbqTokenType::ImportDef => {
@@ -61,7 +62,45 @@ impl RbqRoot {
                         m.annotations.extend(pending_annotations.drain(..));
                         items.push(RbqItem::Micro(m))
                     }
-                    RbqTokenType::QueryPipeline | RbqTokenType::Closure | RbqTokenType::BinaryExpr | RbqTokenType::Expression => items.push(RbqItem::Query(RbqExpr::lower(node, source))),
+                    RbqTokenType::QueryPipeline | RbqTokenType::Closure | RbqTokenType::BinaryExpr | RbqTokenType::Expression => {
+                        let expr = RbqExpr::lower(node, source);
+                        items.push(RbqItem::Query(expr));
+                    }
+                    RbqTokenType::Ident => {
+                        // Check if it's a query assignment: query = ...
+                        let text = source[node.span()].trim();
+                        if text == "query" {
+                            // Find the next expression by iterating through root's children
+                            let mut next_expr = None;
+                            let mut found_query = false;
+                            let mut found_eq = false;
+                            for sibling in red.children() {
+                                if !found_query {
+                                    if let RedTree::Node(n) = &sibling {
+                                        if n.kind::<RbqTokenType>() == RbqTokenType::Ident && source[n.span()].trim() == "query" {
+                                            found_query = true;
+                                        }
+                                    }
+                                    continue;
+                                }
+                                
+                                match sibling {
+                                    RedTree::Token(leaf) if leaf.kind() == RbqTokenType::Eq => found_eq = true,
+                                    RedTree::Node(n) if found_eq => {
+                                        let k = n.kind::<RbqTokenType>();
+                                        if k == RbqTokenType::Expression || k == RbqTokenType::QueryPipeline || k == RbqTokenType::Closure || k == RbqTokenType::BinaryExpr {
+                                            next_expr = Some(RbqExpr::lower(n, source));
+                                            break;
+                                        }
+                                    }
+                                    _ => {}
+                                }
+                            }
+                            if let Some(expr) = next_expr {
+                                items.push(RbqItem::Query(expr));
+                            }
+                        }
+                    }
                     _ => {}
                 },
                 RedTree::Token(_) => {}
@@ -155,7 +194,25 @@ impl RbqNamespace {
 
         for child in red.children() {
             match child.kind::<RbqTokenType>() {
-                RbqTokenType::Ident if name.is_empty() => name = source[child.span()].trim().to_string(),
+                RbqTokenType::Ident => {
+                    if name.is_empty() {
+                        name = source[child.span()].trim().to_string();
+                    } else {
+                        name.push_str(source[child.span()].trim());
+                    }
+                }
+                RbqTokenType::Utf8Kw => {
+                    if name.is_empty() {
+                        name = source[child.span()].trim().to_string();
+                    } else {
+                        name.push_str(source[child.span()].trim());
+                    }
+                }
+                RbqTokenType::Dot => {
+                    if !name.is_empty() {
+                        name.push('.');
+                    }
+                }
                 RbqTokenType::Annotation => {
                     if let Some(node) = child.as_node() {
                         let ann = RbqAnnotation::lower(node, source);
@@ -584,7 +641,7 @@ impl RbqType {
                             if let Some(arg_node) = arg_child.as_node() {
                                 generic_args.push(RbqType::lower(arg_node, source));
                             }
-                            else if arg_child.kind::<RbqTokenType>() == RbqTokenType::Literal {
+                            else if arg_child.kind::<RbqTokenType>() == RbqTokenType::NumberLiteral || arg_child.kind::<RbqTokenType>() == RbqTokenType::StringLiteral {
                                 generic_args.push(RbqType::Literal(source[arg_child.span()].trim().to_string()));
                             }
                         }
@@ -655,8 +712,9 @@ impl RbqAnnotation {
 pub struct RbqMicro {
     pub annotations: Vec<RbqAnnotation>,
     pub name: String,
-    pub args: Vec<(String, RbqType)>,
+    pub args: Vec<RbqField>,
     pub return_type: Option<RbqType>,
+    pub body: Option<Vec<RbqExpr>>,
     #[cfg_attr(feature = "serde", serde(with = "oak_core::serde_range"))]
     pub span: Range<usize>,
 }
@@ -668,9 +726,10 @@ impl RbqMicro {
         let mut name = String::new();
         let mut args = Vec::new();
         let mut return_type = None;
+        let mut body = None;
 
         for child in red.children() {
-            match child.kind() {
+            match child.kind::<RbqTokenType>() {
                 RbqTokenType::Annotation => {
                     if let Some(node) = child.as_node() {
                         annotations.push(RbqAnnotation::lower(node, source))
@@ -679,8 +738,7 @@ impl RbqMicro {
                 RbqTokenType::Ident if name.is_empty() => name = source[child.span()].trim().to_string(),
                 RbqTokenType::FieldDef => {
                     if let Some(node) = child.as_node() {
-                        let field = RbqField::lower(node, source);
-                        args.push((field.name, field.type_ref));
+                        args.push(RbqField::lower(node, source));
                     }
                 }
                 RbqTokenType::TypeRef => {
@@ -688,11 +746,22 @@ impl RbqMicro {
                         return_type = Some(RbqType::lower(node, source));
                     }
                 }
+                RbqTokenType::Block => {
+                    if let Some(node) = child.as_node() {
+                        let mut expressions = Vec::new();
+                        for block_child in node.children() {
+                            if let RedTree::Node(expr_node) = block_child {
+                                expressions.push(RbqExpr::lower(expr_node, source));
+                            }
+                        }
+                        body = Some(expressions);
+                    }
+                }
                 _ => {}
             }
         }
 
-        Self { annotations, name, args, return_type, span }
+        Self { annotations, name, args, return_type, body, span }
     }
 }
 
@@ -714,7 +783,7 @@ pub enum RbqExprKind {
     Call { callee: Box<RbqExpr>, args: Vec<RbqExpr> },
     Member { object: Box<RbqExpr>, property: String },
     Pipeline { base: Box<RbqExpr>, steps: Vec<RbqPipelineStep> },
-    Closure { args: Vec<String>, body: Box<RbqExpr> },
+    Closure { args: Vec<String>, body: Vec<RbqExpr> },
     Block(Vec<RbqExpr>),
     MagicVar(String), // $, $key, $group
 }
@@ -744,7 +813,15 @@ impl RbqExpr {
                 let text = source[span.clone()].trim().to_string();
                 if let Some(leaf) = red.children().find_map(|c| c.as_token()) {
                     match leaf.kind() {
-                        RbqTokenType::StringLiteral => RbqExprKind::Literal(RbqLiteral::String(text)),
+                        RbqTokenType::StringLiteral => {
+                            // Strip quotes
+                            let s = if text.starts_with('"') && text.ends_with('"') {
+                                text[1..text.len()-1].to_string()
+                            } else {
+                                text
+                            };
+                            RbqExprKind::Literal(RbqLiteral::String(s))
+                        }
                         RbqTokenType::NumberLiteral => RbqExprKind::Literal(RbqLiteral::Number(text)),
                         RbqTokenType::TrueKw => RbqExprKind::Literal(RbqLiteral::Boolean(true)),
                         RbqTokenType::FalseKw => RbqExprKind::Literal(RbqLiteral::Boolean(false)),
@@ -856,7 +933,7 @@ impl RbqExpr {
             }
             RbqTokenType::Closure => {
                 let mut args = Vec::new();
-                let mut body = None;
+                let mut body = Vec::new();
                 for child in red.children() {
                     match child {
                         RedTree::Node(node) => match node.kind::<RbqTokenType>() {
@@ -870,16 +947,13 @@ impl RbqExpr {
                                 }
                             }
                             _ => {
-                                // For closures, we might have multiple expressions.
-                                // If we already have a body, we might want to wrap it in a Block
-                                // or just take the last one.
-                                body = Some(Box::new(RbqExpr::lower(node, source)));
+                                body.push(RbqExpr::lower(node, source));
                             }
                         },
                         _ => {}
                     }
                 }
-                if let Some(body) = body { RbqExprKind::Closure { args, body } } else { RbqExprKind::Identifier(source[span.clone()].to_string()) }
+                RbqExprKind::Closure { args, body }
             }
             RbqTokenType::Block => {
                 let mut expressions = Vec::new();

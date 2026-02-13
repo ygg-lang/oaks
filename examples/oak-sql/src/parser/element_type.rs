@@ -28,6 +28,7 @@ pub enum SqlElementType {
     ColumnDefinition,
     ValueList,
     Assignment,
+    AlterAction,
 }
 
 impl ElementType for SqlElementType {
@@ -41,7 +42,7 @@ impl ElementType for SqlElementType {
             Self::Expression => Expression,
             Self::ErrorNode => Error,
             Self::SelectStatement | Self::InsertStatement | Self::UpdateStatement | Self::DeleteStatement | Self::CreateStatement | Self::DropStatement | Self::AlterStatement => Statement,
-            Self::JoinClause | Self::GroupByClause | Self::HavingClause | Self::OrderByClause | Self::LimitClause | Self::SelectItem | Self::ColumnDefinition | Self::ValueList | Self::Assignment => Statement,
+            Self::JoinClause | Self::GroupByClause | Self::HavingClause | Self::OrderByClause | Self::LimitClause | Self::SelectItem | Self::ColumnDefinition | Self::ValueList | Self::Assignment | Self::AlterAction => Statement,
         }
     }
 }

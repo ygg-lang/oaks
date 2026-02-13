@@ -59,7 +59,7 @@ impl<'config> DejavuParser<'config> {
                 let span = node.span();
                 for child in node.children() {
                     match child {
-                        RedTree::Leaf(t) => match t.kind {
+                        RedTree::Token(t) => match t.kind {
                             DejavuSyntaxKind::Whitespace | DejavuSyntaxKind::Newline | DejavuSyntaxKind::LineComment | DejavuSyntaxKind::BlockComment => continue,
                             DejavuSyntaxKind::Keyword(crate::lexer::DejavuKeywords::True) => return Ok(Expr::Bool { value: true, span }),
                             DejavuSyntaxKind::Keyword(crate::lexer::DejavuKeywords::False) => return Ok(Expr::Bool { value: false, span }),
@@ -74,7 +74,7 @@ impl<'config> DejavuParser<'config> {
                 let span = node.span();
                 for child in node.children() {
                     match child {
-                        RedTree::Leaf(t) => match t.kind {
+                        RedTree::Token(t) => match t.kind {
                             DejavuSyntaxKind::Whitespace | DejavuSyntaxKind::Newline | DejavuSyntaxKind::LineComment | DejavuSyntaxKind::BlockComment => continue,
                             _ => return Ok(Expr::Bool { value: t.kind == DejavuSyntaxKind::Keyword(crate::lexer::DejavuKeywords::True), span }),
                         },
@@ -87,7 +87,7 @@ impl<'config> DejavuParser<'config> {
                 let span = node.span();
                 for child in node.children() {
                     match child {
-                        RedTree::Leaf(t) => match t.kind {
+                        RedTree::Token(t) => match t.kind {
                             DejavuSyntaxKind::Whitespace | DejavuSyntaxKind::Newline | DejavuSyntaxKind::LineComment | DejavuSyntaxKind::BlockComment | DejavuSyntaxKind::LeftParen | DejavuSyntaxKind::RightParen => continue,
                             _ => {}
                         },
