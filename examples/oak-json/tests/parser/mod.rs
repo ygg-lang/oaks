@@ -21,7 +21,7 @@ fn run_compliance_tests() -> Result<(), oak_core::OakError> {
 }
 
 fn fingerprint(node: &GreenNode<JsonLanguage>, out: &mut Vec<(JsonSyntaxKind, usize, usize)>) {
-    out.push((node.kind, node.text_len as usize, node.children.len()));
+    out.push((node.kind, node.byte_length as usize, node.children.len()));
     for child in node.children {
         match child {
             GreenTree::Node(n) => fingerprint(n, out),

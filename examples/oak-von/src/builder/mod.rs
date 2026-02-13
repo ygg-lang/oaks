@@ -58,7 +58,7 @@ impl<'config> VonBuilder<'config> {
     }
 
     fn build_value<'a>(&self, node: &GreenNode<'a, VonLanguage>, offset: usize, source: &SourceText) -> Result<VonValue, OakError> {
-        let span: oak_core::Range<usize> = (offset..offset + node.text_len as usize).into();
+        let span: oak_core::Range<usize> = (offset..offset + node.byte_length as usize).into();
 
         match node.kind {
             VonElementType::Object => {
@@ -70,7 +70,7 @@ impl<'config> VonBuilder<'config> {
                             if n.kind == VonElementType::ObjectEntry {
                                 fields.push(self.build_field(n, current_offset, source)?);
                             }
-                            current_offset += n.text_len as usize;
+                            current_offset += n.byte_length as usize;
                         }
                         oak_core::GreenTree::Leaf(l) => {
                             current_offset += l.length as usize;
@@ -88,7 +88,7 @@ impl<'config> VonBuilder<'config> {
                             if n.kind == VonElementType::ArrayElement {
                                 elements.push(self.build_value(n, current_offset, source)?);
                             }
-                            current_offset += n.text_len as usize;
+                            current_offset += n.byte_length as usize;
                         }
                         oak_core::GreenTree::Leaf(l) => {
                             current_offset += l.length as usize;
@@ -105,7 +105,7 @@ impl<'config> VonBuilder<'config> {
                     match child {
                         oak_core::GreenTree::Node(n) => {
                             payload = Some(Box::new(self.build_value(n, current_offset, source)?));
-                            current_offset += n.text_len as usize;
+                            current_offset += n.byte_length as usize;
                         }
                         oak_core::GreenTree::Leaf(l) => {
                             if l.kind == VonTokenType::Identifier {
@@ -189,7 +189,7 @@ impl<'config> VonBuilder<'config> {
     }
 
     fn build_field<'a>(&self, node: &GreenNode<'a, VonLanguage>, offset: usize, source: &SourceText) -> Result<VonField, OakError> {
-        let span: oak_core::Range<usize> = (offset..offset + node.text_len as usize).into();
+        let span: oak_core::Range<usize> = (offset..offset + node.byte_length as usize).into();
 
         let mut name = None;
         let mut value = None;
@@ -201,7 +201,7 @@ impl<'config> VonBuilder<'config> {
                     if n.kind == VonElementType::Value || n.kind == VonElementType::Object || n.kind == VonElementType::Array || n.kind == VonElementType::Enum {
                         value = Some(self.build_value(n, current_offset, source)?);
                     }
-                    current_offset += n.text_len as usize
+                    current_offset += n.byte_length as usize
                 }
                 oak_core::GreenTree::Leaf(l) => {
                     if l.kind == VonTokenType::Identifier || l.kind == VonTokenType::StringLiteral {

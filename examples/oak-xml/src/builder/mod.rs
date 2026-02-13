@@ -33,7 +33,7 @@ impl XmlBuilder {
                         }
                         _ => {}
                     }
-                    current_offset += node.text_len as usize;
+                    current_offset += node.byte_length as usize;
                 }
                 GreenTree::Leaf(leaf) => {
                     current_offset += leaf.length as usize;
@@ -76,7 +76,7 @@ impl XmlBuilder {
                         }
                         _ => {}
                     }
-                    current_offset += n.text_len as usize;
+                    current_offset += n.byte_length as usize;
                 }
                 GreenTree::Leaf(t) => {
                     match t.kind {
@@ -93,7 +93,7 @@ impl XmlBuilder {
             }
         }
 
-        Ok(XmlElement { name, attributes, children, span: Range { start: offset, end: offset + node.text_len as usize } })
+        Ok(XmlElement { name, attributes, children, span: Range { start: offset, end: offset + node.byte_length as usize } })
     }
 
     fn build_attribute<'a>(&self, node: &GreenNode<'a, XmlLanguage>, offset: usize, source: &SourceText) -> Result<XmlAttribute, OakError> {
@@ -123,12 +123,12 @@ impl XmlBuilder {
                     current_offset += t.length as usize;
                 }
                 GreenTree::Node(n) => {
-                    current_offset += n.text_len as usize;
+                    current_offset += n.byte_length as usize;
                 }
             }
         }
 
-        Ok(XmlAttribute { name, value, span: Range { start: offset, end: offset + node.text_len as usize } })
+        Ok(XmlAttribute { name, value, span: Range { start: offset, end: offset + node.byte_length as usize } })
     }
 }
 

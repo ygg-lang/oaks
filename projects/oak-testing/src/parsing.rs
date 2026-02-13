@@ -229,7 +229,7 @@ impl ParserTester {
             children.push(AstNodeData { kind: format!("Leaves({})", leaf_count), children: vec![], text_length: leaf_text_length, is_leaf: true });
         }
 
-        AstNodeData { kind: kind_str, children, text_length: root.text_len as usize, is_leaf: false }
+        AstNodeData { kind: kind_str, children, text_length: root.byte_length as usize, is_leaf: false }
     }
 
     fn count_nodes(node: &AstNodeData) -> usize {

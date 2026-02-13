@@ -58,7 +58,7 @@ impl<'config> JsonBuilder<'config> {
 
     fn build_value<'a>(&self, node: &GreenNode<'a, JsonLanguage>, offset: usize, source: &SourceText) -> Result<JsonValue, OakError> {
         use crate::parser::element_type::JsonElementType;
-        let span: oak_core::Range<usize> = (offset..offset + node.text_len as usize).into();
+        let span: oak_core::Range<usize> = (offset..offset + node.byte_length as usize).into();
 
         match node.kind {
             JsonElementType::Object => {
@@ -70,7 +70,7 @@ impl<'config> JsonBuilder<'config> {
                             if n.kind == JsonElementType::ObjectEntry {
                                 fields.push(self.build_field(n, current_offset, source)?);
                             }
-                            current_offset += n.text_len as usize;
+                            current_offset += n.byte_length as usize;
                         }
                         oak_core::GreenTree::Leaf(l) => {
                             current_offset += l.length as usize;
@@ -91,7 +91,7 @@ impl<'config> JsonBuilder<'config> {
                                 }
                                 _ => {}
                             }
-                            current_offset += n.text_len as usize;
+                            current_offset += n.byte_length as usize;
                         }
                         oak_core::GreenTree::Leaf(l) => {
                             current_offset += l.length as usize;
@@ -134,7 +134,7 @@ impl<'config> JsonBuilder<'config> {
 
     fn build_field<'a>(&self, node: &GreenNode<'a, JsonLanguage>, offset: usize, source: &SourceText) -> Result<crate::ast::JsonField, OakError> {
         use crate::{lexer::token_type::JsonTokenType, parser::element_type::JsonElementType};
-        let span: oak_core::Range<usize> = (offset..offset + node.text_len as usize).into();
+        let span: oak_core::Range<usize> = (offset..offset + node.byte_length as usize).into();
 
         let mut name = None;
         let mut value = None;
@@ -146,7 +146,7 @@ impl<'config> JsonBuilder<'config> {
                 oak_core::GreenTree::Node(n) => {
                     if !seen_colon {
                         if n.kind == JsonElementType::String {
-                            let s_span: oak_core::Range<usize> = (current_offset..current_offset + n.text_len as usize).into();
+                            let s_span: oak_core::Range<usize> = (current_offset..current_offset + n.byte_length as usize).into();
                             let text = source.get_text_in(s_span.clone());
                             let val = text.trim_matches('"').to_string();
                             name = Some(crate::ast::JsonString { value: val, span: s_span });
@@ -160,7 +160,7 @@ impl<'config> JsonBuilder<'config> {
                             _ => {}
                         }
                     }
-                    current_offset += n.text_len as usize;
+                    current_offset += n.byte_length as usize;
                 }
                 oak_core::GreenTree::Leaf(l) => {
                     match l.kind {

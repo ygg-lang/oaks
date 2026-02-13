@@ -92,7 +92,7 @@ impl<'config> KotlinBuilder<'config> {
                     }
                     inner_offset += child.len() as usize
                 }
-                Some(crate::ast::Declaration::Class { name, members, span: (start..start + node.text_len as usize).into() })
+                Some(crate::ast::Declaration::Class { name, members, span: (start..start + node.byte_length as usize).into() })
             }
             KotlinElementType::FunctionDeclaration => {
                 let mut name = "main".to_string();
@@ -135,7 +135,7 @@ impl<'config> KotlinBuilder<'config> {
                     }
                     inner_offset += child.len() as usize
                 }
-                Some(crate::ast::Declaration::Function { name, params, body, span: (start..start + node.text_len as usize).into() })
+                Some(crate::ast::Declaration::Function { name, params, body, span: (start..start + node.byte_length as usize).into() })
             }
             KotlinElementType::VariableDeclaration => {
                 let mut name = "v".to_string();
@@ -156,7 +156,7 @@ impl<'config> KotlinBuilder<'config> {
                     }
                     inner_offset += child.len() as usize
                 }
-                Some(crate::ast::Declaration::Variable { name, is_val, span: (start..start + node.text_len as usize).into() })
+                Some(crate::ast::Declaration::Variable { name, is_val, span: (start..start + node.byte_length as usize).into() })
             }
             _ => None,
         }
@@ -175,7 +175,7 @@ impl<'config> KotlinBuilder<'config> {
             }
             inner_offset += child.len() as usize
         }
-        Some(crate::ast::Parameter { name, type_name: None, span: (offset..offset + node.text_len as usize).into() })
+        Some(crate::ast::Parameter { name, type_name: None, span: (offset..offset + node.byte_length as usize).into() })
     }
 
     fn build_statement(&self, node: &oak_core::GreenNode<KotlinLanguage>, source: &SourceText, offset: usize) -> Option<crate::ast::Statement> {
@@ -189,7 +189,7 @@ impl<'config> KotlinBuilder<'config> {
                 for child in node.children() {
                     if let oak_core::GreenTree::Node(child_node) = child {
                         // Assuming the first node after 'return' is the expression
-                        expr = Some(source.get_text_in((inner_offset..inner_offset + child_node.text_len as usize).into()).to_string());
+                        expr = Some(source.get_text_in((inner_offset..inner_offset + child_node.byte_length as usize).into()).to_string());
                         break;
                     }
                     inner_offset += child.len() as usize
@@ -226,7 +226,7 @@ impl<'config> KotlinBuilder<'config> {
                 for child in node.children() {
                     match child {
                         oak_core::GreenTree::Node(child_node) => {
-                            let text = source.get_text_in((inner_offset..inner_offset + child_node.text_len as usize).into()).to_string();
+                            let text = source.get_text_in((inner_offset..inner_offset + child_node.byte_length as usize).into()).to_string();
                             if !found_assign { target = text } else { value = text }
                         }
                         oak_core::GreenTree::Leaf(leaf) => {

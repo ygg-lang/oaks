@@ -25,7 +25,7 @@ impl<'config> FortranBuilder<'config> {
             }
         }
 
-        FortranRoot { name: None, units, span: Range::from(0..green.text_len as usize) }
+        FortranRoot { name: None, units, span: Range::from(0..green.byte_length as usize) }
     }
 }
 

@@ -13,7 +13,7 @@ impl<'config> MermaidBuilder<'config> {
 
     pub fn build_root(&self, green_tree: &GreenNode<MermaidLanguage>, _source: &SourceText) -> Result<MermaidRoot, oak_core::OakError> {
         // 简化实现，实际逻辑需要根据 GreenTree 节点类型递归构建 AST
-        Ok(MermaidRoot { elements: Vec::new(), span: (0..green_tree.text_len as usize).into() })
+        Ok(MermaidRoot { elements: Vec::new(), span: (0..green_tree.byte_length as usize).into() })
     }
 }
 

@@ -20,12 +20,12 @@ impl<'config> RbqParser<'config> {
     pub(crate) fn parse_root<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> Result<(), OakError> {
         self.skip_trivia(state);
 
-        while state.not_at_end() {
+        while state.not_at_end() && !state.at(RbqTokenType::Eof) {
             let checkpoint = state.checkpoint();
             self.parse_top_level(state)?;
             self.skip_trivia(state);
 
-            if state.checkpoint() == checkpoint && state.not_at_end() {
+            if state.checkpoint() == checkpoint && state.not_at_end() && !state.at(RbqTokenType::Eof) {
                 state.bump()
             }
         }
@@ -68,6 +68,10 @@ impl<'config> RbqParser<'config> {
         }
         else if state.at(RbqTokenType::MicroKw) {
             self.parse_micro_function(state)
+        }
+        else if state.at(RbqTokenType::Semicolon) {
+            state.bump();
+            Ok(())
         }
         else {
             // Handle expressions or potential DSL pipelines
