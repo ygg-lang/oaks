@@ -144,12 +144,14 @@ impl RbqStruct {
 #[derive(Clone, Debug, PartialEq)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct RbqNamespace {
+    pub annotations: Vec<RbqAnnotation>,
     pub name: String,
     pub items: Vec<RbqItem>,
 }
 
 impl RbqNamespace {
     pub fn lower(red: RedNode<RbqLanguage>, source: &str) -> Self {
+        let mut annotations = Vec::new();
         let mut name = String::new();
         let mut items = Vec::new();
         let mut pending_annotations = Vec::new();
@@ -159,7 +161,12 @@ impl RbqNamespace {
                 RbqTokenType::Ident if name.is_empty() => name = source[child.span()].trim().to_string(),
                 RbqTokenType::Annotation => {
                     if let Some(node) = child.as_node() {
-                        pending_annotations.push(RbqAnnotation::lower(node, source))
+                        let ann = RbqAnnotation::lower(node, source);
+                        if name.is_empty() {
+                            annotations.push(ann);
+                        } else {
+                            pending_annotations.push(ann);
+                        }
                     }
                 }
                 RbqTokenType::StructDef | RbqTokenType::ClassDef => {
@@ -221,7 +228,7 @@ impl RbqNamespace {
             }
         }
 
-        Self { name, items }
+        Self { annotations, name, items }
     }
 }
 
@@ -351,7 +358,7 @@ impl RbqUnionMember {
         let mut value = None;
 
         for child in red.children() {
-            match child.kind() {
+            match child.kind::<RbqTokenType>() {
                 RbqTokenType::Annotation => {
                     if let Some(node) = child.as_node() {
                         annotations.push(RbqAnnotation::lower(node, source))
@@ -733,7 +740,7 @@ pub struct RbqPipelineStep {
 impl RbqExpr {
     pub fn lower(red: RedNode<RbqLanguage>, source: &str) -> Self {
         let span = red.span();
-        let kind = match red.kind() {
+        let kind = match red.kind::<RbqTokenType>() {
             RbqTokenType::Literal => {
                 let text = source[span.clone()].trim().to_string();
                 if let Some(leaf) = red.children().find_map(|c| c.as_token()) {
@@ -895,7 +902,7 @@ impl RbqPipelineStep {
         for child in red.children() {
             match child {
                 RedTree::Node(node) => args.push(RbqExpr::lower(node, source)),
-                RedTree::Token(leaf) if leaf.kind::<RbqTokenType>() == RbqTokenType::Ident && name.is_empty() => name = source[leaf.span()].to_string(),
+                RedTree::Token(leaf) if leaf.kind() == RbqTokenType::Ident && name.is_empty() => name = source[leaf.span()].trim().to_string(),
                 _ => {}
             }
         }

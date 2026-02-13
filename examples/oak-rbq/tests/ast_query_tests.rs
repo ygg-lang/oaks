@@ -9,7 +9,7 @@ fn test_rbq_ast_closure_simple() {
 
     let mut session = ParseSession::<RbqLanguage>::default();
     let output = parser.parse(&source, &[], &mut session);
-    assert!(output.result.is_ok(), "Parse failed: {:?}", output.errors);
+    assert!(output.result.is_ok(), "Parse failed: {:?}", output.diagnostics);
 
     let green = output.result.unwrap();
     let red = oak_core::tree::RedNode::new(green, 0);
@@ -38,7 +38,7 @@ fn test_rbq_ast_closure_with_args() {
 
     let mut session = ParseSession::<RbqLanguage>::default();
     let output = parser.parse(&source, &[], &mut session);
-    assert!(output.result.is_ok(), "Parse failed: {:?}", output.errors);
+    assert!(output.result.is_ok(), "Parse failed: {:?}", output.diagnostics);
 
     let green = output.result.unwrap();
     let red = oak_core::tree::RedNode::new(green, 0);
@@ -64,7 +64,7 @@ fn test_rbq_ast_query_pipeline() {
 
     let mut session = ParseSession::<RbqLanguage>::default();
     let output = parser.parse(&source, &[], &mut session);
-    assert!(output.result.is_ok(), "Parse failed: {:?}", output.errors);
+    assert!(output.result.is_ok(), "Parse failed: {:?}", output.diagnostics);
 
     let green = output.result.unwrap();
     let red = oak_core::tree::RedNode::new(green, 0);

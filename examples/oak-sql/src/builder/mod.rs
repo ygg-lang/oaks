@@ -343,76 +343,75 @@ impl<'config> SqlBuilder<'config> {
         let mut data_type = String::new();
         let mut constraints = Vec::new();
 
+        // Debug output for investigation
+        // println!("Building column definition for node: {:?}", node);
+
         for child in node.children() {
-            if let RedTree::Node(n) = child {
-                match n.green.kind {
-                    SqlElementType::ColumnName | SqlElementType::Identifier => {
-                        if name.is_none() {
-                            name = Some(self.build_identifier(n, source)?);
-                        } else {
-                            // This is likely the data type name if it's an identifier after the column name
-                            if !data_type.is_empty() {
-                                data_type.push(' ');
+            match child {
+                RedTree::Node(n) => {
+                    match n.green.kind {
+                        SqlElementType::ColumnName | SqlElementType::Identifier => {
+                            if name.is_none() {
+                                name = Some(self.build_identifier(n, source)?);
+                            } else {
+                                if !data_type.is_empty() {
+                                    data_type.push(' ');
+                                }
+                                data_type.push_str(&self.get_text(n.span(), source).trim());
                             }
-                            data_type.push_str(&self.get_text(n.span(), source).trim());
                         }
+                        _ => {}
                     }
-                    SqlElementType::Expression => {
-                        // Expression nodes are handled below by specific tokens (Default/Check)
-                    }
-                    _ => {}
                 }
-            } else if let RedTree::Token(t) = child {
-                match t.kind {
-                    SqlTokenType::Primary => {
-                        constraints.push(ColumnConstraint::PrimaryKey);
-                    }
-                    SqlTokenType::Not => {
-                        constraints.push(ColumnConstraint::NotNull);
-                    }
-                    SqlTokenType::Null => {
-                        // Only add Nullable if NOT wasn't just added
-                        if !matches!(constraints.last(), Some(ColumnConstraint::NotNull)) {
-                            constraints.push(ColumnConstraint::Nullable);
+                RedTree::Token(t) => {
+                    match t.kind {
+                        SqlTokenType::Primary => {
+                            constraints.push(ColumnConstraint::PrimaryKey);
                         }
-                    }
-                    SqlTokenType::Unique => constraints.push(ColumnConstraint::Unique),
-                    SqlTokenType::AutoIncrement => constraints.push(ColumnConstraint::AutoIncrement),
-                    SqlTokenType::Default => {
-                        if let Some(expr_node) = self.find_next_node(node.clone(), SqlElementType::Expression, t.span.end) {
-                            constraints.push(ColumnConstraint::Default(self.build_expression(expr_node, source)?));
+                        SqlTokenType::Not => {
+                            constraints.push(ColumnConstraint::NotNull);
                         }
-                    }
-                    SqlTokenType::Check => {
-                        if let Some(expr_node) = self.find_next_node(node.clone(), SqlElementType::Expression, t.span.end) {
-                            constraints.push(ColumnConstraint::Check(self.build_expression(expr_node, source)?));
+                        SqlTokenType::Null => {
+                            if !matches!(constraints.last(), Some(ColumnConstraint::NotNull)) {
+                                constraints.push(ColumnConstraint::Nullable);
+                            }
                         }
-                    }
-                    SqlTokenType::NumberLiteral => {
-                        // Part of data type precision e.g. VARCHAR(255)
-                        data_type.push_str(&self.get_text(t.span.clone(), source));
-                    }
-                    SqlTokenType::LeftParen => data_type.push('('),
-                    SqlTokenType::RightParen => data_type.push(')'),
-                    SqlTokenType::Comma => data_type.push(','),
-                    _ if t.kind.role() == oak_core::UniversalTokenRole::Keyword => {
-                        let keyword = self.get_text(t.span.clone(), source).to_uppercase();
-                        // Ignore constraint keywords that are handled specifically
-                        if !matches!(keyword.as_str(), "PRIMARY" | "KEY" | "NOT" | "NULL" | "UNIQUE" | "AUTOINCREMENT" | "DEFAULT" | "CHECK" | "IF" | "EXISTS") {
+                        SqlTokenType::Unique => constraints.push(ColumnConstraint::Unique),
+                        SqlTokenType::AutoIncrement => constraints.push(ColumnConstraint::AutoIncrement),
+                        SqlTokenType::Default => {
+                            if let Some(expr_node) = self.find_next_node(node.clone(), SqlElementType::Expression, t.span.end) {
+                                constraints.push(ColumnConstraint::Default(self.build_expression(expr_node, source)?));
+                            }
+                        }
+                        SqlTokenType::Check => {
+                            if let Some(expr_node) = self.find_next_node(node.clone(), SqlElementType::Expression, t.span.end) {
+                                constraints.push(ColumnConstraint::Check(self.build_expression(expr_node, source)?));
+                            }
+                        }
+                        SqlTokenType::NumberLiteral => {
+                            data_type.push_str(self.get_text(t.span.clone(), source).trim());
+                        }
+                        SqlTokenType::LeftParen => data_type.push('('),
+                        SqlTokenType::RightParen => data_type.push(')'),
+                        SqlTokenType::Comma => data_type.push(','),
+                        _ if t.kind.role() == oak_core::UniversalTokenRole::Keyword => {
+                            let keyword = self.get_text(t.span.clone(), source).to_uppercase();
+                            if !matches!(keyword.as_str(), "PRIMARY" | "KEY" | "NOT" | "NULL" | "UNIQUE" | "AUTOINCREMENT" | "AUTO_INCREMENT" | "DEFAULT" | "CHECK" | "IF" | "EXISTS") {
+                                if !data_type.is_empty() && !data_type.ends_with('(') && !data_type.ends_with(',') {
+                                    data_type.push(' ');
+                                }
+                                data_type.push_str(&keyword);
+                            }
+                        }
+                        SqlTokenType::Identifier_ => {
+                            let text = self.get_text(t.span.clone(), source);
                             if !data_type.is_empty() && !data_type.ends_with('(') && !data_type.ends_with(',') {
                                 data_type.push(' ');
                             }
-                            data_type.push_str(&keyword);
+                            data_type.push_str(&text);
                         }
+                        _ => {}
                     }
-                    SqlTokenType::Identifier_ => {
-                        let text = self.get_text(t.span.clone(), source);
-                        if !data_type.is_empty() && !data_type.ends_with('(') && !data_type.ends_with(',') {
-                            data_type.push(' ');
-                        }
-                        data_type.push_str(&text);
-                    }
-                    _ => {}
                 }
             }
         }

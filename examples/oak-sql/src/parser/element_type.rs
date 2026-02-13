@@ -48,6 +48,31 @@ impl ElementType for SqlElementType {
 
 impl From<crate::lexer::token_type::SqlTokenType> for SqlElementType {
     fn from(token: crate::lexer::token_type::SqlTokenType) -> Self {
-        unsafe { std::mem::transmute(token) }
+        match token {
+            crate::lexer::token_type::SqlTokenType::Root => Self::Root,
+            crate::lexer::token_type::SqlTokenType::SelectStatement => Self::SelectStatement,
+            crate::lexer::token_type::SqlTokenType::InsertStatement => Self::InsertStatement,
+            crate::lexer::token_type::SqlTokenType::UpdateStatement => Self::UpdateStatement,
+            crate::lexer::token_type::SqlTokenType::DeleteStatement => Self::DeleteStatement,
+            crate::lexer::token_type::SqlTokenType::CreateStatement => Self::CreateStatement,
+            crate::lexer::token_type::SqlTokenType::DropStatement => Self::DropStatement,
+            crate::lexer::token_type::SqlTokenType::AlterStatement => Self::AlterStatement,
+            crate::lexer::token_type::SqlTokenType::Expression => Self::Expression,
+            crate::lexer::token_type::SqlTokenType::Identifier => Self::Identifier,
+            crate::lexer::token_type::SqlTokenType::TableName => Self::TableName,
+            crate::lexer::token_type::SqlTokenType::ColumnName => Self::ColumnName,
+            crate::lexer::token_type::SqlTokenType::JoinClause => Self::JoinClause,
+            crate::lexer::token_type::SqlTokenType::GroupByClause => Self::GroupByClause,
+            crate::lexer::token_type::SqlTokenType::HavingClause => Self::HavingClause,
+            crate::lexer::token_type::SqlTokenType::OrderByClause => Self::OrderByClause,
+            crate::lexer::token_type::SqlTokenType::LimitClause => Self::LimitClause,
+            crate::lexer::token_type::SqlTokenType::SelectItem => Self::SelectItem,
+            crate::lexer::token_type::SqlTokenType::Alias => Self::Alias,
+            crate::lexer::token_type::SqlTokenType::ColumnDefinition => Self::ColumnDefinition,
+            crate::lexer::token_type::SqlTokenType::ValueList => Self::ValueList,
+            crate::lexer::token_type::SqlTokenType::Assignment => Self::Assignment,
+            crate::lexer::token_type::SqlTokenType::ErrorNode => Self::ErrorNode,
+            _ => Self::ErrorNode,
+        }
     }
 }
