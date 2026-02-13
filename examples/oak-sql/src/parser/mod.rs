@@ -115,7 +115,9 @@ impl<'config> SqlParser<'config> {
         }
 
         if state.eat(From) {
+            let table_cp = state.checkpoint();
             state.expect(Identifier_).ok(); // TableName
+            state.finish_at(table_cp, SqlElementType::TableName);
 
             // Parse JOIN clauses
             while let Some(kind) = state.peek_kind() {
@@ -199,7 +201,10 @@ impl<'config> SqlParser<'config> {
         let cp = state.checkpoint();
         state.expect(Insert).ok();
         state.eat(Into);
+        
+        let table_cp = state.checkpoint();
         state.expect(Identifier_).ok(); // TableName
+        state.finish_at(table_cp, SqlElementType::TableName);
 
         if state.eat(Values) {
             if state.eat(LeftParen) {
@@ -220,7 +225,10 @@ impl<'config> SqlParser<'config> {
         use crate::lexer::SqlTokenType::*;
         let cp = state.checkpoint();
         state.expect(Update).ok();
+        
+        let table_cp = state.checkpoint();
         state.expect(Identifier_).ok(); // TableName
+        state.finish_at(table_cp, SqlElementType::TableName);
 
         if state.eat(Set) {
             while state.not_at_end() && state.peek_kind() != Some(Where) && state.peek_kind() != Some(Semicolon) {
@@ -247,7 +255,10 @@ impl<'config> SqlParser<'config> {
         let cp = state.checkpoint();
         state.expect(Delete).ok();
         state.eat(From);
+        
+        let table_cp = state.checkpoint();
         state.expect(Identifier_).ok(); // TableName
+        state.finish_at(table_cp, SqlElementType::TableName);
 
         if state.eat(Where) {
             PrattParser::parse(state, 0, self);
@@ -264,7 +275,9 @@ impl<'config> SqlParser<'config> {
         state.expect(Create).ok();
         
         if state.eat(Table) {
+            let table_cp = state.checkpoint();
             state.expect(Identifier_).ok(); // TableName
+            state.finish_at(table_cp, SqlElementType::TableName);
             if state.eat(LeftParen) {
                 while state.not_at_end() && state.peek_kind() != Some(RightParen) {
                     state.expect(Identifier_).ok(); // Column Name
@@ -302,8 +315,16 @@ impl<'config> SqlParser<'config> {
     fn parse_drop<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> Result<(), OakError> {
         use crate::lexer::SqlTokenType::*;
         let cp = state.checkpoint();
-        state.bump(); // drop
-        state.advance_until(Semicolon);
+        state.expect(Drop).ok();
+        
+        if state.eat(Table) || state.eat(View) || state.eat(Index) {
+            state.eat(If);
+            state.eat(Exists);
+            let table_cp = state.checkpoint();
+            state.expect(Identifier_).ok(); // Object Name
+            state.finish_at(table_cp, SqlElementType::TableName);
+        }
+
         state.eat(Semicolon);
         state.finish_at(cp, SqlElementType::DropStatement);
         Ok(())

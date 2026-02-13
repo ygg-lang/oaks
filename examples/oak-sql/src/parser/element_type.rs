@@ -21,6 +21,7 @@ pub enum SqlElementType {
     HavingClause,
     OrderByClause,
     LimitClause,
+    TableName,
 }
 
 impl ElementType for SqlElementType {
@@ -34,7 +35,7 @@ impl ElementType for SqlElementType {
             Self::Expression => Expression,
             Self::ErrorNode => Error,
             Self::SelectStatement | Self::InsertStatement | Self::UpdateStatement | Self::DeleteStatement | Self::CreateStatement | Self::DropStatement | Self::AlterStatement => Statement,
-            Self::JoinClause | Self::GroupByClause | Self::HavingClause | Self::OrderByClause | Self::LimitClause => Statement,
+            Self::JoinClause | Self::GroupByClause | Self::HavingClause | Self::OrderByClause | Self::LimitClause | Self::TableName => Statement,
         }
     }
 }

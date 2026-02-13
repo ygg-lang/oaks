@@ -315,6 +315,7 @@ impl From<crate::parser::element_type::SqlElementType> for SqlTokenType {
             crate::parser::element_type::SqlElementType::HavingClause => Self::HavingClause,
             crate::parser::element_type::SqlElementType::OrderByClause => Self::OrderByClause,
             crate::parser::element_type::SqlElementType::LimitClause => Self::LimitClause,
+            crate::parser::element_type::SqlElementType::TableName => Self::TableName,
         }
     }
 }
