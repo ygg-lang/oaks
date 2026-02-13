@@ -109,7 +109,7 @@ impl<'config> SqlBuilder<'config> {
                         _ => {}
                     }
                 }
-                RedTree::Token(t) => {
+                RedTree::Leaf(t) => {
                     if t.kind == SqlTokenType::Where {
                         where_found = true;
                     }
@@ -137,7 +137,7 @@ impl<'config> SqlBuilder<'config> {
 
         for child in node.children() {
             match child {
-                RedTree::Token(t) => {
+                RedTree::Leaf(t) => {
                     match t.kind {
                         SqlTokenType::Star => is_star = true,
                         SqlTokenType::Identifier_ => {
@@ -200,7 +200,7 @@ impl<'config> SqlBuilder<'config> {
                                 RedTree::Node(sn) if sn.green.kind == SqlElementType::Identifier => {
                                     columns.push(self.build_identifier(sn, source)?);
                                 }
-                                RedTree::Token(st) if st.kind == SqlTokenType::Identifier_ => {
+                                RedTree::Leaf(st) if st.kind == SqlTokenType::Identifier_ => {
                                     columns.push(Identifier {
                                         name: self.get_text(st.span.clone(), source),
                                         span: st.span.clone(),
@@ -314,7 +314,7 @@ impl<'config> SqlBuilder<'config> {
 
         for child in node.children() {
             match child {
-                RedTree::Token(t) => match t.kind {
+                RedTree::Leaf(t) => match t.kind {
                     SqlTokenType::Table => object_type = CreateObjectType::Table,
                     SqlTokenType::View => object_type = CreateObjectType::View,
                     SqlTokenType::Index => object_type = CreateObjectType::Index,
@@ -366,7 +366,7 @@ impl<'config> SqlBuilder<'config> {
                         _ => {}
                     }
                 }
-                RedTree::Token(t) => {
+                RedTree::Leaf(t) => {
                     let text = self.get_text(t.span.clone(), source).to_uppercase();
 
                     match t.kind {
@@ -464,7 +464,7 @@ impl<'config> SqlBuilder<'config> {
 
         for child in node.children() {
             match child {
-                RedTree::Token(t) => match t.kind {
+                RedTree::Leaf(t) => match t.kind {
                     SqlTokenType::Table => object_type = DropObjectType::Table,
                     SqlTokenType::View => object_type = DropObjectType::View,
                     SqlTokenType::Index => object_type = DropObjectType::Index,
@@ -516,7 +516,7 @@ impl<'config> SqlBuilder<'config> {
 
         for child in node.children() {
             match child {
-                RedTree::Token(t) => match t.kind {
+                RedTree::Leaf(t) => match t.kind {
                     Add => is_add = true,
                     Drop => is_drop = true,
                     Rename => is_rename = true,
@@ -578,7 +578,7 @@ impl<'config> SqlBuilder<'config> {
 
         for child in children {
             match child {
-                RedTree::Token(t) => {
+                RedTree::Leaf(t) => {
                     match t.kind {
                         SqlTokenType::NumberLiteral | SqlTokenType::FloatLiteral => {
                             let expr = Expression::Literal(Literal::Number(self.get_text(t.span.clone(), source).trim().to_string(), t.span.clone()));
@@ -673,7 +673,7 @@ impl<'config> SqlBuilder<'config> {
                 RedTree::Node(n) if n.green.kind == SqlElementType::Identifier => {
                     name = Some(self.build_identifier(n, source)?);
                 }
-                RedTree::Token(t) if t.kind == SqlTokenType::Identifier_ => {
+                RedTree::Leaf(t) if t.kind == SqlTokenType::Identifier_ => {
                     name = Some(Identifier {
                         name: self.get_text(t.span.clone(), source),
                         span: t.span.clone(),
@@ -702,7 +702,7 @@ impl<'config> SqlBuilder<'config> {
 
         for child in node.children() {
             match child {
-                RedTree::Token(t) => match t.kind {
+                RedTree::Leaf(t) => match t.kind {
                     SqlTokenType::Inner => join_type = JoinType::Inner,
                     SqlTokenType::Left => join_type = JoinType::Left,
                     SqlTokenType::Right => join_type = JoinType::Right,
@@ -769,7 +769,7 @@ impl<'config> SqlBuilder<'config> {
                         current_expr = Some(self.build_expression(n, source)?);
                     }
                 }
-                RedTree::Token(t) => {
+                RedTree::Leaf(t) => {
                     match t.kind {
                         SqlTokenType::Asc => {
                             if let Some(expr) = current_expr.take() {
@@ -808,7 +808,7 @@ impl<'config> SqlBuilder<'config> {
         let mut offset = None;
 
         for child in node.children() {
-            if let RedTree::Token(t) = child {
+            if let RedTree::Leaf(t) = child {
                 if t.kind == SqlTokenType::NumberLiteral {
                     let expr = Expression::Literal(Literal::Number(self.get_text(t.span.clone(), source), t.span.clone()));
                     if limit.is_none() {

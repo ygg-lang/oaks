@@ -18,7 +18,7 @@ pub enum RedTree<'a, L: Language> {
     /// A red node with child elements.
     Node(RedNode<'a, L>),
     /// A red token.
-    Token(RedLeaf<L>),
+    Leaf(RedLeaf<L>),
 }
 
 // Manually implement Clone/Copy to avoid L: Copy bound
@@ -34,7 +34,7 @@ impl<'a, L: Language> fmt::Debug for RedTree<'a, L> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
             Self::Node(node) => fmt::Debug::fmt(node, f),
-            Self::Token(leaf) => fmt::Debug::fmt(leaf, f),
+            Self::Leaf(leaf) => fmt::Debug::fmt(leaf, f),
         }
     }
 }
@@ -43,7 +43,7 @@ impl<'a, L: Language> PartialEq for RedTree<'a, L> {
     fn eq(&self, other: &Self) -> bool {
         match (self, other) {
             (Self::Node(l0), Self::Node(r0)) => l0 == r0,
-            (Self::Token(l0), Self::Token(r0)) => l0 == r0,
+            (Self::Leaf(l0), Self::Leaf(r0)) => l0 == r0,
             _ => false,
         }
     }
@@ -59,7 +59,7 @@ impl<'a, L: Language> RedTree<'a, L> {
     pub fn span(&self) -> Range<usize> {
         match self {
             RedTree::Node(n) => n.span(),
-            RedTree::Token(t) => t.span,
+            RedTree::Leaf(t) => t.span,
         }
     }
 
@@ -74,7 +74,7 @@ impl<'a, L: Language> RedTree<'a, L> {
     {
         match self {
             RedTree::Node(n) => T::from(n.green.kind),
-            RedTree::Token(l) => T::from(l.kind),
+            RedTree::Leaf(l) => T::from(l.kind),
         }
     }
 
@@ -93,7 +93,7 @@ impl<'a, L: Language> RedTree<'a, L> {
     pub fn children(&self) -> RedChildren<'a, L> {
         match self {
             RedTree::Node(n) => n.children(),
-            RedTree::Token(_) => RedChildren::empty(),
+            RedTree::Leaf(_) => RedChildren::empty(),
         }
     }
 
@@ -101,7 +101,7 @@ impl<'a, L: Language> RedTree<'a, L> {
     pub fn as_node(&self) -> Option<RedNode<'a, L>> {
         match self {
             RedTree::Node(n) => Some(*n),
-            RedTree::Token(_) => None,
+            RedTree::Leaf(_) => None,
         }
     }
 
@@ -109,7 +109,7 @@ impl<'a, L: Language> RedTree<'a, L> {
     pub fn as_token(&self) -> Option<RedLeaf<L>> {
         match self {
             RedTree::Node(_) => None,
-            RedTree::Token(l) => Some(*l),
+            RedTree::Leaf(l) => Some(*l),
         }
     }
 
@@ -286,7 +286,7 @@ impl<'a, L: Language> RedNode<'a, L> {
 
         match green_child {
             GreenTree::Node(n) => RedTree::Node(RedNode::new(n, offset)),
-            GreenTree::Leaf(t) => RedTree::Token(RedLeaf { kind: t.kind, span: Range { start: offset, end: offset + t.length as usize } }),
+            GreenTree::Leaf(t) => RedTree::Leaf(RedLeaf { kind: t.kind, span: Range { start: offset, end: offset + t.length as usize } }),
         }
     }
 
@@ -340,7 +340,7 @@ impl<'a, L: Language> RedNode<'a, L> {
         loop {
             match current.child_at_offset(offset)? {
                 RedTree::Node(n) => current = n,
-                RedTree::Token(l) => return Some(l),
+                RedTree::Leaf(l) => return Some(l),
             }
         }
     }
@@ -360,7 +360,7 @@ impl<'a, L: Language> Iterator for RedChildren<'a, L> {
         let offset = self.offset;
         let elem = match ch {
             GreenTree::Node(n) => RedTree::Node(RedNode::new(n, offset)),
-            GreenTree::Leaf(t) => RedTree::Token(RedLeaf { kind: t.kind, span: Range { start: offset, end: offset + t.length as usize } }),
+            GreenTree::Leaf(t) => RedTree::Leaf(RedLeaf { kind: t.kind, span: Range { start: offset, end: offset + t.length as usize } }),
         };
 
         self.offset += ch.len() as usize;

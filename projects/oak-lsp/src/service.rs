@@ -170,7 +170,7 @@ pub trait LanguageService: Send + Sync {
             use oak_core::tree::RedTree;
             let node = match root.child_at_offset(range.start) {
                 Some(RedTree::Node(n)) => n,
-                Some(RedTree::Token(l)) => return vec![LocationRange { uri: uri.clone().into(), range: l.span }],
+                Some(RedTree::Leaf(l)) => return vec![LocationRange { uri: uri.clone().into(), range: l.span }],
                 None => root,
             };
 

@@ -275,7 +275,7 @@ impl<'a, 't, 'tree, L: Language> Visitor<'tree, L> for HighlightVisitor<'a, 't> 
         for child in node.children() {
             match child {
                 RedTree::Node(n) => <Self as Visitor<L>>::visit_node(self, n),
-                RedTree::Token(t) => <Self as Visitor<L>>::visit_token(self, t),
+                RedTree::Leaf(t) => <Self as Visitor<L>>::visit_token(self, t),
             }
         }
     }

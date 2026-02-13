@@ -125,7 +125,7 @@ impl<L: Language + 'static> Formatter<L>
             for child in n.children() {
                 match child {
                     RedTree::Node(child_node) => children_docs.push(self.format_node(&child_node, &new_context, source)?),
-                    RedTree::Token(child_token) => children_docs.push(self.format_token(&child_token, &new_context, source)?),
+                    RedTree::Leaf(child_token) => children_docs.push(self.format_token(&child_token, &new_context, source)?),
                 }
             }
             Ok(Document::Concat(children_docs))

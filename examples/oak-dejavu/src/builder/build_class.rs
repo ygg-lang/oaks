@@ -16,7 +16,7 @@ impl<'config> DejavuParser<'config> {
 
         for child in node.children() {
             match child {
-                RedTree::Token(t) => match t.kind {
+                RedTree::Leaf(t) => match t.kind {
                     DejavuSyntaxKind::Whitespace | DejavuSyntaxKind::Newline | DejavuSyntaxKind::LineComment | DejavuSyntaxKind::BlockComment => continue,
                     DejavuSyntaxKind::Identifier => {
                         let t_text = text(source, t.span.clone().into());

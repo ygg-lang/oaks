@@ -14,7 +14,7 @@ impl<'config> DejavuParser<'config> {
                 let mut ident: Option<Identifier> = None;
                 for child in node.children() {
                     match child {
-                        RedTree::Token(t) => match t.kind {
+                        RedTree::Leaf(t) => match t.kind {
                             DejavuSyntaxKind::Whitespace | DejavuSyntaxKind::Newline | DejavuSyntaxKind::LineComment | DejavuSyntaxKind::BlockComment => continue,
                             DejavuSyntaxKind::Identifier => {
                                 let t_text = text(source, t.span.clone().into());
@@ -41,7 +41,7 @@ impl<'config> DejavuParser<'config> {
                 else {
                     for child in node.children() {
                         match child {
-                            RedTree::Token(t) => match t.kind {
+                            RedTree::Leaf(t) => match t.kind {
                                 DejavuSyntaxKind::Whitespace | DejavuSyntaxKind::Newline | DejavuSyntaxKind::LineComment | DejavuSyntaxKind::BlockComment => continue,
                                 _ => {}
                             },
@@ -59,7 +59,7 @@ impl<'config> DejavuParser<'config> {
                 let span = node.span();
                 for child in node.children() {
                     match child {
-                        RedTree::Token(t) => match t.kind {
+                        RedTree::Leaf(t) => match t.kind {
                             DejavuSyntaxKind::Whitespace | DejavuSyntaxKind::Newline | DejavuSyntaxKind::LineComment | DejavuSyntaxKind::BlockComment => continue,
                             DejavuSyntaxKind::Keyword(crate::lexer::DejavuKeywords::True) => return Ok(Expr::Bool { value: true, span }),
                             DejavuSyntaxKind::Keyword(crate::lexer::DejavuKeywords::False) => return Ok(Expr::Bool { value: false, span }),
@@ -74,7 +74,7 @@ impl<'config> DejavuParser<'config> {
                 let span = node.span();
                 for child in node.children() {
                     match child {
-                        RedTree::Token(t) => match t.kind {
+                        RedTree::Leaf(t) => match t.kind {
                             DejavuSyntaxKind::Whitespace | DejavuSyntaxKind::Newline | DejavuSyntaxKind::LineComment | DejavuSyntaxKind::BlockComment => continue,
                             _ => return Ok(Expr::Bool { value: t.kind == DejavuSyntaxKind::Keyword(crate::lexer::DejavuKeywords::True), span }),
                         },
@@ -87,7 +87,7 @@ impl<'config> DejavuParser<'config> {
                 let span = node.span();
                 for child in node.children() {
                     match child {
-                        RedTree::Token(t) => match t.kind {
+                        RedTree::Leaf(t) => match t.kind {
                             DejavuSyntaxKind::Whitespace | DejavuSyntaxKind::Newline | DejavuSyntaxKind::LineComment | DejavuSyntaxKind::BlockComment | DejavuSyntaxKind::LeftParen | DejavuSyntaxKind::RightParen => continue,
                             _ => {}
                         },
@@ -103,7 +103,7 @@ impl<'config> DejavuParser<'config> {
                 for child in node.children() {
                     match child {
                         RedTree::Node(n) => expr = Some(self.build_expr(n, source)?),
-                        RedTree::Token(t) => match t.kind {
+                        RedTree::Leaf(t) => match t.kind {
                     DejavuSyntaxKind::Whitespace | DejavuSyntaxKind::Newline | DejavuSyntaxKind::LineComment | DejavuSyntaxKind::BlockComment => continue,
                     _ => {
                         if let oak_core::UniversalTokenRole::Operator = oak_core::TokenType::role(&t.kind) {
@@ -130,7 +130,7 @@ impl<'config> DejavuParser<'config> {
                                 right = Some(self.build_expr(n, source)?);
                             }
                         }
-                        RedTree::Token(t) => match t.kind {
+                        RedTree::Leaf(t) => match t.kind {
                             DejavuSyntaxKind::Whitespace | DejavuSyntaxKind::Newline | DejavuSyntaxKind::LineComment | DejavuSyntaxKind::BlockComment => continue,
                             _ => {
                                 if let oak_core::UniversalTokenRole::Operator = oak_core::TokenType::role(&t.kind) {
@@ -162,7 +162,7 @@ impl<'config> DejavuParser<'config> {
                                 args.push(self.build_expr(n, source)?);
                             }
                         }
-                        RedTree::Token(t) => match t.kind {
+                        RedTree::Leaf(t) => match t.kind {
                             DejavuSyntaxKind::Whitespace | DejavuSyntaxKind::Newline | DejavuSyntaxKind::LineComment | DejavuSyntaxKind::BlockComment | DejavuSyntaxKind::Comma | DejavuSyntaxKind::RightParen => continue,
                             DejavuSyntaxKind::LeftParen => {
                                 seen_paren = true;
@@ -192,7 +192,7 @@ impl<'config> DejavuParser<'config> {
                                 }
                             }
                         }
-                        RedTree::Token(t) => match t.kind {
+                        RedTree::Leaf(t) => match t.kind {
                             DejavuSyntaxKind::Whitespace | DejavuSyntaxKind::Newline | DejavuSyntaxKind::LineComment | DejavuSyntaxKind::BlockComment => continue,
                             DejavuSyntaxKind::Dot => {
                                 seen_dot = true;
@@ -227,7 +227,7 @@ impl<'config> DejavuParser<'config> {
                                 index = Some(self.build_expr(n, source)?);
                             }
                         }
-                        RedTree::Token(t) => match t.kind {
+                        RedTree::Leaf(t) => match t.kind {
                             DejavuSyntaxKind::Whitespace | DejavuSyntaxKind::Newline | DejavuSyntaxKind::LineComment | DejavuSyntaxKind::BlockComment | DejavuSyntaxKind::LeftBracket | DejavuSyntaxKind::RightBracket => continue,
                             _ => {}
                         },
@@ -264,7 +264,7 @@ impl<'config> DejavuParser<'config> {
                                 }
                             }
                         },
-                        RedTree::Token(_) => {}
+                        RedTree::Leaf(_) => {}
                     }
                 }
                 let callee = callee.ok_or_else(|| source.syntax_error("Missing callee in apply block", span.start))?;
@@ -324,7 +324,7 @@ impl<'config> DejavuParser<'config> {
                         }
                     }
                 },
-                RedTree::Token(t) => match t.kind {
+                RedTree::Leaf(t) => match t.kind {
                             DejavuSyntaxKind::Whitespace | DejavuSyntaxKind::Newline | DejavuSyntaxKind::LineComment | DejavuSyntaxKind::BlockComment => continue,
                             DejavuSyntaxKind::Keyword(crate::lexer::DejavuKeywords::Else) => is_else = true,
                             _ => {}
@@ -359,7 +359,7 @@ impl<'config> DejavuParser<'config> {
                         }
                     }
                 },
-                RedTree::Token(t) => match t.kind {
+                RedTree::Leaf(t) => match t.kind {
                     DejavuSyntaxKind::Whitespace | DejavuSyntaxKind::Newline | DejavuSyntaxKind::LineComment | DejavuSyntaxKind::BlockComment => continue,
                     _ => {}
                 },
@@ -400,7 +400,7 @@ impl<'config> DejavuParser<'config> {
                         }
                     }
                 },
-                RedTree::Token(t) => match t.kind {
+                RedTree::Leaf(t) => match t.kind {
                     DejavuSyntaxKind::Whitespace | DejavuSyntaxKind::Newline | DejavuSyntaxKind::LineComment | DejavuSyntaxKind::BlockComment | DejavuSyntaxKind::Colon | DejavuSyntaxKind::Arrow | DejavuSyntaxKind::Comma => continue,
                     DejavuSyntaxKind::Keyword(crate::lexer::DejavuKeywords::When) => {
                         if pattern.is_none() && !is_guard {
@@ -433,7 +433,7 @@ impl<'config> DejavuParser<'config> {
 
         for child in node.children() {
             match child {
-                RedTree::Token(t) => match t.kind {
+                RedTree::Leaf(t) => match t.kind {
                     DejavuSyntaxKind::Whitespace | DejavuSyntaxKind::Newline | DejavuSyntaxKind::LineComment | DejavuSyntaxKind::BlockComment => continue,
                     DejavuSyntaxKind::Identifier => {
                         if !is_class && name_path.is_none() {
@@ -461,7 +461,7 @@ impl<'config> DejavuParser<'config> {
             let mut current_field_name = None;
             for child in node.children() {
                 match child {
-                    RedTree::Token(t) if t.kind == DejavuSyntaxKind::Identifier => {
+                    RedTree::Leaf(t) if t.kind == DejavuSyntaxKind::Identifier => {
                         current_field_name = Some(Identifier { name: text(source, t.span.clone().into()), span: t.span.clone() });
                     }
                     RedTree::Node(n) if n.green.kind == DejavuSyntaxKind::Pattern => {
@@ -503,7 +503,7 @@ impl<'config> DejavuParser<'config> {
                         }
                     }
                 },
-                RedTree::Token(t) => match t.kind {
+                RedTree::Leaf(t) => match t.kind {
                     DejavuSyntaxKind::Whitespace | DejavuSyntaxKind::Newline | DejavuSyntaxKind::LineComment | DejavuSyntaxKind::BlockComment => continue,
                     DejavuSyntaxKind::Identifier => label = Some(text(source, t.span.into())),
                     _ => {}
@@ -523,7 +523,7 @@ impl<'config> DejavuParser<'config> {
                     _ => expr = Some(Box::new(self.build_expr(n, source)?)),
                 },
 
-                RedTree::Token(t) => match t.kind {
+                RedTree::Leaf(t) => match t.kind {
                     DejavuSyntaxKind::Whitespace | DejavuSyntaxKind::Newline | DejavuSyntaxKind::LineComment | DejavuSyntaxKind::BlockComment => continue,
                     _ => {}
                 },
@@ -538,7 +538,7 @@ impl<'config> DejavuParser<'config> {
         let mut expr = None;
         for child in node.children() {
             match child {
-                RedTree::Token(t) => match t.kind {
+                RedTree::Leaf(t) => match t.kind {
                     DejavuSyntaxKind::Whitespace | DejavuSyntaxKind::Newline | DejavuSyntaxKind::LineComment | DejavuSyntaxKind::BlockComment => continue,
                     DejavuSyntaxKind::Identifier => label = Some(text(source, t.span.into())),
                     _ => {}
@@ -557,7 +557,7 @@ impl<'config> DejavuParser<'config> {
         let mut label = None;
         for child in node.children() {
             match child {
-                RedTree::Token(t) => match t.kind {
+                RedTree::Leaf(t) => match t.kind {
                     DejavuSyntaxKind::Whitespace | DejavuSyntaxKind::Newline | DejavuSyntaxKind::LineComment | DejavuSyntaxKind::BlockComment => continue,
                     DejavuSyntaxKind::Identifier => label = Some(text(source, t.span.into())),
                     _ => {}
@@ -577,7 +577,7 @@ impl<'config> DejavuParser<'config> {
         let mut yield_from = false;
         for child in node.children() {
             match child {
-                RedTree::Token(t) => match t.kind {
+                RedTree::Leaf(t) => match t.kind {
                     DejavuSyntaxKind::Whitespace | DejavuSyntaxKind::Newline | DejavuSyntaxKind::LineComment | DejavuSyntaxKind::BlockComment => continue,
                     DejavuSyntaxKind::Star => yield_from = true,
                     _ => {}
@@ -600,7 +600,7 @@ impl<'config> DejavuParser<'config> {
                     DejavuSyntaxKind::Whitespace | DejavuSyntaxKind::Newline | DejavuSyntaxKind::LineComment | DejavuSyntaxKind::BlockComment => continue,
                     _ => expr = Some(Box::new(self.build_expr(n, source)?)),
                 },
-                RedTree::Token(t) => match t.kind {
+                RedTree::Leaf(t) => match t.kind {
                     DejavuSyntaxKind::Whitespace | DejavuSyntaxKind::Newline | DejavuSyntaxKind::LineComment | DejavuSyntaxKind::BlockComment => continue,
                     _ => {}
                 },
@@ -638,7 +638,7 @@ impl<'config> DejavuParser<'config> {
                         }
                     }
                 },
-                RedTree::Token(t) => match t.kind {
+                RedTree::Leaf(t) => match t.kind {
                     DejavuSyntaxKind::Whitespace | DejavuSyntaxKind::Newline | DejavuSyntaxKind::LineComment | DejavuSyntaxKind::BlockComment => continue,
                     _ => {}
                 },
@@ -657,7 +657,7 @@ impl<'config> DejavuParser<'config> {
                     DejavuSyntaxKind::Whitespace | DejavuSyntaxKind::Newline | DejavuSyntaxKind::LineComment | DejavuSyntaxKind::BlockComment => continue,
                     _ => expr = Some(Box::new(self.build_expr(n, source)?)),
                 },
-                RedTree::Token(t) => match t.kind {
+                RedTree::Leaf(t) => match t.kind {
                     DejavuSyntaxKind::Whitespace | DejavuSyntaxKind::Newline | DejavuSyntaxKind::LineComment | DejavuSyntaxKind::BlockComment => continue,
                     _ => {}
                 },
@@ -671,7 +671,7 @@ impl<'config> DejavuParser<'config> {
         let mut statements = Vec::new();
         for child in node.children() {
             match child {
-                RedTree::Token(t) => match t.kind {
+                RedTree::Leaf(t) => match t.kind {
                     DejavuSyntaxKind::Whitespace | DejavuSyntaxKind::Newline | DejavuSyntaxKind::LineComment | DejavuSyntaxKind::BlockComment | DejavuSyntaxKind::LeftBrace | DejavuSyntaxKind::RightBrace | DejavuSyntaxKind::Comma => continue,
                     _ => return Err(source.syntax_error(format!("Unexpected token in block: {:?}", t.kind), t.span.start)),
                 },
