@@ -64,14 +64,19 @@ impl RbqRoot {
                     }
                     RbqElementType::QueryPipeline | RbqElementType::Closure | RbqElementType::BinaryExpr | RbqElementType::Expression | RbqElementType::CallExpr | RbqElementType::MemberExpr | RbqElementType::Literal | RbqElementType::MagicVar => {
                         let expr = RbqExpr::lower(node, source);
-                        items.push(RbqItem::Query(expr));
-                    }
-                    RbqElementType::Ident => {
-                        let text = source[node.span()].trim();
-                        if text != "query" {
-                            let expr = RbqExpr::lower(node, source);
-                            items.push(RbqItem::Query(expr));
+                        // If it's query = ..., just take the right side
+                        match &expr.kind {
+                            RbqExprKind::Binary { left, op, right } if op == "=" => {
+                                if let RbqExprKind::Identifier(id) = &left.kind {
+                                    if id == "query" {
+                                        items.push(RbqItem::Query(*right.clone()));
+                                        continue;
+                                    }
+                                }
+                            }
+                            _ => {}
                         }
+                        items.push(RbqItem::Query(expr));
                     }
                     RbqElementType::Eof | RbqElementType::Error => {}
                     _ => {}
@@ -254,7 +259,15 @@ impl RbqNamespace {
                         items.push(RbqItem::Import(RbqImport::lower(node, source)))
                     }
                 }
-                RbqElementType::QueryPipeline | RbqElementType::Closure | RbqElementType::BinaryExpr | RbqElementType::Expression | RbqElementType::CallExpr | RbqElementType::MemberExpr | RbqElementType::Literal | RbqElementType::MagicVar | RbqElementType::Ident => {
+                RbqElementType::QueryPipeline
+                | RbqElementType::Closure
+                | RbqElementType::BinaryExpr
+                | RbqElementType::Expression
+                | RbqElementType::CallExpr
+                | RbqElementType::MemberExpr
+                | RbqElementType::Literal
+                | RbqElementType::MagicVar
+                | RbqElementType::Ident => {
                     if let Some(node) = child.as_node() {
                         items.push(RbqItem::Query(RbqExpr::lower(node, source)))
                     }
@@ -364,7 +377,8 @@ impl RbqEnumMember {
                 RbqElementType::Literal => {
                     let text = source[child.span()].trim();
                     if text.starts_with('"') || text.starts_with('\'') {
-                        value = Some(text.to_string());
+                        // Strip quotes
+                        value = Some(text[1..text.len()-1].to_string());
                     } else if text == "true" || text == "false" {
                         value = Some(text.to_string());
                     } else if text.chars().next().map_or(false, |c| c.is_ascii_digit()) {
@@ -467,15 +481,70 @@ impl RbqTrait {
                         annotations.push(RbqAnnotation::lower(node, source))
                     }
                 }
-                RbqElementType::Ident if name.is_empty() => name = source[child.span()].trim().to_string(),
-                RbqElementType::FieldDef => {
-                    if let Some(node) = child.as_node() {
-                        items.push(RbqTraitItem::Field(RbqField::lower(node, source)))
-                    }
-                }
                 RbqElementType::MicroDef => {
                     if let Some(node) = child.as_node() {
                         items.push(RbqTraitItem::Method(RbqMicro::lower(node, source)))
+                    }
+                }
+                RbqElementType::Ident if name.is_empty() => name = source[child.span()].trim().to_string(),
+                RbqElementType::FieldDef => {
+                    if let Some(node) = child.as_node() {
+                        let field = RbqField::lower(node, source);
+                        // If it's a field with a Micro value, it's a method
+                        if let Some(expr) = &field.default_value {
+                            if let RbqExprKind::Identifier(id) = &expr.kind {
+                                if id == "micro" {
+                                    // This happens when we have `print: micro();` in a trait
+                                    // We should convert it to a method
+                                    let mut micro = RbqMicro { annotations: field.annotations, name: field.name, args: Vec::new(), return_type: None, body: None, span: node.span() };
+
+                                    // Try to find the actual micro definition if it was parsed as a sibling or child
+                                    // In current parser, `micro(...) -> ...` might be a CallExpr if it's in a default value
+                                    // But for now, let's just use the field info
+                                    items.push(RbqTraitItem::Method(micro));
+                                    continue;
+                                }
+                            }
+                            else if let RbqExprKind::Call { callee, args } = &expr.kind {
+                                if let RbqExprKind::Identifier(id) = &callee.kind {
+                                    if id == "micro" {
+                                        // Handle `print: micro(token: string) -> bool;`
+                                        // Extract return type from the original source or node if possible
+                                        // For now, a simplified conversion:
+                                        let mut micro = RbqMicro {
+                                            annotations: field.annotations,
+                                            name: field.name,
+                                            args: Vec::new(),  // TODO: extract from CallExpr args
+                                            return_type: None, // TODO: extract from somewhere
+                                            body: None,
+                                            span: node.span(),
+                                        };
+
+                                        // Try to map CallExpr args to RbqField args
+                                        for arg_expr in args {
+                                            if let RbqExprKind::Binary { left, op, right } = &arg_expr.kind {
+                                                if op == ":" {
+                                                    if let RbqExprKind::Identifier(arg_name) = &left.kind {
+                                                        // simplified type extraction
+                                                        let type_path = source[right.span].trim().to_string();
+                                                        micro.args.push(RbqField {
+                                                            annotations: Vec::new(),
+                                                            name: arg_name.clone(),
+                                                            type_ref: RbqType::Named { path: type_path, generic_args: Vec::new(), is_physical_ptr: false, is_optional: false },
+                                                            default_value: None,
+                                                        });
+                                                    }
+                                                }
+                                            }
+                                        }
+
+                                        items.push(RbqTraitItem::Method(micro));
+                                        continue;
+                                    }
+                                }
+                            }
+                        }
+                        items.push(RbqTraitItem::Field(field))
                     }
                 }
                 _ => {}
@@ -777,7 +846,14 @@ impl RbqExpr {
         let kind = match red.kind::<RbqElementType>() {
             RbqElementType::Literal => {
                 let text = source[span.clone()].trim().to_string();
-                if let Some(leaf) = red.children().find_map(|c| c.as_token()) {
+                if let Some(leaf) = red.children().find_map(|c| {
+                    let t = c.as_token()?;
+                    let k = t.kind();
+                    match k {
+                        RbqTokenType::StringLiteral | RbqTokenType::NumberLiteral | RbqTokenType::TrueKw | RbqTokenType::FalseKw => Some(t),
+                        _ => None,
+                    }
+                }) {
                     match leaf.kind() {
                         RbqTokenType::StringLiteral => {
                             // Strip quotes
@@ -807,23 +883,36 @@ impl RbqExpr {
                 let mut op = String::new();
                 let mut right = None;
                 for child in red.children() {
-            match child {
-                RedTree::Node(node) => {
-                    if left.is_none() {
-                        left = Some(Box::new(RbqExpr::lower(node, source)))
-                    }
-                    else {
-                        right = Some(Box::new(RbqExpr::lower(node, source)))
+                    match child {
+                        RedTree::Node(node) => {
+                            if left.is_none() {
+                                left = Some(Box::new(RbqExpr::lower(node, source)))
+                            }
+                            else {
+                                right = Some(Box::new(RbqExpr::lower(node, source)))
+                            }
+                        }
+                        RedTree::Leaf(leaf) => {
+                            let k = leaf.kind();
+                            if k == RbqTokenType::Plus
+                                || k == RbqTokenType::Minus
+                                || k == RbqTokenType::Star
+                                || k == RbqTokenType::Slash
+                                || k == RbqTokenType::EqEq
+                                || k == RbqTokenType::NotEq
+                                || k == RbqTokenType::Lt
+                                || k == RbqTokenType::Gt
+                                || k == RbqTokenType::LtEq
+                                || k == RbqTokenType::GtEq
+                                || k == RbqTokenType::AndAnd
+                                || k == RbqTokenType::OrOr
+                                || k == RbqTokenType::Eq
+                            {
+                                op = source[leaf.span()].trim().to_string()
+                            }
+                        }
                     }
                 }
-                RedTree::Leaf(leaf) => {
-                    let k = leaf.kind();
-                    if k == RbqTokenType::Plus || k == RbqTokenType::Minus || k == RbqTokenType::Star || k == RbqTokenType::Slash || k == RbqTokenType::EqEq || k == RbqTokenType::NotEq || k == RbqTokenType::Lt || k == RbqTokenType::Gt || k == RbqTokenType::LtEq || k == RbqTokenType::GtEq || k == RbqTokenType::AndAnd || k == RbqTokenType::OrOr || k == RbqTokenType::Eq {
-                        op = source[leaf.span()].trim().to_string()
-                    }
-                }
-            }
-        }
                 if let (Some(left), Some(right)) = (left, right) { RbqExprKind::Binary { left, op, right } } else { RbqExprKind::Identifier(source[span.clone()].to_string()) }
             }
             RbqElementType::UnaryExpr => {

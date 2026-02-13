@@ -180,6 +180,14 @@ impl AsDocument for TableName {
 }
 
 #[cfg(feature = "oak-pretty-print")]
+#[cfg(feature = "oak-pretty-print")]
+impl AsDocument for ColumnName {
+    fn as_document(&self) -> Document<'_> {
+        self.name.as_document()
+    }
+}
+
+#[cfg(feature = "oak-pretty-print")]
 impl AsDocument for JoinClause {
     fn as_document(&self) -> Document<'_> {
         doc!(self.join_type.as_document(), soft_space, "JOIN", soft_space, self.table.as_document(), if let Some(on) = &self.on { doc!(soft_space, "ON", soft_space, on.as_document()) } else { nil })
@@ -399,6 +407,31 @@ impl AsDocument for DropObjectType {
 #[cfg(feature = "oak-pretty-print")]
 impl AsDocument for AlterStatement {
     fn as_document(&self) -> Document<'_> {
-        doc!("ALTER TABLE", soft_space, self.table_name.as_document())
+        let mut d = doc!("ALTER TABLE", soft_space, self.table_name.as_document());
+        if let Some(action) = &self.action {
+            d = doc!(d, soft_space, action.as_document());
+        }
+        d
+    }
+}
+
+#[cfg(feature = "oak-pretty-print")]
+impl AsDocument for AlterAction {
+    fn as_document(&self) -> Document<'_> {
+        match self {
+            AlterAction::AddColumn { name, data_type } => {
+                let mut d = doc!("ADD COLUMN", soft_space, name.as_document());
+                if let Some(dt) = data_type {
+                    d = doc!(d, soft_space, dt.clone());
+                }
+                d
+            }
+            AlterAction::DropColumn { name } => {
+                doc!("DROP COLUMN", soft_space, name.as_document())
+            }
+            AlterAction::RenameTo { new_name } => {
+                doc!("RENAME TO", soft_space, new_name.as_document())
+            }
+        }
     }
 }

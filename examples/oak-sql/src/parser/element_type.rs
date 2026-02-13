@@ -72,6 +72,7 @@ impl From<crate::lexer::token_type::SqlTokenType> for SqlElementType {
             crate::lexer::token_type::SqlTokenType::ColumnDefinition => Self::ColumnDefinition,
             crate::lexer::token_type::SqlTokenType::ValueList => Self::ValueList,
             crate::lexer::token_type::SqlTokenType::Assignment => Self::Assignment,
+            crate::lexer::token_type::SqlTokenType::AlterAction => Self::AlterAction,
             crate::lexer::token_type::SqlTokenType::ErrorNode => Self::ErrorNode,
             _ => Self::ErrorNode,
         }

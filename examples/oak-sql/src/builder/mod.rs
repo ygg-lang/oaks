@@ -1,5 +1,8 @@
 use crate::{SqlElementType, SqlLanguage, SqlParser, ast, ast::*, lexer::token_type::SqlTokenType};
-use oak_core::{Builder, BuilderCache, GreenNode, OakDiagnostics, OakError, Parser, RedNode, RedTree, SourceText, TextEdit, TokenType, builder::BuildOutput, source::Source};
+use oak_core::{
+    Builder, BuilderCache, GreenNode, OakDiagnostics, OakError, Parser, Range, RedNode, RedTree,
+    SourceText, TextEdit, TokenType, builder::BuildOutput, source::Source,
+};
 
 #[derive(Clone)]
 pub struct SqlBuilder<'config> {
@@ -185,7 +188,7 @@ impl<'config> SqlBuilder<'config> {
     }
 
     fn build_update_statement<'a>(&self, node: RedNode<'a, SqlLanguage>, source: &SourceText) -> Result<UpdateStatement, OakError> {
-        let mut table_name: Option<ast::TableName> = None;
+        let mut table_name: Option<TableName> = None;
         let mut assignments = Vec::new();
         let mut selection = None;
 
@@ -196,7 +199,7 @@ impl<'config> SqlBuilder<'config> {
                     SqlTokenType::Identifier_ => {
                         if table_name.is_none() {
                             let ident = Identifier { name: self.get_text(t.span.clone(), source), span: t.span.clone() };
-                            table_name = Some(ast::TableName { name: ident, span: t.span.clone() });
+                            table_name = Some(TableName { name: ident, span: t.span.clone() });
                         }
                     }
                     _ => {}
@@ -446,7 +449,7 @@ impl<'config> SqlBuilder<'config> {
     }
 
     fn build_alter_action<'a>(&self, node: RedNode<'a, SqlLanguage>, source: &SourceText) -> Result<ast::AlterAction, OakError> {
-        use crate::lexer::SqlTokenType::*;
+        use SqlTokenType::*;
         let mut is_add = false;
         let mut is_drop = false;
         let mut is_rename = false;
@@ -485,7 +488,7 @@ impl<'config> SqlBuilder<'config> {
         } else {
             let start = data_type_tokens[0].start;
             let end = data_type_tokens.last().unwrap().end;
-            Some(self.get_text(core::range::Range { start, end }, source))
+            Some(self.get_text(Range { start, end }, source))
         };
 
         if is_add {
@@ -735,25 +738,6 @@ impl<'config> SqlBuilder<'config> {
 
     fn get_text(&self, span: core::range::Range<usize>, source: &SourceText) -> String {
         source.get_text_in(span).to_string()
-    }
-
-    fn is_binary_op(&self, kind: SqlTokenType) -> bool {
-        matches!(
-            kind,
-            SqlTokenType::Plus
-                | SqlTokenType::Minus
-                | SqlTokenType::Star
-                | SqlTokenType::Slash
-                | SqlTokenType::Equal
-                | SqlTokenType::NotEqual
-                | SqlTokenType::Less
-                | SqlTokenType::Greater
-                | SqlTokenType::LessEqual
-                | SqlTokenType::GreaterEqual
-                | SqlTokenType::And
-                | SqlTokenType::Or
-                | SqlTokenType::Like
-        )
     }
 
     fn map_binary_op(&self, kind: SqlTokenType) -> Option<BinaryOperator> {
