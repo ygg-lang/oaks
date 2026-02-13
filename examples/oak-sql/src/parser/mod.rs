@@ -344,16 +344,7 @@ impl<'config> SqlParser<'config> {
                     state.finish_at(name_cp, SqlElementType::ColumnName);
 
                     // Type
-                    if state.not_at_end() && !matches!(state.peek_kind(), Some(Comma) | Some(RightParen) | Some(Primary) | Some(Not) | Some(Null) | Some(Unique) | Some(Default) | Some(Check) | Some(Foreign) | Some(References)) {
-                        state.bump(); // Type name
-                        if state.eat(LeftParen) {
-                            state.expect(NumberLiteral).ok();
-                            if state.eat(Comma) {
-                                state.expect(NumberLiteral).ok();
-                            }
-                            state.expect(RightParen).ok();
-                        }
-                    }
+                    self.parse_data_type(state);
 
                     // Constraints
                     while state.not_at_end() && !matches!(state.peek_kind(), Some(Comma) | Some(RightParen)) {

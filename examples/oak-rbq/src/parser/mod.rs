@@ -76,7 +76,7 @@ impl<'config> RbqParser<'config> {
         else {
             // Handle expressions or potential DSL pipelines
             let checkpoint = state.checkpoint();
-            self.parse_query_pipeline(state)?;
+            self.parse_expression(state)?;
             self.skip_trivia(state);
             state.eat(RbqTokenType::Semicolon);
             self.skip_trivia(state);
@@ -671,7 +671,26 @@ impl<'config> RbqParser<'config> {
         else if state.at(RbqTokenType::LeftBrace) {
             self.parse_closure_or_pipeline(state)?
         }
-        else if state.at(RbqTokenType::MicroKw) {
+        else if state.at(RbqTokenType::LeftBracket) {
+            state.incremental_node(RbqElementType::Literal, |state| {
+                state.bump(); // [
+                self.skip_trivia(state);
+                while state.not_at_end() && !state.at(RbqTokenType::RightBracket) {
+                    let checkpoint = state.checkpoint();
+                    self.parse_expression(state)?;
+                    self.skip_trivia(state);
+                    if !state.eat(RbqTokenType::Comma) {
+                        break;
+                    }
+                    self.skip_trivia(state);
+                    if state.checkpoint() == checkpoint {
+                        break;
+                    }
+                }
+                state.eat(RbqTokenType::RightBracket);
+                Ok(())
+            })?;
+        }        else if state.at(RbqTokenType::MicroKw) {
             self.parse_micro_function(state)?
         }
         else {
@@ -766,14 +785,14 @@ impl<'config> RbqParser<'config> {
             return self.parse_closure(state);
         }
 
-        // It could be a regular closure { expr; expr; } or a pipeline { base | step | step }
-        // Let's parse the first expression
+        // Parse first expression and check if it's followed by a pipe
         self.parse_expression(state)?;
         self.skip_trivia(state);
 
         if state.at(RbqTokenType::Pipe) {
             // It's a pipeline: { base | step | step }
-            while state.eat(RbqTokenType::Pipe) {
+            while state.at(RbqTokenType::Pipe) {
+                state.bump(); // |
                 self.skip_trivia(state);
                 state.incremental_node(RbqElementType::PipelineStep, |state| {
                     if !state.eat(RbqTokenType::Ident) {

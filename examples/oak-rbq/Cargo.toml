@@ -12,7 +12,6 @@ keywords = ["parser", "rbq", "streaming", "validation"]
 
 [dependencies]
 oak-core = { workspace = true, features = ["testing"] }
-triomphe = { workspace = true }
 oak-highlight = { workspace = true, optional = true }
 oak-pretty-print = { workspace = true, optional = true }
 oak-lsp = { workspace = true, optional = true }
@@ -34,8 +33,6 @@ oak-macros = { workspace = true }
 [features]
 default = ["serde"]
 serde = ["dep:serde", "oak-core/serde"]
-oak-highlight = ["dep:oak-highlight"]
-oak-pretty-print = ["dep:oak-pretty-print"]
 lsp = ["dep:oak-lsp", "dep:oak-hover", "dep:oak-vfs", "oak-highlight", "oak-pretty-print", "dep:futures"]
 mcp = ["lsp", "oak-mcp/io-std"]
 

@@ -123,7 +123,6 @@ impl RbqTokenType {
             Self::Lt | Self::Gt | Self::LtEq | Self::GtEq => 5,
             Self::Plus | Self::Minus => 6,
             Self::Star | Self::Slash => 7,
-            Self::Pipe => 8,
             _ => 0,
         }
     }
