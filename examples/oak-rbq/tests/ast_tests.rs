@@ -1,5 +1,130 @@
 use oak_core::{Parser, SourceText, parser::session::ParseSession};
-use oak_rbq::{RbqLanguage, RbqParser, ast::RbqRoot};
+use oak_rbq::{RbqLanguage, RbqParser, ast::{RbqRoot, RbqLiteral, RbqExprKind}};
+
+#[test]
+fn test_rbq_ast_micro_return_type() {
+    let config = RbqLanguage::default();
+    let parser = RbqParser::new(&config);
+    let source = SourceText::new("micro add(a: i32, b: i32) -> i32;");
+
+    let mut session = ParseSession::<RbqLanguage>::default();
+    let output = parser.parse(&source, &[], &mut session);
+    assert!(output.result.is_ok());
+
+    let green = output.result.unwrap();
+    let red = oak_core::tree::RedNode::new(green, 0);
+
+    let root = RbqRoot::lower(red, source.text());
+
+    assert_eq!(root.items.len(), 1);
+    if let oak_rbq::ast::RbqItem::Micro(m) = &root.items[0] {
+        assert_eq!(m.name, "add");
+        assert_eq!(m.args.len(), 2);
+        if let Some(oak_rbq::ast::RbqType::Named { path, .. }) = &m.return_type {
+            assert_eq!(path, "i32");
+        } else {
+            panic!("Expected named return type");
+        }
+    }
+    else {
+        panic!("Expected micro")
+    }
+}
+
+#[test]
+fn test_rbq_ast_typed_literals() {
+    let config = RbqLanguage::default();
+    let parser = RbqParser::new(&config);
+    let source = SourceText::new("query = 123; query = \"hello\"; query = true;");
+
+    let mut session = ParseSession::<RbqLanguage>::default();
+    let output = parser.parse(&source, &[], &mut session);
+    assert!(output.result.is_ok());
+
+    let green = output.result.unwrap();
+    let red = oak_core::tree::RedNode::new(green, 0);
+
+    let root = RbqRoot::lower(red, source.text());
+
+    assert_eq!(root.items.len(), 3);
+    
+    if let oak_rbq::ast::RbqItem::Query(expr) = &root.items[0] {
+        if let RbqExprKind::Literal(RbqLiteral::Number(n)) = &expr.kind {
+            assert_eq!(n, "123");
+        } else { panic!("Expected Number literal"); }
+    }
+
+    if let oak_rbq::ast::RbqItem::Query(expr) = &root.items[1] {
+        if let RbqExprKind::Literal(RbqLiteral::String(s)) = &expr.kind {
+            assert_eq!(s, "\"hello\"");
+        } else { panic!("Expected String literal"); }
+    }
+
+    if let oak_rbq::ast::RbqItem::Query(expr) = &root.items[2] {
+        if let RbqExprKind::Literal(RbqLiteral::Boolean(b)) = &expr.kind {
+            assert_eq!(*b, true);
+        } else { panic!("Expected Boolean literal"); }
+    }
+}
+
+#[test]
+fn test_rbq_ast_namespace_annotations() {
+    let config = RbqLanguage::default();
+    let parser = RbqParser::new(&config);
+    let source = SourceText::new("@meta(version=\"1.0\") namespace App { @api struct User {} }");
+
+    let mut session = ParseSession::<RbqLanguage>::default();
+    let output = parser.parse(&source, &[], &mut session);
+    assert!(output.result.is_ok());
+
+    let green = output.result.unwrap();
+    let red = oak_core::tree::RedNode::new(green, 0);
+
+    let root = RbqRoot::lower(red, source.text());
+
+    assert_eq!(root.items.len(), 1);
+    if let oak_rbq::ast::RbqItem::Namespace(ns) = &root.items[0] {
+        assert_eq!(ns.annotations.len(), 1);
+        assert_eq!(ns.annotations[0].name, "meta");
+        
+        assert_eq!(ns.items.len(), 1);
+        if let oak_rbq::ast::RbqItem::Struct(s) = &ns.items[0] {
+            assert_eq!(s.annotations.len(), 1);
+            assert_eq!(s.annotations[0].name, "api");
+        }
+    }
+}
+
+#[test]
+fn test_rbq_ast_complex_trait() {
+    let config = RbqLanguage::default();
+    let parser = RbqParser::new(&config);
+    let source = SourceText::new("trait Auth { user_id: i32; login: micro(token: string) -> bool; }");
+
+    let mut session = ParseSession::<RbqLanguage>::default();
+    let output = parser.parse(&source, &[], &mut session);
+    assert!(output.result.is_ok());
+
+    let green = output.result.unwrap();
+    let red = oak_core::tree::RedNode::new(green, 0);
+
+    let root = RbqRoot::lower(red, source.text());
+
+    assert_eq!(root.items.len(), 1);
+    if let oak_rbq::ast::RbqItem::Trait(t) = &root.items[0] {
+        assert_eq!(t.items.len(), 2);
+        // First item is a field
+        if let oak_rbq::ast::RbqTraitItem::Field(f) = &t.items[0] {
+            assert_eq!(f.name, "user_id");
+        } else { panic!("Expected field"); }
+        
+        // Second item is a method (micro)
+        if let oak_rbq::ast::RbqTraitItem::Method(m) = &t.items[1] {
+            assert_eq!(m.name, "login");
+            assert_eq!(m.return_type.as_deref(), Some("bool"));
+        } else { panic!("Expected method"); }
+    }
+}
 
 #[test]
 fn test_rbq_ast_lowering() {

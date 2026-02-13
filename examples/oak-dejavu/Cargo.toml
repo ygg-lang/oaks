@@ -14,7 +14,6 @@ keywords = ["parser", "dejavu", "language"]
 
 [dependencies]
 oak-core = { workspace = true, features = ["serde", "testing"] }
-oak-valkyrie = { workspace = true }
 oak-highlight = { workspace = true, optional = true }
 oak-pretty-print = { workspace = true, optional = true }
 oak-lsp = { workspace = true, optional = true }

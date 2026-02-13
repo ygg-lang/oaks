@@ -58,7 +58,8 @@ impl<'config> RbqLexer<'config> {
                 '"' => self.lex_string(state),
                 '0'..='9' => self.lex_number(state),
                 '{' | '}' | '[' | ']' | '(' | ')' | ':' | ';' | ',' | '.' | '?' | '@' | '$' => self.lex_punctuation(state),
-                '=' | '!' | '>' | '<' | '&' | '|' | '+' | '-' | '*' | '/' => self.lex_operator(state),
+                '=' | '!' | '>' | '<' | '&' | '+' | '-' | '*' | '/' => self.lex_operator(state),
+                '|' => self.lex_pipe(state),
                 _ if ch.is_alphabetic() || ch == '_' => self.lex_ident_or_keyword(state),
                 _ => {
                     state.advance(ch.len_utf8());
@@ -132,9 +133,6 @@ impl<'config> RbqLexer<'config> {
         else if state.consume_if_starts_with("&&") {
             state.add_token(RbqTokenType::AndAnd, start, state.get_position())
         }
-        else if state.consume_if_starts_with("||") {
-            state.add_token(RbqTokenType::OrOr, start, state.get_position())
-        }
         else if state.consume_if_starts_with("->") {
             state.add_token(RbqTokenType::Arrow, start, state.get_position())
         }
@@ -164,6 +162,16 @@ impl<'config> RbqLexer<'config> {
         }
         else if state.consume_if_starts_with("&") {
             state.add_token(RbqTokenType::Ampersand, start, state.get_position())
+        }
+    }
+
+    fn lex_pipe<S: Source + ?Sized>(&self, state: &mut State<'_, S>) {
+        let start = state.get_position();
+        if state.consume_if_starts_with("||") {
+            state.add_token(RbqTokenType::OrOr, start, state.get_position())
+        }
+        else if state.consume_if_starts_with("|") {
+            state.add_token(RbqTokenType::Pipe, start, state.get_position())
         }
     }
 

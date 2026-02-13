@@ -23,17 +23,81 @@ impl<'config> super::ValkyrieParser<'config> {
 
     pub(crate) fn parse_root_internal<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> &'a GreenNode<'a, ValkyrieLanguage> {
         let cp = state.checkpoint();
-        self.skip_trivia(state);
+        
+        match self.config.syntax_mode {
+            oak_dejavu::language::SyntaxMode::Programming => {
+                self.skip_trivia(state);
+                while state.not_at_end() && !state.at(Eof) {
+                    let start_index = state.tokens.index();
+                    if self.parse_source_file(state).is_err() && state.tokens.index() == start_index {
+                        state.bump();
+                    }
+                    self.skip_trivia(state);
+                }
+            }
+            oak_dejavu::language::SyntaxMode::Template => {
+                while state.not_at_end() && !state.at(Eof) {
+                    let start_index = state.tokens.index();
+                    
+                    if state.at(StringPart) {
+                        let text_cp = state.checkpoint();
+                        state.bump();
+                        state.finish_at(text_cp, TemplateText);
+                    }
+                    else if state.at(TemplateControlStart) {
+                        self.parse_template_control(state).ok();
+                    }
+                    else if state.at(InterpolationStart) {
+                        self.parse_template_interpolation(state).ok();
+                    }
+                    else if state.at(TemplateCommentStart) {
+                        self.parse_template_comment(state).ok();
+                    }
+                    else if self.parse_source_file(state).is_err() && state.tokens.index() == start_index {
+                        state.bump();
+                    }
+                }
+            }
+        }
 
-        while state.not_at_end() && !state.at(Eof) {
+        state.finish_at(cp, ValkyrieRoot)
+    }
+
+    fn parse_template_control<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> Result<&'a GreenNode<'a, ValkyrieLanguage>, OakError> {
+        let cp = state.checkpoint();
+        state.expect(TemplateControlStart)?;
+        
+        while state.not_at_end() && !state.at(TemplateControlEnd) {
             let start_index = state.tokens.index();
             if self.parse_source_file(state).is_err() && state.tokens.index() == start_index {
                 state.bump();
             }
-            self.skip_trivia(state);
         }
+        
+        state.expect(TemplateControlEnd)?;
+        Ok(state.finish_at(cp, TemplateControl))
+    }
 
-        state.finish_at(cp, ValkyrieRoot)
+    fn parse_template_interpolation<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> Result<&'a GreenNode<'a, ValkyrieLanguage>, OakError> {
+        let cp = state.checkpoint();
+        state.expect(InterpolationStart)?;
+        
+        self.parse_expression_internal(state, 0);
+        
+        state.expect(InterpolationEnd)?;
+        Ok(state.finish_at(cp, Interpolation))
+    }
+
+    fn parse_template_comment<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> Result<&'a GreenNode<'a, ValkyrieLanguage>, OakError> {
+        let cp = state.checkpoint();
+        state.expect(TemplateCommentStart)?;
+        
+        while state.not_at_end() && !state.at(TemplateCommentEnd) {
+            state.bump();
+        }
+        
+        state.expect(TemplateCommentEnd)?;
+        Ok(state.finish_at(cp, TemplateComment))
     }
 
     fn parse_source_file<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> Result<&'a GreenNode<'a, ValkyrieLanguage>, OakError> {

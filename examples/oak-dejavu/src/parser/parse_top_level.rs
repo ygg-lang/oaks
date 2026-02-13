@@ -28,13 +28,18 @@ impl<'config> super::DejavuParser<'config> {
             let start_index = state.tokens.index();
             
             if state.at(StringPart) {
+                let text_cp = state.checkpoint();
                 state.bump();
+                state.finish_at(text_cp, TemplateText);
             }
             else if state.at(TemplateControlStart) {
                 self.parse_template_control(state).ok();
             }
             else if state.at(InterpolationStart) {
                 self.parse_template_interpolation(state).ok();
+            }
+            else if state.at(TemplateCommentStart) {
+                self.parse_template_comment(state).ok();
             }
             else if self.parse_source_file(state).is_err() && state.tokens.index() == start_index {
                 state.bump();
@@ -56,7 +61,7 @@ impl<'config> super::DejavuParser<'config> {
         }
         
         state.expect(TemplateControlEnd)?;
-        Ok(state.finish_at(cp, DejavuSyntaxKind::ApplyBlock)) // Use ApplyBlock or similar for control
+        Ok(state.finish_at(cp, TemplateControl))
     }
 
     fn parse_template_interpolation<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> Result<&'a GreenNode<'a, DejavuLanguage>, OakError> {
@@ -66,7 +71,19 @@ impl<'config> super::DejavuParser<'config> {
         self.parse_expression_internal(state, 0);
         
         state.expect(InterpolationEnd)?;
-        Ok(state.finish_at(cp, DejavuSyntaxKind::Interpolation))
+        Ok(state.finish_at(cp, Interpolation))
+    }
+
+    fn parse_template_comment<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> Result<&'a GreenNode<'a, DejavuLanguage>, OakError> {
+        let cp = state.checkpoint();
+        state.expect(TemplateCommentStart)?;
+        
+        while state.not_at_end() && !state.at(TemplateCommentEnd) {
+            state.bump();
+        }
+        
+        state.expect(TemplateCommentEnd)?;
+        Ok(state.finish_at(cp, TemplateComment))
     }
 
     fn parse_source_file<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> Result<&'a GreenNode<'a, DejavuLanguage>, OakError> {

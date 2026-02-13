@@ -367,7 +367,7 @@ impl<'config> SqlParser<'config> {
                                 PrattParser::parse(state, 0, self);
                                 state.expect(RightParen).ok();
                             }
-                        } else if state.eat(AutoIncrement) || state.eat(Autoincrement) {
+                        } else if state.eat(AutoIncrement) {
                         } else {
                             state.bump();
                         }
@@ -424,8 +424,29 @@ impl<'config> SqlParser<'config> {
     fn parse_alter<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> Result<(), OakError> {
         use crate::lexer::SqlTokenType::*;
         let cp = state.checkpoint();
-        state.bump(); // alter
-        state.advance_until(Semicolon);
+        state.expect(Alter).ok();
+        
+        if state.eat(Table) {
+            let table_cp = state.checkpoint();
+            state.expect(Identifier_).ok(); // TableName
+            state.finish_at(table_cp, SqlElementType::TableName);
+            
+            // Simplified ALTER TABLE actions
+            if state.eat(Add) {
+                if state.eat(Column) {
+                    state.expect(Identifier_).ok();
+                } else {
+                    state.expect(Identifier_).ok();
+                }
+            } else if state.eat(Drop) {
+                state.eat(Column);
+                state.expect(Identifier_).ok();
+            } else if state.eat(Rename) {
+                state.eat(To);
+                state.expect(Identifier_).ok();
+            }
+        }
+
         state.eat(Semicolon);
         state.finish_at(cp, SqlElementType::AlterStatement);
         Ok(())

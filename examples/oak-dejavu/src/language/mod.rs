@@ -14,17 +14,53 @@ pub enum SyntaxMode {
     Template,
 }
 
-#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
+#[derive(Clone, Debug, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+/// Configuration for template delimiters.
+pub struct TemplateConfig {
+    /// Start of a control block (default: "<%")
+    pub control_start: String,
+    /// End of a control block (default: "%>")
+    pub control_end: String,
+    /// Start of an interpolation block (default: "{")
+    pub interpolation_start: String,
+    /// End of an interpolation block (default: "}")
+    pub interpolation_end: String,
+    /// Start of a template comment (default: "<#")
+    pub comment_start: String,
+    /// End of a template comment (default: "#>")
+    pub comment_end: String,
+}
+
+impl Default for TemplateConfig {
+    fn default() -> Self {
+        Self {
+            control_start: "<%".to_string(),
+            control_end: "%>".to_string(),
+            interpolation_start: "{".to_string(),
+            interpolation_end: "}".to_string(),
+            comment_start: "<#".to_string(),
+            comment_end: "#>".to_string(),
+        }
+    }
+}
+
+#[derive(Clone, Debug, PartialEq, Eq, Hash)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 /// The Dejavu programming language definition.
 pub struct DejavuLanguage {
     /// Current syntax mode
     pub syntax_mode: SyntaxMode,
+    /// Template configuration
+    pub template: TemplateConfig,
 }
 
 impl Default for DejavuLanguage {
     fn default() -> Self {
-        Self { syntax_mode: SyntaxMode::Template }
+        Self { 
+            syntax_mode: SyntaxMode::Template,
+            template: TemplateConfig::default(),
+        }
     }
 }
 

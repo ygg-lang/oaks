@@ -19,8 +19,16 @@ impl crate::lexer::ValkyrieLexer<'_> {
     /// Runs the lexer on the given state.
     pub(crate) fn run<S: Source + ?Sized>(&self, state: &mut State<'_, S>) -> Result<(), OakError> {
         match self._config.syntax_mode {
-            crate::language::SyntaxMode::Programming => self.run_programming(state),
+            oak_dejavu::language::SyntaxMode::Programming => self.run_programming(state),
+            oak_dejavu::language::SyntaxMode::Template => self.run_template(state),
         }
+    }
+
+    fn run_template<S: Source + ?Sized>(&self, state: &mut State<'_, S>) -> Result<(), OakError> {
+        let start = state.get_position();
+        let end = state.get_source().len();
+        self.lex_interpolation(state, start, end, true);
+        Ok(())
     }
 
     fn run_programming<S: Source + ?Sized>(&self, state: &mut State<'_, S>) -> Result<(), OakError> {
@@ -161,36 +169,26 @@ impl crate::lexer::ValkyrieLexer<'_> {
     }
 
     fn lex_interpolation<S: Source + ?Sized>(&self, state: &mut State<'_, S>, start: usize, end: usize, interpolation_enabled: bool) {
-        let mut current = start;
         let original_pos = state.get_position();
-
         state.set_position(start);
+        let mut current = start;
+        let template = &self._config.template;
 
         while state.get_position() < end {
-            if interpolation_enabled && (state.starts_with("\\{") || state.starts_with("\\}")) {
-                state.advance(2);
-                continue;
-            }
-            if interpolation_enabled && (state.starts_with("\\<") || state.starts_with("\\%") || state.starts_with("\\#")) {
-                state.advance(2);
-                continue;
-            }
-
-            if interpolation_enabled && state.starts_with("<#") {
+            if interpolation_enabled && state.starts_with(&template.comment_start) {
                 let part_end = state.get_position();
                 if current < part_end {
                     state.add_token(ValkyrieSyntaxKind::StringPart, current, part_end)
                 }
 
                 let comment_start = state.get_position();
-                state.advance(2); // skip <#
+                state.advance(template.comment_start.len());
                 state.add_token(ValkyrieSyntaxKind::TemplateCommentStart, comment_start, state.get_position());
 
-                // Find matching #>
                 while state.get_position() < end {
-                    if state.starts_with("#>") {
+                    if state.starts_with(&template.comment_end) {
                         let comment_end = state.get_position();
-                        state.advance(2);
+                        state.advance(template.comment_end.len());
                         state.add_token(ValkyrieSyntaxKind::TemplateCommentEnd, comment_end, state.get_position());
                         break;
                     }
@@ -200,21 +198,20 @@ impl crate::lexer::ValkyrieLexer<'_> {
                 continue;
             }
 
-            if interpolation_enabled && state.starts_with("<%") {
+            if interpolation_enabled && state.starts_with(&template.control_start) {
                 let part_end = state.get_position();
                 if current < part_end {
                     state.add_token(ValkyrieSyntaxKind::StringPart, current, part_end)
                 }
 
                 let control_start = state.get_position();
-                state.advance(2); // skip <%
+                state.advance(template.control_start.len());
                 state.add_token(ValkyrieSyntaxKind::TemplateControlStart, control_start, state.get_position());
 
-                // Find matching %>
                 while state.get_position() < end {
-                    if state.starts_with("%>") {
+                    if state.starts_with(&template.control_end) {
                         let control_end = state.get_position();
-                        state.advance(2);
+                        state.advance(template.control_end.len());
                         state.add_token(ValkyrieSyntaxKind::TemplateControlEnd, control_end, state.get_position());
                         break;
                     }
@@ -224,32 +221,33 @@ impl crate::lexer::ValkyrieLexer<'_> {
                 continue;
             }
 
-            if interpolation_enabled && state.starts_with("{") {
+            if interpolation_enabled && state.starts_with(&template.interpolation_start) {
                 let part_end = state.get_position();
                 if current < part_end {
                     state.add_token(ValkyrieSyntaxKind::StringPart, current, part_end)
                 }
 
                 let interp_start = state.get_position();
-                state.advance(1); // skip {
+                state.advance(template.interpolation_start.len());
                 state.add_token(ValkyrieSyntaxKind::InterpolationStart, interp_start, state.get_position());
 
-                // Find matching }
                 let mut depth = 1;
                 while depth > 0 && state.get_position() < end {
-                    if let Some(c) = state.current() {
-                        if c == '{' {
-                            depth += 1;
+                    if state.starts_with(&template.interpolation_start) {
+                        depth += 1;
+                        state.advance(template.interpolation_start.len());
+                    }
+                    else if state.starts_with(&template.interpolation_end) {
+                        depth -= 1;
+                        if depth == 0 {
+                            let interp_end = state.get_position();
+                            state.advance(template.interpolation_end.len());
+                            state.add_token(ValkyrieSyntaxKind::InterpolationEnd, interp_end, state.get_position());
+                            break;
                         }
-                        else if c == '}' {
-                            depth -= 1;
-                            if depth == 0 {
-                                let interp_end = state.get_position();
-                                state.advance(1);
-                                state.add_token(ValkyrieSyntaxKind::InterpolationEnd, interp_end, state.get_position());
-                                break;
-                            }
-                        }
+                        state.advance(template.interpolation_end.len());
+                    }
+                    else if let Some(c) = state.current() {
                         state.advance(c.len_utf8());
                     }
                     else {

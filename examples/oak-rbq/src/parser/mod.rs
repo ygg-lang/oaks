@@ -72,7 +72,9 @@ impl<'config> RbqParser<'config> {
         else {
             // Handle expressions or potential DSL pipelines
             let checkpoint = state.checkpoint();
-            self.parse_expression(state)?;
+            self.parse_query_pipeline(state)?;
+            self.skip_trivia(state);
+            state.eat(RbqTokenType::Semicolon);
             self.skip_trivia(state);
             if state.checkpoint() == checkpoint && state.not_at_end() {
                 state.bump()
@@ -442,26 +444,31 @@ impl<'config> RbqParser<'config> {
         state.incremental_node(RbqElementType::MicroDef, |state| {
             state.bump(); // micro
             self.skip_trivia(state);
-            state.eat(RbqTokenType::Ident); // Optional identifier for lambda form
+            if !state.eat(RbqTokenType::Ident) {
+                state.record_expected("micro name")
+            }
             self.skip_trivia(state);
             if state.eat(RbqTokenType::LeftParen) {
-                self.skip_trivia(state);
                 while state.not_at_end() && !state.at(RbqTokenType::RightParen) {
-                    self.skip_trivia(state);
                     let checkpoint = state.checkpoint();
-                    state.eat(RbqTokenType::Ident);
+                    state.eat(RbqTokenType::Ident); // arg name
                     self.skip_trivia(state);
-                    state.eat(RbqTokenType::Colon);
+                    if state.eat(RbqTokenType::Colon) {
+                        self.skip_trivia(state);
+                        self.parse_type_ref(state)?;
+                    }
                     self.skip_trivia(state);
-                    self.parse_type_ref(state)?;
-                    self.skip_trivia(state);
-                    if !state.eat(RbqTokenType::Comma) {
+                    if !state.at(RbqTokenType::RightParen) && !state.eat(RbqTokenType::Comma) {
+                        if state.checkpoint() == checkpoint && state.not_at_end() {
+                            state.bump();
+                            self.skip_trivia(state);
+                        }
                         break;
                     }
                     self.skip_trivia(state);
                     if state.checkpoint() == checkpoint && state.not_at_end() {
                         state.bump();
-                        self.skip_trivia(state)
+                        self.skip_trivia(state);
                     }
                 }
                 state.eat(RbqTokenType::RightParen);
@@ -470,13 +477,33 @@ impl<'config> RbqParser<'config> {
             if state.eat(RbqTokenType::Arrow) {
                 self.skip_trivia(state);
                 self.parse_type_ref(state)?;
-                self.skip_trivia(state);
-            }
-            if state.at(RbqTokenType::LeftBrace) {
-                self.parse_closure(state)?;
             }
             self.skip_trivia(state);
-            state.eat(RbqTokenType::Semicolon);
+            if state.at(RbqTokenType::LeftBrace) {
+                self.parse_block(state)?;
+            }
+            else {
+                state.eat(RbqTokenType::Semicolon);
+            }
+            Ok(())
+        })
+    }
+
+    fn parse_block<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> Result<(), OakError> {
+        state.incremental_node(RbqElementType::Block, |state| {
+            state.eat(RbqTokenType::LeftBrace);
+            while state.not_at_end() && !state.at(RbqTokenType::RightBrace) {
+                self.skip_trivia(state);
+                let checkpoint = state.checkpoint();
+                self.parse_expression(state)?;
+                state.eat(RbqTokenType::Semicolon);
+                self.skip_trivia(state);
+                if state.checkpoint() == checkpoint && state.not_at_end() {
+                    state.bump();
+                    self.skip_trivia(state);
+                }
+            }
+            state.eat(RbqTokenType::RightBrace);
             Ok(())
         })
     }
@@ -616,7 +643,7 @@ impl<'config> RbqParser<'config> {
             state.eat(RbqTokenType::RightParen);
         }
         else if state.at(RbqTokenType::LeftBrace) {
-            self.parse_closure(state)?
+            self.parse_closure_or_pipeline(state)?
         }
         else if state.at(RbqTokenType::MicroKw) {
             self.parse_micro_function(state)?
@@ -702,11 +729,96 @@ impl<'config> RbqParser<'config> {
         Ok(())
     }
 
+    fn parse_closure_or_pipeline<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> Result<(), OakError> {
+        let checkpoint = state.checkpoint();
+        state.bump(); // {
+        self.skip_trivia(state);
+
+        // Check if it's a closure with args: { |a, b| ... }
+        if state.at(RbqTokenType::Pipe) {
+            state.restore(checkpoint);
+            return self.parse_closure(state);
+        }
+
+        // It could be a regular closure { expr; expr; } or a pipeline { base | step | step }
+        // Let's parse the first expression
+        self.parse_expression(state)?;
+        self.skip_trivia(state);
+
+        if state.at(RbqTokenType::Pipe) {
+            // It's a pipeline: { base | step | step }
+            while state.eat(RbqTokenType::Pipe) {
+                self.skip_trivia(state);
+                state.incremental_node(RbqElementType::PipelineStep, |state| {
+                    if !state.eat(RbqTokenType::Ident) {
+                        state.record_expected("pipeline step name");
+                    }
+                    self.skip_trivia(state);
+                    if state.eat(RbqTokenType::LeftParen) {
+                        self.skip_trivia(state);
+                        while state.not_at_end() && !state.at(RbqTokenType::RightParen) {
+                            let arg_checkpoint = state.checkpoint();
+                            self.parse_expression(state)?;
+                            self.skip_trivia(state);
+                            if !state.eat(RbqTokenType::Comma) {
+                                break;
+                            }
+                            self.skip_trivia(state);
+                            if state.checkpoint() == arg_checkpoint {
+                                break;
+                            }
+                        }
+                        state.eat(RbqTokenType::RightParen);
+                    }
+                    Ok(())
+                })?;
+                self.skip_trivia(state);
+            }
+            state.eat(RbqTokenType::RightBrace);
+            state.finish_at(checkpoint, RbqElementType::QueryPipeline);
+            Ok(())
+        }
+        else {
+            // It's a regular closure: { expr; expr; }
+            if state.eat(RbqTokenType::Semicolon) {
+                self.skip_trivia(state);
+                while state.not_at_end() && !state.at(RbqTokenType::RightBrace) {
+                    let step_checkpoint = state.checkpoint();
+                    self.parse_expression(state)?;
+                    self.skip_trivia(state);
+                    state.eat(RbqTokenType::Semicolon);
+                    self.skip_trivia(state);
+                    if state.checkpoint() == step_checkpoint {
+                        state.bump();
+                    }
+                }
+            }
+            state.eat(RbqTokenType::RightBrace);
+            state.finish_at(checkpoint, RbqElementType::Closure);
+            Ok(())
+        }
+    }
+
     fn parse_closure<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> Result<(), OakError> {
         state.incremental_node(RbqElementType::Closure, |state| {
             state.bump(); // {
+            self.skip_trivia(state);
+            if state.eat(RbqTokenType::Pipe) {
+                state.incremental_node(RbqElementType::ClosureArgs, |state| {
+                    while state.not_at_end() && !state.at(RbqTokenType::Pipe) {
+                        state.eat(RbqTokenType::Ident);
+                        self.skip_trivia(state);
+                        if !state.eat(RbqTokenType::Comma) {
+                            break;
+                        }
+                        self.skip_trivia(state);
+                    }
+                    state.eat(RbqTokenType::Pipe);
+                    Ok(())
+                })?;
+            }
+            self.skip_trivia(state);
             while state.not_at_end() && !state.at(RbqTokenType::RightBrace) {
-                self.skip_trivia(state);
                 let checkpoint = state.checkpoint();
                 self.parse_expression(state)?;
                 self.skip_trivia(state);
@@ -717,6 +829,45 @@ impl<'config> RbqParser<'config> {
                 }
             }
             state.eat(RbqTokenType::RightBrace);
+            Ok(())
+        })
+    }
+
+    fn parse_query_pipeline<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> Result<(), OakError> {
+        state.incremental_node(RbqElementType::QueryPipeline, |state| {
+            self.parse_expression(state)?;
+            self.skip_trivia(state);
+            while state.eat(RbqTokenType::Pipe) {
+                self.skip_trivia(state);
+                state.incremental_node(RbqElementType::PipelineStep, |state| {
+                    if !state.eat(RbqTokenType::Ident) {
+                        state.record_expected("pipeline step name")
+                    }
+                    self.skip_trivia(state);
+                    if state.eat(RbqTokenType::LeftParen) {
+                        while state.not_at_end() && !state.at(RbqTokenType::RightParen) {
+                            let checkpoint = state.checkpoint();
+                            self.parse_expression(state)?;
+                            self.skip_trivia(state);
+                            if !state.at(RbqTokenType::RightParen) && !state.eat(RbqTokenType::Comma) {
+                                if state.checkpoint() == checkpoint && state.not_at_end() {
+                                    state.bump();
+                                    self.skip_trivia(state);
+                                }
+                                break;
+                            }
+                            self.skip_trivia(state);
+                            if state.checkpoint() == checkpoint && state.not_at_end() {
+                                state.bump();
+                                self.skip_trivia(state);
+                            }
+                        }
+                        state.eat(RbqTokenType::RightParen);
+                    }
+                    Ok(())
+                })?;
+                self.skip_trivia(state);
+            }
             Ok(())
         })
     }

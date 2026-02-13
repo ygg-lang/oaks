@@ -88,6 +88,8 @@ impl oak_core::TokenType for SqlTokenType {
             | Self::True
             | Self::False
             | Self::Exists
+            | Self::Rename
+            | Self::To
             | Self::Case
             | Self::When
             | Self::Then
@@ -130,7 +132,6 @@ impl oak_core::TokenType for SqlTokenType {
 pub enum SqlTokenType {
     // 节点种类
     Root,
-    Statement,
     SelectStatement,
     InsertStatement,
     UpdateStatement,
@@ -235,6 +236,9 @@ pub enum SqlTokenType {
     True,
     False,
     Exists,
+    Check,
+    Rename,
+    To,
     Case,
     When,
     Then,

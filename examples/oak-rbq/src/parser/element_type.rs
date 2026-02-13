@@ -27,6 +27,7 @@ pub enum RbqElementType {
     PipelineStep,
     Closure,
     ClosureArgs,
+    Block,
     Expression,
     Literal,
     MagicVar,
@@ -78,6 +79,8 @@ pub enum RbqElementType {
     Minus,
     Star,
     Slash,
+    Pipe,
+    Block,
     Ident,
     StringLiteral,
     NumberLiteral,
@@ -119,6 +122,7 @@ impl RbqElementType {
             Self::Lt | Self::Gt | Self::LtEq | Self::GtEq => 5,
             Self::Plus | Self::Minus => 6,
             Self::Star | Self::Slash => 7,
+            Self::Pipe => 8,
             _ => 0,
         }
     }

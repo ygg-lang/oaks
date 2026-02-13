@@ -56,5 +56,5 @@ impl Language for SqlLanguage {
 
     type TokenType = crate::lexer::token_type::SqlTokenType;
     type ElementType = crate::parser::element_type::SqlElementType;
-    type TypedRoot = ();
+    type TypedRoot = crate::ast::SqlRoot;
 }

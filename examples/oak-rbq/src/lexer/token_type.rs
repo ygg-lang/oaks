@@ -80,6 +80,7 @@ pub enum RbqTokenType {
     Minus,
     Star,
     Slash,
+    Pipe,
     Ident,
     StringLiteral,
     NumberLiteral,
@@ -121,6 +122,7 @@ impl RbqTokenType {
             Self::Lt | Self::Gt | Self::LtEq | Self::GtEq => 5,
             Self::Plus | Self::Minus => 6,
             Self::Star | Self::Slash => 7,
+            Self::Pipe => 8,
             _ => 0,
         }
     }
@@ -202,6 +204,7 @@ impl From<crate::parser::element_type::RbqElementType> for RbqTokenType {
             crate::parser::element_type::RbqElementType::Minus => Self::Minus,
             crate::parser::element_type::RbqElementType::Star => Self::Star,
             crate::parser::element_type::RbqElementType::Slash => Self::Slash,
+            crate::parser::element_type::RbqElementType::Pipe => Self::Pipe,
             crate::parser::element_type::RbqElementType::Ident => Self::Ident,
             crate::parser::element_type::RbqElementType::StringLiteral => Self::StringLiteral,
             crate::parser::element_type::RbqElementType::NumberLiteral => Self::NumberLiteral,
