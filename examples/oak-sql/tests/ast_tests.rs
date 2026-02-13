@@ -1,5 +1,5 @@
 use oak_core::{SourceText, builder::Builder, ParseSession, source::ToSource};
-use oak_sql::{SqlLanguage, SqlBuilder, ast::*};
+use oak_sql::{SqlLanguage, SqlBuilder};
 #[cfg(feature = "oak-pretty-print")]
 use oak_pretty_print::AsDocument;
 
@@ -90,7 +90,7 @@ fn test_sql_create_to_source() {
 fn test_sql_alter_to_source() {
     let config = SqlLanguage::default();
     let builder = SqlBuilder::new(&config);
-    let input = "ALTER TABLE users ADD COLUMN age;";
+    let input = "ALTER TABLE users ADD COLUMN age INT;";
     let source = SourceText::new(input);
 
     let mut session = ParseSession::<SqlLanguage>::default();
@@ -102,5 +102,5 @@ fn test_sql_alter_to_source() {
     let generated = root.to_source_string();
     println!("Generated alter source: {}", generated);
     assert!(generated.contains("ALTER TABLE users"));
-    assert!(generated.contains("ADD COLUMN age"));
+    assert!(generated.contains("ADD COLUMN age INT"));
 }

@@ -439,9 +439,16 @@ impl<'config> SqlParser<'config> {
             if state.peek_kind() == Some(Add) || state.peek_kind() == Some(Drop) || state.peek_kind() == Some(Rename) {
                 let action_cp = state.checkpoint();
                 if state.eat(Add) {
-                    state.eat(Column);
-                    state.expect(Identifier_).ok();
-                } else if state.eat(Drop) {
+                state.eat(Column);
+                state.expect(Identifier_).ok();
+                // Optional data type
+                if let Some(kind) = state.peek_kind() {
+                    // Eat common type keywords or any identifier
+                    if kind == Identifier_ || matches!(kind, Int | Integer | Varchar | Char | Text | Date | Time | Timestamp | Decimal | Float | Double | Boolean) {
+                        state.eat(kind);
+                    }
+                }
+            } else if state.eat(Drop) {
                     state.eat(Column);
                     state.expect(Identifier_).ok();
                 } else if state.eat(Rename) {

@@ -3,7 +3,7 @@ use core::range::Range;
 use oak_core::{
     TokenType,
     language::{ElementRole, Language, TokenRole, UniversalElementRole, UniversalTokenRole},
-    tree::{RedLeaf, RedNode, RedTree},
+    tree::{RedNode, RedTree},
     visitor::Visitor,
 };
 use serde::{Deserialize, Serialize};

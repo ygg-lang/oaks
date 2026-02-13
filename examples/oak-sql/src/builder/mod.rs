@@ -3,6 +3,7 @@ use crate::{
     ast::*,
     lexer::token_type::SqlTokenType,
 };
+use crate::ast;
 use oak_core::{
     Builder, BuilderCache, GreenNode, OakDiagnostics, OakError, Parser, RedNode, RedTree,
     SourceText, TextEdit, TokenType, builder::BuildOutput, source::Source,
@@ -505,12 +506,13 @@ impl<'config> SqlBuilder<'config> {
         })
     }
 
-    fn build_alter_action<'a>(&self, node: RedNode<'a, SqlLanguage>, source: &SourceText) -> Result<AlterAction, OakError> {
+    fn build_alter_action<'a>(&self, node: RedNode<'a, SqlLanguage>, source: &SourceText) -> Result<ast::AlterAction, OakError> {
         use crate::lexer::SqlTokenType::*;
         let mut is_add = false;
         let mut is_drop = false;
         let mut is_rename = false;
-        let mut identifier = None;
+        let mut identifier: Option<ast::Identifier> = None;
+        let mut data_type = None;
 
         for child in node.children() {
             match child {
@@ -518,7 +520,19 @@ impl<'config> SqlBuilder<'config> {
                     Add => is_add = true,
                     Drop => is_drop = true,
                     Rename => is_rename = true,
-                    Identifier_ => identifier = Some(ast::Identifier { name: self.get_text(t.span.clone(), source), span: t.span.clone() }),
+                    Identifier_ => {
+                        if identifier.is_none() {
+                            identifier = Some(ast::Identifier { name: self.get_text(t.span.clone(), source), span: t.span.clone() });
+                        } else {
+                            data_type = Some(self.get_text(t.span.clone(), source));
+                        }
+                    },
+                    // Keywords that might be used as types in this simple parser
+                    Select | From | Where | Insert | Update | Delete | Int | Integer | Varchar | Char | Text | Date | Time | Timestamp | Decimal | Float | Double | Boolean => {
+                        if identifier.is_some() {
+                            data_type = Some(self.get_text(t.span.clone(), source));
+                        }
+                    }
                     _ => {}
                 },
                 RedTree::Node(n) if n.green.kind == SqlElementType::Identifier => {
@@ -529,16 +543,16 @@ impl<'config> SqlBuilder<'config> {
         }
 
         if is_add {
-            Ok(AlterAction::AddColumn {
+            Ok(ast::AlterAction::AddColumn {
                 name: identifier.ok_or_else(|| OakError::custom_error("Missing column name in ALTER TABLE ADD"))?,
-                data_type: None, // Simplified for now
+                data_type,
             })
         } else if is_drop {
-            Ok(AlterAction::DropColumn {
+            Ok(ast::AlterAction::DropColumn {
                 name: identifier.ok_or_else(|| OakError::custom_error("Missing column name in ALTER TABLE DROP"))?,
             })
         } else if is_rename {
-            Ok(AlterAction::RenameTo {
+            Ok(ast::AlterAction::RenameTo {
                 new_name: identifier.ok_or_else(|| OakError::custom_error("Missing new name in ALTER TABLE RENAME"))?,
             })
         } else {

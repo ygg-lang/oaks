@@ -597,7 +597,8 @@ impl<'config> RbqParser<'config> {
     }
 
     fn parse_binary_expr<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>, min_precedence: u8) -> Result<(), OakError> {
-        self.parse_primary_expr(state)?;
+        let checkpoint = state.checkpoint();
+        self.parse_unary_expr(state)?;
         self.skip_trivia(state);
 
         while let Some(token) = state.current() {
@@ -606,19 +607,30 @@ impl<'config> RbqParser<'config> {
                 break;
             }
 
-            state.incremental_node(RbqElementType::BinaryExpr, |state| {
-                state.bump(); // operator
-                self.skip_trivia(state);
-                self.parse_binary_expr(state, precedence + 1)?;
-                self.skip_trivia(state);
-                Ok(())
-            })?
+            state.bump(); // operator
+            self.skip_trivia(state);
+            self.parse_binary_expr(state, precedence + 1)?;
+            self.skip_trivia(state);
+            state.finish_at(checkpoint, RbqElementType::BinaryExpr);
         }
 
         Ok(())
     }
 
     // Removed get_precedence as it's now in RbqTokenType
+
+    fn parse_unary_expr<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> Result<(), OakError> {
+        let checkpoint = state.checkpoint();
+        if TokenType::role(&state.current().map(|t| t.kind).unwrap_or(RbqTokenType::Error)) == oak_core::UniversalTokenRole::Operator {
+            state.bump();
+            self.skip_trivia(state);
+            self.parse_unary_expr(state)?;
+            state.finish_at(checkpoint, RbqElementType::UnaryExpr);
+            Ok(())
+        } else {
+            self.parse_primary_expr(state)
+        }
+    }
 
     fn parse_primary_expr<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> Result<(), OakError> {
         self.skip_trivia(state);
@@ -638,7 +650,10 @@ impl<'config> RbqParser<'config> {
             })?
         }
         else if state.at(RbqTokenType::Ident) || state.at(RbqTokenType::Utf8Kw) {
-            state.bump()
+            state.incremental_node(RbqElementType::Ident, |state| {
+                state.bump();
+                Ok(())
+            })?
         }
         else if state.at(RbqTokenType::LeftParen) {
             state.bump();
