@@ -26,14 +26,14 @@ impl<'config> DejavuParser<'config> {
 
         let let_keyword = children_iter.next().ok_or_else(|| source.syntax_error("Missing 'let' keyword", span.start))?;
         match let_keyword {
-            RedTree::Leaf(t) if t.kind == DejavuSyntaxKind::Keyword(crate::lexer::DejavuKeywords::Let) => {}
+            RedTree::Token(t) if t.kind == DejavuSyntaxKind::Keyword(crate::lexer::DejavuKeywords::Let) => {}
             _ => {
                 return Err(source.syntax_error("Expected 'let' keyword", let_keyword.span().start));
             }
         }
 
         let mut is_mutable = false;
-        if let Some(RedTree::Leaf(t)) = children_iter.peek() {
+        if let Some(RedTree::Token(t)) = children_iter.peek() {
             if t.kind == DejavuSyntaxKind::Keyword(crate::lexer::DejavuKeywords::Mut) {
                 is_mutable = true;
                 children_iter.next();
@@ -71,7 +71,7 @@ impl<'config> DejavuParser<'config> {
 
         while let Some(unexpected_child) = children_iter.next() {
             match unexpected_child {
-                RedTree::Leaf(t) if t.kind == DejavuSyntaxKind::Semicolon => {}
+                RedTree::Token(t) if t.kind == DejavuSyntaxKind::Semicolon => {}
                 _ => {
                     let span = unexpected_child.span();
                     if span.start == span.end {
@@ -235,7 +235,7 @@ impl<'config> DejavuParser<'config> {
         let mut parts = Vec::new();
 
         for child in node.children() {
-            if let RedTree::Leaf(t) = child {
+            if let RedTree::Token(t) = child {
                 match t.kind {
                     DejavuSyntaxKind::Whitespace | DejavuSyntaxKind::Newline | DejavuSyntaxKind::LineComment | DejavuSyntaxKind::BlockComment => continue,
                     DejavuSyntaxKind::Identifier => parts.push(Identifier { name: text(source, t.span.clone().into()), span: t.span.clone() }),

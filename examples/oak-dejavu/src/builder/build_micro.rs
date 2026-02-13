@@ -11,7 +11,7 @@ impl<'config> DejavuParser<'config> {
 
         for child in node.children() {
             match child {
-                RedTree::Leaf(t) => match t.kind {
+                RedTree::Token(t) => match t.kind {
                     DejavuSyntaxKind::Whitespace | DejavuSyntaxKind::Newline | DejavuSyntaxKind::LineComment | DejavuSyntaxKind::BlockComment => continue,
                     DejavuSyntaxKind::Identifier => {
                         name.name = text(source, t.span.clone().into());
@@ -51,7 +51,7 @@ impl<'config> DejavuParser<'config> {
 
         for child in node.children() {
             match child {
-                RedTree::Leaf(t) => match t.kind {
+                RedTree::Token(t) => match t.kind {
                     DejavuSyntaxKind::Whitespace | DejavuSyntaxKind::Newline | DejavuSyntaxKind::LineComment | DejavuSyntaxKind::BlockComment => continue,
                     DejavuSyntaxKind::Identifier => {
                         if name.name.is_empty() {
@@ -95,7 +95,7 @@ impl<'config> DejavuParser<'config> {
 
         for child in node.children() {
             match child {
-                RedTree::Leaf(t) => match t.kind {
+                RedTree::Token(t) => match t.kind {
                     DejavuSyntaxKind::Whitespace | DejavuSyntaxKind::Newline | DejavuSyntaxKind::LineComment | DejavuSyntaxKind::BlockComment => continue,
                     _ => {}
                 },
@@ -139,7 +139,7 @@ impl<'config> DejavuParser<'config> {
         let mut ty = None;
         for child in node.children() {
             match child {
-                RedTree::Leaf(t) => match t.kind {
+                RedTree::Token(t) => match t.kind {
                     DejavuSyntaxKind::Whitespace | DejavuSyntaxKind::Newline | DejavuSyntaxKind::LineComment | DejavuSyntaxKind::BlockComment => continue,
                     DejavuSyntaxKind::Identifier => {
                         if name.is_none() {

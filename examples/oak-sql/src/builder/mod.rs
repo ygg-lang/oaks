@@ -87,7 +87,7 @@ impl<'config> SqlBuilder<'config> {
                     }
                     _ => {}
                 },
-                RedTree::Leaf(t) => {
+                RedTree::Token(t) => {
                     if t.kind == SqlTokenType::Where {
                         where_found = true;
                     }
@@ -105,7 +105,7 @@ impl<'config> SqlBuilder<'config> {
 
         for child in node.children() {
             match child {
-                RedTree::Leaf(t) => match t.kind {
+                RedTree::Token(t) => match t.kind {
                     SqlTokenType::Star => is_star = true,
                     SqlTokenType::Identifier_ => {
                         if expr.is_none() {
@@ -152,7 +152,7 @@ impl<'config> SqlBuilder<'config> {
                                 RedTree::Node(sn) if sn.green.kind == SqlElementType::Identifier => {
                                     columns.push(self.build_identifier(sn, source)?);
                                 }
-                                RedTree::Leaf(st) if st.kind == SqlTokenType::Identifier_ => {
+                                RedTree::Token(st) if st.kind == SqlTokenType::Identifier_ => {
                                     columns.push(Identifier { name: self.get_text(st.span.clone(), source), span: st.span.clone() });
                                 }
                                 _ => {}
@@ -190,12 +190,23 @@ impl<'config> SqlBuilder<'config> {
         let mut selection = None;
 
         for child in node.children() {
-            if let RedTree::Node(n) = child {
-                match n.green.kind {
-                    SqlElementType::TableName => table_name = Some(self.build_table_name(n, source)?),
-                    SqlElementType::Assignment => assignments.push(self.build_assignment(n, source)?),
-                    SqlElementType::Expression => selection = Some(self.build_expression(n, source)?),
+            match child {
+                RedTree::Token(t) => match t.kind {
+                    SqlTokenType::Set => {}
+                    SqlTokenType::Identifier_ => {
+                        if table_name.is_none() {
+                            table_name = Some(Identifier { name: self.get_text(t.span.clone(), source), span: t.span.clone() });
+                        }
+                    }
                     _ => {}
+                },
+                RedTree::Node(n) => {
+                    match n.green.kind {
+                        SqlElementType::TableName => table_name = Some(self.build_table_name(n, source)?),
+                        SqlElementType::Assignment => assignments.push(self.build_assignment(n, source)?),
+                        SqlElementType::Expression => selection = Some(self.build_expression(n, source)?),
+                        _ => {}
+                    }
                 }
             }
         }
@@ -217,7 +228,11 @@ impl<'config> SqlBuilder<'config> {
             }
         }
 
-        Ok(Assignment { column: column.ok_or_else(|| OakError::custom_error("Missing column in assignment"))?, value: value.ok_or_else(|| OakError::custom_error("Missing value in assignment"))?, span: node.span() })
+        Ok(Assignment {
+            column: column.ok_or_else(|| OakError::custom_error("Missing column in assignment"))?,
+            value: value.ok_or_else(|| OakError::custom_error("Missing value in assignment"))?,
+            span: node.span(),
+        })
     }
 
     fn build_delete_statement<'a>(&self, node: RedNode<'a, SqlLanguage>, source: &SourceText) -> Result<DeleteStatement, OakError> {
@@ -225,16 +240,27 @@ impl<'config> SqlBuilder<'config> {
         let mut selection = None;
 
         for child in node.children() {
-            if let RedTree::Node(n) = child {
-                match n.green.kind {
-                    SqlElementType::TableName => table_name = Some(self.build_table_name(n, source)?),
-                    SqlElementType::Expression => selection = Some(self.build_expression(n, source)?),
-                    _ => {}
+            match child {
+                RedTree::Token(t) => {
+                    if t.kind == SqlTokenType::From {
+                        // skip
+                    }
+                },
+                RedTree::Node(n) => {
+                    match n.green.kind {
+                        SqlElementType::TableName => table_name = Some(self.build_table_name(n, source)?),
+                        SqlElementType::Expression => selection = Some(self.build_expression(n, source)?),
+                        _ => {}
+                    }
                 }
             }
         }
 
-        Ok(DeleteStatement { table_name: table_name.ok_or_else(|| OakError::custom_error("Missing table name in DELETE"))?, selection, span: node.span() })
+        Ok(DeleteStatement {
+            table_name: table_name.ok_or_else(|| OakError::custom_error("Missing table name in DELETE"))?,
+            selection,
+            span: node.span(),
+        })
     }
 
     fn build_create_statement<'a>(&self, node: RedNode<'a, SqlLanguage>, source: &SourceText) -> Result<CreateStatement, OakError> {
@@ -245,7 +271,7 @@ impl<'config> SqlBuilder<'config> {
 
         for child in node.children() {
             match child {
-                RedTree::Leaf(t) => match t.kind {
+                RedTree::Token(t) => match t.kind {
                     SqlTokenType::Table => object_type = CreateObjectType::Table,
                     SqlTokenType::View => object_type = CreateObjectType::View,
                     SqlTokenType::Index => object_type = CreateObjectType::Index,
@@ -424,26 +450,24 @@ impl<'config> SqlBuilder<'config> {
         let mut is_drop = false;
         let mut is_rename = false;
         let mut identifier: Option<ast::Identifier> = None;
-        let mut data_type = None;
+        let mut data_type_tokens = Vec::new();
 
         for child in node.children() {
             match child {
-                RedTree::Leaf(t) => match t.kind {
+                RedTree::Token(t) => match t.kind {
                     Add => is_add = true,
                     Drop => is_drop = true,
                     Rename => is_rename = true,
                     Identifier_ => {
                         if identifier.is_none() {
                             identifier = Some(ast::Identifier { name: self.get_text(t.span.clone(), source), span: t.span.clone() });
-                        }
-                        else {
-                            data_type = Some(self.get_text(t.span.clone(), source));
+                        } else if is_add {
+                            data_type_tokens.push(t.span.clone());
                         }
                     }
-                    // Keywords that might be used as types in this simple parser
-                    Select | From | Where | Insert | Update | Delete | Int | Integer | Varchar | Char | Text | Date | Time | Timestamp | Decimal | Float | Double | Boolean => {
-                        if identifier.is_some() {
-                            data_type = Some(self.get_text(t.span.clone(), source));
+                    LeftParen | RightParen | NumberLiteral | Comma | Int | Integer | Varchar | Char | Text | Date | Time | Timestamp | Decimal | Float | Double | Boolean => {
+                        if is_add && identifier.is_some() {
+                            data_type_tokens.push(t.span.clone());
                         }
                     }
                     _ => {}
@@ -454,6 +478,14 @@ impl<'config> SqlBuilder<'config> {
                 _ => {}
             }
         }
+
+        let data_type = if data_type_tokens.is_empty() {
+            None
+        } else {
+            let start = data_type_tokens[0].start;
+            let end = data_type_tokens.last().unwrap().end;
+            Some(self.get_text(start..end, source))
+        };
 
         if is_add {
             Ok(ast::AlterAction::AddColumn { name: identifier.ok_or_else(|| OakError::custom_error("Missing column name in ALTER TABLE ADD"))?, data_type })

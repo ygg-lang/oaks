@@ -62,40 +62,15 @@ impl RbqRoot {
                         m.annotations.extend(pending_annotations.drain(..));
                         items.push(RbqItem::Micro(m))
                     }
-                    RbqElementType::QueryPipeline | RbqElementType::Closure | RbqElementType::BinaryExpr | RbqElementType::Expression => {
+                    RbqElementType::QueryPipeline | RbqElementType::Closure | RbqElementType::BinaryExpr | RbqElementType::Expression | RbqElementType::CallExpr | RbqElementType::MemberExpr | RbqElementType::Literal | RbqElementType::MagicVar => {
                         let expr = RbqExpr::lower(node, source);
                         items.push(RbqItem::Query(expr));
                     }
                     RbqElementType::Ident => {
                         let text = source[node.span()].trim();
-                        if text == "query" {
-                            let mut next_expr = None;
-                            let mut found_query = false;
-                            let mut found_eq = false;
-                            for sibling in red.children() {
-                                if !found_query {
-                                    if let RedTree::Node(n) = &sibling {
-                                        if n.kind::<RbqElementType>() == RbqElementType::Ident && source[n.span()].trim() == "query" {
-                                            found_query = true;
-                                        }
-                                    }
-                                    continue;
-                                }
-                                match sibling {
-                                    RedTree::Leaf(leaf) if leaf.kind() == RbqTokenType::Eq => found_eq = true,
-                                    RedTree::Node(n) if found_eq => {
-                                        let k = n.kind::<RbqElementType>();
-                                        if k == RbqElementType::Expression || k == RbqElementType::QueryPipeline || k == RbqElementType::Closure || k == RbqElementType::BinaryExpr {
-                                            next_expr = Some(RbqExpr::lower(n, source));
-                                            break;
-                                        }
-                                    }
-                                    _ => {}
-                                }
-                            }
-                            if let Some(expr) = next_expr {
-                                items.push(RbqItem::Query(expr));
-                            }
+                        if text != "query" {
+                            let expr = RbqExpr::lower(node, source);
+                            items.push(RbqItem::Query(expr));
                         }
                     }
                     RbqElementType::Eof | RbqElementType::Error => {}
@@ -279,7 +254,7 @@ impl RbqNamespace {
                         items.push(RbqItem::Import(RbqImport::lower(node, source)))
                     }
                 }
-                RbqElementType::QueryPipeline | RbqElementType::Closure | RbqElementType::BinaryExpr | RbqElementType::Expression => {
+                RbqElementType::QueryPipeline | RbqElementType::Closure | RbqElementType::BinaryExpr | RbqElementType::Expression | RbqElementType::CallExpr | RbqElementType::MemberExpr | RbqElementType::Literal | RbqElementType::MagicVar | RbqElementType::Ident => {
                     if let Some(node) = child.as_node() {
                         items.push(RbqItem::Query(RbqExpr::lower(node, source)))
                     }
@@ -356,7 +331,7 @@ impl RbqEnum {
                     _ => {}
                 },
                 RedTree::Leaf(leaf) if leaf.kind() == RbqTokenType::Ident && name.is_empty() => name = source[leaf.span()].trim().to_string(),
-                RedTree::Leaf(_) => {}
+                RedTree::Leaf(_) | RedTree::Token(_) => {}
             }
         }
 
@@ -823,36 +798,36 @@ impl RbqExpr {
                 let mut op = String::new();
                 let mut right = None;
                 for child in red.children() {
-                    match child {
-                        RedTree::Node(node) => {
-                            if left.is_none() {
-                                left = Some(Box::new(RbqExpr::lower(node, source)))
-                            }
-                            else {
-                                right = Some(Box::new(RbqExpr::lower(node, source)))
-                            }
-                        }
-                        RedTree::Leaf(leaf) => {
-                            let k = leaf.kind();
-                            if k == RbqTokenType::Plus
-                                || k == RbqTokenType::Minus
-                                || k == RbqTokenType::Star
-                                || k == RbqTokenType::Slash
-                                || k == RbqTokenType::EqEq
-                                || k == RbqTokenType::NotEq
-                                || k == RbqTokenType::Lt
-                                || k == RbqTokenType::Gt
-                                || k == RbqTokenType::LtEq
-                                || k == RbqTokenType::GtEq
-                                || k == RbqTokenType::AndAnd
-                                || k == RbqTokenType::OrOr
-                                || k == RbqTokenType::Eq
-                            {
-                                op = source[leaf.span()].trim().to_string()
-                            }
-                        }
+            match child {
+                RedTree::Node(node) => {
+                    if left.is_none() {
+                        left = Some(Box::new(RbqExpr::lower(node, source)))
+                    }
+                    else {
+                        right = Some(Box::new(RbqExpr::lower(node, source)))
                     }
                 }
+                RedTree::Leaf(leaf) => {
+                    let k = leaf.kind();
+                    if k == RbqTokenType::Plus
+                        || k == RbqTokenType::Minus
+                        || k == RbqTokenType::Star
+                        || k == RbqTokenType::Slash
+                        || k == RbqTokenType::EqEq
+                        || k == RbqTokenType::NotEq
+                        || k == RbqTokenType::Lt
+                        || k == RbqTokenType::Gt
+                        || k == RbqTokenType::LtEq
+                        || k == RbqTokenType::GtEq
+                        || k == RbqTokenType::AndAnd
+                        || k == RbqTokenType::OrOr
+                        || k == RbqTokenType::Eq
+                    {
+                        op = source[leaf.span()].trim().to_string()
+                    }
+                }
+            }
+        }
                 if let (Some(left), Some(right)) = (left, right) { RbqExprKind::Binary { left, op, right } } else { RbqExprKind::Identifier(source[span.clone()].to_string()) }
             }
             RbqElementType::UnaryExpr => {
@@ -930,10 +905,13 @@ impl RbqExpr {
                         RedTree::Node(node) => match node.kind::<RbqElementType>() {
                             RbqElementType::ClosureArgs => {
                                 for arg in node.children() {
-                                    if let RedTree::Leaf(leaf) = arg {
-                                        if leaf.kind() == RbqTokenType::Ident {
-                                            args.push(source[leaf.span()].trim().to_string())
+                                    match arg {
+                                        RedTree::Leaf(leaf) | RedTree::Token(leaf) => {
+                                            if leaf.kind() == RbqTokenType::Ident {
+                                                args.push(source[leaf.span()].trim().to_string())
+                                            }
                                         }
+                                        _ => {}
                                     }
                                 }
                             }
@@ -974,7 +952,7 @@ impl RbqPipelineStep {
         for child in red.children() {
             match child {
                 RedTree::Node(node) => args.push(RbqExpr::lower(node, source)),
-                RedTree::Leaf(leaf) if leaf.kind() == RbqTokenType::Ident && name.is_empty() => name = source[leaf.span()].trim().to_string(),
+                RedTree::Leaf(leaf) | RedTree::Token(leaf) if leaf.kind() == RbqTokenType::Ident && name.is_empty() => name = source[leaf.span()].trim().to_string(),
                 _ => {}
             }
         }

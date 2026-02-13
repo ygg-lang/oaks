@@ -344,6 +344,10 @@ impl<'s, S: Source + ?Sized, L: Language> LexerState<'s, S, L> {
         Self { cursor: SourceCursor::new_at(source, stable_offset), tokens: reused_tokens, errors: vec![] }
     }
 
+    pub fn sub_state(&self, start: usize, _end: usize) -> Self {
+        Self { cursor: SourceCursor::new_at(self.cursor.source(), start), tokens: vec![], errors: vec![] }
+    }
+
     /// Gets the remaining text from the current position to the end of the source.
     ///
     /// # Returns

@@ -432,12 +432,12 @@ impl<'config> SqlParser<'config> {
         use crate::lexer::SqlTokenType::*;
         let cp = state.checkpoint();
         state.expect(Alter).ok();
-
+        
         if state.eat(Table) {
             let table_cp = state.checkpoint();
             state.expect(Identifier_).ok(); // TableName
             state.finish_at(table_cp, SqlElementType::TableName);
-
+            
             // Simplified ALTER TABLE actions
             if state.peek_kind() == Some(Add) || state.peek_kind() == Some(Drop) || state.peek_kind() == Some(Rename) {
                 let action_cp = state.checkpoint();
@@ -445,18 +445,11 @@ impl<'config> SqlParser<'config> {
                     state.eat(Column);
                     state.expect(Identifier_).ok();
                     // Optional data type
-                    if let Some(kind) = state.peek_kind() {
-                        // Eat common type keywords or any identifier
-                        if kind == Identifier_ || matches!(kind, Int | Integer | Varchar | Char | Text | Date | Time | Timestamp | Decimal | Float | Double | Boolean) {
-                            state.eat(kind);
-                        }
-                    }
-                }
-                else if state.eat(Drop) {
+                    self.parse_data_type(state);
+                } else if state.eat(Drop) {
                     state.eat(Column);
                     state.expect(Identifier_).ok();
-                }
-                else if state.eat(Rename) {
+                } else if state.eat(Rename) {
                     state.eat(To);
                     state.expect(Identifier_).ok();
                 }
@@ -467,6 +460,20 @@ impl<'config> SqlParser<'config> {
         state.eat(Semicolon);
         state.finish_at(cp, SqlElementType::AlterStatement);
         Ok(())
+    }
+
+    fn parse_data_type<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) {
+        use crate::lexer::SqlTokenType::*;
+        if state.not_at_end() && !matches!(state.peek_kind(), Some(Comma) | Some(RightParen) | Some(Primary) | Some(Not) | Some(Null) | Some(Unique) | Some(Default) | Some(Check) | Some(Foreign) | Some(References) | Some(Semicolon)) {
+            state.bump(); // Type name
+            if state.eat(LeftParen) {
+                state.expect(NumberLiteral).ok();
+                if state.eat(Comma) {
+                    state.expect(NumberLiteral).ok();
+                }
+                state.expect(RightParen).ok();
+            }
+        }
     }
 }
 

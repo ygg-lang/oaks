@@ -59,7 +59,7 @@ impl<'a, L: Language> RedTree<'a, L> {
     pub fn span(&self) -> Range<usize> {
         match self {
             RedTree::Node(n) => n.span(),
-            RedTree::Leaf(t) => t.span,
+            RedTree::Token(t) => t.span,
         }
     }
 
