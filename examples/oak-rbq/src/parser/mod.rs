@@ -690,7 +690,8 @@ impl<'config> RbqParser<'config> {
                 state.eat(RbqTokenType::RightBracket);
                 Ok(())
             })?;
-        }        else if state.at(RbqTokenType::MicroKw) {
+        }
+        else if state.at(RbqTokenType::MicroKw) {
             self.parse_micro_function(state)?
         }
         else {

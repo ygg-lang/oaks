@@ -26,7 +26,7 @@ impl crate::lexer::ValkyrieLexer<'_> {
 
     fn run_template<S: Source + ?Sized>(&self, state: &mut State<'_, S>) -> Result<(), OakError> {
         let start = state.get_position();
-        let end = state.get_source().len();
+        let end = state.source().length();
         self.lex_interpolation(state, start, end, true);
         Ok(())
     }

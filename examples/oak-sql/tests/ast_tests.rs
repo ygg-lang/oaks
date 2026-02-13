@@ -95,10 +95,10 @@ fn test_sql_alter_to_source_complex_type() {
 
     let mut session = ParseSession::<SqlLanguage>::default();
     let result = builder.build(&source, &[], &mut session);
-    
+
     assert!(result.result.is_ok());
     let root = result.result.unwrap();
-    
+
     let generated = root.to_source_string();
     println!("Generated alter source: {}", generated);
     assert!(generated.contains("ALTER TABLE users"));

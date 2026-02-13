@@ -34,7 +34,7 @@ impl<'a, L: Language> fmt::Debug for RedTree<'a, L> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
             Self::Node(node) => fmt::Debug::fmt(node, f),
-            Self::Token(leaf) => fmt::Debug::fmt(leaf, f),
+            Self::Leaf(leaf) => fmt::Debug::fmt(leaf, f),
         }
     }
 }

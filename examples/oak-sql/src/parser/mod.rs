@@ -432,12 +432,12 @@ impl<'config> SqlParser<'config> {
         use crate::lexer::SqlTokenType::*;
         let cp = state.checkpoint();
         state.expect(Alter).ok();
-        
+
         if state.eat(Table) {
             let table_cp = state.checkpoint();
             state.expect(Identifier_).ok(); // TableName
             state.finish_at(table_cp, SqlElementType::TableName);
-            
+
             // Simplified ALTER TABLE actions
             if state.peek_kind() == Some(Add) || state.peek_kind() == Some(Drop) || state.peek_kind() == Some(Rename) {
                 let action_cp = state.checkpoint();
@@ -446,10 +446,12 @@ impl<'config> SqlParser<'config> {
                     state.expect(Identifier_).ok();
                     // Optional data type
                     self.parse_data_type(state);
-                } else if state.eat(Drop) {
+                }
+                else if state.eat(Drop) {
                     state.eat(Column);
                     state.expect(Identifier_).ok();
-                } else if state.eat(Rename) {
+                }
+                else if state.eat(Rename) {
                     state.eat(To);
                     state.expect(Identifier_).ok();
                 }

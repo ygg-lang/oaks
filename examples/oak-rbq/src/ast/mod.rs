@@ -361,7 +361,16 @@ impl RbqEnumMember {
                     }
                 }
                 RbqElementType::Ident if name.is_empty() => name = source[child.span()].trim().to_string(),
-                RbqElementType::Literal => value = Some(source[child.span()].trim().to_string()),
+                RbqElementType::Literal => {
+                    let text = source[child.span()].trim();
+                    if text.starts_with('"') || text.starts_with('\'') {
+                        value = Some(text.to_string());
+                    } else if text == "true" || text == "false" {
+                        value = Some(text.to_string());
+                    } else if text.chars().next().map_or(false, |c| c.is_ascii_digit()) {
+                        value = Some(text.to_string());
+                    }
+                }
                 _ => {}
             }
         }

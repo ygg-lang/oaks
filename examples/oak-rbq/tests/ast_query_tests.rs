@@ -97,8 +97,8 @@ fn test_rbq_ast_query_pipeline() {
             assert_eq!(steps[1].name, "sort");
         }
         else if let RbqExprKind::Binary { left, op, right } = &expr.kind {
-             // 如果 Pipeline 被解析成了 Binary (可能是因为优先级问题)
-             println!("Got Binary: {:?} {:?} {:?}", left, op, right);
+            // 如果 Pipeline 被解析成了 Binary (可能是因为优先级问题)
+            println!("Got Binary: {:?} {:?} {:?}", left, op, right);
         }
         else {
             panic!("Expected Pipeline, got {:?}", expr.kind);

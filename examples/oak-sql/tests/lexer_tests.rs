@@ -80,3 +80,23 @@ fn test_sql_lexer_strings() {
 
     assert_eq!(string_tokens.len(), 2)
 }
+
+#[test]
+fn test_sql_lexer_trigger_keywords() {
+    let config = SqlLanguage::default();
+    let lexer = SqlLexer::new(&config);
+    let source = SourceText::new("CREATE TRIGGER my_trigger AFTER INSERT ON my_table FOR EACH ROW BEGIN END;");
+
+    let mut session = oak_core::parser::session::ParseSession::<SqlLanguage>::default();
+    let result = lexer.lex(&source, &[], &mut session);
+    assert!(result.result.is_ok());
+
+    let tokens = result.result.unwrap();
+    let token_kinds: Vec<_> = tokens.iter().map(|t| t.kind).collect();
+
+    assert!(token_kinds.contains(&SqlSyntaxKind::Trigger));
+    assert!(token_kinds.contains(&SqlSyntaxKind::After));
+    assert!(token_kinds.contains(&SqlSyntaxKind::For));
+    assert!(token_kinds.contains(&SqlSyntaxKind::Each));
+    assert!(token_kinds.contains(&SqlSyntaxKind::Row));
+}
