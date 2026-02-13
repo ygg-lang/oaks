@@ -1,5 +1,8 @@
 use oak_core::{Parser, SourceText, parser::session::ParseSession};
-use oak_rbq::{RbqLanguage, RbqParser, ast::{RbqRoot, RbqLiteral, RbqExprKind}};
+use oak_rbq::{
+    RbqLanguage, RbqParser,
+    ast::{RbqExprKind, RbqLiteral, RbqRoot},
+};
 
 #[test]
 fn test_rbq_ast_micro_return_type() {
@@ -22,7 +25,8 @@ fn test_rbq_ast_micro_return_type() {
         assert_eq!(m.args.len(), 2);
         if let Some(oak_rbq::ast::RbqType::Named { path, .. }) = &m.return_type {
             assert_eq!(path, "i32");
-        } else {
+        }
+        else {
             panic!("Expected named return type");
         }
     }
@@ -47,23 +51,32 @@ fn test_rbq_ast_typed_literals() {
     let root = RbqRoot::lower(red, source.text());
 
     assert_eq!(root.items.len(), 3);
-    
+
     if let oak_rbq::ast::RbqItem::Query(expr) = &root.items[0] {
         if let RbqExprKind::Literal(RbqLiteral::Number(n)) = &expr.kind {
             assert_eq!(n, "123");
-        } else { panic!("Expected Number literal"); }
+        }
+        else {
+            panic!("Expected Number literal");
+        }
     }
 
     if let oak_rbq::ast::RbqItem::Query(expr) = &root.items[1] {
         if let RbqExprKind::Literal(RbqLiteral::String(s)) = &expr.kind {
             assert_eq!(s, "\"hello\"");
-        } else { panic!("Expected String literal"); }
+        }
+        else {
+            panic!("Expected String literal");
+        }
     }
 
     if let oak_rbq::ast::RbqItem::Query(expr) = &root.items[2] {
         if let RbqExprKind::Literal(RbqLiteral::Boolean(b)) = &expr.kind {
             assert_eq!(*b, true);
-        } else { panic!("Expected Boolean literal"); }
+        }
+        else {
+            panic!("Expected Boolean literal");
+        }
     }
 }
 
@@ -87,7 +100,7 @@ fn test_rbq_ast_namespace_annotations() {
         let _ = &ns.annotations; // Force check
         assert_eq!(ns.annotations.len(), 1);
         assert_eq!(ns.annotations[0].name, "meta");
-        
+
         assert_eq!(ns.items.len(), 1);
         if let oak_rbq::ast::RbqItem::Struct(s) = &ns.items[0] {
             assert_eq!(s.annotations.len(), 1);
@@ -117,17 +130,24 @@ fn test_rbq_ast_complex_trait() {
         // First item is a field
         if let oak_rbq::ast::RbqTraitItem::Field(f) = &t.items[0] {
             assert_eq!(f.name, "user_id");
-        } else { panic!("Expected field"); }
-        
+        }
+        else {
+            panic!("Expected field");
+        }
+
         // Second item is a method (micro)
         if let oak_rbq::ast::RbqTraitItem::Method(m) = &t.items[1] {
             assert_eq!(m.name, "login");
             if let Some(oak_rbq::ast::RbqType::Named { path, .. }) = &m.return_type {
                 assert_eq!(path, "bool");
-            } else {
+            }
+            else {
                 panic!("Expected named return type");
             }
-        } else { panic!("Expected method"); }
+        }
+        else {
+            panic!("Expected method");
+        }
     }
 }
 
@@ -153,7 +173,8 @@ fn test_rbq_ast_lowering() {
         assert_eq!(s.fields[0].name, "id");
         if let oak_rbq::ast::RbqType::Named { path, .. } = &s.fields[0].type_ref {
             assert_eq!(path, "i32");
-        } else {
+        }
+        else {
             panic!("Expected named type");
         }
     }
@@ -184,7 +205,8 @@ fn test_rbq_ast_utf8() {
         assert_eq!(s.fields[0].name, "name");
         if let oak_rbq::ast::RbqType::Named { path, .. } = &s.fields[0].type_ref {
             assert_eq!(path, "utf8");
-        } else {
+        }
+        else {
             panic!("Expected named type");
         }
     }
@@ -292,10 +314,12 @@ fn test_rbq_ast_complex_type() {
             assert_eq!(generic_args.len(), 1);
             if let oak_rbq::ast::RbqType::Named { path: arg_path, .. } = &generic_args[0] {
                 assert_eq!(arg_path, "i32");
-            } else {
+            }
+            else {
                 panic!("Expected named generic arg");
             }
-        } else {
+        }
+        else {
             panic!("Expected named type");
         }
     }

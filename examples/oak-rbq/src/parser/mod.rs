@@ -456,7 +456,8 @@ impl<'config> RbqParser<'config> {
                 while state.not_at_end() && !state.at(RbqTokenType::RightParen) {
                     let checkpoint = state.checkpoint();
                     state.incremental_node(RbqElementType::FieldDef, |state| {
-                        if !state.eat(RbqTokenType::Ident) { // arg name
+                        if !state.eat(RbqTokenType::Ident) {
+                            // arg name
                             state.record_expected("argument name");
                         }
                         self.skip_trivia(state);
@@ -631,7 +632,8 @@ impl<'config> RbqParser<'config> {
             self.parse_unary_expr(state)?;
             state.finish_at(checkpoint, RbqElementType::UnaryExpr);
             Ok(())
-        } else {
+        }
+        else {
             self.parse_primary_expr(state)
         }
     }

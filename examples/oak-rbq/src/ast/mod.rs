@@ -195,14 +195,16 @@ impl RbqNamespace {
                 RbqElementType::Ident => {
                     if name.is_empty() {
                         name = source[child.span()].trim().to_string();
-                    } else {
+                    }
+                    else {
                         name.push_str(source[child.span()].trim());
                     }
                 }
                 RbqElementType::Utf8Kw => {
                     if name.is_empty() {
                         name = source[child.span()].trim().to_string();
-                    } else {
+                    }
+                    else {
                         name.push_str(source[child.span()].trim());
                     }
                 }
@@ -216,7 +218,8 @@ impl RbqNamespace {
                         let ann = RbqAnnotation::lower(node, source);
                         if name.is_empty() {
                             annotations.push(ann);
-                        } else {
+                        }
+                        else {
                             pending_annotations.push(ann);
                         }
                     }
@@ -538,17 +541,7 @@ impl RbqField {
             }
         }
 
-        Self {
-            annotations,
-            name,
-            type_ref: type_ref.unwrap_or(RbqType::Named {
-                path: "any".to_string(),
-                generic_args: Vec::new(),
-                is_physical_ptr: false,
-                is_optional: false,
-            }),
-            default_value,
-        }
+        Self { annotations, name, type_ref: type_ref.unwrap_or(RbqType::Named { path: "any".to_string(), generic_args: Vec::new(), is_physical_ptr: false, is_optional: false }), default_value }
     }
 }
 
@@ -564,12 +557,7 @@ impl RbqTypeAlias {
     pub fn lower(red: RedNode<RbqLanguage>, source: &str) -> Self {
         let mut annotations = Vec::new();
         let mut name = String::new();
-        let mut type_ref = RbqType::Named { 
-            path: "unknown".to_string(), 
-            generic_args: Vec::new(), 
-            is_physical_ptr: false, 
-            is_optional: false 
-        };
+        let mut type_ref = RbqType::Named { path: "unknown".to_string(), generic_args: Vec::new(), is_physical_ptr: false, is_optional: false };
 
         for child in red.children() {
             match child.kind::<RbqElementType>() {
@@ -595,12 +583,7 @@ impl RbqTypeAlias {
 #[derive(Clone, Debug, PartialEq)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub enum RbqType {
-    Named {
-        path: String,
-        generic_args: Vec<RbqType>,
-        is_physical_ptr: bool,
-        is_optional: bool,
-    },
+    Named { path: String, generic_args: Vec<RbqType>, is_physical_ptr: bool, is_optional: bool },
     InlineStruct(Vec<RbqField>),
     PhysicalRef(Box<RbqType>),
     Optional(Box<RbqType>),
@@ -656,8 +639,12 @@ impl RbqType {
 
         if !inline_fields.is_empty() {
             let mut res = RbqType::InlineStruct(inline_fields);
-            if is_ref { res = RbqType::PhysicalRef(Box::new(res)); }
-            if is_optional { res = RbqType::Optional(Box::new(res)); }
+            if is_ref {
+                res = RbqType::PhysicalRef(Box::new(res));
+            }
+            if is_optional {
+                res = RbqType::Optional(Box::new(res));
+            }
             res
         }
         else if let Some(lit) = literal {
@@ -810,11 +797,7 @@ impl RbqExpr {
                     match leaf.kind() {
                         RbqTokenType::StringLiteral => {
                             // Strip quotes
-                            let s = if text.starts_with('"') && text.ends_with('"') {
-                                text[1..text.len()-1].to_string()
-                            } else {
-                                text
-                            };
+                            let s = if text.starts_with('"') && text.ends_with('"') { text[1..text.len() - 1].to_string() } else { text };
                             RbqExprKind::Literal(RbqLiteral::String(s))
                         }
                         RbqTokenType::NumberLiteral => RbqExprKind::Literal(RbqLiteral::Number(text)),
@@ -851,7 +834,20 @@ impl RbqExpr {
                         }
                         RedTree::Leaf(leaf) => {
                             let k = leaf.kind();
-                            if k == RbqTokenType::Plus || k == RbqTokenType::Minus || k == RbqTokenType::Star || k == RbqTokenType::Slash || k == RbqTokenType::EqEq || k == RbqTokenType::NotEq || k == RbqTokenType::Lt || k == RbqTokenType::Gt || k == RbqTokenType::LtEq || k == RbqTokenType::GtEq || k == RbqTokenType::AndAnd || k == RbqTokenType::OrOr || k == RbqTokenType::Eq {
+                            if k == RbqTokenType::Plus
+                                || k == RbqTokenType::Minus
+                                || k == RbqTokenType::Star
+                                || k == RbqTokenType::Slash
+                                || k == RbqTokenType::EqEq
+                                || k == RbqTokenType::NotEq
+                                || k == RbqTokenType::Lt
+                                || k == RbqTokenType::Gt
+                                || k == RbqTokenType::LtEq
+                                || k == RbqTokenType::GtEq
+                                || k == RbqTokenType::AndAnd
+                                || k == RbqTokenType::OrOr
+                                || k == RbqTokenType::Eq
+                            {
                                 op = source[leaf.span()].trim().to_string()
                             }
                         }

@@ -86,8 +86,7 @@ pub struct Formatter<L: Language + 'static> {
     pub context: FormatContext<L>,
 }
 
-impl<L: Language + 'static> Formatter<L>
-{
+impl<L: Language + 'static> Formatter<L> {
     /// Creates a new formatter
     pub fn new(config: FormatConfig) -> Self {
         let mut formatter = Self { rules: RuleSet::new(), context: FormatContext::new(config) };

@@ -34,14 +34,7 @@ pub struct TemplateConfig {
 
 impl Default for TemplateConfig {
     fn default() -> Self {
-        Self {
-            control_start: "<%".to_string(),
-            control_end: "%>".to_string(),
-            interpolation_start: "{".to_string(),
-            interpolation_end: "}".to_string(),
-            comment_start: "<#".to_string(),
-            comment_end: "#>".to_string(),
-        }
+        Self { control_start: "<%".to_string(), control_end: "%>".to_string(), interpolation_start: "{".to_string(), interpolation_end: "}".to_string(), comment_start: "<#".to_string(), comment_end: "#>".to_string() }
     }
 }
 
@@ -57,10 +50,7 @@ pub struct DejavuLanguage {
 
 impl Default for DejavuLanguage {
     fn default() -> Self {
-        Self { 
-            syntax_mode: SyntaxMode::Template,
-            template: TemplateConfig::default(),
-        }
+        Self { syntax_mode: SyntaxMode::Template, template: TemplateConfig::default() }
     }
 }
 

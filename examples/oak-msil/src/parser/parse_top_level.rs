@@ -90,7 +90,8 @@ impl<'config> MsilParser<'config> {
                 state.bump();
                 state.finish_at(id_cp, crate::parser::element_type::MsilElementType::Identifier);
                 self.skip_trivia(state);
-            } else {
+            }
+            else {
                 state.bump();
             }
         }

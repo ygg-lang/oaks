@@ -127,7 +127,7 @@ impl<'a, L: Language> RedTree<'a, L> {
 /// analysis.
 ///
 /// # Design Note: Reference vs Owned
-/// We store `&'a GreenNode<'a, L>` here instead of `GreenNode<'a, L>` to keep 
+/// We store `&'a GreenNode<'a, L>` here instead of `GreenNode<'a, L>` to keep
 /// `RedNode` as small as possible (16 bytes: 8 for pointer + 8 for offset).
 /// This makes it efficient to pass `RedNode` by value during tree traversal.
 pub struct RedNode<'a, L: Language> {

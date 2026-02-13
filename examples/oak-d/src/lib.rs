@@ -20,11 +20,9 @@ pub mod lsp;
 /// Parser module.
 pub mod parser;
 
-/*
-/// MCP module.
-#[cfg(feature = "mcp")]
-pub mod mcp;
-*/
+// MCP module.
+// #[cfg(feature = "mcp")]
+// pub mod mcp;
 
 pub use crate::{ast::DRoot, builder::DBuilder, language::DLanguage, lexer::DLexer, parser::DParser};
 
@@ -38,10 +36,8 @@ pub use crate::lsp::DLanguageService;
 #[cfg(feature = "lsp")]
 pub use crate::lsp::formatter::DFormatter;
 
-/*
-/// MCP service implementation.
-#[cfg(feature = "mcp")]
-pub use crate::mcp::serve_d_mcp;
-*/
+// MCP service implementation.
+// #[cfg(feature = "mcp")]
+// pub use crate::mcp::serve_d_mcp;
 pub use lexer::token_type::DTokenType;
 pub use parser::element_type::DElementType;

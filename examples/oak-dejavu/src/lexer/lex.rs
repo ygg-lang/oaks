@@ -214,12 +214,7 @@ impl crate::lexer::DejavuLexer<'_> {
                     if state.starts_with(&template.control_end) {
                         break;
                     }
-                    if let Some(c) = state.current() {
-                        state.advance(c.len_utf8())
-                    }
-                    else {
-                        break
-                    }
+                    if let Some(c) = state.current() { state.advance(c.len_utf8()) } else { break }
                 }
                 let content_end = state.get_position();
 
@@ -252,7 +247,7 @@ impl crate::lexer::DejavuLexer<'_> {
                 let mut depth = 1;
                 let start_char = template.interpolation_start.chars().next().unwrap_or('{');
                 let end_char = template.interpolation_end.chars().next().unwrap_or('}');
-                
+
                 while depth > 0 && state.get_position() < end {
                     if state.starts_with(&template.interpolation_start) {
                         depth += 1;

@@ -110,12 +110,10 @@ impl TokenType for VampireTokenType {
             | Self::TTypeKw => UniversalTokenRole::Keyword,
 
             // 字面量
-            Self::IntegerLiteral | Self::RealLiteral | Self::StringLiteral | Self::BoolLiteral => {
-                        UniversalTokenRole::Literal
-                    }
-                    Self::Identifier => UniversalTokenRole::Name,
+            Self::IntegerLiteral | Self::RealLiteral | Self::StringLiteral | Self::BoolLiteral => UniversalTokenRole::Literal,
+            Self::Identifier => UniversalTokenRole::Name,
 
-                    // 注释
+            // 注释
             Self::LineComment | Self::BlockComment => UniversalTokenRole::Comment,
         }
     }

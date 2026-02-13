@@ -113,16 +113,18 @@ impl<'config> SqlParser<'config> {
             let item_cp = state.checkpoint();
             if state.eat(Star) {
                 // All columns
-            } else {
+            }
+            else {
                 PrattParser::parse(state, 0, self);
                 if state.eat(As) {
                     state.expect(Identifier_).ok();
-                } else if state.peek_kind() == Some(Identifier_) {
+                }
+                else if state.peek_kind() == Some(Identifier_) {
                     state.bump();
                 }
             }
             state.finish_at(item_cp, SqlElementType::SelectItem);
-            
+
             if !state.eat(Comma) {
                 break;
             }
@@ -142,7 +144,7 @@ impl<'config> SqlParser<'config> {
                         state.eat(Outer);
                     }
                     state.expect(Join).ok();
-                    
+
                     let table_cp = state.checkpoint();
                     state.expect(Identifier_).ok(); // Joined TableName
                     state.finish_at(table_cp, SqlElementType::TableName);
@@ -219,7 +221,7 @@ impl<'config> SqlParser<'config> {
         let cp = state.checkpoint();
         state.expect(Insert).ok();
         state.eat(Into);
-        
+
         let table_cp = state.checkpoint();
         state.expect(Identifier_).ok(); // TableName
         state.finish_at(table_cp, SqlElementType::TableName);
@@ -248,13 +250,14 @@ impl<'config> SqlParser<'config> {
                 }
                 state.expect(RightParen).ok();
                 state.finish_at(value_list_cp, SqlElementType::ValueList);
-                
+
                 if !state.eat(Comma) {
                     break;
                 }
             }
             state.finish_at(values_cp, SqlElementType::ValueList);
-        } else if state.peek_kind() == Some(Select) {
+        }
+        else if state.peek_kind() == Some(Select) {
             self.parse_select(state)?;
         }
 
@@ -267,7 +270,7 @@ impl<'config> SqlParser<'config> {
         use crate::lexer::SqlTokenType::*;
         let cp = state.checkpoint();
         state.expect(Update).ok();
-        
+
         let table_cp = state.checkpoint();
         state.expect(Identifier_).ok(); // TableName
         state.finish_at(table_cp, SqlElementType::TableName);
@@ -275,7 +278,7 @@ impl<'config> SqlParser<'config> {
         if state.eat(Set) {
             while state.not_at_end() && state.peek_kind() != Some(Where) && state.peek_kind() != Some(Semicolon) {
                 let assign_cp = state.checkpoint();
-                
+
                 let col_cp = state.checkpoint();
                 state.expect(Identifier_).ok(); // Column
                 state.finish_at(col_cp, SqlElementType::ColumnName);
@@ -304,7 +307,7 @@ impl<'config> SqlParser<'config> {
         let cp = state.checkpoint();
         state.expect(Delete).ok();
         state.eat(From);
-        
+
         let table_cp = state.checkpoint();
         state.expect(Identifier_).ok(); // TableName
         state.finish_at(table_cp, SqlElementType::TableName);
@@ -322,7 +325,7 @@ impl<'config> SqlParser<'config> {
         use crate::lexer::SqlTokenType::*;
         let cp = state.checkpoint();
         state.expect(Create).ok();
-        
+
         if state.eat(Table) {
             state.eat(If);
             state.eat(Not);
@@ -335,7 +338,7 @@ impl<'config> SqlParser<'config> {
             if state.eat(LeftParen) {
                 while state.not_at_end() && state.peek_kind() != Some(RightParen) {
                     let col_cp = state.checkpoint();
-                    
+
                     let name_cp = state.checkpoint();
                     state.expect(Identifier_).ok(); // Column Name
                     state.finish_at(name_cp, SqlElementType::ColumnName);
@@ -356,23 +359,30 @@ impl<'config> SqlParser<'config> {
                     while state.not_at_end() && !matches!(state.peek_kind(), Some(Comma) | Some(RightParen)) {
                         if state.eat(Primary) {
                             state.expect(Key).ok();
-                        } else if state.eat(Not) {
+                        }
+                        else if state.eat(Not) {
                             state.expect(Null).ok();
-                        } else if state.eat(Null) {
-                        } else if state.eat(Unique) {
-                        } else if state.eat(Default) {
+                        }
+                        else if state.eat(Null) {
+                        }
+                        else if state.eat(Unique) {
+                        }
+                        else if state.eat(Default) {
                             let expr_cp = state.checkpoint();
                             PrattParser::parse(state, 0, self);
                             state.finish_at(expr_cp, SqlElementType::Expression);
-                        } else if state.eat(Check) {
+                        }
+                        else if state.eat(Check) {
                             if state.eat(LeftParen) {
                                 let expr_cp = state.checkpoint();
                                 PrattParser::parse(state, 0, self);
                                 state.finish_at(expr_cp, SqlElementType::Expression);
                                 state.expect(RightParen).ok();
                             }
-                        } else if state.eat(AutoIncrement) {
-                        } else {
+                        }
+                        else if state.eat(AutoIncrement) {
+                        }
+                        else {
                             state.bump();
                         }
                     }
@@ -384,11 +394,13 @@ impl<'config> SqlParser<'config> {
                 }
                 state.expect(RightParen).ok();
             }
-        } else if state.eat(View) {
+        }
+        else if state.eat(View) {
             state.expect(Identifier_).ok();
             state.expect(As).ok();
             self.parse_select(state)?;
-        } else if state.eat(Index) {
+        }
+        else if state.eat(Index) {
             state.eat(Unique);
             state.expect(Identifier_).ok(); // Index Name
             state.expect(On).ok();
@@ -411,7 +423,7 @@ impl<'config> SqlParser<'config> {
         use crate::lexer::SqlTokenType::*;
         let cp = state.checkpoint();
         state.expect(Drop).ok();
-        
+
         if state.eat(Table) || state.eat(View) || state.eat(Index) {
             state.eat(If);
             state.eat(Exists);
@@ -429,29 +441,31 @@ impl<'config> SqlParser<'config> {
         use crate::lexer::SqlTokenType::*;
         let cp = state.checkpoint();
         state.expect(Alter).ok();
-        
+
         if state.eat(Table) {
             let table_cp = state.checkpoint();
             state.expect(Identifier_).ok(); // TableName
             state.finish_at(table_cp, SqlElementType::TableName);
-            
+
             // Simplified ALTER TABLE actions
             if state.peek_kind() == Some(Add) || state.peek_kind() == Some(Drop) || state.peek_kind() == Some(Rename) {
                 let action_cp = state.checkpoint();
                 if state.eat(Add) {
-                state.eat(Column);
-                state.expect(Identifier_).ok();
-                // Optional data type
-                if let Some(kind) = state.peek_kind() {
-                    // Eat common type keywords or any identifier
-                    if kind == Identifier_ || matches!(kind, Int | Integer | Varchar | Char | Text | Date | Time | Timestamp | Decimal | Float | Double | Boolean) {
-                        state.eat(kind);
-                    }
-                }
-            } else if state.eat(Drop) {
                     state.eat(Column);
                     state.expect(Identifier_).ok();
-                } else if state.eat(Rename) {
+                    // Optional data type
+                    if let Some(kind) = state.peek_kind() {
+                        // Eat common type keywords or any identifier
+                        if kind == Identifier_ || matches!(kind, Int | Integer | Varchar | Char | Text | Date | Time | Timestamp | Decimal | Float | Double | Boolean) {
+                            state.eat(kind);
+                        }
+                    }
+                }
+                else if state.eat(Drop) {
+                    state.eat(Column);
+                    state.expect(Identifier_).ok();
+                }
+                else if state.eat(Rename) {
                     state.eat(To);
                     state.expect(Identifier_).ok();
                 }

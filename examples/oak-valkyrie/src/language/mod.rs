@@ -1,7 +1,7 @@
 #![doc = include_str!("readme.md")]
 use crate::ast::ValkyrieRoot;
 use oak_core::{Language, LanguageCategory};
-use oak_dejavu::language::{TemplateConfig, SyntaxMode};
+use oak_dejavu::language::{SyntaxMode, TemplateConfig};
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
 
@@ -17,10 +17,7 @@ pub struct ValkyrieLanguage {
 
 impl Default for ValkyrieLanguage {
     fn default() -> Self {
-        Self { 
-            syntax_mode: SyntaxMode::Programming,
-            template: TemplateConfig::default(),
-        }
+        Self { syntax_mode: SyntaxMode::Programming, template: TemplateConfig::default() }
     }
 }
 

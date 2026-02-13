@@ -413,16 +413,9 @@ pub struct AlterStatement {
 #[derive(Debug, Clone)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub enum AlterAction {
-    AddColumn {
-        name: Identifier,
-        data_type: Option<String>,
-    },
-    DropColumn {
-        name: Identifier,
-    },
-    RenameTo {
-        new_name: Identifier,
-    },
+    AddColumn { name: Identifier, data_type: Option<String> },
+    DropColumn { name: Identifier },
+    RenameTo { new_name: Identifier },
 }
 
 impl ToSource for AlterStatement {

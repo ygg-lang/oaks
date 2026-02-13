@@ -1,7 +1,7 @@
-use oak_core::{SourceText, builder::Builder, ParseSession, source::ToSource};
-use oak_sql::{SqlLanguage, SqlBuilder};
+use oak_core::{ParseSession, SourceText, builder::Builder, source::ToSource};
 #[cfg(feature = "oak-pretty-print")]
 use oak_pretty_print::AsDocument;
+use oak_sql::{SqlBuilder, SqlLanguage};
 
 #[test]
 fn test_sql_to_source() {
@@ -12,10 +12,10 @@ fn test_sql_to_source() {
 
     let mut session = ParseSession::<SqlLanguage>::default();
     let result = builder.build(&source, &[], &mut session);
-    
+
     assert!(result.result.is_ok());
     let root = result.result.unwrap();
-    
+
     let generated = root.to_source_string();
     println!("Generated source: {}", generated);
     // ToSource adds spaces between tokens, and we expect it to be similar to input but maybe not identical in spacing
@@ -35,14 +35,14 @@ fn test_sql_to_doc() {
 
     let mut session = ParseSession::<SqlLanguage>::default();
     let result = builder.build(&source, &[], &mut session);
-    
+
     assert!(result.result.is_ok());
     let root = result.result.unwrap();
-    
+
     let doc = root.as_document();
     let formatted = doc.render(oak_pretty_print::FormatConfig::default());
     println!("Formatted doc:\n{}", formatted);
-    
+
     assert!(formatted.contains("SELECT"));
     assert!(formatted.contains("FROM users"));
     assert!(formatted.contains("WHERE age > 18"));
@@ -57,10 +57,10 @@ fn test_sql_insert_to_source() {
 
     let mut session = ParseSession::<SqlLanguage>::default();
     let result = builder.build(&source, &[], &mut session);
-    
+
     assert!(result.result.is_ok());
     let root = result.result.unwrap();
-    
+
     let generated = root.to_source_string();
     println!("Generated insert source: {}", generated);
     assert!(generated.contains("INSERT INTO users"));
@@ -76,10 +76,10 @@ fn test_sql_create_to_source() {
 
     let mut session = ParseSession::<SqlLanguage>::default();
     let result = builder.build(&source, &[], &mut session);
-    
+
     assert!(result.result.is_ok());
     let root = result.result.unwrap();
-    
+
     let generated = root.to_source_string();
     assert!(generated.contains("CREATE TABLE users"));
     assert!(generated.contains("id INT PRIMARY KEY"));
@@ -95,10 +95,10 @@ fn test_sql_alter_to_source() {
 
     let mut session = ParseSession::<SqlLanguage>::default();
     let result = builder.build(&source, &[], &mut session);
-    
+
     assert!(result.result.is_ok());
     let root = result.result.unwrap();
-    
+
     let generated = root.to_source_string();
     println!("Generated alter source: {}", generated);
     assert!(generated.contains("ALTER TABLE users"));

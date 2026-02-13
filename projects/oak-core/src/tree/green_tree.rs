@@ -19,7 +19,7 @@ use std::{
 /// We use `&'a GreenNode<'a, L>` instead of an owned `GreenNode<'a, L>` for two reasons:
 /// 1. **Recursion**: `GreenTree` is a recursive structure. To avoid infinite size, we must use a pointer.
 ///    Since green nodes are allocated in an arena, a reference `&'a` is the most efficient choice.
-/// 2. **Handles**: Holding a reference (8 bytes) is much cheaper than holding the whole 
+/// 2. **Handles**: Holding a reference (8 bytes) is much cheaper than holding the whole
 ///    `GreenNode` struct (24+ bytes), making handles like `RedNode` very lightweight.
 pub enum GreenTree<'a, L: Language> {
     /// A green node with child elements

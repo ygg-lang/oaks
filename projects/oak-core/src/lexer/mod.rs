@@ -12,19 +12,17 @@ use std::borrow::Cow;
 use triomphe::Arc;
 
 /// Utilities for scanning comments.
-pub mod scan_comment;
+mod scan_comment;
 /// Utilities for scanning identifiers.
-pub mod scan_identifier;
+mod scan_identifier;
 /// Utilities for scanning numbers.
-pub mod scan_number;
+mod scan_number;
 /// Utilities for scanning string literals.
-pub mod scan_string;
+mod scan_string;
 /// Utilities for scanning whitespace.
-pub mod scan_white_space;
+mod scan_white_space;
 
-pub use scan_comment::CommentConfig;
-pub use scan_string::StringConfig;
-pub use scan_white_space::WhitespaceConfig;
+pub use self::{scan_comment::CommentConfig, scan_string::StringConfig, scan_white_space::WhitespaceConfig};
 
 /// Output type for lexical analysis operations.
 ///

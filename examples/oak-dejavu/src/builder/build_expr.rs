@@ -104,13 +104,13 @@ impl<'config> DejavuParser<'config> {
                     match child {
                         RedTree::Node(n) => expr = Some(self.build_expr(n, source)?),
                         RedTree::Leaf(t) => match t.kind {
-                    DejavuSyntaxKind::Whitespace | DejavuSyntaxKind::Newline | DejavuSyntaxKind::LineComment | DejavuSyntaxKind::BlockComment => continue,
-                    _ => {
-                        if let oak_core::UniversalTokenRole::Operator = oak_core::TokenType::role(&t.kind) {
-                            op = Some(t.kind);
-                        }
-                    }
-                },
+                            DejavuSyntaxKind::Whitespace | DejavuSyntaxKind::Newline | DejavuSyntaxKind::LineComment | DejavuSyntaxKind::BlockComment => continue,
+                            _ => {
+                                if let oak_core::UniversalTokenRole::Operator = oak_core::TokenType::role(&t.kind) {
+                                    op = Some(t.kind);
+                                }
+                            }
+                        },
                     }
                 }
                 if let (Some(op_kind), Some(expr_val)) = (op, expr) { Ok(Expr::Unary { op: op_kind, expr: Box::new(expr_val), span }) } else { Err(source.syntax_error(format!("Missing operand in unary expression at {:?}", span), span.start)) }
@@ -325,10 +325,10 @@ impl<'config> DejavuParser<'config> {
                     }
                 },
                 RedTree::Leaf(t) => match t.kind {
-                            DejavuSyntaxKind::Whitespace | DejavuSyntaxKind::Newline | DejavuSyntaxKind::LineComment | DejavuSyntaxKind::BlockComment => continue,
-                            DejavuSyntaxKind::Keyword(crate::lexer::DejavuKeywords::Else) => is_else = true,
-                            _ => {}
-                        },
+                    DejavuSyntaxKind::Whitespace | DejavuSyntaxKind::Newline | DejavuSyntaxKind::LineComment | DejavuSyntaxKind::BlockComment => continue,
+                    DejavuSyntaxKind::Keyword(crate::lexer::DejavuKeywords::Else) => is_else = true,
+                    _ => {}
+                },
             }
         }
 

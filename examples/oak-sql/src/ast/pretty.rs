@@ -31,7 +31,7 @@ impl AsDocument for SelectStatement {
     fn as_document(&self) -> Document<'_> {
         let mut parts = Vec::new();
         parts.push(Document::text("SELECT"));
-        
+
         let items = Document::join(self.items.iter().map(|it| it.as_document()), doc!(",", soft_space));
         parts.push(indent(doc!(line, items)));
 
@@ -86,7 +86,8 @@ impl AsDocument for SelectItem {
             SelectItem::Expression { expr, alias, .. } => {
                 if let Some(alias) = alias {
                     doc!(expr.as_document(), soft_space, "AS", soft_space, alias.as_document())
-                } else {
+                }
+                else {
                     expr.as_document()
                 }
             }
@@ -255,7 +256,7 @@ impl AsDocument for CreateStatement {
         }
         parts.push(soft_space);
         parts.push(self.name.as_document());
-        
+
         if !self.columns.is_empty() {
             parts.push(soft_space);
             parts.push(Document::text("("));
@@ -264,7 +265,7 @@ impl AsDocument for CreateStatement {
             parts.push(line);
             parts.push(Document::text(")"));
         }
-        
+
         Document::group(Document::Concat(parts))
     }
 }
@@ -309,21 +310,21 @@ impl AsDocument for InsertStatement {
         parts.push(Document::text("INSERT INTO"));
         parts.push(soft_space);
         parts.push(self.table_name.as_document());
-        
+
         if !self.columns.is_empty() {
             parts.push(soft_space);
             parts.push(Document::text("("));
             parts.push(Document::join(self.columns.iter().map(|it| it.as_document()), doc!(",", soft_space)));
             parts.push(Document::text(")"));
         }
-        
+
         parts.push(line);
         parts.push(Document::text("VALUES"));
         parts.push(soft_space);
         parts.push(Document::text("("));
         parts.push(Document::join(self.values.iter().map(|it| it.as_document()), doc!(",", soft_space)));
         parts.push(Document::text(")"));
-        
+
         Document::group(Document::Concat(parts))
     }
 }
@@ -339,14 +340,14 @@ impl AsDocument for UpdateStatement {
         parts.push(Document::text("SET"));
         parts.push(soft_space);
         parts.push(Document::join(self.assignments.iter().map(|it| it.as_document()), doc!(",", line)));
-        
+
         if let Some(selection) = &self.selection {
             parts.push(line);
             parts.push(Document::text("WHERE"));
             parts.push(soft_space);
             parts.push(selection.as_document());
         }
-        
+
         Document::group(Document::Concat(parts))
     }
 }
@@ -365,14 +366,14 @@ impl AsDocument for DeleteStatement {
         parts.push(Document::text("DELETE FROM"));
         parts.push(soft_space);
         parts.push(self.table_name.as_document());
-        
+
         if let Some(selection) = &self.selection {
             parts.push(line);
             parts.push(Document::text("WHERE"));
             parts.push(soft_space);
             parts.push(selection.as_document());
         }
-        
+
         Document::group(Document::Concat(parts))
     }
 }
