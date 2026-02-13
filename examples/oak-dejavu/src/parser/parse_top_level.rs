@@ -23,17 +23,50 @@ impl<'config> super::DejavuParser<'config> {
 
     pub(crate) fn parse_root_internal<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> &'a GreenNode<'a, DejavuLanguage> {
         let cp = state.checkpoint();
-        self.skip_trivia(state);
-
+        
         while state.not_at_end() && !state.at(Eof) {
+            let start_index = state.tokens.index();
+            
+            if state.at(StringPart) {
+                state.bump();
+            }
+            else if state.at(TemplateControlStart) {
+                self.parse_template_control(state).ok();
+            }
+            else if state.at(InterpolationStart) {
+                self.parse_template_interpolation(state).ok();
+            }
+            else if self.parse_source_file(state).is_err() && state.tokens.index() == start_index {
+                state.bump();
+            }
+        }
+
+        state.finish_at(cp, DejavuRoot)
+    }
+
+    fn parse_template_control<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> Result<&'a GreenNode<'a, DejavuLanguage>, OakError> {
+        let cp = state.checkpoint();
+        state.expect(TemplateControlStart)?;
+        
+        while state.not_at_end() && !state.at(TemplateControlEnd) {
             let start_index = state.tokens.index();
             if self.parse_source_file(state).is_err() && state.tokens.index() == start_index {
                 state.bump();
             }
-            self.skip_trivia(state);
         }
+        
+        state.expect(TemplateControlEnd)?;
+        Ok(state.finish_at(cp, DejavuSyntaxKind::ApplyBlock)) // Use ApplyBlock or similar for control
+    }
 
-        state.finish_at(cp, DejavuRoot)
+    fn parse_template_interpolation<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> Result<&'a GreenNode<'a, DejavuLanguage>, OakError> {
+        let cp = state.checkpoint();
+        state.expect(InterpolationStart)?;
+        
+        self.parse_expression_internal(state, 0);
+        
+        state.expect(InterpolationEnd)?;
+        Ok(state.finish_at(cp, DejavuSyntaxKind::Interpolation))
     }
 
     fn parse_source_file<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> Result<&'a GreenNode<'a, DejavuLanguage>, OakError> {

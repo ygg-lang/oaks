@@ -10,6 +10,8 @@ use serde::{Deserialize, Serialize};
 pub enum SyntaxMode {
     /// Programming mode: Standard .vk file
     Programming,
+    /// Template mode: The entire file is a template environment
+    Template,
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
@@ -22,7 +24,7 @@ pub struct DejavuLanguage {
 
 impl Default for DejavuLanguage {
     fn default() -> Self {
-        Self { syntax_mode: SyntaxMode::Programming }
+        Self { syntax_mode: SyntaxMode::Template }
     }
 }
 

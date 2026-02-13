@@ -110,8 +110,22 @@ impl<'config> SqlParser<'config> {
 
         // Parse Select Items
         while state.not_at_end() && state.peek_kind() != Some(From) {
-            PrattParser::parse(state, 0, self);
-            state.eat(Comma);
+            let item_cp = state.checkpoint();
+            if state.eat(Star) {
+                // All columns
+            } else {
+                PrattParser::parse(state, 0, self);
+                if state.eat(As) {
+                    state.expect(Identifier_).ok();
+                } else if state.peek_kind() == Some(Identifier_) {
+                    state.bump();
+                }
+            }
+            state.finish_at(item_cp, SqlElementType::SelectItem);
+            
+            if !state.eat(Comma) {
+                break;
+            }
         }
 
         if state.eat(From) {
@@ -128,7 +142,11 @@ impl<'config> SqlParser<'config> {
                         state.eat(Outer);
                     }
                     state.expect(Join).ok();
+                    
+                    let table_cp = state.checkpoint();
                     state.expect(Identifier_).ok(); // Joined TableName
+                    state.finish_at(table_cp, SqlElementType::TableName);
+
                     if state.eat(On) {
                         PrattParser::parse(state, 0, self); // Join condition
                     }
@@ -206,14 +224,38 @@ impl<'config> SqlParser<'config> {
         state.expect(Identifier_).ok(); // TableName
         state.finish_at(table_cp, SqlElementType::TableName);
 
+        if state.eat(LeftParen) {
+            while state.not_at_end() && state.peek_kind() != Some(RightParen) {
+                let col_cp = state.checkpoint();
+                state.expect(Identifier_).ok();
+                state.finish_at(col_cp, SqlElementType::ColumnName);
+                if !state.eat(Comma) {
+                    break;
+                }
+            }
+            state.expect(RightParen).ok();
+        }
+
         if state.eat(Values) {
-            if state.eat(LeftParen) {
+            let values_cp = state.checkpoint();
+            while state.eat(LeftParen) {
+                let value_list_cp = state.checkpoint();
                 while state.not_at_end() && state.peek_kind() != Some(RightParen) {
                     PrattParser::parse(state, 0, self);
-                    state.eat(Comma);
+                    if !state.eat(Comma) {
+                        break;
+                    }
                 }
                 state.expect(RightParen).ok();
+                state.finish_at(value_list_cp, SqlElementType::ValueList);
+                
+                if !state.eat(Comma) {
+                    break;
+                }
             }
+            state.finish_at(values_cp, SqlElementType::ValueList);
+        } else if state.peek_kind() == Some(Select) {
+            self.parse_select(state)?;
         }
 
         state.eat(Semicolon);
@@ -232,9 +274,16 @@ impl<'config> SqlParser<'config> {
 
         if state.eat(Set) {
             while state.not_at_end() && state.peek_kind() != Some(Where) && state.peek_kind() != Some(Semicolon) {
+                let assign_cp = state.checkpoint();
+                
+                let col_cp = state.checkpoint();
                 state.expect(Identifier_).ok(); // Column
+                state.finish_at(col_cp, SqlElementType::ColumnName);
+
                 state.expect(Equal).ok();
                 PrattParser::parse(state, 0, self);
+                state.finish_at(assign_cp, SqlElementType::Assignment);
+
                 if !state.eat(Comma) {
                     break;
                 }
@@ -275,17 +324,59 @@ impl<'config> SqlParser<'config> {
         state.expect(Create).ok();
         
         if state.eat(Table) {
+            state.eat(If);
+            state.eat(Not);
+            state.eat(Exists);
+
             let table_cp = state.checkpoint();
             state.expect(Identifier_).ok(); // TableName
             state.finish_at(table_cp, SqlElementType::TableName);
+
             if state.eat(LeftParen) {
                 while state.not_at_end() && state.peek_kind() != Some(RightParen) {
+                    let col_cp = state.checkpoint();
+                    
+                    let name_cp = state.checkpoint();
                     state.expect(Identifier_).ok(); // Column Name
-                    // Skip type and constraints for now
-                    while state.not_at_end() && state.peek_kind() != Some(Comma) && state.peek_kind() != Some(RightParen) {
-                        state.bump();
+                    state.finish_at(name_cp, SqlElementType::ColumnName);
+
+                    // Type
+                    if state.not_at_end() && !matches!(state.peek_kind(), Some(Comma) | Some(RightParen) | Some(Primary) | Some(Not) | Some(Null) | Some(Unique) | Some(Default) | Some(Check) | Some(Foreign) | Some(References)) {
+                        state.bump(); // Type name
+                        if state.eat(LeftParen) {
+                            state.expect(NumberLiteral).ok();
+                            if state.eat(Comma) {
+                                state.expect(NumberLiteral).ok();
+                            }
+                            state.expect(RightParen).ok();
+                        }
                     }
-                    state.eat(Comma);
+
+                    // Constraints
+                    while state.not_at_end() && !matches!(state.peek_kind(), Some(Comma) | Some(RightParen)) {
+                        if state.eat(Primary) {
+                            state.expect(Key).ok();
+                        } else if state.eat(Not) {
+                            state.expect(Null).ok();
+                        } else if state.eat(Null) {
+                        } else if state.eat(Unique) {
+                        } else if state.eat(Default) {
+                            PrattParser::parse(state, 0, self);
+                        } else if state.eat(Check) {
+                            if state.eat(LeftParen) {
+                                PrattParser::parse(state, 0, self);
+                                state.expect(RightParen).ok();
+                            }
+                        } else if state.eat(AutoIncrement) || state.eat(Autoincrement) {
+                        } else {
+                            state.bump();
+                        }
+                    }
+
+                    state.finish_at(col_cp, SqlElementType::ColumnDefinition);
+                    if !state.eat(Comma) {
+                        break;
+                    }
                 }
                 state.expect(RightParen).ok();
             }

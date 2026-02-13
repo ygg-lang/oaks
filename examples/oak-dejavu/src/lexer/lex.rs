@@ -20,7 +20,15 @@ impl crate::lexer::DejavuLexer<'_> {
     pub(crate) fn run<S: Source + ?Sized>(&self, state: &mut State<'_, S>) -> Result<(), OakError> {
         match self._config.syntax_mode {
             crate::language::SyntaxMode::Programming => self.run_programming(state),
+            crate::language::SyntaxMode::Template => self.run_template(state),
         }
+    }
+
+    fn run_template<S: Source + ?Sized>(&self, state: &mut State<'_, S>) -> Result<(), OakError> {
+        let start = state.get_position();
+        let end = state.get_source().len();
+        self.lex_interpolation(state, start, end, true);
+        Ok(())
     }
 
     fn run_programming<S: Source + ?Sized>(&self, state: &mut State<'_, S>) -> Result<(), OakError> {
@@ -210,15 +218,30 @@ impl crate::lexer::DejavuLexer<'_> {
                 state.advance(2); // skip <%
                 state.add_token(DejavuSyntaxKind::TemplateControlStart, control_start, state.get_position());
 
+                let content_start = state.get_position();
                 // Find matching %>
                 while state.get_position() < end {
                     if state.starts_with("%>") {
-                        let control_end = state.get_position();
-                        state.advance(2);
-                        state.add_token(DejavuSyntaxKind::TemplateControlEnd, control_end, state.get_position());
                         break;
                     }
-                    if let Some(c) = state.current() { state.advance(c.len_utf8()) } else { break }
+                    if let Some(c) = state.current() {
+                        state.advance(c.len_utf8())
+                    }
+                    else {
+                        break
+                    }
+                }
+                let content_end = state.get_position();
+
+                if content_start < content_end {
+                    let mut sub_state = state.sub_state(content_start, content_end);
+                    let _ = self.run_programming(&mut sub_state);
+                }
+
+                if state.starts_with("%>") {
+                    let control_end = state.get_position();
+                    state.advance(2);
+                    state.add_token(DejavuSyntaxKind::TemplateControlEnd, control_end, state.get_position());
                 }
                 current = state.get_position();
                 continue;
@@ -234,6 +257,7 @@ impl crate::lexer::DejavuLexer<'_> {
                 state.advance(1); // skip {
                 state.add_token(DejavuSyntaxKind::InterpolationStart, interp_start, state.get_position());
 
+                let content_start = state.get_position();
                 // Find matching }
                 let mut depth = 1;
                 while depth > 0 && state.get_position() < end {
@@ -244,9 +268,6 @@ impl crate::lexer::DejavuLexer<'_> {
                         else if c == '}' {
                             depth -= 1;
                             if depth == 0 {
-                                let interp_end = state.get_position();
-                                state.advance(1);
-                                state.add_token(DejavuSyntaxKind::InterpolationEnd, interp_end, state.get_position());
                                 break;
                             }
                         }
@@ -255,6 +276,18 @@ impl crate::lexer::DejavuLexer<'_> {
                     else {
                         break;
                     }
+                }
+                let content_end = state.get_position();
+
+                if content_start < content_end {
+                    let mut sub_state = state.sub_state(content_start, content_end);
+                    let _ = self.run_programming(&mut sub_state);
+                }
+
+                if state.at_char('}') {
+                    let interp_end = state.get_position();
+                    state.advance(1);
+                    state.add_token(DejavuSyntaxKind::InterpolationEnd, interp_end, state.get_position());
                 }
                 current = state.get_position();
             }

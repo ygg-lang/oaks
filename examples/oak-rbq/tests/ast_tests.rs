@@ -21,7 +21,7 @@ fn test_rbq_ast_lowering() {
         assert_eq!(s.name, "User");
         assert_eq!(s.fields.len(), 1);
         assert_eq!(s.fields[0].name, "id");
-        assert_eq!(s.fields[0].type_ref, "i32")
+        assert_eq!(s.fields[0].type_ref.path, "i32")
     }
     else {
         panic!("Expected struct")
@@ -48,7 +48,7 @@ fn test_rbq_ast_utf8() {
         assert_eq!(s.name, "User");
         assert_eq!(s.fields.len(), 1);
         assert_eq!(s.fields[0].name, "name");
-        assert_eq!(s.fields[0].type_ref, "utf8")
+        assert_eq!(s.fields[0].type_ref.path, "utf8")
     }
     else {
         panic!("Expected struct")
@@ -77,5 +77,83 @@ fn test_rbq_ast_namespace() {
     }
     else {
         panic!("Expected namespace")
+    }
+}
+
+#[test]
+fn test_rbq_ast_import() {
+    let config = RbqLanguage::default();
+    let parser = RbqParser::new(&config);
+    let source = SourceText::new("use std.io;");
+
+    let mut session = ParseSession::<RbqLanguage>::default();
+    let output = parser.parse(&source, &[], &mut session);
+    assert!(output.result.is_ok());
+
+    let green = output.result.unwrap();
+    let red = oak_core::tree::RedNode::new(green, 0);
+
+    let root = RbqRoot::lower(red, source.text());
+
+    assert_eq!(root.items.len(), 1);
+    if let oak_rbq::ast::RbqItem::Import(imp) = &root.items[0] {
+        assert_eq!(imp.path, "std.io");
+    }
+    else {
+        panic!("Expected import")
+    }
+}
+
+#[test]
+fn test_rbq_ast_trait() {
+    let config = RbqLanguage::default();
+    let parser = RbqParser::new(&config);
+    let source = SourceText::new("trait Printable { print: micro(); }");
+
+    let mut session = ParseSession::<RbqLanguage>::default();
+    let output = parser.parse(&source, &[], &mut session);
+    assert!(output.result.is_ok());
+
+    let green = output.result.unwrap();
+    let red = oak_core::tree::RedNode::new(green, 0);
+
+    let root = RbqRoot::lower(red, source.text());
+
+    assert_eq!(root.items.len(), 1);
+    if let oak_rbq::ast::RbqItem::Trait(t) = &root.items[0] {
+        assert_eq!(t.name, "Printable");
+        assert_eq!(t.items.len(), 1);
+    }
+    else {
+        panic!("Expected trait")
+    }
+}
+
+#[test]
+fn test_rbq_ast_complex_type() {
+    let config = RbqLanguage::default();
+    let parser = RbqParser::new(&config);
+    let source = SourceText::new("struct Data { items: &List<i32>? }");
+
+    let mut session = ParseSession::<RbqLanguage>::default();
+    let output = parser.parse(&source, &[], &mut session);
+    assert!(output.result.is_ok());
+
+    let green = output.result.unwrap();
+    let red = oak_core::tree::RedNode::new(green, 0);
+
+    let root = RbqRoot::lower(red, source.text());
+
+    assert_eq!(root.items.len(), 1);
+    if let oak_rbq::ast::RbqItem::Struct(s) = &root.items[0] {
+        let field = &s.fields[0];
+        assert_eq!(field.type_ref.path, "List");
+        assert!(field.type_ref.is_physical_ptr);
+        assert!(field.type_ref.is_optional);
+        assert_eq!(field.type_ref.generic_args.len(), 1);
+        assert_eq!(field.type_ref.generic_args[0].path, "i32");
+    }
+    else {
+        panic!("Expected struct")
     }
 }

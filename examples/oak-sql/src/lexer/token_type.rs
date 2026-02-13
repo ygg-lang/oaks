@@ -147,6 +147,11 @@ pub enum SqlTokenType {
     HavingClause,
     OrderByClause,
     LimitClause,
+    SelectItem,
+    Alias,
+    ColumnDefinition,
+    ValueList,
+    Assignment,
     ErrorNode,
 
     // 空白字符和换
@@ -316,6 +321,12 @@ impl From<crate::parser::element_type::SqlElementType> for SqlTokenType {
             crate::parser::element_type::SqlElementType::OrderByClause => Self::OrderByClause,
             crate::parser::element_type::SqlElementType::LimitClause => Self::LimitClause,
             crate::parser::element_type::SqlElementType::TableName => Self::TableName,
+            crate::parser::element_type::SqlElementType::ColumnName => Self::ColumnName,
+            crate::parser::element_type::SqlElementType::SelectItem => Self::SelectItem,
+            crate::parser::element_type::SqlElementType::Alias => Self::Alias,
+            crate::parser::element_type::SqlElementType::ColumnDefinition => Self::ColumnDefinition,
+            crate::parser::element_type::SqlElementType::ValueList => Self::ValueList,
+            crate::parser::element_type::SqlElementType::Assignment => Self::Assignment,
         }
     }
 }
