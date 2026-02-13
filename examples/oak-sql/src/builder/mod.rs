@@ -87,24 +87,30 @@ impl<'config> SqlBuilder<'config> {
         let mut order_by = None;
         let mut limit = None;
 
+        // Debug: iterate through children and see what we have
         for child in node.children() {
-            if let RedTree::Node(n) = child {
-                match n.green.kind {
-                    SqlElementType::SelectItem => items.push(self.build_select_item(n, source)?),
-                    SqlElementType::TableName => from = Some(self.build_table_name(n, source)?),
-                    SqlElementType::JoinClause => joins.push(self.build_join_clause(n, source)?),
-                    SqlElementType::GroupByClause => group_by = Some(self.build_group_by_clause(n, source)?),
-                    SqlElementType::HavingClause => having = Some(self.build_having_clause(n, source)?),
-                    SqlElementType::OrderByClause => order_by = Some(self.build_order_by_clause(n, source)?),
-                    SqlElementType::LimitClause => limit = Some(self.build_limit_clause(n, source)?),
-                    SqlElementType::Expression => {
-                        // The parser doesn't wrap WHERE expression in a special node,
-                        // it just sits in the SelectStatement node.
-                        // However, we need to distinguish it from other expressions.
-                        // In parse_select, WHERE comes after FROM/JOIN and before GROUP BY.
-                        selection = Some(self.build_expression(n, source)?);
+            match child {
+                RedTree::Node(n) => {
+                    match n.green.kind {
+                        SqlElementType::SelectItem => items.push(self.build_select_item(n, source)?),
+                        SqlElementType::TableName => from = Some(self.build_table_name(n, source)?),
+                        SqlElementType::JoinClause => joins.push(self.build_join_clause(n, source)?),
+                        SqlElementType::GroupByClause => group_by = Some(self.build_group_by_clause(n, source)?),
+                        SqlElementType::HavingClause => having = Some(self.build_having_clause(n, source)?),
+                        SqlElementType::OrderByClause => order_by = Some(self.build_order_by_clause(n, source)?),
+                        SqlElementType::LimitClause => limit = Some(self.build_limit_clause(n, source)?),
+                        SqlElementType::Expression => {
+                            // In parse_select, the WHERE clause's PrattParser call attaches an Expression node
+                            // directly to the SelectStatement. We use it as the selection.
+                            if selection.is_none() {
+                                selection = Some(self.build_expression(n, source)?);
+                            }
+                        }
+                        _ => {}
                     }
-                    _ => {}
+                }
+                RedTree::Token(t) => {
+                    // WHERE keyword might be here
                 }
             }
         }
@@ -352,8 +358,7 @@ impl<'config> SqlBuilder<'config> {
                         }
                     }
                     SqlElementType::Expression => {
-                        // This might be a default value or check constraint expression
-                        // But we need to know which constraint it belongs to.
+                        // Expression nodes are handled below by specific tokens (Default/Check)
                     }
                     _ => {}
                 }
@@ -363,7 +368,6 @@ impl<'config> SqlBuilder<'config> {
                         constraints.push(ColumnConstraint::PrimaryKey);
                     }
                     SqlTokenType::Not => {
-                        // Peek next to see if it's NULL
                         constraints.push(ColumnConstraint::NotNull);
                     }
                     SqlTokenType::Null => {
@@ -386,21 +390,27 @@ impl<'config> SqlBuilder<'config> {
                     }
                     SqlTokenType::NumberLiteral => {
                         // Part of data type precision e.g. VARCHAR(255)
-                        if !data_type.is_empty() {
-                            data_type.push('(');
-                            data_type.push_str(&self.get_text(t.span.clone(), source));
-                            data_type.push(')');
-                        }
+                        data_type.push_str(&self.get_text(t.span.clone(), source));
                     }
+                    SqlTokenType::LeftParen => data_type.push('('),
+                    SqlTokenType::RightParen => data_type.push(')'),
+                    SqlTokenType::Comma => data_type.push(','),
                     _ if t.kind.role() == oak_core::UniversalTokenRole::Keyword => {
                         let keyword = self.get_text(t.span.clone(), source).to_uppercase();
                         // Ignore constraint keywords that are handled specifically
                         if !matches!(keyword.as_str(), "PRIMARY" | "KEY" | "NOT" | "NULL" | "UNIQUE" | "AUTOINCREMENT" | "DEFAULT" | "CHECK" | "IF" | "EXISTS") {
-                            if !data_type.is_empty() {
+                            if !data_type.is_empty() && !data_type.ends_with('(') && !data_type.ends_with(',') {
                                 data_type.push(' ');
                             }
                             data_type.push_str(&keyword);
                         }
+                    }
+                    SqlTokenType::Identifier_ => {
+                        let text = self.get_text(t.span.clone(), source);
+                        if !data_type.is_empty() && !data_type.ends_with('(') && !data_type.ends_with(',') {
+                            data_type.push(' ');
+                        }
+                        data_type.push_str(&text);
                     }
                     _ => {}
                 }
@@ -477,15 +487,17 @@ impl<'config> SqlBuilder<'config> {
         let mut right = None;
 
         // Special case for expression wrapped in another expression (e.g. from parentheses or Pratt recursion)
-        if node.children().count() == 1 {
-            if let Some(RedTree::Node(n)) = node.children().next() {
+        // Check if there is ONLY ONE child node that is an Expression or Identifier
+        let children: Vec<_> = node.children().collect();
+        if children.len() == 1 {
+            if let RedTree::Node(n) = &children[0] {
                 if n.green.kind == SqlElementType::Expression || n.green.kind == SqlElementType::Identifier {
-                    return self.build_expression(n, source);
+                    return self.build_expression(n.clone(), source);
                 }
             }
         }
 
-        for child in node.children() {
+        for child in children {
             match child {
                 RedTree::Token(t) => {
                     match t.kind {
@@ -653,16 +665,52 @@ impl<'config> SqlBuilder<'config> {
 
     fn build_order_by_clause<'a>(&self, node: RedNode<'a, SqlLanguage>, source: &SourceText) -> Result<OrderByClause, OakError> {
         let mut items = Vec::new();
+        let mut current_expr = None;
+
         for child in node.children() {
-            if let RedTree::Node(n) = child {
-                if n.green.kind == SqlElementType::Expression {
-                    items.push(OrderByItem {
-                        expr: self.build_expression(n, source)?,
-                        direction: OrderDirection::Asc, // Default
-                    });
+            match child {
+                RedTree::Node(n) => {
+                    if n.green.kind == SqlElementType::Expression {
+                        if let Some(expr) = current_expr.take() {
+                            items.push(OrderByItem {
+                                expr,
+                                direction: OrderDirection::Asc,
+                            });
+                        }
+                        current_expr = Some(self.build_expression(n, source)?);
+                    }
+                }
+                RedTree::Token(t) => {
+                    match t.kind {
+                        SqlTokenType::Asc => {
+                            if let Some(expr) = current_expr.take() {
+                                items.push(OrderByItem {
+                                    expr,
+                                    direction: OrderDirection::Asc,
+                                });
+                            }
+                        }
+                        SqlTokenType::Desc => {
+                            if let Some(expr) = current_expr.take() {
+                                items.push(OrderByItem {
+                                    expr,
+                                    direction: OrderDirection::Desc,
+                                });
+                            }
+                        }
+                        _ => {}
+                    }
                 }
             }
         }
+
+        if let Some(expr) = current_expr {
+            items.push(OrderByItem {
+                expr,
+                direction: OrderDirection::Asc,
+            });
+        }
+
         Ok(OrderByClause { items, span: node.span() })
     }
 

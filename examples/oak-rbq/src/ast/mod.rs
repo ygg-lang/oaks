@@ -121,7 +121,7 @@ impl RbqStruct {
         let mut fields = Vec::new();
 
         for child in red.children() {
-            match child.kind() {
+            match child.kind::<RbqTokenType>() {
                 RbqTokenType::Annotation => {
                     if let Some(node) = child.as_node() {
                         annotations.push(RbqAnnotation::lower(node, source))
@@ -155,7 +155,7 @@ impl RbqNamespace {
         let mut pending_annotations = Vec::new();
 
         for child in red.children() {
-            match child.kind() {
+            match child.kind::<RbqTokenType>() {
                 RbqTokenType::Ident if name.is_empty() => name = source[child.span()].trim().to_string(),
                 RbqTokenType::Annotation => {
                     if let Some(node) = child.as_node() {
@@ -244,6 +244,9 @@ impl RbqUnion {
                 RedTree::Node(node) => match node.kind::<RbqTokenType>() {
                     RbqTokenType::Annotation => annotations.push(RbqAnnotation::lower(node, source)),
                     RbqTokenType::UnionMember | RbqTokenType::EnumMember => members.push(RbqUnionMember::lower(node, source)),
+                    RbqTokenType::MicroDef => {
+                        // Handle micro defs in unions if they are methods
+                    }
                     _ => {}
                 },
                 RedTree::Token(leaf) => {
@@ -315,7 +318,7 @@ impl RbqEnumMember {
         let mut value = None;
 
         for child in red.children() {
-            match child.kind() {
+            match child.kind::<RbqTokenType>() {
                 RbqTokenType::Annotation => {
                     if let Some(node) = child.as_node() {
                         annotations.push(RbqAnnotation::lower(node, source))
@@ -455,7 +458,7 @@ impl RbqField {
         let mut default_value = None;
 
         for child in red.children() {
-            match child.kind() {
+            match child.kind::<RbqTokenType>() {
                 RbqTokenType::Annotation => {
                     if let Some(node) = child.as_node() {
                         annotations.push(RbqAnnotation::lower(node, source))
@@ -469,7 +472,7 @@ impl RbqField {
                 }
                 _ => {
                     if let Some(node) = child.as_node() {
-                        if node.kind() == RbqTokenType::Expression {
+                        if node.kind::<RbqTokenType>() == RbqTokenType::Expression {
                             default_value = Some(RbqExpr::lower(node, source))
                         }
                     }
@@ -511,7 +514,7 @@ impl RbqTypeAlias {
         };
 
         for child in red.children() {
-            match child.kind() {
+            match child.kind::<RbqTokenType>() {
                 RbqTokenType::Annotation => {
                     if let Some(node) = child.as_node() {
                         annotations.push(RbqAnnotation::lower(node, source))
@@ -556,7 +559,7 @@ impl RbqType {
         let mut literal = None;
 
         for child in red.children() {
-            match child.kind() {
+            match child.kind::<RbqTokenType>() {
                 RbqTokenType::Question => is_optional = true,
                 RbqTokenType::Ampersand => is_ref = true,
                 RbqTokenType::Ident | RbqTokenType::Utf8Kw => {
@@ -575,7 +578,7 @@ impl RbqType {
                             if let Some(arg_node) = arg_child.as_node() {
                                 generic_args.push(RbqType::lower(arg_node, source));
                             }
-                            else if arg_child.kind() == RbqTokenType::Literal {
+                            else if arg_child.kind::<RbqTokenType>() == RbqTokenType::Literal {
                                 generic_args.push(RbqType::Literal(source[arg_child.span()].trim().to_string()));
                             }
                         }
@@ -621,12 +624,12 @@ impl RbqAnnotation {
         let mut args = Vec::new();
 
         for child in red.children() {
-            match child.kind() {
+            match child.kind::<RbqTokenType>() {
                 RbqTokenType::Ident if name.is_empty() => name = source[child.span()].trim().to_string(),
                 RbqTokenType::AnnotationArgs => {
                     if let Some(node) = child.as_node() {
                         for arg_child in node.children() {
-                            match arg_child.kind() {
+                            match arg_child.kind::<RbqTokenType>() {
                                 RbqTokenType::Literal | RbqTokenType::MagicVar | RbqTokenType::BinaryExpr | RbqTokenType::MemberExpr | RbqTokenType::CallExpr | RbqTokenType::Ident => args.push(source[arg_child.span()].trim().to_string()),
                                 _ => {}
                             }
@@ -830,7 +833,7 @@ impl RbqExpr {
                 for child in red.children() {
                     match child {
                         RedTree::Node(node) => {
-                            if node.kind() == RbqTokenType::PipelineStep {
+                            if node.kind::<RbqTokenType>() == RbqTokenType::PipelineStep {
                                 steps.push(RbqPipelineStep::lower(node, source))
                             }
                             else if base.is_none() {
