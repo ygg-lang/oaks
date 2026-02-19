@@ -14,13 +14,13 @@ pub(crate) type State<'a, S> = LexerState<'a, S, VLangLanguage>;
 /// VLang lexer implementation.
 #[derive(Clone, Debug)]
 pub struct VLangLexer<'config> {
-    _config: &'config VLangLanguage,
+    config: &'config VLangLanguage,
 }
 
 impl<'config> VLangLexer<'config> {
     /// Creates a new `VLangLexer` instance.
     pub fn new(config: &'config VLangLanguage) -> Self {
-        Self { _config: config }
+        Self { config }
     }
 
     /// Skips whitespace characters.

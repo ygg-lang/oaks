@@ -1,3 +1,4 @@
+/// Token type definitions for Scheme lexer.
 use oak_core::{Source, Token, TokenType, UniversalElementRole, UniversalTokenRole};
 
 pub type SchemeToken = Token<SchemeTokenType>;

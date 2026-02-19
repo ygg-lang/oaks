@@ -1,5 +1,6 @@
 //! Parser implementation for the Rhombus language.
 
+/// Element type definitions for Rhombus parser.
 pub mod element_type;
 
 use crate::{
@@ -58,6 +59,46 @@ impl<'config> RhombusParser<'config> {
         };
 
         state.bump();
+
+        // Check for special forms
+        if let Some(token_type) = state.peek_kind() {
+            match token_type {
+                RhombusTokenType::Require => {
+                    state.bump();
+                    while state.not_at_end() {
+                        if let Some(ck) = close_kind {
+                            if state.at(ck) {
+                                break;
+                            }
+                        }
+                        self.parse_statement(state)?;
+                    }
+                    if let Some(ck) = close_kind {
+                        state.expect(ck).ok();
+                    }
+                    state.finish_at(cp, RhombusElementType::Identifier); // Using Identifier for now
+                    return Ok(());
+                }
+                RhombusTokenType::Provide => {
+                    state.bump();
+                    while state.not_at_end() {
+                        if let Some(ck) = close_kind {
+                            if state.at(ck) {
+                                break;
+                            }
+                        }
+                        self.parse_statement(state)?;
+                    }
+                    if let Some(ck) = close_kind {
+                        state.expect(ck).ok();
+                    }
+                    state.finish_at(cp, RhombusElementType::Identifier); // Using Identifier for now
+                    return Ok(());
+                }
+                _ => {}
+            }
+        }
+
         while state.not_at_end() {
             if let Some(ck) = close_kind {
                 if state.at(ck) {

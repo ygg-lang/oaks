@@ -1,126 +1,228 @@
 use oak_core::{ElementType, UniversalElementRole};
 
+/// Element types for the Scala parser.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub enum ScalaElementType {
-    // Node kinds
+    /// Root node for Scala source files.
     SourceFile,
 
-    // Basic token kinds
+    /// Whitespace token.
     Whitespace,
+    /// Newline token.
     Newline,
+    /// Comment token (generic).
     Comment,
+    /// Single-line comment token.
     LineComment,
+    /// Multi-line block comment token.
     BlockComment,
+    /// Error token for lexical errors.
     Error,
+    /// End-of-file token.
     Eof,
+    /// Error node for parse errors.
     ErrorNode,
 
-    // Identifiers and literals
+    /// Identifier token for names and symbols.
     Identifier,
+    /// Integer literal token.
     IntegerLiteral,
+    /// Floating-point literal token.
     FloatLiteral,
+    /// String literal token.
     StringLiteral,
+    /// Character literal token.
     CharLiteral,
+    /// Boolean literal token (true or false).
     BooleanLiteral,
 
-    // Keywords
+    /// `abstract` keyword.
     Abstract,
+    /// `case` keyword.
     Case,
+    /// `catch` keyword.
     Catch,
+    /// `class` keyword.
     Class,
+    /// `def` keyword.
     Def,
+    /// `do` keyword.
     Do,
+    /// `else` keyword.
     Else,
+    /// `extends` keyword.
     Extends,
+    /// `false` keyword.
     False,
+    /// `final` keyword.
     Final,
+    /// `finally` keyword.
     Finally,
+    /// `for` keyword.
     For,
+    /// `forSome` keyword.
     ForSome,
+    /// `if` keyword.
     If,
+    /// `implicit` keyword.
     Implicit,
+    /// `import` keyword.
     Import,
+    /// `lazy` keyword.
     Lazy,
+    /// `match` keyword.
     Match,
+    /// `new` keyword.
     New,
+    /// `null` keyword.
     Null,
+    /// `object` keyword.
     Object,
+    /// `override` keyword.
     Override,
+    /// `package` keyword.
     Package,
+    /// `private` keyword.
     Private,
+    /// `protected` keyword.
     Protected,
+    /// `return` keyword.
     Return,
+    /// `sealed` keyword.
     Sealed,
+    /// `super` keyword.
     Super,
+    /// `this` keyword.
     This,
+    /// `throw` keyword.
     Throw,
+    /// `trait` keyword.
     Trait,
+    /// `try` keyword.
     Try,
+    /// `true` keyword.
     True,
+    /// `type` keyword.
     Type,
+    /// `val` keyword.
     Val,
+    /// `var` keyword.
     Var,
+    /// `while` keyword.
     While,
+    /// `with` keyword.
     With,
+    /// `yield` keyword.
     Yield,
 
-    // Operators
-    Plus,         // +
-    Minus,        // -
-    Star,         // *
-    Slash,        // /
-    Percent,      // %
-    Eq,           // =
-    EqEq,         // ==
-    Ne,           // !=
-    Lt,           // <
-    Le,           // <=
-    Gt,           // >
-    Ge,           // >=
-    LessEqual,    // <=
-    GreaterEqual, // >=
-    EqualEqual,   // ==
-    NotEqual,     // !=
-    And,          // &
-    Or,           // |
-    Xor,          // ^
-    AndAnd,       // &&
-    OrOr,         // ||
-    Not,          // !
-    Tilde,        // ~
-    LShift,       // <<
-    RShift,       // >>
-    URShift,      // >>>
-    PlusEq,       // +=
-    MinusEq,      // -=
-    StarEq,       // *=
-    SlashEq,      // /=
-    PercentEq,    // %=
-    AndEq,        // &=
-    OrEq,         // |=
-    XorEq,        // ^=
-    LShiftEq,     // <<=
-    RShiftEq,     // >>=
-    URShiftEq,    // >>>=
-    Arrow,        // =>
-    LeftArrow,    // <-
-    Colon,        // :
-    ColonColon,   // ::
-    Semicolon,    // ;
-    Dot,          // .
-    Comma,        // ,
-    Question,     // ?
-    At,           // @
-    Hash,         // #
+    /// Addition operator `+`.
+    Plus,
+    /// Subtraction operator `-`.
+    Minus,
+    /// Multiplication operator `*`.
+    Star,
+    /// Division operator `/`.
+    Slash,
+    /// Modulo operator `%`.
+    Percent,
+    /// Assignment operator `=`.
+    Eq,
+    /// Equality operator `==`.
+    EqEq,
+    /// Inequality operator `!=`.
+    Ne,
+    /// Less-than operator `<`.
+    Lt,
+    /// Less-than-or-equal operator `<=`.
+    Le,
+    /// Greater-than operator `>`.
+    Gt,
+    /// Greater-than-or-equal operator `>=`.
+    Ge,
+    /// Less-than-or-equal operator `<=`.
+    LessEqual,
+    /// Greater-than-or-equal operator `>=`.
+    GreaterEqual,
+    /// Equality operator `==`.
+    EqualEqual,
+    /// Inequality operator `!=`.
+    NotEqual,
+    /// Bitwise AND operator `&`.
+    And,
+    /// Bitwise OR operator `|`.
+    Or,
+    /// Bitwise XOR operator `^`.
+    Xor,
+    /// Logical AND operator `&&`.
+    AndAnd,
+    /// Logical OR operator `||`.
+    OrOr,
+    /// Logical NOT operator `!`.
+    Not,
+    /// Bitwise NOT operator `~`.
+    Tilde,
+    /// Left shift operator `<<`.
+    LShift,
+    /// Right shift operator `>>`.
+    RShift,
+    /// Unsigned right shift operator `>>>`.
+    URShift,
+    /// Addition assignment operator `+=`.
+    PlusEq,
+    /// Subtraction assignment operator `-=`.
+    MinusEq,
+    /// Multiplication assignment operator `*=`.
+    StarEq,
+    /// Division assignment operator `/=`.
+    SlashEq,
+    /// Modulo assignment operator `%=`.
+    PercentEq,
+    /// Bitwise AND assignment operator `&=`.
+    AndEq,
+    /// Bitwise OR assignment operator `|=`.
+    OrEq,
+    /// Bitwise XOR assignment operator `^=`.
+    XorEq,
+    /// Left shift assignment operator `<<=`.
+    LShiftEq,
+    /// Right shift assignment operator `>>=`.
+    RShiftEq,
+    /// Unsigned right shift assignment operator `>>>=`.
+    URShiftEq,
+    /// Arrow operator `=>`.
+    Arrow,
+    /// Left arrow operator `<-`.
+    LeftArrow,
+    /// Colon operator `:`.
+    Colon,
+    /// Cons operator `::`.
+    ColonColon,
+    /// Semicolon separator `;`.
+    Semicolon,
+    /// Dot operator `.`.
+    Dot,
+    /// Comma separator `,`.
+    Comma,
+    /// Question mark operator `?`.
+    Question,
+    /// Annotation operator `@`.
+    At,
+    /// Hash operator `#`.
+    Hash,
 
-    // Separators
-    LeftParen,    // (
-    RightParen,   // )
-    LeftBracket,  // [
-    RightBracket, // ]
-    LeftBrace,    // {
-    RightBrace,   //
+    /// Left parenthesis `(`.
+    LeftParen,
+    /// Right parenthesis `)`.
+    RightParen,
+    /// Left bracket `[`.
+    LeftBracket,
+    /// Right bracket `]`.
+    RightBracket,
+    /// Left brace `{`.
+    LeftBrace,
+    /// Right brace `}`.
+    RightBrace,
 }
 
 impl ElementType for ScalaElementType {

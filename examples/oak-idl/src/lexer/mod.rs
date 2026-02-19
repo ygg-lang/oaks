@@ -17,7 +17,7 @@ static IDL_WHITESPACE: LazyLock<WhitespaceConfig> = LazyLock::new(|| WhitespaceC
 /// Lexical analyzer for the IDL language.
 #[derive(Clone, Debug)]
 pub struct IdlLexer<'config> {
-    _config: &'config IdlLanguage,
+    config: &'config IdlLanguage,
 }
 
 impl<'config> Lexer<IdlLanguage> for IdlLexer<'config> {
@@ -34,7 +34,7 @@ impl<'config> Lexer<IdlLanguage> for IdlLexer<'config> {
 impl<'config> IdlLexer<'config> {
     /// Creates a new IDL lexer with the given configuration.
     pub fn new(config: &'config IdlLanguage) -> Self {
-        Self { _config: config }
+        Self { config }
     }
 
     /// Main lexing loop

@@ -1,5 +1,7 @@
 # 🛠️ Scheme Parser Developer Guide
 
+Rhombus support for the Oak language framework.
+
 This guide is designed to help you quickly get started with developing and integrating `oak-scheme`.
 
 ## 🚦 Quick Start

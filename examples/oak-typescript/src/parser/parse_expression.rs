@@ -18,7 +18,17 @@ impl<'config> TypeScriptParser<'config> {
             Some(NumericLiteral) | Some(StringLiteral) | Some(BigIntLiteral) | Some(TemplateString) | Some(True) | Some(False) | Some(Null) | Some(RegexLiteral) => {
                 let kind = state.peek_kind().unwrap();
                 state.bump();
-                state.finish_at(cp, kind.into())
+                let elem = match kind {
+                    NumericLiteral => crate::parser::element_type::TypeScriptElementType::NumericLiteral,
+                    StringLiteral => crate::parser::element_type::TypeScriptElementType::StringLiteral,
+                    BigIntLiteral => crate::parser::element_type::TypeScriptElementType::BigIntLiteral,
+                    TemplateString => crate::parser::element_type::TypeScriptElementType::TemplateString,
+                    True | False => crate::parser::element_type::TypeScriptElementType::BooleanLiteral,
+                    Null => crate::parser::element_type::TypeScriptElementType::Null,
+                    RegexLiteral => crate::parser::element_type::TypeScriptElementType::RegexLiteral,
+                    _ => crate::parser::element_type::TypeScriptElementType::Error,
+                };
+                state.finish_at(cp, elem)
             }
             Some(LeftParen) => {
                 state.bump();
@@ -203,7 +213,7 @@ impl<'config> TypeScriptParser<'config> {
                 PrattParser::parse(state, 0, self);
                 Some(state.finish_at(cp, crate::parser::element_type::TypeScriptElementType::ConditionalExpression.into()))
             }
-            _ => Some(binary(state, left, kind, prec, assoc, BinaryExpression.into(), |s, p| PrattParser::parse(s, p, self))),
+            _ => Some(binary(state, left, kind, prec, assoc, crate::parser::element_type::TypeScriptElementType::BinaryExpression, |s, p| PrattParser::parse(s, p, self))),
         }
     }
 }

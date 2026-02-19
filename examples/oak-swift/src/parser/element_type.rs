@@ -322,6 +322,7 @@ pub enum SwiftElementType {
 }
 
 impl SwiftElementType {
+    /// Returns true if this element type is trivia (whitespace, newline, or comment).
     pub fn is_trivia(&self) -> bool {
         matches!(self, Self::Whitespace | Self::Newline | Self::Comment)
     }

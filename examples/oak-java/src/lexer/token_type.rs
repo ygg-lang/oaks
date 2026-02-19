@@ -233,6 +233,12 @@ pub enum JavaTokenType {
     At,
     /// `::` delimiter.
     DoubleColon,
+    /// `<` delimiter.
+    LeftAngle,
+    /// `>` delimiter.
+    RightAngle,
+    /// `->` delimiter.
+    Arrow,
 
     /// Error token.
     Error,
@@ -287,9 +293,23 @@ impl TokenType for JavaTokenType {
             | Self::Caret
             | Self::CaretEquals
             | Self::Tilde => Operator,
-            Self::Question | Self::Colon | Self::Semicolon | Self::Comma | Self::Dot | Self::Ellipsis | Self::LeftParen | Self::RightParen | Self::LeftBrace | Self::RightBrace | Self::LeftBracket | Self::RightBracket | Self::At | Self::DoubleColon => {
-                Punctuation
-            }
+            Self::Question
+            | Self::Colon
+            | Self::Semicolon
+            | Self::Comma
+            | Self::Dot
+            | Self::Ellipsis
+            | Self::LeftParen
+            | Self::RightParen
+            | Self::LeftBrace
+            | Self::RightBrace
+            | Self::LeftBracket
+            | Self::RightBracket
+            | Self::At
+            | Self::DoubleColon
+            | Self::LeftAngle
+            | Self::RightAngle
+            | Self::Arrow => Punctuation,
             Self::Error => Error,
             Self::EndOfFile => Eof,
             _ if self.is_keyword() => Keyword,

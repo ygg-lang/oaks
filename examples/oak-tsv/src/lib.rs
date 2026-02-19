@@ -1,7 +1,6 @@
 #![doc = include_str!("readme.md")]
 #![feature(new_range_api)]
 #![warn(missing_docs)]
-//! Tsv support for the Oak language framework.
 
 /// The AST nodes for TSV.
 pub mod ast;

@@ -4,6 +4,7 @@ use std::{
     alloc::{Layout, alloc, dealloc},
     cell::{RefCell, UnsafeCell},
     ptr::{NonNull, copy_nonoverlapping},
+    simd::{Simd, SimdElement, SupportedLaneCount},
 };
 
 /// Default chunk size: 64KB.
@@ -197,6 +198,94 @@ impl SyntaxArena {
         }
     }
 
+    /// Allocates a SIMD-aligned block of memory for SIMD operations.
+    ///
+    /// # Safety
+    ///
+    /// `size` must be a multiple of the SIMD lane count size.
+    #[inline(always)]
+    pub unsafe fn alloc_simd<T>(&self, count: usize) -> &mut [T]
+    where
+        T: SimdElement,
+        Simd<T, 16>: SupportedLaneCount,
+    {
+        let layout = Layout::array::<T>(count).unwrap();
+        let simd_align = std::mem::size_of::<Simd<T, 16>>();
+        let aligned_layout = Layout::from_size_align(layout.size(), simd_align).unwrap();
+
+        let ptr = self.alloc_raw_aligned(aligned_layout.size(), simd_align);
+        let ptr = ptr.as_ptr() as *mut T;
+        std::slice::from_raw_parts_mut(ptr, count)
+    }
+
+    /// Internal raw allocation logic for aligned memory.
+    #[inline(always)]
+    unsafe fn alloc_raw_aligned(&self, size: usize, align: usize) -> NonNull<u8> {
+        // Unsafe block to wrap unsafe ops
+        unsafe {
+            let ptr = *self.ptr.get();
+            let end = *self.end.get();
+
+            let current_addr = ptr.as_ptr() as usize;
+            // Align the current address to the requested alignment
+            let aligned_addr = (current_addr + align - 1) & !(align - 1);
+            let next_addr = aligned_addr + size;
+
+            if std::intrinsics::likely(next_addr <= end.as_ptr() as usize) {
+                *self.ptr.get() = NonNull::new_unchecked(next_addr as *mut u8);
+                return NonNull::new_unchecked(aligned_addr as *mut u8);
+            }
+
+            self.alloc_slow_aligned(size, align)
+        }
+    }
+
+    /// Slow path for aligned allocation when the current chunk is exhausted.
+    #[inline(never)]
+    unsafe fn alloc_slow_aligned(&self, size: usize, align: usize) -> NonNull<u8> {
+        unsafe {
+            // Retire current chunk if it exists.
+            let current_start = *self.current_chunk_start.get();
+            if current_start != NonNull::dangling() {
+                // We record the full size of the chunk so it can be correctly recycled.
+                // Note: for now we assume chunks are either CHUNK_SIZE or specially sized.
+                let current_end = (*self.end.get()).as_ptr() as usize;
+                let actual_size = current_end - current_start.as_ptr() as usize;
+                (*self.full_chunks.get()).push((current_start, actual_size))
+            }
+
+            // Allocate new chunk with the required alignment
+            let alloc_size = usize::max(size + align, CHUNK_SIZE);
+            let chunk_ptr = Self::alloc_chunk_aligned(alloc_size, align);
+
+            *self.current_chunk_start.get() = chunk_ptr;
+
+            let start_addr = chunk_ptr.as_ptr() as usize;
+            // Resulting pointer is the start of the new chunk (already aligned)
+            let result_ptr = NonNull::new_unchecked(start_addr as *mut u8);
+
+            // Calculate the next free pointer
+            let next_free = start_addr + size;
+
+            *self.ptr.get() = NonNull::new_unchecked(next_free as *mut u8);
+            *self.end.get() = NonNull::new_unchecked((start_addr + alloc_size) as *mut u8);
+
+            result_ptr
+        }
+    }
+
+    /// Allocates a new aligned memory chunk from the thread-local pool or global allocator.
+    unsafe fn alloc_chunk_aligned(size: usize, align: usize) -> NonNull<u8> {
+        // For aligned allocations, we always go to the global allocator
+        // since aligned chunks are less likely to be reused for different alignments
+        let layout = Layout::from_size_align(size, align).unwrap();
+        let ptr = alloc(layout);
+        if ptr.is_null() {
+            std::alloc::handle_alloc_error(layout)
+        }
+        NonNull::new_unchecked(ptr)
+    }
+
     /// Slow path for allocation when the current chunk is exhausted.
     ///
     /// 1. Pushes the current chunk to `full_chunks`.
@@ -290,17 +379,24 @@ impl SyntaxArena {
     unsafe fn recycle_chunk(ptr: NonNull<u8>, size: usize) {
         if size == CHUNK_SIZE {
             // Only pool standard-sized chunks to maintain predictability.
-            let _ = CHUNK_POOL.try_with(|pool| {
-                let mut pool = pool.borrow_mut();
-                if pool.len() < 64 {
-                    // Hard limit to prevent memory bloating per thread.
-                    pool.push(ptr)
-                }
-            });
-            // If try_with fails (e.g. during thread destruction), we just leak or dealloc?
-            // Since we can't access pool, we should dealloc.
-            // But try_with error usually means TLS is gone.
-            // We can check error kind. For simplicity, we just fallback to dealloc if pool is unreachable.
+            let _ = CHUNK_POOL
+                .try_with(|pool| {
+                    let mut pool = pool.borrow_mut();
+                    if pool.len() < 64 {
+                        // Hard limit to prevent memory bloating per thread.
+                        pool.push(ptr)
+                    }
+                    else {
+                        // If pool is full, deallocate the chunk
+                        let layout = Layout::from_size_align(size, ALIGN).unwrap();
+                        dealloc(ptr.as_ptr(), layout);
+                    }
+                })
+                .unwrap_or_else(|_| {
+                    // If try_with fails (e.g. during thread destruction), deallocate the chunk
+                    let layout = Layout::from_size_align(size, ALIGN).unwrap();
+                    dealloc(ptr.as_ptr(), layout);
+                });
             return;
         }
         // If not pooled (either because it's a huge chunk or the pool is full/unreachable), deallocate immediately.

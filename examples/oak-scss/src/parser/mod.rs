@@ -1,3 +1,4 @@
+/// Element type definitions for the SCSS parser.
 pub mod element_type;
 
 use crate::{

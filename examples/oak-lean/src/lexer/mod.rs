@@ -1,4 +1,5 @@
 #![doc = include_str!("readme.md")]
+/// Token type definitions for the Lean language lexer.
 pub mod token_type;
 
 /// Lean language lexer

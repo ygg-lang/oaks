@@ -13,11 +13,13 @@ use oak_core::{
 
 pub(crate) type State<'a, S> = ParserState<'a, DjangoLanguage, S>;
 
+/// Parser for Django templates.
 pub struct DjangoParser<'config> {
     pub(crate) config: &'config DjangoLanguage,
 }
 
 impl<'config> DjangoParser<'config> {
+    /// Creates a new DjangoParser with the given language configuration.
     pub fn new(config: &'config DjangoLanguage) -> Self {
         Self { config }
     }

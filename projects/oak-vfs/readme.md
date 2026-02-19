@@ -3,16 +3,35 @@
 [![Crates.io](https://img.shields.io/crates/v/oak-vfs.svg)](https://crates.io/crates/oak-vfs)
 [![Documentation](https://docs.rs/oak-vfs/badge.svg)](https://docs.rs/oak-vfs)
 
-**Core component of the Oak ecosystem** — Providing a solid foundation for building modern programming language toolchains.
+**Virtual File System for Oak Language Tools** — A unified abstraction for file system operations supporting both in-memory and disk-based storage.
 
-## 🎯 Project Vision
+## 🎯 Why oak-vfs?
 
-`oak-vfs` is a key module in the Oak ecosystem, focusing on providing efficient and scalable low-level functionality to help developers quickly build robust programming language-related tools.
+Language tools need to access files from various sources — local disk, in-memory buffers, remote storage, or virtual projects. `oak-vfs` provides a unified abstraction layer that decouples language analysis from storage implementation.
 
-## ✨ Core Features
+## ✨ Key Features
 
-- **⚡ Blazing Fast**: Fully utilizes Rust's performance advantages to achieve sub-millisecond parsing response times.
-- **🔄 Incremental Parsing**: Built-in support for partial updates, demonstrating extremely high efficiency when processing large files.
-- **🌳 Structured Output**: Provides a clear, easy-to-traverse syntax tree or data structure.
-- **🛡️ Robustness**: Features a comprehensive error recovery mechanism, ensuring normal operation even when input is incomplete.
-- **🧩 Easy Integration**: Designed with high cohesion and low coupling, allowing for quick integration into existing Rust projects.
+- **📁 Unified Abstraction** — `Vfs` trait for any file source
+- **💾 Memory VFS** — In-memory projects, testing, sandboxed environments
+- **💿 Disk VFS** — Real file system with watching support (feature-gated)
+- **📊 Line Mapping** — `LineMap` for byte offset to line/column translation
+- **🔄 Serde Support** — Optional serialization for metadata and line maps
+
+## 🏗️ Architecture
+
+- `Vfs` trait — Core abstraction for file system access
+- `MemoryVfs` — In-memory file system for testing
+- `DiskVfs` — Real file system with watching (feature: `disk`)
+- `LineMap` — Efficient line/column mapping
+
+## 🔗 Ecosystem Integration
+
+Used by `oak-lsp` for workspace file management, `oak-mcp` for project analysis, and language servers for cross-file navigation.
+
+## 📖 Documentation
+
+For usage examples and API details, see the [API documentation](https://docs.rs/oak-vfs).
+
+## 🤝 Contributing
+
+Contributions are welcome! Please feel free to submit a Pull Request.

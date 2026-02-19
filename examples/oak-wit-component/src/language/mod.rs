@@ -2,6 +2,10 @@
 // use crate::{lexer::token_type::WitTokenType, parser::element_type::WitElementType};
 use oak_core::{Language, LanguageCategory};
 
+/// Language configuration for WIT (WebAssembly Interface Types) Component.
+///
+/// This struct implements the `Language` trait and provides the configuration
+/// for lexing and parsing WIT component definition files.
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 #[derive(Default, Debug, Clone, Copy)]
 pub struct WitLanguage {}

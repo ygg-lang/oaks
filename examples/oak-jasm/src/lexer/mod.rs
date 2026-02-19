@@ -1,5 +1,3 @@
-//! Lexer implementation for the JASM language.
-
 #![doc = include_str!("readme.md")]
 use oak_core::{
     Lexer, LexerCache, LexerState, OakError, Source,
@@ -112,6 +110,9 @@ impl<'config> JasmLexer<'config> {
 
     /// Skips comments.
     fn skip_comment<S: Source + ?Sized>(&self, state: &mut State<'_, S>) -> bool {
+        if !self.config.comments {
+            return false;
+        }
         JASM_COMMENT.scan(state, JasmTokenType::Comment, JasmTokenType::Comment)
     }
 
@@ -217,6 +218,7 @@ impl<'config> JasmLexer<'config> {
             "method" => JasmTokenType::MethodKw,
             "field" => JasmTokenType::FieldKw,
             "string" => JasmTokenType::StringKw,
+            "source" => JasmTokenType::SourceKw,
             "sourcefile" => JasmTokenType::SourceFileKw,
             "stack" => JasmTokenType::StackKw,
             "locals" => JasmTokenType::LocalsKw,
@@ -226,6 +228,12 @@ impl<'config> JasmLexer<'config> {
             "innerclass" => JasmTokenType::InnerClassKw,
             "nestmembers" => JasmTokenType::NestMembersKw,
             "bootstrapmethod" => JasmTokenType::BootstrapMethodKw,
+            "interface" => JasmTokenType::InterfaceKw,
+            "extends" => JasmTokenType::ExtendsKw,
+            "implements" => JasmTokenType::ImplementsKw,
+            "catch" => JasmTokenType::CatchKw,
+            "attribute" => JasmTokenType::AttributeKw,
+            "stackmap" => JasmTokenType::StackMapKw,
 
             // Access modifiers
             "public" => JasmTokenType::Public,
@@ -241,7 +249,7 @@ impl<'config> JasmLexer<'config> {
             "deprecated" => JasmTokenType::Deprecated,
             "varargs" => JasmTokenType::Varargs,
 
-            // Bytecode instructions
+            // Base bytecode instructions
             "aload_0" => JasmTokenType::ALoad0,
             "aload_1" => JasmTokenType::ALoad1,
             "aload_2" => JasmTokenType::ALoad2,
@@ -256,8 +264,6 @@ impl<'config> JasmLexer<'config> {
             "invokespecial" => JasmTokenType::InvokeSpecial,
             "invokevirtual" => JasmTokenType::InvokeVirtual,
             "invokestatic" => JasmTokenType::InvokeStatic,
-            "invokeinterface" => JasmTokenType::InvokeInterface,
-            "invokedynamic" => JasmTokenType::InvokeDynamic,
             "getstatic" => JasmTokenType::GetStatic,
             "putstatic" => JasmTokenType::PutStatic,
             "getfield" => JasmTokenType::GetField,
@@ -272,6 +278,38 @@ impl<'config> JasmLexer<'config> {
             "dup" => JasmTokenType::Dup,
             "pop" => JasmTokenType::Pop,
             "new" => JasmTokenType::New,
+
+            // Extended bytecode instructions (only if extended mode is enabled)
+            _ if self.config.extended => match text {
+                "invokeinterface" => JasmTokenType::InvokeInterface,
+                "invokedynamic" => JasmTokenType::InvokeDynamic,
+                "checkcast" => JasmTokenType::CheckCast,
+                "instanceof" => JasmTokenType::InstanceOf,
+                "newarray" => JasmTokenType::NewArray,
+                "anewarray" => JasmTokenType::ANewArray,
+                "arraylength" => JasmTokenType::ArrayLength,
+                "athrow" => JasmTokenType::AThrow,
+                "monitorenter" => JasmTokenType::MonitorEnter,
+                "monitorexit" => JasmTokenType::MonitorExit,
+                "multianewarray" => JasmTokenType::MultiANewArray,
+                "ifnull" => JasmTokenType::IfNull,
+                "ifnonnull" => JasmTokenType::IfNonNull,
+                "goto" => JasmTokenType::Goto,
+                "goto_w" => JasmTokenType::GotoW,
+                "jsr" => JasmTokenType::Jsr,
+                "jsr_w" => JasmTokenType::JsrW,
+                "ret" => JasmTokenType::Ret,
+                "tableswitch" => JasmTokenType::TableSwitch,
+                "lookupswitch" => JasmTokenType::LookupSwitch,
+                "bipush" => JasmTokenType::BiPush,
+                "sipush" => JasmTokenType::SiPush,
+                "iinc" => JasmTokenType::IInc,
+                "wide" => JasmTokenType::Wide,
+                "breakpoint" => JasmTokenType::BreakPoint,
+                "impdep1" => JasmTokenType::ImpDep1,
+                "impdep2" => JasmTokenType::ImpDep2,
+                _ => JasmTokenType::Identifier,
+            },
 
             // Default to identifier
             _ => JasmTokenType::Identifier,
@@ -295,6 +333,7 @@ impl<'config> JasmLexer<'config> {
                 '.' => JasmTokenType::Dot,
                 ',' => JasmTokenType::Comma,
                 '/' => JasmTokenType::Slash,
+                '@' => JasmTokenType::At,
                 _ => return false,
             };
 

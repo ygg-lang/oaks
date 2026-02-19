@@ -3,7 +3,6 @@
 #![warn(missing_docs)]
 #![doc(html_logo_url = "https://raw.githubusercontent.com/ygg-lang/oaks/refs/heads/dev/documents/logo.svg")]
 #![doc(html_favicon_url = "https://raw.githubusercontent.com/ygg-lang/oaks/refs/heads/dev/documents/logo.svg")]
-//! Typst support for the Oak language framework.
 
 /// AST module.
 pub mod ast;
@@ -28,6 +27,7 @@ pub mod parser;
 pub use crate::ast::TypstRoot;
 pub use builder::TypstBuilder;
 pub use language::TypstLanguage;
+/// Re-export of lexer types.
 pub use lexer::TypstLexer;
 pub use parser::TypstParser;
 

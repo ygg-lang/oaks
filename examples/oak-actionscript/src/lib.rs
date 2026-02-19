@@ -4,8 +4,6 @@
 #![doc(html_favicon_url = "https://raw.githubusercontent.com/ygg-lang/oaks/refs/heads/dev/documents/logo.svg")]
 #![warn(missing_docs)]
 
-//! Actionscript support for the Oak language framework.
-
 /// Abstract Syntax Tree (AST) definitions for ActionScript.
 pub mod ast;
 mod builder;
@@ -43,5 +41,5 @@ pub use crate::lsp::highlighter::ActionScriptHighlighter;
 #[cfg(feature = "lsp")]
 pub use crate::lsp::ActionScriptLanguageService;
 
-#[cfg(feature = "lsp")]
+#[cfg(feature = "mcp")]
 pub use crate::mcp::serve_actionscript_mcp;

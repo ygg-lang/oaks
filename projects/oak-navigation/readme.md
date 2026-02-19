@@ -3,16 +3,35 @@
 [![Crates.io](https://img.shields.io/crates/v/oak-navigation.svg)](https://crates.io/crates/oak-navigation)
 [![Documentation](https://docs.rs/oak-navigation/badge.svg)](https://docs.rs/oak-navigation)
 
-**Core component of the Oak ecosystem** — Providing a solid foundation for building modern programming language toolchains.
+**Code Navigation Support for Oak Languages** — Traits and utilities for implementing "Go to Definition" and "Find All References" features.
 
-## 🎯 Project Vision
+## 🎯 Why oak-navigation?
 
-`oak-navigation` is a key module in the Oak ecosystem, focusing on providing efficient and scalable low-level functionality to help developers quickly build robust programming language-related tools.
+Code navigation is fundamental to developer productivity. `oak-navigation` provides the building blocks for implementing navigation features in any Oak-based language tool.
 
-## ✨ Core Features
+## ✨ Key Features
 
-- **⚡ Blazing Fast**: Fully utilizes Rust's performance advantages to achieve sub-millisecond parsing response times.
-- **🔄 Incremental Parsing**: Built-in support for partial updates, demonstrating extremely high efficiency when processing large files.
-- **🌳 Structured Output**: Provides a clear, easy-to-traverse syntax tree or data structure.
-- **🛡️ Robustness**: Features a comprehensive error recovery mechanism, ensuring normal operation even when input is incomplete.
-- **🧩 Easy Integration**: Designed with high cohesion and low coupling, allowing for quick integration into existing Rust projects.
+- **🎯 Definition Provider** — `DefinitionProvider` trait for "Go to Definition"
+- **🔍 References Provider** — `ReferencesProvider` trait for "Find All References"
+- **📍 Location Type** — Unified `Location` for source positions across files
+- **🔎 Simple Reference Finder** — Built-in name-based reference search
+- **🔄 Serde Support** — Optional serialization for LSP integration
+
+## 🏗️ Architecture
+
+- `Location` — Represents a position in source code (URI + byte range)
+- `DefinitionProvider<L>` — Trait for finding symbol definitions
+- `ReferencesProvider<L>` — Trait for finding symbol references
+- `SimpleReferenceFinder` — Helper for basic name-based search
+
+## 🔗 Ecosystem Integration
+
+Used by `oak-lsp` for LSP navigation features, `oak-mcp` for AI-assisted navigation, and custom IDE extensions.
+
+## 📖 Documentation
+
+For usage examples and API details, see the [API documentation](https://docs.rs/oak-navigation).
+
+## 🤝 Contributing
+
+Contributions are welcome! Please feel free to submit a Pull Request.

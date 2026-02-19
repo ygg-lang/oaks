@@ -1,10 +1,16 @@
 #![doc = include_str!("readme.md")]
-//! Purescript syntax highlighter.
-//!
-//! This module provides syntax highlighting for Purescript source code, supporting keywords, types, comments, etc.
 
-use crate::token_type::TokenType;
-use oak_lsp::highlighter::{HighlightKind, Highlighter};
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum HighlightKind {
+    Keyword,
+    String,
+    Number,
+    Comment,
+}
+
+pub trait Highlighter {
+    fn highlight(&self, text: &str) -> Vec<(usize, usize, HighlightKind)>;
+}
 
 pub struct PurescriptHighlighter {
     pub use_parser: bool,

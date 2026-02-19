@@ -175,7 +175,7 @@ pub enum MatlabTokenType {
     /// `?` delimiter.
     Question, // ?
     /// `@` delimiter.
-    At, // ↯
+    At, // @
 
     // Special operators
     /// `'` operator.

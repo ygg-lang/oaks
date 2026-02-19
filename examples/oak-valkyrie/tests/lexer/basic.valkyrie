@@ -34,7 +34,7 @@ fn calculate_sum(a: i32, b: i32) -> i32 {
 }
 
 # Generics
-fn identity<T>(x: T) -> T {
+fn identity⟨T⟩(x: T) -> T {
     x
 }
 

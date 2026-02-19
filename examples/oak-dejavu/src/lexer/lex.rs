@@ -595,6 +595,8 @@ impl crate::lexer::DejavuLexer<'_> {
                 ';' => DejavuSyntaxKind::Semicolon,
                 '$' => DejavuSyntaxKind::Dollar,
                 '?' => DejavuSyntaxKind::Question,
+                '⟨' => DejavuSyntaxKind::LeftAngle,
+                '⟩' => DejavuSyntaxKind::RightAngle,
                 _ => return false,
             };
             state.advance(ch.len_utf8());

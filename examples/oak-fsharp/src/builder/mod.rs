@@ -93,7 +93,7 @@ impl<'config> FSharpBuilder<'config> {
             }
         }
 
-        ModuleDeclaration { name, is_top_level: true, items, span }
+        ModuleDeclaration { name, is_top_level: true, is_nested: false, items, span }
     }
 
     fn build_open(&self, node: RedNode<FSharpLanguage>, source: &str) -> OpenDirective {
@@ -131,7 +131,7 @@ impl<'config> FSharpBuilder<'config> {
                     if found_equal && expression.is_none() && !leaf.kind.is_ignored() && !leaf.kind.is_whitespace() {
                         let text = self.get_text(leaf.span, source).trim();
                         if !text.is_empty() {
-                            expression = Some(Expression::Simple(text.to_string()));
+                            expression = Some(Expression::Identifier(text.to_string()));
                         }
                     }
                     else if leaf.kind == FSharpTokenType::Rec {
@@ -142,7 +142,7 @@ impl<'config> FSharpBuilder<'config> {
                             name = self.get_text(leaf.span, source).to_string();
                         }
                         else if !found_equal {
-                            parameters.push(self.get_text(leaf.span, source).to_string());
+                            parameters.push(Parameter { name: self.get_text(leaf.span, source).to_string(), type_annotation: None });
                         }
                     }
                     else if leaf.kind == FSharpTokenType::Equal {
@@ -152,7 +152,7 @@ impl<'config> FSharpBuilder<'config> {
             }
         }
 
-        Binding { name, is_rec, parameters, expression: expression.unwrap_or_else(|| Expression::Simple(String::new())), span }
+        Binding { name, is_rec, is_mutable: false, parameters, type_annotation: None, expression: expression.unwrap_or_else(|| Expression::Identifier(String::new())), span }
     }
 
     fn build_expression(&self, node: RedNode<FSharpLanguage>, source: &str) -> Expression {
@@ -165,14 +165,14 @@ impl<'config> FSharpBuilder<'config> {
                     }
                 }
 
-                let condition = parts.get(0).cloned().map(Box::new).unwrap_or_else(|| Box::new(Expression::Simple(String::new())));
-                let then_branch = parts.get(1).cloned().map(Box::new).unwrap_or_else(|| Box::new(Expression::Simple(String::new())));
+                let condition = parts.get(0).cloned().map(Box::new).unwrap_or_else(|| Box::new(Expression::Identifier(String::new())));
+                let then_branch = parts.get(1).cloned().map(Box::new).unwrap_or_else(|| Box::new(Expression::Identifier(String::new())));
                 let else_branch = parts.get(2).cloned().map(Box::new);
 
                 Expression::If { condition, then_branch, else_branch }
             }
-            FSharpElementType::Expression => Expression::Simple(self.get_text(node.span(), source).trim().to_string()),
-            _ => Expression::Simple(self.get_text(node.span(), source).trim().to_string()),
+            FSharpElementType::Expression => Expression::Identifier(self.get_text(node.span(), source).trim().to_string()),
+            _ => Expression::Identifier(self.get_text(node.span(), source).trim().to_string()),
         }
     }
 }

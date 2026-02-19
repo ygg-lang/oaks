@@ -1,7 +1,6 @@
 #![doc = include_str!("readme.md")]
 #![feature(new_range_api)]
 #![warn(missing_docs)]
-//! Typescript support for the Oak language framework.
 
 /// AST module for TypeScript.
 pub mod ast;

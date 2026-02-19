@@ -58,7 +58,7 @@ impl<'config> JasmBuilder<'config> {
             }
         }
 
-        Ok(JasmRoot { class: class.unwrap_or_else(|| JasmClass { modifiers: vec![], name: String::new(), version: None, methods: vec![], fields: vec![], source_file: None }) })
+        Ok(JasmRoot { class: class.unwrap_or_else(|| JasmClass { modifiers: vec![], name: String::new(), version: None, methods: vec![], fields: vec![], source_file: None, super_class: None, interfaces: vec![], annotations: vec![], attributes: vec![] }) })
     }
 
     fn build_class(&self, node: RedNode<JasmLanguage>, source: &SourceText) -> Result<JasmClass, OakError> {
@@ -93,7 +93,7 @@ impl<'config> JasmBuilder<'config> {
             }
         }
 
-        Ok(JasmClass { modifiers, name, version: None, methods, fields, source_file: None })
+        Ok(JasmClass { modifiers, name, version: None, methods, fields, source_file: None, super_class: None, interfaces: vec![], annotations: vec![], attributes: vec![] })
     }
 
     fn build_method(&self, node: RedNode<JasmLanguage>, source: &SourceText) -> Result<JasmMethod, OakError> {
@@ -152,7 +152,7 @@ impl<'config> JasmBuilder<'config> {
 
         let name_and_descriptor = if descriptor.is_empty() { name } else { format!("{}{}", name, descriptor) };
 
-        Ok(JasmMethod { modifiers, name_and_descriptor, stack_size: stack, locals_count: locals, instructions })
+        Ok(JasmMethod { modifiers, name_and_descriptor, stack_size: stack, locals_count: locals, instructions, exception_handlers: vec![], annotations: vec![], attributes: vec![] })
     }
 
     fn build_field(&self, node: RedNode<JasmLanguage>, source: &SourceText) -> Result<JasmField, OakError> {
@@ -182,7 +182,7 @@ impl<'config> JasmBuilder<'config> {
 
         let name_and_descriptor = if descriptor.is_empty() { name } else { format!("{} {}", name, descriptor) };
 
-        Ok(JasmField { modifiers, name_and_descriptor })
+        Ok(JasmField { modifiers, name_and_descriptor, annotations: vec![], attributes: vec![] })
     }
 
     fn build_instruction(&self, node: RedNode<JasmLanguage>, source: &SourceText) -> Result<JasmInstruction, OakError> {

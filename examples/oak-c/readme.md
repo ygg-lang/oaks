@@ -3,32 +3,26 @@
 [![Crates.io](https://img.shields.io/crates/v/oak-c.svg)](https://crates.io/crates/oak-c)
 [![Documentation](https://docs.rs/oak-c/badge.svg)](https://docs.rs/oak-c)
 
-**Legacy Performance, Modern Tooling** — A high-performance, incremental C parser built on the Oak framework. Optimized for systems programming, legacy codebase analysis, and real-time developer tooling.
-
-## 🎯 Project Vision
-
-C is the foundation of modern computing, but its aging syntax and complex preprocessor make it a challenge for modern developer tools. `oak-c` provides a robust, high-performance, Rust-powered infrastructure for parsing C that is both accurate and incredibly fast. By utilizing Oak's incremental parsing architecture, we enable the creation of highly responsive IDEs, refactoring tools, and static analysis infrastructure that can handle massive C codebases and complex header chains in real-time.
+**Legacy Performance, Modern Tooling.** `oak-c` is a high-performance, incremental C parser built on the Oak framework. Optimized for systems programming, legacy codebase analysis, and real-time developer tooling, it brings modern infrastructure to the C ecosystem.
 
 ## ✨ Core Features
 
-- **⚡ Blazing Fast**: Leverages Rust's zero-cost abstractions to deliver sub-millisecond parsing, essential for real-time feedback in systems-level development.
-- **🔄 Incremental by Design**: Built-in support for partial updates—re-parse only the sections of the C file that changed. Ideal for large-scale source files and complex build systems.
-- **🌳 High-Fidelity AST**: Generates a comprehensive Abstract Syntax Tree capturing the full depth of C:
-    - **Declarations & Definitions**: Precise mapping of variables, functions, structs, unions, and enums.
-    - **Expressions & Statements**: Full support for C's complex operator precedence and control flow.
-    - **Preprocessor Awareness**: Robust handling of directives and macro definitions.
-    - **Comments & Formatting**: Retains all trivia, enabling faithful round-trip processing and refactoring.
-- **🛡️ Industrial-Grade Fault Tolerance**: Engineered to recover from syntax errors gracefully, providing precise diagnostics—crucial for maintaining a smooth developer experience when editing complex C code.
-- **🧩 Deep Ecosystem Integration**: Seamlessly works with `oak-lsp` for full LSP support and `oak-mcp` for intelligent code structure discovery.
+- **⚡ Blazing Fast**: Built in Rust for sub-millisecond parsing, essential for real-time feedback in massive systems-level codebases.
+- **🔄 Truly Incremental**: Re-parse only what changed. Ideal for massive translation units and responsive IDE feedback.
+- **🛡️ Industrial-Grade Fault Tolerance**: Gracefully handles syntax errors, providing precise diagnostics for complex C code.
+- **🌳 High-Fidelity AST**: Captures every detail of C, including declarations, expressions, preprocessor awareness, and trivia.
+- **Full C Support**: Comprehensive coverage of functions, structs, unions, and enums.
+- **Preprocessor Aware**: Robust handling of directives and macro definitions.
+- **IDE Ready**: Designed from the ground up for Language Server Protocol (LSP) and MCP integration.
+- **Lossless Syntax**: Retains all source details, making it perfect for automated refactoring and formatting.
 
-## 🏗️ Architecture
+## 🏗️ Modern Architecture
 
-The parser follows the **Green/Red Tree** architecture (inspired by Roslyn), which allows for:
-1. **Efficient Immutability**: Share nodes across different versions of the tree without copying.
-2. **Lossless Syntax Trees**: Retains all trivia (whitespace and comments), enabling faithful code formatting and refactoring.
-3. **Type Safety**: Strongly-typed "Red" nodes provide a convenient and safe API for tree traversal and analysis.
-
+Leveraging the **Green/Red Tree** pattern (similar to Roslyn and rust-analyzer):
+1. **Efficient Immutability**: Share nodes across tree versions without expensive copies.
+2. **Type-Safe API**: Easy traversal with strongly-typed nodes.
+3. **Zero-Copy Trivia**: Efficiently manage comments and whitespace.
 
 ## 🤝 Contributing
 
-We welcome contributions of all kinds! If you find a bug, have a feature request, or want to contribute code, please check our [issues](https://github.com/ygg-lang/oaks/issues) or submit a pull request.
+We welcome contributions! Whether it's bug reports, feature requests, or code, help us build the best C parsing infrastructure. Check our [issues](https://github.com/ygg-lang/oaks/issues) or submit a PR.

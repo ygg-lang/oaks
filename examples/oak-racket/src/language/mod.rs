@@ -1,21 +1,15 @@
-#![doc = include_str!("readme.md")]
-use oak_core::{Language, LanguageCategory};
+use oak_core::language::{Language, LanguageCategory};
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Default)]
-#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub struct RacketLanguage {}
+use crate::{lexer::TokenType, parser::ElementType};
 
-impl RacketLanguage {
-    pub fn new() -> Self {
-        Self {}
-    }
-}
+/// Racket language definition.
+pub struct RacketLanguage;
 
 impl Language for RacketLanguage {
     const NAME: &'static str = "racket";
     const CATEGORY: LanguageCategory = LanguageCategory::Programming;
 
-    type TokenType = crate::lexer::token_type::RacketTokenType;
-    type ElementType = crate::parser::element_type::RacketElementType;
+    type TokenType = TokenType;
+    type ElementType = ElementType;
     type TypedRoot = ();
 }

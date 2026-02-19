@@ -1,8 +1,10 @@
-# 🛠️ Go Parser Developer Guide
+# 📖 Go Parser User Guide
 
-This guide is designed to help you quickly get started with developing and integrating `oak-go`.
+Go support for the Oak language framework.
 
-## 🚦 Quick Start
+This guide helps you integrate `oak-go` into your project and perform common parsing tasks efficiently.
+
+## 🚀 Quick Start
 
 ### Basic Parsing Example
 
@@ -40,34 +42,29 @@ fn main() {
 }
 ```
 
-## 🔍 Core API Usage
+## 🔍 Core Functionality
 
 ### 1. Syntax Tree Traversal
-After a successful parse, you can use the built-in visitor pattern or manually traverse the Green/Red Tree to extract Go constructs like package declarations, struct methods, or channel operations.
+After a successful parse, use the built-in visitor pattern or manually traverse the Green/Red Tree to extract Go constructs like package declarations, struct methods, or channel operations.
 
 ### 2. Incremental Parsing
-No need to re-parse the entire file when small changes occur:
+Optimize performance by only re-parsing changed sections:
 ```rust
 // Assuming you have an old parse result 'old_result' and new source text 'new_source'
 let new_result = parser.reparse(&new_source, &old_result);
 ```
 
-### 3. Diagnostics
-`oak-go` provides rich error contexts specifically tailored for Go developers:
+### 3. Diagnostics & Error Recovery
+`oak-go` provides detailed error contexts tailored for Go developers:
 ```rust
 for diag in result.diagnostics() {
     println!("[{}:{}] {}", diag.line, diag.column, diag.message);
 }
 ```
 
-## 🏗️ Architecture Overview
+## 🛠️ Performance & Reliability
 
-- **Lexer**: Tokenizes Go source text into a stream of tokens, handling keywords, operators, and literals with support for Go's unique syntax rules.
-- **Parser**: Syntax analyzer based on the Pratt parsing algorithm to handle Go's expression precedence and structural declarations.
-- **AST**: A strongly-typed syntax abstraction layer designed for building high-performance Go analysis tools and IDEs.
+- **High-Fidelity AST**: Retains all trivia (whitespace and comments), making it ideal for code formatting and refactoring tools.
+- **Fault Tolerance**: Automatically recovers from syntax errors to provide as much information as possible from the rest of the file.
+- **Memory Efficiency**: Leverages immutable data structures (Green Trees) for low-overhead tree management.
 
-## 🔗 Advanced Resources
-
-- **Full Examples**: Check the [examples/](examples/) folder in the project root.
-- **API Documentation**: Run `cargo doc --open` for detailed type definitions.
-- **Test Cases**: See [tests/](tests/) for handling of various Go edge cases and language versions.

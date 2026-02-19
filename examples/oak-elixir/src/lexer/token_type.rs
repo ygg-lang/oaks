@@ -1,3 +1,4 @@
+/// Token type definitions for Elixir lexer.
 use oak_core::{Token, TokenType, UniversalTokenRole};
 
 /// Token types for Elixir.

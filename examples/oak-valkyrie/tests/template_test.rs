@@ -5,7 +5,7 @@ use oak_valkyrie::{ValkyrieBuilder, ValkyrieLanguage, ValkyrieParser};
 #[test]
 fn test_template_parsing() {
     let mut language = ValkyrieLanguage::default();
-    language.syntax_mode = SyntaxMode::Template;
+    language.base.syntax_mode = SyntaxMode::Template;
 
     let parser = ValkyrieParser::new(&language);
     let builder = ValkyrieBuilder::new(&language);

@@ -141,21 +141,25 @@ impl ToSource for ColumnDefinition {
 pub enum ColumnConstraint {
     /// PRIMARY KEY constraint.
     PrimaryKey {
+        /// Source span of the constraint.
         #[serde(with = "oak_core::serde_range")]
         span: Range<usize>,
     },
     /// NOT NULL constraint.
     NotNull {
+        /// Source span of the constraint.
         #[serde(with = "oak_core::serde_range")]
         span: Range<usize>,
     },
     /// NULL constraint.
     Nullable {
+        /// Source span of the constraint.
         #[serde(with = "oak_core::serde_range")]
         span: Range<usize>,
     },
     /// UNIQUE constraint.
     Unique {
+        /// Source span of the constraint.
         #[serde(with = "oak_core::serde_range")]
         span: Range<usize>,
     },
@@ -165,6 +169,7 @@ pub enum ColumnConstraint {
     Check(Expression, #[serde(with = "oak_core::serde_range")] Range<usize>),
     /// AUTOINCREMENT constraint.
     AutoIncrement {
+        /// Source span of the constraint.
         #[serde(with = "oak_core::serde_range")]
         span: Range<usize>,
     },

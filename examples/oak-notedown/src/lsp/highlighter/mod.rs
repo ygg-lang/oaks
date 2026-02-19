@@ -1,5 +1,4 @@
 #![doc = include_str!("readme.md")]
-//! Notedown syntax highlighter
 
 /// Kind of highlight
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]

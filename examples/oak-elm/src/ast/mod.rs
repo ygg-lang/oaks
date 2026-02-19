@@ -11,7 +11,7 @@ pub struct Identifier {
     /// The name of the identifier.
     pub name: String,
     /// The source range of the identifier.
-    #[serde(with = "oak_core::serde_range")]
+    #[cfg_attr(feature = "serde", serde(with = "oak_core::serde_range"))]
     pub span: Range<usize>,
 }
 
@@ -44,7 +44,7 @@ pub struct Module {
     /// The items contained in the module.
     pub items: Vec<Item>,
     /// The source range of the module.
-    #[serde(with = "oak_core::serde_range")]
+    #[cfg_attr(feature = "serde", serde(with = "oak_core::serde_range"))]
     pub span: Range<usize>,
 }
 
@@ -59,7 +59,7 @@ pub struct Function {
     /// The body of the function.
     pub body: Block,
     /// The source range of the function.
-    #[serde(with = "oak_core::serde_range")]
+    #[cfg_attr(feature = "serde", serde(with = "oak_core::serde_range"))]
     pub span: Range<usize>,
 }
 
@@ -72,7 +72,7 @@ pub struct Param {
     /// The type of the parameter, if specified.
     pub ty: Option<String>,
     /// The source range of the parameter.
-    #[serde(with = "oak_core::serde_range")]
+    #[cfg_attr(feature = "serde", serde(with = "oak_core::serde_range"))]
     pub span: Range<usize>,
 }
 
@@ -83,7 +83,7 @@ pub struct Block {
     /// The statements in the block.
     pub statements: Vec<Statement>,
     /// The source range of the block.
-    #[serde(with = "oak_core::serde_range")]
+    #[cfg_attr(feature = "serde", serde(with = "oak_core::serde_range"))]
     pub span: Range<usize>,
 }
 
@@ -98,7 +98,7 @@ pub enum Statement {
         /// The expression to bind.
         expr: Expr,
         /// The source range of the statement.
-        #[serde(with = "oak_core::serde_range")]
+        #[cfg_attr(feature = "serde", serde(with = "oak_core::serde_range"))]
         span: Range<usize>,
     },
     /// An expression statement.
@@ -106,7 +106,7 @@ pub enum Statement {
         /// The expression in the statement.
         expr: Expr,
         /// The source range of the statement.
-        #[serde(with = "oak_core::serde_range")]
+        #[cfg_attr(feature = "serde", serde(with = "oak_core::serde_range"))]
         span: Range<usize>,
     },
 }
@@ -122,7 +122,7 @@ pub enum Expr {
         /// The value of the atom.
         value: String,
         /// The source range of the expression.
-        #[serde(with = "oak_core::serde_range")]
+        #[cfg_attr(feature = "serde", serde(with = "oak_core::serde_range"))]
         span: Range<usize>,
     },
     /// A number literal expression.
@@ -130,7 +130,7 @@ pub enum Expr {
         /// The value of the number.
         value: String,
         /// The source range of the expression.
-        #[serde(with = "oak_core::serde_range")]
+        #[cfg_attr(feature = "serde", serde(with = "oak_core::serde_range"))]
         span: Range<usize>,
     },
     /// A string literal expression.
@@ -138,7 +138,7 @@ pub enum Expr {
         /// The value of the string.
         value: String,
         /// The source range of the expression.
-        #[serde(with = "oak_core::serde_range")]
+        #[cfg_attr(feature = "serde", serde(with = "oak_core::serde_range"))]
         span: Range<usize>,
     },
     /// A boolean literal expression.
@@ -146,7 +146,7 @@ pub enum Expr {
         /// The value of the boolean.
         value: bool,
         /// The source range of the expression.
-        #[serde(with = "oak_core::serde_range")]
+        #[cfg_attr(feature = "serde", serde(with = "oak_core::serde_range"))]
         span: Range<usize>,
     },
     /// A binary operation expression.
@@ -158,7 +158,7 @@ pub enum Expr {
         /// The right-hand side of the operation.
         rhs: Box<Expr>,
         /// The source range of the expression.
-        #[serde(with = "oak_core::serde_range")]
+        #[cfg_attr(feature = "serde", serde(with = "oak_core::serde_range"))]
         span: Range<usize>,
     },
     /// A unary operation expression.
@@ -168,7 +168,7 @@ pub enum Expr {
         /// The expression to operate on.
         expr: Box<Expr>,
         /// The source range of the expression.
-        #[serde(with = "oak_core::serde_range")]
+        #[cfg_attr(feature = "serde", serde(with = "oak_core::serde_range"))]
         span: Range<usize>,
     },
     /// A function call expression.
@@ -178,7 +178,7 @@ pub enum Expr {
         /// The arguments to the function.
         args: Vec<Expr>,
         /// The source range of the expression.
-        #[serde(with = "oak_core::serde_range")]
+        #[cfg_attr(feature = "serde", serde(with = "oak_core::serde_range"))]
         span: Range<usize>,
     },
     /// A field access expression.
@@ -188,7 +188,7 @@ pub enum Expr {
         /// The name of the field.
         field: Identifier,
         /// The source range of the expression.
-        #[serde(with = "oak_core::serde_range")]
+        #[cfg_attr(feature = "serde", serde(with = "oak_core::serde_range"))]
         span: Range<usize>,
     },
     /// An index access expression.
@@ -198,7 +198,7 @@ pub enum Expr {
         /// The index expression.
         index: Box<Expr>,
         /// The source range of the expression.
-        #[serde(with = "oak_core::serde_range")]
+        #[cfg_attr(feature = "serde", serde(with = "oak_core::serde_range"))]
         span: Range<usize>,
     },
     /// A parenthesized expression.
@@ -206,7 +206,7 @@ pub enum Expr {
         /// The inner expression.
         expr: Box<Expr>,
         /// The source range of the expression.
-        #[serde(with = "oak_core::serde_range")]
+        #[cfg_attr(feature = "serde", serde(with = "oak_core::serde_range"))]
         span: Range<usize>,
     },
     /// A block expression.
@@ -220,7 +220,7 @@ pub enum Expr {
         /// The `else` branch.
         els: Box<Expr>,
         /// The source range of the expression.
-        #[serde(with = "oak_core::serde_range")]
+        #[cfg_attr(feature = "serde", serde(with = "oak_core::serde_range"))]
         span: Range<usize>,
     },
 }

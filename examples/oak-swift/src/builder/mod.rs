@@ -6,12 +6,14 @@ use crate::{
 };
 use oak_core::{Builder, BuilderCache, GreenNode, GreenTree, OakDiagnostics, OakError, Parser, SourceText, TextEdit, builder::BuildOutput, source::Source};
 
+/// AST builder for Swift language that constructs typed AST nodes from green tree.
 #[derive(Clone)]
 pub struct SwiftBuilder<'config> {
     config: &'config SwiftLanguage,
 }
 
 impl<'config> SwiftBuilder<'config> {
+    /// Creates a new SwiftBuilder with the given language configuration.
     pub fn new(config: &'config SwiftLanguage) -> Self {
         Self { config }
     }
@@ -41,6 +43,7 @@ impl<'config> Builder<SwiftLanguage> for SwiftBuilder<'config> {
 }
 
 impl<'config> SwiftBuilder<'config> {
+    /// Builds a SwiftRoot AST node from a green tree and source text.
     pub fn build_root(&self, green_tree: &GreenNode<SwiftLanguage>, source: &SourceText) -> Result<SwiftRoot, OakError> {
         let mut statements = Vec::new();
         let mut current_offset = 0;

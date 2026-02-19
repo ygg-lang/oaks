@@ -265,7 +265,7 @@ impl SerializeMap for SerializeObject {
         let key = self.current_key.take().unwrap();
         let val = value.serialize(Serializer)?;
 
-        if key.starts_with('↯') {
+        if key.starts_with('@') {
             self.attributes.push(XmlAttribute {
                 name: key[1..].to_string(),
                 value: match val {
@@ -318,7 +318,7 @@ impl SerializeStruct for SerializeObject {
         // Reuse logic from serialize_value but with a known key
         let val = value.serialize(Serializer)?;
 
-        if key.starts_with('↯') {
+        if key.starts_with('@') {
             self.attributes.push(XmlAttribute {
                 name: key[1..].to_string(),
                 value: match val {
@@ -696,7 +696,7 @@ impl MapDeserializer {
         let mut entries: Vec<(String, Vec<XmlValue>)> = Vec::new();
 
         for attr in element.attributes {
-            let key = "↯".to_string() + &attr.name;
+            let key = "@".to_string() + &attr.name;
             entries.push((key, vec![XmlValue::Text(attr.value)]))
         }
 

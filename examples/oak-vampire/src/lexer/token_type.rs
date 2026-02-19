@@ -21,93 +21,173 @@ pub enum VampireTokenType {
     /// Identifier.
     Identifier,
 
-    // Keywords
+    /// The `fof` keyword (first-order formula).
     FofKw,
+    /// The `cnf` keyword (conjunctive normal form).
     CnfKw,
+    /// The `tff` keyword (typed first-order formula).
     TffKw,
+    /// The `thf` keyword (typed higher-order formula).
     ThfKw,
+    /// The `tpi` keyword (typed predicate inference).
     TpiKw,
+    /// The `include` keyword.
     IncludeKw,
+    /// The `axiom` keyword.
     AxiomKw,
+    /// The `hypothesis` keyword.
     HypothesisKw,
+    /// The `definition` keyword.
     DefinitionKw,
+    /// The `assumption` keyword.
     AssumptionKw,
+    /// The `lemma` keyword.
     LemmaKw,
+    /// The `theorem` keyword.
     TheoremKw,
+    /// The `conjecture` keyword.
     ConjectureKw,
+    /// The `negated_conjecture` keyword.
     NegatedConjectureKw,
+    /// The `plain` keyword.
     PlainKw,
+    /// The `type` keyword.
     TypeKw,
+    /// The `fi_domain` keyword.
     FiDomainKw,
+    /// The `fi_functors` keyword.
     FiFunctorsKw,
+    /// The `fi_predicates` keyword.
     FiPredicatesKw,
+    /// The `unknown` keyword.
     UnknownKw,
+    /// The `!` (forall) quantifier keyword.
     ForallKw,
+    /// The `?` (exists) quantifier keyword.
     ExistsKw,
+    /// The `&` (and) logical operator keyword.
     AndKw,
+    /// The `|` (or) logical operator keyword.
     OrKw,
+    /// The `~` (not) logical operator keyword.
     NotKw,
+    /// The `=>` (implies) logical operator keyword.
     ImpliesKw,
+    /// The `<=>` (if and only if) logical operator keyword.
     IffKw,
+    /// The `<~>` (xor) logical operator keyword.
     XorKw,
+    /// The `~|` (nor) logical operator keyword.
     NorKw,
+    /// The `~&` (nand) logical operator keyword.
     NandKw,
+    /// The `$bool` type keyword.
     BoolKw,
+    /// The `$i` (individual) type keyword.
     IndividualKw,
+    /// The `$int` type keyword.
     IntKw,
+    /// The `$real` type keyword.
     RealKw,
+    /// The `$rat` type keyword.
     RatKw,
+    /// The `$tType` type keyword.
     TTypeKw,
+    /// The `$o` type keyword.
     OTypeKw,
+    /// The `$iType` type keyword.
     ITypeKw,
+    /// Boolean literal (`$true` or `$false`).
     BoolLiteral,
 
-    // Operators
+    /// The `==` equality operator.
     DoubleEq,
+    /// The `!=` inequality operator.
     NotEq,
+    /// The `<=` less-than-or-equal operator.
     LessEq,
+    /// The `>=` greater-than-or-equal operator.
     GreaterEq,
+    /// The `&&` logical and operator.
     AndAnd,
+    /// The `||` logical or operator.
     OrOr,
+    /// The `++` increment operator.
     PlusPlus,
+    /// The `--` decrement operator.
     MinusMinus,
+    /// The `+=` addition assignment operator.
     PlusEq,
+    /// The `-=` subtraction assignment operator.
     MinusEq,
+    /// The `*=` multiplication assignment operator.
     StarEq,
+    /// The `/=` division assignment operator.
     SlashEq,
+    /// The `%=` modulo assignment operator.
     PercentEq,
+    /// The `<<` left shift operator.
     LeftShift,
+    /// The `>>` right shift operator.
     RightShift,
+    /// The `->` arrow operator.
     Arrow,
 
-    // Single char tokens
+    /// Left parenthesis `(`.
     LeftParen,
+    /// Right parenthesis `)`.
     RightParen,
+    /// Left bracket `[`.
     LeftBracket,
+    /// Right bracket `]`.
     RightBracket,
+    /// Left brace `{`.
     LeftBrace,
+    /// Right brace `}`.
     RightBrace,
+    /// Colon `:`.
     Colon,
+    /// Semicolon `;`.
     Semicolon,
+    /// Dot `.`.
     Dot,
+    /// Comma `,`.
     Comma,
+    /// Question mark `?`.
     Question,
+    /// Exclamation mark `!`.
     Bang,
+    /// At sign `@`.
     At,
+    /// Hash `#`.
     Hash,
+    /// Dollar sign `$`.
     Dollar,
+    /// Percent `%`.
     Percent,
+    /// Caret `^`.
     Caret,
+    /// Ampersand `&`.
     Ampersand,
+    /// Asterisk `*`.
     Star,
+    /// Plus `+`.
     Plus,
+    /// Minus `-`.
     Minus,
+    /// Equals `=`.
     Eq,
+    /// Less-than `<`.
     LessThan,
+    /// Greater-than `>`.
     GreaterThan,
+    /// Slash `/`.
     Slash,
+    /// Backslash `\`.
     Backslash,
+    /// Pipe `|`.
     Pipe,
+    /// Tilde `~`.
     Tilde,
 }
 

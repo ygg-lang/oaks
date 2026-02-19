@@ -33,7 +33,7 @@ impl<'config> Lexer<AsciiDocLanguage> for AsciiDocLexer {
 
 impl AsciiDocLexer {
     /// Creates a new `AsciiDocLexer` instance.
-    pub fn new(_config: &AsciiDocLanguage) -> Self {
+    pub fn new(config: &AsciiDocLanguage) -> Self {
         Self
     }
 

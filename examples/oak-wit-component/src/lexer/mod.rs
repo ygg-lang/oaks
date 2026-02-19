@@ -1,4 +1,9 @@
 #![doc = include_str!("readme.md")]
+/// Token type definitions for WIT (WebAssembly Interface Types) lexical analysis.
+///
+/// This module provides [`WitTokenType`] which defines all token types
+/// recognized by the WIT lexer, including keywords, identifiers, literals,
+/// and punctuation.
 pub mod token_type;
 
 use crate::{language::WitLanguage, lexer::token_type::WitTokenType};
@@ -15,6 +20,10 @@ static WIT_WHITESPACE: LazyLock<WhitespaceConfig> = LazyLock::new(|| WhitespaceC
 static WIT_COMMENT: LazyLock<CommentConfig> = LazyLock::new(|| CommentConfig { line_marker: "//", block_start: "/*", block_end: "*/", nested_blocks: true });
 static WIT_STRING: LazyLock<StringConfig> = LazyLock::new(|| StringConfig { quotes: &['"'], escape: Some('\\') });
 
+/// Lexer for WIT (WebAssembly Interface Types) files.
+///
+/// This lexer tokenizes WIT source code into a sequence of tokens
+/// that can be processed by the parser.
 #[derive(Clone)]
 pub struct WitLexer<'config> {
     config: &'config WitLanguage,
@@ -29,6 +38,12 @@ impl<'config> Lexer<WitLanguage> for WitLexer<'config> {
 }
 
 impl<'config> WitLexer<'config> {
+    /// Creates a new `WitLexer` instance with the specified language configuration.
+    ///
+    /// # Arguments
+    ///
+    /// * `config` - A reference to the `WitLanguage` configuration.
+    /// Creates a new WitComponentLexer with the given language configuration.
     pub fn new(config: &'config WitLanguage) -> Self {
         Self { config }
     }

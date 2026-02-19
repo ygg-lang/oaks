@@ -1,198 +1,217 @@
-pub mod element_type;
-
-use crate::{language::JinjaLanguage, lexer::token_type::JinjaTokenType};
-pub use element_type::JinjaElementType;
+/// Jinja Parser module
+///
+/// This module defines the parser for Jinja templates, responsible for parsing the tokens into an AST.
 use oak_core::{
-    errors::OakError,
     parser::{ParseCache, ParseOutput, Parser, ParserState, parse_with_lexer},
     source::{Source, TextEdit},
 };
 
+/// Element type definitions for Jinja parser.
+pub mod element_type;
+use crate::{
+    language::JinjaLanguage,
+    lexer::{JinjaLexer, token_type::JinjaTokenType},
+};
+use element_type::JinjaElementType;
+
 pub(crate) type State<'a, S> = ParserState<'a, JinjaLanguage, S>;
 
+/// Parser for Jinja templates
+#[derive(Debug, Clone)]
 pub struct JinjaParser<'config> {
-    language: &'config JinjaLanguage,
+    /// Language configuration
+    config: &'config JinjaLanguage,
 }
 
 impl<'config> JinjaParser<'config> {
-    pub fn new(language: &'config JinjaLanguage) -> Self {
-        Self { language }
+    /// Create a new Jinja parser
+    pub fn new(config: &'config JinjaLanguage) -> Self {
+        Self { config }
     }
 
-    fn parse_node<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> Result<(), OakError> {
+    fn parse_node<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> Result<(), oak_core::OakError> {
         match state.peek_kind() {
-            Some(JinjaTokenType::VariableStart) => self.parse_variable(state),
-            Some(JinjaTokenType::TagStart) => self.parse_tag_statement(state),
+            Some(JinjaTokenType::DoubleLeftBrace) => self.parse_variable(state),
+            Some(JinjaTokenType::LeftBracePercent) => self.parse_tag_statement(state),
             Some(JinjaTokenType::Comment) => {
                 let cp = state.checkpoint();
-                state.advance();
+                state.bump();
                 state.finish_at(cp, JinjaElementType::Comment);
                 Ok(())
             }
-            Some(JinjaTokenType::HtmlContent) => {
+            _ => {
                 let cp = state.checkpoint();
                 state.advance();
-                state.finish_at(cp, JinjaElementType::HtmlContent);
-                Ok(())
-            }
-            _ => {
-                state.advance();
+                state.finish_at(cp, JinjaElementType::Text);
                 Ok(())
             }
         }
     }
 
-    fn parse_variable<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> Result<(), OakError> {
+    fn parse_variable<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> Result<(), oak_core::OakError> {
         let cp = state.checkpoint();
-        state.expect(JinjaTokenType::VariableStart)?;
+        state.expect(JinjaTokenType::DoubleLeftBrace)?;
         self.parse_expression(state)?;
-        state.expect(JinjaTokenType::VariableEnd)?;
+        state.expect(JinjaTokenType::DoubleRightBrace)?;
         state.finish_at(cp, JinjaElementType::Variable);
         Ok(())
     }
 
-    fn parse_tag_statement<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> Result<(), OakError> {
+    fn parse_tag_statement<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> Result<(), oak_core::OakError> {
         let cp = state.checkpoint();
-        state.expect(JinjaTokenType::TagStart)?;
+        state.expect(JinjaTokenType::LeftBracePercent)?;
 
         let kind = state.peek_kind();
         match kind {
-            Some(JinjaTokenType::If) => self.parse_if_statement(state, cp),
-            Some(JinjaTokenType::For) => self.parse_for_statement(state, cp),
-            Some(JinjaTokenType::Block) => self.parse_block_statement(state, cp),
-            Some(JinjaTokenType::Macro) => self.parse_macro_definition(state, cp),
-            Some(JinjaTokenType::Set) => self.parse_set_statement(state, cp),
+            Some(JinjaTokenType::Identifier) => {
+                let text = state.peek_text().unwrap_or_default();
+                match text.as_ref() {
+                    "if" => self.parse_if_statement(state, cp),
+                    "for" => self.parse_for_statement(state, cp),
+                    "block" => self.parse_block_statement(state, cp),
+                    "macro" => self.parse_macro_definition(state, cp),
+                    _ => {
+                        while state.not_at_end() && !state.at(JinjaTokenType::PercentRightBrace) {
+                            state.advance();
+                        }
+                        state.expect(JinjaTokenType::PercentRightBrace)?;
+                        state.finish_at(cp, JinjaElementType::Tag);
+                        Ok(())
+                    }
+                }
+            }
             _ => {
-                while state.not_at_end() && !state.at(JinjaTokenType::TagEnd) {
+                while state.not_at_end() && !state.at(JinjaTokenType::PercentRightBrace) {
                     state.advance();
                 }
-                state.expect(JinjaTokenType::TagEnd)?;
+                state.expect(JinjaTokenType::PercentRightBrace)?;
                 state.finish_at(cp, JinjaElementType::Tag);
                 Ok(())
             }
         }
     }
 
-    fn parse_if_statement<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>, cp: (usize, usize)) -> Result<(), OakError> {
-        state.expect(JinjaTokenType::If)?;
+    fn parse_if_statement<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>, cp: (usize, usize)) -> Result<(), oak_core::OakError> {
+        state.expect(JinjaTokenType::Identifier)?; // if
         self.parse_expression(state)?;
-        state.expect(JinjaTokenType::TagEnd)?;
+        state.expect(JinjaTokenType::PercentRightBrace)?;
 
         while state.not_at_end() {
-            if state.at(JinjaTokenType::TagStart) {
-                let next_kind = state.peek_kind_at(1);
-                if matches!(next_kind, Some(JinjaTokenType::Endif) | Some(JinjaTokenType::Elif) | Some(JinjaTokenType::Else)) {
-                    break;
+            if state.at(JinjaTokenType::LeftBracePercent) {
+                if let Some(JinjaTokenType::Identifier) = state.peek_kind_at(1) {
+                    let text = state.tokens.peek_at(1).map(|t| state.source.get_text_in(t.span)).unwrap_or_default();
+                    if text == "endif" || text == "elif" || text == "else" {
+                        break;
+                    }
                 }
             }
             self.parse_node(state)?;
         }
 
-        match state.peek_kind_at(1) {
-            Some(JinjaTokenType::Elif) => {
-                state.expect(JinjaTokenType::TagStart)?;
+        if state.at(JinjaTokenType::LeftBracePercent) {
+            let text = state.tokens.peek_at(1).map(|t| state.source.get_text_in(t.span)).unwrap_or_default();
+            if text == "elif" {
+                state.expect(JinjaTokenType::LeftBracePercent)?;
                 self.parse_if_statement(state, state.checkpoint())?;
             }
-            Some(JinjaTokenType::Else) => {
-                state.expect(JinjaTokenType::TagStart)?;
-                state.expect(JinjaTokenType::Else)?;
-                state.expect(JinjaTokenType::TagEnd)?;
-                while state.not_at_end() && !(state.at(JinjaTokenType::TagStart) && state.peek_kind_at(1) == Some(JinjaTokenType::Endif)) {
+            else if text == "else" {
+                state.expect(JinjaTokenType::LeftBracePercent)?;
+                state.expect(JinjaTokenType::Identifier)?; // else
+                state.expect(JinjaTokenType::PercentRightBrace)?;
+                while state.not_at_end() && !(state.at(JinjaTokenType::LeftBracePercent) && state.tokens.peek_at(1).map(|t| state.source.get_text_in(t.span)).map(|t| t == "endif").unwrap_or(false)) {
                     self.parse_node(state)?;
                 }
             }
-            _ => {}
         }
 
-        if state.at(JinjaTokenType::TagStart) && state.peek_kind_at(1) == Some(JinjaTokenType::Endif) {
-            state.expect(JinjaTokenType::TagStart)?;
-            state.expect(JinjaTokenType::Endif)?;
-            state.expect(JinjaTokenType::TagEnd)?;
+        if state.at(JinjaTokenType::LeftBracePercent) && state.tokens.peek_at(1).map(|t| state.source.get_text_in(t.span)).map(|t| t == "endif").unwrap_or(false) {
+            state.expect(JinjaTokenType::LeftBracePercent)?;
+            state.expect(JinjaTokenType::Identifier)?; // endif
+            state.expect(JinjaTokenType::PercentRightBrace)?;
         }
 
         state.finish_at(cp, JinjaElementType::IfStatement);
         Ok(())
     }
 
-    fn parse_for_statement<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>, cp: (usize, usize)) -> Result<(), OakError> {
-        state.expect(JinjaTokenType::For)?;
-        // Simplified parsing: for x in y
-        self.parse_expression(state)?;
-        state.expect(JinjaTokenType::In)?;
-        self.parse_expression(state)?;
-        state.expect(JinjaTokenType::TagEnd)?;
+    fn parse_for_statement<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>, cp: (usize, usize)) -> Result<(), oak_core::OakError> {
+        state.expect(JinjaTokenType::Identifier)?; // for
+        self.parse_expression(state)?; // x
+        // Jinja for syntax: for x in y
+        if state.peek_text().map(|t| t == "in").unwrap_or(false) {
+            state.advance();
+            self.parse_expression(state)?; // y
+        }
+        state.expect(JinjaTokenType::PercentRightBrace)?;
 
-        while state.not_at_end() && !(state.at(JinjaTokenType::TagStart) && state.peek_kind_at(1) == Some(JinjaTokenType::Endfor)) {
+        while state.not_at_end() && !(state.at(JinjaTokenType::LeftBracePercent) && state.tokens.peek_at(1).map(|t| state.source.get_text_in(t.span)).map(|t| t == "endfor").unwrap_or(false)) {
             self.parse_node(state)?;
         }
 
-        state.expect(JinjaTokenType::TagStart)?;
-        state.expect(JinjaTokenType::Endfor)?;
-        state.expect(JinjaTokenType::TagEnd)?;
+        state.expect(JinjaTokenType::LeftBracePercent)?;
+        state.expect(JinjaTokenType::Identifier)?; // endfor
+        state.expect(JinjaTokenType::PercentRightBrace)?;
 
         state.finish_at(cp, JinjaElementType::ForStatement);
         Ok(())
     }
 
-    fn parse_block_statement<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>, cp: (usize, usize)) -> Result<(), OakError> {
-        state.expect(JinjaTokenType::Block)?;
-        state.expect(JinjaTokenType::Identifier)?;
-        state.expect(JinjaTokenType::TagEnd)?;
+    fn parse_block_statement<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>, cp: (usize, usize)) -> Result<(), oak_core::OakError> {
+        state.expect(JinjaTokenType::Identifier)?; // block
+        state.expect(JinjaTokenType::Identifier)?; // name
+        state.expect(JinjaTokenType::PercentRightBrace)?;
 
-        while state.not_at_end() && !(state.at(JinjaTokenType::TagStart) && state.peek_kind_at(1) == Some(JinjaTokenType::Endblock)) {
+        while state.not_at_end() && !(state.at(JinjaTokenType::LeftBracePercent) && state.tokens.peek_at(1).map(|t| state.source.get_text_in(t.span)).map(|t| t == "endblock").unwrap_or(false)) {
             self.parse_node(state)?;
         }
 
-        state.expect(JinjaTokenType::TagStart)?;
-        state.expect(JinjaTokenType::Endblock)?;
+        state.expect(JinjaTokenType::LeftBracePercent)?;
+        state.expect(JinjaTokenType::Identifier)?; // endblock
         if state.at(JinjaTokenType::Identifier) {
             state.advance();
         }
-        state.expect(JinjaTokenType::TagEnd)?;
+        state.expect(JinjaTokenType::PercentRightBrace)?;
 
         state.finish_at(cp, JinjaElementType::Block);
         Ok(())
     }
 
-    fn parse_macro_definition<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>, cp: (usize, usize)) -> Result<(), OakError> {
-        state.expect(JinjaTokenType::Macro)?;
-        state.expect(JinjaTokenType::Identifier)?;
+    fn parse_macro_definition<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>, cp: (usize, usize)) -> Result<(), oak_core::OakError> {
+        state.expect(JinjaTokenType::Identifier)?; // macro
+        state.expect(JinjaTokenType::Identifier)?; // name
+
         if state.at(JinjaTokenType::LeftParen) {
             state.advance();
             while state.not_at_end() && !state.at(JinjaTokenType::RightParen) {
-                state.advance();
+                if state.at(JinjaTokenType::Identifier) {
+                    state.advance();
+                }
+                if state.at(JinjaTokenType::Comma) {
+                    state.advance();
+                }
             }
             state.expect(JinjaTokenType::RightParen)?;
         }
-        state.expect(JinjaTokenType::TagEnd)?;
 
-        while state.not_at_end() && !(state.at(JinjaTokenType::TagStart) && state.peek_kind_at(1) == Some(JinjaTokenType::Endmacro)) {
+        state.expect(JinjaTokenType::PercentRightBrace)?;
+
+        while state.not_at_end() && !(state.at(JinjaTokenType::LeftBracePercent) && state.tokens.peek_at(1).map(|t| state.source.get_text_in(t.span)).map(|t| t == "endmacro").unwrap_or(false)) {
             self.parse_node(state)?;
         }
 
-        state.expect(JinjaTokenType::TagStart)?;
-        state.expect(JinjaTokenType::Endmacro)?;
-        state.expect(JinjaTokenType::TagEnd)?;
+        state.expect(JinjaTokenType::LeftBracePercent)?;
+        state.expect(JinjaTokenType::Identifier)?; // endmacro
+        state.expect(JinjaTokenType::PercentRightBrace)?;
 
         state.finish_at(cp, JinjaElementType::MacroDefinition);
         Ok(())
     }
 
-    fn parse_set_statement<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>, cp: (usize, usize)) -> Result<(), OakError> {
-        state.expect(JinjaTokenType::Set)?;
-        state.expect(JinjaTokenType::Identifier)?;
-        state.expect(JinjaTokenType::Equal)?;
-        self.parse_expression(state)?;
-        state.expect(JinjaTokenType::TagEnd)?;
-        state.finish_at(cp, JinjaElementType::SetStatement);
-        Ok(())
-    }
-
-    fn parse_expression<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> Result<(), OakError> {
+    fn parse_expression<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> Result<(), oak_core::OakError> {
         self.parse_binary_expression(state, 0)
     }
 
-    fn parse_binary_expression<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>, min_precedence: i32) -> Result<(), OakError> {
+    fn parse_binary_expression<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>, min_precedence: i32) -> Result<(), oak_core::OakError> {
         let cp = state.checkpoint();
         self.parse_primary_expression(state)?;
 
@@ -204,7 +223,7 @@ impl<'config> JinjaParser<'config> {
 
             state.advance();
             self.parse_binary_expression(state, precedence + 1)?;
-            state.finish_at(cp, if kind == JinjaTokenType::Pipe { JinjaElementType::FilterExpression } else { JinjaElementType::BinaryExpression });
+            state.finish_at(cp, if kind == JinjaTokenType::Pipe { JinjaElementType::Filter } else { JinjaElementType::Expression });
         }
 
         Ok(())
@@ -219,19 +238,28 @@ impl<'config> JinjaParser<'config> {
         }
     }
 
-    fn parse_primary_expression<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> Result<(), OakError> {
+    fn parse_primary_expression<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> Result<(), oak_core::OakError> {
         let cp = state.checkpoint();
+
         match state.peek_kind() {
             Some(JinjaTokenType::Identifier) => {
                 state.advance();
                 if state.at(JinjaTokenType::LeftParen) {
-                    self.parse_call_expression(state, cp)?;
+                    state.advance();
+                    while state.not_at_end() && !state.at(JinjaTokenType::RightParen) {
+                        self.parse_expression(state)?;
+                        if state.at(JinjaTokenType::Comma) {
+                            state.advance();
+                        }
+                    }
+                    state.expect(JinjaTokenType::RightParen)?;
+                    state.finish_at(cp, JinjaElementType::Function);
                 }
                 else {
                     state.finish_at(cp, JinjaElementType::Identifier);
                 }
             }
-            Some(JinjaTokenType::String) | Some(JinjaTokenType::Number) => {
+            Some(JinjaTokenType::String) | Some(JinjaTokenType::Number) | Some(JinjaTokenType::Boolean) => {
                 state.advance();
                 state.finish_at(cp, JinjaElementType::Literal);
             }
@@ -241,37 +269,24 @@ impl<'config> JinjaParser<'config> {
                 state.expect(JinjaTokenType::RightParen)?;
             }
             _ => {
-                while state.not_at_end() && !state.at(JinjaTokenType::TagEnd) && !state.at(JinjaTokenType::VariableEnd) && !state.at(JinjaTokenType::RightParen) && !state.at(JinjaTokenType::Comma) {
+                while state.not_at_end() && !state.at(JinjaTokenType::PercentRightBrace) && !state.at(JinjaTokenType::DoubleRightBrace) && !state.at(JinjaTokenType::RightParen) && !state.at(JinjaTokenType::Comma) {
                     state.advance();
                 }
             }
         }
         Ok(())
     }
-
-    fn parse_call_expression<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>, cp: (usize, usize)) -> Result<(), OakError> {
-        state.expect(JinjaTokenType::LeftParen)?;
-        while state.not_at_end() && !state.at(JinjaTokenType::RightParen) {
-            self.parse_expression(state)?;
-            if state.at(JinjaTokenType::Comma) {
-                state.advance();
-            }
-        }
-        state.expect(JinjaTokenType::RightParen)?;
-        state.finish_at(cp, JinjaElementType::CallExpression);
-        Ok(())
-    }
 }
 
 impl<'config> Parser<JinjaLanguage> for JinjaParser<'config> {
     fn parse<'a, S: Source + ?Sized>(&self, text: &'a S, edits: &[TextEdit], cache: &'a mut impl ParseCache<JinjaLanguage>) -> ParseOutput<'a, JinjaLanguage> {
-        let lexer = crate::lexer::JinjaLexer::new(self.language);
+        let lexer = JinjaLexer::new(&self.config);
         parse_with_lexer(&lexer, text, edits, cache, |state| {
-            let cp = state.checkpoint();
+            let checkpoint = state.checkpoint();
             while state.not_at_end() {
                 self.parse_node(state)?;
             }
-            Ok(state.finish_at(cp, JinjaElementType::Root))
+            Ok(state.finish_at(checkpoint, JinjaElementType::Root))
         })
     }
 }

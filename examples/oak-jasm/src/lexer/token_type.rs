@@ -39,6 +39,22 @@ pub enum JasmTokenType {
     NestMembersKw,
     /// `bootstrap_method` keyword.
     BootstrapMethodKw,
+    /// `super` keyword.
+    SuperKw,
+    /// `interface` keyword.
+    InterfaceKw,
+    /// `implements` keyword.
+    ImplementsKw,
+    /// `extends` keyword.
+    ExtendsKw,
+    /// `source` keyword.
+    SourceKw,
+    /// `catch` keyword.
+    CatchKw,
+    /// `attribute` keyword.
+    AttributeKw,
+    /// `stackmap` keyword.
+    StackMapKw,
 
     /// `public` access modifier.
     Public,
@@ -176,6 +192,249 @@ pub enum JasmTokenType {
     /// `pop` instruction.
     Pop,
 
+    /// `aconst_null` instruction.
+    AConstNull,
+    /// `iconst_m1` instruction.
+    IConstM1,
+    /// `iconst_0` instruction.
+    IConst0,
+    /// `iconst_1` instruction.
+    IConst1,
+    /// `iconst_2` instruction.
+    IConst2,
+    /// `iconst_3` instruction.
+    IConst3,
+    /// `iconst_4` instruction.
+    IConst4,
+    /// `iconst_5` instruction.
+    IConst5,
+    /// `lconst_0` instruction.
+    LConst0,
+    /// `lconst_1` instruction.
+    LConst1,
+    /// `fconst_0` instruction.
+    FConst0,
+    /// `fconst_1` instruction.
+    FConst1,
+    /// `fconst_2` instruction.
+    FConst2,
+    /// `dconst_0` instruction.
+    DConst0,
+    /// `dconst_1` instruction.
+    DConst1,
+
+    /// `aload` instruction.
+    ALoad,
+    /// `iload` instruction.
+    ILoad,
+    /// `lload` instruction.
+    LLoad,
+    /// `fload` instruction.
+    FLoad,
+    /// `dload` instruction.
+    DLoad,
+
+    /// `astore` instruction.
+    AStore,
+    /// `istore` instruction.
+    IStore,
+    /// `lstore` instruction.
+    LStore,
+    /// `fstore` instruction.
+    FStore,
+    /// `dstore` instruction.
+    DStore,
+
+    /// `baload` instruction.
+    BALoad,
+    /// `caload` instruction.
+    CALoad,
+    /// `saload` instruction.
+    SALoad,
+    /// `aaload` instruction.
+    AALoad,
+    /// `iaload` instruction.
+    IALoad,
+    /// `laload` instruction.
+    LALoad,
+    /// `faload` instruction.
+    FALoad,
+    /// `daload` instruction.
+    DALoad,
+
+    /// `bastore` instruction.
+    BAStore,
+    /// `castore` instruction.
+    CAStore,
+    /// `sastore` instruction.
+    SAStore,
+    /// `aastore` instruction.
+    AAStore,
+    /// `iastore` instruction.
+    IAStore,
+    /// `lastore` instruction.
+    LAStore,
+    /// `fastore` instruction.
+    FAStore,
+    /// `dastore` instruction.
+    DAStore,
+
+    /// `swap` instruction.
+    Swap,
+    /// `swap2` instruction.
+    Swap2,
+    /// `dup_x1` instruction.
+    DupX1,
+    /// `dup_x2` instruction.
+    DupX2,
+    /// `dup2` instruction.
+    Dup2,
+    /// `dup2_x1` instruction.
+    Dup2X1,
+    /// `dup2_x2` instruction.
+    Dup2X2,
+
+    /// `iadd` instruction.
+    IAdd,
+    /// `ladd` instruction.
+    LAdd,
+    /// `fadd` instruction.
+    FAdd,
+    /// `dadd` instruction.
+    DAdd,
+    /// `isub` instruction.
+    ISub,
+    /// `lsub` instruction.
+    LSub,
+    /// `fsub` instruction.
+    FSub,
+    /// `dsub` instruction.
+    DSub,
+    /// `imul` instruction.
+    IMul,
+    /// `lmul` instruction.
+    LMul,
+    /// `fmul` instruction.
+    FMul,
+    /// `dmul` instruction.
+    DMul,
+    /// `idiv` instruction.
+    IDiv,
+    /// `ldiv` instruction.
+    LDiv,
+    /// `fdiv` instruction.
+    FDiv,
+    /// `ddiv` instruction.
+    DDiv,
+    /// `irem` instruction.
+    IRem,
+    /// `lrem` instruction.
+    LRem,
+    /// `frem` instruction.
+    FRem,
+    /// `drem` instruction.
+    DRem,
+
+    /// `ineg` instruction.
+    INeg,
+    /// `lneg` instruction.
+    LNeg,
+    /// `fneg` instruction.
+    FNeg,
+    /// `dneg` instruction.
+    DNeg,
+
+    /// `ishl` instruction.
+    IShl,
+    /// `lshl` instruction.
+    LShl,
+    /// `ishr` instruction.
+    IShr,
+    /// `lshr` instruction.
+    LShr,
+    /// `iushr` instruction.
+    IUShr,
+    /// `lushr` instruction.
+    LUShr,
+
+    /// `iand` instruction.
+    IAnd,
+    /// `land` instruction.
+    LAnd,
+    /// `ior` instruction.
+    IOr,
+    /// `lor` instruction.
+    LOr,
+    /// `ixor` instruction.
+    IXor,
+    /// `lxor` instruction.
+    LXor,
+
+    /// `i2l` instruction.
+    I2L,
+    /// `i2f` instruction.
+    I2F,
+    /// `i2d` instruction.
+    I2D,
+    /// `l2i` instruction.
+    L2I,
+    /// `l2f` instruction.
+    L2F,
+    /// `l2d` instruction.
+    L2D,
+    /// `f2i` instruction.
+    F2I,
+    /// `f2l` instruction.
+    F2L,
+    /// `f2d` instruction.
+    F2D,
+    /// `d2i` instruction.
+    D2I,
+    /// `d2l` instruction.
+    D2L,
+    /// `d2f` instruction.
+    D2F,
+
+    /// `lcmp` instruction.
+    LCmp,
+    /// `fcmpl` instruction.
+    FCmpL,
+    /// `fcmpg` instruction.
+    FCmpG,
+    /// `dcmpl` instruction.
+    DCmpL,
+    /// `dcmpg` instruction.
+    DCmpG,
+
+    /// `ifeq` instruction.
+    IfEq,
+    /// `ifne` instruction.
+    IfNe,
+    /// `iflt` instruction.
+    IfLt,
+    /// `ifge` instruction.
+    IfGe,
+    /// `ifgt` instruction.
+    IfGt,
+    /// `ifle` instruction.
+    IfLe,
+    /// `if_icmpeq` instruction.
+    IfICmpEq,
+    /// `if_icmpne` instruction.
+    IfICmpNe,
+    /// `if_icmplt` instruction.
+    IfICmpLt,
+    /// `if_icmpge` instruction.
+    IfICmpGe,
+    /// `if_icmpgt` instruction.
+    IfICmpGt,
+    /// `if_icmple` instruction.
+    IfICmpLe,
+    /// `if_acmpeq` instruction.
+    IfACmpEq,
+    /// `if_acmpne` instruction.
+    IfACmpNe,
+
     /// Left brace `{`.
     LeftBrace,
     /// Right brace `}`.
@@ -200,6 +459,8 @@ pub enum JasmTokenType {
     Dot,
     /// Slash `/`.
     Slash,
+    /// At symbol `@`.
+    At,
 
     /// Identifier.
     Identifier,

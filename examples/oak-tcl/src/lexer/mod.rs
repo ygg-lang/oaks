@@ -1,5 +1,6 @@
 #![doc = include_str!("readme.md")]
 use oak_core::Source;
+/// Token type definitions for the Tcl lexer.
 pub mod token_type;
 
 use crate::{language::TclLanguage, lexer::token_type::TclTokenType};
@@ -14,6 +15,10 @@ static TCL_WHITESPACE: WhitespaceConfig = WhitespaceConfig { unicode_whitespace:
 static TCL_COMMENT: CommentConfig = CommentConfig { line_marker: "#", block_start: "", block_end: "", nested_blocks: false };
 static TCL_STRING: StringConfig = StringConfig { quotes: &['"'], escape: Some('\\') };
 
+/// A lexer for the Tcl programming language.
+///
+/// This lexer tokenizes Tcl source code into a sequence of tokens that can be
+/// processed by the parser.
 #[derive(Clone)]
 pub struct TclLexer<'config> {
     config: &'config TclLanguage,

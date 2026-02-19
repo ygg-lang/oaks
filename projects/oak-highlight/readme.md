@@ -3,16 +3,43 @@
 [![Crates.io](https://img.shields.io/crates/v/oak-highlight.svg)](https://crates.io/crates/oak-highlight)
 [![Documentation](https://docs.rs/oak-highlight/badge.svg)](https://docs.rs/oak-highlight)
 
-**Core component of the Oak ecosystem** — Providing a solid foundation for building modern programming language toolchains.
+**Multi-Format Syntax Highlighting for Oak Languages** — A flexible highlighting library with support for ANSI, HTML, CSS, and JSON output formats.
 
-## 🎯 Project Vision
+## 🎯 Why oak-highlight?
 
-`oak-highlight` is a key module in the Oak ecosystem, focusing on providing efficient and scalable low-level functionality to help developers quickly build robust programming language-related tools.
+Syntax highlighting transforms code from plain text into visually structured, readable content. `oak-highlight` provides a unified highlighting infrastructure that works across all Oak language parsers.
 
-## ✨ Core Features
+## ✨ Key Features
 
-- **⚡ Blazing Fast**: Fully utilizes Rust's performance advantages to achieve sub-millisecond parsing response times.
-- **🔄 Incremental Parsing**: Built-in support for partial updates, demonstrating extremely high efficiency when processing large files.
-- **🌳 Structured Output**: Provides a clear, easy-to-traverse syntax tree or data structure.
-- **🛡️ Robustness**: Features a comprehensive error recovery mechanism, ensuring normal operation even when input is incomplete.
-- **🧩 Easy Integration**: Designed with high cohesion and low coupling, allowing for quick integration into existing Rust projects.
+- **🎨 Multiple Export Formats** — ANSI, HTML, CSS classes, and JSON
+- **🔤 Token-Based Highlighting** — Fast, accurate highlighting from token streams
+- **🎭 Theme Support** — Pluggable theming with predefined and custom themes
+- **⚡ Zero-Allocation Design** — Highlight results borrow from source text
+- **🧩 Language Agnostic** — Works with any Oak language parser
+
+## 🏗️ Architecture
+
+- `OakHighlighter` — Main highlighter processing source into segments
+- `HighlightResult` — Collection of highlighted segments with style
+- `Exporter` trait — Convert results to various output formats
+
+### Available Exporters
+
+| Exporter | Output Format | Use Case |
+|----------|---------------|----------|
+| `AnsiExporter` | ANSI escape codes | Terminal, CLI tools |
+| `HtmlExporter` | HTML with inline styles | Web applications |
+| `CssExporter` | HTML with CSS classes | Custom styling |
+| `JsonExporter` | JSON array | Tooling integration |
+
+## 🔗 Ecosystem Integration
+
+Used by `oak-repl` for terminal highlighting, `oak-lsp` for semantic tokens, and language-specific parsers for preview generation.
+
+## 📖 Documentation
+
+For usage examples and API details, see the [API documentation](https://docs.rs/oak-highlight).
+
+## 🤝 Contributing
+
+Contributions are welcome! Please feel free to submit a Pull Request.

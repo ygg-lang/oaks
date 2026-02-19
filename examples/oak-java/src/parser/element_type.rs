@@ -98,6 +98,22 @@ pub enum JavaElementType {
     CompilationUnit,
     /// Error element.
     Error,
+    /// Anonymous class.
+    AnonymousClass,
+    /// Type parameter.
+    TypeParameter,
+    /// Type parameter constraint.
+    TypeParameterConstraint,
+    /// Generic type.
+    GenericType,
+    /// Lambda expression.
+    LambdaExpression,
+    /// Annotation type declaration.
+    AnnotationTypeDeclaration,
+    /// Annotation element.
+    AnnotationElement,
+    /// Enum constant.
+    EnumConstant,
 }
 
 impl ElementType for JavaElementType {
@@ -146,10 +162,14 @@ impl ElementType for JavaElementType {
             | Self::Continue
             | Self::TryStatement
             | Self::ThrowStatement => Statement,
-            Self::ClassDeclaration | Self::InterfaceDeclaration | Self::EnumDeclaration | Self::StructDeclaration | Self::RecordDeclaration | Self::MethodDeclaration | Self::FieldDeclaration | Self::ConstructorDeclaration => Definition,
-            Self::Parameter | Self::CatchClause | Self::SwitchCase | Self::DefaultCase | Self::ThrowsClause | Self::Annotation => Detail,
+            Self::ClassDeclaration | Self::InterfaceDeclaration | Self::EnumDeclaration | Self::StructDeclaration | Self::RecordDeclaration | Self::MethodDeclaration | Self::FieldDeclaration | Self::ConstructorDeclaration | Self::AnonymousClass => {
+                Definition
+            }
+            Self::Parameter | Self::CatchClause | Self::SwitchCase | Self::DefaultCase | Self::ThrowsClause | Self::Annotation | Self::TypeParameter | Self::TypeParameterConstraint | Self::AnnotationElement | Self::EnumConstant => Detail,
             Self::Package | Self::Import => Statement,
             Self::BlockStatement => Container,
+            Self::LambdaExpression | Self::GenericType => Expression,
+            Self::AnnotationTypeDeclaration => Definition,
             Self::Error => Error,
         }
     }

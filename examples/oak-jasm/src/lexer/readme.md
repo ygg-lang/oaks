@@ -1,5 +1,7 @@
 # Jasm Lexer Module
 
+Lexer implementation for the JASM language.
+
 The Jasm Lexer module provides efficient lexical analysis for the [Jasm assembly language](https://github.com/openjdk/jasm), a modern assembly language for the Java Virtual Machine (JVM). It converts Jasm source code into a stream of tokens, enabling the assembly and analysis of JVM bytecode.
 
 ## Purpose

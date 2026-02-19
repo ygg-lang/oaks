@@ -1,8 +1,10 @@
 use oak_core::{Source, Token, TokenType, UniversalElementRole, UniversalTokenRole};
 
+/// Token type for the R language.
 pub type RToken = Token<RTokenType>;
 
 impl RTokenType {
+    /// Returns true if this token type is trivia (whitespace, newline, or comment).
     pub fn is_trivia(self) -> bool {
         matches!(self, Self::Whitespace | Self::Newline | Self::Comment)
     }
@@ -229,4 +231,5 @@ pub enum RTokenType {
     Eof,
 }
 
+/// Red node type for the R language.
 pub type RNode<'a> = oak_core::tree::RedNode<'a, RLanguage>;

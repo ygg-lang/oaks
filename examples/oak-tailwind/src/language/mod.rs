@@ -1,5 +1,4 @@
 #![doc = include_str!("readme.md")]
-//! Language definition for Tailwind DSL.
 use crate::{ast::TailwindRoot, lexer::TailwindLexer, parser::TailwindParser};
 use oak_core::{Language, LanguageCategory};
 

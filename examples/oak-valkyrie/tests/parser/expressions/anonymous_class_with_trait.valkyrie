@@ -1,0 +1,3 @@
+let impl_trait = class: Trait { x: 10, y: 20 }
+let impl_trait2 = class: Trait { x, y }
+let impl_multiple = class: Trait + Another { x: 10, y }

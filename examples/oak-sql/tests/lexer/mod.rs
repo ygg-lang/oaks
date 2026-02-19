@@ -1,5 +1,3 @@
-mod manual;
-
 use oak_sql::{SqlLanguage, SqlLexer};
 use oak_testing::lexing::LexerTester;
 use std::{path::Path, time::Duration};

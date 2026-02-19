@@ -1,8 +1,4 @@
 #![doc = include_str!("readme.md")]
-//! Markdown syntax highlighter.
-//!
-//! This module provides syntax highlighting for Markdown source code,
-//! supporting headings, emphasis, code blocks, links, etc.
 
 /// Local definition for highlight kinds.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]

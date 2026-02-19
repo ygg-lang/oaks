@@ -8,6 +8,7 @@ use oak_core::{Language, LanguageCategory};
 pub struct DartLanguage {}
 
 impl DartLanguage {
+    /// Creates a new DartLanguage instance.
     pub fn new() -> Self {
         Self {}
     }

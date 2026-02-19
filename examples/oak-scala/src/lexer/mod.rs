@@ -1,4 +1,5 @@
 #![doc = include_str!("readme.md")]
+/// Token type definitions for Scala lexer.
 pub mod token_type;
 
 use crate::{language::ScalaLanguage, lexer::token_type::ScalaTokenType};
@@ -16,6 +17,7 @@ static SCALA_COMMENT: LazyLock<CommentConfig> = LazyLock::new(|| CommentConfig {
 static SCALA_STRING: LazyLock<StringConfig> = LazyLock::new(|| StringConfig { quotes: &['"'], escape: Some('\\') });
 static SCALA_CHAR: LazyLock<StringConfig> = LazyLock::new(|| StringConfig { quotes: &['\''], escape: None });
 
+/// Lexer for Scala source code.
 #[derive(Clone, Debug)]
 pub struct ScalaLexer<'config> {
     config: &'config ScalaLanguage,
@@ -33,6 +35,7 @@ impl<'config> Lexer<ScalaLanguage> for ScalaLexer<'config> {
 }
 
 impl<'config> ScalaLexer<'config> {
+    /// Creates a new ScalaLexer with the given language configuration.
     pub fn new(config: &'config ScalaLanguage) -> Self {
         Self { config }
     }

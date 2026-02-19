@@ -1,5 +1,4 @@
 #![doc = include_str!("readme.md")]
-//! Lexer implementation for the VON language.
 
 use oak_core::{
     Lexer, LexerState, Source, TextEdit,

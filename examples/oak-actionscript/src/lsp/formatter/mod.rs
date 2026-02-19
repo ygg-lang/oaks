@@ -39,12 +39,12 @@ impl ActionScriptFormatter {
     /// Format top-level items
     fn format_item(&self, item: &ActionScriptItem) -> String {
         match item {
-            ActionScriptItem::Class => "class {} // TODO".to_string(),
-            ActionScriptItem::Interface => "interface {} // TODO".to_string(),
-            ActionScriptItem::Function => "function() {} // TODO".to_string(),
-            ActionScriptItem::Variable => "var x; // TODO".to_string(),
-            ActionScriptItem::Package => "package {} // TODO".to_string(),
-            ActionScriptItem::Import => "import {} // TODO".to_string(),
+            ActionScriptItem::Class(_) => "class {} // TODO".to_string(),
+            ActionScriptItem::Interface(_) => "interface {} // TODO".to_string(),
+            ActionScriptItem::Function(_) => "function() {} // TODO".to_string(),
+            ActionScriptItem::Variable(_) => "var x; // TODO".to_string(),
+            ActionScriptItem::Package(_) => "package {} // TODO".to_string(),
+            ActionScriptItem::Import(_) => "import {} // TODO".to_string(),
         }
     }
 

@@ -1,18 +1,30 @@
-# 🚀 oak-wat
+# 🚀 Oak WAT Parser
 
 [![Crates.io](https://img.shields.io/crates/v/oak-wat.svg)](https://crates.io/crates/oak-wat)
 [![Documentation](https://docs.rs/oak-wat/badge.svg)](https://docs.rs/oak-wat)
 
-**Making WAT processing simple** — A high-performance, incremental WAT parser built on the Oak framework.
+**WebAssembly Text Format Parsing Made Simple** — A high-performance, incremental WAT parser built on the Oak framework.
 
-## 🎯 Project Vision
+## 🎯 Why oak-wat?
 
-`oak-wat` is dedicated to providing industrial-grade parsing support for the WAT language. By leveraging Rust's high-performance characteristics and Oak's incremental parsing architecture, it can easily handle a variety of application scenarios, from simple script analysis to complex IDE language servers.
+The WebAssembly Text Format (WAT) is the human-readable representation of WebAssembly binaries. `oak-wat` provides industrial-grade parsing support for WebAssembly development, debugging, and analysis.
 
-## ✨ Core Features
+## ✨ Key Features
 
-- **⚡ Blazing Fast**: Fully utilizes Rust's performance advantages to achieve sub-millisecond parsing response times.
-- **🔄 Incremental Parsing**: Built-in support for partial updates, demonstrating extremely high efficiency when processing large files.
-- **🌳 Structured Output**: Provides a clear, easy-to-traverse syntax tree or data structure.
-- **🛡️ Robustness**: Features a comprehensive error recovery mechanism, ensuring normal operation even when input is incomplete.
-- **🧩 Easy Integration**: Designed with high cohesion and low coupling, allowing for quick integration into existing Rust projects.
+- **⚡ Blazing Fast** — Sub-millisecond parsing for build tools and IDEs
+- **🔄 Incremental Parsing** — Re-parse only what changed
+- **🌳 High-Fidelity AST** — Captures modules, components, functions, instructions, memory, tables, imports/exports
+- **🛡️ Robust Error Recovery** — Precise diagnostics for debugging
+- **🧩 Deep Ecosystem Integration** — Works with `oak-lsp` and `oak-mcp`
+
+## 🏗️ Architecture
+
+Follows the Green/Red Tree architecture with efficient immutability, lossless syntax trees, and type-safe traversal.
+
+## 📖 Documentation
+
+For usage examples and API details, see the [API documentation](https://docs.rs/oak-wat).
+
+## 🤝 Contributing
+
+Contributions are welcome! Please feel free to submit a Pull Request.

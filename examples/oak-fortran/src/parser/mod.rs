@@ -1,3 +1,4 @@
+/// Element type definitions for Fortran parser.
 pub mod element_type;
 
 use crate::{language::FortranLanguage, parser::element_type::FortranElementType};

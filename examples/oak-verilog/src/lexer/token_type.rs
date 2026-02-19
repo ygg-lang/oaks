@@ -1,3 +1,4 @@
+/// Token type definitions for Verilog lexer.
 use oak_core::{TokenType, UniversalTokenRole};
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]

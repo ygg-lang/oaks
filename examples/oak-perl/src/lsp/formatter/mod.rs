@@ -1,5 +1,4 @@
 #![doc = include_str!("readme.md")]
-//! Perl code formatter
 
 use crate::ast::PerlRoot;
 

@@ -1,3 +1,4 @@
+/// Element type definitions for Swift parser.
 pub mod element_type;
 
 use crate::language::SwiftLanguage;
@@ -12,11 +13,13 @@ use oak_core::{
 
 pub(crate) type State<'a, S> = ParserState<'a, SwiftLanguage, S>;
 
+/// Parser for Swift source code.
 pub struct SwiftParser<'config> {
     pub(crate) config: &'config SwiftLanguage,
 }
 
 impl<'config> SwiftParser<'config> {
+    /// Creates a new SwiftParser with the given language configuration.
     pub fn new(config: &'config SwiftLanguage) -> Self {
         Self { config }
     }

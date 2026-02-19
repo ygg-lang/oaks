@@ -1,6 +1,6 @@
 use crate::{
     ValkyrieLanguage,
-    lexer::{ValkyrieKeywords, token_type::ValkyrieSyntaxKind},
+    lexer::{ValkyrieKeywords, token_type::ValkyrieTokenType},
 };
 use oak_core::{
     LexerState, OakError,
@@ -13,25 +13,11 @@ use unicode_ident::{is_xid_continue, is_xid_start};
 pub(crate) type State<'a, S> = LexerState<'a, S, ValkyrieLanguage>;
 
 static VK_WHITESPACE: LazyLock<WhitespaceConfig> = LazyLock::new(|| WhitespaceConfig { unicode_whitespace: true });
-static VK_COMMENT: LazyLock<CommentConfig> = LazyLock::new(|| CommentConfig { line_marker: "#", block_start: "/*", block_end: "*/", nested_blocks: true });
+static VK_COMMENT: LazyLock<CommentConfig> = LazyLock::new(|| CommentConfig { line_marker: "//", block_start: "/*", block_end: "*/", nested_blocks: true });
 
 impl crate::lexer::ValkyrieLexer<'_> {
     /// Runs the lexer on the given state.
     pub(crate) fn run<S: Source + ?Sized>(&self, state: &mut State<'_, S>) -> Result<(), OakError> {
-        match self.config.syntax_mode {
-            oak_dejavu::language::SyntaxMode::Programming => self.run_programming(state),
-            oak_dejavu::language::SyntaxMode::Template => self.run_template(state),
-        }
-    }
-
-    fn run_template<S: Source + ?Sized>(&self, state: &mut State<'_, S>) -> Result<(), OakError> {
-        let start = state.get_position();
-        let end = state.source().length();
-        self.lex_interpolation(state, start, end, true);
-        Ok(())
-    }
-
-    fn run_programming<S: Source + ?Sized>(&self, state: &mut State<'_, S>) -> Result<(), OakError> {
         while state.not_at_end() {
             let start_pos = state.get_position();
 
@@ -44,7 +30,7 @@ impl crate::lexer::ValkyrieLexer<'_> {
             if !matched {
                 if let Some(c) = state.current() {
                     let char_len = c.len_utf8();
-                    state.add_token(ValkyrieSyntaxKind::Error, start_pos, start_pos + char_len);
+                    state.add_token(ValkyrieTokenType::Error, start_pos, start_pos + char_len);
                     state.advance(char_len);
                 }
             }
@@ -58,7 +44,7 @@ impl crate::lexer::ValkyrieLexer<'_> {
         let range = if VK_WHITESPACE.unicode_whitespace { state.take_while(|c| c.is_whitespace()) } else { state.skip_ascii_whitespace() };
 
         if range.end > start {
-            state.add_token(ValkyrieSyntaxKind::Whitespace, start, range.end);
+            state.add_token(ValkyrieTokenType::Whitespace, start, range.end);
             true
         }
         else {
@@ -67,49 +53,55 @@ impl crate::lexer::ValkyrieLexer<'_> {
     }
 
     fn lex_comments<S: Source + ?Sized>(&self, state: &mut State<'_, S>) -> bool {
-        VK_COMMENT.scan(state, ValkyrieSyntaxKind::LineComment, ValkyrieSyntaxKind::BlockComment)
+        VK_COMMENT.scan(state, ValkyrieTokenType::LineComment, ValkyrieTokenType::BlockComment)
     }
 
     fn lex_string_literal<S: Source + ?Sized>(&self, state: &mut State<'_, S>) -> bool {
-        self.lex_symmetric_string(state, '"', ValkyrieSyntaxKind::StringLiteral)
-    }
+        let initial_start = state.get_position();
 
-    fn lex_char_literal<S: Source + ?Sized>(&self, state: &mut State<'_, S>) -> bool {
-        self.lex_symmetric_string(state, '\'', ValkyrieSyntaxKind::CharLiteral)
-    }
+        let prefix_start = state.get_position();
+        let mut prefix_end = prefix_start;
 
-    fn lex_symmetric_string<S: Source + ?Sized>(&self, state: &mut State<'_, S>, quote: char, kind: ValkyrieSyntaxKind) -> bool {
-        let start = state.get_position();
-        let mut prefix: String = String::new();
-
-        // 1. Try to scan prefix (Identifier)
-        if let Some(c) = state.current() {
-            if c != quote && (c == '_' || is_xid_start(c)) {
-                let p_start = start;
-                state.advance(c.len_utf8());
-                while let Some(nc) = state.current() {
-                    if is_xid_continue(nc) {
-                        state.advance(nc.len_utf8());
+        if let Some(ch) = state.current() {
+            if is_xid_start(ch) {
+                state.advance(ch.len_utf8());
+                while let Some(ch) = state.current() {
+                    if is_xid_continue(ch) {
+                        state.advance(ch.len_utf8());
                     }
                     else {
                         break;
                     }
                 }
-                let p_end = state.get_position();
-                // Check if the next character is the quote
-                if state.current() == Some(quote) {
-                    prefix = state.get_text_in((p_start..p_end).into()).into_owned();
-                }
-                else {
-                    // Not a tagged string, backtrack
-                    state.set_position(start);
-                }
+                prefix_end = state.get_position();
             }
         }
 
+        let has_prefix = prefix_end > prefix_start;
+
+        if has_prefix {
+            if let Some('"') = state.current() {
+                state.add_token(ValkyrieTokenType::StringPrefix, prefix_start, prefix_end);
+                return self.lex_symmetric_string(state, '"', ValkyrieTokenType::StringLiteral);
+            }
+            else {
+                state.set_position(initial_start);
+                return false;
+            }
+        }
+
+        self.lex_symmetric_string(state, '"', ValkyrieTokenType::StringLiteral)
+    }
+
+    fn lex_char_literal<S: Source + ?Sized>(&self, state: &mut State<'_, S>) -> bool {
+        self.lex_symmetric_string(state, '\'', ValkyrieTokenType::CharLiteral)
+    }
+
+    fn lex_symmetric_string<S: Source + ?Sized>(&self, state: &mut State<'_, S>, quote: char, kind: ValkyrieTokenType) -> bool {
+        let start = state.get_position();
+
         let mut quote_count = 0;
 
-        // 2. Count starting quotes
         while let Some(c) = state.current() {
             if c == quote {
                 quote_count += 1;
@@ -125,15 +117,12 @@ impl crate::lexer::ValkyrieLexer<'_> {
             return false;
         }
 
-        // Rule: N=2 is an empty string. Others follow symmetric delimiter principle.
         if quote_count == 2 {
             state.add_token(kind, start, state.get_position());
             return true;
         }
 
-        // 3. Symmetric rule: always look for the NEXT sequence of quote_count quotes.
         let mut current_consecutive = 0;
-        let content_start = state.get_position();
 
         while let Some(c) = state.current() {
             if c == quote {
@@ -141,19 +130,7 @@ impl crate::lexer::ValkyrieLexer<'_> {
                 state.advance(c.len_utf8());
                 if current_consecutive == quote_count {
                     let end = state.get_position();
-                    let content_end = end - quote_count * quote.len_utf8();
-
                     state.add_token(kind, start, end);
-
-                    if content_start < content_end {
-                        // Only raise interpolation if:
-                        // 1. No prefix (Default Slot String)
-                        // 2. Prefix is 's' (Explicit Slot String)
-                        // 3. Prefix is 'f' (Format String)
-                        // 4. Prefix is 't' (Template String)
-                        let interpolation_enabled = prefix.is_empty() || prefix == "s" || prefix == "f" || prefix == "t";
-                        self.lex_interpolation(state, content_start, content_end, interpolation_enabled);
-                    }
                     return true;
                 }
             }
@@ -163,112 +140,8 @@ impl crate::lexer::ValkyrieLexer<'_> {
             }
         }
 
-        // Unterminated string
         state.add_token(kind, start, state.get_position());
         true
-    }
-
-    fn lex_interpolation<S: Source + ?Sized>(&self, state: &mut State<'_, S>, start: usize, end: usize, interpolation_enabled: bool) {
-        let original_pos = state.get_position();
-        state.set_position(start);
-        let mut current = start;
-        let template = &self.config.template;
-
-        while state.get_position() < end {
-            if interpolation_enabled && state.starts_with(&template.comment_start) {
-                let part_end = state.get_position();
-                if current < part_end {
-                    state.add_token(ValkyrieSyntaxKind::StringPart, current, part_end)
-                }
-
-                let comment_start = state.get_position();
-                state.advance(template.comment_start.len());
-                state.add_token(ValkyrieSyntaxKind::TemplateCommentStart, comment_start, state.get_position());
-
-                while state.get_position() < end {
-                    if state.starts_with(&template.comment_end) {
-                        let comment_end = state.get_position();
-                        state.advance(template.comment_end.len());
-                        state.add_token(ValkyrieSyntaxKind::TemplateCommentEnd, comment_end, state.get_position());
-                        break;
-                    }
-                    if let Some(c) = state.current() { state.advance(c.len_utf8()) } else { break }
-                }
-                current = state.get_position();
-                continue;
-            }
-
-            if interpolation_enabled && state.starts_with(&template.control_start) {
-                let part_end = state.get_position();
-                if current < part_end {
-                    state.add_token(ValkyrieSyntaxKind::StringPart, current, part_end)
-                }
-
-                let control_start = state.get_position();
-                state.advance(template.control_start.len());
-                state.add_token(ValkyrieSyntaxKind::TemplateControlStart, control_start, state.get_position());
-
-                while state.get_position() < end {
-                    if state.starts_with(&template.control_end) {
-                        let control_end = state.get_position();
-                        state.advance(template.control_end.len());
-                        state.add_token(ValkyrieSyntaxKind::TemplateControlEnd, control_end, state.get_position());
-                        break;
-                    }
-                    if let Some(c) = state.current() { state.advance(c.len_utf8()) } else { break }
-                }
-                current = state.get_position();
-                continue;
-            }
-
-            if interpolation_enabled && state.starts_with(&template.interpolation_start) {
-                let part_end = state.get_position();
-                if current < part_end {
-                    state.add_token(ValkyrieSyntaxKind::StringPart, current, part_end)
-                }
-
-                let interp_start = state.get_position();
-                state.advance(template.interpolation_start.len());
-                state.add_token(ValkyrieSyntaxKind::InterpolationStart, interp_start, state.get_position());
-
-                let mut depth = 1;
-                while depth > 0 && state.get_position() < end {
-                    if state.starts_with(&template.interpolation_start) {
-                        depth += 1;
-                        state.advance(template.interpolation_start.len());
-                    }
-                    else if state.starts_with(&template.interpolation_end) {
-                        depth -= 1;
-                        if depth == 0 {
-                            let interp_end = state.get_position();
-                            state.advance(template.interpolation_end.len());
-                            state.add_token(ValkyrieSyntaxKind::InterpolationEnd, interp_end, state.get_position());
-                            break;
-                        }
-                        state.advance(template.interpolation_end.len());
-                    }
-                    else if let Some(c) = state.current() {
-                        state.advance(c.len_utf8());
-                    }
-                    else {
-                        break;
-                    }
-                }
-                current = state.get_position();
-            }
-            else if let Some(c) = state.current() {
-                state.advance(c.len_utf8());
-            }
-            else {
-                break;
-            }
-        }
-
-        if current < end {
-            state.add_token(ValkyrieSyntaxKind::StringPart, current, end);
-        }
-
-        state.set_position(original_pos);
     }
 
     fn lex_number_literal<'s, S: Source + ?Sized>(&self, state: &mut State<'s, S>) -> bool {
@@ -277,12 +150,11 @@ impl crate::lexer::ValkyrieLexer<'_> {
             if ch.is_ascii_digit() {
                 state.advance(ch.len_utf8());
 
-                // Continue reading digits
                 while let Some(ch) = state.current() {
                     if ch.is_ascii_digit() || ch == '.' || ch == '_' { state.advance(ch.len_utf8()) } else { break }
                 }
 
-                state.add_token(ValkyrieSyntaxKind::IntegerLiteral, start, state.get_position());
+                state.add_token(ValkyrieTokenType::IntegerLiteral, start, state.get_position());
                 return true;
             }
         }
@@ -292,11 +164,9 @@ impl crate::lexer::ValkyrieLexer<'_> {
     fn lex_identifier_or_keyword<'s, S: Source + ?Sized>(&self, state: &mut State<'s, S>) -> bool {
         let start = state.get_position();
         if let Some(ch) = state.current() {
-            // Check if the first character is valid for an identifier
             if ch == '_' || is_xid_start(ch) {
                 state.advance(ch.len_utf8());
 
-                // Continue reading while we have valid identifier continuation characters
                 while let Some(ch) = state.current() {
                     if is_xid_continue(ch) { state.advance(ch.len_utf8()) } else { break }
                 }
@@ -304,48 +174,60 @@ impl crate::lexer::ValkyrieLexer<'_> {
                 let end = state.get_position();
                 let text = state.get_text_in((start..end).into());
                 let token_kind = match &*text {
-                    "namespace" => ValkyrieSyntaxKind::Keyword(ValkyrieKeywords::Namespace),
-                    "using" => ValkyrieSyntaxKind::Keyword(ValkyrieKeywords::Using),
-                    "class" => ValkyrieSyntaxKind::Keyword(ValkyrieKeywords::Class),
-                    "singleton" => ValkyrieSyntaxKind::Keyword(ValkyrieKeywords::Singleton),
-                    "trait" => ValkyrieSyntaxKind::Keyword(ValkyrieKeywords::Trait),
-                    "flags" => ValkyrieSyntaxKind::Keyword(ValkyrieKeywords::Flags),
-                    "enums" => ValkyrieSyntaxKind::Keyword(ValkyrieKeywords::Enums),
-                    "union" => ValkyrieSyntaxKind::Keyword(ValkyrieKeywords::Union),
-                    "micro" => ValkyrieSyntaxKind::Keyword(ValkyrieKeywords::Micro),
-                    "mezzo" => ValkyrieSyntaxKind::Keyword(ValkyrieKeywords::Mezzo),
-                    "macro" => ValkyrieSyntaxKind::Keyword(ValkyrieKeywords::Macro),
-                    "widget" => ValkyrieSyntaxKind::Keyword(ValkyrieKeywords::Widget),
-                    "let" => ValkyrieSyntaxKind::Keyword(ValkyrieKeywords::Let),
-                    "if" => ValkyrieSyntaxKind::Keyword(ValkyrieKeywords::If),
-                    "else" => ValkyrieSyntaxKind::Keyword(ValkyrieKeywords::Else),
-                    "match" => ValkyrieSyntaxKind::Keyword(ValkyrieKeywords::Match),
-                    "case" => ValkyrieSyntaxKind::Keyword(ValkyrieKeywords::Case),
-                    "when" => ValkyrieSyntaxKind::Keyword(ValkyrieKeywords::When),
-                    "try" => ValkyrieSyntaxKind::Keyword(ValkyrieKeywords::Try),
-                    "lambda" => ValkyrieSyntaxKind::Keyword(ValkyrieKeywords::Lambda),
-                    "catch" => ValkyrieSyntaxKind::Keyword(ValkyrieKeywords::Catch),
-                    "while" => ValkyrieSyntaxKind::Keyword(ValkyrieKeywords::While),
-                    "loop" => ValkyrieSyntaxKind::Keyword(ValkyrieKeywords::Loop),
-                    "for" => ValkyrieSyntaxKind::Keyword(ValkyrieKeywords::For),
-                    "in" => ValkyrieSyntaxKind::Keyword(ValkyrieKeywords::In),
-                    "return" => ValkyrieSyntaxKind::Keyword(ValkyrieKeywords::Return),
-                    "break" => ValkyrieSyntaxKind::Keyword(ValkyrieKeywords::Break),
-                    "continue" => ValkyrieSyntaxKind::Keyword(ValkyrieKeywords::Continue),
-                    "true" => ValkyrieSyntaxKind::Keyword(ValkyrieKeywords::True),
-                    "false" => ValkyrieSyntaxKind::Keyword(ValkyrieKeywords::False),
-                    "null" => ValkyrieSyntaxKind::Keyword(ValkyrieKeywords::Null),
-                    "mut" => ValkyrieSyntaxKind::Keyword(ValkyrieKeywords::Mut),
-                    "is" => ValkyrieSyntaxKind::Keyword(ValkyrieKeywords::Is),
-                    "type" => ValkyrieSyntaxKind::Keyword(ValkyrieKeywords::Type),
-                    "yield" => ValkyrieSyntaxKind::Keyword(ValkyrieKeywords::Yield),
-                    "raise" => ValkyrieSyntaxKind::Keyword(ValkyrieKeywords::Raise),
-                    "effect" => ValkyrieSyntaxKind::Keyword(ValkyrieKeywords::Effect),
-                    "resume" => ValkyrieSyntaxKind::Keyword(ValkyrieKeywords::Resume),
-                    "from" => ValkyrieSyntaxKind::Keyword(ValkyrieKeywords::From),
-                    "as" => ValkyrieSyntaxKind::Keyword(ValkyrieKeywords::As),
-                    "_" => ValkyrieSyntaxKind::Underscore,
-                    _ => ValkyrieSyntaxKind::Identifier,
+                    "namespace" => ValkyrieTokenType::Keyword(ValkyrieKeywords::Namespace),
+                    "using" => ValkyrieTokenType::Keyword(ValkyrieKeywords::Using),
+                    "class" => ValkyrieTokenType::Keyword(ValkyrieKeywords::Class),
+                    "abstract" => ValkyrieTokenType::Keyword(ValkyrieKeywords::Abstract),
+                    "sealed" => ValkyrieTokenType::Keyword(ValkyrieKeywords::Sealed),
+                    "final" => ValkyrieTokenType::Keyword(ValkyrieKeywords::Final),
+                    "struct" => ValkyrieTokenType::Keyword(ValkyrieKeywords::Struct),
+                    "structure" => ValkyrieTokenType::Keyword(ValkyrieKeywords::Structure),
+                    "singleton" => ValkyrieTokenType::Keyword(ValkyrieKeywords::Singleton),
+                    "trait" => ValkyrieTokenType::Keyword(ValkyrieKeywords::Trait),
+                    "flags" => ValkyrieTokenType::Keyword(ValkyrieKeywords::Flags),
+                    "enums" => ValkyrieTokenType::Keyword(ValkyrieKeywords::Enums),
+                    "enum" => ValkyrieTokenType::Keyword(ValkyrieKeywords::Enum),
+                    "unity" => ValkyrieTokenType::Keyword(ValkyrieKeywords::Unity),
+                    "union" => ValkyrieTokenType::Keyword(ValkyrieKeywords::Union),
+                    "micro" => ValkyrieTokenType::Keyword(ValkyrieKeywords::Micro),
+                    "mezzo" => ValkyrieTokenType::Keyword(ValkyrieKeywords::Mezzo),
+                    "macro" => ValkyrieTokenType::Keyword(ValkyrieKeywords::Macro),
+                    "widget" => ValkyrieTokenType::Keyword(ValkyrieKeywords::Widget),
+                    "let" => ValkyrieTokenType::Keyword(ValkyrieKeywords::Let),
+                    "if" => ValkyrieTokenType::Keyword(ValkyrieKeywords::If),
+                    "else" => ValkyrieTokenType::Keyword(ValkyrieKeywords::Else),
+                    "match" => ValkyrieTokenType::Keyword(ValkyrieKeywords::Match),
+                    "case" => ValkyrieTokenType::Keyword(ValkyrieKeywords::Case),
+                    "when" => ValkyrieTokenType::Keyword(ValkyrieKeywords::When),
+                    "try" => ValkyrieTokenType::Keyword(ValkyrieKeywords::Try),
+                    "lambda" => ValkyrieTokenType::Keyword(ValkyrieKeywords::Lambda),
+                    "catch" => ValkyrieTokenType::Keyword(ValkyrieKeywords::Catch),
+                    "while" => ValkyrieTokenType::Keyword(ValkyrieKeywords::While),
+                    "loop" => ValkyrieTokenType::Keyword(ValkyrieKeywords::Loop),
+                    "for" => ValkyrieTokenType::Keyword(ValkyrieKeywords::For),
+                    "in" => ValkyrieTokenType::Keyword(ValkyrieKeywords::In),
+                    "return" => ValkyrieTokenType::Keyword(ValkyrieKeywords::Return),
+                    "break" => ValkyrieTokenType::Keyword(ValkyrieKeywords::Break),
+                    "continue" => ValkyrieTokenType::Keyword(ValkyrieKeywords::Continue),
+                    "true" => ValkyrieTokenType::BoolLiteral,
+                    "false" => ValkyrieTokenType::BoolLiteral,
+                    "null" => ValkyrieTokenType::Keyword(ValkyrieKeywords::Null),
+                    "mut" => ValkyrieTokenType::Keyword(ValkyrieKeywords::Mut),
+                    "is" => ValkyrieTokenType::Keyword(ValkyrieKeywords::Is),
+                    "type" => ValkyrieTokenType::Keyword(ValkyrieKeywords::Type),
+                    "yield" => ValkyrieTokenType::Keyword(ValkyrieKeywords::Yield),
+                    "raise" => ValkyrieTokenType::Keyword(ValkyrieKeywords::Raise),
+                    "effect" => ValkyrieTokenType::Keyword(ValkyrieKeywords::Effect),
+                    "resume" => ValkyrieTokenType::Keyword(ValkyrieKeywords::Resume),
+                    "from" => ValkyrieTokenType::Keyword(ValkyrieKeywords::From),
+                    "as" => ValkyrieTokenType::Keyword(ValkyrieKeywords::As),
+                    "get" => ValkyrieTokenType::Keyword(ValkyrieKeywords::Get),
+                    "set" => ValkyrieTokenType::Keyword(ValkyrieKeywords::Set),
+                    "Self" => ValkyrieTokenType::Keyword(ValkyrieKeywords::SelfType),
+                    "impl" => ValkyrieTokenType::Keyword(ValkyrieKeywords::Impl),
+                    "where" => ValkyrieTokenType::Keyword(ValkyrieKeywords::Where),
+                    "_" => ValkyrieTokenType::Underscore,
+                    _ => ValkyrieTokenType::Identifier,
                 };
 
                 state.add_token(token_kind, start, state.get_position());
@@ -362,83 +244,40 @@ impl crate::lexer::ValkyrieLexer<'_> {
                 '+' => {
                     let ch_len = ch.len_utf8();
                     state.advance(ch_len);
-                    if let Some('=') = state.current() {
-                        state.advance('='.len_utf8());
-                        ValkyrieSyntaxKind::PlusEq
-                    }
-                    else if let Some('+') = state.current() {
-                        state.advance('+'.len_utf8());
-                        ValkyrieSyntaxKind::PlusPlus
-                    }
-                    else {
-                        ValkyrieSyntaxKind::Plus
-                    }
+                    ValkyrieTokenType::Plus
                 }
                 '-' => {
                     let ch_len = ch.len_utf8();
                     state.advance(ch_len);
-                    if let Some('=') = state.current() {
-                        state.advance('='.len_utf8());
-                        ValkyrieSyntaxKind::MinusEq
-                    }
-                    else if let Some('-') = state.current() {
-                        state.advance('-'.len_utf8());
-                        ValkyrieSyntaxKind::MinusMinus
-                    }
-                    else if let Some('>') = state.current() {
+                    if let Some('>') = state.current() {
                         state.advance('>'.len_utf8());
-                        ValkyrieSyntaxKind::Arrow
+                        ValkyrieTokenType::Arrow
                     }
                     else {
-                        ValkyrieSyntaxKind::Minus
+                        ValkyrieTokenType::Minus
                     }
                 }
                 '*' => {
-                    let ch_len = ch.len_utf8();
-                    state.advance(ch_len);
-                    if let Some('=') = state.current() {
-                        state.advance('='.len_utf8());
-                        ValkyrieSyntaxKind::StarEq
-                    }
-                    else {
-                        ValkyrieSyntaxKind::Star
-                    }
+                    state.advance(ch.len_utf8());
+                    ValkyrieTokenType::Star
                 }
                 '/' => {
-                    let ch_len = ch.len_utf8();
-                    state.advance(ch_len);
-                    if let Some('=') = state.current() {
-                        state.advance('='.len_utf8());
-                        ValkyrieSyntaxKind::SlashEq
-                    }
-                    else {
-                        ValkyrieSyntaxKind::Slash
-                    }
+                    state.advance(ch.len_utf8());
+                    ValkyrieTokenType::Slash
                 }
                 '%' => {
-                    let ch_len = ch.len_utf8();
-                    state.advance(ch_len);
-                    if let Some('=') = state.current() {
-                        state.advance('='.len_utf8());
-                        ValkyrieSyntaxKind::PercentEq
-                    }
-                    else {
-                        ValkyrieSyntaxKind::Percent
-                    }
+                    state.advance(ch.len_utf8());
+                    ValkyrieTokenType::Percent
                 }
                 '=' => {
                     let ch_len = ch.len_utf8();
                     state.advance(ch_len);
                     if let Some('=') = state.current() {
                         state.advance('='.len_utf8());
-                        ValkyrieSyntaxKind::EqEq
-                    }
-                    else if let Some('>') = state.current() {
-                        state.advance('>'.len_utf8());
-                        ValkyrieSyntaxKind::Arrow
+                        ValkyrieTokenType::EqEq
                     }
                     else {
-                        ValkyrieSyntaxKind::Eq
+                        ValkyrieTokenType::Eq
                     }
                 }
                 '!' => {
@@ -446,10 +285,10 @@ impl crate::lexer::ValkyrieLexer<'_> {
                     state.advance(ch_len);
                     if let Some('=') = state.current() {
                         state.advance('='.len_utf8());
-                        ValkyrieSyntaxKind::NotEq
+                        ValkyrieTokenType::NotEq
                     }
                     else {
-                        ValkyrieSyntaxKind::Bang
+                        ValkyrieTokenType::Bang
                     }
                 }
                 '<' => {
@@ -457,14 +296,14 @@ impl crate::lexer::ValkyrieLexer<'_> {
                     state.advance(ch_len);
                     if let Some('=') = state.current() {
                         state.advance('='.len_utf8());
-                        ValkyrieSyntaxKind::LessEq
+                        ValkyrieTokenType::LessEq
                     }
                     else if let Some('<') = state.current() {
                         state.advance('<'.len_utf8());
-                        ValkyrieSyntaxKind::LeftShift
+                        ValkyrieTokenType::LeftShift
                     }
                     else {
-                        ValkyrieSyntaxKind::LessThan
+                        ValkyrieTokenType::LessThan
                     }
                 }
                 '>' => {
@@ -472,14 +311,14 @@ impl crate::lexer::ValkyrieLexer<'_> {
                     state.advance(ch_len);
                     if let Some('=') = state.current() {
                         state.advance('='.len_utf8());
-                        ValkyrieSyntaxKind::GreaterEq
+                        ValkyrieTokenType::GreaterEq
                     }
                     else if let Some('>') = state.current() {
                         state.advance('>'.len_utf8());
-                        ValkyrieSyntaxKind::RightShift
+                        ValkyrieTokenType::RightShift
                     }
                     else {
-                        ValkyrieSyntaxKind::GreaterThan
+                        ValkyrieTokenType::GreaterThan
                     }
                 }
                 '&' => {
@@ -487,10 +326,10 @@ impl crate::lexer::ValkyrieLexer<'_> {
                     state.advance(ch_len);
                     if let Some('&') = state.current() {
                         state.advance('&'.len_utf8());
-                        ValkyrieSyntaxKind::AndAnd
+                        ValkyrieTokenType::AndAnd
                     }
                     else {
-                        ValkyrieSyntaxKind::Ampersand
+                        ValkyrieTokenType::Ampersand
                     }
                 }
                 '|' => {
@@ -498,41 +337,44 @@ impl crate::lexer::ValkyrieLexer<'_> {
                     state.advance(ch_len);
                     if let Some('|') = state.current() {
                         state.advance('|'.len_utf8());
-                        ValkyrieSyntaxKind::OrOr
-                    }
-                    else if let Some('>') = state.current() {
-                        state.advance('>'.len_utf8());
-                        ValkyrieSyntaxKind::PipeGreater
+                        ValkyrieTokenType::OrOr
                     }
                     else {
-                        ValkyrieSyntaxKind::Pipe
+                        ValkyrieTokenType::Pipe
                     }
                 }
                 '^' => {
                     state.advance(ch.len_utf8());
-                    ValkyrieSyntaxKind::Caret
+                    ValkyrieTokenType::Caret
                 }
                 '~' => {
                     state.advance(ch.len_utf8());
-                    ValkyrieSyntaxKind::Tilde
+                    ValkyrieTokenType::Tilde
                 }
                 '.' => {
-                    state.advance(ch.len_utf8());
-                    ValkyrieSyntaxKind::Dot
+                    let ch_len = ch.len_utf8();
+                    state.advance(ch_len);
+                    if let Some('.') = state.current() {
+                        state.advance('.'.len_utf8());
+                        ValkyrieTokenType::DotDot
+                    }
+                    else {
+                        ValkyrieTokenType::Dot
+                    }
                 }
                 ':' => {
                     let ch_len = ch.len_utf8();
                     state.advance(ch_len);
                     if let Some(':') = state.current() {
                         state.advance(':'.len_utf8());
-                        ValkyrieSyntaxKind::ColonColon
+                        ValkyrieTokenType::ColonColon
                     }
                     else if let Some('=') = state.current() {
                         state.advance('='.len_utf8());
-                        ValkyrieSyntaxKind::ColonEq
+                        ValkyrieTokenType::ColonEq
                     }
                     else {
-                        ValkyrieSyntaxKind::Colon
+                        ValkyrieTokenType::Colon
                     }
                 }
                 _ => return false,
@@ -549,27 +391,26 @@ impl crate::lexer::ValkyrieLexer<'_> {
             match ch {
                 '@' => {
                     state.advance(ch.len_utf8());
-                    state.add_token(ValkyrieSyntaxKind::At, start, state.get_position());
-                    return true;
-                }
-                '\u{21AF}' => {
-                    state.advance(ch.len_utf8());
-                    state.add_token(ValkyrieSyntaxKind::Bolt, start, state.get_position());
+                    state.add_token(ValkyrieTokenType::At, start, state.get_position());
                     return true;
                 }
                 _ => {}
             }
             let kind = match ch {
-                '(' => ValkyrieSyntaxKind::LeftParen,
-                ')' => ValkyrieSyntaxKind::RightParen,
-                '{' => ValkyrieSyntaxKind::LeftBrace,
-                '}' => ValkyrieSyntaxKind::RightBrace,
-                '[' => ValkyrieSyntaxKind::LeftBracket,
-                ']' => ValkyrieSyntaxKind::RightBracket,
-                ',' => ValkyrieSyntaxKind::Comma,
-                ';' => ValkyrieSyntaxKind::Semicolon,
-                '$' => ValkyrieSyntaxKind::Dollar,
-                '?' => ValkyrieSyntaxKind::Question,
+                '(' => ValkyrieTokenType::LeftParen,
+                ')' => ValkyrieTokenType::RightParen,
+                '{' => ValkyrieTokenType::LeftBrace,
+                '}' => ValkyrieTokenType::RightBrace,
+                '[' => ValkyrieTokenType::LeftBracket,
+                ']' => ValkyrieTokenType::RightBracket,
+                ',' => ValkyrieTokenType::Comma,
+                ';' => ValkyrieTokenType::Semicolon,
+                '$' => ValkyrieTokenType::Dollar,
+                '?' => ValkyrieTokenType::Question,
+                '⟨' => ValkyrieTokenType::LeftAngle,
+                '⟩' => ValkyrieTokenType::RightAngle,
+                '⁅' => ValkyrieTokenType::LeftOffset,
+                '⁆' => ValkyrieTokenType::RightOffset,
                 _ => return false,
             };
             state.advance(ch.len_utf8());

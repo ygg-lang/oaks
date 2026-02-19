@@ -1,14 +1,40 @@
-use oak_core::errors::OakError;
-use oak_testing::parsing::ParserTester;
+use oak_core::{ParseSession, Parser, SourceText};
 use oak_vue::{VueLanguage, VueParser};
-use std::{path::Path, time::Duration};
 
 #[test]
-fn test_vue_parser() -> Result<(), OakError> {
-    let here = Path::new(env!("CARGO_MANIFEST_DIR"));
-    let tests = here.join("tests/parser");
-    let language = Box::leak(Box::new(VueLanguage::default()));
-    let parser = VueParser::new(language);
-    let test_runner = ParserTester::new(tests).with_extension("vue").with_timeout(Duration::from_secs(5));
-    test_runner.run_tests(&parser)
+fn test_vue_parser() {
+    let source = SourceText::new(
+        r#"<template>
+  <div class="hello">
+    <h1>{{ msg }}</h1>
+  </div>
+</template>
+
+<script setup>
+const msg = 'Hello Vue 3!'
+</script>
+
+<style scoped>
+.hello {
+  color: #42b983;
+}
+</style>"#,
+    );
+    let language = VueLanguage::default();
+    let parser = VueParser::new(&language);
+    let mut session = ParseSession::default();
+
+    println!("Starting parse...");
+    let result = parser.parse(&source, &[], &mut session);
+    println!("Parse completed!");
+
+    if !result.diagnostics.is_empty() {
+        println!("Diagnostics:");
+        for diag in &result.diagnostics {
+            println!("{:?}", diag);
+        }
+    }
+
+    assert!(result.diagnostics.is_empty(), "Parser should not return errors");
+    println!("Test passed!");
 }

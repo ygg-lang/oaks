@@ -3,7 +3,7 @@ use oak_xml;
 
 #[derive(Debug, serde::Serialize, serde::Deserialize, PartialEq)]
 struct User {
-    #[serde(rename = "↯id")]
+    #[serde(rename = "@id")]
     id: u32,
     #[serde(rename = "name")]
     name: String,

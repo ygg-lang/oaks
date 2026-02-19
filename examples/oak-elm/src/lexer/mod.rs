@@ -1,5 +1,4 @@
 #![doc = include_str!("readme.md")]
-//! Lexer implementation for the Elm language.
 
 use oak_core::Source;
 /// Token types for Elm.

@@ -167,6 +167,8 @@ pub enum MarkdownTokenType {
     Document,
     /// A paragraph of text.
     Paragraph,
+    /// An automatic link (HTTP/HTTPS URL).
+    AutoLink,
     /// End of stream.
     EndOfStream,
 }

@@ -7,6 +7,7 @@ use oak_core::{Lexer, LexerCache, LexerState, OakError, lexer::LexOutput, source
 pub(crate) type State<'a, S> = LexerState<'a, S, PurescriptLanguage>;
 
 #[derive(Clone)]
+/// Lexer for PureScript source code.
 pub struct PurescriptLexer<'config> {
     config: &'config PurescriptLanguage,
 }
@@ -24,6 +25,7 @@ impl<'config> Lexer<PurescriptLanguage> for PurescriptLexer<'config> {
 
 impl<'config> PurescriptLexer<'config> {
     /// Creates a new PurescriptLexer
+    /// Creates a new PurescriptLexer with the given language configuration.
     pub fn new(config: &'config PurescriptLanguage) -> Self {
         Self { config }
     }

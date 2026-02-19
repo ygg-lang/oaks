@@ -1,139 +1,127 @@
-use oak_core::{Source, Token, TokenType, UniversalElementRole, UniversalTokenRole};
+use oak_core::language::UniversalTokenRole;
 
-pub type RacketToken = Token<RacketTokenType>;
+/// Token types for the Racket language lexer.
+///
+/// This enum represents all possible token types in Racket,
+/// including keywords, identifiers, literals, punctuation, and operators.
+#[derive(Debug, PartialEq, Eq, Clone, Copy, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+pub enum TokenType {
+    /// For keyword for iteration.
+    For,
+    /// In keyword for iteration context.
+    In,
+    /// Require keyword for module imports.
+    Require,
+    /// Provide keyword for module exports.
+    Provide,
+    /// Struct keyword for structure definitions.
+    Struct,
+    /// Class keyword for class definitions.
+    Class,
+    /// Match keyword for pattern matching.
+    Match,
+    /// With-handlers keyword for exception handling.
+    WithHandlers,
+    /// Raise keyword for raising exceptions.
+    Raise,
 
-impl TokenType for RacketTokenType {
+    /// Identifier token.
+    Identifier,
+
+    /// Number literal token.
+    Number,
+    /// String literal token.
+    String,
+    /// Boolean literal token.
+    Boolean,
+
+    /// Left parenthesis `(`.
+    LParen,
+    /// Right parenthesis `)`.
+    RParen,
+    /// Left bracket `[`.
+    LBracket,
+    /// Right bracket `]`.
+    RBracket,
+    /// Left brace `{`.
+    LBrace,
+    /// Right brace `}`.
+    RBrace,
+    /// Comma `,`.
+    Comma,
+    /// Dot `.`.
+    Dot,
+    /// Colon `:`.
+    Colon,
+    /// Semicolon `;`.
+    Semicolon,
+
+    /// Plus operator `+`.
+    Plus,
+    /// Minus operator `-`.
+    Minus,
+    /// Multiply operator `*`.
+    Multiply,
+    /// Divide operator `/`.
+    Divide,
+    /// Modulo operator `%`.
+    Modulo,
+    /// Equality operator `=`.
+    Equals,
+    /// Inequality operator `!=`.
+    NotEquals,
+    /// Less than operator `<`.
+    LessThan,
+    /// Less than or equal operator `<=`.
+    LessThanOrEqual,
+    /// Greater than operator `>`.
+    GreaterThan,
+    /// Greater than or equal operator `>=`.
+    GreaterThanOrEqual,
+    /// Logical and operator `and`.
+    And,
+    /// Logical or operator `or`.
+    Or,
+    /// Logical not operator `not`.
+    Not,
+
+    /// Comment token.
+    Comment,
+    /// Whitespace token.
+    Whitespace,
+    /// End of file token.
+    Eof,
+}
+
+impl oak_core::language::TokenType for TokenType {
     type Role = UniversalTokenRole;
-    const END_OF_STREAM: Self = Self::Eof;
 
-    fn is_ignored(&self) -> bool {
-        matches!(self, Self::Whitespace | Self::Newline | Self::Comment | Self::LineComment)
-    }
+    const END_OF_STREAM: Self = TokenType::Eof;
 
     fn role(&self) -> Self::Role {
         match self {
-            Self::Whitespace | Self::Newline => UniversalTokenRole::Whitespace,
-            Self::Comment | Self::LineComment => UniversalTokenRole::Comment,
-            Self::Error => UniversalTokenRole::Error,
-            Self::Eof => UniversalTokenRole::Eof,
-            Self::LeftParen | Self::RightParen | Self::LeftBracket | Self::RightBracket | Self::LeftBrace | Self::RightBrace => UniversalTokenRole::Punctuation,
-            Self::Dot | Self::Quote_ | Self::Quasiquote_ | Self::Unquote_ | Self::UnquoteSplicing_ => UniversalTokenRole::Operator,
-            Self::NumberLiteral => UniversalTokenRole::Literal,
-            Self::StringLiteral | Self::CharacterLiteral | Self::BooleanLiteral => UniversalTokenRole::Literal,
-            Self::Define
-            | Self::Lambda
-            | Self::If
-            | Self::Cond
-            | Self::Case
-            | Self::Let
-            | Self::LetStar
-            | Self::Letrec
-            | Self::Begin
-            | Self::Do
-            | Self::Quote
-            | Self::Quasiquote
-            | Self::Unquote
-            | Self::UnquoteSplicing
-            | Self::And
-            | Self::Or
-            | Self::Not
-            | Self::Set => UniversalTokenRole::Keyword,
-            Self::Identifier => UniversalTokenRole::Name,
-            _ => UniversalTokenRole::None,
+            TokenType::For | TokenType::In | TokenType::Require | TokenType::Provide | TokenType::Struct | TokenType::Class | TokenType::Match | TokenType::WithHandlers | TokenType::Raise => UniversalTokenRole::Keyword,
+            TokenType::Identifier => UniversalTokenRole::Name,
+            TokenType::Number | TokenType::String | TokenType::Boolean => UniversalTokenRole::Literal,
+            TokenType::LParen | TokenType::RParen | TokenType::LBracket | TokenType::RBracket | TokenType::LBrace | TokenType::RBrace | TokenType::Comma | TokenType::Dot | TokenType::Colon | TokenType::Semicolon => UniversalTokenRole::Punctuation,
+            TokenType::Plus
+            | TokenType::Minus
+            | TokenType::Multiply
+            | TokenType::Divide
+            | TokenType::Modulo
+            | TokenType::Equals
+            | TokenType::NotEquals
+            | TokenType::LessThan
+            | TokenType::LessThanOrEqual
+            | TokenType::GreaterThan
+            | TokenType::GreaterThanOrEqual
+            | TokenType::And
+            | TokenType::Or
+            | TokenType::Not => UniversalTokenRole::Operator,
+            TokenType::Comment => UniversalTokenRole::Comment,
+            TokenType::Whitespace => UniversalTokenRole::Whitespace,
+            TokenType::Eof => UniversalTokenRole::Eof,
         }
     }
-}
-
-/// Token types for the Racket language.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub enum RacketTokenType {
-    /// Whitespace.
-    Whitespace,
-    /// A newline.
-    Newline,
-    /// A comment.
-    Comment,
-    /// A line comment.
-    LineComment,
-    /// A numeric literal.
-    NumberLiteral,
-    /// A string literal.
-    StringLiteral,
-    /// A character literal.
-    CharacterLiteral,
-    /// A boolean literal.
-    BooleanLiteral,
-    /// An identifier.
-    Identifier,
-    /// A symbol.
-    Symbol,
-    /// A keyword.
-    Keyword,
-    /// `define` keyword.
-    Define,
-    /// `lambda` keyword.
-    Lambda,
-    /// `if` keyword.
-    If,
-    /// `cond` keyword.
-    Cond,
-    /// `case` keyword.
-    Case,
-    /// `let` keyword.
-    Let,
-    /// `let*` keyword.
-    LetStar,
-    /// `letrec` keyword.
-    Letrec,
-    /// `begin` keyword.
-    Begin,
-    /// `do` keyword.
-    Do,
-    /// `quote` keyword.
-    Quote,
-    /// `quasiquote` keyword.
-    Quasiquote,
-    /// `unquote` keyword.
-    Unquote,
-    /// `unquote-splicing` keyword.
-    UnquoteSplicing,
-    /// `and` keyword.
-    And,
-    /// `or` keyword.
-    Or,
-    /// `not` keyword.
-    Not,
-    /// `set!` keyword.
-    Set,
-    /// `(`.
-    LeftParen,
-    /// `)`.
-    RightParen,
-    /// `[`.
-    LeftBracket,
-    /// `]`.
-    RightBracket,
-    /// `{`.
-    LeftBrace,
-    /// `}`.
-    RightBrace,
-    /// `.`.
-    Dot,
-    /// `#`.
-    Hash,
-    /// `'`.
-    Quote_,
-    /// `` ` ``.
-    Quasiquote_,
-    /// `,`.
-    Unquote_,
-    /// `,@`.
-    UnquoteSplicing_,
-    /// An error token.
-    Error,
-    /// End of stream.
-    Eof,
-    /// A source file.
-    SourceFile,
 }

@@ -1,10 +1,11 @@
-use oak_core::{Parser, parser::ParseSession, source::SourceText};
-use oak_valkyrie::{ValkyrieLanguage, ValkyrieParser};
+use oak_core::{Builder, Parser, parser::ParseSession, source::SourceText};
+use oak_valkyrie::{ValkyrieBuilder, ValkyrieLanguage, ValkyrieParser};
 
 #[test]
 fn test_micro_annotations() {
     let language = ValkyrieLanguage::default();
     let parser = ValkyrieParser::new(&language);
+    let builder = ValkyrieBuilder::new(&language);
     let mut cache = ParseSession::default();
 
     let source = SourceText::new("@specialize @inline micro main() { let x = 42 }");
@@ -13,8 +14,9 @@ fn test_micro_annotations() {
     assert!(result.result.is_ok(), "Parsing failed: {:?}", result.diagnostics);
 
     let green_tree = result.result.unwrap();
-    let source_text = SourceText::new(source.text().to_string());
-    let ast_root = parser.build_root(green_tree, &source_text).expect("Failed to build AST");
+    let built = builder.build(&source, &[], &mut cache);
+    assert!(built.result.is_ok(), "Building failed: {:?}", built.diagnostics);
+    let ast_root = built.result.unwrap();
 
     assert_eq!(ast_root.items.len(), 1);
     if let oak_valkyrie::ast::Item::Micro(m) = &ast_root.items[0] {
@@ -31,6 +33,7 @@ fn test_micro_annotations() {
 fn test_micro_annotations_with_args() {
     let language = ValkyrieLanguage::default();
     let parser = ValkyrieParser::new(&language);
+    let builder = ValkyrieBuilder::new(&language);
     let mut cache = ParseSession::default();
 
     let source = SourceText::new("@specialize(1, 2) micro main() { let x = 42 }");
@@ -39,8 +42,9 @@ fn test_micro_annotations_with_args() {
     assert!(result.result.is_ok(), "Parsing failed: {:?}", result.diagnostics);
 
     let green_tree = result.result.unwrap();
-    let source_text = SourceText::new(source.text().to_string());
-    let ast_root = parser.build_root(green_tree, &source_text).expect("Failed to build AST");
+    let built = builder.build(&source, &[], &mut cache);
+    assert!(built.result.is_ok(), "Building failed: {:?}", built.diagnostics);
+    let ast_root = built.result.unwrap();
 
     assert_eq!(ast_root.items.len(), 1);
     if let oak_valkyrie::ast::Item::Micro(m) = &ast_root.items[0] {

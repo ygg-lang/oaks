@@ -1,92 +1,172 @@
 use crate::lexer::MojoTokenType;
 use oak_core::UniversalElementRole;
 
+/// Element types for the Mojo language parser.
+///
+/// This enum represents all possible element types in the Mojo language,
+/// including tokens mapped from `MojoTokenType`, statement types, expression types,
+/// and special node types.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub enum MojoElementType {
     // Tokens (mapped from MojoTokenType)
+    /// Function keyword `fn`.
     Fn,
+    /// Struct keyword `struct`.
     Struct,
+    /// Variable keyword `var`.
     Var,
+    /// Let keyword `let`.
     Let,
+    /// If keyword `if`.
     If,
+    /// Else keyword `else`.
     Else,
+    /// While keyword `while`.
     While,
+    /// For keyword `for`.
     For,
+    /// In keyword `in`.
     In,
+    /// Return keyword `return`.
     Return,
+    /// Break keyword `break`.
     Break,
+    /// Continue keyword `continue`.
     Continue,
+    /// Import keyword `import`.
     Import,
+    /// From keyword `from`.
     From,
+    /// Boolean literal `True`.
     True,
+    /// Boolean literal `False`.
     False,
+    /// None literal.
     None,
+    /// Identifier token.
     Identifier,
+    /// Integer literal token.
     Integer,
+    /// Float literal token.
     Float,
+    /// String literal token.
     String,
+    /// Plus operator `+`.
     Plus,
+    /// Minus operator `-`.
     Minus,
+    /// Star operator `*`.
     Star,
+    /// Slash operator `/`.
     Slash,
+    /// Percent operator `%`.
     Percent,
+    /// Assignment operator `=`.
     Equal,
+    /// Equality operator `==`.
     EqualEqual,
+    /// Inequality operator `!=`.
     NotEqual,
+    /// Less than operator `<`.
     Less,
+    /// Less than or equal operator `<=`.
     LessEqual,
+    /// Greater than operator `>`.
     Greater,
+    /// Greater than or equal operator `>=`.
     GreaterEqual,
+    /// Logical and operator `and`.
     And,
+    /// Logical or operator `or`.
     Or,
+    /// Logical not operator `not`.
     Not,
+    /// Left parenthesis `(`.
     LeftParen,
+    /// Right parenthesis `)`.
     RightParen,
+    /// Left bracket `[`.
     LeftBracket,
+    /// Right bracket `]`.
     RightBracket,
+    /// Left brace `{`.
     LeftBrace,
+    /// Right brace `}`.
     RightBrace,
+    /// Comma `,`.
     Comma,
+    /// Dot `.`.
     Dot,
+    /// Colon `:`.
     Colon,
+    /// Semicolon `;`.
     Semicolon,
+    /// Arrow operator `->`.
     Arrow,
+    /// Whitespace token.
     Whitespace,
+    /// Newline token.
     Newline,
+    /// Comment token.
     Comment,
+    /// Indent token for significant whitespace.
     Indent,
+    /// Dedent token for significant whitespace.
     Dedent,
+    /// End of stream marker.
     EndOfStream,
 
     // Statements
+    /// Function definition statement.
     FunctionDef,
+    /// Struct definition statement.
     StructDef,
+    /// Variable declaration statement.
     VariableDecl,
+    /// Assignment statement.
     Assignment,
+    /// If statement.
     IfStatement,
+    /// While statement.
     WhileStatement,
+    /// For statement.
     ForStatement,
+    /// Return statement.
     ReturnStatement,
+    /// Expression statement.
     ExpressionStatement,
 
     // Expressions
+    /// Binary expression.
     BinaryExpr,
+    /// Unary expression.
     UnaryExpr,
+    /// Function call expression.
     CallExpr,
+    /// Literal expression.
     LiteralExpr,
+    /// Identifier expression.
     IdentifierExpr,
+    /// Member access expression.
     MemberExpr,
+    /// List expression.
     ListExpr,
 
     // Components
+    /// Parameter list.
     ParamList,
+    /// Argument list.
     ArgList,
+    /// Code block.
     Block,
 
     // Special
+    /// Root node of the AST.
     Root,
+    /// Grouping expression.
     Grouping,
+    /// Error node.
     Error,
 }
 

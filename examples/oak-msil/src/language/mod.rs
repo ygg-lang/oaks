@@ -1,6 +1,6 @@
 #![doc = include_str!("readme.md")]
-use oak_core::{Language, LanguageCategory};
 
+/// MSIL language definition.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct MsilLanguage;

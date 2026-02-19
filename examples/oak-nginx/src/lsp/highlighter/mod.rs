@@ -1,7 +1,4 @@
 #![doc = include_str!("readme.md")]
-//! Nginx syntax highlighter
-//!
-//! This module provides syntax highlighting for Nginx configuration files.
 
 /// Highlight kinds for Nginx
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]

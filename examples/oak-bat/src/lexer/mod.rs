@@ -1,4 +1,8 @@
 #![doc = include_str!("readme.md")]
+/// Token type definitions for Windows Batch (BAT) lexical analysis.
+///
+/// This module provides [`BatTokenType`] which defines all token types
+/// recognized by the BAT lexer, including keywords, labels, and text.
 pub mod token_type;
 
 pub use token_type::BatTokenType;
@@ -8,6 +12,10 @@ use oak_core::{Lexer, LexerCache, LexerState, OakError, lexer::LexOutput, source
 
 pub(crate) type State<'a, S> = LexerState<'a, S, BatLanguage>;
 
+/// Lexer for Windows Batch (BAT) files.
+///
+/// This lexer tokenizes BAT source code into a sequence of tokens
+/// that can be processed by the parser.
 #[derive(Clone)]
 pub struct BatLexer<'config> {
     config: &'config BatLanguage,
@@ -25,6 +33,11 @@ impl<'config> Lexer<BatLanguage> for BatLexer<'config> {
 }
 
 impl<'config> BatLexer<'config> {
+    /// Creates a new `BatLexer` instance with the specified language configuration.
+    ///
+    /// # Arguments
+    ///
+    /// * `config` - A reference to the `BatLanguage` configuration.
     pub fn new(config: &'config BatLanguage) -> Self {
         Self { config }
     }

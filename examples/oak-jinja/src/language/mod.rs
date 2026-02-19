@@ -1,54 +1,61 @@
-use oak_core::{Language, LanguageCategory};
+/// Jinja Language module
+///
+/// This module defines the language characteristics and configuration for Jinja templates.
+use oak_core::language::{Language, LanguageCategory};
 
-/// Jinja2 template language configuration
+use crate::{ast::JinjaRoot, lexer::token_type::JinjaTokenType, parser::element_type::JinjaElementType};
+
+/// Language definition for Jinja templates
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct JinjaLanguage {
-    /// Variable tag start
+    /// Whether to trim whitespace around delimiters
+    pub trim_blocks: bool,
+    /// Whether to lstrip blocks
+    pub lstrip_blocks: bool,
+    /// Whether to keep trailing newlines
+    pub keep_trailing_newline: bool,
+    /// Variable start delimiter
     pub variable_start: String,
-    /// Variable tag end
+    /// Variable end delimiter
     pub variable_end: String,
-    /// Tag start
+    /// Tag start delimiter
     pub tag_start: String,
-    /// Tag end
+    /// Tag end delimiter
     pub tag_end: String,
-    /// Comment start
+    /// Comment start delimiter
     pub comment_start: String,
-    /// Comment end
+    /// Comment end delimiter
     pub comment_end: String,
-    /// Line statement prefix
-    pub line_statement_prefix: Option<String>,
-    /// Line comment prefix
-    pub line_comment_prefix: Option<String>,
-}
-
-impl JinjaLanguage {
-    /// Creates a new Jinja2 language instance
-    pub fn new() -> Self {
-        Self::default()
-    }
 }
 
 impl Default for JinjaLanguage {
     fn default() -> Self {
         Self {
+            trim_blocks: false,
+            lstrip_blocks: false,
+            keep_trailing_newline: false,
             variable_start: "{{".to_string(),
             variable_end: "}}".to_string(),
             tag_start: "{%".to_string(),
             tag_end: "%}".to_string(),
             comment_start: "{#".to_string(),
             comment_end: "#}".to_string(),
-            line_statement_prefix: None,
-            line_comment_prefix: None,
         }
     }
 }
 
 impl Language for JinjaLanguage {
-    const NAME: &'static str = "jinja";
+    const NAME: &'static str = "Jinja2";
     const CATEGORY: LanguageCategory = LanguageCategory::Markup;
 
-    type TokenType = crate::lexer::token_type::JinjaTokenType;
-    type ElementType = crate::parser::element_type::JinjaElementType;
-    type TypedRoot = (); // TypedRoot is not defined yet
+    type TokenType = JinjaTokenType;
+    type ElementType = JinjaElementType;
+    type TypedRoot = JinjaRoot<'static>;
+}
+
+impl JinjaLanguage {
+    /// Create a new Jinja language instance
+    pub fn new() -> Self {
+        Self::default()
+    }
 }

@@ -1,273 +1,195 @@
-#![doc = include_str!("readme.md")]
-use crate::{language::RacketLanguage, lexer::token_type::RacketTokenType};
-pub mod token_type;
 use oak_core::{
-    Lexer, LexerCache, LexerState, OakError, Source, TextEdit,
-    lexer::{CommentConfig, LexOutput, StringConfig, WhitespaceConfig},
+    Range,
+    lexer::{LexOutput, Lexer as CoreLexer, LexerCache, LexerState},
+    source::{Source, TextEdit},
 };
-use std::sync::LazyLock;
 
-pub(crate) type State<'a, S> = LexerState<'a, S, RacketLanguage>;
+use crate::language::RacketLanguage;
+mod token_type;
+pub use token_type::TokenType;
 
-static RACKET_WHITESPACE: LazyLock<WhitespaceConfig> = LazyLock::new(|| WhitespaceConfig { unicode_whitespace: true });
-static RACKET_COMMENT: LazyLock<CommentConfig> = LazyLock::new(|| CommentConfig { line_marker: ";", block_start: "#|", block_end: "|#", nested_blocks: true });
-static RACKET_STRING: LazyLock<StringConfig> = LazyLock::new(|| StringConfig { quotes: &['"'], escape: Some('\\') });
+/// Lexer for Racket source code.
+pub struct Lexer;
 
-#[derive(Clone, Debug)]
-pub struct RacketLexer<'config> {
-    config: &'config RacketLanguage,
-}
+impl CoreLexer<RacketLanguage> for Lexer {
+    fn lex<'a, S: Source + ?Sized>(&self, text: &S, edits: &[TextEdit], cache: &'a mut impl LexerCache<RacketLanguage>) -> LexOutput<RacketLanguage> {
+        let mut state = LexerState::new_with_cache(text, edits.last().map(|edit| edit.span.start).unwrap_or(0), cache);
 
-impl<'config> Lexer<RacketLanguage> for RacketLexer<'config> {
-    fn lex<'a, S: Source + ?Sized>(&self, source: &S, _edits: &[TextEdit], cache: &'a mut impl LexerCache<RacketLanguage>) -> LexOutput<RacketLanguage> {
-        let mut state: State<'_, S> = LexerState::new_with_cache(source, 0, cache);
-        let result = self.run(&mut state);
-        state.finish_with_cache(result, cache)
-    }
-}
-
-impl<'config> RacketLexer<'config> {
-    pub fn new(config: &'config RacketLanguage) -> Self {
-        Self { config }
-    }
-
-    fn run<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> Result<(), OakError> {
         while state.not_at_end() {
             let safe_point = state.get_position();
 
-            if self.skip_whitespace(state) {
+            let whitespace_range = state.skip_ascii_whitespace();
+            if whitespace_range.end > whitespace_range.start {
+                state.add_token(TokenType::Whitespace, whitespace_range.start, whitespace_range.end);
                 continue;
             }
 
-            if self.lex_newline(state) {
+            if state.scan_line_comment(TokenType::Comment, "//") {
                 continue;
             }
 
-            if self.skip_comment(state) {
-                continue;
-            }
-
-            if self.lex_string_literal(state) {
-                continue;
-            }
-
-            if self.lex_number_literal(state) {
-                continue;
-            }
-
-            if self.lex_identifier_or_keyword(state) {
-                continue;
-            }
-
-            if self.lex_single_char_tokens(state) {
-                continue;
-            }
-
-            // Error handling: if no rules match, skip the current character and mark as error
-            let start_pos = state.get_position();
             if let Some(ch) = state.peek() {
-                state.advance(ch.len_utf8());
-                state.add_token(RacketTokenType::Error, start_pos, state.get_position());
-            }
-
-            state.advance_if_dead_lock(safe_point)
-        }
-
-        // Add EOF token
-        state.add_eof();
-        Ok(())
-    }
-
-    fn skip_whitespace<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
-        RACKET_WHITESPACE.scan(state, RacketTokenType::Whitespace)
-    }
-
-    /// Handles newlines
-    fn lex_newline<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
-        let start_pos = state.get_position();
-
-        if let Some('\n') = state.peek() {
-            state.advance(1);
-            state.add_token(RacketTokenType::Newline, start_pos, state.get_position());
-            true
-        }
-        else if let Some('\r') = state.peek() {
-            state.advance(1);
-            if let Some('\n') = state.peek() {
-                state.advance(1);
-            }
-            state.add_token(RacketTokenType::Newline, start_pos, state.get_position());
-            true
-        }
-        else {
-            false
-        }
-    }
-
-    fn skip_comment<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
-        RACKET_COMMENT.scan(state, RacketTokenType::LineComment, RacketTokenType::Comment)
-    }
-
-    fn lex_string_literal<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
-        RACKET_STRING.scan(state, RacketTokenType::StringLiteral)
-    }
-
-    fn lex_number_literal<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
-        let start = state.get_position();
-        let mut len = 0;
-        let mut has_digits = false;
-
-        {
-            let rest = state.rest();
-            if rest.is_empty() {
-                return false;
-            }
-
-            let first_char = rest.chars().next().unwrap();
-            if !first_char.is_ascii_digit() && first_char != '-' && first_char != '+' {
-                return false;
-            }
-
-            // Handle sign
-            if first_char == '-' || first_char == '+' {
-                len += first_char.len_utf8();
-            }
-
-            // Skip digits
-            let mut chars = rest.chars().skip(if first_char == '-' || first_char == '+' { 1 } else { 0 });
-
-            while let Some(ch) = chars.next() {
-                if ch.is_ascii_digit() {
-                    len += ch.len_utf8();
-                    has_digits = true;
-                }
-                else if ch == '.' {
-                    // Float
-                    len += ch.len_utf8();
-                    while let Some(ch) = chars.next() {
-                        if ch.is_ascii_digit() {
-                            len += ch.len_utf8();
-                            has_digits = true;
+                match ch {
+                    '(' => {
+                        state.advance(1);
+                        state.add_token(TokenType::LParen, safe_point, state.get_position());
+                    }
+                    ')' => {
+                        state.advance(1);
+                        state.add_token(TokenType::RParen, safe_point, state.get_position());
+                    }
+                    '[' => {
+                        state.advance(1);
+                        state.add_token(TokenType::LBracket, safe_point, state.get_position());
+                    }
+                    ']' => {
+                        state.advance(1);
+                        state.add_token(TokenType::RBracket, safe_point, state.get_position());
+                    }
+                    '{' => {
+                        state.advance(1);
+                        state.add_token(TokenType::LBrace, safe_point, state.get_position());
+                    }
+                    '}' => {
+                        state.advance(1);
+                        state.add_token(TokenType::RBrace, safe_point, state.get_position());
+                    }
+                    ',' => {
+                        state.advance(1);
+                        state.add_token(TokenType::Comma, safe_point, state.get_position());
+                    }
+                    '.' => {
+                        state.advance(1);
+                        state.add_token(TokenType::Dot, safe_point, state.get_position());
+                    }
+                    ':' => {
+                        state.advance(1);
+                        state.add_token(TokenType::Colon, safe_point, state.get_position());
+                    }
+                    ';' => {
+                        state.advance(1);
+                        state.add_token(TokenType::Semicolon, safe_point, state.get_position());
+                    }
+                    '+' => {
+                        state.advance(1);
+                        state.add_token(TokenType::Plus, safe_point, state.get_position());
+                    }
+                    '-' => {
+                        state.advance(1);
+                        state.add_token(TokenType::Minus, safe_point, state.get_position());
+                    }
+                    '*' => {
+                        state.advance(1);
+                        state.add_token(TokenType::Multiply, safe_point, state.get_position());
+                    }
+                    '/' => {
+                        state.advance(1);
+                        state.add_token(TokenType::Divide, safe_point, state.get_position());
+                    }
+                    '%' => {
+                        state.advance(1);
+                        state.add_token(TokenType::Modulo, safe_point, state.get_position());
+                    }
+                    '=' => {
+                        state.advance(1);
+                        state.add_token(TokenType::Equals, safe_point, state.get_position());
+                    }
+                    '!' => {
+                        state.advance(1);
+                        if state.starts_with("=") {
+                            state.advance(1);
+                            state.add_token(TokenType::NotEquals, safe_point, state.get_position());
                         }
                         else {
-                            break;
+                            state.add_token(TokenType::Not, safe_point, state.get_position());
                         }
                     }
-                    break;
-                }
-                else {
-                    break;
+                    '<' => {
+                        state.advance(1);
+                        if state.starts_with("=") {
+                            state.advance(1);
+                            state.add_token(TokenType::LessThanOrEqual, safe_point, state.get_position());
+                        }
+                        else {
+                            state.add_token(TokenType::LessThan, safe_point, state.get_position());
+                        }
+                    }
+                    '>' => {
+                        state.advance(1);
+                        if state.starts_with("=") {
+                            state.advance(1);
+                            state.add_token(TokenType::GreaterThanOrEqual, safe_point, state.get_position());
+                        }
+                        else {
+                            state.add_token(TokenType::GreaterThan, safe_point, state.get_position());
+                        }
+                    }
+                    'a'..='z' | 'A'..='Z' | '_' => {
+                        let start = state.get_position();
+                        state.advance(1);
+                        state.skip_ascii_ident_continue();
+                        let end = state.get_position();
+                        let range = Range { start, end };
+                        let identifier = state.get_text_in(range).to_string();
+
+                        let token_type = match identifier.as_str() {
+                            "for" => TokenType::For,
+                            "in" => TokenType::In,
+                            _ => TokenType::Identifier,
+                        };
+
+                        state.add_token(token_type, start, end);
+                    }
+                    '0'..='9' => {
+                        let start = state.get_position();
+                        state.advance(1);
+                        while state.not_at_end() {
+                            if let Some(ch) = state.peek() {
+                                if ch.is_ascii_digit() || ch == '.' {
+                                    state.advance(1);
+                                }
+                                else {
+                                    break;
+                                }
+                            }
+                            else {
+                                break;
+                            }
+                        }
+                        let end = state.get_position();
+                        state.add_token(TokenType::Number, start, end);
+                    }
+                    '"' => {
+                        let start = state.get_position();
+                        state.advance(1);
+                        while state.not_at_end() {
+                            if let Some(ch) = state.peek() {
+                                if ch != '"' {
+                                    state.advance(1);
+                                }
+                                else {
+                                    state.advance(1);
+                                    break;
+                                }
+                            }
+                            else {
+                                break;
+                            }
+                        }
+                        let end = state.get_position();
+                        state.add_token(TokenType::String, start, end);
+                    }
+                    _ => {
+                        state.advance(1);
+                        state.add_token(TokenType::Identifier, safe_point, state.get_position());
+                    }
                 }
             }
+
+            state.advance_if_dead_lock(safe_point);
         }
 
-        if has_digits {
-            state.advance(len);
-            let end = state.get_position();
-            state.add_token(RacketTokenType::NumberLiteral, start, end);
-            true
-        }
-        else {
-            false
-        }
-    }
-
-    fn lex_identifier_or_keyword<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
-        let start = state.get_position();
-        let mut len;
-
-        {
-            let rest = state.rest();
-            if rest.is_empty() {
-                return false;
-            }
-
-            let first_char = rest.chars().next().unwrap();
-            if !self.is_identifier_start(first_char) {
-                return false;
-            }
-
-            len = first_char.len_utf8();
-            let mut chars = rest.chars().skip(1);
-
-            while let Some(ch) = chars.next() {
-                if self.is_identifier_continue(ch) {
-                    len += ch.len_utf8();
-                }
-                else {
-                    break;
-                }
-            }
-        }
-
-        let text = state.get_text_in(oak_core::Range { start, end: start + len }).to_string();
-        state.advance(len);
-        let end = state.get_position();
-
-        let kind = match text.as_str() {
-            "define" => RacketTokenType::Define,
-            "lambda" => RacketTokenType::Lambda,
-            "if" => RacketTokenType::If,
-            "cond" => RacketTokenType::Cond,
-            "case" => RacketTokenType::Case,
-            "let" => RacketTokenType::Let,
-            "let*" => RacketTokenType::LetStar,
-            "letrec" => RacketTokenType::Letrec,
-            "begin" => RacketTokenType::Begin,
-            "do" => RacketTokenType::Do,
-            "quote" => RacketTokenType::Quote,
-            "quasiquote" => RacketTokenType::Quasiquote,
-            "unquote" => RacketTokenType::Unquote,
-            "unquote-splicing" => RacketTokenType::UnquoteSplicing,
-            "and" => RacketTokenType::And,
-            "or" => RacketTokenType::Or,
-            "not" => RacketTokenType::Not,
-            "set!" => RacketTokenType::Set,
-            "#t" | "#true" | "true" | "#f" | "#false" | "false" => RacketTokenType::BooleanLiteral,
-            _ => RacketTokenType::Identifier,
-        };
-
-        state.add_token(kind, start, end);
-        true
-    }
-
-    fn is_identifier_start(&self, ch: char) -> bool {
-        ch.is_alphabetic() || "!$%&*+-./:<=>?@^_~".contains(ch)
-    }
-
-    fn is_identifier_continue(&self, ch: char) -> bool {
-        self.is_identifier_start(ch) || ch.is_ascii_digit()
-    }
-
-    fn lex_single_char_tokens<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
-        let start = state.get_position();
-        let ch = match state.peek() {
-            Some(ch) => ch,
-            None => return false,
-        };
-
-        let kind = match ch {
-            '(' => Some(RacketTokenType::LeftParen),
-            ')' => Some(RacketTokenType::RightParen),
-            '[' => Some(RacketTokenType::LeftBracket),
-            ']' => Some(RacketTokenType::RightBracket),
-            '{' => Some(RacketTokenType::LeftBrace),
-            '}' => Some(RacketTokenType::RightBrace),
-            '\'' => Some(RacketTokenType::Quote_),
-            '`' => Some(RacketTokenType::Quasiquote_),
-            ',' => Some(RacketTokenType::Unquote_),
-            '.' => Some(RacketTokenType::Dot),
-            '#' => Some(RacketTokenType::Hash),
-            _ => None,
-        };
-
-        if let Some(kind) = kind {
-            state.advance(ch.len_utf8());
-            state.add_token(kind, start, state.get_position());
-            true
-        }
-        else {
-            false
-        }
+        state.add_eof();
+        state.finish_with_cache(Ok(()), cache)
     }
 }

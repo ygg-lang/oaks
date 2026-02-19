@@ -10,18 +10,16 @@ pub(crate) type State<'a, S> = LexerState<'a, S, MsilLanguage>;
 
 /// MSIL lexer.
 #[derive(Clone, Debug)]
-pub struct MsilLexer<'config> {
-    config: &'config MsilLanguage,
-}
+pub struct MsilLexer;
 
-impl<'config> MsilLexer<'config> {
+impl MsilLexer {
     /// Creates a new MSIL lexer.
-    pub fn new(config: &'config MsilLanguage) -> Self {
-        Self { config }
+    pub fn new(config: &MsilLanguage) -> Self {
+        Self
     }
 }
 
-impl MsilLexer<'_> {
+impl MsilLexer {
     /// Runs the lexer.
     pub fn run<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> Result<(), oak_core::OakError> {
         let safe_point = state.get_position();
@@ -42,11 +40,11 @@ impl MsilLexer<'_> {
                 continue;
             }
 
-            if self.lex_number(state) {
+            if self.lex_identifier(state) {
                 continue;
             }
 
-            if self.lex_identifier(state) {
+            if self.lex_number(state) {
                 continue;
             }
 
@@ -160,6 +158,10 @@ impl MsilLexer<'_> {
                 std::borrow::Cow::Borrowed(".module") => MsilTokenType::ModuleKeyword,
                 std::borrow::Cow::Borrowed(".class") => MsilTokenType::ClassKeyword,
                 std::borrow::Cow::Borrowed(".method") => MsilTokenType::MethodKeyword,
+                std::borrow::Cow::Borrowed(".data") => MsilTokenType::IdentifierToken,
+                std::borrow::Cow::Borrowed(".ver") => MsilTokenType::IdentifierToken,
+                std::borrow::Cow::Borrowed(".publickeytoken") => MsilTokenType::IdentifierToken,
+                std::borrow::Cow::Borrowed(".custom") => MsilTokenType::IdentifierToken,
                 std::borrow::Cow::Borrowed("public") => MsilTokenType::PublicKeyword,
                 std::borrow::Cow::Borrowed("private") => MsilTokenType::PrivateKeyword,
                 std::borrow::Cow::Borrowed("static") => MsilTokenType::StaticKeyword,
@@ -208,34 +210,82 @@ impl MsilLexer<'_> {
         }
     }
 
-    /// Lexes numbers.
+    /// Lexes numbers (decimal and hexadecimal).
     fn lex_number<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) -> bool {
         let start_pos = state.get_position();
 
         if let Some(ch) = state.peek() {
-            if !ch.is_ascii_digit() {
-                return false;
-            }
-
-            // Handle integer part
-            while let Some(ch) = state.peek() {
-                if ch.is_ascii_digit() { state.advance(ch.len_utf8()) } else { break }
-            }
-
-            // Handle decimal point
-            if let Some('.') = state.peek() {
+            // Check for hexadecimal numbers with 0x prefix
+            if ch == '0' {
                 if let Some(next_ch) = state.peek_next_n(1) {
-                    if next_ch.is_ascii_digit() {
-                        state.advance(1); // Skip decimal point
+                    if next_ch == 'x' || next_ch == 'X' {
+                        state.advance(2); // Skip "0x"
+                        let mut has_digits = false;
                         while let Some(ch) = state.peek() {
-                            if ch.is_ascii_digit() { state.advance(ch.len_utf8()) } else { break }
+                            if ch.is_ascii_hexdigit() {
+                                state.advance(ch.len_utf8());
+                                has_digits = true;
+                            }
+                            else {
+                                break;
+                            }
+                        }
+                        if has_digits {
+                            state.add_token(MsilTokenType::NumberToken, start_pos, state.get_position());
+                            return true;
                         }
                     }
                 }
             }
 
-            state.add_token(MsilTokenType::NumberToken, start_pos, state.get_position());
-            true
+            // Check for decimal numbers
+            if ch.is_ascii_digit() {
+                // Handle integer part
+                while let Some(ch) = state.peek() {
+                    if ch.is_ascii_digit() || ch.is_ascii_hexdigit() {
+                        state.advance(ch.len_utf8());
+                    }
+                    else {
+                        break;
+                    }
+                }
+
+                // Handle decimal point
+                if let Some('.') = state.peek() {
+                    if let Some(next_ch) = state.peek_next_n(1) {
+                        if next_ch.is_ascii_digit() {
+                            state.advance(1); // Skip decimal point
+                            while let Some(ch) = state.peek() {
+                                if ch.is_ascii_digit() { state.advance(ch.len_utf8()) } else { break }
+                            }
+                        }
+                    }
+                }
+
+                state.add_token(MsilTokenType::NumberToken, start_pos, state.get_position());
+                true
+            }
+            // Check for hexadecimal bytes (like B7, 7A, etc.)
+            else if ch.is_ascii_hexdigit() {
+                let mut has_digits = false;
+                while let Some(ch) = state.peek() {
+                    if ch.is_ascii_hexdigit() {
+                        state.advance(ch.len_utf8());
+                        has_digits = true;
+                    }
+                    else {
+                        break;
+                    }
+                }
+                if has_digits {
+                    state.add_token(MsilTokenType::NumberToken, start_pos, state.get_position());
+                    return true;
+                }
+                false
+            }
+            else {
+                false
+            }
         }
         else {
             false
@@ -304,7 +354,7 @@ impl MsilLexer<'_> {
     }
 }
 
-impl Lexer<MsilLanguage> for MsilLexer<'_> {
+impl Lexer<MsilLanguage> for MsilLexer {
     fn lex<'a, S: Source + ?Sized>(&self, source: &'a S, _edits: &[oak_core::TextEdit], cache: &'a mut impl LexerCache<MsilLanguage>) -> LexOutput<MsilLanguage> {
         let mut state = State::new_with_cache(source, 0, cache);
         let result = self.run(&mut state);
@@ -312,7 +362,7 @@ impl Lexer<MsilLanguage> for MsilLexer<'_> {
     }
 }
 
-impl MsilLexer<'_> {
+impl MsilLexer {
     /// Tokenizes the text into a list of tokens
     pub fn tokenize<'a>(&self, text: &'a str) -> Vec<oak_core::Token<<MsilLanguage as oak_core::Language>::TokenType>> {
         let source = oak_core::SourceText::new(text);

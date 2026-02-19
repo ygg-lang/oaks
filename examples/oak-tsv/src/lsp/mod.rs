@@ -1,7 +1,7 @@
 #![doc = include_str!("readme.md")]
 use crate::language::TsvLanguage;
+use core::range::Range;
 use oak_core::tree::RedNode;
-use std::ops::Range;
 #[cfg(feature = "lsp")]
 use {futures::Future, oak_lsp::service::LanguageService, oak_lsp::types::Hover as LspHover, oak_vfs::Vfs};
 #[cfg(feature = "lsp")]

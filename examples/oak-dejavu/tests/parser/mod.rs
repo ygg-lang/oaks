@@ -23,6 +23,15 @@ fn test_flags_parser() -> Result<(), oak_core::OakError> {
 }
 
 #[test]
+fn test_legacy_compliance() -> Result<(), oak_core::OakError> {
+    let here = Path::new(env!("CARGO_MANIFEST_DIR"));
+    let lang = Box::leak(Box::new(DejavuLanguage::default()));
+    let parser = DejavuParser::new(lang);
+    let test_runner = ParserTester::new(here.join("tests").join("legacy_parser")).with_extension("dejavu").with_timeout(Duration::from_secs(5));
+    test_runner.run_tests::<DejavuLanguage, _>(&parser)
+}
+
+#[test]
 fn test_dejavu_namespace_parsing() {
     use oak_core::SourceText;
     use oak_dejavu::{DejavuLanguage, DejavuParser};

@@ -1,8 +1,11 @@
 #![doc = include_str!("readme.md")]
 
+/// Expression node types for SQL AST.
 pub mod expression_nodes;
 mod pretty_nodes;
+/// Root node types for SQL AST.
 pub mod root_nodes;
+/// Statement node types for SQL AST.
 pub mod statements;
 
 pub use expression_nodes::*;

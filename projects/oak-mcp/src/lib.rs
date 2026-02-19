@@ -64,12 +64,12 @@ pub struct JsonRpcResponse {
     pub error: Option<JsonRpcError>,
 }
 
+#[cfg(feature = "serde")]
 impl JsonRpcResponse {
     /// Serializes the response to a JSON string.
     ///
     /// Returns a string representation of the response. If serialization
     /// fails (which should not happen with valid data), returns "{}".
-    #[cfg(feature = "serde")]
     pub fn to_json(&self) -> String {
         serde_json::to_string(self).unwrap_or_else(|_| "{}".to_string())
     }
@@ -107,6 +107,7 @@ pub struct JsonRpcNotification {
     pub params: Option<JsonValue>,
 }
 
+#[cfg(feature = "serde")]
 impl JsonRpcNotification {
     /// Parses a JSON string into a `JsonRpcNotification`.
     ///

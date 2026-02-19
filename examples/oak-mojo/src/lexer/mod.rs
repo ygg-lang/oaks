@@ -1,3 +1,4 @@
+/// Token type definitions for the Mojo lexer.
 pub mod token_type;
 pub use token_type::MojoTokenType;
 

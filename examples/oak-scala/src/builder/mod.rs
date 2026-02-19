@@ -9,6 +9,7 @@ pub struct ScalaBuilder<'config> {
 }
 
 impl<'config> ScalaBuilder<'config> {
+    /// Creates a new ScalaBuilder with the given language configuration.
     pub fn new(config: &'config ScalaLanguage) -> Self {
         Self { config }
     }

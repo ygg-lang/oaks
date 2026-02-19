@@ -3,10 +3,6 @@
 #![warn(missing_docs)]
 #![doc(html_logo_url = "https://raw.githubusercontent.com/ygg-lang/oaks/refs/heads/dev/documents/logo.svg")]
 #![doc(html_favicon_url = "https://raw.githubusercontent.com/ygg-lang/oaks/refs/heads/dev/documents/logo.svg")]
-//! TeX support for the Oak language framework.
-//!
-//! This crate provides lexing, parsing, and AST building for TeX/LaTeX documents,
-//! enabling integration with the Oak language server and other tools.
 
 /// AST module containing TeX syntax tree definitions.
 pub mod ast;

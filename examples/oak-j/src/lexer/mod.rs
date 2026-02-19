@@ -19,7 +19,7 @@ static J_WHITESPACE: LazyLock<WhitespaceConfig> = LazyLock::new(|| WhitespaceCon
 /// J language lexer
 #[derive(Clone, Debug)]
 pub struct JLexer<'config> {
-    _config: &'config JLanguage,
+    config: &'config JLanguage,
 }
 
 impl<'config> Lexer<JLanguage> for JLexer<'config> {
@@ -36,7 +36,7 @@ impl<'config> Lexer<JLanguage> for JLexer<'config> {
 impl<'config> JLexer<'config> {
     /// Creates a new J lexer.
     pub fn new(config: &'config JLanguage) -> Self {
-        Self { _config: config }
+        Self { config }
     }
 
     /// Main lexing logic.

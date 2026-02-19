@@ -1,5 +1,4 @@
 #![doc = include_str!("readme.md")]
-//! Go syntax highlighter.
 
 use oak_highlight::HighlightSegment;
 

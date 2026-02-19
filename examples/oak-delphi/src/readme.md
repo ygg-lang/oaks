@@ -1,5 +1,10 @@
 # 🛠️ Developer Guide
 
+Delphi programming language parser implementation
+
+This module provides a complete parser for the Delphi programming language,
+including lexersyntax definitionsand language configuration.
+
 This directory contains the core logic implementation of the project. Below are instructions for a quick start.
 
 ## 🚦 Quick Start

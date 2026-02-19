@@ -1,4 +1,5 @@
 #![doc = include_str!("readme.md")]
+/// Token type definitions for the Vampire lexer.
 pub mod token_type;
 pub use token_type::VampireTokenType;
 
@@ -16,12 +17,14 @@ static VAMPIRE_WHITESPACE: LazyLock<WhitespaceConfig> = LazyLock::new(|| Whitesp
 static VAMPIRE_COMMENT: LazyLock<CommentConfig> = LazyLock::new(|| CommentConfig { line_marker: "%", block_start: "/*", block_end: "*/", nested_blocks: false });
 static VAMPIRE_STRING: LazyLock<StringConfig> = LazyLock::new(|| StringConfig { quotes: &['"'], escape: Some('\\') });
 
+/// Lexer for the Vampire language.
 #[derive(Clone)]
 pub struct VampireLexer<'config> {
     config: &'config VampireLanguage,
 }
 
 impl<'config> Lexer<VampireLanguage> for VampireLexer<'config> {
+    /// Lexes the input text and produces a token stream for the Vampire language.
     fn lex<'a, S: Source + ?Sized>(&self, text: &'a S, _edits: &[TextEdit], _cache: &'a mut impl LexerCache<VampireLanguage>) -> LexOutput<VampireLanguage> {
         let mut state: State<'_, S> = LexerState::new(text);
         let result = self.run(&mut state);
@@ -32,6 +35,7 @@ impl<'config> Lexer<VampireLanguage> for VampireLexer<'config> {
     }
 }
 impl<'config> VampireLexer<'config> {
+    /// Creates a new VampireLexer with the given language configuration.
     pub fn new(config: &'config VampireLanguage) -> Self {
         Self { config }
     }

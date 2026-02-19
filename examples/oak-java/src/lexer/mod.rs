@@ -11,7 +11,7 @@ pub(crate) type State<'a, S> = LexerState<'a, S, JavaLanguage>;
 /// Java lexer.
 #[derive(Clone, Debug)]
 pub struct JavaLexer<'config> {
-    _config: &'config JavaLanguage,
+    config: &'config JavaLanguage,
 }
 
 impl<'config> Lexer<JavaLanguage> for JavaLexer<'config> {
@@ -28,7 +28,7 @@ impl<'config> Lexer<JavaLanguage> for JavaLexer<'config> {
 impl<'config> JavaLexer<'config> {
     /// Create a new Java lexer.
     pub fn new(config: &'config JavaLanguage) -> Self {
-        Self { _config: config }
+        Self { config }
     }
 
     /// Main lexing loop

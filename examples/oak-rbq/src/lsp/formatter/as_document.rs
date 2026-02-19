@@ -17,7 +17,7 @@ impl AsDocument for RbqItem {
             RbqItem::Namespace(it) => it.as_document(),
             RbqItem::TypeAlias(it) => it.as_document(),
             RbqItem::Micro(it) => it.as_document(),
-            RbqItem::Query(it) => it.as_document(),
+            RbqItem::Import(it) => it.as_document(),
         }
     }
 }
@@ -26,8 +26,7 @@ impl AsDocument for RbqStruct {
     fn as_document(&self) -> Document<'_> {
         let header = doc!(Document::join(self.annotations.iter().map(|it| it.as_document()), line), if !self.annotations.is_empty() { line } else { nil }, "struct", soft_space, self.name.as_str(), soft_space, "{");
 
-        let body =
-            doc!(Document::join(self.using.iter().map(|u| doc!("using", soft_space, u.as_str(), ";")), line), if !self.using.is_empty() && !self.fields.is_empty() { line } else { nil }, Document::join(self.fields.iter().map(|it| it.as_document()), line),);
+        let body = doc!(Document::join(self.fields.iter().map(|it| it.as_document()), line),);
 
         Document::group(doc!(header, indent(doc!(line, body)), line, "}"))
     }
@@ -35,7 +34,7 @@ impl AsDocument for RbqStruct {
 
 impl AsDocument for RbqNamespace {
     fn as_document(&self) -> Document<'_> {
-        Document::group(doc!("namespace", soft_space, self.name.as_str(), soft_space, "{", indent(doc!(line, Document::join(self.items.iter().map(|it| it.as_document()), line),)), line, "}"))
+        Document::group(doc!("namespace", soft_space, self.path.as_str(), soft_space, "{", indent(doc!(line,)), line, "}"))
     }
 }
 
@@ -51,19 +50,7 @@ impl AsDocument for RbqEnum {
     fn as_document(&self) -> Document<'_> {
         let header = doc!(Document::join(self.annotations.iter().map(|it| it.as_document()), line), if !self.annotations.is_empty() { line } else { nil }, "enum", soft_space, self.name.as_str(), soft_space, "{");
 
-        Document::group(doc!(header, indent(doc!(line, Document::join(self.variants.iter().map(|it| it.as_document()), line),)), line, "}"))
-    }
-}
-
-impl AsDocument for RbqEnumMember {
-    fn as_document(&self) -> Document<'_> {
-        doc!(
-            Document::join(self.annotations.iter().map(|it| it.as_document()), line),
-            if !self.annotations.is_empty() { line } else { nil },
-            self.name.as_str(),
-            self.value.as_ref().map(|it| doc!(soft_space, "=", soft_space, it.as_str())).unwrap_or(nil),
-            ";"
-        )
+        Document::group(doc!(header, indent(doc!(line, Document::join(self.variants.iter().map(|it| Document::text(it.as_str())), line),)), line, "}"))
     }
 }
 
@@ -83,7 +70,7 @@ impl AsDocument for RbqUnionMember {
 impl AsDocument for RbqUnionPayload {
     fn as_document(&self) -> Document<'_> {
         match self {
-            RbqUnionPayload::Tuple(it) => doc!("(", Document::join(it.iter().map(|t| Document::text(t.as_str())), doc!(",", soft_space)), ")"),
+            RbqUnionPayload::Tuple(it) => doc!("(", Document::join(it.iter().map(|t| t.as_document()), doc!(",", soft_space)), ")"),
             RbqUnionPayload::Struct(it) => Document::group(doc!(soft_space, "{", indent(doc!(line, Document::join(it.iter().map(|f| f.as_document()), line),)), line, "}")),
         }
     }
@@ -106,6 +93,15 @@ impl AsDocument for RbqTrait {
     }
 }
 
+impl AsDocument for RbqTraitItem {
+    fn as_document(&self) -> Document<'_> {
+        match self {
+            RbqTraitItem::Field(f) => f.as_document(),
+            RbqTraitItem::Method(m) => m.as_document(),
+        }
+    }
+}
+
 impl AsDocument for RbqField {
     fn as_document(&self) -> Document<'_> {
         doc!(
@@ -114,8 +110,8 @@ impl AsDocument for RbqField {
             self.name.as_str(),
             ":",
             soft_space,
-            self.type_ref.as_str(),
-            self.default_value.as_ref().map(|it| doc!(soft_space, "=", soft_space, it.as_str())).unwrap_or(nil),
+            self.type_ref.as_document(),
+            self.default_value.as_ref().map(|it| doc!(soft_space, "=", soft_space, it.as_document())).unwrap_or(nil),
             ";"
         )
     }
@@ -123,7 +119,7 @@ impl AsDocument for RbqField {
 
 impl AsDocument for RbqTypeAlias {
     fn as_document(&self) -> Document<'_> {
-        doc!(Document::join(self.annotations.iter().map(|it| it.as_document()), line), if !self.annotations.is_empty() { line } else { nil }, "type", soft_space, self.name.as_str(), soft_space, "=", soft_space, self.type_ref.as_str(), ";")
+        doc!(Document::join(self.annotations.iter().map(|it| it.as_document()), line), if !self.annotations.is_empty() { line } else { nil }, "type", soft_space, self.name.as_str(), soft_space, "=", soft_space, self.type_ref.as_document(), ";")
     }
 }
 
@@ -135,14 +131,55 @@ impl AsDocument for RbqAnnotation {
 
 impl AsDocument for RbqMicro {
     fn as_document(&self) -> Document<'_> {
-        doc!("micro", soft_space, self.name.as_str(), "(", Document::join(self.args.iter().map(|(n, t)| doc!(n.as_str(), ":", soft_space, t.as_str())), doc!(",", soft_space)), ")")
+        doc!("micro", soft_space, self.name.as_str(), "(", Document::join(self.args.iter().map(|a| doc!(a.name.as_str(), ":", soft_space, a.type_ref.as_document())), doc!(",", soft_space)), ")")
+    }
+}
+
+impl AsDocument for RbqImport {
+    fn as_document(&self) -> Document<'_> {
+        doc!("import", soft_space, self.path.as_str())
+    }
+}
+
+impl AsDocument for RbqType {
+    fn as_document(&self) -> Document<'_> {
+        match self {
+            RbqType::Named { path, generic_args, .. } => {
+                if generic_args.is_empty() {
+                    path.as_str().into()
+                }
+                else {
+                    doc!(path.as_str(), "<", Document::join(generic_args.iter().map(|t| t.as_document()), doc!(",", soft_space)), ">")
+                }
+            }
+            RbqType::InlineStruct(fields, _) => {
+                doc!("{", Document::join(fields.iter().map(|f| f.as_document()), line), "}")
+            }
+            RbqType::PhysicalRef(inner, _) => {
+                doc!("&", inner.as_document())
+            }
+            RbqType::Optional(inner, _) => {
+                doc!(inner.as_document(), "?")
+            }
+            RbqType::Literal(value, _) => value.as_str().into(),
+        }
+    }
+}
+
+impl AsDocument for RbqLiteral {
+    fn as_document(&self) -> Document<'_> {
+        match self {
+            RbqLiteral::String(s) => format!("\"{}\"", s).into(),
+            RbqLiteral::Number(n) => n.as_str().into(),
+            RbqLiteral::Boolean(b) => b.to_string().into(),
+        }
     }
 }
 
 impl AsDocument for RbqExpr {
     fn as_document(&self) -> Document<'_> {
         match &self.kind {
-            RbqExprKind::Literal(it) => it.as_str().into(),
+            RbqExprKind::Literal(it) => it.as_document(),
             RbqExprKind::Identifier(it) => it.as_str().into(),
             RbqExprKind::MagicVar(it) => it.as_str().into(),
             RbqExprKind::Binary { left, op, right } => {
@@ -161,7 +198,10 @@ impl AsDocument for RbqExpr {
                 doc!(base.as_document(), Document::join(steps.iter().map(|s| doc!(soft_space, "|", soft_space, s.as_document())), nil))
             }
             RbqExprKind::Closure { args, body } => {
-                doc!("{", soft_space, Document::join(args.iter().map(|a| Document::text(a.as_str())), doc!(",", soft_space)), soft_space, "->", soft_space, body.as_document(), soft_space, "}")
+                doc!("{", soft_space, Document::join(args.iter().map(|a| Document::text(a.as_str())), doc!(",", soft_space)), soft_space, "->", soft_space, Document::join(body.iter().map(|e| e.as_document()), line), soft_space, "}")
+            }
+            RbqExprKind::Block(exprs) => {
+                doc!("{", Document::join(exprs.iter().map(|e| e.as_document()), line), "}")
             }
         }
     }

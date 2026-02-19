@@ -15,8 +15,9 @@ use oak_core::{
 
 mod build_signatures;
 
-/// Go language builder
+/// Go language builder that constructs typed AST from parse trees.
 pub struct GoBuilder<'config> {
+    /// The language configuration reference.
     pub(crate) config: &'config GoLanguage,
 }
 
@@ -34,6 +35,7 @@ impl<'config> Builder<GoLanguage> for GoBuilder<'config> {
 }
 
 impl<'config> GoBuilder<'config> {
+    /// Creates a new Go builder with the given language configuration.
     pub fn new(config: &'config GoLanguage) -> Self {
         Self { config }
     }

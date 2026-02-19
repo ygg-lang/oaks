@@ -125,7 +125,8 @@ impl<'config> JavaBuilder<'config> {
             }
         }
 
-        let method = MethodDeclaration { modifiers, annotations, name, return_type, parameters, body, throws, is_static, span: node.span() };
+        let type_parameters = Vec::new(); // TODO: Extract type parameters
+        let method = MethodDeclaration { type_parameters, modifiers, annotations, name, return_type, parameters, body, throws, is_static, span: node.span() };
 
         method
     }

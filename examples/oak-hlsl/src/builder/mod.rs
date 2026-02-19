@@ -8,10 +8,12 @@ use oak_core::{Builder, BuilderCache, GreenNode, Lexer, OakDiagnostics, OakError
 
 /// AST builder for the HLSL language.
 pub struct HlslBuilder<'config> {
+    /// Language configuration.
     config: &'config HlslLanguage,
 }
 
 impl<'config> HlslBuilder<'config> {
+    /// Creates a new HLSL builder with the given language configuration.
     pub fn new(config: &'config HlslLanguage) -> Self {
         Self { config }
     }

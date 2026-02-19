@@ -1,0 +1,12 @@
+{% loop while i %}
+    loop body
+{% loop end %}
+
+
+
+{% loop while i %}
+    loop body
+{% else %}
+    empty body
+{% loop end %}
+

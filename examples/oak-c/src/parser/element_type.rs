@@ -29,6 +29,18 @@ pub enum CElementType {
     ForStatement,
     /// A `return` statement.
     ReturnStatement,
+    /// A struct definition.
+    StructDefinition,
+    /// A union definition.
+    UnionDefinition,
+    /// An enum definition.
+    EnumDefinition,
+    /// A struct/union member declaration.
+    StructMember,
+    /// An enum constant.
+    EnumConstant,
+    /// A function call.
+    FunctionCall,
     /// An error element used for recovery.
     Error,
 }
@@ -53,7 +65,7 @@ impl ElementType for CElementType {
     fn role(&self) -> Self::Role {
         match self {
             Self::Root => UniversalElementRole::Root,
-            Self::FunctionDefinition => UniversalElementRole::Definition,
+            Self::FunctionDefinition | Self::StructDefinition | Self::UnionDefinition | Self::EnumDefinition => UniversalElementRole::Definition,
             Self::CompoundStatement | Self::ExpressionStatement | Self::DeclarationStatement | Self::IfStatement | Self::WhileStatement | Self::ForStatement | Self::ReturnStatement => UniversalElementRole::Statement,
             Self::Error => UniversalElementRole::Error,
             _ => UniversalElementRole::None,

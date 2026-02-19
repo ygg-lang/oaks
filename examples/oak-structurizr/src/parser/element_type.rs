@@ -33,3 +33,17 @@ impl ElementType for StructurizrElementType {
         }
     }
 }
+
+impl From<crate::lexer::token_type::StructurizrTokenType> for StructurizrElementType {
+    fn from(token: crate::lexer::token_type::StructurizrTokenType) -> Self {
+        match token {
+            crate::lexer::token_type::StructurizrTokenType::Workspace => Self::Workspace,
+            crate::lexer::token_type::StructurizrTokenType::Model => Self::Model,
+            crate::lexer::token_type::StructurizrTokenType::Person => Self::Person,
+            crate::lexer::token_type::StructurizrTokenType::SoftwareSystem => Self::SoftwareSystem,
+            crate::lexer::token_type::StructurizrTokenType::Container => Self::Container,
+            crate::lexer::token_type::StructurizrTokenType::Component => Self::Component,
+            _ => Self::Error,
+        }
+    }
+}

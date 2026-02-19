@@ -5,8 +5,10 @@ use core::range::Range;
 #[derive(Debug, Clone, PartialEq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct SwiftRoot {
+    /// The program node containing all statements.
     pub program: Program,
-    #[serde(with = "oak_core::serde_range")]
+    /// The source span of the root node.
+    #[cfg_attr(feature = "serde", serde(with = "oak_core::serde_range"))]
     pub span: Range<usize>,
 }
 
@@ -14,6 +16,7 @@ pub struct SwiftRoot {
 #[derive(Debug, Clone, PartialEq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct Program {
+    /// The list of statements in the program.
     pub statements: Vec<Statement>,
 }
 
@@ -22,19 +25,56 @@ pub struct Program {
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub enum Statement {
     /// Function definition
-    FunctionDef { name: String, parameters: Vec<Parameter>, return_type: Option<Type>, body: Vec<Statement> },
+    FunctionDef {
+        /// The function name.
+        name: String,
+        /// The function parameters.
+        parameters: Vec<Parameter>,
+        /// The return type of the function.
+        return_type: Option<Type>,
+        /// The function body statements.
+        body: Vec<Statement>,
+    },
     /// Variable declaration
-    VariableDecl { is_mutable: bool, name: String, type_annotation: Option<Type>, value: Option<Expression> },
+    VariableDecl {
+        /// Whether the variable is mutable.
+        is_mutable: bool,
+        /// The variable name.
+        name: String,
+        /// The type annotation of the variable.
+        type_annotation: Option<Type>,
+        /// The initial value of the variable.
+        value: Option<Expression>,
+    },
     /// Expression statement
     Expression(Expression),
     /// Return statement
     Return(Option<Expression>),
     /// Conditional statement
-    If { test: Expression, body: Vec<Statement>, orelse: Option<Vec<Statement>> },
+    If {
+        /// The condition expression.
+        test: Expression,
+        /// The body statements when condition is true.
+        body: Vec<Statement>,
+        /// The else clause statements.
+        orelse: Option<Vec<Statement>>,
+    },
     /// While loop
-    While { test: Expression, body: Vec<Statement> },
+    While {
+        /// The loop condition expression.
+        test: Expression,
+        /// The loop body statements.
+        body: Vec<Statement>,
+    },
     /// For loop
-    For { variable: String, iterable: Expression, body: Vec<Statement> },
+    For {
+        /// The loop variable name.
+        variable: String,
+        /// The iterable expression.
+        iterable: Expression,
+        /// The loop body statements.
+        body: Vec<Statement>,
+    },
     /// Block
     Block(Vec<Statement>),
 }
@@ -44,13 +84,35 @@ pub enum Statement {
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub enum Expression {
     /// Binary operation
-    Binary { left: Box<Expression>, operator: String, right: Box<Expression> },
+    Binary {
+        /// The left operand.
+        left: Box<Expression>,
+        /// The operator.
+        operator: String,
+        /// The right operand.
+        right: Box<Expression>,
+    },
     /// Unary operation
-    Unary { operator: String, operand: Box<Expression> },
+    Unary {
+        /// The operator.
+        operator: String,
+        /// The operand.
+        operand: Box<Expression>,
+    },
     /// Function call
-    Call { callee: Box<Expression>, arguments: Vec<Expression> },
+    Call {
+        /// The callee expression.
+        callee: Box<Expression>,
+        /// The call arguments.
+        arguments: Vec<Expression>,
+    },
     /// Member access
-    Member { object: Box<Expression>, member: String },
+    Member {
+        /// The object expression.
+        object: Box<Expression>,
+        /// The member name.
+        member: String,
+    },
     /// Identifier
     Identifier(String),
     /// Literal
@@ -61,9 +123,13 @@ pub enum Expression {
 #[derive(Debug, Clone, PartialEq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub enum Literal {
+    /// Numeric literal value.
     Number(String),
+    /// String literal value.
     String(String),
+    /// Boolean literal value.
     Boolean(bool),
+    /// Nil literal value.
     Nil,
 }
 
@@ -71,7 +137,9 @@ pub enum Literal {
 #[derive(Debug, Clone, PartialEq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct Parameter {
+    /// The parameter name.
     pub name: String,
+    /// The type annotation of the parameter.
     pub type_annotation: Type,
 }
 
@@ -79,5 +147,6 @@ pub struct Parameter {
 #[derive(Debug, Clone, PartialEq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct Type {
+    /// The type name.
     pub name: String,
 }

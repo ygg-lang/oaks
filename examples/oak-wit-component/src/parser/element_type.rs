@@ -1,103 +1,176 @@
 use oak_core::{ElementType, Parser, UniversalElementRole};
 
+/// Element types for the WIT Component parser.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub enum WitElementType {
-    // Basic kind
+    /// Root node.
     Root,
+    /// Whitespace trivia token.
     Whitespace,
+    /// Newline trivia token.
     Newline,
+    /// Comment trivia token.
     Comment,
+    /// Error token.
     Error,
+    /// End of file token.
     Eof,
+    /// Text token.
     Text,
 
-    // Literals
+    /// Integer literal token.
     IntegerLiteral,
+    /// Float literal token.
     FloatLiteral,
+    /// String literal token.
     StringLiteral,
+    /// Identifier token.
     Identifier,
 
-    // WIT Component keywords - Basic structure
+    /// The `world` keyword.
     WorldKw,
+    /// The `interface` keyword.
     InterfaceKw,
+    /// The `package` keyword.
     PackageKw,
+    /// The `component` keyword.
     ComponentKw,
+    /// The `instance` keyword.
     InstanceKw,
+    /// The `module` keyword.
     ModuleKw,
+    /// The `core` keyword.
     CoreKw,
+    /// The `func` keyword.
     FuncKw,
+    /// The `type` keyword.
     TypeKw,
+    /// The `record` keyword.
     RecordKw,
+    /// The `variant` keyword.
     VariantKw,
+    /// The `enum` keyword.
     EnumKw,
+    /// The `flags` keyword.
     FlagsKw,
+    /// The `union` keyword.
     UnionKw,
+    /// The `tuple` keyword.
     TupleKw,
+    /// The `list` keyword.
     ListKw,
+    /// The `option` keyword.
     OptionKw,
+    /// The `result` keyword.
     ResultKw,
+    /// The `resource` keyword.
     ResourceKw,
 
-    // Import/Export
+    /// The `import` keyword.
     ImportKw,
+    /// The `export` keyword.
     ExportKw,
+    /// The `use` keyword.
     UseKw,
+    /// The `include` keyword.
     IncludeKw,
+    /// The `with` keyword.
     WithKw,
 
-    // Type related
+    /// The `static` keyword.
     StaticKw,
+    /// The `constructor` keyword.
     ConstructorKw,
+    /// The `method` keyword.
     MethodKw,
 
-    // Basic types
+    /// The `bool` type keyword.
     BoolKw,
+    /// The `u8` type keyword.
     U8Kw,
+    /// The `u16` type keyword.
     U16Kw,
+    /// The `u32` type keyword.
     U32Kw,
+    /// The `u64` type keyword.
     U64Kw,
+    /// The `s8` type keyword.
     S8Kw,
+    /// The `s16` type keyword.
     S16Kw,
+    /// The `s32` type keyword.
     S32Kw,
+    /// The `s64` type keyword.
     S64Kw,
+    /// The `f32` type keyword.
     F32Kw,
+    /// The `f64` type keyword.
     F64Kw,
+    /// The `char` type keyword.
     CharKw,
+    /// The `string` type keyword.
     StringKw,
 
-    // Operators
-    Arrow,     // ->
-    FatArrow,  // =>
-    Assign,    // =
-    Colon,     // :
-    Semicolon, // ;
-    Comma,     // ,
-    Dot,       // .
-    Question,  // ?
-    At,        // ↯
-    Hash,      // #
-    Dollar,    // $
-    Percent,   // %
-    Ampersand, // &
-    Star,      // *
-    Plus,      // +
-    Minus,     // -
-    Slash,     // /
-    Lt,        // <
-    Gt,        // >
-    Pipe,      // |
-    Caret,     // ^
-    Tilde,     // ~
-    Bang,      // !
+    /// The arrow operator `->`.
+    Arrow,
+    /// The fat arrow operator `=>`.
+    FatArrow,
+    /// The assign operator `=`.
+    Assign,
+    /// The colon operator `:`.
+    Colon,
+    /// The semicolon operator `;`.
+    Semicolon,
+    /// The comma operator `,`.
+    Comma,
+    /// The dot operator `.`.
+    Dot,
+    /// The question operator `?`.
+    Question,
+    /// The at operator `@`.
+    At,
+    /// The hash operator `#`.
+    Hash,
+    /// The dollar operator `$`.
+    Dollar,
+    /// The percent operator `%`.
+    Percent,
+    /// The ampersand operator `&`.
+    Ampersand,
+    /// The star operator `*`.
+    Star,
+    /// The plus operator `+`.
+    Plus,
+    /// The minus operator `-`.
+    Minus,
+    /// The slash operator `/`.
+    Slash,
+    /// The less-than operator `<`.
+    Lt,
+    /// The greater-than operator `>`.
+    Gt,
+    /// The pipe operator `|`.
+    Pipe,
+    /// The caret operator `^`.
+    Caret,
+    /// The tilde operator `~`.
+    Tilde,
+    /// The bang operator `!`.
+    Bang,
 
-    // Punctuation
-    LeftParen,    // (
-    RightParen,   // )
-    LeftBrace,    // {
-    RightBrace,   // }
-    LeftBracket,  // [
-    RightBracket, // ]
+    /// The left parenthesis `(`.
+    LeftParen,
+    /// The right parenthesis `)`.
+    RightParen,
+    /// The left brace `{`.
+    LeftBrace,
+    /// The right brace `}`.
+    RightBrace,
+    /// The left bracket `[`.
+    LeftBracket,
+    /// The right bracket `]`.
+    RightBracket,
 }
 
 impl std::fmt::Display for WitElementType {

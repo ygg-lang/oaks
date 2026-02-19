@@ -1,5 +1,7 @@
 # 🛠️ oak-groovy Developer Guide
 
+Groovy support for the Oak language framework.
+
 Welcome to the internal implementation of the Groovy parser. This module provides the core logic for tokenizing and parsing Groovy source code into a high-fidelity syntax tree.
 
 ## 📦 Core Components

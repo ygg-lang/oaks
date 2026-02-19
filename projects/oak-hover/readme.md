@@ -3,16 +3,34 @@
 [![Crates.io](https://img.shields.io/crates/v/oak-hover.svg)](https://crates.io/crates/oak-hover)
 [![Documentation](https://docs.rs/oak-hover/badge.svg)](https://docs.rs/oak-hover)
 
-**Core component of the Oak ecosystem** — Providing a solid foundation for building modern programming language toolchains.
+**Hover Information Provider for the Oak Ecosystem** — A lightweight, trait-based library for providing hover information in editors and IDEs.
 
-## 🎯 Project Vision
+## 🎯 Why oak-hover?
 
-`oak-hover` is a key module in the Oak ecosystem, focusing on providing efficient and scalable low-level functionality to help developers quickly build robust programming language-related tools.
+Hover information is essential for modern developer experience — it provides instant feedback about symbols, types, and documentation without leaving the editor. `oak-hover` provides a simple, unified interface for implementing hover support in any Oak-based language parser.
 
-## ✨ Core Features
+## ✨ Key Features
 
-- **⚡ Blazing Fast**: Fully utilizes Rust's performance advantages to achieve sub-millisecond parsing response times.
-- **🔄 Incremental Parsing**: Built-in support for partial updates, demonstrating extremely high efficiency when processing large files.
-- **🌳 Structured Output**: Provides a clear, easy-to-traverse syntax tree or data structure.
-- **🛡️ Robustness**: Features a comprehensive error recovery mechanism, ensuring normal operation even when input is incomplete.
-- **🧩 Easy Integration**: Designed with high cohesion and low coupling, allowing for quick integration into existing Rust projects.
+- **🎯 Trait-Based Design** — Clean `HoverProvider` trait for language-specific hover logic
+- **📝 Markdown Support** — Rich formatting for documentation and type information
+- **📍 Range-Aware** — Optional range information for precise hover targeting
+- **🔄 Serde Integration** — Easy serialization for LSP implementations
+- **🧩 Zero Dependencies** — Minimal footprint with optional serde support
+
+## 🏗️ Architecture
+
+The crate provides two main types:
+- `Hover` — Represents hover content with optional range
+- `HoverProvider<L>` — Trait for implementing language-specific hover
+
+## 🔗 Ecosystem Integration
+
+Works seamlessly with `oak-lsp` for full Language Server Protocol support and any editor that displays hover information.
+
+## 📖 Documentation
+
+For usage examples and API details, see the [API documentation](https://docs.rs/oak-hover).
+
+## 🤝 Contributing
+
+Contributions are welcome! Please feel free to submit a Pull Request.

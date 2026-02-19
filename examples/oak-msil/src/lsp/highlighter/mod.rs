@@ -1,7 +1,4 @@
 #![doc = include_str!("readme.md")]
-//! MSIL syntax highlighter.
-//!
-//! This module provides syntax highlighting for MSIL source code, supporting keywords, directives, opcodes, comments, etc.
 
 /// Local definition of highlight kinds.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]

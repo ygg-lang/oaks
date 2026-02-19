@@ -1,5 +1,3 @@
-//! Language definition for the JASM language.
-
 #![doc = include_str!("readme.md")]
 use oak_core::language::{Language, LanguageCategory};
 

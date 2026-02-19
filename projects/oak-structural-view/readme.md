@@ -3,16 +3,37 @@
 [![Crates.io](https://img.shields.io/crates/v/oak-structural-view.svg)](https://crates.io/crates/oak-structural-view)
 [![Documentation](https://docs.rs/oak-structural-view/badge.svg)](https://docs.rs/oak-structural-view)
 
-**Core component of the Oak ecosystem** — Providing a solid foundation for building modern programming language toolchains.
+**Document Structure View for Oak Languages** — Hierarchical representation of document structure for outline views and breadcrumb navigation.
 
-## 🎯 Project Vision
+## 🎯 Why oak-structural-view?
 
-`oak-structural-view` is a key module in the Oak ecosystem, focusing on providing efficient and scalable low-level functionality to help developers quickly build robust programming language-related tools. It aligns with concepts like IntelliJ's **Structure View** and LSP's **Document Symbols**.
+Structure views help developers navigate large files by showing a hierarchical outline of classes, functions, and other definitions. Similar to IntelliJ's Structure View and VS Code's Outline panel.
 
-## ✨ Core Features
+## ✨ Key Features
 
-- **⚡ Blazing Fast**: Fully utilizes Rust's performance advantages to achieve sub-millisecond parsing response times.
-- **🔄 Incremental Parsing**: Built-in support for partial updates, demonstrating extremely high efficiency when processing large files.
-- **🌳 Structured Output**: Provides a clear, easy-to-traverse syntax tree or data structure.
-- **🛡️ Robustness**: Features a comprehensive error recovery mechanism, ensuring normal operation even when input is incomplete.
-- **🧩 Easy Integration**: Designed with high cohesion and low coupling, allowing for quick integration into existing Rust projects.
+- **📊 Structure Provider Trait** — `StructureProvider` for language-specific extraction
+- **🌳 Hierarchical Items** — `StructureItem` supports nested children
+- **🎯 Selection Ranges** — Separate ranges for full element and clickable identifier
+- **📝 Detail Support** — Optional detail text for signatures or type information
+- **🔄 Serde Support** — Optional serialization for LSP and IDE integration
+
+## 🏗️ Architecture
+
+- `StructureItem` — Name, detail, role, range, selection range, deprecated, children
+- `StructureProvider<L>` — Trait for providing document structure
+
+### IDE Integration
+
+Maps to IntelliJ Structure View, VS Code Outline panel and breadcrumbs, and LSP `textDocument/documentSymbol`.
+
+## 🔗 Ecosystem Integration
+
+Used by `oak-lsp` for `textDocument/documentSymbol`, IDE extensions for outline views, and code navigation tools.
+
+## 📖 Documentation
+
+For usage examples and API details, see the [API documentation](https://docs.rs/oak-structural-view).
+
+## 🤝 Contributing
+
+Contributions are welcome! Please feel free to submit a Pull Request.

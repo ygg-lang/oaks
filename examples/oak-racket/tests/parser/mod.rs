@@ -1,14 +1,14 @@
 use oak_core::parser::{ParseSession, Parser};
-use oak_scheme::{language::SchemeLanguage, parser::SchemeParser};
+use oak_racket::{language::RacketLanguage, parser::RacketParser};
 
 #[test]
-fn test_scheme_parser() {
-    let lang = SchemeLanguage::new();
-    let parser = SchemeParser::new(&lang);
+fn test_racket_parser() {
+    let lang = RacketLanguage::new();
+    let parser = RacketParser::new(&lang);
     let source = "(define (hello) (display \"Hello\"))\n(hello)";
-    let mut session = ParseSession::<SchemeLanguage>::new(16);
+    let mut session = ParseSession::<RacketLanguage>::new(16);
     let output = parser.parse(source, &[], &mut session);
-    assert!(output.is_ok());
-    let green = output.into_result().unwrap();
+    assert!(output.result.is_ok());
+    let green = output.result.unwrap();
     assert!(green.children.len() > 0);
 }

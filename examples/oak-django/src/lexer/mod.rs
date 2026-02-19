@@ -16,6 +16,7 @@ static _DJANGO_COMMENT: LazyLock<CommentConfig> = LazyLock::new(|| CommentConfig
 static DJANGO_STRING_DOUBLE: LazyLock<StringConfig> = LazyLock::new(|| StringConfig { quotes: &['"'], escape: Some('\\') });
 static DJANGO_STRING_SINGLE: LazyLock<StringConfig> = LazyLock::new(|| StringConfig { quotes: &['\''], escape: Some('\\') });
 
+/// Lexer for Django template source code.
 #[derive(Clone)]
 pub struct DjangoLexer<'config> {
     config: &'config DjangoLanguage,
@@ -33,6 +34,7 @@ impl<'config> Lexer<DjangoLanguage> for DjangoLexer<'config> {
 }
 
 impl<'config> DjangoLexer<'config> {
+    /// Creates a new DjangoLexer with the given language configuration.
     pub fn new(config: &'config DjangoLanguage) -> Self {
         Self { config }
     }

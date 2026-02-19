@@ -1,5 +1,4 @@
 #![doc = include_str!("readme.md")]
-//! Tcl code formatter
 
 use crate::ast::TclRoot;
 

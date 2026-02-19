@@ -1,5 +1,7 @@
 # 🛠️ oak-elixir Developer Guide
 
+Elixir support for the Oak language framework.
+
 Welcome to the internal implementation of the Elixir parser. This module provides the core logic for tokenizing and parsing Elixir source code into a high-fidelity syntax tree.
 
 ## 📦 Core Components

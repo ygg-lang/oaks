@@ -1,128 +1,231 @@
 use oak_core::{Token, TokenType, UniversalTokenRole};
 
+/// Token type for Scala lexer output.
 pub type ScalaToken = Token<ScalaTokenType>;
 
+/// Token types for the Scala lexer.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub enum ScalaTokenType {
-    // Node kinds
+    /// Root node for Scala source files.
     SourceFile,
 
-    // Basic token kinds
+    /// Whitespace token.
     Whitespace,
+    /// Newline token.
     Newline,
+    /// Comment token.
     Comment,
+    /// Line comment token.
     LineComment,
+    /// Block comment token.
     BlockComment,
+    /// Error token.
     Error,
+    /// End of file token.
     Eof,
+    /// Error node token.
     ErrorNode,
 
-    // Identifiers and literals
+    /// Identifier token.
     Identifier,
+    /// Integer literal token.
     IntegerLiteral,
+    /// Float literal token.
     FloatLiteral,
+    /// String literal token.
     StringLiteral,
+    /// Character literal token.
     CharLiteral,
+    /// Boolean literal token.
     BooleanLiteral,
 
-    // Keywords
+    /// `abstract` keyword.
     Abstract,
+    /// `case` keyword.
     Case,
+    /// `catch` keyword.
     Catch,
+    /// `class` keyword.
     Class,
+    /// `def` keyword.
     Def,
+    /// `do` keyword.
     Do,
+    /// `else` keyword.
     Else,
+    /// `extends` keyword.
     Extends,
+    /// `false` keyword.
     False,
+    /// `final` keyword.
     Final,
+    /// `finally` keyword.
     Finally,
+    /// `for` keyword.
     For,
+    /// `forSome` keyword.
     ForSome,
+    /// `if` keyword.
     If,
+    /// `implicit` keyword.
     Implicit,
+    /// `import` keyword.
     Import,
+    /// `lazy` keyword.
     Lazy,
+    /// `match` keyword.
     Match,
+    /// `new` keyword.
     New,
+    /// `null` keyword.
     Null,
+    /// `object` keyword.
     Object,
+    /// `override` keyword.
     Override,
+    /// `package` keyword.
     Package,
+    /// `private` keyword.
     Private,
+    /// `protected` keyword.
     Protected,
+    /// `return` keyword.
     Return,
+    /// `sealed` keyword.
     Sealed,
+    /// `super` keyword.
     Super,
+    /// `this` keyword.
     This,
+    /// `throw` keyword.
     Throw,
+    /// `trait` keyword.
     Trait,
+    /// `try` keyword.
     Try,
+    /// `true` keyword.
     True,
+    /// `type` keyword.
     Type,
+    /// `val` keyword.
     Val,
+    /// `var` keyword.
     Var,
+    /// `while` keyword.
     While,
+    /// `with` keyword.
     With,
+    /// `yield` keyword.
     Yield,
 
-    // Operators
-    Plus,         // +
-    Minus,        // -
-    Star,         // *
-    Slash,        // /
-    Percent,      // %
-    Eq,           // =
-    EqEq,         // ==
-    Ne,           // !=
-    Lt,           // <
-    Le,           // <=
-    Gt,           // >
-    Ge,           // >=
-    LessEqual,    // <=
-    GreaterEqual, // >=
-    EqualEqual,   // ==
-    NotEqual,     // !=
-    And,          // &
-    Or,           // |
-    Xor,          // ^
-    AndAnd,       // &&
-    OrOr,         // ||
-    Not,          // !
-    Tilde,        // ~
-    LShift,       // <<
-    RShift,       // >>
-    URShift,      // >>>
-    PlusEq,       // +=
-    MinusEq,      // -=
-    StarEq,       // *=
-    SlashEq,      // /=
-    PercentEq,    // %=
-    AndEq,        // &=
-    OrEq,         // |=
-    XorEq,        // ^=
-    LShiftEq,     // <<=
-    RShiftEq,     // >>=
-    URShiftEq,    // >>>=
-    Arrow,        // =>
-    LeftArrow,    // <-
-    Colon,        // :
-    ColonColon,   // ::
-    Semicolon,    // ;
-    Dot,          // .
-    Comma,        // ,
-    Question,     // ?
-    At,           // @
-    Hash,         // #
+    /// `+` operator.
+    Plus,
+    /// `-` operator.
+    Minus,
+    /// `*` operator.
+    Star,
+    /// `/` operator.
+    Slash,
+    /// `%` operator.
+    Percent,
+    /// `=` operator.
+    Eq,
+    /// `==` operator.
+    EqEq,
+    /// `!=` operator.
+    Ne,
+    /// `<` operator.
+    Lt,
+    /// `<=` operator.
+    Le,
+    /// `>` operator.
+    Gt,
+    /// `>=` operator.
+    Ge,
+    /// `<=` operator.
+    LessEqual,
+    /// `>=` operator.
+    GreaterEqual,
+    /// `==` operator.
+    EqualEqual,
+    /// `!=` operator.
+    NotEqual,
+    /// `&` operator.
+    And,
+    /// `|` operator.
+    Or,
+    /// `^` operator.
+    Xor,
+    /// `&&` operator.
+    AndAnd,
+    /// `||` operator.
+    OrOr,
+    /// `!` operator.
+    Not,
+    /// `~` operator.
+    Tilde,
+    /// `<<` operator.
+    LShift,
+    /// `>>` operator.
+    RShift,
+    /// `>>>` operator.
+    URShift,
+    /// `+=` operator.
+    PlusEq,
+    /// `-=` operator.
+    MinusEq,
+    /// `*=` operator.
+    StarEq,
+    /// `/=` operator.
+    SlashEq,
+    /// `%=` operator.
+    PercentEq,
+    /// `&=` operator.
+    AndEq,
+    /// `|=` operator.
+    OrEq,
+    /// `^=` operator.
+    XorEq,
+    /// `<<=` operator.
+    LShiftEq,
+    /// `>>=` operator.
+    RShiftEq,
+    /// `>>>=` operator.
+    URShiftEq,
+    /// `=>` operator.
+    Arrow,
+    /// `<-` operator.
+    LeftArrow,
+    /// `:` operator.
+    Colon,
+    /// `::` operator.
+    ColonColon,
+    /// `;` operator.
+    Semicolon,
+    /// `.` operator.
+    Dot,
+    /// `,` operator.
+    Comma,
+    /// `?` operator.
+    Question,
+    /// `@` operator.
+    At,
+    /// `#` operator.
+    Hash,
 
-    // Separators
-    LeftParen,    // (
-    RightParen,   // )
-    LeftBracket,  // [
-    RightBracket, // ]
-    LeftBrace,    // {
-    RightBrace,   //
+    /// `(` separator.
+    LeftParen,
+    /// `)` separator.
+    RightParen,
+    /// `[` separator.
+    LeftBracket,
+    /// `]` separator.
+    RightBracket,
+    /// `{` separator.
+    LeftBrace,
+    /// `}` separator.
+    RightBrace,
 }
 
 impl TokenType for ScalaTokenType {

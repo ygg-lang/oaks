@@ -1,0 +1,23 @@
+{% template extends "path"
+class RustWriteMain {
+    lifetime = a
+    path = target_rust::dejavu
+}
+%}
+{% safe_rust_id(rule.name.text) %},
+
+{% slot title %}
+   html title
+{% end slot %}
+
+
+
+{% loop i in j if c %}
+    {% slot title2 %}
+      html title
+    {% end slot %}
+{% else %}
+
+{% loop end %}
+
+

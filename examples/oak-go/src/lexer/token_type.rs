@@ -354,10 +354,12 @@ pub enum GoTokenType {
 }
 
 impl GoTokenType {
+    /// Returns true if this token type represents ignored trivia (whitespace or comments).
     pub fn is_ignored(&self) -> bool {
         matches!(self, Self::Whitespace | Self::Comment)
     }
 
+    /// Returns true if this token type represents a Go keyword.
     pub fn is_keyword(&self) -> bool {
         matches!(
             self,

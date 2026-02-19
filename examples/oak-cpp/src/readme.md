@@ -1,5 +1,7 @@
 # 🛠️ C++ Parser Developer Guide
 
+Cpp support for the Oak language framework.
+
 This guide is designed to help you quickly get started with developing and integrating `oak-cpp`.
 
 ## 🚦 Quick Start
@@ -9,7 +11,8 @@ This guide is designed to help you quickly get started with developing and integ
 The following is a standard workflow for parsing a C++ class:
 
 ```rust
-use oak_cpp::{CppParser, SourceText, CppLanguage};
+use oak_cpp::{CppParser, language::CppLanguage};
+use oak_core::{SourceText, parser::Parser, source::TextEdit, parser::ParseSession};
 
 fn main() {
     // 1. Prepare source code
@@ -30,15 +33,16 @@ fn main() {
     let source = SourceText::new(code);
 
     // 2. Initialize parser
-    let config = CppLanguage::new();
+    let config = CppLanguage::default();
     let parser = CppParser::new(&config);
+    let mut cache = ParseSession::default();
 
     // 3. Execute parsing
-    let result = parser.parse(&source);
+    let result = parser.parse(&source, &[], &mut cache);
 
     // 4. Handle results
-    if result.is_success() {
-        println!("Parsing successful! AST node count: {}", result.node_count());
+    if result.diagnostics.is_empty() {
+        println!("Parsing successful!");
     } else {
         eprintln!("Errors found during parsing.");
     }
@@ -53,15 +57,60 @@ After a successful parse, you can use the built-in visitor pattern or manually t
 ### 2. Incremental Parsing
 No need to re-parse the entire translation unit when small changes occur:
 ```rust
-// Assuming you have an old parse result 'old_result' and new source text 'new_source'
-let new_result = parser.reparse(&new_source, &old_result);
+use oak_cpp::{CppParser, language::CppLanguage};
+use oak_core::{SourceText, parser::Parser, source::TextEdit, parser::ParseSession};
+
+fn main() {
+    // Initial parsing
+    let code = r#"
+        class Vector {
+            void push(int value) {}
+        };
+    "#;
+    let source = SourceText::new(code);
+    let config = CppLanguage::default();
+    let parser = CppParser::new(&config);
+    let mut cache = ParseSession::default();
+    let old_result = parser.parse(&source, &[], &mut cache);
+
+    // Updated code
+    let new_code = r#"
+        class Vector {
+            void push(int value) {
+                data.push_back(value);
+            }
+        };
+    "#;
+    let new_source = SourceText::new(new_code);
+    
+    // Re-parsing (simplified example)
+    let new_result = parser.parse(&new_source, &[], &mut cache);
+}
 ```
 
 ### 3. Diagnostics
 `oak-cpp` provides rich error contexts specifically tailored for C++ developers, handling complex error scenarios like template instantiation failures:
 ```rust
-for diag in result.diagnostics() {
-    println!("[{}:{}] {}", diag.line, diag.column, diag.message);
+use oak_cpp::{CppParser, language::CppLanguage};
+use oak_core::{SourceText, parser::Parser, source::TextEdit, parser::ParseSession};
+
+fn main() {
+    let code = r#"
+        class Vector {
+            void push(int value) {
+                return;
+            }
+        };
+    "#;
+    let source = SourceText::new(code);
+    let config = CppLanguage::default();
+    let parser = CppParser::new(&config);
+    let mut cache = ParseSession::default();
+    let result = parser.parse(&source, &[], &mut cache);
+
+    for error in &result.diagnostics {
+        println!("Error: {}", error);
+    }
 }
 ```
 

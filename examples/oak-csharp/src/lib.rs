@@ -3,11 +3,6 @@
 #![warn(missing_docs)]
 #![doc(html_logo_url = "https://raw.githubusercontent.com/ygg-lang/oaks/refs/heads/dev/documents/logo.svg")]
 #![doc(html_favicon_url = "https://raw.githubusercontent.com/ygg-lang/oaks/refs/heads/dev/documents/logo.svg")]
-//! C# support for the Oak language framework.
-//!
-//! This crate provides lexing, parsing, and AST building for the C# language,
-//! integrated into the Oak ecosystem. It supports modern C# features including
-//! namespaces, classes, structs, records, and more.
 
 use oak_core::Builder;
 

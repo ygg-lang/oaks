@@ -1,5 +1,6 @@
 use oak_core::{Token, TokenType, UniversalTokenRole};
 
+/// Token type for Rhombus lexer output.
 pub type RhombusToken = Token<RhombusTokenType>;
 
 impl TokenType for RhombusTokenType {
@@ -19,7 +20,7 @@ impl TokenType for RhombusTokenType {
             Self::LeftParen | Self::RightParen | Self::LeftBracket | Self::RightBracket | Self::LeftBrace | Self::RightBrace => UniversalTokenRole::Punctuation,
             Self::NumberLiteral | Self::StringLiteral | Self::BooleanLiteral => UniversalTokenRole::Literal,
             Self::Identifier => UniversalTokenRole::Name,
-            Self::Fun | Self::Val | Self::Var | Self::Let | Self::If | Self::Else | Self::Match | Self::Case | Self::Block | Self::Module | Self::Import | Self::Export => UniversalTokenRole::Keyword,
+            Self::Fun | Self::Val | Self::Var | Self::Let | Self::If | Self::Else | Self::Match | Self::Case | Self::Block | Self::Module | Self::Import | Self::Export | Self::Require | Self::Provide => UniversalTokenRole::Keyword,
             _ => UniversalTokenRole::None,
         }
     }
@@ -71,6 +72,10 @@ pub enum RhombusTokenType {
     Import,
     /// `export` keyword.
     Export,
+    /// `require` keyword.
+    Require,
+    /// `provide` keyword.
+    Provide,
     /// `(`.
     LeftParen,
     /// `)`.

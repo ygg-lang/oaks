@@ -1,8 +1,8 @@
-use oak_core::{TokenType, UniversalTokenRole};
+use oak_core::{Token, TokenType, UniversalTokenRole};
 
 /// Token types for Pascal.
-#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 #[derive(Copy, Clone, Debug, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub enum PascalTokenType {
     /// Whitespace characters.
     Whitespace,

@@ -1,5 +1,11 @@
 # 🌳 Oaks: The Oak Language Framework Facade
 
+The main facade for the Oak language framework.
+
+This crate re-exports the most commonly used types and traits from the
+various sub-crates in the Oak ecosystem, providing a single entry point
+for building language services and tools.
+
 `oaks` is the main entry point and facade for the Oak language framework. it provides a unified and simplified API by re-exporting the most commonly used components from across the Oak ecosystem.
 
 ## 🚀 Overview

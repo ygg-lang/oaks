@@ -1,4 +1,8 @@
 #![doc = include_str!("readme.md")]
+
+/// Syntax kinds module.
+pub mod kind;
+
 #[cfg(feature = "oak-highlight")]
 pub mod highlighter;
 

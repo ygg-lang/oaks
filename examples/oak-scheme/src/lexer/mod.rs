@@ -14,6 +14,7 @@ static SCHEME_COMMENT: LazyLock<CommentConfig> = LazyLock::new(|| CommentConfig 
 static SCHEME_STRING: LazyLock<StringConfig> = LazyLock::new(|| StringConfig { quotes: &['"'], escape: Some('\\') });
 
 #[derive(Clone, Debug)]
+/// Lexer for Scheme source code.
 pub struct SchemeLexer<'config> {
     config: &'config SchemeLanguage,
 }
@@ -27,6 +28,7 @@ impl<'config> Lexer<SchemeLanguage> for SchemeLexer<'config> {
 }
 
 impl<'config> SchemeLexer<'config> {
+    /// Creates a new SchemeLexer with the given language configuration.
     pub fn new(config: &'config SchemeLanguage) -> Self {
         Self { config }
     }

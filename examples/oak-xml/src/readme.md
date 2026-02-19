@@ -1,5 +1,7 @@
 # 🛠️ XML Parser Developer Guide
 
+Xml support for the Oak language framework.
+
 This guide is designed to help you quickly get started with developing and integrating `oak-xml`.
 
 ## 🚦 Quick Start

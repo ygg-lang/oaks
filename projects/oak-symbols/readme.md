@@ -3,16 +3,34 @@
 [![Crates.io](https://img.shields.io/crates/v/oak-symbols.svg)](https://crates.io/crates/oak-symbols)
 [![Documentation](https://docs.rs/oak-symbols/badge.svg)](https://docs.rs/oak-symbols)
 
-**Core component of the Oak ecosystem** — Providing a solid foundation for building modern programming language toolchains.
+**Symbol Management for Oak Languages** — Extract and manage symbol information for document outlines, workspace search, and navigation.
 
-## 🎯 Project Vision
+## 🎯 Why oak-symbols?
 
-`oak-symbols` is a key module in the Oak ecosystem, focusing on providing efficient and scalable low-level functionality to help developers quickly build robust programming language-related tools.
+Symbols are the building blocks of code — functions, classes, variables, and more. `oak-symbols` provides a unified interface for extracting symbol information from syntax trees.
 
-## ✨ Core Features
+## ✨ Key Features
 
-- **⚡ Blazing Fast**: Fully utilizes Rust's performance advantages to achieve sub-millisecond parsing response times.
-- **🔄 Incremental Parsing**: Built-in support for partial updates, demonstrating extremely high efficiency when processing large files.
-- **🌳 Structured Output**: Provides a clear, easy-to-traverse syntax tree or data structure.
-- **🛡️ Robustness**: Features a comprehensive error recovery mechanism, ensuring normal operation even when input is incomplete.
-- **🧩 Easy Integration**: Designed with high cohesion and low coupling, allowing for quick integration into existing Rust projects.
+- **📊 Symbol Provider Trait** — `SymbolProvider` for symbol extraction
+- **🔍 Symbol Information** — Rich type with name, role, location, and container
+- **🌐 Universal Provider** — Built-in `UniversalSymbolProvider` for any Oak language
+- **📂 Document & Workspace** — Document-level and workspace-wide symbol queries
+- **🔄 Serde Support** — Optional serialization for LSP integration
+
+## 🏗️ Architecture
+
+- `SymbolInformation` — Symbol name, role, URI, range, and container
+- `SymbolProvider<L>` — Trait for document and workspace symbol queries
+- `UniversalSymbolProvider` — Ready-to-use provider for any language
+
+## 🔗 Ecosystem Integration
+
+Used by `oak-lsp` for `textDocument/documentSymbol` and `workspace/symbol`, `oak-structural-view` for outline views, and `oak-mcp` for AI-assisted symbol discovery.
+
+## 📖 Documentation
+
+For usage examples and API details, see the [API documentation](https://docs.rs/oak-symbols).
+
+## 🤝 Contributing
+
+Contributions are welcome! Please feel free to submit a Pull Request.

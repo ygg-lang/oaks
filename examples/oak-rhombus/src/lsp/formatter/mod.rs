@@ -1,12 +1,15 @@
 #![doc = include_str!("readme.md")]
 
-/// Scheme Code Formatter
-pub struct SchemeFormatter {
+/// Rhombus Code Formatter
+pub struct RhombusFormatter {
     _indent_level: usize,
     _indent_str: String,
 }
 
-impl SchemeFormatter {
+/// Alias for backwards compatibility
+pub type SchemeFormatter = RhombusFormatter;
+
+impl RhombusFormatter {
     /// Create a new Scheme formatter
     pub fn new() -> Self {
         Self {

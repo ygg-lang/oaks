@@ -1,5 +1,5 @@
 #![doc = include_str!("readme.md")]
-use std::ops::Range;
+use std::range::Range;
 
 /// Root node of the OCaml AST.
 #[derive(Debug, PartialEq, Clone)]

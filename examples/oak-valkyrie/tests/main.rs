@@ -12,7 +12,7 @@ fn ready() {
 
 #[test]
 fn test_valkyrie_integration() {
-    use oak_core::SourceText;
+    use oak_core::{Lexer, SourceText, lexer::NoLexerCache};
     use oak_valkyrie::{ValkyrieLanguage, ValkyrieLexer, ValkyrieParser};
 
     let language = ValkyrieLanguage::default();
@@ -23,7 +23,10 @@ fn test_valkyrie_integration() {
     let source = SourceText::new("namespace Test { micro main() { let x = 42 } }");
 
     // Test lexer
-    let tokens: Vec<_> = lexer.tokenize(&source).collect();
+    let mut cache = NoLexerCache;
+    let result = lexer.lex(&source, &[], &mut cache);
+    assert!(result.result.is_ok(), "Lexer should produce tokens");
+    let tokens = result.result.unwrap();
     assert!(!tokens.is_empty(), "Lexer should produce tokens");
 
     println!("Valkyrie integration test passed - {} tokens generated", tokens.len())

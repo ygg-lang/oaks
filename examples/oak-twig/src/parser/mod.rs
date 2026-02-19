@@ -13,11 +13,13 @@ use oak_core::{
 
 pub(crate) type State<'a, S> = ParserState<'a, TwigLanguage, S>;
 
+/// Parser for Twig templates.
 pub struct TwigParser<'config> {
     pub(crate) config: &'config TwigLanguage,
 }
 
 impl<'config> TwigParser<'config> {
+    /// Creates a new TwigParser with the given language configuration.
     pub fn new(config: &'config TwigLanguage) -> Self {
         Self { config }
     }

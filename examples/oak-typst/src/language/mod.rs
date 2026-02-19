@@ -8,6 +8,7 @@ use oak_core::{Language, LanguageCategory};
 pub struct TypstLanguage {}
 
 impl TypstLanguage {
+    /// Creates a new TypstLanguage instance.
     pub fn new() -> Self {
         Self {}
     }

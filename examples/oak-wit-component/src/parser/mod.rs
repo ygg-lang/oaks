@@ -1,3 +1,8 @@
+/// Element type definitions for WIT (WebAssembly Interface Types) syntax tree nodes.
+///
+/// This module provides [`WitElementType`] which defines all element types
+/// used in the WIT parse tree, including structural elements like worlds,
+/// interfaces, packages, and type definitions.
 pub mod element_type;
 
 use crate::{

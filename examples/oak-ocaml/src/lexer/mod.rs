@@ -18,7 +18,7 @@ static OCAML_COMMENT: LazyLock<CommentConfig> = LazyLock::new(|| CommentConfig {
 /// OCaml lexer implementation.
 #[derive(Clone, Debug)]
 pub struct OCamlLexer<'config> {
-    _config: &'config OCamlLanguage,
+    config: &'config OCamlLanguage,
 }
 
 impl<'config> Lexer<OCamlLanguage> for OCamlLexer<'config> {
@@ -35,7 +35,7 @@ impl<'config> Lexer<OCamlLanguage> for OCamlLexer<'config> {
 impl<'config> OCamlLexer<'config> {
     /// Create a new OCaml lexer.
     pub fn new(config: &'config OCamlLanguage) -> Self {
-        Self { _config: config }
+        Self { config }
     }
 
     /// Main lexical analysis loop

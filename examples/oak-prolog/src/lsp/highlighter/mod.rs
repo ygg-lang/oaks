@@ -2,9 +2,28 @@
 //!
 //! This module provides syntax highlighting for Prolog source code, supporting keywords, atoms, variables, comments, etc.
 
-use crate::token_type::TokenType;
-use oak_lsp::highlighter::{HighlightKind, Highlighter};
+/// Highlight kind enumeration
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum HighlightKind {
+    /// Keyword
+    Keyword,
+    /// String
+    String,
+    /// Number
+    Number,
+    /// Comment
+    Comment,
+    /// Identifier
+    Identifier,
+}
 
+/// Highlighter trait
+pub trait Highlighter {
+    /// Highlights the given text
+    fn highlight(&self, text: &str) -> Vec<(usize, usize, HighlightKind)>;
+}
+
+/// Prolog syntax highlighter
 pub struct PrologHighlighter {
     pub use_parser: bool,
 }
@@ -16,10 +35,12 @@ impl Default for PrologHighlighter {
 }
 
 impl PrologHighlighter {
+    /// Creates a new Prolog highlighter instance
     pub fn new() -> Self {
         Self::default()
     }
 
+    /// Creates a highlighter that uses the parser
     pub fn with_parser() -> Self {
         Self { use_parser: true }
     }

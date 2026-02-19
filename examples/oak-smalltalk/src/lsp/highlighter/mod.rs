@@ -1,5 +1,4 @@
 #![doc = include_str!("readme.md")]
-//! Smalltalk syntax highlighter
 use oak_core::errors::ParseResult;
 use oak_highlight::{HighlightResult, Highlighter, themes::Theme};
 

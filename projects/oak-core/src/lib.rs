@@ -36,18 +36,22 @@ pub mod tree;
 /// Tree traversal and transformation utilities.
 pub mod visitor;
 
+/// Unified AST processing interface.
+pub mod ast;
+
 /// Helper utilities for common operations.
 pub mod helpers;
 
 pub use core::range::Range;
 
 pub use crate::{
+    ast::{AstError, AstProcessor, DefaultAstProcessor, RedTreeExt, VisitResult, Visitor},
     builder::{Builder, BuilderCache},
     errors::{OakDiagnostics, OakError, OakErrorKind},
     language::{ElementRole, ElementType, Language, LanguageCategory, TokenRole, TokenType, UniversalElementRole, UniversalTokenRole},
     lexer::{LexOutput, Lexer, LexerCache, LexerState, NoLexerCache, Token, TokenStream, Tokens},
     memory::arena::SyntaxArena,
-    parser::{Associativity, OperatorInfo, ParseCache, ParseOutput, ParseSession, Parser, ParserState, Pratt, PrattParser, binary, parse, parse_one_pass, postfix, state::TreeSink, unary},
+    parser::{Associativity, CachingParseSession, ContentCache, OperatorInfo, ParseCache, ParseOutput, ParseSession, Parser, ParserState, Pratt, PrattParser, binary, parse, parse_one_pass, postfix, state::TreeSink, unary},
     source::{Source, SourceText, TextEdit},
     tree::{GreenNode, GreenTree, RedLeaf, RedNode, RedTree},
 };

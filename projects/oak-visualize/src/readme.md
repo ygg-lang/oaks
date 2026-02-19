@@ -1,5 +1,10 @@
 # 🛠️ Developer Guide
 
+Visualization tools for the Oak language framework.
+
+This crate provides tools for generating visual representations of
+syntax trees and other language structures, primarily in SVG format.
+
 This directory contains the core logic implementation of the project. Below are instructions for a quick start.
 
 ## 🚦 Quick Start

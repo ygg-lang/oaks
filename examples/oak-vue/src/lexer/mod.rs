@@ -12,15 +12,15 @@ use oak_core::{
 /// A lexer for the Vue language.
 #[derive(Clone, Debug)]
 pub struct VueLexer<'config> {
-    _config: &'config VueLanguage,
+    config: &'config VueLanguage,
 }
 
 pub(crate) type State<'a, S> = LexerState<'a, S, VueLanguage>;
 
 impl<'config> VueLexer<'config> {
     /// Creates a new `VueLexer`.
-    pub fn new(_config: &'config VueLanguage) -> Self {
-        Self { _config }
+    pub fn new(config: &'config VueLanguage) -> Self {
+        Self { config }
     }
 
     fn lex_token<'a, S: Source + ?Sized>(&self, state: &mut State<'a, S>) {
@@ -34,13 +34,13 @@ impl<'config> VueLexer<'config> {
         let start_pos = state.get_position();
         let rest = state.rest();
 
-        if rest.starts_with(&self._config.interpolation_start) {
-            state.advance(self._config.interpolation_start.len());
+        if rest.starts_with(&self.config.interpolation_start) {
+            state.advance(self.config.interpolation_start.len());
             state.add_token(VueTokenType::InterpolationStart, start_pos, state.get_position());
             return;
         }
-        if rest.starts_with(&self._config.interpolation_end) {
-            state.advance(self._config.interpolation_end.len());
+        if rest.starts_with(&self.config.interpolation_end) {
+            state.advance(self.config.interpolation_end.len());
             state.add_token(VueTokenType::InterpolationEnd, start_pos, state.get_position());
             return;
         }
@@ -245,7 +245,7 @@ impl<'config> VueLexer<'config> {
         let start_pos = state.get_position();
         while let Some(ch) = state.peek() {
             let rest = state.rest();
-            if ch == '<' || rest.starts_with(&self._config.interpolation_start) || ch.is_whitespace() {
+            if ch == '<' || rest.starts_with(&self.config.interpolation_start) || ch.is_whitespace() {
                 break;
             }
             state.advance(ch.len_utf8())

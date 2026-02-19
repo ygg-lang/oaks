@@ -35,12 +35,18 @@ pub(crate) fn run<'s, S: Source + ?Sized>(_lexer: &RustLexer, state: &mut State<
                     lex_operators(state);
                 }
             }
-            '"' | 'r' => {
-                if !lex_string_literal(state) {
-                    // 'r' might be identifier if not raw string
-                    if ch == 'r' {
-                        lex_identifier_or_keyword(state);
-                    }
+            '"' => {
+                lex_string_literal(state);
+            }
+            'r' => {
+                // Check if 'r' is the start of a raw string
+                let next_char = state.peek_next_n(1);
+                if next_char == Some('"') || next_char == Some('#') {
+                    lex_string_literal(state);
+                }
+                else {
+                    // 'r' is part of an identifier
+                    lex_identifier_or_keyword(state);
                 }
             }
             '\'' => {
@@ -241,17 +247,15 @@ fn lex_string_literal<'s, S: Source + ?Sized>(state: &mut State<'s, S>) -> bool 
             }
             else {
                 // Failed to match raw string start pattern fully (e.g. r# but no quote)
-                // Backtrack? LexerState doesn't support backtrack easily unless we created new one.
-                // But here we modified state.
-                // Assuming valid Rust, r#... must be raw string.
-                // If invalid, we probably consumed 'r' and '#'.
-                // Return true as error? Or false?
-                // If we return false, we need to restore state.
-                // But we already advanced.
-                // Let's assume it's a malformed raw string and tokenize what we have?
-                // Or just treat as identifier 'r' and then '#' (single char)?
-                // Since we don't have backtrack, we should peek before advance.
-                // But this logic was existing. I'll leave it but wrap in logic that handles return.
+                // We've already consumed 'r' and possibly some '#' characters
+                // We need to handle this case by creating tokens for what we've consumed
+                state.add_token(RustTokenType::Identifier, start, start + 1); // 'r' as identifier
+                // Handle any '#' characters we consumed
+                let current_pos = state.get_position();
+                for i in start + 1..current_pos {
+                    state.add_token(RustTokenType::Hash, i, i + 1);
+                }
+                return true;
             }
         }
     }
@@ -340,7 +344,8 @@ fn lex_identifier_or_keyword<'s, S: Source + ?Sized>(state: &mut State<'s, S>) -
         false
     };
 
-    if let Some(ch) = state.current() {
+    // Get the current character after handling raw identifier prefix
+    if let Some(ch) = state.peek() {
         // Check if the first character is valid for an identifier
         if ch == '_' || is_xid_start(ch) {
             state.advance(ch.len_utf8());
@@ -459,32 +464,32 @@ fn lex_operators<'s, S: Source + ?Sized>(state: &mut State<'s, S>) -> bool {
         '<' => {
             state.advance(1);
             if state.consume_if_starts_with("<=") {
-                state.add_token(RustTokenType::LeftShiftEq, start, state.get_position());
+                state.add_token(RustTokenType::ShlEq, start, state.get_position());
             }
             else if state.consume_if_starts_with("<") {
-                state.add_token(RustTokenType::LeftShift, start, state.get_position());
+                state.add_token(RustTokenType::Shl, start, state.get_position());
             }
             else if state.consume_if_starts_with("=") {
-                state.add_token(RustTokenType::LessEq, start, state.get_position());
+                state.add_token(RustTokenType::Le, start, state.get_position());
             }
             else {
-                state.add_token(RustTokenType::LessThan, start, state.get_position());
+                state.add_token(RustTokenType::Lt, start, state.get_position());
             }
             true
         }
         '>' => {
             state.advance(1);
             if state.consume_if_starts_with(">=") {
-                state.add_token(RustTokenType::RightShiftEq, start, state.get_position());
+                state.add_token(RustTokenType::ShrEq, start, state.get_position());
             }
             else if state.consume_if_starts_with(">") {
-                state.add_token(RustTokenType::RightShift, start, state.get_position());
+                state.add_token(RustTokenType::Shr, start, state.get_position());
             }
             else if state.consume_if_starts_with("=") {
-                state.add_token(RustTokenType::GreaterEq, start, state.get_position());
+                state.add_token(RustTokenType::Ge, start, state.get_position());
             }
             else {
-                state.add_token(RustTokenType::GreaterThan, start, state.get_position());
+                state.add_token(RustTokenType::Gt, start, state.get_position());
             }
             true
         }

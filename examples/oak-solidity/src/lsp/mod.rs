@@ -51,11 +51,9 @@ impl<V: Vfs + Send + Sync + 'static + oak_vfs::WritableVfs> LanguageService for 
         let source = self.vfs().get_source(uri);
         async move {
             let source = source?;
-            let language = SolidityLanguage::default();
-            let parser = crate::parser::SolidityParser::new(&language);
-            let lexer = crate::lexer::SolidityLexer::new(&language);
-            let mut cache = oak_core::parser::session::ParseSession::<SolidityLanguage>::default();
-            let _output = oak_core::parser::parse(&parser, &lexer, &source, &[], &mut cache);
+            let _parser = crate::parser::SolidityParser::new();
+            let _lexer = crate::lexer::SolidityLexer::new();
+            let _cache = oak_core::parser::session::ParseSession::<SolidityLanguage>::default();
             None
         }
     }

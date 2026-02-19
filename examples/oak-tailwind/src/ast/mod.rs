@@ -1,5 +1,4 @@
 #![doc = include_str!("readme.md")]
-//! Abstract Syntax Tree for Tailwind DSL.
 use core::range::Range;
 
 /// The root node of a Tailwind document.

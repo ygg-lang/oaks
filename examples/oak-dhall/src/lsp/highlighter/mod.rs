@@ -1,5 +1,4 @@
 #![doc = include_str!("readme.md")]
-//! DHall syntax highlighter
 
 /// Highlight kinds for DHall.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]

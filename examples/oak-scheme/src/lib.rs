@@ -3,8 +3,9 @@
 #![warn(missing_docs)]
 #![doc(html_logo_url = "https://raw.githubusercontent.com/ygg-lang/oaks/refs/heads/dev/documents/logo.svg")]
 #![doc(html_favicon_url = "https://raw.githubusercontent.com/ygg-lang/oaks/refs/heads/dev/documents/logo.svg")]
-//! Scheme support for the Oak language framework.
 
+/// AST module.
+pub mod ast;
 pub mod language;
 pub mod lexer;
 pub mod parser;
@@ -16,7 +17,7 @@ pub mod lsp;
 #[cfg(feature = "mcp")]
 pub mod mcp;
 
-pub use crate::{builder::SchemeBuilder, language::SchemeLanguage, lexer::SchemeLexer, parser::SchemeParser};
+pub use crate::{ast::*, builder::SchemeBuilder, language::SchemeLanguage, lexer::SchemeLexer, parser::SchemeParser};
 
 #[cfg(feature = "lsp")]
 pub use crate::lsp::SchemeLanguageService;

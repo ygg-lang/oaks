@@ -27,6 +27,33 @@ pub enum FSharpElementType {
     BooleanLiteral,
     /// Unit literal
     UnitLiteral,
+    /// Literal
+    Literal,
+
+    /// Match case
+    MatchCase,
+    /// Wildcard pattern
+    WildcardPattern,
+    /// Identifier pattern
+    IdentifierPattern,
+    /// Tuple pattern
+    TuplePattern,
+    /// List pattern
+    ListPattern,
+    /// Active pattern
+    ActivePattern,
+    /// Pattern
+    Pattern,
+    /// Lambda expression
+    Lambda,
+    /// Parenthesized expression
+    Parenthesized,
+    /// List expression
+    List,
+    /// Record expression
+    Record,
+    /// Function application
+    Application,
 
     /// The 'let' keyword
     Let,

@@ -1,13 +1,17 @@
 #![doc = include_str!("readme.md")]
+/// Token type definitions for the Go language.
 pub mod token_type;
 
 use crate::{language::GoLanguage, lexer::token_type::GoTokenType};
 use oak_core::{Lexer, LexerCache, LexerState, OakError, lexer::LexOutput, source::Source};
 
+/// Lexer state type alias for the Go language.
 pub(crate) type State<'a, S> = LexerState<'a, S, GoLanguage>;
 
+/// Go language lexer that tokenizes Go source code.
 #[derive(Clone)]
 pub struct GoLexer<'config> {
+    /// The language configuration reference.
     config: &'config GoLanguage,
 }
 
@@ -23,6 +27,7 @@ impl<'config> Lexer<GoLanguage> for GoLexer<'config> {
 }
 
 impl<'config> GoLexer<'config> {
+    /// Creates a new Go lexer with the given language configuration.
     pub fn new(config: &'config GoLanguage) -> Self {
         Self { config }
     }

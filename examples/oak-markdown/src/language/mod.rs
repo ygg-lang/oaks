@@ -44,7 +44,7 @@ pub struct MarkdownLanguage {
     /// Enable superscript and subscript.
     ///
     /// Example: `^sup^` or `~sub~`
-    pub allow_sub_superscript: bool,
+    pub allow_subscript: bool,
     /// Enable autolinks.
     ///
     /// Example: `<https://example.com>`
@@ -132,9 +132,9 @@ impl Default for MarkdownLanguage {
             allow_footnotes: true,
             allow_front_matter: true,
             allow_definition_lists: false,
-            allow_sub_superscript: false,
+            allow_subscript: false,
             allow_autolinks: true,
-            allow_abbreviations: false,
+            allow_abbreviations: true,
             allow_indented_code_blocks: true,
             allow_html: true,
             allow_hard_line_breaks: true,

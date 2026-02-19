@@ -3,7 +3,6 @@
 #![doc(html_logo_url = "https://raw.githubusercontent.com/ygg-lang/oaks/refs/heads/dev/documents/logo.svg")]
 #![doc(html_favicon_url = "https://raw.githubusercontent.com/ygg-lang/oaks/refs/heads/dev/documents/logo.svg")]
 #![warn(missing_docs)]
-//! Crystal support for the Oak language framework.
 
 pub mod ast;
 pub mod builder;

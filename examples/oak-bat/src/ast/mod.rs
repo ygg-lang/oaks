@@ -1,13 +1,13 @@
 #![doc = include_str!("readme.md")]
 /// Root node of the Windows Batch (BAT) syntax tree.
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, serde::Serialize)]
 pub struct BatRoot {
     /// Elements in the syntax tree.
     pub elements: Vec<Element>,
 }
 
 /// Element in the Windows Batch (BAT) syntax tree.
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, serde::Serialize)]
 pub enum Element {
     /// Command.
     Command(String),

@@ -1,5 +1,7 @@
 # 🛠️ oak-perl Developer Guide
 
+Perl support for the Oak language framework.
+
 Welcome to the internal implementation of the Perl parser. This module provides the core logic for tokenizing and parsing Perl source code into a high-fidelity syntax tree.
 
 ## 📦 Core Components

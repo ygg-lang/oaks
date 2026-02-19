@@ -1,0 +1,19 @@
+{% loop i in j %}
+    loop body
+{% end for %}
+
+
+
+{% loop i in j %}
+    loop body
+{% else %}
+    empty body
+{% end for %}
+
+
+
+{% loop Some() in j %}
+    loop body
+{% else %}
+    empty body
+{% end for %}

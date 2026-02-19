@@ -322,6 +322,43 @@ impl TokenType for RustTokenType {
             Self::BlockComment => UniversalTokenRole::Comment,
             Self::Eof => UniversalTokenRole::Eof,
             Self::Error => UniversalTokenRole::Error,
+            Self::As
+            | Self::Break
+            | Self::Const
+            | Self::Continue
+            | Self::Crate
+            | Self::Else
+            | Self::Enum
+            | Self::Extern
+            | Self::False
+            | Self::Fn
+            | Self::For
+            | Self::If
+            | Self::Impl
+            | Self::In
+            | Self::Let
+            | Self::Loop
+            | Self::Match
+            | Self::Mod
+            | Self::Move
+            | Self::Mut
+            | Self::Pub
+            | Self::Ref
+            | Self::Return
+            | Self::SelfLower
+            | Self::SelfUpper
+            | Self::Static
+            | Self::Struct
+            | Self::Super
+            | Self::Trait
+            | Self::True
+            | Self::Type
+            | Self::Unsafe
+            | Self::Use
+            | Self::Where
+            | Self::While => UniversalTokenRole::Keyword,
+            Self::Identifier => UniversalTokenRole::Name,
+            Self::IntegerLiteral | Self::FloatLiteral | Self::StringLiteral | Self::CharLiteral | Self::ByteLiteral | Self::ByteStringLiteral | Self::RawStringLiteral | Self::BoolLiteral => UniversalTokenRole::Literal,
             _ => UniversalTokenRole::None,
         }
     }

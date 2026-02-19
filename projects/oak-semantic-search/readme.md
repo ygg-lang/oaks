@@ -3,16 +3,34 @@
 [![Crates.io](https://img.shields.io/crates/v/oak-semantic-search.svg)](https://crates.io/crates/oak-semantic-search)
 [![Documentation](https://docs.rs/oak-semantic-search/badge.svg)](https://docs.rs/oak-semantic-search)
 
-**Core component of the Oak ecosystem** — Providing a solid foundation for building modern programming language toolchains.
+**Semantic Search for Oak Languages** — Search code by meaning, not just text.
 
-## 🎯 Project Vision
+## 🎯 Why oak-semantic-search?
 
-`oak-semantic-search` is a key module in the Oak ecosystem, focusing on providing efficient and scalable low-level functionality to help developers quickly build robust programming language-related tools.
+Traditional text search finds literal matches, but semantic search understands code meaning. Search for concepts like "all functions that return Result" or "all implementations of this trait."
 
-## ✨ Core Features
+## ✨ Key Features
 
-- **⚡ Blazing Fast**: Fully utilizes Rust's performance advantages to achieve sub-millisecond parsing response times.
-- **🔄 Incremental Parsing**: Built-in support for partial updates, demonstrating extremely high efficiency when processing large files.
-- **🌳 Structured Output**: Provides a clear, easy-to-traverse syntax tree or data structure.
-- **🛡️ Robustness**: Features a comprehensive error recovery mechanism, ensuring normal operation even when input is incomplete.
-- **🧩 Easy Integration**: Designed with high cohesion and low coupling, allowing for quick integration into existing Rust projects.
+- **🔍 Semantic Queries** — Search by code structure and meaning
+- **📊 Pattern Matching** — Match code patterns across the codebase
+- **🌐 Workspace-Wide** — Search across multiple files and projects
+- **⚡ Fast Indexing** — Efficient indexing for quick searches
+- **🧩 Language Agnostic** — Works with any Oak language parser
+
+## 🏗️ Architecture
+
+- `SemanticQuery` — Query types for semantic searches
+- `SearchPattern` — Pattern-based code matching
+- `SearchIndex` — Workspace-wide symbol indexing
+
+## 🔗 Ecosystem Integration
+
+Integrates with `oak-vfs` for file access, `oak-symbols` for symbol extraction, and IDE extensions for advanced search.
+
+## 📖 Documentation
+
+For usage examples and API details, see the [API documentation](https://docs.rs/oak-semantic-search).
+
+## 🤝 Contributing
+
+Contributions are welcome! Please feel free to submit a Pull Request.

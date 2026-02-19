@@ -377,11 +377,35 @@ impl<'config> TypeScriptParser<'config> {
         let cp = state.checkpoint();
         state.bump(); // for
         self.expect(state, LeftParen).ok();
-        while state.not_at_end() && !self.at(state, RightParen) {
-            self.skip_trivia(state);
-            if state.not_at_end() && !self.at(state, RightParen) { state.bump() } else { break }
+
+        // Init
+        self.skip_trivia(state);
+        if self.at(state, Var) || self.at(state, Let) || self.at(state, Const) {
+            let cp = state.checkpoint();
+            self.parse_variable_declaration_content(state)?;
+            state.finish_at(cp, crate::parser::element_type::TypeScriptElementType::VariableDeclaration);
+        }
+        else {
+            if !self.at(state, Semicolon) {
+                PrattParser::parse(state, 0, self);
+            }
+            self.expect(state, Semicolon).ok();
+        }
+
+        // Test
+        self.skip_trivia(state);
+        if !self.at(state, Semicolon) {
+            PrattParser::parse(state, 0, self);
+        }
+        self.expect(state, Semicolon).ok();
+
+        // Update
+        self.skip_trivia(state);
+        if !self.at(state, RightParen) {
+            PrattParser::parse(state, 0, self);
         }
         self.expect(state, RightParen).ok();
+
         self.parse_statement(state)?;
         state.finish_at(cp, crate::parser::element_type::TypeScriptElementType::ForStatement);
         Ok(())

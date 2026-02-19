@@ -1,7 +1,7 @@
 mod lexer;
 
 use oak_core::{Lexer, ParseSession, Parser, SourceText};
-use oak_twig::{TwigLanguage, kind::TwigSyntaxKind};
+use oak_twig::{TwigLanguage, TwigTokenType};
 
 #[test]
 fn test_lexer_basic() {
@@ -46,7 +46,7 @@ fn test_lexer_string() {
     assert!(!tokens.is_empty());
 
     // Check if string kind exists.
-    let has_string = tokens.iter().any(|t| matches!(t.kind, TwigSyntaxKind::String));
+    let has_string = tokens.iter().any(|t| matches!(t.kind, TwigTokenType::String));
     assert!(has_string, "Should contain a string token")
 }
 
@@ -64,7 +64,7 @@ fn test_lexer_number() {
     assert!(!tokens.is_empty());
 
     // Check if number token exists.
-    let has_number = tokens.iter().any(|t| matches!(t.kind, TwigSyntaxKind::Number));
+    let has_number = tokens.iter().any(|t| matches!(t.kind, TwigTokenType::Number));
     assert!(has_number, "Should contain a number token")
 }
 
@@ -82,7 +82,7 @@ fn test_lexer_boolean() {
     assert!(!tokens.is_empty());
 
     // Check if boolean token exists.
-    let has_boolean = tokens.iter().any(|t| matches!(t.kind, TwigSyntaxKind::Boolean));
+    let has_boolean = tokens.iter().any(|t| matches!(t.kind, TwigTokenType::Boolean));
     assert!(has_boolean, "Should contain a boolean token")
 }
 

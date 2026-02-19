@@ -1,12 +1,14 @@
 use crate::{
-    ValkyrieLanguage, ValkyrieParser,
+    ValkyrieLanguage,
     ast::{Item, NamePath, Namespace},
-    lexer::token_type::ValkyrieSyntaxKind,
+    builder::ValkyrieBuilder,
+    lexer::token_type::ValkyrieTokenType,
+    parser::element_type::ValkyrieElementType,
 };
-use oak_core::{OakError, RedNode, RedTree, source::SourceText};
+use oak_core::{OakError, RedNode, RedTree, Source};
 
-impl<'config> ValkyrieParser<'config> {
-    pub(crate) fn build_namespace(&self, node: RedNode<ValkyrieLanguage>, source: &SourceText) -> Result<Namespace, OakError> {
+impl<'config> ValkyrieBuilder<'config> {
+    pub(crate) fn build_namespace<S: Source + ?Sized>(&self, node: RedNode<ValkyrieLanguage>, source: &S) -> Result<Namespace, OakError> {
         let span = node.span();
         let mut name = NamePath { parts: Vec::new(), span: Default::default() };
         let mut annotations = Vec::new();
@@ -15,109 +17,65 @@ impl<'config> ValkyrieParser<'config> {
         for child in node.children() {
             match child {
                 RedTree::Leaf(t) => match t.kind {
-                    ValkyrieSyntaxKind::Whitespace | ValkyrieSyntaxKind::Newline | ValkyrieSyntaxKind::LineComment | ValkyrieSyntaxKind::BlockComment => continue,
+                    ValkyrieTokenType::Whitespace | ValkyrieTokenType::Newline | ValkyrieTokenType::LineComment | ValkyrieTokenType::BlockComment => continue,
                     _ => {}
                 },
                 RedTree::Node(n) => match n.green.kind {
-                    ValkyrieSyntaxKind::Attribute => {
+                    ValkyrieElementType::Attribute => {
                         annotations.push(self.build_attribute(n, source)?);
                     }
-                    ValkyrieSyntaxKind::NamePath => {
+                    ValkyrieElementType::NamePath => {
                         name = self.build_name_path(n, source)?;
                     }
-                    ValkyrieSyntaxKind::Namespace => {
+                    ValkyrieElementType::Namespace => {
                         let ns = self.build_namespace(n, source)?;
                         items.push(Item::Namespace(ns));
                     }
-                    ValkyrieSyntaxKind::Class => {
+                    ValkyrieElementType::Class => {
                         let class = self.build_class(n, source)?;
                         items.push(Item::Class(class));
                     }
-                    ValkyrieSyntaxKind::Flags => {
+                    ValkyrieElementType::Flags => {
                         let flags = self.build_flags(n, source)?;
                         items.push(Item::Flags(flags));
                     }
-                    ValkyrieSyntaxKind::Enums => {
+                    ValkyrieElementType::Enums => {
                         let enums = self.build_enums(n, source)?;
                         items.push(Item::Enums(enums));
                     }
-                    ValkyrieSyntaxKind::Trait => {
+                    ValkyrieElementType::Trait => {
                         let trait_node = self.build_trait(n, source)?;
                         items.push(Item::Trait(trait_node));
                     }
-                    ValkyrieSyntaxKind::Widget => {
+                    ValkyrieElementType::Widget => {
                         let widget = self.build_widget(n, source)?;
                         items.push(Item::Widget(widget));
                     }
-                    ValkyrieSyntaxKind::UsingStatement => {
+                    ValkyrieElementType::UsingStatement => {
                         let us = self.build_using(n, source)?;
                         items.push(Item::Using(us));
                     }
-                    ValkyrieSyntaxKind::Micro => {
+                    ValkyrieElementType::Micro => {
                         let micro = self.build_micro(n, source)?;
                         items.push(Item::Micro(micro));
                     }
-                    ValkyrieSyntaxKind::Mezzo => {
+                    ValkyrieElementType::Mezzo => {
                         let mezzo = self.build_mezzo(n, source)?;
                         items.push(Item::TypeFunction(mezzo));
                     }
-                    ValkyrieSyntaxKind::LetStatement => {
+                    ValkyrieElementType::LetStatement => {
                         let stmt = self.build_let(n, source)?;
                         items.push(Item::Statement(stmt));
                     }
-                    ValkyrieSyntaxKind::ExpressionStatement => {
+                    ValkyrieElementType::ExprStatement => {
                         let stmt = self.build_expr_stmt(n, source)?;
                         items.push(Item::Statement(stmt));
                     }
-                    ValkyrieSyntaxKind::BlockExpression => {
+                    ValkyrieElementType::BlockExpression => {
                         for inner_child in n.children() {
                             if let RedTree::Node(inner_n) = inner_child {
-                                match inner_n.green.kind {
-                                    ValkyrieSyntaxKind::Namespace => {
-                                        let ns = self.build_namespace(inner_n, source)?;
-                                        items.push(Item::Namespace(ns));
-                                    }
-                                    ValkyrieSyntaxKind::Class => {
-                                        let class = self.build_class(inner_n, source)?;
-                                        items.push(Item::Class(class));
-                                    }
-                                    ValkyrieSyntaxKind::Flags => {
-                                        let flags = self.build_flags(inner_n, source)?;
-                                        items.push(Item::Flags(flags));
-                                    }
-                                    ValkyrieSyntaxKind::Enums => {
-                                        let enums = self.build_enums(inner_n, source)?;
-                                        items.push(Item::Enums(enums));
-                                    }
-                                    ValkyrieSyntaxKind::Trait => {
-                                        let trait_node = self.build_trait(inner_n, source)?;
-                                        items.push(Item::Trait(trait_node));
-                                    }
-                                    ValkyrieSyntaxKind::Widget => {
-                                        let widget = self.build_widget(inner_n, source)?;
-                                        items.push(Item::Widget(widget));
-                                    }
-                                    ValkyrieSyntaxKind::UsingStatement => {
-                                        let us = self.build_using(inner_n, source)?;
-                                        items.push(Item::Using(us));
-                                    }
-                                    ValkyrieSyntaxKind::Micro => {
-                                        let micro = self.build_micro(inner_n, source)?;
-                                        items.push(Item::Micro(micro));
-                                    }
-                                    ValkyrieSyntaxKind::Mezzo => {
-                                        let mezzo = self.build_mezzo(inner_n, source)?;
-                                        items.push(Item::TypeFunction(mezzo));
-                                    }
-                                    ValkyrieSyntaxKind::LetStatement => {
-                                        let stmt = self.build_let(inner_n, source)?;
-                                        items.push(Item::Statement(stmt));
-                                    }
-                                    ValkyrieSyntaxKind::ExpressionStatement => {
-                                        let stmt = self.build_expr_stmt(inner_n, source)?;
-                                        items.push(Item::Statement(stmt));
-                                    }
-                                    _ => {}
+                                if let Ok(item) = self.build_item(inner_n, source) {
+                                    items.push(item);
                                 }
                             }
                         }

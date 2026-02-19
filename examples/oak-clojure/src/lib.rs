@@ -3,12 +3,14 @@
 #![doc(html_logo_url = "https://raw.githubusercontent.com/ygg-lang/oaks/refs/heads/dev/documents/logo.svg")]
 #![doc(html_favicon_url = "https://raw.githubusercontent.com/ygg-lang/oaks/refs/heads/dev/documents/logo.svg")]
 #![warn(missing_docs)]
-//! Clojure support for the Oak language framework.
 
+/// AST module.
 pub mod ast;
+/// Builder module.
 pub mod builder;
 mod language;
 mod lexer;
+/// Parser module.
 pub mod parser;
 // pub mod lsp;
 

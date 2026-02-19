@@ -1,5 +1,5 @@
 #![doc = include_str!("readme.md")]
-use core::range::Range;
+use oak_core::Range;
 
 type SourceSpan = Range<usize>;
 
@@ -25,6 +25,7 @@ pub struct Document {
     /// List of definitions.
     pub definitions: Vec<Definition>,
     /// Source span.
+    #[cfg_attr(feature = "serde", serde(with = "oak_core::serde_range"))]
     pub span: SourceSpan,
 }
 
@@ -64,6 +65,7 @@ pub struct OperationDefinition {
     /// Optional name of the operation.
     pub name: Option<String>,
     /// Source span.
+    #[cfg_attr(feature = "serde", serde(with = "oak_core::serde_range"))]
     pub span: SourceSpan,
 }
 
@@ -99,6 +101,7 @@ pub struct FragmentDefinition {
     /// Name of the fragment.
     pub name: String,
     /// Source span.
+    #[cfg_attr(feature = "serde", serde(with = "oak_core::serde_range"))]
     pub span: SourceSpan,
 }
 
@@ -114,6 +117,7 @@ impl FragmentDefinition {
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct SchemaDefinition {
     /// Source span.
+    #[cfg_attr(feature = "serde", serde(with = "oak_core::serde_range"))]
     pub span: SourceSpan,
 }
 
@@ -131,6 +135,7 @@ pub struct TypeDefinition {
     /// Name of the type.
     pub name: String,
     /// Source span.
+    #[cfg_attr(feature = "serde", serde(with = "oak_core::serde_range"))]
     pub span: SourceSpan,
 }
 

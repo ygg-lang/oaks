@@ -168,10 +168,6 @@ macro_rules! define_token_type {
     };
 }
 
-#[cfg(feature = "serde")]
-define_token_type!(+ serde::Serialize + for<'de> serde::Deserialize<'de>);
-
-#[cfg(not(feature = "serde"))]
 define_token_type!();
 
 /// A trait for types that can represent a token's syntactic role.
@@ -323,10 +319,6 @@ macro_rules! define_element_type {
     };
 }
 
-#[cfg(feature = "serde")]
-define_element_type!(+ serde::Serialize + for<'de> serde::Deserialize<'de>);
-
-#[cfg(not(feature = "serde"))]
 define_element_type!();
 
 /// A trait for types that can represent an element's structural role.

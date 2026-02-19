@@ -3,7 +3,7 @@ pub mod element_type;
 
 use crate::{language::MermaidLanguage, lexer::MermaidLexer, parser::element_type::MermaidElementType};
 use oak_core::{
-    GreenNode, OakError, TextEdit,
+    TextEdit,
     parser::{ParseCache, ParseOutput, Parser, ParserState},
     source::Source,
 };

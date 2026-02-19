@@ -1,5 +1,4 @@
 #![doc = include_str!("readme.md")]
-//! Lexer implementation for the Koka language.
 
 /// Token types for the Koka lexer.
 pub mod token_type;

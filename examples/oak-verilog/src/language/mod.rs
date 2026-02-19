@@ -3,9 +3,11 @@ use oak_core::language::{Language, LanguageCategory};
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Default)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+/// Language definition for Verilog.
 pub struct VerilogLanguage {}
 
 impl VerilogLanguage {
+    /// Creates a new VerilogLanguage instance.
     pub fn new() -> Self {
         Self {}
     }

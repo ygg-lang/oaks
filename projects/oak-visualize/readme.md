@@ -3,16 +3,40 @@
 [![Crates.io](https://img.shields.io/crates/v/oak-visualize.svg)](https://crates.io/crates/oak-visualize)
 [![Documentation](https://docs.rs/oak-visualize/badge.svg)](https://docs.rs/oak-visualize)
 
-**Core component of the Oak ecosystem** — Providing a solid foundation for building modern programming language toolchains.
+**AST Visualization for Oak Languages** — Render syntax trees as graphs and diagrams for debugging and documentation.
 
-## 🎯 Project Vision
+## 🎯 Why oak-visualize?
 
-`oak-visualize` is a key module in the Oak ecosystem, focusing on providing efficient and scalable low-level functionality to help developers quickly build robust programming language-related tools.
+Visualizing syntax trees helps developers understand parser behavior and debug issues. `oak-visualize` provides tools for rendering Oak syntax trees as visual graphs.
 
-## ✨ Core Features
+## ✨ Key Features
 
-- **⚡ Blazing Fast**: Fully utilizes Rust's performance advantages to achieve sub-millisecond parsing response times.
-- **🔄 Incremental Parsing**: Built-in support for partial updates, demonstrating extremely high efficiency when processing large files.
-- **🌳 Structured Output**: Provides a clear, easy-to-traverse syntax tree or data structure.
-- **🛡️ Robustness**: Features a comprehensive error recovery mechanism, ensuring normal operation even when input is incomplete.
-- **🧩 Easy Integration**: Designed with high cohesion and low coupling, allowing for quick integration into existing Rust projects.
+- **📊 Graph Rendering** — Convert syntax trees to visual graph representations
+- **🎨 Multiple Output Formats** — SVG, DOT (Graphviz), JSON
+- **🔍 Tree Inspection** — Interactive exploration of tree structure
+- **📝 Documentation Generation** — Generate visual documentation for grammars
+- **🧩 Language Agnostic** — Works with any Oak language parser
+
+## 🏗️ Architecture
+
+- `TreeVisualizer` — Main visualizer with format-specific output methods
+
+### Supported Formats
+
+| Format | Use Case |
+|--------|----------|
+| SVG | Web display, documentation |
+| DOT | Graphviz processing, research |
+| JSON | Tooling integration |
+
+## 🔗 Ecosystem Integration
+
+Used by parser developers for debugging, documentation generators, and IDE extensions for tree inspection.
+
+## 📖 Documentation
+
+For usage examples and API details, see the [API documentation](https://docs.rs/oak-visualize).
+
+## 🤝 Contributing
+
+Contributions are welcome! Please feel free to submit a Pull Request.

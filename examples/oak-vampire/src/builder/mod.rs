@@ -8,6 +8,7 @@ pub struct VampireBuilder<'config> {
 }
 
 impl<'config> VampireBuilder<'config> {
+    /// Creates a new VampireBuilder with the given language configuration.
     pub fn new(config: &'config VampireLanguage) -> Self {
         Self { config }
     }

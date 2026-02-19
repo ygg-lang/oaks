@@ -1,3 +1,4 @@
+/// Element type definitions for the HLSL parser.
 pub mod element_type;
 pub use element_type::HlslElementType;
 
@@ -9,11 +10,13 @@ use oak_core::{
 
 pub(crate) type State<'a, S> = ParserState<'a, HlslLanguage, S>;
 
+/// HLSL syntax parser.
 pub struct HlslParser<'config> {
     pub(crate) config: &'config HlslLanguage,
 }
 
 impl<'config> HlslParser<'config> {
+    /// Creates a new HLSL parser with the given language configuration.
     pub fn new(config: &'config HlslLanguage) -> Self {
         Self { config }
     }

@@ -6,7 +6,9 @@ use core::range::Range;
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct StylusRoot {
     #[cfg_attr(feature = "serde", serde(with = "oak_core::serde_range"))]
+    /// The source span of the root node.
     pub span: Range<usize>,
+    /// The list of top-level items in the document.
     pub items: Vec<StylusItem>,
 }
 
@@ -14,7 +16,9 @@ pub struct StylusRoot {
 #[derive(Debug, Clone)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub enum StylusItem {
+    /// CSS rule item.
     Rule(StylusRule),
+    /// Comment item.
     Comment(StylusComment),
 }
 
@@ -23,6 +27,7 @@ pub enum StylusItem {
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct StylusRule {
     #[cfg_attr(feature = "serde", serde(with = "oak_core::serde_range"))]
+    /// The source span of the rule.
     pub span: Range<usize>,
     /// Selector of the rule.
     pub selector: String,
@@ -35,6 +40,7 @@ pub struct StylusRule {
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct StylusComment {
     #[cfg_attr(feature = "serde", serde(with = "oak_core::serde_range"))]
+    /// The source span of the comment.
     pub span: Range<usize>,
     /// Text of the comment.
     pub text: String,
@@ -45,6 +51,7 @@ pub struct StylusComment {
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct StylusProperty {
     #[cfg_attr(feature = "serde", serde(with = "oak_core::serde_range"))]
+    /// The source span of the property.
     pub span: Range<usize>,
     /// Name of the property.
     pub name: String,
@@ -53,6 +60,7 @@ pub struct StylusProperty {
 }
 
 impl StylusRoot {
+    /// Creates a new StylusRoot with the given span.
     pub fn new(span: Range<usize>) -> Self {
         Self { span, items: Vec::new() }
     }
