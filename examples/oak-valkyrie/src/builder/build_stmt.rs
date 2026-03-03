@@ -93,13 +93,24 @@ impl<'config> ValkyrieBuilder<'config> {
         let span = node.span();
         let mut path = NamePath { parts: Vec::new(), span: Default::default() };
         let mut alias = None;
+        let mut imports = Vec::new();
+        let mut in_import_list = false;
 
         for child in node.children() {
             match child {
                 RedTree::Leaf(t) => match t.kind {
                     ValkyrieTokenType::Whitespace | ValkyrieTokenType::Newline | ValkyrieTokenType::LineComment | ValkyrieTokenType::BlockComment => continue,
+                    ValkyrieTokenType::LeftBrace => {
+                        in_import_list = true;
+                    }
+                    ValkyrieTokenType::RightBrace => {
+                        in_import_list = false;
+                    }
                     ValkyrieTokenType::Identifier => {
-                        if !path.parts.is_empty() && alias.is_none() {
+                        if in_import_list {
+                            imports.push(Identifier { name: text(source, t.span), span: t.span });
+                        }
+                        else if !path.parts.is_empty() && alias.is_none() {
                             alias = Some(Identifier { name: text(source, t.span), span: t.span });
                         }
                     }
@@ -112,7 +123,7 @@ impl<'config> ValkyrieBuilder<'config> {
                 }
             }
         }
-        Ok(Using { path, alias, span })
+        Ok(Using { path, alias, imports, span })
     }
 
     pub(crate) fn build_effect<S: Source + ?Sized>(&self, node: RedNode<ValkyrieLanguage>, source: &S) -> Result<Effect, OakError> {

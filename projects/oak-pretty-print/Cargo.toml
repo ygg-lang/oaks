@@ -16,13 +16,14 @@ keywords = ["syntax-highlighting", "code", "highlighting", "multi-language"]
 oak-core = { workspace = true }
 oak-macros = { workspace = true }
 serde = { workspace = true, optional = true }
+serde_json = { workspace = true, optional = true }
 
 [dev-dependencies]
 oak-testing = { workspace = true }
 
 [features]
 default = ["serde"]
-serde = ["dep:serde", "oak-core/serde"]
+serde = ["dep:serde", "dep:serde_json", "oak-core/serde"]
 
 [package.metadata.docs.rs]
 all-features = true

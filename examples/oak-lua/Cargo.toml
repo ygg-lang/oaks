@@ -1,6 +1,6 @@
 [package]
 name = "oak-lua"
-version = "0.0.5"
+version = "0.0.6"
 authors = ["Yggdrasill Team <192607617@qq.com>"]
 description = "High-performance incremental Lua parser for the oak ecosystem with flexible configuration, supporting lightweight scripting and embedded development."
 edition = "2024"

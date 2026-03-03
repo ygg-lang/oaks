@@ -252,6 +252,8 @@ pub struct Using {
     pub path: NamePath,
     /// Optional alias for the import.
     pub alias: Option<Identifier>,
+    /// Selective import list (e.g., `{Never, Unit}` in `using core::primitive.{Never, Unit}`)
+    pub imports: Vec<Identifier>,
     /// The source code span.
     #[cfg_attr(feature = "serde", serde(with = "oak_core::serde_range"))]
     pub span: Span,
@@ -373,4 +375,25 @@ pub struct Property {
     pub is_abstract: bool,
     /// Whether this property is final (cannot be overridden).
     pub is_final: bool,
+    /// Whether this property is static (belongs to the class, not instances).
+    ///
+    /// Static properties are accessed via `ClassName.property_name` syntax
+    /// and do not have access to `self`.
+    pub is_static: bool,
+    /// Whether this property is virtual (can be overridden by subclasses).
+    ///
+    /// Virtual properties use dynamic dispatch through the vtable,
+    /// allowing subclasses to provide their own implementation.
+    pub is_virtual: bool,
+    /// Whether this property overrides a parent class property.
+    ///
+    /// Override properties must match the signature of the parent property
+    /// and are verified during type checking.
+    pub is_override: bool,
+    /// Whether this property uses lazy initialization.
+    ///
+    /// Lazy properties cache their computed value after first access.
+    /// The getter is only called once, and subsequent accesses return
+    /// the cached value.
+    pub is_lazy: bool,
 }

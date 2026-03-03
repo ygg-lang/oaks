@@ -1,7 +1,13 @@
 [package]
 name = "oak-racket"
-version = "0.0.5"
-edition = "2021"
+version.workspace = true
+authors.workspace = true
+description = "Hand-written Racket frontend"
+edition.workspace = true
+license.workspace = true
+repository = "https://github.com/ygg-lang/oaks/tree/master/examples/oak-racket"
+categories = ["compilers", "development-tools"]
+keywords = ["frontend", "language", "racket"]
 
 [dependencies]
 oak-core = { workspace = true }

@@ -2,9 +2,56 @@ use crate::Document;
 use alloc::{boxed::Box, string::String, vec::Vec};
 
 /// A trait for types that can be converted to a document for pretty printing.
+/// 
+/// This trait is used to define how types should be formatted as documents.
+/// It supports formatting parameters through the associated `Params` type,
+/// which defaults to `()` if not specified.
+/// 
+/// # Example
+/// ```rust
+/// use oak_pretty_print::{AsDocument, Doc};
+/// 
+/// // Define a type with custom formatting parameters
+/// struct MyType {
+///     value: i32,
+/// }
+/// 
+/// // Define formatting parameters for MyType
+/// #[derive(Default)]
+/// struct MyTypeParams {
+///     indent: usize,
+/// }
+/// 
+/// // Implement AsDocument for MyType with custom parameters
+/// impl AsDocument for MyType {
+///     type Params = MyTypeParams;
+/// 
+///     fn as_document(&self, params: &Self::Params) -> Doc<'_> {
+///         // Use params to customize formatting
+///         Doc::text(format!("MyType({}) with indent {}", self.value, params.indent))
+///     }
+/// }
+/// 
+/// // Create an instance of MyType
+/// let my_type = MyType { value: 42 };
+/// 
+/// // Format it with custom parameters
+/// let params = MyTypeParams { indent: 2 };
+/// let doc = my_type.as_document(&params);
+/// ```
 pub trait AsDocument {
+    /// The type of parameters used for formatting.
+    /// Defaults to `()` if not specified.
+    type Params = ();
+
     /// Converts this type to a document for pretty printing.
-    fn as_document(&self) -> Document<'_>;
+    /// 
+    /// # Parameters
+    /// - `params`: Formatting parameters specific to this type.
+    /// 
+    /// # Returns
+    /// A `Document` representing the formatted type.
+    fn as_document(&self, params: &Self::Params) -> Document<'_>;
 }
 
 /// A trait for types that can be converted to a document value, potentially consuming the input.
@@ -14,47 +61,55 @@ pub trait ToDocument<'a> {
 }
 
 impl AsDocument for String {
-    fn as_document(&self) -> Document<'_> {
+    fn as_document(&self, _params: &Self::Params) -> Document<'_> {
         Document::Text(self.as_str().into())
     }
 }
 
 impl AsDocument for str {
-    fn as_document(&self) -> Document<'_> {
+    fn as_document(&self, _params: &Self::Params) -> Document<'_> {
         Document::Text(self.into())
     }
 }
 
 impl<'a> AsDocument for Document<'a> {
-    fn as_document(&self) -> Document<'_> {
+    fn as_document(&self, _params: &Self::Params) -> Document<'_> {
         self.clone()
     }
 }
 
 impl<T: AsDocument> AsDocument for Vec<T> {
-    fn as_document(&self) -> Document<'_> {
-        Document::Concat(self.iter().map(|t| t.as_document()).collect())
+    type Params = T::Params;
+
+    fn as_document(&self, params: &Self::Params) -> Document<'_> {
+        Document::Concat(self.iter().map(|t| t.as_document(params)).collect())
     }
 }
 
 impl<T: AsDocument> AsDocument for Option<T> {
-    fn as_document(&self) -> Document<'_> {
+    type Params = T::Params;
+
+    fn as_document(&self, params: &Self::Params) -> Document<'_> {
         match self {
-            Some(t) => t.as_document(),
+            Some(t) => t.as_document(params),
             None => Document::Nil,
         }
     }
 }
 
 impl<T: AsDocument + ?Sized> AsDocument for &T {
-    fn as_document(&self) -> Document<'_> {
-        (**self).as_document()
+    type Params = T::Params;
+
+    fn as_document(&self, params: &Self::Params) -> Document<'_> {
+        (**self).as_document(params)
     }
 }
 
 impl<T: AsDocument + ?Sized> AsDocument for Box<T> {
-    fn as_document(&self) -> Document<'_> {
-        self.as_ref().as_document()
+    type Params = T::Params;
+
+    fn as_document(&self, params: &Self::Params) -> Document<'_> {
+        self.as_ref().as_document(params)
     }
 }
 
@@ -64,9 +119,12 @@ impl<'a> ToDocument<'a> for Document<'a> {
     }
 }
 
-impl<'a, T: AsDocument + ?Sized> ToDocument<'a> for &'a T {
+impl<'a, T: AsDocument + ?Sized> ToDocument<'a> for &'a T
+where
+    T::Params: Default,
+{
     fn to_document(self) -> Document<'a> {
-        self.as_document()
+        self.as_document(&T::Params::default())
     }
 }
 
