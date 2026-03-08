@@ -206,6 +206,7 @@ impl RbqTokenType {
             Self::Lt | Self::Gt | Self::LtEq | Self::GtEq => 4,
             Self::Plus | Self::Minus => 5,
             Self::Star | Self::Slash => 6,
+            Self::Eq => 7, // 为等于号设置优先级
             _ => 0,
         }
     }

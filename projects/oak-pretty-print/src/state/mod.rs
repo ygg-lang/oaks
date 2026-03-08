@@ -1,8 +1,8 @@
-use std::collections::HashMap;
 use alloc::string::String;
+use std::collections::HashMap;
 
 /// Default format state implementation
-/// 
+///
 /// This struct provides a default implementation of the format state.
 #[derive(Debug, Clone, Default)]
 pub struct DefaultFormatState {

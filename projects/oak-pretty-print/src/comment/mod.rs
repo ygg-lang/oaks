@@ -55,17 +55,7 @@ pub struct Comment {
 impl Comment {
     /// Creates a new comment
     pub fn new(kind: CommentKind, content: String, span: SourceSpan) -> Self {
-        Self {
-            kind,
-            content,
-            span,
-            is_trailing: false,
-            indent_level: 0,
-            is_attached: false,
-            attached_node_type: None,
-            is_leading: false,
-            preserve_format: false,
-        }
+        Self { kind, content, span, is_trailing: false, indent_level: 0, is_attached: false, attached_node_type: None, is_leading: false, preserve_format: false }
     }
 
     /// Creates a new line comment
@@ -250,13 +240,7 @@ impl CommentCollector {
 
     /// Sorts comments by line and column
     pub fn sort_by_line_column(&mut self) {
-        self.comments.sort_by(|a, b| {
-            if a.span.start.line == b.span.start.line {
-                a.span.start.column.cmp(&b.span.start.column)
-            } else {
-                a.span.start.line.cmp(&b.span.start.line)
-            }
-        })
+        self.comments.sort_by(|a, b| if a.span.start.line == b.span.start.line { a.span.start.column.cmp(&b.span.start.column) } else { a.span.start.line.cmp(&b.span.start.line) })
     }
 
     /// Groups comments by line

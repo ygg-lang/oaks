@@ -24,10 +24,10 @@ pub mod document;
 pub mod errors;
 /// Formatting state
 pub mod state;
-/// Whitespace handling and processing
-pub mod whitespace;
 /// Traits for converting types to documents
 pub mod to_doc;
+/// Whitespace handling and processing
+pub mod whitespace;
 
 // Re-export commonly used types
 pub use crate::{
@@ -35,8 +35,8 @@ pub use crate::{
     document::{Document, IndentStyle, LineEnding, Printer, PrinterConfig},
     errors::FormatResult,
     state::DefaultFormatState,
-    whitespace::WhitespaceProcessor,
     to_doc::{AsDocument, ToDocument},
+    whitespace::WhitespaceProcessor,
 };
 pub use oak_core::language::Language;
 

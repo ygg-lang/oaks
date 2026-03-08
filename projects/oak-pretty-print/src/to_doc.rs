@@ -2,39 +2,39 @@ use crate::Document;
 use alloc::{boxed::Box, string::String, vec::Vec};
 
 /// A trait for types that can be converted to a document for pretty printing.
-/// 
+///
 /// This trait is used to define how types should be formatted as documents.
 /// It supports formatting parameters through the associated `Params` type,
 /// which defaults to `()` if not specified.
-/// 
+///
 /// # Example
 /// ```rust
 /// use oak_pretty_print::{AsDocument, Doc};
-/// 
+///
 /// // Define a type with custom formatting parameters
 /// struct MyType {
 ///     value: i32,
 /// }
-/// 
+///
 /// // Define formatting parameters for MyType
 /// #[derive(Default)]
 /// struct MyTypeParams {
 ///     indent: usize,
 /// }
-/// 
+///
 /// // Implement AsDocument for MyType with custom parameters
 /// impl AsDocument for MyType {
 ///     type Params = MyTypeParams;
-/// 
+///
 ///     fn as_document(&self, params: &Self::Params) -> Doc<'_> {
 ///         // Use params to customize formatting
 ///         Doc::text(format!("MyType({}) with indent {}", self.value, params.indent))
 ///     }
 /// }
-/// 
+///
 /// // Create an instance of MyType
 /// let my_type = MyType { value: 42 };
-/// 
+///
 /// // Format it with custom parameters
 /// let params = MyTypeParams { indent: 2 };
 /// let doc = my_type.as_document(&params);
@@ -45,10 +45,10 @@ pub trait AsDocument {
     type Params = ();
 
     /// Converts this type to a document for pretty printing.
-    /// 
+    ///
     /// # Parameters
     /// - `params`: Formatting parameters specific to this type.
-    /// 
+    ///
     /// # Returns
     /// A `Document` representing the formatted type.
     fn as_document(&self, params: &Self::Params) -> Document<'_>;

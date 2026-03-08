@@ -2,7 +2,7 @@
 mod as_document;
 
 use crate::{ast::RbqRoot, language::RbqLanguage};
-use oak_pretty_print::{AsDocument, FormatConfig};
+use oak_pretty_print::AsDocument;
 
 /// RBQ formatter.
 pub struct RbqFormatter<'config> {

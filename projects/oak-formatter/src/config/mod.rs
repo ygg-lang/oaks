@@ -37,7 +37,7 @@ impl Default for LineEnding {
 }
 
 /// Common formatting configuration that can be shared across languages
-/// 
+///
 /// This struct provides common formatting options that are applicable to most
 /// programming languages. Language-specific formatters can use this as a base
 /// and add their own specific options.
@@ -65,15 +65,6 @@ pub struct CommonFormatterConfig {
 
 impl Default for CommonFormatterConfig {
     fn default() -> Self {
-        Self {
-            indent_style: IndentStyle::default(),
-            indent_text: Cow::Borrowed("    "),
-            line_ending: LineEnding::default(),
-            max_width: 80,
-            insert_final_newline: true,
-            trim_trailing_whitespace: true,
-            preserve_blank_lines: true,
-            max_blank_lines: 2,
-        }
+        Self { indent_style: IndentStyle::default(), indent_text: Cow::Borrowed("    "), line_ending: LineEnding::default(), max_width: 80, insert_final_newline: true, trim_trailing_whitespace: true, preserve_blank_lines: true, max_blank_lines: 2 }
     }
 }
