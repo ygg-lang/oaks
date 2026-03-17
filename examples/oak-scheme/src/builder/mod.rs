@@ -1,4 +1,4 @@
-//! Builder implementation for the Scheme language.
+#![doc = include_str!("readme.md")]
 
 use crate::{language::SchemeLanguage, parser::SchemeParser};
 use oak_core::{Builder, BuilderCache, Lexer, OakDiagnostics, Parser, TextEdit, source::Source};

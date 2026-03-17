@@ -1,6 +1,6 @@
 #![feature(new_range_api)]
 #![warn(missing_docs)]
-//! Mojo support for the Oak language framework.
+#![doc = include_str!("readme.md")]
 
 /// AST module.
 pub mod ast;

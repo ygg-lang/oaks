@@ -1,4 +1,4 @@
-//! Parser implementation for the C# language.
+#![doc = include_str!("readme.md")]
 
 use crate::language::CSharpLanguage;
 /// Element types for the C# parser.

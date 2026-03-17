@@ -1,0 +1,155 @@
+/* CSS test file for lexer testing */
+
+/* Basic selectors and properties */
+body {
+    margin: 0;
+    padding: 0;
+    font-family: 'Arial', sans-serif;
+    background-color: #f0f0f0;
+}
+
+/* Class selector */
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+/* ID selector */
+#main-header {
+    background: linear-gradient(45deg, #007bff, #0056b3);
+    color: white;
+    padding: 1rem 0;
+}
+
+/* Attribute selectors */
+input[type="text"] {
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    padding: 8px 12px;
+}
+
+a[href^="https"] {
+    color: #28a745;
+}
+
+/* Pseudo-classes */
+button:hover {
+    background-color: #0056b3;
+    cursor: pointer;
+}
+
+input:focus {
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
+}
+
+li:nth-child(even) {
+    background-color: #f8f9fa;
+}
+
+/* Pseudo-elements */
+.header::before {
+    content: "";
+    display: block;
+    height: 3px;
+    background-color: #007bff;
+}
+
+.text-content::first-line {
+    font-weight: bold;
+    font-size: 1.2em;
+}
+
+/* Combinators */
+.nav > li {
+    display: inline-block;
+    margin-right: 10px;
+}
+
+.article h2 + p {
+    margin-top: 0;
+}
+
+.sidebar ~ .content {
+    margin-left: 250px;
+}
+
+/* Media queries */
+@media screen and (max-width: 768px) {
+    .container {
+        padding: 10px;
+    }
+    
+    .nav > li {
+        display: block;
+        margin-bottom: 5px;
+    }
+}
+
+/* CSS Grid */
+.grid-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 20px;
+    padding: 20px;
+}
+
+/* CSS Flexbox */
+.flex-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+/* CSS Variables */
+:root {
+    --primary-color: #007bff;
+    --secondary-color: #6c757d;
+    --border-radius: 4px;
+    --box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.card {
+    background-color: white;
+    border-radius: var(--border-radius);
+    box-shadow: var(--box-shadow);
+    padding: 20px;
+}
+
+/* Keyframe animations */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.fade-in {
+    animation: fadeIn 0.5s ease-out;
+}
+
+/* Vendor prefixes */
+.element {
+    -webkit-transform: rotate(45deg);
+    -moz-transform: rotate(45deg);
+    -ms-transform: rotate(45deg);
+    transform: rotate(45deg);
+}
+
+/* Import statement */
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&display=swap');
+
+/* Font face */
+@font-face {
+    font-family: 'CustomFont';
+    src: url('custom-font.woff2') format('woff2'),
+         url('custom-font.woff') format('woff');
+    font-weight: normal;
+    font-style: normal;
+}

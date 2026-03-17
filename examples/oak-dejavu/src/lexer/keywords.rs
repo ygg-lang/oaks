@@ -223,4 +223,36 @@ pub enum DejavuKeywords {
     /// x as T
     /// ```
     As,
+    /// Raw block.
+    ///
+    /// ```v
+    /// raw { ... }
+    /// ```
+    Raw,
+    /// Include directive.
+    ///
+    /// ```v
+    /// include "file.v";
+    /// ```
+    Include,
+    /// Block block.
+    ///
+    /// ```v
+    /// block name { ... }
+    /// ```
+    Block,
+    /// End block.
+    ///
+    /// ```v
+    /// block name { ... } end
+    /// ```
+    End,
+    /// End block (alternative syntax).
+    ///
+    /// ```v
+    /// <$ block "content" $>
+    /// content
+    /// <$ endblock $>
+    /// ```
+    EndBlock,
 }

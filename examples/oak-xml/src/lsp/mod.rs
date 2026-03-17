@@ -1,4 +1,4 @@
-//! XML Language Server Protocol (LSP) support.
+#![doc = include_str!("readme.md")]
 
 use crate::language::XmlLanguage;
 use core::range::Range;

@@ -1,10 +1,6 @@
 #![feature(new_range_api)]
 #![warn(missing_docs)]
-//! Testing utilities for the Oak ecosystem.
-//!
-//! This crate provides comprehensive testing infrastructure for lexers, parsers,
-//! and builders, including file-based testing, expected output comparison,
-//! timeout handling, and test result serialization.
+#![doc = include_str!("readme.md")]
 
 /// Testing utilities for tree building.
 pub mod building;

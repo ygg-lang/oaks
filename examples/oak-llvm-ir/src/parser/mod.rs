@@ -1,4 +1,4 @@
-//! Parser implementation for LLVM IR.
+#![doc = include_str!("readme.md")]
 
 /// Element types for the LLVM IR parser.
 pub mod element_type;

@@ -1,4 +1,4 @@
-//! Voml language definition.
+#![doc = include_str!("readme.md")]
 
 use alloc::{
     string::{String, ToString},

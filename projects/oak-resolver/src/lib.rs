@@ -1,8 +1,5 @@
 #![warn(missing_docs)]
-//! Symbol and module resolution for the Oak language framework.
-//!
-//! This crate provides traits and implementations for resolving module imports
-//! and managing global symbol tables across a workspace.
+#![doc = include_str!("readme.md")]
 
 use dashmap::DashMap;
 use oak_symbols::SymbolInformation;

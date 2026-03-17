@@ -1,4 +1,4 @@
-//! Builder implementation for C# that converts the green tree into a high-level AST.
+#![doc = include_str!("readme.md")]
 
 use crate::{ast::*, language::CSharpLanguage, lexer::token_type::CSharpTokenType, parser::CSharpElementType};
 use core::range::Range;

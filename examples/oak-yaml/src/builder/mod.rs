@@ -50,7 +50,7 @@ impl<'config> YamlBuilder<'config> {
                 // This is a fallback for the placeholder parser
                 let span = oak_core::Range::from(0..green_tree.byte_length as usize);
                 let text = source.get_text_in(span.clone()).to_string();
-                items.push(YamlValue::Scalar(YamlScalar { value: text, span }));
+                items.push(YamlValueNode::Scalar(YamlScalar { value: text, span }));
             }
         }
 
@@ -59,13 +59,13 @@ impl<'config> YamlBuilder<'config> {
         Ok(result)
     }
 
-    fn build_value<'a>(&self, node: &GreenNode<'a, YamlLanguage>, offset: usize, source: &SourceText, _cache: &mut impl BuilderCache<YamlLanguage>) -> Result<YamlValue, OakError> {
+    fn build_value<'a>(&self, node: &GreenNode<'a, YamlLanguage>, offset: usize, source: &SourceText, _cache: &mut impl BuilderCache<YamlLanguage>) -> Result<YamlValueNode, OakError> {
         let span: oak_core::Range<usize> = (offset..offset + node.byte_length as usize).into();
 
         // Placeholder implementation for YAML values
         let text = source.get_text_in(span.clone()).to_string();
 
-        Ok(YamlValue::Scalar(YamlScalar { value: text, span }))
+        Ok(YamlValueNode::Scalar(YamlScalar { value: text, span }))
     }
 }
 

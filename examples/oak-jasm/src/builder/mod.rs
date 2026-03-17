@@ -1,4 +1,4 @@
-//! AST builder for the JASM language.
+#![doc = include_str!("readme.md")]
 
 use crate::{
     ast::*,

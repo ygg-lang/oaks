@@ -13,7 +13,7 @@ use crate::json_from_path;
 use serde::Serialize;
 
 #[cfg(feature = "serde")]
-use serde_json::Value as JsonValue;
+use serde_json::Value as JsonValueNode;
 
 use std::{
     fmt::Debug,
@@ -60,7 +60,7 @@ pub struct TypedRootData {
     pub type_name: String,
     /// The serialized content of the type.
     #[cfg(feature = "serde")]
-    pub content: JsonValue,
+    pub content: JsonValueNode,
     #[cfg(not(feature = "serde"))]
     pub content: (),
 }

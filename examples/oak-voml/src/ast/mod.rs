@@ -1,4 +1,4 @@
-//! Voml Abstract Syntax Tree (AST) nodes.
+#![doc = include_str!("readme.md")]
 
 /// Root node of the Voml AST.
 #[derive(Clone, Debug)]

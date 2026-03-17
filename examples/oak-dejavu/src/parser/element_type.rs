@@ -90,6 +90,10 @@ pub enum DejavuElementType {
     ApplyBlock,
     /// Object expression node.
     ObjectExpression,
+    /// Filter expression node.
+    FilterExpression,
+    /// Translate expression node for internationalization.
+    TranslateExpression,
 
     // Definitions
     /// Micro definition node.
@@ -132,6 +136,12 @@ pub enum DejavuElementType {
     Interpolation,
     /// Template comment node.
     TemplateComment,
+    /// Raw block node.
+    RawBlockNode,
+    /// Include directive node.
+    IncludeDirective,
+    /// Block declaration node.
+    BlockDeclaration,
 
     // Others
     /// Pattern node.

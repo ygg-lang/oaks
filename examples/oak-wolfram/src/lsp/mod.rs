@@ -1,4 +1,4 @@
-//! Wolfram Language Server Protocol (LSP) support.
+#![doc = include_str!("readme.md")]
 
 /// Wolfram syntax highlighter.
 pub mod highlighter;

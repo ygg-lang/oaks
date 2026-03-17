@@ -1,4 +1,4 @@
-//! Abstract Syntax Tree (AST) definitions for Groovy.
+#![doc = include_str!("readme.md")]
 
 use core::range::Range;
 

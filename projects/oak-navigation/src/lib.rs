@@ -1,9 +1,6 @@
 #![feature(new_range_api)]
 #![warn(missing_docs)]
-//! Navigation support for the Oak language framework.
-//!
-//! This crate provides traits and structures for code navigation features
-//! like "Go to Definition" and "Find All References".
+#![doc = include_str!("readme.md")]
 use core::range::Range;
 use oak_core::{Language, TokenType, language::UniversalTokenRole, tree::RedNode, visitor::Visitor};
 

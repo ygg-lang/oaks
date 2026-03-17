@@ -1,4 +1,4 @@
-//! Go language builder
+#![doc = include_str!("readme.md")]
 
 use crate::{
     ast::{self, Declaration, GoRoot},

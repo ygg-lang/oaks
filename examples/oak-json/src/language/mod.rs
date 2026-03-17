@@ -1,17 +1,14 @@
 #![doc = include_str!("readme.md")]
-use oak_core::language::{Language, LanguageCategory};
 #[cfg(feature = "serde")]
-/// Serde serialization and deserialization implementations for JSON values.
-///
-/// This module provides the [`to_value`] function for converting serializable Rust types
-/// into [`JsonValue`] AST nodes, and [`from_value`] for deserializing [`JsonValue`] nodes
-/// back into Rust types.
-pub mod serde_impl;
+mod de;
 #[cfg(feature = "serde")]
-pub use serde_impl::{from_value, to_value};
+mod ser;
+#[cfg(feature = "serde")]
+pub use self::{de::deserialize, de::from_str, ser::serialize, ser::to_string};
+use oak_core::{Language, LanguageCategory};
 
-/// JSON language implementation
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+/// The JSON language definition.
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct JsonLanguage {
     /// Whether to allow trailing commas in objects and arrays
@@ -28,31 +25,31 @@ pub struct JsonLanguage {
     pub infinity_and_nan: bool,
 }
 
+impl Default for JsonLanguage {
+    fn default() -> Self {
+        Self::standard()
+    }
+}
+
 impl JsonLanguage {
-    /// Creates a new JSON language instance with default settings.
-    pub fn new() -> Self {
-        Self::default()
+    /// Create a new instance of the JSON language with custom settings.
+    pub fn new(trailing_comma: bool, bare_keys: bool, single_quotes: bool, comments: bool, hex_numbers: bool, infinity_and_nan: bool) -> Self {
+        Self { trailing_comma, bare_keys, single_quotes, comments, hex_numbers, infinity_and_nan }
     }
 
-    /// Creates a standard JSON language instance (no extensions).
+    /// Create a JSON language instance with strict ANSI JSON settings.
     pub fn standard() -> Self {
-        Self::default()
+        Self { trailing_comma: false, bare_keys: false, single_quotes: false, comments: false, hex_numbers: false, infinity_and_nan: false }
     }
 
-    /// Creates a JSON5 language instance with all extensions enabled.
+    /// Create a JSON language instance with JSON5 settings.
     pub fn json5() -> Self {
         Self { trailing_comma: true, bare_keys: true, single_quotes: true, comments: true, hex_numbers: true, infinity_and_nan: true }
     }
 
-    /// Creates a relaxed JSON language instance with all extensions enabled.
+    /// Create a JSON language instance with relaxed settings (alias for JSON5).
     pub fn relaxed() -> Self {
-        Self { trailing_comma: true, bare_keys: true, single_quotes: true, comments: true, hex_numbers: true, infinity_and_nan: true }
-    }
-}
-
-impl Default for JsonLanguage {
-    fn default() -> Self {
-        Self { trailing_comma: false, bare_keys: false, single_quotes: false, comments: false, hex_numbers: false, infinity_and_nan: false }
+        Self::json5()
     }
 }
 

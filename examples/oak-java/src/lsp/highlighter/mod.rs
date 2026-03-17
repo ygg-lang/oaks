@@ -1,4 +1,4 @@
-//! Syntax highlighting for Java.
+#![doc = include_str!("readme.md")]
 
 use crate::JavaTokenType;
 

@@ -1,4 +1,4 @@
-//! Java Language Server Protocol (LSP) support.
+#![doc = include_str!("readme.md")]
 
 #[cfg(feature = "oak-highlight")]
 pub mod highlighter;

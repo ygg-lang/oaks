@@ -1,4 +1,4 @@
-use crate::language::ScssLanguage;
+use crate::{ast::ScssRoot, language::ScssLanguage};
 use oak_core::{Builder, BuilderCache, Lexer, OakDiagnostics, Parser, TextEdit, builder::BuildOutput, source::Source};
 
 /// AST builder for SCSS language
@@ -8,6 +8,7 @@ pub struct ScssBuilder<'config> {
 }
 
 impl<'config> ScssBuilder<'config> {
+    /// Creates a new `ScssBuilder` with the given configuration.
     pub fn new(config: &'config ScssLanguage) -> Self {
         Self { config }
     }
@@ -23,8 +24,21 @@ impl<'config> Builder<ScssLanguage> for ScssBuilder<'config> {
         let parse_result = parser.parse(source, edits, &mut cache);
 
         match parse_result.result {
-            Ok(_) => OakDiagnostics { result: Ok(()), diagnostics: parse_result.diagnostics },
+            Ok(parse_tree) => {
+                let ast = self.build_ast(source, &parse_tree);
+                OakDiagnostics { result: Ok(ast), diagnostics: parse_result.diagnostics }
+            }
             Err(e) => OakDiagnostics { result: Err(e), diagnostics: parse_result.diagnostics },
         }
+    }
+}
+
+impl<'config> ScssBuilder<'config> {
+    /// Builds an AST from the parse tree.
+    fn build_ast<'a, S: Source + ?Sized>(&self, source: &S, _parse_tree: &oak_core::tree::GreenNode<ScssLanguage>) -> ScssRoot {
+        let children = Vec::new();
+
+        // For now, return an empty AST
+        ScssRoot { span: (0..source.length()).into(), children }
     }
 }

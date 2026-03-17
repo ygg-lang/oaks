@@ -1,4 +1,4 @@
-//! Parser implementation for Tailwind DSL.
+#![doc = include_str!("readme.md")]
 /// Element types for the Tailwind language.
 pub mod element_type;
 

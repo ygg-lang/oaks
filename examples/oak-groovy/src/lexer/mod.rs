@@ -1,4 +1,4 @@
-//! Lexer for the Groovy language.
+#![doc = include_str!("readme.md")]
 
 use oak_core::Source;
 pub mod token_type;

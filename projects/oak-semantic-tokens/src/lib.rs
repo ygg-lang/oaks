@@ -1,8 +1,5 @@
 #![warn(missing_docs)]
-//! Semantic tokens support for the Oak language framework.
-//!
-//! This crate provides traits and structures for semantic syntax highlighting,
-//! compatible with the LSP Semantic Tokens specification.
+#![doc = include_str!("readme.md")]
 use oak_core::{language::Language, source::Source, tree::RedNode};
 use oak_vfs::LineMap;
 

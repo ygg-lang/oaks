@@ -59,6 +59,46 @@ pub struct ParameterNode {
     pub span: Range<usize>,
 }
 
+/// Raw block node for raw text blocks.
+#[derive(Debug, Clone, PartialEq)]
+pub struct RawBlockNode {
+    /// Raw text content.
+    pub content: String,
+    /// Source span of the block.
+    pub span: Range<usize>,
+}
+
+/// Template text node for plain template text.
+#[derive(Debug, Clone, PartialEq)]
+pub struct TemplateTextNode {
+    /// Template text content.
+    pub content: String,
+    /// Source span of the text.
+    pub span: Range<usize>,
+}
+
+/// Include directive node for including other files.
+#[derive(Debug, Clone, PartialEq)]
+pub struct IncludeDirectiveNode {
+    /// Path to the included file.
+    pub path: ExpressionNode,
+    /// Source span of the directive.
+    pub span: Range<usize>,
+}
+
+/// Block node for block declarations.
+#[derive(Debug, Clone, PartialEq)]
+pub struct BlockDeclaration {
+    /// Block name.
+    pub name: IdentifierNode,
+    /// Block annotations.
+    pub annotations: Vec<AttributeNode>,
+    /// Block items.
+    pub items: Vec<ItemNode>,
+    /// Source span of the block.
+    pub span: Range<usize>,
+}
+
 /// Item node representing top-level declarations.
 #[derive(Debug, Clone, PartialEq)]
 pub enum ItemNode {
@@ -88,6 +128,14 @@ pub enum ItemNode {
     TemplateControl(TemplateControlNode),
     /// Template interpolation node.
     TemplateInterpolation(TemplateInterpolationNode),
+    /// Raw block node.
+    RawBlock(RawBlockNode),
+    /// Include directive node.
+    IncludeDirective(IncludeDirectiveNode),
+    /// Block declaration.
+    Block(BlockDeclaration),
+    /// Template text node.
+    TemplateText(TemplateTextNode),
 }
 
 /// Namespace declaration.
@@ -332,6 +380,25 @@ pub enum ExpressionNode {
     Catch(CatchExpressionNode),
     /// Resume expression.
     Resume(ResumeExpressionNode),
+    /// Filter expression.
+    Filter(FilterExpressionNode),
+    /// Translate expression for internationalization.
+    Translate(TranslateExpressionNode),
+}
+
+/// Translate expression node for internationalization.
+#[derive(Debug, Clone, PartialEq)]
+pub struct TranslateExpressionNode {
+    /// Translation key.
+    pub key: String,
+    /// Translation arguments.
+    pub args: Vec<(String, ExpressionNode)>,
+    /// Plural count for plural forms.
+    pub plural: Option<Box<ExpressionNode>>,
+    /// Context for context-dependent translations.
+    pub context: Option<String>,
+    /// Source span of the expression.
+    pub span: Range<usize>,
 }
 
 /// Literal expression node.
@@ -550,6 +617,19 @@ pub struct CatchExpressionNode {
 pub struct ResumeExpressionNode {
     /// Optional resume value.
     pub expr: Option<Box<ExpressionNode>>,
+    /// Source span of the expression.
+    pub span: Range<usize>,
+}
+
+/// Filter expression node for applying filters to values.
+#[derive(Debug, Clone, PartialEq)]
+pub struct FilterExpressionNode {
+    /// The expression to apply the filter to.
+    pub expr: Box<ExpressionNode>,
+    /// The filter name.
+    pub name: IdentifierNode,
+    /// Filter arguments.
+    pub args: Vec<ExpressionNode>,
     /// Source span of the expression.
     pub span: Range<usize>,
 }

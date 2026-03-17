@@ -1,4 +1,4 @@
-//! Crystal language configuration.
+#![doc = include_str!("readme.md")]
 
 use crate::ast::CrystalRoot;
 use oak_core::{Language, LanguageCategory};

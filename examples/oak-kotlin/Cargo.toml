@@ -1,9 +1,9 @@
 [package]
 name = "oak-kotlin"
-version = "0.0.7"
-edition = "2024"
-authors = ["Gaia Team <192607617@qq.com>"]
-license = "MPL-2.0"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+license.workspace = true
 repository = "https://github.com/nyar-vm/oaks"
 homepage = "https://gaia-assembly.netlify.app/"
 description = "Kotlin language support for Oak"

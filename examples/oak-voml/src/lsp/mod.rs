@@ -1,4 +1,4 @@
-//! Voml Language Server Protocol (LSP) support.
+#![doc = include_str!("readme.md")]
 
 use crate::language::VomlLanguage;
 use core::range::Range;

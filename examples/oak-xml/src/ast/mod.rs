@@ -1,4 +1,4 @@
-//! XML Abstract Syntax Tree (AST) nodes.
+#![doc = include_str!("readme.md")]
 
 use crate::{XmlElementType, XmlLanguage, XmlTokenType};
 use core::range::Range;

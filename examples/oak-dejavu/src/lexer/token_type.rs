@@ -108,10 +108,10 @@ pub enum DejavuTokenType {
     Percent,
     /// Percent assignment operator `%=`.
     PercentEq,
-    /// Pipe operator `|`.
+    /// Logical OR operator `|`.
+    Or,
+    /// Pipe operator `|>`.
     Pipe,
-    /// Pipe forward operator `|>`.
-    PipeGreater,
     /// Plus operator `+`.
     Plus,
     /// Plus assignment operator `+=`.
@@ -144,20 +144,20 @@ pub enum DejavuTokenType {
     Underscore,
 
     // Template Specific
-    /// Interpolation start token.
-    InterpolationStart,
-    /// Interpolation end token.
-    InterpolationEnd,
+    /// Code start token.
+    CodeStart,
+    /// Code end token.
+    CodeEnd,
     /// String part token for templates.
     StringPart,
-    /// Template control start token.
-    TemplateControlStart,
-    /// Template control end token.
-    TemplateControlEnd,
-    /// Template comment start token.
+    /// Template comment start token, default is `<#`.
     TemplateCommentStart,
-    /// Template comment end token.
+    /// Template comment end token, default is `#>`.
     TemplateCommentEnd,
+    /// Template control start token, default is `<$`.
+    TemplateControlStart,
+    /// Template control end token, default is `$>`.
+    TemplateControlEnd,
 }
 
 impl TokenType for DejavuTokenType {

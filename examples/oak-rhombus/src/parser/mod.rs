@@ -1,4 +1,4 @@
-//! Parser implementation for the Rhombus language.
+#![doc = include_str!("readme.md")]
 
 /// Element type definitions for Rhombus parser.
 pub mod element_type;

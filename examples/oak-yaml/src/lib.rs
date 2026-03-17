@@ -41,6 +41,14 @@ pub fn parse(yaml: &str) -> Result<crate::ast::YamlRoot, String> {
     result.result.map_err(|e| format!("{:?}", e))
 }
 
+/// Deserializes a YAML string into a Rust type.
+#[cfg(feature = "serde")]
+pub use crate::language::from_str;
+
+/// Serializes a Rust type into a YAML string.
+#[cfg(feature = "serde")]
+pub use crate::language::to_string;
+
 /// LSP implementation.
 #[cfg(feature = "lsp")]
 pub use crate::lsp::YamlLanguageService;

@@ -1,28 +1,50 @@
-# 🛠️ Developer Guide
+# Oak Stylus
 
-Stylus support for the Oak language framework.
+Stylus language support for the Oak framework.
 
-This directory contains the core logic implementation of the project. Below are instructions for a quick start.
+## Features
 
-## 🚦 Quick Start
+- Lexical analysis for Stylus syntax
+- Syntax parsing for Stylus constructs
+- Abstract syntax tree (AST) representation
+- Integration with Oak core framework
 
-### Core API Usage
+## Usage
+
 ```rust
-// Example: Basic calling workflow
-fn main() {
-    // 1. Initialization
-    // 2. Execute core logic
-    // 3. Handle returned results
-}
+use oak_stylus::{StylusLanguage, StylusLexer, StylusParser, StylusBuilder};
+use oak_core::{Lexer, Parser, Builder, Source, SourceText};
+
+// Create a source text
+let source = Source::new(SourceText::from("body { color: red; }".to_string()));
+
+// Lex the source
+let lexer = StylusLexer;
+let lex_output = lexer.lex(source.text());
+
+// Parse the tokens
+let parser = StylusParser;
+let parse_output = parser.parse(&mut lex_output.into_session());
+
+// Build the syntax tree
+let builder = StylusBuilder;
+let green_tree = builder.build(&mut Default::default(), &Default::default());
 ```
 
-## 🔍 Module Description
-- **lib.rs**: Exports public interfaces and core traits.
-- **parser/ (if exists)**: Implements specific syntax parsing logic.
-- **ast/ (if exists)**: Defines the syntax tree structure.
+## Implementation Status
 
-## 🏗️ Architecture Design
-The project follows the general architectural specifications of the Oak ecosystem, emphasizing:
-1. **Immutability**: Uses the Green/Red Tree structure to ensure efficient sharing of syntax trees.
-2. **Fault Tolerance**: Core logic is highly inclusive of erroneous input.
-3. **Scalability**: Convenient for downstream tools to perform secondary development.
+- [x] Language trait implementation
+- [x] Token types and roles
+- [x] Element types and roles
+- [x] Lexer implementation (basic)
+- [x] Parser implementation (basic)
+- [x] AST structure
+- [x] Builder implementation (basic)
+- [ ] Full lexer implementation
+- [ ] Full parser implementation
+- [ ] LSP support
+- [ ] MCP support
+
+## Contributing
+
+Contributions are welcome! Please feel free to submit a pull request or open an issue.

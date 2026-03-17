@@ -1,10 +1,6 @@
 #![feature(new_range_api)]
 #![warn(missing_docs)]
-#![doc = "Hover information provider for Oak languages."]
-//! Hover support for the Oak language framework.
-//!
-//! This crate provides traits and structures for providing hover information
-//! (documentation, type info, etc.) for code elements in an editor.
+#![doc = include_str!("readme.md")]
 
 use core::range::Range;
 use oak_core::{language::Language, tree::RedNode};

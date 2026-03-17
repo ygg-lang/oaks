@@ -1,4 +1,10 @@
 #![doc = include_str!("readme.md")]
+#[cfg(feature = "serde")]
+pub(crate) mod de;
+#[cfg(feature = "serde")]
+pub(crate) mod ser;
+#[cfg(feature = "serde")]
+pub use self::{de::deserialize, de::from_str, ser::serialize, ser::to_string};
 use oak_core::{Language, LanguageCategory};
 
 /// The YAML language definition.

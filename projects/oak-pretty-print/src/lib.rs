@@ -3,10 +3,7 @@
 #![feature(new_range_api)]
 #![feature(associated_type_defaults)]
 #![warn(missing_docs)]
-//! Pretty-printing framework for the Oak language framework.
-//!
-//! This crate provides a document-based pretty-printing system that handles
-//! indentation, line breaks, and grouping for language formatters.
+#![doc = include_str!("readme.md")]
 pub extern crate alloc;
 extern crate self as oak_pretty_print;
 

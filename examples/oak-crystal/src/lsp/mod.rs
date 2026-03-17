@@ -1,4 +1,4 @@
-//! Language Server Protocol (LSP) support for Crystal.
+#![doc = include_str!("readme.md")]
 
 use crate::language::CrystalLanguage;
 use core::range::Range;

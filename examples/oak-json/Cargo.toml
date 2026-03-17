@@ -25,6 +25,7 @@ oak-navigation = { workspace = true, optional = true }
 oak-mcp = { workspace = true, optional = true }
 dashmap = { workspace = true, optional = true }
 serde = { workspace = true, optional = true }
+serde_json = { workspace = true, optional = true }
 futures = { workspace = true, optional = true }
 tokio = { workspace = true, optional = true }
 
@@ -33,8 +34,8 @@ oak-testing = { workspace = true }
 serde_json = { workspace = true }
 
 [features]
-default = []
-serde = ["dep:serde", "oak-core/serde"]
+default = ["serde"]
+serde = ["dep:serde", "oak-core/serde", "dep:serde_json"]
 lsp = ["dep:oak-lsp", "dep:oak-hover", "dep:oak-vfs", "oak-highlight", "oak-pretty-print", "dep:futures"]
 mcp = ["lsp", "oak-mcp/io-std", "dep:tokio"]
 

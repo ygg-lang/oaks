@@ -1,4 +1,4 @@
-//! Parser implementation for the Koka language.
+#![doc = include_str!("readme.md")]
 
 /// Element types for the Koka parser.
 pub mod element_type;

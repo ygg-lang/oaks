@@ -1,4 +1,4 @@
-#![doc = include_str!("../../readme.md")]
+#![doc = include_str!("readme.md")]
 /// Token types for the AsciiDoc language.
 pub mod token_type;
 

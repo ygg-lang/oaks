@@ -1,4 +1,4 @@
-//! Java lexer implementation.
+#![doc = include_str!("readme.md")]
 
 /// Java token types.
 pub mod token_type;

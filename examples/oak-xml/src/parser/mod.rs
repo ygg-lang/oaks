@@ -1,4 +1,4 @@
-//! XML parser implementation.
+#![doc = include_str!("readme.md")]
 
 /// XML element types.
 pub mod element_type;

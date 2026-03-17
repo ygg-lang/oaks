@@ -1,4 +1,4 @@
-//! Parser for the Crystal language.
+#![doc = include_str!("readme.md")]
 
 pub mod element_type;
 use crate::language::CrystalLanguage;

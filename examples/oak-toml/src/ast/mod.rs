@@ -38,7 +38,7 @@ pub struct TomlKeyValue {
     /// The key part.
     pub key: TomlKey,
     /// The value part.
-    pub value: TomlValue,
+    pub value: TomlValueNode,
 }
 
 /// TOML table `[table]`.
@@ -137,7 +137,7 @@ pub struct TomlQuotedKey {
 /// TOML value.
 #[derive(Debug, Clone)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub enum TomlValue {
+pub enum TomlValueNode {
     /// String value.
     String(TomlString),
     /// Integer value.
@@ -237,7 +237,7 @@ pub struct TomlArray {
     #[cfg_attr(feature = "serde", serde(with = "oak_core::serde_range"))]
     pub span: Range<usize>,
     /// List of array items.
-    pub items: Vec<TomlValue>,
+    pub items: Vec<TomlValueNode>,
 }
 
 /// TOML inline table `{ a = 1, b = 2 }`.
@@ -258,7 +258,7 @@ impl TomlTable {
     }
 
     /// Gets a value from the table by key name.
-    pub fn get(&self, key: &str) -> Option<&TomlValue> {
+    pub fn get(&self, key: &str) -> Option<&TomlValueNode> {
         for kv in &self.items {
             if kv.key.to_string() == key {
                 return Some(&kv.value);
@@ -282,11 +282,11 @@ impl TomlKey {
     }
 }
 
-impl TomlValue {
+impl TomlValueNode {
     /// Returns the string slice if the value is a string.
     pub fn as_str(&self) -> Option<&str> {
         match self {
-            TomlValue::String(s) => Some(&s.value),
+            TomlValueNode::String(s) => Some(&s.value),
             _ => None,
         }
     }
@@ -294,7 +294,7 @@ impl TomlValue {
     /// Returns the integer value if the value is an integer.
     pub fn as_integer(&self) -> Option<i64> {
         match self {
-            TomlValue::Integer(i) => Some(i.value),
+            TomlValueNode::Integer(i) => Some(i.value),
             _ => None,
         }
     }
@@ -302,7 +302,7 @@ impl TomlValue {
     /// Returns the boolean value if the value is a boolean.
     pub fn as_bool(&self) -> Option<bool> {
         match self {
-            TomlValue::Boolean(b) => Some(b.value),
+            TomlValueNode::Boolean(b) => Some(b.value),
             _ => None,
         }
     }
@@ -310,7 +310,7 @@ impl TomlValue {
     /// Returns a reference to the inline table if the value is an inline table.
     pub fn as_inline_table(&self) -> Option<&TomlInlineTable> {
         match self {
-            TomlValue::InlineTable(t) => Some(t),
+            TomlValueNode::InlineTable(t) => Some(t),
             _ => None,
         }
     }
@@ -318,7 +318,7 @@ impl TomlValue {
     /// Returns a reference to the array if the value is an array.
     pub fn as_array(&self) -> Option<&TomlArray> {
         match self {
-            TomlValue::Array(a) => Some(a),
+            TomlValueNode::Array(a) => Some(a),
             _ => None,
         }
     }
@@ -326,13 +326,64 @@ impl TomlValue {
     /// Gets the source span of the value.
     pub fn span(&self) -> Range<usize> {
         match self {
-            TomlValue::String(s) => s.span.clone(),
-            TomlValue::Integer(i) => i.span.clone(),
-            TomlValue::Float(f) => f.span.clone(),
-            TomlValue::Boolean(b) => b.span.clone(),
-            TomlValue::DateTime(dt) => dt.span.clone(),
-            TomlValue::Array(a) => a.span.clone(),
-            TomlValue::InlineTable(t) => t.span.clone(),
+            TomlValueNode::String(s) => s.span.clone(),
+            TomlValueNode::Integer(i) => i.span.clone(),
+            TomlValueNode::Float(f) => f.span.clone(),
+            TomlValueNode::Boolean(b) => b.span.clone(),
+            TomlValueNode::DateTime(dt) => dt.span.clone(),
+            TomlValueNode::Array(a) => a.span.clone(),
+            TomlValueNode::InlineTable(t) => t.span.clone(),
         }
+    }
+}
+
+impl std::fmt::Display for TomlValueNode {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            TomlValueNode::String(s) => write!(f, "\"{}\"", s.value),
+            TomlValueNode::Integer(i) => write!(f, "{}", i.value),
+            TomlValueNode::Float(fl) => write!(f, "{}", fl.value),
+            TomlValueNode::Boolean(b) => write!(f, "{}", b.value),
+            TomlValueNode::DateTime(dt) => write!(f, "{}", dt.value),
+            TomlValueNode::Array(a) => {
+                write!(f, "[")?;
+                for (i, item) in a.items.iter().enumerate() {
+                    if i > 0 {
+                        write!(f, ", ")?;
+                    }
+                    write!(f, "{}", item)?;
+                }
+                write!(f, "]")
+            }
+            TomlValueNode::InlineTable(t) => {
+                write!(f, "{{")?;
+                for (i, item) in t.items.iter().enumerate() {
+                    if i > 0 {
+                        write!(f, ", ")?;
+                    }
+                    write!(f, "{} = {}", item.key.to_string(), item.value)?;
+                }
+                write!(f, "}}")
+            }
+        }
+    }
+}
+
+impl TomlRoot {
+    /// Converts the TomlRoot into a TomlValueNode (inline table).
+    pub fn into_value(self) -> TomlValueNode {
+        let mut items = Vec::new();
+        
+        // Only include key-value pairs in the root
+        for item in self.items {
+            if let TomlItem::KeyValue(kv) = item {
+                items.push(kv);
+            }
+        }
+        
+        TomlValueNode::InlineTable(TomlInlineTable {
+            span: self.span,
+            items,
+        })
     }
 }

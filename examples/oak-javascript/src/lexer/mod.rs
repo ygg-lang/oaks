@@ -1,4 +1,4 @@
-//! JavaScript lexer implementation.
+#![doc = include_str!("readme.md")]
 
 pub mod token_type;
 

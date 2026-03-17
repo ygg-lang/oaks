@@ -1,9 +1,6 @@
 #![feature(new_range_api)]
 #![warn(missing_docs)]
-//! Document structural view support for the Oak language framework.
-//!
-//! This crate provides traits and structures for representing the hierarchical
-//! structural view of a document, such as for an outline view or breadcrumbs.
+#![doc = include_str!("readme.md")]
 use core::range::Range;
 use oak_core::{
     language::{Language, UniversalElementRole},

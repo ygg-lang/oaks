@@ -1,9 +1,6 @@
 #![feature(new_range_api)]
 #![warn(missing_docs)]
-//! Symbol management for the Oak language framework.
-//!
-//! This crate defines structures and traits for representing and extracting
-//! symbol information (like functions, classes, and variables) from syntax trees.
+#![doc = include_str!("readme.md")]
 
 use oak_core::{
     Arc, Range,

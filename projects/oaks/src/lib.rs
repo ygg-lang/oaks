@@ -24,3 +24,6 @@ pub use oak_symbols::{SymbolInformation, SymbolProvider};
 pub use oak_vfs::{FileMetadata, FileType, MemoryVfs, Vfs};
 
 mod languages;
+
+/// Re-export of language-specific implementations.
+pub use languages::*;

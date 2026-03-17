@@ -1,4 +1,4 @@
-//! Formatter for the Tailwind language.
+#![doc = include_str!("readme.md")]
 
 use oak_core::SourceText;
 

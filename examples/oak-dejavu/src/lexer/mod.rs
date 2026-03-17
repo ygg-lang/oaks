@@ -7,18 +7,18 @@ use oak_core::{
 pub use token_type::DejavuTokenType;
 
 /// Dejavu lexer.
-pub struct DejavuLexer<'a> {
-    config: &'a DejavuLanguage,
+pub struct DejavuLexer<'config> {
+    config: &'config DejavuLanguage,
 }
 
-impl<'a> DejavuLexer<'a> {
+impl<'config> DejavuLexer<'config> {
     /// Create a new Dejavu lexer.
-    pub fn new(config: &'a DejavuLanguage) -> Self {
+    pub fn new(config: &'config DejavuLanguage) -> Self {
         Self { config }
     }
 }
 
-impl<'a> Lexer<DejavuLanguage> for DejavuLexer<'a> {
+impl<'config> Lexer<DejavuLanguage> for DejavuLexer<'config> {
     fn lex<'b, S: Source + ?Sized>(&self, text: &'b S, edits: &[TextEdit], cache: &'b mut impl LexerCache<DejavuLanguage>) -> LexOutput<DejavuLanguage> {
         let relex_from = if edits.is_empty() { text.length() } else { edits.iter().map(|e| e.span.start).min().unwrap_or(0) };
 
