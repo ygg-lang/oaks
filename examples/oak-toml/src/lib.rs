@@ -23,30 +23,17 @@ pub mod mcp;
 /// Parser module.
 pub mod parser;
 
-// Re-export main types for convenience
+/// Highlighter implementation.
+#[cfg(feature = "oak-highlight")]
+pub use crate::lsp::highlighter::TomlHighlighter;
 pub use crate::{
     ast::TomlRoot,
     builder::TomlBuilder,
     language::TomlLanguage,
     lexer::{TomlLexer, token_type::TomlTokenKind as TomlSyntaxKind},
-    parser::TomlParser,
+    parser::{TomlParser, parse, parse_with_config},
 };
 pub use oak_core::{Builder, TokenType};
-
-/// Highlighter implementation.
-#[cfg(feature = "oak-highlight")]
-pub use crate::lsp::highlighter::TomlHighlighter;
-
-/// Parses a TOML string.
-pub fn parse(toml: &str) -> Result<crate::ast::TomlRoot, String> {
-    use oak_core::{Builder, parser::session::ParseSession, source::SourceText};
-    let language = TomlLanguage::default();
-    let builder = TomlBuilder::new(&language);
-    let source = SourceText::new(toml.to_string());
-    let mut cache = ParseSession::default();
-    let result = builder.build(&source, &[], &mut cache);
-    result.result.map_err(|e| format!("{:?}", e))
-}
 
 /// LSP implementation.
 #[cfg(feature = "lsp")]
