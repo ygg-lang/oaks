@@ -136,6 +136,14 @@ pub enum ItemNode {
     Block(BlockDeclaration),
     /// Template text node.
     TemplateText(TemplateTextNode),
+    /// For loop control node.
+    ForControl(ForControlNode),
+    /// If conditional control node.
+    IfControl(IfControlNode),
+    /// While loop control node.
+    WhileControl(WhileControlNode),
+    /// Loop control node.
+    LoopControl(LoopControlNode),
 }
 
 /// Namespace declaration.
@@ -282,6 +290,64 @@ pub struct TemplateControlNode {
     /// Template items.
     pub items: Vec<ItemNode>,
     /// Source span of the node.
+    pub span: Range<usize>,
+}
+
+/// Else branch node for if control structures.
+#[derive(Debug, Clone, PartialEq)]
+pub enum ElseBranchNode {
+    /// Else if branch.
+    Elif {
+        /// Condition expression.
+        condition: ExpressionNode,
+        /// Branch body.
+        body: Vec<ItemNode>,
+        /// Nested else branch.
+        else_branch: Option<Box<ElseBranchNode>>,
+    },
+    /// Else branch.
+    Else {
+        /// Branch body.
+        body: Vec<ItemNode>,
+    },
+}
+
+/// For loop control node.
+#[derive(Debug, Clone, PartialEq)]
+pub struct ForControlNode {
+    /// Loop variable pattern (e.g., item or (index, item)).
+    pub pattern: PatternNode,
+    /// Iterable expression.
+    pub iterable: ExpressionNode,
+    /// Loop body.
+    pub body: Vec<ItemNode>,
+    /// Optional else branch (executed when iterator is empty).
+    pub else_body: Option<Vec<ItemNode>>,
+    /// Source span.
+    pub span: Range<usize>,
+}
+
+/// If conditional control node.
+#[derive(Debug, Clone, PartialEq)]
+pub struct IfControlNode {
+    /// Condition expression.
+    pub condition: ExpressionNode,
+    /// Then branch.
+    pub then_body: Vec<ItemNode>,
+    /// Else branch (can be else or else if).
+    pub else_branch: Option<ElseBranchNode>,
+    /// Source span.
+    pub span: Range<usize>,
+}
+
+/// While loop control node.
+#[derive(Debug, Clone, PartialEq)]
+pub struct WhileControlNode {
+    /// Condition expression.
+    pub condition: ExpressionNode,
+    /// Loop body.
+    pub body: Vec<ItemNode>,
+    /// Source span.
     pub span: Range<usize>,
 }
 

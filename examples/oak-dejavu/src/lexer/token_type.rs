@@ -154,9 +154,9 @@ pub enum DejavuTokenType {
     TemplateCommentStart,
     /// Template comment end token, default is `#>`.
     TemplateCommentEnd,
-    /// Template control start token, default is `<$`.
+    /// Template control start token, default is `<%`.
     TemplateControlStart,
-    /// Template control end token, default is `$>`.
+    /// Template control end token, default is `%>`.
     TemplateControlEnd,
 }
 

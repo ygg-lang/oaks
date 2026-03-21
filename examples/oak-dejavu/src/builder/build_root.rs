@@ -151,6 +151,22 @@ impl<'config> DejavuBuilder<'config> {
                 };
                 Ok(ItemNode::TemplateInterpolation(TemplateInterpolationNode { expr, span }))
             }
+            DejavuElementType::ForControl => {
+                let for_node = self.build_for_control(n, source)?;
+                Ok(ItemNode::ForControl(for_node))
+            }
+            DejavuElementType::IfControl => {
+                let if_node = self.build_if_control(n, source)?;
+                Ok(ItemNode::IfControl(if_node))
+            }
+            DejavuElementType::WhileControl => {
+                let while_node = self.build_while_control(n, source)?;
+                Ok(ItemNode::WhileControl(while_node))
+            }
+            DejavuElementType::LoopControl => {
+                let loop_node = self.build_loop_control(n, source)?;
+                Ok(ItemNode::LoopControl(loop_node))
+            }
             _ => Err(source.syntax_error(format!("Unexpected node kind in item: {:?}", n.green.kind), n.span().start)),
         }
     }

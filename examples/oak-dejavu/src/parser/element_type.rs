@@ -158,6 +158,17 @@ pub enum DejavuElementType {
     Parameter,
     /// Anonymous class node.
     AnonymousClass,
+
+    /// For control node.
+    ForControl,
+    /// If control node.
+    IfControl,
+    /// While control node.
+    WhileControl,
+    /// Loop control node.
+    LoopControl,
+    /// Else branch node.
+    ElseBranch,
 }
 
 impl ElementType for DejavuElementType {

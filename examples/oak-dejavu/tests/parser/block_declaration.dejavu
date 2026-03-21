@@ -1,12 +1,12 @@
 # Block declaration test
 
-<$ block "header" $>
+<% block "header" %>
 This is the header block content.
 It can contain multiple lines.
-</$ end block $>
+</$ end block %>
 
-<$block "footer"$>No whitespace version</$end block$>
+<%block "footer"%>No whitespace version</$end block%>
 
-<$ block   "sidebar"   $>
+<% block   "sidebar"   %>
 Sidebar content with extra whitespace
-</$ end   block   $>
+</$ end   block   %>

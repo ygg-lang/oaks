@@ -16,14 +16,8 @@ keywords = ["parser", "ruby", "ast", "language"]
 oak-core = { workspace = true }
 oak-highlight = { workspace = true, optional = true }
 oak-pretty-print = { workspace = true, optional = true }
-oak-lsp = { workspace = true, optional = true }
-oak-hover = { workspace = true, optional = true }
-oak-vfs = { workspace = true, optional = true }
-oak-mcp = { workspace = true, optional = true, features = ["io-std"] }
 serde = { workspace = true, optional = true }
-futures = { workspace = true, optional = true }
 tracing = { workspace = true }
-tokio = { workspace = true, optional = true }
 
 [dev-dependencies]
 oak-testing = { workspace = true }
@@ -33,8 +27,6 @@ walkdir = { workspace = true }
 [features]
 default = ["serde"]
 serde = ["dep:serde", "oak-core/serde"]
-lsp = ["dep:oak-lsp", "dep:oak-hover", "dep:oak-vfs", "oak-highlight", "oak-pretty-print", "dep:futures"]
-mcp = ["lsp", "oak-mcp/io-std"]
 
 [package.metadata.docs.rs]
 all-features = true

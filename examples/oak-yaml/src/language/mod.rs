@@ -1,4 +1,9 @@
 #![doc = include_str!("readme.md")]
+
+/// YAML value representation.
+pub mod value;
+pub use value::YamlValue;
+
 #[cfg(feature = "serde")]
 pub(crate) mod de;
 #[cfg(feature = "serde")]

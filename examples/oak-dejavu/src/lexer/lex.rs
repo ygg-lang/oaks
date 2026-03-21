@@ -27,245 +27,94 @@ impl<'config> crate::lexer::DejavuLexer<'config> {
     fn run_template<S: Source + ?Sized>(&self, state: &mut State<'_, S>) -> Result<(), OakError> {
         let end = state.get_length();
         let template = &self.config.template;
+        let code_start = template.code_start.as_str();
+        let code_end = template.code_end.as_str();
+        let comment_start = template.comment_start.as_str();
+        let comment_end = template.comment_end.as_str();
 
         while state.get_position() < end {
             let current_pos = state.get_position();
 
             // 检查是否是 Dejavu 模板语法开始
-            if current_pos + template.code_start.len() <= end {
-                let mut match_found = true;
-                for (i, c) in template.code_start.chars().enumerate() {
-                    if state.get_char_at(current_pos + i) != Some(c) {
-                        match_found = false;
+            if state.starts_with(code_start) {
+                // 处理 Dejavu 模板代码
+                let code_start_pos = current_pos;
+                state.advance(code_start.len());
+                state.add_token(DejavuSyntaxKind::TemplateControlStart, code_start_pos, state.get_position());
+
+                // 寻找代码结束标记
+                let content_start = state.get_position();
+                while state.get_position() < end {
+                    if state.starts_with(code_end) {
+                        break;
+                    }
+                    if let Some(c) = state.current() {
+                        state.advance(c.len_utf8());
+                    }
+                    else {
                         break;
                     }
                 }
-                if match_found {
-                    // 处理 Dejavu 模板代码
-                    let code_start = current_pos;
-                    state.advance(template.code_start.len());
-                    state.add_token(DejavuSyntaxKind::CodeStart, code_start, state.get_position());
 
-                    let content_start = state.get_position();
-                    let mut depth = 1;
-
-                    // 寻找匹配的代码结束标记
-                    while depth > 0 && state.get_position() < end {
-                        let pos = state.get_position();
-                        if pos + template.code_start.len() <= end {
-                            let mut start_match = true;
-                            for (i, c) in template.code_start.chars().enumerate() {
-                                if state.get_char_at(pos + i) != Some(c) {
-                                    start_match = false;
-                                    break;
-                                }
-                            }
-                            if start_match {
-                                depth += 1;
-                                state.advance(template.code_start.len());
-                                continue;
-                            }
-                        }
-                        if pos + template.code_end.len() <= end {
-                            let mut end_match = true;
-                            for (i, c) in template.code_end.chars().enumerate() {
-                                if state.get_char_at(pos + i) != Some(c) {
-                                    end_match = false;
-                                    break;
-                                }
-                            }
-                            if end_match {
-                                depth -= 1;
-                                if depth == 0 {
-                                    state.advance(template.code_end.len());
-                                    break;
-                                }
-                                state.advance(template.code_end.len());
-                                continue;
-                            }
-                        }
-                        if let Some(c) = state.current() {
-                            state.advance(c.len_utf8());
-                        }
-                        else {
-                            break;
-                        }
+                // 解析代码内容
+                let content_end = state.get_position();
+                if content_start < content_end {
+                    let mut sub_state = state.sub_state(content_start, content_end);
+                    let _ = self.run_programming(&mut sub_state);
+                    // 合并子状态的 token 到主状态
+                    for token in sub_state.get_tokens() {
+                        state.add_token(token.kind, token.span.start, token.span.end);
                     }
-
-                    let content_end = state.get_position();
-
-                    // 解析代码内容
-                    if content_start < content_end {
-                        // 直接在主状态上解析代码内容，而不是使用子状态
-                        let original_pos = state.get_position();
-                        state.set_position(content_start);
-                        while state.get_position() < content_end {
-                            let start_pos = state.get_position();
-                            if self.lex_whitespace(state) || self.lex_comments(state) {
-                                continue;
-                            }
-                            let matched = self.lex_string_literal(state) || self.lex_char_literal(state) || self.lex_number_literal(state) || self.lex_identifier_or_keyword(state) || self.lex_operators(state) || self.lex_single_char_tokens(state);
-                            if !matched {
-                                if let Some(c) = state.current() {
-                                    let char_len = c.len_utf8();
-                                    state.add_token(DejavuSyntaxKind::Error, start_pos, start_pos + char_len);
-                                    state.advance(char_len);
-                                }
-                            }
-                        }
-                        state.set_position(original_pos);
-                    }
-
-                    // 处理代码结束标记
-                    let code_end = state.get_position() - template.code_end.len();
-                    state.add_token(DejavuSyntaxKind::CodeEnd, code_end, state.get_position());
-
-                    continue;
                 }
+
+                // 添加代码结束标记
+                if state.starts_with(code_end) {
+                    let code_end_pos = state.get_position();
+                    state.advance(code_end.len());
+                    state.add_token(DejavuSyntaxKind::TemplateControlEnd, code_end_pos, state.get_position());
+                }
+
+                continue;
             }
 
             // 检查是否是 Dejavu 模板注释开始
-            if current_pos + template.comment_start.len() <= end {
-                let mut match_found = true;
-                for (i, c) in template.comment_start.chars().enumerate() {
-                    if state.get_char_at(current_pos + i) != Some(c) {
-                        match_found = false;
+            if state.starts_with(comment_start) {
+                // 处理 Dejavu 模板注释
+                let comment_start_pos = current_pos;
+                state.advance(comment_start.len());
+                state.add_token(DejavuSyntaxKind::TemplateCommentStart, comment_start_pos, state.get_position());
+
+                // 寻找匹配的注释结束标记
+                let mut comment_end_found = false;
+                while state.get_position() < end {
+                    let pos = state.get_position();
+                    if state.starts_with(comment_end) {
+                        let comment_end_pos = state.get_position();
+                        state.advance(comment_end.len());
+                        state.add_token(DejavuSyntaxKind::TemplateCommentEnd, comment_end_pos, state.get_position());
+                        comment_end_found = true;
+                        break;
+                    }
+                    if let Some(c) = state.current() {
+                        state.advance(c.len_utf8());
+                    }
+                    else {
                         break;
                     }
                 }
-                if match_found {
-                    // 处理 Dejavu 模板注释
-                    let comment_start = current_pos;
-                    state.advance(template.comment_start.len());
-                    state.add_token(DejavuSyntaxKind::TemplateCommentStart, comment_start, state.get_position());
 
-                    // 寻找匹配的注释结束标记
-                    while state.get_position() < end {
-                        let pos = state.get_position();
-                        if pos + template.comment_end.len() <= end {
-                            let mut end_match = true;
-                            for (i, c) in template.comment_end.chars().enumerate() {
-                                if state.get_char_at(pos + i) != Some(c) {
-                                    end_match = false;
-                                    break;
-                                }
-                            }
-                            if end_match {
-                                let comment_end = state.get_position();
-                                state.advance(template.comment_end.len());
-                                state.add_token(DejavuSyntaxKind::TemplateCommentEnd, comment_end, state.get_position());
-                                break;
-                            }
-                        }
-                        if let Some(c) = state.current() {
-                            state.advance(c.len_utf8());
-                        }
-                        else {
-                            break;
-                        }
-                    }
-
-                    continue;
-                }
-            }
-
-            // 检查是否是 Jinja2 风格的语法（作为普通文本处理）
-            if current_pos + 2 <= end {
-                let first_two = state.get_text_in((current_pos..current_pos + 2).into()).to_string();
-                if first_two == "{{" || first_two == "{%" || first_two == "{#" {
-                    // 跳过 Jinja2 语法（作为普通文本处理）
-                    let start = current_pos;
-                    let delimiter = if first_two == "{{" {
-                        "}}"
-                    }
-                    else if first_two == "{%" {
-                        "%}"
-                    }
-                    else {
-                        "#}"
-                    };
-
-                    // 寻找匹配的结束标记
-                    let mut jinja_end = start + 2;
-                    while jinja_end + delimiter.len() <= end {
-                        let delimiter_text = state.get_text_in((jinja_end..jinja_end + delimiter.len()).into()).to_string();
-                        if delimiter_text == delimiter {
-                            jinja_end += delimiter.len();
-                            break;
-                        }
-                        if let Some(c) = state.get_char_at(jinja_end) {
-                            jinja_end += c.len_utf8();
-                        }
-                        else {
-                            break;
-                        }
-                    }
-
-                    // 将 Jinja2 语法作为普通文本添加
-                    state.set_position(start);
-                    while state.get_position() < jinja_end {
-                        if let Some(c) = state.current() {
-                            state.advance(c.len_utf8());
-                        }
-                        else {
-                            break;
-                        }
-                    }
-                    state.add_token(DejavuSyntaxKind::StringPart, start, jinja_end);
-
-                    continue;
-                }
+                continue;
             }
 
             // 其他字符作为普通文本处理
             let start = current_pos;
-            // 前进到下一个特殊标记或文件结束
+            // 找到下一个模板标记或结束
             while state.get_position() < end {
-                let pos = state.get_position();
-
-                // 检查是否是 Dejavu 模板语法开始
-                let mut is_special = false;
-                if pos + template.code_start.len() <= end {
-                    let mut match_found = true;
-                    for (i, c) in template.code_start.chars().enumerate() {
-                        if state.get_char_at(pos + i) != Some(c) {
-                            match_found = false;
-                            break;
-                        }
-                    }
-                    if match_found {
-                        is_special = true;
-                    }
-                }
-
-                // 检查是否是 Dejavu 模板注释开始
-                if !is_special && pos + template.comment_start.len() <= end {
-                    let mut match_found = true;
-                    for (i, c) in template.comment_start.chars().enumerate() {
-                        if state.get_char_at(pos + i) != Some(c) {
-                            match_found = false;
-                            break;
-                        }
-                    }
-                    if match_found {
-                        is_special = true;
-                    }
-                }
-
-                // 检查是否是 Jinja2 风格的语法
-                if !is_special && pos + 2 <= end {
-                    let first_two = state.get_text_in((pos..pos + 2).into()).to_string();
-                    if first_two == "{{" || first_two == "{%" || first_two == "{#" {
-                        is_special = true;
-                    }
-                }
-
-                if is_special {
+                let current = state.get_position();
+                if state.starts_with(code_start) || state.starts_with(comment_start) {
                     break;
                 }
-
-                // 前进一个字符
-                if let Some(c) = state.get_char_at(pos) {
+                if let Some(c) = state.current() {
                     state.advance(c.len_utf8());
                 }
                 else {
@@ -284,7 +133,17 @@ impl<'config> crate::lexer::DejavuLexer<'config> {
     }
 
     fn run_programming<S: Source + ?Sized>(&self, state: &mut State<'_, S>) -> Result<(), OakError> {
-        while state.not_at_end() {
+        let end = state.get_length();
+        let template = &self.config.template;
+        let code_end = template.code_end.as_str();
+        let code_start = template.code_start.as_str();
+
+        while state.get_position() < end {
+            // 检查是否遇到模板结束标记
+            if state.starts_with(code_end) || state.starts_with(code_start) {
+                break;
+            }
+
             let start_pos = state.get_position();
 
             if self.lex_whitespace(state) || self.lex_comments(state) {
@@ -459,7 +318,7 @@ impl<'config> crate::lexer::DejavuLexer<'config> {
 
                 let code_start = state.get_position();
                 state.advance(template.code_start.len());
-                state.add_token(DejavuSyntaxKind::CodeStart, code_start, state.get_position());
+                state.add_token(DejavuSyntaxKind::TemplateControlStart, code_start, state.get_position());
 
                 let content_start = state.get_position();
                 // Find matching code_end
@@ -496,7 +355,7 @@ impl<'config> crate::lexer::DejavuLexer<'config> {
                 if state.starts_with(&template.code_end) {
                     let code_end = state.get_position();
                     state.advance(template.code_end.len());
-                    state.add_token(DejavuSyntaxKind::CodeEnd, code_end, state.get_position());
+                    state.add_token(DejavuSyntaxKind::TemplateControlEnd, code_end, state.get_position());
                 }
                 current = state.get_position();
             }
@@ -564,6 +423,7 @@ impl<'config> crate::lexer::DejavuLexer<'config> {
                     "let" => DejavuSyntaxKind::Keyword(DejavuKeywords::Let),
                     "if" => DejavuSyntaxKind::Keyword(DejavuKeywords::If),
                     "else" => DejavuSyntaxKind::Keyword(DejavuKeywords::Else),
+                    "elif" => DejavuSyntaxKind::Keyword(DejavuKeywords::Elif),
                     "match" => DejavuSyntaxKind::Keyword(DejavuKeywords::Match),
                     "case" => DejavuSyntaxKind::Keyword(DejavuKeywords::Case),
                     "when" => DejavuSyntaxKind::Keyword(DejavuKeywords::When),
@@ -705,11 +565,7 @@ impl<'config> crate::lexer::DejavuLexer<'config> {
                 '<' => {
                     let ch_len = ch.len_utf8();
                     state.advance(ch_len);
-                    if let Some('$') = state.current() {
-                        state.advance('$'.len_utf8());
-                        DejavuSyntaxKind::TemplateControlStart
-                    }
-                    else if let Some('=') = state.current() {
+                    if let Some('=') = state.current() {
                         state.advance('='.len_utf8());
                         DejavuSyntaxKind::LessEq
                     }
@@ -815,15 +671,8 @@ impl<'config> crate::lexer::DejavuLexer<'config> {
                 }
                 '$' => {
                     state.advance(ch.len_utf8());
-                    if let Some('>') = state.current() {
-                        state.advance('>'.len_utf8());
-                        state.add_token(DejavuSyntaxKind::TemplateControlEnd, start, state.get_position());
-                        return true;
-                    }
-                    else {
-                        state.add_token(DejavuSyntaxKind::Dollar, start, state.get_position());
-                        return true;
-                    }
+                    state.add_token(DejavuSyntaxKind::Dollar, start, state.get_position());
+                    return true;
                 }
                 _ => {}
             }

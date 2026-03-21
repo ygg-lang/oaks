@@ -35,7 +35,7 @@ fn test_template_parsing() {
 
     let language = DejavuLanguage::default();
     let builder = DejavuBuilder::new(&language);
-    let source = SourceText::new("Hello, <$ name $>!\n\n<$ for item in items $>\n- <$ item $>\n<$ end for $>\n\n<$ if show_extra $>\nThis is extra content!\n<$ end if $>");
+    let source = SourceText::new("Hello, <% name %>!\n\n<% for item in items %>\n- <% item %>\n<% end for %>\n\n<% if show_extra %>\nThis is extra content!\n<% end if %>");
 
     let mut session = ParseSession::new(1024);
     let built = builder.build(&source, &[], &mut session);
