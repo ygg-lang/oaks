@@ -5,7 +5,6 @@ authors.workspace = true
 description = "High-performance incremental LLVM IR parser for the oak ecosystem with flexible configuration, supporting low-level intermediate representation analysis."
 edition.workspace = true
 license.workspace = true
-readme = "readme.md"
 homepage.workspace = true
 repository = "https://github.com/ygg-lang/oaks/tree/master/examples/oak-llvm-ir"
 documentation = "https://docs.rs/oak-llvm-ir"

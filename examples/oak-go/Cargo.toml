@@ -5,7 +5,6 @@ authors.workspace = true
 description = "High-performance incremental Go parser for the oak ecosystem with flexible configuration, supporting concurrent programming and cloud-native development."
 edition.workspace = true
 license.workspace = true
-readme = "readme.md"
 homepage.workspace = true
 repository = "https://github.com/ygg-lang/oaks/tree/master/examples/oak-go"
 documentation = "https://docs.rs/oak-go"

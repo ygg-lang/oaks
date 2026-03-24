@@ -5,7 +5,6 @@ authors.workspace = true
 description = "Mermaid diagramming language parser for Oak"
 edition.workspace = true
 license.workspace = true
-readme = "readme.md"
 homepage.workspace = true
 repository = "https://github.com/ygg-lang/oaks/tree/master/examples/oak-mermaid"
 

@@ -5,7 +5,6 @@ authors.workspace = true
 description = "High-performance incremental TOML parser for the oak ecosystem with flexible configuration, optimized for configuration files and data serialization."
 edition.workspace = true
 license.workspace = true
-readme = "readme.md"
 homepage.workspace = true
 repository = "https://github.com/ygg-lang/oaks/tree/master/examples/oak-toml"
 documentation = "https://docs.rs/oak-toml"

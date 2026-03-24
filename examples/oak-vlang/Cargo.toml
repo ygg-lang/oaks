@@ -5,7 +5,6 @@ authors.workspace = true
 description = "Valkyrie language parser with support for modern Valkyrie syntax and features."
 edition.workspace = true
 license.workspace = true
-readme = "readme.md"
 homepage.workspace = true
 repository = "https://github.com/ygg-lang/oaks/tree/master/examples/oak-vlang"
 documentation = "https://docs.rs/oak-valkyrie"

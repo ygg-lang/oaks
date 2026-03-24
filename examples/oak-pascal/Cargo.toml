@@ -5,7 +5,6 @@ authors.workspace = true
 description = "Pascal programming language parser with support for structured programming and modern Pascal dialects."
 edition.workspace = true
 license.workspace = true
-readme = "readme.md"
 homepage.workspace = true
 repository = "https://github.com/ygg-lang/oaks/tree/master/examples/oak-pascal"
 documentation = "https://docs.rs/oak-pascal"

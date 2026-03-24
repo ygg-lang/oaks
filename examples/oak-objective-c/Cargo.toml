@@ -5,7 +5,6 @@ authors.workspace = true
 description = "Objective-C object-oriented programming language parser with support for Apple platform development and runtime features."
 edition.workspace = true
 license.workspace = true
-readme = "readme.md"
 homepage.workspace = true
 repository = "https://github.com/ygg-lang/oaks/tree/master/examples/oak-objective-c"
 documentation = "https://docs.rs/oak-objective-c"

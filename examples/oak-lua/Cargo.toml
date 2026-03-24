@@ -5,7 +5,6 @@ authors.workspace = true
 description = "High-performance incremental Lua parser for the oak ecosystem with flexible configuration, supporting lightweight scripting and embedded development."
 edition.workspace = true
 license.workspace = true
-readme = "readme.md"
 homepage = "https://github.com/ygg-lang/oaks"
 repository = "https://github.com/ygg-lang/oaks/tree/master/examples/oak-lua"
 documentation = "https://docs.rs/oak-lua"

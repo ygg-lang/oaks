@@ -5,7 +5,6 @@ authors.workspace = true
 description = "TeX/LaTeX document preparation system parser with support for typesetting commands and macros."
 edition.workspace = true
 license.workspace = true
-readme = "readme.md"
 homepage.workspace = true
 repository = "https://github.com/ygg-lang/oaks/tree/master/examples/oak-tex"
 documentation = "https://docs.rs/oak-tex"

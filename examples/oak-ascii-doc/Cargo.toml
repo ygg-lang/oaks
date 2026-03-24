@@ -5,7 +5,6 @@ authors.workspace = true
 description = "AsciiDoc parser with support for AsciiDoc syntax and documentation features."
 edition.workspace = true
 license.workspace = true
-readme = "readme.md"
 homepage.workspace = true
 repository = "https://github.com/ygg-lang/oaks/tree/master/examples/oak-ascii-doc"
 documentation = "https://docs.rs/oak-ascii-doc"

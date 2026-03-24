@@ -5,7 +5,6 @@ authors.workspace = true
 description = "Module resolution and global symbol management for the Oaks framework."
 edition.workspace = true
 license.workspace = true
-readme = "readme.md"
 repository = "https://github.com/ygg-lang/oaks/tree/master/projects/oak-resolver"
 
 [dependencies]

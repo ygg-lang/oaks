@@ -5,7 +5,6 @@ authors.workspace = true
 description = "Django template parser with support for Django template language and web development."
 edition.workspace = true
 license.workspace = true
-readme = "readme.md"
 homepage.workspace = true
 repository = "https://github.com/ygg-lang/oaks/tree/master/examples/oak-django"
 documentation = "https://docs.rs/oak-django"

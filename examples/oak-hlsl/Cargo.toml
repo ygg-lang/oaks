@@ -5,7 +5,6 @@ authors.workspace = true
 description = "HLSL language parser with support for modern shader programming and graphics pipeline features."
 edition.workspace = true
 license.workspace = true
-readme = "readme.md"
 homepage.workspace = true
 repository = "https://github.com/ygg-lang/oaks/tree/master/examples/oak-hlsl"
 documentation = "https://docs.rs/oak-hlsl"

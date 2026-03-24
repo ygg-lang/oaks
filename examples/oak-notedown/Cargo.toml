@@ -5,7 +5,6 @@ authors.workspace = true
 description = "High-performance incremental Markdown parser for the oak ecosystem with flexible configuration, optimized for documentation and content creation."
 edition.workspace = true
 license.workspace = true
-readme = "readme.md"
 homepage.workspace = true
 repository = "https://github.com/ygg-lang/oaks/tree/master/examples/oak-notedown"
 documentation = "https://docs.rs/oak-notedown"

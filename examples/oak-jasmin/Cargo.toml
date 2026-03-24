@@ -5,7 +5,6 @@ authors.workspace = true
 description = "Jasmin Java assembler parser with support for Java bytecode assembly and class file generation."
 edition.workspace = true
 license.workspace = true
-readme = "readme.md"
 homepage.workspace = true
 repository = "https://github.com/ygg-lang/oaks/tree/master/examples/oak-jasmin"
 documentation = "https://docs.rs/oak-jasmin"

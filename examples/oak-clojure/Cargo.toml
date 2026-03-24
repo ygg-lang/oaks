@@ -5,7 +5,6 @@ authors.workspace = true
 description = "Clojure functional programming language parser with support for Lisp syntax and JVM ecosystem integration."
 edition.workspace = true
 license.workspace = true
-readme = "readme.md"
 homepage.workspace = true
 repository = "https://github.com/ygg-lang/oaks/tree/master/examples/oak-clojure"
 documentation = "https://docs.rs/oak-clojure"

@@ -20,7 +20,8 @@ TypeScript has become the standard for large-scale web development, but its comp
     - **Modern Features**: Support for `satisfies` operator, `const` type parameters, and other recent TypeScript additions.
     - **Modules**: Robust handling of ESM (`import`/`export`) and legacy namespace/module systems.
 - **🛡️ Industrial-Grade Fault Tolerance**: Engineered to recover from syntax errors gracefully, providing precise diagnostics—crucial for maintaining a smooth developer experience during active coding.
-- **🧩 Deep Ecosystem Integration**: Seamlessly works with `oak-lsp` for full LSP support and `oak-mcp` for intelligent code discovery and analysis.
+- **🧩 Deep Ecosystem Integration**: 
+  > **Note**: LSP and MCP capabilities have been migrated to the `rusty-typescript` project. This project now focuses solely on TypeScript parsing functionality.
 
 ## 🏗️ Architecture
 

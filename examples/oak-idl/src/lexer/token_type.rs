@@ -190,6 +190,8 @@ pub enum IdlTokenType {
     BitwiseAnd,
     /// A bitwise OR operator (`|`).
     BitwiseOr,
+    /// An `or` keyword for union types.
+    Or,
     /// A bitwise XOR operator (`^`).
     BitwiseXor,
     /// A bitwise NOT operator (`~`).
@@ -311,6 +313,7 @@ impl TokenType for IdlTokenType {
             | Self::Modulo
             | Self::BitwiseAnd
             | Self::BitwiseOr
+            | Self::Or
             | Self::BitwiseXor
             | Self::BitwiseNot
             | Self::LogicalAnd

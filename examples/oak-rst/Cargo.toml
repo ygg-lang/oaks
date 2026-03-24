@@ -5,7 +5,6 @@ authors.workspace = true
 description = "High-performance incremental reStructuredText parser for the oak ecosystem."
 edition.workspace = true
 license.workspace = true
-readme = "readme.md"
 homepage.workspace = true
 repository = "https://github.com/ygg-lang/oaks/tree/master/examples/oak-rst"
 documentation = "https://docs.rs/oak-rst"

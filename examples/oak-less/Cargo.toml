@@ -5,7 +5,6 @@ authors.workspace = true
 description = "Less stylesheet language parser with support for web styling and layout processing."
 edition.workspace = true
 license.workspace = true
-readme = "readme.md"
 homepage.workspace = true
 repository = "https://github.com/ygg-lang/oaks/tree/master/examples/oak-less"
 documentation = "https://docs.rs/oak-less"
