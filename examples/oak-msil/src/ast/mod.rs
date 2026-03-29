@@ -41,8 +41,10 @@ impl ToSource for MsilRoot {
 
 #[cfg(feature = "oak-pretty-print")]
 impl AsDocument for MsilRoot {
-    fn as_document(&self) -> Document<'_> {
-        Document::join(self.items.iter().map(|i| i.as_document()), Document::Line)
+    type Params = ();
+    
+    fn as_document(&self, _params: &Self::Params) -> Document<'_> {
+        Document::join(self.items.iter().map(|i| i.as_document(&())), Document::Line)
     }
 }
 
@@ -80,11 +82,13 @@ impl ToSource for Item {
 
 #[cfg(feature = "oak-pretty-print")]
 impl AsDocument for Item {
-    fn as_document(&self) -> Document<'_> {
+    type Params = ();
+    
+    fn as_document(&self, _params: &Self::Params) -> Document<'_> {
         match self {
-            Item::Assembly(a) => a.as_document(),
+            Item::Assembly(a) => a.as_document(&()),
             Item::Module(m) => Document::Text(format!(".module {}", m).into()),
-            Item::Class(c) => c.as_document(),
+            Item::Class(c) => c.as_document(&()),
             Item::AssemblyExtern(a) => Document::Text(format!(".assembly extern {} {{}}", a).into()),
         }
     }
@@ -111,7 +115,9 @@ impl ToSource for Assembly {
 
 #[cfg(feature = "oak-pretty-print")]
 impl AsDocument for Assembly {
-    fn as_document(&self) -> Document<'_> {
+    type Params = ();
+    
+    fn as_document(&self, _params: &Self::Params) -> Document<'_> {
         Document::Text(format!(".assembly {} {{}}", self.name).into())
     }
 }
@@ -144,12 +150,14 @@ impl ToSource for Class {
 
 #[cfg(feature = "oak-pretty-print")]
 impl AsDocument for Class {
-    fn as_document(&self) -> Document<'_> {
+    type Params = ();
+    
+    fn as_document(&self, _params: &Self::Params) -> Document<'_> {
         Document::Concat(vec![
             Document::Text(format!(".class public auto ansi beforefieldinit {}", self.name).into()),
             Document::Line,
             Document::Text("{".into()),
-            Document::indent(Document::join(self.methods.iter().map(|m| m.as_document()), Document::Line)),
+            Document::indent(Document::join(self.methods.iter().map(|m| m.as_document(&())), Document::Line)),
             Document::Text("}".into()),
         ])
     }
@@ -186,9 +194,11 @@ impl ToSource for Method {
 
 #[cfg(feature = "oak-pretty-print")]
 impl AsDocument for Method {
-    fn as_document(&self) -> Document<'_> {
+    type Params = ();
+    
+    fn as_document(&self, _params: &Self::Params) -> Document<'_> {
         let mut body = vec![Document::Text(".entrypoint".into()), Document::Line];
-        body.extend(self.instructions.iter().map(|i| i.as_document()));
+        body.extend(self.instructions.iter().map(|i| i.as_document(&())));
 
         Document::Concat(vec![
             Document::Text(format!(".method public hidebysig static void {}() cil managed", self.name).into()),
@@ -231,7 +241,9 @@ impl ToSource for Instruction {
 
 #[cfg(feature = "oak-pretty-print")]
 impl AsDocument for Instruction {
-    fn as_document(&self) -> Document<'_> {
+    type Params = ();
+    
+    fn as_document(&self, _params: &Self::Params) -> Document<'_> {
         match self {
             Instruction::Simple(s) => Document::Text(s.clone().into()),
             Instruction::String(s) => Document::Text(format!("ldstr \"{}\"", s).into()),

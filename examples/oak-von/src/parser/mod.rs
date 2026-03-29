@@ -65,8 +65,17 @@ impl<'config> VonParser<'config> {
             }
 
             self.skip_trivia(state);
-            if state.at(VonTokenType::LeftBrace) || state.at(VonTokenType::LeftBracket) {
-                self.parse_value(state)?;
+            if state.at(VonTokenType::LeftBrace) || state.at(VonTokenType::LeftBracket) || state.at(VonTokenType::LeftParen) {
+                if state.at(VonTokenType::LeftParen) {
+                    state.bump();
+                    self.parse_value(state)?;
+                    self.skip_trivia(state);
+                    if !state.eat(VonTokenType::RightParen) {
+                        state.record_expected(")");
+                    }
+                } else {
+                    self.parse_value(state)?;
+                }
             }
             Ok(())
         })

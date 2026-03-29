@@ -1,8 +1,6 @@
 #![doc = include_str!("readme.md")]
-mod as_document;
 
 use crate::{ast::RbqRoot, language::RbqLanguage};
-use oak_pretty_print::AsDocument;
 
 /// RBQ formatter.
 pub struct RbqFormatter<'config> {

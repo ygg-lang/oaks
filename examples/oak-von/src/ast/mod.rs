@@ -138,8 +138,9 @@ impl ToSource for VonEnum {
     fn to_source(&self, buffer: &mut SourceBuffer) {
         buffer.push(&self.variant);
         if let Some(payload) = &self.payload {
-            buffer.push(" ");
-            payload.to_source(buffer)
+            buffer.push("(");
+            payload.to_source(buffer);
+            buffer.push(")");
         }
     }
 }

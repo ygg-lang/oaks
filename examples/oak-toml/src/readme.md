@@ -27,7 +27,7 @@ fn main() {
         name = "oak-toml"
         version = "0.1.0"
         authors = ["Yggdrasil <contact@yggdrasil.com>"]
-        edition = "2021"
+        edition = "2024"
 
         [dependencies]
         oak-core = { path = "../../oak-core" }

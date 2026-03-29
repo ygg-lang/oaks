@@ -23,6 +23,10 @@ pub enum VonTokenType {
     LeftBracket,
     /// A closing bracket (`]`).
     RightBracket,
+    /// An opening parenthesis (`(`).
+    LeftParen,
+    /// A closing parenthesis (`)`).
+    RightParen,
     /// A comma (`,`).
     Comma,
     /// A colon (`:`).

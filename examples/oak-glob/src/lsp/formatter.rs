@@ -1,11 +1,16 @@
-use oak_core::{formatter::Formatter as FormatterTrait, source::SourceText};
+use oak_formatter::Formatter as FormatterTrait;
+use oak_core::language::Language;
 
 /// Formatter for glob pattern syntax.
 pub struct GlobFormatter;
 
-impl FormatterTrait for GlobFormatter {
-    fn format<S: SourceText>(&self, text: &S) -> String {
-        text.to_string()
+impl<L: Language> FormatterTrait<L> for GlobFormatter {
+    type State = ();
+    type Output = String;
+
+    fn format<'a>(&self, _tree: &oak_core::tree::RedTree<'a, L>, _state: &mut Self::State) -> Self::Output {
+        // Simplified implementation
+        "".to_string()
     }
 }
 

@@ -358,6 +358,14 @@ impl<'config> VonLexer<'config> {
                     state.advance(1);
                     VonTokenType::RightBrace
                 }
+                '(' => {
+                    state.advance(1);
+                    VonTokenType::LeftParen
+                }
+                ')' => {
+                    state.advance(1);
+                    VonTokenType::RightParen
+                }
                 ',' => {
                     state.advance(1);
                     VonTokenType::Comma
